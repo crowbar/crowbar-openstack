@@ -1,0 +1,2 @@
+This cookbook deployes the openstack quantum server and client
+ 
