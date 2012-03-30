@@ -22,7 +22,9 @@
 pg_packages = case node['platform']
 when "ubuntu","debian"
   %w{postgresql-client libpq-dev make}
-when "fedora","suse","amazon"
+when "suse"
+  %w{postgresql-devel rubygem-pg}
+when "fedora", "amazon"
   %w{postgresql-devel}
 when "redhat","centos","scientific"
   case
@@ -38,7 +40,9 @@ pg_packages.each do |pg_pack|
     action :nothing
   end.run_action(:install)
 end
- 
-gem_package "pg" do
-  action :nothing
-end.run_action(:install)
+
+if node.platform != "suse"
+  gem_package "pg" do
+    action :nothing
+  end.run_action(:install)
+end
