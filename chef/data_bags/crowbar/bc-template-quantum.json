@@ -21,7 +21,7 @@
       },
       "api": {
         "service_port": 5000,
-        "service_host": "0.0.0.0",
+        "service_host": "0.0.0.0"
       },
       "admin": {
         "tenant": "admin",
