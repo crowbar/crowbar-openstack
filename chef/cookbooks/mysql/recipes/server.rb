@@ -58,11 +58,12 @@ if addr != newaddr
 end
 
 package "mysql-server" do
+  package_name "mysql" if node.platform == "suse"
   action :install
 end
 
 service "mysql" do
-  service_name value_for_platform([ "centos", "redhat", "suse", "fedora" ] => {"default" => "mysqld"}, "default" => "mysql")
+  service_name value_for_platform([ "centos", "redhat", "fedora" ] => {"default" => "mysqld"}, "default" => "mysql")
   if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
     restart_command "restart mysql"
     stop_command "stop mysql"
@@ -133,6 +134,19 @@ end
 # Under crowbar, for some reason, defaults aren't being set properly
 # for the mysql passwords. This is a nasty, nasty hack to
 # fix this until I understand the problem better:
+directory "/etc/mysql/" do
+  owner "root"
+  group "root"
+  mode "0755"
+  action :create
+end
+
+directory "/etc/mysql/conf.d/" do
+  owner "root"
+  group "root"
+  mode "0755"
+  action :create
+end
 
 template "/etc/mysql/conf.d/emergency_init_file" do
   source "emergency_init_file.erb"
@@ -183,6 +197,21 @@ template grants_path do
   action :create
   not_if { File.exists?("#{grants_key}") }
 end
+
+directory "/var/log/mysql/" do
+  owner "mysql"
+  group "root"
+  mode "0755"
+  action :create
+end
+
+directory "/var/run/mysqld/" do
+  owner "mysql"
+  group "root"
+  mode "0755"
+  action :create
+end
+
 
 execute "mysql-install-privileges" do
   command "/usr/bin/mysql -u root #{node['mysql']['server_root_password'].empty? ? '' : '-p' }#{node['mysql']['server_root_password']} < #{grants_path}"
