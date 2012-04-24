@@ -48,7 +48,7 @@ end
 netaddr = node['postgresql']['network_address'] || ""
 netmask = node['postgresql']['network_mask'] || ""
 newnetaddr = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").subnet
-newnetmask = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").subnet
+newnetmask = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").netmask
 if netaddr != newnetaddr or netmask != newnetmask
   node['postgresql']['network_address'] = newnetaddr
   node['postgresql']['network_mask'] = newnetmask
