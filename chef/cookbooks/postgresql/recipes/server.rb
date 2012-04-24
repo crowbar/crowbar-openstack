@@ -91,7 +91,7 @@ echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node[:postgresql][:password][:po
       require 'rubygems'
       Gem.clear_paths
       require 'pg'
-      conn = PGconn.connect(newaddr, 5432, nil, nil, nil, "postgres", node['postgresql']['password']['postgres'])
+      conn = PGconn.connect(:host => newaddr, :port => 5432, :dbname => "postgres", :user => "postgres", :password =>  node['postgresql']['password']['postgres'])
     rescue PGError
       false
     end
@@ -103,14 +103,15 @@ end
 bash "assign-db_maker-password" do
   user 'postgres'
   code <<-EOH
-echo "CREATE ROLE db_maker WITH LOGIN CREATEDB CREATEROLE ENCRYPTED PASSWORD '#{node[:postgresql][:db_maker_password]}';" | psql
+echo "CREATE ROLE db_maker WITH LOGIN CREATEDB CREATEROLE ENCRYPTED PASSWORD '#{node[:postgresql][:db_maker_password]}';
+ALTER ROLE db_maker ENCRYPTED PASSWORD '#{node[:postgresql][:db_maker_password]}';" | psql
   EOH
   not_if do
     begin
       require 'rubygems'
       Gem.clear_paths
       require 'pg'
-      conn = PGconn.connect(newaddr, 5432, nil, nil, nil, "db_maker", node['postgresql']['db_maker_password'])
+      conn = PGconn.connect(:host => newaddr, :port => 5432, :dbname => "postgres", :user => "db_maker", :password => node['postgresql']['db_maker_password'])
     rescue PGError
       false
     end
