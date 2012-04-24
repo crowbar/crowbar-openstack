@@ -91,7 +91,7 @@ echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node[:postgresql][:password][:po
       require 'rubygems'
       Gem.clear_paths
       require 'pg'
-      conn = PGconn.connect("localhost", 5432, nil, nil, nil, "postgres", node['postgresql']['password']['postgres'])
+      conn = PGconn.connect(newaddr, 5432, nil, nil, nil, "postgres", node['postgresql']['password']['postgres'])
     rescue PGError
       false
     end
@@ -110,7 +110,7 @@ echo "CREATE ROLE db_maker WITH LOGIN CREATEDB CREATEROLE ENCRYPTED PASSWORD '#{
       require 'rubygems'
       Gem.clear_paths
       require 'pg'
-      conn = PGconn.connect("localhost", 5432, nil, nil, nil, "db_maker", node['postgresql']['db_maker_password'])
+      conn = PGconn.connect(newaddr, 5432, nil, nil, nil, "db_maker", node['postgresql']['db_maker_password'])
     rescue PGError
       false
     end
