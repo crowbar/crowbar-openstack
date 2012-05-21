@@ -12,6 +12,7 @@
           "type": "map",
           "required": true,
           "mapping": {
+            "tempest_tarball": { "type": "str", "required": true },
             "param1": { "type": "str", "required": true }
           }
         }

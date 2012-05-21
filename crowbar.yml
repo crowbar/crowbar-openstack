@@ -20,6 +20,9 @@ barclamp:
   display: Kong
   description: Kong Validation Tool
   version: 0
+  requires:
+    - @crowbar
+    - nova
   member:
     - openstack
 
@@ -73,3 +76,6 @@ debs:
     - python-nose
     - python-httplib2
     - python-pika
+
+extra_files:
+  - https://github.com/openstack/tempest/tarball/stable/essex.tar.gz tempest

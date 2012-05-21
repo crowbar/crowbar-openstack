@@ -25,15 +25,34 @@ class KongService < ServiceObject
     base = super
     @logger.debug("Kong create_proposal: leaving base part")
 
-    nodes = NodeObject.find_nodes_by_name "d"
-    nodes = nodes.sort{|a, b| a.name <=> b.name}
-
+    nodes = NodeObject.find("roles:nova-multi-controller")
+    nodes.delete_if { |n| n.nil? or n.admin? }
+    unless nodes.empty?
       base["deployment"]["kong"]["elements"] = {
         "kong" => [ nodes.first.name ]
       }
+    end
 
     @logger.debug("Kong create_proposal: exiting")
     base
+  end
+
+  def apply_role_pre_chef_call(old_role, role, all_nodes)
+    @logger.debug("Kong apply_role_pre_chef_call: entering #{all_nodes.inspect}")
+    return if all_nodes.empty?
+
+    # Update tempest_tarball path
+    nodes = NodeObject.find("roles:provisioner-server")
+    unless nodes.nil? or nodes.length < 1
+      admin_ip = nodes[0].get_network_by_type("admin")["address"]
+      web_port = nodes[0]["provisioner"]["web_port"]
+      # substitute the admin web portal
+      tempest_tarball_path = role.default_attributes["kong"]["tempest_tarball"].gsub("<ADMINWEB>", "#{admin_ip}:#{web_port}")
+      role.default_attributes["kong"]["tempest_tarball"] = tempest_tarball_path
+      role.save
+    end
+
+    @logger.debug("Kong apply_role_pre_chef_call: leaving")
   end
 
 end
