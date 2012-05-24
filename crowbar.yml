@@ -18,10 +18,8 @@
 barclamp:
   name: kong
   display: Kong
-  description: Kong Validation Tool
   version: 0
   requires:
-    - @crowbar
     - nova
   member:
     - openstack
