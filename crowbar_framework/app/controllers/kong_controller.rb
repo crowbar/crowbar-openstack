@@ -15,7 +15,7 @@
 
 class KongController < BarclampController
   def initialize
-    @service_object = TestService.new logger
+    @service_object = KongService.new logger
   end
 end
 
