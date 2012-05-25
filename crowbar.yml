@@ -35,45 +35,15 @@ locale_additions:
     barclamp:
       kong:
         edit_attributes: 
-          attributes: Attributes
-          param1: Parameter 1
         edit_deployment: 
           deployment: Deployment
 
 debs:
-  ubuntu-10.10:
-    repos: 
-      - deb http://ops.rcb.me/packages maverick diablo-final
-      - deb http://ppa.launchpad.net/chris-lea/python-pika/ubuntu maverick main
-    pkgs:
-      - python-argparse
-  ubuntu-11.04:
-    repos:
-      - deb http://ops.rcb.me/packages natty diablo-final
-      - deb http://ppa.launchpad.net/chris-lea/python-pika/ubuntu natty main
-    pkgs:
-      - python-argparse
-  ubuntu-11.10:
-    repos:
-      - deb http://ops.rcb.me/packages oneiric diablo-final
-      - deb http://ppa.launchpad.net/chris-lea/python-pika/ubuntu oneiric main
-    pkgs:
-      - python-argparse
-#  ubuntu-12.04:
-#    repos:
-#      - deb http://ppa.launchpad.net/chris-lea/python-pika/ubuntu precise main
+#Assuming that packages for ubuntu 12.04 only used
   pkgs:
-    - python-eventlet
-    - python-pip
-    - python-virtualenv
-    - pep8
-    - pylint
     - python-unittest2
-    - python-anyjson
-    - python-amqplib
     - python-nose
     - python-httplib2
-    - python-pika
 
 extra_files:
   - https://github.com/openstack/tempest/tarball/stable/essex.tar.gz tempest
