@@ -21,9 +21,7 @@
         "environment": "kong-config-kong",
         "mode": "full",
         "transitions": false,
-        "transition_list": [
-          "discovered"
-        ]
+        "transition_list": []
       }
     }
   }
