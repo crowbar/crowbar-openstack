@@ -1,0 +1,40 @@
+#!/bin/bash
+# Copyright 2011, Dell
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+[[ $DEBUG ]] && set -x
+
+die() { res=$1; shift; echo "$@"; exit $res; }
+
+root_do() {
+    # $1 = address of nova controller
+    # $@ = command to run as the nova user.
+    local address="$1" 
+    shift
+    [[ $1 ]] || return 1
+    run_on "$address" sudo -u root -i "$@"
+}
+
+echo "Finding Nova controller..."
+nova_ip=$(knife_node_find 'roles:nova-multi-controller' FQDN)
+if ! [[ $nova_ip ]]; then
+    echo "Could not find nova controller."
+    exit 1
+fi
+echo "Controller at $nova_ip. Verifying nova services..."
+echo "Assuming that tempest is installed on controller"
+
+tempest_ip=$nova_ip
+echo "Starting tempest smoke tests..."
+root_do "$tempest_ip" "nosetests -w /opt/tempest/ -v tempest -a 'type=smoke'"
+# use -x option to stop after first failed testcase
+#root_do "$tempest_ip" "nosetests -w /opt/tempest/ -v -x tempest -a 'type=smoke'"
