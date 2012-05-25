@@ -3,8 +3,7 @@
   "description": "provides a shell for writing kongs against",
   "attributes": {
     "kong": {
-      "tempest_tarball": "http://<ADMINWEB>/files/tempest/essex.tar.gz",
-      "param1": "kong"
+      "tempest_tarball": "http://<ADMINWEB>/files/tempest/essex.tar.gz"
     }
   },
   "deployment": {
