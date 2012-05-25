@@ -22,7 +22,7 @@ package "pylint"
 # Download and unpack tempest tarball
 
 tarball_url = node[:kong][:tempest_tarball]
-filename = tempest_tarball.split('/').last
+filename = tarball_url.split('/').last
 dst_dir = "/opt"
 
 remote_file tarball_url do
