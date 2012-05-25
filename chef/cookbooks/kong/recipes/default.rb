@@ -40,9 +40,12 @@ end
 bash "remove_commit-hash_from_path" do
   cwd dst_dir
   code <<-EOH
-mv openstack-tempest-* openstack-tempest
+mv openstack-tempest-* tempest
 EOH
+  not_if { ::File.exists?("#{dst_dir}/tempest") }
 end
+
+keystone_port = node[:keystone][:api][:service_port]
 
 comp_admin_user = node[:keystone][:admin][:username]
 comp_admin_pass = node[:keystone][:admin][:password]
@@ -64,11 +67,11 @@ keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "
 keystone_token = node[:keystone][:service][:token]
 keystone_admin_port = node[:keystone][:api][:admin_port]
 
-image_ref = `glance -H #{keystone_address} -p 9292 -I admin -K crowbar -T admin -N http://localhost:5000/v2.0 index|grep ami|awk '{print \$1}'`.strip() 
+image_ref = `glance -H #{keystone_address} -p 9292 -I #{comp_admin_user} -K #{comp_admin_pass} -T #{comp_admin_tenant} -N http://#{keystone_address}:#{keystone_port}/v2.0 index|grep ami|awk '{print \$1}'`.strip()
 
 alt_image_ref = image_ref
 flavor_ref = "1"
-alt_flavor_ref = "2"
+alt_flavor_ref = "1"
 
 keystone_register "kong tempest wakeup keystone" do
   host keystone_address
@@ -87,7 +90,7 @@ keystone_register "register second non-admin user crowbar2" do
   action :add_user
 end
 
-template "/etc/tempest/tempest.conf" do
+template "#{dst_dir}/tempest/etc/tempest.conf" do
   source "tempest.conf.erb"
   mode 0644
   variables(
