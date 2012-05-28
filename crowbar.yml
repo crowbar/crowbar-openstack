@@ -24,6 +24,9 @@ barclamp:
   member:
     - openstack
 
+smoketest:
+  timeout: 1800
+
 crowbar:
   layout: 1
   order: 99
