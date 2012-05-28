@@ -11,9 +11,9 @@ catalog_type = identity
 # be accessed over HTTPS
 use_ssl = False
 # This is the main host address of the authentication service API
-host = 127.0.0.1
+host = <%= @key_host %>
 # Port that the authentication service API is running on
-port = 5000
+port = <%= @key_port %>
 # Version of the authentication service API (a string)
 api_version = v2.0
 # Path to the authentication service tokens resource (do not modify unless you
@@ -86,10 +86,10 @@ catalog_type = image
 api_version = 1
 
 # This is the main host address of the Image API
-host = 127.0.0.1
+host = <%= @img_host %>
 
 # Port that the Image API is running on
-port = 9292
+port = <%= @img_port %>
 
 # This should be the username of a user WITHOUT administrative privileges
 user = <%= @img_user %>

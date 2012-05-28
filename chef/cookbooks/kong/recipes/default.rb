@@ -37,15 +37,25 @@ EOH
   not_if { ::File.exists?("#{dst_dir}/tempest") }
 end
 
-keystone_port = node[:keystone][:api][:service_port]
+keystones = search(:node, "roles:keystone-server") || []
+if keystones.length > 0
+  keystone = keystones[0]
+  keystone = node if keystone.name == node.name
+else
+  keystone = node
+end
 
-comp_admin_user = node[:keystone][:admin][:username]
-comp_admin_pass = node[:keystone][:admin][:password]
-comp_admin_tenant = node[:keystone][:admin][:tenant]
+keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone_address, "admin").address if keystone_address.nil?
 
-comp_user = node[:keystone][:default][:username]
-comp_pass = node[:keystone][:default][:password]
-comp_tenant = node[:keystone][:default][:tenant]
+keystone_port = keystone[:keystone][:api][:service_port]
+
+comp_admin_user = keystone[:keystone][:admin][:username]
+comp_admin_pass = keystone[:keystone][:admin][:password]
+comp_admin_tenant = keystone[:keystone][:admin][:tenant]
+
+comp_user = keystone[:keystone][:default][:username]
+comp_pass = keystone[:keystone][:default][:password]
+comp_tenant = keystone[:keystone][:default][:tenant]
 
 img_user = comp_admin_user
 img_pass = comp_admin_pass
@@ -53,13 +63,32 @@ img_tenant = comp_admin_tenant
 
 alt_comp_user = "crowbar2"
 alt_comp_pass = "crowbar2"
-alt_comp_tenant = "admin"
+alt_comp_tenant = "service"
 
-keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address if keystone_address.nil?
-keystone_token = node[:keystone][:service][:token]
-keystone_admin_port = node[:keystone][:api][:admin_port]
+keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_token = keystone[:keystone][:service][:token]
+keystone_admin_port = keystone[:keystone][:api][:admin_port]
 
-image_ref = `glance -H #{keystone_address} -p 9292 -I #{comp_admin_user} -K #{comp_admin_pass} -T #{comp_admin_tenant} -N http://#{keystone_address}:#{keystone_port}/v2.0 index|grep ami|awk '{print \$1}'`.strip()
+glances = search(:node, "roles:glance-server") || []
+if glances.length > 0
+  glance = glances[0]
+  glance = node if glance.name == node.name
+else
+  glance = node
+end
+
+glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "admin").address if glance_address.nil?
+
+glance_port = glance[:glance][:api][:bind_port]
+
+glance_attrs = " -H #{glance_address}" +
+               " -p #{glance_port}" +
+               " -I #{comp_admin_user}" +
+               " -K #{comp_admin_pass}" +
+               " -T #{comp_admin_tenant}" + 
+               " -N http://#{keystone_address}:#{keystone_port}/v2.0"
+
+image_ref = `ssh root@#{glance_address} glance #{glance_attrs} index|grep ami|awk '{print \$1}'`.strip()
 
 alt_image_ref = image_ref
 flavor_ref = "1"
@@ -86,12 +115,16 @@ template "#{dst_dir}/tempest/etc/tempest.conf" do
   source "tempest.conf.erb"
   mode 0644
   variables(
+           :key_host => keystone_address,
+           :key_port => keystone_port,
            :comp_user => comp_user,
            :comp_pass => comp_pass,
            :comp_tenant => comp_tenant,
            :alt_comp_user => alt_comp_user,
            :alt_comp_pass => alt_comp_pass,
            :alt_comp_tenant => alt_comp_tenant,
+           :img_host => glance_address,
+           :img_port => glance_port,
            :image_ref => image_ref,
            :alt_image_ref => alt_image_ref,
            :flavor_ref => flavor_ref,
