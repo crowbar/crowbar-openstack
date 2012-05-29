@@ -36,6 +36,8 @@ echo "Assuming that tempest is installed on controller"
 tempest_ip=$nova_ip
 echo "Starting tempest smoke tests..."
 #SKIP server-addresses, because crowbar has no networks with labels such as private or public
-root_do "$tempest_ip" "nosetests -w /opt/tempest/ -v tempest -a 'type=smoke' -a '!category=server-addresses'"
+root_do "$tempest_ip" 'nosetests -w /opt/tempest/ -v tempest -a type=smoke -a !category=server-addresses'
 # use -x option to stop after first failed testcase
-#root_do "$tempest_ip" "nosetests -w /opt/tempest/ -v -x tempest -a 'type=smoke'"
+#root_do "$tempest_ip" 'nosetests -w /opt/tempest/ -v -x tempest -a type=smoke'
+# to run all tests
+#root_do "$tempest_ip" 'nosetests -w /opt/tempest/ -v -x tempest'
