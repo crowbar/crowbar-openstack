@@ -111,6 +111,16 @@ keystone_register "register second non-admin user crowbar2" do
   action :add_user
 end
 
+keystone_register "add default crowbar2:service -> Member role" do
+  host keystone_address
+  port keystone_admin_port
+  token keystone_token
+  user_name alt_comp_user
+  role_name "Member"
+  tenant_name alt_comp_tenant
+  action :add_access
+end
+
 template "#{dst_dir}/tempest/etc/tempest.conf" do
   source "tempest.conf.erb"
   mode 0644
