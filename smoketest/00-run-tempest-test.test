@@ -1,5 +1,6 @@
 #!/bin/bash
 # Copyright 2011, Dell
+# Copyright 2012, Mirantis
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,27 +17,24 @@
 die() { res=$1; shift; echo "$@"; exit $res; }
 
 root_do() {
-    # $1 = address of nova controller
-    # $@ = command to run as the nova user.
+    # $1 = address of tempest node
+    # $@ = command to run as the root user.
     local address="$1" 
     shift
     [[ $1 ]] || return 1
     run_on "$address" sudo -u root -i "$@"
 }
 
-echo "Finding Nova controller..."
-nova_ip=$(knife_node_find 'roles:nova-multi-controller' FQDN)
-if ! [[ $nova_ip ]]; then
-    echo "Could not find nova controller."
+echo "Finding tempest..."
+tempest_ip=$(knife_node_find 'roles:tempest' FQDN)
+if ! [[ $tempest_ip ]]; then
+    echo "Could not find tempest."
     exit 1
 fi
-echo "Controller at $nova_ip. Verifying nova services..."
-echo "Assuming that tempest is installed on controller"
+echo "Tempest at $tempest_ip..."
 
-tempest_ip=$nova_ip
 echo "Starting tempest smoke tests..."
-#SKIP server-addresses, because crowbar has no networks with labels such as private or public
-root_do "$tempest_ip" 'nosetests -w /opt/tempest/ -v tempest -a type=smoke -a !category=server-addresses'
+root_do "$tempest_ip" 'nosetests -w /opt/tempest/ -v tempest'
 # use -x option to stop after first failed testcase
 #root_do "$tempest_ip" 'nosetests -w /opt/tempest/ -v -x tempest -a type=smoke'
 # to run all tests

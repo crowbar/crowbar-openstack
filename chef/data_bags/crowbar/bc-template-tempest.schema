@@ -2,13 +2,13 @@
   "type": "map",
   "required": true,
   "mapping": {
-    "id": { "type": "str", "required": true, "pattern": "/^bc-kong-|^bc-template-kong$/" },
+    "id": { "type": "str", "required": true, "pattern": "/^bc-tempest-|^bc-template-tempest$/" },
     "description": { "type": "str", "required": true },
     "attributes": {
       "type": "map",
       "required": true,
       "mapping": {
-        "kong": {
+        "tempest": {
           "type": "map",
           "required": true,
           "mapping": {
@@ -21,7 +21,7 @@
       "type": "map",
       "required": true,
       "mapping": {
-        "kong": {
+        "tempest": {
           "type": "map",
           "required": true,
           "mapping": {

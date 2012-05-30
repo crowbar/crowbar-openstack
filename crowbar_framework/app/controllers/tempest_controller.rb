@@ -1,4 +1,5 @@
 # Copyright 2011, Dell 
+# Copyright 2012, Mirantis
 # 
 # Licensed under the Apache License, Version 2.0 (the "License"); 
 # you may not use this file except in compliance with the License. 
@@ -13,9 +14,9 @@
 # limitations under the License. 
 # 
 
-class KongController < BarclampController
+class TempestController < BarclampController
   def initialize
-    @service_object = KongService.new logger
+    @service_object = TempestService.new logger
   end
 end
 

@@ -1,10 +1,21 @@
 #
-# Cookbook Name:: kong
+# Cookbook Name:: tempest
 # Recipe:: default
 #
-# Copyright 2011, YOUR_COMPANY_NAME
+# Copyright 2011, Dell, Inc.
+# Copyright 2012, Mirantis, Inc.
 #
-# All rights reserved - Do Not Redistribute
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 #
 
 package "python-httplib2"
@@ -13,7 +24,7 @@ package "python-unittest2"
 
 # Download and unpack tempest tarball
 
-tarball_url = node[:kong][:tempest_tarball]
+tarball_url = node[:tempest][:tempest_tarball]
 filename = tarball_url.split('/').last
 dst_dir = "/opt"
 
@@ -44,8 +55,6 @@ if keystones.length > 0
 else
   keystone = node
 end
-
-keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
 
 keystone_port = keystone[:keystone][:api][:service_port]
 
@@ -94,7 +103,7 @@ alt_image_ref = image_ref
 flavor_ref = "1"
 alt_flavor_ref = "1"
 
-keystone_register "kong tempest wakeup keystone" do
+keystone_register "tempest tempest wakeup keystone" do
   host keystone_address
   port keystone_admin_port
   token keystone_token

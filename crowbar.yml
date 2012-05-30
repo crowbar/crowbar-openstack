@@ -1,4 +1,5 @@
 # Copyright 2011, Dell
+# Copyright 2012, Mirantis Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +14,11 @@
 # limitations under the License.
 #
 # Author: RobHirschfeld
-#
+# Author: AlexGordeev
 
 barclamp:
-  name: kong
-  display: Kong
+  name: tempest 
+  display: Tempest
   version: 0
   requires:
     - nova
@@ -25,7 +26,7 @@ barclamp:
     - openstack
 
 smoketest:
-  timeout: 1800
+  timeout: 2400
 
 crowbar:
   layout: 1
@@ -36,7 +37,7 @@ crowbar:
 locale_additions:
   en:
     barclamp:
-      kong:
+      tempest:
         edit_attributes: 
         edit_deployment: 
           deployment: Deployment
