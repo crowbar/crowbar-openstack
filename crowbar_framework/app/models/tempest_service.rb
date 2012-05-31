@@ -21,6 +21,12 @@ class TempestService < ServiceObject
     @logger = thelogger
   end
 
+  def proposal_dependencies(role)
+    answer = []
+    answer << { "barclamp" => "nova", "inst" => role.default_attributes["tempest"]["nova_instance"] }
+    answer
+  end
+
   def create_proposal
     @logger.debug("Tempest create_proposal: entering")
     base = super
@@ -34,6 +40,19 @@ class TempestService < ServiceObject
       }
     end
 
+    base["attributes"]["tempest"]["nova_instance"] = ""
+    begin
+      novaService = NovaService.new(@logger)
+      novas = novaService.list_active[1]
+      if novas.empty?
+        # No actives, look for proposals
+        novas = novaService.proposals[1]
+      end
+      base["attributes"]["tempest"]["nova_instance"] = novas[0] unless novas.empty?
+    rescue
+      @logger.info("Tempest create_proposal: no nova found")
+    end
+
     @logger.debug("Tempest create_proposal: exiting")
     base
   end
@@ -41,6 +60,8 @@ class TempestService < ServiceObject
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Tempest apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
+
+    role.default_attributes["tempest"]["alt_userpass"] = random_password if role.default_attributes["tempest"]["alt_userpass"].nil?
 
     # Update tempest_tarball path
     nodes = NodeObject.find("roles:provisioner-server")
@@ -50,8 +71,9 @@ class TempestService < ServiceObject
       # substitute the admin web portal
       tempest_tarball_path = role.default_attributes["tempest"]["tempest_tarball"].gsub("<ADMINWEB>", "#{admin_ip}:#{web_port}")
       role.default_attributes["tempest"]["tempest_tarball"] = tempest_tarball_path
-      role.save
     end
+
+    role.save
 
     @logger.debug("Tempest apply_role_pre_chef_call: leaving")
   end

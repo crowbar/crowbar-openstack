@@ -3,7 +3,11 @@
   "description": "provides a tempest installation",
   "attributes": {
     "tempest": {
-      "tempest_tarball": "http://<ADMINWEB>/files/tempest/essex.tar.gz"
+      "tempest_tarball": "http://<ADMINWEB>/files/tempest/essex.tar.gz",
+      "nova_instance": "none",
+      "create_alt_user": true,
+      "alt_username": "crowbar2",
+      "alt_usertenant": "service"
     }
   },
   "deployment": {
@@ -17,7 +21,7 @@
         [ "tempest" ]
       ],
       "config": {
-        "environment": "tempest-config-tempest",
+        "environment": "tempest-base-config",
         "mode": "full",
         "transitions": false,
         "transition_list": []

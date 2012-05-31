@@ -5,4 +5,15 @@
   = link_to t('raw'), proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :style => "float: right;"
   %div.container
     %p
-
+      %label{ :for => :nova_instance }= t('.nova_instance')
+      = instance_selector("nova", :nova_instance, "nova_instance", @proposal)
+   %p
+      %label{ :for => :create_alt_user }= t('.create_alt_user')
+      = select_tag :create_alt_user, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["create_alt_user"].to_s), :onchange => "update_value('create_alt_user', 'create_alt_user', 'boolean')"
+    %p
+      %label{ :for => :alt_username }= t('.alt_username')
+      %input#alt_username{:type => "text", :name => "alt_username", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["alt_username"], :onchange => "update_value('alt_username','alt_username', 'string')"}
+    %p
+      %label{ :for => :alt_usertenant }= t('.alt_usertenant')
+      %input#alt_usertenant{:type => "text", :name => "alt_usertenant", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["alt_usertenant"], :onchange => "update_value('alt_usertenant','alt_usertenant', 'string')"}
+    

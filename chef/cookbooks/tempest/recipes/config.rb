@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: tempest
-# Recipe:: default
+# Recipe:: config
 #
 # Copyright 2011, Dell, Inc.
 # Copyright 2012, Dell, Inc.
@@ -18,37 +18,20 @@
 # limitations under the License.
 #
 
-package "python-httplib2"
-package "python-nose"
-package "python-unittest2"
 
-# Download and unpack tempest tarball
+env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
 
-tarball_url = node[:tempest][:tempest_tarball]
-filename = tarball_url.split('/').last
-dst_dir = "/opt"
-
-remote_file tarball_url do
-  source tarball_url
-  path "#{dst_dir}/#{filename}"
-  action :create_if_missing
+novas = search(:node, "roles:nova-multi-controller#{env_filter}") || []
+if novas.length > 0
+  nova = novas[0]
+  nova = node if nova.name == node.name
+else
+  nova = node
 end
 
-execute "tar" do
-  cwd dst_dir
-  command "tar -xf #{dst_dir}/#{filename}"
-  action :run
-end
+env_filter = " AND keystone_config_environment:keystone-config-#{nova[:nova][:keystone_instance]}"
 
-bash "remove_commit-hash_from_path" do
-  cwd dst_dir
-  code <<-EOH
-mv openstack-tempest-* tempest
-EOH
-  not_if { ::File.exists?("#{dst_dir}/tempest") }
-end
-
-keystones = search(:node, "roles:keystone-server") || []
+keystones = search(:node, "roles:keystone-server#{env_filter}") || []
 if keystones.length > 0
   keystone = keystones[0]
   keystone = node if keystone.name == node.name
@@ -70,15 +53,17 @@ img_user = comp_admin_user
 img_pass = comp_admin_pass
 img_tenant = comp_admin_tenant
 
-alt_comp_user = "crowbar2"
-alt_comp_pass = "crowbar2"
-alt_comp_tenant = "service"
+alt_comp_user = node[:tempest][:alt_username]
+alt_comp_pass = node[:tempest][:alt_userpass]
+alt_comp_tenant = node[:tempest][:alt_usertenant]
 
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
 keystone_token = keystone[:keystone][:service][:token]
 keystone_admin_port = keystone[:keystone][:api][:admin_port]
 
-glances = search(:node, "roles:glance-server") || []
+env_filter = " AND glance_config_environment:glance-config-#{nova[:nova][:glance_instance]}"
+
+glances = search(:node, "roles:glance-server#{env_filter}") || []
 if glances.length > 0
   glance = glances[0]
   glance = node if glance.name == node.name
@@ -103,31 +88,35 @@ alt_image_ref = image_ref
 flavor_ref = "1"
 alt_flavor_ref = "1"
 
-keystone_register "tempest tempest wakeup keystone" do
-  host keystone_address
-  port keystone_admin_port
-  token keystone_token
-  action :wakeup
-end
+if node[:tempest][:create_alt_user]
 
-keystone_register "register second non-admin user crowbar2" do
-  host keystone_address
-  port keystone_admin_port
-  token keystone_token
-  user_name alt_comp_user
-  user_password alt_comp_pass 
-  tenant_name alt_comp_tenant
-  action :add_user
-end
+  keystone_register "tempest tempest wakeup keystone" do
+    host keystone_address
+    port keystone_admin_port
+    token keystone_token
+    action :wakeup
+  end
 
-keystone_register "add default crowbar2:service -> Member role" do
-  host keystone_address
-  port keystone_admin_port
-  token keystone_token
-  user_name alt_comp_user
-  role_name "Member"
-  tenant_name alt_comp_tenant
-  action :add_access
+  keystone_register "register second non-admin user crowbar2" do
+    host keystone_address
+    port keystone_admin_port
+    token keystone_token
+    user_name alt_comp_user
+    user_password alt_comp_pass 
+    tenant_name alt_comp_tenant
+    action :add_user
+  end
+
+  keystone_register "add default crowbar2:service -> Member role" do
+    host keystone_address
+    port keystone_admin_port
+    token keystone_token
+    user_name alt_comp_user
+    role_name "Member"
+    tenant_name alt_comp_tenant
+    action :add_access
+  end
+
 end
 
 template "#{dst_dir}/tempest/etc/tempest.conf" do

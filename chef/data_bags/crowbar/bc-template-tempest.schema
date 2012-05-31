@@ -12,7 +12,12 @@
           "type": "map",
           "required": true,
           "mapping": {
-            "tempest_tarball": { "type": "str", "required": true }
+            "tempest_tarball": { "type": "str", "required": true },
+            "nova_instance": { "type": "str", "required": true },
+            "create_alt_user": { "type": "bool", "required": true },
+            "alt_username": { "type": "str", "required": true },
+            "alt_usertenant: { "type": "str", "required": true },
+            "alt_userpass": { "type": "str" }
           }
         }
       }
