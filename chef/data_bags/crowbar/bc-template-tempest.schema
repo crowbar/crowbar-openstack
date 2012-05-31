@@ -16,7 +16,7 @@
             "nova_instance": { "type": "str", "required": true },
             "create_alt_user": { "type": "bool", "required": true },
             "alt_username": { "type": "str", "required": true },
-            "alt_usertenant: { "type": "str", "required": true },
+            "alt_usertenant": { "type": "str", "required": true },
             "alt_userpass": { "type": "str" }
           }
         }
