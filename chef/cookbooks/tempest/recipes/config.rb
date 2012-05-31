@@ -119,7 +119,7 @@ if node[:tempest][:create_alt_user]
 
 end
 
-template "#{dst_dir}/tempest/etc/tempest.conf" do
+template "/opt/tempest/etc/tempest.conf" do
   source "tempest.conf.erb"
   mode 0644
   variables(
