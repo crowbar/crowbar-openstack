@@ -38,6 +38,7 @@ locale_additions:
     barclamp:
       tempest:
         edit_attributes: 
+          attributes: Attributes
           nova_instance: Nova
           create_alt_user: Create non-admin alt user for tempest
           alt_username: Choose username for alt user
