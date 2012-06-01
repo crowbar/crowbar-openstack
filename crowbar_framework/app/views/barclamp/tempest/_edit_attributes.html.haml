@@ -7,7 +7,7 @@
     %p
       %label{ :for => :nova_instance }= t('.nova_instance')
       = instance_selector("nova", :nova_instance, "nova_instance", @proposal)
-   %p
+    %p
       %label{ :for => :create_alt_user }= t('.create_alt_user')
       = select_tag :create_alt_user, options_for_select([['yes','true'], ['no', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["create_alt_user"].to_s), :onchange => "update_value('create_alt_user', 'create_alt_user', 'boolean')"
     %p
