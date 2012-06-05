@@ -19,6 +19,25 @@ class TempestController < BarclampController
     @service_object = TempestService.new logger
   end
 
+  
+  # remove test result specified by uuid
+  def removeresult
+    uuid = params[:id]
+    f = @service_object.acquire_lock(@bc_name)
+    prop_name = _get_proposal_name_from_result_uuid(uuid)
+    if prop_name
+      prop = ProposalObject.find_proposal(@bc_name, prop_name)
+      prop.item["attributes"][@bc_name]["test_results"].delete_if{|result| result["uuid"]== uuid}
+      prop.save
+      cmd = "rm -f /opt/dell/crowbar_framework/log/*-#{uuid}.runtests.xml"
+      @service_object.run_remote_chef_client("admin", cmd, "/dev/null") #TODO: perform admin node finding; define filename
+    else
+      Rails.logger.info "coudn't find any proposal contains result with specified uuid #{uuid} OR tests are still running"
+    end
+  ensure
+    @service_object.release_lock(f)
+  end
+
 
   # run tempest test and store test results in xml xunit format in log directory on admin node
   def runtests
@@ -31,7 +50,7 @@ class TempestController < BarclampController
     Kernel::fork {
       Rails.logger.info "Runtests: enrering fork(), starting nosetests on #{node_name} node"
       cmd = "nosetests -q -w /opt/tempest/ tempest.tests.test_authorization --with-xunit --xunit-file=/dev/stdout 1>&2 2>/dev/null"
-      cmd_pid = @service_object.run_remote_chef_client(node_name, cmd , filename)
+      cmd_pid = @service_object.run_remote_chef_client(node_name, cmd, filename)
       # update proposal test_results: "status" => "running"
       status = "running"
       started = Time.now.to_s
@@ -51,9 +70,11 @@ class TempestController < BarclampController
       # update proposal again
       f = @service_object.acquire_lock(@bc_name)
       prop = ProposalObject.find_proposal(@bc_name, prop_name)
-      results_set = prop.item["attributes"][@bc_name]["test_results"].select{ |result| result["uuid"] == uuid }
-      results_set.each do |result|
-        result.merge({"ended" => ended, "status" => status })
+      prop.item["attributes"][@bc_name]["test_results"].each do |result|
+        if result["uuid"] == uuid
+          result.merge!({"ended" => ended, "status" => status })
+          break
+        end
       end
       prop.save
       @service_object.release_lock(f)
@@ -64,8 +85,27 @@ class TempestController < BarclampController
   private
 
   def _get_proposal_name_from_node_name(name)
-    proposal = ProposalObject.find_proposals(@bc_name).select{ |prop| prop.item["deployment"][@bc_name]["elements"][@bc_name].first == name }
-    proposal.name
+    ProposalObject.find_proposals(@bc_name).each do |prop|
+      if prop.item["deployment"][@bc_name]["elements"][@bc_name].first == name
+        return prop.name
+      end
+    end
+    nil
+  end
+
+  def _get_proposal_name_from_result_uuid(uuid)
+    ProposalObject.find_proposals(@bc_name).each do |prop|
+      prop.item["attributes"][@bc_name]["test_results"].each do |result|
+        if result["uuid"] == uuid
+          if result["status"] != "running"
+            return prop.name
+          else
+            return nil
+          end
+        end
+      end
+    end
+    nil
   end
 
   def _uuid
