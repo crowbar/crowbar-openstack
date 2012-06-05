@@ -17,7 +17,20 @@
             "create_alt_user": { "type": "bool", "required": true },
             "alt_username": { "type": "str", "required": true },
             "alt_usertenant": { "type": "str", "required": true },
-            "alt_userpass": { "type": "str" }
+            "alt_userpass": { "type": "str" },
+            "test_results": {
+              "type": "seq",
+              "required": true,
+              "sequence": [ {
+                "type": "map",
+                "mapping": {
+                  "uuid": { "type": "str", "required": "true" },
+                  "started": { "type": "str", "required": "true" },
+                  "ended": { "type": "str", "required": "true" },
+                  "status": { "type": "str", "required": "true" }
+                }
+              } ]
+            }
           }
         }
       }

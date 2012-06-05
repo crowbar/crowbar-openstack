@@ -7,7 +7,8 @@
       "nova_instance": "none",
       "create_alt_user": true,
       "alt_username": "crowbar2",
-      "alt_usertenant": "service"
+      "alt_usertenant": "service",
+      "test_results": []
     }
   },
   "deployment": {
