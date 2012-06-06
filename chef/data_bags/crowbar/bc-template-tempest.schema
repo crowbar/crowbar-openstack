@@ -24,10 +24,10 @@
               "sequence": [ {
                 "type": "map",
                 "mapping": {
-                  "uuid": { "type": "str", "required": "true" },
-                  "started": { "type": "str", "required": "true" },
-                  "ended": { "type": "str", "required": "true" },
-                  "status": { "type": "str", "required": "true" }
+                  "uuid": { "type": "str", "required": true },
+                  "started": { "type": "str", "required": true },
+                  "ended": { "type": "str", "required": true },
+                  "status": { "type": "str", "required": true }
                 }
               } ]
             }
