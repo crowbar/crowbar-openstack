@@ -67,6 +67,7 @@ class TempestController < BarclampController
         status = "passed"
       else
         status = "failed"
+      end
       # update proposal again
       f = @service_object.acquire_lock(@bc_name)
       prop = ProposalObject.find_proposal(@bc_name, prop_name)
