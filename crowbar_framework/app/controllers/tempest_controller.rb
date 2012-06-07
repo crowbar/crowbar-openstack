@@ -40,7 +40,7 @@ class TempestController < BarclampController
     ProposalObject.find_proposals(@bc_name).each do |prop|
       prop.item["attributes"][@bc_name]["test_results"].reject{|result| result["status"] == "running" }.each do |result|
         cmd = "rm -f /opt/dell/crowbar_framework/log/*-#{result["uuid"]}.runtests.xml"
-        @service_object.run_remote_chef_client("admin", cmd, "/dev/null") #TODO: perform admin node finding;
+        @service_object.run_remote_chef_client(_admin_node_hostname, cmd, "/dev/null")
       end
       prop.item["attributes"][@bc_name]["test_results"].delete_if{|result| result["status"] != "running"}
       prop.save
@@ -63,7 +63,7 @@ class TempestController < BarclampController
       prop.save
       Rails.logger.info "Remove result: item with uuid #{uuid} removed"
       cmd = "rm -f /opt/dell/crowbar_framework/log/*-#{uuid}.runtests.xml"
-      @service_object.run_remote_chef_client("admin", cmd, "/dev/null") #TODO: perform admin node finding; define filename
+      @service_object.run_remote_chef_client(_admin_node_hostname, cmd, "/dev/null")
       render :nothing => true
     else
       Rails.logger.info "Remove result: coudn't find any proposal contains result with specified uuid #{uuid} OR tests are still running"
@@ -152,6 +152,10 @@ class TempestController < BarclampController
 
   def _uuid
     `uuidgen`.strip
+  end
+
+  def _admin_node_hostname
+    `hostname`.strip
   end
 
 end
