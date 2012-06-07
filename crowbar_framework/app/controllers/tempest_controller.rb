@@ -43,6 +43,7 @@ class TempestController < BarclampController
         @service_object.run_remote_chef_client("admin", cmd, "/dev/null") #TODO: perform admin node finding;
       end
       prop.item["attributes"][@bc_name]["test_results"].delete_if{|result| result["status"] != "running"}
+      prop.save
     end
     Rails.logger.info "Removeresults: all non running test results/logs have been removed"
     render :nothing => true
