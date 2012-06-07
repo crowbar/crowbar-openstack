@@ -23,14 +23,11 @@ class TempestController < BarclampController
   # get all test results
   def get_results
     results = []
-    f = @service_object.acquire_lock(@bc_name)
     ProposalObject.find_proposals(@bc_name).each do |prop|
       results.concat(prop.item["attributes"][@bc_name]["test_results"])
     end
     Rails.logger.info "Get results: results=#{results.inspect}"
-    render :nothing => true #TODO: add template
-  ensure
-    @service_object.release_lock(f)
+    render :template => 'barclamp/tempest/index.html.haml', :locals => {:results => results.sort{|x,y| x["started"] <=> y["started"]} }
   end
 
 

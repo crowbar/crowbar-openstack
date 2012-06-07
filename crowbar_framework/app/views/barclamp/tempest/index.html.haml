@@ -1,0 +1,25 @@
+%html
+  %head
+    %title= "Tempest Dashboard"
+  %body
+    %p
+      %table{:border => "3"}
+        %tbody
+          %tr
+            %th ID
+            %th Status
+            %th Started at
+            %th Ended at
+          - results.each do |result|
+            %tr
+              %td= result["uuid"][0,7]
+              - statuses = { 'running' => '/images/icons/led/yellow.png', 'passed' => '/images/icons/led/green.png', 'failed' => '/images/icons/led/red.png' }
+              %td 
+                %img{:src => statuses[result["status"]], :alt => result["status"] }
+                = result["status"]
+              %td= result["started"]
+              %td= result["ended"]
+              %td
+                %a{:href => "/tempest/remove_result/#{result["uuid"]}", :title => "Remove result and log"}
+                  %img{:src => '/images/icons/delete.png', :alt => "Remove"}
+
