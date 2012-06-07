@@ -29,10 +29,13 @@ class TempestController < BarclampController
       prop = ProposalObject.find_proposal(@bc_name, prop_name)
       prop.item["attributes"][@bc_name]["test_results"].delete_if{|result| result["uuid"]== uuid}
       prop.save
+      Rails.logger.info "Removeresult: item with uuid #{uuid} removed"
       cmd = "rm -f /opt/dell/crowbar_framework/log/*-#{uuid}.runtests.xml"
       @service_object.run_remote_chef_client("admin", cmd, "/dev/null") #TODO: perform admin node finding; define filename
+      render :nothing => true
     else
-      Rails.logger.info "coudn't find any proposal contains result with specified uuid #{uuid} OR tests are still running"
+      Rails.logger.info "Removeresult: coudn't find any proposal contains result with specified uuid #{uuid} OR tests are still running"
+      render :nothing => true, :status => '404'
     end
   ensure
     @service_object.release_lock(f)
@@ -45,16 +48,22 @@ class TempestController < BarclampController
     uuid = _uuid
     Rails.logger.info "Runtests: will run tempest on #{node_name} node"
     filename = "log/#{node_name}-#{uuid}.runtests.xml"
+    prop_name = _get_proposal_name_from_node_name(node_name)
+    if not prop_name
+      Rails.logger.info "Runtests: couldn't find tempest proposal for node #{node_name}"
+      render :nothing => true, :status => '404'
+      return
+    end
     render :nothing => true
     Rails.logger.info "Runtests: leaving runtests and forking"
     Kernel::fork {
-      Rails.logger.info "Runtests: enrering fork(), starting nosetests on #{node_name} node"
+      Rails.logger.info "Runtests: enrering fork() for starting nosetests on #{node_name} node"
       cmd = "nosetests -q -w /opt/tempest/ tempest.tests.test_authorization --with-xunit --xunit-file=/dev/stdout 1>&2 2>/dev/null"
+      Rails.logger.info "Runtests: starting nosetests on #{node_name}"
       cmd_pid = @service_object.run_remote_chef_client(node_name, cmd, filename)
       # update proposal test_results: "status" => "running"
       status = "running"
       started = Time.now.to_s
-      prop_name = _get_proposal_name_from_node_name(node_name)
       f = @service_object.acquire_lock(@bc_name)
       prop = ProposalObject.find_proposal(@bc_name, prop_name)
       prop.item["attributes"][@bc_name]["test_results"] << { "uuid" => uuid, "started" => started, "ended" => "none", "status" => status }
@@ -87,7 +96,7 @@ class TempestController < BarclampController
 
   def _get_proposal_name_from_node_name(name)
     ProposalObject.find_proposals(@bc_name).each do |prop|
-      if prop.item["deployment"][@bc_name]["elements"][@bc_name].first == name
+      if prop.elements[@bc_name].map{|node| node.split('.').first}.include?(name)
         return prop.name
       end
     end
