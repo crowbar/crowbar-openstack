@@ -19,6 +19,37 @@ class TempestController < BarclampController
     @service_object = TempestService.new logger
   end
 
+
+  # get all test results
+  def getresults
+    results = []
+    f = @service_object.acquire_lock(@bc_name)
+    ProposalObject.find_proposals(@bc_name).each do |prop|
+      results.concat(prop.item["attributes"][@bc_name]["test_results"])
+    end
+    Rails.logger.info "Getresults: results=#{results.inspect}"
+    render :nothing => true #TODO: add template
+  ensure
+    @service_object.release_lock(f)
+  end
+
+
+  # remove all ended test results and xml-s
+  def removeresults
+    f = @service_object.acquire_lock(@bc_name)
+    ProposalObject.find_proposals(@bc_name).each do |prop|
+      prop.item["attributes"][@bc_name]["test_results"].reject{|result| result["status"] == "running" }.each do |result|
+        cmd = "rm -f /opt/dell/crowbar_framework/log/*-#{result["uuid"]}.runtests.xml"
+        @service_object.run_remote_chef_client("admin", cmd, "/dev/null") #TODO: perform admin node finding;
+      end
+      prop.item["attributes"][@bc_name]["test_results"].delete_if{|result| result["status"] != "running"}
+    end
+    Rails.logger.info "Removeresults: all non running test results/logs have been removed"
+    render :nothing => true
+  ensure
+    @service_object.release_lock(f)
+  end
+
   
   # remove test result specified by uuid
   def removeresult
