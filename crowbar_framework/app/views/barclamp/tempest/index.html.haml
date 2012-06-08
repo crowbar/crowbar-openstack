@@ -1,25 +1,28 @@
-%html
-  %head
-    %title= "Tempest Dashboard"
-  %body
-    %p
-      %table{:border => "3"}
-        %tbody
-          %tr
-            %th ID
-            %th Status
-            %th Started at
-            %th Ended at
+%h1= t '.title'
+%p{:style => 'float:right'}
+  = link_to t('.remove_all_results'), '/tempest/remove_results', :class => 'button'
+  %p
+    %label{ :for => :run_tests }= t('.run_tests')
+  - nodes.each do |node|
+    = link_to t('.run_tests_on_node') + ' ' + node, "/tempest/run_tests/#{node}", :class => 'button'
+  %p
+    %h3= t '.results'
+    %table{:border => "2"}
+      %tbody
+        %tr
+          %th= t '.id'
+          %th= t '.status'
+          %th= t '.started_at'
+          %th= t '.ended_at'
           - results.each do |result|
             %tr
-              %td= result["uuid"][0,7]
+              %td
+                = link_to result["uuid"][0, 7], "/tempest/download/#{result["uuid"]}", :title => t('.download_xml_report')
+                = link_to image_tag('/images/icons/delete.png'), "/tempest/remove_result/#{result["uuid"]}", :title => t('.remove_hint')
               - statuses = { 'running' => '/images/icons/led/yellow.png', 'passed' => '/images/icons/led/green.png', 'failed' => '/images/icons/led/red.png' }
               %td 
-                %img{:src => statuses[result["status"]], :alt => result["status"] }
-                = result["status"]
-              %td= result["started"]
-              %td= result["ended"]
-              %td
-                %a{:href => "/tempest/remove_result/#{result["uuid"]}", :title => "Remove result and log"}
-                  %img{:src => '/images/icons/delete.png', :alt => "Remove"}
+                = image_tag statuses[result["status"]], :alt => t(".statuses.#{result["status"]}") 
+                = t(".statuses.#{result["status"]}")
+                %td= result["started"]
+                %td= result["ended"]
 

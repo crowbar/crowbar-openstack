@@ -20,14 +20,25 @@ class TempestController < BarclampController
   end
 
 
+  def download
+    uuid = params[:id]
+    if /^[0-9A-Fa-f]{8}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{4}\-[0-9A-Fa-f]{12}/.match(uuid)
+      send_file("#{Rails.root}/log/#{uuid}.run_tests.xml", :filename => "run_tests.#{uuid[0, 7]}.xml", :type => "application/xml")
+    else
+      render :nothing => true, :status => '404'
+    end
+  end
+
   # get all test results
-  def get_results
+  def index 
     results = []
+    nodes = []
     ProposalObject.find_proposals(@bc_name).each do |prop|
+      nodes.concat(prop.elements[@bc_name].map{|node| node.split('.').first}) if prop.status == "ready"
       results.concat(prop.item["attributes"][@bc_name]["test_results"])
     end
-    Rails.logger.info "Get results: results=#{results.inspect}"
-    render :template => 'barclamp/tempest/index.html.haml', :locals => {:results => results.sort{|x,y| x["started"] <=> y["started"]} }
+    Rails.logger.info "Get results: results=#{results.inspect}, nodes=#{nodes.inspect}"
+    render :template => 'barclamp/tempest/index.html.haml', :locals => {:results => results.sort{|x,y| x["started"] <=> y["started"]}, :nodes => nodes }
   end
 
 
@@ -36,14 +47,15 @@ class TempestController < BarclampController
     f = @service_object.acquire_lock(@bc_name)
     ProposalObject.find_proposals(@bc_name).each do |prop|
       prop.item["attributes"][@bc_name]["test_results"].reject{|result| result["status"] == "running" }.each do |result|
-        cmd = "rm -f /opt/dell/crowbar_framework/log/*-#{result["uuid"]}.runtests.xml"
+        cmd = "rm -f /opt/dell/crowbar_framework/log/#{result["uuid"]}.run_tests.xml"
         @service_object.run_remote_chef_client(_admin_node_hostname, cmd, "/dev/null")
       end
       prop.item["attributes"][@bc_name]["test_results"].delete_if{|result| result["status"] != "running"}
       prop.save
     end
     Rails.logger.info "Remove results: all non running test results/logs have been removed"
-    render :nothing => true
+    flash[:notice] = t('.succeeded', :scope=>'barclamp.tempest.remove_results')
+    redirect_to '/tempest'
   ensure
     @service_object.release_lock(f)
   end
@@ -59,13 +71,14 @@ class TempestController < BarclampController
       prop.item["attributes"][@bc_name]["test_results"].delete_if{|result| result["uuid"]== uuid}
       prop.save
       Rails.logger.info "Remove result: item with uuid #{uuid} removed"
-      cmd = "rm -f /opt/dell/crowbar_framework/log/*-#{uuid}.runtests.xml"
+      cmd = "rm -f /opt/dell/crowbar_framework/log/#{uuid}.run_tests.xml"
       @service_object.run_remote_chef_client(_admin_node_hostname, cmd, "/dev/null")
-      render :nothing => true
+      flash[:notice] = t('.succeeded', :scope=>'barclamp.tempest.remove_result') + ": " + uuid[0, 7]
     else
       Rails.logger.info "Remove result: coudn't find any proposal contains result with specified uuid #{uuid} OR tests are still running"
-      render :nothing => true, :status => '404'
+      flash[:notice] = t('.failed', :scope=>'barclamp.tempest.remove_result') + ": " + uuid[0, 7]
     end
+    redirect_to '/tempest'
   ensure
     @service_object.release_lock(f)
   end
@@ -76,15 +89,15 @@ class TempestController < BarclampController
     node_name = params[:id] # do we need to check node name?
     uuid = _uuid
     Rails.logger.info "Run tests: will run tempest on #{node_name} node"
-    filename = "log/#{node_name}-#{uuid}.runtests.xml"
+    filename = "log/#{uuid}.run_tests.xml"
     prop_name = _get_proposal_name_from_node_name(node_name)
     if not prop_name
       Rails.logger.info "Run tests: couldn't find tempest proposal for node #{node_name}"
-      render :nothing => true, :status => '404'
-      return
+      flash[:notice] = t('.failed', :scope=>'barclamp.tempest.run_tests') + ": " + node_name 
+      return redirect_to '/tempest'
     end
-    render :nothing => true
-    Rails.logger.info "Run tests: leaving runtests and forking"
+    flash[:notice] = t('.succeeded', :scope=>'barclamp.tempest.run_tests') + ": " + uuid[0, 7]
+    Rails.logger.info "Run tests: leaving run_tests and forking"
     Kernel::fork {
       Rails.logger.info "Run tests: enrering fork() for starting nosetests on #{node_name} node"
       cmd = "nosetests -q -w /opt/tempest/ tempest.tests.test_authorization --with-xunit --xunit-file=/dev/stdout 1>&2 2>/dev/null"
@@ -119,6 +132,7 @@ class TempestController < BarclampController
       @service_object.release_lock(f)
       Rails.logger.info "Run tests: leaving fork()"
     }
+    redirect_to '/tempest'
   end
 
   private

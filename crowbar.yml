@@ -37,6 +37,30 @@ locale_additions:
   en:
     barclamp:
       tempest:
+        remove_results:
+          succeeded: All non-running test results/reports have been removed
+        remove_result:
+          failed: Failed to remove the result id
+          succeeded: Successfuly removed the result with id
+        run_tests:
+          failed: Failed to run tests from node
+          succeeded: Successfuly started tests with id 
+        index:
+          title: Tempest Dashboard
+          run_tests: Run tests from following nodes
+          run_tests_on_node: Run on
+          results: Test results and xml reports
+          remove_all_results: Remove results
+          id: Id
+          status: Status
+          started_at: Started at
+          ended_at: Ended at
+          download_xml_report: Download xml report
+          remove_hint: Remove this result and report
+          statuses:
+            passed: Passed
+            failed: Failed
+            running: Running
         edit_attributes: 
           attributes: Attributes
           nova_instance: Nova
