@@ -47,8 +47,12 @@ class TempestController < BarclampController
     f = @service_object.acquire_lock(@bc_name)
     ProposalObject.find_proposals(@bc_name).each do |prop|
       prop.item["attributes"][@bc_name]["test_results"].reject{|result| result["status"] == "running" }.each do |result|
-        cmd = "rm -f /opt/dell/crowbar_framework/log/#{result["uuid"]}.run_tests.xml"
-        @service_object.run_remote_chef_client(_admin_node_hostname, cmd, "/dev/null")
+        filename = "#{Rails.root}/log/#{result["uuid"]}.run_tests.xml"
+        begin
+          File.delete filename
+        rescue
+          Rails.logger.info "Remove results: can't delete file #{filename}"
+        end
       end
       prop.item["attributes"][@bc_name]["test_results"].delete_if{|result| result["status"] != "running"}
       prop.save
@@ -71,8 +75,12 @@ class TempestController < BarclampController
       prop.item["attributes"][@bc_name]["test_results"].delete_if{|result| result["uuid"]== uuid}
       prop.save
       Rails.logger.info "Remove result: item with uuid #{uuid} removed"
-      cmd = "rm -f /opt/dell/crowbar_framework/log/#{uuid}.run_tests.xml"
-      @service_object.run_remote_chef_client(_admin_node_hostname, cmd, "/dev/null")
+      filename = "#{Rails.root}/log/#{uuid}.run_tests.xml"
+      begin
+        File.delete filename
+      rescue
+        Rails.logger.info "Remove results: can't delete file #{filename}"
+      end
       flash[:notice] = t('.succeeded', :scope=>'barclamp.tempest.remove_result') + ": " + uuid[0, 7]
     else
       Rails.logger.info "Remove result: coudn't find any proposal contains result with specified uuid #{uuid} OR tests are still running"
@@ -163,10 +171,6 @@ class TempestController < BarclampController
 
   def _uuid
     `uuidgen`.strip
-  end
-
-  def _admin_node_hostname
-    `hostname`.strip
   end
 
 end
