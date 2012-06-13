@@ -30,7 +30,7 @@ class TempestController < BarclampController
   end
 
   # get all test results
-  def index 
+  def get_results 
     results = []
     nodes = []
     ProposalObject.find_proposals(@bc_name).each do |prop|
@@ -38,7 +38,10 @@ class TempestController < BarclampController
       results.concat(prop.item["attributes"][@bc_name]["test_results"])
     end
     Rails.logger.info "Get results: results=#{results.inspect}, nodes=#{nodes.inspect}"
-    render :template => 'barclamp/tempest/index.html.haml', :locals => {:results => results.sort{|x,y| x["started"] <=> y["started"]}, :nodes => nodes }
+    respond_to do |format|
+      format.json { render :json => results }
+      format.html { render :template => 'barclamp/tempest/index.html.haml', :locals => {:results => results.sort{|x,y| x["started"] <=> y["started"]}, :nodes => nodes } }
+    end
   end
 
 
@@ -59,7 +62,7 @@ class TempestController < BarclampController
     end
     Rails.logger.info "Remove results: all non running test results/logs have been removed"
     flash[:notice] = t('.succeeded', :scope=>'barclamp.tempest.remove_results')
-    redirect_to '/tempest'
+    redirect_to :back
   ensure
     @service_object.release_lock(f)
   end
@@ -86,7 +89,7 @@ class TempestController < BarclampController
       Rails.logger.info "Remove result: coudn't find any proposal contains result with specified uuid #{uuid} OR tests are still running"
       flash[:notice] = t('.failed', :scope=>'barclamp.tempest.remove_result') + ": " + uuid[0, 7]
     end
-    redirect_to '/tempest'
+    redirect_to :back
   ensure
     @service_object.release_lock(f)
   end
@@ -102,7 +105,7 @@ class TempestController < BarclampController
     if not prop_name
       Rails.logger.info "Run tests: couldn't find tempest proposal for node #{node_name}"
       flash[:notice] = t('.failed', :scope=>'barclamp.tempest.run_tests') + ": " + node_name 
-      return redirect_to '/tempest'
+      return redirect_to :back
     end
     flash[:notice] = t('.succeeded', :scope=>'barclamp.tempest.run_tests') + ": " + uuid[0, 7]
     Rails.logger.info "Run tests: leaving run_tests and forking"
@@ -140,7 +143,7 @@ class TempestController < BarclampController
       @service_object.release_lock(f)
       Rails.logger.info "Run tests: leaving fork()"
     }
-    redirect_to '/tempest'
+    redirect_to :back
   end
 
   private
