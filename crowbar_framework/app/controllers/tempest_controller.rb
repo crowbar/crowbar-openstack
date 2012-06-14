@@ -116,7 +116,7 @@ class TempestController < BarclampController
     end
     flash[:notice] = t('.succeeded', :scope=>'barclamp.tempest.run_tests') + ": " + uuid[0, 7]
     Rails.logger.info "Run tests: leaving run_tests and forking"
-    Kernel::fork {
+    pid = fork do
       Rails.logger.info "Run tests: enrering fork() for starting nosetests on #{node_name} node"
       cmd = "nosetests -q -w /opt/tempest/ tempest.tests.test_authorization --with-xunit --xunit-file=/dev/stdout 1>&2 2>/dev/null"
       Rails.logger.info "Run tests: starting nosetests on #{node_name}"
@@ -149,7 +149,8 @@ class TempestController < BarclampController
       prop.save
       @service_object.release_lock(f)
       Rails.logger.info "Run tests: leaving fork()"
-    }
+    end 
+    Process.detach(pid)
     redirect_to :action => 'dashboard'
   end
 
