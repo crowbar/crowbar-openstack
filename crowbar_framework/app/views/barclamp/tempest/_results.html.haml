@@ -1,0 +1,18 @@
+- statuses = { 'running' => '/images/icons/led/yellow.png', 'passed' => '/images/icons/led/green.png', 'failed' => '/images/icons/led/red.png' }
+%table{:border => "2"}
+  %tbody
+    %tr
+      %th= t '.id'
+      %th= t '.status'
+      %th= t '.started_at'
+      %th= t '.ended_at'
+    - @test_results.each do |result|
+      %tr
+        %td
+          = link_to result["uuid"][0, 7], '/tempest/download/' + result["uuid"], :title => t('.download_xml_report')
+          = link_to image_tag('/images/icons/delete.png'), '/tempest/remove_result/' + result["uuid"], :title => t('.remove_hint')
+        %td 
+          = image_tag statuses[result["status"]], :alt => t(".statuses.#{result["status"]}") 
+          = t(".statuses.#{result["status"]}")
+        %td= result["started"]
+        %td= result["ended"]

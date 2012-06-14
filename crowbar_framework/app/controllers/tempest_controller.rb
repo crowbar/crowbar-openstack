@@ -30,17 +30,24 @@ class TempestController < BarclampController
   end
 
   # get all test results
-  def get_results 
+  def dashboard
+    update = params[:id]
     results = []
     nodes = []
     ProposalObject.find_proposals(@bc_name).each do |prop|
       nodes.concat(prop.elements[@bc_name].map{|node| node.split('.').first}) if prop.status == "ready"
       results.concat(prop.item["attributes"][@bc_name]["test_results"])
     end
-    Rails.logger.info "Get results: results=#{results.inspect}, nodes=#{nodes.inspect}"
+    Rails.logger.info "Dashboard: results=#{results.inspect}, nodes=#{nodes.inspect}"
+    @test_results = results.sort{|x,y| x["started"] <=> y["started"]}
+    @run_on_nodes = nodes 
+    @results_update_url = '/tempest/dashboard/update'
     respond_to do |format|
-      format.json { render :json => results }
-      format.html { render :template => 'barclamp/tempest/index.html.haml', :locals => {:results => results.sort{|x,y| x["started"] <=> y["started"]}, :nodes => nodes } }
+      if update
+        format.html { render :partial => 'barclamp/tempest/results.html.haml', :layout => false }
+      else
+        format.html { render :template => 'barclamp/tempest/dashboard.html.haml' }
+      end
     end
   end
 
@@ -62,7 +69,7 @@ class TempestController < BarclampController
     end
     Rails.logger.info "Remove results: all non running test results/logs have been removed"
     flash[:notice] = t('.succeeded', :scope=>'barclamp.tempest.remove_results')
-    redirect_to :back
+    redirect_to :action => 'dashboard'
   ensure
     @service_object.release_lock(f)
   end
@@ -89,7 +96,7 @@ class TempestController < BarclampController
       Rails.logger.info "Remove result: coudn't find any proposal contains result with specified uuid #{uuid} OR tests are still running"
       flash[:notice] = t('.failed', :scope=>'barclamp.tempest.remove_result') + ": " + uuid[0, 7]
     end
-    redirect_to :back
+    redirect_to :action => 'dashboard'
   ensure
     @service_object.release_lock(f)
   end
@@ -97,7 +104,7 @@ class TempestController < BarclampController
 
   # run tempest test and store test results in xml xunit format in log directory on admin node
   def run_tests
-    node_name = params[:id] # do we need to check node name?
+    node_name = params[:id]
     uuid = _uuid
     Rails.logger.info "Run tests: will run tempest on #{node_name} node"
     filename = "log/#{uuid}.run_tests.xml"
@@ -105,7 +112,7 @@ class TempestController < BarclampController
     if not prop_name
       Rails.logger.info "Run tests: couldn't find tempest proposal for node #{node_name}"
       flash[:notice] = t('.failed', :scope=>'barclamp.tempest.run_tests') + ": " + node_name 
-      return redirect_to :back
+      return redirect_to :action => 'dashboard'
     end
     flash[:notice] = t('.succeeded', :scope=>'barclamp.tempest.run_tests') + ": " + uuid[0, 7]
     Rails.logger.info "Run tests: leaving run_tests and forking"
@@ -143,7 +150,7 @@ class TempestController < BarclampController
       @service_object.release_lock(f)
       Rails.logger.info "Run tests: leaving fork()"
     }
-    redirect_to :back
+    redirect_to :action => 'dashboard'
   end
 
   private

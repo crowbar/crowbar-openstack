@@ -45,12 +45,13 @@ locale_additions:
         run_tests:
           failed: Failed to run tests from node
           succeeded: Successfuly started tests with id 
-        index:
+        dashboard:
           title: Tempest Dashboard
           run_tests: Run tests from following nodes
           run_tests_on_node: Run on
           results: Test results and xml reports
           remove_all_results: Remove results
+        results:
           id: Id
           status: Status
           started_at: Started at

@@ -1,0 +1,26 @@
+%h1= t '.title'
+%p{:style => 'float:right'}
+  = link_to t('.remove_all_results'), '/tempest/remove_results', :class => 'button'
+  %p
+    %label{ :for => :run_tests }= t('.run_tests')
+  - @run_on_nodes.each do |node|
+    = link_to t('.run_tests_on_node') + ' ' + node, '/tempest/run_tests/' + node , :class => 'button'
+  %p
+    %h3= t '.results'
+    %div.container{:id => 'test_results_div'}
+      = render :partial => "/barclamp/tempest/results"
+
+:javascript
+
+  $(function (){
+    var i = setInterval(function (){
+        $.ajax({
+            url: '#{@results_update_url}',
+            dataType: 'html',
+            type: 'GET',
+            success: function (data){
+                $('div#test_results_div.container').html(data);
+            }
+        });
+    }, 15000);
+  });
