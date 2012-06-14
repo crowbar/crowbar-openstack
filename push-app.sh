@@ -16,7 +16,7 @@ $SSH -M $SSH_CREDS -Nf
 
 echo "Uploading source files"
 
-rsync -e "$SSH ." -rv $BASE_DIR/crowbar_framework :/opt/dell/crowbar_framework
+rsync -e "$SSH ." -rv $BASE_DIR/crowbar_framework/ :/opt/dell/crowbar_framework
 
 echo "Restarting RoR application"
 
