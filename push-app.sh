@@ -20,7 +20,7 @@ rsync -e "$SSH ." -rv $BASE_DIR/crowbar_framework/ :/opt/dell/crowbar_framework
 
 echo "Restarting RoR application"
 
-$SSH . sudo bluepill crowbar-webserver restart
+#$SSH . sudo bluepill crowbar-webserver restart
 
 echo "Cleaning up"
 

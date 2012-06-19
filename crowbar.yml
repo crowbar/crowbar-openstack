@@ -47,16 +47,15 @@ locale_additions:
           succeeded: Successfuly started tests with id 
         dashboard:
           title: Tempest Dashboard
-          run_tests: Run tests from following nodes
+          n_test_runs: test runs
           run_tests_on_node: Run on
           results: Test results and xml reports
-          remove_all_results: Remove results
-        results:
-          id: Id
+          clear_test_runs: Clear test runs
+        test_runs:
+          node: Node
           status: Status
           started_at: Started at
           ended_at: Ended at
-          download_xml_report: Download xml report
           remove_hint: Remove this result and report
           statuses:
             passed: Passed

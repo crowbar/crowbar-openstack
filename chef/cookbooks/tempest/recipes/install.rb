@@ -45,5 +45,6 @@ bash "remove_commit-hash_from_path" do
   code <<-EOH
 mv openstack-tempest-* tempest
 EOH
+  # TODO: use proposal attribute
   not_if { ::File.exists?("#{dst_dir}/tempest") }
 end

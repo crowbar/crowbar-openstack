@@ -5,10 +5,7 @@
     "tempest": {
       "tempest_tarball": "http://<ADMINWEB>/files/tempest/essex.tar.gz",
       "nova_instance": "none",
-      "create_alt_user": true,
-      "alt_username": "crowbar2",
-      "alt_usertenant": "service",
-      "test_results": []
+      "tempest_path": "/opt/tempest"
     }
   },
   "deployment": {

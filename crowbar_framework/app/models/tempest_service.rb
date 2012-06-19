@@ -15,6 +15,8 @@
 # 
 
 class TempestService < ServiceObject
+  class ServiceError < StandardError
+  end
 
   def initialize(thelogger)
     @bc_name = "tempest"
@@ -28,6 +30,7 @@ class TempestService < ServiceObject
   end
 
   def create_proposal
+    # TODO: ensure that only one proposal can be applied to a node
     @logger.debug("Tempest create_proposal: entering")
     base = super
     @logger.debug("Tempest create_proposal: leaving base part")
@@ -78,5 +81,94 @@ class TempestService < ServiceObject
     @logger.debug("Tempest apply_role_pre_chef_call: leaving")
   end
 
+  def get_test_run_by_uuid(uuid)
+    get_test_runs.each do |r|
+        return r if r['uuid'] == uuid
+    end
+    nil
+  end
+
+  def self.get_all_nodes_hash
+    Hash[ NodeObject.find_all_nodes.map {|n| [n.name, n]} ]
+  end
+
+  def get_ready_nodes
+    nodes = get_ready_proposals.collect { |p| p.elements[@bc_name] }.flatten
+    NodeObject.find_all_nodes.select { |n| nodes.include?(n.name) and n.status == "ready" }
+  end
+
+  def get_ready_proposals
+    ProposalObject.find_proposals(@bc_name).select {|p| p.status == 'ready'}.compact
+  end
+
+  def _get_or_create_db
+    db = ProposalObject.find_data_bag_item "crowbar/tempest"
+    if db.nil?
+      begin
+        lock = acquire_lock @bc_name
+      
+        db_item = Chef::DataBagItem.new
+        db_item.data_bag "crowbar"
+        db_item["id"] = "tempest"
+        db_item["test_runs"] = []
+        db = ProposalObject.new db_item
+        db.save
+      ensure
+        release_lock lock
+      end
+    end
+    db
+  end
+
+  def get_test_runs
+    _get_or_create_db["test_runs"]
+  end
+
+  def clear_test_runs
+    tempest_db = _get_or_create_db
+
+    tempest_db["test_runs"] = []
+    lock = acquire_lock(@bc_name)
+    tempest_db.save
+    release_lock(lock)
+  end
+
+  def run_test(node)
+    raise "failed to look up a tempest proposal applied to #{node.inspect}" if (proposal = _get_proposal_by_node node).nil?
+    
+    test_run = { "uuid" => `uuidgen`.strip, "started" => Time.now.utc.to_i, "ended" => nil, "status" => "running", "node" => node, "results.xml" => tempest_log}
+    test_run["results.xml"] = tempest_log = "log/#{test_run['uuid']}.xml"
+
+    tempest_db = _get_or_create_db
+
+    lock = acquire_lock(@bc_name)
+    tempest_db["test_runs"] << test_run
+    tempest_db.save
+    release_lock(lock)
+
+    # TODO: add proposal_path as an editable parameter to the proposal
+    proposal_path = '/opt/tempest'
+
+    pid = fork do
+      command_line = "nosetests -q -w #{proposal_path} tempest.tests.test_authorization --with-xunit --xunit-file=/dev/stdout 1>&2 2>/dev/null"
+      Process.waitpid run_remote_chef_client(node, command_line, tempest_log)
+
+      test_run["ended"] = Time.now.utc.to_i
+      test_run["status"] = $?.exitstatus ? "failed" : "passed"
+      
+      lock = acquire_lock(@bc_name)
+      tempest_db.save
+      release_lock(lock)
+    end
+    Process.detach pid
+    test_run
+  end
+
+  def _get_proposal_by_node(node)
+    get_ready_proposals.each do |p|
+      return p if p.elements[@bc_name].include? node
+    end
+    nil
+  end
 end
 
