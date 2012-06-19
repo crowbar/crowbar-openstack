@@ -1,19 +1,18 @@
 %p{:style => 'float: right'}
-  = "#{@test_runs.count} " + t(".n_test_runs")
+    = "#{@test_runs.count} " + t(".n_test_runs")
 %h1= t '.title'
--#%p{:style => 'float:right'}
--#  = link_to t('.remove_all_results'), '/tempest/remove_results', :class => 'button'
--#  %form 
--#    %label{ :for => :run_tests }= t('.run_tests')
--#  - @run_on_nodes.each do |node|
--#    = link_to t('.run_tests_on_node') + ' ' + node, '/tempest/run_tests/' + node , :class => 'button'
 .clear
 .column_100
-  %form{:action => 'test_runs', :method => :post, :class => 'box', :id => 'run_test'} 
-    - # TODO: replace with proper form creation (labels, etc)
-    %select{:name => 'node'}
-      - @ready_nodes.each do |node|
-        %option{ :value => node.name }= node.alias  
-    %input{ :type=>'submit', :class=>'button', :value => t('.run_test') }
+    %section{:class => 'box'}
+        - # TODO: replace with url_for
+        %form{:action => 'test_runs/clear', :method => :post, :style => 'float: right'}
+            %input{:type=> 'submit', :class => 'button', :value => t('.clear_test_runs')}
+        %form{:action => 'test_runs', :method => :post, :id => 'run_test'} 
+            - # TODO: replace with proper form creation (labels, etc)
+            %span= t '.run_tests_on_node'
+            %select{:name => 'node'}
+                - @ready_nodes.each do |node|
+                    %option{ :value => node.name }= node.alias  
+            %input{:type=>'submit', :class=>'button', :value => t('.run_test') }
   
 = render 'barclamp/tempest/test_runs.html.haml'

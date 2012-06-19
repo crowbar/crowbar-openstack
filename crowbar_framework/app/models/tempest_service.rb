@@ -136,8 +136,10 @@ class TempestService < ServiceObject
   def run_test(node)
     raise "failed to look up a tempest proposal applied to #{node.inspect}" if (proposal = _get_proposal_by_node node).nil?
     
-    test_run = { "uuid" => `uuidgen`.strip, "started" => Time.now.utc.to_i, "ended" => nil, "status" => "running", "node" => node, "results.xml" => tempest_log}
-    test_run["results.xml"] = tempest_log = "log/#{test_run['uuid']}.xml"
+    test_run_uuid = `uuidgen`.strip
+    test_run = { 
+      "uuid" => test_run_uuid, "started" => Time.now.utc.to_i, "ended" => nil, 
+      "status" => "running", "node" => node, "results.xml" => "log/#{test_run_uuid}.xml"}
 
     tempest_db = _get_or_create_db
 
@@ -151,7 +153,7 @@ class TempestService < ServiceObject
 
     pid = fork do
       command_line = "nosetests -q -w #{proposal_path} tempest.tests.test_authorization --with-xunit --xunit-file=/dev/stdout 1>&2 2>/dev/null"
-      Process.waitpid run_remote_chef_client(node, command_line, tempest_log)
+      Process.waitpid run_remote_chef_client(node, command_line, test_run["results.xml"])
 
       test_run["ended"] = Time.now.utc.to_i
       test_run["status"] = $?.exitstatus ? "failed" : "passed"

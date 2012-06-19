@@ -48,15 +48,15 @@ locale_additions:
         dashboard:
           title: Tempest Dashboard
           n_test_runs: test runs
-          run_tests_on_node: Run on
+          run_tests_on_node: Run tempest on node
           results: Test results and xml reports
           clear_test_runs: Clear test runs
+          run_test: Go!
         test_runs:
           node: Node
           status: Status
           started_at: Started at
           ended_at: Ended at
-          remove_hint: Remove this result and report
           statuses:
             passed: Passed
             failed: Failed

@@ -31,7 +31,10 @@ class TempestController < BarclampController
   end
 
   def test_runs
-    if request.post? or request.put?
+    if (request.post? or request.put?) and params[:id] == 'clear'
+      @service_object.clear_test_runs
+      redirect_to url_for(:action => "dashboard") unless request.xhr?
+    elsif request.post? or request.put?
       test_run = @service_object.run_test(params[:node])
       if request.xhr?
         # REST style interface has been called
