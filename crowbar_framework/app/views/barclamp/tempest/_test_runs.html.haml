@@ -1,9 +1,3 @@
--#- statuses = { 'running' => '/images/icons/led/yellow.png', 'passed' => '/images/icons/led/green.png', 'failed' => '/images/icons/led/red.png'}
--#          = link_to result["uuid"][0, 7], '/tempest/download/' + result["uuid"], :title => t('.download_xml_report')
--#          = link_to image_tag('/images/icons/delete.png'), '/tempest/remove_result/' + result["uuid"], :title => t('.remove_hint')
--#          = image_tag statuses[result["status"]], :alt => t(".statuses.#{result["status"]}") 
--#          = t(".statuses.#{result["status"]}")
-
 %table.data.box
   %tbody
     %thead
@@ -17,6 +11,6 @@
           %td{:title=>test_run["node"]}= link_to @nodes_hash[test_run["node"]].alias, :controller => 'nodes', :action => 'show', :name => test_run["node"]
           %td
             %span{ :class => 'status' }
-              = link_to t(".statuses.#{test_run['status']}"), :action => 'results', :id => test_run["uuid"], :format => "xml", :method => :get
+              = link_to t(".statuses.#{test_run['status']}"), "results/#{test_run['uuid']}"
           %td= Time.at(test_run["started"]).to_s
           %td= test_run["ended"].nil? ? "" : Time.at(test_run["ended"]).to_s
