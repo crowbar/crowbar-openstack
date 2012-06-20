@@ -19,8 +19,8 @@ class TempestController < BarclampController
     @service_object = TempestService.new logger
   end
 
-  def self.return_404
-    render :file => 'public/404.html', :status => 404
+  def raise_not_found
+    raise ActionController::RoutingError.new('Not Found')
   end
 
   def dashboard
@@ -45,9 +45,8 @@ class TempestController < BarclampController
         redirect_to url_for(:action => "dashboard")
       end
     elsif uuid = params[:id]
-      @test_run = @service_object.get_test_run_by_uuid uuid
+      @test_run = @service_object.get_test_run_by_uuid(uuid) or raise_not_found
       respond_to do |format|
-        format.any { TempestController.return_404 } unless @test_run
         format.json { render :json => @test_result } 
         format.html { render :template => 'barclamp/tempest/a_test_run.html.haml' }
       end
@@ -61,9 +60,9 @@ class TempestController < BarclampController
   end
 
   def results
-    test_run = @service_object.get_test_run_by_uuid params[:id]
+    test_run = @service_object.get_test_run_by_uuid(params[:id]) or raise_not_found
+
     respond_to do |format|
-      format.any { TempestController.return_404 } unless @test_run
       format.xml { render :file => test_run["results.xml"] }
     end
   end

@@ -8,7 +8,7 @@
     %tbody
       - @test_runs.each do |test_run|
         %tr
-          %td{:title=>test_run["node"]}= link_to @nodes_hash[test_run["node"]].alias, :controller => 'nodes', :action => 'show', :name => test_run["node"]
+          %td{:title=>test_run["node"]}= link_to @nodes_hash[test_run["node"]].alias, { :controller => 'nodes', :action => 'show', :name => test_run["node"] }
           %td
             %span{ :class => 'status' }
               = link_to t(".statuses.#{test_run['status']}"), "results/#{test_run['uuid']}"
