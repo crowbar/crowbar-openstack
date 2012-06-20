@@ -36,6 +36,7 @@ class TempestController < BarclampController
       redirect_to url_for(:action => "dashboard") unless request.xhr?
     elsif request.post? or request.put?
       test_run = @service_object.run_test(params[:node])
+      # TODO(aandreev): add flash[:notice]
       if request.xhr?
         # REST style interface has been called
         render :text => url_for(:action => "test_runs", :id => test_run["uuid"])
