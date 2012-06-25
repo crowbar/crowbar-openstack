@@ -55,15 +55,24 @@ class DatabaseService < ServiceObject
       node.save
     end
 
-    role.default_attributes["database"]["db_maker_password"] = random_password if role.default_attributes["database"]["db_maker_password"].nil?
+    sql_engine = role.default_attributes["database"]["sql_engine"]
+    role.default_attributes["database"][sql_engine] = {} if role.default_attributes["database"][sql_engine].nil?
+    role.default_attributes["database"][sql_engine]["db_maker_password"] = random_password if role.default_attributes["database"][sql_engine]["db_maker_password"].nil?
 
-    if (role.default_attributes["database"]["sql_engine"] == "mysql" )
+    if ( sql_engine == "mysql" )
       @logger.debug("setting mysql specific attributes")
       role.default_attributes["database"]["mysql"]["server_debian_password"] = random_password if role.default_attributes["database"]["mysql"]["server_debian_password"].nil?
       role.default_attributes["database"]["mysql"]["server_root_password"] = random_password if role.default_attributes["database"]["mysql"]["server_root_password"].nil?
       role.default_attributes["database"]["mysql"]["server_repl_password"] = random_password if role.default_attributes["database"]["mysql"]["server_repl_password"].nil?
-      role.save
     end
+
+
+    # Copy the attributes for database/<sql_engine> to <sql_engine> in the
+    # role attributes to avoid renaming all attributes everywhere in the
+    # postgres and mysql cookbooks
+    # (FIXME: is there a better way to achieve this?)
+    role.default_attributes[sql_engine] = role.default_attributes["database"][sql_engine]
+    role.save
 
     @logger.debug("Database apply_role_pre_chef_call: leaving")
   end
