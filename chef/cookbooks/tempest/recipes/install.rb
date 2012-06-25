@@ -26,7 +26,8 @@ package "python-unittest2"
 
 tarball_url = node[:tempest][:tempest_tarball]
 filename = tarball_url.split('/').last
-dst_dir = "/opt"
+dst_dir = "/tmp"
+inst_dir = node[:tempest][:tempest_path]
 
 remote_file tarball_url do
   source tarball_url
@@ -34,17 +35,14 @@ remote_file tarball_url do
   action :create_if_missing
 end
 
-execute "tar" do
-  cwd dst_dir
-  command "tar -xf #{dst_dir}/#{filename}"
-  action :run
-end
-
-bash "remove_commit-hash_from_path" do
+bash "install_tempest_with_rigth_path" do
   cwd dst_dir
   code <<-EOH
+tar xf #{dst_dir}/#{filename}
 mv openstack-tempest-* tempest
+mkdir -p $(dirname #{inst_dir})
+mv tempest $(dirname #{inst_dir})
 EOH
   # TODO: use proposal attribute
-  not_if { ::File.exists?("#{dst_dir}/tempest") }
+  not_if { ::File.exists?("#{inst_dir}") }
 end
