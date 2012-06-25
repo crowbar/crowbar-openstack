@@ -54,6 +54,17 @@ class DatabaseService < ServiceObject
 
       node.save
     end
+
+    role.default_attributes["database"]["db_maker_password"] = random_password if role.default_attributes["database"]["db_maker_password"].nil?
+
+    if (role.default_attributes["database"]["sql_engine"] == "mysql" )
+      @logger.debug("setting mysql specific attributes")
+      role.default_attributes["database"]["mysql"]["server_debian_password"] = random_password if role.default_attributes["database"]["mysql"]["server_debian_password"].nil?
+      role.default_attributes["database"]["mysql"]["server_root_password"] = random_password if role.default_attributes["database"]["mysql"]["server_root_password"].nil?
+      role.default_attributes["database"]["mysql"]["server_repl_password"] = random_password if role.default_attributes["database"]["mysql"]["server_repl_password"].nil?
+      role.save
+    end
+
     @logger.debug("Database apply_role_pre_chef_call: leaving")
   end
 
