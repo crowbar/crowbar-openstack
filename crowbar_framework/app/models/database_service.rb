@@ -19,10 +19,11 @@ class DatabaseService < ServiceObject
     @bc_name = "database"
     @logger = thelogger
   end
-  
-  #if barclamp allows multiple proposals OVERRIDE
-  # def self.allow_multiple_proposals?
-  
+
+  def self.allow_multiple_proposals?
+    true
+  end
+
   def create_proposal
     @logger.debug("Database create_proposal: entering")
     base = super
