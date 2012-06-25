@@ -6,7 +6,27 @@
   %div.container
     %p
       %label{ :for => :sql_engine }= t('.sql_engine')
-      = select_tag :sql_engine, options_for_select([['PostgreSQL','postgresql'], ['MySQL', 'mysql']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "update_value('sql_engine', 'sql_engine', 'string')"
-    %p
-      %label{ :for => :mysql_datadir}= t('.mysql_datadir')
-      %input#mysql_datadir{:type => "text", :name => "mysql_datadir", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["mysql"]["datadir"], :onchange => "update_value('mysql/datadir', 'mysql_datadir', 'string')"}
+      = select_tag :sql_engine, options_for_select([['PostgreSQL','postgresql'], ['MySQL', 'mysql']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "my_update_value( this.value )"
+  %div{:class => "container" , :id => "mysql_form" }
+    %label{ :for => :mysql_datadir}= t('.mysql_datadir')
+    %input#mysql_datadir{:type => "text", :name => "mysql_datadir", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["mysql"]["datadir"], :onchange => "update_value('mysql/datadir', 'mysql_datadir', 'string')"}
+
+
+:javascript
+  function show_form(backend) {
+    if ( backend == "mysql" ) {
+      obj1 = document.getElementById('mysql_form');
+      obj1.style.visibility = 'visible';
+    } else {
+      obj1 = document.getElementById('mysql_form');
+      obj1.style.visibility = 'hidden';
+    }
+  }
+  function my_update_value(backend) {
+    this.show_form(backend);
+    this.update_value('sql_engine', 'sql_engine', 'string');
+  }
+  $(document).ready(function(){
+    obj1 = document.getElementById('sql_engine');
+    show_form(obj1.value);
+  });
