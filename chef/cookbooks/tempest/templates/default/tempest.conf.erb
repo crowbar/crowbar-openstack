@@ -44,8 +44,9 @@ alt_tenant_name = <%= @alt_comp_tenant %>
 
 # Reference data for tests. The ref and ref_alt should be
 # distinct images/flavors.
-image_ref = <%= @image_ref %>
-image_ref_alt = <%= @alt_image_ref %>
+<% img_id = `cat #{@machine_id_file}`.strip %>
+image_ref = <%= img_id %>
+image_ref_alt = <%= img_id %>
 flavor_ref = <%= @flavor_ref %>
 flavor_ref_alt = <%= @alt_flavor_ref %>
 

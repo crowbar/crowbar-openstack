@@ -45,17 +45,17 @@ comp_admin_user = keystone[:keystone][:admin][:username]
 comp_admin_pass = keystone[:keystone][:admin][:password]
 comp_admin_tenant = keystone[:keystone][:admin][:tenant]
 
-comp_user = keystone[:keystone][:default][:username]
-comp_pass = keystone[:keystone][:default][:password]
-comp_tenant = keystone[:keystone][:default][:tenant]
+alt_comp_user = keystone[:keystone][:default][:username]
+alt_comp_pass = keystone[:keystone][:default][:password]
+alt_comp_tenant = keystone[:keystone][:default][:tenant]
 
 img_user = comp_admin_user
 img_pass = comp_admin_pass
 img_tenant = comp_admin_tenant
 
-alt_comp_user = node[:tempest][:alt_username]
-alt_comp_pass = node[:tempest][:alt_userpass]
-alt_comp_tenant = node[:tempest][:alt_usertenant]
+tempest_comp_user = node[:tempest][:tempest_user_username]
+tempest_comp_pass = node[:tempest][:tempest_user_password]
+tempest_comp_tenant = node[:tempest][:tempest_user_tenant]
 
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
 keystone_token = keystone[:keystone][:service][:token]
@@ -73,76 +73,130 @@ end
 
 glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "admin").address if glance_address.nil?
 
-glance_port = glance[:glance][:api][:bind_port]
-
-glance_attrs = " -H #{glance_address}" +
-               " -p #{glance_port}" +
-               " -I #{comp_admin_user}" +
-               " -K #{comp_admin_pass}" +
-               " -T #{comp_admin_tenant}" + 
-               " -N http://#{keystone_address}:#{keystone_port}/v2.0"
-
-image_ref = `ssh root@#{glance_address} glance #{glance_attrs} index|grep ami|awk '{print \$1}'`.strip()
-
-alt_image_ref = image_ref
 flavor_ref = "1"
 alt_flavor_ref = "1"
 
-if node[:tempest][:create_alt_user]
+keystone_register "tempest tempest wakeup keystone" do
+  host keystone_address
+  port keystone_admin_port
+  token keystone_token
+  action :wakeup
+end
 
-  keystone_register "tempest tempest wakeup keystone" do
-    host keystone_address
-    port keystone_admin_port
-    token keystone_token
-    action :wakeup
-  end
+keystone_register "create tenant #{tempest_user_tenant} for tempest" do
+  host keystone_address
+  port keystone_admin_port
+  token keystone_token
+  tenant_name tempest_user_tenant
+  action :add_tenant
+end
 
-  keystone_register "register second non-admin user crowbar2" do
-    host keystone_address
-    port keystone_admin_port
-    token keystone_token
-    user_name alt_comp_user
-    user_password alt_comp_pass 
-    tenant_name alt_comp_tenant
-    action :add_user
-  end
+keystone_register "add #{tempest_user_username}:#{tempest_user_tenant} user" do
+  host keystone_address
+  port keystone_admin_port
+  token keystone_token
+  user_name tempest_user_tenant
+  user_password tempest_user_password
+  tenant_name tempest_user_tenant 
+  action :add_user
+end
 
-  keystone_register "add default crowbar2:service -> Member role" do
-    host keystone_address
-    port keystone_admin_port
-    token keystone_token
-    user_name alt_comp_user
-    role_name "Member"
-    tenant_name alt_comp_tenant
-    action :add_access
-  end
+keystone_register "add #{tempest_user_username}:#{tempest_user_tenant} user admin role" do
+  host keystone_address
+  port keystone_admin_port
+  token keystone_token
+  user_name tempest_user_username
+  role_name "admin"
+  tenant_name tempest_user_tenant 
+  action :add_access
+end
 
+machine_id_file = node[:tempest][:tempest_path]
+
+bash "upload tempest test image" do
+  code <<-EOH
+IMAGE_URL=${IMAGE_URL:-"http://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-uec.tar.gz"}
+
+OS_USER=${OS_USER:-admin}
+OS_TENANT=${OS_TENANT:-admin}
+OS_PASSWORD=$ADMIN_PASSWORD
+
+TEMP=$(mktemp -d)
+IMG_DIR=$TEMP/image
+IMG_FILE=$(basename $IMAGE_URL)
+IMG_NAME="${IMG_FILE%-*}"
+
+function glance_it() {
+glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N http://$KEYSTONE_HOST:5000/v2.0 -H $GLANCE_HOST $@
+}
+
+function extract_id() {
+cut -d ":" -f2 | tr -d " "
+}
+
+function findfirst() {
+find $IMG_DIR -name "$1" | head -1
+}
+
+echo "Downloading image ... "
+wget $IMAGE_URL --directory-prefix=$TEMP || exit $?
+
+echo "Unpacking image ... "
+mkdir $IMG_DIR
+tar -xvzf $TEMP/$IMG_FILE -C $IMG_DIR || exit $?
+
+echo -n "Adding kernel ... "
+KERNEL_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-kernel" is_public=false container_format=aki disk_format=aki < $(findfirst '*-vmlinuz') | extract_id)
+echo "done."
+
+echo -n "Adding ramdisk ... "
+RAMDISK_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-ramdisk" is_public=false container_format=ari disk_format=ari < $(findfirst '*-initrd') | extract_id)
+echo "done."
+
+echo -n "Adding image ... "
+MACHINE_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-machine" is_public=false container_format=ami disk_format=ami kernel_id=$KERNEL_ID ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
+echo "done."
+
+echo -n "Saving machine id ..."
+echo $MACHINE_ID > #{machine_id_file}
+echo "done."
+
+glance_it index
+EOH
+  environment {
+    'IMAGE_URL' => node[:tempest][:tempest_test_image],
+    'OS_USER' => comp_admin_user,
+    'OS_PASSWORD' => comp_admin_pass,
+    'OS_TENANT' => comp_admin_tenant,
+    'KEYSTONE_HOST' => keystone_address,
+    'GLANCE_HOST' => glance_address
+  }
+  not_if { File.exists?(machine_id_file) }
 end
 
 template "/opt/tempest/etc/tempest.conf" do
   source "tempest.conf.erb"
   mode 0644
   variables(
-           :key_host => keystone_address,
-           :key_port => keystone_port,
-           :comp_user => comp_user,
-           :comp_pass => comp_pass,
-           :comp_tenant => comp_tenant,
-           :alt_comp_user => alt_comp_user,
-           :alt_comp_pass => alt_comp_pass,
-           :alt_comp_tenant => alt_comp_tenant,
-           :img_host => glance_address,
-           :img_port => glance_port,
-           :image_ref => image_ref,
-           :alt_image_ref => alt_image_ref,
-           :flavor_ref => flavor_ref,
-           :alt_flavor_ref => alt_flavor_ref,
-           :img_user => img_user,
-           :img_pass => img_pass,
-           :img_tenant => img_tenant,
-           :comp_admin_user => comp_admin_user,
-           :comp_admin_pass => comp_admin_pass,
-           :comp_admin_tenant => comp_admin_tenant 
-	   )
+    :key_host => keystone_address,
+    :key_port => keystone_port,
+    :comp_user => comp_user,
+    :comp_pass => comp_pass,
+    :comp_tenant => comp_tenant,
+    :alt_comp_user => alt_comp_user,
+    :alt_comp_pass => alt_comp_pass,
+    :alt_comp_tenant => alt_comp_tenant,
+    :img_host => glance_address,
+    :img_port => glance_port,
+    :machine_id_file => machine_id_file,
+    :flavor_ref => flavor_ref,
+    :alt_flavor_ref => alt_flavor_ref,
+    :img_user => img_user,
+    :img_pass => img_pass,
+    :img_tenant => img_tenant,
+    :comp_admin_user => comp_admin_user,
+    :comp_admin_pass => comp_admin_pass,
+    :comp_admin_tenant => comp_admin_tenant 
+  )
 end
 

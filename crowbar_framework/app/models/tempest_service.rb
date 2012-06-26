@@ -56,6 +56,10 @@ class TempestService < ServiceObject
       @logger.info("Tempest create_proposal: no nova found")
     end
 
+    base["attributes"]["tempest"]["tempest_user_username"] = "tempest-user-" + random_password
+    base["attributes"]["tempest"]["tempest_user_tenant"] = "tempest-tenant-" + random_password
+    base["attributes"]["tempest"]["tempest_user_password"] = random_password
+
     @logger.debug("Tempest create_proposal: exiting")
     base
   end
@@ -64,8 +68,6 @@ class TempestService < ServiceObject
     @logger.debug("Tempest apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
-    role.default_attributes["tempest"]["alt_userpass"] = random_password if role.default_attributes["tempest"]["alt_userpass"].nil?
-
     # Update tempest_tarball path
     nodes = NodeObject.find("roles:provisioner-server")
     unless nodes.nil? or nodes.length < 1
@@ -73,7 +75,9 @@ class TempestService < ServiceObject
       web_port = nodes[0]["provisioner"]["web_port"]
       # substitute the admin web portal
       tempest_tarball_path = role.default_attributes["tempest"]["tempest_tarball"].gsub("<ADMINWEB>", "#{admin_ip}:#{web_port}")
+      tempest_test_image_path = role.default_attributes["tempest"]["tempest_test_image"].gsub("<ADMINWEB>", "#{admin_ip}:#{web_port}")
       role.default_attributes["tempest"]["tempest_tarball"] = tempest_tarball_path
+      role.default_attributes["tempest"]["tempest_test_image"] = tempest_test_image_path
     end
 
     role.save
