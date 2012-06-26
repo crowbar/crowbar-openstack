@@ -72,6 +72,7 @@ else
 end
 
 glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "admin").address if glance_address.nil?
+glance_port = glance[:glance][:api][:bind_port]
 
 flavor_ref = "1"
 alt_flavor_ref = "1"
@@ -83,31 +84,31 @@ keystone_register "tempest tempest wakeup keystone" do
   action :wakeup
 end
 
-keystone_register "create tenant #{tempest_user_tenant} for tempest" do
+keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   host keystone_address
   port keystone_admin_port
   token keystone_token
-  tenant_name tempest_user_tenant
+  tenant_name tempest_comp_tenant
   action :add_tenant
 end
 
-keystone_register "add #{tempest_user_username}:#{tempest_user_tenant} user" do
+keystone_register "add #{tempest_comp_user}:#{tempest_comp_tenant} user" do
   host keystone_address
   port keystone_admin_port
   token keystone_token
-  user_name tempest_user_tenant
-  user_password tempest_user_password
-  tenant_name tempest_user_tenant 
+  user_name tempest_comp_user
+  user_password tempest_comp_pass
+  tenant_name tempest_comp_tenant 
   action :add_user
 end
 
-keystone_register "add #{tempest_user_username}:#{tempest_user_tenant} user admin role" do
+keystone_register "add #{tempest_comp_user}:#{tempest_comp_tenant} user admin role" do
   host keystone_address
   port keystone_admin_port
   token keystone_token
-  user_name tempest_user_username
+  user_name tempest_comp_user
   role_name "admin"
-  tenant_name tempest_user_tenant 
+  tenant_name tempest_comp_tenant 
   action :add_access
 end
 
@@ -163,14 +164,14 @@ echo "done."
 
 glance_it index
 EOH
-  environment {
+  environment ({
     'IMAGE_URL' => node[:tempest][:tempest_test_image],
     'OS_USER' => comp_admin_user,
     'OS_PASSWORD' => comp_admin_pass,
     'OS_TENANT' => comp_admin_tenant,
     'KEYSTONE_HOST' => keystone_address,
     'GLANCE_HOST' => glance_address
-  }
+  })
   not_if { File.exists?(machine_id_file) }
 end
 
@@ -180,9 +181,9 @@ template "/opt/tempest/etc/tempest.conf" do
   variables(
     :key_host => keystone_address,
     :key_port => keystone_port,
-    :comp_user => comp_user,
-    :comp_pass => comp_pass,
-    :comp_tenant => comp_tenant,
+    :comp_user => tempest_comp_user,
+    :comp_pass => tempest_comp_pass,
+    :comp_tenant => tempest_comp_tenant,
     :alt_comp_user => alt_comp_user,
     :alt_comp_pass => alt_comp_pass,
     :alt_comp_tenant => alt_comp_tenant,
