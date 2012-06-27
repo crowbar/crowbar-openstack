@@ -112,7 +112,7 @@ keystone_register "add #{tempest_comp_user}:#{tempest_comp_tenant} user admin ro
   action :add_access
 end
 
-machine_id_file = node[:tempest][:tempest_path]
+machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
 
 bash "upload tempest test image" do
   code <<-EOH
@@ -120,7 +120,7 @@ IMAGE_URL=${IMAGE_URL:-"http://launchpad.net/cirros/trunk/0.3.0/+download/cirros
 
 OS_USER=${OS_USER:-admin}
 OS_TENANT=${OS_TENANT:-admin}
-OS_PASSWORD=$ADMIN_PASSWORD
+OS_PASSWORD=${OS_PASSWORD:-admin}
 
 TEMP=$(mktemp -d)
 IMG_DIR=$TEMP/image
