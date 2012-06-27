@@ -64,9 +64,10 @@ locale_additions:
         edit_attributes: 
           attributes: Attributes
           nova_instance: Nova
-          create_alt_user: Create non-admin alt user for tempest
-          alt_username: Choose username for alt user
-          alt_usertenant: Choose tenant for alt user
+          tempest_user: Tempest user and a tenant that will be created for test run
+          tempest_user_username: Choose username
+          tempest_user_password: Choose password
+          tempest_user_tenant: Choose tenant
         edit_deployment: 
           deployment: Deployment
 

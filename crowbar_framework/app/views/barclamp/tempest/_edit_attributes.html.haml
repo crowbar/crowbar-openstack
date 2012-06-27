@@ -10,4 +10,14 @@
     -#%p
       -# %label{ :for => :create_alt_user }= t('.create_alt_user')
       -# = select_tag :create_alt_user, options_for_select([['yes','true'], ['no', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["create_alt_user"].to_s), :onchange => "update_value('create_alt_user', 'create_alt_user', 'boolean')"
-    
+    %p
+      %label{:for => "tempest_user"}= t('.tempest_user')
+      %p
+        %label{ :for => :tempest_user_username }= t('.tempest_user_username')
+        %input#tempest_user_username{:type => "text", :name => "tempest_user_username", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["tempest_user_username"], :onchange => "update_value('tempest_user_username','tempest_user_username', 'string')"}
+      %p
+        %label{ :for => :tempest_user_password }= t('.tempest_user_password')
+        %input#tempest_user_password{:type => "text", :name => "tempest_user_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["tempest_user_password"], :onchange => "update_value('tempest_user_password','tempest_user_password', 'string')"}
+      %p
+        %label{ :for => :tempest_user_tenant }= t('.tempest_user_tenant')
+        %input#tempest_user_tenant{:type => "text", :name => "tempest_user_tenant", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["tempest_user_tenant"], :onchange => "update_value('tempest_user_tenant','tempest_user_tenant', 'string')"}
