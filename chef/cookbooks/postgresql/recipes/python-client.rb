@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: database
-# Recipe:: client
+# Cookbook Name:: postgresql
+# Recipe:: python-client
 #
 # Copyright 2012, SUSE Linux Products GmbH
 #
@@ -17,6 +17,6 @@
 # limitations under the License.
 #
 
-class Chef::Recipe
-  include DatabaseLibrary
+package "python-psycopg2" do
+    action :install
 end
