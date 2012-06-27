@@ -23,7 +23,7 @@ pg_packages = case node['platform']
 when "ubuntu","debian"
   %w{postgresql-client libpq-dev make}
 when "suse"
-  %w{postgresql rubygem-pg}
+  %w{postgresql91 rubygem-pg}
 when "fedora", "amazon"
   %w{postgresql-devel}
 when "redhat","centos","scientific"

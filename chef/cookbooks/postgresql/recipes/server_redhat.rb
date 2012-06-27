@@ -47,6 +47,8 @@ package "postgresql" do
     else
       package_name "postgresql#{node['postgresql']['version'].split('.').join}"
     end
+  when "suse"
+    package_name "postgresql91"
   else
     package_name "postgresql"
   end
@@ -60,7 +62,9 @@ when "redhat","centos","scientific"
   else
     package "postgresql#{node['postgresql']['version'].split('.').join}-server"
   end
-when "fedora","suse"
+when "suse"
+  package "postgresql91-server"
+when "fedora"
   package "postgresql-server"
 end
  
