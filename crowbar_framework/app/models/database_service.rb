@@ -57,7 +57,7 @@ class DatabaseService < ServiceObject
 
     sql_engine = role.default_attributes["database"]["sql_engine"]
     role.default_attributes["database"][sql_engine] = {} if role.default_attributes["database"][sql_engine].nil?
-    role.default_attributes["database"][sql_engine]["db_maker_password"] = random_password if role.default_attributes["database"][sql_engine]["db_maker_password"].nil?
+    role.default_attributes["database"]["db_maker_password"] = random_password if role.default_attributes["database"]["db_maker_password"].nil?
 
     if ( sql_engine == "mysql" )
       @logger.debug("setting mysql specific attributes")

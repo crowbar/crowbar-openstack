@@ -13,11 +13,11 @@
           "required": true,
           "mapping": {
             "sql_engine": { "type": "str", "required": true },
+            "db_maker_password": { "type": "str" },
             "mysql" : {
               "type": "map",
               "required": false,
               "mapping" : {
-                "db_maker_password": { "type": "str" },
                 "server_debian_password": { "type": "str" },
                 "server_repl_password": { "type": "str" },
                 "server_root_password": { "type": "str" },
@@ -28,7 +28,7 @@
               "type": "map",
               "required": false,
               "mapping" : {
-                "db_maker_password": { "type": "str" }
+                "dummy": { "type": "str" }
               }
             }
           }
