@@ -160,7 +160,7 @@ class TempestService < ServiceObject
       Process.waitpid run_remote_chef_client(node, command_line, test_run["results.xml"])
 
       test_run["ended"] = Time.now.utc.to_i
-      test_run["status"] = $?.exitstatus ? "failed" : "passed"
+      test_run["status"] = $?.exitstatus.equal?(0) ? "passed" : "failed"
       
       lock = acquire_lock(@bc_name)
       tempest_db.save
