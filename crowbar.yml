@@ -22,6 +22,8 @@ barclamp:
   display: Database
   description: Resource for accessing Database Servers
   version: 0
+  member:
+    - openstack
 
 crowbar:
   layout: 1
