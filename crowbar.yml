@@ -36,9 +36,10 @@ locale_additions:
     barclamp:
       show_deployment_raw:
         role: Role
-      postgresql:
+      database:
         edit_attributes:
+          sql_engine: SQL Engine
           attributes: Attributes
-          datadir: Datadir
+          mysql_datadir: MySQL Datadir
         edit_deployment:
           deployment: Deployment
