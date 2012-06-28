@@ -166,16 +166,16 @@ glance_it index
 EOH
   environment ({
     'IMAGE_URL' => node[:tempest][:tempest_test_image],
-    'OS_USER' => comp_admin_user,
-    'OS_PASSWORD' => comp_admin_pass,
-    'OS_TENANT' => comp_admin_tenant,
+    'OS_USER' => tempest_comp_user,
+    'OS_PASSWORD' => tempest_comp_pass,
+    'OS_TENANT' => tempest_comp_tenant,
     'KEYSTONE_HOST' => keystone_address,
     'GLANCE_HOST' => glance_address
   })
   not_if { File.exists?(machine_id_file) }
 end
 
-template "/opt/tempest/etc/tempest.conf" do
+template "#{node[:tempest][:tempest_path]}/etc/tempest.conf" do
   source "tempest.conf.erb"
   mode 0644
   variables(
@@ -192,12 +192,15 @@ template "/opt/tempest/etc/tempest.conf" do
     :machine_id_file => machine_id_file,
     :flavor_ref => flavor_ref,
     :alt_flavor_ref => alt_flavor_ref,
-    :img_user => img_user,
-    :img_pass => img_pass,
-    :img_tenant => img_tenant,
+    :img_user => tempest_comp_user,
+    :img_pass => tempest_comp_pass,
+    :img_tenant => tempest_comp_tenant,
     :comp_admin_user => comp_admin_user,
     :comp_admin_pass => comp_admin_pass,
     :comp_admin_tenant => comp_admin_tenant 
   )
 end
 
+cookbook_file "#{node[:tempest][:tempest_path]}/run_tempest.py" do
+  source "run_tempest.py"
+end
