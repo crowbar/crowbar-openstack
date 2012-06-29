@@ -2,16 +2,25 @@ from nose.plugins.attrib import attr
 from tempest import exceptions
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
+import argparse
 import base64
 import logging
 import subprocess
 import unittest2 as unittest
 
 
+def get_argparser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-w', dest='w_dir', help="tempest working dir")
+    parser.add_argument('tests', nargs='+', help="tests to run")
+    return parser
+
+
 if __name__ == '__main__':
-    process = subprocess.Popen(['nosetests', '-q', '-w', '/opt/tempest',
-                                'tempest.tests.test_authorization',
-                                '--with-xunit', '--xunit-file=/dev/stdout'],
+    args = get_argparser().parse_args()
+    process = subprocess.Popen(['nosetests', '-q', '-w', args.w_dir,
+                                " ".join(args.tests), '--with-xunit',
+                                '--xunit-file=/dev/stdout'],
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
     print out
@@ -58,3 +67,4 @@ if __name__ == '__main__':
 #    for img in data:
 #        if 'tempest' in img['name']: continue
 #        client.delete_image(img['id'])
+    exit(process.returncode)
