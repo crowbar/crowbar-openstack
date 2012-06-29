@@ -33,16 +33,16 @@ class TempestController < BarclampController
   def test_runs
     if (request.post? or request.put?) and params[:id] == 'clear'
       @service_object.clear_test_runs
-      redirect_to url_for(:action => "dashboard") unless request.xhr?
+      redirect_to "/#{@bc_name}/dashboard" unless request.xhr?
     elsif request.post? or request.put?
       test_run = @service_object.run_test(params[:node])
       # TODO(aandreev): add flash[:notice]
       if request.xhr?
         # REST style interface has been called
-        render :text => url_for(:action => "test_runs", :id => test_run["uuid"])
+        render :text => "/#{@bc_name}/test_runs/#{test_run["uuid"]}"
       else
         # it was a regular post submit
-        redirect_to url_for(:action => "dashboard")
+        redirect_to "/#{@bc_name}/dashboard"
       end
     elsif uuid = params[:id]
       @test_run = @service_object.get_test_run_by_uuid(uuid) or raise_not_found
