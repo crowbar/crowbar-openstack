@@ -62,6 +62,7 @@ if __name__ == '__main__':
     for kp in data:
         client.delete_keypair(kp['keypair']['name'])
     client = os.images_client
+#    test
 #    resp, data = client.list_images()
 #    print data
 #    for img in data:
