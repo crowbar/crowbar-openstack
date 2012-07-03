@@ -43,7 +43,7 @@ if __name__ == '__main__':
         if vol['status'] in ('error', 'available'):
             client.delete_volume(vol['id'])
         try:
-            client.wait_for_volume_status(vol['id'],'GRRR')
+            client.wait_for_volume_status(vol['id'], 'GRRR')
         except exceptions.NotFound:
             pass
     client = os.servers_client
@@ -66,11 +66,12 @@ if __name__ == '__main__':
     # in list in images_client
     os2 = openstack.ServiceManager()
     client = os2.images.get_client()
-    images = filter(lambda image: image[u'owner']==args.tenant_id,
+    images = filter(lambda image: image[u'owner'] == args.tenant_id,
                                         client.get_images_detailed())
     print images
     for image in images:
-        if 'tempest' in image[u'name']: continue
+        if 'tempest' in image[u'name']:
+            continue
         client.delete_image(image[u'id'])
 #    resp, data = client.list_images()
 #    print data
