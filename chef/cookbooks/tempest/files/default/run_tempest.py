@@ -12,7 +12,7 @@ import unittest2 as unittest
 def get_argparser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', dest='w_dir', help="tempest working dir")
-    parser.add_argument('-o', dest='images_owner', help="images tenant")
+    parser.add_argument('-o', dest='tenant_id', help="images tenant id")
     parser.add_argument('tests', nargs='+', help="tests to run")
     return parser
 
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         client.delete_keypair(kp['keypair']['name'])
     os2 = openstack.ServiceManager()
     client = os2.images.get_client()
-    image_ids = [image[u'id'] for image in client.get_images_detailed() if image[u'owner']==args.images_owner]
+    image_ids = [image[u'id'] for image in client.get_images_detailed() if image[u'owner']==args.tenant_id]
     print image_ids
     for image_id in image_ids:
         client.delete_image(image_id)
