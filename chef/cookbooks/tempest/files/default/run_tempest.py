@@ -62,12 +62,16 @@ if __name__ == '__main__':
     resp, data = client.list_keypairs()
     for kp in data:
         client.delete_keypair(kp['keypair']['name'])
+    # using another client, because there is no owner parameter
+    # in list in images_client
     os2 = openstack.ServiceManager()
     client = os2.images.get_client()
-    image_ids = [image[u'id'] for image in client.get_images_detailed() if image[u'owner']==args.tenant_id]
-    print image_ids
-    for image_id in image_ids:
-        client.delete_image(image_id)
+    images = filter(lambda image: image[u'owner']==args.tenant_id,
+                                        client.get_images_detailed())
+    print images
+    for image in images:
+        if 'tempest' in image[u'name']: continue
+        client.delete_image(image[u'id'])
 #    resp, data = client.list_images()
 #    print data
 #    for img in data:
