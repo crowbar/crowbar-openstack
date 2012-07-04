@@ -61,7 +61,7 @@ if __name__ == '__main__':
     resp, data = client.list_keypairs()
     for kp in data:
         client.delete_keypair(kp['keypair']['name'])
-    # Get tenent_id of current user. I know that it's very magic,
+    # Get tenant_id of current user. I know that it's very magic,
     # but I do not want to use keystone yet.
     tenant_id = os.images_client.client.base_url.split('/')[-1]
     # I have to use another client, because there is no owner parameter
