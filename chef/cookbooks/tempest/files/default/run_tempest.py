@@ -18,8 +18,9 @@ def get_argparser():
 
 if __name__ == '__main__':
     args = get_argparser().parse_args()
-    process = subprocess.Popen(['nosetests', '-w', args.w_dir,
-                                " ".join(args.tests)],
+    process = subprocess.Popen(['nosetests', '-q', '-w', args.w_dir,
+                                " ".join(args.tests)], '--with-xunit',
+                                '--xunit-file=/dev/stdout'],
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
     print out
