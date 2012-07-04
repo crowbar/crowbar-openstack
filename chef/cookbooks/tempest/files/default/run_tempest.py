@@ -18,9 +18,8 @@ def get_argparser():
 
 if __name__ == '__main__':
     args = get_argparser().parse_args()
-    process = subprocess.Popen(['nosetests', '-q', '-w', args.w_dir,
-                                " ".join(args.tests), '--with-xunit',
-                                '--xunit-file=/dev/stdout'],
+    process = subprocess.Popen(['nosetests', '-w', args.w_dir,
+                                " ".join(args.tests)],
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = process.communicate()
     print out
@@ -61,10 +60,10 @@ if __name__ == '__main__':
     resp, data = client.list_keypairs()
     for kp in data:
         client.delete_keypair(kp['keypair']['name'])
-    # get tenent_id of current user. I know that it's very magic, but
-    # I do not want to use keystone yet.
+    # Get tenent_id of current user. I know that it's very magic,
+    # but I do not want to use keystone yet.
     tenant_id = os.images_client.client.base_url.split('/')[-1]
-    # using another client, because there is no owner parameter
+    # I have to use another client, because there is no owner parameter
     # in list in images_client
     os2 = openstack.ServiceManager()
     client = os2.images.get_client()
