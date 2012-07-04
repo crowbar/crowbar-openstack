@@ -12,7 +12,6 @@ import unittest2 as unittest
 def get_argparser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-w', dest='w_dir', help="tempest working dir")
-    parser.add_argument('-o', dest='tenant_id', help="images tenant id")
     parser.add_argument('tests', nargs='+', help="tests to run")
     return parser
 
@@ -62,11 +61,14 @@ if __name__ == '__main__':
     resp, data = client.list_keypairs()
     for kp in data:
         client.delete_keypair(kp['keypair']['name'])
+    # get tenent_id of current user. I know that it's very magic, but
+    # I do not want to use keystone yet.
+    tenant_id = os.images_client.client.base_url.split('/')[-1]
     # using another client, because there is no owner parameter
     # in list in images_client
     os2 = openstack.ServiceManager()
     client = os2.images.get_client()
-    images = filter(lambda image: image[u'owner'] == args.tenant_id,
+    images = filter(lambda image: image[u'owner'] == tenant_id,
                                         client.get_images_detailed())
     for image in images:
         if 'tempest' in image[u'name']:
