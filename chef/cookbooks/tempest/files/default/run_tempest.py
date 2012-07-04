@@ -68,7 +68,6 @@ if __name__ == '__main__':
     client = os2.images.get_client()
     images = filter(lambda image: image[u'owner'] == args.tenant_id,
                                         client.get_images_detailed())
-    print images
     for image in images:
         if 'tempest' in image[u'name']:
             continue
