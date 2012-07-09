@@ -75,7 +75,7 @@ glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "
 glance_port = glance[:glance][:api][:bind_port]
 
 flavor_ref = "1"
-alt_flavor_ref = "1"
+alt_flavor_ref = "2"
 
 keystone_register "tempest tempest wakeup keystone" do
   host keystone_address

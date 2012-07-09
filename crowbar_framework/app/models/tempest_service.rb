@@ -156,7 +156,7 @@ class TempestService < ServiceObject
     proposal_path = '/opt/tempest'
 
     pid = fork do
-      command_line = "python #{proposal_path}/run_tempest.py -w #{proposal_path} tempest.tests.test_keypairs 2>/dev/null"
+      command_line = "python #{proposal_path}/run_tempest.py -w #{proposal_path} tempest 2>/dev/null"
       Process.waitpid run_remote_chef_client(node, command_line, test_run["results.xml"])
 
       test_run["ended"] = Time.now.utc.to_i
