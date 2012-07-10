@@ -147,6 +147,10 @@ class TempestService < ServiceObject
 
     tempest_db = _get_or_create_db
 
+    tempest_db["test_run"].each do |tr|
+      return test_run if tr["node"] == node and tr["status"] == "running"
+    end
+
     lock = acquire_lock(@bc_name)
     tempest_db["test_runs"] << test_run
     tempest_db.save
