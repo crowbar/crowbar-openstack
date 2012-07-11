@@ -147,7 +147,7 @@ class TempestService < ServiceObject
 
     tempest_db = _get_or_create_db
 
-    tempest_db["test_run"].each do |tr|
+    tempest_db["test_runs"].each do |tr|
       return test_run if tr["node"] == node and tr["status"] == "running"
     end
 
