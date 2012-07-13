@@ -156,8 +156,7 @@ class TempestService < ServiceObject
     tempest_db.save
     release_lock(lock)
 
-    # TODO: add proposal_path as an editable parameter to the proposal
-    proposal_path = '/opt/tempest'
+    proposal_path = proposal["attributes"][@bc_name]["tempest_path"]
 
     pid = fork do
       command_line = "python #{proposal_path}/run_tempest.py -w #{proposal_path} tempest 2>/dev/null"
