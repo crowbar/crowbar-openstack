@@ -59,11 +59,23 @@ class TempestController < BarclampController
     end
   end
 
+  def _render_result_html(input_xml_name, output_html_name)
+    input_xml = File.read(input_xml_name)
+    output_html = File.open(output_html_name, "wb")
+    doc, posts = REXML::Document.new(input_xml), []
+  end
+
   def results
     test_run = @service_object.get_test_run_by_uuid(params[:id]) or raise_not_found
+    results_html = "log/#{params[:id]}.html"
 
     respond_to do |format|
       format.xml { render :file => test_run["results.xml"] }
+      format.html { if not File.exist?(results_html)
+                      _render_result_html(test_run["results.xml"], results_html)
+                    end
+                    render :file => results_html
+                  }
     end
   end
 end
