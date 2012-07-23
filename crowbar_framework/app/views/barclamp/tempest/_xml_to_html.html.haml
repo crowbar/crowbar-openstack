@@ -39,37 +39,29 @@
       Results for
       = doc.elements["testsuite"].attribute("name")
     .testcases
-      %table{:border => "1"}
-        %thead
-          %tr
-            %td Class
-            %td Test name
-            %td Running time
-            %td State
-        %tbody
-          - last_class = ""
-          - doc.elements.each('testsuite/testcase') do |test_run|
-            - if not test_run.has_elements?()
-              - type = "passed"
-            - else
-              - type = test_run.elements[1].name
-            %tr{:class => "test-"+type}
-              - class_name = test_run.attribute("classname").to_s()
-              - if class_name == "&lt;nose.suite"
+      - tests = doc.elements.to_a('testsuite/testcase').group_by{|el| el.attribute("classname").to_s()}
+      - tests.keys.sort.each do |class_name|
+        %h3= class_name
+        %table{:border => "1"}
+          %thead
+            %tr
+              %td Test name
+              %td Running time
+              %td State
+          %tbody
+            - tests[class_name].each do |test_run|
+              - if not test_run.has_elements?
+                - type = "passed"
+              - else
+                - type = test_run.elements[1].name
+              %tr{:class => "test-"+type}
                 %td
-                  %p= class_name
-              - elsif class_name != last_class
-                - last_class = class_name
-                - rowspan = doc.elements.to_a("testsuite/testcase[@classname='#{class_name}']").length
-                %td{:rowspan => (rowspan != 0 && rowspan) }
-                  %p= class_name
-              %td
-                %p= test_run.attribute("name").to_s()
-              %td
-                %p= test_run.attribute("time").to_s()
-              %td
-                - if type == "passed"
-                  %p{:class => "test-status"}= type
-                - else
-                  %a{:class => "test-status", :href => "javascript:void(0)"}= type
-                  %pre{:class => "test-status"}= test_run.elements[1].cdatas()
+                  %p= test_run.attribute("name").to_s()
+                %td
+                  %p= test_run.attribute("time").to_s()
+                %td
+                  - if type == "passed"
+                    %p{:class => "test-status"}= type
+                  - else
+                    %a{:class => "test-status", :href => "javascript:void(0)"}= type
+                    %pre{:class => "test-status"}= test_run.elements[1].cdatas()
