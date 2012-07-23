@@ -63,6 +63,8 @@ class TempestController < BarclampController
     input_xml = File.read(input_xml_name)
     output_html = File.open(output_html_name, "wb")
     doc, posts = REXML::Document.new(input_xml), []
+    output_html.write(render_to_string(:template => 'barclamp/tempest/_xml_to_html.html.haml', :locals => {:doc => doc}))
+    output_html.close()
   end
 
   def results

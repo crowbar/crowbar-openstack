@@ -1,0 +1,76 @@
+%html
+  %head
+    %title
+      Xunit Test Results - For:
+      = doc.elements["testsuite"].attribute("name")
+    :css
+      .testcases {
+          border: 1px solid black;
+          padding: 10px;
+      }
+      .failure a {
+          color: red;
+      }
+      .error a {
+          color: red;
+      }
+      .passed a {
+          color: green;
+      }
+      .skipped a {
+          color: blue;
+      }
+      pre {
+          white-space: pre-wrap;
+      }
+      a.error-message {
+          text-transform: capitalize;
+      }
+      pre.error-message {
+          display: none;
+      }
+    %script{:src => "http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js", :type => "text/javascript"}
+    :javascript
+      $(document).ready(function() {
+          $("a.error-message").click(function() {
+              $(this).next("pre").toggle();
+              return false;
+          });
+      });
+  %body
+    %h3.divided
+      Results for
+      = doc.elements["testsuite"].attribute("name")
+    .testcases
+      %table{:border => "1"}
+        %thead
+          %tr
+            %td Class
+            %td Test name
+            %td Running time
+            %td State
+        %tbody
+          - last_class = ""
+          - doc.elements.each('testsuite/testcase') do |test_run|
+            - if not test_run.has_elements?()
+              - type = "passed"
+            - else
+              - type = test_run.elements[1].name
+            %tr{:class => type}
+              - class_name = test_run.attribute("classname").to_s()
+              - if class_name == "&lt;nose.suite"
+                %td
+                  %p= class_name
+              - elsif class_name != last_class
+                - last_class = class_name
+                - rowspan = doc.elements.to_a("testsuite/testcase[@classname='#{class_name}']").length
+                %td{:rowspan => (rowspan != 0 && rowspan) }
+                  %p= class_name
+              %td
+                %p= test_run.attribute("name").to_s()
+              %td
+                %p= test_run.attribute("time").to_s()
+              %td
+                %a{:class => "error-message", :href => (type != "passed" && "javascript:void(0)")}= type
+                - if type != "passed"
+                  %pre{:class => "error-message"}= test_run.elements[1].cdatas()
