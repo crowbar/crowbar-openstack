@@ -14,7 +14,7 @@
       .error a {
           color: red;
       }
-      .passed a {
+      .passed p {
           color: green;
       }
       .skipped a {
@@ -71,6 +71,8 @@
               %td
                 %p= test_run.attribute("time").to_s()
               %td
-                %a{:class => "error-message", :href => (type != "passed" && "javascript:void(0)")}= type
-                - if type != "passed"
+                - if type == "passed"
+                  %p= type
+                - else
+                  %a{:class => "error-message", :href => "javascript:void(0)"}= type
                   %pre{:class => "error-message"}= test_run.elements[1].cdatas()
