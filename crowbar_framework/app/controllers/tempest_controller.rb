@@ -14,6 +14,8 @@
 # limitations under the License. 
 # 
 
+require "rexml/document"
+
 class TempestController < BarclampController
   def initialize
     @service_object = TempestService.new logger

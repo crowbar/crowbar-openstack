@@ -4,35 +4,32 @@
       Xunit Test Results - For:
       = doc.elements["testsuite"].attribute("name")
     :css
-      .testcases {
-          border: 1px solid black;
-          padding: 10px;
-      }
-      .failure a {
+      .test-failure a.test-status {
           color: red;
       }
-      .error a {
+      .test-error a.test-status {
           color: red;
       }
-      .passed p {
+      .test-passed p.test-status {
           color: green;
       }
-      .skipped a {
+      .test-skipped a.test-status {
           color: blue;
       }
-      pre {
-          white-space: pre-wrap;
-      }
-      a.error-message {
+      a.test-status {
           text-transform: capitalize;
       }
-      pre.error-message {
+      p.test-status {
+          text-transform: capitalize;
+      }
+      pre.test-status {
           display: none;
+          white-space: pre-wrap;
       }
     %script{:src => "http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.min.js", :type => "text/javascript"}
     :javascript
       $(document).ready(function() {
-          $("a.error-message").click(function() {
+          $("a.test-status").click(function() {
               $(this).next("pre").toggle();
               return false;
           });
@@ -56,7 +53,7 @@
               - type = "passed"
             - else
               - type = test_run.elements[1].name
-            %tr{:class => type}
+            %tr{:class => "test-"+type}
               - class_name = test_run.attribute("classname").to_s()
               - if class_name == "&lt;nose.suite"
                 %td
@@ -72,7 +69,7 @@
                 %p= test_run.attribute("time").to_s()
               %td
                 - if type == "passed"
-                  %p= type
+                  %p{:class => "test-status"}= type
                 - else
-                  %a{:class => "error-message", :href => "javascript:void(0)"}= type
-                  %pre{:class => "error-message"}= test_run.elements[1].cdatas()
+                  %a{:class => "test-status", :href => "javascript:void(0)"}= type
+                  %pre{:class => "test-status"}= test_run.elements[1].cdatas()
