@@ -11,6 +11,9 @@
           %td{:title=>test_run["node"]}= link_to @nodes_hash[test_run["node"]].alias, { :controller => 'nodes', :action => 'show', :name => test_run["node"] }
           %td
             %span{ :class => 'status' }
-              = test_run["status"] == "running" ? t(".statuses.#{test_run['status']}") : (link_to t(".statuses.#{test_run['status']}"), "results/#{test_run['uuid']}")
+              = t(".statuses.#{test_run['status']}")
+              - if test_run["status"] != "running"
+                = link_to "html", "results/#{test_run['uuid']}.html"
+                = link_to "xml", "results/#{test_run['uuid']}.xml"
           %td= Time.at(test_run["started"]).to_s
           %td= test_run["ended"].nil? ? "" : Time.at(test_run["ended"]).to_s
