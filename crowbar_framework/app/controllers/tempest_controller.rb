@@ -72,6 +72,7 @@ class TempestController < BarclampController
   def results
     test_run = @service_object.get_test_run_by_uuid(params[:id]) or raise_not_found
     results_html = "log/#{params[:id]}.html"
+    test_run["status"] != "running" or raise_not_found
 
     respond_to do |format|
       format.xml { render :file => test_run["results.xml"] }
