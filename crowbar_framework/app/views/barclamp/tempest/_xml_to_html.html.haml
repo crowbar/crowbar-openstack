@@ -22,16 +22,16 @@
       p.test-status {
           text-transform: capitalize;
       }
-      pre.test-status {
-          display: none;
+      tr.test-message {
           white-space: pre-wrap;
       }
     :javascript
       $(document).ready(function() {
           $("a.test-status").click(function() {
-              $(this).next("pre").toggle();
+              $(this).parents("tr").next("tr.test-message").toggle();
               return false;
           });
+          $("tr.test-message").hide();
       });
   %body
     %h1.divided
@@ -64,4 +64,7 @@
                     %p{:class => "test-status"}= type
                   - else
                     %a{:class => "test-status", :href => "javascript:void(0)"}= type
-                    %pre{:class => "test-status"}= test_run.elements[1].cdatas()
+              - if type != "passed"
+                %tr{:class => "test-message"}
+                  %td{:colspan => 3}
+                    %pre= test_run.elements[1].cdatas()
