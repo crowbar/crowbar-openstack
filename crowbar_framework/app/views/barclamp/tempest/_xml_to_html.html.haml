@@ -14,7 +14,7 @@
           color: green;
       }
       .test-skipped a.test-status {
-          color: blue;
+          color: #00CCFF;
       }
       a.test-status {
           text-transform: capitalize;
@@ -26,7 +26,6 @@
           display: none;
           white-space: pre-wrap;
       }
-    = javascript_include_tag 'jquery.min'
     :javascript
       $(document).ready(function() {
           $("a.test-status").click(function() {
@@ -35,19 +34,20 @@
           });
       });
   %body
-    %h3.divided
-      Results for
-      = doc.elements["testsuite"].attribute("name")
+    %h1.divided
+      Results for test
+      = uuid
+      = link_to "(Raw XML)", "#{uuid}.xml"
     .testcases
       - tests = doc.elements.to_a('testsuite/testcase').group_by{|el| el.attribute("classname").to_s()}
       - tests.keys.sort.each do |class_name|
-        %h3= class_name
-        %table{:border => "1"}
+        %h2= class_name
+        %table{:class => "data box"}
           %thead
             %tr
-              %td Test name
-              %td Running time
-              %td State
+              %th Test name
+              %th Running time
+              %th State
           %tbody
             - tests[class_name].each do |test_run|
               - if not test_run.has_elements?
