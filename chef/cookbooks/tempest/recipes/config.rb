@@ -76,6 +76,8 @@ glance_port = glance[:glance][:api][:bind_port]
 
 flavor_ref = "1"
 alt_flavor_ref = "2"
+# NOTE(aandreev): selected "2" while merging 
+#alt_flavor_ref = "1"
 
 keystone_register "tempest tempest wakeup keystone" do
   host keystone_address
