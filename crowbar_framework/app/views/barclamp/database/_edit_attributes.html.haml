@@ -6,7 +6,7 @@
   %div.container
     %p
       %label{ :for => :sql_engine }= t('.sql_engine')
-      = select_tag :sql_engine, options_for_select([['PostgreSQL','postgresql'], ['MySQL', 'mysql']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "my_update_value( this.value )"
+      = select_tag :sql_engine, options_for_select([['PostgreSQL','postgresql']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "my_update_value( this.value )"
   %div{:class => "container" , :id => "mysql_form" }
     %label{ :for => :mysql_datadir}= t('.mysql_datadir')
     %input#mysql_datadir{:type => "text", :name => "mysql_datadir", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["mysql"]["datadir"], :onchange => "update_value('mysql/datadir', 'mysql_datadir', 'string')"}
