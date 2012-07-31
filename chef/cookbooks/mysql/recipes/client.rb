@@ -23,7 +23,7 @@ package "mysql-devel" do
     ["debian", "ubuntu"] => { "default" => 'libmysqlclient-dev' },
     "default" => 'libmysqlclient-dev'
   )
-  action :install
+  action :upgrade
 end
 
 package "mysql-client" do
@@ -31,7 +31,7 @@ package "mysql-client" do
     [ "centos", "redhat", "suse", "fedora"] => { "default" => "mysql" },
     "default" => "mysql-client"
   )
-  action :install
+  action :upgrade
 end
 
 if platform?(%w{debian ubuntu redhat centos fedora suse})
@@ -42,13 +42,13 @@ if platform?(%w{debian ubuntu redhat centos fedora suse})
       ["debian", "ubuntu"] => { "default" => 'libmysql-ruby' },
       "default" => 'libmysql-ruby'
     )
-    action :install
+    action :upgrade
   end
 
 else
 
   gem_package "mysql" do
-    action :install
+    action :upgrade
   end
 
 end

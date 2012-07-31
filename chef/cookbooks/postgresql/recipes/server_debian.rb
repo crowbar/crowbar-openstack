@@ -28,7 +28,9 @@ else # > 8.3
   node.default[:postgresql][:ssl] = "true"
 end
  
-package "postgresql"
+package "postgresql" do
+  action :ugprade
+end
  
 service "postgresql" do
   case node['platform']

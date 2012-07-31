@@ -18,5 +18,5 @@
 #
 
 package "python-psycopg2" do
-    action :install
+    action :upgrade
 end
