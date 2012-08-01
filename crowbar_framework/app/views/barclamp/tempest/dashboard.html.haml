@@ -8,10 +8,14 @@
     %form{:action => 'test_runs/clear', :method => :post, :style => 'float: right'}
       %input{:type=> 'submit', :class => 'button', :value => t('.clear_test_runs')}
     %form{:action => 'test_runs', :method => :post, :id => 'run_test'} 
-      %span= t '.run_tests_on_node'
-      %select{:name => 'node'}
-        - @ready_nodes.each do |node|
-          %option{ :value => node.name }= node.alias  
-      %input{:type=>'submit', :class=>'button', :value => t('.run_test') }
-  
+      - if @ready_nodes.empty?
+        %span{:class => 'no_nodes'}= t '.no_nodes'
+      - else
+        %span= t '.run_tests_on_node'
+        %select{:name => 'node'}
+          - @ready_nodes.each do |node|
+            %option{ :value => node.name }= node.alias  
+        %input{:type=>'submit', :class=>'button', :value => t('.run_test') }
+    
+
 = render 'barclamp/tempest/test_runs.html.haml'

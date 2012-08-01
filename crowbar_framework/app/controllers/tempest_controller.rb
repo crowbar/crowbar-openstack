@@ -61,27 +61,29 @@ class TempestController < BarclampController
     end
   end
 
-  def _render_result_html(input_xml_name, output_html_name, test_uuid)
-    input_xml = File.read(input_xml_name)
-    output_html = File.open(output_html_name, "wb")
-    doc, posts = REXML::Document.new(input_xml), []
-    output_html.write(render_to_string(:template => 'barclamp/tempest/_xml_to_html.html.haml', :locals => {:doc => doc, :uuid => test_uuid}, :layout => false))
-    output_html.close()
+  def _get_results_html(test_run)
+    results_html = "log/#{test_run[:uuid]}.html"
+    
+    return results_html if File.exist?(results_html)
+    
+    xml = REXML::Document.new(IO.read(test_run["results.xml"]))
+    File.open(results_html, "w") { |out| 
+      out.write(
+        render_to_string(:template => 'barclamp/tempest/_results_content.html.haml',
+          :locals => {:xml => xml }, :layout => false))
+    }
+    results_html
   end
 
   def results
-    test_uuid = params[:id]
-    test_run = @service_object.get_test_run_by_uuid(test_uuid) or raise_not_found
-    results_html = "log/#{test_uuid}.html"
-    test_run["status"] != "running" or raise_not_found
+    @test_run = @service_object.get_test_run_by_uuid(params[:id])
+    raise_not_found if not @test_run or @test_run["status"] == "running"
 
     respond_to do |format|
-      format.xml { render :file => test_run["results.xml"] }
-      format.html { if not File.exist?(results_html)
-                      _render_result_html(test_run["results.xml"], results_html, test_uuid)
-                    end
-                    render :file => results_html, :layout => true
-                  }
+      format.xml { render :file => @test_run["results.xml"] }
+      format.html { 
+        render :template => 'barclamp/tempest/results.html.haml', :locals => {:results_html => _get_results_html(@test_run) }
+      }
     end
   end
 end

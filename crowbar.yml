@@ -52,6 +52,7 @@ locale_additions:
           results: Test results and xml reports
           clear_test_runs: Clear test runs
           run_test: Go!
+          no_nodes: No nodes available to run tempest
         test_runs:
           node: Node
           status: Status
@@ -61,15 +62,27 @@ locale_additions:
             passed: Passed
             failed: Failed
             running: Running
-        edit_attributes: 
+        edit_attributes:
           attributes: Attributes
           nova_instance: Nova
           tempest_user: Tempest user and a tenant that will be created for test run
           tempest_user_username: Choose username
           tempest_user_password: Choose password
           tempest_user_tenant: Choose tenant
-        edit_deployment: 
+        edit_deployment:
           deployment: Deployment
+        results:
+          title: Test run results
+          raw_xml: Raw XML
+        results_content:
+          name: Name
+          time: Time
+          status: Status
+          statuses:
+            error: Error
+            failure: Failure
+            passed: Passed
+            skipped: Skipped
 
 debs:
 #Assuming that packages for ubuntu 12.04 only used

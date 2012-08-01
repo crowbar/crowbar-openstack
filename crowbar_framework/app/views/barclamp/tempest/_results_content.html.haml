@@ -1,0 +1,32 @@
+.test_results
+  - tests = xml.elements.to_a('testsuite/testcase').group_by{|el| el.attribute("classname").to_s()}
+  - tests.keys.sort.each do |class_name|
+    %h2= class_name
+    %table{:class => "test_suite data box"}
+      %thead
+        %tr
+          %th.fold
+          %th.name= t ".name"
+          %th.time= t ".time"
+          %th.status= t ".status"
+      %tbody
+        - tests[class_name].each do |test|
+          - status = test.has_elements? ? test.elements[1].name : "passed"
+          - test_name = test.attribute("name").to_s()
+          - test_id = "%02x" % (class_name + test_name).hash
+          %tr{:class => "test _#{status}", :id => test_id}
+            %td.fold
+              - if test.has_elements?
+                .toggle.on{:rel=>"msg_#{test_id}"}
+              -else
+                .toggle.empty.disabled
+            %td.name
+              %span= test_name
+            %td.time
+              %span= test.attribute("time").to_s()
+            %td.status
+              %span= t ".statuses.#{status}"
+          - if test.has_elements?
+            %tr{:class=>"msg _#{status}", :id=>"msg_#{test_id}"}
+              %td{:colspan=>4}
+                %pre= test.elements[1].cdatas()
