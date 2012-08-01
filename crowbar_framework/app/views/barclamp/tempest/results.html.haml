@@ -25,15 +25,25 @@
       padding-left: 5px;
   }
 
+  .test_suite th.time {
+    text-align: right;
+  }
+
+  .test_suite th.status {
+    text-align: right;
+  }
+
   .test .time span {
       width: 50px;
       display: block;
+      text-align: right;
   }
 
   .test .status span {
       text-transform: capitalize;
       width: 70px;
       display: block;
+      text-align: right;
   }
 
   .test_suite .msg pre {
@@ -49,15 +59,15 @@
   }
 
   .msg._error pre {
-      background-color: darkred;
+      background-color: brown;
   }
 
   .msg._skipped pre {
-      background-color: blue;
+      background-color: darkblue;
   } 
 
   .msg._failure pre {
-      background-color: red;
+      background-color: darkred;
   }
 
 :javascript
