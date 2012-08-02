@@ -1,82 +1,10 @@
-:css
-  .test._failure .status {
-      color: red;
-  }
-  .test._error .status {
-      color: darkred;
-  }
-  .test._passed .status {
-      color: green;
-  }
-  .test._skipped .status {
-      color: blue;
-  }
-
-  .test .fold {
-    padding-right: 0;
-  }
-
-  .toggle.empty {
-    background-image: none;
-  }
-
-  .test .name {
-      width: 100%;
-      padding-left: 5px;
-  }
-
-  .test_suite th.time {
-    text-align: right;
-  }
-
-  .test_suite th.status {
-    text-align: right;
-  }
-
-  .test .time span {
-      width: 50px;
-      display: block;
-      text-align: right;
-  }
-
-  .test .status span {
-      text-transform: capitalize;
-      width: 70px;
-      display: block;
-      text-align: right;
-  }
-
-  .test_suite .msg pre {
-      margin: 0;
-      padding: 5px;
-      width: 950px;
-      overflow: auto;
-  }
-
-  .test_suite .msg td:first-child
-  {
-      padding: 0;
-  }
-
-  .msg._error pre {
-      background-color: brown;
-  }
-
-  .msg._skipped pre {
-      background-color: darkblue;
-  } 
-
-  .msg._failure pre {
-      background-color: darkred;
-  }
-
+= stylesheet_link_tag "tempest-results"
 :javascript
   $(document).ready(function() {
       $(".test_suite .toggle.on").toggleClass("on").each(function(){
-        $('#' + $(this).attr('rel')).toggle();
+        $('#' + $(this).attr('rel')).hide();
       });
   });
-
 %h1.divided= t ".title"
 %h2 #{t("barclamp.tempest.test_runs.node")}: #{@test_run["node"]}
 %h2 #{t("barclamp.tempest.test_runs.started_at")}: #{Time.at(@test_run["started"]).to_s()}

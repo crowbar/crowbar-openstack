@@ -5,7 +5,7 @@
     %table{:class => "test_suite data box"}
       %thead
         %tr
-          %th.fold
+          %th.misc
           %th.name= t ".name"
           %th.time= t ".time"
           %th.status= t ".status"
@@ -15,11 +15,9 @@
           - test_name = test.attribute("name").to_s()
           - test_id = "%02x" % (class_name + test_name).hash
           %tr{:class => "test _#{status}", :id => test_id}
-            %td.fold
-              - if test.has_elements?
+            %td.misc
+              - if test.has_elements? 
                 .toggle.on{:rel=>"msg_#{test_id}"}
-              -else
-                .toggle.empty.disabled
             %td.name
               %span= test_name
             %td.time
