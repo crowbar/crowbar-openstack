@@ -17,5 +17,5 @@
             %option{ :value => node.name }= node.alias  
         %input{:type=>'submit', :class=>'button', :value => t('.run_test') }
     
-
-= render 'barclamp/tempest/test_runs.html.haml'
+- if not @test_runs.empty?
+  = render 'barclamp/tempest/test_runs.html.haml'
