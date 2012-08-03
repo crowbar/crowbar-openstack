@@ -33,8 +33,14 @@ crowbar:
   run_order: 99
   chef_order: 99
 
+nav:
+  utils:
+    tempest: '"/tempest/dashboard/", { :link => { :target => "_blank" } }'
+
 locale_additions:
   en:
+    nav:
+      tempest: Tempest
     barclamp:
       tempest:
         remove_results:
