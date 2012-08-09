@@ -43,31 +43,47 @@ locale_additions:
       tempest: Tempest
     barclamp:
       tempest:
-        remove_results:
-          succeeded: All non-running test results/reports have been removed
-        remove_result:
-          failed: Failed to remove the result id
-          succeeded: Successfuly removed the result with id
-        run_tests:
-          failed: Failed to run tests from node
-          succeeded: Successfuly started tests with id 
+        run:
+          success: "Sucessfully started tempest on node %{node}"
+          failure: "Failed to run tempest on node %{node}: %{error}"
+          duplicate: "there's already an active tempest run"
+
         dashboard:
-          title: Tempest Dashboard
-          n_test_runs: test runs
-          run_tests_on_node: Run tempest on node
-          results: Test results and xml reports
-          clear_test_runs: Clear test runs
-          run_test: Go!
-          no_nodes: No nodes available to run tempest
-        test_runs:
-          node: Node
-          status: Status
-          started_at: Started at
-          ended_at: Ended at
-          statuses:
-            passed: Passed
-            failed: Failed
-            running: Running
+          title: Tempest
+          n_test_runs: "%{n} test run(s)"
+          no_test_runs: No test runs
+
+          run:
+            label: Run tempest on node
+            do:  Go!
+            no_nodes: No nodes with installed tempest available
+          clear:
+            do: Clear
+            success: All non-running and stale test runs were cleared
+
+          test_run:
+            node: Node
+            started: Started
+            ended: Ended
+            status: Status
+            status_:
+              running: Running
+              passed: Passed
+              failed: Failed
+
+        results:
+          title: "Results of tempest run %{test_run}"
+          raw_xml: Raw XML
+          test:
+            name: Name
+            time: Time
+            status: Status
+            status_:
+              error: Error
+              failure: Failure
+              passed: Passed
+              skipped: Skipped
+
         edit_attributes:
           attributes: Attributes
           nova_instance: Nova
@@ -77,18 +93,6 @@ locale_additions:
           tempest_user_tenant: Choose tenant
         edit_deployment:
           deployment: Deployment
-        results:
-          title: Test run results
-          raw_xml: Raw XML
-        results_content:
-          name: Name
-          time: Time
-          status: Status
-          statuses:
-            error: Error
-            failure: Failure
-            passed: Passed
-            skipped: Skipped
 
 debs:
 #Assuming that packages for ubuntu 12.04 only used

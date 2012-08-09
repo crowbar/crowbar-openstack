@@ -1,21 +1,54 @@
-- # TODO(aandreev): replace all hardcoded urls with proper url_for calls, need to investigate
-%p{:style => 'float: right'}
-  = "#{@test_runs.count} " + t(".n_test_runs")
-%h1= t '.title'
-.clear
-.column_100
-  %section{:class => 'box'}
-    %form{:action => 'test_runs/clear', :method => :post, :style => 'float: right'}
-      %input{:type=> 'submit', :class => 'button', :value => t('.clear_test_runs')}
-    %form{:action => 'test_runs', :method => :post, :id => 'run_test'} 
-      - if @ready_nodes.empty?
-        %span{:class => 'no_nodes'}= t '.no_nodes'
-      - else
-        %span= t '.run_tests_on_node'
-        %select{:name => 'node'}
-          - @ready_nodes.each do |node|
-            %option{ :value => node.name }= node.alias  
-        %input{:type=>'submit', :class=>'button', :value => t('.run_test') }
-    
-- if not @test_runs.empty?
-  = render 'barclamp/tempest/test_runs.html.haml'
+= stylesheet_link_tag @bc_name
+.dashboard
+  %h1= t '.title'
+  .clear
+  .column_100
+    %section{:class => 'box'}
+      %form{:method => :post, :id =>'clear', :action => "/#{@bc_name}/test_runs/clear"}
+        %label
+          - if @test_runs.empty?
+            = t('.no_test_runs')
+          - else
+            = t('.n_test_runs', :n => @test_runs.count)
+            %input{:type=> 'submit', :class => 'button', :value => t('.clear.do')}
+        
+      %form{:method => :post, :id => 'run_test', :action => "/#{@bc_name}/test_runs" } 
+        - if @ready_nodes.empty?
+          %span{:class => 'no_nodes'}= t '.run.no_nodes'
+        - else
+          %label
+            = t '.run.label'
+            %select{:name => 'node'}
+              - @ready_nodes.each do |node|
+                %option{ :value => node.name }= node.alias  
+          %input{:type=>'submit', :class=>'button', :value => t('.run.do') }
+      
+  - if not @test_runs.empty?
+    %table.data.box.test_runs
+      %tbody
+        %thead
+          %th.node= t '.test_run.node'
+          %th.status= t '.test_run.status'
+          %th.started= t '.test_run.started'
+          %th.ended= t '.test_run.ended'
+        %tbody
+          - @test_runs.each do |test_run|
+            %tr
+              %td.node{:title=>test_run['node']}
+                = link_to @nodes_hash[test_run['node']].alias, { :controller => 'nodes', :action => 'show', :name => test_run['node'] }
+              %td{:class=>"status _#{test_run['status']}"}
+                - if test_run['status'] == 'passed'
+                  %div.led.green
+                - elsif test_run['status'] == 'failed'
+                  %div.led.red
+                - else
+                  %div.led.in_process
+                %span
+                  - if test_run['status'] == 'running'
+                    = t(".test_run.status_.#{test_run['status']}")
+                  - else 
+                    = link_to t(".test_run.status_.#{test_run['status']}"), "/#{@bc_name}/results/#{test_run['uuid']}.html"
+              %td.started
+                = Time.at(test_run['started']).to_s
+              %td.ended
+                = test_run['ended'].nil? ? "" : Time.at(test_run['ended']).to_s
