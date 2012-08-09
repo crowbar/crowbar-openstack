@@ -42,12 +42,12 @@ locale_additions:
     nav:
       tempest: Tempest
     barclamp:
-      run:
-        success: "Sucessfully started tempest on node %{node}"
-        failure: "Failed to run tempest on node %{node}: %{error}"
-        duplicate: "there\'s already an active tempest run"
-
       tempest:
+        run:
+          success: "Sucessfully started tempest on node %{node}"
+          failure: "Failed to run tempest on node %{node}: %{error}"
+          duplicate: "there's already an active tempest run"
+
         dashboard:
           title: Tempest
           n_test_runs: "%{n} test run(s)"
