@@ -14,6 +14,7 @@
 # limitations under the License. 
 # 
 
+
 class TempestService < ServiceObject
   class ServiceError < StandardError
   end
@@ -98,7 +99,7 @@ class TempestService < ServiceObject
 
   def get_ready_nodes
     nodes = get_ready_proposals.collect { |p| p.elements[@bc_name] }.flatten
-    NodeObject.find_all_nodes.select { |n| nodes.include?(n.name) and n.status == "ready" }
+    NodeObject.find_all_nodes.select { |n| nodes.include?(n.name) and n.ready? }
   end
 
   def get_ready_proposals
@@ -106,15 +107,15 @@ class TempestService < ServiceObject
   end
 
   def _get_or_create_db
-    db = ProposalObject.find_data_bag_item "crowbar/tempest"
+    db = ProposalObject.find_data_bag_item "crowbar/#{@bc_name}"
     if db.nil?
       begin
         lock = acquire_lock @bc_name
       
         db_item = Chef::DataBagItem.new
         db_item.data_bag "crowbar"
-        db_item["id"] = "tempest"
-        db_item["test_runs"] = []
+        db_item['id'] = @bc_name
+        db_item['test_runs'] = []
         db = ProposalObject.new db_item
         db.save
       ensure
@@ -125,51 +126,93 @@ class TempestService < ServiceObject
   end
 
   def get_test_runs
-    _get_or_create_db["test_runs"]
+    _get_or_create_db['test_runs']
   end
 
   def clear_test_runs
+    def delete_file(file_name)
+      File.delete(file_name) if File.exist?(file_name)
+    end
+
+    def process_exists(pid)
+      begin
+        Process.getpgid( pid )
+        true
+      rescue Errno::ESRCH
+        false
+      end
+    end
+
     tempest_db = _get_or_create_db
 
-    tempest_db["test_runs"] = []
+    @logger.info('cleaning out test runs and results')
+    tempest_db['test_runs'].delete_if do |test_run|
+      if test_run['status'] == 'running'
+        if test_run['pid'] and not process_exists(test_run['pid'])
+          @logger.warn("running tempest run #{test_run['uuid']} seems to be stale")
+        elsif Time.now.utc.to_i - test_run['started'] > 60 * 60 * 4 # older than 4 hours
+          @logger.warn("running tempest run #{test_run['uuid']} seems to be outdated, started at #{Time.at(test_run['started']).to_s}")
+        else
+          @logger.debug("omitting running test run #{test_run['uuid']} while cleaning")
+          next
+        end
+      else
+        delete_file(test_run['results.html'])
+        delete_file(test_run['results.xml'])
+      end
+      @logger.debug("removing tempest run #{test_run['uuid']}")
+      true
+    end
+
     lock = acquire_lock(@bc_name)
     tempest_db.save
     release_lock(lock)
   end
 
   def run_test(node)
-    raise "failed to look up a tempest proposal applied to #{node.inspect}" if (proposal = _get_proposal_by_node node).nil?
+    raise "unable to look up a #{@bc_name} proposal at node #{node.inspect}" if (proposal = _get_proposal_by_node node).nil?
     
     test_run_uuid = `uuidgen`.strip
     test_run = { 
-      "uuid" => test_run_uuid, "started" => Time.now.utc.to_i, "ended" => nil, 
-      "status" => "running", "node" => node, "results.xml" => "log/#{test_run_uuid}.xml"}
+      'uuid' => test_run_uuid, 'started' => Time.now.utc.to_i, 'ended' => nil, 'pid' => nil,
+      'status' => 'running', 'node' => node, 'results.xml' => "log/#{test_run_uuid}.xml", 
+      'results.html' => "log/#{test_run_uuid}.html"}
 
     tempest_db = _get_or_create_db
 
-    tempest_db["test_runs"].each do |tr|
-      return test_run if tr["node"] == node and tr["status"] == "running"
+    tempest_db['test_runs'].each do |tr|
+      raise ServiceError, I18n.t("barclamp.#{@bc_name}.run.duplicate") if tr['node'] == node and tr['status'] == 'running'
     end
 
     lock = acquire_lock(@bc_name)
-    tempest_db["test_runs"] << test_run
+    tempest_db['test_runs'] << test_run
     tempest_db.save
     release_lock(lock)
 
-    proposal_path = proposal["attributes"][@bc_name]["tempest_path"]
+    proposal_path = proposal['attributes'][@bc_name]['tempest_path']
 
+    @logger.info("starting tempest on node #{node}, test run uuid #{test_run['uuid']}")
     pid = fork do
       command_line = "python #{proposal_path}/run_tempest.py -w #{proposal_path} tempest 2>/dev/null"
-      Process.waitpid run_remote_chef_client(node, command_line, test_run["results.xml"])
+      Process.waitpid run_remote_chef_client(node, command_line, test_run['results.xml'])
 
-      test_run["ended"] = Time.now.utc.to_i
-      test_run["status"] = $?.exitstatus.equal?(0) ? "passed" : "failed"
+      test_run['ended'] = Time.now.utc.to_i
+      test_run['status'] = $?.exitstatus.equal?(0) ? 'passed' : 'failed'
+      test_run['pid'] = nil
       
       lock = acquire_lock(@bc_name)
       tempest_db.save
       release_lock(lock)
+
+      @logger.info("test run #{test_run['uuid']} complete, status '#{test_run['status']}'")
     end
     Process.detach pid
+
+    # saving the PID to prevent 
+    test_run['pid'] = pid
+    lock = acquire_lock(@bc_name)
+    tempest_db.save
+    release_lock(lock)
     test_run
   end
 
@@ -180,4 +223,3 @@ class TempestService < ServiceObject
     nil
   end
 end
-
