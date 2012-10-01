@@ -46,3 +46,8 @@ EOH
   # TODO: use proposal attribute
   not_if { ::File.exists?("#{inst_dir}") }
 end
+
+cookbook_file "#{inst_dir}/tempest/tests/test_flavors.py"
+	mode "0664"
+	source "test_flavors.py"
+end
