@@ -6,6 +6,9 @@
       "sql_engine": "postgresql",
       "mysql": {
         "datadir": "/var/lib/mysql"
+      },
+      "postgresql": {
+        "max_connections": 1000
       }
     }
   },

@@ -51,6 +51,10 @@ The following attributes are generated in
 * `node['postgresql']['ssl']` - whether to enable SSL (off for version
   8.3, true for 8.4).
 
+Performance tuning attributes, each corresponds to the same-named parameter in postgresql.conf; default values listed
+
+* `node['postgresql']['tunable']['max_connections']`     = "1000"
+
 Recipes
 =======
 

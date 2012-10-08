@@ -19,3 +19,12 @@ end
 end
  
 depends "openssl"
+
+attribute "postgresql/tunable",
+  :display_name => "PostgreSQL Tunables",
+  :description => "Hash of PostgreSQL tunable attributes",
+  :type => "hash"
+
+attribute "postgresql/tunable/max_connections",
+  :display_name => "PostgreSQL Tunable Max Connections",
+  :default => "1000"

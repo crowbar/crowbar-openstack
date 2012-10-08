@@ -6,27 +6,33 @@
   %div.container
     %p
       %label{ :for => :sql_engine }= t('.sql_engine')
-      = select_tag :sql_engine, options_for_select([['PostgreSQL','postgresql']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "my_update_value( this.value )"
-  %div{:class => "container" , :id => "mysql_form" }
-    %label{ :for => :mysql_datadir}= t('.mysql_datadir')
-    %input#mysql_datadir{:type => "text", :name => "mysql_datadir", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["mysql"]["datadir"], :onchange => "update_value('mysql/datadir', 'mysql_datadir', 'string')"}
+      = select_tag :sql_engine, options_for_select([['PostgreSQL','postgresql']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "update_value('sql_engine', 'sql_engine', 'string')"
+
+  %label.h3.mysql_engine.sql_engine{ :for => :mysql_form }= t('.mysql_attributes')
+  %div.container.mysql_engine.sql_engine{ :id => :mysql_form }
+    %p
+      %label{ :for => :mysql_datadir }= t('.mysql_datadir')
+      %input#mysql_datadir{:type => "text", :name => "mysql_datadir", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["mysql"]["datadir"], :onchange => "update_value('mysql/datadir', 'mysql_datadir', 'string')"}
+
+  %label.h3.postgresql_engine.sql_engine{ :for => :postgresql_form }= t('.postgresql_attributes')
+  %div.container.postgresql_engine.sql_engine{ :id => :postgresql_form }
+    %p
+      %label{ :for => :postgresql_max_connections }= t('.postgresql_max_connections')
+      %input#postgresql_max_connections{:type => "text", :name => "postgresql_max_connections", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["postgresql"]["max_connections"], :onchange => "update_value('postgresql/tunable/max_connections', 'postgresql_max_connections', 'string')"}
 
 
 :javascript
-  function show_form(backend) {
-    if ( backend == "mysql" ) {
-      obj1 = document.getElementById('mysql_form');
-      obj1.style.visibility = 'visible';
-    } else {
-      obj1 = document.getElementById('mysql_form');
-      obj1.style.visibility = 'hidden';
+  function toggle_sql_engine_form() {
+    $('.sql_engine').hide();
+    switch($('#sql_engine option:selected').attr('value')) {
+      case "mysql":
+        $('.mysql_engine').show();
+        break;
+      case "postgresql":
+        $('.postgresql_engine').show();
+        break;
     }
-  }
-  function my_update_value(backend) {
-    this.show_form(backend);
-    this.update_value('sql_engine', 'sql_engine', 'string');
-  }
-  $(document).ready(function(){
-    obj1 = document.getElementById('sql_engine');
-    show_form(obj1.value);
-  });
+  };
+
+  $(document).ready(function () { toggle_sql_engine_form(); });
+  $('#protocol').change(toggle_sql_engine_form);
