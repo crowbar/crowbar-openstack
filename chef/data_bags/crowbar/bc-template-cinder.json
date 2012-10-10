@@ -1,0 +1,29 @@
+{
+  "id": "bc-template-cinder",
+  "description": "Installation for Cinder",
+  "attributes": {
+    "cinder": {
+      "foo": "bar"
+    }
+  },
+  "deployment": {
+    "cinder": {
+      "crowbar-revision": 0,
+      "element_states": {
+        "cinder-server": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "cinder-server" ]
+      ],
+      "config": {
+        "environment": "cinder-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
+
