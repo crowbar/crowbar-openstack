@@ -77,6 +77,12 @@
           "eqlx_ssh_keepalive_interval": 1200,
           "eqlx_cli_timeout": 30
         }
+      },
+      "db": {
+        "mysql_instance": "none",
+        "password": "",
+        "user": "cinder",
+        "database": "cinder"
       }
     }
   },

@@ -11,62 +11,37 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# Author: RobHirschfeld
-#
-# This file directs the installation of the barclamp by the Crowbar Framework
-# The major compoents are
-#    barclamp: detalis about the barclamp
-#    crowbar: installation instructions
-#    nav: (optional) injects items into the Crowbar UI menu
-#    debs/rpms/gems: components needs by the barclamp
 
 barclamp:
   name: cinder
   display: Cinder
   description: A way to maximize awesomeness for Cinder
   proposal_schema_version: 1
-  # controlls if barclamp is shown in UI list (true=yes)
-  user_managed: true
   version: 0
-  # Requires allows you to declare that this barclamp relies on
-  # another barclamp to provide some of its functionality.
-  # All barclamps implicitly rely on the crowbar barclamp.
   requires:
     - @crowbar
     - git
     - mysql
-    - glance
     - keystone
-    - nova_dashboard
+    - nova
   member:
     - openstack 
 
 crowbar:
   layout: 1
-  order: 1000
-  run_order: 1000
-  chef_order: 1000
-  proposal_schema_version: 2
+  order: 100 
+  run_order: 100
+  chef_order: 100
 
-# debs, gems, rpms and extra_files allow you declare the OS packages,
-# gems, and raw files that this barclamp needs.
-
-# debs allows you to declare extra repositories to pull packages from
-# and delare that packages that you need for systems that use Debian-style
-# packaging.  
 debs:
   pkgs:
     - tgt
     - lvm2
     # paramiko needed for SSH-based SAN drivers
     - python-paramiko
-
-# extra_files downloads and saves a file to be slipstreamed on to the 
-# crowbar .iso in the extra/files directory (or a subdirectory thereof).
-# The build system will try to extract the .rpm files from 
-# anything that looks like an Oracle java rpm.bin and treat the extracted
-# .rpm files as if they were provided by raw_pkgs. 
+    - iscsitarget
+    - open-iscsi
+    - iscsitarget-dkms
 
 locale_additions:
   en:

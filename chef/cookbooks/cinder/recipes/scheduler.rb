@@ -14,5 +14,5 @@
 # limitations under the License.
 #
 # Cookbook Name:: cinder
-# Recipe:: api
+# Recipe:: scheduler
 #
