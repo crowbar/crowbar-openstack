@@ -16,3 +16,7 @@
 # Cookbook Name:: cinder
 # Recipe:: scheduler
 #
+
+include_recipe "#{@cookbook_name}::common"
+
+cinder_service("scheduler")

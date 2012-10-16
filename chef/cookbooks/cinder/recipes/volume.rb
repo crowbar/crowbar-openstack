@@ -16,3 +16,9 @@
 # Cookbook Name:: cinder
 # Recipe:: volume
 #
+include_recipe "#{@cookbook_name}::common"
+
+#TODO: prepare volumes
+
+cinder_service("volume")
+

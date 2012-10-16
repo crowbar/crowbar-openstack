@@ -35,25 +35,39 @@ class CinderService < ServiceObject
       }
     end
 
+    base["attributes"][@bc_name]["git_instance"] = ""
+    begin
+      gitService = GitService.new(@logger)
+      gits = gitService.list_active[1]
+      if gits.empty?
+        # No actives, look for proposals
+        gits = gitService.proposals[1]
+      end
+      unless gits.empty?
+        base["attributes"][@bc_name]["git_instance"] = gits[0]
+      end
+    rescue
+      @logger.info("#{@bc_name} create_proposal: no git found")
+    end
+
+    base["attributes"]["cinder"]["nova_instance"] = ""
+    begin
+      novaService = NovaService.new(@logger)
+      novas = novaService.list_active[1]
+      if novas.empty?
+        # No actives, look for proposals
+        novas = novaService.proposals[1]
+      end
+      base["attributes"]["cinder"]["nova_instance"] = novas[0] unless novas.empty?
+    rescue
+      @logger.info("Cinder create_proposal: no keystone found")
+    end
+
+    base["attributes"]["cinder"]["service_password"] = '%012d' % rand(1e12)
+    base["attributes"]["cinder"]["db"]["password"] = random_password
+
     @logger.debug("Cinder create_proposal: exiting")
     base
-  end
-
-  def apply_role_pre_chef_call(old_role, role, all_nodes)
-    @logger.debug("Cinder apply_role_pre_chef_call: entering #{all_nodes.inspect}")
-    return if all_nodes.empty?
-
-    # Make sure the bind hosts are in the admin network
-    all_nodes.each do |n|
-      node = NodeObject.find_node_by_name n
-
-      admin_address = node.get_network_by_type("admin")["address"]
-      node.crowbar[:cinder] = {} if node.crowbar[:cinder].nil?
-      node.crowbar[:cinder][:api_bind_host] = admin_address
-
-      node.save
-    end
-    @logger.debug("Cinder apply_role_pre_chef_call: leaving")
   end
 
 end

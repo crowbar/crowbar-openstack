@@ -3,8 +3,11 @@
   "description": "Installation for Cinder",
   "attributes": {
     "cinder": {
-      "keystone_instance": "none",
-      "service_user": "nova",
+      "debug": true,
+      "verbose": true,
+      "nova_instance": "none",
+      "user": "cinder",
+      "service_user": "cinder",
       "gitrepo": "http://github.com/openstack/cinder.git",
       "git_refspec": "stable/folsom",
       "use_gitrepo": true,
@@ -78,8 +81,11 @@
           "eqlx_cli_timeout": 30
         }
       },
+      "api": {
+        "bind_open_address": true,
+        "bind_port": 8776
+      },
       "db": {
-        "mysql_instance": "none",
         "password": "",
         "user": "cinder",
         "database": "cinder"
