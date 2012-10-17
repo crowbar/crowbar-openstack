@@ -21,8 +21,6 @@ barclamp:
   requires:
     - @crowbar
     - git
-    - mysql
-    - keystone
     - nova
   member:
     - openstack 
@@ -55,4 +53,4 @@ locale_additions:
         deployment: Deployment
 
 git:
-  - cinder https://github.com/openstack/cinder.git stable/folsom
+  - cinder http://github.com/openstack/cinder.git stable/folsom

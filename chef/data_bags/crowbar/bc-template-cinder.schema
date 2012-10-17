@@ -21,7 +21,7 @@
             "git_refspec": { "type": "str", "required": true },
             "use_gitrepo": { "type": "bool", "required": true },
             "use_gitbarclamp": { "type": "bool", "required": true },
-            "pfs_deps": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
+            "pfs_deps": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ]},
             "volume": {
               "type": "map",
               "required": true,
@@ -82,8 +82,6 @@
             "crowbar-revision": { "type": "int", "required": true },
             "crowbar-committing": { "type": "bool" },
             "crowbar-queued": { "type": "bool" },
-            "crowbar-status": { "type": "str" },
-            "crowbar-failed": { "type": "str" },
             "element_states": {
               "type": "map",
               "mapping": {
