@@ -26,7 +26,7 @@ create_user_and_dirs "cinder" do
   user_name node[:cinder][:user]
 end
 
-execute "cp_policy.json" do
+execute "cp_policy.json_#{@cookbook_name}" do
   command "cp #{cinder_path}/etc/cinder/policy.json /etc/cinder/"
   creates "/etc/cinder/policy.json"
 end
@@ -37,31 +37,31 @@ template "/etc/sudoers.d/cinder-rootwrap" do
   variables(:user => node[:cinder][:user])
 end
 
-bash "deploy_filters" do
+bash "deploy_filters_#{@cookbook_name}" do
   cwd cinder_path
   code <<-EOH
-  ### that was copied from devstack's stack.sh
-  if [[ -d $CINDER_DIR/etc/cinder/rootwrap.d ]]; then
-      # Wipe any existing rootwrap.d files first
-      if [[ -d $CINDER_CONF_DIR/rootwrap.d ]]; then
-          sudo rm -rf $CINDER_CONF_DIR/rootwrap.d
-      fi
-      # Deploy filters to /etc/cinder/rootwrap.d
-      sudo mkdir -m 755 $CINDER_CONF_DIR/rootwrap.d
-      sudo cp $CINDER_DIR/etc/cinder/rootwrap.d/*.filters $CINDER_CONF_DIR/rootwrap.d
-      sudo chown -R root:root $CINDER_CONF_DIR/rootwrap.d
-      sudo chmod 644 $CINDER_CONF_DIR/rootwrap.d/*
-      # Set up rootwrap.conf, pointing to /etc/cinder/rootwrap.d
-      sudo cp $CINDER_DIR/etc/cinder/rootwrap.conf $CINDER_CONF_DIR/
-      sudo sed -e "s:^filters_path=.*$:filters_path=$CINDER_CONF_DIR/rootwrap.d:" -i $CINDER_CONF_DIR/rootwrap.conf
-      sudo chown root:root $CINDER_CONF_DIR/rootwrap.conf
-      sudo chmod 0644 $CINDER_CONF_DIR/rootwrap.conf
-  fi
-  ### end
+    ### that was copied from devstack's stack.sh
+    if [[ -d $CINDER_DIR/etc/cinder/rootwrap.d ]]; then
+        # Wipe any existing rootwrap.d files first
+        if [[ -d $CINDER_CONF_DIR/rootwrap.d ]]; then
+            rm -rf $CINDER_CONF_DIR/rootwrap.d
+        fi
+        # Deploy filters to /etc/cinder/rootwrap.d
+        mkdir -m 755 $CINDER_CONF_DIR/rootwrap.d
+        cp $CINDER_DIR/etc/cinder/rootwrap.d/*.filters $CINDER_CONF_DIR/rootwrap.d
+        chown -R root:root $CINDER_CONF_DIR/rootwrap.d
+        chmod 644 $CINDER_CONF_DIR/rootwrap.d/*
+        # Set up rootwrap.conf, pointing to /etc/cinder/rootwrap.d
+        cp $CINDER_DIR/etc/cinder/rootwrap.conf $CINDER_CONF_DIR/
+        sed -e "s:^filters_path=.*$:filters_path=$CINDER_CONF_DIR/rootwrap.d:" -i $CINDER_CONF_DIR/rootwrap.conf
+        chown root:root $CINDER_CONF_DIR/rootwrap.conf
+        chmod 0644 $CINDER_CONF_DIR/rootwrap.conf
+    fi
+    ### end
   EOH
   environment({
     'CINDER_DIR' => cinder_path,
-    'CINDER_CONF_DIR' => '/etc/cinder',
+    'CINDER_CONF_DIR' => '/etc/cinder'
   })
   not_if {File.exists?("/etc/cinder/rootwrap.d")}
 end
@@ -121,7 +121,7 @@ template "/etc/cinder/cinder.conf" do
             :rabbit_password => nova[:nova][:rabbit][:password],
             :rabbit_virtual_host => nova[:nova][:rabbit][:vhost],
             :glance_server_ip => glance_server_ip,
-            :glance_server_port => glance_server_port,
+            :glance_server_port => glance_server_port
             )
 end
 

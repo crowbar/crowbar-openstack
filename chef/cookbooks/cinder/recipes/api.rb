@@ -30,6 +30,14 @@ else
   nova = node
 end
 
+keystones = search(:node, "recipes:keystone\\:\\:server#{nova[:nova][:keystone_instance]}") || []
+if keystones.length > 0
+  keystone = keystones[0]
+  keystone = node if keystone.name == node.name
+else
+  keystone = node
+end
+
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
 keystone_token = keystone[:keystone][:service][:token]
 keystone_service_port = keystone[:keystone][:api][:service_port]
@@ -39,14 +47,6 @@ keystone_service_user = node[:cinder][:service_user]
 keystone_service_password = node[:cinder][:service_password]
 cinder_port = node[:cinder][:api][:bind_port]
 Chef::Log.info("Keystone server found at #{keystone_address}")
-
-keystones = search(:node, "recipes:keystone\\:\\:server#{nova[:nova][:keystone_instance}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = node if keystone.name == node.name
-else
-  keystone = node
-end
 
 pfs_and_install_deps "keystone" do
   cookbook "keystone"

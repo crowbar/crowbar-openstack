@@ -1,10 +1,11 @@
 [DEFAULT]
 debug=<%= node[:cinder][:debug] %>
 verbose=<%= node[:cinder][:verbose] %>
+logdir=/var/log/cinder
+state_path=/var/lib/cinder
 use_syslog=true
 connection_type=libvirt
 sql_connection=<%= @sql_connection %>
-# state_path=$pybasedir
 my_ip=<%= node[:cinder][:my_ip] %>
 glance_api_servers=<%= @glance_server_ip %>:<%= @glance_server_port %>
 rootwrap_config=/etc/cinder/rootwrap.conf
