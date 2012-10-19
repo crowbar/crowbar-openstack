@@ -14,7 +14,9 @@
           "mapping": {
             "debug": { "type": "bool", "required": true },
             "verbose": { "type": "bool", "required": true },
-            "nova_instance": { "type": "str", "required": true },
+            "keystone_instance": { "type": "str", "required": true },
+            "mysql_instance": { "type": "str", "required": true },
+            "glance_instance": { "type": "str", "required": true },
             "user": { "type": "str", "required": true },
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str", "required": true },

@@ -23,18 +23,8 @@
 
 include_recipe "mysql::client"
 
-env_filter = " AND nova_config_environment:nova-config-#{node[:cinder][:nova_instance]}"
-
-novas = search(:node, "recipes:nova\\:\\:api#{env_filter}") || []
-if novas.length > 0
-  nova = novas[0]
-  nova = node if nova.name == node.name
-else
-  nova = node
-end
-
 # find mysql server configured by mysql-client
-env_filter = " AND mysql_config_environment:mysql-config-#{nova[:nova][:db][:mysql_instance]}"
+env_filter = " AND mysql_config_environment:mysql-config-#{node[:cinder][:db][:mysql_instance]}"
 db_server = search(:node, "roles:mysql-server#{env_filter}")
 # if we found ourself, then use us.
 if db_server[0]['fqdn'] == node['fqdn']

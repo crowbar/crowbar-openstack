@@ -20,17 +20,9 @@
 include_recipe "#{@cookbook_name}::common"
 include_recipe "#{@cookbook_name}::mysql"
 
-env_filter = " AND nova_config_environment:nova-config-#{node[:cinder][:nova_instance]}"
+env_filter = " AND keystone_config_environment:keystone-config-#{node[:cinder][:keystone_instance]}"
 
-novas = search(:node, "recipes:nova\\:\\:api#{env_filter}") || []
-if novas.length > 0
-  nova = novas[0]
-  nova = node if nova.name == node.name
-else
-  nova = node
-end
-
-keystones = search(:node, "recipes:keystone\\:\\:server#{nova[:nova][:keystone_instance]}") || []
+keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
 if keystones.length > 0
   keystone = keystones[0]
   keystone = node if keystone.name == node.name

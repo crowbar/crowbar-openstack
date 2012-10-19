@@ -66,17 +66,7 @@ bash "deploy_filters_#{@cookbook_name}" do
   not_if {File.exists?("/etc/cinder/rootwrap.d")}
 end
 
-env_filter = " AND nova_config_environment:nova-config-#{node[:cinder][:nova_instance]}"
-
-novas = search(:node, "recipes:nova\\:\\:api#{env_filter}") || []
-if novas.length > 0
-  nova = novas[0]
-  nova = node if nova.name == node.name
-else
-  nova = node
-end
-
-glance_env_filter = " AND glance_config_environment:glance-config-#{nova[:nova][:glance_instance]}"
+glance_env_filter = " AND glance_config_environment:glance-config-#{node[:cinder][:glance_instance]}"
 glance_servers = search(:node, "roles:glance-server#{glance_env_filter}") || []
 
 if glance_servers.length > 0
@@ -90,7 +80,7 @@ else
 end
 Chef::Log.info("Glance server at #{glance_server_ip}")
 
-mysql_env_filter = " AND mysql_config_environment:mysql-config-#{nova[:nova][:db][:mysql_instance]}"
+mysql_env_filter = " AND mysql_config_environment:mysql-config-#{node[:cinder][:db][:mysql_instance]}"
 mysqls = search(:node, "roles:mysql-server#{mysql_env_filter}")
 if mysqls.length > 0
   mysql = mysqls[0]
@@ -107,7 +97,31 @@ sql_connection = "mysql://#{node[:cinder][:db][:user]}:#{node[:cinder][:db][:pas
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 node[:glance][:api][:bind_host] = my_ipaddress
 
-node[:nova][:my_ip] = my_ipaddress
+node[:cinder][:my_ip] = my_ipaddress
+
+rabbits = search(:node, "recipes:nova\\:\\:rabbit") || []
+if rabbits.length > 0
+  rabbit = rabbits[0]
+  rabbit = node if rabbit.name == node.name
+else
+  rabbit = node
+end
+rabbit_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(rabbit, "admin").address
+Chef::Log.info("Rabbit server found at #{rabbit_address}")
+if rabbit[:nova]
+  #agordeev:
+  # rabbit settings will work only after nova proposal be deployed
+  # and cinder services will be restarted then
+  rabbit_settings = {
+    :address => rabbit_address,
+    :port => rabbit[:nova][:rabbit][:port],
+    :user => rabbit[:nova][:rabbit][:user],
+    :password => rabbit[:nova][:rabbit][:password],
+    :vhost => rabbit[:nova][:rabbit][:vhost]
+  }
+else
+  rabbit_settings = nil
+end
 
 template "/etc/cinder/cinder.conf" do
   source "cinder.conf.erb"
@@ -116,10 +130,7 @@ template "/etc/cinder/cinder.conf" do
   mode 0640
   variables(
             :sql_connection => sql_connection,
-            :rabbit_host => nova[:rabbitmq][:address],
-            :rabbit_userid => nova[:nova][:rabbit][:user],
-            :rabbit_password => nova[:nova][:rabbit][:password],
-            :rabbit_virtual_host => nova[:nova][:rabbit][:vhost],
+            :rabbit_settings => rabbit_settings,
             :glance_server_ip => glance_server_ip,
             :glance_server_port => glance_server_port
             )

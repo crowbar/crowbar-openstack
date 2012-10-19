@@ -27,8 +27,8 @@ barclamp:
 
 crowbar:
   layout: 1
-  order: 100 
-  run_order: 100
+  order: 92 
+  run_order: 92
   chef_order: 100
 
 debs:

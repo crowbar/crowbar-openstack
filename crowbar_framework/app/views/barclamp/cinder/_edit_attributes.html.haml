@@ -6,8 +6,14 @@
   %div.container
     = render 'barclamp/git/pfsdeps.html.haml'
     %p
-      %label{ :for => :nova_instance }= t('.nova_instance')
-      = instance_selector("nova", :nova_instance, "nova_instance", @proposal)
+      %label{ :for => :mysql_instance }= t('.mysql_instance')
+      = instance_selector("mysql", :mysql_instance, "mysql_instance", @proposal)
+    %p
+      %label{ :for => :keystone_instance }= t('.keystone_instance')
+      = instance_selector("keystone", :keystone_instance, "keystone_instance", @proposal)
+    %p
+      %label{ :for => :glance_instance }= t('.glance_instance')
+      = instance_selector("glance", :glance_instance, "glance_instance", @proposal)
     %p
       %label{ :for => :service_user }= t('.service_user')
       %input#service_user{:type => "text", :name => "service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["service_user"], :onchange => "update_value('service_user','service_user', 'string')"}

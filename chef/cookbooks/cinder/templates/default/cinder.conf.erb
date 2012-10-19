@@ -15,10 +15,15 @@ osapi_volume_listen_port=<%= node[:cinder][:api][:bind_port] %>
 api_paste_config=/etc/cinder/api-paste.ini
 # volume_name_template=volume-%s
 # snapshot_name_template=snapshot-%s
-rabbit_host=<%= @rabbit_host %>
-rabbit_userid=<%= @rabbit_userid %>
-rabbit_password=<%= @rabbit_password%>
-rabbit_virtual_host=<%= @rabbit_virtual_host %>
+<% if @rabbit_settings -%>
+rabbit_host=<%= @rabbit_settings[:address] %>
+<% unless @rabbit_settings[:port].nil? -%>
+rabbit_port=<%= @rabbit_settings[:port] %>
+<% end -%>
+rabbit_userid=<%= @rabbit_settings[:user] %>
+rabbit_password=<%= @rabbit_settings[:password] %>
+rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
+<% end -%>
 # volume_group=cinder-volumes
 #### (StrOpt) Name for the VG that will contain exported volumes
 # iscsi_ip_address=$my_ip
