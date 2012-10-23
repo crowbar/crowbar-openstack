@@ -112,10 +112,10 @@ cookbook_file "/etc/tgt/conf.d/cinder-volume.conf" do
   source "cinder-volume.conf"
 end
 
-cinder_package("volume")
+cinder_service("volume")
 
 # Restart doesn't work correct for this service.
-bash "restart-tgt" do
+bash "restart-tgt_#{@cookbook_name}" do
   code <<-EOH
     stop tgt
     start tgt
@@ -126,5 +126,5 @@ end
 service "tgt" do
   supports :status => true, :restart => true, :reload => true
   action :enable
-  notifies :run, "bash[restart-tgt]"
+  notifies :run, "bash[restart-tgt_#{@cookbook_name}]"
 end

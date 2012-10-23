@@ -21,7 +21,9 @@ barclamp:
   requires:
     - @crowbar
     - git
-    - nova
+    - mysql
+    - keystone
+    - glance
   member:
     - openstack 
 
@@ -46,11 +48,37 @@ locale_additions:
     nav:
       cinder: Cinder
     barclamp:
-      cinder_edit_attributes: 
+      edit_attributes: 
         attributes: Attributes
-        foo: Comic Choice
+        mysql_instance: MySQL
+        keystone_instance: Keystone
+        glance_instance: Glance
+        service_user: Service user (for Keystone)
+        service_password: Service password
+        volume_header: Volume options
+        volume_type: Type of Volume
+        volume_name: Name of Volume
+        volume_file_parameters: File-based Parameters
+        volume_file_name: Volume File Name
+        volume_file_size: Maximum File Size (GB)
+        volume_file_size_error: Maximum File Size must be at least 2GB
+        volume_file_location: Volume File Location
+        volume_disk_parameters: Disk-based Parameters
+        volume_raw_mode: Disk selection method
+        cinder_volume_disks: Disks for cinder-volume storage volume group
+        eqlx_parameters: EQLX Parameters
+        eqlx_san_ip: EQLX SAN IP
+        eqlx_san_login: EQLX SAN login
+        eqlx_san_password: EQLX SAN password
+        eqlx_group_name: EQLX group name (prompt)
+        eqlx_san_thin_provision: Use thin provision for volumes
+        eqlx_use_chap: Use chap auth for targets
+        eqlx_chap_login: EQLX chap login for targets
+        eqlx_chap_password: EQLX chap password for targets
+        eqlx_ssh_keepalive_interval: EQLX SSH keepalive internal
+        eqlx_cli_timeout: EQLX CLI command execution timeout
       cinder_edit_deployment: 
         deployment: Deployment
 
-git:
+git_repo:
   - cinder http://github.com/openstack/cinder.git stable/folsom

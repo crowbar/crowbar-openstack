@@ -67,11 +67,11 @@
         "pip://python-keystoneclient"
       ],
       "volume": {
-        "volume_name": "nova-volumes",
+        "volume_name": "cinder-volumes",
         "volume_type": "raw",
-        "nova_raw_method": "all",
-        "nova_volume_disks": [],
-        "local_file": "/var/lib/nova/volume.raw",
+        "cinder_raw_method": "all",
+        "cinder_volume_disks": [],
+        "local_file": "/var/lib/cinder/volume.raw",
         "local_size": 2000,
         "eqlx": {
           "san_ip": "192.168.124.11",

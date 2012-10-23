@@ -24,7 +24,7 @@ rabbit_userid=<%= @rabbit_settings[:user] %>
 rabbit_password=<%= @rabbit_settings[:password] %>
 rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 <% end -%>
-# volume_group=cinder-volumes
+volume_group=<%= node[:cinder][:volume][:volume_name] %>
 #### (StrOpt) Name for the VG that will contain exported volumes
 # iscsi_ip_address=$my_ip
 #### (StrOpt) use this ip for iscsi

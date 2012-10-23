@@ -73,15 +73,15 @@
       %div{ :id => 'volume_disk_parameters', :class => 'container' }
         %label{ :for => :raw_header }= t('.volume_disk_parameters')
         %div.container
-          %label{ :for => :nova_raw_method }= t('.volume_raw_mode')
-          = select_tag :nova_raw_method, options_for_select([['first','first'], ['all', 'all'], ['selected', 'selected']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["nova_raw_method"].to_s), :onchange => "update_value('volume/nova_raw_method', 'nova_raw_method', 'string')"
-        %div{ :id => 'nova_volume_disks', :class => 'container' }
-          %label{ :for => :volume_disks }= t('.nova_volume_disks')
+          %label{ :for => :cinder_raw_method }= t('.volume_raw_mode')
+          = select_tag :cinder_raw_method, options_for_select([['first','first'], ['all', 'all'], ['selected', 'selected']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["cinder_raw_method"].to_s), :onchange => "update_value('volume/cinder_raw_method', 'cinder_raw_method', 'string')"
+        %div{ :id => 'cinder_volume_disks', :class => 'container' }
+          %label{ :for => :volume_disks }= t('.cinder_volume_disks')
           %ul{ :id => 'nova_volume_disks_list'}
 
 :javascript
 
-  var volume_role = 'nova-multi-volume';
+  var volume_role = 'cinder-server';
   var volume_path = 'div.column_50 div ul#' + volume_role + '.ddlist';
   var volume_disk_list_path = 'ul#nova_volume_disks_list';
 
@@ -100,7 +100,7 @@
     }
     var proposal_input = $("input#proposal_attributes"); 
     var proposal_data = JSON.parse(proposal_input.val());
-    proposal_data['volume']['nova_volume_disks'] = disks;
+    proposal_data['volume']['cinder_volume_disks'] = disks;
     proposal_input.val(JSON.stringify(proposal_data));
   }
 
@@ -149,7 +149,7 @@
 
   function load_proposal_disk_attrs() {
     var proposal_data = JSON.parse($("input#proposal_attributes").val()); 
-    var disks = proposal_data['volume']['nova_volume_disks'];
+    var disks = proposal_data['volume']['cinder_volume_disks'];
     
     on_role_change(check_disks_loaded_from_proposal, disks);      
  
