@@ -123,12 +123,20 @@ else
   rabbit_settings = nil
 end
 
+if node[:cinder][:volume][:volume_type] == "eqlx"
+  Chef::Log.info("Pushing EQLX params to cinder.conf template")
+  eqlx_params = node[:nova][:volume][:eqlx]
+else
+  eqlx_params = nil
+end
+
 template "/etc/cinder/cinder.conf" do
   source "cinder.conf.erb"
   owner node[:cinder][:user]
   group "root"
   mode 0640
   variables(
+            :eqlx_params => eqlx_params,
             :sql_connection => sql_connection,
             :rabbit_settings => rabbit_settings,
             :glance_server_ip => glance_server_ip,
