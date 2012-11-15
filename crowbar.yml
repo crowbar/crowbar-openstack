@@ -34,6 +34,10 @@ crowbar:
   chef_order: 100
 
 debs:
+  ubuntu-12.04:
+    repos:
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
   pkgs:
     - tgt
     - lvm2
@@ -42,6 +46,11 @@ debs:
     - iscsitarget
     - open-iscsi
     - iscsitarget-dkms
+    - cinder-api
+    - cinder-scheduler
+    - cinder-volume
+    - python-cinder
+    - python-keystone
 
 locale_additions:
   en:

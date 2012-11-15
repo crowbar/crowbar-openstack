@@ -102,7 +102,12 @@ end
 if node[:cinder][:volume][:volume_type] == "eqlx"
   package("python-paramiko")
   #TODO(agordeev): use path_spec not hardcode
-  cookbook_file "/opt/cinder/cinder/volume/eqlx.py" do
+  if node[:cinder][:use_gitrepo]
+    eqlx_path = "/opt/cinder/cinder/volume/eqlx.py"
+  else
+    eqlx_path = "/usr/lib/python2.7/dist-packages/cinder/volume/eqlx.py"
+  end
+  cookbook_file eqlx_path do
     mode "0755"
     source "eqlx.py"
   end

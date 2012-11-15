@@ -40,9 +40,13 @@ keystone_service_password = node[:cinder][:service_password]
 cinder_port = node[:cinder][:api][:bind_port]
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
-pfs_and_install_deps "keystone" do
-  cookbook "keystone"
-  cnode keystone
+if node[:cinder][:use_gitrepo]
+  pfs_and_install_deps "keystone" do
+    cookbook "keystone"
+    cnode keystone
+  end
+else
+  package "python-keystone"
 end
 
 public_api_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address

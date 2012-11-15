@@ -16,30 +16,31 @@
 # Recipe:: common
 #
 
-cinder_path = "/opt/cinder"
+if node[:cinder][:use_gitrepo] 
+  cinder_path = "/opt/cinder"
+ 
+  pfs_and_install_deps "cinder" do
+    path cinder_path
+  end
 
-pfs_and_install_deps "cinder" do
-  path cinder_path
-end
+  create_user_and_dirs "cinder" do
+    user_name node[:cinder][:user]
+  end
 
-create_user_and_dirs "cinder" do
-  user_name node[:cinder][:user]
-end
+  execute "cp_policy.json_#{@cookbook_name}" do
+    command "cp #{cinder_path}/etc/cinder/policy.json /etc/cinder/"
+    creates "/etc/cinder/policy.json"
+  end
 
-execute "cp_policy.json_#{@cookbook_name}" do
-  command "cp #{cinder_path}/etc/cinder/policy.json /etc/cinder/"
-  creates "/etc/cinder/policy.json"
-end
+  template "/etc/sudoers.d/cinder-rootwrap" do
+    source "cinder-rootwrap.erb"
+    mode 0440
+    variables(:user => node[:cinder][:user])
+  end
 
-template "/etc/sudoers.d/cinder-rootwrap" do
-  source "cinder-rootwrap.erb"
-  mode 0440
-  variables(:user => node[:cinder][:user])
-end
-
-bash "deploy_filters_#{@cookbook_name}" do
-  cwd cinder_path
-  code <<-EOH
+  bash "deploy_filters_#{@cookbook_name}" do
+    cwd cinder_path
+    code <<-EOH
     ### that was copied from devstack's stack.sh
     if [[ -d $CINDER_DIR/etc/cinder/rootwrap.d ]]; then
         # Wipe any existing rootwrap.d files first
@@ -58,12 +59,16 @@ bash "deploy_filters_#{@cookbook_name}" do
         chmod 0644 $CINDER_CONF_DIR/rootwrap.conf
     fi
     ### end
-  EOH
-  environment({
-    'CINDER_DIR' => cinder_path,
-    'CINDER_CONF_DIR' => '/etc/cinder'
-  })
-  not_if {File.exists?("/etc/cinder/rootwrap.d")}
+    EOH
+    environment({
+      'CINDER_DIR' => cinder_path,
+      'CINDER_CONF_DIR' => '/etc/cinder'
+    })
+    not_if {File.exists?("/etc/cinder/rootwrap.d")}
+  end
+else
+  package "cinder-common"
+  package "python-cinder"
 end
 
 glance_env_filter = " AND glance_config_environment:glance-config-#{node[:cinder][:glance_instance]}"

@@ -2,8 +2,12 @@ define :cinder_service do
 
   cinder_name="cinder-#{params[:name]}"
 
-  link_service cinder_name do
-    user node[:cinder][:user]
+  if node[:cinder][:use_gitrepo]
+    link_service cinder_name do
+      user node[:cinder][:user]
+    end
+  else
+    package cinder_name
   end
 
   service cinder_name do
