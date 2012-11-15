@@ -114,8 +114,10 @@ if node[:cinder][:volume][:volume_type] == "eqlx"
 end
 
 package "tgt"
-cookbook_file "/etc/tgt/conf.d/cinder-volume.conf" do
-  source "cinder-volume.conf"
+if node[:cinder][:use_gitrepo]
+  cookbook_file "/etc/tgt/conf.d/cinder-volume.conf" do
+    source "cinder-volume.conf"
+  end
 end
 
 cinder_service("volume")
