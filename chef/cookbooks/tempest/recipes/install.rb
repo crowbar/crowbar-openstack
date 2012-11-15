@@ -21,6 +21,8 @@
 package "python-httplib2"
 package "python-nose"
 package "python-unittest2"
+package "python-glanceclient"
+package "python-novaclient"
 
 # Download and unpack tempest tarball
 
@@ -45,9 +47,4 @@ mv tempest $(dirname #{inst_dir})
 EOH
   # TODO: use proposal attribute
   not_if { ::File.exists?("#{inst_dir}") }
-end
-
-cookbook_file "#{inst_dir}/tempest/tests/test_flavors.py" do
-  mode "0664"
-  source "test_flavors.py"
 end

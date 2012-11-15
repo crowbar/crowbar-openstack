@@ -14,6 +14,8 @@
           "mapping": {
             "tempest_tarball": { "type": "str", "required": true },
             "nova_instance": { "type": "str", "required": true },
+            "tempest_adm_username": { "type": "str", "required": true },
+            "tempest_adm_password": { "type": "str", "required": true },
             "tempest_user_password": { "type": "str", "required": true },
             "tempest_user_username": { "type": "str", "required": true },
             "tempest_user_tenant": { "type": "str", "required": true },
