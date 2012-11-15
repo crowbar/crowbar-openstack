@@ -21,6 +21,8 @@
 package "python-httplib2"
 package "python-nose"
 package "python-unittest2"
+package "glance-client"
+package "python-novaclient"
 
 # Download and unpack tempest tarball
 
