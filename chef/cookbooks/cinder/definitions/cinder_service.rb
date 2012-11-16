@@ -7,6 +7,9 @@ define :cinder_service do
       user node[:cinder][:user]
     end
   else
+    #TODO(agordeev):
+    # be carefull, dpkg will not overwrite upstart configs
+    # even if it be asked about that by 'confnew' option
     package cinder_name
   end
 

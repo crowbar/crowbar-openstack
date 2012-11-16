@@ -115,6 +115,10 @@ end
 
 package "tgt"
 if node[:cinder][:use_gitrepo]
+  #TODO(agordeev):
+  # tgt will not work with iSCSI targets if it has the same configs in conf.d
+  # e.g. cinder_tgt.conf (which comes from packages) and cinder-volume.conf
+  # with the same data such as 'include /var/lib/cinder/volumes/*'
   cookbook_file "/etc/tgt/conf.d/cinder-volume.conf" do
     source "cinder-volume.conf"
   end
