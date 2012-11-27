@@ -101,6 +101,7 @@ debs:
     - python-nose
     - python-httplib2
     - glance-client
+    - python-novaclient
 
 extra_files:
   - http://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-uec.tar.gz tempest
