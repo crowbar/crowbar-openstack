@@ -19,10 +19,20 @@ class CinderService < ServiceObject
     @bc_name = "cinder"
     @logger = thelogger
   end
-  
+
   #if barclamp allows multiple proposals OVERRIDE
   # def self.allow_multiple_proposals?
-  
+
+  def proposal_dependencies(role)
+    answer = []
+    deps = ["mysql", "keystone", "glance"]
+    deps << "git" if role.default_attributes[@bc_name]["use_gitrepo"]
+    deps.each do |dep|
+      answer << { "barclamp" => dep, "inst" => role.default_attributes[@bc_name]["#{dep}_instance"] }
+    end
+    answer
+  end
+
   def create_proposal
     @logger.debug("Cinder create_proposal: entering")
     base = super
@@ -35,7 +45,8 @@ class CinderService < ServiceObject
       }
     end
 
-    insts = ["Git", "Mysql", "Keystone", "Glance"]
+    insts = ["Mysql", "Keystone", "Glance"]
+    insts << "Git" if base["attributes"][@bc_name]["use_gitrepo"]
 
     insts.each do |inst|
       base["attributes"][@bc_name]["#{inst.downcase}_instance"] = ""
