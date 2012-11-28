@@ -1,10 +1,33 @@
 [DEFAULT]
-# Show more verbose log output (sets INFO log level output)
-verbose = <%= node[:cinder][:verbose] %>
-
-# Show debugging output in logs (sets DEBUG log level output)
-debug = <%= node[:cinder][:debug] %>
-
-[app:cinder-api]
-paste.app_factory = cinder.server:app_factory
-
+debug=<%= node[:cinder][:debug] %>
+verbose=<%= node[:cinder][:verbose] %>
+logdir=/var/log/cinder
+state_path=/var/lib/cinder
+use_syslog=true
+connection_type=libvirt
+sql_connection=<%= @sql_connection %>
+my_ip=<%= node[:cinder][:my_ip] %>
+glance_api_servers=<%= @glance_server_ip %>:<%= @glance_server_port %>
+rootwrap_config=/etc/cinder/rootwrap.conf
+auth_strategy=keystone
+osapi_volume_listen=<%= node[:glance][:api][:bind_open_address] ? "0.0.0.0" : node[:cinder][:api][:bind_host] %>
+osapi_volume_listen_port=<%= node[:cinder][:api][:bind_port] %>
+api_paste_config=/etc/cinder/api-paste.ini
+# volume_name_template=volume-%s
+# snapshot_name_template=snapshot-%s
+<% if @rabbit_settings -%>
+rabbit_host=<%= @rabbit_settings[:address] %>
+<% unless @rabbit_settings[:port].nil? -%>
+rabbit_port=<%= @rabbit_settings[:port] %>
+<% end -%>
+rabbit_userid=<%= @rabbit_settings[:user] %>
+rabbit_password=<%= @rabbit_settings[:password] %>
+rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
+<% end -%>
+volume_group=<%= node[:cinder][:volume][:volume_name] %>
+<% unless @eqlx_params.nil? -%>
+volume_driver=cinder.volume.eqlx.DellEQLSanISCSIDriver
+<%   @eqlx_params.each do |k, v| -%>
+<%=    k + '=' + v.to_s %> 
+<%   end -%>
+<% end -%>
