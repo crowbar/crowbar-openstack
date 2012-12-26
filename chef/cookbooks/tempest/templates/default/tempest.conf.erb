@@ -27,6 +27,18 @@ strategy = keystone
 # This section contains configuration options used when executing tests
 # against the OpenStack Compute API.
 
+# Allows test cases to create/destroy tenants and users. This option
+# enables isolated test cases and better parallel execution,
+# but also requires that OpenStack Identity API admin credentials
+# are known.
+allow_tenant_isolation = false
+
+# Allows test cases to create/destroy tenants and users. This option
+# enables isolated test cases and better parallel execution,
+# but also requires that OpenStack Identity API admin credentials
+# are known.
+allow_tenant_reuse = false
+
 # This should be the username of a user WITHOUT administrative privileges
 username = <%= @comp_user %>
 # The above non-administrative user's password
@@ -58,6 +70,8 @@ build_interval = 10
 # to build or reach an expected status
 build_timeout = 600
 
+run_ssh = false
+
 # The type of endpoint for a Compute API service. Unless you have a
 # custom Keystone service catalog implementation, you probably want to leave
 # this value as "compute"
@@ -73,6 +87,36 @@ resize_available = false
 
 # Level to log Compute API request/response details.
 log_level = ERROR
+
+# Should we run whitebox tests for Compute?
+whitebox_enabled = false
+
+# Path of nova source directory
+source_dir = /opt/stack/nova
+
+# Path of nova configuration file
+config_path = /etc/nova/nova.conf
+
+# Directory containing nova binaries such as nova-manage
+bin_dir = /usr/local/bin
+
+# Path to a private key file for SSH access to remote hosts
+path_to_private_key = /home/user/.ssh/id_rsa
+
+# Connection string to the database of Compute service
+db_uri = mysql://user:pass@localhost/nova
+
+# Run live migration tests (requires 2 hosts)
+live_migration_available = false
+
+# Use block live migration (Otherwise, non-block migration will be
+# performed, which requires XenServer pools in case of using XS)
+use_block_migration_for_live_migration = false
+
+# By default, rely on the status of the diskConfig extension to
+# decide if to execute disk config tests. When set to false, tests
+# are forced to skip, regardless of the extension status
+disk_config_enabled_override = false
 
 [image]
 # This section contains configuration options used when executing tests
@@ -110,3 +154,40 @@ username = <%= @comp_admin_user %>
 password = <%= @comp_admin_pass %>
 # The above administrative user's tenant name
 tenant_name = <%= @comp_admin_tenant %>
+
+[network]
+# This section contains configuration options used when executing tests
+# against the OpenStack Network API.
+
+# Version of the Quantum API
+api_version = v1.1
+# Catalog type of the Quantum Service
+catalog_type = network
+
+[identity-admin]
+# This section contains configuration options for an administrative
+# user of the Compute API. These options are used in tests that stress
+# the admin-only parts of the Compute API
+
+# This should be the username of a user WITH administrative privileges
+username = <%= @comp_admin_user %>
+# The above administrative user's password
+password = <%= @comp_admin_pass %>
+# The above administrative user's tenant name
+tenant_name = <%= @comp_admin_tenant %>
+
+[volume]
+# This section contains the configuration options used when executing tests
+# against the OpenStack Block Storage API service
+
+# The type of endpoint for a Cinder or Block Storage API service.
+# Unless you have a custom Keystone service catalog implementation, you
+# probably want to leave this value as "volume"
+catalog_type = volume
+# Number of seconds to wait while looping to check the status of a
+# volume that is being made available
+build_interval = 10
+# Number of seconds to time out on waiting for a volume
+# to be available or reach an expected status
+build_timeout = 300
+
