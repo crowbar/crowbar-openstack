@@ -10,7 +10,7 @@ my_ip=<%= node[:cinder][:my_ip] %>
 glance_api_servers=<%= @glance_server_ip %>:<%= @glance_server_port %>
 rootwrap_config=/etc/cinder/rootwrap.conf
 auth_strategy=keystone
-osapi_volume_listen=<%= node[:glance][:api][:bind_open_address] ? "0.0.0.0" : node[:cinder][:api][:bind_host] %>
+osapi_volume_listen=<%= node[:cinder][:api][:bind_open_address] ? "0.0.0.0" : node[:cinder][:api][:bind_host] %>
 osapi_volume_listen_port=<%= node[:cinder][:api][:bind_port] %>
 api_paste_config=/etc/cinder/api-paste.ini
 # volume_name_template=volume-%s

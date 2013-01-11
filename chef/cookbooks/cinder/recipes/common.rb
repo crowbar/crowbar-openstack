@@ -85,7 +85,7 @@ else
 end
 Chef::Log.info("Glance server at #{glance_server_ip}")
 
-mysql_env_filter = " AND mysql_config_environment:mysql-config-#{node[:cinder][:db][:mysql_instance]}"
+mysql_env_filter = " AND mysql_config_environment:mysql-config-#{node[:cinder][:mysql_instance]}"
 mysqls = search(:node, "roles:mysql-server#{mysql_env_filter}")
 if mysqls.length > 0
   mysql = mysqls[0]
@@ -100,7 +100,7 @@ Chef::Log.info("Mysql server found at #{mysql_address}")
 sql_connection = "mysql://#{node[:cinder][:db][:user]}:#{node[:cinder][:db][:password]}@#{mysql_address}/#{node[:cinder][:db][:database]}"
 
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-node[:glance][:api][:bind_host] = my_ipaddress
+node[:cinder][:api][:bind_host] = my_ipaddress
 
 node[:cinder][:my_ip] = my_ipaddress
 
