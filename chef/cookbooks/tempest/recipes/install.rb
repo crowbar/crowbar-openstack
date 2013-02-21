@@ -22,8 +22,14 @@ package "python-httplib2"
 package "python-nose"
 package "python-unittest2"
 
-
-pip_cmd="pip install"
+begin
+  provisioner = search(:node, "roles:provisioner-server").first
+  proxy_addr = provisioner[:fqdn]
+  proxy_port = provisioner[:provisioner][:web_port]
+  pip_cmd = "pip install --index-url http://#{proxy_addr}:#{proxy_port}/files/pip_cache/simple/"
+rescue
+  pip_cmd="pip install"
+end
 
 #check if nova and glance use gitrepo or package
 env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
