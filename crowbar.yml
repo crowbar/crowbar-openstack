@@ -94,4 +94,4 @@ locale_additions:
         deployment: Deployment
 
 git_repo:
-  - cinder http://github.com/openstack/cinder.git stable/folsom
+  - cinder http://github.com/openstack/cinder.git grizzly-1
