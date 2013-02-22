@@ -95,13 +95,16 @@ locale_additions:
           deployment: Deployment
 
 debs:
-#Assuming that packages for ubuntu 12.04 only used
+  ubuntu-12.04:
+    repos:
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
   pkgs:
     - python-unittest2
     - python-nose
     - python-httplib2
-    - glance-client
+    - python-glanceclient
+    - python-novaclient
 
 extra_files:
   - http://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-uec.tar.gz tempest
-  - https://github.com/openstack/tempest/tarball/stable/essex.tar.gz tempest
+  - https://github.com/openstack/tempest/tarball/stable/folsom.tar.gz tempest

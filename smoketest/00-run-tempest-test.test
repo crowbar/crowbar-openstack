@@ -34,8 +34,8 @@ fi
 echo "Tempest at $tempest_ip..."
 
 echo "Starting tempest smoke tests..."
-root_do "$tempest_ip" "nosetests -w /opt/tempest/ -v -x tempest"
+#root_do "$tempest_ip" "nosetests -w /opt/tempest/ -v -x tempest"
 # use -x option to stop after first failed testcase
 #root_do "$tempest_ip" 'nosetests -w /opt/tempest/ -v -x tempest -a type=smoke'
 # to run all tests
-#root_do "$tempest_ip" 'nosetests -w /opt/tempest/ -v -x tempest'
+root_do "$tempest_ip" 'nosetests -w /opt/tempest/ -v tempest'
