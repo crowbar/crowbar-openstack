@@ -56,3 +56,6 @@ debs:
     - python-quantum
     - python-quantumclient
     - quantum-plugin-openvswitch
+
+git_repo:
+  - quantum http://github.com/openstack/quantum.git grizzly-1
