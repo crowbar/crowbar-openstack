@@ -37,6 +37,8 @@ locale_additions:
         edit_deployment: 
           deployment: Deployment
         edit_attributes: 
+          service_user: Keystone Service User
+          service_password: Keystone Service Password
           attributes: Attributes
           sql_engine: SQL Engine
           mysql_instance: MySQL Instance
@@ -59,3 +61,7 @@ debs:
 
 git_repo:
   - quantum http://github.com/openstack/quantum.git grizzly-1
+
+git:
+  date: Fri Feb 22 11:56:17 2013 +0000
+  commit: 01ec7ba26f76364f8f44215f0575cc41779ef7f7

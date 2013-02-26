@@ -25,18 +25,32 @@ use_syslog = <%= @use_syslog ? "True" : "False" %>
 # syslog_log_facility = LOG_LOCAL0
 
 
+<% if @rabbit_settings -%>
+rabbit_host=<%= @rabbit_settings[:address] %>
+<% unless @rabbit_settings[:port].nil? -%>
+rabbit_port=<%= @rabbit_settings[:port] %>
+<% end -%>
+rabbit_userid=<%= @rabbit_settings[:user] %>
+rabbit_password=<%= @rabbit_settings[:password] %>
+rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
+<% end -%>
+
+#core_plugin = quantum.plugins.linuxbridge.lb_quantum_plugin.LinuxBridgePluginV2
+core_plugin = quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2
+
+
 ################# sql section will be used for OVS plugin config
-#[sql]
+[sql]
 ## SQLAlchemy connection string for the reference implementation registry
 ## server. Any valid SQLAlchemy connection string is fine.
 ## See: http://bit.ly/ideIpI
-#connection = <%= @sql_connection %>
+connection = <%= @sql_connection %>
 ## Period in seconds after which SQLAlchemy should reestablish its connection
 ## to the database.
-##idle_timeout = <%= @sql_idle_timeout %>
-#min_pool_size = <%= @sql_min_pool_size %>
-#max_pool_size = <%= @sql_max_pool_size %>
-#pool_timeout = <%= @sql_pool_timeout %>
+idle_timeout = <%= @sql_idle_timeout %>
+min_pool_size = <%= @sql_min_pool_size %>
+max_pool_size = <%= @sql_max_pool_size %>
+pool_timeout = <%= @sql_pool_timeout %>
 ###############
 
 # Path to the extensions.  Note that this can be a colon-separated list of

@@ -4,6 +4,27 @@
   "description": "Centralized authentication and authorization service for OpenStack",
   "attributes": {
     "quantum": {
+      "service_user": "quantum",
+      "gitrepo": "http://github.com/openstack/quantum.git",
+      "git_instance": "",
+      "git_refspec": "grizzly-1",
+      "use_gitbarclamp": true,
+      "use_pip_cache": true,
+      "use_gitrepo": true,
+      "pfs_deps": [
+        "python-eventlet",
+        "python-greenlet",
+        "python-pastedeploy",
+        "python-paste",
+        "python-routes",
+        "python-sqlalchemy",
+        "python-migrate",
+        "python-passlib",
+        "python-lxml",
+        "python-pam",
+        "python-iso8601",
+        "python-webob"
+      ],
       "debug": true,
       "verbose": true,
       "use_syslog": false,
@@ -20,7 +41,7 @@
         "pool_timeout": 200
       },
       "api": {
-        "service_port": 5000,
+        "service_port": 9696,
         "service_host": "0.0.0.0"
       },
       "admin": {

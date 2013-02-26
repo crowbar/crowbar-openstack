@@ -3,6 +3,13 @@
   %label{:for => "proposal_attributes"}= t('.attributes')
   = link_to "Raw", proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :style => "float: right;"
   %div.container
+    = render 'barclamp/git/pfsdeps.html.haml'
+    %p
+      %label{ :for => :service_user }= t('.service_user')
+      %input#service_user{:type => "text", :name => "service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["service_user"], :onchange => "update_value('service_user','service_user', 'string')"}
+    %p
+      %label{ :for => :service_password }= t('.service_password')
+      %input#service_password{:type => "text", :name => "service_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["service_password"], :onchange => "update_value('service_password','service_password', 'string')"}
     %p
       %label{ :for => :sql_engine }= t('.sql_engine')
       = select_tag :sql_engine, options_for_select([['MySQL', 'mysql'], ['SQLite','sqlite']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "update_value('sql_engine', 'sql_engine', 'string')"
