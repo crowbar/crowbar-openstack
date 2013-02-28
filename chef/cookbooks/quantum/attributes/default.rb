@@ -20,6 +20,9 @@ default[:quantum][:verbose] = true
 default[:quantum][:db][:database] = "quantum"
 default[:quantum][:db][:user] = "quantum"
 default[:quantum][:db][:password] = "" # Set by Recipe
+default[:quantum][:db][:ovs_database] = "ovs"
+default[:quantum][:db][:ovs_user] = "ovs"
+default[:quantum][:db][:ovs_password] = "" # Set by Recipe
 
 default[:quantum][:api][:service_port] = "9696"
 default[:quantum][:api][:service_host] = "0.0.0.0"

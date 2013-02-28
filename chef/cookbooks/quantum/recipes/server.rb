@@ -21,9 +21,14 @@ else
   puts "git_refspec = #{node[:quantum][:git_refspec]}"
   pfs_and_install_deps(@cookbook_name)
   link_service @cookbook_name do
-    bin_name "quantum-server"
+    bin_name "quantum-server --config-dir /etc/quantum/"
   end
   create_user_and_dirs(@cookbook_name)
+  execute "quantum_cp_policy.json" do
+    command "cp /opt/quantum/etc/policy.json /etc/quantum/"
+    creates "/etc/quantum/policy.json"
+  end
+
 #  pfs_and_install_deps "quantum" do
 #    cookbook "quantum"
 #    cnode quantum
@@ -40,6 +45,7 @@ end
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
 node.set_unless['quantum']['db']['password'] = secure_password
+node.set_unless['quantum']['db']['ovs_password'] = secure_password
 
 if node[:quantum][:sql_engine] == "mysql"
     Chef::Log.info("Configuring Quantum to use MySQL backend")
@@ -79,7 +85,32 @@ if node[:quantum][:sql_engine] == "mysql"
         action :query
         sql "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER on #{node[:quantum][:db][:database]}.* to '#{node[:quantum][:db][:user]}'@'%' IDENTIFIED BY '#{node[:quantum][:db][:password]}';"
     end
+
+    # Create the Quantum Database
+    mysql_database "create #{node[:quantum][:db][:database]} database" do
+        host    mysql_address
+        username "db_maker"
+        password mysql[:mysql][:db_maker_password]
+        database node[:quantum][:db][:ovs_database]
+        action :create_db
+    end
+
+    mysql_database "create dashboard database user" do
+        host    mysql_address
+        username "db_maker"
+        password mysql[:mysql][:db_maker_password]
+        database node[:quantum][:db][:ovs_database]
+        action :query
+        sql "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER on #{node[:quantum][:db][:ovs_database]}.* to '#{node[:quantum][:db][:ovs_user]}'@'%' IDENTIFIED BY '#{node[:quantum][:db][:ovs_password]}';"
+    end
+
+
+    ovs_sql_connection = "mysql://#{node[:quantum][:db][:ovs_user]}:#{node[:quantum][:db][:ovs_password]}@#{mysql_address}/#{node[:quantum][:db][:ovs_database]}"
     sql_connection = "mysql://#{node[:quantum][:db][:user]}:#{node[:quantum][:db][:password]}@#{mysql_address}/#{node[:quantum][:db][:database]}"
+
+
+
+
 elsif node[:quantum][:sql_engine] == "sqlite"
     Chef::Log.info("Configuring Quantum to use SQLite backend")
     sql_connection = "sqlite:////var/lib/quantum/quantum.db"
@@ -171,6 +202,23 @@ template "/etc/quantum/api-paste.ini" do
 end
 
 
+directory "/etc/quantum/plugins/openvswitch/" do
+   mode 00775
+   owner "quantum"
+   action :create
+   recursive true
+end
+
+template "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
+  source "ovs_quantum_plugin.ini.erb"
+  owner "quantum"
+  group "root"
+  mode "0640"
+  variables(
+      :ovs_sql_connection => ovs_sql_connection
+  )
+  notifies :restart, resources(:service => "quantum"), :immediately
+end
 
 
 #execute "quantum-manage db_sync" do

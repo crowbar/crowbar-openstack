@@ -32,7 +32,9 @@
       "mysql_instance": "none",
       "db": {
         "database": "quantum",
-        "user": "quantum"
+        "user": "quantum",
+        "ovs_database": "ovs",
+        "ovs_user": "ovs"
       },
       "sql": {
         "idle_timeout": 30,
