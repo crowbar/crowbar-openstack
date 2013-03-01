@@ -28,7 +28,10 @@ else
     command "cp /opt/quantum/etc/policy.json /etc/quantum/"
     creates "/etc/quantum/policy.json"
   end
-
+  execute "quantum_cp_rootwrap" do
+    command "cp /opt/quantum/etc/rootwrap.conf /etc/quantum/ ; cp -r /opt/quantum/quantum/rootwrap /etc/quantum/rootwrap.d"
+    creates "/etc/quantum/rootwrap.conf"
+  end
 #  pfs_and_install_deps "quantum" do
 #    cookbook "quantum"
 #    cnode quantum
@@ -284,3 +287,50 @@ keystone_register "register quantum endpoint" do
 #  endpoint_enabled true
   action :add_endpoint_template
 end
+
+def mask_to_bits(mask)
+  octets = mask.split(".")
+  count = 0
+  octets.each do |octet|
+    break if octet == "0"
+    c = 1 if octet == "128"
+    c = 2 if octet == "192"
+    c = 3 if octet == "224"
+    c = 4 if octet == "240"
+    c = 5 if octet == "248"
+    c = 6 if octet == "252"
+    c = 7 if octet == "254"
+    c = 8 if octet == "255"
+    count = count + c
+  end
+
+  count
+end
+
+fixed_net=node[:network][:networks]["nova_fixed"]
+fixed_range="#{fixed_net["subnet"]}/#{mask_to_bits(fixed_net["netmask"])}"
+floating_net=node[:network][:networks]["nova_floating"]
+floating_range="#{floating_net["subnet"]}/#{mask_to_bits(floating_net["netmask"])}"
+execute "create_fixed_network" do
+  command "quantum net-create fixed --shared --provider:network_type flat --provider:physical_network physnet1"
+  not_if "quantum net-list | grep -q ' fixed '"
+end
+execute "create_floating_network" do
+  command "quantum net-create floating --shared --router:external=True --provider:network_type flat --provider:physical_network physnet2"
+  not_if "quantum net-list | grep -q ' floating '"
+end
+
+execute "create_fixed_subnet" do
+  command "quantum subnet-create --name fixed fixed #{fixed_range}"
+  not_if "quantum subnet-list | grep -q '#{fixed_range}'"
+end
+execute "create_floating_subnet" do
+  command "quantum subnet-create --name floating floating #{floating_range}"
+  not_if "quantum subnet-list | grep -q '#{floating_range}'"
+end
+
+execute "create_router" do
+  command "quantum router-create router-floating ; quantum router-gateway-set router-floating floating ; quantum router-interface-add router-floating fixed"
+  not_if "quantum router-list | grep -q router-floating"
+end
+
