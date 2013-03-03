@@ -1,0 +1,10 @@
+---
+-
+    name: meter_pipeline
+    interval: 60
+    counters:
+        - "*"
+    transformers:
+    publishers:
+        - meter_publisher
+

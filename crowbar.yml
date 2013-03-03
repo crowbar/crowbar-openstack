@@ -1,0 +1,66 @@
+# Copyright 2012, Dell Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+barclamp:
+  name: ceilometer
+  display: Ceilometer
+  description: Ceilometer install
+  proposal_schema_version: 1
+  version: 0
+  requires:
+    - @crowbar
+    - git
+    - mysql
+    - keystone
+  member:
+    - openstack 
+  os_support:
+    - ubuntu-12.04
+
+crowbar:
+  layout: 1
+  order: 92 
+  run_order: 92
+  chef_order: 100
+
+debs:
+  ubuntu-12.04:
+    repos:
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
+  pkgs:
+#    - ceilometer-agent-central
+#    - ceilometer-agent-compute
+#    - ceilometer-api
+#    - ceilometer-collector
+#    - ceilometer-common
+#    - python-ceilometer
+    - python-keystone
+
+locale_additions:
+  en:
+    nav:
+      ceilometer: Ceilometer
+    barclamp:
+      ceilometer:
+        edit_attributes: 
+          attributes: Attributes
+          keystone_instance: Keystone
+          service_user: Service user (for Keystone)
+          service_password: Service password
+      ceilometer_edit_deployment: 
+        deployment: Deployment
+
+git_repo:
+  - ceilometer http://github.com/openstack/ceilometer.git 2013.1.g3

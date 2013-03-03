@@ -1,0 +1,99 @@
+{
+  "id": "bc-template-ceilometer",
+  "description": "Installation for Ceilometer",
+  "attributes": {
+    "ceilometer": {
+      "debug": true,
+      "verbose": true,
+      "keystone_instance": "none",
+      "glance_instance": "none",
+      "mysql_instance": "none",
+      "user": "ceilometer",
+      "service_user": "ceilometer",
+      "service_password": "",
+      "gitrepo": "http://github.com/openstack/ceilometer.git",
+      "git_instance": "",
+      "git_refspec": "2012.1.g3",
+      "use_gitrepo": true,
+      "use_gitbarclamp": true,
+      "use_pip_cache": true,
+      "pfs_deps": [
+        "gawk",
+        "sqlite3",
+        "sudo",
+        "python-xattr",
+        "python-lxml",
+        "python-mox",
+        "python-paste",
+        "python-migrate",
+        "python-gflags",
+        "python-greenlet",
+        "python-libvirt",
+        "python-libxml2",
+        "python-routes",
+        "python-netaddr",
+        "python-pastedeploy",
+        "python-eventlet",
+        "python-cheetah",
+        "python-carrot",
+        "python-tempita",
+        "python-sqlalchemy",
+        "python-paramiko",
+        "python-iso8601",
+        "python-httplib2",
+        "python-suds",
+        "python-lockfile",
+        "python-m2crypto",
+        "python-boto",
+        "python-kombu",
+        "python-feedparser",
+        "python-iso8601",
+        "python-dateutil",
+        "python-numpy",
+        "python-amqplib",
+        "python-boto",
+        "python-webob",
+        "python-anyjson",
+        "python-flask",
+        "python-jinja2"
+        "python-markupsafe",
+        "python-stevedore",
+        "pip://eventlet>=0.9.17",
+        "pip://setuptools_git>=0.4",
+        "pip://python-quantumclient>=2.0",
+        "pip://python-glanceclient>=0.5.0,<2",
+        "pip://python-novaclient",
+        "pip://python-keystoneclient"
+      ],
+      "api": {
+        "bind_open_address": true,
+        "bind_port": 8777
+      },
+      "db": {
+        "password": "",
+        "user": "ceilometer",
+        "database": "ceilometer"
+      }
+    }
+  },
+  "deployment": {
+    "ceilometer": {
+      "crowbar-revision": 0,
+      "element_states": {
+        "ceilometer-server": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "ceilometer-server" ]
+      ],
+      "config": {
+        "environment": "ceilometer-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
+

@@ -1,0 +1,20 @@
+[DEFAULT]
+os_auth_url = http://<%= @keystone_address %>:<%= @keystone_service_port %>/v2.0
+os_tenant_name = <%= @keystone_service_tenant %>
+os_password = <%= @keystone_service_password %>
+os_username = <%= @keystone_service_user %>
+policy_file = /etc/ceilometer/policy.json
+sql_connection = <%= @sql_connection %>
+verbose = <%= @verbose ? "True" : "False" %>
+notification_topics = notifications,glance_notifications
+rabbit_password = <%= @rabbit_settings[:password] %>
+rabbit_host = <%= @rabbit_settings[:address] %>
+rpc_backend = ceilometer.openstack.common.rpc.impl_kombu
+
+[keystone_authtoken]
+signing_dir = /var/cache/ceilometer
+admin_tenant_name = <%= @keystone_service_tenant %>
+admin_password = <%= @keystone_service_password %>
+admin_user = <%= @keystone_service_user %>
+auth_protocol = http
+
