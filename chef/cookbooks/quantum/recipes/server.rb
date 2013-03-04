@@ -29,14 +29,22 @@ else
     creates "/etc/quantum/policy.json"
   end
   execute "quantum_cp_rootwrap" do
-    command "cp /opt/quantum/etc/rootwrap.conf /etc/quantum/ ; cp -r /opt/quantum/quantum/rootwrap /etc/quantum/rootwrap.d"
-    creates "/etc/quantum/rootwrap.conf"
+    command "cp -r /opt/quantum/etc/quantum/rootwrap.d /etc/quantum/rootwrap.d"
+    creates "/etc/quantum/rootwrap.d"
   end
-#  pfs_and_install_deps "quantum" do
-#    cookbook "quantum"
-#    cnode quantum
-#  end
+  cookbook_file "/etc/quantum/rootwrap.conf" do
+    source "quantum-rootwrap.conf"
+    mode 00644
+    owner "quantum"
+  end
 end
+
+template "/etc/sudoers.d/quantum-rootwrap" do
+  source "quantum-rootwrap.erb"
+  mode 0440
+  variables(:user => "quantum")
+end
+
 
 
 
@@ -186,6 +194,10 @@ keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
 keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
 keystone_service_user = node["quantum"]["service_user"]
 keystone_service_password = node["quantum"]["service_password"]
+admin_username = keystone["keystone"]["admin"]["username"] rescue nil
+admin_password = keystone["keystone"]["admin"]["password"] rescue nil
+default_tenant = keystone["keystone"]["default"]["tenant"] rescue nil
+
 Chef::Log.info("Keystone server found at #{keystone_address}")
 template "/etc/quantum/api-paste.ini" do
   source "api-paste.ini.erb"
@@ -309,8 +321,38 @@ end
 
 fixed_net=node[:network][:networks]["nova_fixed"]
 fixed_range="#{fixed_net["subnet"]}/#{mask_to_bits(fixed_net["netmask"])}"
+fixed_pool_start=fixed_net[:ranges][:dhcp][:start]
+fixed_pool_end=fixed_net[:ranges][:dhcp][:end]
+fixed_first_ip=IPAddr.new("#{fixed_range}").to_range().to_a[2]
+fixed_last_ip=IPAddr.new("#{fixed_range}").to_range().to_a[-2]
+if fixed_first_ip > fixed_pool_start
+fixed_pool_start=fixed_first_ip
+end
+if fixed_last_ip < fixed_pool_end
+fixed_pool_end=fixed_last_ip
+end
+
 floating_net=node[:network][:networks]["nova_floating"]
 floating_range="#{floating_net["subnet"]}/#{mask_to_bits(floating_net["netmask"])}"
+floating_pool_start=floating_net[:ranges][:host][:start]
+floating_pool_end=floating_net[:ranges][:host][:end]
+floating_first_ip=IPAddr.new("#{floating_range}").to_range().to_a[2]
+floating_last_ip=IPAddr.new("#{floating_range}").to_range().to_a[-2]
+if floating_first_ip > floating_pool_start
+floating_pool_start=floating_first_ip
+end
+if floating_last_ip < floating_pool_end
+floating_pool_end=floating_last_ip
+end
+
+
+
+ENV['OS_USERNAME']=admin_username
+ENV['OS_PASSWORD']=admin_password
+ENV['OS_TENANT_NAME']="admin"
+ENV['OS_AUTH_URL']="http://#{keystone_address}:#{keystone_service_port}/v2.0/"
+
+
 execute "create_fixed_network" do
   command "quantum net-create fixed --shared --provider:network_type flat --provider:physical_network physnet1"
   not_if "quantum net-list | grep -q ' fixed '"
@@ -321,16 +363,94 @@ execute "create_floating_network" do
 end
 
 execute "create_fixed_subnet" do
-  command "quantum subnet-create --name fixed fixed #{fixed_range}"
+  command "quantum subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} fixed #{fixed_range}"
   not_if "quantum subnet-list | grep -q '#{fixed_range}'"
 end
 execute "create_floating_subnet" do
-  command "quantum subnet-create --name floating floating #{floating_range}"
+  command "quantum subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} floating #{floating_range}"
   not_if "quantum subnet-list | grep -q '#{floating_range}'"
 end
 
 execute "create_router" do
   command "quantum router-create router-floating ; quantum router-gateway-set router-floating floating ; quantum router-interface-add router-floating fixed"
   not_if "quantum router-list | grep -q router-floating"
+end
+
+
+
+####networking part
+
+if node[:quantum][:use_gitrepo]
+  link_service "quantum-openvswitch-agent" do
+    bin_name "quantum-openvswitch-agent --config-dir /etc/quantum/"
+  end
+  link_service "quantum-dhcp-agent" do
+    bin_name "quantum-dhcp-agent --config-dir /etc/quantum/"
+  end
+  link_service "quantum-l3-agent" do
+    bin_name "quantum-l3-agent --config-dir /etc/quantum/"
+  end
+end
+
+kern_release=`uname -r`
+package "linux-headers-#{kern_release}" do
+    action :install
+end
+package "openvswitch-switch" do
+    action :install
+end
+package "openvswitch-datapath-dkms" do
+    action :install
+end
+
+
+
+service "openvswitch-switch" do
+  supports :status => true, :restart => true
+  action [ :enable, :start ]
+end
+service "quantum-openvswitch-agent" do
+  supports :status => true, :restart => true
+  action [ :enable, :start ]
+end
+service "quantum-dhcp-agent" do
+  supports :status => true, :restart => true
+  action [ :enable, :start ]
+end
+service "quantum-l3-agent" do
+  supports :status => true, :restart => true
+  action [ :enable, :start ]
+end
+
+fip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_fixed")
+if fip
+  fixed_interface = fip.interface
+  fixed_interface = "#{fip.interface}.#{fip.vlan}" if fip.use_vlan
+else
+  fixed_interface = nil
+end
+pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public")
+if pip
+  public_interface = pip.interface
+  public_interface = "#{pip.interface}.#{pip.vlan}" if pip.use_vlan
+else
+  public_interface = nil
+end
+
+execute "create_fixed_br" do
+  command "ovs-vsctl add-br br-fixed"
+  not_if "ovs-vsctl list-br | grep -q br-fixed"
+end
+execute "create_public_br" do
+  command "ovs-vsctl add-br br-public"
+  not_if "ovs-vsctl list-br | grep -q br-public"
+end
+execute "add_fixed_port" do
+  command "ovs-vsctl add-port br-fixed #{fixed_interface}"
+  not_if "ovs-vsctl list-ports br-fixed | grep -q #{fixed_interface}"
+end
+execute "add_public_port" do
+  command "ovs-vsctl add-port br-public #{public_interface}"
+  not_if "ovs-vsctl list-ports br-public | grep -q #{public_interface}"
 end
 

@@ -38,6 +38,29 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 #core_plugin = quantum.plugins.linuxbridge.lb_quantum_plugin.LinuxBridgePluginV2
 core_plugin = quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2
 
+#================dhcp agent====================
+state_path = /var/lib/quantum/
+
+
+interface_driver = quantum.agent.linux.interface.OVSInterfaceDriver
+# LinuxBridge
+#interface_driver = quantum.agent.linux.interface.BridgeInterfaceDriver
+# Ryu
+#interface_driver = quantum.agent.linux.interface.RyuInterfaceDriver
+
+# The agent can use other DHCP drivers.  Dnsmasq is the simplest and requires
+# no additional setup of the DHCP server.
+dhcp_driver = quantum.agent.linux.dhcp.Dnsmasq
+
+# Allow overlapping IP (Must have kernel build with CONFIG_NET_NS=y and
+# iproute2 package that supports namespaces).
+# use_namespaces = True
+
+# Use "sudo quantum-rootwrap /etc/quantum/rootwrap.conf" to use the real
+# root filter facility.
+# Change to "sudo" to skip the filtering and just run the comand directly
+root_helper=sudo /usr/local/bin/quantum-rootwrap /etc/quantum/rootwrap.conf
+
 
 ################# sql section will be used for OVS plugin config
 [DATABASE]
