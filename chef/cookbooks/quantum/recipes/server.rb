@@ -356,24 +356,29 @@ ENV['OS_AUTH_URL']="http://#{keystone_address}:#{keystone_service_port}/v2.0/"
 execute "create_fixed_network" do
   command "quantum net-create fixed --shared --provider:network_type flat --provider:physical_network physnet1"
   not_if "quantum net-list | grep -q ' fixed '"
+  ignore_failure true
 end
 execute "create_floating_network" do
-  command "quantum net-create floating --shared --router:external=True --provider:network_type flat --provider:physical_network physnet2"
+  command "quantum net-create floating --shared --router:external=True --provider:network_type flat --provider:physical_network physnet1 --enable_dhcp False"
   not_if "quantum net-list | grep -q ' floating '"
+  ignore_failure true
 end
 
 execute "create_fixed_subnet" do
   command "quantum subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} fixed #{fixed_range}"
   not_if "quantum subnet-list | grep -q '#{fixed_range}'"
+  ignore_failure true
 end
 execute "create_floating_subnet" do
   command "quantum subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} floating #{floating_range}"
   not_if "quantum subnet-list | grep -q '#{floating_range}'"
+  ignore_failure true
 end
 
 execute "create_router" do
   command "quantum router-create router-floating ; quantum router-gateway-set router-floating floating ; quantum router-interface-add router-floating fixed"
   not_if "quantum router-list | grep -q router-floating"
+  ignore_failure true
 end
 
 
@@ -424,6 +429,8 @@ end
 
 fip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_fixed")
 if fip
+  fixed_address = fip.address
+  fixed_mask = fip.netmask
   fixed_interface = fip.interface
   fixed_interface = "#{fip.interface}.#{fip.vlan}" if fip.use_vlan
 else
@@ -431,12 +438,18 @@ else
 end
 pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public")
 if pip
+  public_address = pip.address
+  public_mask = pip.netmask
   public_interface = pip.interface
   public_interface = "#{pip.interface}.#{pip.vlan}" if pip.use_vlan
 else
   public_interface = nil
 end
 
+execute "create_int_br" do
+  command "ovs-vsctl add-br br-int"
+  not_if "ovs-vsctl list-br | grep -q br-int"
+end
 execute "create_fixed_br" do
   command "ovs-vsctl add-br br-fixed"
   not_if "ovs-vsctl list-br | grep -q br-fixed"
@@ -453,4 +466,11 @@ execute "add_public_port" do
   command "ovs-vsctl add-port br-public #{public_interface}"
   not_if "ovs-vsctl list-ports br-public | grep -q #{public_interface}"
 end
-
+execute "move_fixed_ip" do
+  command "ip address flush dev #{fixed_interface} ; ifconfig br-fixed #{fixed_address} netmask #{fixed_mask}"
+  not_if "ip addr show br-fixed | grep -q #{fixed_address}"
+end
+execute "move_public_ip" do
+  command "ip address flush dev #{public_interface} ; ifconfig br-public #{public_address} netmask #{public_mask}"
+  not_if "ip addr show br-public | grep -q #{public_address}"
+end
