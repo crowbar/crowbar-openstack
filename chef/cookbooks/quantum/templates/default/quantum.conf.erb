@@ -44,6 +44,8 @@ core_plugin = quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2
 #================dhcp agent====================
 state_path = /var/lib/quantum/
 
+dhcp_agent_notification = True
+notification_driver = quantum.openstack.common.notifier.rpc_notifier
 
 interface_driver = quantum.agent.linux.interface.OVSInterfaceDriver
 external_network_bridge = br-public

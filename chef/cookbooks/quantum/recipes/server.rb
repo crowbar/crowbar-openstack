@@ -365,12 +365,12 @@ execute "create_floating_network" do
 end
 
 execute "create_fixed_subnet" do
-  command "quantum subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} fixed #{fixed_range} --enable_dhcp False"
+  command "quantum subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} fixed #{fixed_range}"
   not_if "quantum subnet-list | grep -q '#{fixed_range}'"
   ignore_failure true
 end
 execute "create_floating_subnet" do
-  command "quantum subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} floating #{floating_range}"
+  command "quantum subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} floating #{floating_range} --enable_dhcp False"
   not_if "quantum subnet-list | grep -q '#{floating_range}'"
   ignore_failure true
 end
@@ -446,6 +446,9 @@ else
   public_interface = nil
 end
 
+flat_network_bridge = fixed_net["use_vlan"] ? "br#{fixed_net["vlan"]}" : "br#{fixed_interface}"
+
+
 execute "create_int_br" do
   command "ovs-vsctl add-br br-int"
   not_if "ovs-vsctl list-br | grep -q br-int"
@@ -459,15 +462,15 @@ execute "create_public_br" do
   not_if "ovs-vsctl list-br | grep -q br-public"
 end
 execute "add_fixed_port" do
-  command "ovs-vsctl add-port br-fixed #{fixed_interface}"
-  not_if "ovs-vsctl list-ports br-fixed | grep -q #{fixed_interface}"
+  command "ovs-vsctl add-port br-fixed #{flat_network_bridge}"
+  not_if "ovs-vsctl list-ports br-fixed | grep -q #{flat_network_bridge}"
 end
 execute "add_public_port" do
   command "ovs-vsctl add-port br-public #{public_interface}"
   not_if "ovs-vsctl list-ports br-public | grep -q #{public_interface}"
 end
 execute "move_fixed_ip" do
-  command "ip address flush dev #{fixed_interface} ; ifconfig br-fixed #{fixed_address} netmask #{fixed_mask}"
+  command "ip address flush dev #{fixed_interface} ; ip address flush dev #{flat_network_bridge} ; ifconfig br-fixed #{fixed_address} netmask #{fixed_mask}"
   not_if "ip addr show br-fixed | grep -q #{fixed_address}"
 end
 execute "move_public_ip" do
