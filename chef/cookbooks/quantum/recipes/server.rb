@@ -359,13 +359,13 @@ execute "create_fixed_network" do
   ignore_failure true
 end
 execute "create_floating_network" do
-  command "quantum net-create floating --shared --router:external=True --provider:network_type flat --provider:physical_network physnet1 --enable_dhcp False"
+  command "quantum net-create floating --shared --router:external=True"
   not_if "quantum net-list | grep -q ' floating '"
   ignore_failure true
 end
 
 execute "create_fixed_subnet" do
-  command "quantum subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} fixed #{fixed_range}"
+  command "quantum subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} fixed #{fixed_range} --enable_dhcp False"
   not_if "quantum subnet-list | grep -q '#{fixed_range}'"
   ignore_failure true
 end
