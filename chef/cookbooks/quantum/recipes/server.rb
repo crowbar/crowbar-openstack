@@ -436,7 +436,7 @@ if fip
 else
   fixed_interface = nil
 end
-pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public")
+pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_floating")
 if pip
 #  public_address = pip.address
 #  public_mask = pip.netmask
