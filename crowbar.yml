@@ -36,7 +36,8 @@ locale_additions:
       quantum:
         edit_deployment: 
           deployment: Deployment
-        edit_attributes: 
+        edit_attributes:
+          keystone_instance: Keystone 
           service_user: Keystone Service User
           service_password: Keystone Service Password
           attributes: Attributes
