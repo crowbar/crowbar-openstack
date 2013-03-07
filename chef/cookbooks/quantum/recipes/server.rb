@@ -429,8 +429,8 @@ end
 
 fip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_fixed")
 if fip
-  fixed_address = fip.address
-  fixed_mask = fip.netmask
+#  fixed_address = fip.address
+#  fixed_mask = fip.netmask
   fixed_interface = fip.interface
   fixed_interface = "#{fip.interface}.#{fip.vlan}" if fip.use_vlan
 else
@@ -438,8 +438,8 @@ else
 end
 pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public")
 if pip
-  public_address = pip.address
-  public_mask = pip.netmask
+#  public_address = pip.address
+#  public_mask = pip.netmask
   public_interface = pip.interface
   public_interface = "#{pip.interface}.#{pip.vlan}" if pip.use_vlan
 else
@@ -469,11 +469,11 @@ execute "add_public_port" do
   command "ovs-vsctl add-port br-public #{public_interface}"
   not_if "ovs-vsctl list-ports br-public | grep -q #{public_interface}"
 end
-execute "move_fixed_ip" do
-  command "ip address flush dev #{fixed_interface} ; ip address flush dev #{flat_network_bridge} ; ifconfig br-fixed #{fixed_address} netmask #{fixed_mask}"
-  not_if "ip addr show br-fixed | grep -q #{fixed_address}"
-end
-execute "move_public_ip" do
-  command "ip address flush dev #{public_interface} ; ifconfig br-public #{public_address} netmask #{public_mask}"
-  not_if "ip addr show br-public | grep -q #{public_address}"
-end
+#execute "move_fixed_ip" do
+#  command "ip address flush dev #{fixed_interface} ; ip address flush dev #{flat_network_bridge} ; ifconfig br-fixed #{fixed_address} netmask #{fixed_mask}"
+#  not_if "ip addr show br-fixed | grep -q #{fixed_address}"
+#end
+#execute "move_public_ip" do
+#  command "ip address flush dev #{public_interface} ; ifconfig br-public #{public_address} netmask #{public_mask}"
+#  not_if "ip addr show br-public | grep -q #{public_address}"
+#end
