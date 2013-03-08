@@ -52,6 +52,49 @@ service "quantum" do
   action :enable
 end
 
+if node[:quantum][:use_gitrepo]
+  link_service "quantum-openvswitch-agent" do
+    bin_name "quantum-openvswitch-agent --config-dir /etc/quantum/"
+  end
+  link_service "quantum-dhcp-agent" do
+    bin_name "quantum-dhcp-agent --config-dir /etc/quantum/"
+  end
+  link_service "quantum-l3-agent" do
+    bin_name "quantum-l3-agent --config-dir /etc/quantum/"
+  end
+end
+
+kern_release=`uname -r`
+package "linux-headers-#{kern_release}" do
+    action :install
+end
+package "openvswitch-switch" do
+    action :install
+end
+package "openvswitch-datapath-dkms" do
+    action :install
+end
+
+
+
+service "openvswitch-switch" do
+  supports :status => true, :restart => true
+  action [ :enable, :start ]
+end
+service "quantum-openvswitch-agent" do
+  supports :status => true, :restart => true
+  action :enable
+end
+service "quantum-dhcp-agent" do
+  supports :status => true, :restart => true
+  action :enable
+end
+service "quantum-l3-agent" do
+  supports :status => true, :restart => true
+  action :enable
+end
+
+
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
 node.set_unless['quantum']['db']['password'] = secure_password
@@ -130,6 +173,21 @@ elsif node[:quantum][:sql_engine] == "sqlite"
     end
 end
 
+
+#env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
+#assuming we have only one nova
+#TODO: nova should depend on quantum, but quantum depend on nova a bit, so we have to do somthing with this
+
+novas = search(:node, "roles:nova-multi-controller") || []
+if novas.length > 0
+  nova = novas[0]
+  nova = node if nova.name == node.name
+else
+  nova = node
+end
+metadata_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "public").address rescue nil
+metadata_port = "8773"
+
 rabbits = search(:node, "recipes:nova\\:\\:rabbit") || []
 if rabbits.length > 0
   rabbit = rabbits[0]
@@ -154,27 +212,7 @@ else
   rabbit_settings = nil
 end
 
-template "/etc/quantum/quantum.conf" do
-    source "quantum.conf.erb"
-    mode "0644"
-    owner "quantum"
-    variables(
-      :sql_connection => sql_connection,
-      :sql_idle_timeout => node[:quantum][:sql][:idle_timeout],
-      :sql_min_pool_size => node[:quantum][:sql][:min_pool_size],
-      :sql_max_pool_size => node[:quantum][:sql][:max_pool_size],
-      :sql_pool_timeout => node[:quantum][:sql][:pool_timeout],
-      :debug => node[:quantum][:debug],
-      :verbose => node[:quantum][:verbose],
-      :admin_token => node[:quantum][:service][:token],
-      :service_port => node[:quantum][:api][:service_port], # Compute port
-      :service_host => node[:quantum][:api][:service_host],
-      :use_syslog => node[:quantum][:use_syslog],
-      :rabbit_settings => rabbit_settings
 
-    )
-    notifies :restart, resources(:service => "quantum"), :immediately
-end
 
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:quantum][:keystone_instance]}"
 keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
@@ -196,8 +234,45 @@ keystone_service_password = node["quantum"]["service_password"]
 admin_username = keystone["keystone"]["admin"]["username"] rescue nil
 admin_password = keystone["keystone"]["admin"]["password"] rescue nil
 default_tenant = keystone["keystone"]["default"]["tenant"] rescue nil
-
 Chef::Log.info("Keystone server found at #{keystone_address}")
+
+
+
+
+template "/etc/quantum/quantum.conf" do
+    source "quantum.conf.erb"
+    mode "0644"
+    owner "quantum"
+    variables(
+      :sql_connection => sql_connection,
+      :sql_idle_timeout => node[:quantum][:sql][:idle_timeout],
+      :sql_min_pool_size => node[:quantum][:sql][:min_pool_size],
+      :sql_max_pool_size => node[:quantum][:sql][:max_pool_size],
+      :sql_pool_timeout => node[:quantum][:sql][:pool_timeout],
+      :debug => node[:quantum][:debug],
+      :verbose => node[:quantum][:verbose],
+      :admin_token => node[:quantum][:service][:token],
+      :service_port => node[:quantum][:api][:service_port], # Compute port
+      :service_host => node[:quantum][:api][:service_host],
+      :use_syslog => node[:quantum][:use_syslog],
+      :rabbit_settings => rabbit_settings,
+      :keystone_ip_address => keystone_address,
+      :keystone_admin_token => keystone_token,
+      :keystone_service_port => keystone_service_port,
+      :keystone_service_tenant => keystone_service_tenant,
+      :keystone_service_user => keystone_service_user,
+      :keystone_service_password => keystone_service_password,
+      :keystone_admin_port => keystone_admin_port,
+      :metadata_address => metadata_address,
+      :metadata_port => metadata_port
+    )
+    notifies :restart, resources(:service => "quantum")
+    notifies :restart, resources(:service => "quantum-openvswitch-agent")
+    notifies :restart, resources(:service => "quantum-dhcp-agent")
+    notifies :restart, resources(:service => "quantum-l3-agent")
+end
+
+
 template "/etc/quantum/api-paste.ini" do
   source "api-paste.ini.erb"
   owner "quantum"
@@ -331,12 +406,18 @@ if fixed_last_ip < fixed_pool_end
 fixed_pool_end=fixed_last_ip
 end
 
+#this code seems to be broken in case complicated network when floating network outside of public network
+public_net=node[:network][:networks]["public"]
+public_range="#{public_net["subnet"]}/#{mask_to_bits(public_net["netmask"])}"
+public_router="#{public_net["router"]}"
+
 floating_net=node[:network][:networks]["nova_floating"]
 floating_range="#{floating_net["subnet"]}/#{mask_to_bits(floating_net["netmask"])}"
 floating_pool_start=floating_net[:ranges][:host][:start]
 floating_pool_end=floating_net[:ranges][:host][:end]
-floating_first_ip=IPAddr.new("#{floating_range}").to_range().to_a[2]
-floating_last_ip=IPAddr.new("#{floating_range}").to_range().to_a[-2]
+
+floating_first_ip=IPAddr.new("#{public_range}").to_range().to_a[2]
+floating_last_ip=IPAddr.new("#{public_range}").to_range().to_a[-2]
 if floating_first_ip > floating_pool_start
 floating_pool_start=floating_first_ip
 end
@@ -356,75 +437,54 @@ execute "create_fixed_network" do
   command "quantum net-create fixed --shared --provider:network_type flat --provider:physical_network physnet1"
   not_if "quantum net-list | grep -q ' fixed '"
   ignore_failure true
+  notifies :restart, resources(:service => "quantum")
+  notifies :restart, resources(:service => "quantum-openvswitch-agent")
+  notifies :restart, resources(:service => "quantum-dhcp-agent")
+  notifies :restart, resources(:service => "quantum-l3-agent")
 end
 execute "create_floating_network" do
   command "quantum net-create floating --shared --router:external=True"
   not_if "quantum net-list | grep -q ' floating '"
   ignore_failure true
+  notifies :restart, resources(:service => "quantum")
+  notifies :restart, resources(:service => "quantum-openvswitch-agent")
+  notifies :restart, resources(:service => "quantum-dhcp-agent")
+  notifies :restart, resources(:service => "quantum-l3-agent")
 end
 
 execute "create_fixed_subnet" do
   command "quantum subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} fixed #{fixed_range}"
   not_if "quantum subnet-list | grep -q '#{fixed_range}'"
   ignore_failure true
+  notifies :restart, resources(:service => "quantum")
+  notifies :restart, resources(:service => "quantum-openvswitch-agent")
+  notifies :restart, resources(:service => "quantum-dhcp-agent")
+  notifies :restart, resources(:service => "quantum-l3-agent")
 end
 execute "create_floating_subnet" do
-  command "quantum subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} floating #{floating_range} --enable_dhcp False"
+  command "quantum subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} --gateway #{public_router} floating #{public_range} --enable_dhcp False"
   not_if "quantum subnet-list | grep -q '#{floating_range}'"
   ignore_failure true
+  notifies :restart, resources(:service => "quantum")
+  notifies :restart, resources(:service => "quantum-openvswitch-agent")
+  notifies :restart, resources(:service => "quantum-dhcp-agent")
+  notifies :restart, resources(:service => "quantum-l3-agent")
 end
 
 execute "create_router" do
   command "quantum router-create router-floating ; quantum router-gateway-set router-floating floating ; quantum router-interface-add router-floating fixed"
   not_if "quantum router-list | grep -q router-floating"
   ignore_failure true
+  notifies :restart, resources(:service => "quantum")
+  notifies :restart, resources(:service => "quantum-openvswitch-agent")
+  notifies :restart, resources(:service => "quantum-dhcp-agent")
+  notifies :restart, resources(:service => "quantum-l3-agent")
 end
 
 
 
 ####networking part
 
-if node[:quantum][:use_gitrepo]
-  link_service "quantum-openvswitch-agent" do
-    bin_name "quantum-openvswitch-agent --config-dir /etc/quantum/"
-  end
-  link_service "quantum-dhcp-agent" do
-    bin_name "quantum-dhcp-agent --config-dir /etc/quantum/"
-  end
-  link_service "quantum-l3-agent" do
-    bin_name "quantum-l3-agent --config-dir /etc/quantum/"
-  end
-end
-
-kern_release=`uname -r`
-package "linux-headers-#{kern_release}" do
-    action :install
-end
-package "openvswitch-switch" do
-    action :install
-end
-package "openvswitch-datapath-dkms" do
-    action :install
-end
-
-
-
-service "openvswitch-switch" do
-  supports :status => true, :restart => true
-  action [ :enable, :start ]
-end
-service "quantum-openvswitch-agent" do
-  supports :status => true, :restart => true
-  action [ :enable, :start ]
-end
-service "quantum-dhcp-agent" do
-  supports :status => true, :restart => true
-  action [ :enable, :start ]
-end
-service "quantum-l3-agent" do
-  supports :status => true, :restart => true
-  action [ :enable, :start ]
-end
 
 fip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_fixed")
 if fip
@@ -456,22 +516,42 @@ flat_network_bridge = fixed_net["use_vlan"] ? "br#{fixed_net["vlan"]}" : "br#{fi
 execute "create_int_br" do
   command "ovs-vsctl add-br br-int"
   not_if "ovs-vsctl list-br | grep -q br-int"
+  notifies :restart, resources(:service => "quantum")
+  notifies :restart, resources(:service => "quantum-openvswitch-agent")
+  notifies :restart, resources(:service => "quantum-dhcp-agent")
+  notifies :restart, resources(:service => "quantum-l3-agent")
 end
 execute "create_fixed_br" do
   command "ovs-vsctl add-br br-fixed"
   not_if "ovs-vsctl list-br | grep -q br-fixed"
+  notifies :restart, resources(:service => "quantum")
+  notifies :restart, resources(:service => "quantum-openvswitch-agent")
+  notifies :restart, resources(:service => "quantum-dhcp-agent")
+  notifies :restart, resources(:service => "quantum-l3-agent")
 end
 execute "create_public_br" do
   command "ovs-vsctl add-br br-public"
   not_if "ovs-vsctl list-br | grep -q br-public"
+  notifies :restart, resources(:service => "quantum")
+  notifies :restart, resources(:service => "quantum-openvswitch-agent")
+  notifies :restart, resources(:service => "quantum-dhcp-agent")
+  notifies :restart, resources(:service => "quantum-l3-agent")
 end
 execute "add_fixed_port_#{flat_network_bridge}" do
   command "ovs-vsctl del-port br-fixed #{flat_network_bridge} ; ovs-vsctl add-port br-fixed #{flat_network_bridge}"
   not_if "ovs-dpctl show system@br-fixed | grep -q #{flat_network_bridge}"
+  notifies :restart, resources(:service => "quantum")
+  notifies :restart, resources(:service => "quantum-openvswitch-agent")
+  notifies :restart, resources(:service => "quantum-dhcp-agent")
+  notifies :restart, resources(:service => "quantum-l3-agent")
 end
 execute "add_public_port_#{public_interface}" do
   command "ovs-vsctl del-port br-public #{public_interface} ; ovs-vsctl add-port br-public #{public_interface}"
   not_if "ovs-dpctl show system@br-public | grep -q #{public_interface}"
+  notifies :restart, resources(:service => "quantum")
+  notifies :restart, resources(:service => "quantum-openvswitch-agent")
+  notifies :restart, resources(:service => "quantum-dhcp-agent")
+  notifies :restart, resources(:service => "quantum-l3-agent")
 end
 #execute "move_fixed_ip" do
 #  command "ip address flush dev #{fixed_interface} ; ip address flush dev #{flat_network_bridge} ; ifconfig br-fixed #{fixed_address} netmask #{fixed_mask}"

@@ -47,8 +47,6 @@ state_path = /var/lib/quantum/
 dhcp_agent_notification = True
 notification_driver = quantum.openstack.common.notifier.rpc_notifier
 
-interface_driver = quantum.agent.linux.interface.OVSInterfaceDriver
-external_network_bridge = br-public
 # LinuxBridge
 #interface_driver = quantum.agent.linux.interface.BridgeInterfaceDriver
 # Ryu
@@ -66,6 +64,22 @@ dhcp_driver = quantum.agent.linux.dhcp.Dnsmasq
 # root filter facility.
 # Change to "sudo" to skip the filtering and just run the comand directly
 
+network_scheduler_driver = quantum.scheduler.dhcp_agent_scheduler.ChanceScheduler
+network_auto_schedule = True
+
+
+#=======================================l3 agent======================
+auth_url = http://<%= @keystone_ip_address %>:<%= @keystone_admin_port %>/v2.0
+auth_region = RegionOne
+admin_tenant_name = <%= @keystone_service_tenant %>
+admin_user = <%= @keystone_service_user %>
+admin_password = <%= @keystone_service_password %>
+interface_driver = quantum.agent.linux.interface.OVSInterfaceDriver
+external_network_bridge = br-public
+router_scheduler_driver = quantum.scheduler.l3_agent_scheduler.ChanceScheduler
+router_auto_schedule = True
+metadata_ip_address = <%= @metadata_address %>
+metadata_port = <%= @metadata_port %>
 
 ################# sql section will be used for OVS plugin config
 [DATABASE]
