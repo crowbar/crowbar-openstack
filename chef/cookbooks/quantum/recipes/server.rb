@@ -438,7 +438,7 @@ else
 end
 #we have to rely on public net since we consciously decided not to allocate floating network
 if node[:network][:networks]["nova_floating"]["conduit"]==node[:network][:networks]["public"]["conduit"] and node[:network][:networks]["nova_floating"]["vlan"]==node[:network][:networks]["public"]["vlan"] and node[:network][:networks]["nova_floating"]["use_vlan"]==node[:network][:networks]["public"]["use_vlan"] and node[:network][:networks]["nova_floating"]["add_bridge"]==node[:network][:networks]["public"]["add_bridge"]
-  pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_public")
+  pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public")
 else
   pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_floating")
 end
