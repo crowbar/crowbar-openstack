@@ -18,7 +18,6 @@ unless node[:quantum][:use_gitrepo]
     action :install
   end
 else
-  puts "git_refspec = #{node[:quantum][:git_refspec]}"
   pfs_and_install_deps(@cookbook_name)
   link_service @cookbook_name do
     bin_name "quantum-server --config-dir /etc/quantum/"
@@ -485,7 +484,7 @@ if node[:network][:networks]["nova_floating"]["conduit"]==node[:network][:networ
   public_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
   public_mask = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").netmask
   execute "move_public_ip_#{public_address}_from_#{public_interface}_to_br-public" do
-    command "ifconfig br-public #{public_address} netmask #{public_mask}"
+    command "ip addr flush dev #{public_interface} ; ifconfig br-public #{public_address} netmask #{public_mask}"
     not_if "ip addr show br-public | grep -q #{public_address}"
   end
 end
