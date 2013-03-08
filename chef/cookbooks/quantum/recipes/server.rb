@@ -436,7 +436,12 @@ if fip
 else
   fixed_interface = nil
 end
-pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_floating")
+#we have to rely on public net since we consciously decided not to allocate floating network
+if node[:network][:networks]["nova_floating"]["conduit"]==node[:network][:networks]["public"]["conduit"] and node[:network][:networks]["nova_floating"]["vlan"]==node[:network][:networks]["public"]["vlan"] and node[:network][:networks]["nova_floating"]["use_vlan"]==node[:network][:networks]["public"]["use_vlan"] and node[:network][:networks]["nova_floating"]["add_bridge"]==node[:network][:networks]["public"]["add_bridge"]
+  pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_public")
+else
+  pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_floating")
+end
 if pip
 #  public_address = pip.address
 #  public_mask = pip.netmask
@@ -461,11 +466,11 @@ execute "create_public_br" do
   command "ovs-vsctl add-br br-public"
   not_if "ovs-vsctl list-br | grep -q br-public"
 end
-execute "add_fixed_port" do
+execute "add_fixed_port_#{flat_network_bridge}" do
   command "ovs-vsctl del-port br-fixed #{flat_network_bridge} ; ovs-vsctl add-port br-fixed #{flat_network_bridge}"
   not_if "ovs-dpctl show system@br-fixed | grep -q #{flat_network_bridge}"
 end
-execute "add_public_port" do
+execute "add_public_port_#{public_interface}" do
   command "ovs-vsctl del-port br-public #{public_interface} ; ovs-vsctl add-port br-public #{public_interface}"
   not_if "ovs-dpctl show system@br-public | grep -q #{public_interface}"
 end
@@ -479,7 +484,7 @@ end
 if node[:network][:networks]["nova_floating"]["conduit"]==node[:network][:networks]["public"]["conduit"] and node[:network][:networks]["nova_floating"]["vlan"]==node[:network][:networks]["public"]["vlan"] and node[:network][:networks]["nova_floating"]["use_vlan"]==node[:network][:networks]["public"]["use_vlan"] and node[:network][:networks]["nova_floating"]["add_bridge"]==node[:network][:networks]["public"]["add_bridge"]
   public_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
   public_mask = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").netmask
-  execute "move_public_ip" do
+  execute "move_public_ip_#{public_address}_from_#{public_interface}_to_br-public" do
     command "ifconfig br-public #{public_address} netmask #{public_mask}"
     not_if "ip addr show br-public | grep -q #{public_address}"
   end
