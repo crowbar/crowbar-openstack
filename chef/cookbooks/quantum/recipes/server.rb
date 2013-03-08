@@ -462,18 +462,25 @@ execute "create_public_br" do
   not_if "ovs-vsctl list-br | grep -q br-public"
 end
 execute "add_fixed_port" do
-  command "ovs-vsctl add-port br-fixed #{flat_network_bridge}"
-  not_if "ovs-vsctl list-ports br-fixed | grep -q #{flat_network_bridge}"
+  command "ovs-vsctl del-port br-fixed #{flat_network_bridge} ; ovs-vsctl add-port br-fixed #{flat_network_bridge}"
+  not_if "ovs-dpctl show system@br-fixed | grep -q #{flat_network_bridge}"
 end
 execute "add_public_port" do
-  command "ovs-vsctl add-port br-public #{public_interface}"
-  not_if "ovs-vsctl list-ports br-public | grep -q #{public_interface}"
+  command "ovs-vsctl del-port br-public #{public_interface} ; ovs-vsctl add-port br-public #{public_interface}"
+  not_if "ovs-dpctl show system@br-public | grep -q #{public_interface}"
 end
 #execute "move_fixed_ip" do
 #  command "ip address flush dev #{fixed_interface} ; ip address flush dev #{flat_network_bridge} ; ifconfig br-fixed #{fixed_address} netmask #{fixed_mask}"
 #  not_if "ip addr show br-fixed | grep -q #{fixed_address}"
 #end
-#execute "move_public_ip" do
-#  command "ip address flush dev #{public_interface} ; ifconfig br-public #{public_address} netmask #{public_mask}"
-#  not_if "ip addr show br-public | grep -q #{public_address}"
-#end
+
+#i dunno how to deal with this in proper way
+#currently if public and floating net share the same l2 crowbar bring up single physical iface for this diffent entyties, so we have to deal somehow with this behavior
+if node[:network][:networks]["nova_floating"]["conduit"]==node[:network][:networks]["public"]["conduit"] and node[:network][:networks]["nova_floating"]["vlan"]==node[:network][:networks]["public"]["vlan"] and node[:network][:networks]["nova_floating"]["use_vlan"]==node[:network][:networks]["public"]["use_vlan"] and node[:network][:networks]["nova_floating"]["add_bridge"]==node[:network][:networks]["public"]["add_bridge"]
+  public_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
+  public_mask = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").netmask
+  execute "move_public_ip" do
+    command "ifconfig br-public #{public_address} netmask #{public_mask}"
+    not_if "ip addr show br-public | grep -q #{public_address}"
+  end
+end
