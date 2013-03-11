@@ -186,7 +186,8 @@ else
   nova = node
 end
 metadata_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "public").address rescue nil
-metadata_port = "8773"
+metadata_port = "8775"
+per_tenant_vlan=nova[:nova][:network][:tenant_vlans] rescue false
 
 rabbits = search(:node, "recipes:nova\\:\\:rabbit") || []
 if rabbits.length > 0
@@ -239,6 +240,46 @@ Chef::Log.info("Keystone server found at #{keystone_address}")
 
 
 
+def mask_to_bits(mask)
+  octets = mask.split(".")
+  count = 0
+  octets.each do |octet|
+    break if octet == "0"
+    c = 1 if octet == "128"
+    c = 2 if octet == "192"
+    c = 3 if octet == "224"
+    c = 4 if octet == "240"
+    c = 5 if octet == "248"
+    c = 6 if octet == "252"
+    c = 7 if octet == "254"
+    c = 8 if octet == "255"
+    count = count + c
+  end
+
+  count
+end
+
+
+
+fixed_net=node[:network][:networks]["nova_fixed"]
+fixed_range="#{fixed_net["subnet"]}/#{mask_to_bits(fixed_net["netmask"])}"
+fixed_router_pool_start=fixed_net[:ranges][:router][:start]
+fixed_router_pool_end=fixed_net[:ranges][:router][:end]
+fixed_pool_start=fixed_net[:ranges][:dhcp][:start]
+fixed_pool_end=fixed_net[:ranges][:dhcp][:end]
+fixed_first_ip=IPAddr.new("#{fixed_range}").to_range().to_a[2]
+fixed_last_ip=IPAddr.new("#{fixed_range}").to_range().to_a[-2]
+vlan_start=fixed_net["vlan"]
+vlan_end=vlan_start+2000
+if fixed_first_ip > fixed_pool_start
+fixed_pool_start=fixed_first_ip
+end
+if fixed_last_ip < fixed_pool_end
+fixed_pool_end=fixed_last_ip
+end
+
+
+
 template "/etc/quantum/quantum.conf" do
     source "quantum.conf.erb"
     mode "0644"
@@ -264,7 +305,10 @@ template "/etc/quantum/quantum.conf" do
       :keystone_service_password => keystone_service_password,
       :keystone_admin_port => keystone_admin_port,
       :metadata_address => metadata_address,
-      :metadata_port => metadata_port
+      :metadata_port => metadata_port,
+      :per_tenant_vlan => per_tenant_vlan,
+      :vlan_start => vlan_start,
+      :vlan_end => vlan_end
     )
     notifies :restart, resources(:service => "quantum")
     notifies :restart, resources(:service => "quantum-openvswitch-agent")
@@ -374,37 +418,7 @@ keystone_register "register quantum endpoint" do
   action :add_endpoint_template
 end
 
-def mask_to_bits(mask)
-  octets = mask.split(".")
-  count = 0
-  octets.each do |octet|
-    break if octet == "0"
-    c = 1 if octet == "128"
-    c = 2 if octet == "192"
-    c = 3 if octet == "224"
-    c = 4 if octet == "240"
-    c = 5 if octet == "248"
-    c = 6 if octet == "252"
-    c = 7 if octet == "254"
-    c = 8 if octet == "255"
-    count = count + c
-  end
 
-  count
-end
-
-fixed_net=node[:network][:networks]["nova_fixed"]
-fixed_range="#{fixed_net["subnet"]}/#{mask_to_bits(fixed_net["netmask"])}"
-fixed_pool_start=fixed_net[:ranges][:dhcp][:start]
-fixed_pool_end=fixed_net[:ranges][:dhcp][:end]
-fixed_first_ip=IPAddr.new("#{fixed_range}").to_range().to_a[2]
-fixed_last_ip=IPAddr.new("#{fixed_range}").to_range().to_a[-2]
-if fixed_first_ip > fixed_pool_start
-fixed_pool_start=fixed_first_ip
-end
-if fixed_last_ip < fixed_pool_end
-fixed_pool_end=fixed_last_ip
-end
 
 #this code seems to be broken in case complicated network when floating network outside of public network
 public_net=node[:network][:networks]["public"]
@@ -453,8 +467,8 @@ execute "create_floating_network" do
 end
 
 execute "create_fixed_subnet" do
-  command "quantum subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} fixed #{fixed_range}"
-  not_if "quantum subnet-list | grep -q '#{fixed_range}'"
+  command "quantum subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} --gateway #{fixed_router_pool_end} fixed #{fixed_range}"
+  not_if "quantum subnet-list | grep -q ' fixed '"
   ignore_failure true
   notifies :restart, resources(:service => "quantum")
   notifies :restart, resources(:service => "quantum-openvswitch-agent")
@@ -463,7 +477,7 @@ execute "create_fixed_subnet" do
 end
 execute "create_floating_subnet" do
   command "quantum subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} --gateway #{public_router} floating #{public_range} --enable_dhcp False"
-  not_if "quantum subnet-list | grep -q '#{floating_range}'"
+  not_if "quantum subnet-list | grep -q ' floating '"
   ignore_failure true
   notifies :restart, resources(:service => "quantum")
   notifies :restart, resources(:service => "quantum-openvswitch-agent")
@@ -553,6 +567,24 @@ execute "add_public_port_#{public_interface}" do
   notifies :restart, resources(:service => "quantum-dhcp-agent")
   notifies :restart, resources(:service => "quantum-l3-agent")
 end
+
+#this workaround for metadata service, should be removed when quantum-metadata-proxy will be released
+#it parses jsoned csv output of quantum to get address of router to pass it into metadata node
+ruby_block "get_fixed_net_router" do
+   block do
+     require 'csv'
+     require 'json'
+     csv_data=`quantum router-port-list -F fixed_ips -f csv router-floating -- --device_owner network:router_gateway`
+     node.set[:quantum][:network][:fixed_router]=JSON.parse(CSV.parse(csv_data)[1].join)["ip_address"]
+     node.save
+   end
+   ignore_failure true
+   only_if { node[:quantum][:network][:fixed_router]=="127.0.0.1" }
+end
+
+
+
+
 #execute "move_fixed_ip" do
 #  command "ip address flush dev #{fixed_interface} ; ip address flush dev #{flat_network_bridge} ; ifconfig br-fixed #{fixed_address} netmask #{fixed_mask}"
 #  not_if "ip addr show br-fixed | grep -q #{fixed_address}"

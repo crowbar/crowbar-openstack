@@ -23,6 +23,7 @@ default[:quantum][:db][:password] = "" # Set by Recipe
 default[:quantum][:db][:ovs_database] = "ovs"
 default[:quantum][:db][:ovs_user] = "ovs"
 default[:quantum][:db][:ovs_password] = "" # Set by Recipe
+default[:quantum][:network][:fixed_router] = "127.0.0.1" # Set by Recipe
 
 default[:quantum][:api][:service_port] = "9696"
 default[:quantum][:api][:service_host] = "0.0.0.0"

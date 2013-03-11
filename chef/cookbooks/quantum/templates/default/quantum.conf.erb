@@ -78,7 +78,7 @@ interface_driver = quantum.agent.linux.interface.OVSInterfaceDriver
 external_network_bridge = br-public
 router_scheduler_driver = quantum.scheduler.l3_agent_scheduler.ChanceScheduler
 router_auto_schedule = True
-metadata_ip_address = <%= @metadata_address %>
+metadata_ip = <%= @metadata_address %>
 metadata_port = <%= @metadata_port %>
 
 ################# sql section will be used for OVS plugin config
@@ -128,7 +128,13 @@ root_helper=sudo /usr/local/bin/quantum-rootwrap /etc/quantum/rootwrap.conf
 # Default: network_vlan_ranges =
 # Example: network_vlan_ranges = physnet1:1000:2999
 
+<% if @per_tenant_vlan -%>
+tenant_network_type = vlan
+network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
+<% else -%>
+tenant_network_type = local
 network_vlan_ranges = physnet1
+<% end -%>
 
 # (BoolOpt) Set to True in the server and the agents to enable support
 # for GRE networks. Requires kernel support for OVS patch ports and
