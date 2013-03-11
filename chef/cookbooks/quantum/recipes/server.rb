@@ -424,7 +424,7 @@ end
 public_net=node[:network][:networks]["public"]
 public_range="#{public_net["subnet"]}/#{mask_to_bits(public_net["netmask"])}"
 public_router="#{public_net["router"]}"
-
+public_vlan=public_net["vlan"]
 floating_net=node[:network][:networks]["nova_floating"]
 floating_range="#{floating_net["subnet"]}/#{mask_to_bits(floating_net["netmask"])}"
 floating_pool_start=floating_net[:ranges][:host][:start]
@@ -447,8 +447,14 @@ ENV['OS_TENANT_NAME']="admin"
 ENV['OS_AUTH_URL']="http://#{keystone_address}:#{keystone_service_port}/v2.0/"
 
 
+if per_tenant_vlan
+  fixed_network_type="vlan"
+else
+  fixed_network_type="flat"
+end
+
 execute "create_fixed_network" do
-  command "quantum net-create fixed --shared --provider:network_type flat --provider:physical_network physnet1"
+  command "quantum net-create fixed --shared --provider:network_type #{fixed_network_type} --provider:physical_network physnet1 --provider:segmentation_id #{fixed_net["vlan"]}"
   not_if "quantum net-list | grep -q ' fixed '"
   ignore_failure true
   notifies :restart, resources(:service => "quantum")
