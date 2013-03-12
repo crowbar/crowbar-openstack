@@ -448,13 +448,13 @@ ENV['OS_AUTH_URL']="http://#{keystone_address}:#{keystone_service_port}/v2.0/"
 
 
 if per_tenant_vlan
-  fixed_network_type="vlan"
+  fixed_network_type="vlan --provider:segmentation_id #{fixed_net["vlan"]}"
 else
   fixed_network_type="flat"
 end
 
 execute "create_fixed_network" do
-  command "quantum net-create fixed --shared --provider:network_type #{fixed_network_type} --provider:physical_network physnet1 --provider:segmentation_id #{fixed_net["vlan"]}"
+  command "quantum net-create fixed --shared --provider:network_type #{fixed_network_type} --provider:physical_network physnet1"
   not_if "quantum net-list | grep -q ' fixed '"
   ignore_failure true
   notifies :restart, resources(:service => "quantum")
