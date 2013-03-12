@@ -463,7 +463,7 @@ execute "create_fixed_network" do
   notifies :restart, resources(:service => "quantum-l3-agent")
 end
 execute "create_floating_network" do
-  command "quantum net-create floating --shared --router:external=True"
+  command "quantum net-create floating --router:external=True"
   not_if "quantum net-list | grep -q ' floating '"
   ignore_failure true
   notifies :restart, resources(:service => "quantum")
@@ -588,6 +588,33 @@ ruby_block "get_fixed_net_router" do
    only_if { node[:quantum][:network][:fixed_router]=="127.0.0.1" }
 end
 
+if per_tenant_vlan
+#we should add foating router into user's private networks and pass that network to novas to get metadata service working properly
+  ruby_block "get_private_networks" do
+     block do
+       require 'csv'
+       csv_data=`quantum subnet-list -c cidr -f csv -- --shared false`
+       private_quantum_networks=CSV.parse(csv_data)
+       private_quantum_networks.shift
+       node.set[:quantum][:network][:private_networks]=private_quantum_networks
+       node.save
+     end
+     ignore_failure true
+  end
+
+  ruby_block "add_floating_router_to_private_networks" do
+    block do
+       require 'csv'
+       csv_data=`quantum subnet-list -c id -f csv -- --shared false --enable_dhcp true`
+       private_quantum_ids=CSV.parse(csv_data)
+       private_quantum_ids.shift
+       private_quantum_ids.each do |subnet_id|
+         system("quantum router-interface-add router-floating #{subnet_id}")
+       end
+    end
+    ignore_failure true
+  end
+end
 
 
 
