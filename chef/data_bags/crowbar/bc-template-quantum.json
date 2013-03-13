@@ -28,6 +28,7 @@
       ],
       "debug": true,
       "verbose": true,
+      "networking_mode": "local",
       "use_syslog": false,
       "sql_engine": "mysql",
       "mysql_instance": "none",

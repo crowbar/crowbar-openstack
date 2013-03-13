@@ -187,7 +187,12 @@ else
 end
 metadata_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "public").address rescue nil
 metadata_port = "8775"
-per_tenant_vlan=nova[:nova][:network][:tenant_vlans] rescue false
+if node[:quantum][:networking_mode] != 'local'
+  per_tenant_vlan=true
+else
+  per_tenant_vlan=false
+end
+
 
 rabbits = search(:node, "recipes:nova\\:\\:rabbit") || []
 if rabbits.length > 0
@@ -307,6 +312,7 @@ template "/etc/quantum/quantum.conf" do
       :metadata_address => metadata_address,
       :metadata_port => metadata_port,
       :per_tenant_vlan => per_tenant_vlan,
+      :networking_mode => node[:quantum][:networking_mode],
       :vlan_start => vlan_start,
       :vlan_end => vlan_end
     )
@@ -447,8 +453,10 @@ ENV['OS_TENANT_NAME']="admin"
 ENV['OS_AUTH_URL']="http://#{keystone_address}:#{keystone_service_port}/v2.0/"
 
 
-if per_tenant_vlan
+if node[:quantum][:networking_mode] == 'vlan'
   fixed_network_type="vlan --provider:segmentation_id #{fixed_net["vlan"]}"
+elsif node[:quantum][:networking_mode] == 'gre'
+  fixed_network_type="gre --provider:segmentation_id 1"
 else
   fixed_network_type="flat"
 end

@@ -42,6 +42,7 @@ locale_additions:
           service_password: Keystone Service Password
           attributes: Attributes
           sql_engine: SQL Engine
+          networking_mode: Mode
           mysql_instance: MySQL Instance
           default-tenant: Default Tenant
           admin-username: Administrator Username
