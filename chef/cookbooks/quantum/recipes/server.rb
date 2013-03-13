@@ -601,7 +601,7 @@ if per_tenant_vlan
   ruby_block "get_private_networks" do
      block do
        require 'csv'
-       csv_data=`quantum subnet-list -c cidr -f csv -- --shared false`
+       csv_data=`quantum subnet-list -c cidr -f csv -- --shared false --enable_dhcp true`
        private_quantum_networks=CSV.parse(csv_data)
        private_quantum_networks.shift
        node.set[:quantum][:network][:private_networks]=private_quantum_networks
