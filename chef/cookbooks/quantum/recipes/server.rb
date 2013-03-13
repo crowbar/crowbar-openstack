@@ -454,15 +454,15 @@ ENV['OS_AUTH_URL']="http://#{keystone_address}:#{keystone_service_port}/v2.0/"
 
 
 if node[:quantum][:networking_mode] == 'vlan'
-  fixed_network_type="vlan --provider:segmentation_id #{fixed_net["vlan"]}"
+  fixed_network_type="--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
 elsif node[:quantum][:networking_mode] == 'gre'
-  fixed_network_type="gre --provider:segmentation_id 1"
+  fixed_network_type="--provider:network_type gre --provider:segmentation_id 1"
 else
-  fixed_network_type="flat"
+  fixed_network_type="--provider:network_type flat --provider:physical_network physnet1"
 end
 
 execute "create_fixed_network" do
-  command "quantum net-create fixed --shared --provider:network_type #{fixed_network_type} --provider:physical_network physnet1"
+  command "quantum net-create fixed --shared #{fixed_network_type}"
   not_if "quantum net-list | grep -q ' fixed '"
   ignore_failure true
   notifies :restart, resources(:service => "quantum")
