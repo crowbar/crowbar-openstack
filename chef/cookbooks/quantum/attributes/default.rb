@@ -36,4 +36,4 @@ default[:quantum][:sql][:min_pool_size] = 5
 default[:quantum][:sql][:max_pool_size] = 10
 default[:quantum][:sql][:pool_timeout] = 200
 
-
+default[:quantum][:quantum_server] = false
