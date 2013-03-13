@@ -26,6 +26,15 @@ venv_prefix = quantum[:quantum][:use_virtualenv] ? ". #{venv_path}/bin/activate 
 
 quantum_server = node[:quantum][:quantum_server] rescue false
 
+env_filter = " AND keystone_config_environment:keystone-config-#{quantum[:quantum][:keystone_instance]}"
+keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
+if keystones.length > 0
+  keystone = keystones.first
+  keystone = quantum if keystone.name == quantum.name
+else
+  keystone = quantum
+end
+
 unless quantum[:quantum][:use_gitrepo]
   package "quantum" do
     action :install
@@ -38,15 +47,6 @@ else
     path quantum_path
     wrap_bins [ "quantum", "quantum-rootwrap" ]
   end
-  env_filter = " AND keystone_config_environment:keystone-config-#{quantum[:quantum][:keystone_instance]}"
-  keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-  if keystones.length > 0
-    keystone = keystones.first
-    keystone = node if keystone.name == node.name
-  else
-    keystone = node
-  end
-
   pfs_and_install_deps "keystone" do
     cookbook "keystone"
     cnode keystone
@@ -61,21 +61,6 @@ else
     bin_name "quantum-openvswitch-agent --config-dir /etc/quantum/"
   end
  
-  if quantum_server
-    link_service "quantum" do
-      virtualenv venv_path
-      bin_name "quantum-server --config-dir /etc/quantum/"
-    end
-    link_service "quantum-dhcp-agent" do
-      virtualenv venv_path
-      bin_name "quantum-dhcp-agent --config-dir /etc/quantum/"
-    end
-    link_service "quantum-l3-agent" do
-      virtualenv venv_path
-      bin_name "quantum-l3-agent --config-dir /etc/quantum/"
-    end
-  end
-
   execute "quantum_cp_policy.json" do
     command "cp /opt/quantum/etc/policy.json /etc/quantum/"
     creates "/etc/quantum/policy.json"
@@ -123,10 +108,6 @@ package "python-mysqldb" do
     action :install
 end
 
-if quantum_server 
-  include_recipe "quantum::database"
-end
-
 #env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
 #assuming we have only one nova
 #TODO: nova should depend on quantum, but quantum depend on nova a bit, so we have to do somthing with this
@@ -163,15 +144,6 @@ rabbit_settings = {
   :password => rabbit[:rabbitmq][:password],
   :vhost => rabbit[:rabbitmq][:vhost]
 }
-
-env_filter = " AND keystone_config_environment:keystone-config-#{quantum[:quantum][:keystone_instance]}"
-keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = quantum if keystone.name == quantum.name
-else
-  keystone = quantum
-end
 
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
 keystone_token = keystone["keystone"]["service"]["token"]
@@ -227,64 +199,5 @@ template "/etc/quantum/quantum.conf" do
       :vlan_end => vlan_end
     )
     notifies :restart, resources(:service => "quantum-openvswitch-agent"), :immediately
-end
-
-if quantum_server
-
-  template "/etc/quantum/api-paste.ini" do
-    cookbook "quantum"
-    source "api-paste.ini.erb"
-    owner "quantum"
-    group "root"
-    mode "0640"
-    variables(
-      :keystone_ip_address => keystone_address,
-      :keystone_admin_token => keystone_token,
-      :keystone_service_port => keystone_service_port,
-      :keystone_service_tenant => keystone_service_tenant,
-      :keystone_service_user => keystone_service_user,
-      :keystone_service_password => keystone_service_password,
-      :keystone_admin_port => keystone_admin_port
-    )
-  end
-
-  directory "/etc/quantum/plugins/openvswitch/" do
-     mode 00775
-     owner "quantum"
-     action :create
-     recursive true
-  end
-
-  template "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
-    cookbook "quantum"
-    source "ovs_quantum_plugin.ini.erb"
-    owner "quantum"
-    group "root"
-    mode "0640"
-    variables(
-        :ovs_sql_connection => quantum[:quantum][:ovs_sql_connection]
-    )
-  end
-
-  service "quantum" do
-    supports :status => true, :restart => true
-    action :enable
-    subscribes :restart, resources("template[/etc/quantum/api-paste.ini]"), :immediately
-    subscribes :restart, resources("template[/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini]"), :immediately
-    subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
-  end
-
-  service "quantum-dhcp-agent" do
-    supports :status => true, :restart => true
-    action :enable
-    subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
-  end
-
-  service "quantum-l3-agent" do
-    supports :status => true, :restart => true
-    action :enable
-    subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
-  end
-
 end
 
