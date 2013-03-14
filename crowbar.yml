@@ -22,6 +22,7 @@ barclamp:
     - @crowbar
     - git
     - mysql
+    - rabbitmq
     - keystone
     - glance
   member:
@@ -62,6 +63,7 @@ locale_additions:
       cinder:
         edit_attributes: 
           attributes: Attributes
+          rabbitmq_instance: RabbitMQ
           mysql_instance: MySQL
           keystone_instance: Keystone
           glance_instance: Glance

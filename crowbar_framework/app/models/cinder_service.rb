@@ -25,7 +25,7 @@ class CinderService < ServiceObject
 
   def proposal_dependencies(role)
     answer = []
-    deps = ["mysql", "keystone", "glance"]
+    deps = ["mysql", "keystone", "glance", "rabbitmq"]
     deps << "git" if role.default_attributes[@bc_name]["use_gitrepo"]
     deps.each do |dep|
       answer << { "barclamp" => dep, "inst" => role.default_attributes[@bc_name]["#{dep}_instance"] }
@@ -45,7 +45,7 @@ class CinderService < ServiceObject
       }
     end
 
-    insts = ["Mysql", "Keystone", "Glance"]
+    insts = ["Mysql", "Keystone", "Glance", "Rabbitmq"]
     insts << "Git" if base["attributes"][@bc_name]["use_gitrepo"]
 
     insts.each do |inst|
