@@ -8,6 +8,9 @@
       %label{ :for => :keystone_instance }= t('.keystone_instance')
       = instance_selector("keystone", :keystone_instance, "keystone_instance", @proposal)
     %p
+      %label{ :for => :rabbitmq_instance }= t('.rabbitmq_instance')
+      = instance_selector("rabbitmq", :rabbitmq_instance, "rabbitmq_instance", @proposal)
+    %p
       %label{ :for => :service_user }= t('.service_user')
       %input#service_user{:type => "text", :name => "service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["service_user"], :onchange => "update_value('service_user','service_user', 'string')"}
     %p

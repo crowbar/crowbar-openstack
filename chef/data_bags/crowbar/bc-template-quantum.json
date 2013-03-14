@@ -11,6 +11,7 @@
       "use_gitbarclamp": true,
       "use_pip_cache": true,
       "use_gitrepo": true,
+      "rabbitmq_instance": "none",
       "keystone_instance": "none",
       "pfs_deps": [
         "python-eventlet",
