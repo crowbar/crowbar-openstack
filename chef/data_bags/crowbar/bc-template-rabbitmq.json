@@ -2,6 +2,11 @@
   "id": "bc-template-rabbitmq",
   "description": "Installation for rabbitmq",
   "attributes": {
+    "rabbitmq": {
+      "password": "secure_password",
+      "user": "nova",
+      "vhost": "/nova"
+    }
   },
   "deployment": {
     "rabbitmq": {

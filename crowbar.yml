@@ -36,6 +36,9 @@ locale_additions:
       crowbar:
         edit_attributes:
           attributes: Attributes
+          vhost: Virtual host
+          user: User
+          password: Password
         edit_deployment:
           deployment: Deployment
 

@@ -5,3 +5,11 @@
   = link_to t('raw'), proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :style => "float: right;"
   %div.container
     %p
+      %label{ :for => :vhost }= t('.vhost')
+      %input#vhost{:type => "text", :name => "vhost", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["vhost"], :onchange => "update_value('vhost','vhost', 'string')"}
+    %p
+      %label{ :for => :user }= t('.user')
+      %input#user{:type => "text", :name => "user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["user"], :onchange => "update_value('user','user', 'string')"}
+    %p
+      %label{ :for => :password }= t('.password')
+      %input#password{:type => "text", :name => "password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["password"], :onchange => "update_value('password','password', 'string')"}

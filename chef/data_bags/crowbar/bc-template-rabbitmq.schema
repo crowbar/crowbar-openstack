@@ -4,7 +4,21 @@
   "mapping": {
     "id": { "type": "str", "required": true, "pattern": "/^bc-rabbitmq-|^bc-template-rabbitmq$/" },
     "description": { "type": "str", "required": true },
-    "attributes": { "type": "map", "required": true, "mapping": {
+    "attributes": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "rabbitmq": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "port": { "type": "int" },
+            "password": { "type": "str", "required": true },
+            "user": { "type": "str", "required": true },
+            "vhost": { "type": "str", "required": true }
+          }
+        }
+      }
     },
     "deployment": {
       "type": "map",

@@ -41,6 +41,7 @@ class RabbitmqService < ServiceObject
     base["deployment"]["rabbitmq"]["elements"] = {
       "rabbitmq-server" => [ head.name ]
     }
+    base["attributes"][@bc_name]["password"] = '%012d' % rand(1e12)
 
     @logger.debug("Rabbitmq create_proposal: exiting")
     base
