@@ -8,6 +8,9 @@
       %label{ :for => :vhost }= t('.vhost')
       %input#vhost{:type => "text", :name => "vhost", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["vhost"], :onchange => "update_value('vhost','vhost', 'string')"}
     %p
+      %label{ :for => :port }= t('.port')
+      %input#port{:type => "text", :name => "port", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["port"], :onchange => "update_value('port', 'port', 'integer')"}
+    %p
       %label{ :for => :user }= t('.user')
       %input#user{:type => "text", :name => "user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["user"], :onchange => "update_value('user','user', 'string')"}
     %p

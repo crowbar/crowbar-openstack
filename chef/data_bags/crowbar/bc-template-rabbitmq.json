@@ -3,6 +3,7 @@
   "description": "Installation for rabbitmq",
   "attributes": {
     "rabbitmq": {
+      "port": 5672,
       "password": "secure_password",
       "user": "nova",
       "vhost": "/nova"

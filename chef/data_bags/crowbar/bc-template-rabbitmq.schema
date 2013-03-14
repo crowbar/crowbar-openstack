@@ -12,7 +12,7 @@
           "type": "map",
           "required": true,
           "mapping": {
-            "port": { "type": "int" },
+            "port": { "type": "int", "required": true },
             "password": { "type": "str", "required": true },
             "user": { "type": "str", "required": true },
             "vhost": { "type": "str", "required": true }

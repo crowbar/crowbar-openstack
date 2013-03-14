@@ -39,6 +39,7 @@ locale_additions:
           vhost: Virtual host
           user: User
           password: Password
+          port: Port
         edit_deployment:
           deployment: Deployment
 
