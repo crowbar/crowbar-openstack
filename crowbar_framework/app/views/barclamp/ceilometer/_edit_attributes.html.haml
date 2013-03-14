@@ -13,3 +13,6 @@
     %p
       %label{ :for => :keystone_service_password }= t('.keystone_service_password')
       %input#keystone_service_password{:type => "text", :name => "keystone_service_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_service_password"], :onchange => "update_value('keystone_service_password','keystone_service_password', 'string')"}
+    %p
+      %label{ :for => :rabbitmq_instance }= t('.rabbitmq_instance')
+      = instance_selector("rabbitmq", :rabbitmq_instance, "rabbitmq_instance", @proposal)

@@ -22,6 +22,7 @@ barclamp:
     - @crowbar
     - git
     - mysql
+    - rabbitmq
     - keystone
   member:
     - openstack 
@@ -57,6 +58,7 @@ locale_additions:
         edit_attributes: 
           attributes: Attributes
           keystone_instance: Keystone
+          rabbitmq_instance: RabbitMQ
           service_user: Service user (for Keystone)
           service_password: Service password
       ceilometer_edit_deployment: 

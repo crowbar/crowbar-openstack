@@ -5,6 +5,7 @@
     "ceilometer": {
       "debug": true,
       "verbose": true,
+      "rabbitmq_instance": "none",
       "keystone_instance": "none",
       "user": "ceilometer",
       "service_user": "ceilometer",

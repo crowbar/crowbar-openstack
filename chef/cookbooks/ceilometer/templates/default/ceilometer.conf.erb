@@ -6,8 +6,11 @@ os_username = <%= @keystone_service_user %>
 policy_file = /etc/ceilometer/policy.json
 verbose = <%= @verbose ? "True" : "False" %>
 notification_topics = notifications,glance_notifications
-rabbit_password = <%= @rabbit_settings[:password] %>
 rabbit_host = <%= @rabbit_settings[:address] %>
+rabbit_port = <%= @rabbit_settings[:port] %>
+rabbit_userid = <%= @rabbit_settings[:user] %>
+rabbit_password = <%= @rabbit_settings[:password] %>
+rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 rpc_backend = ceilometer.openstack.common.rpc.impl_kombu
 db_connection = mongodb://<%= @db_host %>:27017/ceilometer
 

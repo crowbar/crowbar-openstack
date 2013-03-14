@@ -26,6 +26,7 @@ class CeilometerService < ServiceObject
 
   def proposal_dependencies(role)
     answer = []
+    answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["ceilometer"]["rabbitmq_instance"] }
     if role.default_attributes["ceilometer"]["use_gitrepo"]
       answer << { "barclamp" => "git", "inst" => role.default_attributes["ceilometer"]["git_instance"] }
     end
@@ -52,6 +53,21 @@ class CeilometerService < ServiceObject
       end
     rescue
       @logger.info("#{@bc_name} create_proposal: no git found")
+    end
+
+    base["attributes"][@bc_name]["rabbitmq_instance"] = ""
+    begin
+      rabbitmqService = RabbitmqService.new(@logger)
+      rabbits = rabbitmqService.list_active[1]
+      if rabbits.empty?
+        # No actives, look for proposals
+        rabbits = rabbitmqService.proposals[1]
+      end
+      unless rabbits.empty?
+        base["attributes"]["ceilometer"]["rabbitmq_instance"] = rabbits[0]
+      end
+    rescue
+      @logger.info("#{@bc_name} create_proposal: no rabbitmq found")
     end
 
     base["deployment"]["ceilometer"]["elements"] = {
