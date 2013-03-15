@@ -31,8 +31,6 @@
             "crowbar-revision": { "type": "int", "required": true },
             "crowbar-committing": { "type": "bool" },
             "crowbar-queued": { "type": "bool" },
-            "crowbar-status": { "type": "str" },
-            "crowbar-failed": { "type": "str" },
             "element_states": {
               "type": "map",
               "mapping": {
