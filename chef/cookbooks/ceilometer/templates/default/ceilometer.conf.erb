@@ -10,6 +10,7 @@ notification_topics = notifications,glance_notifications
 rabbit_password = <%= @rabbit_settings[:password] %>
 rabbit_host = <%= @rabbit_settings[:address] %>
 rpc_backend = ceilometer.openstack.common.rpc.impl_kombu
+db_connection = mongodb://<%= @db_host %>:27017/ceilometer
 
 [keystone_authtoken]
 signing_dir = /var/cache/ceilometer
@@ -17,4 +18,5 @@ admin_tenant_name = <%= @keystone_service_tenant %>
 admin_password = <%= @keystone_service_password %>
 admin_user = <%= @keystone_service_user %>
 auth_protocol = http
+
 

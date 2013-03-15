@@ -55,7 +55,7 @@
         "python-webob",
         "python-anyjson",
         "python-flask",
-        "python-jinja2"
+        "python-jinja2",
         "python-markupsafe",
         "python-stevedore",
         "pip://eventlet>=0.9.17",

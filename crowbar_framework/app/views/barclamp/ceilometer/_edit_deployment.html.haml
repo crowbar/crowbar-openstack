@@ -5,7 +5,9 @@
 :javascript
   $(document).ready(function(){
     var constraints = { 
-      "ceilometer-server": { "unique": false, "count": 1, "admin":false } 
+      "ceilometer-agent": { "unique": false, "count": 1, "admin":false },
+      "ceilometer-cagent": { "unique": false, "count": 1, "admin":false },
+      "ceilometer-server": { "unique": false, "count": 1, "admin":false }      
     };
     node_selector($('#drag_drop'), constraints);
   });
