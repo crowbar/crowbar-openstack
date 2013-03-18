@@ -30,7 +30,7 @@ default[:rabbitmq][:vhost] = "/nova"
 default[:rabbitmq][:nodename]  = node[:hostname]
 default[:rabbitmq][:address]  = nil
 default[:rabbitmq][:port]  = nil
-default[:rabbitmq][:config] = nil
+default[:rabbitmq][:configfile] = nil
 default[:rabbitmq][:logdir] = nil
 default[:rabbitmq][:mnesiadir] = nil
 #clustering

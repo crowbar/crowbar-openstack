@@ -33,7 +33,7 @@ crowbar:
 locale_additions:
   en:
     barclamp:
-      crowbar:
+      rabbitmq:
         edit_attributes:
           attributes: Attributes
           vhost: Virtual host
