@@ -64,7 +64,7 @@ if node[:quantum][:use_gitrepo]
   end
 end
 
-kern_release=`uname -r`
+kern_release=`uname -r`.strip
 package "linux-headers-#{kern_release}" do
     action :install
 end
