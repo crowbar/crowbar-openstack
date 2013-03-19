@@ -43,17 +43,37 @@ else
   end
 end
 
+include_recipe "#{@cookbook_name}::common"
+
+env_filter = " AND keystone_config_environment:keystone-config-#{node[:ceilometer][:keystone_instance]}"
+keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
+if keystones.length > 0
+  keystone = keystones[0]
+  keystone = node if keystone.name == node.name
+else
+  keystone = node
+end
+
+keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_token = keystone["keystone"]["service"]["token"]
+keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
+keystone_service_port = keystone["keystone"]["api"]["service_port"]
+keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
+keystone_service_user = node["ceilometer"]["keystone_service_user"]
+keystone_service_password = node["ceilometer"]["keystone_service_password"]
+Chef::Log.info("Keystone server found at #{keystone_address}")
+
 service "ceilometer-collector" do
   supports :status => true, :restart => true
   action :enable
+  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
 
 service "ceilometer-api" do
   supports :status => true, :restart => true
   action :enable
+  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
-
-include_recipe "#{@cookbook_name}::common"
 
 keystone_register "register ceilometer user" do
   host keystone_address
@@ -71,16 +91,16 @@ keystone_register "give ceilometer user access" do
   token keystone_token
   user_name keystone_service_user
   tenant_name keystone_service_tenant
-  role_name "admin"
+  role_name "ResellerAdmin"
   action :add_access
 end
 
 # Create ceilometer service
-ceilometer_register "register ceilometer service" do
+keystone_register "register ceilometer service" do
   host my_ipaddress
   port node[:ceilometer][:api][:port]
-  service_name "ceilometer-collector"
-  service_type "collector"
+  service_name "ceilometer"
+  service_type "metering"
   service_description "Openstack Collector Service"
   action :add_service
 end

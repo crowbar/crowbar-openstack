@@ -26,9 +26,6 @@ class CeilometerService < ServiceObject
 
   def proposal_dependencies(role)
     answer = []
-    if role.default_attributes["ceilometer"]["sql_engine"] == "mysql"
-      answer << { "barclamp" => "mysql", "inst" => role.default_attributes["ceilometer"]["mysql_instance"] }
-    end
     if role.default_attributes["ceilometer"]["use_gitrepo"]
       answer << { "barclamp" => "git", "inst" => role.default_attributes["ceilometer"]["git_instance"] }
     end
@@ -38,9 +35,6 @@ class CeilometerService < ServiceObject
   def create_proposal
     base = super
 
-    nodes = NodeObject.all
-    nodes.delete_if { |n| n.nil? or n.admin? }
-    
     agent_nodes = NodeObject.find("roles:nova-multi-compute")
 
     server_nodes = NodeObject.find("roles:nova-multi-controller")
@@ -60,36 +54,14 @@ class CeilometerService < ServiceObject
       @logger.info("#{@bc_name} create_proposal: no git found")
     end
 
-
-    base["attributes"]["ceilometer"]["mysql_instance"] = ""
-    begin
-      mysqlService = MysqlService.new(@logger)
-      # Look for active roles
-      mysqls = mysqlService.list_active[1]
-      if mysqls.empty?
-        # No actives, look for proposals
-        mysqls = mysqlService.proposals[1]
-      end
-      if mysqls.empty?
-        base["attributes"]["ceilometer"]["sql_engine"] = "sqlite"
-      else
-        base["attributes"]["ceilometer"]["mysql_instance"] = mysqls[0]
-        base["attributes"]["ceilometer"]["sql_engine"] = "mysql"
-      end
-    rescue
-      @logger.info("Ceilometercreate_proposal: no mysql found")
-      base["attributes"]["ceilometer"]["sql_engine"] = "sqlite"
-    end
-    
     base["deployment"]["ceilometer"]["elements"] = {
         "ceilometer-agent" =>  agent_nodes.map { |x| x.name },
         "ceilometer-cagent" =>  server_nodes.map { |x| x.name },
         "ceilometer-server" =>  server_nodes.map { |x| x.name }
-    } unless nodes.nil? or nodes.length ==0
+    } unless agent_nodes.nil? or server_nodes.nil?
 
-    base[:attributes][:ceilometer][:service][:token] = '%012d' % rand(1e12)
-    base["attributes"]["ceilometer"]["service_password"] = '%012d' % rand(1e12)
-
+    #base[:attributes][:ceilometer][:service][:token] = '%012d' % rand(1e12)
+    #base["attributes"]["ceilometer"]["service_password"] = '%012d' % rand(1e12)
 
     base
   end

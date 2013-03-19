@@ -6,8 +6,6 @@
       "debug": true,
       "verbose": true,
       "keystone_instance": "none",
-      "glance_instance": "none",
-      "mysql_instance": "none",
       "user": "ceilometer",
       "service_user": "ceilometer",
       "service_password": "",
