@@ -5,8 +5,11 @@
   %div.container
     = render 'barclamp/git/pfsdeps.html.haml'
     %p
-      %label{ :for => :service_user }= t('.service_user')
-      %input#service_user{:type => "text", :name => "service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["service_user"], :onchange => "update_value('service_user','service_user', 'string')"}
+      %label{ :for => :keystone_instance }= t('.keystone_instance')
+      = instance_selector("keystone", :keystone_instance, "keystone_instance", @proposal)
     %p
-      %label{ :for => :service_password }= t('.service_password')
-      %input#service_password{:type => "text", :name => "service_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["service_password"], :onchange => "update_value('service_password','service_password', 'string')"}
+      %label{ :for => :keystone_service_user }= t('.keystone_service_user')
+      %input#keystone_service_user{:type => "text", :name => "keystone_service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_service_user"], :onchange => "update_value('keystone_service_user','keystone_service_user', 'string')"}
+    %p
+      %label{ :for => :keystone_service_password }= t('.keystone_service_password')
+      %input#keystone_service_password{:type => "text", :name => "keystone_service_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_service_password"], :onchange => "update_value('keystone_service_password','keystone_service_password', 'string')"}

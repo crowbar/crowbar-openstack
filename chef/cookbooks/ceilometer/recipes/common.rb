@@ -36,8 +36,8 @@ keystone_token = keystone["keystone"]["service"]["token"]
 keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
-keystone_service_user = node[:swift][:keystone_service_user]
-keystone_service_password = node[:swift][:keystone_service_password]
+keystone_service_user = node["ceilometer"]["keystone_service_user"]
+keystone_service_password = node["ceilometer"]["keystone_service_password"]
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
 db_hosts = search(:node, "roles:ceilometer-server") || []
@@ -63,7 +63,7 @@ template "/etc/ceilometer/ceilometer.conf" do
       :keystone_service_password => keystone_service_password,
       :keystone_service_tenant => keystone_service_tenant,
       :keystone_admin_port => keystone_admin_port,
-      :db_host => db_host
+      :db_host => db_host.name
     )
 end
 
