@@ -32,21 +32,12 @@ else
   end
 end
 
+include_recipe "#{@cookbook_name}::common"
+
 service "ceilometer-agent-compute" do
   supports :status => true, :restart => true
   action :enable
-end
-
-include_recipe "#{@cookbook_name}::common"
-
-# Create ceilometer service
-  ceilometer_register "register ceilometer service" do
-  host my_ipaddress
-  #port node[:ceilometer][:api][:port]
-  service_name "ceilometer-agent-compute"
-  service_type "collector"
-  service_description "Openstack Collector Service"
-  action :add_service
+  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
 
 node.save

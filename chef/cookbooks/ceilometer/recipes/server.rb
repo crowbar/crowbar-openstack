@@ -43,17 +43,19 @@ else
   end
 end
 
+include_recipe "#{@cookbook_name}::common"
+
 service "ceilometer-collector" do
   supports :status => true, :restart => true
   action :enable
+  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
 
 service "ceilometer-api" do
   supports :status => true, :restart => true
   action :enable
+  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
-
-include_recipe "#{@cookbook_name}::common"
 
 keystone_register "register ceilometer user" do
   host keystone_address
@@ -71,7 +73,7 @@ keystone_register "give ceilometer user access" do
   token keystone_token
   user_name keystone_service_user
   tenant_name keystone_service_tenant
-  role_name "admin"
+  role_name "ResselerAdmin"
   action :add_access
 end
 
@@ -79,8 +81,8 @@ end
 ceilometer_register "register ceilometer service" do
   host my_ipaddress
   port node[:ceilometer][:api][:port]
-  service_name "ceilometer-collector"
-  service_type "collector"
+  service_name "ceilometer"
+  service_type "metering"
   service_description "Openstack Collector Service"
   action :add_service
 end
