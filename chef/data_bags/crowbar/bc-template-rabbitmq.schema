@@ -13,7 +13,7 @@
           "required": true,
           "mapping": {
             "port": { "type": "int", "required": true },
-            "password": { "type": "str", "required": true },
+            "password": { "type": "str" },
             "user": { "type": "str", "required": true },
             "vhost": { "type": "str", "required": true }
           }

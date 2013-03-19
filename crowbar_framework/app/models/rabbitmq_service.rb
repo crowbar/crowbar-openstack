@@ -41,7 +41,6 @@ class RabbitmqService < ServiceObject
     base["deployment"]["rabbitmq"]["elements"] = {
       "rabbitmq-server" => [ head.name ]
     }
-    base["attributes"][@bc_name]["password"] = '%012d' % rand(1e12)
 
     @logger.debug("Rabbitmq create_proposal: exiting")
     base
@@ -50,6 +49,15 @@ class RabbitmqService < ServiceObject
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Rabbitmq apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
+
+    om = old_role ? old_role.default_attributes["rabbitmq"] : {}
+    nm = role.default_attributes["rabbitmq"]
+    if om["password"]
+      nm["password"] = om["password"]
+    else
+      nm["password"] = random_password
+    end
+    role.save
 
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
   end
