@@ -63,6 +63,9 @@ keystone_service_user = node["ceilometer"]["keystone_service_user"]
 keystone_service_password = node["ceilometer"]["keystone_service_password"]
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
+my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+pub_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address rescue my_ipaddress
+
 service "ceilometer-collector" do
   supports :status => true, :restart => true
   action :enable
