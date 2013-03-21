@@ -23,6 +23,7 @@ venv_prefix = node[:cinder][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" 
 if node[:cinder][:use_gitrepo]
 
   pfs_and_install_deps "cinder" do
+    wrap_bins [ "cinder-rootwrap" ]
     path cinder_path
     virtualenv venv_path
   end
