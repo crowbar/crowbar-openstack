@@ -1,10 +1,14 @@
-define :cinder_service do
+define :cinder_service, :virtualenv => nil do
 
   cinder_name="cinder-#{params[:name]}"
+
+  cinder_path = "/opt/cinder"
+  venv_path = node[:cinder][:use_virtualenv] ? "#{cinder_path}/.venv" : nil
 
   if node[:cinder][:use_gitrepo]
     link_service cinder_name do
       user node[:cinder][:user]
+      virtualenv venv_path
     end
   else
     #TODO(agordeev):

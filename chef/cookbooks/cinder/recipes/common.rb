@@ -16,11 +16,16 @@
 # Recipe:: common
 #
 
-if node[:cinder][:use_gitrepo] 
-  cinder_path = "/opt/cinder"
- 
+cinder_path = "/opt/cinder"
+venv_path = node[:cinder][:use_virtualenv] ? "#{cinder_path}/.venv" : nil
+venv_prefix = node[:cinder][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
+
+if node[:cinder][:use_gitrepo]
+
   pfs_and_install_deps "cinder" do
+    wrap_bins [ "cinder-rootwrap" ]
     path cinder_path
+    virtualenv venv_path
   end
 
   create_user_and_dirs "cinder" do
