@@ -16,6 +16,7 @@
 
 default[:quantum][:debug] = true
 default[:quantum][:verbose] = true
+default[:quantum][:networking_mode] = "local"
 
 default[:quantum][:db][:database] = "quantum"
 default[:quantum][:db][:user] = "quantum"

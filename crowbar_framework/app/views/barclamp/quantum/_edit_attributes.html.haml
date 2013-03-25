@@ -8,6 +8,9 @@
       %label{ :for => :keystone_instance }= t('.keystone_instance')
       = instance_selector("keystone", :keystone_instance, "keystone_instance", @proposal)
     %p
+      %label{ :for => :rabbitmq_instance }= t('.rabbitmq_instance')
+      = instance_selector("rabbitmq", :rabbitmq_instance, "rabbitmq_instance", @proposal)
+    %p
       %label{ :for => :service_user }= t('.service_user')
       %input#service_user{:type => "text", :name => "service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["service_user"], :onchange => "update_value('service_user','service_user', 'string')"}
     %p
@@ -16,6 +19,9 @@
     %p
       %label{ :for => :sql_engine }= t('.sql_engine')
       = select_tag :sql_engine, options_for_select([['MySQL', 'mysql'], ['SQLite','sqlite']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "update_value('sql_engine', 'sql_engine', 'string')"
+    %p
+      %label{ :for => :networking_mode }= t('.networking_mode')
+      = select_tag :networking_mode, options_for_select([['flat', 'local'], ['vlan','vlan']], @proposal.raw_data['attributes'][@proposal.barclamp]["networking_mode"]), :onchange => "update_value('networking_mode', 'networking_mode', 'string')"
     %p
       %label{ :for => :mysql_instance }= t('.mysql_instance')
       = instance_selector("mysql", :mysql_instance, "mysql_instance", @proposal)

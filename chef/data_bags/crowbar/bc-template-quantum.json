@@ -11,6 +11,7 @@
       "use_gitbarclamp": true,
       "use_pip_cache": true,
       "use_gitrepo": true,
+      "rabbitmq_instance": "none",
       "keystone_instance": "none",
       "pfs_deps": [
         "python-eventlet",
@@ -28,6 +29,7 @@
       ],
       "debug": true,
       "verbose": true,
+      "networking_mode": "local",
       "use_syslog": false,
       "sql_engine": "mysql",
       "mysql_instance": "none",

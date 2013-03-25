@@ -32,6 +32,7 @@ class QuantumService < ServiceObject
     if role.default_attributes["quantum"]["use_gitrepo"]
       answer << { "barclamp" => "git", "inst" => role.default_attributes["quantum"]["git_instance"] }
     end
+    answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["quantum"]["rabbitmq_instance"] }
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes["quantum"]["keystone_instance"] }
     answer
   end
@@ -85,7 +86,7 @@ class QuantumService < ServiceObject
     base[:attributes][:quantum][:service][:token] = '%012d' % rand(1e12)
     base["attributes"]["quantum"]["service_password"] = '%012d' % rand(1e12)
 
-    insts = ["Keystone"]
+    insts = ["Keystone", "Rabbitmq"]
 
     insts.each do |inst|
       base["attributes"][@bc_name]["#{inst.downcase}_instance"] = ""

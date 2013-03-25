@@ -21,6 +21,7 @@ barclamp:
   version: 0
   requires:
     - mysql
+    - rabbitmq
   member:
     - openstack
 
@@ -37,11 +38,13 @@ locale_additions:
         edit_deployment: 
           deployment: Deployment
         edit_attributes:
+          rabbitmq_instance: RabbitMQ 
           keystone_instance: Keystone 
           service_user: Keystone Service User
           service_password: Keystone Service Password
           attributes: Attributes
           sql_engine: SQL Engine
+          networking_mode: Mode
           mysql_instance: MySQL Instance
           default-tenant: Default Tenant
           admin-username: Administrator Username

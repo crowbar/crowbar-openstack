@@ -64,7 +64,7 @@ if node[:quantum][:use_gitrepo]
   end
 end
 
-kern_release=`uname -r`
+kern_release=`uname -r`.strip
 package "linux-headers-#{kern_release}" do
     action :install
 end
@@ -187,9 +187,14 @@ else
 end
 metadata_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "public").address rescue nil
 metadata_port = "8775"
-per_tenant_vlan=nova[:nova][:network][:tenant_vlans] rescue false
+if node[:quantum][:networking_mode] != 'local'
+  per_tenant_vlan=true
+else
+  per_tenant_vlan=false
+end
 
-rabbits = search(:node, "recipes:nova\\:\\:rabbit") || []
+env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{node[:quantum][:rabbitmq_instance]}"
+rabbits = search(:node, "roles:rabbitmq-server#{env_filter}") || []
 if rabbits.length > 0
   rabbit = rabbits[0]
   rabbit = node if rabbit.name == node.name
@@ -198,21 +203,13 @@ else
 end
 rabbit_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(rabbit, "admin").address
 Chef::Log.info("Rabbit server found at #{rabbit_address}")
-if rabbit[:nova]
-  #agordeev:
-  # rabbit settings will work only after nova proposal be deployed
-  # and cinder services will be restarted then
-  rabbit_settings = {
-    :address => rabbit_address,
-    :port => rabbit[:nova][:rabbit][:port],
-    :user => rabbit[:nova][:rabbit][:user],
-    :password => rabbit[:nova][:rabbit][:password],
-    :vhost => rabbit[:nova][:rabbit][:vhost]
-  }
-else
-  rabbit_settings = nil
-end
-
+rabbit_settings = {
+  :address => rabbit_address,
+  :port => rabbit[:rabbitmq][:port],
+  :user => rabbit[:rabbitmq][:user],
+  :password => rabbit[:rabbitmq][:password],
+  :vhost => rabbit[:rabbitmq][:vhost]
+}
 
 
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:quantum][:keystone_instance]}"
@@ -307,6 +304,7 @@ template "/etc/quantum/quantum.conf" do
       :metadata_address => metadata_address,
       :metadata_port => metadata_port,
       :per_tenant_vlan => per_tenant_vlan,
+      :networking_mode => node[:quantum][:networking_mode],
       :vlan_start => vlan_start,
       :vlan_end => vlan_end
     )
@@ -447,14 +445,16 @@ ENV['OS_TENANT_NAME']="admin"
 ENV['OS_AUTH_URL']="http://#{keystone_address}:#{keystone_service_port}/v2.0/"
 
 
-if per_tenant_vlan
-  fixed_network_type="vlan --provider:segmentation_id #{fixed_net["vlan"]}"
+if node[:quantum][:networking_mode] == 'vlan'
+  fixed_network_type="--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
+elsif node[:quantum][:networking_mode] == 'gre'
+  fixed_network_type="--provider:network_type gre --provider:segmentation_id 1"
 else
-  fixed_network_type="flat"
+  fixed_network_type="--provider:network_type flat --provider:physical_network physnet1"
 end
 
 execute "create_fixed_network" do
-  command "quantum net-create fixed --shared --provider:network_type #{fixed_network_type} --provider:physical_network physnet1"
+  command "quantum net-create fixed --shared #{fixed_network_type}"
   not_if "quantum net-list | grep -q ' fixed '"
   ignore_failure true
   notifies :restart, resources(:service => "quantum")
@@ -593,7 +593,7 @@ if per_tenant_vlan
   ruby_block "get_private_networks" do
      block do
        require 'csv'
-       csv_data=`quantum subnet-list -c cidr -f csv -- --shared false`
+       csv_data=`quantum subnet-list -c cidr -f csv -- --shared false --enable_dhcp true`
        private_quantum_networks=CSV.parse(csv_data)
        private_quantum_networks.shift
        node.set[:quantum][:network][:private_networks]=private_quantum_networks
