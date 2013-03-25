@@ -108,19 +108,18 @@ keystone_register "register ceilometer service" do
   action :add_service
 end
 
-  keystone_register "register ceilometer endpoint" do
-    host keystone_address
-    port keystone_admin_port
-    token keystone_token
-    endpoint_service "ceilometer"
-    endpoint_region "RegionOne"
-    endpoint_publicURL "http://#{pub_ipaddress}:8777/"
-    endpoint_adminURL "http://#{my_ipaddress}:8777/"
-    endpoint_internalURL "http://#{my_ipaddress}:8777/"
+keystone_register "register ceilometer endpoint" do
+  host keystone_address
+  port keystone_admin_port
+  token keystone_token
+  endpoint_service "ceilometer"
+  endpoint_region "RegionOne"
+  endpoint_publicURL "http://#{pub_ipaddress}:8777/"
+  endpoint_adminURL "http://#{my_ipaddress}:8777/"
+  endpoint_internalURL "http://#{my_ipaddress}:8777/"
 #  endpoint_global true
 #  endpoint_enabled true
-    action :add_endpoint_template
-  end
+  action :add_endpoint_template
 end
 
 node.save
