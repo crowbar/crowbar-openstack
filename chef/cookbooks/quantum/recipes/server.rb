@@ -13,13 +13,23 @@
 # limitations under the License.
 #
 
+quantum_path = "/opt/quantum"
+venv_path = node[:quantum][:use_virtualenv] ? "#{quantum_path}/.venv" : nil
+venv_prefix = node[:quantum][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
+
+
 unless node[:quantum][:use_gitrepo]
   package "quantum" do
     action :install
   end
 else
-  pfs_and_install_deps(@cookbook_name)
+  pfs_and_install_deps @cookbook_name do
+    virtualenv venv_path
+    path quantum_path
+    wrap_bins [ "quantum" ]
+  end
   link_service @cookbook_name do
+    virtualenv venv_path
     bin_name "quantum-server --config-dir /etc/quantum/"
   end
   create_user_and_dirs(@cookbook_name)
@@ -54,12 +64,15 @@ end
 
 if node[:quantum][:use_gitrepo]
   link_service "quantum-openvswitch-agent" do
+    virtualenv venv_path
     bin_name "quantum-openvswitch-agent --config-dir /etc/quantum/"
   end
   link_service "quantum-dhcp-agent" do
+    virtualenv venv_path
     bin_name "quantum-dhcp-agent --config-dir /etc/quantum/"
   end
   link_service "quantum-l3-agent" do
+    virtualenv venv_path
     bin_name "quantum-l3-agent --config-dir /etc/quantum/"
   end
 end

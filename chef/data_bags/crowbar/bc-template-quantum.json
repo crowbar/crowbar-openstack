@@ -12,6 +12,7 @@
       "use_pip_cache": true,
       "use_gitrepo": true,
       "rabbitmq_instance": "none",
+      "use_virtualenv": true,
       "keystone_instance": "none",
       "pfs_deps": [
         "python-eventlet",
@@ -25,7 +26,8 @@
         "python-lxml",
         "python-pam",
         "python-iso8601",
-        "python-webob"
+        "python-webob",
+        "pip://python-keystoneclient"
       ],
       "debug": true,
       "verbose": true,
