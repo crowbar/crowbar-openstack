@@ -19,9 +19,9 @@ unless node[:ceilometer][:use_gitrepo]
   end
 else
   ceilometer_path = "/opt/ceilometer"
-  pfs_and_install_deps("ceilometer")
+  pfs_and_install_deps(@cookbook_name)
   link_service "ceilometer-agent-compute"
-  create_user_and_dirs(ceilometer-agent-compute) 
+  create_user_and_dirs(@cookbook_name) 
   execute "cp_policy.json" do
     command "cp #{ceilometer_path}/etc/policy.json /etc/ceilometer"
     creates "/etc/ceilometer/policy.json"

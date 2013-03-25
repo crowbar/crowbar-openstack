@@ -8,11 +8,11 @@
       "rabbitmq_instance": "none",
       "keystone_instance": "none",
       "user": "ceilometer",
-      "service_user": "ceilometer",
-      "service_password": "",
+      "keystone_service_user": "ceilometer",
+      "keystone_service_password": "secret",
       "gitrepo": "http://github.com/openstack/ceilometer.git",
       "git_instance": "",
-      "git_refspec": "2012.1.g3",
+      "git_refspec": "2013.1.g3",
       "use_gitrepo": true,
       "use_gitbarclamp": true,
       "use_pip_cache": true,
@@ -79,12 +79,20 @@
     "ceilometer": {
       "crowbar-revision": 0,
       "element_states": {
-        "ceilometer-server": [ "readying", "ready", "applying" ]
+        "ceilometer-server": [ "readying", "ready", "applying" ],
+        "ceilometer-cagent": [ "readying", "ready", "applying" ],
+        "ceilometer-agent": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-        [ "ceilometer-server" ]
+        [ "ceilometer-server" ],
+        [ "ceilometer-cagent", "ceilometer-agent" ]
       ],
+      "element_run_list_order": {
+        "ceilometer-server": 101,
+        "ceilometer-cagent": 102,
+        "ceilometer-agent": 103
+      },
       "config": {
         "environment": "ceilometer-base-config",
         "mode": "full",
