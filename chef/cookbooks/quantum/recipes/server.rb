@@ -26,7 +26,7 @@ else
   pfs_and_install_deps @cookbook_name do
     virtualenv venv_path
     path quantum_path
-    wrap_bins [ "quantum" ]
+    wrap_bins [ "quantum", "quantum-rootwrap" ]
   end
   link_service @cookbook_name do
     virtualenv venv_path
