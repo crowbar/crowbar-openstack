@@ -104,7 +104,8 @@ node[:cinder][:api][:bind_host] = my_ipaddress
 
 node[:cinder][:my_ip] = my_ipaddress
 
-rabbits = search(:node, "recipes:nova\\:\\:rabbit") || []
+rabbitmq_env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{node[:cinder][:rabbitmq_instance]}"
+rabbits = search(:node, "roles:rabbitmq-server#{rabbitmq_env_filter}") || []
 if rabbits.length > 0
   rabbit = rabbits[0]
   rabbit = node if rabbit.name == node.name
@@ -113,20 +114,13 @@ else
 end
 rabbit_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(rabbit, "admin").address
 Chef::Log.info("Rabbit server found at #{rabbit_address}")
-if rabbit[:nova]
-  #agordeev:
-  # rabbit settings will work only after nova proposal be deployed
-  # and cinder services will be restarted then
-  rabbit_settings = {
-    :address => rabbit_address,
-    :port => rabbit[:nova][:rabbit][:port],
-    :user => rabbit[:nova][:rabbit][:user],
-    :password => rabbit[:nova][:rabbit][:password],
-    :vhost => rabbit[:nova][:rabbit][:vhost]
-  }
-else
-  rabbit_settings = nil
-end
+rabbit_settings = {
+  :address => rabbit_address,
+  :port => rabbit[:rabbitmq][:port],
+  :user => rabbit[:rabbitmq][:user],
+  :password => rabbit[:rabbitmq][:password],
+  :vhost => rabbit[:rabbitmq][:vhost]
+}
 
 if node[:cinder][:volume][:volume_type] == "eqlx"
   Chef::Log.info("Pushing EQLX params to cinder.conf template")
