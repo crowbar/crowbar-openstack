@@ -19,7 +19,7 @@ barclamp:
   proposal_schema_version: 1
   version: 0
   requires:
-    - @crowbar
+    - '@crowbar'
     - git
     - mysql
     - rabbitmq
