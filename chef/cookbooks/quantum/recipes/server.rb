@@ -26,8 +26,25 @@ else
   pfs_and_install_deps @cookbook_name do
     virtualenv venv_path
     path quantum_path
-    wrap_bins [ "quantum" ]
+    wrap_bins [ "quantum", "quantum-rootwrap" ]
   end
+
+  env_filter = " AND keystone_config_environment:keystone-config-#{node[:quantum][:keystone_instance]}"
+  keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
+  if keystones.length > 0
+    keystone = keystones.first
+    keystone = node if keystone.name == node.name
+  else
+    keystone = node
+  end
+
+  pfs_and_install_deps "keystone" do
+    cookbook "keystone"
+    cnode keystone
+    path File.join(quantum_path,"keystone")
+    virtualenv venv_path
+  end
+
   link_service @cookbook_name do
     virtualenv venv_path
     bin_name "quantum-server --config-dir /etc/quantum/"

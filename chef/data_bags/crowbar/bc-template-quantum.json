@@ -11,7 +11,10 @@
       "use_gitbarclamp": true,
       "use_pip_cache": true,
       "use_gitrepo": true,
+<<<<<<< HEAD
       "rabbitmq_instance": "none",
+=======
+>>>>>>> feature/pfs/betty/grizzly
       "use_virtualenv": true,
       "keystone_instance": "none",
       "pfs_deps": [
