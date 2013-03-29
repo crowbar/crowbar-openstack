@@ -53,10 +53,11 @@
         "python-boto",
         "python-webob",
         "python-anyjson",
-        "pip://python-flask",
+        "pip://flask",
         "python-jinja2",
         "python-markupsafe",
-        "pip://python-stevedore",
+        "pip://stevedore",
+        "pip://oslo-config"
         "pip://eventlet>=0.9.17",
         "pip://setuptools_git>=0.4",
         "pip://python-quantumclient>=2.0",
