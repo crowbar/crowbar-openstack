@@ -56,7 +56,7 @@
         "pip://python-flask",
         "python-jinja2",
         "python-markupsafe",
-        "python-stevedore",
+        "pip://python-stevedore",
         "pip://eventlet>=0.9.17",
         "pip://setuptools_git>=0.4",
         "pip://python-quantumclient>=2.0",

@@ -17,6 +17,17 @@ package "mongodb" do
   action :install
 end
 
+service "mongodb" do
+  supports :status => true, :restart => true
+  action :enable
+end
+
+template "/etc/mongodb.conf" do
+  mode 0644
+  source mongodb.conf.erb
+  notifies :restart, resources(:service => "mongodb"), :immediately
+end
+
 unless node[:ceilometer][:use_gitrepo]
   package "ceilometer-common" do
     action :install
