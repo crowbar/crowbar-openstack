@@ -57,7 +57,7 @@
         "python-jinja2",
         "python-markupsafe",
         "pip://stevedore",
-        "pip://oslo-config"
+        "pip://oslo-config",
         "pip://eventlet>=0.9.17",
         "pip://setuptools_git>=0.4",
         "pip://python-quantumclient>=2.0",
