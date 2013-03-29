@@ -66,4 +66,4 @@ locale_additions:
         deployment: Deployment
 
 git_repo:
-  - ceilometer http://github.com/openstack/ceilometer.git 2013.1.g3
+  - ceilometer http://github.com/openstack/ceilometer.git 2013.1.rc1
