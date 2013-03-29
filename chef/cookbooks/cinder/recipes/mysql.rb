@@ -23,6 +23,10 @@
 
 include_recipe "mysql::client"
 
+cinder_path = "/opt/cinder"
+venv_path = node[:cinder][:use_virtualenv] ? "#{cinder_path}/.venv" : nil
+venv_prefix = node[:cinder][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
+
 # find mysql server configured by mysql-client
 env_filter = " AND mysql_config_environment:mysql-config-#{node[:cinder][:mysql_instance]}"
 db_server = search(:node, "roles:mysql-server#{env_filter}")
@@ -52,7 +56,7 @@ mysql_database "create cinder database user" do
 end
 
 execute "cinder-manage db sync" do
-  command "cinder-manage db sync"
+  command "#{venv_prefix}cinder-manage db sync"
   action :run
 end
 

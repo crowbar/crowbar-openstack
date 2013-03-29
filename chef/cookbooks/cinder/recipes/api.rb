@@ -22,6 +22,9 @@ include_recipe "#{@cookbook_name}::mysql"
 
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:cinder][:keystone_instance]}"
 
+cinder_path = "/opt/cinder"
+venv_path = node[:cinder][:use_virtualenv] ? "#{cinder_path}/.venv" : nil
+
 keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
 if keystones.length > 0
   keystone = keystones[0]
@@ -44,6 +47,8 @@ if node[:cinder][:use_gitrepo]
   pfs_and_install_deps "keystone" do
     cookbook "keystone"
     cnode keystone
+    path File.join(cinder_path,"keystone")
+    virtualenv venv_path
   end
 else
   package "python-keystone"
