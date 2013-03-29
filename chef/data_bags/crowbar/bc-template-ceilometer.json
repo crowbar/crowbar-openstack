@@ -58,7 +58,6 @@
         "pip://Flask==0.9",
         "python-jinja2",
         "python-markupsafe",
-        "pip://argparse",
         "pip://stevedore>=0.7",
         "pip://wsme>=0.5b1",
         "pip://pecan>=0.2.0",

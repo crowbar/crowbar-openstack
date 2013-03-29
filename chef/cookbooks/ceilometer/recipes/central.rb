@@ -23,11 +23,11 @@ else
   link_service "ceilometer-agent-central"
   create_user_and_dirs(@cookbook_name) 
   execute "cp_policy.json" do
-    command "cp #{ceilometer_path}/etc/policy.json /etc/ceilometer"
+    command "cp #{ceilometer_path}/etc/ceilometer/policy.json /etc/ceilometer"
     creates "/etc/ceilometer/policy.json"
   end
   execute "cp_pipeline.yaml" do
-    command "cp #{ceilometer_path}/etc/pipeline.yaml /etc/ceilometer"
+    command "cp #{ceilometer_path}/etc/ceilometer/pipeline.yaml /etc/ceilometer"
     creates "/etc/ceilometer/pipeline.yaml"
   end
 end
