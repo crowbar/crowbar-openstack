@@ -24,7 +24,7 @@ end
 
 template "/etc/mongodb.conf" do
   mode 0644
-  source mongodb.conf.erb
+  source "mongodb.conf.erb"
   notifies :restart, resources(:service => "mongodb"), :immediately
 end
 
