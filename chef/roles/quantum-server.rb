@@ -6,3 +6,4 @@ run_list(
   "recipe[quantum::monitor]"
 )
 
+override_attributes "quantum" => { "quantum_server" => "true" }
