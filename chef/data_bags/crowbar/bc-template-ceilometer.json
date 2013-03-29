@@ -53,7 +53,7 @@
         "python-boto",
         "python-webob",
         "python-anyjson",
-        "python-flask",
+        "pip://python-flask",
         "python-jinja2",
         "python-markupsafe",
         "python-stevedore",
