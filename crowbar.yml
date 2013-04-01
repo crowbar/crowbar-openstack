@@ -49,6 +49,7 @@ debs:
 #    - python-ceilometer
     - mongodb
     - python-keystone
+    - python-pymongo
 
 locale_additions:
   en:
