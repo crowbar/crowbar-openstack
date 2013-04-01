@@ -111,8 +111,9 @@ end
 
 # Create ceilometer service
 keystone_register "register ceilometer service" do
-  host my_ipaddress
-  port node[:ceilometer][:api][:port]
+  host keystone_address
+  port keystone_admin_port
+  token keystone_token
   service_name "ceilometer"
   service_type "metering"
   service_description "Openstack Collector Service"

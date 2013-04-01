@@ -27,6 +27,7 @@ class CeilometerService < ServiceObject
   def proposal_dependencies(role)
     answer = []
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["ceilometer"]["rabbitmq_instance"] }
+    answer << { "barclamp" => "keystone", "inst" => role.default_attributes["ceilometer"]["keystone_instance"] }
     if role.default_attributes["ceilometer"]["use_gitrepo"]
       answer << { "barclamp" => "git", "inst" => role.default_attributes["ceilometer"]["git_instance"] }
     end
