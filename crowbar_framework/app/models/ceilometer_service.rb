@@ -56,6 +56,22 @@ class CeilometerService < ServiceObject
       @logger.info("#{@bc_name} create_proposal: no git found")
     end
 
+    base["attributes"]["ceilometer"]["keystone_instance"] = ""
+    begin
+      keystoneService = KeystoneService.new(@logger)
+      keystones = keystoneService.list_active[1]
+      if keystones.empty?
+        # No actives, look for proposals
+        keystones = keystoneService.proposals[1]
+      end
+      if !keystones.empty?
+        base["attributes"]["ceilometer"]["keystone_instance"] = keystones[0]
+      end
+    rescue
+      @logger.info("ceilometer create_proposal: no keystone found")
+    end
+
+
     base["attributes"][@bc_name]["rabbitmq_instance"] = ""
     begin
       rabbitmqService = RabbitmqService.new(@logger)
