@@ -52,6 +52,34 @@ else
   glance = node
 end
 
+# Download and unpack tempest tarball
+
+tarball_url = node[:tempest][:tempest_tarball]
+filename = tarball_url.split('/').last
+
+puts ">>> tarbal url: #{tarball_url}"
+
+dst_dir = "/tmp"
+inst_dir = node[:tempest][:tempest_path]
+
+puts ">>> install path: #{inst_dir}"
+puts ">>> filename: #{filename}"
+
+system ("rm -r /opt/tempest")
+
+remote_file tarball_url do
+  source tarball_url
+  path "#{dst_dir}/#{filename}"
+  action :create_if_missing
+end
+
+bash "install_tempest_with_rigth_path" do
+  cwd dst_dir
+  code "tar xf #{dst_dir}/#{filename} && mv openstack-tempest-* tempest && mkdir -p $(dirname #{inst_dir}) && mv tempest/* $(dirname #{inst_dir})"
+  # TODO: use proposal attribute
+  not_if { ::File.exists?("#{inst_dir}") }
+end
+
 if node[:tempest][:use_virtualenv]
   package("python-virtualenv")
   package("python-dev")
@@ -81,27 +109,4 @@ else
   end
 end
 
-# Download and unpack tempest tarball
 
-tarball_url = node[:tempest][:tempest_tarball]
-filename = tarball_url.split('/').last
-dst_dir = "/tmp"
-inst_dir = node[:tempest][:tempest_path]
-
-remote_file tarball_url do
-  source tarball_url
-  path "#{dst_dir}/#{filename}"
-  action :create_if_missing
-end
-
-bash "install_tempest_with_rigth_path" do
-  cwd dst_dir
-  code <<-EOH
-tar xf #{dst_dir}/#{filename}
-mv openstack-tempest-* tempest
-mkdir -p $(dirname #{inst_dir})
-mv tempest $(dirname #{inst_dir})
-EOH
-  # TODO: use proposal attribute
-  not_if { ::File.exists?("#{inst_dir}") }
-end

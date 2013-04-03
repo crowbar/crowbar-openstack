@@ -124,6 +124,8 @@ end
 
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
 
+venv_prefix_path = node[:tempest][:use_virtualenv] ? ". /opt/tempest/.venv/bin/activate && " : nil
+
 bash "upload tempest test image" do
   code <<-EOH
 IMAGE_URL=${IMAGE_URL:-"http://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-uec.tar.gz"}
@@ -138,7 +140,7 @@ IMG_FILE=$(basename $IMAGE_URL)
 IMG_NAME="${IMG_FILE%-*}"
 
 function glance_it() {
-glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N http://$KEYSTONE_HOST:5000/v2.0 -H $GLANCE_HOST $@
+#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N http://$KEYSTONE_HOST:5000/v2.0 -H $GLANCE_HOST $@
 }
 
 function extract_id() {
@@ -185,13 +187,15 @@ EOH
   not_if { File.exists?(machine_id_file) }
 end
 
-venv_prefix_path = node[:tempest][:use_virtualenv] ? ". /opt/tempest/.venv/bin/activate && " : nil
-
 bash "create_yet_another_tiny_flavor" do
   code <<-EOH
   #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff #{alt_flavor_ref} 128 1 1 || exit 0
   #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff-2 #{flavor_ref} 132 1 1 || exit 0
 EOH
+end
+
+directory "#{node[:tempest][:tempest_path]}/etc" do
+  action :create
 end
 
 template "#{node[:tempest][:tempest_path]}/etc/tempest.conf" do
