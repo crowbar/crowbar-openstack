@@ -52,11 +52,25 @@ else
   glance = node
 end
 
+if node[:tempest][:use_virtualenv]
+  package("python-virtualenv")
+  package("python-dev")
+  directory "/opt/tempest/.venv" do
+    recursive true
+    owner "root"
+    group "root"
+    mode  0775
+    action :create
+  end
+  execute "virtualenv /opt/tempest/.venv --system-site-packages" unless File.exist?("/opt/tempest/.venv")
+  pip_cmd = ". /opt/tempest/.venv/bin/activate && #{pip_cmd}"
+end
+
 if nova[:nova][:use_gitrepo]!=true
   package "python-novaclient"
 else
   execute "pip_install_clients_python-novaclient_for_tempest" do
-    command "#{pip_cmd} 'python-glanceclient'"
+    command "#{pip_cmd} 'python-novaclient'"
   end
 end
 if glance[:glance][:use_gitrepo]!=true
@@ -66,7 +80,6 @@ else
     command "#{pip_cmd} 'python-glanceclient'"
   end
 end
-
 
 # Download and unpack tempest tarball
 
