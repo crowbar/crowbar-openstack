@@ -53,24 +53,21 @@ else
 end
 
 # Download and unpack tempest tarball
+
 tempest_path = node[:tempest][:tempest_path]
 tarball_url = node[:tempest][:tempest_tarball]
 filename = tarball_url.split('/').last
 
-directory tempest_path do
-  action :create
-end
-
 remote_file tarball_url do
   source tarball_url
-  path File.join(tempest_path,filename)
+  path File.join("tmp",filename)
   action :create_if_missing
 end
 
 bash "install_tempest_from_archive" do
-  cwd tempest_path
-  code "tar xf #{filename} && mv openstack-tempest-* openstack-tempest && mv openstack-tempest/* ./ && rm -r openstack-tempest #{filename}"
-  not_if { ::File.exists?(filename) }
+  cwd "/tmp"
+  code "tar xf #{filename} && mv openstack-tempest-* tempest && mv tempest /opt/ && rm #{filename}"
+  not_if { ::File.exists?(tempest_path) }
 end
 
 if node[:tempest][:use_virtualenv]
