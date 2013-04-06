@@ -3,8 +3,10 @@
   "description": "provides a tempest installation",
   "attributes": {
     "tempest": {
-      "tempest_tarball": "http://<ADMINWEB>/files/tempest/essex.tar.gz",
+      "tempest_tarball": "http://<ADMINWEB>/files/tempest/folsom.tar.gz",
       "tempest_test_image": "http://<ADMINWEB>/files/tempest/cirros-0.3.0-x86_64-uec.tar.gz",
+      "tempest_adm_password": "tempest",
+      "tempest_adm_username": "tempest",
       "tempest_user_password": "tempest",
       "tempest_user_username": "tempest",
       "tempest_user_tenant": "tempest",

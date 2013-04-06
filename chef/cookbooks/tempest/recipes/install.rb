@@ -21,8 +21,52 @@
 package "python-httplib2"
 package "python-nose"
 package "python-unittest2"
-package "glance-client"
-package "python-novaclient"
+
+begin
+  provisioner = search(:node, "roles:provisioner-server").first
+  proxy_addr = provisioner[:fqdn]
+  proxy_port = provisioner[:provisioner][:web_port]
+  pip_cmd = "pip install --index-url http://#{proxy_addr}:#{proxy_port}/files/pip_cache/simple/"
+rescue
+  pip_cmd="pip install"
+end
+
+#check if nova and glance use gitrepo or package
+env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
+
+novas = search(:node, "roles:nova-multi-controller#{env_filter}") || []
+if novas.length > 0
+  nova = novas[0]
+  nova = node if nova.name == node.name
+else
+  nova = node
+end
+
+env_filter = " AND glance_config_environment:glance-config-#{nova[:nova][:glance_instance]}"
+
+glances = search(:node, "roles:glance-server#{env_filter}") || []
+if glances.length > 0
+  glance = glances[0]
+  glance = node if glance.name == node.name
+else
+  glance = node
+end
+
+if nova[:nova][:use_gitrepo]!=true
+  package "python-novaclient"
+else
+  execute "pip_install_clients_python-novaclient_for_tempest" do
+    command "#{pip_cmd} 'python-glanceclient'"
+  end
+end
+if glance[:glance][:use_gitrepo]!=true
+  package "python-glanceclient"
+else
+  execute "pip_install_clients_python-glanceclient_for_tempest" do
+    command "#{pip_cmd} 'python-glanceclient'"
+  end
+end
+
 
 # Download and unpack tempest tarball
 
@@ -47,9 +91,4 @@ mv tempest $(dirname #{inst_dir})
 EOH
   # TODO: use proposal attribute
   not_if { ::File.exists?("#{inst_dir}") }
-end
-
-cookbook_file "#{inst_dir}/tempest/tests/test_flavors.py" do
-  mode "0664"
-  source "test_flavors.py"
 end
