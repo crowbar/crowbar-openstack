@@ -64,4 +64,4 @@ debs:
     - quantum-plugin-openvswitch
 
 git_repo:
-  - quantum https://github.com/openstack/quantum.git grizzly-1
+  - quantum https://github.com/openstack/quantum.git stable/grizzly
