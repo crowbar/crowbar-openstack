@@ -56,6 +56,9 @@ locale_additions:
 
 debs:
   ubuntu-12.04:
+    repos:
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
   pkgs:
     - quantum-common
     - quantum-server

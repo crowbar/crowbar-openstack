@@ -36,9 +36,12 @@ else
 end
 
 unless quantum[:quantum][:use_gitrepo]
-  package "quantum" do
-    action :install
-  end
+  ovs_pkgs = [ "linux-headers-#{`uname -r`.strip}",
+             "openvswitch-switch",
+             "openvswitch-datapath-dkms",
+             "quantum-plugin-openvswitch-agent"
+             ]
+  ovs_pkgs.each { |p| package p }
 else
   pfs_and_install_deps "quantum" do
     cookbook "quantum"
