@@ -17,21 +17,31 @@ include_recipe "quantum::database"
 include_recipe "quantum::api_register"
 include_recipe "quantum::common_install"
 
-quantum_path = "/opt/quantum"
-venv_path = node[:quantum][:use_virtualenv] ? "#{quantum_path}/.venv" : nil
-venv_prefix = node[:quantum][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
+unless node[:quantum][:use_gitrepo]
+  quantum_service_name="quantum-server"
+  pkgs = [ "quantum-server",
+           "quantum-l3-agent",
+           "quantum-dhcp-agent",
+           "quantum-plugin-openvswitch" ]
+  pkgs.each { |p| package p }
+else
+  quantum_service_name="quantum-server"
+  quantum_path = "/opt/quantum"
+  venv_path = node[:quantum][:use_virtualenv] ? "#{quantum_path}/.venv" : nil
+  venv_prefix = node[:quantum][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 
-link_service "quantum" do
-  virtualenv venv_path
-  bin_name "quantum-server --config-dir /etc/quantum/"
-end
-link_service "quantum-dhcp-agent" do
-  virtualenv venv_path
-  bin_name "quantum-dhcp-agent --config-dir /etc/quantum/"
-end
-link_service "quantum-l3-agent" do
-  virtualenv venv_path
-  bin_name "quantum-l3-agent --config-dir /etc/quantum/"
+  link_service "quantum" do
+    virtualenv venv_path
+    bin_name "quantum-server --config-dir /etc/quantum/"
+  end
+  link_service "quantum-dhcp-agent" do
+    virtualenv venv_path
+    bin_name "quantum-dhcp-agent --config-dir /etc/quantum/"
+  end
+  link_service "quantum-l3-agent" do
+    virtualenv venv_path
+    bin_name "quantum-l3-agent --config-dir /etc/quantum/"
+  end
 end
 
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:quantum][:keystone_instance]}"
@@ -85,7 +95,7 @@ template "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
   )
 end
 
-service "quantum" do
+service "#{quantum_service_name}" do
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/quantum/api-paste.ini]"), :immediately
@@ -112,5 +122,4 @@ node[:quantum][:monitor] = {} if node[:quantum][:monitor].nil?
 node[:quantum][:monitor][:svcs] = [] if node[:quantum][:monitor][:svcs].nil?
 node[:quantum][:monitor][:svcs] << ["quantum"] if node[:quantum][:monitor][:svcs].empty?
 node.save
-
 

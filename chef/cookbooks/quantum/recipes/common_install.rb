@@ -36,6 +36,7 @@ else
 end
 
 unless quantum[:quantum][:use_gitrepo]
+  service_name="quantum-plugin-openvswitch-agent"
   ovs_pkgs = [ "linux-headers-#{`uname -r`.strip}",
              "openvswitch-switch",
              "openvswitch-datapath-dkms",
@@ -43,6 +44,7 @@ unless quantum[:quantum][:use_gitrepo]
              ]
   ovs_pkgs.each { |p| package p }
 else
+  service_name="quantum-openvswitch-agent"
   pfs_and_install_deps "quantum" do
     cookbook "quantum"
     cnode quantum
@@ -63,7 +65,7 @@ else
     virtualenv venv_path
     bin_name "quantum-openvswitch-agent --config-dir /etc/quantum/"
   end
- 
+
   execute "quantum_cp_policy.json" do
     command "cp /opt/quantum/etc/policy.json /etc/quantum/"
     creates "/etc/quantum/policy.json"
@@ -98,10 +100,10 @@ service "openvswitch-switch" do
   action [ :enable, :start ]
 end
 
-service "quantum-openvswitch-agent" do
-  supports :status => true, :restart => true
-  action :enable
-end
+  service "#{service_name}" do
+    supports :status => true, :restart => true
+    action :enable
+  end
 
 Chef::Log.info("Configuring Quantum to use MySQL backend")
 
@@ -160,7 +162,7 @@ admin_password = keystone["keystone"]["admin"]["password"] rescue nil
 default_tenant = keystone["keystone"]["default"]["tenant"] rescue nil
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
-service "quantum-openvswitch-agent" do
+service "#{service_name}" do
   supports :status => true, :restart => true
   action :enable
 end
@@ -201,6 +203,6 @@ template "/etc/quantum/quantum.conf" do
       :vlan_start => vlan_start,
       :vlan_end => vlan_end
     )
-    notifies :restart, resources(:service => "quantum-openvswitch-agent"), :immediately
+    notifies :restart, resources(:service => "#{service_name}"), :immediately
 end
 
