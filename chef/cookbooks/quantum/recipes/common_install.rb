@@ -79,11 +79,22 @@ else
   end
 end
 
+rootwrap_bin = nil
+ENV['PATH'].split(':').each do |p|
+  f  =File.join(p,"quantum-rootwrap")
+  next unless File.executable?(f)
+  rootwrap_bin = f
+  break
+end
+
+raise("Could not find quantum rootwrap binary!") unless rootwrap_bin
+
 template "/etc/sudoers.d/quantum-rootwrap" do
   cookbook "quantum"
   source "quantum-rootwrap.erb"
   mode 0440
-  variables(:user => "quantum")
+  variables(:user => "quantum",
+            :binary => rootwrap_bin)
 end
 
 ovs_pkgs = [ "linux-headers-#{`uname -r`.strip}",
@@ -198,7 +209,8 @@ template "/etc/quantum/quantum.conf" do
       :per_tenant_vlan => per_tenant_vlan,
       :networking_mode => quantum[:quantum][:networking_mode],
       :vlan_start => vlan_start,
-      :vlan_end => vlan_end
+      :vlan_end => vlan_end,
+      :rootwrap_bin => rootwrap_bin
     )
     notifies :restart, resources(:service => quantum_agent), :immediately
 end
