@@ -24,6 +24,10 @@ unless node[:quantum][:use_gitrepo]
            "quantum-dhcp-agent",
            "quantum-plugin-openvswitch" ]
   pkgs.each { |p| package p }
+  file "/etc/default/quantum-server" do
+    action :delete
+    notifies :restart, "service[#{quantum_service_name}]"
+  end
 else
   quantum_service_name="quantum-server"
   quantum_path = "/opt/quantum"
