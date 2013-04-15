@@ -21,17 +21,25 @@ quantum_path = "/opt/quantum"
 venv_path = node[:quantum][:use_virtualenv] ? "#{quantum_path}/.venv" : nil
 venv_prefix = node[:quantum][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 
-link_service "quantum" do
-  virtualenv venv_path
-  bin_name "quantum-server --config-dir /etc/quantum/"
-end
-link_service "quantum-dhcp-agent" do
-  virtualenv venv_path
-  bin_name "quantum-dhcp-agent --config-dir /etc/quantum/"
-end
-link_service "quantum-l3-agent" do
-  virtualenv venv_path
-  bin_name "quantum-l3-agent --config-dir /etc/quantum/"
+unless quantum[:quantum][:use_gitrepo]
+  %w(quantum-server quantum-dhcp-agent quantum-l3-agent).each do |p|
+    package p do
+      action :install
+    end
+  end
+else
+  link_service "quantum" do
+    virtualenv venv_path
+    bin_name "quantum-server --config-dir /etc/quantum/"
+  end
+  link_service "quantum-dhcp-agent" do
+    virtualenv venv_path
+    bin_name "quantum-dhcp-agent --config-dir /etc/quantum/"
+  end
+  link_service "quantum-l3-agent" do
+    virtualenv venv_path
+    bin_name "quantum-l3-agent --config-dir /etc/quantum/"
+  end
 end
 
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:quantum][:keystone_instance]}"
