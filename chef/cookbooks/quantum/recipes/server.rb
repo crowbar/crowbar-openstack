@@ -21,7 +21,7 @@ quantum_path = "/opt/quantum"
 venv_path = node[:quantum][:use_virtualenv] ? "#{quantum_path}/.venv" : nil
 venv_prefix = node[:quantum][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 
-unless quantum[:quantum][:use_gitrepo]
+unless node[:quantum][:use_gitrepo]
   %w(quantum-server quantum-dhcp-agent quantum-l3-agent).each do |p|
     package p do
       action :install
