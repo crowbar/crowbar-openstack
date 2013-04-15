@@ -62,6 +62,13 @@ debs:
     - python-quantum
     - python-quantumclient
     - quantum-plugin-openvswitch
+    - quantum-plugin-linuxbridge
+    - quantum-dhcp-agent
+    - quantum-l3-agent
+    - quantum-lbaas-agent
+    - quantum-metadata-agent
+    - quantum-plugin-linuxbridge-agent
+    - quantum-plugin-openvswitch-agent
 
 git_repo:
   - quantum https://github.com/openstack/quantum.git stable/grizzly
