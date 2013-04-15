@@ -36,7 +36,7 @@ else
 end
 
 unless quantum[:quantum][:use_gitrepo]
-  package "quantum" do
+  package "quantum-plugin-openvswitch-agent" do
     action :install
   end
 else
@@ -86,8 +86,7 @@ end
 
 ovs_pkgs = [ "linux-headers-#{`uname -r`.strip}",
              "openvswitch-switch",
-             "openvswitch-datapath-dkms",
-             "quantum-plugin-openvswitch-agent"
+             "openvswitch-datapath-dkms"
            ]
 ovs_pkgs.each { |p| package p }
 
