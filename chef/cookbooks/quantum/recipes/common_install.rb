@@ -87,6 +87,7 @@ end
 ovs_pkgs = [ "linux-headers-#{`uname -r`.strip}",
              "openvswitch-switch",
              "openvswitch-datapath-dkms",
+             "quantum-plugin-openvswitch-agent"
            ]
 ovs_pkgs.each { |p| package p }
 
