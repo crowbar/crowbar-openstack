@@ -20,6 +20,7 @@ include_recipe "quantum::common_install"
 quantum_path = "/opt/quantum"
 venv_path = node[:quantum][:use_virtualenv] ? "#{quantum_path}/.venv" : nil
 venv_prefix = node[:quantum][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
+quantum_service = "quantum-server"
 
 unless node[:quantum][:use_gitrepo]
   %w(quantum-server quantum-dhcp-agent quantum-l3-agent).each do |p|
@@ -28,7 +29,8 @@ unless node[:quantum][:use_gitrepo]
     end
   end
 else
-  link_service "quantum" do
+  quantum_service = "quantum"
+  link_service quantum_service do
     virtualenv venv_path
     bin_name "quantum-server --config-dir /etc/quantum/"
   end
@@ -93,7 +95,7 @@ template "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
   )
 end
 
-service "quantum" do
+service quantum_service do
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/quantum/api-paste.ini]"), :immediately

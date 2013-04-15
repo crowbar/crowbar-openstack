@@ -19,6 +19,7 @@ if quantums.length > 0
 else
   quantum = node
 end
+quantum_agent="quantum-plugin-openvswitch-agent"
 
 quantum_path = "/opt/quantum"
 venv_path = quantum[:quantum][:use_virtualenv] ? "#{quantum_path}/.venv" : nil
@@ -36,10 +37,11 @@ else
 end
 
 unless quantum[:quantum][:use_gitrepo]
-  package "quantum-plugin-openvswitch-agent" do
+  package quantum_agent do
     action :install
   end
 else
+  quantum_agent = "quantum-openvswitch-agent"
   pfs_and_install_deps "quantum" do
     cookbook "quantum"
     cnode quantum
@@ -56,7 +58,7 @@ else
 
   create_user_and_dirs("quantum")
 
-  link_service "quantum-openvswitch-agent" do
+  link_service quantum_agent do
     virtualenv venv_path
     bin_name "quantum-openvswitch-agent --config-dir /etc/quantum/"
   end
@@ -95,7 +97,7 @@ service "openvswitch-switch" do
   action [ :enable, :start ]
 end
 
-service "quantum-openvswitch-agent" do
+service quantum_agent do
   supports :status => true, :restart => true
   action :enable
 end
@@ -157,7 +159,7 @@ admin_password = keystone["keystone"]["admin"]["password"] rescue nil
 default_tenant = keystone["keystone"]["default"]["tenant"] rescue nil
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
-service "quantum-openvswitch-agent" do
+service quantum_agent do
   supports :status => true, :restart => true
   action :enable
 end
@@ -198,6 +200,6 @@ template "/etc/quantum/quantum.conf" do
       :vlan_start => vlan_start,
       :vlan_end => vlan_end
     )
-    notifies :restart, resources(:service => "quantum-openvswitch-agent"), :immediately
+    notifies :restart, resources(:service => quantum_agent), :immediately
 end
 
