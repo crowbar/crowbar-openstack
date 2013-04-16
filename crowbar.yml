@@ -110,6 +110,24 @@ debs:
     - python-testresources
     - python-testtools
 
+pips:
+  - anyjson
+  - nose
+  - httplib2>=0.7.0
+  - testtools>=0.9.29
+  - lxml
+  - boto>=2.2.1
+  - paramiko
+  - netaddr
+  - python-glanceclient>=0.5.0
+  - python-keystoneclient>=0.2.0
+  - python-novaclient>=2.10.0
+  - python-quantumclient>=2.1
+  - testresources
+  - keyring
+  - testrepository
+  - oslo.config>=1.1.0
+
 extra_files:
   - http://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-uec.tar.gz tempest
   - https://github.com/openstack/tempest/tarball/stable/grizzly.tar.gz tempest
