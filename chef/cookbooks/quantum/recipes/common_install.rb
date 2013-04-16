@@ -79,22 +79,25 @@ else
   end
 end
 
-rootwrap_bin = nil
-ENV['PATH'].split(':').each do |p|
-  f  =File.join(p,"quantum-rootwrap")
-  next unless File.executable?(f)
-  rootwrap_bin = f
-  break
-end
-
-raise("Could not find quantum rootwrap binary!") unless rootwrap_bin
+ruby_block "Find quantum rootwrap" do
+  block do
+    ENV['PATH'].split(':').each do |p|
+      f  =File.join(p,"quantum-rootwrap")
+      next unless File.executable?(f)
+      node[:quantum] ||= Mash.new
+      node[:quantum][:rootwrap] = f
+      break
+    end
+    raise("Could not find quantum rootwrap binary!") unless node[:quantum][:rootwrap]
+  end
+end unless node[:quantum][:rootwrap]
 
 template "/etc/sudoers.d/quantum-rootwrap" do
   cookbook "quantum"
   source "quantum-rootwrap.erb"
   mode 0440
   variables(:user => "quantum",
-            :binary => rootwrap_bin)
+            :binary =>  node[:quantum][:rootwrap])
 end
 
 ovs_pkgs = [ "linux-headers-#{`uname -r`.strip}",
@@ -210,7 +213,7 @@ template "/etc/quantum/quantum.conf" do
       :networking_mode => quantum[:quantum][:networking_mode],
       :vlan_start => vlan_start,
       :vlan_end => vlan_end,
-      :rootwrap_bin => rootwrap_bin
+      :rootwrap_bin =>  node[:quantum][:rootwrap]
     )
     notifies :restart, resources(:service => quantum_agent), :immediately
 end
