@@ -11,46 +11,45 @@ import paramiko
 from cinder import exception
 from cinder import flags
 from cinder.openstack.common import log as logging
-from cinder.openstack.common import cfg
+from oslo.config import cfg
 from cinder.openstack.common import jsonutils
 from cinder import utils
-from cinder.volume.san import SanISCSIDriver
-
+from cinder.volume.drivers.san import SanISCSIDriver
 
 LOG = logging.getLogger(__name__)
 
 eqlx_opts = [
     cfg.StrOpt('eqlx_group_name',
-                default='group-0',
-                help='Group name to use for creating volumes'),
+        default='group-0',
+        help='Group name to use for creating volumes'),
     cfg.IntOpt('eqlx_ssh_keepalive_interval',
-               default=1200,
-               help='Seconds to wait before sending a keepalive packet'),
+        default=1200,
+        help='Seconds to wait before sending a keepalive packet'),
     cfg.IntOpt('eqlx_cli_timeout',
-               default=30,
-               help='Timeout for the Group Manager cli command execution'),
+        default=30,
+        help='Timeout for the Group Manager cli command execution'),
     cfg.IntOpt('eqlx_cli_max_retries',
-               default=5,
-               help='Maximum retry count for reconnection'),
+        default=5,
+        help='Maximum retry count for reconnection'),
     cfg.IntOpt('eqlx_cli_retries_timeout',
-               default=30,
-               help='Seconds to sleep before the next reconnection retry'),
+        default=30,
+        help='Seconds to sleep before the next reconnection retry'),
     cfg.BoolOpt('eqlx_use_chap',
-                default=False,
-                help='Use CHAP authentificaion for targets?'),
+        default=False,
+        help='Use CHAP authentificaion for targets?'),
     cfg.StrOpt('eqlx_chap_login',
-                default='admin',
-                help='Existing CHAP account name'),
+        default='admin',
+        help='Existing CHAP account name'),
     cfg.StrOpt('eqlx_chap_password',
-                default='password',
-                help='Password for specified CHAP account name'),
+        default='password',
+        help='Password for specified CHAP account name'),
     cfg.BoolOpt('eqlx_verbose_ssh',
-            default=False,
-            help='Print SSH debugging output to stderr'),
+        default=False,
+        help='Print SSH debugging output to stderr'),
     cfg.StrOpt('eqlx_pool',
-                default='default',
-                help='Pool in which volumes will be created')
-    ]
+        default='default',
+        help='Pool in which volumes will be created')
+]
 
 if __name__ != '__main__':
     FLAGS = flags.FLAGS
@@ -59,6 +58,7 @@ if __name__ != '__main__':
 
 class Timeout(Exception):
     pass
+
 
 def with_timeout(f):
     @functools.wraps(f)
@@ -79,6 +79,7 @@ def with_timeout(f):
 
     return __inner
 
+
 def monkey_patch_eventlet():
     """This monkey patch provides a workaround for the  
     ('_GreenThread' object has no attribute 'daemon') issue seen when using paramiko 
@@ -88,11 +89,14 @@ def monkey_patch_eventlet():
 
     if eventlet.__version__ < '0.9.17':
         _current_thread = threading.current_thread
+
         def current_thread():
             thread = _current_thread()
             thread.__dict__['daemon'] = True
             return thread
+
         threading.current_thread = current_thread
+
 
 class DellEQLSanISCSIDriver(SanISCSIDriver):
     """Implements commands for Dell EqualLogic SAN ISCSI management.
@@ -137,9 +141,10 @@ class DellEQLSanISCSIDriver(SanISCSIDriver):
         eqlx_verbose_ssh=True
     """
 
-    def __init__(self):
-        super(DellEQLSanISCSIDriver, self).__init__()
-        
+    def __init__(self, *args, **kwargs):
+        super(DellEQLSanISCSIDriver, self).__init__(*args, **kwargs)
+        self.configuration.append_config_values(eqlx_opts)
+
         if FLAGS.eqlx_verbose_ssh:
             logger = paramiko.util.logging.getLogger("paramiko")
             logger.setLevel(paramiko.util.DEBUG)
@@ -148,9 +153,29 @@ class DellEQLSanISCSIDriver(SanISCSIDriver):
         monkey_patch_eventlet()
 
     def _connect_to_ssh(self):
-        # NOTE(aandreev): storing a stong reference to the client to avoid 
+        # NOTE(aandreev): storing a stong reference to the client to avoid
         # it's removal by the garbage collection. paramiko is weird!
-        self.ssh_client = super(DellEQLSanISCSIDriver, self)._connect_to_ssh()
+
+        self.ssh_client = paramiko.SSHClient()
+        #TODO(justinsb): We need a better SSH key policy
+        self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        if FLAGS.san_password:
+            self.ssh_client.connect(FLAGS.san_ip,
+                                    port=FLAGS.san_ssh_port,
+                                    username=FLAGS.san_login,
+                                    password=FLAGS.san_password)
+        elif FLAGS.san_private_key:
+            privatekeyfile = os.path.expanduser(FLAGS.san_private_key)
+            # It sucks that paramiko doesn't support DSA keys
+            privatekey = paramiko.RSAKey.from_private_key_file(privatekeyfile)
+            self.ssh_client.connect(FLAGS.san_ip,
+                                    port=FLAGS.san_ssh_port,
+                                    username=FLAGS.san_login,
+                                    pkey=privatekey)
+        else:
+            msg = _("Specify san_password or san_private_key")
+            raise exception.InvalidInput(reason=msg)
+
         transport = self.ssh_client.get_transport()
         transport.set_keepalive(FLAGS.eqlx_ssh_keepalive_interval)
         return transport
@@ -160,19 +185,19 @@ class DellEQLSanISCSIDriver(SanISCSIDriver):
             if hasattr(self, 'ssh'):
                 try:
                     self._run_ssh('cli-settings', 'show',
-                                 timeout=FLAGS.eqlx_cli_timeout)
+                                  timeout=FLAGS.eqlx_cli_timeout)
                 except Exception as error:
                     LOG.debug(error)
                     LOG.info(_("Connection to SAN has been lost"))
                     delattr(self, 'ssh')
                 else:
                     LOG.debug(_("SAN connection is up"))
-                    return 
+                    return
             if try_no:
                 time.sleep(FLAGS.eqlx_cli_retries_timeout)
             try:
-                LOG.debug(_("Connecting to the SAN (%s@%s:%d)"), FLAGS.san_login, 
-                    FLAGS.san_ip, FLAGS.san_ssh_port)
+                LOG.debug(_("Connecting to the SAN (%s@%s:%d)"), FLAGS.san_login,
+                          FLAGS.san_ip, FLAGS.san_ssh_port)
                 self.ssh = self._connect_to_ssh()
                 LOG.info(_("Connected to the SAN after %d retries"), try_no)
             except Exception as error:
@@ -187,7 +212,7 @@ class DellEQLSanISCSIDriver(SanISCSIDriver):
     def set_execute(self, execute):
         """The only possible method of command exection here is SSH"""
         pass
-    
+
     def _execute(self, *args, **kwargs):
         command = ' '.join(args)
         try:
@@ -196,35 +221,35 @@ class DellEQLSanISCSIDriver(SanISCSIDriver):
             return self._run_ssh(command, timeout=FLAGS.eqlx_cli_timeout)
         except Timeout:
             msg = _("Timeout while executing EQL command: %(command)s") % \
-                                                                       locals()
+                  locals()
             raise exception.Error(msg)
 
     @with_timeout
     def _run_ssh(self, command, check_exit_code=True):
         chan = self.ssh.open_session()
         chan.invoke_shell()
-        
+
         if FLAGS.eqlx_verbose_ssh:
             LOG.debug(_("Reading CLI MOTD"))
         motd = self._get_output(chan)
-        
+
         cmd = "%s %s %s" % ('stty', 'columns', '255')
         if FLAGS.eqlx_verbose_ssh:
             LOG.debug(_("Setting CLI terminal width: '%s'"), cmd)
         chan.send(cmd + '\r')
         out = self._get_output(chan)
-        
+
         if FLAGS.eqlx_verbose_ssh:
             LOG.debug(_("Sending CLI command: '%s'"), command)
         chan.send(command + '\r')
         out = self._get_output(chan)
-        
+
         chan.close()
-        
+
         if any(line.startswith(('% Error', 'Error:')) for line in out):
             msg = _("Error executing EQL command: %(cmd)s") % locals()
             for line in out:
-              LOG.error(line)
+                LOG.error(line)
             raise exception.Error(msg, out)
         return out
 
@@ -256,7 +281,7 @@ class DellEQLSanISCSIDriver(SanISCSIDriver):
         model_update['provider_location'] = lun_id
         if FLAGS.eqlx_use_chap:
             model_update['provider_auth'] = 'CHAP %s %s' % \
-                    (FLAGS.eqlx_chap_login, FLAGS.eqlx_chap_password)
+                                            (FLAGS.eqlx_chap_login, FLAGS.eqlx_chap_password)
         return model_update
 
     def do_setup(self, context):
@@ -265,8 +290,7 @@ class DellEQLSanISCSIDriver(SanISCSIDriver):
                                  'formatoutput')
         for feature in disabled_cli_features:
             self._execute('cli-settings', feature, 'off')
-        
-        
+
         for line in self._execute('grpparams', 'show'):
             if line.startswith('Group-Ipaddress:'):
                 _nop, _nop, self._group_ip = line.rstrip().partition(' ')
@@ -292,23 +316,23 @@ class DellEQLSanISCSIDriver(SanISCSIDriver):
     def create_snapshot(self, snapshot):
         """"Create snapshot of existing volume on appliance"""
         out = self._execute('volume', 'select', snapshot['volume_name'],
-                                  'snapshot', 'create-now')
+                            'snapshot', 'create-now')
         prefix = 'Snapshot name is '
         snap_name = self._get_prefixed_value(out, prefix)
         self._execute('volume', 'select', snapshot['volume_name'],
-                            'snapshot', 'rename', snap_name, snapshot['name'])
+                      'snapshot', 'rename', snap_name, snapshot['name'])
 
     def create_volume_from_snapshot(self, volume, snapshot):
         """Create new volume from other volume's snapshot on appliance"""
         out = self._execute('volume', 'select', snapshot['volume_name'],
-                                  'snapshot', 'select', snapshot['name'],
-                                  'clone', volume['name'])
+                            'snapshot', 'select', snapshot['name'],
+                            'clone', volume['name'])
         return self._get_volume_data(out)
 
     def delete_snapshot(self, snapshot):
         """Delete volume's snapshot"""
         self._execute('volume', 'select', snapshot['volume_name'],
-                            'snapshot', 'delete', snapshot['name'])
+                      'snapshot', 'delete', snapshot['name'])
 
     def initialize_connection(self, volume, connector):
         """Restrict access to a volume"""
@@ -326,7 +350,7 @@ class DellEQLSanISCSIDriver(SanISCSIDriver):
     def terminate_connection(self, volume, connector):
         """Remove access restictions from a volume"""
         self._execute('volume', 'select', volume['name'],
-                            'access', 'delete', '1')
+                      'access', 'delete', '1')
 
     def create_export(self, context, volume):
         """Create an export of a volume
@@ -353,6 +377,7 @@ class DellEQLSanISCSIDriver(SanISCSIDriver):
     def local_path(self, volume):
         raise NotImplementedError()
 
+
 if __name__ == "__main__":
     """The following code make it possible to execute a set of arbitrary commands 
     on the SAN without starting up the nova-volume service. The script requires no 
@@ -368,10 +393,10 @@ if __name__ == "__main__":
     utils.default_flagfile()
     args = flags.FLAGS(sys.argv)
     logging.setup()
-    
+
     utils.monkey_patch()
     volume_driver = utils.import_object(FLAGS.volume_driver)
-    
+
     volume_driver.do_setup(None)
     volume_driver.check_for_setup_error()
 
