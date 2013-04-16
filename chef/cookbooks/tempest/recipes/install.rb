@@ -52,11 +52,43 @@ else
   glance = node
 end
 
+# Download and unpack tempest tarball
+
+tempest_path = node[:tempest][:tempest_path]
+tarball_url = node[:tempest][:tempest_tarball]
+filename = tarball_url.split('/').last
+
+remote_file tarball_url do
+  source tarball_url
+  path File.join("tmp",filename)
+  action :create_if_missing
+end
+
+bash "install_tempest_from_archive" do
+  cwd "/tmp"
+  code "tar xf #{filename} && mv openstack-tempest-* tempest && mv tempest /opt/ && rm #{filename}"
+  not_if { ::File.exists?(tempest_path) }
+end
+
+if node[:tempest][:use_virtualenv]
+  package("python-virtualenv")
+  package("python-dev")
+  directory "/opt/tempest/.venv" do
+    recursive true
+    owner "root"
+    group "root"
+    mode  0775
+    action :create
+  end
+  execute "virtualenv /opt/tempest/.venv --system-site-packages" unless File.exist?("/opt/tempest/.venv")
+  pip_cmd = ". /opt/tempest/.venv/bin/activate && #{pip_cmd}"
+end
+
 if nova[:nova][:use_gitrepo]!=true
   package "python-novaclient"
 else
   execute "pip_install_clients_python-novaclient_for_tempest" do
-    command "#{pip_cmd} 'python-glanceclient'"
+    command "#{pip_cmd} 'python-novaclient'"
   end
 end
 if glance[:glance][:use_gitrepo]!=true
@@ -68,27 +100,3 @@ else
 end
 
 
-# Download and unpack tempest tarball
-
-tarball_url = node[:tempest][:tempest_tarball]
-filename = tarball_url.split('/').last
-dst_dir = "/tmp"
-inst_dir = node[:tempest][:tempest_path]
-
-remote_file tarball_url do
-  source tarball_url
-  path "#{dst_dir}/#{filename}"
-  action :create_if_missing
-end
-
-bash "install_tempest_with_rigth_path" do
-  cwd dst_dir
-  code <<-EOH
-tar xf #{dst_dir}/#{filename}
-mv openstack-tempest-* tempest
-mkdir -p $(dirname #{inst_dir})
-mv tempest $(dirname #{inst_dir})
-EOH
-  # TODO: use proposal attribute
-  not_if { ::File.exists?("#{inst_dir}") }
-end

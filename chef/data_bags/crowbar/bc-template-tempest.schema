@@ -20,6 +20,7 @@
             "tempest_user_username": { "type": "str", "required": true },
             "tempest_user_tenant": { "type": "str", "required": true },
             "tempest_test_image": { "type": "str", "required": true },
+            "use_virtualenv": { "type": "bool", "required": true },
             "tempest_path" : {"type": "str", "required": true }
           }
         }
