@@ -22,6 +22,7 @@ barclamp:
   requires:
     - mysql
     - rabbitmq
+    - keystone
   member:
     - openstack
 
