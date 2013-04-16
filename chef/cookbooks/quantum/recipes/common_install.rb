@@ -62,7 +62,7 @@ else
     virtualenv venv_path
     bin_name "quantum-openvswitch-agent --config-dir /etc/quantum/"
   end
- 
+
   execute "quantum_cp_policy.json" do
     command "cp /opt/quantum/etc/policy.json /etc/quantum/"
     creates "/etc/quantum/policy.json"
