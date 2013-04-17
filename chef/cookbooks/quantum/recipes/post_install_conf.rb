@@ -211,18 +211,16 @@ if per_tenant_vlan
   end
 end
 
-#execute "move_fixed_ip" do
-#  command "ip address flush dev #{fixed_interface} ; ip address flush dev #{flat_network_bridge} ; ifconfig br-fixed #{fixed_address} netmask #{fixed_mask}"
-#  not_if "ip addr show br-fixed | grep -q #{fixed_address}"
-#end
-
-#i dunno how to deal with this in proper way
-#currently if public and floating net share the same l2 crowbar bring up single physical iface for this diffent entyties, so we have to deal somehow with this behavior
-if networks_params_equal? netw1, netw2, keys_list
-  public_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
-  public_mask = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").netmask
-  execute "move_public_ip_#{public_address}_from_#{public_interface}_to_br-public" do
-    command "ip addr flush dev #{public_interface} ; ifconfig br-public #{public_address} netmask #{public_mask}"
-    not_if "ip addr show br-public | grep -q #{public_address}"
+{
+  "br-fixed" => fixed_interface,
+  "br-public" => public_interface
+}.each do |t,v|
+  ruby_block "#{t} usurps interface  #{v}" do
+    block do
+      target = ::Nic.new(t)
+      res = target.usurp(v)
+      Chef::Log.info("#{t} usurped #{res[0].join(", ")} addresses from #{v}") unless res[0].empty?
+      Chef::Log.info("#{t} usurped #{res[1].join(", ")} routes from #{v}") unless res[1].empty?
+    end
   end
 end
