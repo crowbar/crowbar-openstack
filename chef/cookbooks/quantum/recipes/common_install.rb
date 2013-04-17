@@ -106,9 +106,19 @@ ovs_pkgs = [ "linux-headers-#{`uname -r`.strip}",
            ]
 ovs_pkgs.each { |p| package p }
 
+bash "Load openvswitch module" do
+  code "modprobe openvswitch"
+  not_if do ::File.directory?("/sys/module/openvswitch") end
+end
+
 service "openvswitch-switch" do
   supports :status => true, :restart => true
-  action [ :enable, :start ]
+  action [ :enable ]
+end
+
+bash "Start openvswitch-switch service" do
+  code "service openvswitch-switch start"
+  only_if "service openvswitch-switch status |grep -q 'is not running'"
 end
 
 service quantum_agent do
