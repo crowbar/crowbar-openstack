@@ -22,6 +22,7 @@ barclamp:
   requires:
     - mysql
     - rabbitmq
+    - keystone
   member:
     - openstack
 
@@ -56,12 +57,23 @@ locale_additions:
 
 debs:
   ubuntu-12.04:
+    repos:
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
   pkgs:
-    - quantum-common
-    - quantum-server
+    - openvswitch-common
+    - openvswitch-switch
     - python-quantum
     - python-quantumclient
+    - quantum-common
+    - quantum-dhcp-agent
+    - quantum-l3-agent
+    - quantum-metadata-agent
+    - quantum-plugin-linuxbridge
+    - quantum-plugin-linuxbridge-agent
     - quantum-plugin-openvswitch
+    - quantum-plugin-openvswitch-agent
+    - quantum-server
 
 git_repo:
   - quantum https://github.com/openstack/quantum.git stable/grizzly

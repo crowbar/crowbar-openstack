@@ -80,29 +80,25 @@ end
 execute "create_fixed_network" do
   command "quantum net-create fixed --shared #{fixed_network_type}"
   not_if "quantum net-list | grep -q ' fixed '"
-  ignore_failure true
 end
+
 execute "create_floating_network" do
   command "quantum net-create floating --router:external=True"
   not_if "quantum net-list | grep -q ' floating '"
-  ignore_failure true
 end
 
 execute "create_fixed_subnet" do
   command "quantum subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} --gateway #{fixed_router_pool_end} fixed #{fixed_range}"
   not_if "quantum subnet-list | grep -q ' fixed '"
-  ignore_failure true
 end
 execute "create_floating_subnet" do
   command "quantum subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} --gateway #{public_router} floating #{public_range} --enable_dhcp False"
   not_if "quantum subnet-list | grep -q ' floating '"
-  ignore_failure true
 end
 
 execute "create_router" do
   command "quantum router-create router-floating ; quantum router-gateway-set router-floating floating ; quantum router-interface-add router-floating fixed"
   not_if "quantum router-list | grep -q router-floating"
-  ignore_failure true
 end
 
 
@@ -148,18 +144,22 @@ execute "create_int_br" do
   command "ovs-vsctl add-br br-int"
   not_if "ovs-vsctl list-br | grep -q br-int"
 end
+
 execute "create_fixed_br" do
   command "ovs-vsctl add-br br-fixed"
   not_if "ovs-vsctl list-br | grep -q br-fixed"
 end
+
 execute "create_public_br" do
   command "ovs-vsctl add-br br-public"
   not_if "ovs-vsctl list-br | grep -q br-public"
 end
+
 execute "add_fixed_port_#{flat_network_bridge}" do
   command "ovs-vsctl del-port br-fixed #{flat_network_bridge} ; ovs-vsctl add-port br-fixed #{flat_network_bridge}"
   not_if "ovs-dpctl show system@br-fixed | grep -q #{flat_network_bridge}"
 end
+
 execute "add_public_port_#{public_interface}" do
   command "ovs-vsctl del-port br-public #{public_interface} ; ovs-vsctl add-port br-public #{public_interface}"
   not_if "ovs-dpctl show system@br-public | grep -q #{public_interface}"
@@ -171,11 +171,11 @@ ruby_block "get_fixed_net_router" do
   block do
     require 'csv'
     require 'json'
-    csv_data = `quantum router-port-list -F fixed_ips -f csv router-floating -- --device_owner network:router_gateway`
-    node.set[:quantum][:network][:fixed_router] = JSON.parse(CSV.parse(csv_data)[1].join)["ip_address"]
+    csv_data = `quantum router-port-list -f csv router-floating -- --device_owner network:router_gateway`
+    Chef::Log.info(csv_data)
+    node.set[:quantum][:network][:fixed_router] = JSON.parse(CSV.parse(csv_data)[1][-1])["ip_address"]
     node.save
   end
-  ignore_failure true
   only_if { node[:quantum][:network][:fixed_router] == "127.0.0.1" }
 end
 
@@ -196,7 +196,6 @@ if per_tenant_vlan
       node.set[:quantum][:network][:private_networks] = private_quantum_networks
       node.save
     end
-    ignore_failure true
   end
 
   ruby_block "add_floating_router_to_private_networks" do
@@ -209,11 +208,8 @@ if per_tenant_vlan
         system("quantum router-interface-add router-floating #{subnet_id}")
       end
     end
-    ignore_failure true
   end
 end
-
-
 
 #execute "move_fixed_ip" do
 #  command "ip address flush dev #{fixed_interface} ; ip address flush dev #{flat_network_bridge} ; ifconfig br-fixed #{fixed_address} netmask #{fixed_mask}"

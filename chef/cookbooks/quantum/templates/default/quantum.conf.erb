@@ -5,7 +5,7 @@ verbose = <%= @verbose ? "True" : "False" %>
 # Show debugging output in logs (sets DEBUG log level output)
 debug = <%= @debug ? "True" : "False" %>
 
-root_helper=sudo /usr/local/bin/quantum-rootwrap /etc/quantum/rootwrap.conf
+root_helper=sudo <%=@rootwrap_bin%> /etc/quantum/rootwrap.conf
 
 # Log to this file. Make sure you do not set the same log
 # file for both the API and registry servers!
@@ -114,7 +114,7 @@ api_extensions_path =
 # Default: tenant_network_type = local
 # Example: tenant_network_type = gre
 
-root_helper=sudo /usr/local/bin/quantum-rootwrap /etc/quantum/rootwrap.conf
+root_helper=sudo <%=@rootwrap_bin%> /etc/quantum/rootwrap.conf
 
 
 # (ListOpt) Comma-separated list of
@@ -228,6 +228,6 @@ paste.app_factory = quantum.api:APIRouterV10.factory
 paste.app_factory = quantum.api:APIRouterV11.factory
 
 [AGENT]
-root_helper=sudo /usr/local/bin/quantum-rootwrap /etc/quantum/rootwrap.conf
+root_helper=sudo <%=@rootwrap_bin%> /etc/quantum/rootwrap.conf
 polling_interval = 2
 
