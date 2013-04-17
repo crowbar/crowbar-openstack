@@ -171,9 +171,9 @@ ruby_block "get_fixed_net_router" do
   block do
     require 'csv'
     require 'json'
-    csv_data = `quantum router-port-list -F fixed_ips -f csv router-floating -- --device_owner network:router_gateway`
+    csv_data = `quantum router-port-list -f csv router-floating -- --device_owner network:router_gateway`
     Chef::Log.info(csv_data)
-    node.set[:quantum][:network][:fixed_router] = JSON.parse(CSV.parse(csv_data)[1].join)["ip_address"]
+    node.set[:quantum][:network][:fixed_router] = JSON.parse(CSV.parse(csv_data)[1][-1])["ip_address"]
     node.save
   end
   only_if { node[:quantum][:network][:fixed_router] == "127.0.0.1" }
