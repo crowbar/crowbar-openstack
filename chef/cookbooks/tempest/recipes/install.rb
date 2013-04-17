@@ -85,6 +85,7 @@ if node[:tempest][:use_virtualenv]
 end
 
 execute "pip_install_reqs_for_tempest" do
+  cwd "/opt/tempest/"
   command "#{pip_cmd} -r tools/pip-requires"
 end
 
@@ -100,7 +101,6 @@ if glance[:glance][:use_gitrepo]!=true
   package "python-glanceclient"
 else
   execute "pip_install_clients_python-glanceclient_for_tempest" do
-    cwd install_path
     command "#{pip_cmd} 'python-glanceclient'"
   end
 end
