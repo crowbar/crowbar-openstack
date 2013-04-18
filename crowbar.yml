@@ -40,13 +40,15 @@ debs:
     repos:
       - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
       - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
   pkgs:
-#    - ceilometer-agent-central
-#    - ceilometer-agent-compute
-#    - ceilometer-api
-#    - ceilometer-collector
-#    - ceilometer-common
-#    - python-ceilometer
+    - ceilometer-agent-central
+    - ceilometer-agent-compute
+    - ceilometer-api
+    - ceilometer-collector
+    - ceilometer-common
+    - python-ceilometer
     - mongodb
     - python-keystone
     - python-pymongo
