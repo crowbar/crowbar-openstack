@@ -38,4 +38,5 @@ echo "Starting tempest smoke tests..."
 # use -x option to stop after first failed testcase
 #root_do "$tempest_ip" 'nosetests -w /opt/tempest/ -v -x tempest -a type=smoke'
 # to run all tests
-root_do "$tempest_ip" 'if [ -x /opt/tempest/.venv/bin/python ]; then /opt/tempest/.venv/bin/python /usr/bin/nosetests -w /opt/tempest/ -v tempest ; else nosetests -w /opt/tempest/ -v tempest ; fi'
+root_do "$tempest_ip" "/tmp/tempest_smoketest.sh"
+

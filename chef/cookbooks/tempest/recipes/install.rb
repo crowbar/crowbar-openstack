@@ -70,6 +70,8 @@ bash "install_tempest_from_archive" do
   not_if { ::File.exists?(tempest_path) }
 end
 
+nosetests=`which nosetests`.strip
+
 if node[:tempest][:use_virtualenv]
   package("python-virtualenv")
   package("python-dev")
@@ -82,6 +84,7 @@ if node[:tempest][:use_virtualenv]
   end
   execute "virtualenv /opt/tempest/.venv --system-site-packages" unless File.exist?("/opt/tempest/.venv")
   pip_cmd = ". /opt/tempest/.venv/bin/activate && #{pip_cmd}"
+  nosetests = "/opt/tempest/.venv/bin/python #{nosetests}"
 end
 
 execute "pip_install_reqs_for_tempest" do
@@ -104,3 +107,12 @@ else
     command "#{pip_cmd} 'python-glanceclient'"
   end
 end
+
+template "/tmp/tempest_smoketest.sh" do
+  mode 0755
+  source "tempest_smoketest.sh.erb"
+  variables(
+    :nosetests => nosetests
+  )
+end
+
