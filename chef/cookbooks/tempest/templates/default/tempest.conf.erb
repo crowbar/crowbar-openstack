@@ -22,6 +22,32 @@ path = tokens
 # Should typically be left as keystone unless you have a non-Keystone
 # authentication API service
 strategy = keystone
+disable_ssl_certificate_validation = True
+
+uri = http://<%= @key_host %>:<%= @key_port %>/v2.0/
+
+# This should be the username of a user WITHOUT administrative privileges
+username = <%= @comp_user %>
+# The above non-administrative user's password
+password = <%= @comp_pass %>
+# The above non-administrative user's tenant name
+tenant_name = <%= @comp_tenant %>
+
+# This should be the username of an alternate user WITHOUT
+# administrative privileges
+alt_username = <%= @alt_comp_user %>
+# The above non-administrative user's password
+alt_password = <%= @alt_comp_pass %>
+# The above non-administrative user's tenant name
+alt_tenant_name = <%= @alt_comp_tenant %>
+
+# This should be the username of a user WITH administrative privileges
+admin_username = <%= @comp_admin_user %>
+# The above administrative user's password
+admin_password = <%= @comp_admin_pass %>
+# The above administrative user's tenant name
+admin_tenant_name = <%= @comp_admin_tenant %>
+
 
 [compute]
 # This section contains configuration options used when executing tests
@@ -160,7 +186,7 @@ tenant_name = <%= @comp_admin_tenant %>
 # against the OpenStack Network API.
 
 # Version of the Quantum API
-api_version = v1.1
+api_version = v2.0
 # Catalog type of the Quantum Service
 catalog_type = network
 
