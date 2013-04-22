@@ -5,7 +5,7 @@
 :javascript
   $(document).ready(function(){
     var constraints = {  
-      "quantum-server": { "unique": false, "count": -1 }
+      "quantum-server": { "unique": true, "count": 1 }
     };
     node_selector($('#drag_drop'), constraints);
   });
