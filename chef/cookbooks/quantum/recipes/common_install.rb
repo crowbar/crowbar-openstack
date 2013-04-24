@@ -191,7 +191,7 @@ end
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 vlan_end = vlan_start + 2000
 
-if quantum[:quantum][:use_gitrepo]
+unless quantum[:quantum][:use_gitrepo]
   link "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
     to "/etc/quantum/quantum.conf"
     notifies :restart, resources(:service => quantum_agent), :immediately
