@@ -89,22 +89,33 @@ directory "/etc/quantum/plugins/openvswitch/" do
    recursive true
 end
 
-template "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
-  source "ovs_quantum_plugin.ini.erb"
-  owner "quantum"
-  group "root"
-  mode "0640"
-  variables(
-      :ovs_sql_connection => node[:quantum][:ovs_sql_connection]
-  )
-end
-
-service quantum_service_name do
-  supports :status => true, :restart => true
-  action :enable
-  subscribes :restart, resources("template[/etc/quantum/api-paste.ini]"), :immediately
-  subscribes :restart, resources("template[/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini]"), :immediately
-  subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
+unless node[:quantum][:use_gitrepo]
+  link "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
+    to "/etc/quantum/quantum.conf"
+  end
+  service quantum_service_name do
+    supports :status => true, :restart => true
+    action :enable
+    subscribes :restart, resources("template[/etc/quantum/api-paste.ini]"), :immediately
+    subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
+  end
+else
+  template "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
+    source "ovs_quantum_plugin.ini.erb"
+    owner "quantum"
+    group "root"
+    mode "0640"
+    variables(
+        :ovs_sql_connection => node[:quantum][:db][:sql_connection]
+    )
+  end
+  service quantum_service_name do
+    supports :status => true, :restart => true
+    action :enable
+    subscribes :restart, resources("template[/etc/quantum/api-paste.ini]"), :immediately
+    subscribes :restart, resources("template[/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini]"), :immediately
+    subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
+  end
 end
 
 service "quantum-dhcp-agent" do
