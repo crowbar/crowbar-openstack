@@ -73,6 +73,7 @@ if node[:cinder][:use_gitrepo]
   end
 else
   package "cinder-common"
+  package "python-mysqldb"
   package "python-cinder"
 end
 
