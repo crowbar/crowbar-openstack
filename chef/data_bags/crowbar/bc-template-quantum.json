@@ -1,7 +1,7 @@
 
 {
   "id": "bc-template-quantum",
-  "description": "Centralized authentication and authorization service for OpenStack",
+  "description": "API-enabled, pluggable virtual network service for OpenStack",
   "attributes": {
     "quantum": {
       "service_user": "quantum",
