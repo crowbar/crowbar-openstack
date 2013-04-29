@@ -15,7 +15,7 @@
 barclamp:
   name: cinder
   display: Cinder
-  description: A way to maximize awesomeness for Cinder
+  description: Openstack block storage
   proposal_schema_version: 1
   version: 0
   requires:
