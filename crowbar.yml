@@ -20,6 +20,10 @@ barclamp:
   display: Tempest
   version: 0
   requires:
+    # We need git for now because we only work in PFS mode.
+    # This will change once Ubuntu starts packaging the
+    # right version of python-testtools
+    - git
     - nova
   member:
     - openstack
@@ -100,16 +104,23 @@ debs:
     repos:
       - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
       - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
-
-  pkgs:
-    - python-unittest2
-    - python-nose
-    - python-httplib2
-    - python-glanceclient
-    - python-novaclient
-    - python-testresources
-    - python-testtools
-
+    pkgs:
+      - python-anyjson
+      - python-nose
+      - python-httplib2
+      - python-testtools
+      - python-lxml
+      - python-boto
+      - python-paramiko
+      - python-netaddr
+      - python-glanceclient
+      - python-keystoneclient
+      - python-novaclient
+      - python-quantumclient
+      - python-testresources
+      - python-keyring
+      - python-testrepository
+      - python-oslo.config
 pips:
   - anyjson
   - nose
