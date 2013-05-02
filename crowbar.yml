@@ -18,6 +18,7 @@
 barclamp:
   name: tempest 
   display: Tempest
+  description: OpenStack Integration Test Suite
   version: 0
   requires:
     # We need git for now because we only work in PFS mode.
