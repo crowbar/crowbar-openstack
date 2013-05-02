@@ -18,6 +18,7 @@
 barclamp:
   name: quantum
   display: OpenStack Quantum 
+  description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management'
   version: 0
   requires:
     - mysql
