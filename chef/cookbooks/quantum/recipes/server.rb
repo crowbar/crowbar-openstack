@@ -22,7 +22,8 @@ unless node[:quantum][:use_gitrepo]
   pkgs = [ "quantum-server",
            "quantum-l3-agent",
            "quantum-dhcp-agent",
-           "quantum-plugin-openvswitch" ]
+           "quantum-plugin-openvswitch",
+           "quantum-metadata-agent" ]
   pkgs.each { |p| package p }
   file "/etc/default/quantum-server" do
     action :delete
@@ -64,6 +65,7 @@ keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
 keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
 keystone_service_user = node["quantum"]["service_user"]
 keystone_service_password = node["quantum"]["service_password"]
+keystone_service_url = "http://#{keystone_address}:#{keystone_admin_port}/v2.0"
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
 template "/etc/quantum/api-paste.ini" do
@@ -82,6 +84,69 @@ template "/etc/quantum/api-paste.ini" do
   )
 end
 
+# Hardcode for now.
+template "/etc/quantum/l3_agent.ini" do
+  source "l3_agent.ini.erb"
+  owner "quantum"
+  group "root"
+  mode "0640"
+  variables(
+            :debug => "True",
+            :interface_driver => "quantum.agent.linux.interface.OVSInterfaceDriver",
+            :use_namespaces => "True",
+            :handle_internal_only_routers => "True",
+            :metadata_port => 9697,
+            :send_arp_for_ha => 3,
+            :periodic_interval => 40,
+            :periodic_fuzzy_delay => 5
+            )
+end
+
+# Ditto
+template "/etc/quantum/dhcp_agent.ini" do
+  source "dhcp_agent.ini.erb"
+  owner "quantum"
+  group "root"
+  mode "0640"
+  variables(
+            :debug => "True",
+            :interface_driver => "quantum.agent.linux.interface.OVSInterfaceDriver",
+            :use_namespaces => "True",
+            :resync_interval => 5,
+            :dhcp_driver => "quantum.agent.linux.dhcp.Dnsmasq",
+            :enable_isolated_metadata => "False",
+            :enable_metadata_network => "False"
+            )
+end
+
+# Double ditto.
+
+novas = search(:node, "roles:nova-multi-controller") || []
+if novas.length > 0
+  nova = novas[0]
+  nova = node if nova.name == node.name
+else
+  nova = node
+end
+metadata_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "public").address rescue nil
+metadata_port = "8773"
+
+template "/etc/quantum/metadata_agent.ini" do
+  source "metadata_agent.ini.erb"
+  owner "quantum"
+  group "root"
+  mode "0640"
+  variables(
+            :debug => "True",
+            :auth_url => keystone_service_url,
+            :admin_tenant_name => keystone_service_tenant,
+            :admin_user => keystone_service_user,
+            :admin_password => keystone_service_password,
+            :nova_metadata_port => metadata_port,
+            :nova_metadata_ip => metadata_address,
+            :metadata_shared_secret => "Secret"
+            )
+end
 directory "/etc/quantum/plugins/openvswitch/" do
    mode 00775
    owner "quantum"
@@ -123,13 +188,23 @@ service "quantum-dhcp-agent" do
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
+  subscribes :restart, resources("template[/etc/quantum/dhcp_agent.ini]")
 end
 
 service "quantum-l3-agent" do
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
+  subscribes :restart, resources("template[/etc/quantum/l3_agent.ini]")
 end
+
+service "quantum-metadata-agent" do
+  supports :status => true, :restart => true
+  action :enable
+  subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
+  subscribes :restart, resources("template[/etc/quantum/metadata_agent.ini]")
+end
+
 
 
 include_recipe "quantum::post_install_conf"
