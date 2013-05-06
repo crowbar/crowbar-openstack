@@ -121,6 +121,44 @@ bash "Start openvswitch-switch service" do
   only_if "service openvswitch-switch status |grep -q 'is not running'"
 end
 
+# We always need br-int.  Quantum uses this bridge internally.
+execute "create_int_br" do
+  command "ovs-vsctl add-br br-int"
+  not_if "ovs-vsctl list-br | grep -q br-int"
+end
+
+# Make sure br-int is always up.
+ruby_block "Bring up the internal bridge" do
+  block do
+    ::Nic.new('br-int').up
+  end
+end
+
+# Create the bridges Quantum needs.
+# Usurp config as needed.
+[ [ "nova_fixed", "fixed" ],
+  [ "public", "public"] ].each do |net|
+  bound_if = (node[:crowbar_wall][:network][:nets][net[0]].last rescue nil)
+  next unless bound_if
+  name = "br-#{net[1]}"
+  execute "Quantum: create #{name}" do
+    command "ovs-vsctl add-br #{name}"
+    not_if "ovs-vsctl list-br |grep -q #{name}"
+  end
+  execute "Quantum: add #{bound_if} to #{name}" do
+    command "ovs-vsctl del-port #{name} #{bound_if} ; ovs-vsctl add-port #{name} #{bound_if}"
+    not_if "ovs-dpctl show system@#{name} | grep -q #{bound_if}"
+  end
+  ruby_block "Have #{name} usurp config from #{bound_if}" do
+    block do
+      target = ::Nic.new(name)
+      res = target.usurp(bound_if)
+      Chef::Log.info("#{name} usurped #{res[0].join(", ")} addresses from #{bound_if}") unless res[0].empty?
+      Chef::Log.info("#{name} usurped #{res[1].join(", ")} routes from #{bound_if}") unless res[1].empty?
+    end
+  end
+end
+
 service quantum_agent do
   supports :status => true, :restart => true
   action :enable
