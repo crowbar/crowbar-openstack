@@ -82,7 +82,7 @@ end
 ruby_block "Find quantum rootwrap" do
   block do
     ENV['PATH'].split(':').each do |p|
-      f  =File.join(p,"quantum-rootwrap")
+      f = File.join(p,"quantum-rootwrap")
       next unless File.executable?(f)
       node[:quantum] ||= Mash.new
       node[:quantum][:rootwrap] = f
@@ -90,14 +90,14 @@ ruby_block "Find quantum rootwrap" do
     end
     raise("Could not find quantum rootwrap binary!") unless node[:quantum][:rootwrap]
   end
-end unless node[:quantum][:rootwrap]
+end unless node[:quantum][:rootwrap] && !node[:quantum][:rootwrap].empty?
 
 template "/etc/sudoers.d/quantum-rootwrap" do
   cookbook "quantum"
   source "quantum-rootwrap.erb"
   mode 0440
   variables(:user => "quantum",
-            :binary =>  node[:quantum][:rootwrap])
+            :binary => node[:quantum][:rootwrap])
 end
 
 ovs_pkgs = [ "linux-headers-#{`uname -r`.strip}",
