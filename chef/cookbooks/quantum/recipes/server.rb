@@ -49,6 +49,17 @@ else
   end
 end
 
+# Kill all the libvirt default networks.
+bash "Destroy the libvort default network" do
+  command "virsh net-destroy default"
+  only_if "virsh net-list |grep default"
+end
+
+link "/etc/libvirt/qemu/networks/autostart/default.xml" do
+  action :delete
+end
+
+
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:quantum][:keystone_instance]}"
 keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
 if keystones.length > 0
@@ -147,6 +158,7 @@ template "/etc/quantum/metadata_agent.ini" do
             :metadata_shared_secret => "Secret"
             )
 end
+
 directory "/etc/quantum/plugins/openvswitch/" do
    mode 00775
    owner "quantum"
