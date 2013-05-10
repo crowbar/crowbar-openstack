@@ -10,8 +10,6 @@ root_helper=sudo <%=@rootwrap_bin%> /etc/quantum/rootwrap.conf
 # Log to this file. Make sure you do not set the same log
 # file for both the API and registry servers!
 log_dir = /var/log/quantum
-log_file = quantum.log
-
 
 bind_host = <%= @service_host %>
 
