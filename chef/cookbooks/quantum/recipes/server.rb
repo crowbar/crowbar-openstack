@@ -150,6 +150,7 @@ template "/etc/quantum/metadata_agent.ini" do
   variables(
             :debug => "True",
             :auth_url => keystone_service_url,
+            :auth_region => "RegionOne",
             :admin_tenant_name => keystone_service_tenant,
             :admin_user => keystone_service_user,
             :admin_password => keystone_service_password,
@@ -157,6 +158,13 @@ template "/etc/quantum/metadata_agent.ini" do
             :nova_metadata_ip => metadata_address,
             :metadata_shared_secret => "Secret"
             )
+end
+
+service "quantum-metadata-agent" do
+  supports :status => true, :restart => true
+  action :enable
+  subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
+  subscribes :restart, resources("template[/etc/quantum/metadata_agent.ini]")
 end
 
 directory "/etc/quantum/plugins/openvswitch/" do
@@ -209,15 +217,6 @@ service "quantum-l3-agent" do
   subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   subscribes :restart, resources("template[/etc/quantum/l3_agent.ini]")
 end
-
-service "quantum-metadata-agent" do
-  supports :status => true, :restart => true
-  action :enable
-  subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
-  subscribes :restart, resources("template[/etc/quantum/metadata_agent.ini]")
-end
-
-
 
 include_recipe "quantum::post_install_conf"
 
