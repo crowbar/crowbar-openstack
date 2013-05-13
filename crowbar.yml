@@ -110,6 +110,7 @@ debs:
       - python-anyjson
       - python-nose
       - python-httplib2
+      - python-extras
       - python-testtools
       - python-lxml
       - python-boto
