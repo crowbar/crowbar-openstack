@@ -26,6 +26,7 @@ barclamp:
     # right version of python-testtools
     - git
     - nova
+    - nova_dashboard
   member:
     - openstack
 
