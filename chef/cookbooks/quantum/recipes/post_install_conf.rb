@@ -68,7 +68,6 @@ ENV['OS_PASSWORD'] = admin_password
 ENV['OS_TENANT_NAME'] = "admin"
 ENV['OS_AUTH_URL'] = "http://#{keystone_address}:#{keystone_service_port}/v2.0/"
 
-
 if node[:quantum][:networking_mode] == 'vlan'
   fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
 elsif node[:quantum][:networking_mode] == 'gre'
@@ -108,63 +107,6 @@ def networks_params_equal?(netw1, netw2, keys_list)
   h1 == h2
 end
 
-####networking part
-
-
-fip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_fixed")
-if fip
-#  fixed_address = fip.address
-#  fixed_mask = fip.netmask
-  fixed_interface = fip.interface
-  fixed_interface = "#{fip.interface}.#{fip.vlan}" if fip.use_vlan
-else
-  fixed_interface = nil
-end
-#we have to rely on public net since we consciously decided not to allocate floating network
-keys_list = %w{conduit vlan use_vlan add_bridge}
-netw1 = node[:network][:networks][:nova_floating]
-netw2 = node[:network][:networks][:public]
-if networks_params_equal? netw1, netw2, keys_list
-  pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public")
-else
-  pip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "nova_floating")
-end
-if pip
-#  public_address = pip.address
-#  public_mask = pip.netmask
-  public_interface = pip.interface
-  public_interface = "#{pip.interface}.#{pip.vlan}" if pip.use_vlan
-else
-  public_interface = nil
-end
-
-flat_network_bridge = fixed_net["use_vlan"] ? "br#{fixed_net["vlan"]}" : "br#{fixed_interface}"
-
-execute "create_int_br" do
-  command "ovs-vsctl add-br br-int"
-  not_if "ovs-vsctl list-br | grep -q br-int"
-end
-
-execute "create_fixed_br" do
-  command "ovs-vsctl add-br br-fixed"
-  not_if "ovs-vsctl list-br | grep -q br-fixed"
-end
-
-execute "create_public_br" do
-  command "ovs-vsctl add-br br-public"
-  not_if "ovs-vsctl list-br | grep -q br-public"
-end
-
-execute "add_fixed_port_#{flat_network_bridge}" do
-  command "ovs-vsctl del-port br-fixed #{flat_network_bridge} ; ovs-vsctl add-port br-fixed #{flat_network_bridge}"
-  not_if "ovs-dpctl show system@br-fixed | grep -q #{flat_network_bridge}"
-end
-
-execute "add_public_port_#{public_interface}" do
-  command "ovs-vsctl del-port br-public #{public_interface} ; ovs-vsctl add-port br-public #{public_interface}"
-  not_if "ovs-dpctl show system@br-public | grep -q #{public_interface}"
-end
-
 #this workaround for metadata service, should be removed when quantum-metadata-proxy will be released
 #it parses jsoned csv output of quantum to get address of router to pass it into metadata node
 ruby_block "get_fixed_net_router" do
@@ -179,7 +121,7 @@ ruby_block "get_fixed_net_router" do
   only_if { node[:quantum][:network][:fixed_router] == "127.0.0.1" }
 end
 
-if node[:quantum][:networking_mode] != 'local'
+if node[:quantum][:networking_mode] == "vlan"
   per_tenant_vlan=true
 else
   per_tenant_vlan=false
@@ -207,20 +149,6 @@ if per_tenant_vlan
       private_quantum_ids.each do |subnet_id|
         system("quantum router-interface-add router-floating #{subnet_id}")
       end
-    end
-  end
-end
-
-{
-  "br-fixed" => fixed_interface,
-  "br-public" => public_interface
-}.each do |t,v|
-  ruby_block "#{t} usurps interface  #{v}" do
-    block do
-      target = ::Nic.new(t)
-      res = target.usurp(v)
-      Chef::Log.info("#{t} usurped #{res[0].join(", ")} addresses from #{v}") unless res[0].empty?
-      Chef::Log.info("#{t} usurped #{res[1].join(", ")} routes from #{v}") unless res[1].empty?
     end
   end
 end
