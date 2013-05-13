@@ -140,7 +140,7 @@ else
   nova = node
 end
 metadata_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "public").address rescue nil
-metadata_port = "8773"
+metadata_port = "8775"
 
 template "/etc/quantum/metadata_agent.ini" do
   source "metadata_agent.ini.erb"
