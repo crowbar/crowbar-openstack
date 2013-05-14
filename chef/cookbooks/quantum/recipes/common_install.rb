@@ -184,7 +184,7 @@ else
   nova = node
 end
 metadata_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "public").address rescue nil
-metadata_port = "8773"
+metadata_port = "8775"
 if quantum[:quantum][:networking_mode] != 'local'
   per_tenant_vlan=true
 else
