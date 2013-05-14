@@ -94,6 +94,7 @@ locale_additions:
           attributes: Attributes
           nova_instance: Nova
           use_virtualenv: Use virtualenv
+          use_pfs: Use Pull From Source
           tempest_user: Tempest user and a tenant that will be created for test run
           tempest_user_username: Choose username
           tempest_user_password: Choose password
