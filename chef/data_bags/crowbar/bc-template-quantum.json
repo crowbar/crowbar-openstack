@@ -75,7 +75,7 @@
       },
       "elements": {},
       "element_order": [
-         ["quantum-server" ]       		           		     
+         ["quantum-server" ]
       ],
       "config": {
         "environment": "quantum-config-base",
@@ -86,4 +86,3 @@
     }
   }
 }
-
