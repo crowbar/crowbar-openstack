@@ -100,7 +100,6 @@ execute "create_router" do
   not_if "quantum router-list | grep -q router-floating"
 end
 
-
 def networks_params_equal?(netw1, netw2, keys_list)
   h1 = keys_list.collect{ |key| netw1[key] }
   h2 = keys_list.collect{ |key| netw2[key] }
@@ -121,14 +120,7 @@ ruby_block "get_fixed_net_router" do
   only_if { node[:quantum][:network][:fixed_router] == "127.0.0.1" }
 end
 
-if node[:quantum][:networking_mode] == "vlan"
-  per_tenant_vlan=true
-else
-  per_tenant_vlan=false
-end
-
-if per_tenant_vlan
-#we should add foating router into user's private networks and pass that network to novas to get metadata service working properly
+if node[:quantum][:networking_mode] != "local"
   ruby_block "get_private_networks" do
     block do
       require 'csv'
