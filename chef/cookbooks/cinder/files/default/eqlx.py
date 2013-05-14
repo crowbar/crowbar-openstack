@@ -347,7 +347,7 @@ class DellEQLSanISCSIDriver(SanISCSIDriver):
             'data': iscsi_properties
         }
 
-    def terminate_connection(self, volume, connector):
+    def terminate_connection(self, volume, connector, force=False, **kwargs):
         """Remove access restictions from a volume"""
         self._execute('volume', 'select', volume['name'],
                       'access', 'delete', '1')
