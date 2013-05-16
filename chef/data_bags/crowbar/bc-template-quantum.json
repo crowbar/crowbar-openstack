@@ -1,4 +1,3 @@
-
 {
   "id": "bc-template-quantum",
   "description": "API-enabled, pluggable virtual network service for OpenStack",
@@ -31,7 +30,7 @@
       ],
       "debug": true,
       "verbose": true,
-      "networking_mode": "local",
+      "networking_mode": "gre",
       "use_syslog": false,
       "sql_engine": "mysql",
       "mysql_instance": "none",
