@@ -137,14 +137,16 @@ end
 # Create the bridges Quantum needs.
 # Usurp config as needed.
 [ [ "nova_fixed", "fixed" ],
+  [ "os_sdn", "tunnel" ],
   [ "public", "public"] ].each do |net|
   bound_if = (node[:crowbar_wall][:network][:nets][net[0]].last rescue nil)
   next unless bound_if
   name = "br-#{net[1]}"
   execute "Quantum: create #{name}" do
-    command "ovs-vsctl add-br #{name}"
+    command "ovs-vsctl add-br #{name}; ip link set #{name} up"
     not_if "ovs-vsctl list-br |grep -q #{name}"
   end
+  next if net[1] == "tunnel"
   execute "Quantum: add #{bound_if} to #{name}" do
     command "ovs-vsctl del-port #{name} #{bound_if} ; ovs-vsctl add-port #{name} #{bound_if}"
     not_if "ovs-dpctl show system@#{name} | grep -q #{bound_if}"
@@ -184,8 +186,8 @@ else
   nova = node
 end
 metadata_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "public").address rescue nil
-metadata_port = "8773"
-if quantum[:quantum][:networking_mode] != 'local'
+metadata_port = "8775"
+if quantum[:quantum][:networking_mode] == 'vlan'
   per_tenant_vlan=true
 else
   per_tenant_vlan=false
@@ -229,14 +231,11 @@ end
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 vlan_end = vlan_start + 2000
 
-unless quantum[:quantum][:use_gitrepo]
-  link "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
-    to "/etc/quantum/quantum.conf"
-    notifies :restart, resources(:service => quantum_agent), :immediately
-    notifies :restart, resources(:service => "openvswitch-switch"), :immediately
-  end
+link "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
+  to "/etc/quantum/quantum.conf"
+  notifies :restart, resources(:service => quantum_agent), :immediately
+  notifies :restart, resources(:service => "openvswitch-switch"), :immediately
 end
-
 
 template "/etc/quantum/quantum.conf" do
     cookbook "quantum"
@@ -270,7 +269,8 @@ template "/etc/quantum/quantum.conf" do
       :networking_mode => quantum[:quantum][:networking_mode],
       :vlan_start => vlan_start,
       :vlan_end => vlan_end,
-      :rootwrap_bin =>  node[:quantum][:rootwrap]
+      :physnet => quantum[:quantum][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed",
+      :rootwrap_bin =>  quantum[:quantum][:rootwrap]
     )
     notifies :restart, resources(:service => quantum_agent), :immediately
 end

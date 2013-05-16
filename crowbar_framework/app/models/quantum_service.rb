@@ -102,12 +102,8 @@ class QuantumService < ServiceObject
         @logger.info("#{@bc_name} create_proposal: no #{inst.downcase} found")
       end
     end
-
-
     base
   end
-
-
 
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
@@ -117,31 +113,16 @@ class QuantumService < ServiceObject
     net_svc = NetworkService.new @logger
 
     tnodes = role.override_attributes["quantum"]["elements"]["quantum-server"]
-    #tnodes = all_nodes if role.default_attributes["nova"]["network"]["ha_enabled"]
     unless tnodes.nil? or tnodes.empty?
       tnodes.each do |n|
-        net_svc.enable_interface "default", "nova_fixed", n
-        cnode = NodeObject.find_node_by_name n
-        #even if crowbar bring up the single iface it keep cfg for both and since no one care even about sorting elements from this cfg we facing randomely bringing up-down-reconfigure-etc ifaces so lets just try not to deal with this problem
-        if cnode[:network][:networks]["nova_floating"]["conduit"]==cnode[:network][:networks]["public"]["conduit"] and cnode[:network][:networks]["nova_floating"]["vlan"]==cnode[:network][:networks]["public"]["vlan"] and cnode[:network][:networks]["nova_floating"]["use_vlan"]==cnode[:network][:networks]["public"]["use_vlan"] and cnode[:network][:networks]["nova_floating"]["add_bridge"]==cnode[:network][:networks]["public"]["add_bridge"]
-          net_svc.allocate_ip "default", "public", "host", n
+        net_svc.allocate_ip "default", "public", "host",n
+        if role.default_attributes["quantum"]["networking_mode"] == "gre"
+          net_svc.allocate_ip "default","os_sdn","host", n
         else
-          net_svc.enable_interface "default", "nova_floating", n
-          net_svc.allocate_ip "default", "public", "host", n
+          net_svc.enable_interface "default", "nova_fixed", n
         end
-        #unless role.default_attributes["nova"]["network"]["tenant_vlans"] # or role.default_attributes["nova"]["networking_backend"]=="quantum"
-        #net_svc.allocate_ip "default", "nova_fixed", "router", n
-        #end
       end
     end
-
-      #all_nodes.each do |n|
-      #  net_svc.enable_interface "default", "nova_fixed", n
-      #end
-
     @logger.debug("Quantum apply_role_pre_chef_call: leaving")
   end
-
-
 end
-
