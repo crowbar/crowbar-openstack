@@ -26,10 +26,13 @@ default[:quantum][:db][:ovs_user] = "ovs"
 default[:quantum][:db][:ovs_password] = "" # Set by Recipe
 default[:quantum][:network][:fixed_router] = "127.0.0.1" # Set by Recipe
 default[:quantum][:network][:private_networks] = [] # Set by Recipe
+# Default range for GRE tunnels
+default[:quantum][:network][:gre_start] = 1
+default[:quantum][:network][:gre_stop] = 1000
+
 
 default[:quantum][:api][:service_port] = "9696"
 default[:quantum][:api][:service_host] = "0.0.0.0"
-
 
 default[:quantum][:sql][:idle_timeout] = 30
 default[:quantum][:sql][:min_pool_size] = 5

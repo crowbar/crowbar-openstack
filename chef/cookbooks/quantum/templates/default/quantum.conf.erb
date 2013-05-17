@@ -131,8 +131,9 @@ tenant_network_type = vlan
 network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
 <% elsif @networking_mode == 'gre' -%>
 tenant_network_type = gre
-tunnel_id_ranges = 1:1000
-network_vlan_ranges = physnet1
+tunnel_bridge = <%=@physnet%>
+tunnel_id_ranges = <%= node[:quantum][:network][:gre_start]%>:<%= node[:quantum][:network][:gre_stop]%>
+local_ip = <%= node.address("os_sdn").addr %>
 enable_tunneling = True
 <% else -%>
 tenant_network_type = local
@@ -180,7 +181,7 @@ network_vlan_ranges = physnet1
 #
 # Default: bridge_mappings =
 # Example: bridge_mappings = physnet1:br-eth1
-bridge_mappings = physnet1:br-fixed
+bridge_mappings = physnet1:<%=@physnet%>
 
 
 [composite:quantum]
