@@ -33,8 +33,14 @@ if checked_disks.empty? or node[:cinder][:volume][:volume_type] == "local"
   fdir = ::File.dirname(fname)
   fsize = node["cinder"]["volume"]["local_size"] * 1024 * 1024 * 1024 # Convert from GB to Bytes
 
+  #this code will be executed at compile-time so we have to use ruby block or get fs capacity from parent directory because at compile-time we have no package resources done
+  #creating enclosing directory and user/group here bypassing packages looks like a bad idea. I'm not sure about postinstall behavior of cinder package.
   # Cap size at 90% of free space
-  max_fsize = ((`df -Pk #{fdir}`.split("\n")[1].split(" ")[3].to_i * 1024) * 0.90).to_i rescue 0
+  encl_dir=fdir
+  while not File.directory?(encl_dir)
+    encl_dir=encl_dir.sub(/\/[^\/]*$/,'')
+  end
+  max_fsize = ((`df -Pk #{encl_dir}`.split("\n")[1].split(" ")[3].to_i * 1024) * 0.90).to_i rescue 0
   fsize = max_fsize if fsize > max_fsize
 
   bash "create local volume file" do
