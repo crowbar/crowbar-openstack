@@ -28,7 +28,7 @@
               "type": "map",
               "required": false,
               "mapping" : {
-                "dummy": { "type": "str" }
+                "max_connections": { "type": "int" }
               }
             }
           }
