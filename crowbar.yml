@@ -48,3 +48,37 @@ locale_additions:
           postgresql_max_connections: Global Connection Limit (max_connections)
         edit_deployment:
           deployment: Deployment
+debs:
+  build_pkgs:
+    - libpq-dev
+    - postgresql-server-dev-9.1
+    - libmysqlclient-dev
+  pkgs:
+    # postgresql stuff
+    - postgresql
+    - postgresql-client
+    # mysql stuff
+    - libmysqlclient-dev
+    - mysql-client
+    - libmysql-ruby
+    - mysql-server
+  src_pkgs:
+    - mysql-5.5
+rpms:
+  build_pkgs:
+    - postgresql-devel
+    - mysql-devel
+  pkgs:
+    # postgresql stuff
+    - postgresql-libs
+    - postgresql
+    - postgresql-server
+    # mysql stuff
+    - mysql-devel
+    - mysql
+    - ruby-mysql
+    - mysql-server
+gems:
+  pkgs:
+    - pg
+    - mysql
