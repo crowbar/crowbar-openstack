@@ -26,6 +26,7 @@ barclamp:
     # right version of python-testtools
     - git
     - nova
+    - nova_dashboard
   member:
     - openstack
 
@@ -93,6 +94,7 @@ locale_additions:
           attributes: Attributes
           nova_instance: Nova
           use_virtualenv: Use virtualenv
+          use_pfs: Use Pull From Source
           tempest_user: Tempest user and a tenant that will be created for test run
           tempest_user_username: Choose username
           tempest_user_password: Choose password
@@ -109,6 +111,7 @@ debs:
       - python-anyjson
       - python-nose
       - python-httplib2
+      - python-extras
       - python-testtools
       - python-lxml
       - python-boto
