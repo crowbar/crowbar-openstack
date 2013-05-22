@@ -26,12 +26,10 @@ class QuantumService < ServiceObject
 
   def proposal_dependencies(role)
     answer = []
-    if role.default_attributes["quantum"]["sql_engine"] == "mysql"
-      answer << { "barclamp" => "mysql", "inst" => role.default_attributes["quantum"]["mysql_instance"] }
-    end
     if role.default_attributes["quantum"]["use_gitrepo"]
       answer << { "barclamp" => "git", "inst" => role.default_attributes["quantum"]["git_instance"] }
     end
+    answer << { "barclamp" => "mysql", "inst" => role.default_attributes["quantum"]["mysql_instance"] }
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["quantum"]["rabbitmq_instance"] }
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes["quantum"]["keystone_instance"] }
     answer
@@ -68,15 +66,13 @@ class QuantumService < ServiceObject
         # No actives, look for proposals
         mysqls = mysqlService.proposals[1]
       end
-      if mysqls.empty?
-        base["attributes"]["quantum"]["sql_engine"] = "sqlite"
-      else
+      unless mysqls.empty?
         base["attributes"]["quantum"]["mysql_instance"] = mysqls[0]
-        base["attributes"]["quantum"]["sql_engine"] = "mysql"
       end
     rescue
-      @logger.info("Quantumcreate_proposal: no mysql found")
-      base["attributes"]["quantum"]["sql_engine"] = "sqlite"
+      @logger.info("Quantum create_proposal: no mysql found")
+    ensure
+      base["attributes"]["quantum"]["sql_engine"] = "mysql"
     end
     
     base["deployment"]["quantum"]["elements"] = {

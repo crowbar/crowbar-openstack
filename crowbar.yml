@@ -40,14 +40,13 @@ locale_additions:
         edit_deployment: 
           deployment: Deployment
         edit_attributes:
+          mysql_instance: MySQL Instance
           rabbitmq_instance: RabbitMQ 
           keystone_instance: Keystone 
           service_user: Keystone Service User
           service_password: Keystone Service Password
           attributes: Attributes
-          sql_engine: SQL Engine
           networking_mode: Mode
-          mysql_instance: MySQL Instance
           default-tenant: Default Tenant
           admin-username: Administrator Username
           admin-password: Administrator Password
