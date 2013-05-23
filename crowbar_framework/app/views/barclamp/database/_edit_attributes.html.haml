@@ -6,7 +6,7 @@
   %div.container
     %p
       %label{ :for => :sql_engine }= t('.sql_engine')
-      = select_tag :sql_engine, options_for_select([['PostgreSQL','postgresql']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "update_value('sql_engine', 'sql_engine', 'string')"
+      = select_tag :sql_engine, options_for_select([['MySQL','mysql'],['PostgreSQL','postgresql']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "update_value('sql_engine', 'sql_engine', 'string')"
 
   %label.h3.mysql_engine.sql_engine{ :for => :mysql_form }= t('.mysql_attributes')
   %div.container.mysql_engine.sql_engine{ :id => :mysql_form }
@@ -35,4 +35,4 @@
   };
 
   $(document).ready(function () { toggle_sql_engine_form(); });
-  $('#protocol').change(toggle_sql_engine_form);
+  $('#sql_engine').change(toggle_sql_engine_form);
