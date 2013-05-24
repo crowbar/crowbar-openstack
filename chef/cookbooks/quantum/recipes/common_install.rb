@@ -168,6 +168,15 @@ service quantum_agent do
   action :enable
 end
 
+
+include_recipe "database::client" 
+backend_name = Chef::Recipe::Database::Util.get_backend_name(sql) 
+
+Chef::Log.info("Configuring Quantum to use #{backend_name} backend")
+
+include_recipe "#{backend_name}::client" 
+include_recipe "#{backend_name}::python-client"
+
 #env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
 #assuming we have only one nova
 #TODO: nova should depend on quantum, but quantum depend on nova a bit, so we have to do somthing with this
