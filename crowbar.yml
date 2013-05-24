@@ -21,7 +21,7 @@ barclamp:
   description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management'
   version: 0
   requires:
-    - mysql
+    - database
     - rabbitmq
     - keystone
   member:
@@ -40,7 +40,8 @@ locale_additions:
         edit_deployment: 
           deployment: Deployment
         edit_attributes:
-          mysql_instance: MySQL Instance
+          database_engine: Database Engine
+          database_instance: Database Instance
           rabbitmq_instance: RabbitMQ 
           keystone_instance: Keystone 
           service_user: Keystone Service User
