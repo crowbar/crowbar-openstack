@@ -91,19 +91,20 @@ else
 end
 Chef::Log.info("Glance server at #{glance_server_ip}")
 
-mysql_env_filter = " AND mysql_config_environment:mysql-config-#{node[:cinder][:mysql_instance]}"
-mysqls = search(:node, "roles:mysql-server#{mysql_env_filter}")
-if mysqls.length > 0
-  mysql = mysqls[0]
-  mysql = node if mysql.name == node.name
+sql_env_filter = " AND database_config_environment:database-config-#{node[:cinder][:database_instance]}"
+sqls = search(:node, "roles:database-server#{sql_env_filter}")
+if sqls.length > 0
+  sql = sqls[0]
+  sql = node if sql.name == node.name
 else
-  mysql = node
+  sql = node
 end
 
-mysql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(mysql, "admin").address if mysql_address.nil?
-Chef::Log.info("Mysql server found at #{mysql_address}")
+sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil?
+Chef::Log.info("SQL server found at #{sql_address}")
 
-sql_connection = "mysql://#{node[:cinder][:db][:user]}:#{node[:cinder][:db][:password]}@#{mysql_address}/#{node[:cinder][:db][:database]}"
+backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
+sql_connection = "#{backend_name}://#{node[:cinder][:db][:user]}:#{node[:cinder][:db][:password]}@#{sql_address}/#{node[:cinder][:db][:database]}"
 
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 node[:cinder][:api][:bind_host] = my_ipaddress

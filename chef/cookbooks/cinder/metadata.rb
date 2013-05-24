@@ -7,6 +7,6 @@ version          "0.1"
 
 depends "nagios"
 depends "git"
-depends "mysql"
+depends "database"
 depends "keystone"
 depends "openssl"

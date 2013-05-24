@@ -20,7 +20,7 @@ barclamp:
   version: 0
   requires:
     - '@crowbar'
-    - mysql
+    - database
     - rabbitmq
     - keystone
     - glance
@@ -63,7 +63,7 @@ locale_additions:
         edit_attributes: 
           attributes: Attributes
           rabbitmq_instance: RabbitMQ
-          mysql_instance: MySQL
+          database_instance: Database Instance 
           keystone_instance: Keystone
           glance_instance: Glance
           service_user: Service user (for Keystone)
