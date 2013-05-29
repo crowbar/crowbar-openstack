@@ -29,7 +29,7 @@ else # > 8.3
 end
  
 package "postgresql" do
-  action :ugprade
+  action :upgrade
 end
  
 service "postgresql" do
