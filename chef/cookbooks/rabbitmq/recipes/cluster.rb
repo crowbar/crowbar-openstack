@@ -30,6 +30,6 @@ template "/etc/rabbitmq/rabbitmq_cluster.config" do
   owner "root"
   group "root"
   mode 0644
-  notifies :restart, resources(:service => "rabbitmq-server")
+  notifies :restart, resources(:service => "rabbitmq-server"), :immediately
 end
 
