@@ -36,7 +36,7 @@ end
 
 # Sigh, silly debian package starting rabbit by default.
 package "rabbitmq-server" do
-  action :upgrade
+  action :install
   notifies :run, "execute[stop rabbitmq]", :immediately
 end
 
@@ -82,14 +82,16 @@ end
 # init scripts.
 service "rabbitmq-server" do
   supports :status => true
-  # This is a big, ugly hammer, but when your control program and the
-  # init scripts that use it are misdesigned, you do what you have to.
-  stop_command "service rabbitmq-server stop; rabbitmqctl stop; ps aux |awk '/^rabbitmq/ {print $2}' |xargs kill || :"
-  # For now, assume that rabbitmq is runnning if any processes owned
-  # by rabbitmq are present, even if rabbitmqctl says otherwise --
-  # when rabbitmqctl status says rabbit is running, it is probably correct,
-  # but when it says it is not we cannot really be sure.
-  status_command "rabbitmqctl status || ps aux |grep -q '^rabbitmq.*/var/lib/rabbitmq'"
+  unless node.platform == "suse"
+    # This is a big, ugly hammer, but when your control program and the
+    # init scripts that use it are misdesigned, you do what you have to.
+    stop_command "service rabbitmq-server stop; rabbitmqctl stop; ps aux |awk '/^rabbitmq/ {print $2}' |xargs kill || :"
+    # For now, assume that rabbitmq is runnning if any processes owned
+    # by rabbitmq are present, even if rabbitmqctl says otherwise --
+    # when rabbitmqctl status says rabbit is running, it is probably correct,
+    # but when it says it is not we cannot really be sure.
+    status_command "rabbitmqctl status || ps aux |grep -q '^rabbitmq.*/var/lib/rabbitmq'"
+  end
   action [:enable, :start]
 end
 
