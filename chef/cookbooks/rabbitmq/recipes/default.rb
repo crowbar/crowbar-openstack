@@ -29,7 +29,7 @@
 #end
 
 execute "stop rabbitmq" do
-  command "rabbitmqctl stop; ps aux |awk '/^rabbit/ {print $2}' |xargs kill"
+  command "rabbitmqctl stop; ps aux |awk '/^rabbit/ {print $2}' |xargs kill || :"
   only_if "which rabbitmqctl && rabbitmqctl status"
   action :nothing
 end
@@ -65,8 +65,7 @@ template "/etc/rabbitmq/rabbitmq-env.conf" do
   owner "root"
   group "root"
   notifies :restart, "service[rabbitmq-server]"
-mode 0644
-
+  mode 0644
 end
 
 template "/etc/rabbitmq/rabbitmq.config" do
@@ -77,11 +76,20 @@ template "/etc/rabbitmq/rabbitmq.config" do
   notifies :restart, "service[rabbitmq-server]"
 end
 
-# Be distro-agnostic and use rabbitmqctl directly for service mamangement.
+# Sigh, rabbitmqctl wants to parse the rabbitmq config files to
+# find the running instances.  Guess what happens when we change them while
+# rabbit is running, and guess what knock-on effects exist in the rabbit
+# init scripts.
 service "rabbitmq-server" do
   supports :status => true
-  stop_command "rabbitmqctl stop"
-  status_command "rabbitmqctl status"
+  # This is a big, ugly hammer, but when your control program and the
+  # init scripts that use it are misdesigned, you do what you have to.
+  stop_command "service rabbitmq-server stop; rabbitmqctl stop; ps aux |awk '/^rabbitmq/ {print $2}' |xargs kill || :"
+  # For now, assume that rabbitmq is runnning if any processes owned
+  # by rabbitmq are present, even if rabbitmqctl says otherwise --
+  # when rabbitmqctl status says rabbit is running, it is probably correct,
+  # but when it says it is not we cannot really be sure.
+  status_command "rabbitmqctl status || ps aux |grep -q '^rabbitmq.*/var/lib/rabbitmq'"
   action [:enable, :start]
 end
 
