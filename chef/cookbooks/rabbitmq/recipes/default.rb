@@ -28,9 +28,18 @@
 #  action :add
 #end
 
+# This is a big, ugly hammer, but when your control program and the
+# init scripts that use it are misdesigned, you do what you have to.
+hacky_kill_command = "service rabbitmq-server stop; rabbitmqctl stop; ps aux | awk '/^rabbitmq / {print $2}' | xargs kill || :"
+# For now, assume that rabbitmq is running if any process owned
+# by rabbitmq is present, even if rabbitmqctl says otherwise --
+# when rabbitmqctl status says rabbit is running, it is probably correct,
+# but when it says it is not we cannot really be sure.
+hacky_status_command = "if which rabbitmqctl; then rabbitmqctl status || ps aux | grep -q '^rabbitmq .*/var/lib/rabbitmq'; else false; fi"
+
 execute "stop rabbitmq" do
-  command "rabbitmqctl stop; ps aux |awk '/^rabbit/ {print $2}' |xargs kill || :"
-  only_if "which rabbitmqctl && rabbitmqctl status"
+  command hacky_kill_command
+  only_if hacky_status_command
   action :nothing
 end
 
@@ -83,14 +92,8 @@ end
 service "rabbitmq-server" do
   supports :status => true
   unless node.platform == "suse"
-    # This is a big, ugly hammer, but when your control program and the
-    # init scripts that use it are misdesigned, you do what you have to.
-    stop_command "service rabbitmq-server stop; rabbitmqctl stop; ps aux |awk '/^rabbitmq/ {print $2}' |xargs kill || :"
-    # For now, assume that rabbitmq is runnning if any processes owned
-    # by rabbitmq are present, even if rabbitmqctl says otherwise --
-    # when rabbitmqctl status says rabbit is running, it is probably correct,
-    # but when it says it is not we cannot really be sure.
-    status_command "rabbitmqctl status || ps aux |grep -q '^rabbitmq.*/var/lib/rabbitmq'"
+    stop_command hacky_kill_command
+    status_command hacky_status_command
   end
   action [:enable, :start]
 end
