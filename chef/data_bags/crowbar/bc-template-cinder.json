@@ -9,7 +9,6 @@
       "keystone_instance": "none",
       "glance_instance": "none",
       "database_instance": "none",
-      "user": "cinder",
       "service_user": "cinder",
       "service_password": "",
       "gitrepo": "http://github.com/openstack/cinder.git",

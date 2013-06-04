@@ -72,9 +72,13 @@ if node[:cinder][:use_gitrepo]
     not_if {File.exists?("/etc/cinder/rootwrap.d")}
   end
 else
-  package "cinder-common"
-  package "python-mysqldb"
-  package "python-cinder"
+  unless platform?("suse")
+    package "cinder-common"
+    package "python-mysqldb"
+    package "python-cinder"
+  else
+    package "openstack-cinder"
+  end
 end
 
 glance_env_filter = " AND glance_config_environment:glance-config-#{node[:cinder][:glance_instance]}"
