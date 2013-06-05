@@ -15,13 +15,12 @@
 barclamp:
   name: cinder
   display: Cinder
-  description: A way to maximize awesomeness for Cinder
+  description: 'Openstack block storage: persistent block level storage devices for use with OpenStack compute instances'
   proposal_schema_version: 1
   version: 0
   requires:
     - '@crowbar'
-    - git
-    - mysql
+    - database
     - rabbitmq
     - keystone
     - glance
@@ -64,7 +63,7 @@ locale_additions:
         edit_attributes: 
           attributes: Attributes
           rabbitmq_instance: RabbitMQ
-          mysql_instance: MySQL
+          database_instance: Database Instance 
           keystone_instance: Keystone
           glance_instance: Glance
           service_user: Service user (for Keystone)

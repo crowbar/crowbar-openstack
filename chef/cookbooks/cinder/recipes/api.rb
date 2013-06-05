@@ -18,7 +18,7 @@
 #
 
 include_recipe "#{@cookbook_name}::common"
-include_recipe "#{@cookbook_name}::mysql"
+include_recipe "#{@cookbook_name}::sql"
 
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:cinder][:keystone_instance]}"
 
