@@ -103,7 +103,11 @@ end
 sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil?
 Chef::Log.info("SQL server found at #{sql_address}")
 
+include_recipe "database::client"
 backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
+include_recipe "#{backend_name}::client"
+include_recipe "#{backend_name}::python-client"
+
 sql_connection = "#{backend_name}://#{node[:cinder][:db][:user]}:#{node[:cinder][:db][:password]}@#{sql_address}/#{node[:cinder][:db][:database]}"
 
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
