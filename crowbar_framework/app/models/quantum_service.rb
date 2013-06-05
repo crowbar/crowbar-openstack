@@ -26,11 +26,11 @@ class QuantumService < ServiceObject
 
   def proposal_dependencies(role)
     answer = []
-    if role.default_attributes["quantum"]["sql_engine"] == "mysql"
-      answer << { "barclamp" => "mysql", "inst" => role.default_attributes["quantum"]["mysql_instance"] }
-    end
     if role.default_attributes["quantum"]["use_gitrepo"]
       answer << { "barclamp" => "git", "inst" => role.default_attributes["quantum"]["git_instance"] }
+    end
+    if role.default_attributes[@bc_name]["database_engine"] == "database" 
+      answer << { "barclamp" => "database", "inst" => role.default_attributes["quantum"]["database_instance"] }
     end
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["quantum"]["rabbitmq_instance"] }
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes["quantum"]["keystone_instance"] }
@@ -59,26 +59,32 @@ class QuantumService < ServiceObject
     end
 
 
-    base["attributes"]["quantum"]["mysql_instance"] = ""
+    base["attributes"]["quantum"]["database_instance"] = ""
     begin
-      mysqlService = MysqlService.new(@logger)
+      databaseService = DatabaseService.new(@logger)
       # Look for active roles
-      mysqls = mysqlService.list_active[1]
-      if mysqls.empty?
+      dbs = databaseService.list_active[1] 
+      if dbs.empty? 
         # No actives, look for proposals
-        mysqls = mysqlService.proposals[1]
+        dbs = databaseService.proposals[1]
       end
-      if mysqls.empty?
-        base["attributes"]["quantum"]["sql_engine"] = "sqlite"
-      else
-        base["attributes"]["quantum"]["mysql_instance"] = mysqls[0]
-        base["attributes"]["quantum"]["sql_engine"] = "mysql"
+      if dbs.empty?
+        @logger.info("Quantum create_proposal: no database proposal found") 
+        base["attributes"]["quantum"]["database_engine"] = "" 
+      else 
+        base["attributes"]["quantum"]["database_instance"] = dbs[0] 
+        base["attributes"]["quantum"]["database_engine"] = "database" 
+        @logger.info("Quantum create_proposal: using database proposal: '#{dbs[0]}'")
       end
     rescue
-      @logger.info("Quantumcreate_proposal: no mysql found")
-      base["attributes"]["quantum"]["sql_engine"] = "sqlite"
+      @logger.info("Quantum create_proposal: no database proposal found") 
+      base["attributes"]["quantum"]["database_engine"] = ""
     end
-    
+
+    if base["attributes"]["quantum"]["database_engine"] == "" 
+      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "database")) 
+    end
+
     base["deployment"]["quantum"]["elements"] = {
         "quantum-server" => [ nodes.first[:fqdn] ]
     } unless nodes.nil? or nodes.length ==0

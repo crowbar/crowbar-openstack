@@ -13,31 +13,39 @@
 # limitations under the License.
 #
 
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+database_engine = node[:quantum][:database_engine]
 
-node.set_unless['quantum']['db']['password'] = secure_password
-node.set_unless['quantum']['db']['ovs_password'] = secure_password
+Chef::Log.info("Configuring Quantum to use #{database_engine} backend")
 
-if node[:quantum][:sql_engine] == "mysql"
-    Chef::Log.info("Configuring Quantum to use MySQL backend")
-
-    include_recipe "mysql::client"
-
-    package "python-mysqldb" do
-        action :install
+if database_engine == "database"
+    env_filter = " AND database_config_environment:database-config-#{node[:quantum][:database_instance]}" 
+    sqls = search(:node, "roles:database-server#{env_filter}") || [] 
+    if sqls.length > 0 
+        sql = sqls[0] 
+        sql = node if sql.name == node.name 
+    else 
+        sql = node 
     end
+    include_recipe "database::client" 
+    backend_name = Chef::Recipe::Database::Util.get_backend_name(sql) 
+    include_recipe "#{backend_name}::client" 
+    include_recipe "#{backend_name}::python-client"
 
-    env_filter = " AND mysql_config_environment:mysql-config-#{node[:quantum][:mysql_instance]}"
-    mysqls = search(:node, "roles:mysql-server#{env_filter}") || []
-    if mysqls.length > 0
-        mysql = mysqls[0]
-        mysql = node if mysql.name == node.name
-    else
-        mysql = node
-    end
+    db_provider = Chef::Recipe::Database::Util.get_database_provider(sql) 
+    db_user_provider = Chef::Recipe::Database::Util.get_user_provider(sql) 
+    privs = Chef::Recipe::Database::Util.get_default_priviledges(sql) 
+    url_scheme = backend_name
 
-    mysql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(mysql, "admin").address if mysql_address.nil?
-    Chef::Log.info("Mysql server found at #{mysql_address}")
+    ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+    node.set_unless['quantum']['db']['password'] = secure_password
+    node.set_unless['quantum']['db']['ovs_password'] = secure_password
+
+    sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil? 
+    Chef::Log.info("Database server found at #{sql_address}") 
+
+    db_conn = { :host => sql_address, 
+                :username => "db_maker", 
+                :password => sql[database_engine][:db_maker_password] }
 
     props = [ {'db_name' => node[:quantum][:db][:database],
               'db_user' => node[:quantum][:db][:user],
@@ -55,25 +63,35 @@ if node[:quantum][:sql_engine] == "mysql"
       db_user = prop['db_user']
       db_pass = prop['db_pass']
       db_conn_name = prop['db_conn_name']
-      mysql_database "create #{db_name} quantum database" do
-          host    mysql_address
-          username "db_maker"
-          password mysql[:mysql][:db_maker_password]
-          database node[:quantum][:db][:database]
-          action :create_db
-      end
 
-      mysql_database "create quantum database user #{db_user}" do
-          host    mysql_address
-          username "db_maker"
-          password mysql[:mysql][:db_maker_password]
-          database node[:quantum][:db][:database]
-          action :query
-          sql "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER on #{db_name}.* to '#{db_user}'@'%' IDENTIFIED BY '#{db_pass}';"
-      end
+        database "create #{db_name} quantum database" do
+            connection db_conn
+            database_name "#{db_name}"
+            provider db_provider
+            action :create
+        end
 
-      node[@cookbook_name][:db][db_conn_name] = "mysql://#{db_user}:#{db_pass}@#{mysql_address}/#{db_name}"
+        database_user "create #{db_user} user in #{db_name} quantum database" do
+            connection db_conn
+            username "#{db_user}"
+            password "#{db_pass}"
+            host '%'
+            provider db_user_provider
+            action :create
+        end
 
+        database_user "grant database access for #{db_user} user in #{db_name} quantum database" do
+            connection db_conn 
+            username "#{db_user}" 
+            password "#{db_pass}"
+            database_name "#{db_name}"
+            host '%' 
+            privileges privs 
+            provider db_user_provider 
+            action :grant 
+        end
+
+        node[@cookbook_name][:db][db_conn_name] = "#{url_scheme}://#{db_user}:#{db_pass}@#{sql_address}/#{db_name}"
     end
 
 elsif node[:quantum][:sql_engine] == "sqlite"
@@ -83,6 +101,8 @@ elsif node[:quantum][:sql_engine] == "sqlite"
         owner "quantum"
         action :create_if_missing
     end
+else 
+    Chef::Log.error("Unknown database engine #{database_engine}") 
 end
 
 node.save
