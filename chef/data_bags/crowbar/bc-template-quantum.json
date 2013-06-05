@@ -32,8 +32,8 @@
       "verbose": true,
       "networking_mode": "gre",
       "use_syslog": false,
-      "sql_engine": "mysql",
-      "mysql_instance": "none",
+      "database_engine": "database",
+      "database_instance": "none",
       "db": {
         "database": "quantum",
         "user": "quantum",

@@ -166,14 +166,6 @@ service quantum_agent do
   action :enable
 end
 
-Chef::Log.info("Configuring Quantum to use MySQL backend")
-
-include_recipe "mysql::client"
-
-package "python-mysqldb" do
-    action :install
-end
-
 #env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
 #assuming we have only one nova
 #TODO: nova should depend on quantum, but quantum depend on nova a bit, so we have to do somthing with this
