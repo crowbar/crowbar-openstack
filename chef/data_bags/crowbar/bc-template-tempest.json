@@ -10,7 +10,8 @@
       "tempest_user_password": "tempest",
       "tempest_user_username": "tempest",
       "tempest_user_tenant": "tempest",
-      "use_virtualenv": true,
+      "use_virtualenv": false,
+      "use_pfs": false,
       "nova_instance": "none",
       "tempest_path": "/opt/tempest"
     }

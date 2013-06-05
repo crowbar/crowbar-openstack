@@ -10,7 +10,10 @@
     %p
       %label{ :for => :use_virtualenv }= t('.use_virtualenv')
       = select_tag :use_virtualenv, options_for_select([['yes','true'], ['no', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_virtualenv"].to_s), :onchange => "update_value('use_virtualenv', 'use_virtualenv', 'boolean')"
-    -#%p
+    %p
+      %label{ :for => :use_pfs }= t('.use_pfs')
+      = select_tag :use_pfs, options_for_select([['yes','true'], ['no', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_pfs"].to_s), :onchange => "update_value('use_virtualenv', 'use_pfs', 'boolean')"
+   -#%p
       -# %label{ :for => :create_alt_user }= t('.create_alt_user')
       -# = select_tag :create_alt_user, options_for_select([['yes','true'], ['no', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["create_alt_user"].to_s), :onchange => "update_value('create_alt_user', 'create_alt_user', 'boolean')"
     %p

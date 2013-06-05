@@ -18,9 +18,15 @@
 # limitations under the License.
 #
 
-package "python-httplib2"
-package "python-nose"
-package "python-unittest2"
+# From the pip-requires -- all the Ubuntu packages for tempest prereqs
+packages = %w(python-anyjson python-nose python-httplib2 python-testtools python-lxml
+   python-boto python-paramiko python-netaddr python-glanceclient
+   python-keystoneclient python-novaclient python-quantumclient
+   python-testresources python-keyring python-testrepository python-oslo.config)
+
+packages.each do |p|
+  package p
+end
 
 begin
   provisioner = search(:node, "roles:provisioner-server").first
@@ -87,11 +93,12 @@ if node[:tempest][:use_virtualenv]
   nosetests = "/opt/tempest/.venv/bin/python #{nosetests}"
 end
 
-execute "pip_install_reqs_for_tempest" do
-  cwd "/opt/tempest/"
-  command "#{pip_cmd} -r tools/pip-requires"
+if node[:tempest][:use_pfs]
+  execute "pip_install_reqs_for_tempest" do
+    cwd "/opt/tempest/"
+    command "#{pip_cmd} -r tools/pip-requires"
+  end
 end
-
 
 if nova[:nova][:use_gitrepo]!=true
   package "python-novaclient"
