@@ -21,7 +21,7 @@ if node.attribute?(:cookbook) and node[:cookbook] == "nova"
      quantum = node
 end
 
-quantum_agent="quantum-plugin-openvswitch-agent"
+quantum_agent=node[:quantum][:platform][:ovs_agent_name]
 
 quantum_path = "/opt/quantum"
 venv_path = quantum[:quantum][:use_virtualenv] ? "#{quantum_path}/.venv" : nil
@@ -77,7 +77,7 @@ else
     cookbook "quantum"
     source "quantum-rootwrap.conf"
     mode 00644
-    owner "quantum"
+    owner node[:quantum][:platform][:user]
   end
 end
 
@@ -102,14 +102,10 @@ template "/etc/sudoers.d/quantum-rootwrap" do
             :binary => node[:quantum][:rootwrap])
 end
 
-ovs_pkgs = [ "linux-headers-#{`uname -r`.strip}",
-             "openvswitch-switch",
-             "openvswitch-datapath-dkms"
-           ]
-ovs_pkgs.each { |p| package p }
+node[:quantum][:platform][:ovs_pkgs].each { |p| package p }
 
 bash "Load openvswitch module" do
-  code "modprobe openvswitch"
+  code node[:quantum][:platform][:ovs_modprobe]
   not_if do ::File.directory?("/sys/module/openvswitch") end
 end
 
@@ -167,15 +163,6 @@ service quantum_agent do
   supports :status => true, :restart => true
   action :enable
 end
-
-
-include_recipe "database::client" 
-backend_name = Chef::Recipe::Database::Util.get_backend_name(sql) 
-
-Chef::Log.info("Configuring Quantum to use #{backend_name} backend")
-
-include_recipe "#{backend_name}::client" 
-include_recipe "#{backend_name}::python-client"
 
 #env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
 #assuming we have only one nova
@@ -244,7 +231,7 @@ template "/etc/quantum/quantum.conf" do
     cookbook "quantum"
     source "quantum.conf.erb"
     mode "0644"
-    owner "quantum"
+    owner node[:quantum][:platform][:user]
     variables(
       :sql_connection => quantum[:quantum][:db][:sql_connection],
       :sql_idle_timeout => quantum[:quantum][:sql][:idle_timeout],
@@ -277,4 +264,3 @@ template "/etc/quantum/quantum.conf" do
     )
     notifies :restart, resources(:service => quantum_agent), :immediately
 end
-
