@@ -8,7 +8,7 @@
       "rabbitmq_instance": "none",
       "keystone_instance": "none",
       "glance_instance": "none",
-      "mysql_instance": "none",
+      "database_instance": "none",
       "user": "cinder",
       "service_user": "cinder",
       "service_password": "",
