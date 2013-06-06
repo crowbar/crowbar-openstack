@@ -213,11 +213,6 @@ admin_password = keystone["keystone"]["admin"]["password"] rescue nil
 default_tenant = keystone["keystone"]["default"]["tenant"] rescue nil
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
-service quantum_agent do
-  supports :status => true, :restart => true
-  action :enable
-end
-
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 vlan_end = vlan_start + 2000
 
