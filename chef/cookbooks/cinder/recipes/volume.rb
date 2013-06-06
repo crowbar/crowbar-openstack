@@ -22,13 +22,7 @@ include_recipe "#{@cookbook_name}::common"
 volname = node[:cinder][:volume][:volume_name]
 
 def make_volumes(node,volname)
-  if Kernel.system("vgs #{volname}")
-    Chef::Log.info("Cinder: Volume group #{volname} already exists.")
-    return
-  end
-  unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
-  claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node,"Cinder")
-
+  
   if node[:cinder][:volume][:volume_type] == "eqlx"
     Chef::Log.info("Cinder: Using eqlx volumes.")
     package("python-paramiko")
@@ -43,7 +37,16 @@ def make_volumes(node,volname)
     source "eqlx.py"
     end
     return
-  elsif (node[:cinder][:volume][:volume_type] == "local") || (unclaimed_disks.empty? && claimed_disks.empty?)
+  end
+  
+  if Kernel.system("vgs #{volname}")
+    Chef::Log.info("Cinder: Volume group #{volname} already exists.")
+    return
+  end
+  unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
+  claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node,"Cinder")
+  
+  if (node[:cinder][:volume][:volume_type] == "local") || (unclaimed_disks.empty? && claimed_disks.empty?)
     Chef::Log.info("Cinder: Using local file volume backing")
     # only OS disk is exists, will use file storage
     fname = node["cinder"]["volume"]["local_file"]
