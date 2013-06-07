@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-default[:quantum][:debug] = true
-default[:quantum][:verbose] = true
+default[:quantum][:debug] = false
+default[:quantum][:verbose] = false
 default[:quantum][:networking_mode] = "local"
 
 default[:quantum][:db][:database] = "quantum"
