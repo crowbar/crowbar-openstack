@@ -15,7 +15,7 @@
       = instance_selector("rabbitmq", :rabbitmq_instance, "rabbitmq_instance", @proposal)
     %p
       %label{ :for => :networking_mode }= t('.networking_mode')
-      = select_tag :networking_mode, options_for_select([['flat', 'local'], ['vlan','vlan'],['gre','gre']], @proposal.raw_data['attributes'][@proposal.barclamp]["networking_mode"]), :onchange => "update_value('networking_mode', 'networking_mode', 'string')"
+      = select_tag :networking_mode, options_for_select([['flat', 'local'], ['gre','gre']], @proposal.raw_data['attributes'][@proposal.barclamp]["networking_mode"]), :onchange => "update_value('networking_mode', 'networking_mode', 'string')"
     %p
       %label{ :for => :service_user }= t('.service_user')
       %input#service_user{:type => "text", :name => "service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["service_user"], :onchange => "update_value('service_user','service_user', 'string')"}
