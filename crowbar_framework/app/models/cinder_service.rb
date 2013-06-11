@@ -20,8 +20,6 @@ class CinderService < ServiceObject
     @logger = thelogger
   end
 
-  #if barclamp allows multiple proposals OVERRIDE
-  # def self.allow_multiple_proposals?
 # Turn off multi proposal support till it really works and people ask for it.
   def self.allow_multiple_proposals?
     false
