@@ -28,8 +28,8 @@
         "python-webob",
         "pip://python-keystoneclient"
       ],
-      "debug": true,
-      "verbose": true,
+      "debug": false,
+      "verbose": false,
       "networking_mode": "gre",
       "use_syslog": false,
       "database_engine": "database",
