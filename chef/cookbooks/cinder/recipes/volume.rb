@@ -127,7 +127,7 @@ if node[:cinder][:use_gitrepo]
   cookbook_file "/etc/tgt/conf.d/cinder-volume.conf" do
     source "cinder-volume.conf"
   end
-elsif platform?("suse")
+elsif node[:platform] == "suse"
   cookbook_file "/etc/tgt/targets.conf" do
     source "cinder-volume.conf"
   end
@@ -137,7 +137,7 @@ cinder_service("volume")
 
 # Restart doesn't work correct for this service.
 bash "restart-tgt_#{@cookbook_name}" do
-  unless platform?("suse")
+  unless node[:platform] == "suse"
     code <<-EOH
       stop tgt
       start tgt
@@ -151,6 +151,6 @@ end
 service "tgt" do
   supports :status => true, :restart => true, :reload => true
   action :enable
-  service_name "tgtd" if platform?("suse")
+  service_name "tgtd" if node[:platform] == "suse"
   notifies :run, "bash[restart-tgt_#{@cookbook_name}]"
 end

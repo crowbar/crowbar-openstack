@@ -110,7 +110,7 @@ end
 
 cinder_service("api")
 
-unless platform?("suse")
+unless node[:platform] == "suse"
   api_service_name = "cinder-api"
 else
   api_service_name = "openstack-cinder-api"

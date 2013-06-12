@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-unless platform?("suse")
+unless node[:platform] == "suse"
   override[:cinder][:user]="cinder"
   override[:cinder][:group]="cinder"
 else
