@@ -13,12 +13,14 @@
 # limitations under the License.
 #
 
-quantums = search(:node, "roles:quantum-server") || []
-if quantums.length > 0
-  quantum = quantums[0]
-else
-  quantum = node
+quantum = nil
+if node.attribute?(:cookbook) and node[:cookbook] == "nova"
+  quantums = search(:node, "roles:quantum-server AND roles:quantum-config-#{node[:nova][:quantum_instance]}")
+  quantum = quantums.first || raise("Quantum instance '#{node[:nova][:quantum_instance]}' for nova not found")
+  else
+     quantum = node
 end
+
 quantum_agent="quantum-plugin-openvswitch-agent"
 
 quantum_path = "/opt/quantum"
