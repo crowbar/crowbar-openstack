@@ -118,6 +118,10 @@ class QuantumService < ServiceObject
     return if all_nodes.empty?
 
     net_svc = NetworkService.new @logger
+    network_proposal = ProposalObject.find_proposal(net_svc.bc_name, "default")
+    if network_proposal["attributes"]["network"]["networks"]["os_sdn"].nil?
+      raise I18n.t("barclamp.quantum.deploy.missing_os_sdn_network")
+    end
 
     tnodes = role.override_attributes["quantum"]["elements"]["quantum-server"]
     unless tnodes.nil? or tnodes.empty?
