@@ -21,11 +21,7 @@ include_recipe "#{@cookbook_name}::common"
 
 volname = node[:cinder][:volume][:volume_name]
 
-checked_disks = []
-
-node[:crowbar][:disks].each do |disk, data|
-  checked_disks << disk if File.exists?("/dev/#{disk}") and data["usage"] == "Storage"
-end
+checked_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node,"Storage").collect{|d| d.device }
 
 if checked_disks.empty? or node[:cinder][:volume][:volume_type] == "local"
   # only OS disk is exists, will use file storage
