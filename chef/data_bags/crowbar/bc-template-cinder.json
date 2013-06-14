@@ -5,6 +5,7 @@
     "cinder": {
       "debug": false,
       "verbose": false,
+      "use_syslog": false,
       "rabbitmq_instance": "none",
       "keystone_instance": "none",
       "glance_instance": "none",
