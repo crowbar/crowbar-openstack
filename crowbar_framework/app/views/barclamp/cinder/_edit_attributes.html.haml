@@ -5,18 +5,10 @@
   = link_to t('raw'), proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :style => "float: right;"
   %div.container
     = render 'barclamp/git/pfsdeps.html.haml'
-    %p
-      %label{ :for => :database_instance }= t('.database_instance')
-      = instance_selector("database", :database_instance, "database_instance", @proposal)
-    %p
-      %label{ :for => :rabbitmq_instance }= t('.rabbitmq_instance')
-      = instance_selector("rabbitmq", :rabbitmq_instance, "rabbitmq_instance", @proposal)
-    %p
-      %label{ :for => :keystone_instance }= t('.keystone_instance')
-      = instance_selector("keystone", :keystone_instance, "keystone_instance", @proposal)
-    %p
-      %label{ :for => :glance_instance }= t('.glance_instance')
-      = instance_selector("glance", :glance_instance, "glance_instance", @proposal)
+    = render_instance_selector("database", :database_instance, t('.database_instance'), "database_instance", @proposal)
+    = render_instance_selector("rabbitmq", :rabbitmq_instance, t('.rabbitmq_instance'), "rabbitmq_instance", @proposal)
+    = render_instance_selector("keystone", :keystone_instance, t('.keystone_instance'), "keystone_instance", @proposal)
+    = render_instance_selector("glance", :glance_instance, t('.glance_instance'), "glance_instance", @proposal)
     %p
       %label{ :for => :service_user }= t('.service_user')
       %input#service_user{:type => "text", :name => "service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["service_user"], :onchange => "update_value('service_user','service_user', 'string')"}
