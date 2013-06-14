@@ -68,6 +68,22 @@ class CinderService < ServiceObject
       end
     end
 
+    if base["attributes"][@bc_name]["database_instance"] == ""
+      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "database"))
+    end
+
+    if base["attributes"][@bc_name]["keystone_instance"] == ""
+      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "keystone"))
+    end
+
+    if base["attributes"][@bc_name]["glance_instance"] == ""
+      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "glance"))
+    end
+
+    if base["attributes"][@bc_name]["rabbitmq_instance"] == ""
+      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "rabbitmq"))
+    end
+
     base["attributes"]["cinder"]["service_password"] = '%012d' % rand(1e12)
     base["attributes"]["cinder"]["db"]["password"] = random_password
 
