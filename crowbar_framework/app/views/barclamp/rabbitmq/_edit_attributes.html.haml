@@ -13,6 +13,3 @@
     %p
       %label{ :for => :user }= t('.user')
       %input#user{:type => "text", :name => "user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["user"], :onchange => "update_value('user','user', 'string')"}
-    %p
-      %label{ :for => :password }= t('.password')
-      %input#password{:type => "text", :name => "password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["password"], :onchange => "update_value('password','password', 'string')"}
