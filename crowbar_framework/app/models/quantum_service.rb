@@ -108,7 +108,12 @@ class QuantumService < ServiceObject
       rescue
         @logger.info("#{@bc_name} create_proposal: no #{inst.downcase} found")
       end
+
+      if base["attributes"][@bc_name]["#{inst.downcase}_instance"] == ""
+        raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "#{inst.downcase}"))
+      end
     end
+
     base
   end
 
