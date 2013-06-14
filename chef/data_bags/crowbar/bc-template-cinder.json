@@ -76,7 +76,6 @@
         "volume_name": "cinder-volumes",
         "volume_type": "raw",
         "cinder_raw_method": "all",
-        "cinder_volume_disks": [],
         "local_file": "/var/lib/cinder/volume.raw",
         "local_size": 2000,
         "eqlx": {

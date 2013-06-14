@@ -78,7 +78,6 @@ locale_additions:
           volume_file_location: Volume File Location
           volume_disk_parameters: Disk-based Parameters
           volume_raw_mode: Disk selection method
-          cinder_volume_disks: Disks for cinder-volume storage volume group
           eqlx_parameters: EQLX Parameters
           eqlx_san_ip: EQLX SAN IP
           eqlx_san_login: EQLX SAN login
