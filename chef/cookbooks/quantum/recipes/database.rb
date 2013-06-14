@@ -98,7 +98,7 @@ elsif node[:quantum][:sql_engine] == "sqlite"
     Chef::Log.info("Configuring Quantum to use SQLite backend")
     node[@cookbook_name][:db][:sql_connection] = "sqlite:////var/lib/quantum/quantum.db"
     file "/var/lib/quantum/quantum.db" do
-        owner "quantum"
+        owner node[:quantum][:platform][:user]
         action :create_if_missing
     end
 else 
