@@ -19,5 +19,5 @@
 
 package "python-mysqldb" do
     package_name "python-mysql" if node.platform == "suse"
-    action :upgrade
+    action :install
 end
