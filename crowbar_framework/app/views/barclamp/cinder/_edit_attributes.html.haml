@@ -31,7 +31,7 @@
         %input#volume_name{:type => "text", :name => "volume_name", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_name"], :onchange => "update_value('volume/volume_name','volume_name', 'string')"}
       %p
         %label{ :for => :volume_type }= t('.volume_type')
-        = select_tag :volume_type, options_for_select([['raw','raw'], ['local', 'local'], ['eqlx','eqlx']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_type"].to_s), :onchange => "update_view();update_value('volume/volume_type', 'volume_type', 'string')"
+        = select_tag :volume_type, options_for_select([['raw','raw'], ['local', 'local'], ['eqlx','eqlx']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_type"].to_s), :onchange => "update_volume_type_view(); update_value('volume/volume_type', 'volume_type', 'string')"
       %div{ :id => 'eqlx_parameters', :class => 'container' }
         %p
           %label{ :for => :eqlx_header }= t('.eqlx_parameters')
@@ -81,3 +81,22 @@
         %div.container
           %label{ :for => :cinder_raw_method }= t('.volume_raw_mode')
           = select_tag :cinder_raw_method, options_for_select([['first','first'], ['all', 'all']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["cinder_raw_method"].to_s), :onchange => "update_value('volume/cinder_raw_method', 'cinder_raw_method', 'string')"
+
+:javascript
+  function update_volume_type_view() {
+    var proposal_data = JSON.parse($("input#proposal_attributes").val());
+    var choice = $("select#volume_type").val();
+    if (choice == 'eqlx') {
+      $('div#eqlx_parameters').show();
+      $('div#volume_file_parameters').hide();
+      $('div#volume_disk_parameters').hide();
+   } else {
+      $('div#eqlx_parameters').hide();
+      $('div#volume_file_parameters').show();
+      $('div#volume_disk_parameters').show();
+    }
+  }
+
+  $(document).ready(function(){
+    update_volume_type_view();
+  });
