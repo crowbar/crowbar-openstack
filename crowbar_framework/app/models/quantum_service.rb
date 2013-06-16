@@ -90,7 +90,6 @@ class QuantumService < ServiceObject
         "quantum-server" => [ nodes.first[:fqdn] ]
     } unless nodes.nil? or nodes.length ==0
 
-    base[:attributes][:quantum][:service][:token] = '%012d' % rand(1e12)
     base["attributes"]["quantum"]["service_password"] = '%012d' % rand(1e12)
 
     insts = ["Keystone", "Rabbitmq"]

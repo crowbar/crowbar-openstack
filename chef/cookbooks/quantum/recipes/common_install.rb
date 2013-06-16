@@ -202,7 +202,6 @@ rabbit_settings = {
 }
 
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
-keystone_token = keystone["keystone"]["service"]["token"]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
 keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
@@ -210,7 +209,6 @@ keystone_service_user = quantum["quantum"]["service_user"]
 keystone_service_password = quantum["quantum"]["service_password"]
 admin_username = keystone["keystone"]["admin"]["username"] rescue nil
 admin_password = keystone["keystone"]["admin"]["password"] rescue nil
-default_tenant = keystone["keystone"]["default"]["tenant"] rescue nil
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
@@ -235,13 +233,11 @@ template "/etc/quantum/quantum.conf" do
       :sql_pool_timeout => quantum[:quantum][:sql][:pool_timeout],
       :debug => quantum[:quantum][:debug],
       :verbose => quantum[:quantum][:verbose],
-      :admin_token => quantum[:quantum][:service][:token],
       :service_port => quantum[:quantum][:api][:service_port], # Compute port
       :service_host => quantum[:quantum][:api][:service_host],
       :use_syslog => quantum[:quantum][:use_syslog],
       :rabbit_settings => rabbit_settings,
       :keystone_ip_address => keystone_address,
-      :keystone_admin_token => keystone_token,
       :keystone_service_port => keystone_service_port,
       :keystone_service_tenant => keystone_service_tenant,
       :keystone_service_user => keystone_service_user,
