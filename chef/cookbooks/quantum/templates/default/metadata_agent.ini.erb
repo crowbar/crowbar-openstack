@@ -1,7 +1,7 @@
 # Managed by Crowbar.
 # Do not edit.
 [DEFAULT]
-debug = <%= @debug %>
+debug = <%= @debug ? "True" : "False" %>
 auth_url = <%= @auth_url %>
 auth_region = <%= @auth_region %>
 admin_tenant_name = <%= @admin_tenant_name %>
