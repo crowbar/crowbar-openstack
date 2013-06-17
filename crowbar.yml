@@ -42,7 +42,6 @@ locale_additions:
         edit_deployment: 
           deployment: Deployment
         edit_attributes:
-          database_engine: Database Engine
           database_instance: Database Instance
           rabbitmq_instance: RabbitMQ 
           keystone_instance: Keystone 
