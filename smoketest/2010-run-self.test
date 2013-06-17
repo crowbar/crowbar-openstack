@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'chef/rest'
+require 'chef/node'
+require 'chef/search/query'
+require 'net/http'
+require 'net/https'
+require 'uri'
+require 'json/pure'
+require 'mysql'
+
+
+def clean_oat_db(oat_db_host, oat_db_user, oat_db_password, oat_db_db)
+#purge all data from oat db
+  con = Mysql.new oat_db_host, oat_db_user, oat_db_password, oat_db_db
+  con.query("delete from HOST")
+  con.query("delete from HOST_MLE")
+  con.query("delete from MLE")
+  con.query("delete from OEM")
+  con.query("delete from OS")
+  con.query("delete from PCR_WHITE_LIST")
+  con.query("delete from PCR_manifest")
+end
+
+begin
+  Chef::Config.from_file(File.expand_path("~/.chef/knife.rb"))
+  query = Chef::Search::Query.new
+
+  oat_server = query.search('node', 'roles:oat-server').first.first rescue raise("oat-server not found")
+  mysql_server = query.search('node', 'roles:database-server').first.first rescue raise("mysql-server not found")
+  oat_hostname=oat_server[:fqdn]
+  oat_port=oat_server[:inteltxt][:server][:port]
+  oat_db_user=oat_server[:inteltxt][:db][:user]
+  oat_db_password=oat_server[:inteltxt][:db][:password]
+  oat_db_db=oat_server[:inteltxt][:db][:database]
+  oat_db_host=mysql_server[:crowbar][:network][:admin][:address]
+
+  clean_oat_db(oat_db_host, oat_db_user, oat_db_password, oat_db_db)
+  r=%x{echo "#{oat_hostname}\n#{oat_port}\n" | bash ./curl.sh}
+
+  clean_oat_db(oat_db_host, oat_db_user, oat_db_password, oat_db_db)
+  
+end
+

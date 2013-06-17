@@ -1,2 +1,0 @@
-barclmap-inteltxt
-=================

@@ -1,0 +1,5 @@
+ManifestWebServicesUrl=https://<%= node[:fqdn] %>:8443/OpenAttestationManifestWebServices/V1.0/PCR
+AttestationWebServicesUrl=https://<%= node[:fqdn] %>:8443/OpenAttestationWebServices/V1.0
+default_attest_interval=<%= node[:inteltxt][:oa_attest_interval] %>
+default_attest_timeout=<%= node[:inteltxt][:oa_attest_timeout] %>
+TrustStore=/var/lib/oat-appraiser/Certificate/TrustStore.jks

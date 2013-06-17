@@ -1,0 +1,61 @@
+{
+  "id": "bc-template-inteltxt",
+  "description": "Installation for Intel TxT",
+  "attributes": {
+    "inteltxt": {
+      "oaws_attest_timeout": 50000,
+      "apache_listen_port": "8383",
+      "alert_mail_host": "localhost",
+      "alert_mail_user": "smtp_user",
+      "alert_mail_port": 25,
+      "alert_mail_pass": "smtp_pass",
+      "oa_attest_interval": 60000,
+      "oa_attest_timeout": 60000,
+      "pcr_select_mask": "FFFFFF",
+      "db": {
+        "user": "oat",
+        "password": "",
+        "database": "oat_db"
+      },
+      "alert_mail_from": "OATapp_no_reply",
+      "database_instance": "none",
+      "alert_mail_to": "oatapp_admin@localhost",
+      "oaws_check_attest_interval": 1000
+    }
+  },
+  "deployment": {
+    "inteltxt": {
+      "config": {
+        "transitions": false,
+        "environment": "oat-base-config",
+        "transition_list": [
+
+        ],
+        "mode": "full"
+      },
+      "crowbar-revision": 0,
+      "element_order": [
+        [
+          "oat-server"
+        ],
+        [
+          "oat-client"
+        ]
+      ],
+      "elements": {
+      },
+      "element_states": {
+        "oat-server": [
+          "readying",
+          "ready",
+          "applying"
+        ],
+        "oat-client": [
+          "readying",
+          "ready",
+          "applying"
+        ]
+      }
+    }
+  }
+}

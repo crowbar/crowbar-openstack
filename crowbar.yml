@@ -1,0 +1,106 @@
+# Copyright 2013, Mirantis
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Author: RobHirschfeld
+#
+# This file directs the installation of the barclamp by the Crowbar Framework
+# The major compoents are
+#    barclamp: detalis about the barclamp
+#    crowbar: installation instructions
+#    nav: (optional) injects items into the Crowbar UI menu
+#    debs/rpms/gems: components needs by the barclamp
+
+barclamp:
+  name: inteltxt
+  display: Intel TXT
+  description: Provide Intel Open Attestation service for openstack trusted computing pool
+  proposal_schema_version: 1
+  user_managed: true
+  version: 0
+  requires:
+    - @crowbar
+    - database
+  member:
+    - openstack
+  os_support:
+    - ubuntu-12.04
+
+crowbar:
+  layout: 1
+  order: 1000
+  run_order: 1000
+  chef_order: 1000
+  proposal_schema_version: 1
+
+debs:
+  pkgs:
+    - oat-appraiser
+    - oat-client
+    - oat-commandtool
+    - openjdk-6-jdk
+    - openssl
+    - trousers
+    - libtspi1
+    - openjdk-6-jre
+    - tpm-tools
+    - dbconfig-common
+    - tboot
+    - wsmancli
+    - libopenwsman1
+  ubuntu-12.04:
+    build_pkgs:
+      - ant
+      - git
+      - g++
+      - libtspi-dev
+      - make
+      - openjdk-6-jdk
+      - unzip
+      - wget
+      - zip
+    repos:
+      - deb http://archive.canonical.com/ubuntu precise partner
+      - deb http://ppa.launchpad.net/jared-dominguez/wsmancli/ubuntu precise main
+    build_cmd: build.sh
+    
+locale_additions:
+  en:
+    nav:
+      oat: OAT
+    barclamp:
+      inteltxt:
+        edit_attributes:
+          attributes: Attributes
+          oat_service_settings: OpenAttestation service settings
+          pcr_select_mask: PCR mask for integrity reports
+          oa_attest_interval: OpenAttestation attest interval
+          oa_attest_timeout: OpenAttestation attest timeout
+          oaws_check_attest_interval: OpenAttestationWebService check attest interval
+          oaws_attest_timeout: OpenAttestationWebService attest timeout
+          db_settings: Database settings
+          db_user: User
+          db_pass: Password (leave blank for autogenerating)
+          db_name: Database name
+          mail_alert_settings: Mail Alert settings
+          alert_mail_to: To
+          alert_mail_from: From
+          mail_alert_smtp_settings: SMTP settings
+          alert_mail_host: SMTP host
+          alert_mail_port: SMTP port
+          alert_mail_user: User
+          alert_mail_pass: Password
+          apache_listen_port: OAT HIS portal port
+          database_instance: Database
+      oat_edit_deployment:
+        deployment: Deployment

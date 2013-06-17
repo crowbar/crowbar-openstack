@@ -1,0 +1,64 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'chef/rest'
+require 'chef/node'
+require 'chef/search/query'
+require 'net/http'
+require 'net/https'
+require 'uri'
+require 'json/pure'
+
+begin
+
+  # configure chef client
+  Chef::Config.from_file(File.expand_path("~/.chef/knife.rb"))
+  query = Chef::Search::Query.new
+
+  # find oat server
+  server = query.search('node', 'roles:oat-server').first.first rescue raise("oat-server not found")
+
+  # retrieve nodes
+  nodes = query.search('node', 'roles:oat-client').first.collect{|node| node[:fqdn].split('.').first} rescue []
+
+  # create connection object
+  url = "http#{"s"if server[:inteltxt][:server][:secure]}://#{server[:fqdn]}:#{server[:inteltxt][:server][:port]}"
+  uri = URI.parse(url)
+  connection = Net::HTTP.new(uri.host, uri.port)
+  if uri.scheme == "https"
+    connection.use_ssl = true
+    connection.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  end
+
+  # retrieve registered agents from OAT server
+  response = connection.get "/AttestationService/resources/hosts", { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
+
+  response = JSON.parse(response.body)["hostBean"] rescue raise("Hosts: bad response from server")
+  agents = response.collect{|host| host["HostName"]}
+
+  # retrieve trusted hosts
+  args = {:hosts => nodes} 
+  response = connection.post "/AttestationService/resources/PollHosts", args.to_json, { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
+
+  response = JSON.parse(response.body)["hosts"] rescue raise("PollHost: bad response from server")
+  trusted = []
+  response.each do |host|
+    trusted << host["host_name"] if host["trust_lvl"] == "trusted"
+  end
+
+  agents.sort!
+  nodes.sort!
+  trusted.sort!
+
+  # verify equals arrays of nodes, agents and trusted
+  unless (agents == nodes) and (agents == trusted) and (nodes == trusted)
+    raise "Test trusted nodes failed (nodes:[#{nodes.join(", ")}] agents:[#{agents.join(", ")}] trusted:[#{trusted.join(", ")}])"
+  end
+  puts "Test trusted nodes passed"
+
+rescue => e
+
+  puts e.message
+  exit(1)
+
+end
