@@ -70,14 +70,14 @@ export OS_TENANT_NAME="admin"
 #TEST 2010 self tests
 echo "Test 2010: OAT server self tests"
 apt-get -y install ruby-mysql
-ruby 2010-run-self.test
-run_on $oat_server_ip 'chef-client'
+ruby /opt/dell/barclamps/inteltxt/smoketest/2010-run-self.test
+run_on $oat_server_ip 'chef-client' &>/dev/null
 cat /tmp/Result
 echo Passed `cat /tmp/Result  | grep ':.*Passed' | wc -l`
 echo Failed `cat /tmp/Result  | grep -i ':.*fail' | wc -l`
 
 #TEST 2020 diff between chef oat-client roles and oat-appraiser response
-ruby 2020-check-lists-nodes.test
+ruby /opt/dell/barclamps/inteltxt/smoketest/2020-check-lists-nodes.test
 
 echo "Test 2030: Reboot"
 
@@ -97,13 +97,18 @@ done
 [[ $alive = true ]] || die 1 "Could not ping $oat_clients"
 echo "Can ping $oat_clients. Waiting for startup"
 
-sleep 60
+sleep 180
 
 host=`echo $oat_clients | awk -F. '{ print $1 }'`
 echo $host
 
 echo "{\"hosts\":[\"$host\"]}" > hostfile
-trust_lvl=`curl --cacert certfile.cer -H "Content-Type: application/json" -X POST -d @hostfile "https://$oat_server_ip:8443/AttestationService/resources/PollHosts" | grep trusted | wc -l`
+trust_lvl=`curl --cacert certfile.cer -H "Content-Type: application/json" -X POST -d @hostfile "https://$oat_server_ip:8443/AttestationService/resources/PollHosts" | grep "\"trusted\"" | wc -l`
+n=0
+while [ $trust_lvl != 1 -a $n -lt 5 ]; do
+    n=$(($n + 1))
+    trust_lvl=`curl --cacert certfile.cer -H "Content-Type: application/json" -X POST -d @hostfile "https://$oat_server_ip:8443/AttestationService/resources/PollHosts" | grep "\"trusted\"" | wc -l`
+done
 if [[ $trust_lvl == 1 ]]; then
     echo "Reboot OAT agent node test passed"
 else
@@ -147,7 +152,7 @@ else
 fi
 
 nova_do $nova_ip nova show $instance_name > "$LOGDIR/nova-$instance_name.status"
-[[ $(grep 'private network' "$LOGDIR/nova-$instance_name.status") =~ $ip_re ]] || \
+[[ $(grep 'fixed network' "$LOGDIR/nova-$instance_name.status") =~ $ip_re ]] || \
     die 1 "$instance_name has no IP!"
 echo "$instance_name at IP ${BASH_REMATCH[1]}"
 
@@ -166,7 +171,7 @@ compute_ip=($(knife_node_find 'roles:nova-multi-compute' FQDN))
 for i in "${compute_ip[@]}"; do
     host=`echo $i | awk -F. '{ print $1 }'`
     echo "{\"hosts\":[\"$host\"]}" > hostfile
-    trust_lvl=`curl --cacert certfile.cer -H "Content-Type: application/json" -X POST -d @hostfile "https://$oat_server_ip:8443/AttestationService/resources/PollHosts" | grep trusted | wc -l`
+    trust_lvl=`curl --cacert certfile.cer -H "Content-Type: application/json" -X POST -d @hostfile "https://$oat_server_ip:8443/AttestationService/resources/PollHosts" | grep "\"trusted\"" | wc -l`
     if [[ $trust_lvl == 0 ]]; then
         echo "Stop nova compute on non-trusted host $host"
         run_on $host "/etc/init.d/nova-compute stop"
@@ -206,7 +211,7 @@ else
 fi
 
 nova_do $nova_ip nova show $instance_name > "$LOGDIR/nova-$instance_name.status"
-[[ $(grep 'private network' "$LOGDIR/nova-$instance_name.status") =~ $ip_re ]] || \
+[[ $(grep 'fixed network' "$LOGDIR/nova-$instance_name.status") =~ $ip_re ]] || \
     die 1 "$instance_name has no IP!"
 echo "$instance_name at IP ${BASH_REMATCH[1]}"
 
@@ -219,7 +224,7 @@ compute_ip=($(knife_node_find 'roles:nova-multi-compute' FQDN))
 for i in "${compute_ip[@]}"; do
     host=`echo $i | awk -F. '{ print $1 }'`
     echo "{\"hosts\":[\"$host\"]}" > hostfile
-    trust_lvl=`curl --cacert certfile.cer -H "Content-Type: application/json" -X POST -d @hostfile "https://$oat_server_ip:8443/AttestationService/resources/PollHosts" | grep trusted | wc -l`
+    trust_lvl=`curl --cacert certfile.cer -H "Content-Type: application/json" -X POST -d @hostfile "https://$oat_server_ip:8443/AttestationService/resources/PollHosts" | grep "\"trusted\"" | wc -l`
     if [[ $trust_lvl == 0 ]]; then
         echo "Start nova compute on non-trusted host $host"
         run_on $host "/etc/init.d/nova-compute start"

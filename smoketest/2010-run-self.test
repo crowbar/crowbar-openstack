@@ -37,7 +37,7 @@ begin
   oat_db_host=mysql_server[:crowbar][:network][:admin][:address]
 
   clean_oat_db(oat_db_host, oat_db_user, oat_db_password, oat_db_db)
-  r=%x{echo "#{oat_hostname}\n#{oat_port}\n" | bash ./curl.sh}
+  r=%x{cd /opt/dell/barclamps/inteltxt/smoketest ; echo "#{oat_hostname}\n#{oat_port}\n" | bash ./curl.sh ; cd $OLDPWD}
 
   clean_oat_db(oat_db_host, oat_db_user, oat_db_password, oat_db_db)
   
