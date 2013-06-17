@@ -98,8 +98,9 @@ template "/etc/sudoers.d/quantum-rootwrap" do
   cookbook "quantum"
   source "quantum-rootwrap.erb"
   mode 0440
-  variables(:user => "quantum",
+  variables(:user => node[:quantum][:platform][:user],
             :binary => node[:quantum][:rootwrap])
+  not_if { node[:platform] == "suse" }
 end
 
 node[:quantum][:platform][:ovs_pkgs].each { |p| package p }
