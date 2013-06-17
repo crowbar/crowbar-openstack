@@ -13,10 +13,6 @@
 # limitations under the License.
 #
 
-include_recipe "quantum::database"
-include_recipe "quantum::api_register"
-include_recipe "quantum::common_install"
-
 unless node[:quantum][:use_gitrepo]
   pkgs = node[:quantum][:platform][:pkgs]
   pkgs.each { |p| package p }
@@ -55,6 +51,10 @@ else
     bin_name "quantum-l3-agent --config-dir /etc/quantum/"
   end
 end
+
+include_recipe "quantum::database"
+include_recipe "quantum::api_register"
+include_recipe "quantum::common_install"
 
 # Kill all the libvirt default networks.
 bash "Destroy the libvort default network" do
