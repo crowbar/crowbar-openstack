@@ -81,18 +81,23 @@ else
   end
 end
 
+node[:quantum] ||= Mash.new
+node[:quantum][:rootwrap] = "/usr/bin/quantum-rootwrap"
+
+# Update path to quantum-rootwrap in case the path above is wrong
 ruby_block "Find quantum rootwrap" do
   block do
+    found = false
     ENV['PATH'].split(':').each do |p|
       f = File.join(p,"quantum-rootwrap")
       next unless File.executable?(f)
-      node[:quantum] ||= Mash.new
       node[:quantum][:rootwrap] = f
+      found = true
       break
     end
-    raise("Could not find quantum rootwrap binary!") unless node[:quantum][:rootwrap]
+    raise("Could not find quantum rootwrap binary!") unless found
   end
-end unless node[:quantum][:rootwrap] && !node[:quantum][:rootwrap].empty?
+end
 
 template "/etc/sudoers.d/quantum-rootwrap" do
   cookbook "quantum"
