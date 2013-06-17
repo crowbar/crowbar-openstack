@@ -224,7 +224,7 @@ end
 template "/etc/quantum/quantum.conf" do
     cookbook "quantum"
     source "quantum.conf.erb"
-    mode "0644"
+    mode "0640"
     owner node[:quantum][:platform][:user]
     variables(
       :sql_connection => quantum[:quantum][:db][:sql_connection],
