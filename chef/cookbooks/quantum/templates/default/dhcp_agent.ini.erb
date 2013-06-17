@@ -1,7 +1,7 @@
 # Managed by Crowbar.
 # Do not edit.
 [DEFAULT]
-debug = <%= @debug %>
+debug = <%= @debug ? "True" : "False" %>
 resync_interval = <%= @resync_interval %>
 interface_driver = <%= @interface_driver %>
 dhcp_driver = <%= @dhcp_driver %>

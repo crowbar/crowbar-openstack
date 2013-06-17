@@ -107,7 +107,7 @@ template "/etc/quantum/l3_agent.ini" do
   group "root"
   mode "0640"
   variables(
-            :debug => "True",
+            :debug => node[:quantum][:debug],
             :interface_driver => "quantum.agent.linux.interface.OVSInterfaceDriver",
             :use_namespaces => "True",
             :handle_internal_only_routers => "True",
@@ -125,7 +125,7 @@ template "/etc/quantum/dhcp_agent.ini" do
   group "root"
   mode "0640"
   variables(
-            :debug => "True",
+            :debug => node[:quantum][:debug],
             :interface_driver => "quantum.agent.linux.interface.OVSInterfaceDriver",
             :use_namespaces => "True",
             :resync_interval => 5,
@@ -153,7 +153,7 @@ template "/etc/quantum/metadata_agent.ini" do
   group "root"
   mode "0640"
   variables(
-            :debug => "True",
+            :debug => node[:quantum][:debug],
             :auth_url => keystone_service_url,
             :auth_region => "RegionOne",
             :admin_tenant_name => keystone_service_tenant,
