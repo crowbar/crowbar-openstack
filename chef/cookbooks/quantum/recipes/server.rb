@@ -57,7 +57,7 @@ else
 end
 
 # Kill all the libvirt default networks.
-bash "Destroy the libvort default network" do
+bash "Destroy the libvirt default network" do
   command "virsh net-destroy default"
   only_if "virsh net-list |grep default"
 end
