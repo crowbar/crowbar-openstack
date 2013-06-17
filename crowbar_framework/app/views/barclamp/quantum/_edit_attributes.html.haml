@@ -10,18 +10,3 @@
     %p
       %label{ :for => :networking_mode }= t('.networking_mode')
       = select_tag :networking_mode, options_for_select([['flat', 'local'], ['gre','gre']], @proposal.raw_data['attributes'][@proposal.barclamp]["networking_mode"]), :onchange => "update_value('networking_mode', 'networking_mode', 'string')"
-    %p
-      %label{ :for => :default_username }= t('.default-username')
-      %input#default_username{:type => "text", :name => "default_username", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["default"]["username"], :onchange => "update_value('default/username','default_username', 'string')"}
-    %p
-      %label{ :for => :default_password }= t('.default-password')
-      %input#default_password{:type => "text", :name => "default_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["default"]["password"], :onchange => "update_value('default/password','default_password', 'string')"}
-    %p
-      %label{ :for => :admin_username  }= t('.admin-username')
-      %input#admin_username{:type => "text", :name => "admin_username", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["admin"]["username"], :onchange => "update_value('admin/username','admin_username', 'string')"}
-    %p
-      %label{ :for => :admin_password  }= t('.admin-password')
-      %input#admin_password{:type => "text", :name => "admin_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["admin"]["password"], :onchange => "update_value('admin/password','admin_password', 'string')"}
-    %p
-      %label{ :for => :admin_token  }= t('.admin-token')
-      %input#admin_token{:type => "text", :name => "admin_token", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["admin"]["token"], :onchange => "update_value('admin/token','admin_token','string')"}

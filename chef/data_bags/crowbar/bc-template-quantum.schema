@@ -41,20 +41,6 @@
                     "api": { "type": "map", "required": true, "mapping": {
                       "service_port": { "type" : "int", "required" : true },
                       "service_host": { "type" : "str", "required" : true }
-                    }},
-                    "admin": { "type": "map", "required": true, "mapping": {
-                      "tenant": { "type" : "str", "required" : true },
-                      "username": { "type" : "str", "required" : true },
-                      "password": { "type" : "str", "required" : true }
-                    }},
-                    "service": { "type": "map", "required": true, "mapping": {
-                      "tenant": { "type" : "str", "required" : true },
-                      "token": { "type": "str", "required" : true }
-                    }},
-                    "default" : { "type" : "map", "required" : true, "mapping": {
-                      "tenant": { "type" : "str", "required" : true },
-                      "username": { "type" : "str", "required" : true },
-                      "password": { "type" : "str", "required" : true }
                     }}
               }}
      }},
