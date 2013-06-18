@@ -15,6 +15,7 @@
                     "keystone_instance": { "type": "str", "required": true },
                     "gitrepo": { "type": "str", "required": true },
                     "networking_mode": { "type": "str", "required": true },
+                    "networking_plugin": { "type": "str", "required": true },
                     "git_instance": { "type": "str", "required": true },
                     "git_refspec": { "type": "str", "required": true },
                     "use_gitrepo": { "type": "bool", "required": true },

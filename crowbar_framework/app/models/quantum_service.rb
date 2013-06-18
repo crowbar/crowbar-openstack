@@ -111,6 +111,14 @@ class QuantumService < ServiceObject
     base
   end
 
+  def validate_proposal_after_save proposal
+    super
+    @logger.debug("validating quantum proposal: #{proposal.inspect}")
+    if proposal["attributes"]["quantum"]["networking_plugin"] == "linuxbridge" and
+        proposal["attributes"]["quantum"]["networking_mode"] != "vlan"
+        raise Chef::Exceptions::ValidationFailed.new("The \"linuxbridge\" plugin only supports the mode: \"vlan\"")
+    end
+  end
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Quantum apply_role_pre_chef_call: entering #{all_nodes.inspect}")

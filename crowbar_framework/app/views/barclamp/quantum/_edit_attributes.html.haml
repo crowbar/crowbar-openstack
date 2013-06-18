@@ -8,5 +8,51 @@
     = render_instance_selector("keystone", :keystone_instance, t('.keystone_instance'), "keystone_instance", @proposal)
     = render_instance_selector("rabbitmq", :rabbitmq_instance, t('.rabbitmq_instance'), "rabbitmq_instance", @proposal)
     %p
-      %label{ :for => :networking_mode }= t('.networking_mode')
-      = select_tag :networking_mode, options_for_select([['flat', 'local'], ['gre','gre']], @proposal.raw_data['attributes'][@proposal.barclamp]["networking_mode"]), :onchange => "update_value('networking_mode', 'networking_mode', 'string')"
+      %label{ :for => :networking_plugin }= t('.networking_plugin')
+      = select_tag :networking_plugin, options_for_select([['linuxbridge', 'linuxbridge'], ['openvswitch','openvswitch']], @proposal.raw_data['attributes'][@proposal.barclamp]['networking_plugin']), :onchange => "update_value('networking_plugin', 'networking_plugin', 'string'); onPluginChange();"
+    %div{ :id => 'networking_mode_div' }
+      %p
+        %label{ :for => :networking_mode }= t('.networking_mode')
+        = select_tag :networking_mode, options_for_select([['flat', 'local'], ['gre','gre']], @proposal.raw_data['attributes'][@proposal.barclamp]["networking_mode"]), :onchange => "update_value('networking_mode', 'networking_mode', 'string')"
+
+:javascript
+  function setSelectedValue(selectObj, valueToSet) {
+    for (var i = 0; i < selectObj.options.length; i++) {
+      if (selectObj.options[i].text == valueToSet) {
+        selectObj.options[i].selected = true;
+        return;
+      }
+    }
+  }
+
+  function update_value_raw_string(path, new_value) {
+    var input = document.getElementById('proposal_attributes');
+    var json = JSON.parse(input.value);
+
+    var path_parts = path.split('/');
+    var data = json;
+    while (path_parts.length > 1) {
+      var path_part = path_parts.shift();
+      if (!(path_part in data))
+        data[path_part] = {};
+      data = data[path_part];
+    }
+    data[path_parts.shift()] = new_value;
+
+    input.value = JSON.stringify(json);
+  }
+
+  function onPluginChange() {
+    networkingPlugin = $('select#networking_plugin').val();
+    if(networkingPlugin == "linuxbridge") {
+      $('div#networking_mode_div').hide();
+      update_value_raw_string('networking_mode', 'vlan');
+    } else if (networkingPlugin == "openvswitch") {
+      $('div#networking_mode_div').show();
+      update_value('networking_mode', 'networking_mode', 'string');
+    }
+  }
+
+  $(document).ready(function(){
+    onPluginChange();
+  });

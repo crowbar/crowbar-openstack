@@ -17,6 +17,7 @@
 default[:quantum][:debug] = false
 default[:quantum][:verbose] = false
 default[:quantum][:networking_mode] = "local"
+default[:quantum][:networking_plugin] = "openvswitch"
 
 default[:quantum][:db][:database] = "quantum"
 default[:quantum][:db][:user] = "quantum"
@@ -53,6 +54,8 @@ when "suse"
     :service_name => "openstack-quantum",
     :ovs_agent_pkg => "openstack-quantum-openvswitch-agent",
     :ovs_agent_name => "openstack-quantum-openvswitch-agent",
+    :lb_agent_pkg => "openstack-quantum-linuxbridge-agent",
+    :lb_agent_name => "openstack-quantum-linuxbridge-agent",
     :metadata_agent_name => "openstack-quantum-metadata-agent",
     :dhcp_agent_name => "openstack-quantum-dhcp-agent",
     :l3_agent_name => "openstack-quantum-l3-agent",
@@ -72,6 +75,8 @@ else
     :service_name => "quantum-server",
     :ovs_agent_pkg => "quantum-plugin-openvswitch-agent",
     :ovs_agent_name => "quantum-plugin-openvswitch-agent",
+    :lb_agent_pkg => "quantum-plugin-linuxbridge-agent",
+    :lb_agent_name => "quantum-plugin-linuxbridge-agent",
     :metadata_agent_name => "quantum-metadata-agent",
     :dhcp_agent_name => "quantum-dhcp-agent",
     :l3_agent_name => "quantum-l3-agent",
