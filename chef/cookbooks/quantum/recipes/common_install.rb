@@ -21,7 +21,7 @@ if node.attribute?(:cookbook) and node[:cookbook] == "nova"
      quantum = node
 end
 
-quantum_agent="quantum-plugin-openvswitch-agent"
+quantum_agent=node[:quantum][:platform][:ovs_agent_name]
 
 quantum_path = "/opt/quantum"
 venv_path = quantum[:quantum][:use_virtualenv] ? "#{quantum_path}/.venv" : nil
@@ -77,39 +77,41 @@ else
     cookbook "quantum"
     source "quantum-rootwrap.conf"
     mode 00644
-    owner "quantum"
+    owner node[:quantum][:platform][:user]
   end
 end
 
+node[:quantum] ||= Mash.new
+node[:quantum][:rootwrap] = "/usr/bin/quantum-rootwrap"
+
+# Update path to quantum-rootwrap in case the path above is wrong
 ruby_block "Find quantum rootwrap" do
   block do
+    found = false
     ENV['PATH'].split(':').each do |p|
       f = File.join(p,"quantum-rootwrap")
       next unless File.executable?(f)
-      node[:quantum] ||= Mash.new
       node[:quantum][:rootwrap] = f
+      found = true
       break
     end
-    raise("Could not find quantum rootwrap binary!") unless node[:quantum][:rootwrap]
+    raise("Could not find quantum rootwrap binary!") unless found
   end
-end unless node[:quantum][:rootwrap] && !node[:quantum][:rootwrap].empty?
+end
 
 template "/etc/sudoers.d/quantum-rootwrap" do
   cookbook "quantum"
   source "quantum-rootwrap.erb"
   mode 0440
-  variables(:user => "quantum",
+  variables(:user => node[:quantum][:platform][:user],
             :binary => node[:quantum][:rootwrap])
+  not_if { node[:platform] == "suse" }
 end
 
-ovs_pkgs = [ "linux-headers-#{`uname -r`.strip}",
-             "openvswitch-switch",
-             "openvswitch-datapath-dkms"
-           ]
-ovs_pkgs.each { |p| package p }
+node[:quantum][:platform][:ovs_pkgs].each { |p| package p }
 
 bash "Load openvswitch module" do
-  code "modprobe openvswitch"
+  code node[:quantum][:platform][:ovs_modprobe]
   not_if do ::File.directory?("/sys/module/openvswitch") end
 end
 
@@ -206,7 +208,6 @@ rabbit_settings = {
 }
 
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
-keystone_token = keystone["keystone"]["service"]["token"]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
 keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
@@ -214,13 +215,7 @@ keystone_service_user = quantum["quantum"]["service_user"]
 keystone_service_password = quantum["quantum"]["service_password"]
 admin_username = keystone["keystone"]["admin"]["username"] rescue nil
 admin_password = keystone["keystone"]["admin"]["password"] rescue nil
-default_tenant = keystone["keystone"]["default"]["tenant"] rescue nil
 Chef::Log.info("Keystone server found at #{keystone_address}")
-
-service quantum_agent do
-  supports :status => true, :restart => true
-  action :enable
-end
 
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 vlan_end = vlan_start + 2000
@@ -234,8 +229,8 @@ end
 template "/etc/quantum/quantum.conf" do
     cookbook "quantum"
     source "quantum.conf.erb"
-    mode "0644"
-    owner "quantum"
+    mode "0640"
+    owner node[:quantum][:platform][:user]
     variables(
       :sql_connection => quantum[:quantum][:db][:sql_connection],
       :sql_idle_timeout => quantum[:quantum][:sql][:idle_timeout],
@@ -244,13 +239,11 @@ template "/etc/quantum/quantum.conf" do
       :sql_pool_timeout => quantum[:quantum][:sql][:pool_timeout],
       :debug => quantum[:quantum][:debug],
       :verbose => quantum[:quantum][:verbose],
-      :admin_token => quantum[:quantum][:service][:token],
       :service_port => quantum[:quantum][:api][:service_port], # Compute port
       :service_host => quantum[:quantum][:api][:service_host],
       :use_syslog => quantum[:quantum][:use_syslog],
       :rabbit_settings => rabbit_settings,
       :keystone_ip_address => keystone_address,
-      :keystone_admin_token => keystone_token,
       :keystone_service_port => keystone_service_port,
       :keystone_service_tenant => keystone_service_tenant,
       :keystone_service_user => keystone_service_user,
@@ -268,4 +261,3 @@ template "/etc/quantum/quantum.conf" do
     )
     notifies :restart, resources(:service => quantum_agent), :immediately
 end
-

@@ -60,12 +60,13 @@ keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keyston
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 admin_username = keystone["keystone"]["admin"]["username"] rescue nil
 admin_password = keystone["keystone"]["admin"]["password"] rescue nil
+admin_tenant = keystone["keystone"]["admin"]["tenant"] rescue "admin"
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
 
 ENV['OS_USERNAME'] = admin_username
 ENV['OS_PASSWORD'] = admin_password
-ENV['OS_TENANT_NAME'] = "admin"
+ENV['OS_TENANT_NAME'] = admin_tenant
 ENV['OS_AUTH_URL'] = "http://#{keystone_address}:#{keystone_service_port}/v2.0/"
 
 if node[:quantum][:networking_mode] == 'vlan'

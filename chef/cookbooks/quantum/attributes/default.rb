@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-default[:quantum][:debug] = true
-default[:quantum][:verbose] = true
+default[:quantum][:debug] = false
+default[:quantum][:verbose] = false
 default[:quantum][:networking_mode] = "local"
 
 default[:quantum][:db][:database] = "quantum"
@@ -40,3 +40,45 @@ default[:quantum][:sql][:max_pool_size] = 10
 default[:quantum][:sql][:pool_timeout] = 200
 
 default[:quantum][:quantum_server] = false
+
+
+case node["platform"]
+when "suse"
+  default[:quantum][:platform] = {
+    :pkgs => [ "openstack-quantum-server",
+               "openstack-quantum-l3-agent",
+               "openstack-quantum-dhcp-agent",
+               "openstack-quantum-openvswitch-agent",
+               "openstack-quantum-metadata-agent" ],
+    :service_name => "openstack-quantum",
+    :ovs_agent_pkg => "openstack-quantum-openvswitch-agent",
+    :ovs_agent_name => "openstack-quantum-openvswitch-agent",
+    :metadata_agent_name => "openstack-quantum-metadata-agent",
+    :dhcp_agent_name => "openstack-quantum-dhcp-agent",
+    :l3_agent_name => "openstack-quantum-l3-agent",
+    :ovs_pkgs => [ "openvswitch",
+                   "openvswitch-switch",
+                   "openvswitch-kmp-default" ],
+    :user => "openstack-quantum",
+    :ovs_modprobe => "modprobe openvswitch"
+  }
+else
+  default[:quantum][:platform] = {
+    :pkgs => [ "quantum-server",
+               "quantum-l3-agent",
+               "quantum-dhcp-agent",
+               "quantum-plugin-openvswitch",
+               "quantum-metadata-agent" ],
+    :service_name => "quantum-server",
+    :ovs_agent_pkg => "quantum-plugin-openvswitch-agent",
+    :ovs_agent_name => "quantum-plugin-openvswitch-agent",
+    :metadata_agent_name => "quantum-metadata-agent",
+    :dhcp_agent_name => "quantum-dhcp-agent",
+    :l3_agent_name => "quantum-l3-agent",
+    :ovs_pkgs => [ "linux-headers-#{`uname -r`.strip}",
+                   "openvswitch-switch",
+                   "openvswitch-datapath-dkms" ],
+    :user => "quantum",
+    :ovs_modprobe => "modprobe openvswitch"
+  }
+end

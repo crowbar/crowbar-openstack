@@ -20,8 +20,9 @@ class QuantumService < ServiceObject
     @logger = thelogger
   end
 
+# Turn off multi proposal support till it really works and people ask for it.
   def self.allow_multiple_proposals?
-    true
+    false
   end
 
   def proposal_dependencies(role)
@@ -29,9 +30,7 @@ class QuantumService < ServiceObject
     if role.default_attributes["quantum"]["use_gitrepo"]
       answer << { "barclamp" => "git", "inst" => role.default_attributes["quantum"]["git_instance"] }
     end
-    if role.default_attributes[@bc_name]["database_engine"] == "database" 
-      answer << { "barclamp" => "database", "inst" => role.default_attributes["quantum"]["database_instance"] }
-    end
+    answer << { "barclamp" => "database", "inst" => role.default_attributes["quantum"]["database_instance"] }
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["quantum"]["rabbitmq_instance"] }
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes["quantum"]["keystone_instance"] }
     answer
@@ -70,18 +69,15 @@ class QuantumService < ServiceObject
       end
       if dbs.empty?
         @logger.info("Quantum create_proposal: no database proposal found") 
-        base["attributes"]["quantum"]["database_engine"] = "" 
       else 
         base["attributes"]["quantum"]["database_instance"] = dbs[0] 
-        base["attributes"]["quantum"]["database_engine"] = "database" 
         @logger.info("Quantum create_proposal: using database proposal: '#{dbs[0]}'")
       end
     rescue
       @logger.info("Quantum create_proposal: no database proposal found") 
-      base["attributes"]["quantum"]["database_engine"] = ""
     end
 
-    if base["attributes"]["quantum"]["database_engine"] == "" 
+    if base["attributes"]["quantum"]["database_instance"] == ""
       raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "database")) 
     end
 
@@ -89,7 +85,6 @@ class QuantumService < ServiceObject
         "quantum-server" => [ nodes.first[:fqdn] ]
     } unless nodes.nil? or nodes.length ==0
 
-    base[:attributes][:quantum][:service][:token] = '%012d' % rand(1e12)
     base["attributes"]["quantum"]["service_password"] = '%012d' % rand(1e12)
 
     insts = ["Keystone", "Rabbitmq"]
@@ -107,7 +102,12 @@ class QuantumService < ServiceObject
       rescue
         @logger.info("#{@bc_name} create_proposal: no #{inst.downcase} found")
       end
+
+      if base["attributes"][@bc_name]["#{inst.downcase}_instance"] == ""
+        raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "#{inst.downcase}"))
+      end
     end
+
     base
   end
 
@@ -117,6 +117,10 @@ class QuantumService < ServiceObject
     return if all_nodes.empty?
 
     net_svc = NetworkService.new @logger
+    network_proposal = ProposalObject.find_proposal(net_svc.bc_name, "default")
+    if network_proposal["attributes"]["network"]["networks"]["os_sdn"].nil?
+      raise I18n.t("barclamp.quantum.deploy.missing_os_sdn_network")
+    end
 
     tnodes = role.override_attributes["quantum"]["elements"]["quantum-server"]
     unless tnodes.nil? or tnodes.empty?

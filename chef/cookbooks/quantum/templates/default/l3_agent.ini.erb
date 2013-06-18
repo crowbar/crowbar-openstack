@@ -1,7 +1,7 @@
 # Managed by Crowbar
 # Do not edit.
 [DEFAULT]
-debug = <%= @debug %>
+debug = <%= @debug ? "True" : "False" %>
 interface_driver = <%= @interface_driver %>
 use_namespaces = <%= @use_namespaces %>
 handle_internal_only_routers = <%= @handle_internal_only_routers %>

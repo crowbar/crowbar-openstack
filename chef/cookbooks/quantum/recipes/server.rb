@@ -13,21 +13,24 @@
 # limitations under the License.
 #
 
-include_recipe "quantum::database"
-include_recipe "quantum::api_register"
-include_recipe "quantum::common_install"
-
 unless node[:quantum][:use_gitrepo]
-  quantum_service_name="quantum-server"
-  pkgs = [ "quantum-server",
-           "quantum-l3-agent",
-           "quantum-dhcp-agent",
-           "quantum-plugin-openvswitch",
-           "quantum-metadata-agent" ]
+  pkgs = node[:quantum][:platform][:pkgs]
   pkgs.each { |p| package p }
   file "/etc/default/quantum-server" do
     action :delete
-    notifies :restart, "service[#{quantum_service_name}]"
+    not_if { node[:platform] == "suse" }
+    notifies :restart, "service[#{node[:quantum][:platform][:service_name]}]"
+  end
+  template "/etc/sysconfig/quantum" do
+    source "suse.sysconfig.quantum.erb"
+    owner "root"
+    group "root"
+    mode 0640
+    variables(
+      :plugin_config_file => "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
+    )
+    only_if { node[:platform] == "suse" }
+    notifies :restart, "service[#{node[:quantum][:platform][:service_name]}]"
   end
 else
   quantum_service_name="quantum-server"
@@ -49,8 +52,12 @@ else
   end
 end
 
+include_recipe "quantum::database"
+include_recipe "quantum::api_register"
+include_recipe "quantum::common_install"
+
 # Kill all the libvirt default networks.
-bash "Destroy the libvort default network" do
+bash "Destroy the libvirt default network" do
   command "virsh net-destroy default"
   only_if "virsh net-list |grep default"
 end
@@ -70,7 +77,6 @@ else
 end
 
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
-keystone_token = keystone["keystone"]["service"]["token"]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
 keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
@@ -81,12 +87,11 @@ Chef::Log.info("Keystone server found at #{keystone_address}")
 
 template "/etc/quantum/api-paste.ini" do
   source "api-paste.ini.erb"
-  owner "quantum"
+  owner node[:quantum][:platform][:user]
   group "root"
   mode "0640"
   variables(
     :keystone_ip_address => keystone_address,
-    :keystone_admin_token => keystone_token,
     :keystone_service_port => keystone_service_port,
     :keystone_service_tenant => keystone_service_tenant,
     :keystone_service_user => keystone_service_user,
@@ -98,11 +103,11 @@ end
 # Hardcode for now.
 template "/etc/quantum/l3_agent.ini" do
   source "l3_agent.ini.erb"
-  owner "quantum"
+  owner node[:quantum][:platform][:user]
   group "root"
   mode "0640"
   variables(
-            :debug => "True",
+            :debug => node[:quantum][:debug],
             :interface_driver => "quantum.agent.linux.interface.OVSInterfaceDriver",
             :use_namespaces => "True",
             :handle_internal_only_routers => "True",
@@ -116,11 +121,11 @@ end
 # Ditto
 template "/etc/quantum/dhcp_agent.ini" do
   source "dhcp_agent.ini.erb"
-  owner "quantum"
+  owner node[:quantum][:platform][:user]
   group "root"
   mode "0640"
   variables(
-            :debug => "True",
+            :debug => node[:quantum][:debug],
             :interface_driver => "quantum.agent.linux.interface.OVSInterfaceDriver",
             :use_namespaces => "True",
             :resync_interval => 5,
@@ -144,11 +149,11 @@ metadata_port = "8775"
 
 template "/etc/quantum/metadata_agent.ini" do
   source "metadata_agent.ini.erb"
-  owner "quantum"
+  owner node[:quantum][:platform][:user]
   group "root"
   mode "0640"
   variables(
-            :debug => "True",
+            :debug => node[:quantum][:debug],
             :auth_url => keystone_service_url,
             :auth_region => "RegionOne",
             :admin_tenant_name => keystone_service_tenant,
@@ -160,7 +165,7 @@ template "/etc/quantum/metadata_agent.ini" do
             )
 end
 
-service "quantum-metadata-agent" do
+service node[:quantum][:platform][:metadata_agent_name] do
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
@@ -169,7 +174,7 @@ end
 
 directory "/etc/quantum/plugins/openvswitch/" do
    mode 00775
-   owner "quantum"
+   owner node[:quantum][:platform][:user]
    action :create
    recursive true
 end
@@ -178,7 +183,7 @@ unless node[:quantum][:use_gitrepo]
   link "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
     to "/etc/quantum/quantum.conf"
   end
-  service quantum_service_name do
+  service node[:quantum][:platform][:service_name] do
     supports :status => true, :restart => true
     action :enable
     subscribes :restart, resources("template[/etc/quantum/api-paste.ini]"), :immediately
@@ -188,7 +193,7 @@ unless node[:quantum][:use_gitrepo]
 else
   template "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
     source "ovs_quantum_plugin.ini.erb"
-    owner "quantum"
+    owner node[:quantum][:platform][:user]
     group "root"
     mode "0640"
     variables(
@@ -204,14 +209,14 @@ else
   end
 end
 
-service "quantum-dhcp-agent" do
+service node[:quantum][:platform][:dhcp_agent_name] do
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   subscribes :restart, resources("template[/etc/quantum/dhcp_agent.ini]")
 end
 
-service "quantum-l3-agent" do
+service node[:quantum][:platform][:l3_agent_name] do
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/quantum/quantum.conf]")

@@ -37,24 +37,16 @@ locale_additions:
   en:
     barclamp:
       quantum:
+        deploy:
+          missing_os_sdn_network: The os_sdn network must be defined in bc-template-network.json
         edit_deployment: 
           deployment: Deployment
         edit_attributes:
-          database_engine: Database Engine
           database_instance: Database Instance
           rabbitmq_instance: RabbitMQ 
           keystone_instance: Keystone 
-          service_user: Keystone Service User
-          service_password: Keystone Service Password
           attributes: Attributes
           networking_mode: Mode
-          default-tenant: Default Tenant
-          admin-username: Administrator Username
-          admin-password: Administrator Password
-          admin-token: Administrator Token (long-lived)
-          default-username: Regular User Username
-          default-password: Regular User Password
-          admin-token-expiration: Administrator Token Expiration
 
 debs:
   ubuntu-12.04:
