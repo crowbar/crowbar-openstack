@@ -28,6 +28,7 @@ else
 end
 
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_token = keystone["keystone"]["service"]["token"]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
@@ -39,6 +40,7 @@ admin_password = keystone["keystone"]["admin"]["password"] rescue nil
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
 keystone_register "quantum api wakeup keystone" do
+  protocol keystone_protocol
   host keystone_address
   port keystone_admin_port
   token keystone_token
@@ -46,6 +48,7 @@ keystone_register "quantum api wakeup keystone" do
 end
 
 keystone_register "register quantum user" do
+  protocol keystone_protocol
   host keystone_address
   port keystone_admin_port
   token keystone_token
@@ -56,6 +59,7 @@ keystone_register "register quantum user" do
 end
 
 keystone_register "give quantum user access" do
+  protocol keystone_protocol
   host keystone_address
   port keystone_admin_port
   token keystone_token
@@ -66,6 +70,7 @@ keystone_register "give quantum user access" do
 end
 
 keystone_register "register quantum service" do
+  protocol keystone_protocol
   host keystone_address
   port keystone_admin_port
   token keystone_token
@@ -76,6 +81,7 @@ keystone_register "register quantum service" do
 end
 
 keystone_register "register quantum endpoint" do
+  protocol keystone_protocol
   host keystone_address
   port keystone_admin_port
   token keystone_token
