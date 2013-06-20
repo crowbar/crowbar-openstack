@@ -107,11 +107,15 @@
     "cinder": {
       "crowbar-revision": 0,
       "element_states": {
-        "cinder-server": [ "readying", "ready", "applying" ]
+          "cinder-api": [ "readying", "ready", "applying" ],
+          "cinder-scheduler": [ "readying", "ready", "applying" ],
+          "cinder-volume": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-        [ "cinder-server" ]
+          [ "cinder-api" ],
+          [ "cinder-scheduler" ],
+          [ "cinder-volume" ]
       ],
       "config": {
         "environment": "cinder-base-config",

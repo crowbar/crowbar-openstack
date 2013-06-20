@@ -5,7 +5,9 @@
 :javascript
   $(document).ready(function(){
     var constraints = { 
-      "cinder-server": { "unique": false, "count": 1, "admin":false } 
+      "cinder-api": { "unique": false, "count": 1},
+      "cinder-sceduler": { "unique": false, "count": 1},
+      "cinder-volume": { "unique": false, "count": -1}
     };
     node_selector($('#drag_drop'), constraints);
   });
