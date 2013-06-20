@@ -52,29 +52,20 @@ package "postgresql" do
   else
     package_name "postgresql"
   end
-  action :upgrade
 end
  
 case node.platform
 when "redhat","centos","scientific"
   case
   when node.platform_version.to_f >= 6.0
-    package "postgresql-server" do
-      action :upgrade
-    end
+    package "postgresql-server"
   else
-    package "postgresql#{node['postgresql']['version'].split('.').join}-server" do
-      action :upgrade
-    end
+    package "postgresql#{node['postgresql']['version'].split('.').join}-server"
   end
 when "suse"
-  package "postgresql91-server" do
-    action :upgrade
-  end
+  package "postgresql91-server"
 when "fedora"
-  package "postgresql-server" do
-    action :upgrade
-  end
+  package "postgresql-server"
 end
  
 execute "/sbin/service postgresql initdb" do

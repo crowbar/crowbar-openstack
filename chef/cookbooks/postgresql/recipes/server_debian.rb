@@ -28,9 +28,7 @@ else # > 8.3
   node.default[:postgresql][:ssl] = "true"
 end
  
-package "postgresql" do
-  action :upgrade
-end
+package "postgresql"
  
 service "postgresql" do
   case node['platform']
