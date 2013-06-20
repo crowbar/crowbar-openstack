@@ -16,10 +16,16 @@ include_recipe "oat::tboot"
 #if necesary (bios updated or tboot is installed or something)
 if tpm_active != 1 or tpm_enabled != 1 or not oat_server[:inteltxt][:server][:client_package_ready]
   return
+else
+  include_recipe "oat::pcr"
+  empty_value="FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+  if node[:inteltxt][:pcr][17] != empty_value and node[:inteltxt][:pcr][18] != empty_value and node[:inteltxt][:pcr][19] != empty_value
+    node[:reboot] = "complete"
+    node.save
+  end
 end
 include_recipe "oat::reboot"
 #end
-include_recipe "oat::pcr"
 
 
 package "trousers"
