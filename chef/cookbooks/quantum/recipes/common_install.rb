@@ -82,7 +82,7 @@ else
 end
 
 node[:quantum] ||= Mash.new
-node[:quantum][:rootwrap] = "/usr/bin/quantum-rootwrap"
+node.set[:quantum][:rootwrap] = "/usr/bin/quantum-rootwrap"
 
 # Update path to quantum-rootwrap in case the path above is wrong
 ruby_block "Find quantum rootwrap" do
@@ -91,7 +91,7 @@ ruby_block "Find quantum rootwrap" do
     ENV['PATH'].split(':').each do |p|
       f = File.join(p,"quantum-rootwrap")
       next unless File.executable?(f)
-      node[:quantum][:rootwrap] = f
+      node.set[:quantum][:rootwrap] = f
       found = true
       break
     end
