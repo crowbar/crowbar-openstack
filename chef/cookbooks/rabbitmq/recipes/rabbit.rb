@@ -28,14 +28,16 @@ rabbitmq_vhost node[:rabbitmq][:vhost] do
 end
 
 # create user for the queue
-rabbitmq_user node[:rabbitmq][:user] do
+rabbitmq_user "adding user #{node[:rabbitmq][:user]}" do
+  user node[:rabbitmq][:user]
   password node[:rabbitmq][:password]
   action :add
 end
 
 # grant the mapper user the ability to do anything with the vhost
 # the three regex's map to config, write, read permissions respectively
-rabbitmq_user node[:rabbitmq][:user] do
+rabbitmq_user "setting permissions for #{node[:rabbitmq][:user]}" do
+  user node[:rabbitmq][:user]
   vhost node[:rabbitmq][:vhost]
   permissions "\".*\" \".*\" \".*\""
   action :set_permissions
