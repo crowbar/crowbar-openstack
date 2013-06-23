@@ -83,7 +83,6 @@ class CinderService < ServiceObject
     end
 
     base["attributes"]["cinder"]["service_password"] = '%012d' % rand(1e12)
-    base["attributes"]["cinder"]["db"]["password"] = random_password
 
     @logger.debug("Cinder create_proposal: exiting")
     base
