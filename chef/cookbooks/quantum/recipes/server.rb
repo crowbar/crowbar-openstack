@@ -60,7 +60,7 @@ include_recipe "quantum::api_register"
 include_recipe "quantum::common_install"
 
 # Kill all the libvirt default networks.
-bash "Destroy the libvirt default network" do
+execute "Destroy the libvirt default network" do
   command "virsh net-destroy default"
   only_if "virsh net-list |grep default"
 end
