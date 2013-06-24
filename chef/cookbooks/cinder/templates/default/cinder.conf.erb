@@ -729,10 +729,16 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 
 # prefix for iscsi volumes (string value)
 #iscsi_target_prefix=iqn.2010-10.org.openstack:
+<% unless @emc_params.nil? -%>
+iscsi_target_prefix = iqn.2001-07.com.vnx
+<% end -%>
 
 # The port that the iSCSI daemon is listening on (string
 # value)
 #iscsi_ip_address=$my_ip
+<% unless @emc_params.nil? -%>
+iscsi_ip_address = <%= node[:cinder][:volume]["emc"]["emc_ecom_server_ip"] %>
+<% end -%>
 
 # The port that the iSCSI daemon is listening on (integer
 # value)
@@ -1156,6 +1162,7 @@ volume_group=<%= node[:cinder][:volume][:volume_name] %>
 
 # Driver to use for volume creation (string value)
 #volume_driver=cinder.volume.drivers.lvm.LVMISCSIDriver
+#
 <% unless @eqlx_params.nil? -%>
 volume_driver=cinder.volume.eqlx.DellEQLSanISCSIDriver
 <%   @eqlx_params.each do |k, v| -%>
@@ -1163,6 +1170,17 @@ volume_driver=cinder.volume.eqlx.DellEQLSanISCSIDriver
 <%   end -%>
 <% end -%>
 
+<% unless @netapp_params.nil? -%>
+volume_driver=cinder.volume.drivers.netapp.iscsi.NetAppISCSIDriver
+<%   @netapp_params.each do |k, v| -%>
+<%=    k + '=' + v.to_s %>
+<%   end -%>
+<% end -%>
+
+<% unless @emc_params.nil? -%>
+volume_driver=cinder.volume.drivers.emc.emc_smis_iscsi.EMCSMISISCSIDriver
+cinder_emc_config_file = /etc/cinder/cinder_emc_config.xml
+<% end -%>
 
 #
 # Multi backend options
@@ -1181,4 +1199,5 @@ volume_driver=cinder.volume.eqlx.DellEQLSanISCSIDriver
 
 
 # Total option count: 255
+
 

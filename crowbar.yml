@@ -76,6 +76,22 @@ locale_additions:
           volume_file_location: Volume File Location
           volume_disk_parameters: Disk-based Parameters
           volume_raw_mode: Disk selection method
+          cinder_volume_disks: Disks for cinder-volume storage volume group
+          emc_parameters: EMC Parameters
+          emc_storage_type: Thin pool where user wants to create volume from
+          ecom_server_ip: IP address of the ECOM server
+          ecom_server_port: Port of the ECOM server
+          ecom_server_username: Username for accessing the ECOM server
+          ecom_server_password: Password for accessing the ECOM server
+          netapp_parameters: NetApp Parameters
+          netapp_wsdl_url: WSDL URL for NetApp OnCommand Webservices
+          netapp_server_hostname: OnCommand server host name
+          netapp_server_port: OnCommand server port to connect to
+          netapp_login: Login user name for OnCommand installation
+          netapp_password: Login password for OnCommand installation
+          netapp_storage_service: Storage service to use while provisioning
+          netapp_storage_service_prefix: Storage service prefix to use on OnCommand
+          netapp_vfiler: The vFiler unit name if using vFiler to host OpenStack volumes
           eqlx_parameters: EQLX Parameters
           eqlx_san_ip: EQLX SAN IP
           eqlx_san_login: EQLX SAN login

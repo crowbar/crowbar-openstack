@@ -38,7 +38,16 @@ def make_volumes(node,volname)
     end
     return
   end
-  
+
+  if node[:cinder][:volume][:volume_type] == "netapp"
+    #TODO(dmueller) Verify that OnCommand is installed?
+    return
+  end
+
+  if node[:cinder][:volume][:volume_type] == "emc"
+    return
+  end
+
   if Kernel.system("vgs #{volname}")
     Chef::Log.info("Cinder: Volume group #{volname} already exists.")
     return

@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<EMC>
+    <StorageType><%= node[:cinder][:volume]["emc"]["emc_storage_type"] %></StorageType>
+    <EcomServerIp><%= node[:cinder][:volume]["emc"]["ecom_server_ip"] %></EcomServerIp>
+    <EcomServerPort><%= node[:cinder][:volume]["emc"]["ecom_server_port"] %></EcomServerPort>
+    <EcomUserName><%= node[:cinder][:volume]["emc"]["ecom_server_username"] %></EcomUserName>
+    <EcomPassword><%= node[:cinder][:volume]["emc"]["ecom_server_password"] %></EcomPassword>
+</EMC>
