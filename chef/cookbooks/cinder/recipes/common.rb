@@ -112,8 +112,11 @@ backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
 include_recipe "#{backend_name}::client"
 include_recipe "#{backend_name}::python-client"
 
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-node.set_unless['cinder']['db']['password'] = secure_password
+# pickup password to database from cinder-api node
+node_api = search(:node, "roles:cinder-api").select{|api| api['cinder']['db']['password'] != nil }.first
+if node_api and node_api[:fqdn] != node[:fqdn]
+  node.set['cinder']['db']['password'] = node_api['cinder']['db']['password']
+end
 
 sql_connection = "#{backend_name}://#{node[:cinder][:db][:user]}:#{node[:cinder][:db][:password]}@#{sql_address}/#{node[:cinder][:db][:database]}"
 

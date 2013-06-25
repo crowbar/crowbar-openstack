@@ -47,6 +47,10 @@ db_conn = { :host => sql_address,
             :username => "db_maker",
             :password => sql[:database][:db_maker_password] }
 
+# generate password must be here!
+::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+node.set_unless['cinder']['db']['password'] = secure_password
+
 # Create the Cinder Database
 database "create #{node[:cinder][:db][:database]} database" do
     connection db_conn
