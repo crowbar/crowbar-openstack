@@ -42,6 +42,15 @@ else
   keystone = quantum
 end
 
+if quantum[:quantum][:networking_plugin] == "openvswitch"
+  node[:quantum][:platform][:ovs_pkgs].each { |p| package p }
+
+  bash "Load openvswitch module" do
+    code node[:quantum][:platform][:ovs_modprobe]
+    not_if do ::File.directory?("/sys/module/openvswitch") end
+  end
+end
+
 unless quantum[:quantum][:use_gitrepo]
   package quantum_agent do
     action :install
@@ -114,13 +123,6 @@ end
 
 case quantum[:quantum][:networking_plugin]
 when "openvswitch"
-
-  node[:quantum][:platform][:ovs_pkgs].each { |p| package p }
-
-  bash "Load openvswitch module" do
-    code node[:quantum][:platform][:ovs_modprobe]
-    not_if do ::File.directory?("/sys/module/openvswitch") end
- end
 
   service "openvswitch-switch" do
     supports :status => true, :restart => true
