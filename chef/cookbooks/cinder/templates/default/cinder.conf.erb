@@ -3,7 +3,7 @@ debug=<%= node[:cinder][:debug] %>
 verbose=<%= node[:cinder][:verbose] %>
 logdir=/var/log/cinder
 state_path=/var/lib/cinder
-use_syslog=true
+use_syslog=<%= node[:cinder][:use_syslog] ? "True" : "False" %>
 connection_type=libvirt
 sql_connection=<%= @sql_connection %>
 my_ip=<%= node[:cinder][:my_ip] %>

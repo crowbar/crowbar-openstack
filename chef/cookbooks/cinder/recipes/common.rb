@@ -72,9 +72,13 @@ if node[:cinder][:use_gitrepo]
     not_if {File.exists?("/etc/cinder/rootwrap.d")}
   end
 else
-  package "cinder-common"
-  package "python-mysqldb"
-  package "python-cinder"
+  unless node[:platform] == "suse"
+    package "cinder-common"
+    package "python-mysqldb"
+    package "python-cinder"
+  else
+    package "openstack-cinder"
+  end
 end
 
 glance_env_filter = " AND glance_config_environment:glance-config-#{node[:cinder][:glance_instance]}"
@@ -135,14 +139,7 @@ rabbit_settings = {
 
 if node[:cinder][:volume][:volume_type] == "eqlx"
   Chef::Log.info("Pushing EQLX params to cinder.conf template")
-  eqlx_params = node[:nova][:volume][:eqlx]
-else
-  eqlx_params = nil
-end
-
-if node[:cinder][:volume][:volume_type] == "eqlx"
-  Chef::Log.info("Pushing EQLX params to cinder.conf template")
-  eqlx_params = node[:nova][:volume][:eqlx]
+  eqlx_params = node[:cinder][:volume][:eqlx]
 else
   eqlx_params = nil
 end

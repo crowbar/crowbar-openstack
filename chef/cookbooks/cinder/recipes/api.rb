@@ -34,6 +34,7 @@ else
 end
 
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_token = keystone[:keystone][:service][:token]
 keystone_service_port = keystone[:keystone][:api][:service_port]
 keystone_admin_port = keystone[:keystone][:api][:admin_port]
@@ -58,6 +59,7 @@ public_api_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "pub
 admin_api_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 
 keystone_register "cinder api wakeup keystone" do
+  protocol keystone_protocol
   host keystone_address
   port keystone_admin_port
   token keystone_token
@@ -65,6 +67,7 @@ keystone_register "cinder api wakeup keystone" do
 end
 
 keystone_register "register cinder user" do
+  protocol keystone_protocol
   host keystone_address
   port keystone_admin_port
   token keystone_token
@@ -75,6 +78,7 @@ keystone_register "register cinder user" do
 end
 
 keystone_register "give cinder user access" do
+  protocol keystone_protocol
   host keystone_address
   port keystone_admin_port
   token keystone_token
@@ -85,6 +89,7 @@ keystone_register "give cinder user access" do
 end
 
 keystone_register "register cinder service" do
+  protocol keystone_protocol
   host keystone_address
   port keystone_admin_port
   token keystone_token
@@ -95,6 +100,7 @@ keystone_register "register cinder service" do
 end
 
 keystone_register "register cinder endpoint" do
+  protocol keystone_protocol
   host keystone_address
   port keystone_admin_port
   token keystone_token
@@ -110,12 +116,19 @@ end
 
 cinder_service("api")
 
+unless node[:platform] == "suse"
+  api_service_name = "cinder-api"
+else
+  api_service_name = "openstack-cinder-api"
+end
+
 template "/etc/cinder/api-paste.ini" do
   source "api-paste.ini.erb"
   owner node[:cinder][:user]
   group "root"
   mode "0640"
   variables(
+    :keystone_protocol => keystone_protocol,
     :keystone_ip_address => keystone_address,
     :keystone_admin_token => keystone_token,
     :keystone_service_port => keystone_service_port,
@@ -124,6 +137,6 @@ template "/etc/cinder/api-paste.ini" do
     :keystone_service_password => keystone_service_password,
     :keystone_admin_port => keystone_admin_port
   )
-  notifies :restart, resources(:service => "cinder-api"), :immediately
+  notifies :restart, resources(:service => api_service_name), :immediately
 end
 

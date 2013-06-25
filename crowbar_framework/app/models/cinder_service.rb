@@ -20,8 +20,6 @@ class CinderService < ServiceObject
     @logger = thelogger
   end
 
-  #if barclamp allows multiple proposals OVERRIDE
-  # def self.allow_multiple_proposals?
 # Turn off multi proposal support till it really works and people ask for it.
   def self.allow_multiple_proposals?
     false
@@ -66,6 +64,22 @@ class CinderService < ServiceObject
       rescue
         @logger.info("#{@bc_name} create_proposal: no #{inst.downcase} found")
       end
+    end
+
+    if base["attributes"][@bc_name]["database_instance"] == ""
+      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "database"))
+    end
+
+    if base["attributes"][@bc_name]["keystone_instance"] == ""
+      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "keystone"))
+    end
+
+    if base["attributes"][@bc_name]["glance_instance"] == ""
+      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "glance"))
+    end
+
+    if base["attributes"][@bc_name]["rabbitmq_instance"] == ""
+      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "rabbitmq"))
     end
 
     base["attributes"]["cinder"]["service_password"] = '%012d' % rand(1e12)

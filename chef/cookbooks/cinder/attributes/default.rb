@@ -13,7 +13,13 @@
 # limitations under the License.
 #
 
-override[:cinder][:user]="cinder"
+unless node[:platform] == "suse"
+  override[:cinder][:user]="cinder"
+  override[:cinder][:group]="cinder"
+else
+  override[:cinder][:user]="openstack-cinder"
+  override[:cinder][:group]="openstack-cinder"
+end
 
 # declare what needs to be monitored
 node[:cinder][:monitor]={}
