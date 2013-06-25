@@ -66,8 +66,6 @@ locale_additions:
           database_instance: Database Instance 
           keystone_instance: Keystone
           glance_instance: Glance
-          service_user: Service user (for Keystone)
-          service_password: Service password
           volume_header: Volume options
           volume_type: Type of Volume
           volume_name: Name of Volume
