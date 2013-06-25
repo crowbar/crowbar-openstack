@@ -19,7 +19,7 @@ barclamp:
   name: rabbitmq 
   display: RabbitMQ
   description: RabbitMQ is a complete and highly reliable enterprise messaging system based on the emerging AMQP standard
-  online_help: 'https://github.com/dellcloudedge/crowbar/wiki'
+  online_help: 'https://github.com/crowbar/crowbar/wiki'
   version: 0
   member:
     - openstack
