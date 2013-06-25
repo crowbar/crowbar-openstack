@@ -26,7 +26,11 @@
         "python-pam",
         "python-iso8601",
         "python-webob",
-        "pip://python-keystoneclient"
+        "pip://python-keystoneclient",
+        "pip://python-quantumclient",
+        "pip://python-novaclient",
+        "pip://alembic>=0.4.1",
+        "pip://pyudev"
       ],
       "debug": false,
       "verbose": false,
