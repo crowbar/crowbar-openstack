@@ -63,5 +63,20 @@ class RabbitmqService < ServiceObject
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
   end
 
+  def validate_proposal_after_save proposal
+    super
+
+    elements = proposal["deployment"]["rabbitmq"]["elements"]
+
+    errors = []
+
+    if not elements.has_key?("rabbitmq-server") or elements["rabbitmq-server"].length != 1
+      errors << "Need one (and only one) rabbitmq-server node."
+    end
+
+    if errors.length > 0
+      raise Chef::Exceptions::ValidationFailed.new(errors.join("\n"))
+    end
+  end
 end
 
