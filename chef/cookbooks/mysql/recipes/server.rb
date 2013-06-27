@@ -59,7 +59,7 @@ end
 
 package "mysql-server" do
   package_name "mysql" if node.platform == "suse"
-  action :upgrade
+  action :install
 end
 
 service "mysql" do
