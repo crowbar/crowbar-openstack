@@ -49,7 +49,6 @@ when "suse"
     :pkgs => [ "openstack-quantum-server",
                "openstack-quantum-l3-agent",
                "openstack-quantum-dhcp-agent",
-               "openstack-quantum-openvswitch-agent",
                "openstack-quantum-metadata-agent" ],
     :service_name => "openstack-quantum",
     :ovs_agent_pkg => "openstack-quantum-openvswitch-agent",
