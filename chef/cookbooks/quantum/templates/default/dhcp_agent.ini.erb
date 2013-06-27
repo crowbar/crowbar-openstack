@@ -8,3 +8,6 @@ dhcp_driver = <%= @dhcp_driver %>
 use_namespaces = <%= @use_namespaces %>
 enable_isolated_metadata = <%= @enable_isolated_metadata %>
 enable_metadata_network = <%= @enable_metadata_network %>
+<% if @nameservers -%>
+dnsmasq_dns_server = <%= @nameservers %>
+<% end -%>
