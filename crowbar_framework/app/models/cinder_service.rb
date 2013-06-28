@@ -44,7 +44,9 @@ class CinderService < ServiceObject
     nodes.delete_if { |n| n.nil? or n.admin? }
     if nodes.size >= 1
       base["deployment"]["cinder"]["elements"] = {
-        "cinder-server" => [ nodes.first[:fqdn] ]
+        "cinder-api" => [ nodes.first[:fqdn] ],
+        "cinder-scheduler" => [ nodes.first[:fqdn] ],
+        "cinder-volume" => [ nodes.first[:fqdn] ]
       }
     end
 
