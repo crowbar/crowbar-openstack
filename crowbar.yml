@@ -46,6 +46,7 @@ locale_additions:
           rabbitmq_instance: RabbitMQ 
           keystone_instance: Keystone 
           attributes: Attributes
+          dhcp_domain: DHCP Domain
           networking_plugin: Plugin
           networking_mode: Mode
 

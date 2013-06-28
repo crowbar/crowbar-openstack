@@ -14,6 +14,7 @@
                     "rabbitmq_instance": { "type": "str", "required": true },
                     "keystone_instance": { "type": "str", "required": true },
                     "gitrepo": { "type": "str", "required": true },
+                    "dhcp_domain": { "type": "str", "required": true },
                     "networking_mode": { "type": "str", "required": true },
                     "networking_plugin": { "type": "str", "required": true },
                     "git_instance": { "type": "str", "required": true },

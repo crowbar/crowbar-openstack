@@ -150,6 +150,7 @@ template "/etc/quantum/dhcp_agent.ini" do
     :use_namespaces => "True",
     :resync_interval => 5,
     :dhcp_driver => "quantum.agent.linux.dhcp.Dnsmasq",
+    :dhcp_domain => node[:quantum][:dhcp_domain],
     :enable_isolated_metadata => "True",
     :enable_metadata_network => "True",
     :nameservers => dns_list

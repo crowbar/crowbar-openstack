@@ -16,6 +16,7 @@
 
 default[:quantum][:debug] = false
 default[:quantum][:verbose] = false
+default[:quantum][:dhcp_domain] = "openstack.local"
 default[:quantum][:networking_mode] = "local"
 default[:quantum][:networking_plugin] = "openvswitch"
 
