@@ -68,6 +68,7 @@ locale_additions:
           glance_instance: Glance
           volume_header: Volume options
           volume_type: Type of Volume
+          volume_type_manual: Other driver
           volume_name: Name of Volume
           volume_file_parameters: File-based Parameters
           volume_file_name: Volume File Name
@@ -104,6 +105,12 @@ locale_additions:
           eqlx_ssh_keepalive_interval: EQLX SSH keepalive internal
           eqlx_cli_timeout: EQLX CLI command execution timeout
           eqlx_pool: EQLX pool name
+          manual_parameters: Other driver parameters
+          manual_parameters_not_supported: Manually picking a driver can be used to specify a Cinder driver not available in the list of drivers above. This is however not supported.
+          manual_volume_driver: Driver
+          manual_volume_driver_hint: For instance, cinder.volume.drivers.netapp.iscsi.NetAppISCSIDriver
+          manual_volume_config: Options
+          manual_volume_config_hint: Each line will be added to cinder.conf. If the driver needs an external file, this file must be manually uploaded.
       cinder_edit_deployment:
         deployment: Deployment
 

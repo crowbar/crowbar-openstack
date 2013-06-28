@@ -17,7 +17,7 @@
         %input#volume_name{:type => "text", :name => "volume_name", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_name"], :onchange => "update_value('volume/volume_name','volume_name', 'string')"}
       %p
         %label{ :for => :volume_type }= t('.volume_type')
-        = select_tag :volume_type, options_for_select([['raw','raw'], ['local', 'local'], ['NetApp', 'netapp'], ['EMC', 'emc'], ['eqlx','eqlx']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_type"].to_s), :onchange => "update_volume_type_view(); update_value('volume/volume_type', 'volume_type', 'string')"
+        = select_tag :volume_type, options_for_select([['raw','raw'], ['local', 'local'], ['NetApp', 'netapp'], ['EMC', 'emc'], ['eqlx','eqlx'], [t('.volume_type_manual'), 'manual']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_type"].to_s), :onchange => "update_volume_type_view(); update_value('volume/volume_type', 'volume_type', 'string')"
       %div{ :id => 'netapp_parameters', :class => 'container' }
         %p
           %label{ :for => :netappp_header }= t('.netapp_parameters')
@@ -114,6 +114,19 @@
         %div.container
           %label{ :for => :cinder_raw_method }= t('.volume_raw_mode')
           = select_tag :cinder_raw_method, options_for_select([['first','first'], ['all', 'all']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["cinder_raw_method"].to_s), :onchange => "update_value('volume/cinder_raw_method', 'cinder_raw_method', 'string')"
+      %div{ :id => 'manual_parameters', :class => 'container' }
+        %em= t('.manual_parameters_not_supported')
+        %p
+          %label{ :for => :manual_header }= t('.manual_parameters')
+        %div.container
+          %p
+            %label{ :for => :manual_volume_driver }= t('.manual_volume_driver')
+            %input#manual_volume_driver{:type => "text", :name => "manual_volume_driver", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["manual"]["driver"], :onchange => "update_value('volume/manual/driver', 'manual_volume_driver', 'string')"}
+            %em= t('.manual_volume_driver_hint')
+          %p
+            %label{ :for => :manual_volume_config }= t('.manual_volume_config')
+            = text_area_tag :manual_volume_config, @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["manual"]["config"], :size => "80x5", :onchange => "update_value('volume/manual/config', 'manual_volume_config', 'string')"
+            %em= t('.manual_volume_config_hint')
 
 :javascript
   function update_volume_type_view() {
@@ -122,6 +135,7 @@
     $('div#emc_parameters').toggle(choice == 'emc');
     $('div#netapp_parameters').toggle(choice == 'netapp');
     $('div#eqlx_parameters').toggle(choice == 'eqlx');
+    $('div#manual_parameters').toggle(choice == 'manual');
     $('div#volume_file_parameters').toggle(choice == 'raw' || choice == 'local');
     $('div#volume_disk_parameters').toggle(choice == 'raw' || choice == 'local');
   }

@@ -174,6 +174,15 @@ else
   emc_params = nil
 end
 
+if node[:cinder][:volume][:volume_type] == "manual"
+  Chef::Log.info("Pushing manual params to cinder.conf template")
+  manual_driver = node[:cinder][:volume][:manual][:driver]
+  manual_driver_config = node[:cinder][:volume][:manual][:config]
+else
+  manual_driver = nil
+  manual_driver_config = nil
+end
+
 template "/etc/cinder/cinder.conf" do
   source "cinder.conf.erb"
   owner node[:cinder][:user]
@@ -183,6 +192,8 @@ template "/etc/cinder/cinder.conf" do
             :eqlx_params => eqlx_params,
             :emc_params => emc_params,
             :netapp_params => netapp_params,
+            :manual_driver => manual_driver,
+            :manual_driver_config => manual_driver_config,
             :sql_connection => sql_connection,
             :rabbit_settings => rabbit_settings,
             :glance_server_ip => glance_server_ip,

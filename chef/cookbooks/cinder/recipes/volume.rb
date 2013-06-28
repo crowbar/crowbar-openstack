@@ -22,7 +22,7 @@ include_recipe "#{@cookbook_name}::common"
 volname = node[:cinder][:volume][:volume_name]
 
 def make_volumes(node,volname)
-  
+
   if node[:cinder][:volume][:volume_type] == "eqlx"
     Chef::Log.info("Cinder: Using eqlx volumes.")
     package("python-paramiko")
@@ -45,6 +45,10 @@ def make_volumes(node,volname)
   end
 
   if node[:cinder][:volume][:volume_type] == "emc"
+    return
+  end
+
+  if node[:cinder][:volume][:volume_type] == "manual"
     return
   end
 

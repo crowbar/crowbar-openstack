@@ -109,6 +109,10 @@
           "ecom_server_port": 0,
           "ecom_server_username": "admin",
           "ecom_server_password": "admin"
+        },
+        "manual": {
+          "driver": "",
+          "config": ""
         }
       },
       "api": {
