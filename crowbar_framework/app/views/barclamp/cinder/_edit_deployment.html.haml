@@ -5,9 +5,9 @@
 :javascript
   $(document).ready(function(){
     var constraints = { 
-      "cinder-api": { "unique": false, "count": 1},
-      "cinder-sceduler": { "unique": false, "count": 1},
-      "cinder-volume": { "unique": false, "count": -1}
+      "cinder-api": { "unique": false, "count": 1, "admin":false },
+      "cinder-sceduler": { "unique": false, "count": 1, "admin":false },
+      "cinder-volume": { "unique": false, "count": -1, "admin":false }
     };
     node_selector($('#drag_drop'), constraints);
   });
