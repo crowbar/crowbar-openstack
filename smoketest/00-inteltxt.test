@@ -77,6 +77,7 @@ echo Passed `cat /tmp/Result  | grep ':.*Passed' | wc -l`
 echo Failed `cat /tmp/Result  | grep -i ':.*fail' | wc -l`
 
 #TEST 2020 diff between chef oat-client roles and oat-appraiser response
+echo "Test 2020: OAT server accepts all OAT agents"
 ruby /opt/dell/barclamps/inteltxt/smoketest/2020-check-lists-nodes.test
 
 echo "Test 2030: Reboot"
