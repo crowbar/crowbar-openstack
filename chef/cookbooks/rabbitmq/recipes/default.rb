@@ -98,7 +98,7 @@ service "rabbitmq-server" do
   action [:enable, :start]
 end
 
-rabbitmq_plugins = "#{Config::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
+rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
 
 bash "Enable rabbit management" do
   code "#{rabbitmq_plugins} enable rabbitmq_management || :"
