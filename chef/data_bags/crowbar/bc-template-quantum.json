@@ -34,6 +34,7 @@
       ],
       "debug": false,
       "verbose": false,
+      "dhcp_domain": "openstack.local",
       "networking_mode": "gre",
       "networking_plugin": "openvswitch",
       "use_syslog": false,
