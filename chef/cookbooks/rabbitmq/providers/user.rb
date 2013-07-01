@@ -34,42 +34,36 @@ action :add do
 end
 
 action :delete do
-  execute "rabbitmqctl delete_user #{new_resource.user}" do
-    only_if "rabbitmqctl list_users | grep #{new_resource.user}"
+  if Kernel::system("rabbitmqctl list_users | grep -q #{new_resource.user}")
     Chef::Log.info "Deleting RabbitMQ user '#{new_resource.user}'."
+    execute "rabbitmqctl delete_user #{new_resource.user}"
     new_resource.updated_by_last_action(true)
   end
 end
 
 action :set_permissions do
-  if new_resource.vhost
-    execute "rabbitmqctl set_permissions -p #{new_resource.vhost} #{new_resource.user} #{new_resource.permissions}" do
-      not_if "test `rabbitmqctl list_user_permissions #{new_resource.user} | wc -l` -gt 2"
+  unless Kernel::system("test `rabbitmqctl list_user_permissions #{new_resource.user} | wc -l` -gt 2")
+    if new_resource.vhost
       Chef::Log.info "Setting RabbitMQ user permissions for '#{new_resource.user}' on vhost #{new_resource.vhost}."
-      new_resource.updated_by_last_action(true)
-    end
-  else
-    execute "rabbitmqctl set_permissions #{new_resource.user} #{new_resource.permissions}" do
-      not_if "test `rabbitmqctl list_user_permissions #{new_resource.user} | wc -l` -gt 2"
+      execute "rabbitmqctl set_permissions -p #{new_resource.vhost} #{new_resource.user} #{new_resource.permissions}"
+    else
       Chef::Log.info "Setting RabbitMQ user permissions for '#{new_resource.user}'."
-      new_resource.updated_by_last_action(true)
+      execute "rabbitmqctl set_permissions #{new_resource.user} #{new_resource.permissions}"
     end
+    new_resource.updated_by_last_action(true)
   end
 end
 
 action :clear_permissions do
-  if new_resource.vhost
-    execute "rabbitmqctl clear_permissions -p #{new_resource.vhost} #{new_resource.user}" do
-      only_if "rabbitmqctl list_user_permissions #{new_resource.user} | grep #{new_resource.user}"
+  if Kernel::system("rabbitmqctl list_user_permissions #{new_resource.user} | grep -q #{new_resource.user}")
+    if new_resource.vhost
       Chef::Log.info "Clearing RabbitMQ user permissions for '#{new_resource.user}' from vhost #{new_resource.vhost}."
-      new_resource.updated_by_last_action(true)
-    end
-  else
-    execute "rabbitmqctl clear_permissions #{new_resource.user}" do
-      only_if "rabbitmqctl list_user_permissions #{new_resource.user} | grep #{new_resource.user}"
+      execute "rabbitmqctl clear_permissions -p #{new_resource.vhost} #{new_resource.user}"
+    else
       Chef::Log.info "Clearing RabbitMQ user permissions for '#{new_resource.user}'."
-      new_resource.updated_by_last_action(true)
+      execute "rabbitmqctl clear_permissions #{new_resource.user}"
     end
+    new_resource.updated_by_last_action(true)
   end
 end
 
