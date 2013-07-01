@@ -18,10 +18,18 @@
 #
 
 action :add do
-  execute "rabbitmqctl add_user #{new_resource.user} #{new_resource.password}" do
-    not_if "rabbitmqctl list_users | grep #{new_resource.user}"
+  unless Kernel::system("rabbitmqctl list_users | grep -q #{new_resource.user}")
     Chef::Log.info "Adding RabbitMQ user '#{new_resource.user}'."
+    execute "rabbitmqctl add_user #{new_resource.user} #{new_resource.password}"
     new_resource.updated_by_last_action(true)
+  else
+    unless new_resource.address.nil? or new_resource.port.nil?
+      unless _can_connect(new_resource.address, new_resource.port, new_resource.user, new_resource.password)
+        Chef::Log.info "Updating password for RabbitMQ user '#{new_resource.user}'."
+        execute "rabbitmqctl change_password #{new_resource.user} #{new_resource.password}"
+        new_resource.updated_by_last_action(true)
+      end
+    end
   end
 end
 
@@ -63,4 +71,15 @@ action :clear_permissions do
       new_resource.updated_by_last_action(true)
     end
   end
+end
+
+private
+def _can_connect(address, port, user, password)
+  http = Net::HTTP.new(address, port)
+  request = Net::HTTP::Get.new('/api/whoami')
+  request.basic_auth(user, password)
+  resp, data = http.request(request)
+  # if we get something different than OK and Unauthorized, then we don't know
+  # what's going on, so we'll assume it's like OK
+  return (not resp.is_a?(Net::HTTPUnauthorized))
 end

@@ -31,6 +31,8 @@ end
 rabbitmq_user "adding user #{node[:rabbitmq][:user]}" do
   user node[:rabbitmq][:user]
   password node[:rabbitmq][:password]
+  address node[:rabbitmq][:address]
+  port 55672
   action :add
 end
 
