@@ -41,7 +41,7 @@ crowbar:
 
 nav:
   utils:
-    tempest: '"/tempest/dashboard/", { :link => { :target => "_blank" } }'
+    tempest: '"/tempest/dashboard/"'
 
 locale_additions:
   en:
