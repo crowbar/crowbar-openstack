@@ -50,6 +50,33 @@
                     "eqlx_pool": { "type": "str", "required": true }
                   }
                 },
+                "netapp": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "netapp_wsdl_url": { "type": "str", "required": true },
+                    "netapp_server_hostname": { "type": "str", "required": true },
+                    "netapp_server_port": { "type": "int", "required": true },
+                    "netapp_login": { "type": "str", "required": true },
+                    "netapp_password": { "type": "str", "required": true },
+                    "netapp_storage_service": { "type": "str", "required": true },
+                    "netapp_storage_service_prefix": { "type": "str", "required": true },
+                    "netapp_vfiler": { "type": "str", "required": true },
+                    "netapp_transport_type": { "type": "str", "required": true },
+                    "netapp_volume_list": { "type": "str", "required": true }
+                  }
+                },
+                "emc": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "ecom_server_ip": { "type": "str", "required": true },
+                    "emc_storage_type": { "type": "str", "required": true },
+                    "ecom_server_port": { "type": "int", "required": true },
+                    "ecom_server_username": { "type": "str", "required": true },
+                    "ecom_server_password": { "type": "str", "required": true }
+                  }
+                },
                 "volume_name": { "type": "str", "required": true },
                 "volume_type": { "type": "str", "required": true },
                 "local_file": { "type": "str", "required": true },
