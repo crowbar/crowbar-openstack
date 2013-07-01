@@ -77,7 +77,6 @@ locale_additions:
           volume_file_location: Volume File Location
           volume_disk_parameters: Disk-based Parameters
           volume_raw_mode: Disk selection method
-          cinder_volume_disks: Disks for cinder-volume storage volume group
           emc_parameters: EMC Parameters
           emc_storage_type: Thin pool where user wants to create volume from
           ecom_server_ip: IP address of the ECOM server
