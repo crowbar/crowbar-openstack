@@ -112,13 +112,20 @@ backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
 include_recipe "#{backend_name}::client"
 include_recipe "#{backend_name}::python-client"
 
-# pickup password to database from cinder-api node
-node_api = search(:node, "roles:cinder-api").select{|api| api['cinder']['db']['password'] != nil }.first
-if node_api and node_api[:fqdn] != node[:fqdn]
-  node.set['cinder']['db']['password'] = node_api['cinder']['db']['password']
+db_password = ''
+if node.roles.include? "cinder-controller"
+  ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+  node.set_unless[:cinder][:db][:password] = secure_password
+  db_password = node[:cinder][:db][:password]
+else
+  # pickup password to database from cinder-controller node
+  node_controllers = search(:node, "roles:cinder-controller") || []
+  if node_controllers.length > 0
+    db_password = node_controllers[0][:cinder][:db][:password]
+  end
 end
 
-sql_connection = "#{backend_name}://#{node[:cinder][:db][:user]}:#{node[:cinder][:db][:password]}@#{sql_address}/#{node[:cinder][:db][:database]}"
+sql_connection = "#{backend_name}://#{node[:cinder][:db][:user]}:#{db_password}@#{sql_address}/#{node[:cinder][:db][:database]}"
 
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 node[:cinder][:api][:bind_host] = my_ipaddress
