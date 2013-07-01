@@ -18,12 +18,9 @@
 # limitations under the License.
 #
 
-#::Chef::Node.send(:include, Opscode::OpenSSL::Password)
-
 #
 # RabbitMQ Settings
 #
-#set_unless[:rabbitmq][:password] = secure_password
 default[:rabbitmq][:user] = "nova"
 default[:rabbitmq][:vhost] = "/nova"
 
