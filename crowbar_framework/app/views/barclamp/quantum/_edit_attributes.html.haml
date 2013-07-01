@@ -25,28 +25,11 @@
     }
   }
 
-  function update_value_raw_string(path, new_value) {
-    var input = document.getElementById('proposal_attributes');
-    var json = JSON.parse(input.value);
-
-    var path_parts = path.split('/');
-    var data = json;
-    while (path_parts.length > 1) {
-      var path_part = path_parts.shift();
-      if (!(path_part in data))
-        data[path_part] = {};
-      data = data[path_part];
-    }
-    data[path_parts.shift()] = new_value;
-
-    input.value = JSON.stringify(json);
-  }
-
   function onPluginChange() {
     networkingPlugin = $('select#networking_plugin').val();
     if(networkingPlugin == "linuxbridge") {
       $('div#networking_mode_div').hide();
-      update_value_raw_string('networking_mode', 'vlan');
+      update_value_direct('networking_mode', 'vlan', 'string');
     } else if (networkingPlugin == "openvswitch") {
       $('div#networking_mode_div').show();
       update_value('networking_mode', 'networking_mode', 'string');
