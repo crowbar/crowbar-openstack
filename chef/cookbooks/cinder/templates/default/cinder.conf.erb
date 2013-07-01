@@ -1182,6 +1182,11 @@ volume_driver=cinder.volume.drivers.emc.emc_smis_iscsi.EMCSMISISCSIDriver
 cinder_emc_config_file = /etc/cinder/cinder_emc_config.xml
 <% end -%>
 
+<% unless @manual_driver.nil? -%>
+volume_driver=<%= @manual_driver -%>
+<%= @manual_driver_config -%>
+<% end -%>
+
 #
 # Multi backend options
 #

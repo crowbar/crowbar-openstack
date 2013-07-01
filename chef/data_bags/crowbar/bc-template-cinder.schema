@@ -77,6 +77,14 @@
                     "ecom_server_password": { "type": "str", "required": true }
                   }
                 },
+                "manual": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "driver": { "type": "str", "required": true },
+                    "config": { "type": "str", "required": true }
+                  }
+                },
                 "volume_name": { "type": "str", "required": true },
                 "volume_type": { "type": "str", "required": true },
                 "local_file": { "type": "str", "required": true },
