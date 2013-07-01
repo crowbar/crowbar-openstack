@@ -30,6 +30,7 @@ default[:rabbitmq][:vhost] = "/nova"
 default[:rabbitmq][:nodename]  = node[:hostname]
 default[:rabbitmq][:address]  = nil
 default[:rabbitmq][:port]  = nil
+default[:rabbitmq][:mochiweb_port] = 55672
 default[:rabbitmq][:configfile] = nil
 default[:rabbitmq][:logdir] = nil
 default[:rabbitmq][:mnesiadir] = nil
