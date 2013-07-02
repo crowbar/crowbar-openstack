@@ -56,6 +56,7 @@ else
   keystone = node
 end
 
+keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 admin_username = keystone["keystone"]["admin"]["username"] rescue nil
@@ -67,7 +68,7 @@ Chef::Log.info("Keystone server found at #{keystone_address}")
 ENV['OS_USERNAME'] = admin_username
 ENV['OS_PASSWORD'] = admin_password
 ENV['OS_TENANT_NAME'] = admin_tenant
-ENV['OS_AUTH_URL'] = "http://#{keystone_address}:#{keystone_service_port}/v2.0/"
+ENV['OS_AUTH_URL'] = "#{keystone_protocol}://#{keystone_address}:#{keystone_service_port}/v2.0/"
 
 case node[:quantum][:networking_plugin]
 when "openvswitch"
