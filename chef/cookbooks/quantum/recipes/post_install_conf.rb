@@ -66,8 +66,11 @@ admin_password = keystone["keystone"]["admin"]["password"] rescue nil
 admin_tenant = keystone["keystone"]["admin"]["tenant"] rescue "admin"
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
+quantum_insecure = node[:quantum][:api][:protocol] == 'https' && node[:quantum][:ssl][:insecure]
+ssl_insecure = keystone_insecure || quantum_insecure
+
 quantum_cmd = 'quantum'
-quantum_cmd = 'quantum --insecure' if keystone_insecure
+quantum_cmd = 'quantum --insecure' if ssl_insecure
 
 ENV['OS_USERNAME'] = node[:quantum][:service_user]
 ENV['OS_PASSWORD'] = node[:quantum][:service_password]
@@ -164,7 +167,7 @@ if node[:quantum][:networking_plugin] == "linuxbridge"
     network_name "floating"
     slaves [bound_if]
     type "linuxbridge"
-    insecure keystone_insecure
+    insecure ssl_insecure
 
     action :create
   end
