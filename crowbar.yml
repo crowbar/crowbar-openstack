@@ -21,7 +21,7 @@ barclamp:
   requires:
     - @crowbar
     - git
-    - mysql
+    - database
     - rabbitmq
     - keystone
   member:
