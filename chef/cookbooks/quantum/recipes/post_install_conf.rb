@@ -59,10 +59,15 @@ end
 keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
+keystone_insecure = keystone_protocol == 'https' && keystone[:keystone][:ssl][:insecure]
+
 admin_username = keystone["keystone"]["admin"]["username"] rescue nil
 admin_password = keystone["keystone"]["admin"]["password"] rescue nil
 admin_tenant = keystone["keystone"]["admin"]["tenant"] rescue "admin"
 Chef::Log.info("Keystone server found at #{keystone_address}")
+
+quantum_cmd = 'quantum'
+quantum_cmd = 'quantum --insecure' if keystone_insecure
 
 ENV['OS_USERNAME'] = node[:quantum][:service_user]
 ENV['OS_PASSWORD'] = node[:quantum][:service_password]
@@ -85,27 +90,27 @@ when "linuxbridge"
 end
 
 execute "create_fixed_network" do
-  command "quantum net-create fixed --shared #{fixed_network_type}"
-  not_if "quantum net-list | grep -q ' fixed '"
+  command "#{quantum_cmd} net-create fixed --shared #{fixed_network_type}"
+  not_if "#{quantum_cmd} net-list | grep -q ' fixed '"
 end
 
 execute "create_floating_network" do
-  command "quantum net-create floating --router:external=True #{floating_network_type}"
-  not_if "quantum net-list | grep -q ' floating '"
+  command "#{quantum_cmd} net-create floating --router:external=True #{floating_network_type}"
+  not_if "#{quantum_cmd} net-list | grep -q ' floating '"
 end
 
 execute "create_fixed_subnet" do
-  command "quantum subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} --gateway #{fixed_router_pool_end} fixed #{fixed_range}"
-  not_if "quantum subnet-list | grep -q ' fixed '"
+  command "#{quantum_cmd} subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} --gateway #{fixed_router_pool_end} fixed #{fixed_range}"
+  not_if "#{quantum_cmd} subnet-list | grep -q ' fixed '"
 end
 execute "create_floating_subnet" do
-  command "quantum subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} --gateway #{public_router} floating #{public_range} --enable_dhcp False"
-  not_if "quantum subnet-list | grep -q ' floating '"
+  command "#{quantum_cmd} subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} --gateway #{public_router} floating #{public_range} --enable_dhcp False"
+  not_if "#{quantum_cmd} subnet-list | grep -q ' floating '"
 end
 
 execute "create_router" do
-  command "quantum router-create router-floating ; quantum router-gateway-set router-floating floating ; quantum router-interface-add router-floating fixed"
-  not_if "quantum router-list | grep -q router-floating"
+  command "#{quantum_cmd} router-create router-floating ; #{quantum_cmd} router-gateway-set router-floating floating ; #{quantum_cmd} router-interface-add router-floating fixed"
+  not_if "#{quantum_cmd} router-list | grep -q router-floating"
 end
 
 def networks_params_equal?(netw1, netw2, keys_list)
@@ -120,7 +125,7 @@ ruby_block "get_fixed_net_router" do
   block do
     require 'csv'
     require 'json'
-    csv_data = `quantum router-port-list -f csv router-floating -- --device_owner network:router_gateway`
+    csv_data = `#{quantum_cmd} router-port-list -f csv router-floating -- --device_owner network:router_gateway`
     Chef::Log.info(csv_data)
     node.set[:quantum][:network][:fixed_router] = JSON.parse(CSV.parse(csv_data)[1][-1])["ip_address"]
     node.save
@@ -132,7 +137,7 @@ if node[:quantum][:networking_mode] != "local"
   ruby_block "get_private_networks" do
     block do
       require 'csv'
-      csv_data = `quantum subnet-list -c cidr -f csv -- --shared false --enable_dhcp true`
+      csv_data = `#{quantum_cmd} subnet-list -c cidr -f csv -- --shared false --enable_dhcp true`
       private_quantum_networks = CSV.parse(csv_data)
       private_quantum_networks.shift
       node.set[:quantum][:network][:private_networks] = private_quantum_networks
@@ -143,11 +148,11 @@ if node[:quantum][:networking_mode] != "local"
   ruby_block "add_floating_router_to_private_networks" do
     block do
       require 'csv'
-      csv_data = `quantum subnet-list -c id -f csv -- --shared false --enable_dhcp true`
+      csv_data = `#{quantum_cmd} subnet-list -c id -f csv -- --shared false --enable_dhcp true`
       private_quantum_ids = CSV.parse(csv_data)
       private_quantum_ids.shift
       private_quantum_ids.each do |subnet_id|
-        system("quantum router-interface-add router-floating #{subnet_id}")
+        system("#{quantum_cmd} router-interface-add router-floating #{subnet_id}")
       end
     end
   end
@@ -159,6 +164,7 @@ if node[:quantum][:networking_plugin] == "linuxbridge"
     network_name "floating"
     slaves [bound_if]
     type "linuxbridge"
+    insecure keystone_insecure
 
     action :create
   end
