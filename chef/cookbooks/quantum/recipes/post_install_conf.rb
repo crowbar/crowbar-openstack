@@ -64,10 +64,9 @@ admin_password = keystone["keystone"]["admin"]["password"] rescue nil
 admin_tenant = keystone["keystone"]["admin"]["tenant"] rescue "admin"
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
-
-ENV['OS_USERNAME'] = admin_username
-ENV['OS_PASSWORD'] = admin_password
-ENV['OS_TENANT_NAME'] = admin_tenant
+ENV['OS_USERNAME'] = node[:quantum][:service_user]
+ENV['OS_PASSWORD'] = node[:quantum][:service_password]
+ENV['OS_TENANT_NAME'] = keystone[:keystone][:service][:tenant]
 ENV['OS_AUTH_URL'] = "#{keystone_protocol}://#{keystone_address}:#{keystone_service_port}/v2.0/"
 
 case node[:quantum][:networking_plugin]
