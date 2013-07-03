@@ -17,6 +17,7 @@
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 pub_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address rescue my_ipaddress
 api_port = node["quantum"]["api"]["service_port"]
+quantum_protocol = node["quantum"]["api"]["protocol"]
 
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:quantum][:keystone_instance]}"
 keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
@@ -87,9 +88,9 @@ keystone_register "register quantum endpoint" do
   token keystone_token
   endpoint_service "quantum"
   endpoint_region "RegionOne"
-  endpoint_publicURL "http://#{pub_ipaddress}:#{api_port}/"
-  endpoint_adminURL "http://#{my_ipaddress}:#{api_port}/"
-  endpoint_internalURL "http://#{my_ipaddress}:#{api_port}/"
+  endpoint_publicURL "#{quantum_protocol}://#{pub_ipaddress}:#{api_port}/"
+  endpoint_adminURL "#{quantum_protocol}://#{my_ipaddress}:#{api_port}/"
+  endpoint_internalURL "#{quantum_protocol}://#{my_ipaddress}:#{api_port}/"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template

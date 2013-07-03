@@ -40,7 +40,15 @@
                       "max_pool_size": { "type" : "int", "required" : true },
                       "pool_timeout": { "type" : "int", "required" : true }
                     }},
+                    "ssl": { "type": "map", "required": true, "mapping": {
+                      "insecure": { "type" : "bool", "required" : true },
+                      "certfile": { "type" : "str", "required" : true },
+                      "keyfile": { "type" : "str", "required" : true },
+                      "cert_required": { "type" : "bool", "required" : true },
+                      "ca_certs": { "type" : "str", "required" : true }
+                    }},
                     "api": { "type": "map", "required": true, "mapping": {
+                      "protocol": { "type" : "str", "required" : true },
                       "service_port": { "type" : "int", "required" : true },
                       "service_host": { "type" : "str", "required" : true }
                     }}

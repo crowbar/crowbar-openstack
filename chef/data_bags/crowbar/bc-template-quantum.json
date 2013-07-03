@@ -51,7 +51,15 @@
         "max_pool_size": 10,
         "pool_timeout": 200
       },
+      "ssl": {
+        "insecure": false,
+        "certfile": "/etc/quantum/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/quantum/ssl/private/signing_key.pem",
+        "cert_required": false,
+        "ca_certs": "/etc/quantum/ssl/certs/ca.pem"
+      },
       "api": {
+        "protocol": "http",
         "service_port": 9696,
         "service_host": "0.0.0.0"
       }

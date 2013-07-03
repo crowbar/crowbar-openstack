@@ -4,7 +4,7 @@ action :create do
   case new_resource.type
   when "linuxbridge"
     updated = false
-    bridge_name = "brq" + ::Quantum.get_net_id_by_name(new_resource.network_name)[0,11]
+    bridge_name = "brq" + ::Quantum.get_net_id_by_name(new_resource.network_name, new_resource.insecure)[0,11]
     unless ::Nic.exists?(bridge_name):
       ::Nic::Bridge.create(bridge_name)
       updated = true

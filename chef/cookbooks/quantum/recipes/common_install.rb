@@ -253,6 +253,21 @@ link plugin_cfg_path do
   notifies :restart, resources(:service => quantum_agent), :immediately
 end
 
+if quantum_server and quantum[:quantum][:api][:protocol] == 'https'
+  unless ::File.exists? quantum[:quantum][:ssl][:certfile]
+    message = "Certificate \"#{quantum[:quantum][:ssl][:certfile]}\" is not present."
+    Chef::Log.fatal(message)
+    raise message
+  end
+  # we do not check for existence of keyfile, as the private key is allowed to
+  # be in the certfile
+  if quantum[:quantum][:ssl][:cert_required] and !::File.exists? quantum[:quantum][:ssl][:ca_certs]
+    message = "Certificate CA \"#{quantum[:quantum][:ssl][:ca_certs]}\" is not present."
+    Chef::Log.fatal(message)
+    raise message
+  end
+end
+
 template "/etc/quantum/quantum.conf" do
     cookbook "quantum"
     source "quantum.conf.erb"
@@ -279,6 +294,11 @@ template "/etc/quantum/quantum.conf" do
       :keystone_admin_port => keystone_admin_port,
       :metadata_address => metadata_address,
       :metadata_port => metadata_port,
+      :ssl_enabled => quantum[:quantum][:api][:protocol] == 'https',
+      :ssl_cert_file => quantum[:quantum][:ssl][:certfile],
+      :ssl_key_file => quantum[:quantum][:ssl][:keyfile],
+      :ssl_cert_required => quantum[:quantum][:ssl][:cert_required],
+      :ssl_ca_file => quantum[:quantum][:ssl][:ca_certs],
       :quantum_server => quantum_server,
       :per_tenant_vlan => per_tenant_vlan,
       :networking_mode => quantum[:quantum][:networking_mode],

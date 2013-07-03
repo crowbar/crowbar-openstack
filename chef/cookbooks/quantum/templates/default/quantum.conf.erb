@@ -81,6 +81,25 @@ router_scheduler_driver = quantum.scheduler.l3_agent_scheduler.ChanceScheduler
 router_auto_schedule = True
 metadata_ip = <%= @metadata_address %>
 metadata_port = <%= @metadata_port %>
+
+# Enable SSL on the API server
+use_ssl = <%= @ssl_enabled ? "True" : "False" %>
+
+# Certificate file to use when starting API server securely
+ssl_cert_file = <%= @ssl_cert_file %>
+
+# Private key file to use when starting API server securely
+ssl_key_file = <%= @ssl_key_file %>
+
+# CA certificate file to use when starting API server securely to
+# verify connecting clients. This is an optional parameter only required if
+# API clients need to authenticate to the API server using SSL certificates
+# signed by a trusted CA
+<% if @ssl_cert_required -%>
+ssl_ca_file = <%= @ssl_ca_file %>
+<% else -%>
+#ssl_ca_file = /path/to/cafile
+<% end -%>
 <% end -%>
 ################# sql section will be used for OVS plugin config
 [DATABASE]
