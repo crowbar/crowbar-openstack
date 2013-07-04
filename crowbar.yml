@@ -33,7 +33,7 @@ crowbar:
   layout: 1
   order: 92 
   run_order: 92
-  chef_order: 100
+  chef_order: 92
 
 debs:
   ubuntu-12.04:
