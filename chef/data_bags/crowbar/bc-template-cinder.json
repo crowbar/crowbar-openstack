@@ -116,8 +116,16 @@
         }
       },
       "api": {
+        "protocol": "http",
         "bind_open_address": true,
         "bind_port": 8776
+      },
+      "ssl": {
+        "insecure": false,
+        "certfile": "/etc/cinder/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/cinder/ssl/private/signing_key.pem",
+        "cert_required": false,
+        "ca_certs": "/etc/cinder/ssl/certs/ca.pem"
       },
       "db": {
         "password": "",

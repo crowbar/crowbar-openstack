@@ -110,6 +110,13 @@ locale_additions:
           manual_volume_driver_hint: For instance, cinder.volume.drivers.netapp.iscsi.NetAppISCSIDriver
           manual_volume_config: Options
           manual_volume_config_hint: Each line will be added to cinder.conf. If the driver needs an external file, this file must be manually uploaded.
+          protocol: Protocol
+          ssl: SSL Attributes
+          ssl_insecure: SSL Certificate is insecure (for instance, auto-signed)
+          ssl_certfile: SSL Certificate File
+          ssl_keyfile: SSL (Private) Key File
+          ssl_cert_required: Require Client Certificate
+          ssl_ca_certs: SSL CA Certificates File
       cinder_edit_deployment:
         deployment: Deployment
 
