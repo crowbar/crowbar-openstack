@@ -57,14 +57,14 @@ else
 end
 
 keystone_protocol = keystone["keystone"]["api"]["protocol"]
-keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_host = keystone[:fqdn]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 keystone_insecure = keystone_protocol == 'https' && keystone[:keystone][:ssl][:insecure]
 
 admin_username = keystone["keystone"]["admin"]["username"] rescue nil
 admin_password = keystone["keystone"]["admin"]["password"] rescue nil
 admin_tenant = keystone["keystone"]["admin"]["tenant"] rescue "admin"
-Chef::Log.info("Keystone server found at #{keystone_address}")
+Chef::Log.info("Keystone server found at #{keystone_host}")
 
 quantum_insecure = node[:quantum][:api][:protocol] == 'https' && node[:quantum][:ssl][:insecure]
 ssl_insecure = keystone_insecure || quantum_insecure
@@ -75,7 +75,7 @@ quantum_cmd = 'quantum --insecure' if ssl_insecure
 ENV['OS_USERNAME'] = node[:quantum][:service_user]
 ENV['OS_PASSWORD'] = node[:quantum][:service_password]
 ENV['OS_TENANT_NAME'] = keystone[:keystone][:service][:tenant]
-ENV['OS_AUTH_URL'] = "#{keystone_protocol}://#{keystone_address}:#{keystone_service_port}/v2.0/"
+ENV['OS_AUTH_URL'] = "#{keystone_protocol}://#{keystone_host}:#{keystone_service_port}/v2.0/"
 
 case node[:quantum][:networking_plugin]
 when "openvswitch"

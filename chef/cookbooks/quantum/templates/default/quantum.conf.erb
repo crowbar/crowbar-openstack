@@ -70,7 +70,7 @@ network_auto_schedule = True
 
 <% if @quantum_server -%>
 #=======================================l3 agent======================
-auth_url = <%= @keystone_protocol %>://<%= @keystone_ip_address %>:<%= @keystone_admin_port %>/v2.0
+auth_url = <%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_admin_port %>/v2.0
 auth_region = RegionOne
 admin_tenant_name = <%= @keystone_service_tenant %>
 admin_user = <%= @keystone_service_user %>
@@ -79,7 +79,7 @@ interface_driver = <%= @interface_driver %>
 external_network_bridge = <%= @external_network_bridge %>
 router_scheduler_driver = quantum.scheduler.l3_agent_scheduler.ChanceScheduler
 router_auto_schedule = True
-metadata_ip = <%= @metadata_address %>
+metadata_ip = <%= @metadata_host %>
 metadata_port = <%= @metadata_port %>
 
 # Enable SSL on the API server

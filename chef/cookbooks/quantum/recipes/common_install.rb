@@ -191,7 +191,7 @@ if novas.length > 0
 else
   nova = node
 end
-metadata_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "public").address rescue nil
+metadata_host = nova[:fqdn]
 metadata_port = "8775"
 if quantum[:quantum][:networking_mode] == 'vlan'
   per_tenant_vlan=true
@@ -217,7 +217,7 @@ rabbit_settings = {
   :vhost => rabbit[:rabbitmq][:vhost]
 }
 
-keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_host = keystone[:fqdn]
 keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
@@ -226,7 +226,7 @@ keystone_service_user = quantum["quantum"]["service_user"]
 keystone_service_password = quantum["quantum"]["service_password"]
 admin_username = keystone["keystone"]["admin"]["username"] rescue nil
 admin_password = keystone["keystone"]["admin"]["password"] rescue nil
-Chef::Log.info("Keystone server found at #{keystone_address}")
+Chef::Log.info("Keystone server found at #{keystone_host}")
 
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 vlan_end = vlan_start + 2000
@@ -286,13 +286,13 @@ template "/etc/quantum/quantum.conf" do
       :use_syslog => quantum[:quantum][:use_syslog],
       :rabbit_settings => rabbit_settings,
       :keystone_protocol => keystone_protocol,
-      :keystone_ip_address => keystone_address,
+      :keystone_host => keystone_host,
       :keystone_service_port => keystone_service_port,
       :keystone_service_tenant => keystone_service_tenant,
       :keystone_service_user => keystone_service_user,
       :keystone_service_password => keystone_service_password,
       :keystone_admin_port => keystone_admin_port,
-      :metadata_address => metadata_address,
+      :metadata_host => metadata_host,
       :metadata_port => metadata_port,
       :ssl_enabled => quantum[:quantum][:api][:protocol] == 'https',
       :ssl_cert_file => quantum[:quantum][:ssl][:certfile],

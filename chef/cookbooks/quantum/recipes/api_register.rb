@@ -14,8 +14,18 @@
 #
 
 
-my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-pub_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address rescue my_ipaddress
+my_admin_host = node[:fqdn]
+# For the public endpoint, we prefer the public name. If not set, then we
+# use the IP address except for SSL, where we always prefer a hostname
+# (for certificate validation).
+my_public_host = node[:crowbar][:public_name]
+if my_public_host.nil? or my_public_host.empty?
+  unless node[:quantum][:api][:protocol] == "https"
+    my_public_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
+  else
+    my_public_host = 'public.'+node[:fqdn]
+  end
+end
 api_port = node["quantum"]["api"]["service_port"]
 quantum_protocol = node["quantum"]["api"]["protocol"]
 
@@ -28,7 +38,7 @@ else
   keystone = node
 end
 
-keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_host = keystone[:fqdn]
 keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_token = keystone["keystone"]["service"]["token"]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
@@ -38,11 +48,11 @@ keystone_service_user = node["quantum"]["service_user"]
 keystone_service_password = node["quantum"]["service_password"]
 admin_username = keystone["keystone"]["admin"]["username"] rescue nil
 admin_password = keystone["keystone"]["admin"]["password"] rescue nil
-Chef::Log.info("Keystone server found at #{keystone_address}")
+Chef::Log.info("Keystone server found at #{keystone_host}")
 
 keystone_register "quantum api wakeup keystone" do
   protocol keystone_protocol
-  host keystone_address
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   action :wakeup
@@ -50,7 +60,7 @@ end
 
 keystone_register "register quantum user" do
   protocol keystone_protocol
-  host keystone_address
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   user_name keystone_service_user
@@ -61,7 +71,7 @@ end
 
 keystone_register "give quantum user access" do
   protocol keystone_protocol
-  host keystone_address
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   user_name keystone_service_user
@@ -72,7 +82,7 @@ end
 
 keystone_register "register quantum service" do
   protocol keystone_protocol
-  host keystone_address
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   service_name "quantum"
@@ -83,14 +93,14 @@ end
 
 keystone_register "register quantum endpoint" do
   protocol keystone_protocol
-  host keystone_address
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   endpoint_service "quantum"
   endpoint_region "RegionOne"
-  endpoint_publicURL "#{quantum_protocol}://#{pub_ipaddress}:#{api_port}/"
-  endpoint_adminURL "#{quantum_protocol}://#{my_ipaddress}:#{api_port}/"
-  endpoint_internalURL "#{quantum_protocol}://#{my_ipaddress}:#{api_port}/"
+  endpoint_publicURL "#{quantum_protocol}://#{my_public_host}:#{api_port}/"
+  endpoint_adminURL "#{quantum_protocol}://#{my_admin_host}:#{api_port}/"
+  endpoint_internalURL "#{quantum_protocol}://#{my_admin_host}:#{api_port}/"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template
