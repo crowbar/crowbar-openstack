@@ -56,6 +56,13 @@ end
 
 include_recipe "#{@cookbook_name}::common"
 
+directory "/var/cache/ceilometer" do
+  owner "ceilometer"
+  group "root"
+  mode 00755
+  action :create
+end
+
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:ceilometer][:keystone_instance]}"
 keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
 if keystones.length > 0

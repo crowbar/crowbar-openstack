@@ -38,8 +38,8 @@ crowbar:
 debs:
   ubuntu-12.04:
     repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
+#      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
+#      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
       - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
       - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
   pkgs:
@@ -49,6 +49,7 @@ debs:
     - ceilometer-collector
     - ceilometer-common
     - python-ceilometer
+    - python-ceilometerclient
     - mongodb
     - python-keystone
     - python-pymongo
