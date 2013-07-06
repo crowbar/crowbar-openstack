@@ -138,6 +138,10 @@
           [ "cinder-controller" ],
           [ "cinder-volume" ]
       ],
+      "element_run_list_order": {
+          "cinder-controller": 92,
+          "cinder-volume": 93
+      },
       "config": {
         "environment": "cinder-base-config",
         "mode": "full",
