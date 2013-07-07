@@ -87,17 +87,17 @@ glance_servers = search(:node, "roles:glance-server#{glance_env_filter}") || []
 if glance_servers.length > 0
   glance_server = glance_servers[0]
   glance_server = node if glance_server.name == node.name
-  glance_server_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance_server, "admin").address
+  glance_server_host = glance_server[:fqdn]
   glance_server_protocol = glance_server[:glance][:api][:protocol]
   glance_server_port = glance_server[:glance][:api][:bind_port]
   glance_server_insecure = glance_server_protocol == 'https' && glance_server[:glance][:ssl][:insecure]
 else
-  glance_server_ip = nil
+  glance_server_host = nil
   glance_server_port = nil
   glance_server_protocol = nil
   glance_server_insecure = nil
 end
-Chef::Log.info("Glance server at #{glance_server_ip}")
+Chef::Log.info("Glance server at #{glance_server_host}")
 
 sql_env_filter = " AND database_config_environment:database-config-#{node[:cinder][:database_instance]}"
 sqls = search(:node, "roles:database-server#{sql_env_filter}")
@@ -223,7 +223,7 @@ template "/etc/cinder/cinder.conf" do
             :sql_connection => sql_connection,
             :rabbit_settings => rabbit_settings,
             :glance_server_protocol => glance_server_protocol,
-            :glance_server_ip => glance_server_ip,
+            :glance_server_host => glance_server_host,
             :glance_server_port => glance_server_port,
             :glance_server_insecure => glance_server_insecure
             )
