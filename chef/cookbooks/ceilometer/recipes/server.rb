@@ -121,7 +121,7 @@ keystone_register "give ceilometer user access" do
   token keystone_token
   user_name keystone_service_user
   tenant_name keystone_service_tenant
-  role_name "ResellerAdmin"
+  role_name "admin"
   action :add_access
 end
 
