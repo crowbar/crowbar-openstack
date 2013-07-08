@@ -94,8 +94,14 @@ else
   end
 end
 
+if not node[:quantum].has_key?("rootwrap")
 node[:quantum] ||= Mash.new
-node.set[:quantum][:rootwrap] = "/usr/bin/quantum-rootwrap"
+  unless quantum[:quantum][:use_gitrepo]
+    node.set[:quantum][:rootwrap] = "/usr/bin/quantum-rootwrap"
+  else
+    node.set[:quantum][:rootwrap] = "/usr/local/bin/quantum-rootwrap"
+  end
+end
 
 # Update path to quantum-rootwrap in case the path above is wrong
 ruby_block "Find quantum rootwrap" do
@@ -105,6 +111,7 @@ ruby_block "Find quantum rootwrap" do
       f = File.join(p,"quantum-rootwrap")
       next unless File.executable?(f)
       node.set[:quantum][:rootwrap] = f
+      node.save
       found = true
       break
     end
@@ -308,7 +315,7 @@ template "/etc/quantum/quantum.conf" do
       :physnet => physnet,
       :interface_driver => interface_driver,
       :external_network_bridge => external_network_bridge,
-      :rootwrap_bin =>  quantum[:quantum][:rootwrap]
+      :rootwrap_bin =>  node[:quantum][:rootwrap]
     )
     notifies :restart, resources(:service => quantum_agent), :immediately
 end
