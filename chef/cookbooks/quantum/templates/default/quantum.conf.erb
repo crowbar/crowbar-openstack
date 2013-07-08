@@ -35,8 +35,11 @@ rabbit_password=<%= @rabbit_settings[:password] %>
 rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 <% end -%>
 
-#core_plugin = quantum.plugins.linuxbridge.lb_quantum_plugin.LinuxBridgePluginV2
+<% if @networking_plugin == 'openvswitch' -%>
 core_plugin = quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2
+<% elsif @networking_plugin == 'linuxbridge' -%>
+core_plugin = quantum.plugins.linuxbridge.lb_quantum_plugin.LinuxBridgePluginV2
+<% end -%>
 
 
 #================dhcp agent====================
@@ -72,12 +75,31 @@ auth_region = RegionOne
 admin_tenant_name = <%= @keystone_service_tenant %>
 admin_user = <%= @keystone_service_user %>
 admin_password = <%= @keystone_service_password %>
-interface_driver = quantum.agent.linux.interface.OVSInterfaceDriver
-external_network_bridge = br-public
+interface_driver = <%= @interface_driver %>
+external_network_bridge = <%= @external_network_bridge %>
 router_scheduler_driver = quantum.scheduler.l3_agent_scheduler.ChanceScheduler
 router_auto_schedule = True
 metadata_ip = <%= @metadata_address %>
 metadata_port = <%= @metadata_port %>
+
+# Enable SSL on the API server
+use_ssl = <%= @ssl_enabled ? "True" : "False" %>
+
+# Certificate file to use when starting API server securely
+ssl_cert_file = <%= @ssl_cert_file %>
+
+# Private key file to use when starting API server securely
+ssl_key_file = <%= @ssl_key_file %>
+
+# CA certificate file to use when starting API server securely to
+# verify connecting clients. This is an optional parameter only required if
+# API clients need to authenticate to the API server using SSL certificates
+# signed by a trusted CA
+<% if @ssl_cert_required -%>
+ssl_ca_file = <%= @ssl_ca_file %>
+<% else -%>
+#ssl_ca_file = /path/to/cafile
+<% end -%>
 <% end -%>
 ################# sql section will be used for OVS plugin config
 [DATABASE]
@@ -221,4 +243,45 @@ root_helper=sudo <%=@rootwrap_bin%> /etc/quantum/rootwrap.conf
 polling_interval = 2
 
 [SECURITYGROUP]
+<% if @networking_plugin == 'openvswitch' -%>
 firewall_driver = quantum.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+<% elsif @networking_plugin == 'linuxbridge' -%>
+firewall_driver = quantum.agent.linux.iptables_firewall.IptablesFirewallDriver
+<% end -%>
+
+[VLANS]
+# (StrOpt) Type of network to allocate for tenant networks. The
+# default value 'local' is useful only for single-box testing and
+# provides no connectivity between hosts. You MUST change this to
+# 'vlan' and configure network_vlan_ranges below in order for tenant
+# networks to provide connectivity between hosts. Set to 'none' to
+# disable creation of tenant networks.
+#
+# Default: tenant_network_type = local
+# Example: tenant_network_type = vlan
+tenant_network_type = vlan
+
+# (ListOpt) Comma-separated list of
+# <physical_network>[:<vlan_min>:<vlan_max>] tuples enumerating ranges
+# of VLAN IDs on named physical networks that are available for
+# allocation. All physical networks listed are available for flat and
+# VLAN provider network creation. Specified ranges of VLAN IDs are
+# available for tenant network allocation if tenant_network_type is
+# 'vlan'. If empty, only local networks may be created.
+#
+# Default: network_vlan_ranges =
+# Example: network_vlan_ranges = physnet1:1000:2999
+network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
+
+
+[LINUX_BRIDGE]
+# (ListOpt) Comma-separated list of
+# <physical_network>:<physical_interface> tuples mapping physical
+# network names to the agent's node-specific physical network
+# interfaces to be used for flat and VLAN networks. All physical
+# networks listed in network_vlan_ranges on the server should have
+# mappings to appropriate interfaces on each agent.
+#
+# Default: physical_interface_mappings =
+# Example: physical_interface_mappings = physnet1:eth1
+physical_interface_mappings = physnet1:<%=@physnet%>

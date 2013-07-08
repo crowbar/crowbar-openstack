@@ -34,7 +34,9 @@
       ],
       "debug": false,
       "verbose": false,
+      "dhcp_domain": "openstack.local",
       "networking_mode": "gre",
+      "networking_plugin": "openvswitch",
       "use_syslog": false,
       "database_instance": "none",
       "db": {
@@ -49,7 +51,15 @@
         "max_pool_size": 10,
         "pool_timeout": 200
       },
+      "ssl": {
+        "insecure": false,
+        "certfile": "/etc/quantum/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/quantum/ssl/private/signing_key.pem",
+        "cert_required": false,
+        "ca_certs": "/etc/quantum/ssl/certs/ca.pem"
+      },
       "api": {
+        "protocol": "http",
         "service_port": 9696,
         "service_host": "0.0.0.0"
       }
