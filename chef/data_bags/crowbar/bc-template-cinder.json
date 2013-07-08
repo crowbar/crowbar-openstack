@@ -90,6 +90,29 @@
           "eqlx_ssh_keepalive_interval": 1200,
           "eqlx_cli_timeout": 30,
           "eqlx_pool": "default"
+        },
+        "netapp": {
+          "netapp_wsdl_url": "http://192.168.124.11:8088/",
+          "netapp_server_hostname": "192.168.124.11",
+          "netapp_server_port": 8088,
+          "netapp_login": "admin",
+          "netapp_password": "admin",
+          "netapp_storage_service": "",
+          "netapp_storage_service_prefix": "crowbar_",
+          "netapp_vfiler": "",
+          "netapp_transport_type": "http",
+          "netapp_volume_list": ""
+        },
+        "emc": {
+          "emc_storage_type": "",
+          "ecom_server_ip": "192.168.124.11",
+          "ecom_server_port": 0,
+          "ecom_server_username": "admin",
+          "ecom_server_password": "admin"
+        },
+        "manual": {
+          "driver": "",
+          "config": ""
         }
       },
       "api": {
@@ -107,12 +130,18 @@
     "cinder": {
       "crowbar-revision": 0,
       "element_states": {
-        "cinder-server": [ "readying", "ready", "applying" ]
+          "cinder-controller": [ "readying", "ready", "applying" ],
+          "cinder-volume": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-        [ "cinder-server" ]
+          [ "cinder-controller" ],
+          [ "cinder-volume" ]
       ],
+      "element_run_list_order": {
+          "cinder-controller": 92,
+          "cinder-volume": 93
+      },
       "config": {
         "environment": "cinder-base-config",
         "mode": "full",

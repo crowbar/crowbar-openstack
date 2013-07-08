@@ -112,10 +112,20 @@ backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
 include_recipe "#{backend_name}::client"
 include_recipe "#{backend_name}::python-client"
 
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-node.set_unless['cinder']['db']['password'] = secure_password
+db_password = ''
+if node.roles.include? "cinder-controller"
+  ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+  node.set_unless[:cinder][:db][:password] = secure_password
+  db_password = node[:cinder][:db][:password]
+else
+  # pickup password to database from cinder-controller node
+  node_controllers = search(:node, "roles:cinder-controller") || []
+  if node_controllers.length > 0
+    db_password = node_controllers[0][:cinder][:db][:password]
+  end
+end
 
-sql_connection = "#{backend_name}://#{node[:cinder][:db][:user]}:#{node[:cinder][:db][:password]}@#{sql_address}/#{node[:cinder][:db][:database]}"
+sql_connection = "#{backend_name}://#{node[:cinder][:db][:user]}:#{db_password}@#{sql_address}/#{node[:cinder][:db][:database]}"
 
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 node[:cinder][:api][:bind_host] = my_ipaddress
@@ -147,6 +157,39 @@ else
   eqlx_params = nil
 end
 
+if node[:cinder][:volume][:volume_type] == "netapp"
+  Chef::Log.info("Pushing NetApp params to cinder.conf template")
+  netapp_params = node[:cinder][:volume][:netapp]
+else
+  netapp_params = nil
+end
+
+if node[:cinder][:volume][:volume_type] == "emc"
+  Chef::Log.info("Pushing EMC params to cinder.conf template")
+  emc_params = node[:cinder][:volume][:emc]
+
+  template "/etc/cinder/cinder_emc_config.xml" do
+    source "cinder_emc_config.xml.erb"
+    owner node[:cinder][:user]
+    group "root"
+    mode 0640
+    variables(
+              :emc_params => emc_params
+             )
+  end
+else
+  emc_params = nil
+end
+
+if node[:cinder][:volume][:volume_type] == "manual"
+  Chef::Log.info("Pushing manual params to cinder.conf template")
+  manual_driver = node[:cinder][:volume][:manual][:driver]
+  manual_driver_config = node[:cinder][:volume][:manual][:config]
+else
+  manual_driver = nil
+  manual_driver_config = nil
+end
+
 template "/etc/cinder/cinder.conf" do
   source "cinder.conf.erb"
   owner node[:cinder][:user]
@@ -154,6 +197,10 @@ template "/etc/cinder/cinder.conf" do
   mode 0640
   variables(
             :eqlx_params => eqlx_params,
+            :emc_params => emc_params,
+            :netapp_params => netapp_params,
+            :manual_driver => manual_driver,
+            :manual_driver_config => manual_driver_config,
             :sql_connection => sql_connection,
             :rabbit_settings => rabbit_settings,
             :glance_server_ip => glance_server_ip,
