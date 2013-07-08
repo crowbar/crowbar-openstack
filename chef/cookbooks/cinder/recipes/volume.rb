@@ -59,7 +59,7 @@ def make_volumes(node,volname)
   unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
   claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node,"Cinder")
   
-  if (node[:cinder][:volume][:volume_type] == "local") || (unclaimed_disks.empty? && claimed_disks.empty?)
+  if (node[:cinder][:volume][:volume_type] == "local")
     Chef::Log.info("Cinder: Using local file volume backing")
     # only OS disk is exists, will use file storage
     fname = node["cinder"]["volume"]["local_file"]
@@ -96,6 +96,9 @@ def make_volumes(node,volname)
       not_if "vgs #{volname}"
     end
     return
+  elsif (node[:cinder][:volume][:volume_type] == "raw") && (unclaimed_disks.empty? && claimed_disks.empty?)
+    Chef::Log.fatal("There is no suitable disks for cinder")
+    raise "There is no suitable disks for cinder"
   elsif claimed_disks.empty?
     Chef::Log.info("Cinder: Using raw disks for volume backing.")
     raw_mode = node[:cinder][:volume][:cinder_raw_method]
