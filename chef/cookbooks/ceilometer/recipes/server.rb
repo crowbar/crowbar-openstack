@@ -106,22 +106,13 @@ keystone_register "register ceilometer user" do
   action :add_user
 end
 
-keystone_register "add default ResellerAdmin role" do
-  host keystone_address
-  port keystone_admin_port
-  token keystone_token
-  role_name "ResellerAdmin"
-  action :add_role
-end
-
-
 keystone_register "give ceilometer user access" do
   host keystone_address
   port keystone_admin_port
   token keystone_token
   user_name keystone_service_user
   tenant_name keystone_service_tenant
-  role_name "ResellerAdmin"
+  role_name "admin"
   action :add_access
 end
 

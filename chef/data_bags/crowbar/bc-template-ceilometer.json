@@ -94,7 +94,8 @@
       "elements": {},
       "element_order": [
         [ "ceilometer-server" ],
-        [ "ceilometer-cagent", "ceilometer-agent" ]
+        [ "ceilometer-cagent" ], 
+        [ "ceilometer-agent" ]
       ],
       "element_run_list_order": {
         "ceilometer-server": 101,
