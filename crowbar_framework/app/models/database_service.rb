@@ -52,21 +52,20 @@ class DatabaseService < ServiceObject
       admin_address = node.get_network_by_type("admin")["address"]
       node.crowbar[:database] = {} if node.crowbar[:database].nil?
       node.crowbar[:database][:api_bind_host] = admin_address
-
+      @logger.debug("Database api bind host: #{node.crowbar[:database][:api_bind_host]}")
       node.save
     end
 
     sql_engine = role.default_attributes["database"]["sql_engine"]
     role.default_attributes["database"][sql_engine] = {} if role.default_attributes["database"][sql_engine].nil?
-    role.default_attributes["database"]["db_maker_password"] = random_password if role.default_attributes["database"]["db_maker_password"].nil?
+    role.default_attributes["database"]["db_maker_password"] = (old_role && old_role.default_attributes["database"]["db_maker_password"]) || random_password
 
     if ( sql_engine == "mysql" )
+      role.default_attributes["database"]["mysql"]["server_debian_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_debian_password"]) || random_password
+      role.default_attributes["database"]["mysql"]["server_root_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_root_password"]) || random_password
+      role.default_attributes["database"]["mysql"]["server_repl_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_repl_password"]) || random_password
       @logger.debug("setting mysql specific attributes")
-      role.default_attributes["database"]["mysql"]["server_debian_password"] = random_password if role.default_attributes["database"]["mysql"]["server_debian_password"].nil?
-      role.default_attributes["database"]["mysql"]["server_root_password"] = random_password if role.default_attributes["database"]["mysql"]["server_root_password"].nil?
-      role.default_attributes["database"]["mysql"]["server_repl_password"] = random_password if role.default_attributes["database"]["mysql"]["server_repl_password"].nil?
     end
-
 
     # Copy the attributes for database/<sql_engine> to <sql_engine> in the
     # role attributes to avoid renaming all attributes everywhere in the
