@@ -85,15 +85,15 @@ else
   keystone = node
 end
 
-keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_host = keystone[:fqdn]
 keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
 keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
 keystone_service_user = node["quantum"]["service_user"]
 keystone_service_password = node["quantum"]["service_password"]
-keystone_service_url = "#{keystone_protocol}://#{keystone_address}:#{keystone_admin_port}/v2.0"
-Chef::Log.info("Keystone server found at #{keystone_address}")
+keystone_service_url = "#{keystone_protocol}://#{keystone_host}:#{keystone_admin_port}/v2.0"
+Chef::Log.info("Keystone server found at #{keystone_host}")
 
 template "/etc/quantum/api-paste.ini" do
   source "api-paste.ini.erb"
@@ -102,7 +102,7 @@ template "/etc/quantum/api-paste.ini" do
   mode "0640"
   variables(
     :keystone_protocol => keystone_protocol,
-    :keystone_ip_address => keystone_address,
+    :keystone_host => keystone_host,
     :keystone_service_port => keystone_service_port,
     :keystone_service_tenant => keystone_service_tenant,
     :keystone_service_user => keystone_service_user,
@@ -166,7 +166,7 @@ if novas.length > 0
 else
   nova = node
 end
-metadata_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "public").address rescue nil
+metadata_host = nova[:fqdn]
 metadata_port = "8775"
 
 template "/etc/quantum/metadata_agent.ini" do
@@ -181,8 +181,8 @@ template "/etc/quantum/metadata_agent.ini" do
     :admin_tenant_name => keystone_service_tenant,
     :admin_user => keystone_service_user,
     :admin_password => keystone_service_password,
+    :nova_metadata_host => metadata_host,
     :nova_metadata_port => metadata_port,
-    :nova_metadata_ip => metadata_address,
     :metadata_shared_secret => "Secret"
   )
 end
