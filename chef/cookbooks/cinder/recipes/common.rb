@@ -194,6 +194,21 @@ else
   manual_driver_config = nil
 end
 
+if node[:cinder][:api][:protocol] == 'https'
+  unless ::File.exists? node[:cinder][:ssl][:certfile]
+    message = "Certificate \"#{node[:cinder][:ssl][:certfile]}\" is not present."
+    Chef::Log.fatal(message)
+    raise message
+  end
+  # we do not check for existence of keyfile, as the private key is allowed to
+  # be in the certfile
+  if node[:cinder][:ssl][:cert_required] and !::File.exists? node[:cinder][:ssl][:ca_certs]
+    message = "Certificate CA \"#{node[:cinder][:ssl][:ca_certs]}\" is not present."
+    Chef::Log.fatal(message)
+    raise message
+  end
+end
+
 template "/etc/cinder/cinder.conf" do
   source "cinder.conf.erb"
   owner node[:cinder][:user]

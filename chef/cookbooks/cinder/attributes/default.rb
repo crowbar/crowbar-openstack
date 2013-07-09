@@ -26,3 +26,10 @@ node[:cinder][:monitor]={}
 node[:cinder][:monitor][:svcs] = []
 node[:cinder][:monitor][:ports]={}
 
+default[:cinder][:api][:protocol] = "http"
+
+default[:cinder][:ssl][:insecure] = false
+default[:cinder][:ssl][:certfile] = "/etc/cinder/ssl/certs/signing_cert.pem"
+default[:cinder][:ssl][:keyfile] = "/etc/cinder/ssl/private/signing_key.pem"
+default[:cinder][:ssl][:cert_required] = false
+default[:cinder][:ssl][:ca_certs] = "/etc/cinder/ssl/certs/ca.pem"

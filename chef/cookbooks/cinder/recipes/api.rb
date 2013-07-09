@@ -42,6 +42,7 @@ keystone_service_tenant = keystone[:keystone][:service][:tenant]
 keystone_service_user = node[:cinder][:service_user]
 keystone_service_password = node[:cinder][:service_password]
 cinder_port = node[:cinder][:api][:bind_port]
+cinder_protocol = node[:cinder][:api][:protocol]
 Chef::Log.info("Keystone server found at #{keystone_address}")
 
 if node[:cinder][:use_gitrepo]
@@ -106,9 +107,9 @@ keystone_register "register cinder endpoint" do
   token keystone_token
   endpoint_service "cinder"
   endpoint_region "RegionOne"
-  endpoint_publicURL "http://#{public_api_ip}:#{cinder_port}/v1/$(tenant_id)s"
-  endpoint_adminURL "http://#{admin_api_ip}:#{cinder_port}/v1/$(tenant_id)s"
-  endpoint_internalURL "http://#{admin_api_ip}:#{cinder_port}/v1/$(tenant_id)s"
+  endpoint_publicURL "#{cinder_protocol}://#{public_api_ip}:#{cinder_port}/v1/$(tenant_id)s"
+  endpoint_adminURL "#{cinder_protocol}://#{admin_api_ip}:#{cinder_port}/v1/$(tenant_id)s"
+  endpoint_internalURL "#{cinder_protocol}://#{admin_api_ip}:#{cinder_port}/v1/$(tenant_id)s"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template
