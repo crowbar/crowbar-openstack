@@ -88,10 +88,14 @@ if glance_servers.length > 0
   glance_server = glance_servers[0]
   glance_server = node if glance_server.name == node.name
   glance_server_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance_server, "admin").address
+  glance_server_protocol = glance_server[:glance][:api][:protocol]
   glance_server_port = glance_server[:glance][:api][:bind_port]
+  glance_server_insecure = glance_server_protocol == 'https' && glance_server[:glance][:ssl][:insecure]
 else
   glance_server_ip = nil
   glance_server_port = nil
+  glance_server_protocol = nil
+  glance_server_insecure = nil
 end
 Chef::Log.info("Glance server at #{glance_server_ip}")
 
@@ -203,8 +207,10 @@ template "/etc/cinder/cinder.conf" do
             :manual_driver_config => manual_driver_config,
             :sql_connection => sql_connection,
             :rabbit_settings => rabbit_settings,
+            :glance_server_protocol => glance_server_protocol,
             :glance_server_ip => glance_server_ip,
-            :glance_server_port => glance_server_port
+            :glance_server_port => glance_server_port,
+            :glance_server_insecure => glance_server_insecure
             )
 end
 
