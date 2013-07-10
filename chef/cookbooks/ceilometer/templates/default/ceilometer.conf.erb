@@ -13,6 +13,7 @@ rabbit_password = <%= @rabbit_settings[:password] %>
 rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 rpc_backend = ceilometer.openstack.common.rpc.impl_kombu
 db_connection = mongodb://<%= @db_host %>:27017/ceilometer
+log_dir = /var/log/ceilometer
 
 [keystone_authtoken]
 signing_dir = /var/cache/ceilometer
