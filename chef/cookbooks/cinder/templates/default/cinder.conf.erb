@@ -97,7 +97,7 @@ my_ip=<%= node[:cinder][:my_ip] %>
 
 # A list of the glance api servers available to cinder
 # ([hostname|ip]:port) (list value)
-glance_api_servers=<%= @glance_server_protocol %>://<%= @glance_server_ip %>:<%= @glance_server_port %>
+glance_api_servers=<%= @glance_server_protocol %>://<%= @glance_server_host %>:<%= @glance_server_port %>
 
 # default version of the glance api to use
 #glance_api_version=1
