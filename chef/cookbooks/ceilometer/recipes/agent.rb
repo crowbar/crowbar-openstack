@@ -30,6 +30,19 @@ else
     command "cp #{ceilometer_path}/etc/ceilometer/pipeline.yaml /etc/ceilometer"
     creates "/etc/ceilometer/pipeline.yaml"
   end
+
+  # Remove after https://bugs.launchpad.net/ceilometer/+bug/1179560 is fixed
+  cookbook_file "/usr/lib/python2.7/dist-packages/patch1179560.patch" do
+    path "/usr/lib/python2.7/dist-packages/patch1179560.patch"
+    source "patch1179560.patch"
+    mode 00644
+  end
+  execute "patch bug 1179560" do
+    command "cd /usr/lib/python2.7/dist-packages && patch -p1 < patch1179560.patch && rm patch1179560.patch"
+    action :nothing
+  end
+  # Remove after https://bugs.launchpad.net/ceilometer/+bug/1179560 is fixed
+
 end
 
 include_recipe "#{@cookbook_name}::common"
