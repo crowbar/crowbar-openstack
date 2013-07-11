@@ -23,9 +23,9 @@ end
 
 case quantum[:quantum][:networking_plugin]
 when "openvswitch"
-  quantum_agent=node[:quantum][:platform][:ovs_agent_name]
+  quantum_agent = node[:quantum][:platform][:ovs_agent_name]
 when "linuxbridge"
-  quantum_agent=node[:quantum][:platform][:lb_agent_name]
+  quantum_agent = node[:quantum][:platform][:lb_agent_name]
 end
 
 quantum_path = "/opt/quantum"
@@ -123,6 +123,10 @@ end
 
 case quantum[:quantum][:networking_plugin]
 when "openvswitch"
+  plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
+  physnet = quantum[:quantum][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed"
+  interface_driver = "quantum.agent.linux.interface.OVSInterfaceDriver"
+  external_network_bridge = "br-public"
 
   service "openvswitch-switch" do
     supports :status => true, :restart => true
@@ -173,11 +177,28 @@ when "openvswitch"
       end
     end
   end
+when "linuxbridge"
+  plugin_cfg_path = "/etc/quantum/plugins/linuxbridge/linuxbridge_conf.ini"
+  physnet = (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil)
+  interface_driver = "quantum.agent.linux.interface.BridgeInterfaceDriver"
+  external_network_bridge = ""
 end
 
-service quantum_agent do
-  supports :status => true, :restart => true
-  action :enable
+if quantum_server
+  # no subscribes for :restart; this is handled by the
+  # "mark quantum-agent as restart for post-install" ruby_block
+  # but it only exists if we're also the server
+  service quantum_agent do
+    supports :status => true, :restart => true
+    action :enable
+  end
+else
+  service quantum_agent do
+    supports :status => true, :restart => true
+    action :enable
+    subscribes :restart, resources("link[#{plugin_cfg_path}]")
+    subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
+  end
 end
 
 #env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
@@ -231,26 +252,12 @@ Chef::Log.info("Keystone server found at #{keystone_host}")
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 vlan_end = vlan_start + 2000
 
-case quantum[:quantum][:networking_plugin]
-when "openvswitch"
-  plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
-  physnet = quantum[:quantum][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed"
-  interface_driver = "quantum.agent.linux.interface.OVSInterfaceDriver"
-  external_network_bridge = "br-public"
-when "linuxbridge"
-  plugin_cfg_path = "/etc/quantum/plugins/linuxbridge/linuxbridge_conf.ini"
-  physnet = (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil)
-  interface_driver = "quantum.agent.linux.interface.BridgeInterfaceDriver"
-  external_network_bridge = ""
-end
-
 if quantum[:quantum][:use_gitrepo] == true
   plugin_cfg_path = File.join("/opt/quantum", plugin_cfg_path)
 end
 
 link plugin_cfg_path do
   to "/etc/quantum/quantum.conf"
-  notifies :restart, resources(:service => quantum_agent), :immediately
 end
 
 if quantum_server and quantum[:quantum][:api][:protocol] == 'https'
@@ -310,5 +317,4 @@ template "/etc/quantum/quantum.conf" do
       :external_network_bridge => external_network_bridge,
       :rootwrap_bin =>  quantum[:quantum][:rootwrap]
     )
-    notifies :restart, resources(:service => quantum_agent), :immediately
 end
