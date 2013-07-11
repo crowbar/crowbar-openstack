@@ -12,7 +12,7 @@
       "keystone_service_password": "secret",
       "gitrepo": "http://github.com/openstack/ceilometer.git",
       "git_instance": "",
-      "git_refspec": "2013.1.rc1",
+      "git_refspec": "stable/grizzly",
       "use_gitrepo": true,
       "use_gitbarclamp": true,
       "use_pip_cache": true,
