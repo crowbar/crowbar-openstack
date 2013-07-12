@@ -23,3 +23,5 @@ attribute :user, :kind_of => String, :name_attribute => true
 attribute :password, :kind_of => String
 attribute :vhost, :kind_of => String
 attribute :permissions, :kind_of => String
+attribute :address, :kind_of => String
+attribute :port, :kind_of => Integer

@@ -18,18 +18,16 @@
 # limitations under the License.
 #
 
-#::Chef::Node.send(:include, Opscode::OpenSSL::Password)
-
 #
 # RabbitMQ Settings
 #
-#set_unless[:rabbitmq][:password] = secure_password
 default[:rabbitmq][:user] = "nova"
 default[:rabbitmq][:vhost] = "/nova"
 
 default[:rabbitmq][:nodename]  = node[:hostname]
 default[:rabbitmq][:address]  = nil
-default[:rabbitmq][:port]  = nil
+default[:rabbitmq][:port]  = 5672
+default[:rabbitmq][:mochiweb_port] = 55672
 default[:rabbitmq][:configfile] = nil
 default[:rabbitmq][:logdir] = nil
 default[:rabbitmq][:mnesiadir] = nil

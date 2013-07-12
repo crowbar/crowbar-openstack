@@ -51,15 +51,6 @@ class RabbitmqService < ServiceObject
     @logger.debug("Rabbitmq apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
-    om = old_role ? old_role.default_attributes["rabbitmq"] : {}
-    nm = role.default_attributes["rabbitmq"]
-    if om["password"]
-      nm["password"] = om["password"]
-    else
-      nm["password"] = random_password
-    end
-    role.save
-
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
   end
 

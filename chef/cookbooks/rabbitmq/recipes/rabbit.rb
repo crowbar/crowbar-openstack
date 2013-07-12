@@ -27,10 +27,15 @@ rabbitmq_vhost node[:rabbitmq][:vhost] do
   action :add
 end
 
+::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+node.set_unless[:rabbitmq][:password] = secure_password
+
 # create user for the queue
 rabbitmq_user "adding user #{node[:rabbitmq][:user]}" do
   user node[:rabbitmq][:user]
   password node[:rabbitmq][:password]
+  address node[:rabbitmq][:address]
+  port node[:rabbitmq][:mochiweb_port]
   action :add
 end
 
