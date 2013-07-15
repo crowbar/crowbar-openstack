@@ -52,8 +52,6 @@ if node[:cinder][:use_gitrepo]
     path File.join(cinder_path,"keystone")
     virtualenv venv_path
   end
-else
-  package "python-keystone"
 end
 
 my_admin_host = node[:fqdn]
