@@ -152,7 +152,7 @@ template "/etc/quantum/dhcp_agent.ini" do
     :dhcp_driver => "quantum.agent.linux.dhcp.Dnsmasq",
     :dhcp_domain => node[:quantum][:dhcp_domain],
     :enable_isolated_metadata => "True",
-    :enable_metadata_network => "True",
+    :enable_metadata_network => "False",
     :nameservers => dns_list
   )
 end
