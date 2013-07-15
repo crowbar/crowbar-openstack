@@ -170,7 +170,7 @@ if node[:quantum][:networking_plugin] == "linuxbridge"
     network_name "floating"
     slaves [bound_if]
     type "linuxbridge"
-    insecure ssl_insecure
+    quantum_cmd quantum_cmd
 
     action :create
   end
