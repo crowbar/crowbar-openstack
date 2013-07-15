@@ -94,8 +94,8 @@ else
   end
 end
 
+node[:quantum] ||= Mash.new
 if not node[:quantum].has_key?("rootwrap")
-  node[:quantum] ||= Mash.new
   unless quantum[:quantum][:use_gitrepo]
     node.set[:quantum][:rootwrap] = "/usr/bin/quantum-rootwrap"
   else
