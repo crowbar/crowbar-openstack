@@ -73,8 +73,11 @@ quantum_args = "--os-username #{node[:quantum][:service_user]}"
 quantum_args = "#{quantum_args} --os-password #{node[:quantum][:service_password]}"
 quantum_args = "#{quantum_args} --os-tenant-name #{keystone[:keystone][:service][:tenant]}"
 quantum_args = "#{quantum_args} --os-auth-url #{keystone_protocol}://#{keystone_host}:#{keystone_service_port}/v2.0/"
-quantum_args = "#{quantum_args} --endpoint-type internalURL"
-quantum_args = "#{quantum_args} --insecure" if ssl_insecure
+if node[:platform] == "suse" or node[:quantum][:use_gitrepo]
+  # these options are backported in SUSE packages, but not in Ubuntu
+  quantum_args = "#{quantum_args} --endpoint-type internalURL"
+  quantum_args = "#{quantum_args} --insecure" if ssl_insecure
+end
 quantum_cmd = "quantum #{quantum_args}"
 
 case node[:quantum][:networking_plugin]
