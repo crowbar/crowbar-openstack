@@ -73,6 +73,7 @@ quantum_args = "--os-username #{node[:quantum][:service_user]}"
 quantum_args = "#{quantum_args} --os-password #{node[:quantum][:service_password]}"
 quantum_args = "#{quantum_args} --os-tenant-name #{keystone[:keystone][:service][:tenant]}"
 quantum_args = "#{quantum_args} --os-auth-url #{keystone_protocol}://#{keystone_host}:#{keystone_service_port}/v2.0/"
+quantum_args = "#{quantum_args} --endpoint-type internalURL"
 quantum_args = "#{quantum_args} --insecure" if ssl_insecure
 quantum_cmd = "quantum #{quantum_args}"
 
