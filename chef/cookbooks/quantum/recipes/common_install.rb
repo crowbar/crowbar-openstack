@@ -119,13 +119,12 @@ ruby_block "Find quantum rootwrap" do
   end
 end
 
-template "/etc/sudoers.d/quantum-rootwrap" do
+template node[:quantum][:platform][:quantum_rootwrap_sudo_template] do
   cookbook "quantum"
   source "quantum-rootwrap.erb"
   mode 0440
   variables(:user => node[:quantum][:platform][:user],
             :binary => node[:quantum][:rootwrap])
-  not_if { node[:platform] == "suse" }
 end
 
 case quantum[:quantum][:networking_plugin]
