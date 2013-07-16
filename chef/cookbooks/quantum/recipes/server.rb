@@ -17,8 +17,10 @@ unless node[:quantum][:use_gitrepo]
   case node[:quantum][:networking_plugin]
   when "openvswitch"
     plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
+    quantum_agent = node[:quantum][:platform][:ovs_agent_name]
   when "linuxbridge"
     plugin_cfg_path = "/etc/quantum/plugins/linuxbridge/linuxbridge_conf.ini"
+    quantum_agent = node[:quantum][:platform][:lb_agent_name]
   end
   pkgs = node[:quantum][:platform][:pkgs]
   pkgs.each { |p| package p }
@@ -39,6 +41,8 @@ unless node[:quantum][:use_gitrepo]
     notifies :restart, "service[#{node[:quantum][:platform][:service_name]}]"
   end
 else
+  quantum_agent = "quantum-openvswitch-agent"
+  plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
   quantum_service_name="quantum-server"
   quantum_path = "/opt/quantum"
   venv_path = node[:quantum][:use_virtualenv] ? "#{quantum_path}/.venv" : nil
@@ -214,15 +218,13 @@ when "linuxbridge"
 end
 
 unless node[:quantum][:use_gitrepo]
-  link plugin_cfg_path do
-    to "/etc/quantum/quantum.conf"
-  end
+  # no need to create link for plugin_cfg_path here; already handled in
+  # common_install recipe
   service node[:quantum][:platform][:service_name] do
     supports :status => true, :restart => true
     action :enable
-    subscribes :restart, resources("template[/etc/quantum/api-paste.ini]"), :immediately
-    subscribes :restart, resources("link[#{plugin_cfg_path}]"), :immediately
-    subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
+    # no subscribes for :restart; this is handled by the
+    # "mark quantum-server as restart for post-install" ruby_block
   end
 else
   template "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
@@ -237,8 +239,8 @@ else
   service quantum_service_name do
     supports :status => true, :restart => true
     action :enable
-    subscribes :restart, resources("template[/etc/quantum/api-paste.ini]"), :immediately
-    subscribes :restart, resources("template[/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini]"), :immediately
+    subscribes :restart, resources("template[/etc/quantum/api-paste.ini]")
+    subscribes :restart, resources("template[/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini]")
     subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   end
 end
@@ -255,6 +257,46 @@ service node[:quantum][:platform][:l3_agent_name] do
   action :enable
   subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   subscribes :restart, resources("template[/etc/quantum/l3_agent.ini]")
+end
+
+# This is some bad hack: we need to restart the server and the agent before
+# post_install_conf if there was a configuration change. We cannot use
+# :immediately to directly restart the services earlier, because they would be
+# started before all configuration files get written.
+services_to_restart = []
+
+ruby_block "mark quantum-server as restart for post-install" do
+  block do
+    _service_name = node[:quantum][:platform][:service_name]
+    _service_name = quantum_service_name if node[:quantum][:use_gitrepo]
+    unless services_to_restart.include?(_service_name)
+      services_to_restart << _service_name
+    end
+  end
+  action :nothing
+  subscribes :create, resources("template[/etc/quantum/api-paste.ini]"), :immediately
+  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately
+  subscribes :create, resources("template[/etc/quantum/quantum.conf]"), :immediately
+end
+
+ruby_block "mark quantum-agent as restart for post-install" do
+  block do
+    unless services_to_restart.include?(quantum_agent)
+      services_to_restart << quantum_agent
+    end
+  end
+  action :nothing
+  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately
+  subscribes :create, resources("template[/etc/quantum/quantum.conf]"), :immediately
+end
+
+ruby_block "restart services for post-install" do
+  block do
+    services_to_restart.each do |service|
+      Chef::Log.info("Restarting #{service}")
+      %x{/sbin/service #{service} restart}
+    end
+  end
 end
 
 include_recipe "quantum::post_install_conf"
