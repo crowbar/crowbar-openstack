@@ -23,11 +23,18 @@
           %label{ :for => :netappp_header }= t('.netapp_parameters')
         %div.container
           %p
-            %label{ :for => :netapp_wsdl_url }= t('.netapp_wsdl_url')
-            %input#netapp_wsdl_url{:type => "text", :name => "netapp_wsdl_url", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_wsdl_url"], :onchange => "update_value('volume/netapp/netapp_wsdl_url', 'netapp_wsdl_url', 'string')"}
+            %label{ :for => :netapp_driver }= t('.netapp_driver')
+            = select_tag :netapp_driver, options_for_select([['7-Mode iSCSI direct driver', 'cinder.volume.drivers.netapp.iscsi.NetAppDirect7modeISCSIDriver'],
+                ['7-Mode NFS direct driver', 'cinder.volume.drivers.netapp.nfs.NetAppDirect7modeNfsDriver'],
+                ['iSCSI direct driver for clustered Data ONTAP', 'cinder.volume.drivers.netapp.iscsi.NetAppDirectCmodeISCSIDriver'],
+                ['NFS direct driver for clustered Data ONTAP', 'cinder.volume.drivers.netapp.nfs.NetAppDirectCmodeNfsDriver'],
+            ], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_driver"].to_s), :onchange => "update_value('volume/netapp/netapp_driver', 'netapp_driver', 'string')"
           %p
             %label{ :for => :netapp_server_hostname }= t('.netapp_server_hostname')
             %input#netapp_server_hostname{:type => "text", :name => "netapp_server_hostname", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_server_hostname"], :onchange => "update_value('volume/netapp/netapp_server_hostname', 'netapp_server_hostname', 'string')"}
+          %p
+            %label{ :for => :netapp_transport_type }= t('.netapp_transport_type')
+            = select_tag :netapp_transport_type, options_for_select([['HTTP','http'], ['HTTPS', 'https']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_transport_type"].to_s), :onchange => "update_value('volume/netapp/netapp_transport_type', 'netapp_transport_type', 'string')"
           %p
             %label{ :for => :netapp_server_port }= t('.netapp_server_port')
             %input#netapp_server_port{:type => "text", :name => "netapp_server_port", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_server_port"], :onchange => "update_value('volume/netapp/netapp_server_port', 'netapp_server_port', 'integer')"}
@@ -37,9 +44,6 @@
           %p
             %label{ :for => :netapp_password }= t('.netapp_password')
             %input#netapp_password{:type => "password", :name => "netapp_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_password"], :onchange => "update_value('volume/netapp/netapp_password', 'netapp_password', 'string')"}
-          %p
-            %label{ :for => :netapp_storage_service_prefix }= t('.netapp_storage_service_prefix')
-            %input#netapp_storage_service_prefix{:type => "text", :name => "netapp_storage_service_prefix", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_storage_service_prefix"], :onchange => "update_value('volume/netapp/netapp_storage_service_prefix', 'netapp_storage_service_prefix', 'string')"}
           %p
             %label{ :for => :netapp_storage_service }= t('.netapp_storage_service')
             %input#netapp_storage_service{:type => "text", :name => "netapp_storage_service", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_storage_service"], :onchange => "update_value('volume/netapp/netapp_storage_service', 'netapp_storage_service', 'string')"}
