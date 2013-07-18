@@ -158,8 +158,8 @@
     $('div#netapp_parameters').toggle(choice == 'netapp');
     $('div#eqlx_parameters').toggle(choice == 'eqlx');
     $('div#manual_parameters').toggle(choice == 'manual');
-    $('div#volume_file_parameters').toggle(choice == 'raw' || choice == 'local');
-    $('div#volume_disk_parameters').toggle(choice == 'raw' || choice == 'local');
+    $('div#volume_file_parameters').toggle(choice == 'local');
+    $('div#volume_disk_parameters').toggle(choice == 'raw');
   }
 
   function toggle_protocol() {
