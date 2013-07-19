@@ -2,3 +2,54 @@
 
 <%= @nosetests %> -q --with-xunit --xunit-file=/dev/stdout -w /opt/tempest/ -v tempest
 
+export OS_AUTH_URL=http://<%= @key_host %>:<%= @key_port %>/v2.0/
+export OS_AUTH_STRATEGY=keystone
+
+username=<%= @comp_user %>
+password=<%= @comp_pass %>
+tenant_name=<%= @comp_tenant %>
+
+alt_username=<%= @alt_comp_user %>
+alt_password=<%= @alt_comp_pass %>
+alt_tenant_name=<%= @alt_comp_tenant %>
+
+admin_username=<%= @comp_admin_user %>
+admin_password=<%= @comp_admin_pass %>
+admin_tenant_name=<%= @comp_admin_tenant %>
+
+
+
+
+### clean up in admin tenant
+export OS_USERNAME=${admin_username}
+export OS_PASSWORD=${admin_password}
+export OS_TENANT_NAME=${admin_tenant_name}
+echo -e "Cleaning up tenants..."
+for f in `keystone tenant-list | grep -E 'test_tenant_|tenant2-[0-9]*|tenant-new[0-9]*|tenant-[0-9]+|tenant-dup-[0-9]+' | awk '{print $2}'` ; do keystone tenant-delete $f ; done
+echo -e "Cleaning up users..."
+for f in `keystone user-list | grep -E 'test_user_[0-9]+' | awk '{print $2}'` ; do keystone user-delete $f ; done
+echo -e "Cleaning up roles..."
+for f in `keystone role-list | grep -E 'role[0-9]+|role-[0-9]+' | awk '{print $2}'` ; do keystone role-delete $f ; done
+echo -e "Cleaning up services..."
+for f in `keystone service-list | grep -E 'service-[0-9]+' | awk '{print $2}'` ; do keystone service-delete $f ; done
+echo -e "Cleaning up security-groups..."
+for f in `quantum security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do quantum security-group-delete $f ; done
+echo -e "Cleaning up images..."
+for f in `nova image-list | grep -E '.image[0-9]+' | awk {'print $2'}`; do nova image-delete $f ; done
+
+#clean up in tempest tenant
+export OS_USERNAME=${username}
+export OS_PASSWORD=${password}
+export OS_TENANT_NAME=${tenant_name}
+echo -e "Cleaning up security-groups..."
+for f in `quantum security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do quantum security-group-delete $f ; done
+echo -e "Cleaning up volume snapshots..."
+for f in `nova volume-snapshot-list | awk {'print $2'} | grep -v '^ID$' | grep -v '^$'` ; do nova volume-snapshot-delete $f ; done
+echo -e "Cleaning up volumes..."
+for f in `nova volume-list | awk {'print $2'} | grep -v '^ID$' | grep -v '^$'` ; do nova volume-delete $f ; done
+echo -e "Cleaning up flavors..."
+for f in `nova flavor-list | grep -E 'test_flavor_[0-9]+' | awk '{print $2}'` ; do nova flavor-delete $f ; done
+echo -e "Cleaning up instances..."
+for f in `nova list | awk '{print $2}' | grep -v '^ID$' | grep -v '^$'` ; do nova delete $f ; done
+echo -e "Cleaning up floating ips..."
+for f in `quantum floatingip-list | awk {'print $2'}`; do quantum floatingip-delete $f ; done
