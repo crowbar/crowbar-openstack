@@ -294,7 +294,11 @@ ruby_block "restart services for post-install" do
   block do
     services_to_restart.each do |service|
       Chef::Log.info("Restarting #{service}")
-      %x{/sbin/service #{service} restart}
+      unless (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
+        %x{/sbin/service #{service} restart}
+      else
+        %x{/sbin/restart #{service}}
+      end
     end
   end
 end
