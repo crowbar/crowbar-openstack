@@ -218,13 +218,15 @@ when "linuxbridge"
 end
 
 unless node[:quantum][:use_gitrepo]
-  # no need to create link for plugin_cfg_path here; already handled in
-  # common_install recipe
+  link plugin_cfg_path do
+    to "/etc/quantum/quantum.conf"
+  end
   service node[:quantum][:platform][:service_name] do
     supports :status => true, :restart => true
     action :enable
-    # no subscribes for :restart; this is handled by the
-    # "mark quantum-server as restart for post-install" ruby_block
+    subscribes :restart, resources("template[/etc/quantum/api-paste.ini]"), :immediately
+    subscribes :restart, resources("link[#{plugin_cfg_path}]"), :immediately
+    subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   end
 else
   template "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
@@ -239,8 +241,8 @@ else
   service quantum_service_name do
     supports :status => true, :restart => true
     action :enable
-    subscribes :restart, resources("template[/etc/quantum/api-paste.ini]")
-    subscribes :restart, resources("template[/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini]")
+    subscribes :restart, resources("template[/etc/quantum/api-paste.ini]"), :immediately
+    subscribes :restart, resources("template[/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini]"), :immediately
     subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   end
 end
