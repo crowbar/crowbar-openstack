@@ -5,29 +5,14 @@
   %div.container
     = render 'barclamp/git/pfsdeps.html.haml'
     %p
-      %label{ :for => :service_user }= t('.service_user')
-      %input#service_user{:type => "text", :name => "service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["service_user"], :onchange => "update_value('service_user','service_user', 'string')"}
+      %label{ :for => :keystone_instance }= t('.keystone_instance')
+      = instance_selector("keystone", :keystone_instance, "keystone_instance", @proposal)
     %p
-      %label{ :for => :service_password }= t('.service_password')
-      %input#service_password{:type => "text", :name => "service_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["service_password"], :onchange => "update_value('service_password','service_password', 'string')"}
+      %label{ :for => :keystone_service_user }= t('.keystone_service_user')
+      %input#keystone_service_user{:type => "text", :name => "keystone_service_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_service_user"], :onchange => "update_value('keystone_service_user','keystone_service_user', 'string')"}
     %p
-      %label{ :for => :sql_engine }= t('.sql_engine')
-      = select_tag :sql_engine, options_for_select([['MySQL', 'mysql'], ['SQLite','sqlite']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "update_value('sql_engine', 'sql_engine', 'string')"
+      %label{ :for => :keystone_service_password }= t('.keystone_service_password')
+      %input#keystone_service_password{:type => "text", :name => "keystone_service_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["keystone_service_password"], :onchange => "update_value('keystone_service_password','keystone_service_password', 'string')"}
     %p
-      %label{ :for => :mysql_instance }= t('.mysql_instance')
-      = instance_selector("mysql", :mysql_instance, "mysql_instance", @proposal)
-    %p
-      %label{ :for => :default_username }= t('.default-username')
-      %input#default_username{:type => "text", :name => "default_username", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["default"]["username"], :onchange => "update_value('default/username','default_username', 'string')"}
-    %p
-      %label{ :for => :default_password }= t('.default-password')
-      %input#default_password{:type => "text", :name => "default_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["default"]["password"], :onchange => "update_value('default/password','default_password', 'string')"}
-    %p
-      %label{ :for => :admin_username  }= t('.admin-username')
-      %input#admin_username{:type => "text", :name => "admin_username", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["admin"]["username"], :onchange => "update_value('admin/username','admin_username', 'string')"}
-    %p
-      %label{ :for => :admin_password  }= t('.admin-password')
-      %input#admin_password{:type => "text", :name => "admin_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["admin"]["password"], :onchange => "update_value('admin/password','admin_password', 'string')"}
-    %p
-      %label{ :for => :admin_token  }= t('.admin-token')
-      %input#admin_token{:type => "text", :name => "admin_token", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["admin"]["token"], :onchange => "update_value('admin/token','admin_token','string')"}
+      %label{ :for => :rabbitmq_instance }= t('.rabbitmq_instance')
+      = instance_selector("rabbitmq", :rabbitmq_instance, "rabbitmq_instance", @proposal)

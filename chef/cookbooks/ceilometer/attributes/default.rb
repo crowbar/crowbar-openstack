@@ -22,12 +22,8 @@ default[:ceilometer][:db][:database] = "ceilometer"
 default[:ceilometer][:db][:user] = "ceilometer"
 default[:ceilometer][:db][:password] = "" # Set by Recipe
 
-default[:ceilometer][:api][:port] = "8777"
+default[:ceilometer][:keystone_service_user] = "ceilometer"
+default[:ceilometer][:keystone_service_password] = "ceilometer"
+
+default[:ceilometer][:api][:port] = 8777
 default[:ceilometer][:api][:host] = "0.0.0.0"
-
-
-default[:ceilometer][:sql][:idle_timeout] = 30
-default[:ceilometer][:sql][:min_pool_size] = 5
-default[:ceilometer][:sql][:max_pool_size] = 10
-default[:ceilometer][:sql][:pool_timeout] = 200
-

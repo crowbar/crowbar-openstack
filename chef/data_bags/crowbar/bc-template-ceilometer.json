@@ -5,15 +5,14 @@
     "ceilometer": {
       "debug": true,
       "verbose": true,
+      "rabbitmq_instance": "none",
       "keystone_instance": "none",
-      "glance_instance": "none",
-      "mysql_instance": "none",
       "user": "ceilometer",
-      "service_user": "ceilometer",
-      "service_password": "",
+      "keystone_service_user": "ceilometer",
+      "keystone_service_password": "secret",
       "gitrepo": "http://github.com/openstack/ceilometer.git",
       "git_instance": "",
-      "git_refspec": "2012.1.g3",
+      "git_refspec": "stable/grizzly",
       "use_gitrepo": true,
       "use_gitbarclamp": true,
       "use_pip_cache": true,
@@ -54,16 +53,24 @@
         "python-boto",
         "python-webob",
         "python-anyjson",
-        "python-flask",
+        "python-yaml",
+        "python-pymongo",
+        "pip://Flask==0.9",
         "python-jinja2",
         "python-markupsafe",
-        "python-stevedore",
+        "pip://stevedore>=0.7",
+        "pip://wsme>=0.5b1",
+        "pip://pecan>=0.2.0",
+        "pip://oslo.config>=1.1.0",
+        "pip://happybase>=0.4",
         "pip://eventlet>=0.9.17",
         "pip://setuptools_git>=0.4",
-        "pip://python-quantumclient>=2.0",
-        "pip://python-glanceclient>=0.5.0,<2",
-        "pip://python-novaclient",
-        "pip://python-keystoneclient"
+        "pip://python-glanceclient",
+        "pip://python-novaclient>=2.6.10",
+        "pip://python-keystoneclient",
+        "pip://python-swiftclient",
+        "pip://requests<1.0",
+        "pip://extras"
       ],
       "api": {
         "bind_open_address": true,
@@ -80,12 +87,21 @@
     "ceilometer": {
       "crowbar-revision": 0,
       "element_states": {
-        "ceilometer-server": [ "readying", "ready", "applying" ]
+        "ceilometer-server": [ "readying", "ready", "applying" ],
+        "ceilometer-cagent": [ "readying", "ready", "applying" ],
+        "ceilometer-agent": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-        [ "ceilometer-server" ]
+        [ "ceilometer-server" ],
+        [ "ceilometer-cagent" ], 
+        [ "ceilometer-agent" ]
       ],
+      "element_run_list_order": {
+        "ceilometer-server": 101,
+        "ceilometer-cagent": 102,
+        "ceilometer-agent": 103
+      },
       "config": {
         "environment": "ceilometer-base-config",
         "mode": "full",
