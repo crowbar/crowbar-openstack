@@ -21,6 +21,7 @@ admin_tenant_name=<%= @comp_admin_tenant %>
 
 
 ### clean up in admin tenant
+(
 export OS_USERNAME=${admin_username}
 export OS_PASSWORD=${admin_password}
 export OS_TENANT_NAME=${admin_tenant_name}
@@ -36,8 +37,10 @@ echo -e "Cleaning up security-groups..."
 for f in `quantum security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do quantum security-group-delete $f ; done
 echo -e "Cleaning up images..."
 for f in `nova image-list | grep -E '.image[0-9]+' | awk {'print $2'}`; do nova image-delete $f ; done
+) 1>&2
 
 #clean up in tempest tenant
+(
 export OS_USERNAME=${username}
 export OS_PASSWORD=${password}
 export OS_TENANT_NAME=${tenant_name}
@@ -53,7 +56,7 @@ echo -e "Cleaning up instances..."
 for f in `nova list | awk '{print $2}' | grep -v '^ID$' | grep -v '^$'` ; do nova delete $f ; done
 echo -e "Cleaning up floating ips..."
 for f in `quantum floatingip-list | awk {'print $2'}`; do quantum floatingip-delete $f ; done
-
+)  1>&2
 # Listing of remaining items after tempest run is finished (Start)
 d=$(date +%y-%m-%d-%T)
 declare -a tenants log
