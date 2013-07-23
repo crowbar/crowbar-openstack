@@ -68,6 +68,8 @@ locale_additions:
           glance_instance: Glance
           volume_header: Volume options
           volume_type: Type of Volume
+          volume_type_raw: Raw devices
+          volume_type_local: Local file
           volume_type_manual: Other driver
           volume_name: Name of Volume
           volume_file_parameters: File-based Parameters
@@ -92,7 +94,7 @@ locale_additions:
           netapp_storage_service: Storage service to use while provisioning
           netapp_storage_service_prefix: Storage service prefix to use on OnCommand
           netapp_vfiler: The vFiler unit name if using vFiler to host OpenStack volumes
-          eqlx_parameters: EQLX Parameters
+          eqlx_parameters: EqualLogic Parameters
           eqlx_san_ip: EQLX SAN IP
           eqlx_san_login: EQLX SAN login
           eqlx_san_password: EQLX SAN password
