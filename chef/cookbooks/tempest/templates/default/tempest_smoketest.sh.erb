@@ -1,7 +1,7 @@
 #!/bin/bash
 
 <%= @nosetests %> -q --with-xunit --xunit-file=/dev/stdout -w /opt/tempest/ -v tempest
-
+tresult=$?
 export OS_AUTH_URL=http://<%= @key_host %>:<%= @key_port %>/v2.0/
 export OS_AUTH_STRATEGY=keystone
 
@@ -90,3 +90,4 @@ for i in "${log[@]}"; do
 done >> "/tmp/tempest_run-$d.log"
 # Listing of remaining items after tempest run is finished (End)
 
+exit ${tresult}
