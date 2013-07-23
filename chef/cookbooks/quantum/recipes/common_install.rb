@@ -268,6 +268,55 @@ link plugin_cfg_path do
 end
 
 if quantum_server and quantum[:quantum][:api][:protocol] == 'https'
+  if quantum[:quantum][:ssl][:generate_certs]
+    package "openssl"
+
+    require "fileutils"
+    [:certfile, :keyfile, :ca_certs].each do |k|
+      dir = File.dirname(quantum[:quantum][:ssl][k])
+      if File.exists?(dir)
+        FileUtils.chown_R quantum[:quantum][:user], quantum[:quantum][:group], dir
+      else
+        FileUtils.mkdir_p(dir) {|d| File.chown quantum[:quantum][:user], quantum[:quantum][:group], d}
+      end
+    end
+
+    # Some more ownership fixes:
+    conf_dir = File.dirname quantum[:quantum][:ssl][:ca_certs]
+    FileUtils.chown "root", quantum[:quantum][:group], conf_dir
+    FileUtils.chown "root", quantum[:quantum][:group], File.expand_path("#{conf_dir}/..")  # /etc/quantum/ssl
+
+    require "fileutils"
+    # Generate private key
+    %x(openssl genrsa -out #{quantum[:quantum][:ssl][:keyfile]} 4096)
+    if $?.exitstatus != 0
+      message = "SSL private key generation failed"
+      Chef::Log.fatal(message)
+      raise message
+    end
+    FileUtils.chown quantum[:quantum][:user], quantum[:quantum][:group], quantum[:quantum][:ssl][:keyfile]
+
+    # Generate certificate signing requests (CSR)
+    ssl_csr_file = "#{conf_dir}/signing_key.csr"
+    ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{quantum[:fqdn]}\""
+    %x(openssl req -new -key #{quantum[:quantum][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
+    if $?.exitstatus != 0
+      message = "SSL certificate signed requests generation failed"
+      Chef::Log.fatal(message)
+      raise message
+    end
+
+    # Generate self-signed certificate with above CSR
+    %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{quantum[:quantum][:ssl][:keyfile]} -out #{quantum[:quantum][:ssl][:certfile]})
+    if $?.exitstatus != 0
+      message = "SSL self-signed certificate generation failed"
+      Chef::Log.fatal(message)
+      raise message
+    end
+
+    File.delete ssl_csr_file  # Nobody should even try to use this
+  end
+
   unless ::File.exists? quantum[:quantum][:ssl][:certfile]
     message = "Certificate \"#{quantum[:quantum][:ssl][:certfile]}\" is not present."
     Chef::Log.fatal(message)
