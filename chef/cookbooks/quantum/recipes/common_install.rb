@@ -191,23 +191,6 @@ when "linuxbridge"
   external_network_bridge = ""
 end
 
-if quantum_server
-  # no subscribes for :restart; this is handled by the
-  # "mark quantum-agent as restart for post-install" ruby_block
-  # but it only exists if we're also the server
-  service quantum_agent do
-    supports :status => true, :restart => true
-    action :enable
-  end
-else
-  service quantum_agent do
-    supports :status => true, :restart => true
-    action :enable
-    subscribes :restart, resources("link[#{plugin_cfg_path}]")
-    subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
-  end
-end
-
 #env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
 #assuming we have only one nova
 #TODO: nova should depend on quantum, but quantum depend on nova a bit, so we have to do somthing with this
@@ -324,4 +307,21 @@ template "/etc/quantum/quantum.conf" do
       :external_network_bridge => external_network_bridge,
       :rootwrap_bin =>  node[:quantum][:rootwrap]
     )
+end
+
+if quantum_server
+  # no subscribes for :restart; this is handled by the
+  # "mark quantum-agent as restart for post-install" ruby_block
+  # but it only exists if we're also the server
+  service quantum_agent do
+    supports :status => true, :restart => true
+    action :enable
+  end
+else
+  service quantum_agent do
+    supports :status => true, :restart => true
+    action :enable
+    subscribes :restart, resources("link[#{plugin_cfg_path}]")
+    subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
+  end
 end
