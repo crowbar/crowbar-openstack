@@ -121,9 +121,10 @@
         "bind_port": 8776
       },
       "ssl": {
-        "insecure": false,
         "certfile": "/etc/cinder/ssl/certs/signing_cert.pem",
         "keyfile": "/etc/cinder/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
         "cert_required": false,
         "ca_certs": "/etc/cinder/ssl/certs/ca.pem"
       },

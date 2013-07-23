@@ -195,6 +195,54 @@ else
 end
 
 if node[:cinder][:api][:protocol] == 'https'
+  if node[:cinder][:ssl][:generate_certs]
+    package "openssl"
+
+    require "fileutils"
+    [:certfile, :keyfile, :ca_certs].each do |k|
+      dir = File.dirname(node[:cinder][:ssl][k])
+      if File.exists?(dir)
+        FileUtils.chown_R node[:cinder][:user], node[:cinder][:group], dir
+      else
+        FileUtils.mkdir_p(dir) {|d| File.chown node[:cinder][:user], node[:cinder][:group], d}
+      end
+    end
+
+    # Some more ownership fixes:
+    conf_dir = File.dirname node[:cinder][:ssl][:ca_certs]
+    FileUtils.chown "root", node[:cinder][:group], conf_dir
+    FileUtils.chown "root", node[:cinder][:group], File.expand_path("#{conf_dir}/..")  # /etc/cinder/ssl
+
+    # Generate private key
+    %x(openssl genrsa -out #{node[:cinder][:ssl][:keyfile]} 4096)
+    if $?.exitstatus != 0
+      message = "SSL private key generation failed"
+      Chef::Log.fatal(message)
+      raise message
+    end
+    FileUtils.chown node[:cinder][:user], node[:cinder][:group], node[:cinder][:ssl][:keyfile]
+
+    # Generate certificate signing requests (CSR)
+    ssl_csr_file = "#{conf_dir}/signing_key.csr"
+    ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{node[:fqdn]}\""
+    %x(openssl req -new -key #{node[:cinder][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
+    if $?.exitstatus != 0
+      message = "SSL certificate signed requests generation failed"
+      Chef::Log.fatal(message)
+      raise message
+    end
+
+    # Generate self-signed certificate with above CSR
+    %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{node[:cinder][:ssl][:keyfile]} -out #{node[:cinder][:ssl][:certfile]})
+    if $?.exitstatus != 0
+      message = "SSL self-signed certificate generation failed"
+      Chef::Log.fatal(message)
+      raise message
+    end
+
+    File.delete ssl_csr_file  # Nobody should even try to use this
+  end
+
   unless ::File.exists? node[:cinder][:ssl][:certfile]
     message = "Certificate \"#{node[:cinder][:ssl][:certfile]}\" is not present."
     Chef::Log.fatal(message)
