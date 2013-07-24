@@ -57,25 +57,28 @@ else
 end
 
 keystone_protocol = keystone["keystone"]["api"]["protocol"]
-keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_host = keystone[:fqdn]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 keystone_insecure = keystone_protocol == 'https' && keystone[:keystone][:ssl][:insecure]
 
 admin_username = keystone["keystone"]["admin"]["username"] rescue nil
 admin_password = keystone["keystone"]["admin"]["password"] rescue nil
 admin_tenant = keystone["keystone"]["admin"]["tenant"] rescue "admin"
-Chef::Log.info("Keystone server found at #{keystone_address}")
+Chef::Log.info("Keystone server found at #{keystone_host}")
 
 quantum_insecure = node[:quantum][:api][:protocol] == 'https' && node[:quantum][:ssl][:insecure]
 ssl_insecure = keystone_insecure || quantum_insecure
 
-quantum_cmd = 'quantum'
-quantum_cmd = 'quantum --insecure' if ssl_insecure
-
-ENV['OS_USERNAME'] = node[:quantum][:service_user]
-ENV['OS_PASSWORD'] = node[:quantum][:service_password]
-ENV['OS_TENANT_NAME'] = keystone[:keystone][:service][:tenant]
-ENV['OS_AUTH_URL'] = "#{keystone_protocol}://#{keystone_address}:#{keystone_service_port}/v2.0/"
+quantum_args = "--os-username #{node[:quantum][:service_user]}"
+quantum_args = "#{quantum_args} --os-password #{node[:quantum][:service_password]}"
+quantum_args = "#{quantum_args} --os-tenant-name #{keystone[:keystone][:service][:tenant]}"
+quantum_args = "#{quantum_args} --os-auth-url #{keystone_protocol}://#{keystone_host}:#{keystone_service_port}/v2.0/"
+if node[:platform] == "suse" or node[:quantum][:use_gitrepo]
+  # these options are backported in SUSE packages, but not in Ubuntu
+  quantum_args = "#{quantum_args} --endpoint-type internalURL"
+  quantum_args = "#{quantum_args} --insecure" if ssl_insecure
+end
+quantum_cmd = "quantum #{quantum_args}"
 
 case node[:quantum][:networking_plugin]
 when "openvswitch"
@@ -167,7 +170,7 @@ if node[:quantum][:networking_plugin] == "linuxbridge"
     network_name "floating"
     slaves [bound_if]
     type "linuxbridge"
-    insecure ssl_insecure
+    quantum_cmd quantum_cmd
 
     action :create
   end

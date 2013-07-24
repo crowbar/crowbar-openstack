@@ -13,7 +13,7 @@ paste.filter_factory = quantum.auth:QuantumKeystoneContext.factory
 
 [filter:authtoken]
 paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
-auth_host = <%= @keystone_ip_address %>
+auth_host = <%= @keystone_host %>
 auth_port = <%= @keystone_admin_port %>
 auth_protocol = <%= @keystone_protocol %>
 admin_user = <%= @keystone_service_user %>
