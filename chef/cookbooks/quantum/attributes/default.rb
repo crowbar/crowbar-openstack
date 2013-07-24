@@ -70,7 +70,8 @@ when "suse"
                    "openvswitch-switch",
                    "openvswitch-kmp-default" ],
     :user => "openstack-quantum",
-    :ovs_modprobe => "modprobe openvswitch"
+    :ovs_modprobe => "modprobe openvswitch",
+    :quantum_rootwrap_sudo_template => "/etc/sudoers.d/openstack-quantum"
   }
 else
   default[:quantum][:platform] = {
@@ -91,6 +92,7 @@ else
                    "openvswitch-switch",
                    "openvswitch-datapath-dkms" ],
     :user => "quantum",
-    :ovs_modprobe => "modprobe openvswitch"
+    :ovs_modprobe => "modprobe openvswitch",
+    :quantum_rootwrap_sudo_template => "/etc/sudoers.d/quantum-rootwrap"
   }
 end
