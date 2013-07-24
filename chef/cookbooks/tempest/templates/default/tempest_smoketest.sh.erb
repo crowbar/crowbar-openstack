@@ -1,4 +1,4 @@
 #!/bin/bash
 
-<%= @nosetests %> -w /opt/tempest/ -v tempest
+<%= @nosetests %> -q --with-xunit --xunit-file=/dev/stdout -w /opt/tempest/ -v tempest
 
