@@ -52,9 +52,10 @@
         "pool_timeout": 200
       },
       "ssl": {
-        "insecure": false,
         "certfile": "/etc/quantum/ssl/certs/signing_cert.pem",
         "keyfile": "/etc/quantum/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
         "cert_required": false,
         "ca_certs": "/etc/quantum/ssl/certs/ca.pem"
       },

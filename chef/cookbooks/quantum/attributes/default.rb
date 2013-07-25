@@ -42,9 +42,10 @@ default[:quantum][:sql][:min_pool_size] = 5
 default[:quantum][:sql][:max_pool_size] = 10
 default[:quantum][:sql][:pool_timeout] = 200
 
-default[:quantum][:ssl][:insecure] = false
 default[:quantum][:ssl][:certfile] = "/etc/quantum/ssl/certs/signing_cert.pem"
 default[:quantum][:ssl][:keyfile] = "/etc/quantum/ssl/private/signing_key.pem"
+default[:quantum][:ssl][:generate_certs] = false
+default[:quantum][:ssl][:insecure] = false
 default[:quantum][:ssl][:cert_required] = false
 default[:quantum][:ssl][:ca_certs] = "/etc/quantum/ssl/certs/ca.pem"
 
@@ -70,7 +71,8 @@ when "suse"
                    "openvswitch-switch",
                    "openvswitch-kmp-default" ],
     :user => "openstack-quantum",
-    :ovs_modprobe => "modprobe openvswitch"
+    :ovs_modprobe => "modprobe openvswitch",
+    :quantum_rootwrap_sudo_template => "/etc/sudoers.d/openstack-quantum"
   }
 else
   default[:quantum][:platform] = {
@@ -91,6 +93,7 @@ else
                    "openvswitch-switch",
                    "openvswitch-datapath-dkms" ],
     :user => "quantum",
-    :ovs_modprobe => "modprobe openvswitch"
+    :ovs_modprobe => "modprobe openvswitch",
+    :quantum_rootwrap_sudo_template => "/etc/sudoers.d/quantum-rootwrap"
   }
 end
