@@ -172,6 +172,7 @@ else
 end
 metadata_host = nova[:fqdn]
 metadata_port = "8775"
+metadata_proxy_shared_secret = nova[:nova][:network][:quantum_metadata_proxy_shared_secret]
 
 template "/etc/quantum/metadata_agent.ini" do
   source "metadata_agent.ini.erb"
@@ -187,7 +188,7 @@ template "/etc/quantum/metadata_agent.ini" do
     :admin_password => keystone_service_password,
     :nova_metadata_host => metadata_host,
     :nova_metadata_port => metadata_port,
-    :metadata_shared_secret => "Secret"
+    :metadata_proxy_shared_secret => metadata_proxy_shared_secret
   )
 end
 
