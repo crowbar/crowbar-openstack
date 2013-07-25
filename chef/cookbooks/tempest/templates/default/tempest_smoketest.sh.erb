@@ -65,6 +65,7 @@ for i in $(keystone tenant-list | grep -v ' name ' | grep -Ev '^$' | grep -v 'se
 
 for i in "${tenants[@]}"; do
     header=$(echo -e "\n\nDate: [ $(date) ] Tenant: $i\n\n")
+    log=("${log[@]}" "$header")
     header=$(echo -e "\n[ $(date) ] Listing instances for $i\n")
     res=$(nova --os-tenant-name $i list)
     log=("${log[@]}" "$header" "$res")
