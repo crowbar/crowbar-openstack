@@ -114,12 +114,3 @@ else
     command "#{pip_cmd} 'python-glanceclient'"
   end
 end
-
-template "/tmp/tempest_smoketest.sh" do
-  mode 0755
-  source "tempest_smoketest.sh.erb"
-  variables(
-    :nosetests => nosetests
-  )
-end
-

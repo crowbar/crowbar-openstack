@@ -195,10 +195,8 @@ class TempestService < ServiceObject
 
     @logger.info("starting tempest on node #{node}, test run uuid #{test_run['uuid']}")
 
-    venv_prefix_path = node[:tempest][:use_virtualenv] ? ". /opt/tempest/.venv/bin/activate && " : nil
-
     pid = fork do
-      command_line = "#{venv_prefix_path} python #{proposal_path}/run_tempest.py -w #{proposal_path} tempest 2>/dev/null"
+      command_line = "/tmp/tempest_smoketest.sh 2>/dev/null"
       Process.waitpid run_remote_chef_client(node, command_line, test_run['results.xml'])
 
       test_run['ended'] = Time.now.utc.to_i

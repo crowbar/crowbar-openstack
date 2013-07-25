@@ -224,6 +224,33 @@ template "#{node[:tempest][:tempest_path]}/etc/tempest.conf" do
   )
 end
 
+nosetests=`which nosetests`.strip
+
+if node[:tempest][:use_virtualenv]
+  nosetests = "/opt/tempest/.venv/bin/python #{nosetests}"
+end
+
+
+template "/tmp/tempest_smoketest.sh" do
+  mode 0755
+  source "tempest_smoketest.sh.erb"
+  variables(
+    :nosetests => nosetests,
+    :key_host => keystone_address,
+    :key_port => keystone_port,
+    :comp_user => tempest_comp_user,
+    :comp_pass => tempest_comp_pass,
+    :comp_tenant => tempest_comp_tenant,
+    :alt_comp_user => alt_comp_user,
+    :alt_comp_pass => alt_comp_pass,
+    :alt_comp_tenant => alt_comp_tenant,
+    :comp_admin_user => comp_admin_user,
+    :comp_admin_pass => comp_admin_pass,
+    :comp_admin_tenant => comp_admin_tenant
+  )
+end
+
+
 cookbook_file "#{node[:tempest][:tempest_path]}/run_tempest.py" do
   source "run_tempest.py"
 end
