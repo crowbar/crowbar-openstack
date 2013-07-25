@@ -172,7 +172,7 @@ else
 end
 metadata_host = nova[:fqdn]
 metadata_port = "8775"
-metadata_proxy_shared_secret = nova[:nova][:network][:quantum_metadata_proxy_shared_secret]
+metadata_proxy_shared_secret = (nova[:nova][:network][:quantum_metadata_proxy_shared_secret] rescue '')
 
 template "/etc/quantum/metadata_agent.ini" do
   source "metadata_agent.ini.erb"
