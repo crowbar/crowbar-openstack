@@ -299,7 +299,7 @@ osapi_volume_listen_port=<%= node[:cinder][:api][:bind_port] %>
 
 # CA certificate file to use to verify connecting clients
 # (string value)
-ssl_ca_file=<%= node[:cinder][:ssl][:ca_certs] if node[:cinder][:api][:protocol] == 'https' %>
+ssl_ca_file=<%= node[:cinder][:ssl][:ca_certs] if node[:cinder][:api][:protocol] == 'https' && node[:cinder][:ssl][:cert_required] %>
 
 # Certificate file to use when starting the server securely
 # (string value)
@@ -307,7 +307,7 @@ ssl_cert_file=<%= node[:cinder][:ssl][:certfile] if node[:cinder][:api][:protoco
 
 # Private key file to use when starting the server securely
 # (string value)
-ssl_key_file=<%= node[:cinder][:ssl][:keyfile] if node[:cinder][:api][:protocol] == 'https' && node[:cinder][:ssl][:cert_required] %>
+ssl_key_file=<%= node[:cinder][:ssl][:keyfile] if node[:cinder][:api][:protocol] == 'https' %>
 
 
 #
