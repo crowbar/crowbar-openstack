@@ -87,6 +87,7 @@ when "openvswitch"
     fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
   elsif node[:quantum][:networking_mode] == 'gre'
     fixed_network_type = "--provider:network_type gre --provider:segmentation_id 1"
+    floating_network_type = "--provider:network_type gre --provider:segmentation_id 2"
   else
     fixed_network_type = "--provider:network_type flat --provider:physical_network physnet1"
   end
