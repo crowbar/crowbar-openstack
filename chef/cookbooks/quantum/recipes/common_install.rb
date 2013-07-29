@@ -382,6 +382,7 @@ template "/etc/quantum/quantum.conf" do
       :per_tenant_vlan => per_tenant_vlan,
       :networking_mode => quantum[:quantum][:networking_mode],
       :networking_plugin => quantum[:quantum][:networking_plugin],
+      :cisco_support => quantum[:quantum][:cisco_support],
       :vlan_start => vlan_start,
       :vlan_end => vlan_end,
       :physnet => physnet,

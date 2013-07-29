@@ -35,7 +35,9 @@ rabbit_password=<%= @rabbit_settings[:password] %>
 rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 <% end -%>
 
-<% if @networking_plugin == 'openvswitch' -%>
+<% if @networking_plugin == 'openvswitch' and @cisco_support -%>
+core_plugin = quantum.plugins.cisco.network_plugin.PluginV2
+<% elsif @networking_plugin == 'openvswitch' -%>
 core_plugin = quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2
 <% elsif @networking_plugin == 'linuxbridge' -%>
 core_plugin = quantum.plugins.linuxbridge.lb_quantum_plugin.LinuxBridgePluginV2

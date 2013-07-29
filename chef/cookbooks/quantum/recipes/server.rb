@@ -221,6 +221,10 @@ when "linuxbridge"
   end
 end
 
+if node[:quantum][:networking_plugin] == "openvswitch" and node[:quantum][:cisco_support]
+  include_recipe "quantum::cisco_support"
+end
+
 unless node[:quantum][:use_gitrepo]
   # no need to create link for plugin_cfg_path here; already handled in
   # common_install recipe

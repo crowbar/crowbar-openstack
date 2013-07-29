@@ -22,6 +22,9 @@
           %label{ :for => :networking_mode }= t('.networking_mode')
           = select_tag :networking_mode, options_for_select([['flat', 'local'], ['gre','gre'], ['vlan', 'vlan']], @proposal.raw_data['attributes'][@proposal.barclamp]["networking_mode"]), :onchange => "update_value('networking_mode', 'networking_mode', 'string')"
           %div.alert.alert-warning#warn_ovs_vlan= t('.warn_ovs_vlan')
+        %p
+          %label{ :for => :cisco_support }= t('.cisco_support')
+          = select_tag :cisco_support, options_for_select([['false', 'false'], ['true','true']], @proposal.raw_data['attributes'][@proposal.barclamp]["cisco_support"].to_s), :onchange => "update_value('cisco_support', 'cisco_support', 'boolean')"
 
     %label.section-header{ :for => :protocol_div }= t('.ssl_header')
     %div.section{ :id => :protocol_div }

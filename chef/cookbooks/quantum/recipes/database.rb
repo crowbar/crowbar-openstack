@@ -34,6 +34,7 @@ url_scheme = backend_name
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 node.set_unless['quantum']['db']['password'] = secure_password
 node.set_unless['quantum']['db']['ovs_password'] = secure_password
+node.set_unless['quantum']['db']['cisco_password'] = secure_password
 
 sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil? 
 Chef::Log.info("Database server found at #{sql_address}") 
@@ -49,7 +50,12 @@ props = [ {'db_name' => node[:quantum][:db][:database],
          {'db_name' => node[:quantum][:db][:ovs_database],
           'db_user' => node[:quantum][:db][:ovs_user],
           'db_pass' => node[:quantum][:db][:ovs_password],
-          'db_conn_name' => 'ovs_sql_connection'}
+          'db_conn_name' => 'ovs_sql_connection'},
+         {'db_name' => node[:quantum][:db][:cisco_database],
+          'db_user' => node[:quantum][:db][:cisco_user],
+          'db_pass' => node[:quantum][:db][:cisco_password],
+          'sql_address_name' => 'cisco_sql_address',
+          'db_conn_name' => 'cisco_sql_connection'}
        ]
          
 # Create the Quantum Databases
@@ -58,6 +64,7 @@ props.each do |prop|
   db_user = prop['db_user']
   db_pass = prop['db_pass']
   db_conn_name = prop['db_conn_name']
+  sql_address_name = prop['sql_address_name']
 
     database "create #{db_name} quantum database" do
         connection db_conn
@@ -87,6 +94,9 @@ props.each do |prop|
     end
 
     node[@cookbook_name][:db][db_conn_name] = "#{url_scheme}://#{db_user}:#{db_pass}@#{sql_address}/#{db_name}"
+    unless sql_address_name.nil?
+        node[@cookbook_name][:db][sql_address_name] = sql_address
+    end
 end
 
 node.save

@@ -1,0 +1,18 @@
+# Managed by Crowbar.
+# Do not edit.
+[SWITCH]
+<% @switches.keys.each do |ip| -%>
+<% @switches[ip].keys.each do |port| -%>
+[[<%=ip%>]]
+[[[<%=@switches[ip][port][:host]%>]]]
+ports=<%=port%>
+[[[ssh_port]]]
+ssh_port=22
+<% end -%>
+<% end -%>
+[DRIVER]
+<% if @vlan_mode -%>
+name=quantum.plugins.cisco.nexus.cisco_nexus_network_driver_v2.CiscoNEXUSDriver
+<% else -%>
+name=quantum.plugins.cisco.tests.unit.v2.nexus.fake_nexus_driver.CiscoNEXUSFakeDriver
+<% end -%>
