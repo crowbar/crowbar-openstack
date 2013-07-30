@@ -19,7 +19,7 @@ barclamp:
   proposal_schema_version: 1
   version: 0
   requires:
-    - @crowbar
+    - '@crowbar'
     - git
     - database
     - rabbitmq
@@ -38,8 +38,6 @@ crowbar:
 debs:
   ubuntu-12.04:
     repos:
-#      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/folsom main
-#      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/folsom main
       - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
       - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
   pkgs:
