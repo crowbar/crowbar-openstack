@@ -14,6 +14,8 @@
           "mapping": {
             "debug": { "type": "bool", "required": true },
             "verbose": { "type": "bool", "required": true },
+            "use_mongodb": { "type": "bool", "required": true },
+            "database_instance": { "type": "str", "required": true },
             "rabbitmq_instance": { "type": "str", "required": true },
             "keystone_instance": { "type": "str", "required": true },
             "keystone_service_user": { "type": "str", "required": true },

@@ -24,6 +24,8 @@ end
 default[:ceilometer][:debug] = false
 default[:ceilometer][:verbose] = false
 
+default[:ceilometer][:use_mongodb] = true
+
 default[:ceilometer][:db][:database] = "ceilometer"
 default[:ceilometer][:db][:user] = "ceilometer"
 default[:ceilometer][:db][:password] = "" # Set by Recipe

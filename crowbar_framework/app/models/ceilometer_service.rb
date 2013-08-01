@@ -29,6 +29,9 @@ class CeilometerService < ServiceObject
     answer = []
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["ceilometer"]["rabbitmq_instance"] }
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes["ceilometer"]["keystone_instance"] }
+    unless role.default_attributes["ceilometer"]["use_mongodb"]
+      answer << { "barclamp" => "database", "inst" => role.default_attributes["ceilometer"]["database_instance"] }
+    end
     if role.default_attributes["ceilometer"]["use_gitrepo"]
       answer << { "barclamp" => "git", "inst" => role.default_attributes["ceilometer"]["git_instance"] }
     end
@@ -52,6 +55,21 @@ class CeilometerService < ServiceObject
       end
     rescue
       @logger.info("#{@bc_name} create_proposal: no git found")
+    end
+
+    base["attributes"][@bc_name]["database_instance"] = ""
+    begin
+      databaseService = DatabaseService.new(@logger)
+      databases = databaseService.list_active[1]
+      if databases.empty?
+        # No actives, look for proposals
+        databases = databaseService.proposals[1]
+      end
+      if !databases.empty?
+        base["attributes"][@bc_name]["database_instance"] = databases[0]
+      end
+    rescue
+      @logger.info("#{@bc_name} create_proposal: no database found")
     end
 
     base["attributes"][@bc_name]["keystone_instance"] = ""

@@ -5,7 +5,9 @@
     "ceilometer": {
       "debug": false,
       "verbose": false,
+      "use_mongodb": true,
       "rabbitmq_instance": "none",
+      "database_instance": "none",
       "keystone_instance": "none",
       "keystone_service_user": "ceilometer",
       "keystone_service_password": "",

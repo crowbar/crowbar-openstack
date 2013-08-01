@@ -13,19 +13,76 @@
 # limitations under the License.
 #
 
-package "mongodb" do
-  action :install
-end
+if node[:ceilometer][:use_mongodb]
+  package "mongodb" do
+    action :install
+  end
 
-service "mongodb" do
-  supports :status => true, :restart => true
-  action :enable
-end
+  service "mongodb" do
+    supports :status => true, :restart => true
+    action :enable
+  end
 
-template "/etc/mongodb.conf" do
-  mode 0644
-  source "mongodb.conf.erb"
-  notifies :restart, resources(:service => "mongodb"), :immediately
+  template "/etc/mongodb.conf" do
+    mode 0644
+    source "mongodb.conf.erb"
+    notifies :restart, resources(:service => "mongodb"), :immediately
+  end
+else
+  ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+  node.set_unless[:ceilometer][:db][:password] = secure_password
+
+  env_filter = " AND database_config_environment:database-config-#{node[:ceilometer][:database_instance]}"
+  sqls = search(:node, "roles:database-server#{env_filter}") || []
+  if sqls.length > 0
+      sql = sqls[0]
+      sql = node if sql.name == node.name
+  else
+      sql = node
+  end
+  include_recipe "database::client"
+  backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
+  include_recipe "#{backend_name}::client"
+  include_recipe "#{backend_name}::python-client"
+
+  db_provider = Chef::Recipe::Database::Util.get_database_provider(sql)
+  db_user_provider = Chef::Recipe::Database::Util.get_user_provider(sql)
+  privs = Chef::Recipe::Database::Util.get_default_priviledges(sql)
+
+  sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil?
+  Chef::Log.info("Database server found at #{sql_address}")
+
+  db_conn = { :host => sql_address,
+              :username => "db_maker",
+              :password => sql[:database][:db_maker_password] }
+
+  # Create the Ceilometer Database
+  database "create #{node[:ceilometer][:db][:database]} database" do
+      connection db_conn
+      database_name node[:ceilometer][:db][:database]
+      provider db_provider
+      action :create
+  end
+
+  database_user "create ceilometer database user" do
+      host '%'
+      connection db_conn
+      username node[:ceilometer][:db][:user]
+      password node[:ceilometer][:db][:password]
+      provider db_user_provider
+      action :create
+  end
+
+  database_user "grant database access for ceilometer database user" do
+      connection db_conn
+      username node[:ceilometer][:db][:user]
+      password node[:ceilometer][:db][:password]
+      database_name node[:ceilometer][:db][:database]
+      host '%'
+      privileges privs
+      provider db_user_provider
+      action :grant
+  end
 end
 
 unless node[:ceilometer][:use_gitrepo]
