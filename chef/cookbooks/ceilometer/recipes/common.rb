@@ -62,7 +62,7 @@ template "/etc/ceilometer/ceilometer.conf" do
       :keystone_service_tenant => keystone_service_tenant,
       :keystone_admin_port => keystone_admin_port,
       :api_port => node[:ceilometer][:api][:port],
-      :db_host => db_host.name
+      :database_connection => "mongodb://#{db_host.name}:27017/ceilometer"
     )
 end
 

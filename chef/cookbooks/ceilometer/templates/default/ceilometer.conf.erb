@@ -417,7 +417,7 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 ######## defined in ceilometer.storage ########
 
 # Database connection string (string value)
-database_connection=mongodb://<%= @db_host %>:27017/ceilometer
+database_connection=<%= @database_connection %>
 
 
 ######## defined in ceilometer.storage.sqlalchemy.models ########
