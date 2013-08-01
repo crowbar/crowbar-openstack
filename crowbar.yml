@@ -62,8 +62,6 @@ locale_additions:
           attributes: Attributes
           keystone_instance: Keystone
           rabbitmq_instance: RabbitMQ
-          keystone_service_user: Service user (for Keystone)
-          keystone_service_password: Service password
       ceilometer_edit_deployment: 
         deployment: Deployment
 
