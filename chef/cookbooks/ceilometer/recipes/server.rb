@@ -29,15 +29,14 @@ template "/etc/mongodb.conf" do
 end
 
 unless node[:ceilometer][:use_gitrepo]
-  package "ceilometer-common" do
-    action :install
+  unless node.platform == "suse"
+    package "ceilometer-common"
+    package "ceilometer-collector"
+    package "ceilometer-api"
+  else
+    package "openstack-ceilometer-collector"
+    package "openstack-ceilometer-api"
   end
-  package "ceilometer-collector" do
-    action :install
-  end
-  package "ceilometer-api" do
-    action :install
-  end  
 else
   ceilometer_path = "/opt/ceilometer"
   pfs_and_install_deps("ceilometer")
@@ -57,11 +56,11 @@ end
 include_recipe "#{@cookbook_name}::common"
 
 directory "/var/cache/ceilometer" do
-  owner "ceilometer"
+  owner node[:ceilometer][:user]
   group "root"
   mode 00755
   action :create
-end
+end unless node.platform == "suse"
 
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:ceilometer][:keystone_instance]}"
 keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
@@ -86,12 +85,14 @@ my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admi
 pub_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address rescue my_ipaddress
 
 service "ceilometer-collector" do
+  service_name "openstack-ceilometer-collector" if node.platform == "suse"
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
 
 service "ceilometer-api" do
+  service_name "openstack-ceilometer-api" if node.platform == "suse"
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
