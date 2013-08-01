@@ -50,7 +50,6 @@ template "/etc/ceilometer/ceilometer.conf" do
     variables(
       :debug => node[:ceilometer][:debug],
       :verbose => node[:ceilometer][:verbose],
-      :use_syslog => node[:ceilometer][:use_syslog],
       :rabbit_settings => rabbit_settings,
       :keystone_protocol => keystone_protocol,
       :keystone_host => keystone_host,
