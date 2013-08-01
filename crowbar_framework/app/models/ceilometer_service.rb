@@ -101,8 +101,7 @@ class CeilometerService < ServiceObject
         "ceilometer-server" =>  server_nodes.map { |x| x.name }
     } unless agent_nodes.nil? or server_nodes.nil?
 
-    #base[:attributes][:ceilometer][:service][:token] = '%012d' % rand(1e12)
-    #base["attributes"]["ceilometer"]["service_password"] = '%012d' % rand(1e12)
+    base["attributes"]["ceilometer"]["keystone_service_password"] = '%012d' % rand(1e12)
 
     @logger.debug("Ceilometer create_proposal: exiting")
     base

@@ -8,7 +8,7 @@
       "rabbitmq_instance": "none",
       "keystone_instance": "none",
       "keystone_service_user": "ceilometer",
-      "keystone_service_password": "secret",
+      "keystone_service_password": "",
       "gitrepo": "http://github.com/openstack/ceilometer.git",
       "git_instance": "",
       "git_refspec": "stable/grizzly",

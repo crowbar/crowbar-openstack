@@ -29,7 +29,7 @@ default[:ceilometer][:db][:user] = "ceilometer"
 default[:ceilometer][:db][:password] = "" # Set by Recipe
 
 default[:ceilometer][:keystone_service_user] = "ceilometer"
-default[:ceilometer][:keystone_service_password] = "ceilometer"
+default[:ceilometer][:keystone_service_password] = ""
 
 default[:ceilometer][:api][:protocol] = "http"
 default[:ceilometer][:api][:port] = 8777
