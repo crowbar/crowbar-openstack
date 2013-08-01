@@ -7,7 +7,6 @@
       "verbose": false,
       "rabbitmq_instance": "none",
       "keystone_instance": "none",
-      "user": "ceilometer",
       "keystone_service_user": "ceilometer",
       "keystone_service_password": "secret",
       "gitrepo": "http://github.com/openstack/ceilometer.git",

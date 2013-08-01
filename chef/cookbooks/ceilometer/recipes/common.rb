@@ -46,7 +46,9 @@ end
 
 template "/etc/ceilometer/ceilometer.conf" do
     source "ceilometer.conf.erb"
-    mode "0644"
+    owner node[:ceilometer][:user]
+    group "root"
+    mode "0640"
     variables(
       :debug => node[:ceilometer][:debug],
       :verbose => node[:ceilometer][:verbose],
