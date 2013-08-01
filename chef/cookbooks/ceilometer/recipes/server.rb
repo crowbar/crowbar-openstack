@@ -145,5 +145,3 @@ keystone_register "register ceilometer endpoint" do
 #  endpoint_enabled true
   action :add_endpoint_template
 end
-
-node.save
