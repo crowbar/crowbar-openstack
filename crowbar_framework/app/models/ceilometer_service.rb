@@ -36,6 +36,7 @@ class CeilometerService < ServiceObject
   end
 
   def create_proposal
+    @logger.debug("Ceilometer create_proposal: entering")
     base = super
 
     base["attributes"][@bc_name]["git_instance"] = ""
@@ -103,6 +104,7 @@ class CeilometerService < ServiceObject
     #base[:attributes][:ceilometer][:service][:token] = '%012d' % rand(1e12)
     #base["attributes"]["ceilometer"]["service_password"] = '%012d' % rand(1e12)
 
+    @logger.debug("Ceilometer create_proposal: exiting")
     base
   end
 
