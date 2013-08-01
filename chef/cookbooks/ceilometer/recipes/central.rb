@@ -15,6 +15,7 @@
 
 unless node[:ceilometer][:use_gitrepo]
   package "ceilometer-agent-central" do
+    package_name "openstack-ceilometer-agent-central" if node.platform == "suse"
     action :install
   end
 else
