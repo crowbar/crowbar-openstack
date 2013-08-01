@@ -138,9 +138,9 @@ keystone_register "register ceilometer endpoint" do
   token keystone_token
   endpoint_service "ceilometer"
   endpoint_region "RegionOne"
-  endpoint_publicURL "http://#{pub_ipaddress}:8777/"
-  endpoint_adminURL "http://#{my_ipaddress}:8777/"
-  endpoint_internalURL "http://#{my_ipaddress}:8777/"
+  endpoint_publicURL "http://#{pub_ipaddress}:#{node[:ceilometer][:api][:port]}/"
+  endpoint_adminURL "http://#{my_ipaddress}:#{node[:ceilometer][:api][:port]}/"
+  endpoint_internalURL "http://#{my_ipaddress}:#{node[:ceilometer][:api][:port]}/"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template

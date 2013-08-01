@@ -73,7 +73,7 @@
         "pip://extras"
       ],
       "api": {
-        "bind_port": 8777
+        "port": 8777
       },
       "db": {
         "password": "",
