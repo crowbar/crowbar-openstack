@@ -52,5 +52,3 @@ service "ceilometer-agent-compute" do
   action :enable
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
-
-node.save
