@@ -72,14 +72,15 @@ else
   keystone = node
 end
 
-keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_host = keystone[:fqdn]
+keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_token = keystone["keystone"]["service"]["token"]
 keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
 keystone_service_user = node["ceilometer"]["keystone_service_user"]
 keystone_service_password = node["ceilometer"]["keystone_service_password"]
-Chef::Log.info("Keystone server found at #{keystone_address}")
+Chef::Log.info("Keystone server found at #{keystone_host}")
 
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 pub_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address rescue my_ipaddress
@@ -97,7 +98,8 @@ service "ceilometer-api" do
 end
 
 keystone_register "register ceilometer user" do
-  host keystone_address
+  protocol keystone_protocol
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   user_name keystone_service_user
@@ -107,7 +109,8 @@ keystone_register "register ceilometer user" do
 end
 
 keystone_register "give ceilometer user access" do
-  host keystone_address
+  protocol keystone_protocol
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   user_name keystone_service_user
@@ -118,7 +121,8 @@ end
 
 # Create ceilometer service
 keystone_register "register ceilometer service" do
-  host keystone_address
+  protocol keystone_protocol
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   service_name "ceilometer"
@@ -128,7 +132,8 @@ keystone_register "register ceilometer service" do
 end
 
 keystone_register "register ceilometer endpoint" do
-  host keystone_address
+  protocol keystone_protocol
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   endpoint_service "ceilometer"
