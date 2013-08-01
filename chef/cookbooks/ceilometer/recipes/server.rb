@@ -81,8 +81,18 @@ keystone_service_user = node["ceilometer"]["keystone_service_user"]
 keystone_service_password = node["ceilometer"]["keystone_service_password"]
 Chef::Log.info("Keystone server found at #{keystone_host}")
 
-my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-pub_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address rescue my_ipaddress
+my_admin_host = node[:fqdn]
+# For the public endpoint, we prefer the public name. If not set, then we
+# use the IP address except for SSL, where we always prefer a hostname
+# (for certificate validation).
+my_public_host = node[:crowbar][:public_name]
+if my_public_host.nil? or my_public_host.empty?
+  unless node[:ceilometer][:api][:protocol] == "https"
+    my_public_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
+  else
+    my_public_host = 'public.'+node[:fqdn]
+  end
+end
 
 service "ceilometer-collector" do
   service_name "openstack-ceilometer-collector" if node.platform == "suse"
@@ -139,9 +149,9 @@ keystone_register "register ceilometer endpoint" do
   token keystone_token
   endpoint_service "ceilometer"
   endpoint_region "RegionOne"
-  endpoint_publicURL "http://#{pub_ipaddress}:#{node[:ceilometer][:api][:port]}/"
-  endpoint_adminURL "http://#{my_ipaddress}:#{node[:ceilometer][:api][:port]}/"
-  endpoint_internalURL "http://#{my_ipaddress}:#{node[:ceilometer][:api][:port]}/"
+  endpoint_publicURL "#{node[:ceilometer][:api][:port]}://#{my_public_host}:#{node[:ceilometer][:api][:port]}/"
+  endpoint_adminURL "#{node[:ceilometer][:api][:port]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}/"
+  endpoint_internalURL "#{node[:ceilometer][:api][:port]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}/"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template

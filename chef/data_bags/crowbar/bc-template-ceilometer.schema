@@ -29,7 +29,8 @@
               "type": "map",
               "required": true,
               "mapping": {
-                "bind_port": { "type": "int", "required": true }
+                "protocol": { "type": "str", "required": true },
+                "port": { "type": "int", "required": true }
               }
             },
             "db": {
