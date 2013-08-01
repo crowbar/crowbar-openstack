@@ -15,8 +15,8 @@
 
 default[:ceilometer][:user] = "ceilometer"
 
-default[:ceilometer][:debug] = true
-default[:ceilometer][:verbose] = true
+default[:ceilometer][:debug] = false
+default[:ceilometer][:verbose] = false
 
 default[:ceilometer][:db][:database] = "ceilometer"
 default[:ceilometer][:db][:user] = "ceilometer"

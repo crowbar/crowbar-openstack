@@ -3,8 +3,8 @@
   "description": "Installation for Ceilometer",
   "attributes": {
     "ceilometer": {
-      "debug": true,
-      "verbose": true,
+      "debug": false,
+      "verbose": false,
       "rabbitmq_instance": "none",
       "keystone_instance": "none",
       "user": "ceilometer",
