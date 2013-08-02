@@ -94,6 +94,7 @@ unless node[:ceilometer][:use_gitrepo]
     package "openstack-ceilometer-collector"
     package "openstack-ceilometer-api"
   end
+  venv_prefix = nil
 else
   ceilometer_path = "/opt/ceilometer"
   pfs_and_install_deps("ceilometer")
@@ -108,6 +109,8 @@ else
     command "cp #{ceilometer_path}/etc/ceilometer/pipeline.yaml /etc/ceilometer"
     creates "/etc/ceilometer/pipeline.yaml"
   end
+  venv_path = node[:ceilometer][:use_virtualenv] ? "#{ceilometer_path}/.venv" : nil
+  venv_prefix = node[:ceilometer][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 end
 
 include_recipe "#{@cookbook_name}::common"
@@ -149,6 +152,11 @@ if my_public_host.nil? or my_public_host.empty?
   else
     my_public_host = 'public.'+node[:fqdn]
   end
+end
+
+execute "calling ceilometer-dbsync" do
+  command "#{venv_prefix}ceilometer-dbsync"
+  action :run
 end
 
 service "ceilometer-collector" do
