@@ -49,6 +49,11 @@ package "rabbitmq-server" do
   notifies :run, "execute[stop rabbitmq]", :immediately
 end
 
+# Install plugins for the management plugin
+package "rabbitmq-server-plugins" do
+  action :install
+end if node.platform == "suse"
+
 directory "/etc/rabbitmq/" do
   owner "root"
   group "root"
@@ -98,11 +103,10 @@ service "rabbitmq-server" do
   action [:enable, :start]
 end
 
+rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
+
 bash "Enable rabbit management" do
-  code <<-'EOH'
-/usr/lib/rabbitmq/bin/rabbitmq-plugins enable rabbitmq_management
-exit 0
-EOH
-  not_if "su - rabbitmq -s /bin/bash -c \"/usr/lib/rabbitmq/bin/rabbitmq-plugins list -E\" | grep -q rabbitmq_management"
+  code "#{rabbitmq_plugins} enable rabbitmq_management || :"
+  not_if "su - rabbitmq -s /bin/bash -c \"#{rabbitmq_plugins} list -E\" | grep -q rabbitmq_management"
   notifies :restart, "service[rabbitmq-server]", :immediately
-end unless node.platform == "suse"
+end

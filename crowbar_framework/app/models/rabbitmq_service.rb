@@ -20,8 +20,9 @@ class RabbitmqService < ServiceObject
     @logger = thelogger
   end
 
+# Turn off multi proposal support till it really works and people ask for it.
   def self.allow_multiple_proposals?
-    true
+    false
   end
 
   def proposal_dependencies(role)
@@ -50,17 +51,23 @@ class RabbitmqService < ServiceObject
     @logger.debug("Rabbitmq apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
-    om = old_role ? old_role.default_attributes["rabbitmq"] : {}
-    nm = role.default_attributes["rabbitmq"]
-    if om["password"]
-      nm["password"] = om["password"]
-    else
-      nm["password"] = random_password
-    end
-    role.save
-
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
   end
 
+  def validate_proposal_after_save proposal
+    super
+
+    elements = proposal["deployment"]["rabbitmq"]["elements"]
+
+    errors = []
+
+    if not elements.has_key?("rabbitmq-server") or elements["rabbitmq-server"].length != 1
+      errors << "Need one (and only one) rabbitmq-server node."
+    end
+
+    if errors.length > 0
+      raise Chef::Exceptions::ValidationFailed.new(errors.join("\n"))
+    end
+  end
 end
 

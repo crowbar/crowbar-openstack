@@ -27,15 +27,22 @@ rabbitmq_vhost node[:rabbitmq][:vhost] do
   action :add
 end
 
+::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+node.set_unless[:rabbitmq][:password] = secure_password
+
 # create user for the queue
-rabbitmq_user node[:rabbitmq][:user] do
+rabbitmq_user "adding user #{node[:rabbitmq][:user]}" do
+  user node[:rabbitmq][:user]
   password node[:rabbitmq][:password]
+  address node[:rabbitmq][:address]
+  port node[:rabbitmq][:mochiweb_port]
   action :add
 end
 
 # grant the mapper user the ability to do anything with the vhost
 # the three regex's map to config, write, read permissions respectively
-rabbitmq_user node[:rabbitmq][:user] do
+rabbitmq_user "setting permissions for #{node[:rabbitmq][:user]}" do
+  user node[:rabbitmq][:user]
   vhost node[:rabbitmq][:vhost]
   permissions "\".*\" \".*\" \".*\""
   action :set_permissions
