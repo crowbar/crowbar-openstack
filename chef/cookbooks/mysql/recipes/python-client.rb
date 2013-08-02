@@ -17,7 +17,10 @@
 # limitations under the License.
 #
 
-package "python-mysqldb" do
-    package_name "python-mysql" if node.platform == "suse"
-    action :install
+case node[:platform]
+when "suse"
+  package "python-mysql"     # C-extensions MySQL driver
+  package "python-PyMySQL"   # pure-Python MySQL driver
+else
+  package "python-mysqldb"
 end
