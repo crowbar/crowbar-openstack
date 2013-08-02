@@ -17,7 +17,54 @@
         %input#volume_name{:type => "text", :name => "volume_name", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_name"], :onchange => "update_value('volume/volume_name','volume_name', 'string')"}
       %p
         %label{ :for => :volume_type }= t('.volume_type')
-        = select_tag :volume_type, options_for_select([['raw','raw'], ['local', 'local'], ['eqlx','eqlx']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_type"].to_s), :onchange => "update_volume_type_view(); update_value('volume/volume_type', 'volume_type', 'string')"
+        = select_tag :volume_type, options_for_select([[t('.volume_type_raw'),'raw'], [t('.volume_type_local'), 'local'], ['NetApp', 'netapp'], ['EMC', 'emc'], ['EqualLogic','eqlx'], [t('.volume_type_manual'), 'manual']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_type"].to_s), :onchange => "update_volume_type_view(); update_value('volume/volume_type', 'volume_type', 'string')"
+      %div{ :id => 'netapp_parameters', :class => 'container' }
+        %p
+          %label{ :for => :netappp_header }= t('.netapp_parameters')
+        %div.container
+          %p
+            %label{ :for => :netapp_wsdl_url }= t('.netapp_wsdl_url')
+            %input#netapp_wsdl_url{:type => "text", :name => "netapp_wsdl_url", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_wsdl_url"], :onchange => "update_value('volume/netapp/netapp_wsdl_url', 'netapp_wsdl_url', 'string')"}
+          %p
+            %label{ :for => :netapp_server_hostname }= t('.netapp_server_hostname')
+            %input#netapp_server_hostname{:type => "text", :name => "netapp_server_hostname", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_server_hostname"], :onchange => "update_value('volume/netapp/netapp_server_hostname', 'netapp_server_hostname', 'string')"}
+          %p
+            %label{ :for => :netapp_server_port }= t('.netapp_server_port')
+            %input#netapp_server_port{:type => "text", :name => "netapp_server_port", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_server_port"], :onchange => "update_value('volume/netapp/netapp_server_port', 'netapp_server_port', 'integer')"}
+          %p
+            %label{ :for => :netapp_login }= t('.netapp_login')
+            %input#netapp_login{:type => "text", :name => "netapp_login", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_login"], :onchange => "update_value('volume/netapp/netapp_login', 'netapp_login', 'string')"}
+          %p
+            %label{ :for => :netapp_password }= t('.netapp_password')
+            %input#netapp_password{:type => "password", :name => "netapp_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_password"], :onchange => "update_value('volume/netapp/netapp_password', 'netapp_password', 'string')"}
+          %p
+            %label{ :for => :netapp_storage_service_prefix }= t('.netapp_storage_service_prefix')
+            %input#netapp_storage_service_prefix{:type => "text", :name => "netapp_storage_service_prefix", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_storage_service_prefix"], :onchange => "update_value('volume/netapp/netapp_storage_service_prefix', 'netapp_storage_service_prefix', 'string')"}
+          %p
+            %label{ :for => :netapp_storage_service }= t('.netapp_storage_service')
+            %input#netapp_storage_service{:type => "text", :name => "netapp_storage_service", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_storage_service"], :onchange => "update_value('volume/netapp/netapp_storage_service', 'netapp_storage_service', 'string')"}
+          %p
+            %label{ :for => :netapp_vfiler }= t('.netapp_vfiler')
+            %input#netapp_vfiler{:type => "text", :name => "netapp_vfiler", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["netapp"]["netapp_vfiler"], :onchange => "update_value('volume/netapp/netapp_vfiler', 'netapp_vfiler', 'string')"}
+      %div{ :id => 'emc_parameters', :class => 'container' }
+        %p
+          %label{ :for => :emc_header }= t('.emc_parameters')
+        %div.container
+          %p
+            %label{ :for => :ecom_server_ip }= t('.ecom_server_ip')
+            %input#ecom_server_ip{:type => "text", :name => "ecom_server_ip", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["emc"]["ecom_server_ip"], :onchange => "update_value('volume/emc/ecom_server_ip', 'ecom_server_ip', 'string')"}
+          %p
+            %label{ :for => :ecom_server_port }= t('.ecom_server_port')
+            %input#ecom_server_port{:type => "text", :name => "ecom_server_port", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["emc"]["ecom_server_port"], :onchange => "update_value('volume/emc/ecom_server_port', 'ecom_server_port', 'integer')"}
+          %p
+            %label{ :for => :ecom_server_username }= t('.ecom_server_username')
+            %input#ecom_server_username{:type => "text", :name => "ecom_server_username", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["emc"]["ecom_server_username"], :onchange => "update_value('volume/emc/ecom_server_username', 'ecom_server_username', 'string')"}
+          %p
+            %label{ :for => :ecom_server_password }= t('.ecom_server_password')
+            %input#ecom_server_password{:type => "password", :name => "ecom_server_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["emc"]["ecom_server_password"], :onchange => "update_value('volume/emc/ecom_server_password', 'ecom_server_password', 'string')"}
+          %p
+            %label{ :for => :emc_storage_type }= t('.emc_storage_type')
+            %input#emc_storage_type{:type => "text", :name => "emc_storage_type", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["emc"]["emc_storage_type"], :onchange => "update_value('volume/emc/emc_storage_type', 'emc_storage_type', 'string')"}
       %div{ :id => 'eqlx_parameters', :class => 'container' }
         %p
           %label{ :for => :eqlx_header }= t('.eqlx_parameters')
@@ -67,22 +114,87 @@
         %div.container
           %label{ :for => :cinder_raw_method }= t('.volume_raw_mode')
           = select_tag :cinder_raw_method, options_for_select([['first','first'], ['all', 'all']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["cinder_raw_method"].to_s), :onchange => "update_value('volume/cinder_raw_method', 'cinder_raw_method', 'string')"
+      %div{ :id => 'manual_parameters', :class => 'container' }
+        %em= t('.manual_parameters_not_supported')
+        %p
+          %label{ :for => :manual_header }= t('.manual_parameters')
+        %div.container
+          %p
+            %label{ :for => :manual_volume_driver }= t('.manual_volume_driver')
+            %input#manual_volume_driver{:type => "text", :name => "manual_volume_driver", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["manual"]["driver"], :onchange => "update_value('volume/manual/driver', 'manual_volume_driver', 'string')"}
+            %em= t('.manual_volume_driver_hint')
+          %p
+            %label{ :for => :manual_volume_config }= t('.manual_volume_config')
+            = text_area_tag :manual_volume_config, @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["manual"]["config"], :size => "80x5", :onchange => "update_value('volume/manual/config', 'manual_volume_config', 'string')"
+            %em= t('.manual_volume_config_hint')
+
+    %div{ :id => :protocol_div }
+      %p
+        %label{ :for => :protocol }= t('.protocol')
+        = select_tag :protocol, options_for_select([['HTTP','http'], ['HTTPS', 'https']], @proposal.raw_data['attributes'][@proposal.barclamp]["api"]["protocol"].to_s), :onchange => "update_value('api/protocol', 'protocol', 'string')"
+    %div{ :id => :ssl_div }
+      %p
+        %label{ :for => :ssl_certfile }= t('.ssl_certfile')
+        = text_field_tag :ssl_certfile, @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["certfile"], :size => 80, :onchange => "update_value('ssl/certfile', 'ssl_certfile', 'string')"
+      %p
+        %label{ :for => :ssl_keyfile }= t('.ssl_keyfile')
+        = text_field_tag :ssl_keyfile, @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["keyfile"], :size => 80, :onchange => "update_value('ssl/keyfile', 'ssl_keyfile', 'string')"
+      %p
+        %label{ :for => :ssl_generate_certs }= t('.ssl_generate_certs')
+        = select_tag :ssl_generate_certs, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["generate_certs"].to_s), :onchange => "update_value('ssl/generate_certs', 'ssl_generate_certs', 'boolean')"
+      %p
+        %label{ :for => :ssl_insecure }= t('.ssl_insecure')
+        = select_tag :ssl_insecure, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["insecure"].to_s), :onchange => "update_value('ssl/insecure', 'ssl_insecure', 'boolean')"
+      %p
+        %label{ :for => :ssl_cert_required }= t('.ssl_cert_required')
+        = select_tag :ssl_cert_required, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["cert_required"].to_s), :onchange => "update_value('ssl/cert_required', 'ssl_cert_required', 'boolean')"
+      %p
+        %label{ :for => :ssl_ca_certs }= t('.ssl_ca_certs')
+        = text_field_tag :ssl_ca_certs, @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["ca_certs"], :size => 80, :onchange => "update_value('ssl/ca_certs', 'ssl_ca_certs', 'string')"
+
 
 :javascript
   function update_volume_type_view() {
     var proposal_data = JSON.parse($("input#proposal_attributes").val());
     var choice = $("select#volume_type").val();
-    if (choice == 'eqlx') {
-      $('div#eqlx_parameters').show();
-      $('div#volume_file_parameters').hide();
-      $('div#volume_disk_parameters').hide();
-   } else {
-      $('div#eqlx_parameters').hide();
-      $('div#volume_file_parameters').show();
-      $('div#volume_disk_parameters').show();
-    }
+    $('div#emc_parameters').toggle(choice == 'emc');
+    $('div#netapp_parameters').toggle(choice == 'netapp');
+    $('div#eqlx_parameters').toggle(choice == 'eqlx');
+    $('div#manual_parameters').toggle(choice == 'manual');
+    $('div#volume_file_parameters').toggle(choice == 'local');
+    $('div#volume_disk_parameters').toggle(choice == 'raw');
   }
+
+  function toggle_protocol() {
+    if ($('#protocol option:selected').attr('value') == 'https') {
+      $('#ssl_div').show();
+    } else {
+      $('#ssl_div').hide();
+    }
+  };
+
+  function toggle_ssl_cert_required() {
+    if ($('#ssl_cert_required option:selected').attr('value') == 'true') {
+      $('#ssl_ca_certs').removeAttr('disabled');
+    } else {
+      $('#ssl_ca_certs').attr('disabled', 'disabled');
+    }
+  };
+
+  function toggle_ssl_generate_certs() {
+    if ($('#ssl_generate_certs option:selected').attr('value') == 'true') {
+      $('#ssl_insecure').attr('value', 'true');
+      $('#ssl_cert_required').attr('value', 'false');
+    }
+  };
 
   $(document).ready(function(){
     update_volume_type_view();
+    toggle_protocol();
+    toggle_ssl_cert_required();
+    toggle_ssl_generate_certs();
   });
+
+  $('#protocol').change(toggle_protocol);
+  $('#ssl_cert_required').change(toggle_ssl_cert_required);
+  $('#ssl_generate_certs').change(toggle_ssl_generate_certs);

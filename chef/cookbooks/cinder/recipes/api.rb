@@ -33,7 +33,7 @@ else
   keystone = node
 end
 
-keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
+keystone_host = keystone[:fqdn]
 keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_token = keystone[:keystone][:service][:token]
 keystone_service_port = keystone[:keystone][:api][:service_port]
@@ -42,7 +42,8 @@ keystone_service_tenant = keystone[:keystone][:service][:tenant]
 keystone_service_user = node[:cinder][:service_user]
 keystone_service_password = node[:cinder][:service_password]
 cinder_port = node[:cinder][:api][:bind_port]
-Chef::Log.info("Keystone server found at #{keystone_address}")
+cinder_protocol = node[:cinder][:api][:protocol]
+Chef::Log.info("Keystone server found at #{keystone_host}")
 
 if node[:cinder][:use_gitrepo]
   pfs_and_install_deps "keystone" do
@@ -51,16 +52,24 @@ if node[:cinder][:use_gitrepo]
     path File.join(cinder_path,"keystone")
     virtualenv venv_path
   end
-else
-  package "python-keystone"
 end
 
-public_api_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
-admin_api_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+my_admin_host = node[:fqdn]
+# For the public endpoint, we prefer the public name. If not set, then we
+# use the IP address except for SSL, where we always prefer a hostname
+# (for certificate validation).
+my_public_host = node[:crowbar][:public_name]
+if my_public_host.nil? or my_public_host.empty?
+  unless node[:cinder][:api][:protocol] == "https"
+    my_public_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
+  else
+    my_public_host = 'public.'+node[:fqdn]
+  end
+end
 
 keystone_register "cinder api wakeup keystone" do
   protocol keystone_protocol
-  host keystone_address
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   action :wakeup
@@ -68,7 +77,7 @@ end
 
 keystone_register "register cinder user" do
   protocol keystone_protocol
-  host keystone_address
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   user_name keystone_service_user
@@ -79,7 +88,7 @@ end
 
 keystone_register "give cinder user access" do
   protocol keystone_protocol
-  host keystone_address
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   user_name keystone_service_user
@@ -90,7 +99,7 @@ end
 
 keystone_register "register cinder service" do
   protocol keystone_protocol
-  host keystone_address
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   service_name "cinder"
@@ -101,14 +110,14 @@ end
 
 keystone_register "register cinder endpoint" do
   protocol keystone_protocol
-  host keystone_address
+  host keystone_host
   port keystone_admin_port
   token keystone_token
   endpoint_service "cinder"
   endpoint_region "RegionOne"
-  endpoint_publicURL "http://#{public_api_ip}:#{cinder_port}/v1/$(tenant_id)s"
-  endpoint_adminURL "http://#{admin_api_ip}:#{cinder_port}/v1/$(tenant_id)s"
-  endpoint_internalURL "http://#{admin_api_ip}:#{cinder_port}/v1/$(tenant_id)s"
+  endpoint_publicURL "#{cinder_protocol}://#{my_public_host}:#{cinder_port}/v1/$(tenant_id)s"
+  endpoint_adminURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v1/$(tenant_id)s"
+  endpoint_internalURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v1/$(tenant_id)s"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template
@@ -129,7 +138,7 @@ template "/etc/cinder/api-paste.ini" do
   mode "0640"
   variables(
     :keystone_protocol => keystone_protocol,
-    :keystone_ip_address => keystone_address,
+    :keystone_host => keystone_host,
     :keystone_admin_token => keystone_token,
     :keystone_service_port => keystone_service_port,
     :keystone_service_tenant => keystone_service_tenant,

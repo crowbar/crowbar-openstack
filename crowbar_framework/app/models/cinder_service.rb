@@ -44,7 +44,8 @@ class CinderService < ServiceObject
     nodes.delete_if { |n| n.nil? or n.admin? }
     if nodes.size >= 1
       base["deployment"]["cinder"]["elements"] = {
-        "cinder-server" => [ nodes.first[:fqdn] ]
+        "cinder-controller" => [ nodes.first[:fqdn] ],
+        "cinder-volume" => [ nodes.first[:fqdn] ]
       }
     end
 
@@ -86,6 +87,19 @@ class CinderService < ServiceObject
 
     @logger.debug("Cinder create_proposal: exiting")
     base
+  end
+
+  def apply_role_pre_chef_call(old_role, role, all_nodes)
+    @logger.debug("Cinder apply_role_pre_chef_call: entering #{all_nodes.inspect}")
+    return if all_nodes.empty?
+
+    net_svc = NetworkService.new @logger
+    tnodes = role.override_attributes["cinder"]["elements"]["cinder-controller"]
+    tnodes.each do |n|
+      net_svc.allocate_ip "default", "public", "host", n
+    end unless tnodes.nil?
+
+    @logger.debug("Cinder apply_role_pre_chef_call: leaving")
   end
 
 end
