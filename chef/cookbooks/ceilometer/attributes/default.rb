@@ -35,3 +35,5 @@ default[:ceilometer][:keystone_service_password] = ""
 
 default[:ceilometer][:api][:protocol] = "http"
 default[:ceilometer][:api][:port] = 8777
+
+default[:ceilometer][:metering_secret] = "" # Set by Recipe

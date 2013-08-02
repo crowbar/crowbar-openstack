@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+
 if node[:ceilometer][:use_mongodb]
   package "mongodb" do
     action :install
@@ -29,7 +31,6 @@ if node[:ceilometer][:use_mongodb]
     notifies :restart, resources(:service => "mongodb"), :immediately
   end
 else
-  ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
   node.set_unless[:ceilometer][:db][:password] = secure_password
 
   env_filter = " AND database_config_environment:database-config-#{node[:ceilometer][:database_instance]}"
@@ -112,6 +113,8 @@ else
   venv_path = node[:ceilometer][:use_virtualenv] ? "#{ceilometer_path}/.venv" : nil
   venv_prefix = node[:ceilometer][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 end
+
+node.set_unless[:ceilometer][:metering_secret] = secure_password
 
 include_recipe "#{@cookbook_name}::common"
 
@@ -221,3 +224,5 @@ keystone_register "register ceilometer endpoint" do
 #  endpoint_enabled true
   action :add_endpoint_template
 end
+
+node.save

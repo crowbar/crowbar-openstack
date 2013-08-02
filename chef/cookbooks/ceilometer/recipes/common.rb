@@ -68,7 +68,6 @@ else
     # password is already created because common recipe comes
     # after the server recipe
     db_password = node[:ceilometer][:db][:password]
-    node.save
   else
     # pickup password to database from ceilometer-server node
     node_controllers = search(:node, "roles:ceilometer-server") || []
@@ -78,6 +77,19 @@ else
   end
 
   db_connection = "#{backend_name}://#{node[:ceilometer][:db][:user]}:#{db_password}@#{sql_address}/#{node[:ceilometer][:db][:database]}"
+end
+
+metering_secret = ''
+if node.roles.include? "ceilometer-server"
+  # secret is already created because common recipe comes
+  # after the server recipe
+  metering_secret = node[:ceilometer][:metering_secret]
+else
+  # pickup secret from ceilometer-server node
+  node_controllers = search(:node, "roles:ceilometer-server") || []
+  if node_controllers.length > 0
+    metering_secret = node_controllers[0][:ceilometer][:metering_secret]
+  end
 end
 
 template "/etc/ceilometer/ceilometer.conf" do
@@ -98,6 +110,7 @@ template "/etc/ceilometer/ceilometer.conf" do
       :keystone_service_tenant => keystone_service_tenant,
       :keystone_admin_port => keystone_admin_port,
       :api_port => node[:ceilometer][:api][:port],
+      :metering_secret => metering_secret,
       :database_connection => db_connection
     )
 end
