@@ -15,7 +15,7 @@
 barclamp:
   name: ceilometer
   display: Ceilometer
-  description: Ceilometer install
+  description: 'OpenStack Metering: measurements collection for monitoring and metering'
   proposal_schema_version: 1
   version: 0
   requires:
