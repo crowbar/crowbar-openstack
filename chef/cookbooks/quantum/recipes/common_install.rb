@@ -44,16 +44,18 @@ end
 
 if quantum[:quantum][:networking_plugin] == "openvswitch"
 
-  # If we expect to install the openvswitch module via DKMS, but the module
-  # does not exist, rmmod the openvswitch module before continuing.
-  if node[:quantum][:platform][:ovs_pkgs].any?{|e|e == "openvswitch-datapath-dkms"} &&
-      !File.exists?("/lib/modules/#{%x{uname -r}.strip}/updates/dkms/openvswitch.ko") &&
-      File.directory?("/sys/module/openvswitch")
-    if IO.read("/sys/module/openvswitch").strip != "0"
-      Chef::Log.error("Kernel openvswitch module already loaded and in use! Please reboot me!")
-    else
-      bash "Unload non-DKMS openvswitch module" do
-        code "rmmod openvswitch"
+  if node.platform == "ubuntu"
+    # If we expect to install the openvswitch module via DKMS, but the module
+    # does not exist, rmmod the openvswitch module before continuing.
+    if node[:quantum][:platform][:ovs_pkgs].any?{|e|e == "openvswitch-datapath-dkms"} &&
+        !File.exists?("/lib/modules/#{%x{uname -r}.strip}/updates/dkms/openvswitch.ko") &&
+        File.directory?("/sys/module/openvswitch")
+      if IO.read("/sys/module/openvswitch").strip != "0"
+        Chef::Log.error("Kernel openvswitch module already loaded and in use! Please reboot me!")
+      else
+        bash "Unload non-DKMS openvswitch module" do
+          code "rmmod openvswitch"
+        end
       end
     end
   end
