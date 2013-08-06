@@ -13,7 +13,7 @@
       "gitrepo": "http://github.com/openstack/ceilometer.git",
       "git_instance": "",
       "git_refspec": "stable/grizzly",
-      "use_gitrepo": true,
+      "use_gitrepo": false,
       "use_gitbarclamp": true,
       "use_pip_cache": true,
       "pfs_deps": [
