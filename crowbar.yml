@@ -15,7 +15,7 @@
 barclamp:
   name: cinder
   display: Cinder
-  description: 'Openstack block storage: persistent block level storage devices for use with OpenStack compute instances'
+  description: 'Openstack Block Storage: persistent block level storage devices for use with OpenStack compute instances'
   proposal_schema_version: 1
   version: 0
   requires:
