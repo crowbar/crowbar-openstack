@@ -18,21 +18,22 @@
 # limitations under the License.
 #
 
-# Install RabbitMQ server
-package "rabbitmq-server"
-# Install RabbitMQ plugins if SUSE platform
-package "rabbitmq-server-plugins" if node.platform == "suse"
-
 service "rabbitmq-server" do
-  supports :status => true, :restart => true
-  action :enable
+  supports :restart => true, :start => true, :stop => true
+  action :nothing
+end
+
+directory "/etc/rabbitmq/" do
+  owner "root"
+  group "root"
+  mode 0755
+  action :create
 end
 
 template "/etc/rabbitmq/rabbitmq-env.conf" do
   source "rabbitmq-env.conf.erb"
   owner "root"
   group "root"
-  notifies :restart, "service[rabbitmq-server]"
   mode 0644
 end
 
@@ -41,13 +42,15 @@ template "/etc/rabbitmq/rabbitmq.config" do
   owner "root"
   group "root"
   mode 0644
-  notifies :restart, "service[rabbitmq-server]"
 end
+
+package "rabbitmq-server"
+package "rabbitmq-server-plugins" if node.platform == "suse"
 
 rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
 
 bash "enabling rabbit management" do
-  code "#{rabbitmq_plugins} enable rabbitmq_management"
+  code "#{rabbitmq_plugins} enable rabbitmq_management > /dev/null"
   not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q"
-  notifies :restart, "service[rabbitmq-server]", :immediately
+  notifies :restart, "service[rabbitmq-server]"
 end
