@@ -11,4 +11,65 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
+die() {
+    res=$1
+    shift
+    echo "$@"
+    exit $res
+}
+
+echo "Checking Ceilometer"
+echo "Finding ceilometer server..."
+ceilometer_ip=$(knife_node_find 'roles:ceilometer-server' IP)
+if ! [[ $ceilometer_ip ]]; then
+   die 1 "Could not find ceilometer server."
+fi
+echo "Ceilometer server at $ceilometer_ip. Verifying meters..."
+
+echo "Finding keystone..."
+keystone_ip=$(knife_node_find 'roles:keystone-server' IP)
+if [[ ! $keystone_ip ]]; then
+    die 1 "Cannot find Keystone"
+fi
+
+export OS_AUTH_URL="http://$keystone_ip:5000/v2.0"
+export OS_USERNAME="admin"
+export OS_PASSWORD="crowbar"
+export OS_TENANT_NAME="admin"
+export CEILOMETER_URL="http://$ceilometer_ip:8777"
+
+sudo apt-get install -y python-ceilometerclient
+
+#echo "export OS_AUTH_URL=$OS_AUTH_URL"
+#echo "export OS_USERNAME=$OS_USERNAME"
+#echo "export OS_PASSWORD=$OS_PASSWORD"
+#echo "export OS_TENANT_NAME=$OS_TENANT_NAME"
+#echo "export CEILOMETER_URL=$CEILOMETER_URL"
+
+echo "Getting meter-list from ceilometer"
+if ! ceilometer meter-list; then
+  die 1 "Could not get meter-list from ceilometer"
+fi
+
+echo "Getting resource-list from ceilometer"
+if ! ceilometer resource-list; then
+  die 1 "Could not get resource-list from ceilometer"
+fi
+
+echo "Getting project-list from ceilometer"
+if ! ceilometer project-list; then
+  die 1 "Could not get project-list from ceilometer"
+fi
+
+echo "Getting sample-list from ceilometer"
+if ! ceilometer sample-list; then
+  die 1 "Could not get sample-list from ceilometer"
+fi
+
+echo "Getting user-list from ceilometer"
+if ! ceilometer user-list; then
+  die 1 "Could not get user-list from ceilometer"
+fi
+
+echo "Ceilometer check passed."
 exit 0
