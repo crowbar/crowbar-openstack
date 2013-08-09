@@ -3,19 +3,20 @@
   "description": "Installation for Ceilometer",
   "attributes": {
     "ceilometer": {
-      "debug": true,
-      "verbose": true,
+      "debug": false,
+      "verbose": false,
+      "use_mongodb": true,
       "rabbitmq_instance": "none",
+      "database_instance": "none",
       "keystone_instance": "none",
-      "user": "ceilometer",
       "keystone_service_user": "ceilometer",
-      "keystone_service_password": "secret",
+      "keystone_service_password": "",
       "gitrepo": "http://github.com/openstack/ceilometer.git",
       "git_instance": "",
       "git_refspec": "stable/grizzly",
-      "use_gitrepo": true,
-      "use_gitbarclamp": true,
-      "use_pip_cache": true,
+      "use_gitrepo": false,
+      "use_gitbarclamp": false,
+      "use_pip_cache": false,
       "pfs_deps": [
         "gawk",
         "sqlite3",
@@ -73,8 +74,8 @@
         "pip://extras"
       ],
       "api": {
-        "bind_open_address": true,
-        "bind_port": 8777
+        "protocol": "http",
+        "port": 8777
       },
       "db": {
         "password": "",
