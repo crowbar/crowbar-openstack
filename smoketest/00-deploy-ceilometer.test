@@ -71,5 +71,33 @@ if ! ceilometer user-list; then
   die 1 "Could not get user-list from ceilometer"
 fi
 
+echo "Deploying Nova VM."
+
+images=($(nova image-list | grep "ACTIVE" | grep "ubuntu" | grep "\-image" | awk '{print $2}'))
+[[ ! $images ]] && die 1 "Could not find a test image to run on Nova"
+test_image=${images[0]}
+echo -e  "Selected image id: $test_image"
+
+fixed_net=$(quantum net-list |grep fixed |awk '{print $2}')
+instance_name="smoketest"
+nova boot --poll --image "$test_image" --flavor 1 --nic net-id=$fixed_net "$instance_name" --meta description='Use for smoke testing purposes'
+
+until [[ "$(nova list | grep "$instance_name" | awk {'print $6'})" = "ACTIVE" ]]
+  do
+    echo "Sleeping for next 10 seconds"
+    sleep 10;
+  done
+instance_id=$(nova list | grep "$instance_name" | awk '{print $2}')
+echo "Created $instance_name instance with ID: $instance_id"
+
+echo "Getting meter-list for test virtual machine from ceilometer"
+if ! ceilometer meter-list --resource=$instance_id | grep -qs instance; then
+  die 1 "Could not get meter-list for test virtual machine from ceilometer"
+fi
+ceilometer meter-list --resource=$instance_id
+
+echo "Deleting Nova VM."
+nova delete "$instance_id"
+
 echo "Ceilometer check passed."
 exit 0
