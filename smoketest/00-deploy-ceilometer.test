@@ -40,12 +40,6 @@ export CEILOMETER_URL="http://$ceilometer_ip:8777"
 
 sudo apt-get install -y python-ceilometerclient
 
-#echo "export OS_AUTH_URL=$OS_AUTH_URL"
-#echo "export OS_USERNAME=$OS_USERNAME"
-#echo "export OS_PASSWORD=$OS_PASSWORD"
-#echo "export OS_TENANT_NAME=$OS_TENANT_NAME"
-#echo "export CEILOMETER_URL=$CEILOMETER_URL"
-
 echo "Getting meter-list from ceilometer"
 if ! ceilometer meter-list; then
   die 1 "Could not get meter-list from ceilometer"
