@@ -50,6 +50,7 @@
                     %input#new_password{:type => "password", :name => "Password", :'data-default' => ""}
                   %td
                     %button{ :type => 'button', :onclick => "javascript:add_switch();" }= t('.add_switch')
+            %div{:id => 'cisco_switch_port'}
 
     %label.section-header{ :for => :protocol_div }= t('.ssl_header')
     %div.section{ :id => :protocol_div }
@@ -169,7 +170,15 @@
          function(data) {
             $('table#cisco_switches > tbody > tr').eq(-1).before(data);
          }
-         );
+      );
+  }
+
+  function render_switch_ports(switches) {
+    $.get('/quantum/render_switch_ports', { switches: switches },
+        function(data) {
+            $('#cisco_switch_port').replaceWith(data);
+        }
+      );
   }
 
   function add_switch() {
@@ -202,6 +211,9 @@
     update_value_direct("cisco_switches/" + ip + "/password", password, 'string');
 
     render_switch(ip, port, user, password);
+    input = document.getElementById('proposal_attributes');
+    json = JSON.parse(input.value);
+    render_switch_ports(json["cisco_switches"]);
 
     $('input#new_ip').val("");
     $('input#new_port').val("");
@@ -220,6 +232,7 @@
       }
     }
     $(document.getElementById("switch_" + name )).remove()
+    render_switch_ports(json["cisco_switches"]);
   }
 
   $(document).ready(function(){
@@ -249,6 +262,7 @@
           render_switch(k, this_switch["port"], this_switch["user"], this_switch["password"]);
         }
       });
+      render_switch_ports(switches);
     }
 
   });

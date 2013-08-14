@@ -4,10 +4,10 @@
 [SWITCH]
 <% @switches.keys.each do |ip| -%>
 [[<%=ip%>]]
-<% if @switches[ip].has_key?(:nodes) -%>
-<% @switches[ip][:nodes].each do |switch_node| -%>
-[[[<%=switch_node[:hostname]%>]]]
-ports=<%=switch_node[:switch_port]%>
+<% if @switches[ip].has_key?(:switch_ports) -%>
+<% @switches[ip][:switch_ports].each do |name, values| -%>
+[[[<%=name%>]]]
+ports=<%=values[:switch_port]%>
 <% end -%>
 <% end -%>
 [[[ssh_port]]]

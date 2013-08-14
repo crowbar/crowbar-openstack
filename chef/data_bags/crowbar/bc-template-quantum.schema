@@ -27,7 +27,20 @@
                           "mapping" : {
                             "port": { "type": "str", "required": true },
                             "user": { "type": "str", "required": true },
-                            "password": { "type": "str", "required": true }
+                            "password": { "type": "str", "required": true },
+                            "switch_ports": {
+                              "type" : "map",
+                              "required" : false,
+                              "mapping" : {
+                                = : {
+                                  "type" : "map",
+                                  "required" : false,
+                                  "mapping" : {
+                                    "switch_port": { "type": "str", "required": true }
+                                  }
+                                }
+                              }
+                            }
                           }
                         }
                       }

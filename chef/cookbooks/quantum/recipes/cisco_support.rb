@@ -85,29 +85,7 @@ end
 
 switches = {}
 if vlan_mode
-  computes = search(:node, "crowbar_cisco_switch_ip:* AND crowbar_cisco_switch_port:*") or []
-  switches = quantum[:quantum][:cisco_switches].to_hash;
-
-  computes.each do |compute|
-    next if compute[:crowbar].nil?
-    next if compute[:crowbar][:cisco_switch].nil?
-    next if compute[:crowbar][:cisco_switch][:ip].nil?
-    next if compute[:crowbar][:cisco_switch][:port].nil?
-    ip = compute[:crowbar][:cisco_switch][:ip]
-    if ! switches.has_key?(ip)
-      Chef::Log.error("No switch with address #{ip} defined in the quantum proposal, skipping.")
-      next
-    end
-    switches[ip][:nodes] = [] if !switches[ip].has_key?(:nodes)
-
-    port = compute[:crowbar][:cisco_switch][:port]
-
-    switch_node = {}
-    switch_node[:hostname] = compute[:hostname]
-    switch_node[:switch_port] = port
-
-    switches[ip][:nodes] << switch_node
-  end
+    switches = quantum[:quantum][:cisco_switches].to_hash
 end
 
 template "/etc/quantum/plugins/cisco/nexus.ini" do

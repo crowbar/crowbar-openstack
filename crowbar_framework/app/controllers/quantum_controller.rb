@@ -18,47 +18,6 @@ class QuantumController < BarclampController
     @service_object = QuantumService.new logger
   end
 
-  def cisco_topology
-    if request.post?
-      nodes_req = {}
-      params.each do |k, v|
-        if k.starts_with? "node:"
-          parts = k.split ':'
-          node = parts[1]
-          area = parts[2]
-          nodes_req[node] = {} if nodes_req[node].nil?
-          nodes_req[node][area] = (v.empty? ? nil : v)
-        end
-      end
-      nodes_req.each do |node_name, values|
-        begin
-          dirty = false
-          node = NodeObject.find_node_by_name node_name
-          if !(@service_object.get_cisco_switch_value(node, 'ip') == values['switch_ip'])
-            @service_object.set_cisco_switch_value(node, 'ip', values['switch_ip'])
-            dirty = true
-          end
-          if !(@service_object.get_cisco_switch_value(node, 'port') == values['switch_port'])
-            @service_object.set_cisco_switch_value(node, 'port', values['switch_port'])
-            dirty = true
-          end
-          if dirty
-            node.save
-          end
-        rescue Exception=>e
-          failed << node_name
-        end 
-      end
-    end
-    @nodes = {}
-    NodeObject.find("roles:nova-multi-compute-*").each do |node|
-      @service_object.set_cisco_switch_value(node, 'ip', @service_object.get_cisco_switch_value(node, 'ip'))
-      @service_object.set_cisco_switch_value(node, 'port', @service_object.get_cisco_switch_value(node, 'port'))
-      @nodes[node.handle] = node
-    end
-    render :template => "barclamp/#{@bc_name}/cisco_topology.html.haml"
-  end
-
   def render_switch
     @switch_ip = params[:switch_ip]
     @switch_port = params[:switch_port]
@@ -74,6 +33,27 @@ class QuantumController < BarclampController
     end
     respond_to do |format|
       format.html { render :partial => 'barclamp/quantum/edit_cisco_switch' }
+    end
+  end
+
+  def render_switch_ports
+    @switches = params[:switches]
+    @nodes = {}
+    unless @switches.empty?
+      NodeObject.find("roles:nova-multi-compute-*").each do |node|
+        tmpnode = {}
+        tmpnode["name"] = node.handle
+        @switches.each do |ip,values|
+          if not values["switch_ports"].nil? and ! values["switch_ports"][node.handle].nil?
+            tmpnode["switch_ip"] = ip
+            tmpnode["switch_port"] = values["switch_ports"][node.handle]["switch_port"]
+          end
+        end
+        @nodes[node.handle] = tmpnode
+      end
+    end
+    respond_to do |format|
+      format.html { render :partial => 'barclamp/quantum/edit_cisco_switch_ports' }
     end
   end
 end

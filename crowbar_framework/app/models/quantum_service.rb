@@ -155,16 +155,4 @@ class QuantumService < ServiceObject
     @logger.debug("Quantum apply_role_pre_chef_call: leaving")
   end
 
-  def set_cisco_switch_value(node, value_name, value)
-     return nil if node.crowbar["crowbar"].nil?
-     node.crowbar["crowbar"]["cisco_switch"] = {} if node.crowbar["crowbar"]["cisco_switch"].nil?
-     node.crowbar["crowbar"]["cisco_switch"][value_name] = value
-  end
-
-  def get_cisco_switch_value(node, value_name)
-     return "" if node.crowbar["crowbar"].nil?
-     return "" if node.crowbar["crowbar"]["cisco_switch"].nil?
-     node.crowbar["crowbar"]["cisco_switch"][value_name] || ""
-   end
-
 end
