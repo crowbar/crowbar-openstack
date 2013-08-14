@@ -53,6 +53,18 @@ debs:
     - cinder-volume
     - python-cinder
     - python-keystone
+rpms:
+  centos-6.4:
+    repos:
+      - http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+  redhat-6.4:
+    repos:
+      - http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+  pkgs:
+    - lvm2
+    - openstack-cinder
+    - python-cinder
+    - python-cinderclient
 
 locale_additions:
   en:
