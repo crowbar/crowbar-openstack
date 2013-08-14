@@ -34,12 +34,12 @@ class QuantumController < BarclampController
         begin
           dirty = false
           node = NodeObject.find_node_by_name node_name
-          if !(get_cisco_switch_value(node, 'ip') == values['switch_ip'])
-            set_cisco_switch_value(node, 'ip', values['switch_ip'])
+          if !(@service_object.get_cisco_switch_value(node, 'ip') == values['switch_ip'])
+            @service_object.set_cisco_switch_value(node, 'ip', values['switch_ip'])
             dirty = true
           end
-          if !(get_cisco_switch_value(node, 'port') == values['switch_port'])
-            set_cisco_switch_value(node, 'port', values['switch_port'])
+          if !(@service_object.get_cisco_switch_value(node, 'port') == values['switch_port'])
+            @service_object.set_cisco_switch_value(node, 'port', values['switch_port'])
             dirty = true
           end
           if dirty
@@ -52,26 +52,11 @@ class QuantumController < BarclampController
     end
     @nodes = {}
     NodeObject.find("roles:nova-multi-compute-*").each do |node|
-      set_cisco_switch_value(node, 'ip', get_cisco_switch_value(node, 'ip'))
-      set_cisco_switch_value(node, 'port', get_cisco_switch_value(node, 'port'))
+      @service_object.set_cisco_switch_value(node, 'ip', @service_object.get_cisco_switch_value(node, 'ip'))
+      @service_object.set_cisco_switch_value(node, 'port', @service_object.get_cisco_switch_value(node, 'port'))
       @nodes[node.handle] = node
     end
     render :template => "barclamp/#{@bc_name}/cisco_topology.html.haml"
   end
-
-  private
-
-  def set_cisco_switch_value(node, value_name, value)
-     return nil if node.crowbar["crowbar"].nil?
-     node.crowbar["crowbar"]["cisco_switch"] = {} if node.crowbar["crowbar"]["cisco_switch"].nil?
-     node.crowbar["crowbar"]["cisco_switch"][value_name] = value
-  end
-
-  def get_cisco_switch_value(node, value_name)
-     return "" if node.crowbar["crowbar"].nil?
-     return "" if node.crowbar["crowbar"]["cisco_switch"].nil?
-     node.crowbar["crowbar"]["cisco_switch"][value_name] || ""
-   end
-
 end
 
