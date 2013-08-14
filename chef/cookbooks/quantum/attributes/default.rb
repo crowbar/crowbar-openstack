@@ -90,8 +90,8 @@ else
     :dhcp_agent_name => "quantum-dhcp-agent",
     :l3_agent_name => "quantum-l3-agent",
     :ovs_pkgs => [ "linux-headers-#{`uname -r`.strip}",
-                   "openvswitch-switch",
-                   "openvswitch-datapath-dkms" ],
+                   "openvswitch-datapath-dkms",
+                   "openvswitch-switch" ],
     :user => "quantum",
     :ovs_modprobe => "modprobe openvswitch",
     :quantum_rootwrap_sudo_template => "/etc/sudoers.d/quantum-rootwrap"
