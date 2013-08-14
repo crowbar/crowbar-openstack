@@ -2,13 +2,14 @@
 # Do not edit.
 [SWITCH]
 <% @switches.keys.each do |ip| -%>
-<% @switches[ip].keys.each do |port| -%>
 [[<%=ip%>]]
+<% @switches[ip].keys.each do |port| -%>
 [[[<%=@switches[ip][port][:host]%>]]]
 ports=<%=port%>
+<% end -%>
 [[[ssh_port]]]
 ssh_port=22
-<% end -%>
+
 <% end -%>
 [DRIVER]
 <% if @vlan_mode -%>
