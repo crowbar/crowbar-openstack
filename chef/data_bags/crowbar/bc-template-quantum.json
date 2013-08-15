@@ -37,7 +37,6 @@
       "dhcp_domain": "openstack.local",
       "networking_mode": "gre",
       "networking_plugin": "openvswitch",
-      "cisco_support": false,
       "use_syslog": false,
       "database_instance": "none",
       "db": {

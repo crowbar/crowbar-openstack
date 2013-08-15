@@ -35,7 +35,7 @@ rabbit_password=<%= @rabbit_settings[:password] %>
 rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 <% end -%>
 
-<% if @networking_plugin == 'openvswitch' and @cisco_support -%>
+<% if @networking_plugin == 'cisco' -%>
 core_plugin = quantum.plugins.cisco.network_plugin.PluginV2
 <% elsif @networking_plugin == 'openvswitch' -%>
 core_plugin = quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2
@@ -244,7 +244,7 @@ root_helper=sudo <%=@rootwrap_bin%> /etc/quantum/rootwrap.conf
 polling_interval = 2
 
 [SECURITYGROUP]
-<% if @networking_plugin == 'openvswitch' -%>
+<% if @networking_plugin == 'openvswitch' or @networking_plugin == 'cisco' -%>
 firewall_driver = quantum.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
 <% elsif @networking_plugin == 'linuxbridge' -%>
 firewall_driver = quantum.agent.linux.iptables_firewall.IptablesFirewallDriver
