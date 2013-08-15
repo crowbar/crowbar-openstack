@@ -15,7 +15,7 @@ define :cinder_service, :virtualenv => nil do
     #TODO(agordeev):
     # be carefull, dpkg will not overwrite upstart configs
     # even if it be asked about that by 'confnew' option
-    package cinder_name
+    package cinder_name unless node.platform?(%w{centos redhat})
   end
 
   service cinder_name do
