@@ -153,7 +153,7 @@ cinder_service("volume")
 
 # Restart doesn't work correct for this service.
 bash "restart-tgt_#{@cookbook_name}" do
-  unless node[:platform] == "suse"
+  unless node.platform?(%w{centos redhat suse})
     code <<-EOH
       stop tgt
       start tgt
@@ -167,6 +167,6 @@ end
 service "tgt" do
   supports :status => true, :restart => true, :reload => true
   action :enable
-  service_name "tgtd" if node[:platform] == "suse"
+  service_name "tgtd" if node.platform?(%w{centos redhat suse})
   notifies :run, "bash[restart-tgt_#{@cookbook_name}]"
 end

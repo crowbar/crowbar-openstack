@@ -1,7 +1,7 @@
 define :cinder_service, :virtualenv => nil do
 
   cinder_name="cinder-#{params[:name]}"
-  cinder_name="openstack-cinder-#{params[:name]}" if node.platform == "suse"
+  cinder_name="openstack-cinder-#{params[:name]}" if node.platform?(%w{centos redhat suse})  
 
   cinder_path = "/opt/cinder"
   venv_path = node[:cinder][:use_virtualenv] ? "#{cinder_path}/.venv" : nil
