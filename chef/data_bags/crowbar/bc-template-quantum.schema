@@ -17,6 +17,21 @@
                     "dhcp_domain": { "type": "str", "required": true },
                     "networking_mode": { "type": "str", "required": true },
                     "networking_plugin": { "type": "str", "required": true },
+                    "cisco_switches": {
+                      "type" : "map",
+                      "required" : false,
+                      "mapping" : {
+                        = : {
+                          "type" : "map",
+                          "required" : false,
+                          "mapping" : {
+                            "port": { "type": "str", "required": true },
+                            "user": { "type": "str", "required": true },
+                            "password": { "type": "str", "required": true }
+                          }
+                        }
+                      }
+                    },
                     "git_instance": { "type": "str", "required": true },
                     "git_refspec": { "type": "str", "required": true },
                     "use_gitrepo": { "type": "bool", "required": true },

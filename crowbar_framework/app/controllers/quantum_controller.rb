@@ -58,5 +58,23 @@ class QuantumController < BarclampController
     end
     render :template => "barclamp/#{@bc_name}/cisco_topology.html.haml"
   end
+
+  def render_switch
+    @switch_ip = params[:switch_ip]
+    @switch_port = params[:switch_port]
+    @switch_user = params[:switch_user]
+    @switch_password = params[:switch_password]
+
+    if (@switch_ip.nil? or @switch_ip.empty? or
+        @switch_port.nil? or @switch_port.empty? or
+        @switch_user.nil? or @switch_user.empty? or
+        @switch_password.nil? or @switch_password.empty?)
+      render :text=>"Invalid parameters", :status => 400
+      return
+    end
+    respond_to do |format|
+      format.html { render :partial => 'barclamp/quantum/edit_cisco_switch' }
+    end
+  end
 end
 
