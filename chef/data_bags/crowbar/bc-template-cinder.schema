@@ -54,6 +54,7 @@
                   "type": "map",
                   "required": true,
                   "mapping": {
+                    "netapp_driver": { "type": "str", "required": true},
                     "netapp_wsdl_url": { "type": "str", "required": true },
                     "netapp_server_hostname": { "type": "str", "required": true },
                     "netapp_server_port": { "type": "int", "required": true },

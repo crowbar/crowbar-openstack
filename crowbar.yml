@@ -85,15 +85,18 @@ locale_additions:
           ecom_server_port: Port of the ECOM server
           ecom_server_username: Username for accessing the ECOM server
           ecom_server_password: Password for accessing the ECOM server
+          netapp_driver: NetApp Driver Mode
           netapp_parameters: NetApp Parameters
           netapp_wsdl_url: WSDL URL for NetApp OnCommand Webservices
-          netapp_server_hostname: OnCommand server host name
-          netapp_server_port: OnCommand server port to connect to
-          netapp_login: Login user name for OnCommand installation
-          netapp_password: Login password for OnCommand installation
+          netapp_server_hostname: Server host name
+          netapp_server_port: Server port
+          netapp_login: Login user name
+          netapp_password: Login password
+          netapp_transport_type: NetApp Transport Type
           netapp_storage_service: Storage service to use while provisioning
           netapp_storage_service_prefix: Storage service prefix to use on OnCommand
           netapp_vfiler: The vFiler unit name if using vFiler to host OpenStack volumes
+          netapp_volume_list: Comma separated volume list for provisioning
           eqlx_parameters: EqualLogic Parameters
           eqlx_san_ip: EQLX SAN IP
           eqlx_san_login: EQLX SAN login
