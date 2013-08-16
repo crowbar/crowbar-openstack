@@ -65,6 +65,7 @@ rpms:
     - openstack-cinder
     - python-cinder
     - python-cinderclient
+    - scsi-target-utils
 
 locale_additions:
   en:

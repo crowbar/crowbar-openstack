@@ -134,7 +134,8 @@ end
 
 make_volumes(node,volname)
 
-package "tgt"
+package "tgt" unless node.platform?(%w{centos redhat suse})
+package "scsi-target-utils" if node.platform?(%w{centos redhat})
 if node[:cinder][:use_gitrepo]
   #TODO(agordeev):
   # tgt will not work with iSCSI targets if it has the same configs in conf.d
