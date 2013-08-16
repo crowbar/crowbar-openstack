@@ -13,17 +13,27 @@
 # limitations under the License.
 #
 
-default[:ceilometer][:user] = "ceilometer"
+unless node[:platform] == "suse"
+  default[:ceilometer][:user]="ceilometer"
+  default[:ceilometer][:group]="ceilometer"
+else
+  default[:ceilometer][:user]="openstack-ceilometer"
+  default[:ceilometer][:group]="openstack-ceilometer"
+end
 
-default[:ceilometer][:debug] = true
-default[:ceilometer][:verbose] = true
+default[:ceilometer][:debug] = false
+default[:ceilometer][:verbose] = false
+
+default[:ceilometer][:use_mongodb] = true
 
 default[:ceilometer][:db][:database] = "ceilometer"
 default[:ceilometer][:db][:user] = "ceilometer"
 default[:ceilometer][:db][:password] = "" # Set by Recipe
 
 default[:ceilometer][:keystone_service_user] = "ceilometer"
-default[:ceilometer][:keystone_service_password] = "ceilometer"
+default[:ceilometer][:keystone_service_password] = ""
 
+default[:ceilometer][:api][:protocol] = "http"
 default[:ceilometer][:api][:port] = 8777
-default[:ceilometer][:api][:host] = "0.0.0.0"
+
+default[:ceilometer][:metering_secret] = "" # Set by Recipe

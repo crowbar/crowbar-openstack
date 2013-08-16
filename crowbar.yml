@@ -15,7 +15,7 @@
 barclamp:
   name: ceilometer
   display: Ceilometer
-  description: Ceilometer install
+  description: 'OpenStack Metering: measurements collection for monitoring and metering'
   proposal_schema_version: 1
   version: 0
   requires:
@@ -34,6 +34,7 @@ crowbar:
   order: 101 
   run_order: 101
   chef_order: 101
+  proposal_schema_version: 2
 
 debs:
   ubuntu-12.04:
@@ -60,10 +61,10 @@ locale_additions:
       ceilometer:
         edit_attributes: 
           attributes: Attributes
+          use_mongodb: Use MongoDB instead of standard database
+          database_instance: Database
           keystone_instance: Keystone
           rabbitmq_instance: RabbitMQ
-          keystone_service_user: Service user (for Keystone)
-          keystone_service_password: Service password
       ceilometer_edit_deployment: 
         deployment: Deployment
 

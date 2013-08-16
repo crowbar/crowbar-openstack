@@ -15,6 +15,7 @@
 
 unless node[:ceilometer][:use_gitrepo]
   package "ceilometer-agent-compute" do
+    package_name "openstack-ceilometer-agent-compute" if node.platform == "suse"
     action :install
   end
 else
@@ -48,9 +49,8 @@ end
 include_recipe "#{@cookbook_name}::common"
 
 service "ceilometer-agent-compute" do
+  service_name "openstack-ceilometer-agent-compute" if node.platform == "suse"
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
-
-node.save
