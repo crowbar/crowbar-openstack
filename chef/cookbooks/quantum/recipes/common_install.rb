@@ -24,6 +24,7 @@ end
 case quantum[:quantum][:networking_plugin]
 when "openvswitch"
   quantum_agent = node[:quantum][:platform][:ovs_agent_name]
+  quantum_agent_pkg = node[:quantum][:platform][:ovs_agent_pkg]
 when "linuxbridge"
   quantum_agent = node[:quantum][:platform][:lb_agent_name]
 end
@@ -69,7 +70,7 @@ if quantum[:quantum][:networking_plugin] == "openvswitch"
 end
 
 unless quantum[:quantum][:use_gitrepo]
-  package quantum_agent do
+  package quantum_agent_pkg do
     action :install
   end
 else
@@ -150,15 +151,17 @@ when "openvswitch"
   physnet = quantum[:quantum][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed"
   interface_driver = "quantum.agent.linux.interface.OVSInterfaceDriver"
   external_network_bridge = "br-public"
-
-  service "openvswitch-switch" do
+  
+  openvswitch_service="openvswitch-switch" unless node.platform?(%w{centos redhat suse})
+  openvswitch_service="openvswitch" if node.platform?(%w{centos redhat suse})
+  service "#{openvswitch_service}" do
     supports :status => true, :restart => true
     action [ :enable ]
   end
 
-  bash "Start openvswitch-switch service" do
-    code "service openvswitch-switch start"
-    only_if "service openvswitch-switch status |grep -q 'is not running'"
+  bash "Start #{openvswitch_service} service" do
+    code "service #{openvswitch_service} start"
+    only_if "service #{openvswitch_service} status |grep -q 'is not running'"
   end
 
   # We always need br-int.  Quantum uses this bridge internally.
@@ -264,6 +267,12 @@ end
 
 link plugin_cfg_path do
   to "/etc/quantum/quantum.conf"
+end
+
+if node.platform?(%w{redhat centos})
+ link "/etc/quantum/plugin.ini" do
+   to "/etc/quantum/quantum.conf"
+ end
 end
 
 if quantum_server and quantum[:quantum][:api][:protocol] == 'https'
