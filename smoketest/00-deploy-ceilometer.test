@@ -11,4 +11,87 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
+die() {
+    res=$1
+    shift
+    echo "$@"
+    exit $res
+}
+
+echo "Checking Ceilometer"
+echo "Finding ceilometer server..."
+ceilometer_ip=$(knife_node_find 'roles:ceilometer-server' IP)
+if ! [[ $ceilometer_ip ]]; then
+   die 1 "Could not find ceilometer server."
+fi
+echo "Ceilometer server at $ceilometer_ip. Verifying meters..."
+
+echo "Finding keystone..."
+keystone_ip=$(knife_node_find 'roles:keystone-server' IP)
+if [[ ! $keystone_ip ]]; then
+    die 1 "Cannot find Keystone"
+fi
+
+export OS_AUTH_URL="http://$keystone_ip:5000/v2.0"
+export OS_USERNAME="admin"
+export OS_PASSWORD="crowbar"
+export OS_TENANT_NAME="admin"
+export CEILOMETER_URL="http://$ceilometer_ip:8777"
+
+sudo apt-get install -y python-ceilometerclient
+
+echo "Getting meter-list from ceilometer"
+if ! ceilometer meter-list; then
+  die 1 "Could not get meter-list from ceilometer"
+fi
+
+echo "Getting resource-list from ceilometer"
+if ! ceilometer resource-list; then
+  die 1 "Could not get resource-list from ceilometer"
+fi
+
+echo "Getting project-list from ceilometer"
+if ! ceilometer project-list; then
+  die 1 "Could not get project-list from ceilometer"
+fi
+
+echo "Getting sample-list from ceilometer"
+if ! ceilometer sample-list; then
+  die 1 "Could not get sample-list from ceilometer"
+fi
+
+echo "Getting user-list from ceilometer"
+if ! ceilometer user-list; then
+  die 1 "Could not get user-list from ceilometer"
+fi
+
+echo "Deploying Nova VM."
+
+images=($(nova image-list | grep "ACTIVE" | grep "ubuntu" | grep "\-image" | awk '{print $2}'))
+[[ ! $images ]] && die 1 "Could not find a test image to run on Nova"
+test_image=${images[0]}
+echo -e  "Selected image id: $test_image"
+
+fixed_net=$(quantum net-list |grep fixed |awk '{print $2}')
+instance_name="smoketest"
+nova boot --poll --image "$test_image" --flavor 1 --nic net-id=$fixed_net "$instance_name" --meta description='Use for smoke testing purposes'
+
+until [[ "$(nova list | grep "$instance_name" | awk {'print $6'})" = "ACTIVE" ]]
+  do
+    echo "Sleeping for next 10 seconds"
+    sleep 10;
+  done
+instance_id=$(nova list | grep "$instance_name" | awk '{print $2}')
+echo "Created $instance_name instance with ID: $instance_id"
+
+echo "Getting meter-list for test virtual machine from ceilometer"
+if ! ceilometer meter-list --resource=$instance_id | grep -qs instance; then
+  die 1 "Could not get meter-list for test virtual machine from ceilometer"
+fi
+ceilometer meter-list --resource=$instance_id
+
+echo "Deleting Nova VM."
+nova delete "$instance_id"
+
+echo "Ceilometer check passed."
 exit 0
