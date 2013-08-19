@@ -32,6 +32,7 @@ crowbar:
   order: 94
   run_order: 94
   chef_order: 94
+  proposal_schema_version: 2
 
 locale_additions:
   en:
