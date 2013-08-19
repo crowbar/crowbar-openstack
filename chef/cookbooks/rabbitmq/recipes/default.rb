@@ -46,13 +46,18 @@ template "/etc/rabbitmq/rabbitmq.config" do
   notifies :restart, "service[rabbitmq-server]"
 end
 
-package "rabbitmq-server"
+package "rabbitmq-server" do
+  notifies :restart, "service[rabbitmq-server]", :immediately if node.platform?(%w{"redhat" "centos"})
+end
 package "rabbitmq-server-plugins" if node.platform == "suse"
 
 rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
-
-bash "enabling rabbit management" do
-  code "#{rabbitmq_plugins} enable rabbitmq_management > /dev/null"
-  not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q"
-  notifies :restart, "service[rabbitmq-server]"
+unless node.platform?(%w{"redhat" "centos"})
+#there is no rabbitmq_management plugin for redhat
+  bash "enabling rabbit management" do
+    code "#{rabbitmq_plugins} enable rabbitmq_management > /dev/null"
+    not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q"
+    notifies :restart, "service[rabbitmq-server]"
+  end
 end
+
