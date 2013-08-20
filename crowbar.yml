@@ -51,3 +51,5 @@ rpms:
   pkgs:
     # rabbitmq stuff
     - rabbitmq-server
+extra_files:
+  - http://www.rabbitmq.com/releases/rabbitmq-server/v2.8.7/rabbitmq-server-2.8.7-1.noarch.rpm rabbit
