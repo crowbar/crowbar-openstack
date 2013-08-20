@@ -56,25 +56,26 @@ rabbitmq_plugins = "/usr/sbin/rabbitmq-plugins" if node.platform?(%w{"redhat" "c
 
 if node.platform?(%w{"redhat" "centos"})
   rpm_url = node[:rabbitmq][:rabbitmq_rpm]
-  filename = tarball_url.split('/').last
+  filename = rpm_url.split('/').last
+
+  bash "install proper rabbit server" do
+    code "rpm -Uvh #{File.join("tmp",filename)}"
+    notifies :restart, "service[rabbitmq-server]", :immediately
+    action :nothing
+  end
 
   remote_file rpm_url do
     source rpm_url
     path File.join("tmp",filename)
     action :create_if_missing
+    notifies :run, resources(:bash => "install proper rabbit server"), :immediately
   end
 
-  bash "install proper rabbit server" do
-    code "rpm -Uvh #{File.join("tmp",filename)}"
-    notifies :restart, "service[rabbitmq-server]"
-    action :nothing
-  end
 end
 
 bash "enabling rabbit management" do
   code "#{rabbitmq_plugins} enable rabbitmq_management > /dev/null"
   not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q"
-  notifies :restart, "service[rabbitmq-server]"
-end
+  notifies :restart, "service[rabbitmq-server]", :immediately
 end
 
