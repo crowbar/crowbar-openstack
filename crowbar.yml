@@ -16,7 +16,6 @@ barclamp:
   name: cinder
   display: Cinder
   description: 'Openstack Block Storage: persistent block level storage devices for use with OpenStack compute instances'
-  proposal_schema_version: 1
   version: 0
   requires:
     - '@crowbar'
@@ -34,6 +33,7 @@ crowbar:
   order: 92 
   run_order: 92
   chef_order: 92
+  proposal_schema_version: 2
 
 debs:
   ubuntu-12.04:
