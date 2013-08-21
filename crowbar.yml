@@ -59,6 +59,7 @@ locale_additions:
           ssl_generate_certs: Generate (self-signed) certificates (implies insecure)
           ssl_cert_required: Require Client Certificate
           ssl_ca_certs: SSL CA Certificates File
+          warn_ovs_vlan: This mode only works if the "nova_fixed" and "admin" networks are on different physical interfaces.
 
 debs:
   ubuntu-12.04:
