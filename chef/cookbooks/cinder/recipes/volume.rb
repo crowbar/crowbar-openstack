@@ -58,7 +58,7 @@ def make_volumes(node,volname)
   end
   unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
   claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node,"Cinder")
-  
+
   if (node[:cinder][:volume][:volume_type] == "local")
     Chef::Log.info("Cinder: Using local file volume backing")
     # only OS disk is exists, will use file storage
@@ -78,19 +78,19 @@ def make_volumes(node,volname)
     end
     max_fsize = ((`df -Pk #{encl_dir}`.split("\n")[1].split(" ")[3].to_i * 1024) * 0.90).to_i rescue 0
     fsize = max_fsize if fsize > max_fsize
-    
+
     bash "create local volume file" do
       code "truncate -s #{fsize} #{fname}"
       not_if do
         File.exists?(fname)
       end
     end
-    
+
     bash "setup loop device for volume" do
       code "losetup -f --show #{fname}"
       not_if "losetup -j #{fname} | grep #{fname}"
     end
-    
+
     bash "create volume group" do
       code "vgcreate #{volname} `losetup -j #{fname} | cut -f1 -d:`"
       not_if "vgs #{volname}"
@@ -121,7 +121,11 @@ def make_volumes(node,volname)
   # Now are disks are claimed.  Have our way with them.
   claimed_disks.each do |disk|
     bash "Create physical volume on #{disk.name}" do
-      code "pvcreate -f #{disk.name}"
+      code <<-EOH
+      dd if=/dev/zero of=#{disk.name} bs=1024 count=10
+      blockdev --rereadpt  #{disk.name}
+      pvcreate -f #{disk.name}
+      EOH
       not_if "pvs #{disk.name}"
     end
   end
