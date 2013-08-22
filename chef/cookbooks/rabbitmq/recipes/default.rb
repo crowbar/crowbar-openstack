@@ -61,6 +61,7 @@ if node.platform?(%w{"redhat" "centos"})
   bash "install proper rabbit server" do
     code "rpm -Uvh #{File.join("tmp",filename)}"
     notifies :restart, "service[rabbitmq-server]", :immediately
+    notifies :enable, "service[rabbitmq-server]", :immediately
     action :nothing
   end
 
