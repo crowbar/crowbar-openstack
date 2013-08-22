@@ -76,6 +76,11 @@ debs:
     - quantum-plugin-openvswitch
     - quantum-plugin-openvswitch-agent
     - quantum-server
+    - kernel
+    - iputils
+    - iproute
+    - kernel-firmware
+    - kernel-headers
 rpms:
   centos-6.4:
     repos:
