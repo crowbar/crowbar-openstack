@@ -16,6 +16,7 @@ keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_service_port = keystone["keystone"]["api"]["service_port"]
 keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
 keystone_service_user = node["quantum"]["service_user"]
+keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
 keystone_service_password = node["quantum"]["service_password"]
 keystone_service_url = "#{keystone_protocol}://#{keystone_host}:#{keystone_admin_port}/v2.0"
 Chef::Log.info("Keystone server found at #{keystone_host}")
@@ -48,7 +49,10 @@ template "/etc/quantum/plugins/cisco/credentials.ini" do
   variables(
     :keystone_url => keystone_service_url,
     :keystone_username => keystone_service_user,
-    :keystone_password => keystone_service_password
+    :keystone_password => keystone_service_password,
+    :keystone_tenant => keystone_service_tenant,
+    :switches => quantum[:quantum][:cisco_switches],
+    :vlan_mode => vlan_mode
   )
   notifies :restart, "service[#{node[:quantum][:platform][:service_name]}]"
 end
@@ -79,28 +83,63 @@ template "/etc/quantum/plugins/cisco/l2network_plugin.ini" do
   notifies :restart, "service[#{node[:quantum][:platform][:service_name]}]"
 end
 
-computes = search(:node, "crowbar_cisco_switch_ip:* AND crowbar_cisco_switch_port:*") or []
 switches = {}
-computes.each do |compute|
-  next if compute[:crowbar].nil?
-  next if compute[:crowbar][:cisco_switch].nil?
-  next if compute[:crowbar][:cisco_switch][:ip].nil?
-  next if compute[:crowbar][:cisco_switch][:port].nil?
-  ip = compute[:crowbar][:cisco_switch][:ip]
-  port = compute[:crowbar][:cisco_switch][:port]
-  if ip.length and port.length
-    switches[ip] = {} if switches[ip].nil?
-    switches[ip][port] = {} if switches[ip][port].nil?
-    switches[ip][port][:host] = compute[:hostname]
+if vlan_mode
+  computes = search(:node, "crowbar_cisco_switch_ip:* AND crowbar_cisco_switch_port:*") or []
+  switches = quantum[:quantum][:cisco_switches].to_hash;
+
+  computes.each do |compute|
+    next if compute[:crowbar].nil?
+    next if compute[:crowbar][:cisco_switch].nil?
+    next if compute[:crowbar][:cisco_switch][:ip].nil?
+    next if compute[:crowbar][:cisco_switch][:port].nil?
+    ip = compute[:crowbar][:cisco_switch][:ip]
+    if ! switches.has_key?(ip)
+      Chef::Log.error("No switch with address #{ip} defined in the quantum proposal, skipping.")
+      next
+    end
+    switches[ip][:nodes] = [] if !switches[ip].has_key?(:nodes)
+
+    port = compute[:crowbar][:cisco_switch][:port]
+
+    switch_node = {}
+    switch_node[:hostname] = compute[:hostname]
+    switch_node[:switch_port] = port
+
+    switches[ip][:nodes] << switch_node
   end
 end
+
 template "/etc/quantum/plugins/cisco/nexus.ini" do
   cookbook "quantum"
   source "cisco_nexus.ini.erb"
   mode "0640"
   owner node[:quantum][:platform][:user]
   variables(
-    :switches => switches
+    :switches => switches,
+    :vlan_mode => vlan_mode
   )
   notifies :restart, "service[#{node[:quantum][:platform][:service_name]}]"
+end
+
+ssh_keys = ""
+switches.keys.each do |ip|
+  ssh_keys << `ssh-keyscan #{ip} 2> /dev/null`
+end
+
+homedir = `getent passwd #{node[:quantum][:platform][:user]}`.split(':')[5]
+
+directory "#{homedir}/.ssh" do
+  mode 0700
+  owner node[:quantum][:platform][:user]
+  action :create
+end
+
+template "#{homedir}/.ssh/known_hosts" do
+  source "ssh_known_hosts.erb"
+  mode "0640"
+  owner node[:quantum][:platform][:user]
+  variables(
+    :host_keys => ssh_keys
+  )
 end

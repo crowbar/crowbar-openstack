@@ -1,15 +1,19 @@
 # Managed by Crowbar.
 # Do not edit.
+<% if @vlan_mode -%>
 [SWITCH]
 <% @switches.keys.each do |ip| -%>
 [[<%=ip%>]]
-<% @switches[ip].keys.each do |port| -%>
-[[[<%=@switches[ip][port][:host]%>]]]
-ports=<%=port%>
+<% if @switches[ip].has_key?(:nodes) -%>
+<% @switches[ip][:nodes].each do |switch_node| -%>
+[[[<%=switch_node[:hostname]%>]]]
+ports=<%=switch_node[:switch_port]%>
+<% end -%>
 <% end -%>
 [[[ssh_port]]]
-ssh_port=22
+ssh_port=<%=@switches[ip][:port]%>
 
+<% end -%>
 <% end -%>
 [DRIVER]
 <% if @vlan_mode -%>
