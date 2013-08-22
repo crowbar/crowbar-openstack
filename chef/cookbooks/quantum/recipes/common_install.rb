@@ -399,3 +399,31 @@ else
     subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   end
 end
+
+
+if node.platform?(%w{centos redhat})
+  net_core_pkgs=%w(kernel iproute iputils)
+
+
+  ruby_block "unset_reboot" do
+    block do
+      node.set[:reboot] = "complete"
+      node.save
+    end
+    action :create
+  end
+  ruby_block "set_reboot" do
+    block do
+      node.set[:reboot] = "require"
+      node.save
+    end
+    action :nothing
+  end
+  net_core_pkgs.each do |pkg|
+    package "#{pkg}" do
+      action :upgrade
+      notifies :create, "ruby_block[set_reboot]"
+    end
+  end
+  
+end
