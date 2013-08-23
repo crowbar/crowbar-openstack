@@ -412,18 +412,22 @@ if node.platform?(%w{centos redhat})
     end
     action :create
   end
+
   ruby_block "set_reboot" do
     block do
       node.set[:reboot] = "require"
       node.save
     end
-    action :nothing
+    action :create
+    not_if "uname -a | grep 'openstack'"
   end
+
   net_core_pkgs.each do |pkg|
     package "#{pkg}" do
       action :upgrade
       notifies :create, "ruby_block[set_reboot]"
     end
   end
-  
+
 end
+
