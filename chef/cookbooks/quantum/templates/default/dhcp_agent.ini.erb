@@ -6,12 +6,7 @@ resync_interval = <%= @resync_interval %>
 interface_driver = <%= @interface_driver %>
 dhcp_driver = <%= @dhcp_driver %>
 dhcp_domain = <%= @dhcp_domain %>
-<% if node.platform?(%w{"redhat" "centos"}) %>
-#rhel not support for namespaces
-use_namespaces = False
-<% else %>
 use_namespaces = <%= @use_namespaces %>
-<% end %>
 enable_isolated_metadata = <%= @enable_isolated_metadata %>
 enable_metadata_network = <%= @enable_metadata_network %>
 <% if @nameservers -%>

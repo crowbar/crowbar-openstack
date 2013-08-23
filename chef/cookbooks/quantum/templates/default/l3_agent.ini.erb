@@ -3,12 +3,7 @@
 [DEFAULT]
 debug = <%= @debug ? "True" : "False" %>
 interface_driver = <%= @interface_driver %>
-<% if node.platform?(%w{"redhat" "centos"}) %>
-#rhel not support for namespaces
-use_namespaces = False
-<% else %>
 use_namespaces = <%= @use_namespaces %>
-<% end %>
 handle_internal_only_routers = <%= @handle_internal_only_routers %>
 metadata_port = <%= @metadata_port %>
 send_arp_for_ha = <%= @send_arp_for_ha %>
