@@ -404,13 +404,6 @@ end
 if node.platform?(%w{centos redhat})
   net_core_pkgs=%w(kernel iproute iputils)
 
-  #quantum tries to use v6 ip utils but rhel not support for v6, so lets workaround this issue this way
-  link "/sbin/ip6tables-restore" do
-    to "/bin/true"
-  end
-  link "/sbin/ip6tables-save" do
-    to "/bin/true"
-  end
 
 
   ruby_block "unset_reboot" do
@@ -436,6 +429,12 @@ if node.platform?(%w{centos redhat})
       notifies :create, "ruby_block[set_reboot]"
     end
   end
-
+  #quantum tries to use v6 ip utils but rhel not support for v6, so lets workaround this issue this way
+  link "/sbin/ip6tables-restore" do
+    to "/bin/true"
+  end
+  link "/sbin/ip6tables-save" do
+    to "/bin/true"
+  end
 end
 
