@@ -78,6 +78,7 @@ rpms:
     - mysql
     - ruby-mysql
     - mysql-server
+    - python-psycopg2
 gems:
   pkgs:
     - pg
