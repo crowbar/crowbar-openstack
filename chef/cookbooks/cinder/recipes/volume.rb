@@ -120,7 +120,11 @@ def make_volumes(node,volname)
   # Now are disks are claimed.  Have our way with them.
   claimed_disks.each do |disk|
     bash "Create physical volume on #{disk.name}" do
-      code "pvcreate -f #{disk.name}"
+      code <<-EOH
+      dd if=/dev/zero of=#{disk.name} bs=1024 count=10
+      blockdev --rereadpt  #{disk.name}
+      pvcreate -f #{disk.name}
+      EOH
       not_if "pvs #{disk.name}"
     end
   end
