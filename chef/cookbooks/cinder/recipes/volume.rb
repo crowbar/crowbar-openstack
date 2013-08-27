@@ -58,7 +58,7 @@ def make_volumes(node,volname)
   end
   unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
   claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node,"Cinder")
-  
+
   if (node[:cinder][:volume][:volume_type] == "local")
     Chef::Log.info("Cinder: Using local file volume backing")
     # only OS disk is exists, will use file storage
@@ -78,19 +78,19 @@ def make_volumes(node,volname)
     end
     max_fsize = ((`df -Pk #{encl_dir}`.split("\n")[1].split(" ")[3].to_i * 1024) * 0.90).to_i rescue 0
     fsize = max_fsize if fsize > max_fsize
-    
+
     bash "create local volume file" do
       code "truncate -s #{fsize} #{fname}"
       not_if do
         File.exists?(fname)
       end
     end
-    
+
     bash "setup loop device for volume" do
       code "losetup -f --show #{fname}"
       not_if "losetup -j #{fname} | grep #{fname}"
     end
-    
+
     bash "create volume group" do
       code "vgcreate #{volname} `losetup -j #{fname} | cut -f1 -d:`"
       not_if "vgs #{volname}"
@@ -101,14 +101,13 @@ def make_volumes(node,volname)
     raise "There is no suitable disks for cinder"
   elsif claimed_disks.empty?
     Chef::Log.info("Cinder: Using raw disks for volume backing.")
-    raw_mode = node[:cinder][:volume][:cinder_raw_method]
-    if raw_mode == "first"
+    if node[:cinder][:volume][:cinder_raw_method] == "first"
       raw_list = [unclaimed_disks.first]
     else
       raw_list = unclaimed_disks
     end
     # Now, we have the final list of devices to claim, so claim them
-    claimed_disks = unclaimed_disks.select do |d|
+    claimed_disks = raw_list.select do |d|
       if d.claim("Cinder")
         Chef::Log.info("Cinder: Claimed #{d.name}")
         true
