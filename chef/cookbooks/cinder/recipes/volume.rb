@@ -144,9 +144,10 @@ if node[:cinder][:use_gitrepo]
   cookbook_file "/etc/tgt/conf.d/cinder-volume.conf" do
     source "cinder-volume.conf"
   end
-elsif node[:platform] == "suse"
+elsif node.platform?(%w{centos redhat suse})
   cookbook_file "/etc/tgt/targets.conf" do
     source "cinder-volume.conf"
+    notifies :restart, "service[tgt]"
   end
 end
 
