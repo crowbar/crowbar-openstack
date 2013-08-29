@@ -14,6 +14,14 @@
 # limitations under the License.
 #
 
+unless node[:platform] == "suse"
+  override[:quantum][:user]="quantum"
+  override[:quantum][:group]="quantum"
+else
+  override[:quantum][:user]="openstack-quantum"
+  override[:quantum][:group]="openstack-quantum"
+end
+
 default[:quantum][:debug] = false
 default[:quantum][:verbose] = false
 default[:quantum][:dhcp_domain] = "openstack.local"
