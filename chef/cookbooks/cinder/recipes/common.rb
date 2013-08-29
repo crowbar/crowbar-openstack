@@ -72,7 +72,7 @@ if node[:cinder][:use_gitrepo]
     not_if {File.exists?("/etc/cinder/rootwrap.d")}
   end
 else
-  unless node.platform?(%w{centos redhat suse})
+  unless %w(redhat centos suse).include?(node.platform)
     package "cinder-common"
     package "python-mysqldb"
     package "python-cinder"
