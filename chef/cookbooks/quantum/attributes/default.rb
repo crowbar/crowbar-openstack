@@ -100,7 +100,7 @@ else
                "quantum-metadata-agent" ],
     :service_name => "quantum-server",
     :ovs_agent_pkg => "quantum-plugin-openvswitch-agent",
-    :ovs_agent_name => "quantum-plugin-openvswitch",
+    :ovs_agent_name => "quantum-plugin-openvswitch-agent",
     :lb_agent_pkg => "quantum-plugin-linuxbridge-agent",
     :lb_agent_name => "quantum-plugin-linuxbridge-agent",
     :metadata_agent_name => "quantum-metadata-agent",
