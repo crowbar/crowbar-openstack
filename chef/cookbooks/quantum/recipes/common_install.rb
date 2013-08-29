@@ -267,25 +267,17 @@ link plugin_cfg_path do
 end
 
 if quantum_server and quantum[:quantum][:api][:protocol] == 'https'
-  if quantum[:quantum][:ssl][:generate_certs]
+  if !(::File.exists? node[:quantum][:ssl][:certfile] and ::File.exists? node[:quantum][:ssl][:keyfile]) and quantum[:quantum][:ssl][:generate_certs]
     package "openssl"
-
     require "fileutils"
-    [:certfile, :keyfile, :ca_certs].each do |k|
+
+    Chef::Log.info("Generating SSL certificate for quantum...")
+
+    [:certfile, :keyfile].each do |k|
       dir = File.dirname(quantum[:quantum][:ssl][k])
-      if File.exists?(dir)
-        FileUtils.chown_R quantum[:quantum][:user], quantum[:quantum][:group], dir
-      else
-        FileUtils.mkdir_p(dir) {|d| File.chown quantum[:quantum][:user], quantum[:quantum][:group], d}
-      end
+      FileUtils.mkdir_p(dir) unless File.exists?(dir)
     end
 
-    # Some more ownership fixes:
-    conf_dir = File.dirname quantum[:quantum][:ssl][:ca_certs]
-    FileUtils.chown "root", quantum[:quantum][:group], conf_dir
-    FileUtils.chown "root", quantum[:quantum][:group], File.expand_path("#{conf_dir}/..")  # /etc/quantum/ssl
-
-    require "fileutils"
     # Generate private key
     %x(openssl genrsa -out #{quantum[:quantum][:ssl][:keyfile]} 4096)
     if $?.exitstatus != 0
@@ -293,9 +285,11 @@ if quantum_server and quantum[:quantum][:api][:protocol] == 'https'
       Chef::Log.fatal(message)
       raise message
     end
-    FileUtils.chown quantum[:quantum][:user], quantum[:quantum][:group], quantum[:quantum][:ssl][:keyfile]
+    FileUtils.chown "root", quantum[:quantum][:group], quantum[:quantum][:ssl][:keyfile]
+    FileUtils.chmod 0640, node[:quantum][:ssl][:keyfile]
 
     # Generate certificate signing requests (CSR)
+    conf_dir = File.dirname quantum[:quantum][:ssl][:certfile]
     ssl_csr_file = "#{conf_dir}/signing_key.csr"
     ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{quantum[:fqdn]}\""
     %x(openssl req -new -key #{quantum[:quantum][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
