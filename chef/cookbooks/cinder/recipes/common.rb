@@ -195,23 +195,16 @@ else
 end
 
 if node[:cinder][:api][:protocol] == 'https'
-  if node[:cinder][:ssl][:generate_certs]
+  if !(::File.exists? node[:cinder][:ssl][:certfile] and ::File.exists? node[:cinder][:ssl][:keyfile]) and node[:cinder][:ssl][:generate_certs]
     package "openssl"
-
     require "fileutils"
-    [:certfile, :keyfile, :ca_certs].each do |k|
-      dir = File.dirname(node[:cinder][:ssl][k])
-      if File.exists?(dir)
-        FileUtils.chown_R node[:cinder][:user], node[:cinder][:group], dir
-      else
-        FileUtils.mkdir_p(dir) {|d| File.chown node[:cinder][:user], node[:cinder][:group], d}
-      end
-    end
 
-    # Some more ownership fixes:
-    conf_dir = File.dirname node[:cinder][:ssl][:ca_certs]
-    FileUtils.chown "root", node[:cinder][:group], conf_dir
-    FileUtils.chown "root", node[:cinder][:group], File.expand_path("#{conf_dir}/..")  # /etc/cinder/ssl
+    Chef::Log.info("Generating SSL certificate for cinder...")
+
+    [:certfile, :keyfile].each do |k|
+      dir = File.dirname(node[:cinder][:ssl][k])
+      FileUtils.mkdir_p(dir) unless File.exists?(dir)
+    end
 
     # Generate private key
     %x(openssl genrsa -out #{node[:cinder][:ssl][:keyfile]} 4096)
@@ -220,9 +213,11 @@ if node[:cinder][:api][:protocol] == 'https'
       Chef::Log.fatal(message)
       raise message
     end
-    FileUtils.chown node[:cinder][:user], node[:cinder][:group], node[:cinder][:ssl][:keyfile]
+    FileUtils.chown "root", node[:cinder][:group], node[:cinder][:ssl][:keyfile]
+    FileUtils.chmod 0640, node[:cinder][:ssl][:keyfile]
 
     # Generate certificate signing requests (CSR)
+    conf_dir = File.dirname node[:cinder][:ssl][:certfile]
     ssl_csr_file = "#{conf_dir}/signing_key.csr"
     ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{node[:fqdn]}\""
     %x(openssl req -new -key #{node[:cinder][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
