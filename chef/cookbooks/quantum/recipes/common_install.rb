@@ -152,8 +152,8 @@ when "openvswitch"
   interface_driver = "quantum.agent.linux.interface.OVSInterfaceDriver"
   external_network_bridge = "br-public"
   
-  openvswitch_service="openvswitch-switch" unless node.platform?(%w{centos redhat suse})
-  openvswitch_service="openvswitch" if node.platform?(%w{centos redhat suse})
+  openvswitch_service="openvswitch-switch" unless %w(redhat centos suse).include?(node.platform)
+  openvswitch_service="openvswitch" if %w(redhat centos suse).include?(node.platform)
   service "#{openvswitch_service}" do
     supports :status => true, :restart => true
     action [ :enable ]
@@ -269,7 +269,7 @@ link plugin_cfg_path do
   to "/etc/quantum/quantum.conf"
 end
 
-if node.platform?(%w{redhat centos})
+if %w(redhat centos).include?(node.platform)
  link "/etc/quantum/plugin.ini" do
    to "/etc/quantum/quantum.conf"
  end
@@ -401,7 +401,7 @@ else
 end
 
 
-if node.platform?(%w{centos redhat})
+if %w(redhat centos).include?(node.platform)
   net_core_pkgs=%w(kernel iproute iputils)
 
 
