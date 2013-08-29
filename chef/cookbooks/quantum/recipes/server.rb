@@ -266,6 +266,17 @@ end
 # started before all configuration files get written.
 services_to_restart = []
 
+ruby_block "mark the l3-agent as restart for post-install" do
+  block do
+    unless services_to_restart.include?(node[:quantum][:platform][:l3_agent_name])
+      services_to_restart << node[:quantum][:platform][:l3_agent_name]
+    end
+  end
+  action :nothing
+  subscribes :create, resources("template[/etc/quantum/l3_agent.ini]"), :immediately
+  subscribes :create, resources("template[/etc/quantum/quantum.conf]"), :immediately
+end
+
 ruby_block "mark quantum-server as restart for post-install" do
   block do
     _service_name = node[:quantum][:platform][:service_name]
