@@ -66,7 +66,6 @@ locale_additions:
           database_instance: Database Instance 
           keystone_instance: Keystone
           glance_instance: Glance
-          volume_header: Volume options
           volume_type: Type of Volume
           volume_type_raw: Raw devices
           volume_type_local: Local file
@@ -115,8 +114,8 @@ locale_additions:
           manual_volume_driver_hint: For instance, cinder.volume.drivers.netapp.iscsi.NetAppISCSIDriver
           manual_volume_config: Options
           manual_volume_config_hint: Each line will be added to cinder.conf. If the driver needs an external file, this file must be manually uploaded.
+          ssl_header: SSL Support
           protocol: Protocol
-          ssl: SSL Attributes
           ssl_insecure: SSL Certificate is insecure (for instance, auto-signed)
           ssl_certfile: SSL Certificate File
           ssl_keyfile: SSL (Private) Key File
