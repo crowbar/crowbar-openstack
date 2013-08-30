@@ -91,6 +91,7 @@ unless node[:ceilometer][:use_gitrepo]
     package "ceilometer-common"
     package "ceilometer-collector"
     package "ceilometer-api"
+    package "python-ceilometerclient"
   else
     package "openstack-ceilometer-collector"
     package "openstack-ceilometer-api"
@@ -101,7 +102,7 @@ else
   pfs_and_install_deps("ceilometer")
   link_service "ceilometer-collector"
   link_service "ceilometer-api"
-  create_user_and_dirs("ceilometer") 
+  create_user_and_dirs("ceilometer")
   execute "cp_policy.json" do
     command "cp #{ceilometer_path}/etc/ceilometer/policy.json /etc/ceilometer"
     creates "/etc/ceilometer/policy.json"
