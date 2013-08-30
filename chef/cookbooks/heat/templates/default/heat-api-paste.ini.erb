@@ -72,19 +72,19 @@ paste.filter_factory = heat.common.context:ContextMiddleware_filter_factory
 
 [filter:authtoken]
 paste.filter_factory = heat.common.auth_token:filter_factory
-service_protocol = http
-service_host = 127.0.0.1
+service_protocol = <%= @keystone_protocol %>
+service_host = <%= @keystone_service_user %>
 service_port = 5000
-auth_host = 127.0.0.1
+auth_host = <%= @keystone_host %>
 auth_port = 35357
-auth_protocol = http
+auth_protocol = <%= @keystone_protocol %>
 auth_uri = http://127.0.0.1:35357/v2.0
 
 # These must be set to your local values in order for the token
 # authentication to work.
-admin_tenant_name = service
-admin_user = heat
-admin_password = verybadpass
+admin_tenant_name = <%= @keystone_service_tenant %>
+admin_user =  <%= @keystone_service_user %>
+admin_password = <%= @keystone_service_password %>
 
 [filter:auth-context]
 paste.filter_factory = heat.common.wsgi:filter_factory

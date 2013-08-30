@@ -199,7 +199,6 @@ keystone_register "register Heat Service" do
   action :add_service
 end
 
-
 keystone_register "register heat endpoint" do
   protocol keystone_protocol
   host keystone_host
@@ -235,6 +234,25 @@ template "/etc/heat/heat-api.conf" do
     )
 end
 
+template "/etc/heat/heat-api-paste.ini" do
+    source "heat-api-paste.ini.erb"
+    owner node[:heat][:user]
+    group "root"
+    mode "0640"
+    variables(
+      :debug => node[:heat][:debug],
+      :verbose => node[:heat][:verbose],
+      :keystone_protocol => keystone_protocol,
+      :keystone_host => keystone_host,
+      :keystone_auth_token => keystone_token,
+      :keystone_service_port => keystone_service_port,
+      :keystone_service_user => keystone_service_user,
+      :keystone_service_password => keystone_service_password,
+      :keystone_service_tenant => keystone_service_tenant,
+      :keystone_admin_port => keystone_admin_port,
+      :api_port => node[:heat][:api][:port]
+    )
+end
 
 service "heat-api" do
   service_name "openstack-heat-api" if node.platform == "suse"
@@ -242,7 +260,6 @@ service "heat-api" do
   action :enable
   subscribes :restart, resources("template[/etc/heat/heat-api.conf]")
 end
-
 
 template "/etc/heat/heat-api-cfn.conf" do
     source "heat-api-cfn.conf.erb"
@@ -263,6 +280,28 @@ template "/etc/heat/heat-api-cfn.conf" do
       :cfn_port => node[:heat][:api][:cfn_port]
     )
 end
+
+template "/etc/heat/heat-api-cfn-paste.ini" do
+    source "heat-api-cfn-paste.ini.erb"
+    owner node[:heat][:user]
+    group "root"
+    mode "0640"
+    variables(
+      :debug => node[:heat][:debug],
+      :verbose => node[:heat][:verbose],
+      :keystone_protocol => keystone_protocol,
+      :keystone_host => keystone_host,
+      :keystone_auth_token => keystone_token,
+      :keystone_service_port => keystone_service_port,
+      :keystone_service_user => keystone_service_user,
+      :keystone_service_password => keystone_service_password,
+      :keystone_service_tenant => keystone_service_tenant,
+      :keystone_admin_port => keystone_admin_port,
+      :cfn_port => node[:heat][:api][:cfn_port]
+    )
+end
+
+
 
 service "heat-api-cfn" do
   service_name "openstack-heat-api-cfn" if node.platform == "suse"
