@@ -318,8 +318,8 @@ template "/etc/heat/heat-engine.conf" do
     )
 end
 
-service "heat-api-engine" do
-  service_name "openstack-heat-api-engine" if node.platform == "suse"
+service "heat-engine" do
+  service_name "openstack-heat-engine" if node.platform == "suse"
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/heat/heat-engine.conf]")

@@ -31,7 +31,10 @@
               "required": true,
               "mapping": {
                 "protocol": { "type": "str", "required": true },
-                "port": { "type": "int", "required": true }
+                "port": { "type": "int", "required": true },
+                "cfn_port": { "type": "int", "required": true },
+                "engine_port": { "type": "int", "required": true },
+                "cw_port": { "type": "int", "required": true }
               }
             },
             "db": {

@@ -74,7 +74,10 @@
       ],
       "api": {
         "protocol": "http",
-        "port": 8777
+        "cfn_port": 8000,
+        "engine_port": 8001,
+        "cw_port": 8003,
+        "port": 8004
       },
       "db": {
         "password": "",
