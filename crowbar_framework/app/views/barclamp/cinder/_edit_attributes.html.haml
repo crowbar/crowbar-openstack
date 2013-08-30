@@ -13,9 +13,6 @@
     %p
       %label{ :for => :volume_type }= t('.volume_type')
       = select_tag :volume_type, options_for_select([[t('.volume_type_raw'),'raw'], [t('.volume_type_local'), 'local'], ['NetApp', 'netapp'], ['EMC', 'emc'], ['EqualLogic','eqlx'], [t('.volume_type_manual'), 'manual']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_type"].to_s), :onchange => "update_volume_type_view(); update_value('volume/volume_type', 'volume_type', 'string')"
-    %p
-      %label{ :for => :volume_name }= t('.volume_name')
-      %input#volume_name{:type => "text", :name => "volume_name", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_name"], :onchange => "update_value('volume/volume_name','volume_name', 'string')"}
 
     %div{ :id => 'netapp_parameters', :class => 'container' }
       %label.section-header{ :for => :netapp_div }= t('.netapp_parameters')
@@ -112,12 +109,18 @@
         %p
         %label{ :for => :local_size }= t('.volume_file_size')
         %input#local_size{:type => "text", :name => "local_size", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["local_size"], :onchange => "update_value('volume/local_size','local_size', 'integer')"}
+        %p
+          %label{ :for => :volume_name_file }= t('.volume_name')
+          %input.volume_name#volume_name_file{:type => "text", :name => "volume_name_file", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_name"], :onchange => "update_value('volume/volume_name','volume_name_file', 'string')"}
 
     %div{ :id => 'volume_disk_parameters', :class => 'container' }
       %label.section-header{ :for => :volume_disk_div }= t('.volume_disk_parameters')
       %div.section{ :id => :volume_disk_div }
         %label{ :for => :cinder_raw_method }= t('.volume_raw_mode')
         = select_tag :cinder_raw_method, options_for_select([['first','first'], ['all', 'all']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["cinder_raw_method"].to_s), :onchange => "update_value('volume/cinder_raw_method', 'cinder_raw_method', 'string')"
+        %p
+          %label{ :for => :volume_name_disk }= t('.volume_name')
+          %input.volume_name#volume_name_disk{:type => "text", :name => "volume_name_disk", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_name"], :onchange => "update_value('volume/volume_name','volume_name_disk', 'string')"}
 
     %div{ :id => 'manual_parameters', :class => 'container' }
       %label.section-header{ :for => :manual_div }= t('.manual_parameters')
@@ -161,7 +164,6 @@
 
 :javascript
   function update_volume_type_view() {
-    var proposal_data = JSON.parse($("input#proposal_attributes").val());
     var choice = $("select#volume_type").val();
     $('div#emc_parameters').toggle(choice == 'emc');
     $('div#netapp_parameters').toggle(choice == 'netapp');
@@ -169,6 +171,18 @@
     $('div#manual_parameters').toggle(choice == 'manual');
     $('div#volume_file_parameters').toggle(choice == 'local');
     $('div#volume_disk_parameters').toggle(choice == 'raw');
+  }
+
+  function update_volume_name() {
+    var choice = $("select#volume_type").val();
+
+    if (choice == 'local') {
+      var value = $("#volume_name_file").val();
+      $('#volume_name_disk').attr('value', value);
+    } else if (choice == 'raw') {
+      var value = $("#volume_name_disk").val();
+      $('#volume_name_file').attr('value', value);
+    }
   }
 
   function toggle_protocol() {
@@ -201,6 +215,7 @@
     toggle_ssl_generate_certs();
   });
 
+  $('.volume_name').change(update_volume_name);
   $('#protocol').change(toggle_protocol);
   $('#ssl_cert_required').change(toggle_ssl_cert_required);
   $('#ssl_generate_certs').change(toggle_ssl_generate_certs);
