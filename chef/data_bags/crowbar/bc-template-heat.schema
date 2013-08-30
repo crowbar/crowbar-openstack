@@ -1,0 +1,121 @@
+{
+  "type": "map",
+  "required": true,
+  "mapping": {
+    "id": { "type": "str", "required": true, "pattern": "/^bc-heat-|^bc-template-heat$/" },
+    "description": { "type": "str", "required": true },
+    "attributes": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "heat": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "debug": { "type": "bool", "required": true },
+            "verbose": { "type": "bool", "required": true },
+            "database_instance": { "type": "str", "required": true },
+            "rabbitmq_instance": { "type": "str", "required": true },
+            "keystone_instance": { "type": "str", "required": true },
+            "keystone_service_user": { "type": "str", "required": true },
+            "keystone_service_password": { "type": "str", "required": true },
+            "gitrepo": { "type": "str", "required": true },
+            "git_instance": { "type": "str", "required": true },
+            "git_refspec": { "type": "str", "required": true },
+            "use_gitrepo": { "type": "bool", "required": true },
+            "use_gitbarclamp": { "type": "bool", "required": true },
+            "use_pip_cache": { "type": "bool", "required": true },
+            "pfs_deps": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ]},
+            "api": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "protocol": { "type": "str", "required": true },
+                "port": { "type": "int", "required": true }
+              }
+            },
+            "db": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "password": { "type": "str", "required": true },
+                "user": { "type": "str", "required": true },
+                "database": { "type": "str", "required": true }
+              }
+            }
+          }
+        }
+      }
+    },
+    "deployment": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "heat": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "crowbar-revision": { "type": "int", "required": true },
+            "crowbar-committing": { "type": "bool" },
+            "crowbar-status": { "type": "str" },
+            "crowbar-failed": { "type": "str" },
+            "crowbar-queued": { "type": "bool" },
+            "element_states": {
+              "type": "map",
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "elements": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "element_order": {
+              "type": "seq",
+              "required": true,
+              "sequence": [ {
+                "type": "seq",
+                "sequence": [ { "type": "str" } ]
+              } ]
+            },
+            "element_run_list_order": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                = : {
+                  "type": "int",
+                  "required": true
+                }
+              }
+            },
+            "config": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "environment": { "type": "str", "required": true },
+                "mode": { "type": "str", "required": true },
+                "transitions": { "type": "bool", "required": true },
+                "transition_list": {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,69 @@
+# Copyright 2013, SUSE Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+barclamp:
+  name: heat
+  display: Heat
+  description: 'OpenStack Orchestration: orchestrate multiple composite cloud applications using the AWS CloudFormation template format'
+  proposal_schema_version: 1
+  version: 0
+  requires:
+    - '@crowbar'
+    - git
+    - database
+    - rabbitmq
+    - keystone
+  member:
+    - openstack 
+  os_support:
+    - ubuntu-12.04
+
+crowbar:
+  layout: 1
+  order: 101 
+  run_order: 101
+  chef_order: 101
+  proposal_schema_version: 2
+
+debs:
+  ubuntu-12.04:
+    repos:
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
+  pkgs:
+    - heat-api
+    - python-heat
+    - python-heatclient
+    - python-keystone
+
+locale_additions:
+  en:
+    nav:
+      heat: Heat
+    barclamp:
+      heat:
+        edit_attributes: 
+          attributes: Attributes
+          verbose: Setup Verbose Logging
+          database_instance: Database
+          keystone_instance: Keystone
+          rabbitmq_instance: RabbitMQ
+      heat_edit_deployment: 
+        deployment: Deployment
+
+pips:
+  - python-heatclient>=1.0.0
+
+git_repo:
+  - heat http://github.com/openstack/heat.git stable/grizzly
