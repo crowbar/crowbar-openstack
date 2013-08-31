@@ -103,6 +103,24 @@ directory "/var/cache/heat" do
   action :create
 end unless node.platform == "suse"
 
+env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{node[:heat][:rabbitmq_instance]}"
+rabbits = search(:node, "roles:rabbitmq-server#{env_filter}") || []
+if rabbits.length > 0
+  rabbit = rabbits[0]
+  rabbit = node if rabbit.name == node.name
+else
+  rabbit = node
+end
+rabbit_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(rabbit, "admin").address
+Chef::Log.info("Rabbit server found at #{rabbit_address}")
+rabbit_settings = {
+  :address => rabbit_address,
+  :port => rabbit[:rabbitmq][:port],
+  :user => rabbit[:rabbitmq][:user],
+  :password => rabbit[:rabbitmq][:password],
+  :vhost => rabbit[:rabbitmq][:vhost]
+}
+
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:heat][:keystone_instance]}"
 keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
 if keystones.length > 0
@@ -134,6 +152,23 @@ if my_public_host.nil? or my_public_host.empty?
     my_public_host = 'public.'+node[:fqdn]
   end
 end
+
+db_password = ''
+if node.roles.include? "heat-server"
+  # password is already created because common recipe comes
+  # after the server recipe
+  db_password = node[:heat][:db][:password]
+else
+  # pickup password to database from heat-server node
+  node_controllers = search(:node, "roles:heat-server") || []
+  if node_controllers.length > 0
+    db_password = node_controllers[0][:heat][:db][:password]
+  end
+end
+
+
+db_connection = "#{backend_name}://#{node[:heat][:db][:user]}:#{db_password}@#{sql_address}/#{node[:heat][:db][:database]}"
+
 
 # run heat-db-setup
 
@@ -222,6 +257,7 @@ template "/etc/heat/heat-api.conf" do
     variables(
       :debug => node[:heat][:debug],
       :verbose => node[:heat][:verbose],
+      :rabbit_settings => rabbit_settings,
       :keystone_protocol => keystone_protocol,
       :keystone_host => keystone_host,
       :keystone_auth_token => keystone_token,
@@ -230,7 +266,8 @@ template "/etc/heat/heat-api.conf" do
       :keystone_service_password => keystone_service_password,
       :keystone_service_tenant => keystone_service_tenant,
       :keystone_admin_port => keystone_admin_port,
-      :api_port => node[:heat][:api][:port]
+      :api_port => node[:heat][:api][:port],
+      :database_connection => db_connection
     )
 end
 
@@ -269,6 +306,7 @@ template "/etc/heat/heat-api-cfn.conf" do
     variables(
       :debug => node[:heat][:debug],
       :verbose => node[:heat][:verbose],
+      :rabbit_settings => rabbit_settings,
       :keystone_protocol => keystone_protocol,
       :keystone_host => keystone_host,
       :keystone_auth_token => keystone_token,
@@ -345,6 +383,7 @@ template "/etc/heat/heat-engine.conf" do
     variables(
       :debug => node[:heat][:debug],
       :verbose => node[:heat][:verbose],
+      :rabbit_settings => rabbit_settings,
       :keystone_protocol => keystone_protocol,
       :keystone_host => keystone_host,
       :keystone_auth_token => keystone_token,
@@ -353,7 +392,8 @@ template "/etc/heat/heat-engine.conf" do
       :keystone_service_password => keystone_service_password,
       :keystone_service_tenant => keystone_service_tenant,
       :keystone_admin_port => keystone_admin_port,
-      :cfn_port => node[:heat][:api][:cfn_port]
+      :cfn_port => node[:heat][:api][:cfn_port],
+      :database_connection => db_connection
     )
 end
 

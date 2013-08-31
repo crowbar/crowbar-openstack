@@ -27,7 +27,28 @@ bind_port = 8004
 
 rpc_backend=heat.openstack.common.rpc.impl_kombu
 
+# The RabbitMQ broker address where a single node is used
+# (string value)
+rabbit_host=<%= @rabbit_settings[:address] %>
 
+# The RabbitMQ broker port where a single node is used
+# (integer value)
+rabbit_port=<%= @rabbit_settings[:port] %>
+
+# RabbitMQ HA cluster host:port pairs (list value)
+#rabbit_hosts=$rabbit_host:$rabbit_port
+
+# connect over SSL for RabbitMQ (boolean value)
+#rabbit_use_ssl=false
+
+# the RabbitMQ userid (string value)
+rabbit_userid=<%= @rabbit_settings[:user] %>
+
+# the RabbitMQ password (string value)
+rabbit_password=<%= @rabbit_settings[:password] %>
+
+# the RabbitMQ virtual host (string value)
+rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 
 # Uncomment this if you're using a custom cloud backend:
 # [paste_deploy]

@@ -58,10 +58,33 @@ heat_watch_server_url = http://127.0.0.1:8003
 # imported. Defaults to OpenStack if none provided.
 # cloud_backend=deltacloud_heat.client
 
-sql_connection = mysql://heat:heat@localhost/heat
+sql_connection = <%= @database_connection %>
 
 db_backend=heat.db.sqlalchemy.api
 
-rpc_backend=heat.openstack.common.rpc.impl_qpid
+rpc_backend=heat.openstack.common.rpc.impl_kombu
+
+# The RabbitMQ broker address where a single node is used
+# (string value)
+rabbit_host=<%= @rabbit_settings[:address] %>
+
+# The RabbitMQ broker port where a single node is used
+# (integer value)
+rabbit_port=<%= @rabbit_settings[:port] %>
+
+# RabbitMQ HA cluster host:port pairs (list value)
+#rabbit_hosts=$rabbit_host:$rabbit_port
+
+# connect over SSL for RabbitMQ (boolean value)
+#rabbit_use_ssl=false
+
+# the RabbitMQ userid (string value)
+rabbit_userid=<%= @rabbit_settings[:user] %>
+
+# the RabbitMQ password (string value)
+rabbit_password=<%= @rabbit_settings[:password] %>
+
+# the RabbitMQ virtual host (string value)
+rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 
 auth_encryption_key=%ENCRYPTION_KEY%
