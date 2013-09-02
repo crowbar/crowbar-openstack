@@ -195,56 +195,63 @@ else
 end
 
 if node[:cinder][:api][:protocol] == 'https'
-  if !(::File.exists? node[:cinder][:ssl][:certfile] and ::File.exists? node[:cinder][:ssl][:keyfile]) and node[:cinder][:ssl][:generate_certs]
+  if node[:cinder][:ssl][:generate_certs]
     package "openssl"
-    require "fileutils"
+    ruby_block "generate_certs for cinder" do
+      block do
+        unless ::File.exists? node[:cinder][:ssl][:certfile] and ::File.exists? node[:cinder][:ssl][:keyfile]
+          require "fileutils"
 
-    Chef::Log.info("Generating SSL certificate for cinder...")
+          Chef::Log.info("Generating SSL certificate for cinder...")
 
-    [:certfile, :keyfile].each do |k|
-      dir = File.dirname(node[:cinder][:ssl][k])
-      FileUtils.mkdir_p(dir) unless File.exists?(dir)
-    end
+          [:certfile, :keyfile].each do |k|
+            dir = File.dirname(node[:cinder][:ssl][k])
+            FileUtils.mkdir_p(dir) unless File.exists?(dir)
+          end
 
-    # Generate private key
-    %x(openssl genrsa -out #{node[:cinder][:ssl][:keyfile]} 4096)
-    if $?.exitstatus != 0
-      message = "SSL private key generation failed"
+          # Generate private key
+          %x(openssl genrsa -out #{node[:cinder][:ssl][:keyfile]} 4096)
+          if $?.exitstatus != 0
+            message = "SSL private key generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
+          FileUtils.chown "root", node[:cinder][:group], node[:cinder][:ssl][:keyfile]
+          FileUtils.chmod 0640, node[:cinder][:ssl][:keyfile]
+
+          # Generate certificate signing requests (CSR)
+          conf_dir = File.dirname node[:cinder][:ssl][:certfile]
+          ssl_csr_file = "#{conf_dir}/signing_key.csr"
+          ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{node[:fqdn]}\""
+          %x(openssl req -new -key #{node[:cinder][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
+          if $?.exitstatus != 0
+            message = "SSL certificate signed requests generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
+
+          # Generate self-signed certificate with above CSR
+          %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{node[:cinder][:ssl][:keyfile]} -out #{node[:cinder][:ssl][:certfile]})
+          if $?.exitstatus != 0
+            message = "SSL self-signed certificate generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
+
+          File.delete ssl_csr_file  # Nobody should even try to use this
+        end # unless files exist
+      end # block
+    end # ruby_block
+  else # if generate_certs
+    unless ::File.exists? node[:cinder][:ssl][:certfile]
+      message = "Certificate \"#{node[:cinder][:ssl][:certfile]}\" is not present."
       Chef::Log.fatal(message)
       raise message
     end
-    FileUtils.chown "root", node[:cinder][:group], node[:cinder][:ssl][:keyfile]
-    FileUtils.chmod 0640, node[:cinder][:ssl][:keyfile]
+    # we do not check for existence of keyfile, as the private key is allowed
+    # to be in the certfile
+  end # if generate_certs
 
-    # Generate certificate signing requests (CSR)
-    conf_dir = File.dirname node[:cinder][:ssl][:certfile]
-    ssl_csr_file = "#{conf_dir}/signing_key.csr"
-    ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{node[:fqdn]}\""
-    %x(openssl req -new -key #{node[:cinder][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
-    if $?.exitstatus != 0
-      message = "SSL certificate signed requests generation failed"
-      Chef::Log.fatal(message)
-      raise message
-    end
-
-    # Generate self-signed certificate with above CSR
-    %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{node[:cinder][:ssl][:keyfile]} -out #{node[:cinder][:ssl][:certfile]})
-    if $?.exitstatus != 0
-      message = "SSL self-signed certificate generation failed"
-      Chef::Log.fatal(message)
-      raise message
-    end
-
-    File.delete ssl_csr_file  # Nobody should even try to use this
-  end
-
-  unless ::File.exists? node[:cinder][:ssl][:certfile]
-    message = "Certificate \"#{node[:cinder][:ssl][:certfile]}\" is not present."
-    Chef::Log.fatal(message)
-    raise message
-  end
-  # we do not check for existence of keyfile, as the private key is allowed to
-  # be in the certfile
   if node[:cinder][:ssl][:cert_required] and !::File.exists? node[:cinder][:ssl][:ca_certs]
     message = "Certificate CA \"#{node[:cinder][:ssl][:ca_certs]}\" is not present."
     Chef::Log.fatal(message)
