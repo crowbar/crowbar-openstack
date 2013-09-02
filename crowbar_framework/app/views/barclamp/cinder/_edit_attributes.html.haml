@@ -105,7 +105,7 @@
       %label.section-header{ :for => :volume_file_div }= t('.volume_file_parameters')
       %div.section{ :id => :volume_file_div }
         %label{ :for => :local_file }= t('.volume_file_name')
-        %input#local_file{:type => "text", :name => "local_file", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["local_file"], :onchange => "update_value('volume/local_file','local_file', 'string')"}
+        %input#local_file{:type => "text", :class => "input-xxlarge", :name => "local_file", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["local_file"], :onchange => "update_value('volume/local_file','local_file', 'string')"}
         %p
         %label{ :for => :local_size }= t('.volume_file_size')
         %input#local_size{:type => "text", :name => "local_size", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["local_size"], :onchange => "update_value('volume/local_size','local_size', 'integer')"}
