@@ -170,7 +170,11 @@ end
 db_connection = "#{backend_name}://#{node[:heat][:db][:user]}:#{db_password}@#{sql_address}/#{node[:heat][:db][:database]}"
 
 
-# run heat-db-setup
+# do not run heat-db-setup since it wants to install packages and setup db passwords
+execute "calling heat db sync" do
+  command "python -m heat.db.sync"
+  action :run
+end
 
 
 keystone_register "register heat user" do
