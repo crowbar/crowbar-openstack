@@ -97,7 +97,7 @@ when "linuxbridge"
 end
 
 execute "create_fixed_network" do
-  command ""
+  command "#{quantum_cmd} net-create fixed --shared #{fixed_network_type}"
   not_if "out=$(#{quantum_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
   action :nothing
 end
