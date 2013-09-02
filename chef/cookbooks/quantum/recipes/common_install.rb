@@ -267,56 +267,63 @@ link plugin_cfg_path do
 end
 
 if quantum_server and quantum[:quantum][:api][:protocol] == 'https'
-  if !(::File.exists? node[:quantum][:ssl][:certfile] and ::File.exists? node[:quantum][:ssl][:keyfile]) and quantum[:quantum][:ssl][:generate_certs]
+  if quantum[:quantum][:ssl][:generate_certs]
     package "openssl"
-    require "fileutils"
+    ruby_block "generate_certs for quantum" do
+      block do
+        unless ::File.exists? node[:quantum][:ssl][:certfile] and ::File.exists? node[:quantum][:ssl][:keyfile]
+          require "fileutils"
 
-    Chef::Log.info("Generating SSL certificate for quantum...")
+          Chef::Log.info("Generating SSL certificate for quantum...")
 
-    [:certfile, :keyfile].each do |k|
-      dir = File.dirname(quantum[:quantum][:ssl][k])
-      FileUtils.mkdir_p(dir) unless File.exists?(dir)
-    end
+          [:certfile, :keyfile].each do |k|
+            dir = File.dirname(quantum[:quantum][:ssl][k])
+            FileUtils.mkdir_p(dir) unless File.exists?(dir)
+          end
 
-    # Generate private key
-    %x(openssl genrsa -out #{quantum[:quantum][:ssl][:keyfile]} 4096)
-    if $?.exitstatus != 0
-      message = "SSL private key generation failed"
+          # Generate private key
+          %x(openssl genrsa -out #{quantum[:quantum][:ssl][:keyfile]} 4096)
+          if $?.exitstatus != 0
+            message = "SSL private key generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
+          FileUtils.chown "root", quantum[:quantum][:group], quantum[:quantum][:ssl][:keyfile]
+          FileUtils.chmod 0640, node[:quantum][:ssl][:keyfile]
+
+          # Generate certificate signing requests (CSR)
+          conf_dir = File.dirname quantum[:quantum][:ssl][:certfile]
+          ssl_csr_file = "#{conf_dir}/signing_key.csr"
+          ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{quantum[:fqdn]}\""
+          %x(openssl req -new -key #{quantum[:quantum][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
+          if $?.exitstatus != 0
+            message = "SSL certificate signed requests generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
+
+          # Generate self-signed certificate with above CSR
+          %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{quantum[:quantum][:ssl][:keyfile]} -out #{quantum[:quantum][:ssl][:certfile]})
+          if $?.exitstatus != 0
+            message = "SSL self-signed certificate generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
+
+          File.delete ssl_csr_file  # Nobody should even try to use this
+        end # unless files exist
+      end # block
+    end # ruby_block
+  else # if generate_certs
+    unless ::File.exists? quantum[:quantum][:ssl][:certfile]
+      message = "Certificate \"#{quantum[:quantum][:ssl][:certfile]}\" is not present."
       Chef::Log.fatal(message)
       raise message
     end
-    FileUtils.chown "root", quantum[:quantum][:group], quantum[:quantum][:ssl][:keyfile]
-    FileUtils.chmod 0640, node[:quantum][:ssl][:keyfile]
+    # we do not check for existence of keyfile, as the private key is allowed
+    # to be in the certfile
+  end # if generate_certs
 
-    # Generate certificate signing requests (CSR)
-    conf_dir = File.dirname quantum[:quantum][:ssl][:certfile]
-    ssl_csr_file = "#{conf_dir}/signing_key.csr"
-    ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{quantum[:fqdn]}\""
-    %x(openssl req -new -key #{quantum[:quantum][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
-    if $?.exitstatus != 0
-      message = "SSL certificate signed requests generation failed"
-      Chef::Log.fatal(message)
-      raise message
-    end
-
-    # Generate self-signed certificate with above CSR
-    %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{quantum[:quantum][:ssl][:keyfile]} -out #{quantum[:quantum][:ssl][:certfile]})
-    if $?.exitstatus != 0
-      message = "SSL self-signed certificate generation failed"
-      Chef::Log.fatal(message)
-      raise message
-    end
-
-    File.delete ssl_csr_file  # Nobody should even try to use this
-  end
-
-  unless ::File.exists? quantum[:quantum][:ssl][:certfile]
-    message = "Certificate \"#{quantum[:quantum][:ssl][:certfile]}\" is not present."
-    Chef::Log.fatal(message)
-    raise message
-  end
-  # we do not check for existence of keyfile, as the private key is allowed to
-  # be in the certfile
   if quantum[:quantum][:ssl][:cert_required] and !::File.exists? quantum[:quantum][:ssl][:ca_certs]
     message = "Certificate CA \"#{quantum[:quantum][:ssl][:ca_certs]}\" is not present."
     Chef::Log.fatal(message)
