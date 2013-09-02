@@ -45,7 +45,7 @@ package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node.platform == "suse"
 
 rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
-rabbitmq_plugins = "/usr/sbin/rabbitmq-plugins" if %w(redhat centos).include?(node.platform)
+rabbitmq_plugins = "/usr/sbin/rabbitmq-plugins" if %w(redhat centos suse).include?(node.platform)
 
 if %w(redhat centos).include?(node.platform)
   rpm_url = node[:rabbitmq][:rabbitmq_rpm]
