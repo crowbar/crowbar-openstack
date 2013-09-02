@@ -18,11 +18,6 @@
 # limitations under the License.
 #
 
-service "rabbitmq-server" do
-  supports :restart => true, :start => true, :stop => true
-  action :nothing
-end
-
 directory "/etc/rabbitmq/" do
   owner "root"
   group "root"
@@ -49,8 +44,6 @@ end
 package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node.platform == "suse"
 
-
-
 rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
 rabbitmq_plugins = "/usr/sbin/rabbitmq-plugins" if %w(redhat centos).include?(node.platform)
 
@@ -72,6 +65,11 @@ if %w(redhat centos).include?(node.platform)
     notifies :run, resources(:bash => "install proper rabbit server"), :immediately
   end
 
+end
+
+service "rabbitmq-server" do
+  supports :restart => true, :start => true, :stop => true
+  action [ :enable, :start ]
 end
 
 bash "enabling rabbit management" do
