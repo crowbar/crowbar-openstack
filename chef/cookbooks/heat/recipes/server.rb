@@ -170,13 +170,6 @@ end
 db_connection = "#{backend_name}://#{node[:heat][:db][:user]}:#{db_password}@#{sql_address}/#{node[:heat][:db][:database]}"
 
 
-# do not run heat-db-setup since it wants to install packages and setup db passwords
-execute "calling heat db sync" do
-  command "python -m heat.db.sync"
-  action :run
-end
-
-
 keystone_register "register heat user" do
   protocol keystone_protocol
   host keystone_host
@@ -360,6 +353,7 @@ template "/etc/heat/heat-api-cloudwatch.conf" do
     variables(
       :debug => node[:heat][:debug],
       :verbose => node[:heat][:verbose],
+      :rabbit_settings => rabbit_settings,
       :keystone_protocol => keystone_protocol,
       :keystone_host => keystone_host,
       :keystone_auth_token => keystone_token,
@@ -399,6 +393,7 @@ template "/etc/heat/heat-engine.conf" do
       :cfn_port => node[:heat][:api][:cfn_port],
       :database_connection => db_connection
     )
+    notifies :run, "execute[heat-db-sync]", :delayed
 end
 
 service "heat-engine" do
@@ -408,5 +403,10 @@ service "heat-engine" do
   subscribes :restart, resources("template[/etc/heat/heat-engine.conf]")
 end
 
+execute "heat-db-sync" do
+  # do not run heat-db-setup since it wants to install packages and setup db passwords
+  command "python -m heat.db.sync"
+  action :nothing
+end
 
 node.save
