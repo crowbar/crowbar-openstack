@@ -96,15 +96,6 @@ when "linuxbridge"
     floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{public_net["vlan"]} --provider:physical_network physnet1"
 end
 
-execute "Quantum network configuration" do
-  command "true"
-  notifies :run, "execute[create_fixed_network]", :immediately
-  notifies :run, "execute[create_floating_network]", :immediately
-  notifies :run, "execute[create_fixed_subnet]", :immediately
-  notifies :run, "execute[create_floating_subnet]", :immediately
-  notifies :run, "execute[create_router]", :immediately
-end.run_action(:run)
-
 execute "create_fixed_network" do
   command ""
   not_if "out=$(#{quantum_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
@@ -140,6 +131,15 @@ def networks_params_equal?(netw1, netw2, keys_list)
   h2 = keys_list.collect{ |key| netw2[key] }
   h1 == h2
 end
+
+execute "Quantum network configuration" do
+  command "true"
+  notifies :run, "execute[create_fixed_network]", :immediately
+  notifies :run, "execute[create_floating_network]", :immediately
+  notifies :run, "execute[create_fixed_subnet]", :immediately
+  notifies :run, "execute[create_floating_subnet]", :immediately
+  notifies :run, "execute[create_router]", :immediately
+end.run_action(:run)
 
 #this workaround for metadata service, should be removed when quantum-metadata-proxy will be released
 #it parses jsoned csv output of quantum to get address of router to pass it into metadata node
