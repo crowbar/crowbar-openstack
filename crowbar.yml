@@ -53,6 +53,32 @@ debs:
     - python-keystone
     - python-pymongo
 
+rpms:
+  centos-6.4:
+    repos:
+      - rpm http://rdo.fedorapeople.org/openstack/openstack-grizzly/rdo-release-grizzly.rpm
+      - bare MongoDB 10 http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
+      # http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+      # http://mirror.us.leaseweb.net/epel/6/x86_64
+      # http://rbel.frameos.org/stable/el6/x86_64
+  redhat-6.4:
+    repos:
+      - rpm http://rdo.fedorapeople.org/openstack/openstack-grizzly/rdo-release-grizzly.rpm
+      # rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+  pkgs:
+    - openstack-ceilometer
+    - openstack-ceilometer-api
+    - openstack-ceilometer-central
+    - openstack-ceilometer-collector
+    - openstack-ceilometer-common
+    - openstack-ceilometer-compute
+    - python-ceilometer
+    - python-ceilometerclient
+    - mongo-10gen
+    - mongo-10gen-server
+    - pymongo
+
+
 locale_additions:
   en:
     nav:
