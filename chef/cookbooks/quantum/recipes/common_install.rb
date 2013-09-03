@@ -152,8 +152,11 @@ when "openvswitch"
   interface_driver = "quantum.agent.linux.interface.OVSInterfaceDriver"
   external_network_bridge = "br-public"
   
-  openvswitch_service="openvswitch-switch" unless %w(redhat centos suse).include?(node.platform)
-  openvswitch_service="openvswitch" if %w(redhat centos suse).include?(node.platform)
+  if %w(redhat centos).include?(node.platform)
+    openvswitch_service = "openvswitch"
+  else
+    openvswitch_service = "openvswitch-switch"
+  end
   service "#{openvswitch_service}" do
     supports :status => true, :restart => true
     action [ :enable ]
@@ -403,8 +406,6 @@ end
 
 if %w(redhat centos).include?(node.platform)
   net_core_pkgs=%w(kernel iproute iputils)
-
-
 
   ruby_block "unset_reboot" do
     block do
