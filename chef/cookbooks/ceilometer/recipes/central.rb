@@ -15,7 +15,11 @@
 
 unless node[:ceilometer][:use_gitrepo]
   package "ceilometer-agent-central" do
-    package_name "openstack-ceilometer-agent-central" if node.platform == "suse"
+    if %w(suse).include?(node.platform)
+      package_name "openstack-ceilometer-agent-central"
+    elsif %w(redhat centos).include?(node.platform)
+      package_name "openstack-ceilometer-central"
+    end
     action :install
   end
 else
@@ -36,7 +40,11 @@ end
 include_recipe "#{@cookbook_name}::common"
 
 service "ceilometer-agent-central" do
-  service_name "openstack-ceilometer-agent-central" if node.platform == "suse"
+  if %w(suse).include?(node.platform)
+    service_name "openstack-ceilometer-agent-central"
+  elsif %w(redhat centos).include?(node.platform) 
+    service_name "openstack-ceilometer-central"
+  end
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")

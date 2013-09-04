@@ -16,19 +16,29 @@
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
 if node[:ceilometer][:use_mongodb]
-  package "mongodb" do
-    action :install
+  case node["platform"]
+    when "centos", "redhat"
+      mongo_conf="/etc/mongod.conf"
+      mongo_service="mongod"
+      package "mongo-10gen"
+      package "mongo-10gen-server"
+    else
+      mongo_conf="/etc/mongodb.conf"
+      mongo_service="mongodb"
+      package "mongodb" do
+        action :install
+      end
   end
 
-  service "mongodb" do
+  service "#{mongo_service}" do
     supports :status => true, :restart => true
     action :enable
   end
 
-  template "/etc/mongodb.conf" do
+  template "#{mongo_conf}" do
     mode 0644
     source "mongodb.conf.erb"
-    notifies :restart, resources(:service => "mongodb"), :immediately
+    notifies :restart, resources(:service => "#{mongo_service}"), :immediately
   end
 else
   node.set_unless[:ceilometer][:db][:password] = secure_password
@@ -87,14 +97,19 @@ else
 end
 
 unless node[:ceilometer][:use_gitrepo]
-  unless node.platform == "suse"
-    package "ceilometer-common"
-    package "ceilometer-collector"
-    package "ceilometer-api"
-  else
-    package "openstack-ceilometer-collector"
-    package "openstack-ceilometer-api"
-  end
+  case node["platform"]
+    when "suse"
+      package "openstack-ceilometer-collector"
+      package "openstack-ceilometer-api"
+    when "centos", "redhat"
+      package "openstack-ceilometer-common"
+      package "openstack-ceilometer-collector"
+      package "openstack-ceilometer-api"
+    else
+      package "ceilometer-common"
+      package "ceilometer-collector"
+      package "ceilometer-api"
+    end
   venv_prefix = nil
 else
   ceilometer_path = "/opt/ceilometer"
@@ -163,14 +178,14 @@ execute "calling ceilometer-dbsync" do
 end
 
 service "ceilometer-collector" do
-  service_name "openstack-ceilometer-collector" if node.platform == "suse"
+  service_name "openstack-ceilometer-collector" if %w(redhat centos suse).include?(node.platform)
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
 
 service "ceilometer-api" do
-  service_name "openstack-ceilometer-api" if node.platform == "suse"
+  service_name "openstack-ceilometer-api" if %w(redhat centos suse).include?(node.platform)
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
