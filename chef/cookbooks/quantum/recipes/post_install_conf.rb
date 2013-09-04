@@ -98,48 +98,59 @@ end
 
 execute "create_fixed_network" do
   command "#{quantum_cmd} net-create fixed --shared #{fixed_network_type}"
-  not_if "out=$(#{quantum_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
+  not_if "#{quantum_cmd} net-list | grep -q ' fixed '"
+  retries 5
+  retry_delay 10
   action :nothing
 end
 
 execute "create_floating_network" do
   command "#{quantum_cmd} net-create floating --router:external=True #{floating_network_type}"
-  not_if "out=$(#{quantum_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
+  not_if "#{quantum_cmd} net-list | grep -q ' floating '"
+  retries 5
+  retry_delay 10
   action :nothing
 end
 
 execute "create_fixed_subnet" do
   command "#{quantum_cmd} subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} --gateway #{fixed_router_pool_end} fixed #{fixed_range}"
-  not_if "out=$(#{quantum_cmd} subnet-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
+  not_if "#{quantum_cmd} subnet-list | grep -q ' fixed '"
+  retries 5
+  retry_delay 10
   action :nothing
 end
 
 execute "create_floating_subnet" do
   command "#{quantum_cmd} subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} --gateway #{public_router} floating #{public_range} --enable_dhcp False"
-  not_if "out=$(#{quantum_cmd} subnet-list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
+  not_if "#{quantum_cmd} subnet-list | grep -q ' floating '"
+  retries 5
+  retry_delay 10
   action :nothing
 end
 
 execute "create_router" do
   command "#{quantum_cmd} router-create router-floating ; #{quantum_cmd} router-gateway-set router-floating floating ; #{quantum_cmd} router-interface-add router-floating fixed"
-  not_if "out=$(#{quantum_cmd} router-list); [ $? != 0 ] || echo ${out} | grep -q router-floating"
+  not_if "#{quantum_cmd} router-list | grep -q router-floating"
+  retries 5
+  retry_delay 10
   action :nothing
 end
+
+execute "Quantum network configuration" do
+  command "#{quantum_cmd} net-list"
+  retries 5
+  retry_delay 10
+  notifies :run, "execute[create_floating_network]", :immediately
+  notifies :run, "execute[create_fixed_subnet]", :immediately
+  notifies :run, "execute[create_floating_subnet]", :immediately
+  notifies :run, "execute[create_router]", :immediately
+end.run_action(:run)
 
 def networks_params_equal?(netw1, netw2, keys_list)
   h1 = keys_list.collect{ |key| netw1[key] }
   h2 = keys_list.collect{ |key| netw2[key] }
   h1 == h2
 end
-
-execute "Quantum network configuration" do
-  command "true"
-  notifies :run, "execute[create_fixed_network]", :immediately
-  notifies :run, "execute[create_floating_network]", :immediately
-  notifies :run, "execute[create_fixed_subnet]", :immediately
-  notifies :run, "execute[create_floating_subnet]", :immediately
-  notifies :run, "execute[create_router]", :immediately
-end.run_action(:run)
 
 #this workaround for metadata service, should be removed when quantum-metadata-proxy will be released
 #it parses jsoned csv output of quantum to get address of router to pass it into metadata node
