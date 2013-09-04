@@ -1,0 +1,77 @@
+#! /bin/sh
+#
+# Copyright (c) 2013 SUSE, Inc.
+#
+# /etc/init.d/boot.looplvm
+#
+### BEGIN INIT INFO
+# Provides:          boot.looplvm
+# Required-Start:    boot.localfs boot.device-mapper
+# Should-Start:
+# Required-Stop:     boot.localfs boot.device-mapper
+# Should-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       start loopback mount for LVM VGs
+### END INIT INFO
+
+. /etc/rc.status
+
+rc_reset
+
+LOOP_LVM=<%= @loop_lvm_path %>
+
+find_associated_loopdev()
+{
+    loopdev=$(losetup -j $LOOP_LVM 2>/dev/null | head -n1 | cut -d: -f1)
+    echo $loopdev
+}
+
+case "$1" in
+    start)
+    #
+    # Find and activate volume groups (HM 1/1/1999)
+    #
+    if [ -f $LOOP_LVM ]; then
+        loopdev=$(find_associated_loopdev)
+        if [ -z "$loopdev" -o ! -b "$loopdev" ]; then
+            echo -n "Loop mounting $LOOP_LVM"
+            losetup -f $LOOP_LVM
+            rc_status -v
+
+        elif [ -b "$loopdev" ]; then
+            echo -n "Loop mount unnecessary; $LOOP_LVM already available via $loopdev"
+            rc_failed 0
+        fi
+    fi
+
+    rc_status -v
+    ;;
+    stop)
+
+        loopdev=$(find_associated_loopdev)
+        if [ -b "$loopdev" ]; then
+            echo -n "Disabling loop mount of $LOOP_LVM"
+            losetup -d $loopdev
+        else
+            echo -n "Could not find loop mount of $LOOP_LVM"
+            rc_failed 3
+        fi
+
+        rc_status -v
+        ;;
+
+    status)
+        rc_failed 4
+        rc_status -v
+        ;;
+    reload)
+        $0 start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status|reload}"
+        exit 1
+        ;;
+esac
+
+rc_exit

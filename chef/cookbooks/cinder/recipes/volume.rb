@@ -86,9 +86,19 @@ def make_volumes(node,volname)
       end
     end
 
-    bash "setup loop device for volume" do
-      code "losetup -f --show #{fname}"
-      not_if "losetup -j #{fname} | grep #{fname}"
+    template "boot.looplvm" do
+      path "/etc/init.d/boot.looplvm"
+      source "boot.looplvm.erb"
+      owner "root"
+      group "root"
+      mode 0755
+      variables(:loop_lvm_path => fname)
+      notifies :reload, "service[boot.looplvm]", :immediately
+    end
+
+    service "boot.looplvm" do
+      supports :start => true, :stop => true
+      action [:enable, :start]
     end
 
     bash "create volume group" do
