@@ -137,7 +137,7 @@ execute "create_router" do
 end
 
 execute "Quantum network configuration" do
-  command "#{quantum_cmd} net-list"
+  command "#{quantum_cmd} net-list &>/dev/null"
   retries 5
   retry_delay 10
   notifies :run, "execute[create_fixed_network]", :immediately
