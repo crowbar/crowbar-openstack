@@ -140,11 +140,12 @@ execute "Quantum network configuration" do
   command "#{quantum_cmd} net-list"
   retries 5
   retry_delay 10
+  notifies :run, "execute[create_fixed_network]", :immediately
   notifies :run, "execute[create_floating_network]", :immediately
   notifies :run, "execute[create_fixed_subnet]", :immediately
   notifies :run, "execute[create_floating_subnet]", :immediately
   notifies :run, "execute[create_router]", :immediately
-end.run_action(:run)
+end
 
 def networks_params_equal?(netw1, netw2, keys_list)
   h1 = keys_list.collect{ |key| netw1[key] }
