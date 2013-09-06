@@ -337,9 +337,8 @@ template "/etc/quantum/quantum.conf" do
     owner node[:quantum][:platform][:user]
     variables(
       :sql_connection => quantum[:quantum][:db][:sql_connection],
-      :sql_idle_timeout => quantum[:quantum][:sql][:idle_timeout],
       :sql_min_pool_size => quantum[:quantum][:sql][:min_pool_size],
-      :sql_max_pool_size => quantum[:quantum][:sql][:max_pool_size],
+      :sql_max_pool_overflow => quantum[:quantum][:sql][:max_pool_overflow],
       :sql_pool_timeout => quantum[:quantum][:sql][:pool_timeout],
       :debug => quantum[:quantum][:debug],
       :verbose => quantum[:quantum][:verbose],

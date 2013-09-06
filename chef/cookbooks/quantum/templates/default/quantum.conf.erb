@@ -109,10 +109,9 @@ ssl_ca_file = <%= @ssl_ca_file %>
 sql_connection = <%= @sql_connection %>
 ## Period in seconds after which SQLAlchemy should reestablish its connection
 ## to the database.
-idle_timeout = <%= @sql_idle_timeout %>
-min_pool_size = <%= @sql_min_pool_size %>
-max_pool_size = <%= @sql_max_pool_size %>
-pool_timeout = <%= @sql_pool_timeout %>
+sqlalchemy_pool_size = <%= @sql_min_pool_size %>
+sqlalchemy_max_overflow = <%= @sql_max_pool_overflow %>
+sqlalchemy_pool_timeout = <%= @sql_pool_timeout %>
 ###############
 
 # Path to the extensions.  Note that this can be a colon-separated list of
