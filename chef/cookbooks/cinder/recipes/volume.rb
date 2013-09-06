@@ -17,6 +17,16 @@
 # Recipe:: volume
 #
 
+if %w(redhat centos).include?(node.platform)
+  #workaround for https://bugzilla.redhat.com/show_bug.cgi?id=975052#c11 https://bugs.launchpad.net/cinder/+bug/1191812
+  template "/etc/lvm/lvm.conf" do
+    source "lvm.conf.erb"
+    mode 0644
+    owner "root"
+    group "root"
+  end
+end
+
 include_recipe "#{@cookbook_name}::common"
 
 volname = node[:cinder][:volume][:volume_name]
