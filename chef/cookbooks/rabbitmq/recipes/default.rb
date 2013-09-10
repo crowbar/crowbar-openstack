@@ -45,27 +45,7 @@ package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node.platform == "suse"
 
 rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
-rabbitmq_plugins = "/usr/sbin/rabbitmq-plugins" if %w(redhat centos suse).include?(node.platform)
-
-if %w(redhat centos).include?(node.platform)
-  rpm_url = node[:rabbitmq][:rabbitmq_rpm]
-  filename = rpm_url.split('/').last
-
-  bash "install proper rabbit server" do
-    code "rpm -Uvh #{File.join("tmp",filename)}"
-    notifies :restart, "service[rabbitmq-server]", :immediately
-    notifies :enable, "service[rabbitmq-server]", :immediately
-    action :nothing
-  end
-
-  remote_file rpm_url do
-    source rpm_url
-    path File.join("tmp",filename)
-    action :create_if_missing
-    notifies :run, resources(:bash => "install proper rabbit server"), :immediately
-  end
-
-end
+rabbitmq_plugins = "/usr/lib/rabbitmq/bin/rabbitmq-plugins" if %w(redhat centos).include?(node.platform)
 
 service "rabbitmq-server" do
   supports :restart => true, :start => true, :stop => true

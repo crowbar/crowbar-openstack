@@ -12,7 +12,6 @@
           "type": "map",
           "required": true,
           "mapping": {
-            "rabbitmq_rpm" : { "type": "str", "required": true },
             "port": { "type": "int", "required": true },
             "password": { "type": "str", "required": true },
             "user": { "type": "str", "required": true },

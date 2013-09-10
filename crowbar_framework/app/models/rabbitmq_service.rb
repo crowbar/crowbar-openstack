@@ -50,15 +50,6 @@ class RabbitmqService < ServiceObject
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Rabbitmq apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
-    # Update rabbit centos rpm path
-    nodes = NodeObject.find("roles:provisioner-server")
-    unless nodes.nil? or nodes.length < 1
-      admin_ip = nodes[0].get_network_by_type("admin")["address"]
-      web_port = nodes[0]["provisioner"]["web_port"]
-      # substitute the admin web portal
-      rabbitmq_rpm_path = role.default_attributes["rabbitmq"]["rabbitmq_rpm"].gsub("<ADMINWEB>", "#{admin_ip}:#{web_port}")
-      role.default_attributes["rabbitmq"]["rabbitmq_rpm"] = rabbitmq_rpm_path
-    end
 
     role.save
 

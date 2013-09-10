@@ -3,7 +3,6 @@
   "description": "Installation for rabbitmq",
   "attributes": {
     "rabbitmq": {
-      "rabbitmq_rpm": "http://<ADMINWEB>/files/rabbit/rabbitmq-server-2.8.7-1.noarch.rpm",
       "port": 5672,
       "password": "",
       "user": "nova",
