@@ -56,5 +56,6 @@ bash "enabling rabbit management" do
   code "#{rabbitmq_plugins} enable rabbitmq_management > /dev/null"
   not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q"
   notifies :restart, "service[rabbitmq-server]", :immediately
+  notifies :enable, "service[rabbitmq-server]", :immediately
 end
 
