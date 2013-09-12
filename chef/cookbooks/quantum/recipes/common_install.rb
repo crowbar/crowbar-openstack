@@ -94,7 +94,7 @@ else
 
   link_service quantum_agent do
     virtualenv venv_path
-    bin_name "quantum-openvswitch-agent --config-dir /etc/quantum/"
+    bin_name "quantum-openvswitch-agent --config-file #{plugin_cfg_path} --config-dir /etc/quantum/"
   end
 
   execute "quantum_cp_policy.json" do
@@ -269,14 +269,6 @@ Chef::Log.info("Keystone server found at #{keystone_host}")
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 vlan_end = vlan_start + 2000
 
-if quantum[:quantum][:use_gitrepo] == true
-  plugin_cfg_path = File.join("/opt/quantum", plugin_cfg_path)
-end
-
-link plugin_cfg_path do
-  to "/etc/quantum/quantum.conf"
-end
-
 if %w(redhat centos).include?(node.platform)
  link "/etc/quantum/plugin.ini" do
    to "/etc/quantum/quantum.conf"
@@ -403,7 +395,7 @@ else
   service quantum_agent do
     supports :status => true, :restart => true
     action :enable
-    subscribes :restart, resources("link[#{plugin_cfg_path}]")
+    subscribes :restart, resources("template[#{plugin_cfg_path}]")
     subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   end
 end

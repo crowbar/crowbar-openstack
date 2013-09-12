@@ -243,7 +243,7 @@ unless node[:quantum][:use_gitrepo]
     # "mark quantum-server as restart for post-install" ruby_block
   end
 else
-  template "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
+  template "#{plugin_cfg_path}" do
     source "ovs_quantum_plugin.ini.erb"
     owner node[:quantum][:platform][:user]
     group "root"
@@ -256,7 +256,7 @@ else
     supports :status => true, :restart => true
     action :enable
     subscribes :restart, resources("template[/etc/quantum/api-paste.ini]")
-    subscribes :restart, resources("template[/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini]")
+    subscribes :restart, resources("template[#{plugin_cfg_path}]")
     subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   end
 end
@@ -313,7 +313,7 @@ ruby_block "mark quantum-server as restart for post-install" do
   end
   action :nothing
   subscribes :create, resources("template[/etc/quantum/api-paste.ini]"), :immediately
-  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately
+  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately
   subscribes :create, resources("template[/etc/quantum/quantum.conf]"), :immediately
 end
 
@@ -324,7 +324,7 @@ ruby_block "mark quantum-agent as restart for post-install" do
     end
   end
   action :nothing
-  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately
+  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately
   subscribes :create, resources("template[/etc/quantum/quantum.conf]"), :immediately
 end
 
