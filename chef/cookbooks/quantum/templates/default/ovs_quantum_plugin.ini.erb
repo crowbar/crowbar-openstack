@@ -86,7 +86,7 @@ polling_interval = 2
 # Use "sudo quantum-rootwrap /etc/quantum/rootwrap.conf" to use the real
 # root filter facility.
 # Change to "sudo" to skip the filtering and just run the comand directly
-root_helper = sudo
+root_helper = sudo <%=@rootwrap_bin%> /etc/quantum/rootwrap.conf
 
 #-----------------------------------------------------------------------------
 # Sample Configurations.
