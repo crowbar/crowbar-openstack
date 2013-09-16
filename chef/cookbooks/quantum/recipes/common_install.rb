@@ -218,7 +218,10 @@ if novas.length > 0
 else
   nova = node
 end
-metadata_host = nova[:fqdn]
+# we use an IP address here, and not nova[:fqdn] because nova-metadata doesn't use SSL
+# and because it listens on this specific IP address only (so we don't want to use a name
+# that could resolve to 127.0.0.1).
+metadata_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "admin").address
 metadata_port = "8775"
 if quantum[:quantum][:networking_mode] == 'vlan'
   per_tenant_vlan=true
