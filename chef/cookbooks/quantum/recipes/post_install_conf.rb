@@ -101,6 +101,7 @@ execute "create_fixed_network" do
   not_if "out=$(#{quantum_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
   retries 5
   retry_delay 10
+  action :nothing
 end
 
 execute "create_floating_network" do
@@ -108,6 +109,7 @@ execute "create_floating_network" do
   not_if "out=$(#{quantum_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
   retries 5
   retry_delay 10
+  action :nothing
 end
 
 execute "create_fixed_subnet" do
@@ -115,6 +117,7 @@ execute "create_fixed_subnet" do
   not_if "out=$(#{quantum_cmd} subnet-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
   retries 5
   retry_delay 10
+  action :nothing
 end
 
 execute "create_floating_subnet" do
@@ -122,6 +125,7 @@ execute "create_floating_subnet" do
   not_if "out=$(#{quantum_cmd} subnet-list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
   retries 5
   retry_delay 10
+  action :nothing
 end
 
 execute "create_router" do
@@ -129,6 +133,18 @@ execute "create_router" do
   not_if "out=$(#{quantum_cmd} router-list); [ $? != 0 ] || echo ${out} | grep -q router-floating"
   retries 5
   retry_delay 10
+  action :nothing
+end
+
+execute "Quantum network configuration" do
+  command "#{quantum_cmd} net-list &>/dev/null"
+  retries 5
+  retry_delay 10
+  notifies :run, "execute[create_fixed_network]", :immediately
+  notifies :run, "execute[create_floating_network]", :immediately
+  notifies :run, "execute[create_fixed_subnet]", :immediately
+  notifies :run, "execute[create_floating_subnet]", :immediately
+  notifies :run, "execute[create_router]", :immediately
 end
 
 def networks_params_equal?(netw1, netw2, keys_list)
