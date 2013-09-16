@@ -185,6 +185,19 @@ else
   emc_params = nil
 end
 
+if node[:cinder][:volume][:volume_type] == "rbd"
+  Chef::Log.info("Pushing Rbd params to cinder.conf template")
+  rbd_params = node[:cinder][:volume][:rbd]
+
+  if node[:platform] == "suse"
+    package "ceph"
+    package "ceph-kmp-default"
+  end
+
+else
+  rbd_params = nil
+end
+
 if node[:cinder][:volume][:volume_type] == "manual"
   Chef::Log.info("Pushing manual params to cinder.conf template")
   manual_driver = node[:cinder][:volume][:manual][:driver]
@@ -265,6 +278,7 @@ template "/etc/cinder/cinder.conf" do
   variables(
             :eqlx_params => eqlx_params,
             :emc_params => emc_params,
+            :rbd_params => rbd_params,
             :netapp_params => netapp_params,
             :manual_driver => manual_driver,
             :manual_driver_config => manual_driver_config,

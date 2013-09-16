@@ -78,6 +78,15 @@
                     "ecom_server_password": { "type": "str", "required": true }
                   }
                 },
+                "rbd": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "pool": { "type": "str", "required": true },
+                    "user": { "type": "str", "required": true },
+                    "secret_uuid": { "type": "str", "required": true }
+                    }
+                },
                 "manual": {
                   "type": "map",
                   "required": true,
