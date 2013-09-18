@@ -45,15 +45,6 @@ cinder_port = node[:cinder][:api][:bind_port]
 cinder_protocol = node[:cinder][:api][:protocol]
 Chef::Log.info("Keystone server found at #{keystone_host}")
 
-if node[:cinder][:use_gitrepo]
-  pfs_and_install_deps "keystone" do
-    cookbook "keystone"
-    cnode keystone
-    path File.join(cinder_path,"keystone")
-    virtualenv venv_path
-  end
-end
-
 my_admin_host = node[:fqdn]
 # For the public endpoint, we prefer the public name. If not set, then we
 # use the IP address except for SSL, where we always prefer a hostname
