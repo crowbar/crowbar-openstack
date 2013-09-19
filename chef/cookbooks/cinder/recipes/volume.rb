@@ -134,8 +134,11 @@ end
 
 make_volumes(node,volname)
 
-package "tgt" unless %w(redhat centos).include?(node.platform)
-package "scsi-target-utils" if %w(redhat centos).include?(node.platform)
+unless %w(redhat centos).include?(node.platform) 
+ package "tgt"
+else
+ package "scsi-target-utils"
+end
 if node[:cinder][:use_gitrepo]
   #TODO(agordeev):
   # tgt will not work with iSCSI targets if it has the same configs in conf.d
@@ -147,7 +150,7 @@ if node[:cinder][:use_gitrepo]
 elsif %w(redhat centos suse).include?(node.platform)
   cookbook_file "/etc/tgt/targets.conf" do
     source "cinder-volume.conf"
-    notifies :restart, "service[tgt]"
+    notifies :restart, "service[tgt]" if %w(redhat centos).include?(node.platform)
   end
 end
 
