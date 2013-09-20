@@ -19,13 +19,15 @@
 #
 
 # From the pip-requires -- all the Ubuntu packages for tempest prereqs
-packages = %w(python-anyjson python-nose python-httplib2 python-testtools python-lxml
-   python-boto python-paramiko python-netaddr python-glanceclient
-   python-keystoneclient python-novaclient python-quantumclient
-   python-testresources python-keyring python-testrepository python-oslo.config)
+unless %w(redhat centos).include?(node.platform)
+  packages = %w(python-anyjson python-nose python-httplib2 python-testtools python-lxml
+     python-boto python-paramiko python-netaddr python-glanceclient
+     python-keystoneclient python-novaclient python-quantumclient
+     python-testresources python-keyring python-testrepository python-oslo.config)
 
-packages.each do |p|
-  package p
+  packages.each do |p|
+    package p
+  end
 end
 
 begin
@@ -76,11 +78,21 @@ bash "install_tempest_from_archive" do
   not_if { ::File.exists?(tempest_path) }
 end
 
-nosetests=`which nosetests`.strip
+unless %w(redhat centos).include?(node.platform)
+  nosetests = `which nosetests`.strip
+else
+  #for centos we have to use nosetests from venv
+  nosetests = "/opt/tempest/.venv/bin/nosetests"
+end
 
 if node[:tempest][:use_virtualenv]
   package("python-virtualenv")
-  package("python-dev")
+  unless %w(redhat centos).include?(node.platform)
+    package("python-dev")
+  else
+    package("python-devel")
+    package("python-pip")
+  end
   directory "/opt/tempest/.venv" do
     recursive true
     owner "root"
@@ -114,3 +126,4 @@ else
     command "#{pip_cmd} 'python-glanceclient'"
   end
 end
+

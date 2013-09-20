@@ -125,6 +125,27 @@ debs:
       - python-keyring
       - python-testrepository
       - python-oslo.config
+
+rpms:
+  pkgs:
+    - python-anyjson
+    - python-nose
+    - python-httplib2
+    - python-testtools
+    - python-lxml
+    - python-boto
+    - python-paramiko
+    - python-netaddr
+    - python-glanceclient
+    - python-keystoneclient
+    - python-novaclient
+    - python-quantumclient
+    - python-testresources
+    - python-keyring
+    - python-testrepository
+    - python-oslo.config
+
+
 pips:
   - anyjson
   - nose
