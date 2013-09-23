@@ -97,7 +97,8 @@ locale_additions:
           use_pfs: Use Pull From Source
           tempest_user: Tempest user and a tenant that will be created for test run
           tempest_user_username: Choose username
-          tempest_user_password: Choose password
+          tempest_adm_username: Choose Tempest admin username
+          tempest_adm_password: Choose Tempest admin password
           tempest_user_tenant: Choose tenant
         edit_deployment:
           deployment: Deployment
