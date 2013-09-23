@@ -44,8 +44,14 @@ end
 package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node.platform == "suse"
 
-rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
-rabbitmq_plugins = "/usr/lib/rabbitmq/bin/rabbitmq-plugins" if %w(redhat centos).include?(node.platform)
+case node["platform"]
+when "suse"
+  rabbitmq_plugins = "/usr/sbin/rabbitmq-plugins"
+when "redhat", "centos"
+  rabbitmq_plugins = "/usr/lib/rabbitmq/bin/rabbitmq-plugins"
+else
+  rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
+end
 
 service "rabbitmq-server" do
   supports :restart => true, :start => true, :stop => true
