@@ -51,8 +51,6 @@ class RabbitmqService < ServiceObject
     @logger.debug("Rabbitmq apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
-    role.save
-
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
   end
 
