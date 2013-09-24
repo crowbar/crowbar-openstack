@@ -1216,6 +1216,7 @@ cinder_emc_config_file = /etc/cinder/cinder_emc_config.xml
 
 <% unless @manual_driver.nil? -%>
 volume_driver=<%= @manual_driver -%>
+
 <%= @manual_driver_config -%>
 <% end -%>
 
