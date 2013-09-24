@@ -157,7 +157,8 @@ when "openvswitch"
   else
     openvswitch_service = "openvswitch-switch"
   end
-  service "#{openvswitch_service}" do
+  service "openvswitch_service" do
+    service_name openvswitch_service
     supports :status => true, :restart => true
     action [ :enable ]
   end
