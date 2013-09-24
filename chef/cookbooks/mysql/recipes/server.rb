@@ -63,7 +63,7 @@ package "mysql-server" do
 end
 
 case node[:platform]
-when "suse", "centos", "redhat", "fedora"
+when "centos", "redhat", "fedora"
   mysql_service_name = "mysqld"
 else
   mysql_service_name = "mysql"
@@ -114,7 +114,7 @@ template "#{node[:mysql][:datadir]}/my.cnf" do
   group "root"
   mode "0644"
    notifies :run, resources(:script => "handle mysql restart"), :immediately if platform?(%w{debian ubuntu})
-   notifies :restart, "service[mysql]", :immediately if platform?(%w{centos redhat suse})
+   notifies :restart, "service[mysql]", :immediately if platform?(%w{centos redhat suse fedora})
 end
 
 unless Chef::Config[:solo]
