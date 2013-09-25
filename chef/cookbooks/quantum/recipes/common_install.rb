@@ -29,6 +29,7 @@ when "openvswitch", "cisco"
 when "linuxbridge"
   quantum_agent = node[:quantum][:platform][:lb_agent_name]
   quantum_agent_pkg = node[:quantum][:platform][:lb_agent_pkg]
+  plugin_cfg_path = "/etc/quantum/plugins/linuxbridge/linuxbridge_conf.ini"
 end
 
 quantum_path = "/opt/quantum"
@@ -75,6 +76,11 @@ unless quantum[:quantum][:use_gitrepo]
   package quantum_agent_pkg do
     action :install
   end
+
+  link plugin_cfg_path do
+    to "/etc/quantum/quantum.conf"
+  end 
+
 else
   quantum_agent = "quantum-openvswitch-agent"
   pfs_and_install_deps "quantum" do
@@ -117,18 +123,31 @@ else
     owner node[:quantum][:platform][:user]
   end
 
-  template plugin_cfg_path do
-    cookbook "quantum"
-    source "ovs_quantum_plugin.ini.erb"
-    owner quantum[:quantum][:platform][:user]
-    group "root"
-    mode "0640"
-    variables(
-        :ovs_sql_connection => quantum[:quantum][:db][:sql_connection],
-        :rootwrap_bin =>  node[:quantum][:rootwrap]
-    )
+  case quantum[:quantum][:networking_plugin]
+  when "openvswitch"
+    template plugin_cfg_path do
+      cookbook "quantum"
+      source "ovs_quantum_plugin.ini.erb"
+      owner quantum[:quantum][:platform][:user]
+      group "root"
+      mode "0640"
+      variables(
+          :ovs_sql_connection => quantum[:quantum][:db][:sql_connection],
+          :rootwrap_bin =>  node[:quantum][:rootwrap]
+      )
+    end
+  when "linuxbridge"
+    template plugin_cfg_path do
+      cookbook "quantum"
+      source "linuxbridge_conf.ini.erb"
+      owner quantum[:quantum][:platform][:user]
+      group "root"
+      mode "0640"
+      variables(
+          :sql_connection => quantum[:quantum][:db][:sql_connection]
+      )
+    end
   end
-
 end
 
 node[:quantum] ||= Mash.new
@@ -227,7 +246,6 @@ when "openvswitch", "cisco"
     end
   end
 when "linuxbridge"
-  plugin_cfg_path = "/etc/quantum/plugins/linuxbridge/linuxbridge_conf.ini"
   physnet = (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil)
   interface_driver = "quantum.agent.linux.interface.BridgeInterfaceDriver"
   external_network_bridge = ""
@@ -413,7 +431,8 @@ else
   service quantum_agent do
     supports :status => true, :restart => true
     action :enable
-    subscribes :restart, resources("template[#{plugin_cfg_path}]")
+    subscribes :restart, resources("link[#{plugin_cfg_path}]") unless quantum[:quantum][:use_gitrepo]
+    subscribes :restart, resources("template[#{plugin_cfg_path}]") if quantum[:quantum][:use_gitrepo]
     subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   end
 end
