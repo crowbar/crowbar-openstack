@@ -24,6 +24,7 @@ end
 case quantum[:quantum][:networking_plugin]
 when "openvswitch"
   quantum_agent = node[:quantum][:platform][:ovs_agent_name]
+  quantum_agent_pkg = node[:quantum][:platform][:ovs_agent_pkg]
 when "linuxbridge"
   quantum_agent = node[:quantum][:platform][:lb_agent_name]
 end
@@ -69,7 +70,7 @@ if quantum[:quantum][:networking_plugin] == "openvswitch"
 end
 
 unless quantum[:quantum][:use_gitrepo]
-  package quantum_agent do
+  package quantum_agent_pkg do
     action :install
   end
 else
@@ -150,15 +151,21 @@ when "openvswitch"
   physnet = quantum[:quantum][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed"
   interface_driver = "quantum.agent.linux.interface.OVSInterfaceDriver"
   external_network_bridge = "br-public"
-
-  service "openvswitch-switch" do
+  
+  if %w(redhat centos).include?(node.platform)
+    openvswitch_service = "openvswitch"
+  else
+    openvswitch_service = "openvswitch-switch"
+  end
+  service "openvswitch_service" do
+    service_name openvswitch_service
     supports :status => true, :restart => true
     action [ :enable ]
   end
 
-  bash "Start openvswitch-switch service" do
-    code "service openvswitch-switch start"
-    only_if "service openvswitch-switch status |grep -q 'is not running'"
+  bash "Start #{openvswitch_service} service" do
+    code "service #{openvswitch_service} start"
+    only_if "service #{openvswitch_service} status |grep -q 'is not running'"
   end
 
   # We always need br-int.  Quantum uses this bridge internally.
@@ -267,6 +274,12 @@ end
 
 link plugin_cfg_path do
   to "/etc/quantum/quantum.conf"
+end
+
+if %w(redhat centos).include?(node.platform)
+ link "/etc/quantum/plugin.ini" do
+   to "/etc/quantum/quantum.conf"
+ end
 end
 
 if quantum_server and quantum[:quantum][:api][:protocol] == 'https'
@@ -393,3 +406,40 @@ else
     subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   end
 end
+
+
+if %w(redhat centos).include?(node.platform)
+  net_core_pkgs=%w(kernel iproute iputils)
+
+  ruby_block "unset_reboot" do
+    block do
+      node.set[:reboot] = "complete"
+      node.save
+    end
+    action :create
+  end
+
+  ruby_block "set_reboot" do
+    block do
+      node.set[:reboot] = "require"
+      node.save
+    end
+    action :create
+    not_if "uname -a | grep 'openstack'"
+  end
+
+  net_core_pkgs.each do |pkg|
+    package "#{pkg}" do
+      action :upgrade
+      notifies :create, "ruby_block[set_reboot]"
+    end
+  end
+  #quantum tries to use v6 ip utils but rhel not support for v6, so lets workaround this issue this way
+  link "/sbin/ip6tables-restore" do
+    to "/bin/true"
+  end
+  link "/sbin/ip6tables-save" do
+    to "/bin/true"
+  end
+end
+

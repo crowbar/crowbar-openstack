@@ -79,6 +79,26 @@ debs:
     - quantum-plugin-openvswitch
     - quantum-plugin-openvswitch-agent
     - quantum-server
+    - kernel
+    - iputils
+    - iproute
+    - kernel-firmware
+    - kernel-headers
+rpms:
+  centos-6.4:
+    repos:
+      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+  redhat-6.4:
+    repos:
+      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+  pkgs:
+    - openstack-quantum
+    - openstack-quantum-linuxbridge
+    - openstack-quantum-openvswitch
+    - openvswitch
+    - python-quantum
+    - python-quantumclient
+    - python-openvswitch
 
 git_repo:
   - quantum https://github.com/openstack/quantum.git stable/grizzly

@@ -74,6 +74,23 @@ when "suse"
     :ovs_modprobe => "modprobe openvswitch",
     :quantum_rootwrap_sudo_template => "/etc/sudoers.d/openstack-quantum"
   }
+when "centos", "redhat"
+  default[:quantum][:platform] = {
+    :pkgs => [ "openstack-quantum" ],
+    :service_name => "quantum-server",
+    :ovs_agent_pkg => "openstack-quantum-openvswitch",
+    :ovs_agent_name => "quantum-openvswitch-agent",
+    :lb_agent_pkg => "openstack-quantum-linuxbridge",
+    :lb_agent_name => "openstack-quantum-linuxbridge-agent",
+    :metadata_agent_name => "quantum-metadata-agent",
+    :dhcp_agent_name => "quantum-dhcp-agent",
+    :l3_agent_name => "quantum-l3-agent",
+    :ovs_pkgs => [ "openvswitch",
+                   "openstack-quantum-openvswitch" ],
+    :user => "quantum",
+    :ovs_modprobe => "modprobe openvswitch",
+    :quantum_rootwrap_sudo_template => "/etc/sudoers.d/openstack-quantum"
+  }
 else
   default[:quantum][:platform] = {
     :pkgs => [ "quantum-server",
