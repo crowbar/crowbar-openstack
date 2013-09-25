@@ -21,6 +21,8 @@ case node[:platform]
 when "suse"
   package "python-mysql"     # C-extensions MySQL driver
   package "python-PyMySQL"   # pure-Python MySQL driver
+when "redhat", "centos"
+  package "MySQL-python"
 else
   package "python-mysqldb"
 end

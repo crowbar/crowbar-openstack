@@ -62,15 +62,22 @@ package "mysql-server" do
   action :install
 end
 
+case node[:platform]
+when "centos", "redhat", "fedora"
+  mysql_service_name = "mysqld"
+else
+  mysql_service_name = "mysql"
+end
+
 service "mysql" do
-  service_name value_for_platform([ "centos", "redhat", "fedora" ] => {"default" => "mysqld"}, "default" => "mysql")
+  service_name mysql_service_name
   if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
     restart_command "restart mysql"
     stop_command "stop mysql"
     start_command "start mysql"
   end
   supports :status => true, :restart => true, :reload => true
-  action :nothing
+  action :enable
 end
 
 link value_for_platform([ "centos", "redhat", "suse" , "fedora" ] => {"default" => "/etc/my.cnf"}, "default" => "/etc/mysql/my.cnf") do
@@ -106,7 +113,8 @@ template "#{node[:mysql][:datadir]}/my.cnf" do
   owner "root"
   group "root"
   mode "0644"
-  notifies :run, resources(:script => "handle mysql restart"), :immediately
+   notifies :run, resources(:script => "handle mysql restart"), :immediately if platform?(%w{debian ubuntu})
+   notifies :restart, "service[mysql]", :immediately if platform?(%w{centos redhat suse fedora})
 end
 
 unless Chef::Config[:solo]
@@ -156,19 +164,18 @@ template "/etc/mysql/conf.d/emergency_init_file" do
   action :create
 end
 
-
 script "fix_perms_hack" do
   interpreter "bash"
   user "root"
   cwd "/tmp"
   code <<-EOH
-  /etc/init.d/mysql stop
+  /etc/init.d/#{mysql_service_name} stop
   chmod 644 /etc/mysql/conf.d/emergency_init_file
   /usr/bin/mysqld_safe --init-file=/etc/mysql/conf.d/emergency_init_file &
   sleep 10
   killall mysqld
   chmod 600 /etc/mysql/conf.d/emergency_init_file
-  /etc/init.d/mysql start
+  /etc/init.d/#{mysql_service_name} start
   EOH
   not_if "/usr/bin/mysql -u root #{node['mysql']['server_root_password'].empty? ? '' : '-p' }#{node['mysql']['server_root_password']} -e 'show databases;'"
 end
