@@ -44,16 +44,23 @@ end
 package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node.platform == "suse"
 
+case node["platform"]
+when "suse"
+  rabbitmq_plugins = "/usr/sbin/rabbitmq-plugins"
+when "redhat", "centos"
+  rabbitmq_plugins = "/usr/lib/rabbitmq/bin/rabbitmq-plugins"
+else
+  rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
+end
+
 service "rabbitmq-server" do
   supports :restart => true, :start => true, :stop => true
   action [ :enable, :start ]
 end
-
-rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
-rabbitmq_plugins = "/usr/sbin/rabbitmq-plugins" if node.platform == "suse"
 
 bash "enabling rabbit management" do
   code "#{rabbitmq_plugins} enable rabbitmq_management > /dev/null"
   not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q"
   notifies :restart, "service[rabbitmq-server]"
 end
+
