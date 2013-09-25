@@ -125,7 +125,7 @@ end
 
 cinder_service("api")
 
-unless node[:platform] == "suse"
+unless %w(redhat centos suse).include?(node.platform)
   api_service_name = "cinder-api"
 else
   api_service_name = "openstack-cinder-api"

@@ -137,7 +137,11 @@ end
 
 make_volumes(node,volname)
 
-package "tgt"
+unless %w(redhat centos).include?(node.platform) 
+ package "tgt"
+else
+ package "scsi-target-utils"
+end
 if node[:cinder][:use_gitrepo]
   #TODO(agordeev):
   # tgt will not work with iSCSI targets if it has the same configs in conf.d
@@ -146,9 +150,10 @@ if node[:cinder][:use_gitrepo]
   cookbook_file "/etc/tgt/conf.d/cinder-volume.conf" do
     source "cinder-volume.conf"
   end
-elsif node[:platform] == "suse"
+elsif %w(redhat centos suse).include?(node.platform)
   cookbook_file "/etc/tgt/targets.conf" do
     source "cinder-volume.conf"
+    notifies :restart, "service[tgt]" if %w(redhat centos).include?(node.platform)
   end
 end
 
@@ -156,7 +161,7 @@ cinder_service("volume")
 
 # Restart doesn't work correct for this service.
 bash "restart-tgt_#{@cookbook_name}" do
-  unless node[:platform] == "suse"
+  unless %w(redhat centos suse).include?(node.platform)
     code <<-EOH
       stop tgt
       start tgt
@@ -170,6 +175,6 @@ end
 service "tgt" do
   supports :status => true, :restart => true, :reload => true
   action :enable
-  service_name "tgtd" if node[:platform] == "suse"
+  service_name "tgtd" if %w(redhat centos suse).include?(node.platform)
   notifies :run, "bash[restart-tgt_#{@cookbook_name}]"
 end
