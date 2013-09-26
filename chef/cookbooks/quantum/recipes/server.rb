@@ -243,15 +243,6 @@ unless node[:quantum][:use_gitrepo]
     # "mark quantum-server as restart for post-install" ruby_block
   end
 else
-  template "#{plugin_cfg_path}" do
-    source "ovs_quantum_plugin.ini.erb"
-    owner node[:quantum][:platform][:user]
-    group "root"
-    mode "0640"
-    variables(
-        :ovs_sql_connection => node[:quantum][:db][:sql_connection]
-    )
-  end
   service quantum_service_name do
     supports :status => true, :restart => true
     action :enable

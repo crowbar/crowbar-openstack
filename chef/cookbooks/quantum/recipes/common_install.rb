@@ -25,6 +25,7 @@ case quantum[:quantum][:networking_plugin]
 when "openvswitch", "cisco"
   quantum_agent = node[:quantum][:platform][:ovs_agent_name]
   quantum_agent_pkg = node[:quantum][:platform][:ovs_agent_pkg]
+  plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
 when "linuxbridge"
   quantum_agent = node[:quantum][:platform][:lb_agent_name]
   quantum_agent_pkg = node[:quantum][:platform][:lb_agent_pkg]
@@ -101,6 +102,10 @@ else
     command "cp /opt/quantum/etc/policy.json /etc/quantum/"
     creates "/etc/quantum/policy.json"
   end
+  execute "quantum_cp_plugins" do
+    command "cp -r /opt/quantum/etc/quantum/plugins /etc/quantum/plugins"
+    creates "/etc/quantum/plugins"
+  end
   execute "quantum_cp_rootwrap" do
     command "cp -r /opt/quantum/etc/quantum/rootwrap.d /etc/quantum/rootwrap.d"
     creates "/etc/quantum/rootwrap.d"
@@ -111,6 +116,19 @@ else
     mode 00644
     owner node[:quantum][:platform][:user]
   end
+
+  template plugin_cfg_path do
+    cookbook "quantum"
+    source "ovs_quantum_plugin.ini.erb"
+    owner quantum[:quantum][:platform][:user]
+    group "root"
+    mode "0640"
+    variables(
+        :ovs_sql_connection => quantum[:quantum][:db][:sql_connection],
+        :rootwrap_bin =>  node[:quantum][:rootwrap]
+    )
+  end
+
 end
 
 node[:quantum] ||= Mash.new
