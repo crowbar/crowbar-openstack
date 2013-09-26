@@ -27,6 +27,7 @@ when "openvswitch"
   quantum_agent_pkg = node[:quantum][:platform][:ovs_agent_pkg]
 when "linuxbridge"
   quantum_agent = node[:quantum][:platform][:lb_agent_name]
+  quantum_agent_pkg = node[:quantum][:platform][:lb_agent_pkg]
 end
 
 quantum_path = "/opt/quantum"
