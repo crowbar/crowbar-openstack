@@ -962,23 +962,26 @@ netapp_vfiler=<%= @netapp_params['netapp_vfiler'] %>
 #
 # Options defined in cinder.volume.drivers.rbd
 #
+#
+<% unless @rbd_params.nil? -%>
+volume_driver=cinder.volume.drivers.rbd.RBDDriver
 
 # the RADOS pool in which rbd volumes are stored (string
 # value)
-#rbd_pool=rbd
+rbd_pool=<%= @rbd_params['pool'] %>
 
 # the RADOS client name for accessing rbd volumes (string
 # value)
-#rbd_user=<None>
+rbd_user=<%= @rbd_params['user'] %>
 
 # the libvirt uuid of the secret for the rbd_uservolumes
 # (string value)
-#rbd_secret_uuid=<None>
+rbd_secret_uuid=<%= @rbd_params['secret_uuid'] %>
 
 # where to store temporary image files if the volume driver
 # does not write them directly to the volume (string value)
 #volume_tmp_dir=<None>
-
+<% end -%>
 
 #
 # Options defined in cinder.volume.drivers.san.san
@@ -1213,6 +1216,7 @@ volume_driver=<%= @netapp_params['netapp_driver'] %>
 volume_driver=cinder.volume.drivers.emc.emc_smis_iscsi.EMCSMISISCSIDriver
 cinder_emc_config_file = /etc/cinder/cinder_emc_config.xml
 <% end -%>
+
 
 <% unless @manual_driver.nil? -%>
 volume_driver=<%= @manual_driver -%>

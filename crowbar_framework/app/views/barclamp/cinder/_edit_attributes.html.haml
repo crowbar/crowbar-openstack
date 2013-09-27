@@ -12,8 +12,20 @@
 
     %p
       %label{ :for => :volume_type }= t('.volume_type')
-      = select_tag :volume_type, options_for_select([[t('.volume_type_raw'),'raw'], [t('.volume_type_local'), 'local'], ['NetApp', 'netapp'], ['EMC', 'emc'], ['EqualLogic','eqlx'], [t('.volume_type_manual'), 'manual']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_type"].to_s), :onchange => "update_volume_type_view(); update_value('volume/volume_type', 'volume_type', 'string')"
+      = select_tag :volume_type, options_for_select([[t('.volume_type_raw'),'raw'], [t('.volume_type_local'), 'local'], ['NetApp', 'netapp'], ['EMC', 'emc'], ['EqualLogic','eqlx'], ['Rados', 'rbd'], [t('.volume_type_manual'), 'manual']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_type"].to_s), :onchange => "update_volume_type_view(); update_value('volume/volume_type', 'volume_type', 'string')"
 
+    %div{ :id => 'rbd_parameters', :class => 'container' }
+      %label.section-header{ :for => :rbd_div }= t('.rbd_parameters')
+      %div.section{ :id => :rbd_div }
+        %p
+          %label{ :for => :rbd_pool }= t('.rbd_pool')
+          %input#rbd_pool{:type => "text", :name => "volume/rbd/pool", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["rbd"]["pool"], :onchange => "update_value('volume/rbd/pool', 'rbd_pool', 'string')"}
+        %p
+          %label{ :for => :rbd_user }= t('.rbd_user')
+          %input#rbd_user{:type => "text", :name => "volume/rbd/user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["rbd"]["user"], :onchange => "update_value('volume/rbd/user', 'rbd_user', 'string')"}
+        %p
+          %label{ :for => :rbd_secret_uuid }= t('.rbd_secret_uuid')
+          %input#rbd_secret_uuid{:type => "text", :name => "volume/rbd/secret_uuid", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["rbd"]["secret_uuid"], :onchange => "update_value('volume/rbd/secret_uuid', 'rbd_secret_uuid', 'string')"}
     %div{ :id => 'netapp_parameters', :class => 'container' }
       %label.section-header{ :for => :netapp_div }= t('.netapp_parameters')
       %div.section{ :id => :netapp_div }
@@ -170,6 +182,7 @@
     $('div#eqlx_parameters').toggle(choice == 'eqlx');
     $('div#manual_parameters').toggle(choice == 'manual');
     $('div#volume_file_parameters').toggle(choice == 'local');
+    $('div#rbd_parameters').toggle(choice == 'rbd');
     $('div#volume_disk_parameters').toggle(choice == 'raw');
   }
 

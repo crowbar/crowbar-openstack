@@ -111,6 +111,11 @@
           "ecom_server_username": "admin",
           "ecom_server_password": "admin"
         },
+        "rbd": {
+          "pool": "volumes",
+          "user": "volumes",
+          "secret_uuid": ""
+        },
         "manual": {
           "driver": "",
           "config": ""
