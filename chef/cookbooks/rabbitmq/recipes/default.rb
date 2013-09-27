@@ -59,8 +59,9 @@ service "rabbitmq-server" do
 end
 
 bash "enabling rabbit management" do
+  environment "HOME" => "/root/"
   code "#{rabbitmq_plugins} enable rabbitmq_management > /dev/null"
-  not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q"
+  not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q", :environment => {"HOME" => "/root/"}
   notifies :restart, "service[rabbitmq-server]"
 end
 
