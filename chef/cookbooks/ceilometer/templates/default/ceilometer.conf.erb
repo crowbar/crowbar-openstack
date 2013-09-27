@@ -91,6 +91,7 @@ metering_secret=<%= @metering_secret %>
 
 # Inspector to use for inspecting the hypervisor layer (string
 # value)
+<% if defined?(node[:nova][:libvirt_type]) -%>
 hypervisor_inspector=libvirt
 
 
@@ -98,13 +99,13 @@ hypervisor_inspector=libvirt
 
 # Libvirt domain type (valid options are: kvm, lxc, qemu, uml,
 # xen) (string value)
-libvirt_type=<%= @libvirt_type %>
+libvirt_type=<%= node[:nova][:libvirt_type] %>
 
 # Override the default libvirt URI (which is dependent on
 # libvirt_type) (string value)
 #libvirt_uri=
 
-
+<% end -%>
 ######## defined in ceilometer.image.notifications ########
 
 # Exchange name for Glance notifications (string value)

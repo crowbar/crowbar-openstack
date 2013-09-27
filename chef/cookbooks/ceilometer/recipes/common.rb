@@ -112,8 +112,7 @@ template "/etc/ceilometer/ceilometer.conf" do
       :api_port => node[:ceilometer][:api][:port],
       :metering_secret => metering_secret,
       :database_connection => db_connection,
-      :node_hostname => node['hostname'],
-      :libvirt_type => node[:nova][:libvirt_type]
+      :node_hostname => node['hostname']
     )
 end
 
