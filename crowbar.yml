@@ -79,11 +79,6 @@ debs:
     - quantum-plugin-openvswitch
     - quantum-plugin-openvswitch-agent
     - quantum-server
-    - kernel
-    - iputils
-    - iproute
-    - kernel-firmware
-    - kernel-headers
 rpms:
   centos-6.4:
     repos:
@@ -99,6 +94,11 @@ rpms:
     - python-quantum
     - python-quantumclient
     - python-openvswitch
+    - kernel
+    - iputils
+    - iproute
+    - kernel-firmware
+    - kernel-headers
 
 git_repo:
   - quantum https://github.com/openstack/quantum.git stable/grizzly
