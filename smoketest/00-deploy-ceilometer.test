@@ -65,6 +65,7 @@ if ! ceilometer user-list; then
   die 1 "Could not get user-list from ceilometer"
 fi
 
+# Switch command line ceilometer tool to work with API version 2
 export CEILOMETER_API_VERSION=2
 
 echo "Deploying Nova VM."
