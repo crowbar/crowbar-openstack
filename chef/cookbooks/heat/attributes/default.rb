@@ -13,12 +13,23 @@
 # limitations under the License.
 #
 
-unless node[:platform] == "suse"
-  default[:heat][:user]="heat"
-  default[:heat][:group]="heat"
-else
-  default[:heat][:user]="openstack-heat"
-  default[:heat][:group]="openstack-heat"
+case node["platform"]
+    when "ubuntu" 
+        default[:heat][:platform] = {
+            :packages => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"],
+            :services => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"],
+            :aux_dirs => ["/var/cache/heat"]
+        }
+        default[:heat][:user] = "heat"
+        default[:heat][:group] = "heat"
+    when "suse"
+         default[:heat][:platform] = {
+            :packages => ["openstack-heat-engine","openstack-heat-api","openstack-heat-api-cfn","openstack-heat-api-cloudwatch","python-heatclient"],
+            :services => ["openstack-heat-engine","openstack-heat-api","openstack-heat-api-cfn","openstack-heat-api-cloudwatch"],
+            :aux_dirs => ["/var/cache/heat"]
+        }
+        default[:heat][:user] = "openstack-heat"
+        default[:heat][:group] = "openstak-heat"
 end
 
 default[:heat][:debug] = false
@@ -33,6 +44,8 @@ default[:heat][:keystone_service_password] = ""
 
 default[:heat][:api][:protocol] = "http"
 default[:heat][:api][:cfn_port] = 8000
+default[:heat][:api][:engine_port] = 8001
+default[:heat][:api][:cloud_watch_port] = 8003
 default[:heat][:api][:port] = 8004
 
 default[:heat][:metering_secret] = "" # Set by Recipe

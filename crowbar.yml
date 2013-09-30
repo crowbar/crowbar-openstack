@@ -63,7 +63,7 @@ locale_additions:
         deployment: Deployment
 
 pips:
-  - python-heatclient>=1.0.0
+  - python-heatclient
 
 git_repo:
   - heat https://github.com/openstack/heat.git stable/grizzly
