@@ -35,9 +35,8 @@
                       "ovs_password": { "type" : "str" }
                     }},
                     "sql": { "type": "map", "required": true, "mapping": {
-                      "idle_timeout": { "type" : "int", "required" : true },
                       "min_pool_size": { "type" : "int", "required" : true },
-                      "max_pool_size": { "type" : "int", "required" : true },
+                      "max_pool_overflow": { "type" : "int", "required" : true },
                       "pool_timeout": { "type" : "int", "required" : true }
                     }},
                     "ssl": { "type": "map", "required": true, "mapping": {

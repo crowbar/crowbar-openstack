@@ -46,10 +46,9 @@
         "ovs_user": "ovs"
       },
       "sql": {
-        "idle_timeout": 30,
-        "min_pool_size": 5,
-        "max_pool_size": 10,
-        "pool_timeout": 200
+        "min_pool_size": 30,
+        "max_pool_overflow": 10,
+        "pool_timeout": 30
       },
       "ssl": {
         "certfile": "/etc/quantum/ssl/certs/signing_cert.pem",
