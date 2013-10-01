@@ -111,7 +111,8 @@ template "/etc/ceilometer/ceilometer.conf" do
       :keystone_admin_port => keystone_admin_port,
       :api_port => node[:ceilometer][:api][:port],
       :metering_secret => metering_secret,
-      :database_connection => db_connection
+      :database_connection => db_connection,
+      :node_hostname => node['hostname']
     )
 end
 
