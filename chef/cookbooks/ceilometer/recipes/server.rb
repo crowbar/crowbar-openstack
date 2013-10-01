@@ -38,6 +38,7 @@ if node[:ceilometer][:use_mongodb]
   template "#{mongo_conf}" do
     mode 0644
     source "mongodb.conf.erb"
+    variables(:listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address)
     notifies :restart, resources(:service => "#{mongo_service}"), :immediately
   end
 else
