@@ -182,15 +182,15 @@ end
 
 service "ceilometer-collector" do
   service_name "openstack-ceilometer-collector" if %w(redhat centos suse).include?(node.platform)
-  supports :status => true, :restart => true
-  action :enable
+  supports :status => true, :restart => true, :start => true, :stop => true
+  action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
 
 service "ceilometer-api" do
   service_name "openstack-ceilometer-api" if %w(redhat centos suse).include?(node.platform)
-  supports :status => true, :restart => true
-  action :enable
+  supports :status => true, :restart => true, :start => true, :stop => true
+  action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
 

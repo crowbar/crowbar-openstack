@@ -26,7 +26,7 @@ else
   ceilometer_path = "/opt/ceilometer"
   pfs_and_install_deps(@cookbook_name)
   link_service "ceilometer-agent-central"
-  create_user_and_dirs(@cookbook_name) 
+  create_user_and_dirs(@cookbook_name)
   execute "cp_policy.json" do
     command "cp #{ceilometer_path}/etc/ceilometer/policy.json /etc/ceilometer"
     creates "/etc/ceilometer/policy.json"
@@ -42,10 +42,10 @@ include_recipe "#{@cookbook_name}::common"
 service "ceilometer-agent-central" do
   if %w(suse).include?(node.platform)
     service_name "openstack-ceilometer-agent-central"
-  elsif %w(redhat centos).include?(node.platform) 
+  elsif %w(redhat centos).include?(node.platform)
     service_name "openstack-ceilometer-central"
   end
-  supports :status => true, :restart => true
-  action :enable
+  supports :status => true, :restart => true, :start => true, :stop => true
+  action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
