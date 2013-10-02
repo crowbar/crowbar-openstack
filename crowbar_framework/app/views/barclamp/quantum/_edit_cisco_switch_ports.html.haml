@@ -1,0 +1,60 @@
+%div{:id => 'cisco_switch_port'}
+  - if ! @switches.empty?
+    %label{ :for => :cisco_switch_port }= t('.assign_switch_port')
+    %table.data.box
+      %thead
+        %tr
+          %th= t('.node')
+          %th= t('.switch_ip')
+          %th= t('.switch_port')
+      %tbody
+        -if ! @nodes.empty?
+          -@nodes.sort_by{ |handle, node| node["name"]}.each do |handle, node|
+            %tr
+              %td{:title=>node[:description]}= link_to node["name"], node_path(:name=>handle)
+              - switch_ip_id = "node:#{node["name"]}:switch_ip".to_sym
+              %td{:title=>t('.switch_ip')}= select_tag switch_ip_id, options_for_select(@switches.keys, node["switch_ip"]), :onchange => "update_switch_ip('#{node["name"]}', '#{switch_ip_id}')"
+              - port_id = "node:#{node["name"]}:switch_port".to_sym
+              %td{:title=>t('.switch_port')}= text_field_tag port_id, node["switch_port"], :size => 15, :onchange => "update_switch_port('#{node["name"]}', '#{switch_ip_id}', '#{port_id}')"
+        -else
+          %tr
+            %td{:colspan=>(3)}
+              %div.alert.alert-warning= t('.edit_after_allocating_compute_nodes')
+
+  :javascript
+    function update_switch_ip(node_name, id) {
+      // first delete the node from the old switch
+      var input = document.getElementById('proposal_attributes');
+      var json = JSON.parse(input.value);
+      var node = {};
+      if ("cisco_switches" in json) {
+        var switches = json["cisco_switches"];
+        var keys = Object.keys(switches);
+        keys.forEach(
+          function(k) {
+            // use hasOwnProperty to filter out keys from the Object.prototype
+            if ( switches.hasOwnProperty(k) ) {
+              if ( switches[k].hasOwnProperty("switch_ports") ) {
+                if ( switches[k]["switch_ports"].hasOwnProperty(node_name) ) {
+                  node = switches[k]["switch_ports"][node_name];
+                  delete switches[k]["switch_ports"][node_name];
+                }
+              }
+            }
+          }
+        );
+      }
+
+      var switch_ip = document.getElementById(id).value;
+      if (! switches[switch_ip].hasOwnProperty("switch_ports") ) {
+        switches[switch_ip]["switch_ports"] = {}
+      }
+      switches[switch_ip]["switch_ports"][node_name] = node;
+      input.value = JSON.stringify(json);
+    }
+
+    function update_switch_port(node_name, switch_id, port_id) {
+      switch_ip =  document.getElementById(switch_id).value;
+      port =  document.getElementById(port_id).value;
+      update_value_direct('cisco_switches/' + switch_ip + '/switch_ports/' + node_name + '/switch_port', port, 'string')
+    }

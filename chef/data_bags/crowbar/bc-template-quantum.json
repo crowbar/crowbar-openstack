@@ -43,7 +43,9 @@
         "database": "quantum",
         "user": "quantum",
         "ovs_database": "ovs",
-        "ovs_user": "ovs"
+        "ovs_user": "ovs",
+        "cisco_database": "cisco_ovs",
+        "cisco_user": "cisco_ovs"
       },
       "sql": {
         "min_pool_size": 30,

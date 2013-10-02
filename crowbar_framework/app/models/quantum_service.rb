@@ -154,4 +154,5 @@ class QuantumService < ServiceObject
     end
     @logger.debug("Quantum apply_role_pre_chef_call: leaving")
   end
+
 end

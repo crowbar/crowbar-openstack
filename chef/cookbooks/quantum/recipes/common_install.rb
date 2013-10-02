@@ -22,7 +22,7 @@ if node.attribute?(:cookbook) and node[:cookbook] == "nova"
 end
 
 case quantum[:quantum][:networking_plugin]
-when "openvswitch"
+when "openvswitch", "cisco"
   quantum_agent = node[:quantum][:platform][:ovs_agent_name]
   quantum_agent_pkg = node[:quantum][:platform][:ovs_agent_pkg]
 when "linuxbridge"
@@ -44,7 +44,7 @@ else
   keystone = quantum
 end
 
-if quantum[:quantum][:networking_plugin] == "openvswitch"
+if quantum[:quantum][:networking_plugin] == "openvswitch" or quantum[:quantum][:networking_plugin] == "cisco"
 
   if node.platform == "ubuntu"
     # If we expect to install the openvswitch module via DKMS, but the module
@@ -147,7 +147,7 @@ template node[:quantum][:platform][:quantum_rootwrap_sudo_template] do
 end
 
 case quantum[:quantum][:networking_plugin]
-when "openvswitch"
+when "openvswitch", "cisco"
   plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
   physnet = quantum[:quantum][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed"
   interface_driver = "quantum.agent.linux.interface.OVSInterfaceDriver"

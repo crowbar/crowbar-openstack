@@ -15,7 +15,7 @@
 
 unless node[:quantum][:use_gitrepo]
   case node[:quantum][:networking_plugin]
-  when "openvswitch"
+  when "openvswitch", "cisco"
     plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
     quantum_agent = node[:quantum][:platform][:ovs_agent_name]
   when "linuxbridge"
@@ -116,7 +116,7 @@ template "/etc/quantum/api-paste.ini" do
 end
 
 case node[:quantum][:networking_plugin]
-when "openvswitch"
+when "openvswitch", "cisco"
   interface_driver = "quantum.agent.linux.interface.OVSInterfaceDriver"
 when "linuxbridge"
   interface_driver = "quantum.agent.linux.interface.BridgeInterfaceDriver"
@@ -211,6 +211,14 @@ when "openvswitch"
      recursive true
      not_if { node[:platform] == "suse" }
   end
+when "cisco"
+  directory "/etc/quantum/plugins/cisco/" do
+     mode 00775
+     owner node[:quantum][:platform][:user]
+     action :create
+     recursive true
+     not_if { node[:platform] == "suse" }
+  end
 when "linuxbridge"
   directory "/etc/quantum/plugins/linuxbridge/" do
      mode 00775
@@ -219,6 +227,10 @@ when "linuxbridge"
      recursive true
      not_if { node[:platform] == "suse" }
   end
+end
+
+if node[:quantum][:networking_plugin] == "cisco"
+  include_recipe "quantum::cisco_support"
 end
 
 unless node[:quantum][:use_gitrepo]
