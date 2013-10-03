@@ -98,4 +98,4 @@ pips:
   - python-ceilometerclient>=1.0.0
 
 git_repo:
-  - ceilometer http://github.com/openstack/ceilometer.git stable/grizzly
+  - ceilometer https://github.com/openstack/ceilometer.git stable/grizzly
