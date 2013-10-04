@@ -53,6 +53,7 @@ debs:
     - cinder-volume
     - python-cinder
     - python-keystone
+    - qemu-utils
 rpms:
   centos-6.4:
     repos:
