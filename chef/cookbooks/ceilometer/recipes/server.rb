@@ -38,6 +38,7 @@ if node[:ceilometer][:use_mongodb]
   template "#{mongo_conf}" do
     mode 0644
     source "mongodb.conf.erb"
+    variables(:listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address)
     notifies :restart, resources(:service => "#{mongo_service}"), :immediately
   end
 else
@@ -181,15 +182,15 @@ end
 
 service "ceilometer-collector" do
   service_name "openstack-ceilometer-collector" if %w(redhat centos suse).include?(node.platform)
-  supports :status => true, :restart => true
-  action :enable
+  supports :status => true, :restart => true, :start => true, :stop => true
+  action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
 
 service "ceilometer-api" do
   service_name "openstack-ceilometer-api" if %w(redhat centos suse).include?(node.platform)
-  supports :status => true, :restart => true
-  action :enable
+  supports :status => true, :restart => true, :start => true, :stop => true
+  action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
 end
 

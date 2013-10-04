@@ -47,6 +47,10 @@ os_auth_url=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_serv
 # communication with OpenStack services. (string value)
 os_endpoint_type=internalURL
 
+# The short hostname for node to correct filtering of
+# instances list (string value)
+host=<%= @node_hostname %>
+
 ######## defined in ceilometer.api ########
 
 # The port for the ceilometer API server (integer value)
@@ -87,20 +91,21 @@ metering_secret=<%= @metering_secret %>
 
 # Inspector to use for inspecting the hypervisor layer (string
 # value)
-#hypervisor_inspector=libvirt
+<% if defined?(node[:nova][:libvirt_type]) -%>
+hypervisor_inspector=libvirt
 
 
 ######## defined in ceilometer.compute.virt.libvirt.inspector ########
 
 # Libvirt domain type (valid options are: kvm, lxc, qemu, uml,
 # xen) (string value)
-#libvirt_type=kvm
+libvirt_type=<%= node[:nova][:libvirt_type] %>
 
 # Override the default libvirt URI (which is dependent on
 # libvirt_type) (string value)
 #libvirt_uri=
 
-
+<% end -%>
 ######## defined in ceilometer.image.notifications ########
 
 # Exchange name for Glance notifications (string value)
