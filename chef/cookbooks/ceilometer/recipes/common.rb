@@ -44,7 +44,8 @@ if node[:ceilometer][:use_mongodb]
   else
     db_host = node
   end
-  db_connection = "mongodb://#{db_host.name}:27017/ceilometer"
+  mongodb_ip=Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
+  db_connection = "mongodb://#{mongodb_ip}:27017/ceilometer"
 else
   sql_env_filter = " AND database_config_environment:database-config-#{node[:ceilometer][:database_instance]}"
   sqls = search(:node, "roles:database-server#{sql_env_filter}")
@@ -111,7 +112,8 @@ template "/etc/ceilometer/ceilometer.conf" do
       :keystone_admin_port => keystone_admin_port,
       :api_port => node[:ceilometer][:api][:port],
       :metering_secret => metering_secret,
-      :database_connection => db_connection
+      :database_connection => db_connection,
+      :node_hostname => node['hostname']
     )
 end
 
