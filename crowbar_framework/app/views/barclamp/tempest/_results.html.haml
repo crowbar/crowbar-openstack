@@ -13,7 +13,8 @@
         - tests[class_name].each do |test|
           - status = test.has_elements? ? test.elements[1].name : 'passed'
           - test_name = test.attribute('name').to_s()
-          - test_id = '%02x' % (class_name + test_name).hash
+          - test_time = test.attribute('time').to_s()
+          - test_id = ('%02x' % (class_name + test_name + Time.now.to_f.to_s).hash)
           %tr{:class => "test _#{status}", :id => test_id}
             %td.misc
               - if test.has_elements? 

@@ -13,5 +13,5 @@
     = dl_item(t("barclamp.#{@bc_name}.dashboard.test_run.started"), Time.at(@test_run['started']).to_s())
     = dl_item(t("barclamp.#{@bc_name}.dashboard.test_run.ended"), Time.at(@test_run['ended']).to_s())
 
-= link_to t('.raw_xml'), "#{@test_run['uuid']}.xml"
+= link_to t('.raw_xml'), "#{@test_run['uuid']}.xml", :target => "_blank"
 = render :file => @test_run['results.html']
