@@ -27,6 +27,7 @@ default[:quantum][:verbose] = false
 default[:quantum][:dhcp_domain] = "openstack.local"
 default[:quantum][:networking_mode] = "local"
 default[:quantum][:networking_plugin] = "openvswitch"
+default[:quantum][:cisco_support] = false
 
 default[:quantum][:db][:database] = "quantum"
 default[:quantum][:db][:user] = "quantum"
@@ -34,6 +35,9 @@ default[:quantum][:db][:password] = "" # Set by Recipe
 default[:quantum][:db][:ovs_database] = "ovs"
 default[:quantum][:db][:ovs_user] = "ovs"
 default[:quantum][:db][:ovs_password] = "" # Set by Recipe
+default[:quantum][:db][:cisco_database] = "cisco_ovs"
+default[:quantum][:db][:cisco_user] = "cisco_ovs"
+default[:quantum][:db][:cisco_password] = "" # Set by Recipe
 default[:quantum][:network][:fixed_router] = "127.0.0.1" # Set by Recipe
 default[:quantum][:network][:private_networks] = [] # Set by Recipe
 # Default range for GRE tunnels
@@ -45,10 +49,9 @@ default[:quantum][:api][:protocol] = "http"
 default[:quantum][:api][:service_port] = "9696"
 default[:quantum][:api][:service_host] = "0.0.0.0"
 
-default[:quantum][:sql][:idle_timeout] = 30
-default[:quantum][:sql][:min_pool_size] = 5
-default[:quantum][:sql][:max_pool_size] = 10
-default[:quantum][:sql][:pool_timeout] = 200
+default[:quantum][:sql][:min_pool_size] = 30
+default[:quantum][:sql][:max_pool_overflow] = 10
+default[:quantum][:sql][:pool_timeout] = 30
 
 default[:quantum][:ssl][:certfile] = "/etc/quantum/ssl/certs/signing_cert.pem"
 default[:quantum][:ssl][:keyfile] = "/etc/quantum/ssl/private/signing_key.pem"
@@ -78,6 +81,7 @@ when "suse"
     :ovs_pkgs => [ "openvswitch",
                    "openvswitch-switch",
                    "openvswitch-kmp-default" ],
+    :cisco_pkgs => [ "openstack-quantum-plugin-cisco" ],
     :user => "openstack-quantum",
     :ovs_modprobe => "modprobe openvswitch",
     :quantum_rootwrap_sudo_template => "/etc/sudoers.d/openstack-quantum"
@@ -117,6 +121,7 @@ else
     :ovs_pkgs => [ "linux-headers-#{`uname -r`.strip}",
                    "openvswitch-datapath-dkms",
                    "openvswitch-switch" ],
+    :cisco_pkgs => [ "" ],
     :user => "quantum",
     :ovs_modprobe => "modprobe openvswitch",
     :quantum_rootwrap_sudo_template => "/etc/sudoers.d/quantum-rootwrap"

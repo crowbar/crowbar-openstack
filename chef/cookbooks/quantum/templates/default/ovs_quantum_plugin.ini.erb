@@ -36,7 +36,7 @@ reconnect_interval = 2
 # Default: network_vlan_ranges =
 # Example: network_vlan_ranges = physnet1:1000:2999
 
-network_vlan_ranges = physnet1
+#network_vlan_ranges = physnet1
 
 # (BoolOpt) Set to True in the server and the agents to enable support
 # for GRE networks. Requires kernel support for OVS patch ports and
@@ -86,7 +86,7 @@ polling_interval = 2
 # Use "sudo quantum-rootwrap /etc/quantum/rootwrap.conf" to use the real
 # root filter facility.
 # Change to "sudo" to skip the filtering and just run the comand directly
-root_helper = sudo
+root_helper = sudo <%=@rootwrap_bin%> /etc/quantum/rootwrap.conf
 
 #-----------------------------------------------------------------------------
 # Sample Configurations.

@@ -15,7 +15,7 @@
 
 unless node[:quantum][:use_gitrepo]
   case node[:quantum][:networking_plugin]
-  when "openvswitch"
+  when "openvswitch", "cisco"
     plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
     quantum_agent = node[:quantum][:platform][:ovs_agent_name]
   when "linuxbridge"
@@ -41,8 +41,14 @@ unless node[:quantum][:use_gitrepo]
     notifies :restart, "service[#{node[:quantum][:platform][:service_name]}]"
   end
 else
-  quantum_agent = "quantum-openvswitch-agent"
-  plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
+  case node[:quantum][:networking_plugin]
+  when "openvswitch"
+    plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
+    quantum_agent = "quantum-openvswitch-agent"
+  when "linuxbridge"
+    plugin_cfg_path = "/etc/quantum/plugins/linuxbridge/linuxbridge_conf.ini"
+    quantum_agent = "quantum-linuxbridge-agent"
+  end
   quantum_service_name="quantum-server"
   quantum_path = "/opt/quantum"
   venv_path = node[:quantum][:use_virtualenv] ? "#{quantum_path}/.venv" : nil
@@ -116,7 +122,7 @@ template "/etc/quantum/api-paste.ini" do
 end
 
 case node[:quantum][:networking_plugin]
-when "openvswitch"
+when "openvswitch", "cisco"
   interface_driver = "quantum.agent.linux.interface.OVSInterfaceDriver"
 when "linuxbridge"
   interface_driver = "quantum.agent.linux.interface.BridgeInterfaceDriver"
@@ -211,6 +217,14 @@ when "openvswitch"
      recursive true
      not_if { node[:platform] == "suse" }
   end
+when "cisco"
+  directory "/etc/quantum/plugins/cisco/" do
+     mode 00775
+     owner node[:quantum][:platform][:user]
+     action :create
+     recursive true
+     not_if { node[:platform] == "suse" }
+  end
 when "linuxbridge"
   directory "/etc/quantum/plugins/linuxbridge/" do
      mode 00775
@@ -219,6 +233,10 @@ when "linuxbridge"
      recursive true
      not_if { node[:platform] == "suse" }
   end
+end
+
+if node[:quantum][:networking_plugin] == "cisco"
+  include_recipe "quantum::cisco_support"
 end
 
 unless node[:quantum][:use_gitrepo]
@@ -231,20 +249,11 @@ unless node[:quantum][:use_gitrepo]
     # "mark quantum-server as restart for post-install" ruby_block
   end
 else
-  template "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini" do
-    source "ovs_quantum_plugin.ini.erb"
-    owner node[:quantum][:platform][:user]
-    group "root"
-    mode "0640"
-    variables(
-        :ovs_sql_connection => node[:quantum][:db][:sql_connection]
-    )
-  end
   service quantum_service_name do
     supports :status => true, :restart => true
     action :enable
     subscribes :restart, resources("template[/etc/quantum/api-paste.ini]")
-    subscribes :restart, resources("template[/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini]")
+    subscribes :restart, resources("template[#{plugin_cfg_path}]")
     subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   end
 end
@@ -301,7 +310,8 @@ ruby_block "mark quantum-server as restart for post-install" do
   end
   action :nothing
   subscribes :create, resources("template[/etc/quantum/api-paste.ini]"), :immediately
-  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately
+  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately unless node[:quantum][:use_gitrepo]
+  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately if node[:quantum][:use_gitrepo]
   subscribes :create, resources("template[/etc/quantum/quantum.conf]"), :immediately
 end
 
@@ -312,7 +322,8 @@ ruby_block "mark quantum-agent as restart for post-install" do
     end
   end
   action :nothing
-  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately
+  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately unless node[:quantum][:use_gitrepo]
+  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately if node[:quantum][:use_gitrepo]
   subscribes :create, resources("template[/etc/quantum/quantum.conf]"), :immediately
 end
 

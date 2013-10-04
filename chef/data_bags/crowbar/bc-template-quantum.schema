@@ -17,6 +17,34 @@
                     "dhcp_domain": { "type": "str", "required": true },
                     "networking_mode": { "type": "str", "required": true },
                     "networking_plugin": { "type": "str", "required": true },
+                    "cisco_switches": {
+                      "type" : "map",
+                      "required" : false,
+                      "mapping" : {
+                        = : {
+                          "type" : "map",
+                          "required" : false,
+                          "mapping" : {
+                            "port": { "type": "str", "required": true },
+                            "user": { "type": "str", "required": true },
+                            "password": { "type": "str", "required": true },
+                            "switch_ports": {
+                              "type" : "map",
+                              "required" : false,
+                              "mapping" : {
+                                = : {
+                                  "type" : "map",
+                                  "required" : false,
+                                  "mapping" : {
+                                    "switch_port": { "type": "str", "required": true }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
                     "git_instance": { "type": "str", "required": true },
                     "git_refspec": { "type": "str", "required": true },
                     "use_gitrepo": { "type": "bool", "required": true },
@@ -28,16 +56,17 @@
                     "database_instance": { "type": "str", "required": true },
                     "db": { "type": "map", "required": true, "mapping": {
                       "database": { "type" : "str", "required" : true },
+                      "cisco_database": { "type" : "str", "required" : true },
                       "ovs_database": { "type" : "str", "required" : true },
                       "user": { "type" : "str", "required" : true },
                       "ovs_user": { "type" : "str", "required" : true },
+                      "cisco_user": { "type" : "str", "required" : true },
                       "password": { "type" : "str" },
                       "ovs_password": { "type" : "str" }
                     }},
                     "sql": { "type": "map", "required": true, "mapping": {
-                      "idle_timeout": { "type" : "int", "required" : true },
                       "min_pool_size": { "type" : "int", "required" : true },
-                      "max_pool_size": { "type" : "int", "required" : true },
+                      "max_pool_overflow": { "type" : "int", "required" : true },
                       "pool_timeout": { "type" : "int", "required" : true }
                     }},
                     "ssl": { "type": "map", "required": true, "mapping": {

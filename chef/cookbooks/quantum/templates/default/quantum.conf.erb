@@ -35,7 +35,9 @@ rabbit_password=<%= @rabbit_settings[:password] %>
 rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 <% end -%>
 
-<% if @networking_plugin == 'openvswitch' -%>
+<% if @networking_plugin == 'cisco' -%>
+core_plugin = quantum.plugins.cisco.network_plugin.PluginV2
+<% elsif @networking_plugin == 'openvswitch' -%>
 core_plugin = quantum.plugins.openvswitch.ovs_quantum_plugin.OVSQuantumPluginV2
 <% elsif @networking_plugin == 'linuxbridge' -%>
 core_plugin = quantum.plugins.linuxbridge.lb_quantum_plugin.LinuxBridgePluginV2
@@ -109,10 +111,9 @@ ssl_ca_file = <%= @ssl_ca_file %>
 sql_connection = <%= @sql_connection %>
 ## Period in seconds after which SQLAlchemy should reestablish its connection
 ## to the database.
-idle_timeout = <%= @sql_idle_timeout %>
-min_pool_size = <%= @sql_min_pool_size %>
-max_pool_size = <%= @sql_max_pool_size %>
-pool_timeout = <%= @sql_pool_timeout %>
+sqlalchemy_pool_size = <%= @sql_min_pool_size %>
+sqlalchemy_max_overflow = <%= @sql_max_pool_overflow %>
+sqlalchemy_pool_timeout = <%= @sql_pool_timeout %>
 ###############
 
 # Path to the extensions.  Note that this can be a colon-separated list of
@@ -243,7 +244,7 @@ root_helper=sudo <%=@rootwrap_bin%> /etc/quantum/rootwrap.conf
 polling_interval = 2
 
 [SECURITYGROUP]
-<% if @networking_plugin == 'openvswitch' -%>
+<% if @networking_plugin == 'openvswitch' or @networking_plugin == 'cisco' -%>
 firewall_driver = quantum.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
 <% elsif @networking_plugin == 'linuxbridge' -%>
 firewall_driver = quantum.agent.linux.iptables_firewall.IptablesFirewallDriver

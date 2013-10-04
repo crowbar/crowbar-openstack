@@ -43,13 +43,14 @@
         "database": "quantum",
         "user": "quantum",
         "ovs_database": "ovs",
-        "ovs_user": "ovs"
+        "ovs_user": "ovs",
+        "cisco_database": "cisco_ovs",
+        "cisco_user": "cisco_ovs"
       },
       "sql": {
-        "idle_timeout": 30,
-        "min_pool_size": 5,
-        "max_pool_size": 10,
-        "pool_timeout": 200
+        "min_pool_size": 30,
+        "max_pool_overflow": 10,
+        "pool_timeout": 30
       },
       "ssl": {
         "certfile": "/etc/quantum/ssl/certs/signing_cert.pem",
