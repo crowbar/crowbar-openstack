@@ -25,9 +25,11 @@ case quantum[:quantum][:networking_plugin]
 when "openvswitch", "cisco"
   quantum_agent = node[:quantum][:platform][:ovs_agent_name]
   quantum_agent_pkg = node[:quantum][:platform][:ovs_agent_pkg]
+  plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
 when "linuxbridge"
   quantum_agent = node[:quantum][:platform][:lb_agent_name]
   quantum_agent_pkg = node[:quantum][:platform][:lb_agent_pkg]
+  plugin_cfg_path = "/etc/quantum/plugins/linuxbridge/linuxbridge_conf.ini"
 end
 
 quantum_path = "/opt/quantum"
@@ -74,6 +76,11 @@ unless quantum[:quantum][:use_gitrepo]
   package quantum_agent_pkg do
     action :install
   end
+
+  link plugin_cfg_path do
+    to "/etc/quantum/quantum.conf"
+  end 
+
 else
   quantum_agent = "quantum-openvswitch-agent"
   pfs_and_install_deps "quantum" do
@@ -94,12 +101,16 @@ else
 
   link_service quantum_agent do
     virtualenv venv_path
-    bin_name "quantum-openvswitch-agent --config-dir /etc/quantum/"
+    bin_name "quantum-openvswitch-agent --config-file #{plugin_cfg_path} --config-dir /etc/quantum/"
   end
 
   execute "quantum_cp_policy.json" do
     command "cp /opt/quantum/etc/policy.json /etc/quantum/"
     creates "/etc/quantum/policy.json"
+  end
+  execute "quantum_cp_plugins" do
+    command "cp -r /opt/quantum/etc/quantum/plugins /etc/quantum/plugins"
+    creates "/etc/quantum/plugins"
   end
   execute "quantum_cp_rootwrap" do
     command "cp -r /opt/quantum/etc/quantum/rootwrap.d /etc/quantum/rootwrap.d"
@@ -110,6 +121,32 @@ else
     source "quantum-rootwrap.conf"
     mode 00644
     owner node[:quantum][:platform][:user]
+  end
+
+  case quantum[:quantum][:networking_plugin]
+  when "openvswitch"
+    template plugin_cfg_path do
+      cookbook "quantum"
+      source "ovs_quantum_plugin.ini.erb"
+      owner quantum[:quantum][:platform][:user]
+      group "root"
+      mode "0640"
+      variables(
+          :ovs_sql_connection => quantum[:quantum][:db][:sql_connection],
+          :rootwrap_bin =>  node[:quantum][:rootwrap]
+      )
+    end
+  when "linuxbridge"
+    template plugin_cfg_path do
+      cookbook "quantum"
+      source "linuxbridge_conf.ini.erb"
+      owner quantum[:quantum][:platform][:user]
+      group "root"
+      mode "0640"
+      variables(
+          :sql_connection => quantum[:quantum][:db][:sql_connection]
+      )
+    end
   end
 end
 
@@ -209,7 +246,6 @@ when "openvswitch", "cisco"
     end
   end
 when "linuxbridge"
-  plugin_cfg_path = "/etc/quantum/plugins/linuxbridge/linuxbridge_conf.ini"
   physnet = (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil)
   interface_driver = "quantum.agent.linux.interface.BridgeInterfaceDriver"
   external_network_bridge = ""
@@ -268,14 +304,6 @@ Chef::Log.info("Keystone server found at #{keystone_host}")
 
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 vlan_end = vlan_start + 2000
-
-if quantum[:quantum][:use_gitrepo] == true
-  plugin_cfg_path = File.join("/opt/quantum", plugin_cfg_path)
-end
-
-link plugin_cfg_path do
-  to "/etc/quantum/quantum.conf"
-end
 
 if %w(redhat centos).include?(node.platform)
  link "/etc/quantum/plugin.ini" do
@@ -403,7 +431,8 @@ else
   service quantum_agent do
     supports :status => true, :restart => true
     action :enable
-    subscribes :restart, resources("link[#{plugin_cfg_path}]")
+    subscribes :restart, resources("link[#{plugin_cfg_path}]") unless quantum[:quantum][:use_gitrepo]
+    subscribes :restart, resources("template[#{plugin_cfg_path}]") if quantum[:quantum][:use_gitrepo]
     subscribes :restart, resources("template[/etc/quantum/quantum.conf]")
   end
 end
