@@ -129,8 +129,24 @@ execute "create_floating_subnet" do
 end
 
 execute "create_router" do
-  command "#{quantum_cmd} router-create router-floating ; #{quantum_cmd} router-gateway-set router-floating floating ; #{quantum_cmd} router-interface-add router-floating fixed"
+  command "#{quantum_cmd} router-create router-floating"
   not_if "out=$(#{quantum_cmd} router-list); [ $? != 0 ] || echo ${out} | grep -q router-floating"
+  retries 5
+  retry_delay 10
+  action :nothing
+end
+
+execute "set_router_gateway" do
+  command "#{quantum_cmd} router-gateway-set router-floating floating"
+  not_if "out=$(#{quantum_cmd} router-show router-floating -c external_gateway_info -f shell); [ $? != 0 ] || [ \"$(echo $out | awk -F= '{print $2}')\" != \"\\\"\\\"\" ]"
+  retries 5
+  retry_delay 10
+  action :nothing
+end
+
+execute "add_fixed_network_to_router" do
+  command "#{quantum_cmd} router-interface-add router-floating fixed"
+  not_if "out1=$(#{quantum_cmd} subnet-show -f shell -c id fixed); rc1=$?; id=$(echo $out1 | awk -F= '{print $2}'); out2=$(#{quantum_cmd} router-port-list router-floating); [ $? != 0 ] || [ $rc1 != 0 ] || echo $out2 | grep -q $id"
   retries 5
   retry_delay 10
   action :nothing
@@ -145,51 +161,8 @@ execute "Quantum network configuration" do
   notifies :run, "execute[create_fixed_subnet]", :immediately
   notifies :run, "execute[create_floating_subnet]", :immediately
   notifies :run, "execute[create_router]", :immediately
-end
-
-def networks_params_equal?(netw1, netw2, keys_list)
-  h1 = keys_list.collect{ |key| netw1[key] }
-  h2 = keys_list.collect{ |key| netw2[key] }
-  h1 == h2
-end
-
-#this workaround for metadata service, should be removed when quantum-metadata-proxy will be released
-#it parses jsoned csv output of quantum to get address of router to pass it into metadata node
-ruby_block "get_fixed_net_router" do
-  block do
-    require 'csv'
-    require 'json'
-    csv_data = `#{quantum_cmd} router-port-list -f csv router-floating -- --device_owner network:router_gateway`
-    Chef::Log.info(csv_data)
-    node.set[:quantum][:network][:fixed_router] = JSON.parse(CSV.parse(csv_data)[1][-1])["ip_address"]
-    node.save
-  end
-  only_if { node[:quantum][:network][:fixed_router] == "127.0.0.1" }
-end
-
-if node[:quantum][:networking_mode] != "local"
-  ruby_block "get_private_networks" do
-    block do
-      require 'csv'
-      csv_data = `#{quantum_cmd} subnet-list -c cidr -f csv -- --shared false --enable_dhcp true`
-      private_quantum_networks = CSV.parse(csv_data)
-      private_quantum_networks.shift
-      node.set[:quantum][:network][:private_networks] = private_quantum_networks
-      node.save
-    end
-  end
-
-  ruby_block "add_floating_router_to_private_networks" do
-    block do
-      require 'csv'
-      csv_data = `#{quantum_cmd} subnet-list -c id -f csv -- --shared false --enable_dhcp true`
-      private_quantum_ids = CSV.parse(csv_data)
-      private_quantum_ids.shift
-      private_quantum_ids.each do |subnet_id|
-        system("#{quantum_cmd} router-interface-add router-floating #{subnet_id}")
-      end
-    end
-  end
+  notifies :run, "execute[set_router_gateway]", :immediately
+  notifies :run, "execute[add_fixed_network_to_router]", :immediately
 end
 
 if node[:quantum][:networking_plugin] == "linuxbridge"
