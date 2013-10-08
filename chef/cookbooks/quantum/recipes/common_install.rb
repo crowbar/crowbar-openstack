@@ -26,6 +26,31 @@ when "openvswitch", "cisco"
   quantum_agent = node[:quantum][:platform][:ovs_agent_name]
   quantum_agent_pkg = node[:quantum][:platform][:ovs_agent_pkg]
   plugin_cfg_path = "/etc/quantum/plugins/openvswitch/ovs_quantum_plugin.ini"
+
+  # Arrange for quantum-ovs-cleanup to be run on bootup of compute nodes only
+  unless quantum.name == node.name
+    cookbook_file "/etc/init.d/quantum-ovs-cleanup" do
+      source "quantum-ovs-cleanup"
+      mode 00755
+      owner node[:quantum][:platform][:user]
+    end
+
+    link "/etc/rc2.d/S20quantum-ovs-cleanup" do
+      to "../init.d/quantum-ovs-cleanup"
+    end
+
+    link "/etc/rc3.d/S20quantum-ovs-cleanup" do
+      to "../init.d/quantum-ovs-cleanup"
+    end
+
+    link "/etc/rc4.d/S20quantum-ovs-cleanup" do
+      to "../init.d/quantum-ovs-cleanup"
+    end
+
+    link "/etc/rc5.d/S20quantum-ovs-cleanup" do
+      to "../init.d/quantum-ovs-cleanup"
+    end
+  end
 when "linuxbridge"
   quantum_agent = node[:quantum][:platform][:lb_agent_name]
   quantum_agent_pkg = node[:quantum][:platform][:lb_agent_pkg]
