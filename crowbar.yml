@@ -18,7 +18,7 @@
 barclamp:
   name: quantum
   display: Quantum 
-  description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management'
+  description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management (to be renamed "Neutron")'
   version: 0
   requires:
     - database
