@@ -129,8 +129,13 @@ else
     wrap_bins [ "ceilometer" ]
   end
 
-  link_service "ceilometer-collector"
-  link_service "ceilometer-api"
+  link_service "ceilometer-collector" do
+    virtualenv venv_path
+  end
+  link_service "ceilometer-api" do
+    virtualenv venv_path
+  end
+
   create_user_and_dirs("ceilometer")
   execute "cp_policy.json" do
     command "cp #{ceilometer_path}/etc/ceilometer/policy.json /etc/ceilometer"

@@ -37,7 +37,10 @@ else
     wrap_bins [ "ceilometer" ]
   end
 
-  link_service "ceilometer-agent-central"
+  link_service "ceilometer-agent-central" do
+    virtualenv venv_path
+  end
+
   create_user_and_dirs(@cookbook_name)
   execute "cp_policy.json" do
     command "cp #{ceilometer_path}/etc/ceilometer/policy.json /etc/ceilometer"
