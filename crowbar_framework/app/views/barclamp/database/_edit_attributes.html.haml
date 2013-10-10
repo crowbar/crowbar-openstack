@@ -12,7 +12,7 @@
   %div.section.mysql_engine.sql_engine{ :id => :mysql_form }
     %p
       %label{ :for => :mysql_datadir }= t('.mysql_datadir')
-      %input#mysql_datadir{:type => "text", :name => "mysql_datadir", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["mysql"]["datadir"], :onchange => "update_value('mysql/datadir', 'mysql_datadir', 'string')"}
+      %input#mysql_datadir{:readonly => "readonly", :type => "text", :name => "mysql_datadir", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["mysql"]["datadir"], :onchange => "update_value('mysql/datadir', 'mysql_datadir', 'string')"}
 
   %label.section-header.postgresql_engine.sql_engine{ :for => :postgresql_form }= t('.postgresql_attributes')
   %div.section.postgresql_engine.sql_engine{ :id => :postgresql_form }
