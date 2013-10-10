@@ -29,6 +29,10 @@ barclamp:
   os_support:
     - ubuntu-12.04
 
+smoketest:
+  timeout: 1200
+
+
 crowbar:
   layout: 1
   order: 101 

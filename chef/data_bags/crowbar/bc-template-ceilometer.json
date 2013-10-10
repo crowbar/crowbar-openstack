@@ -17,6 +17,7 @@
       "use_gitrepo": false,
       "use_gitbarclamp": false,
       "use_pip_cache": false,
+      "use_virtualenv": false,
       "pfs_deps": [
         "gawk",
         "sqlite3",
@@ -70,7 +71,7 @@
         "pip://python-novaclient>=2.6.10",
         "pip://python-keystoneclient",
         "pip://python-swiftclient",
-        "pip://requests<1.0",
+        "pip://python-ceilometerclient",
         "pip://extras"
       ],
       "api": {

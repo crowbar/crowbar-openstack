@@ -116,7 +116,19 @@ unless node[:ceilometer][:use_gitrepo]
   venv_prefix = nil
 else
   ceilometer_path = "/opt/ceilometer"
-  pfs_and_install_deps("ceilometer")
+
+  venv_path = node[:ceilometer][:use_virtualenv] ? "#{ceilometer_path}/.venv" : nil
+  venv_prefix = node[:ceilometer][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
+  puts "venv_path=#{venv_path}"
+  puts "use_virtualenv=#{node[:ceilometer][:use_virtualenv]}"
+  pfs_and_install_deps "ceilometer" do
+    cookbook "ceilometer"
+    cnode node
+    virtualenv venv_path
+    path ceilometer_path
+    wrap_bins [ "ceilometer" ]
+  end
+
   link_service "ceilometer-collector"
   link_service "ceilometer-api"
   create_user_and_dirs("ceilometer")
@@ -128,8 +140,6 @@ else
     command "cp #{ceilometer_path}/etc/ceilometer/pipeline.yaml /etc/ceilometer"
     creates "/etc/ceilometer/pipeline.yaml"
   end
-  venv_path = node[:ceilometer][:use_virtualenv] ? "#{ceilometer_path}/.venv" : nil
-  venv_prefix = node[:ceilometer][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 end
 
 node.set_unless[:ceilometer][:metering_secret] = secure_password
