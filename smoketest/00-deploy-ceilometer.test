@@ -89,7 +89,7 @@ echo "Created $instance_name instance with ID: $instance_id"
 
 echo "Getting meter-list for test virtual machine from ceilometer"
 
-for meter in cpu cpu_utils disk.read.bytes disk.write.requests; do
+for meter in cpu cpu_util disk.read.bytes disk.write.requests; do
   isok="false"
   for ((i=1; i<=5; i++)); do
     metrics=$(ceilometer meter-list --query resource_id=$instance_id)
