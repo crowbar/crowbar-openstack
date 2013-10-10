@@ -114,6 +114,19 @@ class QuantumService < ServiceObject
   def validate_proposal_after_save proposal
     super
     @logger.debug("validating quantum proposal: #{proposal.inspect}")
+
+    if proposal["attributes"][@bc_name]["use_gitrepo"]
+      gitService = GitService.new(@logger)
+      gits = gitService.list_active[1]
+      if gits.empty?
+        # No actives, look for proposals
+        gits = gitService.proposals[1]
+      end
+      if not gits.include?proposal["attributes"][@bc_name]["git_instance"]
+        raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "git"))
+      end
+    end
+
     if proposal["attributes"]["quantum"]["networking_plugin"] == "linuxbridge" and
         proposal["attributes"]["quantum"]["networking_mode"] != "vlan"
         raise Chef::Exceptions::ValidationFailed.new("The \"linuxbridge\" plugin only supports the mode: \"vlan\"")
