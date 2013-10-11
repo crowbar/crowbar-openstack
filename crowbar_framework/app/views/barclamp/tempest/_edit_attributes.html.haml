@@ -21,12 +21,15 @@
     %p
       %label{ :for => :tempest_adm_password }= t('.tempest_adm_password')
       %input#tempest_adm_password{:type => "password", :name => "tempest_adm_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["tempest_adm_password"], :onchange => "update_value('tempest_adm_password','tempest_adm_password', 'string')"}
-    %p
-      %label{ :for => :use_pfs }= t('.use_pfs')
-      = select_tag :use_pfs, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_pfs"].to_s)
-    %p#use_virtenv_p
-      %label{ :for => :use_virtualenv }= t('.use_virtualenv')
-      = select_tag :use_virtualenv, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_virtualenv"].to_s)
+    %label.section-header{ :for => :cpfs_div }= t('.pull_from_source')
+    %div.section{ :id => :pfs_div } 
+      %p
+        %p
+          %label{ :for => :use_pfs }= t('.use_pfs')
+          = select_tag :use_pfs, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_pfs"].to_s)
+        %p#use_virtenv_p
+          %label{ :for => :use_virtualenv }= t('.use_virtualenv')
+          = select_tag :use_virtualenv, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_virtualenv"].to_s)
 
 :javascript
 $(document).ready(function(){

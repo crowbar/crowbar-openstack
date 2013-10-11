@@ -91,6 +91,7 @@ locale_additions:
               skipped: Skipped
 
         edit_attributes:
+          pull_from_source: Pull From Source
           attributes: Attributes
           nova_instance: Nova
           use_virtualenv: Use virtualenv
