@@ -19,9 +19,11 @@
 # limitations under the License.
 #
 
-cinder_path = "/opt/cinder"
-venv_path = node[:cinder][:use_virtualenv] ? "#{cinder_path}/.venv" : nil
-venv_prefix = node[:cinder][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
+if node[:cinder][:use_gitrepo]
+  cinder_path = "/opt/cinder"
+  venv_path = node[:cinder][:use_virtualenv] ? "#{cinder_path}/.venv" : nil
+  venv_prefix = node[:cinder][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
+end
 
 env_filter = " AND database_config_environment:database-config-#{node[:cinder][:database_instance]}"
 sqls = search(:node, "roles:database-server#{env_filter}") || []
