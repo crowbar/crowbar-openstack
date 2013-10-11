@@ -113,7 +113,6 @@ unless node[:ceilometer][:use_gitrepo]
       package "ceilometer-collector"
       package "ceilometer-api"
   end
-  venv_prefix = nil
 else
   ceilometer_path = "/opt/ceilometer"
 
