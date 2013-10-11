@@ -128,7 +128,7 @@
       %label.section-header{ :for => :volume_disk_div }= t('.volume_disk_parameters')
       %div.section{ :id => :volume_disk_div }
         %label{ :for => :cinder_raw_method }= t('.volume_raw_mode')
-        = select_tag :cinder_raw_method, options_for_select([['first','first'], ['all', 'all']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["cinder_raw_method"].to_s), :onchange => "update_value('volume/cinder_raw_method', 'cinder_raw_method', 'string')"
+        = select_tag :cinder_raw_method, options_for_select([['all', 'all']], @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["cinder_raw_method"].to_s), :onchange => "update_value('volume/cinder_raw_method', 'cinder_raw_method', 'string')"
         %p
           %label{ :for => :volume_name_disk }= t('.volume_name')
           %input.volume_name#volume_name_disk{:type => "text", :name => "volume_name_disk", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["volume_name"], :onchange => "update_value('volume/volume_name','volume_name_disk', 'string')"}
