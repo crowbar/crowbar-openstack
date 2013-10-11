@@ -10,8 +10,8 @@
       "use_gitbarclamp": true,
       "use_pip_cache": true,
       "use_gitrepo": false,
-      "rabbitmq_instance": "none",
       "use_virtualenv": true,
+      "rabbitmq_instance": "none",
       "keystone_instance": "none",
       "pfs_deps": [
         "python-eventlet",
