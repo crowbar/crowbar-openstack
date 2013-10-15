@@ -92,7 +92,7 @@ echo "Getting meter-list for test virtual machine from ceilometer"
 for meter in cpu cpu_util disk.read.bytes disk.write.requests; do
   isok="false"
   for ((i=1; i<=60; i++)); do
-    metrics=$(ceilometer meter-list --query resource_id=$instance_id)
+    metrics=$(ceilometer meter-list | grep "$instance_id")
     if echo $metrics | grep -qs "${meter}"; then
       echo "Successfully fetched ${meter} meter attempt ${i}"
       isok="true"
