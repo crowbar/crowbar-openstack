@@ -32,7 +32,6 @@ when "openvswitch", "cisco"
     cookbook_file "/etc/init.d/quantum-ovs-cleanup" do
       source "quantum-ovs-cleanup"
       mode 00755
-      owner node[:quantum][:platform][:user]
     end
 
     link "/etc/rc2.d/S20quantum-ovs-cleanup" do
