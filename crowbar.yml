@@ -107,8 +107,8 @@ locale_additions:
 debs:
   ubuntu-12.04:
     repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/havana main
     pkgs:
       - python-anyjson
       - python-nose
@@ -168,4 +168,4 @@ pips:
 
 extra_files:
   - http://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-uec.tar.gz tempest
-  - https://github.com/openstack/tempest/tarball/stable/grizzly.tar.gz tempest
+  - https://github.com/openstack/tempest/tarball/stable/havana.tar.gz tempest
