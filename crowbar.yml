@@ -80,8 +80,8 @@ locale_additions:
 debs:
   ubuntu-12.04:
     repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/havana main
   pkgs:
     - openvswitch-common
     - openvswitch-switch
@@ -99,10 +99,10 @@ debs:
 rpms:
   centos-6.4:
     repos:
-      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
   redhat-6.4:
     repos:
-      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
   pkgs:
     - openstack-quantum
     - openstack-quantum-linuxbridge
@@ -118,4 +118,5 @@ rpms:
     - kernel-headers
 
 git_repo:
-  - quantum https://github.com/openstack/quantum.git stable/grizzly
+  - quantum https://github.com/openstack/quantum.git milestone-proposed
+  # - quantum https://github.com/openstack/quantum.git stable/havana
