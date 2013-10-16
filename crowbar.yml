@@ -39,8 +39,8 @@ crowbar:
 debs:
   ubuntu-12.04:
     repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/havana main
   pkgs:
     - ceilometer-agent-central
     - ceilometer-agent-compute
@@ -56,15 +56,16 @@ debs:
 rpms:
   centos-6.4:
     repos:
-      - rpm http://rdo.fedorapeople.org/openstack/openstack-grizzly/rdo-release-grizzly.rpm
-      - bare MongoDB 10 http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
-      # http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
+      #- rpm http://rdo.fedorapeople.org/openstack/openstack-havana/rdo-release-havana.rpm
+      #- bare MongoDB 10 http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
       # http://mirror.us.leaseweb.net/epel/6/x86_64
       # http://rbel.frameos.org/stable/el6/x86_64
   redhat-6.4:
     repos:
-      - rpm http://rdo.fedorapeople.org/openstack/openstack-grizzly/rdo-release-grizzly.rpm
-      # rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
+      #- rpm http://rdo.fedorapeople.org/openstack/openstack-havana/rdo-release-havana.rpm
+      # rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
   pkgs:
     - openstack-ceilometer
     - openstack-ceilometer-api
@@ -98,4 +99,5 @@ pips:
   - python-ceilometerclient>=1.0.0
 
 git_repo:
-  - ceilometer https://github.com/openstack/ceilometer.git stable/grizzly
+  - ceilometer https://github.com/openstack/ceilometer.git milestone-proposed
+  #- ceilometer https://github.com/openstack/ceilometer.git stable/havana
