@@ -66,4 +66,4 @@ pips:
   - python-heatclient>=1.0.0
 
 git_repo:
-  - heat http://github.com/openstack/heat.git stable/grizzly
+  - heat https://github.com/openstack/heat.git stable/grizzly
