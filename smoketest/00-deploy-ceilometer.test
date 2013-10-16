@@ -88,19 +88,27 @@ instance_id=$(nova list | grep "$instance_name" | awk '{print $2}')
 echo "Created $instance_name instance with ID: $instance_id"
 
 echo "Getting meter-list for test virtual machine from ceilometer"
-metrics=$(ceilometer meter-list --query resource_id=$instance_id);
-if ! echo $metrics | grep -qs cpu; then
-  die 1 "Could not get cpu meter for test virtual machine from ceilometer"
-fi
-if ! echo $metrics | grep -qs cpu_utils; then
-  die 1 "Could not get cpu_utils meter for test virtual machine from ceilometer"
-fi
-if ! echo $metrics | grep -qs disk.read.bytes; then
-  die 1 "Could not get disk.read.bytes meter for test virtual machine from ceilometer"
-fi
-if ! echo $metrics | grep -qs disk.write.requests; then
-  die 1 "Could not get disk.write.requests meter for test virtual machine from ceilometer"
-fi
+
+for meter in cpu cpu_util disk.read.bytes disk.write.requests; do
+  isok="false"
+  for ((i=1; i<=60; i++)); do
+    metrics=$(ceilometer meter-list | grep "$instance_id")
+    if echo $metrics | grep -qs "${meter}"; then
+      echo "Successfully fetched ${meter} meter attempt ${i}"
+      isok="true"
+      break
+    else
+      echo "Failed to fetch ${meter} meter attempt ${i}"
+      #we need such huge timeout to be sure we fit into pipeline interval wich is 600 by default 20*60=1200
+      sleep 20
+    fi
+  done
+  if [ "${isok}" != "true" ] ; then
+    die 1 "Failed to fetch ${meter} meter"
+  fi
+done
+
+
 echo "$metrics";
 echo "Deleting Nova VM.";
 nova delete "$instance_id";
