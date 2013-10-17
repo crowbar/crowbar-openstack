@@ -99,5 +99,4 @@ pips:
   - python-ceilometerclient>=1.0.0
 
 git_repo:
-  - ceilometer https://github.com/openstack/ceilometer.git milestone-proposed
-  #- ceilometer https://github.com/openstack/ceilometer.git stable/havana
+  - ceilometer https://github.com/openstack/ceilometer.git stable/havana
