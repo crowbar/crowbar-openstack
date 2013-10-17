@@ -118,5 +118,4 @@ rpms:
     - kernel-headers
 
 git_repo:
-  - neutron https://github.com/openstack/neutron.git milestone-proposed
-  # - neutron https://github.com/openstack/neutron.git stable/havana
+  - neutron https://github.com/openstack/neutron.git stable/havana
