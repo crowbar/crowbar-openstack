@@ -1,0 +1,130 @@
+{
+  "type": "map", "required": true,
+  "mapping": {
+    "id": { "type": "str", "required": true, "pattern": "/^bc-neutron-|^bc-template-neutron$/" },
+    "description": { "type": "str", "required": true },
+    "attributes": { "type": "map", "required": true, 
+      "mapping": {
+        "neutron": { "type": "map", "required": true, 
+             "mapping": {
+                    "verbose": { "type": "bool", "required": true },
+                    "debug": { "type": "bool", "required": true },
+                    "service_user": { "type": "str", "required": true },
+                    "service_password": { "type": "str" },
+                    "rabbitmq_instance": { "type": "str", "required": true },
+                    "keystone_instance": { "type": "str", "required": true },
+                    "gitrepo": { "type": "str", "required": true },
+                    "dhcp_domain": { "type": "str", "required": true },
+                    "networking_mode": { "type": "str", "required": true },
+                    "networking_plugin": { "type": "str", "required": true },
+                    "cisco_switches": {
+                      "type" : "map",
+                      "required" : false,
+                      "mapping" : {
+                        = : {
+                          "type" : "map",
+                          "required" : false,
+                          "mapping" : {
+                            "port": { "type": "str", "required": true },
+                            "user": { "type": "str", "required": true },
+                            "password": { "type": "str", "required": true },
+                            "switch_ports": {
+                              "type" : "map",
+                              "required" : false,
+                              "mapping" : {
+                                = : {
+                                  "type" : "map",
+                                  "required" : false,
+                                  "mapping" : {
+                                    "switch_port": { "type": "str", "required": true }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "git_instance": { "type": "str", "required": true },
+                    "git_refspec": { "type": "str", "required": true },
+                    "use_gitrepo": { "type": "bool", "required": true },
+                    "use_virtualenv": { "type": "bool", "required": true },
+                    "use_gitbarclamp": { "type": "bool", "required": true },
+                    "use_pip_cache": { "type": "bool", "required": true },
+                    "pfs_deps": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
+                    "use_syslog": { "type": "bool", "required": true },
+                    "database_instance": { "type": "str", "required": true },
+                    "db": { "type": "map", "required": true, "mapping": {
+                      "database": { "type" : "str", "required" : true },
+                      "cisco_database": { "type" : "str", "required" : true },
+                      "ovs_database": { "type" : "str", "required" : true },
+                      "user": { "type" : "str", "required" : true },
+                      "ovs_user": { "type" : "str", "required" : true },
+                      "cisco_user": { "type" : "str", "required" : true },
+                      "password": { "type" : "str" },
+                      "ovs_password": { "type" : "str" }
+                    }},
+                    "sql": { "type": "map", "required": true, "mapping": {
+                      "min_pool_size": { "type" : "int", "required" : true },
+                      "max_pool_overflow": { "type" : "int", "required" : true },
+                      "pool_timeout": { "type" : "int", "required" : true }
+                    }},
+                    "ssl": { "type": "map", "required": true, "mapping": {
+                      "certfile": { "type" : "str", "required" : true },
+                      "keyfile": { "type" : "str", "required" : true },
+                      "generate_certs": { "type" : "bool", "required" : true },
+                      "insecure": { "type" : "bool", "required" : true },
+                      "cert_required": { "type" : "bool", "required" : true },
+                      "ca_certs": { "type" : "str", "required" : true }
+                    }},
+                    "api": { "type": "map", "required": true, "mapping": {
+                      "protocol": { "type" : "str", "required" : true },
+                      "service_port": { "type" : "int", "required" : true },
+                      "service_host": { "type" : "str", "required" : true }
+                    }}
+              }}
+     }},
+    "deployment": { "type": "map", "required": true,
+      "mapping": {
+        "neutron": { "type": "map", "required": true,
+          "mapping": {
+            "crowbar-revision": { "type": "int", "required": true },
+            "crowbar-committing": { "type": "bool" },
+            "crowbar-status": { "type": "str" },
+            "crowbar-failed": { "type": "str" },
+            "crowbar-queued": { "type": "bool" },
+            "element_states": { "type": "map", "mapping": {
+                = : { "type": "seq", "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "elements": { "type": "map", "required": true,
+              "mapping": {
+                = : {"type": "seq", "required": true,
+                  "sequence": [   { "type": "str" }  ]
+                }
+              }
+            },
+            "element_order": { "type": "seq", "required": true,
+              "sequence": [ {
+                "type": "seq",
+                "sequence": [ { "type": "str" } ]
+              } ]
+            },
+            "config": { "type": "map", "required": true,
+              "mapping": {
+                "environment": { "type": "str", "required": true },
+                "mode": { "type": "str", "required": true },
+                "transitions": { "type": "bool", "required": true },
+                "transition_list": { "type": "seq", "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

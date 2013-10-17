@@ -1,0 +1,21 @@
+# Managed by Crowbar.
+# Do not edit.
+[VLANS]
+vlan_start=<%= @vlan_start %>
+vlan_end=<%= @vlan_end %>
+vlan_name_prefix=q-
+
+[PORTS]
+max_ports=100
+
+[PORTPROFILES]
+max_port_profiles=65568
+
+[NETWORKS]
+max_networks=65568
+
+[SEGMENTATION]
+manager_class=neutron.plugins.cisco.segmentation.l2network_vlan_mgr_v2.L2NetworkVLANMgr
+
+[MODEL]
+model_class=neutron.plugins.cisco.models.virt_phy_sw_v2.VirtualPhysicalSwitchModelV2

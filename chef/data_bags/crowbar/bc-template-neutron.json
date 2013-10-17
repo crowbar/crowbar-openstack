@@ -1,0 +1,88 @@
+{
+  "id": "bc-template-neutron",
+  "description": "API-enabled, pluggable virtual network service for OpenStack",
+  "attributes": {
+    "neutron": {
+      "service_user": "neutron",
+      "gitrepo": "http://github.com/openstack/neutron.git",
+      "git_instance": "",
+      "git_refspec": "stable/grizzly",
+      "use_gitbarclamp": true,
+      "use_pip_cache": true,
+      "use_gitrepo": false,
+      "use_virtualenv": true,
+      "rabbitmq_instance": "none",
+      "keystone_instance": "none",
+      "pfs_deps": [
+        "python-eventlet",
+        "python-greenlet",
+        "python-pastedeploy",
+        "python-paste",
+        "python-routes",
+        "python-sqlalchemy",
+        "python-migrate",
+        "python-passlib",
+        "python-lxml",
+        "python-pam",
+        "python-iso8601",
+        "python-webob",
+        "pip://python-keystoneclient",
+        "pip://python-neutronclient",
+        "pip://python-novaclient",
+        "pip://alembic>=0.4.1",
+        "pip://pyudev"
+      ],
+      "debug": false,
+      "verbose": false,
+      "dhcp_domain": "openstack.local",
+      "networking_mode": "gre",
+      "networking_plugin": "openvswitch",
+      "use_syslog": false,
+      "database_instance": "none",
+      "db": {
+        "database": "neutron",
+        "user": "neutron",
+        "ovs_database": "ovs",
+        "ovs_user": "ovs",
+        "cisco_database": "cisco_ovs",
+        "cisco_user": "cisco_ovs"
+      },
+      "sql": {
+        "min_pool_size": 30,
+        "max_pool_overflow": 10,
+        "pool_timeout": 30
+      },
+      "ssl": {
+        "certfile": "/etc/neutron/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/neutron/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
+        "cert_required": false,
+        "ca_certs": "/etc/neutron/ssl/certs/ca.pem"
+      },
+      "api": {
+        "protocol": "http",
+        "service_port": 9696,
+        "service_host": "0.0.0.0"
+      }
+    }
+  },
+  "deployment": {
+    "neutron": {
+      "crowbar-revision": 0,
+      "element_states": {
+        "neutron-server": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+         ["neutron-server" ]
+      ],
+      "config": {
+        "environment": "neutron-config-base",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": []
+      }
+    }
+  }
+}

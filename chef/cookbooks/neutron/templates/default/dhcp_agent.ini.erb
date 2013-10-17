@@ -1,0 +1,14 @@
+# Managed by Crowbar.
+# Do not edit.
+[DEFAULT]
+debug = <%= @debug ? "True" : "False" %>
+resync_interval = <%= @resync_interval %>
+interface_driver = <%= @interface_driver %>
+dhcp_driver = <%= @dhcp_driver %>
+dhcp_domain = <%= @dhcp_domain %>
+use_namespaces = <%= @use_namespaces %>
+enable_isolated_metadata = <%= @enable_isolated_metadata %>
+enable_metadata_network = <%= @enable_metadata_network %>
+<% if @nameservers -%>
+dnsmasq_dns_server = <%= @nameservers %>
+<% end -%>

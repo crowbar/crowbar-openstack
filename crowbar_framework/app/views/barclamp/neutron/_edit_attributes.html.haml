@@ -1,0 +1,273 @@
+%input#proposal_attributes{:type => "hidden", :name => "proposal_attributes", :value => @proposal.raw_data['attributes'][@proposal.barclamp].to_json}
+%p
+  %label{:for => "proposal_attributes"}= t('.attributes')
+  = link_to "Raw", proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :style => "float: right;"
+  %div.container
+    = render_instance_selector("database", :database_instance, t('.database_instance'), "database_instance", @proposal)
+    = render_instance_selector("keystone", :keystone_instance, t('.keystone_instance'), "keystone_instance", @proposal)
+    = render_instance_selector("rabbitmq", :rabbitmq_instance, t('.rabbitmq_instance'), "rabbitmq_instance", @proposal)
+
+    %p
+      %label{ :for => :dhcp_domain }= t('.dhcp_domain')
+      %input#dhcp_domain{:type => "text", :name => "dhcp_domain", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["dhcp_domain"], :onchange => "update_value('dhcp_domain','dhcp_domain', 'string')"}
+
+    %label.section-header{ :for => :plugin_div }= t('.plugin_header')
+    %div.section{ :id => :plugin_div }
+      %p
+        %label{ :for => :networking_plugin }= t('.networking_plugin')
+        = select_tag :networking_plugin, options_for_select([['linuxbridge', 'linuxbridge'], ['openvswitch','openvswitch'], ['cisco','cisco']], @proposal.raw_data['attributes'][@proposal.barclamp]['networking_plugin']), :onchange => "update_value('networking_plugin', 'networking_plugin', 'string'); onPluginChange();"
+      %div{ :id => 'networking_mode_div' }
+        %p
+          %label{ :for => :networking_mode }= t('.networking_mode')
+          = select_tag :networking_mode, options_for_select([['flat', 'local'], ['gre','gre'], ['vlan', 'vlan']], @proposal.raw_data['attributes'][@proposal.barclamp]["networking_mode"]), :onchange => "update_value('networking_mode', 'networking_mode', 'string')"
+          %div.alert.alert-warning#warn_ovs_vlan= t('.warn_ovs_vlan')
+        %div{ :id => 'cisco_switches_div'}
+          %p
+            %label{ :for => :cisco_switches }= t('.cisco_switches')
+            %table#cisco_switches.data.box
+              %thead
+                %tr
+                  %th= t('.switch_ip')
+                  %th= t('.switch_port')
+                  %th= t('.switch_user')
+                  %th= t('.switch_password')
+                  %th
+              %tbody
+                %tr
+                  %td{ :colspan => "5" }
+                    %em#error_empty= t('.error_empty')
+                    %em#error_duplicate= t('.error_duplicate')
+              %tfoot
+                %tr
+                  %td
+                    %input#new_ip{:type => "text", :name => "IP Address", :'data-default' => ""}
+                  %td
+                    %input#new_port{:type => "text", :style => "width:5em", :maxlength => "5", :name => "SSH Port", :'data-default' => "22"}
+                  %td
+                    %input#new_user{:type => "text", :name => "Username", :'data-default' => ""}
+                  %td
+                    %input#new_password{:type => "password", :name => "Password", :'data-default' => ""}
+                  %td
+                    %button{ :type => 'button', :onclick => "javascript:add_switch();" }= t('.add_switch')
+            %div{:id => 'cisco_switch_port'}
+
+    %label.section-header{ :for => :protocol_div }= t('.ssl_header')
+    %div.section{ :id => :protocol_div }
+      %p
+        %label{ :for => :protocol }= t('.protocol')
+        = select_tag :protocol, options_for_select([['HTTP','http'], ['HTTPS', 'https']], @proposal.raw_data['attributes'][@proposal.barclamp]["api"]["protocol"].to_s), :onchange => "update_value('api/protocol', 'protocol', 'string')"
+
+      %div{ :id => :ssl_div }
+        %p
+          %label{ :for => :ssl_generate_certs }= t('.ssl_generate_certs')
+          = select_tag :ssl_generate_certs, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["generate_certs"].to_s), :onchange => "update_value('ssl/generate_certs', 'ssl_generate_certs', 'boolean')"
+        %p
+          %label{ :for => :ssl_certfile }= t('.ssl_certfile')
+          = text_field_tag :ssl_certfile, @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["certfile"], :class=> "input-xxlarge", :size => 80, :onchange => "update_value('ssl/certfile', 'ssl_certfile', 'string')"
+        %p
+          %label{ :for => :ssl_keyfile }= t('.ssl_keyfile')
+          = text_field_tag :ssl_keyfile, @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["keyfile"], :class=> "input-xxlarge", :size => 80, :onchange => "update_value('ssl/keyfile', 'ssl_keyfile', 'string')"
+        %p
+          %label{ :for => :ssl_insecure }= t('.ssl_insecure')
+          = select_tag :ssl_insecure, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["insecure"].to_s), :onchange => "update_value('ssl/insecure', 'ssl_insecure', 'boolean')"
+        %p
+          %label{ :for => :ssl_cert_required }= t('.ssl_cert_required')
+          = select_tag :ssl_cert_required, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["cert_required"].to_s), :onchange => "update_value('ssl/cert_required', 'ssl_cert_required', 'boolean')"
+        %p
+          %label{ :for => :ssl_ca_certs }= t('.ssl_ca_certs')
+          = text_field_tag :ssl_ca_certs, @proposal.raw_data['attributes'][@proposal.barclamp]["ssl"]["ca_certs"], :class=> "input-xxlarge", :size => 80, :onchange => "update_value('ssl/ca_certs', 'ssl_ca_certs', 'string')"
+    = render 'barclamp/git/pfsdeps.html.haml'
+
+:javascript
+  function setSelectedValue(selectObj, valueToSet) {
+    for (var i = 0; i < selectObj.options.length; i++) {
+      if (selectObj.options[i].text == valueToSet) {
+        selectObj.options[i].selected = true;
+        return;
+      }
+    }
+  }
+
+  function onPluginChange() {
+    networkingPlugin = $('select#networking_plugin').val();
+    if(networkingPlugin == "linuxbridge") {
+      $('div#networking_mode_div').hide();
+      update_value_direct('networking_mode', 'vlan', 'string');
+    } else if (networkingPlugin == "openvswitch" ) {
+      $('div#cisco_switches_div').hide();
+      $('div#networking_mode_div').show();
+      update_value('networking_mode', 'networking_mode', 'string');
+    } else if (networkingPlugin == "cisco")  {
+      if ($('select#networking_mode').val() == "vlan") {
+        $('div#cisco_switches_div').show();
+      } else {
+        $('div#cisco_switches_div').hide();
+      }
+      $('div#networking_mode_div').show();
+      update_value('networking_mode', 'networking_mode', 'string');
+    }
+  }
+
+  function onModeChange() {
+    networkingPlugin = $('select#networking_plugin').val();
+    networkingMode = $('select#networking_mode').val();
+    $('#warn_ovs_vlan').toggle(((networkingPlugin == "openvswitch") || (networkingPlugin == "cisco")) && (networkingMode == "vlan"))
+    $('div#cisco_switches_div').toggle((networkingPlugin == "cisco") && (networkingMode == "vlan"));
+  }
+
+  function toggle_protocol() {
+    if ($('#protocol option:selected').attr('value') == 'https') {
+      $('#ssl_div').show();
+    } else {
+      $('#ssl_div').hide();
+    }
+  };
+
+  function toggle_ssl_cert_required() {
+    if ($('#ssl_cert_required option:selected').attr('value') == 'true') {
+      $('#ssl_ca_certs').removeAttr('disabled');
+    } else {
+      $('#ssl_ca_certs').attr('disabled', 'disabled');
+    }
+  };
+
+  function toggle_ssl_generate_certs_full(init) {
+    if ($('#ssl_generate_certs option:selected').attr('value') == 'true') {
+      $('#ssl_certfile').attr('disabled', 'disabled');
+      $('#ssl_keyfile').attr('disabled', 'disabled');
+      $('#ssl_insecure').attr('disabled', 'disabled');
+
+      var value = '/etc/neutron/ssl/certs/signing_cert.pem'
+      $('#ssl_certfile').attr('value', value);
+      update_value_direct('ssl/certfile', value, 'string');
+      value = '/etc/neutron/ssl/private/signing_key.pem'
+      $('#ssl_keyfile').attr('value', value);
+      update_value_direct('ssl/keyfile', value, 'string');
+      $('#ssl_insecure').attr('value', 'true');
+      update_value_direct('ssl/insecure', 'true', 'boolean');
+    } else {
+      $('#ssl_certfile').removeAttr('disabled');
+      $('#ssl_keyfile').removeAttr('disabled');
+      $('#ssl_insecure').removeAttr('disabled');
+
+      // No need to change the certfile/keyfile values
+      if (!init) {
+        // Reset insecure to false, to not leave it as true by accident.
+        // We do not change insecure on page loading, though!
+        $('#ssl_insecure').attr('value', 'false');
+        update_value_direct('ssl/insecure', 'false', 'boolean');
+      }
+    }
+  };
+
+  function toggle_ssl_generate_certs() {
+    toggle_ssl_generate_certs_full(false);
+  };
+
+  function render_switch(ip, port, user, password) {
+    $.get('/neutron/render_switch', 
+         { switch_ip: ip, switch_port: port, switch_user: user, switch_password: password },
+         function(data) {
+            $('table#cisco_switches > tbody > tr').eq(-1).before(data);
+         }
+      );
+  }
+
+  function render_switch_ports(switches) {
+    $.get('/neutron/render_switch_ports', { switches: switches },
+        function(data) {
+            $('#cisco_switch_port').replaceWith(data);
+        }
+      );
+  }
+
+  function add_switch() {
+    var ip = $('input#new_ip').val();
+    var port = $('input#new_port').val();
+    var user = $('input#new_user').val();
+    var password = $('input#new_password').val();
+
+    if (ip == "" || port == "" || user == "" || password == "") {
+      $('#error_empty').show();
+      $('#error_duplicate').hide();
+      return;
+    }
+
+    var input = document.getElementById('proposal_attributes');
+    var json = JSON.parse(input.value);
+    if ("cisco_switches" in json) {
+      if (ip in json["cisco_switches"]) {
+        $('#error_empty').hide();
+        $('#error_duplicate').show();
+        return;
+      }
+    }
+
+    $('#error_empty').hide();
+    $('#error_duplicate').hide();
+
+    update_value_direct("cisco_switches/" + ip + "/port", port, 'string');
+    update_value_direct("cisco_switches/" + ip + "/user", user, 'string');
+    update_value_direct("cisco_switches/" + ip + "/password", password, 'string');
+
+    render_switch(ip, port, user, password);
+    input = document.getElementById('proposal_attributes');
+    json = JSON.parse(input.value);
+    render_switch_ports(json["cisco_switches"]);
+
+    $('input#new_ip').val("");
+    $('input#new_port').val("");
+    $('input#new_user').val("");
+    $('input#new_password').val("");
+  }
+
+  function delete_switch(name) {
+    var input = document.getElementById('proposal_attributes');
+    var json = JSON.parse(input.value);
+    if ("cisco_switches" in json) {
+      var switches = json["cisco_switches"];
+      if (name in switches) {
+        delete switches[name];
+        input.value = JSON.stringify(json);
+      }
+    }
+    $(document.getElementById("switch_" + name )).remove()
+    render_switch_ports(json["cisco_switches"]);
+  }
+
+  $(document).ready(function(){
+    onModeChange();
+    onPluginChange();
+    toggle_protocol();
+    toggle_ssl_cert_required();
+    toggle_ssl_generate_certs_full(true);
+
+    $('#error_empty').hide();
+    $('#error_duplicate').hide();
+
+    var input = document.getElementById('proposal_attributes');
+    var json = JSON.parse(input.value);
+
+    if ("cisco_switches" in json) {
+      var switches = json["cisco_switches"]
+      var sorted_keys = Object.keys(switches).sort()
+      sorted_keys.forEach(function(k) {
+        // use hasOwnProperty to filter out keys from the Object.prototype
+        if (switches.hasOwnProperty(k)) {
+          this_switch = switches[k]
+          if (!("port" in this_switch)) return;
+          if (!("user" in this_switch)) return;
+          if (!("password" in this_switch)) return;
+
+          render_switch(k, this_switch["port"], this_switch["user"], this_switch["password"]);
+        }
+      });
+      render_switch_ports(switches);
+    }
+
+  });
+
+  $('#networking_mode').change(onModeChange);
+  $('#protocol').change(toggle_protocol);
+  $('#ssl_cert_required').change(toggle_ssl_cert_required);
+  $('#ssl_generate_certs').change(toggle_ssl_generate_certs);

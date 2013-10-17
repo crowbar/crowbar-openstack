@@ -1,0 +1,11 @@
+# Managed by Crowbar
+# Do not edit.
+[DEFAULT]
+debug = <%= @debug ? "True" : "False" %>
+interface_driver = <%= @interface_driver %>
+use_namespaces = <%= @use_namespaces %>
+handle_internal_only_routers = <%= @handle_internal_only_routers %>
+metadata_port = <%= @metadata_port %>
+send_arp_for_ha = <%= @send_arp_for_ha %>
+periodic_interval = <%= @periodic_interval %>
+periodic_fuzzy_delay = <%= @periodic_fuzzy_delay %>

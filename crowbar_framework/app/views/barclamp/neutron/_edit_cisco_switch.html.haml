@@ -1,0 +1,11 @@
+%tr{ :id => "switch_#{@switch_ip}" }
+  %td
+    %input{:type => "text", :id => "switch_#{@switch_ip}_ip", :name => "IP Address", :value=> @switch_ip}
+  %td
+    %input{:type => "text", :id => "switch_#{@switch_ip}_port", :style => "width:5em", :maxlength => "5", :name => "SSH Port", :value => @switch_port}
+  %td
+    %input{:type => "text", :id => "switch_#{@switch_ip}_user", :name => "Username", :value => @switch_user}
+  %td
+    %input{:type => "password", :id => "switch_#{@switch_ip}_password", :name => "Password", :value => @switch_password}
+  %td
+    %button{ :type => 'button', :onclick => "javascript:delete_switch('#{@switch_ip}');" }= t('.remove')
