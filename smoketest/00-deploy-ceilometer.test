@@ -75,7 +75,7 @@ images=($(nova image-list | grep "ACTIVE" | grep "ubuntu" | grep "\-image" | awk
 test_image=${images[0]}
 echo -e  "Selected image id: $test_image"
 
-fixed_net=$(quantum net-list |grep fixed |awk '{print $2}')
+fixed_net=$(neutron net-list |grep fixed |awk '{print $2}')
 instance_name="smoketest"
 nova boot --poll --image "$test_image" --flavor 1 --nic net-id=$fixed_net "$instance_name" --meta description='Use for smoke testing purposes'
 
