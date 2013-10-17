@@ -16,8 +16,8 @@
 #
 
 barclamp:
-  name: quantum
-  display: Quantum 
+  name: neutron
+  display: Neutron 
   description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management (to be renamed "Neutron")'
   version: 0
   requires:
@@ -37,7 +37,7 @@ crowbar:
 locale_additions:
   en:
     barclamp:
-      quantum:
+      neutron:
         edit_cisco_switch_ports:
           assign_switch_port: Assign Switch Ports
           edit_after_allocating_compute_nodes: Edit assignments after allocating compute nodes in the nova barclamp
@@ -85,17 +85,17 @@ debs:
   pkgs:
     - openvswitch-common
     - openvswitch-switch
-    - python-quantum
-    - python-quantumclient
-    - quantum-common
-    - quantum-dhcp-agent
-    - quantum-l3-agent
-    - quantum-metadata-agent
-    - quantum-plugin-linuxbridge
-    - quantum-plugin-linuxbridge-agent
-    - quantum-plugin-openvswitch
-    - quantum-plugin-openvswitch-agent
-    - quantum-server
+    - python-neutron
+    - python-neutronclient
+    - neutron-common
+    - neutron-dhcp-agent
+    - neutron-l3-agent
+    - neutron-metadata-agent
+    - neutron-plugin-linuxbridge
+    - neutron-plugin-linuxbridge-agent
+    - neutron-plugin-openvswitch
+    - neutron-plugin-openvswitch-agent
+    - neutron-server
 rpms:
   centos-6.4:
     repos:
@@ -104,12 +104,12 @@ rpms:
     repos:
       - rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
   pkgs:
-    - openstack-quantum
-    - openstack-quantum-linuxbridge
-    - openstack-quantum-openvswitch
+    - openstack-neutron
+    - openstack-neutron-linuxbridge
+    - openstack-neutron-openvswitch
     - openvswitch
-    - python-quantum
-    - python-quantumclient
+    - python-neutron
+    - python-neutronclient
     - python-openvswitch
     - kernel
     - iputils
@@ -118,5 +118,5 @@ rpms:
     - kernel-headers
 
 git_repo:
-  - quantum https://github.com/openstack/quantum.git milestone-proposed
-  # - quantum https://github.com/openstack/quantum.git stable/havana
+  - neutron https://github.com/openstack/neutron.git milestone-proposed
+  # - neutron https://github.com/openstack/neutron.git stable/havana
