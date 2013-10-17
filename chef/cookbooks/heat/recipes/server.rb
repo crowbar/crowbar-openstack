@@ -298,7 +298,7 @@ end
 service "heat-api" do
   service_name "openstack-heat-api" if node.platform == "suse"
   supports :status => true, :restart => true
-  action :enable
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/heat/heat-api.conf]")
 end
 
