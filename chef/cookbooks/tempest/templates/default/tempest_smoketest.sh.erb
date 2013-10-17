@@ -34,7 +34,7 @@ for f in `keystone role-list | grep -E 'role[0-9]+|role-[0-9]+' | awk '{print $2
 echo -e "Cleaning up services..."
 for f in `keystone service-list | grep -E 'service-[0-9]+' | awk '{print $2}'` ; do keystone service-delete $f ; done
 echo -e "Cleaning up security-groups..."
-for f in `quantum security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do quantum security-group-delete $f ; done
+for f in `neutron security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do neutron security-group-delete $f ; done
 echo -e "Cleaning up images..."
 for f in `nova image-list | grep -E '.image[0-9]+' | awk {'print $2'}`; do nova image-delete $f ; done
 ) 1>&2
@@ -45,7 +45,7 @@ export OS_USERNAME=${username}
 export OS_PASSWORD=${password}
 export OS_TENANT_NAME=${tenant_name}
 echo -e "Cleaning up security-groups..."
-for f in `quantum security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do quantum security-group-delete $f ; done
+for f in `neutron security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do neutron security-group-delete $f ; done
 echo -e "Cleaning up volume snapshots..."
 for f in `nova volume-snapshot-list | awk {'print $2'} | grep -v '^ID$' | grep -v '^$'` ; do nova volume-snapshot-delete $f ; done
 echo -e "Cleaning up volumes..."
@@ -55,7 +55,7 @@ for f in `nova flavor-list | grep -E 'test_flavor_[0-9]+' | awk '{print $2}'` ; 
 echo -e "Cleaning up instances..."
 for f in `nova list | awk '{print $2}' | grep -v '^ID$' | grep -v '^$'` ; do nova delete $f ; done
 echo -e "Cleaning up floating ips..."
-for f in `quantum floatingip-list | awk {'print $2'}`; do quantum floatingip-delete $f ; done
+for f in `neutron floatingip-list | awk {'print $2'}`; do neutron floatingip-delete $f ; done
 )  1>&2
 # Listing of remaining items after tempest run is finished (Start)
 d=$(date +%y-%m-%d-%T)
@@ -79,10 +79,10 @@ for i in "${tenants[@]}"; do
     res=$(glance --os-tenant-name $i index)
     log=("${log[@]}" "$header" "$res")
     header=$(echo -e "\n[ $(date) ] Listing security groups for $i\n")
-    res=$(quantum --os-tenant-name $i security-group-list)
+    res=$(neutron --os-tenant-name $i security-group-list)
     log=("${log[@]}" "$header" "$res")
     header=$(echo -e "\n[ $(date) ] Listing floating_ips for $i\n")
-    res=$(quantum --os-tenant-name $i floatingip-list)
+    res=$(neutron --os-tenant-name $i floatingip-list)
     log=("${log[@]}" "$header" "$res" "\n\n\n")
 done
 
