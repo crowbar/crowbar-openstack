@@ -138,7 +138,7 @@ end
 
 execute "set_router_gateway" do
   command "#{quantum_cmd} router-gateway-set router-floating floating"
-  not_if "out=$(#{quantum_cmd} router-show router-floating -c external_gateway_info -f shell); [ $? != 0 ] || [ \"$(echo $out | awk -F= '{print $2}')\" != \"\\\"\\\"\" ]"
+  not_if "out=$(#{quantum_cmd} router-show router-floating -f shell) ; [ $? != 0 ] || eval $out && [ \"${external_gateway_info}\" != \"\" ]"
   retries 5
   retry_delay 10
   action :nothing
@@ -146,7 +146,7 @@ end
 
 execute "add_fixed_network_to_router" do
   command "#{quantum_cmd} router-interface-add router-floating fixed"
-  not_if "out1=$(#{quantum_cmd} subnet-show -f shell -c id fixed); rc1=$?; id=$(echo $out1 | awk -F= '{print $2}'); out2=$(#{quantum_cmd} router-port-list router-floating); [ $? != 0 ] || [ $rc1 != 0 ] || echo $out2 | grep -q $id"
+  not_if "out1=$(#{quantum_cmd} subnet-show -f shell fixed) ; rc1=$?; eval $out1 ; out2=$(#{quantum_cmd} router-port-list router-floating); [ $? != 0 ] || [ $rc1 != 0 ] || echo $out2 | grep -q $id"
   retries 5
   retry_delay 10
   action :nothing
