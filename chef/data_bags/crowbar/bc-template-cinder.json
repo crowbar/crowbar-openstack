@@ -14,7 +14,7 @@
       "service_password": "",
       "gitrepo": "http://github.com/openstack/cinder.git",
       "git_instance": "",
-      "git_refspec": "stable/grizzly",
+      "git_refspec": "stable/havana",
       "use_gitrepo": false,
       "use_gitbarclamp": false,
       "use_virtualenv": false,
