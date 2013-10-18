@@ -38,8 +38,8 @@ crowbar:
 debs:
   ubuntu-12.04:
     repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/havana main
   pkgs:
     - tgt
     - lvm2
@@ -57,10 +57,10 @@ debs:
 rpms:
   centos-6.4:
     repos:
-      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
   redhat-6.4:
     repos:
-      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-grizzly/epel-6
+      - rpm http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6
   pkgs:
     - lvm2
     - openstack-cinder
@@ -143,4 +143,4 @@ locale_additions:
         deployment: Deployment
 
 git_repo:
-  - cinder https://github.com/openstack/cinder.git stable/grizzly
+  - cinder https://github.com/openstack/cinder.git stable/havana
