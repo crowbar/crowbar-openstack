@@ -143,5 +143,4 @@ locale_additions:
         deployment: Deployment
 
 git_repo:
-  - cinder https://github.com/openstack/cinder.git milestone-proposed
-  # - cinder https://github.com/openstack/cinder.git stable/havana
+  - cinder https://github.com/openstack/cinder.git stable/havana
