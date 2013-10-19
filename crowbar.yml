@@ -107,8 +107,8 @@ locale_additions:
 debs:
   ubuntu-12.04:
     repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/grizzly main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/grizzly main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/havana main
     pkgs:
       - python-anyjson
       - python-nose
@@ -122,7 +122,7 @@ debs:
       - python-glanceclient
       - python-keystoneclient
       - python-novaclient
-      - python-quantumclient
+      - python-neutronclient
       - python-testresources
       - python-keyring
       - python-testrepository
@@ -141,7 +141,7 @@ rpms:
     - python-glanceclient
     - python-keystoneclient
     - python-novaclient
-    - python-quantumclient
+    - python-neutronclient
     - python-testresources
     - python-keyring
     - python-testrepository
@@ -160,7 +160,7 @@ pips:
   - python-glanceclient>=0.5.0
   - python-keystoneclient>=0.2.0
   - python-novaclient>=2.10.0
-  - python-quantumclient>=2.1
+  - python-neutronclient>=2.1
   - testresources
   - keyring
   - testrepository
