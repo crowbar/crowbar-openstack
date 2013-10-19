@@ -1,0 +1,32 @@
+[composite:neutron]
+use = egg:Paste#urlmap
+/: neutronversions
+/v2.0: neutronapi_v2_0
+
+[composite:neutronapi_v2_0]
+use = call:neutron.auth:pipeline_factory
+noauth = extensions neutronapiapp_v2_0
+keystone = authtoken keystonecontext extensions neutronapiapp_v2_0
+
+[filter:keystonecontext]
+paste.filter_factory = neutron.auth:NeutronKeystoneContext.factory
+
+[filter:authtoken]
+paste.filter_factory = keystone.middleware.auth_token:filter_factory
+auth_host = <%= @keystone_host %>
+auth_port = <%= @keystone_admin_port %>
+auth_protocol = <%= @keystone_protocol %>
+admin_user = <%= @keystone_service_user %>
+admin_password = <%= @keystone_service_password %>
+admin_tenant_name = <%= @keystone_service_tenant %>
+<%= "signing_dir = /var/lib/neutron/keystone-signin" if node[:platform] == "suse" %>
+
+[filter:extensions]
+paste.filter_factory = neutron.api.extensions:plugin_aware_extension_middleware_factory
+
+[app:neutronversions]
+paste.app_factory = neutron.api.versions:Versions.factory
+
+[app:neutronapiapp_v2_0]
+paste.app_factory = neutron.api.v2.router:APIRouter.factory
+

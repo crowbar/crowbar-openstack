@@ -16,8 +16,8 @@
 #
 
 barclamp:
-  name: quantum
-  display: Quantum 
+  name: neutron
+  display: Neutron 
   description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management (to be renamed "Neutron")'
   version: 0
   requires:
@@ -37,7 +37,7 @@ crowbar:
 locale_additions:
   en:
     barclamp:
-      quantum:
+      neutron:
         edit_cisco_switch_ports:
           assign_switch_port: Assign Switch Ports
           edit_after_allocating_compute_nodes: Edit assignments after allocating compute nodes in the nova barclamp

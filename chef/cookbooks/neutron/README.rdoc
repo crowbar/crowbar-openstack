@@ -1,0 +1,2 @@
+This cookbook deployes the openstack neutron server and client
+ 

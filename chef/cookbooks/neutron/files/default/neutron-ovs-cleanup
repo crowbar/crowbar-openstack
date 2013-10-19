@@ -1,0 +1,20 @@
+#!/bin/sh -e
+#
+# Do not modify this file directly.  Managed by chef.
+#
+
+
+case "$1" in
+    start)
+        echo "Running neutron-ovs-cleanup"
+        neutron-ovs-cleanup
+        ;;
+    stop)
+        ;;
+    status)
+        ;;
+    *)
+        echo "Usage: $0 start" >&2
+        exit 1
+        ;;
+esac

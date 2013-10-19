@@ -1,0 +1,21 @@
+#!/bin/bash
+# neutron_nodes="$(knife_node_find 'roles:neutron-server' FQDN)"
+
+# [[ $neutron_nodes ]] || {
+#     echo "Could not find nodes with the neutron-server role!"
+#     exit 1
+# }
+# unset http_proxy
+
+# for node in $neutron_nodes; do
+#     token=$(curl -sS -d \
+#         $'{"auth":{"passwordCredentials":{"username":"admin","password":"crowbar"}}}' \
+#         -L -H 'Content-Type: application/json' \
+#         "http://$node:5000/v2.0/tokens")
+#     [[ $token =~ serviceCatalog ]] || {
+#         echo "Did not get valid response from neutron @ $node!"
+#         exit 1
+#     }
+#     echo "$token" > "$LOGDIR/neutron-token.json"
+#     echo "Neutron up on $node"
+# done

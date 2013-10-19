@@ -1,0 +1,9 @@
+# Managed by Crowbar.
+# Do not edit.
+[PLUGINS]
+<% if @vlan_mode -%>
+nexus_plugin=neutron.plugins.cisco.nexus.cisco_nexus_plugin_v2.NexusPlugin
+<% end -%>
+vswitch_plugin=neutron.plugins.openvswitch.ovs_neutron_plugin.OVSNeutronPluginV2
+
+[INVENTORY]

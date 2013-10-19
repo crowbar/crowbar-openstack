@@ -1,0 +1,23 @@
+# Managed by Crowbar.
+# Do not edit.
+<% if @vlan_mode -%>
+[SWITCH]
+<% @switches.keys.each do |ip| -%>
+[[<%=ip%>]]
+<% if @switches[ip].has_key?(:switch_ports) -%>
+<% @switches[ip][:switch_ports].each do |name, values| -%>
+[[[<%=name%>]]]
+ports=<%=values[:switch_port]%>
+<% end -%>
+<% end -%>
+[[[ssh_port]]]
+ssh_port=<%=@switches[ip][:port]%>
+
+<% end -%>
+<% end -%>
+[DRIVER]
+<% if @vlan_mode -%>
+name=neutron.plugins.cisco.nexus.cisco_nexus_network_driver_v2.CiscoNEXUSDriver
+<% else -%>
+name=neutron.plugins.cisco.tests.unit.v2.nexus.fake_nexus_driver.CiscoNEXUSFakeDriver
+<% end -%>
