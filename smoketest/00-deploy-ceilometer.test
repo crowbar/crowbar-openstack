@@ -17,7 +17,7 @@ die() {
     echo "$@"
     exit $res
 }
-set -x
+
 echo "Checking Ceilometer"
 echo "Finding ceilometer server..."
 ceilometer_ip=$(knife_node_find 'roles:ceilometer-server' IP)
