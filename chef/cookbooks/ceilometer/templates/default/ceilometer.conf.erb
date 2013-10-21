@@ -496,3 +496,10 @@ admin_user = <%= @keystone_service_user %>
 auth_protocol = <%= @keystone_protocol %>
 
 
+[service_credentials]
+os_username=<%= @keystone_service_user %>
+os_password=<%= @keystone_service_password %>
+os_tenant_name=<%= @keystone_service_tenant %>
+os_auth_url=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/v2.0
+os_endpoint_type=internalURL
+
