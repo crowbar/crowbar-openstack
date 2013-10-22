@@ -27,26 +27,6 @@
 
 ######## defined in ceilometer.service ########
 
-# Username to use for openstack service access (string value)
-os_username=<%= @keystone_service_user %>
-
-# Password to use for openstack service access (string value)
-os_password=<%= @keystone_service_password %>
-
-# Tenant ID to use for openstack service access (string value)
-#os_tenant_id=
-
-# Tenant name to use for openstack service access (string
-# value)
-os_tenant_name=<%= @keystone_service_tenant %>
-
-# Auth URL to use for openstack service access (string value)
-os_auth_url=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/v2.0
-
-# Type of endpoint in Identity service catalog to use for
-# communication with OpenStack services. (string value)
-os_endpoint_type=internalURL
-
 # The short hostname for node to correct filtering of
 # instances list (string value)
 host=<%= @node_hostname %>
