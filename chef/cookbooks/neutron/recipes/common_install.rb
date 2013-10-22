@@ -114,12 +114,6 @@ else
     path neutron_path
     wrap_bins [ "neutron", "neutron-rootwrap" ]
   end
-  pfs_and_install_deps "keystone" do
-    cookbook "keystone"
-    cnode keystone
-    path File.join(neutron_path,"keystone")
-    virtualenv venv_path
-  end
 
   create_user_and_dirs("neutron")
 
