@@ -139,11 +139,13 @@
       %div.section{ :id => :manual_div }
         %p
           %label{ :for => :manual_volume_driver }= t('.manual_volume_driver')
-          %input#manual_volume_driver{:type => "text", :name => "manual_volume_driver", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["manual"]["driver"], :onchange => "update_value('volume/manual/driver', 'manual_volume_driver', 'string')"}
+          %input#manual_volume_driver{:type => "text", :class => 'input-xxlarge', :name => "manual_volume_driver", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["manual"]["driver"], :onchange => "update_value('volume/manual/driver', 'manual_volume_driver', 'string')"}
+          %br/
           %em= t('.manual_volume_driver_hint')
         %p
           %label{ :for => :manual_volume_config }= t('.manual_volume_config')
-          = text_area_tag :manual_volume_config, @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["manual"]["config"], :size => "80x5", :onchange => "update_value('volume/manual/config', 'manual_volume_config', 'string')"
+          = text_area_tag :manual_volume_config, @proposal.raw_data['attributes'][@proposal.barclamp]["volume"]["manual"]["config"], :size => "80x5", :class => "form-control input-xxlarge", :onchange => "update_value('volume/manual/config', 'manual_volume_config', 'string')"
+          %br/
           %em= t('.manual_volume_config_hint')
 
     %label.section-header{ :for => :protocol_div }= t('.ssl_header')
