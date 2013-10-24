@@ -66,4 +66,4 @@ pips:
   - python-heatclient
 
 git_repo:
-  - heat https://github.com/openstack/heat.git stable/grizzly
+  - heat https://github.com/openstack/heat.git stable/havana
