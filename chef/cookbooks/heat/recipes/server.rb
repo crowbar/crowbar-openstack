@@ -15,16 +15,14 @@
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
-node.set_unless[:heat][:db][:password] = secure_password
+heat_path = "/opt/heat"
+venv_path = node[:heat][:use_virtualenv] ? "#{heat_path}/.venv" : nil
+venv_prefix = node[:heat][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 
+node.set_unless[:heat][:db][:password] = secure_password
 env_filter = " AND database_config_environment:database-config-#{node[:heat][:database_instance]}"
-sqls = search(:node, "roles:database-server#{env_filter}") || []
-if sqls.length > 0
-    sql = sqls[0]
-    sql = node if sql.name == node.name
-else
-    sql = node
-end
+sql = search(:node, "roles:database-server#{env_filter}").first || node
+
 include_recipe "database::client"
 backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
 include_recipe "#{backend_name}::client"
@@ -70,47 +68,37 @@ database_user "grant database access for heat database user" do
 end
 
 unless node[:heat][:use_gitrepo]
-  unless node.platform == "suse"
-    package "heat-api"
-    package "python-heatclient"
-  else
-    package "openstack-heat-api"
-    package "openstack-heat-api-cfn"
-    package "openstack-heat-api-cloudwatch"
-    package "openstack-heat-engine"
-    package "python-heatclient"
-  end
-  venv_prefix = nil
+    node[:heat][:platform][:packages].each do |p|
+        package p
+    end
 else
-  heat_path = "/opt/heat"
-  pfs_and_install_deps("heat")
-  link_service "heat-api"
-  create_user_and_dirs("heat")
-  execute "cp_policy.json" do
-    command "cp #{heat_path}/etc/policy.json /etc/heat"
-    creates "/etc/heat/policy.json"
-  end
-  venv_path = node[:heat][:use_virtualenv] ? "#{heat_path}/.venv" : nil
-  venv_prefix = node[:heat][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
-end
+    pfs_and_install_deps @cookbook_name do
+        virtualenv venv_path
+        path heat_path
+        wrap_bins "heat" 
+    end
+    
+    node[:heat][:platform][:services].each do |s|
+        link_service s do
+            virtualenv venv_path
+        end
+    end
 
+    create_user_and_dirs("heat")
+
+    node[:heat][:platform][:aux_dirs].each do |d|
+        directory d do
+           owner node[:heat][:user]
+           group "root"
+           mode 00755
+           action :create 
+        end
+    end
+    
+end
 include_recipe "#{@cookbook_name}::common"
-
-directory "/var/cache/heat" do
-  owner node[:heat][:user]
-  group "root"
-  mode 00755
-  action :create
-end unless node.platform == "suse"
-
 env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{node[:heat][:rabbitmq_instance]}"
-rabbits = search(:node, "roles:rabbitmq-server#{env_filter}") || []
-if rabbits.length > 0
-  rabbit = rabbits[0]
-  rabbit = node if rabbit.name == node.name
-else
-  rabbit = node
-end
+rabbit = search(:node, "roles:rabbitmq-server#{env_filter}").first || node
 rabbit_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(rabbit, "admin").address
 Chef::Log.info("Rabbit server found at #{rabbit_address}")
 rabbit_settings = {
@@ -122,14 +110,7 @@ rabbit_settings = {
 }
 
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:heat][:keystone_instance]}"
-keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = node if keystone.name == node.name
-else
-  keystone = node
-end
-
+keystone = search(:node, "recipes:keystone\\:\\:server#{env_filter}").first || node
 keystone_host = keystone[:fqdn]
 keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_token = keystone["keystone"]["service"]["token"]
@@ -160,10 +141,7 @@ if node.roles.include? "heat-server"
   db_password = node[:heat][:db][:password]
 else
   # pickup password to database from heat-server node
-  node_controllers = search(:node, "roles:heat-server") || []
-  if node_controllers.length > 0
-    db_password = node_controllers[0][:heat][:db][:password]
-  end
+  node_controllers = search(:node, "roles:heat-server").first || []
 end
 
 
@@ -246,6 +224,7 @@ keystone_register "register heat endpoint" do
   action :add_endpoint_template
 end
 
+
 template "/etc/heat/heat-api.conf" do
     source "heat-api.conf.erb"
     owner node[:heat][:user]
@@ -316,6 +295,15 @@ template "/etc/heat/heat-api-cfn.conf" do
     )
 end
 
+service "heat-api" do
+  service_name "openstack-heat-api" if node.platform == "suse"
+  supports :status => true, :restart => true
+  action [:enable, :start]
+  subscribes :restart, resources("template[/etc/heat/heat-api.conf]")
+end
+
+
+
 template "/etc/heat/heat-api-cfn-paste.ini" do
     source "heat-api-cfn-paste.ini.erb"
     owner node[:heat][:user]
@@ -366,11 +354,19 @@ template "/etc/heat/heat-api-cloudwatch.conf" do
     )
 end
 
+template "/etc/heat/heat-api-cloudwatch-paste.ini" do
+    source "heat-api-cloudwatch-paste.ini.erb"
+    owner node[:heat][:user]
+    group "root"
+    mode "0640"
+end
+
 service "heat-api-cloudwatch" do
   service_name "openstack-heat-api-cloudwatch" if node.platform == "suse"
   supports :status => true, :restart => true
   action :enable
   subscribes :restart, resources("template[/etc/heat/heat-api-cloudwatch.conf]")
+  subscribes :restart, resources("template[/etc/heat/heat-api-cloudwatch-paste.ini]")
 end
 
 template "/etc/heat/heat-engine.conf" do
@@ -405,7 +401,7 @@ end
 
 execute "heat-db-sync" do
   # do not run heat-db-setup since it wants to install packages and setup db passwords
-  command "python -m heat.db.sync"
+  command "#{venv_prefix}python -m heat.db.sync" 
   action :nothing
 end
 
