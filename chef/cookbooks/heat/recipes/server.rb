@@ -224,9 +224,22 @@ keystone_register "register heat endpoint" do
   action :add_endpoint_template
 end
 
+template "/etc/heat/environment.d/default.yaml" do
+    source "default.yaml.erb"
+    owner node[:heat][:user]
+    group "root"
+    mode "0640"
+end
 
-template "/etc/heat/heat-api.conf" do
-    source "heat-api.conf.erb"
+template "/etc/heat/policy.json" do
+    source "policy.json.erb"
+    owner node[:heat][:user]
+    group "root"
+    mode "0640"
+end
+
+template "/etc/heat/heat.conf" do
+    source "heat.conf.erb"
     owner node[:heat][:user]
     group "root"
     mode "0640"
@@ -243,69 +256,14 @@ template "/etc/heat/heat-api.conf" do
       :keystone_service_tenant => keystone_service_tenant,
       :keystone_admin_port => keystone_admin_port,
       :api_port => node[:heat][:api][:port],
-      :database_connection => db_connection
-    )
-end
-
-template "/etc/heat/heat-api-paste.ini" do
-    source "heat-api-paste.ini.erb"
-    owner node[:heat][:user]
-    group "root"
-    mode "0640"
-    variables(
-      :debug => node[:heat][:debug],
-      :verbose => node[:heat][:verbose],
-      :keystone_protocol => keystone_protocol,
-      :keystone_host => keystone_host,
-      :keystone_auth_token => keystone_token,
-      :keystone_service_port => keystone_service_port,
-      :keystone_service_user => keystone_service_user,
-      :keystone_service_password => keystone_service_password,
-      :keystone_service_tenant => keystone_service_tenant,
-      :keystone_admin_port => keystone_admin_port,
-      :api_port => node[:heat][:api][:port]
-    )
-end
-
-service "heat-api" do
-  service_name "openstack-heat-api" if node.platform == "suse"
-  supports :status => true, :restart => true
-  action :enable
-  subscribes :restart, resources("template[/etc/heat/heat-api.conf]")
-end
-
-template "/etc/heat/heat-api-cfn.conf" do
-    source "heat-api-cfn.conf.erb"
-    owner node[:heat][:user]
-    group "root"
-    mode "0640"
-    variables(
-      :debug => node[:heat][:debug],
-      :verbose => node[:heat][:verbose],
-      :rabbit_settings => rabbit_settings,
-      :keystone_protocol => keystone_protocol,
-      :keystone_host => keystone_host,
-      :keystone_auth_token => keystone_token,
-      :keystone_service_port => keystone_service_port,
-      :keystone_service_user => keystone_service_user,
-      :keystone_service_password => keystone_service_password,
-      :keystone_service_tenant => keystone_service_tenant,
-      :keystone_admin_port => keystone_admin_port,
+      :database_connection => db_connection,
       :cfn_port => node[:heat][:api][:cfn_port]
     )
+   notifies :run, "execute[heat-db-sync]", :delayed
 end
 
-service "heat-api" do
-  service_name "openstack-heat-api" if node.platform == "suse"
-  supports :status => true, :restart => true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/heat/heat-api.conf]")
-end
-
-
-
-template "/etc/heat/heat-api-cfn-paste.ini" do
-    source "heat-api-cfn-paste.ini.erb"
+template "/etc/heat/api-paste.ini" do
+    source "api-paste.ini.erb"
     owner node[:heat][:user]
     group "root"
     mode "0640"
@@ -320,83 +278,42 @@ template "/etc/heat/heat-api-cfn-paste.ini" do
       :keystone_service_password => keystone_service_password,
       :keystone_service_tenant => keystone_service_tenant,
       :keystone_admin_port => keystone_admin_port,
+      :api_port => node[:heat][:api][:port],
       :cfn_port => node[:heat][:api][:cfn_port]
+
     )
-end
-
-
-
-service "heat-api-cfn" do
-  service_name "openstack-heat-api-cfn" if node.platform == "suse"
-  supports :status => true, :restart => true
-  action :enable
-  subscribes :restart, resources("template[/etc/heat/heat-api-cfn.conf]")
-end
-
-template "/etc/heat/heat-api-cloudwatch.conf" do
-    source "heat-api-cloudwatch.conf.erb"
-    owner node[:heat][:user]
-    group "root"
-    mode "0640"
-    variables(
-      :debug => node[:heat][:debug],
-      :verbose => node[:heat][:verbose],
-      :rabbit_settings => rabbit_settings,
-      :keystone_protocol => keystone_protocol,
-      :keystone_host => keystone_host,
-      :keystone_auth_token => keystone_token,
-      :keystone_service_port => keystone_service_port,
-      :keystone_service_user => keystone_service_user,
-      :keystone_service_password => keystone_service_password,
-      :keystone_service_tenant => keystone_service_tenant,
-      :keystone_admin_port => keystone_admin_port,
-      :cfn_port => node[:heat][:api][:cfn_port]
-    )
-end
-
-template "/etc/heat/heat-api-cloudwatch-paste.ini" do
-    source "heat-api-cloudwatch-paste.ini.erb"
-    owner node[:heat][:user]
-    group "root"
-    mode "0640"
-end
-
-service "heat-api-cloudwatch" do
-  service_name "openstack-heat-api-cloudwatch" if node.platform == "suse"
-  supports :status => true, :restart => true
-  action :enable
-  subscribes :restart, resources("template[/etc/heat/heat-api-cloudwatch.conf]")
-  subscribes :restart, resources("template[/etc/heat/heat-api-cloudwatch-paste.ini]")
-end
-
-template "/etc/heat/heat-engine.conf" do
-    source "heat-engine.conf.erb"
-    owner node[:heat][:user]
-    group "root"
-    mode "0640"
-    variables(
-      :debug => node[:heat][:debug],
-      :verbose => node[:heat][:verbose],
-      :rabbit_settings => rabbit_settings,
-      :keystone_protocol => keystone_protocol,
-      :keystone_host => keystone_host,
-      :keystone_auth_token => keystone_token,
-      :keystone_service_port => keystone_service_port,
-      :keystone_service_user => keystone_service_user,
-      :keystone_service_password => keystone_service_password,
-      :keystone_service_tenant => keystone_service_tenant,
-      :keystone_admin_port => keystone_admin_port,
-      :cfn_port => node[:heat][:api][:cfn_port],
-      :database_connection => db_connection
-    )
-    notifies :run, "execute[heat-db-sync]", :delayed
 end
 
 service "heat-engine" do
   service_name "openstack-heat-engine" if node.platform == "suse"
   supports :status => true, :restart => true
   action :enable
-  subscribes :restart, resources("template[/etc/heat/heat-engine.conf]")
+  subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
+end
+
+service "heat-api" do
+  service_name "openstack-heat-api" if node.platform == "suse"
+  supports :status => true, :restart => true
+  action :enable
+  subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
+end
+
+service "heat-api-cfn" do
+  service_name "openstack-heat-api-cfn" if node.platform == "suse"
+  supports :status => true, :restart => true
+  action :enable
+  subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
+end
+
+service "heat-api-cloudwatch" do
+  service_name "openstack-heat-api-cloudwatch" if node.platform == "suse"
+  supports :status => true, :restart => true
+  action :enable
+  subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
 end
 
 execute "heat-db-sync" do

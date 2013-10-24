@@ -17,7 +17,10 @@
       "use_gitbarclamp": false,
       "use_pip_cache": false,
       "pfs_deps": [
-        "pip://python-heatclient"
+        "pip://python-heatclient",
+        "pip://setuptools-git",
+        "pip://distribute>=0.6.28",
+        "pip://MySQL-python"
       ],
       "use_virtualenv": false,
       "api": {
