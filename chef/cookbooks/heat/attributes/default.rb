@@ -18,7 +18,7 @@ case node["platform"]
         default[:heat][:platform] = {
             :packages => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"],
             :services => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"],
-            :aux_dirs => ["/var/cache/heat"]
+            :aux_dirs => ["/var/cache/heat","/etc/heat/environment.d"]
         }
         default[:heat][:user] = "heat"
         default[:heat][:group] = "heat"
@@ -26,7 +26,7 @@ case node["platform"]
          default[:heat][:platform] = {
             :packages => ["openstack-heat-engine","openstack-heat-api","openstack-heat-api-cfn","openstack-heat-api-cloudwatch","python-heatclient"],
             :services => ["openstack-heat-engine","openstack-heat-api","openstack-heat-api-cfn","openstack-heat-api-cloudwatch"],
-            :aux_dirs => ["/var/cache/heat"]
+            :aux_dirs => ["/var/cache/heat","/etc/heat/environment.d"]
         }
         default[:heat][:user] = "openstack-heat"
         default[:heat][:group] = "openstak-heat"
