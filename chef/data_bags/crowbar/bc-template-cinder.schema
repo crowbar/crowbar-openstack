@@ -83,8 +83,7 @@
                   "required": true,
                   "mapping": {
                     "pool": { "type": "str", "required": true },
-                    "user": { "type": "str", "required": true },
-                    "secret_uuid": { "type": "str", "required": true }
+                    "user": { "type": "str", "required": true }
                     }
                 },
                 "manual": {
@@ -143,6 +142,7 @@
             "crowbar-status": { "type": "str" },
             "crowbar-failed": { "type": "str" },
             "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
             "element_states": {
               "type": "map",
               "mapping": {

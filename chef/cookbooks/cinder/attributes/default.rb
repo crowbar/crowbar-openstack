@@ -36,3 +36,5 @@ default[:cinder][:ssl][:generate_certs] = false
 default[:cinder][:ssl][:insecure] = false
 default[:cinder][:ssl][:cert_required] = false
 default[:cinder][:ssl][:ca_certs] = "/etc/cinder/ssl/certs/ca.pem"
+
+default[:cinder][:volume][:rbd][:ceph_conf] = '/etc/ceph/ceph.conf'
