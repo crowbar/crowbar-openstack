@@ -108,7 +108,7 @@ end
 if node[:tempest][:use_pfs]
   execute "pip_install_reqs_for_tempest" do
     cwd "/opt/tempest/"
-    command "#{pip_cmd} -r tools/pip-requires"
+    command "#{pip_cmd} -r /opt/tempest/requirements.txt"
   end
 end
 
