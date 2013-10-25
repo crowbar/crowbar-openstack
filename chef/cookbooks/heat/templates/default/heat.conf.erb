@@ -101,7 +101,7 @@ auth_encryption_key=%ENCRYPTION_KEY%
 
 # The backend to use for db (string value)
 db_backend=heat.db.sqlalchemy.api
-
+sql_connection=<%= @database_connection %>
 
 #
 # Options defined in heat.engine.clients
@@ -504,7 +504,7 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 
 # The SQLAlchemy connection string used to connect to the
 # database (string value)
-connection=<%= @database_connection %>
+#connection=
 
 # The SQLAlchemy connection string used to connect to the
 # slave database (string value)
