@@ -18,7 +18,7 @@
 barclamp:
   name: neutron
   display: Neutron 
-  description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management (to be renamed "Neutron")'
+  description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management'
   version: 0
   requires:
     - database
