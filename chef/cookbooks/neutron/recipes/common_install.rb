@@ -78,7 +78,7 @@ if neutron[:neutron][:networking_plugin] == "openvswitch" or neutron[:neutron][:
     if node[:neutron][:platform][:ovs_pkgs].any?{|e|e == "openvswitch-datapath-dkms"} &&
         !File.exists?("/lib/modules/#{%x{uname -r}.strip}/updates/dkms/openvswitch.ko") &&
         File.directory?("/sys/module/openvswitch")
-      if IO.read("/sys/module/openvswitch").strip != "0"
+      if IO.read("/sys/module/openvswitch/refcnt").strip != "0"
         Chef::Log.error("Kernel openvswitch module already loaded and in use! Please reboot me!")
       else
         bash "Unload non-DKMS openvswitch module" do
