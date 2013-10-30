@@ -92,6 +92,7 @@ if node[:tempest][:use_virtualenv]
   else
     package("python-devel")
     package("python-pip")
+    package("libxslt-devel")
   end
   directory "/opt/tempest/.venv" do
     recursive true
