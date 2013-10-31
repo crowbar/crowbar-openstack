@@ -100,7 +100,7 @@ auth_encryption_key=%ENCRYPTION_KEY%
 #
 
 # The backend to use for db (string value)
-db_backend=heat.db.sqlalchemy.api
+#db_backend=heat.db.sqlalchemy.api
 sql_connection=<%= @database_connection %>
 
 #
@@ -155,11 +155,11 @@ sql_connection=<%= @database_connection %>
 
 # Print debugging output (set logging level to DEBUG instead
 # of default WARNING level). (boolean value)
-debug=<%= node[:heat][:debug] %>
+debug=<%= node[:heat][:debug] ? 'true' : 'false' %>
 
 # Print more verbose output (set logging level to INFO instead
 # of default WARNING level). (boolean value)
-verbose= <%= node[:heat][:verbose] ? 'True' : 'False' %>
+verbose= <%= node[:heat][:verbose] ? 'true' : 'false' %>
 
 # Log output to standard error (boolean value)
 use_stderr=false
@@ -217,14 +217,14 @@ log_date_format=%Y-%m-%d %H:%M:%S
 
 # (Optional) Name of log file to output to. If no default is
 # set, logging will go to stdout. (string value)
-log_file=/var/log/heat/heat-engine.log
+log_file=heat-engine.log
 
 # (Optional) The base directory used for relative --log-file
 # paths (string value)
 log_dir=/var/log/heat
 
 # Use syslog for logging. (boolean value)
-use_syslog=false
+#use_syslog=false
 
 # syslog facility to receive log lines (string value)
 #syslog_log_facility=LOG_USER
@@ -268,11 +268,11 @@ use_syslog=false
 #
 
 # JSON file containing policy (string value)
-policy_file=policy.json
+#policy_file=default
 
 # Rule enforced when requested rule is not found (string
 # value)
-policy_default_rule=default
+#policy_default_rule=default
 
 
 #
@@ -281,7 +281,7 @@ policy_default_rule=default
 
 # The messaging module to use, defaults to kombu. (string
 # value)
-rpc_backend=heat.openstack.common.rpc.impl_kombu
+#rpc_backend=default
 
 # Size of RPC thread pool (integer value)
 #rpc_thread_pool_size=64
@@ -577,7 +577,7 @@ api_paste_config=api-paste.ini
 #
 
 # Authentication Endpoint URI (string value)
-auth_uri=http://127.0.0.1:5000/v2.0
+auth_uri=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/v2.0
 
 # Allow orchestration of multiple clouds (boolean value)
 #multi_cloud=false
@@ -594,7 +594,7 @@ auth_uri=http://127.0.0.1:5000/v2.0
 # Options defined in heat.common.wsgi
 #
 
-log_file=/var/log/heat/heat_api_cloudwatch.log
+log_file=heat_api_cloudwatch.log
 
 
 # Address to bind the server.  Useful when selecting a
@@ -626,7 +626,7 @@ bind_port=<%= node[:heat][:api][:cw_port] %>
 # Options defined in heat.common.wsgi
 #
 
-log_file=/var/log/heat/heat_api.log
+log_file=heat_api.log
 
 # Address to bind the server.  Useful when selecting a
 # particular network interface. (string value)
@@ -657,7 +657,7 @@ bind_port=<%= node[:heat][:api][:port] %>
 # Options defined in heat.common.wsgi
 #
 
-log_file=/var/log/heat/heat_api_cfn.log
+log_file=heat_api_cfn.log
 
 # Address to bind the server.  Useful when selecting a
 # particular network interface. (string value)
@@ -694,21 +694,21 @@ bind_port=<%= node[:heat][:api][:cfn_port] %>
 
 # Host providing the admin Identity API endpoint (string
 # value)
-auth_host=<%= @keystone_host %>
+#auth_host=
 
 # Port of the admin Identity API endpoint (integer value)
-auth_port=<%= @keystone_admin_port %>
+#auth_port=
 
 # Protocol of the admin Identity API endpoint(http or https)
 # (string value)
-auth_protocol=<%= @keystone_protocol %>
+#auth_protocol=
 
 # Complete public Identity API endpoint (string value)
-auth_uri=http://127.0.0.1:5000
+auth_uri=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/v2.0
 
 # API version of the admin Identity API endpoint (string
 # value)
-auth_version=v2.0
+#auth_version=
 
 # Do not handle authorization requests within the middleware,
 # but delegate the authorization decision to downstream WSGI

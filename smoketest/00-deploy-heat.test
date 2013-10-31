@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright 2011, Dell
+# Copyright 2013, Dell
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,15 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 
+echo -e "Searching test scenarios..."
+tested_service_name="heat"
+tests_dir="/opt/dell/barclamps/$tested_service_name/smoketest"
+test_key_path="/tmp/$tested_service_name-smoketest.pem"
+test_flavor="$tested_service_name-smoketest-flavor"
+test_sec_group="$tested_service_name-hot"
+floating_ip_subnet=".126."
+declare -a cfn_tests hot_tests cloudwatch_tests stack_ids stack_ips
+declare -A alive_stacks
 die() {
     res=$1
     shift
@@ -18,9 +27,147 @@ die() {
     exit $res
 }
 
-echo "Checking Heat"
+for t in $(ls "$tests_dir"); do
+  echo "Processing file: $t"
+  [[ "$t" = cfn_*  ]] && cfn_tests=("${cfn_tests[@]}" "$t")
+  [[ "$t" = hot_*  ]] && hot_tests=("${hot_tests[@]}" "$t")
+  [[ "$t" == cloudwatch_*  ]] && cloudwatch_tests=("${cloudwatch_tests[@]}" "$t")
+done
 
-echo "TODO"
-exit 0
-echo "Heat check passed."
-exit 0
+[[ $cfn_tests ]] || [[ $hot_tests ]] || [[ $cloudwatch_tests ]] || die 1 "No test scenarios found, aborting."
+
+echo -e "Ensuring heat client is installed..."
+if [ -f /etc/redhat-release ]; then
+  sudo yum --assumeyes install python-heatclient
+else
+  sudo apt-get install -y python-novaclient python-heatclient
+fi
+
+echo -e "Authorizing for tests execution..."
+echo "Finding  keystone host..."
+keystone_host=$(knife_node_find 'roles:keystone-server' IP)
+if [[ ! $keystone_host ]]; then
+    die 1 "Failed to find keystone host, can't authorize myself for tests execution"
+else
+    echo -e "Keystone host found: on $keystone_host, preparing for tests"
+    echo -e "Creating: \n1. Heat smoketest keypair.\n2. Heat smoketest security group.\n3. Heat smoketest flavor.\n"
+    export OS_AUTH_URL="http://$keystone_host:5000/v2.0"
+    export OS_USERNAME="admin"
+    export OS_PASSWORD="crowbar"
+    export OS_TENANT_NAME="admin"
+    nova keypair-add "$tested_service_name-smoketest" > $test_key_path && chmod 600 $test_key_path || die 1 "ERROR:Failed to add a keypair."
+    nova flavor-create $test_flavor  512mb2gb1cpu 512 2 1 || die 1 "ERROR:Failed to add heat smoketest flavor."
+    pub_net_id=$(neutron net-list | grep 'floating' | awk {'print $2'})
+    priv_net_id=$(neutron net-list | grep 'fixed' | awk {'print $2'})
+    priv_subnet_id=$(neutron subnet-list | grep 'fixed' | awk {'print $2'})
+    default_grp_id=$(nova secgroup-list | grep 'default' | awk {'print $2'})
+
+
+fi
+
+[[ $DEBUG ]] && set -x
+cleanup() {
+    # Only cleanup if the tests were successful
+    if [ $? -eq 0 ]; then
+        trap '' QUIT TERM
+        echo -e "Performing cleanup..."
+        for stack_id in "${stack_ids[@]}"; do
+            heat stack-delete "$stack_id"
+            while heat list |grep -q "$stack_id"; do sleep 1; done
+        done
+        nova keypair-delete "$tested_service_name-smoketest"
+        ssh-agent -k
+        nova flavor-delete "$test_flavor"
+       for g in $(neutron security-group-list | grep 'heat*' | awk {'print $2'}); do
+         echo -e "Deleting security group: $g"
+         neutron security-group-delete $g
+       done
+    fi
+}
+
+
+trap cleanup EXIT QUIT TERM
+
+
+
+echo -e "Executing CFN templates..."
+if [[ $cfn_tests ]]; then
+  for cfn in "${cfn_tests[@]}"; do
+    stack_name=$(echo $cfn | sed -e 's/\.json//i')
+    stack_state="UNDFINDED"
+    echo -e "Processing stack: $stack_name"
+    stack_id=$(heat stack-create $stack_name --template-file=$tests_dir/$cfn | grep $stack_name | awk {'print $2'})
+    stack_ids=("${stack_ids[@]}" "$stack_id")
+    sleep 5
+    for ((i=1; i<=5; i++)); do
+      echo -e "Verifying CFN stack: $stack_id  state attempt $i"
+      stack_state=$(heat list | grep "$stack_id" | awk {'print $6'})
+      [[ "$stack_state" = "CREATE_FAILED"  ]] && final_state="$stack_state" && break
+      [[ "$stack_state" = "CREATE_COMPLETE" ]] && final_state="$stack_state" && break || sleep 60 && continue
+    done
+   echo -e "\n\nStack: $stack_id processing ended with status: $final_state\n\n"
+  done
+else
+   echo -e "No CFN api tests found, skipping..."
+fi
+
+if [[ $hot_tests ]]; then
+  echo -e "\n\nATTENTION: Security group creation funtional is not implemented for HOT API yet, security group $test_sec_group  management will be handled with 'AWS::EC2::SecurityGroup' \n\n"
+ for hot in "${hot_tests[@]}"; do
+    stack_name=$(echo $hot | sed -e 's/\.yaml//i')
+    echo -e "Processing stack: $stack_name"
+    stack_state="UNDEFINED"
+    stack_id=$(heat stack-create $stack_name --template-file=$tests_dir/$hot --parameters="public_net_id=$pub_net_id;private_net_id=$priv_net_id;private_subnet_id=$priv_subnet_id"  | grep $stack_name | awk {'print $2'})
+    stack_ids=("${stack_ids[@]}" "$stack_id")
+    sleep 5
+   for ((i=1; i<=5; i++)); do
+      echo -e "Verifying HOT stack: $stack_id  state attempt $i"
+      stack_state=$(heat list | grep "$stack_id" | awk {'print $6'})
+      [[ "$stack_state" = "CREATE_FAILED"  ]] && final_state="$stack_state" && break
+      [[ "$stack_state"  = "CREATE_COMPLETE" ]] && final_state="$stack_state" && break || sleep 60 && continue
+   done
+   echo -e "\n\nStack: $stack_id processing ended with status: $final_state\n\n"
+ done
+else
+   echo -e "No HOT api tests found, skipping..."
+fi
+
+
+if [[ $cloudwatch_tests ]]; then
+  for cld in "${cloudwatch_tests[@]}"; do
+    stack_name=$(echo $cld | sed -e 's/\.yaml//i')
+    stack_state="UNDEFINED"
+    echo -e "Processing stack: $stack_name"
+    stack_id=$(heat stack-create $stack_name --template-file=$tests_dir/$cld | grep $stack_name | awk {'print $2'})
+    stack_ids=("${stack_ids[@]}" "$stack_id")
+    sleep 5
+   for ((i=1; i<=5; i++)); do
+      echo -e "Verifying Cloudwatch stack: $stack_id  state attempt $i"
+      stack_state=$(heat list | grep "$stack_id" | awk {'print $6'})
+      [[ "$stack_state" = "CREATE_FAILED"  ]] && final_state="$stack_state" && break
+      [[ "$stack_state" = "CREATE_COMPLETE" ]] && final_state="$stack_state" && break || sleep 60 && continue
+    done
+   echo -e "\n\nStack: $stack_id processing ended with status: $final_state\n\n"
+  done
+else
+   echo -e "No Cloudwatch api tests found, skipping..."
+fi
+
+echo -e "Pinging created stacks, waiting 180 seconds for stacks to fully come up"
+
+for i in $(neutron floatingip-list | grep "$floating_ip_subnet" | awk {'print $6'});do 
+  stack_ips=("${stack_ips[@]}" "$i")
+  echo -e "Found $i stack ip"
+done
+sleep 180
+for addr in "${stack_ips[@]}";do
+  alive=false
+  echo "Processing: $addr"
+  for ((i=1; i<50; i++)); do
+      echo -e "Pinging $addr attempt $i"
+      printf '.'
+      ping -q -c 1 -i 1 $addr &>/dev/null && alive_stacks[$addr]=true || continue
+      break
+  done
+  [[ "${alive_stacks[$addr]}" = true ]] && echo -e "\nSUCCESS: Stack_ip: $addr responded on ping attempt $i\n" || echo -e "\nFAILURE: Stack_ip: $addr is not responding\n"
+done

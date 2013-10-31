@@ -76,13 +76,6 @@ paste.filter_factory = heat.api.aws.ec2token:EC2Token_filter_factory
 # Auth middleware that validates token against keystone
 [filter:authtoken]
 paste.filter_factory = heat.common.auth_token:filter_factory
-service_protocol = <%= @keystone_protocol %>
-service_host = 127.0.0.1
-service_port = 5000
-auth_host = 127.0.0.1
-auth_port = 35357
-auth_protocol = <%= @keystone_protocol %>
-auth_uri = http://127.0.0.1:5000/v2.0
 
 # These must be set to your local values in order for the token
 # authentication to work.

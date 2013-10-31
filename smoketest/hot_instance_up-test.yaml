@@ -1,0 +1,65 @@
+heat_template_version: 2013-05-23
+
+description: >
+  HOT template to deploy one server into an existing neutron tenant network and
+  assign floating IP addresses to it  so it routable from the
+  public network.
+
+parameters:
+  public_net_id:
+    type: string
+    description: ID of public network for which floating IP addresses will be allocated
+  private_net_id:
+    type: string
+    description: ID of private network into which servers get deployed
+  private_subnet_id:
+    type: string
+    description: ID of private sub network into which servers get deployed
+
+resources:
+  heat-hot:
+    type: AWS::EC2::SecurityGroup
+    properties:
+      GroupDescription: Enable only ping and SSH access
+      SecurityGroupIngress:
+        - {CidrIp: 0.0.0.0/0, FromPort: '-1', IpProtocol: icmp, ToPort: '-1'}
+        - {CidrIp: 0.0.0.0/0, FromPort: '22', IpProtocol: tcp, ToPort: '22'}
+
+# ATTENTION: This template made for checking HOT-API+OS based resources, but due to a fact that Bug #1221564
+# is still affect "OS::Nova::Server + OS::Nova::Neutron" resources combination, this template will use "AWS::EC2::EIP"
+# resource in order to provide flaoting ip feature for HOT instance. In order to disable this workaround, delete "AWS::EC2::EIP"
+# resource and uncomment lines below.
+
+  server1:
+    type: OS::Nova::Server
+    properties:
+      name: hot_instance_up_test
+      image: ubuntu-12.04-image
+      flavor: heat-smoketest-flavor
+      key_name: heat-smoketest
+#      networks:
+#        - port: { get_resource: server1_port }
+      security_groups: [{Ref: heat-hot}]
+
+#  server1_port:
+#    type: OS::Neutron::Port
+#    properties:
+#      network_id: { get_param: private_net_id }
+#      fixed_ips:
+#        - subnet_id: { get_param: private_subnet_id }
+#
+#  server1_floating_ip:
+#    type: OS::Neutron::FloatingIP
+#    properties:
+#      floating_network_id: { get_param: public_net_id }
+#      port_id: { get_resource: server1_port }
+
+  server1_floating_ip:
+    type: AWS::EC2::EIP
+    properties:
+      InstanceId: {Ref: server1}
+
+outputs:
+  server1_private_ip:
+    description: IP address of server1 in private network
+    value: { get_attr: [ server1, first_address ] }

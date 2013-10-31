@@ -1,0 +1,34 @@
+{
+  "HeatTemplateVersion" : "2010-09-09",
+
+  "Resources" : {
+     "heat-smoketest" : {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+          "GroupDescription" : "SSH access",
+          "SecurityGroupIngress" : [
+            { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0" },
+            { "IpProtocol" : "icmp", "FromPort" : "-1", "ToPort" : "-1", "CidrIp" : "0.0.0.0/0" }
+          ]
+        }
+     },
+
+     "EiP": {
+       "Type" : "AWS::EC2::EIP",
+        "Properties" : {
+          "InstanceId" : { "Ref" : "HeatSmoketest" }
+        }
+     },
+
+
+    "HeatSmoketest" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "KeyName" : "heat-smoketest",
+        "ImageId" : "ubuntu-12.04-image",
+        "SecurityGroupIds" : [ { "Ref" : "heat-smoketest" } ],
+        "InstanceType" : "heat-smoketest-flavor"
+     }
+    } 
+  }
+}
