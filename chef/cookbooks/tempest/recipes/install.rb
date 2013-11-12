@@ -18,18 +18,6 @@
 # limitations under the License.
 #
 
-# From the pip-requires -- all the Ubuntu packages for tempest prereqs
-unless %w(redhat centos).include?(node.platform)
-  packages = %w(python-anyjson python-nose python-httplib2 python-testtools python-lxml
-     python-boto python-paramiko python-netaddr python-glanceclient
-     python-keystoneclient python-novaclient python-neutronclient
-     python-testresources python-keyring python-testrepository python-oslo.config)
-
-  packages.each do |p|
-    package p
-  end
-end
-
 begin
   provisioner = search(:node, "roles:provisioner-server").first
   proxy_addr = provisioner[:fqdn]
