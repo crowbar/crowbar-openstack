@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+default[:cinder][:debug] = false
+
 unless node[:platform] == "suse"
   override[:cinder][:user]="cinder"
   override[:cinder][:group]="cinder"
