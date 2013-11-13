@@ -3,7 +3,7 @@
 verbose = <%= node[:heat][:verbose] ? 'True' : 'False' %>
 
 # Show debugging output in logs (sets DEBUG log level output)
-debug = False
+debug = <%= node[:heat][:debug] ? 'True' : 'False' %>
 
 # Turn off standard error logging
 use_stderr = False
