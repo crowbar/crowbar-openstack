@@ -66,13 +66,6 @@ bash "install_tempest_from_archive" do
   not_if { ::File.exists?(tempest_path) }
 end
 
-unless %w(redhat centos).include?(node.platform)
-  nosetests = `which nosetests`.strip
-else
-  #for centos we have to use nosetests from venv
-  nosetests = "/opt/tempest/.venv/bin/nosetests"
-end
-
 if node[:tempest][:use_virtualenv]
   package("python-virtualenv")
   unless %w(redhat centos).include?(node.platform)
@@ -90,14 +83,11 @@ if node[:tempest][:use_virtualenv]
   end
   execute "virtualenv /opt/tempest/.venv --system-site-packages" unless File.exist?("/opt/tempest/.venv")
   pip_cmd = ". /opt/tempest/.venv/bin/activate && #{pip_cmd}"
-  nosetests = "/opt/tempest/.venv/bin/python #{nosetests}"
 end
 
-if node[:tempest][:use_pfs]
-  execute "pip_install_reqs_for_tempest" do
-    cwd "/opt/tempest/"
-    command "#{pip_cmd} -r /opt/tempest/requirements.txt"
-  end
+execute "pip_install_reqs_for_tempest" do
+  cwd "/opt/tempest/"
+  command "#{pip_cmd} -r /opt/tempest/requirements.txt"
 end
 
 if nova[:nova][:use_gitrepo]!=true

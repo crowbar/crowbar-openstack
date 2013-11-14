@@ -245,7 +245,6 @@ template "/tmp/tempest_smoketest.sh" do
   )
 end
 
-
 cookbook_file "#{node[:tempest][:tempest_path]}/run_tempest.py" do
   source "run_tempest.py"
 end
