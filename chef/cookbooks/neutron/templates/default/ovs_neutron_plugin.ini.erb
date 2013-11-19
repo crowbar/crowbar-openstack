@@ -1,29 +1,25 @@
-[DATABASE]
-# This line MUST be changed to actually run the plugin.
-# Example:
-# sql_connection = mysql://root:nova@127.0.0.1:3306/ovs_neutron
-# Replace 127.0.0.1 above with the IP address of the database used by the
-# main neutron server. (Leave it as is if the database runs on this host.)
-#sql_connection = sqlite://
-sql_connection = <%= @ovs_sql_connection %>
-
-# Database reconnection retry times - in event connectivity is lost
-# set to -1 implies an infinite retry count
-# sql_max_retries = 10
-# Database reconnection interval in seconds - in event connectivity is lost
-reconnect_interval = 2
-
-[OVS]
+[ovs]
 # (StrOpt) Type of network to allocate for tenant networks. The
 # default value 'local' is useful only for single-box testing and
 # provides no connectivity between hosts. You MUST either change this
 # to 'vlan' and configure network_vlan_ranges below or change this to
-# 'gre' and configure tunnel_id_ranges below in order for tenant
-# networks to provide connectivity between hosts. Set to 'none' to
-# disable creation of tenant networks.
+# 'gre' or 'vxlan' and configure tunnel_id_ranges below in order for
+# tenant networks to provide connectivity between hosts. Set to 'none'
+# to disable creation of tenant networks.
 #
-# Default: tenant_network_type = local
-# Example: tenant_network_type = gre
+<% if @networking_mode == 'vlan' -%>
+tenant_network_type = vlan
+network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
+<% elsif @networking_mode == 'gre' -%>
+tenant_network_type = gre
+tunnel_bridge = <%=@physnet%>
+tunnel_id_ranges = <%= node[:neutron][:network][:gre_start]%>:<%= node[:neutron][:network][:gre_stop]%>
+local_ip = <%= node.address("os_sdn").addr %>
+enable_tunneling = True
+<% else -%>
+tenant_network_type = local
+network_vlan_ranges = physnet1
+<% end -%>
 
 # (ListOpt) Comma-separated list of
 # <physical_network>[:<vlan_min>:<vlan_max>] tuples enumerating ranges
@@ -31,24 +27,34 @@ reconnect_interval = 2
 # allocation. All physical networks listed are available for flat and
 # VLAN provider network creation. Specified ranges of VLAN IDs are
 # available for tenant network allocation if tenant_network_type is
-# 'vlan'. If empty, only gre and local networks may be created.
+# 'vlan'. If empty, only gre, vxlan and local networks may be created.
 #
-# Default: network_vlan_ranges =
+# network_vlan_ranges =
 # Example: network_vlan_ranges = physnet1:1000:2999
 
-#network_vlan_ranges = physnet1
-
 # (BoolOpt) Set to True in the server and the agents to enable support
-# for GRE networks. Requires kernel support for OVS patch ports and
-# GRE tunneling.
+# for GRE or VXLAN networks. Requires kernel support for OVS patch ports and
+# GRE or VXLAN tunneling.
 #
-# Default: enable_tunneling = False
+# WARNING: This option will be deprecated in the Icehouse release, at which
+#          point setting tunnel_type below will be required to enable
+#          tunneling.
+#
+# enable_tunneling = False
+
+# (StrOpt) The type of tunnel network, if any, supported by the plugin. If
+# this is set, it will cause tunneling to be enabled. If this is not set and
+# the option enable_tunneling is set, this will default to 'gre'.
+#
+# tunnel_type =
+# Example: tunnel_type = gre
+# Example: tunnel_type = vxlan
 
 # (ListOpt) Comma-separated list of <tun_min>:<tun_max> tuples
-# enumerating ranges of GRE tunnel IDs that are available for tenant
-# network allocation if tenant_network_type is 'gre'.
+# enumerating ranges of GRE or VXLAN tunnel IDs that are available for
+# tenant network allocation if tenant_network_type is 'gre' or 'vxlan'.
 #
-# Default: tunnel_id_ranges =
+# tunnel_id_ranges =
 # Example: tunnel_id_ranges = 1:1000
 
 # Do not change this parameter unless you have a good reason to.
@@ -57,62 +63,102 @@ reconnect_interval = 2
 # attached to this bridge and then "patched" according to their network
 # connectivity.
 #
-# Default: integration_bridge = br-int
+# integration_bridge = br-int
 
 # Only used for the agent if tunnel_id_ranges (above) is not empty for
 # the server.  In most cases, the default value should be fine.
 #
-# Default: tunnel_bridge = br-tun
+# tunnel_bridge = br-tun
+
+# Peer patch port in integration bridge for tunnel bridge
+# int_peer_patch_port = patch-tun
+
+# Peer patch port in tunnel bridge for integration bridge
+# tun_peer_patch_port = patch-int
 
 # Uncomment this line for the agent if tunnel_id_ranges (above) is not
 # empty for the server. Set local-ip to be the local IP address of
 # this hypervisor.
 #
-# Default: local_ip =
+# local_ip =
 
 # (ListOpt) Comma-separated list of <physical_network>:<bridge> tuples
 # mapping physical network names to the agent's node-specific OVS
-# bridge names to be used for flat and VLAN networks. Each bridge must
+# bridge names to be used for flat and VLAN networks. The length of
+# bridge names should be no more than 11. Each bridge must
 # exist, and should have a physical network interface configured as a
 # port. All physical networks listed in network_vlan_ranges on the
 # server should have mappings to appropriate bridges on each agent.
 #
-# Default: bridge_mappings =
+# bridge_mappings =
 # Example: bridge_mappings = physnet1:br-eth1
+bridge_mappings = physnet1:<%=@physnet%>
 
-[AGENT]
+[agent]
 # Agent's polling interval in seconds
-polling_interval = 2
-# Use "sudo neutron-rootwrap /etc/neutron/rootwrap.conf" to use the real
-# root filter facility.
-# Change to "sudo" to skip the filtering and just run the comand directly
-root_helper = sudo <%=@rootwrap_bin%> /etc/neutron/rootwrap.conf
+# polling_interval = 2
+
+# (ListOpt) The types of tenant network tunnels supported by the agent.
+# Setting this will enable tunneling support in the agent. This can be set to
+# either 'gre' or 'vxlan'. If this is unset, it will default to [] and
+# disable tunneling support in the agent. When running the agent with the OVS
+# plugin, this value must be the same as "tunnel_type" in the "[ovs]" section.
+# When running the agent with ML2, you can specify as many values here as
+# your compute hosts supports.
+#
+# tunnel_types =
+# Example: tunnel_types = gre
+# Example: tunnel_types = vxlan
+# Example: tunnel_types = vxlan, gre
+
+# (IntOpt) The port number to utilize if tunnel_types includes 'vxlan'. By
+# default, this will make use of the Open vSwitch default value of '4789' if
+# not specified.
+#
+# vxlan_udp_port =
+# Example: vxlan_udp_port = 8472
+
+# (IntOpt) This is the MTU size of veth interfaces.
+# Do not change unless you have a good reason to.
+# The default MTU size of veth interfaces is 1500.
+# veth_mtu =
+# Example: veth_mtu = 1504
+
+# (BoolOpt) Flag to enable l2-population extension. This option should only be
+# used in conjunction with ml2 plugin and l2population mechanism driver. It'll
+# enable plugin to populate remote ports macs and IPs (using fdb_add/remove
+# RPC calbbacks instead of tunnel_sync/update) on OVS agents in order to
+# optimize tunnel management.
+#
+# l2_population = False
+
+[securitygroup]
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+# Firewall driver for realizing neutron security group function.
+# firewall_driver = neutron.agent.firewall.NoopFirewallDriver
+# Example: firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
 
 #-----------------------------------------------------------------------------
 # Sample Configurations.
 #-----------------------------------------------------------------------------
 #
 # 1. With VLANs on eth1.
-# [DATABASE]
-# sql_connection = mysql://root:nova@127.0.0.1:3306/ovs_neutron
+# [database]
+# connection = mysql://root:nova@127.0.0.1:3306/ovs_neutron
 # [OVS]
 # network_vlan_ranges = default:2000:3999
 # tunnel_id_ranges =
 # integration_bridge = br-int
 # bridge_mappings = default:br-eth1
 # [AGENT]
-# root_helper = sudo
 # Add the following setting, if you want to log to a file
 #
 # 2. With tunneling.
-# [DATABASE]
-# sql_connection = mysql://root:nova@127.0.0.1:3306/ovs_neutron
+# [database]
+# connection = mysql://root:nova@127.0.0.1:3306/ovs_neutron
 # [OVS]
 # network_vlan_ranges =
 # tunnel_id_ranges = 1:1000
 # integration_bridge = br-int
 # tunnel_bridge = br-tun
 # local_ip = 10.0.0.3
-# [AGENT]
-# root_helper = sudo
-
