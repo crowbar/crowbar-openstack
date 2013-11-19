@@ -123,9 +123,6 @@ source_dir = /opt/stack/nova
 # Path of nova configuration file
 config_path = /etc/nova/nova.conf
 
-# Directory containing nova binaries such as nova-manage
-cli_dir = /usr/bin
-
 # Path to a private key file for SSH access to remote hosts
 path_to_private_key = /home/user/.ssh/id_rsa
 
@@ -217,3 +214,10 @@ build_interval = 10
 # to be available or reach an expected status
 build_timeout = 300
 
+[cli]
+# Enable cli tests
+enabled = True
+# directory where python client binaries are located
+cli_dir = /usr/local/bin
+# Number of seconds to wait on a CLI timeout
+timeout = 15
