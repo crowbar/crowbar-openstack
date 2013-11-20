@@ -224,8 +224,12 @@ template "#{node[:tempest][:tempest_path]}/etc/tempest.conf" do
   )
 end
 
-nosetests = "/opt/tempest/.venv/bin/nosetests"
+nosetests = `which nosetests`.strip
 
+if node[:tempest][:use_virtualenv]
+  nosetests = "/opt/tempest/.venv/bin/python #{nosetests}"
+end
+  
 template "/tmp/tempest_smoketest.sh" do
   mode 0755
   source "tempest_smoketest.sh.erb"
