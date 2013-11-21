@@ -127,6 +127,7 @@ debs:
       - python-keyring
       - python-testrepository
       - python-oslo.config
+      - libxslt1-dev
 
 rpms:
   pkgs:

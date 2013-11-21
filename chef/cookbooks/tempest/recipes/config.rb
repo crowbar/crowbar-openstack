@@ -125,6 +125,7 @@ end
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
 
 venv_prefix_path = node[:tempest][:use_virtualenv] ? ". /opt/tempest/.venv/bin/activate && " : nil
+bin_path = node[:tempest][:use_virtualenv] ? "/opt/tempest/.venv/bin" : "/usr/bin/"
 
 bash "upload tempest test image" do
   code <<-EOH
@@ -220,7 +221,8 @@ template "#{node[:tempest][:tempest_path]}/etc/tempest.conf" do
     :img_tenant => tempest_comp_tenant,
     :comp_admin_user => comp_admin_user,
     :comp_admin_pass => comp_admin_pass,
-    :comp_admin_tenant => comp_admin_tenant 
+    :comp_admin_tenant => comp_admin_tenant,
+    :bin_path => bin_path
   )
 end
 
