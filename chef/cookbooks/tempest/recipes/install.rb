@@ -66,8 +66,6 @@ bash "install_tempest_from_archive" do
   not_if { ::File.exists?(tempest_path) }
 end
 
-package("libxslt1-dev")
-
 if node[:tempest][:use_virtualenv]
   package("python-virtualenv")
   unless %w(redhat centos).include?(node.platform)
