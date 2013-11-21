@@ -16,7 +16,7 @@
 case node["platform"]
     when "ubuntu" 
         default[:heat][:platform] = {
-            :packages => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"],
+            :packages => ["heat-api","heat-api-cfn","heat-api-cloudwatch","python-heat","heat-common","python-heatclient"],
             :services => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"],
             :aux_dirs => ["/var/cache/heat","/etc/heat/environment.d"]
         }
