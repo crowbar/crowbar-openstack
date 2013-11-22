@@ -178,6 +178,7 @@ pips:
   - six>=1.4.1
   - iso8601>=0.1.4
   - fixtures>=0.3.14
+  - argparse
 
 extra_files:
   - http://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-uec.tar.gz tempest
