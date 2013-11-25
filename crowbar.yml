@@ -53,6 +53,7 @@ debs:
     - heat-api-cfn
     - heat-api-cloudwatch
     - heat-common
+    - heat-engine
 
 locale_additions:
   en:
