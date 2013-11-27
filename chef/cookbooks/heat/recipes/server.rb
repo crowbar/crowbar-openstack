@@ -71,11 +71,12 @@ unless node[:heat][:use_gitrepo]
     node[:heat][:platform][:packages].each do |p|
         package p
     end
+
 else
     pfs_and_install_deps @cookbook_name do
         virtualenv venv_path
         path heat_path
-        wrap_bins "heat" 
+        wrap_bins "heat"
     end
     
     node[:heat][:platform][:services].each do |s|
@@ -86,16 +87,18 @@ else
 
     create_user_and_dirs("heat")
 
-    node[:heat][:platform][:aux_dirs].each do |d|
-        directory d do
-           owner node[:heat][:user]
-           group "root"
-           mode 00755
-           action :create 
-        end
-    end
-    
 end
+
+node[:heat][:platform][:aux_dirs].each do |d|
+    directory d do
+       owner node[:heat][:user]
+       group "root"
+       mode 00755
+       action :create 
+    end
+end
+
+
 include_recipe "#{@cookbook_name}::common"
 env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{node[:heat][:rabbitmq_instance]}"
 rabbit = search(:node, "roles:rabbitmq-server#{env_filter}").first || node

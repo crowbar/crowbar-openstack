@@ -701,7 +701,7 @@ bind_port=<%= node[:heat][:api][:cfn_port] %>
 
 # Protocol of the admin Identity API endpoint(http or https)
 # (string value)
-#auth_protocol=
+auth_protocol=<%= @keystone_protocol %>
 
 # Complete public Identity API endpoint (string value)
 auth_uri=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/v2.0
@@ -732,13 +732,13 @@ auth_uri=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service
 # Single shared secret with the Keystone configuration used
 # for bootstrapping a Keystone installation, or otherwise
 # bypassing the normal authentication process. (string value)
-admin_token=<% @keystone_auth_token %>
+admin_token=<%= @keystone_auth_token %>
 
 # Keystone account username (string value)
-admin_user=<% @keystone_service_user %>
+admin_user=<%= @keystone_service_user %>
 
 # Keystone account password (string value)
-#admin_password=<% @keystone_service_password %>
+#admin_password=<%= @keystone_service_password %>
 
 # Keystone service account tenant name to validate user tokens
 # (string value)
