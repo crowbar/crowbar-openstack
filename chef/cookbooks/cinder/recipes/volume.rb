@@ -123,6 +123,7 @@ when node[:cinder][:volume][:volume_type] == "netapp"
   #TODO(dmueller) Verify that OnCommand is installed?
 when node[:cinder][:volume][:volume_type] == "emc"
 when node[:cinder][:volume][:volume_type] == "manual"
+when node[:cinder][:volume][:volume_type] == "rbd"
 end
 
 unless %w(redhat centos).include? node.platform

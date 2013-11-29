@@ -189,6 +189,12 @@ if node[:cinder][:volume][:volume_type] == "rbd"
   Chef::Log.info("Pushing Rbd params to cinder.conf template")
   rbd_params = node[:cinder][:volume][:rbd]
 
+  ceph_env_filter = " AND ceph_config_environment:ceph-config-default"
+  ceph_servers = search(:node, "roles:ceph-osd#{ceph_env_filter}") || []
+  if ceph_servers.length > 0
+    include_recipe "ceph::cinder"
+  end
+
   if node[:platform] == "suse"
     package "ceph"
     package "ceph-kmp-default"
