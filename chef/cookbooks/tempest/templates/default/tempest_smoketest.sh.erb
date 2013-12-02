@@ -18,7 +18,6 @@ admin_tenant_name=<%= @comp_admin_tenant %>
 
 #s3 test preparation
 cert_dir=<%= @tempest_path %>/etc/certs/
-mkdir -p ${cert_dir}
 
 export OS_USERNAME=${username}
 export OS_PASSWORD=${password}
@@ -29,7 +28,8 @@ export EC2_CERT="${cert_dir}/cert.pem"
 export EC2_PRIVATE_KEY="${cert_dir}/pk.pem"
 
 
-
+(
+mkdir -p ${cert_dir}
 nova x509-get-root-cert "${EUCALYPTUS_CERT}"
 nova x509-create-cert "${EC2_PRIVATE_KEY}" "${EC2_CERT}"
 
@@ -38,7 +38,7 @@ s3_materials_path=<%= @tempest_path %>/etc/cirros/
 euca-bundle-image -i ${s3_materials_path}/cirros-*-blank.img -d ${s3_materials_path}
 euca-bundle-image -i ${s3_materials_path}/cirros-*-initrd --ramdisk true -d ${s3_materials_path}
 euca-bundle-image -i ${s3_materials_path}/cirros-*-vmlinuz --kernel true -d ${s3_materials_path}
-
+) 1>&2
 
 <%= @nosetests %> -q --with-xunit --xunit-file=/dev/stdout -w /opt/tempest/ -v tempest
 tresult=$?
