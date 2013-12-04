@@ -104,11 +104,6 @@ unless neutron[:neutron][:use_gitrepo]
   package neutron_agent_pkg do
     action :install
   end
-
-  link plugin_cfg_path do
-    to "/etc/neutron/neutron.conf"
-  end
-
 else
   neutron_agent = "neutron-openvswitch-agent"
   pfs_and_install_deps "neutron" do
@@ -144,33 +139,33 @@ else
     mode 00644
     owner node[:neutron][:platform][:user]
   end
+end
 
-  case neutron[:neutron][:networking_plugin]
-  when "openvswitch"
-    template plugin_cfg_path do
-      cookbook "neutron"
-      source "ovs_neutron_plugin.ini.erb"
-      owner neutron[:neutron][:platform][:user]
-      group "root"
-      mode "0640"
-      variables(
-        :physnet => neutron[:neutron][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed",
-        :ovs_sql_connection => neutron[:neutron][:db][:sql_connection],
-        :networking_mode => neutron[:neutron][:networking_mode]
+case neutron[:neutron][:networking_plugin]
+when "openvswitch"
+  template plugin_cfg_path do
+    cookbook "neutron"
+    source "ovs_neutron_plugin.ini.erb"
+    owner neutron[:neutron][:platform][:user]
+    group "root"
+    mode "0640"
+    variables(
+      :physnet => neutron[:neutron][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed",
+      :ovs_sql_connection => neutron[:neutron][:db][:sql_connection],
+      :networking_mode => neutron[:neutron][:networking_mode]
       )
-    end
-  when "linuxbridge"
-    template plugin_cfg_path do
-      cookbook "neutron"
-      source "linuxbridge_conf.ini.erb"
-      owner neutron[:neutron][:platform][:user]
-      group "root"
-      mode "0640"
-      variables(
-        :sql_connection => neutron[:neutron][:db][:sql_connection],
-        :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil)
+  end
+when "linuxbridge"
+  template plugin_cfg_path do
+    cookbook "neutron"
+    source "linuxbridge_conf.ini.erb"
+    owner neutron[:neutron][:platform][:user]
+    group "root"
+    mode "0640"
+    variables(
+      :sql_connection => neutron[:neutron][:db][:sql_connection],
+      :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil)
       )
-    end
   end
 end
 
@@ -449,8 +444,7 @@ else
   service neutron_agent do
     supports :status => true, :restart => true
     action :enable
-    subscribes :restart, resources("link[#{plugin_cfg_path}]") unless neutron[:neutron][:use_gitrepo]
-    subscribes :restart, resources("template[#{plugin_cfg_path}]") if neutron[:neutron][:use_gitrepo]
+    subscribes :restart, resources("template[#{plugin_cfg_path}]")
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   end
 end

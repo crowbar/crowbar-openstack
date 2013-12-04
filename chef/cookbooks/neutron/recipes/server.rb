@@ -310,8 +310,7 @@ ruby_block "mark neutron-server as restart for post-install" do
   end
   action :nothing
   subscribes :create, resources("template[/etc/neutron/api-paste.ini]"), :immediately
-  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately unless node[:neutron][:use_gitrepo]
-  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately if node[:neutron][:use_gitrepo]
+  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately
   subscribes :create, resources("template[/etc/neutron/neutron.conf]"), :immediately
 end
 
@@ -322,8 +321,7 @@ ruby_block "mark neutron-agent as restart for post-install" do
     end
   end
   action :nothing
-  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately unless node[:neutron][:use_gitrepo]
-  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately if node[:neutron][:use_gitrepo]
+  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately
   subscribes :create, resources("template[/etc/neutron/neutron.conf]"), :immediately
 end
 
