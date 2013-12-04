@@ -60,7 +60,7 @@ default['mysql']['tunable']['query_cache_limit']        = "1M"
 default['mysql']['tunable']['query_cache_size']         = "32M"
 
 default['mysql']['tunable']['log_slow_queries']         = "/var/log/mysql/slow.log"
-default['mysql']['tunable']['long_query_time']          = 10
+default['mysql']['tunable']['long_query_time']          = 2
 
 # InnoDB Settings
 default['mysql']['tunable']['innodb_buffer_pool_size']  = "256M"
