@@ -38,9 +38,9 @@ class RabbitmqService < ServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? }
     nodes.delete_if { |n| n.admin? } if nodes.size > 1
-    head = nodes.shift
     base["deployment"]["rabbitmq"]["elements"] = {
-      "rabbitmq-server" => [ head.name ]
+      controller = nodes.find { |n| n if n.intended_role == "controller" } || nodes.first
+      "rabbitmq-server" => [ controller.name ]
     }
 
     @logger.debug("Rabbitmq create_proposal: exiting")
