@@ -16,7 +16,7 @@
       "pfs_deps": [
         "libmysqlclient-dev",
         "pip://setuptools-git",
-        "pip://distribute>=0.6.28",
+        "pip://distribute==0.6.28",
         "pip://MySQL-python",
         "pip://pyudev"
       ],
