@@ -694,7 +694,7 @@ bind_port=<%= node[:heat][:api][:cfn_port] %>
 
 # Host providing the admin Identity API endpoint (string
 # value)
-#auth_host=
+auth_host=<%= @keystone_host %>
 
 # Port of the admin Identity API endpoint (integer value)
 #auth_port=
