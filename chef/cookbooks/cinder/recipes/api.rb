@@ -116,12 +116,6 @@ end
 
 cinder_service("api")
 
-unless %w(redhat centos suse).include?(node.platform)
-  api_service_name = "cinder-api"
-else
-  api_service_name = "openstack-cinder-api"
-end
-
 template "/etc/cinder/api-paste.ini" do
   source "api-paste.ini.erb"
   owner node[:cinder][:user]
@@ -137,6 +131,6 @@ template "/etc/cinder/api-paste.ini" do
     :keystone_service_password => keystone_service_password,
     :keystone_admin_port => keystone_admin_port
   )
-  notifies :restart, resources(:service => api_service_name), :immediately
+  notifies :restart, resources(:service => "cinder-api"), :immediately
 end
 
