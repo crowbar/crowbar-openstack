@@ -38,8 +38,8 @@ class RabbitmqService < ServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? }
     nodes.delete_if { |n| n.admin? } if nodes.size > 1
+    controller = nodes.find { |n| n if n.intended_role == "controller" } || nodes.first
     base["deployment"]["rabbitmq"]["elements"] = {
-      controller = nodes.find { |n| n if n.intended_role == "controller" } || nodes.first
       "rabbitmq-server" => [ controller.name ]
     }
 
