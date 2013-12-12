@@ -141,7 +141,7 @@ when node[:cinder][:volume][:volume_type] == "emc"
 when node[:cinder][:volume][:volume_type] == "manual"
 end
 
-unless %w(redhat centos).include?(node.platform)
+unless %w(redhat centos).include? node.platform
  package "tgt"
 else
  package "scsi-target-utils"
@@ -154,10 +154,10 @@ if node[:cinder][:use_gitrepo]
   cookbook_file "/etc/tgt/conf.d/cinder-volume.conf" do
     source "cinder-volume.conf"
   end
-elsif %w(redhat centos suse).include?(node.platform)
+elsif %w(redhat centos suse).include? node.platform
   cookbook_file "/etc/tgt/targets.conf" do
     source "cinder-volume.conf"
-    notifies :restart, "service[tgt]" if %w(redhat centos).include?(node.platform)
+    notifies :restart, "service[tgt]" if %w(redhat centos).include? node.platform
   end
 end
 
@@ -171,7 +171,7 @@ cinder_service("volume")
 
 # Restart doesn't work correct for this service.
 bash "restart-tgt_#{@cookbook_name}" do
-  unless %w(redhat centos suse).include?(node.platform)
+  unless %w(redhat centos suse).include? node.platform
     code <<-EOH
       stop tgt
       start tgt
@@ -185,6 +185,6 @@ end
 service "tgt" do
   supports :status => true, :restart => true, :reload => true
   action :enable
-  service_name "tgtd" if %w(redhat centos suse).include?(node.platform)
+  service_name "tgtd" if %w(redhat centos suse).include? node.platform
   notifies :run, "bash[restart-tgt_#{@cookbook_name}]"
 end

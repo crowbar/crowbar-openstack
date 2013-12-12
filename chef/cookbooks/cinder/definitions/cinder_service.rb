@@ -2,7 +2,7 @@ define :cinder_service, :virtualenv => nil do
 
   cinder_service_name="cinder-#{params[:name]}"
   cinder_name = cinder_service_name
-  cinder_name="openstack-cinder-#{params[:name]}" if %w(redhat centos suse).include?(node.platform)
+  cinder_name="openstack-cinder-#{params[:name]}" if %w(redhat centos suse).include? node.platform
 
   cinder_path = "/opt/cinder"
   venv_path = node[:cinder][:use_virtualenv] ? "#{cinder_path}/.venv" : nil
@@ -16,7 +16,7 @@ define :cinder_service, :virtualenv => nil do
     #TODO(agordeev):
     # be carefull, dpkg will not overwrite upstart configs
     # even if it be asked about that by 'confnew' option
-    package cinder_name unless %w(redhat centos).include?(node.platform)
+    package cinder_name unless %w(redhat centos).include? node.platform
   end
 
   service cinder_service_name do
