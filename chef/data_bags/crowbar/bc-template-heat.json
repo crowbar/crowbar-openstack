@@ -4,7 +4,7 @@
   "attributes": {
     "heat": {
       "debug": false,
-      "verbose": false,
+      "verbose": true,
       "rabbitmq_instance": "none",
       "database_instance": "none",
       "keystone_instance": "none",
