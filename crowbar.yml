@@ -32,23 +32,6 @@ crowbar:
   chef_order: 74
   proposal_schema_version: 2
 
-locale_additions:
-  en:
-    nav:
-      database: Database
-    barclamp:
-      show_deployment_raw:
-        role: Role
-      database:
-        edit_attributes:
-          sql_engine: SQL Engine
-          attributes: Attributes
-          mysql_attributes: MySQL Options
-          mysql_datadir: Datadir
-          postgresql_attributes: PostgreSQL Options
-          postgresql_max_connections: Global Connection Limit (max_connections)
-        edit_deployment:
-          deployment: Deployment
 debs:
   build_pkgs:
     - libpq-dev
@@ -65,6 +48,7 @@ debs:
     - mysql-server
   src_pkgs:
     - mysql-5.5
+
 rpms:
   build_pkgs:
     - postgresql-devel
@@ -80,6 +64,7 @@ rpms:
     - ruby-mysql
     - mysql-server
     - python-psycopg2
+
 gems:
   pkgs:
     - pg
