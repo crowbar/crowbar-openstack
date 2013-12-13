@@ -69,9 +69,9 @@ rpms:
     - python-neutron
     - python-neutronclient
     - python-openvswitch
-    - kernel
+    - kernel-2.6.32-358.123.2.openstack.el6
     - iputils
-    - iproute
+    - iproute-2.6.32-130.el6ost.netns.2
     - kernel-firmware
     - kernel-headers
 
