@@ -43,9 +43,11 @@ class CinderService < ServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
     if nodes.size >= 1
+      controller        = nodes.detect { |n| n.intended_role == "controller"} || nodes.first
+      storage           = nodes.detect { |n| n.intended_role == "storage" } || controller
       base["deployment"]["cinder"]["elements"] = {
-        "cinder-controller" => [ nodes.first[:fqdn] ],
-        "cinder-volume" => [ nodes.first[:fqdn] ]
+        "cinder-controller"     => [ controller[:fqdn] ],
+        "cinder-volume"         => [ storage[:fqdn] ]
       }
     end
 
