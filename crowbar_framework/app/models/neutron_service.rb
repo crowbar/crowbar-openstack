@@ -81,8 +81,11 @@ class NeutronService < ServiceObject
       raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "database")) 
     end
 
+    network_node   = nodes.find { |n| n.intended_role == "network" }
+    network_node ||= nodes.find { |n| n.intended_role == "controller" }
+    network_node ||= nodes.first
     base["deployment"]["neutron"]["elements"] = {
-        "neutron-server" => [ nodes.first[:fqdn] ]
+        "neutron-server" => [ network_node[:fqdn] ]
     } unless nodes.nil? or nodes.length ==0
 
     base["attributes"]["neutron"]["service_password"] = '%012d' % rand(1e12)
