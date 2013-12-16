@@ -32,8 +32,9 @@ class DatabaseService < ServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
     if nodes.size >= 1
+      controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
       base["deployment"]["database"]["elements"] = {
-        "database-server" => [ nodes.first[:fqdn] ]
+        "database-server" => [ controller[:fqdn] ]
       }
     end
 
