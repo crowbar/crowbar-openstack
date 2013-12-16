@@ -108,16 +108,12 @@ class HeatService < ServiceObject
       raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "rabbitmq"))
     end
 
-    agent_nodes = NodeObject.find("roles:nova-multi-compute-kvm") +
-      NodeObject.find("roles:nova-multi-compute-qemu") +
-      NodeObject.find("roles:nova-multi-compute-xen") +
-      NodeObject.find("roles:nova-multi-compute-esxi")
-
-    server_nodes = NodeObject.find("roles:nova-multi-controller")
+    nodes        = NodeObject.all
+    server_nodes = nodes.select { |n| n.intended_role == "controller" }
 
     base["deployment"]["heat"]["elements"] = {
         "heat-server" =>  server_nodes.map { |x| x.name }
-    } unless agent_nodes.nil? or server_nodes.nil?
+    } unless server_nodes.nil?
 
     base["attributes"]["heat"]["keystone_service_password"] = '%012d' % rand(1e12)
 
