@@ -1,0 +1,13 @@
+en:
+  nav:
+    ceilometer: Ceilometer
+  barclamp:
+    ceilometer:
+      edit_attributes:
+        attributes: Attributes
+        use_mongodb: Use MongoDB instead of standard database
+        database_instance: Database
+        keystone_instance: Keystone
+        rabbitmq_instance: RabbitMQ
+    ceilometer_edit_deployment:
+      deployment: Deployment
