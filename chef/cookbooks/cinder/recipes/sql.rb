@@ -58,7 +58,7 @@ database "create #{node[:cinder][:db][:database]} database" do
 end
 
 database_user "create cinder database user" do
-    host '%' 
+    host '%'
     connection db_conn
     username node[:cinder][:db][:user]
     password node[:cinder][:db][:password]
@@ -79,7 +79,9 @@ end
 
 execute "cinder-manage db sync" do
   command "#{venv_prefix}cinder-manage db sync"
-  action :run
+  user node[:cinder][:user]
+  group node[:cinder][:group]
+  not_if { node[:platform] == "suse" }
 end
 
 # save data so it can be found by search
