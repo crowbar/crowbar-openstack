@@ -5,10 +5,9 @@ en:
     database:
       edit_attributes:
         sql_engine: SQL Engine
-        attributes: Attributes
         mysql_attributes: MySQL Options
-        mysql_datadir: Datadir
+        mysql:
+          datadir: Datadir
         postgresql_attributes: PostgreSQL Options
-        postgresql_max_connections: Global Connection Limit (max_connections)
-      edit_deployment:
-        deployment: Deployment
+        postgresql:
+          max_connections: Global Connection Limit (max_connections)
