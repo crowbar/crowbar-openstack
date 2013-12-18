@@ -165,14 +165,3 @@ execute "Neutron network configuration" do
   notifies :run, "execute[add_fixed_network_to_router]", :immediately
 end
 
-if node[:neutron][:networking_plugin] == "linuxbridge"
-  bound_if = (node[:crowbar_wall][:network][:nets][:public].last rescue nil)
-  neutron_bridge "floating bridge" do
-    network_name "floating"
-    slaves [bound_if]
-    type "linuxbridge"
-    neutron_cmd neutron_cmd
-
-    action :create
-  end
-end
