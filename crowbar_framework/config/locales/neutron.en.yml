@@ -19,14 +19,12 @@ en:
         networking_mode: Mode
         cisco_switches: Cisco Switch Credentials
         cisco_ports: Assign Switch Ports
-
         switch_ip: IP Address
         switch_port: Port
         switch_user: Username
         switch_password: Password
         add_switch: Add
         remove_switch: Remove
-
         ssl_header: SSL Support
         api:
           protocol: Protocol
@@ -38,8 +36,6 @@ en:
           cert_required: Require Client Certificate
           ca_certs: SSL CA Certificates File
         no_switches: Currently there are no switches assigned
-        error_empty: IP Address, Port, Username and Password must not be empty.
-        error_duplicate: There is already a Switch configuration for that IP Address.
+        error_invalid: IP Address, Port, Username and Password must not be empty!
+        error_duplicate: There is already a Switch configuration for that IP Address!
         warn_ovs_vlan: This mode only works if the "nova_fixed" and "admin" networks are on different physical interfaces.
-      edit_cisco_switch:
-        remove: Remove

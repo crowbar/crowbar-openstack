@@ -22,60 +22,47 @@
         .alert.alert-warning#warn_ovs_vlan
           = t(".warn_ovs_vlan")
 
+    #cisco_switches
+      %fieldset
+        %legend
+          = t(".cisco_switches")
+
+        %table.table.table-middle{ "data-dynamic" => "#switch-entries", "data-namespace" => "cisco_switches", "data-optional" => "", "data-invalid" => t(".error_invalid"), "data-duplicate" => t(".error_duplicate") }
+          %thead
+            %tr
+              %th.col-sm-3
+                = t(".switch_ip")
+              %th.col-sm-2
+                = t(".switch_port")
+              %th.col-sm-3
+                = t(".switch_user")
+              %th.col-sm-3
+                = t(".switch_password")
+              %th.col-sm-1
+
+          %tbody
+
+          %tfoot
+            %tr
+              %th
+                = text_field_tag "switch[name]", "", :placeholder => t(".switch_ip"), :class => "form-control", "data-name" => "name", "data-type" => "string"
+              %th
+                = text_field_tag "switch[port]", "", :placeholder => t(".switch_port"), :class => "form-control", "data-name" => "port", "data-type" => "string"
+              %th
+                = text_field_tag "switch[user]", "", :placeholder => t(".switch_user"), :class => "form-control", "data-name" => "user", "data-type" => "string"
+              %th
+                = text_field_tag "switch[password]", "", :placeholder => t(".switch_password"), :class => "form-control", "data-name" => "password", "data-type" => "string"
+              %th
+                = link_to t(".add_switch"), "#", :class => "btn btn-default btn-block", "data-add" => true
 
 
 
 
 
-
-
-
-
-    -##cisco_switches{ "data-invalid" => t(".error_empty"), "data-duplicate" => t(".error_duplicate") }
-    -#  %fieldset
-    -#    %legend
-    -#      = t(".cisco_switches")
-    -#
-    -#    %table.table.table-middle
-    -#      %thead
-    -#        %tr
-    -#          %th.col-sm-3
-    -#            = t(".switch_ip")
-    -#          %th.col-sm-2
-    -#            = t(".switch_port")
-    -#          %th.col-sm-3
-    -#            = t(".switch_user")
-    -#          %th.col-sm-3
-    -#            = t(".switch_password")
-    -#          %th.col-sm-1
-    -#      %tbody
-    -#
-    -#      %tfoot
-    -#        %tr
-    -#          %th
-    -#            = text_field_tag "switch_ip", "", :placeholder => t(".switch_ip"), :class => "form-control"
-    -#          %th
-    -#            = text_field_tag "switch_port", "", :placeholder => t(".switch_port"), :class => "form-control"
-    -#          %th
-    -#            = text_field_tag "switch_user", "", :placeholder => t(".switch_user"), :class => "form-control"
-    -#          %th
-    -#            = text_field_tag "switch_password", "", :placeholder => t(".switch_password"), :class => "form-control"
-    -#          %th
-    -#            = submit_tag t(".add_switch"), :class => "btn btn-default btn-block"
-    -#
     -##cisco_ports
     -#  %fieldset
     -#    %legend
     -#      = t(".cisco_ports")
-
-
-
-
-
-
-
-
-
 
 
 
@@ -97,19 +84,19 @@
 
     = render "barclamp/git/pfsdeps"
 
-%script#cisco_switch_row{ :type => "text/x-handlebars-template" }
-  {{#each switches}}
-  %tr
+%script#switch-entries{ :type => "text/x-handlebars-template" }
+  {{#each entries}}
+  %tr.edit
     %td
-      {{ip}}
+      = text_field_tag "switch[name]", "{{name}}", :placeholder => t(".switch_ip"), :class => "form-control", :disabled => "disabled"
     %td
-      {{port}}
+      = text_field_tag "switch[port]", "{{port}}", :placeholder => t(".switch_port"), :class => "form-control", "data-update" => "exports/{{name}}/port", "data-type" => "string"
     %td
-      {{user}}
+      = text_field_tag "switch[user]", "{{user}}", :placeholder => t(".switch_user"), :class => "form-control", "data-update" => "exports/{{name}}/user", "data-type" => "string"
     %td
-      {{password}}
+      = text_field_tag "switch[password]", "{{password}}", :placeholder => t(".switch_password"), :class => "form-control", "data-update" => "exports/{{name}}/password", "data-type" => "string"
     %td
-      = link_to t(".remove_switch"), "#", "data-target" => "{{ip}}", :class => "btn btn-default"
+      = link_to t(".remove_switch"), "#", :class => "btn btn-default btn-block", "data-remove" => "{{name}}"
   {{else}}
   %tr
     %td{ :colspan => 5 }
