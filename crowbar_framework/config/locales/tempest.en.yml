@@ -1,0 +1,59 @@
+en:
+  nav:
+    tempest: Tempest
+  barclamp:
+    tempest:
+      run:
+        success: "Sucessfully started tempest on node %{node}"
+        failure: "Failed to run tempest on node %{node}: %{error}"
+        duplicate: "there's already an active tempest run"
+
+      dashboard:
+        title: Tempest
+        n_test_runs: "%{n} test run(s)"
+        no_test_runs: No test runs
+
+        run:
+          label: Run tempest on node
+          do:  Go!
+          no_nodes: No nodes with installed tempest available
+        clear:
+          do: Clear
+          success: All non-running and stale test runs were cleared
+
+        test_run:
+          node: Node
+          started: Started
+          ended: Ended
+          status: Status
+          status_:
+            running: Running
+            passed: Passed
+            failed: Failed
+
+      results:
+        title: "Results of tempest run %{test_run}"
+        raw_xml: Raw XML
+        test:
+          name: Name
+          time: Time
+          status: Status
+          status_:
+            error: Error
+            failure: Failure
+            passed: Passed
+            skipped: Skipped
+
+      edit_attributes:
+        pull_from_source: Pull From Source
+        attributes: Attributes
+        nova_instance: Nova
+        use_virtualenv: Use virtualenv
+        use_pfs: Use Pull From Source
+        tempest_user: Tempest user and a tenant that will be created for test run
+        tempest_user_username: Choose username
+        tempest_adm_username: Choose Tempest admin username
+        tempest_adm_password: Choose Tempest admin password
+        tempest_user_tenant: Choose tenant
+      edit_deployment:
+        deployment: Deployment
