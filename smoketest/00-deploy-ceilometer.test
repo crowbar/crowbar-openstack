@@ -38,7 +38,13 @@ export OS_PASSWORD="crowbar"
 export OS_TENANT_NAME="admin"
 export CEILOMETER_URL="http://$ceilometer_ip:8777"
 
-sudo apt-get install -y python-ceilometerclient
+if [ -f /etc/redhat-release ]; then
+  sudo yum --assumeyes install python-ceilometerclient
+elif [ -f /etc/SuSE-release ]; then
+  sudo zypper -n install python-ceilometerclient
+else
+  sudo apt-get install -y python-ceilometerclient
+fi
 
 echo "Getting meter-list from ceilometer"
 if ! ceilometer meter-list; then
