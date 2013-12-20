@@ -34,49 +34,6 @@ crowbar:
   chef_order: 94
   proposal_schema_version: 2
 
-locale_additions:
-  en:
-    barclamp:
-      neutron:
-        edit_cisco_switch_ports:
-          assign_switch_port: Assign Switch Ports
-          edit_after_allocating_compute_nodes: Edit assignments after allocating compute nodes in the nova barclamp
-          node: Node
-          switch_ip: Cisco Switch IP
-          switch_port: Cisco Switch Port
-        deploy:
-          missing_os_sdn_network: The os_sdn network must be defined in bc-template-network.json
-        edit_deployment: 
-          deployment: Deployment
-        edit_attributes:
-          add_switch: Add
-          database_instance: Database Instance
-          rabbitmq_instance: RabbitMQ 
-          keystone_instance: Keystone 
-          attributes: Attributes
-          dhcp_domain: DHCP Domain
-          plugin_header: Networking Plugin
-          networking_plugin: Plugin
-          networking_mode: Mode
-          ssl_header: SSL Support
-          protocol: Protocol
-          cisco_switches: Cisco Switch Credentials
-          switch_ip: IP Address
-          switch_port: Port
-          switch_user: Username
-          switch_password: Password
-          error_empty: IP Address, Port, Username and Password must not be empty.
-          error_duplicate: There is already a Switch configuration for that IP Address.
-          ssl_insecure: SSL Certificate is insecure (for instance, self-signed)
-          ssl_certfile: SSL Certificate File
-          ssl_keyfile: SSL (Private) Key File
-          ssl_generate_certs: Generate (self-signed) certificates (implies insecure)
-          ssl_cert_required: Require Client Certificate
-          ssl_ca_certs: SSL CA Certificates File
-          warn_ovs_vlan: This mode only works if the "nova_fixed" and "admin" networks are on different physical interfaces.
-        edit_cisco_switch:
-          remove: Remove
-
 debs:
   ubuntu-12.04:
     repos:
@@ -96,6 +53,7 @@ debs:
     - neutron-plugin-openvswitch
     - neutron-plugin-openvswitch-agent
     - neutron-server
+
 rpms:
   centos-6.4:
     repos:
