@@ -21,7 +21,7 @@
         "pip://pyudev"
       ],
       "debug": false,
-      "verbose": false,
+      "verbose": true,
       "dhcp_domain": "openstack.local",
       "networking_mode": "gre",
       "networking_plugin": "openvswitch",
