@@ -2,9 +2,6 @@ en:
   barclamp:
     rabbitmq:
       edit_attributes:
-        attributes: Attributes
         vhost: Virtual host
         user: User
         port: Port
-      edit_deployment:
-        deployment: Deployment

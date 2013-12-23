@@ -1,12 +1,1 @@
-
-%p
-  = render :partial => "barclamp/node_selector"
-
-:javascript
-  $(document).ready(function(){
-    var constraints = {  
-      "rabbitmq-server": { "unique": false, "count": 1 }
-    };
-    node_selector($('#drag_drop'), constraints);
-  });
-
+= render :partial => "barclamp/node_selector", :locals => { :constraints => rabbitmq_role_contraints }
