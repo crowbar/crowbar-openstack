@@ -1,7 +1,5 @@
 #!/bin/bash
 
-<%= @nosetests %> -q --with-xunit --xunit-file=/dev/stdout -w /opt/tempest/ -v tempest
-tresult=$?
 export OS_AUTH_URL=http://<%= @key_host %>:<%= @key_port %>/v2.0/
 export OS_AUTH_STRATEGY=keystone
 
@@ -17,6 +15,33 @@ admin_username=<%= @comp_admin_user %>
 admin_password=<%= @comp_admin_pass %>
 admin_tenant_name=<%= @comp_admin_tenant %>
 
+
+#s3 test preparation
+cert_dir=<%= @tempest_path %>/etc/certs/
+
+export OS_USERNAME=${username}
+export OS_PASSWORD=${password}
+export OS_TENANT_NAME=${tenant_name}
+export EC2_USER_ID=${username}
+export EUCALYPTUS_CERT="${cert_dir}/cacert.pem"
+export EC2_CERT="${cert_dir}/cert.pem"
+export EC2_PRIVATE_KEY="${cert_dir}/pk.pem"
+
+
+(
+mkdir -p ${cert_dir}
+nova x509-get-root-cert "${EUCALYPTUS_CERT}"
+nova x509-create-cert "${EC2_PRIVATE_KEY}" "${EC2_CERT}"
+
+s3_materials_path=<%= @tempest_path %>/etc/cirros/
+
+euca-bundle-image -i ${s3_materials_path}/cirros-*-blank.img -d ${s3_materials_path}
+euca-bundle-image -i ${s3_materials_path}/cirros-*-initrd --ramdisk true -d ${s3_materials_path}
+euca-bundle-image -i ${s3_materials_path}/cirros-*-vmlinuz --kernel true -d ${s3_materials_path}
+) 1>&2
+
+<%= @nosetests %> -q --with-xunit --xunit-file=/dev/stdout -w /opt/tempest/ -v tempest
+tresult=$?
 
 
 
@@ -57,38 +82,6 @@ for f in `nova list | awk '{print $2}' | grep -v '^ID$' | grep -v '^$'` ; do nov
 echo -e "Cleaning up floating ips..."
 for f in `neutron floatingip-list | awk {'print $2'}`; do neutron floatingip-delete $f ; done
 )  1>&2
-# Listing of remaining items after tempest run is finished (Start)
-d=$(date +%y-%m-%d-%T)
-declare -a tenants log
-for i in $(keystone tenant-list | grep -v ' name ' | grep -Ev '^$' | grep -v 'service'  |awk {'print $4'}); do  tenants=("${tenants[@]}" "$i"); done
-
-
-for i in "${tenants[@]}"; do
-    header=$(echo -e "\n\nDate: [ $(date) ] Tenant: $i\n\n")
-    log=("${log[@]}" "$header")
-    header=$(echo -e "\n[ $(date) ] Listing instances for $i\n")
-    res=$(nova --os-tenant-name $i list)
-    log=("${log[@]}" "$header" "$res")
-    header=$(echo -e "\n[ $(date) ] Listing volumes for $i\n")
-    res=$(cinder --os-tenant-name $i list)
-    log=("${log[@]}" "$header" "$res")
-    header=$(echo -e "\n[ $(date) ] Listing snapshots for $i\n")
-    res=$(cinder --os-tenant-name $i snapshot-list)
-    log=("${log[@]}" "$header" "$res")
-    header=$(echo -e "\n[ $(date) ] Listing images for $i\n")
-    res=$(glance --os-tenant-name $i index)
-    log=("${log[@]}" "$header" "$res")
-    header=$(echo -e "\n[ $(date) ] Listing security groups for $i\n")
-    res=$(neutron --os-tenant-name $i security-group-list)
-    log=("${log[@]}" "$header" "$res")
-    header=$(echo -e "\n[ $(date) ] Listing floating_ips for $i\n")
-    res=$(neutron --os-tenant-name $i floatingip-list)
-    log=("${log[@]}" "$header" "$res" "\n\n\n")
-done
-
-for i in "${log[@]}"; do
-    echo -e "$i"
-done >> "/tmp/tempest_run-$d.log"
-# Listing of remaining items after tempest run is finished (End)
 
 exit ${tresult}
+

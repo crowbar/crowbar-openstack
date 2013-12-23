@@ -123,9 +123,6 @@ source_dir = /opt/stack/nova
 # Path of nova configuration file
 config_path = /etc/nova/nova.conf
 
-# Directory containing nova binaries such as nova-manage
-bin_dir = /usr/local/bin
-
 # Path to a private key file for SSH access to remote hosts
 path_to_private_key = /home/user/.ssh/id_rsa
 
@@ -216,4 +213,57 @@ build_interval = 10
 # Number of seconds to time out on waiting for a volume
 # to be available or reach an expected status
 build_timeout = 300
+
+[cli]
+# Enable cli tests
+enabled = True
+# directory where python client binaries are located
+cli_dir = <%= @bin_path %>
+# Number of seconds to wait on a CLI timeout
+timeout = 15
+
+[boto]
+# This section contains configuration options used when executing tests
+# with boto.
+
+# EC2 URL
+ec2_url = http://<%= @nova_host %>:8773/services/Cloud
+# S3 URL
+s3_url = http://<%= @nova_host %>:3333/
+
+# Use keystone ec2-* command to get those values for your test user and tenant
+aws_access = <%= @ec2_access %>
+aws_secret = <%= @ec2_secret %>
+
+# Image materials for S3 upload
+# ALL content of the specified directory will be uploaded to S3
+s3_materials_path = <%= @tempest_path %>/etc/cirros/
+
+# The manifest.xml files, must be in the s3_materials_path directory
+# Subdirectories not allowed!
+# The filenames will be used as a Keys in the S3 Buckets
+
+# ARI Ramdisk manifest. Must be in the above s3_materials_path
+ari_manifest = cirros-<%= @cirros_version %>-x86_64-initrd.manifest.xml
+
+# AMI Machine Image manifest. Must be in the above s3_materials_path
+ami_manifest = cirros-<%= @cirros_version %>-x86_64-blank.img.manifest.xml
+
+# AKI Kernel Image manifest, Must be in the above s3_materials_path
+aki_manifest = cirros-<%= @cirros_version %>-x86_64-vmlinuz.manifest.xml
+
+# Instance type
+instance_type = m1.tiny
+
+# TCP/IP connection timeout
+http_socket_timeout = 5
+
+# Number of retries actions on connection or 5xx error
+num_retries = 2
+
+# Status change wait timout
+build_timeout = 240
+
+# Status change wait interval
+build_interval = 1
 

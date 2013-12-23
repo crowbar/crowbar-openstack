@@ -18,18 +18,6 @@
 # limitations under the License.
 #
 
-# From the pip-requires -- all the Ubuntu packages for tempest prereqs
-unless %w(redhat centos).include?(node.platform)
-  packages = %w(python-anyjson python-nose python-httplib2 python-testtools python-lxml
-     python-boto python-paramiko python-netaddr python-glanceclient
-     python-keystoneclient python-novaclient python-neutronclient
-     python-testresources python-keyring python-testrepository python-oslo.config)
-
-  packages.each do |p|
-    package p
-  end
-end
-
 begin
   provisioner = search(:node, "roles:provisioner-server").first
   proxy_addr = provisioner[:fqdn]
@@ -72,17 +60,22 @@ remote_file tarball_url do
   action :create_if_missing
 end
 
+#needed to create venv correctly
+if %w(redhat centos).include?(node.platform)
+  package("libxslt-devel")
+else
+  package("libxslt1-dev")
+end
+#needed for tempest.tests.test_wrappers.TestWrappers.test_pretty_tox
+package("git")
+#needed for ec2 and s3 test suite
+package("euca2ools")
+
+
 bash "install_tempest_from_archive" do
   cwd "/tmp"
   code "tar xf #{filename} && mv openstack-tempest-* tempest && mv tempest /opt/ && rm #{filename}"
   not_if { ::File.exists?(tempest_path) }
-end
-
-unless %w(redhat centos).include?(node.platform)
-  nosetests = `which nosetests`.strip
-else
-  #for centos we have to use nosetests from venv
-  nosetests = "/opt/tempest/.venv/bin/nosetests"
 end
 
 if node[:tempest][:use_virtualenv]
@@ -101,16 +94,13 @@ if node[:tempest][:use_virtualenv]
     mode  0775
     action :create
   end
-  execute "virtualenv /opt/tempest/.venv --system-site-packages" unless File.exist?("/opt/tempest/.venv")
+  execute "virtualenv /opt/tempest/.venv" unless File.exist?("/opt/tempest/.venv")
   pip_cmd = ". /opt/tempest/.venv/bin/activate && #{pip_cmd}"
-  nosetests = "/opt/tempest/.venv/bin/python #{nosetests}"
 end
 
-if node[:tempest][:use_pfs]
-  execute "pip_install_reqs_for_tempest" do
-    cwd "/opt/tempest/"
-    command "#{pip_cmd} -r /opt/tempest/requirements.txt"
-  end
+execute "pip_install_reqs_for_tempest" do
+  cwd "/opt/tempest/"
+  command "#{pip_cmd} -r /opt/tempest/requirements.txt"
 end
 
 if nova[:nova][:use_gitrepo]!=true

@@ -85,7 +85,7 @@ keystone_register "tempest tempest wakeup keystone" do
   port keystone_admin_port
   token keystone_token
   action :wakeup
-end
+end.run_action(:wakeup)
 
 keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   host keystone_address
@@ -93,13 +93,14 @@ keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   token keystone_token
   tenant_name tempest_comp_tenant
   action :add_tenant
-end
+end.run_action(:add_tenant)
 
 users = [
           {'name' => tempest_comp_user, 'pass' => tempest_comp_pass, 'role' => 'Member'},
           {'name' => tempest_adm_user, 'pass' => tempest_adm_pass, 'role' => 'admin' },
         ]
 users.each do |user|
+
   keystone_register "add #{user["name"]}:#{user["pass"]} user" do
     host keystone_address
     port keystone_admin_port
@@ -108,7 +109,7 @@ users.each do |user|
     user_password user["pass"]
     tenant_name tempest_comp_tenant 
     action :add_user
-  end
+  end.run_action(:add_user)
 
   keystone_register "add #{user["name"]}:#{tempest_comp_tenant} user #{user["role"]} role" do
     host keystone_address
@@ -118,13 +119,37 @@ users.each do |user|
     role_name user["role"]
     tenant_name tempest_comp_tenant 
     action :add_access
-  end
+  end.run_action(:add_access)
+
+  keystone_register "add default ec2 creds for #{user["name"]}:#{tempest_comp_tenant}" do
+    host keystone_address
+    port keystone_admin_port
+    token keystone_token
+    user_name user["name"]
+    tenant_name tenant_name tempest_comp_tenant
+    action :add_ec2
+  end.run_action(:add_ec2)
+
+
+end
+
+directory "#{node[:tempest][:tempest_path]}/etc" do
+  action :create
+end
+
+directory "#{node[:tempest][:tempest_path]}/etc/certs" do
+  action :create
+end
+
+directory "#{node[:tempest][:tempest_path]}/etc/cirros" do
+  action :create
 end
 
 
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
 
 venv_prefix_path = node[:tempest][:use_virtualenv] ? ". /opt/tempest/.venv/bin/activate && " : nil
+bin_path = node[:tempest][:use_virtualenv] ? "/opt/tempest/.venv/bin" : "/usr/bin/"
 
 bash "upload tempest test image" do
   code <<-EOH
@@ -157,6 +182,8 @@ wget $IMAGE_URL --directory-prefix=$TEMP || exit $?
 echo "Unpacking image ... "
 mkdir $IMG_DIR
 tar -xvzf $TEMP/$IMG_FILE -C $IMG_DIR || exit $?
+rm -rf #{node[:tempest][:tempest_path]}/etc/cirros/*
+cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/
 
 echo -n "Adding kernel ... "
 KERNEL_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-kernel" is_public=false container_format=aki disk_format=aki < $(findfirst '*-vmlinuz') | extract_id)
@@ -194,9 +221,9 @@ bash "create_yet_another_tiny_flavor" do
 EOH
 end
 
-directory "#{node[:tempest][:tempest_path]}/etc" do
-  action :create
-end
+ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
+ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
+cirros_version = "0.3.0"
 
 template "#{node[:tempest][:tempest_path]}/etc/tempest.conf" do
   source "tempest.conf.erb"
@@ -220,21 +247,17 @@ template "#{node[:tempest][:tempest_path]}/etc/tempest.conf" do
     :img_tenant => tempest_comp_tenant,
     :comp_admin_user => comp_admin_user,
     :comp_admin_pass => comp_admin_pass,
-    :comp_admin_tenant => comp_admin_tenant 
+    :comp_admin_tenant => comp_admin_tenant,
+    :ec2_access => ec2_access,
+    :ec2_secret => ec2_secret,
+    :tempest_path => node[:tempest][:tempest_path],
+    :nova_host => nova.name,
+    :cirros_version => cirros_version,
+    :bin_path => bin_path
   )
 end
 
-unless %w(redhat centos).include?(node.platform)
-  nosetests = `which nosetests`.strip
-else
-  #for centos we have to use nosetests from venv
-  nosetests = "/opt/tempest/.venv/bin/nosetests"
-end
-
-if node[:tempest][:use_virtualenv]
-  nosetests = "/opt/tempest/.venv/bin/python #{nosetests}"
-end
-
+nosetests = "/opt/tempest/.venv/bin/nosetests"
 
 template "/tmp/tempest_smoketest.sh" do
   mode 0755
@@ -251,10 +274,10 @@ template "/tmp/tempest_smoketest.sh" do
     :alt_comp_tenant => alt_comp_tenant,
     :comp_admin_user => comp_admin_user,
     :comp_admin_pass => comp_admin_pass,
-    :comp_admin_tenant => comp_admin_tenant
+    :comp_admin_tenant => comp_admin_tenant,
+    :tempest_path => node[:tempest][:tempest_path]
   )
 end
-
 
 cookbook_file "#{node[:tempest][:tempest_path]}/run_tempest.py" do
   source "run_tempest.py"
