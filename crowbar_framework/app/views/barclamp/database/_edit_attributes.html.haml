@@ -1,38 +1,22 @@
+- register_javascripts "barclamps/database/form"
 
-%input#proposal_attributes{:type => "hidden", :name => "proposal_attributes", :value => @proposal.raw_data['attributes'][@proposal.barclamp].to_json}
-%p
-  %label{:class => "h3", :for => "proposal_attributes"}= t('.attributes')
-  = link_to t('raw'), proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :style => "float: right;"
-  %div.container
-    %p
-      %label{ :for => :sql_engine }= t('.sql_engine')
-      = select_tag :sql_engine, options_for_select([['MySQL','mysql'],['PostgreSQL','postgresql']], @proposal.raw_data['attributes'][@proposal.barclamp]["sql_engine"]), :onchange => "update_value('sql_engine', 'sql_engine', 'string')"
+= attributes_for @proposal do
+  .panel-sub
+    = header @dep_raw, true
 
-  %label.section-header.mysql_engine.sql_engine{ :for => :mysql_form }= t('.mysql_attributes')
-  %div.section.mysql_engine.sql_engine{ :id => :mysql_form }
-    %p
-      %label{ :for => :mysql_datadir }= t('.mysql_datadir')
-      %input#mysql_datadir{:readonly => "readonly", :type => "text", :name => "mysql_datadir", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["mysql"]["datadir"], :onchange => "update_value('mysql/datadir', 'mysql_datadir', 'string')"}
+  .panel-body
+    = select_field :sql_engine, :collection => :engines_for_database
 
-  %label.section-header.postgresql_engine.sql_engine{ :for => :postgresql_form }= t('.postgresql_attributes')
-  %div.section.postgresql_engine.sql_engine{ :id => :postgresql_form }
-    %p
-      %label{ :for => :postgresql_max_connections }= t('.postgresql_max_connections')
-      %input#postgresql_max_connections{:type => "text", :name => "postgresql_max_connections", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["postgresql"]["max_connections"], :onchange => "update_value('postgresql/tunable/max_connections', 'postgresql_max_connections', 'string')"}
+    #mysql_container
+      %fieldset
+        %legend
+          = t('.mysql_attributes')
 
+        = string_field %w(mysql datadir)
 
-:javascript
-  function toggle_sql_engine_form() {
-    $('.sql_engine').hide();
-    switch($('#sql_engine option:selected').attr('value')) {
-      case "mysql":
-        $('.mysql_engine').show();
-        break;
-      case "postgresql":
-        $('.postgresql_engine').show();
-        break;
-    }
-  };
+    #postgresql_container
+      %fieldset
+        %legend
+          = t('.postgresql_attributes')
 
-  $(document).ready(function () { toggle_sql_engine_form(); });
-  $('#sql_engine').change(toggle_sql_engine_form);
+        = string_field %w(postgresql max_connections)
