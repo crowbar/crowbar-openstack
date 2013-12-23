@@ -4,7 +4,7 @@
   "attributes": {
     "ceilometer": {
       "debug": false,
-      "verbose": false,
+      "verbose": true,
       "use_mongodb": true,
       "rabbitmq_instance": "none",
       "database_instance": "none",
