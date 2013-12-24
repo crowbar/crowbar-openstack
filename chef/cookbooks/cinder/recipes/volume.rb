@@ -23,21 +23,6 @@ def volume_exists(volname)
   Kernel.system("vgs #{volname}")
 end
 
-def make_eqlx_volumes(node)
-  Chef::Log.info("Cinder: Using eqlx volumes.")
-  package("python-paramiko")
-  #TODO(agordeev): use path_spec not hardcode
-  if node[:cinder][:use_gitrepo]
-    eqlx_path = "/opt/cinder/cinder/volume/eqlx.py"
-  else
-    eqlx_path = "/usr/lib/python2.7/dist-packages/cinder/volume/eqlx.py"
-  end
-  cookbook_file eqlx_path do
-    mode "0755"
-    source "eqlx.py"
-  end
-end
-
 def make_loopback_volume(node,volname)
   return if volume_exists(volname)
   Chef::Log.info("Cinder: Using local file volume backing")
@@ -130,7 +115,6 @@ claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node,"Cinder"
 
 case
 when node[:cinder][:volume][:volume_type] == "eqlx"
-  make_eqlx_volumes(node)
 when (node[:cinder][:volume][:volume_type] == "local")
   make_loopback_volume(node,volname)
 when node[:cinder][:volume][:volume_type] == "raw"

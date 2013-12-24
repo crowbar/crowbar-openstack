@@ -1204,7 +1204,7 @@ rbd_secret_uuid=<%= @rbd_params['secret_uuid'] %>
 #volume_driver=cinder.volume.drivers.lvm.LVMISCSIDriver
 #
 <% unless @eqlx_params.nil? -%>
-volume_driver=cinder.volume.eqlx.DellEQLSanISCSIDriver
+volume_driver=cinder.volume.drivers.eqlx.DellEQLSanISCSIDriver
 <%   @eqlx_params.each do |k, v| -%>
 <%=    k + '=' + v.to_s %> 
 <%   end -%>
