@@ -720,10 +720,10 @@ os_endpoint_type=internalURL
 
 # Host providing the admin Identity API endpoint (string
 # value)
-#auth_host=127.0.0.1
+auth_host=<%= @keystone_host %>
 
 # Port of the admin Identity API endpoint (integer value)
-#auth_port=35357
+auth_port=<%= @keystone_admin_port %>
 
 # Protocol of the admin Identity API endpoint(http or https)
 # (string value)
