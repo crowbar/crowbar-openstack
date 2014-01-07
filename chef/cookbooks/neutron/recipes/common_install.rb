@@ -29,25 +29,26 @@ when "openvswitch", "cisco"
 
   # Arrange for neutron-ovs-cleanup to be run on bootup of compute nodes only
   unless neutron.name == node.name
-    cookbook_file "/etc/init.d/neutron-ovs-cleanup" do
-      source "neutron-ovs-cleanup"
-      mode 00755
-    end
+    if %w(debian ubuntu).include? node.platform
+      cookbook_file "/etc/init.d/neutron-ovs-cleanup" do
+        source "neutron-ovs-cleanup"
+        mode 00755
+      end
+      link "/etc/rc2.d/S20neutron-ovs-cleanup" do
+        to "../init.d/neutron-ovs-cleanup"
+      end
 
-    link "/etc/rc2.d/S20neutron-ovs-cleanup" do
-      to "../init.d/neutron-ovs-cleanup"
-    end
+      link "/etc/rc3.d/S20neutron-ovs-cleanup" do
+        to "../init.d/neutron-ovs-cleanup"
+      end
 
-    link "/etc/rc3.d/S20neutron-ovs-cleanup" do
-      to "../init.d/neutron-ovs-cleanup"
-    end
+      link "/etc/rc4.d/S20neutron-ovs-cleanup" do
+        to "../init.d/neutron-ovs-cleanup"
+      end
 
-    link "/etc/rc4.d/S20neutron-ovs-cleanup" do
-      to "../init.d/neutron-ovs-cleanup"
-    end
-
-    link "/etc/rc5.d/S20neutron-ovs-cleanup" do
-      to "../init.d/neutron-ovs-cleanup"
+      link "/etc/rc5.d/S20neutron-ovs-cleanup" do
+        to "../init.d/neutron-ovs-cleanup"
+      end
     end
   end
 when "linuxbridge"
@@ -103,7 +104,7 @@ unless neutron[:neutron][:use_gitrepo]
 
   link plugin_cfg_path do
     to "/etc/neutron/neutron.conf"
-  end 
+  end
 
 else
   neutron_agent = "neutron-openvswitch-agent"
@@ -207,21 +208,24 @@ when "openvswitch", "cisco"
   physnet = neutron[:neutron][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed"
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
   external_network_bridge = "br-public"
-  
+
   if %w(redhat centos).include?(node.platform)
     openvswitch_service = "openvswitch"
   else
     openvswitch_service = "openvswitch-switch"
   end
+
   service "openvswitch_service" do
     service_name openvswitch_service
     supports :status => true, :restart => true
-    action [ :enable ]
+    action [ :start, :enable ]
   end
 
-  bash "Start #{openvswitch_service} service" do
-    code "service #{openvswitch_service} start"
-    only_if "service #{openvswitch_service} status |grep -q 'is not running'"
+  unless %w(debian ubuntu).include? node.platform
+    service "neutron-ovs-cleanup" do
+      service_name "openstack-neutron-ovs-cleanup" if %w(suse).include?(node.platform)
+      action [ :enable ]
+    end
   end
 
   # We always need br-int.  Neutron uses this bridge internally.
@@ -454,7 +458,6 @@ else
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   end
 end
-
 
 if %w(redhat centos).include?(node.platform)
   net_core_pkgs=%w(kernel iproute iputils)
