@@ -54,6 +54,8 @@ core_plugin = neutron.plugins.cisco.network_plugin.PluginV2
 core_plugin = neutron.plugins.openvswitch.ovs_neutron_plugin.OVSNeutronPluginV2
 <%   elsif @networking_plugin == 'linuxbridge' -%>
 core_plugin = neutron.plugins.linuxbridge.lb_neutron_plugin.LinuxBridgePluginV2
+<%   elsif @networking_plugin == 'vmware' -%>
+core_plugin = neutron.plugins.nicira.NeutronPlugin.NvpPluginV2
 <%   end -%>
 <% end -%>
 

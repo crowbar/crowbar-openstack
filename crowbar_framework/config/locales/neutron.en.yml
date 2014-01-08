@@ -25,6 +25,12 @@ en:
         switch_password: Password
         add_switch: Add
         remove_switch: Remove
+        vmware:
+          user: VMWare NSX Username
+          password: VMWare NSX Password
+          controllers: VMWare NSX Controllers
+          tz_uuid: UUID of the NVP Transport Zone
+          l3_gw_uuid: UUID of the NVP Gateway Service
         ssl_header: SSL Support
         api:
           protocol: Protocol

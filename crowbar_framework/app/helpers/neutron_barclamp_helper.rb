@@ -32,7 +32,8 @@ module NeutronBarclampHelper
       [
         ["linuxbridge", "linuxbridge"],
         ["openvswitch","openvswitch"],
-        ["cisco","cisco"]
+        ["cisco","cisco"],
+        ["vmware","vmware"]
       ],
       selected.to_s
     )

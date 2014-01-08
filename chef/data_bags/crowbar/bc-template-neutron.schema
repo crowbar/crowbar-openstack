@@ -68,6 +68,13 @@
                       "max_pool_overflow": { "type" : "int", "required" : true },
                       "pool_timeout": { "type" : "int", "required" : true }
                     }},
+                    "vmware": { "type": "map", "required": true, "mapping": {
+                      "user": { "type" : "str", "required" : true },
+                      "password": { "type" : "str", "required" : true },
+                      "controllers": { "type" : "str", "required" : true },
+                      "tz_uuid": { "type" : "str", "required" : true },
+                      "l3_gw_uuid": { "type" : "str", "required" : true }
+                    }},
                     "ssl": { "type": "map", "required": true, "mapping": {
                       "certfile": { "type" : "str", "required" : true },
                       "keyfile": { "type" : "str", "required" : true },
