@@ -9,33 +9,33 @@ en:
         switch_port: Cisco Switch Port
       deploy:
         missing_os_sdn_network: The os_sdn network must be defined in bc-template-network.json
-      edit_deployment:
-        deployment: Deployment
       edit_attributes:
-        add_switch: Add
         database_instance: Database Instance
-        rabbitmq_instance: RabbitMQ
-        keystone_instance: Keystone
-        attributes: Attributes
+        rabbitmq_instance: RabbitMQ Instance
+        keystone_instance: Keystone Instance
         dhcp_domain: DHCP Domain
         plugin_header: Networking Plugin
         networking_plugin: Plugin
         networking_mode: Mode
-        ssl_header: SSL Support
-        protocol: Protocol
         cisco_switches: Cisco Switch Credentials
+        cisco_ports: Assign Switch Ports
         switch_ip: IP Address
         switch_port: Port
         switch_user: Username
         switch_password: Password
-        error_empty: IP Address, Port, Username and Password must not be empty.
-        error_duplicate: There is already a Switch configuration for that IP Address.
-        ssl_insecure: SSL Certificate is insecure (for instance, self-signed)
-        ssl_certfile: SSL Certificate File
-        ssl_keyfile: SSL (Private) Key File
-        ssl_generate_certs: Generate (self-signed) certificates (implies insecure)
-        ssl_cert_required: Require Client Certificate
-        ssl_ca_certs: SSL CA Certificates File
+        add_switch: Add
+        remove_switch: Remove
+        ssl_header: SSL Support
+        api:
+          protocol: Protocol
+        ssl:
+          generate_certs: Generate (self-signed) certificates (implies insecure)
+          certfile: SSL Certificate File
+          keyfile: SSL (Private) Key File
+          insecure: SSL Certificate is insecure (for instance, self-signed)
+          cert_required: Require Client Certificate
+          ca_certs: SSL CA Certificates File
+        no_switches: Currently there are no switches assigned
+        error_invalid: IP Address, Port, Username and Password must not be empty!
+        error_duplicate: There is already a Switch configuration for that IP Address!
         warn_ovs_vlan: This mode only works if the "nova_fixed" and "admin" networks are on different physical interfaces.
-      edit_cisco_switch:
-        remove: Remove
