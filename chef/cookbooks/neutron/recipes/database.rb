@@ -33,8 +33,6 @@ url_scheme = backend_name
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 node.set_unless['neutron']['db']['password'] = secure_password
-node.set_unless['neutron']['db']['ovs_password'] = secure_password
-node.set_unless['neutron']['db']['cisco_password'] = secure_password
 
 sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil? 
 Chef::Log.info("Database server found at #{sql_address}") 
@@ -46,18 +44,18 @@ db_conn = { :host => sql_address,
 props = [ {'db_name' => node[:neutron][:db][:database],
           'db_user' => node[:neutron][:db][:user],
           'db_pass' => node[:neutron][:db][:password],
-          'db_conn_name' => 'sql_connection'  },
-         {'db_name' => node[:neutron][:db][:ovs_database],
-          'db_user' => node[:neutron][:db][:ovs_user],
-          'db_pass' => node[:neutron][:db][:ovs_password],
-          'db_conn_name' => 'ovs_sql_connection'},
-         {'db_name' => node[:neutron][:db][:cisco_database],
-          'db_user' => node[:neutron][:db][:cisco_user],
-          'db_pass' => node[:neutron][:db][:cisco_password],
-          'sql_address_name' => 'cisco_sql_address',
-          'db_conn_name' => 'cisco_sql_connection'}
-       ]
-         
+          'db_conn_name' => 'sql_connection'  }
+        ]
+
+if node[:networking_plugin] == "cisco"
+  node.set_unless['neutron']['db']['cisco_password'] = secure_password
+  props << {'db_name' => node[:neutron][:db][:cisco_database],
+            'db_user' => node[:neutron][:db][:cisco_user],
+            'db_pass' => node[:neutron][:db][:cisco_password],
+            'sql_address_name' => 'cisco_sql_address',
+            'db_conn_name' => 'cisco_sql_connection'}
+end
+
 # Create the Neutron Databases
 props.each do |prop|
   db_name = prop['db_name']

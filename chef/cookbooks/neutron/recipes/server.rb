@@ -16,11 +16,11 @@
 unless node[:neutron][:use_gitrepo]
   case node[:neutron][:networking_plugin]
   when "openvswitch", "cisco"
-    plugin_cfg_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
     neutron_agent = node[:neutron][:platform][:ovs_agent_name]
+    agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
   when "linuxbridge"
-    plugin_cfg_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
     neutron_agent = node[:neutron][:platform][:lb_agent_name]
+    agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
   end
   pkgs = node[:neutron][:platform][:pkgs]
   pkgs.each { |p| package p }
@@ -29,25 +29,14 @@ unless node[:neutron][:use_gitrepo]
     not_if { node[:platform] == "suse" }
     notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end
-  template "/etc/sysconfig/neutron" do
-    source "suse.sysconfig.neutron.erb"
-    owner "root"
-    group "root"
-    mode 0640
-    variables(
-      :plugin_config_file => plugin_cfg_path
-    )
-    only_if { node[:platform] == "suse" }
-    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-  end
 else
   case node[:neutron][:networking_plugin]
   when "openvswitch"
-    plugin_cfg_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
     neutron_agent = "neutron-openvswitch-agent"
+    agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
   when "linuxbridge"
-    plugin_cfg_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
     neutron_agent = "neutron-linuxbridge-agent"
+    agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
   end
   neutron_service_name="neutron-server"
   neutron_path = "/opt/neutron"
@@ -69,6 +58,24 @@ else
     virtualenv venv_path
     bin_name "neutron-metadata-agent --config-dir /etc/neutron/ --config-file /etc/neutron/metadata_agent.ini"
   end
+end
+
+if node[:neutron][:use_ml2]
+  plugin_cfg_path = "/etc/neutron/plugins/ml2/ml2_conf.ini"
+else
+  plugin_cfg_path = agent_config_path
+end
+
+template "/etc/sysconfig/neutron" do
+  source "suse.sysconfig.neutron.erb"
+  owner "root"
+  group "root"
+  mode 0640
+  variables(
+    :plugin_config_file => plugin_cfg_path
+  )
+  only_if { node[:platform] == "suse" }
+  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
 end
 
 include_recipe "neutron::database"
@@ -128,6 +135,23 @@ when "openvswitch", "cisco"
 when "linuxbridge"
   interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
   external_network_bridge = ""
+end
+
+vlan_start = node[:network][:networks][:nova_fixed][:vlan]
+vlan_end = vlan_start + 2000
+
+template plugin_cfg_path do
+  source "ml2_conf.ini.erb"
+  owner node[:neutron][:platform][:user]
+  group "root"
+  mode "0640"
+  variables(
+    :networking_mode => node[:neutron][:networking_mode],
+    :mechanism_driver => node[:neutron][:networking_plugin],
+    :vlan_start => vlan_start,
+    :vlan_end => vlan_end
+  )
+  only_if { node[:neutron][:use_ml2] }
 end
 
 # Hardcode for now.
@@ -324,7 +348,7 @@ ruby_block "mark neutron-agent as restart for post-install" do
     end
   end
   action :nothing
-  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately
+  subscribes :create, resources("template[#{agent_config_path}]"), :immediately
   subscribes :create, resources("template[/etc/neutron/neutron.conf]"), :immediately
 end
 
