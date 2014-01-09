@@ -206,7 +206,6 @@ case neutron[:neutron][:networking_plugin]
 when "openvswitch", "cisco"
   plugin_cfg_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
-  external_network_bridge = "br-public"
 
   if %w(redhat centos).include?(node.platform)
     openvswitch_service = "openvswitch"
@@ -268,7 +267,6 @@ when "openvswitch", "cisco"
   end
 when "linuxbridge"
   interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
-  external_network_bridge = ""
 end
 
 #env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
@@ -427,7 +425,6 @@ template "/etc/neutron/neutron.conf" do
       :per_tenant_vlan => per_tenant_vlan,
       :networking_plugin => neutron[:neutron][:networking_plugin],
       :interface_driver => interface_driver,
-      :external_network_bridge => external_network_bridge,
       :rootwrap_bin =>  node[:neutron][:rootwrap]
     )
 end
