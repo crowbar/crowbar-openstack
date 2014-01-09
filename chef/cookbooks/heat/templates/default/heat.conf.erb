@@ -4,6 +4,14 @@
 # Options defined in heat.common.config
 #
 
+# The SQLAlchemy connection string used to connect to the
+# database (string value)
+#sql_connection=mysql://heat:heat@localhost/heat
+
+# timeout before idle sql connections are reaped (integer
+# value)
+#sql_idle_timeout=3600
+
 # The default user for new instances (string value)
 #instance_user=ec2-user
 
@@ -14,7 +22,7 @@
 #plugin_dirs=/usr/lib64/heat,/usr/lib/heat
 
 # The directory to search for environment files (string value)
-environment_dir=/etc/heat/environment.d
+#environment_dir=/etc/heat/environment.d
 
 # Select deferred auth method, stored password or trusts
 # (string value)
@@ -100,8 +108,8 @@ auth_encryption_key=%ENCRYPTION_KEY%
 #
 
 # The backend to use for db (string value)
-#db_backend=heat.db.sqlalchemy.api
-sql_connection=<%= @database_connection %>
+#db_backend=sqlalchemy
+
 
 #
 # Options defined in heat.engine.clients
@@ -213,11 +221,11 @@ use_stderr=false
 
 # Format string for %%(asctime)s in log records. Default:
 # %(default)s (string value)
-log_date_format=%Y-%m-%d %H:%M:%S
+#log_date_format=%Y-%m-%d %H:%M:%S
 
 # (Optional) Name of log file to output to. If no default is
 # set, logging will go to stdout. (string value)
-log_file=heat-engine.log
+#log_file=<None>
 
 # (Optional) The base directory used for relative --log-file
 # paths (string value)
@@ -268,7 +276,7 @@ log_dir=/var/log/heat
 #
 
 # JSON file containing policy (string value)
-#policy_file=default
+#policy_file=policy.json
 
 # Rule enforced when requested rule is not found (string
 # value)
@@ -281,7 +289,7 @@ log_dir=/var/log/heat
 
 # The messaging module to use, defaults to kombu. (string
 # value)
-#rpc_backend=default
+#rpc_backend=heat.openstack.common.rpc.impl_kombu
 
 # Size of RPC thread pool (integer value)
 #rpc_thread_pool_size=64
@@ -504,7 +512,8 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 
 # The SQLAlchemy connection string used to connect to the
 # database (string value)
-#connection=
+#connection=sqlite:////heat/openstack/common/db/$sqlite_db
+connection=<%= @database_connection %>
 
 # The SQLAlchemy connection string used to connect to the
 # slave database (string value)
@@ -557,7 +566,7 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 #flavor=<None>
 
 # The API paste config file to use (string value)
-api_paste_config=api-paste.ini
+#api_paste_config=api-paste.ini
 
 
 [rpc_notifier2]
@@ -594,12 +603,9 @@ auth_uri=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service
 # Options defined in heat.common.wsgi
 #
 
-log_file=heat_api_cloudwatch.log
-
-
 # Address to bind the server.  Useful when selecting a
 # particular network interface. (string value)
-bind_host=0.0.0.0
+#bind_host=0.0.0.0
 
 # The port on which the server will listen. (integer value)
 bind_port=<%= node[:heat][:api][:cw_port] %>
@@ -626,11 +632,9 @@ bind_port=<%= node[:heat][:api][:cw_port] %>
 # Options defined in heat.common.wsgi
 #
 
-log_file=heat_api.log
-
 # Address to bind the server.  Useful when selecting a
 # particular network interface. (string value)
-bind_host=0.0.0.0
+#bind_host=0.0.0.0
 
 # The port on which the server will listen. (integer value)
 bind_port=<%= node[:heat][:api][:port] %>
@@ -657,11 +661,9 @@ bind_port=<%= node[:heat][:api][:port] %>
 # Options defined in heat.common.wsgi
 #
 
-log_file=heat_api_cfn.log
-
 # Address to bind the server.  Useful when selecting a
 # particular network interface. (string value)
-bind_host=0.0.0.0
+#bind_host=0.0.0.0
 
 # The port on which the server will listen. (integer value)
 bind_port=<%= node[:heat][:api][:cfn_port] %>
@@ -834,3 +836,5 @@ admin_tenant_name=<%= @keystone_service_tenant %>
 
 # Password for Redis server. (optional) (string value)
 #password=<None>
+
+
