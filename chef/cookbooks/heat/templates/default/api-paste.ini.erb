@@ -1,24 +1,25 @@
-# heat-api pipeline                                                                                                                                                                                                                            
-[pipeline:heat-api]                                                                                                                                                                                                                            
-pipeline = faultwrap versionnegotiation authtoken context apiv1app                                                                                                                                                                             
-                                                                                                                                                                                                                                               
-# heat-api pipeline for standalone heat                                                                                                                                                                                                        
-# ie. uses alternative auth backend that authenticates users against keystone                                                                                                                                                                  
-# using username and password instead of validating token (which requires                                                                                                                                                                      
-# an admin/service token).                                                                                                                                                                                                                     
-# To enable, in heat.conf:                                                                                                                                                                                                                     
-#   [paste_deploy]                                                                                                                                                                                                                             
-#   flavor = standalone                                                                                                                                                                                                                        
-#                                                                                                                                                                                                                                              
-[pipeline:heat-api-standalone]                                                                                                                                                                                                                 
-pipeline = faultwrap versionnegotiation authpassword context apiv1app                                                                                                                                                                          
-                                                                                                                                                                                                                                               
-# heat-api pipeline for custom cloud backends                                                                                                                                                                                                  
-# i.e. in heat.conf:                                                                                                                                                                                                                           
-#   [paste_deploy]                                                                                                                                                                                                                             
-#   flavor = custombackend                                                                                                                                                                                                                     
-#                                                                                                                                                                                                                                              
-[pipeline:heat-api-custombackend]                                                                                                                                                                                                              
+
+# heat-api pipeline
+[pipeline:heat-api]
+pipeline = faultwrap versionnegotiation authtoken context apiv1app
+
+# heat-api pipeline for standalone heat
+# ie. uses alternative auth backend that authenticates users against keystone
+# using username and password instead of validating token (which requires
+# an admin/service token).
+# To enable, in heat.conf:
+#   [paste_deploy]
+#   flavor = standalone
+#
+[pipeline:heat-api-standalone]
+pipeline = faultwrap versionnegotiation authpassword context apiv1app
+
+# heat-api pipeline for custom cloud backends
+# i.e. in heat.conf:
+#   [paste_deploy]
+#   flavor = custombackend
+#
+[pipeline:heat-api-custombackend]
 pipeline = faultwrap versionnegotiation context custombackendauth apiv1app
 
 # heat-api-cfn pipeline
