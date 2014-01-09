@@ -4,16 +4,18 @@ $(document).ready(function($) {
 
     switch (value) {
       case 'linuxbridge':
-        $('#networking_mode').trigger('change');
+        $('#networking_mode').val('vlan').trigger('change');
         $('#mode_container').hide(100).attr('disabled', 'disabled');
 
         $('#cisco_switches').hide(100).attr('disabled', 'disabled');
+        $('#cisco_ports').hide(100).attr('disabled', 'disabled');
         break;
       case 'openvswitch':
         $('#networking_mode').trigger('change');
         $('#mode_container').show(100).removeAttr('disabled');
 
         $('#cisco_switches').hide(100).attr('disabled', 'disabled');
+        $('#cisco_ports').hide(100).attr('disabled', 'disabled');
         break;
       case 'cisco':
         $('#networking_mode').trigger('change');
@@ -21,8 +23,10 @@ $(document).ready(function($) {
 
         if ($('#networking_mode').val() == 'vlan') {
           $('#cisco_switches').show(100).removeAttr('disabled');
+          $('#cisco_ports').show(100).removeAttr('disabled');
         } else {
           $('#cisco_switches').hide(100).attr('disabled', 'disabled');
+          $('#cisco_ports').hide(100).attr('disabled', 'disabled');
         }
         break;
     }
