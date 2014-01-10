@@ -166,7 +166,9 @@ when "linuxbridge"
     mode "0640"
     variables(
       :sql_connection => neutron[:neutron][:db][:sql_connection],
-      :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil)
+      :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil),
+      :vlan_start => vlan_start,
+      :vlan_end => vlan_end
       )
   end
 end
