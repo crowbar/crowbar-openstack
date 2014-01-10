@@ -69,22 +69,21 @@
                 = t(".port_number")
               %th.col-sm-1
           %tbody
-            - if nodes_by_role("nova-multi-compute-*").empty?
-              %tr
-                %td{ :colspan => 4 }
-                  .empty.alert.alert-info.text-center
-                    = t(".no_nodes")
-            - else
-              - compute_nodes.each do |node|
-                %tr.edit
-                  %td
-                    = text_field_tag "port[node]", node.alias, :placeholder => t(".port_node"), :class => "form-control", :disabled => "disabled"
-                  %td
-                    = select_tag "port[switch]", "", :placeholder => t(".port_switch"), :class => "form-control", "data-node" => node.handle, "data-name" => "switch"
-                  %td
-                    = text_field_tag "port[number]", "", :placeholder => t(".port_number"), :class => "form-control", "data-node" => node.handle, "data-name" => "number"
-                  %td
-                    = link_to t(".clear_port"), "#", :class => "btn btn-default btn-block", "data-clear" => node.handle
+            %tr
+              %td{ :colspan => 4 }
+                .empty.alert.alert-info.text-center
+                  = t(".no_nodes")
+
+            - nodes_by_role("nova-multi-compute-*").each do |node|
+              %tr.edit
+                %td
+                  = text_field_tag "port[node]", node.alias, :placeholder => t(".port_node"), :class => "form-control", :disabled => "disabled"
+                %td
+                  = select_tag "port[switch]", "", :placeholder => t(".port_switch"), :class => "form-control", "data-node" => node.handle, "data-name" => "switch"
+                %td
+                  = text_field_tag "port[number]", "", :placeholder => t(".port_number"), :class => "form-control", "data-node" => node.handle, "data-name" => "number"
+                %td
+                  = link_to t(".clear_port"), "#", :class => "btn btn-default btn-block", "data-clear" => node.handle
 
     %fieldset
       %legend
