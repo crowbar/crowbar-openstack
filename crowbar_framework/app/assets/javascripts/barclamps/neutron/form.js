@@ -19,8 +19,8 @@
   CiscoPorts.prototype.initialize = function() {
     var self = this;
 
-    $(document).on(
-      "neutronShowCisco neutronHideCisco",
+    $("#networking_plugin, #networking_mode").live(
+      "change",
       function() {
         self.visualizePorts();
       }
@@ -220,20 +220,12 @@ $(document).ready(function($) {
         $('#mode_container').hide(100).attr('disabled', 'disabled');
 
         $('#cisco_switches').hide(100).attr('disabled', 'disabled');
-
-        $.event.trigger({
-          type: 'neutronHideCisco'
-        });
         break;
       case 'openvswitch':
         $('#networking_mode').trigger('change');
         $('#mode_container').show(100).removeAttr('disabled');
 
         $('#cisco_switches').hide(100).attr('disabled', 'disabled');
-
-        $.event.trigger({
-          type: 'neutronHideCisco'
-        });
         break;
       case 'cisco':
         $('#networking_mode').trigger('change');
@@ -241,16 +233,8 @@ $(document).ready(function($) {
 
         if ($('#networking_mode').val() == 'vlan') {
           $('#cisco_switches').show(100).removeAttr('disabled');
-
-          $.event.trigger({
-            type: 'neutronShowCisco'
-          });
         } else {
           $('#cisco_switches').hide(100).attr('disabled', 'disabled');
-
-          $.event.trigger({
-            type: 'neutronHideCisco'
-          });
         }
         break;
     }
@@ -265,25 +249,13 @@ $(document).ready(function($) {
 
         if ($('#networking_plugin').val() == 'cisco') {
           $('#cisco_switches').show(100).removeAttr('disabled');
-
-          $.event.trigger({
-            type: 'neutronShowCisco'
-          });
         } else {
           $('#cisco_switches').hide(100).attr('disabled', 'disabled');
-
-          $.event.trigger({
-            type: 'neutronHideCisco'
-          });
         }
         break;
       default:
         $('#warn_ovs_vlan').hide(100).attr('disabled', 'disabled');
         $('#cisco_switches').hide(100).attr('disabled', 'disabled');
-
-        $.event.trigger({
-          type: 'neutronHideCisco'
-        });
         break;
     }
   }).trigger('change');
