@@ -39,34 +39,51 @@
               %th.col-sm-3
                 = t(".switch_password")
               %th.col-sm-1
-
           %tbody
-
           %tfoot
             %tr
               %th
                 = text_field_tag "switch[name]", "", :placeholder => t(".switch_ip"), :class => "form-control", "data-name" => "name", "data-type" => "string"
               %th
-                = text_field_tag "switch[port]", "", :placeholder => t(".switch_port"), :class => "form-control", "data-name" => "port", "data-type" => "string"
+                = number_field_tag "switch[port]", "", :placeholder => t(".switch_port"), :class => "form-control", "data-name" => "port", "data-type" => "string"
               %th
                 = text_field_tag "switch[user]", "", :placeholder => t(".switch_user"), :class => "form-control", "data-name" => "user", "data-type" => "string"
               %th
-                = text_field_tag "switch[password]", "", :placeholder => t(".switch_password"), :class => "form-control", "data-name" => "password", "data-type" => "string"
+                = password_field_tag "switch[password]", "", :placeholder => t(".switch_password"), :class => "form-control", "data-name" => "password", "data-type" => "string"
               %th
                 = link_to t(".add_switch"), "#", :class => "btn btn-default btn-block", "data-add" => true
 
+    #cisco_ports
+      %fieldset
+        %legend
+          = t(".cisco_ports")
 
+        %table.table.table-middle
+          %thead
+            %tr
+              %th.col-sm-5
+                = t(".port_node")
+              %th.col-sm-3
+                = t(".port_switch")
+              %th.col-sm-3
+                = t(".port_number")
+              %th.col-sm-1
+          %tbody
+            %tr
+              %td{ :colspan => 4 }
+                .empty.alert.alert-info.text-center
+                  = t(".port_hint")
 
-
-
-    -##cisco_ports
-    -#  %fieldset
-    -#    %legend
-    -#      = t(".cisco_ports")
-
-
-
-
+            - nodes_by_role("nova-multi-compute-*").each do |node|
+              %tr.edit
+                %td
+                  = text_field_tag "port[node]", node.alias, :placeholder => t(".port_node"), :class => "form-control", :disabled => "disabled"
+                %td
+                  = select_tag "port[switch]", "", :placeholder => t(".port_switch"), :class => "form-control", "data-node" => node.handle, "data-name" => "switch"
+                %td
+                  = text_field_tag "port[number]", "", :placeholder => t(".port_number"), :class => "form-control", "data-node" => node.handle, "data-name" => "number"
+                %td
+                  = link_to t(".clear_port"), "#", :class => "btn btn-default btn-block", "data-clear" => node.handle
 
     %fieldset
       %legend
@@ -90,11 +107,11 @@
     %td
       = text_field_tag "switch[name]", "{{name}}", :placeholder => t(".switch_ip"), :class => "form-control", :disabled => "disabled"
     %td
-      = text_field_tag "switch[port]", "{{port}}", :placeholder => t(".switch_port"), :class => "form-control", "data-update" => "exports/{{name}}/port", "data-type" => "string"
+      = number_field_tag "switch[port]", "{{port}}", :placeholder => t(".switch_port"), :class => "form-control", "data-update" => "exports/{{name}}/port", "data-type" => "string"
     %td
       = text_field_tag "switch[user]", "{{user}}", :placeholder => t(".switch_user"), :class => "form-control", "data-update" => "exports/{{name}}/user", "data-type" => "string"
     %td
-      = text_field_tag "switch[password]", "{{password}}", :placeholder => t(".switch_password"), :class => "form-control", "data-update" => "exports/{{name}}/password", "data-type" => "string"
+      = password_field_tag "switch[password]", "{{password}}", :placeholder => t(".switch_password"), :class => "form-control", "data-update" => "exports/{{name}}/password", "data-type" => "string"
     %td
       = link_to t(".remove_switch"), "#", :class => "btn btn-default btn-block", "data-remove" => "{{name}}"
   {{else}}
