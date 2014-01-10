@@ -69,7 +69,7 @@
                 = t(".port_number")
               %th.col-sm-1
           %tbody
-            - if compute_nodes.empty?
+            - if nodes_by_role("nova-multi-compute-*").empty?
               %tr
                 %td{ :colspan => 4 }
                   .empty.alert.alert-info.text-center
