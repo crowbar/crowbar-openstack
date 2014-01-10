@@ -220,10 +220,7 @@ $(document).ready(function($) {
       case 'linuxbridge':
         networking_mode.data('non-linuxbridge', networking_mode.val());
         $('#networking_mode').val('vlan').trigger('change');
-
         $('#mode_container').hide(100).attr('disabled', 'disabled');
-
-        $('#cisco_switches').hide(100).attr('disabled', 'disabled');
         break;
       case 'openvswitch':
         if (non_linuxbridge_mode != undefined) {
@@ -233,8 +230,6 @@ $(document).ready(function($) {
 
         $('#mode_container').show(100).removeAttr('disabled');
         networking_mode.trigger('change');
-
-        $('#cisco_switches').hide(100).attr('disabled', 'disabled');
         break;
       case 'cisco':
         if (non_linuxbridge_mode != undefined) {
@@ -244,12 +239,6 @@ $(document).ready(function($) {
 
         $('#mode_container').show(100).removeAttr('disabled');
         networking_mode.trigger('change');
-
-        if (networking_mode.val() == 'vlan') {
-          $('#cisco_switches').show(100).removeAttr('disabled');
-        } else {
-          $('#cisco_switches').hide(100).attr('disabled', 'disabled');
-        }
         break;
     }
   }).trigger('change');
