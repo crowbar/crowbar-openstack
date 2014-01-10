@@ -60,7 +60,6 @@ en:
           rbd:
             pool: RADOS pool for Cinder volumes
             user: RADOS client name for accessing the volumes
-            secret_uuid: libvirt uuid of the secret for the rbd_uservolumes
         api:
           protocol: Protocol
         ssl:

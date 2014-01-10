@@ -78,7 +78,6 @@
 
         = string_field %w(volume rbd pool)
         = string_field %w(volume rbd user)
-        = string_field %w(volume rbd secret_uuid)
 
     #manual_container
       %fieldset
@@ -91,7 +90,7 @@
         = string_field %w(volume manual driver)
         %span.help-block
           = t(".volume.manual.driver_hint")
-          
+
         = text_field %w(volume manual config), :size => "80x5"
         %span.help-block
           = t(".volume.manual.config_hint")
