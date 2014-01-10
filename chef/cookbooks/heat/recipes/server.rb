@@ -232,6 +232,7 @@ template "/etc/heat/environment.d/default.yaml" do
     owner node[:heat][:user]
     group "root"
     mode "0640"
+    not_if { node[:platform] == "suse" }
 end
 
 template "/etc/heat/policy.json" do
@@ -239,6 +240,7 @@ template "/etc/heat/policy.json" do
     owner node[:heat][:user]
     group "root"
     mode "0640"
+    not_if { node[:platform] == "suse" }
 end
 
 template "/etc/heat/heat.conf" do
