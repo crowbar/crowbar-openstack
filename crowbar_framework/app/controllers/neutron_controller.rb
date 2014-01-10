@@ -17,25 +17,4 @@ class NeutronController < BarclampController
   def initialize
     @service_object = NeutronService.new logger
   end
-
-  def render_switch_ports
-    @switches = params[:switches]
-    @nodes = {}
-    unless @switches.empty?
-      NodeObject.find("roles:nova-multi-compute-*").each do |node|
-        tmpnode = {}
-        tmpnode["name"] = node.handle
-        @switches.each do |ip,values|
-          if not values["switch_ports"].nil? and ! values["switch_ports"][node.handle].nil?
-            tmpnode["switch_ip"] = ip
-            tmpnode["switch_port"] = values["switch_ports"][node.handle]["switch_port"]
-          end
-        end
-        @nodes[node.handle] = tmpnode
-      end
-    end
-    respond_to do |format|
-      format.html { render :partial => 'barclamp/neutron/edit_cisco_switch_ports' }
-    end
-  end
 end

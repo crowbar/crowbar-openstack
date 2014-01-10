@@ -39,3 +39,8 @@ en:
         error_invalid: IP Address, Port, Username and Password must not be empty!
         error_duplicate: There is already a Switch configuration for that IP Address!
         warn_ovs_vlan: This mode only works if the "nova_fixed" and "admin" networks are on different physical interfaces.
+        port_node: Node
+        port_switch: Switch IP
+        port_number: Switch Port
+        clear_port: Clear
+        no_nodes: Edit assignments after allocating compute nodes in the nova barclamp
