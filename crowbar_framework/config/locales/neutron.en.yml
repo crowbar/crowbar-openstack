@@ -43,4 +43,4 @@ en:
         port_switch: Switch IP
         port_number: Switch Port
         clear_port: Clear
-        no_nodes: Edit assignments after allocating compute nodes in the nova barclamp
+        port_hint: Edit assignments after allocating compute nodes in the nova barclamp
