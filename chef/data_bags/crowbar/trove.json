@@ -1,0 +1,30 @@
+{
+  "id": "bc-template-trove",
+  "description": "Sets up OpenStack Trove Database Service",
+  "attributes": {
+    "suse_manager_client": {
+      "activation_key": "",
+      "manager_server": ""
+    }
+  },
+  "deployment": {
+    "trove": {
+      "crowbar-revision": 0,
+      "element_states": {
+        "trove": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "trove" ]
+      ],
+      "config": {
+        "environment": "trove-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
+
