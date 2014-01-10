@@ -152,7 +152,9 @@ when "openvswitch"
     variables(
       :physnet => neutron[:neutron][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed",
       :ovs_sql_connection => neutron[:neutron][:db][:sql_connection],
-      :networking_mode => neutron[:neutron][:networking_mode]
+      :networking_mode => neutron[:neutron][:networking_mode],
+      :vlan_start => vlan_start,
+      :vlan_end => vlan_end
       )
   end
 when "linuxbridge"
