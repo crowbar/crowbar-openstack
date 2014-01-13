@@ -16,8 +16,8 @@
 class CinderService < ServiceObject
 
   def initialize(thelogger)
+    super(thelogger)
     @bc_name = "cinder"
-    @logger = thelogger
   end
 
 # Turn off multi proposal support till it really works and people ask for it.
@@ -106,16 +106,15 @@ class CinderService < ServiceObject
   end
 
   def validate_proposal_after_save proposal
-    super
-    if proposal["attributes"][@bc_name]["use_gitrepo"]
-      gitService = GitService.new(@logger)
-      gits = gitService.list_active[1].to_a
-      if not gits.include?proposal["attributes"][@bc_name]["git_instance"]
-        raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "git"))
-      end
-    end
-  end
+    validate_one_for_role proposal, "cinder-controller"
+    validate_at_least_n_for_role proposal, "cinder-volume", 1
 
+    if proposal["attributes"][@bc_name]["use_gitrepo"]
+      validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
+    end
+
+    super
+  end
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Cinder apply_role_pre_chef_call: entering #{all_nodes.inspect}")
