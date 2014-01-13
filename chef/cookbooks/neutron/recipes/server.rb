@@ -124,8 +124,10 @@ end
 case node[:neutron][:networking_plugin]
 when "openvswitch", "cisco"
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+  external_network_bridge = "br-public"
 when "linuxbridge"
   interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
+  external_network_bridge = ""
 end
 
 # Hardcode for now.
@@ -142,7 +144,8 @@ template "/etc/neutron/l3_agent.ini" do
     :metadata_port => 9697,
     :send_arp_for_ha => 3,
     :periodic_interval => 40,
-    :periodic_fuzzy_delay => 5
+    :periodic_fuzzy_delay => 5,
+    :external_network_bridge => external_network_bridge
   )
 end
 
@@ -310,8 +313,7 @@ ruby_block "mark neutron-server as restart for post-install" do
   end
   action :nothing
   subscribes :create, resources("template[/etc/neutron/api-paste.ini]"), :immediately
-  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately unless node[:neutron][:use_gitrepo]
-  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately if node[:neutron][:use_gitrepo]
+  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately
   subscribes :create, resources("template[/etc/neutron/neutron.conf]"), :immediately
 end
 
@@ -322,8 +324,7 @@ ruby_block "mark neutron-agent as restart for post-install" do
     end
   end
   action :nothing
-  subscribes :create, resources("link[#{plugin_cfg_path}]"), :immediately unless node[:neutron][:use_gitrepo]
-  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately if node[:neutron][:use_gitrepo]
+  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately
   subscribes :create, resources("template[/etc/neutron/neutron.conf]"), :immediately
 end
 

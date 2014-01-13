@@ -97,15 +97,13 @@ if neutron[:neutron][:networking_plugin] == "openvswitch" or neutron[:neutron][:
   end
 end
 
+vlan_start = node[:network][:networks][:nova_fixed][:vlan]
+vlan_end = vlan_start + 2000
+
 unless neutron[:neutron][:use_gitrepo]
   package neutron_agent_pkg do
     action :install
   end
-
-  link plugin_cfg_path do
-    to "/etc/neutron/neutron.conf"
-  end
-
 else
   neutron_agent = "neutron-openvswitch-agent"
   pfs_and_install_deps "neutron" do
@@ -141,31 +139,37 @@ else
     mode 00644
     owner node[:neutron][:platform][:user]
   end
+end
 
-  case neutron[:neutron][:networking_plugin]
-  when "openvswitch"
-    template plugin_cfg_path do
-      cookbook "neutron"
-      source "ovs_neutron_plugin.ini.erb"
-      owner neutron[:neutron][:platform][:user]
-      group "root"
-      mode "0640"
-      variables(
-          :ovs_sql_connection => neutron[:neutron][:db][:sql_connection],
-          :rootwrap_bin =>  node[:neutron][:rootwrap]
+case neutron[:neutron][:networking_plugin]
+when "openvswitch"
+  template plugin_cfg_path do
+    cookbook "neutron"
+    source "ovs_neutron_plugin.ini.erb"
+    owner neutron[:neutron][:platform][:user]
+    group "root"
+    mode "0640"
+    variables(
+      :physnet => neutron[:neutron][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed",
+      :ovs_sql_connection => neutron[:neutron][:db][:sql_connection],
+      :networking_mode => neutron[:neutron][:networking_mode],
+      :vlan_start => vlan_start,
+      :vlan_end => vlan_end
       )
-    end
-  when "linuxbridge"
-    template plugin_cfg_path do
-      cookbook "neutron"
-      source "linuxbridge_conf.ini.erb"
-      owner neutron[:neutron][:platform][:user]
-      group "root"
-      mode "0640"
-      variables(
-          :sql_connection => neutron[:neutron][:db][:sql_connection]
+  end
+when "linuxbridge"
+  template plugin_cfg_path do
+    cookbook "neutron"
+    source "linuxbridge_conf.ini.erb"
+    owner neutron[:neutron][:platform][:user]
+    group "root"
+    mode "0640"
+    variables(
+      :sql_connection => neutron[:neutron][:db][:sql_connection],
+      :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil),
+      :vlan_start => vlan_start,
+      :vlan_end => vlan_end
       )
-    end
   end
 end
 
@@ -205,9 +209,7 @@ end
 case neutron[:neutron][:networking_plugin]
 when "openvswitch", "cisco"
   plugin_cfg_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
-  physnet = neutron[:neutron][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed"
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
-  external_network_bridge = "br-public"
 
   if %w(redhat centos).include?(node.platform)
     openvswitch_service = "openvswitch"
@@ -268,9 +270,7 @@ when "openvswitch", "cisco"
     end
   end
 when "linuxbridge"
-  physnet = (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil)
   interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
-  external_network_bridge = ""
 end
 
 #env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
@@ -323,9 +323,6 @@ keystone_service_password = neutron["neutron"]["service_password"]
 admin_username = keystone["keystone"]["admin"]["username"] rescue nil
 admin_password = keystone["keystone"]["admin"]["password"] rescue nil
 Chef::Log.info("Keystone server found at #{keystone_host}")
-
-vlan_start = node[:network][:networks][:nova_fixed][:vlan]
-vlan_end = vlan_start + 2000
 
 if %w(redhat centos).include?(node.platform)
  link "/etc/neutron/plugin.ini" do
@@ -430,13 +427,8 @@ template "/etc/neutron/neutron.conf" do
       :ssl_ca_file => neutron[:neutron][:ssl][:ca_certs],
       :neutron_server => neutron_server,
       :per_tenant_vlan => per_tenant_vlan,
-      :networking_mode => neutron[:neutron][:networking_mode],
       :networking_plugin => neutron[:neutron][:networking_plugin],
-      :vlan_start => vlan_start,
-      :vlan_end => vlan_end,
-      :physnet => physnet,
       :interface_driver => interface_driver,
-      :external_network_bridge => external_network_bridge,
       :rootwrap_bin =>  node[:neutron][:rootwrap]
     )
 end
@@ -453,8 +445,7 @@ else
   service neutron_agent do
     supports :status => true, :restart => true
     action :enable
-    subscribes :restart, resources("link[#{plugin_cfg_path}]") unless neutron[:neutron][:use_gitrepo]
-    subscribes :restart, resources("template[#{plugin_cfg_path}]") if neutron[:neutron][:use_gitrepo]
+    subscribes :restart, resources("template[#{plugin_cfg_path}]")
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   end
 end
