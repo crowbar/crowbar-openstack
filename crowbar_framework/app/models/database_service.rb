@@ -16,8 +16,8 @@
 class DatabaseService < ServiceObject
 
   def initialize(thelogger)
+    super(thelogger)
     @bc_name = "database"
-    @logger = thelogger
   end
 
 # turn off nulti proposal support till it really works and people ask for it.
@@ -40,6 +40,12 @@ class DatabaseService < ServiceObject
 
     @logger.debug("Database create_proposal: exiting")
     base
+  end
+
+  def validate_proposal_after_save proposal
+    validate_one_for_role proposal, "database-server"
+
+    super
   end
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
