@@ -42,73 +42,10 @@ class CeilometerService < ServiceObject
     @logger.debug("Ceilometer create_proposal: entering")
     base = super
 
-    base["attributes"][@bc_name]["git_instance"] = ""
-    begin
-      gitService = GitService.new(@logger)
-      gits = gitService.list_active[1]
-      if gits.empty?
-        # No actives, look for proposals
-        gits = gitService.proposals[1]
-      end
-      unless gits.empty?
-        base["attributes"][@bc_name]["git_instance"] = gits[0]
-      end
-    rescue
-      @logger.info("#{@bc_name} create_proposal: no git found")
-    end
-
-    base["attributes"][@bc_name]["database_instance"] = ""
-    begin
-      databaseService = DatabaseService.new(@logger)
-      databases = databaseService.list_active[1]
-      if databases.empty?
-        # No actives, look for proposals
-        databases = databaseService.proposals[1]
-      end
-      if !databases.empty?
-        base["attributes"][@bc_name]["database_instance"] = databases[0]
-      end
-    rescue
-      @logger.info("#{@bc_name} create_proposal: no database found")
-    end
-
-    base["attributes"][@bc_name]["keystone_instance"] = ""
-    begin
-      keystoneService = KeystoneService.new(@logger)
-      keystones = keystoneService.list_active[1]
-      if keystones.empty?
-        # No actives, look for proposals
-        keystones = keystoneService.proposals[1]
-      end
-      if !keystones.empty?
-        base["attributes"][@bc_name]["keystone_instance"] = keystones[0]
-      end
-    rescue
-      @logger.info("#{@bc_name} create_proposal: no keystone found")
-    end
-
-    if base["attributes"][@bc_name]["keystone_instance"] == ""
-      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "keystone"))
-    end
-
-    base["attributes"][@bc_name]["rabbitmq_instance"] = ""
-    begin
-      rabbitmqService = RabbitmqService.new(@logger)
-      rabbits = rabbitmqService.list_active[1]
-      if rabbits.empty?
-        # No actives, look for proposals
-        rabbits = rabbitmqService.proposals[1]
-      end
-      unless rabbits.empty?
-        base["attributes"][@bc_name]["rabbitmq_instance"] = rabbits[0]
-      end
-    rescue
-      @logger.info("#{@bc_name} create_proposal: no rabbitmq found")
-    end
-
-    if base["attributes"][@bc_name]["rabbitmq_instance"] == ""
-      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "rabbitmq"))
-    end
+    base["attributes"][@bc_name]["git_instance"] = find_dep_proposal("git", true)
+    base["attributes"][@bc_name]["database_instance"] = find_dep_proposal("database", true)
+    base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
+    base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
 
     agent_nodes = NodeObject.find("roles:nova-multi-compute-kvm") +
       NodeObject.find("roles:nova-multi-compute-qemu") +
