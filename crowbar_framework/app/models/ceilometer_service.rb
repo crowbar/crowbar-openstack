@@ -112,8 +112,8 @@ class CeilometerService < ServiceObject
 
     agent_nodes = NodeObject.find("roles:nova-multi-compute-kvm") +
       NodeObject.find("roles:nova-multi-compute-qemu") +
-      NodeObject.find("roles:nova-multi-compute-xen") +
-      NodeObject.find("roles:nova-multi-compute-esxi")
+      NodeObject.find("roles:nova-multi-compute-vmware") +
+      NodeObject.find("roles:nova-multi-compute-xen")
 
     nodes       = NodeObject.all
     server_nodes = nodes.select { |n| n.intended_role == "controller" }
