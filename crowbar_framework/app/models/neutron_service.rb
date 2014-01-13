@@ -42,44 +42,10 @@ class NeutronService < ServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
 
-    base["attributes"][@bc_name]["git_instance"] = ""
-    begin
-      gitService = GitService.new(@logger)
-      gits = gitService.list_active[1]
-      if gits.empty?
-        # No actives, look for proposals
-        gits = gitService.proposals[1]
-      end
-      unless gits.empty?
-        base["attributes"]["neutron"]["git_instance"] = gits[0]
-      end
-    rescue
-      @logger.info("#{@bc_name} create_proposal: no git found")
-    end
-
-
-    base["attributes"]["neutron"]["database_instance"] = ""
-    begin
-      databaseService = DatabaseService.new(@logger)
-      # Look for active roles
-      dbs = databaseService.list_active[1] 
-      if dbs.empty? 
-        # No actives, look for proposals
-        dbs = databaseService.proposals[1]
-      end
-      if dbs.empty?
-        @logger.info("Neutron create_proposal: no database proposal found") 
-      else 
-        base["attributes"]["neutron"]["database_instance"] = dbs[0] 
-        @logger.info("Neutron create_proposal: using database proposal: '#{dbs[0]}'")
-      end
-    rescue
-      @logger.info("Neutron create_proposal: no database proposal found") 
-    end
-
-    if base["attributes"]["neutron"]["database_instance"] == ""
-      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "database")) 
-    end
+    base["attributes"][@bc_name]["git_instance"] = find_dep_proposal("git", true)
+    base["attributes"][@bc_name]["database_instance"] = find_dep_proposal("database")
+    base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
+    base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
 
     network_node   = nodes.find { |n| n.intended_role == "network" }
     network_node ||= nodes.find { |n| n.intended_role == "controller" }
@@ -89,27 +55,6 @@ class NeutronService < ServiceObject
     } unless nodes.nil? or nodes.length ==0
 
     base["attributes"]["neutron"]["service_password"] = '%012d' % rand(1e12)
-
-    insts = ["Keystone", "Rabbitmq"]
-
-    insts.each do |inst|
-      base["attributes"][@bc_name]["#{inst.downcase}_instance"] = ""
-      begin
-        instService = eval "#{inst}Service.new(@logger)"
-        instes = instService.list_active[1]
-        if instes.empty?
-          # No actives, look for proposals
-          instes = instService.proposals[1]
-        end
-        base["attributes"][@bc_name]["#{inst.downcase}_instance"] = instes[0] unless instes.empty?
-      rescue
-        @logger.info("#{@bc_name} create_proposal: no #{inst.downcase} found")
-      end
-
-      if base["attributes"][@bc_name]["#{inst.downcase}_instance"] == ""
-        raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "#{inst.downcase}"))
-      end
-    end
 
     base
   end
