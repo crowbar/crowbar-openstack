@@ -16,8 +16,8 @@
 class HeatService < ServiceObject
 
   def initialize(thelogger)
+    super(thelogger)
     @bc_name = "heat"
-    @logger = thelogger
   end
 
 # Turn off multi proposal support till it really works and people ask for it.
@@ -120,6 +120,16 @@ class HeatService < ServiceObject
 
     @logger.debug("Heat create_proposal: exiting")
     base
+  end
+
+  def validate_proposal_after_save proposal
+    validate_one_for_role proposal, "heat-server"
+
+    if proposal["attributes"][@bc_name]["use_gitrepo"]
+      validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
+    end
+
+    super
   end
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
