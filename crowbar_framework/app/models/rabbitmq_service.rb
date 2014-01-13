@@ -16,8 +16,8 @@
 class RabbitmqService < ServiceObject
 
   def initialize(thelogger)
+    super(thelogger)
     @bc_name = "rabbitmq"
-    @logger = thelogger
   end
 
 # Turn off multi proposal support till it really works and people ask for it.
@@ -55,19 +55,9 @@ class RabbitmqService < ServiceObject
   end
 
   def validate_proposal_after_save proposal
+    validate_one_for_role proposal, "rabbitmq-server"
+
     super
-
-    elements = proposal["deployment"]["rabbitmq"]["elements"]
-
-    errors = []
-
-    if not elements.has_key?("rabbitmq-server") or elements["rabbitmq-server"].length != 1
-      errors << "Need one (and only one) rabbitmq-server node."
-    end
-
-    if errors.length > 0
-      raise Chef::Exceptions::ValidationFailed.new(errors.join("\n"))
-    end
   end
 end
 
