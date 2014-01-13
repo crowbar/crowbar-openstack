@@ -16,8 +16,8 @@
 class NeutronService < ServiceObject
 
   def initialize(thelogger)
+    super(thelogger)
     @bc_name = "neutron"
-    @logger = thelogger
   end
 
 # Turn off multi proposal support till it really works and people ask for it.
@@ -115,21 +115,18 @@ class NeutronService < ServiceObject
   end
 
   def validate_proposal_after_save proposal
-    super
-    @logger.debug("validating neutron proposal: #{proposal.inspect}")
+    validate_one_for_role proposal, "neutron-server"
 
     if proposal["attributes"][@bc_name]["use_gitrepo"]
-      gitService = GitService.new(@logger)
-      gits = gitService.list_active[1].to_a
-      if not gits.include?proposal["attributes"][@bc_name]["git_instance"]
-        raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "git"))
-      end
+      validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
     end
 
     if proposal["attributes"]["neutron"]["networking_plugin"] == "linuxbridge" and
         proposal["attributes"]["neutron"]["networking_mode"] != "vlan"
-        raise Chef::Exceptions::ValidationFailed.new("The \"linuxbridge\" plugin only supports the mode: \"vlan\"")
+        validation_error("The \"linuxbridge\" plugin only supports the mode: \"vlan\"")
     end
+
+    super
   end
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
