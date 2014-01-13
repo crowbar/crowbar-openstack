@@ -51,53 +51,11 @@ class CinderService < ServiceObject
       }
     end
 
-    insts = ["Database", "Keystone", "Glance", "Rabbitmq"]
-
-    base["attributes"][@bc_name]["git_instance"] = ""
-    begin
-      gitService = GitService.new(@logger)
-      gits = gitService.list_active[1]
-      if gits.empty?
-        # No actives, look for proposals
-        gits = gitService.proposals[1]
-      end
-      unless gits.empty?
-        base["attributes"][@bc_name]["git_instance"] = gits[0]
-      end
-    rescue
-      @logger.info("#{@bc_name} create_proposal: no git found")
-    end
-
-    insts.each do |inst|
-      base["attributes"][@bc_name]["#{inst.downcase}_instance"] = ""
-      begin
-        instService = eval "#{inst}Service.new(@logger)"
-        instes = instService.list_active[1]
-        if instes.empty?
-          # No actives, look for proposals
-          instes = instService.proposals[1]
-        end
-        base["attributes"][@bc_name]["#{inst.downcase}_instance"] = instes[0] unless instes.empty?
-      rescue
-        @logger.info("#{@bc_name} create_proposal: no #{inst.downcase} found")
-      end
-    end
-
-    if base["attributes"][@bc_name]["database_instance"] == ""
-      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "database"))
-    end
-
-    if base["attributes"][@bc_name]["keystone_instance"] == ""
-      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "keystone"))
-    end
-
-    if base["attributes"][@bc_name]["glance_instance"] == ""
-      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "glance"))
-    end
-
-    if base["attributes"][@bc_name]["rabbitmq_instance"] == ""
-      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "rabbitmq"))
-    end
+    base["attributes"][@bc_name]["git_instance"] = find_dep_proposal("git", true)
+    base["attributes"][@bc_name]["database_instance"] = find_dep_proposal("database")
+    base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
+    base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
+    base["attributes"][@bc_name]["glance_instance"] = find_dep_proposal("glance")
 
     base["attributes"]["cinder"]["service_password"] = '%012d' % rand(1e12)
 
