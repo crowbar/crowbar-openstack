@@ -60,7 +60,8 @@ core_plugin = neutron.plugins.linuxbridge.lb_neutron_plugin.LinuxBridgePluginV2
 
 # The strategy to be used for auth.
 # Supported values are 'keystone'(default), 'noauth'.
-# auth_strategy = keystone
+# Note: explicitely set this because of RHEL (where noauth is used)
+auth_strategy = keystone
 
 # Base MAC address. The first 3 octets will remain unchanged. If the
 # 4h octet is not 00, it will also used. The others will be
@@ -95,7 +96,8 @@ core_plugin = neutron.plugins.linuxbridge.lb_neutron_plugin.LinuxBridgePluginV2
 
 # RPC configuration options. Defined in rpc __init__
 # The messaging module to use, defaults to kombu.
-# rpc_backend = neutron.openstack.common.rpc.impl_kombu
+# Note: explicitely set this because of RHEL (where qpid is used by default)
+rpc_backend = neutron.openstack.common.rpc.impl_kombu
 # Size of RPC thread pool
 # rpc_thread_pool_size = 64
 # Size of RPC connection pool
