@@ -12,5 +12,6 @@ recipe           "openstack-database_service::taskmanager", "Installs TaskManage
 recipe           "openstack-database_service::guestagent", "Installs GuestAgent service"
 
 depends          'openstack-common', '~> 8.0'
+depends          'openstack-identity', '~> 8.0'
 
 supports "suse"
