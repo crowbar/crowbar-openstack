@@ -15,6 +15,31 @@ About this Barclamp: Trove
 
 TODO
 
+Contributing
+------------
+
+This repository contains a copy of the cookbook-openstack-database_service repository which is a git subtree. Here are some useful commands to help work with it:
+
+First add the cookbook repository as a remote:
+
+```
+$ git remote add cookbook git@github.com:mapleoin/cookbook-openstack-database_service.git
+$ git fetch
+```
+
+Then add the git subtree.
+
+```
+$ git subtree add --prefix chef/cookbooks/openstack-database_service/ --squash cookbook master
+```
+
+Now you can push commits done to the upstream cookbook into that repository directly:
+
+```
+$ git subtree push --prefix=chef/cookbooks/openstack-database_service/ cookbook master
+```
+
+
 Legals
 -------------------------------------
 Unless required by applicable law or agreed to in writing, software
