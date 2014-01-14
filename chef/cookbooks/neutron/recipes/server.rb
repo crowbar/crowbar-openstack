@@ -67,7 +67,7 @@ else
 end
 
 template "/etc/sysconfig/neutron" do
-  source "suse.sysconfig.neutron.erb"
+  source "sysconfig.neutron.erb"
   owner "root"
   group "root"
   mode 0640
