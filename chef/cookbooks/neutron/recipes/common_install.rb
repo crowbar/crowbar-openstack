@@ -25,7 +25,7 @@ case neutron[:neutron][:networking_plugin]
 when "openvswitch", "cisco"
   neutron_agent = node[:neutron][:platform][:ovs_agent_name]
   neutron_agent_pkg = node[:neutron][:platform][:ovs_agent_pkg]
-  plugin_cfg_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
+  agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
 
   # Arrange for neutron-ovs-cleanup to be run on bootup of compute nodes only
   unless neutron.name == node.name
@@ -54,7 +54,7 @@ when "openvswitch", "cisco"
 when "linuxbridge"
   neutron_agent = node[:neutron][:platform][:lb_agent_name]
   neutron_agent_pkg = node[:neutron][:platform][:lb_agent_pkg]
-  plugin_cfg_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
+  agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
 end
 
 neutron_path = "/opt/neutron"
@@ -118,7 +118,7 @@ else
 
   link_service neutron_agent do
     virtualenv venv_path
-    bin_name "neutron-openvswitch-agent --config-file #{plugin_cfg_path} --config-dir /etc/neutron/"
+    bin_name "neutron-openvswitch-agent --config-file #{agent_config_path} --config-dir /etc/neutron/"
   end
 
   execute "neutron_cp_policy.json" do
@@ -143,7 +143,7 @@ end
 
 case neutron[:neutron][:networking_plugin]
 when "openvswitch"
-  template plugin_cfg_path do
+  template agent_config_path do
     cookbook "neutron"
     source "ovs_neutron_plugin.ini.erb"
     owner neutron[:neutron][:platform][:user]
@@ -151,14 +151,13 @@ when "openvswitch"
     mode "0640"
     variables(
       :physnet => neutron[:neutron][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed",
-      :ovs_sql_connection => neutron[:neutron][:db][:sql_connection],
       :networking_mode => neutron[:neutron][:networking_mode],
       :vlan_start => vlan_start,
       :vlan_end => vlan_end
       )
   end
 when "linuxbridge"
-  template plugin_cfg_path do
+  template agent_config_path do
     cookbook "neutron"
     source "linuxbridge_conf.ini.erb"
     owner neutron[:neutron][:platform][:user]
@@ -208,7 +207,6 @@ end
 
 case neutron[:neutron][:networking_plugin]
 when "openvswitch", "cisco"
-  plugin_cfg_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
 
   if %w(redhat centos).include?(node.platform)
@@ -427,6 +425,7 @@ template "/etc/neutron/neutron.conf" do
       :ssl_ca_file => neutron[:neutron][:ssl][:ca_certs],
       :neutron_server => neutron_server,
       :per_tenant_vlan => per_tenant_vlan,
+      :use_ml2 => neutron[:neutron][:use_ml2],
       :networking_plugin => neutron[:neutron][:networking_plugin],
       :interface_driver => interface_driver,
       :rootwrap_bin =>  node[:neutron][:rootwrap]
@@ -445,7 +444,7 @@ else
   service neutron_agent do
     supports :status => true, :restart => true
     action :enable
-    subscribes :restart, resources("template[#{plugin_cfg_path}]")
+    subscribes :restart, resources("template[#{agent_config_path}]")
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   end
 end

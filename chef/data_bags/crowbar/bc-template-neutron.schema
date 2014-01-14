@@ -15,6 +15,7 @@
                     "keystone_instance": { "type": "str", "required": true },
                     "gitrepo": { "type": "str", "required": true },
                     "dhcp_domain": { "type": "str", "required": true },
+                    "use_ml2": { "type": "bool", "required": true },
                     "networking_mode": { "type": "str", "required": true },
                     "networking_plugin": { "type": "str", "required": true },
                     "cisco_switches": {
@@ -57,12 +58,10 @@
                     "db": { "type": "map", "required": true, "mapping": {
                       "database": { "type" : "str", "required" : true },
                       "cisco_database": { "type" : "str", "required" : true },
-                      "ovs_database": { "type" : "str", "required" : true },
                       "user": { "type" : "str", "required" : true },
-                      "ovs_user": { "type" : "str", "required" : true },
                       "cisco_user": { "type" : "str", "required" : true },
                       "password": { "type" : "str" },
-                      "ovs_password": { "type" : "str" }
+                      "cisco_password": { "type" : "str" }
                     }},
                     "sql": { "type": "map", "required": true, "mapping": {
                       "min_pool_size": { "type" : "int", "required" : true },
@@ -93,6 +92,7 @@
             "crowbar-status": { "type": "str" },
             "crowbar-failed": { "type": "str" },
             "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
             "element_states": { "type": "map", "mapping": {
                 = : { "type": "seq", "required": true,
                   "sequence": [ { "type": "str" } ]

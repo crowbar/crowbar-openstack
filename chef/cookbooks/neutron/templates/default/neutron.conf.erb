@@ -45,15 +45,23 @@ bind_port = <%= @service_port %>
 # api_extensions_path =
 
 # Neutron plugin provider module
-<% if @networking_plugin == 'cisco' -%>
+<% if @use_ml2 -%>
+core_plugin = neutron.plugins.ml2.plugin.Ml2Plugin
+<% else -%>
+<%   if @networking_plugin == 'cisco' -%>
 core_plugin = neutron.plugins.cisco.network_plugin.PluginV2
-<% elsif @networking_plugin == 'openvswitch' -%>
+<%   elsif @networking_plugin == 'openvswitch' -%>
 core_plugin = neutron.plugins.openvswitch.ovs_neutron_plugin.OVSNeutronPluginV2
-<% elsif @networking_plugin == 'linuxbridge' -%>
+<%   elsif @networking_plugin == 'linuxbridge' -%>
 core_plugin = neutron.plugins.linuxbridge.lb_neutron_plugin.LinuxBridgePluginV2
+<%   end -%>
 <% end -%>
+
 # Advanced service modules
 # service_plugins =
+<% if @use_ml2 -%>
+service_plugins = neutron.services.l3_router.l3_router_plugin.L3RouterPlugin
+<% end -%>
 
 # Paste configuration file
 # api_paste_config = api-paste.ini

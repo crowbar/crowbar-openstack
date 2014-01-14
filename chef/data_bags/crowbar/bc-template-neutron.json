@@ -23,6 +23,7 @@
       "debug": false,
       "verbose": true,
       "dhcp_domain": "openstack.local",
+      "use_ml2": true,
       "networking_mode": "gre",
       "networking_plugin": "openvswitch",
       "use_syslog": false,
@@ -30,8 +31,6 @@
       "db": {
         "database": "neutron",
         "user": "neutron",
-        "ovs_database": "ovs",
-        "ovs_user": "ovs",
         "cisco_database": "cisco_ovs",
         "cisco_user": "cisco_ovs"
       },
@@ -58,6 +57,7 @@
   "deployment": {
     "neutron": {
       "crowbar-revision": 0,
+      "schema-revision": 1,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ]
       },
