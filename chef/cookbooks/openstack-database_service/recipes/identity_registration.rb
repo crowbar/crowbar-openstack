@@ -80,7 +80,7 @@ end
 openstack_identity_register "Register Database Service Endpoint" do
   auth_uri auth_uri
   bootstrap_token bootstrap_token
-  service_type "database-service"
+  service_type "database"
   endpoint_region region
   endpoint_adminurl ::URI.decode database_service_api_endpoint.to_s
   endpoint_internalurl ::URI.decode database_service_api_endpoint.to_s
