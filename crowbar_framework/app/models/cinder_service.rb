@@ -16,8 +16,8 @@
 class CinderService < ServiceObject
 
   def initialize(thelogger)
+    super(thelogger)
     @bc_name = "cinder"
-    @logger = thelogger
   end
 
 # Turn off multi proposal support till it really works and people ask for it.
@@ -51,53 +51,11 @@ class CinderService < ServiceObject
       }
     end
 
-    insts = ["Database", "Keystone", "Glance", "Rabbitmq"]
-
-    base["attributes"][@bc_name]["git_instance"] = ""
-    begin
-      gitService = GitService.new(@logger)
-      gits = gitService.list_active[1]
-      if gits.empty?
-        # No actives, look for proposals
-        gits = gitService.proposals[1]
-      end
-      unless gits.empty?
-        base["attributes"][@bc_name]["git_instance"] = gits[0]
-      end
-    rescue
-      @logger.info("#{@bc_name} create_proposal: no git found")
-    end
-
-    insts.each do |inst|
-      base["attributes"][@bc_name]["#{inst.downcase}_instance"] = ""
-      begin
-        instService = eval "#{inst}Service.new(@logger)"
-        instes = instService.list_active[1]
-        if instes.empty?
-          # No actives, look for proposals
-          instes = instService.proposals[1]
-        end
-        base["attributes"][@bc_name]["#{inst.downcase}_instance"] = instes[0] unless instes.empty?
-      rescue
-        @logger.info("#{@bc_name} create_proposal: no #{inst.downcase} found")
-      end
-    end
-
-    if base["attributes"][@bc_name]["database_instance"] == ""
-      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "database"))
-    end
-
-    if base["attributes"][@bc_name]["keystone_instance"] == ""
-      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "keystone"))
-    end
-
-    if base["attributes"][@bc_name]["glance_instance"] == ""
-      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "glance"))
-    end
-
-    if base["attributes"][@bc_name]["rabbitmq_instance"] == ""
-      raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "rabbitmq"))
-    end
+    base["attributes"][@bc_name]["git_instance"] = find_dep_proposal("git", true)
+    base["attributes"][@bc_name]["database_instance"] = find_dep_proposal("database")
+    base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
+    base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
+    base["attributes"][@bc_name]["glance_instance"] = find_dep_proposal("glance")
 
     base["attributes"]["cinder"]["service_password"] = '%012d' % rand(1e12)
 
@@ -106,16 +64,15 @@ class CinderService < ServiceObject
   end
 
   def validate_proposal_after_save proposal
-    super
-    if proposal["attributes"][@bc_name]["use_gitrepo"]
-      gitService = GitService.new(@logger)
-      gits = gitService.list_active[1].to_a
-      if not gits.include?proposal["attributes"][@bc_name]["git_instance"]
-        raise(I18n.t('model.service.dependency_missing', :name => @bc_name, :dependson => "git"))
-      end
-    end
-  end
+    validate_one_for_role proposal, "cinder-controller"
+    validate_at_least_n_for_role proposal, "cinder-volume", 1
 
+    if proposal["attributes"][@bc_name]["use_gitrepo"]
+      validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
+    end
+
+    super
+  end
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Cinder apply_role_pre_chef_call: entering #{all_nodes.inspect}")
