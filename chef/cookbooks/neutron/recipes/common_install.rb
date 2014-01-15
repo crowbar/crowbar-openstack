@@ -58,7 +58,7 @@ when "linuxbridge"
 when "vmware"
   neutron_agent = node[:neutron][:platform][:nvp_agent_name]
   neutron_agent_pkg = node[:neutron][:platform][:nvp_agent_pkg]
-  plugin_cfg_path = "/etc/neutron/plugins/nicira/nvp.ini"
+  agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
 end
 
 neutron_path = "/opt/neutron"
@@ -173,14 +173,13 @@ when "linuxbridge"
       :vlan_end => vlan_end
       )
     end
-  when "vmware"
-    template plugin_cfg_path do
-      cookbook "neutron"
-      source "nvp.ini.erb"
-      owner neutron[:neutron][:platform][:user]
-      group "root"
-      mode "0640"
-    end
+when "vmware"
+  template agent_config_path do
+    cookbook "neutron"
+    source "nvp.ini.erb"
+    owner neutron[:neutron][:platform][:user]
+    group "root"
+    mode "0640"
   end
 end
 
