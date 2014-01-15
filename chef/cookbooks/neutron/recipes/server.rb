@@ -71,9 +71,15 @@ template "/etc/sysconfig/neutron" do
   owner "root"
   group "root"
   mode 0640
-  variables(
-    :plugin_config_file => plugin_cfg_path
-  )
+  if node[:neutron][:networking_plugin] == "cisco" and node[:neutron][:use_ml2]
+    variables(
+      :plugin_config_file => plugin_cfg_path +  " /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
+    )
+  else
+    variables(
+      :plugin_config_file => plugin_cfg_path
+    )
+  end
   only_if { node[:platform] == "suse" }
   notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
 end
@@ -140,6 +146,12 @@ end
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 vlan_end = vlan_start + 2000
 
+if node[:neutron][:networking_plugin] == "cisco"
+  mechanism_driver = "openvswitch,cisco_nexus"
+else
+  mechanism_driver = node[:neutron][:networking_plugin]
+end
+
 template plugin_cfg_path do
   source "ml2_conf.ini.erb"
   owner node[:neutron][:platform][:user]
@@ -147,7 +159,7 @@ template plugin_cfg_path do
   mode "0640"
   variables(
     :networking_mode => node[:neutron][:networking_mode],
-    :mechanism_driver => node[:neutron][:networking_plugin],
+    :mechanism_driver => mechanism_driver,
     :vlan_start => vlan_start,
     :vlan_end => vlan_end
   )
