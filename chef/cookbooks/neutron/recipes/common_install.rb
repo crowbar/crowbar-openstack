@@ -436,7 +436,7 @@ template "/etc/neutron/neutron.conf" do
       :ssl_ca_file => neutron[:neutron][:ssl][:ca_certs],
       :neutron_server => neutron_server,
       :per_tenant_vlan => per_tenant_vlan,
-      :use_ml2 => neutron[:neutron][:use_ml2],
+      :use_ml2 => neutron[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware",
       :networking_plugin => neutron[:neutron][:networking_plugin],
       :interface_driver => interface_driver,
       :rootwrap_bin =>  node[:neutron][:rootwrap]
