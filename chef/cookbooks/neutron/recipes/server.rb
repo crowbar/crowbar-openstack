@@ -88,6 +88,33 @@ include_recipe "neutron::database"
 include_recipe "neutron::api_register"
 include_recipe "neutron::common_install"
 
+# Enable ip forwarding on network node
+ruby_block "edit /etc/sysconfig/sysctl for IP_FORWARD" do
+  block do
+    rc = Chef::Util::FileEdit.new("/etc/sysconfig/sysctl")
+    rc.search_file_replace_line(/^IP_FORWARD=/, 'IP_FORWARD="yes"')
+    rc.write_file
+  end
+  only_if { node[:platform] == "suse" }
+end
+
+directory "create /etc/sysctl.d for enable-ip_forward" do
+  path "/etc/sysctl.d"
+  mode "755"
+end
+
+enable_ip_forward_file = "/etc/sysctl.d/50-neutron-enable-ip_forward.conf"
+cookbook_file enable_ip_forward_file do
+  source "sysctl-enable-ip_forward.conf"
+  mode "0644"
+end
+
+bash "reload enable-ip_forward-sysctl" do
+  code "/sbin/sysctl -e -q -p #{enable_ip_forward_file}"
+  action :nothing
+  subscribes :run, resources(:cookbook_file=> enable_ip_forward_file), :delayed
+end
+
 # Kill all the libvirt default networks.
 execute "Destroy the libvirt default network" do
   command "virsh net-destroy default"
