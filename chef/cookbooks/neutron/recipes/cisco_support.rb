@@ -30,74 +30,93 @@ end
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 vlan_end = vlan_start + 2000
 
-template "/etc/neutron/plugins/cisco/cisco_plugins.ini" do
-  cookbook "neutron"
-  source "cisco_plugins.ini.erb"
-  mode "0640"
-  owner node[:neutron][:platform][:user]
-  variables(
-    :vlan_mode => vlan_mode
-  )
-  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-end
-
-template "/etc/neutron/plugins/cisco/credentials.ini" do
-  cookbook "neutron"
-  source "cisco_credentials.ini.erb"
-  mode "0640"
-  owner node[:neutron][:platform][:user]
-  variables(
-    :keystone_url => keystone_service_url,
-    :keystone_username => keystone_service_user,
-    :keystone_password => keystone_service_password,
-    :keystone_tenant => keystone_service_tenant,
-    :switches => neutron[:neutron][:cisco_switches],
-    :vlan_mode => vlan_mode
-  )
-  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-end
-
-template "/etc/neutron/plugins/cisco/db_conn.ini" do
-  cookbook "neutron"
-  source "cisco_db_conn.ini.erb"
-  mode "0640"
-  owner node[:neutron][:platform][:user]
-  variables(
-    :db_name => neutron[:neutron][:db][:cisco_database],
-    :db_user => neutron[:neutron][:db][:cisco_user],
-    :db_pass => neutron[:neutron][:db][:cisco_password],
-    :db_host => neutron[:neutron][:db][:cisco_sql_address]
-  )
-  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-end
-
-template "/etc/neutron/plugins/cisco/l2network_plugin.ini" do
-  cookbook "neutron"
-  source "cisco_l2network_plugin.ini.erb"
-  mode "0640"
-  owner node[:neutron][:platform][:user]
-  variables(
-    :vlan_start => vlan_start,
-    :vlan_end => vlan_end
-  )
-  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-end
-
-switches = {}
-if vlan_mode
-    switches = neutron[:neutron][:cisco_switches].to_hash
-end
-
-template "/etc/neutron/plugins/cisco/nexus.ini" do
-  cookbook "neutron"
-  source "cisco_nexus.ini.erb"
-  mode "0640"
-  owner node[:neutron][:platform][:user]
-  variables(
-    :switches => switches,
-    :vlan_mode => vlan_mode
-  )
-  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+if node[:neutron][:use_ml2]
+  switches = {}
+  if vlan_mode
+      switches = neutron[:neutron][:cisco_switches].to_hash
+  end
+  
+  template "/etc/neutron/plugins/ml2/ml2_conf_cisco.ini" do
+    cookbook "neutron"
+    source "ml2_conf_cisco.ini.erb"
+    mode "0640"
+    owner node[:neutron][:platform][:user]
+    variables(
+      :switches => switches,
+      :vlan_mode => vlan_mode
+    )
+    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+  end
+else
+  template "/etc/neutron/plugins/cisco/cisco_plugins.ini" do
+    cookbook "neutron"
+    source "cisco_plugins.ini.erb"
+    mode "0640"
+    owner node[:neutron][:platform][:user]
+    variables(
+      :vlan_mode => vlan_mode
+    )
+    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+  end
+  
+  template "/etc/neutron/plugins/cisco/credentials.ini" do
+    cookbook "neutron"
+    source "cisco_credentials.ini.erb"
+    mode "0640"
+    owner node[:neutron][:platform][:user]
+    variables(
+      :keystone_url => keystone_service_url,
+      :keystone_username => keystone_service_user,
+      :keystone_password => keystone_service_password,
+      :keystone_tenant => keystone_service_tenant,
+      :switches => neutron[:neutron][:cisco_switches],
+      :vlan_mode => vlan_mode
+    )
+    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+  end
+  
+  template "/etc/neutron/plugins/cisco/db_conn.ini" do
+    cookbook "neutron"
+    source "cisco_db_conn.ini.erb"
+    mode "0640"
+    owner node[:neutron][:platform][:user]
+    variables(
+      :db_name => neutron[:neutron][:db][:cisco_database],
+      :db_user => neutron[:neutron][:db][:cisco_user],
+      :db_pass => neutron[:neutron][:db][:cisco_password],
+      :db_host => neutron[:neutron][:db][:cisco_sql_address]
+    )
+    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+  end
+  
+  template "/etc/neutron/plugins/cisco/l2network_plugin.ini" do
+    cookbook "neutron"
+    source "cisco_l2network_plugin.ini.erb"
+    mode "0640"
+    owner node[:neutron][:platform][:user]
+    variables(
+      :vlan_start => vlan_start,
+      :vlan_end => vlan_end
+    )
+    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+  end
+  
+  switches = {}
+  if vlan_mode
+      switches = neutron[:neutron][:cisco_switches].to_hash
+  end
+  
+  template "/etc/neutron/plugins/cisco/nexus.ini" do
+    cookbook "neutron"
+    source "cisco_nexus.ini.erb"
+    mode "0640"
+    owner node[:neutron][:platform][:user]
+    variables(
+      :switches => switches,
+      :vlan_mode => vlan_mode
+    )
+    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+  end
 end
 
 ssh_keys = ""

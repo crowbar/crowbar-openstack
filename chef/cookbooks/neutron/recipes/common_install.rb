@@ -142,7 +142,7 @@ else
 end
 
 case neutron[:neutron][:networking_plugin]
-when "openvswitch"
+when "openvswitch", "cisco"
   template agent_config_path do
     cookbook "neutron"
     source "ovs_neutron_plugin.ini.erb"
