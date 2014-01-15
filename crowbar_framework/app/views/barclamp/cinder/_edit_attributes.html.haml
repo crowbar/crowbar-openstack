@@ -39,7 +39,7 @@
         = select_field %w(volume netapp netapp_transport_type), :collection => :netapp_transports_for_cinder
         = integer_field %w(volume netapp netapp_server_port)
         = string_field %w(volume netapp netapp_login)
-        = string_field %w(volume netapp netapp_password)
+        = password_field %w(volume netapp netapp_password)
         = string_field %w(volume netapp netapp_storage_service)
         = string_field %w(volume netapp netapp_vfiler)
 
@@ -51,7 +51,7 @@
         = string_field %w(volume emc ecom_server_ip)
         = integer_field %w(volume emc ecom_server_port)
         = string_field %w(volume emc ecom_server_username)
-        = string_field %w(volume emc ecom_server_password)
+        = password_field %w(volume emc ecom_server_password)
         = string_field %w(volume emc emc_storage_type)
 
     #eqlx_container
@@ -61,13 +61,13 @@
 
         = string_field %w(volume eqlx san_ip)
         = string_field %w(volume eqlx san_login)
-        = string_field %w(volume eqlx san_password)
+        = password_field %w(volume eqlx san_password)
         = string_field %w(volume eqlx eqlx_group_name)
         = string_field %w(volume eqlx eqlx_pool)
         = boolean_field %w(volume eqlx san_thin_provision)
         = boolean_field %w(volume eqlx eqlx_use_chap)
         = string_field %w(volume eqlx eqlx_chap_login)
-        = string_field %w(volume eqlx eqlx_chap_password)
+        = password_field %w(volume eqlx eqlx_chap_password)
         = integer_field %w(volume eqlx eqlx_ssh_keepalive_interval)
         = integer_field %w(volume eqlx eqlx_cli_timeout)
 
