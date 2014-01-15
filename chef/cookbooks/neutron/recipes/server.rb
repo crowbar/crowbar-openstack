@@ -147,6 +147,9 @@ when "openvswitch", "cisco"
 when "linuxbridge"
   interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
   external_network_bridge = ""
+when "vmware"
+  interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+  external_network_bridge = ""
 end
 
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]

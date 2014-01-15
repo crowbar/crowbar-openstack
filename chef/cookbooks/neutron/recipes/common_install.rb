@@ -217,7 +217,7 @@ template node[:neutron][:platform][:neutron_rootwrap_sudo_template] do
 end
 
 case neutron[:neutron][:networking_plugin]
-when "openvswitch", "cisco"
+when "openvswitch", "cisco", "vmware"
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
 
   if %w(redhat centos).include?(node.platform)
