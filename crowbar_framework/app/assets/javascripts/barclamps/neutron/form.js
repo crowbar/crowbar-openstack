@@ -221,6 +221,8 @@ $(document).ready(function($) {
         networking_mode.data('non-linuxbridge', networking_mode.val());
         $('#networking_mode').val('vlan').trigger('change');
         $('#mode_container').hide(100).attr('disabled', 'disabled');
+
+        $('#vmware_container').hide(100).attr('disabled', 'disabled');
         break;
       case 'openvswitch':
         if (non_linuxbridge_mode != undefined) {
@@ -230,6 +232,8 @@ $(document).ready(function($) {
 
         $('#mode_container').show(100).removeAttr('disabled');
         networking_mode.trigger('change');
+
+        $('#vmware_container').hide(100).attr('disabled', 'disabled');
         break;
       case 'cisco':
         if (non_linuxbridge_mode != undefined) {
@@ -239,6 +243,15 @@ $(document).ready(function($) {
 
         $('#mode_container').show(100).removeAttr('disabled');
         networking_mode.trigger('change');
+
+        $('#vmware_container').hide(100).attr('disabled', 'disabled');
+        break;
+      case 'vmware':
+        $('#networking_mode').trigger('change');
+        $('#networking_mode').val('gre');
+        $('#mode_container').hide(100).attr('disabled', 'disabled');
+
+        $('#vmware_container').show(100).removeAttr('disabled');
         break;
     }
   }).trigger('change');

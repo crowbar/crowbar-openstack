@@ -55,6 +55,10 @@ when "linuxbridge"
   neutron_agent = node[:neutron][:platform][:lb_agent_name]
   neutron_agent_pkg = node[:neutron][:platform][:lb_agent_pkg]
   agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
+when "vmware"
+  neutron_agent = node[:neutron][:platform][:nvp_agent_name]
+  neutron_agent_pkg = node[:neutron][:platform][:nvp_agent_pkg]
+  plugin_cfg_path = "/etc/neutron/plugins/nicira/nvp.ini"
 end
 
 neutron_path = "/opt/neutron"
@@ -71,8 +75,7 @@ else
   keystone = neutron
 end
 
-if neutron[:neutron][:networking_plugin] == "openvswitch" or neutron[:neutron][:networking_plugin] == "cisco"
-
+if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plugin]
   if node.platform == "ubuntu"
     # If we expect to install the openvswitch module via DKMS, but the module
     # does not exist, rmmod the openvswitch module before continuing.
@@ -169,6 +172,15 @@ when "linuxbridge"
       :vlan_start => vlan_start,
       :vlan_end => vlan_end
       )
+    end
+  when "vmware"
+    template plugin_cfg_path do
+      cookbook "neutron"
+      source "nvp.ini.erb"
+      owner neutron[:neutron][:platform][:user]
+      group "root"
+      mode "0640"
+    end
   end
 end
 

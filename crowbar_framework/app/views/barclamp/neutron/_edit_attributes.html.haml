@@ -22,6 +22,13 @@
         .alert.alert-warning#warn_ovs_vlan
           = t(".warn_ovs_vlan")
 
+      #vmware_container
+        = string_field %w(vmware user)
+        = password_field %w(vmware password)
+        = string_field %w(vmware controllers)
+        = string_field %w(vmware tz_uuid)
+        = string_field %w(vmware l3_gw_uuid)
+
     #cisco_switches
       %fieldset
         %legend

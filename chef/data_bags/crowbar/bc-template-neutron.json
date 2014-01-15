@@ -39,6 +39,13 @@
         "max_pool_overflow": 10,
         "pool_timeout": 30
       },
+      "vmware": {
+        "user": "",
+        "password": "",
+        "controllers": "",
+        "tz_uuid": "",
+        "l3_gw_uuid": ""
+      },
       "ssl": {
         "certfile": "/etc/neutron/ssl/certs/signing_cert.pem",
         "keyfile": "/etc/neutron/ssl/private/signing_key.pem",
@@ -57,7 +64,7 @@
   "deployment": {
     "neutron": {
       "crowbar-revision": 0,
-      "schema-revision": 1,
+      "schema-revision": 2,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ]
       },

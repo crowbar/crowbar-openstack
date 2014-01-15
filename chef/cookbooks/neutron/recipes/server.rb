@@ -21,6 +21,9 @@ unless node[:neutron][:use_gitrepo]
   when "linuxbridge"
     neutron_agent = node[:neutron][:platform][:lb_agent_name]
     agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
+  when "vmware"
+    neutron_agent = node[:neutron][:platform][:nvp_agent_name]
+    agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
   end
   pkgs = node[:neutron][:platform][:pkgs]
   pkgs.each { |p| package p }
@@ -37,6 +40,9 @@ else
   when "linuxbridge"
     neutron_agent = "neutron-linuxbridge-agent"
     agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
+  when "vmware"
+    neutron_agent = "neutron-nicira-agent"
+    agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
   end
   neutron_service_name="neutron-server"
   neutron_path = "/opt/neutron"
@@ -183,6 +189,7 @@ template "/etc/neutron/l3_agent.ini" do
     :periodic_fuzzy_delay => 5,
     :external_network_bridge => external_network_bridge
   )
+  not_if { node[:neutron][:networking_plugin] == "vmware" }
 end
 
 dns_list = node[:dns][:forwarders].join(" ")
@@ -272,6 +279,15 @@ when "linuxbridge"
      recursive true
      not_if { node[:platform] == "suse" }
   end
+when "vmware"
+  directory "/etc/neutron/plugins/nicira/" do
+     mode 00775
+     owner node[:neutron][:platform][:user]
+     group "root"
+     action :create
+     recursive true
+     not_if { node[:platform] == "suse" }
+  end
 end
 
 if node[:neutron][:networking_plugin] == "cisco"
@@ -309,6 +325,7 @@ service node[:neutron][:platform][:l3_agent_name] do
   action :enable
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
+  not_if { node[:neutron][:networking_plugin] == "vmware" }
 end
 
 # This is some bad hack: we need to restart the server and the agent before
@@ -337,6 +354,7 @@ ruby_block "mark the l3-agent as restart for post-install" do
   action :nothing
   subscribes :create, resources("template[/etc/neutron/l3_agent.ini]"), :immediately
   subscribes :create, resources("template[/etc/neutron/neutron.conf]"), :immediately
+  not_if { node[:neutron][:networking_plugin] == "vmware" }
 end
 
 ruby_block "mark neutron-server as restart for post-install" do
