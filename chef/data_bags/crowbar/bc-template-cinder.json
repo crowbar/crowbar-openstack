@@ -68,8 +68,9 @@
           "emc_storage_type": "",
           "ecom_server_ip": "192.168.124.11",
           "ecom_server_port": 0,
+          "masking_view": "",
           "ecom_server_username": "admin",
-          "ecom_server_password": "admin"
+          "ecom_server_password": ""
         },
         "rbd": {
           "pool": "volumes",
@@ -103,7 +104,7 @@
   "deployment": {
     "cinder": {
       "crowbar-revision": 0,
-      "schema-revision": 2,
+      "schema-revision": 3,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
