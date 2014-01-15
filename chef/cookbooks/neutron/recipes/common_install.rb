@@ -173,14 +173,13 @@ when "linuxbridge"
       :vlan_end => vlan_end
       )
     end
-  when "vmware"
-    template plugin_cfg_path do
-      cookbook "neutron"
-      source "nvp.ini.erb"
-      owner neutron[:neutron][:platform][:user]
-      group "root"
-      mode "0640"
-    end
+when "vmware"
+  template plugin_cfg_path do
+    cookbook "neutron"
+    source "nvp.ini.erb"
+    owner neutron[:neutron][:platform][:user]
+    group "root"
+    mode "0640"
   end
 end
 
