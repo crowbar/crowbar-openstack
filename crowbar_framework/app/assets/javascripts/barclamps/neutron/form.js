@@ -221,7 +221,7 @@ $(document).ready(function($) {
         if (non_forced_mode == undefined) {
           networking_mode.data('non-forced', networking_mode.val());
         }
-        $('#networking_mode').val('vlan').trigger('change');
+        networking_mode.val('vlan').trigger('change');
         $('#mode_container').hide(100).attr('disabled', 'disabled');
 
         $('#vmware_container').hide(100).attr('disabled', 'disabled');
@@ -252,7 +252,7 @@ $(document).ready(function($) {
         if (non_forced_mode == undefined) {
           networking_mode.data('non-forced', networking_mode.val());
         }
-        $('#networking_mode').val('gre').trigger('change');
+        networking_mode.val('gre').trigger('change');
         $('#mode_container').hide(100).attr('disabled', 'disabled');
 
         $('#vmware_container').show(100).removeAttr('disabled');
