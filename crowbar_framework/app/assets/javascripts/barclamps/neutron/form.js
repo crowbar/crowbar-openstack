@@ -214,20 +214,22 @@ $(document).ready(function($) {
   $('#networking_plugin').on('change', function() {
     var value = $(this).val();
     var networking_mode = $('#networking_mode')
-    var non_linuxbridge_mode = networking_mode.data('non-linuxbridge');
+    var non_forced_mode = networking_mode.data('non-forced');
 
     switch (value) {
       case 'linuxbridge':
-        networking_mode.data('non-linuxbridge', networking_mode.val());
-        $('#networking_mode').val('vlan').trigger('change');
+        if (non_forced_mode == undefined) {
+          networking_mode.data('non-forced', networking_mode.val());
+        }
+        networking_mode.val('vlan').trigger('change');
         $('#mode_container').hide(100).attr('disabled', 'disabled');
 
         $('#vmware_container').hide(100).attr('disabled', 'disabled');
         break;
       case 'openvswitch':
-        if (non_linuxbridge_mode != undefined) {
-          networking_mode.val(non_linuxbridge_mode);
-          networking_mode.removeData('non-linuxbridge');
+        if (non_forced_mode != undefined) {
+          networking_mode.val(non_forced_mode);
+          networking_mode.removeData('non-forced');
         }
 
         $('#mode_container').show(100).removeAttr('disabled');
@@ -236,9 +238,9 @@ $(document).ready(function($) {
         $('#vmware_container').hide(100).attr('disabled', 'disabled');
         break;
       case 'cisco':
-        if (non_linuxbridge_mode != undefined) {
-          networking_mode.val(non_linuxbridge_mode);
-          networking_mode.removeData('non-linuxbridge');
+        if (non_forced_mode != undefined) {
+          networking_mode.val(non_forced_mode);
+          networking_mode.removeData('non-forced');
         }
 
         $('#mode_container').show(100).removeAttr('disabled');
@@ -247,8 +249,10 @@ $(document).ready(function($) {
         $('#vmware_container').hide(100).attr('disabled', 'disabled');
         break;
       case 'vmware':
-        $('#networking_mode').trigger('change');
-        $('#networking_mode').val('gre');
+        if (non_forced_mode == undefined) {
+          networking_mode.data('non-forced', networking_mode.val());
+        }
+        networking_mode.val('gre').trigger('change');
         $('#mode_container').hide(100).attr('disabled', 'disabled');
 
         $('#vmware_container').show(100).removeAttr('disabled');
