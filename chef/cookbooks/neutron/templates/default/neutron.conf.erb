@@ -62,7 +62,9 @@ core_plugin = neutron.plugins.nicira.NeutronPlugin.NvpPluginV2
 # Advanced service modules
 # service_plugins =
 <% if @use_ml2 -%>
-service_plugins = neutron.services.l3_router.l3_router_plugin.L3RouterPlugin
+service_plugins = neutron.services.l3_router.l3_router_plugin.L3RouterPlugin,neutron.services.metering.metering_plugin.MeteringPlugin
+<% else -%>
+service_plugins = neutron.services.metering.metering_plugin.MeteringPlugin
 <% end -%>
 
 # Paste configuration file
