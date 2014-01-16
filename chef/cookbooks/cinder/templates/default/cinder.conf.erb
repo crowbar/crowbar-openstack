@@ -207,7 +207,7 @@ auth_strategy=keystone
 
 # AMQP exchange to connect to if using RabbitMQ or Qpid
 # (string value)
-#control_exchange=cinder
+control_exchange=cinder
 
 
 #
@@ -455,6 +455,7 @@ logdir=/var/log/cinder
 # Options defined in cinder.openstack.common.notifier.rabbit_notifier
 #
 
+notification_driver=cinder.openstack.common.notifier.rabbit_notifier
 # AMQP topic used for openstack notifications (list value)
 #notification_topics=notifications
 
