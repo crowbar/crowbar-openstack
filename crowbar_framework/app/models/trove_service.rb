@@ -31,5 +31,13 @@ class TroveService < ServiceObject
     false
   end
 
+  def proposal_dependencies(role)
+    answer = []
+    answer << { "barclamp" => "keystone", "inst" => role.default_attributes["nova"]["keystone_instance"] }
+    answer << { "barclamp" => "nova", "inst" => role.default_attributes["nova"]["nova_instance"] }
+    answer << { "barclamp" => "cinder", "inst" => role.default_attributes["nova"]["cinder_instance"] }
+    answer << { "barclamp" => "glance", "inst" => role.default_attributes["nova"]["glance_instance"] }
+    answer
+  end
 end
 
