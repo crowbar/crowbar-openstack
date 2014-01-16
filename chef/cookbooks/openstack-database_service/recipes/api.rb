@@ -45,8 +45,8 @@ db_uri = db_uri("database_service", db_user, db_pass).to_s
 api_endpoint = endpoint "database_service-api"
 
 identity_uri = endpoint("identity-api")
-compute_uri = endpoint("compute-api").gsub(/%\(tenant_id\)s/, "")
-block_storage_uri = endpoint("volume-api").gsub(/%\(tenant_id\)s/, "")
+compute_uri = endpoint("compute-api").to_s.gsub(/%\(tenant_id\)s/, "")
+block_storage_uri = endpoint("volume-api").to_s.gsub(/%\(tenant_id\)s/, "")
 object_storage_uri = endpoint("object-storage-api")
 
 rabbit_pass = user_password node["openstack"]["database_service"]["rabbit"]["username"]
