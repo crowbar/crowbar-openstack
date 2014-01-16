@@ -75,12 +75,19 @@ echo -e  "Selected image id: $test_image"
 
 fixed_net=$(neutron net-list |grep fixed |awk '{print $2}')
 instance_name="smoketest"
+v_device="vdb"
+volume_name="smoketest_metering_target"
 
 echo "Adding smoke flavor"
 flavor_rnd=$(( 100 + $RANDOM % 100))
 nova flavor-create smoketest-${flavor_rnd} ${flavor_rnd} 512 2 1 || die 1 "Unable to create flavor"
 
-nova boot --poll --image "$test_image" --flavor ${flavor_rnd} --nic net-id=$fixed_net "$instance_name" --meta description='Use for smoke testing purposes'
+nova volume-create --display_name $volume_name 2
+volume_id=$(nova volume-list | grep $volume_name | awk {'print $2'})
+nova boot --poll --image "$test_image" --flavor ${flavor_rnd} --nic net-id=$fixed_net "$instance_name" --meta description='Use for smoke testing purposes' && sleep 30
+instance_id=$(nova list | grep $instance_name | awk {'print $2'})
+echo -e "Instance_id:$instance_id\nVolume_id: $volume_id\nV_device:$v_device"
+nova volume-attach $instance_id  $volume_id /dev/$v_device && sleep 5
 
 until [[ "$(nova list | grep "$instance_name" | awk {'print $6'})" = "ACTIVE" ]]
   do
@@ -113,10 +120,33 @@ for meter in cpu disk.ephemeral.size disk.root.size memory; do
   fi
 done
 
+for meter in 'volume' 'volume\.size'; do
+  isok="false"
+  for ((i=1; i<=60; i++)); do
+   echo -e "Processing metric: $meter"
+    v_metrics=$(ceilometer meter-list | grep "$meter " | grep "$volume_id" | awk {'print $8'})
+    if [[ $v_metrics ]]; then
+      echo "Successfully fetched meter: ${meter} resource_id: $v_metrics attempt ${i}"
+      isok="true"
+      break
+    else
+      echo -ne "\r"
+      echo -ne "Failed to fetch ${meter} meter attempt ${i}/60"
+      #we need such huge timeout to be sure we fit into pipeline interval wich is 600 by default 20*60=1200
+      sleep 20
+    fi
+  done
+  echo ""
+  if [ "${isok}" != "true" ] ; then
+    die 1 "Failed to fetch ${meter} meter"
+  fi
+done
 
 echo "$metrics";
-echo "Deleting Nova VM.";
+echo "Cleaning up...";
+nova volume-detach $instance_id $volume_id && sleep 5
 nova delete "$instance_id";
+nova volume-delete $volume_id
 nova flavor-delete smoketest-${flavor_rnd}
 
 echo "Ceilometer check passed.";
