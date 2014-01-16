@@ -15,6 +15,8 @@
             "debug": { "type": "bool", "required": true },
             "verbose": { "type": "bool", "required": true },
             "use_mongodb": { "type": "bool", "required": true },
+            "cpu_interval": { "type": "int", "required": true },
+            "meters_interval": { "type": "int", "required": true },
             "database_instance": { "type": "str", "required": true },
             "rabbitmq_instance": { "type": "str", "required": true },
             "keystone_instance": { "type": "str", "required": true },
@@ -62,6 +64,7 @@
             "crowbar-status": { "type": "str" },
             "crowbar-failed": { "type": "str" },
             "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
             "element_states": {
               "type": "map",
               "mapping": {

@@ -5,9 +5,11 @@ en:
     ceilometer:
       edit_attributes:
         attributes: Attributes
-        use_mongodb: Use MongoDB instead of standard database
         database_instance: Database
         keystone_instance: Keystone
         rabbitmq_instance: RabbitMQ
+        cpu_interval: Interval used for CPU meter updates (in seconds)
+        meters_interval: Interval used for other meter updates (in seconds)
+        use_mongodb: Use MongoDB instead of standard database
     ceilometer_edit_deployment:
       deployment: Deployment

@@ -1,0 +1,24 @@
+---
+-
+    name: meter_pipeline
+    interval: <%= @meters_interval %>
+    meters:
+        - "*"
+    transformers:
+    publishers:
+        - rpc://
+-
+    name: cpu_pipeline
+    interval: <%= @cpu_interval %>
+    meters:
+        - "cpu"
+    transformers:
+        - name: "rate_of_change"
+          parameters:
+              target:
+                  name: "cpu_util"
+                  unit: "%"
+                  type: "gauge"
+                  scale: "100.0 / (10**9 * (resource_metadata.cpu_number or 1))"
+    publishers:
+        - rpc://
