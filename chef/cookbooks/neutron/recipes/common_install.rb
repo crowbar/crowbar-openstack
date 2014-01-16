@@ -216,10 +216,7 @@ template node[:neutron][:platform][:neutron_rootwrap_sudo_template] do
             :binary => node[:neutron][:rootwrap])
 end
 
-case neutron[:neutron][:networking_plugin]
-when "openvswitch", "cisco", "vmware"
-  interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
-
+if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plugin]
   if %w(redhat centos).include?(node.platform)
     openvswitch_service = "openvswitch"
   else
@@ -278,8 +275,6 @@ when "openvswitch", "cisco", "vmware"
       end
     end
   end
-when "linuxbridge"
-  interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
 end
 
 #env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
@@ -438,7 +433,6 @@ template "/etc/neutron/neutron.conf" do
       :per_tenant_vlan => per_tenant_vlan,
       :use_ml2 => neutron[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware",
       :networking_plugin => neutron[:neutron][:networking_plugin],
-      :interface_driver => interface_driver,
       :rootwrap_bin =>  node[:neutron][:rootwrap]
     )
 end
