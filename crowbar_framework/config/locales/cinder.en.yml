@@ -33,6 +33,7 @@ en:
 
           emc_parameters: EMC Parameters
           emc:
+            masking_view: Unisphere for VMAX Masking View
             ecom_server_ip: IP address of the ECOM server
             ecom_server_port: Port of the ECOM server
             ecom_server_username: Username for accessing the ECOM server
