@@ -795,70 +795,70 @@ volume_group=<%= node[:cinder][:volume][:volume_name] %>
 #lvm_mirrors=0
 
 
+<% unless @netapp_params.nil? -%>
 #
-# Options defined in cinder.volume.drivers.netapp
+# Options defined in cinder.volume.drivers.netapp.options
 #
 
-# URL of the WSDL file for the DFM server (string value)
-#netapp_wsdl_url=<None>
-<% unless @netapp_params.nil? -%>
-netapp_wsdl_url=<%= @netapp_params['netapp_wsdl_url'] %>
-<% end -%>
-
-# User name for the DFM server (string value)
-#netapp_login=<None>
-<% unless @netapp_params.nil? -%>
-netapp_login=<%= @netapp_params['netapp_login'] %>
-<% end -%>
-
-# Password for the DFM server (string value)
-#netapp_password=<None>
-<% unless @netapp_params.nil? -%>
-netapp_password=<%= @netapp_params['netapp_password'] %>
-<% end -%>
-
-# Hostname for the DFM server (string value)
-#netapp_server_hostname=<None>
-<% unless @netapp_params.nil? -%>
-netapp_server_hostname=<%= @netapp_params['netapp_server_hostname'] %>
-<% end -%>
-
-# Port number for the DFM server (integer value)
-#netapp_server_port=8088
-<% unless @netapp_params.nil? -%>
-netapp_server_port=<%= @netapp_params['netapp_server_port'] %>
-<% end -%>
-
-# Transport type for the DFM server (string value)
-#netapp_transport_type=http|https
-<% unless @netapp_params.nil? -%>
-netapp_transport_type=<%= @netapp_params['netapp_transport_type'] %>
-<% end -%>
-
-# Comma separated volumes to be used for provisioning
-#netapp_volume_list=None
-<% unless @netapp_params.nil? -%>
-netapp_volume_list=<%= @netapp_params['netapp_volume_list'] %>
-<% end -%>
-
-# Storage service to use for provisioning (when
-# volume_type=None) (string value)
-#netapp_storage_service=<None>
-<% unless @netapp_params.nil? -%>
-netapp_storage_service=<%= @netapp_params['netapp_storage_service'] %>
-<% end -%>
-
-# Prefix of storage service name to use for provisioning
-# (volume_type name will be appended) (string value)
-#netapp_storage_service_prefix=<None>
-<% unless @netapp_params.nil? -%>
-netapp_storage_service_prefix=<%= @netapp_params['netapp_storage_service_prefix'] %>
-<% end -%>
 
 # Vfiler to use for provisioning (string value)
 #netapp_vfiler=<None>
-<% unless @netapp_params.nil? -%>
 netapp_vfiler=<%= @netapp_params['netapp_vfiler'] %>
+
+# User name for the storage controller (string value)
+#netapp_login=<None>
+netapp_login=<%= @netapp_params['netapp_login'] %>
+
+# Password for the storage controller (string value)
+#netapp_password=<None>
+netapp_password=<%= @netapp_params['netapp_password'] %>
+
+# Cluster vserver to use for provisioning (string value)
+#netapp_vserver=<None>
+netapp_vserver=<%= @netapp_params['vserver'] %>
+
+# Host name for the storage controller (string value)
+#netapp_server_hostname=<None>
+netapp_server_hostname=<%= @netapp_params['netapp_server_hostname'] %>
+
+# Port number for the storage controller (integer value)
+#netapp_server_port=80
+netapp_server_port=<%= @netapp_params['netapp_server_port'] %>
+
+# Threshold available percent to start cache cleaning.
+# (integer value)
+#thres_avl_size_perc_start=20
+
+# Threshold available percent to stop cache cleaning. (integer
+# value)
+#thres_avl_size_perc_stop=60
+
+# Threshold minutes after which cache file can be cleaned.
+# (integer value)
+#expiry_thres_minutes=720
+
+# Volume size multiplier to ensure while creation (floating
+# point value)
+#netapp_size_multiplier=1.2
+
+# Comma separated volumes to be used for provisioning (string
+# value)
+#netapp_volume_list=<None>
+netapp_volume_list=<%= @netapp_params['netapp_volume_list'] %>
+
+# Storage family type. (string value)
+#netapp_storage_family=ontap_cluster
+netapp_storage_family=<%= @netapp_params['storage_family'] %>
+
+# The storage protocol to be used on the data path with the
+# storage system; valid values are iscsi or nfs. (string
+# value)
+netapp_storage_protocol=<%= @netapp_params['storage_protocol'] %>
+
+# Transport type protocol (string value)
+#netapp_transport_type=http
+netapp_transport_type=<%= @netapp_params['netapp_transport_type'] %>
+
 <% end -%>
 
 #
@@ -1212,9 +1212,11 @@ volume_driver=cinder.volume.drivers.eqlx.DellEQLSanISCSIDriver
 <%   end -%>
 <% end -%>
 
+
 <% unless @netapp_params.nil? -%>
-volume_driver=<%= @netapp_params['netapp_driver'] %>
+volume_driver=cinder.volume.drivers.netapp.common.NetAppDriver
 <% end -%>
+
 
 <% unless @emc_params.nil? -%>
 volume_driver=cinder.volume.drivers.emc.emc_smis_iscsi.EMCSMISISCSIDriver

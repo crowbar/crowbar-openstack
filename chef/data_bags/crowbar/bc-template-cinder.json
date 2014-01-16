@@ -53,14 +53,13 @@
           "eqlx_pool": "default"
         },
         "netapp": {
-          "netapp_driver": "cinder.volume.drivers.netapp.iscsi.NetAppDirect7modeISCSIDriver",
-          "netapp_wsdl_url": "http://192.168.124.11:8088/",
+          "storage_family": "ontap_7mode",
+          "storage_protocol": "iscsi",
+          "vserver": "",
           "netapp_server_hostname": "192.168.124.11",
           "netapp_server_port": 443,
           "netapp_login": "admin",
-          "netapp_password": "admin",
-          "netapp_storage_service": "",
-          "netapp_storage_service_prefix": "crowbar_",
+          "netapp_password": "",
           "netapp_vfiler": "",
           "netapp_transport_type": "https",
           "netapp_volume_list": ""
@@ -104,7 +103,7 @@
   "deployment": {
     "cinder": {
       "crowbar-revision": 0,
-      "schema-revision": 1,
+      "schema-revision": 2,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

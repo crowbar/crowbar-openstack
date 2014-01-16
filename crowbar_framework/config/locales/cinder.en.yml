@@ -21,14 +21,16 @@ en:
           local_size: Maximum File Size (GB)
           netapp_parameters: NetApp Parameters
           netapp:
-            netapp_driver: NetApp Driver Mode
+            storage_family: Storage Family Type
+            storage_protocol: Storage Protocol
+            vserver: Name of the Virtual Storage Server (Vserver)
             netapp_server_hostname: Server host name
             netapp_transport_type: Transport Type
             netapp_server_port: Server port
             netapp_login: Username for accessing NetApp
             netapp_password: Password for accessing NetApp
-            netapp_storage_service: Storage service to use while provisioning
             netapp_vfiler: The vFiler unit name if using vFiler to host OpenStack volumes
+
           emc_parameters: EMC Parameters
           emc:
             ecom_server_ip: IP address of the ECOM server

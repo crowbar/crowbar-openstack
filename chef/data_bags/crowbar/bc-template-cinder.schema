@@ -54,14 +54,13 @@
                   "type": "map",
                   "required": true,
                   "mapping": {
-                    "netapp_driver": { "type": "str", "required": true},
-                    "netapp_wsdl_url": { "type": "str", "required": true },
+                    "storage_family": { "type": "str", "required": true },
+                    "storage_protocol": { "type": "str", "required": true },
+                    "vserver": { "type": "str", "required": true },
                     "netapp_server_hostname": { "type": "str", "required": true },
                     "netapp_server_port": { "type": "int", "required": true },
                     "netapp_login": { "type": "str", "required": true },
                     "netapp_password": { "type": "str", "required": true },
-                    "netapp_storage_service": { "type": "str", "required": true },
-                    "netapp_storage_service_prefix": { "type": "str", "required": true },
                     "netapp_vfiler": { "type": "str", "required": true },
                     "netapp_transport_type": { "type": "str", "required": true },
                     "netapp_volume_list": { "type": "str", "required": true }

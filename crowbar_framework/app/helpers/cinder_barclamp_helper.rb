@@ -58,13 +58,21 @@ module CinderBarclampHelper
     )
   end
 
-  def netapp_drivers_for_cinder(selected)
+  def netapp_storage_family(selected)
     options_for_select(
       [
-        ["7-Mode iSCSI direct driver", "cinder.volume.drivers.netapp.iscsi.NetAppDirect7modeISCSIDriver"],
-        ["7-Mode NFS direct driver", "cinder.volume.drivers.netapp.nfs.NetAppDirect7modeNfsDriver"],
-        ["iSCSI direct driver for clustered Data ONTAP", "cinder.volume.drivers.netapp.iscsi.NetAppDirectCmodeISCSIDriver"],
-        ["NFS direct driver for clustered Data ONTAP", "cinder.volume.drivers.netapp.nfs.NetAppDirectCmodeNfsDriver"]
+        ["Data ONTAP in 7-Mode", "ontap_7mode"],
+        ["Data ONTAP in Clustered Mode", "ontap_cluster"]
+      ],
+      selected.to_s
+    )
+  end
+
+  def netapp_storage_protocol(selected)
+    options_for_select(
+      [
+        ["iSCSI", "iscsi"],
+        ["NFS", "nfs"]
       ],
       selected.to_s
     )
@@ -73,7 +81,7 @@ module CinderBarclampHelper
   def netapp_transports_for_cinder(selected)
     options_for_select(
       [
-        ["HTTP","http"], 
+        ["HTTP","http"],
         ["HTTPS", "https"]
       ],
       selected.to_s
