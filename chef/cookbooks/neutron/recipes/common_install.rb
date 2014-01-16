@@ -460,6 +460,34 @@ else
   end
 end
 
+# Disable rp_filter
+ruby_block "edit /etc/sysctl.conf for rp_filter" do
+  block do
+    rc = Chef::Util::FileEdit.new("/etc/sysctl.conf")
+    rc.search_file_replace_line(/^net.ipv4.conf.all.rp_filter/, 'net.ipv4.conf.all.rp_filter = 0')
+    rc.write_file
+  end
+  only_if { node[:platform] == "suse" }
+end
+
+directory "create /etc/sysctl.d for disable-rp_filter" do
+  path "/etc/sysctl.d"
+  mode "755"
+end
+
+disable_rp_filter_file = "/etc/sysctl.d/50-neutron-disable-rp_filter.conf"
+cookbook_file disable_rp_filter_file do
+  source "sysctl-disable-rp_filter.conf"
+  mode "0644"
+end
+
+bash "reload disable-rp_filter-sysctl" do
+  code "/sbin/sysctl -e -q -p #{disable_rp_filter_file}"
+  action :nothing
+  subscribes :run, resources(:cookbook_file=> disable_rp_filter_file), :delayed
+end
+
+# RDO package magic (non-standard packages)
 if %w(redhat centos).include?(node.platform)
   net_core_pkgs=%w(kernel-*openstack* iproute-*el6ost.netns* iputils)
 
