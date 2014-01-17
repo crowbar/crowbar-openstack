@@ -36,5 +36,7 @@ locale_additions:
       trove:
         edit_attributes:
           attributes: Attributes
+          logging_header: Logging
+          verbose: Verbose
         edit_deployment:
           deployment: Deployment

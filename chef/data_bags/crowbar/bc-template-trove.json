@@ -3,7 +3,7 @@
   "description": "Sets up OpenStack Trove Database Service",
   "attributes": {
     "trove": {
-      "foo": ""
+      "verbose": false
     }
   },
   "deployment": {

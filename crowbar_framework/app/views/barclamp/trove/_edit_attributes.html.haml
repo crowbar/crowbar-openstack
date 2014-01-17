@@ -1,9 +1,14 @@
-%input#proposal_attributes{:type => "hidden", :name => "proposal_attributes", :value => @proposal.raw_data['attributes'][@proposal.barclamp].to_json}
-%h3.page-header
-  = t('.attributes')
-  = link_to t('raw'), proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :class => "pull-right"
-%br
-%p
-  %label{ :for => :foo}= t('.foo')
-  %input#foo{:type => "text", :name => "foo", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["foo"], :onchange => "update_value('foo', 'foo', 'string')"}
-  %em= t('.foo_hint')
+- register_javascripts "barclamps/trove/form"
+
+= attributes_for @proposal do
+  .panel-sub
+    = header @dep_raw, true
+
+  .panel-body
+    %fieldset
+      %legend
+        = t(".logging_header")
+      = boolean_field :verbose
+
+    = render "barclamp/git/pfsdeps"
+      
