@@ -59,6 +59,9 @@ when "vmware"
   neutron_agent = node[:neutron][:platform][:nvp_agent_name]
   neutron_agent_pkg = node[:neutron][:platform][:nvp_agent_pkg]
   agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
+  # It is needed to have neutron-ovs-cleanup service
+  ovs_agent_pkg = node[:neutron][:platform][:ovs_agent_pkg]
+  ovs_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
 end
 
 neutron_path = "/opt/neutron"
@@ -106,6 +109,9 @@ vlan_end = vlan_start + 2000
 unless neutron[:neutron][:use_gitrepo]
   package neutron_agent_pkg do
     action :install
+  end
+  if neutron[:neutron][:networking_plugin] == "vmware"
+    package ovs_agent_pkg
   end
 else
   neutron_agent = "neutron-openvswitch-agent"
@@ -180,6 +186,19 @@ when "vmware"
     owner neutron[:neutron][:platform][:user]
     group "root"
     mode "0640"
+  end
+  template ovs_config_path do
+    cookbook "neutron"
+    source "ovs_neutron_plugin.ini.erb"
+    owner neutron[:neutron][:platform][:user]
+    group "root"
+    mode "0640"
+    variables(
+      :physnet => "br-tunnel",
+      :networking_mode => "gre",
+      :vlan_start => vlan_start,
+      :vlan_end => vlan_end
+      )
   end
 end
 
