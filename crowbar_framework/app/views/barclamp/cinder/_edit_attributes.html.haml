@@ -37,12 +37,18 @@
         = select_field %w(volume netapp storage_family), :collection => :netapp_storage_family
         = select_field %w(volume netapp storage_protocol), :collection => :netapp_storage_protocol
         = string_field %w(volume netapp netapp_server_hostname)
-        = string_field %w(volume netapp vserver)
         = select_field %w(volume netapp netapp_transport_type), :collection => :netapp_transports_for_cinder
         = integer_field %w(volume netapp netapp_server_port)
         = string_field %w(volume netapp netapp_login)
         = password_field %w(volume netapp netapp_password)
         = string_field %w(volume netapp netapp_vfiler)
+
+        #netapp_nfs_container
+          = string_field %w(volume netapp vserver)
+          = text_field %w(volume netapp nfs_shares), :size => "80x5"
+
+          %span.help-block
+            = t(".volume.netapp.nfs_shares_config_hint")
 
     #emc_container
       %fieldset

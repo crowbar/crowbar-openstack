@@ -38,4 +38,15 @@ $(document).ready(function($) {
         break;
     }
   }).trigger('change');
+
+  $('#volume_netapp_storage_protocol').on('change', function() {
+      switch ($('#volume_netapp_storage_protocol').val()) {
+        case 'nfs':
+          $('#netapp_nfs_container').show(100).removeAttr('disabled');
+          break;
+        default:
+          $('#netapp_nfs_container').hide(100).attr('disabled', 'disabled');
+          break;
+      }
+  }).trigger('change');
 });

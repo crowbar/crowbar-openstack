@@ -56,6 +56,7 @@
                   "mapping": {
                     "storage_family": { "type": "str", "required": true },
                     "storage_protocol": { "type": "str", "required": true },
+                    "nfs_shares": { "type": "str", "required": true },
                     "vserver": { "type": "str", "required": true },
                     "netapp_server_hostname": { "type": "str", "required": true },
                     "netapp_server_port": { "type": "int", "required": true },
