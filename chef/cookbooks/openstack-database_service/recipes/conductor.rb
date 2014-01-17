@@ -42,7 +42,7 @@ template "/etc/trove/trove-conductor.conf" do
   mode 00640
   variables(
     :database_connection => db_uri,
-    :identity_uri => identity_uri,
+    :identity_uri => identity_uri
     )
 
   notifies :restart, "service[trove-conductor]", :immediately
