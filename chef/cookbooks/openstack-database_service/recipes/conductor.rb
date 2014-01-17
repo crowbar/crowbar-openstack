@@ -31,7 +31,7 @@ service "trove-conductor" do
 end
 
 db_user = node["openstack"]["database_service"]["db"]["username"]
-db_pass = db_password "trove"
+db_pass = db_password "openstack-database_service"
 db_uri = db_uri("database_service", db_user, db_pass).to_s
 identity_uri = endpoint("identity-api")
 
