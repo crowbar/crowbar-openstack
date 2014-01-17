@@ -59,6 +59,9 @@ when "vmware"
   neutron_agent = node[:neutron][:platform][:nvp_agent_name]
   neutron_agent_pkg = node[:neutron][:platform][:nvp_agent_pkg]
   agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
+  # It is needed to have neutron-ovs-cleanup service
+  ovs_agent_pkg = node[:neutron][:platform][:ovs_agent_pkg]
+  ovs_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
 end
 
 neutron_path = "/opt/neutron"
@@ -106,6 +109,9 @@ vlan_end = vlan_start + 2000
 unless neutron[:neutron][:use_gitrepo]
   package neutron_agent_pkg do
     action :install
+  end
+  if neutron[:neutron][:networking_plugin] == "vmware"
+    package ovs_agent_pkg
   end
 else
   neutron_agent = "neutron-openvswitch-agent"
@@ -181,6 +187,19 @@ when "vmware"
     group "root"
     mode "0640"
   end
+  template ovs_config_path do
+    cookbook "neutron"
+    source "ovs_neutron_plugin.ini.erb"
+    owner neutron[:neutron][:platform][:user]
+    group "root"
+    mode "0640"
+    variables(
+      :physnet => "br-tunnel",
+      :networking_mode => "gre",
+      :vlan_start => vlan_start,
+      :vlan_end => vlan_end
+      )
+  end
 end
 
 node[:neutron] ||= Mash.new
@@ -216,10 +235,7 @@ template node[:neutron][:platform][:neutron_rootwrap_sudo_template] do
             :binary => node[:neutron][:rootwrap])
 end
 
-case neutron[:neutron][:networking_plugin]
-when "openvswitch", "cisco"
-  interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
-
+if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plugin]
   if %w(redhat centos).include?(node.platform)
     openvswitch_service = "openvswitch"
   else
@@ -278,8 +294,6 @@ when "openvswitch", "cisco"
       end
     end
   end
-when "linuxbridge"
-  interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
 end
 
 #env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
@@ -436,9 +450,8 @@ template "/etc/neutron/neutron.conf" do
       :ssl_ca_file => neutron[:neutron][:ssl][:ca_certs],
       :neutron_server => neutron_server,
       :per_tenant_vlan => per_tenant_vlan,
-      :use_ml2 => neutron[:neutron][:use_ml2],
+      :use_ml2 => neutron[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware",
       :networking_plugin => neutron[:neutron][:networking_plugin],
-      :interface_driver => interface_driver,
       :rootwrap_bin =>  node[:neutron][:rootwrap]
     )
 end

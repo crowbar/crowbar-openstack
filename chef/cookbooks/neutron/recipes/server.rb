@@ -66,7 +66,7 @@ else
   end
 end
 
-if node[:neutron][:use_ml2]
+if node[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware"
   plugin_cfg_path = "/etc/neutron/plugins/ml2/ml2_conf.ini"
 else
   plugin_cfg_path = agent_config_path
@@ -174,6 +174,9 @@ when "openvswitch", "cisco"
 when "linuxbridge"
   interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
   external_network_bridge = ""
+when "vmware"
+  interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+  external_network_bridge = ""
 end
 
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
@@ -196,7 +199,7 @@ template plugin_cfg_path do
     :vlan_start => vlan_start,
     :vlan_end => vlan_end
   )
-  only_if { node[:neutron][:use_ml2] }
+  only_if { node[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware" }
 end
 
 # Hardcode for now.
