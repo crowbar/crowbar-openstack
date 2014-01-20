@@ -99,6 +99,14 @@ else
 end
 Chef::Log.info("Glance server at #{glance_server_host}")
 
+nova_apis = search(:node, "roles:nova-multi-controller") || []
+if nova_apis.length > 0
+  nova_api = nova_apis[0]
+  nova_api_insecure = nova_api[:nova][:ssl][:enabled] && nova_api[:nova][:ssl][:insecure]
+else
+  nova_api_insecure = false
+end
+
 sql_env_filter = " AND database_config_environment:database-config-#{node[:cinder][:database_instance]}"
 sqls = search(:node, "roles:database-server#{sql_env_filter}")
 if sqls.length > 0
@@ -295,7 +303,8 @@ template "/etc/cinder/cinder.conf" do
             :glance_server_protocol => glance_server_protocol,
             :glance_server_host => glance_server_host,
             :glance_server_port => glance_server_port,
-            :glance_server_insecure => glance_server_insecure
+            :glance_server_insecure => glance_server_insecure,
+            :nova_api_insecure => nova_api_insecure
             )
 end
 
