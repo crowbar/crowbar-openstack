@@ -78,7 +78,7 @@ else
         path heat_path
         wrap_bins "heat"
     end
-    
+
     node[:heat][:platform][:services].each do |s|
         link_service s do
             virtualenv venv_path
@@ -94,7 +94,7 @@ node[:heat][:platform][:aux_dirs].each do |d|
        owner node[:heat][:user]
        group "root"
        mode 00755
-       action :create 
+       action :create
     end
 end
 
@@ -300,7 +300,7 @@ end
 service "heat-api" do
   service_name "openstack-heat-api" if node.platform == "suse"
   supports :status => true, :restart => true
-  action :enable
+  action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
   subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
 end
@@ -308,7 +308,7 @@ end
 service "heat-api-cfn" do
   service_name "openstack-heat-api-cfn" if node.platform == "suse"
   supports :status => true, :restart => true
-  action :enable
+  action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
   subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
 end
@@ -316,15 +316,16 @@ end
 service "heat-api-cloudwatch" do
   service_name "openstack-heat-api-cloudwatch" if node.platform == "suse"
   supports :status => true, :restart => true
-  action :enable
+  action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
   subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
 end
 
 execute "heat-db-sync" do
   # do not run heat-db-setup since it wants to install packages and setup db passwords
-  command "#{venv_prefix}python -m heat.db.sync" 
+  command "#{venv_prefix}python -m heat.db.sync"
   action :nothing
+  not_if { node[:platform] == "suse" }
 end
 
 node.save
