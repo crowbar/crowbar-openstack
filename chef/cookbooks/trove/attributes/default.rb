@@ -17,4 +17,4 @@
 # limitations under the License.
 #
 
-node["openstack"]["database_service"]["verbose"] = node[:trove][:verbose]
+default[:trove][:verbose] = true

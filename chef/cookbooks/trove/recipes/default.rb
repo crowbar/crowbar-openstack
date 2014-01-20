@@ -23,6 +23,7 @@ end
 
 # TODO developer mode is set so we don't have to handle data bags yet
 node.set[:openstack][:developer_mode] = true
+node.set["openstack"]["database_service"]["verbose"] = node[:trove][:verbose]
 
 # XXX mysql configuration
 # this part should go away once trove supports postgresl
@@ -75,4 +76,3 @@ end
 include_recipe "openstack-database_service::api"
 include_recipe "openstack-database_service::conductor"
 include_recipe "openstack-database_service::taskmanager"
-
