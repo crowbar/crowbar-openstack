@@ -452,7 +452,8 @@ template "/etc/neutron/neutron.conf" do
       :per_tenant_vlan => per_tenant_vlan,
       :use_ml2 => neutron[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware",
       :networking_plugin => neutron[:neutron][:networking_plugin],
-      :rootwrap_bin =>  node[:neutron][:rootwrap]
+      :rootwrap_bin =>  node[:neutron][:rootwrap],
+      :use_namespaces => true
     )
 end
 
