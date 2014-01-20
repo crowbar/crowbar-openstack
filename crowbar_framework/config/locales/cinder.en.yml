@@ -30,6 +30,8 @@ en:
             netapp_login: Username for accessing NetApp
             netapp_password: Password for accessing NetApp
             netapp_vfiler: The vFiler unit name if using vFiler to host OpenStack volumes
+            nfs_shares: List of Netapp NFS Exports
+            nfs_shares_config_hint: Format one entry per line in the form hostname:/vol/path optional-nfs-mount-options
 
           emc_parameters: EMC Parameters
           emc:

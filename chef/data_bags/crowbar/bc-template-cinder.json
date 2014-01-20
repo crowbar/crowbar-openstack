@@ -55,6 +55,7 @@
         "netapp": {
           "storage_family": "ontap_7mode",
           "storage_protocol": "iscsi",
+          "nfs_shares": "",
           "vserver": "",
           "netapp_server_hostname": "192.168.124.11",
           "netapp_server_port": 443,
@@ -104,7 +105,7 @@
   "deployment": {
     "cinder": {
       "crowbar-revision": 0,
-      "schema-revision": 3,
+      "schema-revision": 4,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
