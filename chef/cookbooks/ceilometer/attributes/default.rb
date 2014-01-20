@@ -26,6 +26,9 @@ default[:ceilometer][:verbose] = false
 
 default[:ceilometer][:use_mongodb] = true
 
+default[:ceilometer][:meters_interval] = 600
+default[:ceilometer][:cpu_interval] = 600
+
 default[:ceilometer][:db][:database] = "ceilometer"
 default[:ceilometer][:db][:user] = "ceilometer"
 default[:ceilometer][:db][:password] = "" # Set by Recipe

@@ -140,10 +140,6 @@ else
     command "cp #{ceilometer_path}/etc/ceilometer/policy.json /etc/ceilometer"
     creates "/etc/ceilometer/policy.json"
   end
-  execute "cp_pipeline.yaml" do
-    command "cp #{ceilometer_path}/etc/ceilometer/pipeline.yaml /etc/ceilometer"
-    creates "/etc/ceilometer/pipeline.yaml"
-  end
 end
 
 node.set_unless[:ceilometer][:metering_secret] = secure_password
@@ -199,6 +195,7 @@ service "ceilometer-collector" do
   supports :status => true, :restart => true, :start => true, :stop => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
+  subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
 end
 
 service "ceilometer-api" do
@@ -206,6 +203,7 @@ service "ceilometer-api" do
   supports :status => true, :restart => true, :start => true, :stop => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
+  subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
 end
 
 keystone_register "register ceilometer user" do

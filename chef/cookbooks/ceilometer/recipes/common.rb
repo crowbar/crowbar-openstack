@@ -117,3 +117,13 @@ template "/etc/ceilometer/ceilometer.conf" do
     )
 end
 
+template "/etc/ceilometer/pipeline.yaml" do
+  source "pipeline.yaml.erb"
+  owner node[:ceilometer][:user]
+  group "root"
+  mode "0640"
+  variables({
+      :meters_interval => node[:ceilometer][:meters_interval],
+      :cpu_interval => node[:ceilometer][:cpu_interval]
+  })
+end

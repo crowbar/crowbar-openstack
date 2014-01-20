@@ -3,9 +3,13 @@
     = header @dep_raw, true
 
   .panel-body
-    = boolean_field :use_mongodb
     = instance_field :database
     = instance_field :keystone
     = instance_field :rabbitmq
+
+    = integer_field cpu_interval
+    = integer_field meters_interval
+
+    = boolean_field :use_mongodb
 
     = render "barclamp/git/pfsdeps"
