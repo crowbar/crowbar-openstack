@@ -108,7 +108,9 @@ glance_api_servers=<%= @glance_server_protocol %>://<%= @glance_server_host %>:<
 
 # Allow to perform insecure SSL (https) requests to glance
 # (boolean value)
+<% unless @glance_server_insecure.nil? -%>
 glance_api_insecure=<%= @glance_server_insecure %>
+<% end -%>
 
 # the topic scheduler nodes listen on (string value)
 #scheduler_topic=cinder-scheduler
