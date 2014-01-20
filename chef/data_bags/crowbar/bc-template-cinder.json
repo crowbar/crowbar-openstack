@@ -48,7 +48,6 @@
           "eqlx_use_chap": false,
           "eqlx_chap_login": "chapadmin",
           "eqlx_chap_password": "12345",
-          "eqlx_ssh_keepalive_interval": 1200,
           "eqlx_cli_timeout": 30,
           "eqlx_pool": "default"
         },
@@ -105,7 +104,7 @@
   "deployment": {
     "cinder": {
       "crowbar-revision": 0,
-      "schema-revision": 4,
+      "schema-revision": 5,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
