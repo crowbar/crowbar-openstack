@@ -53,6 +53,8 @@ class CeilometerService < ServiceObject
       NodeObject.find("roles:nova-multi-compute-xen")
 
     nodes       = NodeObject.all
+    nodes.delete_if { |n| n.nil? or n.admin? }
+
     server_nodes = nodes.select { |n| n.intended_role == "controller" }
     server_nodes = [ nodes.first ] if server_nodes.empty?
 
