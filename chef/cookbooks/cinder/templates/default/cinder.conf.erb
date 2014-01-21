@@ -416,11 +416,11 @@ auth_strategy=keystone
 # Info to match when looking for nova in the service catalog.
 # Format is : separated values of the form:
 # <service_type>:<service_name>:<endpoint_type> (string value)
-#nova_catalog_info=compute:nova:publicURL
+nova_catalog_info=compute:nova:internalURL
 
 # Same as nova_catalog_info, but for admin endpoint. (string
 # value)
-#nova_catalog_admin_info=compute:nova:adminURL
+nova_catalog_admin_info=compute:nova:adminURL
 
 # Override service catalog lookup with template for nova
 # endpoint e.g. http://localhost:8774/v2/%(tenant_id)s (string
@@ -440,7 +440,7 @@ auth_strategy=keystone
 
 # Allow to perform insecure SSL requests to nova (boolean
 # value)
-#nova_api_insecure=false
+nova_api_insecure=<%= @nova_api_insecure %>
 
 
 #
