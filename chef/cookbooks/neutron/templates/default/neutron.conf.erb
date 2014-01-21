@@ -140,20 +140,19 @@ rpc_backend = neutron.openstack.common.rpc.impl_kombu
 <% if @rabbit_settings -%>
 # IP address of the RabbitMQ installation
 rabbit_host=<%= @rabbit_settings[:address] %>
+# Password of the RabbitMQ server
+rabbit_password=<%= @rabbit_settings[:password] %>
 <% unless @rabbit_settings[:port].nil? -%>
 # Port where RabbitMQ server is running/listening
 rabbit_port=<%= @rabbit_settings[:port] %>
 <% end -%>
-# User ID used for RabbitMQ connections
-rabbit_userid=<%= @rabbit_settings[:user] %>
-# Password of the RabbitMQ server
-rabbit_password=<%= @rabbit_settings[:password] %>
-# Location of a virtual RabbitMQ installation.
-rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
-<% end -%>
 # RabbitMQ single or HA cluster (host:port pairs i.e: host1:5672, host2:5672)
 # rabbit_hosts is defaulted to '$rabbit_host:$rabbit_port'
 # rabbit_hosts = localhost:5672
+# User ID used for RabbitMQ connections
+rabbit_userid=<%= @rabbit_settings[:user] %>
+# Location of a virtual RabbitMQ installation.
+rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 # Maximum retries with trying to connect to RabbitMQ
 # (the default of 0 implies an infinite retry count)
 # rabbit_max_retries = 0
@@ -162,6 +161,7 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 # Use HA queues in RabbitMQ (x-ha-policy: all).You need to
 # wipe RabbitMQ database when changing this option. (boolean value)
 # rabbit_ha_queues = false
+<% end -%>
 
 # QPID
 # rpc_backend=neutron.openstack.common.rpc.impl_qpid
@@ -234,8 +234,9 @@ notification_driver = neutron.openstack.common.notifier.rpc_notifier
 # max_fixed_ips_per_port = 5
 
 # =========== items for agent management extension =============
-# Seconds to regard the agent as down.
-# agent_down_time = 5
+# Seconds to regard the agent as down; should be at least twice
+# report_interval, to be sure the agent is down for good
+# agent_down_time = 9
 # ===========  end of items for agent management extension =====
 
 # =========== items for agent scheduler extension =============
@@ -262,6 +263,10 @@ notification_driver = neutron.openstack.common.notifier.rpc_notifier
 # ===========  end of items for agent scheduler extension =====
 
 # =========== WSGI parameters related to the API server ==============
+# Number of separate worker processes to spawn.  The default, 0, runs the
+# worker thread in the current process.  Greater than 0 launches that number of
+# child processes as workers.  The parent process manages them.
+# api_workers = 0
 # Sets the value of TCP_KEEPIDLE in seconds to use for each server socket when
 # starting API server. Not supported on OS X.
 # tcp_keepidle = 600
@@ -330,8 +335,8 @@ ssl_ca_file = <%= @ssl_ca_file %>
 root_helper=sudo <%=@rootwrap_bin%> /etc/neutron/rootwrap.conf
 
 # =========== items for agent management extension =============
-# seconds between nodes reporting state to server, should be less than
-# agent_down_time
+# seconds between nodes reporting state to server; should be less than
+# agent_down_time, best if it is half or less than agent_down_time
 # report_interval = 4
 
 # ===========  end of items for agent management extension =====
