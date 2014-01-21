@@ -27,6 +27,7 @@ unless node[:neutron][:use_gitrepo]
   end
   pkgs = node[:neutron][:platform][:pkgs]
   pkgs.each { |p| package p }
+  package node[:neutron][:platform][:metering_agent_pkg]
   file "/etc/default/neutron-server" do
     action :delete
     not_if { node[:platform] == "suse" }
@@ -63,6 +64,10 @@ else
   link_service "neutron-metadata-agent" do
     virtualenv venv_path
     bin_name "neutron-metadata-agent --config-dir /etc/neutron/ --config-file /etc/neutron/metadata_agent.ini"
+  end
+  link_service "neutron-metering-agent" do
+    virtualenv venv_path
+    bin_name "neutron-metering-agent --config-dir /etc/neutron/ --config-file /etc/neutron/metering_agent.ini"
   end
 end
 
@@ -243,6 +248,19 @@ template "/etc/neutron/dhcp_agent.ini" do
   )
 end
 
+template "/etc/neutron/metering_agent.ini" do
+  cookbook "neutron"
+  source "metering_agent.ini.erb"
+  owner node[:neutron][:platform][:user]
+  group "root"
+  mode "0640"
+  variables(
+    :debug => node[:neutron][:debug],
+    :interface_driver => interface_driver,
+    :use_namespaces => "True"
+  )
+end
+
 # Double ditto.
 
 novas = search(:node, "roles:nova-multi-controller") || []
@@ -356,6 +374,13 @@ service node[:neutron][:platform][:l3_agent_name] do
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
   not_if { node[:neutron][:networking_plugin] == "vmware" }
+end
+
+service node[:neutron][:platform][:metering_agent_name] do
+  supports :status => true, :restart => true
+  action :enable
+  subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+  subscribes :restart, resources("template[/etc/neutron/metering_agent.ini]")
 end
 
 # This is some bad hack: we need to restart the server and the agent before
