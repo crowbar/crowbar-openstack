@@ -39,7 +39,7 @@
   "deployment": {
     "ceilometer": {
       "crowbar-revision": 0,
-      "schema-revision": 1,
+      "schema-revision": 2,
       "element_states": {
         "ceilometer-server": [ "readying", "ready", "applying" ],
         "ceilometer-cagent": [ "readying", "ready", "applying" ],
