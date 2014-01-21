@@ -46,6 +46,8 @@ class HeatService < ServiceObject
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
 
     nodes = NodeObject.all
+    nodes.delete_if { |n| n.nil? or n.admin? }
+
     if nodes.size >= 1
       controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
       base["deployment"]["heat"]["elements"] = {
