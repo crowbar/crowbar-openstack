@@ -47,15 +47,6 @@ props = [ {'db_name' => node[:neutron][:db][:database],
           'db_conn_name' => 'sql_connection'  }
         ]
 
-if node[:networking_plugin] == "cisco"
-  node.set_unless['neutron']['db']['cisco_password'] = secure_password
-  props << {'db_name' => node[:neutron][:db][:cisco_database],
-            'db_user' => node[:neutron][:db][:cisco_user],
-            'db_pass' => node[:neutron][:db][:cisco_password],
-            'sql_address_name' => 'cisco_sql_address',
-            'db_conn_name' => 'cisco_sql_connection'}
-end
-
 # Create the Neutron Databases
 props.each do |prop|
   db_name = prop['db_name']
