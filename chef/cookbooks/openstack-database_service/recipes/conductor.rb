@@ -33,6 +33,7 @@ end
 db_user = node["openstack"]["database_service"]["db"]["username"]
 db_pass = db_password "openstack-database_service"
 db_uri = db_uri("database_service", db_user, db_pass).to_s
+rabbit_pass = user_password node["openstack"]["database_service"]["rabbit"]["username"]
 identity_uri = endpoint("identity-api")
 
 template "/etc/trove/trove-conductor.conf" do
@@ -42,7 +43,8 @@ template "/etc/trove/trove-conductor.conf" do
   mode 00640
   variables(
     :database_connection => db_uri,
-    :identity_uri => identity_uri
+    :identity_uri => identity_uri,
+    :rabbit_pass => rabbit_pass
     )
 
   notifies :restart, "service[trove-conductor]", :immediately
