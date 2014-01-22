@@ -30,9 +30,7 @@
       "database_instance": "none",
       "db": {
         "database": "neutron",
-        "user": "neutron",
-        "cisco_database": "cisco_ovs",
-        "cisco_user": "cisco_ovs"
+        "user": "neutron"
       },
       "sql": {
         "min_pool_size": 30,
@@ -64,7 +62,7 @@
   "deployment": {
     "neutron": {
       "crowbar-revision": 0,
-      "schema-revision": 2,
+      "schema-revision": 3,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ]
       },

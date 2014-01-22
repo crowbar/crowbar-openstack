@@ -57,11 +57,8 @@
                     "database_instance": { "type": "str", "required": true },
                     "db": { "type": "map", "required": true, "mapping": {
                       "database": { "type" : "str", "required" : true },
-                      "cisco_database": { "type" : "str", "required" : true },
                       "user": { "type" : "str", "required" : true },
-                      "cisco_user": { "type" : "str", "required" : true },
-                      "password": { "type" : "str" },
-                      "cisco_password": { "type" : "str" }
+                      "password": { "type" : "str" }
                     }},
                     "sql": { "type": "map", "required": true, "mapping": {
                       "min_pool_size": { "type" : "int", "required" : true },

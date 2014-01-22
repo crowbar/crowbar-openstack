@@ -32,12 +32,6 @@ default[:neutron][:cisco_support] = false
 default[:neutron][:db][:database] = "neutron"
 default[:neutron][:db][:user] = "neutron"
 default[:neutron][:db][:password] = "" # Set by Recipe
-default[:neutron][:db][:ovs_database] = "ovs"
-default[:neutron][:db][:ovs_user] = "ovs"
-default[:neutron][:db][:ovs_password] = "" # Set by Recipe
-default[:neutron][:db][:cisco_database] = "cisco_ovs"
-default[:neutron][:db][:cisco_user] = "cisco_ovs"
-default[:neutron][:db][:cisco_password] = "" # Set by Recipe
 default[:neutron][:network][:fixed_router] = "127.0.0.1" # Set by Recipe
 default[:neutron][:network][:private_networks] = [] # Set by Recipe
 # Default range for GRE tunnels
