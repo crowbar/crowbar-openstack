@@ -23,7 +23,7 @@ end
 
 # TODO developer mode is set so we don't have to handle data bags yet
 node.set[:openstack][:developer_mode] = true
-node.set["openstack"]["database_service"]["verbose"] = node[:trove][:verbose]
+node.set['openstack']['database_service']['verbose'] = node[:trove][:verbose]
 
 [['keystone', 'identity-api'],
   ['nova', 'compute-api'],
@@ -32,10 +32,10 @@ node.set["openstack"]["database_service"]["verbose"] = node[:trove][:verbose]
 ].each do |comp, endpoint|
   instance = get_instance(:node, "recipes:#{comp}\\:\\:server")
   Chef::Log.info("Found #{comp} server on #{instance}.")
-  node.set_unless["openstack"]["endpoints"][endpoint] = {}
-  node.set["openstack"]["endpoints"][endpoint]["host"] = instance[:fqdn]
-  node.set["openstack"]["endpoints"][endpoint]["scheme"] = instance[:protocol]
-  node.set["openstack"]["endpoints"][endpoint]["port"] = instance[:service_port]
+  node.set_unless['openstack']['endpoints'][endpoint] = {}
+  node.set['openstack']['endpoints'][endpoint]['host'] = instance[:fqdn]
+  node.set['openstack']['endpoints'][endpoint]['scheme'] = instance[:protocol]
+  node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
 end
 
 # XXX mysql configuration
@@ -44,11 +44,11 @@ end
   package pkg
 end
 
-service "mysql" do
+service 'mysql' do
   action :start
 end
 
-node.set["openstack"]["db"]["trove"]["db_type"] = "mysql"
+node.set['openstack']['db']['trove']['db_type'] = 'mysql'
 
 # copied from openstack-common/database/db_create_with_user
 conn = {
@@ -57,27 +57,27 @@ conn = {
     :username => 'root',
   }
 
-database "create trove database" do
+database 'create trove database' do
   provider ::Chef::Provider::Database::Mysql
   connection conn
-  database_name "trove"
+  database_name 'trove'
   action :create
 end
 
 # create user
-database_user "trove" do
+database_user 'trove' do
   provider ::Chef::Provider::Database::MysqlUser
   connection conn
-  password "openstack-database_service"
+  password 'openstack-database_service'
   action :create
 end
 
 # grant privs to user
-database_user "trove" do
+database_user 'trove' do
   provider ::Chef::Provider::Database::MysqlUser
   connection conn
-  password "openstack-database_service"
-  database_name "trove"
+  password 'openstack-database_service'
+  database_name 'trove'
   host '%'
   privileges [:all]
   action :grant
@@ -85,7 +85,7 @@ end
 
 # XXX enable the identity_registration recipe instead of setting up
 # mysql manually above
-# include_recipe "openstack-database_service::identity_registration"
-include_recipe "openstack-database_service::api"
-include_recipe "openstack-database_service::conductor"
-include_recipe "openstack-database_service::taskmanager"
+# include_recipe 'openstack-database_service::identity_registration'
+include_recipe 'openstack-database_service::api'
+include_recipe 'openstack-database_service::conductor'
+include_recipe 'openstack-database_service::taskmanager'
