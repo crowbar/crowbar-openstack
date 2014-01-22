@@ -25,6 +25,26 @@ end
 node.set[:openstack][:developer_mode] = true
 node.set["openstack"]["database_service"]["verbose"] = node[:trove][:verbose]
 
+[['keystone', 'identity-api'],
+  ['nova', 'compute-api'],
+  ['cinder', 'volume-api'],
+  ['swift', 'object-storage-api']
+].each do |comp, endpoint|
+  instances = search(:node, "recipes:#{comp}\\:\\:server AND "\
+    "#{comp}_config_environment:#{comp}-config-#{node[:trove][:keystone_instance]}") || []
+  if instances.length > 0
+    instance = instances[0]
+    instance = node if instance.name == node.name
+  else
+    instance = node
+  end
+  Chef::Log.info("Found #{comp} server on #{instance}.")
+  node.set_unless["openstack"]["endpoints"][endpoint] = {}
+  node.set["openstack"]["endpoints"][endpoint]["host"] = instance[:fqdn]
+  node.set["openstack"]["endpoints"][endpoint]["scheme"] = instance[:protocol]
+  node.set["openstack"]["endpoints"][endpoint]["port"] = instance[:service_port]
+end
+
 # XXX mysql configuration
 # this part should go away once trove supports postgresl
 ['mysql', 'python-mysql'].each do |pkg|

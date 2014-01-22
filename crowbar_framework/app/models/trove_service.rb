@@ -23,6 +23,12 @@ class TroveService < ServiceObject
   def create_proposal
     @logger.debug("Trove create_proposal: entering")
     base = super
+
+    base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
+    base["attributes"][@bc_name]["nova_instance"] = find_dep_proposal("nova")
+    base["attributes"][@bc_name]["cinder_instance"] = find_dep_proposal("cinder")
+    base["attributes"][@bc_name]["swift_instance"] = find_dep_proposal("swift")
+
     @logger.debug("Trove create_proposal: exiting")
     base
   end
@@ -33,10 +39,10 @@ class TroveService < ServiceObject
 
   def proposal_dependencies(role)
     answer = []
-    answer << { "barclamp" => "keystone", "inst" => role.default_attributes["nova"]["keystone_instance"] }
-    answer << { "barclamp" => "nova", "inst" => role.default_attributes["nova"]["nova_instance"] }
-    answer << { "barclamp" => "cinder", "inst" => role.default_attributes["nova"]["cinder_instance"] }
-    answer << { "barclamp" => "glance", "inst" => role.default_attributes["nova"]["glance_instance"] }
+    answer << { "barclamp" => "keystone", "inst" => role.default_attributes[@bc_name]["keystone_instance"] }
+    answer << { "barclamp" => "nova", "inst" => role.default_attributes[@bc_name]["nova_instance"] }
+    answer << { "barclamp" => "cinder", "inst" => role.default_attributes[@bc_name]["cinder_instance"] }
+    answer << { "barclamp" => "swift", "inst" => role.default_attributes[@bc_name]["swift_instance"] }
     answer
   end
 end
