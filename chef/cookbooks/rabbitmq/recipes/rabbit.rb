@@ -20,7 +20,7 @@
 
 node[:rabbitmq][:address] = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 
-include_recipe "rabbitmq"
+include_recipe "rabbitmq::default"
 
 # add a vhost to the queue
 rabbitmq_vhost node[:rabbitmq][:vhost] do
