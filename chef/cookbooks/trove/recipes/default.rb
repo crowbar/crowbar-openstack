@@ -30,14 +30,7 @@ node.set["openstack"]["database_service"]["verbose"] = node[:trove][:verbose]
   ['cinder', 'volume-api'],
   ['swift', 'object-storage-api']
 ].each do |comp, endpoint|
-  instances = search(:node, "recipes:#{comp}\\:\\:server AND "\
-    "#{comp}_config_environment:#{comp}-config-#{node[:trove][:keystone_instance]}") || []
-  if instances.length > 0
-    instance = instances[0]
-    instance = node if instance.name == node.name
-  else
-    instance = node
-  end
+  instance = get_instance(:node, "recipes:#{comp}\\:\\:server")
   Chef::Log.info("Found #{comp} server on #{instance}.")
   node.set_unless["openstack"]["endpoints"][endpoint] = {}
   node.set["openstack"]["endpoints"][endpoint]["host"] = instance[:fqdn]
