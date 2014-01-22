@@ -109,12 +109,24 @@ api_paste_config = api-paste.ini
 
 # ============ notifer queue kombu connection options ========================
 
-notifier_queue_hostname = localhost
-notifier_queue_userid = guest
-notifier_queue_password = guest
+<% if node['openstack']['mq']['database_service']['service_type'] == 'rabbitmq' %>
+notifier_queue_hostname = <%= node['openstack']['mq']['database_service']['rabbit']['host'] %>
+notifier_queue_userid = <%= node['openstack']['mq']['database_service']['rabbit']['userid'] %>
+notifier_queue_password = <%= @rabbit_pass %>
 notifier_queue_ssl = False
-notifier_queue_port = 5672
-notifier_queue_virtual_host = /
+notifier_queue_port = <%= node['openstack']['mq']['database_service']['rabbit']['port'] %>
+notifier_queue_virtual_host = <%= node['openstack']['mq']['database_service']['rabbit']['vhost'] %>
+<% end %>
+
+<% if node['openstack']['mq']['database_service']['service_type'] == 'qpid' %>
+notifier_queue_hostname = <%= node['openstack']['mq']['database_service']['qpid']['host'] %>
+notifier_queue_userid = <%= node['openstack']['mq']['database_service']['qpid']['username'] %>
+notifier_queue_password = <%= node['openstack']['mq']['database_service']['qpid']['password'] %>
+notifier_queue_ssl = False
+notifier_queue_port = <%= node['openstack']['mq']['database_service']['qpid']['port'] %>
+notifier_queue_virtual_host = <%= node['openstack']['mq']['database_service']['qpid']['vhost'] %>
+<% end %>
+
 notifier_queue_transport = memory
 
 control_exchange = trove
