@@ -678,7 +678,7 @@ use_syslog=<%= node[:cinder][:use_syslog] ? "True" : "False" %>
 
 # Driver or drivers to handle sending notifications (multi
 # valued)
-notification_driver=cinder.openstack.common.notifier.rabbit_notifier
+notification_driver=cinder.openstack.common.notifier.rpc_notifier
 
 # Default notification level for outgoing notifications
 # (string value)
