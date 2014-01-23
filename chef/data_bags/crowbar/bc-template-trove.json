@@ -7,7 +7,8 @@
       "keystone_instance": "none",
       "nova_instance": "none",
       "swift_instance": "none",
-      "cinder_instance": "none"
+      "cinder_instance": "none",
+      "rabbit_instance": "none"
     }
   },
   "deployment": {

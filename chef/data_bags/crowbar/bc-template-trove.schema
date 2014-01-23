@@ -16,7 +16,8 @@
             "nova_instance": { "type": "str", "required": true },
             "cinder_instance": { "type": "str", "required": true },
             "keystone_instance": { "type": "str", "required": true },
-            "swift_instance": { "type": "str", "required": true }
+            "swift_instance": { "type": "str", "required": true },
+            "rabbit_instance": { "type": "str", "required": true }
           }
         }
       }

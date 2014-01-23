@@ -38,6 +38,13 @@ node.set['openstack']['database_service']['verbose'] = node[:trove][:verbose]
   node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
 end
 
+rabbitmq = get_instance(:node, 'roles:rabbitmq-server')
+Chef::Log.info("Found rabbitmq server on #{rabbitmq}.")
+node.set['openstack']['mq']['database_service']['service_type'] = 'rabbitmq'
+node.set['openstack']['mq']['database_service']['rabbit']['host'] = rabbitmq[:fqdn]
+node.set['openstack']['mq']['database_service']['rabbit']['use_ssl'] = True if rabbitmq[:protocol] == 'https'
+node.set['openstack']['mq']['database_service']['rabbit']['port'] = rabbitmq[:service_port]
+
 # XXX mysql configuration
 # this part should go away once trove supports postgresl
 ['mysql', 'python-mysql'].each do |pkg|
