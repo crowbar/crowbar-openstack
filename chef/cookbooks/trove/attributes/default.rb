@@ -17,4 +17,4 @@
 # limitations under the License.
 #
 
-default[:trove][:verbose] = true
+default[:trove][:verbose] = false
