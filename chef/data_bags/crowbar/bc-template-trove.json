@@ -3,6 +3,7 @@
   "description": "Sets up OpenStack Trove Database Service",
   "attributes": {
     "trove": {
+      "debug": false,
       "verbose": false,
       "keystone_instance": "none",
       "nova_instance": "none",

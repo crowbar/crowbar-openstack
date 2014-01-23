@@ -12,6 +12,7 @@
           "type": "map",
           "required": true,
           "mapping": {
+            "debug": { "type": "bool", "required": true },
             "verbose": { "type": "bool", "required": true },
             "nova_instance": { "type": "str", "required": true },
             "cinder_instance": { "type": "str", "required": true },

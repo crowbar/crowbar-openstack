@@ -18,3 +18,4 @@
 #
 
 default[:trove][:verbose] = false
+default[:trove][:debug] = false
