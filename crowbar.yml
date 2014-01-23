@@ -66,7 +66,7 @@ rpms:
       - bare openstack havana http://repos.fedorapeople.org/repos/openstack/openstack-havana/epel-6/
       - bare MongoDB 10 http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
   pkgs:
-    - openstack-ceilometer
+    - openstack-ceilometer-alarm
     - openstack-ceilometer-api
     - openstack-ceilometer-central
     - openstack-ceilometer-collector
@@ -74,9 +74,9 @@ rpms:
     - openstack-ceilometer-compute
     - python-ceilometer
     - python-ceilometerclient
-    - mongo-10gen
-    - mongo-10gen-server
-    - pymongo
+    - mongodb
+    - mongodb-server
+    - python-pymongo
 
 pips:
   - python-ceilometerclient>=1.0.0
