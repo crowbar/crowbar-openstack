@@ -26,9 +26,10 @@ node.set[:openstack][:developer_mode] = true
 node.set['openstack']['database_service']['verbose'] = node[:trove][:verbose]
 
 [['keystone', 'identity-api'],
-  ['nova', 'compute-api'],
-  ['cinder', 'volume-api'],
-  ['swift', 'object-storage-api']
+ ['keystone', 'identity-admin'],
+ ['nova', 'compute-api'],
+ ['cinder', 'volume-api'],
+ ['swift', 'object-storage-api']
 ].each do |comp, endpoint|
   instance = get_instance(:node, "recipes:#{comp}\\:\\:server")
   Chef::Log.info("Found #{comp} server on #{instance}.")
