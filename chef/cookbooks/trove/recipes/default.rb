@@ -93,9 +93,7 @@ database_user 'trove' do
   action :grant
 end
 
-# XXX enable the identity_registration recipe instead of setting up
-# mysql manually above
-# include_recipe 'openstack-database_service::identity_registration'
+include_recipe 'openstack-database_service::identity_registration'
 include_recipe 'openstack-database_service::api'
 include_recipe 'openstack-database_service::conductor'
 include_recipe 'openstack-database_service::taskmanager'
