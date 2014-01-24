@@ -28,7 +28,7 @@ class TroveService < ServiceObject
     base["attributes"][@bc_name]["nova_instance"] = find_dep_proposal("nova")
     base["attributes"][@bc_name]["cinder_instance"] = find_dep_proposal("cinder")
     base["attributes"][@bc_name]["swift_instance"] = find_dep_proposal("swift")
-    base["attributes"][@bc_name]["rabbit_instance"] = find_dep_proposal("rabbit")
+    base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
 
     @logger.debug("Trove create_proposal: exiting")
     base
@@ -44,7 +44,7 @@ class TroveService < ServiceObject
     answer << { "barclamp" => "nova", "inst" => role.default_attributes[@bc_name]["nova_instance"] }
     answer << { "barclamp" => "cinder", "inst" => role.default_attributes[@bc_name]["cinder_instance"] }
     answer << { "barclamp" => "swift", "inst" => role.default_attributes[@bc_name]["swift_instance"] }
-    answer << { "barclamp" => "rabbit", "inst" => role.default_attributes[@bc_name]["rabbit_instance"] }
+    answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes[@bc_name]["rabbitmq_instance"] }
     answer
   end
 end
