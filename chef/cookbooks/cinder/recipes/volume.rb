@@ -50,19 +50,11 @@ def make_loopback_volume(node,volname)
     end
   end
 
-  template "boot.looplvm" do
-    path "/etc/init.d/boot.looplvm"
-    source "boot.looplvm.erb"
-    owner "root"
-    group "root"
-    mode 0755
-    variables(:loop_lvm_path => fname)
-    notifies :reload, "service[boot.looplvm]", :immediately
-  end
-
-  service "boot.looplvm" do
-    supports :start => true, :stop => true
-    action [:enable, :start]
+  if %w(suse).include? node.platform
+    service "boot.looplvm" do
+      supports :start => true, :stop => true
+      action [:enable, :start]
+    end
   end
 
   bash "create volume group" do
@@ -116,6 +108,17 @@ claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node,"Cinder"
 case
 when node[:cinder][:volume][:volume_type] == "eqlx"
 when (node[:cinder][:volume][:volume_type] == "local")
+  if %w(suse).include? node.platform
+    template "boot.looplvm" do
+      path "/etc/init.d/boot.looplvm"
+      source "boot.looplvm.erb"
+      owner "root"
+      group "root"
+      mode 0755
+      variables(:loop_lvm_path => node["cinder"]["volume"]["local_file"])
+      notifies :reload, "service[boot.looplvm]", :immediately
+    end
+  end
   make_loopback_volume(node,volname)
 when node[:cinder][:volume][:volume_type] == "raw"
   make_volume(node,volname,unclaimed_disks,claimed_disks)
