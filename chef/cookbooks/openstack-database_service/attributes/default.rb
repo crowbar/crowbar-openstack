@@ -49,8 +49,6 @@ end
 default["openstack"]["database_service"]["db"]["username"] = "trove"
 
 default["openstack"]["database_service"]["service_user"] = "trove"
-# TODO set this in the proposal
-default["openstack"]["database_service"]["service_password"] = "secret"
 default["openstack"]["database_service"]["service_role"] = "admin"
 default["openstack"]["database_service"]["service_tenant_name"] = "service"
 default["openstack"]["database_service"]["region"] = "RegionOne"
