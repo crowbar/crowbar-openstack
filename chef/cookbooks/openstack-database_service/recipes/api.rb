@@ -79,6 +79,7 @@ template "/etc/trove/api-paste.ini" do
   mode 00640
   variables(
     :identity_admin_uri => identity_admin_uri,
+    :identity_uri => identity_uri,
     :admin_token => admin_token
     )
 

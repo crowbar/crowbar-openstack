@@ -17,7 +17,7 @@ paste.filter_factory = trove.common.extensions:factory
 
 [filter:tokenauth]
 paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
-auth_uri = <%= @identity_admin_uri.to_s %>
+auth_uri = <%= @identity_uri.to_s %>
 auth_host = <%= @identity_admin_uri.host %>
 auth_port = <%= @identity_admin_uri.port %>
 auth_protocol = <%= @identity_admin_uri.scheme %>
