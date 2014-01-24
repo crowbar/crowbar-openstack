@@ -39,6 +39,11 @@ case "$1" in
             losetup -f $LOOP_LVM
             rc_status -v
 
+            # Need to tell LVM to rescan
+            if [ -f /etc/init.d/boot.lvm ]; then
+                /etc/init.d/boot.lvm start
+            fi
+
         elif [ -b "$loopdev" ]; then
             echo -n "Loop mount unnecessary; $LOOP_LVM already available via $loopdev"
             rc_failed 0
