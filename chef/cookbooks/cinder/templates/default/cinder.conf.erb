@@ -339,6 +339,9 @@ glance_api_insecure=<%= @glance_server_insecure %>
 
 # availability zone of this node (string value)
 #storage_availability_zone=nova
+<% unless @availability_zone.nil? -%>
+storage_availability_zone=<%= @availability_zone %>
+<% end -%>
 
 # default availability zone to use when creating a new volume.
 # If this is not set then we use the value from the

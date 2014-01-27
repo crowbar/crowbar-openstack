@@ -286,6 +286,13 @@ if node[:cinder][:api][:protocol] == 'https'
   end
 end
 
+availability_zone = nil
+unless node[:crowbar_wall].nil? or node[:crowbar_wall][:openstack].nil?
+  if node[:crowbar_wall][:openstack][:availability_zone] != ""
+    availability_zone = node[:crowbar_wall][:openstack][:availability_zone]
+  end
+end
+
 template "/etc/cinder/cinder.conf" do
   source "cinder.conf.erb"
   owner node[:cinder][:user]
@@ -304,7 +311,8 @@ template "/etc/cinder/cinder.conf" do
             :glance_server_host => glance_server_host,
             :glance_server_port => glance_server_port,
             :glance_server_insecure => glance_server_insecure,
-            :nova_api_insecure => nova_api_insecure
+            :nova_api_insecure => nova_api_insecure,
+            :availability_zone => availability_zone
             )
 end
 
