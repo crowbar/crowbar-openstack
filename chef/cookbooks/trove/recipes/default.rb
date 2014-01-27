@@ -21,9 +21,6 @@ class ::Chef::Recipe
   include ::Openstack
 end
 
-# TODO developer mode is set so we don't have to handle data bags yet
-node.set[:openstack][:developer_mode] = true
-
 node.set['openstack']['database_service']['verbose'] = node[:trove][:verbose]
 node.set['openstack']['database_service']['debug'] = node[:trove][:debug]
 

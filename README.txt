@@ -15,6 +15,46 @@ About this Barclamp: Trove
 
 TODO
 
+
+Data bags
+-----
+
+openssl rand -base64 512 | tr -d '\r\n' > /etc/chef/openstack_data_bag_secret
+scp /etc/chef/openstack_data_bag_secret root@trove-api-node:/etc/chef/
+
+export EDITOR=vi
+knife data bag create secrets openstack_identity_bootstrap_token --secret-file /etc/chef/openstack_data_bag_secret
+
+{
+  "id": "openstack_identity_bootstrap_token",
+  "openstack_identity_bootstrap_token": "406356008824"
+}
+
+knife data bag create db_passwords openstack-database_service --secret-file /etc/chef/openstack_data_bag_secret
+
+{
+  "openstack-database_service": "db_pass",
+  "id": "openstack-database_service"
+}
+
+knife data bag create user_passwords openstack-database_service --secret-file /etc/chef/openstack_data_bag_secret 
+{
+  "id": "openstack-database_service",
+  "openstack-database_service": "user-pass"
+}
+
+knife data bag create user_passwords guest --secret-file /etc/chef/openstack_data_bag_secret
+
+{
+  "id": "guest",
+  "guest": "guest-pass"
+}
+
+Note: for development, you do not have to use databags and can simply set developer_mode in the default trove recipe:
+
+node.set[:openstack][:developer_mode] = true
+
+
 Contributing
 ------------
 
