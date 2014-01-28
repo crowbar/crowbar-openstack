@@ -155,7 +155,7 @@ auth_encryption_key=%ENCRYPTION_KEY%
 #disable_process_locking=false
 
 # Directory to use for lock files. (string value)
-#lock_path=<None>
+lock_path=/var/lock/heat
 
 
 #
@@ -767,7 +767,7 @@ admin_tenant_name=<%= @keystone_service_tenant %>
 
 # Directory used to cache files related to PKI tokens (string
 # value)
-#signing_dir=<None>
+signing_dir=/var/cache/heat/keystone-signing
 
 # If defined, the memcache server(s) to use for caching (list
 # value)
