@@ -30,7 +30,7 @@ node.set['openstack']['database_service']['debug'] = node[:trove][:debug]
  ['cinder', 'volume-api'],
  ['swift', 'object-storage-api']
 ].each do |comp, endpoint|
-  instance = get_instance(:node, "recipes:#{comp}\\:\\:server")
+  instance = get_instance("recipes:#{comp}\\:\\:server")
   Chef::Log.info("Found #{comp} server on #{instance}.")
   node.set_unless['openstack']['endpoints'][endpoint] = {}
   node.set['openstack']['endpoints'][endpoint]['host'] = instance[:fqdn]
@@ -38,7 +38,7 @@ node.set['openstack']['database_service']['debug'] = node[:trove][:debug]
   node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
 end
 
-rabbitmq = get_instance(:node, 'roles:rabbitmq-server')
+rabbitmq = get_instance('roles:rabbitmq-server')
 Chef::Log.info("Found rabbitmq server on #{rabbitmq}.")
 node.set['openstack']['mq']['database_service']['service_type'] = 'rabbitmq'
 node.set['openstack']['mq']['database_service']['rabbit']['host'] = rabbitmq[:fqdn]
