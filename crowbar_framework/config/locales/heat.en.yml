@@ -4,7 +4,7 @@ en:
   barclamp:
     heat:
       edit_attributes:
-        verbose: Setup Verbose Logging
+        verbose: Verbose Logging
         database_instance: Database
         keystone_instance: Keystone
         rabbitmq_instance: RabbitMQ
