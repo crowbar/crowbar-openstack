@@ -58,10 +58,13 @@ class CeilometerService < ServiceObject
     server_nodes = nodes.select { |n| n.intended_role == "controller" }
     server_nodes = [ nodes.first ] if server_nodes.empty?
 
+    swift_proxy_nodes = NodeObject.find("roles:swift-proxy")
+
     base["deployment"]["ceilometer"]["elements"] = {
         "ceilometer-agent" =>  agent_nodes.map { |x| x.name },
         "ceilometer-cagent" =>  server_nodes.map { |x| x.name },
-        "ceilometer-server" =>  server_nodes.map { |x| x.name }
+        "ceilometer-server" =>  server_nodes.map { |x| x.name },
+        "ceilometer-swift-proxy-middleware" =>  swift_proxy_nodes.map { |x| x.name }
     } unless agent_nodes.nil? or server_nodes.nil?
 
     base["attributes"]["ceilometer"]["keystone_service_password"] = '%012d' % rand(1e12)
@@ -76,6 +79,13 @@ class CeilometerService < ServiceObject
 
     if proposal["attributes"][@bc_name]["use_gitrepo"]
       validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
+    end
+
+    swift_proxy_nodes = NodeObject.find("roles:swift-proxy").map { |x| x.name }
+    proposal["deployment"]["ceilometer"]["elements"]["ceilometer-swift-proxy-middleware"].each do |n|
+      unless swift_proxy_nodes.include? n
+        validation_error("Nodes with the ceilometer-swift-proxy-middleware role must also have the swift-proxy role.")
+      end
     end
 
     super

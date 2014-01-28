@@ -39,22 +39,25 @@
   "deployment": {
     "ceilometer": {
       "crowbar-revision": 0,
-      "schema-revision": 2,
+      "schema-revision": 3,
       "element_states": {
         "ceilometer-server": [ "readying", "ready", "applying" ],
         "ceilometer-cagent": [ "readying", "ready", "applying" ],
-        "ceilometer-agent": [ "readying", "ready", "applying" ]
+        "ceilometer-agent": [ "readying", "ready", "applying" ],
+        "ceilometer-swift-proxy-middleware": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
         [ "ceilometer-server" ],
         [ "ceilometer-cagent" ], 
-        [ "ceilometer-agent" ]
+        [ "ceilometer-agent" ],
+        [ "ceilometer-swift-proxy-middleware" ]
       ],
       "element_run_list_order": {
         "ceilometer-server": 101,
         "ceilometer-cagent": 102,
-        "ceilometer-agent": 103
+        "ceilometer-agent": 103,
+        "ceilometer-swift-proxy-middleware" : 80
       },
       "config": {
         "environment": "ceilometer-base-config",
