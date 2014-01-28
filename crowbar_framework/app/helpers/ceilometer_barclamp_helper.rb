@@ -31,6 +31,10 @@ module CeilometerBarclampHelper
       "ceilometer-server" => {
         "unique" => false,
         "count" => 1
+      },
+      "ceilometer-swift-proxy-middleware" => {
+        "unique" => false,
+        "count" => -1
       }
     }
   end
