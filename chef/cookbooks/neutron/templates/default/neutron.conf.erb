@@ -10,7 +10,7 @@ verbose = <%= @verbose ? "True" : "False" %>
 # state_path = /var/lib/neutron
 
 # Where to store lock files
-lock_path = $state_path/lock
+lock_path = /var/lock/neutron
 
 # log_format = %(asctime)s %(levelname)8s [%(name)s] %(message)s
 # log_date_format = %Y-%m-%d %H:%M:%S
@@ -348,7 +348,7 @@ auth_url = <%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_admin
 admin_tenant_name = <%= @keystone_service_tenant %>
 admin_user = <%= @keystone_service_user %>
 admin_password = <%= @keystone_service_password %>
-signing_dir = $state_path/keystone-signing
+signing_dir = /var/cache/neutron/keystone-signing
 
 [database]
 # This line MUST be changed to actually run the plugin.

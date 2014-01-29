@@ -20,7 +20,6 @@ auth_protocol = <%= @keystone_protocol %>
 admin_user = <%= @keystone_service_user %>
 admin_password = <%= @keystone_service_password %>
 admin_tenant_name = <%= @keystone_service_tenant %>
-<%= "signing_dir = /var/lib/neutron/keystone-signin" if node[:platform] == "suse" %>
 
 [filter:extensions]
 paste.filter_factory = neutron.api.extensions:plugin_aware_extension_middleware_factory
