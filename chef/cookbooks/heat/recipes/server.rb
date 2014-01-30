@@ -137,19 +137,7 @@ if my_public_host.nil? or my_public_host.empty?
   end
 end
 
-db_password = ''
-if node.roles.include? "heat-server"
-  # password is already created because common recipe comes
-  # after the server recipe
-  db_password = node[:heat][:db][:password]
-else
-  # pickup password to database from heat-server node
-  node_controllers = search(:node, "roles:heat-server").first || []
-end
-
-
-db_connection = "#{backend_name}://#{node[:heat][:db][:user]}:#{db_password}@#{sql_address}/#{node[:heat][:db][:database]}"
-
+db_connection = "#{backend_name}://#{node[:heat][:db][:user]}:#{node[:heat][:db][:password]}@#{sql_address}/#{node[:heat][:db][:database]}"
 
 keystone_register "register heat user" do
   protocol keystone_protocol
