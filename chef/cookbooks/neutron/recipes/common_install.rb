@@ -249,6 +249,7 @@ if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plu
   end
 
   unless %w(debian ubuntu).include? node.platform
+    # Note: this must not be started! This service only makes sense on boot.
     service "neutron-ovs-cleanup" do
       service_name "openstack-neutron-ovs-cleanup" if %w(suse).include?(node.platform)
       action [ :enable ]
@@ -463,12 +464,12 @@ if neutron_server
   # but it only exists if we're also the server
   service neutron_agent do
     supports :status => true, :restart => true
-    action :enable
+    action [:enable, :start]
   end
 else
   service neutron_agent do
     supports :status => true, :restart => true
-    action :enable
+    action [:enable, :start]
     subscribes :restart, resources("template[#{agent_config_path}]")
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   end

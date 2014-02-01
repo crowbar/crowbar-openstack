@@ -297,7 +297,7 @@ end
 
 service node[:neutron][:platform][:metadata_agent_name] do
   supports :status => true, :restart => true
-  action :enable
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
 end
@@ -347,14 +347,14 @@ unless node[:neutron][:use_gitrepo]
   # common_install recipe
   service node[:neutron][:platform][:service_name] do
     supports :status => true, :restart => true
-    action :enable
+    action [:enable, :start]
     # no subscribes for :restart; this is handled by the
     # "mark neutron-server as restart for post-install" ruby_block
   end
 else
   service neutron_service_name do
     supports :status => true, :restart => true
-    action :enable
+    action [:enable, :start]
     subscribes :restart, resources("template[/etc/neutron/api-paste.ini]")
     subscribes :restart, resources("template[#{plugin_cfg_path}]")
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
@@ -363,14 +363,14 @@ end
 
 service node[:neutron][:platform][:dhcp_agent_name] do
   supports :status => true, :restart => true
-  action :enable
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/dhcp_agent.ini]")
 end
 
 service node[:neutron][:platform][:l3_agent_name] do
   supports :status => true, :restart => true
-  action :enable
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
   not_if { node[:neutron][:networking_plugin] == "vmware" }
@@ -378,7 +378,7 @@ end
 
 service node[:neutron][:platform][:metering_agent_name] do
   supports :status => true, :restart => true
-  action :enable
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/metering_agent.ini]")
 end
