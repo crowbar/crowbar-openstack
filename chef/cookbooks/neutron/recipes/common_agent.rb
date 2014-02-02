@@ -57,31 +57,6 @@ when "openvswitch", "cisco"
   neutron_agent = node[:neutron][:platform][:ovs_agent_name]
   neutron_agent_pkg = node[:neutron][:platform][:ovs_agent_pkg]
   agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
-
-  # Arrange for neutron-ovs-cleanup to be run on bootup of compute nodes only
-  unless neutron.name == node.name
-    if %w(debian ubuntu).include? node.platform
-      cookbook_file "/etc/init.d/neutron-ovs-cleanup" do
-        source "neutron-ovs-cleanup"
-        mode 00755
-      end
-      link "/etc/rc2.d/S20neutron-ovs-cleanup" do
-        to "../init.d/neutron-ovs-cleanup"
-      end
-
-      link "/etc/rc3.d/S20neutron-ovs-cleanup" do
-        to "../init.d/neutron-ovs-cleanup"
-      end
-
-      link "/etc/rc4.d/S20neutron-ovs-cleanup" do
-        to "../init.d/neutron-ovs-cleanup"
-      end
-
-      link "/etc/rc5.d/S20neutron-ovs-cleanup" do
-        to "../init.d/neutron-ovs-cleanup"
-      end
-    end
-  end
 when "linuxbridge"
   neutron_agent = node[:neutron][:platform][:lb_agent_name]
   neutron_agent_pkg = node[:neutron][:platform][:lb_agent_pkg]
@@ -93,32 +68,6 @@ when "vmware"
   # It is needed to have neutron-ovs-cleanup service
   ovs_agent_pkg = node[:neutron][:platform][:ovs_agent_pkg]
   ovs_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
-end
-
-
-if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plugin]
-  if node.platform == "ubuntu"
-    # If we expect to install the openvswitch module via DKMS, but the module
-    # does not exist, rmmod the openvswitch module before continuing.
-    if node[:neutron][:platform][:ovs_pkgs].any?{|e|e == "openvswitch-datapath-dkms"} &&
-        !File.exists?("/lib/modules/#{%x{uname -r}.strip}/updates/dkms/openvswitch.ko") &&
-        File.directory?("/sys/module/openvswitch")
-      if IO.read("/sys/module/openvswitch/refcnt").strip != "0"
-        Chef::Log.error("Kernel openvswitch module already loaded and in use! Please reboot me!")
-      else
-        bash "Unload non-DKMS openvswitch module" do
-          code "rmmod openvswitch"
-        end
-      end
-    end
-  end
-
-  node[:neutron][:platform][:ovs_pkgs].each { |p| package p }
-
-  bash "Load openvswitch module" do
-    code node[:neutron][:platform][:ovs_modprobe]
-    not_if do ::File.directory?("/sys/module/openvswitch") end
-  end
 end
 
 
@@ -171,6 +120,29 @@ end
 
 
 if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plugin]
+  if node.platform == "ubuntu"
+    # If we expect to install the openvswitch module via DKMS, but the module
+    # does not exist, rmmod the openvswitch module before continuing.
+    if node[:neutron][:platform][:ovs_pkgs].any?{|e|e == "openvswitch-datapath-dkms"} &&
+        !File.exists?("/lib/modules/#{%x{uname -r}.strip}/updates/dkms/openvswitch.ko") &&
+        File.directory?("/sys/module/openvswitch")
+      if IO.read("/sys/module/openvswitch/refcnt").strip != "0"
+        Chef::Log.error("Kernel openvswitch module already loaded and in use! Please reboot me!")
+      else
+        bash "Unload non-DKMS openvswitch module" do
+          code "rmmod openvswitch"
+        end
+      end
+    end
+  end
+
+  node[:neutron][:platform][:ovs_pkgs].each { |p| package p }
+
+  bash "Load openvswitch module" do
+    code node[:neutron][:platform][:ovs_modprobe]
+    not_if do ::File.directory?("/sys/module/openvswitch") end
+  end
+
   if %w(redhat centos).include?(node.platform)
     openvswitch_service = "openvswitch"
   else
@@ -188,6 +160,26 @@ if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plu
     service "neutron-ovs-cleanup" do
       service_name "openstack-neutron-ovs-cleanup" if %w(suse).include?(node.platform)
       action [ :enable ]
+    end
+  else
+    # Arrange for neutron-ovs-cleanup to be run on bootup of compute nodes only
+    unless neutron.name == node.name
+      cookbook_file "/etc/init.d/neutron-ovs-cleanup" do
+        source "neutron-ovs-cleanup"
+        mode 00755
+      end
+      link "/etc/rc2.d/S20neutron-ovs-cleanup" do
+        to "../init.d/neutron-ovs-cleanup"
+      end
+      link "/etc/rc3.d/S20neutron-ovs-cleanup" do
+        to "../init.d/neutron-ovs-cleanup"
+      end
+      link "/etc/rc4.d/S20neutron-ovs-cleanup" do
+        to "../init.d/neutron-ovs-cleanup"
+      end
+      link "/etc/rc5.d/S20neutron-ovs-cleanup" do
+        to "../init.d/neutron-ovs-cleanup"
+      end
     end
   end
 
