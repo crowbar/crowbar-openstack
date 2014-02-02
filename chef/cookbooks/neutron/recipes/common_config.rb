@@ -95,6 +95,7 @@ template node[:neutron][:platform][:neutron_rootwrap_sudo_template] do
   mode 0440
   variables(:user => node[:neutron][:platform][:user],
             :binary => node[:neutron][:rootwrap])
+  not_if { node.platform == "suse" }
 end
 
 
