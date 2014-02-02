@@ -236,19 +236,9 @@ end
 include_recipe "neutron::common_config"
 
 
-if neutron_server
-  # no subscribes for :restart; this is handled by the
-  # "mark neutron-agent as restart for post-install" ruby_block
-  # but it only exists if we're also the server
-  service neutron_agent do
-    supports :status => true, :restart => true
-    action [:enable, :start]
-  end
-else
-  service neutron_agent do
-    supports :status => true, :restart => true
-    action [:enable, :start]
-    subscribes :restart, resources("template[#{agent_config_path}]")
-    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
-  end
+service neutron_agent do
+  supports :status => true, :restart => true
+  action [:enable, :start]
+  subscribes :restart, resources("template[#{agent_config_path}]")
+  subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
 end

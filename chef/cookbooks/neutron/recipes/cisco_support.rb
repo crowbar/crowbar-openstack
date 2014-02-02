@@ -27,6 +27,14 @@ if node[:neutron][:use_ml2]
     notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end
 else
+  directory "/etc/neutron/plugins/cisco/" do
+     mode 00775
+     owner node[:neutron][:platform][:user]
+     action :create
+     recursive true
+     not_if { node[:platform] == "suse" }
+  end
+
   template "/etc/neutron/plugins/cisco/cisco_plugins.ini" do
     cookbook "neutron"
     source "cisco_plugins.ini.erb"

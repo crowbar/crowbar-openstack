@@ -279,6 +279,15 @@ vlan_end = vlan_start + 2000
 case neutron[:neutron][:networking_plugin]
 when "openvswitch", "cisco"
   agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
+
+  directory "/etc/neutron/plugins/openvswitch/" do
+     mode 00775
+     owner node[:neutron][:platform][:user]
+     action :create
+     recursive true
+     not_if { node[:platform] == "suse" }
+  end
+
   template agent_config_path do
     cookbook "neutron"
     source "ovs_neutron_plugin.ini.erb"
@@ -294,6 +303,15 @@ when "openvswitch", "cisco"
   end
 when "linuxbridge"
   agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
+
+  directory "/etc/neutron/plugins/linuxbridge/" do
+     mode 00775
+     owner node[:neutron][:platform][:user]
+     action :create
+     recursive true
+     not_if { node[:platform] == "suse" }
+  end
+
   template agent_config_path do
     cookbook "neutron"
     source "linuxbridge_conf.ini.erb"
@@ -309,7 +327,16 @@ when "linuxbridge"
     end
 when "vmware"
   agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
-  ovs_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
+
+  directory "/etc/neutron/plugins/nicira/" do
+     mode 00775
+     owner node[:neutron][:platform][:user]
+     group "root"
+     action :create
+     recursive true
+     not_if { node[:platform] == "suse" }
+  end
+
   template agent_config_path do
     cookbook "neutron"
     source "nvp.ini.erb"
@@ -317,6 +344,17 @@ when "vmware"
     group "root"
     mode "0640"
   end
+
+  ovs_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
+
+  directory "/etc/neutron/plugins/openvswitch/" do
+     mode 00775
+     owner node[:neutron][:platform][:user]
+     action :create
+     recursive true
+     not_if { node[:platform] == "suse" }
+  end
+
   template ovs_config_path do
     cookbook "neutron"
     source "ovs_neutron_plugin.ini.erb"
