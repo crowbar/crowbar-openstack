@@ -26,7 +26,6 @@ end
 def make_loopback_volume(node,volname)
   return if volume_exists(volname)
   Chef::Log.info("Cinder: Using local file volume backing")
-  node[:cinder][:volume][:volume_type] = "local"
   fname = node["cinder"]["volume"]["local_file"]
   fdir = ::File.dirname(fname)
   fsize = node["cinder"]["volume"]["local_size"] * 1024 * 1024 * 1024 # Convert from GB to Bytes
