@@ -255,34 +255,11 @@ template "/etc/heat/heat.conf" do
    notifies :run, "execute[heat-db-sync]", :delayed
 end
 
-template "/etc/heat/api-paste.ini" do
-    source "api-paste.ini.erb"
-    owner node[:heat][:user]
-    group "root"
-    mode "0640"
-    variables(
-      :debug => node[:heat][:debug],
-      :verbose => node[:heat][:verbose],
-      :keystone_protocol => keystone_protocol,
-      :keystone_host => keystone_host,
-      :keystone_auth_token => keystone_token,
-      :keystone_service_port => keystone_service_port,
-      :keystone_service_user => keystone_service_user,
-      :keystone_service_password => keystone_service_password,
-      :keystone_service_tenant => keystone_service_tenant,
-      :keystone_admin_port => keystone_admin_port,
-      :api_port => node[:heat][:api][:port],
-      :cfn_port => node[:heat][:api][:cfn_port]
-
-    )
-end
-
 service "heat-engine" do
   service_name "openstack-heat-engine" if node.platform == "suse"
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
-  subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
 end
 
 service "heat-api" do
@@ -290,7 +267,6 @@ service "heat-api" do
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
-  subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
 end
 
 service "heat-api-cfn" do
@@ -298,7 +274,6 @@ service "heat-api-cfn" do
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
-  subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
 end
 
 service "heat-api-cloudwatch" do
@@ -306,7 +281,6 @@ service "heat-api-cloudwatch" do
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
-  subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
 end
 
 execute "heat-db-sync" do
