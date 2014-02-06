@@ -118,7 +118,7 @@ claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node,"Cinder"
 
 case
 when node[:cinder][:volume][:volume_type] == "eqlx"
-when (node[:cinder][:volume][:volume_type] == "local")
+when node[:cinder][:volume][:volume_type] == "local"
   make_loopback_volume(node,volname)
 when node[:cinder][:volume][:volume_type] == "raw"
   make_volume(node,volname,unclaimed_disks,claimed_disks)
