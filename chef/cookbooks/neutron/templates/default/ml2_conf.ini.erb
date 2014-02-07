@@ -14,7 +14,7 @@ tenant_network_types = <%= @networking_mode %>
 
 # (ListOpt) Ordered list of networking mechanism driver entrypoints
 # to be loaded from the neutron.ml2.mechanism_drivers namespace.
-mechanism_drivers = <%= @mechanism_driver %>
+mechanism_drivers = <%= @mechanism_driver %>,hyperv
 # Example: mechanism_drivers = arista
 # Example: mechanism_drivers = cisco,logger
 
