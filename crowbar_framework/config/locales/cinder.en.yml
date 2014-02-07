@@ -63,7 +63,7 @@ en:
           rbd_parameters: RADOS Parameters
           rbd:
             pool: RADOS pool for Cinder volumes
-            user: RADOS user for CephX authentication
+            user: RADOS user (Set only if using CephX authentication)
         api:
           protocol: Protocol
         ssl:

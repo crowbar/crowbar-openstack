@@ -1477,7 +1477,7 @@ rbd_pool=<%= @rbd_params['pool'] %>
 
 # the RADOS client name for accessing rbd volumes - only set
 # when using cephx authentication (string value)
-<% unless @rbd_params.nil? -%>
+<% unless @rbd_params.nil? or @rbd_params['user'].empty? -%>
 rbd_user=<%= @rbd_params['user'] %>
 <% end -%>
 
