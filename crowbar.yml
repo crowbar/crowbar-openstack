@@ -15,7 +15,7 @@
 barclamp:
   name: heat
   display: Heat
-  description: 'OpenStack Orchestration: Orchestration engine for composite cloud applications'
+  description: 'Orchestration Module: Orchestration engine for composite cloud applications'
   proposal_schema_version: 1
   version: 0
   requires:
