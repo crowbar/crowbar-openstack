@@ -61,7 +61,7 @@ describe "openstack-database_service::api" do
       @filename = "/etc/trove/api-paste.ini"
     end
 
-    it "creates trove.conf file" do
+    it "creates the file" do
       expect(@chef_run).to create_template(@filename).with(
         user: "openstack-trove",
         group: "openstack-trove",
