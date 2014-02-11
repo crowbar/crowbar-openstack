@@ -188,6 +188,9 @@ end
 execute "calling ceilometer-dbsync" do
   command "#{venv_prefix}ceilometer-dbsync"
   action :run
+  user node[:ceilometer][:user]
+  group node[:ceilometer][:group]
+  not_if { node[:platform] == "suse" }
 end
 
 service "ceilometer-collector" do
