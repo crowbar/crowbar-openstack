@@ -38,7 +38,8 @@ describe "openstack-database_service::taskmanager" do
       /^cinder_url = http:\/\/127.0.0.1:8776\/v1\/%\(tenant_id\)s$/,
       /^swift_url = http:\/\/127.0.0.1:8080\/v1\/$/,
       /^dns_auth_url = http:\/\/127.0.0.1:5000\/v2.0$/,
-      /^log_dir = \/var\/log\/trove$/
+      /^log_dir = \/var\/log\/trove$/,
+      /^notifier_queue_hostname = 127\.0\.0\.1$/
     ].each do |content|
       it "has a \"#{content.source[1...-1]}\" line" do
         expect(@chef_run).to render_file(@filename).with_content(content)
