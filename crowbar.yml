@@ -29,14 +29,3 @@ crowbar:
   run_order: 102
   chef_order: 102
   proposal_schema_version: 1
-
-locale_additions:
-  en:
-    barclamp:
-      trove:
-        edit_attributes:
-          attributes: Attributes
-          logging_header: Logging
-          verbose: Verbose
-        edit_deployment:
-          deployment: Deployment

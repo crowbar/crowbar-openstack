@@ -5,10 +5,16 @@
     = header @dep_raw, true
 
   .panel-body
+    = instance_field :rabbitmq
+    = instance_field :keystone
+    = instance_field :nova
+    = instance_field :swift
+    = instance_field :cinder
     %fieldset
       %legend
         = t(".logging_header")
       = boolean_field :verbose
+      = boolean_field :debug
 
     = render "barclamp/git/pfsdeps"
       

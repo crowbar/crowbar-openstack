@@ -1,0 +1,15 @@
+en:
+  barclamp:
+    trove:
+      edit_attributes:
+        attributes: Attributes
+        logging_header: Logging
+        verbose: Verbose
+        debug: Debug
+        rabbitmq_instance: RabbitMQ
+        keystone_instance: Keystone Instance
+        cinder_instance: Cinder Instance
+        nova_instance: Nova Instance
+        swift_instance: Swift Instance
+      edit_deployment:
+        deployment: Deployment
