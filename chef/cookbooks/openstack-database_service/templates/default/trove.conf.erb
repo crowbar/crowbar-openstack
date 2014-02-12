@@ -53,7 +53,7 @@ network_label_regex = ^private$
 #ip_regex = ^(15.|123.)
 
 # Config options for enabling volume service
-trove_volume_support = True
+trove_volume_support = <%= node['openstack']['database_service']['volume_support'] %>
 block_device_mapping = vdb
 device_path = /dev/vdb
 mount_point = /var/lib/mysql
