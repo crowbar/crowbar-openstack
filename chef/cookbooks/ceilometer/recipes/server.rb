@@ -30,16 +30,16 @@ if node[:ceilometer][:use_mongodb]
       end
   end
 
-  service "#{mongo_service}" do
-    supports :status => true, :restart => true
-    action :enable
-  end
-
-  template "#{mongo_conf}" do
+  template mongo_conf do
     mode 0644
     source "mongodb.conf.erb"
     variables(:listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address)
-    notifies :restart, resources(:service => "#{mongo_service}"), :immediately
+    notifies :restart, "service[#{mongo_service}]", :immediately
+  end
+
+  service mongo_service do
+    supports :status => true, :restart => true
+    action [:enable, :start]
   end
 else
   node.set_unless[:ceilometer][:db][:password] = secure_password
@@ -188,6 +188,9 @@ end
 execute "calling ceilometer-dbsync" do
   command "#{venv_prefix}ceilometer-dbsync"
   action :run
+  user node[:ceilometer][:user]
+  group node[:ceilometer][:group]
+  not_if { node[:platform] == "suse" }
 end
 
 service "ceilometer-collector" do
