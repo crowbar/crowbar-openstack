@@ -18,7 +18,8 @@
             "cinder_instance": { "type": "str", "required": true },
             "keystone_instance": { "type": "str", "required": true },
             "swift_instance": { "type": "str", "required": true },
-            "rabbitmq_instance": { "type": "str", "required": true }
+            "rabbitmq_instance": { "type": "str", "required": true },
+            "volume_support": { "type": "bool", "required": true }
           }
         }
       }

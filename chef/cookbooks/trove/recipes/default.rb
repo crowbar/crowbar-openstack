@@ -23,6 +23,7 @@ end
 
 node.set['openstack']['database_service']['verbose'] = node[:trove][:verbose]
 node.set['openstack']['database_service']['debug'] = node[:trove][:debug]
+node.set['openstack']['database_service']['volume_support'] = node[:trove][:volume_support]
 
 [['keystone', 'identity-api'],
  ['keystone', 'identity-admin'],

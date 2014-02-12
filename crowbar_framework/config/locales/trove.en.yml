@@ -11,5 +11,6 @@ en:
         cinder_instance: Cinder Instance
         nova_instance: Nova Instance
         swift_instance: Swift Instance
+        volume_support: Enable Trove Volume Support
       edit_deployment:
         deployment: Deployment

@@ -19,3 +19,5 @@
 
 default[:trove][:verbose] = false
 default[:trove][:debug] = false
+
+default[:trove][:volume_support] = true

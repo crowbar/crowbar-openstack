@@ -9,7 +9,8 @@
       "nova_instance": "none",
       "swift_instance": "none",
       "cinder_instance": "none",
-      "rabbitmq_instance": "none"
+      "rabbitmq_instance": "none",
+      "volume_support": true
     }
   },
   "deployment": {
