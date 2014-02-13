@@ -31,9 +31,10 @@ service "trove-conductor" do
 end
 
 db_user = node["openstack"]["database_service"]["db"]["username"]
-db_pass = db_password "openstack-database_service"
+db_pass = get_password 'db', "openstack-database_service"
 db_uri = db_uri("database_service", db_user, db_pass).to_s
-rabbit_pass = user_password node["openstack"]["database_service"]["rabbit"]["username"]
+rabbit_pass = get_password(
+  'user', node["openstack"]['mq']["database_service"]["rabbit"]["userid"])
 identity_uri = endpoint("identity-api")
 
 template "/etc/trove/trove-conductor.conf" do

@@ -40,7 +40,7 @@ service "trove-api" do
 end
 
 db_user = node["openstack"]["database_service"]["db"]["username"]
-db_pass = db_password "openstack-database_service"
+db_pass = get_password 'db', "openstack-database_service"
 db_uri = db_uri("database_service", db_user, db_pass).to_s
 
 api_endpoint = endpoint "database_service-api"
@@ -50,7 +50,7 @@ compute_uri = endpoint("compute-api").to_s.gsub(/%\(tenant_id\)s/, "")
 block_storage_uri = endpoint("volume-api").to_s.gsub(/%\(tenant_id\)s/, "")
 object_storage_uri = endpoint("object-storage-api")
 
-rabbit_pass = user_password node["openstack"]["database_service"]["rabbit"]["username"]
+rabbit_pass = get_password('user', node["openstack"]['mq']["database_service"]["rabbit"]["userid"])
 
 template "/etc/trove/trove.conf" do
   source "trove.conf.erb"

@@ -35,7 +35,7 @@ service "trove-taskmanager" do
 end
 
 db_user = node["openstack"]["database_service"]["db"]["username"]
-db_pass = db_password "openstack-database_service"
+db_pass = get_password 'db', "openstack-database_service"
 db_uri = db_uri("database_service", db_user, db_pass).to_s
 
 identity_uri = endpoint("identity-api")
@@ -44,8 +44,7 @@ block_storage_uri = endpoint("volume-api")
 object_storage_uri = endpoint("object-storage-api")
 
 rabbit = node['openstack']['mq']['database_service']['rabbit']
-rabbit['password'] = user_password(
-  node["openstack"]["database_service"]["rabbit"]["username"])
+rabbit_pass = get_password('user', rabbit['userid'])
 
 template "/etc/trove/trove-taskmanager.conf" do
   source "trove-taskmanager.conf.erb"
@@ -55,6 +54,7 @@ template "/etc/trove/trove-taskmanager.conf" do
   variables(
     :database_connection => db_uri,
     :rabbit => rabbit,
+    :rabbit_pass => rabbit_pass,
     :identity_uri => identity_uri,
     :compute_uri => compute_uri,
     :block_storage_uri => block_storage_uri,
