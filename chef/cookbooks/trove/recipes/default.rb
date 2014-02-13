@@ -39,9 +39,12 @@ node.set['openstack']['database_service']['volume_support'] = node[:trove][:volu
   node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
 end
 
+node.set_unless['openstack']['endpoints']['database_service-api'] = {}
+node.set['openstack']['endpoints']['database_service-api']['host'] = node[:fqdn]
+
 rabbitmq = get_instance('roles:rabbitmq-server')
 Chef::Log.info("Found rabbitmq server on #{rabbitmq}.")
-node.set['openstack']['mq']['database_service']['service_type'] = 'rabbitmq'
+node.set['openstack']['mq']['service_type'] = 'rabbitmq'
 node.set['openstack']['mq']['database_service']['rabbit']['host'] = rabbitmq[:fqdn]
 node.set['openstack']['mq']['database_service']['rabbit']['use_ssl'] = (rabbitmq[:protocol] == 'https')
 node.set['openstack']['mq']['database_service']['rabbit']['port'] = rabbitmq[:service_port]

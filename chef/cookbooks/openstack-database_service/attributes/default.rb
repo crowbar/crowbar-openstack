@@ -53,9 +53,6 @@ default["openstack"]["database_service"]["service_role"] = "admin"
 default["openstack"]["database_service"]["service_tenant_name"] = "service"
 default["openstack"]["database_service"]["region"] = "RegionOne"
 
-default["openstack"]["database_service"]["rabbit"]["username"] = "guest"
-default["openstack"]["database_service"]["rabbit"]["host"] = "127.0.0.1"
-
 default["openstack"]["database_service"]["volume_support"] = true
 
 # Keystone PKI signing directory
