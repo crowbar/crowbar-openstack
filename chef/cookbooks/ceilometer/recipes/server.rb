@@ -13,8 +13,6 @@
 # limitations under the License.
 #
 
-require 'timeout'
-
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
 if node[:ceilometer][:use_mongodb]
@@ -49,6 +47,7 @@ if node[:ceilometer][:use_mongodb]
   # wait for mongodb start (ceilometer services need it running)
   ruby_block "wait for mongodb start" do
     block do
+      require 'timeout'
       begin
         Timeout.timeout(60) do
           while ! ::Kernel.system("mongo #{node_address} --quiet < /dev/null &> /dev/null")
