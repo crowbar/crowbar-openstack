@@ -83,7 +83,7 @@ describe "openstack-database_service::api" do
   end
 
   describe "database initialization" do
-    let(:manage_cmd) { "trove-manage --config-file=/etc/trove/trove.conf db_wipe mysql" }
+    let(:manage_cmd) { "trove-manage db_sync" }
 
     it "runs trove-manage" do
       expect(@chef_run).to run_execute(manage_cmd)

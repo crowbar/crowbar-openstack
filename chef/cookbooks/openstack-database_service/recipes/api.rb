@@ -1,3 +1,4 @@
+# -*- coding: undecided -*-
 #
 # Cookbook Name:: openstack-database_service
 # Recipe:: api
@@ -86,6 +87,6 @@ template "/etc/trove/api-paste.ini" do
   notifies :restart, "service[trove-api]", :immediately
 end
 
-execute "trove-manage --config-file=/etc/trove/trove.conf db_wipe #{node["openstack"]["db"]["database_service"]["db_type"]}" do
+execute "trove-manage db_sync" do
   notifies :restart, "service[trove-api]", :immediately
 end
