@@ -43,7 +43,7 @@ rabbitmq = get_instance('roles:rabbitmq-server')
 Chef::Log.info("Found rabbitmq server on #{rabbitmq}.")
 node.set['openstack']['mq']['database_service']['service_type'] = 'rabbitmq'
 node.set['openstack']['mq']['database_service']['rabbit']['host'] = rabbitmq[:fqdn]
-node.set['openstack']['mq']['database_service']['rabbit']['use_ssl'] = True if rabbitmq[:protocol] == 'https'
+node.set['openstack']['mq']['database_service']['rabbit']['use_ssl'] = (rabbitmq[:protocol] == 'https')
 node.set['openstack']['mq']['database_service']['rabbit']['port'] = rabbitmq[:service_port]
 
 # XXX mysql configuration
