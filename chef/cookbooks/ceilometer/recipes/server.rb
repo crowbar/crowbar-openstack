@@ -32,10 +32,12 @@ if node[:ceilometer][:use_mongodb]
       end
   end
 
+  node_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+
   template mongo_conf do
     mode 0644
     source "mongodb.conf.erb"
-    variables(:listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address)
+    variables(:listen_addr => node_address)
     notifies :restart, "service[#{mongo_service}]", :immediately
   end
 
@@ -49,7 +51,7 @@ if node[:ceilometer][:use_mongodb]
     block do
       begin
         Timeout.timeout(60) do
-          while ! ::Kernel.system("mongo #{node[:fqdn]} --quiet < /dev/null &> /dev/null")
+          while ! ::Kernel.system("mongo #{node_address} --quiet < /dev/null &> /dev/null")
             Chef::Log.debug("mongodb still not reachable")
             sleep(2)
           end
