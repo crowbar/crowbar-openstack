@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+guard :rspec, cmd: 'bundle exec rspec -f doc' do
+  watch(%r{^spec/.+_spec\.rb$})
+  watch('spec/spec_helper.rb')  { "spec" }
+end
+

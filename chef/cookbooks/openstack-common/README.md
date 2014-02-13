@@ -19,7 +19,7 @@ The following cookbooks are dependencies:
 Attributes
 ==========
 
-Please see the extensive inline documentation in `attributes/default.rb` for descriptions
+Please see the extensive inline documentation in `attributes/*.rb` for descriptions
 of all the settable attributes for this cookbook.
 
 Note that all attributes are in the `default["openstack"]` "namespace"
@@ -87,9 +87,7 @@ This cookbook exposes a set of default library routines:
 * `db_uri` -- Returns the SQLAlchemy RFC-1738 DB URI (see: http://rfc.net/rfc1738.html) for a named OpenStack database
 * `db_create_with_user` -- Creates a database and database user for a named OpenStack database
 * `secret` -- Returns the value of an encrypted data bag for a named OpenStack secret key and key-section
-* `db_password` -- Ease-of-use helper that returns the decrypted database password for a named OpenStack database
-* `service_password` -- Ease-of-use helper that returns the decrypted service password for named OpenStack service
-* `user_password` -- Ease-of-use helper that returns the decrypted password for a Keystone user
+* `get_password` -- Ease-of-use helper that returns the decrypted password for a named database, service or keystone user.
 
 Usage
 -----
@@ -118,10 +116,10 @@ require "uri"
 puts ::URI.decode nova_api_ap.to_s
 ```
 
-Example of using the `db_password` and `db_uri` routine:
+Example of using the `get_password` and `db_uri` routine:
 
 ```ruby
-db_pass = db_password "cinder"
+db_pass = get_password "db" "cinder"
 db_user = node["cinder"]["db"]["user"]
 sql_connection = db_uri "volume", db_user, db_pass
 
@@ -180,15 +178,17 @@ in your recipe.
 Testing
 =====
 
-This cookbook uses [bundler](http://gembundler.com/), [berkshelf](http://berkshelf.com/), and [strainer](https://github.com/customink/strainer) to isolate dependencies and run tests.
+Please refer to the [TESTING.md](TESTING.md) for instructions for testing the cookbook.
 
-Tests are defined in Strainerfile.
+Berkshelf
+=====
 
-To run tests:
-
-    $ bundle install # install gem dependencies
-    $ bundle exec berks install # install cookbook dependencies
-    $ bundle exec strainer test # run tests
+Berks will resolve version requirements and dependencies on first run and
+store these in Berksfile.lock. If new cookbooks become available you can run
+`berks update` to update the references in Berksfile.lock. Berksfile.lock will
+be included in stable branches to provide a known good set of dependencies.
+Berksfile.lock will not be included in development branches to encourage
+development against the latest cookbooks.
 
 License and Author
 ==================
@@ -207,7 +207,7 @@ License and Author
 | **Copyright**        |  Copyright (c) 2013, Opscode, Inc.                 |
 | **Copyright**        |  Copyright (c) 2013, Craig Tracey                  |
 | **Copyright**        |  Copyright (c) 2013, SUSE Linux GmbH               |
-| **Copyright**        |  Copyright (c) 2013, IBM, Corp.                    |
+| **Copyright**        |  Copyright (c) 2013-2014, IBM, Corp.               |
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
