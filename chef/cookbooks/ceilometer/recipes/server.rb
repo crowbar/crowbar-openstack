@@ -30,10 +30,12 @@ if node[:ceilometer][:use_mongodb]
       end
   end
 
+  node_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+
   template mongo_conf do
     mode 0644
     source "mongodb.conf.erb"
-    variables(:listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address)
+    variables(:listen_addr => node_address)
     notifies :restart, "service[#{mongo_service}]", :immediately
   end
 
@@ -41,6 +43,24 @@ if node[:ceilometer][:use_mongodb]
     supports :status => true, :restart => true
     action [:enable, :start]
   end
+
+  # wait for mongodb start (ceilometer services need it running)
+  ruby_block "wait for mongodb start" do
+    block do
+      require 'timeout'
+      begin
+        Timeout.timeout(60) do
+          while ! ::Kernel.system("mongo #{node_address} --quiet < /dev/null &> /dev/null")
+            Chef::Log.debug("mongodb still not reachable")
+            sleep(2)
+          end
+        end
+      rescue Timeout::Error
+        Chef::Log.warn("mongodb does not seem to be responding 1 minute after start")
+      end
+    end
+  end
+
 else
   node.set_unless[:ceilometer][:db][:password] = secure_password
 
