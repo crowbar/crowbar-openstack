@@ -17,11 +17,11 @@
     "trove": {
       "crowbar-revision": 0,
       "element_states": {
-        "trove": [ "readying", "ready", "applying" ]
+        "trove-server": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-        [ "trove" ]
+        [ "trove-server" ]
       ],
       "config": {
         "environment": "trove-base-config",
