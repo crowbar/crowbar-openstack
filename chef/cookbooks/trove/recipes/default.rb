@@ -25,14 +25,14 @@ node.set['openstack']['database_service']['verbose'] = node[:trove][:verbose]
 node.set['openstack']['database_service']['debug'] = node[:trove][:debug]
 node.set['openstack']['database_service']['volume_support'] = node[:trove][:volume_support]
 
-[['keystone', 'identity-api'],
- ['keystone', 'identity-admin'],
- ['nova', 'compute-api'],
- ['cinder', 'volume-api'],
- ['swift', 'object-storage-api']
+[['keystone-server', 'identity-api'],
+ ['keystone-server', 'identity-admin'],
+ ['nova-multi-controller', 'compute-api'],
+ ['cinder-controller', 'volume-api'],
+ ['swift-proxy', 'object-storage-api']
 ].each do |comp, endpoint|
-  instance = get_instance("recipes:#{comp}\\:\\:server")
-  Chef::Log.info("Found #{comp} server on #{instance}.")
+  instance = get_instance("roles:#{comp}")
+  Chef::Log.info("Found #{comp} instance on #{instance}.")
   node.set_unless['openstack']['endpoints'][endpoint] = {}
   node.set['openstack']['endpoints'][endpoint]['host'] = instance[:fqdn]
   node.set['openstack']['endpoints'][endpoint]['scheme'] = instance[:protocol]
