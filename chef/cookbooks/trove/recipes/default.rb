@@ -36,7 +36,11 @@ node.set['openstack']['database_service']['volume_support'] = node[:trove][:volu
   node.set_unless['openstack']['endpoints'][endpoint] = {}
   node.set['openstack']['endpoints'][endpoint]['host'] = instance[:fqdn]
   node.set['openstack']['endpoints'][endpoint]['scheme'] = instance[:protocol]
-  node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
+  if endpoint == 'volume-api'
+    node.set['openstack']['endpoints'][endpoint]['port'] = instance[:cinder][:api][:bind_port]
+  else
+    node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
+  end
   if endpoint == 'identity-api'
     node.set['openstack']['database_service']['nova_proxy_user'] = instance[:keystone][:admin][:user]
     node.set['openstack']['database_service']['nova_proxy_password'] = instance[:keystone][:admin][:password]
