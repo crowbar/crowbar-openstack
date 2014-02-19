@@ -49,18 +49,6 @@ keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
 keystone_service_user = node["ceilometer"]["keystone_service_user"]
 Chef::Log.info("Keystone server found at #{keystone_host}")
 
-
-keystone_register "give ceilometer user ResellerAdmin role" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
-  user_name keystone_service_user
-  tenant_name keystone_service_tenant
-  role_name "ResellerAdmin"
-  action :add_access
-end
-
 # swift user needs read access to ceilometer.conf
 group node[:ceilometer][:group] do
   action :modify
