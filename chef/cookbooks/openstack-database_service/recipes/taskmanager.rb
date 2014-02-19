@@ -39,7 +39,7 @@ db_pass = get_password 'db', "openstack-database_service"
 db_uri = db_uri("database_service", db_user, db_pass).to_s
 
 identity_uri = endpoint("identity-api")
-compute_uri = endpoint("compute-api")
+compute_uri = endpoint("compute-api").to_s.gsub(/%\(tenant_id\)s/, '')
 block_storage_uri = endpoint("volume-api")
 object_storage_uri = endpoint("object-storage-api")
 
