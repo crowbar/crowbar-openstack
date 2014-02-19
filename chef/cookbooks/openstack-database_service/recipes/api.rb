@@ -50,6 +50,7 @@ compute_uri = endpoint("compute-api").to_s.gsub(/%\(tenant_id\)s/, "")
 block_storage_uri = endpoint("volume-api").to_s.gsub(/%\(tenant_id\)s/, "")
 object_storage_uri = endpoint("object-storage-api")
 
+rabbit = node['openstack']['mq']['database_service']['rabbit']
 rabbit_pass = get_password('user', node["openstack"]['mq']["database_service"]["rabbit"]["userid"])
 
 template "/etc/trove/trove.conf" do
@@ -60,6 +61,7 @@ template "/etc/trove/trove.conf" do
   variables(
     :database_connection => db_uri,
     :endpoint => api_endpoint,
+    :rabbit => rabbit,
     :rabbit_pass => rabbit_pass,
     :identity_uri => identity_uri,
     :compute_uri => compute_uri,

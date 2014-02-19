@@ -21,7 +21,13 @@ sql_connection = <%= @database_connection %>
 #sql_connection = postgresql://trove:trove@localhost/trove
 
 # AMQP Connection info
+rabbit_host = <%= @rabbit['host'] %>
+rabbit_userid = <%= @rabbit['userid'] %>
 rabbit_password = <%= @rabbit_pass %>
+rabbit_virtual_host = <%= @rabbit['vhost'] %>
+rabbit_port = <%= @rabbit['port'] %>
+rabbit_use_ssl = <%= @rabbit['use_ssl'] %>
+rabbit_notification_topic = <%= @rabbit['notification_topic'] %>
 
 # Path to the extensions
 api_extensions_path = trove/extensions/routes
@@ -51,10 +57,6 @@ root_grant_option = True
 
 # For communicating with trove-conductor
 control_exchange = trove
-
-# ============ kombu connection options ========================
-
-rabbit_host = <%= node["openstack"]["database_service"]["rabbit"]["host"] %>
 
 # ============ Logging information =============================
 log_dir = /var/log/trove
