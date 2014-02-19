@@ -53,7 +53,8 @@ paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
 service_protocol = <%= @keystone_protocol %>
 service_host = <%= @keystone_host %>
 service_port = <%= @keystone_service_port %>
-auth_host = <%= @keystone_host %>
+auth_uri = <%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/v2.0
+auth_host = <%= @keystone_admin_host %>
 auth_port = <%= @keystone_admin_port %>
 auth_protocol = <%= @keystone_protocol %>
 admin_tenant_name = <%= @keystone_service_tenant %>
