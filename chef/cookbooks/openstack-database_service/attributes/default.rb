@@ -57,3 +57,7 @@ default["openstack"]["database_service"]["volume_support"] = true
 
 # Keystone PKI signing directory
 default["openstack"]["trove"]["api"]["auth"]["cache_dir"] = "/var/cache/trove/api"
+
+default["openstack"]["database_service"]["nova_proxy_user"] = "admin"
+default["openstack"]["database_service"]["nova_proxy_password"] = "admin"
+default["openstack"]["database_service"]["nova_proxy_tenant"] = "admin"
