@@ -14,13 +14,8 @@
 # limitations under the License.
 #
 
-unless node[:platform] == "suse"
-  override[:neutron][:user]="neutron"
-  override[:neutron][:group]="neutron"
-else
-  override[:neutron][:user]="openstack-neutron"
-  override[:neutron][:group]="openstack-neutron"
-end
+override[:neutron][:user]="neutron"
+override[:neutron][:group]="neutron"
 
 default[:neutron][:debug] = false
 default[:neutron][:verbose] = false
