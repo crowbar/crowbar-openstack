@@ -28,9 +28,7 @@ end
 
 
 include_recipe "neutron::database"
-include_recipe "neutron::l3"
-# Once we stop including l3 from here, we'll need:
-#include_recipe "neutron::common_config"
+include_recipe "neutron::common_config"
 
 
 env_filter = " AND keystone_config_environment:keystone-config-#{node[:neutron][:keystone_instance]}"

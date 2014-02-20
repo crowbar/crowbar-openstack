@@ -62,14 +62,20 @@
   "deployment": {
     "neutron": {
       "crowbar-revision": 0,
-      "schema-revision": 3,
+      "schema-revision": 4,
       "element_states": {
-        "neutron-server": [ "readying", "ready", "applying" ]
+        "neutron-server": [ "readying", "ready", "applying" ],
+        "neutron-l3": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-         ["neutron-server" ]
+         ["neutron-server" ],
+         ["neutron-l3" ]
       ],
+      "element_run_list_order": {
+        "neutron-server": 94,
+        "neutron-l3": 95
+      },
       "config": {
         "environment": "neutron-config-base",
         "mode": "full",
