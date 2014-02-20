@@ -14,7 +14,7 @@
 #
 
 case node["platform"]
-    when "ubuntu" 
+    when "ubuntu"
         default[:heat][:platform] = {
             :packages => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch","python-heat","heat-common","python-heatclient"],
             :services => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"],
@@ -29,7 +29,7 @@ case node["platform"]
             :aux_dirs => ["/var/cache/heat","/etc/heat/environment.d"]
         }
         default[:heat][:user] = "openstack-heat"
-        default[:heat][:group] = "openstak-heat"
+        default[:heat][:group] = "openstack-heat"
 end
 
 default[:heat][:debug] = false
