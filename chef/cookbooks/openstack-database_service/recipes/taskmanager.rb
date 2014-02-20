@@ -40,7 +40,7 @@ db_uri = db_uri("database_service", db_user, db_pass).to_s
 
 identity_uri = endpoint("identity-api")
 compute_uri = endpoint("compute-api").to_s.gsub(/%\(tenant_id\)s/, '')
-block_storage_uri = endpoint("volume-api")
+block_storage_uri = endpoint("block-storage-api")
 object_storage_uri = endpoint("object-storage-api")
 
 rabbit = node['openstack']['mq']['database_service']['rabbit']
