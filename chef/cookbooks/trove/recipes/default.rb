@@ -28,7 +28,7 @@ node.set['openstack']['database_service']['volume_support'] = node[:trove][:volu
 [['keystone-server', 'identity-api'],
  ['keystone-server', 'identity-admin'],
  ['nova-multi-controller', 'compute-api'],
- ['cinder-controller', 'volume-api'],
+ ['cinder-controller', 'block-storage-api'],
  ['swift-proxy', 'object-storage-api']
 ].each do |comp, endpoint|
   instance = get_instance("roles:#{comp}")
@@ -36,11 +36,7 @@ node.set['openstack']['database_service']['volume_support'] = node[:trove][:volu
   node.set_unless['openstack']['endpoints'][endpoint] = {}
   node.set['openstack']['endpoints'][endpoint]['host'] = instance[:fqdn]
   node.set['openstack']['endpoints'][endpoint]['scheme'] = instance[:protocol]
-  if endpoint == 'volume-api'
-    node.set['openstack']['endpoints'][endpoint]['port'] = instance[:cinder][:api][:bind_port]
-  else
-    node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
-  end
+  node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
   if endpoint == 'identity-api'
     node.set['openstack']['database_service']['nova_proxy_user'] = instance[:keystone][:admin][:user]
     node.set['openstack']['database_service']['nova_proxy_password'] = instance[:keystone][:admin][:password]
