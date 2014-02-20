@@ -14,26 +14,30 @@
 #
 
 case node["platform"]
-    when "ubuntu" 
-        default[:heat][:platform] = {
-            :packages => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch","python-heat","heat-common","python-heatclient"],
-            :services => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"],
-            :aux_dirs => ["/var/cache/heat","/etc/heat/environment.d"]
-        }
-        default[:heat][:user] = "heat"
-        default[:heat][:group] = "heat"
-    when "suse"
-         default[:heat][:platform] = {
-            :packages => ["openstack-heat-engine","openstack-heat-api","openstack-heat-api-cfn","openstack-heat-api-cloudwatch","python-heatclient"],
-            :services => ["openstack-heat-engine","openstack-heat-api","openstack-heat-api-cfn","openstack-heat-api-cloudwatch"],
-            :aux_dirs => ["/var/cache/heat","/etc/heat/environment.d"]
-        }
-        default[:heat][:user] = "openstack-heat"
-        default[:heat][:group] = "openstak-heat"
+  when "ubuntu"
+    default[:heat][:platform] = {
+      :packages => ["heat-engine", "heat-api", "heat-api-cfn",
+                    "heat-api-cloudwatch", "python-heat", "heat-common",
+                    "python-heatclient"],
+      :services => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"],
+      :aux_dirs => ["/var/cache/heat","/etc/heat/environment.d"]
+    }
+   when "suse"
+    default[:heat][:platform] = {
+      :packages => ["openstack-heat-engine", "openstack-heat-api",
+                    "openstack-heat-api-cfn", "openstack-heat-api-cloudwatch",
+                    "python-heatclient"],
+      :services => ["openstack-heat-engine", "openstack-heat-api",
+                    "openstack-heat-api-cfn", "openstack-heat-api-cloudwatch"],
+      :aux_dirs => ["/var/cache/heat", "/etc/heat/environment.d"]
+    }
 end
 
 default[:heat][:debug] = false
 default[:heat][:verbose] = false
+
+default[:heat][:user] = "heat"
+default[:heat][:group] = "heat"
 
 default[:heat][:db][:database] = "heat"
 default[:heat][:db][:user] = "heat"
