@@ -97,36 +97,30 @@ when "linuxbridge"
 end
 
 
-# This is some bad hack: we need to restart the server and the agent before
-# if there was a configuration change. We cannot use :immediately to directly
-# restart the services earlier, because they would be started before all
-# configuration files get written.
+# This is some bad hack: we need to restart the server now if there was a
+# configuration change. We cannot use :immediately to directly restart the
+# service earlier, because it would be started before all configuration
+# files get written.
 services_to_restart = []
 services_started = []
 
 unless node[:neutron][:use_gitrepo]
   case node[:neutron][:networking_plugin]
   when "openvswitch", "cisco"
-    neutron_agent = node[:neutron][:platform][:ovs_agent_name]
     agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
   when "linuxbridge"
-    neutron_agent = node[:neutron][:platform][:lb_agent_name]
     agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
   when "vmware"
-    neutron_agent = node[:neutron][:platform][:nvp_agent_name]
     agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
   end
   neutron_service_name = node[:neutron][:platform][:service_name]
 else
   case node[:neutron][:networking_plugin]
   when "openvswitch"
-    neutron_agent = "neutron-openvswitch-agent"
     agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
   when "linuxbridge"
-    neutron_agent = "neutron-linuxbridge-agent"
     agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
   when "vmware"
-    neutron_agent = "neutron-nicira-agent"
     agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
   end
   neutron_service_name = "neutron-server"
@@ -135,41 +129,6 @@ if node[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware"
   plugin_cfg_path = "/etc/neutron/plugins/ml2/ml2_conf.ini"
 else
   plugin_cfg_path = agent_config_path
-end
-
-ruby_block "mark the dhcp-agent as restart for post-install" do
-  block do
-    services_to_restart << node[:neutron][:platform][:dhcp_agent_name]
-  end
-  action :nothing
-  subscribes :create, resources("template[/etc/neutron/neutron.conf]"), :immediately
-  subscribes :create, resources("template[/etc/neutron/dhcp_agent.ini]"), :immediately
-end
-
-ruby_block "mark dhcp-agent as started" do
-  block do
-    service_started << node[:neutron][:platform][:dhcp_agent_name]
-  end
-  action :nothing
-  subscribes :create, resources("service[#{node[:neutron][:platform][:dhcp_agent_name]}]"), :immediately
-end
-
-ruby_block "mark the l3-agent as restart for post-install" do
-  block do
-    services_to_restart << node[:neutron][:platform][:l3_agent_name]
-  end
-  action :nothing
-  subscribes :create, resources("template[/etc/neutron/l3_agent.ini]"), :immediately
-  subscribes :create, resources("template[/etc/neutron/neutron.conf]"), :immediately
-  not_if { node[:neutron][:networking_plugin] == "vmware" }
-end
-
-ruby_block "mark l3-agent as started" do
-  block do
-    service_started << node[:neutron][:platform][:l3_agent_name]
-  end
-  action :nothing
-  subscribes :create, resources("service[#{node[:neutron][:platform][:l3_agent_name]}]"), :immediately
 end
 
 ruby_block "mark neutron-server as restart for post-install" do
@@ -184,33 +143,16 @@ end
 
 ruby_block "mark neutron-server as started" do
   block do
-    service_started << neutron_service_name
+    services_started << neutron_service_name
   end
   action :nothing
   subscribes :create, resources("service[#{neutron_service_name}]"), :immediately
 end
 
-ruby_block "mark neutron-agent as restart for post-install" do
-  block do
-    services_to_restart << neutron_agent
-  end
-  action :nothing
-  subscribes :create, resources("template[#{agent_config_path}]"), :immediately
-  subscribes :create, resources("template[/etc/neutron/neutron.conf]"), :immediately
-end
-
-ruby_block "mark neutron-agent as started" do
-  block do
-    service_started << neutron_agent
-  end
-  action :nothing
-  subscribes :create, resources("service[#{neutron_agent}]"), :immediately
-end
-
 ruby_block "restart services for post-install" do
   block do
     services_to_restart.uniq.each do |service|
-      unless service_started.include? service
+      unless services_started.include? service
         Chef::Log.info("Restarting #{service}")
         %x{/etc/init.d/#{service} restart}
       end
