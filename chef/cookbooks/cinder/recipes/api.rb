@@ -38,6 +38,7 @@ keystone_protocol = keystone["keystone"]["api"]["protocol"]
 keystone_token = keystone[:keystone][:service][:token]
 keystone_service_port = keystone[:keystone][:api][:service_port]
 keystone_admin_port = keystone[:keystone][:api][:admin_port]
+keystone_admin_host = keystone[:keystone][:api][:admin_host]
 keystone_service_tenant = keystone[:keystone][:service][:tenant]
 keystone_service_user = node[:cinder][:service_user]
 keystone_service_password = node[:cinder][:service_password]
@@ -129,6 +130,7 @@ template "/etc/cinder/api-paste.ini" do
     :keystone_service_tenant => keystone_service_tenant,
     :keystone_service_user => keystone_service_user,
     :keystone_service_password => keystone_service_password,
+    :keystone_admin_host => keystone_admin_host,
     :keystone_admin_port => keystone_admin_port
   )
   notifies :restart, resources(:service => "cinder-api"), :immediately
