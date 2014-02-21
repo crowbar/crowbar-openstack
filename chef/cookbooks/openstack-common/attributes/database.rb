@@ -149,11 +149,11 @@ default['openstack']['db']['orchestration']['db_name'] = 'heat'
 default['openstack']['db']['orchestration']['username'] = 'heat'
 
 # Database used by OpenStack Database Service (trove)
-default['openstack']['db']['database_service']['service_type'] = node['openstack']['db']['service_type']
-default['openstack']['db']['database_service']['host'] = node['openstack']['db']['host']
-default['openstack']['db']['database_service']['port'] = node['openstack']['db']['port']
-default['openstack']['db']['database_service']['db_name'] = 'trove'
-default['openstack']['db']['database_service']['username'] = 'trove'
+default['openstack']['db']['database-service']['service_type'] = node['openstack']['db']['service_type']
+default['openstack']['db']['database-service']['host'] = node['openstack']['db']['host']
+default['openstack']['db']['database-service']['port'] = node['openstack']['db']['port']
+default['openstack']['db']['database-service']['db_name'] = 'trove'
+default['openstack']['db']['database-service']['username'] = 'trove'
 
 # Switch to store the MySQL root password in a databag instead of
 # using the generated OpenSSL cookbook secure_password one.

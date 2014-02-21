@@ -277,8 +277,8 @@ default['openstack']['sysctl']['net.ipv4.conf.default.rp_filter'] = 0
 
 
 # The OpenStack Database Service (Trove) API endpoint
-default['openstack']['endpoints']['database_service-api']['host'] = "127.0.0.1"
-default['openstack']['endpoints']['database_service-api']['scheme'] = "http"
-default['openstack']['endpoints']['database_service-api']['port'] = "8779"
-default['openstack']['endpoints']['database_service-api']['path'] = "/v1.0/%(tenant_id)s"
-default['openstack']['endpoints']['database_service-api']['bind_interface'] = nil
+default['openstack']['endpoints']['database-service-api']['host'] = "127.0.0.1"
+default['openstack']['endpoints']['database-service-api']['scheme'] = "http"
+default['openstack']['endpoints']['database-service-api']['port'] = "8779"
+default['openstack']['endpoints']['database-service-api']['path'] = "/v1.0/%(tenant_id)s"
+default['openstack']['endpoints']['database-service-api']['bind_interface'] = nil

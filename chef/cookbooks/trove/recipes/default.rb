@@ -21,9 +21,9 @@ class ::Chef::Recipe
   include ::Openstack
 end
 
-node.set['openstack']['database_service']['verbose'] = node[:trove][:verbose]
-node.set['openstack']['database_service']['debug'] = node[:trove][:debug]
-node.set['openstack']['database_service']['volume_support'] = node[:trove][:volume_support]
+node.set['openstack']['database-service']['verbose'] = node[:trove][:verbose]
+node.set['openstack']['database-service']['debug'] = node[:trove][:debug]
+node.set['openstack']['database-service']['volume_support'] = node[:trove][:volume_support]
 
 [['keystone-server', 'identity-api'],
  ['keystone-server', 'identity-admin'],
@@ -38,21 +38,21 @@ node.set['openstack']['database_service']['volume_support'] = node[:trove][:volu
   node.set['openstack']['endpoints'][endpoint]['scheme'] = instance[:protocol]
   node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
   if endpoint == 'identity-api'
-    node.set['openstack']['database_service']['nova_proxy_user'] = instance[:keystone][:admin][:user]
-    node.set['openstack']['database_service']['nova_proxy_password'] = instance[:keystone][:admin][:password]
-    node.set['openstack']['database_service']['nova_proxy_tenant'] = instance[:keystone][:admin][:tenant]
+    node.set['openstack']['database-service']['nova_proxy_user'] = instance[:keystone][:admin][:user]
+    node.set['openstack']['database-service']['nova_proxy_password'] = instance[:keystone][:admin][:password]
+    node.set['openstack']['database-service']['nova_proxy_tenant'] = instance[:keystone][:admin][:tenant]
   end
 end
 
-node.set_unless['openstack']['endpoints']['database_service-api'] = {}
-node.set['openstack']['endpoints']['database_service-api']['host'] = node[:fqdn]
+node.set_unless['openstack']['endpoints']['database-service-api'] = {}
+node.set['openstack']['endpoints']['database-service-api']['host'] = node[:fqdn]
 
 rabbitmq = get_instance('roles:rabbitmq-server')
 Chef::Log.info("Found rabbitmq server on #{rabbitmq}.")
 node.set['openstack']['mq']['service_type'] = 'rabbitmq'
-node.set['openstack']['mq']['database_service']['rabbit']['host'] = rabbitmq[:fqdn]
-node.set['openstack']['mq']['database_service']['rabbit']['use_ssl'] = (rabbitmq[:protocol] == 'https')
-node.set['openstack']['mq']['database_service']['rabbit']['port'] = rabbitmq[:service_port]
+node.set['openstack']['mq']['database-service']['rabbit']['host'] = rabbitmq[:fqdn]
+node.set['openstack']['mq']['database-service']['rabbit']['use_ssl'] = (rabbitmq[:protocol] == 'https')
+node.set['openstack']['mq']['database-service']['rabbit']['port'] = rabbitmq[:service_port]
 
 # XXX mysql configuration
 # this part should go away once trove supports postgresl
@@ -84,7 +84,7 @@ end
 database_user 'trove' do
   provider ::Chef::Provider::Database::MysqlUser
   connection conn
-  password 'openstack-database_service'
+  password 'openstack-database-service'
   action :create
 end
 
@@ -92,14 +92,14 @@ end
 database_user 'trove' do
   provider ::Chef::Provider::Database::MysqlUser
   connection conn
-  password 'openstack-database_service'
+  password 'openstack-database-service'
   database_name 'trove'
   host '%'
   privileges [:all]
   action :grant
 end
 
-include_recipe 'openstack-database_service::identity_registration'
-include_recipe 'openstack-database_service::api'
-include_recipe 'openstack-database_service::conductor'
-include_recipe 'openstack-database_service::taskmanager'
+include_recipe 'openstack-database-service::identity_registration'
+include_recipe 'openstack-database-service::api'
+include_recipe 'openstack-database-service::conductor'
+include_recipe 'openstack-database-service::taskmanager'

@@ -205,29 +205,29 @@ when 'rabbitmq'
 end
 
 # Messaging attributes used by the OpenStack Database Service (Trove) service
-default['openstack']['mq']['database_service']['service_type'] = node['openstack']['mq']['service_type']
-case node['openstack']['mq']['database_service']['service_type']
+default['openstack']['mq']['database-service']['service_type'] = node['openstack']['mq']['service_type']
+case node['openstack']['mq']['database-service']['service_type']
 when 'qpid'
-  default['openstack']['mq']['database_service']['qpid']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['database_service']['qpid']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['database_service']['qpid']['qpid_hosts'] = ['127.0.0.1:5672']
-  default['openstack']['mq']['database_service']['qpid']['username'] = ''
-  default['openstack']['mq']['database_service']['qpid']['password'] = ''
-  default['openstack']['mq']['database_service']['qpid']['sasl_mechanisms'] = ''
-  default['openstack']['mq']['database_service']['qpid']['reconnect'] = true
-  default['openstack']['mq']['database_service']['qpid']['reconnect_timeout'] = 0
-  default['openstack']['mq']['database_service']['qpid']['reconnect_limit'] = 0
-  default['openstack']['mq']['database_service']['qpid']['reconnect_interval_min'] = 0
-  default['openstack']['mq']['database_service']['qpid']['reconnect_interval_max'] = 0
-  default['openstack']['mq']['database_service']['qpid']['reconnect_interval'] = 0
-  default['openstack']['mq']['database_service']['qpid']['heartbeat'] = 60
-  default['openstack']['mq']['database_service']['qpid']['protocol'] = 'tcp'
-  default['openstack']['mq']['database_service']['qpid']['tcp_nodelay'] = true
+  default['openstack']['mq']['database-service']['qpid']['host'] = node['openstack']['mq']['host']
+  default['openstack']['mq']['database-service']['qpid']['port'] = node['openstack']['mq']['port']
+  default['openstack']['mq']['database-service']['qpid']['qpid_hosts'] = ['127.0.0.1:5672']
+  default['openstack']['mq']['database-service']['qpid']['username'] = ''
+  default['openstack']['mq']['database-service']['qpid']['password'] = ''
+  default['openstack']['mq']['database-service']['qpid']['sasl_mechanisms'] = ''
+  default['openstack']['mq']['database-service']['qpid']['reconnect'] = true
+  default['openstack']['mq']['database-service']['qpid']['reconnect_timeout'] = 0
+  default['openstack']['mq']['database-service']['qpid']['reconnect_limit'] = 0
+  default['openstack']['mq']['database-service']['qpid']['reconnect_interval_min'] = 0
+  default['openstack']['mq']['database-service']['qpid']['reconnect_interval_max'] = 0
+  default['openstack']['mq']['database-service']['qpid']['reconnect_interval'] = 0
+  default['openstack']['mq']['database-service']['qpid']['heartbeat'] = 60
+  default['openstack']['mq']['database-service']['qpid']['protocol'] = 'tcp'
+  default['openstack']['mq']['database-service']['qpid']['tcp_nodelay'] = true
 when 'rabbitmq'
-  default['openstack']['mq']['database_service']['rabbit']['userid'] = node['openstack']['mq']['user']
-  default['openstack']['mq']['database_service']['rabbit']['vhost'] = node['openstack']['mq']['vhost']
-  default['openstack']['mq']['database_service']['rabbit']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['database_service']['rabbit']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['database_service']['rabbit']['ha'] = false
-  default['openstack']['mq']['database_service']['rabbit']['use_ssl'] = false
+  default['openstack']['mq']['database-service']['rabbit']['userid'] = node['openstack']['mq']['user']
+  default['openstack']['mq']['database-service']['rabbit']['vhost'] = node['openstack']['mq']['vhost']
+  default['openstack']['mq']['database-service']['rabbit']['port'] = node['openstack']['mq']['port']
+  default['openstack']['mq']['database-service']['rabbit']['host'] = node['openstack']['mq']['host']
+  default['openstack']['mq']['database-service']['rabbit']['ha'] = false
+  default['openstack']['mq']['database-service']['rabbit']['use_ssl'] = false
 end
