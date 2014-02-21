@@ -15,13 +15,8 @@
 
 default[:cinder][:debug] = false
 
-unless node[:platform] == "suse"
-  override[:cinder][:user]="cinder"
-  override[:cinder][:group]="cinder"
-else
-  override[:cinder][:user]="openstack-cinder"
-  override[:cinder][:group]="openstack-cinder"
-end
+override[:cinder][:user]="cinder"
+override[:cinder][:group]="cinder"
 
 # declare what needs to be monitored
 node[:cinder][:monitor]={}
