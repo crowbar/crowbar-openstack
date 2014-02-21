@@ -16,6 +16,7 @@
                     "gitrepo": { "type": "str", "required": true },
                     "dhcp_domain": { "type": "str", "required": true },
                     "use_ml2": { "type": "bool", "required": true },
+                    "use_lbaas": { "type": "bool", "required": true },
                     "networking_mode": { "type": "str", "required": true },
                     "networking_plugin": { "type": "str", "required": true },
                     "num_vlans": { "type": "int", "required": true },

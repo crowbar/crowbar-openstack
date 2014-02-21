@@ -20,6 +20,10 @@ include_recipe "neutron::common_agent"
 unless node[:neutron][:use_gitrepo]
   pkgs = [ node[:neutron][:platform][:dhcp_agent_pkg], node[:neutron][:platform][:l3_agent_pkg], node[:neutron][:platform][:metadata_agent_pkg], node[:neutron][:platform][:metering_agent_pkg] ]
   pkgs.uniq.each { |p| package p }
+
+  if node[:neutron][:use_lbaas]
+    package node[:neutron][:platform][:lbaas_agent_pkg]
+  end
 else
   neutron_path = "/opt/neutron"
   venv_path = node[:neutron][:use_virtualenv] ? "#{neutron_path}/.venv" : nil
@@ -35,6 +39,12 @@ else
   link_service "neutron-metadata-agent" do
     virtualenv venv_path
     bin_name "neutron-metadata-agent --config-dir /etc/neutron/ --config-file /etc/neutron/metadata_agent.ini"
+  end
+  if node[:neutron][:use_lbaas]
+    link_service "neutron-lbaas-agent" do
+      virtualenv venv_path
+      bin_name "neutron-lbaas-agent --config-dir /etc/neutron/ --config-file /etc/neutron/lbaas_agent.ini"
+    end
   end
   link_service "neutron-metering-agent" do
     virtualenv venv_path
@@ -193,6 +203,22 @@ service node[:neutron][:platform][:l3_agent_name] do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
+if node[:neutron][:use_lbaas] then
+  template "/etc/neutron/lbaas_agent.ini" do
+    cookbook "neutron"
+    source "lbaas_agent.ini.erb"
+    owner node[:neutron][:platform][:user]
+    group "root"
+    mode "0640"
+    variables(
+      :debug => node[:neutron][:debug],
+      :interface_driver => interface_driver,
+      :user_group => node[:neutron][:platform][:lbaas_haproxy_group],
+      :device_driver => "neutron.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver"
+    )
+  end
+end
+
 service node[:neutron][:platform][:metering_agent_name] do
   service_name "neutron-metering-agent" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
@@ -200,6 +226,16 @@ service node[:neutron][:platform][:metering_agent_name] do
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/metering_agent.ini]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+end
+
+if node[:neutron][:use_lbaas] then
+  service node[:neutron][:platform][:lbaas_agent_name] do
+    service_name "neutron-lbaas-agent" if node[:neutron][:use_gitrepo]
+    supports :status => true, :restart => true
+    action [:enable, :start]
+    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources("template[/etc/neutron/lbaas_agent.ini]")
+  end
 end
 
 service node[:neutron][:platform][:dhcp_agent_name] do
