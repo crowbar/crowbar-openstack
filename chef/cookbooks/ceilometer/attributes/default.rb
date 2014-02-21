@@ -13,13 +13,8 @@
 # limitations under the License.
 #
 
-unless node[:platform] == "suse"
-  default[:ceilometer][:user]="ceilometer"
-  default[:ceilometer][:group]="ceilometer"
-else
-  default[:ceilometer][:user]="openstack-ceilometer"
-  default[:ceilometer][:group]="openstack-ceilometer"
-end
+default[:ceilometer][:user]="ceilometer"
+default[:ceilometer][:group]="ceilometer"
 
 default[:ceilometer][:debug] = false
 default[:ceilometer][:verbose] = false
