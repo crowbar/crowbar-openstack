@@ -1,11 +1,11 @@
 require_relative "spec_helper"
 
-describe "openstack-database_service::conductor" do
+describe "openstack-database-service::conductor" do
   before do
     database_service_stubs
 
     @chef_run = ::ChefSpec::Runner.new ::OPENSUSE_OPTS
-    @chef_run.converge "openstack-database_service::conductor"
+    @chef_run.converge "openstack-database-service::conductor"
   end
 
   it "installs the converge packages" do

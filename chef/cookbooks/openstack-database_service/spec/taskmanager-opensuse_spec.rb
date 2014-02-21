@@ -1,11 +1,11 @@
 require_relative "spec_helper"
 
-describe "openstack-database_service::taskmanager" do
+describe "openstack-database-service::taskmanager" do
   before do
     database_service_stubs
 
     @chef_run = ::ChefSpec::Runner.new ::OPENSUSE_OPTS
-    @chef_run.converge "openstack-database_service::taskmanager"
+    @chef_run.converge "openstack-database-service::taskmanager"
   end
 
   it "installs the taskmanager packages" do

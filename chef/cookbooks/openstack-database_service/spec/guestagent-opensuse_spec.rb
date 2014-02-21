@@ -1,11 +1,11 @@
 require_relative "spec_helper"
 
-describe "openstack-database_service::guestagent" do
+describe "openstack-database-service::guestagent" do
   before do
     database_service_stubs
 
     @chef_run = ::ChefSpec::Runner.new ::OPENSUSE_OPTS
-    @chef_run.converge "openstack-database_service::guestagent"
+    @chef_run.converge "openstack-database-service::guestagent"
   end
 
   it "installs the guestagent packages" do

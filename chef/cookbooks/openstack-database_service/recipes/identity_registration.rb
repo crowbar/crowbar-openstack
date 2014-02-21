@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: openstack-database_service
+# Cookbook Name:: openstack-database-service
 # Recipe:: identity_registration
 #
 # Copyright 2013, SUSE Linux GmbH
@@ -26,12 +26,12 @@ end
 identity_admin_endpoint = endpoint "identity-admin"
 bootstrap_token = secret "secrets", "openstack_identity_bootstrap_token"
 auth_uri = ::URI.decode identity_admin_endpoint.to_s
-service_pass = get_password 'service', "openstack-database_service"
-service_user = node["openstack"]["database_service"]["service_user"]
-service_role = node["openstack"]["database_service"]["service_role"]
-service_tenant_name = node["openstack"]["database_service"]["service_tenant_name"]
-database_service_api_endpoint = endpoint "database_service-api"
-region = node["openstack"]["database_service"]["region"]
+service_pass = get_password 'service', "openstack-database-service"
+service_user = node["openstack"]["database-service"]["service_user"]
+service_role = node["openstack"]["database-service"]["service_role"]
+service_tenant_name = node["openstack"]["database-service"]["service_tenant_name"]
+database-service_api_endpoint = endpoint "database-service-api"
+region = node["openstack"]["database-service"]["region"]
 
 # Register Service Tenant
 openstack_identity_register "Register '#{service_tenant_name}' Tenant" do
@@ -82,9 +82,9 @@ openstack_identity_register "Register Database Service Endpoint" do
   bootstrap_token bootstrap_token
   service_type "database"
   endpoint_region region
-  endpoint_adminurl ::URI.decode database_service_api_endpoint.to_s
-  endpoint_internalurl ::URI.decode database_service_api_endpoint.to_s
-  endpoint_publicurl ::URI.decode database_service_api_endpoint.to_s
+  endpoint_adminurl ::URI.decode database-service_api_endpoint.to_s
+  endpoint_internalurl ::URI.decode database-service_api_endpoint.to_s
+  endpoint_publicurl ::URI.decode database-service_api_endpoint.to_s
 
   action :create_endpoint
 end

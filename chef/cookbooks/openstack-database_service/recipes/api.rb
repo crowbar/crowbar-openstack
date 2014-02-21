@@ -1,6 +1,6 @@
 # -*- coding: undecided -*-
 #
-# Cookbook Name:: openstack-database_service
+# Cookbook Name:: openstack-database-service
 # Recipe:: api
 #
 # Copyright 2013, SUSE Linux GmbH
@@ -22,11 +22,11 @@ class ::Chef::Recipe
   include ::Openstack
 end
 
-if node["openstack"]["database_service"]["syslog"]["use"]
+if node["openstack"]["database-service"]["syslog"]["use"]
   include_recipe "openstack-common::logging"
 end
 
-platform_options = node["openstack"]["database_service"]["platform"]
+platform_options = node["openstack"]["database-service"]["platform"]
 
 platform_options["api_packages"].each do |pkg|
   package pkg
@@ -39,24 +39,24 @@ service "trove-api" do
   action [ :enable ]
 end
 
-db_user = node["openstack"]["database_service"]["db"]["username"]
-db_pass = get_password 'db', "openstack-database_service"
-db_uri = db_uri("database_service", db_user, db_pass).to_s
+db_user = node["openstack"]["database-service"]["db"]["username"]
+db_pass = get_password 'db', "openstack-database-service"
+db_uri = db_uri("database-service", db_user, db_pass).to_s
 
-api_endpoint = endpoint "database_service-api"
+api_endpoint = endpoint "database-service-api"
 
 identity_uri = endpoint("identity-api")
 compute_uri = endpoint("compute-api").to_s.gsub(/%\(tenant_id\)s/, "")
 block_storage_uri = endpoint("block-storage-api").to_s.gsub(/%\(tenant_id\)s/, "")
 object_storage_uri = endpoint("object-storage-api")
 
-rabbit = node['openstack']['mq']['database_service']['rabbit']
-rabbit_pass = get_password('user', node["openstack"]['mq']["database_service"]["rabbit"]["userid"])
+rabbit = node['openstack']['mq']['database-service']['rabbit']
+rabbit_pass = get_password('user', node["openstack"]['mq']["database-service"]["rabbit"]["userid"])
 
 template "/etc/trove/trove.conf" do
   source "trove.conf.erb"
-  owner node["openstack"]["database_service"]["user"]
-  group node["openstack"]["database_service"]["group"]
+  owner node["openstack"]["database-service"]["user"]
+  group node["openstack"]["database-service"]["group"]
   mode 00640
   variables(
     :database_connection => db_uri,
@@ -77,8 +77,8 @@ identity_admin_uri = endpoint("identity-admin")
 
 template "/etc/trove/api-paste.ini" do
   source "api-paste.ini.erb"
-  owner node["openstack"]["database_service"]["user"]
-  group node["openstack"]["database_service"]["group"]
+  owner node["openstack"]["database-service"]["user"]
+  group node["openstack"]["database-service"]["group"]
   mode 00640
   variables(
     :identity_admin_uri => identity_admin_uri,

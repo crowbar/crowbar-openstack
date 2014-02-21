@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: openstack-database_service
+# Cookbook Name:: openstack-database-service
 # Recipe:: taskmanager
 #
 # Copyright 2013, SUSE Linux GmbH
@@ -21,7 +21,7 @@ class ::Chef::Recipe
   include ::Openstack
 end
 
-platform_options = node["openstack"]["database_service"]["platform"]
+platform_options = node["openstack"]["database-service"]["platform"]
 
 platform_options["taskmanager_packages"].each do |pkg|
   package pkg
@@ -34,22 +34,22 @@ service "trove-taskmanager" do
   action [ :enable ]
 end
 
-db_user = node["openstack"]["database_service"]["db"]["username"]
-db_pass = get_password 'db', "openstack-database_service"
-db_uri = db_uri("database_service", db_user, db_pass).to_s
+db_user = node["openstack"]["database-service"]["db"]["username"]
+db_pass = get_password 'db', "openstack-database-service"
+db_uri = db_uri("database-service", db_user, db_pass).to_s
 
 identity_uri = endpoint("identity-api")
 compute_uri = endpoint("compute-api").to_s.gsub(/%\(tenant_id\)s/, '')
 block_storage_uri = endpoint("block-storage-api")
 object_storage_uri = endpoint("object-storage-api")
 
-rabbit = node['openstack']['mq']['database_service']['rabbit']
+rabbit = node['openstack']['mq']['database-service']['rabbit']
 rabbit_pass = get_password('user', rabbit['userid'])
 
 template "/etc/trove/trove-taskmanager.conf" do
   source "trove-taskmanager.conf.erb"
-  owner node["openstack"]["database_service"]["user"]
-  group node["openstack"]["database_service"]["group"]
+  owner node["openstack"]["database-service"]["user"]
+  group node["openstack"]["database-service"]["group"]
   mode 00640
   variables(
     :database_connection => db_uri,

@@ -1,10 +1,10 @@
-<%= node["openstack"]["database_service"]["custom_template_banner"] %>
+<%= node["openstack"]["database-service"]["custom_template_banner"] %>
 
 [DEFAULT]
 control_exchange = trove
 trove_auth_url = <%= @identity_uri %>
-nova_proxy_admin_user = <%= node['openstack']['database_service']['nova_proxy_user'] %>
-nova_proxy_admin_pass = <%= node['openstack']['database_service']['nova_proxy_password'] %>
-nova_proxy_admin_tenant_name = <%= node['openstack']['database_service']['nova_proxy_tenant'] %>
+nova_proxy_admin_user = <%= node['openstack']['database-service']['nova_proxy_user'] %>
+nova_proxy_admin_pass = <%= node['openstack']['database-service']['nova_proxy_password'] %>
+nova_proxy_admin_tenant_name = <%= node['openstack']['database-service']['nova_proxy_tenant'] %>
 sql_connection = <%= @database_connection %>
 rabbit_password = <%= @rabbit_pass %>
