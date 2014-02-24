@@ -47,11 +47,16 @@ class NeutronService < ServiceObject
     base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
 
-    network_node   = nodes.find { |n| n.intended_role == "network" }
-    network_node ||= nodes.find { |n| n.intended_role == "controller" }
-    network_node ||= nodes.first
+    controller_nodes = nodes.select { |n| n.intended_role == "controller" }
+    controller_node = controller_nodes.first
+    controller_node ||= nodes.first
+
+    network_nodes = nodes.select { |n| n.intended_role == "network" }
+    network_nodes = [ controller_node ] if network_nodes.empty?
+
     base["deployment"]["neutron"]["elements"] = {
-        "neutron-server" => [ network_node[:fqdn] ]
+        "neutron-server" => [ controller_node[:fqdn] ],
+        "neutron-l3" => network_nodes.map { |x| x[:fqdn] }
     } unless nodes.nil? or nodes.length ==0
 
     base["attributes"]["neutron"]["service_password"] = '%012d' % rand(1e12)
@@ -61,6 +66,7 @@ class NeutronService < ServiceObject
 
   def validate_proposal_after_save proposal
     validate_one_for_role proposal, "neutron-server"
+    validate_at_least_n_for_role proposal, "neutron-l3", 1
 
     if proposal["attributes"][@bc_name]["use_gitrepo"]
       validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
@@ -85,6 +91,13 @@ class NeutronService < ServiceObject
     end
 
     tnodes = role.override_attributes["neutron"]["elements"]["neutron-server"]
+    unless tnodes.nil? or tnodes.empty?
+      tnodes.each do |n|
+        net_svc.allocate_ip "default", "public", "host", n
+      end
+    end
+
+    tnodes = role.override_attributes["neutron"]["elements"]["neutron-l3"]
     unless tnodes.nil? or tnodes.empty?
       tnodes.each do |n|
         net_svc.allocate_ip "default", "public", "host",n

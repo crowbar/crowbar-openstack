@@ -96,6 +96,71 @@ when "linuxbridge"
     floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{public_net["vlan"]} --provider:physical_network physnet1"
 end
 
+
+# This is some bad hack: we need to restart the server now if there was a
+# configuration change. We cannot use :immediately to directly restart the
+# service earlier, because it would be started before all configuration
+# files get written.
+services_to_restart = []
+services_started = []
+
+unless node[:neutron][:use_gitrepo]
+  case node[:neutron][:networking_plugin]
+  when "openvswitch", "cisco"
+    agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
+  when "linuxbridge"
+    agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
+  when "vmware"
+    agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
+  end
+  neutron_service_name = node[:neutron][:platform][:service_name]
+else
+  case node[:neutron][:networking_plugin]
+  when "openvswitch"
+    agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
+  when "linuxbridge"
+    agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
+  when "vmware"
+    agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
+  end
+  neutron_service_name = "neutron-server"
+end
+if node[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware"
+  plugin_cfg_path = "/etc/neutron/plugins/ml2/ml2_conf.ini"
+else
+  plugin_cfg_path = agent_config_path
+end
+
+ruby_block "mark neutron-server as restart for post-install" do
+  block do
+    services_to_restart << neutron_service_name
+  end
+  action :nothing
+  subscribes :create, resources("template[/etc/neutron/api-paste.ini]"), :immediately
+  subscribes :create, resources("template[#{plugin_cfg_path}]"), :immediately
+  subscribes :create, resources("template[/etc/neutron/neutron.conf]"), :immediately
+end
+
+ruby_block "mark neutron-server as started" do
+  block do
+    services_started << neutron_service_name
+  end
+  action :nothing
+  subscribes :create, resources("service[#{neutron_service_name}]"), :immediately
+end
+
+ruby_block "restart services for post-install" do
+  block do
+    services_to_restart.uniq.each do |service|
+      unless services_started.include? service
+        Chef::Log.info("Restarting #{service}")
+        %x{/etc/init.d/#{service} restart}
+      end
+    end
+  end
+end
+
+
 execute "create_fixed_network" do
   command "#{neutron_cmd} net-create fixed --shared #{fixed_network_type}"
   not_if "out=$(#{neutron_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"

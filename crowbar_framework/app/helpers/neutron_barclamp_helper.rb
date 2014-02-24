@@ -23,6 +23,11 @@ module NeutronBarclampHelper
       "neutron-server" => {
         "unique" => true,
         "count" => 1
+      },
+      "neutron-l3" => {
+        "unique" => false,
+        "count" => -1,
+        "admin" => false
       }
     }
   end
