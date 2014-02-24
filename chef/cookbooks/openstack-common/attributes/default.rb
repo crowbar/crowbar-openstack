@@ -282,3 +282,10 @@ default['openstack']['endpoints']['database-service-api']['scheme'] = "http"
 default['openstack']['endpoints']['database-service-api']['port'] = "8779"
 default['openstack']['endpoints']['database-service-api']['path'] = "/v1.0/%(tenant_id)s"
 default['openstack']['endpoints']['database-service-api']['bind_interface'] = nil
+
+# The OpenStack Database Service (Trove) GuestAgent endpoint
+default['openstack']['endpoints']['database-service-guestagent']['host'] = "127.0.0.1"
+default['openstack']['endpoints']['database-service-guestagent']['scheme'] = "http"
+default['openstack']['endpoints']['database-service-guestagent']['port'] = "8778"
+default['openstack']['endpoints']['database-service-guestagent']['path'] = "/v1.0/%(tenant_id)s"
+default['openstack']['endpoints']['database-service-guestagent']['bind_interface'] = nil
