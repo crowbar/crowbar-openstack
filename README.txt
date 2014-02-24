@@ -30,17 +30,17 @@ knife data bag create secrets openstack_identity_bootstrap_token --secret-file /
   "openstack_identity_bootstrap_token": "406356008824"
 }
 
-knife data bag create db_passwords openstack-database_service --secret-file /etc/chef/openstack_data_bag_secret
+knife data bag create db_passwords openstack-database-service --secret-file /etc/chef/openstack_data_bag_secret
 
 {
-  "openstack-database_service": "db_pass",
-  "id": "openstack-database_service"
+  "openstack-database-service": "db_pass",
+  "id": "openstack-database-service"
 }
 
-knife data bag create user_passwords openstack-database_service --secret-file /etc/chef/openstack_data_bag_secret 
+knife data bag create user_passwords openstack-database-service --secret-file /etc/chef/openstack_data_bag_secret 
 {
-  "id": "openstack-database_service",
-  "openstack-database_service": "user-pass"
+  "id": "openstack-database-service",
+  "openstack-database-service": "user-pass"
 }
 
 knife data bag create user_passwords guest --secret-file /etc/chef/openstack_data_bag_secret
@@ -58,25 +58,25 @@ node.set[:openstack][:developer_mode] = true
 Contributing
 ------------
 
-This repository contains a copy of the cookbook-openstack-database_service repository which is a git subtree. Here are some useful commands to help work with it:
+This repository contains a copy of the cookbook-openstack-database-service repository which is a git subtree. Here are some useful commands to help work with it:
 
 First add the cookbook repository as a remote:
 
 ```
-$ git remote add cookbook git@github.com:mapleoin/cookbook-openstack-database_service.git
+$ git remote add cookbook git@github.com:mapleoin/cookbook-openstack-database-service.git
 $ git fetch
 ```
 
 Then add the git subtree.
 
 ```
-$ git subtree add --prefix chef/cookbooks/openstack-database_service/ --squash cookbook master
+$ git subtree add --prefix chef/cookbooks/openstack-database-service/ --squash cookbook master
 ```
 
 Now you can push commits done to the upstream cookbook into that repository directly:
 
 ```
-$ git subtree push --prefix=chef/cookbooks/openstack-database_service/ cookbook master
+$ git subtree push --prefix=chef/cookbooks/openstack-database-service/ cookbook master
 ```
 
 
