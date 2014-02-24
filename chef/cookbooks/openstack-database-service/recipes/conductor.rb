@@ -17,6 +17,10 @@
 # limitations under the License.
 #
 
+class ::Chef::Recipe
+  include ::Openstack
+end
+
 platform_options = node["openstack"]["database-service"]["platform"]
 
 platform_options["conductor_packages"].each do |pkg|
