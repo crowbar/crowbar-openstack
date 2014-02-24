@@ -16,12 +16,10 @@ describe "openstack-database-service::taskmanager" do
   end
 
   describe "trove-taskmanager.conf" do
-    before do
-      @filename = "/etc/trove/trove-taskmanager.conf"
-    end
+    let(:filename) { "/etc/trove/trove-taskmanager.conf" }
 
     it "creates trove-taskmanager.conf file" do
-      expect(chef_run).to create_template(@filename).with(
+      expect(chef_run).to create_template(filename).with(
         user: "openstack-trove",
         group: "openstack-trove",
         mode: 0640
@@ -45,7 +43,7 @@ describe "openstack-database-service::taskmanager" do
       /^log_dir = \/var\/log\/trove$/
     ].each do |content|
       it "has a \"#{content.source[1...-1]}\" line" do
-        expect(chef_run).to render_file(@filename).with_content(content)
+        expect(chef_run).to render_file(filename).with_content(content)
       end
     end
   end

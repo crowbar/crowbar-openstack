@@ -16,12 +16,10 @@ describe "openstack-database-service::guestagent" do
   end
 
   describe "trove-guestagent.conf" do
-    before do
-      @filename = "/etc/trove/trove-guestagent.conf"
-    end
+    let(:filename) { "/etc/trove/trove-guestagent.conf" }
 
     it "creates trove-guestagent.conf file" do
-      expect(chef_run).to create_template(@filename).with(
+      expect(chef_run).to create_template(filename).with(
         user: "openstack-trove",
         group: "openstack-trove",
         mode: 0640
@@ -41,7 +39,7 @@ describe "openstack-database-service::guestagent" do
       /^log_file = trove-guestagent.log$/
     ].each do |content|
       it "has a \"#{content.source[1...-1]}\" line" do
-        expect(chef_run).to render_file(@filename).with_content(content)
+        expect(chef_run).to render_file(filename).with_content(content)
       end
     end
   end

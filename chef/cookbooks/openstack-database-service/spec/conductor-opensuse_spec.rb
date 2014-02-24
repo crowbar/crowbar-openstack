@@ -16,12 +16,10 @@ describe "openstack-database-service::conductor" do
   end
 
   describe "trove-conductor.conf" do
-    before do
-      @filename = "/etc/trove/trove-conductor.conf"
-    end
+    let(:filename) { "/etc/trove/trove-conductor.conf" }
 
     it "creates the trove-conductor.conf file" do
-      expect(chef_run).to create_template(@filename).with(
+      expect(chef_run).to create_template(filename).with(
         user: "openstack-trove",
         group: "openstack-trove",
         mode: 0640
@@ -32,7 +30,7 @@ describe "openstack-database-service::conductor" do
       /^trove_auth_url = http:\/\/127.0.0.1:5000\/v2.0$/
     ].each do |content|
       it "has a \"#{content.source[1...-1]}\" line" do
-        expect(chef_run).to render_file(@filename).with_content(content)
+        expect(chef_run).to render_file(filename).with_content(content)
       end
     end
   end      

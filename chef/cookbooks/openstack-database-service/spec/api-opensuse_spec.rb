@@ -24,12 +24,10 @@ describe "openstack-database-service::api" do
   end
 
   describe "trove.conf" do
-    before do
-      @filename = "/etc/trove/trove.conf"
-    end
+    let(:filename) { "/etc/trove/trove.conf" }
 
     it "creates trove.conf file" do
-      expect(chef_run).to create_template(@filename).with(
+      expect(chef_run).to create_template(filename).with(
         user: "openstack-trove",
         group: "openstack-trove",
         mode: 0640
@@ -56,18 +54,16 @@ describe "openstack-database-service::api" do
       /^trove_volume_support = true$/
     ].each do |content|
       it "has a \"#{content.source[1...-1]}\" line" do
-        expect(chef_run).to render_file(@filename).with_content(content)
+        expect(chef_run).to render_file(filename).with_content(content)
       end
     end
   end
 
   describe "api-paste.ini" do
-    before do
-      @filename = "/etc/trove/api-paste.ini"
-    end
+    let(:filename) { "/etc/trove/api-paste.ini" }
 
     it "creates the file" do
-      expect(chef_run).to create_template(@filename).with(
+      expect(chef_run).to create_template(filename).with(
         user: "openstack-trove",
         group: "openstack-trove",
         mode: 0640
@@ -81,7 +77,7 @@ describe "openstack-database-service::api" do
       /^signing_dir = \/var\/cache\/trove\/api$/
         ].each do |content|
       it "has a \"#{content.source[1...-1]}\" line" do
-        expect(chef_run).to render_file(@filename).with_content(content)
+        expect(chef_run).to render_file(filename).with_content(content)
       end
     end
   end
