@@ -1,4 +1,3 @@
-# -*- coding: undecided -*-
 #
 # Cookbook Name:: openstack-database-service
 # Recipe:: api
@@ -51,7 +50,7 @@ block_storage_uri = endpoint("block-storage-api").to_s.gsub(/%\(tenant_id\)s/, "
 object_storage_uri = endpoint("object-storage-api")
 
 rabbit = node['openstack']['mq']['database-service']['rabbit']
-rabbit_pass = get_password('user', node["openstack"]['mq']["database-service"]["rabbit"]["userid"])
+rabbit_pass = get_password('user', rabbit['userid'])
 
 template "/etc/trove/trove.conf" do
   source "trove.conf.erb"

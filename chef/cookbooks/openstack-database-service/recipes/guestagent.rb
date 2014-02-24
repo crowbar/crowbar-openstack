@@ -37,14 +37,14 @@ end
 api_endpoint = endpoint("database-service-guestagent")
 
 db_user = node["openstack"]["database-service"]["db"]["username"]
-db_pass = get_password 'db', "trove"
+db_pass = get_password 'db', 'openstack-database-service'
 db_uri = db_uri("database-service", db_user, db_pass).to_s
 
 identity_uri = endpoint("identity-api")
 object_storage_uri = endpoint("object-storage-api")
 
-rabbit_pass = get_password(
-  'user', node['openstack']['mq']['database-service']['rabbit']['userid'])
+rabbit = node['openstack']['mq']['database-service']['rabbit']
+rabbit_pass = get_password('user', rabbit['userid'])
 
 template "/etc/trove/trove-guestagent.conf" do
   source "trove-guestagent.conf.erb"
@@ -53,6 +53,7 @@ template "/etc/trove/trove-guestagent.conf" do
   mode 00640
   variables(
     :database_connection => db_uri,
+    :rabbit => rabbit,
     :rabbit_pass => rabbit_pass,
     :endpoint => api_endpoint,
     :identity_uri => identity_uri,
