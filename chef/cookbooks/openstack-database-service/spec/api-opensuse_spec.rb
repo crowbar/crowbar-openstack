@@ -70,7 +70,7 @@ describe "openstack-database-service::api" do
         )
     end
 
-    [/^auth_uri = http:\/\/127.0.0.1:35357\/v2.0$/,
+    [/^auth_uri = http:\/\/127.0.0.1:5000\/v2.0$/,
       /^auth_host = 127.0.0.1$/,
       /^auth_port = 35357$/,
       /^auth_protocol = http$/,
