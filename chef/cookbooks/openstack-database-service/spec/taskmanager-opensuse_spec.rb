@@ -32,7 +32,7 @@ describe "openstack-database-service::taskmanager" do
     [/^debug = false$/,
       /^verbose = false$/,
       /^sql_connection = mysql:\/\/trove:db-pass\@127\.0\.0\.1:3306\/trove\?charset=utf8/,
-      /^rabbit_host = '127.0.0.1'$/,
+      /^rabbit_host = 127.0.0.1$/,
       /^rabbit_virtual_host = \/$/,
       /^rabbit_port = 5672$/,
       /^rabbit_userid = guest$/,
