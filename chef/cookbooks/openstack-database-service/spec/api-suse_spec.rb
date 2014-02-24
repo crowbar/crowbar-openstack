@@ -1,7 +1,7 @@
 require_relative "spec_helper"
 
 describe "openstack-database-service::api" do
-  let(:runner) { ChefSpec::Runner.new(OPENSUSE_OPTS) }
+  let(:runner) { ChefSpec::Runner.new(SUSE_OPTS) }
   let(:node) { runner.node }
   let(:chef_run) { runner.converge(described_recipe) }
 
@@ -16,7 +16,7 @@ describe "openstack-database-service::api" do
   end
 
   it "includes the logging recipe if syslog is enabled" do
-    chef_run = ChefSpec::Runner.new(::OPENSUSE_OPTS) do |node|
+    chef_run = ChefSpec::Runner.new(::SUSE_OPTS) do |node|
       node.set['openstack']['database-service']['syslog']['use'] = true
     end.converge('openstack-database-service::api')
 
