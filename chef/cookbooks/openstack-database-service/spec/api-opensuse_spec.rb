@@ -1,19 +1,18 @@
 require_relative "spec_helper"
 
 describe "openstack-database-service::api" do
-  before do
-    database_service_stubs
+  let(:runner) { ChefSpec::Runner.new(OPENSUSE_OPTS) }
+  let(:node) { runner.node }
+  let(:chef_run) { runner.converge(described_recipe) }
 
-    @chef_run = ::ChefSpec::Runner.new ::OPENSUSE_OPTS
-    @chef_run.converge "openstack-database-service::api"
-  end
+  include_context 'database-service-stubs'
 
   it "installs the api packages" do
-    expect(@chef_run).to install_package('openstack-trove-api')
+    expect(chef_run).to install_package('openstack-trove-api')
   end
 
   it "starts the api service" do
-    expect(@chef_run).to enable_service("openstack-trove-api")
+    expect(chef_run).to enable_service("openstack-trove-api")
   end
 
   it "includes the logging recipe if syslog is enabled" do
@@ -30,7 +29,7 @@ describe "openstack-database-service::api" do
     end
 
     it "creates trove.conf file" do
-      expect(@chef_run).to create_template(@filename).with(
+      expect(chef_run).to create_template(@filename).with(
         user: "openstack-trove",
         group: "openstack-trove",
         mode: 0640
@@ -57,7 +56,7 @@ describe "openstack-database-service::api" do
       /^trove_volume_support = true$/
     ].each do |content|
       it "has a \"#{content.source[1...-1]}\" line" do
-        expect(@chef_run).to render_file(@filename).with_content(content)
+        expect(chef_run).to render_file(@filename).with_content(content)
       end
     end
   end
@@ -68,7 +67,7 @@ describe "openstack-database-service::api" do
     end
 
     it "creates the file" do
-      expect(@chef_run).to create_template(@filename).with(
+      expect(chef_run).to create_template(@filename).with(
         user: "openstack-trove",
         group: "openstack-trove",
         mode: 0640
@@ -82,7 +81,7 @@ describe "openstack-database-service::api" do
       /^signing_dir = \/var\/cache\/trove\/api$/
         ].each do |content|
       it "has a \"#{content.source[1...-1]}\" line" do
-        expect(@chef_run).to render_file(@filename).with_content(content)
+        expect(chef_run).to render_file(@filename).with_content(content)
       end
     end
   end
@@ -91,11 +90,11 @@ describe "openstack-database-service::api" do
     let(:manage_cmd) { "trove-manage db_sync" }
 
     it "runs trove-manage" do
-      expect(@chef_run).to run_execute(manage_cmd)
+      expect(chef_run).to run_execute(manage_cmd)
     end
 
     it "restarts the trove-api service" do
-      res = @chef_run.execute(manage_cmd)
+      res = chef_run.execute(manage_cmd)
       expect(res).to notify("service[trove-api]").to(:restart)
     end
   end

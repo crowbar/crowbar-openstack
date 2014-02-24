@@ -1,19 +1,18 @@
 require_relative "spec_helper"
 
 describe "openstack-database-service::conductor" do
-  before do
-    database_service_stubs
+  let(:runner) { ChefSpec::Runner.new(OPENSUSE_OPTS) }
+  let(:node) { runner.node }
+  let(:chef_run) { runner.converge(described_recipe) }
 
-    @chef_run = ::ChefSpec::Runner.new ::OPENSUSE_OPTS
-    @chef_run.converge "openstack-database-service::conductor"
-  end
+  include_context 'database-service-stubs'
 
   it "installs the converge packages" do
-    expect(@chef_run).to install_package('openstack-trove-conductor')
+    expect(chef_run).to install_package('openstack-trove-conductor')
   end
 
   it "starts the conductor service" do
-    expect(@chef_run).to enable_service("openstack-trove-conductor")
+    expect(chef_run).to enable_service("openstack-trove-conductor")
   end
 
   describe "trove-conductor.conf" do
@@ -22,7 +21,7 @@ describe "openstack-database-service::conductor" do
     end
 
     it "creates the trove-conductor.conf file" do
-      expect(@chef_run).to create_template(@filename).with(
+      expect(chef_run).to create_template(@filename).with(
         user: "openstack-trove",
         group: "openstack-trove",
         mode: 0640
@@ -33,7 +32,7 @@ describe "openstack-database-service::conductor" do
       /^trove_auth_url = http:\/\/127.0.0.1:5000\/v2.0$/
     ].each do |content|
       it "has a \"#{content.source[1...-1]}\" line" do
-        expect(@chef_run).to render_file(@filename).with_content(content)
+        expect(chef_run).to render_file(@filename).with_content(content)
       end
     end
   end      
