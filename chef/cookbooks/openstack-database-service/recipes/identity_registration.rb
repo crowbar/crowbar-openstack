@@ -30,7 +30,7 @@ service_pass = get_password 'service', "openstack-database-service"
 service_user = node["openstack"]["database-service"]["service_user"]
 service_role = node["openstack"]["database-service"]["service_role"]
 service_tenant_name = node["openstack"]["database-service"]["service_tenant_name"]
-database-service_api_endpoint = endpoint "database-service-api"
+database_service_api_endpoint = endpoint "database-service-api"
 region = node["openstack"]["database-service"]["region"]
 
 # Register Service Tenant
@@ -82,9 +82,9 @@ openstack_identity_register "Register Database Service Endpoint" do
   bootstrap_token bootstrap_token
   service_type "database"
   endpoint_region region
-  endpoint_adminurl ::URI.decode database-service_api_endpoint.to_s
-  endpoint_internalurl ::URI.decode database-service_api_endpoint.to_s
-  endpoint_publicurl ::URI.decode database-service_api_endpoint.to_s
+  endpoint_adminurl ::URI.decode database_service_api_endpoint.to_s
+  endpoint_internalurl ::URI.decode database_service_api_endpoint.to_s
+  endpoint_publicurl ::URI.decode database_service_api_endpoint.to_s
 
   action :create_endpoint
 end
