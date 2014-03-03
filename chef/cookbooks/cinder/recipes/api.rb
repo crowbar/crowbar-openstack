@@ -32,18 +32,9 @@ Chef::Log.info("Keystone server found at #{keystone_settings['internal_url_host'
 cinder_port = node[:cinder][:api][:bind_port]
 cinder_protocol = node[:cinder][:api][:protocol]
 
-my_admin_host = node[:fqdn]
-# For the public endpoint, we prefer the public name. If not set, then we
-# use the IP address except for SSL, where we always prefer a hostname
-# (for certificate validation).
-my_public_host = node[:crowbar][:public_name]
-if my_public_host.nil? or my_public_host.empty?
-  unless node[:cinder][:api][:protocol] == "https"
-    my_public_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
-  else
-    my_public_host = 'public.'+node[:fqdn]
-  end
-end
+ha_enabled = false
+my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
+my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:cinder][:api][:protocol] == "https", ha_enabled)
 
 keystone_register "cinder api wakeup keystone" do
   protocol keystone_settings['protocol']
