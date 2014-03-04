@@ -140,7 +140,7 @@ rabbit_settings = {
   :vhost => rabbit[:rabbitmq][:vhost]
 }
 
-keystone_settings = NeutronHelper.keystone_settings(node)
+keystone_settings = NeutronHelper.keystone_settings(neutron)
 
 if neutron_server and neutron[:neutron][:api][:protocol] == 'https'
   if neutron[:neutron][:ssl][:generate_certs]
@@ -207,6 +207,14 @@ if neutron_server and neutron[:neutron][:api][:protocol] == 'https'
   end
 end
 
+if neutron[:neutron][:ha][:enabled]
+  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(neutron, "admin").address
+  bind_host = admin_address
+  bind_port = neutron[:neutron][:ha][:ports][:server]
+else
+  bind_host = neutron[:neutron][:api][:service_host]
+  bind_port = neutron[:neutron][:api][:service_port]
+end
 
 template "/etc/neutron/neutron.conf" do
     cookbook "neutron"
@@ -220,8 +228,8 @@ template "/etc/neutron/neutron.conf" do
       :sql_pool_timeout => neutron[:neutron][:sql][:pool_timeout],
       :debug => neutron[:neutron][:debug],
       :verbose => neutron[:neutron][:verbose],
-      :service_port => neutron[:neutron][:api][:service_port], # Compute port
-      :service_host => neutron[:neutron][:api][:service_host],
+      :bind_host => bind_host,
+      :bind_port => bind_port,
       :use_syslog => neutron[:neutron][:use_syslog],
       :rabbit_settings => rabbit_settings,
       :keystone_settings => keystone_settings,

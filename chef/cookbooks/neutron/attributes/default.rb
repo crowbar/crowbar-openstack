@@ -56,6 +56,10 @@ default[:neutron][:ssl][:ca_certs] = "/etc/neutron/ssl/certs/ca.pem"
 
 default[:neutron][:neutron_server] = false
 
+default[:neutron][:ha][:enabled] = false
+# Ports to bind to when haproxy is used for the real ports
+default[:neutron][:ha][:ports][:server] = 5530
+
 
 case node["platform"]
 when "suse"

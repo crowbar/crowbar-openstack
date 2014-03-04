@@ -13,7 +13,8 @@
 # limitations under the License.
 #
 
-ha_enabled = false
+ha_enabled = node[:neutron][:ha][:enabled]
+
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:neutron][:api][:protocol] == "https", ha_enabled)
 

@@ -124,6 +124,14 @@ end
 
 
 include_recipe "neutron::api_register"
+
+if node[:neutron][:ha][:enabled]
+  log "HA support for neutron is enabled"
+  include_recipe "neutron::server_ha"
+else
+  log "HA support for neutron is disabled"
+end
+
 include_recipe "neutron::post_install_conf"
 
 
