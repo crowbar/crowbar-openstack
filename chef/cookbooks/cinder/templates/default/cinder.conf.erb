@@ -75,10 +75,10 @@
 #periodic_fuzzy_delay=60
 
 # IP address for OpenStack Volume API to listen (string value)
-osapi_volume_listen=<%= node[:cinder][:api][:bind_open_address] ? "0.0.0.0" : node[:cinder][:api][:bind_host] %>
+osapi_volume_listen=<%= @bind_host %>
 
 # port for os volume api to listen (integer value)
-osapi_volume_listen_port=<%= node[:cinder][:api][:bind_port] %>
+osapi_volume_listen_port=<%= @bind_port %>
 
 
 #

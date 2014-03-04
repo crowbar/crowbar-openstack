@@ -126,8 +126,6 @@ include_recipe "#{backend_name}::python-client"
 
 db_password = ''
 if node.roles.include? "cinder-controller"
-  ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-  node.set_unless[:cinder][:db][:password] = secure_password
   db_password = node[:cinder][:db][:password]
 else
   # pickup password to database from cinder-controller node
@@ -293,12 +291,23 @@ unless node[:crowbar_wall].nil? or node[:crowbar_wall][:openstack].nil?
   end
 end
 
+if node[:cinder][:ha][:enabled]
+  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  bind_host = admin_address
+  bind_port = node[:cinder][:ha][:ports][:api]
+else
+  bind_host = node[:cinder][:api][:bind_open_address] ? "0.0.0.0" : node[:cinder][:api][:bind_host]
+  bind_port = node[:cinder][:api][:bind_port]
+end
+
 template "/etc/cinder/cinder.conf" do
   source "cinder.conf.erb"
   owner node[:cinder][:user]
   group "root"
   mode 0640
   variables(
+            :bind_host => bind_host,
+            :bind_port => bind_port,
             :eqlx_params => eqlx_params,
             :emc_params => emc_params,
             :rbd_params => rbd_params,

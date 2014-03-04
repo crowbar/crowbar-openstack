@@ -13,7 +13,7 @@
 # limitations under the License. 
 # 
 
-class CinderService < ServiceObject
+class CinderService < PacemakerServiceObject
 
   def initialize(thelogger)
     super(thelogger)
@@ -31,6 +31,7 @@ class CinderService < ServiceObject
         "cinder-controller" => {
           "unique" => false,
           "count" => 1,
+          "cluster" => true,
           "admin" => false
         },
         "cinder-volume" => {
@@ -74,6 +75,7 @@ class CinderService < ServiceObject
     base["attributes"][@bc_name]["glance_instance"] = find_dep_proposal("glance")
 
     base["attributes"]["cinder"]["service_password"] = '%012d' % rand(1e12)
+    base["attributes"][@bc_name][:db][:password] = random_password
 
     @logger.debug("Cinder create_proposal: exiting")
     base
@@ -94,11 +96,24 @@ class CinderService < ServiceObject
     @logger.debug("Cinder apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
+    controller_elements, controller_nodes, ha_enabled = role_expand_elements(role, "cinder-controller")
+
+    vip_networks = ["admin", "public"]
+
+    dirty = false
+    dirty = prepare_role_for_ha_with_haproxy(role, ["cinder", "ha", "enabled"], ha_enabled, vip_networks)
+    role.save if dirty
+
     net_svc = NetworkService.new @logger
-    tnodes = role.override_attributes["cinder"]["elements"]["cinder-controller"]
-    tnodes.each do |n|
+    # All nodes must have a public IP, even if part of a cluster; otherwise
+    # the VIP can't be moved to the nodes
+    controller_nodes.each do |n|
       net_svc.allocate_ip "default", "public", "host", n
-    end unless tnodes.nil?
+    end
+
+    # No specific need to call sync dns here, as the cookbook doesn't require
+    # the VIP of the cluster to be setup
+    allocate_virtual_ips_for_any_cluster_in_networks(controller_elements, vip_networks)
 
     @logger.debug("Cinder apply_role_pre_chef_call: leaving")
   end

@@ -32,7 +32,8 @@ Chef::Log.info("Keystone server found at #{keystone_settings['internal_url_host'
 cinder_port = node[:cinder][:api][:bind_port]
 cinder_protocol = node[:cinder][:api][:protocol]
 
-ha_enabled = false
+ha_enabled = node[:cinder][:ha][:enabled]
+
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:cinder][:api][:protocol] == "https", ha_enabled)
 
