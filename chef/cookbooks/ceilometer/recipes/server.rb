@@ -175,18 +175,9 @@ end unless node.platform == "suse"
 
 keystone_settings = CeilometerHelper.keystone_settings(node)
 
-my_admin_host = node[:fqdn]
-# For the public endpoint, we prefer the public name. If not set, then we
-# use the IP address except for SSL, where we always prefer a hostname
-# (for certificate validation).
-my_public_host = node[:crowbar][:public_name]
-if my_public_host.nil? or my_public_host.empty?
-  unless node[:ceilometer][:api][:protocol] == "https"
-    my_public_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
-  else
-    my_public_host = 'public.'+node[:fqdn]
-  end
-end
+ha_enabled = false
+my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
+my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:api][:protocol] == "https", ha_enabled)
 
 execute "calling ceilometer-dbsync" do
   command "#{venv_prefix}ceilometer-dbsync"
