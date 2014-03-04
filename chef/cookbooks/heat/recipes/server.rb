@@ -118,18 +118,9 @@ keystone_settings['service_user'] = node[:heat][:keystone_service_user]
 keystone_settings['service_password'] = node[:heat][:keystone_service_password]
 Chef::Log.info("Keystone server found at #{keystone_settings['internal_url_host']}")
 
-my_admin_host = node[:fqdn]
-# For the public endpoint, we prefer the public name. If not set, then we
-# use the IP address except for SSL, where we always prefer a hostname
-# (for certificate validation).
-my_public_host = node[:crowbar][:public_name]
-if my_public_host.nil? or my_public_host.empty?
-  unless node[:heat][:api][:protocol] == "https"
-    my_public_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
-  else
-    my_public_host = 'public.'+node[:fqdn]
-  end
-end
+ha_enabled = false
+my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
+my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:protocol] == "https", ha_enabled)
 
 db_connection = "#{backend_name}://#{node[:heat][:db][:user]}:#{node[:heat][:db][:password]}@#{sql_address}/#{node[:heat][:db][:database]}"
 
