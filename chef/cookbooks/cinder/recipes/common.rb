@@ -87,7 +87,7 @@ glance_servers = search(:node, "roles:glance-server#{glance_env_filter}") || []
 if glance_servers.length > 0
   glance_server = glance_servers[0]
   glance_server = node if glance_server.name == node.name
-  glance_server_host = glance_server[:fqdn]
+  glance_server_host = CrowbarHelper.get_host_for_admin_url(glance_server, (glance_server[:glance][:ha][:enabled] rescue false))
   glance_server_protocol = glance_server[:glance][:api][:protocol]
   glance_server_port = glance_server[:glance][:api][:bind_port]
   glance_server_insecure = glance_server_protocol == 'https' && glance_server[:glance][:ssl][:insecure]
