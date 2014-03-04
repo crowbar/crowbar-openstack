@@ -15,7 +15,7 @@
 barclamp:
   name: cinder
   display: Cinder
-  description: 'Openstack Block Storage: Management of volumes (persistent block level storage)'
+  description: 'OpenStack Block Storage: Management of volumes (persistent block level storage)'
   version: 0
   requires:
     - '@crowbar'
