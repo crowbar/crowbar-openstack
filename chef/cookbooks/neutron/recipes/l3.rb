@@ -162,23 +162,7 @@ metadata_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "adm
 metadata_port = "8775"
 metadata_proxy_shared_secret = (nova[:nova][:neutron_metadata_proxy_shared_secret] rescue '')
 
-env_filter = " AND keystone_config_environment:keystone-config-#{node[:neutron][:keystone_instance]}"
-keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = node if keystone.name == node.name
-else
-  keystone = node
-end
-
-keystone_host = keystone[:fqdn]
-keystone_protocol = keystone["keystone"]["api"]["protocol"]
-keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
-keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
-keystone_service_user = node["neutron"]["service_user"]
-keystone_service_password = node["neutron"]["service_password"]
-keystone_service_url = "#{keystone_protocol}://#{keystone_host}:#{keystone_admin_port}/v2.0"
-Chef::Log.info("Keystone server found at #{keystone_host}")
+keystone_settings = NeutronHelper.keystone_settings(node)
 
 template "/etc/neutron/metadata_agent.ini" do
   source "metadata_agent.ini.erb"
@@ -187,11 +171,8 @@ template "/etc/neutron/metadata_agent.ini" do
   mode "0640"
   variables(
     :debug => node[:neutron][:debug],
-    :auth_url => keystone_service_url,
+    :keystone_settings => keystone_settings,
     :auth_region => "RegionOne",
-    :admin_tenant_name => keystone_service_tenant,
-    :admin_user => keystone_service_user,
-    :admin_password => keystone_service_password,
     :nova_metadata_host => metadata_host,
     :nova_metadata_port => metadata_port,
     :metadata_proxy_shared_secret => metadata_proxy_shared_secret

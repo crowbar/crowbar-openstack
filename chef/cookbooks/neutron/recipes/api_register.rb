@@ -29,62 +29,43 @@ end
 api_port = node["neutron"]["api"]["service_port"]
 neutron_protocol = node["neutron"]["api"]["protocol"]
 
-env_filter = " AND keystone_config_environment:keystone-config-#{node[:neutron][:keystone_instance]}"
-keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = node if keystone.name == node.name
-else
-  keystone = node
-end
-
-keystone_host = keystone[:fqdn]
-keystone_protocol = keystone["keystone"]["api"]["protocol"]
-keystone_token = keystone["keystone"]["service"]["token"]
-keystone_service_port = keystone["keystone"]["api"]["service_port"]
-keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
-keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
-keystone_service_user = node["neutron"]["service_user"]
-keystone_service_password = node["neutron"]["service_password"]
-admin_username = keystone["keystone"]["admin"]["username"] rescue nil
-admin_password = keystone["keystone"]["admin"]["password"] rescue nil
-Chef::Log.info("Keystone server found at #{keystone_host}")
+keystone_settings = NeutronHelper.keystone_settings(node)
 
 keystone_register "neutron api wakeup keystone" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   action :wakeup
 end
 
 keystone_register "register neutron user" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
-  user_name keystone_service_user
-  user_password keystone_service_password
-  tenant_name keystone_service_tenant
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['service_user']
+  user_password keystone_settings['service_password']
+  tenant_name keystone_settings['service_tenant']
   action :add_user
 end
 
 keystone_register "give neutron user access" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
-  user_name keystone_service_user
-  tenant_name keystone_service_tenant
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['service_user']
+  tenant_name keystone_settings['service_tenant']
   role_name "admin"
   action :add_access
 end
 
 keystone_register "register neutron service" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   service_name "neutron"
   service_type "network"
   service_description "Openstack Neutron Service"
@@ -92,10 +73,10 @@ keystone_register "register neutron service" do
 end
 
 keystone_register "register neutron endpoint" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   endpoint_service "neutron"
   endpoint_region "RegionOne"
   endpoint_publicURL "#{neutron_protocol}://#{my_public_host}:#{api_port}/"

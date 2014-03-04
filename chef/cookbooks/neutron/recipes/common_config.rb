@@ -140,26 +140,7 @@ rabbit_settings = {
   :vhost => rabbit[:rabbitmq][:vhost]
 }
 
-
-env_filter = " AND keystone_config_environment:keystone-config-#{neutron[:neutron][:keystone_instance]}"
-keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones.first
-  keystone = neutron if keystone.name == neutron.name
-else
-  keystone = neutron
-end
-keystone_host = keystone[:fqdn]
-keystone_protocol = keystone["keystone"]["api"]["protocol"]
-keystone_service_port = keystone["keystone"]["api"]["service_port"]
-keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
-keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
-keystone_service_user = neutron["neutron"]["service_user"]
-keystone_service_password = neutron["neutron"]["service_password"]
-admin_username = keystone["keystone"]["admin"]["username"] rescue nil
-admin_password = keystone["keystone"]["admin"]["password"] rescue nil
-Chef::Log.info("Keystone server found at #{keystone_host}")
-
+keystone_settings = NeutronHelper.keystone_settings(node)
 
 if neutron_server and neutron[:neutron][:api][:protocol] == 'https'
   if neutron[:neutron][:ssl][:generate_certs]
@@ -243,13 +224,7 @@ template "/etc/neutron/neutron.conf" do
       :service_host => neutron[:neutron][:api][:service_host],
       :use_syslog => neutron[:neutron][:use_syslog],
       :rabbit_settings => rabbit_settings,
-      :keystone_protocol => keystone_protocol,
-      :keystone_host => keystone_host,
-      :keystone_service_port => keystone_service_port,
-      :keystone_service_tenant => keystone_service_tenant,
-      :keystone_service_user => keystone_service_user,
-      :keystone_service_password => keystone_service_password,
-      :keystone_admin_port => keystone_admin_port,
+      :keystone_settings => keystone_settings,
       :metadata_host => metadata_host,
       :metadata_port => metadata_port,
       :ssl_enabled => neutron[:neutron][:api][:protocol] == 'https',
