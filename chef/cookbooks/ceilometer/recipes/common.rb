@@ -17,24 +17,7 @@ rabbit_settings = {
   :vhost => rabbit[:rabbitmq][:vhost]
 }
 
-env_filter = " AND keystone_config_environment:keystone-config-#{node[:ceilometer][:keystone_instance]}"
-keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = node if keystone.name == node.name
-else
-  keystone = node
-end
-
-keystone_host = keystone[:fqdn]
-keystone_protocol = keystone["keystone"]["api"]["protocol"]
-keystone_token = keystone["keystone"]["service"]["token"]
-keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
-keystone_service_port = keystone["keystone"]["api"]["service_port"]
-keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
-keystone_service_user = node["ceilometer"]["keystone_service_user"]
-keystone_service_password = node["ceilometer"]["keystone_service_password"]
-Chef::Log.info("Keystone server found at #{keystone_host}")
+keystone_settings = CeilometerHelper.keystone_settings(node)
 
 if node[:ceilometer][:use_mongodb]
   db_hosts = search(:node, "roles:ceilometer-server") || []
@@ -102,14 +85,7 @@ template "/etc/ceilometer/ceilometer.conf" do
       :debug => node[:ceilometer][:debug],
       :verbose => node[:ceilometer][:verbose],
       :rabbit_settings => rabbit_settings,
-      :keystone_protocol => keystone_protocol,
-      :keystone_host => keystone_host,
-      :keystone_auth_token => keystone_token,
-      :keystone_service_port => keystone_service_port,
-      :keystone_service_user => keystone_service_user,
-      :keystone_service_password => keystone_service_password,
-      :keystone_service_tenant => keystone_service_tenant,
-      :keystone_admin_port => keystone_admin_port,
+      :keystone_settings => keystone_settings,
       :api_port => node[:ceilometer][:api][:port],
       :metering_secret => metering_secret,
       :database_connection => db_connection,

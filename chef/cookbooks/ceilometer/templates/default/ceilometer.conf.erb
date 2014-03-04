@@ -664,23 +664,23 @@ port=<%= @api_port %>
 #
 
 # Username to use for openstack service access (string value)
-os_username=<%= @keystone_service_user %>
+os_username=<%= @keystone_settings['service_user'] %>
 
 # Password to use for openstack service access (string value)
-os_password=<%= @keystone_service_password %>
+os_password=<%= @keystone_settings['service_password'] %>
 
 # Tenant ID to use for openstack service access (string value)
 #os_tenant_id=
 
 # Tenant name to use for openstack service access (string
 # value)
-os_tenant_name=<%= @keystone_service_tenant %>
+os_tenant_name=<%= @keystone_settings['service_tenant'] %>
 
 # Certificate chain for SSL validation (string value)
 #os_cacert=<None>
 
 # Auth URL to use for openstack service access (string value)
-os_auth_url=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/v2.0
+os_auth_url=<%= @keystone_settings['internal_auth_url'] %>
 
 # Region name to use for openstack service endpoints (string
 # value)
@@ -720,17 +720,17 @@ os_endpoint_type=internalURL
 
 # Host providing the admin Identity API endpoint (string
 # value)
-auth_host=<%= @keystone_host %>
+auth_host=<%= @keystone_settings['internal_url_host'] %>
 
 # Port of the admin Identity API endpoint (integer value)
-auth_port=<%= @keystone_admin_port %>
+auth_port=<%= @keystone_settings['admin_port'] %>
 
 # Protocol of the admin Identity API endpoint(http or https)
 # (string value)
-auth_protocol = <%= @keystone_protocol %>
+auth_protocol = <%= @keystone_settings['protocol'] %>
 
 # Complete public Identity API endpoint (string value)
-auth_uri=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/v2.0
+auth_uri=<%= @keystone_settings['internal_auth_url'] %>
 
 # API version of the admin Identity API endpoint (string
 # value)
@@ -761,14 +761,14 @@ auth_uri=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service
 #admin_token=<None>
 
 # Keystone account username (string value)
-admin_user = <%= @keystone_service_user %>
+admin_user = <%= @keystone_settings['service_user'] %>
 
 # Keystone account password (string value)
-admin_password = <%= @keystone_service_password %>
+admin_password = <%= @keystone_settings['service_password'] %>
 
 # Keystone service account tenant name to validate user tokens
 # (string value)
-admin_tenant_name = <%= @keystone_service_tenant %>
+admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 
 # Env key for the swift cache (string value)
 #cache=<None>

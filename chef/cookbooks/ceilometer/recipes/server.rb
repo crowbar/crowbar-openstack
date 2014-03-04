@@ -173,24 +173,7 @@ directory "/var/cache/ceilometer" do
   action :create
 end unless node.platform == "suse"
 
-env_filter = " AND keystone_config_environment:keystone-config-#{node[:ceilometer][:keystone_instance]}"
-keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = node if keystone.name == node.name
-else
-  keystone = node
-end
-
-keystone_host = keystone[:fqdn]
-keystone_protocol = keystone["keystone"]["api"]["protocol"]
-keystone_token = keystone["keystone"]["service"]["token"]
-keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
-keystone_service_port = keystone["keystone"]["api"]["service_port"]
-keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
-keystone_service_user = node["ceilometer"]["keystone_service_user"]
-keystone_service_password = node["ceilometer"]["keystone_service_password"]
-Chef::Log.info("Keystone server found at #{keystone_host}")
+keystone_settings = CeilometerHelper.keystone_settings(node)
 
 my_admin_host = node[:fqdn]
 # For the public endpoint, we prefer the public name. If not set, then we
@@ -230,23 +213,23 @@ service "ceilometer-api" do
 end
 
 keystone_register "register ceilometer user" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
-  user_name keystone_service_user
-  user_password keystone_service_password
-  tenant_name keystone_service_tenant
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['service_user']
+  user_password keystone_settings['service_password']
+  tenant_name keystone_settings['service_tenant']
   action :add_user
 end
 
 keystone_register "give ceilometer user access" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
-  user_name keystone_service_user
-  tenant_name keystone_service_tenant
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['service_user']
+  tenant_name keystone_settings['service_tenant']
   role_name "admin"
   action :add_access
 end
@@ -255,12 +238,12 @@ env_filter = " AND ceilometer_config_environment:#{node[:ceilometer][:config][:e
 swift_middlewares = search(:node, "roles:ceilometer-swift-proxy-middleware#{env_filter}") || []
 unless swift_middlewares.empty?
   keystone_register "give ceilometer user ResellerAdmin role" do
-    protocol keystone_protocol
-    host keystone_host
-    port keystone_admin_port
-    token keystone_token
-    user_name keystone_service_user
-    tenant_name keystone_service_tenant
+    protocol keystone_settings['protocol']
+    host keystone_settings['internal_url_host']
+    port keystone_settings['admin_port']
+    token keystone_settings['admin_token']
+    user_name keystone_settings['service_user']
+    tenant_name keystone_settings['service_tenant']
     role_name "ResellerAdmin"
     action :add_access
   end
@@ -268,10 +251,10 @@ end
 
 # Create ceilometer service
 keystone_register "register ceilometer service" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   service_name "ceilometer"
   service_type "metering"
   service_description "Openstack Collector Service"
@@ -279,10 +262,10 @@ keystone_register "register ceilometer service" do
 end
 
 keystone_register "register ceilometer endpoint" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   endpoint_service "ceilometer"
   endpoint_region "RegionOne"
   endpoint_publicURL "#{node[:ceilometer][:api][:protocol]}://#{my_public_host}:#{node[:ceilometer][:api][:port]}/"
