@@ -13,19 +13,10 @@
 # limitations under the License.
 #
 
+ha_enabled = false
+my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
+my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:neutron][:api][:protocol] == "https", ha_enabled)
 
-my_admin_host = node[:fqdn]
-# For the public endpoint, we prefer the public name. If not set, then we
-# use the IP address except for SSL, where we always prefer a hostname
-# (for certificate validation).
-my_public_host = node[:crowbar][:public_name]
-if my_public_host.nil? or my_public_host.empty?
-  unless node[:neutron][:api][:protocol] == "https"
-    my_public_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
-  else
-    my_public_host = 'public.'+node[:fqdn]
-  end
-end
 api_port = node["neutron"]["api"]["service_port"]
 neutron_protocol = node["neutron"]["api"]["protocol"]
 
