@@ -112,17 +112,11 @@ rabbit_settings = {
   :vhost => rabbit[:rabbitmq][:vhost]
 }
 
-env_filter = " AND keystone_config_environment:keystone-config-#{node[:heat][:keystone_instance]}"
-keystone = search(:node, "recipes:keystone\\:\\:server#{env_filter}").first || node
-keystone_host = keystone[:fqdn]
-keystone_protocol = keystone["keystone"]["api"]["protocol"]
-keystone_token = keystone["keystone"]["service"]["token"]
-keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
-keystone_service_port = keystone["keystone"]["api"]["service_port"]
-keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
-keystone_service_user = node["heat"]["keystone_service_user"]
-keystone_service_password = node["heat"]["keystone_service_password"]
-Chef::Log.info("Keystone server found at #{keystone_host}")
+keystone = get_instance('roles:keystone-server')
+keystone_settings = KeystoneHelper.keystone_settings(keystone)
+keystone_settings['service_user'] = node[:heat][:keystone_service_user]
+keystone_settings['service_password'] = node[:heat][:keystone_service_password]
+Chef::Log.info("Keystone server found at #{keystone_settings['internal_url_host']}")
 
 my_admin_host = node[:fqdn]
 # For the public endpoint, we prefer the public name. If not set, then we
@@ -140,33 +134,33 @@ end
 db_connection = "#{backend_name}://#{node[:heat][:db][:user]}:#{node[:heat][:db][:password]}@#{sql_address}/#{node[:heat][:db][:database]}"
 
 keystone_register "register heat user" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
-  user_name keystone_service_user
-  user_password keystone_service_password
-  tenant_name keystone_service_tenant
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['service_user']
+  user_password keystone_settings['service_password']
+  tenant_name keystone_settings['service_tenant']
   action :add_user
 end
 
 keystone_register "give heat user access" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
-  user_name keystone_service_user
-  tenant_name keystone_service_tenant
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['service_user']
+  tenant_name keystone_settings['service_tenant']
   role_name "admin"
   action :add_access
 end
 
 # Create Heat CloudFormation service
 keystone_register "register Heat CloudFormation Service" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   service_name "heat-cfn"
   service_type "cloudformation"
   service_description "Heat CloudFormation Service"
@@ -174,10 +168,10 @@ keystone_register "register Heat CloudFormation Service" do
 end
 
 keystone_register "register heat Cfn endpoint" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   endpoint_service "heat"
   endpoint_region "RegionOne"
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1"
@@ -190,10 +184,10 @@ end
 
 # Create Heat service
 keystone_register "register Heat Service" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   service_name "heat"
   service_type "orchestration"
   service_description "Heat Service"
@@ -201,10 +195,10 @@ keystone_register "register Heat Service" do
 end
 
 keystone_register "register heat endpoint" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   endpoint_service "heat"
   endpoint_region "RegionOne"
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:port]}/v1/$(tenant_id)s"
@@ -240,14 +234,7 @@ template "/etc/heat/heat.conf" do
       :debug => node[:heat][:debug],
       :verbose => node[:heat][:verbose],
       :rabbit_settings => rabbit_settings,
-      :keystone_protocol => keystone_protocol,
-      :keystone_host => keystone_host,
-      :keystone_auth_token => keystone_token,
-      :keystone_service_port => keystone_service_port,
-      :keystone_service_user => keystone_service_user,
-      :keystone_service_password => keystone_service_password,
-      :keystone_service_tenant => keystone_service_tenant,
-      :keystone_admin_port => keystone_admin_port,
+      :keystone_settings => keystone_settings,
       :api_port => node[:heat][:api][:port],
       :database_connection => db_connection,
       :cfn_port => node[:heat][:api][:cfn_port]
@@ -263,14 +250,7 @@ template "/etc/heat/api-paste.ini" do
     variables(
       :debug => node[:heat][:debug],
       :verbose => node[:heat][:verbose],
-      :keystone_protocol => keystone_protocol,
-      :keystone_host => keystone_host,
-      :keystone_auth_token => keystone_token,
-      :keystone_service_port => keystone_service_port,
-      :keystone_service_user => keystone_service_user,
-      :keystone_service_password => keystone_service_password,
-      :keystone_service_tenant => keystone_service_tenant,
-      :keystone_admin_port => keystone_admin_port,
+      :keystone_settings => keystone_settings,
       :api_port => node[:heat][:api][:port],
       :cfn_port => node[:heat][:api][:cfn_port]
 
