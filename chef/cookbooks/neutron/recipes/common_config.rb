@@ -99,29 +99,6 @@ template node[:neutron][:platform][:neutron_rootwrap_sudo_template] do
 end
 
 
-#env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
-#assuming we have only one nova
-#TODO: nova should depend on neutron, but neutron depend on nova a bit, so we have to do somthing with this
-
-novas = search(:node, "roles:nova-multi-controller") || []
-if novas.length > 0
-  nova = novas[0]
-  nova = node if nova.name == node.name
-else
-  nova = node
-end
-# we use an IP address here, and not nova[:fqdn] because nova-metadata doesn't use SSL
-# and because it listens on this specific IP address only (so we don't want to use a name
-# that could resolve to 127.0.0.1).
-metadata_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "admin").address
-metadata_port = "8775"
-if neutron[:neutron][:networking_mode] == 'vlan'
-  per_tenant_vlan=true
-else
-  per_tenant_vlan=false
-end
-
-
 env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{neutron[:neutron][:rabbitmq_instance]}"
 rabbits = search(:node, "roles:rabbitmq-server#{env_filter}") || []
 if rabbits.length > 0
@@ -233,15 +210,12 @@ template "/etc/neutron/neutron.conf" do
       :use_syslog => neutron[:neutron][:use_syslog],
       :rabbit_settings => rabbit_settings,
       :keystone_settings => keystone_settings,
-      :metadata_host => metadata_host,
-      :metadata_port => metadata_port,
       :ssl_enabled => neutron[:neutron][:api][:protocol] == 'https',
       :ssl_cert_file => neutron[:neutron][:ssl][:certfile],
       :ssl_key_file => neutron[:neutron][:ssl][:keyfile],
       :ssl_cert_required => neutron[:neutron][:ssl][:cert_required],
       :ssl_ca_file => neutron[:neutron][:ssl][:ca_certs],
       :neutron_server => neutron_server,
-      :per_tenant_vlan => per_tenant_vlan,
       :use_ml2 => neutron[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware",
       :networking_plugin => neutron[:neutron][:networking_plugin],
       :rootwrap_bin =>  node[:neutron][:rootwrap],

@@ -148,6 +148,7 @@ template "/etc/neutron/dhcp_agent.ini" do
 end
 
 
+#TODO: nova should depend on neutron, but neutron depend on nova a bit, so we have to do somthing with this
 novas = search(:node, "roles:nova-multi-controller") || []
 if novas.length > 0
   nova = novas[0]
@@ -158,7 +159,7 @@ end
 # we use an IP address here, and not nova[:fqdn] because nova-metadata doesn't use SSL
 # and because it listens on this specific IP address only (so we don't want to use a name
 # that could resolve to 127.0.0.1).
-metadata_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova, "admin").address
+metadata_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
 metadata_port = "8775"
 metadata_proxy_shared_secret = (nova[:nova][:neutron_metadata_proxy_shared_secret] rescue '')
 
