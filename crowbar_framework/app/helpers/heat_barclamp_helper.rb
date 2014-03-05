@@ -18,12 +18,4 @@
 #
 
 module HeatBarclampHelper
-  def heat_role_contraints
-    {
-      "heat-server" => {
-        "unique" => false,
-        "count" => 1
-      }
-    }
-  end
 end
