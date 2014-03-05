@@ -18,7 +18,4 @@
 #
 
 module CeilometerBarclampHelper
-  def ceilometer_role_constraints
-    CeilometerService.role_constraints
-  end
 end
