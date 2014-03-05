@@ -63,17 +63,13 @@ else
   db_connection = "#{backend_name}://#{node[:ceilometer][:db][:user]}:#{db_password}@#{sql_address}/#{node[:ceilometer][:db][:database]}"
 end
 
-metering_secret = ''
-if node.roles.include? "ceilometer-server"
-  # secret is already created because common recipe comes
-  # after the server recipe
-  metering_secret = node[:ceilometer][:metering_secret]
+if node[:ceilometer][:ha][:server][:enabled]
+  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  bind_host = admin_address
+  bind_port = node[:ceilometer][:ha][:ports][:api]
 else
-  # pickup secret from ceilometer-server node
-  node_controllers = search(:node, "roles:ceilometer-server") || []
-  if node_controllers.length > 0
-    metering_secret = node_controllers[0][:ceilometer][:metering_secret]
-  end
+  bind_host = "0.0.0.0"
+  bind_port = node[:ceilometer][:api][:port]
 end
 
 template "/etc/ceilometer/ceilometer.conf" do
@@ -86,8 +82,9 @@ template "/etc/ceilometer/ceilometer.conf" do
       :verbose => node[:ceilometer][:verbose],
       :rabbit_settings => rabbit_settings,
       :keystone_settings => keystone_settings,
-      :api_port => node[:ceilometer][:api][:port],
-      :metering_secret => metering_secret,
+      :bind_host => bind_host,
+      :bind_port => bind_port,
+      :metering_secret => node[:ceilometer][:metering_secret],
       :database_connection => db_connection,
       :node_hostname => node['hostname']
     )

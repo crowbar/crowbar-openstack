@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
 if node[:ceilometer][:use_mongodb]
   case node["platform"]
@@ -62,8 +62,6 @@ if node[:ceilometer][:use_mongodb]
   end
 
 else
-  node.set_unless[:ceilometer][:db][:password] = secure_password
-
   env_filter = " AND database_config_environment:database-config-#{node[:ceilometer][:database_instance]}"
   sqls = search(:node, "roles:database-server#{env_filter}") || []
   if sqls.length > 0
@@ -162,8 +160,6 @@ else
   end
 end
 
-node.set_unless[:ceilometer][:metering_secret] = secure_password
-
 include_recipe "#{@cookbook_name}::common"
 
 directory "/var/cache/ceilometer" do
@@ -175,7 +171,6 @@ end unless node.platform == "suse"
 
 keystone_settings = CeilometerHelper.keystone_settings(node)
 
-ha_enabled = false
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:api][:protocol] == "https", ha_enabled)
 
@@ -201,6 +196,13 @@ service "ceilometer-api" do
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
+end
+
+if ha_enabled
+  log "HA support for ceilometer is enabled"
+  include_recipe "ceilometer::server_ha"
+else
+  log "HA support for ceilometer is disabled"
 end
 
 keystone_register "register ceilometer user" do

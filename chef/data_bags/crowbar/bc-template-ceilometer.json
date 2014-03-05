@@ -8,6 +8,7 @@
       "use_mongodb": true,
       "cpu_interval": 600,
       "meters_interval": 600,
+      "metering_secret": "",
       "rabbitmq_instance": "none",
       "database_instance": "none",
       "keystone_instance": "none",
@@ -39,7 +40,7 @@
   "deployment": {
     "ceilometer": {
       "crowbar-revision": 0,
-      "schema-revision": 3,
+      "schema-revision": 4,
       "element_states": {
         "ceilometer-server": [ "readying", "ready", "applying" ],
         "ceilometer-cagent": [ "readying", "ready", "applying" ],

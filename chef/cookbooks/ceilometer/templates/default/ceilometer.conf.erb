@@ -651,10 +651,10 @@ connection=<%= @database_connection %>
 #
 
 # The port for the ceilometer API server (integer value)
-port=<%= @api_port %>
+port=<%= @bind_port %>
 
 # The listen IP for the ceilometer API server (string value)
-#host=0.0.0.0
+host=<%= @bind_host %>
 
 
 [service_credentials]
