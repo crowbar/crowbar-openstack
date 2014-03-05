@@ -18,21 +18,6 @@
 #
 
 module CinderBarclampHelper
-  def cinder_role_contraints
-    {
-      "cinder-controller" => {
-        "unique" => false,
-        "count" => 1,
-        "admin" => false
-      },
-      "cinder-volume" => {
-        "unique" => false,
-        "count" => -1,
-        "admin" => false
-      }
-    }
-  end
-
   def volume_type_for_cinder(selected)
     options_for_select(
       [
