@@ -16,47 +16,49 @@
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
 if node[:ceilometer][:use_mongodb]
-  case node["platform"]
-    when "centos", "redhat"
-      mongo_conf = "/etc/mongod.conf"
-      mongo_service = "mongod"
-      package "mongo-10gen"
-      package "mongo-10gen-server"
-    else
-      mongo_conf = "/etc/mongodb.conf"
-      mongo_service = "mongodb"
-      package "mongodb" do
-        action :install
-      end
-  end
-
-  node_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-
-  template mongo_conf do
-    mode 0644
-    source "mongodb.conf.erb"
-    variables(:listen_addr => node_address)
-    notifies :restart, "service[#{mongo_service}]", :immediately
-  end
-
-  service mongo_service do
-    supports :status => true, :restart => true
-    action [:enable, :start]
-  end
-
-  # wait for mongodb start (ceilometer services need it running)
-  ruby_block "wait for mongodb start" do
-    block do
-      require 'timeout'
-      begin
-        Timeout.timeout(60) do
-          while ! ::Kernel.system("mongo #{node_address} --quiet < /dev/null &> /dev/null")
-            Chef::Log.debug("mongodb still not reachable")
-            sleep(2)
-          end
+  if !ha_enabled || node.roles.include?("pacemaker-cluster-founder")
+    case node["platform"]
+      when "centos", "redhat"
+        mongo_conf = "/etc/mongod.conf"
+        mongo_service = "mongod"
+        package "mongo-10gen"
+        package "mongo-10gen-server"
+      else
+        mongo_conf = "/etc/mongodb.conf"
+        mongo_service = "mongodb"
+        package "mongodb" do
+          action :install
         end
-      rescue Timeout::Error
-        Chef::Log.warn("mongodb does not seem to be responding 1 minute after start")
+    end
+
+    node_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+
+    template mongo_conf do
+      mode 0644
+      source "mongodb.conf.erb"
+      variables(:listen_addr => node_address)
+      notifies :restart, "service[#{mongo_service}]", :immediately
+    end
+
+    service mongo_service do
+      supports :status => true, :restart => true
+      action [:enable, :start]
+    end
+
+    # wait for mongodb start (ceilometer services need it running)
+    ruby_block "wait for mongodb start" do
+      block do
+        require 'timeout'
+        begin
+          Timeout.timeout(60) do
+            while ! ::Kernel.system("mongo #{node_address} --quiet < /dev/null &> /dev/null")
+              Chef::Log.debug("mongodb still not reachable")
+              sleep(2)
+            end
+          end
+        rescue Timeout::Error
+          Chef::Log.warn("mongodb does not seem to be responding 1 minute after start")
+        end
       end
     end
   end

@@ -20,14 +20,15 @@ rabbit_settings = {
 keystone_settings = CeilometerHelper.keystone_settings(node)
 
 if node[:ceilometer][:use_mongodb]
-  db_hosts = search(:node, "roles:ceilometer-server") || []
-  if db_hosts.length > 0
-    db_host = db_hosts.first
-    db_host = node if db_host.name == node.name
-  else
-    db_host = node
+  db_host = nil
+  db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
+  if node[:ceilometer][:ha][:server][:enabled]
+    # Currently, we only setup mongodb non-HA on the first node
+    db_host = db_hosts.select { |n| n.roles.include?("pacemaker-cluster-founder") }.first
   end
-  mongodb_ip=Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
+  db_host ||= db_hosts.first || node
+
+  mongodb_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
   db_connection = "mongodb://#{mongodb_ip}:27017/ceilometer"
 else
   sql_env_filter = " AND database_config_environment:database-config-#{node[:ceilometer][:database_instance]}"
