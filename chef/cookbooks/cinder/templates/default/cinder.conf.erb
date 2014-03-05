@@ -1265,7 +1265,12 @@ eqlx_pool=<%= @eqlx_params["eqlx_pool"] %>
 
 # Name for the VG that will contain exported volumes (string
 # value)
-volume_group=<%= node[:cinder][:volume][:volume_name] %>
+<%= unless @raw_params.nil? -%>
+volume_group=<%= node[:cinder][:volume][:raw][:volume_name] %>
+<% end -%>
+<%= unless @local_params.nil? -%>
+volume_group=<%= node[:cinder][:volume][:local][:volume_name] %>
+<% end -%>
 
 # Size of thin provisioning pool (None uses entire cinder VG)
 # (string value)

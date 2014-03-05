@@ -144,6 +144,20 @@ rabbit_settings = {
   :vhost => rabbit[:rabbitmq][:vhost]
 }
 
+if node[:cinder][:volume][:volume_type] == "raw"
+  Chef::Log.info("Pushing raw params to cinder.conf template")
+  raw_params = node[:cinder][:volume][:raw]
+else
+  raw_params = nil
+end
+
+if node[:cinder][:volume][:volume_type] == "local"
+  Chef::Log.info("Pushing local params to cinder.conf template")
+  local_params = node[:cinder][:volume][:local]
+else
+  local_params = nil
+end
+
 if node[:cinder][:volume][:volume_type] == "eqlx"
   Chef::Log.info("Pushing EQLX params to cinder.conf template")
   eqlx_params = node[:cinder][:volume][:eqlx]
@@ -292,6 +306,8 @@ template "/etc/cinder/cinder.conf" do
   variables(
     :bind_host => bind_host,
     :bind_port => bind_port,
+    :raw_params => raw_params,
+    :local_params => local_params,
     :eqlx_params => eqlx_params,
     :emc_params => emc_params,
     :rbd_params => rbd_params,

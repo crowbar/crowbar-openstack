@@ -33,10 +33,22 @@
               "type": "map",
               "required": true,
               "mapping": {
+                "volume_type": { "type": "str", "required": true },
+                "local": {
+                  "type": "map", "required": true, "mapping": {
+                    "volume_name": { "type": "str", "required": true },
+                    "file_name": { "type": "str", "required": true },
+                    "file_size": { "type": "int", "required": true }
+                  }
+                },
+                "raw": {
+                  "type": "map", "required": true, "mapping": {
+                    "volume_name": { "type": "str", "required": true },
+                    "cinder_raw_method": { "type": "str", "required": true }
+                  }
+                },
                 "eqlx": {
-                  "type": "map",
-                  "required": true,
-                  "mapping": {
+                  "type": "map", "required": true, "mapping": {
                     "san_ip": { "type": "str", "required": true },
                     "san_login": { "type": "str", "required": true },
                     "san_password": { "type": "str", "required": true },
@@ -50,9 +62,7 @@
                   }
                 },
                 "netapp": {
-                  "type": "map",
-                  "required": true,
-                  "mapping": {
+                  "type": "map", "required": true, "mapping": {
                     "storage_family": { "type": "str", "required": true },
                     "storage_protocol": { "type": "str", "required": true },
                     "nfs_shares": { "type": "str", "required": true },
@@ -67,9 +77,7 @@
                   }
                 },
                 "emc": {
-                  "type": "map",
-                  "required": true,
-                  "mapping": {
+                  "type": "map", "required": true, "mapping": {
                     "ecom_server_ip": { "type": "str", "required": true },
                     "emc_storage_type": { "type": "str", "required": true },
                     "masking_view": { "type": "str", "required": true },
@@ -79,26 +87,17 @@
                   }
                 },
                 "rbd": {
-                  "type": "map",
-                  "required": true,
-                  "mapping": {
+                  "type": "map", "required": true, "mapping": {
                     "pool": { "type": "str", "required": true },
                     "user": { "type": "str", "required": true }
                     }
                 },
                 "manual": {
-                  "type": "map",
-                  "required": true,
-                  "mapping": {
+                  "type": "map", "required": true, "mapping": {
                     "driver": { "type": "str", "required": true },
                     "config": { "type": "str", "required": true }
                   }
-                },
-                "volume_name": { "type": "str", "required": true },
-                "volume_type": { "type": "str", "required": true },
-                "local_file": { "type": "str", "required": true },
-                "cinder_raw_method": { "type": "str", "required": true },
-                "local_size": { "type": "int", "required": true }
+                }
               }
             },
             "api": {
