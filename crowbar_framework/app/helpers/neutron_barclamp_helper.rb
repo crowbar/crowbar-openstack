@@ -18,20 +18,6 @@
 #
 
 module NeutronBarclampHelper
-  def neutron_role_contraints
-    {
-      "neutron-server" => {
-        "unique" => true,
-        "count" => 1
-      },
-      "neutron-l3" => {
-        "unique" => false,
-        "count" => -1,
-        "admin" => false
-      }
-    }
-  end
-
   def networking_plugins_for_neutron(selected)
     options_for_select(
       [
