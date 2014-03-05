@@ -25,6 +25,20 @@ class DatabaseService < ServiceObject
     false
   end
 
+  class << self
+    def role_constraints
+      @role_constraints ||= begin
+        {
+          "database-server" => {
+            "unique" => false,
+            "count" => 1,
+            "admin" => false
+          }
+        }
+      end
+    end
+  end
+
   def create_proposal
     @logger.debug("Database create_proposal: entering")
     base = super
