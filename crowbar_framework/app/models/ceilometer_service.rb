@@ -25,6 +25,31 @@ class CeilometerService < ServiceObject
     false
   end
 
+  class << self
+    def role_constraints
+      @role_constraints ||= begin
+        {
+          "ceilometer-agent" => {
+            "unique" => false,
+            "count" => -1
+          },
+          "ceilometer-cagent" => {
+            "unique" => false,
+            "count" => 1
+          },
+          "ceilometer-server" => {
+            "unique" => false,
+            "count" => 1
+          },
+          "ceilometer-swift-proxy-middleware" => {
+            "unique" => false,
+            "count" => -1
+          }
+        }
+      end
+    end
+  end
+
   def proposal_dependencies(role)
     answer = []
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["ceilometer"]["rabbitmq_instance"] }
