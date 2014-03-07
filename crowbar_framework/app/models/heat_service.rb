@@ -25,6 +25,19 @@ class HeatService < ServiceObject
     false
   end
 
+  class << self
+    def role_constraints
+      @role_constraints ||= begin
+        {
+          "heat-server" => {
+            "unique" => false,
+            "count" => 1
+          }
+        }
+      end
+    end
+  end
+
   def proposal_dependencies(role)
     answer = []
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["heat"]["rabbitmq_instance"] }
