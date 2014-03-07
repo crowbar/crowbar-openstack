@@ -18,12 +18,4 @@
 #
 
 module RabbitmqBarclampHelper
-  def rabbitmq_role_contraints
-    {
-      "rabbitmq-server" => {
-        "unique" => false,
-        "count" => 1
-      }
-    }
-  end
 end
