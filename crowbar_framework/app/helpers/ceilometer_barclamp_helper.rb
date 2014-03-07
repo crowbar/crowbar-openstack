@@ -18,24 +18,4 @@
 #
 
 module CeilometerBarclampHelper
-  def ceilometer_role_contraints
-    {
-      "ceilometer-agent" => {
-        "unique" => false,
-        "count" => -1
-      },
-      "ceilometer-cagent" => {
-        "unique" => false,
-        "count" => 1
-      },
-      "ceilometer-server" => {
-        "unique" => false,
-        "count" => 1
-      },
-      "ceilometer-swift-proxy-middleware" => {
-        "unique" => false,
-        "count" => -1
-      }
-    }
-  end
 end
