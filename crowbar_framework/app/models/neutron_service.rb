@@ -25,6 +25,24 @@ class NeutronService < ServiceObject
     false
   end
 
+  class << self
+    def role_constraints
+      @role_constraints ||= begin
+        {
+          "neutron-server" => {
+            "unique" => true,
+            "count" => 1
+          },
+          "neutron-l3" => {
+            "unique" => false,
+            "count" => -1,
+            "admin" => false
+          }
+        }
+      end
+    end
+  end
+
   def proposal_dependencies(role)
     answer = []
     if role.default_attributes["neutron"]["use_gitrepo"]
