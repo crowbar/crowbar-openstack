@@ -18,16 +18,6 @@
 #
 
 module DatabaseBarclampHelper
-  def database_role_contraints
-    {
-      "database-server" => {
-        "unique" => false,
-        "count" => 1,
-        "admin" => false
-      }
-    }
-  end
-
   def engines_for_database(selected)
     options_for_select(
       [
