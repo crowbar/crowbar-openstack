@@ -27,14 +27,12 @@ class RabbitmqService < ServiceObject
 
   class << self
     def role_constraints
-      @role_constraints ||= begin
-        {
-          "rabbitmq-server" => {
-            "unique" => false,
-            "count" => 1
-          }
+      {
+        "rabbitmq-server" => {
+          "unique" => false,
+          "count" => 1
         }
-      end
+      }
     end
   end
 
