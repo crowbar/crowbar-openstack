@@ -27,26 +27,24 @@ class CeilometerService < ServiceObject
 
   class << self
     def role_constraints
-      @role_constraints ||= begin
-        {
-          "ceilometer-agent" => {
-            "unique" => false,
-            "count" => -1
-          },
-          "ceilometer-cagent" => {
-            "unique" => false,
-            "count" => 1
-          },
-          "ceilometer-server" => {
-            "unique" => false,
-            "count" => 1
-          },
-          "ceilometer-swift-proxy-middleware" => {
-            "unique" => false,
-            "count" => -1
-          }
+      {
+        "ceilometer-agent" => {
+          "unique" => false,
+          "count" => -1
+        },
+        "ceilometer-cagent" => {
+          "unique" => false,
+          "count" => 1
+        },
+        "ceilometer-server" => {
+          "unique" => false,
+          "count" => 1
+        },
+        "ceilometer-swift-proxy-middleware" => {
+          "unique" => false,
+          "count" => -1
         }
-      end
+      }
     end
   end
 
