@@ -27,15 +27,13 @@ class DatabaseService < ServiceObject
 
   class << self
     def role_constraints
-      @role_constraints ||= begin
-        {
-          "database-server" => {
-            "unique" => false,
-            "count" => 1,
-            "admin" => false
-          }
+      {
+        "database-server" => {
+          "unique" => false,
+          "count" => 1,
+          "admin" => false
         }
-      end
+      }
     end
   end
 
