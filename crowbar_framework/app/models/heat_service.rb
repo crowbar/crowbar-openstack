@@ -27,14 +27,12 @@ class HeatService < ServiceObject
 
   class << self
     def role_constraints
-      @role_constraints ||= begin
-        {
-          "heat-server" => {
-            "unique" => false,
-            "count" => 1
-          }
+      {
+        "heat-server" => {
+          "unique" => false,
+          "count" => 1
         }
-      end
+      }
     end
   end
 
