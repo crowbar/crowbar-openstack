@@ -27,19 +27,17 @@ class NeutronService < ServiceObject
 
   class << self
     def role_constraints
-      @role_constraints ||= begin
-        {
-          "neutron-server" => {
-            "unique" => true,
-            "count" => 1
-          },
-          "neutron-l3" => {
-            "unique" => false,
-            "count" => -1,
-            "admin" => false
-          }
+      {
+        "neutron-server" => {
+          "unique" => false,
+          "count" => 1
+        },
+        "neutron-l3" => {
+          "unique" => false,
+          "count" => -1,
+          "admin" => false
         }
-      end
+      }
     end
   end
 
