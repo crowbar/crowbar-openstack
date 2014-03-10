@@ -27,20 +27,18 @@ class CinderService < ServiceObject
 
   class << self
     def role_constraints
-      @role_constraints ||= begin
-        {
-          "cinder-controller" => {
-            "unique" => false,
-            "count" => 1,
-            "admin" => false
-          },
-          "cinder-volume" => {
-            "unique" => false,
-            "count" => -1,
-            "admin" => false
-          }
+      {
+        "cinder-controller" => {
+          "unique" => false,
+          "count" => 1,
+          "admin" => false
+        },
+        "cinder-volume" => {
+          "unique" => false,
+          "count" => -1,
+          "admin" => false
         }
-      end
+      }
     end
   end
 
