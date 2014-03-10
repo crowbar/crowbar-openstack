@@ -30,7 +30,7 @@ class NeutronService < ServiceObject
       @role_constraints ||= begin
         {
           "neutron-server" => {
-            "unique" => true,
+            "unique" => false,
             "count" => 1
           },
           "neutron-l3" => {
