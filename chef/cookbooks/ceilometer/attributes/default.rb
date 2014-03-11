@@ -45,3 +45,17 @@ default[:ceilometer][:ha][:server][:enabled] = false
 default[:ceilometer][:ha][:central][:enabled] = false
 # Ports to bind to when haproxy is used for the real ports
 default[:ceilometer][:ha][:ports][:api] = 5560
+
+lsb_service_name = "ceilometer-agent-central"
+if %w(suse).include?(node[:platform])
+  lsb_service_name = "openstack-ceilometer-agent-central"
+elsif %w(redhat centos).include?(node[:platform])
+  lsb_service_name = "openstack-ceilometer-central"
+end
+
+default[:ceilometer][:agent_central][:service_name]     = lsb_service_name
+
+default[:ceilometer][:ha][:central][:agent] = "lsb:#{lsb_service_name}"
+# use OCF agent once it is able to use LSB services internally
+#default[:ceilometer][:ha][:central][:agent] = "ocf:openstack:ceilometer-agent-central"
+default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"
