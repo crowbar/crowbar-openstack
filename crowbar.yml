@@ -21,6 +21,7 @@ barclamp:
   requires:
     - '@crowbar'
     - git
+    - pacemaker
     - database
     - rabbitmq
     - keystone
