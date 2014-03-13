@@ -185,7 +185,7 @@ if neutron_server and neutron[:neutron][:api][:protocol] == 'https'
   end
 end
 
-if neutron[:neutron][:ha][:enabled]
+if neutron[:neutron][:ha][:server][:enabled]
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(neutron, "admin").address
   bind_host = admin_address
   bind_port = neutron[:neutron][:ha][:ports][:server]

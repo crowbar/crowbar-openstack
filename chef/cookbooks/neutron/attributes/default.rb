@@ -136,8 +136,8 @@ else
   }
 end
 
-default[:neutron][:ha][:enabled] = false
-default[:neutron][:ha][:server_ra] = "lsb:#{default[:neutron][:platform][:service_name]}"
-default[:neutron][:ha][:op][:monitor][:interval] = "10s"
+default[:neutron][:ha][:server][:enabled] = false
+default[:neutron][:ha][:server][:server_ra] = "lsb:#{default[:neutron][:platform][:service_name]}"
+default[:neutron][:ha][:server][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:neutron][:ha][:ports][:server] = 5530

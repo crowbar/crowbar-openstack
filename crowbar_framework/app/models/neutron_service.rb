@@ -108,12 +108,12 @@ class NeutronService < PacemakerServiceObject
       raise I18n.t("barclamp.neutron.deploy.missing_os_sdn_network")
     end
 
-    server_elements, server_nodes, ha_enabled = role_expand_elements(role, "neutron-server")
+    server_elements, server_nodes, server_ha_enabled = role_expand_elements(role, "neutron-server")
 
     vip_networks = ["admin", "public"]
 
     dirty = false
-    dirty = prepare_role_for_ha_with_haproxy(role, ["neutron", "ha", "enabled"], ha_enabled, vip_networks)
+    dirty = prepare_role_for_ha_with_haproxy(role, ["neutron", "ha", "server", "enabled"], server_ha_enabled, vip_networks)
     role.save if dirty
 
     # All nodes must have a public IP, even if part of a cluster; otherwise

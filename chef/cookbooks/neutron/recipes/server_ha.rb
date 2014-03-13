@@ -30,8 +30,8 @@ crowbar_pacemaker_sync_mark "sync-neutron_before_ha"
 crowbar_pacemaker_sync_mark "wait-neutron_ha_resources"
 
 pacemaker_primitive "neutron-service" do
-  agent node[:neutron][:ha][:server_ra]
-  op node[:neutron][:ha][:op]
+  agent node[:neutron][:ha][:server][:server_ra]
+  op node[:neutron][:ha][:server][:op]
   action :create
 end
 

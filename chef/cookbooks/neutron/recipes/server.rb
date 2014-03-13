@@ -112,7 +112,7 @@ if node[:neutron][:networking_plugin] == "cisco"
   include_recipe "neutron::cisco_support"
 end
 
-ha_enabled = node[:neutron][:ha][:enabled]
+ha_enabled = node[:neutron][:ha][:server][:enabled]
 
 service node[:neutron][:platform][:service_name] do
   service_name "neutron-server" if node[:neutron][:use_gitrepo]
