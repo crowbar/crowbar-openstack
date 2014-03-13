@@ -118,15 +118,12 @@ Chef::Log.info("Keystone server found at #{keystone_settings['internal_url_host'
 ha_enabled = node[:heat][:ha][:enabled]
 
 if ha_enabled
-  log "HA support for heat is enabled"
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
   bind_host = admin_address
   api_port = node[:heat][:ha][:ports][:api_port]
   cfn_port = node[:heat][:ha][:ports][:cfn_port]
   cloud_watch_port = node[:heat][:ha][:ports][:cloud_watch_port]
-  include_recipe "heat::ha"
 else
-  log "HA support for heat is disabled"
   bind_host = "0.0.0.0"
   api_port = node[:heat][:api][:port]
   cfn_port = node[:heat][:api][:cfn_port]
@@ -296,6 +293,13 @@ execute "heat-db-sync" do
   command "#{venv_prefix}python -m heat.db.sync"
   action :nothing
   not_if { node[:platform] == "suse" }
+end
+
+if ha_enabled
+  log "HA support for heat is enabled"
+  include_recipe "heat::ha"
+else
+  log "HA support for heat is disabled"
 end
 
 node.save
