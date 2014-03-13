@@ -31,9 +31,6 @@ db_user_provider = Chef::Recipe::Database::Util.get_user_provider(sql)
 privs = Chef::Recipe::Database::Util.get_default_priviledges(sql) 
 url_scheme = backend_name
 
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-node.set_unless['neutron']['db']['password'] = secure_password
-
 sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil? 
 Chef::Log.info("Database server found at #{sql_address}") 
 

@@ -21,6 +21,7 @@ barclamp:
   description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management'
   version: 0
   requires:
+    - pacemaker
     - database
     - rabbitmq
     - keystone
