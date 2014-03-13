@@ -13,8 +13,6 @@
 # limitations under the License.
 #
 
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-
 heat_path = "/opt/heat"
 venv_path = node[:heat][:use_virtualenv] ? "#{heat_path}/.venv" : nil
 venv_prefix = node[:heat][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
