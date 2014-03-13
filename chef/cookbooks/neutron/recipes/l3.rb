@@ -213,3 +213,10 @@ service node[:neutron][:platform][:metadata_agent_name] do
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
 end
+
+if node[:neutron][:ha][:l3][:enabled]
+  log "HA support for neutron-l3-agent is enabled"
+  include_recipe "neutron::l3_ha"
+else
+  log "HA support for neutron-l3-agent is disabled"
+end

@@ -136,6 +136,7 @@ else
   }
 end
 
+default[:neutron][:ha][:l3][:enabled] = false
 default[:neutron][:ha][:server][:enabled] = false
 default[:neutron][:ha][:server][:server_ra] = "lsb:#{default[:neutron][:platform][:service_name]}"
 default[:neutron][:ha][:server][:op][:monitor][:interval] = "10s"
