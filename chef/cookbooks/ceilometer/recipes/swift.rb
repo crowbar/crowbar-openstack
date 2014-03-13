@@ -32,23 +32,6 @@ end
 
 include_recipe "#{@cookbook_name}::common"
 
-env_filter = " AND keystone_config_environment:keystone-config-#{node[:ceilometer][:keystone_instance]}"
-keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = node if keystone.name == node.name
-else
-  keystone = node
-end
-
-keystone_host = keystone[:fqdn]
-keystone_protocol = keystone["keystone"]["api"]["protocol"]
-keystone_token = keystone["keystone"]["service"]["token"]
-keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
-keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
-keystone_service_user = node["ceilometer"]["keystone_service_user"]
-Chef::Log.info("Keystone server found at #{keystone_host}")
-
 # swift user needs read access to ceilometer.conf
 group node[:ceilometer][:group] do
   action :modify

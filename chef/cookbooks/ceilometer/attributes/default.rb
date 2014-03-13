@@ -31,7 +31,7 @@ default[:ceilometer][:cpu_interval] = 600
 
 default[:ceilometer][:db][:database] = "ceilometer"
 default[:ceilometer][:db][:user] = "ceilometer"
-default[:ceilometer][:db][:password] = "" # Set by Recipe
+default[:ceilometer][:db][:password] = "" # Set by wrapper
 
 default[:ceilometer][:keystone_service_user] = "ceilometer"
 default[:ceilometer][:keystone_service_password] = ""
@@ -39,4 +39,9 @@ default[:ceilometer][:keystone_service_password] = ""
 default[:ceilometer][:api][:protocol] = "http"
 default[:ceilometer][:api][:port] = 8777
 
-default[:ceilometer][:metering_secret] = "" # Set by Recipe
+default[:ceilometer][:metering_secret] = "" # Set by wrapper
+
+default[:ceilometer][:ha][:server][:enabled] = false
+default[:ceilometer][:ha][:central][:enabled] = false
+# Ports to bind to when haproxy is used for the real ports
+default[:ceilometer][:ha][:ports][:api] = 5560

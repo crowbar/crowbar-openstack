@@ -13,57 +13,57 @@
 # limitations under the License.
 #
 
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
 if node[:ceilometer][:use_mongodb]
-  case node["platform"]
-    when "centos", "redhat"
-      mongo_conf = "/etc/mongod.conf"
-      mongo_service = "mongod"
-      package "mongo-10gen"
-      package "mongo-10gen-server"
-    else
-      mongo_conf = "/etc/mongodb.conf"
-      mongo_service = "mongodb"
-      package "mongodb" do
-        action :install
-      end
-  end
-
-  node_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-
-  template mongo_conf do
-    mode 0644
-    source "mongodb.conf.erb"
-    variables(:listen_addr => node_address)
-    notifies :restart, "service[#{mongo_service}]", :immediately
-  end
-
-  service mongo_service do
-    supports :status => true, :restart => true
-    action [:enable, :start]
-  end
-
-  # wait for mongodb start (ceilometer services need it running)
-  ruby_block "wait for mongodb start" do
-    block do
-      require 'timeout'
-      begin
-        Timeout.timeout(60) do
-          while ! ::Kernel.system("mongo #{node_address} --quiet < /dev/null &> /dev/null")
-            Chef::Log.debug("mongodb still not reachable")
-            sleep(2)
-          end
+  if !ha_enabled || node.roles.include?("pacemaker-cluster-founder")
+    case node["platform"]
+      when "centos", "redhat"
+        mongo_conf = "/etc/mongod.conf"
+        mongo_service = "mongod"
+        package "mongo-10gen"
+        package "mongo-10gen-server"
+      else
+        mongo_conf = "/etc/mongodb.conf"
+        mongo_service = "mongodb"
+        package "mongodb" do
+          action :install
         end
-      rescue Timeout::Error
-        Chef::Log.warn("mongodb does not seem to be responding 1 minute after start")
+    end
+
+    node_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+
+    template mongo_conf do
+      mode 0644
+      source "mongodb.conf.erb"
+      variables(:listen_addr => node_address)
+      notifies :restart, "service[#{mongo_service}]", :immediately
+    end
+
+    service mongo_service do
+      supports :status => true, :restart => true
+      action [:enable, :start]
+    end
+
+    # wait for mongodb start (ceilometer services need it running)
+    ruby_block "wait for mongodb start" do
+      block do
+        require 'timeout'
+        begin
+          Timeout.timeout(60) do
+            while ! ::Kernel.system("mongo #{node_address} --quiet < /dev/null &> /dev/null")
+              Chef::Log.debug("mongodb still not reachable")
+              sleep(2)
+            end
+          end
+        rescue Timeout::Error
+          Chef::Log.warn("mongodb does not seem to be responding 1 minute after start")
+        end
       end
     end
   end
 
 else
-  node.set_unless[:ceilometer][:db][:password] = secure_password
-
   env_filter = " AND database_config_environment:database-config-#{node[:ceilometer][:database_instance]}"
   sqls = search(:node, "roles:database-server#{env_filter}") || []
   if sqls.length > 0
@@ -162,8 +162,6 @@ else
   end
 end
 
-node.set_unless[:ceilometer][:metering_secret] = secure_password
-
 include_recipe "#{@cookbook_name}::common"
 
 directory "/var/cache/ceilometer" do
@@ -173,37 +171,10 @@ directory "/var/cache/ceilometer" do
   action :create
 end unless node.platform == "suse"
 
-env_filter = " AND keystone_config_environment:keystone-config-#{node[:ceilometer][:keystone_instance]}"
-keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = node if keystone.name == node.name
-else
-  keystone = node
-end
+keystone_settings = CeilometerHelper.keystone_settings(node)
 
-keystone_host = keystone[:fqdn]
-keystone_protocol = keystone["keystone"]["api"]["protocol"]
-keystone_token = keystone["keystone"]["service"]["token"]
-keystone_admin_port = keystone["keystone"]["api"]["admin_port"]
-keystone_service_port = keystone["keystone"]["api"]["service_port"]
-keystone_service_tenant = keystone["keystone"]["service"]["tenant"]
-keystone_service_user = node["ceilometer"]["keystone_service_user"]
-keystone_service_password = node["ceilometer"]["keystone_service_password"]
-Chef::Log.info("Keystone server found at #{keystone_host}")
-
-my_admin_host = node[:fqdn]
-# For the public endpoint, we prefer the public name. If not set, then we
-# use the IP address except for SSL, where we always prefer a hostname
-# (for certificate validation).
-my_public_host = node[:crowbar][:public_name]
-if my_public_host.nil? or my_public_host.empty?
-  unless node[:ceilometer][:api][:protocol] == "https"
-    my_public_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
-  else
-    my_public_host = 'public.'+node[:fqdn]
-  end
-end
+my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
+my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:api][:protocol] == "https", ha_enabled)
 
 execute "calling ceilometer-dbsync" do
   command "#{venv_prefix}ceilometer-dbsync"
@@ -229,24 +200,31 @@ service "ceilometer-api" do
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
 end
 
+if ha_enabled
+  log "HA support for ceilometer is enabled"
+  include_recipe "ceilometer::server_ha"
+else
+  log "HA support for ceilometer is disabled"
+end
+
 keystone_register "register ceilometer user" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
-  user_name keystone_service_user
-  user_password keystone_service_password
-  tenant_name keystone_service_tenant
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['service_user']
+  user_password keystone_settings['service_password']
+  tenant_name keystone_settings['service_tenant']
   action :add_user
 end
 
 keystone_register "give ceilometer user access" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
-  user_name keystone_service_user
-  tenant_name keystone_service_tenant
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['service_user']
+  tenant_name keystone_settings['service_tenant']
   role_name "admin"
   action :add_access
 end
@@ -255,12 +233,12 @@ env_filter = " AND ceilometer_config_environment:#{node[:ceilometer][:config][:e
 swift_middlewares = search(:node, "roles:ceilometer-swift-proxy-middleware#{env_filter}") || []
 unless swift_middlewares.empty?
   keystone_register "give ceilometer user ResellerAdmin role" do
-    protocol keystone_protocol
-    host keystone_host
-    port keystone_admin_port
-    token keystone_token
-    user_name keystone_service_user
-    tenant_name keystone_service_tenant
+    protocol keystone_settings['protocol']
+    host keystone_settings['internal_url_host']
+    port keystone_settings['admin_port']
+    token keystone_settings['admin_token']
+    user_name keystone_settings['service_user']
+    tenant_name keystone_settings['service_tenant']
     role_name "ResellerAdmin"
     action :add_access
   end
@@ -268,10 +246,10 @@ end
 
 # Create ceilometer service
 keystone_register "register ceilometer service" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   service_name "ceilometer"
   service_type "metering"
   service_description "Openstack Collector Service"
@@ -279,10 +257,10 @@ keystone_register "register ceilometer service" do
 end
 
 keystone_register "register ceilometer endpoint" do
-  protocol keystone_protocol
-  host keystone_host
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   endpoint_service "ceilometer"
   endpoint_region "RegionOne"
   endpoint_publicURL "#{node[:ceilometer][:api][:protocol]}://#{my_public_host}:#{node[:ceilometer][:api][:port]}/"
