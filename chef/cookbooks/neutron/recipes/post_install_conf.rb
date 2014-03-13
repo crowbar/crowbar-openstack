@@ -47,32 +47,15 @@ floating_pool_start = floating_first_ip if floating_first_ip > floating_pool_sta
 
 floating_pool_end = floating_last_ip if floating_last_ip < floating_pool_end
 
-env_filter = " AND keystone_config_environment:keystone-config-#{node[:neutron][:keystone_instance]}"
-keystones = search(:node, "recipes:keystone\\:\\:server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = node if keystone.name == node.name
-else
-  keystone = node
-end
-
-keystone_protocol = keystone["keystone"]["api"]["protocol"]
-keystone_host = keystone[:fqdn]
-keystone_service_port = keystone["keystone"]["api"]["service_port"]
-keystone_insecure = keystone_protocol == 'https' && keystone[:keystone][:ssl][:insecure]
-
-admin_username = keystone["keystone"]["admin"]["username"] rescue nil
-admin_password = keystone["keystone"]["admin"]["password"] rescue nil
-admin_tenant = keystone["keystone"]["admin"]["tenant"] rescue "admin"
-Chef::Log.info("Keystone server found at #{keystone_host}")
+keystone_settings = NeutronHelper.keystone_settings(node)
 
 neutron_insecure = node[:neutron][:api][:protocol] == 'https' && node[:neutron][:ssl][:insecure]
-ssl_insecure = keystone_insecure || neutron_insecure
+ssl_insecure = keystone_settings['insecure'] || neutron_insecure
 
-neutron_args = "--os-username #{node[:neutron][:service_user]}"
-neutron_args = "#{neutron_args} --os-password #{node[:neutron][:service_password]}"
-neutron_args = "#{neutron_args} --os-tenant-name #{keystone[:keystone][:service][:tenant]}"
-neutron_args = "#{neutron_args} --os-auth-url #{keystone_protocol}://#{keystone_host}:#{keystone_service_port}/v2.0/"
+neutron_args = "--os-username #{keystone_settings['service_user']}"
+neutron_args = "#{neutron_args} --os-password #{keystone_settings['service_password']}"
+neutron_args = "#{neutron_args} --os-tenant-name #{keystone_settings['service_tenant']}"
+neutron_args = "#{neutron_args} --os-auth-url #{keystone_settings['internal_auth_url']}"
 if node[:platform] == "suse" or node[:neutron][:use_gitrepo]
   # these options are backported in SUSE packages, but not in Ubuntu
   neutron_args = "#{neutron_args} --endpoint-type internalURL"
