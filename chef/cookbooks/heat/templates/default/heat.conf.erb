@@ -587,7 +587,7 @@ connection=<%= @database_connection %>
 #
 
 # Authentication Endpoint URI (string value)
-auth_uri=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/v2.0
+auth_uri=<%= @keystone_settings['internal_auth_url'] %>
 
 # Allow orchestration of multiple clouds (boolean value)
 #multi_cloud=false
@@ -697,17 +697,17 @@ bind_port=<%= node[:heat][:api][:cfn_port] %>
 
 # Host providing the admin Identity API endpoint (string
 # value)
-auth_host=<%= @keystone_host %>
+auth_host=<%= @keystone_settings['internal_url_host'] %>
 
 # Port of the admin Identity API endpoint (integer value)
 #auth_port=
 
 # Protocol of the admin Identity API endpoint(http or https)
 # (string value)
-auth_protocol=<%= @keystone_protocol %>
+auth_protocol=<%= @keystone_settings['protocol'] %>
 
 # Complete public Identity API endpoint (string value)
-auth_uri=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service_port %>/v2.0
+auth_uri=<%= @keystone_settings['internal_auth_url'] %>
 
 # API version of the admin Identity API endpoint (string
 # value)
@@ -735,17 +735,17 @@ auth_uri=<%= @keystone_protocol %>://<%= @keystone_host %>:<%= @keystone_service
 # Single shared secret with the Keystone configuration used
 # for bootstrapping a Keystone installation, or otherwise
 # bypassing the normal authentication process. (string value)
-admin_token=<%= @keystone_auth_token %>
+admin_token=<%= @keystone_settings['admin_token'] %>
 
 # Keystone account username (string value)
-admin_user=<%= @keystone_service_user %>
+admin_user=<%= @keystone_settings['service_user'] %>
 
 # Keystone account password (string value)
-admin_password=<%= @keystone_service_password %>
+admin_password=<%= @keystone_settings['service_password'] %>
 
 # Keystone service account tenant name to validate user tokens
 # (string value)
-admin_tenant_name=<%= @keystone_service_tenant %>
+admin_tenant_name=<%= @keystone_settings['service_tenant'] %>
 
 # Env key for the swift cache (string value)
 #cache=<None>
