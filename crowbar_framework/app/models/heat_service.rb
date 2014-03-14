@@ -30,7 +30,8 @@ class HeatService < PacemakerServiceObject
       {
         "heat-server" => {
           "unique" => false,
-          "count" => 1
+          "count" => 1,
+          "cluster" => true
         }
       }
     end
