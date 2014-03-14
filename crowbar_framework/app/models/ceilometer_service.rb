@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-class CeilometerService < ServiceObject
+class CeilometerService < PacemakerServiceObject
 
   def initialize(thelogger)
     super(thelogger)
@@ -38,7 +38,8 @@ class CeilometerService < ServiceObject
         },
         "ceilometer-server" => {
           "unique" => false,
-          "count" => 1
+          "count" => 1,
+          "cluster" => true
         },
         "ceilometer-swift-proxy-middleware" => {
           "unique" => false,
@@ -91,6 +92,8 @@ class CeilometerService < ServiceObject
     } unless agent_nodes.nil? or server_nodes.nil?
 
     base["attributes"]["ceilometer"]["keystone_service_password"] = '%012d' % rand(1e12)
+    base["attributes"][@bc_name][:db][:password] = random_password
+    base["attributes"][@bc_name][:metering_secret] = random_password
 
     @logger.debug("Ceilometer create_proposal: exiting")
     base
@@ -114,16 +117,28 @@ class CeilometerService < ServiceObject
     super
   end
 
-
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Ceilometer apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
+    server_elements, server_nodes, ha_enabled = role_expand_elements(role, "ceilometer-server")
+
+    vip_networks = ["admin", "public"]
+
+    dirty = false
+    dirty = prepare_role_for_ha_with_haproxy(role, ["ceilometer", "ha", "server", "enabled"], ha_enabled, vip_networks)
+    role.save if dirty
+
     net_svc = NetworkService.new @logger
-    tnodes = role.override_attributes["ceilometer"]["elements"]["ceilometer-server"]
-    tnodes.each do |n|
+    # All nodes must have a public IP, even if part of a cluster; otherwise
+    # the VIP can't be moved to the nodes
+    server_nodes.each do |n|
       net_svc.allocate_ip "default", "public", "host", n
-    end unless tnodes.nil?
+    end
+
+    # No specific need to call sync dns here, as the cookbook doesn't require
+    # the VIP of the cluster to be setup
+    allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
 
     @logger.debug("Ceilometer apply_role_pre_chef_call: leaving")
   end

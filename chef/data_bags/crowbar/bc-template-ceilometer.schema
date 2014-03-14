@@ -17,6 +17,7 @@
             "use_mongodb": { "type": "bool", "required": true },
             "cpu_interval": { "type": "int", "required": true },
             "meters_interval": { "type": "int", "required": true },
+            "metering_secret": { "type": "str", "required": true },
             "database_instance": { "type": "str", "required": true },
             "rabbitmq_instance": { "type": "str", "required": true },
             "keystone_instance": { "type": "str", "required": true },
