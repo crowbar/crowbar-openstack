@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-class HeatService < ServiceObject
+class HeatService < PacemakerServiceObject
 
   def initialize(thelogger)
     super(thelogger)
@@ -30,7 +30,8 @@ class HeatService < ServiceObject
       {
         "heat-server" => {
           "unique" => false,
-          "count" => 1
+          "count" => 1,
+          "cluster" => true
         }
       }
     end
@@ -67,6 +68,7 @@ class HeatService < ServiceObject
     end
 
     base["attributes"]["heat"]["keystone_service_password"] = '%012d' % rand(1e12)
+    base["attributes"][@bc_name][:db][:password] = random_password
 
     @logger.debug("Heat create_proposal: exiting")
     base
@@ -86,11 +88,20 @@ class HeatService < ServiceObject
     @logger.debug("Heat apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
+    vip_networks = ["admin", "public"]
+
+    server_elements, server_nodes, ha_enabled = role_expand_elements(role, "heat-server")
+
+    role.save if prepare_role_for_ha_with_haproxy(role, ["heat", "ha", "enabled"], ha_enabled, vip_networks)
+
     net_svc = NetworkService.new @logger
-    tnodes = role.override_attributes["heat"]["elements"]["heat-server"]
-    tnodes.each do |n|
+    # All nodes must have a public IP, even if part of a cluster; otherwise
+    # the VIP can't be moved to the nodes
+    server_nodes.each do |n|
       net_svc.allocate_ip "default", "public", "host", n
-    end unless tnodes.nil?
+    end
+
+    allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
 
     @logger.debug("Heat apply_role_pre_chef_call: leaving")
   end

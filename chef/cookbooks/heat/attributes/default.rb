@@ -49,3 +49,14 @@ default[:heat][:api][:cloud_watch_port] = 8003
 default[:heat][:api][:port] = 8004
 
 default[:heat][:metering_secret] = "" # Set by Recipe
+
+default[:heat][:ha][:enabled] = false
+# Ports to bind to when haproxy is used for the real ports
+default[:heat][:ha][:ports][:cfn_port] = 5570
+default[:heat][:ha][:ports][:api_port] = 5571
+default[:heat][:ha][:ports][:cloud_watch_port] = 5572
+
+# Pacemaker bits
+# TODO agents for othe services?
+default[:heat][:ha][:agent] = "ocf:openstack:heat-engine"
+default[:heat][:ha][:op][:monitor][:interval] = "10s"
