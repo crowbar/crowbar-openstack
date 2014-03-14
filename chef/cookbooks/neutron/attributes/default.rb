@@ -75,6 +75,7 @@ when "suse"
     :dhcp_agent_pkg => "openstack-neutron-dhcp-agent",
     :l3_agent_name => "openstack-neutron-l3-agent",
     :l3_agent_pkg => "openstack-neutron-l3-agent",
+    :ha_tool_pkg => "openstack-neutron-ha-tool",
     :ovs_pkgs => [ "openvswitch",
                    "openvswitch-switch",
                    "openvswitch-kmp-default" ],
@@ -101,6 +102,7 @@ when "centos", "redhat"
     :dhcp_agent_pkg => "openstack-neutron",
     :l3_agent_name => "neutron-l3-agent",
     :l3_agent_pkg => "openstack-neutron",
+    :ha_tool_pkg => "",
     :ovs_pkgs => [ "openvswitch",
                    "openstack-neutron-openvswitch" ],
     :user => "neutron",
@@ -126,6 +128,7 @@ else
     :dhcp_agent_pkg => "neutron-dhcp-agent",
     :l3_agent_name => "neutron-l3-agent",
     :l3_agent_pkg => "neutron-l3-agent",
+    :ha_tool_pkg => "",
     :ovs_pkgs => [ "linux-headers-#{`uname -r`.strip}",
                    "openvswitch-datapath-dkms",
                    "openvswitch-switch" ],
@@ -137,6 +140,12 @@ else
 end
 
 default[:neutron][:ha][:l3][:enabled] = false
+default[:neutron][:ha][:l3][:l3_ra] = "lsb:openstack-neutron-l3-agent"
+default[:neutron][:ha][:l3][:dhcp_ra] = "lsb:openstack-neutron-dhcp-agent"
+default[:neutron][:ha][:l3][:metadata_ra] = "lsb:openstack-neutron-metadata-agent"
+default[:neutron][:ha][:l3][:metering_ra] = "lsb:openstack-neutron-metering-agent"
+default[:neutron][:ha][:l3][:ha_tool_ra] = "ocf:openstack:neutron-ha-tool"
+default[:neutron][:ha][:l3][:op][:monitor][:interval] = "10s"
 default[:neutron][:ha][:server][:enabled] = false
 default[:neutron][:ha][:server][:server_ra] = "lsb:#{default[:neutron][:platform][:service_name]}"
 default[:neutron][:ha][:server][:op][:monitor][:interval] = "10s"

@@ -180,11 +180,12 @@ template "/etc/neutron/metadata_agent.ini" do
   )
 end
 
+ha_enabled = node[:neutron][:ha][:l3][:enabled]
 
 service node[:neutron][:platform][:l3_agent_name] do
   service_name "neutron-l3-agent" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
-  action [:enable, :start]
+  action ha_enabled ? :disable : [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
   not_if { node[:neutron][:networking_plugin] == "vmware" }
@@ -193,7 +194,7 @@ end
 service node[:neutron][:platform][:metering_agent_name] do
   service_name "neutron-metering-agent" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
-  action [:enable, :start]
+  action ha_enabled ? :disable : [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/metering_agent.ini]")
 end
@@ -201,7 +202,7 @@ end
 service node[:neutron][:platform][:dhcp_agent_name] do
   service_name "neutron-dhcp-agent" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
-  action [:enable, :start]
+  action ha_enabled ? :disable : [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/dhcp_agent.ini]")
 end
@@ -209,12 +210,12 @@ end
 service node[:neutron][:platform][:metadata_agent_name] do
   service_name "neutron-metadata-agent" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
-  action [:enable, :start]
+  action ha_enabled ? :disable : [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
 end
 
-if node[:neutron][:ha][:l3][:enabled]
+if ha_enabled
   log "HA support for neutron-l3-agent is enabled"
   include_recipe "neutron::l3_ha"
 else
