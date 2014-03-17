@@ -84,6 +84,15 @@ class DatabaseService < ServiceObject
       role.default_attributes["database"]["mysql"]["server_root_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_root_password"]) || random_password
       role.default_attributes["database"]["mysql"]["server_repl_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_repl_password"]) || random_password
       @logger.debug("setting mysql specific attributes")
+    elsif ( sql_engine == "postgresql" )
+      # Attribute is not living in "database" namespace, but that's because
+      # it's for the postgresql cookbook. We're not using default_attributes
+      # because the upstream cookbook use node.set_unless which would override
+      # a default attribute.
+      role.override_attributes["postgresql"] ||= {}
+      role.override_attributes["postgresql"]["password"] ||= {}
+      role.override_attributes["postgresql"]["password"]["postgres"] = (old_role && (old_role.override_attributes["postgresql"]["password"]["postgres"] rescue nil)) || random_password
+      @logger.debug("setting postgresql specific attributes")
     end
 
     # Copy the attributes for database/<sql_engine> to <sql_engine> in the
