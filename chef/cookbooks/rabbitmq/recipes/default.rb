@@ -55,7 +55,7 @@ end
 
 service "rabbitmq-server" do
   supports :restart => true, :start => true, :stop => true
-  action [ :enable, :start ]
+  action node[:rabbitmq][:ha][:enabled] ? :disable : [ :enable, :start ]
 end
 
 bash "enabling rabbit management" do

@@ -13,7 +13,7 @@
 # limitations under the License. 
 # 
 
-class RabbitmqService < ServiceObject
+class RabbitmqService < PacemakerServiceObject
 
   def initialize(thelogger)
     super(thelogger)
@@ -30,7 +30,8 @@ class RabbitmqService < ServiceObject
       {
         "rabbitmq-server" => {
           "unique" => false,
-          "count" => 1
+          "count" => 1,
+          "cluster" => true
         }
       }
     end
@@ -54,6 +55,8 @@ class RabbitmqService < ServiceObject
       "rabbitmq-server" => [ controller.name ]
     }
 
+    base["attributes"][@bc_name]["password"] = random_password
+
     @logger.debug("Rabbitmq create_proposal: exiting")
     base
   end
@@ -61,6 +64,19 @@ class RabbitmqService < ServiceObject
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Rabbitmq apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
+
+    rabbitmq_elements, rabbitmq_nodes, rabbitmq_ha_enabled = role_expand_elements(role, "rabbitmq-server")
+    role.save if prepare_role_for_ha(role, ["rabbitmq", "ha", "enabled"], rabbitmq_ha_enabled)
+
+    if rabbitmq_ha_enabled
+      net_svc = NetworkService.new @logger
+      unless rabbitmq_elements.length == 1 && PacemakerServiceObject.is_cluster?(rabbitmq_elements[0])
+        raise "Internal error: HA enabled, but element is not a cluster"
+      end
+      cluster = rabbitmq_elements[0]
+      rabbitmq_vhostname = "#{role.name.gsub("-config", "")}-#{PacemakerServiceObject.cluster_name(cluster)}.#{ChefObject.cloud_domain}".gsub("_", "-")
+      net_svc.allocate_virtual_ip "default", "admin", "host", rabbitmq_vhostname
+    end
 
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
   end

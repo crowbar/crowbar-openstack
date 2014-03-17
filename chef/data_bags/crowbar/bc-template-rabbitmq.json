@@ -12,6 +12,7 @@
   "deployment": {
     "rabbitmq": {
       "crowbar-revision": 0,
+      "schema-revision": 1,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },

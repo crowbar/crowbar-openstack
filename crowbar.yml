@@ -21,6 +21,8 @@ barclamp:
   description: 'AMQP Messaging Middleware: robust enterprise messaging system'
   online_help: 'https://github.com/crowbar/crowbar/wiki'
   version: 0
+  requires:
+    - pacemaker
   member:
     - openstack
 
