@@ -111,7 +111,7 @@ ALTER ROLE db_maker ENCRYPTED PASSWORD '#{node[:database][:db_maker_password]}';
       require 'rubygems'
       Gem.clear_paths
       require 'pg'
-      conn = PGconn.connect(:host => newaddr, :port => 5432, :dbname => "postgres", :user => "db_maker", :password => node['postgresql']['db_maker_password'])
+      conn = PGconn.connect(:host => newaddr, :port => 5432, :dbname => "postgres", :user => "db_maker", :password => node['database']['db_maker_password'])
     rescue PGError
       false
     end
