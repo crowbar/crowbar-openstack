@@ -64,17 +64,6 @@ class DatabaseService < ServiceObject
     @logger.debug("Database apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
-    # Make sure the bind hosts are in the admin network
-    all_nodes.each do |n|
-      node = NodeObject.find_node_by_name n
-
-      admin_address = node.get_network_by_type("admin")["address"]
-      node.crowbar[:database] = {} if node.crowbar[:database].nil?
-      node.crowbar[:database][:api_bind_host] = admin_address
-      @logger.debug("Database api bind host: #{node.crowbar[:database][:api_bind_host]}")
-      node.save
-    end
-
     sql_engine = role.default_attributes["database"]["sql_engine"]
     role.default_attributes["database"][sql_engine] = {} if role.default_attributes["database"][sql_engine].nil?
     role.default_attributes["database"]["db_maker_password"] = (old_role && old_role.default_attributes["database"]["db_maker_password"]) || random_password
