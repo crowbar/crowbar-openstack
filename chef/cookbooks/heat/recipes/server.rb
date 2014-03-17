@@ -13,13 +13,10 @@
 # limitations under the License.
 #
 
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-
 heat_path = "/opt/heat"
 venv_path = node[:heat][:use_virtualenv] ? "#{heat_path}/.venv" : nil
 venv_prefix = node[:heat][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 
-node.set_unless[:heat][:db][:password] = secure_password
 env_filter = " AND database_config_environment:database-config-#{node[:heat][:database_instance]}"
 sql = search(:node, "roles:database-server#{env_filter}").first || node
 
@@ -118,7 +115,21 @@ keystone_settings['service_user'] = node[:heat][:keystone_service_user]
 keystone_settings['service_password'] = node[:heat][:keystone_service_password]
 Chef::Log.info("Keystone server found at #{keystone_settings['internal_url_host']}")
 
-ha_enabled = false
+ha_enabled = node[:heat][:ha][:enabled]
+
+if ha_enabled
+  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  bind_host = admin_address
+  api_port = node[:heat][:ha][:ports][:api_port]
+  cfn_port = node[:heat][:ha][:ports][:cfn_port]
+  cloud_watch_port = node[:heat][:ha][:ports][:cloud_watch_port]
+else
+  bind_host = "0.0.0.0"
+  api_port = node[:heat][:api][:port]
+  cfn_port = node[:heat][:api][:cfn_port]
+  cloud_watch_port = node[:heat][:api][:cloud_watch_port]
+end
+
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:protocol] == "https", ha_enabled)
 
@@ -226,9 +237,11 @@ template "/etc/heat/heat.conf" do
       :verbose => node[:heat][:verbose],
       :rabbit_settings => rabbit_settings,
       :keystone_settings => keystone_settings,
-      :api_port => node[:heat][:api][:port],
       :database_connection => db_connection,
-      :cfn_port => node[:heat][:api][:cfn_port]
+      :bind_host => bind_host,
+      :api_port => api_port,
+      :cloud_watch_port => cloud_watch_port,
+      :cfn_port => cfn_port
     )
    notifies :run, "execute[heat-db-sync]", :delayed
 end
@@ -266,6 +279,13 @@ execute "heat-db-sync" do
   command "#{venv_prefix}python -m heat.db.sync"
   action :nothing
   not_if { node[:platform] == "suse" }
+end
+
+if ha_enabled
+  log "HA support for heat is enabled"
+  include_recipe "heat::ha"
+else
+  log "HA support for heat is disabled"
 end
 
 node.save
