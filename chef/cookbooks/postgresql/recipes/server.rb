@@ -38,7 +38,7 @@ end
 
 # For Crowbar, we need to set the address to bind - default to admin node.
 addr = node['postgresql']['listen_addresses'] || ""
-newaddr = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+newaddr = CrowbarDatabaseHelper.get_listen_address(node)
 if addr != newaddr
   node['postgresql']['listen_addresses'] = newaddr
   node.save
@@ -75,6 +75,13 @@ template "#{node[:postgresql][:dir]}/pg_hba.conf" do
     variables( :ident => "" )
   end
   notifies :reload, resources(:service => "postgresql"), :immediately
+end
+
+if node[:database][:ha][:enabled]
+  log "HA support for postgresql is enabled"
+  include_recipe "postgresql::ha"
+else
+  log "HA support for postgresql is disabled"
 end
  
 # Default PostgreSQL install has 'ident' checking on unix user 'postgres'

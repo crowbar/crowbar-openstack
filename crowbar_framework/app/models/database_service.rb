@@ -13,7 +13,7 @@
 # limitations under the License. 
 # 
 
-class DatabaseService < ServiceObject
+class DatabaseService < PacemakerServiceObject
 
   def initialize(thelogger)
     super(thelogger)
@@ -31,6 +31,7 @@ class DatabaseService < ServiceObject
         "database-server" => {
           "unique" => false,
           "count" => 1,
+          "cluster" => true,
           "admin" => false
         }
       }
@@ -57,12 +58,28 @@ class DatabaseService < ServiceObject
   def validate_proposal_after_save proposal
     validate_one_for_role proposal, "database-server"
 
+    # FIXME: only accept HA if postgresql is used?
     super
   end
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Database apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
+
+    database_elements, database_nodes, database_ha_enabled = role_expand_elements(role, "database-server")
+    prepare_role_for_ha(role, ["database", "ha", "enabled"], database_ha_enabled)
+
+    if database_ha_enabled
+      net_svc = NetworkService.new @logger
+      unless database_elements.length == 1 && PacemakerServiceObject.is_cluster?(database_elements[0])
+        raise "Internal error: HA enabled, but element is not a cluster"
+      end
+      cluster = database_elements[0]
+      # Any change in the generation of the vhostname here must be reflected in
+      # CrowbarDatabaseHelper.get_ha_vhostname
+      database_vhostname = "#{role.name.gsub("-config", "")}-#{PacemakerServiceObject.cluster_name(cluster)}.#{ChefObject.cloud_domain}".gsub("_", "-")
+      net_svc.allocate_virtual_ip "default", "admin", "host", database_vhostname
+    end
 
     sql_engine = role.default_attributes["database"]["sql_engine"]
     role.default_attributes["database"][sql_engine] = {} if role.default_attributes["database"][sql_engine].nil?

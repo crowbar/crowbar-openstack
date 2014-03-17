@@ -75,7 +75,7 @@ end
  
 service "postgresql" do
   supports :restart => true, :status => true, :reload => true
-  action [:enable, :start]
+  action node[:database][:ha][:enabled] ? :disable : [:enable, :start]
 end
  
 template "#{node[:postgresql][:dir]}/postgresql.conf" do
