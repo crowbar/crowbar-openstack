@@ -97,12 +97,10 @@ end
 
 
 include_recipe "#{@cookbook_name}::common"
-env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{node[:heat][:rabbitmq_instance]}"
-rabbit = search(:node, "roles:rabbitmq-server#{env_filter}").first || node
-rabbit_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(rabbit, "admin").address
-Chef::Log.info("Rabbit server found at #{rabbit_address}")
+rabbit = get_instance('roles:rabbitmq-server')
+Chef::Log.info("Rabbit server found at #{rabbit[:rabbitmq][:address]}")
 rabbit_settings = {
-  :address => rabbit_address,
+  :address => rabbit[:rabbitmq][:address],
   :port => rabbit[:rabbitmq][:port],
   :user => rabbit[:rabbitmq][:user],
   :password => rabbit[:rabbitmq][:password],
