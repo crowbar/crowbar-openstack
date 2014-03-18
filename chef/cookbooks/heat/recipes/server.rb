@@ -253,35 +253,39 @@ template "/etc/heat/api-paste.ini" do
 end
 
 service "heat-engine" do
-  service_name "openstack-heat-engine" if node.platform == "suse"
+  service_name node[:heat][:engine][:service_name]
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
   subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service "heat-api" do
-  service_name "openstack-heat-api" if node.platform == "suse"
+  service_name node[:heat][:api][:service_name]
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
   subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service "heat-api-cfn" do
-  service_name "openstack-heat-api-cfn" if node.platform == "suse"
+  service_name node[:heat][:api_cfn][:service_name]
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
   subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service "heat-api-cloudwatch" do
-  service_name "openstack-heat-api-cloudwatch" if node.platform == "suse"
+  service_name node[:heat][:api_cloudwatch][:service_name]
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
   subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 execute "heat-db-sync" do
