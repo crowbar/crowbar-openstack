@@ -17,8 +17,7 @@ heat_path = "/opt/heat"
 venv_path = node[:heat][:use_virtualenv] ? "#{heat_path}/.venv" : nil
 venv_prefix = node[:heat][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 
-env_filter = " AND database_config_environment:database-config-#{node[:heat][:database_instance]}"
-sql = search(:node, "roles:database-server#{env_filter}").first || node
+sql = get_instance('roles:database-server')
 
 include_recipe "database::client"
 backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
@@ -29,7 +28,7 @@ db_provider = Chef::Recipe::Database::Util.get_database_provider(sql)
 db_user_provider = Chef::Recipe::Database::Util.get_user_provider(sql)
 privs = Chef::Recipe::Database::Util.get_default_priviledges(sql)
 
-sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil?
+sql_address = CrowbarDatabaseHelper.get_listen_address(sql)
 Chef::Log.info("Database server found at #{sql_address}")
 
 db_conn = { :host => sql_address,
