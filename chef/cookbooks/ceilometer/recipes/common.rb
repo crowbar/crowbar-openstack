@@ -23,16 +23,9 @@ if node[:ceilometer][:use_mongodb]
   mongodb_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
   db_connection = "mongodb://#{mongodb_ip}:27017/ceilometer"
 else
-  sql_env_filter = " AND database_config_environment:database-config-#{node[:ceilometer][:database_instance]}"
-  sqls = search(:node, "roles:database-server#{sql_env_filter}")
-  if sqls.length > 0
-    sql = sqls[0]
-    sql = node if sql.name == node.name
-  else
-    sql = node
-  end
+  sql = get_instance('roles:database-server')
 
-  sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil?
+  sql_address = CrowbarDatabaseHelper.get_listen_address(sql)
   Chef::Log.info("SQL server found at #{sql_address}")
 
   include_recipe "database::client"
