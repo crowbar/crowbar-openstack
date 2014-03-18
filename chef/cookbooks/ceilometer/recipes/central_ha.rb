@@ -13,24 +13,21 @@
 # limitations under the License.
 #
 
-if node[:ceilometer][:ha][:central][:enabled]
+service_name = "ceilometer-agent-central-service"
 
-  service_name = "ceilometer-agent-central-service"
-
-  # Allow one retry, to avoid races where two nodes create the primitive at the
-  # same time when it wasn't created yet (only one can obviously succeed)
-  pacemaker_primitive service_name do
-    agent node[:ceilometer][:ha][:central][:agent]
-    op node[:ceilometer][:ha][:central][:op]
-    # use these params with ocf:openstack:ceilometer-agent-central:
-    #params ({
-    #  "user"    => node[:ceilometer][:user],
-    #  "binary"  => "/usr/bin/ceilometer-agent-central",
-    #  "use_service"    => true,
-    #  "service" => node[:ceilometer][:agent_central][:service_name]
-    #})
-    action [ :create, :start ]
-    retries 1
-    retry_delay 5
-  end
+# Allow one retry, to avoid races where two nodes create the primitive at the
+# same time when it wasn't created yet (only one can obviously succeed)
+pacemaker_primitive service_name do
+  agent node[:ceilometer][:ha][:central][:agent]
+  op node[:ceilometer][:ha][:central][:op]
+  # use these params with ocf:openstack:ceilometer-agent-central:
+  #params ({
+  #  "user"    => node[:ceilometer][:user],
+  #  "binary"  => "/usr/bin/ceilometer-agent-central",
+  #  "use_service"    => true,
+  #  "service" => node[:ceilometer][:central][:service_name]
+  #})
+  action [ :create, :start ]
+  retries 1
+  retry_delay 5
 end

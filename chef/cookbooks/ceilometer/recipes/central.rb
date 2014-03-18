@@ -52,8 +52,8 @@ include_recipe "#{@cookbook_name}::common"
 
 ha_enabled = node[:ceilometer][:ha][:central][:enabled]
 
-service "ceilometer-agent-central-service" do
-  service_name node[:ceilometer][:agent_central][:service_name]
+service "ceilometer-agent-central" do
+  service_name node[:ceilometer][:central][:service_name]
   supports :status => true, :restart => true, :start => true, :stop => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
@@ -61,4 +61,9 @@ service "ceilometer-agent-central-service" do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
-include_recipe "ceilometer::central_ha"
+if ha_enabled
+  log "HA support for ceilometer-central is enabled"
+  include_recipe "ceilometer::central_ha"
+else
+  log "HA support for ceilometer-central is disabled"
+end

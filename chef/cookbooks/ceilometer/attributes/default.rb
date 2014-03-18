@@ -21,6 +21,21 @@ else
   default[:ceilometer][:group]="openstack-ceilometer"
 end
 
+central_service_name = "ceilometer-agent-central"
+if %w(suse).include?(node[:platform])
+  central_service_name = "openstack-ceilometer-agent-central"
+elsif %w(redhat centos).include?(node[:platform])
+  central_service_name = "openstack-ceilometer-central"
+end
+
+api_service_name = "ceilometer-api"
+if %w(redhat centos suse).include?(node[:platform])
+  api_service_name = "openstack-ceilometer-api"
+end
+
+default[:ceilometer][:api][:service_name] = api_service_name
+default[:ceilometer][:central][:service_name] = central_service_name
+
 default[:ceilometer][:debug] = false
 default[:ceilometer][:verbose] = false
 
@@ -42,20 +57,10 @@ default[:ceilometer][:api][:port] = 8777
 default[:ceilometer][:metering_secret] = "" # Set by wrapper
 
 default[:ceilometer][:ha][:server][:enabled] = false
+default[:ceilometer][:ha][:server][:agent] = "lsb:#{api_service_name}"
+default[:ceilometer][:ha][:server][:op][:monitor][:interval] = "10s"
 default[:ceilometer][:ha][:central][:enabled] = false
+default[:ceilometer][:ha][:central][:agent] = "lsb:#{central_service_name}"
+default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:ceilometer][:ha][:ports][:api] = 5560
-
-lsb_service_name = "ceilometer-agent-central"
-if %w(suse).include?(node[:platform])
-  lsb_service_name = "openstack-ceilometer-agent-central"
-elsif %w(redhat centos).include?(node[:platform])
-  lsb_service_name = "openstack-ceilometer-central"
-end
-
-default[:ceilometer][:agent_central][:service_name]     = lsb_service_name
-
-default[:ceilometer][:ha][:central][:agent] = "lsb:#{lsb_service_name}"
-# use OCF agent once it is able to use LSB services internally
-#default[:ceilometer][:ha][:central][:agent] = "ocf:openstack:ceilometer-agent-central"
-default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"

@@ -20,3 +20,18 @@ haproxy_loadbalancer "ceilometer-api" do
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "ceilometer", "ceilometer-server", "api")
   action :nothing
 end.run_action(:create)
+
+service_name = "ceilometer-api-service"
+
+pacemaker_primitive service_name do
+  agent node[:ceilometer][:ha][:api][:agent]
+  op    node[:ceilometer][:ha][:api][:op]
+  action :create
+  retries 1
+  retry_delay 5
+end
+
+pacemaker_clone "clone-#{service_name}" do
+  rsc service_name
+  action [ :create, :start ]
+end
