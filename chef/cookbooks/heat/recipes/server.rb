@@ -95,7 +95,6 @@ node[:heat][:platform][:aux_dirs].each do |d|
 end
 
 
-include_recipe "#{@cookbook_name}::common"
 rabbit = get_instance('roles:rabbitmq-server')
 Chef::Log.info("Rabbit server found at #{rabbit[:rabbitmq][:address]}")
 rabbit_settings = {
