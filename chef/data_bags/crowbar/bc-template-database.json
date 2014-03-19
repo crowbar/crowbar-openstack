@@ -9,12 +9,23 @@
       },
       "postgresql": {
         "max_connections": 1000
+      },
+      "ha": {
+        "storage": {
+          "mode": "shared",
+          "shared": {
+            "device": "",
+            "fstype": "",
+            "options": ""
+          }
+        }
       }
     }
   },
   "deployment": {
     "database": {
       "crowbar-revision": 0,
+      "schema-revision": 1,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },

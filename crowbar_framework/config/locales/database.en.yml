@@ -11,3 +11,16 @@ en:
         postgresql_attributes: PostgreSQL Options
         postgresql:
           max_connections: Global Connection Limit (max_connections)
+        ha_header: High Availability
+        ha:
+          storage:
+            mode: Storage Mode
+            modes:
+              drbd: DRBD
+              shared: Shared Storage
+            drbd_info: All nodes in the cluster must have an available disk that will be used for DRBD.
+            shared_info: The data directory of the database must have the correct ownership on the shared storage.
+            shared:
+              device: Name of Block Device or NFS Mount Specification
+              fstype: Filesystem Type
+              options: Mount Options
