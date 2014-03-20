@@ -167,6 +167,17 @@ keystone_register "give heat user access" do
   action :add_access
 end
 
+keystone_register "add heat stack user role" do
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['service_user']
+  tenant_name keystone_settings['service_tenant']
+  role_name "heat_stack_user"
+  action :add_role
+end
+
 # Create Heat CloudFormation service
 keystone_register "register Heat CloudFormation Service" do
   protocol keystone_settings['protocol']
