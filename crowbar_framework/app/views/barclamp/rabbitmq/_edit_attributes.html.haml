@@ -6,3 +6,20 @@
     = string_field :vhost
     = integer_field :port
     = string_field :user
+
+    %fieldset
+      %legend
+        = t('.ha_header')
+
+      = select_field %w(ha storage mode), :collection => :ha_storage_mode_for_rabbitmq, "data-showit" => ["drbd", "shared"].join(";"), "data-showit-target" => "#drbd_storage_container;#shared_storage_container", "data-showit-direct" => "true"
+
+      #drbd_storage_container
+        .alert.alert-info
+          = t('.ha.storage.drbd_info')
+
+      #shared_storage_container
+        .alert.alert-info
+          = t('.ha.storage.shared_info')
+        = string_field %w(ha storage shared device)
+        = string_field %w(ha storage shared fstype)
+        = string_field %w(ha storage shared options)

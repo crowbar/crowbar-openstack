@@ -15,7 +15,29 @@
             "port": { "type": "int", "required": true },
             "password": { "type": "str", "required": true },
             "user": { "type": "str", "required": true },
-            "vhost": { "type": "str", "required": true }
+            "vhost": { "type": "str", "required": true },
+            "ha" : {
+              "type": "map",
+              "required": true,
+              "mapping" : {
+                "storage": {
+                  "type": "map",
+                  "required": true,
+                  "mapping" : {
+                    "mode": { "type": "str", "required": true },
+                    "shared": {
+                      "type": "map",
+                      "required": true,
+                      "mapping" : {
+                        "device": { "type": "str", "required": true },
+                        "fstype": { "type": "str", "required": true },
+                        "options": { "type": "str", "required": true }
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }

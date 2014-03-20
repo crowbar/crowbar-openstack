@@ -6,7 +6,17 @@
       "port": 5672,
       "password": "",
       "user": "nova",
-      "vhost": "/nova"
+      "vhost": "/nova",
+      "ha": {
+        "storage": {
+          "mode": "shared",
+          "shared": {
+            "device": "",
+            "fstype": "",
+            "options": ""
+          }
+        }
+      }
     }
   },
   "deployment": {

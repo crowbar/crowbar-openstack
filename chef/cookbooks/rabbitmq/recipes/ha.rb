@@ -17,10 +17,22 @@ rabbitmq_environment = node[:rabbitmq][:config][:environment]
 
 vhostname = CrowbarRabbitmqHelper.get_ha_vhostname(node)
 vip_primitive = "#{vhostname}-vip-admin"
+fs_primitive = "#{rabbitmq_environment}-fs"
 service_name = "#{rabbitmq_environment}-service"
 group_name = "#{service_name}-group"
 
 ip_addr = CrowbarRabbitmqHelper.get_listen_address(node)
+
+if node[:rabbitmq][:ha][:storage][:mode] != "shared"
+  raise "Invalid mode for HA storage!"
+end
+fs_params = {}
+fs_params["device"] = node[:rabbitmq][:ha][:storage][:shared][:device]
+fs_params["directory"] = "/var/lib/rabbitmq"
+fs_params["fstype"] = node[:rabbitmq][:ha][:storage][:shared][:fstype]
+unless node[:rabbitmq][:ha][:storage][:shared][:options].empty?
+  fs_params["options"] = node[:rabbitmq][:ha][:storage][:shared][:options]
+end
 
 agent_name = "ocf:rabbitmq:rabbitmq-server"
 rabbitmq_op = {}
@@ -36,6 +48,13 @@ pacemaker_primitive vip_primitive do
   action :create
 end
 
+pacemaker_primitive fs_primitive do
+  agent "ocf:heartbeat:Filesystem"
+  params fs_params
+  op rabbitmq_op
+  action :create
+end
+
 pacemaker_primitive service_name do
   agent agent_name
   params ({
@@ -47,8 +66,8 @@ end
 
 pacemaker_group group_name do
   # Membership order *is* significant; VIPs should come first so
-  # that they are available for the haproxy service to bind to.
-  members [vip_primitive, service_name]
+  # that they are available for the service to bind to.
+  members [vip_primitive, fs_primitive, service_name]
   meta ({
     "is-managed" => true,
     "target-role" => "started"
