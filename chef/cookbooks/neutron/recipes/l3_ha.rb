@@ -15,12 +15,14 @@
 
 package node[:neutron][:platform][:ha_tool_pkg]
 
+use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
 pacemaker_primitive node[:neutron][:platform][:l3_agent_name] do
   agent node[:neutron][:ha][:l3][:l3_ra]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
   retries 1
   retry_delay 5
+  only_if { use_l3_agent }
 end
 
 pacemaker_primitive node[:neutron][:platform][:dhcp_agent_name] do
@@ -47,11 +49,14 @@ pacemaker_primitive node[:neutron][:platform][:metering_agent_name] do
   retry_delay 5
 end
 
+group_members = []
+group_members << node[:neutron][:platform][:l3_agent_name] if use_l3_agent
+group_members += [ node[:neutron][:platform][:dhcp_agent_name],
+                   node[:neutron][:platform][:metadata_agent_name],
+                   node[:neutron][:platform][:metering_agent_name] ]
+
 pacemaker_group "group-neutron-agents" do
-  members [ node[:neutron][:platform][:l3_agent_name],
-            node[:neutron][:platform][:dhcp_agent_name],
-            node[:neutron][:platform][:metadata_agent_name],
-            node[:neutron][:platform][:metering_agent_name] ] 
+  members group_members
   meta ({
     "is-managed" => true,
     "target-role" => "started"
@@ -80,6 +85,7 @@ pacemaker_primitive "neutron-ha-tool" do
   action [ :create, :start ]
   retries 1
   retry_delay 5
+  only_if { use_l3_agent }
 end
 
 # FIXME: We might need to define a "ordering" here to make sure that 
