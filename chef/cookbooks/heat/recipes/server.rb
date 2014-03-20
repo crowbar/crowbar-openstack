@@ -17,8 +17,7 @@ heat_path = "/opt/heat"
 venv_path = node[:heat][:use_virtualenv] ? "#{heat_path}/.venv" : nil
 venv_prefix = node[:heat][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 
-env_filter = " AND database_config_environment:database-config-#{node[:heat][:database_instance]}"
-sql = search(:node, "roles:database-server#{env_filter}").first || node
+sql = get_instance('roles:database-server')
 
 include_recipe "database::client"
 backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
@@ -29,7 +28,7 @@ db_provider = Chef::Recipe::Database::Util.get_database_provider(sql)
 db_user_provider = Chef::Recipe::Database::Util.get_user_provider(sql)
 privs = Chef::Recipe::Database::Util.get_default_priviledges(sql)
 
-sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil?
+sql_address = CrowbarDatabaseHelper.get_listen_address(sql)
 Chef::Log.info("Database server found at #{sql_address}")
 
 db_conn = { :host => sql_address,
@@ -96,13 +95,10 @@ node[:heat][:platform][:aux_dirs].each do |d|
 end
 
 
-include_recipe "#{@cookbook_name}::common"
-env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{node[:heat][:rabbitmq_instance]}"
-rabbit = search(:node, "roles:rabbitmq-server#{env_filter}").first || node
-rabbit_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(rabbit, "admin").address
-Chef::Log.info("Rabbit server found at #{rabbit_address}")
+rabbit = get_instance('roles:rabbitmq-server')
+Chef::Log.info("Rabbit server found at #{rabbit[:rabbitmq][:address]}")
 rabbit_settings = {
-  :address => rabbit_address,
+  :address => rabbit[:rabbitmq][:address],
   :port => rabbit[:rabbitmq][:port],
   :user => rabbit[:rabbitmq][:user],
   :password => rabbit[:rabbitmq][:password],
