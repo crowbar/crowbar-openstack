@@ -107,6 +107,9 @@ pacemaker_primitive "neutron-ha-tool" do
   only_if { use_l3_agent }
 end
 
-# FIXME: We might need to define a "ordering" here to make sure that 
-# "clone-neutron-agents" is started/restarted before "neutron-ha-tool"
-
+pacemaker_order "neutron-ha-tool_after_clone-neutron-agents" do
+  ordering "clone-neutron-agents neutron-ha-tool"
+  score "Mandatory"
+  action [ :create ]
+  only_if { use_l3_agent }
+end
