@@ -185,34 +185,38 @@ ha_enabled = node[:neutron][:ha][:l3][:enabled]
 service node[:neutron][:platform][:l3_agent_name] do
   service_name "neutron-l3-agent" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
-  action ha_enabled ? :disable : [:enable, :start]
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
   not_if { node[:neutron][:networking_plugin] == "vmware" }
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service node[:neutron][:platform][:metering_agent_name] do
   service_name "neutron-metering-agent" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
-  action ha_enabled ? :disable : [:enable, :start]
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/metering_agent.ini]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service node[:neutron][:platform][:dhcp_agent_name] do
   service_name "neutron-dhcp-agent" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
-  action ha_enabled ? :disable : [:enable, :start]
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/dhcp_agent.ini]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service node[:neutron][:platform][:metadata_agent_name] do
   service_name "neutron-metadata-agent" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
-  action ha_enabled ? :disable : [:enable, :start]
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 if ha_enabled
