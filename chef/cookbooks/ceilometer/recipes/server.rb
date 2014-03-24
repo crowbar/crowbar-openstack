@@ -81,6 +81,8 @@ else
               :username => "db_maker",
               :password => sql[:database][:db_maker_password] }
 
+  crowbar_pacemaker_sync_mark "wait-ceilometer_database"
+
   # Create the Ceilometer Database
   database "create #{node[:ceilometer][:db][:database]} database" do
       connection db_conn
@@ -108,6 +110,8 @@ else
       provider db_user_provider
       action :grant
   end
+    
+  crowbar_pacemaker_sync_mark "create-ceilometer_database"
 end
 
 unless node[:ceilometer][:use_gitrepo]
@@ -169,12 +173,17 @@ keystone_settings = CeilometerHelper.keystone_settings(node)
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:api][:protocol] == "https", ha_enabled)
 
-execute "calling ceilometer-dbsync" do
-  command "#{venv_prefix}ceilometer-dbsync"
-  action :run
-  user node[:ceilometer][:user]
-  group node[:ceilometer][:group]
-  not_if { node[:platform] == "suse" }
+unless node[:platform] == "suse"
+  crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync"
+
+  execute "calling ceilometer-dbsync" do
+    command "#{venv_prefix}ceilometer-dbsync"
+    action :run
+    user node[:ceilometer][:user]
+    group node[:ceilometer][:group]
+  end
+
+  crowbar_pacemaker_sync_mark "create-ceilometer_db_sync"
 end
 
 service "ceilometer-collector" do
@@ -199,6 +208,8 @@ if ha_enabled
 else
   log "HA support for ceilometer is disabled"
 end
+
+crowbar_pacemaker_sync_mark "wait-ceilometer_register"
 
 keystone_register "register ceilometer user" do
   protocol keystone_settings['protocol']
@@ -263,5 +274,7 @@ keystone_register "register ceilometer endpoint" do
 #  endpoint_enabled true
   action :add_endpoint_template
 end
+
+crowbar_pacemaker_sync_mark "create-ceilometer_register"
 
 node.save
