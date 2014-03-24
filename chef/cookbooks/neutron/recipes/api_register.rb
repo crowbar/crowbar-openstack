@@ -23,6 +23,8 @@ neutron_protocol = node["neutron"]["api"]["protocol"]
 
 keystone_settings = NeutronHelper.keystone_settings(node)
 
+crowbar_pacemaker_sync_mark "wait-neutron_register"
+
 keystone_register "neutron api wakeup keystone" do
   protocol keystone_settings['protocol']
   host keystone_settings['internal_url_host']
@@ -79,4 +81,4 @@ keystone_register "register neutron endpoint" do
   action :add_endpoint_template
 end
 
-
+crowbar_pacemaker_sync_mark "create-neutron_register"

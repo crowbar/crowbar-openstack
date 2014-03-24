@@ -37,6 +37,8 @@ props = [ {'db_name' => node[:neutron][:db][:database],
           'db_conn_name' => 'sql_connection'  }
         ]
 
+crowbar_pacemaker_sync_mark "wait-neutron_database"
+
 # Create the Neutron Databases
 props.each do |prop|
   db_name = prop['db_name']
@@ -77,5 +79,7 @@ props.each do |prop|
         node[@cookbook_name][:db][sql_address_name] = sql_address
     end
 end
+
+crowbar_pacemaker_sync_mark "create-neutron_database"
 
 node.save
