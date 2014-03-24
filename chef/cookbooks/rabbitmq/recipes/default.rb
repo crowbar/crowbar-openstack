@@ -55,7 +55,8 @@ end
 
 service "rabbitmq-server" do
   supports :restart => true, :start => true, :stop => true
-  action node[:rabbitmq][:ha][:enabled] ? :disable : [ :enable, :start ]
+  action [ :enable, :start ]
+  provider Chef::Provider::CrowbarPacemakerService if node[:rabbitmq][:ha][:enabled]
 end
 
 bash "enabling rabbit management" do

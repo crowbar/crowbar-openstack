@@ -84,9 +84,3 @@ pacemaker_group group_name do
 end
 
 crowbar_pacemaker_sync_mark "create-rabbitmq_ha_resources"
-
-# adapt standard service commands to force chef use crm API
-resource = resources(:service => "rabbitmq-server")
-resource.start_command("crm resource start #{group_name}")
-resource.restart_command("crm resource restart #{group_name}")
-resource.stop_command("crm resource stop #{group_name}")
