@@ -38,6 +38,18 @@ postgres_op = {}
 postgres_op["monitor"] = {}
 postgres_op["monitor"]["interval"] = "10s"
 
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required packages installed before we create the pacemaker
+# resources
+crowbar_pacemaker_sync_mark "sync-database_before_ha" do
+  revision node[:database]["crowbar-revision"]
+end
+
+# Avoid races when creating pacemaker resources
+crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
+  revision node[:database]["crowbar-revision"]
+end
+
 pacemaker_primitive vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
   params ({
@@ -69,6 +81,10 @@ pacemaker_group group_name do
     "target-role" => "started"
   })
   action [ :create, :start ]
+end
+
+crowbar_pacemaker_sync_mark "create-database_ha_resources" do
+  revision node[:database]["crowbar-revision"]
 end
 
 # adapt standard service commands to force chef use crm API
