@@ -39,6 +39,14 @@ rabbitmq_op = {}
 rabbitmq_op["monitor"] = {}
 rabbitmq_op["monitor"]["interval"] = "10s"
 
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required packages installed before we create the pacemaker
+# resources
+crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha"
+
+# Avoid races when creating pacemaker resources
+crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources"
+
 pacemaker_primitive vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
   params ({
@@ -74,6 +82,8 @@ pacemaker_group group_name do
   })
   action [ :create, :start ]
 end
+
+crowbar_pacemaker_sync_mark "create-rabbitmq_ha_resources"
 
 # adapt standard service commands to force chef use crm API
 resource = resources(:service => "rabbitmq-server")
