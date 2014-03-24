@@ -140,18 +140,18 @@ else
 end
 
 default[:neutron][:ha][:l3][:enabled] = false
-default[:neutron][:ha][:l3][:l3_ra] = "lsb:openstack-neutron-l3-agent"
-default[:neutron][:ha][:l3][:dhcp_ra] = "lsb:openstack-neutron-dhcp-agent"
-default[:neutron][:ha][:l3][:metadata_ra] = "lsb:openstack-neutron-metadata-agent"
-default[:neutron][:ha][:l3][:metering_ra] = "lsb:openstack-neutron-metering-agent"
-default[:neutron][:ha][:l3][:openvswitch_ra] = "lsb:openstack-neutron-openvswitch-agent"
-default[:neutron][:ha][:l3][:cisco_ra] = "lsb:openstack-neutron-openvswitch-agent"
-default[:neutron][:ha][:l3][:linuxbridge_ra] = "lsb:openstack-neutron-linuxbridge-agent"
-default[:neutron][:ha][:l3][:vmware_ra] = "lsb:openstack-neutron-vmware-agent"
+default[:neutron][:ha][:l3][:l3_ra] = "lsb:#{node[:neutron][:platform][:l3_agent_name]}"
+default[:neutron][:ha][:l3][:dhcp_ra] = "lsb:#{node[:neutron][:platform][:dhcp_agent_name]}"
+default[:neutron][:ha][:l3][:metadata_ra] = "lsb:#{node[:neutron][:platform][:metering_agent_name]}"
+default[:neutron][:ha][:l3][:metering_ra] = "lsb:#{node[:neutron][:platform][:metering_agent_name]}"
+default[:neutron][:ha][:l3][:openvswitch_ra] = "lsb:#{node[:neutron][:platform][:ovs_agent_name]}"
+default[:neutron][:ha][:l3][:cisco_ra] = "lsb:#{node[:neutron][:ha][:l3][:openvswitch_ra]}"
+default[:neutron][:ha][:l3][:linuxbridge_ra] = "lsb:#{node[:neutron][:platform][:lb_agent_name]}"
+default[:neutron][:ha][:l3][:vmware_ra] = "lsb:#{node[:neutron][:platform][:nvp_agent_name]}"
 default[:neutron][:ha][:l3][:ha_tool_ra] = "ocf:openstack:neutron-ha-tool"
 default[:neutron][:ha][:l3][:op][:monitor][:interval] = "10s"
 default[:neutron][:ha][:server][:enabled] = false
-default[:neutron][:ha][:server][:server_ra] = "lsb:#{default[:neutron][:platform][:service_name]}"
+default[:neutron][:ha][:server][:server_ra] = "lsb:#{node[:neutron][:platform][:service_name]}"
 default[:neutron][:ha][:server][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:neutron][:ha][:ports][:server] = 5530
