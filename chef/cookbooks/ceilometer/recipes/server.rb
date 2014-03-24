@@ -31,12 +31,12 @@ if node[:ceilometer][:use_mongodb]
         end
     end
 
-    node_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+    mongodb_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 
     template mongo_conf do
       mode 0644
       source "mongodb.conf.erb"
-      variables(:listen_addr => node_address)
+      variables(:listen_addr => mongodb_address)
       notifies :restart, "service[#{mongo_service}]", :immediately
     end
 
@@ -44,24 +44,30 @@ if node[:ceilometer][:use_mongodb]
       supports :status => true, :restart => true
       action [:enable, :start]
     end
-
-    # wait for mongodb start (ceilometer services need it running)
-    ruby_block "wait for mongodb start" do
-      block do
-        require 'timeout'
-        begin
-          Timeout.timeout(60) do
-            while ! ::Kernel.system("mongo #{node_address} --quiet < /dev/null &> /dev/null")
-              Chef::Log.debug("mongodb still not reachable")
-              sleep(2)
-            end
-          end
-        rescue Timeout::Error
-          Chef::Log.warn("mongodb does not seem to be responding 1 minute after start")
-        end
-      end
-    end
+  else
+    # HA is enabled, and we're not the cluster founder
+    # Currently, we only setup mongodb non-HA on the first node, so wait for this one...
+    db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
+    db_host = db_hosts.select { |n| n.roles.include?("pacemaker-cluster-founder") }.first
+    mongodb_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
   end
+
+  # wait for mongodb start (ceilometer services need it running)
+  ruby_block "wait for mongodb start" do
+    block do
+      require 'timeout'
+      begin
+        Timeout.timeout(60) do
+          while ! ::Kernel.system("mongo #{mongodb_address} --quiet < /dev/null &> /dev/null")
+            Chef::Log.debug("mongodb still not reachable")
+            sleep(2)
+          end
+        end
+      rescue Timeout::Error
+        Chef::Log.warn("mongodb does not seem to be responding 1 minute after start")
+      end
+    end # block
+  end # ruby_block
 
 else
   sql = get_instance('roles:database-server')
