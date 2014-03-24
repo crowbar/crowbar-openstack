@@ -35,6 +35,8 @@ db_conn = { :host => sql_address,
             :username => "db_maker",
             :password => sql[:database][:db_maker_password] }
 
+crowbar_pacemaker_sync_mark "wait-heat_database"
+
 # Create the Heat Database
 database "create #{node[:heat][:db][:database]} database" do
     connection db_conn
@@ -62,6 +64,8 @@ database_user "grant database access for heat database user" do
     provider db_user_provider
     action :grant
 end
+
+crowbar_pacemaker_sync_mark "create-heat_database"
 
 unless node[:heat][:use_gitrepo]
     node[:heat][:platform][:packages].each do |p|
@@ -130,6 +134,8 @@ my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:protocol] == "https", ha_enabled)
 
 db_connection = "#{backend_name}://#{node[:heat][:db][:user]}:#{node[:heat][:db][:password]}@#{sql_address}/#{node[:heat][:db][:database]}"
+
+crowbar_pacemaker_sync_mark "wait-heat_register"
 
 keystone_register "register heat user" do
   protocol keystone_settings['protocol']
@@ -207,6 +213,8 @@ keystone_register "register heat endpoint" do
   action :add_endpoint_template
 end
 
+crowbar_pacemaker_sync_mark "create-heat_register"
+
 template "/etc/heat/environment.d/default.yaml" do
     source "default.yaml.erb"
     owner node[:heat][:user]
@@ -239,7 +247,6 @@ template "/etc/heat/heat.conf" do
       :cloud_watch_port => cloud_watch_port,
       :cfn_port => cfn_port
     )
-   notifies :run, "execute[heat-db-sync]", :delayed
 end
 
 template "/etc/heat/api-paste.ini" do
@@ -284,11 +291,17 @@ service "heat-api-cloudwatch" do
   subscribes :restart, resources("template[/etc/heat/api-paste.ini]")
 end
 
-execute "heat-db-sync" do
-  # do not run heat-db-setup since it wants to install packages and setup db passwords
-  command "#{venv_prefix}python -m heat.db.sync"
-  action :nothing
-  not_if { node[:platform] == "suse" }
+unless node[:platform] == "suse"
+  crowbar_pacemaker_sync_mark "wait-heat_db_sync"
+
+  execute "heat-db-sync" do
+    # do not run heat-db-setup since it wants to install packages and setup db passwords
+    command "#{venv_prefix}python -m heat.db.sync"
+    action :nothing
+    subscribes :create, "template[/etc/heat/heat.conf]", :delayed
+  end
+
+  crowbar_pacemaker_sync_mark "create-heat_db_sync"
 end
 
 if ha_enabled
