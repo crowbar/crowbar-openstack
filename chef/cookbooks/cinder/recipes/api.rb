@@ -97,7 +97,9 @@ end
 
 crowbar_pacemaker_sync_mark "create-cinder_register"
 
-cinder_service("api")
+cinder_service "api" do
+  use_pacemaker_provider ha_enabled
+end
 
 template "/etc/cinder/api-paste.ini" do
   source "api-paste.ini.erb"

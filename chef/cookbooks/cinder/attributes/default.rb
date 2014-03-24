@@ -41,5 +41,13 @@ default[:cinder][:volume][:rbd][:ceph_conf] = '/etc/ceph/ceph.conf'
 default[:cinder][:volume][:nfs_shares] = '/etc/cinder/nfs_shares'
 
 default[:cinder][:ha][:enabled] = false
+if %w(redhat centos suse).include? node.platform
+  default[:cinder][:ha][:api_ra] = "lsb:openstack-cinder-api"
+  default[:cinder][:ha][:scheduler_ra] = "lsb:openstack-cinder-scheduler"
+else
+  default[:cinder][:ha][:api_ra] = "lsb:cinder-api"
+  default[:cinder][:ha][:scheduler_ra] = "lsb:cinder-scheduler"
+end
+default[:cinder][:ha][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:cinder][:ha][:ports][:api] = 5520
