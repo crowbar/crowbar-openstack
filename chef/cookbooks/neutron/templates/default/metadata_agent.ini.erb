@@ -5,11 +5,11 @@
 debug = <%= @debug ? "True" : "False" %>
 
 # The Neutron user information for accessing the Neutron API.
-auth_url = <%= @auth_url %>
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_region = <%= @auth_region %>
-admin_tenant_name = <%= @admin_tenant_name %>
-admin_user = <%= @admin_user %>
-admin_password = <%= @admin_password %>
+admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+admin_user = <%= @keystone_settings['service_user'] %>
+admin_password = <%= @keystone_settings['service_password'] %>
 
 # Network service endpoint type to pull from the keystone catalog
 # endpoint_type = adminURL

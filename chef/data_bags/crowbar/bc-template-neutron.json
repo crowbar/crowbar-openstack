@@ -62,7 +62,7 @@
   "deployment": {
     "neutron": {
       "crowbar-revision": 0,
-      "schema-revision": 4,
+      "schema-revision": 5,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-l3": [ "readying", "ready", "applying" ]
