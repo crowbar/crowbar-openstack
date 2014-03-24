@@ -86,9 +86,3 @@ end
 crowbar_pacemaker_sync_mark "create-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
-
-# adapt standard service commands to force chef use crm API
-resource = resources(:service => "postgresql")
-resource.start_command("crm resource start #{group_name}")
-resource.restart_command("crm resource restart #{group_name}")
-resource.stop_command("crm resource stop #{group_name}")

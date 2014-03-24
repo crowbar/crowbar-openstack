@@ -75,7 +75,8 @@ end
  
 service "postgresql" do
   supports :restart => true, :status => true, :reload => true
-  action node[:database][:ha][:enabled] ? :disable : [:enable, :start]
+  action [:enable, :start]
+  provider Chef::Provider::CrowbarPacemakerService if node[:database][:ha][:enabled]
 end
  
 template "#{node[:postgresql][:dir]}/postgresql.conf" do
