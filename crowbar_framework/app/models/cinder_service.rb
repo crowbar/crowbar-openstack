@@ -85,6 +85,14 @@ class CinderService < PacemakerServiceObject
     validate_one_for_role proposal, "cinder-controller"
     validate_at_least_n_for_role proposal, "cinder-volume", 1
 
+    if proposal["attributes"][@bc_name]["volume"]["volume_type"] == "raw"
+      has_usable_drives = proposal["deployment"]["cinder-volume"]["elements"].all? do |node_name|
+        node = NodeObject.find_node_by_name(node_name)
+        node && !node.unclaimed_physical_drives.empty?
+      end
+      validation_error("All nodes need at least one unclaimed drive for cinder volume deployment.") unless has_usable_drives
+    end
+
     if proposal["attributes"][@bc_name]["use_gitrepo"]
       validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
     end
