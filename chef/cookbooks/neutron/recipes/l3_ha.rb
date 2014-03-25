@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-package node[:neutron][:platform][:ha_tool_pkg]
+package node[:neutron][:platform][:ha_tool_pkg] unless node[:neutron][:platform][:ha_tool_pkg] == ""
 
 use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
 pacemaker_primitive node[:neutron][:platform][:l3_agent_name] do
