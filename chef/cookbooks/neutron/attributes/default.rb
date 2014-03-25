@@ -75,7 +75,7 @@ when "suse"
                    "openvswitch-switch",
                    "openvswitch-kmp-default" ],
     :cisco_pkgs => [ "openstack-neutron-plugin-cisco" ],
-    :user => "openstack-neutron",
+    :user => "neutron",
     :ovs_modprobe => "modprobe openvswitch",
     :neutron_rootwrap_sudo_template => "/etc/sudoers.d/openstack-neutron"
   }
