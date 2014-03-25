@@ -55,6 +55,11 @@ if netaddr != newnetaddr or netmask != newnetmask
   node.save
 end
 
+# While we would like to include the "postgresql::ha" recipe from here, it's
+# not possible: we need to have the packages installed first, and we need to
+# include it before we do templates. Which means we need to do it in the
+# server_* recipe directly, since they do both.
+
 # Include the right "family" recipe for installing the server
 # since they do things slightly differently.
 case node.platform
@@ -77,13 +82,6 @@ template "#{node[:postgresql][:dir]}/pg_hba.conf" do
   notifies :reload, resources(:service => "postgresql"), :immediately
 end
 
-if node[:database][:ha][:enabled]
-  log "HA support for postgresql is enabled"
-  include_recipe "postgresql::ha"
-else
-  log "HA support for postgresql is disabled"
-end
- 
 # Default PostgreSQL install has 'ident' checking on unix user 'postgres'
 # and 'md5' password checking with connections from 'localhost'. This script
 # runs as user 'postgres', so we can execute the 'role' and 'database' resources

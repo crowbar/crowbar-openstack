@@ -30,6 +30,25 @@ end
  
 package "postgresql"
  
+# We need to include the HA recipe early, before the config files are
+# generated, but after the postgresql packages are installed since they live in
+# the directory that will be mounted for HA
+if node[:database][:ha][:enabled]
+  # We need to create the directory; it's usually done by postgresql on start,
+  # but for HA, not all nodes will start postgresql, so we do this here to
+  # allow the templates to be created.
+  directory "#{node[:postgresql][:dir]}" do
+    owner "postgres"
+    group "postgres"
+    mode 0700
+  end
+
+  log "HA support for postgresql is enabled"
+  include_recipe "postgresql::ha"
+else
+  log "HA support for postgresql is disabled"
+end
+
 service "postgresql" do
   case node['platform']
   when "ubuntu"
