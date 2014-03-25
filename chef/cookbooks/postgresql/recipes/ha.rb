@@ -86,3 +86,34 @@ end
 crowbar_pacemaker_sync_mark "create-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
+
+# wait for fs primitive to be active, and for the directory to be actually
+# mounted; this is needed before we generate files in the directory
+ruby_block "wait for #{fs_primitive} to be started" do
+  block do
+    require 'timeout'
+    begin
+      Timeout.timeout(20) do
+        # Check that the fs resource is running
+        cmd = "crm resource show #{fs_primitive} 2> /dev/null | grep -q \"is running on\""
+        while ! ::Kernel.system(cmd)
+          Chef::Log.debug("#{fs_primitive} still not started")
+          sleep(2)
+        end
+        # Check that the fs resource is mounted, if it's running on this node
+        cmd = "crm resource show #{fs_primitive} | grep -q \" #{node.hostname} *$\""
+        if ::Kernel.system(cmd)
+          cmd = "mount | grep -q \"on #{fs_params["directory"]} \""
+          while ! ::Kernel.system(cmd)
+            Chef::Log.debug("#{fs_params["directory"]} still not mounted")
+            sleep(2)
+          end
+        end
+      end
+    rescue Timeout::Error
+      message = "The #{fs_primitive} pacemaker resource is not started. Please manually check for an error."
+      Chef::Log.fatal(message)
+      raise message
+    end
+  end # block
+end # ruby_block
