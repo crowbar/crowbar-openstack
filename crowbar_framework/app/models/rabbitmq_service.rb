@@ -76,6 +76,9 @@ class RabbitmqService < PacemakerServiceObject
       cluster = rabbitmq_elements[0]
       rabbitmq_vhostname = "#{role.name.gsub("-config", "")}-#{PacemakerServiceObject.cluster_name(cluster)}.#{ChefObject.cloud_domain}".gsub("_", "-")
       net_svc.allocate_virtual_ip "default", "admin", "host", rabbitmq_vhostname
+      # rabbitmq, on start, needs to have the virtual hostname resolvable; so
+      # let's force a dns update now
+      ensure_dns_uptodate
     end
 
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
