@@ -29,7 +29,8 @@ fs_primitive = "#{database_environment}-fs"
 service_name = "#{database_environment}-service"
 group_name = "#{service_name}-group"
 
-agent_name = "lsb:postgresql"
+agent_name = "ocf:heartbeat:pgsql"
+ip_addr = CrowbarDatabaseHelper.get_listen_address(node)
 
 postgres_op = {}
 postgres_op["monitor"] = {}
@@ -49,6 +50,11 @@ end
 
 pacemaker_primitive service_name do
   agent agent_name
+  params ({
+    "pghost" => ip_addr,
+    "monitor_user" => "postgres",
+    "monitor_password" => node['postgresql']['password']['postgres']
+  })
   op postgres_op
   action :create
 end
