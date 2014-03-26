@@ -82,6 +82,16 @@ template "#{node[:postgresql][:dir]}/pg_hba.conf" do
   notifies :reload, resources(:service => "postgresql"), :immediately
 end
 
+ha_enabled = node[:database][:ha][:enabled]
+
+if ha_enabled
+  database_environment = node[:database][:config][:environment]
+  service_name = "#{database_environment}-service"
+  # Only run the psql commands if the service is running on this node, so that
+  # we don't depend on the node running the service to be as fast as this one
+  only_if_command = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
+end
+
 # Default PostgreSQL install has 'ident' checking on unix user 'postgres'
 # and 'md5' password checking with connections from 'localhost'. This script
 # runs as user 'postgres', so we can execute the 'role' and 'database' resources
@@ -101,6 +111,7 @@ echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node[:postgresql][:password][:po
       false
     end
   end
+  only_if only_if_command if ha_enabled
   action :run
 end
 
@@ -121,5 +132,6 @@ ALTER ROLE db_maker ENCRYPTED PASSWORD '#{node[:database][:db_maker_password]}';
       false
     end
   end
+  only_if only_if_command if ha_enabled
   action :run
 end
