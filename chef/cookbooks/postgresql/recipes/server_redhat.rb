@@ -68,27 +68,33 @@ when "fedora"
   package "postgresql-server"
 end
  
+ha_enabled = node[:database][:ha][:enabled]
+
 # We need to include the HA recipe early, before the config files are
 # generated, but after the postgresql packages are installed since they live in
 # the directory that will be mounted for HA
-if node[:database][:ha][:enabled]
-  # We need to create the directory; it's usually done by postgresql on start,
-  # but for HA, not all nodes will start postgresql, so we do this here to
-  # allow the templates to be created.
-  directory "#{node[:postgresql][:dir]}" do
-    owner "postgres"
-    group "postgres"
-    mode 0700
-  end
-
-  log "HA support for postgresql is enabled"
-  include_recipe "postgresql::ha"
-else
-  log "HA support for postgresql is disabled"
+if ha_enabled
+  include_recipe "postgresql::ha_storage"
 end
 
-execute "/sbin/service postgresql initdb" do
-  not_if { node.platform == "suse" or
+# We need initdb to populate /var/lib/pgsql/data before we generate the config
+# files (otherwise, later calls to initdb don't do anything and postgresql
+# doesn't want to start).
+#
+#   - This is always done below for the non-SUSE case.
+#
+#   - For SUSE, however, we rely on the init script to call initdb on start.
+#     But with HA, this won't happen: the OCF RA doesn't call initdb, so we
+#     need to do it manually.
+#     Also, on SUSE, there's no single initdb argument to the init script. So
+#     we need to do a quick start / stop just for that :/
+execute "Initial population of #{node.postgresql.dir}" do
+  if node.platform == "suse"
+    command "service postgresql start; service postgresql stop"
+  else
+    command "/sbin/service postgresql initdb"
+  end
+  not_if { (node.platform == "suse" && !ha_enabled) ||
            ::FileTest.exist?(File.join(node.postgresql.dir, "PG_VERSION")) }
 end
  

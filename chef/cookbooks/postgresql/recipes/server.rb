@@ -55,9 +55,9 @@ if netaddr != newnetaddr or netmask != newnetmask
   node.save
 end
 
-# While we would like to include the "postgresql::ha" recipe from here, it's
-# not possible: we need to have the packages installed first, and we need to
-# include it before we do templates. Which means we need to do it in the
+# While we would like to include the "postgresql::ha_storage" recipe from here,
+# it's not possible: we need to have the packages installed first, and we need
+# to include it before we do templates. Which means we need to do it in the
 # server_* recipe directly, since they do both.
 
 # Include the right "family" recipe for installing the server
@@ -85,11 +85,16 @@ end
 ha_enabled = node[:database][:ha][:enabled]
 
 if ha_enabled
+  log "HA support for postgresql is enabled"
+  include_recipe "postgresql::ha"
+
   database_environment = node[:database][:config][:environment]
   service_name = "#{database_environment}-service"
   # Only run the psql commands if the service is running on this node, so that
   # we don't depend on the node running the service to be as fast as this one
   only_if_command = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
+else
+  log "HA support for postgresql is disabled"
 end
 
 # Default PostgreSQL install has 'ident' checking on unix user 'postgres'
