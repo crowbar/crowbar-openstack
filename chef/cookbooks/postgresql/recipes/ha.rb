@@ -73,3 +73,34 @@ end
 crowbar_pacemaker_sync_mark "create-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
+
+# wait for service to be active, and really ready before we go on (because we
+# will then need the database to be ready to answer queries)
+ruby_block "wait for #{service_name} to be started" do
+  block do
+    require 'timeout'
+    begin
+      Timeout.timeout(20) do
+        # Check that the service is running
+        cmd = "crm resource show #{service_name} 2> /dev/null | grep -q \"is running on\""
+        while ! ::Kernel.system(cmd)
+          Chef::Log.debug("#{service_name} still not started")
+          sleep(2)
+        end
+        # Check that the service is available, if it's running on this node
+        cmd = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
+        if ::Kernel.system(cmd)
+          cmd = "su - postgres -c 'psql -c \"select now();\"' &> /dev/null"
+          while ! ::Kernel.system(cmd)
+            Chef::Log.debug("#{service_name} still not answering")
+            sleep(2)
+          end
+        end
+      end
+    rescue Timeout::Error
+      message = "The #{service_name} pacemaker resource is not started. Please manually check for an error."
+      Chef::Log.fatal(message)
+      raise message
+    end
+  end # block
+end # ruby_block
