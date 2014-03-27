@@ -31,6 +31,7 @@ case node["platform"]
                     "openstack-heat-api-cfn", "openstack-heat-api-cloudwatch"],
       :aux_dirs => ["/var/cache/heat", "/etc/heat/environment.d"]
     }
+end
 
 default[:heat][:debug] = false
 default[:heat][:verbose] = false
