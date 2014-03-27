@@ -65,6 +65,37 @@ end
 
 crowbar_pacemaker_sync_mark "create-rabbitmq_ha_storage"
 
+# Ensure that uid/gid are the same on all nodes
+#
+# This is really hacky!!!
+#
+# We need to have the uid/gid be the same accross all nodes, but rabbitmq
+# packages don't use a static uid/gid. So we pick one (91) which doesn't seem
+# to be in use:
+#  - see base-passwd package for Debian: http://sources.debian.net/src/base-passwd/3.5.32/passwd.master
+#  - see wiki page for Fedora: https://fedoraproject.org/wiki/PackageUserRegistry
+# We could use the chef user/group LWRP to do the change, but we also need to
+# run other commands (to change ownership of existing files), so we might as
+# well do a big script.
+# We also stop rabbitmq in case it was running before, so we can change the uid
+# without any impact. Pacemaker will start the process on one other node later
+# on anyway.
+static_uid = 91
+static_gid = 91
+bash "assign static uid to rabbitmq" do
+ code <<EOC
+ service rabbitmq-server stop > /dev/null;
+ groupmod -g #{static_gid} rabbitmq;
+ usermod -u #{static_uid} -g #{static_gid} rabbitmq;
+ chown -R rabbitmq:rabbitmq /var/lib/rabbitmq;
+ chown rabbitmq:rabbitmq /var/run/rabbitmq /var/log/rabbitmq;
+ chown rabbitmq:rabbitmq /var/run/rabbitmq/pid /var/log/rabbitmq/*.log* || :;
+EOC
+ # Make any error in the commands fatal
+ flags "-e"
+ only_if "test \"$(id -u rabbitmq 2> /dev/null)\" != \"#{static_uid}\" -a \"$(id -g rabbitmq 2> /dev/null)\" != \"#{static_gid}\""
+end
+
 # wait for fs primitive to be active, and for the directory to be actually
 # mounted; this is needed so we can change its ownership
 ruby_block "wait for #{fs_primitive} to be started" do
