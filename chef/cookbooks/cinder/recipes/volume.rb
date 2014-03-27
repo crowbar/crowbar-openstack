@@ -159,7 +159,8 @@ cinder_service("volume")
 
 case
 when node[:cinder][:volume][:volume_type] == "netapp"
-  file node[:cinder][:volume][:nfs_shares] do
+  #TODO(saschpe): change the file location based on the backend name:
+  file '/etc/cinder/nfs_shares' do
     content node[:cinder][:volume][:netapp][:nfs_shares]
     owner "root"
     group node[:cinder][:group]
