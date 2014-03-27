@@ -45,7 +45,7 @@ rabbitmq_op["monitor"]["interval"] = "10s"
 crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources"
+crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_storage"
 
 # wait for DNS to be updated for hostname of virtual IP (otherwise, rabbitmq
 # can't start)
@@ -83,6 +83,52 @@ pacemaker_primitive fs_primitive do
   op rabbitmq_op
   action :create
 end
+
+crowbar_pacemaker_sync_mark "create-rabbitmq_ha_storage"
+
+# wait for fs primitive to be active, and for the directory to be actually
+# mounted; this is needed so we can change its ownership
+ruby_block "wait for #{fs_primitive} to be started" do
+  block do
+    require 'timeout'
+    begin
+      Timeout.timeout(20) do
+        # Check that the fs resource is running
+        cmd = "crm resource show #{fs_primitive} 2> /dev/null | grep -q \"is running on\""
+        while ! ::Kernel.system(cmd)
+          Chef::Log.debug("#{fs_primitive} still not started")
+          sleep(2)
+        end
+        # Check that the fs resource is mounted, if it's running on this node
+        cmd = "crm resource show #{fs_primitive} | grep -q \" #{node.hostname} *$\""
+        if ::Kernel.system(cmd)
+          cmd = "mount | grep -q \"on #{fs_params["directory"]} \""
+          while ! ::Kernel.system(cmd)
+            Chef::Log.debug("#{fs_params["directory"]} still not mounted")
+            sleep(2)
+          end
+        end
+      end
+    rescue Timeout::Error
+      message = "The #{fs_primitive} pacemaker resource is not started. Please manually check for an error."
+      Chef::Log.fatal(message)
+      raise message
+    end
+  end # block
+end # ruby_block
+
+# Ensure that the mounted directory is owned by rabbitmq; this works because we
+# waited for the mount above. (This will obviously not be useful on nodes that
+# are not using the mount resource; but it won't harm them either)
+directory fs_params["directory"] do
+  owner "rabbitmq"
+  group "rabbitmq"
+  mode 0750
+end
+# Now we can get the rabbitmq process to start since we know the directory is
+# writable, so we can create the primitive for rabbitmq.
+
+crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources"
 
 pacemaker_primitive service_name do
   agent agent_name
