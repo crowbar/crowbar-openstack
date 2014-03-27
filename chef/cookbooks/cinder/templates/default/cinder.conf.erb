@@ -1488,7 +1488,8 @@ rbd_user=<%= @rbd_params['user'] %>
 
 # path to the ceph configuration file to use (string value)
 <% unless @rbd_params.nil? -%>
-rbd_ceph_conf=<%= node[:cinder][:volume][:rbd][:ceph_conf] %>
+<%# TODO(saschpe): File name will include the backend name, e.g. '/etc/ceph/ceph-default.conf' %>
+rbd_ceph_conf=/etc/ceph/ceph.conf
 <% end -%>
 
 # flatten volumes created from snapshots to remove dependency
