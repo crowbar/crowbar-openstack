@@ -108,6 +108,15 @@ ruby_block "wait for #{fs_primitive} to be started" do
   end # block
 end # ruby_block
 
+# Ensure that the mounted directory is owned by postgres; this works because we
+# waited for the mount above. (This will obviously not be useful on nodes that
+# are not using the mount resource; but it won't harm them either)
+directory fs_params["directory"] do
+  owner "postgres"
+  group "postgres"
+  mode 0750
+end
+
 # We need to create the directory; it's usually done by postgresql on start,
 # but for HA:
 #  - we start postgresql later (after the config files have been created)
