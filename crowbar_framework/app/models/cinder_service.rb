@@ -86,7 +86,7 @@ class CinderService < PacemakerServiceObject
     validate_at_least_n_for_role proposal, "cinder-volume", 1
 
     if proposal["attributes"][@bc_name]["volume"]["volume_type"] == "raw"
-      has_usable_drives = proposal["deployment"]["cinder-volume"]["elements"].all? do |node_name|
+      has_usable_drives = proposal["deployment"][@bc_name]["elements"]["cinder-volume"].all? do |node_name|
         node = NodeObject.find_node_by_name(node_name)
         node && !node.unclaimed_physical_drives.empty?
       end
