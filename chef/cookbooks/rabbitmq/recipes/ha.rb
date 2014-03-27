@@ -47,27 +47,6 @@ crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_storage"
 
-# wait for DNS to be updated for hostname of virtual IP (otherwise, rabbitmq
-# can't start)
-vhostname = CrowbarRabbitmqHelper.get_ha_vhostname(node)
-ruby_block "wait for rabbitmq vhostname" do
-  block do
-    require 'timeout'
-    begin
-      Timeout.timeout(120) do
-        while ! ::Kernel.system("host #{vhostname} &> /dev/null")
-          Chef::Log.debug("rabbitmq vhostname still not in DNS")
-          sleep(2)
-        end
-      end
-    rescue Timeout::Error
-      message = "rabbitmq vhostname (#{vhostname}) not defined in DNS; manually re-applying the DNS proposal should unbreak this."
-      Chef::Log.fatal(message)
-      raise message
-    end
-  end # block
-end # ruby_block
-
 pacemaker_primitive vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
   params ({
@@ -129,6 +108,27 @@ end
 # writable, so we can create the primitive for rabbitmq.
 
 crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources"
+
+# wait for DNS to be updated for hostname of virtual IP (otherwise, rabbitmq
+# can't start)
+vhostname = CrowbarRabbitmqHelper.get_ha_vhostname(node)
+ruby_block "wait for rabbitmq vhostname" do
+  block do
+    require 'timeout'
+    begin
+      Timeout.timeout(120) do
+        while ! ::Kernel.system("host #{vhostname} &> /dev/null")
+          Chef::Log.debug("rabbitmq vhostname still not in DNS")
+          sleep(2)
+        end
+      end
+    rescue Timeout::Error
+      message = "rabbitmq vhostname (#{vhostname}) not defined in DNS; manually re-applying the DNS proposal should unbreak this."
+      Chef::Log.fatal(message)
+      raise message
+    end
+  end # block
+end # ruby_block
 
 pacemaker_primitive service_name do
   agent agent_name
