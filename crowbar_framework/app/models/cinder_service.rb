@@ -90,7 +90,7 @@ class CinderService < PacemakerServiceObject
         node = NodeObject.find_node_by_name(node_name)
         node && !node.unclaimed_physical_drives.empty?
       end
-      validation_error("All nodes need at least one unclaimed drive for cinder volume deployment.") unless has_usable_drives
+      validation_error("All nodes require at least one unclaimed drive for cinder volume backed by a raw device.") unless has_usable_drives
     end
 
     if proposal["attributes"][@bc_name]["use_gitrepo"]
