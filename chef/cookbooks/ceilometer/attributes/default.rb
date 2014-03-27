@@ -77,6 +77,8 @@ default[:ceilometer][:api][:port] = 8777
 
 default[:ceilometer][:metering_secret] = "" # Set by wrapper
 
+default[:ceilometer][:mongodb][:port] = 27017
+
 default[:ceilometer][:ha][:server][:enabled] = false
 
 default[:ceilometer][:ha][:api][:agent] = "lsb:#{api_service_name}"
@@ -98,3 +100,8 @@ default[:ceilometer][:ha][:central][:agent] = "lsb:#{central_service_name}"
 default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:ceilometer][:ha][:ports][:api] = 5561
+default[:ceilometer][:ha][:mongodb][:replica_set][:name] = "crowbar-ceilometer"
+default[:ceilometer][:ha][:mongodb][:replica_set][:member] = false
+# this establishes which node is used for mongo client connections that
+# we use to initialize the replica set
+default[:ceilometer][:ha][:mongodb][:replica_set][:controller] = false

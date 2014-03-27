@@ -148,6 +148,8 @@ class CeilometerService < PacemakerServiceObject
       net_svc.allocate_ip "default", "public", "host", n
     end
 
+    mongodb_ha(server_nodes) if ha_enabled
+
     # No specific need to call sync dns here, as the cookbook doesn't require
     # the VIP of the cluster to be setup
     allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
@@ -159,4 +161,29 @@ class CeilometerService < PacemakerServiceObject
     @logger.debug("Ceilometer apply_role_pre_chef_call: leaving")
   end
 
+  def mongodb_ha(instances)
+    # enforce that mongodb is only installed on an odd number of nodes
+    # so we don't get problems when they try to vote for a replica set
+    # primary node
+    instances.pop if instances.length % 2 == 0
+
+    # make sure only the current replica set instances have the replica
+    # set attributes enabled
+    require 'set'
+    members = Set.new(NodeObject.find("ceilometer_ha_mongodb_replica_set_member:true"))
+    (members - instances).each do |node|
+      node[:ceilometer][:ha][:mongodb][:replica_set][:member] = false
+      node[:ceilometer][:ha][:mongodb][:replica_set][:controller] = false
+      node.save
+    end
+
+    instances.each do |instance|
+      node = NodeObject.find_node_by_name(instance)
+      node[:ceilometer][:ha][:mongodb][:replica_set][:member] = true
+      node.save
+    end
+    controller = NodeObject.find_node_by_name(instances.sort.first)
+    controller[:ceilometer][:ha][:mongodb][:replica_set][:controller] = true
+    controller.save
+  end
 end

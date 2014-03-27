@@ -16,7 +16,27 @@
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
 if node[:ceilometer][:use_mongodb]
-  include_recipe "ceilometer::mongodb"
+  include_recipe "ceilometer::mongodb" if !node[:ceilometer][:ha][:server][:enabled] || node[:ceilometer][:ha][:mongodb][:replica_set][:member]
+
+  # need to wait for mongodb to start even if it's on a
+  # different host (ceilometer services need it running)
+  members = search(:node, "ceilometer_ha_mongodb_replica_set_member:true")
+  node_address = members.first.fqdn
+  ruby_block "wait for mongodb start" do
+    block do
+      require 'timeout'
+      begin
+        Timeout.timeout(60) do
+          while ! ::Kernel.system("mongo #{node_address} --quiet < /dev/null &> /dev/null")
+            Chef::Log.debug("mongodb still not reachable")
+            sleep(2)
+          end
+        end
+      rescue Timeout::Error
+        Chef::Log.warn("mongodb on #{node_address} does not seem to be respondin g after trying for 1 minute")
+      end
+    end
+  end
 else
   db_settings = fetch_database_settings
 

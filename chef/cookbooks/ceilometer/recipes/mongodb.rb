@@ -58,8 +58,9 @@ service mongo_service do
 end
 
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
-if ha_enabled && node.roles.include?("pacemaker-cluster-founder")
+node_is_controller = node[:ceilometer][:ha][:mongodb][:replica_set][:controller]
+if ha_enabled && node_is_controller
   package "rubygem-mongo"
-  members = search_env_filtered(:node, "roles:ceilometer-mongodb")
+  members = search(:node, "ceilometer_ha_mongodb_replica_set_member:true").sort
   CeilometerHelper.configure_replicaset(node, "crowbar-ceilometer", members)
 end
