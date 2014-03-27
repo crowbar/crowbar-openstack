@@ -27,6 +27,7 @@ database_environment = node[:database][:config][:environment]
 
 vip_primitive = "#{CrowbarDatabaseHelper.get_ha_vhostname(node)}-vip-admin"
 fs_primitive = "#{database_environment}-fs"
+ms_name = "#{database_environment}-ms"
 
 ip_addr = CrowbarDatabaseHelper.get_listen_address(node)
 
@@ -34,15 +35,25 @@ postgres_op = {}
 postgres_op["monitor"] = {}
 postgres_op["monitor"]["interval"] = "10s"
 
-if node[:database][:ha][:storage][:mode] != "shared"
-  raise "Invalid mode for HA storage!"
-end
 fs_params = {}
-fs_params["device"] = node[:database][:ha][:storage][:shared][:device]
 fs_params["directory"] = "/var/lib/pgsql"
-fs_params["fstype"] = node[:database][:ha][:storage][:shared][:fstype]
-unless node[:database][:ha][:storage][:shared][:options].empty?
-  fs_params["options"] = node[:database][:ha][:storage][:shared][:options]
+
+if node[:database][:ha][:storage][:mode] == "drbd"
+  drbd_resource = "postgresql"
+
+  fs_params["device"] = crowbar_drbd "drbd for database" do
+    resource_name drbd_resource
+    size "50G"
+  end
+  fs_params["fstype"] = "xfs"
+elsif node[:database][:ha][:storage][:mode] == "shared"
+  fs_params["device"] = node[:database][:ha][:storage][:shared][:device]
+  fs_params["fstype"] = node[:database][:ha][:storage][:shared][:fstype]
+  unless node[:database][:ha][:storage][:shared][:options].empty?
+    fs_params["options"] = node[:database][:ha][:storage][:shared][:options]
+  end
+else
+  raise "Invalid mode for HA storage!"
 end
 
 # Wait for all nodes to reach this point so we know that all nodes will have
@@ -55,6 +66,45 @@ end
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-database_ha_storage" do
   revision node[:database]["crowbar-revision"]
+end
+
+if node[:database][:ha][:storage][:mode] == "drbd"
+  drbd_primitive = "drbd_#{drbd_resource}"
+  drbd_params = {}
+  drbd_params["drbd_resource"] = drbd_resource
+
+  pacemaker_primitive drbd_primitive do
+    agent "ocf:linbit:drbd"
+    params drbd_params
+    op postgres_op
+    action :create
+  end
+
+  pacemaker_ms ms_name do
+    rsc drbd_primitive
+    meta ({
+      "master-max" => "1",
+      "master-node-max" => "1",
+      "clone-max" => "2",
+      "clone-node-max" => "1",
+      "notify" => "true"
+    })
+    action :create
+  end
+
+  ruby_block "wait for #{drbd_primitive} to be started" do
+    block do
+      begin
+        # Check that the drbd resource is running
+        cmd = "crm resource show #{ms_name} 2> /dev/null | grep -q \"Master\""
+        if ! ::Kernel.system(cmd)
+          Chef::Log.info("#{drbd_primitive} needs some cleanup")
+          run = "crm resource cleanup #{drbd_primitive} 2> /dev/null"
+          ::Kernel.system(run)
+        end
+      end
+    end
+  end # block
 end
 
 pacemaker_primitive vip_primitive do

@@ -18,7 +18,7 @@ en:
             modes:
               drbd: DRBD
               shared: Shared Storage
-            drbd_info: All nodes in the cluster must have an available disk that will be used for DRBD.
+            drbd_info: The cluster must have been setup for DRBD.
             shared:
               device: Name of Block Device or NFS Mount Specification
               fstype: Filesystem Type

@@ -27,6 +27,7 @@ database_environment = node[:database][:config][:environment]
 vip_primitive = "#{CrowbarDatabaseHelper.get_ha_vhostname(node)}-vip-admin"
 fs_primitive = "#{database_environment}-fs"
 service_name = "#{database_environment}-service"
+ms_name = "#{database_environment}-ms"
 group_name = "#{service_name}-group"
 
 agent_name = "ocf:heartbeat:pgsql"
@@ -59,15 +60,39 @@ pacemaker_primitive service_name do
   action :create
 end
 
-pacemaker_group group_name do
-  # Membership order *is* significant; VIPs should come first so
-  # that they are available for the service to bind to.
-  members [vip_primitive, fs_primitive, service_name]
-  meta ({
-    "is-managed" => true,
-    "target-role" => "started"
-  })
-  action [ :create, :start ]
+if node[:database][:ha][:storage][:mode] == "drbd"
+
+  pacemaker_colocation "pgsql_colocation" do
+    score "INFINITY"
+    resources [vip_primitive, fs_primitive, service_name, "#{ms_name}:Master"]
+    action :create
+  end
+
+  pacemaker_order "pgsql_order_start" do
+    score "INFINITY"
+    ordering "#{ms_name}:promote #{vip_primitive}:start #{fs_primitive}:start #{service_name}:start"
+    action :create
+  end
+
+  pacemaker_order "pgsql_order_stop" do
+    score "INFINITY"
+    ordering "#{service_name}:stop #{fs_primitive}:stop #{vip_primitive}:stop #{ms_name}:demote"
+    action :create
+  end
+
+else
+
+  pacemaker_group group_name do
+    # Membership order *is* significant; VIPs should come first so
+    # that they are available for the service to bind to.
+    members [vip_primitive, fs_primitive, service_name]
+    meta ({
+      "is-managed" => true,
+      "target-role" => "started"
+    })
+    action [ :create, :start ]
+  end
+
 end
 
 crowbar_pacemaker_sync_mark "create-database_ha_resources" do
