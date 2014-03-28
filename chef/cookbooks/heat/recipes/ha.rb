@@ -37,6 +37,14 @@ haproxy_loadbalancer "heat-api-cloudwatch" do
   action :nothing
 end.run_action(:create)
 
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required packages installed before we create the pacemaker
+# resources
+crowbar_pacemaker_sync_mark "sync-heat_before_ha"
+
+# Avoid races when creating pacemaker resources
+crowbar_pacemaker_sync_mark "wait-heat_ha_resources"
+
 primitives = []
 
 ["engine", "api", "api_cfn", "api_cloudwatch"].each do |service|
@@ -63,3 +71,4 @@ pacemaker_clone "clone-heat-group" do
   action [ :create, :start]
 end
 
+crowbar_pacemaker_sync_mark "create-heat_ha_resources"
