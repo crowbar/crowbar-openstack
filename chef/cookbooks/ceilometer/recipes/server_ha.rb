@@ -29,17 +29,31 @@ crowbar_pacemaker_sync_mark "sync-ceilometer_server_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources"
 
-service_name = "ceilometer-api-service"
+primitives = []
 
-pacemaker_primitive service_name do
-  agent node[:ceilometer][:ha][:api][:agent]
-  op    node[:ceilometer][:ha][:api][:op]
+["collector", "api"].each do |service|
+  primitive_name = "ceilometer-#{service}-service"
+
+  pacemaker_primitive primitive_name do
+    agent node[:ceilometer][:ha][service.to_sym][:agent]
+    op    node[:ceilometer][:ha][service.to_sym][:op]
+    action :create
+  end
+  primitives << primitive_name
+end
+
+pacemaker_group "ceilometer-server-group" do
+  members primitives
+  meta ({
+    "is-managed" => true,
+    "target-role" => "started"
+  })
   action :create
 end
 
-pacemaker_clone "clone-#{service_name}" do
-  rsc service_name
-  action [ :create, :start ]
+pacemaker_clone "clone-ceilometer-server-group" do
+  rsc "ceilometer-server-group"
+  action [ :create, :start]
 end
 
 crowbar_pacemaker_sync_mark "create-ceilometer_server_ha_resources"
