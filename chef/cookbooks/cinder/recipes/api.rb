@@ -37,6 +37,8 @@ ha_enabled = node[:cinder][:ha][:enabled]
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:cinder][:api][:protocol] == "https", ha_enabled)
 
+crowbar_pacemaker_sync_mark "wait-cinder_register"
+
 keystone_register "cinder api wakeup keystone" do
   protocol keystone_settings['protocol']
   host keystone_settings['internal_url_host']
@@ -93,7 +95,11 @@ keystone_register "register cinder endpoint" do
   action :add_endpoint_template
 end
 
-cinder_service("api")
+crowbar_pacemaker_sync_mark "create-cinder_register"
+
+cinder_service "api" do
+  use_pacemaker_provider ha_enabled
+end
 
 template "/etc/cinder/api-paste.ini" do
   source "api-paste.ini.erb"

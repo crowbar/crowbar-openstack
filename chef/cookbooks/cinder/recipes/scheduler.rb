@@ -23,4 +23,6 @@ if node.platform == "ubuntu"
  package "qemu-utils"
 end
 
-cinder_service("scheduler")
+cinder_service "scheduler" do
+  use_pacemaker_provider node[:cinder][:ha][:enabled]
+end

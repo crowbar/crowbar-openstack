@@ -43,6 +43,8 @@ db_conn = { :host => sql_address,
             :username => "db_maker",
             :password => sql[:database][:db_maker_password] }
 
+crowbar_pacemaker_sync_mark "wait-cinder_database"
+
 # Create the Cinder Database
 database "create #{node[:cinder][:db][:database]} database" do
     connection db_conn
@@ -77,6 +79,8 @@ execute "cinder-manage db sync" do
   group node[:cinder][:group]
   not_if { node[:platform] == "suse" }
 end
+
+crowbar_pacemaker_sync_mark "create-cinder_database"
 
 # save data so it can be found by search
 node.save

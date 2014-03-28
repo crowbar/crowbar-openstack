@@ -1,4 +1,4 @@
-define :cinder_service, :virtualenv => nil do
+define :cinder_service, :use_pacemaker_provider => false, :virtualenv => nil do
 
   cinder_service_name="cinder-#{params[:name]}"
   cinder_name = cinder_service_name
@@ -30,6 +30,7 @@ define :cinder_service, :virtualenv => nil do
     supports :status => true, :restart => true
     action [:enable, :start]
     subscribes :restart, resources(:template => "/etc/cinder/cinder.conf")
+    provider Chef::Provider::CrowbarPacemakerService if params[:use_pacemaker_provider]
   end
 
 end
