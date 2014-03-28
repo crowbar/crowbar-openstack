@@ -31,12 +31,12 @@ if node[:ceilometer][:use_mongodb]
         end
     end
 
-    node_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+    mongodb_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 
     template mongo_conf do
       mode 0644
       source "mongodb.conf.erb"
-      variables(:listen_addr => node_address)
+      variables(:listen_addr => mongodb_address)
       notifies :restart, "service[#{mongo_service}]", :immediately
     end
 
@@ -44,24 +44,30 @@ if node[:ceilometer][:use_mongodb]
       supports :status => true, :restart => true
       action [:enable, :start]
     end
-
-    # wait for mongodb start (ceilometer services need it running)
-    ruby_block "wait for mongodb start" do
-      block do
-        require 'timeout'
-        begin
-          Timeout.timeout(60) do
-            while ! ::Kernel.system("mongo #{node_address} --quiet < /dev/null &> /dev/null")
-              Chef::Log.debug("mongodb still not reachable")
-              sleep(2)
-            end
-          end
-        rescue Timeout::Error
-          Chef::Log.warn("mongodb does not seem to be responding 1 minute after start")
-        end
-      end
-    end
+  else
+    # HA is enabled, and we're not the cluster founder
+    # Currently, we only setup mongodb non-HA on the first node, so wait for this one...
+    db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
+    db_host = db_hosts.select { |n| n.roles.include?("pacemaker-cluster-founder") }.first
+    mongodb_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
   end
+
+  # wait for mongodb start (ceilometer services need it running)
+  ruby_block "wait for mongodb start" do
+    block do
+      require 'timeout'
+      begin
+        Timeout.timeout(60) do
+          while ! ::Kernel.system("mongo #{mongodb_address} --quiet < /dev/null &> /dev/null")
+            Chef::Log.debug("mongodb still not reachable")
+            sleep(2)
+          end
+        end
+      rescue Timeout::Error
+        Chef::Log.warn("mongodb does not seem to be responding 1 minute after start")
+      end
+    end # block
+  end # ruby_block
 
 else
   sql = get_instance('roles:database-server')
@@ -80,6 +86,8 @@ else
   db_conn = { :host => sql_address,
               :username => "db_maker",
               :password => sql[:database][:db_maker_password] }
+
+  crowbar_pacemaker_sync_mark "wait-ceilometer_database"
 
   # Create the Ceilometer Database
   database "create #{node[:ceilometer][:db][:database]} database" do
@@ -108,6 +116,8 @@ else
       provider db_user_provider
       action :grant
   end
+    
+  crowbar_pacemaker_sync_mark "create-ceilometer_database"
 end
 
 unless node[:ceilometer][:use_gitrepo]
@@ -169,12 +179,17 @@ keystone_settings = CeilometerHelper.keystone_settings(node)
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:api][:protocol] == "https", ha_enabled)
 
-execute "calling ceilometer-dbsync" do
-  command "#{venv_prefix}ceilometer-dbsync"
-  action :run
-  user node[:ceilometer][:user]
-  group node[:ceilometer][:group]
-  not_if { node[:platform] == "suse" }
+unless node[:platform] == "suse"
+  crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync"
+
+  execute "calling ceilometer-dbsync" do
+    command "#{venv_prefix}ceilometer-dbsync"
+    action :run
+    user node[:ceilometer][:user]
+    group node[:ceilometer][:group]
+  end
+
+  crowbar_pacemaker_sync_mark "create-ceilometer_db_sync"
 end
 
 service "ceilometer-collector" do
@@ -199,6 +214,8 @@ if ha_enabled
 else
   log "HA support for ceilometer is disabled"
 end
+
+crowbar_pacemaker_sync_mark "wait-ceilometer_register"
 
 keystone_register "register ceilometer user" do
   protocol keystone_settings['protocol']
@@ -263,5 +280,7 @@ keystone_register "register ceilometer endpoint" do
 #  endpoint_enabled true
   action :add_endpoint_template
 end
+
+crowbar_pacemaker_sync_mark "create-ceilometer_register"
 
 node.save
