@@ -18,20 +18,32 @@ rabbitmq_environment = node[:rabbitmq][:config][:environment]
 vhostname = CrowbarRabbitmqHelper.get_ha_vhostname(node)
 vip_primitive = "#{vhostname}-vip-admin"
 fs_primitive = "#{rabbitmq_environment}-fs"
+ms_name = "#{rabbitmq_environment}-ms"
 service_name = "#{rabbitmq_environment}-service"
 group_name = "#{service_name}-group"
 
 ip_addr = CrowbarRabbitmqHelper.get_listen_address(node)
 
-if node[:rabbitmq][:ha][:storage][:mode] != "shared"
-  raise "Invalid mode for HA storage!"
-end
 fs_params = {}
-fs_params["device"] = node[:rabbitmq][:ha][:storage][:shared][:device]
 fs_params["directory"] = "/var/lib/rabbitmq"
-fs_params["fstype"] = node[:rabbitmq][:ha][:storage][:shared][:fstype]
-unless node[:rabbitmq][:ha][:storage][:shared][:options].empty?
-  fs_params["options"] = node[:rabbitmq][:ha][:storage][:shared][:options]
+if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
+  drbd_resource = "rabbitmq"
+
+  crowbar_pacemaker_drbd drbd_resource do
+    size "50G"
+    action :nothing
+  end.run_action(:create)
+
+  fs_params["device"] = node["drbd"]["rsc"][drbd_resource]["device"]
+  fs_params["fstype"] = "xfs"
+elsif node[:rabbitmq][:ha][:storage][:mode] == "shared"
+  fs_params["device"] = node[:rabbitmq][:ha][:storage][:shared][:device]
+  fs_params["fstype"] = node[:rabbitmq][:ha][:storage][:shared][:fstype]
+  unless node[:rabbitmq][:ha][:storage][:shared][:options].empty?
+    fs_params["options"] = node[:rabbitmq][:ha][:storage][:shared][:options]
+  end
+else
+  raise "Invalid mode for HA storage!"
 end
 
 agent_name = "ocf:rabbitmq:rabbitmq-server"
@@ -42,10 +54,43 @@ rabbitmq_op["monitor"]["interval"] = "10s"
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required packages installed before we create the pacemaker
 # resources
-crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha"
+crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha_storage"
 
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_storage"
+
+if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
+  drbd_primitive = "drbd_#{drbd_resource}"
+  drbd_params = {}
+  drbd_params["drbd_resource"] = drbd_resource
+
+  pacemaker_primitive drbd_primitive do
+    agent "ocf:linbit:drbd"
+    params drbd_params
+    op rabbitmq_op
+    action :create
+  end
+
+  pacemaker_ms ms_name do
+    rsc drbd_primitive
+    meta ({
+      "master-max" => "1",
+      "master-node-max" => "1",
+      "clone-max" => "2",
+      "clone-node-max" => "1",
+      "notify" => "true"
+    })
+    action :create
+  end
+
+  # This is needed because we don't create all the pacemaker resources in the
+  # same transaction
+  execute "Cleanup #{drbd_primitive} on #{ms_name} start" do
+    command "sleep 2; crm resource cleanup #{drbd_primitive}"
+    action :nothing
+    subscribes :run, "pacemaker_ms[#{ms_name}]", :immediately
+  end
+end
 
 pacemaker_primitive vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
@@ -61,6 +106,34 @@ pacemaker_primitive fs_primitive do
   params fs_params
   op rabbitmq_op
   action :create
+end
+
+if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
+  pacemaker_colocation "col-fs-rabbitmq" do
+    score "inf"
+    resources [fs_primitive, "#{ms_name}:Master"]
+    action :create
+  end
+
+  pacemaker_order "o-start-fs-rabbitmq" do
+    score "inf"
+    ordering "#{ms_name}:promote #{fs_primitive}:start"
+    action :create
+  end
+
+  pacemaker_order "o-stop-fs-rabbitmq" do
+    score "inf"
+    ordering "#{fs_primitive}:stop #{ms_name}:demote"
+    action :create
+  end
+
+  # This is needed because we don't create all the pacemaker resources in the
+  # same transaction
+  execute "Start #{fs_primitive} after constraints" do
+    command "sleep 2; crm resource cleanup #{fs_primitive}; crm resource start #{fs_primitive}"
+    action :nothing
+    subscribes :run, "pacemaker_order[o-stop-fs-rabbitmq]", :immediately
+  end
 end
 
 crowbar_pacemaker_sync_mark "create-rabbitmq_ha_storage"
@@ -138,6 +211,8 @@ end
 # Now we can get the rabbitmq process to start since we know the directory is
 # writable, so we can create the primitive for rabbitmq.
 
+crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha"
+
 crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources"
 
 # wait for DNS to be updated for hostname of virtual IP (otherwise, rabbitmq
@@ -170,15 +245,39 @@ pacemaker_primitive service_name do
   action :create
 end
 
-pacemaker_group group_name do
-  # Membership order *is* significant; VIPs should come first so
-  # that they are available for the service to bind to.
-  members [vip_primitive, fs_primitive, service_name]
-  meta ({
-    "is-managed" => true,
-    "target-role" => "started"
-  })
-  action [ :create, :start ]
+if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
+
+  pacemaker_colocation "col-service-rabbitmq" do
+    score "inf"
+    resources [vip_primitive, fs_primitive, service_name]
+    action :create
+  end
+
+  pacemaker_order "o-start-service-rabbitmq" do
+    score "inf"
+    ordering "#{vip_primitive}:start #{fs_primitive}:start #{service_name}:start"
+    action :create
+  end
+
+  pacemaker_order "o-stop-service-rabbitmq" do
+    score "inf"
+    ordering "#{service_name}:stop #{fs_primitive}:stop #{vip_primitive}:stop"
+    action :create
+  end
+
+else
+
+  pacemaker_group group_name do
+    # Membership order *is* significant; VIPs should come first so
+    # that they are available for the service to bind to.
+    members [vip_primitive, fs_primitive, service_name]
+    meta ({
+      "is-managed" => true,
+      "target-role" => "started"
+    })
+    action [ :create, :start ]
+  end
+
 end
 
 crowbar_pacemaker_sync_mark "create-rabbitmq_ha_resources"
