@@ -16,7 +16,7 @@ if node[:ceilometer][:use_mongodb]
   db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
   if node[:ceilometer][:ha][:server][:enabled]
     # Currently, we only setup mongodb non-HA on the first node
-    db_host = db_hosts.select { |n| n.roles.include?("pacemaker-cluster-founder") }.first
+    db_host = db_hosts.select { |n| CrowbarPacemakerHelper.is_cluster_founder?(n) }.first
   end
   db_host ||= db_hosts.first || node
 
