@@ -21,17 +21,25 @@ haproxy_loadbalancer "ceilometer-api" do
   action :nothing
 end.run_action(:create)
 
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required packages installed before we create the pacemaker
+# resources
+crowbar_pacemaker_sync_mark "sync-ceilometer_server_before_ha"
+
+# Avoid races when creating pacemaker resources
+crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources"
+
 service_name = "ceilometer-api-service"
 
 pacemaker_primitive service_name do
   agent node[:ceilometer][:ha][:api][:agent]
   op    node[:ceilometer][:ha][:api][:op]
   action :create
-  retries 1
-  retry_delay 5
 end
 
 pacemaker_clone "clone-#{service_name}" do
   rsc service_name
   action [ :create, :start ]
 end
+
+crowbar_pacemaker_sync_mark "create-ceilometer_server_ha_resources"

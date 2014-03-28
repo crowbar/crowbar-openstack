@@ -13,6 +13,14 @@
 # limitations under the License.
 #
 
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required packages installed before we create the pacemaker
+# resources
+crowbar_pacemaker_sync_mark "sync-ceilometer_central_before_ha"
+
+# Avoid races when creating pacemaker resources
+crowbar_pacemaker_sync_mark "wait-ceilometer_central_ha_resources"
+
 service_name = "ceilometer-agent-central-service"
 
 # Allow one retry, to avoid races where two nodes create the primitive at the
@@ -28,6 +36,6 @@ pacemaker_primitive service_name do
   #  "service" => node[:ceilometer][:central][:service_name]
   #})
   action [ :create, :start ]
-  retries 1
-  retry_delay 5
 end
+
+crowbar_pacemaker_sync_mark "create-ceilometer_central_ha_resources"
