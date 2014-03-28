@@ -56,11 +56,6 @@ default[:neutron][:ssl][:ca_certs] = "/etc/neutron/ssl/certs/ca.pem"
 
 default[:neutron][:neutron_server] = false
 
-default[:neutron][:ha][:enabled] = false
-# Ports to bind to when haproxy is used for the real ports
-default[:neutron][:ha][:ports][:server] = 5530
-
-
 case node["platform"]
 when "suse"
   default[:neutron][:platform] = {
@@ -140,3 +135,9 @@ else
     :neutron_rootwrap_sudo_template => "/etc/sudoers.d/neutron-rootwrap"
   }
 end
+
+default[:neutron][:ha][:enabled] = false
+default[:neutron][:ha][:server_ra] = "lsb:#{default[:neutron][:platform][:service_name]}"
+default[:neutron][:ha][:op][:monitor][:interval] = "10s"
+# Ports to bind to when haproxy is used for the real ports
+default[:neutron][:ha][:ports][:server] = 5530
