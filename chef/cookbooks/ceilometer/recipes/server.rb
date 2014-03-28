@@ -193,19 +193,21 @@ unless node[:platform] == "suse"
 end
 
 service "ceilometer-collector" do
-  service_name "openstack-ceilometer-collector" if %w(redhat centos suse).include?(node.platform)
+  service_name node[:ceilometer][:collector][:service_name]
   supports :status => true, :restart => true, :start => true, :stop => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service "ceilometer-api" do
-  service_name "openstack-ceilometer-api" if %w(redhat centos suse).include?(node.platform)
+  service_name node[:ceilometer][:api][:service_name]
   supports :status => true, :restart => true, :start => true, :stop => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 if ha_enabled
