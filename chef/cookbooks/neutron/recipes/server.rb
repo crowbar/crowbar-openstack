@@ -85,7 +85,7 @@ end
 
 
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
-vlan_end = vlan_start + 2000
+vlan_end = [vlan_start + 2000, 4094].min
 
 if node[:neutron][:networking_plugin] == "cisco"
   mechanism_driver = "openvswitch,cisco_nexus"
