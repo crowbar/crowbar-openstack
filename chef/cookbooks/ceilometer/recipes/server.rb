@@ -16,7 +16,7 @@
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
 if node[:ceilometer][:use_mongodb]
-  if !ha_enabled || node.roles.include?("pacemaker-cluster-founder")
+  if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
     case node["platform"]
       when "centos", "redhat"
         mongo_conf = "/etc/mongod.conf"
@@ -48,7 +48,7 @@ if node[:ceilometer][:use_mongodb]
     # HA is enabled, and we're not the cluster founder
     # Currently, we only setup mongodb non-HA on the first node, so wait for this one...
     db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
-    db_host = db_hosts.select { |n| n.roles.include?("pacemaker-cluster-founder") }.first
+    db_host = db_hosts.select { |n| CrowbarPacemakerHelper.is_cluster_founder?(n) }.first
     mongodb_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
   end
 
