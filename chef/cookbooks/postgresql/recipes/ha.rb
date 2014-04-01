@@ -73,19 +73,19 @@ end
 if node[:database][:ha][:storage][:mode] == "drbd"
 
   pacemaker_colocation "pgsql_colocation" do
-    score "INFINITY"
+    score "inf"
     resources [vip_primitive, fs_primitive, service_name]
     action :create
   end
 
   pacemaker_order "pgsql_order_start" do
-    score "INFINITY"
+    score "inf"
     ordering "#{vip_primitive}:start #{fs_primitive}:start #{service_name}:start"
     action :create
   end
 
   pacemaker_order "pgsql_order_stop" do
-    score "INFINITY"
+    score "inf"
     ordering "#{service_name}:stop #{fs_primitive}:stop #{vip_primitive}:stop"
     action :create
   end

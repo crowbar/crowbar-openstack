@@ -119,19 +119,19 @@ end
 
 if node[:database][:ha][:storage][:mode] == "drbd"
   pacemaker_colocation "col-fs-database" do
-    score "INFINITY"
+    score "inf"
     resources [fs_primitive, "#{ms_name}:Master"]
     action :create
   end
 
   pacemaker_order "o-start-fs-database" do
-    score "INFINITY"
+    score "inf"
     ordering "#{ms_name}:promote #{fs_primitive}:start"
     action :create
   end
 
   pacemaker_order "o-stop-fs-database" do
-    score "INFINITY"
+    score "inf"
     ordering "#{fs_primitive}:stop #{ms_name}:demote"
     action :create
   end
