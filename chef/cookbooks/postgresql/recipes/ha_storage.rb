@@ -123,6 +123,26 @@ pacemaker_primitive fs_primitive do
   action :create
 end
 
+if node[:database][:ha][:storage][:mode] == "drbd"
+  pacemaker_colocation "col-fs-database" do
+    score "INFINITY"
+    resources [fs_primitive, "#{ms_name}:Master"]
+    action :create
+  end
+
+  pacemaker_order "o-start-fs-database" do
+    score "INFINITY"
+    ordering "#{ms_name}:promote #{fs_primitive}:start"
+    action :create
+  end
+
+  pacemaker_order "o-stop-fs-database" do
+    score "INFINITY"
+    ordering "#{fs_primitive}:stop #{ms_name}:demote"
+    action :create
+  end
+end
+
 crowbar_pacemaker_sync_mark "create-database_ha_storage" do
   revision node[:database]["crowbar-revision"]
 end

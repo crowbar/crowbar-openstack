@@ -27,7 +27,6 @@ database_environment = node[:database][:config][:environment]
 vip_primitive = "#{CrowbarDatabaseHelper.get_ha_vhostname(node)}-vip-admin"
 fs_primitive = "#{database_environment}-fs"
 service_name = "#{database_environment}-service"
-ms_name = "#{database_environment}-ms"
 group_name = "#{service_name}-group"
 
 agent_name = "ocf:heartbeat:pgsql"
@@ -64,19 +63,19 @@ if node[:database][:ha][:storage][:mode] == "drbd"
 
   pacemaker_colocation "pgsql_colocation" do
     score "INFINITY"
-    resources [vip_primitive, fs_primitive, service_name, "#{ms_name}:Master"]
+    resources [vip_primitive, fs_primitive, service_name]
     action :create
   end
 
   pacemaker_order "pgsql_order_start" do
     score "INFINITY"
-    ordering "#{ms_name}:promote #{vip_primitive}:start #{fs_primitive}:start #{service_name}:start"
+    ordering "#{vip_primitive}:start #{fs_primitive}:start #{service_name}:start"
     action :create
   end
 
   pacemaker_order "pgsql_order_stop" do
     score "INFINITY"
-    ordering "#{service_name}:stop #{fs_primitive}:stop #{vip_primitive}:stop #{ms_name}:demote"
+    ordering "#{service_name}:stop #{fs_primitive}:stop #{vip_primitive}:stop"
     action :create
   end
 
