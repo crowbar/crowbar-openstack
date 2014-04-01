@@ -30,7 +30,6 @@ service_name = "#{database_environment}-service"
 group_name = "#{service_name}-group"
 
 agent_name = "ocf:heartbeat:pgsql"
-ip_addr = CrowbarDatabaseHelper.get_listen_address(node)
 
 postgres_op = {}
 postgres_op["monitor"] = {}
@@ -48,13 +47,25 @@ crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
 
+# We run the resource agent "ocf:heartbeat:pgsql" without params, instead of
+# something like:
+#  params ({
+#    "pghost" => CrowbarDatabaseHelper.get_listen_address(node),
+#    "monitor_user" => "postgres",
+#    "monitor_password" => node['postgresql']['password']['postgres']
+#  })
+#
+# The reason is that the first time the resource is started, the password has
+# not been setup and is not correct, so the monitor action will fail, which can
+# result in bad things.
+#
+# It turns out it's no big issue, as the vip primitive will check for the IP
+# address, and the pgsql RA will do its "select now()" query locally (instead
+# of through the IP address). So we're still monitoring what we want, although
+# in two different steps -- and strictly speaking, we're not monitoring the
+# fact that the database is listening on the IP address.
 pacemaker_primitive service_name do
   agent agent_name
-  params ({
-    "pghost" => ip_addr,
-    "monitor_user" => "postgres",
-    "monitor_password" => node['postgresql']['password']['postgres']
-  })
   op postgres_op
   action :create
 end
