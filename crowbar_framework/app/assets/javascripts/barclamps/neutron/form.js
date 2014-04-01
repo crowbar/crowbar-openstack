@@ -266,6 +266,7 @@ $(document).ready(function($) {
     switch (value) {
       case 'vlan':
         $('#warn_ovs_vlan').show(100).removeAttr('disabled');
+        $('#num_vlans_container').show(100).removeAttr('disabled');
 
         if ($('#networking_plugin').val() == 'cisco') {
           $('#cisco_switches').show(100).removeAttr('disabled');
@@ -276,6 +277,7 @@ $(document).ready(function($) {
       default:
         $('#warn_ovs_vlan').hide(100).attr('disabled', 'disabled');
         $('#cisco_switches').hide(100).attr('disabled', 'disabled');
+        $('#num_vlans_container').hide(100).attr('disabled', 'disabled');
         break;
     }
   }).trigger('change');

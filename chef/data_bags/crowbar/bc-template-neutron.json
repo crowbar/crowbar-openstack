@@ -26,6 +26,7 @@
       "use_ml2": true,
       "networking_mode": "gre",
       "networking_plugin": "openvswitch",
+      "num_vlans": 2000,
       "use_syslog": false,
       "database_instance": "none",
       "db": {
@@ -62,7 +63,7 @@
   "deployment": {
     "neutron": {
       "crowbar-revision": 0,
-      "schema-revision": 5,
+      "schema-revision": 6,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-l3": [ "readying", "ready", "applying" ]
