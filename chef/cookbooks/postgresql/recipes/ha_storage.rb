@@ -92,19 +92,13 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     action :create
   end
 
-  ruby_block "wait for #{drbd_primitive} to be started" do
-    block do
-      begin
-        # Check that the drbd resource is running
-        cmd = "crm resource show #{ms_name} 2> /dev/null | grep -q \"Master\""
-        if ! ::Kernel.system(cmd)
-          Chef::Log.info("#{drbd_primitive} needs some cleanup")
-          run = "crm resource cleanup #{drbd_primitive} 2> /dev/null"
-          ::Kernel.system(run)
-        end
-      end
-    end
-  end # block
+  # This is needed because we don't create all the pacemaker resources in the
+  # same transaction
+  execute "Cleanup #{drbd_primitive} on #{ms_name} start" do
+    command "sleep 2; crm resource cleanup #{drbd_primitive}"
+    action :nothing
+    subscribes :run, "pacemaker_ms[#{ms_name}]", :immediately
+  end
 end
 
 pacemaker_primitive vip_primitive do
@@ -140,6 +134,14 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     score "INFINITY"
     ordering "#{fs_primitive}:stop #{ms_name}:demote"
     action :create
+  end
+
+  # This is needed because we don't create all the pacemaker resources in the
+  # same transaction
+  execute "Start #{fs_primitive} after constraints" do
+    command "sleep 2; crm resource cleanup #{fs_primitive}; crm resource start #{fs_primitive}"
+    action :nothing
+    subscribes :run, "pacemaker_order[o-stop-fs-database]", :immediately
   end
 end
 

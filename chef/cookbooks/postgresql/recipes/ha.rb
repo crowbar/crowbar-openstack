@@ -79,6 +79,14 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     action :create
   end
 
+  # This is needed because we don't create all the pacemaker resources in the
+  # same transaction
+  execute "Cleanup #{service_name} after constraints" do
+    command "crm resource cleanup #{service_name}"
+    action :nothing
+    subscribes :run, "pacemaker_order[pgsql_order_stop]", :immediately
+  end
+
 else
 
   pacemaker_group group_name do
@@ -90,6 +98,14 @@ else
       "target-role" => "started"
     })
     action [ :create, :start ]
+  end
+
+  # This is needed because we don't create all the pacemaker resources in the
+  # same transaction
+  execute "Cleanup database pacemaker resources after definition" do
+    command "crm resource cleanup #{group_name}"
+    action :nothing
+    subscribes :run, "pacemaker_group[#{group_name}]", :immediately
   end
 
 end
