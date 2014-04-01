@@ -87,6 +87,24 @@ class RabbitmqService < PacemakerServiceObject
   def validate_proposal_after_save proposal
     validate_one_for_role proposal, "rabbitmq-server"
 
+    attributes = proposal["attributes"][@bc_name]
+
+    # HA validation
+    servers = proposal["deployment"][@bc_name]["elements"]["rabbitmq-server"]
+    unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
+      storage_mode = attributes["ha"]["storage"]["mode"]
+      validation_error("Unknown mode for HA storage: #{storage_mode}.") unless %w(shared drbd).include?(storage_mode)
+
+      if storage_mode == "shared"
+        validation_error("No device specified for shared storage.") if attributes["ha"]["storage"]["shared"]["device"].blank?
+        validation_error("No filesystem type specified for shared storage.") if attributes["ha"]["storage"]["shared"]["fstype"].blank?
+      elsif storage_mode == "drbd"
+        cluster = servers.first
+        role = available_clusters[cluster]
+        validation_error("DRBD is not enabled for cluster #{cluster_name(cluster)}.") unless role.default_attributes["pacemaker"]["drbd"]["enabled"]
+      end
+    end
+
     super
   end
 end
