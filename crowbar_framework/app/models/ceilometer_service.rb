@@ -179,6 +179,7 @@ class CeilometerService < PacemakerServiceObject
 
     instances.each do |instance|
       node = NodeObject.find_node_by_name(instance)
+      node[:ceilometer][:ha][:mongodb] ||= {:replica_set => {}}
       node[:ceilometer][:ha][:mongodb][:replica_set][:member] = true
       node.save
     end
