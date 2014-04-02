@@ -41,10 +41,12 @@ fs_params["directory"] = "/var/lib/pgsql"
 if node[:database][:ha][:storage][:mode] == "drbd"
   drbd_resource = "postgresql"
 
-  fs_params["device"] = crowbar_drbd "drbd for database" do
-    resource_name drbd_resource
+  crowbar_pacemaker_drbd drbd_resource do
     size "50G"
-  end
+    action :nothing
+  end.run_action(:create)
+
+  fs_params["device"] = node["drbd"]["rsc"][drbd_resource]["device"]
   fs_params["fstype"] = "xfs"
 elsif node[:database][:ha][:storage][:mode] == "shared"
   fs_params["device"] = node[:database][:ha][:storage][:shared][:device]
