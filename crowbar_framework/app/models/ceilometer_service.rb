@@ -183,7 +183,7 @@ class CeilometerService < PacemakerServiceObject
       node[:ceilometer][:ha][:mongodb][:replica_set][:member] = true
       node.save
     end
-    controller = NodeObject.find_node_by_name(instances.sort.first)
+    controller = NodeObject.find("pacemaker_founder:true").first
     controller[:ceilometer][:ha][:mongodb][:replica_set][:controller] = true
     controller.save
   end
