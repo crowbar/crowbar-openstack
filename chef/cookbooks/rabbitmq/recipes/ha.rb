@@ -30,7 +30,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   drbd_resource = "rabbitmq"
 
   crowbar_pacemaker_drbd drbd_resource do
-    size "50G"
+    size "#{node[:rabbitmq][:ha][:storage][:drbd][:size]}G"
     action :nothing
   end.run_action(:create)
 

@@ -25,6 +25,13 @@
                   "required": true,
                   "mapping" : {
                     "mode": { "type": "str", "required": true },
+                    "drbd": {
+                      "type": "map",
+                      "required": true,
+                      "mapping" : {
+                        "size": { "type": "int", "required": true }
+                      }
+                    },
                     "shared": {
                       "type": "map",
                       "required": true,

@@ -16,6 +16,7 @@
       #drbd_storage_container
         .alert.alert-info
           = t('.ha.storage.drbd_info')
+        = integer_field %w(ha storage drbd size)
 
       #shared_storage_container
         = string_field %w(ha storage shared device)
