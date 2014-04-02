@@ -281,3 +281,25 @@ else
 end
 
 crowbar_pacemaker_sync_mark "create-rabbitmq_ha_resources"
+
+# wait for service to be active, to be sure there's no issue with pacemaker
+# resources
+ruby_block "wait for #{service_name} to be started" do
+  block do
+    require 'timeout'
+    begin
+      Timeout.timeout(30) do
+        # Check that the service is running
+        cmd = "crm resource show #{service_name} 2> /dev/null | grep -q \"is running on\""
+        while ! ::Kernel.system(cmd)
+          Chef::Log.debug("#{service_name} still not started")
+          sleep(2)
+        end
+      end
+    rescue Timeout::Error
+      message = "The #{service_name} pacemaker resource is not started. Please manually check for an error."
+      Chef::Log.fatal(message)
+      raise message
+    end
+  end # block
+end # ruby_block
