@@ -19,6 +19,8 @@ en:
               drbd: DRBD
               shared: Shared Storage
             drbd_info: The cluster must have been setup for DRBD.
+            drbd:
+              size: Size to Allocate for DRBD Device (in Gigabytes)
             shared:
               device: Name of Block Device or NFS Mount Specification
               fstype: Filesystem Type

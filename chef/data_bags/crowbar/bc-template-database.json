@@ -13,6 +13,9 @@
       "ha": {
         "storage": {
           "mode": "shared",
+          "drbd": {
+            "size": 50
+          },
           "shared": {
             "device": "",
             "fstype": "",

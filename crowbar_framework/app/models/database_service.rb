@@ -77,6 +77,7 @@ class DatabaseService < PacemakerServiceObject
         cluster = servers.first
         role = available_clusters[cluster]
         validation_error("DRBD is not enabled for cluster #{cluster_name(cluster)}.") unless role.default_attributes["pacemaker"]["drbd"]["enabled"]
+        validation_error("Invalid size for DRBD device.") if attributes["ha"]["storage"]["drbd"]["size"] <= 0
       end
     end
 
