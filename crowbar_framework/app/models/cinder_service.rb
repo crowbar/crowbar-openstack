@@ -91,7 +91,7 @@ class CinderService < PacemakerServiceObject
         node && node.unclaimed_physical_drives.empty?
       end
       unless nodes_without_unclaimed_drives.empty?
-        validation_error("Cinder-volume nodes #{nodes_without_unclaimed_drives.to_sentence} are missing at least one unclaimed disk, required when using raw devices.")
+        validation_error("Nodes #{nodes_without_unclaimed_drives.to_sentence} for cinder volume role are missing at least one unclaimed disk, required when using raw devices.")
       end
     end
 
