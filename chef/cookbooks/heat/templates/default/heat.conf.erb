@@ -763,7 +763,9 @@ admin_tenant_name=<%= @keystone_settings['service_tenant'] %>
 #cafile=<None>
 
 # Verify HTTPS connections. (boolean value)
-#insecure=false
+<% if @keystone_settings['insecure'] -%>
+insecure = <%= @keystone_settings['insecure'] %>
+<% end -%>
 
 # Directory used to cache files related to PKI tokens (string
 # value)
