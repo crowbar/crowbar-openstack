@@ -90,13 +90,19 @@ keystone_settings = NeutronHelper.keystone_settings(node)
 
 ha_tool_primitive_name = "neutron-ha-tool"
 
+# FIXME: While the neutron-ha-tool resource agent allows specifying a CA 
+# Certificate to use for SSL Certificate verification, it's hard to select
+# right CA file as we allow Keystone's and Neutron's to use different CAs.  So
+# we just rely on the correct CA files being installed in a system wide default
+# location.
 pacemaker_primitive ha_tool_primitive_name do
   agent node[:neutron][:ha][:l3][:ha_tool_ra]
   params ({
     "os_auth_url"    => keystone_settings["internal_auth_url"],
     "os_tenant_name" => keystone_settings["admin_tenant"],
     "os_username"    => keystone_settings["admin_user"],
-    "os_password"    => keystone_settings["admin_password"]
+    "os_password"    => keystone_settings["admin_password"],
+    "os_insecure"    => keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
   })
   op node[:neutron][:ha][:l3][:op]
   action [ :create, :start ]
