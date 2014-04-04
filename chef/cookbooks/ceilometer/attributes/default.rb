@@ -100,6 +100,8 @@ default[:ceilometer][:ha][:central][:agent] = "lsb:#{central_service_name}"
 default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:ceilometer][:ha][:ports][:api] = 5561
+default[:ceilometer][:ha][:mongodb][:agent] = "lsb:mongodb"
+default[:ceilometer][:ha][:mongodb][:op][:monitor][:interval] = "10s"
 default[:ceilometer][:ha][:mongodb][:replica_set][:name] = "crowbar-ceilometer"
 default[:ceilometer][:ha][:mongodb][:replica_set][:member] = false
 # this establishes which node is used for mongo client connections that

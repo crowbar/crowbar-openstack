@@ -32,38 +32,29 @@ template mongo_conf do
   mode 0644
   source "mongodb.conf.erb"
   variables(:listen_addr => node.fqdn)
-  notifies :restart, "service[#{mongo_service}]", :immediately
-end
-
-# wait for mongodb start (ceilometer services need it running)
-ruby_block "wait for mongodb start" do
-  block do
-    require 'timeout'
-    begin
-      Timeout.timeout(60) do
-        while ! ::Kernel.system("mongo #{node.fqdn} --quiet < /dev/null &> /dev/null")
-          Chef::Log.debug("mongodb still not reachable")
-          sleep(2)
-        end
-      end
-    rescue Timeout::Error
-      Chef::Log.warn("mongodb does not seem to be responding 1 minute after start")
-    end
-  end
-end
-
-service mongo_service do
-  supports :status => true, :restart => true
-  action [:enable, :start]
+  # notifies :restart, "service[#{mongo_service}]", :immediately
 end
 
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 node_is_controller = node[:ceilometer][:ha][:mongodb][:replica_set][:controller]
-if ha_enabled && node_is_controller
-  # install the package immediately because we need it to configure the
-  # replicaset
-  package("rubygem-mongo").run_action(:install)
+if ha_enabled
+  pacemaker_primitive "mongodb" do
+    agent node[:ceilometer][:ha][:mongodb][:agent]
+    op node[:ceilometer][:ha][:mongodb][:op]
+    action [:create, :start]
+  end
 
-  members = search(:node, "ceilometer_ha_mongodb_replica_set_member:true").sort
-  CeilometerHelper.configure_replicaset(node, "crowbar-ceilometer", members)
+  if node_is_controller
+    # install the package immediately because we need it to configure the
+    # replicaset
+    package("rubygem-mongo").run_action(:install)
+
+    members = search(:node, "ceilometer_ha_mongodb_replica_set_member:true").sort
+    CeilometerHelper.configure_replicaset(node, "crowbar-ceilometer", members)
+  end
+else
+  service mongo_service do
+    supports :status => true, :restart => true
+    action [:enable, :start]
+  end
 end
