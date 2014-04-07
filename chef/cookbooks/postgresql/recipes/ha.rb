@@ -29,6 +29,8 @@ group_name = "g-#{service_name}"
 
 agent_name = "ocf:heartbeat:pgsql"
 
+ip_addr = CrowbarDatabaseHelper.get_listen_address(node)
+
 postgres_op = {}
 postgres_op["monitor"] = {}
 postgres_op["monitor"]["interval"] = "10s"
@@ -43,6 +45,15 @@ end
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
+end
+
+pacemaker_primitive vip_primitive do
+  agent "ocf:heartbeat:IPaddr2"
+  params ({
+    "ip" => ip_addr,
+  })
+  op postgres_op
+  action :create
 end
 
 # We run the resource agent "ocf:heartbeat:pgsql" without params, instead of

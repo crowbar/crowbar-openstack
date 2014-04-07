@@ -23,16 +23,12 @@
 #
 # This is the first step.
 
-vhostname = CrowbarDatabaseHelper.get_ha_vhostname(node)
 drbd_resource = "postgresql"
 
-vip_primitive = "vip-admin-#{vhostname}"
 service_name = "postgresql"
 fs_primitive = "fs-#{service_name}"
 drbd_primitive = "drbd-#{drbd_resource}"
 ms_name = "ms-#{drbd_primitive}"
-
-ip_addr = CrowbarDatabaseHelper.get_listen_address(node)
 
 postgres_op = {}
 postgres_op["monitor"] = {}
@@ -101,15 +97,6 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     action :nothing
     subscribes :run, "pacemaker_ms[#{ms_name}]", :immediately
   end
-end
-
-pacemaker_primitive vip_primitive do
-  agent "ocf:heartbeat:IPaddr2"
-  params ({
-    "ip" => ip_addr,
-  })
-  op postgres_op
-  action :create
 end
 
 pacemaker_primitive fs_primitive do
