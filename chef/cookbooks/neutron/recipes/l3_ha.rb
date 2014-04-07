@@ -78,10 +78,6 @@ agents_clone_name = "cl-#{agents_group_name}"
 
 pacemaker_group agents_group_name do
   members group_members
-  meta ({
-    "is-managed" => true,
-    "target-role" => "started"
-  })
   action [ :create ]
 end
 
