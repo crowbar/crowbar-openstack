@@ -22,12 +22,10 @@
 #
 # This is the second step.
 
-database_environment = node[:database][:config][:environment]
-
-vip_primitive = "#{CrowbarDatabaseHelper.get_ha_vhostname(node)}-vip-admin"
-fs_primitive = "#{database_environment}-fs"
-service_name = "#{database_environment}-service"
-group_name = "#{service_name}-group"
+vip_primitive = "vip-admin-#{CrowbarDatabaseHelper.get_ha_vhostname(node)}"
+service_name = "postgresql"
+fs_primitive = "fs-#{service_name}"
+group_name = "g-#{service_name}"
 
 agent_name = "ocf:heartbeat:pgsql"
 
@@ -72,19 +70,19 @@ end
 
 if node[:database][:ha][:storage][:mode] == "drbd"
 
-  pacemaker_colocation "col-service-database" do
+  pacemaker_colocation "col-#{service_name}" do
     score "inf"
     resources [vip_primitive, fs_primitive, service_name]
     action :create
   end
 
-  pacemaker_order "o-start-service-database" do
+  pacemaker_order "o-start-#{service_name}" do
     score "inf"
     ordering "#{vip_primitive}:start #{fs_primitive}:start #{service_name}:start"
     action :create
   end
 
-  pacemaker_order "o-stop-service-database" do
+  pacemaker_order "o-stop-#{service_name}" do
     score "inf"
     ordering "#{service_name}:stop #{fs_primitive}:stop #{vip_primitive}:stop"
     action :create
