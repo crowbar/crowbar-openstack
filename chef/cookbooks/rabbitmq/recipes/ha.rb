@@ -90,15 +90,6 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   end
 end
 
-pacemaker_primitive vip_primitive do
-  agent "ocf:heartbeat:IPaddr2"
-  params ({
-    "ip" => ip_addr,
-  })
-  op rabbitmq_op
-  action :create
-end
-
 pacemaker_primitive fs_primitive do
   agent "ocf:heartbeat:Filesystem"
   params fs_params
@@ -232,6 +223,15 @@ ruby_block "wait for rabbitmq vhostname" do
     end
   end # block
 end # ruby_block
+
+pacemaker_primitive vip_primitive do
+  agent "ocf:heartbeat:IPaddr2"
+  params ({
+    "ip" => ip_addr,
+  })
+  op rabbitmq_op
+  action :create
+end
 
 pacemaker_primitive service_name do
   agent agent_name
