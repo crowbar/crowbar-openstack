@@ -32,7 +32,7 @@ crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources"
 primitives = []
 
 ["collector", "api"].each do |service|
-  primitive_name = "ceilometer-#{service}-service"
+  primitive_name = "ceilometer-#{service}"
 
   pacemaker_primitive primitive_name do
     agent node[:ceilometer][:ha][service.to_sym][:agent]
@@ -42,17 +42,15 @@ primitives = []
   primitives << primitive_name
 end
 
-pacemaker_group "ceilometer-server-group" do
+group_name = "g-ceilometer-server"
+
+pacemaker_group group_name do
   members primitives
-  meta ({
-    "is-managed" => true,
-    "target-role" => "started"
-  })
   action :create
 end
 
-pacemaker_clone "clone-ceilometer-server-group" do
-  rsc "ceilometer-server-group"
+pacemaker_clone "cl-#{group_name}" do
+  rsc group_name
   action [ :create, :start]
 end
 
