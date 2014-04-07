@@ -22,14 +22,14 @@
 #
 # This is the second step.
 
-database_environment = node[:database][:config][:environment]
-
-vip_primitive = "#{CrowbarDatabaseHelper.get_ha_vhostname(node)}-vip-admin"
-fs_primitive = "#{database_environment}-fs"
-service_name = "#{database_environment}-service"
-group_name = "#{service_name}-group"
+vip_primitive = "vip-admin-#{CrowbarDatabaseHelper.get_ha_vhostname(node)}"
+service_name = "postgresql"
+fs_primitive = "fs-#{service_name}"
+group_name = "g-#{service_name}"
 
 agent_name = "ocf:heartbeat:pgsql"
+
+ip_addr = CrowbarDatabaseHelper.get_listen_address(node)
 
 postgres_op = {}
 postgres_op["monitor"] = {}
@@ -45,6 +45,15 @@ end
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
+end
+
+pacemaker_primitive vip_primitive do
+  agent "ocf:heartbeat:IPaddr2"
+  params ({
+    "ip" => ip_addr,
+  })
+  op postgres_op
+  action :create
 end
 
 # We run the resource agent "ocf:heartbeat:pgsql" without params, instead of
@@ -72,22 +81,32 @@ end
 
 if node[:database][:ha][:storage][:mode] == "drbd"
 
-  pacemaker_colocation "col-service-database" do
+  pacemaker_colocation "col-#{service_name}" do
     score "inf"
     resources [vip_primitive, fs_primitive, service_name]
     action :create
   end
 
-  pacemaker_order "o-start-service-database" do
+  pacemaker_order "o-start-#{service_name}" do
     score "inf"
     ordering "#{vip_primitive}:start #{fs_primitive}:start #{service_name}:start"
     action :create
   end
 
-  pacemaker_order "o-stop-service-database" do
+  pacemaker_order "o-stop-#{service_name}" do
     score "inf"
     ordering "#{service_name}:stop #{fs_primitive}:stop #{vip_primitive}:stop"
     action :create
+    # This is our last constraint, so we can finally start service_name
+    notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
+    notifies :start, "pacemaker_primitive[#{service_name}]", :immediately
+  end
+
+  # This is needed because we don't create all the pacemaker resources in the
+  # same transaction, so we will need to cleanup before starting
+  execute "Cleanup #{service_name} after constraints" do
+    command "sleep 2; crm resource cleanup #{service_name}"
+    action :nothing
   end
 
 else
@@ -96,10 +115,6 @@ else
     # Membership order *is* significant; VIPs should come first so
     # that they are available for the service to bind to.
     members [vip_primitive, fs_primitive, service_name]
-    meta ({
-      "is-managed" => true,
-      "target-role" => "started"
-    })
     action [ :create, :start ]
   end
 

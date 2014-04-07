@@ -23,13 +23,12 @@
 #
 # This is the first step.
 
-database_environment = node[:database][:config][:environment]
+drbd_resource = "postgresql"
 
-vip_primitive = "#{CrowbarDatabaseHelper.get_ha_vhostname(node)}-vip-admin"
-fs_primitive = "#{database_environment}-fs"
-ms_name = "#{database_environment}-ms"
-
-ip_addr = CrowbarDatabaseHelper.get_listen_address(node)
+service_name = "postgresql"
+fs_primitive = "fs-#{service_name}"
+drbd_primitive = "drbd-#{drbd_resource}"
+ms_name = "ms-#{drbd_primitive}"
 
 postgres_op = {}
 postgres_op["monitor"] = {}
@@ -39,8 +38,6 @@ fs_params = {}
 fs_params["directory"] = "/var/lib/pgsql"
 
 if node[:database][:ha][:storage][:mode] == "drbd"
-  drbd_resource = "postgresql"
-
   crowbar_pacemaker_drbd drbd_resource do
     size "#{node[:database][:ha][:storage][:drbd][:size]}G"
     action :nothing
@@ -71,7 +68,6 @@ crowbar_pacemaker_sync_mark "wait-database_ha_storage" do
 end
 
 if node[:database][:ha][:storage][:mode] == "drbd"
-  drbd_primitive = "drbd_#{drbd_resource}"
   drbd_params = {}
   drbd_params["drbd_resource"] = drbd_resource
 
@@ -103,15 +99,6 @@ if node[:database][:ha][:storage][:mode] == "drbd"
   end
 end
 
-pacemaker_primitive vip_primitive do
-  agent "ocf:heartbeat:IPaddr2"
-  params ({
-    "ip" => ip_addr,
-  })
-  op postgres_op
-  action :create
-end
-
 pacemaker_primitive fs_primitive do
   agent "ocf:heartbeat:Filesystem"
   params fs_params
@@ -120,30 +107,32 @@ pacemaker_primitive fs_primitive do
 end
 
 if node[:database][:ha][:storage][:mode] == "drbd"
-  pacemaker_colocation "col-fs-database" do
+  pacemaker_colocation "col-#{fs_primitive}" do
     score "inf"
     resources [fs_primitive, "#{ms_name}:Master"]
     action :create
   end
 
-  pacemaker_order "o-start-fs-database" do
+  pacemaker_order "o-start-#{fs_primitive}" do
     score "inf"
     ordering "#{ms_name}:promote #{fs_primitive}:start"
     action :create
   end
 
-  pacemaker_order "o-stop-fs-database" do
+  pacemaker_order "o-stop-#{fs_primitive}" do
     score "inf"
     ordering "#{fs_primitive}:stop #{ms_name}:demote"
     action :create
+    # This is our last constraint, so we can finally start fs_primitive
+    notifies :run, "execute[Cleanup #{fs_primitive} after constraints]", :immediately
+    notifies :start, "pacemaker_primitive[#{fs_primitive}]", :immediately
   end
 
   # This is needed because we don't create all the pacemaker resources in the
-  # same transaction
-  execute "Start #{fs_primitive} after constraints" do
-    command "sleep 2; crm resource cleanup #{fs_primitive}; crm resource start #{fs_primitive}"
+  # same transaction, so we will need to cleanup before starting
+  execute "Cleanup #{fs_primitive} after constraints" do
+    command "sleep 2; crm resource cleanup #{fs_primitive}"
     action :nothing
-    subscribes :run, "pacemaker_order[o-stop-fs-database]", :immediately
   end
 end
 
