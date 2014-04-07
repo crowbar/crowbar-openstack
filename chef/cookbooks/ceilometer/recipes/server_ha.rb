@@ -46,10 +46,6 @@ group_name = "g-ceilometer-server"
 
 pacemaker_group group_name do
   members primitives
-  meta ({
-    "is-managed" => true,
-    "target-role" => "started"
-  })
   action :create
 end
 
