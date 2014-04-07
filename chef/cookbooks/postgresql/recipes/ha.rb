@@ -96,10 +96,6 @@ else
     # Membership order *is* significant; VIPs should come first so
     # that they are available for the service to bind to.
     members [vip_primitive, fs_primitive, service_name]
-    meta ({
-      "is-managed" => true,
-      "target-role" => "started"
-    })
     action [ :create, :start ]
   end
 
