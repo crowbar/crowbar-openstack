@@ -97,6 +97,16 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     score "inf"
     ordering "#{service_name}:stop #{fs_primitive}:stop #{vip_primitive}:stop"
     action :create
+    # This is our last constraint, so we can finally start service_name
+    notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
+    notifies :start, "pacemaker_primitive[#{service_name}]", :immediately
+  end
+
+  # This is needed because we don't create all the pacemaker resources in the
+  # same transaction, so we will need to cleanup before starting
+  execute "Cleanup #{service_name} after constraints" do
+    command "sleep 2; crm resource cleanup #{service_name}"
+    action :nothing
   end
 
 else

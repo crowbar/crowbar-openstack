@@ -123,14 +123,16 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     score "inf"
     ordering "#{fs_primitive}:stop #{ms_name}:demote"
     action :create
+    # This is our last constraint, so we can finally start fs_primitive
+    notifies :run, "execute[Cleanup #{fs_primitive} after constraints]", :immediately
+    notifies :start, "pacemaker_primitive[#{fs_primitive}]", :immediately
   end
 
   # This is needed because we don't create all the pacemaker resources in the
-  # same transaction
-  execute "Start #{fs_primitive} after constraints" do
-    command "sleep 2; crm resource cleanup #{fs_primitive}; crm resource start #{fs_primitive}"
+  # same transaction, so we will need to cleanup before starting
+  execute "Cleanup #{fs_primitive} after constraints" do
+    command "sleep 2; crm resource cleanup #{fs_primitive}"
     action :nothing
-    subscribes :run, "pacemaker_order[o-stop-#{fs_primitive}]", :immediately
   end
 end
 
