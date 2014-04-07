@@ -73,7 +73,10 @@ group_members += [ node[:neutron][:platform][:dhcp_agent_name],
                    node[:neutron][:platform][:metering_agent_name],
                    neutron_agent ]
 
-pacemaker_group "group-neutron-agents" do
+agents_group_name = "g-neutron-agents"
+agents_clone_name = "cl-#{agents_group_name}"
+
+pacemaker_group agents_group_name do
   members group_members
   meta ({
     "is-managed" => true,
@@ -82,14 +85,16 @@ pacemaker_group "group-neutron-agents" do
   action [ :create ]
 end
 
-pacemaker_clone "clone-neutron-agents" do
-  rsc "group-neutron-agents"
+pacemaker_clone agents_clone_name do
+  rsc agents_group_name
   action [ :create, :start ]
 end
 
 keystone_settings = NeutronHelper.keystone_settings(node)
 
-pacemaker_primitive "neutron-ha-tool" do
+ha_tool_primitive_name = "neutron-ha-tool"
+
+pacemaker_primitive ha_tool_primitive_name do
   agent node[:neutron][:ha][:l3][:ha_tool_ra]
   params ({
     "os_auth_url"    => keystone_settings["internal_auth_url"],
@@ -102,8 +107,8 @@ pacemaker_primitive "neutron-ha-tool" do
   only_if { use_l3_agent }
 end
 
-pacemaker_order "neutron-ha-tool_after_clone-neutron-agents" do
-  ordering "clone-neutron-agents neutron-ha-tool"
+pacemaker_order "o-neutron-ha-tool" do
+  ordering "#{agents_clone_name} #{ha_tool_primitive_name}"
   score "Mandatory"
   action [ :create ]
   only_if { use_l3_agent }

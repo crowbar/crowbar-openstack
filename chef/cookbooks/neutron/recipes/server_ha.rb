@@ -29,14 +29,16 @@ crowbar_pacemaker_sync_mark "sync-neutron_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-neutron_ha_resources"
 
-pacemaker_primitive "neutron-service" do
+primitive_name = "neutron-server"
+
+pacemaker_primitive primitive_name do
   agent node[:neutron][:ha][:server][:server_ra]
   op node[:neutron][:ha][:server][:op]
   action :create
 end
 
-pacemaker_clone "clone-neutron-server" do
-  rsc "neutron-service"
+pacemaker_clone "cl-#{primitive_name}" do
+  rsc primitive_name
   action [:create, :start]
 end
 
