@@ -52,10 +52,6 @@ group_name = "g-cinder-controller"
 
 pacemaker_group group_name do
   members ["cinder-api", "cinder-scheduler"]
-  meta ({
-    "is-managed" => true,
-    "target-role" => "started"
-  })
   action :create
 end
 
