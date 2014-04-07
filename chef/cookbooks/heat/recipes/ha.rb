@@ -61,10 +61,6 @@ group_name = "g-heat"
 
 pacemaker_group group_name do
   members primitives
-  meta ({
-    "is-managed" => true,
-    "target-role" => "started"
-  })
   action :create
 end
 
