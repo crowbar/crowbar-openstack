@@ -36,20 +36,22 @@ crowbar_pacemaker_sync_mark "sync-cinder_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-cinder_ha_resources"
 
-pacemaker_primitive "cinder-api-service" do
+pacemaker_primitive "cinder-api" do
   agent node[:cinder][:ha][:api_ra]
   op node[:cinder][:ha][:op]
   action :create
 end
 
-pacemaker_primitive "cinder-scheduler-service" do
+pacemaker_primitive "cinder-scheduler" do
   agent node[:cinder][:ha][:scheduler_ra]
   op node[:cinder][:ha][:op]
   action :create
 end
 
-pacemaker_group "cinder-controller-group" do
-  members ["cinder-api-service", "cinder-scheduler-service"]
+group_name = "g-cinder-controller"
+
+pacemaker_group group_name do
+  members ["cinder-api", "cinder-scheduler"]
   meta ({
     "is-managed" => true,
     "target-role" => "started"
@@ -57,8 +59,8 @@ pacemaker_group "cinder-controller-group" do
   action :create
 end
 
-pacemaker_clone "clone-cinder-controller" do
-  rsc "cinder-controller-group"
+pacemaker_clone "cl-#{group_name}" do
+  rsc group_name
   action [:create, :start]
 end
 
