@@ -48,7 +48,7 @@ crowbar_pacemaker_sync_mark "wait-heat_ha_resources"
 primitives = []
 
 ["engine", "api", "api_cfn", "api_cloudwatch"].each do |service|
-  primitive_name = "heat-#{service}-service".gsub("_","-")
+  primitive_name = "heat-#{service}".gsub("_","-")
   pacemaker_primitive primitive_name do
     agent node[:heat][:ha][service.to_sym][:agent]
     op    node[:heat][:ha][service.to_sym][:op]
@@ -57,7 +57,9 @@ primitives = []
   primitives << primitive_name
 end
 
-pacemaker_group "heat-group" do
+group_name = "g-heat"
+
+pacemaker_group group_name do
   members primitives
   meta ({
     "is-managed" => true,
@@ -66,8 +68,8 @@ pacemaker_group "heat-group" do
   action :create
 end
 
-pacemaker_clone "clone-heat-group" do
-  rsc "heat-group"
+pacemaker_clone "cl-#{group_name}" do
+  rsc group_name
   action [ :create, :start]
 end
 
