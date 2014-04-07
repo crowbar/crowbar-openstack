@@ -88,10 +88,9 @@ if ha_enabled
   log "HA support for postgresql is enabled"
   include_recipe "postgresql::ha"
 
-  database_environment = node[:database][:config][:environment]
-  service_name = "#{database_environment}-service"
   # Only run the psql commands if the service is running on this node, so that
   # we don't depend on the node running the service to be as fast as this one
+  service_name = "postgresql"
   only_if_command = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
 else
   log "HA support for postgresql is disabled"
