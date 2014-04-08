@@ -30,10 +30,9 @@ include_recipe "rabbitmq::default"
 if ha_enabled
   log "HA support for rabbitmq is enabled"
   include_recipe "rabbitmq::ha"
-  rabbitmq_environment = node[:rabbitmq][:config][:environment]
-  service_name = "#{rabbitmq_environment}-service"
   # All the rabbitmqctl commands are local, and can only be run if rabbitmq is
   # local
+  service_name = "rabbitmq"
   only_if_command = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
 else
   log "HA support for rabbitmq is disabled"

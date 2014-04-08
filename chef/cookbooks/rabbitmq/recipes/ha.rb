@@ -13,22 +13,21 @@
 # limitations under the License.
 #
 
-rabbitmq_environment = node[:rabbitmq][:config][:environment]
-
 vhostname = CrowbarRabbitmqHelper.get_ha_vhostname(node)
-vip_primitive = "#{vhostname}-vip-admin"
-fs_primitive = "#{rabbitmq_environment}-fs"
-ms_name = "#{rabbitmq_environment}-ms"
-service_name = "#{rabbitmq_environment}-service"
-group_name = "#{service_name}-group"
+drbd_resource = "rabbitmq"
+
+vip_primitive = "vip-admin-#{vhostname}"
+service_name = "rabbitmq"
+fs_primitive = "fs-#{service_name}"
+drbd_primitive = "drbd-#{drbd_resource}"
+ms_name = "ms-#{drbd_primitive}"
+group_name = "g-#{service_name}"
 
 ip_addr = CrowbarRabbitmqHelper.get_listen_address(node)
 
 fs_params = {}
 fs_params["directory"] = "/var/lib/rabbitmq"
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
-  drbd_resource = "rabbitmq"
-
   crowbar_pacemaker_drbd drbd_resource do
     size "#{node[:rabbitmq][:ha][:storage][:drbd][:size]}G"
     action :nothing
@@ -60,7 +59,6 @@ crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha_storage"
 crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_storage"
 
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
-  drbd_primitive = "drbd_#{drbd_resource}"
   drbd_params = {}
   drbd_params["drbd_resource"] = drbd_resource
 
@@ -92,15 +90,6 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   end
 end
 
-pacemaker_primitive vip_primitive do
-  agent "ocf:heartbeat:IPaddr2"
-  params ({
-    "ip" => ip_addr,
-  })
-  op rabbitmq_op
-  action :create
-end
-
 pacemaker_primitive fs_primitive do
   agent "ocf:heartbeat:Filesystem"
   params fs_params
@@ -109,30 +98,32 @@ pacemaker_primitive fs_primitive do
 end
 
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
-  pacemaker_colocation "col-fs-rabbitmq" do
+  pacemaker_colocation "col-#{fs_primitive}" do
     score "inf"
     resources [fs_primitive, "#{ms_name}:Master"]
     action :create
   end
 
-  pacemaker_order "o-start-fs-rabbitmq" do
+  pacemaker_order "o-start-#{fs_primitive}" do
     score "inf"
     ordering "#{ms_name}:promote #{fs_primitive}:start"
     action :create
   end
 
-  pacemaker_order "o-stop-fs-rabbitmq" do
+  pacemaker_order "o-stop-#{fs_primitive}" do
     score "inf"
     ordering "#{fs_primitive}:stop #{ms_name}:demote"
     action :create
+    # This is our last constraint, so we can finally start fs_primitive
+    notifies :run, "execute[Cleanup #{fs_primitive} after constraints]", :immediately
+    notifies :start, "pacemaker_primitive[#{fs_primitive}]", :immediately
   end
 
   # This is needed because we don't create all the pacemaker resources in the
-  # same transaction
-  execute "Start #{fs_primitive} after constraints" do
-    command "sleep 2; crm resource cleanup #{fs_primitive}; crm resource start #{fs_primitive}"
+  # same transaction, so we will need to cleanup before starting
+  execute "Cleanup #{fs_primitive} after constraints" do
+    command "sleep 2; crm resource cleanup #{fs_primitive}"
     action :nothing
-    subscribes :run, "pacemaker_order[o-stop-fs-rabbitmq]", :immediately
   end
 end
 
@@ -217,7 +208,6 @@ crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources"
 
 # wait for DNS to be updated for hostname of virtual IP (otherwise, rabbitmq
 # can't start)
-vhostname = CrowbarRabbitmqHelper.get_ha_vhostname(node)
 ruby_block "wait for rabbitmq vhostname" do
   block do
     require 'timeout'
@@ -236,6 +226,15 @@ ruby_block "wait for rabbitmq vhostname" do
   end # block
 end # ruby_block
 
+pacemaker_primitive vip_primitive do
+  agent "ocf:heartbeat:IPaddr2"
+  params ({
+    "ip" => ip_addr,
+  })
+  op rabbitmq_op
+  action :create
+end
+
 pacemaker_primitive service_name do
   agent agent_name
   params ({
@@ -247,22 +246,32 @@ end
 
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
 
-  pacemaker_colocation "col-service-rabbitmq" do
+  pacemaker_colocation "col-#{service_name}" do
     score "inf"
     resources [vip_primitive, fs_primitive, service_name]
     action :create
   end
 
-  pacemaker_order "o-start-service-rabbitmq" do
+  pacemaker_order "o-start-#{service_name}" do
     score "inf"
     ordering "#{vip_primitive}:start #{fs_primitive}:start #{service_name}:start"
     action :create
   end
 
-  pacemaker_order "o-stop-service-rabbitmq" do
+  pacemaker_order "o-stop-#{service_name}" do
     score "inf"
     ordering "#{service_name}:stop #{fs_primitive}:stop #{vip_primitive}:stop"
     action :create
+    # This is our last constraint, so we can finally start service_name
+    notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
+    notifies :start, "pacemaker_primitive[#{service_name}]", :immediately
+  end
+
+  # This is needed because we don't create all the pacemaker resources in the
+  # same transaction, so we will need to cleanup before starting
+  execute "Cleanup #{service_name} after constraints" do
+    command "sleep 2; crm resource cleanup #{service_name}"
+    action :nothing
   end
 
 else
@@ -271,10 +280,6 @@ else
     # Membership order *is* significant; VIPs should come first so
     # that they are available for the service to bind to.
     members [vip_primitive, fs_primitive, service_name]
-    meta ({
-      "is-managed" => true,
-      "target-role" => "started"
-    })
     action [ :create, :start ]
   end
 
