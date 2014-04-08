@@ -41,6 +41,11 @@ if ha_enabled
   pacemaker_primitive "mongodb" do
     agent node[:ceilometer][:ha][:mongodb][:agent]
     op node[:ceilometer][:ha][:mongodb][:op]
+    action :create
+  end
+
+  pacemaker_clone "cl-mongodb" do
+    rsc "mongodb"
     action [:create, :start]
   end
 
