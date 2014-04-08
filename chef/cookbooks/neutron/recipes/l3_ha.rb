@@ -25,26 +25,31 @@ crowbar_pacemaker_sync_mark "sync-neutron-l3_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-neutron-l3_ha_resources"
 
-pacemaker_primitive node[:neutron][:platform][:l3_agent_name] do
+l3_agent_primitive = "neutron-l3-agent"
+dhcp_agent_primitive = "neutron-dhcp-agent"
+metadatda_agent_primitive = "neutron-metadata-agent"
+metering_agent_primitive =  "neutron-metering-agent"
+
+pacemaker_primitive l3_agent_primitive do
   agent node[:neutron][:ha][:l3][:l3_ra]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
   only_if { use_l3_agent }
 end
 
-pacemaker_primitive node[:neutron][:platform][:dhcp_agent_name] do
+pacemaker_primitive dhcp_agent_primitive do
   agent node[:neutron][:ha][:l3][:dhcp_ra]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
 end
 
-pacemaker_primitive node[:neutron][:platform][:metadata_agent_name] do
+pacemaker_primitive metadatda_agent_primitive do
   agent node[:neutron][:ha][:l3][:metadata_ra]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
 end
 
-pacemaker_primitive node[:neutron][:platform][:metering_agent_name] do
+pacemaker_primitive metering_agent_primitive do
   agent node[:neutron][:ha][:l3][:metering_ra]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
@@ -59,6 +64,8 @@ when "linuxbridge"
 when "vmware"
   neutron_agent = node[:neutron][:platform][:nvp_agent_name]
 end
+neutron_agent.slice! 'openstack-'
+
 
 pacemaker_primitive neutron_agent do
   agent node[:neutron][:ha][:l3]["#{networking_plugin}_ra"]
@@ -67,10 +74,10 @@ pacemaker_primitive neutron_agent do
 end
 
 group_members = []
-group_members << node[:neutron][:platform][:l3_agent_name] if use_l3_agent
-group_members += [ node[:neutron][:platform][:dhcp_agent_name],
-                   node[:neutron][:platform][:metadata_agent_name],
-                   node[:neutron][:platform][:metering_agent_name],
+group_members << l3_agent_primitive if use_l3_agent
+group_members += [ dhcp_agent_primitive,
+                   metadatda_agent_primitive,
+                   metering_agent_primitive,
                    neutron_agent ]
 
 agents_group_name = "g-neutron-agents"
