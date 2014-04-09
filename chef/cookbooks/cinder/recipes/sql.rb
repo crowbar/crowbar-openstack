@@ -77,7 +77,9 @@ execute "cinder-manage db sync" do
   command "#{venv_prefix}cinder-manage db sync"
   user node[:cinder][:user]
   group node[:cinder][:group]
-  not_if { node[:platform] == "suse" }
+  # On SUSE, we only need this when HA is enabled as the init script is doing
+  # this (but that creates races with HA)
+  only_if { node.platform != "suse" || node[:cinder][:ha][:enabled] }
 end
 
 crowbar_pacemaker_sync_mark "create-cinder_database"
