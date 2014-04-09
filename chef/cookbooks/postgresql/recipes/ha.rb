@@ -87,15 +87,9 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     action :create
   end
 
-  pacemaker_order "o-start-#{service_name}" do
-    score "inf"
-    ordering "#{vip_primitive}:start #{fs_primitive}:start #{service_name}:start"
-    action :create
-  end
-
-  pacemaker_order "o-stop-#{service_name}" do
-    score "inf"
-    ordering "#{service_name}:stop #{fs_primitive}:stop #{vip_primitive}:stop"
+  pacemaker_order "o-#{service_name}" do
+    score "Mandatory"
+    ordering "#{vip_primitive} #{fs_primitive} #{service_name}"
     action :create
     # This is our last constraint, so we can finally start service_name
     notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
