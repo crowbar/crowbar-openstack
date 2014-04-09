@@ -137,6 +137,14 @@ db_connection = "#{backend_name}://#{node[:heat][:db][:user]}:#{node[:heat][:db]
 
 crowbar_pacemaker_sync_mark "wait-heat_register"
 
+keystone_register "heat wakeup keystone" do
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  action :wakeup
+end
+
 keystone_register "register heat user" do
   protocol keystone_settings['protocol']
   host keystone_settings['internal_url_host']
