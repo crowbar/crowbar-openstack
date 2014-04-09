@@ -295,17 +295,18 @@ service "heat-api-cloudwatch" do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
-unless node[:platform] == "suse"
-  crowbar_pacemaker_sync_mark "wait-heat_db_sync"
+crowbar_pacemaker_sync_mark "wait-heat_db_sync"
 
-  execute "heat-manage db_sync" do
-    command "#{venv_prefix}heat-manage db_sync"
-    action :nothing
-    subscribes :create, "template[/etc/heat/heat.conf]", :delayed
-  end
-
-  crowbar_pacemaker_sync_mark "create-heat_db_sync"
+execute "heat-manage db_sync" do
+  user node[:heat][:user]
+  group node[:heat][:group]
+  command "#{venv_prefix}heat-manage db_sync"
+  # On SUSE, we only need this when HA is enabled as the init script is doing
+  # this (but that creates races with HA)
+  only_if { node.platform != "suse" || ha_enabled }
 end
+
+crowbar_pacemaker_sync_mark "create-heat_db_sync"
 
 if ha_enabled
   log "HA support for heat is enabled"
