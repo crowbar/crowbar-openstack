@@ -298,9 +298,8 @@ end
 unless node[:platform] == "suse"
   crowbar_pacemaker_sync_mark "wait-heat_db_sync"
 
-  execute "heat-db-sync" do
-    # do not run heat-db-setup since it wants to install packages and setup db passwords
-    command "#{venv_prefix}python -m heat.db.sync"
+  execute "heat-manage db_sync" do
+    command "#{venv_prefix}heat-manage db_sync"
     action :nothing
     subscribes :create, "template[/etc/heat/heat.conf]", :delayed
   end
