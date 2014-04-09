@@ -179,18 +179,19 @@ keystone_settings = CeilometerHelper.keystone_settings(node)
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:api][:protocol] == "https", ha_enabled)
 
-unless node[:platform] == "suse"
-  crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync"
+crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync"
 
-  execute "calling ceilometer-dbsync" do
-    command "#{venv_prefix}ceilometer-dbsync"
-    action :run
-    user node[:ceilometer][:user]
-    group node[:ceilometer][:group]
-  end
-
-  crowbar_pacemaker_sync_mark "create-ceilometer_db_sync"
+execute "calling ceilometer-dbsync" do
+  command "#{venv_prefix}ceilometer-dbsync"
+  action :run
+  user node[:ceilometer][:user]
+  group node[:ceilometer][:group]
+  # On SUSE, we only need this when HA is enabled as the init script is doing
+  # this (but that creates races with HA)
+  only_if { node.platform != "suse" || ha_enabled }
 end
+
+crowbar_pacemaker_sync_mark "create-ceilometer_db_sync"
 
 service "ceilometer-collector" do
   service_name node[:ceilometer][:collector][:service_name]
