@@ -104,16 +104,9 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     action :create
   end
 
-  pacemaker_order "o-start-#{fs_primitive}" do
-    score "inf"
+  pacemaker_order "o-#{fs_primitive}" do
+    score "Mandatory"
     ordering "#{ms_name}:promote #{fs_primitive}:start"
-    action :create
-  end
-
-  pacemaker_order "o-stop-#{fs_primitive}" do
-    score "inf"
-    ordering "#{fs_primitive}:stop #{ms_name}:demote"
-    action :create
     # This is our last constraint, so we can finally start fs_primitive
     notifies :run, "execute[Cleanup #{fs_primitive} after constraints]", :immediately
     notifies :start, "pacemaker_primitive[#{fs_primitive}]", :immediately
@@ -252,15 +245,9 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     action :create
   end
 
-  pacemaker_order "o-start-#{service_name}" do
-    score "inf"
-    ordering "#{vip_primitive}:start #{fs_primitive}:start #{service_name}:start"
-    action :create
-  end
-
-  pacemaker_order "o-stop-#{service_name}" do
-    score "inf"
-    ordering "#{service_name}:stop #{fs_primitive}:stop #{vip_primitive}:stop"
+  pacemaker_order "o-#{service_name}" do
+    score "Mandatory"
+    ordering "#{vip_primitive} #{fs_primitive} #{service_name}"
     action :create
     # This is our last constraint, so we can finally start service_name
     notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
