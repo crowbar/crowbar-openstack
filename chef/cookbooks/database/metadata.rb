@@ -9,6 +9,7 @@ recipe "database", "Empty placeholder"
 
 depends "mysql"
 depends "postgresql"
+depends "crowbar-pacemaker"
 
 %w{ debian ubuntu centos suse fedora redhat scientific }.each do |os|
   supports os

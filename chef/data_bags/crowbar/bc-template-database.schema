@@ -30,6 +30,35 @@
               "mapping" : {
                 "max_connections": { "type": "int" }
               }
+            },
+            "ha" : {
+              "type": "map",
+              "required": true,
+              "mapping" : {
+                "storage": {
+                  "type": "map",
+                  "required": true,
+                  "mapping" : {
+                    "mode": { "type": "str", "required": true },
+                    "drbd": {
+                      "type": "map",
+                      "required": true,
+                      "mapping" : {
+                        "size": { "type": "int", "required": true }
+                      }
+                    },
+                    "shared": {
+                      "type": "map",
+                      "required": true,
+                      "mapping" : {
+                        "device": { "type": "str", "required": true },
+                        "fstype": { "type": "str", "required": true },
+                        "options": { "type": "str", "required": true }
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
@@ -48,6 +77,7 @@
             "crowbar-status": { "type": "str" },
             "crowbar-failed": { "type": "str" },
             "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
             "element_states": {
               "type": "map",
               "mapping": {
