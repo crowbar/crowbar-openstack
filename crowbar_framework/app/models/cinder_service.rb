@@ -101,7 +101,7 @@ class CinderService < PacemakerServiceObject
     vip_networks = ["admin", "public"]
 
     dirty = false
-    dirty = prepare_role_for_ha_with_haproxy(role, ["cinder", "ha", "enabled"], ha_enabled, vip_networks)
+    dirty = prepare_role_for_ha_with_haproxy(role, ["cinder", "ha", "enabled"], ha_enabled, controller_elements, vip_networks)
     role.save if dirty
 
     net_svc = NetworkService.new @logger
