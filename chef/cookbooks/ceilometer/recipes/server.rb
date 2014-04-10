@@ -219,6 +219,14 @@ end
 
 crowbar_pacemaker_sync_mark "wait-ceilometer_register"
 
+keystone_register "ceilometer wakeup keystone" do
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  action :wakeup
+end
+
 keystone_register "register ceilometer user" do
   protocol keystone_settings['protocol']
   host keystone_settings['internal_url_host']
