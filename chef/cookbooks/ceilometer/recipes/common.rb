@@ -1,16 +1,8 @@
 
-env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{node[:ceilometer][:rabbitmq_instance]}"
-rabbits = search(:node, "roles:rabbitmq-server#{env_filter}") || []
-if rabbits.length > 0
-  rabbit = rabbits[0]
-  rabbit = node if rabbit.name == node.name
-else
-  rabbit = node
-end
-rabbit_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(rabbit, "admin").address
-Chef::Log.info("Rabbit server found at #{rabbit_address}")
+rabbit = get_instance('roles:rabbitmq-server')
+Chef::Log.info("Rabbit server found at #{rabbit[:rabbitmq][:address]}")
 rabbit_settings = {
-  :address => rabbit_address,
+  :address => rabbit[:rabbitmq][:address],
   :port => rabbit[:rabbitmq][:port],
   :user => rabbit[:rabbitmq][:user],
   :password => rabbit[:rabbitmq][:password],
@@ -24,23 +16,16 @@ if node[:ceilometer][:use_mongodb]
   db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
   if node[:ceilometer][:ha][:server][:enabled]
     # Currently, we only setup mongodb non-HA on the first node
-    db_host = db_hosts.select { |n| n.roles.include?("pacemaker-cluster-founder") }.first
+    db_host = db_hosts.select { |n| CrowbarPacemakerHelper.is_cluster_founder?(n) }.first
   end
   db_host ||= db_hosts.first || node
 
   mongodb_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
   db_connection = "mongodb://#{mongodb_ip}:27017/ceilometer"
 else
-  sql_env_filter = " AND database_config_environment:database-config-#{node[:ceilometer][:database_instance]}"
-  sqls = search(:node, "roles:database-server#{sql_env_filter}")
-  if sqls.length > 0
-    sql = sqls[0]
-    sql = node if sql.name == node.name
-  else
-    sql = node
-  end
+  sql = get_instance('roles:database-server')
 
-  sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil?
+  sql_address = CrowbarDatabaseHelper.get_listen_address(sql)
   Chef::Log.info("SQL server found at #{sql_address}")
 
   include_recipe "database::client"
