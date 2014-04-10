@@ -17,6 +17,7 @@ en:
         plugin_header: Networking Plugin
         networking_plugin: Plugin
         networking_mode: Mode
+        num_vlans: Maximum number of VLANs
         cisco_switches: Cisco Switch Credentials
         cisco_ports: Assign Switch Ports
         switch_ip: IP Address

@@ -85,7 +85,8 @@ end
 
 
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
-vlan_end = vlan_start + 2000
+num_vlans = node[:neutron][:num_vlans]
+vlan_end = [vlan_start + num_vlans - 1, 4094].min
 
 if node[:neutron][:networking_plugin] == "cisco"
   mechanism_driver = "openvswitch,cisco_nexus"
@@ -112,6 +113,7 @@ if node[:neutron][:networking_plugin] == "cisco"
   include_recipe "neutron::cisco_support"
 end
 
+ha_enabled = node[:neutron][:ha][:server][:enabled]
 
 service node[:neutron][:platform][:service_name] do
   service_name "neutron-server" if node[:neutron][:use_gitrepo]
@@ -120,12 +122,13 @@ service node[:neutron][:platform][:service_name] do
   subscribes :restart, resources("template[/etc/neutron/api-paste.ini]")
   subscribes :restart, resources("template[#{plugin_cfg_path}]")
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 
 include_recipe "neutron::api_register"
 
-if node[:neutron][:ha][:enabled]
+if ha_enabled
   log "HA support for neutron is enabled"
   include_recipe "neutron::server_ha"
 else

@@ -99,6 +99,8 @@ template node[:neutron][:platform][:neutron_rootwrap_sudo_template] do
 end
 
 
+# We can't use get_instance here because the search is done on the "neutron"
+# node, not on "node"
 env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{neutron[:neutron][:rabbitmq_instance]}"
 rabbits = search(:node, "roles:rabbitmq-server#{env_filter}") || []
 if rabbits.length > 0
@@ -107,10 +109,9 @@ if rabbits.length > 0
 else
   rabbit = node
 end
-rabbit_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(rabbit, "admin").address
-Chef::Log.info("Rabbit server found at #{rabbit_address}")
+Chef::Log.info("Rabbit server found at #{rabbit[:rabbitmq][:address]}")
 rabbit_settings = {
-  :address => rabbit_address,
+  :address => rabbit[:rabbitmq][:address],
   :port => rabbit[:rabbitmq][:port],
   :user => rabbit[:rabbitmq][:user],
   :password => rabbit[:rabbitmq][:password],
@@ -184,7 +185,7 @@ if neutron_server and neutron[:neutron][:api][:protocol] == 'https'
   end
 end
 
-if neutron[:neutron][:ha][:enabled]
+if neutron[:neutron][:ha][:server][:enabled]
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(neutron, "admin").address
   bind_host = admin_address
   bind_port = neutron[:neutron][:ha][:ports][:server]
@@ -231,7 +232,8 @@ end
 
 
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
-vlan_end = vlan_start + 2000
+num_vlans = neutron[:neutron][:num_vlans]
+vlan_end = [vlan_start + num_vlans - 1, 4094].min
 
 case neutron[:neutron][:networking_plugin]
 when "openvswitch", "cisco"
