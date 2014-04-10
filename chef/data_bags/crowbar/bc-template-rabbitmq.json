@@ -6,12 +6,26 @@
       "port": 5672,
       "password": "",
       "user": "nova",
-      "vhost": "/nova"
+      "vhost": "/nova",
+      "ha": {
+        "storage": {
+          "mode": "shared",
+          "drbd": {
+            "size": 50
+          },
+          "shared": {
+            "device": "",
+            "fstype": "",
+            "options": ""
+          }
+        }
+      }
     }
   },
   "deployment": {
     "rabbitmq": {
       "crowbar-revision": 0,
+      "schema-revision": 1,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },
