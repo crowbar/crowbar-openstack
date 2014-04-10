@@ -25,14 +25,8 @@ if node[:cinder][:use_gitrepo]
   venv_prefix = node[:cinder][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 end
 
-env_filter = " AND database_config_environment:database-config-#{node[:cinder][:database_instance]}"
-sqls = search(:node, "roles:database-server#{env_filter}") || []
-if sqls.length > 0
-    sql = sqls[0]
-    sql = node if sql.name == node.name
-else
-    sql = node
-end
+sql = get_instance('roles:database-server')
+
 include_recipe "database::client"
 backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
 include_recipe "#{backend_name}::client"
@@ -42,12 +36,14 @@ db_provider = Chef::Recipe::Database::Util.get_database_provider(sql)
 db_user_provider = Chef::Recipe::Database::Util.get_user_provider(sql)
 privs = Chef::Recipe::Database::Util.get_default_priviledges(sql)
 
-sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil?
+sql_address = CrowbarDatabaseHelper.get_listen_address(sql)
 Chef::Log.info("Database server found at #{sql_address}")
 
 db_conn = { :host => sql_address,
             :username => "db_maker",
             :password => sql[:database][:db_maker_password] }
+
+crowbar_pacemaker_sync_mark "wait-cinder_database"
 
 # Create the Cinder Database
 database "create #{node[:cinder][:db][:database]} database" do
@@ -83,6 +79,8 @@ execute "cinder-manage db sync" do
   group node[:cinder][:group]
   not_if { node[:platform] == "suse" }
 end
+
+crowbar_pacemaker_sync_mark "create-cinder_database"
 
 # save data so it can be found by search
 node.save

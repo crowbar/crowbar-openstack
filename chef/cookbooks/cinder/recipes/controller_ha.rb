@@ -27,3 +27,37 @@ haproxy_loadbalancer "cinder-api" do
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "cinder", "cinder-controller", "api")
   action :nothing
 end.run_action(:create)
+
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required packages installed before we create the pacemaker
+# resources
+crowbar_pacemaker_sync_mark "sync-cinder_before_ha"
+
+# Avoid races when creating pacemaker resources
+crowbar_pacemaker_sync_mark "wait-cinder_ha_resources"
+
+pacemaker_primitive "cinder-api" do
+  agent node[:cinder][:ha][:api_ra]
+  op node[:cinder][:ha][:op]
+  action :create
+end
+
+pacemaker_primitive "cinder-scheduler" do
+  agent node[:cinder][:ha][:scheduler_ra]
+  op node[:cinder][:ha][:op]
+  action :create
+end
+
+group_name = "g-cinder-controller"
+
+pacemaker_group group_name do
+  members ["cinder-api", "cinder-scheduler"]
+  action :create
+end
+
+pacemaker_clone "cl-#{group_name}" do
+  rsc group_name
+  action [:create, :start]
+end
+
+crowbar_pacemaker_sync_mark "create-cinder_ha_resources"
