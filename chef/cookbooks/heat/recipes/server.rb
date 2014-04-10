@@ -17,8 +17,7 @@ heat_path = "/opt/heat"
 venv_path = node[:heat][:use_virtualenv] ? "#{heat_path}/.venv" : nil
 venv_prefix = node[:heat][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 
-env_filter = " AND database_config_environment:database-config-#{node[:heat][:database_instance]}"
-sql = search(:node, "roles:database-server#{env_filter}").first || node
+sql = get_instance('roles:database-server')
 
 include_recipe "database::client"
 backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
@@ -29,12 +28,14 @@ db_provider = Chef::Recipe::Database::Util.get_database_provider(sql)
 db_user_provider = Chef::Recipe::Database::Util.get_user_provider(sql)
 privs = Chef::Recipe::Database::Util.get_default_priviledges(sql)
 
-sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil?
+sql_address = CrowbarDatabaseHelper.get_listen_address(sql)
 Chef::Log.info("Database server found at #{sql_address}")
 
 db_conn = { :host => sql_address,
             :username => "db_maker",
             :password => sql[:database][:db_maker_password] }
+
+crowbar_pacemaker_sync_mark "wait-heat_database"
 
 # Create the Heat Database
 database "create #{node[:heat][:db][:database]} database" do
@@ -63,6 +64,8 @@ database_user "grant database access for heat database user" do
     provider db_user_provider
     action :grant
 end
+
+crowbar_pacemaker_sync_mark "create-heat_database"
 
 unless node[:heat][:use_gitrepo]
     node[:heat][:platform][:packages].each do |p|
@@ -96,13 +99,10 @@ node[:heat][:platform][:aux_dirs].each do |d|
 end
 
 
-include_recipe "#{@cookbook_name}::common"
-env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{node[:heat][:rabbitmq_instance]}"
-rabbit = search(:node, "roles:rabbitmq-server#{env_filter}").first || node
-rabbit_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(rabbit, "admin").address
-Chef::Log.info("Rabbit server found at #{rabbit_address}")
+rabbit = get_instance('roles:rabbitmq-server')
+Chef::Log.info("Rabbit server found at #{rabbit[:rabbitmq][:address]}")
 rabbit_settings = {
-  :address => rabbit_address,
+  :address => rabbit[:rabbitmq][:address],
   :port => rabbit[:rabbitmq][:port],
   :user => rabbit[:rabbitmq][:user],
   :password => rabbit[:rabbitmq][:password],
@@ -134,6 +134,16 @@ my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:protocol] == "https", ha_enabled)
 
 db_connection = "#{backend_name}://#{node[:heat][:db][:user]}:#{node[:heat][:db][:password]}@#{sql_address}/#{node[:heat][:db][:database]}"
+
+crowbar_pacemaker_sync_mark "wait-heat_register"
+
+keystone_register "heat wakeup keystone" do
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  action :wakeup
+end
 
 keystone_register "register heat user" do
   protocol keystone_settings['protocol']
@@ -211,6 +221,8 @@ keystone_register "register heat endpoint" do
   action :add_endpoint_template
 end
 
+crowbar_pacemaker_sync_mark "create-heat_register"
+
 template "/etc/heat/environment.d/default.yaml" do
     source "default.yaml.erb"
     owner node[:heat][:user]
@@ -243,42 +255,51 @@ template "/etc/heat/heat.conf" do
       :cloud_watch_port => cloud_watch_port,
       :cfn_port => cfn_port
     )
-   notifies :run, "execute[heat-db-sync]", :delayed
 end
 
 service "heat-engine" do
-  service_name "openstack-heat-engine" if node.platform == "suse"
+  service_name node[:heat][:engine][:service_name]
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service "heat-api" do
-  service_name "openstack-heat-api" if node.platform == "suse"
+  service_name node[:heat][:api][:service_name]
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service "heat-api-cfn" do
-  service_name "openstack-heat-api-cfn" if node.platform == "suse"
+  service_name node[:heat][:api_cfn][:service_name]
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service "heat-api-cloudwatch" do
-  service_name "openstack-heat-api-cloudwatch" if node.platform == "suse"
+  service_name node[:heat][:api_cloudwatch][:service_name]
   supports :status => true, :restart => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
-execute "heat-db-sync" do
-  # do not run heat-db-setup since it wants to install packages and setup db passwords
-  command "#{venv_prefix}python -m heat.db.sync"
-  action :nothing
-  not_if { node[:platform] == "suse" }
+unless node[:platform] == "suse"
+  crowbar_pacemaker_sync_mark "wait-heat_db_sync"
+
+  execute "heat-db-sync" do
+    # do not run heat-db-setup since it wants to install packages and setup db passwords
+    command "#{venv_prefix}python -m heat.db.sync"
+    action :nothing
+    subscribes :create, "template[/etc/heat/heat.conf]", :delayed
+  end
+
+  crowbar_pacemaker_sync_mark "create-heat_db_sync"
 end
 
 if ha_enabled
