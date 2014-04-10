@@ -13,6 +13,11 @@
 # limitations under the License.
 #
 
+default[:heat][:engine][:service_name] = "heat-engine"
+default[:heat][:api][:service_name] = "heat-api"
+default[:heat][:api_cfn][:service_name] = "heat-api-cfn"
+default[:heat][:api_cloudwatch][:service_name] = "heat-api-cloudwatch"
+
 case node["platform"]
   when "ubuntu"
     default[:heat][:platform] = {
@@ -31,6 +36,10 @@ case node["platform"]
                     "openstack-heat-api-cfn", "openstack-heat-api-cloudwatch"],
       :aux_dirs => ["/var/cache/heat", "/etc/heat/environment.d"]
     }
+    default[:heat][:engine][:service_name] = "openstack-heat-engine"
+    default[:heat][:api][:service_name] = "openstack-heat-api"
+    default[:heat][:api_cfn][:service_name] = "openstack-heat-api-cfn"
+    default[:heat][:api_cloudwatch][:service_name] = "openstack-heat-api-cloudwatch"
 end
 
 default[:heat][:debug] = false
@@ -61,6 +70,11 @@ default[:heat][:ha][:ports][:api_port] = 5571
 default[:heat][:ha][:ports][:cloud_watch_port] = 5572
 
 # Pacemaker bits
-# TODO agents for othe services?
-default[:heat][:ha][:agent] = "ocf:openstack:heat-engine"
-default[:heat][:ha][:op][:monitor][:interval] = "10s"
+default[:heat][:ha][:engine][:agent] = "lsb:#{default[:heat][:engine][:service_name]}"
+default[:heat][:ha][:engine][:op][:monitor][:interval] = "10s"
+default[:heat][:ha][:api][:agent] = "lsb:#{default[:heat][:api][:service_name]}"
+default[:heat][:ha][:api][:op][:monitor][:interval] = "10s"
+default[:heat][:ha][:api_cfn][:agent] = "lsb:#{default[:heat][:api_cfn][:service_name]}"
+default[:heat][:ha][:api_cfn][:op][:monitor][:interval] = "10s"
+default[:heat][:ha][:api_cloudwatch][:agent] = "lsb:#{default[:heat][:api_cloudwatch][:service_name]}"
+default[:heat][:ha][:api_cloudwatch][:op][:monitor][:interval] = "10s"
