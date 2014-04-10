@@ -20,3 +20,26 @@ haproxy_loadbalancer "neutron-server" do
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "neutron", "neutron-server", "server")
   action :nothing
 end.run_action(:create)
+
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required packages installed before we create the pacemaker
+# resources
+crowbar_pacemaker_sync_mark "sync-neutron_before_ha"
+
+# Avoid races when creating pacemaker resources
+crowbar_pacemaker_sync_mark "wait-neutron_ha_resources"
+
+primitive_name = "neutron-server"
+
+pacemaker_primitive primitive_name do
+  agent node[:neutron][:ha][:server][:server_ra]
+  op node[:neutron][:ha][:server][:op]
+  action :create
+end
+
+pacemaker_clone "cl-#{primitive_name}" do
+  rsc primitive_name
+  action [:create, :start]
+end
+
+crowbar_pacemaker_sync_mark "create-neutron_ha_resources"

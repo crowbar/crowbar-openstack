@@ -18,6 +18,7 @@
                     "use_ml2": { "type": "bool", "required": true },
                     "networking_mode": { "type": "str", "required": true },
                     "networking_plugin": { "type": "str", "required": true },
+                    "num_vlans": { "type": "int", "required": true },
                     "cisco_switches": {
                       "type" : "map",
                       "required" : false,

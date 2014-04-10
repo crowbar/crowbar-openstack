@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-ha_enabled = node[:neutron][:ha][:enabled]
+ha_enabled = node[:neutron][:ha][:server][:enabled]
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:neutron][:api][:protocol] == "https", ha_enabled)
@@ -22,6 +22,8 @@ api_port = node["neutron"]["api"]["service_port"]
 neutron_protocol = node["neutron"]["api"]["protocol"]
 
 keystone_settings = NeutronHelper.keystone_settings(node)
+
+crowbar_pacemaker_sync_mark "wait-neutron_register"
 
 keystone_register "neutron api wakeup keystone" do
   protocol keystone_settings['protocol']
@@ -79,4 +81,4 @@ keystone_register "register neutron endpoint" do
   action :add_endpoint_template
 end
 
-
+crowbar_pacemaker_sync_mark "create-neutron_register"

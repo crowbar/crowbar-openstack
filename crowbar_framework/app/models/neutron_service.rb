@@ -35,8 +35,9 @@ class NeutronService < PacemakerServiceObject
         },
         "neutron-l3" => {
           "unique" => false,
-          "count" => -1,
-          "admin" => false
+          "count" => 1,
+          "admin" => false,
+          "cluster" => true
         }
       }
     end
@@ -108,12 +109,14 @@ class NeutronService < PacemakerServiceObject
       raise I18n.t("barclamp.neutron.deploy.missing_os_sdn_network")
     end
 
-    server_elements, server_nodes, ha_enabled = role_expand_elements(role, "neutron-server")
+    server_elements, server_nodes, server_ha_enabled = role_expand_elements(role, "neutron-server")
+    l3_elements, l3_nodes, l3_ha_enabled = role_expand_elements(role, "neutron-l3")
 
     vip_networks = ["admin", "public"]
 
     dirty = false
-    dirty = prepare_role_for_ha_with_haproxy(role, ["neutron", "ha", "enabled"], ha_enabled, vip_networks)
+    dirty = prepare_role_for_ha_with_haproxy(role, ["neutron", "ha", "server", "enabled"], server_ha_enabled, vip_networks)
+    dirty = prepare_role_for_ha(role, ["neutron", "ha", "l3", "enabled"], l3_ha_enabled) || dirty
     role.save if dirty
 
     # All nodes must have a public IP, even if part of a cluster; otherwise
@@ -124,24 +127,21 @@ class NeutronService < PacemakerServiceObject
 
     allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
 
-    tnodes = role.override_attributes["neutron"]["elements"]["neutron-l3"]
-    unless tnodes.nil? or tnodes.empty?
-      tnodes.each do |n|
-        net_svc.allocate_ip "default", "public", "host",n
-        if role.default_attributes["neutron"]["networking_mode"] == "gre"
-          net_svc.allocate_ip "default","os_sdn","host", n
-        else
-          net_svc.enable_interface "default", "nova_fixed", n
-          if role.default_attributes["neutron"]["networking_mode"] == "vlan"
-            # Force "use_vlan" to false in VLAN mode (linuxbridge and ovs). We
-            # need to make sure that the network recipe does NOT create the
-            # VLAN interfaces (ethX.VLAN) 
-            node = NodeObject.find_node_by_name n
-            if node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"]
-              @logger.info("Forcing use_vlan to false for the nova_fixed network on node #{n}")
-              node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"] = false
-              node.save
-            end
+    l3_nodes.each do |n|
+      net_svc.allocate_ip "default", "public", "host",n
+      if role.default_attributes["neutron"]["networking_mode"] == "gre"
+        net_svc.allocate_ip "default","os_sdn","host", n
+      else
+        net_svc.enable_interface "default", "nova_fixed", n
+        if role.default_attributes["neutron"]["networking_mode"] == "vlan"
+          # Force "use_vlan" to false in VLAN mode (linuxbridge and ovs). We
+          # need to make sure that the network recipe does NOT create the
+          # VLAN interfaces (ethX.VLAN) 
+          node = NodeObject.find_node_by_name n
+          if node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"]
+            @logger.info("Forcing use_vlan to false for the nova_fixed network on node #{n}")
+            node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"] = false
+            node.save
           end
         end
       end
