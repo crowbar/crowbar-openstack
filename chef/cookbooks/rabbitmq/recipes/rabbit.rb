@@ -18,17 +18,31 @@
 # limitations under the License.
 #
 
-node[:rabbitmq][:address] = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+ha_enabled = node[:rabbitmq][:ha][:enabled]
+
+node[:rabbitmq][:address] = CrowbarRabbitmqHelper.get_listen_address(node)
+if ha_enabled
+  node[:rabbitmq][:nodename] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
+end
 
 include_recipe "rabbitmq::default"
+
+if ha_enabled
+  log "HA support for rabbitmq is enabled"
+  include_recipe "rabbitmq::ha"
+  # All the rabbitmqctl commands are local, and can only be run if rabbitmq is
+  # local
+  service_name = "rabbitmq"
+  only_if_command = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
+else
+  log "HA support for rabbitmq is disabled"
+end
 
 # add a vhost to the queue
 rabbitmq_vhost node[:rabbitmq][:vhost] do
   action :add
+  only_if only_if_command if ha_enabled
 end
-
-::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
-node.set_unless[:rabbitmq][:password] = secure_password
 
 # create user for the queue
 rabbitmq_user "adding user #{node[:rabbitmq][:user]}" do
@@ -37,6 +51,7 @@ rabbitmq_user "adding user #{node[:rabbitmq][:user]}" do
   address node[:rabbitmq][:address]
   port node[:rabbitmq][:mochiweb_port]
   action :add
+  only_if only_if_command if ha_enabled
 end
 
 # grant the mapper user the ability to do anything with the vhost
@@ -46,11 +61,13 @@ rabbitmq_user "setting permissions for #{node[:rabbitmq][:user]}" do
   vhost node[:rabbitmq][:vhost]
   permissions "\".*\" \".*\" \".*\""
   action :set_permissions
+  only_if only_if_command if ha_enabled
 end
 
 execute "rabbitmqctl set_user_tags #{node[:rabbitmq][:user]} management" do
   not_if "rabbitmqctl list_users | grep #{node[:rabbitmq][:user]} | grep -q management"
   action :run
+  only_if only_if_command if ha_enabled
 end
 
 # save data so it can be found by search

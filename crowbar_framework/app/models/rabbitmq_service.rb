@@ -13,7 +13,7 @@
 # limitations under the License. 
 # 
 
-class RabbitmqService < ServiceObject
+class RabbitmqService < PacemakerServiceObject
 
   def initialize(thelogger)
     super(thelogger)
@@ -30,7 +30,8 @@ class RabbitmqService < ServiceObject
       {
         "rabbitmq-server" => {
           "unique" => false,
-          "count" => 1
+          "count" => 1,
+          "cluster" => true
         }
       }
     end
@@ -54,6 +55,8 @@ class RabbitmqService < ServiceObject
       "rabbitmq-server" => [ controller.name ]
     }
 
+    base["attributes"][@bc_name]["password"] = random_password
+
     @logger.debug("Rabbitmq create_proposal: exiting")
     base
   end
@@ -62,11 +65,46 @@ class RabbitmqService < ServiceObject
     @logger.debug("Rabbitmq apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
+    rabbitmq_elements, rabbitmq_nodes, rabbitmq_ha_enabled = role_expand_elements(role, "rabbitmq-server")
+    role.save if prepare_role_for_ha(role, ["rabbitmq", "ha", "enabled"], rabbitmq_ha_enabled)
+
+    if rabbitmq_ha_enabled
+      net_svc = NetworkService.new @logger
+      unless rabbitmq_elements.length == 1 && PacemakerServiceObject.is_cluster?(rabbitmq_elements[0])
+        raise "Internal error: HA enabled, but element is not a cluster"
+      end
+      cluster = rabbitmq_elements[0]
+      rabbitmq_vhostname = "#{role.name.gsub("-config", "")}-#{PacemakerServiceObject.cluster_name(cluster)}.#{ChefObject.cloud_domain}".gsub("_", "-")
+      net_svc.allocate_virtual_ip "default", "admin", "host", rabbitmq_vhostname
+      # rabbitmq, on start, needs to have the virtual hostname resolvable; so
+      # let's force a dns update now
+      ensure_dns_uptodate
+    end
+
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
   end
 
   def validate_proposal_after_save proposal
     validate_one_for_role proposal, "rabbitmq-server"
+
+    attributes = proposal["attributes"][@bc_name]
+
+    # HA validation
+    servers = proposal["deployment"][@bc_name]["elements"]["rabbitmq-server"]
+    unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
+      storage_mode = attributes["ha"]["storage"]["mode"]
+      validation_error("Unknown mode for HA storage: #{storage_mode}.") unless %w(shared drbd).include?(storage_mode)
+
+      if storage_mode == "shared"
+        validation_error("No device specified for shared storage.") if attributes["ha"]["storage"]["shared"]["device"].blank?
+        validation_error("No filesystem type specified for shared storage.") if attributes["ha"]["storage"]["shared"]["fstype"].blank?
+      elsif storage_mode == "drbd"
+        cluster = servers.first
+        role = available_clusters[cluster]
+        validation_error("DRBD is not enabled for cluster #{cluster_name(cluster)}.") unless role.default_attributes["pacemaker"]["drbd"]["enabled"]
+        validation_error("Invalid size for DRBD device.") if attributes["ha"]["storage"]["drbd"]["size"] <= 0
+      end
+    end
 
     super
   end
