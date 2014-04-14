@@ -194,12 +194,29 @@ else
   bind_port = neutron[:neutron][:api][:service_port]
 end
 
+nova = get_instance("roles:nova-multi-controller")
+nova_notify = {}
+
+unless nova[:nova].nil? or nova[:nova][:ssl].nil?
+  nova_api_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:server][:enabled] rescue false))
+  nova_api_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
+
+  nova_admin_tenant_id = %x[keystone --os_username #{keystone_settings['admin_user']} --os_password #{keystone_settings['admin_password']} --os_tenant_name #{keystone_settings['admin_tenant']} --os_auth_url #{keystone_settings['admin_auth_url']} tenant-get #{keystone_settings['service_tenant']} | awk '/id/  { print $4 }'].chomp
+
+  nova_notify = {
+    :nova_url => "#{nova_api_protocol}://#{nova_api_host}:#{nova[:nova][:ports][:api]}/v2",
+    :nova_admin_username => nova[:nova][:service_user],
+    :nova_admin_tenant_id => nova_admin_tenant_id,
+    :nova_admin_password => nova[:nova][:service_password]
+  }
+end
+
 template "/etc/neutron/neutron.conf" do
     cookbook "neutron"
     source "neutron.conf.erb"
     mode "0640"
     owner node[:neutron][:platform][:user]
-    variables(
+    variables({
       :sql_connection => neutron[:neutron][:db][:sql_connection],
       :sql_min_pool_size => neutron[:neutron][:sql][:min_pool_size],
       :sql_max_pool_overflow => neutron[:neutron][:sql][:max_pool_overflow],
@@ -221,7 +238,7 @@ template "/etc/neutron/neutron.conf" do
       :networking_plugin => neutron[:neutron][:networking_plugin],
       :rootwrap_bin =>  node[:neutron][:rootwrap],
       :use_namespaces => true
-    )
+    }.merge(nova_notify))
 end
 
 if %w(redhat centos).include?(node.platform)
