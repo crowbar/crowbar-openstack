@@ -179,18 +179,32 @@ keystone_settings = CeilometerHelper.keystone_settings(node)
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:api][:protocol] == "https", ha_enabled)
 
-unless node[:platform] == "suse"
-  crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync"
+crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync"
 
-  execute "calling ceilometer-dbsync" do
-    command "#{venv_prefix}ceilometer-dbsync"
-    action :run
-    user node[:ceilometer][:user]
-    group node[:ceilometer][:group]
-  end
-
-  crowbar_pacemaker_sync_mark "create-ceilometer_db_sync"
+execute "ceilometer-dbsync" do
+  command "#{venv_prefix}ceilometer-dbsync"
+  action :run
+  user node[:ceilometer][:user]
+  group node[:ceilometer][:group]
+  # We only do the sync the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if { !node[:ceilometer][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
 end
+
+# We want to keep a note that we've done db_sync, so we don't do it again.
+# If we were doing that outside a ruby_block, we would add the note in the
+# compile phase, before the actual db_sync is done (which is wrong, since it
+# could possibly not be reached in case of errors).
+ruby_block "mark node for ceilometer db_sync" do
+  block do
+    node[:ceilometer][:db_synced] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[ceilometer-dbsync]", :immediately
+end
+
+crowbar_pacemaker_sync_mark "create-ceilometer_db_sync"
 
 service "ceilometer-collector" do
   service_name node[:ceilometer][:collector][:service_name]
