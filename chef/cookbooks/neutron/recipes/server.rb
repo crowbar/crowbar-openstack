@@ -64,6 +64,8 @@ template "/etc/sysconfig/neutron" do
   owner "root"
   group "root"
   mode 0640
+  # whenever changing plugin_config_file here, keep in mind to change the call
+  # to neutron-db-manage too
   if node[:neutron][:networking_plugin] == "cisco" and node[:neutron][:use_ml2]
     variables(
       :plugin_config_file => plugin_cfg_path +  " /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
@@ -114,6 +116,37 @@ if node[:neutron][:networking_plugin] == "cisco"
 end
 
 ha_enabled = node[:neutron][:ha][:server][:enabled]
+
+crowbar_pacemaker_sync_mark "wait-neutron_db_sync"
+
+config_files = "--config-file /etc/neutron/neutron.conf --config-file #{plugin_cfg_path}"
+if node[:neutron][:networking_plugin] == "cisco" and node[:neutron][:use_ml2]
+  config_files += " --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
+end
+
+execute "neutron-db-manage check_migration" do
+  user node[:neutron][:user]
+  group node[:neutron][:group]
+  command "neutron-db-manage #{config_files} check_migration"
+  # We only do the sync the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if { !node[:neutron][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+end
+
+# We want to keep a note that we've done db_sync, so we don't do it again.
+# If we were doing that outside a ruby_block, we would add the note in the
+# compile phase, before the actual db_sync is done (which is wrong, since it
+# could possibly not be reached in case of errors).
+ruby_block "mark node for neutron db_sync" do
+  block do
+    node[:neutron][:db_synced] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[neutron-db-manage check_migration]", :immediately
+end
+
+crowbar_pacemaker_sync_mark "create-neutron_db_sync"
 
 service node[:neutron][:platform][:service_name] do
   service_name "neutron-server" if node[:neutron][:use_gitrepo]
