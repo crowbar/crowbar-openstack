@@ -304,6 +304,10 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     action :create
     # This is our last constraint, so we can finally start service_name
     notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
+    notifies :start, "pacemaker_primitive[#{admin_vip_primitive}]", :immediately
+    if node[:rabbitmq][:listen_public]
+      notifies :start, "pacemaker_primitive[#{public_vip_primitive}]", :immediately
+    end
     notifies :start, "pacemaker_primitive[#{service_name}]", :immediately
   end
 
