@@ -93,6 +93,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     action :create
     # This is our last constraint, so we can finally start service_name
     notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
+    notifies :start, "pacemaker_primitive[#{vip_primitive}]", :immediately
     notifies :start, "pacemaker_primitive[#{service_name}]", :immediately
   end
 
