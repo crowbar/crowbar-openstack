@@ -301,10 +301,9 @@ execute "heat-manage db_sync" do
   user node[:heat][:user]
   group node[:heat][:group]
   command "#{venv_prefix}heat-manage db_sync"
-  # On SUSE, we only need this when HA is enabled as the init script is doing
-  # this (but that creates races with HA); we only care about it for the
-  # initial sync, though, so we'll do that once, on the founder.
-  only_if { node.platform != "suse" || (!node[:heat][:db_synced] && ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+  # We only do the sync the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if { !node[:heat][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
 end
 
 # We want to keep a note that we've done db_sync, so we don't do it again.
