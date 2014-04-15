@@ -135,8 +135,23 @@ else
   log "HA support for neutron is disabled"
 end
 
-include_recipe "neutron::post_install_conf"
-
+# The post_install_conf recipe includes a few execute resources like this:
+#
+# execute "create_router" do
+#   command "#{neutron_cmd} router-create router-floating"
+#   not_if "out=$(#{neutron_cmd} router-list); ..."
+#   action :nothing
+# end
+#
+# If this runs simulatiously on multiple nodes (e.g. in a HA setup). It might
+# be that one node creates the router after the other did the "not_if" check.
+# In that case the router will be created twice (as it is perfectly fine to
+# have multiple routers with the same name). To avoid this race-condition we
+# make sure that the post_install_conf recipe is only executed on a single node
+# of the cluster.
+if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
+  include_recipe "neutron::post_install_conf"
+end
 
 node[:neutron][:monitor] = {} if node[:neutron][:monitor].nil?
 node[:neutron][:monitor][:svcs] = [] if node[:neutron][:monitor][:svcs].nil?
