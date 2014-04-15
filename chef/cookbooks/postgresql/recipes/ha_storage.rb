@@ -137,7 +137,7 @@ end
 if node[:database][:ha][:storage][:mode] == "drbd"
   pacemaker_colocation "col-#{fs_primitive}" do
     score "inf"
-    resources [fs_primitive, "#{ms_name}:Master"]
+    resources "#{fs_primitive} #{ms_name}:Master"
     action :create
   end
 
