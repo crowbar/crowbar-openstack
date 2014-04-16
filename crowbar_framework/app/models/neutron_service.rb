@@ -115,7 +115,7 @@ class NeutronService < PacemakerServiceObject
     vip_networks = ["admin", "public"]
 
     dirty = false
-    dirty = prepare_role_for_ha_with_haproxy(role, ["neutron", "ha", "server", "enabled"], server_ha_enabled, vip_networks)
+    dirty = prepare_role_for_ha_with_haproxy(role, ["neutron", "ha", "server", "enabled"], server_ha_enabled, server_elements, vip_networks)
     dirty = prepare_role_for_ha(role, ["neutron", "ha", "l3", "enabled"], l3_ha_enabled) || dirty
     role.save if dirty
 
