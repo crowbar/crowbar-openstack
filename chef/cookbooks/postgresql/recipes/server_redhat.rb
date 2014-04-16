@@ -111,3 +111,10 @@ template "#{node[:postgresql][:dir]}/postgresql.conf" do
   mode 0600
   notifies :restart, resources(:service => "postgresql")
 end
+
+template "/etc/cron.daily/postgresql-logs" do
+  source "cron-postgresql-logs.erb"
+  owner "root"
+  group "root"
+  mode 0755
+end
