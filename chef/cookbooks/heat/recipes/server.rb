@@ -289,18 +289,31 @@ service "heat-api-cloudwatch" do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
-unless node[:platform] == "suse"
-  crowbar_pacemaker_sync_mark "wait-heat_db_sync"
+crowbar_pacemaker_sync_mark "wait-heat_db_sync"
 
-  execute "heat-db-sync" do
-    # do not run heat-db-setup since it wants to install packages and setup db passwords
-    command "#{venv_prefix}python -m heat.db.sync"
-    action :nothing
-    subscribes :create, "template[/etc/heat/heat.conf]", :delayed
-  end
-
-  crowbar_pacemaker_sync_mark "create-heat_db_sync"
+execute "heat-manage db_sync" do
+  user node[:heat][:user]
+  group node[:heat][:group]
+  command "#{venv_prefix}heat-manage db_sync"
+  # We only do the sync the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if { !node[:heat][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
 end
+
+# We want to keep a note that we've done db_sync, so we don't do it again.
+# If we were doing that outside a ruby_block, we would add the note in the
+# compile phase, before the actual db_sync is done (which is wrong, since it
+# could possibly not be reached in case of errors).
+ruby_block "mark node for heat db_sync" do
+  block do
+    node[:heat][:db_synced] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[heat-manage db_sync]", :immediately
+end
+
+crowbar_pacemaker_sync_mark "create-heat_db_sync"
 
 if ha_enabled
   log "HA support for heat is enabled"

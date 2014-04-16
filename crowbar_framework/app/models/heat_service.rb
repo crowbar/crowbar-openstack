@@ -92,7 +92,7 @@ class HeatService < PacemakerServiceObject
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "heat-server")
 
-    role.save if prepare_role_for_ha_with_haproxy(role, ["heat", "ha", "enabled"], ha_enabled, vip_networks)
+    role.save if prepare_role_for_ha_with_haproxy(role, ["heat", "ha", "enabled"], ha_enabled, server_elements, vip_networks)
 
     net_svc = NetworkService.new @logger
     # All nodes must have a public IP, even if part of a cluster; otherwise
