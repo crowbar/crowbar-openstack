@@ -77,7 +77,22 @@ execute "cinder-manage db sync" do
   command "#{venv_prefix}cinder-manage db sync"
   user node[:cinder][:user]
   group node[:cinder][:group]
-  not_if { node[:platform] == "suse" }
+  # We only do the sync the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if { !node[:cinder][:db_synced] && (!node[:cinder][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+end
+
+# We want to keep a note that we've done db_sync, so we don't do it again.
+# If we were doing that outside a ruby_block, we would add the note in the
+# compile phase, before the actual db_sync is done (which is wrong, since it
+# could possibly not be reached in case of errors).
+ruby_block "mark node for cinder db_sync" do
+  block do
+    node[:cinder][:db_synced] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[cinder-manage db sync]", :immediately
 end
 
 crowbar_pacemaker_sync_mark "create-cinder_database"
