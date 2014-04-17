@@ -60,4 +60,4 @@ pips:
   - python-heatclient
 
 git_repo:
-  - heat https://github.com/openstack/heat.git stable/havana
+  - heat https://github.com/openstack/heat.git stable/icehouse
