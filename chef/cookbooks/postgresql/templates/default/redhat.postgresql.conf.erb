@@ -245,9 +245,9 @@ logging_collector = on                  # Enable capturing of stderr and csvlog
 # These are only used if logging_collector is on:
 log_directory = 'pg_log'                # directory where log files are written,
                                         # can be absolute or relative to PGDATA
-log_filename = 'postgresql-%a.log'      # log file name pattern,
+log_filename = 'postgresql.log-%Y%m%d%H%M'  # log file name pattern,
                                         # can include strftime() escapes
-log_truncate_on_rotation = on           # If on, an existing log file of the
+log_truncate_on_rotation = off          # If on, an existing log file of the
                                         # same name as the new log file will be
                                         # truncated rather than appended to.
                                         # But such truncation only occurs on
