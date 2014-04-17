@@ -66,6 +66,8 @@ default[:ceilometer][:ha][:server][:enabled] = false
 
 default[:ceilometer][:ha][:api][:agent] = "lsb:#{api_service_name}"
 default[:ceilometer][:ha][:api][:op][:monitor][:interval] = "10s"
+# increase default timeout: ceilometer has to wait until mongodb is ready
+default[:ceilometer][:ha][:api][:op][:start][:timeout] = "60s"
 default[:ceilometer][:ha][:collector][:agent] = "lsb:#{collector_service_name}"
 default[:ceilometer][:ha][:collector][:op][:monitor][:interval] = "10s"
 
