@@ -35,3 +35,7 @@ default[:rabbitmq][:mnesiadir] = nil
 default[:rabbitmq][:cluster] = "no"
 default[:rabbitmq][:cluster_config] = "/etc/rabbitmq/rabbitmq_cluster.config"
 default[:rabbitmq][:cluster_disk_nodes] = []
+
+# ha
+default[:rabbitmq][:ha][:enabled] = false
+default[:rabbitmq][:ha][:storage][:mode] = nil
