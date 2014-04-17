@@ -73,4 +73,4 @@ default[:ceilometer][:ha][:central][:enabled] = false
 default[:ceilometer][:ha][:central][:agent] = "lsb:#{central_service_name}"
 default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
-default[:ceilometer][:ha][:ports][:api] = 5560
+default[:ceilometer][:ha][:ports][:api] = 5561
