@@ -12,7 +12,7 @@
       "keystone_service_password": "",
       "gitrepo": "http://github.com/openstack/heat.git",
       "git_instance": "",
-      "git_refspec": "stable/havana",
+      "git_refspec": "stable/icehouse",
       "use_gitrepo": false,
       "use_gitbarclamp": false,
       "use_pip_cache": false,
