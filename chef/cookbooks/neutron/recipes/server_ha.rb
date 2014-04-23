@@ -21,9 +21,9 @@ haproxy_loadbalancer "neutron-server" do
   action :nothing
 end.run_action(:create)
 
-# Wait for all nodes to reach this point so we know that all nodes will have
-# all the required packages installed before we create the pacemaker
-# resources
+# Wait for all "neutron-server" nodes to reach this point so we know that they
+# will have all the required packages installed and configuration files updated
+# before we create the pacemaker resources.
 crowbar_pacemaker_sync_mark "sync-neutron_before_ha"
 
 # Avoid races when creating pacemaker resources
