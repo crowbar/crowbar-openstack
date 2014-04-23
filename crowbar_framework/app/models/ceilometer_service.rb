@@ -110,6 +110,8 @@ class CeilometerService < PacemakerServiceObject
       validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
     end
 
+    validate_minimum_three_nodes_in_cluster(proposal)
+
     swift_proxy_nodes = NodeObject.find("roles:swift-proxy").map { |x| x.name }
     if proposal["deployment"]["ceilometer"]["elements"]["ceilometer-swift-proxy-middleware"]
       proposal["deployment"]["ceilometer"]["elements"]["ceilometer-swift-proxy-middleware"].each do |n|
@@ -204,6 +206,30 @@ class CeilometerService < PacemakerServiceObject
       end
 
       node.save if dirty
+    end
+  end
+
+  private
+
+  # If the ceilometer-server role has a cluster assigned, we want to
+  # make sure that the cluster contains at least three nodes. MongoDB HA
+  # requires it; otherwise the Replica Set wouldn't be able to elect a
+  # primary.
+  def validate_minimum_three_nodes_in_cluster(proposal)
+    servers = proposal["deployment"][@bc_name]["elements"]["ceilometer-server"]
+    use_mongodb = proposal["attributes"][@bc_name]["use_mongodb"]
+
+    if use_mongodb && servers.length == 1 && is_cluster?(servers[0])
+      nodes, failures = expand_nodes_for_all servers
+
+      @logger.debug("validate_minimum_three_nodes_in_cluster: skipping "\
+        "items that we failed to expand: #{failures.join(", ")}"
+        ) unless failures.nil? || failures.empty?
+
+      validation_error(
+        "The cluster assigned to the ceilometer-server "\
+        "role should have at least 3 nodes, but it only has #{nodes.count}."
+        ) if nodes.length < 3
     end
   end
 end
