@@ -17,9 +17,9 @@ package node[:neutron][:platform][:ha_tool_pkg] unless node[:neutron][:platform]
 
 use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
 
-# Wait for all nodes to reach this point so we know that all nodes will have
-# all the required packages installed before we create the pacemaker
-# resources
+# Wait for all "neutron-l3" nodes to reach this point so we know that they will
+# have all the required packages installed and configuration files updated
+# before we create the pacemaker resources.
 crowbar_pacemaker_sync_mark "sync-neutron-l3_before_ha"
 
 # Avoid races when creating pacemaker resources
