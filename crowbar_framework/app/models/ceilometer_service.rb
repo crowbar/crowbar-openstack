@@ -148,7 +148,8 @@ class CeilometerService < PacemakerServiceObject
       net_svc.allocate_ip "default", "public", "host", n
     end
 
-    mongodb_ha(server_nodes) if ha_enabled
+    use_mongodb = role.default_attributes[@bc_name]["use_mongodb"]
+    mongodb_ha(server_nodes) if ha_enabled && use_mongodb
 
     # No specific need to call sync dns here, as the cookbook doesn't require
     # the VIP of the cluster to be setup
@@ -166,6 +167,9 @@ class CeilometerService < PacemakerServiceObject
     # so we don't get problems when they try to vote for a replica set
     # primary node
     instances.pop if instances.length % 2 == 0
+
+    logger.debug("Configuring a MongoDB Replica Set with "\
+      "the following nodes: #{instances.join(", ")}")
 
     # make sure only the current replica set instances have the replica
     # set attributes enabled
