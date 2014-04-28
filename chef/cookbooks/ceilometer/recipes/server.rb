@@ -21,7 +21,12 @@ if node[:ceilometer][:use_mongodb]
   # need to wait for mongodb to start even if it's on a
   # different host (ceilometer services need it running)
   members = search(:node, "ceilometer_ha_mongodb_replica_set_member:true")
-  node_address = members.first.fqdn
+  # if we don't have HA enabled, then mongodb should be on the current host
+  if members.empty?
+    node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  else
+    node_address = members.first.fqdn
+  end
   ruby_block "wait for mongodb start" do
     block do
       require 'timeout'
