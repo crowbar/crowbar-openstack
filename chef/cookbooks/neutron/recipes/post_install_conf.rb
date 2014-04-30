@@ -65,7 +65,11 @@ neutron_cmd = "neutron #{neutron_args}"
 floating_network_type = ""
 if node[:neutron][:networking_mode] == 'vlan'
   fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
-  floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{floating_net["vlan"]} --provider:physical_network physnet1"
+  if node[:network][:networks][:nova_floating][:use_vlan]
+    floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{floating_net["vlan"]} --provider:physical_network physnet1"
+  else
+    floating_network_type = "--provider:network_type flat --provider:physical_network physnet1"
+  end
 end
 
 if node[:neutron][:networking_plugin] == "openvswitch"
