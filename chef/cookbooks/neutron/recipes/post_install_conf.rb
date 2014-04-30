@@ -35,7 +35,6 @@ fixed_pool_end = fixed_last_ip if fixed_last_ip < fixed_pool_end
 public_net = node[:network][:networks]["public"]
 public_range = "#{public_net["subnet"]}/#{mask_to_bits(public_net["netmask"])}"
 public_router = "#{public_net["router"]}"
-public_vlan = public_net["vlan"]
 floating_net = node[:network][:networks]["nova_floating"]
 floating_range = "#{floating_net["subnet"]}/#{mask_to_bits(floating_net["netmask"])}"
 floating_pool_start = floating_net[:ranges][:host][:start]
@@ -75,8 +74,8 @@ when "openvswitch"
     fixed_network_type = "--provider:network_type flat --provider:physical_network physnet1"
   end
 when "linuxbridge"
-    fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
-    floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{public_net["vlan"]} --provider:physical_network physnet1"
+  fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
+  floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{floating_net["vlan"]} --provider:physical_network physnet1"
 end
 
 execute "create_fixed_network" do
