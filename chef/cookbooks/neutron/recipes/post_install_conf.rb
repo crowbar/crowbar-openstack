@@ -62,20 +62,19 @@ if node[:platform] == "suse" or node[:neutron][:use_gitrepo]
 end
 neutron_cmd = "neutron #{neutron_args}"
 
-case node[:neutron][:networking_plugin]
-when "openvswitch"
-  floating_network_type = ""
-  if node[:neutron][:networking_mode] == 'vlan'
-    fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
-  elsif node[:neutron][:networking_mode] == 'gre'
+floating_network_type = ""
+if node[:neutron][:networking_mode] == 'vlan'
+  fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
+  floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{floating_net["vlan"]} --provider:physical_network physnet1"
+end
+
+if node[:neutron][:networking_plugin] == "openvswitch"
+  if node[:neutron][:networking_mode] == 'gre'
     fixed_network_type = "--provider:network_type gre --provider:segmentation_id 1"
     floating_network_type = "--provider:network_type gre --provider:segmentation_id 2"
   else
     fixed_network_type = "--provider:network_type flat --provider:physical_network physnet1"
   end
-when "linuxbridge"
-  fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
-  floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{floating_net["vlan"]} --provider:physical_network physnet1"
 end
 
 execute "create_fixed_network" do
