@@ -3,7 +3,10 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 if node[:ceilometer][:use_mongodb]
   if node[:ceilometer][:ha][:server][:enabled]
-    db_hosts = search(:node, "ceilometer_ha_mongodb_replica_set_member:true")
+    db_hosts = search(:node,
+      "ceilometer_ha_mongodb_replica_set_member:true AND "\
+      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
+      )
     instances = db_hosts.map {|s| "#{s.address.addr}:#{s[:ceilometer][:mongodb][:port]}"}
     db_connection = "mongodb://#{instances.join(',')}/ceilometer?replicaSet=#{node[:ceilometer][:ha][:mongodb][:replica_set][:name]}"
   else

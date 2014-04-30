@@ -54,7 +54,10 @@ if ha_enabled
     # replicaset
     package("rubygem-mongo").run_action(:install)
 
-    members = search(:node, "ceilometer_ha_mongodb_replica_set_member:true").sort
+    members = search(:node,
+      "ceilometer_ha_mongodb_replica_set_member:true AND "\
+      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
+      ).sort
     CeilometerHelper.configure_replicaset(node, "crowbar-ceilometer", members)
   end
 else
