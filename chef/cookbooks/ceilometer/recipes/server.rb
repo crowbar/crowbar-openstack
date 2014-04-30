@@ -38,7 +38,7 @@ if node[:ceilometer][:use_mongodb]
           end
         end
       rescue Timeout::Error
-        Chef::Log.warn("mongodb on #{node_address} does not seem to be respondin g after trying for 1 minute")
+        Chef::Log.warn("mongodb on #{node_address} does not seem to be responding after trying for 1 minute")
       end
     end
   end
