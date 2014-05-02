@@ -31,7 +31,9 @@ end
 template mongo_conf do
   mode 0644
   source "mongodb.conf.erb"
-  variables(:listen_addr => node.fqdn)
+  variables(
+    :listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+    )
   # notifies :restart, "service[#{mongo_service}]", :immediately
 end
 

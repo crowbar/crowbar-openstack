@@ -58,7 +58,7 @@ module CeilometerHelper
       rs_members = []
       rs_options = {}
       members.each_index do |n|
-        host = "#{members[n]['fqdn']}:#{members[n][:ceilometer][:mongodb][:port]}"
+        host = "#{members[n].address.addr}:#{members[n][:ceilometer][:mongodb][:port]}"
         rs_options[host] = {}
         rs_members << { '_id' => n, 'host' => host }.merge(rs_options[host])
       end
@@ -89,7 +89,7 @@ module CeilometerHelper
       if result.fetch('ok', nil) == 1
         # everything is fine, do nothing
       elsif result.fetch('errmsg', nil) =~ /(\S+) is already initiated/ || (result.fetch('errmsg', nil) == 'already initialized')
-        server, port = Regexp.last_match.nil? || Regexp.last_match.length < 2 ? [node.fqdn, node[:ceilometer][:mongodb][:port] ] : Regexp.last_match[1].split(':')
+        server, port = Regexp.last_match.nil? || Regexp.last_match.length < 2 ? [node.address.addr, node[:ceilometer][:mongodb][:port] ] : Regexp.last_match[1].split(':')
         begin
           connection = Mongo::Connection.new(server, port, :op_timeout => 5, :slave_ok => true)
         rescue
@@ -110,7 +110,7 @@ module CeilometerHelper
           rs_member_ips.each do |mem_h|
             members.each do |n|
               ip, prt = mem_h['host'].split(':')
-              mapping["#{ip}:#{prt}"] = "#{n['fqdn']}:#{prt}" if ip == n['ipaddress']
+              mapping["#{ip}:#{prt}"] = "#{n.address.addr}:#{prt}" if ip == n['ipaddress']
             end
           end
           config['members'].map! do |m|
@@ -133,7 +133,7 @@ module CeilometerHelper
             result = admin.command(cmd, :check_response => false)
           rescue Mongo::ConnectionFailure
             # reconfiguring destroys existing connections, reconnect
-            connection = Mongo::Connection.new(node.fqdn, node[:ceilometer][:mongodb][:port], :op_timeout => 5, :slave_ok => true)
+            connection = Mongo::Connection.new(node.address.addr, node[:ceilometer][:mongodb][:port], :op_timeout => 5, :slave_ok => true)
             config = connection['local']['system']['replset'].find_one('_id' => name)
             # Validate configuration change
             if config['members'] == rs_members
@@ -178,7 +178,7 @@ module CeilometerHelper
             result = admin.command(cmd, :check_response => false)
           rescue Mongo::ConnectionFailure
             # reconfiguring destroys existing connections, reconnect
-            connection = Mongo::Connection.new(node.fqdn, node[:ceilometer][:mongodb][:port], :op_timeout => 5, :slave_ok => true)
+            connection = Mongo::Connection.new(node.address.addr, node[:ceilometer][:mongodb][:port], :op_timeout => 5, :slave_ok => true)
             config = connection['local']['system']['replset'].find_one('_id' => name)
             # Validate configuration change
             if config['members'] == rs_members
