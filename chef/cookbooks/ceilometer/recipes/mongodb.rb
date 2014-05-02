@@ -47,6 +47,8 @@ service mongo_service do
 end
 
 if ha_enabled
+  crowbar_pacemaker_sync_mark "wait-mongodb_service"
+
   pacemaker_primitive "mongodb" do
     agent node[:ceilometer][:ha][:mongodb][:agent]
     op node[:ceilometer][:ha][:mongodb][:op]
@@ -57,6 +59,8 @@ if ha_enabled
     rsc "mongodb"
     action [:create, :start]
   end
+
+  crowbar_pacemaker_sync_mark "create-mongodb_service"
 
   if node_is_controller
     # install the package immediately because we need it to configure the
