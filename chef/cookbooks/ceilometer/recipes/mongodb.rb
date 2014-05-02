@@ -39,6 +39,13 @@ end
 
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 node_is_controller = node[:ceilometer][:ha][:mongodb][:replica_set][:controller]
+
+service mongo_service do
+  supports :status => true, :restart => true
+  action [:enable, :start]
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+end
+
 if ha_enabled
   pacemaker_primitive "mongodb" do
     agent node[:ceilometer][:ha][:mongodb][:agent]
@@ -61,10 +68,5 @@ if ha_enabled
       "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
       ).sort
     CeilometerHelper.configure_replicaset(node, "crowbar-ceilometer", members)
-  end
-else
-  service mongo_service do
-    supports :status => true, :restart => true
-    action [:enable, :start]
   end
 end
