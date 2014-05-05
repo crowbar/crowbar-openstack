@@ -54,9 +54,11 @@ pacemaker_clone "cl-#{group_name}" do
   action [ :create, :start]
 end
 
-pacemaker_order "o-ceilometer-mongo" do
-  score "Mandatory"
-  ordering "cl-mongodb cl-g-ceilometer-server"
+if node[:ceilometer][:use_mongodb]
+  pacemaker_order "o-ceilometer-mongo" do
+    score "Mandatory"
+    ordering "cl-mongodb cl-g-ceilometer-server"
+  end
 end
 
 crowbar_pacemaker_sync_mark "create-ceilometer_server_ha_resources"
