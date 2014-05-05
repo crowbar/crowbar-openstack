@@ -185,9 +185,12 @@ class CeilometerService < PacemakerServiceObject
       node = NodeObject.find_node_by_name(instance)
       node[:ceilometer][:ha][:mongodb] ||= {:replica_set => {}}
       node[:ceilometer][:ha][:mongodb][:replica_set][:member] = true
+      node[:ceilometer][:ha][:mongodb][:replica_set][:controller] = false
       node.save
     end
-    controller = NodeObject.find("pacemaker_founder:true AND ceilometer_config_environment:#{role.name}").first
+    # this is just the node we use to communicate to mongodb and
+    # configure the replica set
+    controller = NodeObject.find_node_by_name(instances.first)
     controller[:ceilometer][:ha][:mongodb][:replica_set][:controller] = true
     controller.save
   end
