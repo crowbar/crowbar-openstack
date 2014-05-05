@@ -117,36 +117,44 @@ end
 
 ha_enabled = node[:neutron][:ha][:server][:enabled]
 
-crowbar_pacemaker_sync_mark "wait-neutron_db_sync"
+# There's no way to do DB migration for neutron: it's automatically done on
+# startup. This is fine in general, except for HA where we want this to happen
+# once before we start the daemon through pacemaker (otherwise, with the clone,
+# it will start on several servers concurrently, and the resource will fail on
+# all but one, defeating HA by default). For this reason, we manually start the
+# daemon once to do the migration if we use HA.
+if ha_enabled
+  crowbar_pacemaker_sync_mark "wait-neutron_db_sync"
 
-config_files = "--config-file /etc/neutron/neutron.conf --config-file #{plugin_cfg_path}"
-if node[:neutron][:networking_plugin] == "cisco" and node[:neutron][:use_ml2]
-  config_files += " --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
-end
-
-execute "neutron-db-manage check_migration" do
-  user node[:neutron][:user]
-  group node[:neutron][:group]
-  command "neutron-db-manage #{config_files} check_migration"
-  # We only do the sync the first time, and only if we're not doing HA or if we
-  # are the founder of the HA cluster (so that it's really only done once).
-  only_if { !node[:neutron][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
-end
-
-# We want to keep a note that we've done db_sync, so we don't do it again.
-# If we were doing that outside a ruby_block, we would add the note in the
-# compile phase, before the actual db_sync is done (which is wrong, since it
-# could possibly not be reached in case of errors).
-ruby_block "mark node for neutron db_sync" do
-  block do
-    node[:neutron][:db_synced] = true
-    node.save
+  service "initial neutron start for db sync" do
+    if node[:neutron][:use_gitrepo]
+      service_name "neutron-server"
+    else
+      service_name node[:neutron][:platform][:service_name]
+    end
+    action [:start, :stop]
+    # We only do the hack the first time; note that the only_if constraint will
+    # apply for both :start and :stop, which means that we can't change the
+    # db_synced attribute in a notification (as we do for other cookbooks): if
+    # we do so, :stop will not be called (as the attribute will have been
+    # set)
+    only_if { !node[:neutron][:db_synced] && CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  action :nothing
-  subscribes :create, "execute[neutron-db-manage check_migration]", :immediately
-end
 
-crowbar_pacemaker_sync_mark "create-neutron_db_sync"
+  # We want to keep a note that we've done db_sync, so we don't do it again.
+  # If we were doing that outside a ruby_block, we would add the note in the
+  # compile phase, before the actual db_sync is done (which is wrong, since it
+  # could possibly not be reached in case of errors).
+  ruby_block "mark node for neutron db_sync" do
+    block do
+      node[:neutron][:db_synced] = true
+      node.save
+    end
+    only_if { !node[:neutron][:db_synced] && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  crowbar_pacemaker_sync_mark "create-neutron_db_sync"
+end
 
 service node[:neutron][:platform][:service_name] do
   service_name "neutron-server" if node[:neutron][:use_gitrepo]
