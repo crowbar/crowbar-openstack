@@ -137,7 +137,7 @@ end
 default[:neutron][:ha][:l3][:enabled] = false
 default[:neutron][:ha][:l3][:l3_ra] = "lsb:#{node[:neutron][:platform][:l3_agent_name]}"
 default[:neutron][:ha][:l3][:dhcp_ra] = "lsb:#{node[:neutron][:platform][:dhcp_agent_name]}"
-default[:neutron][:ha][:l3][:metadata_ra] = "lsb:#{node[:neutron][:platform][:metering_agent_name]}"
+default[:neutron][:ha][:l3][:metadata_ra] = "lsb:#{node[:neutron][:platform][:metadata_agent_name]}"
 default[:neutron][:ha][:l3][:metering_ra] = "lsb:#{node[:neutron][:platform][:metering_agent_name]}"
 default[:neutron][:ha][:l3][:openvswitch_ra] = "lsb:#{node[:neutron][:platform][:ovs_agent_name]}"
 default[:neutron][:ha][:l3][:cisco_ra] = "lsb:#{node[:neutron][:ha][:l3][:openvswitch_ra]}"
