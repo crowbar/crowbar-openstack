@@ -305,6 +305,37 @@ ssl_ca_file = <%= @ssl_ca_file %>
 # ssl_ca_file = /path/to/cafile
 # ======== end of WSGI parameters related to the API server ==========
 
+# ======== neutron nova interactions ==========
+# Send notification to nova when port status is active.
+# notify_nova_on_port_status_changes = True
+
+# Send notifications to nova when port data (fixed_ips/floatingips) change
+# so nova can update it's cache.
+# notify_nova_on_port_data_changes = True
+
+# URL for connection to nova (Only supports one nova region currently).
+nova_url = <%= @nova_url if @nova_url %>
+
+# Name of nova region to use. Useful if keystone manages more than one region
+nova_region_name = <%= @keystone_settings['endpoint_region'] %>
+
+# Username for connection to nova in admin context
+nova_admin_username = <%= @nova_admin_username if @nova_admin_username %>
+
+# The uuid of the admin nova tenant
+nova_admin_tenant_id = <%= @nova_admin_tenant_id if @nova_admin_tenant_id %>
+
+# Password for connection to nova in admin context.
+nova_admin_password = <%= @nova_admin_password if @nova_admin_password %>
+
+# Authorization URL for connection to nova in admin context.
+nova_admin_auth_url = <%= @keystone_settings['internal_auth_url'] %>
+
+# Number of seconds between sending events to nova if there are any events to send
+# send_events_interval = 2
+
+# ======== end of neutron nova interactions ==========
+
 [quotas]
 # resource name(s) that are supported in quota features
 # quota_items = network,subnet,port

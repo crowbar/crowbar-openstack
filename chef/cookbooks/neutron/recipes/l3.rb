@@ -148,7 +148,8 @@ template "/etc/neutron/dhcp_agent.ini" do
 end
 
 
-#TODO: nova should depend on neutron, but neutron depend on nova a bit, so we have to do somthing with this
+#TODO: nova should depend on neutron, but neutron also depends on nova
+# so we have to do something like this
 novas = search(:node, "roles:nova-multi-controller") || []
 if novas.length > 0
   nova = novas[0]
