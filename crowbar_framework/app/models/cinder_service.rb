@@ -85,6 +85,16 @@ class CinderService < PacemakerServiceObject
     validate_one_for_role proposal, "cinder-controller"
     validate_at_least_n_for_role proposal, "cinder-volume", 1
 
+    if proposal["attributes"][@bc_name]["volume"]["volume_type"] == "raw"
+      nodes_without_suitable_drives = proposal["deployment"][@bc_name]["elements"]["cinder-volume"].select do |node_name|
+        node = NodeObject.find_node_by_name(node_name)
+        node && (node.unclaimed_physical_drives.empty? || node.physical_drives.none? { |d| node.disk_owner?(d) == 'Cinder' })
+      end
+      unless nodes_without_suitable_drives.empty?
+        validation_error("Nodes #{nodes_without_suitable_drives.to_sentence} for cinder volume role are missing at least one unclaimed disk, required when using raw devices.")
+      end
+    end
+
     if proposal["attributes"][@bc_name]["use_gitrepo"]
       validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
     end
