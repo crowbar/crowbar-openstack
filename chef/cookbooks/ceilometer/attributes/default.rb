@@ -61,6 +61,8 @@ default[:ceilometer][:ha][:server][:enabled] = false
 
 default[:ceilometer][:ha][:api][:agent] = "lsb:#{api_service_name}"
 default[:ceilometer][:ha][:api][:op][:monitor][:interval] = "10s"
+# increase default timeout: ceilometer has to wait until mongodb is ready
+default[:ceilometer][:ha][:api][:op][:start][:timeout] = "60s"
 default[:ceilometer][:ha][:collector][:agent] = "lsb:#{collector_service_name}"
 default[:ceilometer][:ha][:collector][:op][:monitor][:interval] = "10s"
 
@@ -68,4 +70,4 @@ default[:ceilometer][:ha][:central][:enabled] = false
 default[:ceilometer][:ha][:central][:agent] = "lsb:#{central_service_name}"
 default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
-default[:ceilometer][:ha][:ports][:api] = 5560
+default[:ceilometer][:ha][:ports][:api] = 5561
