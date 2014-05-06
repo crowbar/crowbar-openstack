@@ -83,13 +83,13 @@ if node[:database][:ha][:storage][:mode] == "drbd"
 
   pacemaker_colocation "col-#{service_name}" do
     score "inf"
-    resources [vip_primitive, fs_primitive, service_name]
+    resources [fs_primitive, vip_primitive, service_name]
     action :create
   end
 
   pacemaker_order "o-#{service_name}" do
     score "Mandatory"
-    ordering "#{vip_primitive} #{fs_primitive} #{service_name}"
+    ordering "#{fs_primitive} #{vip_primitive} #{service_name}"
     action :create
     # This is our last constraint, so we can finally start service_name
     notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
@@ -108,7 +108,7 @@ else
   pacemaker_group group_name do
     # Membership order *is* significant; VIPs should come first so
     # that they are available for the service to bind to.
-    members [vip_primitive, fs_primitive, service_name]
+    members [fs_primitive, vip_primitive, service_name]
     action [ :create, :start ]
   end
 
