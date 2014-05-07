@@ -7,9 +7,16 @@ if node[:ceilometer][:use_mongodb]
       "ceilometer_ha_mongodb_replica_set_member:true AND "\
       "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
       )
-    instances = db_hosts.map {|s| "#{s.address.addr}:#{s[:ceilometer][:mongodb][:port]}"}
-    db_connection = "mongodb://#{instances.join(',')}/ceilometer?replicaSet=#{node[:ceilometer][:ha][:mongodb][:replica_set][:name]}"
-  else
+    unless db_hosts.empty?
+      instances = db_hosts.map {|s| "#{s.address.addr}:#{s[:ceilometer][:mongodb][:port]}"}
+      db_connection = "mongodb://#{instances.join(',')}/ceilometer?replicaSet=#{node[:ceilometer][:ha][:mongodb][:replica_set][:name]}"
+    end
+  end
+
+  # if this is a cluster, but the replica set member attribute hasn't
+  # been set on any node (yet), we just fallback to using the first
+  # ceilometer-server node
+  if !node[:ceilometer][:ha][:server][:enabled] or db_hosts.empty?
     db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
     db_host ||= db_hosts.first || node
     mongodb_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
