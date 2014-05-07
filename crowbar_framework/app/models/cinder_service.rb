@@ -88,7 +88,7 @@ class CinderService < PacemakerServiceObject
     if proposal["attributes"][@bc_name]["volume"]["volume_type"] == "raw"
       nodes_without_suitable_drives = proposal["deployment"][@bc_name]["elements"]["cinder-volume"].select do |node_name|
         node = NodeObject.find_node_by_name(node_name)
-        node && (node.unclaimed_physical_drives.empty? || node.physical_drives.none? { |d| node.disk_owner?(d) == 'Cinder' })
+        node && (node.unclaimed_physical_drives.empty? || node.physical_drives.none? { |d| node.disk_owner(d) == 'Cinder' })
       end
       unless nodes_without_suitable_drives.empty?
         validation_error("Nodes #{nodes_without_suitable_drives.to_sentence} for cinder volume role are missing at least one unclaimed disk, required when using raw devices.")
