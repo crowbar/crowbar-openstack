@@ -17,16 +17,16 @@
 
 module Barclamp
   module CinderHelper
-    def volume_type_for_cinder(selected)
+    def volume_driver_for_cinder(selected)
       options_for_select(
         [
-          [t(".volume.raw_volume_type"), "raw"],
-          [t(".volume.local_volume_type"), "local"],
-          [t(".volume.netapp_volume_type"), "netapp"],
-          [t(".volume.emc_volume_type"), "emc"],
-          [t(".volume.eqlx_volume_type"), "eqlx"],
-          [t(".volume.rbd_volume_type"), "rbd"],
-          [t(".volume.manual_volume_type"), "manual"]
+          [t(".volumes.raw_volume_driver"), "raw"],
+          [t(".volumes.local_volume_driver"), "local"],
+          [t(".volumes.netapp_volume_driver"), "netapp"],
+          [t(".volumes.emc_volume_driver"), "emc"],
+          [t(".volumes.eqlx_volume_driver"), "eqlx"],
+          [t(".volumes.rbd_volume_driver"), "rbd"],
+          [t(".volumes.manual_volume_driver"), "manual"]
         ],
         selected.to_s
       )

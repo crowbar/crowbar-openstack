@@ -392,7 +392,12 @@ auth_strategy=keystone
 # A list of backend names to use. These backend names should
 # be backed by a unique [CONFIG] group with its options (list
 # value)
-#enabled_backends=<None>
+#
+<% if @use_multi_backend -%>
+enabled_backends=<%= @volumes.each_with_index.collect { |backend,idx|
+    "backend-#{backend['backend_driver']}-#{idx}"
+}.join(',') %>
+<% end -%>
 
 # Whether snapshots count against GigaByte quota (boolean
 # value)
@@ -1016,6 +1021,27 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 # source volume (boolean value)
 #cloned_volume_same_az=true
 
+#############################################################################
+#############################################################################
+#############################################################################
+#############################################################################
+## Cinder backends
+#############################################################################
+
+<%
+  @volumes.each_with_index do |volume, volid|
+
+    backend_id = "backend-#{volume['backend_driver']}-#{volid}"
+%>
+#############################################################################
+
+<% if @use_multi_backend -%>
+[<%= backend_id %>]
+
+# The backend name for a given driver implementation (string
+# value)
+volume_backend_name=<%= volume['backend_name'] %>
+<% end -%>
 
 #
 # Options defined in cinder.volume.driver
@@ -1034,8 +1060,8 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 #iscsi_num_targets=100
 
 # prefix for iscsi volumes (string value)
-<% unless @emc_params.nil? -%>
-    <% case @emc_params[:emc_storage_type].downcase %>
+<% if volume['backend_driver'] == 'emc' -%>
+    <% case volume["emc"]["emc_storage_type"].downcase %>
     <% when "vnx" %>
 iscsi_target_prefix = iqn.2001-07.com.vnx
     <% when "vmax" %>
@@ -1045,8 +1071,8 @@ iscsi_target_prefix = iqn.1992-04.com.em
 
 # The IP address that the iSCSI daemon is listening on (string
 # value)
-<% unless @emc_params.nil? -%>
-iscsi_ip_address = <%= node[:cinder][:volume]["emc"]["emc_ecom_server_ip"] %>
+<% if volume['backend_driver'] == 'emc' -%>
+iscsi_ip_address = <%= volume["emc"]["emc_ecom_server_ip"] %>
 <% end -%>
 
 # The port that the iSCSI daemon is listening on (integer
@@ -1079,10 +1105,6 @@ iscsi_ip_address = <%= node[:cinder][:volume]["emc"]["emc_ecom_server_ip"] %>
 # iser target user-land tool to use (string value)
 #iser_helper=tgtadm
 
-# The backend name for a given driver implementation (string
-# value)
-#volume_backend_name=<None>
-
 # Do we attach/detach volumes in cinder using multipath for
 # volume to image and image to volume transfers? (boolean
 # value)
@@ -1114,15 +1136,7 @@ iscsi_ip_address = <%= node[:cinder][:volume]["emc"]["emc_ecom_server_ip"] %>
 # will autodetect type of backing device (string value)
 #iscsi_iotype=fileio
 
-
-#
-# Options defined in cinder.volume.drivers.block_device
-#
-
-# List of all available devices (list value)
-#available_devices=
-
-
+<% if volume['backend_driver'] == 'coraid' -%>
 #
 # Options defined in cinder.volume.drivers.coraid
 #
@@ -1143,47 +1157,51 @@ iscsi_ip_address = <%= node[:cinder][:volume]["emc"]["emc_ecom_server_ip"] %>
 # Volume Type key name to store ESM Repository Name (string
 # value)
 #coraid_repository_key=coraid_repository
+<% end %>
+
+<% if volume['backend_driver'] == 'emc' -%>
+#
+# Options defined in cinder.volume.drivers.emc.emc_smis_common
+#
+
+# use this file for cinder emc plugin config data (string
+# value)
+cinder_emc_config_file=/etc/cinder/cinder_emc_config-<% backend_id -%>.xml
+
+<% end %>
 
 
+<% if volume['backend_driver'] == 'eqlx' -%>
 #
 # Options defined in cinder.volume.drivers.eqlx
 #
 
 # Group name to use for creating volumes (string value)
-<% unless @eqlx_params.nil? -%>
-eqlx_group_name=<%= @eqlx_params["eqlx_group_name"] %>
-<% end -%>
+eqlx_group_name=<%= volume['eqlx']["eqlx_group_name"] %>
 
 # Timeout for the Group Manager cli command execution (integer
 # value)
-<% unless @eqlx_params.nil? -%>
-eqlx_cli_timeout=<%= @eqlx_params["eqlx_cli_timeout"] %>
-<% end -%>
+eqlx_cli_timeout=<%= volume['eqlx']["eqlx_cli_timeout"] %>
 
 # Maximum retry count for reconnection (integer value)
 #eqlx_cli_max_retries=5
 
 # Use CHAP authentificaion for targets? (boolean value)
 #eqlx_use_chap=false
-<% unless @eqlx_params.nil? -%>
-eqlx_use_chap=<%= @eqlx_params["eqlx_use_chap"] %>
-<% end -%>
+eqlx_use_chap=<%= volume['eqlx']["eqlx_use_chap"] %>
 
 # Existing CHAP account name (string value)
-<% unless @eqlx_params.nil? -%>
-eqlx_chap_login=<%= @eqlx_params["eqlx_chap_login"] %>
-<% end -%>
+eqlx_chap_login=<%= volume['eqlx']["eqlx_chap_login"] %>
 
 # Password for specified CHAP account name (string value)
-<% unless @eqlx_params.nil? -%>
-eqlx_chap_password=<%= @eqlx_params["eqlx_chap_password"] %>
-<% end -%>
+eqlx_chap_password=<%= volume['eqlx']["eqlx_chap_password"] %>
 
 # Pool in which volumes will be created (string value)
-<% unless @eqlx_params.nil? -%>
-eqlx_pool=<%= @eqlx_params["eqlx_pool"] %>
+eqlx_pool=<%= volume['eqlx']["eqlx_pool"] %>
+
 <% end -%>
 
+<% if volume['backend_driver'] == 'eqlx' -%>
 #
 # Options defined in cinder.volume.drivers.glusterfs
 #
@@ -1208,7 +1226,9 @@ eqlx_pool=<%= @eqlx_params["eqlx_pool"] %>
 # value)
 #glusterfs_mount_point_base=$state_path/mnt
 
+<% end -%>
 
+<% if volume['backend_driver'] == 'gpfs' -%>
 #
 # Options defined in cinder.volume.drivers.gpfs
 #
@@ -1245,24 +1265,7 @@ eqlx_pool=<%= @eqlx_params["eqlx_pool"] %>
 # created as a fully allocated file, in which case, creation
 # may take a significantly longer time. (boolean value)
 #gpfs_sparse_volumes=true
-
-
-#
-# Options defined in cinder.volume.drivers.hds.hds
-#
-
-# configuration file for HDS cinder plugin for HUS (string
-# value)
-#hds_cinder_config_file=/opt/hds/hus/cinder_hus_conf.xml
-
-
-#
-# Options defined in cinder.volume.drivers.huawei
-#
-
-# config data for cinder huawei plugin (string value)
-#cinder_huawei_conf_file=/etc/cinder/cinder_huawei_conf.xml
-
+<% end -%>
 
 #
 # Options defined in cinder.volume.drivers.lvm
@@ -1270,11 +1273,11 @@ eqlx_pool=<%= @eqlx_params["eqlx_pool"] %>
 
 # Name for the VG that will contain exported volumes (string
 # value)
-<% unless @raw_params.nil? -%>
-volume_group=<%= node[:cinder][:volume][:raw][:volume_name] %>
+<% if volume['backend_driver'] == 'raw' -%>
+volume_group=<%= volume[:raw][:volume_name] %>
 <% end -%>
-<% unless @local_params.nil? -%>
-volume_group=<%= node[:cinder][:volume][:local][:volume_name] %>
+<% if volume['backend_driver'] == 'local' -%>
+volume_group=<%= volume[:local][:volume_name] %>
 <% end -%>
 
 # Size of thin provisioning pool (None uses entire cinder VG)
@@ -1291,89 +1294,141 @@ volume_group=<%= node[:cinder][:volume][:local][:volume_name] %>
 lvm_type=thin
 
 
+<% if volume['backend_driver'] == 'netapp' -%>
 #
 # Options defined in cinder.volume.drivers.netapp.options
 #
 
-# Vfiler to use for provisioning (string value)
-#netapp_vfiler=<None>
-<% unless @netapp_params.nil? -%>
-netapp_vfiler=<%= @netapp_params['netapp_vfiler'] %>
-<% end -%>
+# The vFiler unit on which provisioning of block storage
+# volumes will be done. This option is only used by the driver
+# when connecting to an instance with a storage family of Data
+# ONTAP operating in 7-Mode and the storage protocol selected
+# is iSCSI. Only use this option when utilizing the MultiStore
+# feature on the NetApp storage system. (string value)
+netapp_vfiler=<%= volume['netapp']['netapp_vfiler'] %>
 
-# User name for the storage controller (string value)
-#netapp_login=<None>
-<% unless @netapp_params.nil? -%>
-netapp_login=<%= @netapp_params['netapp_login'] %>
-<% end -%>
+# Administrative user account name used to access the storage
+# system or proxy server. (string value)
+netapp_login=<%= volume['netapp']['netapp_login'] %>
 
-# Password for the storage controller (string value)
-#netapp_password=<None>
-<% unless @netapp_params.nil? -%>
-netapp_password=<%= @netapp_params['netapp_password'] %>
-<% end -%>
+# Password for the administrative user account specified in
+# the netapp_login option. (string value)
+netapp_password=<%= volume['netapp']['netapp_password'] %>
 
-# Cluster vserver to use for provisioning (string value)
-#netapp_vserver=<None>
-<% unless @netapp_params.nil? -%>
-netapp_vserver=<%= @netapp_params['vserver'] %>
-<% end -%>
+# This option specifies the virtual storage server (Vserver)
+# name on the storage cluster on which provisioning of block
+# storage volumes should occur. If using the NFS storage
+# protocol, this parameter is mandatory for storage service
+# catalog support (utilized by Cinder volume type extra_specs
+# support). If this option is specified, the exports belonging
+# to the Vserver will only be used for provisioning in the
+# future. Block storage volumes on exports not belonging to
+# the Vserver specified by this option will continue to
+# function normally. (string value)
+netapp_vserver=<%= volume['netapp']['vserver'] %>
 
-# Host name for the storage controller (string value)
-#netapp_server_hostname=<None>
-<% unless @netapp_params.nil? -%>
-netapp_server_hostname=<%= @netapp_params['netapp_server_hostname'] %>
-<% end -%>
+# The hostname (or IP address) for the storage system or proxy
+# server. (string value)
+netapp_server_hostname=<%= volume['netapp']['netapp_server_hostname'] %>
 
-# Port number for the storage controller (integer value)
-#netapp_server_port=80
-<% unless @netapp_params.nil? -%>
-netapp_server_port=<%= @netapp_params['netapp_server_port'] %>
-<% end -%>
+# The TCP port to use for communication with the storage
+# system or proxy server. Traditionally, port 80 is used for
+# HTTP and port 443 is used for HTTPS; however, this value
+# should be changed if an alternate port has been configured
+# on the storage system or proxy server. (integer value)
+netapp_server_port=<%= volume['netapp']['netapp_server_port'] %>
 
-# Threshold available percent to start cache cleaning.
-# (integer value)
+# This option is used to specify the path to the E-Series
+# proxy application on a proxy server. The value is combined
+# with the value of the netapp_transport_type,
+# netapp_server_hostname, and netapp_server_port options to
+# create the URL used by the driver to connect to the proxy
+# application. (string value)
+#netapp_webservice_path=/devmgr/v2
+
+# This option is only utilized when the storage family is
+# configured to eseries. This option is used to restrict
+# provisioning to the specified controllers. Specify the value
+# of this option to be a comma separated list of controller
+# hostnames or IP addresses to be used for provisioning.
+# (string value)
+#netapp_controller_ips=<None>
+
+# Password for the NetApp E-Series storage array. (string
+# value)
+#netapp_sa_password=<None>
+
+# This option is used to restrict provisioning to the
+# specified storage pools. Only dynamic disk pools are
+# currently supported. Specify the value of this option to be
+# a comma separated list of disk pool names to be used for
+# provisioning. (string value)
+#netapp_storage_pools=<None>
+
+# If the percentage of available space for an NFS share has
+# dropped below the value specified by this option, the NFS
+# image cache will be cleaned. (integer value)
 #thres_avl_size_perc_start=20
 
-# Threshold available percent to stop cache cleaning. (integer
-# value)
+# When the percentage of available space on an NFS share has
+# reached the percentage specified by this option, the driver
+# will stop clearing files from the NFS image cache that have
+# not been accessed in the last M minutes, where M is the
+# value of the expiry_thres_minutes configuration option.
+# (integer value)
 #thres_avl_size_perc_stop=60
 
-# Threshold minutes after which cache file can be cleaned.
-# (integer value)
+# This option specifies the threshold for last access time for
+# images in the NFS image cache. When a cache cleaning cycle
+# begins, images in the cache that have not been accessed in
+# the last M minutes, where M is the value of this parameter,
+# will be deleted from the cache to create free space on the
+# NFS share. (integer value)
 #expiry_thres_minutes=720
 
-# Volume size multiplier to ensure while creation (floating
-# point value)
+# This option specifies the path of the NetApp copy offload
+# tool binary. Ensure that the binary has execute permissions
+# set which allow the effective user of the cinder-volume
+# process to execute the file. (string value)
+#netapp_copyoffload_tool_path=<None>
+
+# The quantity to be multiplied by the requested volume size
+# to ensure enough space is available on the virtual storage
+# server (Vserver) to fulfill the volume creation request.
+# (floating point value)
 #netapp_size_multiplier=1.2
 
-# Comma separated volumes to be used for provisioning (string
-# value)
-#netapp_volume_list=<None>
-<% unless @netapp_params.nil? -%>
-netapp_volume_list=<%= @netapp_params['netapp_volume_list'] %>
-<% end -%>
+# This option is only utilized when the storage protocol is
+# configured to use iSCSI. This option is used to restrict
+# provisioning to the specified controller volumes. Specify
+# the value of this option to be a comma separated list of
+# NetApp controller volume names to be used for provisioning.
+# (string value)
+netapp_volume_list=<%= volume['netapp']['netapp_volume_list'] %>
 
-# Storage family type. (string value)
-#netapp_storage_family=ontap_cluster
-<% unless @netapp_params.nil? -%>
-netapp_storage_family=<%= @netapp_params['storage_family'] %>
-<% end -%>
+# The storage family type used on the storage system; valid
+# values are ontap_7mode for using Data ONTAP operating in
+# 7-Mode, ontap_cluster for using clustered Data ONTAP, or
+# eseries for using E-Series. (string value)
+netapp_storage_family=<%= volume['netapp']['storage_family'] %>
 
 # The storage protocol to be used on the data path with the
 # storage system; valid values are iscsi or nfs. (string
 # value)
-<% unless @netapp_params.nil? -%>
-netapp_storage_protocol=<%= @netapp_params['storage_protocol'] %>
+netapp_storage_protocol=<%= volume['netapp']['storage_protocol'] %>
+
+# The transport protocol used when communicating with the
+# storage system or proxy server. Valid values are http or
+# https. (string value)
+netapp_transport_type=<%= volume['netapp']['netapp_transport_type'] %>
+
+# File with the list of available nfs shares (string value)
+nfs_shares_config=/etc/cinder/nfs_shares-<% backend_id -%>
+
 <% end -%>
 
-# Transport type protocol (string value)
-#netapp_transport_type=http
-<% unless @netapp_params.nil? -%>
-netapp_transport_type=<%= @netapp_params['netapp_transport_type'] %>
-<% end -%>
 
-
+<% if volume['backend_driver'] == 'nexenta' -%>
 #
 # Options defined in cinder.volume.drivers.nexenta.options
 #
@@ -1442,14 +1497,17 @@ netapp_transport_type=<%= @netapp_params['netapp_transport_type'] %>
 
 # flag to create sparse volumes (boolean value)
 #nexenta_sparse=false
+<% end -%>
 
 
 #
 # Options defined in cinder.volume.drivers.nfs
 #
 
+<% if volume['backend_driver'] == 'netapp' -%>
 # File with the list of available nfs shares (string value)
-#nfs_shares_config=/etc/cinder/nfs_shares
+nfs_shares_config=/etc/cinder/nfs_shares-<% backend_id -%>
+<% end -%>
 
 # Create volumes as sparsed files which take no space.If set
 # to False volume is created as regular file.In such case
@@ -1475,27 +1533,23 @@ netapp_transport_type=<%= @netapp_params['netapp_transport_type'] %>
 #nfs_mount_options=<None>
 
 
+<% if volume['backend_driver'] == 'rbd' -%>
 #
 # Options defined in cinder.volume.drivers.rbd
 #
 
 # the RADOS pool in which rbd volumes are stored (string
 # value)
-<% unless @rbd_params.nil? -%>
-rbd_pool=<%= @rbd_params['pool'] %>
-<% end -%>
+rbd_pool=<%= volume['rbd']['pool'] %>
 
 # the RADOS client name for accessing rbd volumes - only set
 # when using cephx authentication (string value)
-<% unless @rbd_params.nil? or @rbd_params['user'].empty? -%>
-rbd_user=<%= @rbd_params['user'] %>
+<% unless volume['rbd']['user'].empty? -%>
+rbd_user=<%= volume['rbd']['user'] %>
 <% end -%>
 
 # path to the ceph configuration file to use (string value)
-<% unless @rbd_params.nil? -%>
-<%# TODO(saschpe): File name will include the backend name, e.g. '/etc/ceph/ceph-default.conf' %>
 rbd_ceph_conf=/etc/ceph/ceph.conf
-<% end -%>
 
 # flatten volumes created from snapshots to remove dependency
 # (boolean value)
@@ -1514,7 +1568,9 @@ rbd_ceph_conf=/etc/ceph/ceph.conf
 # value of zero disables cloning (integer value)
 #rbd_max_clone_depth=5
 
+<% end -%>
 
+<% if volume['backend_driver'] == 'hp' -%>
 #
 # Options defined in cinder.volume.drivers.san.hp.hp_3par_common
 #
@@ -1553,31 +1609,25 @@ rbd_ceph_conf=/etc/ceph/ceph.conf
 
 # List of target iSCSI addresses to use. (list value)
 #hp3par_iscsi_ips=
+<% end -%>
 
 
+<% if volume['backend_driver'] == 'eqlx' -%>
 #
 # Options defined in cinder.volume.drivers.san.san
 #
 
 # Use thin provisioning for SAN volumes? (boolean value)
-<% unless @eqlx_params.nil? -%>
-san_thin_provision=<%= @eqlx_params["san_thin_provision"] %>
-<% end -%>
+san_thin_provision=<%= volume['eqlx']["san_thin_provision"] %>
 
 # IP address of SAN controller (string value)
-<% unless @eqlx_params.nil? -%>
-san_ip=<%= @eqlx_params["san_ip"] %>
-<% end -%>
+san_ip=<%= volume['eqlx']["san_ip"] %>
 
 # Username for SAN controller (string value)
-<% unless @eqlx_params.nil? -%>
-san_login=<%= @eqlx_params["san_login"] %>
-<% end -%>
+san_login=<%= volume['eqlx']["san_login"] %>
 
 # Password for SAN controller (string value)
-<% unless @eqlx_params.nil? -%>
-san_password=<%= @eqlx_params["san_password"] %>
-<% end -%>
+san_password=<%= volume['eqlx']["san_password"] %>
 
 # Filename of private key to use for SSH authentication
 # (string value)
@@ -1601,8 +1651,9 @@ san_password=<%= @eqlx_params["san_password"] %>
 
 # Maximum ssh connections in the pool (integer value)
 #ssh_max_pool_conn=5
+<% end -%>
 
-
+<% if volume['backend_driver'] == 'eqlx' -%>
 #
 # Options defined in cinder.volume.drivers.san.solaris
 #
@@ -1610,8 +1661,9 @@ san_password=<%= @eqlx_params["san_password"] %>
 # The ZFS path under which to create zvols for volumes.
 # (string value)
 #san_zfs_volume_base=rpool/
+<% end -%>
 
-
+<% if volume['backend_driver'] == 'scality' -%>
 #
 # Options defined in cinder.volume.drivers.scality
 #
@@ -1625,8 +1677,10 @@ san_password=<%= @eqlx_params["san_password"] %>
 
 # Path from Scality SOFS root to volume dir (string value)
 #scality_sofs_volume_dir=cinder/volumes
+<% end -%>
 
 
+<% if volume['backend_driver'] == 'solidfire' -%>
 #
 # Options defined in cinder.volume.drivers.solidfire
 #
@@ -1643,8 +1697,10 @@ san_password=<%= @eqlx_params["san_password"] %>
 # SolidFire API port. Useful if the device api is behind a
 # proxy on a different port. (integer value)
 #sf_api_port=443
+<% end -%>
 
 
+<% if volume['backend_driver'] == 'storewize_svc' -%>
 #
 # Options defined in cinder.volume.drivers.storwize_svc
 #
@@ -1696,8 +1752,9 @@ san_password=<%= @eqlx_params["san_password"] %>
 
 # Allows vdisk to multi host mapping (boolean value)
 #storwize_svc_multihostmap_enabled=true
+<% end -%>
 
-
+<% if volume['backend_driver'] == 'vmware' -%>
 #
 # Options defined in cinder.volume.drivers.vmware.vmdk
 #
@@ -1740,16 +1797,18 @@ san_password=<%= @eqlx_params["san_password"] %>
 # in one shot. Server may still limit the count to something
 # less than the configured value. (integer value)
 #vmware_max_objects_retrieval=100
+<% end -%>
 
-
+<% if volume['backend_driver'] == 'windows' -%>
 #
 # Options defined in cinder.volume.drivers.windows.windows
 #
 
 # Path to store VHD backed volumes (string value)
 #windows_iscsi_lun_path=C:\iSCSIVirtualDisks
+<% end -%>
 
-
+<% if volume['backend_driver'] == 'xen' -%>
 #
 # Options defined in cinder.volume.drivers.xenapi.sm
 #
@@ -1771,8 +1830,10 @@ san_password=<%= @eqlx_params["san_password"] %>
 
 # Base path to the storage repository (string value)
 #xenapi_sr_base_path=/var/run/sr-mount
+<% end -%>
 
 
+<% if volume['backend_driver'] == 'xiv_ds8k' -%>
 #
 # Options defined in cinder.volume.drivers.xiv_ds8k
 #
@@ -1784,8 +1845,10 @@ san_password=<%= @eqlx_params["san_password"] %>
 # Connection type to the IBM Storage Array
 # (fibre_channel|iscsi) (string value)
 #xiv_ds8k_connection_type=iscsi
+<% end -%>
 
 
+<% if volume['backend_driver'] == 'zadara' -%>
 #
 # Options defined in cinder.volume.drivers.zadara
 #
@@ -1830,7 +1893,7 @@ san_password=<%= @eqlx_params["san_password"] %>
 # Don't halt on deletion of non-existing volumes (boolean
 # value)
 #zadara_vpsa_allow_nonexistent_delete=true
-
+<% end -%>
 
 #
 # Options defined in cinder.volume.manager
@@ -1838,40 +1901,29 @@ san_password=<%= @eqlx_params["san_password"] %>
 
 # Driver to use for volume creation (string value)
 #volume_driver=cinder.volume.drivers.lvm.LVMISCSIDriver
-<% unless @rbd_params.nil? -%>
+<% if volume['backend_driver'] == 'rbd' -%>
 volume_driver=cinder.volume.drivers.rbd.RBDDriver
 <% end -%>
-<% unless @eqlx_params.nil? -%>
+<% if volume['backend_driver'] == 'eqlx' -%>
 volume_driver=cinder.volume.drivers.eqlx.DellEQLSanISCSIDriver
 <% end -%>
-<% unless @netapp_params.nil? -%>
+<% if volume['backend_driver'] == 'netapp' -%>
 volume_driver=cinder.volume.drivers.netapp.common.NetAppDriver
 <% end -%>
-<% unless @emc_params.nil? -%>
+<% if volume['backend_driver'] == 'emc' -%>
 volume_driver=cinder.volume.drivers.emc.emc_smis_iscsi.EMCSMISISCSIDriver
 <% end -%>
-<% unless @manual_driver.nil? -%>
-volume_driver=<%= @manual_driver %>
-<%= @manual_driver_config %>
+<% if volume['backend_driver'] == 'manual' -%>
+volume_driver=<%= volume['manual']['driver'] %>
+<%= volume['manual']['config'] %>
 <% end -%>
 
-# Timeout for creating the volume to migrate to when
-# performing volume migration (seconds) (integer value)
-#migration_create_volume_timeout_secs=300
+<% break unless @use_multi_backend -%>
+<% end %>
 
-# Offload pending volume delete during volume service startup
-# (boolean value)
-#volume_service_inithost_offload=false
-
-
-#
-# Options defined in cinder.volume.utils
-#
-
-# The default block size used when copying/clearing volumes
-# (string value)
-#volume_dd_blocksize=1M
-
+#############################################################################
+## END Cinder backends
+#############################################################################
 
 [keystone_authtoken]
 
@@ -1998,4 +2050,4 @@ signing_dir=/var/cache/cinder/keystone-signing
 # Catalog header. (boolean value)
 #include_service_catalog=true
 
-# Total option count: 382
+
