@@ -1,5 +1,6 @@
 #
 # Copyright 2012 Dell, Inc.
+# Copyright 2014 SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,10 +25,7 @@ cinder_path = "/opt/cinder"
 venv_path = node[:cinder][:use_virtualenv] ? "#{cinder_path}/.venv" : nil
 
 keystone = get_instance('roles:keystone-server')
-keystone_settings = KeystoneHelper.keystone_settings(keystone)
-keystone_settings['service_user'] = node[:cinder][:service_user]
-keystone_settings['service_password'] = node[:cinder][:service_password]
-Chef::Log.info("Keystone server found at #{keystone_settings['internal_url_host']}")
+keystone_settings = KeystoneHelper.keystone_settings(keystone, :cinder)
 
 cinder_port = node[:cinder][:api][:bind_port]
 cinder_protocol = node[:cinder][:api][:protocol]
