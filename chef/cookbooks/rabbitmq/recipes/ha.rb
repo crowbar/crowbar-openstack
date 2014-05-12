@@ -62,10 +62,33 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   drbd_params = {}
   drbd_params["drbd_resource"] = drbd_resource
 
+  # Careful here: when creating the DRBD resources, we should in theory create
+  # the primitive and the ms resources in one transaction. This is what is
+  # expected by the drbd OCF agent, which checks (for the primitive) that the
+  # meta bits (like clone-max), that are supposed to be inherited from the
+  # required ms resource, are present.
+  #
+  # When that check fails, we can see this error:
+  #   ERROR: meta parameter misconfigured, expected clone-max -le 2, but found unset.
+  # which will cause fencing (the resource is not supposed to start, but the
+  # monitoring op fails, so pacemaker tries to stop the resource to be safe,
+  # and that fails too, leading to fencing).
+  #
+  # However, we cannot create the two resources in one transaction. So what we
+  # do instead is on initial creation (and only in that case), we mark the drbd
+  # primitive as unmanaged (that will cause the failure to not be fatal, with
+  # no fencing), and we clean it up + mark it as managed after we create the ms
+  # resource.
+
   pacemaker_primitive drbd_primitive do
     agent "ocf:linbit:drbd"
     params drbd_params
     op rabbitmq_op
+    # See big comment above as to why we do that. We know that the founder will
+    # go first here, so we only do this on the founder.
+    meta ({
+      "is-managed" => "false"
+    }) if (CrowbarPacemakerHelper.is_cluster_founder?(node) && ! ::Kernel.system("crm configure show #{drbd_primitive} &> /dev/null"))
     action :create
   end
 
@@ -81,12 +104,17 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     action :create
   end
 
-  # This is needed because we don't create all the pacemaker resources in the
-  # same transaction
-  execute "Cleanup #{drbd_primitive} on #{ms_name} start" do
-    command "sleep 2; crm resource cleanup #{drbd_primitive}"
+  # See big comment above as to why we do that. We know that the founder will
+  # go first here, so we only do this on the founder, but in short: this is
+  # needed because we don't create all the pacemaker resources in the same
+  # transaction.
+  # Note that we don't use "crm resource manage" because it will change
+  # is-managed of the ms resource...
+  execute "Cleanup and manage #{drbd_primitive} on #{ms_name} start" do
+    command "sleep 2; crm resource cleanup #{drbd_primitive}; crm_resource --resource #{drbd_primitive} --delete-parameter \"is-managed\" --meta || :"
     action :nothing
     subscribes :run, "pacemaker_ms[#{ms_name}]", :immediately
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 
