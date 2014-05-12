@@ -44,7 +44,7 @@ floating_pool_start = floating_first_ip if floating_first_ip > floating_pool_sta
 
 floating_pool_end = floating_last_ip if floating_last_ip < floating_pool_end
 
-keystone_settings = NeutronHelper.keystone_settings(node)
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 neutron_insecure = node[:neutron][:api][:protocol] == 'https' && node[:neutron][:ssl][:insecure]
 ssl_insecure = keystone_settings['insecure'] || neutron_insecure

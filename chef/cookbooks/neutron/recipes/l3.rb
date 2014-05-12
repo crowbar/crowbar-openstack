@@ -164,7 +164,7 @@ metadata_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:en
 metadata_port = "8775"
 metadata_proxy_shared_secret = (nova[:nova][:neutron_metadata_proxy_shared_secret] rescue '')
 
-keystone_settings = NeutronHelper.keystone_settings(node)
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 template "/etc/neutron/metadata_agent.ini" do
   source "metadata_agent.ini.erb"

@@ -93,7 +93,7 @@ pacemaker_clone agents_clone_name do
   action [ :create, :start ]
 end
 
-keystone_settings = NeutronHelper.keystone_settings(node)
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 ha_tool_primitive_name = "neutron-ha-tool"
 
