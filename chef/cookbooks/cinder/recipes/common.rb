@@ -290,23 +290,23 @@ template "/etc/cinder/cinder.conf" do
   group "root"
   mode 0640
   variables(
-            :bind_host => bind_host,
-            :bind_port => bind_port,
-            :eqlx_params => eqlx_params,
-            :emc_params => emc_params,
-            :rbd_params => rbd_params,
-            :netapp_params => netapp_params,
-            :manual_driver => manual_driver,
-            :manual_driver_config => manual_driver_config,
-            :sql_connection => sql_connection,
-            :rabbit_settings => rabbit_settings,
-            :glance_server_protocol => glance_server_protocol,
-            :glance_server_host => glance_server_host,
-            :glance_server_port => glance_server_port,
-            :glance_server_insecure => glance_server_insecure,
-            :nova_api_insecure => nova_api_insecure,
-            :availability_zone => availability_zone
-            )
+    :bind_host => bind_host,
+    :bind_port => bind_port,
+    :eqlx_params => eqlx_params,
+    :emc_params => emc_params,
+    :rbd_params => rbd_params,
+    :netapp_params => netapp_params,
+    :manual_driver => manual_driver,
+    :manual_driver_config => manual_driver_config,
+    :sql_connection => sql_connection,
+    :rabbit_settings => rabbit_settings,
+    :glance_server_protocol => glance_server_protocol,
+    :glance_server_host => glance_server_host,
+    :glance_server_port => glance_server_port,
+    :glance_server_insecure => glance_server_insecure,
+    :nova_api_insecure => nova_api_insecure,
+    :availability_zone => availability_zone
+    )
 end
 
 node.save
