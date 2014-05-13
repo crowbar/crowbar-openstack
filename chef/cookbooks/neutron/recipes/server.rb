@@ -31,19 +31,6 @@ include_recipe "neutron::database"
 include_recipe "neutron::common_config"
 
 
-keystone_settings = NeutronHelper.keystone_settings(node)
-
-template "/etc/neutron/api-paste.ini" do
-  source "api-paste.ini.erb"
-  owner node[:neutron][:platform][:user]
-  group "root"
-  mode "0640"
-  variables(
-    :keystone_settings => keystone_settings
-  )
-end
-
-
 if node[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware"
   plugin_cfg_path = "/etc/neutron/plugins/ml2/ml2_conf.ini"
 else
@@ -160,7 +147,6 @@ service node[:neutron][:platform][:service_name] do
   service_name "neutron-server" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/neutron/api-paste.ini]")
   subscribes :restart, resources("template[#{plugin_cfg_path}]")
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
