@@ -305,7 +305,8 @@ template "/etc/cinder/cinder.conf" do
     :glance_server_port => glance_server_port,
     :glance_server_insecure => glance_server_insecure,
     :nova_api_insecure => nova_api_insecure,
-    :availability_zone => availability_zone
+    :availability_zone => availability_zone,
+    :keystone_settings => KeystoneHelper.keystone_settings(node, :cinder)
     )
 end
 

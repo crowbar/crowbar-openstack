@@ -1868,23 +1868,29 @@ volume_driver=<%= @manual_driver %>
 # Options defined in keystoneclient.middleware.auth_token
 #
 
-# Prefix to prepend at the beginning of the path (string
-# value)
+# Prefix to prepend at the beginning of the path. Deprecated,
+# use identity_uri. (string value)
 #auth_admin_prefix=
 
-# Host providing the admin Identity API endpoint (string
-# value)
+# Host providing the admin Identity API endpoint. Deprecated,
+# use identity_uri. (string value)
 #auth_host=127.0.0.1
 
-# Port of the admin Identity API endpoint (integer value)
+# Port of the admin Identity API endpoint. Deprecated, use
+# identity_uri. (integer value)
 #auth_port=35357
 
-# Protocol of the admin Identity API endpoint(http or https)
-# (string value)
+# Protocol of the admin Identity API endpoint (http or https).
+# Deprecated, use identity_uri. (string value)
 #auth_protocol=https
 
 # Complete public Identity API endpoint (string value)
-#auth_uri=<None>
+auth_uri = <%= @keystone_settings['internal_auth_url'] %>
+
+# Complete admin Identity API endpoint. This should specify
+# the unversioned root endpoint eg. https://localhost:35357/
+# (string value)
+identity_uri = <%= @keystone_settings['admin_auth_url'] %>
 
 # API version of the admin Identity API endpoint (string
 # value)
@@ -1915,14 +1921,14 @@ volume_driver=<%= @manual_driver %>
 #admin_token=<None>
 
 # Keystone account username (string value)
-#admin_user=<None>
+admin_user = <%= @keystone_settings['service_user'] %>
 
 # Keystone account password (string value)
-#admin_password=<None>
+admin_password = <%= @keystone_settings['service_password'] %>
 
 # Keystone service account tenant name to validate user tokens
 # (string value)
-#admin_tenant_name=admin
+admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 
 # Env key for the swift cache (string value)
 #cache=<None>
@@ -1940,7 +1946,7 @@ volume_driver=<%= @manual_driver %>
 #cafile=<None>
 
 # Verify HTTPS connections. (boolean value)
-#insecure=false
+insecure = <%= @keystone_settings['insecure'] %>
 
 # Directory used to cache files related to PKI tokens (string
 # value)

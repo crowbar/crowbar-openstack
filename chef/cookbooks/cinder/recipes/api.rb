@@ -100,15 +100,3 @@ crowbar_pacemaker_sync_mark "create-cinder_register"
 cinder_service "api" do
   use_pacemaker_provider ha_enabled
 end
-
-template "/etc/cinder/api-paste.ini" do
-  source "api-paste.ini.erb"
-  owner node[:cinder][:user]
-  group "root"
-  mode "0640"
-  variables(
-    :keystone_settings => keystone_settings
-  )
-  notifies :restart, resources(:service => "cinder-api"), :immediately
-end
-
