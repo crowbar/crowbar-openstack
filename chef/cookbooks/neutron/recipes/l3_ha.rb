@@ -116,8 +116,13 @@ pacemaker_primitive ha_tool_primitive_name do
   only_if { use_l3_agent }
 end
 
+ha_tool_ordering = "#{agents_clone_name} #{ha_tool_primitive_name}"
+if node.roles.include?("neutron-server") && node[:neutron][:ha][:server][:enabled]
+  ha_tool_ordering = "g-haproxy cl-neutron-server #{agents_clone_name} #{ha_tool_primitive_name}"
+end
+
 pacemaker_order "o-neutron-ha-tool" do
-  ordering "#{agents_clone_name} #{ha_tool_primitive_name}"
+  ordering ha_tool_ordering
   score "Mandatory"
   action [ :create ]
   only_if { use_l3_agent }
