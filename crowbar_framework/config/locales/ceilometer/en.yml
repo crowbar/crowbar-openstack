@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 #
 # Copyright 2011-2013, Dell
 # Copyright 2013-2014, SUSE LINUX Products GmbH
@@ -16,7 +15,16 @@
 # limitations under the License.
 #
 
-require File.join(File.expand_path(File.dirname(__FILE__)), "barclamp_lib")
-@barclamp = "ceilometer"
-
-main
+en:
+  nav:
+    ceilometer: 'Ceilometer'
+  barclamp:
+    ceilometer:
+      edit_attributes:
+        database_instance: 'Database'
+        keystone_instance: 'Keystone'
+        rabbitmq_instance: 'RabbitMQ'
+        cpu_interval: 'Interval used for CPU meter updates (in seconds)'
+        meters_interval: 'Interval used for other meter updates (in seconds)'
+        use_mongodb: 'Use MongoDB instead of standard database'
+        verbose: 'Verbose Logging'
