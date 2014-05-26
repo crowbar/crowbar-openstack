@@ -1,5 +1,6 @@
+#
 # Copyright 2011-2013, Dell
-# Copyright 2013, SUSE LINUX Products GmbH
+# Copyright 2013-2014, SUSE LINUX Products GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,28 +14,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Author: Dell Crowbar Team
-# Author: SUSE LINUX Products GmbH
-#
 
-module DatabaseBarclampHelper
-  def engines_for_database(selected)
-    options_for_select(
-      [
-        ["MySQL","mysql"],
-        ["PostgreSQL","postgresql"]
-      ],
-      selected.to_s
-    )
-  end
+module Barclamp
+  module DatabaseHelper
+    def engines_for_database(selected)
+      options_for_select(
+        [
+          ["MySQL", "mysql"],
+          ["PostgreSQL", "postgresql"]
+        ],
+        selected.to_s
+      )
+    end
 
-  def ha_storage_mode_for_database(selected)
-    options_for_select(
-      [
-        [t(".ha.storage.modes.drbd"), "drbd"],
-        [t(".ha.storage.modes.shared"), "shared"]
-      ],
-      selected.to_s
-    )
+    def ha_storage_mode_for_database(selected)
+      options_for_select(
+        [
+          [t(".ha.storage.modes.drbd"), "drbd"],
+          [t(".ha.storage.modes.shared"), "shared"]
+        ],
+        selected.to_s
+      )
+    end
   end
 end
