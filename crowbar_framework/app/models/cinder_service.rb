@@ -62,7 +62,7 @@ class CinderService < PacemakerServiceObject
     if nodes.size >= 1
       controller        = nodes.detect { |n| n.intended_role == "controller"} || nodes.first
       storage           = nodes.detect { |n| n.intended_role == "storage" } || controller
-      base["deployment"]["cinder"]["elements"] = {
+      base["deployment"][@bc_name]["elements"] = {
         "cinder-controller"     => [ controller[:fqdn] ],
         "cinder-volume"         => [ storage[:fqdn] ]
       }
@@ -74,7 +74,7 @@ class CinderService < PacemakerServiceObject
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
     base["attributes"][@bc_name]["glance_instance"] = find_dep_proposal("glance")
 
-    base["attributes"]["cinder"]["service_password"] = '%012d' % rand(1e12)
+    base["attributes"][@bc_name]["service_password"] = '%012d' % rand(1e12)
     base["attributes"][@bc_name][:db][:password] = random_password
 
     @logger.debug("Cinder create_proposal: exiting")
