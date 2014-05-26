@@ -1,0 +1,93 @@
+#
+# Copyright 2011-2013, Dell
+# Copyright 2013-2014, SUSE LINUX Products GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+en:
+  nav:
+    cinder: 'Cinder'
+  barclamp:
+    cinder:
+      edit_attributes:
+        rabbitmq_instance: 'RabbitMQ'
+        database_instance: 'Database Instance'
+        keystone_instance: 'Keystone'
+        glance_instance: 'Glance'
+        volume:
+          volume_type: 'Type of Volume'
+          raw: 'Raw devices'
+          local: 'Local file'
+          manually: 'Other driver'
+          disk_parameters: 'Disk-based Parameters'
+          cinder_raw_method: 'Disk selection method'
+          volume_name: 'Name of Volume'
+          file_parameters: 'File-based Parameters'
+          local_file: 'Volume File Name'
+          local_size: 'Maximum File Size (GB)'
+          netapp_parameters: 'NetApp Parameters'
+          netapp:
+            storage_family: 'Storage Family Type'
+            storage_protocol: 'Storage Protocol'
+            vserver: 'Name of the Virtual Storage Server (Vserver)'
+            netapp_server_hostname: 'Server host name'
+            netapp_transport_type: 'Transport Type'
+            netapp_server_port: 'Server port'
+            netapp_login: 'Username for accessing NetApp'
+            netapp_password: 'Password for accessing NetApp'
+            netapp_vfiler: 'The vFiler unit name if using vFiler to host OpenStack volumes'
+            nfs_shares: 'List of Netapp NFS Exports'
+            nfs_shares_config_hint: 'Format one entry per line in the form hostname:/vol/path optional-nfs-mount-options'
+
+          emc_parameters: 'EMC Parameters'
+          emc:
+            masking_view: 'Unisphere for VMAX Masking View'
+            ecom_server_ip: 'IP address of the ECOM server'
+            ecom_server_port: 'Port of the ECOM server'
+            ecom_server_username: 'Username for accessing the ECOM server'
+            ecom_server_password: 'Password for accessing the ECOM server'
+            emc_storage_type: 'Thin pool where user wants to create volume from'
+          eqlx_parameters: 'EqualLogic Parameters'
+          eqlx:
+            san_ip: 'EQLX SAN IP'
+            san_login: 'EQLX SAN login'
+            san_password: 'EQLX SAN password'
+            eqlx_group_name: 'EQLX group name (prompt)'
+            eqlx_pool: 'EQLX pool name'
+            san_thin_provision: 'Use thin provision for volumes'
+            eqlx_use_chap: 'Use chap auth for targets'
+            eqlx_chap_login: 'EQLX chap login for targets'
+            eqlx_chap_password: 'EQLX chap password for targets'
+            eqlx_cli_timeout: 'EQLX CLI command execution timeout'
+          manual_parameters: 'Other driver parameters'
+          manual:
+            not_supported: 'Manually picking a driver can be used to specify a Cinder driver not available in the list of drivers above. This is however not supported.'
+            driver: 'Driver'
+            driver_hint: 'For instance, cinder.volume.drivers.netapp.iscsi.NetAppISCSIDriver'
+            config: 'Options'
+            config_hint: 'Each line will be added to cinder.conf. If the driver needs an external file, this file must be manually uploaded.'
+          rbd_parameters: 'RADOS Parameters'
+          rbd:
+            pool: 'RADOS pool for Cinder volumes'
+            user: 'RADOS user (Set only if using CephX authentication)'
+        api:
+          protocol: 'Protocol'
+        ssl:
+          header: 'SSL Support'
+          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          certfile: 'SSL Certificate File'
+          keyfile: 'SSL (Private) Key File'
+          generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          cert_required: 'Require Client Certificate'
+          ca_certs: 'SSL CA Certificates File'
