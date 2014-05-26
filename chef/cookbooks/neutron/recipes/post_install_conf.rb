@@ -20,8 +20,6 @@ end
 
 fixed_net = node[:network][:networks]["nova_fixed"]
 fixed_range = "#{fixed_net["subnet"]}/#{mask_to_bits(fixed_net["netmask"])}"
-fixed_router_pool_start = fixed_net[:ranges][:router][:start]
-fixed_router_pool_end = fixed_net[:ranges][:router][:end]
 fixed_pool_start = fixed_net[:ranges][:dhcp][:start]
 fixed_pool_end = fixed_net[:ranges][:dhcp][:end]
 fixed_first_ip = IPAddr.new("#{fixed_range}").to_range().to_a[2]
@@ -98,7 +96,7 @@ execute "create_floating_network" do
 end
 
 execute "create_fixed_subnet" do
-  command "#{neutron_cmd} subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} --gateway #{fixed_router_pool_end} fixed #{fixed_range}"
+  command "#{neutron_cmd} subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} fixed #{fixed_range}"
   not_if "out=$(#{neutron_cmd} subnet-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
   retries 5
   retry_delay 10
