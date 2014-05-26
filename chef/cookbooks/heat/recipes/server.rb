@@ -245,6 +245,7 @@ template "/etc/heat/heat.conf" do
       :api_port => api_port,
       :cloud_watch_port => cloud_watch_port,
       :cfn_port => cfn_port,
+      :auth_encryption_key => node[:heat][:auth_encryption_key],
       :heat_metadata_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
       :heat_waitcondition_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
       :heat_watch_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}"

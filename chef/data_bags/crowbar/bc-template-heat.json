@@ -10,6 +10,7 @@
       "keystone_instance": "none",
       "service_user": "heat",
       "service_password": "",
+      "auth_encryption_key": "",
       "gitrepo": "http://github.com/openstack/heat.git",
       "git_instance": "",
       "git_refspec": "stable/icehouse",
@@ -40,7 +41,7 @@
   "deployment": {
     "heat": {
       "crowbar-revision": 0,
-      "schema-revision": 10,
+      "schema-revision": 11,
       "element_states": {
         "heat-server": [ "readying", "ready", "applying" ]
       },
