@@ -375,11 +375,17 @@ root_helper=sudo <%=@rootwrap_bin%> /etc/neutron/rootwrap.conf
 # ===========  end of items for agent management extension =====
 
 [keystone_authtoken]
-auth_url = <%= @keystone_settings['internal_auth_url'] %>
+auth_uri = <%= @keystone_settings['internal_auth_url'] %>
+auth_host = <%= @keystone_settings['internal_url_host'] %>
+auth_port = <%= @keystone_settings['admin_port'] %>
+auth_protocol = <%= @keystone_settings['protocol'] %>
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
 signing_dir = /var/cache/neutron/keystone-signing
+<% if @keystone_settings['insecure'] -%>
+insecure = <%= @keystone_settings['insecure'] %>
+<% end -%>
 
 [database]
 # This line MUST be changed to actually run the plugin.
