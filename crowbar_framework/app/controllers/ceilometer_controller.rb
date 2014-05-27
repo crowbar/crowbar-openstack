@@ -14,7 +14,10 @@
 # 
 
 class CeilometerController < BarclampController
-  def initialize
+
+  protected
+
+  def initialize_service
     @service_object = CeilometerService.new logger
   end
 end
