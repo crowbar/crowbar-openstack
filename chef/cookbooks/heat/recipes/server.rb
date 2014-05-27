@@ -234,22 +234,6 @@ end
 
 crowbar_pacemaker_sync_mark "create-heat_register"
 
-template "/etc/heat/environment.d/default.yaml" do
-    source "default.yaml.erb"
-    owner node[:heat][:user]
-    group "root"
-    mode "0640"
-    not_if { node[:platform] == "suse" }
-end
-
-template "/etc/heat/policy.json" do
-    source "policy.json.erb"
-    owner node[:heat][:user]
-    group "root"
-    mode "0640"
-    not_if { node[:platform] == "suse" }
-end
-
 template "/etc/heat/heat.conf" do
     source "heat.conf.erb"
     owner node[:heat][:user]
