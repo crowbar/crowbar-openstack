@@ -14,7 +14,10 @@
 # 
 
 class NeutronController < BarclampController
-  def initialize
+
+  protected
+
+  def initialize_service
     @service_object = NeutronService.new logger
   end
 end
