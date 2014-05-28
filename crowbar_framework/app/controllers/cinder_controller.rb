@@ -14,7 +14,10 @@
 # 
 
 class CinderController < BarclampController
-  def initialize
+
+  protected
+
+  def initialize_service
     @service_object = CinderService.new logger
   end
 end
