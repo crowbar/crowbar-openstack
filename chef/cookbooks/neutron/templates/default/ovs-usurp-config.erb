@@ -1,0 +1,55 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          ovs-usurp-config-<%= @dest %>
+# Required-Start:    $network openvswitch-switch
+# Should-Start:
+# Required-Stop:     $network openvswitch-switch
+# Should-Stop: 
+# Default-Start:     3 5
+# Default-Stop:      0 1 2 6
+# Short-Description: Usurping IPs and Routes from <%= @source %> to <%= @dest %>
+# Description: Usurping IPs and Routes from <%= @source %> to <%= @dest %>
+### END INIT INFO
+
+. /etc/rc.status
+# Reset status of this service
+rc_reset
+
+case "$1" in
+    start)
+        ip -4 route flush dev <%= @source %>
+        ip -6 route flush dev <%= @source %>
+        ip addr flush dev <%= @source %>
+<% @addresses.each do |addr| -%>
+        ip addr add <%= addr.to_s %> dev <%= @dest %>
+<% end -%>
+<% @routes.each do |route| -%>
+        ip route add <%= route %> dev <%= @dest %>
+<% end -%>
+        ;;
+
+    stop)
+        ip -4 route flush dev <%= @dest %>
+        ip -6 route flush dev <%= @dest %>
+        ip addr flush dev <%= @dest %>
+<% @addresses.each do |addr| -%>
+        ip addr add <%= addr.to_s %> dev <%= @source %>
+<% end -%>
+<% @routes.each do |route| -%>
+        ip route add <%= route %> dev <%= @source %>
+<% end -%>
+        ;;
+
+    restart|try-restart|force-reload|reload|status|probe)
+        echo "not implemented"
+        rc_failed 3
+        rc_status -v
+        ;;
+
+    *)
+        echo "Usage: $0 {start|stop|status|try-restart|restart|force-reload|reload|probe}"
+        exit 1
+        ;;
+esac
+rc_exit
