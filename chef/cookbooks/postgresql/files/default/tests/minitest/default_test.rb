@@ -1,8 +1,5 @@
 #
-# Cookbook Name:: postgresql
-# Recipe:: default
-#
-# Copyright 2009, Opscode, Inc.
+# Copyright 2012, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,4 +14,14 @@
 # limitations under the License.
 #
 
-include_recipe "postgresql::client"
+require File.expand_path('../support/helpers', __FILE__)
+
+describe 'postgresql::default' do
+  include Helpers::Postgresql
+
+  it 'installs the postgresql client packages' do
+    node['postgresql']['client']['packages'].each do |pkg|
+      package(pkg).must_be_installed
+    end
+  end
+end
