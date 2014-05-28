@@ -16,10 +16,6 @@
 require "rexml/document"
 
 class TempestController < BarclampController
-  def initialize
-    @service_object = TempestService.new logger
-  end
-
   def raise_not_found
     raise ActionController::RoutingError.new('Not Found')
   end
@@ -89,5 +85,11 @@ class TempestController < BarclampController
         render :template => "barclamp/#{@bc_name}/results.html.haml"
       }
     end
+  end
+
+  protected
+
+  def initialize_service
+    @service_object = TempestService.new logger
   end
 end
