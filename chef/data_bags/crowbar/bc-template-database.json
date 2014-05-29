@@ -8,7 +8,9 @@
         "datadir": "/var/lib/mysql"
       },
       "postgresql": {
-        "max_connections": 1000
+        "config_pgtune": {
+          "max_connections": 1000
+        }
       },
       "ha": {
         "storage": {
@@ -28,7 +30,7 @@
   "deployment": {
     "database": {
       "crowbar-revision": 0,
-      "schema-revision": 1,
+      "schema-revision": 2,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },
