@@ -118,7 +118,7 @@ rabbit_settings = {
   :vhost => rabbit[:rabbitmq][:vhost]
 }
 
-keystone_settings = NeutronHelper.keystone_settings(neutron)
+keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
 if neutron_server and neutron[:neutron][:api][:protocol] == 'https'
   if neutron[:neutron][:ssl][:generate_certs]

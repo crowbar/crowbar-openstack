@@ -21,7 +21,7 @@ my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:neutron][:api
 api_port = node["neutron"]["api"]["service_port"]
 neutron_protocol = node["neutron"]["api"]["protocol"]
 
-keystone_settings = NeutronHelper.keystone_settings(node)
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 crowbar_pacemaker_sync_mark "wait-neutron_register"
 
