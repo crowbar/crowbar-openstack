@@ -107,7 +107,7 @@ users.each do |user|
     token keystone_token
     user_name user["name"]
     user_password user["pass"]
-    tenant_name tempest_comp_tenant 
+    tenant_name tempest_comp_tenant
     action :add_user
   end.run_action(:add_user)
 
@@ -117,7 +117,7 @@ users.each do |user|
     token keystone_token
     user_name user["name"]
     role_name user["role"]
-    tenant_name tempest_comp_tenant 
+    tenant_name tempest_comp_tenant
     action :add_access
   end.run_action(:add_access)
 
