@@ -224,6 +224,8 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
         end
       end
 
+    when volume[:backend_driver] == "vmware"
+
   end
 end
 

@@ -1765,15 +1765,15 @@ san_password=<%= volume['eqlx']["san_password"] %>
 
 # IP address for connecting to VMware ESX/VC server. (string
 # value)
-#vmware_host_ip=<None>
+vmware_host_ip=<%= volume['vmware']["host"] %>
 
 # Username for authenticating with VMware ESX/VC server.
 # (string value)
-#vmware_host_username=<None>
+vmware_host_username=<%= volume['vmware']["user"] %>
 
 # Password for authenticating with VMware ESX/VC server.
 # (string value)
-#vmware_host_password=<None>
+vmware_host_password=<%= volume['vmware']["password"] %>
 
 # Optional VIM service WSDL Location e.g
 # http://<server>/vimService.wsdl. Optional over-ride to
@@ -1790,7 +1790,7 @@ san_password=<%= volume['eqlx']["san_password"] %>
 
 # Name for the folder in the VC datacenter that will contain
 # cinder volumes. (string value)
-#vmware_volume_folder=cinder-volumes
+vmware_volume_folder=<%= volume['vmware']["volume"] %>
 
 # Timeout in seconds for VMDK volume transfer between Cinder
 # and Glance. (integer value)
@@ -1934,6 +1934,9 @@ volume_driver=cinder.volume.drivers.fujitsu.fujitsu_eternus_dx_iscsi.FJDXISCSIDr
   <% else -%>
 volume_driver=cinder.volume.drivers.fujitsu.fujitsu_eternus_dx_fc.FJDXFCDriver
   <% end -%>
+<% end -%>
+<% if volume['backend_driver'] == 'vmware' -%>
+volume_driver=cinder.volume.drivers.vmware.vmdk.VMwareVcVmdkDriver
 <% end -%>
 <% if volume['backend_driver'] == 'manual' -%>
 volume_driver=<%= volume['manual']['driver'] %>

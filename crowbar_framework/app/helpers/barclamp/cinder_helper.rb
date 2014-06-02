@@ -27,6 +27,7 @@ module Barclamp
           [t(".volumes.eqlx_volume_driver"), "eqlx"],
           [t(".volumes.eternus_volume_driver"), "eternus"],
           [t(".volumes.rbd_volume_driver"), "rbd"],
+          [t(".volumes.vmware_volume_driver"), "vmware"],
           [t(".volumes.manual_volume_driver"), "manual"]
         ],
         selected.to_s

@@ -125,6 +125,18 @@
               = string_field %w(volumes {{@index}} rbd user)
 
           {{/if_eq}}
+          {{#if_eq backend_driver 'vmware'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.vmware_parameters')
+
+              = string_field %w(volumes {{@index}} vmware host)
+              = string_field %w(volumes {{@index}} vmware user)
+              = password_field %w(volumes {{@index}} vmware password)
+              = string_field %w(volumes {{@index}} vmware volume)
+
+          {{/if_eq}}
           {{#if_eq backend_driver 'manual'}}
           %li.list-group-item
             %fieldset

@@ -105,6 +105,14 @@
                     "user": { "type": "str", "required": true }
                     }
                 },
+                "vmware": {
+                "type": "map", "mapping": {
+                    "host": { "type": "str", "required": true },
+                    "user": { "type": "str", "required": true },
+                    "password": { "type": "str", "required": true },
+                    "volume": { "type": "str", "required": true }
+                }
+                },
                 "manual": {
                 "type": "map", "mapping": {
                     "driver": { "type": "str", "required": true },
@@ -192,6 +200,14 @@
                       "pool": { "type": "str", "required": true },
                       "user": { "type": "str", "required": true }
                     }
+                  },
+                  "vmware": {
+                    "type": "map", "mapping": {
+                      "host": { "type": "str", "required": true },
+                      "user": { "type": "str", "required": true },
+                      "password": { "type": "str", "required": true },
+                      "volume": { "type": "str", "required": true }
+                      }
                   },
                   "manual": {
                     "type": "map", "mapping": {
