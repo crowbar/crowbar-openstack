@@ -48,69 +48,81 @@ else
   glance = node
 end
 
-# Download and unpack tempest tarball
-
-tempest_path = node[:tempest][:tempest_path]
-tarball_url = node[:tempest][:tempest_tarball]
-filename = tarball_url.split('/').last
-
-remote_file tarball_url do
-  source tarball_url
-  path File.join("tmp",filename)
-  action :create_if_missing
-end
-
 #needed to create venv correctly
 if %w(redhat centos).include?(node.platform)
   package "libxslt-devel"
 el
   package "libxslt1-dev"
 end
-#needed for tempest.tests.test_wrappers.TestWrappers.test_pretty_tox
-package "git"
+
+if %w(suse).include?(node.platform)
+  #needed for tempest.tests.test_wrappers.TestWrappers.test_pretty_tox
+  package "git-core"
+else
+  #needed for tempest.tests.test_wrappers.TestWrappers.test_pretty_tox
+  package "git"
+end
+
 #needed for ec2 and s3 test suite
 package "euca2ools"
 
+if node[:tempest][:use_gitrepo]
+  # Download and unpack tempest tarball
 
-bash "install_tempest_from_archive" do
-  cwd "/tmp"
-  code "tar xf #{filename} && mv openstack-tempest-* tempest && mv tempest /opt/ && rm #{filename}"
-  not_if { ::File.exists?(tempest_path) }
-end
+  tempest_path = node[:tempest][:tempest_path]
 
-if node[:tempest][:use_virtualenv]
-  package "python-virtualenv"
-  unless %w(redhat centos).include?(node.platform)
-    package "python-dev"
-  else
-    package "python-devel"
-    package "python-pip"
-    package "libxslt-devel"
+  tarball_url = node[:tempest][:tempest_tarball]
+  filename = tarball_url.split('/').last
+
+  remote_file tarball_url do
+    source tarball_url
+    path File.join("tmp",filename)
+    action :create_if_missing
   end
-  directory "/opt/tempest/.venv" do
-    recursive true
-    owner "root"
-    group "root"
-    mode  0775
-    action :create
+
+  bash "install_tempest_from_archive" do
+    cwd "/tmp"
+    code "tar xf #{filename} && mv openstack-tempest-* tempest && mv tempest /opt/ && rm #{filename}"
+    not_if { ::File.exists?(tempest_path) }
   end
-  execute "virtualenv /opt/tempest/.venv" unless File.exist?("/opt/tempest/.venv")
-  pip_cmd = ". /opt/tempest/.venv/bin/activate && #{pip_cmd}"
+
+  if node[:tempest][:use_virtualenv]
+    package "python-virtualenv"
+    unless %w(redhat centos).include?(node.platform)
+      package "python-dev"
+    else
+      package "python-devel"
+      package "python-pip"
+      package "libxslt-devel"
+    end
+    directory "/opt/tempest/.venv" do
+      recursive true
+      owner "root"
+      group "root"
+      mode  0775
+      action :create
+    end
+    execute "virtualenv /opt/tempest/.venv" unless File.exist?("/opt/tempest/.venv")
+    pip_cmd = ". /opt/tempest/.venv/bin/activate && #{pip_cmd}"
+  end
+
+  execute "pip_install_reqs_for_tempest" do
+    cwd "/opt/tempest/"
+    command "#{pip_cmd} -r /opt/tempest/requirements.txt"
+  end
+else
+  package "openstack-tempest-test"
 end
 
-execute "pip_install_reqs_for_tempest" do
-  cwd "/opt/tempest/"
-  command "#{pip_cmd} -r /opt/tempest/requirements.txt"
-end
-
-if nova[:nova][:use_gitrepo]!=true
+unless nova[:nova][:use_gitrepo]
   package "python-novaclient"
 else
   execute "pip_install_clients_python-novaclient_for_tempest" do
     command "#{pip_cmd} 'python-novaclient'"
   end
 end
-if glance[:glance][:use_gitrepo]!=true
+
+unless glance[:glance][:use_gitrepo]
   package "python-glanceclient"
 else
   execute "pip_install_clients_python-glanceclient_for_tempest" do
