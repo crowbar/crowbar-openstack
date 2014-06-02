@@ -62,10 +62,6 @@ en:
             skipped: 'Skipped'
 
       edit_attributes:
-        pull_from_source: 'Pull From Source'
-        nova_instance: 'Nova'
-        use_virtualenv: 'Use virtualenv'
-        use_pfs: 'Use Pull From Source'
         tempest_user: 'Tempest user and a tenant that will be created for test run'
         tempest_user_username: 'Choose username'
         tempest_adm_username: 'Choose Tempest admin username'

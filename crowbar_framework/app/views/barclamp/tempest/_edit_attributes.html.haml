@@ -1,56 +1,18 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header @dep_raw, true
 
-%input#proposal_attributes{:type => "hidden", :name => "proposal_attributes", :value => @proposal.raw_data['attributes'][@proposal.barclamp].to_json}
-%p
-  %label{:for => "proposal_attributes"}= t('.attributes')
-  = link_to t('raw'), proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :style => "float: right;"
-  %div.container
-    %p
-      %label{ :for => :nova_instance }= t('.nova_instance')
-      = instance_selector("nova", :nova_instance, "nova_instance", @proposal)
-    %p
-      %label{:for => "tempest_user"}= t('.tempest_user')
-    %p
-      %label{ :for => :tempest_user_username }= t('.tempest_user_username')
-      %input#tempest_user_username{:type => "text", :name => "tempest_user_username", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["tempest_user_username"], :onchange => "update_value('tempest_user_username','tempest_user_username', 'string')"}
-    %p
-      %label{ :for => :tempest_user_tenant }= t('.tempest_user_tenant')
-      %input#tempest_user_tenant{:type => "text", :name => "tempest_user_tenant", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["tempest_user_tenant"], :onchange => "update_value('tempest_user_tenant','tempest_user_tenant', 'string')"}
-    %p
-      %label{ :for => :tempest_adm_username }= t('.tempest_adm_username')
-      %input#tempest_adm_username{:type => "text", :name => "tempest_adm_username", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["tempest_adm_username"], :onchange => "update_value('tempest_adm_username','tempest_adm_username', 'string')"}
-    %p
-      %label{ :for => :tempest_adm_password }= t('.tempest_adm_password')
-      %input#tempest_adm_password{:type => "password", :name => "tempest_adm_password", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["tempest_adm_password"], :onchange => "update_value('tempest_adm_password','tempest_adm_password', 'string')"}
-    %label.section-header{ :for => :cpfs_div }= t('.pull_from_source')
-    %div.section{ :id => :pfs_div } 
-      %p
-        %p
-          %label{ :for => :use_pfs }= t('.use_pfs')
-          = select_tag :use_pfs, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_pfs"].to_s)
-        %p#use_virtenv_p
-          %label{ :for => :use_virtualenv }= t('.use_virtualenv')
-          = select_tag :use_virtualenv, options_for_select([['true','true'], ['false', 'false']], @proposal.raw_data['attributes'][@proposal.barclamp]["use_virtualenv"].to_s)
+  .panel-body
+    = instance_field :nova
 
-:javascript
-$(document).ready(function(){
-  var use_pfs_val = $("#use_pfs").val() === "true"
-  if (use_pfs_val){
-    $("#use_virtenv_p").show();
-  } else {
-    $("#use_virtenv_p").hide();
-  }
- 
-  $("#use_pfs").change(function (){
-    var val = $(this).val() === "true";
-    if(val){
-      $("#use_virtenv_p").show();
-      $("#use_virtualenv").change(function (){
-         update_value('use_virtualenv', 'use_virtualenv', 'boolean');
-      });
-    } else {
-      $("#use_virtualenv").val('false');
-      $("#use_virtenv_p").hide();
-    }
-    update_value('use_pfs', 'use_pfs', 'boolean');
-  });
-});
+    %fieldset
+      %legend
+        = t(".tempest_user")
+
+      = string_field %w(tempest_user_username)
+      = password_field %w(tempest_user_username)
+      = string_field %w(tempest_user_tenant)
+      = string_field %w(tempest_adm_username)
+      = password_field %w(tempest_adm_password)
+
+    = render "barclamp/git/pfsdeps"
