@@ -62,14 +62,14 @@ end
 
 #needed to create venv correctly
 if %w(redhat centos).include?(node.platform)
-  package("libxslt-devel")
-else
-  package("libxslt1-dev")
+  package "libxslt-devel"
+el
+  package "libxslt1-dev"
 end
 #needed for tempest.tests.test_wrappers.TestWrappers.test_pretty_tox
-package("git")
+package "git"
 #needed for ec2 and s3 test suite
-package("euca2ools")
+package "euca2ools"
 
 
 bash "install_tempest_from_archive" do
@@ -79,13 +79,13 @@ bash "install_tempest_from_archive" do
 end
 
 if node[:tempest][:use_virtualenv]
-  package("python-virtualenv")
+  package "python-virtualenv"
   unless %w(redhat centos).include?(node.platform)
-    package("python-dev")
+    package "python-dev"
   else
-    package("python-devel")
-    package("python-pip")
-    package("libxslt-devel")
+    package "python-devel"
+    package "python-pip"
+    package "libxslt-devel"
   end
   directory "/opt/tempest/.venv" do
     recursive true
