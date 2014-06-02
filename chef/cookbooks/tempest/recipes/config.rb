@@ -145,7 +145,6 @@ directory "#{node[:tempest][:tempest_path]}/etc/cirros" do
   action :create
 end
 
-
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
 
 venv_prefix_path = node[:tempest][:use_virtualenv] ? ". /opt/tempest/.venv/bin/activate && " : nil
@@ -225,7 +224,19 @@ ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempes
 ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
 cirros_version = "0.3.1"
 
-template "#{node[:tempest][:tempest_path]}/etc/tempest.conf" do
+tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
+if %w(suse redhat centos).include?(node.platform)
+  tempest_conf = "/etc/tempest/tempest.conf"
+end
+
+swifts = search(:node, "roles:swift-proxy") || []
+heats = search(:node, "roles:heat-server") || []
+
+neutrons = search(:node, "roles:neutron-server") || []
+
+public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
+
+template "#{tempest_conf}" do
   source "tempest.conf.erb"
   mode 0644
   variables(
@@ -252,8 +263,12 @@ template "#{node[:tempest][:tempest_path]}/etc/tempest.conf" do
     :ec2_secret => ec2_secret,
     :tempest_path => node[:tempest][:tempest_path],
     :nova_host => nova.name,
+    :public_network_id => public_network_id,
     :cirros_version => cirros_version,
-    :bin_path => bin_path
+    :bin_path => bin_path,
+    :use_heat => !heats.empty?,
+    :use_swift => !swifts.empty?,
+    :use_neutron => !neutrons.empty?
   )
 end
 
