@@ -231,6 +231,7 @@ end
 
 swifts = search(:node, "roles:swift-proxy") || []
 heats = search(:node, "roles:heat-server") || []
+horizons = search(:node, "roles:nova_dashboard-server") || []
 
 neutrons = search(:node, "roles:neutron-server") || []
 
@@ -267,6 +268,7 @@ template "#{tempest_conf}" do
     :cirros_version => cirros_version,
     :bin_path => bin_path,
     :use_heat => !heats.empty?,
+    :use_horizon => !horizons.empty?,
     :use_swift => !swifts.empty?,
     :use_neutron => !neutrons.empty?
   )
