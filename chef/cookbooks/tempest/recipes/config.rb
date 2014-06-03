@@ -107,7 +107,7 @@ users.each do |user|
     token keystone_token
     user_name user["name"]
     user_password user["pass"]
-    tenant_name tempest_comp_tenant 
+    tenant_name tempest_comp_tenant
     action :add_user
   end.run_action(:add_user)
 
@@ -117,7 +117,7 @@ users.each do |user|
     token keystone_token
     user_name user["name"]
     role_name user["role"]
-    tenant_name tempest_comp_tenant 
+    tenant_name tempest_comp_tenant
     action :add_access
   end.run_action(:add_access)
 
@@ -145,7 +145,6 @@ directory "#{node[:tempest][:tempest_path]}/etc/cirros" do
   action :create
 end
 
-
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
 
 venv_prefix_path = node[:tempest][:use_virtualenv] ? ". /opt/tempest/.venv/bin/activate && " : nil
@@ -153,7 +152,7 @@ bin_path = node[:tempest][:use_virtualenv] ? "/opt/tempest/.venv/bin" : "/usr/bi
 
 bash "upload tempest test image" do
   code <<-EOH
-IMAGE_URL=${IMAGE_URL:-"http://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-uec.tar.gz"}
+IMAGE_URL=${IMAGE_URL:-"http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz"}
 
 OS_USER=${OS_USER:-admin}
 OS_TENANT=${OS_TENANT:-admin}
@@ -223,9 +222,22 @@ end
 
 ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
 ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
-cirros_version = "0.3.0"
+cirros_version = "0.3.1"
 
-template "#{node[:tempest][:tempest_path]}/etc/tempest.conf" do
+tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
+if %w(suse redhat centos).include?(node.platform)
+  tempest_conf = "/etc/tempest/tempest.conf"
+end
+
+swifts = search(:node, "roles:swift-proxy") || []
+heats = search(:node, "roles:heat-server") || []
+horizons = search(:node, "roles:nova_dashboard-server") || []
+
+neutrons = search(:node, "roles:neutron-server") || []
+
+public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
+
+template "#{tempest_conf}" do
   source "tempest.conf.erb"
   mode 0644
   variables(
@@ -252,8 +264,13 @@ template "#{node[:tempest][:tempest_path]}/etc/tempest.conf" do
     :ec2_secret => ec2_secret,
     :tempest_path => node[:tempest][:tempest_path],
     :nova_host => nova.name,
+    :public_network_id => public_network_id,
     :cirros_version => cirros_version,
-    :bin_path => bin_path
+    :bin_path => bin_path,
+    :use_heat => !heats.empty?,
+    :use_horizon => !horizons.empty?,
+    :use_swift => !swifts.empty?,
+    :use_neutron => !neutrons.empty?
   )
 end
 

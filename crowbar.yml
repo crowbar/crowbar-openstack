@@ -46,8 +46,8 @@ nav:
 debs:
   ubuntu-12.04:
     repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/havana main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/havana main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/icehouse main
+      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/icehouse main
     pkgs:
       - python-anyjson
       - python-nose
@@ -120,5 +120,5 @@ pips:
   - argparse
 
 extra_files:
-  - http://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-x86_64-uec.tar.gz tempest
-  - https://github.com/openstack/tempest/tarball/stable/havana.tar.gz tempest
+  - http://launchpad.net/cirros/trunk/0.3.1/+download/cirros-0.3.1-x86_64-uec.tar.gz tempest
+  - http://tarballs.openstack.org/tempest/tempest-master.tar.gz tempest

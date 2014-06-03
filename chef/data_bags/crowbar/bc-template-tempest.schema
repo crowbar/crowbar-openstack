@@ -21,7 +21,10 @@
             "tempest_user_tenant": { "type": "str", "required": true },
             "tempest_test_image": { "type": "str", "required": true },
             "use_virtualenv": { "type": "bool", "required": true },
-            "use_pfs": { "type": "bool", "required": true },
+            "use_gitrepo": { "type": "bool", "required": true },
+            "use_pip_cache": { "type": "bool", "required": true },
+            "use_gitbarclamp": { "type": "bool", "required": true },
+            "pfs_deps": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
             "tempest_path" : {"type": "str", "required": true }
           }
         }
