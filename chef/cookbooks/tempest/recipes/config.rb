@@ -77,9 +77,6 @@ end
 glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "admin").address if glance_address.nil?
 glance_port = glance[:glance][:api][:bind_port]
 
-flavor_ref = "6"
-alt_flavor_ref = "7"
-
 keystone_register "tempest tempest wakeup keystone" do
   host keystone_address
   port keystone_admin_port
@@ -212,6 +209,9 @@ EOH
   })
   not_if { File.exists?(machine_id_file) }
 end
+
+flavor_ref = "6"
+alt_flavor_ref = "7"
 
 bash "create_yet_another_tiny_flavor" do
   code <<-EOH
