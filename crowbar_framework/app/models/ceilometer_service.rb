@@ -94,7 +94,7 @@ class CeilometerService < PacemakerServiceObject
         "ceilometer-swift-proxy-middleware" =>  swift_proxy_nodes.map { |x| x.name }
     } unless agent_nodes.nil? or server_nodes.nil?
 
-    base["attributes"]["ceilometer"]["keystone_service_password"] = '%012d' % rand(1e12)
+    base["attributes"]["ceilometer"]["service_password"] = '%012d' % rand(1e12)
     base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name][:metering_secret] = random_password
 
