@@ -126,9 +126,14 @@ users.each do |user|
   end.run_action(:add_access)
 
   keystone_register "add default ec2 creds for #{user["name"]}:#{tempest_comp_tenant}" do
-    host keystone_address
-    port keystone_admin_port
-    token keystone_token
+    protocol keystone_settings['protocol']
+    host keystone_settings['internal_url_host']
+    port keystone_settings['admin_port']
+    auth ({
+      :tenant => keystone_settings['admin_tenant'],
+      :user => keystone_settings['admin_user'],
+      :password => keystone_settings['admin_password']
+    })
     user_name user["name"]
     tenant_name tempest_comp_tenant
     action :nothing
