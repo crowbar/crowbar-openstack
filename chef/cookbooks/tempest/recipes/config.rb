@@ -141,6 +141,14 @@ users.each do |user|
 
 end
 
+directory "#{node[:tempest][:tempest_path]}" do
+  action :create
+end
+
+directory "#{node[:tempest][:tempest_path]}/bin" do
+  action :create
+end
+
 directory "#{node[:tempest][:tempest_path]}/etc" do
   action :create
 end
@@ -288,7 +296,7 @@ end
 
 nosetests = "/opt/tempest/.venv/bin/nosetests"
 
-template "/tmp/tempest_smoketest.sh" do
+template "#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh" do
   mode 0755
   source "tempest_smoketest.sh.erb"
   variables(
@@ -308,6 +316,6 @@ template "/tmp/tempest_smoketest.sh" do
   )
 end
 
-cookbook_file "#{node[:tempest][:tempest_path]}/run_tempest.py" do
+cookbook_file "#{node[:tempest][:tempest_path]}/bin/run_tempest.py" do
   source "run_tempest.py"
 end
