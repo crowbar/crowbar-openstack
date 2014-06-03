@@ -111,7 +111,7 @@ users.each do |user|
     user_name user["name"]
     user_password user["pass"]
     tenant_name tempest_comp_tenant
-    action :add_user
+    action :nothing
   end.run_action(:add_user)
 
   keystone_register "add #{user["name"]}:#{tempest_comp_tenant} user #{user["role"]} role" do
@@ -122,7 +122,7 @@ users.each do |user|
     user_name user["name"]
     role_name user["role"]
     tenant_name tempest_comp_tenant
-    action :add_access
+    action :nothing
   end.run_action(:add_access)
 
   keystone_register "add default ec2 creds for #{user["name"]}:#{tempest_comp_tenant}" do
@@ -130,8 +130,8 @@ users.each do |user|
     port keystone_admin_port
     token keystone_token
     user_name user["name"]
-    tenant_name tenant_name tempest_comp_tenant
-    action :add_ec2
+    tenant_name tempest_comp_tenant
+    action :nothing
   end.run_action(:add_ec2)
 
 end
