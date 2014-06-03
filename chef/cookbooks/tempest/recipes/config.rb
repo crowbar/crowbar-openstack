@@ -64,6 +64,8 @@ keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keyston
 keystone_token = keystone[:keystone][:service][:token]
 keystone_admin_port = keystone[:keystone][:api][:admin_port]
 
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
 env_filter = " AND glance_config_environment:glance-config-#{nova[:nova][:glance_instance]}"
 
 glances = search(:node, "roles:glance-server#{env_filter}") || []
@@ -77,20 +79,20 @@ end
 glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "admin").address if glance_address.nil?
 glance_port = glance[:glance][:api][:bind_port]
 
-flavor_ref = "6"
-alt_flavor_ref = "7"
-
 keystone_register "tempest tempest wakeup keystone" do
-  host keystone_address
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   action :wakeup
 end.run_action(:wakeup)
 
 keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
-  host keystone_address
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+
   tenant_name tempest_comp_tenant
   action :add_tenant
 end.run_action(:add_tenant)
@@ -102,34 +104,40 @@ users = [
 users.each do |user|
 
   keystone_register "add #{user["name"]}:#{user["pass"]} user" do
-    host keystone_address
-    port keystone_admin_port
-    token keystone_token
+    protocol keystone_settings['protocol']
+    host keystone_settings['internal_url_host']
+    port keystone_settings['admin_port']
+    token keystone_settings['admin_token']
     user_name user["name"]
     user_password user["pass"]
     tenant_name tempest_comp_tenant
-    action :add_user
+    action :nothing
   end.run_action(:add_user)
 
   keystone_register "add #{user["name"]}:#{tempest_comp_tenant} user #{user["role"]} role" do
-    host keystone_address
-    port keystone_admin_port
-    token keystone_token
+    protocol keystone_settings['protocol']
+    host keystone_settings['internal_url_host']
+    port keystone_settings['admin_port']
+    token keystone_settings['admin_token']
     user_name user["name"]
     role_name user["role"]
     tenant_name tempest_comp_tenant
-    action :add_access
+    action :nothing
   end.run_action(:add_access)
 
   keystone_register "add default ec2 creds for #{user["name"]}:#{tempest_comp_tenant}" do
-    host keystone_address
-    port keystone_admin_port
-    token keystone_token
+    protocol keystone_settings['protocol']
+    host keystone_settings['internal_url_host']
+    port keystone_settings['admin_port']
+    auth ({
+      :tenant => keystone_settings['admin_tenant'],
+      :user => keystone_settings['admin_user'],
+      :password => keystone_settings['admin_password']
+    })
     user_name user["name"]
-    tenant_name tenant_name tempest_comp_tenant
-    action :add_ec2
+    tenant_name tempest_comp_tenant
+    action :nothing
   end.run_action(:add_ec2)
-
 
 end
 
@@ -213,6 +221,9 @@ EOH
   not_if { File.exists?(machine_id_file) }
 end
 
+flavor_ref = "6"
+alt_flavor_ref = "7"
+
 bash "create_yet_another_tiny_flavor" do
   code <<-EOH
   #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff #{alt_flavor_ref} 128 1 1 || exit 0
@@ -220,8 +231,8 @@ bash "create_yet_another_tiny_flavor" do
 EOH
 end
 
-ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
-ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
+ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
+ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
 cirros_version = "0.3.1"
 
 tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
@@ -241,36 +252,37 @@ template "#{tempest_conf}" do
   source "tempest.conf.erb"
   mode 0644
   variables(
-    :key_host => keystone_address,
-    :key_port => keystone_port,
-    :comp_user => tempest_comp_user,
-    :comp_pass => tempest_comp_pass,
-    :comp_tenant => tempest_comp_tenant,
-    :alt_comp_user => alt_comp_user,
     :alt_comp_pass => alt_comp_pass,
     :alt_comp_tenant => alt_comp_tenant,
-    :img_host => glance_address,
-    :img_port => glance_port,
-    :machine_id_file => machine_id_file,
-    :flavor_ref => flavor_ref,
+    :alt_comp_user => alt_comp_user,
     :alt_flavor_ref => alt_flavor_ref,
-    :img_user => tempest_comp_user,
-    :img_pass => tempest_comp_pass,
-    :img_tenant => tempest_comp_tenant,
-    :comp_admin_user => comp_admin_user,
+    :bin_path => bin_path,
+    :cirros_version => cirros_version,
     :comp_admin_pass => comp_admin_pass,
     :comp_admin_tenant => comp_admin_tenant,
+    :comp_admin_user => comp_admin_user,
+    :comp_pass => tempest_comp_pass,
+    :comp_tenant => tempest_comp_tenant,
+    :comp_user => tempest_comp_user,
     :ec2_access => ec2_access,
     :ec2_secret => ec2_secret,
-    :tempest_path => node[:tempest][:tempest_path],
+    :flavor_ref => flavor_ref,
+    :img_host => glance_address,
+    :img_pass => tempest_comp_pass,
+    :img_port => glance_port,
+    :img_tenant => tempest_comp_tenant,
+    :img_user => tempest_comp_user,
+    :key_host => keystone_address,
+    :key_port => keystone_port,
+    :keystone_settings => keystone_settings,
+    :machine_id_file => machine_id_file,
     :nova_host => nova.name,
     :public_network_id => public_network_id,
-    :cirros_version => cirros_version,
-    :bin_path => bin_path,
+    :tempest_path => node[:tempest][:tempest_path],
     :use_heat => !heats.empty?,
     :use_horizon => !horizons.empty?,
-    :use_swift => !swifts.empty?,
-    :use_neutron => !neutrons.empty?
+    :use_neutron => !neutrons.empty?,
+    :use_swift => !swifts.empty?
   )
 end
 
