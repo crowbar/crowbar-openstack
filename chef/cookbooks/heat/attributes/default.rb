@@ -52,8 +52,8 @@ default[:heat][:db][:database] = "heat"
 default[:heat][:db][:user] = "heat"
 default[:heat][:db][:password] = "" # Set by Recipe
 
-default[:heat][:keystone_service_user] = "heat"
-default[:heat][:keystone_service_password] = ""
+default[:heat][:service_user] = "heat"
+default[:heat][:service_password] = ""
 
 default[:heat][:api][:protocol] = "http"
 default[:heat][:api][:cfn_port] = 8000

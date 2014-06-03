@@ -8,8 +8,8 @@
       "rabbitmq_instance": "none",
       "database_instance": "none",
       "keystone_instance": "none",
-      "keystone_service_user": "heat",
-      "keystone_service_password": "",
+      "service_user": "heat",
+      "service_password": "",
       "gitrepo": "http://github.com/openstack/heat.git",
       "git_instance": "",
       "git_refspec": "stable/icehouse",
@@ -40,7 +40,7 @@
   "deployment": {
     "heat": {
       "crowbar-revision": 0,
-      "schema-revision": 1,
+      "schema-revision": 10,
       "element_states": {
         "heat-server": [ "readying", "ready", "applying" ]
       },
