@@ -64,6 +64,8 @@ keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keyston
 keystone_token = keystone[:keystone][:service][:token]
 keystone_admin_port = keystone[:keystone][:api][:admin_port]
 
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
 env_filter = " AND glance_config_environment:glance-config-#{nova[:nova][:glance_instance]}"
 
 glances = search(:node, "roles:glance-server#{env_filter}") || []
@@ -78,16 +80,19 @@ glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "
 glance_port = glance[:glance][:api][:bind_port]
 
 keystone_register "tempest tempest wakeup keystone" do
-  host keystone_address
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
   action :wakeup
 end.run_action(:wakeup)
 
 keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
-  host keystone_address
-  port keystone_admin_port
-  token keystone_token
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+
   tenant_name tempest_comp_tenant
   action :add_tenant
 end.run_action(:add_tenant)
@@ -99,9 +104,10 @@ users = [
 users.each do |user|
 
   keystone_register "add #{user["name"]}:#{user["pass"]} user" do
-    host keystone_address
-    port keystone_admin_port
-    token keystone_token
+    protocol keystone_settings['protocol']
+    host keystone_settings['internal_url_host']
+    port keystone_settings['admin_port']
+    token keystone_settings['admin_token']
     user_name user["name"]
     user_password user["pass"]
     tenant_name tempest_comp_tenant
@@ -109,9 +115,10 @@ users.each do |user|
   end.run_action(:add_user)
 
   keystone_register "add #{user["name"]}:#{tempest_comp_tenant} user #{user["role"]} role" do
-    host keystone_address
-    port keystone_admin_port
-    token keystone_token
+    protocol keystone_settings['protocol']
+    host keystone_settings['internal_url_host']
+    port keystone_settings['admin_port']
+    token keystone_settings['admin_token']
     user_name user["name"]
     role_name user["role"]
     tenant_name tempest_comp_tenant
@@ -126,7 +133,6 @@ users.each do |user|
     tenant_name tenant_name tempest_comp_tenant
     action :add_ec2
   end.run_action(:add_ec2)
-
 
 end
 
