@@ -4,7 +4,7 @@
   "attributes": {
     "tempest": {
       "tempest_tarball": "http://<ADMINWEB>/files/tempest/havana.tar.gz",
-      "tempest_test_image": "http://<ADMINWEB>/files/tempest/cirros-0.3.1-x86_64-uec.tar.gz",
+      "tempest_test_image": "http://<ADMINWEB>/files/tempest/cirros-0.3.2-x86_64-uec.tar.gz",
       "tempest_adm_password": "tempest",
       "tempest_adm_username": "tempest",
       "tempest_user_password": "tempest",
