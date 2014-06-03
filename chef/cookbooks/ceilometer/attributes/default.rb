@@ -49,8 +49,8 @@ default[:ceilometer][:db][:database] = "ceilometer"
 default[:ceilometer][:db][:user] = "ceilometer"
 default[:ceilometer][:db][:password] = "" # Set by wrapper
 
-default[:ceilometer][:keystone_service_user] = "ceilometer"
-default[:ceilometer][:keystone_service_password] = ""
+default[:ceilometer][:service_user] = "ceilometer"
+default[:ceilometer][:service_password] = ""
 
 default[:ceilometer][:api][:protocol] = "http"
 default[:ceilometer][:api][:port] = 8777

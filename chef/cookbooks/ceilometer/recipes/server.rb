@@ -174,7 +174,7 @@ directory "/var/cache/ceilometer" do
   action :create
 end unless node.platform == "suse"
 
-keystone_settings = CeilometerHelper.keystone_settings(node)
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:api][:protocol] == "https", ha_enabled)
