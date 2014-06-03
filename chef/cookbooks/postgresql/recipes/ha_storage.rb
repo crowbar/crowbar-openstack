@@ -55,9 +55,9 @@ else
   raise "Invalid mode for HA storage!"
 end
 
-# Wait for all nodes to reach this point so we know that all nodes will have
-# all the required packages installed before we create the pacemaker
-# resources
+# Wait for all "database" nodes to reach this point so we know that 
+# they will have all the required packages installed and configuration 
+# files updated before we create the pacemaker resources.
 crowbar_pacemaker_sync_mark "sync-database_before_ha_storage" do
   revision node[:database]["crowbar-revision"]
 end
