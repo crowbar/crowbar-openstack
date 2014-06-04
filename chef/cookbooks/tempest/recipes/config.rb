@@ -141,6 +141,14 @@ users.each do |user|
 
 end
 
+directory "#{node[:tempest][:tempest_path]}" do
+  action :create
+end
+
+directory "#{node[:tempest][:tempest_path]}/bin" do
+  action :create
+end
+
 directory "#{node[:tempest][:tempest_path]}/etc" do
   action :create
 end
@@ -160,7 +168,7 @@ bin_path = node[:tempest][:use_virtualenv] ? "/opt/tempest/.venv/bin" : "/usr/bi
 
 bash "upload tempest test image" do
   code <<-EOH
-IMAGE_URL=${IMAGE_URL:-"http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz"}
+IMAGE_URL=${IMAGE_URL:-"http://download.cirros-cloud.net/0.3.2/cirros-0.3.2-x86_64-uec.tar.gz"}
 
 OS_USER=${OS_USER:-admin}
 OS_TENANT=${OS_TENANT:-admin}
@@ -233,7 +241,7 @@ end
 
 ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
 ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
-cirros_version = "0.3.1"
+cirros_version = "0.3.2"
 
 tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
 if %w(suse redhat centos).include?(node.platform)
@@ -288,7 +296,7 @@ end
 
 nosetests = "/opt/tempest/.venv/bin/nosetests"
 
-template "/tmp/tempest_smoketest.sh" do
+template "#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh" do
   mode 0755
   source "tempest_smoketest.sh.erb"
   variables(
@@ -308,6 +316,6 @@ template "/tmp/tempest_smoketest.sh" do
   )
 end
 
-cookbook_file "#{node[:tempest][:tempest_path]}/run_tempest.py" do
+cookbook_file "#{node[:tempest][:tempest_path]}/bin/run_tempest.py" do
   source "run_tempest.py"
 end
