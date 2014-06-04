@@ -109,11 +109,7 @@ rabbit_settings = {
   :vhost => rabbit[:rabbitmq][:vhost]
 }
 
-keystone = get_instance('roles:keystone-server')
-keystone_settings = KeystoneHelper.keystone_settings(keystone)
-keystone_settings['service_user'] = node[:heat][:keystone_service_user]
-keystone_settings['service_password'] = node[:heat][:keystone_service_password]
-Chef::Log.info("Keystone server found at #{keystone_settings['internal_url_host']}")
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 ha_enabled = node[:heat][:ha][:enabled]
 
