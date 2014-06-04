@@ -10,7 +10,7 @@
 #disable_process_locking=false
 
 # Directory to use for lock files. (string value)
-#lock_path=<None>
+lock_path=/var/run/tempest
 
 
 #
@@ -635,11 +635,11 @@ admin_password=<%=@comp_admin_pass %>
 
 # Matching images become parameters for scenario tests (string
 # value)
-#image_regex=^cirros-0.3.1-x86_64-uec$
+image_regex=^cirros-<%= @cirros_version %>-x86_64-tempest-machine$
 
 # Matching flavors become parameters for scenario tests
 # (string value)
-#flavor_regex=^m1.nano$
+flavor_regex=^tempest-stuff$
 
 # SSH verification in tests is skippedfor matching images
 # (string value)
@@ -647,7 +647,7 @@ admin_password=<%=@comp_admin_pass %>
 
 # List of user mapped to regex to matching image names.
 # (string value)
-#ssh_user_regex=[["^.*[Cc]irros.*$", "root"]]
+ssh_user_regex=[["^.*[Cc]irros.*$", "root"]]
 
 
 [negative]
@@ -841,22 +841,22 @@ image_ref=<%=img_id %>
 #
 
 # Directory containing image files (string value)
-#img_dir=/opt/stack/new/devstack/files/images/cirros-0.3.1-x86_64-uec
+img_dir=<%=@tempest_path %>/etc/cirros/
 
 # QCOW2 image file name (string value)
-#qcow2_img_file=cirros-0.3.1-x86_64-disk.img
+qcow2_img_file=cirros-<%= @cirros_version %>-x86_64-disk.img
 
 # AMI image file name (string value)
-#ami_img_file=cirros-0.3.1-x86_64-blank.img
+ami_img_file=cirros-<%= @cirros_version %>-x86_64-blank.img
 
 # ARI image file name (string value)
-#ari_img_file=cirros-0.3.1-x86_64-initrd
+ari_img_file=cirros-<%= @cirros_version %>-x86_64-initrd
 
 # AKI image file name (string value)
-#aki_img_file=cirros-0.3.1-x86_64-vmlinuz
+aki_img_file=cirros-<%= @cirros_version %>-x86_64-vmlinuz
 
 # ssh username for the image file (string value)
-#ssh_user=cirros
+ssh_user=cirros
 
 # specifies how many resources to request at once. Used for
 # large operations testing. (integer value)
