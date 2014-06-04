@@ -50,9 +50,9 @@ rabbitmq_op = {}
 rabbitmq_op["monitor"] = {}
 rabbitmq_op["monitor"]["interval"] = "10s"
 
-# Wait for all nodes to reach this point so we know that all nodes will have
-# all the required packages installed before we create the pacemaker
-# resources
+# Wait for all "rabbitmq" nodes to reach this point so we know that 
+# they will have all the required packages installed and configuration 
+# files updated before we create the pacemaker resources.
 crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha_storage"
 
 # Avoid races when creating pacemaker resources
