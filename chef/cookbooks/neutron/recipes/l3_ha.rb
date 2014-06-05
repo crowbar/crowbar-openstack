@@ -16,6 +16,7 @@
 package node[:neutron][:platform][:ha_tool_pkg] unless node[:neutron][:platform][:ha_tool_pkg] == ""
 
 use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
+use_lbaas_agent = node[:neutron][:use_lbaas]
 
 # Wait for all "neutron-l3" nodes to reach this point so we know that they will
 # have all the required packages installed and configuration files updated
@@ -29,6 +30,7 @@ l3_agent_primitive = "neutron-l3-agent"
 dhcp_agent_primitive = "neutron-dhcp-agent"
 metadatda_agent_primitive = "neutron-metadata-agent"
 metering_agent_primitive =  "neutron-metering-agent"
+lbaas_agent_primitive =  "neutron-lbaas-agent"
 
 pacemaker_primitive l3_agent_primitive do
   agent node[:neutron][:ha][:l3][:l3_ra]
@@ -55,6 +57,12 @@ pacemaker_primitive metering_agent_primitive do
   action [ :create ]
 end
 
+pacemaker_primitive lbaas_agent_primitive do
+  agent node[:neutron][:ha][:l3][:lbaas_ra]
+  op node[:neutron][:ha][:l3][:op]
+  action [ :create ]
+end
+
 networking_plugin = node[:neutron][:networking_plugin]
 case networking_plugin
 when "openvswitch", "cisco"
@@ -75,6 +83,7 @@ end
 
 group_members = []
 group_members << l3_agent_primitive if use_l3_agent
+group_members << lbaas_agent_primitive if use_lbaas_agent
 group_members += [ dhcp_agent_primitive,
                    metadatda_agent_primitive,
                    metering_agent_primitive,
@@ -97,7 +106,7 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 ha_tool_primitive_name = "neutron-ha-tool"
 
-# FIXME: While the neutron-ha-tool resource agent allows specifying a CA 
+# FIXME: While the neutron-ha-tool resource agent allows specifying a CA
 # Certificate to use for SSL Certificate verification, it's hard to select
 # right CA file as we allow Keystone's and Neutron's to use different CAs.  So
 # we just rely on the correct CA files being installed in a system wide default

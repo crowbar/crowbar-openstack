@@ -211,6 +211,12 @@ unless nova[:nova].nil? or nova[:nova][:ssl].nil?
   }
 end
 
+service_plugins = "neutron.services.metering.metering_plugin.MeteringPlugin"
+service_plugins = "#{service_plugins}, neutron.services.firewall.fwaas_plugin.FirewallPlugin"
+if node[:neutron][:use_lbaas] then
+  service_plugins = "#{service_plugins}, neutron.services.loadbalancer.plugin.LoadBalancerPlugin"
+end
+
 template "/etc/neutron/neutron.conf" do
     cookbook "neutron"
     source "neutron.conf.erb"
@@ -236,6 +242,7 @@ template "/etc/neutron/neutron.conf" do
       :neutron_server => neutron_server,
       :use_ml2 => neutron[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware",
       :networking_plugin => neutron[:neutron][:networking_plugin],
+      :service_plugins => service_plugins,
       :rootwrap_bin =>  node[:neutron][:rootwrap],
       :use_namespaces => true
     }.merge(nova_notify))

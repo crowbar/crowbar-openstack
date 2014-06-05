@@ -60,6 +60,9 @@ when "suse"
     :ovs_agent_name => "openstack-neutron-openvswitch-agent",
     :lb_agent_pkg => "openstack-neutron-linuxbridge-agent",
     :lb_agent_name => "openstack-neutron-linuxbridge-agent",
+    :lbaas_agent_pkg => "openstack-neutron-lbaas-agent",
+    :lbaas_agent_name => "openstack-neutron-lbaas-agent",
+    :lbaas_haproxy_group => "haproxy",
     :nvp_agent_pkg => "openstack-neutron-vmware-agent",
     :nvp_agent_name => "openstack-neutron-vmware-agent",
     :metadata_agent_name => "openstack-neutron-metadata-agent",
@@ -87,6 +90,9 @@ when "centos", "redhat"
     :ovs_agent_name => "neutron-openvswitch-agent",
     :lb_agent_pkg => "openstack-neutron-linuxbridge",
     :lb_agent_name => "neutron-linuxbridge-agent",
+    :lbaas_agent_pkg => "openstack-neutron-lbaas-agent",
+    :lbaas_agent_name => "neutron-lbaas-agent",
+    :lbaas_haproxy_group => "nogroup",
     :nvp_agent_pkg => "openstack-neutron-nicira",
     :nvp_agent_name => "neutron-nicira-agent",
     :metadata_agent_name => "neutron-metadata-agent",
@@ -113,6 +119,9 @@ else
     :ovs_agent_name => "neutron-plugin-openvswitch-agent",
     :lb_agent_pkg => "neutron-plugin-linuxbridge-agent",
     :lb_agent_name => "neutron-plugin-linuxbridge-agent",
+    :lbaas_agent_pkg => "neutron-lbaas-agent",
+    :lbaas_agent_name => "neutron-lbaas-agent",
+    :lbaas_haproxy_group => "nogroup",
     :nvp_agent_pkg => "neutron-plugin-nicira-agent",
     :nvp_agent_name => "neutron-plugin-nicira-agent",
     :metadata_agent_name => "neutron-metadata-agent",
@@ -136,6 +145,7 @@ end
 
 default[:neutron][:ha][:l3][:enabled] = false
 default[:neutron][:ha][:l3][:l3_ra] = "lsb:#{node[:neutron][:platform][:l3_agent_name]}"
+default[:neutron][:ha][:l3][:lbaas_ra] = "lsb:#{node[:neutron][:platform][:lbaas_agent_name]}"
 default[:neutron][:ha][:l3][:dhcp_ra] = "lsb:#{node[:neutron][:platform][:dhcp_agent_name]}"
 default[:neutron][:ha][:l3][:metadata_ra] = "lsb:#{node[:neutron][:platform][:metadata_agent_name]}"
 default[:neutron][:ha][:l3][:metering_ra] = "lsb:#{node[:neutron][:platform][:metering_agent_name]}"

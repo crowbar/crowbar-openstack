@@ -62,9 +62,9 @@ core_plugin = neutron.plugins.nicira.NeutronPlugin.NvpPluginV2
 # Advanced service modules
 # service_plugins =
 <% if @use_ml2 -%>
-service_plugins = neutron.services.l3_router.l3_router_plugin.L3RouterPlugin,neutron.services.metering.metering_plugin.MeteringPlugin, neutron.services.firewall.fwaas_plugin.FirewallPlugin
+service_plugins = neutron.services.l3_router.l3_router_plugin.L3RouterPlugin, <%= @service_plugins -%>
 <% else -%>
-service_plugins = neutron.services.metering.metering_plugin.MeteringPlugin, neutron.services.firewall.fwaas_plugin.FirewallPlugin
+service_plugins = <%= @service_plugins -%>
 <% end -%>
 
 # Paste configuration file
@@ -434,6 +434,9 @@ pool_timeout = <%= @sql_pool_timeout %>
 # List of allowed service type include LOADBALANCER, FIREWALL, VPN
 # Combination of <service type> and <name> must be unique; <driver> must also be unique
 # this is multiline option, example for default provider:
+<% if node[:neutron][:use_lbaas] %>
+service_provider=LOADBALANCER:Haproxy:neutron.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
+<% end -%>
 # service_provider=LOADBALANCER:name:lbaas_plugin_driver_path:default
 # example of non-default provider:
 # service_provider=FIREWALL:name2:firewall_driver_path
