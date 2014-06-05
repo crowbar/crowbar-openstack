@@ -18,31 +18,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
- 
-pg_packages = case node['platform']
-when "ubuntu","debian"
-  %w{postgresql-client libpq-dev make}
-when "suse"
-  %w{postgresql91 rubygem-pg}
-when "fedora", "amazon"
-  %w{postgresql-devel}
-when "redhat","centos","scientific"
-  case
-  when node['platform_version'].to_f >= 6.0
-    %w{postgresql-devel}
-  else
-    [ "postgresql#{node['postgresql']['version'].split('.').join}-devel" ]
-  end
-end
- 
-pg_packages.each do |pg_pack|
-  package pg_pack do
-    action :nothing
-  end.run_action(:install)
+
+if platform_family?('ubuntu', 'debian') && node['postgresql']['version'].to_f > 9.1
+    node.default['postgresql']['enable_pgdg_apt'] = true
 end
 
-if node.platform != "suse"
-  gem_package "pg" do
-    action :nothing
-  end.run_action(:install)
+if(node['postgresql']['enable_pgdg_apt'])
+  include_recipe 'postgresql::apt_pgdg_postgresql'
+end
+
+if(node['postgresql']['enable_pgdg_yum'])
+  include_recipe 'postgresql::yum_pgdg_postgresql'
+end
+
+node['postgresql']['client']['packages'].each do |pg_pack|
+
+  package pg_pack
+
 end

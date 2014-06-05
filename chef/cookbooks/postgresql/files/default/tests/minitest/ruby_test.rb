@@ -1,8 +1,8 @@
 #
-# Cookbook Name:: postgresql
+# Cookbook Name:: postgresql_test
 # Recipe:: default
 #
-# Copyright 2009, Opscode, Inc.
+# Copyright 2012, Opscode, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,4 +17,12 @@
 # limitations under the License.
 #
 
-include_recipe "postgresql::client"
+require File.expand_path('../support/helpers', __FILE__)
+
+describe 'postgresql::ruby' do
+  include Helpers::Postgresql
+
+  it 'installs the pg gem in Chefs ruby environment' do
+    assert Gem::Specification.all_names.grep("pg-.*")
+  end
+end

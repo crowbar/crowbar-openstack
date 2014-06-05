@@ -18,16 +18,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
- 
+
 include_recipe "postgresql::client"
- 
+
 # Create a group and user like the package will.
 # Otherwise the templates fail.
- 
+
 group "postgres" do
   gid 26
 end
- 
+
 user "postgres" do
   shell "/bin/bash"
   comment "PostgreSQL Server"
@@ -37,37 +37,20 @@ user "postgres" do
   uid 26
   supports :manage_home => false
 end
- 
-package "postgresql" do
-  case node.platform
-  when "redhat","centos","scientific"
-    case
-    when node.platform_version.to_f >= 6.0
-      package_name "postgresql"
-    else
-      package_name "postgresql#{node['postgresql']['version'].split('.').join}"
-    end
-  when "suse"
-    package_name "postgresql91"
-  else
-    package_name "postgresql"
-  end
+
+directory node['postgresql']['dir'] do
+  owner "postgres"
+  group "postgres"
+  recursive true
+  action :create
 end
- 
-case node.platform
-when "redhat","centos","scientific"
-  case
-  when node.platform_version.to_f >= 6.0
-    package "postgresql-server"
-  else
-    package "postgresql#{node['postgresql']['version'].split('.').join}-server"
-  end
-when "suse"
-  package "postgresql91-server"
-when "fedora"
-  package "postgresql-server"
+
+node['postgresql']['server']['packages'].each do |pg_pack|
+
+  package pg_pack
+
 end
- 
+
 ha_enabled = node[:database][:ha][:enabled]
 
 # We need to include the HA recipe early, before the config files are
@@ -75,6 +58,12 @@ ha_enabled = node[:database][:ha][:enabled]
 # the directory that will be mounted for HA
 if ha_enabled
   include_recipe "postgresql::ha_storage"
+end
+
+template "#{node['postgresql']['sysconfig']}" do
+  source "pgsql.sysconfig.erb"
+  mode "0644"
+  notifies :restart, "service[postgresql]", :delayed
 end
 
 # We need initdb to populate /var/lib/pgsql/data before we generate the config
@@ -92,24 +81,17 @@ execute "Initial population of #{node.postgresql.dir}" do
   if node.platform == "suse"
     command "service postgresql start; service postgresql stop"
   else
-    command "/sbin/service postgresql initdb"
+    command "/sbin/service #{node['postgresql']['server']['service_name']} initdb #{node['postgresql']['initdb_locale']}"
   end
   not_if { (node.platform == "suse" && !ha_enabled) ||
            ::FileTest.exist?(File.join(node.postgresql.dir, "PG_VERSION")) }
 end
- 
+
 service "postgresql" do
+  service_name node['postgresql']['server']['service_name']
   supports :restart => true, :status => true, :reload => true
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if node[:database][:ha][:enabled]
-end
- 
-template "#{node[:postgresql][:dir]}/postgresql.conf" do
-  source "redhat.postgresql.conf.erb"
-  owner "postgres"
-  group "postgres"
-  mode 0600
-  notifies :restart, resources(:service => "postgresql")
 end
 
 template "/etc/cron.daily/postgresql-logs" do
