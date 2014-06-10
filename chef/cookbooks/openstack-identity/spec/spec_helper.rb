@@ -6,19 +6,19 @@ ChefSpec::Coverage.start! { add_filter 'openstack-identity' }
 
 LOG_LEVEL = :fatal
 SUSE_OPTS = {
-  platform: 'suse',
-  version: '11.03',
-  log_level: LOG_LEVEL
+  :platform => 'suse',
+  :version => '11.03',
+  :log_level => LOG_LEVEL
 }
 REDHAT_OPTS = {
-  platform: 'redhat',
-  version: '6.3',
-  log_level: LOG_LEVEL
+  :platform => 'redhat',
+  :version => '6.3',
+  :log_level => LOG_LEVEL
 }
 UBUNTU_OPTS = {
-  platform: 'ubuntu',
-  version: '12.04',
-  log_level: LOG_LEVEL
+  :platform => 'ubuntu',
+  :version => '12.04',
+  :log_level => LOG_LEVEL
 }
 
 # Helper methods

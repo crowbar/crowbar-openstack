@@ -82,11 +82,11 @@ default['openstack']['db']['server_role'] = 'os-ops-database'
 default['openstack']['db']['service_type'] = 'mysql'
 # Database connection options. Should include starting '?'
 default['openstack']['db']['options'] = {
-   mysql: '?charset=utf8',
-   postgresql: '',
-   sqlite: '',
-   db2: '?charset=utf8',
-   nosql: ''
+   :mysql => '?charset=utf8',
+   :postgresql => '',
+   :sqlite => '',
+   :db2 => '?charset=utf8',
+   :nosql => ''
 }
 
 # Database used by the OpenStack Compute (Nova) service

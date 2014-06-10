@@ -410,13 +410,13 @@ end
 default['openstack']['ceph']['setup_client'] = true
 
 default['openstack']['ceph']['global'] = {
-  fsid: '00000000-0000-0000-0000-000000000000',
-  mon_initial_members: [],
-  mon_host: [],
-  auth_cluster_required: 'cephx',
-  auth_service_required: 'cephx',
-  auth_client_required: 'cephx',
-  filestore_xattr_use_omap: true
+  :fsid => '00000000-0000-0000-0000-000000000000',
+  :mon_initial_members => [],
+  :mon_host => [],
+  :auth_cluster_required => 'cephx',
+  :auth_service_required => 'cephx',
+  :auth_client_required => 'cephx',
+  :filestore_xattr_use_omap => true
 }
 
 case node['platform_family']

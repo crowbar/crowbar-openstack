@@ -293,8 +293,8 @@ describe 'openstack-identity::server' do
         before { node.set['openstack']['auth']['strategy'] = 'uuid' }
         it 'does not execute' do
           expect(chef_run).to_not run_execute(cmd).with(
-            user: 'keystone',
-            group: 'keystone'
+            :user => 'keystone',
+            :group => 'keystone'
           )
         end
       end
@@ -307,8 +307,8 @@ describe 'openstack-identity::server' do
               .and_return(false)
 
             expect(chef_run).to run_execute(cmd).with(
-              user: 'keystone',
-              group: 'keystone'
+              :user => 'keystone',
+              :group => 'keystone'
             )
           end
         end
@@ -322,8 +322,8 @@ describe 'openstack-identity::server' do
 
           it 'does not execute' do
             expect(chef_run).to_not run_execute(cmd).with(
-              user: 'keystone',
-              group: 'keystone'
+              :user => 'keystone',
+              :group => 'keystone'
             )
           end
         end
@@ -334,8 +334,8 @@ describe 'openstack-identity::server' do
             .and_return(true)
 
           expect(chef_run).not_to run_execute(cmd).with(
-            user: 'keystone',
-            group: 'keystone'
+            :user => 'keystone',
+            :group => 'keystone'
           )
         end
       end
@@ -621,12 +621,12 @@ describe 'openstack-identity::server' do
 
       describe '[signing] section' do
         opts = {
-          certfile: '/etc/keystone/ssl/certs/signing_cert.pem',
-          keyfile: '/etc/keystone/ssl/private/signing_key.pem',
-          ca_certs: '/etc/keystone/ssl/certs/ca.pem',
-          key_size: '2048',
-          valid_days: '3650',
-          ca_password: nil
+          :certfile => '/etc/keystone/ssl/certs/signing_cert.pem',
+          :keyfile => '/etc/keystone/ssl/private/signing_key.pem',
+          :ca_certs => '/etc/keystone/ssl/certs/ca.pem',
+          :key_size => '2048',
+          :valid_days => '3650',
+          :ca_password => nil
         }
 
         describe 'with pki' do
@@ -689,16 +689,16 @@ describe 'openstack-identity::server' do
 
       it 'runs migrations' do
         expect(chef_run).to run_execute(cmd).with(
-          user: 'keystone',
-          group: 'keystone'
+          :user => 'keystone',
+          :group => 'keystone'
         )
       end
 
       it 'does not run migrations' do
         node.set['openstack']['db']['identity']['migrate'] = false
         expect(chef_run).not_to run_execute(cmd).with(
-          user: 'keystone',
-          group: 'keystone'
+          :user => 'keystone',
+          :group => 'keystone'
         )
       end
     end
@@ -716,9 +716,9 @@ describe 'openstack-identity::server' do
 
         it 'does manage keystone-paste from remote file if specified' do
           expect(chef_run).to create_remote_file('/etc/keystone/keystone-paste.ini').with(
-            user: 'keystone',
-            group: 'keystone',
-            mode: 00644)
+            :user => 'keystone',
+            :group => 'keystone',
+            :mode => 00644)
           expect(remote_paste).to notify('service[keystone]').to(:restart)
         end
       end

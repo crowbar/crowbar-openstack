@@ -55,30 +55,30 @@ default['openstack']['mq']['qpid']['protocol'] = 'tcp'
 # defined in oslo/messaging/_drivers/impl_qpid.py
 default['openstack']['mq']['qpid']['topology_version'] = 1
 qpid_defaults = {
-  username: node['openstack']['mq']['user'],
-  sasl_mechanisms: '',
-  reconnect: true,
-  reconnect_timeout: 0,
-  reconnect_limit: 0,
-  reconnect_interval_min: 0,
-  reconnect_interval_max: 0,
-  reconnect_interval: 0,
-  heartbeat: 60,
-  protocol: node['openstack']['mq']['qpid']['protocol'],
-  tcp_nodelay: true,
-  host: node['openstack']['endpoints']['mq']['host'],
-  port: node['openstack']['endpoints']['mq']['port'],
-  qpid_hosts: ["#{node['openstack']['endpoints']['mq']['host']}:#{node['openstack']['endpoints']['mq']['port']}"],
-  topology_version: node['openstack']['mq']['qpid']['topology_version']
+  :username => node['openstack']['mq']['user'],
+  :sasl_mechanisms => '',
+  :reconnect => true,
+  :reconnect_timeout => 0,
+  :reconnect_limit => 0,
+  :reconnect_interval_min => 0,
+  :reconnect_interval_max => 0,
+  :reconnect_interval => 0,
+  :heartbeat => 60,
+  :protocol => node['openstack']['mq']['qpid']['protocol'],
+  :tcp_nodelay => true,
+  :host => node['openstack']['endpoints']['mq']['host'],
+  :port => node['openstack']['endpoints']['mq']['port'],
+  :qpid_hosts => ["#{node['openstack']['endpoints']['mq']['host']}:#{node['openstack']['endpoints']['mq']['port']}"],
+  :topology_version => node['openstack']['mq']['qpid']['topology_version']
 }
 
 rabbit_defaults = {
-  userid: node['openstack']['mq']['user'],
-  vhost: node['openstack']['mq']['vhost'],
-  port: node['openstack']['endpoints']['mq']['port'],
-  host: node['openstack']['endpoints']['mq']['host'],
-  ha: false,
-  use_ssl: false
+  :userid => node['openstack']['mq']['user'],
+  :vhost => node['openstack']['mq']['vhost'],
+  :port => node['openstack']['endpoints']['mq']['port'],
+  :host => node['openstack']['endpoints']['mq']['host'],
+  :ha => false,
+  :use_ssl => false
 }
 
 ###################################################################

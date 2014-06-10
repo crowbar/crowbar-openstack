@@ -62,7 +62,7 @@ module ::Openstack # rubocop:disable Documentation
       openstackcmd << "--#{key}" << val.to_s
     end
     Chef::Log.debug("Running openstack command: #{openstackcmd} with environment: #{env}")
-    result = shell_out(openstackcmd, env: env)
+    result = shell_out(openstackcmd, :env => env)
     fail "#{result.stderr} (#{result.exitstatus})" if result.exitstatus != 0
     result.stdout
   end

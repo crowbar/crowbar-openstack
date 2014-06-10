@@ -17,9 +17,9 @@ describe 'openstack-common::openrc' do
 
       it 'creates the /root/openrc file' do
         expect(chef_run).to create_template(file.name).with(
-          user: 'root',
-          group: 'root',
-          mode: 0600
+          :user => 'root',
+          :group => 'root',
+          :mode => 0600
         )
       end
 

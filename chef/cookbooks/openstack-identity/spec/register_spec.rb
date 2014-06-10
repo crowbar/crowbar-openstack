@@ -336,10 +336,10 @@ describe 'openstack-identity::default' do
           provider.stub(:shell_out)
             .with(['keystone', 'user-create', '--enabled',
                    'false', '--description', 'more than one word'],
-                  env: {
+                  :env => {
                     'OS_SERVICE_ENDPOINT' => nil,
                     'OS_SERVICE_TOKEN' => nil })
-            .and_return double('shell_out', exitstatus: 0, stdout: 'good')
+            .and_return double('shell_out', :exitstatus => 0, :stdout => 'good')
 
           expect(
             provider.send(:identity_command, resource, 'user-create',

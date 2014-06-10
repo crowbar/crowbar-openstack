@@ -20,24 +20,24 @@ describe 'openstack-common::ceph_client' do
       # Using cookbook(apt) LWRP custom matcher
       # https://github.com/sethvargo/chefspec#packaging-custom-matchers
       expect(chef_run).to add_apt_repository('ceph').with(
-        uri: 'http://ceph.com/debian-emperor',
-        components: ['main'],
-        distribution: 'precise')
+        :uri => 'http://ceph.com/debian-emperor',
+        :components => ['main'],
+        :distribution => 'precise')
     end
 
     it 'creates the /etc/ceph directory' do
       expect(chef_run).to create_directory('/etc/ceph').with(
-        owner: 'root',
-        group: 'root'
+        :owner => 'root',
+        :group => 'root'
       )
     end
 
     context 'configuration file' do
       it 'creates the file' do
         expect(chef_run).to create_template(file.name).with(
-          owner: 'root',
-          group: 'root',
-          mode: '644'
+          :owner => 'root',
+          :group => 'root',
+          :mode => '644'
         )
       end
 

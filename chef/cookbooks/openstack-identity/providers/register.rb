@@ -53,7 +53,7 @@ def identity_command(resource, cmd, args = {})
     keystonecmd << "--#{key}" << val.to_s
   end
   Chef::Log.debug("Running identity command: #{keystonecmd}")
-  rc = shell_out(keystonecmd, env: (cmd.include? 'ec2') ? generate_ec2_creds(resource) : generate_creds(resource))
+  rc = shell_out(keystonecmd, :env => (cmd.include? 'ec2') ? generate_ec2_creds(resource) : generate_creds(resource))
   fail "#{rc.stderr} (#{rc.exitstatus})" if rc.exitstatus != 0
   rc.stdout
 end

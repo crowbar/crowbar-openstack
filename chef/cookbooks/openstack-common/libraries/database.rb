@@ -80,10 +80,10 @@ module ::Openstack # rubocop:disable Documentation
       end
 
       connection_info = {
-        host: host,
-        port: port.to_i,
-        username: super_user,
-        password: super_password
+        :host => host,
+        :port => port.to_i,
+        :username => super_user,
+        :password => super_password
       }
 
       # create database

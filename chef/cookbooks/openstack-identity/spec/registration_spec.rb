@@ -30,10 +30,10 @@ describe 'openstack-identity::registration' do
             expect(chef_run).to create_tenant_openstack_identity_register(
               "Register '#{tenant_name}' Tenant"
             ).with(
-              auth_uri: 'http://127.0.0.1:35357/v2.0',
-              bootstrap_token: 'bootstrap-token',
-              tenant_name: tenant_name,
-              tenant_description: "#{tenant_name} Tenant"
+              :auth_uri => 'http://127.0.0.1:35357/v2.0',
+              :bootstrap_token => 'bootstrap-token',
+              :tenant_name => tenant_name,
+              :tenant_description => "#{tenant_name} Tenant"
             )
           end
         end
@@ -46,10 +46,10 @@ describe 'openstack-identity::registration' do
             expect(chef_run).to create_tenant_openstack_identity_register(
               "Register '#{tenant_name}' Tenant"
             ).with(
-              auth_uri: 'http://127.0.0.1:35357/v2.0',
-              bootstrap_token: 'bootstrap-token',
-              tenant_name: tenant_name,
-              tenant_description: "#{tenant_name} Tenant"
+              :auth_uri => 'http://127.0.0.1:35357/v2.0',
+              :bootstrap_token => 'bootstrap-token',
+              :tenant_name => tenant_name,
+              :tenant_description => "#{tenant_name} Tenant"
             )
           end
         end
@@ -63,9 +63,9 @@ describe 'openstack-identity::registration' do
             expect(chef_run).to create_role_openstack_identity_register(
               "Register '#{role_name}' Role"
             ).with(
-              auth_uri: 'http://127.0.0.1:35357/v2.0',
-              bootstrap_token: 'bootstrap-token',
-              role_name: role_name
+              :auth_uri => 'http://127.0.0.1:35357/v2.0',
+              :bootstrap_token => 'bootstrap-token',
+              :role_name => role_name
             )
           end
         end
@@ -79,9 +79,9 @@ describe 'openstack-identity::registration' do
             expect(chef_run).to create_role_openstack_identity_register(
               "Register '#{role_name}' Role"
             ).with(
-              auth_uri: 'http://127.0.0.1:35357/v2.0',
-              bootstrap_token: 'bootstrap-token',
-              role_name: role_name
+              :auth_uri => 'http://127.0.0.1:35357/v2.0',
+              :bootstrap_token => 'bootstrap-token',
+              :role_name => role_name
             )
           end
         end
@@ -101,11 +101,11 @@ describe 'openstack-identity::registration' do
               expect(chef_run).to create_user_openstack_identity_register(
                 "Register '#{user}' User"
               ).with(
-                auth_uri: 'http://127.0.0.1:35357/v2.0',
-                bootstrap_token: 'bootstrap-token',
-                user_name: user,
-                user_pass: '',
-                tenant_name: tenant
+                :auth_uri => 'http://127.0.0.1:35357/v2.0',
+                :bootstrap_token => 'bootstrap-token',
+                :user_name => user,
+                :user_pass => '',
+                :tenant_name => tenant
               )
             end
 
@@ -114,12 +114,12 @@ describe 'openstack-identity::registration' do
                 expect(chef_run).to grant_role_openstack_identity_register(
                   "Grant '#{role}' Role to '#{user}' User in 'admin' Tenant"
                 ).with(
-                  auth_uri: 'http://127.0.0.1:35357/v2.0',
-                  bootstrap_token: 'bootstrap-token',
-                  user_name: user,
-                  role_name: role,
-                  tenant_name: 'admin',
-                  action: [:grant_role]
+                  :auth_uri => 'http://127.0.0.1:35357/v2.0',
+                  :bootstrap_token => 'bootstrap-token',
+                  :user_name => user,
+                  :role_name => role,
+                  :tenant_name => 'admin',
+                  :action => [:grant_role]
                 )
               end
             end
@@ -135,11 +135,11 @@ describe 'openstack-identity::registration' do
           expect(chef_run).to create_user_openstack_identity_register(
             "Register 'user1' User"
           ).with(
-            auth_uri: 'http://127.0.0.1:35357/v2.0',
-            bootstrap_token: 'bootstrap-token',
-            user_name: 'user1',
-            user_pass: 'secret1',
-            tenant_name: 'default_tenant1'
+            :auth_uri => 'http://127.0.0.1:35357/v2.0',
+            :bootstrap_token => 'bootstrap-token',
+            :user_name => 'user1',
+            :user_pass => 'secret1',
+            :tenant_name => 'default_tenant1'
           )
         end
 
@@ -147,11 +147,11 @@ describe 'openstack-identity::registration' do
           expect(chef_run).to grant_role_openstack_identity_register(
             "Grant 'role1' Role to 'user1' User in 'role_tenant1' Tenant"
           ).with(
-            auth_uri: 'http://127.0.0.1:35357/v2.0',
-            bootstrap_token: 'bootstrap-token',
-            user_name: 'user1',
-            role_name: 'role1',
-            tenant_name: 'role_tenant1'
+            :auth_uri => 'http://127.0.0.1:35357/v2.0',
+            :bootstrap_token => 'bootstrap-token',
+            :user_name => 'user1',
+            :role_name => 'role1',
+            :tenant_name => 'role_tenant1'
           )
         end
       end
@@ -178,9 +178,9 @@ describe 'openstack-identity::registration' do
           expect(chef_run).to create_service_openstack_identity_register(
             'Register Identity Service'
           ).with(
-            service_name: 'keystone',
-            service_type: 'identity',
-            service_description: 'Keystone Identity Service'
+            :service_name => 'keystone',
+            :service_type => 'identity',
+            :service_description => 'Keystone Identity Service'
           )
         end
       end
@@ -208,13 +208,13 @@ describe 'openstack-identity::registration' do
           expect(chef_run).to create_endpoint_openstack_identity_register(
             'Register Identity Endpoint'
           ).with(
-            auth_uri: 'http://127.0.0.1:35357/v2.0',
-            bootstrap_token: 'bootstrap-token',
-            service_type: 'identity',
-            endpoint_region: 'RegionOne',
-            endpoint_adminurl: 'http://127.0.0.1:35357/v2.0',
-            endpoint_internalurl: 'http://127.0.0.1:35357/v2.0',
-            endpoint_publicurl: 'http://127.0.0.1:5000/v2.0'
+            :auth_uri => 'http://127.0.0.1:35357/v2.0',
+            :bootstrap_token => 'bootstrap-token',
+            :service_type => 'identity',
+            :endpoint_region => 'RegionOne',
+            :endpoint_adminurl => 'http://127.0.0.1:35357/v2.0',
+            :endpoint_internalurl => 'http://127.0.0.1:35357/v2.0',
+            :endpoint_publicurl => 'http://127.0.0.1:5000/v2.0'
           )
         end
 
@@ -222,7 +222,7 @@ describe 'openstack-identity::registration' do
           node.set['openstack']['identity']['region'] = 'identityRegion'
           expect(chef_run).to create_endpoint_openstack_identity_register(
             'Register Identity Endpoint'
-          ).with(endpoint_region: 'identityRegion')
+          ).with(:endpoint_region => 'identityRegion')
         end
       end
     end

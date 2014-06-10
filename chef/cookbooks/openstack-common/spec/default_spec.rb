@@ -20,15 +20,15 @@ describe 'openstack-common::default' do
       # https://github.com/sethvargo/chefspec#packaging-custom-matchers
       node.set['openstack']['apt']['live_updates_enabled'] = true
       expect(chef_run).to add_apt_repository('openstack-ppa').with(
-        uri: 'http://ubuntu-cloud.archive.canonical.com/ubuntu',
-        components: ['precise-updates/icehouse', 'main'])
+        :uri => 'http://ubuntu-cloud.archive.canonical.com/ubuntu',
+        :components => ['precise-updates/icehouse', 'main'])
     end
 
     it 'disables openstack live updates' do
       node.set['openstack']['apt']['live_updates_enabled'] = false
       expect(chef_run).to_not add_apt_repository('openstack-ppa').with(
-        uri: 'http://ubuntu-cloud.archive.canonical.com/ubuntu',
-        components: ['precise-updates/icehouse', 'main'])
+        :uri => 'http://ubuntu-cloud.archive.canonical.com/ubuntu',
+        :components => ['precise-updates/icehouse', 'main'])
     end
   end
 end
