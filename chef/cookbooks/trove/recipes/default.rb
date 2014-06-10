@@ -37,12 +37,15 @@ node.set['openstack']['database-service']['volume_support'] = node[:trove][:volu
   node.set['openstack']['endpoints'][endpoint]['host'] = instance[:fqdn]
   node.set['openstack']['endpoints'][endpoint]['scheme'] = instance[:protocol]
   node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
-  if endpoint == 'identity-api'
-    node.set['openstack']['database-service']['nova_proxy_user'] = instance[:keystone][:admin][:user]
-    node.set['openstack']['database-service']['nova_proxy_password'] = instance[:keystone][:admin][:password]
-    node.set['openstack']['database-service']['nova_proxy_tenant'] = instance[:keystone][:admin][:tenant]
-  end
 end
+
+# talking to nova via the novaclient, this should be an admin user in
+# the keystone config (see the attributes in trove-taskmanager.conf and
+# others)
+keystone_settings = KeystoneHelper.keystone_settings(node, :nova)
+node.set['openstack']['database-service']['nova_proxy_user'] = keystone_settings[:admin_user]
+node.set['openstack']['database-service']['nova_proxy_password'] = keystone_settings[:admin_password]
+node.set['openstack']['database-service']['nova_proxy_tenant'] = keystone_settings[:admin_tenant]
 
 node.set_unless['openstack']['endpoints']['database-service-api'] = {}
 node.set['openstack']['endpoints']['database-service-api']['host'] = node[:fqdn]
