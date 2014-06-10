@@ -43,45 +43,7 @@ euca-bundle-image -i ${s3_materials_path}/cirros-*-vmlinuz --kernel true -d ${s3
 <%= @nosetests %> -q --with-xunit --xunit-file=/dev/stdout -w /opt/tempest/ -v tempest
 tresult=$?
 
-
-
-### clean up in admin tenant
-(
-export OS_USERNAME=${admin_username}
-export OS_PASSWORD=${admin_password}
-export OS_TENANT_NAME=${admin_tenant_name}
-echo -e "Cleaning up tenants..."
-for f in `keystone tenant-list | grep -E 'test_tenant_|tenant2-[0-9]*|tenant-new[0-9]*|tenant-[0-9]+|tenant-dup-[0-9]+' | awk '{print $2}'` ; do keystone tenant-delete $f ; done
-echo -e "Cleaning up users..."
-for f in `keystone user-list | grep -E 'test_user_[0-9]+' | awk '{print $2}'` ; do keystone user-delete $f ; done
-echo -e "Cleaning up roles..."
-for f in `keystone role-list | grep -E 'role[0-9]+|role-[0-9]+' | awk '{print $2}'` ; do keystone role-delete $f ; done
-echo -e "Cleaning up services..."
-for f in `keystone service-list | grep -E 'service-[0-9]+' | awk '{print $2}'` ; do keystone service-delete $f ; done
-echo -e "Cleaning up security-groups..."
-for f in `neutron security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do neutron security-group-delete $f ; done
-echo -e "Cleaning up images..."
-for f in `nova image-list | grep -E '.image[0-9]+' | awk {'print $2'}`; do nova image-delete $f ; done
-) 1>&2
-
-#clean up in tempest tenant
-(
-export OS_USERNAME=${username}
-export OS_PASSWORD=${password}
-export OS_TENANT_NAME=${tenant_name}
-echo -e "Cleaning up security-groups..."
-for f in `neutron security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do neutron security-group-delete $f ; done
-echo -e "Cleaning up volume snapshots..."
-for f in `nova volume-snapshot-list | awk {'print $2'} | grep -v '^ID$' | grep -v '^$'` ; do nova volume-snapshot-delete $f ; done
-echo -e "Cleaning up volumes..."
-for f in `nova volume-list | awk {'print $2'} | grep -v '^ID$' | grep -v '^$'` ; do nova volume-delete $f ; done
-echo -e "Cleaning up flavors..."
-for f in `nova flavor-list | grep -E 'test_flavor_[0-9]+' | awk '{print $2}'` ; do nova flavor-delete $f ; done
-echo -e "Cleaning up instances..."
-for f in `nova list | awk '{print $2}' | grep -v '^ID$' | grep -v '^$'` ; do nova delete $f ; done
-echo -e "Cleaning up floating ips..."
-for f in `neutron floatingip-list | awk {'print $2'}`; do neutron floatingip-delete $f ; done
-)  1>&2
+<%= @tempest_path %>/bin/tempest_cleanup.sh || :
 
 exit ${tresult}
 

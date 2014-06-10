@@ -296,24 +296,29 @@ end
 
 nosetests = "/opt/tempest/.venv/bin/nosetests"
 
-template "#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh" do
-  mode 0755
-  source "tempest_smoketest.sh.erb"
-  variables(
-    :nosetests => nosetests,
-    :key_host => keystone_address,
-    :key_port => keystone_port,
-    :comp_user => tempest_comp_user,
-    :comp_pass => tempest_comp_pass,
-    :comp_tenant => tempest_comp_tenant,
-    :alt_comp_user => alt_comp_user,
-    :alt_comp_pass => alt_comp_pass,
-    :alt_comp_tenant => alt_comp_tenant,
-    :comp_admin_user => comp_admin_user,
-    :comp_admin_pass => comp_admin_pass,
-    :comp_admin_tenant => comp_admin_tenant,
-    :tempest_path => node[:tempest][:tempest_path]
-  )
+
+["#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh",
+ "#{node[:tempest][:tempest_path]}/bin/tempest_cleanup.sh"].each do |p|
+
+  template "#{p}" do
+    mode 0755
+    source "#{(p.rpartition '/')[2]}.erb"
+    variables(
+      :nosetests => nosetests,
+      :key_host => keystone_address,
+      :key_port => keystone_port,
+      :comp_user => tempest_comp_user,
+      :comp_pass => tempest_comp_pass,
+      :comp_tenant => tempest_comp_tenant,
+      :alt_comp_user => alt_comp_user,
+      :alt_comp_pass => alt_comp_pass,
+      :alt_comp_tenant => alt_comp_tenant,
+      :comp_admin_user => comp_admin_user,
+      :comp_admin_pass => comp_admin_pass,
+      :comp_admin_tenant => comp_admin_tenant,
+      :tempest_path => node[:tempest][:tempest_path]
+    )
+  end
 end
 
 cookbook_file "#{node[:tempest][:tempest_path]}/bin/run_tempest.py" do
