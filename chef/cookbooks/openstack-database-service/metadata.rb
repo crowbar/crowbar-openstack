@@ -11,7 +11,7 @@ recipe           "openstack-database-service::conductor", "Installs Conductor se
 recipe           "openstack-database-service::taskmanager", "Installs TaskManager service"
 recipe           "openstack-database-service::guestagent", "Installs GuestAgent service"
 
-depends          'openstack-common', '~> 8.0'
-depends          'openstack-identity', '~> 8.0'
+depends          'openstack-common', '~> 9.0'
+depends          'openstack-identity', '~> 9.0'
 
 supports "suse"
