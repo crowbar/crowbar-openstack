@@ -24,8 +24,21 @@ of all the settable attributes for this cookbook.
 
 Note that all attributes are in the `default["openstack"]` "namespace"
 
+* `openstack['api']['auth']['version']` - Select v2.0 or v3.0. Default v2.0. The default auth API version used by other components to interact with identity service.
+
+default
+-------
+
+Support multiple network types. Default network type is "nova" with the other option supported being "neutron".
+The attribute is in the `default["openstack"]["compute"]["network"]["service_type"]`.
+
 Recipes
 =======
+
+client
+----
+
+Install the common python openstack client package
 
 default
 ----
@@ -64,6 +77,14 @@ example, overriding `node['openstack']['endpoints']['identity']['host']`). If
 ]
 ```
 
+openrc
+----
+
+Creates an /root/openrc file. This requires the identity attributes for
+admin_user and admin_tenant_name, or for the identity_service_chef_role
+to be used on the identity server node.
+
+
 sysctl
 ----
 
@@ -81,6 +102,7 @@ Libraries
 
 This cookbook exposes a set of default library routines:
 
+* `cli` -- Used to call openstack CLIs
 * `endpoint` -- Used to return a `::URI` object representing the named OpenStack endpoint
 * `endpoints` -- Useful for operating on all OpenStack endpoints
 * `db` -- Returns a Hash of information about a named OpenStack database
@@ -202,12 +224,14 @@ License and Author
 | **Author**           |  Sean Gallagher (<sean.gallagher@att.com>)         |
 | **Author**           |  Ionut Artarisi (<iartarisi@suse.cz>)              |
 | **Author**           |  Chen Zhiwei (<zhiwchen@cn.ibm.com>)               |
+| **Author**           |  Brett Campbell (<brett.campbell@rackspace.com>)   |
 |                      |                                                    |
 | **Copyright**        |  Copyright (c) 2012-2013, AT&T Services, Inc.      |
 | **Copyright**        |  Copyright (c) 2013, Opscode, Inc.                 |
 | **Copyright**        |  Copyright (c) 2013, Craig Tracey                  |
 | **Copyright**        |  Copyright (c) 2013, SUSE Linux GmbH               |
 | **Copyright**        |  Copyright (c) 2013-2014, IBM, Corp.               |
+| **Copyright**        |  Copyright (c) 2013-2014, Rackspace US, Inc.       |
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

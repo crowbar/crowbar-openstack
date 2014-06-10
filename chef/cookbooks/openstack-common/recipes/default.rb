@@ -18,31 +18,35 @@
 # limitations under the License.
 #
 
+platform_options = node['openstack']['common']['platform']
 case node['platform_family']
 when 'debian'
   package 'ubuntu-cloud-keyring' do
-    action :install
+    options platform_options['package_overrides']
+    action :upgrade
   end
 
-  apt_components = node['openstack']['apt']['components']
-
-  # Simple variable substitution for LSB codename and OpenStack release
-  apt_components.each do | comp |
-    comp.gsub! '%release%', node['openstack']['release']
-    comp.gsub! '%codename%', node['lsb']['codename']
+  if node['openstack']['apt']['live_updates_enabled']
+    apt_components = node['openstack']['apt']['components']
+    # Simple variable substitution for LSB codename and OpenStack release
+    apt_components.each do | comp |
+      comp.gsub! '%release%', node['openstack']['release']
+      comp.gsub! '%codename%', node['lsb']['codename']
+    end
+    apt_repository 'openstack-ppa' do
+      uri node['openstack']['apt']['uri']
+      components apt_components
+    end
   end
-
-  apt_repository 'openstack-ppa' do
-    uri node['openstack']['apt']['uri']
-    components apt_components
-  end
-
 when 'rhel'
 
   if node['openstack']['yum']['rdo_enabled']
     repo_action = :add
-  else
+    include_recipe 'yum-epel'
+  elsif FileTest.exist? "/etc/yum.repos.d/RDO-#{node['openstack']['release']}.repo"
     repo_action = :remove
+  else
+    repo_action = :nothing
   end
 
   yum_repository "RDO-#{node['openstack']['release']}" do

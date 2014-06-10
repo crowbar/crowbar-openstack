@@ -1,9 +1,9 @@
 # encoding: UTF-8
 #
 # Cookbook Name:: openstack-common
-# recipe:: set_endpoints_by_interface
+# Recipe:: client
 #
-# Copyright 2013, Opscode, Inc.
+# Copyright 2014, IBM Corp.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ class ::Chef::Recipe # rubocop:disable Documentation
   include ::Openstack
 end
 
-# iterate over the endpoints, look for bind_interface to set the host
-node['openstack']['endpoints'].keys.each do |component|
-  unless node['openstack']['endpoints'][component]['bind_interface'].nil?
-    ip_address = address node['openstack']['endpoints'][component]
-    node.default['openstack']['endpoints'][component]['host'] = ip_address
+platform_options = node['openstack']['common']['platform']
+platform_options['common_client_packages'].each do |pkg|
+  package pkg do
+    options platform_options['package_overrides']
+
+    action :upgrade
   end
 end
