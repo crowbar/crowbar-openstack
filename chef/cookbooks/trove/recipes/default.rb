@@ -47,6 +47,11 @@ node.set['openstack']['database-service']['nova_proxy_user'] = keystone_settings
 node.set['openstack']['database-service']['nova_proxy_password'] = keystone_settings[:admin_password]
 node.set['openstack']['database-service']['nova_proxy_tenant'] = keystone_settings[:admin_tenant]
 
+# XXX since we're not using databags (yet?), use the developer mode and
+# set the token in an attribute
+node.set['openstack']['developer_mode'] = true
+node.set['openstack']['secret']['trove'] = keystone_settings[:admin_token]
+
 node.set_unless['openstack']['endpoints']['database-service-api'] = {}
 node.set['openstack']['endpoints']['database-service-api']['host'] = node[:fqdn]
 
