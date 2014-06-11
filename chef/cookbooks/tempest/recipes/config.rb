@@ -254,6 +254,7 @@ end
 
 swifts = search(:node, "roles:swift-proxy") || []
 heats = search(:node, "roles:heat-server") || []
+ceilometers = search(:node, "roles:ceilometer-server") || []
 horizons = search(:node, "roles:nova_dashboard-server") || []
 
 neutrons = search(:node, "roles:neutron-server") || []
@@ -286,6 +287,7 @@ template "#{tempest_conf}" do
     :public_network_id => public_network_id,
     :tempest_path => node[:tempest][:tempest_path],
     :use_heat => !heats.empty?,
+    :use_ceilometer => !ceilometers.empty?,
     :use_horizon => !horizons.empty?,
     :use_neutron => !neutrons.empty?,
     :use_swift => !swifts.empty?
