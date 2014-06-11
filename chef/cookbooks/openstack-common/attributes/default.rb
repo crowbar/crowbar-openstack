@@ -357,6 +357,17 @@ default['openstack']['endpoints']['orchestration-api-cloudwatch']['port'] = '800
 default['openstack']['endpoints']['orchestration-api-cloudwatch']['path'] = '/v1'
 default['openstack']['endpoints']['orchestration-api-cloudwatch']['bind_interface'] = nil
 
+# The OpenStack Database (Trove) API endpoint
+default['openstack']['endpoints']['database-api-bind']['host'] = node['openstack']['endpoints']['bind-host']
+default['openstack']['endpoints']['database-api-bind']['port'] = '8779'
+default['openstack']['endpoints']['database-api-bind']['bind_interface'] = nil
+
+default['openstack']['endpoints']['database-api']['host'] = node['openstack']['endpoints']['host']
+default['openstack']['endpoints']['database-api']['scheme'] = 'http'
+default['openstack']['endpoints']['database-api']['port'] = '8779'
+default['openstack']['endpoints']['database-api']['path'] = '/v1'
+default['openstack']['endpoints']['database-api']['bind_interface'] = nil
+
 # Alternately, if you used some standardized DNS naming scheme, you could
 # do something like this, which would override any part-wise specifications above.
 #
