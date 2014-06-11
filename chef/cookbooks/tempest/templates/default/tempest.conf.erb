@@ -801,7 +801,7 @@ api_extensions=provider,security-group,dhcp_agent_scheduler,external-net,ext-gw-
 
 # Instance type for tests. Needs to be big enough for a full
 # OS plus the test workload (string value)
-#instance_type=m1.micro
+instance_type=<%=@flavor_ref %>
 
 # Name of heat-cfntools enabled image to use when launching
 # test instances. (string value)
