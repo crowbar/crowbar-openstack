@@ -47,8 +47,8 @@ done
 echo -e "Cleaning up routers"
 for r in $(neutron router-list -f csv | egrep '"router--[0-9]*"' | cut -d'"' -f2); do
     # delete ports on the router
-    for p in $(neutron router-port-list -f csv $r | cut -d'"' -f2); do
-        neutron port-delete $p
+    for p in $(neutron router-port-list -f csv -F fixed_ips $r | cut -d'"' -f8); do
+        neutron router-interface-delete $r $p || :
     done
     neutron router-delete $r || :
 done
