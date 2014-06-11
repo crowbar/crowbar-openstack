@@ -28,8 +28,8 @@ describe "openstack-database-service::api" do
 
     it "creates trove.conf file" do
       expect(chef_run).to create_template(filename).with(
-        user: "openstack-trove",
-        group: "openstack-trove",
+        user: "trove",
+        group: "trove",
         mode: 0640
         )
     end
@@ -64,8 +64,8 @@ describe "openstack-database-service::api" do
 
     it "creates the file" do
       expect(chef_run).to create_template(filename).with(
-        user: "openstack-trove",
-        group: "openstack-trove",
+        user: "trove",
+        group: "trove",
         mode: 0640
         )
     end

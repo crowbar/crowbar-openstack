@@ -29,10 +29,11 @@ default["openstack"]["database-service"]["debug"] = false
 
 default["openstack"]["database-service"]["syslog"]["use"] = false
 
+default["openstack"]["database-service"]["user"] = "trove"
+default["openstack"]["database-service"]["group"] = "trove"
+
 case platform
 when "suse"
-  default["openstack"]["database-service"]["user"] = "openstack-trove"
-  default["openstack"]["database-service"]["group"] = "openstack-trove"
   default["openstack"]["database-service"]["platform"] = {
     "api_packages" => [ "openstack-trove-api" ],
     "api_service" => "openstack-trove-api",
