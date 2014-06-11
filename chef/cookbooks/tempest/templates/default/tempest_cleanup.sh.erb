@@ -11,9 +11,9 @@ alt_username=<%= @alt_comp_user %>
 alt_password=<%= @alt_comp_pass %>
 alt_tenant_name=<%= @alt_comp_tenant %>
 
-admin_username=<%= @comp_admin_user %>
-admin_password=<%= @comp_admin_pass %>
-admin_tenant_name=<%= @comp_admin_tenant %>
+admin_username=<%= @keystone_settings['admin_user'] %>
+admin_password=<%= @keystone_settings['admin_password'] %>
+admin_tenant_name=<%= @keystone_settings['default_tenant'] %>
 
 
 ### clean up in admin tenant

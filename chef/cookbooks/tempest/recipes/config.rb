@@ -41,10 +41,6 @@ end
 
 keystone_port = keystone[:keystone][:api][:service_port]
 
-comp_admin_user = keystone[:keystone][:admin][:username]
-comp_admin_pass = keystone[:keystone][:admin][:password]
-comp_admin_tenant = keystone[:keystone][:admin][:tenant]
-
 alt_comp_user = keystone[:keystone][:default][:username]
 alt_comp_pass = keystone[:keystone][:default][:password]
 alt_comp_tenant = keystone[:keystone][:default][:tenant]
@@ -262,9 +258,6 @@ template "#{tempest_conf}" do
     :alt_flavor_ref => alt_flavor_ref,
     :bin_path => bin_path,
     :cirros_version => cirros_version,
-    :comp_admin_pass => comp_admin_pass,
-    :comp_admin_tenant => comp_admin_tenant,
-    :comp_admin_user => comp_admin_user,
     :comp_pass => tempest_comp_pass,
     :comp_tenant => tempest_comp_tenant,
     :comp_user => tempest_comp_user,
@@ -297,18 +290,16 @@ nosetests = "/opt/tempest/.venv/bin/nosetests"
     mode 0755
     source "#{(p.rpartition '/')[2]}.erb"
     variables(
-      :nosetests => nosetests,
-      :key_host => keystone_address,
-      :key_port => keystone_port,
-      :comp_user => tempest_comp_user,
-      :comp_pass => tempest_comp_pass,
-      :comp_tenant => tempest_comp_tenant,
-      :alt_comp_user => alt_comp_user,
       :alt_comp_pass => alt_comp_pass,
       :alt_comp_tenant => alt_comp_tenant,
-      :comp_admin_user => comp_admin_user,
-      :comp_admin_pass => comp_admin_pass,
-      :comp_admin_tenant => comp_admin_tenant,
+      :alt_comp_user => alt_comp_user,
+      :comp_pass => tempest_comp_pass,
+      :comp_tenant => tempest_comp_tenant,
+      :comp_user => tempest_comp_user,
+      :key_host => keystone_address,
+      :key_port => keystone_port,
+      :keystone_settings => keystone_settings,
+      :nosetests => nosetests,
       :tempest_path => node[:tempest][:tempest_path]
     )
   end

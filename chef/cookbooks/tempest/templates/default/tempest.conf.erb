@@ -347,14 +347,14 @@ use_floatingip_for_ssh=true
 
 # Administrative Username to use for Nova API requests.
 # (string value)
-username=<%=@comp_admin_user %>
+username=<%= @keystone_settings['admin_user'] %>
 
 # Administrative Tenant name to use for Nova API requests.
 # (string value)
-tenant_name=<%=@comp_admin_tenant %>
+tenant_name=<%= @keystone_settings['default_tenant'] %>
 
 # API key to use when authenticating as admin. (string value)
-password=<%=@comp_admin_pass %>
+password=<%= @keystone_settings['admin_password'] %>
 
 # Domain name for authentication as admin (Keystone V3).The
 # same domain applies to user and project (string value)
@@ -527,16 +527,16 @@ uri_v3=http://<%= @key_host %>:5000/v3
 #endpoint_type=publicURL
 
 # Username to use for Nova API requests. (string value)
-username=<%=@comp_admin_user %>
+username=<%= @comp_user %>
 
 # Tenant name to use for Nova API requests. (string value)
-tenant_name=<%=@comp_admin_tenant %>
+tenant_name=<%= @comp_tenant %>
 
 # Role required to administrate keystone. (string value)
 #admin_role=admin
 
 # API key to use when authenticating. (string value)
-password=<%=@comp_admin_pass %>
+password=<%= @comp_pass %>
 
 # Domain name for authentication (Keystone V3).The same domain
 # applies to user and project (string value)
@@ -560,14 +560,14 @@ alt_password=<%=@alt_comp_pass %>
 
 # Administrative Username to use for Keystone API requests.
 # (string value)
-admin_username=<%=@comp_admin_user %>
+admin_username=<%= @keystone_settings['admin_user'] %>
 
 # Administrative Tenant name to use for Keystone API requests.
 # (string value)
-admin_tenant_name=<%=@comp_admin_tenant %>
+admin_tenant_name=<%= @keystone_settings['default_tenant'] %>
 
 # API key to use when authenticating as admin. (string value)
-admin_password=<%=@comp_admin_pass %>
+admin_password=<%= @keystone_settings['admin_password'] %>
 
 # Admin domain name for authentication (Keystone V3).The same
 # domain applies to user and project (string value)
