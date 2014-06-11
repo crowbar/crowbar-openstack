@@ -133,6 +133,18 @@ users.each do |user|
 
 end
 
+# Give admin user access to tempest tenant
+keystone_register "add #{keystone_settings['admin_user']}:#{tempest_comp_tenant} user admin role" do
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['admin_user']
+  role_name "admin"
+  tenant_name tempest_comp_tenant
+  action :nothing
+end.run_action(:add_access)
+
 directory "#{node[:tempest][:tempest_path]}" do
   action :create
 end
