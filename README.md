@@ -15,58 +15,8 @@ system for specific applications.
 About this barclamp
 -------------------
 
-Information for this barclamp is maintained on the [Crowbar Framework Wiki](https://github.com/crowbar/crowbar/wiki)
+This barclamp uses a wrapper cookbook around an upstream/stackforge-style openstack-database-service cookbook. It also includes two additional cookbooks: openstack-common, openstack-identity which are required for their libraries/LWRPs, but no recipes are run from them.
 
-Data bags
----------
-
-```
-openssl rand -base64 512 | tr -d '\r\n' > /etc/chef/openstack_data_bag_secret
-scp /etc/chef/openstack_data_bag_secret root@trove-api-node:/etc/chef/
-export EDITOR=vi
-```
-
-```
-knife data bag create secrets openstack_identity_bootstrap_token --secret-file /etc/chef/openstack_data_bag_secret
-```
-
-> {
->   "id": "openstack_identity_bootstrap_token",
->   "openstack_identity_bootstrap_token": "406356008824"
-> }
-
-```
-knife data bag create db_passwords openstack-database-service --secret-file /etc/chef/openstack_data_bag_secret
-```
-
-> {
->   "openstack-database-service": "db_pass",
->   "id": "openstack-database-service"
-> }
-
-```
-knife data bag create user_passwords openstack-database-service --secret-file /etc/chef/openstack_data_bag_secret 
-```
-
-> {
->   "id": "openstack-database-service",
->   "openstack-database-service": "user-pass"
-> }
-
-```
-knife data bag create user_passwords guest --secret-file /etc/chef/openstack_data_bag_secret
-```
-
-> {
->   "id": "guest",
->   "guest": "guest-pass"
-> }
-
-Note: For development, you do not have to use databags and can simply set developer_mode in the default trove recipe:
-
-```ruby
-node.set[:openstack][:developer_mode] = true
-```
 
 Contributing
 ------------
