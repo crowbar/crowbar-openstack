@@ -17,7 +17,7 @@
 barclamp:
   name: trove
   display: Trove
-  description: 'OpenStack Database Service: provide scalable and reliable Cloud Database as a Service provisioning functionality'
+  description: 'OpenStack Database: provide scalable and reliable Cloud Database as a Service provisioning functionality'
   version: 0
   member:
     - openstack

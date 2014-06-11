@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: openstack-database-service
+# Cookbook Name:: openstack-database
 # Recipe:: api
 #
 # Copyright 2013, SUSE Linux GmbH
@@ -21,11 +21,11 @@ class ::Chef::Recipe
   include ::Openstack
 end
 
-if node["openstack"]["database-service"]["syslog"]["use"]
+if node["openstack"]["database"]["syslog"]["use"]
   include_recipe "openstack-common::logging"
 end
 
-platform_options = node["openstack"]["database-service"]["platform"]
+platform_options = node["openstack"]["database"]["platform"]
 
 platform_options["api_packages"].each do |pkg|
   package pkg
@@ -38,24 +38,24 @@ service "trove-api" do
   action [ :enable ]
 end
 
-db_user = node["openstack"]["database-service"]["db"]["username"]
-db_pass = get_password 'db', "openstack-database-service"
-db_uri = db_uri("database-service", db_user, db_pass).to_s
+db_user = node["openstack"]["database"]["db"]["username"]
+db_pass = get_password 'db', "openstack-database"
+db_uri = db_uri("database", db_user, db_pass).to_s
 
-api_endpoint = endpoint "database-service-api"
+api_endpoint = endpoint "database-api"
 
 identity_uri = endpoint("identity-api")
 compute_uri = endpoint("compute-api").to_s.gsub(/%\(tenant_id\)s/, "")
 block_storage_uri = endpoint("block-storage-api").to_s.gsub(/%\(tenant_id\)s/, "")
 object_storage_uri = endpoint("object-storage-api")
 
-rabbit = node['openstack']['mq']['database-service']['rabbit']
+rabbit = node['openstack']['mq']['database']['rabbit']
 rabbit_pass = get_password('user', rabbit['userid'])
 
 template "/etc/trove/trove.conf" do
   source "trove.conf.erb"
-  owner node["openstack"]["database-service"]["user"]
-  group node["openstack"]["database-service"]["group"]
+  owner node["openstack"]["database"]["user"]
+  group node["openstack"]["database"]["group"]
   mode 00640
   variables(
     :database_connection => db_uri,
@@ -76,8 +76,8 @@ identity_admin_uri = endpoint("identity-admin")
 
 template "/etc/trove/api-paste.ini" do
   source "api-paste.ini.erb"
-  owner node["openstack"]["database-service"]["user"]
-  group node["openstack"]["database-service"]["group"]
+  owner node["openstack"]["database"]["user"]
+  group node["openstack"]["database"]["group"]
   mode 00640
   variables(
     :identity_admin_uri => identity_admin_uri,

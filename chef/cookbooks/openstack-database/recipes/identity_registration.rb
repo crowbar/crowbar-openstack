@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: openstack-database-service
+# Cookbook Name:: openstack-database
 # Recipe:: identity_registration
 #
 # Copyright 2013, SUSE Linux GmbH
@@ -26,12 +26,12 @@ end
 identity_admin_endpoint = endpoint "identity-admin"
 bootstrap_token = secret "secrets", "openstack_identity_bootstrap_token"
 auth_uri = ::URI.decode identity_admin_endpoint.to_s
-service_pass = get_password 'service', "openstack-database-service"
-service_user = node["openstack"]["database-service"]["service_user"]
-service_role = node["openstack"]["database-service"]["service_role"]
-service_tenant_name = node["openstack"]["database-service"]["service_tenant_name"]
-database_service_api_endpoint = endpoint "database-service-api"
-region = node["openstack"]["database-service"]["region"]
+service_pass = get_password 'service', "openstack-database"
+service_user = node["openstack"]["database"]["service_user"]
+service_role = node["openstack"]["database"]["service_role"]
+service_tenant_name = node["openstack"]["database"]["service_tenant_name"]
+database_service_api_endpoint = endpoint "database-api"
+region = node["openstack"]["database"]["region"]
 
 # Register Service Tenant
 openstack_identity_register "Register '#{service_tenant_name}' Tenant" do

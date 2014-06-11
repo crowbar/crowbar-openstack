@@ -19,13 +19,13 @@ require "chef/application"
   :log_level => ::LOG_LEVEL
 }
 
-shared_context 'database-service-stubs' do
+shared_context 'database-stubs' do
   before do
     Chef::Recipe.any_instance.stub(:secret)
       .with('secrets', 'openstack_identity_bootstrap_token').and_return('bootstrap-token')
     Chef::Recipe.any_instance.stub(:get_password).
       with('user', 'guest').and_return('rabbit-pass')
     Chef::Recipe.any_instance.stub(:get_password).
-      with('db', 'openstack-database-service').and_return('db-pass')
+      with('db', 'openstack-database').and_return('db-pass')
   end
 end

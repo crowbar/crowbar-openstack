@@ -1,11 +1,11 @@
-<%= node["openstack"]["database-service"]["custom_template_banner"] %>
+<%= node["openstack"]["database"]["custom_template_banner"] %>
 
 [DEFAULT]
 # Show more verbose log output (sets INFO log level output)
-verbose = <%= node["openstack"]["database-service"]["verbose"] %>
+verbose = <%= node["openstack"]["database"]["verbose"] %>
 
 # Show debugging output in logs (sets DEBUG log level output)
-debug = <%= node["openstack"]["database-service"]["debug"] %>
+debug = <%= node["openstack"]["database"]["debug"] %>
 
 # Address to bind the API server
 bind_host = <%= @endpoint.host %>
@@ -59,7 +59,7 @@ network_label_regex = ^private$
 #ip_regex = ^(15.|123.)
 
 # Config options for enabling volume service
-trove_volume_support = <%= node['openstack']['database-service']['volume_support'] %>
+trove_volume_support = <%= node['openstack']['database']['volume_support'] %>
 block_device_mapping = vdb
 device_path = /dev/vdb
 mount_point = /var/lib/mysql

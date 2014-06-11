@@ -1,9 +1,9 @@
 Description
 ===========
 
-Installs the OpenStack Database Service service **Trove** as part of the OpenStack
-reference deployment Chef for OpenStack.  Trove is currently installed
-from packages.
+Installs the OpenStack Database service **Trove** as part of the
+OpenStack reference deployment Chef for OpenStack.  Trove is currently
+installed from packages.
 
 https://wiki.openstack.org/wiki/Trove
 

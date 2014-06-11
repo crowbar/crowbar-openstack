@@ -1,11 +1,11 @@
 require_relative "spec_helper"
 
-describe "openstack-database-service::api" do
+describe "openstack-database::api" do
   let(:runner) { ChefSpec::Runner.new(SUSE_OPTS) }
   let(:node) { runner.node }
   let(:chef_run) { runner.converge(described_recipe) }
 
-  include_context 'database-service-stubs'
+  include_context 'database-stubs'
 
   it "installs the api packages" do
     expect(chef_run).to install_package('openstack-trove-api')
@@ -17,8 +17,8 @@ describe "openstack-database-service::api" do
 
   it "includes the logging recipe if syslog is enabled" do
     chef_run = ChefSpec::Runner.new(::SUSE_OPTS) do |node|
-      node.set['openstack']['database-service']['syslog']['use'] = true
-    end.converge('openstack-database-service::api')
+      node.set['openstack']['database']['syslog']['use'] = true
+    end.converge('openstack-database::api')
 
     expect(chef_run).to include_recipe 'openstack-common::logging'
   end

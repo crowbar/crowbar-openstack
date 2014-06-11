@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: openstack-database-service
-# Recipe:: guestagent
+# Cookbook Name:: openstack-database
+# Recipe:: taskmanager
 #
 # Copyright 2013, SUSE Linux GmbH
 #
@@ -21,44 +21,45 @@ class ::Chef::Recipe
   include ::Openstack
 end
 
-platform_options = node["openstack"]["database-service"]["platform"]
+platform_options = node["openstack"]["database"]["platform"]
 
-platform_options["guestagent_packages"].each do |pkg|
+platform_options["taskmanager_packages"].each do |pkg|
   package pkg
 end
 
-service "trove-guestagent" do
-  service_name platform_options["guestagent_service"]
+service "trove-taskmanager" do
+  service_name platform_options["taskmanager_service"]
   supports :status => true, :restart => true
 
   action [ :enable ]
 end
 
-api_endpoint = endpoint("database-service-guestagent")
-
-db_user = node["openstack"]["database-service"]["db"]["username"]
-db_pass = get_password 'db', 'openstack-database-service'
-db_uri = db_uri("database-service", db_user, db_pass).to_s
+db_user = node["openstack"]["database"]["db"]["username"]
+db_pass = get_password 'db', "openstack-database"
+db_uri = db_uri("database", db_user, db_pass).to_s
 
 identity_uri = endpoint("identity-api")
+compute_uri = endpoint("compute-api").to_s.gsub(/%\(tenant_id\)s/, '')
+block_storage_uri = endpoint("block-storage-api").to_s.gsub(/%\(tenant_id\)s/, "")
 object_storage_uri = endpoint("object-storage-api")
 
-rabbit = node['openstack']['mq']['database-service']['rabbit']
+rabbit = node['openstack']['mq']['database']['rabbit']
 rabbit_pass = get_password('user', rabbit['userid'])
 
-template "/etc/trove/trove-guestagent.conf" do
-  source "trove-guestagent.conf.erb"
-  owner node["openstack"]["database-service"]["user"]
-  group node["openstack"]["database-service"]["group"]
+template "/etc/trove/trove-taskmanager.conf" do
+  source "trove-taskmanager.conf.erb"
+  owner node["openstack"]["database"]["user"]
+  group node["openstack"]["database"]["group"]
   mode 00640
   variables(
     :database_connection => db_uri,
     :rabbit => rabbit,
     :rabbit_pass => rabbit_pass,
-    :endpoint => api_endpoint,
     :identity_uri => identity_uri,
+    :compute_uri => compute_uri,
+    :block_storage_uri => block_storage_uri,
     :object_storage_uri => object_storage_uri
     )
 
-  notifies :restart, "service[trove-guestagent]", :immediately
+  notifies :restart, "service[trove-taskmanager]", :immediately
 end

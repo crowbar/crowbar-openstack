@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: openstack-database-service
+# Cookbook Name:: openstack-database
 # Recipe:: conductor
 #
 # Copyright 2013, SUSE Linux GmbH
@@ -21,7 +21,7 @@ class ::Chef::Recipe
   include ::Openstack
 end
 
-platform_options = node["openstack"]["database-service"]["platform"]
+platform_options = node["openstack"]["database"]["platform"]
 
 platform_options["conductor_packages"].each do |pkg|
   package pkg
@@ -34,17 +34,17 @@ service "trove-conductor" do
   action [ :enable ]
 end
 
-db_user = node["openstack"]["database-service"]["db"]["username"]
-db_pass = get_password 'db', "openstack-database-service"
-db_uri = db_uri("database-service", db_user, db_pass).to_s
+db_user = node["openstack"]["database"]["db"]["username"]
+db_pass = get_password 'db', "openstack-database"
+db_uri = db_uri("database", db_user, db_pass).to_s
 rabbit_pass = get_password(
-  'user', node["openstack"]['mq']["database-service"]["rabbit"]["userid"])
+  'user', node["openstack"]['mq']["database"]["rabbit"]["userid"])
 identity_uri = endpoint("identity-api")
 
 template "/etc/trove/trove-conductor.conf" do
   source "trove-conductor.conf.erb"
-  owner node["openstack"]["database-service"]["user"]
-  group node["openstack"]["database-service"]["group"]
+  owner node["openstack"]["database"]["user"]
+  group node["openstack"]["database"]["group"]
   mode 00640
   variables(
     :database_connection => db_uri,

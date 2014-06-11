@@ -1,11 +1,11 @@
 require_relative "spec_helper"
 
-describe "openstack-database-service::conductor" do
+describe "openstack-database::conductor" do
   let(:runner) { ChefSpec::Runner.new(SUSE_OPTS) }
   let(:node) { runner.node }
   let(:chef_run) { runner.converge(described_recipe) }
 
-  include_context 'database-service-stubs'
+  include_context 'database-stubs'
 
   it "installs the converge packages" do
     expect(chef_run).to install_package('openstack-trove-conductor')
