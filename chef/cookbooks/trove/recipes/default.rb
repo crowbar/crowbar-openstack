@@ -64,7 +64,11 @@ node.set['openstack']['mq']['database']['rabbit']['port'] = rabbitmq[:service_po
 
 # XXX mysql configuration
 # this part should go away once trove supports postgresl
-['mysql', 'python-mysql'].each do |pkg|
+
+# rubygem-mysql is installed here, although it would normally be the
+# database cookbook's responsibility. The database cookbook uses a
+# special mysql-chef_gem for this which is Chef 0.11 only.
+['mysql', 'python-mysql', 'rubygem-mysql'].each do |pkg|
   package pkg
 end
 
