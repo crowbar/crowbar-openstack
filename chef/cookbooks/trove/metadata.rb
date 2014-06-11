@@ -8,6 +8,7 @@ version          '0.1.0'
 recipe           "trove::default", "Troves"
 
 depends          'openstack-database', '~> 9.0'
+depends          'database'
 depends          'utils'
 depends          'nova'
 depends          'keystone'
