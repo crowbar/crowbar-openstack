@@ -318,7 +318,3 @@ nosetests = "/opt/tempest/.venv/bin/nosetests"
     )
   end
 end
-
-cookbook_file "#{node[:tempest][:tempest_path]}/bin/run_tempest.py" do
-  source "run_tempest.py"
-end
