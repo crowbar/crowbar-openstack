@@ -45,10 +45,6 @@ class TroveService < ServiceObject
     base
   end
 
-  def self.allow_multiple_proposals?
-    false
-  end
-
   def proposal_dependencies(role)
     answer = []
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes[@bc_name]["keystone_instance"] }
