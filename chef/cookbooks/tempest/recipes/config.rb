@@ -49,10 +49,6 @@ alt_comp_user = keystone[:keystone][:default][:username]
 alt_comp_pass = keystone[:keystone][:default][:password]
 alt_comp_tenant = keystone[:keystone][:default][:tenant]
 
-img_user = comp_admin_user
-img_pass = comp_admin_pass
-img_tenant = comp_admin_tenant
-
 tempest_comp_user = node[:tempest][:tempest_user_username]
 tempest_comp_pass = node[:tempest][:tempest_user_password]
 tempest_comp_tenant = node[:tempest][:tempest_user_tenant]
@@ -276,10 +272,7 @@ template "#{tempest_conf}" do
     :ec2_secret => ec2_secret,
     :flavor_ref => flavor_ref,
     :img_host => glance_address,
-    :img_pass => tempest_comp_pass,
     :img_port => glance_port,
-    :img_tenant => tempest_comp_tenant,
-    :img_user => tempest_comp_user,
     :key_host => keystone_address,
     :key_port => keystone_port,
     :keystone_settings => keystone_settings,
