@@ -1,5 +1,5 @@
 #
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2014, SUSE LINUX Products GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ root:
     author: 'Multiple authors'
     license: 'Apache 2'
     copyright: '2014 by SUSE LINUX Products GmbH'
-    date: 'June 1, 2012'
+    date: 'June 12, 2014'
     order: 'alpha'
     url: '/crowbar/openstack/1.0'
     format: 'markdown'
