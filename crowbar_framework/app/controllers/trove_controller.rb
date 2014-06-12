@@ -15,8 +15,10 @@
 #
 
 class TroveController < BarclampController
-  def initialize
+
+  protected
+
+  def initialize_service
     @service_object = TroveService.new logger
   end
 end
-
