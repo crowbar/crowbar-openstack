@@ -347,14 +347,14 @@ use_floatingip_for_ssh=true
 
 # Administrative Username to use for Nova API requests.
 # (string value)
-username=<%=@comp_admin_user %>
+username=<%= @keystone_settings['admin_user'] %>
 
 # Administrative Tenant name to use for Nova API requests.
 # (string value)
-tenant_name=<%=@comp_admin_tenant %>
+tenant_name=<%= @keystone_settings['default_tenant'] %>
 
 # API key to use when authenticating as admin. (string value)
-password=<%=@comp_admin_pass %>
+password=<%= @keystone_settings['admin_password'] %>
 
 # Domain name for authentication as admin (Keystone V3).The
 # same domain applies to user and project (string value)
@@ -386,7 +386,7 @@ password=<%=@comp_admin_pass %>
 #change_password=false
 
 # Does the test environment support resizing? (boolean value)
-#resize=false
+resize=true
 
 # Does the test environment support pausing? (boolean value)
 #pause=true
@@ -427,10 +427,10 @@ vnc_console=true
 #
 
 # Where the dashboard can be found (string value)
-#dashboard_url=http://localhost/
+dashboard_url=http://<%= @keystone_settings['internal_url_host'] %>/
 
 # Login page for the dashboard (string value)
-#login_url=http://localhost/auth/login/
+login_url=http://<%= @keystone_settings['internal_url_host'] %>/auth/login/
 
 
 [data_processing]
@@ -527,16 +527,16 @@ uri_v3=http://<%= @key_host %>:5000/v3
 #endpoint_type=publicURL
 
 # Username to use for Nova API requests. (string value)
-username=<%=@comp_admin_user %>
+username=<%= @comp_user %>
 
 # Tenant name to use for Nova API requests. (string value)
-tenant_name=<%=@comp_admin_tenant %>
+tenant_name=<%= @comp_tenant %>
 
 # Role required to administrate keystone. (string value)
 #admin_role=admin
 
 # API key to use when authenticating. (string value)
-password=<%=@comp_admin_pass %>
+password=<%= @comp_pass %>
 
 # Domain name for authentication (Keystone V3).The same domain
 # applies to user and project (string value)
@@ -560,14 +560,14 @@ alt_password=<%=@alt_comp_pass %>
 
 # Administrative Username to use for Keystone API requests.
 # (string value)
-admin_username=<%=@comp_admin_user %>
+admin_username=<%= @keystone_settings['admin_user'] %>
 
 # Administrative Tenant name to use for Keystone API requests.
 # (string value)
-admin_tenant_name=<%=@comp_admin_tenant %>
+admin_tenant_name=<%= @keystone_settings['default_tenant'] %>
 
 # API key to use when authenticating as admin. (string value)
-admin_password=<%=@comp_admin_pass %>
+admin_password=<%= @keystone_settings['admin_password'] %>
 
 # Admin domain name for authentication (Keystone V3).The same
 # domain applies to user and project (string value)
@@ -726,7 +726,7 @@ public_network_id=<%= @public_network_id %>
 # A list of enabled network extensions with a special entry
 # all which indicates every extension is enabled (list value)
 # FIXME: this should be "all"
-api_extensions=provider,security-group,dhcp_agent_scheduler,external-net,ext-gw-mode,binding,agent,quotas,l3_agent_scheduler,multi-provider,router,extra_dhcp_opt,allowed-address-pairs,extraroute,metering
+api_extensions=provider,security-group,dhcp_agent_scheduler,external-net,ext-gw-mode,binding,agent,quotas,l3_agent_scheduler,multi-provider,router,extra_dhcp_opt,allowed-address-pairs,extraroute,metering,fwaas,service-type
 
 
 [object-storage]
@@ -801,7 +801,7 @@ api_extensions=provider,security-group,dhcp_agent_scheduler,external-net,ext-gw-
 
 # Instance type for tests. Needs to be big enough for a full
 # OS plus the test workload (string value)
-#instance_type=m1.micro
+instance_type=<%=@flavor_ref %>
 
 # Name of heat-cfntools enabled image to use when launching
 # test instances. (string value)
@@ -895,7 +895,7 @@ heat=<%= @use_heat %>
 
 # Whether or not Ceilometer is expected to be available
 # (boolean value)
-ceilometer=false
+ceilometer=<%= @use_ceilometer %>
 
 # Whether or not Horizon is expected to be available (boolean
 # value)

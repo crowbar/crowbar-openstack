@@ -41,17 +41,9 @@ end
 
 keystone_port = keystone[:keystone][:api][:service_port]
 
-comp_admin_user = keystone[:keystone][:admin][:username]
-comp_admin_pass = keystone[:keystone][:admin][:password]
-comp_admin_tenant = keystone[:keystone][:admin][:tenant]
-
 alt_comp_user = keystone[:keystone][:default][:username]
 alt_comp_pass = keystone[:keystone][:default][:password]
 alt_comp_tenant = keystone[:keystone][:default][:tenant]
-
-img_user = comp_admin_user
-img_pass = comp_admin_pass
-img_tenant = comp_admin_tenant
 
 tempest_comp_user = node[:tempest][:tempest_user_username]
 tempest_comp_pass = node[:tempest][:tempest_user_password]
@@ -141,6 +133,18 @@ users.each do |user|
 
 end
 
+# Give admin user access to tempest tenant
+keystone_register "add #{keystone_settings['admin_user']}:#{tempest_comp_tenant} user admin role" do
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['admin_user']
+  role_name "admin"
+  tenant_name tempest_comp_tenant
+  action :nothing
+end.run_action(:add_access)
+
 directory "#{node[:tempest][:tempest_path]}" do
   action :create
 end
@@ -201,15 +205,15 @@ rm -rf #{node[:tempest][:tempest_path]}/etc/cirros/*
 cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/
 
 echo -n "Adding kernel ... "
-KERNEL_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-kernel" is_public=false container_format=aki disk_format=aki < $(findfirst '*-vmlinuz') | extract_id)
+KERNEL_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-kernel" is_public=true container_format=aki disk_format=aki < $(findfirst '*-vmlinuz') | extract_id)
 echo "done."
 
 echo -n "Adding ramdisk ... "
-RAMDISK_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-ramdisk" is_public=false container_format=ari disk_format=ari < $(findfirst '*-initrd') | extract_id)
+RAMDISK_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-ramdisk" is_public=true container_format=ari disk_format=ari < $(findfirst '*-initrd') | extract_id)
 echo "done."
 
 echo -n "Adding image ... "
-MACHINE_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-machine" is_public=false container_format=ami disk_format=ami kernel_id=$KERNEL_ID ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
+MACHINE_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-machine" is_public=true container_format=ami disk_format=ami kernel_id=$KERNEL_ID ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
 echo "done."
 
 echo -n "Saving machine id ..."
@@ -234,8 +238,8 @@ alt_flavor_ref = "7"
 
 bash "create_yet_another_tiny_flavor" do
   code <<-EOH
-  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff #{alt_flavor_ref} 128 1 1 || exit 0
-  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff-2 #{flavor_ref} 132 1 1 || exit 0
+  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff #{flavor_ref} 128 0 1 || exit 0
+  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff-2 #{alt_flavor_ref} 196 0 1 || exit 0
 EOH
 end
 
@@ -250,6 +254,7 @@ end
 
 swifts = search(:node, "roles:swift-proxy") || []
 heats = search(:node, "roles:heat-server") || []
+ceilometers = search(:node, "roles:ceilometer-server") || []
 horizons = search(:node, "roles:nova_dashboard-server") || []
 
 neutrons = search(:node, "roles:neutron-server") || []
@@ -266,9 +271,6 @@ template "#{tempest_conf}" do
     :alt_flavor_ref => alt_flavor_ref,
     :bin_path => bin_path,
     :cirros_version => cirros_version,
-    :comp_admin_pass => comp_admin_pass,
-    :comp_admin_tenant => comp_admin_tenant,
-    :comp_admin_user => comp_admin_user,
     :comp_pass => tempest_comp_pass,
     :comp_tenant => tempest_comp_tenant,
     :comp_user => tempest_comp_user,
@@ -276,10 +278,7 @@ template "#{tempest_conf}" do
     :ec2_secret => ec2_secret,
     :flavor_ref => flavor_ref,
     :img_host => glance_address,
-    :img_pass => tempest_comp_pass,
     :img_port => glance_port,
-    :img_tenant => tempest_comp_tenant,
-    :img_user => tempest_comp_user,
     :key_host => keystone_address,
     :key_port => keystone_port,
     :keystone_settings => keystone_settings,
@@ -288,6 +287,7 @@ template "#{tempest_conf}" do
     :public_network_id => public_network_id,
     :tempest_path => node[:tempest][:tempest_path],
     :use_heat => !heats.empty?,
+    :use_ceilometer => !ceilometers.empty?,
     :use_horizon => !horizons.empty?,
     :use_neutron => !neutrons.empty?,
     :use_swift => !swifts.empty?
@@ -304,23 +304,17 @@ nosetests = "/opt/tempest/.venv/bin/nosetests"
     mode 0755
     source "#{(p.rpartition '/')[2]}.erb"
     variables(
-      :nosetests => nosetests,
-      :key_host => keystone_address,
-      :key_port => keystone_port,
-      :comp_user => tempest_comp_user,
-      :comp_pass => tempest_comp_pass,
-      :comp_tenant => tempest_comp_tenant,
-      :alt_comp_user => alt_comp_user,
       :alt_comp_pass => alt_comp_pass,
       :alt_comp_tenant => alt_comp_tenant,
-      :comp_admin_user => comp_admin_user,
-      :comp_admin_pass => comp_admin_pass,
-      :comp_admin_tenant => comp_admin_tenant,
+      :alt_comp_user => alt_comp_user,
+      :comp_pass => tempest_comp_pass,
+      :comp_tenant => tempest_comp_tenant,
+      :comp_user => tempest_comp_user,
+      :key_host => keystone_address,
+      :key_port => keystone_port,
+      :keystone_settings => keystone_settings,
+      :nosetests => nosetests,
       :tempest_path => node[:tempest][:tempest_path]
     )
   end
-end
-
-cookbook_file "#{node[:tempest][:tempest_path]}/bin/run_tempest.py" do
-  source "run_tempest.py"
 end
