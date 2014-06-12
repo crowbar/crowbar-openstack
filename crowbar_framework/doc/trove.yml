@@ -14,11 +14,19 @@
 # limitations under the License.
 #
 
-class TroveController < BarclampController
+root:
+  topic_meta_data:
+    author: 'Multiple authors'
+    license: 'Apache 2'
+    copyright: '2014 by SUSE LINUX Products GmbH'
+    date: 'June 12, 2014'
+    order: 'alpha'
+    url: '/crowbar/openstack/1.0'
+    format: 'markdown'
 
-  protected
-
-  def initialize_service
-    @service_object = TroveService.new logger
-  end
-end
+  barclamps:
+    deployer:
+      topic_meta_data:
+        file: 'index'
+        url: '/crowbar/openstack/1.0?selected=trove'
+        order: 100

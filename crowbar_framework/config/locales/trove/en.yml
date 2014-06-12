@@ -14,11 +14,16 @@
 # limitations under the License.
 #
 
-class TroveController < BarclampController
-
-  protected
-
-  def initialize_service
-    @service_object = TroveService.new logger
-  end
-end
+en:
+  barclamp:
+    trove:
+      edit_attributes:
+        logging_header: 'Logging'
+        verbose: 'Verbose'
+        debug: 'Debug'
+        rabbitmq_instance: 'RabbitMQ'
+        keystone_instance: 'Keystone Instance'
+        cinder_instance: 'Cinder Instance'
+        nova_instance: 'Nova Instance'
+        swift_instance: 'Swift Instance'
+        volume_support: 'Enable Trove Volume Support'

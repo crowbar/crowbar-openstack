@@ -14,11 +14,7 @@
 # limitations under the License.
 #
 
-class TroveController < BarclampController
-
-  protected
-
-  def initialize_service
-    @service_object = TroveService.new logger
+module Barclamp
+  module TroveHelper
   end
 end
