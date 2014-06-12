@@ -15,10 +15,20 @@
 #
 
 class TroveService < ServiceObject
-
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "trove"
+  end
+
+  class << self
+    def role_constraints
+      {
+        "trove" => {
+          "unique" => false,
+          "count" => -1
+        }
+      }
+    end
   end
 
   def create_proposal
