@@ -1,1 +1,5 @@
-scripts/
+.DS_Store
+*~
+
+.coverage/
+rubydeps.*
