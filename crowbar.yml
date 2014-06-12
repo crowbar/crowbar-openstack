@@ -19,6 +19,12 @@ barclamp:
   display: Trove
   description: 'OpenStack Database: provide scalable and reliable Cloud Database as a Service provisioning functionality'
   version: 0
+  requires:
+    - cinder
+    - keystone
+    - nova
+    - rabbitmq
+    - swift
   member:
     - openstack
 
