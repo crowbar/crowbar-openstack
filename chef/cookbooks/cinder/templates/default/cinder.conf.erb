@@ -1270,10 +1270,10 @@ eqlx_pool=<%= @eqlx_params["eqlx_pool"] %>
 
 # Name for the VG that will contain exported volumes (string
 # value)
-<%= unless @raw_params.nil? -%>
+<% unless @raw_params.nil? -%>
 volume_group=<%= node[:cinder][:volume][:raw][:volume_name] %>
 <% end -%>
-<%= unless @local_params.nil? -%>
+<% unless @local_params.nil? -%>
 volume_group=<%= node[:cinder][:volume][:local][:volume_name] %>
 <% end -%>
 
