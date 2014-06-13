@@ -27,15 +27,20 @@ en:
         glance_instance: 'Glance'
         volume:
           volume_type: 'Type of Volume'
-          raw: 'Raw devices'
-          local: 'Local file'
-          manually: 'Other driver'
+          raw_volume_type: 'Raw Devices'
+          raw_parameters: 'Raw Devices Parameters'
+          local_volume_type: 'Local File'
+          local_parameters: 'Local File Parameters'
           disk_parameters: 'Disk-based Parameters'
-          cinder_raw_method: 'Disk selection method'
-          volume_name: 'Name of Volume'
+          raw:
+            cinder_raw_method: 'Disk selection method'
+            volume_name: 'Name of Volume'
           file_parameters: 'File-based Parameters'
-          local_file: 'Volume File Name'
-          local_size: 'Maximum File Size (GB)'
+          local:
+            file_name: 'Volume File Name'
+            file_size: 'Maximum File Size (GB)'
+            volume_name: 'Name of Volume'
+          netapp_volume_type: 'NetApp'
           netapp_parameters: 'NetApp Parameters'
           netapp:
             storage_family: 'Storage Family Type'
@@ -50,6 +55,7 @@ en:
             nfs_shares: 'List of Netapp NFS Exports'
             nfs_shares_config_hint: 'Format one entry per line in the form hostname:/vol/path optional-nfs-mount-options'
 
+          emc_volume_type: 'EMC'
           emc_parameters: 'EMC Parameters'
           emc:
             masking_view: 'Unisphere for VMAX Masking View'
@@ -58,6 +64,7 @@ en:
             ecom_server_username: 'Username for accessing the ECOM server'
             ecom_server_password: 'Password for accessing the ECOM server'
             emc_storage_type: 'Thin pool where user wants to create volume from'
+          eqlx_volume_type: 'EqualLogic'
           eqlx_parameters: 'EqualLogic Parameters'
           eqlx:
             san_ip: 'EQLX SAN IP'
@@ -70,6 +77,7 @@ en:
             eqlx_chap_login: 'EQLX chap login for targets'
             eqlx_chap_password: 'EQLX chap password for targets'
             eqlx_cli_timeout: 'EQLX CLI command execution timeout'
+          manual_volume_type: 'Other Driver'
           manual_parameters: 'Other driver parameters'
           manual:
             not_supported: 'Manually picking a driver can be used to specify a Cinder driver not available in the list of drivers above. This is however not supported.'
@@ -77,6 +85,7 @@ en:
             driver_hint: 'For instance, cinder.volume.drivers.netapp.iscsi.NetAppISCSIDriver'
             config: 'Options'
             config_hint: 'Each line will be added to cinder.conf. If the driver needs an external file, this file must be manually uploaded.'
+          rbd_volume_type: 'RADOS'
           rbd_parameters: 'RADOS Parameters'
           rbd:
             pool: 'RADOS pool for Cinder volumes'
