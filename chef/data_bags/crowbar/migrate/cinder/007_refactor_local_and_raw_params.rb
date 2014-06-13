@@ -1,7 +1,7 @@
 def upgrade ta, td, a, d
   a["volume"]["local"] = {}
   a["volume"]["local"]["volume_name"] = a["volume"]["volume_name"]
-  a["volume"]["local"]["file_name"] = a["volume"]["local_name"]
+  a["volume"]["local"]["file_name"] = a["volume"]["local_file"]
   a["volume"]["local"]["file_size"] = a["volume"]["local_size"]
 
   a["volume"]["raw"] = {}
@@ -10,7 +10,7 @@ def upgrade ta, td, a, d
 
   a["volume"].delete("volume_name")
   a["volume"].delete("cinder_raw_method")
-  a["volume"].delete("local_name")
+  a["volume"].delete("local_file")
   a["volume"].delete("local_size")
   return a, d
 end
