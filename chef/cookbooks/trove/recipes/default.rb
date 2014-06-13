@@ -76,8 +76,6 @@ service 'mysql' do
   action :start
 end
 
-node.set['openstack']['db']['trove']['db_type'] = 'mysql'
-
 # copied from openstack-common/database/db_create_with_user
 conn = {
     :host => '127.0.0.1',
