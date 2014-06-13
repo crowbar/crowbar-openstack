@@ -32,9 +32,6 @@ default[:cinder][:ssl][:insecure] = false
 default[:cinder][:ssl][:cert_required] = false
 default[:cinder][:ssl][:ca_certs] = "/etc/cinder/ssl/certs/ca.pem"
 
-default[:cinder][:volume][:rbd][:ceph_conf] = '/etc/ceph/ceph.conf'
-default[:cinder][:volume][:nfs_shares] = '/etc/cinder/nfs_shares'
-
 default[:cinder][:ha][:enabled] = false
 if %w(redhat centos suse).include? node.platform
   default[:cinder][:ha][:api_ra] = "lsb:openstack-cinder-api"

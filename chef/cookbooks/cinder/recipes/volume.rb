@@ -26,9 +26,9 @@ end
 def make_loopback_volume(node,volname)
   return if volume_exists(volname)
   Chef::Log.info("Cinder: Using local file volume backing")
-  fname = node["cinder"]["volume"]["local_file"]
+  fname = node["cinder"]["volume"][:local][:file_name]
   fdir = ::File.dirname(fname)
-  fsize = node["cinder"]["volume"]["local_size"] * 1024 * 1024 * 1024 # Convert from GB to Bytes
+  fsize = node["cinder"]["volume"][:local][:file_size] * 1024 * 1024 * 1024 # Convert from GB to Bytes
   # this code will be executed at compile-time so we have to use ruby block
   # or get fs capacity from parent directory because at compile-time we have
   # no package resources done
@@ -50,7 +50,7 @@ def make_loopback_volume(node,volname)
   end
 
   if %w(suse).include? node.platform
-    # FIXME: technically, we should regenerate the template when local_file
+    # FIXME: technically, we should regenerate the template when file_name
     # changes; however, since we do not change the volume group...
     template "boot.looplvm" do
       path "/etc/init.d/boot.looplvm"
@@ -112,16 +112,17 @@ def make_volume(node,volname,unclaimed_disks,claimed_disks)
   end
 end
 
-volname = node[:cinder][:volume][:volume_name]
-unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
-claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node,"Cinder")
 
 case
 when node[:cinder][:volume][:volume_type] == "eqlx"
 when node[:cinder][:volume][:volume_type] == "local"
-  make_loopback_volume(node,volname)
+  volname = node[:cinder][:volume][:local][:volume_name]
+  make_loopback_volume(node, volname)
 when node[:cinder][:volume][:volume_type] == "raw"
-  make_volume(node,volname,unclaimed_disks,claimed_disks)
+  volname = node[:cinder][:volume][:raw][:volume_name]
+  unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
+  claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node, "Cinder")
+  make_volume(node, volname, unclaimed_disks, claimed_disks)
 when node[:cinder][:volume][:volume_type] == "netapp"
 when node[:cinder][:volume][:volume_type] == "emc"
 when node[:cinder][:volume][:volume_type] == "manual"
@@ -158,7 +159,8 @@ cinder_service("volume")
 
 case
 when node[:cinder][:volume][:volume_type] == "netapp"
-  file node[:cinder][:volume][:nfs_shares] do
+  #TODO(saschpe): change the file location based on the backend name:
+  file '/etc/cinder/nfs_shares' do
     content node[:cinder][:volume][:netapp][:nfs_shares]
     owner "root"
     group node[:cinder][:group]

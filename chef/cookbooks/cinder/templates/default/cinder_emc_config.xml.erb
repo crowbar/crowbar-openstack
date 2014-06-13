@@ -1,9 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <EMC>
-    <StorageType><%= node[:cinder][:volume]["emc"]["emc_storage_type"] %></StorageType>
-    <MaskingView><%= node[:cinder][:volume]["emc"]["masking_view"] %></MaskingView>
-    <EcomServerIp><%= node[:cinder][:volume]["emc"]["ecom_server_ip"] %></EcomServerIp>
-    <EcomServerPort><%= node[:cinder][:volume]["emc"]["ecom_server_port"] %></EcomServerPort>
-    <EcomUserName><%= node[:cinder][:volume]["emc"]["ecom_server_username"] %></EcomUserName>
-    <EcomPassword><%= node[:cinder][:volume]["emc"]["ecom_server_password"] %></EcomPassword>
+    <StorageType><%= @emc_params["emc_storage_type"] %></StorageType>
+    <MaskingView><%= @emc_params["masking_view"] %></MaskingView>
+    <EcomServerIp><%= @emc_params["ecom_server_ip"] %></EcomServerIp>
+    <EcomServerPort><%= @emc_params["ecom_server_port"] %></EcomServerPort>
+    <EcomUserName><%= @emc_params["ecom_server_username"] %></EcomUserName>
+    <EcomPassword><%= @emc_params["ecom_server_password"] %></EcomPassword>
 </EMC>

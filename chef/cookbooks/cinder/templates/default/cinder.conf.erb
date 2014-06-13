@@ -1035,7 +1035,12 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 
 # prefix for iscsi volumes (string value)
 <% unless @emc_params.nil? -%>
+    <% case @emc_params[:emc_storage_type].downcase %>
+    <% when "vnx" %>
 iscsi_target_prefix = iqn.2001-07.com.vnx
+    <% when "vmax" %>
+iscsi_target_prefix = iqn.1992-04.com.em
+    <% end %>
 <% end -%>
 
 # The IP address that the iSCSI daemon is listening on (string
@@ -1265,7 +1270,12 @@ eqlx_pool=<%= @eqlx_params["eqlx_pool"] %>
 
 # Name for the VG that will contain exported volumes (string
 # value)
-volume_group=<%= node[:cinder][:volume][:volume_name] %>
+<%= unless @raw_params.nil? -%>
+volume_group=<%= node[:cinder][:volume][:raw][:volume_name] %>
+<% end -%>
+<%= unless @local_params.nil? -%>
+volume_group=<%= node[:cinder][:volume][:local][:volume_name] %>
+<% end -%>
 
 # Size of thin provisioning pool (None uses entire cinder VG)
 # (string value)
@@ -1483,7 +1493,8 @@ rbd_user=<%= @rbd_params['user'] %>
 
 # path to the ceph configuration file to use (string value)
 <% unless @rbd_params.nil? -%>
-rbd_ceph_conf=<%= node[:cinder][:volume][:rbd][:ceph_conf] %>
+<%# TODO(saschpe): File name will include the backend name, e.g. '/etc/ceph/ceph-default.conf' %>
+rbd_ceph_conf=/etc/ceph/ceph.conf
 <% end -%>
 
 # flatten volumes created from snapshots to remove dependency

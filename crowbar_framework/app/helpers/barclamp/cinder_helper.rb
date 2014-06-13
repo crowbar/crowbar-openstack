@@ -20,13 +20,13 @@ module Barclamp
     def volume_type_for_cinder(selected)
       options_for_select(
         [
-          [t(".volume.raw"), "raw"],
-          [t(".volume.local"), "local"],
-          ["NetApp", "netapp"],
-          ["EMC", "emc"],
-          ["EqualLogic", "eqlx"],
-          ["Rados", "rbd"],
-          [t(".volume.manually"), "manual"]
+          [t(".volume.raw_volume_type"), "raw"],
+          [t(".volume.local_volume_type"), "local"],
+          [t(".volume.netapp_volume_type"), "netapp"],
+          [t(".volume.emc_volume_type"), "emc"],
+          [t(".volume.eqlx_volume_type"), "eqlx"],
+          [t(".volume.rbd_volume_type"), "rbd"],
+          [t(".volume.manual_volume_type"), "manual"]
         ],
         selected.to_s
       )

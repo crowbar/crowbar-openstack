@@ -13,19 +13,19 @@
     #raw_container
       %fieldset
         %legend
-          = t('.volume.disk_parameters')
+          = t('.volume.raw_parameters')
 
-        = select_field %w(volume cinder_raw_method), :collection => :raw_methods_for_cinder
-        = string_field %w(volume volume_name)
+        = select_field %w(volume raw cinder_raw_method), :collection => :raw_methods_for_cinder
+        = string_field %w(volume raw volume_name)
 
     #local_container
       %fieldset
         %legend
-          = t('.volume.file_parameters')
+          = t('.volume.local_parameters')
 
-        = string_field %w(volume local_file)
-        = integer_field %w(volume local_size)
-        = string_field %w(volume volume_name)
+        = string_field %w(volume local file_name)
+        = integer_field %w(volume local file_size)
+        = string_field %w(volume local volume_name)
 
     #netapp_container
       %fieldset

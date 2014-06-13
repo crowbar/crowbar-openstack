@@ -34,11 +34,16 @@
         "pip://python-cinderclient>=1.0.5"
       ],
       "volume": {
-        "volume_name": "cinder-volumes",
         "volume_type": "raw",
-        "cinder_raw_method": "first",
-        "local_file": "/var/lib/cinder/volume.raw",
-        "local_size": 2000,
+        "raw": {
+          "volume_name": "cinder-volumes",
+          "cinder_raw_method": "first"
+        },
+        "local": {
+          "volume_name": "cinder-volumes",
+          "file_name": "/var/lib/cinder/volume.raw",
+          "file_size": 2000
+        },
         "eqlx": {
           "san_ip": "192.168.124.11",
           "san_login": "grpadmin",
@@ -104,7 +109,7 @@
   "deployment": {
     "cinder": {
       "crowbar-revision": 0,
-      "schema-revision": 6,
+      "schema-revision": 7,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
