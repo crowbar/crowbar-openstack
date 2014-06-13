@@ -1035,7 +1035,12 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 
 # prefix for iscsi volumes (string value)
 <% unless @emc_params.nil? -%>
+    <% case @emc_params[:emc_storage_type].downcase %>
+    <% when "vnx" %>
 iscsi_target_prefix = iqn.2001-07.com.vnx
+    <% when "vmax" %>
+iscsi_target_prefix = iqn.1992-04.com.em
+    <% end %>
 <% end -%>
 
 # The IP address that the iSCSI daemon is listening on (string
