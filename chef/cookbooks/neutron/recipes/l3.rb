@@ -137,7 +137,7 @@ template "/etc/neutron/metering_agent.ini" do
   )
 end
 
-dns_list = node[:dns][:forwarders].join(" ")
+dns_list = node[:dns][:forwarders].join(",")
 
 template "/etc/neutron/dhcp_agent.ini" do
   source "dhcp_agent.ini.erb"
