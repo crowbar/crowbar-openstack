@@ -71,6 +71,7 @@ class HeatService < PacemakerServiceObject
 
     base["attributes"]["heat"]["service_password"] = '%012d' % rand(1e12)
     base["attributes"][@bc_name][:db][:password] = random_password
+    base["attributes"][@bc_name][:auth_encryption_key] = random_password
 
     @logger.debug("Heat create_proposal: exiting")
     base

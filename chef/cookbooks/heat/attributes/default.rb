@@ -48,6 +48,8 @@ default[:heat][:verbose] = false
 default[:heat][:user] = "heat"
 default[:heat][:group] = "heat"
 
+default[:heat]["auth_encryption_key"] = "" # Set by Recipe
+
 default[:heat][:db][:database] = "heat"
 default[:heat][:db][:user] = "heat"
 default[:heat][:db][:password] = "" # Set by Recipe
