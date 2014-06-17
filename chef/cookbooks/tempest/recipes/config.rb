@@ -259,6 +259,16 @@ horizons = search(:node, "roles:nova_dashboard-server") || []
 
 neutrons = search(:node, "roles:neutron-server") || []
 
+# FIXME: this should be 'all' instead
+#
+neutron_api_extensions = "provider,security-group,dhcp_agent_scheduler,external-net,ext-gw-mode,binding,agent,quotas,l3_agent_scheduler,multi-provider,router,extra_dhcp_opt,allowed-address-pairs,extraroute,metering,fwaas,service-type"
+
+unless neutrons[0].nil?
+  if neutrons[0][:neutron][:use_lbaas] then
+    neutron_api_extensions += ",lbaas"
+  end
+end
+
 public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
 
 template "#{tempest_conf}" do
@@ -290,6 +300,7 @@ template "#{tempest_conf}" do
     :use_ceilometer => !ceilometers.empty?,
     :use_horizon => !horizons.empty?,
     :use_neutron => !neutrons.empty?,
+    :neutron_api_extensions => neutron_api_extensions,
     :use_swift => !swifts.empty?
   )
 end
