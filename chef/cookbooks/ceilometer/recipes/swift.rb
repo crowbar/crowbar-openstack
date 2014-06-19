@@ -14,8 +14,14 @@
 #
 
 unless node[:ceilometer][:use_gitrepo]
-  package "openstack-ceilometer"
-  package "openstack-swift-proxy" # we need it for swift user presence
+  case node["platform"]
+    when "ubuntu", "debian"
+      package "ceilometer-common"
+      package "swift-proxy"
+    else
+      package "openstack-ceilometer"
+      package "openstack-swift-proxy" # we need it for swift user presence
+  end
 else
   ceilometer_path = "/opt/ceilometer"
   venv_path = node[:ceilometer][:use_virtualenv] ? "#{ceilometer_path}/.venv" : nil
