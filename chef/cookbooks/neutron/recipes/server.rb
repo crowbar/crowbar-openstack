@@ -91,6 +91,12 @@ else
   mechanism_driver = node[:neutron][:networking_plugin]
 end
 
+directory "/etc/neutron/plugins/ml2" do
+  mode 0755
+  action :create
+  only_if { node[:platform] == "ubuntu" }
+end
+
 template plugin_cfg_path do
   source "ml2_conf.ini.erb"
   owner node[:neutron][:platform][:user]
