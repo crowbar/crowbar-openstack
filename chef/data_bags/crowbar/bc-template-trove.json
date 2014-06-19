@@ -16,6 +16,7 @@
   "deployment": {
     "trove": {
       "crowbar-revision": 0,
+      "crowbar-applied": false,
       "element_states": {
         "trove-server": [ "readying", "ready", "applying" ]
       },

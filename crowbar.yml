@@ -27,4 +27,4 @@ crowbar:
   order: 102
   run_order: 102
   chef_order: 102
-  proposal_schema_version: 1
+  proposal_schema_version: 3
