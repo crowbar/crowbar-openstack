@@ -127,7 +127,7 @@ else
     :metadata_agent_name => "neutron-metadata-agent",
     :metadata_agent_pkg => "neutron-metadata-agent",
     :metering_agent_pkg => "neutron-plugin-metering-agent",
-    :metering_agent_name => "neutron-metering-agent",
+    :metering_agent_name => "neutron-plugin-metering-agent",
     :dhcp_agent_name => "neutron-dhcp-agent",
     :dhcp_agent_pkg => "neutron-dhcp-agent",
     :l3_agent_name => "neutron-l3-agent",
