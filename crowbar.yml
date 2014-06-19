@@ -78,6 +78,7 @@ rpms:
 
 pips:
   - pyudev
+  - six
 
 git_repo:
   - neutron https://github.com/openstack/neutron.git stable/icehouse

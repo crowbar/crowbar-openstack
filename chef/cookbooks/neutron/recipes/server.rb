@@ -143,6 +143,7 @@ if ha_enabled
   crowbar_pacemaker_sync_mark "create-neutron_db_sync"
 end
 
+
 service node[:neutron][:platform][:service_name] do
   service_name "neutron-server" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
