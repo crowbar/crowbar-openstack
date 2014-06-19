@@ -157,7 +157,6 @@ if ha_enabled
   crowbar_pacemaker_sync_mark "create-neutron_db_sync"
 end
 
-
 service node[:neutron][:platform][:service_name] do
   service_name "neutron-server" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
@@ -169,6 +168,15 @@ end
 
 
 include_recipe "neutron::api_register"
+
+template "/etc/default/neutron-server" do
+  source "neutron-server.erb"
+  owner node[:neutron][:platform][:user]
+  variables(
+      :neutron_plugin_config => "/etc/neutron/plugins/ml2/ml2_conf.ini",
+    )
+  only_if { node[:platform] == "ubuntu" }
+end
 
 if ha_enabled
   log "HA support for neutron is enabled"
