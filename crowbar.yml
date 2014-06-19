@@ -51,6 +51,7 @@ debs:
     - neutron-metadata-agent
     - neutron-plugin-linuxbridge
     - neutron-plugin-linuxbridge-agent
+    - neutron-plugin-metering-agent
     - neutron-plugin-openvswitch
     - neutron-plugin-openvswitch-agent
     - neutron-server
