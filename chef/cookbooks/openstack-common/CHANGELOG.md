@@ -1,6 +1,73 @@
 # CHANGELOG for cookbook-openstack-common
 
 This file is used to list changes made in each version of cookbook-openstack-common.
+## 9.5.0
+* Add new image_id cli library method for obtaining glance ID from image name
+
+## 9.4.1
+* Fix to allow database connection options for telemetry nosql
+
+## 9.4.0
+* Add durable_queues, auto_delete, and qpid topology version attributes
+
+## 9.3.0
+* Provide an option to specify the password when dev mode equals true
+
+## 9.2.2
+* Fixed openrc failure on role search
+
+## 9.2.1
+* Fix package action to allow updates
+
+## 9.2.0
+* Add recipe for openrc file (moved from compute cookbook)
+
+## 9.1.2
+* Make PKI tokens the new default
+
+## 9.1.1
+* Add new library method for making cli calls and one for getting uuids
+
+## 9.1.0
+* Added python-openstackclient support
+
+## 9.0.2
+* Allow address_for family default to be overridden
+
+## 9.0.1
+### Bug
+* Fix the depends cookbook version issue in metadata.rb
+
+## 9.0.0
+* Upgrading to Icehouse
+
+## 8.5.0
+* Add get_secret library method which allows one to specify a secrets_data_bag in attributes.
+
+## 8.4.2
+* Adjust image service endpoint path from /v2 to /
+
+## 8.4.1
+* Fix a renaming openstack-metering issue, change `metering` to `telemetry` in db_uri function.
+
+## 8.4.0
+* Rename openstack-metering to openstack-telemetry
+
+## 8.3.0
+### Blueprint
+* use-data-bag-for-qpid-password: have qpid use get_password method rather than
+  using a password attribute
+
+## 8.2.1
+### Bug
+* Add notification_topics attribute to network attributes
+
+## 8.2.0
+* Update and add new attributes for openstack-network cookbook
+
+## 8.1.1
+### Bug
+* Adjust metering service endpoint path from /v1 to /
 
 ## 8.1.0
 ### Blueprint:

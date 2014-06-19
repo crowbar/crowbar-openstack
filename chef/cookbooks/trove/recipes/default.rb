@@ -21,9 +21,9 @@ class ::Chef::Recipe
   include ::Openstack
 end
 
-node.set['openstack']['database-service']['verbose'] = node[:trove][:verbose]
-node.set['openstack']['database-service']['debug'] = node[:trove][:debug]
-node.set['openstack']['database-service']['volume_support'] = node[:trove][:volume_support]
+node.set['openstack']['database']['verbose'] = node[:trove][:verbose]
+node.set['openstack']['database']['debug'] = node[:trove][:debug]
+node.set['openstack']['database']['volume_support'] = node[:trove][:volume_support]
 
 [['keystone-server', 'identity-api'],
  ['keystone-server', 'identity-admin'],
@@ -37,34 +37,44 @@ node.set['openstack']['database-service']['volume_support'] = node[:trove][:volu
   node.set['openstack']['endpoints'][endpoint]['host'] = instance[:fqdn]
   node.set['openstack']['endpoints'][endpoint]['scheme'] = instance[:protocol]
   node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
-  if endpoint == 'identity-api'
-    node.set['openstack']['database-service']['nova_proxy_user'] = instance[:keystone][:admin][:user]
-    node.set['openstack']['database-service']['nova_proxy_password'] = instance[:keystone][:admin][:password]
-    node.set['openstack']['database-service']['nova_proxy_tenant'] = instance[:keystone][:admin][:tenant]
-  end
 end
 
-node.set_unless['openstack']['endpoints']['database-service-api'] = {}
-node.set['openstack']['endpoints']['database-service-api']['host'] = node[:fqdn]
+# talking to nova via the novaclient, this should be an admin user in
+# the keystone config (see the attributes in trove-taskmanager.conf and
+# others)
+keystone_settings = KeystoneHelper.keystone_settings(node, :nova)
+node.set['openstack']['database']['nova_proxy_user'] = keystone_settings[:admin_user]
+node.set['openstack']['database']['nova_proxy_password'] = keystone_settings[:admin_password]
+node.set['openstack']['database']['nova_proxy_tenant'] = keystone_settings[:admin_tenant]
+
+# XXX since we're not using databags (yet?), use the developer mode and
+# set the token in an attribute
+node.set['openstack']['developer_mode'] = true
+node.set['openstack']['secret']['trove'] = keystone_settings[:admin_token]
+
+node.set_unless['openstack']['endpoints']['database-api'] = {}
+node.set['openstack']['endpoints']['database-api']['host'] = node[:fqdn]
 
 rabbitmq = get_instance('roles:rabbitmq-server')
 Chef::Log.info("Found rabbitmq server on #{rabbitmq}.")
 node.set['openstack']['mq']['service_type'] = 'rabbitmq'
-node.set['openstack']['mq']['database-service']['rabbit']['host'] = rabbitmq[:fqdn]
-node.set['openstack']['mq']['database-service']['rabbit']['use_ssl'] = (rabbitmq[:protocol] == 'https')
-node.set['openstack']['mq']['database-service']['rabbit']['port'] = rabbitmq[:service_port]
+node.set['openstack']['mq']['database']['rabbit']['host'] = rabbitmq[:fqdn]
+node.set['openstack']['mq']['database']['rabbit']['use_ssl'] = (rabbitmq[:protocol] == 'https')
+node.set['openstack']['mq']['database']['rabbit']['port'] = rabbitmq[:service_port]
 
 # XXX mysql configuration
 # this part should go away once trove supports postgresl
-['mysql', 'python-mysql'].each do |pkg|
+
+# rubygem-mysql is installed here, although it would normally be the
+# database cookbook's responsibility. The database cookbook uses a
+# special mysql-chef_gem for this which is Chef 0.11 only.
+['mysql', 'python-mysql', 'rubygem-mysql'].each do |pkg|
   package pkg
 end
 
 service 'mysql' do
   action :start
 end
-
-node.set['openstack']['db']['trove']['db_type'] = 'mysql'
 
 # copied from openstack-common/database/db_create_with_user
 conn = {
@@ -84,7 +94,7 @@ end
 database_user 'trove' do
   provider ::Chef::Provider::Database::MysqlUser
   connection conn
-  password 'openstack-database-service'
+  password 'openstack-database'
   action :create
 end
 
@@ -92,14 +102,14 @@ end
 database_user 'trove' do
   provider ::Chef::Provider::Database::MysqlUser
   connection conn
-  password 'openstack-database-service'
+  password 'openstack-database'
   database_name 'trove'
   host '%'
   privileges [:all]
   action :grant
 end
 
-include_recipe 'openstack-database-service::identity_registration'
-include_recipe 'openstack-database-service::api'
-include_recipe 'openstack-database-service::conductor'
-include_recipe 'openstack-database-service::taskmanager'
+include_recipe 'openstack-database::identity_registration'
+include_recipe 'openstack-database::api'
+include_recipe 'openstack-database::conductor'
+include_recipe 'openstack-database::taskmanager'

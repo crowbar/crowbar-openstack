@@ -5,6 +5,7 @@
 #
 # Copyright 2012-2013, AT&T Services, Inc.
 # Copyright 2013, SUSE Linux GmbH
+# Copyright 2013-2014, Rackspace US, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,211 +24,116 @@
 # expected to create the user, pass, vhost in a wrapper rabbitmq cookbook.
 #
 
-# Default messaging attributes
+# ******************** RabbitMQ Endpoint **************************************
+default['openstack']['endpoints']['mq']['host'] = '127.0.0.1'
+default['openstack']['endpoints']['mq']['scheme'] = nil
+default['openstack']['endpoints']['mq']['port'] = '5672'
+default['openstack']['endpoints']['mq']['path'] = nil
+default['openstack']['endpoints']['mq']['bind_interface'] = nil
+
+###################################################################
+# Services to assign mq attributes for
+###################################################################
+services = %w{block-storage compute database image telemetry network orchestration}
+
+###################################################################
+# Generic default attributes
+###################################################################
 default['openstack']['mq']['server_role'] = 'os-ops-messaging'
 default['openstack']['mq']['service_type'] = 'rabbitmq'
-default['openstack']['mq']['host'] = '127.0.0.1'
-default['openstack']['mq']['port'] = '5672'
 default['openstack']['mq']['user'] = 'guest'
 default['openstack']['mq']['vhost'] = '/'
 
-# Messaging attributes used by the OpenStack Volume (Cinder) service
-default['openstack']['mq']['block-storage']['service_type'] = node['openstack']['mq']['service_type']
-default['openstack']['mq']['block-storage']['notification_topic'] = 'notifications'
-case node['openstack']['mq']['block-storage']['service_type']
-when 'qpid'
-  default['openstack']['mq']['block-storage']['qpid']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['block-storage']['qpid']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['block-storage']['qpid']['qpid_hosts'] = ['127.0.0.1:5672']
-  default['openstack']['mq']['block-storage']['qpid']['username'] = ''
-  default['openstack']['mq']['block-storage']['qpid']['password'] = ''
-  default['openstack']['mq']['block-storage']['qpid']['sasl_mechanisms'] = ''
-  default['openstack']['mq']['block-storage']['qpid']['reconnect'] = true
-  default['openstack']['mq']['block-storage']['qpid']['reconnect_timeout'] = 0
-  default['openstack']['mq']['block-storage']['qpid']['reconnect_limit'] = 0
-  default['openstack']['mq']['block-storage']['qpid']['reconnect_interval_min'] = 0
-  default['openstack']['mq']['block-storage']['qpid']['reconnect_interval_max'] = 0
-  default['openstack']['mq']['block-storage']['qpid']['reconnect_interval'] = 0
-  default['openstack']['mq']['block-storage']['qpid']['heartbeat'] = 60
-  default['openstack']['mq']['block-storage']['qpid']['protocol'] = 'tcp'
-  default['openstack']['mq']['block-storage']['qpid']['tcp_nodelay'] = true
-  default['openstack']['mq']['block-storage']['qpid']['notification_topic'] = node['openstack']['mq']['block-storage']['notification_topic']
-when 'rabbitmq'
-  default['openstack']['mq']['block-storage']['rabbit']['userid'] = node['openstack']['mq']['user']
-  default['openstack']['mq']['block-storage']['rabbit']['vhost'] = node['openstack']['mq']['vhost']
-  default['openstack']['mq']['block-storage']['rabbit']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['block-storage']['rabbit']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['block-storage']['rabbit']['ha'] = false
-  default['openstack']['mq']['block-storage']['rabbit']['use_ssl'] = false
-  default['openstack']['mq']['block-storage']['rabbit']['notification_topic'] = node['openstack']['mq']['block-storage']['notification_topic']
+# defined in oslo/messaging/_drivers/amqp.py
+default['openstack']['mq']['durable_queues'] = false
+default['openstack']['mq']['auto_delete'] = false
+
+###################################################################
+# Default qpid and rabbit values (for attribute assignment below)
+###################################################################
+default['openstack']['mq']['qpid']['protocol'] = 'tcp'
+# defined in oslo/messaging/_drivers/impl_qpid.py
+default['openstack']['mq']['qpid']['topology_version'] = 1
+qpid_defaults = {
+  :username => node['openstack']['mq']['user'],
+  :sasl_mechanisms => '',
+  :reconnect => true,
+  :reconnect_timeout => 0,
+  :reconnect_limit => 0,
+  :reconnect_interval_min => 0,
+  :reconnect_interval_max => 0,
+  :reconnect_interval => 0,
+  :heartbeat => 60,
+  :protocol => node['openstack']['mq']['qpid']['protocol'],
+  :tcp_nodelay => true,
+  :host => node['openstack']['endpoints']['mq']['host'],
+  :port => node['openstack']['endpoints']['mq']['port'],
+  :qpid_hosts => ["#{node['openstack']['endpoints']['mq']['host']}:#{node['openstack']['endpoints']['mq']['port']}"],
+  :topology_version => node['openstack']['mq']['qpid']['topology_version']
+}
+
+rabbit_defaults = {
+  :userid => node['openstack']['mq']['user'],
+  :vhost => node['openstack']['mq']['vhost'],
+  :port => node['openstack']['endpoints']['mq']['port'],
+  :host => node['openstack']['endpoints']['mq']['host'],
+  :ha => false,
+  :use_ssl => false
+}
+
+###################################################################
+# Assign default mq attributes for every service
+###################################################################
+services.each do |svc|
+  default['openstack']['mq'][svc]['service_type'] = node['openstack']['mq']['service_type']
+  default['openstack']['mq'][svc]['notification_topic'] = 'notifications'
+
+  default['openstack']['mq'][svc]['durable_queues'] =
+    node['openstack']['mq']['durable_queues']
+  default['openstack']['mq'][svc]['auto_delete'] =
+    node['openstack']['mq']['auto_delete']
+
+  case node['openstack']['mq'][svc]['service_type']
+  when 'qpid'
+    qpid_defaults.each do |key, val|
+      default['openstack']['mq'][svc]['qpid'][key.to_s] = val
+    end
+  when 'rabbitmq'
+    rabbit_defaults.each do |key, val|
+      default['openstack']['mq'][svc]['rabbit'][key.to_s] = val
+    end
+  end
 end
 
-# Messaging attributes used by the OpenStack Compute (Nova) service
-default['openstack']['mq']['compute']['service_type'] = node['openstack']['mq']['service_type']
-case node['openstack']['mq']['compute']['service_type']
-when 'qpid'
-  default['openstack']['mq']['compute']['qpid']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['compute']['qpid']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['compute']['qpid']['qpid_hosts'] = ['127.0.0.1:5672']
-  default['openstack']['mq']['compute']['qpid']['username'] = ''
-  default['openstack']['mq']['compute']['qpid']['password'] = ''
-  default['openstack']['mq']['compute']['qpid']['sasl_mechanisms'] = ''
-  default['openstack']['mq']['compute']['qpid']['reconnect_timeout'] = 0
-  default['openstack']['mq']['compute']['qpid']['reconnect_limit'] = 0
-  default['openstack']['mq']['compute']['qpid']['reconnect_interval_min'] = 0
-  default['openstack']['mq']['compute']['qpid']['reconnect_interval_max'] = 0
-  default['openstack']['mq']['compute']['qpid']['reconnect_interval'] = 0
-  default['openstack']['mq']['compute']['qpid']['heartbeat'] = 60
-  default['openstack']['mq']['compute']['qpid']['protocol'] = 'tcp'
-  default['openstack']['mq']['compute']['qpid']['tcp_nodelay'] = true
-when 'rabbitmq'
-  default['openstack']['mq']['compute']['rabbit']['userid'] = node['openstack']['mq']['user']
-  default['openstack']['mq']['compute']['rabbit']['vhost'] = node['openstack']['mq']['vhost']
-  default['openstack']['mq']['compute']['rabbit']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['compute']['rabbit']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['compute']['rabbit']['ha'] = false
-  default['openstack']['mq']['compute']['rabbit']['use_ssl'] = false
-end
+###################################################################
+# Overrides and additional attributes for individual services
+###################################################################
+# block-storage
+default['openstack']['mq']['block-storage']['qpid']['notification_topic'] =
+  node['openstack']['mq']['block-storage']['notification_topic']
+default['openstack']['mq']['block-storage']['rabbit']['notification_topic'] =
+  node['openstack']['mq']['block-storage']['notification_topic']
+default['openstack']['mq']['block-storage']['control_exchange'] = 'cinder'
 
-# Messaging attributes used by the OpenStack Image (Glance) service
-default['openstack']['mq']['image']['service_type'] = node['openstack']['mq']['service_type']
+# image
 default['openstack']['mq']['image']['notifier_strategy'] = 'noop'
 default['openstack']['mq']['image']['notification_topic'] = 'glance_notifications'
-case node['openstack']['mq']['image']['service_type']
-when 'qpid'
-  default['openstack']['mq']['image']['qpid']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['image']['qpid']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['image']['qpid']['qpid_hosts'] = ['127.0.0.1:5672']
-  default['openstack']['mq']['image']['qpid']['username'] = ''
-  default['openstack']['mq']['image']['qpid']['password'] = ''
+default['openstack']['mq']['image']['qpid']['notification_topic'] =
+  node['openstack']['mq']['image']['notification_topic']
+default['openstack']['mq']['image']['rabbit']['notification_topic'] =
+  node['openstack']['mq']['image']['notification_topic']
+default['openstack']['mq']['image']['control_exchange'] = 'glance'
 
-  default['openstack']['mq']['image']['qpid']['sasl_mechanisms'] = ''
-  default['openstack']['mq']['image']['qpid']['reconnect'] = true
-  default['openstack']['mq']['image']['qpid']['reconnect_timeout'] = 0
-  default['openstack']['mq']['image']['qpid']['reconnect_limit'] = 0
-  default['openstack']['mq']['image']['qpid']['reconnect_interval_min'] = 0
-  default['openstack']['mq']['image']['qpid']['reconnect_interval_max'] = 0
-  default['openstack']['mq']['image']['qpid']['reconnect_interval'] = 0
-  default['openstack']['mq']['image']['qpid']['heartbeat'] = 60
-  default['openstack']['mq']['image']['qpid']['protocol'] = 'tcp'
-  default['openstack']['mq']['image']['qpid']['tcp_nodelay'] = true
-  default['openstack']['mq']['image']['qpid']['notification_topic'] = node['openstack']['mq']['image']['notification_topic']
-when 'rabbitmq'
-  default['openstack']['mq']['image']['rabbit']['userid'] = node['openstack']['mq']['user']
-  default['openstack']['mq']['image']['rabbit']['vhost'] = node['openstack']['mq']['vhost']
-  default['openstack']['mq']['image']['rabbit']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['image']['rabbit']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['image']['rabbit']['use_ssl'] = false
-  default['openstack']['mq']['image']['rabbit']['notification_topic'] = node['openstack']['mq']['image']['notification_topic']
-end
+# network
+# AMQP topics used for openstack notifications, can be comma-separated values
+default['openstack']['mq']['network']['notification_topics'] = 'notifications'
+default['openstack']['mq']['network']['control_exchange'] = 'neutron'
 
-# Messaging attributes used by the OpenStack Metering (Ceilometer) service
-default['openstack']['mq']['metering']['service_type'] = node['openstack']['mq']['service_type']
-case node['openstack']['mq']['metering']['service_type']
-when 'qpid'
-  default['openstack']['mq']['metering']['qpid']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['metering']['qpid']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['metering']['qpid']['qpid_hosts'] = ['127.0.0.1:5672']
-  default['openstack']['mq']['metering']['qpid']['username'] = ''
-  default['openstack']['mq']['metering']['qpid']['password'] = ''
-  default['openstack']['mq']['metering']['qpid']['sasl_mechanisms'] = ''
-  default['openstack']['mq']['metering']['qpid']['reconnect'] = true
-  default['openstack']['mq']['metering']['qpid']['reconnect_timeout'] = 0
-  default['openstack']['mq']['metering']['qpid']['reconnect_limit'] = 0
-  default['openstack']['mq']['metering']['qpid']['reconnect_interval_min'] = 0
-  default['openstack']['mq']['metering']['qpid']['reconnect_interval_max'] = 0
-  default['openstack']['mq']['metering']['qpid']['reconnect_interval'] = 0
-  default['openstack']['mq']['metering']['qpid']['heartbeat'] = 60
-  default['openstack']['mq']['metering']['qpid']['protocol'] = 'tcp'
-  default['openstack']['mq']['metering']['qpid']['tcp_nodelay'] = true
-when 'rabbitmq'
-  default['openstack']['mq']['metering']['rabbit']['userid'] = node['openstack']['mq']['user']
-  default['openstack']['mq']['metering']['rabbit']['vhost'] = node['openstack']['mq']['vhost']
-  default['openstack']['mq']['metering']['rabbit']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['metering']['rabbit']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['metering']['rabbit']['ha'] = false
-  default['openstack']['mq']['metering']['rabbit']['use_ssl'] = false
-end
+# compute
+default['openstack']['mq']['compute']['control_exchange'] = 'nova'
 
-# Messaging attributes used by the OpenStack Network (Neutron) service
-default['openstack']['mq']['network']['service_type'] = node['openstack']['mq']['service_type']
-case node['openstack']['mq']['network']['service_type']
-when 'qpid'
-  default['openstack']['mq']['network']['qpid']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['network']['qpid']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['network']['qpid']['qpid_hosts'] = ['127.0.0.1:5672']
-  default['openstack']['mq']['network']['qpid']['username'] = ''
-  default['openstack']['mq']['network']['qpid']['password'] = ''
-  default['openstack']['mq']['network']['qpid']['sasl_mechanisms'] = ''
-  default['openstack']['mq']['network']['qpid']['reconnect'] = true
-  default['openstack']['mq']['network']['qpid']['reconnect_timeout'] = 0
-  default['openstack']['mq']['network']['qpid']['reconnect_limit'] = 0
-  default['openstack']['mq']['network']['qpid']['reconnect_interval_min'] = 0
-  default['openstack']['mq']['network']['qpid']['reconnect_interval_max'] = 0
-  default['openstack']['mq']['network']['qpid']['reconnect_interval'] = 0
-  default['openstack']['mq']['network']['qpid']['heartbeat'] = 60
-  default['openstack']['mq']['network']['qpid']['protocol'] = 'tcp'
-  default['openstack']['mq']['network']['qpid']['tcp_nodelay'] = true
-when 'rabbitmq'
-  default['openstack']['mq']['network']['rabbit']['userid'] = node['openstack']['mq']['user']
-  default['openstack']['mq']['network']['rabbit']['vhost'] = node['openstack']['mq']['vhost']
-  default['openstack']['mq']['network']['rabbit']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['network']['rabbit']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['network']['rabbit']['ha'] = false
-end
+# orchestration
+default['openstack']['mq']['orchestration']['control_exchange'] = 'heat'
 
-# Messaging attributes used by the OpenStack Orchestration (Heat) service
-default['openstack']['mq']['orchestration']['service_type'] = node['openstack']['mq']['service_type']
-case node['openstack']['mq']['orchestration']['service_type']
-when 'qpid'
-  default['openstack']['mq']['orchestration']['qpid']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['orchestration']['qpid']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['orchestration']['qpid']['qpid_hosts'] = ['127.0.0.1:5672']
-  default['openstack']['mq']['orchestration']['qpid']['username'] = ''
-  default['openstack']['mq']['orchestration']['qpid']['password'] = ''
-  default['openstack']['mq']['orchestration']['qpid']['sasl_mechanisms'] = ''
-  default['openstack']['mq']['orchestration']['qpid']['reconnect'] = true
-  default['openstack']['mq']['orchestration']['qpid']['reconnect_timeout'] = 0
-  default['openstack']['mq']['orchestration']['qpid']['reconnect_limit'] = 0
-  default['openstack']['mq']['orchestration']['qpid']['reconnect_interval_min'] = 0
-  default['openstack']['mq']['orchestration']['qpid']['reconnect_interval_max'] = 0
-  default['openstack']['mq']['orchestration']['qpid']['reconnect_interval'] = 0
-  default['openstack']['mq']['orchestration']['qpid']['heartbeat'] = 60
-  default['openstack']['mq']['orchestration']['qpid']['protocol'] = 'tcp'
-  default['openstack']['mq']['orchestration']['qpid']['tcp_nodelay'] = true
-when 'rabbitmq'
-  default['openstack']['mq']['orchestration']['rabbit']['userid'] = node['openstack']['mq']['user']
-  default['openstack']['mq']['orchestration']['rabbit']['vhost'] = node['openstack']['mq']['vhost']
-  default['openstack']['mq']['orchestration']['rabbit']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['orchestration']['rabbit']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['orchestration']['rabbit']['ha'] = false
-  default['openstack']['mq']['orchestration']['rabbit']['use_ssl'] = false
-end
-
-# Messaging attributes used by the OpenStack Database Service (Trove) service
-default['openstack']['mq']['database-service']['service_type'] = node['openstack']['mq']['service_type']
-case node['openstack']['mq']['database-service']['service_type']
-when 'qpid'
-  default['openstack']['mq']['database-service']['qpid']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['database-service']['qpid']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['database-service']['qpid']['qpid_hosts'] = ['127.0.0.1:5672']
-  default['openstack']['mq']['database-service']['qpid']['username'] = ''
-  default['openstack']['mq']['database-service']['qpid']['password'] = ''
-  default['openstack']['mq']['database-service']['qpid']['sasl_mechanisms'] = ''
-  default['openstack']['mq']['database-service']['qpid']['reconnect'] = true
-  default['openstack']['mq']['database-service']['qpid']['reconnect_timeout'] = 0
-  default['openstack']['mq']['database-service']['qpid']['reconnect_limit'] = 0
-  default['openstack']['mq']['database-service']['qpid']['reconnect_interval_min'] = 0
-  default['openstack']['mq']['database-service']['qpid']['reconnect_interval_max'] = 0
-  default['openstack']['mq']['database-service']['qpid']['reconnect_interval'] = 0
-  default['openstack']['mq']['database-service']['qpid']['heartbeat'] = 60
-  default['openstack']['mq']['database-service']['qpid']['protocol'] = 'tcp'
-  default['openstack']['mq']['database-service']['qpid']['tcp_nodelay'] = true
-when 'rabbitmq'
-  default['openstack']['mq']['database-service']['rabbit']['userid'] = node['openstack']['mq']['user']
-  default['openstack']['mq']['database-service']['rabbit']['vhost'] = node['openstack']['mq']['vhost']
-  default['openstack']['mq']['database-service']['rabbit']['port'] = node['openstack']['mq']['port']
-  default['openstack']['mq']['database-service']['rabbit']['host'] = node['openstack']['mq']['host']
-  default['openstack']['mq']['database-service']['rabbit']['ha'] = false
-  default['openstack']['mq']['database-service']['rabbit']['use_ssl'] = false
-end
+# telemetry
+default['openstack']['mq']['telemetry']['control_exchange'] = 'ceilometer'

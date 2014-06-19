@@ -38,12 +38,26 @@ module ::Openstack # rubocop:disable Documentation
   # nova_password = secret 'passwords', 'nova'
   #
   # That means nova_password will == 'nova'.
+  #
+  # You also can provide a default password value in developer mode,
+  # like following:
+  #
+  # node.set['openstack']['secret']['nova'] = 'nova_password'
+  # nova_password = secret 'passwords', 'nova'
+  #
+  # The nova_password will == 'nova_password'
   def secret(bag_name, index)
-    return index if node['openstack']['developer_mode']
+    return (node['openstack']['secret'][index] || index) if node['openstack']['developer_mode']
     key_path = node['openstack']['secret']['key_path']
     ::Chef::Log.info "Loading encrypted databag #{bag_name}.#{index} using key at #{key_path}"
     secret = ::Chef::EncryptedDataBagItem.load_secret key_path
     ::Chef::EncryptedDataBagItem.load(bag_name, index, secret)[index]
+  end
+
+  # Ease-of-use/standarization routine that returns a secret from the
+  # attribute-specified openstack secrets databag.
+  def get_secret(key)
+    secret node['openstack']['secret']['secrets_data_bag'], key
   end
 
   # Ease-of-use/standarization routine that returns a service/database/user
