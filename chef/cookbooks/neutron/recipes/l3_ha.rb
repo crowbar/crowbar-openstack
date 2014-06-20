@@ -61,6 +61,7 @@ pacemaker_primitive lbaas_agent_primitive do
   agent node[:neutron][:ha][:l3][:lbaas_ra]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
+  only_if { use_lbaas_agent }
 end
 
 networking_plugin = node[:neutron][:networking_plugin]
