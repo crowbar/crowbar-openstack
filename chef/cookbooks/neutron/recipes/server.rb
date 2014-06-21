@@ -173,7 +173,7 @@ template "/etc/default/neutron-server" do
   source "neutron-server.erb"
   owner node[:neutron][:platform][:user]
   variables(
-      :neutron_plugin_config => "/etc/neutron/plugins/ml2/ml2_conf.ini",
+      :neutron_plugin_config => "/etc/neutron/plugins/ml2/ml2_conf.ini"
     )
   only_if { node[:platform] == "ubuntu" }
 end
