@@ -77,7 +77,7 @@ node.set['openstack']['secret'][rabbitmq[:user]]['user'] = rabbitmq[:password]
 end
 
 service 'mysql' do
-  action :start
+  action [:start, :enable]
 end
 
 # copied from openstack-common/database/db_create_with_user
