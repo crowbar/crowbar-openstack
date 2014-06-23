@@ -39,10 +39,10 @@ node.set['openstack']['database']['volume_support'] = node[:trove][:volume_suppo
   node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
 end
 
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 # talking to nova via the novaclient, this should be an admin user in
 # the keystone config (see the attributes in trove-taskmanager.conf and
 # others)
-keystone_settings = KeystoneHelper.keystone_settings(node, :nova)
 node.set['openstack']['database']['nova_proxy_user'] = keystone_settings[:admin_user]
 node.set['openstack']['database']['nova_proxy_password'] = keystone_settings[:admin_password]
 node.set['openstack']['database']['nova_proxy_tenant'] = keystone_settings[:admin_tenant]
