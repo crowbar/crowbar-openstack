@@ -34,18 +34,18 @@ node.set['openstack']['database']['volume_support'] = node[:trove][:volume_suppo
   instance = get_instance("roles:#{comp}")
   Chef::Log.info("Found #{comp} instance on #{instance}.")
   node.set_unless['openstack']['endpoints'][endpoint] = {}
-  node.set['openstack']['endpoints'][endpoint]['host'] = instance[:fqdn]
-  node.set['openstack']['endpoints'][endpoint]['scheme'] = instance[:protocol]
-  node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
+  node.set['openstack']['endpoints'][endpoint]['host'] = instance['fqdn']
+  node.set['openstack']['endpoints'][endpoint]['scheme'] = instance['protocol']
+  node.set['openstack']['endpoints'][endpoint]['port'] = instance['service_port']
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 # talking to nova via the novaclient, this should be an admin user in
 # the keystone config (see the attributes in trove-taskmanager.conf and
 # others)
-node.set['openstack']['database']['nova_proxy_user'] = keystone_settings[:admin_user]
-node.set['openstack']['database']['nova_proxy_password'] = keystone_settings[:admin_password]
-node.set['openstack']['database']['nova_proxy_tenant'] = keystone_settings[:admin_tenant]
+node.set['openstack']['database']['nova_proxy_user'] = keystone_settings['admin_user']
+node.set['openstack']['database']['nova_proxy_password'] = keystone_settings['admin_password']
+node.set['openstack']['database']['nova_proxy_tenant'] = keystone_settings['admin_tenant']
 
 node.set['openstack']['use_databags'] = false
 node.set['openstack']['secret']['openstack_identity_bootstrap_token'] = {:token => keystone_settings['admin_token'] }
@@ -54,7 +54,7 @@ node.set['openstack']['secret']['database']['service'] = keystone_settings['serv
 node.set['openstack']['database']['service_user'] = keystone_settings['service_user']
 
 node.set_unless['openstack']['endpoints']['database-api'] = {}
-node.set['openstack']['endpoints']['database-api']['host'] = node[:fqdn]
+node.set['openstack']['endpoints']['database-api']['host'] = node['fqdn']
 
 rabbitmq = get_instance('roles:rabbitmq-server')[:rabbitmq]
 Chef::Log.info("Found rabbitmq server on #{rabbitmq}.")
