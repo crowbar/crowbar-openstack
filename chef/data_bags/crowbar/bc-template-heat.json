@@ -17,6 +17,7 @@
       "use_gitrepo": false,
       "use_gitbarclamp": false,
       "use_pip_cache": false,
+      "default_instance_user": "ec2-user",
       "pfs_deps": [
         "pip://python-heatclient",
         "pip://setuptools-git",
@@ -41,7 +42,7 @@
   "deployment": {
     "heat": {
       "crowbar-revision": 0,
-      "schema-revision": 11,
+      "schema-revision": 12,
       "element_states": {
         "heat-server": [ "readying", "ready", "applying" ]
       },

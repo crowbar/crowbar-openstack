@@ -19,7 +19,7 @@
 # empty, Heat will use the default user set up with your cloud
 # image (for OS::Nova::Server) or 'ec2-user' (for
 # AWS::EC2::Instance). (string value)
-#instance_user=ec2-user
+instance_user=<%= @instance_user %>
 
 # Driver to use for controlling instances. (string value)
 #instance_driver=heat.engine.nova

@@ -244,6 +244,7 @@ template "/etc/heat/heat.conf" do
       :bind_host => bind_host,
       :api_port => api_port,
       :cloud_watch_port => cloud_watch_port,
+      :instance_user => node[:heat][:default_instance_user],
       :cfn_port => cfn_port,
       :auth_encryption_key => node[:heat][:auth_encryption_key],
       :heat_metadata_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
