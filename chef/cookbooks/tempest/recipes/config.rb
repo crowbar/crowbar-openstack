@@ -289,6 +289,7 @@ template "#{tempest_conf}" do
     :flavor_ref => flavor_ref,
     :img_host => glance_address,
     :img_port => glance_port,
+    :http_image => node[:tempest][:tempest_test_image],
     :key_host => keystone_address,
     :key_port => keystone_port,
     :keystone_settings => keystone_settings,
