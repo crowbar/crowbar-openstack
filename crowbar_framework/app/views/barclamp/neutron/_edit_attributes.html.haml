@@ -17,9 +17,6 @@
       #mode_container
         = select_field :networking_mode, :collection => :networking_modes_for_neutron
 
-        .alert.alert-warning#warn_ovs_vlan
-          = t(".warn_ovs_vlan")
-
       #vmware_container
         = string_field %w(vmware user)
         = password_field %w(vmware password)
