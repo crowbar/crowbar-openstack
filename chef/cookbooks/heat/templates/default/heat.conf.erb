@@ -178,6 +178,9 @@ auth_encryption_key=<%= @auth_encryption_key %>
 # Custom template for the built-in loadbalancer nested stack.
 # (string value)
 #loadbalancer_template=<None>
+<% if node[:platform] == "suse" -%>
+loadbalancer_template=/etc/heat/loadbalancer.template
+<% end %>
 
 
 #
