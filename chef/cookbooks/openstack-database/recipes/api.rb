@@ -1,8 +1,9 @@
+# encoding: UTF-8
 #
 # Cookbook Name:: openstack-database
 # Recipe:: api
 #
-# Copyright 2013, SUSE Linux GmbH
+# Copyright 2013-2014, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,45 +18,45 @@
 # limitations under the License.
 #
 
-class ::Chef::Recipe
+class ::Chef::Recipe # rubocop:disable Documentation
   include ::Openstack
 end
 
-if node["openstack"]["database"]["syslog"]["use"]
-  include_recipe "openstack-common::logging"
+if node['openstack']['database']['syslog']['use']
+  include_recipe 'openstack-common::logging'
 end
 
-platform_options = node["openstack"]["database"]["platform"]
+platform_options = node['openstack']['database']['platform']
 
-platform_options["api_packages"].each do |pkg|
+platform_options['api_packages'].each do |pkg|
   package pkg
 end
 
-service "trove-api" do
-  service_name platform_options["api_service"]
+service 'trove-api' do
+  service_name platform_options['api_service']
   supports :status => true, :restart => true
 
-  action [ :enable ]
+  action [:enable]
 end
 
-db_user = node["openstack"]["database"]["db"]["username"]
-db_pass = get_password 'db', "openstack-database"
-db_uri = db_uri("database", db_user, db_pass).to_s
+db_user = node['openstack']['db']['database']['username']
+db_pass = get_password 'db', 'database'
+db_uri = db_uri('database', db_user, db_pass).to_s
 
-api_endpoint = endpoint "database-api"
+api_endpoint = endpoint 'database-api'
 
-identity_uri = endpoint("identity-api")
-compute_uri = endpoint("compute-api").to_s.gsub(/%\(tenant_id\)s/, "")
-block_storage_uri = endpoint("block-storage-api").to_s.gsub(/%\(tenant_id\)s/, "")
-object_storage_uri = endpoint("object-storage-api")
+identity_uri = endpoint('identity-api')
+compute_uri = endpoint('compute-api').to_s.gsub(/%\(tenant_id\)s/, '')
+block_storage_uri = endpoint('block-storage-api').to_s.gsub(/%\(tenant_id\)s/, '')
+object_storage_uri = endpoint('object-storage-api')
 
 rabbit = node['openstack']['mq']['database']['rabbit']
 rabbit_pass = get_password('user', rabbit['userid'])
 
-template "/etc/trove/trove.conf" do
-  source "trove.conf.erb"
-  owner node["openstack"]["database"]["user"]
-  group node["openstack"]["database"]["group"]
+template '/etc/trove/trove.conf' do
+  source 'trove.conf.erb'
+  owner node['openstack']['database']['user']
+  group node['openstack']['database']['group']
   mode 00640
   variables(
     :database_connection => db_uri,
@@ -68,16 +69,22 @@ template "/etc/trove/trove.conf" do
     :object_storage_uri => object_storage_uri
     )
 
-  notifies :restart, "service[trove-api]", :immediately
+  notifies :restart, 'service[trove-api]', :immediately
 end
 
-admin_token = secret "secrets", "openstack_identity_bootstrap_token"
-identity_admin_uri = endpoint("identity-admin")
+admin_token = get_password('token', 'openstack_identity_bootstrap_token')
+identity_admin_uri = endpoint('identity-admin')
 
-template "/etc/trove/api-paste.ini" do
-  source "api-paste.ini.erb"
-  owner node["openstack"]["database"]["user"]
-  group node["openstack"]["database"]["group"]
+directory ::File.dirname(node['openstack']['database']['api']['auth']['cache_dir']) do
+  owner node['openstack']['database']['user']
+  group node['openstack']['database']['group']
+  mode 00700
+end
+
+template '/etc/trove/api-paste.ini' do
+  source 'api-paste.ini.erb'
+  owner node['openstack']['database']['user']
+  group node['openstack']['database']['group']
   mode 00640
   variables(
     :identity_admin_uri => identity_admin_uri,
@@ -85,9 +92,9 @@ template "/etc/trove/api-paste.ini" do
     :admin_token => admin_token
     )
 
-  notifies :restart, "service[trove-api]", :immediately
+  notifies :restart, 'service[trove-api]', :immediately
 end
 
-execute "trove-manage db_sync" do
-  notifies :restart, "service[trove-api]", :immediately
+execute 'trove-manage db_sync' do
+  notifies :restart, 'service[trove-api]', :immediately
 end
