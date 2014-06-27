@@ -49,7 +49,7 @@ node.set['openstack']['database']['nova_proxy_tenant'] = keystone_settings['admi
 
 node.set['openstack']['use_databags'] = false
 node.set['openstack']['secret']['openstack_identity_bootstrap_token'] = {:token => keystone_settings['admin_token'] }
-node.set['openstack']['secret']['database']['db'] = keystone_settings['service_password']
+node.set['openstack']['secret']['database']['db'] = node[:trove][:db][:password]
 node.set['openstack']['secret']['database']['service'] = keystone_settings['service_password']
 node.set['openstack']['database']['service_user'] = keystone_settings['service_user']
 
@@ -93,24 +93,24 @@ conn = {
 database 'create trove database' do
   provider ::Chef::Provider::Database::Mysql
   connection conn
-  database_name 'trove'
+  database_name node[:trove][:db][:database]
   action :create
 end
 
 # create user
-database_user 'trove' do
+database_user node[:trove][:db][:user] do
   provider ::Chef::Provider::Database::MysqlUser
   connection conn
-  password 'trove'
+  password node[:trove][:db][:password]
   action :create
 end
 
 # grant privs to user
-database_user 'trove' do
+database_user node[:trove][:db][:user] do
   provider ::Chef::Provider::Database::MysqlUser
   connection conn
-  password 'trove'
-  database_name 'trove'
+  password node[:trove][:db][:password]
+  database_name node[:trove][:db][:database]
   host '%'
   privileges [:all]
   action :grant
