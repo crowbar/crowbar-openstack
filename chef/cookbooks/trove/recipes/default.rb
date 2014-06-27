@@ -34,33 +34,38 @@ node.set['openstack']['database']['volume_support'] = node[:trove][:volume_suppo
   instance = get_instance("roles:#{comp}")
   Chef::Log.info("Found #{comp} instance on #{instance}.")
   node.set_unless['openstack']['endpoints'][endpoint] = {}
-  node.set['openstack']['endpoints'][endpoint]['host'] = instance[:fqdn]
-  node.set['openstack']['endpoints'][endpoint]['scheme'] = instance[:protocol]
-  node.set['openstack']['endpoints'][endpoint]['port'] = instance[:service_port]
+  node.set['openstack']['endpoints'][endpoint]['host'] = instance['fqdn']
+  node.set['openstack']['endpoints'][endpoint]['scheme'] = instance['protocol']
+  node.set['openstack']['endpoints'][endpoint]['port'] = instance['service_port']
 end
 
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 # talking to nova via the novaclient, this should be an admin user in
 # the keystone config (see the attributes in trove-taskmanager.conf and
 # others)
-keystone_settings = KeystoneHelper.keystone_settings(node, :nova)
-node.set['openstack']['database']['nova_proxy_user'] = keystone_settings[:admin_user]
-node.set['openstack']['database']['nova_proxy_password'] = keystone_settings[:admin_password]
-node.set['openstack']['database']['nova_proxy_tenant'] = keystone_settings[:admin_tenant]
+node.set['openstack']['database']['nova_proxy_user'] = keystone_settings['admin_user']
+node.set['openstack']['database']['nova_proxy_password'] = keystone_settings['admin_password']
+node.set['openstack']['database']['nova_proxy_tenant'] = keystone_settings['admin_tenant']
 
-# XXX since we're not using databags (yet?), use the developer mode and
-# set the token in an attribute
-node.set['openstack']['developer_mode'] = true
-node.set['openstack']['secret']['trove'] = keystone_settings[:admin_token]
+node.set['openstack']['use_databags'] = false
+node.set['openstack']['secret']['openstack_identity_bootstrap_token'] = {:token => keystone_settings['admin_token'] }
+node.set['openstack']['secret']['database']['db'] = keystone_settings['service_password']
+node.set['openstack']['secret']['database']['service'] = keystone_settings['service_password']
+node.set['openstack']['database']['service_user'] = keystone_settings['service_user']
 
 node.set_unless['openstack']['endpoints']['database-api'] = {}
-node.set['openstack']['endpoints']['database-api']['host'] = node[:fqdn]
+node.set['openstack']['endpoints']['database-api']['host'] = node['fqdn']
+node.set['openstack']['endpoints']['database-api']['bind-host'] = node['fqdn']
 
-rabbitmq = get_instance('roles:rabbitmq-server')
+rabbitmq = get_instance('roles:rabbitmq-server')[:rabbitmq]
 Chef::Log.info("Found rabbitmq server on #{rabbitmq}.")
 node.set['openstack']['mq']['service_type'] = 'rabbitmq'
-node.set['openstack']['mq']['database']['rabbit']['host'] = rabbitmq[:fqdn]
-node.set['openstack']['mq']['database']['rabbit']['use_ssl'] = (rabbitmq[:protocol] == 'https')
-node.set['openstack']['mq']['database']['rabbit']['port'] = rabbitmq[:service_port]
+node.set['openstack']['mq']['database']['rabbit']['host'] = rabbitmq[:address]
+node.set['openstack']['mq']['database']['rabbit']['port'] = rabbitmq[:port] if rabbitmq[:port]
+# XXX using the nova user for now, check about using a different user
+# here (upstream default is 'guest' for everything)
+node.set['openstack']['mq']['database']['rabbit']['userid'] = rabbitmq[:user]
+node.set['openstack']['secret'][rabbitmq[:user]]['user'] = rabbitmq[:password]
 
 # XXX mysql configuration
 # this part should go away once trove supports postgresl
@@ -73,7 +78,7 @@ node.set['openstack']['mq']['database']['rabbit']['port'] = rabbitmq[:service_po
 end
 
 service 'mysql' do
-  action :start
+  action [:start, :enable]
 end
 
 # copied from openstack-common/database/db_create_with_user
@@ -94,7 +99,7 @@ end
 database_user 'trove' do
   provider ::Chef::Provider::Database::MysqlUser
   connection conn
-  password 'openstack-database'
+  password 'trove'
   action :create
 end
 
@@ -102,7 +107,7 @@ end
 database_user 'trove' do
   provider ::Chef::Provider::Database::MysqlUser
   connection conn
-  password 'openstack-database'
+  password 'trove'
   database_name 'trove'
   host '%'
   privileges [:all]
