@@ -55,6 +55,7 @@ node.set['openstack']['database']['service_user'] = keystone_settings['service_u
 
 node.set_unless['openstack']['endpoints']['database-api'] = {}
 node.set['openstack']['endpoints']['database-api']['host'] = node['fqdn']
+node.set['openstack']['endpoints']['database-api']['bind-host'] = node['fqdn']
 
 rabbitmq = get_instance('roles:rabbitmq-server')[:rabbitmq]
 Chef::Log.info("Found rabbitmq server on #{rabbitmq}.")
