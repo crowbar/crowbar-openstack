@@ -18,6 +18,7 @@ Cookbooks
 The following cookbooks are dependencies:
 
 * openstack-common
+* openstack-identity
 
 
 Usage
@@ -35,10 +36,6 @@ taskmanager
 ----
 - Installs the taskmanager service.
 
-guestagent
-----
-- Installs the guestagent service
-
 identity_registration
 ----
 - Registers the endpoints with Keystone.
@@ -49,15 +46,7 @@ Attributes
 Testing
 =====
 
-This cookbook uses [bundler](http://gembundler.com/), [berkshelf](http://berkshelf.com/), and [strainer](https://github.com/customink/strainer) to isolate dependencies and run tests.
-
-Tests are defined in Strainerfile.
-
-To run tests:
-
-    $ bundle install # install gem dependencies
-    $ bundle exec berks install # install cookbook dependencies
-    $ bundle exec strainer test # run tests
+Please refer to the [TESTING.md](TESTING.md) for instructions for testing the cookbook.
 
 License and Author
 ==================
@@ -66,7 +55,7 @@ License and Author
 |:---------------------|:---------------------------------------------------|
 | **Author**           |  Ionut Artarisi (<iartarisi@suse.cz>)              |
 |                      |                                                    |
-| **Copyright**        |  Copyright (c) 2013, SUSE Linux GmbH               |
+| **Copyright**        |  Copyright (c) 2013-2014, SUSE Linux GmbH          |
 
 
 Licensed under the Apache License, Version 2.0 (the "License");

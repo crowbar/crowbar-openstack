@@ -1,10 +1,12 @@
-# CHANGELOG for cookbook-openstack-database_service
+# CHANGELOG for cookbook-openstack-database
 
+This file is used to list changes made in each version of the cookbook-openstack-database.
 
-This file is used to list changes made in each version of the cookbook-opensatck-database_service.
+## 9.0.1
+* Allow setting passwords via attributes by using the get_password method
 
-## 0.1.0
-* Initial release of cookbook-openstack-trovex
+## 9.0.0
+* Initial release of cookbook-openstack-database for Icehouse
 
 - - -
 Check the [Markdown Syntax Guide](http://daringfireball.net/projects/markdown/syntax) for help with Markdown.

@@ -21,27 +21,11 @@ This barclamp uses a wrapper cookbook around an upstream/stackforge-style openst
 Contributing
 ------------
 
-This repository contains a copy of the cookbook-openstack-database-service repository which is a git 
-subtree. Here are some useful commands to help work with it:
+This repository contains copies of upstream stackforge openstack
+cookbook repos from github.com/stackforge/cookbook-openstack-* for
+cookbooks: common, identity and database. In order to update the code to
+a new upstream version, just copy the upstream content over to our repo.
 
-* First add the cookbook repository as a remote
-
-  ```
-  $ git remote add cookbook git@github.com:mapleoin/cookbook-openstack-database-service.git
-  $ git fetch
-  ```
-
-* Then add the git subtree
-
-  ```
-  $ git subtree add --prefix chef/cookbooks/openstack-database-service/ --squash cookbook master
-  ```
-
-* Now you can push commits done to the upstream cookbook into that repository directly
-
-  ```
-  $ git subtree push --prefix=chef/cookbooks/openstack-database-service/ cookbook master
-  ```
 
 Legals
 ------
