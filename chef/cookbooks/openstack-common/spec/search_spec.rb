@@ -17,8 +17,8 @@ describe 'openstack-common::default' do
     describe '#search_for' do
       it 'returns results' do
         subject.stub(:node).and_return(chef_run.node)
-        subject.stub(:search)
-          .with(:node, '(chef_environment:_default AND roles:role) OR (chef_environment:_default AND recipes:role)')
+        subject.stub(:search)\
+          .with(:node, '(chef_environment:_default AND roles:role) OR (chef_environment:_default AND recipes:role)')\
           .and_return([chef_run.node])
         resp = subject.search_for('role')
         expect(resp[0]['fqdn']).to eq('fauxhai.local')
@@ -26,8 +26,8 @@ describe 'openstack-common::default' do
 
       it 'returns empty results' do
         subject.stub(:node).and_return(chef_run.node)
-        subject.stub(:search)
-          .with(:node, '(chef_environment:_default AND roles:empty-role) OR (chef_environment:_default AND recipes:empty-role)')
+        subject.stub(:search)\
+          .with(:node, '(chef_environment:_default AND roles:empty-role) OR (chef_environment:_default AND recipes:empty-role)')\
           .and_return([])
         expect(
           subject.search_for('empty-role')
@@ -36,8 +36,8 @@ describe 'openstack-common::default' do
 
       it 'always returns empty results' do
         subject.stub(:node).and_return(chef_run.node)
-        subject.stub(:search)
-          .with(:node, '(chef_environment:_default AND roles:empty-role) OR (chef_environment:_default AND recipes:empty-role)')
+        subject.stub(:search)\
+          .with(:node, '(chef_environment:_default AND roles:empty-role) OR (chef_environment:_default AND recipes:empty-role)')\
           .and_return(nil)
         expect(
           subject.search_for('empty-role')
@@ -52,8 +52,8 @@ describe 'openstack-common::default' do
           { 'memcached' => { 'listen' => '2.2.2.2', 'port' => '11211' } }
         ]
         subject.stub(:node).and_return(chef_run.node)
-        subject.stub(:search_for)
-          .with('role')
+        subject.stub(:search_for)\
+          .with('role')\
           .and_return(nodes)
         expect(
           subject.memcached_servers('role')
@@ -67,8 +67,8 @@ describe 'openstack-common::default' do
           { 'memcached' => { 'listen' => '2.2.2.2', 'port' => '11211' } }
         ]
         subject.stub(:node).and_return(chef_run.node)
-        subject.stub(:search_for)
-          .with('role')
+        subject.stub(:search_for)\
+          .with('role')\
           .and_return(nodes)
         expect(
           subject.memcached_servers('role')
@@ -107,7 +107,7 @@ describe 'openstack-common::default' do
           { 'openstack' => { 'mq' => { 'listen' => '2.2.2.2' }, 'endpoints' => { 'mq' => { 'port' => '5672' } } } }
         ]
         subject.stub(:node).and_return(chef_run.node)
-        subject.stub(:search_for)
+        subject.stub(:search_for)\
           .and_return(nodes)
         expect(
           subject.rabbit_servers).to eq('1.1.1.1:5672,2.2.2.2:5672')
@@ -120,7 +120,7 @@ describe 'openstack-common::default' do
           { 'openstack' => { 'mq' => { 'listen' => '2.2.2.2' }, 'endpoints' => { 'mq' => { 'port' => '5672'  } } } }
         ]
         subject.stub(:node).and_return(chef_run.node)
-        subject.stub(:search_for)
+        subject.stub(:search_for)\
           .and_return(nodes)
         expect(
           subject.rabbit_servers

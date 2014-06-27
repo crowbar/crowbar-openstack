@@ -4,7 +4,7 @@
 # Attributes:: default
 #
 # Copyright 2012-2013, AT&T Services, Inc.
-# Copyright 2013, SUSE Linux GmbH
+# Copyright 2013-2014, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,23 @@ default['openstack']['common']['custom_template_banner'] = '
 # pass = secret "passwords", "nova"
 #
 # The value of pass will be "nova"
+#
+# This attribute is now DEPRECATED and will be removed. Use the default
+# attributes below instead.
 default['openstack']['developer_mode'] = false
+
+# Use data bags for storing passwords
+# Set this to false in order to get the passwords from attributes like:
+# node['openstack']['secret'][key][type]
+default['openstack']['use_databags'] = true
+
+# Default attributes when not using data bags (use_databags = false)
+%w{block-storage object-storage compute database dashboard image identity
+   telemetry network object-storage orchestration}.each do |service|
+  %w{user service db token}.each do |type|
+    default['openstack']['secret'][service][type] = "#{service}-#{type}"
+  end
+end
 
 # The type of token signing to use (uuid or pki)
 default['openstack']['auth']['strategy'] = 'pki'
@@ -365,7 +381,7 @@ default['openstack']['endpoints']['database-api-bind']['bind_interface'] = nil
 default['openstack']['endpoints']['database-api']['host'] = node['openstack']['endpoints']['host']
 default['openstack']['endpoints']['database-api']['scheme'] = 'http'
 default['openstack']['endpoints']['database-api']['port'] = '8779'
-default['openstack']['endpoints']['database-api']['path'] = '/v1'
+default['openstack']['endpoints']['database-api']['path'] = '/v1.0/%(tenant_id)s'
 default['openstack']['endpoints']['database-api']['bind_interface'] = nil
 
 # Alternately, if you used some standardized DNS naming scheme, you could

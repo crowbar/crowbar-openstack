@@ -31,8 +31,7 @@ end
 
 shared_context 'common-stubs' do
   before do
-    Chef::Recipe.any_instance.stub(:search_for)
-    .with('os-identity').and_return(
+    Chef::Recipe.any_instance.stub(:search_for).with('os-identity').and_return(
       [{
         'openstack' => {
           'identity' => {
@@ -42,11 +41,7 @@ shared_context 'common-stubs' do
         }
       }]
     )
-    Chef::Recipe.any_instance.stub(:get_password)
-      .with('user', 'admin')
-      .and_return('admin')
-    Chef::Recipe.any_instance.stub(:get_password)
-      .with('user', 'admin-user-override')
-      .and_return('admin-user-override')
+    Chef::Recipe.any_instance.stub(:get_password).with('user', 'admin').and_return('admin')
+    Chef::Recipe.any_instance.stub(:get_password).with('user', 'admin-user-override').and_return('admin-user-override')
   end
 end
