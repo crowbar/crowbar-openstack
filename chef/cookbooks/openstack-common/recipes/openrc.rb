@@ -50,9 +50,9 @@ template '/root/openrc' do
   group  'root'
   mode   00600
   variables(
-    user: ksadmin_user,
-    tenant: ksadmin_tenant_name,
-    password: ksadmin_pass,
-    identity_endpoint: identity_endpoint.to_s
+    :user => ksadmin_user,
+    :tenant => ksadmin_tenant_name,
+    :password => ksadmin_pass,
+    :identity_endpoint => identity_endpoint.to_s
   )
 end

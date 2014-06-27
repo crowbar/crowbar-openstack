@@ -13,9 +13,7 @@ describe 'openstack-common::default' do
 
     describe '#db_create_with_user' do
       before do
-        subject.stub(:include_recipe)
-          .with('database::mysql')
-          .and_return('')
+        subject.stub(:include_recipe).with('database::mysql').and_return('')
       end
 
       it 'returns nil when no such service was found' do

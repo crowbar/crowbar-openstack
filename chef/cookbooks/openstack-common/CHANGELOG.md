@@ -1,6 +1,19 @@
 # CHANGELOG for cookbook-openstack-common
 
 This file is used to list changes made in each version of cookbook-openstack-common.
+
+## 9.6.1
+* Add python_packages attribute for sqlite
+
+## 9.6.0
+* Add an option to store passwords in attributes instead of data bags. Deprecates the get_secret method and the development_mode.
+
+## 9.5.2
+* Adds new python_packages attributes for database client packages
+
+## 9.5.1
+* Add Trove endpoints, database and mq attributes
+
 ## 9.5.0
 * Add new image_id cli library method for obtaining glance ID from image name
 
