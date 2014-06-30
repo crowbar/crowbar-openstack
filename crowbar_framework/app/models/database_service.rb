@@ -53,11 +53,6 @@ class DatabaseService < PacemakerServiceObject
       }
     end
 
-    # archive everything rather than let logs be overwritten cyclically
-    base["attributes"]["postgresql"]["config"]["log_truncate_on_rotation"] = false
-    # linear time (as opposed to the weekday default) + more granularity
-    base["attributes"]["postgresql"]["config"]["log_filename"] = "postgresql.log-%Y%m%d%H%M"
-
     @logger.debug("Database create_proposal: exiting")
     base
   end
