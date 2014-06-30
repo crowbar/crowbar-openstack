@@ -109,6 +109,7 @@
   "deployment": {
     "cinder": {
       "crowbar-revision": 0,
+      "crowbar-applied": false,
       "schema-revision": 7,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
