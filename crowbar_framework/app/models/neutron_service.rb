@@ -79,7 +79,7 @@ class NeutronService < PacemakerServiceObject
         "neutron-l3" => network_nodes.map { |x| x[:fqdn] }
     } unless nodes.nil? or nodes.length ==0
 
-    base["attributes"]["neutron"]["service_password"] = '%012d' % rand(1e12)
+    base["attributes"]["neutron"]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
     base
