@@ -79,7 +79,7 @@ class NeutronService < PacemakerServiceObject
         "neutron-l3" => network_nodes.map { |x| x[:fqdn] }
     } unless nodes.nil? or nodes.length ==0
 
-    base["attributes"]["neutron"]["service_password"] = '%012d' % rand(1e12)
+    base["attributes"]["neutron"]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
     base
@@ -138,7 +138,7 @@ class NeutronService < PacemakerServiceObject
         if role.default_attributes["neutron"]["networking_mode"] == "vlan"
           # Force "use_vlan" to false in VLAN mode (linuxbridge and ovs). We
           # need to make sure that the network recipe does NOT create the
-          # VLAN interfaces (ethX.VLAN) 
+          # VLAN interfaces (ethX.VLAN)
           node = NodeObject.find_node_by_name n
           if node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"]
             @logger.info("Forcing use_vlan to false for the nova_fixed network on node #{n}")
