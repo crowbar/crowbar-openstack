@@ -62,9 +62,11 @@ Chef::Log.info("Found rabbitmq server on #{rabbitmq}.")
 node.set['openstack']['mq']['service_type'] = 'rabbitmq'
 node.set['openstack']['mq']['database']['rabbit']['host'] = rabbitmq[:address]
 node.set['openstack']['mq']['database']['rabbit']['port'] = rabbitmq[:port] if rabbitmq[:port]
-# XXX using the nova user for now, check about using a different user
-# here (upstream default is 'guest' for everything)
+# XXX using the 'nova' user and vhost for now
+# (upstream default is 'guest' for everything)
+# TODO find out what happens if we use a different user/vhost than nova
 node.set['openstack']['mq']['database']['rabbit']['userid'] = rabbitmq[:user]
+node.set['openstack']['mq']['database']['rabbit']['vhost'] = rabbitmq[:vhost]
 node.set['openstack']['secret'][rabbitmq[:user]]['user'] = rabbitmq[:password]
 
 # XXX mysql configuration
