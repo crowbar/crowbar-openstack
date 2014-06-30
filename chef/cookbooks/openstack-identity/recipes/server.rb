@@ -5,7 +5,7 @@
 #
 # Copyright 2012, Rackspace US, Inc.
 # Copyright 2012-2013, Opscode, Inc.
-# Copyright 2013 SUSE LINUX Products GmbH.
+# Copyright 2013-2014 SUSE LINUX Products GmbH.
 #
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ platform_options = node['openstack']['identity']['platform']
 
 db_type = node['openstack']['db']['identity']['service_type']
 unless db_type == 'sqlite'
-  platform_options["#{db_type}_python_packages"].each do |pkg|
+  node['openstack']['db']['python_packages'][db_type].each do |pkg|
     package pkg do
       options platform_options['package_options']
       action :upgrade
@@ -64,7 +64,7 @@ end
 
 service 'keystone' do
   service_name platform_options['keystone_service']
-  supports status: true, restart: true
+  supports :status => true, :restart => true
 
   action [:enable]
 
@@ -203,16 +203,16 @@ template '/etc/keystone/keystone.conf' do
   group node['openstack']['identity']['group']
   mode   00644
   variables(
-    sql_connection: sql_connection,
-    bind_address: bind_address,
-    bootstrap_token: bootstrap_token,
-    memcache_servers: memcache_servers,
-    public_endpoint: public_endpoint,
-    public_port: identity_endpoint.port,
-    admin_endpoint: admin_endpoint,
-    admin_port: identity_admin_endpoint.port,
-    ldap: node['openstack']['identity']['ldap'],
-    token_expiration: node['openstack']['identity']['token']['expiration']
+    :sql_connection => sql_connection,
+    :bind_address => bind_address,
+    :bootstrap_token => bootstrap_token,
+    :memcache_servers => memcache_servers,
+    :public_endpoint => public_endpoint,
+    :public_port => identity_endpoint.port,
+    :admin_endpoint => admin_endpoint,
+    :admin_port => identity_admin_endpoint.port,
+    :ldap => node['openstack']['identity']['ldap'],
+    :token_expiration => node['openstack']['identity']['token']['expiration']
   )
 
   notifies :restart, 'service[keystone]', :immediately
@@ -235,7 +235,7 @@ template '/etc/keystone/default_catalog.templates' do
   group node['openstack']['identity']['group']
   mode   00644
   variables(
-    uris: uris
+    :uris => uris
   )
 
   notifies :restart, 'service[keystone]', :immediately
@@ -261,9 +261,6 @@ cron 'keystone-manage-token-flush' do
   weekday node['openstack']['identity']['token_flush_cron']['weekday']
   action should_run_cron ? :create : :delete
   user node['openstack']['identity']['user']
-  command %Q{
-    `which keystone-manage` token_flush > #{log_file} 2>&1 &&
-    echo keystone-manage token_flush ran at $(/bin/date) with exit code $? >> #{log_file}
-  }.gsub!(/\n/, '')
+  command "keystone-manage token_flush > #{log_file} 2>&1; "\
+          "echo keystone-manage token_flush ran at $(/bin/date) with exit code $? >> #{log_file}"
 end
-# TODO(luisg): We can remove the \n substitution in the cron command when https://tickets.opscode.com/browse/CHEF-5238 is fixed

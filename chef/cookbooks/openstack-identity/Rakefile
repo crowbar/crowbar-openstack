@@ -1,8 +1,6 @@
-require "rubygems"
-require "chef"
-require "yard"
+task :default => [:syntaxcheck]
 
-YARD::Config.load_plugin 'chef'
-YARD::Rake::YardocTask.new do |t|
-  t.files = ['**/*.rb']
+task :syntaxcheck do
+  system('for f in `find -name \*.rb` ; do echo -n "Syntaxcheck $f: "; ruby -c $f || exit $? ; done')
+  exit $?.exitstatus
 end
