@@ -138,7 +138,7 @@ class NeutronService < PacemakerServiceObject
         if role.default_attributes["neutron"]["networking_mode"] == "vlan"
           # Force "use_vlan" to false in VLAN mode (linuxbridge and ovs). We
           # need to make sure that the network recipe does NOT create the
-          # VLAN interfaces (ethX.VLAN) 
+          # VLAN interfaces (ethX.VLAN)
           node = NodeObject.find_node_by_name n
           if node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"]
             @logger.info("Forcing use_vlan to false for the nova_fixed network on node #{n}")
