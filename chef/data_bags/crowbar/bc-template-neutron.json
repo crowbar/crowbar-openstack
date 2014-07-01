@@ -25,7 +25,7 @@
       "verbose": true,
       "dhcp_domain": "openstack.local",
       "use_ml2": true,
-      "use_lbaas": false,
+      "use_lbaas": true,
       "networking_mode": "gre",
       "networking_plugin": "openvswitch",
       "num_vlans": 2000,
