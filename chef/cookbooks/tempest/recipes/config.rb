@@ -254,6 +254,7 @@ end
 
 swifts = search(:node, "roles:swift-proxy") || []
 heats = search(:node, "roles:heat-server") || []
+cinders = search(:node, "roles:cinder-controller") || []
 ceilometers = search(:node, "roles:ceilometer-server") || []
 horizons = search(:node, "roles:nova_dashboard-server") || []
 
@@ -302,6 +303,7 @@ template "#{tempest_conf}" do
     :use_horizon => !horizons.empty?,
     :use_neutron => !neutrons.empty?,
     :neutron_api_extensions => neutron_api_extensions,
+    :storage_protocol => cinders[0][:cinder][:volume][:volume_type] == "rbd" ? "ceph" : "iSCSI",
     :use_swift => !swifts.empty?
   )
 end
