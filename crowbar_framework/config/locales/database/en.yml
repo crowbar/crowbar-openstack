@@ -27,7 +27,7 @@ en:
           datadir: 'Datadir'
         postgresql_attributes: 'PostgreSQL Options'
         postgresql:
-          config_pgtune:
+          config:
             max_connections: 'Global Connection Limit (max_connections)'
         ha_header: 'High Availability'
         ha:

@@ -28,7 +28,7 @@
               "type": "map",
               "required": false,
               "mapping": {
-                "config_pgtune": {
+                "config": {
                   "type": "map",
                   "required": false,
                   "mapping": {
