@@ -166,6 +166,7 @@ directory "#{node[:tempest][:tempest_path]}/etc/cirros" do
 end
 
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
+heat_machine_id_file = node[:tempest][:tempest_path] + '/heat_machine.id'
 
 venv_prefix_path = node[:tempest][:use_virtualenv] ? ". /opt/tempest/.venv/bin/activate && " : nil
 bin_path = node[:tempest][:use_virtualenv] ? "/opt/tempest/.venv/bin" : "/usr/bin/"
@@ -220,6 +221,8 @@ echo -n "Saving machine id ..."
 echo $MACHINE_ID > #{machine_id_file}
 echo "done."
 
+rm -rf $TEMP
+
 glance_it index
 EOH
   environment ({
@@ -233,13 +236,43 @@ EOH
   not_if { File.exists?(machine_id_file) }
 end
 
+bash "upload tempest heat-cfntools image" do
+    code <<-EOF
+
+OS_USER=${OS_USER:-admin}
+OS_TENANT=${OS_TENANT:-admin}
+OS_PASSWORD=${OS_PASSWORD:-admin}
+
+function glance_it() {
+#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N http://$KEYSTONE_HOST:5000/v2.0 -H $GLANCE_HOST $@
+}
+
+id=$(glance_it image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
+[ -n "$id" ] && echo $id > #{heat_machine_id_file}
+true
+
+EOF
+  environment ({
+    'IMAGE_NAME' => node[:tempest][:heat_test_image_name],
+    'OS_USER' => tempest_comp_user,
+    'OS_PASSWORD' => tempest_comp_pass,
+    'OS_TENANT' => tempest_comp_tenant,
+    'KEYSTONE_HOST' => keystone_address,
+    'GLANCE_HOST' => glance_address
+  })
+
+  not_if { node[:tempest][:heat_test_image_name].nil? or File.exists?(heat_machine_id_file) }
+end
+
 flavor_ref = "6"
 alt_flavor_ref = "7"
+heat_flavor_ref = "8"
 
 bash "create_yet_another_tiny_flavor" do
   code <<-EOH
   #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff #{flavor_ref} 128 0 1 || exit 0
   #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff-2 #{alt_flavor_ref} 196 0 1 || exit 0
+  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-heat #{heat_flavor_ref} 512 0 1 || exit 0
 EOH
 end
 
@@ -288,6 +321,8 @@ template "#{tempest_conf}" do
     :ec2_access => ec2_access,
     :ec2_secret => ec2_secret,
     :flavor_ref => flavor_ref,
+    :heat_flavor_ref => heat_flavor_ref,
+    :heat_machine_id_file => heat_machine_id_file,
     :img_host => glance_address,
     :img_port => glance_port,
     :http_image => node[:tempest][:tempest_test_image],

@@ -797,15 +797,15 @@ api_extensions=<%= @neutron_api_extensions %>
 
 # Timeout in seconds to wait for a stack to build. (integer
 # value)
-#build_timeout=1200
+build_timeout=600
 
 # Instance type for tests. Needs to be big enough for a full
 # OS plus the test workload (string value)
-instance_type=<%=@flavor_ref %>
+instance_type=<%=@heat_flavor_ref %>
 
 # Name of heat-cfntools enabled image to use when launching
 # test instances. (string value)
-image_ref=<%=img_id %>
+image_ref=<%= `cat #{@heat_machine_id_file}`.strip %>
 
 # Name of existing keypair to launch servers with. (string
 # value)
