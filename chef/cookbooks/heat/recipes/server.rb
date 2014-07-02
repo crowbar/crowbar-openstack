@@ -261,6 +261,15 @@ service "heat-engine" do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
+template "/etc/heat/loadbalancer.template" do
+    source "loadbalancer.template.erb"
+    owner node[:heat][:user]
+    group "root"
+    mode "0640"
+    notifies :restart, "service[heat-engine]", :delayed
+    only_if { node[:platform] == "suse" }
+end
+
 service "heat-api" do
   service_name node[:heat][:api][:service_name]
   supports :status => true, :restart => true
