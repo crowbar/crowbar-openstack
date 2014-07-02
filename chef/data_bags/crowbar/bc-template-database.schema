@@ -32,7 +32,9 @@
                   "type": "map",
                   "required": false,
                   "mapping": {
-                    "max_connections": { "type": "int" }
+                    "max_connections": { "type": "int" },
+                    "log_truncate_on_rotation": { "type": "bool" },
+                    "log_filename": {"type": "str" }
                   }
                 }
               }
