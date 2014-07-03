@@ -183,19 +183,6 @@ if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plu
     end
   end
 
-  # We always need br-int.  Neutron uses this bridge internally.
-  execute "create_int_br" do
-    command "ovs-vsctl add-br br-int"
-    not_if "ovs-vsctl list-br | grep -q br-int"
-  end
-
-  # Make sure br-int is always up.
-  ruby_block "Bring up the internal bridge" do
-    block do
-      ::Nic.new('br-int').up
-    end
-  end
-
   # Create the bridges Neutron needs.
   # Usurp config as needed.
   [ [ "nova_fixed", "fixed" ],
