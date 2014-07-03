@@ -299,7 +299,7 @@ neutron_api_extensions = "provider,security-group,dhcp_agent_scheduler,external-
 
 unless neutrons[0].nil?
   if neutrons[0][:neutron][:use_lbaas] then
-    neutron_api_extensions += ",lbaas"
+    neutron_api_extensions += ",lbaas,lbaas_agent_scheduler"
   end
 end
 
