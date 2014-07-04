@@ -33,7 +33,7 @@ attribute :auth_uri, :kind_of => String
 attribute :bootstrap_token, :kind_of => String
 
 # Used by both :create_service and :create_endpoint
-attribute :service_type, :kind_of => String, :equal_to => %w{image identity compute storage ec2 volume object-store metering network orchestration cloudformation database}
+attribute :service_type, :kind_of => String
 
 # :create_service specific attributes
 attribute :service_name, :kind_of => String
@@ -55,7 +55,7 @@ attribute :tenant_enabled, :kind_of => BOOLEAN, :default => true
 # :create_user specific attributes
 attribute :user_name, :kind_of => String
 attribute :user_pass, :kind_of => String
-# attribute :user_email, kind_of: String
+# attribute :user_email, :kind_of => String
 attribute :user_enabled, :kind_of => BOOLEAN, :default => true
 
 # Used by :create_role and :grant_role specific attributes

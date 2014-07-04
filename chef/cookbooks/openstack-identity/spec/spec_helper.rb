@@ -36,17 +36,17 @@ end
 shared_context 'identity_stubs' do
   before do
     ::Chef::Recipe.any_instance.stub(:memcached_servers).and_return []
-    ::Chef::Recipe.any_instance.stub(:get_password)
-      .with('db', anything)
+    ::Chef::Recipe.any_instance.stub(:get_password)\
+      .with('db', anything)\
       .and_return('')
-    ::Chef::Recipe.any_instance.stub(:get_password)
-      .with('user', anything)
+    ::Chef::Recipe.any_instance.stub(:get_password)\
+      .with('user', anything)\
       .and_return('')
-    ::Chef::Recipe.any_instance.stub(:get_password)
-      .with('user', 'user1')
+    ::Chef::Recipe.any_instance.stub(:get_password)\
+      .with('user', 'user1')\
       .and_return('secret1')
-    ::Chef::Recipe.any_instance.stub(:get_secret)
-      .with('openstack_identity_bootstrap_token')
+    ::Chef::Recipe.any_instance.stub(:get_secret)\
+      .with('openstack_identity_bootstrap_token')\
       .and_return('bootstrap-token')
   end
 end
