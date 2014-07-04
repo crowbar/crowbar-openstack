@@ -278,7 +278,7 @@ when "openvswitch", "cisco"
     group "root"
     mode "0640"
     variables(
-      :physnet => neutron[:neutron][:networking_mode] == 'gre' ? "br-tunnel" : "br-fixed",
+      :physnet => neutron[:neutron][:networking_mode] == 'gre' ? nil : "br-fixed",
       :networking_mode => neutron[:neutron][:networking_mode],
       :vlan_start => vlan_start,
       :vlan_end => vlan_end

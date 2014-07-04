@@ -192,7 +192,6 @@ if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plu
   # Create the bridges Neutron needs.
   # Usurp config as needed.
   [ [ "nova_fixed", "fixed" ],
-    [ "os_sdn", "tunnel" ],
     [ "public", "public"] ].each do |net|
     bound_if = (node[:crowbar_wall][:network][:nets][net[0]].last rescue nil)
     next unless bound_if
@@ -201,7 +200,6 @@ if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plu
       command "ovs-vsctl add-br #{name}; ip link set #{name} up"
       not_if "ovs-vsctl list-br |grep -q #{name}"
     end
-    next if net[1] == "tunnel"
     execute "Neutron: add #{bound_if} to #{name}" do
       command "ovs-vsctl del-port #{name} #{bound_if} ; ovs-vsctl add-port #{name} #{bound_if}"
       not_if "ovs-dpctl show system@#{name} | grep -q #{bound_if}"
