@@ -260,7 +260,7 @@ end
 
 include_recipe "neutron::common_config"
 
-neutron_l3_ha = node[:neutron][:ha][:l3][:enabled]
+neutron_l3_ha = node.roles.include?("neutron-l3") && node[:neutron][:ha][:l3][:enabled]
 
 service neutron_agent do
   supports :status => true, :restart => true
