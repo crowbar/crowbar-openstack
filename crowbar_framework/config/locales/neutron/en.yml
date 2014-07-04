@@ -62,7 +62,6 @@ en:
         no_switches: 'Currently there are no switches assigned'
         error_invalid: 'IP Address, Port, Username and Password must not be empty!'
         error_duplicate: 'There is already a Switch configuration for that IP Address!'
-        warn_ovs_vlan: 'This mode only works if the "nova_fixed" and "admin" networks are on different physical interfaces.'
         port_node: 'Node'
         port_switch: 'Switch IP'
         port_number: 'Switch Port'

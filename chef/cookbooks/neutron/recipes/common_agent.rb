@@ -183,6 +183,12 @@ if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plu
     end
   end
 
+  # This only includes the IP addresses allocated to the node by crowbar. It
+  # does not include e.g. virtual IP addresses allocated to a cluster. Which is
+  # important as we need to filter those out from being added to the
+  # ovs-usurp-config init script that is being created below.
+  my_addresses = node.all_addresses
+
   # Create the bridges Neutron needs.
   # Usurp config as needed.
   [ [ "nova_fixed", "fixed" ],
@@ -208,9 +214,51 @@ if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plu
         Chef::Log.info("#{name} usurped #{res[1].join(", ")} routes from #{bound_if}") unless res[1].empty?
       end
     end
+    source = ::Nic.new(bound_if)
+    # filter out cluster VIPs that a currently assigned to the interface
+    addresses = source.addresses.select { |address| my_addresses.include? address }
+    routes = source.routes
+    template "/etc/init.d/ovs-usurp-config-#{name}" do
+      source "ovs-usurp-config.erb"
+      owner "root"
+      group "root"
+      mode "0755"
+      variables(
+        :source => bound_if,
+        :dest => name,
+        :addresses => addresses,
+        :routes => routes
+      )
+      # After the ruby_block "Have #{name} usurp config from #{bound_if}" was
+      # executed for the first time, the physical interface (eth) will not have
+      # any addresses or routes assigned anymore. So we should not recreate the
+      # init script in that case. Neither should it be removed.
+      not_if { addresses.empty? and routes.empty? }
+    end
+    service "ovs-usurp-config-#{name}" do
+      # Don't start it here. It only needs to be executed during boot.
+      action [:nothing]
+      subscribes :enable, resources("template[/etc/init.d/ovs-usurp-config-#{name}]")
+    end
+  end
+else
+  # Cleanup the ovs-usurp init scripts if we're not using openvswitch anymore.
+  # Note: As moving between network plugins is currently not supported by this
+  #       cookbook this code is mostly just sitting here and waiting for the
+  #       plugin switching support to be implemented.
+  [ "br-public", "br-fixed" ].each do |name|
+    service "ovs-usurp-config-#{name}" do
+      # FIXME: Don't stop it here until we handle the shutdown of openvswitch
+      #        and the neutron-ovs-agent correctly. Otherwise we might be cut
+      #        off of the network immediately.
+      action [:disable]
+      only_if { ::File.exists?("/etc/init.d/ovs-usurp-config-#{name}") }
+    end
+    file "/etc/init.d/ovs-usurp-config-#{name}" do
+      action :delete
+    end
   end
 end
-
 
 include_recipe "neutron::common_config"
 
