@@ -10,12 +10,17 @@
       "swift_instance": "none",
       "cinder_instance": "none",
       "rabbitmq_instance": "none",
-      "volume_support": true
+      "volume_support": true,
+      "db": {
+        "password": "",
+        "user": "trove",
+        "database": "trove"
+      }
     }
   },
   "deployment": {
     "trove": {
-      "crowbar-revision": 0,
+      "crowbar-revision": 1,
       "crowbar-applied": false,
       "element_states": {
         "trove-server": [ "readying", "ready", "applying" ]
