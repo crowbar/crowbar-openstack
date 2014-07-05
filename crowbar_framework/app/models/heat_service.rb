@@ -69,7 +69,8 @@ class HeatService < PacemakerServiceObject
       }
     end
 
-    base["attributes"]["heat"]["service_password"] = '%012d' % rand(1e12)
+    base["attributes"][@bc_name]["service_password"] = random_password
+    base["attributes"][@bc_name]["stack_domain_admin_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
     encryption_key = random_password
     while encryption_key.length < 32 do

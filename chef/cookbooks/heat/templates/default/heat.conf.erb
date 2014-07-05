@@ -108,15 +108,15 @@ heat_watch_server_url=<%= @heat_watch_server_url %>
 
 # Keystone domain ID which contains heat template-defined
 # users. (string value)
-#stack_user_domain=<None>
+stack_user_domain=<%= @stack_user_domain %>
 
 # Keystone username, a user with roles sufficient to manage
 # users and projects in the stack_user_domain. (string value)
-#stack_domain_admin=<None>
+stack_domain_admin=<%= @stack_domain_admin %>
 
 # Keystone password for stack_domain_admin user. (string
 # value)
-#stack_domain_admin_password=<None>
+stack_domain_admin_password=<%= @stack_domain_admin_password %>
 
 # Maximum raw byte size of any template. (integer value)
 #max_template_size=524288
