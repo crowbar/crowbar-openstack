@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-default[:trove][:verbose] = false
+default[:trove][:verbose] = true
 default[:trove][:debug] = false
 
 default[:trove][:volume_support] = true
