@@ -39,63 +39,63 @@ crowbar_pacemaker_sync_mark "wait-heat_database"
 
 # Create the Heat Database
 database "create #{node[:heat][:db][:database]} database" do
-    connection db_conn
-    database_name node[:heat][:db][:database]
-    provider db_provider
-    action :create
+  connection db_conn
+  database_name node[:heat][:db][:database]
+  provider db_provider
+  action :create
 end
 
 database_user "create heat database user" do
-    host '%'
-    connection db_conn
-    username node[:heat][:db][:user]
-    password node[:heat][:db][:password]
-    provider db_user_provider
-    action :create
+  host '%'
+  connection db_conn
+  username node[:heat][:db][:user]
+  password node[:heat][:db][:password]
+  provider db_user_provider
+  action :create
 end
 
 database_user "grant database access for heat database user" do
-    connection db_conn
-    username node[:heat][:db][:user]
-    password node[:heat][:db][:password]
-    database_name node[:heat][:db][:database]
-    host '%'
-    privileges privs
-    provider db_user_provider
-    action :grant
+  connection db_conn
+  username node[:heat][:db][:user]
+  password node[:heat][:db][:password]
+  database_name node[:heat][:db][:database]
+  host '%'
+  privileges privs
+  provider db_user_provider
+  action :grant
 end
 
 crowbar_pacemaker_sync_mark "create-heat_database"
 
 unless node[:heat][:use_gitrepo]
-    node[:heat][:platform][:packages].each do |p|
-        package p
-    end
+  node[:heat][:platform][:packages].each do |p|
+    package p
+  end
 
 else
-    pfs_and_install_deps @cookbook_name do
-        virtualenv venv_path
-        path heat_path
-        wrap_bins "heat"
-    end
+  pfs_and_install_deps @cookbook_name do
+    virtualenv venv_path
+    path heat_path
+    wrap_bins "heat"
+  end
 
-    node[:heat][:platform][:services].each do |s|
-        link_service s do
-            virtualenv venv_path
-        end
+  node[:heat][:platform][:services].each do |s|
+    link_service s do
+      virtualenv venv_path
     end
+  end
 
-    create_user_and_dirs("heat")
+  create_user_and_dirs("heat")
 
 end
 
 node[:heat][:platform][:aux_dirs].each do |d|
-    directory d do
-       owner node[:heat][:user]
-       group "root"
-       mode 00755
-       action :create
-    end
+  directory d do
+    owner node[:heat][:user]
+    group "root"
+    mode 00755
+    action :create
+  end
 end
 
 
@@ -174,6 +174,44 @@ keystone_register "add heat stack user role" do
   action :add_role
 end
 
+package "python-openstackclient" do
+  action :install
+end
+
+
+stack_user_domain_name = "heat"
+
+bash "register heat domain" do
+  user "root"
+  code <<-EOF
+
+    OS_URL="#{KeystoneHelper.service_URL(node, node[:fqdn], node["keystone"]["api"]["service_port"])}/v3"
+
+    eval $(openstack --os-token #{keystone_settings['admin_token']} \
+        --os-url=$OS_URL \
+        --os-identity-api-version=3 domain show -f shell --variable id #{stack_user_domain_name})
+
+    HEAT_DOMAIN_ID=$id
+
+    if [ -z "$HEAT_DOMAIN_ID" ]; then
+        HEAT_DOMAIN_ID=$(openstack --os-token #{keystone_settings['admin_token']} \
+            --os-url=$OS_URL \
+            --os-identity-api-version=3 domain create #{stack_user_domain_name} \
+            --description "Owns users and projects created by heat" \
+            | awk '/id/  { print $4 } ')
+    fi
+
+    openstack --os-token #{keystone_settings['admin_token']} --os-url=$OS_URL \
+        --os-identity-api-version=3 user create --password #{node[:heat]["stack_domain_admin_password"]} \
+        --domain $HEAT_DOMAIN_ID #{node[:heat]["stack_domain_admin"]} \
+        --description "Manages users and projects created by heat" || true
+
+    openstack --os-token #{keystone_settings['admin_token']} --os-url=$OS_URL \
+        --os-identity-api-version=3 role add --user #{node[:heat]["stack_domain_admin"]} \
+        --domain $HEAT_DOMAIN_ID admin || true
+  EOF
+end
+
 # Create Heat CloudFormation service
 keystone_register "register Heat CloudFormation Service" do
   protocol keystone_settings['protocol']
@@ -196,8 +234,8 @@ keystone_register "register heat Cfn endpoint" do
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1"
   endpoint_adminURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:cfn_port]}/v1"
   endpoint_internalURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:cfn_port]}/v1"
-#  endpoint_global true
-#  endpoint_enabled true
+  #  endpoint_global true
+  #  endpoint_enabled true
   action :add_endpoint_template
 end
 
@@ -223,34 +261,45 @@ keystone_register "register heat endpoint" do
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:port]}/v1/$(tenant_id)s"
   endpoint_adminURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:port]}/v1/$(tenant_id)s"
   endpoint_internalURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:port]}/v1/$(tenant_id)s"
-#  endpoint_global true
-#  endpoint_enabled true
+  #  endpoint_global true
+  #  endpoint_enabled true
   action :add_endpoint_template
 end
 
 crowbar_pacemaker_sync_mark "create-heat_register"
 
+shell_get_stack_user_domain = <<-EOF
+  export OS_URL="#{KeystoneHelper.service_URL(node, node[:fqdn], node["keystone"]["api"]["service_port"])}/v3";
+  eval $(openstack --os-token #{keystone_settings['admin_token']} \
+    --os-url=$OS_URL \
+    --os-identity-api-version=3 domain show -f shell --variable id #{stack_user_domain_name});
+  echo $id
+EOF
+
 template "/etc/heat/heat.conf" do
-    source "heat.conf.erb"
-    owner node[:heat][:user]
-    group "root"
-    mode "0640"
-    variables(
-      :debug => node[:heat][:debug],
-      :verbose => node[:heat][:verbose],
-      :rabbit_settings => rabbit_settings,
-      :keystone_settings => keystone_settings,
-      :database_connection => db_connection,
-      :bind_host => bind_host,
-      :api_port => api_port,
-      :cloud_watch_port => cloud_watch_port,
-      :instance_user => node[:heat][:default_instance_user],
-      :cfn_port => cfn_port,
-      :auth_encryption_key => node[:heat][:auth_encryption_key],
-      :heat_metadata_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
-      :heat_waitcondition_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
-      :heat_watch_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}"
-    )
+  source "heat.conf.erb"
+  owner node[:heat][:user]
+  group "root"
+  mode "0640"
+  variables(
+    :debug => node[:heat][:debug],
+    :verbose => node[:heat][:verbose],
+    :rabbit_settings => rabbit_settings,
+    :keystone_settings => keystone_settings,
+    :database_connection => db_connection,
+    :bind_host => bind_host,
+    :api_port => api_port,
+    :cloud_watch_port => cloud_watch_port,
+    :instance_user => node[:heat][:default_instance_user],
+    :cfn_port => cfn_port,
+    :auth_encryption_key => node[:heat][:auth_encryption_key],
+    :heat_metadata_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
+    :heat_waitcondition_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
+    :heat_watch_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}",
+    :stack_user_domain => %x[ #{shell_get_stack_user_domain} ].chomp,
+    :stack_domain_admin => node[:heat]["stack_domain_admin"],
+    :stack_domain_admin_password => node[:heat]["stack_domain_admin_password"]
+  )
 end
 
 service "heat-engine" do
@@ -262,12 +311,12 @@ service "heat-engine" do
 end
 
 template "/etc/heat/loadbalancer.template" do
-    source "loadbalancer.template.erb"
-    owner node[:heat][:user]
-    group "root"
-    mode "0640"
-    notifies :restart, "service[heat-engine]", :delayed
-    only_if { node[:platform] == "suse" }
+  source "loadbalancer.template.erb"
+  owner node[:heat][:user]
+  group "root"
+  mode "0640"
+  notifies :restart, "service[heat-engine]", :delayed
+  only_if { node[:platform] == "suse" }
 end
 
 service "heat-api" do
