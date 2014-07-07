@@ -305,6 +305,14 @@ end
 
 public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
 
+
+storage_protocol = "iSCSI"
+cinders[0][:cinder][:volumes].each do |volume|
+  if volume[:backend_driver] == "rbd"
+    storage_protocol = "ceph"
+  end
+end
+
 template "#{tempest_conf}" do
   source "tempest.conf.erb"
   mode 0644
@@ -339,7 +347,7 @@ template "#{tempest_conf}" do
     :use_horizon => !horizons.empty?,
     :use_neutron => !neutrons.empty?,
     :neutron_api_extensions => neutron_api_extensions,
-    :storage_protocol => cinders[0][:cinder][:volume][:volume_type] == "rbd" ? "ceph" : "iSCSI",
+    :storage_protocol => storage_protocol,
     :cinder_api_v2 => cinders[0][:cinder][:enable_v2_api],
     :use_swift => !swifts.empty?
   )
