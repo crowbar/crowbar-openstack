@@ -4,7 +4,7 @@
   "attributes": {
     "trove": {
       "debug": false,
-      "verbose": false,
+      "verbose": true,
       "keystone_instance": "none",
       "nova_instance": "none",
       "swift_instance": "none",
