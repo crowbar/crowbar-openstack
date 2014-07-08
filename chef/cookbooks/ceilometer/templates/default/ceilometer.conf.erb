@@ -88,8 +88,7 @@ host=<%= @node_hostname %>
 # Inspector to use for inspecting the hypervisor layer.
 # (string value)
 #hypervisor_inspector=libvirt
-<% if defined?(node[:nova][:libvirt_type]) -%>
-hypervisor_inspector=libvirt
+hypervisor_inspector=<%= @hypervisor_inspector %>
 
 #
 # Options defined in ceilometer.compute.virt.libvirt.inspector
@@ -102,7 +101,6 @@ libvirt_type=<%= node[:nova][:libvirt_type] %>
 # Override the default libvirt URI (which is dependent on
 # libvirt_type). (string value)
 #libvirt_uri=
-<% end -%>
 
 #
 # Options defined in ceilometer.image.notifications
@@ -1005,13 +1003,13 @@ insecure= <%= @keystone_settings['insecure'] %>
 #
 
 # IP address of the VMware Vsphere host (string value)
-#host_ip=
+host_ip=<%= node[:nova][:vcenter][:host] rescue "" %>
 
 # Username of VMware Vsphere (string value)
-#host_username=
+host_username=<%= node[:nova][:vcenter][:user] rescue "" %>
 
 # Password of VMware Vsphere (string value)
-#host_password=
+host_password=<%= node[:nova][:vcenter][:password] rescue "" %>
 
 # Number of times a VMware Vsphere API must be retried
 # (integer value)
