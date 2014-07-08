@@ -33,8 +33,14 @@ if %w(redhat centos suse).include?(node[:platform])
   collector_service_name = "openstack-ceilometer-collector"
 end
 
+agent_notification_service_name = "ceilometer-agent-notification"
+if %w(redhat centos suse).include?(node[:platform])
+  agent_notification_service_name = "openstack-ceilometer-agent-notification"
+end
+
 default[:ceilometer][:api][:service_name] = api_service_name
 default[:ceilometer][:collector][:service_name] = collector_service_name
+default[:ceilometer][:agent_notification][:service_name] = agent_notification_service_name
 default[:ceilometer][:central][:service_name] = central_service_name
 
 default[:ceilometer][:debug] = false
@@ -65,6 +71,8 @@ default[:ceilometer][:ha][:api][:op][:monitor][:interval] = "10s"
 default[:ceilometer][:ha][:api][:op][:start][:timeout] = "60s"
 default[:ceilometer][:ha][:collector][:agent] = "lsb:#{collector_service_name}"
 default[:ceilometer][:ha][:collector][:op][:monitor][:interval] = "10s"
+default[:ceilometer][:ha][:agent_notification][:agent] = "lsb:#{agent_notification_service_name}"
+default[:ceilometer][:ha][:agent_notification][:op][:monitor][:interval] = "10s"
 
 default[:ceilometer][:ha][:central][:enabled] = false
 default[:ceilometer][:ha][:central][:agent] = "lsb:#{central_service_name}"

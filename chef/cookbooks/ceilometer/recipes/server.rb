@@ -124,16 +124,19 @@ unless node[:ceilometer][:use_gitrepo]
   case node["platform"]
     when "suse"
       package "openstack-ceilometer-collector"
+      package "openstack-ceilometer-agent-notification"
       package "openstack-ceilometer-api"
     when "centos", "redhat"
       package "openstack-ceilometer-common"
       package "openstack-ceilometer-collector"
+      package "openstack-ceilometer-agent-notification"
       package "openstack-ceilometer-api"
       package "python-ceilometerclient"
     else
       package "python-ceilometerclient"
       package "ceilometer-common"
       package "ceilometer-collector"
+      package "ceilometer-agent-notification"
       package "ceilometer-api"
   end
 else
@@ -152,6 +155,9 @@ else
   end
 
   link_service "ceilometer-collector" do
+    virtualenv venv_path
+  end
+  link_service "ceilometer-agent-notification" do
     virtualenv venv_path
   end
   link_service "ceilometer-api" do
@@ -208,6 +214,15 @@ crowbar_pacemaker_sync_mark "create-ceilometer_db_sync"
 
 service "ceilometer-collector" do
   service_name node[:ceilometer][:collector][:service_name]
+  supports :status => true, :restart => true, :start => true, :stop => true
+  action [ :enable, :start ]
+  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
+  subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+end
+
+service "ceilometer-agent-notification" do
+  service_name node[:ceilometer][:agent_notification][:service_name]
   supports :status => true, :restart => true, :start => true, :stop => true
   action [ :enable, :start ]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
