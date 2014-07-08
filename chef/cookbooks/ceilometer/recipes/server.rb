@@ -286,7 +286,7 @@ keystone_register "register ceilometer service" do
   token keystone_settings['admin_token']
   service_name "ceilometer"
   service_type "metering"
-  service_description "Openstack Collector Service"
+  service_description "Openstack Telemetry Service"
   action :add_service
 end
 
