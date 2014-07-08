@@ -339,6 +339,9 @@ nova_admin_auth_url = <%= @keystone_settings['internal_auth_url'] %>
 [quotas]
 # resource name(s) that are supported in quota features
 # quota_items = network,subnet,port
+<% if node[:neutron][:use_lbaas] %>
+quota_items = network,subnet,port,vip,pool,member,health_monitor
+<% end -%>
 
 # default number of resource allowed per tenant, minus for unlimited
 # default_quota = -1
