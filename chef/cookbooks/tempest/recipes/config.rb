@@ -339,6 +339,7 @@ template "#{tempest_conf}" do
     :use_neutron => !neutrons.empty?,
     :neutron_api_extensions => neutron_api_extensions,
     :storage_protocol => cinders[0][:cinder][:volume][:volume_type] == "rbd" ? "ceph" : "iSCSI",
+    :cinder_api_v2 => cinders[0][:cinder][:enable_v2_api],
     :use_swift => !swifts.empty?
   )
 end
