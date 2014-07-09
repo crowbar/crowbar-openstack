@@ -13,7 +13,7 @@ sources:
       sinks:
           - cpu_sink
     - name: disk_source
-      interval: <%= @meters_interval %>
+      interval: <%= @disk_interval %>
       meters:
           - "disk.read.bytes"
           - "disk.read.requests"
@@ -22,7 +22,7 @@ sources:
       sinks:
           - disk_sink
     - name: network_source
-      interval: <%= @meters_interval %>
+      interval: <%= @network_interval %>
       meters:
           - "network.incoming.bytes"
           - "network.incoming.packets"
