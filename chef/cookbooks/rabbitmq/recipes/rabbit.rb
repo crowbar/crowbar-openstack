@@ -38,6 +38,13 @@ else
   log "HA support for rabbitmq is disabled"
 end
 
+# remove guest user
+rabbitmq_user "remove guest user" do
+  user "guest"
+  action :delete
+  only_if only_if_command if ha_enabled
+end
+
 # add a vhost to the queue
 rabbitmq_vhost node[:rabbitmq][:vhost] do
   action :add
