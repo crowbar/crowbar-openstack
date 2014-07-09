@@ -306,6 +306,7 @@ template "/etc/cinder/cinder.conf" do
   variables(
     :bind_host => bind_host,
     :bind_port => bind_port,
+    :enable_v2_api => node[:cinder][:enable_v2_api],
     :raw_params => raw_params,
     :local_params => local_params,
     :eqlx_params => eqlx_params,
