@@ -301,7 +301,7 @@ keystone_register "register ceilometer service" do
   token keystone_settings['admin_token']
   service_name "ceilometer"
   service_type "metering"
-  service_description "Openstack Collector Service"
+  service_description "Openstack Telemetry Service"
   action :add_service
 end
 
@@ -312,9 +312,9 @@ keystone_register "register ceilometer endpoint" do
   token keystone_settings['admin_token']
   endpoint_service "ceilometer"
   endpoint_region "RegionOne"
-  endpoint_publicURL "#{node[:ceilometer][:api][:protocol]}://#{my_public_host}:#{node[:ceilometer][:api][:port]}/"
-  endpoint_adminURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}/"
-  endpoint_internalURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}/"
+  endpoint_publicURL "#{node[:ceilometer][:api][:protocol]}://#{my_public_host}:#{node[:ceilometer][:api][:port]}"
+  endpoint_adminURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
+  endpoint_internalURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template
