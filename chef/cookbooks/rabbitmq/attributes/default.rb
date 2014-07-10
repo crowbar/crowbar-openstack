@@ -25,9 +25,10 @@ default[:rabbitmq][:user] = "nova"
 default[:rabbitmq][:vhost] = "/nova"
 
 default[:rabbitmq][:nodename]  = node[:hostname]
-default[:rabbitmq][:address]  = nil
+default[:rabbitmq][:addresses] = []
 default[:rabbitmq][:port]  = 5672
 default[:rabbitmq][:mochiweb_port] = 55672
+default[:rabbitmq][:mochiweb_address] = nil
 default[:rabbitmq][:configfile] = nil
 default[:rabbitmq][:logdir] = nil
 default[:rabbitmq][:mnesiadir] = nil

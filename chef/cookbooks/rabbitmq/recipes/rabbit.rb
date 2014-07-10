@@ -20,7 +20,9 @@
 
 ha_enabled = node[:rabbitmq][:ha][:enabled]
 
-node[:rabbitmq][:address] = CrowbarRabbitmqHelper.get_listen_address(node)
+node[:rabbitmq][:mochiweb_address] = CrowbarRabbitmqHelper.get_listen_address(node)
+node[:rabbitmq][:addresses] = [ CrowbarRabbitmqHelper.get_listen_address(node) ]
+
 if ha_enabled
   node[:rabbitmq][:nodename] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
 end
@@ -55,7 +57,7 @@ end
 rabbitmq_user "adding user #{node[:rabbitmq][:user]}" do
   user node[:rabbitmq][:user]
   password node[:rabbitmq][:password]
-  address node[:rabbitmq][:address]
+  address node[:rabbitmq][:mochiweb_address]
   port node[:rabbitmq][:mochiweb_port]
   action :add
   only_if only_if_command if ha_enabled

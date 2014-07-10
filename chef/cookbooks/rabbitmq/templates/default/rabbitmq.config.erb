@@ -1,13 +1,15 @@
 [
  {rabbit,
   [
-   {tcp_listeners, [{"<%= node[:rabbitmq][:address] %>", <%= node[:rabbitmq][:port] %>}]},
+   {tcp_listeners, [
+                    <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{node[:rabbitmq][:port]}}" }.join(", ") %>
+                   ]},
    {disk_free_limit, 50000000}
   ]
  },
  {rabbitmq_mochiweb,
   [
-   {listeners, [{mgmt, [{ip, "<%= node[:rabbitmq][:address] %>"}, {port, <%= node[:rabbitmq][:mochiweb_port] %>}]}]}
+   {listeners, [{mgmt, [{ip, "<%= node[:rabbitmq][:mochiweb_address] %>"}, {port, <%= node[:rabbitmq][:mochiweb_port] %>}]}]}
   ]
  }
 ].
