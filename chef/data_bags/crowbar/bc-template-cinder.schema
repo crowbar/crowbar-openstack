@@ -107,6 +107,7 @@
                 "bind_port": { "type": "int", "required": true }
               }
             },
+            "enable_v2_api": { "type": "bool", "required": true },
             "ssl": { "type": "map", "required": true, "mapping": {
               "certfile": { "type" : "str", "required" : true },
               "keyfile": { "type" : "str", "required" : true },

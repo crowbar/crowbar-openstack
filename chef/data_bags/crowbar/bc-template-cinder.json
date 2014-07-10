@@ -91,6 +91,7 @@
         "bind_open_address": true,
         "bind_port": 8776
       },
+      "enable_v2_api": false,
       "ssl": {
         "certfile": "/etc/cinder/ssl/certs/signing_cert.pem",
         "keyfile": "/etc/cinder/ssl/private/signing_key.pem",
@@ -110,7 +111,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 7,
+      "schema-revision": 10,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

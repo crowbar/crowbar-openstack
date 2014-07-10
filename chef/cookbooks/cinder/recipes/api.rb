@@ -92,28 +92,30 @@ keystone_register "register cinder endpoint" do
   action :add_endpoint_template
 end
 
-keystone_register "register cinder service v2" do
-  protocol keystone_settings['protocol']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  service_name "cinderv2"
-  service_type "volumev2"
-  service_description "Openstack Cinder Service V2"
-  action :add_service
-end
+if node[:cinder][:enable_v2_api]
+  keystone_register "register cinder service v2" do
+    protocol keystone_settings['protocol']
+    host keystone_settings['internal_url_host']
+    port keystone_settings['admin_port']
+    token keystone_settings['admin_token']
+    service_name "cinderv2"
+    service_type "volumev2"
+    service_description "Openstack Cinder Service V2"
+    action :add_service
+  end
 
-keystone_register "register cinder endpoint v2" do
-  protocol keystone_settings['protocol']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  endpoint_service "cinderv2"
-  endpoint_region "RegionOne"
-  endpoint_publicURL "#{cinder_protocol}://#{my_public_host}:#{cinder_port}/v2/$(tenant_id)s"
-  endpoint_adminURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v2/$(tenant_id)s"
-  endpoint_internalURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v2/$(tenant_id)s"
-  action :add_endpoint_template
+  keystone_register "register cinder endpoint v2" do
+    protocol keystone_settings['protocol']
+    host keystone_settings['internal_url_host']
+    port keystone_settings['admin_port']
+    token keystone_settings['admin_token']
+    endpoint_service "cinderv2"
+    endpoint_region "RegionOne"
+    endpoint_publicURL "#{cinder_protocol}://#{my_public_host}:#{cinder_port}/v2/$(tenant_id)s"
+    endpoint_adminURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v2/$(tenant_id)s"
+    endpoint_internalURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v2/$(tenant_id)s"
+    action :add_endpoint_template
+  end
 end
 
 crowbar_pacemaker_sync_mark "create-cinder_register"
