@@ -83,6 +83,8 @@ template "/etc/ceilometer/pipeline.yaml" do
   mode "0640"
   variables({
       :meters_interval => node[:ceilometer][:meters_interval],
-      :cpu_interval => node[:ceilometer][:cpu_interval]
+      :cpu_interval => node[:ceilometer][:cpu_interval],
+      :disk_interval => node[:ceilometer][:disk_interval],
+      :network_interval => node[:ceilometer][:network_interval]
   })
 end

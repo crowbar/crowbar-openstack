@@ -50,6 +50,8 @@ default[:ceilometer][:use_mongodb] = true
 
 default[:ceilometer][:meters_interval] = 600
 default[:ceilometer][:cpu_interval] = 600
+default[:ceilometer][:disk_interval] = 600
+default[:ceilometer][:network_interval] = 600
 
 default[:ceilometer][:db][:database] = "ceilometer"
 default[:ceilometer][:db][:user] = "ceilometer"
