@@ -7,6 +7,9 @@
 # tenant networks to provide connectivity between hosts. Set to 'none'
 # to disable creation of tenant networks.
 #
+# tenant_network_type = local
+# Example: tenant_network_type = gre
+# Example: tenant_network_type = vxlan
 <% if @networking_mode == 'vlan' -%>
 tenant_network_type = vlan
 network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
@@ -100,6 +103,13 @@ bridge_mappings = physnet1:<%=@physnet%>
 # Agent's polling interval in seconds
 # polling_interval = 2
 
+# Minimize polling by monitoring ovsdb for interface changes
+# minimize_polling = True
+
+# When minimize_polling = True, the number of seconds to wait before
+# respawning the ovsdb monitor after losing communication with it
+# ovsdb_monitor_respawn_interval = 30
+
 # (ListOpt) The types of tenant network tunnels supported by the agent.
 # Setting this will enable tunneling support in the agent. This can be set to
 # either 'gre' or 'vxlan'. If this is unset, it will default to [] and
@@ -135,32 +145,42 @@ bridge_mappings = physnet1:<%=@physnet%>
 # l2_population = False
 
 [securitygroup]
-firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
 # Firewall driver for realizing neutron security group function.
 # firewall_driver = neutron.agent.firewall.NoopFirewallDriver
 # Example: firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+
+# Controls if neutron security group is enabled or not.
+# It should be false when you use nova security group.
+# enable_security_group = True
 
 #-----------------------------------------------------------------------------
 # Sample Configurations.
 #-----------------------------------------------------------------------------
 #
 # 1. With VLANs on eth1.
-# [database]
-# connection = mysql://root:nova@127.0.0.1:3306/ovs_neutron
-# [OVS]
+# [ovs]
 # network_vlan_ranges = default:2000:3999
 # tunnel_id_ranges =
 # integration_bridge = br-int
 # bridge_mappings = default:br-eth1
-# [AGENT]
-# Add the following setting, if you want to log to a file
 #
-# 2. With tunneling.
-# [database]
-# connection = mysql://root:nova@127.0.0.1:3306/ovs_neutron
-# [OVS]
+# 2. With GRE tunneling.
+# [ovs]
 # network_vlan_ranges =
 # tunnel_id_ranges = 1:1000
 # integration_bridge = br-int
 # tunnel_bridge = br-tun
 # local_ip = 10.0.0.3
+#
+# 3. With VXLAN tunneling.
+# [ovs]
+# network_vlan_ranges =
+# tenant_network_type = vxlan
+# tunnel_type = vxlan
+# tunnel_id_ranges = 1:1000
+# integration_bridge = br-int
+# tunnel_bridge = br-tun
+# local_ip = 10.0.0.3
+# [agent]
+# tunnel_types = vxlan

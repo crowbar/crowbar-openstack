@@ -14,9 +14,13 @@ tenant_network_types = <%= @networking_mode %>
 
 # (ListOpt) Ordered list of networking mechanism driver entrypoints
 # to be loaded from the neutron.ml2.mechanism_drivers namespace.
-mechanism_drivers = <%= @mechanism_driver %>,hyperv
+# mechanism_drivers =
+# Example: mechanism drivers = openvswitch,mlnx
 # Example: mechanism_drivers = arista
 # Example: mechanism_drivers = cisco,logger
+# Example: mechanism_drivers = openvswitch,brocade
+# Example: mechanism_drivers = linuxbridge,brocade
+mechanism_drivers = <%= @mechanism_driver %>,hyperv
 
 [ml2_type_flat]
 # (ListOpt) List of physical_network names with which flat networks
@@ -61,7 +65,9 @@ tunnel_id_ranges = <%= node[:neutron][:network][:gre_start]%>:<%= node[:neutron]
 #
 # vxlan_group =
 # Example: vxlan_group = 239.1.1.1
-#
 
 [securitygroup]
 firewall_driver = dummy_value_to_enable_security_groups_in_server
+# Controls if neutron security group is enabled or not.
+# It should be false when you use nova security group.
+# enable_security_group = True

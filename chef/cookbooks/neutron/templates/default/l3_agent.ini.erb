@@ -29,10 +29,11 @@ use_namespaces = <%= @use_namespaces %>
 # This is done by setting the specific router_id.
 # router_id =
 
-# Each L3 agent can be associated with at most one external network.  This
-# value should be set to the UUID of that external network.  If empty,
-# the agent will enforce that only a single external networks exists and
-# use that external network id
+# When external_network_bridge is set, each L3 agent can be associated
+# with no more than one external network. This value should be set to the UUID
+# of that external network. To allow L3 agent support multiple external
+# networks, both the external_network_bridge and gateway_external_network_id
+# must be left empty.
 # gateway_external_network_id =
 
 # Indicates that this L3 agent should also handle routers that do not have
@@ -42,7 +43,9 @@ use_namespaces = <%= @use_namespaces %>
 handle_internal_only_routers = <%= @handle_internal_only_routers %>
 
 # Name of bridge used for external network traffic. This should be set to
-# empty value for the linux bridge
+# empty value for the linux bridge. when this parameter is set, each L3 agent
+# can be associated with no more than one external network.
+# external_network_bridge = br-ex
 external_network_bridge = <%= @external_network_bridge %>
 
 # TCP Port used by Neutron metadata server
@@ -65,3 +68,18 @@ periodic_fuzzy_delay = <%= @periodic_fuzzy_delay %>
 
 # Location of Metadata Proxy UNIX domain socket
 # metadata_proxy_socket = $state_path/metadata_proxy
+
+# router_delete_namespaces, which is false by default, can be set to True if
+# namespaces can be deleted cleanly on the host running the L3 agent.
+# Do not enable this until you understand the problem with the Linux iproute
+# utility mentioned in https://bugs.launchpad.net/neutron/+bug/1052535 and
+# you are sure that your version of iproute does not suffer from the problem.
+# If True, namespaces will be deleted when a router is destroyed.
+# router_delete_namespaces = False
+<% if node[:platform]=="suse" -%>
+router_delete_namespaces = True
+<% end -%>
+
+# Timeout for ovs-vsctl commands.
+# If the timeout expires, ovs commands will fail with ALARMCLOCK error.
+# ovs_vsctl_timeout = 10
