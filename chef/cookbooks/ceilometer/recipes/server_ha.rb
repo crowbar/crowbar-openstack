@@ -31,7 +31,7 @@ crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources"
 
 primitives = []
 
-["collector", "agent_notification", "api"].each do |service|
+["collector", "agent_notification", "api", "alarm_evaluator", "alarm_notifier" ].each do |service|
   primitive_name = "ceilometer-#{service}"
 
   pacemaker_primitive primitive_name do
