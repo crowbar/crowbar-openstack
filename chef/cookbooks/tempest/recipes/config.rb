@@ -331,6 +331,7 @@ template "#{tempest_conf}" do
     :keystone_settings => keystone_settings,
     :machine_id_file => machine_id_file,
     :nova_host => nova.name,
+    :nova_api_v3 => nova[:nova][:enable_v3_api],
     :public_network_id => public_network_id,
     :tempest_path => node[:tempest][:tempest_path],
     :use_heat => !heats.empty?,
