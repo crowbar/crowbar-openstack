@@ -22,6 +22,7 @@ ha_enabled = node[:rabbitmq][:ha][:enabled]
 
 node[:rabbitmq][:mochiweb_address] = CrowbarRabbitmqHelper.get_listen_address(node)
 node[:rabbitmq][:addresses] = [ CrowbarRabbitmqHelper.get_listen_address(node) ]
+node[:rabbitmq][:addresses] << CrowbarRabbitmqHelper.get_public_listen_address(node) if node[:rabbitmq][:listen_public]
 
 if ha_enabled
   node[:rabbitmq][:nodename] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"

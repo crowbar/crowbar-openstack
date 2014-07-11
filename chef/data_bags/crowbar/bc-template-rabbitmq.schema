@@ -12,6 +12,7 @@
           "type": "map",
           "required": true,
           "mapping": {
+            "listen_public": { "type": "bool", "required": true },
             "port": { "type": "int", "required": true },
             "password": { "type": "str", "required": true },
             "user": { "type": "str", "required": true },

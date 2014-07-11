@@ -16,14 +16,19 @@
 vhostname = CrowbarRabbitmqHelper.get_ha_vhostname(node)
 drbd_resource = "rabbitmq"
 
-vip_primitive = "vip-admin-#{vhostname}"
+admin_vip_primitive = "vip-admin-#{vhostname}"
+public_vip_primitive = "vip-public-#{vhostname}"
 service_name = "rabbitmq"
 fs_primitive = "fs-#{service_name}"
 drbd_primitive = "drbd-#{drbd_resource}"
 ms_name = "ms-#{drbd_primitive}"
 group_name = "g-#{service_name}"
 
-ip_addr = CrowbarRabbitmqHelper.get_listen_address(node)
+admin_ip_addr = CrowbarRabbitmqHelper.get_listen_address(node)
+public_ip_addr = ""
+if node[:rabbitmq][:listen_public]
+  public_ip_addr = CrowbarRabbitmqHelper.get_public_listen_address(node)
+end
 
 fs_params = {}
 fs_params["directory"] = "/var/lib/rabbitmq"
@@ -247,13 +252,24 @@ ruby_block "wait for rabbitmq vhostname" do
   end # block
 end # ruby_block
 
-pacemaker_primitive vip_primitive do
+pacemaker_primitive admin_vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
   params ({
-    "ip" => ip_addr,
+    "ip" => admin_ip_addr,
   })
   op rabbitmq_op
   action :create
+end
+
+if node[:rabbitmq][:listen_public]
+  pacemaker_primitive public_vip_primitive do
+    agent "ocf:heartbeat:IPaddr2"
+    params ({
+      "ip" => public_ip_addr,
+    })
+    op rabbitmq_op
+    action :create
+  end
 end
 
 pacemaker_primitive service_name do
@@ -265,17 +281,23 @@ pacemaker_primitive service_name do
   action :create
 end
 
+primitives = [ fs_primitive, admin_vip_primitive ]
+if node[:rabbitmq][:listen_public]
+  primitives << public_vip_primitive
+end
+primitives << service_name
+
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
 
   pacemaker_colocation "col-#{service_name}" do
     score "inf"
-    resources [fs_primitive, vip_primitive, service_name]
+    resources primitives
     action :create
   end
 
   pacemaker_order "o-#{service_name}" do
     score "Mandatory"
-    ordering "#{fs_primitive} #{vip_primitive} #{service_name}"
+    ordering "#{primitives.join(" ")}"
     action :create
     # This is our last constraint, so we can finally start service_name
     notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
@@ -294,7 +316,7 @@ else
   pacemaker_group group_name do
     # Membership order *is* significant; VIPs should come first so
     # that they are available for the service to bind to.
-    members [fs_primitive, vip_primitive, service_name]
+    members primitives
     action [ :create, :start ]
   end
 
