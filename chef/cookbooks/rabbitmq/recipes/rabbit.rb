@@ -80,5 +80,31 @@ execute "rabbitmqctl set_user_tags #{node[:rabbitmq][:user]} management" do
   only_if only_if_command if ha_enabled
 end
 
+if node[:rabbitmq][:trove][:enabled]
+  rabbitmq_vhost node[:rabbitmq][:trove][:vhost] do
+    action :add
+    only_if only_if_command if ha_enabled
+  end
+
+  rabbitmq_user "adding user #{node[:rabbitmq][:trove][:user]}" do
+    user node[:rabbitmq][:trove][:user]
+    password node[:rabbitmq][:trove][:password]
+    address node[:rabbitmq][:mochiweb_address]
+    port node[:rabbitmq][:mochiweb_port]
+    action :add
+    only_if only_if_command if ha_enabled
+  end
+
+  # grant the trove user the ability to do anything with the trove vhost
+  # the three regex's map to config, write, read permissions respectively
+  rabbitmq_user "setting permissions for #{node[:rabbitmq][:trove][:user]}" do
+    user node[:rabbitmq][:trove][:user]
+    vhost node[:rabbitmq][:trove][:vhost]
+    permissions "\".*\" \".*\" \".*\""
+    action :set_permissions
+    only_if only_if_command if ha_enabled
+  end
+end
+
 # save data so it can be found by search
 node.save

@@ -58,6 +58,7 @@ class RabbitmqService < PacemakerServiceObject
     }
 
     base["attributes"][@bc_name]["password"] = random_password
+    base["attributes"][@bc_name]["trove"]["password"] = random_password
 
     @logger.debug("Rabbitmq create_proposal: exiting")
     base

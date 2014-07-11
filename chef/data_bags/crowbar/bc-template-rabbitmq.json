@@ -20,6 +20,12 @@
             "options": ""
           }
         }
+      },
+      "trove": {
+        "enabled": false,
+        "password": "",
+        "user": "trove",
+        "vhost": "/trove"
       }
     }
   },
@@ -27,7 +33,7 @@
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 10,
+      "schema-revision": 11,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },
