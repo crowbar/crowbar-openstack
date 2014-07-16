@@ -49,6 +49,16 @@ else
   db_connection = "#{backend_name}://#{node[:ceilometer][:db][:user]}:#{db_password}@#{sql_address}/#{node[:ceilometer][:db][:database]}"
 end
 
+# Find hypervisor inspector
+hypervisor_inspector = nil
+if node.roles.include?("ceilometer-agent")
+  if node.roles.include?("nova-multi-compute-vmware")
+    hypervisor_inspector = "vsphere"
+  else
+    hypervisor_inspector = "libvirt"
+  end
+end
+
 if node[:ceilometer][:ha][:server][:enabled]
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
   bind_host = admin_address
@@ -72,7 +82,8 @@ template "/etc/ceilometer/ceilometer.conf" do
       :bind_port => bind_port,
       :metering_secret => node[:ceilometer][:metering_secret],
       :database_connection => db_connection,
-      :node_hostname => node['hostname']
+      :node_hostname => node['hostname'],
+      :hypervisor_inspector => hypervisor_inspector
     )
 end
 
