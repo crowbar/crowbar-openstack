@@ -35,6 +35,8 @@ en:
           emc_volume_driver: 'EMC'
           eqlx_parameters: 'EqualLogic Parameters'
           eqlx_volume_driver: 'EqualLogic'
+          eternus_parameters: 'Fujitsu ETERNUS DX Parameters'
+          eternus_volume_driver: 'Fujitsu ETERNUS DX'
           file_parameters: 'File-based Parameters'
           listheader: 'Cinder Backends'
           loading_text: 'Loading Backends...'
@@ -73,6 +75,14 @@ en:
               san_login: 'EQLX SAN login'
               san_password: 'EQLX SAN password'
               san_thin_provision: 'Use thin provision for volumes'
+            eternus:
+              protocol: 'ETERNUS Connection Protocol'
+              ip: 'ETERNUS IP for SMIS'
+              port: 'ETERNUS Port for SMIS'
+              user: 'ETERNUS Username for SMIS'
+              password: 'ETERNUS Password for SMIS'
+              pool: 'ETERNUS Poolname'
+              iscsi_ip: 'iSCSI IP'
             manual:
               config: 'Options'
               driver: 'Driver'

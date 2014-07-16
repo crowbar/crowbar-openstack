@@ -1899,6 +1899,17 @@ san_password=<%= volume['eqlx']["san_password"] %>
 #zadara_vpsa_allow_nonexistent_delete=true
 <% end -%>
 
+
+<% if volume['backend_driver'] == 'eternus' -%>
+#
+# Options defined in cinder.volume.drivers.fujitsu.fujitsu_eternus_dx_common
+#
+
+# Use this file for cinder Fujitsu ETERNUS DX plugin config data
+# (string value)
+cinder_eternus_config_file=/etc/cinder/cinder_eternus_dx_config-<% backend_id -%>.xml
+<% end -%>
+
 #
 # Options defined in cinder.volume.manager
 #
@@ -1916,6 +1927,13 @@ volume_driver=cinder.volume.drivers.netapp.common.NetAppDriver
 <% end -%>
 <% if volume['backend_driver'] == 'emc' -%>
 volume_driver=cinder.volume.drivers.emc.emc_smis_iscsi.EMCSMISISCSIDriver
+<% end -%>
+<% if volume['backend_driver'] == 'eternus' -%>
+  <% if volume['eternus']['protocol'] == "iscsi" -%>
+volume_driver=cinder.volume.drivers.fujitsu.fujitsu_eternus_dx_iscsi.FJDXISCSIDriver
+  <% else -%>
+volume_driver=cinder.volume.drivers.fujitsu.fujitsu_eternus_dx_fc.FJDXFCDriver
+  <% end -%>
 <% end -%>
 <% if volume['backend_driver'] == 'manual' -%>
 volume_driver=<%= volume['manual']['driver'] %>

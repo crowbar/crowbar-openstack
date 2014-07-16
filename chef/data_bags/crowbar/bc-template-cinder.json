@@ -77,6 +77,15 @@
           "ecom_server_username": "admin",
           "ecom_server_password": ""
         },
+        "eternus": {
+          "protocol": "fc",
+          "ip": "",
+          "port": 5988,
+          "user": "",
+          "password": "",
+          "pool": "",
+          "iscsi_ip": ""
+        },
         "rbd": {
           "use_crowbar": true,
           "config_file": "/etc/ceph/ceph.conf",
@@ -123,7 +132,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 12,
+      "schema-revision": 13,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

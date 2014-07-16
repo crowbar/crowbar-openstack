@@ -188,7 +188,17 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
         notifies :restart, resources(:service => "cinder-volume")
       end
 
-    when volume[:backend_driver] == "emc"
+    when volume[:backend_driver] == "eternus"
+      template "/etc/cinder/cinder_eternus_dx_config-#{backend_id}.xml" do
+        source "cinder_eternus_dx_config.xml.erb"
+        owner "root"
+        group node[:cinder][:group]
+        mode 0640
+        variables(
+          :eternus_params => volume['eternus']
+        )
+        notifies :restart, resources(:service => "cinder-volume")
+      end
 
     when volume[:backend_driver] == "manual"
 
