@@ -178,8 +178,8 @@ if node[:cinder][:volume][:volume_type] == "emc"
 
   template "/etc/cinder/cinder_emc_config.xml" do
     source "cinder_emc_config.xml.erb"
-    owner node[:cinder][:user]
-    group "root"
+    owner "root"
+    group node[:cinder][:group]
     mode 0640
     variables(
               :emc_params => emc_params
