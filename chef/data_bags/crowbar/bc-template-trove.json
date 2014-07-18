@@ -10,7 +10,7 @@
       "swift_instance": "none",
       "cinder_instance": "none",
       "rabbitmq_instance": "none",
-      "volume_support": true,
+      "volume_support": false,
       "db": {
         "password": "",
         "user": "trove",
