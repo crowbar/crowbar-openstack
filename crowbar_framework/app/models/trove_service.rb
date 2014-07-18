@@ -55,5 +55,8 @@ class TroveService < ServiceObject
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes[@bc_name]["rabbitmq_instance"] }
     answer
   end
-end
 
+  def validate_proposal_after_save proposal
+    validate_one_for_role proposal, "trove-server"
+  end
+end
