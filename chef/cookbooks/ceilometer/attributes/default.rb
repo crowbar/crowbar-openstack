@@ -38,10 +38,22 @@ if %w(redhat centos suse).include?(node[:platform])
   agent_notification_service_name = "openstack-ceilometer-agent-notification"
 end
 
+alarm_evaluator_service_name = "ceilometer-alarm-evaluator"
+if %w(redhat centos suse).include?(node[:platform])
+  alarm_evaluator_service_name = "openstack-ceilometer-alarm-evaluator"
+end
+
+alarm_notifier_service_name = "ceilometer-alarm-notifier"
+if %w(redhat centos suse).include?(node[:platform])
+  alarm_notifier_service_name = "openstack-ceilometer-alarm-notifier"
+end
+
 default[:ceilometer][:api][:service_name] = api_service_name
 default[:ceilometer][:collector][:service_name] = collector_service_name
 default[:ceilometer][:agent_notification][:service_name] = agent_notification_service_name
 default[:ceilometer][:central][:service_name] = central_service_name
+default["ceilometer"]["alarm_evaluator"]["service_name"] = alarm_evaluator_service_name
+default["ceilometer"]["alarm_notifier"]["service_name"] = alarm_notifier_service_name
 
 default[:ceilometer][:debug] = false
 default[:ceilometer][:verbose] = false
@@ -75,6 +87,11 @@ default[:ceilometer][:ha][:collector][:agent] = "lsb:#{collector_service_name}"
 default[:ceilometer][:ha][:collector][:op][:monitor][:interval] = "10s"
 default[:ceilometer][:ha][:agent_notification][:agent] = "lsb:#{agent_notification_service_name}"
 default[:ceilometer][:ha][:agent_notification][:op][:monitor][:interval] = "10s"
+
+default["ceilometer"]["ha"]["alarm_evaluator"]["agent"] = "lsb:#{alarm_evaluator_service_name}"
+default["ceilometer"]["ha"]["alarm_evaluator"]["op"]["monitor"]["interval"] = "10s"
+default["ceilometer"]["ha"]["alarm_notifier"]["agent"] = "lsb:#{alarm_notifier_service_name}"
+default["ceilometer"]["ha"]["alarm_notifier"]["op"]["monitor"]["interval"] = "10s"
 
 default[:ceilometer][:ha][:central][:enabled] = false
 default[:ceilometer][:ha][:central][:agent] = "lsb:#{central_service_name}"
