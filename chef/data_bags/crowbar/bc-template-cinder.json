@@ -78,6 +78,8 @@
           "ecom_server_password": ""
         },
         "rbd": {
+          "use_crowbar": true,
+          "config_file": "/etc/ceph/ceph.conf",
           "pool": "volumes",
           "user": "volumes"
         },
@@ -121,7 +123,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 11,
+      "schema-revision": 12,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

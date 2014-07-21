@@ -88,6 +88,8 @@
                 },
                 "rbd": {
                 "type": "map", "mapping": {
+                    "use_crowbar": { "type": "bool", "required": true },
+                    "config_file": { "type": "str", "required": true },
                     "pool": { "type": "str", "required": true },
                     "user": { "type": "str", "required": true }
                     }
@@ -163,6 +165,8 @@
                   },
                   "rbd": {
                     "type": "map", "mapping": {
+                      "use_crowbar": { "type": "bool", "required": true },
+                      "config_file": { "type": "str", "required": true },
                       "pool": { "type": "str", "required": true },
                       "user": { "type": "str", "required": true }
                     }

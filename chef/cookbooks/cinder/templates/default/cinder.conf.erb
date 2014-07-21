@@ -1549,7 +1549,11 @@ rbd_user=<%= volume['rbd']['user'] %>
 <% end -%>
 
 # path to the ceph configuration file to use (string value)
+<% if volume['rbd']['use_crowbar'] -%>
 rbd_ceph_conf=/etc/ceph/ceph.conf
+<% else -%>
+rbd_ceph_conf=<%= volume['rbd']['config_file'] %>
+<% end -%>
 
 # flatten volumes created from snapshots to remove dependency
 # (boolean value)
