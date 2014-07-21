@@ -203,8 +203,6 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
   end
 end
 
-cinder_service("volume")
-
 unless %w(redhat centos).include? node.platform
  package "tgt"
 else
@@ -250,3 +248,5 @@ service "tgt" do
   service_name "tgtd" if %w(redhat centos suse).include? node.platform
   notifies :run, "bash[restart-tgt_#{@cookbook_name}]"
 end
+
+cinder_service("volume")
