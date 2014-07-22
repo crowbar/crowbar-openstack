@@ -144,37 +144,6 @@ rabbit_settings = {
   :vhost => rabbit[:rabbitmq][:vhost]
 }
 
-have_rbd = false
-include_ceph_recipe = false
-
-node[:cinder][:volume].each do |volume|
-  if volume['backend_driver'] == "rbd"
-    # if include_ceph_recipe is already true, avoid re-entering the if (and executing a slow search)
-    if volume['rbd']['use_crowbar'] && !include_ceph_recipe
-      ceph_env_filter = " AND ceph_config_environment:ceph-config-default"
-      ceph_servers = search(:node, "roles:ceph-osd#{ceph_env_filter}") || []
-      if ceph_servers.length > 0
-        include_ceph_recipe = true
-      else
-        message = "Ceph was not deployed with Crowbar yet!"
-        Chef::Log.fatal(message)
-        raise message
-      end
-    end
-
-    have_rbd = true
-  end
-end
-
-if have_rbd
-  include_recipe "ceph::cinder" if include_ceph_recipe
-
-  if node[:platform] == "suse"
-    package "ceph"
-    package "python-ceph"
-  end
-end
-
 if node[:cinder][:api][:protocol] == 'https'
   if node[:cinder][:ssl][:generate_certs]
     package "openssl"
