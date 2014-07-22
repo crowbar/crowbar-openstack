@@ -29,8 +29,16 @@ describe 'openstack-database::conductor' do
     end
 
     it 'has the default values for configurable attributes' do
-      [%r{^sql_connection = mysql://trove:db-pass@127.0.0.1:3306/trove\?charset=utf8$},
-       %r{^trove_auth_url = http://127.0.0.1:5000/v2.0$}
+      [/^debug = false$/,
+       /^verbose = false$/,
+       %r{^sql_connection = mysql://trove:db-pass@127.0.0.1:3306/trove\?charset=utf8$},
+       %r{^trove_auth_url = http://127.0.0.1:5000/v2.0$},
+       /^rabbit_host = 127.0.0.1$/,
+       /^rabbit_virtual_host = \/$/,
+       /^rabbit_port = 5672$/,
+       /^rabbit_userid = guest$/,
+       /^rabbit_password = rabbit-pass$/,
+       /^rabbit_use_ssl = false$/
       ].each do |content|
         expect(chef_run).to render_file(filename).with_content(content)
       end
