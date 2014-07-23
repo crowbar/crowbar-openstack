@@ -805,7 +805,7 @@ instance_type=<%=@heat_flavor_ref %>
 
 # Name of heat-cfntools enabled image to use when launching
 # test instances. (string value)
-image_ref=<%= `cat #{@heat_machine_id_file}`.strip %>
+image_ref=<%= `test -f #{@heat_machine_id_file} && cat #{@heat_machine_id_file}`.strip %>
 
 # Name of existing keypair to launch servers with. (string
 # value)
