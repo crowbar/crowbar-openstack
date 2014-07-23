@@ -30,9 +30,6 @@ mechanism_drivers = <%= @mechanism_driver %>,hyperv
 # flat_networks =
 # Example:flat_networks = physnet1,physnet2
 # Example:flat_networks = *
-<% if @networking_mode == "flat" -%>
-flat_networks = physnet1
-<% end -%>
 
 [ml2_type_vlan]
 # (ListOpt) List of <physical_network>[:<vlan_min>:<vlan_max>] tuples
