@@ -32,7 +32,6 @@ module Barclamp
     def networking_modes_for_neutron(selected)
       options_for_select(
         [
-          ["flat", "local"], 
           ["gre", "gre"], 
           ["vlan", "vlan"]
         ],
