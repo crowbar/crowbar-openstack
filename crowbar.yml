@@ -35,9 +35,9 @@ smoketest:
 
 crowbar:
   layout: 1
-  order: 99
-  run_order: 99
-  chef_order: 99
+  order: 199
+  run_order: 199
+  chef_order: 199
   proposal_schema_version: 3
 
 nav:
