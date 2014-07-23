@@ -32,13 +32,18 @@ $(document).ready(function($) {
 
   function cb_cinder_volume_delete()
   {
-    volume_entry = $(this).data("volumeid");
+    //FIXME: right now, there's no good way to localize strings in js :/
+    if (confirm("All volumes in the backend will be made unavailable; do you really want to delete this backend?")) {
+      volume_entry = $(this).data("volumeid");
 
-    $(this).hide('slow', function() {
-      // delete the backend entry from the attributes JSON
-      $('#proposal_attributes').removeJsonAttribute('volumes/' + volume_entry);
-      redisplay_backends();
-    });
+      $(this).hide('slow', function() {
+        // delete the backend entry from the attributes JSON
+        $('#proposal_attributes').removeJsonAttribute('volumes/' + volume_entry);
+        redisplay_backends();
+      });
+    }
+
+    return false;
   }
 
   function attach_events()
