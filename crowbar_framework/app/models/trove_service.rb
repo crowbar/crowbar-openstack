@@ -38,7 +38,7 @@ class TroveService < ServiceObject
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
     base["attributes"][@bc_name]["nova_instance"] = find_dep_proposal("nova")
     base["attributes"][@bc_name]["cinder_instance"] = find_dep_proposal("cinder")
-    base["attributes"][@bc_name]["swift_instance"] = find_dep_proposal("swift")
+    base["attributes"][@bc_name]["swift_instance"] = find_dep_proposal("swift", true)
     base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
     base["attributes"][@bc_name]["db"]["password"] = random_password
 
@@ -51,9 +51,11 @@ class TroveService < ServiceObject
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes[@bc_name]["keystone_instance"] }
     answer << { "barclamp" => "nova", "inst" => role.default_attributes[@bc_name]["nova_instance"] }
     answer << { "barclamp" => "cinder", "inst" => role.default_attributes[@bc_name]["cinder_instance"] }
-    answer << { "barclamp" => "swift", "inst" => role.default_attributes[@bc_name]["swift_instance"] }
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes[@bc_name]["rabbitmq_instance"] }
+    if role.default_attributes[@bc_name]["volume_support"]
+      answer << { "barclamp" => "swift", "inst" => role.default_attributes[@bc_name]["swift_instance"] }
+    end
+
     answer
   end
 end
-
