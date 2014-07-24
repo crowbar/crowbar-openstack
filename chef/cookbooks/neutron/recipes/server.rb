@@ -125,10 +125,10 @@ if node[:neutron][:networking_plugin] == "cisco" and node[:neutron][:use_ml2]
   config_files += " --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
 end
 
-execute "neutron-db-manage check_migration" do
+execute "neutron-db-manage migrate" do
   user node[:neutron][:user]
   group node[:neutron][:group]
-  command "neutron-db-manage #{config_files} check_migration"
+  command "neutron-db-manage #{config_files} upgrade head"
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
   only_if { !node[:neutron][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
