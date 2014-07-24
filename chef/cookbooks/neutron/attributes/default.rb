@@ -63,8 +63,6 @@ when "suse"
     :lbaas_agent_pkg => "openstack-neutron-lbaas-agent",
     :lbaas_agent_name => "openstack-neutron-lbaas-agent",
     :lbaas_haproxy_group => "haproxy",
-    :nvp_agent_pkg => "openstack-neutron-vmware-agent",
-    :nvp_agent_name => "openstack-neutron-vmware-agent",
     :metadata_agent_name => "openstack-neutron-metadata-agent",
     :metadata_agent_pkg => "openstack-neutron-metadata-agent",
     :metering_agent_pkg => "openstack-neutron-metering-agent",
@@ -77,6 +75,7 @@ when "suse"
     :ovs_pkgs => [ "openvswitch",
                    "openvswitch-switch",
                    "openvswitch-kmp-default" ],
+    :nsx_pkgs => [ "openvswitch-pki" ],
     :cisco_pkgs => [ "openstack-neutron-plugin-cisco" ],
     :user => "neutron",
     :ovs_modprobe => "modprobe openvswitch",
@@ -93,8 +92,6 @@ when "centos", "redhat"
     :lbaas_agent_pkg => "openstack-neutron-lbaas-agent",
     :lbaas_agent_name => "neutron-lbaas-agent",
     :lbaas_haproxy_group => "nogroup",
-    :nvp_agent_pkg => "openstack-neutron-nicira",
-    :nvp_agent_name => "neutron-nicira-agent",
     :metadata_agent_name => "neutron-metadata-agent",
     :metadata_agent_pkg => "openstack-neutron",
     :metering_agent_pkg => "openstack-neutron-metering-agent",
@@ -122,8 +119,6 @@ else
     :lbaas_agent_pkg => "neutron-lbaas-agent",
     :lbaas_agent_name => "neutron-lbaas-agent",
     :lbaas_haproxy_group => "nogroup",
-    :nvp_agent_pkg => "neutron-plugin-nicira-agent",
-    :nvp_agent_name => "neutron-plugin-nicira-agent",
     :metadata_agent_name => "neutron-metadata-agent",
     :metadata_agent_pkg => "neutron-metadata-agent",
     :metering_agent_pkg => "neutron-plugin-metering-agent",
@@ -136,6 +131,7 @@ else
     :ovs_pkgs => [ "linux-headers-#{`uname -r`.strip}",
                    "openvswitch-datapath-dkms",
                    "openvswitch-switch" ],
+    :nsx_pkgs => [ "" ],
     :cisco_pkgs => [ "" ],
     :user => "neutron",
     :ovs_modprobe => "modprobe openvswitch",
@@ -152,7 +148,6 @@ default[:neutron][:ha][:l3][:metering_ra] = "lsb:#{node[:neutron][:platform][:me
 default[:neutron][:ha][:l3][:openvswitch_ra] = "lsb:#{node[:neutron][:platform][:ovs_agent_name]}"
 default[:neutron][:ha][:l3][:cisco_ra] = "lsb:#{node[:neutron][:ha][:l3][:openvswitch_ra]}"
 default[:neutron][:ha][:l3][:linuxbridge_ra] = "lsb:#{node[:neutron][:platform][:lb_agent_name]}"
-default[:neutron][:ha][:l3][:vmware_ra] = "lsb:#{node[:neutron][:platform][:nvp_agent_name]}"
 default[:neutron][:ha][:l3][:ha_tool_ra] = "ocf:openstack:neutron-ha-tool"
 default[:neutron][:ha][:l3][:op][:monitor][:interval] = "10s"
 default[:neutron][:ha][:server][:enabled] = false

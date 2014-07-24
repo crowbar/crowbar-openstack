@@ -40,7 +40,7 @@ else
   when "linuxbridge"
     agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
   when "vmware"
-    agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
+    agent_config_path = "/etc/neutron/plugins/vmware/nsx.ini"
   end
 
   plugin_cfg_path = agent_config_path

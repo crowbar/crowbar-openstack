@@ -79,6 +79,13 @@ if node[:neutron][:networking_plugin] == "openvswitch"
   end
 end
 
+if node[:neutron][:networking_plugin] == "vmware"
+  fixed_network_type = ""
+  # We would like to be sure that floating network will be created 
+  # without any additional options, NSX will take care about everything.
+  floating_network_type = ""
+end
+
 execute "create_fixed_network" do
   command "#{neutron_cmd} net-create fixed --shared #{fixed_network_type}"
   not_if "out=$(#{neutron_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"

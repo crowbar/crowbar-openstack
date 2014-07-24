@@ -61,63 +61,53 @@ when "linuxbridge"
   neutron_agent = node[:neutron][:platform][:lb_agent_name]
   neutron_agent_pkg = node[:neutron][:platform][:lb_agent_pkg]
   agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
-when "vmware"
-  neutron_agent = node[:neutron][:platform][:nvp_agent_name]
-  neutron_agent_pkg = node[:neutron][:platform][:nvp_agent_pkg]
-  agent_config_path = "/etc/neutron/plugins/nicira/nvp.ini"
-  # It is needed to have neutron-ovs-cleanup service
-  ovs_agent_pkg = node[:neutron][:platform][:ovs_agent_pkg]
-  ovs_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
 end
 
+unless neutron[:neutron][:networking_plugin] == "vmware"
+  unless neutron[:neutron][:use_gitrepo]
+    package neutron_agent_pkg do
+      action :install
+    end
+  else
+    neutron_path = "/opt/neutron"
+    venv_path = neutron[:neutron][:use_virtualenv] ? "#{neutron_path}/.venv" : nil
 
-unless neutron[:neutron][:use_gitrepo]
-  package neutron_agent_pkg do
-    action :install
-  end
-  if neutron[:neutron][:networking_plugin] == "vmware"
-    package ovs_agent_pkg
-  end
-else
-  neutron_path = "/opt/neutron"
-  venv_path = neutron[:neutron][:use_virtualenv] ? "#{neutron_path}/.venv" : nil
+    neutron_agent = "neutron-openvswitch-agent"
+    pfs_and_install_deps "neutron" do
+      cookbook "neutron"
+      cnode neutron
+      virtualenv venv_path
+      path neutron_path
+      wrap_bins [ "neutron", "neutron-rootwrap" ]
+    end
 
-  neutron_agent = "neutron-openvswitch-agent"
-  pfs_and_install_deps "neutron" do
-    cookbook "neutron"
-    cnode neutron
-    virtualenv venv_path
-    path neutron_path
-    wrap_bins [ "neutron", "neutron-rootwrap" ]
-  end
+    create_user_and_dirs("neutron")
 
-  create_user_and_dirs("neutron")
+    link_service neutron_agent do
+      virtualenv venv_path
+      bin_name "neutron-openvswitch-agent --config-file #{agent_config_path} --config-dir /etc/neutron/"
+    end
 
-  link_service neutron_agent do
-    virtualenv venv_path
-    bin_name "neutron-openvswitch-agent --config-file #{agent_config_path} --config-dir /etc/neutron/"
-  end
-
-  execute "neutron_cp_policy.json" do
-    command "cp /opt/neutron/etc/policy.json /etc/neutron/"
-    creates "/etc/neutron/policy.json"
-  end
-  execute "neutron_cp_plugins" do
-    command "cp -r /opt/neutron/etc/neutron/plugins /etc/neutron/plugins"
-    creates "/etc/neutron/plugins"
-  end
-  execute "neutron_cp_rootwrap" do
-    command "cp -r /opt/neutron/etc/neutron/rootwrap.d /etc/neutron/rootwrap.d"
-    creates "/etc/neutron/rootwrap.d"
-  end
-  cookbook_file "/etc/neutron/rootwrap.conf" do
-    cookbook "neutron"
-    source "neutron-rootwrap.conf"
-    mode 00644
-    owner node[:neutron][:platform][:user]
+    execute "neutron_cp_policy.json" do
+      command "cp /opt/neutron/etc/policy.json /etc/neutron/"
+      creates "/etc/neutron/policy.json"
+    end
+    execute "neutron_cp_plugins" do
+      command "cp -r /opt/neutron/etc/neutron/plugins /etc/neutron/plugins"
+      creates "/etc/neutron/plugins"
+    end
+    execute "neutron_cp_rootwrap" do
+      command "cp -r /opt/neutron/etc/neutron/rootwrap.d /etc/neutron/rootwrap.d"
+      creates "/etc/neutron/rootwrap.d"
+    end
+    cookbook_file "/etc/neutron/rootwrap.conf" do
+      cookbook "neutron"
+      source "neutron-rootwrap.conf"
+      mode 00644
+      owner node[:neutron][:platform][:user]
+    end
   end
 end
-
 
 if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plugin]
   if node.platform == "ubuntu"
@@ -153,6 +143,14 @@ if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plu
     service_name openvswitch_service
     supports :status => true, :restart => true
     action [ :start, :enable ]
+  end
+
+  if neutron[:neutron][:networking_plugin] == "vmware"
+    include_recipe "neutron::vmware_support"
+    # We don't need anything more installed or configured on
+    # compute nodes except openvswitch packages with stt.
+    # For NSX plugin no neutron packages are needed.
+    return
   end
 
   unless %w(debian ubuntu).include? node.platform

@@ -16,9 +16,9 @@
 
 include_recipe "neutron::common_agent"
 
-
 unless node[:neutron][:use_gitrepo]
-  pkgs = [ node[:neutron][:platform][:dhcp_agent_pkg], node[:neutron][:platform][:l3_agent_pkg], node[:neutron][:platform][:metadata_agent_pkg], node[:neutron][:platform][:metering_agent_pkg] ]
+  pkgs = [ node[:neutron][:platform][:dhcp_agent_pkg], node[:neutron][:platform][:metadata_agent_pkg], node[:neutron][:platform][:metering_agent_pkg] ]
+  pkgs << node[:neutron][:platform][:l3_agent_pkg] unless node[:neutron][:networking_plugin] == "vmware"
   pkgs.uniq.each { |p| package p }
 
   if node[:neutron][:use_lbaas]
@@ -193,14 +193,15 @@ end
 
 ha_enabled = node[:neutron][:ha][:l3][:enabled]
 
-service node[:neutron][:platform][:l3_agent_name] do
-  service_name "neutron-l3-agent" if node[:neutron][:use_gitrepo]
-  supports :status => true, :restart => true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
-  subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
-  not_if { node[:neutron][:networking_plugin] == "vmware" }
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+unless node[:neutron][:networking_plugin] == "vmware"
+  service node[:neutron][:platform][:l3_agent_name] do
+    service_name "neutron-l3-agent" if node[:neutron][:use_gitrepo]
+    supports :status => true, :restart => true
+    action [:enable, :start]
+    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
+    provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  end
 end
 
 if node[:neutron][:use_lbaas] then
