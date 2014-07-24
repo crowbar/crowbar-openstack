@@ -1010,10 +1010,16 @@ horizon=<%= @use_horizon %>
 # Name of the backend1 (must be declared in cinder.conf)
 # (string value)
 #backend1_name=BACKEND_1
+<% if @cinder_multi_backend -%>
+backend1_name=<%= @cinder_backend1_name %>
+<% end -%>
 
 # Name of the backend2 (must be declared in cinder.conf)
 # (string value)
 #backend2_name=BACKEND_2
+<% if @cinder_multi_backend -%>
+backend2_name=<%= @cinder_backend2_name %>
+<% end -%>
 
 # Backend protocol to target when creating volume types
 # (string value)
@@ -1040,7 +1046,7 @@ storage_protocol=<%= @storage_protocol %>
 
 # Runs Cinder multi-backend test (requires 2 backends)
 # (boolean value)
-#multi_backend=false
+multi_backend=<%= @cinder_multi_backend ? 'true' : 'false' %>
 
 # Runs Cinder volumes backup test (boolean value)
 backup=false

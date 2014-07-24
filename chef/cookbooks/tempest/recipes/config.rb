@@ -313,6 +313,16 @@ cinders[0][:cinder][:volumes].each do |volume|
   end
 end
 
+cinder_multi_backend = false
+cinder_backend1_name = nil
+cinder_backend2_name = nil
+backend_names = cinders[0][:cinder][:volumes].map{|volume| volume[:backend_name]}.uniq
+if backend_names.length > 1
+  cinder_multi_backend = true
+  cinder_backend1_name = backend_names[0]
+  cinder_backend2_name = backend_names[1]
+end
+
 template "#{tempest_conf}" do
   source "tempest.conf.erb"
   mode 0644
@@ -348,6 +358,9 @@ template "#{tempest_conf}" do
     :use_neutron => !neutrons.empty?,
     :neutron_api_extensions => neutron_api_extensions,
     :storage_protocol => storage_protocol,
+    :cinder_multi_backend => cinder_multi_backend,
+    :cinder_backend1_name => cinder_backend1_name,
+    :cinder_backend2_name => cinder_backend2_name,
     :cinder_api_v2 => cinders[0][:cinder][:enable_v2_api],
     :use_swift => !swifts.empty?
   )
