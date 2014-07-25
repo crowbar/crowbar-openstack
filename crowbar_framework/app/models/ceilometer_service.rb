@@ -117,6 +117,13 @@ class CeilometerService < PacemakerServiceObject
       end
     end
 
+    alarm_eval_interval = proposal["attributes"][@bc_name]["alarm_threshold_evaluation_interval"]
+    ["cpu_interval", "disk_interval", "network_interval", "meters_interval"].each do |i|
+      if alarm_eval_interval < proposal["attributes"][@bc_name][i]
+        validation_error("The threshold alarm evaluation interval needs be greater than (or equal to) all the meter update intervals.")
+        break
+      end
+    end
     super
   end
 

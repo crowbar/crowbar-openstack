@@ -24,6 +24,7 @@ en:
         database_instance: 'Database'
         keystone_instance: 'Keystone'
         rabbitmq_instance: 'RabbitMQ'
+        alarm_threshold_evaluation_interval: 'Evaluation interval for threshold alarms (in seconds).'
         cpu_interval: 'Interval used for CPU meter updates (in seconds)'
         disk_interval: 'Interval used for disk meter updates (in seconds)'
         network_interval: 'Interval used for network meter updates (in seconds)'
