@@ -167,7 +167,7 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
         variables(
           :emc_params => volume['emc']
         )
-        notifies :restart, resources(:service => "cinder-volume")
+        notifies :restart, "service[cinder-volume]"
       end
 
     when volume[:backend_driver] == "eqlx"
@@ -185,7 +185,7 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
         group node[:cinder][:group]
         mode "0640"
         action :create
-        notifies :restart, resources(:service => "cinder-volume")
+        notifies :restart, "service[cinder-volume]"
       end
 
     when volume[:backend_driver] == "eternus"
@@ -197,7 +197,7 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
         variables(
           :eternus_params => volume['eternus']
         )
-        notifies :restart, resources(:service => "cinder-volume")
+        notifies :restart, "service[cinder-volume]"
       end
 
     when volume[:backend_driver] == "manual"
