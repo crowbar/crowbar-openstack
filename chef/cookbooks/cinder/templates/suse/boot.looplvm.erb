@@ -19,7 +19,7 @@
 
 rc_reset
 
-LOOP_LVM=<%= @loop_lvm_path %>
+LOOP_LVMS="<%= @loop_lvm_paths %>"
 
 find_associated_loopdev()
 {
@@ -29,41 +29,50 @@ find_associated_loopdev()
 
 case "$1" in
     start)
-    #
-    # Find and activate volume groups (HM 1/1/1999)
-    #
-    if [ -f $LOOP_LVM ]; then
-        loopdev=$(find_associated_loopdev)
-        if [ -z "$loopdev" -o ! -b "$loopdev" ]; then
-            echo -n "Loop mounting $LOOP_LVM"
-            losetup -f $LOOP_LVM
-            rc_status -v
+        rescan=0
 
-            # Need to tell LVM to rescan
-            if [ -f /etc/init.d/boot.lvm ]; then
-                /etc/init.d/boot.lvm start
-            fi
+        for LOOP_LVM in $LOOP_LVMS; do
+             #
+             # Find and activate volume groups (HM 1/1/1999)
+             #
+             if [ -f $LOOP_LVM ]; then
+                 loopdev=$(find_associated_loopdev)
+                 if [ -z "$loopdev" -o ! -b "$loopdev" ]; then
+                     echo -n "Loop mounting $LOOP_LVM"
+                     losetup -f $LOOP_LVM
+                     rc_status -v
 
-        elif [ -b "$loopdev" ]; then
-            echo -n "Loop mount unnecessary; $LOOP_LVM already available via $loopdev"
-            rc_failed 0
+                     # Need to tell LVM to rescan
+                     rescan=1
+
+                 elif [ -b "$loopdev" ]; then
+                     echo -n "Loop mount unnecessary; $LOOP_LVM already available via $loopdev"
+                     rc_failed 0
+                     rc_status -v
+                 fi
+             fi
+        done
+
+        if [ $rescan -ne 0 ]; then
+             if [ -f /etc/init.d/boot.lvm ]; then
+                 /etc/init.d/boot.lvm start
+                 rc_status -v
+             fi
         fi
-    fi
-
-    rc_status -v
     ;;
     stop)
-
-        loopdev=$(find_associated_loopdev)
-        if [ -b "$loopdev" ]; then
-            echo -n "Disabling loop mount of $LOOP_LVM"
-            losetup -d $loopdev
-        else
-            echo -n "Could not find loop mount of $LOOP_LVM"
-            rc_failed 3
-        fi
-
-        rc_status -v
+        for LOOP_LVM in $LOOP_LVMS; do
+             loopdev=$(find_associated_loopdev)
+             if [ -b "$loopdev" ]; then
+                 echo -n "Disabling loop mount of $LOOP_LVM"
+                 losetup -d $loopdev
+                 rc_status -v
+             else
+                 echo -n "Could not find loop mount of $LOOP_LVM"
+                 rc_failed 3
+                 rc_status -v
+             fi
+        done
         ;;
 
     status)
