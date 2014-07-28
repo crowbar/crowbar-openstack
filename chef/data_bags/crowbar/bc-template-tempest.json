@@ -26,7 +26,7 @@
       "crowbar-revision": 0,
       "crowbar-applied": false,
       "element_states": {
-        "tempest": [ "readying", "ready", "applying" ]
+        "tempest": [ "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
