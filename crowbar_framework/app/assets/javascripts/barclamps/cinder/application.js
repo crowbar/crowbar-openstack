@@ -96,6 +96,10 @@ $(document).ready(function($) {
       })
     );
 
+    // Fix up the select elements by reading the data-initial-value attributes
+    // and setting it as value (aka selecting this option by default)
+    $("select[data-initial-value]").each(function(){ $(this).val($(this).data("initial-value")); });
+
     // refresh data-change handlers
     detach_events();
     attach_events();
@@ -126,10 +130,6 @@ $(document).ready(function($) {
       $('#volume-entry-0-heading').remove();
     }
   }
-
-  // Fix up the select elements by reading the data-initial-value attributes
-  // and setting it as value (aka selecting this option by default)
-  $("select[data-initial-value]").each(function(){ $(this).val($(this).data("initial-value")); });
 
   $('#add_cinder_backend').click(function() {
     var new_backend = {
