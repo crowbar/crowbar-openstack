@@ -83,7 +83,8 @@ template "/etc/ceilometer/ceilometer.conf" do
       :metering_secret => node[:ceilometer][:metering_secret],
       :database_connection => db_connection,
       :node_hostname => node['hostname'],
-      :hypervisor_inspector => hypervisor_inspector
+      :hypervisor_inspector => hypervisor_inspector,
+      :alarm_threshold_evaluation_interval => node[:ceilometer][:alarm_threshold_evaluation_interval]
     )
 end
 

@@ -571,7 +571,7 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 # pipeline interval for collection of underlying metrics.
 # (integer value)
 # Deprecated group/name - [alarm]/threshold_evaluation_interval
-#evaluation_interval=60
+threshold_evaluation_interval=<%= @alarm_threshold_evaluation_interval %>
 
 
 #
