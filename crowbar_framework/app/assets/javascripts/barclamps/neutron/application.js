@@ -255,13 +255,11 @@ $(document).ready(function($) {
         $('#vmware_container').hide(100).attr('disabled', 'disabled');
         break;
       case 'cisco':
-        if (non_forced_mode != undefined) {
-          networking_mode.val(non_forced_mode);
-          networking_mode.removeData('non-forced');
+        if (non_forced_mode == undefined) {
+          networking_mode.data('non-forced', networking_mode.val());
         }
-
-        $('#mode_container').show(100).removeAttr('disabled');
-        networking_mode.trigger('change');
+        networking_mode.val('vlan').trigger('change');
+        $('#mode_container').hide(100).attr('disabled', 'disabled');
 
         $('#vmware_container').hide(100).attr('disabled', 'disabled');
         break;
