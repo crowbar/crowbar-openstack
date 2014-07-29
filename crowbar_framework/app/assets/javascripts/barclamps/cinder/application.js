@@ -36,9 +36,10 @@ $(document).ready(function($) {
     if (confirm("All volumes in the backend will be made unavailable; do you really want to delete this backend?")) {
       volume_entry = $(this).data("volumeid");
 
-      $(this).hide('slow', function() {
-        // delete the backend entry from the attributes JSON
-        $('#proposal_attributes').removeJsonAttribute('volumes/' + volume_entry);
+      // delete the backend entry from the attributes JSON
+      $('#proposal_attributes').removeJsonAttribute('volumes/' + volume_entry);
+
+      $('#volume-entry-' + volume_entry).hide('slow', function() {
         redisplay_backends();
       });
     }
