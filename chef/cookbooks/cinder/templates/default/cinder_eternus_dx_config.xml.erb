@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<FUJITSU>
+<EternusIP><%= @eternus_params["ip"] %></EternusIP>
+<EternusPort><%= @eternus_params["port"] %></EternusPort>
+<EternusUser><%= @eternus_params["user"] %></EternusUser>
+<EternusPassword><%= @eternus_params["password"] %></EternusPassword>
+<EternusPool><%= @eternus_params["pool"] %></EternusPool>
+<EternusISCSIIP><% if @eternus_params["protocol"] == "iscsi" %><%= @eternus_params["iscsi_ip"] %><% end %></EternusISCSIIP>
+</FUJITSU>

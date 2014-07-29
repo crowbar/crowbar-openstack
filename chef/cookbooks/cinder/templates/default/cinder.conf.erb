@@ -1166,7 +1166,7 @@ iscsi_ip_address = <%= volume["emc"]["emc_ecom_server_ip"] %>
 
 # use this file for cinder emc plugin config data (string
 # value)
-cinder_emc_config_file=/etc/cinder/cinder_emc_config-<% backend_id -%>.xml
+cinder_emc_config_file=/etc/cinder/cinder_emc_config-<%= backend_id %>.xml
 
 <% end %>
 
@@ -1423,7 +1423,7 @@ netapp_storage_protocol=<%= volume['netapp']['storage_protocol'] %>
 netapp_transport_type=<%= volume['netapp']['netapp_transport_type'] %>
 
 # File with the list of available nfs shares (string value)
-nfs_shares_config=/etc/cinder/nfs_shares-<% backend_id -%>
+nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
 
 <% end -%>
 
@@ -1506,7 +1506,7 @@ nfs_shares_config=/etc/cinder/nfs_shares-<% backend_id -%>
 
 <% if volume['backend_driver'] == 'netapp' -%>
 # File with the list of available nfs shares (string value)
-nfs_shares_config=/etc/cinder/nfs_shares-<% backend_id -%>
+nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
 <% end -%>
 
 # Create volumes as sparsed files which take no space.If set
@@ -1765,15 +1765,15 @@ san_password=<%= volume['eqlx']["san_password"] %>
 
 # IP address for connecting to VMware ESX/VC server. (string
 # value)
-#vmware_host_ip=<None>
+vmware_host_ip=<%= volume['vmware']["host"] %>
 
 # Username for authenticating with VMware ESX/VC server.
 # (string value)
-#vmware_host_username=<None>
+vmware_host_username=<%= volume['vmware']["user"] %>
 
 # Password for authenticating with VMware ESX/VC server.
 # (string value)
-#vmware_host_password=<None>
+vmware_host_password=<%= volume['vmware']["password"] %>
 
 # Optional VIM service WSDL Location e.g
 # http://<server>/vimService.wsdl. Optional over-ride to
@@ -1790,7 +1790,7 @@ san_password=<%= volume['eqlx']["san_password"] %>
 
 # Name for the folder in the VC datacenter that will contain
 # cinder volumes. (string value)
-#vmware_volume_folder=cinder-volumes
+vmware_volume_folder=<%= volume['vmware']["volume"] %>
 
 # Timeout in seconds for VMDK volume transfer between Cinder
 # and Glance. (integer value)
@@ -1899,6 +1899,17 @@ san_password=<%= volume['eqlx']["san_password"] %>
 #zadara_vpsa_allow_nonexistent_delete=true
 <% end -%>
 
+
+<% if volume['backend_driver'] == 'eternus' -%>
+#
+# Options defined in cinder.volume.drivers.fujitsu.fujitsu_eternus_dx_common
+#
+
+# Use this file for cinder Fujitsu ETERNUS DX plugin config data
+# (string value)
+cinder_eternus_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.xml
+<% end -%>
+
 #
 # Options defined in cinder.volume.manager
 #
@@ -1916,6 +1927,16 @@ volume_driver=cinder.volume.drivers.netapp.common.NetAppDriver
 <% end -%>
 <% if volume['backend_driver'] == 'emc' -%>
 volume_driver=cinder.volume.drivers.emc.emc_smis_iscsi.EMCSMISISCSIDriver
+<% end -%>
+<% if volume['backend_driver'] == 'eternus' -%>
+  <% if volume['eternus']['protocol'] == "iscsi" -%>
+volume_driver=cinder.volume.drivers.fujitsu.fujitsu_eternus_dx_iscsi.FJDXISCSIDriver
+  <% else -%>
+volume_driver=cinder.volume.drivers.fujitsu.fujitsu_eternus_dx_fc.FJDXFCDriver
+  <% end -%>
+<% end -%>
+<% if volume['backend_driver'] == 'vmware' -%>
+volume_driver=cinder.volume.drivers.vmware.vmdk.VMwareVcVmdkDriver
 <% end -%>
 <% if volume['backend_driver'] == 'manual' -%>
 volume_driver=<%= volume['manual']['driver'] %>

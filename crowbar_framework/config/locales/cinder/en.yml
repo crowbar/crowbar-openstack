@@ -31,13 +31,14 @@ en:
           addheader: 'Add new Cinder Backend'
           backend_name: 'Name for Backend'
           backend_driver: 'Type of Volume'
+          loading_text: 'Loading Backends...'
+          listheader: 'Cinder Backends'
           emc_parameters: 'EMC Parameters'
           emc_volume_driver: 'EMC'
           eqlx_parameters: 'EqualLogic Parameters'
           eqlx_volume_driver: 'EqualLogic'
-          file_parameters: 'File-based Parameters'
-          listheader: 'Cinder Backends'
-          loading_text: 'Loading Backends...'
+          eternus_parameters: 'Fujitsu ETERNUS DX Parameters'
+          eternus_volume_driver: 'Fujitsu ETERNUS DX'
           local_parameters: 'Local File Parameters'
           local_volume_driver: 'Local File'
           manual_parameters: 'Other driver parameters'
@@ -54,6 +55,8 @@ en:
           raw_volume_driver: 'Raw Devices'
           rbd_parameters: 'RADOS Parameters'
           rbd_volume_driver: 'RADOS'
+          vmware_parameters: 'VMWare Parameters'
+          vmware_volume_driver: 'VMWare'
           index:
             emc:
               ecom_server_ip: 'IP address of the ECOM server'
@@ -73,6 +76,14 @@ en:
               san_login: 'EQLX SAN login'
               san_password: 'EQLX SAN password'
               san_thin_provision: 'Use thin provision for volumes'
+            eternus:
+              protocol: 'ETERNUS Connection Protocol'
+              ip: 'ETERNUS IP for SMIS'
+              port: 'ETERNUS Port for SMIS'
+              user: 'ETERNUS Username for SMIS'
+              password: 'ETERNUS Password for SMIS'
+              pool: 'ETERNUS Poolname'
+              iscsi_ip: 'iSCSI IP'
             manual:
               config: 'Options'
               driver: 'Driver'
@@ -95,6 +106,11 @@ en:
               config_file: 'Path to Ceph configuration file'
               pool: 'RADOS pool for Cinder volumes'
               user: 'RADOS user (Set only if using CephX authentication)'
+            vmware:
+              host: 'vCenter IP Address'
+              user: 'vCenter Username'
+              password: 'vCenter Password'
+              volume: 'Volume Name'
             local:
               file_name: 'Volume File Name'
               file_size: 'Maximum File Size (GB)'

@@ -96,6 +96,21 @@
               = integer_field %w(volumes {{@index}} eqlx eqlx_cli_timeout)
 
           {{/if_eq}}
+          {{#if_eq backend_driver 'eternus'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.eternus_parameters')
+
+              = select_field %w(volumes {{@index}} eternus protocol), :collection => :eternus_protocols_for_cinder, "data-showit" => "iscsi", "data-showit-target" => "#volumes_{{@index}}_eternus_iscsi_ip"
+              = string_field %w(volumes {{@index}} eternus ip)
+              = integer_field %w(volumes {{@index}} eternus port)
+              = string_field %w(volumes {{@index}} eternus user)
+              = password_field %w(volumes {{@index}} eternus password)
+              = string_field %w(volumes {{@index}} eternus pool)
+              = string_field %w(volumes {{@index}} eternus iscsi_ip)
+
+          {{/if_eq}}
           {{#if_eq backend_driver 'rbd'}}
           %li.list-group-item
             %fieldset
@@ -108,6 +123,18 @@
 
               = string_field %w(volumes {{@index}} rbd pool)
               = string_field %w(volumes {{@index}} rbd user)
+
+          {{/if_eq}}
+          {{#if_eq backend_driver 'vmware'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.vmware_parameters')
+
+              = string_field %w(volumes {{@index}} vmware host)
+              = string_field %w(volumes {{@index}} vmware user)
+              = password_field %w(volumes {{@index}} vmware password)
+              = string_field %w(volumes {{@index}} vmware volume)
 
           {{/if_eq}}
           {{#if_eq backend_driver 'manual'}}
