@@ -52,21 +52,6 @@ $(document).ready(function($) {
     $('#cinder_backends [data-change]').updateAttribute();
 
     $('.volume-backend-delete').on('click', cb_cinder_volume_delete);
-    $('#cinder_backends [data-netapp-storage-protocol]').on('change', function() {
-      var volume_id = $(this).data('volumeid');
-
-      var netapp_storage_protocol = "#volumes_{0}_netapp_storage_protocol".format(volume_id);
-      var netapp_nfs_container = "#netapp_nfs_container_{0}".format(volume_id);
-
-      switch ($(netapp_storage_protocol).val()) {
-        case 'nfs':
-          $(netapp_nfs_container).show(100).removeAttr('disabled');
-          break;
-        default:
-          $(netapp_nfs_container).hide(100).attr('disabled', 'disabled');
-          break;
-      }
-    }).trigger('change');
     $('#cinder_backends [data-hideit]').trigger('change');
     $('#cinder_backends [data-showit]').trigger('change');
   }
@@ -75,7 +60,6 @@ $(document).ready(function($) {
   {
     $('#cinder_backends [data-change]').off('change keyup');
     $('.volume-backend-delete').off('click');
-    $('#cinder_backends [data-netapp-storage-protocol]').off('change');
   }
 
   function redisplay_backends()

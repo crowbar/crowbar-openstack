@@ -48,7 +48,7 @@
                 = t('.volumes.netapp_parameters')
 
               = select_field %w(volumes {{@index}} netapp storage_family), :collection => :netapp_storage_family
-              = select_field %w(volumes {{@index}} netapp storage_protocol), :collection => :netapp_storage_protocol, "data-netapp-storage-protocol" => true, "data-volumeid" => "{{@index}}"
+              = select_field %w(volumes {{@index}} netapp storage_protocol), :collection => :netapp_storage_protocol, "data-showit" => "nfs", "data-showit-target" => "#netapp_nfs_container_{{@index}}", "data-showit-direct" => "true"
               = string_field %w(volumes {{@index}} netapp netapp_server_hostname)
               = select_field %w(volumes {{@index}} netapp netapp_transport_type), :collection => :netapp_transports_for_cinder
               = integer_field %w(volumes {{@index}} netapp netapp_server_port)
@@ -56,7 +56,7 @@
               = password_field %w(volumes {{@index}} netapp netapp_password)
               = string_field %w(volumes {{@index}} netapp netapp_vfiler)
 
-              %div{ :id => "netapp_nfs_container_{{@index}}", "data-volumeid" => "{{@index}}"}
+              %div{ :id => "netapp_nfs_container_{{@index}}" }
                 = string_field %w(volumes {{@index}} netapp vserver)
                 = text_field %w(volumes {{@index}} netapp nfs_shares), :size => "80x5"
 
