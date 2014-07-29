@@ -1517,7 +1517,7 @@ netapp_transport_type=<%= volume['netapp']['netapp_transport_type'] %>
 
 
 <% end -%>
-<% if ['netapp'].include? volume['backend_driver'] -%>
+<% if volume['backend_driver'] == 'netapp' && volume['netapp']['storage_protocol'] == 'nfs' -%>
 #
 # Options defined in cinder.volume.drivers.nfs
 #

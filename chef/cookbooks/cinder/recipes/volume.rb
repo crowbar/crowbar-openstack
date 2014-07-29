@@ -186,6 +186,7 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
         mode "0640"
         action :create
         notifies :restart, "service[cinder-volume]"
+        only_if volume[:netapp][:storage_protocol] == "nfs"
       end
 
     when volume[:backend_driver] == "eternus"
