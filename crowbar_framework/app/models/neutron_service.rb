@@ -95,8 +95,13 @@ class NeutronService < PacemakerServiceObject
 
     plugin = proposal["attributes"]["neutron"]["networking_plugin"]
     mode = proposal["attributes"]["neutron"]["networking_mode"]
+
     if %(linuxbridge cisco).include?(plugin) and mode != "vlan"
       validation_error("The \"#{plugin}\" plugin only supports the mode: \"vlan\"")
+    end
+
+    if !%(gre vlan).include?(mode)
+      validation_error("Unknown networking mode \"#{mode}\"")
     end
 
     super
