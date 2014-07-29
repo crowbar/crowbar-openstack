@@ -93,9 +93,10 @@ class NeutronService < PacemakerServiceObject
       validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
     end
 
-    if proposal["attributes"]["neutron"]["networking_plugin"] == "linuxbridge" and
-        proposal["attributes"]["neutron"]["networking_mode"] != "vlan"
-        validation_error("The \"linuxbridge\" plugin only supports the mode: \"vlan\"")
+    plugin = proposal["attributes"]["neutron"]["networking_plugin"]
+    mode = proposal["attributes"]["neutron"]["networking_mode"]
+    if %(linuxbridge cisco).include?(plugin) and mode != "vlan"
+      validation_error("The \"#{plugin}\" plugin only supports the mode: \"vlan\"")
     end
 
     super
