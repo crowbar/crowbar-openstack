@@ -68,6 +68,7 @@ $(document).ready(function($) {
       }
     }).trigger('change');
     $('#cinder_backends [data-hideit]').trigger('change');
+    $('#cinder_backends [data-showit]').trigger('change');
   }
 
   function detach_events()
