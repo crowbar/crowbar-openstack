@@ -64,7 +64,7 @@ rabbitmq_user "adding user #{node[:rabbitmq][:user]}" do
   only_if only_if_command if ha_enabled
 end
 
-# grant the mapper user the ability to do anything with the vhost
+# grant the user created above the ability to do anything with the vhost
 # the three regex's map to config, write, read permissions respectively
 rabbitmq_user "setting permissions for #{node[:rabbitmq][:user]}" do
   user node[:rabbitmq][:user]
