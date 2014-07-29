@@ -21,13 +21,13 @@ module Barclamp
       options_for_select(
         [
           [t(".volumes.raw_volume_driver"), "raw"],
-          [t(".volumes.local_volume_driver"), "local"],
-          [t(".volumes.netapp_volume_driver"), "netapp"],
           [t(".volumes.emc_volume_driver"), "emc"],
           [t(".volumes.eqlx_volume_driver"), "eqlx"],
           [t(".volumes.eternus_volume_driver"), "eternus"],
+          [t(".volumes.netapp_volume_driver"), "netapp"],
           [t(".volumes.rbd_volume_driver"), "rbd"],
           [t(".volumes.vmware_volume_driver"), "vmware"],
+          [t(".volumes.local_volume_driver"), "local"],
           [t(".volumes.manual_volume_driver"), "manual"]
         ],
         selected.to_s
