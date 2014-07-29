@@ -25,18 +25,41 @@ node.set['openstack']['database']['verbose'] = node[:trove][:verbose]
 node.set['openstack']['database']['debug'] = node[:trove][:debug]
 node.set['openstack']['database']['volume_support'] = node[:trove][:volume_support]
 
-[['keystone-server', 'identity-api'],
- ['keystone-server', 'identity-admin'],
- ['nova-multi-controller', 'compute-api'],
- ['cinder-controller', 'block-storage-api'],
- ['swift-proxy', 'object-storage-api']
-].each do |comp, endpoint|
-  instance = get_instance("roles:#{comp}")
-  Chef::Log.info("Found #{comp} instance on #{instance}.")
-  node.set_unless['openstack']['endpoints'][endpoint] = {}
-  node.set['openstack']['endpoints'][endpoint]['host'] = instance['fqdn']
-  node.set['openstack']['endpoints'][endpoint]['scheme'] = instance['protocol']
-  node.set['openstack']['endpoints'][endpoint]['port'] = instance['service_port']
+keystone_server = get_instance('roles:keystone-server')
+Chef::Log.info("Found keystone-server instance on #{keystone_server}.")
+node.set_unless['openstack']['endpoints']['identity-api'] = {}
+node['openstack']['endpoints']['identity-api']['host'] = keystone_server['fqdn']
+node['openstack']['endpoints']['identity-api']['scheme'] = keystone_server['keystone']['api']['protocol']
+node['openstack']['endpoints']['identity-api']['port'] = keystone_server['keystone']['api']['service_port']
+
+node.set_unless['openstack']['endpoints']['identity-admin'] = {}
+node['openstack']['endpoints']['identity-admin']['host'] = keystone_server['fqdn']
+node['openstack']['endpoints']['identity-admin']['scheme'] = keystone_server['keystone']['api']['protocol']
+node['openstack']['endpoints']['identity-admin']['port'] = keystone_server['keystone']['api']['admin_port']
+
+nova_multi_controller = get_instance('roles:nova-multi-controller')
+Chef::Log.info("Found nova-multi-controller instance on #{nova_multi_controller}.")
+node.set_unless['openstack']['endpoints']['compute-api'] = {}
+node['openstack']['endpoints']['compute-api']['host'] = nova_multi_controller['fqdn']
+node['openstack']['endpoints']['compute-api']['scheme'] = nova_multi_controller['nova']['ssl']['enabled'] ? 'https' : 'http'
+node['openstack']['endpoints']['compute-api']['port'] = nova_multi_controller['nova']['ports']['api']
+
+cinder_controller = get_instance('roles:cinder-controller')
+Chef::Log.info("Found cinder-controller instance on #{cinder_controller}.")
+node.set_unless['openstack']['endpoints']['block-storage-api'] = {}
+node['openstack']['endpoints']['block-storage-api']['host'] = cinder_controller['fqdn']
+node['openstack']['endpoints']['block-storage-api']['scheme'] = cinder_controller['cinder']['api']['protocol']
+node['openstack']['endpoints']['block-storage-api']['port'] = cinder_controller['cinder']['api']['bind_port']
+
+swift_proxy = get_instance('roles:swift-proxy')
+if swift_proxy  # swift is optional
+  Chef::Log.info("Found swift-proxy instance on #{swift_proxy}.")
+  node.set_unless['openstack']['endpoints']['object-storage-api'] = {}
+  node['openstack']['endpoints']['object-storage-api']['host'] = swift_proxy['fqdn']
+  node['openstack']['endpoints']['object-storage-api']['scheme'] = swift_proxy['swift']['ssl']['enabled'] ? 'https' : 'http'
+  node['openstack']['endpoints']['object-storage-api']['port'] = swift_proxy['swift']['ports']['proxy']
+else
+  Chef::Log.info("Did not find a swift-proxy instance.")
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
