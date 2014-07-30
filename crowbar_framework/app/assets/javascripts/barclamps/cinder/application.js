@@ -83,7 +83,7 @@ $(document).ready(function($) {
 
     // Fix up the select elements by reading the data-initial-value attributes
     // and setting it as value (aka selecting this option by default)
-    $("select[data-initial-value]").each(function(){ $(this).val($(this).data("initial-value").toString()); });
+    $("#cinder_backends select[data-initial-value]").each(function(){ $(this).val($(this).data("initial-value").toString()); });
 
     // refresh data-change handlers
     detach_events();
