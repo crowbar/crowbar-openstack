@@ -112,18 +112,11 @@ $(document).ready(function($) {
       $('#proposal_attributes').writeJsonAttribute('volumes', volumes);
 
       redisplay_backends();
-
-      // Drop useless header
-      $('#volume-entry-0-heading').remove();
     });
   }
 
   if ($.queryString['attr_raw'] != "true") {
     redisplay_backends();
-    if (!use_multi_backend) {
-      // Drop useless header
-      $('#volume-entry-0-heading').remove();
-    }
   }
 
   // Fix up the select elements by reading the data-initial-value attributes

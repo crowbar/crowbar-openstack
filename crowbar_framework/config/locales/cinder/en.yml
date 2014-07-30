@@ -77,12 +77,12 @@ en:
               san_password: 'EQLX SAN password'
               san_thin_provision: 'Use thin provision for volumes'
             eternus:
-              protocol: 'ETERNUS Connection Protocol'
-              ip: 'ETERNUS IP for SMIS'
-              port: 'ETERNUS Port for SMIS'
-              user: 'ETERNUS Username for SMIS'
-              password: 'ETERNUS Password for SMIS'
-              pool: 'ETERNUS Poolname'
+              protocol: 'Connection Protocol'
+              ip: 'IP for SMI-S'
+              port: 'Port for SMI-S'
+              user: 'Username for SMI-S'
+              password: 'Password for SMI-S'
+              pool: 'Pool Name'
               iscsi_ip: 'iSCSI IP'
             manual:
               config: 'Options'
