@@ -307,9 +307,29 @@ public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{
 
 
 storage_protocol = "iSCSI"
+vendor_name = "Open Source"
 cinders[0][:cinder][:volumes].each do |volume|
   if volume[:backend_driver] == "rbd"
     storage_protocol = "ceph"
+    break
+  elsif volume[:backend_driver] == "emc"
+    vendor_name = "EMC"
+    break
+  elsif volume[:backend_driver] == "eqlx"
+    vendor_name = "Dell"
+    break
+  elsif volume[:backend_driver] == "eternus"
+    vendor_name = "FUJITSU"
+    storage_protocol = "fibre_channel" if volume[:eternus][:protocol] == "fc"
+    break
+  elsif volume[:backend_driver] == "netapp"
+    vendor_name = "NetApp"
+    storage_protocol = "nfs" if volume[:netapp][:storage_protocol] == "nfs"
+    break
+  elsif volume[:backend_driver] == "vmware"
+    vendor_name = "VMware"
+    storage_protocol = "LSI Logic SCSI"
+    break
   end
 end
 
@@ -358,6 +378,7 @@ template "#{tempest_conf}" do
     :use_neutron => !neutrons.empty?,
     :neutron_api_extensions => neutron_api_extensions,
     :storage_protocol => storage_protocol,
+    :vendor_name => vendor_name,
     :cinder_multi_backend => cinder_multi_backend,
     :cinder_backend1_name => cinder_backend1_name,
     :cinder_backend2_name => cinder_backend2_name,
