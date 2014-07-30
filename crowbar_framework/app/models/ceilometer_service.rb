@@ -111,9 +111,11 @@ class CeilometerService < PacemakerServiceObject
     end
 
     swift_proxy_nodes = NodeObject.find("roles:swift-proxy").map { |x| x.name }
-    proposal["deployment"]["ceilometer"]["elements"]["ceilometer-swift-proxy-middleware"].each do |n|
-      unless swift_proxy_nodes.include? n
-        validation_error("Nodes with the ceilometer-swift-proxy-middleware role must also have the swift-proxy role.")
+    if proposal["deployment"]["ceilometer"]["elements"]["ceilometer-swift-proxy-middleware"]
+      proposal["deployment"]["ceilometer"]["elements"]["ceilometer-swift-proxy-middleware"].each do |n|
+        unless swift_proxy_nodes.include? n
+          validation_error("Nodes with the ceilometer-swift-proxy-middleware role must also have the swift-proxy role.")
+        end
       end
     end
 
