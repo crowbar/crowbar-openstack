@@ -144,7 +144,7 @@ ruby_block "mark node for neutron db_sync" do
     node.save
   end
   action :nothing
-  subscribes :create, "execute[neutron-db-manage check_migration]", :immediately
+  subscribes :create, "execute[neutron-db-manage migrate]", :immediately
 end
 
 crowbar_pacemaker_sync_mark "create-neutron_db_sync"
