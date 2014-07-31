@@ -42,6 +42,16 @@ class TroveService < ServiceObject
     base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
     base["attributes"][@bc_name]["db"]["password"] = random_password
 
+    # assign a default node to the trove-server role
+    nodes = NodeObject.all
+    nodes.delete_if { |n| n.nil? or n.admin? }
+    if nodes.size >= 1
+      controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
+      base["deployment"]["trove"]["elements"] = {
+        "trove-server" => [ controller[:fqdn] ]
+      }
+    end
+
     @logger.debug("Trove create_proposal: exiting")
     base
   end
