@@ -270,6 +270,9 @@ if node[:rabbitmq][:listen_public]
     op rabbitmq_op
     action :create
   end
+  # Note: The "else" part of this, to remove the VIP for rabbitmq again, is
+  #       located further down below, because we first need to update the
+  #       constraints before we can stop and delete the primitive.
 end
 
 pacemaker_primitive service_name do
@@ -320,6 +323,15 @@ else
     action [ :create, :start ]
   end
 
+end
+
+# When listen_public is disabled remove the VIP primitive for rabbitmq
+unless node[:rabbitmq][:listen_public]
+  pacemaker_primitive public_vip_primitive do
+    agent "ocf:heartbeat:IPaddr2"
+    action [:stop, :delete]
+    only_if "crm configure show #{public_vip_primitive}"
+  end
 end
 
 crowbar_pacemaker_sync_mark "create-rabbitmq_ha_resources"

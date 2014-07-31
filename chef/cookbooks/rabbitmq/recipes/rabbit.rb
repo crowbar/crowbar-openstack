@@ -104,6 +104,19 @@ if node[:rabbitmq][:trove][:enabled]
     action :set_permissions
     only_if only_if_command if ha_enabled
   end
+else
+  rabbitmq_user "deleting user #{node[:rabbitmq][:trove][:user]}" do
+    user node[:rabbitmq][:trove][:user]
+    address node[:rabbitmq][:mochiweb_address]
+    port node[:rabbitmq][:mochiweb_port]
+    action :delete
+    only_if only_if_command if ha_enabled
+  end
+
+  rabbitmq_vhost node[:rabbitmq][:trove][:vhost] do
+    action :delete
+    only_if only_if_command if ha_enabled
+  end
 end
 
 # save data so it can be found by search
