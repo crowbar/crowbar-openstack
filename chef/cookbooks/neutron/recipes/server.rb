@@ -134,6 +134,22 @@ execute "neutron-db-manage migrate" do
   only_if { !node[:neutron][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
 end
 
+if ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) && !node[:neutron][:db_synced]
+  # Unfortunately, on first start, neutron populates the database. This is racy
+  # in the HA case and causes failures to start. So we work around this by
+  # quickly starting and stopping the service.
+  # https://bugs.launchpad.net/neutron/+bug/1326634
+  # https://bugzilla.novell.com/show_bug.cgi?id=889325
+  service "workaround for races in initial db population" do
+    if node[:neutron][:use_gitrepo]
+      service_name "neutron-server"
+    else
+      service_name node[:neutron][:platform][:service_name]
+    end
+    action [:start, :stop]
+  end
+end
+
 # We want to keep a note that we've done db_sync, so we don't do it again.
 # If we were doing that outside a ruby_block, we would add the note in the
 # compile phase, before the actual db_sync is done (which is wrong, since it
