@@ -38,6 +38,7 @@ describe 'openstack-database::taskmanager' do
        /^rabbit_userid = guest$/,
        /^rabbit_password = rabbit-pass$/,
        /^rabbit_use_ssl = false$/,
+       /^use_nova_server_config_drive = false$/,
        %r{^trove_auth_url = http://127.0.0.1:5000/v2.0$},
        %r{^nova_compute_url = http://127.0.0.1:8774/v2/$},
        %r{^cinder_url = http://127.0.0.1:8776/v1/$},
