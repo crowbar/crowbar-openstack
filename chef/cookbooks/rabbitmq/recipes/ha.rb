@@ -315,6 +315,18 @@ ruby_block "wait for #{service_name} to be started" do
           Chef::Log.debug("#{service_name} still not started")
           sleep(2)
         end
+        # Check that the service is available, if it's running on this node
+        cmd = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
+        if ::Kernel.system(cmd)
+          # The sed command grabs everything between '{running_applications'
+          # and ']}', and what we want is that the rabbit application is
+          # running
+          cmd = "rabbitmqctl -q status 2> /dev/null| sed -n '/{running_applications/,/\]}/p' | grep -q '{rabbit,'"
+          while ! ::Kernel.system(cmd)
+            Chef::Log.debug("#{service_name} still not answering")
+            sleep(2)
+          end
+        end
       end
     rescue Timeout::Error
       message = "The #{service_name} pacemaker resource is not started. Please manually check for an error."
