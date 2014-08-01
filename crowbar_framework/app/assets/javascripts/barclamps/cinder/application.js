@@ -36,9 +36,10 @@ $(document).ready(function($) {
     if (confirm("All volumes in the backend will be made unavailable; do you really want to delete this backend?")) {
       volume_entry = $(this).data("volumeid");
 
-      $(this).hide('slow', function() {
-        // delete the backend entry from the attributes JSON
-        $('#proposal_attributes').removeJsonAttribute('volumes/' + volume_entry);
+      // delete the backend entry from the attributes JSON
+      $('#proposal_attributes').removeJsonAttribute('volumes/' + volume_entry);
+
+      $('#volume-entry-' + volume_entry).hide('slow', function() {
         redisplay_backends();
       });
     }
@@ -51,29 +52,14 @@ $(document).ready(function($) {
     $('#cinder_backends [data-change]').updateAttribute();
 
     $('.volume-backend-delete').on('click', cb_cinder_volume_delete);
-    $('#cinder_backends [data-netapp-storage-protocol]').on('change', function() {
-      var volume_id = $(this).data('volumeid');
-
-      var netapp_storage_protocol = "#volumes_{0}_netapp_storage_protocol".format(volume_id);
-      var netapp_nfs_container = "#netapp_nfs_container_{0}".format(volume_id);
-
-      switch ($(netapp_storage_protocol).val()) {
-        case 'nfs':
-          $(netapp_nfs_container).show(100).removeAttr('disabled');
-          break;
-        default:
-          $(netapp_nfs_container).hide(100).attr('disabled', 'disabled');
-          break;
-      }
-    }).trigger('change');
     $('#cinder_backends [data-hideit]').trigger('change');
+    $('#cinder_backends [data-showit]').trigger('change');
   }
 
   function detach_events()
   {
     $('#cinder_backends [data-change]').off('change keyup');
     $('.volume-backend-delete').off('click');
-    $('#cinder_backends [data-netapp-storage-protocol]').off('change');
   }
 
   function redisplay_backends()
@@ -94,6 +80,10 @@ $(document).ready(function($) {
         "is_only_backend": volumes.length == 1
       })
     );
+
+    // Fix up the select elements by reading the data-initial-value attributes
+    // and setting it as value (aka selecting this option by default)
+    $("#cinder_backends select[data-initial-value]").each(function(){ $(this).val($(this).data("initial-value").toString()); });
 
     // refresh data-change handlers
     detach_events();
@@ -118,10 +108,6 @@ $(document).ready(function($) {
   if ($.queryString['attr_raw'] != "true") {
     redisplay_backends();
   }
-
-  // Fix up the select elements by reading the data-initial-value attributes
-  // and setting it as value (aka selecting this option by default)
-  $("select[data-initial-value]").each(function(){ $(this).val($(this).data("initial-value")); });
 
   $('#add_cinder_backend').click(function() {
     var new_backend = {
