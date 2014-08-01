@@ -24,6 +24,8 @@ end
 node.set['openstack']['database']['verbose'] = node[:trove][:verbose]
 node.set['openstack']['database']['debug'] = node[:trove][:debug]
 node.set['openstack']['database']['volume_support'] = node[:trove][:volume_support]
+# we need this in order for nova file injection to work for trove
+node.set['openstack']['database']['use_nova_server_config_drive'] = true
 
 keystone_server = get_instance('roles:keystone-server')
 Chef::Log.info("Found keystone-server instance on #{keystone_server}.")
