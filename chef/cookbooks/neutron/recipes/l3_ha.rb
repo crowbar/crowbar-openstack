@@ -73,9 +73,9 @@ when "linuxbridge"
 when "vmware"
   neutron_agent = ''
 end
-neutron_agent.slice! 'openstack-'
+neutron_agent_primitive = neutron_agent.sub(/^openstack-/, "")
 
-pacemaker_primitive neutron_agent do
+pacemaker_primitive neutron_agent_primitive do
   agent node[:neutron][:ha][:l3]["#{networking_plugin}_ra"]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
@@ -88,7 +88,7 @@ group_members << lbaas_agent_primitive if use_lbaas_agent
 group_members += [ dhcp_agent_primitive,
                    metadatda_agent_primitive,
                    metering_agent_primitive ]
-group_members << neutron_agent if use_l3_agent
+group_members << neutron_agent_primitive if use_l3_agent
 
 agents_group_name = "g-neutron-agents"
 agents_clone_name = "cl-#{agents_group_name}"
