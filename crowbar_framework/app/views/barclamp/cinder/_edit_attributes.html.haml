@@ -12,6 +12,7 @@
       %div#cinder_backends
         {{#each entries}}
         %ul.list-group(id="volume-entry-{{@index}}")
+          {{#if ../use_multi_backend }}
           %li.list-group-item.active
             %h3.list-group-item-heading
               Backend: {{ backend_name }}
@@ -19,6 +20,7 @@
               {{else}}
               = link_to icon_tag("trash"), "#", :class => "volume-backend-delete pull-right delete", "data-volumeid" => "{{@index}}"
               {{/if}}
+          {{/if}}
 
           {{#if_eq backend_driver 'raw'}}
           %li.list-group-item
