@@ -86,6 +86,9 @@ template "/etc/ceilometer/ceilometer.conf" do
       :hypervisor_inspector => hypervisor_inspector,
       :alarm_threshold_evaluation_interval => node[:ceilometer][:alarm_threshold_evaluation_interval]
     )
+    if node.roles.include?("ceilometer-agent")
+      notifies :restart, "service[nova-compute]"
+    end
 end
 
 template "/etc/ceilometer/pipeline.yaml" do
@@ -99,4 +102,7 @@ template "/etc/ceilometer/pipeline.yaml" do
       :disk_interval => node[:ceilometer][:disk_interval],
       :network_interval => node[:ceilometer][:network_interval]
   })
+  if node.roles.include?("ceilometer-agent")
+    notifies :restart, "service[nova-compute]"
+  end
 end
