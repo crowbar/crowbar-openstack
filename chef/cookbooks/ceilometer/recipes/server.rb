@@ -16,29 +16,42 @@
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
 if node[:ceilometer][:use_mongodb]
-  include_recipe "ceilometer::mongodb" if !node[:ceilometer][:ha][:server][:enabled] || node[:ceilometer][:ha][:mongodb][:replica_set][:member]
+  include_recipe "ceilometer::mongodb" if !ha_enabled || node[:ceilometer][:ha][:mongodb][:replica_set][:member]
 
   # need to wait for mongodb to start even if it's on a
   # different host (ceilometer services need it running)
-  members = search(:node, "ceilometer_ha_mongodb_replica_set_member:true")
-  # if we don't have HA enabled, then mongodb should be on the current host
-  if members.empty?
-    node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  else
-    node_address = members.first.fqdn
+  mongodb_node = nil
+
+  if ha_enabled && !node[:ceilometer][:ha][:mongodb][:replica_set][:member]
+    mongodb_nodes = search(:node,
+      "ceilometer_ha_mongodb_replica_set_member:true AND "\
+      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
+      )
+
+    unless mongodb_nodes.empty?
+      mongodb_node = mongodb_nodes.first
+    end
   end
+
+  # if we don't have HA enabled, then mongodb should be on the current host; if
+  # we have HA enabled and the node is part of the replica set, then we're fine
+  # too
+  mongodb_node ||= node
+
+  mongodb_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(mongodb_node, "admin").address
+
   ruby_block "wait for mongodb start" do
     block do
       require 'timeout'
       begin
         Timeout.timeout(60) do
-          while ! ::Kernel.system("mongo #{node_address} --quiet < /dev/null &> /dev/null")
+          while ! ::Kernel.system("mongo #{mongodb_address} --quiet < /dev/null &> /dev/null")
             Chef::Log.debug("mongodb still not reachable")
             sleep(2)
           end
         end
       rescue Timeout::Error
-        Chef::Log.warn("mongodb on #{node_address} does not seem to be responding after trying for 1 minute")
+        Chef::Log.warn("mongodb on #{mongodb_address} does not seem to be responding after trying for 1 minute")
       end
     end
   end
