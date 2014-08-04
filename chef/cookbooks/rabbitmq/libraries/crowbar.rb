@@ -16,6 +16,7 @@ module CrowbarRabbitmqHelper
       Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
     end
   end
+
   def self.get_public_listen_address(node)
     if node[:rabbitmq][:ha][:enabled]
       vhostname = get_ha_vhostname(node)
