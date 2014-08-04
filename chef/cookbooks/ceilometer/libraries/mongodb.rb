@@ -30,7 +30,14 @@ module CeilometerHelper
     def configure_replicaset(node, name, members)
       # lazy require, to move loading this modules to runtime of the cookbook
       require 'rubygems'
-      require 'mongo'
+      begin
+        require 'mongo'
+      rescue LoadError
+        # After installation of the gem, we have a new path for the new gem, so
+        # we need to reset the paths if we can't load rubygem-mongo
+        Gem.clear_paths
+        require 'mongo'
+      end
 
       if members.length == 0
         if Chef::Config[:solo]
