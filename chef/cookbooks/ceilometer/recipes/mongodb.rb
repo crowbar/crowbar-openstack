@@ -38,7 +38,6 @@ template mongo_conf do
 end
 
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
-node_is_controller = node[:ceilometer][:ha][:mongodb][:replica_set][:controller]
 
 service mongo_service do
   supports :status => true, :restart => true
@@ -62,7 +61,7 @@ if ha_enabled
 
   crowbar_pacemaker_sync_mark "create-mongodb_service"
 
-  if node_is_controller
+  if node[:ceilometer][:ha][:mongodb][:replica_set][:controller]
     # install the package immediately because we need it to configure the
     # replicaset
     package("rubygem-mongo").run_action(:install)
