@@ -34,7 +34,7 @@ template mongo_conf do
   variables(
     :listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
     )
-  # notifies :restart, "service[#{mongo_service}]", :immediately
+  notifies :restart, "service[#{mongo_service}]", :immediately
 end
 
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
