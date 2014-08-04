@@ -162,36 +162,48 @@ class CeilometerService < PacemakerServiceObject
     @logger.debug("Ceilometer apply_role_pre_chef_call: leaving")
   end
 
-  def mongodb_ha(instances, role)
+  def mongodb_ha(new_members, role)
     # enforce that mongodb is only installed on an odd number of nodes
     # so we don't get problems when they try to vote for a replica set
     # primary node
-    instances.pop if instances.length % 2 == 0
+    new_members.pop if new_members.length % 2 == 0
 
-    logger.debug("Configuring a MongoDB Replica Set with "\
-      "the following nodes: #{instances.join(", ")}")
-
-    # make sure only the current replica set instances have the replica
-    # set attributes enabled
-    require 'set'
-    members = Set.new(NodeObject.find("ceilometer_ha_mongodb_replica_set_member:true AND ceilometer_config_environment:#{role.name}"))
-    (members - instances).each do |node|
-      node[:ceilometer][:ha][:mongodb][:replica_set][:member] = false
-      node[:ceilometer][:ha][:mongodb][:replica_set][:controller] = false
-      node.save
-    end
-
-    instances.each do |instance|
-      node = NodeObject.find_node_by_name(instance)
-      node[:ceilometer] ||= {:ha => {:mongodb => {:replica_set => {}}}}
-      node[:ceilometer][:ha][:mongodb][:replica_set][:member] = true
-      node[:ceilometer][:ha][:mongodb][:replica_set][:controller] = false
-      node.save
-    end
     # this is just the node we use to communicate to mongodb and
     # configure the replica set
-    controller = NodeObject.find_node_by_name(instances.first)
-    controller[:ceilometer][:ha][:mongodb][:replica_set][:controller] = true
-    controller.save
+    controller = new_members.sort.first
+
+    logger.debug("Configuring a MongoDB Replica Set with "\
+      "the following nodes: #{new_members.join(", ")}")
+
+    # make sure only the current replica set new_members have the replica
+    # set attributes enabled
+    old_members = NodeObject.find("ceilometer_ha_mongodb_replica_set_member:true AND ceilometer_config_environment:#{role.name}")
+    old_members.each do |old_member|
+      next if new_members.include?(old_member.name)
+      old_member[:ceilometer][:ha][:mongodb][:replica_set][:member] = false
+      old_member[:ceilometer][:ha][:mongodb][:replica_set][:controller] = false
+      old_member.save
+    end
+
+    new_members.each do |new_member|
+      dirty = false
+
+      node = NodeObject.find_node_by_name(new_member)
+      node[:ceilometer] ||= {:ha => {:mongodb => {:replica_set => {}}}}
+
+      # explicit check for true; otherwise it doesn't work
+      unless node[:ceilometer][:ha][:mongodb][:replica_set][:member] == true
+        node[:ceilometer][:ha][:mongodb][:replica_set][:member] = true
+        dirty = true
+      end
+
+      is_controller = (new_member == controller)
+      unless node[:ceilometer][:ha][:mongodb][:replica_set][:controller] == is_controller
+        node[:ceilometer][:ha][:mongodb][:replica_set][:controller] = is_controller
+        dirty = true
+      end
+
+      node.save if dirty
+    end
   end
 end
