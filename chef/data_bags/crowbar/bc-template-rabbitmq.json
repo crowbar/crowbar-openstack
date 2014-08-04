@@ -3,6 +3,7 @@
   "description": "Installation for rabbitmq",
   "attributes": {
     "rabbitmq": {
+      "listen_public": false,
       "port": 5672,
       "password": "",
       "user": "nova",
@@ -19,6 +20,12 @@
             "options": ""
           }
         }
+      },
+      "trove": {
+        "enabled": false,
+        "password": "",
+        "user": "trove",
+        "vhost": "/trove"
       }
     }
   },
@@ -26,7 +33,7 @@
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 1,
+      "schema-revision": 11,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },

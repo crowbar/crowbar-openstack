@@ -58,6 +58,7 @@ class RabbitmqService < PacemakerServiceObject
     }
 
     base["attributes"][@bc_name]["password"] = random_password
+    base["attributes"][@bc_name]["trove"]["password"] = random_password
 
     @logger.debug("Rabbitmq create_proposal: exiting")
     base
@@ -70,14 +71,24 @@ class RabbitmqService < PacemakerServiceObject
     rabbitmq_elements, rabbitmq_nodes, rabbitmq_ha_enabled = role_expand_elements(role, "rabbitmq-server")
     role.save if prepare_role_for_ha(role, ["rabbitmq", "ha", "enabled"], rabbitmq_ha_enabled)
 
+    net_svc = NetworkService.new @logger
+    # Allocate public IP if rabbitmq should listen on public interface
+    if role.default_attributes["rabbitmq"]["listen_public"]
+      rabbitmq_nodes.each do |n|
+        net_svc.allocate_ip "default", "public", "host", n
+      end
+    end
+
     if rabbitmq_ha_enabled
-      net_svc = NetworkService.new @logger
       unless rabbitmq_elements.length == 1 && PacemakerServiceObject.is_cluster?(rabbitmq_elements[0])
         raise "Internal error: HA enabled, but element is not a cluster"
       end
       cluster = rabbitmq_elements[0]
       rabbitmq_vhostname = "#{role.name.gsub("-config", "")}-#{PacemakerServiceObject.cluster_name(cluster)}.#{ChefObject.cloud_domain}".gsub("_", "-")
       net_svc.allocate_virtual_ip "default", "admin", "host", rabbitmq_vhostname
+      if role.default_attributes["rabbitmq"]["listen_public"]
+        net_svc.allocate_virtual_ip "default", "public", "host", rabbitmq_vhostname
+      end
       # rabbitmq, on start, needs to have the virtual hostname resolvable; so
       # let's force a dns update now
       ensure_dns_uptodate
