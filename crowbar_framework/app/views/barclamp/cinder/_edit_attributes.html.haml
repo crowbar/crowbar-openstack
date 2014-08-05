@@ -136,7 +136,7 @@
               = string_field %w(volumes {{@index}} vmware host)
               = string_field %w(volumes {{@index}} vmware user)
               = password_field %w(volumes {{@index}} vmware password)
-              = string_field %w(volumes {{@index}} vmware volume)
+              = string_field %w(volumes {{@index}} vmware volume_folder)
 
           {{/if_eq}}
           {{#if_eq backend_driver 'manual'}}

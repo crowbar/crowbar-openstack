@@ -110,7 +110,7 @@ en:
               host: 'vCenter Host/IP Address'
               user: 'vCenter Username'
               password: 'vCenter Password'
-              volume: 'Volume Name'
+              volume_folder: 'Folder for Volumes'
             local:
               file_name: 'Volume File Name'
               file_size: 'Maximum File Size (GB)'
