@@ -110,7 +110,7 @@
                     "host": { "type": "str", "required": true },
                     "user": { "type": "str", "required": true },
                     "password": { "type": "str", "required": true },
-                    "volume": { "type": "str", "required": true }
+                    "volume_folder": { "type": "str", "required": true }
                 }
                 },
                 "manual": {
@@ -206,7 +206,7 @@
                       "host": { "type": "str", "required": true },
                       "user": { "type": "str", "required": true },
                       "password": { "type": "str", "required": true },
-                      "volume": { "type": "str", "required": true }
+                      "volume_folder": { "type": "str", "required": true }
                       }
                   },
                   "manual": {
