@@ -96,7 +96,7 @@ hypervisor_inspector=<%= @hypervisor_inspector %>
 
 # Libvirt domain type (valid options are: kvm, lxc, qemu, uml,
 # xen). (string value)
-libvirt_type=<%= node[:nova][:libvirt_type] %>
+libvirt_type=<%= @libvirt_type %>
 
 # Override the default libvirt URI (which is dependent on
 # libvirt_type). (string value)

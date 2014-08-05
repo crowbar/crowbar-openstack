@@ -51,11 +51,13 @@ end
 
 # Find hypervisor inspector
 hypervisor_inspector = nil
+libvirt_type = nil
 if node.roles.include?("ceilometer-agent")
   if node.roles.include?("nova-multi-compute-vmware")
     hypervisor_inspector = "vsphere"
   else
     hypervisor_inspector = "libvirt"
+    libvirt_type = node[:nova][:libvirt_type]
   end
 end
 
@@ -84,6 +86,7 @@ template "/etc/ceilometer/ceilometer.conf" do
       :database_connection => db_connection,
       :node_hostname => node['hostname'],
       :hypervisor_inspector => hypervisor_inspector,
+      :libvirt_type => libvirt_type,
       :alarm_threshold_evaluation_interval => node[:ceilometer][:alarm_threshold_evaluation_interval]
     )
     if node.roles.include?("ceilometer-agent")
