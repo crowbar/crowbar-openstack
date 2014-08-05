@@ -70,6 +70,28 @@ if ha_enabled
       "ceilometer_ha_mongodb_replica_set_member:true AND "\
       "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
       ).sort
-    CeilometerHelper.configure_replicaset(node, "crowbar-ceilometer", members)
+
+    # configure replica set in a ruby block where we also wait for mongodb
+    # because we need mongodb to be started (which is not the case in compile
+    # phase)
+    ruby_block "Configure MongoDB replica set" do
+      block do
+        require 'timeout'
+        begin
+          mongodb_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+
+          Timeout.timeout(60) do
+            while ! ::Kernel.system("mongo #{mongodb_address} --quiet < /dev/null &> /dev/null")
+              Chef::Log.debug("mongodb still not reachable")
+              sleep(2)
+            end
+
+            CeilometerHelper.configure_replicaset(node, "crowbar-ceilometer", members)
+          end
+        rescue Timeout::Error
+          Chef::Log.warn("Cannot configure replicaset: mongodb does not seem to be responding after trying for 1 minute")
+        end
+      end
+    end
   end
 end
