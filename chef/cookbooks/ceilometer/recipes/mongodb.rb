@@ -80,7 +80,7 @@ if ha_enabled
         begin
           mongodb_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 
-          Timeout.timeout(60) do
+          Timeout.timeout(120) do
             while ! ::Kernel.system("mongo #{mongodb_address} --quiet < /dev/null &> /dev/null")
               Chef::Log.debug("mongodb still not reachable")
               sleep(2)

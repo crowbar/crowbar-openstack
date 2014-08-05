@@ -44,14 +44,14 @@ if node[:ceilometer][:use_mongodb]
     block do
       require 'timeout'
       begin
-        Timeout.timeout(60) do
+        Timeout.timeout(120) do
           while ! ::Kernel.system("mongo #{mongodb_address} --quiet < /dev/null &> /dev/null")
             Chef::Log.debug("mongodb still not reachable")
             sleep(2)
           end
         end
       rescue Timeout::Error
-        Chef::Log.warn("mongodb on #{mongodb_address} does not seem to be responding after trying for 1 minute")
+        Chef::Log.warn("mongodb on #{mongodb_address} does not seem to be responding after trying for 2 minutes")
       end
     end
   end
