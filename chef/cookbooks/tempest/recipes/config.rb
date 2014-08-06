@@ -19,25 +19,9 @@
 #
 
 
-env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
-
-novas = search(:node, "roles:nova-multi-controller#{env_filter}") || []
-if novas.length > 0
-  nova = novas[0]
-  nova = node if nova.name == node.name
-else
-  nova = node
-end
-
-env_filter = " AND keystone_config_environment:keystone-config-#{nova[:nova][:keystone_instance]}"
-
-keystones = search(:node, "roles:keystone-server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = node if keystone.name == node.name
-else
-  keystone = node
-end
+keystone = get_instance('roles:keystone-server')
+glance = get_instance('roles:glance-server')
+nova = get_instance('roles:nova-multi-controller')
 
 keystone_port = keystone[:keystone][:api][:service_port]
 
@@ -57,16 +41,6 @@ keystone_token = keystone[:keystone][:service][:token]
 keystone_admin_port = keystone[:keystone][:api][:admin_port]
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
-env_filter = " AND glance_config_environment:glance-config-#{nova[:nova][:glance_instance]}"
-
-glances = search(:node, "roles:glance-server#{env_filter}") || []
-if glances.length > 0
-  glance = glances[0]
-  glance = node if glance.name == node.name
-else
-  glance = node
-end
 
 glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "admin").address if glance_address.nil?
 glance_port = glance[:glance][:api][:bind_port]

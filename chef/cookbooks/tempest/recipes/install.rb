@@ -27,27 +27,6 @@ rescue
   pip_cmd="pip install"
 end
 
-#check if nova and glance use gitrepo or package
-env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
-
-novas = search(:node, "roles:nova-multi-controller#{env_filter}") || []
-if novas.length > 0
-  nova = novas[0]
-  nova = node if nova.name == node.name
-else
-  nova = node
-end
-
-env_filter = " AND glance_config_environment:glance-config-#{nova[:nova][:glance_instance]}"
-
-glances = search(:node, "roles:glance-server#{env_filter}") || []
-if glances.length > 0
-  glance = glances[0]
-  glance = node if glance.name == node.name
-else
-  glance = node
-end
-
 #needed to create venv correctly
 if %w(redhat centos).include?(node.platform)
   package "libxslt-devel"
@@ -114,6 +93,7 @@ else
   package "openstack-tempest-test"
 end
 
+nova = get_instance('roles:nova-multi-controller')
 unless nova[:nova][:use_gitrepo]
   package "python-novaclient"
 else
@@ -122,6 +102,7 @@ else
   end
 end
 
+glance = get_instance('roles:glance-server')
 unless glance[:glance][:use_gitrepo]
   package "python-glanceclient"
 else
