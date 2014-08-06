@@ -15,7 +15,6 @@
       "use_pip_cache": true,
       "use_gitbarclamp": true,
       "nova_instance": "none",
-      "tempest_path": "/opt/tempest",
       "pfs_deps": [
         "pip://python-novaclient"
       ]
@@ -25,6 +24,7 @@
     "tempest": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
+      "schema-revision": 1,
       "element_states": {
         "tempest": [ "ready", "applying" ]
       },

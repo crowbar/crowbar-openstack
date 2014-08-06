@@ -137,8 +137,8 @@ end
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
 heat_machine_id_file = node[:tempest][:tempest_path] + '/heat_machine.id'
 
-venv_prefix_path = node[:tempest][:use_virtualenv] ? ". /opt/tempest/.venv/bin/activate && " : nil
-bin_path = node[:tempest][:use_virtualenv] ? "/opt/tempest/.venv/bin" : "/usr/bin/"
+venv_prefix_path = node[:tempest][:use_virtualenv] ? ". #{node[:tempest][:tempest_path]}/.venv/bin/activate && " : nil
+bin_path = node[:tempest][:use_virtualenv] ? "#{node[:tempest][:tempest_path]}/.venv/bin" : "/usr/bin/"
 
 bash "upload tempest test image" do
   code <<-EOH
@@ -355,7 +355,7 @@ template "#{tempest_conf}" do
   )
 end
 
-nosetests = "/opt/tempest/.venv/bin/nosetests"
+nosetests = "#{node[:tempest][:tempest_path]}/.venv/bin/nosetests"
 
 
 ["#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh",

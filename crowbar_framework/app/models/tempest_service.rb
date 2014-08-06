@@ -191,8 +191,6 @@ class TempestService < ServiceObject
     tempest_db.save
     release_lock(lock)
 
-    proposal_path = proposal['attributes'][@bc_name]['tempest_path']
-
     @logger.info("starting tempest on node #{node}, test run uuid #{test_run['uuid']}")
 
     pid = fork do
