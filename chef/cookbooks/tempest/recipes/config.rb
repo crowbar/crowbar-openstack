@@ -365,13 +365,9 @@ nosetests = "/opt/tempest/.venv/bin/nosetests"
     mode 0755
     source "#{(p.rpartition '/')[2]}.erb"
     variables(
-      :alt_comp_pass => alt_comp_pass,
-      :alt_comp_tenant => alt_comp_tenant,
-      :alt_comp_user => alt_comp_user,
       :comp_pass => tempest_comp_pass,
       :comp_tenant => tempest_comp_tenant,
       :comp_user => tempest_comp_user,
-      :keystone_url => keystone_settings["internal_auth_url"],
       :keystone_settings => keystone_settings,
       :nosetests => nosetests,
       :tempest_path => node[:tempest][:tempest_path]

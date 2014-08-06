@@ -1,19 +1,11 @@
 #!/bin/bash
 
-export OS_AUTH_URL=<%= @keystone_url %>
+export OS_AUTH_URL=<%= @keystone_settings['internal_auth_url'] %>
 export OS_AUTH_STRATEGY=keystone
 
 username=<%= @comp_user %>
 password=<%= @comp_pass %>
 tenant_name=<%= @comp_tenant %>
-
-alt_username=<%= @alt_comp_user %>
-alt_password=<%= @alt_comp_pass %>
-alt_tenant_name=<%= @alt_comp_tenant %>
-
-admin_username=<%= @keystone_settings['admin_user'] %>
-admin_password=<%= @keystone_settings['admin_password'] %>
-admin_tenant_name=<%= @keystone_settings['default_tenant'] %>
 
 #s3 test preparation
 cert_dir=<%= @tempest_path %>/etc/certs/
