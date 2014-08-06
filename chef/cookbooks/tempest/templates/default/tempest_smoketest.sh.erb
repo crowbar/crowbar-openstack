@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export OS_AUTH_URL=http://<%= @key_host %>:<%= @key_port %>/v2.0/
+export OS_AUTH_URL=<%= @keystone_url %>
 export OS_AUTH_STRATEGY=keystone
 
 username=<%= @comp_user %>

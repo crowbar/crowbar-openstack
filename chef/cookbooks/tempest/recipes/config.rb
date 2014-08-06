@@ -20,10 +20,9 @@
 
 
 keystone = get_instance('roles:keystone-server')
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 glance = get_instance('roles:glance-server')
 nova = get_instance('roles:nova-multi-controller')
-
-keystone_port = keystone[:keystone][:api][:service_port]
 
 alt_comp_user = keystone[:keystone][:default][:username]
 alt_comp_pass = keystone[:keystone][:default][:password]
@@ -37,10 +36,6 @@ tempest_adm_user = node[:tempest][:tempest_adm_username]
 tempest_adm_pass = node[:tempest][:tempest_adm_password]
 
 keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
-keystone_token = keystone[:keystone][:service][:token]
-keystone_admin_port = keystone[:keystone][:api][:admin_port]
-
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "admin").address if glance_address.nil?
 glance_port = glance[:glance][:api][:bind_port]
@@ -159,7 +154,7 @@ IMG_FILE=$(basename $IMAGE_URL)
 IMG_NAME="${IMG_FILE%-*}"
 
 function glance_it() {
-#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N http://$KEYSTONE_HOST:5000/v2.0 -H $GLANCE_HOST $@
+#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL -H $GLANCE_HOST $@
 }
 
 function extract_id() {
@@ -204,7 +199,7 @@ EOH
     'OS_USER' => tempest_comp_user,
     'OS_PASSWORD' => tempest_comp_pass,
     'OS_TENANT' => tempest_comp_tenant,
-    'KEYSTONE_HOST' => keystone_address,
+    'KEYSTONE_URL' => keystone_settings["internal_auth_url"],
     'GLANCE_HOST' => glance_address
   })
   not_if { File.exists?(machine_id_file) }
@@ -218,7 +213,7 @@ OS_TENANT=${OS_TENANT:-admin}
 OS_PASSWORD=${OS_PASSWORD:-admin}
 
 function glance_it() {
-#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N http://$KEYSTONE_HOST:5000/v2.0 -H $GLANCE_HOST $@
+#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL -H $GLANCE_HOST $@
 }
 
 id=$(glance_it image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
@@ -231,7 +226,7 @@ EOF
     'OS_USER' => tempest_comp_user,
     'OS_PASSWORD' => tempest_comp_pass,
     'OS_TENANT' => tempest_comp_tenant,
-    'KEYSTONE_HOST' => keystone_address,
+    'KEYSTONE_URL' => keystone_settings["internal_auth_url"],
     'GLANCE_HOST' => glance_address
   })
 
@@ -244,14 +239,14 @@ heat_flavor_ref = "8"
 
 bash "create_yet_another_tiny_flavor" do
   code <<-EOH
-  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff #{flavor_ref} 128 0 1 || exit 0
-  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff-2 #{alt_flavor_ref} 196 0 1 || exit 0
-  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-heat #{heat_flavor_ref} 512 0 1 || exit 0
+  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-stuff #{flavor_ref} 128 0 1 || exit 0
+  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-stuff-2 #{alt_flavor_ref} 196 0 1 || exit 0
+  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-heat #{heat_flavor_ref} 512 0 1 || exit 0
 EOH
 end
 
-ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
-ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
+ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
+ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
 cirros_version = "0.3.2"
 
 tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
@@ -277,7 +272,7 @@ unless neutrons[0].nil?
   end
 end
 
-public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
+public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
 
 
 storage_protocol = "iSCSI"
@@ -339,7 +334,6 @@ template "#{tempest_conf}" do
     :img_port => glance_port,
     :http_image => node[:tempest][:tempest_test_image],
     :key_host => keystone_address,
-    :key_port => keystone_port,
     :keystone_settings => keystone_settings,
     :machine_id_file => machine_id_file,
     :nova_host => nova.name,
@@ -377,8 +371,7 @@ nosetests = "/opt/tempest/.venv/bin/nosetests"
       :comp_pass => tempest_comp_pass,
       :comp_tenant => tempest_comp_tenant,
       :comp_user => tempest_comp_user,
-      :key_host => keystone_address,
-      :key_port => keystone_port,
+      :keystone_url => keystone_settings["internal_auth_url"],
       :keystone_settings => keystone_settings,
       :nosetests => nosetests,
       :tempest_path => node[:tempest][:tempest_path]
