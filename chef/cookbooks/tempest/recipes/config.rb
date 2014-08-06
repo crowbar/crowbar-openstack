@@ -249,11 +249,6 @@ ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempes
 ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
 cirros_version = "0.3.2"
 
-tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
-if %w(suse redhat centos).include?(node.platform)
-  tempest_conf = "/etc/tempest/tempest.conf"
-end
-
 swifts = search(:node, "roles:swift-proxy") || []
 heats = search(:node, "roles:heat-server") || []
 cinders = search(:node, "roles:cinder-controller") || []
@@ -310,6 +305,12 @@ if backend_names.length > 1
   cinder_multi_backend = true
   cinder_backend1_name = backend_names[0]
   cinder_backend2_name = backend_names[1]
+end
+
+if node[:tempest][:use_gitrepo]
+  tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
+else
+  tempest_conf = "/etc/tempest/tempest.conf"
 end
 
 template "#{tempest_conf}" do
