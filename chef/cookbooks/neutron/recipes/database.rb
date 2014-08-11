@@ -13,23 +13,10 @@
 # limitations under the License.
 #
 
-sql = get_instance('roles:database-server')
-include_recipe "database::client" 
-backend_name = Chef::Recipe::Database::Util.get_backend_name(sql) 
-include_recipe "#{backend_name}::client" 
-include_recipe "#{backend_name}::python-client"
-
-db_provider = Chef::Recipe::Database::Util.get_database_provider(sql) 
-db_user_provider = Chef::Recipe::Database::Util.get_user_provider(sql) 
-privs = Chef::Recipe::Database::Util.get_default_priviledges(sql) 
-url_scheme = backend_name
-
-sql_address = CrowbarDatabaseHelper.get_listen_address(sql)
-Chef::Log.info("Database server found at #{sql_address}") 
-
-db_conn = { :host => sql_address, 
-            :username => "db_maker", 
-            :password => sql["database"][:db_maker_password] }
+db_settings = fetch_database_settings
+include_recipe "database::client"
+include_recipe "#{db_settings[:backend_name]}::client"
+include_recipe "#{db_settings[:backend_name]}::python-client"
 
 props = [ {'db_name' => node[:neutron][:db][:database],
           'db_user' => node[:neutron][:db][:user],
@@ -48,33 +35,33 @@ props.each do |prop|
   sql_address_name = prop['sql_address_name']
 
     database "create #{db_name} neutron database" do
-        connection db_conn
+        connection db_settings[:connection]
         database_name "#{db_name}"
-        provider db_provider
+        provider db_settings[:provider]
         action :create
     end
 
     database_user "create #{db_user} user in #{db_name} neutron database" do
-        connection db_conn
+        connection db_settings[:connection]
         username "#{db_user}"
         password "#{db_pass}"
         host '%'
-        provider db_user_provider
+        provider db_settings[:user_provider]
         action :create
     end
 
     database_user "grant database access for #{db_user} user in #{db_name} neutron database" do
-        connection db_conn 
-        username "#{db_user}" 
+        connection db_settings[:connection]
+        username "#{db_user}"
         password "#{db_pass}"
         database_name "#{db_name}"
-        host '%' 
-        privileges privs 
-        provider db_user_provider 
-        action :grant 
+        host '%'
+        privileges db_settings[:privs]
+        provider db_settings[:user_provider]
+        action :grant
     end
 
-    node[@cookbook_name][:db][db_conn_name] = "#{url_scheme}://#{db_user}:#{db_pass}@#{sql_address}/#{db_name}"
+    node[@cookbook_name][:db][db_conn_name] = "#{db_settings[:url_scheme]}://#{db_user}:#{db_pass}@#{db_settings[:address]}/#{db_name}"
     unless sql_address_name.nil?
         node[@cookbook_name][:db][sql_address_name] = sql_address
     end

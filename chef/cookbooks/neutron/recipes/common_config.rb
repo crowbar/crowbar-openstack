@@ -99,25 +99,6 @@ template node[:neutron][:platform][:neutron_rootwrap_sudo_template] do
 end
 
 
-# We can't use get_instance here because the search is done on the "neutron"
-# node, not on "node"
-env_filter = " AND rabbitmq_config_environment:rabbitmq-config-#{neutron[:neutron][:rabbitmq_instance]}"
-rabbits = search(:node, "roles:rabbitmq-server#{env_filter}") || []
-if rabbits.length > 0
-  rabbit = rabbits[0]
-  rabbit = node if rabbit.name == node.name
-else
-  rabbit = node
-end
-Chef::Log.info("Rabbit server found at #{rabbit[:rabbitmq][:address]}")
-rabbit_settings = {
-  :address => rabbit[:rabbitmq][:address],
-  :port => rabbit[:rabbitmq][:port],
-  :user => rabbit[:rabbitmq][:user],
-  :password => rabbit[:rabbitmq][:password],
-  :vhost => rabbit[:rabbitmq][:vhost]
-}
-
 keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
 if neutron_server and neutron[:neutron][:api][:protocol] == 'https'
@@ -232,7 +213,9 @@ template "/etc/neutron/neutron.conf" do
       :bind_host => bind_host,
       :bind_port => bind_port,
       :use_syslog => neutron[:neutron][:use_syslog],
-      :rabbit_settings => rabbit_settings,
+      # Note that we don't uset fetch_rabbitmq_settings, as we want to run the
+      # query on the "neutron" node, not on "node"
+      :rabbit_settings => CrowbarOpenStackHelper.rabbitmq_settings(neutron, "neutron"),
       :keystone_settings => keystone_settings,
       :ssl_enabled => neutron[:neutron][:api][:protocol] == 'https',
       :ssl_cert_file => neutron[:neutron][:ssl][:certfile],
