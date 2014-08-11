@@ -1,14 +1,4 @@
 
-rabbit = get_instance('roles:rabbitmq-server')
-Chef::Log.info("Rabbit server found at #{rabbit[:rabbitmq][:address]}")
-rabbit_settings = {
-  :address => rabbit[:rabbitmq][:address],
-  :port => rabbit[:rabbitmq][:port],
-  :user => rabbit[:rabbitmq][:user],
-  :password => rabbit[:rabbitmq][:password],
-  :vhost => rabbit[:rabbitmq][:vhost]
-}
-
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 if node[:ceilometer][:use_mongodb]
@@ -23,15 +13,11 @@ if node[:ceilometer][:use_mongodb]
   mongodb_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
   db_connection = "mongodb://#{mongodb_ip}:27017/ceilometer"
 else
-  sql = get_instance('roles:database-server')
-
-  sql_address = CrowbarDatabaseHelper.get_listen_address(sql)
-  Chef::Log.info("SQL server found at #{sql_address}")
+  db_settings = fetch_database_settings
 
   include_recipe "database::client"
-  backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
-  include_recipe "#{backend_name}::client"
-  include_recipe "#{backend_name}::python-client"
+  include_recipe "#{db_settings[:backend_name]}::client"
+  include_recipe "#{db_settings[:backend_name]}::python-client"
 
   db_password = ''
   if node.roles.include? "ceilometer-server"
@@ -46,7 +32,7 @@ else
     end
   end
 
-  db_connection = "#{backend_name}://#{node[:ceilometer][:db][:user]}:#{db_password}@#{sql_address}/#{node[:ceilometer][:db][:database]}"
+  db_connection = "#{db_settings[:url_scheme]}://#{node[:ceilometer][:db][:user]}:#{db_password}@#{db_settings[:address]}/#{node[:ceilometer][:db][:database]}"
 end
 
 # Find hypervisor inspector
@@ -78,7 +64,7 @@ template "/etc/ceilometer/ceilometer.conf" do
     variables(
       :debug => node[:ceilometer][:debug],
       :verbose => node[:ceilometer][:verbose],
-      :rabbit_settings => rabbit_settings,
+      :rabbit_settings => fetch_rabbitmq_settings,
       :keystone_settings => keystone_settings,
       :bind_host => bind_host,
       :bind_port => bind_port,
