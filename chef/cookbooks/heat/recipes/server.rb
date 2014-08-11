@@ -17,51 +17,39 @@ heat_path = "/opt/heat"
 venv_path = node[:heat][:use_virtualenv] ? "#{heat_path}/.venv" : nil
 venv_prefix = node[:heat][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 
-sql = get_instance('roles:database-server')
+db_settings = fetch_database_settings
 
 include_recipe "database::client"
-backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
-include_recipe "#{backend_name}::client"
-include_recipe "#{backend_name}::python-client"
-
-db_provider = Chef::Recipe::Database::Util.get_database_provider(sql)
-db_user_provider = Chef::Recipe::Database::Util.get_user_provider(sql)
-privs = Chef::Recipe::Database::Util.get_default_priviledges(sql)
-
-sql_address = CrowbarDatabaseHelper.get_listen_address(sql)
-Chef::Log.info("Database server found at #{sql_address}")
-
-db_conn = { :host => sql_address,
-            :username => "db_maker",
-            :password => sql[:database][:db_maker_password] }
+include_recipe "#{db_settings[:backend_name]}::client"
+include_recipe "#{db_settings[:backend_name]}::python-client"
 
 crowbar_pacemaker_sync_mark "wait-heat_database"
 
 # Create the Heat Database
 database "create #{node[:heat][:db][:database]} database" do
-  connection db_conn
+  connection db_settings[:connection]
   database_name node[:heat][:db][:database]
-  provider db_provider
+  provider db_settings[:provider]
   action :create
 end
 
 database_user "create heat database user" do
   host '%'
-  connection db_conn
+  connection db_settings[:connection]
   username node[:heat][:db][:user]
   password node[:heat][:db][:password]
-  provider db_user_provider
+  provider db_settings[:user_provider]
   action :create
 end
 
 database_user "grant database access for heat database user" do
-  connection db_conn
+  connection db_settings[:connection]
   username node[:heat][:db][:user]
   password node[:heat][:db][:password]
   database_name node[:heat][:db][:database]
   host '%'
-  privileges privs
-  provider db_user_provider
+  privileges db_settings[:privs]
+  provider db_settings[:user_provider]
   action :grant
 end
 
@@ -99,16 +87,6 @@ node[:heat][:platform][:aux_dirs].each do |d|
 end
 
 
-rabbit = get_instance('roles:rabbitmq-server')
-Chef::Log.info("Rabbit server found at #{rabbit[:rabbitmq][:address]}")
-rabbit_settings = {
-  :address => rabbit[:rabbitmq][:address],
-  :port => rabbit[:rabbitmq][:port],
-  :user => rabbit[:rabbitmq][:user],
-  :password => rabbit[:rabbitmq][:password],
-  :vhost => rabbit[:rabbitmq][:vhost]
-}
-
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 ha_enabled = node[:heat][:ha][:enabled]
@@ -129,7 +107,7 @@ end
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:protocol] == "https", ha_enabled)
 
-db_connection = "#{backend_name}://#{node[:heat][:db][:user]}:#{node[:heat][:db][:password]}@#{sql_address}/#{node[:heat][:db][:database]}"
+db_connection = "#{db_settings[:url_scheme]}://#{node[:heat][:db][:user]}:#{node[:heat][:db][:password]}@#{db_settings[:address]}/#{node[:heat][:db][:database]}"
 
 crowbar_pacemaker_sync_mark "wait-heat_register"
 
@@ -284,7 +262,7 @@ template "/etc/heat/heat.conf" do
   variables(
     :debug => node[:heat][:debug],
     :verbose => node[:heat][:verbose],
-    :rabbit_settings => rabbit_settings,
+    :rabbit_settings => fetch_rabbitmq_settings,
     :keystone_settings => keystone_settings,
     :database_connection => db_connection,
     :bind_host => bind_host,
