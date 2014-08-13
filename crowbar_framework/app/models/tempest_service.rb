@@ -44,18 +44,7 @@ class TempestService < ServiceObject
       }
     end
 
-    base["attributes"]["tempest"]["nova_instance"] = ""
-    begin
-      novaService = NovaService.new(@logger)
-      novas = novaService.list_active[1]
-      if novas.empty?
-        # No actives, look for proposals
-        novas = novaService.proposals[1]
-      end
-      base["attributes"]["tempest"]["nova_instance"] = novas[0] unless novas.empty?
-    rescue
-      @logger.info("Tempest create_proposal: no nova found")
-    end
+    base["attributes"][@bc_name]["nova_instance"] = find_dep_proposal("nova")
 
     base["attributes"]["tempest"]["tempest_user_username"] = "tempest-user-" + random_password
     base["attributes"]["tempest"]["tempest_adm_username"] = "tempest-adm-" + random_password
