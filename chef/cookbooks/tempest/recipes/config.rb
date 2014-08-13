@@ -298,38 +298,48 @@ template "#{tempest_conf}" do
   source "tempest.conf.erb"
   mode 0644
   variables(
-    :alt_comp_pass => alt_comp_pass,
-    :alt_comp_tenant => alt_comp_tenant,
-    :alt_comp_user => alt_comp_user,
-    :alt_flavor_ref => alt_flavor_ref,
-    :bin_path => bin_path,
-    :cirros_version => File.basename(node[:tempest][:tempest_test_image]).gsub(/^cirros-/, "").gsub(/-.*/, ""),
-    :comp_pass => tempest_comp_pass,
-    :comp_tenant => tempest_comp_tenant,
-    :comp_user => tempest_comp_user,
-    :ec2_access => ec2_access,
-    :ec2_secret => ec2_secret,
-    :flavor_ref => flavor_ref,
-    :heat_flavor_ref => heat_flavor_ref,
-    :heat_machine_id_file => heat_machine_id_file,
-    :http_image => node[:tempest][:tempest_test_image],
+    # general settings
     :keystone_settings => keystone_settings,
     :machine_id_file => machine_id_file,
-    :nova_host => nova.name,
-    :nova_api_v3 => nova[:nova][:enable_v3_api],
-    :public_network_id => public_network_id,
     :tempest_path => node[:tempest][:tempest_path],
+    :use_swift => use_swift,
+    :use_horizon => !horizons.empty?,
     :use_heat => use_heat,
     :use_ceilometer => use_ceilometer,
-    :use_horizon => !horizons.empty?,
+    # boto settings
+    :nova_host => nova.name,
+    :ec2_access => ec2_access,
+    :ec2_secret => ec2_secret,
+    # cli settings
+    :bin_path => bin_path,
+    # compute settings
+    :flavor_ref => flavor_ref,
+    :alt_flavor_ref => alt_flavor_ref,
+    :nova_api_v3 => nova[:nova][:enable_v3_api],
+    # identity settings
+    :comp_user => tempest_comp_user,
+    :comp_tenant => tempest_comp_tenant,
+    :comp_pass => tempest_comp_pass,
+    :alt_comp_user => alt_comp_user,
+    :alt_comp_tenant => alt_comp_tenant,
+    :alt_comp_pass => alt_comp_pass,
+    # image settings
+    :http_image => node[:tempest][:tempest_test_image],
+    # network settings
+    :public_network_id => public_network_id,
     :neutron_api_extensions => neutron_api_extensions,
-    :storage_protocol => storage_protocol,
-    :vendor_name => vendor_name,
+    # orchestration settings
+    :heat_flavor_ref => heat_flavor_ref,
+    :heat_machine_id_file => heat_machine_id_file,
+    # scenario settings
+    :cirros_version => File.basename(node[:tempest][:tempest_test_image]).gsub(/^cirros-/, "").gsub(/-.*/, ""),
+    # volume settings
     :cinder_multi_backend => cinder_multi_backend,
     :cinder_backend1_name => cinder_backend1_name,
     :cinder_backend2_name => cinder_backend2_name,
-    :cinder_api_v2 => cinders[0][:cinder][:enable_v2_api],
-    :use_swift => use_swift
+    :storage_protocol => storage_protocol,
+    :vendor_name => vendor_name,
+    :cinder_api_v2 => cinders[0][:cinder][:enable_v2_api]
   )
 end
 
