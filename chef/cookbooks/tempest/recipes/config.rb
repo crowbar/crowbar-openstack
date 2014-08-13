@@ -117,8 +117,6 @@ end
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
 heat_machine_id_file = node[:tempest][:tempest_path] + '/heat_machine.id'
 
-bin_path = node[:tempest][:use_virtualenv] ? "#{node[:tempest][:tempest_path]}/.venv/bin" : "/usr/bin"
-
 bash "upload tempest test image" do
   code <<-EOH
 IMAGE_URL=${IMAGE_URL:-"http://download.cirros-cloud.net/0.3.2/cirros-0.3.2-x86_64-uec.tar.gz"}
@@ -313,7 +311,7 @@ template "#{tempest_conf}" do
     :ec2_access => ec2_access,
     :ec2_secret => ec2_secret,
     # cli settings
-    :bin_path => bin_path,
+    :bin_path => "/usr/bin",
     # compute settings
     :flavor_ref => flavor_ref,
     :alt_flavor_ref => alt_flavor_ref,
