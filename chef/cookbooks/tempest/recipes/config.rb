@@ -229,12 +229,11 @@ ec2_access = `#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --
 ec2_secret = `#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
 
 swifts = search(:node, "roles:swift-proxy") || []
-heats = search(:node, "roles:heat-server") || []
 cinders = search(:node, "roles:cinder-controller") || []
-ceilometers = search(:node, "roles:ceilometer-server") || []
-horizons = search(:node, "roles:nova_dashboard-server") || []
-
 neutrons = search(:node, "roles:neutron-server") || []
+horizons = search(:node, "roles:nova_dashboard-server") || []
+heats = search(:node, "roles:heat-server") || []
+ceilometers = search(:node, "roles:ceilometer-server") || []
 
 # FIXME: this should be 'all' instead
 #
