@@ -235,6 +235,7 @@ use_heat = $?.success?
 %x{#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service metering &> /dev/null}
 use_ceilometer = $?.success?
 
+# FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
 # FIXME: this should be 'all' instead
 #
@@ -248,6 +249,7 @@ end
 
 public_network_id = `#{venv_prefix_path} neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
 
+# FIXME: should avoid search with no environment in query
 cinders = search(:node, "roles:cinder-controller") || []
 storage_protocol = "iSCSI"
 vendor_name = "Open Source"
@@ -286,6 +288,7 @@ if backend_names.length > 1
   cinder_backend2_name = backend_names[1]
 end
 
+# FIXME: should avoid search with no environment in query
 horizons = search(:node, "roles:nova_dashboard-server") || []
 
 if node[:tempest][:use_gitrepo]
