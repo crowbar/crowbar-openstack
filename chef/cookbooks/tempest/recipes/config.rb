@@ -222,8 +222,8 @@ bash "create_yet_another_tiny_flavor" do
 EOH
 end
 
-ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
-ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
+ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`.strip
+ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`.strip
 
 %x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service object-store &> /dev/null}
 use_swift = $?.success?
@@ -244,7 +244,7 @@ unless neutrons[0].nil?
   end
 end
 
-public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
+public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2`.strip
 
 # FIXME: should avoid search with no environment in query
 cinders = search(:node, "roles:cinder-controller") || []
