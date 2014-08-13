@@ -307,7 +307,8 @@ template "#{tempest_conf}" do
     :use_heat => use_heat,
     :use_ceilometer => use_ceilometer,
     # boto settings
-    :nova_host => nova.name,
+    :s3_host => CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
+    :s3_port => nova[:nova][:ports][:objectstore],
     :ec2_access => ec2_access,
     :ec2_secret => ec2_secret,
     # cli settings

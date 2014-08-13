@@ -140,7 +140,7 @@ lock_path=/var/run/tempest
 #ec2_url=http://localhost:8773/services/Cloud
 
 # S3 URL (string value)
-s3_url=http://<%= @nova_host %>:3333/
+s3_url=http://<%= @s3_host %>:<%= @s3_port %>/
 
 # AWS Secret Key (string value)
 aws_secret=<%=@ec2_secret %>
