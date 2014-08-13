@@ -19,7 +19,6 @@
 #
 
 
-glance = get_instance('roles:glance-server')
 nova = get_instance('roles:nova-multi-controller')
 keystone_settings = KeystoneHelper.keystone_settings(nova, "nova")
 
@@ -33,9 +32,6 @@ tempest_comp_tenant = node[:tempest][:tempest_user_tenant]
 
 tempest_adm_user = node[:tempest][:tempest_adm_username]
 tempest_adm_pass = node[:tempest][:tempest_adm_password]
-
-glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "admin").address if glance_address.nil?
-glance_port = glance[:glance][:api][:bind_port]
 
 keystone_register "tempest tempest wakeup keystone" do
   protocol keystone_settings['protocol']
@@ -151,7 +147,7 @@ IMG_FILE=$(basename $IMAGE_URL)
 IMG_NAME="${IMG_FILE%-*}"
 
 function glance_it() {
-#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL -H $GLANCE_HOST $@
+#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
 }
 
 function extract_id() {
@@ -196,8 +192,7 @@ EOH
     'OS_USER' => tempest_comp_user,
     'OS_PASSWORD' => tempest_comp_pass,
     'OS_TENANT' => tempest_comp_tenant,
-    'KEYSTONE_URL' => keystone_settings["internal_auth_url"],
-    'GLANCE_HOST' => glance_address
+    'KEYSTONE_URL' => keystone_settings["internal_auth_url"]
   })
   not_if { File.exists?(machine_id_file) }
 end
@@ -210,7 +205,7 @@ OS_TENANT=${OS_TENANT:-admin}
 OS_PASSWORD=${OS_PASSWORD:-admin}
 
 function glance_it() {
-#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL -H $GLANCE_HOST $@
+#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
 }
 
 id=$(glance_it image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
@@ -223,8 +218,7 @@ EOF
     'OS_USER' => tempest_comp_user,
     'OS_PASSWORD' => tempest_comp_pass,
     'OS_TENANT' => tempest_comp_tenant,
-    'KEYSTONE_URL' => keystone_settings["internal_auth_url"],
-    'GLANCE_HOST' => glance_address
+    'KEYSTONE_URL' => keystone_settings["internal_auth_url"]
   })
 
   not_if { node[:tempest][:heat_test_image_name].nil? or File.exists?(heat_machine_id_file) }
@@ -328,8 +322,6 @@ template "#{tempest_conf}" do
     :flavor_ref => flavor_ref,
     :heat_flavor_ref => heat_flavor_ref,
     :heat_machine_id_file => heat_machine_id_file,
-    :img_host => glance_address,
-    :img_port => glance_port,
     :http_image => node[:tempest][:tempest_test_image],
     :keystone_settings => keystone_settings,
     :machine_id_file => machine_id_file,
