@@ -185,7 +185,7 @@ bash "register heat domain" do
   user "root"
   code <<-EOF
 
-    OS_URL="#{KeystoneHelper.service_URL(node, node[:fqdn], node["keystone"]["api"]["service_port"])}/v3"
+    OS_URL="#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3"
 
     eval $(openstack --os-token #{keystone_settings['admin_token']} \
         --os-url=$OS_URL \
