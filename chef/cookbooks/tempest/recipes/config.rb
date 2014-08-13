@@ -134,15 +134,15 @@ IMG_FILE=$(basename $IMAGE_URL)
 IMG_NAME="${IMG_FILE%-*}"
 
 function glance_it() {
-#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
+  #{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
 }
 
 function extract_id() {
-cut -d ":" -f2 | tr -d " "
+  cut -d ":" -f2 | tr -d " "
 }
 
 function findfirst() {
-find $IMG_DIR -name "$1" | head -1
+  find $IMG_DIR -name "$1" | head -1
 }
 
 echo "Downloading image ... "
@@ -152,19 +152,22 @@ echo "Unpacking image ... "
 mkdir $IMG_DIR
 tar -xvzf $TEMP/$IMG_FILE -C $IMG_DIR || exit $?
 rm -rf #{node[:tempest][:tempest_path]}/etc/cirros/*
-cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/
+cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
 
 echo -n "Adding kernel ... "
 KERNEL_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-kernel" is_public=true container_format=aki disk_format=aki < $(findfirst '*-vmlinuz') | extract_id)
 echo "done."
+[ -n "$KERNEL_ID" ] || exit 1
 
 echo -n "Adding ramdisk ... "
 RAMDISK_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-ramdisk" is_public=true container_format=ari disk_format=ari < $(findfirst '*-initrd') | extract_id)
 echo "done."
+[ -n "$RAMDISK_ID" ] || exit 1
 
 echo -n "Adding image ... "
 MACHINE_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-machine" is_public=true container_format=ami disk_format=ami kernel_id=$KERNEL_ID ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
 echo "done."
+[ -n "$MACHINE_ID" ] || exit 1
 
 echo -n "Saving machine id ..."
 echo $MACHINE_ID > #{machine_id_file}
@@ -186,19 +189,18 @@ end
 
 bash "upload tempest heat-cfntools image" do
     code <<-EOF
-
 OS_USER=${OS_USER:-admin}
 OS_TENANT=${OS_TENANT:-admin}
 OS_PASSWORD=${OS_PASSWORD:-admin}
 
 function glance_it() {
-#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
+  #{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
 }
 
 id=$(glance_it image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
 [ -n "$id" ] && echo $id > #{heat_machine_id_file}
-true
 
+true
 EOF
   environment ({
     'IMAGE_NAME' => node[:tempest][:heat_test_image_name],
