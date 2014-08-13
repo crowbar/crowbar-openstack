@@ -343,9 +343,6 @@ template "#{tempest_conf}" do
   )
 end
 
-nosetests = "#{node[:tempest][:tempest_path]}/.venv/bin/nosetests"
-
-
 ["#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh",
  "#{node[:tempest][:tempest_path]}/bin/tempest_cleanup.sh"].each do |p|
 
@@ -357,8 +354,8 @@ nosetests = "#{node[:tempest][:tempest_path]}/.venv/bin/nosetests"
       :comp_tenant => tempest_comp_tenant,
       :comp_user => tempest_comp_user,
       :keystone_settings => keystone_settings,
-      :nosetests => nosetests,
-      :tempest_path => node[:tempest][:tempest_path]
+      :tempest_path => node[:tempest][:tempest_path],
+      :use_virtualenv => node[:tempest][:use_virtualenv]
     )
   end
 end

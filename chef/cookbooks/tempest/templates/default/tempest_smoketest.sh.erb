@@ -31,7 +31,7 @@ euca-bundle-image -i ${s3_materials_path}/cirros-*-initrd --ramdisk true -d ${s3
 euca-bundle-image -i ${s3_materials_path}/cirros-*-vmlinuz --kernel true -d ${s3_materials_path}
 ) 1>&2
 
-<%= @nosetests %> -q --with-xunit --xunit-file=/dev/stdout -w /opt/tempest/ -v tempest
+<%= @tempest_path %>/run_tempest.sh <%= @use_virtualenv ? "" : "-N" %> -t -s
 tresult=$?
 
 <%= @tempest_path %>/bin/tempest_cleanup.sh || :
