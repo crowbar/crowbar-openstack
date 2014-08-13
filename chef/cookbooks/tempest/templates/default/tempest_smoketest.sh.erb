@@ -1,5 +1,6 @@
 #!/bin/bash
 
+(
 export OS_AUTH_URL=<%= @keystone_settings['internal_auth_url'] %>
 export OS_AUTH_STRATEGY=keystone
 
@@ -14,8 +15,6 @@ export EUCALYPTUS_CERT="${cert_dir}/cacert.pem"
 export EC2_CERT="${cert_dir}/cert.pem"
 export EC2_PRIVATE_KEY="${cert_dir}/pk.pem"
 
-
-(
 mkdir -p ${cert_dir}
 nova x509-get-root-cert "${EUCALYPTUS_CERT}"
 nova x509-create-cert "${EC2_PRIVATE_KEY}" "${EC2_CERT}"
