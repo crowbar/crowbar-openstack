@@ -228,13 +228,14 @@ end
 ec2_access = `#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
 ec2_secret = `#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
 
-swifts = search(:node, "roles:swift-proxy") || []
-cinders = search(:node, "roles:cinder-controller") || []
-neutrons = search(:node, "roles:neutron-server") || []
-horizons = search(:node, "roles:nova_dashboard-server") || []
-heats = search(:node, "roles:heat-server") || []
-ceilometers = search(:node, "roles:ceilometer-server") || []
+%x{#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service object-store &> /dev/null}
+use_swift = $?.success?
+%x{#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service orchestration &> /dev/null}
+use_heat = $?.success?
+%x{#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service metering &> /dev/null}
+use_ceilometer = $?.success?
 
+neutrons = search(:node, "roles:neutron-server") || []
 # FIXME: this should be 'all' instead
 #
 neutron_api_extensions = "provider,security-group,dhcp_agent_scheduler,external-net,ext-gw-mode,binding,agent,quotas,l3_agent_scheduler,multi-provider,router,extra_dhcp_opt,allowed-address-pairs,extraroute,metering,fwaas,service-type"
@@ -247,7 +248,7 @@ end
 
 public_network_id = `#{venv_prefix_path} neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
 
-
+cinders = search(:node, "roles:cinder-controller") || []
 storage_protocol = "iSCSI"
 vendor_name = "Open Source"
 cinders[0][:cinder][:volumes].each do |volume|
@@ -285,6 +286,8 @@ if backend_names.length > 1
   cinder_backend2_name = backend_names[1]
 end
 
+horizons = search(:node, "roles:nova_dashboard-server") || []
+
 if node[:tempest][:use_gitrepo]
   tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
 else
@@ -316,8 +319,8 @@ template "#{tempest_conf}" do
     :nova_api_v3 => nova[:nova][:enable_v3_api],
     :public_network_id => public_network_id,
     :tempest_path => node[:tempest][:tempest_path],
-    :use_heat => !heats.empty?,
-    :use_ceilometer => !ceilometers.empty?,
+    :use_heat => use_heat,
+    :use_ceilometer => use_ceilometer,
     :use_horizon => !horizons.empty?,
     :neutron_api_extensions => neutron_api_extensions,
     :storage_protocol => storage_protocol,
@@ -326,7 +329,7 @@ template "#{tempest_conf}" do
     :cinder_backend1_name => cinder_backend1_name,
     :cinder_backend2_name => cinder_backend2_name,
     :cinder_api_v2 => cinders[0][:cinder][:enable_v2_api],
-    :use_swift => !swifts.empty?
+    :use_swift => use_swift
   )
 end
 
