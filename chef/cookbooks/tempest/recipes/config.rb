@@ -287,6 +287,16 @@ end
 
 # FIXME: should avoid search with no environment in query
 horizons = search(:node, "roles:nova_dashboard-server") || []
+if horizons.empty?
+  use_horizon = false
+  horizon_host = "localhost"
+  horizont_protocol = "http"
+else
+  horizon = horizons[0]
+  use_horizon = true
+  horizon_host = CrowbarHelper.get_host_for_admin_url(horizon, horizon[:nova_dashboard][:ha][:enabled])
+  horizon_protocol = horizon[:nova_dashboard][:apache][:ssl] ? "https" : "http"
+end
 
 if node[:tempest][:use_gitrepo]
   tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
@@ -303,7 +313,7 @@ template "#{tempest_conf}" do
     :machine_id_file => machine_id_file,
     :tempest_path => node[:tempest][:tempest_path],
     :use_swift => use_swift,
-    :use_horizon => !horizons.empty?,
+    :use_horizon => use_horizon,
     :use_heat => use_heat,
     :use_ceilometer => use_ceilometer,
     # boto settings
@@ -317,6 +327,9 @@ template "#{tempest_conf}" do
     :flavor_ref => flavor_ref,
     :alt_flavor_ref => alt_flavor_ref,
     :nova_api_v3 => nova[:nova][:enable_v3_api],
+    # dashboard settings
+    :horizon_host => horizon_host,
+    :horizon_protocol => horizon_protocol,
     # identity settings
     :comp_user => tempest_comp_user,
     :comp_tenant => tempest_comp_tenant,
