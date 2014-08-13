@@ -19,14 +19,13 @@
 #
 
 
-keystone = get_instance('roles:keystone-server')
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 glance = get_instance('roles:glance-server')
 nova = get_instance('roles:nova-multi-controller')
 
-alt_comp_user = keystone[:keystone][:default][:username]
-alt_comp_pass = keystone[:keystone][:default][:password]
-alt_comp_tenant = keystone[:keystone][:default][:tenant]
+alt_comp_user = keystone_settings["default_user"]
+alt_comp_pass = keystone_settings["default_password"]
+alt_comp_tenant = keystone_settings["default_tenant"]
 
 tempest_comp_user = node[:tempest][:tempest_user_username]
 tempest_comp_pass = node[:tempest][:tempest_user_password]
@@ -34,8 +33,6 @@ tempest_comp_tenant = node[:tempest][:tempest_user_tenant]
 
 tempest_adm_user = node[:tempest][:tempest_adm_username]
 tempest_adm_pass = node[:tempest][:tempest_adm_password]
-
-keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
 
 glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "admin").address if glance_address.nil?
 glance_port = glance[:glance][:api][:bind_port]
@@ -334,7 +331,6 @@ template "#{tempest_conf}" do
     :img_host => glance_address,
     :img_port => glance_port,
     :http_image => node[:tempest][:tempest_test_image],
-    :key_host => keystone_address,
     :keystone_settings => keystone_settings,
     :machine_id_file => machine_id_file,
     :nova_host => nova.name,

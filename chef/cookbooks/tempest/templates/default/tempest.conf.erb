@@ -506,11 +506,11 @@ login_url=http://<%= @keystone_settings['internal_url_host'] %>/auth/login/
 
 # Full URI of the OpenStack Identity API (Keystone), v2
 # (string value)
-uri=http://<%= @key_host %>:5000/v2.0
+uri=<%= @keystone_settings["protocol"] %>://<%= @keystone_settings["internal_url_host"] %>:<%= @keystone_settings["service_port"] %>/v2.0
 
 # Full URI of the OpenStack Identity API (Keystone), v3
 # (string value)
-uri_v3=http://<%= @key_host %>:5000/v3
+uri_v3=<%= @keystone_settings["protocol"] %>://<%= @keystone_settings["internal_url_host"] %>:<%= @keystone_settings["service_port"] %>/v3
 
 # Identity API version to be used for authentication for API
 # tests. (string value)
