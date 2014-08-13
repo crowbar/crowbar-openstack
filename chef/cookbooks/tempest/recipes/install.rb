@@ -101,5 +101,6 @@ else
   package "openstack-tempest-test"
 end
 
-package "python-novaclient"
-package "python-glanceclient"
+%w(keystone swift glance cinder neutron nova heat ceilometer).each do |component|
+  package "python-#{component}client"
+end
