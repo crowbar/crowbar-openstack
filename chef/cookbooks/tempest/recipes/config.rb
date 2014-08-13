@@ -19,9 +19,9 @@
 #
 
 
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 glance = get_instance('roles:glance-server')
 nova = get_instance('roles:nova-multi-controller')
+keystone_settings = KeystoneHelper.keystone_settings(nova, "nova")
 
 alt_comp_user = keystone_settings["default_user"]
 alt_comp_pass = keystone_settings["default_password"]
