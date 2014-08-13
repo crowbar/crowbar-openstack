@@ -101,21 +101,5 @@ else
   package "openstack-tempest-test"
 end
 
-nova = get_instance('roles:nova-multi-controller')
-unless nova[:nova][:use_gitrepo]
-  package "python-novaclient"
-else
-  execute "pip_install_clients_python-novaclient_for_tempest" do
-    command "#{pip_cmd} 'python-novaclient'"
-  end
-end
-
-glance = get_instance('roles:glance-server')
-unless glance[:glance][:use_gitrepo]
-  package "python-glanceclient"
-else
-  execute "pip_install_clients_python-glanceclient_for_tempest" do
-    command "#{pip_cmd} 'python-glanceclient'"
-  end
-end
-
+package "python-novaclient"
+package "python-glanceclient"
