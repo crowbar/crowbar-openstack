@@ -227,7 +227,6 @@ end
 
 ec2_access = `#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
 ec2_secret = `#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
-cirros_version = "0.3.2"
 
 swifts = search(:node, "roles:swift-proxy") || []
 heats = search(:node, "roles:heat-server") || []
@@ -302,7 +301,7 @@ template "#{tempest_conf}" do
     :alt_comp_user => alt_comp_user,
     :alt_flavor_ref => alt_flavor_ref,
     :bin_path => bin_path,
-    :cirros_version => cirros_version,
+    :cirros_version => File.basename(node[:tempest][:tempest_test_image]).gsub(/^cirros-/, "").gsub(/-.*/, ""),
     :comp_pass => tempest_comp_pass,
     :comp_tenant => tempest_comp_tenant,
     :comp_user => tempest_comp_user,
