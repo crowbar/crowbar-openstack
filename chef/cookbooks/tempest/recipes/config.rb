@@ -117,7 +117,6 @@ end
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
 heat_machine_id_file = node[:tempest][:tempest_path] + '/heat_machine.id'
 
-venv_prefix_path = node[:tempest][:use_virtualenv] ? ". #{node[:tempest][:tempest_path]}/.venv/bin/activate && " : nil
 bin_path = node[:tempest][:use_virtualenv] ? "#{node[:tempest][:tempest_path]}/.venv/bin" : "/usr/bin"
 
 bash "upload tempest test image" do
@@ -134,7 +133,7 @@ IMG_FILE=$(basename $IMAGE_URL)
 IMG_NAME="${IMG_FILE%-*}"
 
 function glance_it() {
-  #{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
+  glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
 }
 
 function extract_id() {
@@ -194,7 +193,7 @@ OS_TENANT=${OS_TENANT:-admin}
 OS_PASSWORD=${OS_PASSWORD:-admin}
 
 function glance_it() {
-  #{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
+  glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
 }
 
 id=$(glance_it image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
@@ -219,20 +218,20 @@ heat_flavor_ref = "8"
 
 bash "create_yet_another_tiny_flavor" do
   code <<-EOH
-  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-stuff #{flavor_ref} 128 0 1 || exit 0
-  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-stuff-2 #{alt_flavor_ref} 196 0 1 || exit 0
-  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-heat #{heat_flavor_ref} 512 0 1 || exit 0
+  nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-stuff #{flavor_ref} 128 0 1 || exit 0
+  nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-stuff-2 #{alt_flavor_ref} 196 0 1 || exit 0
+  nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-heat #{heat_flavor_ref} 512 0 1 || exit 0
 EOH
 end
 
-ec2_access = `#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
-ec2_secret = `#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
+ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
+ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
 
-%x{#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service object-store &> /dev/null}
+%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service object-store &> /dev/null}
 use_swift = $?.success?
-%x{#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service orchestration &> /dev/null}
+%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service orchestration &> /dev/null}
 use_heat = $?.success?
-%x{#{venv_prefix_path} keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service metering &> /dev/null}
+%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service metering &> /dev/null}
 use_ceilometer = $?.success?
 
 # FIXME: should avoid search with no environment in query
@@ -247,7 +246,7 @@ unless neutrons[0].nil?
   end
 end
 
-public_network_id = `#{venv_prefix_path} neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
+public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
 
 # FIXME: should avoid search with no environment in query
 cinders = search(:node, "roles:cinder-controller") || []
