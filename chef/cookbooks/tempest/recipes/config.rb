@@ -319,7 +319,6 @@ template "#{tempest_conf}" do
     :use_heat => !heats.empty?,
     :use_ceilometer => !ceilometers.empty?,
     :use_horizon => !horizons.empty?,
-    :use_neutron => !neutrons.empty?,
     :neutron_api_extensions => neutron_api_extensions,
     :storage_protocol => storage_protocol,
     :vendor_name => vendor_name,
