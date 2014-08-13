@@ -3,17 +3,13 @@
 export OS_AUTH_URL=<%= @keystone_settings['internal_auth_url'] %>
 export OS_AUTH_STRATEGY=keystone
 
-username=<%= @comp_user %>
-password=<%= @comp_pass %>
-tenant_name=<%= @comp_tenant %>
-
 #s3 test preparation
 cert_dir=<%= @tempest_path %>/etc/certs/
 
-export OS_USERNAME=${username}
-export OS_PASSWORD=${password}
-export OS_TENANT_NAME=${tenant_name}
-export EC2_USER_ID=${username}
+export OS_USERNAME=<%= @comp_user %>
+export OS_PASSWORD=<%= @comp_pass %>
+export OS_TENANT_NAME=<%= @comp_tenant %>
+export EC2_USER_ID=<%= @comp_user %>
 export EUCALYPTUS_CERT="${cert_dir}/cacert.pem"
 export EC2_CERT="${cert_dir}/cert.pem"
 export EC2_PRIVATE_KEY="${cert_dir}/pk.pem"
@@ -37,4 +33,3 @@ tresult=$?
 <%= @tempest_path %>/bin/tempest_cleanup.sh || :
 
 exit ${tresult}
-
