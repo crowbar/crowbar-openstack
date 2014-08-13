@@ -107,24 +107,11 @@ keystone_register "add #{keystone_settings['admin_user']}:#{tempest_comp_tenant}
   action :nothing
 end.run_action(:add_access)
 
-directory "#{node[:tempest][:tempest_path]}" do
-  action :create
-end
-
-directory "#{node[:tempest][:tempest_path]}/bin" do
-  action :create
-end
-
-directory "#{node[:tempest][:tempest_path]}/etc" do
-  action :create
-end
-
-directory "#{node[:tempest][:tempest_path]}/etc/certs" do
-  action :create
-end
-
-directory "#{node[:tempest][:tempest_path]}/etc/cirros" do
-  action :create
+# Create directories that we need
+["", "bin", "etc", "etc/certs", "etc/cirros"].each do |subdir|
+  directory "#{node[:tempest][:tempest_path]}/#{subdir}" do
+    action :create
+  end
 end
 
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
