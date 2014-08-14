@@ -334,6 +334,9 @@ template "#{tempest_conf}" do
     :horizon_host => horizon_host,
     :horizon_protocol => horizon_protocol,
     # identity settings
+    # FIXME: it's a bit unclear, but looking at the tempest code, we should set
+    # this if any of the services is insecure, not just keystone
+    :ssl_insecure => keystone_settings["insecure"],
     :comp_user => tempest_comp_user,
     :comp_tenant => tempest_comp_tenant,
     :comp_pass => tempest_comp_pass,

@@ -502,7 +502,7 @@ login_url=<%= @horizon_protocol %>://<%= @horizon_host %>/auth/login/
 
 # Set to True if using self-signed SSL certificates. (boolean
 # value)
-#disable_ssl_certificate_validation=false
+disable_ssl_certificate_validation=<%= @ssl_insecure ? 'true' : 'false' %>
 
 # Full URI of the OpenStack Identity API (Keystone), v2
 # (string value)
