@@ -3,7 +3,7 @@
   "description": "provides a tempest installation",
   "attributes": {
     "tempest": {
-      "tempest_tarball": "http://<ADMINWEB>/files/tempest/havana.tar.gz",
+      "tempest_tarball": "http://<ADMINWEB>/files/tempest/icehouse.tar.gz",
       "tempest_test_image": "http://<ADMINWEB>/files/tempest/cirros-0.3.2-x86_64-uec.tar.gz",
       "tempest_adm_password": "tempest",
       "tempest_adm_username": "tempest",
@@ -15,7 +15,6 @@
       "use_pip_cache": true,
       "use_gitbarclamp": true,
       "nova_instance": "none",
-      "tempest_path": "/opt/tempest",
       "pfs_deps": [
         "pip://python-novaclient"
       ]
@@ -25,6 +24,7 @@
     "tempest": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
+      "schema-revision": 1,
       "element_states": {
         "tempest": [ "ready", "applying" ]
       },

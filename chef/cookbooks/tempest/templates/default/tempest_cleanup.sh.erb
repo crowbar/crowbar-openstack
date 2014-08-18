@@ -1,26 +1,13 @@
 #!/bin/bash
 
-export OS_AUTH_URL=http://<%= @key_host %>:<%= @key_port %>/v2.0/
+export OS_AUTH_URL=<%= @keystone_settings['internal_auth_url'] %>
 export OS_AUTH_STRATEGY=keystone
-
-username=<%= @comp_user %>
-password=<%= @comp_pass %>
-tenant_name=<%= @comp_tenant %>
-
-alt_username=<%= @alt_comp_user %>
-alt_password=<%= @alt_comp_pass %>
-alt_tenant_name=<%= @alt_comp_tenant %>
-
-admin_username=<%= @keystone_settings['admin_user'] %>
-admin_password=<%= @keystone_settings['admin_password'] %>
-admin_tenant_name=<%= @keystone_settings['default_tenant'] %>
-
 
 ### clean up in admin tenant
 (
-export OS_USERNAME=${admin_username}
-export OS_PASSWORD=${admin_password}
-export OS_TENANT_NAME=${admin_tenant_name}
+export OS_USERNAME=<%= @keystone_settings['admin_user'] %>
+export OS_PASSWORD=<%= @keystone_settings['admin_password'] %>
+export OS_TENANT_NAME=<%= @keystone_settings['default_tenant'] %>
 echo -e "Cleaning up tenants..."
 for f in `keystone tenant-list | grep -E 'test_tenant_|tenant2-[0-9]*|tenant-new[0-9]*|tenant-[0-9]+|tenant-dup-[0-9]+' | awk '{print $2}'` ; do keystone tenant-delete $f ; done
 echo -e "Cleaning up users..."
@@ -63,9 +50,9 @@ done
 
 #clean up in tempest tenant
 (
-export OS_USERNAME=${username}
-export OS_PASSWORD=${password}
-export OS_TENANT_NAME=${tenant_name}
+export OS_USERNAME=<%= @comp_user %>
+export OS_PASSWORD=<%= @comp_pass %>
+export OS_TENANT_NAME=<%= @comp_tenant %>
 echo -e "Cleaning up security-groups..."
 for f in `neutron security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do neutron security-group-delete $f ; done
 echo -e "Cleaning up volume snapshots..."
@@ -81,4 +68,3 @@ for f in $(neutron floatingip-list | awk '{ print $2}' ); do
     neutron floatingip-delete $f ;
 done
 )  1>&2
-

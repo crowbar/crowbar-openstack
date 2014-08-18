@@ -113,7 +113,7 @@ lock_path=/var/run/tempest
 
 # The endpoint type to use for the baremetal provisioning
 # service (string value)
-#endpoint_type=publicURL
+endpoint_type=internalURL
 
 # Timeout for Ironic node to completely provision (integer
 # value)
@@ -137,10 +137,10 @@ lock_path=/var/run/tempest
 #
 
 # EC2 URL (string value)
-#ec2_url=http://localhost:8773/services/Cloud
+ec2_url=<%= @ec2_protocol %>://<%= @ec2_host %>:<%= @ec2_port %>/services/Cloud
 
 # S3 URL (string value)
-s3_url=http://<%= @nova_host %>:3333/
+s3_url=http://<%= @s3_host %>:<%= @s3_port %>/
 
 # AWS Secret Key (string value)
 aws_secret=<%=@ec2_secret %>
@@ -309,7 +309,7 @@ use_floatingip_for_ssh=true
 
 # The endpoint type to use for the compute service. (string
 # value)
-#endpoint_type=publicURL
+endpoint_type=internalURL
 
 # Catalog type of the Compute v3 service. (string value)
 #catalog_v3_type=computev3
@@ -427,10 +427,10 @@ vnc_console=true
 #
 
 # Where the dashboard can be found (string value)
-dashboard_url=http://<%= @keystone_settings['internal_url_host'] %>/
+dashboard_url=<%= @horizon_protocol %>://<%= @horizon_host %>/
 
 # Login page for the dashboard (string value)
-login_url=http://<%= @keystone_settings['internal_url_host'] %>/auth/login/
+login_url=<%= @horizon_protocol %>://<%= @horizon_host %>/auth/login/
 
 
 [data_processing]
@@ -444,7 +444,7 @@ login_url=http://<%= @keystone_settings['internal_url_host'] %>/auth/login/
 
 # The endpoint type to use for the data processing service.
 # (string value)
-#endpoint_type=publicURL
+endpoint_type=internalURL
 
 
 [database]
@@ -502,15 +502,15 @@ login_url=http://<%= @keystone_settings['internal_url_host'] %>/auth/login/
 
 # Set to True if using self-signed SSL certificates. (boolean
 # value)
-#disable_ssl_certificate_validation=false
+disable_ssl_certificate_validation=<%= @ssl_insecure ? 'true' : 'false' %>
 
 # Full URI of the OpenStack Identity API (Keystone), v2
 # (string value)
-uri=http://<%= @key_host %>:5000/v2.0
+uri=<%= @keystone_settings["protocol"] %>://<%= @keystone_settings["internal_url_host"] %>:<%= @keystone_settings["service_port"] %>/v2.0
 
 # Full URI of the OpenStack Identity API (Keystone), v3
 # (string value)
-uri_v3=http://<%= @key_host %>:5000/v3
+uri_v3=<%= @keystone_settings["protocol"] %>://<%= @keystone_settings["internal_url_host"] %>:<%= @keystone_settings["service_port"] %>/v3
 
 # Identity API version to be used for authentication for API
 # tests. (string value)
@@ -524,7 +524,7 @@ uri_v3=http://<%= @key_host %>:5000/v3
 
 # The endpoint type to use for the identity service. (string
 # value)
-#endpoint_type=publicURL
+endpoint_type=internalURL
 
 # Username to use for Nova API requests. (string value)
 username=<%= @comp_user %>
@@ -608,7 +608,7 @@ admin_password=<%= @keystone_settings['admin_password'] %>
 
 # The endpoint type to use for the image service. (string
 # value)
-#endpoint_type=publicURL
+endpoint_type=internalURL
 
 # http accessible image (string value)
 http_image=<%= @http_image %>
@@ -677,7 +677,7 @@ ssh_user_regex=[["^.*[Cc]irros.*$", "root"]]
 
 # The endpoint type to use for the network service. (string
 # value)
-#endpoint_type=publicURL
+endpoint_type=internalURL
 
 # The cidr block to allocate tenant ipv4 subnets from (string
 # value)
@@ -746,7 +746,7 @@ api_extensions=<%= @neutron_api_extensions %>
 
 # The endpoint type to use for the object-store service.
 # (string value)
-#endpoint_type=publicURL
+endpoint_type=internalURL
 
 # Number of seconds to time on waiting for a container to
 # container synchronization complete. (integer value)
@@ -793,7 +793,7 @@ api_extensions=<%= @neutron_api_extensions %>
 
 # The endpoint type to use for the orchestration service.
 # (string value)
-#endpoint_type=publicURL
+endpoint_type=internalURL
 
 # Timeout in seconds to wait for a stack to build. (integer
 # value)
@@ -875,7 +875,7 @@ ssh_user=cirros
 
 # Whether or not neutron is expected to be available (boolean
 # value)
-neutron=<%= @use_neutron %>
+neutron=true
 
 # Whether or not glance is expected to be available (boolean
 # value)
@@ -977,7 +977,7 @@ horizon=<%= @use_horizon %>
 
 # The endpoint type to use for the telemetry service. (string
 # value)
-#endpoint_type=publicURL
+endpoint_type=internalURL
 
 
 [volume]
@@ -1005,7 +1005,7 @@ horizon=<%= @use_horizon %>
 
 # The endpoint type to use for the volume service. (string
 # value)
-#endpoint_type=publicURL
+endpoint_type=internalURL
 
 # Name of the backend1 (must be declared in cinder.conf)
 # (string value)

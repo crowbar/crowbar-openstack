@@ -27,27 +27,6 @@ rescue
   pip_cmd="pip install"
 end
 
-#check if nova and glance use gitrepo or package
-env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
-
-novas = search(:node, "roles:nova-multi-controller#{env_filter}") || []
-if novas.length > 0
-  nova = novas[0]
-  nova = node if nova.name == node.name
-else
-  nova = node
-end
-
-env_filter = " AND glance_config_environment:glance-config-#{nova[:nova][:glance_instance]}"
-
-glances = search(:node, "roles:glance-server#{env_filter}") || []
-if glances.length > 0
-  glance = glances[0]
-  glance = node if glance.name == node.name
-else
-  glance = node
-end
-
 #needed to create venv correctly
 if %w(redhat centos).include?(node.platform)
   package "libxslt-devel"
@@ -69,8 +48,6 @@ package "euca2ools"
 if node[:tempest][:use_gitrepo]
   # Download and unpack tempest tarball
 
-  tempest_path = node[:tempest][:tempest_path]
-
   tarball_url = node[:tempest][:tempest_tarball]
   filename = tarball_url.split('/').last
 
@@ -80,10 +57,20 @@ if node[:tempest][:use_gitrepo]
     action :create_if_missing
   end
 
+  parent_tempest_path = File.dirname(node[:tempest][:tempest_path])
+
+  directory parent_tempest_path do
+    recursive true
+    owner "root"
+    group "root"
+    mode  0755
+    action :create
+  end
+
   bash "install_tempest_from_archive" do
     cwd "/tmp"
-    code "tar xf #{filename} && mv openstack-tempest-* tempest && mv tempest /opt/ && rm #{filename}"
-    not_if { ::File.exists?(tempest_path) }
+    code "tar xf #{filename} && mv openstack-tempest-* tempest && mv tempest #{node[:tempest][:tempest_path]} && rm #{filename}"
+    not_if { ::File.exists?(node[:tempest][:tempest_path]) }
   end
 
   if node[:tempest][:use_virtualenv]
@@ -95,38 +82,25 @@ if node[:tempest][:use_gitrepo]
       package "python-pip"
       package "libxslt-devel"
     end
-    directory "/opt/tempest/.venv" do
+    directory "#{node[:tempest][:tempest_path]}/.venv" do
       recursive true
       owner "root"
       group "root"
       mode  0775
       action :create
     end
-    execute "virtualenv /opt/tempest/.venv" unless File.exist?("/opt/tempest/.venv")
-    pip_cmd = ". /opt/tempest/.venv/bin/activate && #{pip_cmd}"
+    execute "virtualenv #{node[:tempest][:tempest_path]}/.venv" unless File.exist?("#{node[:tempest][:tempest_path]}/.venv")
+    pip_cmd = ". #{node[:tempest][:tempest_path]}/.venv/bin/activate && #{pip_cmd}"
   end
 
   execute "pip_install_reqs_for_tempest" do
-    cwd "/opt/tempest/"
-    command "#{pip_cmd} -r /opt/tempest/requirements.txt"
+    cwd "#{node[:tempest][:tempest_path]}"
+    command "#{pip_cmd} -r #{node[:tempest][:tempest_path]}/requirements.txt"
   end
 else
   package "openstack-tempest-test"
 end
 
-unless nova[:nova][:use_gitrepo]
-  package "python-novaclient"
-else
-  execute "pip_install_clients_python-novaclient_for_tempest" do
-    command "#{pip_cmd} 'python-novaclient'"
-  end
+%w(keystone swift glance cinder neutron nova heat ceilometer).each do |component|
+  package "python-#{component}client"
 end
-
-unless glance[:glance][:use_gitrepo]
-  package "python-glanceclient"
-else
-  execute "pip_install_clients_python-glanceclient_for_tempest" do
-    command "#{pip_cmd} 'python-glanceclient'"
-  end
-end
-

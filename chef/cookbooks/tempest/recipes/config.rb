@@ -19,31 +19,12 @@
 #
 
 
-env_filter = " AND nova_config_environment:nova-config-#{node[:tempest][:nova_instance]}"
+nova = get_instance('roles:nova-multi-controller')
+keystone_settings = KeystoneHelper.keystone_settings(nova, "nova")
 
-novas = search(:node, "roles:nova-multi-controller#{env_filter}") || []
-if novas.length > 0
-  nova = novas[0]
-  nova = node if nova.name == node.name
-else
-  nova = node
-end
-
-env_filter = " AND keystone_config_environment:keystone-config-#{nova[:nova][:keystone_instance]}"
-
-keystones = search(:node, "roles:keystone-server#{env_filter}") || []
-if keystones.length > 0
-  keystone = keystones[0]
-  keystone = node if keystone.name == node.name
-else
-  keystone = node
-end
-
-keystone_port = keystone[:keystone][:api][:service_port]
-
-alt_comp_user = keystone[:keystone][:default][:username]
-alt_comp_pass = keystone[:keystone][:default][:password]
-alt_comp_tenant = keystone[:keystone][:default][:tenant]
+alt_comp_user = keystone_settings["default_user"]
+alt_comp_pass = keystone_settings["default_password"]
+alt_comp_tenant = keystone_settings["default_tenant"]
 
 tempest_comp_user = node[:tempest][:tempest_user_username]
 tempest_comp_pass = node[:tempest][:tempest_user_password]
@@ -51,25 +32,6 @@ tempest_comp_tenant = node[:tempest][:tempest_user_tenant]
 
 tempest_adm_user = node[:tempest][:tempest_adm_username]
 tempest_adm_pass = node[:tempest][:tempest_adm_password]
-
-keystone_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(keystone, "admin").address if keystone_address.nil?
-keystone_token = keystone[:keystone][:service][:token]
-keystone_admin_port = keystone[:keystone][:api][:admin_port]
-
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
-env_filter = " AND glance_config_environment:glance-config-#{nova[:nova][:glance_instance]}"
-
-glances = search(:node, "roles:glance-server#{env_filter}") || []
-if glances.length > 0
-  glance = glances[0]
-  glance = node if glance.name == node.name
-else
-  glance = node
-end
-
-glance_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(glance, "admin").address if glance_address.nil?
-glance_port = glance[:glance][:api][:bind_port]
 
 keystone_register "tempest tempest wakeup keystone" do
   protocol keystone_settings['protocol']
@@ -145,31 +107,15 @@ keystone_register "add #{keystone_settings['admin_user']}:#{tempest_comp_tenant}
   action :nothing
 end.run_action(:add_access)
 
-directory "#{node[:tempest][:tempest_path]}" do
-  action :create
-end
-
-directory "#{node[:tempest][:tempest_path]}/bin" do
-  action :create
-end
-
-directory "#{node[:tempest][:tempest_path]}/etc" do
-  action :create
-end
-
-directory "#{node[:tempest][:tempest_path]}/etc/certs" do
-  action :create
-end
-
-directory "#{node[:tempest][:tempest_path]}/etc/cirros" do
-  action :create
+# Create directories that we need
+["", "bin", "etc", "etc/certs", "etc/cirros"].each do |subdir|
+  directory "#{node[:tempest][:tempest_path]}/#{subdir}" do
+    action :create
+  end
 end
 
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
 heat_machine_id_file = node[:tempest][:tempest_path] + '/heat_machine.id'
-
-venv_prefix_path = node[:tempest][:use_virtualenv] ? ". /opt/tempest/.venv/bin/activate && " : nil
-bin_path = node[:tempest][:use_virtualenv] ? "/opt/tempest/.venv/bin" : "/usr/bin/"
 
 bash "upload tempest test image" do
   code <<-EOH
@@ -185,15 +131,15 @@ IMG_FILE=$(basename $IMAGE_URL)
 IMG_NAME="${IMG_FILE%-*}"
 
 function glance_it() {
-#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N http://$KEYSTONE_HOST:5000/v2.0 -H $GLANCE_HOST $@
+  glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
 }
 
 function extract_id() {
-cut -d ":" -f2 | tr -d " "
+  cut -d ":" -f2 | tr -d " "
 }
 
 function findfirst() {
-find $IMG_DIR -name "$1" | head -1
+  find $IMG_DIR -name "$1" | head -1
 }
 
 echo "Downloading image ... "
@@ -203,19 +149,22 @@ echo "Unpacking image ... "
 mkdir $IMG_DIR
 tar -xvzf $TEMP/$IMG_FILE -C $IMG_DIR || exit $?
 rm -rf #{node[:tempest][:tempest_path]}/etc/cirros/*
-cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/
+cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
 
 echo -n "Adding kernel ... "
 KERNEL_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-kernel" is_public=true container_format=aki disk_format=aki < $(findfirst '*-vmlinuz') | extract_id)
 echo "done."
+[ -n "$KERNEL_ID" ] || exit 1
 
 echo -n "Adding ramdisk ... "
 RAMDISK_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-ramdisk" is_public=true container_format=ari disk_format=ari < $(findfirst '*-initrd') | extract_id)
 echo "done."
+[ -n "$RAMDISK_ID" ] || exit 1
 
 echo -n "Adding image ... "
 MACHINE_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-machine" is_public=true container_format=ami disk_format=ami kernel_id=$KERNEL_ID ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
 echo "done."
+[ -n "$MACHINE_ID" ] || exit 1
 
 echo -n "Saving machine id ..."
 echo $MACHINE_ID > #{machine_id_file}
@@ -230,35 +179,32 @@ EOH
     'OS_USER' => tempest_comp_user,
     'OS_PASSWORD' => tempest_comp_pass,
     'OS_TENANT' => tempest_comp_tenant,
-    'KEYSTONE_HOST' => keystone_address,
-    'GLANCE_HOST' => glance_address
+    'KEYSTONE_URL' => keystone_settings["internal_auth_url"]
   })
   not_if { File.exists?(machine_id_file) }
 end
 
 bash "upload tempest heat-cfntools image" do
     code <<-EOF
-
 OS_USER=${OS_USER:-admin}
 OS_TENANT=${OS_TENANT:-admin}
 OS_PASSWORD=${OS_PASSWORD:-admin}
 
 function glance_it() {
-#{venv_prefix_path} glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N http://$KEYSTONE_HOST:5000/v2.0 -H $GLANCE_HOST $@
+  glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
 }
 
 id=$(glance_it image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
 [ -n "$id" ] && echo $id > #{heat_machine_id_file}
-true
 
+true
 EOF
   environment ({
     'IMAGE_NAME' => node[:tempest][:heat_test_image_name],
     'OS_USER' => tempest_comp_user,
     'OS_PASSWORD' => tempest_comp_pass,
     'OS_TENANT' => tempest_comp_tenant,
-    'KEYSTONE_HOST' => keystone_address,
-    'GLANCE_HOST' => glance_address
+    'KEYSTONE_URL' => keystone_settings["internal_auth_url"]
   })
 
   not_if { node[:tempest][:heat_test_image_name].nil? or File.exists?(heat_machine_id_file) }
@@ -270,29 +216,24 @@ heat_flavor_ref = "8"
 
 bash "create_yet_another_tiny_flavor" do
   code <<-EOH
-  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff #{flavor_ref} 128 0 1 || exit 0
-  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-stuff-2 #{alt_flavor_ref} 196 0 1 || exit 0
-  #{venv_prefix_path} nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 flavor-create tempest-heat #{heat_flavor_ref} 512 0 1 || exit 0
+  nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-stuff #{flavor_ref} 128 0 1 || exit 0
+  nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-stuff-2 #{alt_flavor_ref} 196 0 1 || exit 0
+  nova --os_username #{tempest_adm_user} --os_password #{tempest_adm_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} flavor-create tempest-heat #{heat_flavor_ref} 512 0 1 || exit 0
 EOH
 end
 
-ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`
-ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`
-cirros_version = "0.3.2"
+ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`.strip
+ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`.strip
 
-tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
-if %w(suse redhat centos).include?(node.platform)
-  tempest_conf = "/etc/tempest/tempest.conf"
-end
+%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service object-store &> /dev/null}
+use_swift = $?.success?
+%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service orchestration &> /dev/null}
+use_heat = $?.success?
+%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service metering &> /dev/null}
+use_ceilometer = $?.success?
 
-swifts = search(:node, "roles:swift-proxy") || []
-heats = search(:node, "roles:heat-server") || []
-cinders = search(:node, "roles:cinder-controller") || []
-ceilometers = search(:node, "roles:ceilometer-server") || []
-horizons = search(:node, "roles:nova_dashboard-server") || []
-
+# FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
-
 # FIXME: this should be 'all' instead
 #
 neutron_api_extensions = "provider,security-group,dhcp_agent_scheduler,external-net,ext-gw-mode,binding,agent,quotas,l3_agent_scheduler,multi-provider,router,extra_dhcp_opt,allowed-address-pairs,extraroute,metering,fwaas,service-type"
@@ -303,9 +244,10 @@ unless neutrons[0].nil?
   end
 end
 
-public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url http://#{keystone_address}:5000/v2.0 net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2 `
+public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2`.strip
 
-
+# FIXME: should avoid search with no environment in query
+cinders = search(:node, "roles:cinder-controller") || []
 storage_protocol = "iSCSI"
 vendor_name = "Open Source"
 cinders[0][:cinder][:volumes].each do |volume|
@@ -343,52 +285,83 @@ if backend_names.length > 1
   cinder_backend2_name = backend_names[1]
 end
 
+# FIXME: should avoid search with no environment in query
+horizons = search(:node, "roles:nova_dashboard-server") || []
+if horizons.empty?
+  use_horizon = false
+  horizon_host = "localhost"
+  horizont_protocol = "http"
+else
+  horizon = horizons[0]
+  use_horizon = true
+  horizon_host = CrowbarHelper.get_host_for_admin_url(horizon, horizon[:nova_dashboard][:ha][:enabled])
+  horizon_protocol = horizon[:nova_dashboard][:apache][:ssl] ? "https" : "http"
+end
+
+if node[:tempest][:use_gitrepo]
+  tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
+else
+  tempest_conf = "/etc/tempest/tempest.conf"
+end
+
 template "#{tempest_conf}" do
   source "tempest.conf.erb"
   mode 0644
   variables(
-    :alt_comp_pass => alt_comp_pass,
-    :alt_comp_tenant => alt_comp_tenant,
-    :alt_comp_user => alt_comp_user,
-    :alt_flavor_ref => alt_flavor_ref,
-    :bin_path => bin_path,
-    :cirros_version => cirros_version,
-    :comp_pass => tempest_comp_pass,
-    :comp_tenant => tempest_comp_tenant,
-    :comp_user => tempest_comp_user,
-    :ec2_access => ec2_access,
-    :ec2_secret => ec2_secret,
-    :flavor_ref => flavor_ref,
-    :heat_flavor_ref => heat_flavor_ref,
-    :heat_machine_id_file => heat_machine_id_file,
-    :img_host => glance_address,
-    :img_port => glance_port,
-    :http_image => node[:tempest][:tempest_test_image],
-    :key_host => keystone_address,
-    :key_port => keystone_port,
+    # general settings
     :keystone_settings => keystone_settings,
     :machine_id_file => machine_id_file,
-    :nova_host => nova.name,
-    :nova_api_v3 => nova[:nova][:enable_v3_api],
-    :public_network_id => public_network_id,
     :tempest_path => node[:tempest][:tempest_path],
-    :use_heat => !heats.empty?,
-    :use_ceilometer => !ceilometers.empty?,
-    :use_horizon => !horizons.empty?,
-    :use_neutron => !neutrons.empty?,
+    :use_swift => use_swift,
+    :use_horizon => use_horizon,
+    :use_heat => use_heat,
+    :use_ceilometer => use_ceilometer,
+    # boto settings
+    :ec2_protocol => nova[:nova][:ssl][:enabled] ? "https" : "http",
+    :ec2_host => CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
+    :ec2_port => nova[:nova][:ports][:api_ec2],
+    :s3_host => CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
+    :s3_port => nova[:nova][:ports][:objectstore],
+    :ec2_access => ec2_access,
+    :ec2_secret => ec2_secret,
+    # cli settings
+    :bin_path => "/usr/bin",
+    # compute settings
+    :flavor_ref => flavor_ref,
+    :alt_flavor_ref => alt_flavor_ref,
+    :nova_api_v3 => nova[:nova][:enable_v3_api],
+    # dashboard settings
+    :horizon_host => horizon_host,
+    :horizon_protocol => horizon_protocol,
+    # identity settings
+    # FIXME: it's a bit unclear, but looking at the tempest code, we should set
+    # this if any of the services is insecure, not just keystone
+    :ssl_insecure => keystone_settings["insecure"],
+    :comp_user => tempest_comp_user,
+    :comp_tenant => tempest_comp_tenant,
+    :comp_pass => tempest_comp_pass,
+    :alt_comp_user => alt_comp_user,
+    :alt_comp_tenant => alt_comp_tenant,
+    :alt_comp_pass => alt_comp_pass,
+    # image settings
+    :http_image => node[:tempest][:tempest_test_image],
+    # network settings
+    :public_network_id => public_network_id,
     :neutron_api_extensions => neutron_api_extensions,
-    :storage_protocol => storage_protocol,
-    :vendor_name => vendor_name,
+    # orchestration settings
+    :heat_flavor_ref => heat_flavor_ref,
+    :heat_machine_id_file => heat_machine_id_file,
+    # scenario settings
+    :cirros_version => File.basename(node[:tempest][:tempest_test_image]).gsub(/^cirros-/, "").gsub(/-.*/, ""),
+    # volume settings
     :cinder_multi_backend => cinder_multi_backend,
     :cinder_backend1_name => cinder_backend1_name,
     :cinder_backend2_name => cinder_backend2_name,
-    :cinder_api_v2 => cinders[0][:cinder][:enable_v2_api],
-    :use_swift => !swifts.empty?
+    :storage_protocol => storage_protocol,
+    :vendor_name => vendor_name,
+    :cinder_api_v2 => cinders[0][:cinder][:enable_v2_api]
   )
 end
-
-nosetests = "/opt/tempest/.venv/bin/nosetests"
-
 
 ["#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh",
  "#{node[:tempest][:tempest_path]}/bin/tempest_cleanup.sh"].each do |p|
@@ -397,17 +370,12 @@ nosetests = "/opt/tempest/.venv/bin/nosetests"
     mode 0755
     source "#{(p.rpartition '/')[2]}.erb"
     variables(
-      :alt_comp_pass => alt_comp_pass,
-      :alt_comp_tenant => alt_comp_tenant,
-      :alt_comp_user => alt_comp_user,
       :comp_pass => tempest_comp_pass,
       :comp_tenant => tempest_comp_tenant,
       :comp_user => tempest_comp_user,
-      :key_host => keystone_address,
-      :key_port => keystone_port,
       :keystone_settings => keystone_settings,
-      :nosetests => nosetests,
-      :tempest_path => node[:tempest][:tempest_path]
+      :tempest_path => node[:tempest][:tempest_path],
+      :use_virtualenv => node[:tempest][:use_virtualenv]
     )
   end
 end
