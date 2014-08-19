@@ -45,7 +45,7 @@
     "heat": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 13,
+      "schema-revision": 14,
       "element_states": {
         "heat-server": [ "readying", "ready", "applying" ]
       },
