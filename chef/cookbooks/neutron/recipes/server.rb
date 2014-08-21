@@ -31,6 +31,22 @@ include_recipe "neutron::database"
 include_recipe "neutron::common_config"
 
 
+# XXX this is no different from the file provided in the package, but
+# since we used to have a configured template here, we need to make sure
+# that it gets overwritten specifically since it used to contain
+# auth_token configuration options which conflict with the ones in
+# neutron.conf and the packages won't overwrite a modified file.
+# This block can be removed when either neutron does not read auth_token
+# configuration from api-paste.ini or we are sure that the target
+# machine no longer has an api-paste.ini file with the auth_token settings
+cookbook_file "api-paste.ini" do
+  path "/etc/neutron/api-paste.ini"
+  owner "root"
+  group node[:neutron][:group]
+  mode "0640"
+  action :create
+end
+
 if node[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware"
   plugin_cfg_path = "/etc/neutron/plugins/ml2/ml2_conf.ini"
 else
