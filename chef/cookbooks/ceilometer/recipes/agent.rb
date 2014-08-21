@@ -57,7 +57,7 @@ service "ceilometer-agent-compute" do
     service_name "openstack-ceilometer-compute"
   end
   supports :status => true, :restart => true
-  action :enable
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
 end
