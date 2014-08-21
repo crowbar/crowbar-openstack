@@ -49,10 +49,12 @@ else
   db_connection = "#{backend_name}://#{node[:ceilometer][:db][:user]}:#{db_password}@#{sql_address}/#{node[:ceilometer][:db][:database]}"
 end
 
+is_compute_agent = node.roles.include?("ceilometer-agent") && node.roles.any?{|role| /^nova-multi-compute-/ =~ role}
+
 # Find hypervisor inspector
 hypervisor_inspector = nil
 libvirt_type = nil
-if node.roles.include?("ceilometer-agent")
+if is_compute_agent
   if node.roles.include?("nova-multi-compute-vmware")
     hypervisor_inspector = "vsphere"
   else
@@ -89,7 +91,7 @@ template "/etc/ceilometer/ceilometer.conf" do
       :libvirt_type => libvirt_type,
       :alarm_threshold_evaluation_interval => node[:ceilometer][:alarm_threshold_evaluation_interval]
     )
-    if node.roles.include?("ceilometer-agent")
+    if is_compute_agent
       notifies :restart, "service[nova-compute]"
     end
 end
@@ -105,7 +107,7 @@ template "/etc/ceilometer/pipeline.yaml" do
       :disk_interval => node[:ceilometer][:disk_interval],
       :network_interval => node[:ceilometer][:network_interval]
   })
-  if node.roles.include?("ceilometer-agent")
+  if is_compute_agent
     notifies :restart, "service[nova-compute]"
   end
 end
