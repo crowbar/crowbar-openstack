@@ -50,6 +50,8 @@ end
 
 include_recipe "#{@cookbook_name}::common"
 
+is_compute = node.roles.any?{|role| /^nova-multi-compute-/ =~ role}
+
 service "ceilometer-agent-compute" do
   if %w(suse).include?(node.platform)
     service_name "openstack-ceilometer-agent-compute"
@@ -57,7 +59,11 @@ service "ceilometer-agent-compute" do
     service_name "openstack-ceilometer-compute"
   end
   supports :status => true, :restart => true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
-  subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
+  if is_compute
+    action [:enable, :start]
+    subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
+    subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
+  else
+    action [:disable, :stop]
+  end
 end
