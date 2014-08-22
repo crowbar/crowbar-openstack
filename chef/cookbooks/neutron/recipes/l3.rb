@@ -185,6 +185,7 @@ template "/etc/neutron/metadata_agent.ini" do
     :debug => node[:neutron][:debug],
     :keystone_settings => keystone_settings,
     :auth_region => "RegionOne",
+    :neutron_insecure => node[:neutron][:ssl][:insecure],
     :nova_metadata_host => metadata_host,
     :nova_metadata_port => metadata_port,
     :metadata_proxy_shared_secret => metadata_proxy_shared_secret

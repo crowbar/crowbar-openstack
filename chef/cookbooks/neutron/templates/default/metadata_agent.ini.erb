@@ -7,6 +7,7 @@ debug = <%= @debug ? "True" : "False" %>
 # The Neutron user information for accessing the Neutron API.
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_region = <%= @auth_region %>
+auth_insecure = <%= (@keystone_settings['insecure'] || @neutron_insecure) ? "True" : "False" %>
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
