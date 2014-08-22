@@ -25,6 +25,9 @@ default[:rabbitmq][:user] = "nova"
 default[:rabbitmq][:vhost] = "/nova"
 
 default[:rabbitmq][:nodename]  = node[:hostname]
+# This is the address for internal usage
+default[:rabbitmq][:address] = nil
+# These are all the addresses, possibly including public one
 default[:rabbitmq][:addresses] = []
 default[:rabbitmq][:port]  = 5672
 default[:rabbitmq][:mochiweb_port] = 55672
