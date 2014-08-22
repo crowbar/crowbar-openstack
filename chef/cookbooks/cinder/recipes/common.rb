@@ -107,14 +107,11 @@ else
   nova_api_insecure = false
 end
 
-sql = get_instance('roles:database-server')
-sql_address = CrowbarDatabaseHelper.get_listen_address(sql)
-Chef::Log.info("SQL server found at #{sql_address}")
+db_settings = fetch_database_settings
 
 include_recipe "database::client"
-backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
-include_recipe "#{backend_name}::client"
-include_recipe "#{backend_name}::python-client"
+include_recipe "#{db_settings[:backend_name]}::client"
+include_recipe "#{db_settings[:backend_name]}::python-client"
 
 db_password = ''
 if node.roles.include? "cinder-controller"
@@ -127,22 +124,12 @@ else
   end
 end
 
-sql_connection = "#{backend_name}://#{node[:cinder][:db][:user]}:#{db_password}@#{sql_address}/#{node[:cinder][:db][:database]}"
+sql_connection = "#{db_settings[:url_scheme]}://#{node[:cinder][:db][:user]}:#{db_password}@#{db_settings[:address]}/#{node[:cinder][:db][:database]}"
 
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 node[:cinder][:api][:bind_host] = my_ipaddress
 
 node[:cinder][:my_ip] = my_ipaddress
-
-rabbit = get_instance('roles:rabbitmq-server')
-Chef::Log.info("Rabbit server found at #{rabbit[:rabbitmq][:address]}")
-rabbit_settings = {
-  :address => rabbit[:rabbitmq][:address],
-  :port => rabbit[:rabbitmq][:port],
-  :user => rabbit[:rabbitmq][:user],
-  :password => rabbit[:rabbitmq][:password],
-  :vhost => rabbit[:rabbitmq][:vhost]
-}
 
 if node[:cinder][:api][:protocol] == 'https'
   if node[:cinder][:ssl][:generate_certs]
@@ -237,7 +224,7 @@ template "/etc/cinder/cinder.conf" do
     :use_multi_backend => node[:cinder][:use_multi_backend],
     :volumes => node[:cinder][:volumes],
     :sql_connection => sql_connection,
-    :rabbit_settings => rabbit_settings,
+    :rabbit_settings => fetch_rabbitmq_settings,
     :glance_server_protocol => glance_server_protocol,
     :glance_server_host => glance_server_host,
     :glance_server_port => glance_server_port,

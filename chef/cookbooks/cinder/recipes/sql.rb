@@ -25,51 +25,39 @@ if node[:cinder][:use_gitrepo]
   venv_prefix = node[:cinder][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 end
 
-sql = get_instance('roles:database-server')
+db_settings = fetch_database_settings
 
 include_recipe "database::client"
-backend_name = Chef::Recipe::Database::Util.get_backend_name(sql)
-include_recipe "#{backend_name}::client"
-include_recipe "#{backend_name}::python-client"
-
-db_provider = Chef::Recipe::Database::Util.get_database_provider(sql)
-db_user_provider = Chef::Recipe::Database::Util.get_user_provider(sql)
-privs = Chef::Recipe::Database::Util.get_default_priviledges(sql)
-
-sql_address = CrowbarDatabaseHelper.get_listen_address(sql)
-Chef::Log.info("Database server found at #{sql_address}")
-
-db_conn = { :host => sql_address,
-            :username => "db_maker",
-            :password => sql[:database][:db_maker_password] }
+include_recipe "#{db_settings[:backend_name]}::client"
+include_recipe "#{db_settings[:backend_name]}::python-client"
 
 crowbar_pacemaker_sync_mark "wait-cinder_database"
 
 # Create the Cinder Database
 database "create #{node[:cinder][:db][:database]} database" do
-    connection db_conn
+    connection db_settings[:connection]
     database_name node[:cinder][:db][:database]
-    provider db_provider
+    provider db_settings[:provider]
     action :create
 end
 
 database_user "create cinder database user" do
     host '%'
-    connection db_conn
+    connection db_settings[:connection]
     username node[:cinder][:db][:user]
     password node[:cinder][:db][:password]
-    provider db_user_provider
+    provider db_settings[:user_provider]
     action :create
 end
 
 database_user "grant database access for cinder database user" do
-    connection db_conn
+    connection db_settings[:connection]
     username node[:cinder][:db][:user]
     password node[:cinder][:db][:password]
     database_name node[:cinder][:db][:database]
     host '%'
-    privileges privs
-    provider db_user_provider
+    privileges db_settings[:privs]
+    provider db_settings[:user_provider]
     action :grant
 end
 
