@@ -89,11 +89,11 @@ ruby_block "Find neutron rootwrap" do
   end
 end
 
-template node[:neutron][:platform][:neutron_rootwrap_sudo_template] do
+template neutron[:neutron][:platform][:neutron_rootwrap_sudo_template] do
   cookbook "neutron"
   source "neutron-rootwrap.erb"
   mode 0440
-  variables(:user => node[:neutron][:platform][:user],
+  variables(:user => neutron[:neutron][:platform][:user],
             :binary => node[:neutron][:rootwrap])
   not_if { node.platform == "suse" }
 end
@@ -194,7 +194,7 @@ end
 
 service_plugins = "neutron.services.metering.metering_plugin.MeteringPlugin"
 service_plugins = "#{service_plugins}, neutron.services.firewall.fwaas_plugin.FirewallPlugin"
-if node[:neutron][:use_lbaas] then
+if neutron[:neutron][:use_lbaas] then
   service_plugins = "#{service_plugins}, neutron.services.loadbalancer.plugin.LoadBalancerPlugin"
 end
 
@@ -224,7 +224,7 @@ template "/etc/neutron/neutron.conf" do
       :ssl_cert_required => neutron[:neutron][:ssl][:cert_required],
       :ssl_ca_file => neutron[:neutron][:ssl][:ca_certs],
       :neutron_server => neutron_server,
-      :use_ml2 => neutron[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware",
+      :use_ml2 => neutron[:neutron][:use_ml2] && neutron[:neutron][:networking_plugin] != "vmware",
       :networking_plugin => neutron[:neutron][:networking_plugin],
       :service_plugins => service_plugins,
       :rootwrap_bin =>  node[:neutron][:rootwrap],
