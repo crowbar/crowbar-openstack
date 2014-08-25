@@ -60,7 +60,7 @@ end
 
 template "/etc/ceilometer/ceilometer.conf" do
     source "ceilometer.conf.erb"
-    owner node[:ceilometer][:user]
+    owner "root"
     group node[:ceilometer][:group]
     mode "0640"
     variables(
@@ -84,7 +84,7 @@ end
 
 template "/etc/ceilometer/pipeline.yaml" do
   source "pipeline.yaml.erb"
-  owner node[:ceilometer][:user]
+  owner "root"
   group node[:ceilometer][:group]
   mode "0640"
   variables({
