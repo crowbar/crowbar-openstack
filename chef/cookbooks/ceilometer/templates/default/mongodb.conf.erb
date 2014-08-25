@@ -9,7 +9,11 @@ logpath=/var/log/mongodb/mongodb.log
 logappend=true
 
 bind_ip = <%= @listen_addr %>
-#port = 27017
+port = <%= node[:ceilometer][:mongodb][:port] %>
+
+<% if node[:ceilometer][:ha][:server][:enabled] %>
+replSet = <%= node[:ceilometer][:ha][:mongodb][:replica_set][:name] %>
+<% end %>
 
 # Enable journaling, http://www.mongodb.org/display/DOCS/Journaling
 journal=true

@@ -16,59 +16,52 @@
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
 if node[:ceilometer][:use_mongodb]
-  if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
-    case node["platform"]
-      when "centos", "redhat"
-        mongo_conf = "/etc/mongod.conf"
-        mongo_service = "mongod"
-        package "mongo-10gen"
-        package "mongo-10gen-server"
-      else
-        mongo_conf = "/etc/mongodb.conf"
-        mongo_service = "mongodb"
-        package "mongodb" do
-          action :install
-        end
-    end
+  include_recipe "ceilometer::mongodb" if !ha_enabled || node[:ceilometer][:ha][:mongodb][:replica_set][:member]
 
-    mongodb_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  # need to wait for mongodb to start even if it's on a different host
+  # (ceilometer services need it running)
+  mongodb_nodes = nil
 
-    template mongo_conf do
-      mode 0644
-      source "mongodb.conf.erb"
-      variables(:listen_addr => mongodb_address)
-      notifies :restart, "service[#{mongo_service}]", :immediately
-    end
-
-    service mongo_service do
-      supports :status => true, :restart => true
-      action [:enable, :start]
-    end
-  else
-    # HA is enabled, and we're not the cluster founder
-    # Currently, we only setup mongodb non-HA on the first node, so wait for this one...
-    db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
-    db_host = db_hosts.select { |n| CrowbarPacemakerHelper.is_cluster_founder?(n) }.first
-    mongodb_address  = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
+  if ha_enabled && !node[:ceilometer][:ha][:mongodb][:replica_set][:member]
+    mongodb_nodes = search(:node,
+      "ceilometer_ha_mongodb_replica_set_member:true AND "\
+      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
+      )
   end
 
-  # wait for mongodb start (ceilometer services need it running)
+  # if we don't have HA enabled, then mongodb should be on the current host; if
+  # we have HA enabled and the node is part of the replica set, then we're fine
+  # too
+  mongodb_nodes ||= [ node ]
+
+  mongodb_addresses = mongodb_nodes.map{|n| Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address}
+
   ruby_block "wait for mongodb start" do
     block do
       require 'timeout'
       begin
-        Timeout.timeout(60) do
-          while ! ::Kernel.system("mongo #{mongodb_address} --quiet < /dev/null &> /dev/null")
+        Timeout.timeout(120) do
+          master_available = false
+          while true
+            mongodb_addresses.each do |mongodb_address|
+              cmd = shell_out("mongo --quiet #{mongodb_address} --eval \"db.isMaster()['ismaster']\" 2> /dev/null")
+              if cmd.exitstatus == 0 and cmd.stdout.strip == "true"
+                master_available = true
+                break
+              end
+            end
+
+            break if master_available
+
             Chef::Log.debug("mongodb still not reachable")
             sleep(2)
           end
         end
       rescue Timeout::Error
-        Chef::Log.warn("mongodb does not seem to be responding 1 minute after start")
+        Chef::Log.warn("No master for mongodb on #{mongodb_addresses.join(',')} after trying for 2 minutes")
       end
-    end # block
-  end # ruby_block
-
+    end
+  end
 else
   db_settings = fetch_database_settings
 

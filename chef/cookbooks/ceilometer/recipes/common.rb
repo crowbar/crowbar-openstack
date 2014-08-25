@@ -2,16 +2,28 @@
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 if node[:ceilometer][:use_mongodb]
-  db_host = nil
-  db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
-  if node[:ceilometer][:ha][:server][:enabled]
-    # Currently, we only setup mongodb non-HA on the first node
-    db_host = db_hosts.select { |n| CrowbarPacemakerHelper.is_cluster_founder?(n) }.first
-  end
-  db_host ||= db_hosts.first || node
+  db_connection = nil
 
-  mongodb_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
-  db_connection = "mongodb://#{mongodb_ip}:27017/ceilometer"
+  if node[:ceilometer][:ha][:server][:enabled]
+    db_hosts = search(:node,
+      "ceilometer_ha_mongodb_replica_set_member:true AND "\
+      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
+      )
+    unless db_hosts.empty?
+      mongodb_servers = db_hosts.map {|s| "#{Chef::Recipe::Barclamp::Inventory.get_network_by_type(s, "admin").address}:#{s[:ceilometer][:mongodb][:port]}"}
+      db_connection = "mongodb://#{mongodb_servers.sort.join(',')}/ceilometer?replicaSet=#{node[:ceilometer][:ha][:mongodb][:replica_set][:name]}"
+    end
+  end
+
+  # if this is a cluster, but the replica set member attribute hasn't
+  # been set on any node (yet), we just fallback to using the first
+  # ceilometer-server node
+  if db_connection.nil?
+    db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
+    db_host = db_hosts.first || node
+    mongodb_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
+    db_connection = "mongodb://#{mongodb_ip}:#{db_host[:ceilometer][:mongodb][:port]}/ceilometer"
+  end
 else
   db_settings = fetch_database_settings
 
