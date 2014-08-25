@@ -78,6 +78,7 @@ when "suse"
     :nsx_pkgs => [ "openvswitch-pki" ],
     :cisco_pkgs => [ "openstack-neutron-plugin-cisco" ],
     :user => "neutron",
+    :group => "neutron",
     :ovs_modprobe => "modprobe openvswitch",
     :neutron_rootwrap_sudo_template => "/etc/sudoers.d/openstack-neutron"
   }
@@ -104,6 +105,7 @@ when "centos", "redhat"
     :ovs_pkgs => [ "openvswitch",
                    "openstack-neutron-openvswitch" ],
     :user => "neutron",
+    :group => "neutron",
     :ovs_modprobe => "modprobe openvswitch",
     :neutron_rootwrap_sudo_template => "/etc/sudoers.d/openstack-neutron"
   }
@@ -134,6 +136,7 @@ else
     :nsx_pkgs => [ "" ],
     :cisco_pkgs => [ "" ],
     :user => "neutron",
+    :group => "neutron",
     :ovs_modprobe => "modprobe openvswitch",
     :neutron_rootwrap_sudo_template => "/etc/sudoers.d/neutron-rootwrap"
   }

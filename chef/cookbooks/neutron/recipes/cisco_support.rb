@@ -18,7 +18,8 @@ if node[:neutron][:use_ml2]
     cookbook "neutron"
     source "ml2_conf_cisco.ini.erb"
     mode "0640"
-    owner node[:neutron][:platform][:user]
+    owner "root"
+    group node[:neutron][:platform][:group]
     variables(
       :switches => switches,
       :vlan_mode => vlan_mode
@@ -28,7 +29,8 @@ if node[:neutron][:use_ml2]
 else
   directory "/etc/neutron/plugins/cisco" do
      mode 0755
-     owner node[:neutron][:platform][:user]
+     owner "root"
+     group node[:neutron][:platform][:group]
      action :create
      recursive true
      not_if { node[:platform] == "suse" }
@@ -38,7 +40,8 @@ else
     cookbook "neutron"
     source "cisco_plugins.ini.erb"
     mode "0640"
-    owner node[:neutron][:platform][:user]
+    owner "root"
+    group node[:neutron][:platform][:group]
     variables(
       :switches => switches,
       :vlan_mode => vlan_mode

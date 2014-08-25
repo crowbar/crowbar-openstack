@@ -104,7 +104,8 @@ unless neutron[:neutron][:networking_plugin] == "vmware"
       cookbook "neutron"
       source "neutron-rootwrap.conf"
       mode 00644
-      owner node[:neutron][:platform][:user]
+      owner "root"
+      group node[:neutron][:platform][:group]
     end
   end
 end

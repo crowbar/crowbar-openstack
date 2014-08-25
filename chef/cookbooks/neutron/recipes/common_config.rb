@@ -202,7 +202,8 @@ template "/etc/neutron/neutron.conf" do
     cookbook "neutron"
     source "neutron.conf.erb"
     mode "0640"
-    owner node[:neutron][:platform][:user]
+    owner "root"
+    group neutron[:neutron][:platform][:group]
     variables({
       :sql_connection => neutron[:neutron][:db][:sql_connection],
       :sql_min_pool_size => neutron[:neutron][:sql][:min_pool_size],
@@ -247,8 +248,9 @@ when "openvswitch", "cisco"
   agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
 
   directory "/etc/neutron/plugins/openvswitch/" do
-     mode 00775
-     owner node[:neutron][:platform][:user]
+     mode 00755
+     owner "root"
+     group neutron[:neutron][:platform][:group]
      action :create
      recursive true
      not_if { node[:platform] == "suse" }
@@ -257,7 +259,8 @@ when "openvswitch", "cisco"
   template agent_config_path do
     cookbook "neutron"
     source "ovs_neutron_plugin.ini.erb"
-    owner neutron[:neutron][:platform][:user]
+    owner "root"
+    group neutron[:neutron][:platform][:group]
     group "root"
     mode "0640"
     variables(
@@ -271,8 +274,9 @@ when "linuxbridge"
   agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
 
   directory "/etc/neutron/plugins/linuxbridge/" do
-     mode 00775
-     owner node[:neutron][:platform][:user]
+     mode 00755
+     owner "root"
+     group neutron[:neutron][:platform][:group]
      action :create
      recursive true
      not_if { node[:platform] == "suse" }
@@ -281,8 +285,8 @@ when "linuxbridge"
   template agent_config_path do
     cookbook "neutron"
     source "linuxbridge_conf.ini.erb"
-    owner neutron[:neutron][:platform][:user]
-    group "root"
+    owner "root"
+    group neutron[:neutron][:platform][:group]
     mode "0640"
     variables(
       :sql_connection => neutron[:neutron][:db][:sql_connection],
@@ -295,8 +299,9 @@ when "vmware"
   agent_config_path = "/etc/neutron/plugins/vmware/nsx.ini"
 
   directory "/etc/neutron/plugins/vmware/" do
-     mode 00775
-     owner node[:neutron][:platform][:user]
+     mode 00755
+     owner "root"
+     group neutron[:neutron][:platform][:group]
      group "root"
      action :create
      recursive true
@@ -306,8 +311,8 @@ when "vmware"
   template agent_config_path do
     cookbook "neutron"
     source "nsx.ini.erb"
-    owner neutron[:neutron][:platform][:user]
-    group "root"
+    owner "root"
+    group neutron[:neutron][:platform][:group]
     mode "0640"
     variables(
       :vmware_config => neutron[:neutron][:vmware]

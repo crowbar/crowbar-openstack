@@ -99,8 +99,8 @@ end
 
 template plugin_cfg_path do
   source "ml2_conf.ini.erb"
-  owner node[:neutron][:platform][:user]
-  group "root"
+  owner "root"
+  group node[:neutron][:platform][:group]
   mode "0640"
   variables(
     :networking_mode => node[:neutron][:networking_mode],
@@ -179,7 +179,8 @@ include_recipe "neutron::api_register"
 
 template "/etc/default/neutron-server" do
   source "neutron-server.erb"
-  owner node[:neutron][:platform][:user]
+  owner "root"
+  group node[:neutron][:platform][:group]
   variables(
       :neutron_plugin_config => "/etc/neutron/plugins/ml2/ml2_conf.ini"
     )
