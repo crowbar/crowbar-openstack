@@ -85,8 +85,8 @@ end
 template "/etc/ceilometer/pipeline.yaml" do
   source "pipeline.yaml.erb"
   owner "root"
-  group node[:ceilometer][:group]
-  mode "0640"
+  group "root"
+  mode "0644"
   variables({
       :meters_interval => node[:ceilometer][:meters_interval],
       :cpu_interval => node[:ceilometer][:cpu_interval],
