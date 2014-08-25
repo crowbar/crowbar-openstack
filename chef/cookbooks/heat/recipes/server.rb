@@ -256,8 +256,8 @@ EOF
 
 template "/etc/heat/heat.conf" do
   source "heat.conf.erb"
-  owner node[:heat][:user]
-  group "root"
+  owner "root"
+  group node[:heat][:group]
   mode "0640"
   variables(
     :debug => node[:heat][:debug],
@@ -290,8 +290,8 @@ end
 
 template "/etc/heat/loadbalancer.template" do
   source "loadbalancer.template.erb"
-  owner node[:heat][:user]
-  group "root"
+  owner "root"
+  group node[:heat][:group]
   mode "0640"
   notifies :restart, "service[heat-engine]", :delayed
   only_if { node[:platform] == "suse" }
