@@ -214,8 +214,8 @@ end
 
 template "/etc/cinder/cinder.conf" do
   source "cinder.conf.erb"
-  owner node[:cinder][:user]
-  group "root"
+  owner "root"
+  group node[:cinder][:group]
   mode 0640
   variables(
     :bind_host => bind_host,
