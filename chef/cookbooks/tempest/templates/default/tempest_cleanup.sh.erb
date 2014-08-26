@@ -21,12 +21,12 @@ for f in `neutron security-group-list | grep -v default | grep -v '\-\{5\}' | gr
 echo -e "Cleaning up images..."
 for f in `nova image-list | grep -E '.image[0-9]+' | awk {'print $2'}`; do nova image-delete $f ; done
 
-echo -e "Cleanup up ports"
+echo -e "Cleaning up ports"
 for p in $(neutron port-list -f csv | egrep '"10.100.0.' | cut -d'"' -f2); do
     neutron port-delete $p || :
 done
 
-echo -e "Cleanup up subnets"
+echo -e "Cleaning up subnets"
 for n in $(neutron subnet-list -f csv | egrep '"10.100.0.' | cut -d'"' -f2); do
     neutron subnet-delete $n || :
 done
@@ -40,7 +40,7 @@ for r in $(neutron router-list -f csv | egrep '"router--[0-9]*"' | cut -d'"' -f2
     neutron router-delete $r || :
 done
 
-echo -e "Cleanup up networks"
+echo -e "Cleaning up networks"
 for n in $(neutron net-list -f csv | egrep '"test-network--[0-9]*"' | cut -d'"' -f2); do
     neutron net-delete $n || :
 done
