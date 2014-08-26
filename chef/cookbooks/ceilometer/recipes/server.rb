@@ -22,7 +22,7 @@ if node[:ceilometer][:use_mongodb]
   # (ceilometer services need it running)
   mongodb_nodes = nil
 
-  if ha_enabled && !node[:ceilometer][:ha][:mongodb][:replica_set][:member]
+  if ha_enabled
     mongodb_nodes = search(:node,
       "ceilometer_ha_mongodb_replica_set_member:true AND "\
       "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
