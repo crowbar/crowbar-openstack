@@ -89,11 +89,11 @@ ruby_block "Find neutron rootwrap" do
   end
 end
 
-template node[:neutron][:platform][:neutron_rootwrap_sudo_template] do
+template neutron[:neutron][:platform][:neutron_rootwrap_sudo_template] do
   cookbook "neutron"
   source "neutron-rootwrap.erb"
   mode 0440
-  variables(:user => node[:neutron][:platform][:user],
+  variables(:user => neutron[:neutron][:platform][:user],
             :binary => node[:neutron][:rootwrap])
   not_if { node.platform == "suse" }
 end
@@ -194,7 +194,7 @@ end
 
 service_plugins = "neutron.services.metering.metering_plugin.MeteringPlugin"
 service_plugins = "#{service_plugins}, neutron.services.firewall.fwaas_plugin.FirewallPlugin"
-if node[:neutron][:use_lbaas] then
+if neutron[:neutron][:use_lbaas] then
   service_plugins = "#{service_plugins}, neutron.services.loadbalancer.plugin.LoadBalancerPlugin"
 end
 
@@ -202,7 +202,8 @@ template "/etc/neutron/neutron.conf" do
     cookbook "neutron"
     source "neutron.conf.erb"
     mode "0640"
-    owner node[:neutron][:platform][:user]
+    owner "root"
+    group neutron[:neutron][:platform][:group]
     variables({
       :sql_connection => neutron[:neutron][:db][:sql_connection],
       :sql_min_pool_size => neutron[:neutron][:sql][:min_pool_size],
@@ -223,7 +224,7 @@ template "/etc/neutron/neutron.conf" do
       :ssl_cert_required => neutron[:neutron][:ssl][:cert_required],
       :ssl_ca_file => neutron[:neutron][:ssl][:ca_certs],
       :neutron_server => neutron_server,
-      :use_ml2 => neutron[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware",
+      :use_ml2 => neutron[:neutron][:use_ml2] && neutron[:neutron][:networking_plugin] != "vmware",
       :networking_plugin => neutron[:neutron][:networking_plugin],
       :service_plugins => service_plugins,
       :rootwrap_bin =>  node[:neutron][:rootwrap],
@@ -247,8 +248,9 @@ when "openvswitch", "cisco"
   agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
 
   directory "/etc/neutron/plugins/openvswitch/" do
-     mode 00775
-     owner node[:neutron][:platform][:user]
+     mode 00755
+     owner "root"
+     group neutron[:neutron][:platform][:group]
      action :create
      recursive true
      not_if { node[:platform] == "suse" }
@@ -257,7 +259,8 @@ when "openvswitch", "cisco"
   template agent_config_path do
     cookbook "neutron"
     source "ovs_neutron_plugin.ini.erb"
-    owner neutron[:neutron][:platform][:user]
+    owner "root"
+    group neutron[:neutron][:platform][:group]
     group "root"
     mode "0640"
     variables(
@@ -271,8 +274,9 @@ when "linuxbridge"
   agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
 
   directory "/etc/neutron/plugins/linuxbridge/" do
-     mode 00775
-     owner node[:neutron][:platform][:user]
+     mode 00755
+     owner "root"
+     group neutron[:neutron][:platform][:group]
      action :create
      recursive true
      not_if { node[:platform] == "suse" }
@@ -281,8 +285,8 @@ when "linuxbridge"
   template agent_config_path do
     cookbook "neutron"
     source "linuxbridge_conf.ini.erb"
-    owner neutron[:neutron][:platform][:user]
-    group "root"
+    owner "root"
+    group neutron[:neutron][:platform][:group]
     mode "0640"
     variables(
       :sql_connection => neutron[:neutron][:db][:sql_connection],
@@ -295,8 +299,9 @@ when "vmware"
   agent_config_path = "/etc/neutron/plugins/vmware/nsx.ini"
 
   directory "/etc/neutron/plugins/vmware/" do
-     mode 00775
-     owner node[:neutron][:platform][:user]
+     mode 00755
+     owner "root"
+     group neutron[:neutron][:platform][:group]
      group "root"
      action :create
      recursive true
@@ -306,8 +311,8 @@ when "vmware"
   template agent_config_path do
     cookbook "neutron"
     source "nsx.ini.erb"
-    owner neutron[:neutron][:platform][:user]
-    group "root"
+    owner "root"
+    group neutron[:neutron][:platform][:group]
     mode "0640"
     variables(
       :vmware_config => neutron[:neutron][:vmware]

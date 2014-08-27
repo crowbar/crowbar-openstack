@@ -107,8 +107,8 @@ end
 
 template "/etc/neutron/l3_agent.ini" do
   source "l3_agent.ini.erb"
-  owner node[:neutron][:platform][:user]
-  group "root"
+  owner "root"
+  group node[:neutron][:platform][:group]
   mode "0640"
   variables(
     :debug => node[:neutron][:debug],
@@ -127,8 +127,8 @@ end
 template "/etc/neutron/metering_agent.ini" do
   cookbook "neutron"
   source "metering_agent.ini.erb"
-  owner node[:neutron][:platform][:user]
-  group "root"
+  owner "root"
+  group node[:neutron][:platform][:group]
   mode "0640"
   variables(
     :debug => node[:neutron][:debug],
@@ -141,8 +141,8 @@ dns_list = node[:dns][:forwarders].join(",")
 
 template "/etc/neutron/dhcp_agent.ini" do
   source "dhcp_agent.ini.erb"
-  owner node[:neutron][:platform][:user]
-  group "root"
+  owner "root"
+  group node[:neutron][:platform][:group]
   mode "0640"
   variables(
     :debug => node[:neutron][:debug],
@@ -178,8 +178,8 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 template "/etc/neutron/metadata_agent.ini" do
   source "metadata_agent.ini.erb"
-  owner node[:neutron][:platform][:user]
-  group "root"
+  owner "root"
+  group node[:neutron][:platform][:group]
   mode "0640"
   variables(
     :debug => node[:neutron][:debug],
@@ -209,8 +209,8 @@ if node[:neutron][:use_lbaas] then
   template "/etc/neutron/lbaas_agent.ini" do
     cookbook "neutron"
     source "lbaas_agent.ini.erb"
-    owner node[:neutron][:platform][:user]
-    group "root"
+    owner "root"
+    group node[:neutron][:platform][:group]
     mode "0640"
     variables(
       :debug => node[:neutron][:debug],
