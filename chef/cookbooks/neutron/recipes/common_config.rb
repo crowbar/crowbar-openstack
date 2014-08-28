@@ -261,7 +261,6 @@ when "openvswitch", "cisco"
     source "ovs_neutron_plugin.ini.erb"
     owner "root"
     group neutron[:neutron][:platform][:group]
-    group "root"
     mode "0640"
     variables(
       :physnet => neutron[:neutron][:networking_mode] == 'gre' ? nil : "br-fixed",
@@ -302,7 +301,6 @@ when "vmware"
      mode 00755
      owner "root"
      group neutron[:neutron][:platform][:group]
-     group "root"
      action :create
      recursive true
      not_if { node[:platform] == "suse" }
