@@ -77,15 +77,19 @@ else
 
 end
 
-node[:heat][:platform][:aux_dirs].each do |d|
-  directory d do
-    owner node[:heat][:user]
-    group "root"
-    mode 00755
-    action :create
-  end
+directory "/var/cache/heat" do
+  owner node[:heat][:user]
+  group node[:heat][:group]
+  mode 00750
+  action :create
 end
 
+directory "/etc/heat/environment.d" do
+  owner "root"
+  group "root"
+  mode 00755
+  action :create
+end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
@@ -256,8 +260,8 @@ EOF
 
 template "/etc/heat/heat.conf" do
   source "heat.conf.erb"
-  owner node[:heat][:user]
-  group "root"
+  owner "root"
+  group node[:heat][:group]
   mode "0640"
   variables(
     :debug => node[:heat][:debug],
@@ -290,8 +294,8 @@ end
 
 template "/etc/heat/loadbalancer.template" do
   source "loadbalancer.template.erb"
-  owner node[:heat][:user]
-  group "root"
+  owner "root"
+  group node[:heat][:group]
   mode "0640"
   notifies :restart, "service[heat-engine]", :delayed
   only_if { node[:platform] == "suse" }

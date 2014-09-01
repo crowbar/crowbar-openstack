@@ -24,8 +24,7 @@ case node["platform"]
       :packages => ["heat-engine", "heat-api", "heat-api-cfn",
                     "heat-api-cloudwatch", "python-heat", "heat-common",
                     "python-heatclient"],
-      :services => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"],
-      :aux_dirs => ["/var/cache/heat","/etc/heat/environment.d"]
+      :services => ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"]
     }
    when "suse"
     default[:heat][:platform] = {
@@ -33,8 +32,7 @@ case node["platform"]
                     "openstack-heat-api-cfn", "openstack-heat-api-cloudwatch",
                     "python-heatclient"],
       :services => ["openstack-heat-engine", "openstack-heat-api",
-                    "openstack-heat-api-cfn", "openstack-heat-api-cloudwatch"],
-      :aux_dirs => ["/var/cache/heat", "/etc/heat/environment.d"]
+                    "openstack-heat-api-cfn", "openstack-heat-api-cloudwatch"]
     }
     default[:heat][:engine][:service_name] = "openstack-heat-engine"
     default[:heat][:api][:service_name] = "openstack-heat-api"
