@@ -55,8 +55,8 @@ en:
           raw_volume_driver: 'Raw Devices'
           rbd_parameters: 'RADOS Parameters'
           rbd_volume_driver: 'RADOS'
-          vmware_parameters: 'VMWare Parameters'
-          vmware_volume_driver: 'VMWare'
+          vmware_parameters: 'VMware Parameters'
+          vmware_volume_driver: 'VMware'
           index:
             emc:
               ecom_server_ip: 'IP address of the ECOM server'
