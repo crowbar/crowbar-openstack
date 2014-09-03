@@ -23,7 +23,7 @@
 # original at: https://github.com/edelight/chef-mongodb/blob/master/libraries/mongodb.rb
 
 require 'json'
-
+include Chef::Mixin::ShellOut
 
 module CeilometerHelper
   class << self
