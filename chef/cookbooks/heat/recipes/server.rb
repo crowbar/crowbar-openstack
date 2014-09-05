@@ -251,7 +251,7 @@ end
 crowbar_pacemaker_sync_mark "create-heat_register"
 
 shell_get_stack_user_domain = <<-EOF
-  export OS_URL="#{KeystoneHelper.service_URL(node, node[:fqdn], node["keystone"]["api"]["service_port"])}/v3";
+  export OS_URL="#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3"
   eval $(openstack --os-token #{keystone_settings['admin_token']} \
     --os-url=$OS_URL \
     --os-identity-api-version=3 domain show -f shell --variable id #{stack_user_domain_name});
