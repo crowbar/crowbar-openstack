@@ -176,8 +176,8 @@ glance_it index
 EOH
   environment ({
     'IMAGE_URL' => node[:tempest][:tempest_test_image],
-    'OS_USER' => tempest_comp_user,
-    'OS_PASSWORD' => tempest_comp_pass,
+    'OS_USER' => tempest_adm_user,
+    'OS_PASSWORD' => tempest_adm_pass,
     'OS_TENANT' => tempest_comp_tenant,
     'KEYSTONE_URL' => keystone_settings["internal_auth_url"]
   })
@@ -201,8 +201,8 @@ true
 EOF
   environment ({
     'IMAGE_NAME' => node[:tempest][:heat_test_image_name],
-    'OS_USER' => tempest_comp_user,
-    'OS_PASSWORD' => tempest_comp_pass,
+    'OS_USER' => tempest_adm_user,
+    'OS_PASSWORD' => tempest_adm_pass,
     'OS_TENANT' => tempest_comp_tenant,
     'KEYSTONE_URL' => keystone_settings["internal_auth_url"]
   })
