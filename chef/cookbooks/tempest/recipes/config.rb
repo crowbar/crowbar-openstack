@@ -143,7 +143,7 @@ function findfirst() {
 }
 
 echo "Downloading image ... "
-wget $IMAGE_URL --directory-prefix=$TEMP || exit $?
+wget --no-verbose $IMAGE_URL --directory-prefix=$TEMP 2>&1 || exit $?
 
 echo "Unpacking image ... "
 mkdir $IMG_DIR
