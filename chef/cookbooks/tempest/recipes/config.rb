@@ -121,21 +121,18 @@ bash "upload tempest test image" do
   code <<-EOH
 IMAGE_URL=${IMAGE_URL:-"http://download.cirros-cloud.net/0.3.2/cirros-0.3.2-x86_64-uec.tar.gz"}
 
-OS_USER=${OS_USER:-admin}
-OS_TENANT=${OS_TENANT:-admin}
-OS_PASSWORD=${OS_PASSWORD:-admin}
+export OS_USERNAME=${OS_USERNAME:-admin}
+export OS_TENANT_NAME=${OS_TENANT_NAME:-admin}
+export OS_PASSWORD=${OS_PASSWORD:-admin}
+export OS_AUTH_URL
 
 TEMP=$(mktemp -d)
 IMG_DIR=$TEMP/image
 IMG_FILE=$(basename $IMAGE_URL)
 IMG_NAME="${IMG_FILE%-*}"
 
-function glance_it() {
-  glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
-}
-
 function extract_id() {
-  cut -d ":" -f2 | tr -d " "
+  grep ' id ' | awk '{ print $4 }'
 }
 
 function findfirst() {
@@ -152,17 +149,24 @@ rm -rf #{node[:tempest][:tempest_path]}/etc/cirros/*
 cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
 
 echo -n "Adding kernel ... "
-KERNEL_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-kernel" is_public=true container_format=aki disk_format=aki < $(findfirst '*-vmlinuz') | extract_id)
+KERNEL_ID=$(glance image-create --name "$IMG_NAME-tempest-kernel" \
+    --is-public True --container-format aki \
+    --disk-format aki < $(findfirst '*-vmlinuz') | extract_id)
 echo "done."
 [ -n "$KERNEL_ID" ] || exit 1
 
 echo -n "Adding ramdisk ... "
-RAMDISK_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-ramdisk" is_public=true container_format=ari disk_format=ari < $(findfirst '*-initrd') | extract_id)
+RAMDISK_ID=$(glance image-create --name="$IMG_NAME-tempest-ramdisk" \
+    --is-public True --container-format ari \
+    --disk-format ari < $(findfirst '*-initrd') | extract_id)
 echo "done."
 [ -n "$RAMDISK_ID" ] || exit 1
 
 echo -n "Adding image ... "
-MACHINE_ID=$(glance_it add --silent-upload name="$IMG_NAME-tempest-machine" is_public=true container_format=ami disk_format=ami kernel_id=$KERNEL_ID ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
+MACHINE_ID=$(glance image-create --name="$IMG_NAME-tempest-machine" \
+    --is-public True --container-format ami --disk-format ami \
+    --property kernel_id=$KERNEL_ID \
+    --property ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
 echo "done."
 [ -n "$MACHINE_ID" ] || exit 1
 
@@ -172,39 +176,35 @@ echo "done."
 
 rm -rf $TEMP
 
-glance_it index
+glance image-list
 EOH
   environment ({
     'IMAGE_URL' => node[:tempest][:tempest_test_image],
-    'OS_USER' => tempest_adm_user,
+    'OS_USERNAME' => tempest_adm_user,
     'OS_PASSWORD' => tempest_adm_pass,
-    'OS_TENANT' => tempest_comp_tenant,
-    'KEYSTONE_URL' => keystone_settings["internal_auth_url"]
+    'OS_TENANT_NAME' => tempest_comp_tenant,
+    'OS_AUTH_URL' => keystone_settings["internal_auth_url"]
   })
   not_if { File.exists?(machine_id_file) }
 end
 
 bash "upload tempest heat-cfntools image" do
     code <<-EOF
-OS_USER=${OS_USER:-admin}
-OS_TENANT=${OS_TENANT:-admin}
+OS_USERNAME=${OS_USERNAME:-admin}
+OS_TENANT_NAME=${OS_TENANT_NAME:-admin}
 OS_PASSWORD=${OS_PASSWORD:-admin}
 
-function glance_it() {
-  glance -I $OS_USER -T $OS_TENANT -K $OS_PASSWORD -N $KEYSTONE_URL $@
-}
-
-id=$(glance_it image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
+id=$(glance image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
 [ -n "$id" ] && echo $id > #{heat_machine_id_file}
 
 true
 EOF
   environment ({
     'IMAGE_NAME' => node[:tempest][:heat_test_image_name],
-    'OS_USER' => tempest_adm_user,
+    'OS_USERNAME' => tempest_adm_user,
     'OS_PASSWORD' => tempest_adm_pass,
-    'OS_TENANT' => tempest_comp_tenant,
-    'KEYSTONE_URL' => keystone_settings["internal_auth_url"]
+    'OS_TENANT_NAME' => tempest_comp_tenant,
+    'OS_AUTH_URL' => keystone_settings["internal_auth_url"]
   })
 
   not_if { node[:tempest][:heat_test_image_name].nil? or File.exists?(heat_machine_id_file) }
