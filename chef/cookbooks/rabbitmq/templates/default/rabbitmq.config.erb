@@ -7,9 +7,9 @@
    {disk_free_limit, 50000000}
   ]
  },
- {rabbitmq_mochiweb,
+ {rabbitmq_management,
   [
-   {listeners, [{mgmt, [{ip, "<%= node[:rabbitmq][:mochiweb_address] %>"}, {port, <%= node[:rabbitmq][:mochiweb_port] %>}]}]}
+   {listener, [{ip, "<%= node[:rabbitmq][:management_address] %>"}, {port, <%= node[:rabbitmq][:management_port] %>}]}
   ]
  }
 ].
