@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: nvp
-# Attributes:: default
+# Cookbook Name:: nsx
+# Recipe:: hypervisor
 #
 # Copyright 2013, cloudbau GmbH
 #
@@ -17,22 +17,21 @@
 # limitations under the License.
 #
 
-default[:nvp][:controllers] = []
-#
-# to be used like this:
-#
-#  "nvp" => {
-#    "controllers" => [
-#      {
-#        :host => '10.127.1.10',
-#        :port => 443,
-#        :username => 'admin',
-#        :password => 'admin'
-#      }
-#    ]
-#  }
-default[:nvp][:nvp_cluster_uuid] = nil
-default[:nvp][:default_tz_uuid] = nil
-default[:nvp][:default_l3_gateway_service_uuid] = nil
-default[:nvp][:default_l3_gateway_service_uuid] = nil
-default[:nvp][:default_iface_name] = nil
+
+include_recipe 'nsx::default'
+
+controller = node[:nsx][:controllers].first
+
+nsx_transport_node node[:fqdn] do
+  nsx_controller controller
+  client_pem_file '/etc/openvswitch/ovsclient-cert.pem'
+  integration_bridge_id 'br-int'
+  tunnel_probe_random_vlan true
+  transport_connectors([
+    {
+      "transport_zone_uuid" => node[:nsx][:default_tz_uuid],
+      "ip_address" => node[:ipaddress],
+      "type" => "STTConnector"
+    }
+  ])
+end

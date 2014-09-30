@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: nvp
-# Recipe:: hypervisor
+# Cookbook Name:: nsx
+# Recipe:: default
 #
 # Copyright 2013, cloudbau GmbH
 #
@@ -16,22 +16,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-
-include_recipe 'nvp::default'
-
-controller = node[:nvp][:controllers].first
-
-nvp_transport_node node[:fqdn] do
-  nvp_controller controller
-  client_pem_file '/etc/openvswitch/ovsclient-cert.pem'
-  integration_bridge_id 'br-int'
-  tunnel_probe_random_vlan true
-  transport_connectors([
-    {
-      "transport_zone_uuid" => node[:nvp][:default_tz_uuid],
-      "ip_address" => node[:ipaddress],
-      "type" => "STTConnector"
-    }
-  ])
-end
+chef_gem 'faraday'

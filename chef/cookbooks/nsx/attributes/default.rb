@@ -1,6 +1,6 @@
 #
-# Cookbook Name:: nvp
-# Recipe:: default
+# Cookbook Name:: nsx
+# Attributes:: default
 #
 # Copyright 2013, cloudbau GmbH
 #
@@ -16,4 +16,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-chef_gem 'faraday'
+
+default[:nsx][:controllers] = []
+#
+# to be used like this:
+#
+#  "nsx" => {
+#    "controllers" => [
+#      {
+#        :host => '10.127.1.10',
+#        :port => 443,
+#        :username => 'admin',
+#        :password => 'admin'
+#      }
+#    ]
+#  }
+default[:nsx][:nsx_cluster_uuid] = nil
+default[:nsx][:default_tz_uuid] = nil
+default[:nsx][:default_l3_gateway_service_uuid] = nil
+default[:nsx][:default_l3_gateway_service_uuid] = nil
+default[:nsx][:default_iface_name] = nil

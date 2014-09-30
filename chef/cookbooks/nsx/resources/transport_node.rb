@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: nvp
+# Cookbook Name:: nsx
 # Resource:: transport_node
 #
 # Copyright 2013, cloudbau GmbH
@@ -21,13 +21,13 @@ actions :create, :delete
 default_action :create
 
 attribute :display_name, :kind_of => String, :name_attribute => true
-attribute :nvp_controller, :kind_of => Hash, :required => true
+attribute :nsx_controller, :kind_of => Hash, :required => true
 attribute :transport_connectors, :kind_of => [Array, Hash], :default => []
 #  E.g.
 #  [
 #     {
-#       "transport_zone_uuid": "b9db1ed0-b214-4f29-a40d-1d4e59e2f209", 
-#       "ip_address": "10.10.1.2", 
+#       "transport_zone_uuid": "b9db1ed0-b214-4f29-a40d-1d4e59e2f209",
+#       "ip_address": "10.10.1.2",
 #       "type": "STTConnector"
 #     }
 #  ]

@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: nvp
+# Cookbook Name:: nsx
 # Provider:: transport_node
 #
 # Copyright 2013, cloudbau GmbH
@@ -28,7 +28,7 @@ def create_connection(controller)
   begin
     require 'faraday'
   rescue LoadError
-    Chef::Log.error "Missing gem 'faraday'. Use the default nvp recipe to install it first."
+    Chef::Log.error "Missing gem 'faraday'. Use the default nsx recipe to install it first."
   end
 
   conn = Faraday.new(url: "https://#{controller[:host]}:#{controller[:port]}", ssl: { verify: false }) do |faraday|
@@ -54,8 +54,8 @@ action :create do
 
     converge_by "creating transport node #{@new_resource.name}" do
 
-      conn, cookie = create_connection @new_resource.nvp_controller
-      
+      conn, cookie = create_connection @new_resource.nsx_controller
+
       tnode = {}
       tnode['display_name'] = @new_resource.name
       tnode['integration_bridge_id'] = @new_resource.integration_bridge_id
@@ -88,7 +88,7 @@ action :create do
       Chef::Log.info "#{client_pem.inspect} <==> #{@current_resource.client_pem.inspect}"
 
       converge_by "updating existing transport node #{@new_resource.name}" do
-        conn, cookie = create_connection @new_resource.nvp_controller
+        conn, cookie = create_connection @new_resource.nsx_controller
 
         tnode = {}
         tnode['display_name'] = @new_resource.name
@@ -117,7 +117,7 @@ action :delete do
   if @current_resource.exists
 
     converge_by "delete transport node #{@new_resource.name}" do
-      conn, cookie = create_connection @new_resource.nvp_controller
+      conn, cookie = create_connection @new_resource.nsx_controller
 
       resp = conn.delete "/ws.v1/transport-node/#{@current_resource.uuid}" do |req|
         req.headers['Cookie'] = cookie
@@ -132,9 +132,9 @@ action :delete do
 end
 
 def load_current_resource
-  @current_resource = Chef::Resource::NvpTransportNode.new(@new_resource.name)
+  @current_resource = Chef::Resource::NsxTransportNode.new(@new_resource.name)
 
-  conn, cookie = create_connection @new_resource.nvp_controller
+  conn, cookie = create_connection @new_resource.nsx_controller
 
   resp = conn.get '/ws.v1/transport-node', display_name: @new_resource.name, fields: '*' do |req|
     req.headers['Cookie'] = cookie

@@ -1,25 +1,25 @@
-NVP LWRP Cookbook
+NSX LWRP Cookbook
 ============
-This cookbook provides the `nvp_transport_node` resource, allowing to create, update and delete transport nodes via communicating with the API of an NVP controller.
+This cookbook provides the `nsx_transport_node` resource, allowing to create, update and delete transport nodes via communicating with the API of an NSX controller.
 
 Usage
 ------------
 
-See `nvp::hypervisor`:
+See `nsx::hypervisor`:
 
 ```ruby
-include_recipe 'nvp::default'
+include_recipe 'nsx::default'
 
-controller = node[:nvp][:controllers].first
+controller = node[:nsx][:controllers].first
 
-nvp_transport_node node[:fqdn] do
-  nvp_controller controller
+nsx_transport_node node[:fqdn] do
+  nsx_controller controller
   client_pem_file '/etc/openvswitch/ovsclient-cert.pem'
   integration_bridge_id 'br-int'
   tunnel_probe_random_vlan true
   transport_connectors([
     {
-      "transport_zone_uuid" => node[:nvp][:default_tz_uuid],
+      "transport_zone_uuid" => node[:nsx][:default_tz_uuid],
       "ip_address" => node[:ipaddress],
       "type" => "STTConnector"
     }
@@ -29,18 +29,18 @@ end
 
 Requirements
 ------------
-- `chef_gem 'faraday'`, included in `nvp::default`
+- `chef_gem 'faraday'`, included in `nsx::default`
 
 
 Attributes
 ----------
 
-In the `nvp` "namespace", i.e. `node[:nvp]`, the following attributes are expected:
+In the `nsx` "namespace", i.e. `node[:nsx]`, the following attributes are expected:
 
 - `controllers`, for example an array like this:
 
 ```ruby
-"nvp" => {
+"nsx" => {
   "controllers" => [
     {
       :host => '10.127.1.10',
@@ -55,7 +55,7 @@ In the `nvp` "namespace", i.e. `node[:nvp]`, the following attributes are expect
 
 - UUIDs:
 
-    - `nvp_cluster_uuid`
+    - `nsx_cluster_uuid`
     - `default_tz_uuid`
     - `default_l3_gateway_service_uuid`
     - `default_l3_gateway_service_uuid`
