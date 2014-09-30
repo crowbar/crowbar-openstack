@@ -70,6 +70,7 @@
                     "vmware": { "type": "map", "required": true, "mapping": {
                       "user": { "type" : "str", "required" : true },
                       "password": { "type" : "str", "required" : true },
+                      "port": { "type" : "str", "required" : true },
                       "controllers": { "type" : "str", "required" : true },
                       "tz_uuid": { "type" : "str", "required" : true },
                       "l3_gw_uuid": { "type" : "str", "required" : true }

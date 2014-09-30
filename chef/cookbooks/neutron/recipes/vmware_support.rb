@@ -106,3 +106,40 @@ execute "add_bound_if_to_br1" do
   command "ovs-vsctl add-port br1 #{bound_if}"
   action :nothing
 end
+
+# After installation of ruby-faraday, we have a new path for the new gem, so we
+# need to reset the paths if we can't load ruby-faraday
+begin
+  require 'faraday'
+rescue LoadError
+  Gem.clear_paths
+end
+
+nsx_data = {}
+unless neutron[:neutron][:vmware][:controllers].empty?
+  nsx_data['host'] = neutron[:neutron][:vmware][:controllers].split(",").first
+else
+  Chef::Log.error "No NSX controller has been found."
+end
+nsx_data['port'] = neutron[:neutron][:vmware][:port]
+nsx_data['username'] = neutron[:neutron][:vmware][:user]
+nsx_data['password'] = neutron[:neutron][:vmware][:password]
+
+nsx_transport_node node.name.split(".").first do
+  nsx_controller nsx_data
+  client_pem_file '/etc/openvswitch/ovsclient-cert.pem'
+  integration_bridge_id 'br-int'
+  tunnel_probe_random_vlan true
+  transport_connectors([
+    {
+      "transport_zone_uuid" => neutron[:neutron][:vmware][:tz_uuid],
+      "ip_address" => node[:crowbar][:network][:os_sdn][:address],
+      "type" => "STTConnector"
+    },
+    {
+      "transport_zone_uuid" => neutron[:neutron][:vmware][:tz_uuid],
+      "bridge_id" => "br1",
+      "type" => "BridgeConnector"
+    }
+  ])
+end
