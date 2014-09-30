@@ -27,20 +27,21 @@ nsx_controller = neutron[:neutron][:vmware][:controllers].split(",")[0]
 
 execute "set_initial_controller" do
   command "ovs-vsctl set-manager ssl:#{nsx_controller}"
+  notifies :run, "execute[ovs_pki_init]", :immediately
   not_if "ovs-vsctl show | grep -q Manager"
 end
 
 # Initialize the PKI
 execute "ovs_pki_init" do
-  command "ovs-pki init"
-  notifies :run, "execute[ovs_pki_req_sign]"
-  not_if { File.exists?("/var/lib/openvswitch/pki") }
+  command "ovs-pki init --force"
+  notifies :run, "execute[ovs_pki_req_sign]", :immediately
+  action :nothing
 end
 
 # Combine the above two steps, producing all three files
 execute "ovs_pki_req_sign" do
-  command "cd /etc/openvswitch; ovs-pki req+sign ovsclient controller"
-  notifies :run, "execute[ovs_bootstrap_ssl]"
+  command "cd /etc/openvswitch; ovs-pki req+sign ovsclient controller --force"
+  notifies :run, "execute[ovs_bootstrap_ssl]", :immediately
   action :nothing
 end
 
@@ -54,7 +55,6 @@ end
 execute "create_int_br" do
   command "ovs-vsctl add-br br-int"
   not_if "ovs-vsctl list-br | grep -q br-int"
-  notifies :run, "execute[set_external_id]"
 end
 
 # Make sure br-int is always up.
@@ -66,20 +66,16 @@ end
 
 execute "set_external_id" do
   command "ovs-vsctl br-set-external-id br-int bridge-id br-int"
-  notifies :run, "execute[set_bridge_config]"
-  action :nothing
 end
 
 execute "set_bridge_config" do
   command "ovs-vsctl set Bridge br-int other_config:disable-in-band=true -- set Bridge br-int fail_mode=secure"
-  action :nothing
 end
 
 # Create br1, it will be used for vlan backends
 execute "create_int_br1" do
   command "ovs-vsctl add-br br1"
   not_if "ovs-vsctl list-br | grep -q br1"
-  notifies :run, "execute[set_external_id_br1]"
 end
 
 # Make sure br1 is always up.
@@ -91,18 +87,56 @@ end
 
 execute "set_external_id_br1" do
   command "ovs-vsctl br-set-external-id br1 bridge-id br1"
-  notifies :run, "execute[set_bridge_config_br1]"
-  action :nothing
 end
 
 execute "set_bridge_config_br1" do
   command "ovs-vsctl set Bridge br1 fail_mode=standalone"
-  notifies :run, "execute[add_bound_if_to_br1]"
-  action :nothing
 end
 
 bound_if = node[:crowbar_wall][:network][:nets][:os_sdn].first
-execute "add_bound_if_to_br1" do
-  command "ovs-vsctl add-port br1 #{bound_if}"
-  action :nothing
+admin_if = node[:crowbar_wall][:network][:nets][:admin].first
+# We have to be sure that admin interface will not be assigned to VLAN
+# bridge in NSX mode, because we will lose connection to this node.
+unless bound_if == admin_if
+  execute "add_bound_if_to_br1" do
+    command "ovs-vsctl add-port br1 #{bound_if}"
+    not_if "ovs-vsctl list-ports br1 | grep -q #{bound_if}"
+  end
+end
+
+# After installation of ruby-faraday, we have a new path for the new gem, so we
+# need to reset the paths if we can't load ruby-faraday
+begin
+  require 'faraday'
+rescue LoadError
+  Gem.clear_paths
+end
+
+nsx_data = {}
+unless neutron[:neutron][:vmware][:controllers].empty?
+  nsx_data['host'] = neutron[:neutron][:vmware][:controllers].split(",").first
+else
+  Chef::Log.error "No NSX controller has been found."
+end
+nsx_data['port'] = neutron[:neutron][:vmware][:port]
+nsx_data['username'] = neutron[:neutron][:vmware][:user]
+nsx_data['password'] = neutron[:neutron][:vmware][:password]
+
+nsx_transport_node node.name.split(".").first do
+  nsx_controller nsx_data
+  client_pem_file '/etc/openvswitch/ovsclient-cert.pem'
+  integration_bridge_id 'br-int'
+  tunnel_probe_random_vlan true
+  transport_connectors([
+    {
+      "transport_zone_uuid" => neutron[:neutron][:vmware][:tz_uuid],
+      "ip_address" => node[:crowbar][:network][:os_sdn][:address],
+      "type" => "STTConnector"
+    },
+    {
+      "transport_zone_uuid" => neutron[:neutron][:vmware][:tz_uuid],
+      "bridge_id" => "br1",
+      "type" => "BridgeConnector"
+    }
+  ])
 end
