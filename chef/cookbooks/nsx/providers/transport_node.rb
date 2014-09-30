@@ -31,13 +31,13 @@ def create_connection(controller)
     Chef::Log.error "Missing gem 'faraday'. Use the default nsx recipe to install it first."
   end
 
-  conn = Faraday.new(url: "https://#{controller[:host]}:#{controller[:port]}", ssl: { verify: false }) do |faraday|
+  conn = Faraday.new(:url => "https://#{controller['host']}:#{controller['port']}", :ssl => { :verify => false }) do |faraday|
     faraday.request  :url_encoded
     faraday.response :logger
     faraday.adapter  Faraday.default_adapter
   end
 
-  resp = conn.post '/ws.v1/login', username: controller[:username], password: controller[:password]
+  resp = conn.post '/ws.v1/login', :username => controller['username'], :password => controller['password']
   Chef::Log.error(resp.body) unless resp.status == 200
 
   cookie = resp.headers['set-cookie'].split(';').first
@@ -136,7 +136,7 @@ def load_current_resource
 
   conn, cookie = create_connection @new_resource.nsx_controller
 
-  resp = conn.get '/ws.v1/transport-node', display_name: @new_resource.name, fields: '*' do |req|
+  resp = conn.get '/ws.v1/transport-node', :display_name => @new_resource.name, :fields => '*' do |req|
     req.headers['Cookie'] = cookie
   end
   Chef::Log.error(resp.body) unless resp.status == 200
