@@ -100,7 +100,7 @@ heat_watch_server_url=<%= @heat_watch_server_url %>
 
 # Default region name used to get services endpoints. (string
 # value)
-#region_name_for_services=<None>
+region_name_for_services=<%= @keystone_settings['endpoint_region'] %>
 
 # Keystone role for heat template-defined users. (string
 # value)
