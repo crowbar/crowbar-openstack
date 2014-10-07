@@ -83,7 +83,7 @@ keystone_register "register cinder endpoint" do
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
   endpoint_service "cinder"
-  endpoint_region "RegionOne"
+  endpoint_region keystone_settings['endpoint_region']
   endpoint_publicURL "#{cinder_protocol}://#{my_public_host}:#{cinder_port}/v1/$(tenant_id)s"
   endpoint_adminURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v1/$(tenant_id)s"
   endpoint_internalURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v1/$(tenant_id)s"
@@ -110,7 +110,7 @@ if node[:cinder][:enable_v2_api]
     port keystone_settings['admin_port']
     token keystone_settings['admin_token']
     endpoint_service "cinderv2"
-    endpoint_region "RegionOne"
+    endpoint_region keystone_settings['endpoint_region']
     endpoint_publicURL "#{cinder_protocol}://#{my_public_host}:#{cinder_port}/v2/$(tenant_id)s"
     endpoint_adminURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v2/$(tenant_id)s"
     endpoint_internalURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v2/$(tenant_id)s"
