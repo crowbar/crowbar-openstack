@@ -316,7 +316,7 @@ keystone_register "register ceilometer endpoint" do
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
   endpoint_service "ceilometer"
-  endpoint_region "RegionOne"
+  endpoint_region keystone_settings['endpoint_region']
   endpoint_publicURL "#{node[:ceilometer][:api][:protocol]}://#{my_public_host}:#{node[:ceilometer][:api][:port]}"
   endpoint_adminURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
   endpoint_internalURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
