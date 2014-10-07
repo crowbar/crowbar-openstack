@@ -635,7 +635,7 @@ nova_catalog_admin_info=compute:nova:adminURL
 #nova_endpoint_admin_template=<None>
 
 # region name of this node (string value)
-#os_region_name=<None>
+os_region_name= <%= @keystone_settings['endpoint_region'] %>
 
 # Location of ca certificates file to use for nova client
 # requests. (string value)
