@@ -966,7 +966,7 @@ os_auth_url=<%= @keystone_settings['internal_auth_url'] %>
 
 # Region name to use for OpenStack service endpoints. (string
 # value)
-#os_region_name=<None>
+os_region_name=<%= @keystone_settings['endpoint_region'] %>
 
 # Type of endpoint in Identity service catalog to use for
 # communication with OpenStack services. (string value)
