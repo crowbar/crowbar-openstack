@@ -72,7 +72,7 @@ keystone_register "register neutron endpoint" do
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
   endpoint_service "neutron"
-  endpoint_region "RegionOne"
+  endpoint_region keystone_settings['endpoint_region']
   endpoint_publicURL "#{neutron_protocol}://#{my_public_host}:#{api_port}/"
   endpoint_adminURL "#{neutron_protocol}://#{my_admin_host}:#{api_port}/"
   endpoint_internalURL "#{neutron_protocol}://#{my_admin_host}:#{api_port}/"

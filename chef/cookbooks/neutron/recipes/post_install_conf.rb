@@ -53,6 +53,7 @@ neutron_args = "--os-username #{keystone_settings['service_user']}"
 neutron_args = "#{neutron_args} --os-password #{keystone_settings['service_password']}"
 neutron_args = "#{neutron_args} --os-tenant-name #{keystone_settings['service_tenant']}"
 neutron_args = "#{neutron_args} --os-auth-url #{keystone_settings['internal_auth_url']}"
+neutron_args = "#{neutron_args} --os-region-name #{keystone_settings['endpoint_region']}"
 if node[:platform] == "suse" or node[:neutron][:use_gitrepo]
   # these options are backported in SUSE packages, but not in Ubuntu
   neutron_args = "#{neutron_args} --endpoint-type internalURL"
