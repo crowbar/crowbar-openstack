@@ -520,7 +520,7 @@ uri_v3=<%= @keystone_settings["protocol"] %>://<%= @keystone_settings["internal_
 # services' region name unless they are set explicitly. If no
 # such region is found in the service catalog, the first found
 # one is used. (string value)
-#region=RegionOne
+region=<%= @keystone_settings['endpoint_region'] %>
 
 # The endpoint type to use for the identity service. (string
 # value)

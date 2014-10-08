@@ -3,6 +3,7 @@
 (
 export OS_AUTH_URL=<%= @keystone_settings['internal_auth_url'] %>
 export OS_AUTH_STRATEGY=keystone
+export OS_REGION_NAME='<%= @keystone_settings['endpoint_region'] %>'
 
 #s3 test preparation
 cert_dir=<%= @tempest_path %>/etc/certs/
