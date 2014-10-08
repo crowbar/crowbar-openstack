@@ -2,6 +2,7 @@
 
 export OS_AUTH_URL=http://<%= @key_host %>:<%= @key_port %>/v2.0/
 export OS_AUTH_STRATEGY=keystone
+export OS_REGION_NAME='<%= @keystone_settings['endpoint_region'] %>'
 
 username=<%= @comp_user %>
 password=<%= @comp_pass %>
