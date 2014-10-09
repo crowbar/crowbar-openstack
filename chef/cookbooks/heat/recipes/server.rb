@@ -170,25 +170,28 @@ bash "register heat domain" do
     OS_URL="#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3"
 
     eval $(openstack --os-token #{keystone_settings['admin_token']} \
-        --os-url=$OS_URL \
-        --os-identity-api-version=3 domain show -f shell --variable id #{stack_user_domain_name})
+        --os-url=$OS_URL --os-identity-api-version=3 \
+        --os-region-name='#{keystone_settings['endpoint_region']}' domain show -f shell --variable id #{stack_user_domain_name})
 
     HEAT_DOMAIN_ID=$id
 
     if [ -z "$HEAT_DOMAIN_ID" ]; then
         HEAT_DOMAIN_ID=$(openstack --os-token #{keystone_settings['admin_token']} \
-            --os-url=$OS_URL \
-            --os-identity-api-version=3 domain create #{stack_user_domain_name} \
+            --os-url=$OS_URL --os-identity-api-version=3 \
+            --os-region-name='#{keystone_settings['endpoint_region']}' \
+            domain create #{stack_user_domain_name} \
             --description "Owns users and projects created by heat" \
             | awk '/id/  { print $4 } ')
     fi
 
     openstack --os-token #{keystone_settings['admin_token']} --os-url=$OS_URL \
+        --os-region-name='#{keystone_settings['endpoint_region']}' \
         --os-identity-api-version=3 user create --password #{node[:heat]["stack_domain_admin_password"]} \
         --domain $HEAT_DOMAIN_ID #{node[:heat]["stack_domain_admin"]} \
         --description "Manages users and projects created by heat" || true
 
     openstack --os-token #{keystone_settings['admin_token']} --os-url=$OS_URL \
+        --os-region-name='#{keystone_settings['endpoint_region']}' \
         --os-identity-api-version=3 role add --user #{node[:heat]["stack_domain_admin"]} \
         --domain $HEAT_DOMAIN_ID admin || true
   EOF
@@ -254,6 +257,7 @@ shell_get_stack_user_domain = <<-EOF
   export OS_URL="#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3"
   eval $(openstack --os-token #{keystone_settings['admin_token']} \
     --os-url=$OS_URL \
+    --os-region-name='#{keystone_settings['endpoint_region']}' \
     --os-identity-api-version=3 domain show -f shell --variable id #{stack_user_domain_name});
   echo $id
 EOF
