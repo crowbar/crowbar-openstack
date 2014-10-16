@@ -89,8 +89,8 @@ class CeilometerService < PacemakerServiceObject
 
     base["deployment"]["ceilometer"]["elements"] = {
         "ceilometer-agent" =>  agent_nodes.map { |x| x.name },
-        "ceilometer-cagent" =>  server_nodes.map { |x| x.name },
-        "ceilometer-server" =>  server_nodes.map { |x| x.name },
+        "ceilometer-cagent" =>  server_nodes.first.name,
+        "ceilometer-server" =>  server_nodes.first.name,
         "ceilometer-swift-proxy-middleware" =>  swift_proxy_nodes.map { |x| x.name }
     } unless agent_nodes.nil? or server_nodes.nil?
 
