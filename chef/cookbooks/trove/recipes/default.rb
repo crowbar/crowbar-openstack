@@ -91,6 +91,7 @@ node.set['openstack']['mq']['database']['rabbit']['userid'] = rabbitmq[:trove][:
 node.set['openstack']['mq']['database']['rabbit']['vhost'] = rabbitmq[:trove][:vhost]
 node.set['openstack']['secret'][rabbitmq[:trove][:user]]['user'] = rabbitmq[:trove][:password]
 
+node.set['openstack']['region'] = keystone_settings['endpoint_region']
 # XXX mysql configuration
 # this part should go away once trove supports postgresl
 
