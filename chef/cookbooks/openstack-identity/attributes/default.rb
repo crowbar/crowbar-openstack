@@ -20,6 +20,8 @@
 # limitations under the License.
 #
 
+include_attribute "openstack-common::messaging"
+
 # Set to some text value if you want templated config files
 # to contain a custom banner at the top of the written file
 default['openstack']['identity']['custom_template_banner'] = "
