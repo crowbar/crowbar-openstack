@@ -214,7 +214,7 @@ keystone_register "register heat Cfn endpoint" do
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
-  endpoint_service "heat"
+  endpoint_service "heat-cfn"
   endpoint_region keystone_settings['endpoint_region']
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1"
   endpoint_adminURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:cfn_port]}/v1"
