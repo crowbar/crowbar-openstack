@@ -20,4 +20,4 @@
 # XXX hack since we can't modify attributes in the postgresql namespace
 # in crowbar.
 # Chef doesn't allow us to call merge/merge! directly on node attributes
-node['postgresql'] = node['postgresql'].to_hash.merge(node['database']['postgresql'])
+node.set['postgresql'] = node['postgresql'].to_hash.merge(node['database']['postgresql'])

@@ -28,7 +28,7 @@ include_recipe "postgresql::client"
 # For Crowbar, we need to set the address to bind - default to admin node.
 newaddr = CrowbarDatabaseHelper.get_listen_address(node)
 if node['postgresql']['config']['listen_addresses'] != newaddr
-  node['postgresql']['config']['listen_addresses'] = newaddr
+  node.set['postgresql']['config']['listen_addresses'] = newaddr
   node.save
 end
 
@@ -38,7 +38,7 @@ end
 if node['postgresql']['pg_hba'][4]
   netaddr, netmask = node['postgresql']['pg_hba'][4][:addr].split
 else
-  node['postgresql']['pg_hba'][4] = {
+  node.set['postgresql']['pg_hba'][4] = {
     :type => 'host',
     :db => 'all',
     :user => 'all',
@@ -51,7 +51,7 @@ newnetaddr = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin"
 newnetmask = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").netmask
 
 if netaddr != newnetaddr or netmask != newnetmask
-  node['postgresql']['pg_hba'][4][:addr] = [newnetaddr, newnetmask].join('    ')
+  node.set['postgresql']['pg_hba'][4][:addr] = [newnetaddr, newnetmask].join('    ')
   node.save
 end
 
