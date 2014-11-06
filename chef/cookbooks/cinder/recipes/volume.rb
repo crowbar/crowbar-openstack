@@ -229,6 +229,16 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
         only_if { volume[:netapp][:storage_protocol] == "nfs" }
       end
 
+    when volume[:backend_driver] == "nfs"
+      file "/etc/cinder/nfs_shares-#{backend_id}" do
+        content volume[:nfs][:nfs_shares]
+        owner "root"
+        group node[:cinder][:group]
+        mode "0640"
+        action :create
+        notifies :restart, "service[cinder-volume]"
+      end
+
     when volume[:backend_driver] == "eternus"
       template "/etc/cinder/cinder_eternus_dx_config-#{backend_id}.xml" do
         source "cinder_eternus_dx_config.xml.erb"
