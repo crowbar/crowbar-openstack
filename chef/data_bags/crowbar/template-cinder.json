@@ -72,6 +72,10 @@
           "pool": "",
           "iscsi_ip": ""
         },
+        "nfs": {
+          "nfs_shares": "",
+          "nfs_mount_options": ""
+        },
         "rbd": {
           "use_crowbar": true,
           "config_file": "/etc/ceph/ceph.conf",
@@ -131,7 +135,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 47,
+      "schema-revision": 48,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
