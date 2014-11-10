@@ -96,5 +96,8 @@ template '/etc/trove/api-paste.ini' do
 end
 
 execute 'trove-manage db_sync' do
+  user  node['openstack']['database']['user']
+  group node['openstack']['database']['group']
+
   notifies :restart, 'service[trove-api]', :immediately
-end
+end unless node.platform == "suse"
