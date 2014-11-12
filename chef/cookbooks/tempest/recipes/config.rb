@@ -235,6 +235,8 @@ use_swift = !swifts.empty?
 use_heat = $?.success?
 %x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service metering &> /dev/null}
 use_ceilometer = $?.success?
+%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service database &> /dev/null}
+use_trove = $?.success?
 
 # FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
@@ -320,6 +322,7 @@ template "#{tempest_conf}" do
     :use_horizon => use_horizon,
     :use_heat => use_heat,
     :use_ceilometer => use_ceilometer,
+    :use_trove => use_trove,
     # boto settings
     :ec2_protocol => nova[:nova][:ssl][:enabled] ? "https" : "http",
     :ec2_host => CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
