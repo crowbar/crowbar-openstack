@@ -26,28 +26,6 @@ if node[:neutron][:use_ml2]
     )
     notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end
-else
-  directory "/etc/neutron/plugins/cisco" do
-     mode 0755
-     owner "root"
-     group node[:neutron][:platform][:group]
-     action :create
-     recursive true
-     not_if { node[:platform] == "suse" }
-  end
-
-  template "/etc/neutron/plugins/cisco/cisco_plugins.ini" do
-    cookbook "neutron"
-    source "cisco_plugins.ini.erb"
-    mode "0640"
-    owner "root"
-    group node[:neutron][:platform][:group]
-    variables(
-      :switches => switches,
-      :vlan_mode => vlan_mode
-    )
-    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-  end
 end
 
 ssh_keys = ""

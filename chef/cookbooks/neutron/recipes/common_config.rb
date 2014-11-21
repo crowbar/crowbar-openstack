@@ -182,11 +182,15 @@ unless nova[:nova].nil? or nova[:nova][:ssl].nil?
   nova_api_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
   nova_api_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
   keystone_insecure = keystone_settings['insecure'] ? "--insecure" : ""
+  nova_insecure = nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]
+  nova_ssl_cacerts = nova[:nova][:ssl][:ca_certs] unless nova_insecure
 
   nova_admin_tenant_id = %x[keystone --os_username '#{keystone_settings['admin_user']}' --os_password '#{keystone_settings['admin_password']}' --os_tenant_name '#{keystone_settings['admin_tenant']}' --os_auth_url '#{keystone_settings['internal_auth_url']}' --os_region_name '#{keystone_settings['endpoint_region']}' #{keystone_insecure} tenant-get '#{keystone_settings['service_tenant']}' | awk '/id/  { print $4 }'].chomp
 
   nova_notify = {
     :nova_url => "#{nova_api_protocol}://#{nova_api_host}:#{nova[:nova][:ports][:api]}/v2",
+    :nova_insecure => nova_insecure,
+    :nova_ssl_cacerts => nova_ssl_cacerts || nil,
     :nova_admin_username => nova[:nova][:service_user],
     :nova_admin_tenant_id => nova_admin_tenant_id,
     :nova_admin_password => nova[:nova][:service_password]

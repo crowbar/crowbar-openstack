@@ -1,16 +1,14 @@
 [DEFAULT]
 # User name for NSX controller
+# nsx_user = admin
 nsx_user = <%= @vmware_config[:user] %>
 
 # Password for NSX controller
+# nsx_password = admin
 nsx_password = <%= @vmware_config[:password] %>
 
-# Total time limit for a cluster request
-# (including retries across different controllers)
-# req_timeout = 30
-
-# Time before aborting a request on an unresponsive controller
-# http_timeout = 10
+# Time before aborting a request on an unresponsive controller (Seconds)
+# http_timeout = 75
 
 # Maximum number of times a particular request should be retried
 # retries = 2
@@ -20,14 +18,17 @@ nsx_password = <%= @vmware_config[:password] %>
 
 # Comma-separated list of NSX controller endpoints (<ip>:<port>). When port
 # is omitted, 443 is assumed. This option MUST be specified, e.g.:
+# nsx_controllers = xx.yy.zz.ww:443, aa.bb.cc.dd, ee.ff.gg.hh.ee:80
 nsx_controllers = <%= @vmware_config[:controllers] %>
 
 # UUID of the pre-existing default NSX Transport zone to be used for creating
 # tunneled isolated "Neutron" networks. This option MUST be specified, e.g.:
+# default_tz_uuid = 1e8e52cf-fa7f-46b0-a14a-f99835a9cb53
 default_tz_uuid = <%= @vmware_config[:tz_uuid] %>
 
 # (Optional) UUID for the default l3 gateway service to use with this cluster.
 # To be specified if planning to use logical routers with external gateways.
+# default_l3_gw_service_uuid =
 default_l3_gw_service_uuid = <%= @vmware_config[:l3_gw_uuid] %>
 
 # (Optional) UUID for the default l2 gateway service to use with this cluster.
@@ -132,6 +133,8 @@ default_l3_gw_service_uuid = <%= @vmware_config[:l3_gw_uuid] %>
 # a service node is required in order to perform packet replication. This can
 # also be set to source if one wants replication to be performed locally (NOTE:
 # usually only useful for testing if one does not want to deploy a service node).
+# In order to leverage distributed routers, replication_mode should be set to
+# "service".
 # replication_mode = service
 
 [nsx_sync]

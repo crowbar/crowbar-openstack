@@ -2,15 +2,18 @@
 # Do not edit.
 [DEFAULT]
 # Show debugging output in log (sets DEBUG log level output)
+# debug = False
 debug = <%= @debug ? "True" : "False" %>
 
 # The DHCP agent will resync its state with Neutron to recover from any
 # transient notification or rpc errors. The interval is number of
 # seconds between attempts.
+# resync_interval = 5
 resync_interval = <%= @resync_interval %>
 
 # The DHCP agent requires an interface driver be set. Choose the one that best
 # matches your plugin.
+# interface_driver =
 interface_driver = <%= @interface_driver %>
 
 # Example of interface_driver option for OVS based plugins(OVS, Ryu, NEC, NVP,
@@ -30,17 +33,20 @@ interface_driver = <%= @interface_driver %>
 
 # The agent can use other DHCP drivers.  Dnsmasq is the simplest and requires
 # no additional setup of the DHCP server.
+# dhcp_driver = neutron.agent.linux.dhcp.Dnsmasq
 dhcp_driver = <%= @dhcp_driver %>
 
 # Allow overlapping IP (Must have kernel build with CONFIG_NET_NS=y and
 # iproute2 package that supports namespaces).
+# use_namespaces = True
 use_namespaces = <%= @use_namespaces %>
 
 # The DHCP server can assist with providing metadata support on isolated
 # networks. Setting this value to True will cause the DHCP server to append
-# specific host routes to the DHCP request.  The metadata service will only
+# specific host routes to the DHCP request. The metadata service will only
 # be activated when the subnet does not contain any router port. The guest
 # instance must be configured to request host routes via DHCP (Option 121).
+# enable_isolated_metadata = False
 enable_isolated_metadata = <%= @enable_isolated_metadata %>
 
 # Allows for serving metadata requests coming from a dedicated metadata
@@ -49,6 +55,7 @@ enable_isolated_metadata = <%= @enable_isolated_metadata %>
 # request. In this case DHCP Option 121 will not be injected in VMs, as
 # they will be able to reach 169.254.169.254 through a router.
 # This option requires enable_isolated_metadata = True
+# enable_metadata_network = False
 enable_metadata_network = <%= @enable_metadata_network %>
 
 # Number of threads to use during sync process. Should not exceed connection
@@ -59,6 +66,7 @@ enable_metadata_network = <%= @enable_metadata_network %>
 # dhcp_confs = $state_path/dhcp
 
 # Domain to use for building the hostnames
+# dhcp_domain = openstacklocal
 dhcp_domain = <%= @dhcp_domain %>
 
 # Override the default dnsmasq settings with this file
