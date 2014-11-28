@@ -133,10 +133,10 @@ nsx_transport_node node.name.split(".").first do
       "ip_address" => node[:crowbar][:network][:os_sdn][:address],
       "type" => "STTConnector"
     },
-    {
-      "transport_zone_uuid" => neutron[:neutron][:vmware][:tz_uuid],
-      "bridge_id" => "br1",
-      "type" => "BridgeConnector"
-    }
+    {
+      "transport_zone_uuid" => neutron[:neutron][:vmware][:tz_uuid],
+      "bridge_id" => "br1",
+      "type" => "BridgeConnector"
+    }
   ])
 end
