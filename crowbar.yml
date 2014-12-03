@@ -16,62 +16,26 @@
 #
 
 barclamp:
-  name: cinder
-  display: Cinder
+  name: 'cinder'
+  display: 'Cinder'
   description: 'OpenStack Block Storage: Management of volumes (persistent block level storage)'
   version: 0
   requires:
     - '@crowbar'
-    - pacemaker
-    - database
-    - rabbitmq
-    - keystone
-    - glance
+    - 'pacemaker'
+    - 'database'
+    - 'rabbitmq'
+    - 'keystone'
+    - 'glance'
   member:
-    - openstack 
-  os_support:
-    - ubuntu-12.04
+    - 'openstack'
 
 crowbar:
   layout: 1
-  order: 92 
+  order: 92
   run_order: 92
   chef_order: 92
   proposal_schema_version: 3
 
-debs:
-  ubuntu-12.04:
-    repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/icehouse main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/icehouse main
-  pkgs:
-    - tgt
-    - lvm2
-    # paramiko needed for SSH-based SAN drivers
-    - python-paramiko
-    - iscsitarget
-    - open-iscsi
-    - iscsitarget-dkms
-    - cinder-api
-    - cinder-scheduler
-    - cinder-volume
-    - python-cinder
-    - python-keystone
-    - qemu-utils
-
-rpms:
-  centos-6.4:
-    repos:
-      - bare openstack icehouse http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/epel-6/
-  redhat-6.4:
-    repos:
-      - bare openstack icehouse http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/epel-6/
-  pkgs:
-    - lvm2
-    - openstack-cinder
-    - python-cinder
-    - python-cinderclient
-    - scsi-target-utils
-
 git_repo:
-  - cinder https://github.com/openstack/cinder.git stable/icehouse
+  - 'cinder https://github.com/openstack/cinder.git stable/juno'
