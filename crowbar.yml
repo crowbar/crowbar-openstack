@@ -16,22 +16,16 @@
 #
 
 barclamp:
-  name: tempest 
-  display: Tempest
-  description: OpenStack Integration Test Suite
+  name: 'tempest'
+  display: 'Tempest'
+  description: 'OpenStack Integration Test Suite'
   version: 0
+  user_managed: true
   requires:
-    # We need git for now because we only work in PFS mode.
-    # This will change once Ubuntu starts packaging the
-    # right version of python-testtools
-    - git
-    - nova
-    - nova_dashboard
+    - 'nova'
+    - 'nova_dashboard'
   member:
-    - openstack
-
-smoketest:
-  timeout: 2400
+    - 'openstack'
 
 crowbar:
   layout: 1
@@ -40,86 +34,11 @@ crowbar:
   chef_order: 199
   proposal_schema_version: 3
 
+smoketest:
+  timeout: 2400
+
 nav:
   utils:
-    tempest: '"/tempest/dashboard/"'
-
-debs:
-  ubuntu-12.04:
-    repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/icehouse main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/icehouse main
-    pkgs:
-      - python-anyjson
-      - python-nose
-      - python-httplib2
-      - python-extras
-      - python-testtools
-      - python-lxml
-      - python-boto
-      - python-paramiko
-      - python-netaddr
-      - python-glanceclient
-      - python-keystoneclient
-      - python-novaclient
-      - python-neutronclient
-      - python-testresources
-      - python-keyring
-      - python-testrepository
-      - python-oslo.config
-      - libxslt1-dev
-      - euca2ools
-      - git
-
-rpms:
-  pkgs:
-    - python-anyjson
-    - python-nose
-    - python-httplib2
-    - python-testtools
-    - python-lxml
-    - python-boto
-    - python-paramiko
-    - python-netaddr
-    - python-glanceclient
-    - python-keystoneclient
-    - python-novaclient
-    - python-neutronclient
-    - python-testresources
-    - python-keyring
-    - python-testrepository
-    - python-oslo.config
-    - libxslt-devel
-    - git
-    - euca2ools
-
-pips:
-  - pbr>=0.5.21,<1.0
-  - anyjson>=0.3.3
-  - nose
-  - httplib2
-  - jsonschema>=1.3.0,!=1.4.0
-  - testtools>=0.9.32
-  - lxml>=2.3
-  - boto>=2.4.0
-  - paramiko>=1.8.0
-  - netaddr
-  - python-glanceclient>=0.9.0
-  - python-keystoneclient>=0.3.0
-  - python-novaclient>=2.12.0
-  - python-neutronclient>=2.2.3,<3
-  - python-cinderclient>=1.0.4
-  - python-heatclient>=0.2.3
-  - testresources>=0.2.4
-  - keyring>=1.6.1
-  - testrepository>=0.0.17
-  - oslo.config>=1.2.0
-  - eventlet>=0.13.0
-  - six>=1.4.1
-  - iso8601>=0.1.4
-  - fixtures>=0.3.14
-  - argparse
-
-extra_files:
-  - http://launchpad.net/cirros/trunk/0.3.1/+download/cirros-0.3.1-x86_64-uec.tar.gz tempest
-  - http://tarballs.openstack.org/tempest/tempest-master.tar.gz tempest
+    tempest:
+      order: 30
+      route: 'tempest_dashboard_path'
