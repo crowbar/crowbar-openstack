@@ -90,13 +90,6 @@ directory "/var/cache/neutron" do
   only_if { node[:platform] == "ubuntu" }
 end
 
-file "/etc/default/neutron-server" do
-  action :delete
-  not_if { node[:platform] == "suse" }
-  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-end
-
-
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 num_vlans = node[:neutron][:num_vlans]
 vlan_end = [vlan_start + num_vlans - 1, 4094].min
