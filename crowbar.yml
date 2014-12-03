@@ -16,17 +16,18 @@
 #
 
 barclamp:
-  name: neutron
-  display: Neutron 
+  name: 'neutron'
+  display: 'Neutron'
   description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management'
   version: 0
+  user_managed: true
   requires:
-    - pacemaker
-    - database
-    - rabbitmq
-    - keystone
+    - 'pacemaker'
+    - 'database'
+    - 'rabbitmq'
+    - 'keystone'
   member:
-    - openstack
+    - 'openstack'
 
 crowbar:
   layout: 1
@@ -35,51 +36,5 @@ crowbar:
   chef_order: 94
   proposal_schema_version: 3
 
-debs:
-  ubuntu-12.04:
-    repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/icehouse main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/icehouse main
-  pkgs:
-    - openvswitch-common
-    - openvswitch-switch
-    - python-neutron
-    - python-neutronclient
-    - neutron-common
-    - neutron-dhcp-agent
-    - neutron-l3-agent
-    - neutron-metadata-agent
-    - neutron-plugin-linuxbridge
-    - neutron-plugin-linuxbridge-agent
-    - neutron-plugin-metering-agent
-    - neutron-plugin-openvswitch
-    - neutron-plugin-openvswitch-agent
-    - neutron-server
-
-rpms:
-  centos-6.4:
-    repos:
-      - bare openstack icehouse http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/epel-6/
-  redhat-6.4:
-    repos:
-      - bare openstack icehouse http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/epel-6/
-  pkgs:
-    - openstack-neutron
-    - openstack-neutron-linuxbridge
-    - openstack-neutron-openvswitch
-    - openvswitch
-    - python-neutron
-    - python-neutronclient
-    - python-openvswitch
-    - kernel-2.6.32-358.123.2.openstack.el6
-    - iputils
-    - iproute-2.6.32-130.el6ost.netns.2
-    - kernel-firmware
-    - kernel-headers
-
-pips:
-  - pyudev
-  - six
-
 git_repo:
-  - neutron https://github.com/openstack/neutron.git stable/icehouse
+  - 'neutron https://github.com/openstack/neutron.git stable/juno'
