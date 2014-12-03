@@ -16,15 +16,15 @@
 #
 
 barclamp:
-  name: rabbitmq 
-  display: RabbitMQ
+  name: 'rabbitmq'
+  display: 'RabbitMQ'
   description: 'AMQP Messaging Middleware: robust enterprise messaging system'
-  online_help: 'https://github.com/crowbar/crowbar/wiki'
   version: 0
+  user_managed: true
   requires:
-    - pacemaker
+    - 'pacemaker'
   member:
-    - openstack
+    - 'openstack'
 
 crowbar:
   layout: 1
@@ -32,13 +32,3 @@ crowbar:
   run_order: 76
   chef_order: 76
   proposal_schema_version: 3
-
-debs:
-  pkgs:
-    # rabbitmq stuff
-    - rabbitmq-server
-
-rpms:
-  pkgs:
-    # rabbitmq stuff
-    - rabbitmq-server
