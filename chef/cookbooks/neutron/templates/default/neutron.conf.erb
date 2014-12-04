@@ -546,9 +546,6 @@ control_exchange = neutron
 
 # Resource name(s) that are supported in quota features
 # quota_items = network,subnet,port
-<% if node[:neutron][:use_lbaas] %>
-quota_items = network,subnet,port,vip,pool,member,health_monitor
-<% end -%>
 
 # Default number of resource allowed per tenant. A negative value means
 # unlimited.
