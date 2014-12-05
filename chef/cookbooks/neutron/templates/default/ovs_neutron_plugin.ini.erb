@@ -99,6 +99,11 @@ network_vlan_ranges = physnet1
 bridge_mappings = physnet1:<%=@physnet%>
 <% end -%>
 
+# (BoolOpt) Use veths instead of patch ports to interconnect the integration
+# bridge to physical networks. Support kernel without ovs patch port support
+# so long as it is set to True.
+# use_veth_interconnection = False
+
 [agent]
 # Agent's polling interval in seconds
 # polling_interval = 2
@@ -133,6 +138,7 @@ bridge_mappings = physnet1:<%=@physnet%>
 # (IntOpt) This is the MTU size of veth interfaces.
 # Do not change unless you have a good reason to.
 # The default MTU size of veth interfaces is 1500.
+# This option has no effect if use_veth_interconnection is False
 # veth_mtu =
 # Example: veth_mtu = 1504
 
@@ -143,6 +149,21 @@ bridge_mappings = physnet1:<%=@physnet%>
 # optimize tunnel management.
 #
 # l2_population = False
+
+# Enable local ARP responder. Requires OVS 2.1. This is only used by the l2
+# population ML2 MechanismDriver.
+#
+# arp_responder = False
+
+# (BoolOpt) Set or un-set the don't fragment (DF) bit on outgoing IP packet
+# carrying GRE/VXLAN tunnel. The default value is True.
+#
+# dont_fragment = True
+
+# (BoolOpt) Set to True on L2 agents to enable support
+# for distributed virtual routing.
+#
+# enable_distributed_routing = False
 
 [securitygroup]
 # Firewall driver for realizing neutron security group function.

@@ -10,6 +10,7 @@ debug = <%= @debug %>
 
 # LBaas requires an interface driver be set. Choose the one that best
 # matches your plugin.
+# interface_driver =
 interface_driver = <%= @interface_driver %>
 
 # Example of interface_driver option for OVS based plugins (OVS, Ryu, NEC, NVP,
@@ -37,4 +38,9 @@ device_driver = <%= @device_driver %>
 # loadbalancer_state_path = $state_path/lbaas
 
 # The user group
+# user_group = nogroup
 user_group = <%= @user_group %>
+
+# When delete and re-add the same vip, send this many gratuitous ARPs to flush
+# the ARP cache in the Router. Set it below or equal to 0 to disable this feature.
+# send_gratuitous_arp = 3

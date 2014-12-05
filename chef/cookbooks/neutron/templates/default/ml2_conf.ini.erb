@@ -2,6 +2,7 @@
 # (ListOpt) List of network type driver entrypoints to be loaded from
 # the neutron.ml2.type_drivers namespace.
 #
+# type_drivers = local,flat,vlan,gre,vxlan
 type_drivers = flat,vlan,gre
 # Example: type_drivers = flat,vlan,gre,vxlan
 
@@ -9,18 +10,24 @@ type_drivers = flat,vlan,gre
 # networks. The default value 'local' is useful for single-box testing
 # but provides no connectivity between hosts.
 #
+# tenant_network_types = local
 tenant_network_types = <%= @networking_mode %>
 # Example: tenant_network_types = vlan,gre,vxlan
 
 # (ListOpt) Ordered list of networking mechanism driver entrypoints
 # to be loaded from the neutron.ml2.mechanism_drivers namespace.
 # mechanism_drivers =
-# Example: mechanism drivers = openvswitch,mlnx
+# Example: mechanism_drivers = openvswitch,mlnx
 # Example: mechanism_drivers = arista
 # Example: mechanism_drivers = cisco,logger
 # Example: mechanism_drivers = openvswitch,brocade
 # Example: mechanism_drivers = linuxbridge,brocade
 mechanism_drivers = <%= @mechanism_driver %>,hyperv
+
+# (ListOpt) Ordered list of extension driver entrypoints
+# to be loaded from the neutron.ml2.extension_drivers namespace.
+# extension_drivers =
+# Example: extension_drivers = anewextensiondriver
 
 [ml2_type_flat]
 # (ListOpt) List of physical_network names with which flat networks
@@ -64,7 +71,10 @@ tunnel_id_ranges = <%= node[:neutron][:network][:gre_start]%>:<%= node[:neutron]
 # Example: vxlan_group = 239.1.1.1
 
 [securitygroup]
-firewall_driver = dummy_value_to_enable_security_groups_in_server
 # Controls if neutron security group is enabled or not.
 # It should be false when you use nova security group.
 # enable_security_group = True
+
+# Use ipset to speed-up the iptables security groups. Enabling ipset support
+# requires that ipset is installed on L2 agent node.
+# enable_ipset = True
