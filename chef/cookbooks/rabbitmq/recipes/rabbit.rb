@@ -21,7 +21,7 @@
 ha_enabled = node[:rabbitmq][:ha][:enabled]
 
 node[:rabbitmq][:address] = CrowbarRabbitmqHelper.get_listen_address(node)
-node[:rabbitmq][:mochiweb_address] = node[:rabbitmq][:address]
+node[:rabbitmq][:management_address] = node[:rabbitmq][:address]
 node[:rabbitmq][:addresses] = [ node[:rabbitmq][:address] ]
 node[:rabbitmq][:addresses] << CrowbarRabbitmqHelper.get_public_listen_address(node) if node[:rabbitmq][:listen_public]
 
@@ -59,8 +59,8 @@ end
 rabbitmq_user "adding user #{node[:rabbitmq][:user]}" do
   user node[:rabbitmq][:user]
   password node[:rabbitmq][:password]
-  address node[:rabbitmq][:mochiweb_address]
-  port node[:rabbitmq][:mochiweb_port]
+  address node[:rabbitmq][:management_address]
+  port node[:rabbitmq][:management_port]
   action :add
   only_if only_if_command if ha_enabled
 end
@@ -90,8 +90,8 @@ if node[:rabbitmq][:trove][:enabled]
   rabbitmq_user "adding user #{node[:rabbitmq][:trove][:user]}" do
     user node[:rabbitmq][:trove][:user]
     password node[:rabbitmq][:trove][:password]
-    address node[:rabbitmq][:mochiweb_address]
-    port node[:rabbitmq][:mochiweb_port]
+    address node[:rabbitmq][:management_address]
+    port node[:rabbitmq][:management_port]
     action :add
     only_if only_if_command if ha_enabled
   end
@@ -108,8 +108,8 @@ if node[:rabbitmq][:trove][:enabled]
 else
   rabbitmq_user "deleting user #{node[:rabbitmq][:trove][:user]}" do
     user node[:rabbitmq][:trove][:user]
-    address node[:rabbitmq][:mochiweb_address]
-    port node[:rabbitmq][:mochiweb_port]
+    address node[:rabbitmq][:management_address]
+    port node[:rabbitmq][:management_port]
     action :delete
     only_if only_if_command if ha_enabled
   end

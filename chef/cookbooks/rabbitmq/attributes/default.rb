@@ -30,8 +30,8 @@ default[:rabbitmq][:address] = nil
 # These are all the addresses, possibly including public one
 default[:rabbitmq][:addresses] = []
 default[:rabbitmq][:port]  = 5672
-default[:rabbitmq][:mochiweb_port] = 55672
-default[:rabbitmq][:mochiweb_address] = nil
+default[:rabbitmq][:management_port] = 15672
+default[:rabbitmq][:management_address] = nil
 default[:rabbitmq][:configfile] = nil
 default[:rabbitmq][:logdir] = nil
 default[:rabbitmq][:mnesiadir] = nil
