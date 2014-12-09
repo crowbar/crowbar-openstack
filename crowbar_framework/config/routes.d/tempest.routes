@@ -15,30 +15,7 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'tempest'
-  display: 'Tempest'
-  description: 'OpenStack Integration Test Suite'
-  version: 0
-  user_managed: true
-  requires:
-    - 'nova'
-    - 'nova_dashboard'
-  member:
-    - 'openstack'
-
-crowbar:
-  layout: 1
-  order: 199
-  run_order: 199
-  chef_order: 199
-  proposal_schema_version: 3
-
-smoketest:
-  timeout: 2400
-
-nav:
-  utils:
-    tempest:
-      order: 30
-      route: 'tempest_dashboard_path'
+post 'tempest/create' => 'tempest#create', as: 'tempest_create_report'
+get 'tempest/dashboard' => 'tempest#dashboard', as: 'tempest_dashboard'
+get 'tempest/clear' => 'tempest#clear', as: 'tempest_clear_report'
+get 'tempest/results/:id.:format' => 'tempest#results', as: 'tempest_show_report'

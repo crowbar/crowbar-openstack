@@ -17,7 +17,8 @@
 
 en:
   nav:
-    tempest: 'Tempest'
+    utils:
+      tempest: 'Tempest Dashboard'
   barclamp:
     tempest:
       run:
