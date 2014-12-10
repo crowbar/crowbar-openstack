@@ -142,8 +142,10 @@ auth_strategy = keystone
 # Attention: the following parameter MUST be set to False if Neutron is
 # being used in conjunction with nova security groups
 # allow_overlapping_ips = False
-<% if @use_namespaces -%>
+<% if @use_namespaces && @allow_overlapping_ips -%>
 allow_overlapping_ips = True
+<% else -%>
+allow_overlapping_ips = False
 <% end -%>
 # Ensure that configured gateway is on subnet. For IPv6, validate only if
 # gateway is not a link local address. Deprecated, to be removed during the

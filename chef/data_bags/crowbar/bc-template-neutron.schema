@@ -20,6 +20,7 @@
                     "networking_mode": { "type": "str", "required": true },
                     "networking_plugin": { "type": "str", "required": true },
                     "num_vlans": { "type": "int", "required": true },
+                    "allow_overlapping_ips": { "type": "bool", "required": true },
                     "cisco_switches": {
                       "type" : "map",
                       "required" : false,
