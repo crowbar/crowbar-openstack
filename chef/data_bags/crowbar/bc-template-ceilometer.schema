@@ -50,7 +50,14 @@
                 "user": { "type": "str", "required": true },
                 "database": { "type": "str", "required": true }
               }
-            }
+            },
+            "database": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "time_to_live": { "type": "int", "required": true }
+              }
+	    }
           }
         }
       }

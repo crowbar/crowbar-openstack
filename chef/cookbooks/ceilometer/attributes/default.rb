@@ -77,6 +77,8 @@ default[:ceilometer][:api][:port] = 8777
 
 default[:ceilometer][:metering_secret] = "" # Set by wrapper
 
+default[:ceilometer][:database][:time_to_live] = -1
+
 default[:ceilometer][:mongodb][:port] = 27017
 
 default[:ceilometer][:ha][:server][:enabled] = false
