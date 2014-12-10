@@ -145,7 +145,6 @@ auth_strategy = keystone
 <% if @use_namespaces -%>
 allow_overlapping_ips = True
 <% end -%>
-# Ensure that configured gateway is on subnet
 # Ensure that configured gateway is on subnet. For IPv6, validate only if
 # gateway is not a link local address. Deprecated, to be removed during the
 # K release, at which point the check will be mandatory.
