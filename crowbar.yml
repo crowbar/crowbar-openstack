@@ -15,18 +15,19 @@
 #
 
 barclamp:
-  name: trove
-  display: Trove
+  name: 'trove'
+  display: 'Trove'
   description: 'OpenStack Database: Scalable and reliable Database-as-a-Service provisioning'
   version: 0
+  user_managed: true
   requires:
-    - cinder
-    - keystone
-    - nova
-    - rabbitmq
-    - swift
+    - 'cinder'
+    - 'keystone'
+    - 'nova'
+    - 'rabbitmq'
+    - 'swift'
   member:
-    - openstack
+    - 'openstack'
 
 crowbar:
   layout: 1
@@ -34,3 +35,6 @@ crowbar:
   run_order: 102
   chef_order: 102
   proposal_schema_version: 3
+
+git_repo:
+  - 'trove https://github.com/openstack/trove.git stable/juno'

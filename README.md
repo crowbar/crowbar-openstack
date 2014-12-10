@@ -15,17 +15,18 @@ system for specific applications.
 About this barclamp
 -------------------
 
-This barclamp uses a wrapper cookbook around an upstream/stackforge-style openstack-database-service cookbook. It also includes two additional cookbooks: openstack-common, openstack-identity which are required for their libraries/LWRPs, but no recipes are run from them.
+[![Build Status](https://travis-ci.org/crowbar/barclamp-trove.svg?branch=master)](https://travis-ci.org/crowbar/barclamp-trove)
 
+This barclamp uses a wrapper cookbook around an upstream/stackforge-style openstack-database-service cookbook. It
+also includes two additional cookbooks: openstack-common, openstack-identity which are required for their
+libraries/LWRPs, but no recipes are run from them.
 
 Contributing
 ------------
 
-This repository contains copies of upstream stackforge openstack
-cookbook repos from github.com/stackforge/cookbook-openstack-* for
-cookbooks: common, identity and database. In order to update the code to
-a new upstream version, just copy the upstream content over to our repo.
-
+This repository contains copies of upstream stackforge openstack cookbook repos from github.com/stackforge/cookbook-openstack-*
+for cookbooks: common, identity and database. In order to update the code to a new upstream version, just copy the
+upstream content over to our repo.
 
 Legals
 ------
