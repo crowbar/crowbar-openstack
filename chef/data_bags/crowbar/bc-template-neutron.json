@@ -29,6 +29,7 @@
       "networking_mode": "gre",
       "networking_plugin": "openvswitch",
       "num_vlans": 2000,
+      "allow_overlapping_ips": true,
       "use_syslog": false,
       "database_instance": "none",
       "db": {
@@ -67,7 +68,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 11,
+      "schema-revision": 20,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-l3": [ "readying", "ready", "applying" ]
