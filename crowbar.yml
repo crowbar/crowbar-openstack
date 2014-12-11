@@ -23,6 +23,7 @@ barclamp:
   user_managed: true
   requires:
     - '@crowbar'
+    - 'git'
     - 'pacemaker'
     - 'database'
     - 'rabbitmq'
