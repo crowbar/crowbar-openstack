@@ -325,6 +325,42 @@ keystone_register "register ceilometer endpoint" do
   action :add_endpoint_template
 end
 
+# Cronjob to clean the database. The effectiveness of this depends on
+# the database in use.
+# http://docs.openstack.org/admin-guide-cloud/content/section_telemetry-storing-data.html
+if node[:ceilometer][:database][:time_to_live] > 0
+  cookbook_file 'cronjob-ceilometer-expirer' do
+    path '/etc/cron.daily/crowbar-ceilometer-expirer'
+    owner 'root'
+    group 'root'
+    mode '0755'
+    action :create
+  end
+else
+  file '/etc/cron.daily/crowbar-ceilometer-expirer' do
+    action :delete
+  end
+end
+
+# Cronjob to repair the database and free space for mongodb.  This
+# only makes sense when the time_to_live > 0
+if node[:ceilometer][:use_mongodb] && node[:ceilometer][:database][:time_to_live] > 0
+  template '/etc/cron.weekly/crowbar-repairdatabase-mongodb' do
+    source 'cronjob-repairdatabase-mongodb.erb'
+    owner 'root'
+    group 'root'
+    mode 0755
+    backup false
+    variables(
+      :listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+    )
+  end
+else
+  file '/etc/cron.weekly/crowbar-repairdatabase-mongodb' do
+    action :delete
+  end
+end
+
 crowbar_pacemaker_sync_mark "create-ceilometer_register"
 
 node.save
