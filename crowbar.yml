@@ -16,25 +16,20 @@
 #
 
 barclamp:
-  name: ceilometer
-  display: Ceilometer
+  name: 'ceilometer'
+  display: 'Ceilometer'
   description: 'Telemetry Module: Measurements collection for monitoring and metering'
-  proposal_schema_version: 1
   version: 0
+  user_managed: true
   requires:
     - '@crowbar'
-    - git
-    - pacemaker
-    - database
-    - rabbitmq
-    - keystone
+    - 'git'
+    - 'pacemaker'
+    - 'database'
+    - 'rabbitmq'
+    - 'keystone'
   member:
-    - openstack 
-  os_support:
-    - ubuntu-12.04
-
-smoketest:
-  timeout: 1200
+    - 'openstack'
 
 crowbar:
   layout: 1
@@ -43,47 +38,8 @@ crowbar:
   chef_order: 98
   proposal_schema_version: 3
 
-debs:
-  ubuntu-12.04:
-    repos:
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-updates/icehouse main
-      - deb http://ubuntu-cloud.archive.canonical.com/ubuntu precise-proposed/icehouse main
-  pkgs:
-    - ceilometer-agent-central
-    - ceilometer-agent-compute
-    - ceilometer-api
-    - ceilometer-collector
-    - ceilometer-common
-    - python-ceilometer
-    - python-ceilometerclient
-    - mongodb
-    - python-keystone
-    - python-pymongo
-
-rpms:
-  centos-6.4:
-    repos:
-      - bare openstack icehouse http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/epel-6/
-      - bare MongoDB 10 http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
-  redhat-6.4:
-    repos:
-      - bare openstack icehouse http://repos.fedorapeople.org/repos/openstack/openstack-icehouse/epel-6/
-      - bare MongoDB 10 http://downloads-distro.mongodb.org/repo/redhat/os/x86_64/
-  pkgs:
-    - openstack-ceilometer-alarm
-    - openstack-ceilometer-api
-    - openstack-ceilometer-central
-    - openstack-ceilometer-collector
-    - openstack-ceilometer-common
-    - openstack-ceilometer-compute
-    - python-ceilometer
-    - python-ceilometerclient
-    - mongodb
-    - mongodb-server
-    - python-pymongo
-
-pips:
-  - python-ceilometerclient>=1.0.0
+smoketest:
+  timeout: 1200
 
 git_repo:
-  - ceilometer https://github.com/openstack/ceilometer.git stable/icehouse
+  - 'ceilometer https://github.com/openstack/ceilometer.git stable/juno'
