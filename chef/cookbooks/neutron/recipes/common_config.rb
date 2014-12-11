@@ -203,6 +203,11 @@ if neutron[:neutron][:use_lbaas] then
   service_plugins = "#{service_plugins}, neutron.services.loadbalancer.plugin.LoadBalancerPlugin"
 end
 
+core_plugin = "ml2"
+if neutron[:neutron][:networking_plugin] == "vmware"
+  core_plugin = "vmware"
+end
+
 template "/etc/neutron/neutron.conf" do
     cookbook "neutron"
     source "neutron.conf.erb"
@@ -229,8 +234,7 @@ template "/etc/neutron/neutron.conf" do
       :ssl_cert_required => neutron[:neutron][:ssl][:cert_required],
       :ssl_ca_file => neutron[:neutron][:ssl][:ca_certs],
       :neutron_server => neutron_server,
-      :use_ml2 => neutron[:neutron][:use_ml2] && neutron[:neutron][:networking_plugin] != "vmware",
-      :networking_plugin => neutron[:neutron][:networking_plugin],
+      :core_plugin => core_plugin,
       :service_plugins => service_plugins,
       :rootwrap_bin =>  node[:neutron][:rootwrap],
       :use_namespaces => true,

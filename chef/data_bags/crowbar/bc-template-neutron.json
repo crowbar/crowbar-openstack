@@ -24,7 +24,6 @@
       "debug": false,
       "verbose": true,
       "dhcp_domain": "openstack.local",
-      "use_ml2": true,
       "use_lbaas": true,
       "networking_mode": "gre",
       "networking_plugin": "openvswitch",
@@ -68,7 +67,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 20,
+      "schema-revision": 21,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-l3": [ "readying", "ready", "applying" ]

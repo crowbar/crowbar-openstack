@@ -47,19 +47,10 @@ cookbook_file "api-paste.ini" do
   action :create
 end
 
-if node[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware"
-  plugin_cfg_path = "/etc/neutron/plugins/ml2/ml2_conf.ini"
+if node[:neutron][:networking_plugin] == "vmware"
+  plugin_cfg_path = "/etc/neutron/plugins/vmware/nsx.ini"
 else
-  case node[:neutron][:networking_plugin]
-  when "openvswitch", "cisco"
-    agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
-  when "linuxbridge"
-    agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
-  when "vmware"
-    agent_config_path = "/etc/neutron/plugins/vmware/nsx.ini"
-  end
-
-  plugin_cfg_path = agent_config_path
+  plugin_cfg_path = "/etc/neutron/plugins/ml2/ml2_conf.ini"
 end
 
 template "/etc/sysconfig/neutron" do
@@ -69,7 +60,7 @@ template "/etc/sysconfig/neutron" do
   mode 0640
   # whenever changing plugin_config_file here, keep in mind to change the call
   # to neutron-db-manage too
-  if node[:neutron][:networking_plugin] == "cisco" and node[:neutron][:use_ml2]
+  if node[:neutron][:networking_plugin] == "cisco"
     variables(
       :plugin_config_file => plugin_cfg_path +  " /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
     )
@@ -117,7 +108,7 @@ template plugin_cfg_path do
     :vlan_start => vlan_start,
     :vlan_end => vlan_end
   )
-  only_if { node[:neutron][:use_ml2] && node[:neutron][:networking_plugin] != "vmware" }
+  only_if { node[:neutron][:networking_plugin] != "vmware" }
 end
 
 
@@ -130,7 +121,7 @@ ha_enabled = node[:neutron][:ha][:server][:enabled]
 crowbar_pacemaker_sync_mark "wait-neutron_db_sync"
 
 config_files = "--config-file /etc/neutron/neutron.conf --config-file #{plugin_cfg_path}"
-if node[:neutron][:networking_plugin] == "cisco" and node[:neutron][:use_ml2]
+if node[:neutron][:networking_plugin] == "cisco"
   config_files += " --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
 end
 
