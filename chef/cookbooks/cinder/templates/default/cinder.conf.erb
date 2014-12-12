@@ -589,6 +589,9 @@ storage_availability_zone=<%= @availability_zone %>
 # storage_availability_zone option value is used as the
 # default for new volumes. (string value)
 #default_availability_zone=<None>
+<% unless @default_availability_zone.nil? or @default_availability_zone == "" -%>
+default_availability_zone=<%= @default_availability_zone %>
+<% end -%>
 
 # Default volume type to use (string value)
 #default_volume_type=<None>
