@@ -37,6 +37,9 @@
         "password": "",
         "user": "ceilometer",
         "database": "ceilometer"
+      },
+      "database": {
+        "time_to_live": -1
       }
     }
   },
@@ -44,7 +47,7 @@
     "ceilometer": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 12,
+      "schema-revision": 13,
       "element_states": {
         "ceilometer-server": [ "readying", "ready", "applying" ],
         "ceilometer-cagent": [ "readying", "ready", "applying" ],
