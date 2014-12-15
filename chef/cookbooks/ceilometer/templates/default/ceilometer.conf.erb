@@ -695,7 +695,7 @@ connection=<%= @database_connection %>
 
 # Number of seconds that samples are kept in the database for
 # (<= 0 means forever). (integer value)
-time_to_live=<%= node[:ceilometer][:database][:time_to_live] %>
+time_to_live=<%= @time_to_live %>
 
 
 [dispatcher_file]
