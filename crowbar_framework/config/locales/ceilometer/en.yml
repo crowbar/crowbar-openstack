@@ -32,5 +32,5 @@ en:
         use_mongodb: 'Use MongoDB instead of standard database'
         verbose: 'Verbose Logging'
         database:
-          time_to_live: 'How long are samples kept in the database (in seconds)'
+          time_to_live: 'How long are samples kept in the database (in days)'
           time_to_live_hint: '-1 means that samples are kept in the database forever'

@@ -70,6 +70,12 @@ else
   bind_port = node[:ceilometer][:api][:port]
 end
 
+time_to_live = node[:ceilometer][:database][:time_to_live]
+if time_to_live > 0
+  # We store the value of time to live in days, but config file expects seconds
+  time_to_live = time_to_live * 3600 * 24
+end
+
 template "/etc/ceilometer/ceilometer.conf" do
     source "ceilometer.conf.erb"
     owner "root"
@@ -87,6 +93,7 @@ template "/etc/ceilometer/ceilometer.conf" do
       :node_hostname => node['hostname'],
       :hypervisor_inspector => hypervisor_inspector,
       :libvirt_type => libvirt_type,
+      :time_to_live => time_to_live,
       :alarm_threshold_evaluation_interval => node[:ceilometer][:alarm_threshold_evaluation_interval]
     )
     if is_compute_agent
