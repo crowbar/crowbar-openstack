@@ -232,7 +232,8 @@ template "/etc/cinder/cinder.conf" do
     :nova_api_insecure => nova_api_insecure,
     :availability_zone => availability_zone,
     :keystone_settings => KeystoneHelper.keystone_settings(node, :cinder),
-    :strict_ssh_host_key_policy => node[:cinder][:strict_ssh_host_key_policy]
+    :strict_ssh_host_key_policy => node[:cinder][:strict_ssh_host_key_policy],
+    :default_availability_zone => node[:cinder][:default_availability_zone]
     )
 end
 

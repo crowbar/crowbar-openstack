@@ -227,6 +227,7 @@
             },
             "enable_v2_api": { "type": "bool", "required": true },
             "strict_ssh_host_key_policy": { "type": "bool", "required": true },
+            "default_availability_zone": { "type": "str", "required": true },
             "ssl": { "type": "map", "required": true, "mapping": {
               "certfile": { "type" : "str", "required" : true },
               "keyfile": { "type" : "str", "required" : true },

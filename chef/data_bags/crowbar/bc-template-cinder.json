@@ -120,6 +120,7 @@
       },
       "enable_v2_api": false,
       "strict_ssh_host_key_policy": false,
+      "default_availability_zone": "",
       "ssl": {
         "certfile": "/etc/cinder/ssl/certs/signing_cert.pem",
         "keyfile": "/etc/cinder/ssl/private/signing_key.pem",
@@ -139,7 +140,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 30,
+      "schema-revision": 31,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
