@@ -14,10 +14,11 @@
     = integer_field :alarm_threshold_evaluation_interval
 
     = boolean_field :use_mongodb
-    = boolean_field :verbose
 
     = integer_field %w(database time_to_live)
     %span.help-block
       = t(".database.time_to_live_hint")
+
+    = boolean_field :verbose
 
     = render "barclamp/git/pfsdeps"
