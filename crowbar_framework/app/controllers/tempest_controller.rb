@@ -59,10 +59,9 @@ class TempestController < BarclampController
       @test_runs = @service_object.get_test_runs
       respond_to do |format|
         format.json { render :json => @test_runs }
-        format.html { nil } # redirect to dashboard
+        format.html { redirect_to "/#{@bc_name}/dashboard" } # redirect to dashboard
       end
-    end 
-    redirect_to "/#{@bc_name}/dashboard" unless request.xhr?
+    end
   end
 
   def _prepare_results_html(test_run)
