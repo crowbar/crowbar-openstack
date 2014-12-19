@@ -111,6 +111,33 @@ lock_path = /var/run/tempest
 #publish_errors = false
 
 
+[auth]
+
+#
+# From tempest.config
+#
+
+# Allows test cases to create/destroy tenants and users. This option
+# requires that OpenStack Identity API admin credentials are known. If
+# false, isolated test cases and parallel execution, can still be
+# achieved configuring a list of test accounts (boolean value)
+# Deprecated group/name - [compute]/allow_tenant_isolation
+# Deprecated group/name - [orchestration]/allow_tenant_isolation
+#allow_tenant_isolation = false
+
+# If set to True it enables the Accounts provider, which locks
+# credentials to allow for parallel execution with pre-provisioned
+# accounts. It can only be used to run tests that ensure credentials
+# cleanup happens. It requires at least `2 * CONC` distinct accounts
+# configured in `test_accounts_file`, with CONC == the number of
+# concurrent test processes. (boolean value)
+#locking_credentials_provider = false
+
+# Path to the yaml file that contains the list of credentials to use
+# for running tests (string value)
+#test_accounts_file = etc/accounts.yaml
+
+
 [baremetal]
 
 #
@@ -220,12 +247,6 @@ cli_dir = <%=@bin_path %>
 # From tempest.config
 #
 
-# Allows test cases to create/destroy tenants and users. This
-# option enables isolated test cases and better parallel
-# execution, but also requires that OpenStack Identity API
-# admin credentials are known. (boolean value)
-#allow_tenant_isolation = false
-
 # Time in seconds between build status checks. (integer value)
 #build_interval = 1
 
@@ -250,6 +271,11 @@ flavor_ref = <%=@flavor_ref %>
 
 # Valid secondary flavor to be used in tests. (string value)
 flavor_ref_alt = <%=@alt_flavor_ref %>
+
+# Unallocated floating IP range, which will be used to test the
+# floating IP bulk feature for CRUD operation. This block must not
+# overlap an existing floating IP pool. (string value)
+#floating_ip_range = 10.0.0.0/29
 
 # Password used to authenticate to an instance using the alternate
 # image. (string value)
@@ -391,12 +417,24 @@ api_v3_extensions = all
 # (boolean value)
 #change_password = false
 
+# Does the test environment support obtaining instance serial console
+# output? (boolean value)
+#console_output = true
+
 # If false, skip disk config tests (boolean value)
 #disk_config = true
 
+# Enables returning of the instance password by the relevant server
+# API calls such as create, rebuild or rescue. (boolean value)
+#enable_instance_password = true
+
+# Does the test environment support dynamic network interface
+# attachment? (boolean value)
+#interface_attach = true
+
 # Does the test environment support live migration available? (boolean
 # value)
-#live_migration = false
+live_migration = false
 
 # Does the test environment support pausing? (boolean value)
 #pause = true
@@ -405,8 +443,20 @@ api_v3_extensions = all
 # [nova.rdp]->enabled in nova.conf (boolean value)
 #rdp_console = false
 
+# Does the test environment support instance rescue mode? (boolean
+# value)
+#rescue = true
+
 # Does the test environment support resizing? (boolean value)
 resize = <%= @use_resize %>
+
+# Does the test environment support shelving/unshelving? (boolean
+# value)
+#shelve = true
+
+# Does the test environment support creating snapshot images of
+# running instances? (boolean value)
+#snapshot = true
 
 # Enable Spice console. This configuration value should be same as
 # [nova.spice]->enabled in nova.conf (boolean value)
@@ -991,6 +1041,10 @@ trove = <%= @use_trove %>
 
 # The endpoint type to use for the telemetry service. (string value)
 endpoint_type = internalURL
+
+# This variable is used as flag to enable notification tests (boolean
+# value)
+too_slow_to_test = false
 
 
 [volume]
