@@ -138,4 +138,5 @@ cookbook_file "api-paste.ini" do
   group node[:cinder][:group]
   mode "0640"
   action :create
+  notifies :restart, "service[cinder-api]"
 end
