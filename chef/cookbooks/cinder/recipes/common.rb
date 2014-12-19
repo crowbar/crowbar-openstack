@@ -220,7 +220,6 @@ template "/etc/cinder/cinder.conf" do
   variables(
     :bind_host => bind_host,
     :bind_port => bind_port,
-    :enable_v2_api => node[:cinder][:enable_v2_api],
     :use_multi_backend => node[:cinder][:use_multi_backend],
     :volumes => node[:cinder][:volumes],
     :sql_connection => sql_connection,

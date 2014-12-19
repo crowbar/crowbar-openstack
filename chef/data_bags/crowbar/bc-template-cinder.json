@@ -118,7 +118,6 @@
         "bind_open_address": true,
         "bind_port": 8776
       },
-      "enable_v2_api": false,
       "strict_ssh_host_key_policy": false,
       "default_availability_zone": "",
       "ssl": {
@@ -140,7 +139,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 31,
+      "schema-revision": 32,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
