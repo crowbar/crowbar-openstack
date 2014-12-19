@@ -365,8 +365,7 @@ template "#{tempest_conf}" do
     :cinder_backend1_name => cinder_backend1_name,
     :cinder_backend2_name => cinder_backend2_name,
     :storage_protocol => storage_protocol,
-    :vendor_name => vendor_name,
-    :cinder_api_v2 => cinders[0][:cinder][:enable_v2_api]
+    :vendor_name => vendor_name
   )
 end
 
