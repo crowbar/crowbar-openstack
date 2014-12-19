@@ -799,10 +799,19 @@ endpoint_type = internalURL
 # From tempest.config
 #
 
+# Execute (old style) container-sync tests (boolean value)
+#container_sync = true
+
+# Execute discoverability tests (boolean value)
+#discoverability = true
+
 # A list of the enabled optional discoverable apis. A single entry,
 # all, indicates that all of these features are expected to be enabled
 # (list value)
 #discoverable_apis = all
+
+# Execute object-versioning tests (boolean value)
+object_versioning = <%= @object_versioning ? 'true' : 'false' %>
 
 
 [orchestration]
