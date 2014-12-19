@@ -469,9 +469,6 @@ endpoint_type = internalURL
 # From tempest.config
 #
 
-# Enable diagnostic commands (boolean value)
-#enable = true
-
 # A regex to determine which requests should be traced.  This is a
 # regex to match the caller for rest client requests to be able to
 # selectively trace calls out of specific classes and methods. It
@@ -529,6 +526,10 @@ alt_username = <%=@alt_comp_user %>
 # Identity API version to be used for authentication for API tests.
 # (string value)
 #auth_version = v2
+
+# Specify a CA bundle file to use in verifying a TLS (https) server
+# certificate. (string value)
+#ca_certificates_file = <None>
 
 # Catalog type of the Identity service. (string value)
 #catalog_type = identity
@@ -636,6 +637,42 @@ image_regex = ^cirros-<%= @cirros_version %>-x86_64-tempest-machine$
 ssh_user_regex = [["^.*[Cc]irros.*$", "root"]]
 
 
+[messaging]
+
+#
+# From tempest.config
+#
+
+# Catalog type of the Messaging service. (string value)
+#catalog_type = messaging
+
+# The maximum grace period for a claim (integer value)
+#max_claim_grace = 43200
+
+# The maximum ttl for a claim (integer value)
+#max_claim_ttl = 43200
+
+# The maximum size of a message body (integer value)
+#max_message_size = 262144
+
+# The maximum ttl for a message (integer value)
+#max_message_ttl = 1209600
+
+# The maximum number of messages per claim (integer value)
+#max_messages_per_claim = 20
+
+# The maximum number of queue message per page when listing (or)
+# posting messages (integer value)
+#max_messages_per_page = 20
+
+# The maximum metadata size for a queue (integer value)
+#max_queue_metadata = 65536
+
+# The maximum number of queue records per page when listing queues
+# (integer value)
+#max_queues_per_page = 20
+
+
 [negative]
 
 #
@@ -662,6 +699,10 @@ ssh_user_regex = [["^.*[Cc]irros.*$", "root"]]
 
 # Catalog type of the Neutron service. (string value)
 #catalog_type = network
+
+# List of dns servers whichs hould be used for subnet creation (list
+# value)
+#dns_servers = 8.8.8.8,8.8.4.4
 
 # The endpoint type to use for the network service. (string value)
 endpoint_type = internalURL
@@ -712,6 +753,10 @@ api_extensions = <%= @neutron_api_extensions %>
 
 # Allow the execution of IPv6 tests (boolean value)
 #ipv6 = true
+
+# Allow the execution of IPv6 subnet tests that use the extended IPv6
+# attributes ipv6_ra_mode and ipv6_address_mode (boolean value)
+#ipv6_subnet_attributes = false
 
 
 [object-storage]
@@ -766,6 +811,9 @@ endpoint_type = internalURL
 # From tempest.config
 #
 
+# Time in seconds between build status checks. (integer value)
+#build_interval = 1
+
 # Timeout in seconds to wait for a stack to build. (integer value)
 build_timeout = 2000
 
@@ -801,20 +849,6 @@ instance_type = <%=@heat_flavor_ref %>
 #region =
 
 
-[queuing]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the Queuing service. (string value)
-#catalog_type = queuing
-
-# The maximum number of queue records per page when listing
-# queues (integer value)
-#max_queues_per_page = 20
-
-
 [scenario]
 
 #
@@ -830,15 +864,22 @@ ami_img_file = cirros-<%= @cirros_version %>-x86_64-blank.img
 # ARI image file name (string value)
 ari_img_file = cirros-<%= @cirros_version %>-x86_64-initrd
 
+# Image container format (string value)
+#img_container_format = bare
+
 # Directory containing image files (string value)
 img_dir = <%=@tempest_path %>/etc/cirros/
+
+# Image disk format (string value)
+#img_disk_format = qcow2
+
+# Image file name (string value)
+# Deprecated group/name - [DEFAULT]/qcow2_img_file
+img_file = cirros-<%= @cirros_version %>-x86_64-disk.img
 
 # specifies how many resources to request at once. Used for large
 # operations testing. (integer value)
 #large_ops_number = 0
-
-# QCOW2 image file name (string value)
-qcow2_img_file = cirros-<%= @cirros_version %>-x86_64-disk.img
 
 # ssh username for the image file (string value)
 ssh_user = cirros
@@ -869,9 +910,6 @@ horizon = <%= @use_horizon %>
 # Whether or not Ironic is expected to be available (boolean value)
 #ironic = false
 
-# Whether or not Marconi is expected to be available (boolean value)
-#marconi = false
-
 # Whether or not neutron is expected to be available (boolean value)
 neutron = true
 
@@ -886,6 +924,9 @@ swift = <%= @use_swift %>
 
 # Whether or not Trove is expected to be available (boolean value)
 trove = <%= @use_trove %>
+
+# Whether or not Zaqar is expected to be available (boolean value)
+#zaqar = false
 
 
 [stress]
