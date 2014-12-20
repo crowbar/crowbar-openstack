@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-post 'tempest/create' => 'tempest#create', as: 'tempest_create_report'
 get 'tempest/dashboard' => 'tempest#dashboard', as: 'tempest_dashboard'
-get 'tempest/clear' => 'tempest#clear', as: 'tempest_clear_report'
 get 'tempest/results/:id.:format' => 'tempest#results', as: 'tempest_show_report'
+match 'tempest/test_runs(/:id)(.:format)' => 'tempest#test_runs', via: [:post, :get, :put]
