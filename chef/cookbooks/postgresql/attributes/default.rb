@@ -130,7 +130,8 @@ when "suse"
     default['postgresql']['contrib']['packages'] = ['postgresql-contrib']
   when node['platform_version'].to_f < 12.0
     default['postgresql']['version'] = "9.1"
-    default['postgresql']['client']['packages'] = ['postgresql91', 'rubygem-pg']
+    default['postgresql']['client']['packages'] = ['postgresql91',
+      "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-pg"]
     default['postgresql']['server']['packages'] = ['postgresql91-server']
     default['postgresql']['contrib']['packages'] = ['postgresql91-contrib']
   else
