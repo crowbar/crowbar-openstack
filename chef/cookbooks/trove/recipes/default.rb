@@ -99,12 +99,7 @@ node.set['openstack']['region'] = keystone_settings['endpoint_region']
 # database cookbook's responsibility. The database cookbook uses a
 # special mysql-chef_gem for this which is Chef 0.11 only.
 pkgs = ['mysql', 'python-mysql']
-if node["platform"] == "suse" && node["platform_version"].to_f >= 12 ||
-   node["platform"] == "opensuse" && node["platform_version"].to_f >= 13.2
-  pkgs.push("ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-mysql")
-else
-  pkgs.push("rubygem-mysql")
-end
+pkgs.push("ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-mysql")
 pkgs.each do |pkg|
   package pkg
 end
