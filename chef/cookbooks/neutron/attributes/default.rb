@@ -76,7 +76,7 @@ when "suse"
                    "openvswitch-switch",
                    "openvswitch-kmp-default" ],
     :nsx_pkgs => [ "openvswitch-pki",
-                   "rubygem-faraday" ],
+                   "ruby2.1-rubygem-faraday" ],
     :cisco_pkgs => [ "openstack-neutron-plugin-cisco" ],
     :user => "neutron",
     :group => "neutron",
