@@ -64,12 +64,7 @@ if ha_enabled
   if node[:ceilometer][:ha][:mongodb][:replica_set][:controller]
     # install the package immediately because we need it to configure the
     # replicaset
-    if node["platform"] == "suse" && node["platform_version"].to_f >= 12 ||
-       node["platform"] == "opensuse" && node["platform_version"].to_f >= 13.2
-      package("ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-mongo").run_action(:install)
-    else
-      package("rubygem-mongo").run_action(:install)
-    end
+    package("ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-mongo").run_action(:install)
 
     members = search(:node,
       "ceilometer_ha_mongodb_replica_set_member:true AND "\
