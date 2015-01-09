@@ -13,19 +13,17 @@ if vlan_mode
   switches = neutron[:neutron][:cisco_switches].to_hash
 end
 
-if node[:neutron][:use_ml2]
-  template "/etc/neutron/plugins/ml2/ml2_conf_cisco.ini" do
-    cookbook "neutron"
-    source "ml2_conf_cisco.ini.erb"
-    mode "0640"
-    owner "root"
-    group node[:neutron][:platform][:group]
-    variables(
-      :switches => switches,
-      :vlan_mode => vlan_mode
-    )
-    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-  end
+template "/etc/neutron/plugins/ml2/ml2_conf_cisco.ini" do
+  cookbook "neutron"
+  source "ml2_conf_cisco.ini.erb"
+  mode "0640"
+  owner "root"
+  group node[:neutron][:platform][:group]
+  variables(
+    :switches => switches,
+    :vlan_mode => vlan_mode
+  )
+  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
 end
 
 ssh_keys = ""

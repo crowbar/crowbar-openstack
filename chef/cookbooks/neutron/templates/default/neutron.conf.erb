@@ -69,20 +69,7 @@ bind_port = <%= @bind_port %>
 #
 # core_plugin =
 # Example: core_plugin = ml2
-
-<% if @use_ml2 -%>
-core_plugin = neutron.plugins.ml2.plugin.Ml2Plugin
-<% else -%>
-<%   if @networking_plugin == 'cisco' -%>
-core_plugin = neutron.plugins.cisco.network_plugin.PluginV2
-<%   elsif @networking_plugin == 'openvswitch' -%>
-core_plugin = neutron.plugins.openvswitch.ovs_neutron_plugin.OVSNeutronPluginV2
-<%   elsif @networking_plugin == 'linuxbridge' -%>
-core_plugin = neutron.plugins.linuxbridge.lb_neutron_plugin.LinuxBridgePluginV2
-<%   elsif @networking_plugin == 'vmware' -%>
-core_plugin = neutron.plugins.nicira.NeutronPlugin.NvpPluginV2
-<%   end -%>
-<% end -%>
+core_plugin = <%= @core_plugin %>
 
 # (ListOpt) List of service plugin entrypoints to be loaded from the
 # neutron.service_plugins namespace. See setup.cfg for the entrypoint names of
@@ -92,7 +79,7 @@ core_plugin = neutron.plugins.nicira.NeutronPlugin.NvpPluginV2
 #
 # service_plugins =
 # Example: service_plugins = router,firewall,lbaas,vpnaas,metering
-<% if @use_ml2 -%>
+<% if @core_plugin == "ml2" -%>
 service_plugins = neutron.services.l3_router.l3_router_plugin.L3RouterPlugin, <%= @service_plugins -%>
 <% else -%>
 service_plugins = <%= @service_plugins -%>
