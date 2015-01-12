@@ -34,7 +34,7 @@ sinks:
     - name: meter_sink
       transformers:
       publishers:
-          - rpc://
+          - notifier://
     - name: cpu_sink
       transformers:
           - name: "rate_of_change"
@@ -45,7 +45,7 @@ sinks:
                     type: "gauge"
                     scale: "100.0 / (10**9 * (resource_metadata.cpu_number or 1))"
       publishers:
-          - rpc://
+          - notifier://
     - name: disk_sink
       transformers:
           - name: "rate_of_change"
@@ -60,7 +60,7 @@ sinks:
                         unit: "\\1/s"
                     type: "gauge"
       publishers:
-          - rpc://
+          - notifier://
     - name: network_sink
       transformers:
           - name: "rate_of_change"
@@ -75,4 +75,4 @@ sinks:
                         unit: "\\1/s"
                     type: "gauge"
       publishers:
-          - rpc://
+          - notifier://
