@@ -3,7 +3,11 @@ def upgrade ta, td, a, d
   # role
   unless defined?(@@heat_auth_encryption_key)
     service = ServiceObject.new "fake-logger"
-    @@heat_auth_encryption_key = service.random_password
+    encryption_key = service.random_password
+    while encryption_key.length < 32 do
+      encryption_key += service.random_password
+    end
+    @@heat_auth_encryption_key = encryption_key
   end
 
   a['auth_encryption_key'] = @@heat_auth_encryption_key
