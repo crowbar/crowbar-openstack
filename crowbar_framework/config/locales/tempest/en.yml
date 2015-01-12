@@ -69,3 +69,4 @@ en:
         tempest_adm_username: 'Choose Tempest admin username'
         tempest_adm_password: 'Choose Tempest admin password'
         tempest_user_tenant: 'Choose tenant'
+        nova_instance: 'Nova'
