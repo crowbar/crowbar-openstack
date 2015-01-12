@@ -1,36 +1,36 @@
 = stylesheet_link_tag @bc_name
 .dashboard
-  %h1= t '.title'
+  %h1= t("barclamp.#{@bc_name}.dashboard.title")
   .clear
   .column_100
     %section{:class => 'box'}
       %form{:method => :post, :id =>'clear', :action => "/#{@bc_name}/test_runs/clear"}
         %label
           - if @test_runs.empty?
-            = t('.no_test_runs')
+            = t("barclamp.#{@bc_name}.dashboard.no_test_runs")
           - else
-            = t('.n_test_runs', :n => @test_runs.count)
-            %input{:type=> 'submit', :class => 'button', :value => t('.clear.do')}
+            = t("barclamp.#{@bc_name}.dashboard.n_test_runs", :n => @test_runs.count)
+            %input{:type=> 'submit', :class => 'button', :value => t("barclamp.#{@bc_name}.dashboard.clear.do")}
         
       %form{:method => :post, :id => 'run_test', :action => "/#{@bc_name}/test_runs" } 
         - if @ready_nodes.empty?
-          %span{:class => 'no_nodes'}= t '.run.no_nodes'
+          %span{:class => 'no_nodes'}= t "barclamp.#{@bc_name}.dashboard.run.no_nodes"
         - else
           %label
-            = t '.run.label'
+            = t "barclamp.#{@bc_name}.dashboard.run.label"
             %select{:name => 'node'}
               - @ready_nodes.each do |node|
                 %option{ :value => node.name }= node.alias  
-          %input{:type=>'submit', :class=>'button', :value => t('.run.do') }
+          %input{:type=>'submit', :class=>'button', :value => t("barclamp.#{@bc_name}.dashboard.run.do") }
       
   - if not @test_runs.empty?
     %table.data.box.test_runs
       %tbody
         %thead
-          %th.node= t '.test_run.node'
-          %th.status= t '.test_run.status'
-          %th.started= t '.test_run.started'
-          %th.ended= t '.test_run.ended'
+          %th.node= t "barclamp.#{@bc_name}.dashboard.test_run.node"
+          %th.status= t "barclamp.#{@bc_name}.dashboard.test_run.status"
+          %th.started= t "barclamp.#{@bc_name}.dashboard.test_run.started"
+          %th.ended= t "barclamp.#{@bc_name}.dashboard.test_run.ended"
         %tbody
           - @test_runs.each do |test_run|
             %tr
@@ -45,9 +45,9 @@
                   %div.led.in_process
                 %span
                   - if test_run['status'] == 'running'
-                    = t(".test_run.status_.#{test_run['status']}")
+                    = t("barclamp.#{@bc_name}.dashboard.test_run.status_.#{test_run['status']}")
                   - else 
-                    = link_to t(".test_run.status_.#{test_run['status']}"), "/#{@bc_name}/results/#{test_run['uuid']}.html"
+                    = link_to t("barclamp.#{@bc_name}.dashboard.test_run.status_.#{test_run['status']}"), "/#{@bc_name}/results/#{test_run['uuid']}.html"
               %td.started
                 = Time.at(test_run['started']).to_s
               %td.ended
