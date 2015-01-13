@@ -56,6 +56,12 @@ class TempestService < ServiceObject
     base
   end
 
+  def validate_proposal_after_save proposal
+    validate_one_for_role proposal, "tempest"
+
+    super
+  end
+
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Tempest apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
