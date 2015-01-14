@@ -1,4 +1,0 @@
-#!/bin/sh
-
-# Remove related objects
-ceilometer-expirer
