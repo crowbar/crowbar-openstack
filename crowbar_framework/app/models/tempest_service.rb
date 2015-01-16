@@ -56,6 +56,12 @@ class TempestService < ServiceObject
     base
   end
 
+  def validate_proposal_after_save proposal
+    validate_one_for_role proposal, "tempest"
+
+    super
+  end
+
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Tempest apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
@@ -102,7 +108,7 @@ class TempestService < ServiceObject
     if db.nil?
       begin
         lock = acquire_lock @bc_name
-      
+
         db_item = Chef::DataBagItem.new
         db_item.data_bag "crowbar"
         db_item['id'] = @bc_name
@@ -162,11 +168,11 @@ class TempestService < ServiceObject
 
   def run_test(node)
     raise "unable to look up a #{@bc_name} proposal at node #{node.inspect}" if (proposal = _get_proposal_by_node node).nil?
-    
+
     test_run_uuid = `uuidgen`.strip
-    test_run = { 
+    test_run = {
       'uuid' => test_run_uuid, 'started' => Time.now.utc.to_i, 'ended' => nil, 'pid' => nil,
-      'status' => 'running', 'node' => node, 'results.xml' => "log/#{test_run_uuid}.xml", 
+      'status' => 'running', 'node' => node, 'results.xml' => "log/#{test_run_uuid}.xml",
       'results.html' => "log/#{test_run_uuid}.html"}
 
     tempest_db = _get_or_create_db
@@ -189,7 +195,7 @@ class TempestService < ServiceObject
       test_run['ended'] = Time.now.utc.to_i
       test_run['status'] = $?.exitstatus.equal?(0) ? 'passed' : 'failed'
       test_run['pid'] = nil
-      
+
       lock = acquire_lock(@bc_name)
       tempest_db.save
       release_lock(lock)
@@ -198,7 +204,7 @@ class TempestService < ServiceObject
     end
     Process.detach pid
 
-    # saving the PID to prevent 
+    # saving the PID to prevent
     test_run['pid'] = pid
     lock = acquire_lock(@bc_name)
     tempest_db.save
