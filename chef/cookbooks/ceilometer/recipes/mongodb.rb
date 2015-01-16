@@ -68,8 +68,7 @@ if ha_enabled
 
     members = search(:node,
       "ceilometer_ha_mongodb_replica_set_member:true AND "\
-      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
-      ).sort
+      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}")
 
     # configure replica set in a ruby block where we also wait for mongodb
     # because we need mongodb to be started (which is not the case in compile
