@@ -234,7 +234,7 @@ if have_rbd
   include_recipe "ceph::cinder" if include_ceph_recipe
 
   if node[:platform] == "suse"
-    package "ceph"
+    package "ceph-common"
     package "python-ceph"
   end
 end
