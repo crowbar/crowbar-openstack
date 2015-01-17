@@ -190,7 +190,7 @@ unless nova[:nova].nil? or nova[:nova][:ssl].nil?
   nova_notify = {
     :nova_url => "#{nova_api_protocol}://#{nova_api_host}:#{nova[:nova][:ports][:api]}/v2",
     :nova_insecure => nova_insecure,
-    :nova_ssl_cacerts => nova_ssl_cacerts || nil,
+    :nova_ssl_cacerts => nova_ssl_cacerts,
     :nova_admin_username => nova[:nova][:service_user],
     :nova_admin_tenant_id => nova_admin_tenant_id,
     :nova_admin_password => nova[:nova][:service_password]
