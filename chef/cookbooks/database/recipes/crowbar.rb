@@ -17,7 +17,35 @@
 # limitations under the License.
 #
 
-# XXX hack since we can't modify attributes in the postgresql namespace
-# in crowbar.
-# Chef doesn't allow us to call merge/merge! directly on node attributes
-node.set['postgresql'] = node['postgresql'].to_hash.merge(node['database']['postgresql'])
+def pg_hash_only_merge(merge_onto, merge_with)
+  # If there are two Hashes, recursively merge.
+  if merge_onto.kind_of?(Hash) && merge_with.kind_of?(Hash)
+    merge_with.each do |key, merge_with_value|
+      merge_onto[key] = pg_hash_only_merge(merge_onto[key], merge_with_value)
+    end
+    merge_onto
+
+    # If merge_with is nil, don't replace merge_onto
+  elsif merge_with.nil?
+    merge_onto
+
+    # In all other cases, replace merge_onto with merge_with
+  else
+    merge_with
+  end
+end
+
+if Chef::VERSION.split('.')[0].to_i >= 11
+  raise "Your chef version has hash_only_merge; consider removing the local copy."
+else
+  node.default['postgresql'] = pg_hash_only_merge(node.default['postgresql'].to_hash, node.default['database']['postgresql'].to_hash)
+end
+
+# stoney had a bug where we were merging all attributes (including default and
+# override) as normal attributes, so fix it here
+# Note that the postgresql.client key should never be in normal, so this means
+# we'll do that only once.
+if node.normal_attrs['postgresql'].has_key? 'client'
+  node.normal_attrs.delete(:postgresql)
+  node.save
+end

@@ -38,13 +38,15 @@ end
 if node['postgresql']['pg_hba'][4]
   netaddr, netmask = node['postgresql']['pg_hba'][4][:addr].split
 else
-  node.set['postgresql']['pg_hba'][4] = {
+  pg_hba = node['postgresql']['pg_hba']
+  pg_hba << {
     :type => 'host',
     :db => 'all',
     :user => 'all',
     :method => 'md5',
   }
-  netaddr, netmaks = '', ''
+  netaddr, netmask = '', ''
+  node.set['postgresql']['pg_hba'] = pg_hba
 end
 
 newnetaddr = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").subnet
