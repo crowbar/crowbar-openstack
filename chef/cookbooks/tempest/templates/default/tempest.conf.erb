@@ -406,7 +406,7 @@ api_v3_extensions = all
 #rdp_console = false
 
 # Does the test environment support resizing? (boolean value)
-resize = true
+resize = <%= @use_resize %>
 
 # Enable Spice console. This configuration value should be same as
 # [nova.spice]->enabled in nova.conf (boolean value)

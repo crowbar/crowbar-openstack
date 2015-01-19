@@ -291,6 +291,9 @@ if backend_names.length > 1
   cinder_backend2_name = backend_names[1]
 end
 
+compute_nodes = search(:node, "roles:nova-multi-compute-kvm") || []
+use_resize = compute_nodes.length > 1
+
 # FIXME: should avoid search with no environment in query
 horizons = search(:node, "roles:nova_dashboard-server") || []
 if horizons.empty?
@@ -337,6 +340,7 @@ template "#{tempest_conf}" do
     :flavor_ref => flavor_ref,
     :alt_flavor_ref => alt_flavor_ref,
     :nova_api_v3 => nova[:nova][:enable_v3_api],
+    :use_resize => use_resize,
     # dashboard settings
     :horizon_host => horizon_host,
     :horizon_protocol => horizon_protocol,
