@@ -156,6 +156,28 @@ keystone_register "add heat stack user role" do
   action :add_role
 end
 
+keystone_register "add heat stack owner role" do
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['service_user']
+  tenant_name keystone_settings['service_tenant']
+  role_name "heat_stack_owner"
+  action :add_role
+end
+
+keystone_register "give admin access to stack owner role" do
+  protocol keystone_settings['protocol']
+  host keystone_settings['internal_url_host']
+  port keystone_settings['admin_port']
+  token keystone_settings['admin_token']
+  user_name keystone_settings['admin_user']
+  tenant_name keystone_settings['default_tenant']
+  role_name "heat_stack_owner"
+  action :add_access
+end
+
 package "python-openstackclient" do
   action :install
 end
