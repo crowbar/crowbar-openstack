@@ -225,12 +225,6 @@ end
 ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`.strip
 ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`.strip
 
-# FIXME: the command above should be good enough, but radosgw is broken with
-# tempest; also should avoid search with no environment in query
-#%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service object-store &> /dev/null}
-#use_swift = $?.success?
-swifts = search(:node, "roles:swift-proxy") || []
-use_swift = !swifts.empty?
 %x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service orchestration &> /dev/null}
 use_heat = $?.success?
 %x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service metering &> /dev/null}
@@ -251,6 +245,18 @@ unless neutrons[0].nil?
 end
 
 public_network_id = `neutron --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2`.strip
+
+# FIXME: the command above should be good enough, but radosgw is broken with
+# tempest; also should avoid search with no environment in query
+#%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service object-store &> /dev/null}
+#use_swift = $?.success?
+swifts = search(:node, "roles:swift-proxy") || []
+use_swift = !swifts.empty?
+if use_swift
+  swift_allow_versions = swifts[0][:swift][:allow_versions]
+else
+  swift_allow_versions = false
+end
 
 # FIXME: should avoid search with no environment in query
 cinders = search(:node, "roles:cinder-controller") || []
@@ -359,6 +365,8 @@ template "#{tempest_conf}" do
     # network settings
     :public_network_id => public_network_id,
     :neutron_api_extensions => neutron_api_extensions,
+    # object storage settings
+    :object_versioning => swift_allow_versions,
     # orchestration settings
     :heat_flavor_ref => heat_flavor_ref,
     :heat_machine_id_file => heat_machine_id_file,

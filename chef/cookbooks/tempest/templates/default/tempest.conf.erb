@@ -111,6 +111,33 @@ lock_path = /var/run/tempest
 #publish_errors = false
 
 
+[auth]
+
+#
+# From tempest.config
+#
+
+# Allows test cases to create/destroy tenants and users. This option
+# requires that OpenStack Identity API admin credentials are known. If
+# false, isolated test cases and parallel execution, can still be
+# achieved configuring a list of test accounts (boolean value)
+# Deprecated group/name - [compute]/allow_tenant_isolation
+# Deprecated group/name - [orchestration]/allow_tenant_isolation
+#allow_tenant_isolation = false
+
+# If set to True it enables the Accounts provider, which locks
+# credentials to allow for parallel execution with pre-provisioned
+# accounts. It can only be used to run tests that ensure credentials
+# cleanup happens. It requires at least `2 * CONC` distinct accounts
+# configured in `test_accounts_file`, with CONC == the number of
+# concurrent test processes. (boolean value)
+#locking_credentials_provider = false
+
+# Path to the yaml file that contains the list of credentials to use
+# for running tests (string value)
+#test_accounts_file = etc/accounts.yaml
+
+
 [baremetal]
 
 #
@@ -220,12 +247,6 @@ cli_dir = <%=@bin_path %>
 # From tempest.config
 #
 
-# Allows test cases to create/destroy tenants and users. This
-# option enables isolated test cases and better parallel
-# execution, but also requires that OpenStack Identity API
-# admin credentials are known. (boolean value)
-#allow_tenant_isolation = false
-
 # Time in seconds between build status checks. (integer value)
 #build_interval = 1
 
@@ -250,6 +271,11 @@ flavor_ref = <%=@flavor_ref %>
 
 # Valid secondary flavor to be used in tests. (string value)
 flavor_ref_alt = <%=@alt_flavor_ref %>
+
+# Unallocated floating IP range, which will be used to test the
+# floating IP bulk feature for CRUD operation. This block must not
+# overlap an existing floating IP pool. (string value)
+#floating_ip_range = 10.0.0.0/29
 
 # Password used to authenticate to an instance using the alternate
 # image. (string value)
@@ -391,12 +417,24 @@ api_v3_extensions = all
 # (boolean value)
 #change_password = false
 
+# Does the test environment support obtaining instance serial console
+# output? (boolean value)
+#console_output = true
+
 # If false, skip disk config tests (boolean value)
 #disk_config = true
 
+# Enables returning of the instance password by the relevant server
+# API calls such as create, rebuild or rescue. (boolean value)
+#enable_instance_password = true
+
+# Does the test environment support dynamic network interface
+# attachment? (boolean value)
+#interface_attach = true
+
 # Does the test environment support live migration available? (boolean
 # value)
-#live_migration = false
+live_migration = false
 
 # Does the test environment support pausing? (boolean value)
 #pause = true
@@ -405,8 +443,20 @@ api_v3_extensions = all
 # [nova.rdp]->enabled in nova.conf (boolean value)
 #rdp_console = false
 
+# Does the test environment support instance rescue mode? (boolean
+# value)
+#rescue = true
+
 # Does the test environment support resizing? (boolean value)
 resize = <%= @use_resize %>
+
+# Does the test environment support shelving/unshelving? (boolean
+# value)
+#shelve = true
+
+# Does the test environment support creating snapshot images of
+# running instances? (boolean value)
+#snapshot = true
 
 # Enable Spice console. This configuration value should be same as
 # [nova.spice]->enabled in nova.conf (boolean value)
@@ -469,9 +519,6 @@ endpoint_type = internalURL
 # From tempest.config
 #
 
-# Enable diagnostic commands (boolean value)
-#enable = true
-
 # A regex to determine which requests should be traced.  This is a
 # regex to match the caller for rest client requests to be able to
 # selectively trace calls out of specific classes and methods. It
@@ -529,6 +576,10 @@ alt_username = <%=@alt_comp_user %>
 # Identity API version to be used for authentication for API tests.
 # (string value)
 #auth_version = v2
+
+# Specify a CA bundle file to use in verifying a TLS (https) server
+# certificate. (string value)
+#ca_certificates_file = <None>
 
 # Catalog type of the Identity service. (string value)
 #catalog_type = identity
@@ -636,6 +687,42 @@ image_regex = ^cirros-<%= @cirros_version %>-x86_64-tempest-machine$
 ssh_user_regex = [["^.*[Cc]irros.*$", "root"]]
 
 
+[messaging]
+
+#
+# From tempest.config
+#
+
+# Catalog type of the Messaging service. (string value)
+#catalog_type = messaging
+
+# The maximum grace period for a claim (integer value)
+#max_claim_grace = 43200
+
+# The maximum ttl for a claim (integer value)
+#max_claim_ttl = 43200
+
+# The maximum size of a message body (integer value)
+#max_message_size = 262144
+
+# The maximum ttl for a message (integer value)
+#max_message_ttl = 1209600
+
+# The maximum number of messages per claim (integer value)
+#max_messages_per_claim = 20
+
+# The maximum number of queue message per page when listing (or)
+# posting messages (integer value)
+#max_messages_per_page = 20
+
+# The maximum metadata size for a queue (integer value)
+#max_queue_metadata = 65536
+
+# The maximum number of queue records per page when listing queues
+# (integer value)
+#max_queues_per_page = 20
+
+
 [negative]
 
 #
@@ -662,6 +749,10 @@ ssh_user_regex = [["^.*[Cc]irros.*$", "root"]]
 
 # Catalog type of the Neutron service. (string value)
 #catalog_type = network
+
+# List of dns servers whichs hould be used for subnet creation (list
+# value)
+#dns_servers = 8.8.8.8,8.8.4.4
 
 # The endpoint type to use for the network service. (string value)
 endpoint_type = internalURL
@@ -713,6 +804,10 @@ api_extensions = <%= @neutron_api_extensions %>
 # Allow the execution of IPv6 tests (boolean value)
 #ipv6 = true
 
+# Allow the execution of IPv6 subnet tests that use the extended IPv6
+# attributes ipv6_ra_mode and ipv6_address_mode (boolean value)
+#ipv6_subnet_attributes = false
+
 
 [object-storage]
 
@@ -754,10 +849,19 @@ endpoint_type = internalURL
 # From tempest.config
 #
 
+# Execute (old style) container-sync tests (boolean value)
+#container_sync = true
+
+# Execute discoverability tests (boolean value)
+#discoverability = true
+
 # A list of the enabled optional discoverable apis. A single entry,
 # all, indicates that all of these features are expected to be enabled
 # (list value)
 #discoverable_apis = all
+
+# Execute object-versioning tests (boolean value)
+object_versioning = <%= @object_versioning ? 'true' : 'false' %>
 
 
 [orchestration]
@@ -765,6 +869,9 @@ endpoint_type = internalURL
 #
 # From tempest.config
 #
+
+# Time in seconds between build status checks. (integer value)
+#build_interval = 1
 
 # Timeout in seconds to wait for a stack to build. (integer value)
 build_timeout = 2000
@@ -801,20 +908,6 @@ instance_type = <%=@heat_flavor_ref %>
 #region =
 
 
-[queuing]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the Queuing service. (string value)
-#catalog_type = queuing
-
-# The maximum number of queue records per page when listing
-# queues (integer value)
-#max_queues_per_page = 20
-
-
 [scenario]
 
 #
@@ -830,15 +923,22 @@ ami_img_file = cirros-<%= @cirros_version %>-x86_64-blank.img
 # ARI image file name (string value)
 ari_img_file = cirros-<%= @cirros_version %>-x86_64-initrd
 
+# Image container format (string value)
+#img_container_format = bare
+
 # Directory containing image files (string value)
 img_dir = <%=@tempest_path %>/etc/cirros/
+
+# Image disk format (string value)
+#img_disk_format = qcow2
+
+# Image file name (string value)
+# Deprecated group/name - [DEFAULT]/qcow2_img_file
+img_file = cirros-<%= @cirros_version %>-x86_64-disk.img
 
 # specifies how many resources to request at once. Used for large
 # operations testing. (integer value)
 #large_ops_number = 0
-
-# QCOW2 image file name (string value)
-qcow2_img_file = cirros-<%= @cirros_version %>-x86_64-disk.img
 
 # ssh username for the image file (string value)
 ssh_user = cirros
@@ -869,9 +969,6 @@ horizon = <%= @use_horizon %>
 # Whether or not Ironic is expected to be available (boolean value)
 #ironic = false
 
-# Whether or not Marconi is expected to be available (boolean value)
-#marconi = false
-
 # Whether or not neutron is expected to be available (boolean value)
 neutron = true
 
@@ -886,6 +983,9 @@ swift = <%= @use_swift %>
 
 # Whether or not Trove is expected to be available (boolean value)
 trove = <%= @use_trove %>
+
+# Whether or not Zaqar is expected to be available (boolean value)
+#zaqar = false
 
 
 [stress]
@@ -941,6 +1041,10 @@ trove = <%= @use_trove %>
 
 # The endpoint type to use for the telemetry service. (string value)
 endpoint_type = internalURL
+
+# This variable is used as flag to enable notification tests (boolean
+# value)
+too_slow_to_test = false
 
 
 [volume]
