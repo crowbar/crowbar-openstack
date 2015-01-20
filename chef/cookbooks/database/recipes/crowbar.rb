@@ -45,7 +45,7 @@ end
 # override) as normal attributes, so fix it here
 # Note that the postgresql.client key should never be in normal, so this means
 # we'll do that only once.
-if node.normal_attrs['postgresql'].has_key? 'client'
+if !node.normal_attrs['postgresql'].nil? && node.normal_attrs['postgresql'].has_key?('client')
   node.normal_attrs.delete(:postgresql)
   node.save
 end
