@@ -33,6 +33,9 @@ class HeatService < PacemakerServiceObject
         "heat-server" => {
           "unique" => false,
           "count" => 1,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          },
           "cluster" => true
         }
       }
