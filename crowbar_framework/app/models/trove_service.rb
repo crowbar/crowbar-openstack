@@ -25,7 +25,11 @@ class TroveService < ServiceObject
       {
         "trove" => {
           "unique" => false,
-          "count" => -1
+          "count" => 1,
+          "exclude_platform" => {
+            "suse" => "12.0",
+            "windows" => "/.*/"
+          }
         }
       }
     end
