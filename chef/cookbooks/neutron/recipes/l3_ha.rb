@@ -65,18 +65,26 @@ pacemaker_primitive lbaas_agent_primitive do
 end
 
 networking_plugin = node[:neutron][:networking_plugin]
+
 case networking_plugin
-when "openvswitch", "cisco"
-  neutron_agent = node[:neutron][:platform][:ovs_agent_name]
-when "linuxbridge"
-  neutron_agent = node[:neutron][:platform][:lb_agent_name]
+when 'ml2'
+  ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
+  case
+  when ml2_mech_drivers.include?("openvswitch")
+    neutron_agent = node[:neutron][:platform][:ovs_agent_name]
+    neutron_agent_ra = node[:neutron][:ha][:l3]["openvswitch_ra"]
+  when ml2_mech_drivers.include?("linuxbridge")
+    neutron_agent = node[:neutron][:platform][:lb_agent_name]
+    neutron_agent_ra = node[:neutron][:ha][:l3]["linuxbridge_ra"]
+  end
 when "vmware"
   neutron_agent = ''
+  neutron_agent_ra = ''
 end
 neutron_agent_primitive = neutron_agent.sub(/^openstack-/, "")
 
 pacemaker_primitive neutron_agent_primitive do
-  agent node[:neutron][:ha][:l3]["#{networking_plugin}_ra"]
+  agent neutron_agent_ra
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
   only_if { use_l3_agent }

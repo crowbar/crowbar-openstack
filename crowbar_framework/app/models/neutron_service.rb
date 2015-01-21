@@ -94,14 +94,50 @@ class NeutronService < PacemakerServiceObject
     end
 
     plugin = proposal["attributes"]["neutron"]["networking_plugin"]
-    mode = proposal["attributes"]["neutron"]["networking_mode"]
+    ml2_mechanism_drivers = proposal["attributes"]["neutron"]["ml2_mechanism_drivers"]
+    ml2_type_drivers = proposal["attributes"]["neutron"]["ml2_type_drivers"]
+    ml2_type_drivers_default_provider_network = proposal["attributes"]["neutron"]["ml2_type_drivers_default_provider_network"]
+    ml2_type_drivers_default_tenant_network = proposal["attributes"]["neutron"]["ml2_type_drivers_default_tenant_network"]
 
-    if %(linuxbridge cisco).include?(plugin) and mode != "vlan"
-      validation_error("The \"#{plugin}\" plugin only supports the mode: \"vlan\"")
+    # at least one ml2 type driver must be selected for ml2 as core plugin
+    if plugin == 'ml2' && ml2_type_drivers.length == 0
+      validation_error("At least one ml2 type driver must be selected")
     end
 
-    if !%(gre vlan).include?(mode)
-      validation_error("Unknown networking mode \"#{mode}\"")
+    # at least one ml2 mech driver must be selected for ml2 as core plugin
+    if plugin == 'ml2' && ml2_mechanism_drivers.length == 0
+      validation_error("At least one ml2 mechanism driver must be selected")
+    end
+
+    # default provider network ml2 type driver must be a driver from the selected ml2 type drivers
+    # TODO(toabctl): select the ml2_type_driver automatically if used as default? Or directly check in the ui via js?
+    unless ml2_type_drivers.include?(ml2_type_drivers_default_provider_network)
+      validation_error("The default provider network type driver \"#{ml2_type_drivers_default_provider_network}\" is not a selected ml2 type driver")
+    end
+
+    # default tenant network ml2 type driver must be a driver from the selected ml2 type drivers
+    # TODO(toabctl): select the ml2_type_driver automatically if used as default? Or directly check in the ui via js?
+    unless ml2_type_drivers.include?(ml2_type_drivers_default_tenant_network)
+      validation_error("The default tenant network type driver \"#{ml2_type_drivers_default_tenant_network}\" is not a selected ml2 type driver")
+    end
+
+    # linuxbridge and cisco_nexus mech drivers need vlan type driver
+    # TODO(toabctl): select vlan type driver automatically if linuxbridge or cisco were selected!?
+    %w(linuxbridge cisco_nexus).each do |drv|
+      if ml2_mechanism_drivers.include? drv and not ml2_type_drivers.include? 'vlan'
+        validation_error("The mechanism driver \"#{drv}\" needs the type driver \"vlan\"")
+      end
+    end
+
+    # cisco_nexus mech driver needs also openvswitch mech driver
+    # TODO(toabctl): select openvswitch automatically if cisco_nexus was selected!?
+    if ml2_mechanism_drivers.include? "cisco_nexus" and not ml2_mechanism_drivers.include? "openvswitch"
+      validation_error("The 'cisco_nexus' mechanism driver needs also the 'openvswitch' mechanism driver")
+    end
+
+    # for now, openvswitch and linuxbrige can't be used in parallel
+    if ml2_mechanism_drivers.include? "openvswitch" and ml2_mechanism_drivers.include? "linuxbridge"
+      validation_error("The 'openvswitch' and 'linuxbridge' mechanism drivers can't be used in parallel. Only select one of them")
     end
 
     super
@@ -137,11 +173,14 @@ class NeutronService < PacemakerServiceObject
 
     l3_nodes.each do |n|
       net_svc.allocate_ip "default", "public", "host",n
-      if role.default_attributes["neutron"]["networking_mode"] == "gre"
-        net_svc.allocate_ip "default","os_sdn","host", n
-      else
-        net_svc.enable_interface "default", "nova_fixed", n
-        if role.default_attributes["neutron"]["networking_mode"] == "vlan"
+      # TODO(toabctl): The same code is in the nova barclamp. Should be extracted and reused!
+      #                (see crowbar_framework/app/models/nova_service.rb)
+      if role.default_attributes["neutron"]["networking_plugin"] == "ml2"
+        if role.default_attributes["neutron"]["ml2_type_drivers"].include?("gre")
+          net_svc.allocate_ip "default","os_sdn","host", n
+        end
+        if role.default_attributes["neutron"]["ml2_type_drivers"].include?("vlan")
+          net_svc.enable_interface "default", "nova_fixed", n
           # Force "use_vlan" to false in VLAN mode (linuxbridge and ovs). We
           # need to make sure that the network recipe does NOT create the
           # VLAN interfaces (ethX.VLAN)

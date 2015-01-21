@@ -1,6 +1,6 @@
 /**
  * Copyright 2011-2013, Dell
- * Copyright 2013-2014, SUSE LINUX Products GmbH
+ * Copyright 2013-2015, SUSE LINUX Products GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@
   CiscoPorts.prototype.initialize = function() {
     var self = this;
 
-    $("#networking_plugin, #networking_mode").live(
+    $("#networking_plugin, #ml2_type_drivers, #ml2_mechanism_drivers").live(
       "change",
       function() {
         self.visualizePorts();
@@ -216,8 +216,9 @@
 
   CiscoPorts.prototype.visualSwitches = function() {
     return !$.isEmptyObject(this.retrieveSwitches())
-      && $('#networking_plugin').val() == 'cisco'
-      && $('#networking_mode').val() == 'vlan';
+      && $('#networking_plugin').val() == 'ml2'
+      && $('#ml2_mechanism_drivers').val().indexOf('cisco_nexus') >= 0
+      && $('#ml2_type_drivers').val().indexOf('vlan') >= 0;
   };
 
   $.fn.ciscoPorts = function(options) {
@@ -227,73 +228,56 @@
   };
 }(jQuery, document, window));
 
+function networking_plugin_check() {
+  switch ($('#networking_plugin').val()) {
+  case 'ml2':
+    $('#vmware_container').hide();
+    $('#ml2_mechanism_drivers_container').show();
+    $('#ml2_type_drivers_container').show();
+    $('#ml2_type_drivers_default_provider_network_container').show();
+    $('#ml2_type_drivers_default_tenant_network_container').show();
+    ml2_type_drivers_check();
+    ml2_mechanism_drivers_check();
+    break;
+  case 'vmware':
+    $('#vmware_container').show();
+    $('#ml2_mechanism_drivers_container').hide();
+    $('#ml2_type_drivers_container').hide();
+    $('#ml2_type_drivers_default_provider_network_container').hide();
+    $('#ml2_type_drivers_default_tenant_network_container').hide();
+    $('#num_vlans_container').hide();
+    $('#cisco_switches').hide();
+    $('#cisco_ports').hide();
+    break;
+  }
+}
+
+function ml2_type_drivers_check() {
+  var values = $('#ml2_type_drivers').val();
+  if (values.indexOf("vlan") >= 0) {
+    $('#num_vlans_container').show();
+  } else {
+    $('#num_vlans_container').hide();
+  }
+}
+
+function ml2_mechanism_drivers_check() {
+  var values = $('#ml2_mechanism_drivers').val();
+    if (values.indexOf("cisco_nexus") >= 0) {
+      $('#cisco_switches').show();
+    } else {
+      $('#cisco_switches').hide();
+    }
+}
+
 $(document).ready(function($) {
-  $('#networking_plugin').on('change', function() {
-    var value = $(this).val();
-    var networking_mode = $('#networking_mode')
-    var non_forced_mode = networking_mode.data('non-forced');
+  networking_plugin_check();
+  ml2_type_drivers_check();
+  ml2_mechanism_drivers_check();
 
-    switch (value) {
-      case 'linuxbridge':
-        if (non_forced_mode == undefined) {
-          networking_mode.data('non-forced', networking_mode.val());
-        }
-        networking_mode.val('vlan').trigger('change');
-        $('#mode_container').hide(100).attr('disabled', 'disabled');
-
-        $('#vmware_container').hide(100).attr('disabled', 'disabled');
-        break;
-      case 'openvswitch':
-        if (non_forced_mode != undefined) {
-          networking_mode.val(non_forced_mode);
-          networking_mode.removeData('non-forced');
-        }
-
-        $('#mode_container').show(100).removeAttr('disabled');
-        networking_mode.trigger('change');
-
-        $('#vmware_container').hide(100).attr('disabled', 'disabled');
-        break;
-      case 'cisco':
-        if (non_forced_mode == undefined) {
-          networking_mode.data('non-forced', networking_mode.val());
-        }
-        networking_mode.val('vlan').trigger('change');
-        $('#mode_container').hide(100).attr('disabled', 'disabled');
-
-        $('#vmware_container').hide(100).attr('disabled', 'disabled');
-        break;
-      case 'vmware':
-        if (non_forced_mode == undefined) {
-          networking_mode.data('non-forced', networking_mode.val());
-        }
-        networking_mode.val('gre').trigger('change');
-        $('#mode_container').hide(100).attr('disabled', 'disabled');
-
-        $('#vmware_container').show(100).removeAttr('disabled');
-        break;
-    }
-  }).trigger('change');
-
-  $('#networking_mode').on('change', function() {
-    var value = $(this).val();
-
-    switch (value) {
-      case 'vlan':
-        $('#num_vlans_container').show(100).removeAttr('disabled');
-
-        if ($('#networking_plugin').val() == 'cisco') {
-          $('#cisco_switches').show(100).removeAttr('disabled');
-        } else {
-          $('#cisco_switches').hide(100).attr('disabled', 'disabled');
-        }
-        break;
-      default:
-        $('#cisco_switches').hide(100).attr('disabled', 'disabled');
-        $('#num_vlans_container').hide(100).attr('disabled', 'disabled');
-        break;
-    }
-  }).trigger('change');
+  $('#networking_plugin').on('change', networking_plugin_check).trigger('change');
+  $('#ml2_type_drivers').on('change', ml2_type_drivers_check);
+  $('#ml2_mechanism_drivers').on('change', ml2_mechanism_drivers_check);
 
   $('#cisco_ports table').ciscoPorts();
 });

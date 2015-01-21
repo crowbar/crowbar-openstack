@@ -1,4 +1,5 @@
 # Copyright 2011 Dell, Inc.
+# Copyright 2015 SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +27,7 @@ fixed_first_ip = IPAddr.new("#{fixed_range}").to_range().to_a[2]
 fixed_last_ip = IPAddr.new("#{fixed_range}").to_range().to_a[-2]
 
 fixed_pool_start = fixed_first_ip if fixed_first_ip > fixed_pool_start
-fixed_pool_end = fixed_last_ip if fixed_last_ip < fixed_pool_end 
+fixed_pool_end = fixed_last_ip if fixed_last_ip < fixed_pool_end
 
 
 #this code seems to be broken in case complicated network when floating network outside of public network
@@ -61,25 +62,36 @@ if node[:platform] == "suse" or node[:neutron][:use_gitrepo]
 end
 neutron_cmd = "neutron #{neutron_args}"
 
+fixed_network_type = ""
 floating_network_type = ""
-if node[:neutron][:networking_mode] == 'vlan'
-  fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
-  if node[:network][:networks][:nova_floating][:use_vlan]
-    floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{floating_net["vlan"]} --provider:physical_network physnet1"
-  else
-    floating_network_type = "--provider:network_type flat --provider:physical_network physnet1"
-  end
-elsif node[:neutron][:networking_mode] == 'gre'
-  fixed_network_type = "--provider:network_type gre --provider:segmentation_id 1"
-  floating_network_type = "--provider:network_type gre --provider:segmentation_id 2"
-end
 
-if node[:neutron][:networking_plugin] == "vmware"
+networking_plugin = node[:neutron][:networking_plugin]
+ml2_type_drivers_default_provider_network = node[:neutron][:ml2_type_drivers_default_provider_network]
+case networking_plugin
+when 'ml2'
+  case ml2_type_drivers_default_provider_network
+  when 'vlan'
+    fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
+    if node[:network][:networks][:nova_floating][:use_vlan]
+      floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{floating_net["vlan"]} --provider:physical_network physnet1"
+    else
+      floating_network_type = "--provider:network_type flat --provider:physical_network physnet1"
+    end
+  when 'gre'
+    fixed_network_type = "--provider:network_type gre --provider:segmentation_id 1"
+    floating_network_type = "--provider:network_type gre --provider:segmentation_id 2"
+  else
+    Chef::Log.error("default provider network ml2 type driver '#{ml2_type_drivers_default_provider_network}' invalid for creating provider networks")
+  end
+when 'vmware'
   fixed_network_type = ""
-  # We would like to be sure that floating network will be created 
+  # We would like to be sure that floating network will be created
   # without any additional options, NSX will take care about everything.
   floating_network_type = ""
+else
+  Chef::Log.error("networking plugin '#{networking_plugin}' invalid for creating provider networks")
 end
+
 
 execute "create_fixed_network" do
   command "#{neutron_cmd} net-create fixed --shared #{fixed_network_type}"

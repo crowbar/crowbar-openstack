@@ -14,8 +14,21 @@
 
       = select_field :networking_plugin, :collection => :networking_plugins_for_neutron
 
-      #mode_container
-        = select_field :networking_mode, :collection => :networking_modes_for_neutron
+      #ml2_mechanism_drivers_container
+        = select_field :ml2_mechanism_drivers, :collection => :networking_ml2_mechanism_drivers_for_neutron, :multiple => true
+
+      #ml2_type_drivers_container
+        = select_field :ml2_type_drivers, :collection => :networking_ml2_type_drivers_for_neutron, :multiple => true
+
+      #ml2_type_drivers_default_provider_network_container
+        = select_field :ml2_type_drivers_default_provider_network, :collection => :networking_ml2_type_drivers_default_provider_network_for_neutron
+        %span.help-block
+          = t('.ml2_type_drivers_default_provider_network_hint')
+
+      #ml2_type_drivers_default_tenant_network_container
+        = select_field :ml2_type_drivers_default_tenant_network, :collection => :networking_ml2_type_drivers_default_tenant_network_for_neutron
+        %span.help-block
+          = t('.ml2_type_drivers_default_tenant_network_hint')
 
       #vmware_container
         = string_field %w(vmware user)

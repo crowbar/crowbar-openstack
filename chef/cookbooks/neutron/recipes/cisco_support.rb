@@ -2,7 +2,7 @@ node[:neutron][:platform][:cisco_pkgs].each { |p| package p }
 
 neutron = node
 
-if neutron[:neutron][:networking_mode] == 'vlan'
+if neutron[:neutron][:ml2_type_drivers].include? 'vlan'
   vlan_mode = true
 else
   vlan_mode = false
