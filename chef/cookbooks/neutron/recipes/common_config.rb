@@ -21,8 +21,6 @@ if node.attribute?(:cookbook) and node[:cookbook] == "nova"
 else
   neutron = node
 end
-neutron_server = node[:neutron][:neutron_server] rescue false
-
 
 # RDO package magic (non-standard packages)
 if %w(redhat centos).include?(node.platform)
@@ -101,71 +99,6 @@ end
 
 keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
-if neutron_server and neutron[:neutron][:api][:protocol] == 'https'
-  if neutron[:neutron][:ssl][:generate_certs]
-    package "openssl"
-    ruby_block "generate_certs for neutron" do
-      block do
-        unless ::File.exists? node[:neutron][:ssl][:certfile] and ::File.exists? node[:neutron][:ssl][:keyfile]
-          require "fileutils"
-
-          Chef::Log.info("Generating SSL certificate for neutron...")
-
-          [:certfile, :keyfile].each do |k|
-            dir = File.dirname(neutron[:neutron][:ssl][k])
-            FileUtils.mkdir_p(dir) unless File.exists?(dir)
-          end
-
-          # Generate private key
-          %x(openssl genrsa -out #{neutron[:neutron][:ssl][:keyfile]} 4096)
-          if $?.exitstatus != 0
-            message = "SSL private key generation failed"
-            Chef::Log.fatal(message)
-            raise message
-          end
-          FileUtils.chown "root", neutron[:neutron][:group], neutron[:neutron][:ssl][:keyfile]
-          FileUtils.chmod 0640, node[:neutron][:ssl][:keyfile]
-
-          # Generate certificate signing requests (CSR)
-          conf_dir = File.dirname neutron[:neutron][:ssl][:certfile]
-          ssl_csr_file = "#{conf_dir}/signing_key.csr"
-          ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{neutron[:fqdn]}\""
-          %x(openssl req -new -key #{neutron[:neutron][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
-          if $?.exitstatus != 0
-            message = "SSL certificate signed requests generation failed"
-            Chef::Log.fatal(message)
-            raise message
-          end
-
-          # Generate self-signed certificate with above CSR
-          %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{neutron[:neutron][:ssl][:keyfile]} -out #{neutron[:neutron][:ssl][:certfile]})
-          if $?.exitstatus != 0
-            message = "SSL self-signed certificate generation failed"
-            Chef::Log.fatal(message)
-            raise message
-          end
-
-          File.delete ssl_csr_file  # Nobody should even try to use this
-        end # unless files exist
-      end # block
-    end # ruby_block
-  else # if generate_certs
-    unless ::File.exists? neutron[:neutron][:ssl][:certfile]
-      message = "Certificate \"#{neutron[:neutron][:ssl][:certfile]}\" is not present."
-      Chef::Log.fatal(message)
-      raise message
-    end
-    # we do not check for existence of keyfile, as the private key is allowed
-    # to be in the certfile
-  end # if generate_certs
-
-  if neutron[:neutron][:ssl][:cert_required] and !::File.exists? neutron[:neutron][:ssl][:ca_certs]
-    message = "Certificate CA \"#{neutron[:neutron][:ssl][:ca_certs]}\" is not present."
-    Chef::Log.fatal(message)
-    raise message
-  end
-end
-
 if neutron[:neutron][:ha][:server][:enabled]
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(neutron, "admin").address
   bind_host = admin_address
@@ -233,7 +166,6 @@ template "/etc/neutron/neutron.conf" do
       :ssl_key_file => neutron[:neutron][:ssl][:keyfile],
       :ssl_cert_required => neutron[:neutron][:ssl][:cert_required],
       :ssl_ca_file => neutron[:neutron][:ssl][:ca_certs],
-      :neutron_server => neutron_server,
       :core_plugin => core_plugin,
       :service_plugins => service_plugins,
       :rootwrap_bin =>  node[:neutron][:rootwrap],

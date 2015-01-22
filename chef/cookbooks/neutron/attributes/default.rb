@@ -49,8 +49,6 @@ default[:neutron][:ssl][:insecure] = false
 default[:neutron][:ssl][:cert_required] = false
 default[:neutron][:ssl][:ca_certs] = "/etc/neutron/ssl/certs/ca.pem"
 
-default[:neutron][:neutron_server] = false
-
 case node["platform"]
 when "suse"
   default[:neutron][:platform] = {
