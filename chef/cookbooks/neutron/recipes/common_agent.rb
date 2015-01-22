@@ -21,8 +21,6 @@ if node.attribute?(:cookbook) and node[:cookbook] == "nova"
 else
   neutron = node
 end
-neutron_server = node[:neutron][:neutron_server] rescue false
-
 
 # Disable rp_filter
 ruby_block "edit /etc/sysctl.conf for rp_filter" do
