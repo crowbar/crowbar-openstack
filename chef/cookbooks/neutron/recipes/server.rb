@@ -206,18 +206,18 @@ ha_enabled = node[:neutron][:ha][:server][:enabled]
 
 crowbar_pacemaker_sync_mark "wait-neutron_db_sync"
 
-config_files = "--config-file /etc/neutron/neutron.conf --config-file #{plugin_cfg_path}"
-if node[:neutron][:networking_plugin] == "ml2" and node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
-  config_files += " --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
-end
-
 execute "neutron-db-manage migrate" do
   user node[:neutron][:user]
   group node[:neutron][:group]
-  command "neutron-db-manage #{config_files} upgrade head"
+  command 'source /etc/sysconfig/neutron; \
+           for i in $NEUTRON_PLUGIN_CONF; do \
+             CONF_ARGS="$CONF_ARGS --config-file $i"; \
+           done; \
+           neutron-db-manage --config-file /etc/neutron/neutron.conf $CONF_ARGS upgrade head'
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
-  only_if { !node[:neutron][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+  only_if { node[:platform] == "suse" && !node[:neutron][:db_synced] &&
+            (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
 end
 
 if ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) && !node[:neutron][:db_synced]
