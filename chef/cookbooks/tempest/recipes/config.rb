@@ -51,10 +51,18 @@ keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   action :add_tenant
 end.run_action(:add_tenant)
 
+%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service orchestration &> /dev/null}
+use_heat = $?.success?
+
 users = [
           {'name' => tempest_comp_user, 'pass' => tempest_comp_pass, 'role' => 'Member'},
           {'name' => tempest_adm_user, 'pass' => tempest_adm_pass, 'role' => 'admin' },
         ]
+
+if use_heat
+  users.push({'name' => tempest_comp_user, 'pass' => tempest_comp_pass, 'role' => 'heat_stack_owner'})
+end
+
 users.each do |user|
 
   keystone_register "add #{user["name"]}:#{user["pass"]} user" do
@@ -92,7 +100,6 @@ users.each do |user|
     tenant_name tempest_comp_tenant
     action :nothing
   end.run_action(:add_ec2)
-
 end
 
 # Give admin user access to tempest tenant
@@ -225,8 +232,6 @@ end
 ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`.strip
 ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`.strip
 
-%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service orchestration &> /dev/null}
-use_heat = $?.success?
 %x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service metering &> /dev/null}
 use_ceilometer = $?.success?
 %x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service database &> /dev/null}
