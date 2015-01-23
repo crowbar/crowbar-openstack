@@ -37,16 +37,25 @@ class CeilometerService < PacemakerServiceObject
         "ceilometer-cagent" => {
           "unique" => false,
           "count" => 1,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          },
           "cluster" => true
         },
         "ceilometer-server" => {
           "unique" => false,
           "count" => 1,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          },
           "cluster" => true
         },
         "ceilometer-swift-proxy-middleware" => {
           "unique" => false,
-          "count" => -1
+          "count" => -1,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          }
         }
       }
     end
