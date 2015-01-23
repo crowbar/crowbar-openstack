@@ -33,12 +33,18 @@ class NeutronService < PacemakerServiceObject
         "neutron-server" => {
           "unique" => false,
           "count" => 1,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          },
           "cluster" => true
         },
         "neutron-l3" => {
           "unique" => false,
           "count" => 1,
           "admin" => false,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          },
           "cluster" => true
         }
       }
