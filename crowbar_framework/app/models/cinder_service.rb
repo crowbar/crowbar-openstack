@@ -34,12 +34,18 @@ class CinderService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "cluster" => true,
-          "admin" => false
+          "admin" => false,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          },
         },
         "cinder-volume" => {
           "unique" => false,
           "count" => -1,
-          "admin" => false
+          "admin" => false,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          }
         }
       }
     end
