@@ -24,6 +24,21 @@ class TempestService < ServiceObject
     @logger = thelogger
   end
 
+  class << self
+    def role_constraints
+      {
+        "tempest" => {
+          "unique" => false,
+          "count" => 1,
+          "exclude_platform" => {
+            "suse" => "12.0",
+            "windows" => "/.*/"
+          }
+        }
+      }
+    end
+  end
+
   def proposal_dependencies(role)
     answer = []
     answer << { "barclamp" => "nova", "inst" => role.default_attributes["tempest"]["nova_instance"] }
