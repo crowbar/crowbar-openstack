@@ -32,13 +32,17 @@ class CeilometerService < PacemakerServiceObject
       {
         "ceilometer-agent" => {
           "unique" => false,
-          "count" => -1
+          "count" => -1,
+          "exclude_platform" => {
+            "windows" => "/.*/"
+          }
         },
         "ceilometer-cagent" => {
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "12.0"
+            "suse" => "12.0",
+            "windows" => "/.*/"
           },
           "cluster" => true
         },
@@ -46,7 +50,8 @@ class CeilometerService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "12.0"
+            "suse" => "12.0",
+            "windows" => "/.*/"
           },
           "cluster" => true
         },
@@ -54,7 +59,8 @@ class CeilometerService < PacemakerServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "12.0"
+            "suse" => "12.0",
+            "windows" => "/.*/"
           }
         }
       }
