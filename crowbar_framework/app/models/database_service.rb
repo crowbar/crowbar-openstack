@@ -34,7 +34,10 @@ class DatabaseService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "cluster" => true,
-          "admin" => false
+          "admin" => false,
+          "exclude_platform" => {
+            "suse" => "12.0"
+          }
         }
       }
     end
