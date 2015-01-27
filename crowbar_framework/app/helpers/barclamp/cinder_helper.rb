@@ -48,7 +48,7 @@ module Barclamp
       options_for_select(
         [
           ["Data ONTAP in 7-Mode", "ontap_7mode"],
-          ["Data ONTAP in Clustered Mode", "ontap_cluster"]
+          ["Clustered Data ONTAP", "ontap_cluster"]
         ],
         selected.to_s
       )
