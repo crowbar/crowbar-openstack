@@ -68,15 +68,13 @@ class CinderService < PacemakerServiceObject
     base = super
 
     nodes = NodeObject.all
-    nodes.delete_if { |n| n.nil? or n.admin? }
-    if nodes.size >= 1
-      controller        = nodes.detect { |n| n.intended_role == "controller"} || nodes.first
-      storage           = nodes.detect { |n| n.intended_role == "storage" } || controller
-      base["deployment"][@bc_name]["elements"] = {
-        "cinder-controller"     => [ controller[:fqdn] ],
-        "cinder-volume"         => [ storage[:fqdn] ]
-      }
-    end
+    controller = select_nodes_for_role(nodes, "cinder-controller", "controller") || []
+    storage = select_nodes_for_role(nodes, "cinder-volume", "storage") || []
+
+    base["deployment"][@bc_name]["elements"] = {
+      "cinder-controller" => [ controller.first.name ],
+      "cinder-volume" => storage.map { |x| x.name }
+    }
 
     base["attributes"][@bc_name]["git_instance"] = find_dep_proposal("git", true)
     base["attributes"][@bc_name]["database_instance"] = find_dep_proposal("database")
