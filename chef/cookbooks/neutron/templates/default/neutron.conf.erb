@@ -213,7 +213,11 @@ allow_overlapping_ips = False
 # worker thread in the current process.  Greater than 0 launches that number of
 # child processes as workers.  The parent process manages them.
 # api_workers = 0
+# This is workaround for lp#1354226
+# https://bugs.launchpad.net/neutron/+bug/1354226
+<% unless @core_plugin == "vmware" -%>
 api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+<% end -%>
 
 # Number of separate RPC worker processes to spawn.  The default, 0, runs the
 # worker thread in the current process.  Greater than 0 launches that number of
@@ -221,7 +225,11 @@ api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 # This feature is experimental until issues are addressed and testing has been
 # enabled for various plugins for compatibility.
 # rpc_workers = 0
+# This is workaround for bug1354226
+# https://bugs.launchpad.net/neutron/+bug/1354226
+<% unless @core_plugin == "vmware" -%>
 rpc_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+<% end -%>
 
 # Sets the value of TCP_KEEPIDLE in seconds to use for each server socket when
 # starting API server. Not supported on OS X.
