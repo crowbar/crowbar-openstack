@@ -255,7 +255,7 @@ if node[:cinder][:use_gitrepo]
 elsif %w(redhat centos suse).include? node.platform
   cookbook_file "/etc/tgt/targets.conf" do
     source "cinder-volume.conf"
-    notifies :restart, "service[tgt]" if %w(redhat centos).include? node.platform
+    notifies :restart, "service[tgt]"
   end
 end
 
