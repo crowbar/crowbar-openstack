@@ -19,7 +19,7 @@ barclamp:
   name: 'tempest'
   display: 'Tempest'
   description: 'OpenStack Integration Test Suite'
-  version: 0
+  version: 1
   user_managed: true
   requires:
     - 'nova'
