@@ -265,24 +265,16 @@ if %w(suse).include? node.platform
   end
 end
 
-# Restart doesn't work correct for this service.
-bash "restart-tgt_#{@cookbook_name}" do
-  unless %w(redhat centos suse).include? node.platform
-    code <<-EOH
-      stop tgt
-      start tgt
-EOH
-  else
-    code "service tgtd stop; service tgtd start"
-  end
-  action :nothing
-end
-
 service "tgt" do
   supports :status => true, :restart => true, :reload => true
-  action :enable
+  action [:enable, :start]
   service_name "tgtd" if %w(redhat centos suse).include? node.platform
-  notifies :run, "bash[restart-tgt_#{@cookbook_name}]"
+  # Restart doesn't work correct for this service.
+  if %w(redhat centos suse).include? node.platform
+    restart_command "service tgtd stop; service tgtd start"
+  else
+    restart_command "stop tgt; start tgt"
+  end
 end
 
 cinder_service("volume")
