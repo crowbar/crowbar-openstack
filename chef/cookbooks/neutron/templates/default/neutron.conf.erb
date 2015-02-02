@@ -225,7 +225,7 @@ api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 # This feature is experimental until issues are addressed and testing has been
 # enabled for various plugins for compatibility.
 # rpc_workers = 0
-# This is workaround for bug1354226
+# This is workaround for lp#1354226
 # https://bugs.launchpad.net/neutron/+bug/1354226
 <% unless @core_plugin == "vmware" -%>
 rpc_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
