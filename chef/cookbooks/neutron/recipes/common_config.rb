@@ -1,5 +1,5 @@
 # Copyright 2013 Dell, Inc.
-# Copyright 2014 SUSE
+# Copyright 2014-2015 SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -136,11 +136,6 @@ if neutron[:neutron][:use_lbaas] then
   service_plugins = "#{service_plugins}, neutron.services.loadbalancer.plugin.LoadBalancerPlugin"
 end
 
-core_plugin = "ml2"
-if neutron[:neutron][:networking_plugin] == "vmware"
-  core_plugin = "vmware"
-end
-
 template "/etc/neutron/neutron.conf" do
     cookbook "neutron"
     source "neutron.conf.erb"
@@ -166,7 +161,7 @@ template "/etc/neutron/neutron.conf" do
       :ssl_key_file => neutron[:neutron][:ssl][:keyfile],
       :ssl_cert_required => neutron[:neutron][:ssl][:cert_required],
       :ssl_ca_file => neutron[:neutron][:ssl][:ca_certs],
-      :core_plugin => core_plugin,
+      :core_plugin => neutron[:neutron][:networking_plugin],
       :service_plugins => service_plugins,
       :rootwrap_bin =>  node[:neutron][:rootwrap],
       :use_namespaces => true,
@@ -180,61 +175,55 @@ if %w(redhat centos).include?(node.platform)
   end
 end
 
-
-vlan_start = node[:network][:networks][:nova_fixed][:vlan]
-num_vlans = neutron[:neutron][:num_vlans]
-vlan_end = [vlan_start + num_vlans - 1, 4094].min
-
 case neutron[:neutron][:networking_plugin]
-when "openvswitch", "cisco"
-  agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
+when 'ml2'
+  ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
+  case
+  when ml2_mech_drivers.include?("openvswitch")
+    agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
 
-  directory "/etc/neutron/plugins/openvswitch/" do
-     mode 00755
-     owner "root"
-     group neutron[:neutron][:platform][:group]
-     action :create
-     recursive true
-     not_if { node[:platform] == "suse" }
-  end
+    directory "/etc/neutron/plugins/openvswitch/" do
+      mode 00755
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      action :create
+      recursive true
+      not_if { node[:platform] == "suse" }
+    end
 
-  template agent_config_path do
-    cookbook "neutron"
-    source "ovs_neutron_plugin.ini.erb"
-    owner "root"
-    group neutron[:neutron][:platform][:group]
-    mode "0640"
-    variables(
-      :physnet => neutron[:neutron][:networking_mode] == 'gre' ? nil : "br-fixed",
-      :networking_mode => neutron[:neutron][:networking_mode],
-      :vlan_start => vlan_start,
-      :vlan_end => vlan_end
-      )
-  end
-when "linuxbridge"
-  agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
-
-  directory "/etc/neutron/plugins/linuxbridge/" do
-     mode 00755
-     owner "root"
-     group neutron[:neutron][:platform][:group]
-     action :create
-     recursive true
-     not_if { node[:platform] == "suse" }
-  end
-
-  template agent_config_path do
-    cookbook "neutron"
-    source "linuxbridge_conf.ini.erb"
-    owner "root"
-    group neutron[:neutron][:platform][:group]
-    mode "0640"
-    variables(
-      :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil),
-      :vlan_start => vlan_start,
-      :vlan_end => vlan_end
+    template agent_config_path do
+      cookbook "neutron"
+      source "ovs_neutron_plugin.ini.erb"
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      mode "0640"
+      variables(
+        :ml2_type_drivers => neutron[:neutron][:ml2_type_drivers]
       )
     end
+  when ml2_mech_drivers.include?("linuxbridge")
+    agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
+
+    directory "/etc/neutron/plugins/linuxbridge/" do
+      mode 00755
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      action :create
+      recursive true
+      not_if { node[:platform] == "suse" }
+    end
+
+    template agent_config_path do
+      cookbook "neutron"
+      source "linuxbridge_conf.ini.erb"
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      mode "0640"
+      variables(
+        :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil)
+      )
+    end
+  end
 when "vmware"
   agent_config_path = "/etc/neutron/plugins/vmware/nsx.ini"
 

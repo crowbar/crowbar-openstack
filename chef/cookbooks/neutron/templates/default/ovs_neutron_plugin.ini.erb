@@ -10,19 +10,7 @@
 # tenant_network_type = local
 # Example: tenant_network_type = gre
 # Example: tenant_network_type = vxlan
-<% if @networking_mode == 'vlan' -%>
-tenant_network_type = vlan
-network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
-<% elsif @networking_mode == 'gre' -%>
-tenant_network_type = gre
-tunnel_bridge = br-tunnel
-tunnel_id_ranges = <%= node[:neutron][:network][:gre_start]%>:<%= node[:neutron][:network][:gre_stop]%>
-local_ip = <%= node.address("os_sdn").addr %>
-enable_tunneling = True
-<% else -%>
-tenant_network_type = local
-network_vlan_ranges = physnet1
-<% end -%>
+# NOTE(toabctl): tenant_network_type is no longer used for ml2. the option is now tenant_network_types, in ml2_conf.ini section [ml2]
 
 # (ListOpt) Comma-separated list of
 # <physical_network>[:<vlan_min>:<vlan_max>] tuples enumerating ranges
@@ -34,6 +22,7 @@ network_vlan_ranges = physnet1
 #
 # network_vlan_ranges =
 # Example: network_vlan_ranges = physnet1:1000:2999
+# NOTE(toabctl): network_vlan_ranges is no longer used for ml2. the option moved to ml2_conf.ini, section [ml2_type_vlan]
 
 # (BoolOpt) Set to True in the server and the agents to enable support
 # for GRE or VXLAN networks. Requires kernel support for OVS patch ports and
@@ -44,6 +33,7 @@ network_vlan_ranges = physnet1
 #          tunneling.
 #
 # enable_tunneling = False
+# NOTE(toabctl): enable_tunneling is automatically set to True if [AGENT]tunnel_type is set
 
 # (StrOpt) The type of tunnel network, if any, supported by the plugin. If
 # this is set, it will cause tunneling to be enabled. If this is not set and
@@ -52,6 +42,7 @@ network_vlan_ranges = physnet1
 # tunnel_type =
 # Example: tunnel_type = gre
 # Example: tunnel_type = vxlan
+# NOTE(toabctl): tunnel_type from [ovs] section is not used for ml2. Use tunnel_type from [AGENT] section
 
 # (ListOpt) Comma-separated list of <tun_min>:<tun_max> tuples
 # enumerating ranges of GRE or VXLAN tunnel IDs that are available for
@@ -59,6 +50,7 @@ network_vlan_ranges = physnet1
 #
 # tunnel_id_ranges =
 # Example: tunnel_id_ranges = 1:1000
+#NOTE(toabctl): tunnel_id_ranges is no longer used for ml2. the option moved to ml2_conf.ini, section [ml2_type_gre]
 
 # Do not change this parameter unless you have a good reason to.
 # This is the name of the OVS integration bridge. There is one per hypervisor.
@@ -72,6 +64,9 @@ network_vlan_ranges = physnet1
 # the server.  In most cases, the default value should be fine.
 #
 # tunnel_bridge = br-tun
+<% if @ml2_type_drivers.include?("gre") -%>
+tunnel_bridge = br-tunnel
+<% end -%>
 
 # Peer patch port in integration bridge for tunnel bridge
 # int_peer_patch_port = patch-tun
@@ -84,6 +79,9 @@ network_vlan_ranges = physnet1
 # this hypervisor.
 #
 # local_ip =
+<% if @ml2_type_drivers.include?("gre") -%>
+local_ip = <%= node.address("os_sdn").addr %>
+<% end -%>
 
 # (ListOpt) Comma-separated list of <physical_network>:<bridge> tuples
 # mapping physical network names to the agent's node-specific OVS
@@ -95,8 +93,8 @@ network_vlan_ranges = physnet1
 #
 # bridge_mappings =
 # Example: bridge_mappings = physnet1:br-eth1
-<% if @physnet -%>
-bridge_mappings = physnet1:<%=@physnet%>
+<% if @ml2_type_drivers.include?("vlan") -%>
+bridge_mappings = physnet1:br-fixed
 <% end -%>
 
 # (BoolOpt) Use veths instead of patch ports to interconnect the integration
@@ -127,6 +125,9 @@ bridge_mappings = physnet1:<%=@physnet%>
 # Example: tunnel_types = gre
 # Example: tunnel_types = vxlan
 # Example: tunnel_types = vxlan, gre
+<% if @ml2_type_drivers.include?("gre") -%>
+tunnel_types=gre
+<% end -%>
 
 # (IntOpt) The port number to utilize if tunnel_types includes 'vxlan'. By
 # default, this will make use of the Open vSwitch default value of '4789' if

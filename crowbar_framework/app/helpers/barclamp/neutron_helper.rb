@@ -1,6 +1,6 @@
 #
 # Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2013-2015, SUSE LINUX Products GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,23 +20,55 @@ module Barclamp
     def networking_plugins_for_neutron(selected)
       options_for_select(
         [
-          ["linuxbridge", "linuxbridge"],
-          ["openvswitch", "openvswitch"],
-          ["cisco", "cisco"],
+          ["ml2", "ml2"],
           ["vmware", "vmware"]
         ],
         selected.to_s
       )
     end
 
-    def networking_modes_for_neutron(selected)
+    def networking_ml2_mechanism_drivers_for_neutron(selected)
+      selected = selected.gsub(/\s+/, "").split(",")
       options_for_select(
         [
-          ["gre", "gre"], 
-          ["vlan", "vlan"]
+          ["linuxbridge", "linuxbridge"],
+          ["openvswitch", "openvswitch"],
+          ["cisco_nexus", "cisco_nexus"],
         ],
-        selected.to_s
+        selected
       )
+    end
+
+    def networking_ml2_type_drivers_valid()
+      ["vlan", "gre"]
+    end
+
+    def networking_ml2_type_drivers_for_neutron(selected)
+      selected = selected.gsub(/\s+/, "").split(",")
+      valid_options = networking_ml2_type_drivers_valid()
+      # preserve the order of the selected entries
+      options = []
+      selected.each do |el|
+        if valid_options.include?(el)
+          options << [el, el]
+          valid_options.delete(el)
+        end
+      end
+      # append unselected but valid options
+      valid_options.each do |el|
+        options << [el, el]
+      end
+      options_for_select(options, selected)
+    end
+
+    def networking_ml2_type_drivers_default_provider_network_for_neutron(selected)
+      options_for_select(networking_ml2_type_drivers_valid().map{|x| [x, x]},
+                         selected.to_s)
+    end
+
+    def networking_ml2_type_drivers_default_tenant_network_for_neutron(selected)
+      options_for_select(networking_ml2_type_drivers_valid().map{|x| [x, x]},
+                         selected.to_s)
     end
 
     def api_protocols_for_neutron(selected)

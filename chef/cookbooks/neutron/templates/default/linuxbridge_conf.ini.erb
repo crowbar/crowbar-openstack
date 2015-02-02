@@ -8,7 +8,8 @@
 #
 # tenant_network_type = local
 # Example: tenant_network_type = vlan
-tenant_network_type = vlan
+# NOTE(rhafer): tenant_network_type is no longer used for ml2. The option is now
+# in ml2_conf.ini section [ml2] (on the neutron-server node)
 
 # (ListOpt) Comma-separated list of
 # <physical_network>[:<vlan_min>:<vlan_max>] tuples enumerating ranges
@@ -20,7 +21,8 @@ tenant_network_type = vlan
 #
 # network_vlan_ranges =
 # Example: network_vlan_ranges = physnet1:1000:2999
-network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
+# NOTE(rhafer): network_vlan_ranges is no longer used for ml2. The option is now
+# in ml2_conf.ini section [ml2] (on the neutron-server node)
 
 [linux_bridge]
 # (ListOpt) Comma-separated list of

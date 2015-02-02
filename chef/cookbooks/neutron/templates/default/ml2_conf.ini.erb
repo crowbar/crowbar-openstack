@@ -3,7 +3,7 @@
 # the neutron.ml2.type_drivers namespace.
 #
 # type_drivers = local,flat,vlan,gre,vxlan
-type_drivers = flat,vlan,gre
+type_drivers = <%= @ml2_type_drivers.join(",") %>,flat
 # Example: type_drivers = flat,vlan,gre,vxlan
 
 # (ListOpt) Ordered list of network_types to allocate as tenant
@@ -11,7 +11,7 @@ type_drivers = flat,vlan,gre
 # but provides no connectivity between hosts.
 #
 # tenant_network_types = local
-tenant_network_types = <%= @networking_mode %>
+tenant_network_types = <%= @tenant_network_types.join(",") %>
 # Example: tenant_network_types = vlan,gre,vxlan
 
 # (ListOpt) Ordered list of networking mechanism driver entrypoints
@@ -22,7 +22,7 @@ tenant_network_types = <%= @networking_mode %>
 # Example: mechanism_drivers = cisco,logger
 # Example: mechanism_drivers = openvswitch,brocade
 # Example: mechanism_drivers = linuxbridge,brocade
-mechanism_drivers = <%= @mechanism_driver %>,hyperv
+mechanism_drivers = <%= @ml2_mechanism_drivers.join(",") %>,hyperv
 
 # (ListOpt) Ordered list of extension driver entrypoints
 # to be loaded from the neutron.ml2.extension_drivers namespace.
@@ -46,14 +46,14 @@ mechanism_drivers = <%= @mechanism_driver %>,hyperv
 #
 # network_vlan_ranges =
 # Example: network_vlan_ranges = physnet1:1000:2999,physnet2
-<% if @networking_mode == "vlan" -%>
+<% if @ml2_type_drivers.include?("vlan") -%>
 network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
 <% end -%>
 
 [ml2_type_gre]
 # (ListOpt) Comma-separated list of <tun_min>:<tun_max> tuples enumerating ranges of GRE tunnel IDs that are available for tenant network allocation
 # tunnel_id_ranges =
-<% if @networking_mode == "gre" -%>
+<% if @ml2_type_drivers.include?("gre") -%>
 tunnel_id_ranges = <%= node[:neutron][:network][:gre_start]%>:<%= node[:neutron][:network][:gre_stop]%>
 <% end -%>
 

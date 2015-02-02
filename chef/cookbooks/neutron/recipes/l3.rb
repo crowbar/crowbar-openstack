@@ -93,12 +93,16 @@ end
 
 
 case node[:neutron][:networking_plugin]
-when "openvswitch", "cisco"
-  interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
-  external_network_bridge = "br-public"
-when "linuxbridge"
-  interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
-  external_network_bridge = ""
+when 'ml2'
+  ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
+  case
+  when ml2_mech_drivers.include?("openvswitch")
+    interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+    external_network_bridge = "br-public"
+  when ml2_mech_drivers.include?("linuxbridge")
+    interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
+    external_network_bridge = ""
+  end
 when "vmware"
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
   external_network_bridge = ""

@@ -20,8 +20,7 @@ override[:neutron][:group]="neutron"
 default[:neutron][:debug] = false
 default[:neutron][:verbose] = false
 default[:neutron][:dhcp_domain] = "openstack.local"
-default[:neutron][:networking_mode] = "gre"
-default[:neutron][:networking_plugin] = "openvswitch"
+default[:neutron][:networking_plugin] = "ml2"
 default[:neutron][:cisco_support] = false
 
 default[:neutron][:db][:database] = "neutron"

@@ -1,5 +1,5 @@
 # Copyright 2013 Dell, Inc.
-# Copyright 2014 SUSE
+# Copyright 2014-2015 SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,19 +49,20 @@ bash "reload disable-rp_filter-sysctl" do
   subscribes :run, resources(:cookbook_file=> disable_rp_filter_file), :delayed
 end
 
+if neutron[:neutron][:networking_plugin] == "ml2"
+  ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
+  case
+  when ml2_mech_drivers.include?("openvswitch")
+    neutron_agent = node[:neutron][:platform][:ovs_agent_name]
+    neutron_agent_pkg = node[:neutron][:platform][:ovs_agent_pkg]
+    agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
+  when ml2_mech_drivers.include?("linuxbridge")
+    neutron_agent = node[:neutron][:platform][:lb_agent_name]
+    neutron_agent_pkg = node[:neutron][:platform][:lb_agent_pkg]
+    agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
+  end
 
-case neutron[:neutron][:networking_plugin]
-when "openvswitch", "cisco"
-  neutron_agent = node[:neutron][:platform][:ovs_agent_name]
-  neutron_agent_pkg = node[:neutron][:platform][:ovs_agent_pkg]
-  agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
-when "linuxbridge"
-  neutron_agent = node[:neutron][:platform][:lb_agent_name]
-  neutron_agent_pkg = node[:neutron][:platform][:lb_agent_pkg]
-  agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
-end
-
-unless neutron[:neutron][:networking_plugin] == "vmware"
+  # agent package/git installation
   unless neutron[:neutron][:use_gitrepo]
     package neutron_agent_pkg do
       action :install
@@ -108,7 +109,11 @@ unless neutron[:neutron][:networking_plugin] == "vmware"
   end
 end
 
-if ['openvswitch', 'cisco', 'vmware'].include? neutron[:neutron][:networking_plugin]
+
+# openvswitch installation and configuration
+if neutron[:neutron][:networking_plugin] == 'vmware' or
+  (neutron[:neutron][:networking_plugin] == 'ml2' and
+   neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch"))
   if node.platform == "ubuntu"
     # If we expect to install the openvswitch module via DKMS, but the module
     # does not exist, rmmod the openvswitch module before continuing.
