@@ -265,6 +265,11 @@ function ml2_mechanism_drivers_check() {
   var values = $('#ml2_mechanism_drivers').val();
     if (values.indexOf("cisco_nexus") >= 0) {
       $('#cisco_switches').show();
+      // auto-select openvswitch if cisco is selected
+      if (values.indexOf("openvswitch") < 0) {
+        values.push("openvswitch");
+        $("#ml2_mechanism_drivers").val(values);
+      }
     } else {
       $('#cisco_switches').hide();
     }

@@ -138,7 +138,6 @@ class NeutronService < PacemakerServiceObject
     end
 
     # cisco_nexus mech driver needs also openvswitch mech driver
-    # TODO(toabctl): select openvswitch automatically if cisco_nexus was selected!?
     if ml2_mechanism_drivers.include? "cisco_nexus" and not ml2_mechanism_drivers.include? "openvswitch"
       validation_error("The 'cisco_nexus' mechanism driver needs also the 'openvswitch' mechanism driver")
     end
