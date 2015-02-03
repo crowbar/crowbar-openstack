@@ -17,35 +17,15 @@
 
 module Barclamp
   module NeutronHelper
+
     def networking_plugins_for_neutron(selected)
       options_for_select(
-        [
-          ["ml2", "ml2"],
-          ["vmware", "vmware"]
-        ],
+        NeutronService.networking_plugins_valid.map { |el| [el, el] },
         selected.to_s
       )
     end
 
-    def networking_ml2_mechanism_drivers_for_neutron(selected)
-      selected = selected.gsub(/\s+/, "").split(",")
-      options_for_select(
-        [
-          ["linuxbridge", "linuxbridge"],
-          ["openvswitch", "openvswitch"],
-          ["cisco_nexus", "cisco_nexus"],
-        ],
-        selected
-      )
-    end
-
-    def networking_ml2_type_drivers_valid()
-      ["vlan", "gre"]
-    end
-
-    def networking_ml2_type_drivers_for_neutron(selected)
-      selected = selected.gsub(/\s+/, "").split(",")
-      valid_options = networking_ml2_type_drivers_valid()
+    def options_keep_order(valid_options, selected)
       # preserve the order of the selected entries
       options = []
       selected.each do |el|
@@ -58,16 +38,28 @@ module Barclamp
       valid_options.each do |el|
         options << [el, el]
       end
-      options_for_select(options, selected)
+      options
+    end
+
+    def networking_ml2_mechanism_drivers_for_neutron(selected)
+      selected = selected.gsub(/\s+/, "").split(",")
+      valid_options = NeutronService.networking_ml2_mechanism_drivers_valid
+      options_for_select(options_keep_order(valid_options, selected), selected)
+    end
+
+    def networking_ml2_type_drivers_for_neutron(selected)
+      selected = selected.gsub(/\s+/, "").split(",")
+      valid_options = NeutronService.networking_ml2_type_drivers_valid
+      options_for_select(options_keep_order(valid_options, selected), selected)
     end
 
     def networking_ml2_type_drivers_default_provider_network_for_neutron(selected)
-      options_for_select(networking_ml2_type_drivers_valid().map{|x| [x, x]},
+      options_for_select(NeutronService.networking_ml2_type_drivers_valid.map { |x| [x, x] },
                          selected.to_s)
     end
 
     def networking_ml2_type_drivers_default_tenant_network_for_neutron(selected)
-      options_for_select(networking_ml2_type_drivers_valid().map{|x| [x, x]},
+      options_for_select(NeutronService.networking_ml2_type_drivers_valid.map { |x| [x, x] },
                          selected.to_s)
     end
 

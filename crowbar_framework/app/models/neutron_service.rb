@@ -27,6 +27,18 @@ class NeutronService < PacemakerServiceObject
     false
   end
 
+  def self.networking_plugins_valid
+    ["ml2", "vmware"]
+  end
+
+  def self.networking_ml2_type_drivers_valid
+    ["vlan", "gre"]
+  end
+
+  def self.networking_ml2_mechanism_drivers_valid
+    ["linuxbridge", "openvswitch", "cisco_nexus"]
+  end
+
   class << self
     def role_constraints
       {
@@ -107,6 +119,9 @@ class NeutronService < PacemakerServiceObject
     ml2_type_drivers_default_provider_network = proposal["attributes"]["neutron"]["ml2_type_drivers_default_provider_network"]
     ml2_type_drivers_default_tenant_network = proposal["attributes"]["neutron"]["ml2_type_drivers_default_tenant_network"]
 
+    ml2_type_drivers_valid = NeutronService.networking_ml2_type_drivers_valid
+    ml2_mechanism_drivers_valid = NeutronService.networking_ml2_mechanism_drivers_valid
+
     # at least one ml2 type driver must be selected for ml2 as core plugin
     if plugin == 'ml2' && ml2_type_drivers.length == 0
       validation_error("At least one ml2 type driver must be selected")
@@ -115,6 +130,20 @@ class NeutronService < PacemakerServiceObject
     # at least one ml2 mech driver must be selected for ml2 as core plugin
     if plugin == 'ml2' && ml2_mechanism_drivers.length == 0
       validation_error("At least one ml2 mechanism driver must be selected")
+    end
+
+    # only allow valid ml2 type drivers
+    ml2_type_drivers.each do |drv|
+      unless ml2_type_drivers_valid.include? drv
+        validation_error("Selected ml2 type driver \"#{drv}\" is not a valid option. Valid drivers are #{ml2_type_drivers_valid.join(',')}")
+      end
+    end
+
+    # only allow valid ml2 mechanism drivers
+    ml2_mechanism_drivers.each do |drv|
+      unless ml2_mechanism_drivers_valid.include? drv
+        validation_error("Selected ml2 mechansim driver \"#{drv}\" is not a valid option. Valid drivers are #{ml2_mechanism_drivers_valid.join(',')}")
+      end
     end
 
     # default provider network ml2 type driver must be a driver from the selected ml2 type drivers
@@ -138,7 +167,6 @@ class NeutronService < PacemakerServiceObject
     end
 
     # cisco_nexus mech driver needs also openvswitch mech driver
-    # TODO(toabctl): select openvswitch automatically if cisco_nexus was selected!?
     if ml2_mechanism_drivers.include? "cisco_nexus" and not ml2_mechanism_drivers.include? "openvswitch"
       validation_error("The 'cisco_nexus' mechanism driver needs also the 'openvswitch' mechanism driver")
     end
