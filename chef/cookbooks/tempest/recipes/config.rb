@@ -124,6 +124,9 @@ end
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
 heat_machine_id_file = node[:tempest][:tempest_path] + '/heat_machine.id'
 
+glance_node = search_env_filtered(:node, "roles:glance-server").first
+insecure = glance_node[:glance][:ssl][:insecure] ? "--insecure" : ""
+
 bash "upload tempest test image" do
   code <<-EOH
 IMAGE_URL=${IMAGE_URL:-"http://download.cirros-cloud.net/0.3.2/cirros-0.3.2-x86_64-uec.tar.gz"}
@@ -156,21 +159,21 @@ rm -rf #{node[:tempest][:tempest_path]}/etc/cirros/*
 cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
 
 echo -n "Adding kernel ... "
-KERNEL_ID=$(glance image-create --name "$IMG_NAME-tempest-kernel" \
+KERNEL_ID=$(glance #{insecure} image-create --name "$IMG_NAME-tempest-kernel" \
     --is-public True --container-format aki \
     --disk-format aki < $(findfirst '*-vmlinuz') | extract_id)
 echo "done."
 [ -n "$KERNEL_ID" ] || exit 1
 
 echo -n "Adding ramdisk ... "
-RAMDISK_ID=$(glance image-create --name="$IMG_NAME-tempest-ramdisk" \
+RAMDISK_ID=$(glance #{insecure} image-create --name="$IMG_NAME-tempest-ramdisk" \
     --is-public True --container-format ari \
     --disk-format ari < $(findfirst '*-initrd') | extract_id)
 echo "done."
 [ -n "$RAMDISK_ID" ] || exit 1
 
 echo -n "Adding image ... "
-MACHINE_ID=$(glance image-create --name="$IMG_NAME-tempest-machine" \
+MACHINE_ID=$(glance #{insecure} image-create --name="$IMG_NAME-tempest-machine" \
     --is-public True --container-format ami --disk-format ami \
     --property kernel_id=$KERNEL_ID \
     --property ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
@@ -183,7 +186,7 @@ echo "done."
 
 rm -rf $TEMP
 
-glance image-list
+glance #{insecure} image-list
 EOH
   environment ({
     'IMAGE_URL' => node[:tempest][:tempest_test_image],
@@ -201,7 +204,7 @@ OS_USERNAME=${OS_USERNAME:-admin}
 OS_TENANT_NAME=${OS_TENANT_NAME:-admin}
 OS_PASSWORD=${OS_PASSWORD:-admin}
 
-id=$(glance image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
+id=$(glance #{insecure} image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
 [ -n "$id" ] && echo $id > #{heat_machine_id_file}
 
 true
