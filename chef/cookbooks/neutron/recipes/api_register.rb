@@ -27,6 +27,7 @@ crowbar_pacemaker_sync_mark "wait-neutron_register"
 
 keystone_register "neutron api wakeup keystone" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -35,6 +36,7 @@ end
 
 keystone_register "register neutron user" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -46,6 +48,7 @@ end
 
 keystone_register "give neutron user access" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -57,6 +60,7 @@ end
 
 keystone_register "register neutron service" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -68,6 +72,7 @@ end
 
 keystone_register "register neutron endpoint" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
