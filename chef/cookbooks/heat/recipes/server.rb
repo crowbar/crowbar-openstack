@@ -117,6 +117,7 @@ crowbar_pacemaker_sync_mark "wait-heat_register"
 
 keystone_register "heat wakeup keystone" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -125,6 +126,7 @@ end
 
 keystone_register "register heat user" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -136,6 +138,7 @@ end
 
 keystone_register "give heat user access" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -147,6 +150,7 @@ end
 
 keystone_register "add heat stack user role" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -158,6 +162,7 @@ end
 
 keystone_register "add heat stack owner role" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -169,6 +174,7 @@ end
 
 keystone_register "give admin access to stack owner role" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -184,6 +190,7 @@ end
 
 
 stack_user_domain_name = "heat"
+insecure = keystone_settings['insecure'] ? "--insecure" : ""
 
 bash "register heat domain" do
   user "root"
@@ -193,14 +200,14 @@ bash "register heat domain" do
 
     eval $(openstack --os-token #{keystone_settings['admin_token']} \
         --os-url=$OS_URL --os-identity-api-version=3 \
-        --os-region-name='#{keystone_settings['endpoint_region']}' domain show -f shell --variable id #{stack_user_domain_name})
+        --os-region-name='#{keystone_settings['endpoint_region']}' #{insecure} domain show -f shell --variable id #{stack_user_domain_name})
 
     HEAT_DOMAIN_ID=$id
 
     if [ -z "$HEAT_DOMAIN_ID" ]; then
         HEAT_DOMAIN_ID=$(openstack --os-token #{keystone_settings['admin_token']} \
             --os-url=$OS_URL --os-identity-api-version=3 \
-            --os-region-name='#{keystone_settings['endpoint_region']}' \
+            --os-region-name='#{keystone_settings['endpoint_region']}' #{insecure}\
             domain create #{stack_user_domain_name} \
             --description "Owns users and projects created by heat" \
             | awk '/id/  { print $4 } ')
@@ -208,13 +215,13 @@ bash "register heat domain" do
 
     openstack --os-token #{keystone_settings['admin_token']} --os-url=$OS_URL \
         --os-region-name='#{keystone_settings['endpoint_region']}' \
-        --os-identity-api-version=3 user create --password #{node[:heat]["stack_domain_admin_password"]} \
+        --os-identity-api-version=3 #{insecure} user create --password #{node[:heat]["stack_domain_admin_password"]} \
         --domain $HEAT_DOMAIN_ID #{node[:heat]["stack_domain_admin"]} \
         --description "Manages users and projects created by heat" || true
 
     openstack --os-token #{keystone_settings['admin_token']} --os-url=$OS_URL \
         --os-region-name='#{keystone_settings['endpoint_region']}' \
-        --os-identity-api-version=3 role add --user #{node[:heat]["stack_domain_admin"]} \
+        --os-identity-api-version=3 #{insecure} role add --user #{node[:heat]["stack_domain_admin"]} \
         --domain $HEAT_DOMAIN_ID admin || true
   EOF
 end
@@ -222,6 +229,7 @@ end
 # Create Heat CloudFormation service
 keystone_register "register Heat CloudFormation Service" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -233,6 +241,7 @@ end
 
 keystone_register "register heat Cfn endpoint" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -249,6 +258,7 @@ end
 # Create Heat service
 keystone_register "register Heat Service" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -260,6 +270,7 @@ end
 
 keystone_register "register heat endpoint" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -280,7 +291,7 @@ shell_get_stack_user_domain = <<-EOF
   eval $(openstack --os-token #{keystone_settings['admin_token']} \
     --os-url=$OS_URL \
     --os-region-name='#{keystone_settings['endpoint_region']}' \
-    --os-identity-api-version=3 domain show -f shell --variable id #{stack_user_domain_name});
+    --os-identity-api-version=3 #{insecure} domain show -f shell --variable id #{stack_user_domain_name});
   echo $id
 EOF
 
