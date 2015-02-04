@@ -282,6 +282,11 @@ function ml2_mechanism_drivers_check() {
       values.push("openvswitch");
       $("#ml2_mechanism_drivers").val(values);
     }
+    var type_drivers = $('#ml2_type_drivers').val() || [];
+    if (type_drivers.indexOf('vlan') == -1) {
+        type_drivers.push('vlan')
+        $('#ml2_type_drivers').val(type_drivers);
+    }
   } else {
     $('#cisco_switches').hide();
   }
@@ -295,17 +300,18 @@ function ml2_mechanism_drivers_check() {
     $('#ml2_type_drivers').val(['vlan']).trigger('change');
     $('#ml2_type_drivers_default_tenant_network').val('vlan').trigger('change');
     $('#ml2_type_drivers_default_provider_network').val('vlan').trigger('change');
-    ml2_type_drivers_check();
   } else {
     $('#ml2_type_drivers_container').show();
     $('#ml2_type_drivers_default_provider_network_container').show();
     $('#ml2_type_drivers_default_tenant_network_container').show();
   }
+
+  // we might have updated the type drivers
+  ml2_type_drivers_check();
 }
 
 $(document).ready(function($) {
   networking_plugin_check();
-  ml2_type_drivers_check();
   ml2_mechanism_drivers_check();
 
   $('#networking_plugin').on('change', networking_plugin_check).trigger('change');
