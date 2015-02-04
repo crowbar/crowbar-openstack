@@ -259,6 +259,18 @@ function ml2_type_drivers_check() {
   } else {
     $('#num_vlans_container').hide();
   }
+
+  if (values.length <= 1) {
+    $('#ml2_type_drivers_default_provider_network_container').hide();
+    $('#ml2_type_drivers_default_tenant_network_container').hide();
+    if (values.length == 1) {
+      $('#ml2_type_drivers_default_tenant_network').val(values[0]).trigger('change');
+      $('#ml2_type_drivers_default_provider_network').val(values[0]).trigger('change');
+    }
+  } else {
+    $('#ml2_type_drivers_default_provider_network_container').show();
+    $('#ml2_type_drivers_default_tenant_network_container').show();
+  }
 }
 
 function ml2_mechanism_drivers_check() {
