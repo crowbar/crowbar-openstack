@@ -253,7 +253,7 @@ function networking_plugin_check() {
 }
 
 function ml2_type_drivers_check() {
-  var values = $('#ml2_type_drivers').val();
+  var values = $('#ml2_type_drivers').val() || [];
   if (values.indexOf("vlan") >= 0) {
     $('#num_vlans_container').show();
   } else {
@@ -262,7 +262,7 @@ function ml2_type_drivers_check() {
 }
 
 function ml2_mechanism_drivers_check() {
-  var values = $('#ml2_mechanism_drivers').val();
+  var values = $('#ml2_mechanism_drivers').val() || [];
   if (values.indexOf("cisco_nexus") >= 0) {
     $('#cisco_switches').show();
     // auto-select openvswitch if cisco is selected
