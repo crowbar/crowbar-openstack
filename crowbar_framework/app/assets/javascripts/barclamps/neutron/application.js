@@ -282,12 +282,12 @@ function ml2_mechanism_drivers_check() {
     // auto-select openvswitch if cisco is selected
     if (values.indexOf("openvswitch") < 0) {
       values.push("openvswitch");
-      $("#ml2_mechanism_drivers").val(values);
+      $("#ml2_mechanism_drivers").val(values).trigger('change');
     }
     var type_drivers = $('#ml2_type_drivers').val() || [];
     if (type_drivers.indexOf('vlan') == -1) {
         type_drivers.push('vlan')
-        $('#ml2_type_drivers').val(type_drivers);
+        $('#ml2_type_drivers').val(type_drivers).trigger('change');
     }
   } else {
     $('#cisco_switches').hide();
