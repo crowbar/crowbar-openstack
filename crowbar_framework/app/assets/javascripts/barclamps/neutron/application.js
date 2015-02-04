@@ -273,6 +273,22 @@ function ml2_mechanism_drivers_check() {
   } else {
     $('#cisco_switches').hide();
   }
+
+  // hide uneeded typedriver fields if only linuxbrige is selected
+  // and autoselect the vlan type driver
+  if (values.length == 1 && values[0] == "linuxbridge") {
+    $('#ml2_type_drivers_container').hide();
+    $('#ml2_type_drivers_default_provider_network_container').hide();
+    $('#ml2_type_drivers_default_tenant_network_container').hide();
+    $('#ml2_type_drivers').val(['vlan']).trigger('change');
+    $('#ml2_type_drivers_default_tenant_network').val('vlan').trigger('change');
+    $('#ml2_type_drivers_default_provider_network').val('vlan').trigger('change');
+    ml2_type_drivers_check();
+  } else {
+    $('#ml2_type_drivers_container').show();
+    $('#ml2_type_drivers_default_provider_network_container').show();
+    $('#ml2_type_drivers_default_tenant_network_container').show();
+  }
 }
 
 $(document).ready(function($) {
