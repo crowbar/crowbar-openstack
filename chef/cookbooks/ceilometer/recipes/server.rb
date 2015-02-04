@@ -255,6 +255,7 @@ crowbar_pacemaker_sync_mark "wait-ceilometer_register"
 
 keystone_register "ceilometer wakeup keystone" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -263,6 +264,7 @@ end
 
 keystone_register "register ceilometer user" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -274,6 +276,7 @@ end
 
 keystone_register "give ceilometer user access" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -288,6 +291,7 @@ swift_middlewares = search(:node, "roles:ceilometer-swift-proxy-middleware#{env_
 unless swift_middlewares.empty?
   keystone_register "give ceilometer user ResellerAdmin role" do
     protocol keystone_settings['protocol']
+    insecure keystone_settings['insecure']
     host keystone_settings['internal_url_host']
     port keystone_settings['admin_port']
     token keystone_settings['admin_token']
@@ -301,6 +305,7 @@ end
 # Create ceilometer service
 keystone_register "register ceilometer service" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
@@ -312,6 +317,7 @@ end
 
 keystone_register "register ceilometer endpoint" do
   protocol keystone_settings['protocol']
+  insecure keystone_settings['insecure']
   host keystone_settings['internal_url_host']
   port keystone_settings['admin_port']
   token keystone_settings['admin_token']
