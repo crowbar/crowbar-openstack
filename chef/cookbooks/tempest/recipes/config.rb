@@ -126,7 +126,7 @@ heat_machine_id_file = node[:tempest][:tempest_path] + '/heat_machine.id'
 
 bash "upload tempest test image" do
   code <<-EOH
-IMAGE_URL=${IMAGE_URL:-"http://download.cirros-cloud.net/0.3.2/cirros-0.3.2-x86_64-uec.tar.gz"}
+IMAGE_URL=${IMAGE_URL:-"http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-uec.tar.gz"}
 
 export OS_USERNAME=${OS_USERNAME:-admin}
 export OS_TENANT_NAME=${OS_TENANT_NAME:-admin}
