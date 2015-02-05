@@ -68,11 +68,11 @@ class CinderService < PacemakerServiceObject
     base = super
 
     nodes = NodeObject.all
-    controller = select_nodes_for_role(nodes, "cinder-controller", "controller") || []
+    controllers = select_nodes_for_role(nodes, "cinder-controller", "controller") || []
     storage = select_nodes_for_role(nodes, "cinder-volume", "storage") || []
 
     base["deployment"][@bc_name]["elements"] = {
-      "cinder-controller" => [ controller.first.name ],
+      "cinder-controller" => controllers.empty? ? [] : [ controllers.first.name ],
       "cinder-volume" => storage.map { |x| x.name }
     }
 
