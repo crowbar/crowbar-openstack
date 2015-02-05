@@ -160,19 +160,41 @@ end
 #                so the order is important
 tenant_network_types = [[node[:neutron][:ml2_type_drivers_default_tenant_network]] + node[:neutron][:ml2_type_drivers]].flatten.uniq
 
-template plugin_cfg_path do
-  source "ml2_conf.ini.erb"
-  owner "root"
-  group node[:neutron][:platform][:group]
-  mode "0640"
-  variables(
-    :ml2_mechanism_drivers => node[:neutron][:ml2_mechanism_drivers],
-    :ml2_type_drivers => node[:neutron][:ml2_type_drivers],
-    :tenant_network_types => tenant_network_types,
-    :vlan_start => vlan_start,
-    :vlan_end => vlan_end
-  )
-  only_if { node[:neutron][:networking_plugin] != "vmware" }
+case node[:neutron][:networking_plugin]
+when 'ml2'
+  template plugin_cfg_path do
+    source "ml2_conf.ini.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    variables(
+      :ml2_mechanism_drivers => node[:neutron][:ml2_mechanism_drivers],
+      :ml2_type_drivers => node[:neutron][:ml2_type_drivers],
+      :tenant_network_types => tenant_network_types,
+      :vlan_start => vlan_start,
+      :vlan_end => vlan_end
+    )
+  end
+when "vmware"
+  directory "/etc/neutron/plugins/vmware/" do
+     mode 00755
+     owner "root"
+     group node[:neutron][:platform][:group]
+     action :create
+     recursive true
+     not_if { node[:platform] == "suse" }
+  end
+
+  template plugin_cfg_path do
+    cookbook "neutron"
+    source "nsx.ini.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    variables(
+      :vmware_config => node[:neutron][:vmware]
+    )
+  end
 end
 
 
