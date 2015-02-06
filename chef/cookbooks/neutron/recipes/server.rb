@@ -124,7 +124,7 @@ template "/etc/sysconfig/neutron" do
   mode 0640
   # whenever changing plugin_config_file here, keep in mind to change the call
   # to neutron-db-manage too
-  if node[:neutron][:networking_plugin] == "cisco"
+  if node[:neutron][:networking_plugin] == "ml2" and node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
     variables(
       :plugin_config_file => plugin_cfg_path +  " /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
     )
@@ -185,7 +185,7 @@ ha_enabled = node[:neutron][:ha][:server][:enabled]
 crowbar_pacemaker_sync_mark "wait-neutron_db_sync"
 
 config_files = "--config-file /etc/neutron/neutron.conf --config-file #{plugin_cfg_path}"
-if node[:neutron][:networking_plugin] == "cisco"
+if node[:neutron][:networking_plugin] == "ml2" and node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
   config_files += " --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
 end
 
