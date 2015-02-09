@@ -1174,7 +1174,7 @@ workers=<%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
 # Complete public Identity API endpoint (string value)
 #auth_uri=<None>
-auth_uri=<%= @keystone_settings['internal_auth_url'] %>
+auth_uri=<%= @keystone_settings['public_auth_url'] %>
 
 # Complete admin Identity API endpoint. This should specify
 # the unversioned root endpoint e.g. https://localhost:35357/
