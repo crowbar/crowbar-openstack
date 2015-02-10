@@ -302,9 +302,6 @@ nova_admin_auth_url = <%= @keystone_settings['internal_auth_url'] %>
 
 # CA file for novaclient to verify server certificates
 # nova_ca_certificates_file =
-<% if @nova_ssl_cacerts -%>
-nova_ca_certificates_file = <%= @nova_ssl_cacerts %>
-<% end -%>
 
 # Boolean to control ignoring SSL errors on the nova url
 # nova_api_insecure = False
