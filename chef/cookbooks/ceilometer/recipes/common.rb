@@ -6,7 +6,7 @@ if node[:ceilometer][:use_mongodb]
 
   if node[:ceilometer][:ha][:server][:enabled]
     db_hosts = search(:node,
-      "ceilometer_ha_mongodb_replica_set_member:true AND "\
+      "ceilometer_ha_mongodb_replica_set_member:true AND roles:ceilometer-server AND "\
       "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
       )
     unless db_hosts.empty?
