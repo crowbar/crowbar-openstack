@@ -331,6 +331,14 @@ keystone_register "register ceilometer endpoint" do
   action :add_endpoint_template
 end
 
+# In stoney/icehouse we have the cronjob crowbar-ceilometer-expirer in
+# /etc/cron.daily/.  In tex/juno this cronjob is moved into the
+# package, and is renamed as openstack-ceilometer-expirer.  We remove
+# the old cronjob here.
+file '/etc/cron.daily/crowbar-ceilometer-expirer' do
+  action :delete
+end
+
 # Cronjob to repair the database and free space for mongodb.  This
 # only makes sense when the time_to_live > 0
 if node[:ceilometer][:use_mongodb] && node[:ceilometer][:database][:time_to_live] > 0
