@@ -411,7 +411,7 @@ api_v3_extensions = all
 
 # Does the test environment use block devices for live migration
 # (boolean value)
-#block_migration_for_live_migration = false
+block_migration_for_live_migration = true
 
 # Does the test environment support changing the admin password?
 # (boolean value)
@@ -434,7 +434,7 @@ api_v3_extensions = all
 
 # Does the test environment support live migration available? (boolean
 # value)
-live_migration = false
+live_migration = <%= @use_livemigration %>
 
 # Does the test environment support pausing? (boolean value)
 #pause = true
