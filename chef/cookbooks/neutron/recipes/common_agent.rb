@@ -53,12 +53,12 @@ if neutron[:neutron][:networking_plugin] == "ml2"
   ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
   case
   when ml2_mech_drivers.include?("openvswitch")
-    neutron_agent = node[:neutron][:platform][:ovs_agent_name]
-    neutron_agent_pkg = node[:neutron][:platform][:ovs_agent_pkg]
+    neutron_agent = neutron[:neutron][:platform][:ovs_agent_name]
+    neutron_agent_pkg = neutron[:neutron][:platform][:ovs_agent_pkg]
     agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
   when ml2_mech_drivers.include?("linuxbridge")
-    neutron_agent = node[:neutron][:platform][:lb_agent_name]
-    neutron_agent_pkg = node[:neutron][:platform][:lb_agent_pkg]
+    neutron_agent = neutron[:neutron][:platform][:lb_agent_name]
+    neutron_agent_pkg = neutron[:neutron][:platform][:lb_agent_pkg]
     agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
   end
 
@@ -105,6 +105,49 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       mode 00644
       owner "root"
       group node[:neutron][:platform][:group]
+    end
+  end
+
+  case
+  when ml2_mech_drivers.include?("openvswitch")
+    directory "/etc/neutron/plugins/openvswitch/" do
+      mode 00755
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      action :create
+      recursive true
+      not_if { node[:platform] == "suse" }
+    end
+
+    template agent_config_path do
+      cookbook "neutron"
+      source "ovs_neutron_plugin.ini.erb"
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      mode "0640"
+      variables(
+        :ml2_type_drivers => neutron[:neutron][:ml2_type_drivers]
+      )
+    end
+  when ml2_mech_drivers.include?("linuxbridge")
+    directory "/etc/neutron/plugins/linuxbridge/" do
+      mode 00755
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      action :create
+      recursive true
+      not_if { node[:platform] == "suse" }
+    end
+
+    template agent_config_path do
+      cookbook "neutron"
+      source "linuxbridge_conf.ini.erb"
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      mode "0640"
+      variables(
+        :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil)
+      )
     end
   end
 end
