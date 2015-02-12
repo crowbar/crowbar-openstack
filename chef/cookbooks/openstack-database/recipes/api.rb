@@ -32,6 +32,12 @@ platform_options['api_packages'].each do |pkg|
   package pkg
 end
 
+file '/var/log/trove/trove-manage.log' do
+    owner node['openstack']['database']['user']
+    group node['openstack']['database']['group']
+    mode 00700
+end
+
 service 'trove-api' do
   service_name platform_options['api_service']
   supports :status => true, :restart => true
@@ -100,4 +106,5 @@ execute 'trove-manage db_sync' do
   group node['openstack']['database']['group']
 
   notifies :restart, 'service[trove-api]', :immediately
+# Skip run on SUSE. FIXME: needs to be readded once HA support is implemented
 end unless node.platform == "suse"
