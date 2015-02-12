@@ -253,31 +253,87 @@ function networking_plugin_check() {
 }
 
 function ml2_type_drivers_check() {
-  var values = $('#ml2_type_drivers').val();
+  var values = $('#ml2_type_drivers').val() || [];
   if (values.indexOf("vlan") >= 0) {
     $('#num_vlans_container').show();
   } else {
     $('#num_vlans_container').hide();
   }
+
+  if (values.length <= 1) {
+    $('#ml2_type_drivers_default_provider_network_container').hide();
+    $('#ml2_type_drivers_default_tenant_network_container').hide();
+    if (values.length == 1) {
+      $('#ml2_type_drivers_default_tenant_network').val(values[0]).trigger('change');
+      $('#ml2_type_drivers_default_provider_network').val(values[0]).trigger('change');
+    }
+  } else {
+    $('#ml2_type_drivers_default_provider_network_container').show();
+    $('#ml2_type_drivers_default_tenant_network_container').show();
+  }
 }
 
+var ovsSelection = null
+
 function ml2_mechanism_drivers_check() {
-  var values = $('#ml2_mechanism_drivers').val();
-    if (values.indexOf("cisco_nexus") >= 0) {
-      $('#cisco_switches').show();
-      // auto-select openvswitch if cisco is selected
-      if (values.indexOf("openvswitch") < 0) {
-        values.push("openvswitch");
-        $("#ml2_mechanism_drivers").val(values);
-      }
-    } else {
-      $('#cisco_switches').hide();
+  var values = $('#ml2_mechanism_drivers').val() || [];
+  if (values.indexOf("cisco_nexus") >= 0) {
+    $('#cisco_switches').show();
+    // auto-select openvswitch if cisco is selected
+    if (values.indexOf("openvswitch") < 0) {
+      values.push("openvswitch");
+      $("#ml2_mechanism_drivers").val(values).trigger('change');
     }
+    var type_drivers = $('#ml2_type_drivers').val() || [];
+    if (type_drivers.indexOf('vlan') == -1) {
+        type_drivers.push('vlan')
+        $('#ml2_type_drivers').val(type_drivers).trigger('change');
+    }
+  } else {
+    $('#cisco_switches').hide();
+  }
+
+  // hide uneeded typedriver fields if only linuxbrige is selected
+  // and autoselect the vlan type driver
+  if (values.length == 1 && values[0] == "linuxbridge") {
+    $('#ml2_type_drivers_container').hide();
+    $('#ml2_type_drivers_default_provider_network_container').hide();
+    $('#ml2_type_drivers_default_tenant_network_container').hide();
+    // remember previously selected values for ovs, avoid overwriting remembered
+    // values, e.g. when switching back to ml2 from vmware.
+    if (ovsSelection == null) {
+      ovsSelection = {
+        type_drivers: $('#ml2_type_drivers').val(),
+        provider_type: $('#ml2_type_drivers_default_provider_network').val(),
+        tenant_type: $('#ml2_type_drivers_default_tenant_network').val()
+      };
+    }
+    $('#ml2_type_drivers').val(['vlan']).trigger('change');
+    $('#ml2_type_drivers_default_tenant_network').val('vlan').trigger('change');
+    $('#ml2_type_drivers_default_provider_network').val('vlan').trigger('change');
+  } else {
+    $('#ml2_type_drivers_container').show();
+    $('#ml2_type_drivers_default_provider_network_container').show();
+    $('#ml2_type_drivers_default_tenant_network_container').show();
+  }
+
+  if (values.indexOf("openvswitch") >= 0) {
+    if (ovsSelection != null ) {
+      // We must be switching back from "linuxbridge", restore previously
+      // selected values.
+      $('#ml2_type_drivers').val(ovsSelection.type_drivers).trigger('change');
+      $('#ml2_type_drivers_default_tenant_network').val(ovsSelection.tenant_type).trigger('change');
+      $('#ml2_type_drivers_default_provider_network').val(ovsSelection.provider_type).trigger('change');
+      ovsSelection = null;
+    }
+  }
+
+  // we might have updated the type drivers
+  ml2_type_drivers_check();
 }
 
 $(document).ready(function($) {
   networking_plugin_check();
-  ml2_type_drivers_check();
   ml2_mechanism_drivers_check();
 
   $('#networking_plugin').on('change', networking_plugin_check).trigger('change');
