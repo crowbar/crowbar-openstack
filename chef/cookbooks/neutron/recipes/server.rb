@@ -209,15 +209,18 @@ crowbar_pacemaker_sync_mark "wait-neutron_db_sync"
 execute "neutron-db-manage migrate" do
   user node[:neutron][:user]
   group node[:neutron][:group]
-  command 'source /etc/sysconfig/neutron; \
-           for i in $NEUTRON_PLUGIN_CONF; do \
-             CONF_ARGS="$CONF_ARGS --config-file $i"; \
-           done; \
-           neutron-db-manage --config-file /etc/neutron/neutron.conf $CONF_ARGS upgrade head'
+  if node[:platform] == "suse"
+    command 'source /etc/sysconfig/neutron; \
+             for i in $NEUTRON_PLUGIN_CONF; do \
+               CONF_ARGS="$CONF_ARGS --config-file $i"; \
+             done; \
+             neutron-db-manage --config-file /etc/neutron/neutron.conf $CONF_ARGS upgrade head'
+  else
+    command "neutron-db-manage --config-file /etc/neutron/neutron.conf upgrade head"
+  end
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
-  only_if { node[:platform] == "suse" && !node[:neutron][:db_synced] &&
-            (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+  only_if { !node[:neutron][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
 end
 
 if ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) && !node[:neutron][:db_synced]
