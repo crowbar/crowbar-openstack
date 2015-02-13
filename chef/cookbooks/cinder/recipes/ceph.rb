@@ -37,9 +37,17 @@ if has_internal
   if ceph_servers.length > 0
     include_recipe "ceph::keyring"
   else
-    message = "Ceph was not deployed with Crowbar yet!"
-    Chef::Log.fatal(message)
-    raise message
+    # If we don't have any osd from our query, it could be because the
+    # osd nodes temporarily lost the role (while rebooting, for instance).
+    # So check if the ceph setup was done once already, to decide whether
+    # to fail or just to emit a warning.
+    if File.exists?("/etc/ceph/ceph.client.admin.keyring")
+      Chef::Log.warn("Ceph nodes seem to not be running; RBD backends might not work.")
+    else
+      message = "Ceph was not deployed with Crowbar yet!"
+      Chef::Log.fatal(message)
+      raise message
+    end
   end
 end
 
