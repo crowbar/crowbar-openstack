@@ -15,10 +15,10 @@
       = select_field :networking_plugin, :collection => :networking_plugins_for_neutron
 
       #ml2_mechanism_drivers_container
-        = select_field :ml2_mechanism_drivers, :collection => :networking_ml2_mechanism_drivers_for_neutron, :multiple => true
+        = select_field :ml2_mechanism_drivers, :collection => :networking_ml2_mechanism_drivers_for_neutron, :multiple => true, :size => NeutronService.networking_ml2_mechanism_drivers_valid.size
 
       #ml2_type_drivers_container
-        = select_field :ml2_type_drivers, :collection => :networking_ml2_type_drivers_for_neutron, :multiple => true
+        = select_field :ml2_type_drivers, :collection => :networking_ml2_type_drivers_for_neutron, :multiple => true, :size => NeutronService.networking_ml2_type_drivers_valid.size
 
       #ml2_type_drivers_default_provider_network_container
         = select_field :ml2_type_drivers_default_provider_network, :collection => :networking_ml2_type_drivers_default_provider_network_for_neutron
