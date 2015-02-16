@@ -1062,12 +1062,16 @@ iscsi_target_prefix = iqn.2001-07.com.vnx
     <% when "vmax" -%>
 iscsi_target_prefix = iqn.1992-04.com.em
     <% end -%>
+<% elsif volume['backend_driver'] == 'eternus' -%>
+iscsi_target_prefix = iqn.2000-09.com.fujitsu
 <% end -%>
 
 # The IP address that the iSCSI daemon is listening on (string
 # value)
 <% if volume['backend_driver'] == 'emc' -%>
 iscsi_ip_address = <%= volume["emc"]["emc_ecom_server_ip"] %>
+<% elsif volume['backend_driver'] == 'eternus' -%>
+iscsi_ip_address = <%= volume["eternus"]["iscsi_ip"] -%>
 <% end -%>
 
 # The port that the iSCSI daemon is listening on (integer
