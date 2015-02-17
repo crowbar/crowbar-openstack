@@ -25,6 +25,8 @@ if node[:cinder][:use_gitrepo]
   venv_prefix = node[:cinder][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 end
 
+ha_enabled = node[:cinder][:ha][:enabled]
+
 db_settings = fetch_database_settings
 
 include_recipe "database::client"
@@ -39,6 +41,7 @@ database "create #{node[:cinder][:db][:database]} database" do
     database_name node[:cinder][:db][:database]
     provider db_settings[:provider]
     action :create
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 database_user "create cinder database user" do
@@ -48,6 +51,7 @@ database_user "create cinder database user" do
     password node[:cinder][:db][:password]
     provider db_settings[:user_provider]
     action :create
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 database_user "grant database access for cinder database user" do
@@ -59,6 +63,7 @@ database_user "grant database access for cinder database user" do
     privileges db_settings[:privs]
     provider db_settings[:user_provider]
     action :grant
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 execute "cinder-manage db sync" do
@@ -67,7 +72,7 @@ execute "cinder-manage db sync" do
   group node[:cinder][:group]
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
-  only_if { !node[:cinder][:db_synced] && (!node[:cinder][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+  only_if { !node[:cinder][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
 end
 
 # We want to keep a note that we've done db_sync, so we don't do it again.
