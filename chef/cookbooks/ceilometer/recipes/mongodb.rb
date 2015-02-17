@@ -52,11 +52,13 @@ if ha_enabled
     agent node[:ceilometer][:ha][:mongodb][:agent]
     op node[:ceilometer][:ha][:mongodb][:op]
     action :create
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
   pacemaker_clone "cl-mongodb" do
     rsc "mongodb"
     action [:create, :start]
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
   crowbar_pacemaker_sync_mark "create-mongodb_service"

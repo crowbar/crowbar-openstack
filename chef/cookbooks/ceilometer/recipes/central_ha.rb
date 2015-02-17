@@ -36,6 +36,7 @@ pacemaker_primitive service_name do
   #  "service" => node[:ceilometer][:central][:service_name]
   #})
   action [ :create, :start ]
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-ceilometer_central_ha_resources"
