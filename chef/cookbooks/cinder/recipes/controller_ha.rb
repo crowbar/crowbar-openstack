@@ -40,12 +40,14 @@ pacemaker_primitive "cinder-api" do
   agent node[:cinder][:ha][:api_ra]
   op node[:cinder][:ha][:op]
   action :create
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive "cinder-scheduler" do
   agent node[:cinder][:ha][:scheduler_ra]
   op node[:cinder][:ha][:op]
   action :create
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 group_name = "g-cinder-controller"
@@ -53,11 +55,13 @@ group_name = "g-cinder-controller"
 pacemaker_group group_name do
   members ["cinder-api", "cinder-scheduler"]
   action :create
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_clone "cl-#{group_name}" do
   rsc group_name
   action [:create, :start]
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-cinder_ha_resources"
