@@ -36,32 +36,35 @@ pacemaker_primitive l3_agent_primitive do
   agent node[:neutron][:ha][:l3][:l3_ra]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
-  only_if { use_l3_agent }
+  only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive dhcp_agent_primitive do
   agent node[:neutron][:ha][:l3][:dhcp_ra]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive metadatda_agent_primitive do
   agent node[:neutron][:ha][:l3][:metadata_ra]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive metering_agent_primitive do
   agent node[:neutron][:ha][:l3][:metering_ra]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive lbaas_agent_primitive do
   agent node[:neutron][:ha][:l3][:lbaas_ra]
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
-  only_if { use_lbaas_agent }
+  only_if { use_lbaas_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 networking_plugin = node[:neutron][:networking_plugin]
@@ -87,7 +90,7 @@ pacemaker_primitive neutron_agent_primitive do
   agent neutron_agent_ra
   op node[:neutron][:ha][:l3][:op]
   action [ :create ]
-  only_if { use_l3_agent }
+  only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 group_members = []
@@ -104,11 +107,13 @@ agents_clone_name = "cl-#{agents_group_name}"
 pacemaker_group agents_group_name do
   members group_members
   action [ :create ]
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_clone agents_clone_name do
   rsc agents_group_name
   action [ :create, :start ]
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -131,7 +136,7 @@ pacemaker_primitive ha_tool_primitive_name do
   })
   op node[:neutron][:ha][:l3][:op]
   action [ :create, :start ]
-  only_if { use_l3_agent }
+  only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 ha_tool_ordering = "#{agents_clone_name} #{ha_tool_primitive_name}"
@@ -143,7 +148,7 @@ pacemaker_order "o-neutron-ha-tool" do
   ordering ha_tool_ordering
   score "Mandatory"
   action [ :create ]
-  only_if { use_l3_agent }
+  only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-neutron-l3_ha_resources"
