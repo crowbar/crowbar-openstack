@@ -85,7 +85,7 @@ en:
               port: 'Port for SMI-S'
               user: 'Username for SMI-S'
               password: 'Password for SMI-S'
-              pool: 'Pool Name'
+              pool: 'Snapshot (Thick/RAID Group) Pool Name'
               iscsi_ip: 'iSCSI IP'
             manual:
               config: 'Options'
