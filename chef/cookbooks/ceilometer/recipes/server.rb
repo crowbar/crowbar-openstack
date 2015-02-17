@@ -77,6 +77,7 @@ else
       database_name node[:ceilometer][:db][:database]
       provider db_settings[:provider]
       action :create
+      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
   database_user "create ceilometer database user" do
@@ -86,6 +87,7 @@ else
       password node[:ceilometer][:db][:password]
       provider db_settings[:user_provider]
       action :create
+      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
   database_user "grant database access for ceilometer database user" do
@@ -97,6 +99,7 @@ else
       privileges db_settings[:privs]
       provider db_settings[:user_provider]
       action :grant
+      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
     
   crowbar_pacemaker_sync_mark "create-ceilometer_database"
