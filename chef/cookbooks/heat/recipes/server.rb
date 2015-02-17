@@ -17,6 +17,8 @@ heat_path = "/opt/heat"
 venv_path = node[:heat][:use_virtualenv] ? "#{heat_path}/.venv" : nil
 venv_prefix = node[:heat][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
 
+ha_enabled = node[:heat][:ha][:enabled]
+
 db_settings = fetch_database_settings
 
 include_recipe "database::client"
@@ -31,6 +33,7 @@ database "create #{node[:heat][:db][:database]} database" do
   database_name node[:heat][:db][:database]
   provider db_settings[:provider]
   action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 database_user "create heat database user" do
@@ -40,6 +43,7 @@ database_user "create heat database user" do
   password node[:heat][:db][:password]
   provider db_settings[:user_provider]
   action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 database_user "grant database access for heat database user" do
@@ -51,6 +55,7 @@ database_user "grant database access for heat database user" do
   privileges db_settings[:privs]
   provider db_settings[:user_provider]
   action :grant
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-heat_database"
@@ -92,8 +97,6 @@ directory "/etc/heat/environment.d" do
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
-ha_enabled = node[:heat][:ha][:enabled]
 
 if ha_enabled
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
