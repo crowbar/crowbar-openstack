@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+ha_enabled = node[:neutron][:ha][:server][:enabled]
+
 db_settings = fetch_database_settings
 include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
@@ -39,6 +41,7 @@ props.each do |prop|
         database_name "#{db_name}"
         provider db_settings[:provider]
         action :create
+        only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
 
     database_user "create #{db_user} user in #{db_name} neutron database" do
@@ -48,6 +51,7 @@ props.each do |prop|
         host '%'
         provider db_settings[:user_provider]
         action :create
+        only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
 
     database_user "grant database access for #{db_user} user in #{db_name} neutron database" do
@@ -59,6 +63,7 @@ props.each do |prop|
         privileges db_settings[:privs]
         provider db_settings[:user_provider]
         action :grant
+        only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
 
     node[@cookbook_name][:db][db_conn_name] = "#{db_settings[:url_scheme]}://#{db_user}:#{db_pass}@#{db_settings[:address]}/#{db_name}"

@@ -35,11 +35,13 @@ pacemaker_primitive primitive_name do
   agent node[:neutron][:ha][:server][:server_ra]
   op node[:neutron][:ha][:server][:op]
   action :create
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_clone "cl-#{primitive_name}" do
   rsc primitive_name
   action [:create, :start]
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-neutron_ha_resources"
