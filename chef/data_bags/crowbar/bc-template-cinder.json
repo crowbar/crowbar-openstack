@@ -19,6 +19,9 @@
       "use_gitbarclamp": true,
       "use_virtualenv": true,
       "use_pip_cache": true,
+      "max_pool_size": 30,
+      "max_overflow": 10,
+      "pool_timeout": 30,
       "pfs_deps": [
         "kpartx",
         "parted",
@@ -139,7 +142,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 32,
+      "schema-revision": 33,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
