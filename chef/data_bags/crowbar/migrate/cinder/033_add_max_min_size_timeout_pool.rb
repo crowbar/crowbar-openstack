@@ -1,11 +1,11 @@
 def upgrade ta, td, a, d
-  unless ta.has_key? 'max_pool_size'
+  unless a.has_key? 'max_pool_size'
     a['max_pool_size'] = ta['max_pool_size']
   end
-  unless ta.has_key? 'max_overflow'
+  unless a.has_key? 'max_overflow'
     a['max_overflow'] = ta['max_overflow']
   end
-  unless ta.has_key? 'pool_timeout'
+  unless a.has_key? 'pool_timeout'
     a['pool_timeout'] = ta['pool_timeout']
   end
   return a, d
