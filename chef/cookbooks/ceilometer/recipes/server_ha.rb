@@ -60,7 +60,8 @@ end
 if node[:ceilometer][:use_mongodb]
   pacemaker_order "o-ceilometer-mongo" do
     score "Mandatory"
-    ordering "cl-mongodb cl-g-ceilometer-server"
+    ordering "cl-mongodb cl-#{group_name}"
+    action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
