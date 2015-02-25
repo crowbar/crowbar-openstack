@@ -16,6 +16,9 @@ About this barclamp
 -------------------
 
 [![Build Status](https://travis-ci.org/crowbar/barclamp-trove.svg?branch=master)](https://travis-ci.org/crowbar/barclamp-trove)
+[![Code Climate](https://codeclimate.com/github/crowbar/barclamp-trove/badges/gpa.svg)](https://codeclimate.com/github/crowbar/barclamp-trove)
+[![Test Coverage](https://codeclimate.com/github/crowbar/barclamp-trove/badges/coverage.svg)](https://codeclimate.com/github/crowbar/barclamp-trove)
+[![Dependency Status](https://gemnasium.com/crowbar/barclamp-trove.svg)](https://gemnasium.com/crowbar/barclamp-trove)
 
 This barclamp uses a wrapper cookbook around an upstream/stackforge-style openstack-database-service cookbook. It
 also includes two additional cookbooks: openstack-common, openstack-identity which are required for their
