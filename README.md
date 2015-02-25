@@ -16,6 +16,9 @@ About this barclamp
 -------------------
 
 [![Build Status](https://travis-ci.org/crowbar/barclamp-cinder.svg?branch=master)](https://travis-ci.org/crowbar/barclamp-cinder)
+[![Code Climate](https://codeclimate.com/github/crowbar/barclamp-cinder/badges/gpa.svg)](https://codeclimate.com/github/crowbar/barclamp-cinder)
+[![Test Coverage](https://codeclimate.com/github/crowbar/barclamp-cinder/badges/coverage.svg)](https://codeclimate.com/github/crowbar/barclamp-cinder)
+[![Dependency Status](https://gemnasium.com/crowbar/barclamp-cinder.svg)](https://gemnasium.com/crowbar/barclamp-cinder)
 
 Information for this barclamp is maintained on the [Crowbar Framework Wiki](https://github.com/crowbar/crowbar/wiki)
 
