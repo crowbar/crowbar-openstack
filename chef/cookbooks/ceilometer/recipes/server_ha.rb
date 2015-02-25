@@ -57,6 +57,8 @@ pacemaker_clone "cl-#{group_name}" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
+order_only_existing = [ "rabbitmq", "cl-keystone", "cl-#{group_name}" ]
+
 if node[:ceilometer][:use_mongodb]
   pacemaker_order "o-ceilometer-mongo" do
     score "Mandatory"
@@ -64,10 +66,15 @@ if node[:ceilometer][:use_mongodb]
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+else
+  # we don't make the db mandatory if not mongodb; this is debatable, but
+  # oslo.db is supposed to deal well with reconnections; it's less clear about
+  # mongodb
+  order_only_existing.unshift "postgresql"
 end
 
 crowbar_pacemaker_order_only_existing "o-cl-#{group_name}" do
-  ordering [ "rabbitmq", "cl-keystone", "cl-#{group_name}" ]
+  ordering order_only_existing
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
