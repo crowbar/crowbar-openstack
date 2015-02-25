@@ -16,6 +16,9 @@ About this barclamp
 -------------------
 
 [![Build Status](https://travis-ci.org/crowbar/barclamp-tempest.svg?branch=master)](https://travis-ci.org/crowbar/barclamp-tempest)
+[![Code Climate](https://codeclimate.com/github/crowbar/barclamp-tempest/badges/gpa.svg)](https://codeclimate.com/github/crowbar/barclamp-tempest)
+[![Test Coverage](https://codeclimate.com/github/crowbar/barclamp-tempest/badges/coverage.svg)](https://codeclimate.com/github/crowbar/barclamp-tempest)
+[![Dependency Status](https://gemnasium.com/crowbar/barclamp-tempest.svg)](https://gemnasium.com/crowbar/barclamp-tempest)
 
 Information for this barclamp is maintained on the [Crowbar Framework Wiki](https://github.com/crowbar/crowbar/wiki)
 
