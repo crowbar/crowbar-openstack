@@ -171,9 +171,6 @@ if novas.length > 0
 else
   nova = node
 end
-# we use an IP address here, and not nova[:fqdn] because nova-metadata doesn't use SSL
-# and because it listens on this specific IP address only (so we don't want to use a name
-# that could resolve to 127.0.0.1).
 metadata_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
 metadata_port = nova[:nova][:ports][:metadata] rescue 8775
 metadata_protocol = (nova[:nova][:ssl][:enabled] ? "https" : "http") rescue "http"
