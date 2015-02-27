@@ -53,15 +53,30 @@ else
 end
 
 
-# Enable ip forwarding on network node
+# Enable ip forwarding on network node for SLE11
 ruby_block "edit /etc/sysconfig/sysctl for IP_FORWARD" do
   block do
     rc = Chef::Util::FileEdit.new("/etc/sysconfig/sysctl")
     rc.search_file_replace_line(/^IP_FORWARD=/, 'IP_FORWARD="yes"')
     rc.write_file
   end
-  only_if { node[:platform] == "suse" }
+  only_if { node[:platform] == "suse" && node[:platform_version].to_f < 12.0 }
 end
+
+# Enable ip forwarding on network node for SLE12
+ruby_block "edit /etc/sysctl.d/99-sysctl.conf for net.ipv4.ip_forward" do
+  block do
+    rc = Chef::Util::FileEdit.new("/etc/sysctl.d/99-sysctl.conf")
+    rc.search_file_replace_line(/^net.ipv4.ip_forward =/, 'net.ipv4.ip_forward = 1')
+    rc.write_file
+  end
+  only_if { node[:platform] == "suse" && node[:platform_version].to_f >= 12.0 }
+end
+
+# The rest of this logic will be compatible for all the platforms.
+# There is an overlap here, but will not cause inferference (the
+# variable `net.ipv4.ip_forward` is set to 1 in two files,
+# 99-sysctl.conf and 50-neutron-enable-ip_forward.conf)
 
 directory "create /etc/sysctl.d for enable-ip_forward" do
   path "/etc/sysctl.d"
