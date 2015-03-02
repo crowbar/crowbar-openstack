@@ -92,8 +92,9 @@
         "rbd": {
           "use_crowbar": true,
           "config_file": "/etc/ceph/ceph.conf",
+          "admin_keyring": "/etc/ceph/ceph.client.admin.keyring",
           "pool": "volumes",
-          "user": "volumes"
+          "user": "cinder"
         },
         "vmware": {
           "host": "",
@@ -142,7 +143,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 33,
+      "schema-revision": 34,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

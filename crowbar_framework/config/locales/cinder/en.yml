@@ -107,6 +107,7 @@ en:
               volume_name: 'Name of Volume'
             rbd:
               use_crowbar: 'Use Ceph deployed by Crowbar'
+              admin_keyring: 'Path to Ceph admin keyring'
               config_file: 'Path to Ceph configuration file'
               pool: 'RADOS pool for Cinder volumes'
               user: 'RADOS user (Set only if using CephX authentication)'
