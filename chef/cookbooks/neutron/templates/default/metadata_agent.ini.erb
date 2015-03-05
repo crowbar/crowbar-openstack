@@ -21,6 +21,7 @@ admin_password = <%= @keystone_settings['service_password'] %>
 
 # Network service endpoint type to pull from the keystone catalog
 # endpoint_type = adminURL
+endpoint_type = internalURL
 
 # IP address used by Nova metadata server
 # nova_metadata_ip = 127.0.0.1
@@ -31,11 +32,11 @@ nova_metadata_ip = <%= @nova_metadata_host %>
 nova_metadata_port = <%= @nova_metadata_port %>
 
 # Which protocol to use for requests to Nova metadata server, http or https
-# nova_metadata_protocol = http
+nova_metadata_protocol = <%= @nova_metadata_protocol %>
 
 # Whether insecure SSL connection should be accepted for Nova metadata server
 # requests
-# nova_metadata_insecure = False
+nova_metadata_insecure = <%= @nova_metadata_insecure ? "True" : "False" %>
 
 # Client certificate for nova api, needed when nova api requires client
 # certificates
