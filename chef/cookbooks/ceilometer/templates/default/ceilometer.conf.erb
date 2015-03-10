@@ -233,11 +233,11 @@ host=<%= @node_hostname %>
 
 # Number of workers for collector service. A single collector
 # is enabled by default. (integer value)
-#collector_workers=1
+collector_workers=<%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
 # Number of workers for notification service. A single
 # notification agent is enabled by default. (integer value)
-#notification_workers=1
+notification_workers=<%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
 # Timeout seconds for HTTP requests. Set it to None to disable
 # timeout. (integer value)
