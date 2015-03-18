@@ -135,6 +135,7 @@
               = boolean_field %w(volumes {{@index}} rbd use_crowbar), "data-hideit" => "true", "data-hideit-target" => "#rbd_config_file_{{@index}}", "data-hideit-direct" => "true"
               %div{:id => "rbd_config_file_{{@index}}"}
                 = string_field %w(volumes {{@index}} rbd config_file)
+                = string_field %w(volumes {{@index}} rbd admin_keyring)
 
               = string_field %w(volumes {{@index}} rbd pool)
               = string_field %w(volumes {{@index}} rbd user)
