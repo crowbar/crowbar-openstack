@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+require 'ipaddr'
+
 class NeutronService < PacemakerServiceObject
 
   def initialize(thelogger)
@@ -32,7 +34,7 @@ class NeutronService < PacemakerServiceObject
   end
 
   def self.networking_ml2_type_drivers_valid
-    ["vlan", "gre"]
+    ["vlan", "gre", "vxlan"]
   end
 
   def self.networking_ml2_mechanism_drivers_valid
@@ -104,6 +106,33 @@ class NeutronService < PacemakerServiceObject
     base
   end
 
+  def validate_vxlan vxlan_settings
+    if vxlan_settings["vni_start"] < 0 || vxlan_settings["vni_start"] > 16777215
+      validation_error("Start of VXLAN VNI range must be between 0 and 16777215")
+    end
+    if vxlan_settings["vni_end"]  < 0 || vxlan_settings["vni_end"] > 16777215
+      validation_error("End of VXLAN VNI range must be between 0 and 16777215")
+    end
+    if vxlan_settings["vni_start"] > vxlan_settings["vni_end"]
+      validation_error("End of VXLAN VNI range must be higher than start of VXLAN VNI range")
+    elsif vxlan_settings["vni_start"] == vxlan_settings["vni_end"]
+      validation_error("VXLAN VNI range is too small")
+    end
+
+    mcast_group = vxlan_settings["multicast_group"]
+    unless mcast_group.empty?
+      begin
+        IPAddr.new(mcast_group)
+      rescue ArgumentError
+        validation_error("Multicast group for VXLAN broadcast emulation #{mcast_group} is not a valid IP address")
+      end
+      mcast_first = mcast_group.split('.')[0].to_i
+      if mcast_first < 224 || mcast_first > 239
+        validation_error("Multicast group for VXLAN broadcast emulation #{mcast_group} is not a valid multicast IP address")
+      end
+    end
+  end
+
   def validate_proposal_after_save proposal
     validate_one_for_role proposal, "neutron-server"
     validate_at_least_n_for_role proposal, "neutron-l3", 1
@@ -155,6 +184,10 @@ class NeutronService < PacemakerServiceObject
     # TODO(toabctl): select the ml2_type_driver automatically if used as default? Or directly check in the ui via js?
     unless ml2_type_drivers.include?(ml2_type_drivers_default_tenant_network)
       validation_error("The default tenant network type driver \"#{ml2_type_drivers_default_tenant_network}\" is not a selected ml2 type driver")
+    end
+
+    if ml2_type_drivers.include? 'vxlan'
+      validate_vxlan proposal["attributes"]["neutron"]["vxlan"]
     end
 
     # linuxbridge and cisco_nexus mech drivers need vlan type driver
@@ -211,10 +244,11 @@ class NeutronService < PacemakerServiceObject
       # TODO(toabctl): The same code is in the nova barclamp. Should be extracted and reused!
       #                (see crowbar_framework/app/models/nova_service.rb)
       if role.default_attributes["neutron"]["networking_plugin"] == "ml2"
-        if role.default_attributes["neutron"]["ml2_type_drivers"].include?("gre")
+        ml2_type_drivers = role.default_attributes["neutron"]["ml2_type_drivers"]
+        if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
           net_svc.allocate_ip "default","os_sdn","host", n
         end
-        if role.default_attributes["neutron"]["ml2_type_drivers"].include?("vlan")
+        if ml2_type_drivers.include?("vlan")
           net_svc.enable_interface "default", "nova_fixed", n
           # Force "use_vlan" to false in VLAN mode (linuxbridge and ovs). We
           # need to make sure that the network recipe does NOT create the

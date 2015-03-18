@@ -246,6 +246,7 @@ function networking_plugin_check() {
     $('#ml2_type_drivers_default_provider_network_container').hide();
     $('#ml2_type_drivers_default_tenant_network_container').hide();
     $('#num_vlans_container').hide();
+    $('#vxlan_container').hide();
     $('#cisco_switches').hide();
     $('#cisco_ports').hide();
     break;
@@ -258,6 +259,12 @@ function ml2_type_drivers_check() {
     $('#num_vlans_container').show();
   } else {
     $('#num_vlans_container').hide();
+  }
+
+  if (values.indexOf("vxlan") >= 0) {
+    $('#vxlan_container').show();
+  } else {
+    $('#vxlan_container').hide();
   }
 
   if (values.length <= 1) {
@@ -299,6 +306,7 @@ function ml2_mechanism_drivers_check() {
     $('#ml2_type_drivers_container').hide();
     $('#ml2_type_drivers_default_provider_network_container').hide();
     $('#ml2_type_drivers_default_tenant_network_container').hide();
+    $('#vxlan_group_container').show();
     // remember previously selected values for ovs, avoid overwriting remembered
     // values, e.g. when switching back to ml2 from vmware.
     if (ovsSelection == null) {
@@ -315,6 +323,7 @@ function ml2_mechanism_drivers_check() {
     $('#ml2_type_drivers_container').show();
     $('#ml2_type_drivers_default_provider_network_container').show();
     $('#ml2_type_drivers_default_tenant_network_container').show();
+    $('#vxlan_group_container').hide();
   }
 
   if (values.indexOf("openvswitch") >= 0) {

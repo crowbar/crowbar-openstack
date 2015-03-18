@@ -31,6 +31,10 @@ default[:neutron][:network][:private_networks] = [] # Set by Recipe
 default[:neutron][:network][:gre_start] = 1
 default[:neutron][:network][:gre_stop] = 1000
 
+default[:neutron][:vxlan][:vni_start] = 4096
+default[:neutron][:vxlan][:vni_stop] = 99999
+default[:neutron][:vxlan][:multicast_group] = "239.1.1.1"
+
 
 default[:neutron][:api][:protocol] = "http"
 default[:neutron][:api][:service_port] = "9696"

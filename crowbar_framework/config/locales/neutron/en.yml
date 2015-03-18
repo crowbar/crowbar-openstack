@@ -40,6 +40,12 @@ en:
         ml2_type_drivers_default_tenant_network_hint: 'Modular Layer 2 type driver used to create the tenant networks'
         ml2_mechanism_drivers: 'Modular Layer 2 mechanism drivers'
         num_vlans: 'Maximum number of VLANs'
+        vxlan_header: 'VXLAN'
+        vxlan:
+          vni_start: 'Start of VXLAN VNI range'
+          vni_end: 'End of VXLAN VNI range'
+          multicast_group: 'Multicast group for broadcast emulation'
+          multicast_group_hint: 'If empty, broadcast emulation will be disabled.'
         cisco_switches: 'Cisco Switch Credentials'
         cisco_ports: 'Assign Switch Ports'
         switch_ip: 'IP Address'

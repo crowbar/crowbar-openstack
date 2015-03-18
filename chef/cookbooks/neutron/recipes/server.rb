@@ -149,6 +149,9 @@ vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 num_vlans = node[:neutron][:num_vlans]
 vlan_end = [vlan_start + num_vlans - 1, 4094].min
 
+vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
+vni_end = [node[:neutron][:vxlan][:vni_end], 16777215].min
+
 directory "/etc/neutron/plugins/ml2" do
   mode 0755
   action :create
@@ -172,7 +175,10 @@ when 'ml2'
       :ml2_type_drivers => node[:neutron][:ml2_type_drivers],
       :tenant_network_types => tenant_network_types,
       :vlan_start => vlan_start,
-      :vlan_end => vlan_end
+      :vlan_end => vlan_end,
+      :vxlan_start => vni_start,
+      :vxlan_end => vni_end,
+      :vxlan_mcast_group => node[:neutron][:vxlan][:multicast_group]
     )
   end
 when "vmware"

@@ -40,6 +40,17 @@
       #num_vlans_container
         = integer_field %w(num_vlans)
 
+      #vxlan_container
+        %fieldset
+          %legend
+            = t(".vxlan_header")
+          = integer_field %w(vxlan vni_start)
+          = integer_field %w(vxlan vni_end)
+          #vxlan_group_container
+            = string_field %w(vxlan multicast_group)
+            %span.help-block
+              = t('.vxlan.multicast_group_hint')
+
     #cisco_switches
       %fieldset
         %legend

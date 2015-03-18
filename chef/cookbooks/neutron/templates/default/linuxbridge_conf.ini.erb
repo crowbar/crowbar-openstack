@@ -41,6 +41,10 @@ physical_interface_mappings = physnet1:<%=@physnet%>
 # VXLAN support can be enabled when agent is managed by ml2 plugin using
 # linuxbridge mechanism driver. Useless if set while using linuxbridge plugin.
 # enable_vxlan = False
+<% if @ml2_type_drivers.include?("vxlan") -%>
+enable_vxlan = True
+<% end -%>
+
 #
 # (IntOpt) use specific TTL for vxlan interface protocol packets
 # ttl =
@@ -51,9 +55,17 @@ physical_interface_mappings = physnet1:<%=@physnet%>
 # (StrOpt) multicast group to use for broadcast emulation.
 # This group must be the same on all the agents.
 # vxlan_group = 224.0.0.1
+<% if @ml2_type_drivers.include?("vxlan") && !@vxlan_mcast_group.empty? -%>
+vxlan_group = <%= @vxlan_mcast_group %>
+<% end -%>
+
 #
 # (StrOpt) Local IP address to use for VXLAN endpoints (required)
 # local_ip =
+<% if @ml2_type_drivers.include?("vxlan") -%>
+local_ip = <%= node.address("os_sdn").addr %>
+<% end -%>
+
 #
 # (BoolOpt) Flag to enable l2population extension. This option should be used
 # in conjunction with ml2 plugin l2population mechanism driver (in that case,

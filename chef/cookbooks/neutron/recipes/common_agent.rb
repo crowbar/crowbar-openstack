@@ -126,7 +126,8 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       group neutron[:neutron][:platform][:group]
       mode "0640"
       variables(
-        :ml2_type_drivers => neutron[:neutron][:ml2_type_drivers]
+        :ml2_type_drivers => neutron[:neutron][:ml2_type_drivers],
+        :tunnel_types => neutron[:neutron][:ml2_type_drivers].select { |t| ["vxlan", "gre"].include?(t) }
       )
     end
   when ml2_mech_drivers.include?("linuxbridge")
@@ -146,7 +147,9 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       group neutron[:neutron][:platform][:group]
       mode "0640"
       variables(
-        :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil)
+        :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil),
+        :ml2_type_drivers => neutron[:neutron][:ml2_type_drivers],
+        :vxlan_mcast_group => neutron[:neutron][:vxlan][:multicast_group]
       )
     end
   end

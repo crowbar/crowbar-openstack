@@ -42,8 +42,9 @@ floating_pool_end = floating_net[:ranges][:host][:end]
 floating_first_ip = IPAddr.new("#{public_range}").to_range().to_a[2]
 floating_last_ip = IPAddr.new("#{public_range}").to_range().to_a[-2]
 floating_pool_start = floating_first_ip if floating_first_ip > floating_pool_start
-
 floating_pool_end = floating_last_ip if floating_last_ip < floating_pool_end
+
+vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
@@ -80,6 +81,9 @@ when 'ml2'
   when 'gre'
     fixed_network_type = "--provider:network_type gre --provider:segmentation_id 1"
     floating_network_type = "--provider:network_type gre --provider:segmentation_id 2"
+  when 'vxlan'
+    fixed_network_type = "--provider:network_type vxlan --provider:segmentation_id #{vni_start}"
+    floating_network_type = "--provider:network_type vxlan --provider:segmentation_id #{vni_start + 1}"
   else
     Chef::Log.error("default provider network ml2 type driver '#{ml2_type_drivers_default_provider_network}' invalid for creating provider networks")
   end

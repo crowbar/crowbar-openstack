@@ -64,7 +64,7 @@
 # the server.  In most cases, the default value should be fine.
 #
 # tunnel_bridge = br-tun
-<% if @ml2_type_drivers.include?("gre") -%>
+<% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") -%>
 tunnel_bridge = br-tunnel
 <% end -%>
 
@@ -79,7 +79,7 @@ tunnel_bridge = br-tunnel
 # this hypervisor.
 #
 # local_ip =
-<% if @ml2_type_drivers.include?("gre") -%>
+<% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") -%>
 local_ip = <%= node.address("os_sdn").addr %>
 <% end -%>
 
@@ -125,8 +125,8 @@ bridge_mappings = physnet1:br-fixed
 # Example: tunnel_types = gre
 # Example: tunnel_types = vxlan
 # Example: tunnel_types = vxlan, gre
-<% if @ml2_type_drivers.include?("gre") -%>
-tunnel_types=gre
+<% unless @tunnel_types.empty? -%>
+tunnel_types = <%= @tunnel_types.join(",") %>
 <% end -%>
 
 # (IntOpt) The port number to utilize if tunnel_types includes 'vxlan'. By
