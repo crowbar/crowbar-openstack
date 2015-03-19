@@ -1,0 +1,4 @@
+# this file is managed by chef to give extra options to dnsmasq
+<% if @force_mtu -%>
+dhcp-option-force=26,<%= @force_mtu.to_s %>
+<% end -%>
