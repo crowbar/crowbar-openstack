@@ -230,7 +230,6 @@ if rbd_enabled
     # we need install ceph client packages
     if node[:platform] == "suse"
       package "ceph-common"
-      package "python-ceph"
     end
   end
 

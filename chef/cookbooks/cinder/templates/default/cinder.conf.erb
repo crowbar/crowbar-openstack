@@ -1944,7 +1944,7 @@ rbd_pool=<%= volume['rbd']['pool'] %>
 # when using cephx authentication (string value)
 #rbd_user=
 <% unless volume['rbd']['user'].empty? -%>
-rbd_user=<%= volume['rbd']['user'] %>
+rbd_user=<%= Digest::MD5.hexdigest(volume['rbd']['config_file']) + '.' + volume['rbd']['user'] %>
 <% end -%>
 
 # path to the ceph configuration file to use (string value)

@@ -17,49 +17,81 @@
 # Recipe:: ceph
 #
 
-glance_servers = search(:node, "roles:glance-server")
-if glance_servers.length > 0
-  glance_pool = glance_servers[0][:glance][:rbd][:store_pool]
-else   
-  glance_pool = nil
-end
+ceph_clients = {}
+ceph_keyrings = {}
 
 node[:cinder][:volumes].each_with_index do |volume, volid|
-  if volume['backend_driver'] == "rbd"
+  unless volume[:backend_driver] == "rbd"
+    next
+  else
 
-    check_ceph = Mixlib::ShellOut.new("ceph -k #{volume['rbd']['admin_keyring']} -c #{volume['rbd']['config_file']} -s | grep -q -e 'HEALTH_[OK|WARN]'")
-    check_ceph.run_command
+    ceph_conf = volume[:rbd][:config_file]
+    admin_keyring = volume[:rbd][:admin_keyring]
+    if File.exists?(admin_keyring)
+      Chef::Log.info("Using external ceph cluster for cinder #{volume[:backend_name]} backend, with automatic setup.")
+    else
+      Chef::Log.info("Using external ceph cluster for cinder #{volume[:backend_name]} backend, with no automatic setup.")
+      next
+    end
 
-    if check_ceph.exitstatus == 0
+    cmd = ["ceph", "-k", admin_keyring, "-c", ceph_conf, "-s"]
+    check_ceph = Mixlib::ShellOut.new(cmd)
 
-      backend_id = "backend-#{volume['backend_driver']}-#{volid}"
-      cinder_user = volume[:rbd][:user]
-      cinder_pool = volume[:rbd][:pool]
+    unless check_ceph.run_command.stdout.match("(HEALTH_OK|HEALTH_WARN)")
+      Chef::Log.info("Ceph cluster is not healthy; skipping the ceph setup for cinder #{volume[:backend_name]} backend")
+      next
+    end
 
-      cinder_pools = []
-      cinder_pools << cinder_pool
+    backend_id = "backend-#{volume[:backend_driver]}-#{volid}"
+
+    cinder_user = volume[:rbd][:user]
+    cinder_pool = volume[:rbd][:pool]
+
+    ceph_clients[ceph_conf] = {} unless ceph_clients[ceph_conf]
+    ceph_keyrings[ceph_conf] = admin_keyring unless ceph_keyrings[ceph_conf]
+
+    cinder_pools = (ceph_clients[ceph_conf][cinder_user] || []) << cinder_pool
+    ceph_clients[ceph_conf][cinder_user] = cinder_pools
+
+    ceph_pool cinder_pool do
+      ceph_conf ceph_conf
+      admin_keyring admin_keyring
+    end
+  end
+end
+
+unless ceph_clients.empty?
+  glance_servers = search(:node, "roles:glance-server")
+  if glance_servers.length > 0
+    glance_pool = glance_servers[0][:glance][:rbd][:store_pool]
+  else
+    glance_pool = nil
+  end
+
+  ceph_clients.each do |ceph_conf, ceph_pools|
+    ceph_hash = Digest::MD5.hexdigest(ceph_conf)
+
+    ceph_pools.each_pair do |cinder_user, cinder_pools|
       cinder_pools << glance_pool unless glance_pool.nil?
+
       allow_pools = cinder_pools.map{|p| "allow rwx pool=#{p}"}.join(", ")
       ceph_caps = { 'mon' => 'allow r', 'osd' => "allow class-read object_prefix rbd_children, #{allow_pools}" }
 
+      # We have to compute MD5 hash from ceph_conf and cinder_user
+      # to be sure that keyring file will not be overwritten 
+      # by config from another cluster, with same user but different 
+      # config file
+      ceph_hash = Digest::MD5.hexdigest(ceph_conf)
+
       ceph_client cinder_user do
-        unless volume['rbd']['use_crowbar']
-          ceph_conf  volume['rbd']['config_file']
-          admin_keyring  volume['rbd']['admin_keyring']
-        end
+        ceph_conf  ceph_conf
+        admin_keyring  ceph_keyrings[ceph_conf]
         caps ceph_caps
-        keyname "client.#{cinder_user}"
-        filename "/etc/ceph/ceph.client.#{cinder_user}.keyring"
+        keyname "client.#{ceph_hash}.#{cinder_user}"
+        filename "/etc/ceph/ceph.client.#{ceph_hash}.#{cinder_user}.keyring"
         owner "root"
         group node[:cinder][:group]
         mode 0640
-      end
-
-      ceph_pool cinder_pool do
-        unless volume['rbd']['use_crowbar']
-          ceph_conf  volume['rbd']['config_file']
-          admin_keyring  volume['rbd']['admin_keyring']
-        end
       end
 
     end
