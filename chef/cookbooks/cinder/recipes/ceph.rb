@@ -60,7 +60,6 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
           ceph_conf  volume['rbd']['config_file']
           admin_keyring  volume['rbd']['admin_keyring']
         end
-        pool_name cinder_pool
       end
 
     end
