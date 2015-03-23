@@ -150,11 +150,17 @@ tunnel_types = <%= @tunnel_types.join(",") %>
 # optimize tunnel management.
 #
 # l2_population = False
+<% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") -%>
+l2_population = True
+<% end -%>
 
 # Enable local ARP responder. Requires OVS 2.1. This is only used by the l2
 # population ML2 MechanismDriver.
 #
 # arp_responder = False
+<% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") -%>
+arp_responder = True
+<% end -%>
 
 # (BoolOpt) Set or un-set the don't fragment (DF) bit on outgoing IP packet
 # carrying GRE/VXLAN tunnel. The default value is True.
