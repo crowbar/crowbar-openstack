@@ -143,17 +143,17 @@ else
   }
 end
 
-default[:neutron][:ha][:l3][:enabled] = false
-default[:neutron][:ha][:l3][:l3_ra] = "lsb:#{node[:neutron][:platform][:l3_agent_name]}"
-default[:neutron][:ha][:l3][:lbaas_ra] = "lsb:#{node[:neutron][:platform][:lbaas_agent_name]}"
-default[:neutron][:ha][:l3][:dhcp_ra] = "lsb:#{node[:neutron][:platform][:dhcp_agent_name]}"
-default[:neutron][:ha][:l3][:metadata_ra] = "lsb:#{node[:neutron][:platform][:metadata_agent_name]}"
-default[:neutron][:ha][:l3][:metering_ra] = "lsb:#{node[:neutron][:platform][:metering_agent_name]}"
-default[:neutron][:ha][:l3][:openvswitch_ra] = "lsb:#{node[:neutron][:platform][:ovs_agent_name]}"
-default[:neutron][:ha][:l3][:cisco_ra] = "lsb:#{node[:neutron][:ha][:l3][:openvswitch_ra]}"
-default[:neutron][:ha][:l3][:linuxbridge_ra] = "lsb:#{node[:neutron][:platform][:lb_agent_name]}"
-default[:neutron][:ha][:l3][:ha_tool_ra] = "ocf:openstack:neutron-ha-tool"
-default[:neutron][:ha][:l3][:op][:monitor][:interval] = "10s"
+default[:neutron][:ha][:network][:enabled] = false
+default[:neutron][:ha][:network][:l3_ra] = "lsb:#{node[:neutron][:platform][:l3_agent_name]}"
+default[:neutron][:ha][:network][:lbaas_ra] = "lsb:#{node[:neutron][:platform][:lbaas_agent_name]}"
+default[:neutron][:ha][:network][:dhcp_ra] = "lsb:#{node[:neutron][:platform][:dhcp_agent_name]}"
+default[:neutron][:ha][:network][:metadata_ra] = "lsb:#{node[:neutron][:platform][:metadata_agent_name]}"
+default[:neutron][:ha][:network][:metering_ra] = "lsb:#{node[:neutron][:platform][:metering_agent_name]}"
+default[:neutron][:ha][:network][:openvswitch_ra] = "lsb:#{node[:neutron][:platform][:ovs_agent_name]}"
+default[:neutron][:ha][:network][:cisco_ra] = "lsb:#{node[:neutron][:ha][:network][:openvswitch_ra]}"
+default[:neutron][:ha][:network][:linuxbridge_ra] = "lsb:#{node[:neutron][:platform][:lb_agent_name]}"
+default[:neutron][:ha][:network][:ha_tool_ra] = "ocf:openstack:neutron-ha-tool"
+default[:neutron][:ha][:network][:op][:monitor][:interval] = "10s"
 default[:neutron][:ha][:server][:enabled] = false
 default[:neutron][:ha][:server][:server_ra] = "lsb:#{node[:neutron][:platform][:service_name]}"
 default[:neutron][:ha][:server][:op][:monitor][:interval] = "10s"

@@ -212,7 +212,7 @@ template "/etc/neutron/metadata_agent.ini" do
   )
 end
 
-ha_enabled = node[:neutron][:ha][:l3][:enabled]
+ha_enabled = node[:neutron][:ha][:network][:enabled]
 
 unless node[:neutron][:networking_plugin] == "vmware"
   service node[:neutron][:platform][:l3_agent_name] do
@@ -280,8 +280,8 @@ service node[:neutron][:platform][:metadata_agent_name] do
 end
 
 if ha_enabled
-  log "HA support for neutron-l3-agent is enabled"
-  include_recipe "neutron::l3_ha"
+  log "HA support for neutron agents is enabled"
+  include_recipe "neutron::network_agents_ha"
 else
-  log "HA support for neutron-l3-agent is disabled"
+  log "HA support for neutron agents is disabled"
 end

@@ -312,12 +312,12 @@ end
 
 include_recipe "neutron::common_config"
 
-neutron_l3_ha = node.roles.include?("neutron-l3") && node[:neutron][:ha][:l3][:enabled]
+neutron_network_ha = node.roles.include?("neutron-network") && node[:neutron][:ha][:network][:enabled]
 
 service neutron_agent do
   supports :status => true, :restart => true
   action [:enable, :start]
   subscribes :restart, resources("template[#{agent_config_path}]")
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if neutron_l3_ha
+  provider Chef::Provider::CrowbarPacemakerService if neutron_network_ha
 end
