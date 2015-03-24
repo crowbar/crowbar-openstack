@@ -31,6 +31,10 @@
       "ml2_type_drivers_default_provider_network": "gre",
       "ml2_type_drivers_default_tenant_network": "gre",
       "num_vlans": 2000,
+      "gre": {
+        "tunnel_id_start": 1,
+        "tunnel_id_end": 1000
+      },
       "vxlan": {
         "vni_start": 4096,
         "vni_end": 99999,
@@ -75,7 +79,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 23,
+      "schema-revision": 24,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-l3": [ "readying", "ready", "applying" ]

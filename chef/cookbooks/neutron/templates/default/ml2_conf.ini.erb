@@ -54,7 +54,7 @@ network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
 # (ListOpt) Comma-separated list of <tun_min>:<tun_max> tuples enumerating ranges of GRE tunnel IDs that are available for tenant network allocation
 # tunnel_id_ranges =
 <% if @ml2_type_drivers.include?("gre") -%>
-tunnel_id_ranges = <%= node[:neutron][:network][:gre_start]%>:<%= node[:neutron][:network][:gre_stop]%>
+tunnel_id_ranges = <%= @gre_start %>:<%= @gre_end %>
 <% end -%>
 
 [ml2_type_vxlan]

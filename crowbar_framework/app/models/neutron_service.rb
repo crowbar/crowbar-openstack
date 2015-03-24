@@ -106,6 +106,23 @@ class NeutronService < PacemakerServiceObject
     base
   end
 
+  def validate_gre gre_settings
+    if gre_settings["tunnel_id_start"] < 1 || gre_settings["tunnel_id_start"] > 2147483647
+      validation_error("Start of GRE tunnel ID range must be between 0 and 2147483647")
+    end
+    if gre_settings["tunnel_id_end"]  < 1 || gre_settings["tunnel_id_end"] > 2147483647
+      validation_error("End of GRE tunnel ID range must be between 0 and 2147483647")
+    end
+    if gre_settings["tunnel_id_start"] > gre_settings["tunnel_id_end"]
+      validation_error("End of GRE tunnel ID range must be higher than start of GRE tunnel ID range")
+    elsif gre_settings["tunnel_id_start"] == gre_settings["tunnel_id_end"]
+      validation_error("GRE tunnel ID range is too small")
+    elsif gre_settings["tunnel_id_end"] + 1 - gre_settings["tunnel_id_start"] > 1000000
+      # test being done in neutron for unreasonable ranges
+      validation_error("GRE tunnel ID range is unreasonable for neutron")
+    end
+  end
+
   def validate_vxlan vxlan_settings
     if vxlan_settings["vni_start"] < 0 || vxlan_settings["vni_start"] > 16777215
       validation_error("Start of VXLAN VNI range must be between 0 and 16777215")
@@ -184,6 +201,10 @@ class NeutronService < PacemakerServiceObject
     # TODO(toabctl): select the ml2_type_driver automatically if used as default? Or directly check in the ui via js?
     unless ml2_type_drivers.include?(ml2_type_drivers_default_tenant_network)
       validation_error("The default tenant network type driver \"#{ml2_type_drivers_default_tenant_network}\" is not a selected ml2 type driver")
+    end
+
+    if ml2_type_drivers.include? 'gre'
+      validate_gre proposal["attributes"]["neutron"]["gre"]
     end
 
     if ml2_type_drivers.include? 'vxlan'

@@ -27,9 +27,9 @@ default[:neutron][:db][:user] = "neutron"
 default[:neutron][:db][:password] = "" # Set by Recipe
 default[:neutron][:network][:fixed_router] = "127.0.0.1" # Set by Recipe
 default[:neutron][:network][:private_networks] = [] # Set by Recipe
-# Default range for GRE tunnels
-default[:neutron][:network][:gre_start] = 1
-default[:neutron][:network][:gre_stop] = 1000
+
+default[:neutron][:gre][:tunnel_id_start] = 1
+default[:neutron][:gre][:tunnel_id_stop] = 1000
 
 default[:neutron][:vxlan][:vni_start] = 4096
 default[:neutron][:vxlan][:vni_stop] = 99999

@@ -149,6 +149,9 @@ vlan_start = node[:network][:networks][:nova_fixed][:vlan]
 num_vlans = node[:neutron][:num_vlans]
 vlan_end = [vlan_start + num_vlans - 1, 4094].min
 
+gre_start = [node[:neutron][:gre][:tunnel_id_start], 1].max
+gre_end = [node[:neutron][:gre][:tunnel_id_end], 2147483647].min
+
 vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 vni_end = [node[:neutron][:vxlan][:vni_end], 16777215].min
 
@@ -176,6 +179,8 @@ when 'ml2'
       :tenant_network_types => tenant_network_types,
       :vlan_start => vlan_start,
       :vlan_end => vlan_end,
+      :gre_start => gre_start,
+      :gre_end => gre_end,
       :vxlan_start => vni_start,
       :vxlan_end => vni_end,
       :vxlan_mcast_group => node[:neutron][:vxlan][:multicast_group]
