@@ -102,6 +102,9 @@ router_delete_namespaces = True
 #   DVR. This mode must be used for an L3 agent running on a centralized
 #   node (or in single-host deployments, e.g. devstack).
 # agent_mode = legacy
+<% if @dvr_enabled -%>
+agent_mode = <%= @dvr_mode %>
+<% end -%>
 
 # Location to store keepalived and all HA configurations
 # ha_confs_path = $state_path/ha_confs

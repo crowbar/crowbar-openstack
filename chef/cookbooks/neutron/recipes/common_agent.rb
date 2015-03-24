@@ -130,7 +130,8 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       variables(
         :ml2_type_drivers => ml2_type_drivers,
         :tunnel_types => ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
-        :use_l2pop => neutron[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"))
+        :use_l2pop => neutron[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")),
+        :dvr_enabled => neutron[:neutron][:use_dvr]
       )
     end
   when ml2_mech_drivers.include?("linuxbridge")
@@ -312,7 +313,7 @@ end
 
 include_recipe "neutron::common_config"
 
-neutron_network_ha = node.roles.include?("neutron-network") && node[:neutron][:ha][:network][:enabled]
+neutron_network_ha = node.roles.include?("neutron-network") && neutron[:neutron][:ha][:network][:enabled]
 
 service neutron_agent do
   supports :status => true, :restart => true
@@ -320,4 +321,56 @@ service neutron_agent do
   subscribes :restart, resources("template[#{agent_config_path}]")
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   provider Chef::Provider::CrowbarPacemakerService if neutron_network_ha
+end
+
+# Note: if vmware, we do not reach this code
+
+if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
+  unless neutron[:neutron][:use_gitrepo]
+    package node[:neutron][:platform][:l3_agent_pkg]
+  else
+    link_service "neutron-l3-agent" do
+      virtualenv venv_path
+      bin_name "neutron-l3-agent --config-dir /etc/neutron/"
+    end
+  end
+
+  ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
+  case
+  when ml2_mech_drivers.include?("openvswitch")
+    interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+    external_network_bridge = "br-public"
+  when ml2_mech_drivers.include?("linuxbridge")
+    interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
+    external_network_bridge = ""
+  end
+
+  template "/etc/neutron/l3_agent.ini" do
+    source "l3_agent.ini.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    variables(
+      :debug => neutron[:neutron][:debug],
+      :interface_driver => interface_driver,
+      :use_namespaces => "True",
+      :handle_internal_only_routers => "True",
+      :metadata_port => 9697,
+      :send_arp_for_ha => 3,
+      :periodic_interval => 40,
+      :periodic_fuzzy_delay => 5,
+      :external_network_bridge => external_network_bridge,
+      :dvr_enabled => neutron[:neutron][:use_dvr],
+      :dvr_mode => node.roles.include?("neutron-network") ? "dvr_snat" : "dvr"
+    )
+  end
+
+  service node[:neutron][:platform][:l3_agent_name] do
+    service_name "neutron-l3-agent" if neutron[:neutron][:use_gitrepo]
+    supports :status => true, :restart => true
+    action [:enable, :start]
+    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
+    provider Chef::Provider::CrowbarPacemakerService if neutron_network_ha
+  end
 end

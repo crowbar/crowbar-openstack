@@ -10,6 +10,9 @@ verbose = <%= @verbose ? "True" : "False" %>
 # value is "False" to support legacy mode (centralized) routers.
 #
 # router_distributed = False
+<% if @dvr_enabled -%>
+router_distributed = True
+<% end -%>
 #
 # ===========End Global Config Option for Distributed L3 Router===============
 
