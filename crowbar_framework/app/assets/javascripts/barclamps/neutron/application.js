@@ -246,6 +246,7 @@ function networking_plugin_check() {
     $('#ml2_type_drivers_default_provider_network_container').hide();
     $('#ml2_type_drivers_default_tenant_network_container').hide();
     $('#num_vlans_container').hide();
+    $('#gre_container').hide();
     $('#vxlan_container').hide();
     $('#cisco_switches').hide();
     $('#cisco_ports').hide();
@@ -259,6 +260,12 @@ function ml2_type_drivers_check() {
     $('#num_vlans_container').show();
   } else {
     $('#num_vlans_container').hide();
+  }
+
+  if (values.indexOf("gre") >= 0) {
+    $('#gre_container').show();
+  } else {
+    $('#gre_container').hide();
   }
 
   if (values.indexOf("vxlan") >= 0) {

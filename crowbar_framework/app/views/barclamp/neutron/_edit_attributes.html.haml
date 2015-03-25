@@ -40,6 +40,13 @@
       #num_vlans_container
         = integer_field %w(num_vlans)
 
+      #gre_container
+        %fieldset
+          %legend
+            = t(".gre_header")
+          = integer_field %w(gre tunnel_id_start)
+          = integer_field %w(gre tunnel_id_end)
+
       #vxlan_container
         %fieldset
           %legend
