@@ -54,7 +54,7 @@ network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
 # (ListOpt) Comma-separated list of <tun_min>:<tun_max> tuples enumerating ranges of GRE tunnel IDs that are available for tenant network allocation
 # tunnel_id_ranges =
 <% if @ml2_type_drivers.include?("gre") -%>
-tunnel_id_ranges = <%= node[:neutron][:network][:gre_start]%>:<%= node[:neutron][:network][:gre_stop]%>
+tunnel_id_ranges = <%= @gre_start %>:<%= @gre_end %>
 <% end -%>
 
 [ml2_type_vxlan]
@@ -62,6 +62,9 @@ tunnel_id_ranges = <%= node[:neutron][:network][:gre_start]%>:<%= node[:neutron]
 # ranges of VXLAN VNI IDs that are available for tenant network allocation.
 #
 # vni_ranges =
+<% if @ml2_type_drivers.include?("vxlan") -%>
+vni_ranges = <%= @vxlan_start %>:<%= @vxlan_end %>
+<% end -%>
 
 # (StrOpt) Multicast group for the VXLAN interface. When configured, will
 # enable sending all broadcast traffic to this multicast group. When left
@@ -69,6 +72,10 @@ tunnel_id_ranges = <%= node[:neutron][:network][:gre_start]%>:<%= node[:neutron]
 #
 # vxlan_group =
 # Example: vxlan_group = 239.1.1.1
+<% if @ml2_type_drivers.include?("vxlan") && @ml2_mechanism_drivers.include?("linuxbridge") && !@vxlan_mcast_group.empty? -%>
+vxlan_group = <%= @vxlan_mcast_group %>
+<% end -%>
+
 
 [securitygroup]
 # Controls if neutron security group is enabled or not.

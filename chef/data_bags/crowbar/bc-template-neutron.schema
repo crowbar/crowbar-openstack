@@ -22,6 +22,15 @@
                     "ml2_type_drivers_default_provider_network": { "type": "str", "required": true },
                     "ml2_type_drivers_default_tenant_network": { "type": "str", "required": true },
                     "num_vlans": { "type": "int", "required": true },
+                    "gre": { "type": "map", "required": true, "mapping": {
+                      "tunnel_id_start": { "type" : "int", "required" : true },
+                      "tunnel_id_end": { "type" : "int", "required" : true }
+                    }},
+                    "vxlan": { "type": "map", "required": true, "mapping": {
+                      "vni_start": { "type" : "int", "required" : true },
+                      "vni_end": { "type" : "int", "required" : true },
+                      "multicast_group": { "type" : "str", "required": true }
+                    }},
                     "allow_overlapping_ips": { "type": "bool", "required": true },
                     "cisco_switches": {
                       "type" : "map",

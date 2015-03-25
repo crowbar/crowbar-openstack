@@ -38,7 +38,28 @@
         = string_field %w(vmware l3_gw_uuid)
 
       #num_vlans_container
-        = integer_field %w(num_vlans)
+        %fieldset
+          %legend
+            = t(".vlan_header")
+          = integer_field %w(num_vlans)
+
+      #gre_container
+        %fieldset
+          %legend
+            = t(".gre_header")
+          = integer_field %w(gre tunnel_id_start)
+          = integer_field %w(gre tunnel_id_end)
+
+      #vxlan_container
+        %fieldset
+          %legend
+            = t(".vxlan_header")
+          = integer_field %w(vxlan vni_start)
+          = integer_field %w(vxlan vni_end)
+          #vxlan_group_container
+            = string_field %w(vxlan multicast_group)
+            %span.help-block
+              = t('.vxlan.multicast_group_hint')
 
     #cisco_switches
       %fieldset
