@@ -38,7 +38,10 @@
         = string_field %w(vmware l3_gw_uuid)
 
       #num_vlans_container
-        = integer_field %w(num_vlans)
+        %fieldset
+          %legend
+            = t(".vlan_header")
+          = integer_field %w(num_vlans)
 
       #gre_container
         %fieldset

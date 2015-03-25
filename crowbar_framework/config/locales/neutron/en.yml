@@ -39,6 +39,7 @@ en:
         ml2_type_drivers_default_tenant_network: 'Default type driver for tenant network'
         ml2_type_drivers_default_tenant_network_hint: 'Modular Layer 2 type driver used to create the tenant networks'
         ml2_mechanism_drivers: 'Modular Layer 2 mechanism drivers'
+        vlan_header: 'VLAN'
         num_vlans: 'Maximum number of VLANs'
         gre_header: 'GRE'
         gre:
