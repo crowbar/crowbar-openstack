@@ -49,117 +49,40 @@ bash "reload disable-rp_filter-sysctl" do
   subscribes :run, resources(:cookbook_file=> disable_rp_filter_file), :delayed
 end
 
-if neutron[:neutron][:networking_plugin] == "ml2"
-  ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
-  case
-  when ml2_mech_drivers.include?("openvswitch")
-    neutron_agent = neutron[:neutron][:platform][:ovs_agent_name]
-    neutron_agent_pkg = neutron[:neutron][:platform][:ovs_agent_pkg]
-    agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
-  when ml2_mech_drivers.include?("linuxbridge")
-    neutron_agent = neutron[:neutron][:platform][:lb_agent_name]
-    neutron_agent_pkg = neutron[:neutron][:platform][:lb_agent_pkg]
-    agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
+if neutron[:neutron][:use_gitrepo]
+  neutron_path = "/opt/neutron"
+  venv_path = neutron[:neutron][:use_virtualenv] ? "#{neutron_path}/.venv" : nil
+
+  pfs_and_install_deps "neutron" do
+    cookbook "neutron"
+    cnode neutron
+    virtualenv venv_path
+    path neutron_path
+    wrap_bins [ "neutron", "neutron-rootwrap" ]
   end
 
-  # agent package/git installation
-  unless neutron[:neutron][:use_gitrepo]
-    package neutron_agent_pkg do
-      action :install
-    end
-  else
-    neutron_path = "/opt/neutron"
-    venv_path = neutron[:neutron][:use_virtualenv] ? "#{neutron_path}/.venv" : nil
+  create_user_and_dirs("neutron")
 
-    neutron_agent = "neutron-openvswitch-agent"
-    pfs_and_install_deps "neutron" do
-      cookbook "neutron"
-      cnode neutron
-      virtualenv venv_path
-      path neutron_path
-      wrap_bins [ "neutron", "neutron-rootwrap" ]
-    end
-
-    create_user_and_dirs("neutron")
-
-    link_service neutron_agent do
-      virtualenv venv_path
-      bin_name "neutron-openvswitch-agent --config-file #{agent_config_path} --config-dir /etc/neutron/"
-    end
-
-    execute "neutron_cp_policy.json" do
-      command "cp /opt/neutron/etc/policy.json /etc/neutron/"
-      creates "/etc/neutron/policy.json"
-    end
-    execute "neutron_cp_plugins" do
-      command "cp -r /opt/neutron/etc/neutron/plugins /etc/neutron/plugins"
-      creates "/etc/neutron/plugins"
-    end
-    execute "neutron_cp_rootwrap" do
-      command "cp -r /opt/neutron/etc/neutron/rootwrap.d /etc/neutron/rootwrap.d"
-      creates "/etc/neutron/rootwrap.d"
-    end
-    cookbook_file "/etc/neutron/rootwrap.conf" do
-      cookbook "neutron"
-      source "neutron-rootwrap.conf"
-      mode 00644
-      owner "root"
-      group node[:neutron][:platform][:group]
-    end
+  execute "neutron_cp_policy.json" do
+    command "cp /opt/neutron/etc/policy.json /etc/neutron/"
+    creates "/etc/neutron/policy.json"
   end
-
-  ml2_type_drivers = neutron[:neutron][:ml2_type_drivers]
-
-  case
-  when ml2_mech_drivers.include?("openvswitch")
-    directory "/etc/neutron/plugins/openvswitch/" do
-      mode 00755
-      owner "root"
-      group neutron[:neutron][:platform][:group]
-      action :create
-      recursive true
-      not_if { node[:platform] == "suse" }
-    end
-
-    template agent_config_path do
-      cookbook "neutron"
-      source "ovs_neutron_plugin.ini.erb"
-      owner "root"
-      group neutron[:neutron][:platform][:group]
-      mode "0640"
-      variables(
-        :ml2_type_drivers => ml2_type_drivers,
-        :tunnel_types => ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
-        :use_l2pop => neutron[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")),
-        :dvr_enabled => neutron[:neutron][:use_dvr]
-      )
-    end
-  when ml2_mech_drivers.include?("linuxbridge")
-    directory "/etc/neutron/plugins/linuxbridge/" do
-      mode 00755
-      owner "root"
-      group neutron[:neutron][:platform][:group]
-      action :create
-      recursive true
-      not_if { node[:platform] == "suse" }
-    end
-
-    template agent_config_path do
-      cookbook "neutron"
-      source "linuxbridge_conf.ini.erb"
-      owner "root"
-      group neutron[:neutron][:platform][:group]
-      mode "0640"
-      variables(
-        :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil),
-        :ml2_type_drivers => ml2_type_drivers,
-        :vxlan_mcast_group => neutron[:neutron][:vxlan][:multicast_group],
-        :use_l2pop => neutron[:neutron][:use_l2pop] && ml2_type_drivers.include?("vxlan")
-      )
-    end
+  execute "neutron_cp_plugins" do
+    command "cp -r /opt/neutron/etc/neutron/plugins /etc/neutron/plugins"
+    creates "/etc/neutron/plugins"
+  end
+  execute "neutron_cp_rootwrap" do
+    command "cp -r /opt/neutron/etc/neutron/rootwrap.d /etc/neutron/rootwrap.d"
+    creates "/etc/neutron/rootwrap.d"
+  end
+  cookbook_file "/etc/neutron/rootwrap.conf" do
+    cookbook "neutron"
+    source "neutron-rootwrap.conf"
+    mode 00644
+    owner "root"
+    group node[:neutron][:platform][:group]
   end
 end
-
 
 # openvswitch installation and configuration
 if neutron[:neutron][:networking_plugin] == 'vmware' or
@@ -314,6 +237,90 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
   neutron_network_ha = node.roles.include?("neutron-network") && neutron[:neutron][:ha][:network][:enabled]
 
+  ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
+  ml2_type_drivers = neutron[:neutron][:ml2_type_drivers]
+
+  case
+  when ml2_mech_drivers.include?("openvswitch")
+    neutron_agent = neutron[:neutron][:platform][:ovs_agent_name]
+    neutron_agent_pkg = neutron[:neutron][:platform][:ovs_agent_pkg]
+    agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
+    interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+    external_network_bridge = "br-public"
+  when ml2_mech_drivers.include?("linuxbridge")
+    neutron_agent = neutron[:neutron][:platform][:lb_agent_name]
+    neutron_agent_pkg = neutron[:neutron][:platform][:lb_agent_pkg]
+    agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
+    interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
+    external_network_bridge = ""
+  end
+
+  # L2 agent
+  unless neutron[:neutron][:use_gitrepo]
+    package neutron_agent_pkg
+  else
+    case
+    when ml2_mech_drivers.include?("openvswitch")
+      neutron_agent = "neutron-openvswitch-agent"
+    when ml2_mech_drivers.include?("linuxbridge")
+      neutron_agent = "neutron-linuxbridge-agent"
+    end
+
+    link_service neutron_agent do
+      virtualenv venv_path
+      bin_name "#{neutron_agent} --config-file #{agent_config_path} --config-dir /etc/neutron/"
+    end
+  end
+
+  case
+  when ml2_mech_drivers.include?("openvswitch")
+    directory "/etc/neutron/plugins/openvswitch/" do
+      mode 00755
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      action :create
+      recursive true
+      not_if { node[:platform] == "suse" }
+    end
+
+    template agent_config_path do
+      cookbook "neutron"
+      source "ovs_neutron_plugin.ini.erb"
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      mode "0640"
+      variables(
+        :ml2_type_drivers => ml2_type_drivers,
+        :tunnel_types => ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
+        :use_l2pop => neutron[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")),
+        :dvr_enabled => neutron[:neutron][:use_dvr]
+      )
+    end
+  when ml2_mech_drivers.include?("linuxbridge")
+    directory "/etc/neutron/plugins/linuxbridge/" do
+      mode 00755
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      action :create
+      recursive true
+      not_if { node[:platform] == "suse" }
+    end
+
+    template agent_config_path do
+      cookbook "neutron"
+      source "linuxbridge_conf.ini.erb"
+      owner "root"
+      group neutron[:neutron][:platform][:group]
+      mode "0640"
+      variables(
+        :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil),
+        :ml2_type_drivers => ml2_type_drivers,
+        :vxlan_mcast_group => neutron[:neutron][:vxlan][:multicast_group],
+        :use_l2pop => neutron[:neutron][:use_l2pop] && ml2_type_drivers.include?("vxlan")
+      )
+    end
+  end
+
   service neutron_agent do
     supports :status => true, :restart => true
     action [:enable, :start]
@@ -322,6 +329,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     provider Chef::Provider::CrowbarPacemakerService if neutron_network_ha
   end
 
+  # L3 agent
   if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
     unless neutron[:neutron][:use_gitrepo]
       package node[:neutron][:platform][:l3_agent_pkg]
@@ -330,16 +338,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         virtualenv venv_path
         bin_name "neutron-l3-agent --config-dir /etc/neutron/"
       end
-    end
-
-    ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
-    case
-    when ml2_mech_drivers.include?("openvswitch")
-      interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
-      external_network_bridge = "br-public"
-    when ml2_mech_drivers.include?("linuxbridge")
-      interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
-      external_network_bridge = ""
     end
 
     template "/etc/neutron/l3_agent.ini" do
