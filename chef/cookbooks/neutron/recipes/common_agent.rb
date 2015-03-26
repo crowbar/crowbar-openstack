@@ -242,14 +242,14 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
   case
   when ml2_mech_drivers.include?("openvswitch")
-    neutron_agent = neutron[:neutron][:platform][:ovs_agent_name]
-    neutron_agent_pkg = neutron[:neutron][:platform][:ovs_agent_pkg]
+    neutron_agent = node[:neutron][:platform][:ovs_agent_name]
+    neutron_agent_pkg = node[:neutron][:platform][:ovs_agent_pkg]
     agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
     interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
     external_network_bridge = "br-public"
   when ml2_mech_drivers.include?("linuxbridge")
-    neutron_agent = neutron[:neutron][:platform][:lb_agent_name]
-    neutron_agent_pkg = neutron[:neutron][:platform][:lb_agent_pkg]
+    neutron_agent = node[:neutron][:platform][:lb_agent_name]
+    neutron_agent_pkg = node[:neutron][:platform][:lb_agent_pkg]
     agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
     external_network_bridge = ""
@@ -277,7 +277,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     directory "/etc/neutron/plugins/openvswitch/" do
       mode 00755
       owner "root"
-      group neutron[:neutron][:platform][:group]
+      group node[:neutron][:platform][:group]
       action :create
       recursive true
       not_if { node[:platform] == "suse" }
@@ -287,7 +287,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       cookbook "neutron"
       source "ovs_neutron_plugin.ini.erb"
       owner "root"
-      group neutron[:neutron][:platform][:group]
+      group node[:neutron][:platform][:group]
       mode "0640"
       variables(
         :ml2_type_drivers => ml2_type_drivers,
@@ -300,7 +300,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     directory "/etc/neutron/plugins/linuxbridge/" do
       mode 00755
       owner "root"
-      group neutron[:neutron][:platform][:group]
+      group node[:neutron][:platform][:group]
       action :create
       recursive true
       not_if { node[:platform] == "suse" }
@@ -310,7 +310,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       cookbook "neutron"
       source "linuxbridge_conf.ini.erb"
       owner "root"
-      group neutron[:neutron][:platform][:group]
+      group node[:neutron][:platform][:group]
       mode "0640"
       variables(
         :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil),
