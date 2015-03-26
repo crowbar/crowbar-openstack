@@ -17,7 +17,7 @@
 include_recipe "neutron::common_agent"
 
 unless node[:neutron][:use_gitrepo]
-  pkgs = [ node[:neutron][:platform][:dhcp_agent_pkg], node[:neutron][:platform][:metadata_agent_pkg], node[:neutron][:platform][:metering_agent_pkg] ]
+  pkgs = [ node[:neutron][:platform][:dhcp_agent_pkg], node[:neutron][:platform][:metering_agent_pkg] ]
   pkgs.uniq.each { |p| package p }
 
   if node[:neutron][:use_lbaas]
@@ -30,10 +30,6 @@ else
   link_service "neutron-dhcp-agent" do
     virtualenv venv_path
     bin_name "neutron-dhcp-agent --config-dir /etc/neutron/"
-  end
-  link_service "neutron-metadata-agent" do
-    virtualenv venv_path
-    bin_name "neutron-metadata-agent --config-dir /etc/neutron/ --config-file /etc/neutron/metadata_agent.ini"
   end
   if node[:neutron][:use_lbaas]
     link_service "neutron-lbaas-agent" do
@@ -149,44 +145,6 @@ template "/etc/neutron/dhcp_agent.ini" do
   )
 end
 
-
-#TODO: nova should depend on neutron, but neutron also depends on nova
-# so we have to do something like this
-novas = search(:node, "roles:nova-multi-controller") || []
-if novas.length > 0
-  nova = novas[0]
-  nova = node if nova.name == node.name
-else
-  nova = node
-end
-metadata_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
-metadata_port = nova[:nova][:ports][:metadata] rescue 8775
-metadata_protocol = (nova[:nova][:ssl][:enabled] ? "https" : "http") rescue "http"
-metadata_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
-metadata_proxy_shared_secret = (nova[:nova][:neutron_metadata_proxy_shared_secret] rescue '')
-
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
-template "/etc/neutron/metadata_agent.ini" do
-  source "metadata_agent.ini.erb"
-  owner "root"
-  group node[:neutron][:platform][:group]
-  mode "0640"
-  variables(
-    :debug => node[:neutron][:debug],
-    :keystone_settings => keystone_settings,
-    :auth_region => keystone_settings['endpoint_region'],
-    :neutron_insecure => node[:neutron][:ssl][:insecure],
-    :nova_metadata_host => metadata_host,
-    :nova_metadata_port => metadata_port,
-    :nova_metadata_protocol => metadata_protocol,
-    :nova_metadata_insecure => metadata_insecure,
-    :metadata_proxy_shared_secret => metadata_proxy_shared_secret
-  )
-end
-
-ha_enabled = node[:neutron][:ha][:network][:enabled]
-
 if node[:neutron][:use_lbaas] then
   template "/etc/neutron/lbaas_agent.ini" do
     cookbook "neutron"
@@ -202,6 +160,8 @@ if node[:neutron][:use_lbaas] then
     )
   end
 end
+
+ha_enabled = node[:neutron][:ha][:network][:enabled]
 
 service node[:neutron][:platform][:metering_agent_name] do
   service_name "neutron-metering-agent" if node[:neutron][:use_gitrepo]
@@ -229,15 +189,6 @@ service node[:neutron][:platform][:dhcp_agent_name] do
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/dhcp_agent.ini]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-end
-
-service node[:neutron][:platform][:metadata_agent_name] do
-  service_name "neutron-metadata-agent" if node[:neutron][:use_gitrepo]
-  supports :status => true, :restart => true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
-  subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
