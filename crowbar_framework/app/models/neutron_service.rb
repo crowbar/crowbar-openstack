@@ -229,6 +229,12 @@ class NeutronService < PacemakerServiceObject
       validation_error("The 'openvswitch' and 'linuxbridge' mechanism drivers can't be used in parallel. Only select one of them")
     end
 
+    if proposal["attributes"]["neutron"]["use_l2pop"]
+      unless ml2_type_drivers.include?('gre') || ml2_type_drivers.include?('vxlan')
+        validation_error("L2 population requires GRE and/or VXLAN")
+      end
+    end
+
     super
   end
 

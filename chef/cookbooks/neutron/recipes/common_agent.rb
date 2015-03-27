@@ -108,6 +108,8 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     end
   end
 
+  ml2_type_drivers = neutron[:neutron][:ml2_type_drivers]
+
   case
   when ml2_mech_drivers.include?("openvswitch")
     directory "/etc/neutron/plugins/openvswitch/" do
@@ -126,8 +128,9 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       group neutron[:neutron][:platform][:group]
       mode "0640"
       variables(
-        :ml2_type_drivers => neutron[:neutron][:ml2_type_drivers],
-        :tunnel_types => neutron[:neutron][:ml2_type_drivers].select { |t| ["vxlan", "gre"].include?(t) }
+        :ml2_type_drivers => ml2_type_drivers,
+        :tunnel_types => ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
+        :use_l2pop => neutron[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"))
       )
     end
   when ml2_mech_drivers.include?("linuxbridge")
@@ -148,8 +151,9 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       mode "0640"
       variables(
         :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil),
-        :ml2_type_drivers => neutron[:neutron][:ml2_type_drivers],
-        :vxlan_mcast_group => neutron[:neutron][:vxlan][:multicast_group]
+        :ml2_type_drivers => ml2_type_drivers,
+        :vxlan_mcast_group => neutron[:neutron][:vxlan][:multicast_group],
+        :use_l2pop => neutron[:neutron][:use_l2pop] && ml2_type_drivers.include?("vxlan")
       )
     end
   end

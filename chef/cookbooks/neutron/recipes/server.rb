@@ -170,7 +170,7 @@ case node[:neutron][:networking_plugin]
 when 'ml2'
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
   ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
-  if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
+  if node[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"))
     ml2_mechanism_drivers.push("l2population")
   end
 

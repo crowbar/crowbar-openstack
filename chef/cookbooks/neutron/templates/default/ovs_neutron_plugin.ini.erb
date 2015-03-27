@@ -150,7 +150,7 @@ tunnel_types = <%= @tunnel_types.join(",") %>
 # optimize tunnel management.
 #
 # l2_population = False
-<% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") -%>
+<% if @use_l2pop -%>
 l2_population = True
 <% end -%>
 
@@ -158,7 +158,7 @@ l2_population = True
 # population ML2 MechanismDriver.
 #
 # arp_responder = False
-<% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") -%>
+<% if @use_l2pop -%>
 arp_responder = True
 <% end -%>
 
