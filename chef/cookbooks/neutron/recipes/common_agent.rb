@@ -128,6 +128,9 @@ end
 if neutron[:neutron][:networking_plugin] == 'ml2' and
    neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch")
 
+  # Install the package now as neutron-ovs-cleanup service is shipped with this
+  package node[:neutron][:platform][:ovs_agent_pkg]
+
   unless %w(debian ubuntu).include? node.platform
     # Note: this must not be started! This service only makes sense on boot.
     service "neutron-ovs-cleanup" do
@@ -242,23 +245,23 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
   case
   when ml2_mech_drivers.include?("openvswitch")
+    # package is already installed
+
     neutron_agent = node[:neutron][:platform][:ovs_agent_name]
-    neutron_agent_pkg = node[:neutron][:platform][:ovs_agent_pkg]
     agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
     interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
     external_network_bridge = "br-public"
   when ml2_mech_drivers.include?("linuxbridge")
+    package node[:neutron][:platform][:lb_agent_pkg]
+
     neutron_agent = node[:neutron][:platform][:lb_agent_name]
-    neutron_agent_pkg = node[:neutron][:platform][:lb_agent_pkg]
     agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
     external_network_bridge = ""
   end
 
   # L2 agent
-  unless neutron[:neutron][:use_gitrepo]
-    package neutron_agent_pkg
-  else
+  if neutron[:neutron][:use_gitrepo]
     case
     when ml2_mech_drivers.include?("openvswitch")
       neutron_agent = "neutron-openvswitch-agent"
