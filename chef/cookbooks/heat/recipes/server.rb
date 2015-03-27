@@ -199,6 +199,7 @@ bash "register heat domain" do
   user "root"
   code <<-EOF
 
+    # Find domain ID
     id=
     eval $(openstack #{insecure} \
         domain show \
@@ -219,17 +220,53 @@ bash "register heat domain" do
 
     [ -n "$HEAT_DOMAIN_ID" ] || exit 1
 
-    openstack #{insecure} \
-        user create \
-        --password #{node[:heat]["stack_domain_admin_password"]} \
-        --domain $HEAT_DOMAIN_ID \
-        --description "Manages users and projects created by heat" \
-        #{node[:heat]["stack_domain_admin"]} \
-        || true
+    # Find user ID
+    STACK_DOMAIN_ADMIN_ID=
 
+    # we need to loop, as there might be users with this name in different
+    # domains; unfortunately --domain doesn't allow fetching users from just
+    # one domain
+    for userid in $(openstack #{insecure} \
+                        user list \
+                        -f csv \
+                        --domain $HEAT_DOMAIN_ID \
+                        | grep \"#{node[:heat]["stack_domain_admin"]}\" | cut -d , -f 1 | sed 's/"//g'); do
+        domain_id=
+        eval $(openstack #{insecure} \
+            user show \
+            -f shell --variable domain_id \
+            $userid)
+
+        if [ x"$domain_id" = x"$HEAT_DOMAIN_ID" ]; then
+            STACK_DOMAIN_ADMIN_ID=$userid
+            openstack #{insecure} \
+                user set \
+                --domain $HEAT_DOMAIN_ID \
+                --password #{node[:heat]["stack_domain_admin_password"]} \
+                --description "Manages users and projects created by heat" \
+                $STACK_DOMAIN_ADMIN_ID
+            break
+        fi
+    done
+
+    if [ -z "$STACK_DOMAIN_ADMIN_ID" ]; then
+        id=
+        eval $(openstack #{insecure} \
+            user create \
+            -f shell --variable id \
+            --domain $HEAT_DOMAIN_ID \
+            --password #{node[:heat]["stack_domain_admin_password"]} \
+            --description "Manages users and projects created by heat" \
+            #{node[:heat]["stack_domain_admin"]})
+        STACK_DOMAIN_ADMIN_ID=$id
+    fi
+
+    [ -n "$STACK_DOMAIN_ADMIN_ID" ] || exit 1
+
+    # Make user an admin
     openstack #{insecure} \
         role add \
-        --user #{node[:heat]["stack_domain_admin"]} \
+        --user $STACK_DOMAIN_ADMIN_ID \
         --domain $HEAT_DOMAIN_ID \
         admin || true
   EOF
