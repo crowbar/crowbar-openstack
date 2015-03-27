@@ -199,45 +199,33 @@ bash "register heat domain" do
   user "root"
   code <<-EOF
 
-    OS_URL="#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3"
-
-    eval $(openstack --os-token #{keystone_settings['admin_token']} \
-        --os-url=$OS_URL \
-        --os-identity-api-version=3 \
-        --os-region-name='#{keystone_settings['endpoint_region']}' \
-        #{insecure} \
+    eval $(openstack #{insecure} \
         domain show -f shell --variable id #{stack_user_domain_name})
 
     HEAT_DOMAIN_ID=$id
 
     if [ -z "$HEAT_DOMAIN_ID" ]; then
-        HEAT_DOMAIN_ID=$(openstack --os-token #{keystone_settings['admin_token']} \
-            --os-url=$OS_URL \
-            --os-identity-api-version=3 \
-            --os-region-name='#{keystone_settings['endpoint_region']}' \
-            #{insecure} \
+        HEAT_DOMAIN_ID=$(openstack #{insecure} \
             domain create #{stack_user_domain_name} \
             --description "Owns users and projects created by heat" \
             | awk '/id/  { print $4 } ')
     fi
 
-    openstack --os-token #{keystone_settings['admin_token']} \
-        --os-url=$OS_URL \
-        --os-identity-api-version=3 \
-        --os-region-name='#{keystone_settings['endpoint_region']}' \
-        #{insecure} \
+    openstack #{insecure} \
         user create --password #{node[:heat]["stack_domain_admin_password"]} \
         --domain $HEAT_DOMAIN_ID #{node[:heat]["stack_domain_admin"]} \
         --description "Manages users and projects created by heat" || true
 
-    openstack --os-token #{keystone_settings['admin_token']} \
-        --os-url=$OS_URL \
-        --os-identity-api-version=3 \
-        --os-region-name='#{keystone_settings['endpoint_region']}' \
-        #{insecure} \
+    openstack #{insecure} \
         role add --user #{node[:heat]["stack_domain_admin"]} \
         --domain $HEAT_DOMAIN_ID admin || true
   EOF
+  environment ({
+    'OS_TOKEN' => keystone_settings['admin_token'],
+    'OS_URL' => "#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3",
+    'OS_REGION_NAME' => keystone_settings['endpoint_region'],
+    'OS_IDENTITY_API_VERSION' => "3"
+  })
 end
 
 # Create Heat CloudFormation service
