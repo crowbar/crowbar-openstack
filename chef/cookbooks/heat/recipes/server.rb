@@ -200,25 +200,33 @@ bash "register heat domain" do
   code <<-EOF
 
     eval $(openstack #{insecure} \
-        domain show -f shell --variable id #{stack_user_domain_name})
+        domain show \
+        -f shell --variable id \
+        #{stack_user_domain_name})
 
     HEAT_DOMAIN_ID=$id
 
     if [ -z "$HEAT_DOMAIN_ID" ]; then
         HEAT_DOMAIN_ID=$(openstack #{insecure} \
-            domain create #{stack_user_domain_name} \
+            domain create \
             --description "Owns users and projects created by heat" \
+            #{stack_user_domain_name} \
             | awk '/id/  { print $4 } ')
     fi
 
     openstack #{insecure} \
-        user create --password #{node[:heat]["stack_domain_admin_password"]} \
-        --domain $HEAT_DOMAIN_ID #{node[:heat]["stack_domain_admin"]} \
-        --description "Manages users and projects created by heat" || true
+        user create \
+        --password #{node[:heat]["stack_domain_admin_password"]} \
+        --domain $HEAT_DOMAIN_ID \
+        --description "Manages users and projects created by heat" \
+        #{node[:heat]["stack_domain_admin"]} \
+        || true
 
     openstack #{insecure} \
-        role add --user #{node[:heat]["stack_domain_admin"]} \
-        --domain $HEAT_DOMAIN_ID admin || true
+        role add \
+        --user #{node[:heat]["stack_domain_admin"]} \
+        --domain $HEAT_DOMAIN_ID \
+        admin || true
   EOF
   environment ({
     'OS_TOKEN' => keystone_settings['admin_token'],
