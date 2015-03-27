@@ -199,6 +199,7 @@ bash "register heat domain" do
   user "root"
   code <<-EOF
 
+    id=
     eval $(openstack #{insecure} \
         domain show \
         -f shell --variable id \
