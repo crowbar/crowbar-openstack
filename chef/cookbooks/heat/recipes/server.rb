@@ -208,12 +208,16 @@ bash "register heat domain" do
     HEAT_DOMAIN_ID=$id
 
     if [ -z "$HEAT_DOMAIN_ID" ]; then
-        HEAT_DOMAIN_ID=$(openstack #{insecure} \
+        id=
+        eval $(openstack #{insecure} \
             domain create \
+            -f shell --variable id \
             --description "Owns users and projects created by heat" \
-            #{stack_user_domain_name} \
-            | awk '/id/  { print $4 } ')
+            #{stack_user_domain_name})
+        HEAT_DOMAIN_ID=$id
     fi
+
+    [ -n "$HEAT_DOMAIN_ID" ] || exit 1
 
     openstack #{insecure} \
         user create \
