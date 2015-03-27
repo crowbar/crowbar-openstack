@@ -126,7 +126,7 @@ unless nova[:nova].nil? or nova[:nova][:ssl].nil?
     action :nothing
   end.run_action(:wakeup)
 
-  nova_admin_tenant_id = %x[keystone --os_username '#{keystone_settings['admin_user']}' --os_password '#{keystone_settings['admin_password']}' --os_tenant_name '#{keystone_settings['admin_tenant']}' --os_auth_url '#{keystone_settings['internal_auth_url']}' --os_region_name '#{keystone_settings['endpoint_region']}' #{keystone_insecure} tenant-get '#{keystone_settings['service_tenant']}' | awk '/^\| *id /  { print $4 }'].chomp
+  nova_admin_tenant_id = %x[keystone --os_username '#{keystone_settings['admin_user']}' --os_password '#{keystone_settings['admin_password']}' --os_tenant_name '#{keystone_settings['admin_tenant']}' --os_auth_url '#{keystone_settings['internal_auth_url']}' --os_region_name '#{keystone_settings['endpoint_region']}' #{keystone_insecure} tenant-get '#{keystone_settings['service_tenant']}' | awk '/^\\| *id /  { print $4 }'].chomp
 
   raise("Cannot fetch ID of admin tenant") if nova_admin_tenant_id.nil? || nova_admin_tenant_id.empty?
 
