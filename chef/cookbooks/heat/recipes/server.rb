@@ -202,29 +202,40 @@ bash "register heat domain" do
     OS_URL="#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3"
 
     eval $(openstack --os-token #{keystone_settings['admin_token']} \
-        --os-url=$OS_URL --os-identity-api-version=3 \
-        --os-region-name='#{keystone_settings['endpoint_region']}' #{insecure} domain show -f shell --variable id #{stack_user_domain_name})
+        --os-url=$OS_URL \
+        --os-identity-api-version=3 \
+        --os-region-name='#{keystone_settings['endpoint_region']}' \
+        #{insecure} \
+        domain show -f shell --variable id #{stack_user_domain_name})
 
     HEAT_DOMAIN_ID=$id
 
     if [ -z "$HEAT_DOMAIN_ID" ]; then
         HEAT_DOMAIN_ID=$(openstack --os-token #{keystone_settings['admin_token']} \
-            --os-url=$OS_URL --os-identity-api-version=3 \
-            --os-region-name='#{keystone_settings['endpoint_region']}' #{insecure}\
+            --os-url=$OS_URL \
+            --os-identity-api-version=3 \
+            --os-region-name='#{keystone_settings['endpoint_region']}' \
+            #{insecure} \
             domain create #{stack_user_domain_name} \
             --description "Owns users and projects created by heat" \
             | awk '/id/  { print $4 } ')
     fi
 
-    openstack --os-token #{keystone_settings['admin_token']} --os-url=$OS_URL \
+    openstack --os-token #{keystone_settings['admin_token']} \
+        --os-url=$OS_URL \
+        --os-identity-api-version=3 \
         --os-region-name='#{keystone_settings['endpoint_region']}' \
-        --os-identity-api-version=3 #{insecure} user create --password #{node[:heat]["stack_domain_admin_password"]} \
+        #{insecure} \
+        user create --password #{node[:heat]["stack_domain_admin_password"]} \
         --domain $HEAT_DOMAIN_ID #{node[:heat]["stack_domain_admin"]} \
         --description "Manages users and projects created by heat" || true
 
-    openstack --os-token #{keystone_settings['admin_token']} --os-url=$OS_URL \
+    openstack --os-token #{keystone_settings['admin_token']} \
+        --os-url=$OS_URL \
+        --os-identity-api-version=3 \
         --os-region-name='#{keystone_settings['endpoint_region']}' \
-        --os-identity-api-version=3 #{insecure} role add --user #{node[:heat]["stack_domain_admin"]} \
+        #{insecure} \
+        role add --user #{node[:heat]["stack_domain_admin"]} \
         --domain $HEAT_DOMAIN_ID admin || true
   EOF
 end
