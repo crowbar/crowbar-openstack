@@ -22,7 +22,7 @@ tenant_network_types = <%= @tenant_network_types.join(",") %>
 # Example: mechanism_drivers = cisco,logger
 # Example: mechanism_drivers = openvswitch,brocade
 # Example: mechanism_drivers = linuxbridge,brocade
-mechanism_drivers = <%= @ml2_mechanism_drivers.join(",") %>,hyperv
+mechanism_drivers = <%= @ml2_mechanism_drivers.join(",") %>
 
 # (ListOpt) Ordered list of extension driver entrypoints
 # to be loaded from the neutron.ml2.extension_drivers namespace.

@@ -168,13 +168,19 @@ tenant_network_types = [[node[:neutron][:ml2_type_drivers_default_tenant_network
 
 case node[:neutron][:networking_plugin]
 when 'ml2'
+  ml2_type_drivers = node[:neutron][:ml2_type_drivers]
+  ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
+  if node[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"))
+    ml2_mechanism_drivers.push("l2population")
+  end
+
   template plugin_cfg_path do
     source "ml2_conf.ini.erb"
     owner "root"
     group node[:neutron][:platform][:group]
     mode "0640"
     variables(
-      :ml2_mechanism_drivers => node[:neutron][:ml2_mechanism_drivers],
+      :ml2_mechanism_drivers => ml2_mechanism_drivers,
       :ml2_type_drivers => node[:neutron][:ml2_type_drivers],
       :tenant_network_types => tenant_network_types,
       :vlan_start => vlan_start,
