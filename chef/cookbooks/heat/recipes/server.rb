@@ -264,11 +264,18 @@ bash "register heat domain" do
     [ -n "$STACK_DOMAIN_ADMIN_ID" ] || exit 1
 
     # Make user an admin
-    openstack #{insecure} \
-        role add \
-        --user $STACK_DOMAIN_ADMIN_ID \
-        --domain $HEAT_DOMAIN_ID \
-        admin || true
+    if ! openstack #{insecure} \
+            role list \
+            -f csv --column Name \
+            --domain $HEAT_DOMAIN_ID \
+            --user $STACK_DOMAIN_ADMIN_ID \
+            | grep -q \"admin\"; then
+        openstack #{insecure} \
+            role add \
+            --domain $HEAT_DOMAIN_ID \
+            --user $STACK_DOMAIN_ADMIN_ID \
+            admin
+    fi
   EOF
   environment ({
     'OS_TOKEN' => keystone_settings['admin_token'],
