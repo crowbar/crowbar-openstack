@@ -236,8 +236,9 @@ class NeutronService < PacemakerServiceObject
     end
 
     if proposal["attributes"]["neutron"]["use_dvr"]
-      if !ml2_mechanism_drivers.include?("openvswitch") || !ml2_type_drivers.include?('vxlan')
-        validation_error("DVR can only be used with openvswitch and vxlan")
+      if !ml2_mechanism_drivers.include?("openvswitch") ||
+         (!ml2_type_drivers.include?('gre') && !ml2_type_drivers.include?('vxlan'))
+        validation_error("DVR can only be used with openvswitch and gre/vxlan")
       end
 
       if !proposal["attributes"]["neutron"]["use_l2pop"]
