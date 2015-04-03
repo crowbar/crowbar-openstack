@@ -152,7 +152,6 @@ end
 ### Loop 2 over volumes
 # now do everything else we need to do
 rbd_enabled = false
-internal_ceph = false
 
 node[:cinder][:volumes].each_with_index do |volume, volid|
   backend_id = "backend-#{volume['backend_driver']}-#{volid}"
@@ -206,35 +205,13 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
     when volume[:backend_driver] == "rbd"
       rbd_enabled = true
 
-      # if include_ceph_recipe is already true, avoid re-entering the if (and executing a slow search)
-      internal_ceph = true if volume['rbd']['use_crowbar'] 
-
     when volume[:backend_driver] == "vmware"
 
   end
 end
 
 if rbd_enabled
-  if internal_ceph
-    ceph_env_filter = " AND ceph_config_environment:ceph-config-default"
-    ceph_servers = search(:node, "roles:ceph-osd#{ceph_env_filter}") || []
-    if ceph_servers.length > 0
-      include_recipe "ceph::keyring"
-    else
-      message = "Ceph was not deployed with Crowbar yet!"
-      Chef::Log.fatal(message)
-      raise message
-    end
-  else
-    # If external Ceph cluster will be used,
-    # we need install ceph client packages
-    if node[:platform] == "suse"
-      package "ceph-common"
-    end
-  end
-
   include_recipe "cinder::ceph"
-
 end
 
 unless %w(redhat centos).include? node.platform

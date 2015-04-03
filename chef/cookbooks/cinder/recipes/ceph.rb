@@ -20,6 +20,40 @@
 ceph_clients = {}
 ceph_keyrings = {}
 
+has_internal = false
+has_external = false
+
+# First loop to find if we have internal/external cluster
+node[:cinder][:volumes].each_with_index do |volume, volid|
+  next unless volume[:backend_driver] == "rbd"
+
+  has_internal ||= true if volume[:rbd][:use_crowbar]
+  has_external ||= true unless volume[:rbd][:use_crowbar]
+end
+
+if has_internal
+  ceph_env_filter = " AND ceph_config_environment:ceph-config-default"
+  ceph_servers = search(:node, "roles:ceph-osd#{ceph_env_filter}") || []
+  if ceph_servers.length > 0
+    include_recipe "ceph::keyring"
+  else
+    message = "Ceph was not deployed with Crowbar yet!"
+    Chef::Log.fatal(message)
+    raise message
+  end
+end
+
+if has_external
+  # Ensure ceph is available here
+  if node[:platform] == "suse"
+    # install package in compile phase because we will run "ceph -s"
+    package "ceph-common" do
+      action :nothing
+    end.run_action(:install)
+  end
+end
+
+# Second loop to do our setup
 node[:cinder][:volumes].each_with_index do |volume, volid|
   next unless volume[:backend_driver] == "rbd"
 
