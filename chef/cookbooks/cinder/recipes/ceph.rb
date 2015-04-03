@@ -111,12 +111,6 @@ unless ceph_clients.empty?
   end
 
   ceph_clients.each do |ceph_conf, ceph_pools|
-    # We have to compute MD5 hash from ceph_conf and cinder_user
-    # to be sure that keyring file will not be overwritten
-    # by config from another cluster, with same user but different
-    # config file
-    ceph_hash = Digest::MD5.hexdigest(ceph_conf)
-
     ceph_pools.each_pair do |cinder_user, cinder_pools|
       cinder_pools << glance_pool unless glance_pool.nil?
 
@@ -127,8 +121,8 @@ unless ceph_clients.empty?
         ceph_conf  ceph_conf
         admin_keyring  ceph_keyrings[ceph_conf]
         caps ceph_caps
-        keyname "client.#{ceph_hash}.#{cinder_user}"
-        filename "/etc/ceph/ceph.client.#{ceph_hash}.#{cinder_user}.keyring"
+        keyname "client.#{cinder_user}"
+        filename "/etc/ceph/ceph.client.#{cinder_user}.keyring"
         owner "root"
         group node[:cinder][:group]
         mode 0640
