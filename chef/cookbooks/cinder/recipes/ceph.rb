@@ -66,6 +66,10 @@ unless ceph_clients.empty?
   end
 
   ceph_clients.each do |ceph_conf, ceph_pools|
+    # We have to compute MD5 hash from ceph_conf and cinder_user
+    # to be sure that keyring file will not be overwritten
+    # by config from another cluster, with same user but different
+    # config file
     ceph_hash = Digest::MD5.hexdigest(ceph_conf)
 
     ceph_pools.each_pair do |cinder_user, cinder_pools|
@@ -73,12 +77,6 @@ unless ceph_clients.empty?
 
       allow_pools = cinder_pools.map{|p| "allow rwx pool=#{p}"}.join(", ")
       ceph_caps = { 'mon' => 'allow r', 'osd' => "allow class-read object_prefix rbd_children, #{allow_pools}" }
-
-      # We have to compute MD5 hash from ceph_conf and cinder_user
-      # to be sure that keyring file will not be overwritten 
-      # by config from another cluster, with same user but different 
-      # config file
-      ceph_hash = Digest::MD5.hexdigest(ceph_conf)
 
       ceph_client cinder_user do
         ceph_conf  ceph_conf
