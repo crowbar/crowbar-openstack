@@ -64,7 +64,12 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
     ceph_conf = volume[:rbd][:config_file]
     admin_keyring = volume[:rbd][:admin_keyring]
 
-    if File.exists?(admin_keyring)
+    if ceph_conf.empty? || !File.exists?(ceph_conf)
+      Chef::Log.info("Ceph configuration file is missing; skipping the ceph setup for backend #{volume[:backend_name]}")
+      next
+    end
+
+    if !admin_keyring.empty? && File.exists?(admin_keyring)
       Chef::Log.info("Using external ceph cluster for cinder #{volume[:backend_name]} backend, with automatic setup.")
     else
       Chef::Log.info("Using external ceph cluster for cinder #{volume[:backend_name]} backend, with no automatic setup.")
@@ -75,7 +80,7 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
     check_ceph = Mixlib::ShellOut.new(cmd)
 
     unless check_ceph.run_command.stdout.match("(HEALTH_OK|HEALTH_WARN)")
-      Chef::Log.info("Ceph cluster is not healthy; skipping the ceph setup for cinder #{volume[:backend_name]} backend")
+      Chef::Log.info("Ceph cluster is not healthy; skipping the ceph setup for backend #{volume[:backend_name]}")
       next
     end
   end
