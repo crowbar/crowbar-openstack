@@ -171,6 +171,9 @@ arp_responder = True
 # for distributed virtual routing.
 #
 # enable_distributed_routing = False
+<% if @dvr_enabled -%>
+enable_distributed_routing = True
+<% end -%>
 
 [securitygroup]
 # Firewall driver for realizing neutron security group function.

@@ -174,7 +174,8 @@ template "/etc/neutron/neutron.conf" do
       :service_plugins => service_plugins,
       :rootwrap_bin =>  node[:neutron][:rootwrap],
       :use_namespaces => true,
-      :allow_overlapping_ips => node[:neutron][:allow_overlapping_ips]
+      :allow_overlapping_ips => neutron[:neutron][:allow_overlapping_ips],
+      :dvr_enabled => neutron[:neutron][:use_dvr]
     }.merge(nova_notify))
 end
 

@@ -53,7 +53,7 @@ class NeutronService < PacemakerServiceObject
           },
           "cluster" => true
         },
-        "neutron-l3" => {
+        "neutron-network" => {
           "unique" => false,
           "count" => 1,
           "admin" => false,
@@ -97,7 +97,7 @@ class NeutronService < PacemakerServiceObject
 
     base["deployment"]["neutron"]["elements"] = {
         "neutron-server" => [ controller_node[:fqdn] ],
-        "neutron-l3" => network_nodes.map { |x| x[:fqdn] }
+        "neutron-network" => network_nodes.map { |x| x[:fqdn] }
     } unless nodes.nil? or nodes.length ==0
 
     base["attributes"]["neutron"]["service_password"] = random_password
@@ -152,7 +152,7 @@ class NeutronService < PacemakerServiceObject
 
   def validate_proposal_after_save proposal
     validate_one_for_role proposal, "neutron-server"
-    validate_at_least_n_for_role proposal, "neutron-l3", 1
+    validate_at_least_n_for_role proposal, "neutron-network", 1
 
     if proposal["attributes"][@bc_name]["use_gitrepo"]
       validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
@@ -235,6 +235,24 @@ class NeutronService < PacemakerServiceObject
       end
     end
 
+    if proposal["attributes"]["neutron"]["use_dvr"]
+      if !ml2_mechanism_drivers.include?("openvswitch") ||
+         (!ml2_type_drivers.include?('gre') && !ml2_type_drivers.include?('vxlan'))
+        validation_error("DVR can only be used with openvswitch and gre/vxlan")
+      end
+
+      if !proposal["attributes"]["neutron"]["use_l2pop"]
+        validation_error("DVR requires L2 population")
+      end
+
+      unless proposal["deployment"]["neutron"]["elements"].fetch("neutron-network", []).empty? 
+        network_node = proposal["deployment"]["neutron"]["elements"]["neutron-network"][0]
+        if is_cluster? network_node
+          validation_error("DVR is not compatible with High Availability for neutron-network")
+        end
+      end
+    end
+
     super
   end
 
@@ -249,13 +267,13 @@ class NeutronService < PacemakerServiceObject
     end
 
     server_elements, server_nodes, server_ha_enabled = role_expand_elements(role, "neutron-server")
-    l3_elements, l3_nodes, l3_ha_enabled = role_expand_elements(role, "neutron-l3")
+    network_elements, network_nodes, network_ha_enabled = role_expand_elements(role, "neutron-network")
 
     vip_networks = ["admin", "public"]
 
     dirty = false
     dirty = prepare_role_for_ha_with_haproxy(role, ["neutron", "ha", "server", "enabled"], server_ha_enabled, server_elements, vip_networks)
-    dirty = prepare_role_for_ha(role, ["neutron", "ha", "l3", "enabled"], l3_ha_enabled) || dirty
+    dirty = prepare_role_for_ha(role, ["neutron", "ha", "network", "enabled"], network_ha_enabled) || dirty
     role.save if dirty
 
     # All nodes must have a public IP, even if part of a cluster; otherwise
@@ -266,7 +284,7 @@ class NeutronService < PacemakerServiceObject
 
     allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
 
-    l3_nodes.each do |n|
+    network_nodes.each do |n|
       net_svc.allocate_ip "default", "public", "host",n
       # TODO(toabctl): The same code is in the nova barclamp. Should be extracted and reused!
       #                (see crowbar_framework/app/models/nova_service.rb)

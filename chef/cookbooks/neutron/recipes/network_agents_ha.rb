@@ -18,13 +18,13 @@ package node[:neutron][:platform][:ha_tool_pkg] unless node[:neutron][:platform]
 use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
 use_lbaas_agent = node[:neutron][:use_lbaas]
 
-# Wait for all "neutron-l3" nodes to reach this point so we know that they will
+# Wait for all "neutron-network" nodes to reach this point so we know that they will
 # have all the required packages installed and configuration files updated
 # before we create the pacemaker resources.
-crowbar_pacemaker_sync_mark "sync-neutron-l3_before_ha"
+crowbar_pacemaker_sync_mark "sync-neutron-network_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-neutron-l3_ha_resources"
+crowbar_pacemaker_sync_mark "wait-neutron-network_ha_resources"
 
 l3_agent_primitive = "neutron-l3-agent"
 dhcp_agent_primitive = "neutron-dhcp-agent"
@@ -33,36 +33,36 @@ metering_agent_primitive =  "neutron-metering-agent"
 lbaas_agent_primitive =  "neutron-lbaas-agent"
 
 pacemaker_primitive l3_agent_primitive do
-  agent node[:neutron][:ha][:l3][:l3_ra]
-  op node[:neutron][:ha][:l3][:op]
+  agent node[:neutron][:ha][:network][:l3_ra]
+  op node[:neutron][:ha][:network][:op]
   action [ :create ]
   only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive dhcp_agent_primitive do
-  agent node[:neutron][:ha][:l3][:dhcp_ra]
-  op node[:neutron][:ha][:l3][:op]
+  agent node[:neutron][:ha][:network][:dhcp_ra]
+  op node[:neutron][:ha][:network][:op]
   action [ :create ]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive metadatda_agent_primitive do
-  agent node[:neutron][:ha][:l3][:metadata_ra]
-  op node[:neutron][:ha][:l3][:op]
+  agent node[:neutron][:ha][:network][:metadata_ra]
+  op node[:neutron][:ha][:network][:op]
   action [ :create ]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive metering_agent_primitive do
-  agent node[:neutron][:ha][:l3][:metering_ra]
-  op node[:neutron][:ha][:l3][:op]
+  agent node[:neutron][:ha][:network][:metering_ra]
+  op node[:neutron][:ha][:network][:op]
   action [ :create ]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive lbaas_agent_primitive do
-  agent node[:neutron][:ha][:l3][:lbaas_ra]
-  op node[:neutron][:ha][:l3][:op]
+  agent node[:neutron][:ha][:network][:lbaas_ra]
+  op node[:neutron][:ha][:network][:op]
   action [ :create ]
   only_if { use_lbaas_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
@@ -75,10 +75,10 @@ when 'ml2'
   case
   when ml2_mech_drivers.include?("openvswitch")
     neutron_agent = node[:neutron][:platform][:ovs_agent_name]
-    neutron_agent_ra = node[:neutron][:ha][:l3]["openvswitch_ra"]
+    neutron_agent_ra = node[:neutron][:ha][:network]["openvswitch_ra"]
   when ml2_mech_drivers.include?("linuxbridge")
     neutron_agent = node[:neutron][:platform][:lb_agent_name]
-    neutron_agent_ra = node[:neutron][:ha][:l3]["linuxbridge_ra"]
+    neutron_agent_ra = node[:neutron][:ha][:network]["linuxbridge_ra"]
   end
 when "vmware"
   neutron_agent = ''
@@ -88,7 +88,7 @@ neutron_agent_primitive = neutron_agent.sub(/^openstack-/, "")
 
 pacemaker_primitive neutron_agent_primitive do
   agent neutron_agent_ra
-  op node[:neutron][:ha][:l3][:op]
+  op node[:neutron][:ha][:network][:op]
   action [ :create ]
   only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
@@ -126,7 +126,7 @@ ha_tool_primitive_name = "neutron-ha-tool"
 # we just rely on the correct CA files being installed in a system wide default
 # location.
 pacemaker_primitive ha_tool_primitive_name do
-  agent node[:neutron][:ha][:l3][:ha_tool_ra]
+  agent node[:neutron][:ha][:network][:ha_tool_ra]
   params ({
     "os_auth_url"    => keystone_settings["internal_auth_url"],
     "os_tenant_name" => keystone_settings["admin_tenant"],
@@ -134,7 +134,7 @@ pacemaker_primitive ha_tool_primitive_name do
     "os_password"    => keystone_settings["admin_password"],
     "os_insecure"    => keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
   })
-  op node[:neutron][:ha][:l3][:op]
+  op node[:neutron][:ha][:network][:op]
   action [ :create, :start ]
   only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
@@ -146,4 +146,4 @@ crowbar_pacemaker_order_only_existing "o-#{ha_tool_primitive_name}" do
   only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-neutron-l3_ha_resources"
+crowbar_pacemaker_sync_mark "create-neutron-network_ha_resources"
