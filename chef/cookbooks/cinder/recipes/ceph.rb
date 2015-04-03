@@ -23,10 +23,13 @@ ceph_keyrings = {}
 node[:cinder][:volumes].each_with_index do |volume, volid|
   next unless volume[:backend_driver] == "rbd"
 
-  ceph_conf = volume[:rbd][:config_file]
-  admin_keyring = volume[:rbd][:admin_keyring]
+  if volume[:rbd][:use_crowbar]
+    ceph_conf = "/etc/ceph/ceph.conf"
+    admin_keyring = "/etc/ceph/ceph.client.admin.keyring"
+  else
+    ceph_conf = volume[:rbd][:config_file]
+    admin_keyring = volume[:rbd][:admin_keyring]
 
-  unless volume[:rbd][:use_crowbar]
     if File.exists?(admin_keyring)
       Chef::Log.info("Using external ceph cluster for cinder #{volume[:backend_name]} backend, with automatic setup.")
     else
