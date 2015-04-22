@@ -199,34 +199,90 @@ bash "register heat domain" do
   user "root"
   code <<-EOF
 
-    OS_URL="#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3"
-
-    eval $(openstack --os-token #{keystone_settings['admin_token']} \
-        --os-url=$OS_URL --os-identity-api-version=3 \
-        --os-region-name='#{keystone_settings['endpoint_region']}' #{insecure} domain show -f shell --variable id #{stack_user_domain_name})
+    # Find domain ID
+    id=
+    eval $(openstack #{insecure} \
+        domain show \
+        -f shell --variable id \
+        #{stack_user_domain_name})
 
     HEAT_DOMAIN_ID=$id
 
     if [ -z "$HEAT_DOMAIN_ID" ]; then
-        HEAT_DOMAIN_ID=$(openstack --os-token #{keystone_settings['admin_token']} \
-            --os-url=$OS_URL --os-identity-api-version=3 \
-            --os-region-name='#{keystone_settings['endpoint_region']}' #{insecure}\
-            domain create #{stack_user_domain_name} \
+        id=
+        eval $(openstack #{insecure} \
+            domain create \
+            -f shell --variable id \
             --description "Owns users and projects created by heat" \
-            | awk '/id/  { print $4 } ')
+            #{stack_user_domain_name})
+        HEAT_DOMAIN_ID=$id
     fi
 
-    openstack --os-token #{keystone_settings['admin_token']} --os-url=$OS_URL \
-        --os-region-name='#{keystone_settings['endpoint_region']}' \
-        --os-identity-api-version=3 #{insecure} user create --password #{node[:heat]["stack_domain_admin_password"]} \
-        --domain $HEAT_DOMAIN_ID #{node[:heat]["stack_domain_admin"]} \
-        --description "Manages users and projects created by heat" || true
+    [ -n "$HEAT_DOMAIN_ID" ] || exit 1
 
-    openstack --os-token #{keystone_settings['admin_token']} --os-url=$OS_URL \
-        --os-region-name='#{keystone_settings['endpoint_region']}' \
-        --os-identity-api-version=3 #{insecure} role add --user #{node[:heat]["stack_domain_admin"]} \
-        --domain $HEAT_DOMAIN_ID admin || true
+    # Find user ID
+    STACK_DOMAIN_ADMIN_ID=
+
+    # we need to loop, as there might be users with this name in different
+    # domains; unfortunately --domain doesn't allow fetching users from just
+    # one domain
+    for userid in $(openstack #{insecure} \
+                        user list \
+                        -f csv \
+                        --domain $HEAT_DOMAIN_ID \
+                        | grep \"#{node[:heat]["stack_domain_admin"]}\" | cut -d , -f 1 | sed 's/"//g'); do
+        domain_id=
+        eval $(openstack #{insecure} \
+            user show \
+            -f shell --variable domain_id \
+            $userid)
+
+        if [ x"$domain_id" = x"$HEAT_DOMAIN_ID" ]; then
+            STACK_DOMAIN_ADMIN_ID=$userid
+            openstack #{insecure} \
+                user set \
+                --domain $HEAT_DOMAIN_ID \
+                --password #{node[:heat]["stack_domain_admin_password"]} \
+                --description "Manages users and projects created by heat" \
+                $STACK_DOMAIN_ADMIN_ID
+            break
+        fi
+    done
+
+    if [ -z "$STACK_DOMAIN_ADMIN_ID" ]; then
+        id=
+        eval $(openstack #{insecure} \
+            user create \
+            -f shell --variable id \
+            --domain $HEAT_DOMAIN_ID \
+            --password #{node[:heat]["stack_domain_admin_password"]} \
+            --description "Manages users and projects created by heat" \
+            #{node[:heat]["stack_domain_admin"]})
+        STACK_DOMAIN_ADMIN_ID=$id
+    fi
+
+    [ -n "$STACK_DOMAIN_ADMIN_ID" ] || exit 1
+
+    # Make user an admin
+    if ! openstack #{insecure} \
+            role list \
+            -f csv --column Name \
+            --domain $HEAT_DOMAIN_ID \
+            --user $STACK_DOMAIN_ADMIN_ID \
+            | grep -q \"admin\"; then
+        openstack #{insecure} \
+            role add \
+            --domain $HEAT_DOMAIN_ID \
+            --user $STACK_DOMAIN_ADMIN_ID \
+            admin
+    fi
   EOF
+  environment ({
+    'OS_TOKEN' => keystone_settings['admin_token'],
+    'OS_URL' => "#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3",
+    'OS_REGION_NAME' => keystone_settings['endpoint_region'],
+    'OS_IDENTITY_API_VERSION' => "3"
+  })
 end
 
 # Create Heat CloudFormation service
