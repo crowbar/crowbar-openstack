@@ -274,6 +274,9 @@ function ml2_type_drivers_check() {
     $('#vxlan_container').hide();
   }
 
+  var use_l2pop = (values.indexOf("gre") >= 0 || values.indexOf("vxlan") >= 0);
+  $('#proposal_attributes').writeJsonAttribute('use_l2pop', use_l2pop);
+
   if (values.length <= 1) {
     $('#ml2_type_drivers_default_provider_network_container').hide();
     $('#ml2_type_drivers_default_tenant_network_container').hide();

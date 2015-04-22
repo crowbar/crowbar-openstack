@@ -245,7 +245,7 @@ class NeutronService < PacemakerServiceObject
         validation_error("DVR requires L2 population")
       end
 
-      unless proposal["deployment"]["neutron"]["elements"].fetch("neutron-network", []).empty? 
+      unless proposal["deployment"]["neutron"]["elements"].fetch("neutron-network", []).empty?
         network_node = proposal["deployment"]["neutron"]["elements"]["neutron-network"][0]
         if is_cluster? network_node
           validation_error("DVR is not compatible with High Availability for neutron-network")
