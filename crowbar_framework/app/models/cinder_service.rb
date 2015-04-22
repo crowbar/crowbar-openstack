@@ -198,6 +198,20 @@ class CinderService < PacemakerServiceObject
     # the VIP of the cluster to be setup
     allocate_virtual_ips_for_any_cluster_in_networks(controller_elements, vip_networks)
 
+    # Generate secrets uuid for libvirt rbd backend
+    proposal = ProposalObject.find_data_bag_item "crowbar/bc-cinder-default"
+    role.default_attributes[:cinder][:volumes].each_with_index do |volume, volid|
+    # proposal[:attributes][:cinder][:volumes].each_with_index do |volume, volid|
+      next unless volume[:backend_driver] == "rbd"
+      if volume[:rbd][:secret_uuid].empty?
+        secret_uuid = `uuidgen`.strip
+        volume[:rbd][:secret_uuid] = secret_uuid
+        proposal[:attributes][:cinder][:volumes][volid][:rbd][:secret_uuid] = secret_uuid
+      end
+    end
+    proposal.save
+    role.save
+
     @logger.debug("Cinder apply_role_pre_chef_call: leaving")
   end
 
