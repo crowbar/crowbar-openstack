@@ -125,6 +125,18 @@ template "/etc/neutron/metering_agent.ini" do
   )
 end
 
+ml2_drivers = node[:neutron][:ml2_type_drivers]
+template "/etc/neutron/dnsmasq-neutron.conf" do
+  source "dnsmasq-neutron.conf.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(
+    # nil means to leave the default MTU
+    :force_mtu => ml2_drivers.include?('gre') || ml2_drivers.include?('vxlan') ? 1400 : nil
+  )
+end
+
 dns_list = node[:dns][:forwarders].join(",")
 
 template "/etc/neutron/dhcp_agent.ini" do
@@ -189,6 +201,7 @@ service node[:neutron][:platform][:dhcp_agent_name] do
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/dhcp_agent.ini]")
+  subscribes :restart, resources("template[/etc/neutron/dnsmasq-neutron.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
