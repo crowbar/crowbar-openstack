@@ -53,7 +53,8 @@ keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   action :add_tenant
 end.run_action(:add_tenant)
 
-%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service orchestration &> /dev/null}
+keystone = "keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]}"
+%x{#{keystone} endpoint-get --service orchestration &> /dev/null}
 use_heat = $?.success?
 
 users = [
@@ -247,13 +248,13 @@ EOH
   })
 end
 
-ec2_access = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`.strip
-ec2_secret = `keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`.strip
+ec2_access = `#{keystone} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`.strip
+ec2_secret = `#{keystone} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`.strip
 raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
 
-%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service metering &> /dev/null}
+%x{#{keystone} endpoint-get --service metering &> /dev/null}
 use_ceilometer = $?.success?
-%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service database &> /dev/null}
+%x{#{keystone} endpoint-get --service database &> /dev/null}
 use_trove = $?.success?
 
 # FIXME: should avoid search with no environment in query
@@ -273,7 +274,7 @@ raise("Cannot fetch ID of floating network") if public_network_id.empty?
 
 # FIXME: the command above should be good enough, but radosgw is broken with
 # tempest; also should avoid search with no environment in query
-#%x{keystone --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} endpoint-get --service object-store &> /dev/null}
+#%x{#{keystone} endpoint-get --service object-store &> /dev/null}
 #use_swift = $?.success?
 swifts = search(:node, "roles:swift-proxy") || []
 use_swift = !swifts.empty?
