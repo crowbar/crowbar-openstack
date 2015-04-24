@@ -81,6 +81,9 @@ $(document).ready(function($) {
       })
     );
 
+    // Make newly-added password fields toggleable
+    $('input[type=password]').hideShowPassword();
+
     // Fix up the select elements by reading the data-initial-value attributes
     // and setting it as value (aka selecting this option by default)
     $("#cinder_backends select[data-initial-value]").each(function(){ $(this).val($(this).data("initial-value").toString()); });
