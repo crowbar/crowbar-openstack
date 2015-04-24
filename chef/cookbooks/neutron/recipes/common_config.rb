@@ -115,7 +115,7 @@ unless nova[:nova].nil? or nova[:nova][:ssl].nil?
   nova_api_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
   nova_api_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
   keystone_insecure = keystone_settings['insecure'] ? "--insecure" : ""
-  nova_insecure = nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]
+  nova_insecure = keystone_settings['insecure'] || (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure])
 
   keystone_register "neutron config wakeup keystone" do
     protocol keystone_settings['protocol']
