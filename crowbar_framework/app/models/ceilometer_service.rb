@@ -37,6 +37,13 @@ class CeilometerService < PacemakerServiceObject
             "windows" => "/.*/"
           }
         },
+        "ceilometer-agent-hyperv" => {
+          "unique" => false,
+          "count" => -1,
+          "platform" => {
+            "windows" => "/.*/"
+          }
+        },
         "ceilometer-cagent" => {
           "unique" => false,
           "count" => 1,
@@ -90,6 +97,8 @@ class CeilometerService < PacemakerServiceObject
       NodeObject.find("roles:nova-multi-compute-vmware") +
       NodeObject.find("roles:nova-multi-compute-xen")
 
+    hyperv_agent_nodes = NodeObject.find("roles:nova-multi-compute-hyperv")
+
     nodes       = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
 
@@ -100,6 +109,7 @@ class CeilometerService < PacemakerServiceObject
 
     base["deployment"]["ceilometer"]["elements"] = {
         "ceilometer-agent" => agent_nodes.map { |x| x.name },
+        "ceilometer-agent-hyperv" => hyperv_agent_nodes.map { |x| x.name },
         "ceilometer-cagent" => [ server_nodes.first.name ],
         "ceilometer-server" => [ server_nodes.first.name ],
         "ceilometer-swift-proxy-middleware" => swift_proxy_nodes.map { |x| x.name }
@@ -118,6 +128,10 @@ class CeilometerService < PacemakerServiceObject
     validate_one_for_role proposal, "ceilometer-server"
 
     validate_minimum_three_nodes_in_cluster(proposal)
+
+    unless proposal["deployment"]["ceilometer"]["elements"]["ceilometer-agent-hyperv"].empty? || hyperv_available?
+      validation_error("Hyper-V support is not available.")
+    end
 
     swift_proxy_nodes = NodeObject.find("roles:swift-proxy").map { |x| x.name }
     if proposal["deployment"]["ceilometer"]["elements"]["ceilometer-swift-proxy-middleware"]
@@ -141,6 +155,10 @@ class CeilometerService < PacemakerServiceObject
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Ceilometer apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
+
+    unless hyperv_available?
+      role.override_attributes["ceilometer"]["elements"]["ceilometer-hyperv-agent"] = []
+    end
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "ceilometer-server")
 
@@ -239,4 +257,9 @@ class CeilometerService < PacemakerServiceObject
         ) if nodes.length < 3
     end
   end
+
+  def hyperv_available?
+    return File.exist?('/opt/dell/chef/cookbooks/hyperv')
+  end
+
 end
