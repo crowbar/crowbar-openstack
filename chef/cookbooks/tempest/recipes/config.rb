@@ -128,6 +128,7 @@ end.run_action(:add_access)
 end
 
 machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
+docker_image_id_file = node[:tempest][:tempest_path] + '/docker_machine.id'
 heat_machine_id_file = node[:tempest][:tempest_path] + '/heat_machine.id'
 
 glance_node = search(:node, "roles:glance-server").first
@@ -313,9 +314,37 @@ if backend_names.length > 1
   cinder_backend2_name = backend_names[1]
 end
 
-compute_nodes = search(:node, "roles:nova-multi-compute-kvm") || []
-use_resize = compute_nodes.length > 1
-use_livemigration = nova[:nova][:use_migration] && compute_nodes.length > 1
+kvm_compute_nodes = search(:node, "roles:nova-multi-compute-kvm") || []
+docker_compute_nodes = search(:node, "roles:nova-multi-compute-docker") || []
+
+use_resize = kvm_compute_nodes.length > 1
+use_livemigration = nova[:nova][:use_migration] && kvm_compute_nodes.length > 1
+
+if !docker_compute_nodes.empty? && kvm_compute_nodes.empty?
+  bash "find tempest test image for docker" do
+    code <<-EOH
+DOCKER_IMAGE_ID=$(glance #{insecure} image-list \
+    --name cirros \
+    --container-format docker \
+    --is-public True \
+    --page-size 1 \
+    2> /dev/null | tail -n 2 | head -n 1 | awk '{ print $2 }')
+[ -n "$DOCKER_IMAGE_ID" ] && echo "$DOCKER_IMAGE_ID" > #{docker_image_id_file}
+EOH
+    environment ({
+      'IMAGE_URL' => node[:tempest][:tempest_test_image],
+      'OS_USERNAME' => tempest_adm_user,
+      'OS_PASSWORD' => tempest_adm_pass,
+      'OS_TENANT_NAME' => tempest_comp_tenant,
+      'OS_AUTH_URL' => keystone_settings["internal_auth_url"]
+    })
+    not_if { File.exists?(docker_image_id_file) }
+  end
+
+  use_docker = true
+else
+  use_docker = false
+end
 
 # FIXME: should avoid search with no environment in query
 horizons = search(:node, "roles:nova_dashboard-server") || []
@@ -342,7 +371,7 @@ template "#{tempest_conf}" do
   variables(
     # general settings
     :keystone_settings => keystone_settings,
-    :machine_id_file => machine_id_file,
+    :machine_id_file => use_docker ? docker_image_id_file : machine_id_file,
     :tempest_path => node[:tempest][:tempest_path],
     :use_swift => use_swift,
     :use_horizon => use_horizon,
