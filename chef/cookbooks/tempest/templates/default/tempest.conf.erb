@@ -677,7 +677,7 @@ http_image = <%= @http_image %>
 flavor_regex = ^tempest-stuff$
 
 # Matching images become parameters for scenario tests (string value)
-image_regex = ^cirros-<%= @cirros_version %>-x86_64-tempest-machine$
+image_regex = <%= @image_regex %>
 
 # SSH verification in tests is skippedfor matching images (string
 # value)

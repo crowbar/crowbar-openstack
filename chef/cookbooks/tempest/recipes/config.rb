@@ -134,6 +134,8 @@ heat_machine_id_file = node[:tempest][:tempest_path] + '/heat_machine.id'
 glance_node = search(:node, "roles:glance-server").first
 insecure = (keystone_settings["insecure"] || glance_node[:glance][:ssl][:insecure]) ? "--insecure" : ""
 
+cirros_version = File.basename(node[:tempest][:tempest_test_image]).gsub(/^cirros-/, "").gsub(/-.*/, "")
+
 bash "upload tempest test image" do
   code <<-EOH
 IMAGE_URL=${IMAGE_URL:-"http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-uec.tar.gz"}
@@ -321,10 +323,12 @@ use_resize = kvm_compute_nodes.length > 1
 use_livemigration = nova[:nova][:use_migration] && kvm_compute_nodes.length > 1
 
 if !docker_compute_nodes.empty? && kvm_compute_nodes.empty?
+  image_name = "cirros"
+
   bash "find tempest test image for docker" do
     code <<-EOH
 DOCKER_IMAGE_ID=$(glance #{insecure} image-list \
-    --name cirros \
+    --name #{image_name} \
     --container-format docker \
     --is-public True \
     --page-size 1 \
@@ -347,12 +351,14 @@ EOH
   use_suspend = false
   # no vnc support: https://bugs.launchpad.net/nova-docker/+bug/1321818
   use_vnc = false
+  image_regex = "^#{image_name}$"
 else
   use_docker = false
   use_interface_attach = true
   use_rescue = true
   use_suspend = true
   use_vnc = true
+  image_regex = "^cirros-#{cirros_version}-x86_64-tempest-machine$"
 end
 
 # FIXME: should avoid search with no environment in query
@@ -431,7 +437,8 @@ template "#{tempest_conf}" do
     :heat_flavor_ref => heat_flavor_ref,
     :heat_machine_id_file => heat_machine_id_file,
     # scenario settings
-    :cirros_version => File.basename(node[:tempest][:tempest_test_image]).gsub(/^cirros-/, "").gsub(/-.*/, ""),
+    :cirros_version => cirros_version,
+    :image_regex => image_regex,
     # volume settings
     :cinder_multi_backend => cinder_multi_backend,
     :cinder_backend1_name => cinder_backend1_name,
