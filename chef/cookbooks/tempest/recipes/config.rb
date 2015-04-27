@@ -344,10 +344,13 @@ EOH
   use_docker = true
   use_interface_attach = false
   use_rescue = false
+  # no vnc support: https://bugs.launchpad.net/nova-docker/+bug/1321818
+  use_vnc = false
 else
   use_docker = false
   use_interface_attach = true
   use_rescue = true
+  use_vnc = true
 end
 
 # FIXME: should avoid search with no environment in query
@@ -399,6 +402,7 @@ template "#{tempest_conf}" do
     :use_interface_attach => use_interface_attach,
     :use_rescue => use_rescue,
     :use_resize => use_resize,
+    :use_vnc => use_vnc,
     :use_livemigration => use_livemigration,
     # dashboard settings
     :horizon_host => horizon_host,

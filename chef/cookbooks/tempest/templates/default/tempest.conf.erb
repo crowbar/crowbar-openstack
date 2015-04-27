@@ -467,7 +467,7 @@ resize = <%= @use_resize %>
 
 # Enable VNC console. This configuration value should be same as
 # [nova.vnc]->vnc_enabled in nova.conf (boolean value)
-vnc_console = true
+vnc_console = <%= @use_vnc %>
 
 
 [dashboard]
