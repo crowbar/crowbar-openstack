@@ -344,12 +344,14 @@ EOH
   use_docker = true
   use_interface_attach = false
   use_rescue = false
+  use_suspend = false
   # no vnc support: https://bugs.launchpad.net/nova-docker/+bug/1321818
   use_vnc = false
 else
   use_docker = false
   use_interface_attach = true
   use_rescue = true
+  use_suspend = true
   use_vnc = true
 end
 
@@ -402,6 +404,7 @@ template "#{tempest_conf}" do
     :use_interface_attach => use_interface_attach,
     :use_rescue => use_rescue,
     :use_resize => use_resize,
+    :use_suspend => use_suspend,
     :use_vnc => use_vnc,
     :use_livemigration => use_livemigration,
     # dashboard settings

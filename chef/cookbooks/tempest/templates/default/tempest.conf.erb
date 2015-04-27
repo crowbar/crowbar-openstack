@@ -463,7 +463,7 @@ resize = <%= @use_resize %>
 #spice_console = false
 
 # Does the test environment support suspend/resume? (boolean value)
-#suspend = true
+suspend = <%= @use_suspend %>
 
 # Enable VNC console. This configuration value should be same as
 # [nova.vnc]->vnc_enabled in nova.conf (boolean value)
