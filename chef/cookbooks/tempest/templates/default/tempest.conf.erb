@@ -430,7 +430,7 @@ block_migration_for_live_migration = true
 
 # Does the test environment support dynamic network interface
 # attachment? (boolean value)
-#interface_attach = true
+interface_attach = <%= @use_interface_attach %>
 
 # Does the test environment support live migration available? (boolean
 # value)
