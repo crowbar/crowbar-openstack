@@ -238,8 +238,6 @@ neutron_network_ha = node.roles.include?("neutron-network") && neutron[:neutron]
 
 # ML2 configuration: L2 agent and L3 agent
 if neutron[:neutron][:networking_plugin] == "ml2"
-  include_recipe "neutron::common_config"
-
   ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
   ml2_type_drivers = neutron[:neutron][:ml2_type_drivers]
 
@@ -259,6 +257,9 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
     external_network_bridge = ""
   end
+
+  # include neutron::common_config only now, after we've installed packages
+  include_recipe "neutron::common_config"
 
   # L2 agent
   if neutron[:neutron][:use_gitrepo]
