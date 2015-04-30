@@ -62,33 +62,12 @@ if %w(redhat centos).include?(node.platform)
 end
 
 
-node[:neutron] ||= Mash.new
-if not node[:neutron].has_key?("rootwrap")
-  node.set[:neutron][:rootwrap] = "/usr/bin/neutron-rootwrap"
-end
-
-# Update path to neutron-rootwrap in case the path above is wrong
-ruby_block "Find neutron rootwrap" do
-  block do
-    found = false
-    ENV['PATH'].split(':').each do |p|
-      f = File.join(p,"neutron-rootwrap")
-      next unless File.executable?(f)
-      node.set[:neutron][:rootwrap] = f
-      node.save
-      found = true
-      break
-    end
-    raise("Could not find neutron rootwrap binary!") unless found
-  end
-end
-
 template neutron[:neutron][:platform][:neutron_rootwrap_sudo_template] do
   cookbook "neutron"
   source "neutron-rootwrap.erb"
   mode 0440
   variables(:user => neutron[:neutron][:platform][:user],
-            :binary => node[:neutron][:rootwrap])
+            :binary => "/usr/bin/neutron-rootwrap")
   not_if { node.platform == "suse" }
 end
 
