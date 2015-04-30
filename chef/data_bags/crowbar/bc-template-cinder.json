@@ -12,30 +12,9 @@
       "database_instance": "none",
       "service_user": "cinder",
       "service_password": "",
-      "gitrepo": "http://github.com/openstack/cinder.git",
-      "git_instance": "",
-      "git_refspec": "stable/icehouse",
-      "use_gitrepo": false,
-      "use_gitbarclamp": true,
-      "use_virtualenv": true,
-      "use_pip_cache": true,
       "max_pool_size": 30,
       "max_overflow": 10,
       "pool_timeout": 30,
-      "pfs_deps": [
-        "kpartx",
-        "parted",
-        "gawk",
-        "sqlite3",
-        "sudo",
-        "lvm2",
-        "open-iscsi",
-        "open-iscsi-utils",
-        "tgt",
-        "pip://distribute>=0.6.28",
-        "pip://MySQL-python",
-        "pip://python-cinderclient>=1.0.5"
-      ],
       "use_multi_backend": true,
       "volume_defaults": {
         "raw": {
@@ -143,7 +122,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 34,
+      "schema-revision": 40,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

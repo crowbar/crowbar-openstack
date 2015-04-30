@@ -36,6 +36,3 @@ crowbar:
   run_order: 92
   chef_order: 92
   proposal_schema_version: 3
-
-git_repo:
-  - 'cinder https://github.com/openstack/cinder.git stable/juno'

@@ -19,12 +19,6 @@
 # limitations under the License.
 #
 
-if node[:cinder][:use_gitrepo]
-  cinder_path = "/opt/cinder"
-  venv_path = node[:cinder][:use_virtualenv] ? "#{cinder_path}/.venv" : nil
-  venv_prefix = node[:cinder][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
-end
-
 ha_enabled = node[:cinder][:ha][:enabled]
 
 db_settings = fetch_database_settings
@@ -67,7 +61,7 @@ database_user "grant database access for cinder database user" do
 end
 
 execute "cinder-manage db sync" do
-  command "#{venv_prefix}cinder-manage db sync"
+  command "cinder-manage db sync"
   user node[:cinder][:user]
   group node[:cinder][:group]
   # We only do the sync the first time, and only if we're not doing HA or if we

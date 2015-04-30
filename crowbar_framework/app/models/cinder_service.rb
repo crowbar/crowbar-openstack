@@ -55,9 +55,7 @@ class CinderService < PacemakerServiceObject
 
   def proposal_dependencies(role)
     answer = []
-    deps = ["database", "keystone", "glance", "rabbitmq"]
-    deps << "git" if role.default_attributes[@bc_name]["use_gitrepo"]
-    deps.each do |dep|
+    ["database", "keystone", "glance", "rabbitmq"].each do |dep|
       answer << { "barclamp" => dep, "inst" => role.default_attributes[@bc_name]["#{dep}_instance"] }
     end
     answer
@@ -76,7 +74,6 @@ class CinderService < PacemakerServiceObject
       "cinder-volume" => storage.map { |x| x.name }
     }
 
-    base["attributes"][@bc_name]["git_instance"] = find_dep_proposal("git", true)
     base["attributes"][@bc_name]["database_instance"] = find_dep_proposal("database")
     base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
@@ -173,10 +170,6 @@ class CinderService < PacemakerServiceObject
 
     if rbd_crowbar && rbd_ceph_conf
       validation_error("RADOS backends not deployed with Crowbar cannot use /etc/ceph/ceph.conf as configuration files when also using the RADOS backend deployed with Crowbar.")
-    end
-
-    if proposal["attributes"][@bc_name]["use_gitrepo"]
-      validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
     end
 
     super
