@@ -48,9 +48,6 @@ class HeatService < PacemakerServiceObject
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["heat"]["rabbitmq_instance"] }
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes["heat"]["keystone_instance"] }
     answer << { "barclamp" => "database", "inst" => role.default_attributes["heat"]["database_instance"] }
-    if role.default_attributes["heat"]["use_gitrepo"]
-      answer << { "barclamp" => "git", "inst" => role.default_attributes["heat"]["git_instance"] }
-    end
     answer
   end
 
@@ -58,7 +55,6 @@ class HeatService < PacemakerServiceObject
     @logger.debug("Heat create_proposal: entering")
     base = super
 
-    base["attributes"][@bc_name]["git_instance"] = find_dep_proposal("git", true)
     base["attributes"][@bc_name]["database_instance"] = find_dep_proposal("database")
     base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
@@ -88,10 +84,6 @@ class HeatService < PacemakerServiceObject
 
   def validate_proposal_after_save proposal
     validate_one_for_role proposal, "heat-server"
-
-    if proposal["attributes"][@bc_name]["use_gitrepo"]
-      validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
-    end
 
     super
   end

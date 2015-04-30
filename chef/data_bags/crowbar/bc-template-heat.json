@@ -13,20 +13,7 @@
       "service_user": "heat",
       "service_password": "",
       "auth_encryption_key": "",
-      "gitrepo": "http://github.com/openstack/heat.git",
-      "git_instance": "",
-      "git_refspec": "stable/icehouse",
-      "use_gitrepo": false,
-      "use_gitbarclamp": false,
-      "use_pip_cache": false,
       "default_instance_user": "ec2-user",
-      "pfs_deps": [
-        "pip://python-heatclient",
-        "pip://setuptools-git",
-        "pip://distribute>=0.6.28",
-        "pip://MySQL-python"
-      ],
-      "use_virtualenv": false,
       "api": {
         "protocol": "http",
         "cfn_port": 8000,
@@ -45,7 +32,7 @@
     "heat": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 15,
+      "schema-revision": 20,
       "element_states": {
         "heat-server": [ "readying", "ready", "applying" ]
       },

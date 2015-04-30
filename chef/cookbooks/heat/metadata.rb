@@ -6,7 +6,6 @@ long_description IO.read(File.join(File.dirname(__FILE__), 'README.me'))
 version          "0.1"
 
 depends "nagios"
-depends "git"
 depends "keystone"
 depends "database"
 depends "crowbar-openstack"
