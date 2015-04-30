@@ -68,9 +68,6 @@ class NeutronService < PacemakerServiceObject
 
   def proposal_dependencies(role)
     answer = []
-    if role.default_attributes["neutron"]["use_gitrepo"]
-      answer << { "barclamp" => "git", "inst" => role.default_attributes["neutron"]["git_instance"] }
-    end
     answer << { "barclamp" => "database", "inst" => role.default_attributes["neutron"]["database_instance"] }
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["neutron"]["rabbitmq_instance"] }
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes["neutron"]["keystone_instance"] }
@@ -83,7 +80,6 @@ class NeutronService < PacemakerServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
 
-    base["attributes"][@bc_name]["git_instance"] = find_dep_proposal("git", true)
     base["attributes"][@bc_name]["database_instance"] = find_dep_proposal("database")
     base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
@@ -153,10 +149,6 @@ class NeutronService < PacemakerServiceObject
   def validate_proposal_after_save proposal
     validate_one_for_role proposal, "neutron-server"
     validate_at_least_n_for_role proposal, "neutron-network", 1
-
-    if proposal["attributes"][@bc_name]["use_gitrepo"]
-      validate_dep_proposal_is_active "git", proposal["attributes"][@bc_name]["git_instance"]
-    end
 
     plugin = proposal["attributes"]["neutron"]["networking_plugin"]
     ml2_mechanism_drivers = proposal["attributes"]["neutron"]["ml2_mechanism_drivers"]

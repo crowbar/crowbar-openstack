@@ -16,33 +16,12 @@
 
 include_recipe "neutron::common_agent"
 
-unless node[:neutron][:use_gitrepo]
-  pkgs = [ node[:neutron][:platform][:dhcp_agent_pkg], node[:neutron][:platform][:metering_agent_pkg] ]
-  pkgs.uniq.each { |p| package p }
+pkgs = [ node[:neutron][:platform][:dhcp_agent_pkg], node[:neutron][:platform][:metering_agent_pkg] ]
+pkgs.uniq.each { |p| package p }
 
-  if node[:neutron][:use_lbaas]
-    package node[:neutron][:platform][:lbaas_agent_pkg]
-  end
-else
-  neutron_path = "/opt/neutron"
-  venv_path = node[:neutron][:use_virtualenv] ? "#{neutron_path}/.venv" : nil
-
-  link_service "neutron-dhcp-agent" do
-    virtualenv venv_path
-    bin_name "neutron-dhcp-agent --config-dir /etc/neutron/"
-  end
-  if node[:neutron][:use_lbaas]
-    link_service "neutron-lbaas-agent" do
-      virtualenv venv_path
-      bin_name "neutron-lbaas-agent --config-dir /etc/neutron/ --config-file /etc/neutron/lbaas_agent.ini"
-    end
-  end
-  link_service "neutron-metering-agent" do
-    virtualenv venv_path
-    bin_name "neutron-metering-agent --config-dir /etc/neutron/ --config-file /etc/neutron/metering_agent.ini"
-  end
+if node[:neutron][:use_lbaas]
+  package node[:neutron][:platform][:lbaas_agent_pkg]
 end
-
 
 # Enable ip forwarding on network node for SLE11
 ruby_block "edit /etc/sysconfig/sysctl for IP_FORWARD" do
@@ -176,7 +155,6 @@ end
 ha_enabled = node[:neutron][:ha][:network][:enabled]
 
 service node[:neutron][:platform][:metering_agent_name] do
-  service_name "neutron-metering-agent" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
@@ -186,7 +164,6 @@ end
 
 if node[:neutron][:use_lbaas] then
   service node[:neutron][:platform][:lbaas_agent_name] do
-    service_name "neutron-lbaas-agent" if node[:neutron][:use_gitrepo]
     supports :status => true, :restart => true
     action [:enable, :start]
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
@@ -196,7 +173,6 @@ if node[:neutron][:use_lbaas] then
 end
 
 service node[:neutron][:platform][:dhcp_agent_name] do
-  service_name "neutron-dhcp-agent" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")

@@ -4,23 +4,8 @@
   "attributes": {
     "neutron": {
       "service_user": "neutron",
-      "gitrepo": "http://github.com/openstack/neutron.git",
-      "git_instance": "",
-      "git_refspec": "stable/icehouse",
-      "use_gitbarclamp": true,
-      "use_pip_cache": true,
-      "use_gitrepo": false,
-      "use_virtualenv": true,
       "rabbitmq_instance": "none",
       "keystone_instance": "none",
-      "pfs_deps": [
-        "libmysqlclient-dev",
-        "pip://setuptools-git",
-        "pip://distribute==0.6.28",
-        "pip://MySQL-python",
-        "pip://pyudev",
-        "pip://six"
-      ],
       "debug": false,
       "verbose": true,
       "dhcp_domain": "openstack.local",
@@ -81,7 +66,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 27,
+      "schema-revision": 40,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

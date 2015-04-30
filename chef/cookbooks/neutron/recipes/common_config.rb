@@ -64,11 +64,7 @@ end
 
 node[:neutron] ||= Mash.new
 if not node[:neutron].has_key?("rootwrap")
-  unless neutron[:neutron][:use_gitrepo]
-    node.set[:neutron][:rootwrap] = "/usr/bin/neutron-rootwrap"
-  else
-    node.set[:neutron][:rootwrap] = "/usr/local/bin/neutron-rootwrap"
-  end
+  node.set[:neutron][:rootwrap] = "/usr/bin/neutron-rootwrap"
 end
 
 # Update path to neutron-rootwrap in case the path above is wrong

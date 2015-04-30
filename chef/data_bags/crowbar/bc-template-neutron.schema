@@ -13,7 +13,6 @@
                     "service_password": { "type": "str" },
                     "rabbitmq_instance": { "type": "str", "required": true },
                     "keystone_instance": { "type": "str", "required": true },
-                    "gitrepo": { "type": "str", "required": true },
                     "dhcp_domain": { "type": "str", "required": true },
                     "use_lbaas": { "type": "bool", "required": true },
                     "use_l2pop": { "type": "bool", "required": true },
@@ -62,13 +61,6 @@
                         }
                       }
                     },
-                    "git_instance": { "type": "str", "required": true },
-                    "git_refspec": { "type": "str", "required": true },
-                    "use_gitrepo": { "type": "bool", "required": true },
-                    "use_virtualenv": { "type": "bool", "required": true },
-                    "use_gitbarclamp": { "type": "bool", "required": true },
-                    "use_pip_cache": { "type": "bool", "required": true },
-                    "pfs_deps": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
                     "use_syslog": { "type": "bool", "required": true },
                     "database_instance": { "type": "str", "required": true },
                     "db": { "type": "map", "required": true, "mapping": {

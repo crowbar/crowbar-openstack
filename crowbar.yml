@@ -35,6 +35,3 @@ crowbar:
   run_order: 94
   chef_order: 94
   proposal_schema_version: 3
-
-git_repo:
-  - 'neutron https://github.com/openstack/neutron.git stable/juno'
