@@ -1,5 +1,3 @@
-default[:tempest][:use_virtualenv] = false
-
 default[:tempest][:tempest_path] = "/opt/tempest"
 
 if node.platform == "suse"

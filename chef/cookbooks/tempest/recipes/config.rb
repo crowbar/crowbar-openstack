@@ -330,13 +330,7 @@ else
   horizon_protocol = horizon[:nova_dashboard][:apache][:ssl] ? "https" : "http"
 end
 
-if node[:tempest][:use_gitrepo]
-  tempest_conf = "#{node[:tempest][:tempest_path]}/etc/tempest.conf"
-else
-  tempest_conf = "/etc/tempest/tempest.conf"
-end
-
-template "#{tempest_conf}" do
+template "/etc/tempest/tempest.conf" do
   source "tempest.conf.erb"
   mode 0644
   variables(
@@ -410,8 +404,7 @@ end
       :comp_tenant => tempest_comp_tenant,
       :comp_user => tempest_comp_user,
       :keystone_settings => keystone_settings,
-      :tempest_path => node[:tempest][:tempest_path],
-      :use_virtualenv => node[:tempest][:use_virtualenv]
+      :tempest_path => node[:tempest][:tempest_path]
     )
   end
 end
