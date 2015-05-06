@@ -13,10 +13,6 @@
 # limitations under the License.
 #
 
-heat_path = "/opt/heat"
-venv_path = node[:heat][:use_virtualenv] ? "#{heat_path}/.venv" : nil
-venv_prefix = node[:heat][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
-
 ha_enabled = node[:heat][:ha][:enabled]
 
 db_settings = fetch_database_settings
@@ -60,26 +56,8 @@ end
 
 crowbar_pacemaker_sync_mark "create-heat_database"
 
-unless node[:heat][:use_gitrepo]
-  node[:heat][:platform][:packages].each do |p|
-    package p
-  end
-
-else
-  pfs_and_install_deps @cookbook_name do
-    virtualenv venv_path
-    path heat_path
-    wrap_bins "heat"
-  end
-
-  node[:heat][:platform][:services].each do |s|
-    link_service s do
-      virtualenv venv_path
-    end
-  end
-
-  create_user_and_dirs("heat")
-
+node[:heat][:platform][:packages].each do |p|
+  package p
 end
 
 directory "/var/cache/heat" do
@@ -426,7 +404,7 @@ crowbar_pacemaker_sync_mark "wait-heat_db_sync"
 execute "heat-manage db_sync" do
   user node[:heat][:user]
   group node[:heat][:group]
-  command "#{venv_prefix}heat-manage db_sync"
+  command "heat-manage db_sync"
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
   only_if { !node[:heat][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }

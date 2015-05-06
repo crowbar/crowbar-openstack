@@ -41,6 +41,3 @@ crowbar:
   run_order: 97
   chef_order: 97
   proposal_schema_version: 3
-
-git_repo:
-  - 'heat https://github.com/openstack/heat.git stable/juno'
