@@ -16,8 +16,8 @@
 
 include_recipe "neutron::common_agent"
 
-pkgs = [ node[:neutron][:platform][:dhcp_agent_pkg], node[:neutron][:platform][:metering_agent_pkg] ]
-pkgs.uniq.each { |p| package p }
+package node[:neutron][:platform][:dhcp_agent_pkg]
+package node[:neutron][:platform][:metering_agent_pkg]
 
 if node[:neutron][:use_lbaas]
   package node[:neutron][:platform][:lbaas_agent_pkg]
