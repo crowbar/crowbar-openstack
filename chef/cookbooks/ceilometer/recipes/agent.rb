@@ -13,39 +13,13 @@
 # limitations under the License.
 #
 
-unless node[:ceilometer][:use_gitrepo]
-  package "ceilometer-agent-compute" do
-    if %w(suse).include?(node.platform)
-      package_name "openstack-ceilometer-agent-compute"
-    elsif %w(redhat centos).include?(node.platform)
-      package_name "openstack-ceilometer-compute"
-    end
-    action :install
+package "ceilometer-agent-compute" do
+  if %w(suse).include?(node.platform)
+    package_name "openstack-ceilometer-agent-compute"
+  elsif %w(redhat centos).include?(node.platform)
+    package_name "openstack-ceilometer-compute"
   end
-else
-  ceilometer_path = "/opt/ceilometer"
-
-  venv_path = node[:ceilometer][:use_virtualenv] ? "#{ceilometer_path}/.venv" : nil
-  venv_prefix = node[:ceilometer][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
-  puts "venv_path=#{venv_path}"
-  puts "use_virtualenv=#{node[:ceilometer][:use_virtualenv]}"
-  pfs_and_install_deps "ceilometer" do
-    cookbook "ceilometer"
-    cnode node
-    virtualenv venv_path
-    path ceilometer_path
-    wrap_bins [ "ceilometer" ]
-  end
-
-  link_service "ceilometer-agent-compute" do
-    virtualenv venv_path
-  end
-
-  create_user_and_dirs(@cookbook_name)
-  execute "cp_policy.json" do
-    command "cp #{ceilometer_path}/etc/ceilometer/policy.json /etc/ceilometer"
-    creates "/etc/ceilometer/policy.json"
-  end
+  action :install
 end
 
 include_recipe "#{@cookbook_name}::common"

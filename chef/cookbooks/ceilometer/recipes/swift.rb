@@ -13,27 +13,13 @@
 # limitations under the License.
 #
 
-unless node[:ceilometer][:use_gitrepo]
-  case node["platform"]
-    when "ubuntu", "debian"
-      package "ceilometer-common"
-      package "swift-proxy"
-    else
-      package "openstack-ceilometer"
-      package "openstack-swift-proxy" # we need it for swift user presence
-  end
-else
-  ceilometer_path = "/opt/ceilometer"
-  venv_path = node[:ceilometer][:use_virtualenv] ? "#{ceilometer_path}/.venv" : nil
-  venv_prefix = node[:ceilometer][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
-  pfs_and_install_deps "ceilometer" do
-    cookbook "ceilometer"
-    cnode node
-    virtualenv venv_path
-    path ceilometer_path
-    wrap_bins [ "ceilometer" ]
-  end
-  create_user_and_dirs(@cookbook_name)
+case node["platform"]
+  when "ubuntu", "debian"
+    package "ceilometer-common"
+    package "swift-proxy"
+  else
+    package "openstack-ceilometer"
+    package "openstack-swift-proxy" # we need it for swift user presence
 end
 
 include_recipe "#{@cookbook_name}::common"

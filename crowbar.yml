@@ -23,7 +23,6 @@ barclamp:
   user_managed: true
   requires:
     - '@crowbar'
-    - 'git'
     - 'pacemaker'
     - 'database'
     - 'rabbitmq'
@@ -40,6 +39,3 @@ crowbar:
 
 smoketest:
   timeout: 1200
-
-git_repo:
-  - 'ceilometer https://github.com/openstack/ceilometer.git stable/juno'

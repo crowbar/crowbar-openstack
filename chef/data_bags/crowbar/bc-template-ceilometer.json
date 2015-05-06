@@ -17,18 +17,6 @@
       "keystone_instance": "none",
       "service_user": "ceilometer",
       "service_password": "",
-      "gitrepo": "http://github.com/openstack/ceilometer.git",
-      "git_instance": "",
-      "git_refspec": "stable/icehouse",
-      "use_gitrepo": false,
-      "use_gitbarclamp": true,
-      "use_pip_cache": true,
-      "use_virtualenv": true,
-      "pfs_deps": [
-        "gawk",
-        "sqlite3",
-        "sudo"
-      ],
       "api": {
         "protocol": "http",
         "port": 8777
@@ -47,7 +35,7 @@
     "ceilometer": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 13,
+      "schema-revision": 20,
       "element_states": {
         "ceilometer-server": [ "readying", "ready", "applying" ],
         "ceilometer-cagent": [ "readying", "ready", "applying" ],

@@ -105,60 +105,28 @@ else
   crowbar_pacemaker_sync_mark "create-ceilometer_database"
 end
 
-unless node[:ceilometer][:use_gitrepo]
-  case node["platform"]
-    when "suse"
-      package "openstack-ceilometer-collector"
-      package "openstack-ceilometer-agent-notification"
-      package "openstack-ceilometer-api"
-      package "openstack-ceilometer-alarm-evaluator"
-      package "openstack-ceilometer-alarm-notifier"
-    when "centos", "redhat"
-      package "openstack-ceilometer-common"
-      package "openstack-ceilometer-collector"
-      package "openstack-ceilometer-agent-notification"
-      package "openstack-ceilometer-api"
-      package "openstack-ceilometer-alarm"
-      package "python-ceilometerclient"
-    else
-      package "python-ceilometerclient"
-      package "ceilometer-common"
-      package "ceilometer-collector"
-      package "ceilometer-agent-notification"
-      package "ceilometer-api"
-      package "ceilometer-alarm-evaluator"
-      package "ceilometer-alarm-notifier"
-  end
-else
-  ceilometer_path = "/opt/ceilometer"
-
-  venv_path = node[:ceilometer][:use_virtualenv] ? "#{ceilometer_path}/.venv" : nil
-  venv_prefix = node[:ceilometer][:use_virtualenv] ? ". #{venv_path}/bin/activate &&" : nil
-  puts "venv_path=#{venv_path}"
-  puts "use_virtualenv=#{node[:ceilometer][:use_virtualenv]}"
-  pfs_and_install_deps "ceilometer" do
-    cookbook "ceilometer"
-    cnode node
-    virtualenv venv_path
-    path ceilometer_path
-    wrap_bins [ "ceilometer" ]
-  end
-
-  link_service "ceilometer-collector" do
-    virtualenv venv_path
-  end
-  link_service "ceilometer-agent-notification" do
-    virtualenv venv_path
-  end
-  link_service "ceilometer-api" do
-    virtualenv venv_path
-  end
-
-  create_user_and_dirs("ceilometer")
-  execute "cp_policy.json" do
-    command "cp #{ceilometer_path}/etc/ceilometer/policy.json /etc/ceilometer"
-    creates "/etc/ceilometer/policy.json"
-  end
+case node["platform"]
+  when "suse"
+    package "openstack-ceilometer-collector"
+    package "openstack-ceilometer-agent-notification"
+    package "openstack-ceilometer-api"
+    package "openstack-ceilometer-alarm-evaluator"
+    package "openstack-ceilometer-alarm-notifier"
+  when "centos", "redhat"
+    package "openstack-ceilometer-common"
+    package "openstack-ceilometer-collector"
+    package "openstack-ceilometer-agent-notification"
+    package "openstack-ceilometer-api"
+    package "openstack-ceilometer-alarm"
+    package "python-ceilometerclient"
+  else
+    package "python-ceilometerclient"
+    package "ceilometer-common"
+    package "ceilometer-collector"
+    package "ceilometer-agent-notification"
+    package "ceilometer-api"
+    package "ceilometer-alarm-evaluator"
+    package "ceilometer-alarm-notifier"
 end
 
 include_recipe "#{@cookbook_name}::common"
@@ -178,7 +146,7 @@ my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:
 crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync"
 
 execute "ceilometer-dbsync" do
-  command "#{venv_prefix}ceilometer-dbsync"
+  command "ceilometer-dbsync"
   action :run
   user node[:ceilometer][:user]
   group node[:ceilometer][:group]
