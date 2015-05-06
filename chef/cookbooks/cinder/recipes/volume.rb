@@ -219,15 +219,8 @@ unless %w(redhat centos).include? node.platform
 else
  package "scsi-target-utils"
 end
-if node[:cinder][:use_gitrepo]
-  #TODO(agordeev):
-  # tgt will not work with iSCSI targets if it has the same configs in conf.d
-  # e.g. cinder_tgt.conf (which comes from packages) and cinder-volume.conf
-  # with the same data such as 'include /var/lib/cinder/volumes/*'
-  cookbook_file "/etc/tgt/conf.d/cinder-volume.conf" do
-    source "cinder-volume.conf"
-  end
-elsif %w(redhat centos suse).include? node.platform
+# Note: Ubuntu provides cinder_tgt.conf with the package
+if %w(redhat centos suse).include? node.platform
   cookbook_file "/etc/tgt/targets.conf" do
     source "cinder-volume.conf"
     notifies :restart, "service[tgt]" if %w(redhat centos).include? node.platform

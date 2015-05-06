@@ -21,9 +21,6 @@
 include_recipe "#{@cookbook_name}::common"
 include_recipe "#{@cookbook_name}::sql"
 
-cinder_path = "/opt/cinder"
-venv_path = node[:cinder][:use_virtualenv] ? "#{cinder_path}/.venv" : nil
-
 keystone_settings = KeystoneHelper.keystone_settings(node, :cinder)
 
 cinder_port = node[:cinder][:api][:bind_port]
