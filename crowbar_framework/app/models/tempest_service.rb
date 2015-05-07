@@ -119,7 +119,7 @@ class TempestService < ServiceObject
   end
 
   def _get_or_create_db
-    db = Chef::DataBag.load "crowbar/#{@bc_name}"
+    db = Chef::DataBag.load "crowbar/#{@bc_name}" rescue nil
     if db.nil?
       begin
         lock = acquire_lock @bc_name
