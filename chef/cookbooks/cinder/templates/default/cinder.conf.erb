@@ -1961,6 +1961,7 @@ rbd_ceph_conf=<%= volume['rbd']['config_file'] %>
 # the libvirt uuid of the secret for the rbd_user volumes
 # (string value)
 #rbd_secret_uuid=<None>
+rbd_secret_uuid=<%= volume['rbd']['secret_uuid'] %>
 
 # Directory where temporary image files are stored when the
 # volume driver does not write them directly to the volume.
