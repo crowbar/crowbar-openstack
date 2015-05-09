@@ -133,7 +133,7 @@ end
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   pacemaker_colocation "col-#{fs_primitive}" do
     score "inf"
-    resources [fs_primitive, "#{ms_name}:Master"]
+    resources "#{fs_primitive} #{ms_name}:Master"
     action :create
   end
 
@@ -284,11 +284,11 @@ pacemaker_primitive service_name do
   action :create
 end
 
-primitives = [ fs_primitive, admin_vip_primitive ]
+dependencies = [ fs_primitive, admin_vip_primitive ]
 if node[:rabbitmq][:listen_public]
-  primitives << public_vip_primitive
+  dependencies << public_vip_primitive
 end
-primitives << service_name
+primitives = "( #{dependencies.join ' '} ) " + service_name
 
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
 
@@ -300,10 +300,14 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
 
   pacemaker_order "o-#{service_name}" do
     score "Mandatory"
-    ordering "#{primitives.join(" ")}"
+    ordering primitives
     action :create
     # This is our last constraint, so we can finally start service_name
     notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
+    notifies :start, "pacemaker_primitive[#{admin_vip_primitive}]", :immediately
+    if node[:rabbitmq][:listen_public]
+      notifies :start, "pacemaker_primitive[#{public_vip_primitive}]", :immediately
+    end
     notifies :start, "pacemaker_primitive[#{service_name}]", :immediately
   end
 
