@@ -115,20 +115,19 @@ class TempestService < ServiceObject
   end
 
   def get_ready_proposals
-    ProposalObject.find_proposals(@bc_name).select {|p| p.status == 'ready'}.compact
+    Proposal.where(barclamp: @bc_name).all.select {|p| p.status == 'ready'}.compact
   end
 
   def _get_or_create_db
-    db = ProposalObject.find_data_bag_item "crowbar/#{@bc_name}"
+    db = Chef::DataBag.load "crowbar/#{@bc_name}" rescue nil
     if db.nil?
       begin
         lock = acquire_lock @bc_name
 
-        db_item = Chef::DataBagItem.new
-        db_item.data_bag "crowbar"
-        db_item['id'] = @bc_name
-        db_item['test_runs'] = []
-        db = ProposalObject.new db_item
+        db = Chef::DataBagItem.new
+        db.data_bag "crowbar"
+        db['id'] = @bc_name
+        db['test_runs'] = []
         db.save
       ensure
         release_lock lock
