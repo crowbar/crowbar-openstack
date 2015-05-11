@@ -49,41 +49,6 @@ bash "reload disable-rp_filter-sysctl" do
   subscribes :run, resources(:cookbook_file=> disable_rp_filter_file), :delayed
 end
 
-if neutron[:neutron][:use_gitrepo]
-  neutron_path = "/opt/neutron"
-  venv_path = neutron[:neutron][:use_virtualenv] ? "#{neutron_path}/.venv" : nil
-
-  pfs_and_install_deps "neutron" do
-    cookbook "neutron"
-    cnode neutron
-    virtualenv venv_path
-    path neutron_path
-    wrap_bins [ "neutron", "neutron-rootwrap" ]
-  end
-
-  create_user_and_dirs("neutron")
-
-  execute "neutron_cp_policy.json" do
-    command "cp /opt/neutron/etc/policy.json /etc/neutron/"
-    creates "/etc/neutron/policy.json"
-  end
-  execute "neutron_cp_plugins" do
-    command "cp -r /opt/neutron/etc/neutron/plugins /etc/neutron/plugins"
-    creates "/etc/neutron/plugins"
-  end
-  execute "neutron_cp_rootwrap" do
-    command "cp -r /opt/neutron/etc/neutron/rootwrap.d /etc/neutron/rootwrap.d"
-    creates "/etc/neutron/rootwrap.d"
-  end
-  cookbook_file "/etc/neutron/rootwrap.conf" do
-    cookbook "neutron"
-    source "neutron-rootwrap.conf"
-    mode 00644
-    owner "root"
-    group node[:neutron][:platform][:group]
-  end
-end
-
 # openvswitch installation and configuration
 if neutron[:neutron][:networking_plugin] == 'vmware' or
   (neutron[:neutron][:networking_plugin] == 'ml2' and
@@ -262,20 +227,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
   include_recipe "neutron::common_config"
 
   # L2 agent
-  if neutron[:neutron][:use_gitrepo]
-    case
-    when ml2_mech_drivers.include?("openvswitch")
-      neutron_agent = "neutron-openvswitch-agent"
-    when ml2_mech_drivers.include?("linuxbridge")
-      neutron_agent = "neutron-linuxbridge-agent"
-    end
-
-    link_service neutron_agent do
-      virtualenv venv_path
-      bin_name "#{neutron_agent} --config-file #{agent_config_path} --config-dir /etc/neutron/"
-    end
-  end
-
   case
   when ml2_mech_drivers.include?("openvswitch")
     directory "/etc/neutron/plugins/openvswitch/" do
@@ -335,14 +286,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
   # L3 agent
   if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
-    unless neutron[:neutron][:use_gitrepo]
-      package node[:neutron][:platform][:l3_agent_pkg]
-    else
-      link_service "neutron-l3-agent" do
-        virtualenv venv_path
-        bin_name "neutron-l3-agent --config-dir /etc/neutron/"
-      end
-    end
+    package node[:neutron][:platform][:l3_agent_pkg]
 
     template "/etc/neutron/l3_agent.ini" do
       source "l3_agent.ini.erb"
@@ -365,7 +309,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     end
 
     service node[:neutron][:platform][:l3_agent_name] do
-      service_name "neutron-l3-agent" if neutron[:neutron][:use_gitrepo]
       supports :status => true, :restart => true
       action [:enable, :start]
       subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
@@ -376,14 +319,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 end
 
 # Metadata agent
-unless neutron[:neutron][:use_gitrepo]
-  package node[:neutron][:platform][:metadata_agent_pkg]
-else
-  link_service "neutron-metadata-agent" do
-    virtualenv venv_path
-    bin_name "neutron-metadata-agent --config-dir /etc/neutron/ --config-file /etc/neutron/metadata_agent.ini"
-  end
-end
+package node[:neutron][:platform][:metadata_agent_pkg]
 
 #TODO: nova should depend on neutron, but neutron also depends on nova
 # so we have to do something like this
@@ -421,7 +357,6 @@ template "/etc/neutron/metadata_agent.ini" do
 end
 
 service node[:neutron][:platform][:metadata_agent_name] do
-  service_name "neutron-metadata-agent" if neutron[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")

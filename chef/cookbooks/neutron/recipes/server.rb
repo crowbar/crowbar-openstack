@@ -13,18 +13,8 @@
 # limitations under the License.
 #
 
-unless node[:neutron][:use_gitrepo]
-  pkgs = node[:neutron][:platform][:pkgs]
-  pkgs.each { |p| package p }
-else
-  neutron_path = "/opt/neutron"
-  venv_path = node[:neutron][:use_virtualenv] ? "#{neutron_path}/.venv" : nil
-
-  link_service "neutron-server" do
-    virtualenv venv_path
-    bin_name "neutron-server --config-dir /etc/neutron/"
-  end
-end
+pkgs = node[:neutron][:platform][:pkgs]
+pkgs.each { |p| package p }
 
 include_recipe "neutron::database"
 
@@ -261,11 +251,7 @@ if ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) && !node[:neut
   # https://bugs.launchpad.net/neutron/+bug/1326634
   # https://bugzilla.novell.com/show_bug.cgi?id=889325
   service "workaround for races in initial db population" do
-    if node[:neutron][:use_gitrepo]
-      service_name "neutron-server"
-    else
-      service_name node[:neutron][:platform][:service_name]
-    end
+    service_name node[:neutron][:platform][:service_name]
     action [:start, :stop]
   end
 end
@@ -286,7 +272,6 @@ end
 crowbar_pacemaker_sync_mark "create-neutron_db_sync"
 
 service node[:neutron][:platform][:service_name] do
-  service_name "neutron-server" if node[:neutron][:use_gitrepo]
   supports :status => true, :restart => true
   action [:enable, :start]
   subscribes :restart, resources("template[#{plugin_cfg_path}]")
