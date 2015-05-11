@@ -605,7 +605,7 @@ control_exchange = neutron
 # root filter facility.
 # Change to "sudo" to skip the filtering and just run the comand directly
 # root_helper = sudo
-root_helper=sudo <%=@rootwrap_bin%> /etc/neutron/rootwrap.conf
+root_helper=sudo neutron-rootwrap /etc/neutron/rootwrap.conf
 
 # =========== items for agent management extension =============
 # seconds between nodes reporting state to server; should be less than
