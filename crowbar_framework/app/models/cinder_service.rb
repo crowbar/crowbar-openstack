@@ -36,7 +36,6 @@ class CinderService < PacemakerServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "12.0",
             "windows" => "/.*/"
           },
         },
