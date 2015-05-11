@@ -128,20 +128,3 @@ crowbar_pacemaker_sync_mark "create-cinder_register"
 cinder_service "api" do
   use_pacemaker_provider ha_enabled
 end
-
-# XXX this is no different from the file provided in the package, but
-# since we used to have a configured template here, we need to make sure
-# that it gets overwritten specifically since it used to contain
-# auth_token configuration options which conflict with the ones in
-# cinder.conf and the packages won't overwrite a modified file.
-# This block can be removed when either cinder does not read auth_token
-# configuration from api-paste.ini or we are sure that the target
-# machine no longer has an api-paste.ini file with the auth_token settings
-cookbook_file "api-paste.ini" do
-  path "/etc/cinder/api-paste.ini"
-  owner "root"
-  group node[:cinder][:group]
-  mode "0640"
-  action :create
-  notifies :restart, "service[cinder-api]"
-end
