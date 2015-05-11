@@ -10,21 +10,14 @@
       "tempest_user_password": "tempest",
       "tempest_user_username": "tempest",
       "tempest_user_tenant": "tempest",
-      "use_gitrepo": false,
-      "use_virtualenv": true,
-      "use_pip_cache": true,
-      "use_gitbarclamp": true,
-      "nova_instance": "none",
-      "pfs_deps": [
-        "pip://python-novaclient"
-      ]
+      "nova_instance": "none"
     }
   },
   "deployment": {
     "tempest": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 1,
+      "schema-revision": 10,
       "element_states": {
         "tempest": [ "ready", "applying" ]
       },
