@@ -430,7 +430,7 @@ block_migration_for_live_migration = true
 
 # Does the test environment support dynamic network interface
 # attachment? (boolean value)
-#interface_attach = true
+interface_attach = <%= @use_interface_attach %>
 
 # Does the test environment support live migration available? (boolean
 # value)
@@ -445,7 +445,7 @@ live_migration = <%= @use_livemigration %>
 
 # Does the test environment support instance rescue mode? (boolean
 # value)
-#rescue = true
+rescue = <%= @use_rescue %>
 
 # Does the test environment support resizing? (boolean value)
 resize = <%= @use_resize %>
@@ -463,11 +463,11 @@ resize = <%= @use_resize %>
 #spice_console = false
 
 # Does the test environment support suspend/resume? (boolean value)
-#suspend = true
+suspend = <%= @use_suspend %>
 
 # Enable VNC console. This configuration value should be same as
 # [nova.vnc]->vnc_enabled in nova.conf (boolean value)
-vnc_console = true
+vnc_console = <%= @use_vnc %>
 
 
 [dashboard]
@@ -677,7 +677,7 @@ http_image = <%= @http_image %>
 flavor_regex = ^tempest-stuff$
 
 # Matching images become parameters for scenario tests (string value)
-image_regex = ^cirros-<%= @cirros_version %>-x86_64-tempest-machine$
+image_regex = <%= @image_regex %>
 
 # SSH verification in tests is skippedfor matching images (string
 # value)
