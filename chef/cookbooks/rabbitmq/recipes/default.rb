@@ -60,6 +60,31 @@ bash "enabling rabbit management" do
   notifies :restart, "service[rabbitmq-server]"
 end
 
+if node[:platform] == "opensuse"
+  # On Leap, epmd.socket is enabled by default but only listens on 127.0.0.1,
+  # while we need it to listen on 0.0.0.0.
+
+  directory "/etc/systemd/system/epmd.socket.d" do
+    owner "root"
+    group "root"
+    mode 0755
+    action :create
+  end
+
+  cookbook_file "/etc/systemd/system/epmd.socket.d/listen.conf" do
+    source "epmd.socket-listen.conf"
+    owner "root"
+    group "root"
+    mode 0644
+  end
+
+  bash "reload systemd for epmd.socket extension" do
+    code "systemctl daemon-reload"
+    action :nothing
+    subscribes :run, "cookbook_file[/etc/systemd/system/epmd.socket.d/listen.conf]", :immediate
+  end
+end
+
 service "rabbitmq-server" do
   supports restart: true, start: true, stop: true, status: true
   action [:enable, :start]
