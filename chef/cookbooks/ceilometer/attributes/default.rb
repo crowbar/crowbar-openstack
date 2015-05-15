@@ -73,6 +73,7 @@ default[:ceilometer][:service_user] = "ceilometer"
 default[:ceilometer][:service_password] = ""
 
 default[:ceilometer][:api][:protocol] = "http"
+default[:ceilometer][:api][:host] = "0.0.0.0"
 default[:ceilometer][:api][:port] = 8777
 
 default[:ceilometer][:metering_secret] = "" # Set by wrapper

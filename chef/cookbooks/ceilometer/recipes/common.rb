@@ -66,7 +66,7 @@ if node[:ceilometer][:ha][:server][:enabled]
   bind_host = admin_address
   bind_port = node[:ceilometer][:ha][:ports][:api]
 else
-  bind_host = "0.0.0.0"
+  bind_host = node[:ceilometer][:api][:host]
   bind_port = node[:ceilometer][:api][:port]
 end
 
