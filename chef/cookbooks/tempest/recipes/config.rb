@@ -133,7 +133,7 @@ docker_image_id_file = node[:tempest][:tempest_path] + '/docker_machine.id'
 heat_machine_id_file = node[:tempest][:tempest_path] + '/heat_machine.id'
 
 glance_node = search(:node, "roles:glance-server").first
-insecure = (keystone_settings["insecure"] || glance_node[:glance][:ssl][:insecure]) ? "--insecure" : ""
+insecure = "--insecure"
 
 cirros_version = File.basename(node[:tempest][:tempest_test_image]).gsub(/^cirros-/, "").gsub(/-.*/, "")
 
