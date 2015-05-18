@@ -48,6 +48,7 @@ else
 end
 
 is_compute_agent = node.roles.include?("ceilometer-agent") && node.roles.any?{|role| /^nova-multi-compute-/ =~ role}
+is_swift_proxy = node.roles.include?("ceilometer-swift-proxy-middleware") && node.roles.include?("swift-proxy")
 
 # Find hypervisor inspector
 hypervisor_inspector = nil
@@ -99,6 +100,9 @@ template "/etc/ceilometer/ceilometer.conf" do
     if is_compute_agent
       notifies :restart, "service[nova-compute]"
     end
+    if is_swift_proxy
+      notifies :restart, "service[swift-proxy]"
+    end
 end
 
 template "/etc/ceilometer/pipeline.yaml" do
@@ -114,5 +118,8 @@ template "/etc/ceilometer/pipeline.yaml" do
   })
   if is_compute_agent
     notifies :restart, "service[nova-compute]"
+  end
+  if is_swift_proxy
+    notifies :restart, "service[swift-proxy]"
   end
 end
