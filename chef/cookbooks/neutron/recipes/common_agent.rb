@@ -319,49 +319,51 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 end
 
 # Metadata agent
-package node[:neutron][:platform][:metadata_agent_pkg]
+if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
+  package node[:neutron][:platform][:metadata_agent_pkg]
 
-#TODO: nova should depend on neutron, but neutron also depends on nova
-# so we have to do something like this
-novas = search(:node, "roles:nova-multi-controller") || []
-if novas.length > 0
-  nova = novas[0]
-  nova = node if nova.name == node.name
-else
-  nova = node
-end
-metadata_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
-metadata_port = nova[:nova][:ports][:metadata] rescue 8775
-metadata_protocol = (nova[:nova][:ssl][:enabled] ? "https" : "http") rescue "http"
-metadata_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
-metadata_proxy_shared_secret = (nova[:nova][:neutron_metadata_proxy_shared_secret] rescue '')
+  #TODO: nova should depend on neutron, but neutron also depends on nova
+  # so we have to do something like this
+  novas = search(:node, "roles:nova-multi-controller") || []
+  if novas.length > 0
+    nova = novas[0]
+    nova = node if nova.name == node.name
+  else
+    nova = node
+  end
+  metadata_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
+  metadata_port = nova[:nova][:ports][:metadata] rescue 8775
+  metadata_protocol = (nova[:nova][:ssl][:enabled] ? "https" : "http") rescue "http"
+  metadata_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
+  metadata_proxy_shared_secret = (nova[:nova][:neutron_metadata_proxy_shared_secret] rescue '')
 
-keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
+  keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
-template "/etc/neutron/metadata_agent.ini" do
-  source "metadata_agent.ini.erb"
-  owner "root"
-  group node[:neutron][:platform][:group]
-  mode "0640"
-  variables(
-    :debug => neutron[:neutron][:debug],
-    :keystone_settings => keystone_settings,
-    :auth_region => keystone_settings['endpoint_region'],
-    :neutron_insecure => neutron[:neutron][:ssl][:insecure],
-    :nova_metadata_host => metadata_host,
-    :nova_metadata_port => metadata_port,
-    :nova_metadata_protocol => metadata_protocol,
-    :nova_metadata_insecure => metadata_insecure,
-    :metadata_proxy_shared_secret => metadata_proxy_shared_secret
-  )
-end
+  template "/etc/neutron/metadata_agent.ini" do
+    source "metadata_agent.ini.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    variables(
+      :debug => neutron[:neutron][:debug],
+      :keystone_settings => keystone_settings,
+      :auth_region => keystone_settings['endpoint_region'],
+      :neutron_insecure => neutron[:neutron][:ssl][:insecure],
+      :nova_metadata_host => metadata_host,
+      :nova_metadata_port => metadata_port,
+      :nova_metadata_protocol => metadata_protocol,
+      :nova_metadata_insecure => metadata_insecure,
+      :metadata_proxy_shared_secret => metadata_proxy_shared_secret
+    )
+  end
 
-service node[:neutron][:platform][:metadata_agent_name] do
-  supports :status => true, :restart => true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
-  subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
-  provider Chef::Provider::CrowbarPacemakerService if neutron_network_ha
+  service node[:neutron][:platform][:metadata_agent_name] do
+    supports :status => true, :restart => true
+    action [:enable, :start]
+    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
+    provider Chef::Provider::CrowbarPacemakerService if neutron_network_ha
+  end
 end
 
 # VMware specific code
