@@ -125,13 +125,23 @@ ha_tool_primitive_name = "neutron-ha-tool"
 # right CA file as we allow Keystone's and Neutron's to use different CAs.  So
 # we just rely on the correct CA files being installed in a system wide default
 # location.
+file "/etc/neutron/os_password" do
+  owner 'root'
+  group 'root'
+  mode '0600'
+  content keystone_settings["admin_password"]
+  # Our Chef is apparently too old for this :-/
+  #sensitive true
+  action :create
+end
+
 pacemaker_primitive ha_tool_primitive_name do
   agent node[:neutron][:ha][:network][:ha_tool_ra]
   params ({
     "os_auth_url"    => keystone_settings["internal_auth_url"],
+    "os_region_name" => keystone_settings["endpoint_region"],
     "os_tenant_name" => keystone_settings["admin_tenant"],
     "os_username"    => keystone_settings["admin_user"],
-    "os_password"    => keystone_settings["admin_password"],
     "os_insecure"    => keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
   })
   op node[:neutron][:ha][:network][:op]
