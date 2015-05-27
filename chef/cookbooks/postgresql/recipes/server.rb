@@ -150,8 +150,12 @@ end
 bash "assign-db_maker-password" do
   user 'postgres'
   code <<-EOH
-echo "CREATE ROLE db_maker WITH LOGIN CREATEDB CREATEROLE ENCRYPTED PASSWORD '#{node[:database][:db_maker_password]}';
-ALTER ROLE db_maker ENCRYPTED PASSWORD '#{node[:database][:db_maker_password]}';" | psql
+    echo "SELECT rolname FROM pg_roles WHERE rolname='db_maker';" | psql | grep -q db_maker
+    if [ $? -ne 0 ]; then
+        echo "CREATE ROLE db_maker WITH LOGIN CREATEDB CREATEROLE ENCRYPTED PASSWORD '#{node[:database][:db_maker_password]}';" | psql
+    else
+        echo "ALTER ROLE db_maker ENCRYPTED PASSWORD '#{node[:database][:db_maker_password]}';" | psql
+    fi
   EOH
   only_if only_if_command if ha_enabled
   action :run
