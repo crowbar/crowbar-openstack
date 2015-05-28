@@ -4,6 +4,16 @@ export OS_AUTH_URL=<%= @keystone_settings['internal_auth_url'] %>
 export OS_AUTH_STRATEGY=keystone
 export OS_REGION_NAME='<%= @keystone_settings['endpoint_region'] %>'
 
+<% if keystone_settings['insecure'] -%>
+function keystone()
+{
+    command keystone --insecure "$@"
+}
+<% end -%>
+
+export NEUTRONCLIENT_INSECURE=true
+export NOVACLIENT_INSECURE=true
+
 ### clean up in admin tenant
 (
 export OS_USERNAME=<%= @keystone_settings['admin_user'] %>
