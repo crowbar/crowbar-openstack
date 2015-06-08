@@ -191,7 +191,7 @@ allow_overlapping_ips = False
 
 # Number of DHCP agents scheduled to host a network. This enables redundant
 # DHCP agents for configured networks.
-# dhcp_agents_per_network = 1
+dhcp_agents_per_network = <%= @network_nodes_count %>
 
 # ===========  end of items for agent scheduler extension =====
 
