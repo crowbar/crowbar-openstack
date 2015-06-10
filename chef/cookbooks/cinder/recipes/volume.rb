@@ -43,12 +43,10 @@ def make_loopback_file(node, volume)
   max_fsize = ((`df -Pk #{encl_dir}`.split("\n")[1].split(" ")[3].to_i * 1024) * 0.90).to_i rescue 0
   fsize = max_fsize if fsize > max_fsize
 
-  bash "Create local volume file #{fname}" do
-    code "truncate -s #{fsize} #{fname}"
-    not_if do
-      File.exists?(fname)
-    end
-  end
+  Chef::Log.info("Create local volume file #{fname}")
+  cmd = ["truncate", "-s", "#{fsize}", fname]
+  create_local_file = Mixlib::ShellOut.new(cmd)
+  create_local_file.run_command
 end
 
 def setup_loopback_device(volume)
@@ -77,11 +75,14 @@ def make_loopback_volume(node, backend_id, volume)
   return if volume_exists(volname)
 
   Chef::Log.info("Cinder: Using local file volume backing (#{backend_id})")
+  cmd = ["losetup", "-j", fname]
+  check_loopback_device = Mixlib::ShellOut.new(cmd)
+  loop_device = check_loopback_device.run_command.stdout.strip.split(':').first
 
-  bash "Create volume group #{volname}" do
-    code "vgcreate #{volname} `losetup -j #{fname} | cut -f1 -d:`"
-    not_if "vgs #{volname}"
-  end
+  Chef::Log.info("Create volume group #{volname}")
+  cmd = [ "vgcreate", volname, loop_device ]
+  create_volume_group = Mixlib::ShellOut.new(cmd)
+  create_volume_group.run_command
 end
 
 def make_volume(node, backend_id, volume)
