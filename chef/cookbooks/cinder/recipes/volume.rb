@@ -23,7 +23,7 @@ def volume_exists(volname)
   Kernel.system("vgs #{volname}")
 end
 
-def make_loopback_file(node, volume)
+def make_loopback_file(volume)
   fname = volume[:local][:file_name]
   fsize = volume[:local][:file_size] * 1024 * 1024 * 1024 # Convert from GB to Bytes
 
@@ -68,7 +68,7 @@ def setup_loopback_device(volume)
   end
 end
 
-def make_loopback_volume(node, backend_id, volume)
+def make_loopback_volume(backend_id, volume)
   volname = volume[:local][:volume_name]
   fname = volume[:local][:file_name]
 
@@ -142,7 +142,7 @@ loop_lvm_paths = []
 
 node[:cinder][:volumes].each do |volume|
   if volume[:backend_driver] == "local"
-    make_loopback_file(node, volume)
+    make_loopback_file(volume)
     if (%w(suse).include? node.platform) && (node.platform_version.to_f >= 12.0)
       setup_loopback_device(volume)
     end
@@ -195,7 +195,7 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
     when volume[:backend_driver] == "eqlx"
 
     when volume[:backend_driver] == "local"
-      make_loopback_volume(node, backend_id, volume)
+      make_loopback_volume(backend_id, volume)
 
     when volume[:backend_driver] == "raw"
       make_volume(node, backend_id, volume)
