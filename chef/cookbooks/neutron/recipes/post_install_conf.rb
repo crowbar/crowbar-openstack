@@ -56,6 +56,10 @@ neutron_args = "#{neutron_args} --os-password '#{keystone_settings['service_pass
 neutron_args = "#{neutron_args} --os-tenant-name '#{keystone_settings['service_tenant']}'"
 neutron_args = "#{neutron_args} --os-auth-url '#{keystone_settings['internal_auth_url']}'"
 neutron_args = "#{neutron_args} --os-region-name '#{keystone_settings['endpoint_region']}'"
+if keystone_settings['api_version'] != "2.0"
+  neutron_args = "#{neutron_args} --os-user-domain-name Default"
+  neutron_args = "#{neutron_args} --os-project-domain-name Default"
+end
 neutron_args = "#{neutron_args} --endpoint-type internalURL"
 neutron_args = "#{neutron_args} --insecure" if ssl_insecure
 neutron_cmd = "neutron #{neutron_args}"

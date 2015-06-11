@@ -626,6 +626,7 @@ auth_uri = <%= @keystone_settings['public_auth_url'] %>
 # (string value)
 identity_uri = <%= @keystone_settings['admin_auth_url'] %>
 
+auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
