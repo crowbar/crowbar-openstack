@@ -2738,7 +2738,7 @@ identity_uri = <%= @keystone_settings['admin_auth_url'] %>
 
 # API version of the admin Identity API endpoint (string
 # value)
-#auth_version=<None>
+auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
 
 # Do not handle authorization requests within the middleware,
 # but delegate the authorization decision to downstream WSGI
