@@ -301,7 +301,10 @@ nova_admin_password = <%= @nova_admin_password if @nova_admin_password %>
 
 # Authorization URL for connection to nova in admin context.
 # nova_admin_auth_url =
-nova_admin_auth_url = <%= @keystone_settings['internal_auth_url'] %>
+nova_admin_auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol"],
+                                    @keystone_settings["internal_url_host"],
+                                    @keystone_settings["service_port"],
+                                    "2.0") %>
 
 # CA file for novaclient to verify server certificates
 # nova_ca_certificates_file =
