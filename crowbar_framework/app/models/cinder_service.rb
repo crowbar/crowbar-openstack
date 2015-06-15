@@ -44,7 +44,6 @@ class CinderService < PacemakerServiceObject
           "count" => -1,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "12.0",
             "windows" => "/.*/"
           }
         }

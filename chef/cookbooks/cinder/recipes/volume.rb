@@ -23,7 +23,7 @@ def volume_exists(volname)
   Kernel.system("vgs #{volname}")
 end
 
-def make_loopback_file(node, volume)
+def make_loopback_file(volume)
   fname = volume[:local][:file_name]
   fsize = volume[:local][:file_size] * 1024 * 1024 * 1024 # Convert from GB to Bytes
 
@@ -43,26 +43,46 @@ def make_loopback_file(node, volume)
   max_fsize = ((`df -Pk #{encl_dir}`.split("\n")[1].split(" ")[3].to_i * 1024) * 0.90).to_i rescue 0
   fsize = max_fsize if fsize > max_fsize
 
-  bash "Create local volume file #{fname}" do
-    code "truncate -s #{fsize} #{fname}"
-    not_if do
-      File.exists?(fname)
-    end
+  Chef::Log.info("Create local volume file #{fname}")
+  cmd = ["truncate", "-s", "#{fsize}", fname]
+  create_local_file = Mixlib::ShellOut.new(cmd)
+  create_local_file.run_command
+end
+
+def setup_loopback_device(volume)
+  fname = volume[:local][:file_name]
+
+  unless File.exists?(fname)
+    Chef::Log.info("Loopback file #{fname} doesn't exist")
+    return
+  end
+
+  sleep 1
+  cmd = ["losetup", "-j", fname]
+  check_loopback_device = Mixlib::ShellOut.new(cmd)
+  if check_loopback_device.run_command.stdout.empty?
+    Chef::Log.info("Attach #{fname} file to loop device")
+    cmd = ["losetup", "-f", fname]
+    attach_loopback_device = Mixlib::ShellOut.new(cmd)
+    attach_loopback_device.run_command
   end
 end
 
-def make_loopback_volume(node, backend_id, volume)
+def make_loopback_volume(backend_id, volume)
   volname = volume[:local][:volume_name]
   fname = volume[:local][:file_name]
 
   return if volume_exists(volname)
 
   Chef::Log.info("Cinder: Using local file volume backing (#{backend_id})")
+  cmd = ["losetup", "-j", fname]
+  check_loopback_device = Mixlib::ShellOut.new(cmd)
+  loop_device = check_loopback_device.run_command.stdout.strip.split(':').first
 
-  bash "Create volume group #{volname}" do
-    code "vgcreate #{volname} `losetup -j #{fname} | cut -f1 -d:`"
-    not_if "vgs #{volname}"
-  end
+  Chef::Log.info("Create volume group #{volname}")
+  cmd = [ "vgcreate", volname, loop_device ]
+  create_volume_group = Mixlib::ShellOut.new(cmd)
+  create_volume_group.run_command
 end
 
 def make_volume(node, backend_id, volume)
@@ -122,12 +142,15 @@ loop_lvm_paths = []
 
 node[:cinder][:volumes].each do |volume|
   if volume[:backend_driver] == "local"
-    make_loopback_file(node, volume)
+    make_loopback_file(volume)
+    if (%w(suse).include? node.platform) && (node.platform_version.to_f >= 12.0)
+      setup_loopback_device(volume)
+    end
     loop_lvm_paths << volume[:local][:file_name]
   end
 end
 
-if %w(suse).include? node.platform
+if (%w(suse).include? node.platform) && (node.platform_version.to_f < 12.0)
   # We need to create boot.looplvm before we create the volume groups; note
   # that the loopback files need to exist before we can use this script
   unless loop_lvm_paths.empty?
@@ -172,7 +195,7 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
     when volume[:backend_driver] == "eqlx"
 
     when volume[:backend_driver] == "local"
-      make_loopback_volume(node, backend_id, volume)
+      make_loopback_volume(backend_id, volume)
 
     when volume[:backend_driver] == "raw"
       make_volume(node, backend_id, volume)
@@ -227,7 +250,7 @@ if %w(redhat centos suse).include? node.platform
   end
 end
 
-if %w(suse).include? node.platform
+if (%w(suse).include? node.platform) && (node.platform_version.to_f < 12.0)
   service "boot.lvm" do
     action [:enable]
   end
