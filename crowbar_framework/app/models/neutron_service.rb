@@ -296,6 +296,8 @@ class NeutronService < PacemakerServiceObject
             node.save
           end
         end
+      elsif role.default_attributes["neutron"]["networking_plugin"] == "vmware"
+        net_svc.allocate_ip "default","os_sdn","host", n
       end
     end
     @logger.debug("Neutron apply_role_pre_chef_call: leaving")
