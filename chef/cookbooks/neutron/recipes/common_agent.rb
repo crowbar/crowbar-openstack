@@ -89,6 +89,7 @@ if neutron[:neutron][:networking_plugin] == 'vmware' or
   end
 end
 
+multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty? && node.roles.include?("neutron-network")
 # openvswitch configuration specific to ML2
 if neutron[:neutron][:networking_plugin] == 'ml2' and
    neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch")
@@ -132,8 +133,11 @@ if neutron[:neutron][:networking_plugin] == 'ml2' and
 
   # Create the bridges Neutron needs.
   # Usurp config as needed.
-  [ [ "nova_fixed", "fixed" ],
-    [ "public", "public"] ].each do |net|
+  networks = [[ "nova_fixed", "fixed" ], ["public", "public"]]
+  neutron[:neutron][:additional_external_networks].each do |net|
+    networks << [net, net]
+  end
+  networks.each do |net|
     bound_if = (node[:crowbar_wall][:network][:nets][net[0]].last rescue nil)
     next unless bound_if
     name = "br-#{net[1]}"
@@ -185,7 +189,11 @@ else
   # Note: As moving between network plugins is currently not supported by this
   #       cookbook this code is mostly just sitting here and waiting for the
   #       plugin switching support to be implemented.
-  [ "br-public", "br-fixed" ].each do |name|
+  bridges = ["br-public", "br_fixed"]
+  neutron[:neutron][:additional_external_networks].each do |net|
+    bridges << "br-#{net}"
+  end
+  bridges.each do |name|
     service "ovs-usurp-config-#{name}" do
       # FIXME: Don't stop it here until we handle the shutdown of openvswitch
       #        and the neutron-ovs-agent correctly. Otherwise we might be cut
@@ -209,18 +217,34 @@ if neutron[:neutron][:networking_plugin] == "ml2"
   case
   when ml2_mech_drivers.include?("openvswitch")
     # package is already installed
-
     neutron_agent = node[:neutron][:platform][:ovs_agent_name]
     agent_config_path = "/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini"
     interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
-    external_network_bridge = "br-public"
+    bridge_mappings = "floating:br-public"
+    if multiple_external_networks
+      bridge_mappings += ", "
+      bridge_mappings += neutron[:neutron][:additional_external_networks].collect { |n| n + ":" + "br-" + n }.join ','
+    end
+    if ml2_type_drivers.include?("vlan")
+      bridge_mappings += ", physnet1:br-fixed"
+    end
   when ml2_mech_drivers.include?("linuxbridge")
     package node[:neutron][:platform][:lb_agent_pkg]
 
     neutron_agent = node[:neutron][:platform][:lb_agent_name]
     agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
-    external_network_bridge = ""
+    physnet = node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil
+    interface_mappings = "physnet1:" + physnet
+    if multiple_external_networks
+      neutron[:neutron][:additional_external_networks].each do |net|
+        ext_iface = node[:crowbar_wall][:network][:nets][net].first
+        if ext_iface != physnet
+          mapping = ", " + net + ":" + ext_iface
+          interface_mappings += mapping
+        end
+      end
+    end
   end
 
   # include neutron::common_config only now, after we've installed packages
@@ -248,7 +272,8 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         :ml2_type_drivers => ml2_type_drivers,
         :tunnel_types => ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
         :use_l2pop => neutron[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")),
-        :dvr_enabled => neutron[:neutron][:use_dvr]
+        :dvr_enabled => neutron[:neutron][:use_dvr],
+        :bridge_mappings => bridge_mappings
       )
     end
   when ml2_mech_drivers.include?("linuxbridge")
@@ -268,11 +293,11 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       group node[:neutron][:platform][:group]
       mode "0640"
       variables(
-        :physnet => (node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil),
         :ml2_type_drivers => ml2_type_drivers,
         :vxlan_mcast_group => neutron[:neutron][:vxlan][:multicast_group],
-        :use_l2pop => neutron[:neutron][:use_l2pop] && ml2_type_drivers.include?("vxlan")
-      )
+        :use_l2pop => neutron[:neutron][:use_l2pop] && ml2_type_drivers.include?("vxlan"),
+        :interface_mappings => interface_mappings
+       )
     end
   end
 
@@ -302,7 +327,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         :send_arp_for_ha => 3,
         :periodic_interval => 40,
         :periodic_fuzzy_delay => 5,
-        :external_network_bridge => external_network_bridge,
         :dvr_enabled => neutron[:neutron][:use_dvr],
         :dvr_mode => node.roles.include?("neutron-network") ? "dvr_snat" : "dvr"
       )

@@ -93,9 +93,7 @@ local_ip = <%= node.address("os_sdn").addr %>
 #
 # bridge_mappings =
 # Example: bridge_mappings = physnet1:br-eth1
-<% if @ml2_type_drivers.include?("vlan") -%>
-bridge_mappings = physnet1:br-fixed
-<% end -%>
+bridge_mappings = <%= @bridge_mappings %>
 
 # (BoolOpt) Use veths instead of patch ports to interconnect the integration
 # bridge to physical networks. Support kernel without ovs patch port support
