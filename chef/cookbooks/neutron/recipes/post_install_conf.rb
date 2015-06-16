@@ -32,17 +32,11 @@ fixed_pool_end = fixed_last_ip if fixed_last_ip < fixed_pool_end
 
 #this code seems to be broken in case complicated network when floating network outside of public network
 public_net = node[:network][:networks]["public"]
-public_range = "#{public_net["subnet"]}/#{mask_to_bits(public_net["netmask"])}"
 public_router = "#{public_net["router"]}"
 floating_net = node[:network][:networks]["nova_floating"]
 floating_range = "#{floating_net["subnet"]}/#{mask_to_bits(floating_net["netmask"])}"
 floating_pool_start = floating_net[:ranges][:host][:start]
 floating_pool_end = floating_net[:ranges][:host][:end]
-
-floating_first_ip = IPAddr.new("#{public_range}").to_range().to_a[2]
-floating_last_ip = IPAddr.new("#{public_range}").to_range().to_a[-2]
-floating_pool_start = floating_first_ip if floating_first_ip > floating_pool_start
-floating_pool_end = floating_last_ip if floating_last_ip < floating_pool_end
 
 vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 
