@@ -133,7 +133,7 @@ if neutron[:neutron][:networking_plugin] == 'ml2' and
 
   # Create the bridges Neutron needs.
   # Usurp config as needed.
-  networks = [[ "nova_fixed", "fixed" ], ["public", "public"]]
+  networks = [[ "nova_fixed", "fixed" ], [ "nova_floating", "public" ]]
   neutron[:neutron][:additional_external_networks].each do |net|
     networks << [net, net]
   end
