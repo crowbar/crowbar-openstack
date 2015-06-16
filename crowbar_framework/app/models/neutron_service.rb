@@ -298,7 +298,7 @@ class NeutronService < PacemakerServiceObject
     allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
 
     network_nodes.each do |n|
-      net_svc.allocate_ip "default", "public", "host",n
+      net_svc.enable_interface "default", "nova_floating", n
       role.default_attributes["neutron"]["additional_external_networks"].each do |extnet|
         net_svc.enable_interface "default", extnet, n
       end
