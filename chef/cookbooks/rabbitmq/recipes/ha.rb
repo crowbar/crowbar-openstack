@@ -288,9 +288,9 @@ dependencies = [ fs_primitive, admin_vip_primitive ]
 if node[:rabbitmq][:listen_public]
   dependencies << public_vip_primitive
 end
-primitives = "( #{dependencies.join ' '} ) " + service_name
 
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
+  primitives = "( #{dependencies.join ' '} ) " + service_name
 
   pacemaker_colocation "col-#{service_name}" do
     score "inf"
@@ -319,6 +319,8 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   end
 
 else
+  # Pacemaker groups do not support parallel startup ordering :-(
+  primitives = dependencies + [service_name]
 
   pacemaker_group group_name do
     # Membership order *is* significant; VIPs should come first so
