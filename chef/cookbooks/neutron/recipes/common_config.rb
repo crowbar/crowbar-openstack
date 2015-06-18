@@ -120,7 +120,10 @@ if neutron[:neutron][:use_lbaas] then
   service_plugins = "#{service_plugins}, neutron.services.loadbalancer.plugin.LoadBalancerPlugin"
 end
 
-network_nodes = search_env_filtered(:node, "roles:neutron-network")
+network_nodes_count = neutron[:neutron][:elements]["neutron-network"].count
+if neutron[:neutron][:elements_expanded]
+  network_nodes_count = neutron[:neutron][:elements_expanded]["neutron-network"].count
+end
 
 template "/etc/neutron/neutron.conf" do
     cookbook "neutron"
@@ -152,7 +155,7 @@ template "/etc/neutron/neutron.conf" do
       :use_namespaces => true,
       :allow_overlapping_ips => neutron[:neutron][:allow_overlapping_ips],
       :dvr_enabled => neutron[:neutron][:use_dvr],
-      :network_nodes_count => network_nodes.count
+      :network_nodes_count => network_nodes_count
     }.merge(nova_notify))
 end
 
