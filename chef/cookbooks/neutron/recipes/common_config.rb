@@ -89,27 +89,13 @@ nova_notify = {}
 unless nova[:nova].nil? or nova[:nova][:ssl].nil?
   nova_api_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
   nova_api_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
-  keystone_insecure = keystone_settings['insecure'] ? "--insecure" : ""
   nova_insecure = keystone_settings['insecure'] || (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure])
-
-  keystone_register "neutron config wakeup keystone" do
-    protocol keystone_settings['protocol']
-    insecure keystone_settings['insecure']
-    host keystone_settings['internal_url_host']
-    port keystone_settings['admin_port']
-    token keystone_settings['admin_token']
-    action :nothing
-  end.run_action(:wakeup)
-
-  nova_admin_tenant_id = %x[keystone --os_username '#{keystone_settings['admin_user']}' --os_password '#{keystone_settings['admin_password']}' --os_tenant_name '#{keystone_settings['admin_tenant']}' --os_auth_url '#{keystone_settings['internal_auth_url']}' --os_region_name '#{keystone_settings['endpoint_region']}' #{keystone_insecure} tenant-get '#{keystone_settings['service_tenant']}' | awk '/^\\| *id /  { print $4 }'].chomp
-
-  raise("Cannot fetch ID of admin tenant") if nova_admin_tenant_id.nil? || nova_admin_tenant_id.empty?
 
   nova_notify = {
     :nova_url => "#{nova_api_protocol}://#{nova_api_host}:#{nova[:nova][:ports][:api]}/v2",
     :nova_insecure => nova_insecure,
     :nova_admin_username => nova[:nova][:service_user],
-    :nova_admin_tenant_id => nova_admin_tenant_id,
+    :nova_admin_tenant_id => keystone_settings['service_tenant_id'],
     :nova_admin_password => nova[:nova][:service_password]
   }
 end
