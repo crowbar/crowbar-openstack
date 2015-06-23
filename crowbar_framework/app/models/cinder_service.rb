@@ -198,7 +198,7 @@ class CinderService < PacemakerServiceObject
 
     # Generate secrets uuid for libvirt rbd backend
     dirty = false
-    proposal = ProposalObject.find_data_bag_item "crowbar/bc-cinder-#{role.inst}"
+    proposal = Proposal.where(barclamp: "cinder", name: role.inst).first
     role.default_attributes[:cinder][:volumes].each_with_index do |volume, volid|
       next unless volume[:backend_driver] == "rbd"
       if volume[:rbd][:secret_uuid].empty?
