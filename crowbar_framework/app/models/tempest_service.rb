@@ -96,7 +96,7 @@ class TempestService < ServiceObject
 
     # Allocate a public IP, tempest needs it
     net_svc = NetworkService.new @logger
-    NodeObject.find("roles:tempest").each do |n|
+    all_nodes.each do |n|
       net_svc.allocate_ip "default", "public", "host", n
     end
 
