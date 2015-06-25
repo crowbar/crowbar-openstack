@@ -32,6 +32,15 @@ This repository contains copies of upstream stackforge openstack cookbook repos 
 for cookbooks: common, identity and database. In order to update the code to a new upstream version, just copy the
 upstream content over to our repo.
 
+Contact
+-------
+
+To get in contact with the developers you have multiple options, all of them are listed below:
+
+* [Google Mailinglist](https://groups.google.com/forum/#!forum/crowbar)
+* [Gitter Chat](https://gitter.im/crowbar)
+* [Freenode Webchat](http://webchat.freenode.net/?channels=%23crowbar)
+
 Legals
 ------
 
