@@ -1,5 +1,8 @@
 # mongodb.conf
 
+# Run MongoDB as daemon.
+fork = true
+
 # Where to store the data.
 dbpath=/var/lib/mongodb
 
@@ -10,6 +13,8 @@ logappend=true
 
 bind_ip = <%= @listen_addr %>
 port = <%= node[:ceilometer][:mongodb][:port] %>
+
+ipv6 = true
 
 <% if node[:ceilometer][:ha][:server][:enabled] %>
 replSet = <%= node[:ceilometer][:ha][:mongodb][:replica_set][:name] %>
