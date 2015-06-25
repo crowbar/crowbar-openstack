@@ -2,6 +2,7 @@ def upgrade ta, td, a, d
   a['volume_defaults']['rbd']['secret_uuid'] = ta['volume_defaults']['rbd']['secret_uuid']
   a['volumes'].each do |volume|
     next if volume['backend_driver'] != 'rbd'
+    next unless volume['backend_driver']['secret_uuid'].nil?
     volume['rbd']['secret_uuid'] = `uuidgen`.strip
   end
   return a, d
