@@ -542,7 +542,7 @@ endpoint_type = internalURL
 
 # Admin domain name for authentication (Keystone V3).The same domain
 # applies to user and project (string value)
-#admin_domain_name = <None>
+admin_domain_name = Default
 
 # API key to use when authenticating as admin. (string value)
 admin_password = <%= @keystone_settings['admin_password'] %>
@@ -560,7 +560,7 @@ admin_username = <%= @keystone_settings['admin_user'] %>
 
 # Alternate domain name for authentication (Keystone V3).The same
 # domain applies to user and project (string value)
-#alt_domain_name = <None>
+alt_domain_name = Default
 
 # API key to use when authenticating as alternate user. (string value)
 alt_password = <%=@alt_comp_pass %>
@@ -575,7 +575,7 @@ alt_username = <%=@alt_comp_user %>
 
 # Identity API version to be used for authentication for API tests.
 # (string value)
-#auth_version = v2
+auth_version = <%= "v#{@keystone_settings['api_version'].to_i}" %>
 
 # Specify a CA bundle file to use in verifying a TLS (https) server
 # certificate. (string value)
@@ -589,7 +589,7 @@ disable_ssl_certificate_validation = <%= @ssl_insecure ? 'true' : 'false' %>
 
 # Domain name for authentication (Keystone V3).The same domain applies
 # to user and project (string value)
-#domain_name = <None>
+domain_name = Default
 
 # The endpoint type to use for the identity service. (string value)
 endpoint_type = internalURL
