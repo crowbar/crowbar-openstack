@@ -6,6 +6,7 @@
       "service_user": "neutron",
       "rabbitmq_instance": "none",
       "keystone_instance": "none",
+      "max_header_line": 16384,
       "debug": false,
       "verbose": true,
       "dhcp_domain": "openstack.local",
@@ -66,7 +67,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 40,
+      "schema-revision": 41,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

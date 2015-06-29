@@ -245,7 +245,7 @@ rpc_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 # backlog = 4096
 
 # Max header line to accommodate large tokens
-# max_header_line = 16384
+max_header_line = <%= node[:neutron][:max_header_line] %>
 
 # Enable SSL on the API server
 # use_ssl = False
