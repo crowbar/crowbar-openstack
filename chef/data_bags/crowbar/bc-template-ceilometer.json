@@ -5,7 +5,7 @@
     "ceilometer": {
       "debug": false,
       "verbose": true,
-      "use_mongodb": true,
+      "use_mongodb": false,
       "alarm_threshold_evaluation_interval": 600,
       "cpu_interval": 600,
       "disk_interval": 600,

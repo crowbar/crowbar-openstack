@@ -58,7 +58,7 @@ default["ceilometer"]["alarm_notifier"]["service_name"] = alarm_notifier_service
 default[:ceilometer][:debug] = false
 default[:ceilometer][:verbose] = false
 
-default[:ceilometer][:use_mongodb] = true
+default[:ceilometer][:use_mongodb] = false
 
 default[:ceilometer][:meters_interval] = 600
 default[:ceilometer][:cpu_interval] = 600
