@@ -53,8 +53,13 @@ keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   action :add_tenant
 end.run_action(:add_tenant)
 
+v2_auth_url = KeystoneHelper.versioned_service_URL(
+    keystone_settings["protocol"], keystone_settings["internal_url_host"],
+    keystone_settings["service_port"], "2.0")
+keystonev2 = "keystone --insecure --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{v2_auth_url}"
 keystone = "keystone --insecure --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]}"
-%x{#{keystone} endpoint-get --service orchestration &> /dev/null}
+
+%x{#{keystonev2} endpoint-get --service orchestration &> /dev/null}
 use_heat = $?.success?
 
 users = [
@@ -145,6 +150,8 @@ export OS_USERNAME=${OS_USERNAME:-admin}
 export OS_TENANT_NAME=${OS_TENANT_NAME:-admin}
 export OS_PASSWORD=${OS_PASSWORD:-admin}
 export OS_AUTH_URL
+export OS_USER_DOMAIN_NAME=${OS_USER_DOMAIN_NAME:-Default}
+export OS_PROJECT_DOMAIN_NAME=${OS_PROJECT_DOMAIN_NAME:-Default}
 
 TEMP=$(mktemp -d)
 IMG_DIR=$TEMP/image
@@ -203,7 +210,9 @@ EOH
     'OS_USERNAME' => tempest_adm_user,
     'OS_PASSWORD' => tempest_adm_pass,
     'OS_TENANT_NAME' => tempest_comp_tenant,
-    'OS_AUTH_URL' => keystone_settings["internal_auth_url"]
+    'OS_AUTH_URL' => keystone_settings["internal_auth_url"],
+    'OS_USER_DOMAIN_NAME' => "Default",
+    'OS_PROJECT_DOMAIN_NAME' => "Default"
   })
   not_if { File.exists?(machine_id_file) }
 end
@@ -213,6 +222,8 @@ bash "upload tempest heat-cfntools image" do
 OS_USERNAME=${OS_USERNAME:-admin}
 OS_TENANT_NAME=${OS_TENANT_NAME:-admin}
 OS_PASSWORD=${OS_PASSWORD:-admin}
+OS_USER_DOMAIN_NAME=${OS_USER_DOMAIN_NAME:-Default}
+OS_PROJECT_DOMAIN_NAME=${OS_PROJECT_DOMAIN_NAME:-Default}
 
 id=$(glance #{insecure} image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
 [ -n "$id" ] && echo $id > #{heat_machine_id_file}
@@ -224,7 +235,9 @@ EOF
     'OS_USERNAME' => tempest_adm_user,
     'OS_PASSWORD' => tempest_adm_pass,
     'OS_TENANT_NAME' => tempest_comp_tenant,
-    'OS_AUTH_URL' => keystone_settings["internal_auth_url"]
+    'OS_AUTH_URL' => keystone_settings["internal_auth_url"],
+    'OS_USER_DOMAIN_NAME' => "Default",
+    'OS_PROJECT_DOMAIN_NAME' => "Default"
   })
 
   not_if { node[:tempest][:heat_test_image_name].nil? or File.exists?(heat_machine_id_file) }
@@ -245,17 +258,19 @@ EOH
     'OS_PASSWORD' => tempest_adm_pass,
     'OS_TENANT_NAME' => tempest_comp_tenant,
     'NOVACLIENT_INSECURE' => 'true',
-    'OS_AUTH_URL' => keystone_settings["internal_auth_url"]
+    'OS_AUTH_URL' => keystone_settings["internal_auth_url"],
+    'OS_USER_DOMAIN_NAME' => "Default",
+    'OS_PROJECT_DOMAIN_NAME' => "Default"
   })
 end
 
-ec2_access = `#{keystone} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`.strip
-ec2_secret = `#{keystone} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`.strip
+ec2_access = `#{keystonev2} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`.strip
+ec2_secret = `#{keystonev2} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`.strip
 raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
 
-%x{#{keystone} endpoint-get --service metering &> /dev/null}
+%x{#{keystonev2} endpoint-get --service metering &> /dev/null}
 use_ceilometer = $?.success?
-%x{#{keystone} endpoint-get --service database &> /dev/null}
+%x{#{keystonev2} endpoint-get --service database &> /dev/null}
 use_trove = $?.success?
 
 # FIXME: should avoid search with no environment in query
@@ -270,7 +285,7 @@ unless neutrons[0].nil?
   end
 end
 
-public_network_id = `neutron --insecure --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2`.strip
+public_network_id = `neutron --insecure --os-user-domain-name Default --os-project-domain-name Default --os-username #{tempest_comp_user} --os-password #{tempest_comp_pass} --os-tenant-name #{tempest_comp_tenant} --os-auth-url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2`.strip
 raise("Cannot fetch ID of floating network") if public_network_id.empty?
 
 # FIXME: the command above should be good enough, but radosgw is broken with
