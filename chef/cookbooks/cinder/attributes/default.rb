@@ -14,6 +14,7 @@
 #
 
 default[:cinder][:debug] = false
+default[:cinder][:max_header_line] = 16384
 
 override[:cinder][:user]="cinder"
 override[:cinder][:group]="cinder"
