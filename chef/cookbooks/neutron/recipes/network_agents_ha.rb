@@ -117,6 +117,11 @@ pacemaker_clone agents_clone_name do
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+# FIXME: neutron-ha-tool can't do keystone v3 currently
+os_auth_url_v2 =  KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
+                                                       keystone_settings["internal_url_host"],
+                                                       keystone_settings["service_port"],
+                                                       "2.0")
 
 ha_tool_primitive_name = "neutron-ha-tool"
 
@@ -138,7 +143,7 @@ end
 pacemaker_primitive ha_tool_primitive_name do
   agent node[:neutron][:ha][:network][:ha_tool_ra]
   params ({
-    "os_auth_url"    => keystone_settings["internal_auth_url"],
+    "os_auth_url"    => os_auth_url_v2,
     "os_region_name" => keystone_settings["endpoint_region"],
     "os_tenant_name" => keystone_settings["admin_tenant"],
     "os_username"    => keystone_settings["admin_user"],

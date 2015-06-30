@@ -19,6 +19,7 @@ override[:neutron][:group]="neutron"
 
 default[:neutron][:debug] = false
 default[:neutron][:verbose] = false
+default[:neutron][:max_header_line] = 16384
 default[:neutron][:dhcp_domain] = "openstack.local"
 default[:neutron][:networking_plugin] = "ml2"
 

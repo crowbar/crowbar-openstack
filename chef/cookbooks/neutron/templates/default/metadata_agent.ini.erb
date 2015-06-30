@@ -7,7 +7,10 @@ debug = <%= @debug ? "True" : "False" %>
 
 # The Neutron user information for accessing the Neutron API.
 # auth_url = http://localhost:5000/v2.0
-auth_url = <%= @keystone_settings['internal_auth_url'] %>
+auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol"],
+                                                    @keystone_settings["internal_url_host"],
+                                                    @keystone_settings["service_port"],
+                                                    "2.0") %>
 # auth_region = RegionOne
 auth_region = <%= @auth_region %>
 # Turn off verification of the certificate for ssl
