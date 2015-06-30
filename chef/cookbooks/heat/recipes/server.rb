@@ -258,8 +258,8 @@ bash "register heat domain" do
   environment ({
     'OS_USERNAME' => keystone_settings['admin_user'],
     'OS_PASSWORD' => keystone_settings['admin_password'],
-    'OS_TENANT_NAME' => keystone_settings['service_tenant'],
-    'OS_URL' => "#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3",
+    'OS_TENANT_NAME' => keystone_settings['admin_tenant'],
+    'OS_AUTH_URL' => "#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3",
     'OS_REGION_NAME' => keystone_settings['endpoint_region'],
     'OS_IDENTITY_API_VERSION' => "3"
   })
