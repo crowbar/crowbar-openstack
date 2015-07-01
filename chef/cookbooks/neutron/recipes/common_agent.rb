@@ -189,7 +189,7 @@ else
   # Note: As moving between network plugins is currently not supported by this
   #       cookbook this code is mostly just sitting here and waiting for the
   #       plugin switching support to be implemented.
-  bridges = ["br-public", "br_fixed"]
+  bridges = ["br-public", "br-fixed"]
   neutron[:neutron][:additional_external_networks].each do |net|
     bridges << "br-#{net}"
   end
@@ -234,7 +234,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     neutron_agent = node[:neutron][:platform][:lb_agent_name]
     agent_config_path = "/etc/neutron/plugins/linuxbridge/linuxbridge_conf.ini"
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
-    physnet = node[:crowbar_wall][:network][:nets][:nova_fixed].first rescue nil
+    physnet = node[:crowbar_wall][:network][:nets][:nova_fixed].first
     interface_mappings = "physnet1:" + physnet
     if multiple_external_networks
       neutron[:neutron][:additional_external_networks].each do |net|
