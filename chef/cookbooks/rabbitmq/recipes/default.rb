@@ -54,7 +54,7 @@ else
 end
 
 service "rabbitmq-server" do
-  supports :restart => true, :start => true, :stop => true
+  supports :restart => true, :start => true, :stop => true, :status => true
   action [ :enable, :start ]
   provider Chef::Provider::CrowbarPacemakerService if node[:rabbitmq][:ha][:enabled]
 end
