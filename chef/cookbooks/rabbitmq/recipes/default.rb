@@ -53,16 +53,17 @@ else
   rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
 end
 
+bash "enabling rabbit management" do
+  environment "HOME" => "/root/"
+  code "#{rabbitmq_plugins} --offline enable rabbitmq_management > /dev/null"
+  not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q", :environment => {"HOME" => "/root/"}
+  notifies :restart, "service[rabbitmq-server]"
+end
+
 service "rabbitmq-server" do
   supports :restart => true, :start => true, :stop => true, :status => true
   action [ :enable, :start ]
   provider Chef::Provider::CrowbarPacemakerService if node[:rabbitmq][:ha][:enabled]
 end
 
-bash "enabling rabbit management" do
-  environment "HOME" => "/root/"
-  code "#{rabbitmq_plugins} enable rabbitmq_management > /dev/null"
-  not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q", :environment => {"HOME" => "/root/"}
-  notifies :restart, "service[rabbitmq-server]"
-end
 
