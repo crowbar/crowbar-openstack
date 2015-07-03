@@ -18,6 +18,9 @@
 # limitations under the License.
 #
 
+package "rabbitmq-server"
+package "rabbitmq-server-plugins" if node.platform == "suse"
+
 directory "/etc/rabbitmq/" do
   owner "root"
   group "root"
@@ -40,9 +43,6 @@ template "/etc/rabbitmq/rabbitmq.config" do
   mode 0644
   notifies :restart, "service[rabbitmq-server]"
 end
-
-package "rabbitmq-server"
-package "rabbitmq-server-plugins" if node.platform == "suse"
 
 case node["platform"]
 when "suse"
