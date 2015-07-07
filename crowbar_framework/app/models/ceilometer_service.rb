@@ -126,7 +126,7 @@ class CeilometerService < PacemakerServiceObject
 
     validate_minimum_three_nodes_in_cluster(proposal)
 
-    unless proposal["deployment"]["ceilometer"]["elements"]["ceilometer-agent-hyperv"].empty? || hyperv_available?
+    unless (proposal["deployment"]["ceilometer"]["elements"]["ceilometer-agent-hyperv"] || []).empty? || hyperv_available?
       validation_error("Hyper-V support is not available.")
     end
 
