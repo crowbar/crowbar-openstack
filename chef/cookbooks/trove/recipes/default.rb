@@ -98,7 +98,7 @@ node.set['openstack']['region'] = keystone_settings['endpoint_region']
 # rubygem-mysql is installed here, although it would normally be the
 # database cookbook's responsibility. The database cookbook uses a
 # special mysql-chef_gem for this which is Chef 0.11 only.
-pkgs = ['mysql', 'python-mysql']
+pkgs = ['mariadb', 'python-mysql']
 pkgs.push("ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-mysql")
 pkgs.each do |pkg|
   package pkg
