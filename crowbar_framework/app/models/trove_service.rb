@@ -27,7 +27,6 @@ class TroveService < ServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "12.0",
             "windows" => "/.*/"
           }
         }
