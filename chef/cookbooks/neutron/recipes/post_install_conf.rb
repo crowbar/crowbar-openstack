@@ -31,8 +31,19 @@ fixed_pool_end = fixed_last_ip if fixed_last_ip < fixed_pool_end
 
 public_net = node[:network][:networks]["public"]
 floating_net = node[:network][:networks]["nova_floating"]
-floating_router = floating_net["router"] || public_net["router"]
-floating_range = "#{floating_net["subnet"]}/#{mask_to_bits(floating_net["netmask"])}"
+
+public_net_addr = IPAddr.new("#{public_net["subnet"]}/#{public_net["netmask"]}")
+floating_net_addr = IPAddr.new("#{floating_net["subnet"]}/#{floating_net["netmask"]}")
+
+# For backwards compatibility, if floating is a subnet of public use the
+# router and range/netmask from public (otherwise router creation will fail)
+if public_net_addr.include?(floating_net_addr)
+  floating_router = public_net["router"]
+  floating_range = "#{public_net["subnet"]}/#{mask_to_bits(public_net["netmask"])}"
+else
+  floating_router = floating_net["router"]
+  floating_range = "#{floating_net["subnet"]}/#{mask_to_bits(floating_net["netmask"])}"
+end
 floating_pool_start = floating_net[:ranges][:host][:start]
 floating_pool_end = floating_net[:ranges][:host][:end]
 
