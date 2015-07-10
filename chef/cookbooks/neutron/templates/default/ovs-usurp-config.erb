@@ -21,6 +21,11 @@ case "$1" in
         ip -4 route flush dev <%= @source %>
         ip -6 route flush dev <%= @source %>
         ip addr flush dev <%= @source %>
+        # (aplanas) temporal workaround for bsc#930986 proposed by
+        # rhafer. A better workaround based on
+        # https://en.opensuse.org/Portal:Wicked/OpenvSwitch is in
+        # planning.
+        ip link set up <%= @source %>
 <% @addresses.each do |addr| -%>
         ip addr add <%= addr.to_s %> dev <%= @dest %>
 <% end -%>
