@@ -1,0 +1,92 @@
+{
+  "id": "bc-template-neutron",
+  "description": "API-enabled, pluggable virtual network service for OpenStack",
+  "attributes": {
+    "neutron": {
+      "service_user": "neutron",
+      "rabbitmq_instance": "none",
+      "keystone_instance": "none",
+      "max_header_line": 16384,
+      "debug": false,
+      "verbose": true,
+      "dhcp_domain": "openstack.local",
+      "use_lbaas": true,
+      "use_l2pop": true,
+      "use_dvr": false,
+      "networking_plugin": "ml2",
+      "ml2_mechanism_drivers": ["openvswitch"],
+      "ml2_type_drivers": ["gre"],
+      "ml2_type_drivers_default_provider_network": "gre",
+      "ml2_type_drivers_default_tenant_network": "gre",
+      "num_vlans": 2000,
+      "gre": {
+        "tunnel_id_start": 1,
+        "tunnel_id_end": 1000
+      },
+      "vxlan": {
+        "vni_start": 4096,
+        "vni_end": 99999,
+        "multicast_group": "239.1.1.1"
+      },
+      "allow_overlapping_ips": true,
+      "use_syslog": false,
+      "database_instance": "none",
+      "db": {
+        "database": "neutron",
+        "user": "neutron"
+      },
+      "sql": {
+        "min_pool_size": 30,
+        "max_pool_overflow": 10,
+        "pool_timeout": 30
+      },
+      "vmware": {
+        "user": "",
+        "password": "",
+        "port": "443",
+        "controllers": "",
+        "tz_uuid": "",
+        "l3_gw_uuid": ""
+      },
+      "ssl": {
+        "certfile": "/etc/neutron/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/neutron/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
+        "cert_required": false,
+        "ca_certs": "/etc/neutron/ssl/certs/ca.pem"
+      },
+      "api": {
+        "protocol": "http",
+        "service_port": 9696,
+        "service_host": "0.0.0.0"
+      }
+    }
+  },
+  "deployment": {
+    "neutron": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 41,
+      "element_states": {
+        "neutron-server": [ "readying", "ready", "applying" ],
+        "neutron-network": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+         ["neutron-server" ],
+         ["neutron-network" ]
+      ],
+      "element_run_list_order": {
+        "neutron-server": 94,
+        "neutron-network": 95
+      },
+      "config": {
+        "environment": "neutron-config-base",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": []
+      }
+    }
+  }
+}

@@ -1,0 +1,85 @@
+#
+# Copyright 2011-2013, Dell
+# Copyright 2013-2014, SUSE LINUX Products GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+en:
+  barclamp:
+    neutron:
+      edit_cisco_switch_ports:
+        assign_switch_port: 'Assign Switch Ports'
+        edit_after_allocating_compute_nodes: 'Edit assignments after allocating compute nodes in the nova barclamp'
+        node: 'Node'
+        switch_ip: 'Cisco Switch IP'
+        switch_port: 'Cisco Switch Port'
+      deploy:
+        missing_os_sdn_network: 'The os_sdn network must be defined in bc-template-network.json'
+      edit_attributes:
+        database_instance: 'Database Instance'
+        rabbitmq_instance: 'RabbitMQ Instance'
+        keystone_instance: 'Keystone Instance'
+        dhcp_domain: 'DHCP Domain'
+        plugin_header: 'Networking Plugin'
+        networking_plugin: 'Plugin'
+        ml2_type_drivers: 'Modular Layer 2 type drivers'
+        ml2_type_drivers_default_provider_network: 'Default type driver for provider network'
+        ml2_type_drivers_default_provider_network_hint: 'Modular Layer 2 type driver used to create the "fixed" network'
+        ml2_type_drivers_default_tenant_network: 'Default type driver for tenant network'
+        ml2_type_drivers_default_tenant_network_hint: 'Modular Layer 2 type driver used to create the tenant networks'
+        ml2_mechanism_drivers: 'Modular Layer 2 mechanism drivers'
+        vlan_header: 'VLAN'
+        num_vlans: 'Maximum number of VLANs'
+        gre_header: 'GRE'
+        gre:
+          tunnel_id_start: 'Start of tunnel ID range'
+          tunnel_id_end: 'End of tunnel ID range'
+        vxlan_header: 'VXLAN'
+        vxlan:
+          vni_start: 'Start of VXLAN VNI range'
+          vni_end: 'End of VXLAN VNI range'
+          multicast_group: 'Multicast group for broadcast emulation'
+          multicast_group_hint: 'If empty, broadcast emulation will be disabled.'
+        cisco_switches: 'Cisco Switch Credentials'
+        cisco_ports: 'Assign Switch Ports'
+        switch_ip: 'IP Address'
+        switch_port: 'Port'
+        switch_user: 'Username'
+        switch_password: 'Password'
+        add_switch: 'Add'
+        remove_switch: 'Remove'
+        vmware:
+          user: 'VMware NSX Username'
+          password: 'VMware NSX Password'
+          controllers: 'VMware NSX Controllers'
+          tz_uuid: 'UUID of the NSX Transport Zone'
+          l3_gw_uuid: 'UUID of the NSX Gateway Service'
+        ssl_header: 'SSL Support'
+        api:
+          protocol: 'Protocol'
+        ssl:
+          generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          certfile: 'SSL Certificate File'
+          keyfile: 'SSL (Private) Key File'
+          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          cert_required: 'Require Client Certificate'
+          ca_certs: 'SSL CA Certificates File'
+        no_switches: 'Currently there are no switches assigned'
+        error_invalid: 'IP Address, Port, Username and Password must not be empty!'
+        error_duplicate: 'There is already a Switch configuration for that IP Address!'
+        port_node: 'Node'
+        port_switch: 'Switch IP'
+        port_number: 'Switch Port'
+        clear_port: 'Clear'
+        port_hint: 'Edit assignments after allocating compute nodes in the nova barclamp'
