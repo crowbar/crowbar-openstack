@@ -1,0 +1,445 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=US-ASCII" />
+<title>
+  Cookbook Documentation
+  
+    &mdash; Documentation by YARD 0.8.7
+  
+</title>
+
+  <link rel="stylesheet" href="css/style.css" type="text/css" charset="utf-8" />
+
+  <link rel="stylesheet" href="css/common.css" type="text/css" charset="utf-8" />
+
+<script type="text/javascript" charset="utf-8">
+  hasFrames = window.top.frames.main ? true : false;
+  relpath = '';
+  framesUrl = "frames.html#!" + escape(window.location.href);
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="header">
+      <div id="menu">
+  
+    <a href="_index.html">Index</a> &raquo; 
+    <span class="title">File: README</span>
+  
+
+  <div class="noframes"><span class="title">(</span><a href="." target="_top">no frames</a><span class="title">)</span></div>
+</div>
+
+      <div id="search">
+  
+    <a class="full_list_link" id="cookbooks_list_link"
+        href="cookbooks_list.html">
+      Cookbook List
+    </a>
+  
+    <a class="full_list_link" id="recipes_list_link"
+        href="recipes_list.html">
+      Recipe List
+    </a>
+  
+    <a class="full_list_link" id="resources_list_link"
+        href="resources_list.html">
+      Resource List
+    </a>
+  
+    <a class="full_list_link" id="definitions_list_link"
+        href="definitions_list.html">
+      Definitions List
+    </a>
+  
+    <a class="full_list_link" id="class_list_link"
+        href="class_list.html">
+      Libraries List
+    </a>
+  
+</div>
+      <div class="clear"></div>
+    </div>
+
+    <iframe id="search_frame"></iframe>
+
+    <div id="content">
+
+<div id="filecontents">
+  <h1>Chef Cookbooks Documentation</h1>
+  <div id='filecontents'><h1>Description</h1>
+
+<p>This cookbook installs the OpenStack Identity Service <strong>Keystone</strong> as part of the OpenStack reference deployment Chef for OpenStack. The <a href="http://github.com/mattray/chef-openstack-repo">http://github.com/mattray/chef-openstack-repo</a> contains documentation for using this cookbook in the context of a full OpenStack deployment. Keystone is installed from packages, creating the default user, tenant, and roles. It also registers the identity service and identity endpoint.</p>
+
+<p><a href="http://keystone.openstack.org/">http://keystone.openstack.org/</a></p>
+
+<h1>Requirements</h1>
+
+<p>Chef 0.10.0 or higher required (for Chef environment use)</p>
+
+<h2>Cookbooks</h2>
+
+<p>The following cookbooks are dependencies:</p>
+
+<ul>
+<li>openstack-common</li>
+</ul>
+
+<h1>Usage</h1>
+
+<h2>server</h2>
+
+<p>Installs and Configures Keystone Service</p>
+
+<pre class="code json"><code class="json">&quot;run_list&quot;: [
+    &quot;recipe[openstack-identity::server]&quot;
+]
+</code></pre>
+
+<h1>Resources/Providers</h1>
+
+<p>These resources provide an abstraction layer for interacting with the keystone server&#39;s API, allowing for other nodes to register any required users, tenants, roles, services, or endpoints.</p>
+
+<h2>register</h2>
+
+<p>Register users, tenants, roles, services and endpoints with Keystone</p>
+
+<h3>Actions</h3>
+
+<ul>
+<li>:create_tenant: Create a tenant</li>
+<li>:create_user: Create a user for a specified tenant</li>
+<li>:create_role: Create a role</li>
+<li>:grant_role: Grant a role to a specified user for a specified tenant</li>
+<li>:create_service: Create a service</li>
+<li>:create_endpoint: Create an endpoint for a sepcified service</li>
+</ul>
+
+<h3>General Attributes</h3>
+
+<ul>
+<li>auth_protocol: Required communication protocol with Keystone server
+
+<ul>
+<li>Acceptable values are [ &quot;http&quot;, &quot;https&quot; ]</li>
+</ul></li>
+<li>auth_host: Keystone server IP Address</li>
+<li>auth_port: Port Keystone server is listening on</li>
+<li>api_ver: API Version for Keystone server
+
+<ul>
+<li>Accepted values are [ &quot;/v2.0&quot; ]</li>
+</ul></li>
+<li>auth_token: Auth Token for communication with Keystone server</li>
+</ul>
+
+<h3>:create_tenant Specific Attributes</h3>
+
+<ul>
+<li>tenant_name: Name of tenant to create</li>
+<li>tenant_description: Description of tenant to create</li>
+<li>tenant_enabled: Enable or Disable tenant
+
+<ul>
+<li>Accepted values are [ &quot;true&quot;, &quot;false&quot; ]</li>
+<li>Default is &quot;true&quot;</li>
+</ul></li>
+</ul>
+
+<h3>:create_user Specific Attributes</h3>
+
+<ul>
+<li>user_name: Name of user account to create</li>
+<li>user_pass: Password for the user account</li>
+<li>user_enabled: Enable or Disable user
+
+<ul>
+<li>Accepted values are [ &quot;true&quot;, &quot;false&quot; ]</li>
+<li>Default is &quot;true&quot;</li>
+</ul></li>
+<li>tenant_name: Name of tenant to create user in</li>
+</ul>
+
+<h3>:create_role Specific Attributes</h3>
+
+<ul>
+<li>role_name: Name of the role to create</li>
+</ul>
+
+<h3>:grant_role Specific Attributes</h3>
+
+<ul>
+<li>role_name: Name of the role to grant</li>
+<li>user_name: User name to grant the role to</li>
+<li>tenant_name: Name of tenant to grant role in</li>
+</ul>
+
+<h3>:create_service Specific Attributes</h3>
+
+<ul>
+<li>service_name: Name of service</li>
+<li>service_description: Description of service</li>
+<li>service_type: Type of service to create
+
+<ul>
+<li>Accepted values are [ &quot;image&quot;, &quot;identity&quot;, &quot;compute&quot;, &quot;storage&quot;, &quot;ec2&quot;, &quot;volume&quot; ]</li>
+</ul></li>
+</ul>
+
+<h3>:create_endpoint Specific Attributes</h3>
+
+<ul>
+<li>endpoint_region: Default value is &quot;RegionOne&quot;</li>
+<li>endpoint_adminurl: URL to admin endpoint (using admin port)</li>
+<li>endpoint_internalurl: URL to service endpoint (using service port)</li>
+<li>endpoint_publicurl: URL to public endpoint
+
+<ul>
+<li>Default is same as endpoint_internalURL</li>
+</ul></li>
+<li>service_type: Type of service to create endpoint for
+
+<ul>
+<li>Accepted values are [ &quot;image&quot;, &quot;identity&quot;, &quot;compute&quot;, &quot;storage&quot;, &quot;ec2&quot;, &quot;volume&quot; ]</li>
+</ul></li>
+</ul>
+
+<h3>Examples</h3>
+
+<pre class="code ruby"><code class="ruby"><span class='comment'># Create 'openstack' tenant
+</span><span class='id identifier rubyid_openstack_identity_register'>openstack_identity_register</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Register 'openstack' Tenant</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_auth_host'>auth_host</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>192.168.1.10</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_port'>auth_port</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>35357</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_protocol'>auth_protocol</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>http</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_api_ver'>api_ver</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>/v2.0</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_token'>auth_token</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>123456789876</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_tenant_name'>tenant_name</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>openstack</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_tenant_description'>tenant_description</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Default Tenant</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_tenant_enabled'>tenant_enabled</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>true</span><span class='tstring_end'>&quot;</span></span> <span class='comment'># Not required as this is the default
+</span>  <span class='id identifier rubyid_action'>action</span> <span class='symbol'>:create_tenant</span>
+<span class='kw'>end</span>
+
+<span class='comment'># Create 'admin' user
+</span><span class='id identifier rubyid_openstack_identity_register'>openstack_identity_register</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Register 'admin' User</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_auth_host'>auth_host</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>192.168.1.10</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_port'>auth_port</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>35357</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_protocol'>auth_protocol</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>http</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_api_ver'>api_ver</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>/v2.0</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_token'>auth_token</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>123456789876</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_tenant_name'>tenant_name</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>openstack</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_user_name'>user_name</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>admin</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_user_pass'>user_pass</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>secrete</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_user_enabled'>user_enabled</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>true</span><span class='tstring_end'>&quot;</span></span> <span class='comment'># Not required as this is the default
+</span>  <span class='id identifier rubyid_action'>action</span> <span class='symbol'>:create_user</span>
+<span class='kw'>end</span>
+
+<span class='comment'># Create 'admin' role
+</span><span class='id identifier rubyid_openstack_identity_register'>openstack_identity_register</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Register 'admin' Role</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_auth_host'>auth_host</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>192.168.1.10</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_port'>auth_port</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>35357</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_protocol'>auth_protocol</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>http</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_api_ver'>api_ver</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>/v2.0</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_token'>auth_token</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>123456789876</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_role_name'>role_name</span> <span class='id identifier rubyid_role_key'>role_key</span>
+  <span class='id identifier rubyid_action'>action</span> <span class='symbol'>:create_role</span>
+<span class='kw'>end</span>
+
+
+<span class='comment'># Grant 'admin' role to 'admin' user in the 'openstack' tenant
+</span><span class='id identifier rubyid_openstack_identity_register'>openstack_identity_register</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Grant 'admin' Role to 'admin' User</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_auth_host'>auth_host</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>192.168.1.10</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_port'>auth_port</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>35357</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_protocol'>auth_protocol</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>http</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_api_ver'>api_ver</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>/v2.0</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_token'>auth_token</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>123456789876</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_tenant_name'>tenant_name</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>openstack</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_user_name'>user_name</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>admin</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_role_name'>role_name</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>admin</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_action'>action</span> <span class='symbol'>:grant_role</span>
+<span class='kw'>end</span>
+
+<span class='comment'># Create 'identity' service
+</span><span class='id identifier rubyid_openstack_identity_register'>openstack_identity_register</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Register Identity Service</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_auth_host'>auth_host</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>192.168.1.10</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_port'>auth_port</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>35357</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_protocol'>auth_protocol</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>http</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_api_ver'>api_ver</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>/v2.0</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_token'>auth_token</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>123456789876</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_service_name'>service_name</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>keystone</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_service_type'>service_type</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>identity</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_service_description'>service_description</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Keystone Identity Service</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_action'>action</span> <span class='symbol'>:create_service</span>
+<span class='kw'>end</span>
+
+<span class='comment'># Create 'identity' endpoint
+</span><span class='id identifier rubyid_openstack_identity_register'>openstack_identity_register</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Register Identity Endpoint</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_auth_host'>auth_host</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>192.168.1.10</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_port'>auth_port</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>35357</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_protocol'>auth_protocol</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>http</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_api_ver'>api_ver</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>/v2.0</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_token'>auth_token</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>123456789876</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_service_type'>service_type</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>identity</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_endpoint_region'>endpoint_region</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>RegionOne</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_endpoint_adminurl'>endpoint_adminurl</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>http://192.168.1.10:35357/v2.0</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_endpoint_internalurl'>endpoint_internalurl</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>http://192.168.1.10:5001/v2.0</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_endpoint_publicurl'>endpoint_publicurl</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>http://1.2.3.4:5001/v2.0</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_action'>action</span> <span class='symbol'>:create_endpoint</span>
+<span class='kw'>end</span>
+</code></pre>
+
+<h2>credentials</h2>
+
+<p>Create EC2 credentials for a given user in the specified tenant</p>
+
+<h3>Actions</h3>
+
+<ul>
+<li>:create_ec2: create EC2 credentials</li>
+</ul>
+
+<h3>General Attributes</h3>
+
+<ul>
+<li>auth_protocol: Required communication protocol with Keystone server. Acceptable values are [ &quot;http&quot;, &quot;https&quot; ]</li>
+<li>auth_host: Keystone server IP Address</li>
+<li>auth_port: Port Keystone server is listening on</li>
+<li>api_ver: API Version for Keystone server
+
+<ul>
+<li>Accepted values are [ &quot;/v2.0&quot; ]</li>
+</ul></li>
+<li>auth_token: Auth Token for communication with Keystone server</li>
+</ul>
+
+<h3>:create_ec2 Specific Attributes</h3>
+
+<ul>
+<li>user_name: User name to grant the credentials for</li>
+<li>tenant_name: Tenant name to grant the credentials in</li>
+</ul>
+
+<h3>Examples</h3>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_openstack_identity_credentials'>openstack_identity_credentials</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>Create EC2 credentials for 'admin' user</span><span class='tstring_end'>&quot;</span></span> <span class='kw'>do</span>
+  <span class='id identifier rubyid_auth_host'>auth_host</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>192.168.1.10</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_port'>auth_port</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>35357</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_protocol'>auth_protocol</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>http</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_api_ver'>api_ver</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>/v2.0</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_auth_token'>auth_token</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>123456789876</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_user_name'>user_name</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>admin</span><span class='tstring_end'>&quot;</span></span>
+  <span class='id identifier rubyid_tenant_name'>tenant_name</span> <span class='tstring'><span class='tstring_beg'>&quot;</span><span class='tstring_content'>openstack</span><span class='tstring_end'>&quot;</span></span>
+<span class='kw'>end</span>
+</code></pre>
+
+<h1>Attributes</h1>
+
+<ul>
+<li><code>openstack[&#39;identity&#39;][&#39;db_server_chef_role&#39;]</code> - The name of the Chef role that knows about the db server</li>
+<li><code>openstack[&#39;identity&#39;][&#39;bind_interface&#39;]</code> - Interface to bind keystone to</li>
+<li><code>openstack[&#39;identity&#39;][&#39;service_port&#39;]</code> - Port to listen on for client functions</li>
+<li><code>openstack[&#39;identity&#39;][&#39;admin_port&#39;]</code> - Port to listen on for admin functions</li>
+<li><code>openstack[&#39;identity&#39;][&#39;user&#39;]</code> - User keystone runs as</li>
+<li><code>openstack[&#39;identity&#39;][&#39;group&#39;]</code> - Group keystone runs as</li>
+<li><code>openstack[&#39;identity&#39;][&#39;db&#39;]</code> - Name of keystone database</li>
+<li><code>openstack[&#39;identity&#39;][&#39;db_user&#39;]</code> - Username for keystone database access</li>
+<li><code>openstack[&#39;identity&#39;][&#39;db_passwd&#39;]</code> - Password for keystone database access</li>
+<li><code>openstack[&#39;identity&#39;][&#39;db_ipaddress&#39;]</code> - IP address of the keystone database</li>
+<li><code>openstack[&#39;identity&#39;][&#39;api_ipaddress&#39;]</code> - IP address for the keystone API to bind to. <em>TODO</em>: Rename to bind_address</li>
+<li><code>openstack[&#39;identity&#39;][&#39;verbose&#39;]</code> - Enables/disables verbose output for keystone API server</li>
+<li><code>openstack[&#39;identity&#39;][&#39;debug&#39;]</code> - Enables/disables debug output for keystone API server</li>
+<li><code>openstack[&#39;identity&#39;][&#39;service_port&#39;]</code> - Port for the keystone service API to bind to</li>
+<li><code>openstack[&#39;identity&#39;][&#39;admin_port&#39;]</code> - Port for the keystone admin service to bind to</li>
+<li><code>openstack[&#39;identity&#39;][&#39;admin_token&#39;]</code> - Admin token for bootstraping keystone server</li>
+<li><code>openstack[&#39;identity&#39;][&#39;roles&#39;]</code> - Array of roles to create in the keystone server</li>
+<li><code>openstack[&#39;identity&#39;][&#39;users&#39;]</code> - Array of users to create in the keystone server</li>
+</ul>
+
+<h1>Testing</h1>
+
+<p>This cookbook uses <a href="http://gembundler.com/">bundler</a>, <a href="http://berkshelf.com/">berkshelf</a>, and <a href="https://github.com/customink/strainer">strainer</a> to isolate dependencies and run tests.</p>
+
+<p>Tests are defined in Strainerfile.</p>
+
+<p>To run tests:</p>
+
+<pre class="code ruby"><code class="ruby">$ bundle install # install gem dependencies
+$ bundle exec berks install # install cookbook dependencies
+$ bundle exec strainer test # run tests
+</code></pre>
+
+<h1>License and Author</h1>
+
+<p>Author:: Justin Shepherd (<a href="mailto:justin.shepherd@rackspace.com">justin.shepherd@rackspace.com</a>)
+Author:: Jason Cannavale (<a href="mailto:jason.cannavale@rackspace.com">jason.cannavale@rackspace.com</a>)
+Author:: Ron Pedde (<a href="mailto:ron.pedde@rackspace.com">ron.pedde@rackspace.com</a>)
+Author:: Joseph Breu (<a href="mailto:joseph.breu@rackspace.com">joseph.breu@rackspace.com</a>)
+Author:: William Kelly (<a href="mailto:william.kelly@rackspace.com">william.kelly@rackspace.com</a>)
+Author:: Darren Birkett (<a href="mailto:darren.birkett@rackspace.co.uk">darren.birkett@rackspace.co.uk</a>)
+Author:: Evan Callicoat (<a href="mailto:evan.callicoat@rackspace.com">evan.callicoat@rackspace.com</a>)
+Author:: Matt Ray (<a href="mailto:matt@opscode.com">matt@opscode.com</a>)
+Author:: Jay Pipes (<a href="mailto:jaypipes@att.com">jaypipes@att.com</a>)
+Author:: John Dewey (<a href="mailto:jdewey@att.com">jdewey@att.com</a>)
+Author:: Sean Gallagher (<a href="mailto:sean.gallagher@att.com">sean.gallagher@att.com</a>)
+Author:: Ionut Artarisi (<a href="mailto:iartarisi@suse.cz">iartarisi@suse.cz</a>)</p>
+
+<p>Copyright 2012, Rackspace US, Inc.
+Copyright 2012-2013, Opscode, Inc.
+Copyright 2012-2013, AT&amp;T Services, Inc.
+Copyright 2013, SUSE Linux GmbH</p>
+
+<p>Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at</p>
+
+<pre class="code ruby"><code class="ruby"><span class='id identifier rubyid_http'>http</span><span class='symbol'>:/</span><span class='op'>/</span><span class='id identifier rubyid_www'>www</span><span class='period'>.</span><span class='id identifier rubyid_apache'>apache</span><span class='period'>.</span><span class='id identifier rubyid_org'>org</span><span class='op'>/</span><span class='id identifier rubyid_licenses'>licenses</span><span class='op'>/</span><span class='const'>LICENSE</span><span class='op'>-</span><span class='float'>2.0</span>
+</code></pre>
+
+<p>Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.</p>
+</div>
+
+<h1>Cookbooks List</h1>
+<table>
+  <thead>
+    <tr>
+      <th>Cookbook</th>
+      <th>Description</th>
+      <th>Version</th>
+    </tr>
+  </thead>
+  <tbody>
+  
+  
+  
+    <tr class="r1">
+      <td><span class='object_link'><a href="chef/identity.html" title="chef::identity (cookbook)">identity</a></span></td>
+      <td>The OpenStack Identity service Keystone.</td>
+      <td>7.0.0</td>
+    </tr>
+    
+  
+  </tbody>
+</table>
+
+</div>
+</div>
+
+    <div id="footer">
+  Generated on Tue Aug 20 15:56:08 2013 by
+  <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.8.7 (ruby-1.9.3).
+</div>
+
+  </body>
+</html>
