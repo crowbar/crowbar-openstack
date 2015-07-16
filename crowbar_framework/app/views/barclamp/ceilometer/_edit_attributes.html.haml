@@ -1,0 +1,22 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header show_raw_deployment?, true
+
+  .panel-body
+    = instance_field :database
+    = instance_field :keystone
+    = instance_field :rabbitmq
+
+    = integer_field :cpu_interval
+    = integer_field :disk_interval
+    = integer_field :network_interval
+    = integer_field :meters_interval
+    = integer_field :alarm_threshold_evaluation_interval
+
+    = boolean_field :use_mongodb
+
+    = integer_field %w(database time_to_live)
+    %span.help-block
+      = t(".database.time_to_live_hint")
+
+    = boolean_field :verbose

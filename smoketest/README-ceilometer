@@ -1,0 +1,10 @@
+Ensuring that the cli commands run without error:
+1. meter list
+2. resource list
+3. project list
+4. sample list
+5. user list
+
+Compute (Nova)
+1. check meter list available for a temporarily created instance
+

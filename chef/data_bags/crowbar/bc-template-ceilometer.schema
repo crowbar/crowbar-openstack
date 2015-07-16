@@ -1,0 +1,130 @@
+{
+  "type": "map",
+  "required": true,
+  "mapping": {
+    "id": { "type": "str", "required": true, "pattern": "/^bc-ceilometer-|^bc-template-ceilometer$/" },
+    "description": { "type": "str", "required": true },
+    "attributes": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "ceilometer": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "debug": { "type": "bool", "required": true },
+            "verbose": { "type": "bool", "required": true },
+            "use_mongodb": { "type": "bool", "required": true },
+            "alarm_threshold_evaluation_interval": { "type": "int", "required": true },
+            "cpu_interval": { "type": "int", "required": true },
+            "disk_interval": { "type": "int", "required": true },
+            "network_interval": { "type": "int", "required": true },
+            "meters_interval": { "type": "int", "required": true },
+            "metering_secret": { "type": "str", "required": true },
+            "database_instance": { "type": "str", "required": true },
+            "rabbitmq_instance": { "type": "str", "required": true },
+            "keystone_instance": { "type": "str", "required": true },
+            "service_user": { "type": "str", "required": true },
+            "service_password": { "type": "str", "required": true },
+            "api": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "protocol": { "type": "str", "required": true },
+                "port": { "type": "int", "required": true }
+              }
+            },
+            "db": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "password": { "type": "str", "required": true },
+                "user": { "type": "str", "required": true },
+                "database": { "type": "str", "required": true }
+              }
+            },
+            "database": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "time_to_live": { "type": "int", "required": true }
+              }
+	    }
+          }
+        }
+      }
+    },
+    "deployment": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "ceilometer": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "crowbar-revision": { "type": "int", "required": true },
+            "crowbar-committing": { "type": "bool" },
+            "crowbar-applied": { "type": "bool" },
+            "crowbar-status": { "type": "str" },
+            "crowbar-failed": { "type": "str" },
+            "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
+            "element_states": {
+              "type": "map",
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "elements": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "element_order": {
+              "type": "seq",
+              "required": true,
+              "sequence": [ {
+                "type": "seq",
+                "sequence": [ { "type": "str" } ]
+              } ]
+            },
+            "element_run_list_order": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                = : {
+                  "type": "int",
+                  "required": true
+                }
+              }
+            },
+            "config": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "environment": { "type": "str", "required": true },
+                "mode": { "type": "str", "required": true },
+                "transitions": { "type": "bool", "required": true },
+                "transition_list": {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
