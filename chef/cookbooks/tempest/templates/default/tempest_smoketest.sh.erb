@@ -1,0 +1,35 @@
+#!/bin/bash
+
+(
+export OS_AUTH_URL=<%= @keystone_settings['internal_auth_url'] %>
+export OS_AUTH_STRATEGY=keystone
+export OS_REGION_NAME='<%= @keystone_settings['endpoint_region'] %>'
+
+#s3 test preparation
+cert_dir=<%= @tempest_path %>/etc/certs/
+
+export OS_USERNAME=<%= @comp_user %>
+export OS_PASSWORD=<%= @comp_pass %>
+export OS_TENANT_NAME=<%= @comp_tenant %>
+export EC2_USER_ID=<%= @comp_user %>
+export EUCALYPTUS_CERT="${cert_dir}/cacert.pem"
+export EC2_CERT="${cert_dir}/cert.pem"
+export EC2_PRIVATE_KEY="${cert_dir}/pk.pem"
+
+mkdir -p ${cert_dir}
+nova x509-get-root-cert "${EUCALYPTUS_CERT}"
+nova x509-create-cert "${EC2_PRIVATE_KEY}" "${EC2_CERT}"
+
+s3_materials_path=<%= @tempest_path %>/etc/cirros/
+
+euca-bundle-image -i ${s3_materials_path}/cirros-*-blank.img -d ${s3_materials_path}
+euca-bundle-image -i ${s3_materials_path}/cirros-*-initrd --ramdisk true -d ${s3_materials_path}
+euca-bundle-image -i ${s3_materials_path}/cirros-*-vmlinuz --kernel true -d ${s3_materials_path}
+) 1>&2
+
+<%= @tempest_path %>/run_tempest.sh -N -t -s
+tresult=$?
+
+<%= @tempest_path %>/bin/tempest_cleanup.sh || :
+
+exit ${tresult}
