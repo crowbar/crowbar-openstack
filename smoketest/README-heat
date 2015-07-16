@@ -1,0 +1,20 @@
+Smoketest workflow:
+1. Smoketest script seeks ".json" and ".yaml" files in a smoketest directory and interprets them as CFN (.json files)  and HOT (.yaml files) stack templates.
+2. If any templates are found, script authorizes itself to work in a cloud and calculates any data required as input for further actions.
+3. CFN stack execution and verification of it both by querying stack state through heat-client and by pinging VM deployed during stack execution.
+4. HOT stack  execution and verification of it both by querying stack state through heat-client and by pinging VM deployed during stack execution.
+5. Triggering stacks deletion through heat-client.
+6. Cleanup.
+
+
+CFN stack template features:
+  - Security Group resource creation.
+  - EIP (floating_ip) resource creation.
+  - VM instance creation.
+
+HOT stack template features:
+  - CLI paramters parsing.
+  - HOT\AWS resources mix. (HOT API)
+  - Security group resource creation. (CFN API)
+  - VM instance creation (HOT API)
+  - EIP resource creation\association. (CFN API)

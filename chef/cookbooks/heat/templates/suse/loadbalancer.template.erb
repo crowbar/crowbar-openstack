@@ -1,0 +1,164 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Built in HAProxy server",
+  "Parameters" : {
+    "KeyName" : {
+      "Type" : "String"
+    }
+  },
+  "Resources": {
+    "latency_watcher": {
+     "Type": "AWS::CloudWatch::Alarm",
+     "Properties": {
+        "MetricName": "Latency",
+        "Namespace": "AWS/ELB",
+        "Statistic": "Average",
+        "Period": "60",
+        "EvaluationPeriods": "1",
+        "Threshold": "2",
+        "AlarmActions": [],
+        "ComparisonOperator": "GreaterThanThreshold"
+      }
+    },
+    "CfnLBUser" : {
+      "Type" : "AWS::IAM::User"
+    },
+    "CfnLBAccessKey" : {
+      "Type" : "AWS::IAM::AccessKey",
+      "Properties" : {
+        "UserName" : {"Ref": "CfnLBUser"}
+      }
+    },
+    "LB_instance": {
+      "Type": "AWS::EC2::Instance",
+      "Metadata": {
+        "AWS::CloudFormation::Init": {
+          "config": {
+            "packages": {
+              "zypper": {
+                "cron"           : [],
+                "haproxy"        : [],
+                "socat"          : [],
+                "python-psutil"  : []
+              }
+            },
+            "services": {
+              "sysvinit": {
+                "cron"     : { "enabled" : "true", "ensureRunning" : "true" }
+              }
+            },
+            "files": {
+              "/etc/cfn/cfn-credentials" : {
+                "content" : { "Fn::Join" : ["", [
+                  "AWSAccessKeyId=", { "Ref" : "CfnLBAccessKey" }, "\n",
+                  "AWSSecretKey=", {"Fn::GetAtt": ["CfnLBAccessKey",
+                                    "SecretAccessKey"]}, "\n"
+                ]]},
+                "mode"    : "000400",
+                "owner"   : "root",
+                "group"   : "root"
+              },
+              "/etc/cfn/cfn-hup.conf" : {
+                "content" : { "Fn::Join" : ["", [
+                  "[main]\n",
+                  "stack=", { "Ref" : "AWS::StackId" }, "\n",
+                  "credential-file=/etc/cfn/cfn-credentials\n",
+                  "region=", { "Ref" : "AWS::Region" }, "\n",
+                  "interval=60\n"
+                ]]},
+                "mode"    : "000400",
+                "owner"   : "root",
+                "group"   : "root"
+              },
+              "/etc/cfn/hooks.conf" : {
+                "content": { "Fn::Join" : ["", [
+                  "[cfn-init]\n",
+                  "triggers=post.update\n",
+                  "path=Resources.LB_instance.Metadata\n",
+                  "action=/opt/aws/bin/cfn-init -s ",
+                  { "Ref": "AWS::StackId" },
+                  "    -r LB_instance ",
+                  "    --region ", { "Ref": "AWS::Region" }, "\n",
+                  "runas=root\n",
+                  "\n",
+                  "[reload]\n",
+                  "triggers=post.update\n",
+                  "path=Resources.LB_instance.Metadata\n",
+                  "action=service haproxy restart\n",
+                  "runas=root\n"
+                ]]},
+                "mode"    : "000400",
+                "owner"   : "root",
+                "group"   : "root"
+              },
+              "/etc/haproxy/haproxy.cfg": {
+                "content": "",
+                "mode": "000644",
+                "owner": "root",
+                "group": "root"
+              },
+              "/tmp/cfn-hup-crontab.txt" : {
+                "content" : { "Fn::Join" : ["", [
+                "MAIL=\"\"\n",
+                "\n",
+                "* * * * * /opt/aws/bin/cfn-hup -f\n",
+                "* * * * * /opt/aws/bin/cfn-push-stats ",
+                " --watch ", { "Ref" : "latency_watcher" }, " --haproxy\n"
+                ]]},
+                "mode"    : "000600",
+                "owner"   : "root",
+                "group"   : "root"
+              }
+            }
+          }
+        }
+      },
+      "Properties": {
+        "ImageId": "SLE11SP3-x86_64-cfntools",
+        "InstanceType": "m1.small",
+        "KeyName": { "Ref": "KeyName" },
+        "UserData": { "Fn::Base64": { "Fn::Join": ["", [
+          "#!/bin/bash -v\n",
+          "# Helper function\n",
+          "function error_exit\n",
+          "{\n",
+          "  /opt/aws/bin/cfn-signal -e 1 -r \"$1\" '",
+          { "Ref" : "WaitHandle" }, "'\n",
+          "  exit 1\n",
+          "}\n",
+
+          "/opt/aws/bin/cfn-init -s ",
+          { "Ref": "AWS::StackId" },
+          "    -r LB_instance ",
+          "    --region ", { "Ref": "AWS::Region" }, "\n",
+          "# install cfn-hup crontab\n",
+          "crontab /tmp/cfn-hup-crontab.txt\n",
+
+          "# LB setup completed, signal success\n",
+          "/opt/aws/bin/cfn-signal -e 0 -r \"LB server setup complete\" '",
+          { "Ref" : "WaitHandle" }, "'\n"
+
+        ]]}}
+      }
+    },
+    "WaitHandle" : {
+      "Type" : "AWS::CloudFormation::WaitConditionHandle"
+    },
+
+    "WaitCondition" : {
+      "Type" : "AWS::CloudFormation::WaitCondition",
+      "DependsOn" : "LB_instance",
+      "Properties" : {
+        "Handle" : {"Ref" : "WaitHandle"},
+        "Timeout" : "600"
+      }
+    }
+  },
+
+  "Outputs": {
+    "PublicIp": {
+      "Value": { "Fn::GetAtt": [ "LB_instance", "PublicIp" ] },
+      "Description": "instance IP"
+    }
+  }
+}
