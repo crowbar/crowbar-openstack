@@ -1,0 +1,13 @@
+language: ruby
+rvm:
+  - 2.1.0
+
+gemfile: crowbar_framework/Gemfile
+
+install:
+  - cd crowbar_framework
+  - bin/bundle install
+  - bin/rake db:create db:migrate
+
+script:
+  - bin/rake spec brakeman:run

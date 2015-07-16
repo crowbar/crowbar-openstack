@@ -1,0 +1,17 @@
+AllCops:
+  RunRailsCops: true
+  DisplayStyleGuide: true
+  DisplayCopNames: true
+
+Style/RedundantReturn:
+  Exclude:
+    - "chef/data_bags/crowbar/migrate/*"
+
+Lint/UnusedMethodArgument:
+  Enabled: false
+
+Metrics/AbcSize:
+  Max: 50
+
+Metrics/LineLength:
+  Max: 150
