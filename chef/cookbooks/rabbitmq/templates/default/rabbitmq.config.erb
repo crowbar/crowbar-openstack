@@ -1,0 +1,15 @@
+[
+ {rabbit,
+  [
+   {tcp_listeners, [
+                    <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{node[:rabbitmq][:port]}}" }.join(", ") %>
+                   ]},
+   {disk_free_limit, 50000000}
+  ]
+ },
+ {rabbitmq_management,
+  [
+   {listener, [{ip, "<%= node[:rabbitmq][:management_address] %>"}, {port, <%= node[:rabbitmq][:management_port] %>}]}
+  ]
+ }
+].
