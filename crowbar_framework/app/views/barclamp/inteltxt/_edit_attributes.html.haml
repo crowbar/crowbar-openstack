@@ -1,0 +1,67 @@
+
+%input#proposal_attributes{:type => "hidden", :name => "proposal_attributes", :value => @proposal.raw_data['attributes'][@proposal.barclamp].to_json}
+%p
+  %label{:class => "h3", :for => "proposal_attributes"}= t('.attributes')
+  = link_to t('raw'), proposal_barclamp_path(:id => @proposal.name, :controller => @proposal.barclamp, :dep_raw => @dep_raw, :attr_raw => true), :style => "float: right;"
+  %div.container
+    %p
+      %label{ :for => :oat_service_settings }= t('.oat_service_settings')
+    %div.container
+      %p
+        %label{ :for => :apache_listen_port }= t('.apache_listen_port')
+        %input#apache_listen_port{:type => "text", :name => "apache_listen_port", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["apache_listen_port"], :onchange => "update_value('apache_listen_port','apache_listen_port', 'string')"}
+      %p
+        %label{ :for => :pcr_select_mask }= t('.pcr_select_mask')
+        %input#pcr_select_mask{:type => "text", :name => "pcr_select_mask", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["pcr_select_mask"], :onchange => "update_value('pcr_select_mask','pcr_select_mask', 'string')"}
+      %p
+        %label{ :for => :oa_attest_interval }= t('.oa_attest_interval')
+        %input#oa_attest_interval{:type => "text", :name => "oa_attest_interval", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["oa_attest_interval"], :onchange => "update_value('oa_attest_interval','oa_attest_interval', 'int')"}
+      %p
+        %label{ :for => :oa_attest_timeout }= t('.oa_attest_timeout')
+        %input#oa_attest_timeout{:type => "text", :name => "oa_attest_timeout", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["oa_attest_timeout"], :onchange => "update_value('oa_attest_timeout','oa_attest_timeout', 'int')"}
+      %p
+        %label{ :for => :oaws_check_attest_interval }= t('.oaws_check_attest_interval')
+        %input#oaws_check_attest_interval{:type => "text", :name => "oaws_check_attest_interval", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["oaws_check_attest_interval"], :onchange => "update_value('oaws_check_attest_interval','oaws_check_attest_interval', 'int')"}
+      %p
+        %label{ :for => :oaws_attest_timeout }= t('.oaws_attest_timeout')
+        %input#oaws_attest_timeout{:type => "text", :name => "oaws_attest_timeout", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["oaws_attest_timeout"], :onchange => "update_value('oaws_attest_timeout','oaws_attest_timeout', 'int')"}
+    %p
+      %label{ :for => :db_settings }= t('.db_settings')
+    %div.container
+      %p
+        %label{ :for => :database_instance }= t('.database_instance')
+        = instance_selector("database", :database_instance, "database_instance", @proposal)
+      %p
+        %label{ :for => :db_user }= t('.db_user')
+        %input#db_user{:type => "text", :name => "db_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["db"]["user"], :onchange => "update_value('db/user','user', 'string')"}
+      %p
+        %label{ :for => :db_pass }= t('.db_pass')
+        %input#db_pass{:type => "text", :name => "db_pass", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["db"]["password"], :onchange => "update_value('db/password','password', 'string')"}
+      %p
+        %label{ :for => :db_name }= t('.db_name')
+        %input#db_name{:type => "text", :name => "db_name", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["db"]["database"], :onchange => "update_value('db/database','database', 'string')"}
+    %p
+      %label{ :for => :mail_alert_settings }= t('.mail_alert_settings')
+    %div.container
+      %p
+        %label{ :for => :alert_mail_to }= t('.alert_mail_to')
+        %input#alert_mail_to{:type => "text", :name => "alert_mail_to", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["alert_mail_to"], :onchange => "update_value('alert_mail_to','alert_mail_to', 'string')"}
+      %p
+        %label{ :for => :alert_mail_from }= t('.alert_mail_from')
+        %input#alert_mail_from{:type => "text", :name => "alert_mail_from", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["alert_mail_from"], :onchange => "update_value('alert_mail_from','alert_mail_from', 'string')"}
+      %p
+        %label{ :for => :mail_alert_smtp_settings }= t('.mail_alert_smtp_settings')
+      %div.container
+        %p
+          %label{ :for => :alert_mail_host }= t('.alert_mail_host')
+          %input#alert_mail_host{:type => "text", :name => "alert_mail_host", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["alert_mail_host"], :onchange => "update_value('alert_mail_host','alert_mail_host', 'string')"}
+        %p
+          %label{ :for => :alert_mail_port }= t('.alert_mail_port')
+          %input#alert_mail_port{:type => "text", :name => "alert_mail_port", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["alert_mail_port"], :onchange => "update_value('alert_mail_port','alert_mail_port', 'int')"}
+        %p
+          %label{ :for => :alert_mail_user }= t('.alert_mail_user')
+          %input#alert_mail_user{:type => "text", :name => "alert_mail_user", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["alert_mail_user"], :onchange => "update_value('alert_mail_user','alert_mail_user', 'string')"}
+        %p
+          %label{ :for => :alert_mail_pass }= t('.alert_mail_pass')
+          %input#alert_mail_pass{:type => "text", :name => "alert_mail_pass", :'data-default' => @proposal.raw_data['attributes'][@proposal.barclamp]["alert_mail_pass"], :onchange => "update_value('alert_mail_pass','alert_mail_pass', 'string')"}
+

@@ -1,0 +1,90 @@
+#!/bin/bash
+# Copyright 2013, Mirantis
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+[[ $DEBUG ]] && set -x
+ip_re='(([0-9]{1,3}\.){3}[0-9]{1,3})'
+declare -a instances
+
+cleanup() {
+    trap '' QUIT TERM
+    local instance_name
+    for instance_name in "${instances[@]}"; do
+        nova console-log $instance_name > "$LOGDIR/nova-$instance_name.console.log"
+        nova delete $instance_name
+        while nova list |grep -q $instance_name; do sleep 1; done
+    done
+    ssh-agent -k
+}
+
+trap cleanup EXIT QUIT TERM
+
+die() {
+    res=$1
+    shift
+    echo "$@"
+    exit $res
+}
+
+nova_do() {
+    # $1 = address of nova controller
+    # $@ = command to run as the nova user.
+    local address="$1" 
+    shift
+    [[ $1 ]] || return 1
+    run_on "$address" OS_USERNAME="admin" OS_PASSWORD="crowbar" OS_TENANT_NAME="admin" \
+    OS_AUTH_URL="http://$keystone_ip:5000/v2.0" "$@"
+}
+
+echo "Fetching OAT client list..."
+oat_clients=($(knife_node_find "roles:oat-client" FQDN))
+
+echo "Finding OAT Server..."
+oat_server_ip=$(knife_node_find 'roles:oat-server' FQDN)
+if [[ ! $oat_server_ip ]]; then
+    die 1 "Couldn't find OAT Server"
+fi
+echo "OAT Server at $oat_server_ip"
+
+echo "Fetching OAT certificate..."
+echo quit | openssl s_client -connect $oat_server_ip:8443 -cipher DHE-RSA-AES256-SHA | tee certfile.cer
+
+echo "Rebooting $oat_clients..."
+ssh $oat_clients "reboot"
+
+sleep 10
+
+echo "Waiting for boot $oat_clients..."
+for ((i=0; i<150; i++)); do
+    printf '.'
+    ping -q -c 1 -i 1 $oat_clients &>/dev/null || continue
+    alive=true
+    break
+done
+
+[[ $alive = true ]] || die 1 "Could not ping $oat_clients"
+echo "Can ping $oat_clients. Waiting for startup"
+
+sleep 60
+
+host=`echo $oat_clients | awk -F. '{ print $1 }'`
+echo $host
+
+echo "{\"hosts\":[\"$host\"]}" > hostfile
+trust_lvl=`curl --cacert certfile.cer -H "Content-Type: application/json" -X POST -d @hostfile "https://$oat_server_ip:8443/AttestationService/resources/PollHosts" | grep trusted | wc -l`
+if [[ $trust_lvl == 1 ]]; then
+    echo "Reboot OAT agent node test passed"
+else
+    die 1 "Reboot OAT agent node test failed"
+fi
+
+

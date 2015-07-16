@@ -1,0 +1,159 @@
+#!/bin/bash
+# Copyright 2013, Mirantis
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+[[ $DEBUG ]] && set -x
+ip_re='(([0-9]{1,3}\.){3}[0-9]{1,3})'
+declare -a instances
+
+cleanup() {
+    trap '' QUIT TERM
+    local instance_name
+    for instance_name in "${instances[@]}"; do
+        nova console-log $instance_name > "$LOGDIR/nova-$instance_name.console.log"
+        nova delete $instance_name
+        while nova list |grep -q $instance_name; do sleep 1; done
+    done
+    ssh-agent -k
+}
+
+trap cleanup EXIT QUIT TERM
+
+die() {
+    res=$1
+    shift
+    echo "$@"
+    exit $res
+}
+
+nova_do() {
+    # $1 = address of nova controller
+    # $@ = command to run as the nova user.
+    local address="$1" 
+    shift
+    [[ $1 ]] || return 1
+    run_on "$address" OS_USERNAME="admin" OS_PASSWORD="crowbar" OS_TENANT_NAME="admin" \
+    OS_AUTH_URL="http://$keystone_ip:5000/v2.0" "$@"
+}
+
+echo "Finding Nova controller..."
+nova_ip=$(knife_node_find 'roles:nova-multi-controller' FQDN)
+if ! [[ $nova_ip ]]; then
+    echo "Could not find nova controller."
+    exit 1
+fi
+echo "Controller at $nova_ip. Verifying nova services..."
+
+echo "Finding keystone..."
+keystone_ip=$(knife_node_find 'roles:keystone-server' IP)
+if [[ ! $keystone_ip ]]; then
+    die 1 "Cannot find Keystone"
+fi
+
+echo "Keystone found at $keystone_ip"
+
+export OS_AUTH_URL="http://$keystone_ip:5000/v2.0"
+export OS_USERNAME="admin"
+export OS_PASSWORD="crowbar"
+export OS_TENANT_NAME="admin"
+
+echo "Finding OAT Server..."
+oat_server_ip=$(knife_node_find 'roles:oat-server' FQDN)
+if [[ ! $oat_server_ip ]]; then
+    die 1 "Couldn't find OAT Server"
+fi
+echo "OAT Server at $oat_server_ip"
+
+echo "Fetching OAT certificate..."
+echo quit | openssl s_client -connect $oat_server_ip:8443 -cipher DHE-RSA-AES256-SHA | tee certfile.cer
+
+echo "Disabling non-trusted nodes..."
+compute_ip=($(knife_node_find 'roles:nova-multi-compute' FQDN))
+
+for i in "${compute_ip[@]}"; do
+    host=`echo $i | awk -F. '{ print $1 }'`
+    echo "{\"hosts\":[\"$host\"]}" > hostfile
+    trust_lvl=`curl --cacert certfile.cer -H "Content-Type: application/json" -X POST -d @hostfile "https://$oat_server_ip:8443/AttestationService/resources/PollHosts" | grep trusted | wc -l`
+    if [[ $trust_lvl == 0 ]]; then
+        echo "Stop nova compute on non-trusted host $host"
+        run_on $host "/etc/init.d/nova-compute stop"
+    fi
+done
+
+sudo apt-get install -y python-novaclient python-quantumclient
+
+test_image=''
+image_re='([-0-9a-f]+) \| ([^ ]+-image) | ACTIVE'
+
+while read line;do
+    [[ $line =~ $image_re ]] || continue
+    test_image="${BASH_REMATCH[1]}"
+    echo $test_image
+    break
+done < <(nova_do $nova_ip nova image-list |tee \
+    "$LOGDIR/nova-images.status")
+if [[ ! $test_image ]]; then
+    echo "Could not find a test image to run on Nova"
+    exit 1
+fi
+
+instance_name="oat-non-trusted"
+
+run_on $nova_ip nova-manage instance_type unset_key m1.tiny trust:trusted_host
+
+echo "Launching $instance_name with $test_image"
+(
+    nova_do $nova_ip nova boot --poll --image $test_image --flavor m1.tiny $instance_name  | \
+        tee "$LOGDIR/nova-$instance_name.status"
+) 
+sleep 2
+
+if nova_do $nova_ip nova show $instance_name |grep -q 'status.*ACTIVE'; then
+    echo "$instance_name launched."
+else
+    die 1 "Failed to launch $instance_name"
+fi
+
+nova_do $nova_ip nova show $instance_name > "$LOGDIR/nova-$instance_name.status"
+[[ $(grep 'private network' "$LOGDIR/nova-$instance_name.status") =~ $ip_re ]] || \
+    die 1 "$instance_name has no IP!"
+echo "$instance_name at IP ${BASH_REMATCH[1]}"
+#ip_addr=${BASH_REMATCH[1]}
+#for ((i=0; i<150; i++)); do
+#    printf '.'
+#    ping -q -c 1 -i 1 ${ip_addr} &>/dev/null || continue
+#    alive=true
+#    break
+#done
+#nova_do $nova_ip nova console-log $instance_name |tee "$LOGDIR/nova-instance_name.console.log"
+#[[ $alive = true ]] || die 1 "Could not ping $instance_name at ${ip_addr}"
+#echo "Can ping $instance_name at ${ip_addr}"
+
+echo "Deleting $instance_name..."
+nova_do $nova_ip nova delete $instance_name
+
+echo "Enabling non-trusted nodes..."
+compute_ip=($(knife_node_find 'roles:nova-multi-compute' FQDN))
+
+for i in "${compute_ip[@]}"; do
+    host=`echo $i | awk -F. '{ print $1 }'`
+    echo "{\"hosts\":[\"$host\"]}" > hostfile
+    trust_lvl=`curl --cacert certfile.cer -H "Content-Type: application/json" -X POST -d @hostfile "https://$oat_server_ip:8443/AttestationService/resources/PollHosts" | grep trusted | wc -l`
+    if [[ $trust_lvl == 0 ]]; then
+        echo "Start nova compute on non-trusted host $host"
+        run_on $host "/etc/init.d/nova-compute start"
+    fi
+done
+
+echo "Non-trusted VM deploy passed."
+exit 0
+

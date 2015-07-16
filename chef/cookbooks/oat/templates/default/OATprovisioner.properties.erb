@@ -1,0 +1,18 @@
+#TPM Provisioning Data
+EcValidityDays = 3652
+TpmOwnerAuth = <%= @keyauth %>
+##########HIS Identity Provisioning Data############
+HisIdentityLabel = HIS Identity Key
+HisIdentityIndex = <%= @keyindex %>
+HisIdentityAuth = <%= @keyauth %>
+
+
+PrivacyCaCertFile = PrivacyCA.cer
+PrivacyCaUrl = https://<%= @source %>:8443/HisPrivacyCAWebServices2
+HisRegistrationUrl = https://<%= @source %>:8443/HisWebServices
+TrustStore = TrustStore.jks
+NtruBypass = true
+ClientPath = <%= @clientpath %>
+ecStorage = FILE
+ecSigningKeySize = 2048
+
