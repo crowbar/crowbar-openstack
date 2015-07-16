@@ -1,5 +1,4 @@
 define :glance_service do
-
   short_name    = "#{params[:name]}"
   glance_name   = node[:glance][short_name][:service_name]
   ha_enabled    = node[:glance][:ha][:enabled]
@@ -11,10 +10,9 @@ define :glance_service do
       start_command "start #{glance_name}"
       status_command "status #{glance_name} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
     end
-    supports :status => true, :restart => true
+    supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(:template => node[:glance][short_name][:config_file])
+    subscribes :restart, resources(template: node[:glance][short_name][:config_file])
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
-
 end

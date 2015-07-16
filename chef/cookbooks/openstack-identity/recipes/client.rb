@@ -22,10 +22,10 @@ class ::Chef::Recipe # rubocop:disable Documentation
   include ::Openstack
 end
 
-platform_options = node['openstack']['identity']['platform']
-platform_options['keystone_client_packages'].each do |pkg|
+platform_options = node["openstack"]["identity"]["platform"]
+platform_options["keystone_client_packages"].each do |pkg|
   package pkg do
-    options platform_options['package_overrides']
+    options platform_options["package_overrides"]
 
     action :upgrade
   end

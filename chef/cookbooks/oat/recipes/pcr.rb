@@ -4,7 +4,7 @@ File.open("/sys/class/misc/tpm0/device/pcrs", "r") do |pcrs|
   while (line = pcrs.gets)
     line=line.split(":")
     pcr_n=line[0].split("-")[1].to_i
-    pcr_v=line[1].delete(' ')
+    pcr_v=line[1].delete(" ")
     node[:inteltxt][:pcr][pcr_n]=pcr_v.strip
   end
 end

@@ -16,7 +16,6 @@
 #
 
 class HeatService < PacemakerServiceObject
-
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "heat"
@@ -64,7 +63,7 @@ class HeatService < PacemakerServiceObject
     if nodes.size >= 1
       controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
       base["deployment"]["heat"]["elements"] = {
-        "heat-server" =>  [ controller.name ]
+        "heat-server" =>  [controller.name]
       }
     end
 
@@ -108,5 +107,4 @@ class HeatService < PacemakerServiceObject
 
     @logger.debug("Heat apply_role_pre_chef_call: leaving")
   end
-
 end

@@ -56,10 +56,10 @@ module DatabaseLibrary
                 privs = nil
                 case backend
                 when "postgresql"
-                    privs = [ "CREATE", "CONNECT", "TEMP" ]
+                    privs = ["CREATE", "CONNECT", "TEMP"]
                 when "mysql"
-                    privs = [ "SELECT", "INSERT", "UPDATE", "DELETE", "CREATE",
-                          "DROP", "INDEX", "ALTER" ]
+                    privs = ["SELECT", "INSERT", "UPDATE", "DELETE", "CREATE",
+                          "DROP", "INDEX", "ALTER"]
                 else
                     Chef::Log.error("Unsupported Database Provider: #{backend}")
                 end

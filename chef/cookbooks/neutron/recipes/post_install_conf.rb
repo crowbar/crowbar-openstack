@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require 'ipaddr'
+require "ipaddr"
 
 def mask_to_bits(mask)
   IPAddr.new(mask).to_i.to_s(2).count("1")
@@ -28,7 +28,6 @@ fixed_last_ip = IPAddr.new("#{fixed_range}").to_range().to_a[-2]
 
 fixed_pool_start = fixed_first_ip if fixed_first_ip > fixed_pool_start
 fixed_pool_end = fixed_last_ip if fixed_last_ip < fixed_pool_end
-
 
 #this code seems to be broken in case complicated network when floating network outside of public network
 public_net = node[:network][:networks]["public"]
@@ -48,15 +47,15 @@ vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-neutron_insecure = node[:neutron][:api][:protocol] == 'https' && node[:neutron][:ssl][:insecure]
-ssl_insecure = keystone_settings['insecure'] || neutron_insecure
+neutron_insecure = node[:neutron][:api][:protocol] == "https" && node[:neutron][:ssl][:insecure]
+ssl_insecure = keystone_settings["insecure"] || neutron_insecure
 
 neutron_args = "--os-username '#{keystone_settings['service_user']}'"
 neutron_args = "#{neutron_args} --os-password '#{keystone_settings['service_password']}'"
 neutron_args = "#{neutron_args} --os-tenant-name '#{keystone_settings['service_tenant']}'"
 neutron_args = "#{neutron_args} --os-auth-url '#{keystone_settings['internal_auth_url']}'"
 neutron_args = "#{neutron_args} --os-region-name '#{keystone_settings['endpoint_region']}'"
-if keystone_settings['api_version'] != "2.0"
+if keystone_settings["api_version"] != "2.0"
   neutron_args = "#{neutron_args} --os-user-domain-name Default"
   neutron_args = "#{neutron_args} --os-project-domain-name Default"
 end
@@ -70,25 +69,25 @@ floating_network_type = ""
 networking_plugin = node[:neutron][:networking_plugin]
 ml2_type_drivers_default_provider_network = node[:neutron][:ml2_type_drivers_default_provider_network]
 case networking_plugin
-when 'ml2'
+when "ml2"
   case ml2_type_drivers_default_provider_network
-  when 'vlan'
+  when "vlan"
     fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
     if node[:network][:networks][:nova_floating][:use_vlan]
       floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{floating_net["vlan"]} --provider:physical_network physnet1"
     else
       floating_network_type = "--provider:network_type flat --provider:physical_network physnet1"
     end
-  when 'gre'
+  when "gre"
     fixed_network_type = "--provider:network_type gre --provider:segmentation_id 1"
     floating_network_type = "--provider:network_type gre --provider:segmentation_id 2"
-  when 'vxlan'
+  when "vxlan"
     fixed_network_type = "--provider:network_type vxlan --provider:segmentation_id #{vni_start}"
     floating_network_type = "--provider:network_type vxlan --provider:segmentation_id #{vni_start + 1}"
   else
     Chef::Log.error("default provider network ml2 type driver '#{ml2_type_drivers_default_provider_network}' invalid for creating provider networks")
   end
-when 'vmware'
+when "vmware"
   fixed_network_type = ""
   # We would like to be sure that floating network will be created
   # without any additional options, NSX will take care about everything.
@@ -96,7 +95,6 @@ when 'vmware'
 else
   Chef::Log.error("networking plugin '#{networking_plugin}' invalid for creating provider networks")
 end
-
 
 execute "create_fixed_network" do
   command "#{neutron_cmd} net-create fixed --shared #{fixed_network_type}"

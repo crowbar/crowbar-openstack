@@ -6,8 +6,8 @@
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
-node.set_unless['oat']['db']['password'] = secure_password
-node.set_unless['oat']['password'] = secure_password
+node.set_unless["oat"]["db"]["password"] = secure_password
+node.set_unless["oat"]["password"] = secure_password
 
 Chef::Log.info("Configuring OAT to use MySQL backend")
 
@@ -38,7 +38,7 @@ execute "create_tables_for_oat" do
 end
 
 mysql_database "create #{node[:inteltxt][:db][:database]} oat database" do
-    host    mysql_address
+    host mysql_address
     username "db_maker"
     password mysql[:mysql][:db_maker_password]
     database node[:inteltxt][:db][:database]
@@ -46,35 +46,35 @@ mysql_database "create #{node[:inteltxt][:db][:database]} oat database" do
 end
 
 mysql_database "create oat database user #{node[:inteltxt][:db][:user]}" do
-    host    mysql_address
+    host mysql_address
     username "db_maker"
     password mysql[:mysql][:db_maker_password]
     database node[:inteltxt][:db][:database]
     action :query
     sql "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, INDEX, ALTER on #{node[:inteltxt][:db][:database]}.* to '#{node[:inteltxt][:db][:user]}'@'%' IDENTIFIED BY '#{node[:inteltxt][:db][:password]}';"
-    notifies :run, resources(:execute => "create_tables_for_oat"), :immediately
+    notifies :run, resources(execute: "create_tables_for_oat"), :immediately
 end
 
 package "dbconfig-common"
 
 template "/etc/dbconfig-common/oat-appraiser.conf" do
   source "oat-appraiser.conf.erb"
-  variables(:db_user => node[:inteltxt][:db][:user],
-            :db_pass => node[:inteltxt][:db][:password],
-            :db_name => node[:inteltxt][:db][:database]
+  variables(db_user: node[:inteltxt][:db][:user],
+            db_pass: node[:inteltxt][:db][:password],
+            db_name: node[:inteltxt][:db][:database]
            )
 end
 
-[ { "k" => "password", "t" => "password", "v" => node[:inteltxt][:password] },
-  { "k" => "hostname", "t" => "string", "v" => node[:fqdn] },
+[{ "k" => "password", "t" => "password", "v" => node[:inteltxt][:password] },
+  { "k" => "hostname", "t" => "string", "v" => node[:fqdn] }
 ].each { |x|
   execute "set_#{x['k']}_for_oat-appraiser-installation" do
     command "echo oat-appraiser oat-appraiser/#{x['k']} #{x['t']} #{x['v']} | debconf-set-selections"
   end
 }
 
-ENV['DB_CONFIGURED'] = 'true'
-ENV['DEBIAN_FRONTEND'] = 'noninteractive'
+ENV["DB_CONFIGURED"] = "true"
+ENV["DEBIAN_FRONTEND"] = "noninteractive"
 package "oat-appraiser" do
   options "--force-yes"
 end
@@ -83,7 +83,7 @@ end
 execute "create_keystore" do
   command "/usr/share/oat-appraiser/scripts/generate-keystores #{node[:fqdn]} #{node[:inteltxt][:password]} 2>&1 >/dev/null"
   ignore_failure true
-  not_if { File.exists? "/var/lib/oat-appraiser/Certificate/keystore.jks" } 
+  not_if { File.exists? "/var/lib/oat-appraiser/Certificate/keystore.jks" }
 end
 
 execute "restart_tomcat6_service" do
@@ -102,7 +102,7 @@ execute "fix_db_hostname" do
   command "find /etc/oat-appraiser -type f -exec sed -i 's/localhost/#{mysql_address}/' {} \\;"
   only_if "grep -q -r localhost /etc/oat-appraiser/"
   ignore_failure true
-  notifies :run, resources(:execute => "restart_tomcat6_service")
-  notifies :run, resources(:execute => "restart_apache2_service")
+  notifies :run, resources(execute: "restart_tomcat6_service")
+  notifies :run, resources(execute: "restart_apache2_service")
 end
 

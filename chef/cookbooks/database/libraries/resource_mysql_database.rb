@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 
-require File.join(File.dirname(__FILE__), 'resource_database')
-require File.join(File.dirname(__FILE__), 'provider_database_mysql')
+require File.join(File.dirname(__FILE__), "resource_database")
+require File.join(File.dirname(__FILE__), "provider_database_mysql")
 
 class Chef
   class Resource

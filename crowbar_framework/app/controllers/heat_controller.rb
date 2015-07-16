@@ -16,7 +16,6 @@
 #
 
 class HeatController < BarclampController
-
   protected
 
   def initialize_service

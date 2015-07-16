@@ -136,7 +136,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
 
         if !admin_keyring.empty? && File.exists?(admin_keyring)
           # Now add our secret and its value
-          cmd = ["ceph", "-k", admin_keyring, "-c", ceph_conf, "auth", "get-key", "client.#{rbd_user}" ]
+          cmd = ["ceph", "-k", admin_keyring, "-c", ceph_conf, "auth", "get-key", "client.#{rbd_user}"]
           ceph_get_key = Mixlib::ShellOut.new(cmd)
           client_key = ceph_get_key.run_command.stdout.strip
           ceph_get_key.error!
@@ -154,7 +154,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
           end
         end
 
-        cmd = ["virsh", "secret-get-value", rbd_uuid ]
+        cmd = ["virsh", "secret-get-value", rbd_uuid]
         virsh_secret_get_value = Mixlib::ShellOut.new(cmd)
         secret = virsh_secret_get_value.run_command.stdout.chomp.strip
 

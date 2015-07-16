@@ -18,8 +18,7 @@
 # limitations under the License.
 #
 
-
-nova = get_instance('roles:nova-multi-controller')
+nova = get_instance("roles:nova-multi-controller")
 keystone_settings = KeystoneHelper.keystone_settings(nova, "nova")
 
 alt_comp_user = keystone_settings["default_user"]
@@ -34,20 +33,20 @@ tempest_adm_user = node[:tempest][:tempest_adm_username]
 tempest_adm_pass = node[:tempest][:tempest_adm_password]
 
 keystone_register "tempest tempest wakeup keystone" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   action :wakeup
 end.run_action(:wakeup)
 
 keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
 
   tenant_name tempest_comp_tenant
   action :add_tenant
@@ -62,22 +61,21 @@ keystonev2 = "keystone --insecure --os_username #{tempest_comp_user} --os_passwo
 use_heat = $?.success?
 
 users = [
-          {'name' => tempest_comp_user, 'pass' => tempest_comp_pass, 'role' => 'Member'},
-          {'name' => tempest_adm_user, 'pass' => tempest_adm_pass, 'role' => 'admin' },
+          {"name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "Member"},
+          {"name" => tempest_adm_user, "pass" => tempest_adm_pass, "role" => "admin" }
         ]
 
 if use_heat
-  users.push({'name' => tempest_comp_user, 'pass' => tempest_comp_pass, 'role' => 'heat_stack_owner'})
+  users.push({"name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "heat_stack_owner"})
 end
 
 users.each do |user|
-
   keystone_register "add #{user["name"]}:#{user["pass"]} user" do
-    protocol keystone_settings['protocol']
-    insecure keystone_settings['insecure']
-    host keystone_settings['internal_url_host']
-    port keystone_settings['admin_port']
-    token keystone_settings['admin_token']
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    token keystone_settings["admin_token"]
     user_name user["name"]
     user_password user["pass"]
     tenant_name tempest_comp_tenant
@@ -85,11 +83,11 @@ users.each do |user|
   end.run_action(:add_user)
 
   keystone_register "add #{user["name"]}:#{tempest_comp_tenant} user #{user["role"]} role" do
-    protocol keystone_settings['protocol']
-    insecure keystone_settings['insecure']
-    host keystone_settings['internal_url_host']
-    port keystone_settings['admin_port']
-    token keystone_settings['admin_token']
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    token keystone_settings["admin_token"]
     user_name user["name"]
     role_name user["role"]
     tenant_name tempest_comp_tenant
@@ -97,14 +95,14 @@ users.each do |user|
   end.run_action(:add_access)
 
   keystone_register "add default ec2 creds for #{user["name"]}:#{tempest_comp_tenant}" do
-    protocol keystone_settings['protocol']
-    insecure keystone_settings['insecure']
-    host keystone_settings['internal_url_host']
-    port keystone_settings['admin_port']
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
     auth ({
-      :tenant => keystone_settings['admin_tenant'],
-      :user => keystone_settings['admin_user'],
-      :password => keystone_settings['admin_password']
+      tenant: keystone_settings["admin_tenant"],
+      user: keystone_settings["admin_user"],
+      password: keystone_settings["admin_password"]
     })
     user_name user["name"]
     tenant_name tempest_comp_tenant
@@ -114,12 +112,12 @@ end
 
 # Give admin user access to tempest tenant
 keystone_register "add #{keystone_settings['admin_user']}:#{tempest_comp_tenant} user admin role" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['admin_user']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["admin_user"]
   role_name "admin"
   tenant_name tempest_comp_tenant
   action :nothing
@@ -132,9 +130,9 @@ end.run_action(:add_access)
   end
 end
 
-machine_id_file = node[:tempest][:tempest_path] + '/machine.id'
-docker_image_id_file = node[:tempest][:tempest_path] + '/docker_machine.id'
-heat_machine_id_file = node[:tempest][:tempest_path] + '/heat_machine.id'
+machine_id_file = node[:tempest][:tempest_path] + "/machine.id"
+docker_image_id_file = node[:tempest][:tempest_path] + "/docker_machine.id"
+heat_machine_id_file = node[:tempest][:tempest_path] + "/heat_machine.id"
 
 glance_node = search(:node, "roles:glance-server").first
 insecure = "--insecure"
@@ -206,14 +204,14 @@ rm -rf $TEMP
 glance #{insecure} image-list
 EOH
   environment ({
-    'IMAGE_URL' => node[:tempest][:tempest_test_image],
-    'OS_USERNAME' => tempest_adm_user,
-    'OS_PASSWORD' => tempest_adm_pass,
-    'OS_TENANT_NAME' => tempest_comp_tenant,
-    'OS_AUTH_URL' => keystone_settings["internal_auth_url"],
-    'OS_IDENTITY_API_VERSION' => keystone_settings["api_version"],
-    'OS_USER_DOMAIN_NAME' => keystone_settings["api_version"] != "2.0" ? "Default" : "",
-    'OS_PROJECT_DOMAIN_NAME' => keystone_settings["api_version"] != "2.0" ? "Default" : ""
+    "IMAGE_URL" => node[:tempest][:tempest_test_image],
+    "OS_USERNAME" => tempest_adm_user,
+    "OS_PASSWORD" => tempest_adm_pass,
+    "OS_TENANT_NAME" => tempest_comp_tenant,
+    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
+    "OS_USER_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
+    "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : ""
   })
   not_if { File.exists?(machine_id_file) }
 end
@@ -230,14 +228,14 @@ id=$(glance #{insecure} image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
 true
 EOF
   environment ({
-    'IMAGE_NAME' => node[:tempest][:heat_test_image_name],
-    'OS_USERNAME' => tempest_adm_user,
-    'OS_PASSWORD' => tempest_adm_pass,
-    'OS_TENANT_NAME' => tempest_comp_tenant,
-    'OS_AUTH_URL' => keystone_settings["internal_auth_url"],
-    'OS_IDENTITY_API_VERSION' => keystone_settings["api_version"],
-    'OS_USER_DOMAIN_NAME' => keystone_settings["api_version"] != "2.0" ? "Default" : "",
-    'OS_PROJECT_DOMAIN_NAME' => keystone_settings["api_version"] != "2.0" ? "Default" : ""
+    "IMAGE_NAME" => node[:tempest][:heat_test_image_name],
+    "OS_USERNAME" => tempest_adm_user,
+    "OS_PASSWORD" => tempest_adm_pass,
+    "OS_TENANT_NAME" => tempest_comp_tenant,
+    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
+    "OS_USER_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
+    "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : ""
   })
 
   not_if { node[:tempest][:heat_test_image_name].nil? or File.exists?(heat_machine_id_file) }
@@ -254,14 +252,14 @@ bash "create_yet_another_tiny_flavor" do
   nova flavor-show tempest-heat &> /dev/null || nova flavor-create tempest-heat #{heat_flavor_ref} 512 0 1 || exit 0
 EOH
   environment ({
-    'OS_USERNAME' => tempest_adm_user,
-    'OS_PASSWORD' => tempest_adm_pass,
-    'OS_TENANT_NAME' => tempest_comp_tenant,
-    'NOVACLIENT_INSECURE' => 'true',
-    'OS_AUTH_URL' => keystone_settings["internal_auth_url"],
-    'OS_IDENTITY_API_VERSION' => keystone_settings["api_version"],
-    'OS_USER_DOMAIN_NAME' => keystone_settings["api_version"] != "2.0" ? "Default" : "",
-    'OS_PROJECT_DOMAIN_NAME' => keystone_settings["api_version"] != "2.0" ? "Default" : ""
+    "OS_USERNAME" => tempest_adm_user,
+    "OS_PASSWORD" => tempest_adm_pass,
+    "OS_TENANT_NAME" => tempest_comp_tenant,
+    "NOVACLIENT_INSECURE" => "true",
+    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
+    "OS_USER_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
+    "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : ""
   })
 end
 
@@ -333,7 +331,7 @@ end
 cinder_multi_backend = false
 cinder_backend1_name = nil
 cinder_backend2_name = nil
-backend_names = cinders[0][:cinder][:volumes].map{|volume| volume[:backend_name]}.uniq
+backend_names = cinders[0][:cinder][:volumes].map{ |volume| volume[:backend_name] }.uniq
 if backend_names.length > 1
   cinder_multi_backend = true
   cinder_backend1_name = backend_names[0]
@@ -360,14 +358,14 @@ DOCKER_IMAGE_ID=$(glance #{insecure} image-list \
 [ -n "$DOCKER_IMAGE_ID" ] && echo "$DOCKER_IMAGE_ID" > #{docker_image_id_file}
 EOH
     environment ({
-      'IMAGE_URL' => node[:tempest][:tempest_test_image],
-      'OS_USERNAME' => tempest_adm_user,
-      'OS_PASSWORD' => tempest_adm_pass,
-      'OS_TENANT_NAME' => tempest_comp_tenant,
-      'OS_AUTH_URL' => keystone_settings["internal_auth_url"],
-      'OS_IDENTITY_API_VERSION' => keystone_settings["api_version"],
-      'OS_USER_DOMAIN_NAME' => keystone_settings["api_version"] != "2.0" ? "Default" : "",
-      'OS_PROJECT_DOMAIN_NAME' => keystone_settings["api_version"] != "2.0" ? "Default" : ""
+      "IMAGE_URL" => node[:tempest][:tempest_test_image],
+      "OS_USERNAME" => tempest_adm_user,
+      "OS_PASSWORD" => tempest_adm_pass,
+      "OS_TENANT_NAME" => tempest_comp_tenant,
+      "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+      "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
+      "OS_USER_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
+      "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : ""
     })
     not_if { File.exists?(docker_image_id_file) }
   end
@@ -406,81 +404,80 @@ template "/etc/tempest/tempest.conf" do
   mode 0644
   variables(
     # general settings
-    :keystone_settings => keystone_settings,
-    :machine_id_file => use_docker ? docker_image_id_file : machine_id_file,
-    :tempest_path => node[:tempest][:tempest_path],
-    :use_swift => use_swift,
-    :use_horizon => use_horizon,
-    :use_heat => use_heat,
-    :use_ceilometer => use_ceilometer,
-    :use_trove => use_trove,
+    keystone_settings: keystone_settings,
+    machine_id_file: use_docker ? docker_image_id_file : machine_id_file,
+    tempest_path: node[:tempest][:tempest_path],
+    use_swift: use_swift,
+    use_horizon: use_horizon,
+    use_heat: use_heat,
+    use_ceilometer: use_ceilometer,
+    use_trove: use_trove,
     # boto settings
-    :ec2_protocol => nova[:nova][:ssl][:enabled] ? "https" : "http",
-    :ec2_host => CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
-    :ec2_port => nova[:nova][:ports][:api_ec2],
-    :s3_host => CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
-    :s3_port => nova[:nova][:ports][:objectstore],
-    :ec2_access => ec2_access,
-    :ec2_secret => ec2_secret,
+    ec2_protocol: nova[:nova][:ssl][:enabled] ? "https" : "http",
+    ec2_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
+    ec2_port: nova[:nova][:ports][:api_ec2],
+    s3_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
+    s3_port: nova[:nova][:ports][:objectstore],
+    ec2_access: ec2_access,
+    ec2_secret: ec2_secret,
     # cli settings
-    :bin_path => "/usr/bin",
+    bin_path: "/usr/bin",
     # compute settings
-    :flavor_ref => flavor_ref,
-    :alt_flavor_ref => alt_flavor_ref,
-    :nova_api_v3 => nova[:nova][:enable_v3_api],
-    :use_interface_attach => use_interface_attach,
-    :use_rescue => use_rescue,
-    :use_resize => use_resize,
-    :use_suspend => use_suspend,
-    :use_vnc => use_vnc,
-    :use_livemigration => use_livemigration,
+    flavor_ref: flavor_ref,
+    alt_flavor_ref: alt_flavor_ref,
+    nova_api_v3: nova[:nova][:enable_v3_api],
+    use_interface_attach: use_interface_attach,
+    use_rescue: use_rescue,
+    use_resize: use_resize,
+    use_suspend: use_suspend,
+    use_vnc: use_vnc,
+    use_livemigration: use_livemigration,
     # dashboard settings
-    :horizon_host => horizon_host,
-    :horizon_protocol => horizon_protocol,
+    horizon_host: horizon_host,
+    horizon_protocol: horizon_protocol,
     # identity settings
     # FIXME: it's a bit unclear, but looking at the tempest code, we should set
     # this if any of the services is insecure, not just keystone
-    :ssl_insecure => keystone_settings["insecure"],
-    :comp_user => tempest_comp_user,
-    :comp_tenant => tempest_comp_tenant,
-    :comp_pass => tempest_comp_pass,
-    :alt_comp_user => alt_comp_user,
-    :alt_comp_tenant => alt_comp_tenant,
-    :alt_comp_pass => alt_comp_pass,
+    ssl_insecure: keystone_settings["insecure"],
+    comp_user: tempest_comp_user,
+    comp_tenant: tempest_comp_tenant,
+    comp_pass: tempest_comp_pass,
+    alt_comp_user: alt_comp_user,
+    alt_comp_tenant: alt_comp_tenant,
+    alt_comp_pass: alt_comp_pass,
     # image settings
-    :http_image => node[:tempest][:tempest_test_image],
+    http_image: node[:tempest][:tempest_test_image],
     # network settings
-    :public_network_id => public_network_id,
-    :neutron_api_extensions => neutron_api_extensions,
+    public_network_id: public_network_id,
+    neutron_api_extensions: neutron_api_extensions,
     # object storage settings
-    :object_versioning => swift_allow_versions,
+    object_versioning: swift_allow_versions,
     # orchestration settings
-    :heat_flavor_ref => heat_flavor_ref,
-    :heat_machine_id_file => heat_machine_id_file,
+    heat_flavor_ref: heat_flavor_ref,
+    heat_machine_id_file: heat_machine_id_file,
     # scenario settings
-    :cirros_version => cirros_version,
-    :image_regex => image_regex,
+    cirros_version: cirros_version,
+    image_regex: image_regex,
     # volume settings
-    :cinder_multi_backend => cinder_multi_backend,
-    :cinder_backend1_name => cinder_backend1_name,
-    :cinder_backend2_name => cinder_backend2_name,
-    :storage_protocol => storage_protocol,
-    :vendor_name => vendor_name
+    cinder_multi_backend: cinder_multi_backend,
+    cinder_backend1_name: cinder_backend1_name,
+    cinder_backend2_name: cinder_backend2_name,
+    storage_protocol: storage_protocol,
+    vendor_name: vendor_name
   )
 end
 
 ["#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh",
  "#{node[:tempest][:tempest_path]}/bin/tempest_cleanup.sh"].each do |p|
-
   template "#{p}" do
     mode 0755
     source "#{(p.rpartition '/')[2]}.erb"
     variables(
-      :comp_pass => tempest_comp_pass,
-      :comp_tenant => tempest_comp_tenant,
-      :comp_user => tempest_comp_user,
-      :keystone_settings => keystone_settings,
-      :tempest_path => node[:tempest][:tempest_path]
+      comp_pass: tempest_comp_pass,
+      comp_tenant: tempest_comp_tenant,
+      comp_user: tempest_comp_user,
+      keystone_settings: keystone_settings,
+      tempest_path: node[:tempest][:tempest_path]
     )
   end
 end

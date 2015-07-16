@@ -53,7 +53,7 @@ database_user "grant privileges to the nova database user" do
   database_name node[:nova][:db][:database]
   username node[:nova][:db][:user]
   password node[:nova][:db][:password]
-  host '%'
+  host "%"
   privileges db_settings[:privs]
   provider db_settings[:user_provider]
   action :grant

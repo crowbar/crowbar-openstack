@@ -16,7 +16,6 @@
 #
 
 class CinderService < PacemakerServiceObject
-
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "cinder"
@@ -37,7 +36,7 @@ class CinderService < PacemakerServiceObject
           "admin" => false,
           "exclude_platform" => {
             "windows" => "/.*/"
-          },
+          }
         },
         "cinder-volume" => {
           "unique" => false,
@@ -68,7 +67,7 @@ class CinderService < PacemakerServiceObject
     storage = select_nodes_for_role(nodes, "cinder-volume", "storage") || []
 
     base["deployment"][@bc_name]["elements"] = {
-      "cinder-controller" => controllers.empty? ? [] : [ controllers.first.name ],
+      "cinder-controller" => controllers.empty? ? [] : [controllers.first.name],
       "cinder-volume" => storage.map { |x| x.name }
     }
 
@@ -156,7 +155,7 @@ class CinderService < PacemakerServiceObject
             if node.nil?
               false
             else
-              candidate_disks_count = node.unclaimed_physical_drives.length + node.physical_drives.select { |d, data| node.disk_owner(node.unique_device_for(d)) == 'Cinder' }.length
+              candidate_disks_count = node.unclaimed_physical_drives.length + node.physical_drives.select { |d, data| node.disk_owner(node.unique_device_for(d)) == "Cinder" }.length
               candidate_disks_count < raw_count
             end
           end
@@ -216,6 +215,5 @@ class CinderService < PacemakerServiceObject
 
     @logger.debug("Cinder apply_role_pre_chef_call: leaving")
   end
-
 end
 

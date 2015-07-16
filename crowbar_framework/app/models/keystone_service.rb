@@ -16,7 +16,6 @@
 #
 
 class KeystoneService < PacemakerServiceObject
-
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "keystone"
@@ -60,10 +59,9 @@ class KeystoneService < PacemakerServiceObject
     if nodes.size >= 1
       controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
       base["deployment"]["keystone"]["elements"] = {
-        "keystone-server" => [ controller[:fqdn] ]
+        "keystone-server" => [controller[:fqdn]]
       }
     end
-
 
     base["attributes"][@bc_name][:service][:token] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
@@ -106,6 +104,5 @@ class KeystoneService < PacemakerServiceObject
 
     @logger.debug("Keystone apply_role_pre_chef_call: leaving")
   end
-
 end
 

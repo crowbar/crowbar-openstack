@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-require 'json'
-require 'openssl'
+require "json"
+require "openssl"
 
 def whyrun_supported?
   true
@@ -26,21 +26,21 @@ end
 
 def create_connection(controller)
   begin
-    require 'faraday'
+    require "faraday"
   rescue LoadError
     Chef::Log.error "Missing gem 'faraday'. Use the default nsx recipe to install it first."
   end
 
-  conn = Faraday.new(:url => "https://#{controller['host']}:#{controller['port']}", :ssl => { :verify => false }) do |faraday|
-    faraday.request  :url_encoded
+  conn = Faraday.new(url: "https://#{controller['host']}:#{controller['port']}", ssl: { verify: false }) do |faraday|
+    faraday.request :url_encoded
     faraday.response :logger
-    faraday.adapter  Faraday.default_adapter
+    faraday.adapter Faraday.default_adapter
   end
 
-  resp = conn.post '/ws.v1/login', :username => controller['username'], :password => controller['password']
+  resp = conn.post "/ws.v1/login", username: controller["username"], password: controller["password"]
   Chef::Log.error(resp.body) unless resp.status == 200
 
-  cookie = resp.headers['set-cookie'].split(';').first
+  cookie = resp.headers["set-cookie"].split(";").first
 
   [conn, cookie]
 end
@@ -53,23 +53,22 @@ action :create do
   unless @current_resource.exists # create
 
     converge_by "creating transport node #{@new_resource.name}" do
-
       conn, cookie = create_connection @new_resource.nsx_controller
 
       tnode = {}
-      tnode['display_name'] = @new_resource.name
-      tnode['integration_bridge_id'] = @new_resource.integration_bridge_id
-      tnode['transport_connectors'] = @new_resource.transport_connectors
-      tnode['credential'] = {
-        'client_certificate' => {
-          'pem_encoded' => client_pem
+      tnode["display_name"] = @new_resource.name
+      tnode["integration_bridge_id"] = @new_resource.integration_bridge_id
+      tnode["transport_connectors"] = @new_resource.transport_connectors
+      tnode["credential"] = {
+        "client_certificate" => {
+          "pem_encoded" => client_pem
         },
-        'type' => 'SecurityCertificateCredential'
+        "type" => "SecurityCertificateCredential"
       }
 
       resp = conn.post "/ws.v1/transport-node" do |req|
-        req.headers['Cookie'] = cookie
-        req.headers['Content-Type'] = 'application/json'
+        req.headers["Cookie"] = cookie
+        req.headers["Content-Type"] = "application/json"
         req.body = tnode.to_json
       end
       Chef::Log.error(resp.body) unless resp.status == 201 # Created
@@ -79,7 +78,7 @@ action :create do
   else # exists => update?
     unless @new_resource.integration_bridge_id == @current_resource.integration_bridge_id and
            @new_resource.tunnel_probe_random_vlan == @current_resource.tunnel_probe_random_vlan and
-           @new_resource.transport_connectors.first.map {|k,v| @current_resource.transport_connectors.first[k] == v }.all? and
+           @new_resource.transport_connectors.first.map { |k,v| @current_resource.transport_connectors.first[k] == v }.all? and
            client_pem == @current_resource.client_pem
 
       Chef::Log.info "#{@new_resource.integration_bridge_id} <==> #{@current_resource.integration_bridge_id}"
@@ -91,19 +90,19 @@ action :create do
         conn, cookie = create_connection @new_resource.nsx_controller
 
         tnode = {}
-        tnode['display_name'] = @new_resource.name
-        tnode['integration_bridge_id'] = @new_resource.integration_bridge_id
-        tnode['transport_connectors'] = @new_resource.transport_connectors
-        tnode['credential'] = {
-          'client_certificate' => {
-            'pem_encoded' => client_pem
+        tnode["display_name"] = @new_resource.name
+        tnode["integration_bridge_id"] = @new_resource.integration_bridge_id
+        tnode["transport_connectors"] = @new_resource.transport_connectors
+        tnode["credential"] = {
+          "client_certificate" => {
+            "pem_encoded" => client_pem
           },
-          'type' => 'SecurityCertificateCredential'
+          "type" => "SecurityCertificateCredential"
         }
 
         resp = conn.put "/ws.v1/transport-node/#{@current_resource.uuid}" do |req|
-          req.headers['Cookie'] = cookie
-          req.headers['Content-Type'] = 'application/json'
+          req.headers["Cookie"] = cookie
+          req.headers["Content-Type"] = "application/json"
           req.body = tnode.to_json
         end
         Chef::Log.error(resp.body) unless resp.status == 200 # OK
@@ -120,7 +119,7 @@ action :delete do
       conn, cookie = create_connection @new_resource.nsx_controller
 
       resp = conn.delete "/ws.v1/transport-node/#{@current_resource.uuid}" do |req|
-        req.headers['Cookie'] = cookie
+        req.headers["Cookie"] = cookie
       end
       Chef::Log.error(resp.body) unless resp.status == 204 # No Content
     end
@@ -136,26 +135,26 @@ def load_current_resource
 
   conn, cookie = create_connection @new_resource.nsx_controller
 
-  resp = conn.get '/ws.v1/transport-node', :display_name => @new_resource.name, :fields => '*' do |req|
-    req.headers['Cookie'] = cookie
+  resp = conn.get "/ws.v1/transport-node", display_name: @new_resource.name, fields: "*" do |req|
+    req.headers["Cookie"] = cookie
   end
   Chef::Log.error(resp.body) unless resp.status == 200
   data = JSON::parse resp.body
 
-  if data['result_count'] == 0
+  if data["result_count"] == 0
     Chef::Log.debug "No transport node with display_name #{@new_resource.name} found"
-  elsif data['result_count'] > 1
+  elsif data["result_count"] > 1
     Chef::Log.info "More than one transport nodes with display_name #{@new_resource.name} found -- this means trouble"
   else
     Chef::Log.debug "One transport node with display_name #{@new_resource.name}"
 
-    tnode = data['results'].first
+    tnode = data["results"].first
 
-    @current_resource.integration_bridge_id tnode['integration_bridge_id']
-    @current_resource.transport_connectors tnode['transport_connectors']
-    @current_resource.client_pem tnode['credential']['client_certificate']['pem_encoded']
-    @current_resource.tunnel_probe_random_vlan tnode['tunnel_probe_random_vlan']
-    @current_resource.uuid = tnode['uuid'] # save for eventual update
+    @current_resource.integration_bridge_id tnode["integration_bridge_id"]
+    @current_resource.transport_connectors tnode["transport_connectors"]
+    @current_resource.client_pem tnode["credential"]["client_certificate"]["pem_encoded"]
+    @current_resource.tunnel_probe_random_vlan tnode["tunnel_probe_random_vlan"]
+    @current_resource.uuid = tnode["uuid"] # save for eventual update
     @current_resource.exists = true
   end
 

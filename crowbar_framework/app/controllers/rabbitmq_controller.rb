@@ -16,7 +16,6 @@
 #
 
 class RabbitmqController < BarclampController
-
   protected
 
   def initialize_service

@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 
-require File.join(File.dirname(__FILE__), 'resource_database_user')
-require File.join(File.dirname(__FILE__), 'provider_database_sql_server_user')
+require File.join(File.dirname(__FILE__), "resource_database_user")
+require File.join(File.dirname(__FILE__), "provider_database_sql_server_user")
 
 class Chef
   class Resource
@@ -37,8 +37,8 @@ class Chef
       set_or_return(
           :windows_user,
           arg,
-          :kind_of => [TrueClass, FalseClass],
-          :default => false
+          kind_of: [TrueClass, FalseClass],
+          default: false
       )
     end
 
@@ -47,7 +47,7 @@ class Chef
       set_or_return(
           :sql_roles,
           arg,
-          :kind_of => Hash
+          kind_of: Hash
       )
     end
 
@@ -56,7 +56,7 @@ class Chef
       set_or_return(
           :sql_sys_roles,
           arg,
-          :kind_of => Hash
+          kind_of: Hash
       )
     end
   end

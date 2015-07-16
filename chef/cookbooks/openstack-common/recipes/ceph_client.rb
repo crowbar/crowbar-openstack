@@ -43,6 +43,6 @@ template '/etc/ceph/ceph.conf' do
   group 'root'
   mode '644'
   variables(
-    :global => node['openstack']['ceph']['global']
+    global: node['openstack']['ceph']['global']
   )
 end

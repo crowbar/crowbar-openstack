@@ -82,11 +82,11 @@ default['openstack']['db']['server_role'] = 'os-ops-database'
 default['openstack']['db']['service_type'] = 'mysql'
 # Database connection options. Should include starting '?'
 default['openstack']['db']['options'] = {
-   :mysql => '?charset=utf8',
-   :postgresql => '',
-   :sqlite => '',
-   :db2 => '?charset=utf8',
-   :nosql => ''
+   mysql: '?charset=utf8',
+   postgresql: '',
+   sqlite: '',
+   db2: '?charset=utf8',
+   nosql: ''
 }
 
 # Database used by the OpenStack Compute (Nova) service
@@ -197,8 +197,8 @@ default['openstack']['db']['root_user_key'] = 'mysqlroot'
 
 # platform and DBMS-specific python client packages
 default['openstack']['db']['python_packages'] = {
-  :postgresql => ['python-psycopg2'],
-  :sqlite => []
+  postgresql: ['python-psycopg2'],
+  sqlite: []
 }
 case node['platform_family']
 when 'rhel'

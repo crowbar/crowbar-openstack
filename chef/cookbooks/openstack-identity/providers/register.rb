@@ -21,7 +21,7 @@
 # limitations under the License.
 #
 
-require 'chef/mixin/shell_out'
+require "chef/mixin/shell_out"
 include Chef::Mixin::ShellOut
 include ::Openstack
 
@@ -29,8 +29,8 @@ private
 
 def generate_creds(resource)
   {
-    'OS_SERVICE_ENDPOINT' => resource.auth_uri,
-    'OS_SERVICE_TOKEN' => resource.bootstrap_token
+    "OS_SERVICE_ENDPOINT" => resource.auth_uri,
+    "OS_SERVICE_TOKEN" => resource.bootstrap_token
   }
 end
 
@@ -38,34 +38,34 @@ private
 
 def generate_ec2_creds(resource)
   {
-      'OS_USERNAME' => resource.admin_user,
-      'OS_PASSWORD' => resource.admin_pass,
-      'OS_TENANT_NAME' => resource.admin_tenant_name,
-      'OS_AUTH_URL' => resource.identity_endpoint
+      "OS_USERNAME" => resource.admin_user,
+      "OS_PASSWORD" => resource.admin_pass,
+      "OS_TENANT_NAME" => resource.admin_tenant_name,
+      "OS_AUTH_URL" => resource.identity_endpoint
   }
 end
 
 private
 
 def identity_command(resource, cmd, args = {})
-  keystonecmd = ['keystone'] << cmd
+  keystonecmd = ["keystone"] << cmd
   args.each do |key, val|
     keystonecmd << "--#{key}" << val.to_s
   end
   Chef::Log.debug("Running identity command: #{keystonecmd}")
-  rc = shell_out(keystonecmd, :env => (cmd.include? 'ec2') ? generate_ec2_creds(resource) : generate_creds(resource))
+  rc = shell_out(keystonecmd, env: (cmd.include? "ec2") ? generate_ec2_creds(resource) : generate_creds(resource))
   fail "#{rc.stderr} (#{rc.exitstatus})" if rc.exitstatus != 0
   rc.stdout
 end
 
 private
 
-def identity_uuid(resource, type, key, value, args = {}, uuid_field = 'id')  # rubocop: disable ParameterLists
+def identity_uuid(resource, type, key, value, args = {}, uuid_field = "id")  # rubocop: disable ParameterLists
   rc = nil
   begin
     output = identity_command resource, "#{type}-list", args
     output = prettytable_to_array(output)
-    rc = (type == 'endpoint') ? (search_uuid(output, uuid_field, key => value, 'region' => resource.endpoint_region)) : (search_uuid(output, uuid_field, key => value))
+    rc = (type == "endpoint") ? (search_uuid(output, uuid_field, key => value, "region" => resource.endpoint_region)) : (search_uuid(output, uuid_field, key => value))
   rescue RuntimeError => e
     raise "Could not lookup uuid for #{type}:#{key}=>#{value}. Error was #{e.message}"
   end
@@ -83,22 +83,22 @@ def search_uuid(output, uuid_field, required_hash = {})
 end
 
 action :create_service do
-  if node['openstack']['identity']['catalog']['backend'] == 'templated'
-    Chef::Log.info('Skipping service creation - templated catalog backend in use.')
+  if node["openstack"]["identity"]["catalog"]["backend"] == "templated"
+    Chef::Log.info("Skipping service creation - templated catalog backend in use.")
     new_resource.updated_by_last_action(false)
   else
     begin
-      service_uuid = identity_uuid new_resource, 'service', 'type', new_resource.service_type
+      service_uuid = identity_uuid new_resource, "service", "type", new_resource.service_type
 
       if service_uuid
         Chef::Log.info("Service Type '#{new_resource.service_type}' already exists.. Not creating.")
         Chef::Log.info("Service UUID: #{service_uuid}")
         new_resource.updated_by_last_action(false)
       else
-        identity_command(new_resource, 'service-create',
-                         'type' => new_resource.service_type,
-                         'name' => new_resource.service_name,
-                         'description' => new_resource.service_description)
+        identity_command(new_resource, "service-create",
+                         "type" => new_resource.service_type,
+                         "name" => new_resource.service_name,
+                         "description" => new_resource.service_description)
         Chef::Log.info("Created service '#{new_resource.service_name}'")
         new_resource.updated_by_last_action(true)
       end
@@ -111,29 +111,29 @@ action :create_service do
 end
 
 action :create_endpoint do
-  if node['openstack']['identity']['catalog']['backend'] == 'templated'
-    Chef::Log.info('Skipping endpoint creation - templated catalog backend in use.')
+  if node["openstack"]["identity"]["catalog"]["backend"] == "templated"
+    Chef::Log.info("Skipping endpoint creation - templated catalog backend in use.")
     new_resource.updated_by_last_action(false)
   else
     begin
-      service_uuid = identity_uuid new_resource, 'service', 'type', new_resource.service_type
+      service_uuid = identity_uuid new_resource, "service", "type", new_resource.service_type
       unless service_uuid
         Chef::Log.error("Unable to find service type '#{new_resource.service_type}'")
         new_resource.updated_by_last_action(false)
         next
       end
 
-      endpoint_uuid = identity_uuid new_resource, 'endpoint', 'service_id', service_uuid
+      endpoint_uuid = identity_uuid new_resource, "endpoint", "service_id", service_uuid
       if endpoint_uuid
         Chef::Log.info("Endpoint already exists for Service Type '#{new_resource.service_type}' already exists.. Not creating.")
         new_resource.updated_by_last_action(false)
       else
-        identity_command(new_resource, 'endpoint-create',
-                         'region' => new_resource.endpoint_region,
-                         'service_id' => service_uuid,
-                         'publicurl' => new_resource.endpoint_publicurl,
-                         'internalurl' => new_resource.endpoint_internalurl,
-                         'adminurl' => new_resource.endpoint_adminurl)
+        identity_command(new_resource, "endpoint-create",
+                         "region" => new_resource.endpoint_region,
+                         "service_id" => service_uuid,
+                         "publicurl" => new_resource.endpoint_publicurl,
+                         "internalurl" => new_resource.endpoint_internalurl,
+                         "adminurl" => new_resource.endpoint_adminurl)
         Chef::Log.info("Created endpoint for service type '#{new_resource.service_type}'")
         new_resource.updated_by_last_action(true)
       end
@@ -147,17 +147,17 @@ end
 
 action :create_tenant do
   begin
-    tenant_uuid = identity_uuid new_resource, 'tenant', 'name', new_resource.tenant_name
+    tenant_uuid = identity_uuid new_resource, "tenant", "name", new_resource.tenant_name
 
     if tenant_uuid
       Chef::Log.info("Tenant '#{new_resource.tenant_name}' already exists.. Not creating.")
       Chef::Log.info("Tenant UUID: #{tenant_uuid}") if tenant_uuid
       new_resource.updated_by_last_action(false)
     else
-      identity_command(new_resource, 'tenant-create',
-                       'name' => new_resource.tenant_name,
-                       'description' => new_resource.tenant_description,
-                       'enabled' => new_resource.tenant_enabled)
+      identity_command(new_resource, "tenant-create",
+                       "name" => new_resource.tenant_name,
+                       "description" => new_resource.tenant_description,
+                       "enabled" => new_resource.tenant_enabled)
       Chef::Log.info("Created tenant '#{new_resource.tenant_name}'")
       new_resource.updated_by_last_action(true)
     end
@@ -170,15 +170,15 @@ end
 
 action :create_role do
   begin
-    role_uuid = identity_uuid new_resource, 'role', 'name', new_resource.role_name
+    role_uuid = identity_uuid new_resource, "role", "name", new_resource.role_name
 
     if role_uuid
       Chef::Log.info("Role '#{new_resource.role_name}' already exists.. Not creating.")
       Chef::Log.info("Role UUID: #{role_uuid}")
       new_resource.updated_by_last_action(false)
     else
-      identity_command(new_resource, 'role-create',
-                       'name' => new_resource.role_name)
+      identity_command(new_resource, "role-create",
+                       "name" => new_resource.role_name)
       Chef::Log.info("Created Role '#{new_resource.role_name}'")
       new_resource.updated_by_last_action(true)
     end
@@ -191,19 +191,19 @@ end
 
 action :create_user do
   begin
-    tenant_uuid = identity_uuid new_resource, 'tenant', 'name', new_resource.tenant_name
+    tenant_uuid = identity_uuid new_resource, "tenant", "name", new_resource.tenant_name
     unless tenant_uuid
       Chef::Log.error("Unable to find tenant '#{new_resource.tenant_name}'")
       new_resource.updated_by_last_action(false)
       next
     end
 
-    output = identity_command(new_resource, 'user-list',
-                              'tenant-id' => tenant_uuid)
+    output = identity_command(new_resource, "user-list",
+                              "tenant-id" => tenant_uuid)
     users = prettytable_to_array output
     user_found = false
     users.each do |user|
-      user_found = true if user['name'] == new_resource.user_name
+      user_found = true if user["name"] == new_resource.user_name
     end
 
     if user_found
@@ -212,11 +212,11 @@ action :create_user do
       next
     end
 
-    identity_command(new_resource, 'user-create',
-                     'name' => new_resource.user_name,
-                     'tenant-id' => tenant_uuid,
-                     'pass' => new_resource.user_pass,
-                     'enabled' => new_resource.user_enabled)
+    identity_command(new_resource, "user-create",
+                     "name" => new_resource.user_name,
+                     "tenant-id" => tenant_uuid,
+                     "pass" => new_resource.user_pass,
+                     "enabled" => new_resource.user_enabled)
     Chef::Log.info("Created user '#{new_resource.user_name}' for tenant '#{new_resource.tenant_name}'")
     new_resource.updated_by_last_action(true)
   rescue StandardError => e
@@ -228,39 +228,39 @@ end
 
 action :grant_role do
   begin
-    tenant_uuid = identity_uuid new_resource, 'tenant', 'name', new_resource.tenant_name
+    tenant_uuid = identity_uuid new_resource, "tenant", "name", new_resource.tenant_name
     unless tenant_uuid
       Chef::Log.error("Unable to find tenant '#{new_resource.tenant_name}'")
       new_resource.updated_by_last_action(false)
       next
     end
 
-    user_uuid = identity_uuid new_resource, 'user', 'name', new_resource.user_name
+    user_uuid = identity_uuid new_resource, "user", "name", new_resource.user_name
     unless tenant_uuid
       Chef::Log.error("Unable to find user '#{new_resource.user_name}'")
       new_resource.updated_by_last_action(false)
       next
     end
 
-    role_uuid = identity_uuid new_resource, 'role', 'name', new_resource.role_name
+    role_uuid = identity_uuid new_resource, "role", "name", new_resource.role_name
     unless tenant_uuid
       Chef::Log.error("Unable to find role '#{new_resource.role_name}'")
       new_resource.updated_by_last_action(false)
       next
     end
 
-    assigned_role_uuid = identity_uuid(new_resource, 'user-role', 'name',
+    assigned_role_uuid = identity_uuid(new_resource, "user-role", "name",
                                        new_resource.role_name,
-                                       'tenant-id' => tenant_uuid,
-                                       'user-id' => user_uuid)
+                                       "tenant-id" => tenant_uuid,
+                                       "user-id" => user_uuid)
     if role_uuid == assigned_role_uuid
       Chef::Log.info("Role '#{new_resource.role_name}' already granted to User '#{new_resource.user_name}' in Tenant '#{new_resource.tenant_name}'")
       new_resource.updated_by_last_action(false)
     else
-      identity_command(new_resource, 'user-role-add',
-                       'tenant-id' => tenant_uuid,
-                       'role-id' => role_uuid,
-                       'user-id' => user_uuid)
+      identity_command(new_resource, "user-role-add",
+                       "tenant-id" => tenant_uuid,
+                       "role-id" => role_uuid,
+                       "user-id" => user_uuid)
       Chef::Log.info("Granted Role '#{new_resource.role_name}' to User '#{new_resource.user_name}' in Tenant '#{new_resource.tenant_name}'")
       new_resource.updated_by_last_action(true)
     end
@@ -273,16 +273,16 @@ end
 
 action :create_ec2_credentials do
   begin
-    tenant_uuid = identity_uuid new_resource, 'tenant', 'name', new_resource.tenant_name
+    tenant_uuid = identity_uuid new_resource, "tenant", "name", new_resource.tenant_name
     unless tenant_uuid
       Chef::Log.error("Unable to find tenant '#{new_resource.tenant_name}'")
       new_resource.updated_by_last_action(false)
       next
     end
 
-    user_uuid = identity_uuid(new_resource, 'user', 'name',
+    user_uuid = identity_uuid(new_resource, "user", "name",
                               new_resource.user_name,
-                              'tenant-id' => tenant_uuid)
+                              "tenant-id" => tenant_uuid)
     unless user_uuid
       Chef::Log.error("Unable to find user '#{new_resource.user_name}'")
       new_resource.updated_by_last_action(false)
@@ -290,14 +290,14 @@ action :create_ec2_credentials do
     end
 
     # this is not really a uuid, but this will work nonetheless
-    access = identity_uuid new_resource, 'ec2-credentials', 'tenant', new_resource.tenant_name, { 'user-id' => user_uuid }, 'access'
+    access = identity_uuid new_resource, "ec2-credentials", "tenant", new_resource.tenant_name, { "user-id" => user_uuid }, "access"
     if access
       Chef::Log.info("EC2 credentials already exist for '#{new_resource.user_name}' in tenant '#{new_resource.tenant_name}'")
       new_resource.updated_by_last_action(false)
     else
-      output = identity_command(new_resource, 'ec2-credentials-create',
-                                'user-id' => user_uuid,
-                                'tenant-id' => tenant_uuid)
+      output = identity_command(new_resource, "ec2-credentials-create",
+                                "user-id" => user_uuid,
+                                "tenant-id" => tenant_uuid)
       Chef::Log.info("Created EC2 Credentials for User '#{new_resource.user_name}' in Tenant '#{new_resource.tenant_name}'")
       data = prettytable_to_array(output)
 
@@ -306,8 +306,8 @@ action :create_ec2_credentials do
         Chef::Log.error("Data: #{data}")
       else
         # Update node attributes
-        node.set['credentials']['EC2'][new_resource.user_name]['access'] = data[0]['access']
-        node.set['credentials']['EC2'][new_resource.user_name]['secret'] = data[0]['secret']
+        node.set["credentials"]["EC2"][new_resource.user_name]["access"] = data[0]["access"]
+        node.set["credentials"]["EC2"][new_resource.user_name]["secret"] = data[0]["secret"]
         node.save unless Chef::Config[:solo]
         new_resource.updated_by_last_action(true)
       end

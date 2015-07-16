@@ -1,6 +1,5 @@
 #some magic should be here wich able to configure bios and pass control to tboot.rb
 
-
 tpm_active = File.exist?("/sys/class/misc/tpm0/device/active") ? File.read("/sys/class/misc/tpm0/device/active").to_i : 0
 tpm_enabled = File.exist?("/sys/class/misc/tpm0/device/enabled") ? File.read("/sys/class/misc/tpm0/device/enabled").to_i : 0
 if tpm_enabled != 1 and tpm_active != 1
@@ -13,31 +12,29 @@ if tpm_enabled != 1 and tpm_active != 1
   password = node["ipmi"]["bmc_password"] rescue "cr0wBar!"
   cert_f = "/tmp/cer-#{ip}.cer"
 
-
   ruby_block "invoke_wsman" do
     block do
-
       system("echo | openssl s_client -connect #{ip}:443 2>&1 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' >#{cert_f} 2>&1")
 
       cl=Wsm.new
-      
-      if not cl.check_val('TpmSecurity', 'OnPbm', "#{ip}", "#{user}", "#{password}", "#{cert_f}")
-        cl.set_value('TpmSecurity', 'OnPbm', "#{ip}", "#{user}", "#{password}", "#{cert_f}")
+
+      if not cl.check_val("TpmSecurity", "OnPbm", "#{ip}", "#{user}", "#{password}", "#{cert_f}")
+        cl.set_value("TpmSecurity", "OnPbm", "#{ip}", "#{user}", "#{password}", "#{cert_f}")
       end
-      if not cl.check_val('TpmActivation', 'Activate', "#{ip}", "#{user}", "#{password}", "#{cert_f}")
+      if not cl.check_val("TpmActivation", "Activate", "#{ip}", "#{user}", "#{password}", "#{cert_f}")
         3.times do
-          if not cl.set_value('TpmActivation', 'Activate', "#{ip}", "#{user}", "#{password}", "#{cert_f}")
-            cl.set_value('TpmSecurity', 'OnPbm', "#{ip}", "#{user}", "#{password}", "#{cert_f}")
+          if not cl.set_value("TpmActivation", "Activate", "#{ip}", "#{user}", "#{password}", "#{cert_f}")
+            cl.set_value("TpmSecurity", "OnPbm", "#{ip}", "#{user}", "#{password}", "#{cert_f}")
           else
             break
           end
         end
       end
-      if not cl.check_val('IntelTxt', 'On', "#{ip}", "#{user}", "#{password}", "#{cert_f}")
+      if not cl.check_val("IntelTxt", "On", "#{ip}", "#{user}", "#{password}", "#{cert_f}")
         3.times do
-          if not cl.set_value('IntelTxt', 'On', "#{ip}", "#{user}", "#{password}", "#{cert_f}")
-            cl.set_value('TpmSecurity', 'OnPbm', "#{ip}", "#{user}", "#{password}", "#{cert_f}")
-            cl.set_value('TpmActivation', 'Activate', "#{ip}", "#{user}", "#{password}", "#{cert_f}")
+          if not cl.set_value("IntelTxt", "On", "#{ip}", "#{user}", "#{password}", "#{cert_f}")
+            cl.set_value("TpmSecurity", "OnPbm", "#{ip}", "#{user}", "#{password}", "#{cert_f}")
+            cl.set_value("TpmActivation", "Activate", "#{ip}", "#{user}", "#{password}", "#{cert_f}")
           else
             break
           end

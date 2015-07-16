@@ -22,9 +22,9 @@ default[:trove][:debug] = false
 
 default[:trove][:volume_support] = false
 
-default[:trove][:service_user] = 'trove'
-default[:trove][:service_password] = 'trove'
+default[:trove][:service_user] = "trove"
+default[:trove][:service_password] = "trove"
 
 default[:trove][:db][:password] = nil
-default[:trove][:db][:database] = 'trove'
-default[:trove][:db][:user] = 'trove'
+default[:trove][:db][:database] = "trove"
+default[:trove][:db][:user] = "trove"

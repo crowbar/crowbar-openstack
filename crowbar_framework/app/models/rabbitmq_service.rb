@@ -16,7 +16,6 @@
 #
 
 class RabbitmqService < PacemakerServiceObject
-
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "rabbitmq"
@@ -57,7 +56,7 @@ class RabbitmqService < PacemakerServiceObject
     nodes.delete_if { |n| n.admin? } if nodes.size > 1
     controller = nodes.find { |n| n if n.intended_role == "controller" } || nodes.first
     base["deployment"]["rabbitmq"]["elements"] = {
-      "rabbitmq-server" => [ controller.name ]
+      "rabbitmq-server" => [controller.name]
     }
 
     base["attributes"][@bc_name]["password"] = random_password

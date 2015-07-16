@@ -1,5 +1,5 @@
 def upgrade ta, td, a, d
-  a['db'] = ta['db']
+  a["db"] = ta["db"]
 
   # Old proposals had passwords created in the cookbook, but in the wrong
   # namespace for attributes. So no need to migrate them here. We use a class
@@ -8,12 +8,12 @@ def upgrade ta, td, a, d
     service = ServiceObject.new "fake-logger"
     @@nova_dashboard_db_password = service.random_password
   end
-  a['db']['password'] = @@nova_dashboard_db_password
+  a["db"]["password"] = @@nova_dashboard_db_password
 
   return a, d
 end
 
 def downgrade ta, td, a, d
-  a.delete('db')
+  a.delete("db")
   return a, d
 end

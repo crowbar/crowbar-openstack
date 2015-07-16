@@ -55,8 +55,8 @@ else
   raise "Invalid mode for HA storage!"
 end
 
-# Wait for all "database" nodes to reach this point so we know that 
-# they will have all the required packages installed and configuration 
+# Wait for all "database" nodes to reach this point so we know that
+# they will have all the required packages installed and configuration
 # files updated before we create the pacemaker resources.
 crowbar_pacemaker_sync_mark "sync-database_before_ha_storage" do
   revision node[:database]["crowbar-revision"]
@@ -166,7 +166,7 @@ end
 # mounted; this is needed before we generate files in the directory
 ruby_block "wait for #{fs_primitive} to be started" do
   block do
-    require 'timeout'
+    require "timeout"
     begin
       Timeout.timeout(20) do
         # Check that the fs resource is running

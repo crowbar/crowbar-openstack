@@ -21,8 +21,8 @@ action :wakeup do
   http, headers = _build_connection(new_resource)
 
   # Construct the path
-  path = '/v2.0/OS-KSADM/services'
-  dir = 'OS-KSADM:services'
+  path = "/v2.0/OS-KSADM/services"
+  dir = "OS-KSADM:services"
 
   # Lets verify that the service does not exist yet
   count = 0
@@ -42,8 +42,8 @@ action :add_service do
   http, headers = _build_connection(new_resource)
 
   # Construct the path
-  path = '/v2.0/OS-KSADM/services'
-  dir = 'OS-KSADM:services'
+  path = "/v2.0/OS-KSADM/services"
+  dir = "OS-KSADM:services"
 
   # Lets verify that the service does not exist yet
   item_id, error = _find_id(http, headers, new_resource.service_name, path, dir)
@@ -67,8 +67,8 @@ action :add_tenant do
   http, headers = _build_connection(new_resource)
 
   # Construct the path
-  path = '/v2.0/tenants'
-  dir = 'tenants'
+  path = "/v2.0/tenants"
+  dir = "tenants"
 
   # Lets verify that the service does not exist yet
   item_id, error = _find_id(http, headers, new_resource.tenant_name, path, dir)
@@ -93,11 +93,11 @@ action :add_user do
 
   # Lets verify that the item does not exist yet
   tenant = new_resource.tenant_name
-  tenant_id, terror = _find_id(http, headers, tenant, '/v2.0/tenants', 'tenants')
+  tenant_id, terror = _find_id(http, headers, tenant, "/v2.0/tenants", "tenants")
 
   # Construct the path
-  path = '/v2.0/users'
-  dir = 'users'
+  path = "/v2.0/users"
+  dir = "users"
 
   # Lets verify that the service does not exist yet
   item_id, uerror = _find_id(http, headers, new_resource.user_name, path, dir)
@@ -114,7 +114,7 @@ action :add_user do
   else
     path = "/v2.0/tokens"
     body = _build_auth(new_resource.user_name, new_resource.user_password, tenant_id)
-    resp = http.send_request('POST', path, JSON.generate(body), headers)
+    resp = http.send_request("POST", path, JSON.generate(body), headers)
     if resp.is_a?(Net::HTTPCreated) or resp.is_a?(Net::HTTPOK)
       Chef::Log.info "User '#{new_resource.user_name}' already exists. No password change."
       new_resource.updated_by_last_action(false)
@@ -142,8 +142,8 @@ action :add_role do
   http, headers = _build_connection(new_resource)
 
   # Construct the path
-  path = '/v2.0/OS-KSADM/roles'
-  dir = 'roles'
+  path = "/v2.0/OS-KSADM/roles"
+  dir = "roles"
 
   # Lets verify that the service does not exist yet
   item_id, error = _find_id(http, headers, new_resource.role_name, path, dir)
@@ -170,12 +170,12 @@ action :add_access do
   tenant = new_resource.tenant_name
   user = new_resource.user_name
   role = new_resource.role_name
-  user_id, uerror = _find_id(http, headers, user, '/v2.0/users', 'users')
-  tenant_id, terror = _find_id(http, headers, tenant, '/v2.0/tenants', 'tenants')
-  role_id, rerror = _find_id(http, headers, role, '/v2.0/OS-KSADM/roles', 'roles')
+  user_id, uerror = _find_id(http, headers, user, "/v2.0/users", "users")
+  tenant_id, terror = _find_id(http, headers, tenant, "/v2.0/tenants", "tenants")
+  role_id, rerror = _find_id(http, headers, role, "/v2.0/OS-KSADM/roles", "roles")
 
   path = "/v2.0/tenants/#{tenant_id}/users/#{user_id}/roles"
-  t_role_id, aerror = _find_id(http, headers, role, path, 'roles')
+  t_role_id, aerror = _find_id(http, headers, role, path, "roles")
 
   error = (aerror or rerror or uerror or terror)
   unless role_id == t_role_id or error
@@ -195,19 +195,19 @@ end
 action :add_ec2 do
   http, headers = _build_connection(new_resource)
 
-  headers.delete('X-Auth-Token')
-  resp = http.send_request('POST', '/v2.0/tokens', JSON.generate({:auth => {:tenantName => new_resource.auth[:tenant], :passwordCredentials => {:username => new_resource.auth[:user], :password => new_resource.auth[:password]}}}),headers)
+  headers.delete("X-Auth-Token")
+  resp = http.send_request("POST", "/v2.0/tokens", JSON.generate({auth: {tenantName: new_resource.auth[:tenant], passwordCredentials: {username: new_resource.auth[:user], password: new_resource.auth[:password]}}}),headers)
   data = JSON.parse(resp.read_body)
-  headers.store('X-Auth-Token', data["access"]["token"]["id"])
+  headers.store("X-Auth-Token", data["access"]["token"]["id"])
 
   # Lets verify that the item does not exist yet
   tenant = new_resource.tenant_name
   user = new_resource.user_name
-  user_id, uerror = _find_id(http, headers, user, '/v2.0/users', 'users')
-  tenant_id, terror = _find_id(http, headers, tenant, '/v2.0/tenants', 'tenants')
+  user_id, uerror = _find_id(http, headers, user, "/v2.0/users", "users")
+  tenant_id, terror = _find_id(http, headers, tenant, "/v2.0/tenants", "tenants")
 
   path = "/v2.0/users/#{user_id}/credentials/OS-EC2"
-  t_tenant_id, aerror = _find_id(http, headers, tenant_id, path, 'credentials', 'tenant_id', 'tenant_id')
+  t_tenant_id, aerror = _find_id(http, headers, tenant_id, path, "credentials", "tenant_id", "tenant_id")
 
   error = (aerror or uerror or terror)
   unless tenant_id == t_tenant_id or error
@@ -227,8 +227,8 @@ action :add_endpoint_template do
 
   # Look up my service id
   # Construct the path
-  path = '/v2.0/OS-KSADM/services'
-  dir = 'OS-KSADM:services'
+  path = "/v2.0/OS-KSADM/services"
+  dir = "OS-KSADM:services"
   my_service_id, error = _find_id(http, headers, new_resource.endpoint_service, path, dir)
   unless my_service_id
       Chef::Log.error "Couldn't find service #{new_resource.endpoint_service} in keystone"
@@ -237,7 +237,7 @@ action :add_endpoint_template do
   end
 
   # Construct the path
-  path = '/v2.0/endpoints'
+  path = "/v2.0/endpoints"
 
   # Lets verify that the endpoint does not exist yet
   resp = http.request_get(path, headers)
@@ -281,7 +281,7 @@ action :add_endpoint_template do
                  new_resource.endpoint_publicURL,
                  new_resource.endpoint_global,
                  new_resource.endpoint_enabled)
-          resp = http.send_request('POST', path, JSON.generate(body), headers)
+          resp = http.send_request("POST", path, JSON.generate(body), headers)
           if resp.is_a?(Net::HTTPCreated)
               Chef::Log.info("Created keystone endpointTemplate for '#{new_resource.endpoint_service}'")
               new_resource.updated_by_last_action(true)
@@ -305,11 +305,10 @@ action :add_endpoint_template do
   end
 end
 
-
 # Return true on success
 private
 def _create_item(http, headers, path, body, name)
-  resp = http.send_request('POST', path, JSON.generate(body), headers)
+  resp = http.send_request("POST", path, JSON.generate(body), headers)
   if resp.is_a?(Net::HTTPCreated)
     Chef::Log.info("Created keystone item '#{name}'")
     return true
@@ -328,9 +327,9 @@ end
 private
 def _update_item(http, headers, path, body, name)
   unless body.nil?
-    resp = http.send_request('PUT', path, JSON.generate(body), headers)
+    resp = http.send_request("PUT", path, JSON.generate(body), headers)
   else
-    resp = http.send_request('PUT', path, nil, headers)
+    resp = http.send_request("PUT", path, nil, headers)
   end
   if resp.is_a?(Net::HTTPOK)
     Chef::Log.info("Updated keystone item '#{name}'")
@@ -350,7 +349,7 @@ private
 def _build_connection(new_resource)
   # Need to require net/https so that Net::HTTP gets monkey-patched
   # to actually support SSL:
-  require 'net/https' if new_resource.protocol == "https"
+  require "net/https" if new_resource.protocol == "https"
 
   # Construct the http object
   http = Net::HTTP.new(new_resource.host, new_resource.port)
@@ -360,11 +359,11 @@ def _build_connection(new_resource)
   # Fill out the headers
   headers = _build_headers(new_resource.token)
 
-  [ http, headers ]
+  [http, headers]
 end
 
 private
-def _find_id(http, headers, svc_name, spath, dir, key = 'name', ret = 'id')
+def _find_id(http, headers, svc_name, spath, dir, key = "name", ret = "id")
   # Construct the path
   my_service_id = nil
   error = false
@@ -383,7 +382,7 @@ def _find_id(http, headers, svc_name, spath, dir, key = 'name', ret = 'id')
     Chef::Log.error("Response Message: #{resp.message}")
     error = true
   end
-  [ my_service_id, error ]
+  [my_service_id, error]
 end
 
 private
@@ -495,8 +494,8 @@ end
 private
 def _build_headers(token = nil)
   ret = Hash.new
-  ret.store('X-Auth-Token', token) if token
-  ret.store('Content-type', 'application/json')
+  ret.store("X-Auth-Token", token) if token
+  ret.store("Content-type", "application/json")
   return ret
 end
 

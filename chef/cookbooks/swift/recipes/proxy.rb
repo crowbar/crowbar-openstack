@@ -16,11 +16,11 @@
 # Author: andi abes
 #
 
-include_recipe 'utils'
-include_recipe 'swift::auth'
+include_recipe "utils"
+include_recipe "swift::auth"
 # Note: we always want to setup rsync, even if we do not do anything else; this
 # will allow the ring-compute node to push the rings.
-include_recipe 'swift::rsync'
+include_recipe "swift::rsync"
 
 if node.roles.include?("swift-storage") && node[:swift][:devs].nil?
   # If we're a storage node and have no device yet, then it simply means that we
@@ -61,7 +61,7 @@ end
 
 admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 public_host = CrowbarHelper.get_host_for_public_url(node, node[:swift][:ssl][:enabled], ha_enabled)
-swift_protocol = node[:swift][:ssl][:enabled] ? 'https' : 'http'
+swift_protocol = node[:swift][:ssl][:enabled] ? "https" : "http"
 
 ###
 # bucket to collect all the config items that end up in the proxy config template
@@ -155,56 +155,56 @@ case proxy_config[:auth_method]
      crowbar_pacemaker_sync_mark "wait-swift_register"
 
      keystone_register "swift proxy wakeup keystone" do
-       protocol keystone_settings['protocol']
-       insecure keystone_settings['insecure']
-       host keystone_settings['internal_url_host']
-       port keystone_settings['admin_port']
-       token keystone_settings['admin_token']
+       protocol keystone_settings["protocol"]
+       insecure keystone_settings["insecure"]
+       host keystone_settings["internal_url_host"]
+       port keystone_settings["admin_port"]
+       token keystone_settings["admin_token"]
        action :wakeup
      end
 
      # ResellerAdmin is used by swift (see reseller_admin_role option)
      role = "ResellerAdmin"
      keystone_register "add #{role} role for swift" do
-       protocol keystone_settings['protocol']
-       insecure keystone_settings['insecure']
-       host keystone_settings['internal_url_host']
-       port keystone_settings['admin_port']
-       token keystone_settings['admin_token']
+       protocol keystone_settings["protocol"]
+       insecure keystone_settings["insecure"]
+       host keystone_settings["internal_url_host"]
+       port keystone_settings["admin_port"]
+       token keystone_settings["admin_token"]
        role_name role
        action :add_role
      end
 
      keystone_register "register swift user" do
-       protocol keystone_settings['protocol']
-       insecure keystone_settings['insecure']
-       host keystone_settings['internal_url_host']
-       port keystone_settings['admin_port']
-       token keystone_settings['admin_token']
-       user_name keystone_settings['service_user']
-       user_password keystone_settings['service_password']
-       tenant_name keystone_settings['service_tenant']
+       protocol keystone_settings["protocol"]
+       insecure keystone_settings["insecure"]
+       host keystone_settings["internal_url_host"]
+       port keystone_settings["admin_port"]
+       token keystone_settings["admin_token"]
+       user_name keystone_settings["service_user"]
+       user_password keystone_settings["service_password"]
+       tenant_name keystone_settings["service_tenant"]
        action :add_user
      end
 
      keystone_register "give swift user access" do
-       protocol keystone_settings['protocol']
-       insecure keystone_settings['insecure']
-       host keystone_settings['internal_url_host']
-       port keystone_settings['admin_port']
-       token keystone_settings['admin_token']
-       user_name keystone_settings['service_user']
-       tenant_name keystone_settings['service_tenant']
+       protocol keystone_settings["protocol"]
+       insecure keystone_settings["insecure"]
+       host keystone_settings["internal_url_host"]
+       port keystone_settings["admin_port"]
+       token keystone_settings["admin_token"]
+       user_name keystone_settings["service_user"]
+       tenant_name keystone_settings["service_tenant"]
        role_name "admin"
        action :add_access
      end
 
      keystone_register "register swift service" do
-       protocol keystone_settings['protocol']
-       insecure keystone_settings['insecure']
-       host keystone_settings['internal_url_host']
-       token keystone_settings['admin_token']
-       port keystone_settings['admin_port']
+       protocol keystone_settings["protocol"]
+       insecure keystone_settings["insecure"]
+       host keystone_settings["internal_url_host"]
+       token keystone_settings["admin_token"]
+       port keystone_settings["admin_port"]
        service_name "swift"
        service_type "object-store"
        service_description "Openstack Swift Object Store Service"
@@ -212,13 +212,13 @@ case proxy_config[:auth_method]
      end
 
      keystone_register "register swift-proxy endpoint" do
-         protocol keystone_settings['protocol']
-         insecure keystone_settings['insecure']
-         host keystone_settings['internal_url_host']
-         token keystone_settings['admin_token']
-         port keystone_settings['admin_port']
+         protocol keystone_settings["protocol"]
+         insecure keystone_settings["insecure"]
+         host keystone_settings["internal_url_host"]
+         token keystone_settings["admin_token"]
+         port keystone_settings["admin_port"]
          endpoint_service "swift"
-         endpoint_region keystone_settings['endpoint_region']
+         endpoint_region keystone_settings["endpoint_region"]
          endpoint_publicURL "#{swift_protocol}://#{public_host}:#{node[:swift][:ports][:proxy]}/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
          endpoint_adminURL "#{swift_protocol}://#{admin_host}:#{node[:swift][:ports][:proxy]}/v1/"
          endpoint_internalURL "#{swift_protocol}://#{admin_host}:#{node[:swift][:ports][:proxy]}/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
@@ -303,22 +303,20 @@ if !result.nil? and (result.length > 0)
     s += ":11211 "
   }
   memcached_servers.sort!
-  log("memcached servers" + memcached_servers.join(",")) {level :debug}
+  log("memcached servers" + memcached_servers.join(",")) { level :debug }
   servers = memcached_servers.join(",")
 else
-  log("found no swift-proxy nodes") {level :warn}
+  log("found no swift-proxy nodes") { level :warn }
 end
 proxy_config[:memcached_ips] = servers
 
-
-
 ## Create the proxy server configuraiton file
 template "/etc/swift/proxy-server.conf" do
-  source     "proxy-server.conf.erb"
-  mode       "0640"
-  owner       "root"
-  group       node[:swift][:group]
-  variables   proxy_config
+  source "proxy-server.conf.erb"
+  mode "0640"
+  owner "root"
+  group node[:swift][:group]
+  variables proxy_config
 end
 
 ## install a default memcached instsance.
@@ -333,7 +331,7 @@ env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment
 compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
 if (!compute_nodes.nil? and compute_nodes.length > 0 and node[:fqdn]!=compute_nodes[0][:fqdn] )
   compute_node_addr  = Swift::Evaluator.get_ip_by_type(compute_nodes[0],:storage_ip_expr)
-  log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") {level :debug}
+  log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") { level :debug }
   %w{container account object}.each { |ring|
     execute "pull #{ring} ring" do
       user node[:swift][:user]
@@ -352,27 +350,27 @@ ruby_block "Check if ring is present" do
   not_if { ::File.exists? "/etc/swift/object.ring.gz" }
 end
 
-if node[:swift][:frontend]=='native'
+if node[:swift][:frontend]=="native"
   service "swift-proxy" do
     service_name node[:swift][:proxy][:service_name]
     if %w(redhat centos suse).include?(node.platform)
-      supports :status => true, :restart => true
+      supports status: true, restart: true
     else
       restart_command "stop swift-proxy ; start swift-proxy"
     end
     action [:enable, :start]
-    subscribes :restart, resources(:template => "/etc/swift/swift.conf"), :immediately
-    subscribes :restart, resources(:template => "/etc/swift/proxy-server.conf"), :immediately
+    subscribes :restart, resources(template: "/etc/swift/swift.conf"), :immediately
+    subscribes :restart, resources(template: "/etc/swift/proxy-server.conf"), :immediately
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
     # Do not even try to start the daemon if we don't have the ring yet
     only_if { ::File.exists? "/etc/swift/object.ring.gz" }
   end
-elsif node[:swift][:frontend]=='uwsgi'
+elsif node[:swift][:frontend]=="uwsgi"
 
   service "swift-proxy" do
     service_name node[:swift][:proxy][:service_name]
-    supports :status => true, :restart => true
-    action [ :disable, :stop ]
+    supports status: true, restart: true
+    action [:disable, :stop]
   end
 
   directory "/usr/lib/cgi-bin/swift/" do
@@ -387,45 +385,45 @@ elsif node[:swift][:frontend]=='uwsgi'
     source "swift-uwsgi-service.py.erb"
     mode 0755
     variables(
-      :service => "proxy"
+      service: "proxy"
     )
   end
 
   if node[:swift][:ssl][:enabled]
     uwsgi_instances = {
-      :https => "#{bind_host}:#{bind_port},#{node[:swift][:ssl][:certfile]},#{node[:swift][:ssl][:keyfile]}"
+      https: "#{bind_host}:#{bind_port},#{node[:swift][:ssl][:certfile]},#{node[:swift][:ssl][:keyfile]}"
     }
   else
     uwsgi_instances = {
-      :http => "#{bind_host}:#{bind_port}"
+      http: "#{bind_host}:#{bind_port}"
     }
   end
 
   uwsgi "swift-proxy" do
     options({
-      :chdir => "/usr/lib/cgi-bin/swift/",
-      :callable => :application,
-      :module => :proxy,
-      :protocol => swift_protocol,
-      :user => :swift,
-      :vacuum => true,
-      :"no-orphans" => true,
-      :"reload-on-rss" => 192,
-      :"reload-on-as" => 256,
-      :"max-requests" => 2000,
-      :"cpu-affinity" => 1,
-      :"reload-mercy" => 8,
-      :processes => 4,
-      :"buffer-size" => 65535,
-      :harakiri => 60,
-      :log => "/var/log/swift-proxy-uwsgi.log"
+      chdir: "/usr/lib/cgi-bin/swift/",
+      callable: :application,
+      module: :proxy,
+      protocol: swift_protocol,
+      user: :swift,
+      vacuum: true,
+      "no-orphans": true,
+      "reload-on-rss": 192,
+      "reload-on-as": 256,
+      "max-requests": 2000,
+      "cpu-affinity": 1,
+      "reload-mercy": 8,
+      processes: 4,
+      "buffer-size": 65535,
+      harakiri: 60,
+      log: "/var/log/swift-proxy-uwsgi.log"
     })
     instances (uwsgi_instances)
     service_name "swift-proxy-uwsgi"
   end
 
   service "swift-proxy-uwsgi" do
-    supports :status => true, :restart => true, :start => true
+    supports status: true, restart: true, start: true
     action :start
     subscribes :restart, "template[/usr/lib/cgi-bin/swift/proxy.py]"
     # Do not even try to start the daemon if we don't have the ring yet
@@ -439,10 +437,10 @@ unless %w(redhat centos suse).include?(node.platform)
     code <<-EOH
 EOH
     action :nothing
-    subscribes :run, resources(:template => "/etc/swift/proxy-server.conf")
-    notifies :restart, resources(:service => "memcached-swift-proxy")
-    if node[:swift][:frontend]=='native'
-      notifies :restart, resources(:service => "swift-proxy")
+    subscribes :run, resources(template: "/etc/swift/proxy-server.conf")
+    notifies :restart, resources(service: "memcached-swift-proxy")
+    if node[:swift][:frontend]=="native"
+      notifies :restart, resources(service: "swift-proxy")
     end
   end
 end
@@ -457,15 +455,15 @@ end
 ###
 # let the monitoring tools know what services should be running on this node.
 node[:swift][:monitor] = {}
-node[:swift][:monitor][:svcs] = ["swift-proxy", "memcached" ]
-node[:swift][:monitor][:ports] = {:proxy =>node[:swift][:ports][:proxy]}
+node[:swift][:monitor][:svcs] = ["swift-proxy", "memcached"]
+node[:swift][:monitor][:ports] = {proxy: node[:swift][:ports][:proxy]}
 node.save
 
 ##
 # only run slog init code if enabled, and the proxy has been fully setup
 #(after the storage nodes have come up as well)
 if node["swift"]["use_slog"] and node["swift"]["proxy_init_done"]
-  log ("installing slogging") {level :info}
+  log ("installing slogging") { level :info }
   include_recipe "swift::slog"
 end
 

@@ -70,7 +70,7 @@ end
 private
 def _can_connect(address, port, user, password)
   http = Net::HTTP.new(address, port)
-  request = Net::HTTP::Get.new('/api/whoami')
+  request = Net::HTTP::Get.new("/api/whoami")
   request.basic_auth(user, password)
   resp, data = http.request(request)
   # if we get something different than OK and Unauthorized, then we don't know

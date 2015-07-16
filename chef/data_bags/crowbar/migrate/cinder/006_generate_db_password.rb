@@ -12,13 +12,13 @@ def upgrade ta, td, a, d
       unless node[:cinder][:db][:password].empty?
         @@cinder_db_password = node[:cinder][:db][:password]
       end
-      node[:cinder][:db].delete('password')
+      node[:cinder][:db].delete("password")
       node.save
     end
   end
 
-  if a['db']['password'].nil? || a['db']['password'].empty?
-    a['db']['password'] = @@cinder_db_password
+  if a["db"]["password"].nil? || a["db"]["password"].empty?
+    a["db"]["password"] = @@cinder_db_password
   end
 
   return a, d

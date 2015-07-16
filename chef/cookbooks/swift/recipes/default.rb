@@ -30,16 +30,16 @@ template "/etc/swift/swift.conf" do
   group node[:swift][:group]
   source "swift.conf.erb"
  variables( {
-       :swift_cluster_hash => node[:swift][:cluster_hash]
+       swift_cluster_hash: node[:swift][:cluster_hash]
  })
 end
 
 rsyslog_version = `rsyslogd -v | head -1 | sed -e "s/^rsyslogd \\(.*\\), .*$/\\1/"`
 # log swift components into separate log files
 template "/etc/rsyslog.d/11-swift.conf" do
-  source     "11-swift.conf.erb"
-  mode       "0644"
-  variables(:rsyslog_version => rsyslog_version)
-  notifies   :restart, "service[rsyslog]"
+  source "11-swift.conf.erb"
+  mode "0644"
+  variables(rsyslog_version: rsyslog_version)
+  notifies :restart, "service[rsyslog]"
   only_if    { node[:platform] == "suse" } # other distros might not have /var/log/swift
 end

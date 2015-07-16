@@ -24,7 +24,7 @@ end
 
 include_recipe "#{@cookbook_name}::common"
 
-is_compute = node.roles.any?{|role| /^nova-multi-compute-/ =~ role}
+is_compute = node.roles.any?{ |role| /^nova-multi-compute-/ =~ role }
 
 service "ceilometer-agent-compute" do
   if %w(suse).include?(node.platform)
@@ -32,7 +32,7 @@ service "ceilometer-agent-compute" do
   elsif %w(redhat centos).include?(node.platform)
     service_name "openstack-ceilometer-compute"
   end
-  supports :status => true, :restart => true
+  supports status: true, restart: true
   if is_compute
     action [:enable, :start]
     subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")

@@ -6,8 +6,8 @@
 
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
-node.set_unless['inteltxt']['db']['password'] = secure_password
-node.set_unless['inteltxt']['password'] = secure_password
+node.set_unless["inteltxt"]["db"]["password"] = secure_password
+node.set_unless["inteltxt"]["password"] = secure_password
 
 # prepare db
 Chef::Log.info("Configuring OAT to use database backend")
@@ -26,9 +26,9 @@ end
 sql_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(sql, "admin").address if sql_address.nil?
 Chef::Log.info("sql server found at #{sql_address}")
 
-db_conn = { :host => sql_address,
-            :username => "db_maker",
-            :password => sql[:database][:db_maker_password] }
+db_conn = { host: sql_address,
+            username: "db_maker",
+            password: sql[:database][:db_maker_password] }
 db_provider = Chef::Recipe::Database::Util.get_database_provider(sql)
 db_user_provider = Chef::Recipe::Database::Util.get_user_provider(sql)
 privs = Chef::Recipe::Database::Util.get_default_priviledges(sql)
@@ -41,7 +41,7 @@ database "create #{node[:inteltxt][:db][:database]} oat database" do
 end
 
 database_user "create oat database user" do
-    host '%' 
+    host "%"
     connection db_conn
     username node[:inteltxt][:db][:user]
     password node[:inteltxt][:db][:password]
@@ -54,19 +54,18 @@ database_user "grant database access for oat database user" do
     username node[:inteltxt][:db][:user]
     password node[:inteltxt][:db][:password]
     database_name node[:inteltxt][:db][:database]
-    host '%'
+    host "%"
     privileges privs
     provider db_user_provider
     action :grant
 end
-
 
 # installing package
 # downloading it direclty because it can't be added to repository index
 provisioners = search(:node, "roles:provisioner-server")
 provisioner = provisioners[0] if provisioners
 os_token="#{node[:platform]}-#{node[:platform_version]}"
-repo_url = provisioner[:provisioner][:repositories][os_token][:inteltxt].keys.first.split(' ')[1]
+repo_url = provisioner[:provisioner][:repositories][os_token][:inteltxt].keys.first.split(" ")[1]
 
 pkg_name = "OAT-Appraiser-Base-OATapp-1.0.0-2.x86_64.deb"
 pkg_path = "/root/#{pkg_name}"
@@ -80,10 +79,10 @@ dpkg_package pkg_name do
   source pkg_path
 end
 
-[ "tomcat6", "zip", "unzip", "php5", "php5-mysql", "openssl" ].each { |p| package p }
+["tomcat6", "zip", "unzip", "php5", "php5-mysql", "openssl"].each { |p| package p }
 
 #create dirs
-[ "/etc/oat-appraiser", "/var/lib/oat-appraiser", "/var/lib/oat-appraiser/ClientFiles",
+["/etc/oat-appraiser", "/var/lib/oat-appraiser", "/var/lib/oat-appraiser/ClientFiles",
   "/var/lib/oat-appraiser/CaCerts", "/var/lib/oat-appraiser/Certificate", "/usr/share/oat-appraiser"
 ].each do |d|
   directory d do
@@ -96,7 +95,7 @@ inst_name = "OAT-Appraiser-Base"
 
 execute "unzip_OAT_Setup" do
   command "unzip -o /#{inst_name}/OAT_Server_Install.zip -d /#{inst_name}/"
-  not_if { File.exists? "/#{inst_name}/OAT_Server_Install/oat_db.MySQL" } 
+  not_if { File.exists? "/#{inst_name}/OAT_Server_Install/oat_db.MySQL" }
 end
 
 execute "fix_sql_script" do
@@ -105,7 +104,7 @@ execute "fix_sql_script" do
   subscribes :run, "execute[unzip_OAT_Setup]", :immediately
 end
 
-[ "oat_db.MySQL", "init.sql" ].each do |f|
+["oat_db.MySQL", "init.sql"].each do |f|
   execute "create_tables_for_oat" do
     command "mysql -u #{node[:inteltxt][:db][:user]} -p#{node[:inteltxt][:db][:password]} -h #{sql_address} #{node[:inteltxt][:db][:database]} < /#{inst_name}/OAT_Server_Install/#{f}"
     ignore_failure true
@@ -135,11 +134,11 @@ bash "create_keystore_and_truststore" do
   keytool -import -keystore $truststore -storepass $truststore_pass -file hostname.cer -noprompt
   EOH
   environment({
-    'p12pass' => node[:inteltxt][:keystore_pass],
-    'truststore_pass' => node[:inteltxt][:truststore_pass],
-    'p12file' => 'internal.p12',
-    'keystore' => 'keystore.jks',
-    'truststore' => 'TrustStore.jks'
+    "p12pass" => node[:inteltxt][:keystore_pass],
+    "truststore_pass" => node[:inteltxt][:truststore_pass],
+    "p12file" => "internal.p12",
+    "keystore" => "keystore.jks",
+    "truststore" => "TrustStore.jks"
   })
   ignore_failure true
   not_if { File.exists? "/var/lib/oat-appraiser/Certificate/TrustStore.jks" }
@@ -149,7 +148,7 @@ end
 # configure tomcat6
 
 webapp_dir = "/usr/share/oat-appraiser/webapps"
-[ "AttestationService", "HisPrivacyCAWebServices2", 
+["AttestationService", "HisPrivacyCAWebServices2",
   "HisWebServices", "WLMService"].each do |webapp|
   template "/etc/oat-appraiser/#{webapp}.xml" do
     mode 0640
@@ -157,12 +156,12 @@ webapp_dir = "/usr/share/oat-appraiser/webapps"
     group "tomcat6"
     source "webapp.xml.erb"
     variables({
-      :resource_name => webapp,
-      :webapp_path => webapp_dir,
-      :db_user => node[:inteltxt][:db][:user],
-      :db_pass => node[:inteltxt][:db][:password],
-      :db_name => node[:inteltxt][:db][:database],
-      :mysql_host => sql_address
+      resource_name: webapp,
+      webapp_path: webapp_dir,
+      db_user: node[:inteltxt][:db][:user],
+      db_pass: node[:inteltxt][:db][:password],
+      db_name: node[:inteltxt][:db][:database],
+      mysql_host: sql_address
     })
   end
   execute "link_service_#{webapp}" do
@@ -183,7 +182,7 @@ template "/etc/oat-appraiser/server.xml" do
   group "tomcat6"
   source "server.xml.erb"
   variables(
-    :listen_IP => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+    listen_IP: Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
   )
 end
 
@@ -203,8 +202,8 @@ bash "deploy_wars" do
   code <<-EOH
   unzip -o /$name/OAT_Server_Install.zip -d /$name/
   cp -R /$name/OAT_Server_Install/HisWebServices $WEBAPP_DIR/
-  unzip -o /$name/OAT_Server_Install/WLMService.war -d $WEBAPP_DIR/WLMService 
-  unzip -o /$name/OAT_Server_Install/AttestationService.war -d $WEBAPP_DIR/AttestationService 
+  unzip -o /$name/OAT_Server_Install/WLMService.war -d $WEBAPP_DIR/WLMService
+  unzip -o /$name/OAT_Server_Install/AttestationService.war -d $WEBAPP_DIR/AttestationService
   unzip -o /$name/HisPrivacyCAWebServices2.war -d $WEBAPP_DIR/HisPrivacyCAWebServices2
   rm $WEBAPP_DIR/AttestationService/WEB-INF/classes/OpenAttestationWebServices.properties /etc/oat-appraiser/OpenAttestationWebServices.properties
   cp /$name/OAT_Server_Install/hibernateOat.cfg.xml $WEBAPP_DIR/HisWebServices/WEB-INF/classes/
@@ -221,7 +220,7 @@ execute "deploy_setup.properties" do
   not_if { File.exists? "/etc/oat-appraiser/setup.properties" }
 end
 
-[ "/etc/oat-appraiser", "/var/lib/oat-appraiser"].each do |d|
+["/etc/oat-appraiser", "/var/lib/oat-appraiser"].each do |d|
   execute "fix_file_permissions_for_#{d}" do
     command "chown -R tomcat6:tomcat6 #{d}"
     action :nothing
@@ -230,7 +229,7 @@ end
   end
 end
 
-[ "OpenAttestation", "OpenAttestationWebServices", "OAT" ].each do |prop|
+["OpenAttestation", "OpenAttestationWebServices", "OAT"].each do |prop|
   template "/etc/oat-appraiser/#{prop}.properties" do
     mode 0640
     owner "tomcat6"
@@ -240,7 +239,7 @@ end
 end
 
 service "tomcat6" do
-  action [ :enable, :start ]
+  action [:enable, :start]
   subscribes :restart, "bash[deploy_wars]", :immediately
   subscribes :restart, "bash[create_keystore_and_truststore]", :immediately
   subscribes :restart, "bash[deploy_server_xml]", :immediately
@@ -256,10 +255,10 @@ template "#{node[:apache][:dir]}/sites-available/oat_vhost" do
   source "oat_vhost.erb"
   mode 0644
   variables(
-      :oat_dir => "/var/www/OAT"
+      oat_dir: "/var/www/OAT"
   )
   if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/oat_vhost")
-    notifies :reload, resources(:service => "apache2")
+    notifies :reload, resources(service: "apache2")
   end
 end
 
@@ -283,18 +282,18 @@ end
 template "/var/www/OAT/includes/dbconnect.php" do
   source "dbconnect.php.erb"
   variables(
-    :db_user => node[:inteltxt][:db][:user],
-    :db_pass => node[:inteltxt][:db][:password],
-    :db_name => node[:inteltxt][:db][:database],
-    :db_host => sql_address
+    db_user: node[:inteltxt][:db][:user],
+    db_pass: node[:inteltxt][:db][:password],
+    db_name: node[:inteltxt][:db][:database],
+    db_host: sql_address
   )
-  notifies :restart, "service[apache2]"  
+  notifies :restart, "service[apache2]"
 end
 
 # appraiser will create PrivacyCA only after successful startup
 ruby_block "sleep_after_startup" do
   block do
-    sleep 60 
+    sleep 60
   end
   action :nothing
   not_if { File.exists? "/var/www/OAT/ClientInstallForLinux.zip" }
@@ -310,7 +309,7 @@ bash "prepare_agent" do
     rm -f ${out_dir}.zip
     cp -r -f linuxOatInstall ${out_dir}
     cp OAT_Standalone.jar ${out_dir}/
-    cp -r lib ${out_dir}/ 
+    cp -r lib ${out_dir}/
     cp -r -f /var/lib/oat-appraiser/ClientFiles/PrivacyCA.cer ${out_dir}/
     cp -r -f /var/lib/oat-appraiser/ClientFiles/TrustStore.jks ${out_dir}/
     zip -9 -r ${out_dir}.zip ${out_dir}

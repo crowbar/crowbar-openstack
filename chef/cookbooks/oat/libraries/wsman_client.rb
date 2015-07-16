@@ -1,11 +1,10 @@
 class Wsm
-
 def set_value(key, value, ip, user, password, cert_f)
-        require 'xml'
+        require "xml"
         puts "Setting #{key} to #{value}"
         3.times do |attemp|
           inv_r=%x{wsman invoke -a SetAttribute 'http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/DCIM_BIOSService?SystemCreationClassName=DCIM_ComputerSystem,CreationClassName=DCIM_BIOSService,SystemName=DCIM:ComputerSystem,Name=DCIM:BIOSService' -h #{ip} -P 443 -u #{user} -p '#{password}' -c #{cert_f} -N root/dcim -v -o -j utf-8 -y basic -m 512 -V -k 'Target=BIOS.Setup.1-1' -k 'AttributeName=#{key}' -k 'AttributeValue=#{value}'}
-          return_val=XML::Parser.string(inv_r).parse.find('//n1:ReturnValue').first.content
+          return_val=XML::Parser.string(inv_r).parse.find("//n1:ReturnValue").first.content
           if return_val != "0"
             puts "Command:"
             puts %Q{wsman invoke -a SetAttribute 'http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/DCIM_BIOSService?SystemCreationClassName=DCIM_ComputerSystem,CreationClassName=DCIM_BIOSService,SystemName=DCIM:ComputerSystem,Name=DCIM:BIOSService' -h #{ip} -P 443 -u #{user} -p '#{password}' -c #{cert_f} -N root/dcim -v -o -j utf-8 -y basic -m 512 -V -k 'Target=BIOS.Setup.1-1' -k 'AttributeName=#{key}' -k 'AttributeValue=#{value}'}
@@ -23,7 +22,7 @@ def set_value(key, value, ip, user, password, cert_f)
 end
 
 def check_val(key, value, ip, user, password, cert_f)
-        require 'xml'
+        require "xml"
         3.times do
           begin
             enum_r=%x{wsman enumerate 'http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/root/dcim/DCIM_BIOSEnumeration' -h #{ip} -P 443 -u #{user} -p '#{password}' -c #{cert_f} -N root/dcim -v -o -j utf-8 -y basic -m 512 -V}
@@ -56,8 +55,6 @@ def check_val(key, value, ip, user, password, cert_f)
         end
         return false
 end
-
-
 end
 
 #Xyzzy.new.do_it

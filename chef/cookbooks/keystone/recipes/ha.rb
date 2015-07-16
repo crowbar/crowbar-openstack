@@ -30,7 +30,7 @@ haproxy_loadbalancer "keystone-admin" do
 end.run_action(:create)
 
 ## Pacemaker is only used with native frontend
-if node[:keystone][:frontend] == 'native'
+if node[:keystone][:frontend] == "native"
   proposal_name = node[:keystone][:config][:environment]
   monitor_creds = node[:keystone][:admin]
 
@@ -66,7 +66,7 @@ if node[:keystone][:frontend] == 'native'
   end
 
   crowbar_pacemaker_order_only_existing "o-cl-#{service_name}" do
-    ordering [ "postgresql", "rabbitmq", "cl-#{service_name}" ]
+    ordering ["postgresql", "rabbitmq", "cl-#{service_name}"]
     score "Optional"
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

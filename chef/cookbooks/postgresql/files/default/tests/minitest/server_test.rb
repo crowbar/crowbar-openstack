@@ -14,30 +14,29 @@
 # limitations under the License.
 #
 
-require File.expand_path('../support/helpers', __FILE__)
+require File.expand_path("../support/helpers", __FILE__)
 
-describe 'postgresql::server' do
+describe "postgresql::server" do
   include Helpers::Postgresql
 
-  it 'installs the postgresql server packages' do
-    node['postgresql']['server']['packages'].each do |pkg|
+  it "installs the postgresql server packages" do
+    node["postgresql"]["server"]["packages"].each do |pkg|
       package(pkg).must_be_installed
     end
   end
 
-  it 'runs the postgresql service' do
-    service((node['postgresql']['server']['service_name'] || 'postgresql')).must_be_running
+  it "runs the postgresql service" do
+    service((node["postgresql"]["server"]["service_name"] || "postgresql")).must_be_running
   end
 
-  it 'can connect to postgresql' do
-    require 'pg'
+  it "can connect to postgresql" do
+    require "pg"
     conn = PG::Connection.new(
-                               :host => 'localhost',
-                               :port => '5432',
-                               :password => node['postgresql']['password']['postgres'],
-                               :user => "postgres"
+                               host: "localhost",
+                               port: "5432",
+                               password: node["postgresql"]["password"]["postgres"],
+                               user: "postgres"
                              )
     assert_match(/localhost/, conn.host)
   end
-
 end

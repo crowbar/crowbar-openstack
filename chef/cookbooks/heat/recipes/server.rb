@@ -33,7 +33,7 @@ database "create #{node[:heat][:db][:database]} database" do
 end
 
 database_user "create heat database user" do
-  host '%'
+  host "%"
   connection db_settings[:connection]
   username node[:heat][:db][:user]
   password node[:heat][:db][:password]
@@ -47,7 +47,7 @@ database_user "grant database access for heat database user" do
   username node[:heat][:db][:user]
   password node[:heat][:db][:password]
   database_name node[:heat][:db][:database]
-  host '%'
+  host "%"
   privileges db_settings[:privs]
   provider db_settings[:user_provider]
   action :grant
@@ -97,70 +97,70 @@ db_connection = "#{db_settings[:url_scheme]}://#{node[:heat][:db][:user]}:#{node
 crowbar_pacemaker_sync_mark "wait-heat_register"
 
 keystone_register "heat wakeup keystone" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   action :wakeup
 end
 
 keystone_register "register heat user" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  user_password keystone_settings['service_password']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  user_password keystone_settings["service_password"]
+  tenant_name keystone_settings["service_tenant"]
   action :add_user
 end
 
 keystone_register "give heat user access" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
 
 keystone_register "add heat stack user role" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
   role_name "heat_stack_user"
   action :add_role
 end
 
 keystone_register "add heat stack owner role" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
   role_name "heat_stack_owner"
   action :add_role
 end
 
 keystone_register "give admin access to stack owner role" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['admin_user']
-  tenant_name keystone_settings['default_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["admin_user"]
+  tenant_name keystone_settings["default_tenant"]
   role_name "heat_stack_owner"
   action :add_access
 end
@@ -169,9 +169,8 @@ package "python-openstackclient" do
   action :install
 end
 
-
 stack_user_domain_name = "heat"
-insecure = keystone_settings['insecure'] ? "--insecure" : ""
+insecure = keystone_settings["insecure"] ? "--insecure" : ""
 
 bash "register heat domain" do
   user "root"
@@ -256,22 +255,22 @@ bash "register heat domain" do
     fi
   EOF
   environment ({
-    'OS_USERNAME' => keystone_settings['admin_user'],
-    'OS_PASSWORD' => keystone_settings['admin_password'],
-    'OS_TENANT_NAME' => keystone_settings['admin_tenant'],
-    'OS_AUTH_URL' => "#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3",
-    'OS_REGION_NAME' => keystone_settings['endpoint_region'],
-    'OS_IDENTITY_API_VERSION' => "3"
+    "OS_USERNAME" => keystone_settings["admin_user"],
+    "OS_PASSWORD" => keystone_settings["admin_password"],
+    "OS_TENANT_NAME" => keystone_settings["admin_tenant"],
+    "OS_AUTH_URL" => "#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3",
+    "OS_REGION_NAME" => keystone_settings["endpoint_region"],
+    "OS_IDENTITY_API_VERSION" => "3"
   })
 end
 
 # Create Heat CloudFormation service
 keystone_register "register Heat CloudFormation Service" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   service_name "heat-cfn"
   service_type "cloudformation"
   service_description "Heat CloudFormation Service"
@@ -279,13 +278,13 @@ keystone_register "register Heat CloudFormation Service" do
 end
 
 keystone_register "register heat Cfn endpoint" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   endpoint_service "heat-cfn"
-  endpoint_region keystone_settings['endpoint_region']
+  endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1"
   endpoint_adminURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:cfn_port]}/v1"
   endpoint_internalURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:cfn_port]}/v1"
@@ -296,11 +295,11 @@ end
 
 # Create Heat service
 keystone_register "register Heat Service" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   service_name "heat"
   service_type "orchestration"
   service_description "Heat Service"
@@ -308,13 +307,13 @@ keystone_register "register Heat Service" do
 end
 
 keystone_register "register heat endpoint" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   endpoint_service "heat"
-  endpoint_region keystone_settings['endpoint_region']
+  endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:port]}/v1/$(tenant_id)s"
   endpoint_adminURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:port]}/v1/$(tenant_id)s"
   endpoint_internalURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:port]}/v1/$(tenant_id)s"
@@ -340,30 +339,30 @@ template "/etc/heat/heat.conf" do
   group node[:heat][:group]
   mode "0640"
   variables(
-    :debug => node[:heat][:debug],
-    :verbose => node[:heat][:verbose],
-    :rabbit_settings => fetch_rabbitmq_settings,
-    :keystone_settings => keystone_settings,
-    :database_connection => db_connection,
-    :bind_host => bind_host,
-    :api_port => api_port,
-    :cloud_watch_port => cloud_watch_port,
-    :instance_user => node[:heat][:default_instance_user],
-    :cfn_port => cfn_port,
-    :auth_encryption_key => node[:heat][:auth_encryption_key],
-    :heat_metadata_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
-    :heat_waitcondition_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
-    :heat_watch_server_url => "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}",
-    :stack_user_domain => %x[ #{shell_get_stack_user_domain} ].chomp,
-    :stack_domain_admin => node[:heat]["stack_domain_admin"],
-    :stack_domain_admin_password => node[:heat]["stack_domain_admin_password"]
+    debug: node[:heat][:debug],
+    verbose: node[:heat][:verbose],
+    rabbit_settings: fetch_rabbitmq_settings,
+    keystone_settings: keystone_settings,
+    database_connection: db_connection,
+    bind_host: bind_host,
+    api_port: api_port,
+    cloud_watch_port: cloud_watch_port,
+    instance_user: node[:heat][:default_instance_user],
+    cfn_port: cfn_port,
+    auth_encryption_key: node[:heat][:auth_encryption_key],
+    heat_metadata_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
+    heat_waitcondition_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
+    heat_watch_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}",
+    stack_user_domain: %x[ #{shell_get_stack_user_domain} ].chomp,
+    stack_domain_admin: node[:heat]["stack_domain_admin"],
+    stack_domain_admin_password: node[:heat]["stack_domain_admin_password"]
   )
 end
 
 service "heat-engine" do
   service_name node[:heat][:engine][:service_name]
-  supports :status => true, :restart => true
-  action [ :enable, :start ]
+  supports status: true, restart: true
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
@@ -379,24 +378,24 @@ end
 
 service "heat-api" do
   service_name node[:heat][:api][:service_name]
-  supports :status => true, :restart => true
-  action [ :enable, :start ]
+  supports status: true, restart: true
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service "heat-api-cfn" do
   service_name node[:heat][:api_cfn][:service_name]
-  supports :status => true, :restart => true
-  action [ :enable, :start ]
+  supports status: true, restart: true
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 service "heat-api-cloudwatch" do
   service_name node[:heat][:api_cloudwatch][:service_name]
-  supports :status => true, :restart => true
-  action [ :enable, :start ]
+  supports status: true, restart: true
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/heat/heat.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end

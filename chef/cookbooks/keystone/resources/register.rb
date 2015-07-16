@@ -19,44 +19,44 @@
 
 actions :add_service, :add_endpoint_template, :add_tenant, :add_user, :add_role, :add_access, :add_ec2, :wakeup
 
-attribute :protocol, :kind_of => String
-attribute :insecure, :kind_of => [TrueClass, FalseClass], :default => false
-attribute :host, :kind_of => String
-attribute :port, :kind_of => Integer
-attribute :token, :kind_of => String
+attribute :protocol, kind_of: String
+attribute :insecure, kind_of: [TrueClass, FalseClass], default: false
+attribute :host, kind_of: String
+attribute :port, kind_of: Integer
+attribute :token, kind_of: String
 
 # use tenant name, user name and password. This used now only for ec2 creation
-attribute :auth, :kind_of => Hash
+attribute :auth, kind_of: Hash
 
 # :add_service specific attributes
-attribute :service_name, :kind_of => String
-attribute :service_type, :kind_of => String
-attribute :service_description, :kind_of => String
+attribute :service_name, kind_of: String
+attribute :service_type, kind_of: String
+attribute :service_description, kind_of: String
 
 # :add_endpoint_template specific attributes
-attribute :endpoint_service, :kind_of => String
-attribute :endpoint_region, :kind_of => String
-attribute :endpoint_adminURL, :kind_of => String
-attribute :endpoint_internalURL, :kind_of => String
-attribute :endpoint_publicURL, :kind_of => String
-attribute :endpoint_global, :default => true
-attribute :endpoint_enabled, :default => true
+attribute :endpoint_service, kind_of: String
+attribute :endpoint_region, kind_of: String
+attribute :endpoint_adminURL, kind_of: String
+attribute :endpoint_internalURL, kind_of: String
+attribute :endpoint_publicURL, kind_of: String
+attribute :endpoint_global, default: true
+attribute :endpoint_enabled, default: true
 
 # :add_tenant specific attributes
-attribute :tenant_name, :kind_of => String
+attribute :tenant_name, kind_of: String
 
 # :add_user specific attributes
-attribute :user_name, :kind_of => String
-attribute :user_password, :kind_of => String
+attribute :user_name, kind_of: String
+attribute :user_password, kind_of: String
 
 # :add_role specific attributes
-attribute :role_name, :kind_of => String
+attribute :role_name, kind_of: String
 
 # :add_access specific attributes
-attribute :user_name, :kind_of => String
-attribute :role_name, :kind_of => String
-attribute :tenant_name, :kind_of => String
+attribute :user_name, kind_of: String
+attribute :role_name, kind_of: String
+attribute :tenant_name, kind_of: String
 
 # :add_ec2 specific attributes
-attribute :user_name, :kind_of => String
-attribute :tenant_name, :kind_of => String
+attribute :user_name, kind_of: String
+attribute :tenant_name, kind_of: String

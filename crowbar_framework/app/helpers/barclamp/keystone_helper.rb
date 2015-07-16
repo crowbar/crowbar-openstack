@@ -31,7 +31,7 @@ module Barclamp
     def token_formats_for_keystone(selected)
       options_for_select(
         [
-          ["PKI", "PKI"], 
+          ["PKI", "PKI"],
           ["UUID", "UUID"]
         ],
         selected.to_s

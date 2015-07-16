@@ -8,12 +8,12 @@
 # All rights reserved - Do Not Redistribute
 #
 
-require 'rubygems'
-require 'net/http'
-require 'net/https'
-require 'uri'
+require "rubygems"
+require "net/http"
+require "net/https"
+require "uri"
 #require 'json/pure'
-require 'cgi'
+require "cgi"
 
 # module OAT API Client
 module OATClient
@@ -27,8 +27,8 @@ module OATClient
     @options = options
     @options[:retries] ||= 5
     @options[:wait] ||= 3
-    @headers = { 'Content-Type' => 'application/json', 'Accept' => 'application/json' }
-    @headers['Auth_blob'] = secret if secret
+    @headers = { "Content-Type" => "application/json", "Accept" => "application/json" }
+    @headers["Auth_blob"] = secret if secret
   end
 
   # request API
@@ -42,17 +42,17 @@ module OATClient
     query = options[:query] || {}
     params = options[:params] || {}
     # delete key with nil values
-    query.reject!{|_,value| value.nil? }
+    query.reject!{ |_,value| value.nil? }
 
     # delete key with nil values
-    params.reject!{|_,value| value.nil? }
+    params.reject!{ |_,value| value.nil? }
 
     #puts "\n> #{type.to_s.upcase}: #{path}"
     #puts "> Query: #{query.inspect}"
     #puts "> Params: #{params.inspect}"
     #
     # prepare query with escape values
-    query = (query || {}).collect{|key,value|"#{key.to_s}=#{CGI.escape(value)}"}.join("&")
+    query = (query || {}).collect{ |key,value|"#{key.to_s}=#{CGI.escape(value)}" }.join("&")
 
     @options[:retries].times do |try|
       begin
@@ -152,27 +152,27 @@ module OATClient
     # delete current model
     # @return [True,False]
     def delete
-      OATClient::request(:delete, :path => "/WLMService/resources/os", :query => {
-          :Name => name,
-          :Version => version
+      OATClient::request(:delete, path: "/WLMService/resources/os", query: {
+          Name: name,
+          Version: version
       })
     end
     # save current model
     # @return [True,False]
     def save
       type = (@new_record == true) ? :post : :put
-      OATClient::request(type, :path => "/WLMService/resources/os", :params => {
-          :Name => name,
-          :Version => version,
-          :Description => description
+      OATClient::request(type, path: "/WLMService/resources/os", params: {
+          Name: name,
+          Version: version,
+          Description: description
       })
     end
     # retrieve all OS models from server
     # @return [Array<OATClient::OS>]
     def self.all
-      models = OATClient::request(:get, :path => "/WLMService/resources/os")
+      models = OATClient::request(:get, path: "/WLMService/resources/os")
       models.collect do |item|
-        model = new(:name => item["Name"],:version => item["Version"],:description => item["Description"])
+        model = new(name: item["Name"],version: item["Version"],description: item["Description"])
         model.not_new_model!
         model
       end
@@ -180,7 +180,7 @@ module OATClient
     # exists current model on OAT server?
     # @return [True, False]
     def exists?
-      self.class.search(:name => name).any?
+      self.class.search(name: name).any?
     end
   end
 
@@ -190,9 +190,9 @@ module OATClient
     # retrieve all OS models from server
     # @return [Array<OATClient::OEM>]
     def self.all
-      models = OATClient::request :get, :path => "/WLMService/resources/oem"
+      models = OATClient::request :get, path: "/WLMService/resources/oem"
       models.collect do |item|
-        model = new(:name => item["Name"],:description => item["Description"])
+        model = new(name: item["Name"],description: item["Description"])
         model.not_new_model!
         model
       end
@@ -205,22 +205,22 @@ module OATClient
     # @return [True,False]
     def save
       type = (@new_record == true) ? :post : :put
-      OATClient::request(type, :path => "/WLMService/resources/oem", :params => {
-          :Name => name,
-          :Description => description
+      OATClient::request(type, path: "/WLMService/resources/oem", params: {
+          Name: name,
+          Description: description
       })
     end
     # delete current model
     # @return [True,False]
     def delete
-      OATClient::request(:delete, :path => "/WLMService/resources/oem", :query => {
-          :Name => name
+      OATClient::request(:delete, path: "/WLMService/resources/oem", query: {
+          Name: name
       })
     end
     # exists current model on OAT server?
     # @return [True, False]
     def exists?
-      self.class.search(:name => name).any?
+      self.class.search(name: name).any?
     end
   end
 
@@ -231,41 +231,41 @@ module OATClient
     # @return [True, False]
     def exists?
       self.class.search(
-          :host_name => host_name,
-          :ip_address => ip_address,
-          :port => port,
-          :bios_name => bios_name,
-          :bios_version => bios_version,
-          :bios_oem => bios_oem,
-          :vmm_name => vmm_name,
-          :vmm_version => vmm_version,
-          :vmm_os_name => vmm_os_name,
-          :vmm_os_version => vmm_os_version,
-          :addon_sonnection_string => addon_sonnection_string,
-          :email => email,
-          :location => location).any?
+          host_name: host_name,
+          ip_address: ip_address,
+          port: port,
+          bios_name: bios_name,
+          bios_version: bios_version,
+          bios_oem: bios_oem,
+          vmm_name: vmm_name,
+          vmm_version: vmm_version,
+          vmm_os_name: vmm_os_name,
+          vmm_os_version: vmm_os_version,
+          addon_sonnection_string: addon_sonnection_string,
+          email: email,
+          location: location).any?
     end
 
     # retrieve all OS models from server
     # @return [Array<OATClient::Host>]
     def self.all
-      models = OATClient::request(:get, :path => "/AttestationService/resources/hosts", :query => {:searchCriteria => "?"})
+      models = OATClient::request(:get, path: "/AttestationService/resources/hosts", query: {searchCriteria: "?"})
       models.collect do |item|
         model = new(
-            :host_name => item["HostName"],
-            :ip_address => item["IPAddress"],
-            :port => item["Port"],
-            :bios_name => item["BIOS_Name"],
-            :bios_oem => item["BIOS_Oem"],
-            :bios_version => item["BIOS_Version"],
-            :vmm_name => item["VMM_Name"],
-            :vmm_version => item["VMM_Version"],
-            :vmm_os_name => item["VMM_OSName"],
-            :vmm_os_version => item["VMM_OSVersion"],
-            :addon_sonnection_string => item["AddOn_Connection_String"],
-            :description => item["Description"],
-            :email => item["Email"],
-            :location => item["Location"]
+            host_name: item["HostName"],
+            ip_address: item["IPAddress"],
+            port: item["Port"],
+            bios_name: item["BIOS_Name"],
+            bios_oem: item["BIOS_Oem"],
+            bios_version: item["BIOS_Version"],
+            vmm_name: item["VMM_Name"],
+            vmm_version: item["VMM_Version"],
+            vmm_os_name: item["VMM_OSName"],
+            vmm_os_version: item["VMM_OSVersion"],
+            addon_sonnection_string: item["AddOn_Connection_String"],
+            description: item["Description"],
+            email: item["Email"],
+            location: item["Location"]
         )
         model.not_new_model!
         model
@@ -275,21 +275,21 @@ module OATClient
     # @return [True,False]
     def save
       type = (@new_record == true) ? :post : :put
-      OATClient::request(type, :path =>  "/AttestationService/resources/hosts", :params => {
-          :HostName => host_name,
-          :IPAddress => ip_address,
-          :Port => port,
-          :BIOS_Name => bios_name,
-          :BIOS_Oem => bios_oem,
-          :BIOS_Version => bios_version,
-          :VMM_Name => vmm_name,
-          :VMM_Version => vmm_version,
-          :VMM_OSName => vmm_os_name,
-          :VMM_OSVersion => vmm_os_version,
-          :AddOn_Connection_String => addon_sonnection_string,
-          :Description => description,
-          :Email => email,
-          :Location => location
+      OATClient::request(type, path: "/AttestationService/resources/hosts", params: {
+          HostName: host_name,
+          IPAddress: ip_address,
+          Port: port,
+          BIOS_Name: bios_name,
+          BIOS_Oem: bios_oem,
+          BIOS_Version: bios_version,
+          VMM_Name: vmm_name,
+          VMM_Version: vmm_version,
+          VMM_OSName: vmm_os_name,
+          VMM_OSVersion: vmm_os_version,
+          AddOn_Connection_String: addon_sonnection_string,
+          Description: description,
+          Email: email,
+          Location: location
       })
     end
     # search models by params
@@ -299,8 +299,8 @@ module OATClient
     # delete current model
     # @return [True,False]
     def delete
-      OATClient::request(:delete, :path =>   "/AttestationService/resources/hosts", :query => {
-          :hostName => host_name
+      OATClient::request(:delete, path: "/AttestationService/resources/hosts", query: {
+          hostName: host_name
       })
     end
   end
@@ -312,38 +312,37 @@ module OATClient
     # @return [True, False]
     def exists?
       self.class.search(
-          :name => name,
-          :version => version,
-          :os_name => os_name,
-          :os_version => os_version,
-          :attestation_type => attestation_type,
-          :mle_type => mle_type,
-          :oem_name => oem_name
+          name: name,
+          version: version,
+          os_name: os_name,
+          os_version: os_version,
+          attestation_type: attestation_type,
+          mle_type: mle_type,
+          oem_name: oem_name
       ).any?
     end
-
 
     # retrieve all OS models from server
     # @return [Array<OATClient::MLE>]
     def self.all
-      models = OATClient::request(:get, :path => "/WLMService/resources/mles", :query => {:searchCriteria => ""})
+      models = OATClient::request(:get, path: "/WLMService/resources/mles", query: {searchCriteria: ""})
       models.collect do |item|
         model = new(
-            :name => item["Name"],
-            :version => item["Version"],
-            :os_name => item["OsName"],
-            :os_version => item["OsVersion"],
-            :attestation_type => item["Attestation_Type"],
-            :mle_type => item["MLE_Type"],
-            :description => item["Description"],
-            :oem_name => item["OemName"]
+            name: item["Name"],
+            version: item["Version"],
+            os_name: item["OsName"],
+            os_version: item["OsVersion"],
+            attestation_type: item["Attestation_Type"],
+            mle_type: item["MLE_Type"],
+            description: item["Description"],
+            oem_name: item["OemName"]
         )
         if item["MLE_Manifests"]
           item["MLE_Manifests"] = [item["MLE_Manifests"]] if item["MLE_Manifests"].kind_of? Hash
           model.manifests = item["MLE_Manifests"].collect do |manifest|
             MLE::Manifest.new(
-                :name => manifest["Name"],
-                :value => manifest["Value"].strip
+                name: manifest["Name"],
+                value: manifest["Value"].strip
             )
           end
         else
@@ -357,28 +356,28 @@ module OATClient
     # @return [True,False]
     def save
       type = (@new_record == true) ? :post : :put
-      OATClient::request(type, :path => "/WLMService/resources/mles", :params => {
-          :Name => name,
-          :Version => version,
-          :OsName => os_name,
-          :OsVersion => os_version,
-          :Attestation_Type => attestation_type,
-          :MLE_Type => mle_type,
-          :Description => description,
-          :OemName => oem_name,
-          :MLE_Manifests => (manifests ? manifests.collect {|manifest| { :Name => manifest.name, :Value => manifest.value } } : nil)
+      OATClient::request(type, path: "/WLMService/resources/mles", params: {
+          Name: name,
+          Version: version,
+          OsName: os_name,
+          OsVersion: os_version,
+          Attestation_Type: attestation_type,
+          MLE_Type: mle_type,
+          Description: description,
+          OemName: oem_name,
+          MLE_Manifests: (manifests ? manifests.collect { |manifest| { Name: manifest.name, Value: manifest.value } } : nil)
       })
     end
     # delete current model
     # @return [True,False]
     def delete
       #TODO: Fix too late. OAT server cant delete entry with error: {"error_code":"1007","error_message":"WLM Service Error - MLE not found in attestation data to delete"}
-      OATClient::request(:delete, :path =>   "/WLMService/resources/mles", :query => {
-          :mleName => name,
-          :mleVersion => version,
-          :oemName => oem_name,
-          :osName => os_name,
-          :osVersion => os_version,
+      OATClient::request(:delete, path: "/WLMService/resources/mles", query: {
+          mleName: name,
+          mleVersion: version,
+          oemName: oem_name,
+          osName: os_name,
+          osVersion: os_version
       })
     end
     # search models by params

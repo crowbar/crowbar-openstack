@@ -43,16 +43,16 @@ if node[:nova][:use_novnc]
   end
   service "nova-novncproxy" do
     service_name "openstack-nova-novncproxy" if %w(redhat centos suse).include?(node.platform)
-    supports :status => true, :restart => true
+    supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(:template => "/etc/nova/nova.conf"), :delayed
+    subscribes :restart, resources(template: "/etc/nova/nova.conf"), :delayed
     provider Chef::Provider::CrowbarPacemakerService if node[:nova][:ha][:enabled]
   end
 end
 service "nova-consoleauth" do
   service_name "openstack-nova-consoleauth" if %w(redhat centos suse).include?(node.platform)
-  supports :status => true, :restart => true
+  supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources(:template => "/etc/nova/nova.conf"), :delayed
+  subscribes :restart, resources(template: "/etc/nova/nova.conf"), :delayed
   provider Chef::Provider::CrowbarPacemakerService if node[:nova][:ha][:enabled]
 end

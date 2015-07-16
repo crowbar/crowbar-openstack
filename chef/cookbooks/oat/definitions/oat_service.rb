@@ -1,5 +1,4 @@
 define :oat_service do
-
   oat_name="oat-#{params[:name]}"
 
   service oat_name do
@@ -9,9 +8,8 @@ define :oat_service do
       start_command "start #{oat_name}"
       status_command "status #{oat_name} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
     end
-    supports :status => true, :restart => true
+    supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(:template => node[:inteltxt][:config_file])
+    subscribes :restart, resources(template: node[:inteltxt][:config_file])
   end
-
 end

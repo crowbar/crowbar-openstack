@@ -18,8 +18,8 @@
 # limitations under the License.
 #
 
-require File.join(File.dirname(__FILE__), 'resource_database_user')
-require File.join(File.dirname(__FILE__), 'provider_database_postgresql_user')
+require File.join(File.dirname(__FILE__), "resource_database_user")
+require File.join(File.dirname(__FILE__), "provider_database_postgresql_user")
 
 class Chef
   class Resource
@@ -36,7 +36,7 @@ class Chef
         set_or_return(
           :schema_name,
           arg,
-          :kind_of => String
+          kind_of: String
         )
       end
     end

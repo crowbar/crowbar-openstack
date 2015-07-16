@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-define :nova_package, :enable => true, :use_pacemaker_provider => false do
-
+define :nova_package, enable: true, use_pacemaker_provider: false do
   nova_name="nova-#{params[:name]}"
 
   package nova_name do
@@ -29,7 +28,7 @@ define :nova_package, :enable => true, :use_pacemaker_provider => false do
       start_command "start #{nova_name}"
       status_command "status #{nova_name} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
     end
-    supports :status => true, :restart => true
+    supports status: true, restart: true
 
     if params[:enable] != false
       # only enable and start the service, unless a reboot has been triggered
@@ -49,9 +48,8 @@ define :nova_package, :enable => true, :use_pacemaker_provider => false do
       end
     end
 
-    subscribes :restart, resources(:template => "/etc/nova/nova.conf")
+    subscribes :restart, resources(template: "/etc/nova/nova.conf")
 
     provider Chef::Provider::CrowbarPacemakerService if params[:use_pacemaker_provider]
   end
-
 end

@@ -2,7 +2,7 @@ node[:neutron][:platform][:cisco_pkgs].each { |p| package p }
 
 neutron = node
 
-if neutron[:neutron][:ml2_type_drivers].include? 'vlan'
+if neutron[:neutron][:ml2_type_drivers].include? "vlan"
   vlan_mode = true
 else
   vlan_mode = false
@@ -20,8 +20,8 @@ template "/etc/neutron/plugins/ml2/ml2_conf_cisco.ini" do
   owner "root"
   group node[:neutron][:platform][:group]
   variables(
-    :switches => switches,
-    :vlan_mode => vlan_mode
+    switches: switches,
+    vlan_mode: vlan_mode
   )
   notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
 end
@@ -31,7 +31,7 @@ switches.keys.each do |ip|
   ssh_keys << `ssh-keyscan #{ip} 2> /dev/null`
 end
 
-homedir = `getent passwd #{node[:neutron][:platform][:user]}`.split(':')[5]
+homedir = `getent passwd #{node[:neutron][:platform][:user]}`.split(":")[5]
 
 directory "#{homedir}/.ssh" do
   mode 0700
@@ -44,6 +44,6 @@ template "#{homedir}/.ssh/known_hosts" do
   mode "0640"
   owner node[:neutron][:platform][:user]
   variables(
-    :host_keys => ssh_keys
+    host_keys: ssh_keys
   )
 end

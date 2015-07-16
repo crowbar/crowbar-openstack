@@ -16,7 +16,6 @@
 #
 
 class CinderController < BarclampController
-
   protected
 
   def initialize_service

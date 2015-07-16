@@ -16,7 +16,6 @@
 #
 
 class DatabaseController < BarclampController
-
   protected
 
   def initialize_service

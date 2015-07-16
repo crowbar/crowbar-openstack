@@ -21,12 +21,12 @@ class SwiftController < BarclampController
 
   def dashboard
     @reports = reports_list
-    render :template => "barclamp/#{@bc_name}/dashboard"
+    render template: "barclamp/#{@bc_name}/dashboard"
   end
 
   def clear
     @service_object.clear_dispersion_reports
-    redirect_to swift_dashboard_path, :notice => I18n.t("barclamp.swift.clear.success")
+    redirect_to swift_dashboard_path, notice: I18n.t("barclamp.swift.clear.success")
   end
 
   def create
@@ -35,18 +35,18 @@ class SwiftController < BarclampController
 
       begin
         report = @service_object.run_report params[:node]
-        flash[:notice] = I18n.t("barclamp.swift.run.success", :node => params[:node])
+        flash[:notice] = I18n.t("barclamp.swift.run.success", node: params[:node])
       rescue SwiftService::ServiceError => error
-        flash[:notice] = I18n.t("barclamp.swift.run.failure", :node => params[:node], :error => error)
+        flash[:notice] = I18n.t("barclamp.swift.run.failure", node: params[:node], error: error)
       end
 
       if request.xhr?
-        render :text => swift_show_report_path(:id => report["uuid"])
+        render text: swift_show_report_path(id: report["uuid"])
       else
         redirect_to swift_dashboard_path
       end
     else
-      redirect_to swift_dashboard_path, :alert => I18n.t("barclamp.swift.run.no_node")
+      redirect_to swift_dashboard_path, alert: I18n.t("barclamp.swift.run.no_node")
     end
   end
 
@@ -57,8 +57,8 @@ class SwiftController < BarclampController
     generate_for(@report)
 
     respond_to do |format|
-      format.html { render :template => "barclamp/swift/results" }
-      format.json { render :file => Rails.root.join(@report["results.json"]) }
+      format.html { render template: "barclamp/swift/results" }
+      format.json { render file: Rails.root.join(@report["results.json"]) }
     end
   end
 
@@ -77,9 +77,9 @@ class SwiftController < BarclampController
       File.open(Rails.root.join(report["results.html"]), "w") do |out|
         out.write(
           render_to_string(
-            :template => "barclamp/swift/_results.html",
-            :layout => false,
-            :locals => { :json => json }
+            template: "barclamp/swift/_results.html",
+            layout: false,
+            locals: { json: json }
           )
         )
       end

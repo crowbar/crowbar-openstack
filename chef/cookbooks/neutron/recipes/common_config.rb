@@ -61,16 +61,14 @@ if %w(redhat centos).include?(node.platform)
   end
 end
 
-
 template neutron[:neutron][:platform][:neutron_rootwrap_sudo_template] do
   cookbook "neutron"
   source "neutron-rootwrap.erb"
   mode 0440
-  variables(:user => neutron[:neutron][:platform][:user],
-            :binary => "/usr/bin/neutron-rootwrap")
+  variables(user: neutron[:neutron][:platform][:user],
+            binary: "/usr/bin/neutron-rootwrap")
   not_if { node.platform == "suse" }
 end
-
 
 keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
@@ -89,14 +87,14 @@ nova_notify = {}
 unless nova[:nova].nil? or nova[:nova][:ssl].nil?
   nova_api_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
   nova_api_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
-  nova_insecure = keystone_settings['insecure'] || (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure])
+  nova_insecure = keystone_settings["insecure"] || (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure])
 
   nova_notify = {
-    :nova_url => "#{nova_api_protocol}://#{nova_api_host}:#{nova[:nova][:ports][:api]}/v2",
-    :nova_insecure => nova_insecure,
-    :nova_admin_username => nova[:nova][:service_user],
-    :nova_admin_tenant_id => keystone_settings['service_tenant_id'],
-    :nova_admin_password => nova[:nova][:service_password]
+    nova_url: "#{nova_api_protocol}://#{nova_api_host}:#{nova[:nova][:ports][:api]}/v2",
+    nova_insecure: nova_insecure,
+    nova_admin_username: nova[:nova][:service_user],
+    nova_admin_tenant_id: keystone_settings["service_tenant_id"],
+    nova_admin_password: nova[:nova][:service_password]
   }
 end
 
@@ -118,30 +116,30 @@ template "/etc/neutron/neutron.conf" do
     owner "root"
     group neutron[:neutron][:platform][:group]
     variables({
-      :sql_connection => neutron[:neutron][:db][:sql_connection],
-      :sql_min_pool_size => neutron[:neutron][:sql][:min_pool_size],
-      :sql_max_pool_overflow => neutron[:neutron][:sql][:max_pool_overflow],
-      :sql_pool_timeout => neutron[:neutron][:sql][:pool_timeout],
-      :debug => neutron[:neutron][:debug],
-      :verbose => neutron[:neutron][:verbose],
-      :bind_host => bind_host,
-      :bind_port => bind_port,
-      :use_syslog => neutron[:neutron][:use_syslog],
+      sql_connection: neutron[:neutron][:db][:sql_connection],
+      sql_min_pool_size: neutron[:neutron][:sql][:min_pool_size],
+      sql_max_pool_overflow: neutron[:neutron][:sql][:max_pool_overflow],
+      sql_pool_timeout: neutron[:neutron][:sql][:pool_timeout],
+      debug: neutron[:neutron][:debug],
+      verbose: neutron[:neutron][:verbose],
+      bind_host: bind_host,
+      bind_port: bind_port,
+      use_syslog: neutron[:neutron][:use_syslog],
       # Note that we don't uset fetch_rabbitmq_settings, as we want to run the
       # query on the "neutron" node, not on "node"
-      :rabbit_settings => CrowbarOpenStackHelper.rabbitmq_settings(neutron, "neutron"),
-      :keystone_settings => keystone_settings,
-      :ssl_enabled => neutron[:neutron][:api][:protocol] == 'https',
-      :ssl_cert_file => neutron[:neutron][:ssl][:certfile],
-      :ssl_key_file => neutron[:neutron][:ssl][:keyfile],
-      :ssl_cert_required => neutron[:neutron][:ssl][:cert_required],
-      :ssl_ca_file => neutron[:neutron][:ssl][:ca_certs],
-      :core_plugin => neutron[:neutron][:networking_plugin],
-      :service_plugins => service_plugins,
-      :use_namespaces => true,
-      :allow_overlapping_ips => neutron[:neutron][:allow_overlapping_ips],
-      :dvr_enabled => neutron[:neutron][:use_dvr],
-      :network_nodes_count => network_nodes_count
+      rabbit_settings: CrowbarOpenStackHelper.rabbitmq_settings(neutron, "neutron"),
+      keystone_settings: keystone_settings,
+      ssl_enabled: neutron[:neutron][:api][:protocol] == "https",
+      ssl_cert_file: neutron[:neutron][:ssl][:certfile],
+      ssl_key_file: neutron[:neutron][:ssl][:keyfile],
+      ssl_cert_required: neutron[:neutron][:ssl][:cert_required],
+      ssl_ca_file: neutron[:neutron][:ssl][:ca_certs],
+      core_plugin: neutron[:neutron][:networking_plugin],
+      service_plugins: service_plugins,
+      use_namespaces: true,
+      allow_overlapping_ips: neutron[:neutron][:allow_overlapping_ips],
+      dvr_enabled: neutron[:neutron][:use_dvr],
+      network_nodes_count: network_nodes_count
     }.merge(nova_notify))
 end
 

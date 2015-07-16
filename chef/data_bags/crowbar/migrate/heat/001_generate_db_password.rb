@@ -12,13 +12,13 @@ def upgrade ta, td, a, d
       unless node[:heat][:db][:password].empty?
         @@heat_db_password = node[:heat][:db][:password]
       end
-      node[:heat][:db].delete('password')
+      node[:heat][:db].delete("password")
       node.save
     end
   end
 
-  if a['db']['password'].nil? || a['db']['password'].empty?
-    a['db']['password'] = @@heat_db_password
+  if a["db"]["password"].nil? || a["db"]["password"].empty?
+    a["db"]["password"] = @@heat_db_password
   end
 
   return a, d

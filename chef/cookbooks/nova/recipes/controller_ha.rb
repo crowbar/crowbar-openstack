@@ -22,7 +22,7 @@ log "HA support for nova is enabled"
 
 cluster_vhostname = CrowbarPacemakerHelper.cluster_vhostname(node)
 
-admin_net_db = Chef::DataBagItem.load('crowbar', 'admin_network').raw_data
+admin_net_db = Chef::DataBagItem.load("crowbar", "admin_network").raw_data
 cluster_admin_ip = admin_net_db["allocated_by_name"]["#{cluster_vhostname}.#{node[:domain]}"]["address"]
 
 haproxy_loadbalancer "nova-api" do
@@ -124,7 +124,7 @@ pacemaker_clone "cl-#{group_name}" do
 end
 
 crowbar_pacemaker_order_only_existing "o-cl-#{group_name}" do
-  ordering [ "postgresql", "rabbitmq", "cl-keystone", "cl-#{group_name}" ]
+  ordering ["postgresql", "rabbitmq", "cl-keystone", "cl-#{group_name}"]
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

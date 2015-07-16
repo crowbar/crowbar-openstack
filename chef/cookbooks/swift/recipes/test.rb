@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require 'rubygems'
-require 'json'
-require 'net/http'
+require "rubygems"
+require "json"
+require "net/http"
 
-
-t = <<END 
+t = <<END
 {
   "id": "bc-template-swift",
   "description": "The default proposal for swift",
@@ -25,7 +24,7 @@ t = <<END
     "swift": {
     "cluster_hash": "fa8bea159b55bd7e",
     "cluster_admin_pw": "swauth",
-    "replicas": "1"   
+    "replicas": "1"
     }
   },
   "deployment": {
@@ -47,7 +46,6 @@ t = <<END
 }
 END
 
-
 JSON.parse(t)
 
 def _eval(s,h)
@@ -55,7 +53,7 @@ def _eval(s,h)
   @b.eval(s)
 end
 
-s = 'local_variables.each { |v| puts v }; global_variables.each { |g| puts g} '
+s = "local_variables.each { |v| puts v }; global_variables.each { |g| puts g} "
 
-puts _eval(s,:a =>'foo', :b=>'c')
+puts _eval(s,a: "foo", b: "c")
 

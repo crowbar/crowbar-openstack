@@ -55,8 +55,8 @@ rabbitmq_op = {}
 rabbitmq_op["monitor"] = {}
 rabbitmq_op["monitor"]["interval"] = "10s"
 
-# Wait for all "rabbitmq" nodes to reach this point so we know that 
-# they will have all the required packages installed and configuration 
+# Wait for all "rabbitmq" nodes to reach this point so we know that
+# they will have all the required packages installed and configuration
 # files updated before we create the pacemaker resources.
 crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha_storage"
 
@@ -190,7 +190,7 @@ end
 # mounted; this is needed so we can change its ownership
 ruby_block "wait for #{fs_primitive} to be started" do
   block do
-    require 'timeout'
+    require "timeout"
     begin
       Timeout.timeout(20) do
         # Check that the fs resource is running
@@ -236,7 +236,7 @@ crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources"
 # can't start)
 ruby_block "wait for rabbitmq vhostname" do
   block do
-    require 'timeout'
+    require "timeout"
     begin
       Timeout.timeout(120) do
         while ! ::Kernel.system("host #{vhostname} &> /dev/null")
@@ -255,7 +255,7 @@ end # ruby_block
 pacemaker_primitive admin_vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
   params ({
-    "ip" => admin_ip_addr,
+    "ip" => admin_ip_addr
   })
   op rabbitmq_op
   action :create
@@ -265,7 +265,7 @@ if node[:rabbitmq][:listen_public]
   pacemaker_primitive public_vip_primitive do
     agent "ocf:heartbeat:IPaddr2"
     params ({
-      "ip" => public_ip_addr,
+      "ip" => public_ip_addr
     })
     op rabbitmq_op
     action :create
@@ -278,13 +278,13 @@ end
 pacemaker_primitive service_name do
   agent agent_name
   params ({
-    "nodename" => node[:rabbitmq][:nodename],
+    "nodename" => node[:rabbitmq][:nodename]
   })
   op rabbitmq_op
   action :create
 end
 
-dependencies = [ fs_primitive, admin_vip_primitive ]
+dependencies = [fs_primitive, admin_vip_primitive]
 if node[:rabbitmq][:listen_public]
   dependencies << public_vip_primitive
 end
@@ -324,7 +324,7 @@ else
     # Membership order *is* significant; VIPs should come first so
     # that they are available for the service to bind to.
     members primitives
-    action [ :create, :start ]
+    action [:create, :start]
   end
 
 end
@@ -344,7 +344,7 @@ crowbar_pacemaker_sync_mark "create-rabbitmq_ha_resources"
 # resources
 ruby_block "wait for #{service_name} to be started" do
   block do
-    require 'timeout'
+    require "timeout"
     begin
       Timeout.timeout(30) do
         # Check that the service is running

@@ -20,9 +20,9 @@
 actions :create, :delete
 default_action :create
 
-attribute :display_name, :kind_of => String, :name_attribute => true
-attribute :nsx_controller, :kind_of => Hash, :required => true
-attribute :transport_connectors, :kind_of => [Array, Hash], :default => []
+attribute :display_name, kind_of: String, name_attribute: true
+attribute :nsx_controller, kind_of: Hash, required: true
+attribute :transport_connectors, kind_of: [Array, Hash], default: []
 #  E.g.
 #  [
 #     {
@@ -32,11 +32,11 @@ attribute :transport_connectors, :kind_of => [Array, Hash], :default => []
 #     }
 #  ]
 
-attribute :integration_bridge_id, :kind_of => String, :required => true
-attribute :client_pem, :kind_of => String #, :required => true
-attribute :client_pem_file, :kind_of => String
-attribute :tunnel_probe_random_vlan, :kind_of => [TrueClass, FalseClass], :default => false
-attribute :uuid, :kind_of => String, :required => false # remember what to update/delete
-attribute :exists, :kind_of => [TrueClass, FalseClass], :default => false
+attribute :integration_bridge_id, kind_of: String, required: true
+attribute :client_pem, kind_of: String #, :required => true
+attribute :client_pem_file, kind_of: String
+attribute :tunnel_probe_random_vlan, kind_of: [TrueClass, FalseClass], default: false
+attribute :uuid, kind_of: String, required: false # remember what to update/delete
+attribute :exists, kind_of: [TrueClass, FalseClass], default: false
 
 attr_accessor :exists, :uuid

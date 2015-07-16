@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-require 'chef/provider'
+require "chef/provider"
 
 class Chef
   class Provider
@@ -26,7 +26,7 @@ class Chef
 
         def load_current_resource
           Gem.clear_paths
-          require 'mysql'
+          require "mysql"
           @current_resource = Chef::Resource::Database.new(@new_resource.name)
           @current_resource.database_name(@new_resource.database_name)
           @current_resource
@@ -75,7 +75,7 @@ class Chef
         end
 
         private
-        
+
         def exists?
           db.list_dbs.include?(@new_resource.database_name)
         end

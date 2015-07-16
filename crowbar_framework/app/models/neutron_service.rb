@@ -15,10 +15,9 @@
 # limitations under the License.
 #
 
-require 'ipaddr'
+require "ipaddr"
 
 class NeutronService < PacemakerServiceObject
-
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "neutron"
@@ -88,10 +87,10 @@ class NeutronService < PacemakerServiceObject
     controller_node ||= nodes.first
 
     network_nodes = nodes.select { |n| n.intended_role == "network" }
-    network_nodes = [ controller_node ] if network_nodes.empty?
+    network_nodes = [controller_node] if network_nodes.empty?
 
     base["deployment"]["neutron"]["elements"] = {
-        "neutron-server" => [ controller_node[:fqdn] ],
+        "neutron-server" => [controller_node[:fqdn]],
         "neutron-network" => network_nodes.map { |x| x[:fqdn] }
     } unless nodes.nil? or nodes.length ==0
 
@@ -138,7 +137,7 @@ class NeutronService < PacemakerServiceObject
       rescue ArgumentError
         validation_error("Multicast group for VXLAN broadcast emulation #{mcast_group} is not a valid IP address")
       end
-      mcast_first = mcast_group.split('.')[0].to_i
+      mcast_first = mcast_group.split(".")[0].to_i
       if mcast_first < 224 || mcast_first > 239
         validation_error("Multicast group for VXLAN broadcast emulation #{mcast_group} is not a valid multicast IP address")
       end
@@ -159,12 +158,12 @@ class NeutronService < PacemakerServiceObject
     ml2_mechanism_drivers_valid = NeutronService.networking_ml2_mechanism_drivers_valid
 
     # at least one ml2 type driver must be selected for ml2 as core plugin
-    if plugin == 'ml2' && ml2_type_drivers.length == 0
+    if plugin == "ml2" && ml2_type_drivers.length == 0
       validation_error("At least one ml2 type driver must be selected")
     end
 
     # at least one ml2 mech driver must be selected for ml2 as core plugin
-    if plugin == 'ml2' && ml2_mechanism_drivers.length == 0
+    if plugin == "ml2" && ml2_mechanism_drivers.length == 0
       validation_error("At least one ml2 mechanism driver must be selected")
     end
 
@@ -194,18 +193,18 @@ class NeutronService < PacemakerServiceObject
       validation_error("The default tenant network type driver \"#{ml2_type_drivers_default_tenant_network}\" is not a selected ml2 type driver")
     end
 
-    if ml2_type_drivers.include? 'gre'
+    if ml2_type_drivers.include? "gre"
       validate_gre proposal["attributes"]["neutron"]["gre"]
     end
 
-    if ml2_type_drivers.include? 'vxlan'
+    if ml2_type_drivers.include? "vxlan"
       validate_vxlan proposal["attributes"]["neutron"]["vxlan"]
     end
 
     # linuxbridge and cisco_nexus mech drivers need vlan type driver
     # TODO(toabctl): select vlan type driver automatically if linuxbridge or cisco were selected!?
     %w(linuxbridge cisco_nexus).each do |drv|
-      if ml2_mechanism_drivers.include? drv and not ml2_type_drivers.include? 'vlan'
+      if ml2_mechanism_drivers.include? drv and not ml2_type_drivers.include? "vlan"
         validation_error("The mechanism driver \"#{drv}\" needs the type driver \"vlan\"")
       end
     end
@@ -221,14 +220,14 @@ class NeutronService < PacemakerServiceObject
     end
 
     if proposal["attributes"]["neutron"]["use_l2pop"]
-      unless ml2_type_drivers.include?('gre') || ml2_type_drivers.include?('vxlan')
+      unless ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
         validation_error("L2 population requires GRE and/or VXLAN")
       end
     end
 
     if proposal["attributes"]["neutron"]["use_dvr"]
       if !ml2_mechanism_drivers.include?("openvswitch") ||
-         (!ml2_type_drivers.include?('gre') && !ml2_type_drivers.include?('vxlan'))
+         (!ml2_type_drivers.include?("gre") && !ml2_type_drivers.include?("vxlan"))
         validation_error("DVR can only be used with openvswitch and gre/vxlan")
       end
 
@@ -302,5 +301,4 @@ class NeutronService < PacemakerServiceObject
     end
     @logger.debug("Neutron apply_role_pre_chef_call: leaving")
   end
-
 end

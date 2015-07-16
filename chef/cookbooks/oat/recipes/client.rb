@@ -7,7 +7,6 @@
 tpm_active = File.exist?("/sys/class/misc/tpm0/device/active") ? File.read("/sys/class/misc/tpm0/device/active").to_i : 0
 tpm_enabled = File.exist?("/sys/class/misc/tpm0/device/enabled") ? File.read("/sys/class/misc/tpm0/device/enabled").to_i : 0
 
-
 #NOTE: assumed that server exists
 oat_server =( search(:node, "roles:oat-server") || [] ).first
 
@@ -27,14 +26,12 @@ end
 include_recipe "oat::reboot"
 #end
 
-
 package "trousers"
 package "unzip"
 package "default-jre-headless"
 
-
 service "trousers" do
-  supports :status => true, :restart => true
+  supports status: true, restart: true
   action [:enable, :start]
 end
 
@@ -80,9 +77,9 @@ end
 template "/tmp/#{contain}/OAT.properties" do
   source "OAT_agent.properties.erb"
   variables(
-    :source => source,
-    :keyauth => node[:inteltxt][:owner_auth],
-    :keyindex => "1"
+    source: source,
+    keyauth: node[:inteltxt][:owner_auth],
+    keyindex: "1"
   )
   not_if { ::File.exists?("/etc/init.d/OATClient") }
 end
@@ -90,14 +87,13 @@ end
 template "/tmp/#{contain}/OATprovisioner.properties" do
   source "OATprovisioner.properties.erb"
   variables(
-    :keyauth => node[:inteltxt][:owner_auth],
-    :keyindex => 1,
-    :source => source,
-    :clientpath => clientpath
+    keyauth: node[:inteltxt][:owner_auth],
+    keyindex: 1,
+    source: source,
+    clientpath: clientpath
   )
   not_if { ::File.exists?("/etc/init.d/OATClient") }
 end
-
 
 execute "provisioning_node" do
   cwd "/tmp/"
@@ -145,26 +141,23 @@ template "/etc/init.d/OATClient" do
   mode 0755
   source "OATClient.erb"
   variables(
-    :clientpath => clientpath
+    clientpath: clientpath
   )
 end
-
-
 
 template "#{clientpath}/OAT.properties" do
   source "OAT_agent.properties.erb"
   variables(
-    :source => source,
-    :keyauth => node[:inteltxt][:owner_auth],
-    :keyindex => 1
+    source: source,
+    keyauth: node[:inteltxt][:owner_auth],
+    keyindex: 1
   )
 end
 
-
 service "OATClient" do
-  supports :status => true, :restart => true
+  supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources(:template => "/etc/init.d/OATClient")
-  subscribes :restart, resources(:template => "#{clientpath}/OAT.properties")
+  subscribes :restart, resources(template: "/etc/init.d/OATClient")
+  subscribes :restart, resources(template: "#{clientpath}/OAT.properties")
 end
 

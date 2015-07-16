@@ -35,8 +35,8 @@ postgres_op = {}
 postgres_op["monitor"] = {}
 postgres_op["monitor"]["interval"] = "10s"
 
-# Wait for all "database" nodes to reach this point so we know that 
-# they will have all the required packages installed and configuration 
+# Wait for all "database" nodes to reach this point so we know that
+# they will have all the required packages installed and configuration
 # files updated before we create the pacemaker resources.
 crowbar_pacemaker_sync_mark "sync-database_before_ha" do
   revision node[:database]["crowbar-revision"]
@@ -50,7 +50,7 @@ end
 pacemaker_primitive vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
   params ({
-    "ip" => ip_addr,
+    "ip" => ip_addr
   })
   op postgres_op
   action :create
@@ -110,7 +110,7 @@ else
     # Membership order *is* significant; VIPs should come first so
     # that they are available for the service to bind to.
     members [fs_primitive, vip_primitive, service_name]
-    action [ :create, :start ]
+    action [:create, :start]
   end
 
 end
@@ -123,7 +123,7 @@ end
 # will then need the database to be ready to answer queries)
 ruby_block "wait for #{service_name} to be started" do
   block do
-    require 'timeout'
+    require "timeout"
     begin
       Timeout.timeout(20) do
         # Check that the service is running

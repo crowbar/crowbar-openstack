@@ -30,8 +30,8 @@ def downgrade ta, td, a, d
   a["volume"]["netapp"]["netapp_wsdl_url"] = ta["volume"]["netapp"]["netapp_wsdl_url"]
   a["volume"]["netapp"]["netapp_storage_service"] = ta["volume"]["netapp"]["netapp_storage_service"]
   a["volume"]["netapp"]["netapp_storage_service_prefix"] = ta["volume"]["netapp"]["netapp_storage_service_prefix"]
-  a["volume"]["netapp"].delete('storage_family')
-  a["volume"]["netapp"].delete('storage_protocol')
-  a["volume"]["netapp"].delete('vserver')
+  a["volume"]["netapp"].delete("storage_family")
+  a["volume"]["netapp"].delete("storage_protocol")
+  a["volume"]["netapp"].delete("vserver")
   return a, d
 end

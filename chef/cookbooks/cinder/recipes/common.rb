@@ -16,7 +16,6 @@
 # Recipe:: common
 #
 
-
 unless %w(redhat centos suse).include? node.platform
   package "cinder-common"
   package "python-mysqldb"
@@ -34,7 +33,7 @@ if glance_servers.length > 0
   glance_server_host = CrowbarHelper.get_host_for_admin_url(glance_server, (glance_server[:glance][:ha][:enabled] rescue false))
   glance_server_protocol = glance_server[:glance][:api][:protocol]
   glance_server_port = glance_server[:glance][:api][:bind_port]
-  glance_server_insecure = glance_server_protocol == 'https' && glance_server[:glance][:ssl][:insecure]
+  glance_server_insecure = glance_server_protocol == "https" && glance_server[:glance][:ssl][:insecure]
 else
   glance_server_host = nil
   glance_server_port = nil
@@ -57,7 +56,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-db_password = ''
+db_password = ""
 if node.roles.include? "cinder-controller"
   db_password = node[:cinder][:db][:password]
 else
@@ -75,7 +74,7 @@ node[:cinder][:api][:bind_host] = my_ipaddress
 
 node[:cinder][:my_ip] = my_ipaddress
 
-if node[:cinder][:api][:protocol] == 'https'
+if node[:cinder][:api][:protocol] == "https"
   if node[:cinder][:ssl][:generate_certs]
     package "openssl"
     ruby_block "generate_certs for cinder" do
@@ -162,21 +161,21 @@ template "/etc/cinder/cinder.conf" do
   group node[:cinder][:group]
   mode 0640
   variables(
-    :bind_host => bind_host,
-    :bind_port => bind_port,
-    :use_multi_backend => node[:cinder][:use_multi_backend],
-    :volumes => node[:cinder][:volumes],
-    :sql_connection => sql_connection,
-    :rabbit_settings => fetch_rabbitmq_settings,
-    :glance_server_protocol => glance_server_protocol,
-    :glance_server_host => glance_server_host,
-    :glance_server_port => glance_server_port,
-    :glance_server_insecure => glance_server_insecure,
-    :nova_api_insecure => nova_api_insecure,
-    :availability_zone => availability_zone,
-    :keystone_settings => KeystoneHelper.keystone_settings(node, :cinder),
-    :strict_ssh_host_key_policy => node[:cinder][:strict_ssh_host_key_policy],
-    :default_availability_zone => node[:cinder][:default_availability_zone]
+    bind_host: bind_host,
+    bind_port: bind_port,
+    use_multi_backend: node[:cinder][:use_multi_backend],
+    volumes: node[:cinder][:volumes],
+    sql_connection: sql_connection,
+    rabbit_settings: fetch_rabbitmq_settings,
+    glance_server_protocol: glance_server_protocol,
+    glance_server_host: glance_server_host,
+    glance_server_port: glance_server_port,
+    glance_server_insecure: glance_server_insecure,
+    nova_api_insecure: nova_api_insecure,
+    availability_zone: availability_zone,
+    keystone_settings: KeystoneHelper.keystone_settings(node, :cinder),
+    strict_ssh_host_key_policy: node[:cinder][:strict_ssh_host_key_policy],
+    default_availability_zone: node[:cinder][:default_availability_zone]
     )
 end
 

@@ -56,11 +56,10 @@ default[:swift][:public_ip_expr] = "node[:ipaddress]"
 # - params - a hash with the following keys:
 #   :ring=> one of "object", "account" or "container"
 #   :disk=> disk partition information as created in disks.rb,contains: :name (e.g sdb) :size either :remaining (= all the disk) or an actual byte count.
-default[:swift][:disk_zone_assign_expr] = '$DISK_CNT||=0; $DISK_CNT= $DISK_CNT+1 ;[ $DISK_CNT % node[:swift][:zones] , 99]'
+default[:swift][:disk_zone_assign_expr] = "$DISK_CNT||=0; $DISK_CNT= $DISK_CNT+1 ;[ $DISK_CNT % node[:swift][:zones] , 99]"
 
 ####
 # new parameters for diablo
-
 
 #
 # the authentication method to use. possible values:
@@ -77,7 +76,7 @@ default[:swift][:max_header_size] = 16384
 
 default[:swift][:install_slog_from_dev] = false
 
-default[:swift][:frontend] = 'uwsgi'
+default[:swift][:frontend] = "uwsgi"
 
 default[:swift][:ssl][:enabled] = false
 default[:swift][:ssl][:certfile] = "/etc/swift/cert.crt"

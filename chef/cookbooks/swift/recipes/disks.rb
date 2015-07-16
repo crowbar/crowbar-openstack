@@ -26,7 +26,7 @@ def get_uuid(disk)
   IO.popen("blkid -c /dev/null -s UUID -o value #{disk}"){ |f|
     uuid=f.read.strip
   }
-  return uuid if uuid && (uuid != '')
+  return uuid if uuid && (uuid != "")
   nil
 end
 
@@ -45,7 +45,6 @@ node[:swift][:devs] ||= Mash.new
 found_disks=[]
 wait_for_format = false
 to_use_disks.each do |d|
-
   k = d.device
   disk_name = k.gsub(/!/, "/")  # "cciss!c0d0"
   partition_suffix = "1" # by default, will use format first partition.
@@ -112,7 +111,7 @@ found_disks.each do |disk|
     ::Kernel.system("/sbin/udevadm settle")
 
     disk[:state] = "Operational"
-    disk[:name] = disk[:uuid].delete('-')
+    disk[:name] = disk[:uuid].delete("-")
     Chef::Log.info("Adding new disk #{disk[:device]} with UUID #{disk[:uuid]} to the Swift config")
     node[:swift][:devs][disk[:uuid]] = disk.dup
   end

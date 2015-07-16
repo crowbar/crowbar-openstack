@@ -35,20 +35,18 @@ user "postgres" do
   gid "postgres"
   system true
   uid 26
-  supports :manage_home => false
+  supports manage_home: false
 end
 
-directory node['postgresql']['dir'] do
+directory node["postgresql"]["dir"] do
   owner "postgres"
   group "postgres"
   recursive true
   action :create
 end
 
-node['postgresql']['server']['packages'].each do |pg_pack|
-
+node["postgresql"]["server"]["packages"].each do |pg_pack|
   package pg_pack
-
 end
 
 ha_enabled = node[:database][:ha][:enabled]
@@ -88,8 +86,8 @@ execute "Initial population of #{node.postgresql.dir}" do
 end
 
 service "postgresql" do
-  service_name node['postgresql']['server']['service_name']
-  supports :restart => true, :status => true, :reload => true
+  service_name node["postgresql"]["server"]["service_name"]
+  supports restart: true, status: true, reload: true
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if node[:database][:ha][:enabled]
 end

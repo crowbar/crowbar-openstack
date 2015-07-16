@@ -34,44 +34,44 @@ my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:cinder][:api]
 crowbar_pacemaker_sync_mark "wait-cinder_register"
 
 keystone_register "cinder api wakeup keystone" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   action :wakeup
 end
 
 keystone_register "register cinder user" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  user_password keystone_settings['service_password']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  user_password keystone_settings["service_password"]
+  tenant_name keystone_settings["service_tenant"]
   action :add_user
 end
 
 keystone_register "give cinder user access" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
 
 keystone_register "register cinder service" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   service_name "cinder"
   service_type "volume"
   service_description "Openstack Cinder Service"
@@ -79,13 +79,13 @@ keystone_register "register cinder service" do
 end
 
 keystone_register "register cinder endpoint" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   endpoint_service "cinder"
-  endpoint_region keystone_settings['endpoint_region']
+  endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{cinder_protocol}://#{my_public_host}:#{cinder_port}/v1/$(tenant_id)s"
   endpoint_adminURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v1/$(tenant_id)s"
   endpoint_internalURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v1/$(tenant_id)s"
@@ -95,11 +95,11 @@ keystone_register "register cinder endpoint" do
 end
 
 keystone_register "register cinder service v2" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   service_name "cinderv2"
   service_type "volumev2"
   service_description "Openstack Cinder Service V2"
@@ -107,13 +107,13 @@ keystone_register "register cinder service v2" do
 end
 
 keystone_register "register cinder endpoint v2" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   endpoint_service "cinderv2"
-  endpoint_region keystone_settings['endpoint_region']
+  endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{cinder_protocol}://#{my_public_host}:#{cinder_port}/v2/$(tenant_id)s"
   endpoint_adminURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v2/$(tenant_id)s"
   endpoint_internalURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v2/$(tenant_id)s"

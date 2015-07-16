@@ -16,7 +16,6 @@
 #
 
 class CeilometerController < BarclampController
-
   protected
 
   def initialize_service

@@ -34,7 +34,7 @@ cinder_api_insecure = false
 cinders = search(:node, "roles:cinder-controller") || []
 if cinders.length > 0
   cinder = cinders[0]
-  cinder_api_insecure = cinder[:cinder][:api][:protocol] == 'https' && cinder[:cinder][:ssl][:insecure]
+  cinder_api_insecure = cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
 end
 
 glance_stores = node.default[:glance][:glance_stores]
@@ -46,9 +46,9 @@ template node[:glance][:cache][:config_file] do
   group node[:glance][:group]
   mode 0640
   variables(
-      :keystone_settings => keystone_settings,
-      :cinder_api_insecure => cinder_api_insecure,
-      :glance_stores => glance_stores.join(",")
+      keystone_settings: keystone_settings,
+      cinder_api_insecure: cinder_api_insecure,
+      glance_stores: glance_stores.join(",")
   )
 end
 
@@ -80,10 +80,10 @@ if node[:glance][:enable_caching]
     group "root"
     mode 0644
     variables(
-      :glance_min => "45",
-      :glance_hour => "*",
-      :glance_user => node[:glance][:user],
-      :glance_command => "/usr/bin/glance-cache-pruner")
+      glance_min: "45",
+      glance_hour: "*",
+      glance_user: node[:glance][:user],
+      glance_command: "/usr/bin/glance-cache-pruner")
   end
 
   template "/etc/cron.d/glance-prefetcher" do
@@ -92,10 +92,10 @@ if node[:glance][:enable_caching]
     group "root"
     mode 0644
     variables(
-      :glance_min => "25",
-      :glance_hour => "*",
-      :glance_user => node[:glance][:user],
-      :glance_command => "/usr/bin/glance-cache-prefetcher")
+      glance_min: "25",
+      glance_hour: "*",
+      glance_user: node[:glance][:user],
+      glance_command: "/usr/bin/glance-cache-prefetcher")
   end
 else
   file "/etc/cron.d/glance-pruner" do

@@ -24,10 +24,10 @@ if node[:nova]["use_shared_instance_storage"]
   service "nfs-kernel-server" do
     service_name "nfs" if node[:platform] =~ /^(redhat|centos)$/
     service_name "nfsserver" if node[:platform] == "suse"
-    supports :restart => true, :status => true, :reload => true
+    supports restart: true, status: true, reload: true
     running true
     enabled true
-    action [ :enable, :start ]
+    action [:enable, :start]
   end
 
   admin_net = node[:network][:networks][:admin]
@@ -38,8 +38,8 @@ if node[:nova]["use_shared_instance_storage"]
     owner "root"
     mode 0644
     variables(
-      :admin_subnet => admin_net[:subnet]  + "/" + admin_net[:netmask],
-      :instances_path => node[:nova][:instances_path]
+      admin_subnet: admin_net[:subnet]  + "/" + admin_net[:netmask],
+      instances_path: node[:nova][:instances_path]
     )
     notifies :run, "execute[nfs-export]", :delayed
   end

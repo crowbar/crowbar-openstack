@@ -15,10 +15,10 @@ template node[:glance][:registry][:config_file] do
   group node[:glance][:group]
   mode 0640
   variables(
-      :bind_host => network_settings[:registry][:bind_host],
-      :bind_port => network_settings[:registry][:bind_port],
-      :keystone_settings => keystone_settings,
-      :rabbit_settings => fetch_rabbitmq_settings
+      bind_host: network_settings[:registry][:bind_host],
+      bind_port: network_settings[:registry][:bind_port],
+      keystone_settings: keystone_settings,
+      rabbit_settings: fetch_rabbitmq_settings
   )
 end
 

@@ -37,7 +37,7 @@ end
 ruby_block "edit /etc/sysctl.d/99-sysctl.conf for net.ipv4.ip_forward" do
   block do
     rc = Chef::Util::FileEdit.new("/etc/sysctl.d/99-sysctl.conf")
-    rc.search_file_replace_line(/^net.ipv4.ip_forward =/, 'net.ipv4.ip_forward = 1')
+    rc.search_file_replace_line(/^net.ipv4.ip_forward =/, "net.ipv4.ip_forward = 1")
     rc.write_file
   end
   only_if { node[:platform] == "suse" && node[:platform_version].to_f >= 12.0 }
@@ -62,9 +62,8 @@ end
 bash "reload enable-ip_forward-sysctl" do
   code "/sbin/sysctl -e -q -p #{enable_ip_forward_file}"
   action :nothing
-  subscribes :run, resources(:cookbook_file=> enable_ip_forward_file), :delayed
+  subscribes :run, resources(cookbook_file: enable_ip_forward_file), :delayed
 end
-
 
 # Kill all the libvirt default networks.
 execute "Destroy the libvirt default network" do
@@ -76,9 +75,8 @@ link "/etc/libvirt/qemu/networks/autostart/default.xml" do
   action :delete
 end
 
-
 case node[:neutron][:networking_plugin]
-when 'ml2'
+when "ml2"
   ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
   case
   when ml2_mech_drivers.include?("openvswitch")
@@ -90,7 +88,6 @@ when "vmware"
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
 end
 
-
 template "/etc/neutron/metering_agent.ini" do
   cookbook "neutron"
   source "metering_agent.ini.erb"
@@ -98,9 +95,9 @@ template "/etc/neutron/metering_agent.ini" do
   group node[:neutron][:platform][:group]
   mode "0640"
   variables(
-    :debug => node[:neutron][:debug],
-    :interface_driver => interface_driver,
-    :use_namespaces => "True"
+    debug: node[:neutron][:debug],
+    interface_driver: interface_driver,
+    use_namespaces: "True"
   )
 end
 
@@ -112,7 +109,7 @@ template "/etc/neutron/dnsmasq-neutron.conf" do
   mode "0644"
   variables(
     # nil means to leave the default MTU
-    :force_mtu => ml2_drivers.include?('gre') || ml2_drivers.include?('vxlan') ? 1400 : nil
+    force_mtu: ml2_drivers.include?("gre") || ml2_drivers.include?("vxlan") ? 1400 : nil
   )
 end
 
@@ -124,15 +121,15 @@ template "/etc/neutron/dhcp_agent.ini" do
   group node[:neutron][:platform][:group]
   mode "0640"
   variables(
-    :debug => node[:neutron][:debug],
-    :interface_driver => interface_driver,
-    :use_namespaces => "True",
-    :resync_interval => 5,
-    :dhcp_driver => "neutron.agent.linux.dhcp.Dnsmasq",
-    :dhcp_domain => node[:neutron][:dhcp_domain],
-    :enable_isolated_metadata => "True",
-    :enable_metadata_network => "False",
-    :nameservers => dns_list
+    debug: node[:neutron][:debug],
+    interface_driver: interface_driver,
+    use_namespaces: "True",
+    resync_interval: 5,
+    dhcp_driver: "neutron.agent.linux.dhcp.Dnsmasq",
+    dhcp_domain: node[:neutron][:dhcp_domain],
+    enable_isolated_metadata: "True",
+    enable_metadata_network: "False",
+    nameservers: dns_list
   )
 end
 
@@ -144,10 +141,10 @@ if node[:neutron][:use_lbaas] then
     group node[:neutron][:platform][:group]
     mode "0640"
     variables(
-      :debug => node[:neutron][:debug],
-      :interface_driver => interface_driver,
-      :user_group => node[:neutron][:platform][:lbaas_haproxy_group],
-      :device_driver => "neutron.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver"
+      debug: node[:neutron][:debug],
+      interface_driver: interface_driver,
+      user_group: node[:neutron][:platform][:lbaas_haproxy_group],
+      device_driver: "neutron.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver"
     )
   end
 end
@@ -155,7 +152,7 @@ end
 ha_enabled = node[:neutron][:ha][:network][:enabled]
 
 service node[:neutron][:platform][:metering_agent_name] do
-  supports :status => true, :restart => true
+  supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/metering_agent.ini]")
@@ -164,7 +161,7 @@ end
 
 if node[:neutron][:use_lbaas] then
   service node[:neutron][:platform][:lbaas_agent_name] do
-    supports :status => true, :restart => true
+    supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
     subscribes :restart, resources("template[/etc/neutron/lbaas_agent.ini]")
@@ -173,7 +170,7 @@ if node[:neutron][:use_lbaas] then
 end
 
 service node[:neutron][:platform][:dhcp_agent_name] do
-  supports :status => true, :restart => true
+  supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   subscribes :restart, resources("template[/etc/neutron/dhcp_agent.ini]")

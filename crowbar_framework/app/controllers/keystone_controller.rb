@@ -16,7 +16,6 @@
 #
 
 class KeystoneController < BarclampController
-
   protected
 
   def initialize_service

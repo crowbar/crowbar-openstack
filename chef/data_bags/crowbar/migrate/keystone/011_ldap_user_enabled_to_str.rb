@@ -3,11 +3,11 @@
 # in there before. The admin has to go in and manually fix it up.
 
 def upgrade ta, td, a, d
-  a['ldap']['user_enabled_default'] = ta['ldap']['user_enabled_default']
+  a["ldap"]["user_enabled_default"] = ta["ldap"]["user_enabled_default"]
   return a, d
 end
 
 def downgrade ta, td, a, d
-  a['ldap']['user_enabled_default'] = true
+  a["ldap"]["user_enabled_default"] = true
   return a, d
 end

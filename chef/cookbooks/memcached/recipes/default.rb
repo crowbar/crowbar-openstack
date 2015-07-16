@@ -32,7 +32,7 @@ end
 
 service "memcached" do
   action :nothing
-  supports :status => true, :start => true, :stop => true, :restart => true
+  supports status: true, start: true, stop: true, restart: true
 end
 
 template "/etc/memcached.conf" do
@@ -47,13 +47,13 @@ template "/etc/memcached.conf" do
   group "root"
   mode "0644"
   variables(
-    :daemonize => node[:memcached][:daemonize],
-    :listen => node[:memcached][:listen],
-    :user => node[:memcached][:user],
-    :port => node[:memcached][:port],
-    :memory => node[:memcached][:memory]
+    daemonize: node[:memcached][:daemonize],
+    listen: node[:memcached][:listen],
+    user: node[:memcached][:user],
+    port: node[:memcached][:port],
+    memory: node[:memcached][:memory]
   )
-  notifies :restart, resources(:service => "memcached"), :immediately
+  notifies :restart, resources(service: "memcached"), :immediately
 end
 
 case node[:lsb][:codename]
@@ -63,6 +63,6 @@ when "karmic"
     owner "root"
     group "root"
     mode "0644"
-    notifies :restart, resources(:service => "memcached"), :immediately
+    notifies :restart, resources(service: "memcached"), :immediately
   end
 end

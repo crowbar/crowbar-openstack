@@ -69,56 +69,56 @@
 # Locale Configuration
 
 # See libraries/default.rb for the locale_date_order() method.
-node.default['postgresql']['config']['datestyle'] = "iso, #{locale_date_order()}"
+node.default["postgresql"]["config"]["datestyle"] = "iso, #{locale_date_order()}"
 
 # According to the locale(1) manpage, the locale settings are determined
 # by environment variables according to the following precedence:
 # LC_ALL > (LC_MESSAGES, LC_MONETARY, LC_NUMERIC, LC_TIME) > LANG.
 
-node.default['postgresql']['config']['lc_messages'] =
-  [ ENV['LC_ALL'], ENV['LC_MESSAGES'], ENV['LANG'] ].compact.first
+node.default["postgresql"]["config"]["lc_messages"] =
+  [ENV["LC_ALL"], ENV["LC_MESSAGES"], ENV["LANG"]].compact.first
 
-node.default['postgresql']['config']['lc_monetary'] =
-  [ ENV['LC_ALL'], ENV['LC_MONETARY'], ENV['LANG'] ].compact.first
+node.default["postgresql"]["config"]["lc_monetary"] =
+  [ENV["LC_ALL"], ENV["LC_MONETARY"], ENV["LANG"]].compact.first
 
-node.default['postgresql']['config']['lc_numeric'] =
-  [ ENV['LC_ALL'], ENV['LC_NUMERIC'], ENV['LANG'] ].compact.first
+node.default["postgresql"]["config"]["lc_numeric"] =
+  [ENV["LC_ALL"], ENV["LC_NUMERIC"], ENV["LANG"]].compact.first
 
-node.default['postgresql']['config']['lc_time'] =
-  [ ENV['LC_ALL'], ENV['LC_TIME'], ENV['LANG'] ].compact.first
+node.default["postgresql"]["config"]["lc_time"] =
+  [ENV["LC_ALL"], ENV["LC_TIME"], ENV["LANG"]].compact.first
 
-node.default['postgresql']['config']['default_text_search_config'] =
-  case ENV['LANG']
+node.default["postgresql"]["config"]["default_text_search_config"] =
+  case ENV["LANG"]
   when /da_.*/
-    'pg_catalog.danish'
+    "pg_catalog.danish"
   when /nl_.*/
-    'pg_catalog.dutch'
+    "pg_catalog.dutch"
   when /en_.*/
-    'pg_catalog.english'
+    "pg_catalog.english"
   when /fi_.*/
-    'pg_catalog.finnish'
+    "pg_catalog.finnish"
   when /fr_.*/
-    'pg_catalog.french'
+    "pg_catalog.french"
   when /de_.*/
-    'pg_catalog.german'
+    "pg_catalog.german"
   when /hu_.*/
-    'pg_catalog.hungarian'
+    "pg_catalog.hungarian"
   when /it_.*/
-    'pg_catalog.italian'
+    "pg_catalog.italian"
   when /no_.*/
-    'pg_catalog.norwegian'
+    "pg_catalog.norwegian"
   when /pt_.*/
-    'pg_catalog.portuguese'
+    "pg_catalog.portuguese"
   when /ro_.*/
-    'pg_catalog.romanian'
+    "pg_catalog.romanian"
   when /ru_.*/
-    'pg_catalog.russian'
+    "pg_catalog.russian"
   when /es_.*/
-    'pg_catalog.spanish'
+    "pg_catalog.spanish"
   when /sv_.*/
-    'pg_catalog.swedish'
+    "pg_catalog.swedish"
   when /tr_.*/
-    'pg_catalog.turkish'
+    "pg_catalog.turkish"
   else
     nil
   end
@@ -133,16 +133,16 @@ node.default['postgresql']['config']['default_text_search_config'] =
 tzdirpath = pg_TZDIR() # See libraries/default.rb
 default_timezone = select_default_timezone(tzdirpath) # See libraries/default.rb
 if !default_timezone.nil?
-    node.default['postgresql']['config']['log_timezone'] = default_timezone
-    node.default['postgresql']['config']['timezone'] = default_timezone
+    node.default["postgresql"]["config"]["log_timezone"] = default_timezone
+    node.default["postgresql"]["config"]["timezone"] = default_timezone
 end
 
 #######
 # - Where to Log -
-node.default['postgresql']['config']['log_destination'] = 'stderr'
-node.default['postgresql']['config']['log_directory'] = 'pg_log'
-node.default['postgresql']['config']['log_filename'] = 'postgresql-%a.log'
-node.default['postgresql']['config']['logging_collector'] = true # on
-node.default['postgresql']['config']['log_rotation_age'] = '1d'
-node.default['postgresql']['config']['log_rotation_size'] = 0
-node.default['postgresql']['config']['log_truncate_on_rotation'] = true # on
+node.default["postgresql"]["config"]["log_destination"] = "stderr"
+node.default["postgresql"]["config"]["log_directory"] = "pg_log"
+node.default["postgresql"]["config"]["log_filename"] = "postgresql-%a.log"
+node.default["postgresql"]["config"]["logging_collector"] = true # on
+node.default["postgresql"]["config"]["log_rotation_age"] = "1d"
+node.default["postgresql"]["config"]["log_rotation_size"] = 0
+node.default["postgresql"]["config"]["log_truncate_on_rotation"] = true # on

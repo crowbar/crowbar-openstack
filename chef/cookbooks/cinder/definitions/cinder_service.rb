@@ -1,5 +1,4 @@
-define :cinder_service, :use_pacemaker_provider => false do
-
+define :cinder_service, use_pacemaker_provider: false do
   cinder_service_name="cinder-#{params[:name]}"
   cinder_name = cinder_service_name
   cinder_name="openstack-cinder-#{params[:name]}" if %w(redhat centos suse).include? node.platform
@@ -17,10 +16,9 @@ define :cinder_service, :use_pacemaker_provider => false do
       status_command "status #{cinder_name} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
     end
     service_name cinder_name
-    supports :status => true, :restart => true
+    supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(:template => "/etc/cinder/cinder.conf")
+    subscribes :restart, resources(template: "/etc/cinder/cinder.conf")
     provider Chef::Provider::CrowbarPacemakerService if params[:use_pacemaker_provider]
   end
-
 end

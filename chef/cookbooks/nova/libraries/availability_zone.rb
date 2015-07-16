@@ -20,22 +20,22 @@ module NovaAvailabilityZone
 
     nova_insecure = node[:nova][:ssl][:enabled] && node[:nova][:ssl][:insecure]
 
-    command = [ "/usr/bin/crowbar-nova-set-availability-zone" ]
+    command = ["/usr/bin/crowbar-nova-set-availability-zone"]
     command << "--os-username"
-    command << keystone_settings['admin_user']
+    command << keystone_settings["admin_user"]
     command << "--os-password"
-    command << keystone_settings['admin_password']
+    command << keystone_settings["admin_password"]
     command << "--os-tenant-name"
-    command << keystone_settings['default_tenant']
+    command << keystone_settings["default_tenant"]
     command << "--os-auth-url"
     command << KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
                                                     keystone_settings["internal_url_host"],
                                                     keystone_settings["service_port"],
                                                     "2.0")
     command << "--os-region-name"
-    command << keystone_settings['endpoint_region']
+    command << keystone_settings["endpoint_region"]
 
-    if keystone_settings['insecure'] || nova_insecure
+    if keystone_settings["insecure"] || nova_insecure
       command << "--insecure"
     end
 

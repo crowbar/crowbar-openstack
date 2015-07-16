@@ -18,7 +18,7 @@
 # limitations under the License.
 #
 
-require File.join(File.dirname(__FILE__), 'provider_database_postgresql')
+require File.join(File.dirname(__FILE__), "provider_database_postgresql")
 
 class Chef
   class Provider
@@ -28,7 +28,7 @@ class Chef
 
         def load_current_resource
           Gem.clear_paths
-          require 'pg'
+          require "pg"
           @current_resource = Chef::Resource::DatabaseUser.new(@new_resource.name)
           @current_resource.username(@new_resource.name)
           @current_resource
@@ -39,7 +39,7 @@ class Chef
             begin
               statement = "CREATE USER \"#{@new_resource.username}\""
               statement += " WITH PASSWORD '#{@new_resource.password}'" if @new_resource.password
-              db('template1').query(statement)
+              db("template1").query(statement)
               @new_resource.updated_by_last_action(true)
             ensure
               close
@@ -47,11 +47,11 @@ class Chef
           else
             # check if password needs to be updated
             begin
-              conn = PGconn.connect(:host => @new_resource.connection[:host],
-                                    :port => @new_resource.connection[:port] || 5432,
-                                    :dbname => "template1",
-                                    :user => @new_resource.username,
-                                    :password => @new_resource.password )
+              conn = PGconn.connect(host: @new_resource.connection[:host],
+                                    port: @new_resource.connection[:port] || 5432,
+                                    dbname: "template1",
+                                    user: @new_resource.username,
+                                    password: @new_resource.password )
               conn.close
             rescue
               Chef::Log.info("User #{@new_resource.username} already exists. Updating password.")
@@ -64,7 +64,7 @@ class Chef
         def action_drop
           if exists?
             begin
-              db('template1').query("DROP USER \"#{@new_resource.username}\"")
+              db("template1").query("DROP USER \"#{@new_resource.username}\"")
               @new_resource.updated_by_last_action(true)
             ensure
               close
@@ -98,7 +98,7 @@ class Chef
         private
         def exists?
           begin
-            exists = db('template1').query("SELECT * FROM pg_user WHERE usename='#{@new_resource.username}'").num_tuples != 0
+            exists = db("template1").query("SELECT * FROM pg_user WHERE usename='#{@new_resource.username}'").num_tuples != 0
           ensure
             close
           end

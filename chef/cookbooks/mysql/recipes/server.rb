@@ -44,16 +44,16 @@ if platform?(%w{debian ubuntu})
 
   execute "preseed mysql-server" do
     command "debconf-set-selections /var/cache/local/preseeding/mysql-server.seed"
-    only_if "test -f /var/cache/local/preseeding/mysql-server.seed" 
+    only_if "test -f /var/cache/local/preseeding/mysql-server.seed"
   end
 
 end
 
 # For Crowbar, we need to set the address to bind - default to admin node.
-addr = node['mysql']['bind_address'] || ""
+addr = node["mysql"]["bind_address"] || ""
 newaddr = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 if addr != newaddr
-  node['mysql']['bind_address'] = newaddr
+  node["mysql"]["bind_address"] = newaddr
   node.save
 end
 
@@ -76,11 +76,11 @@ service "mysql" do
     stop_command "stop mysql"
     start_command "start mysql"
   end
-  supports :status => true, :restart => true, :reload => true
+  supports status: true, restart: true, reload: true
   action :enable
 end
 
-link value_for_platform([ "centos", "redhat", "suse" , "fedora" ] => {"default" => "/etc/my.cnf"}, "default" => "/etc/mysql/my.cnf") do
+link value_for_platform(["centos", "redhat", "suse" , "fedora"] => {"default" => "/etc/my.cnf"}, "default" => "/etc/mysql/my.cnf") do
   to "#{node[:mysql][:datadir]}/my.cnf"
 end
 
@@ -113,7 +113,7 @@ template "#{node[:mysql][:datadir]}/my.cnf" do
   owner "root"
   group "root"
   mode "0644"
-   notifies :run, resources(:script => "handle mysql restart"), :immediately if platform?(%w{debian ubuntu})
+   notifies :run, resources(script: "handle mysql restart"), :immediately if platform?(%w{debian ubuntu})
    notifies :restart, "service[mysql]", :immediately if platform?(%w{centos redhat suse fedora})
 end
 
@@ -126,7 +126,7 @@ unless Chef::Config[:solo]
   end
 end
 
-# set the root password on platforms 
+# set the root password on platforms
 # that don't support pre-seeding
 unless platform?(%w{debian ubuntu})
 
@@ -183,14 +183,14 @@ end
 # End hackness
 
 grants_path = value_for_platform(
-  ["centos", "redhat", "suse", "fedora" ] => {
+  ["centos", "redhat", "suse", "fedora"] => {
     "default" => "/etc/mysql_grants.sql"
   },
   "default" => "/etc/mysql/grants.sql"
 )
 
 grants_key = value_for_platform(
-  ["centos", "redhat", "suse", "fedora" ] => {
+  ["centos", "redhat", "suse", "fedora"] => {
     "default" => "/etc/applied_grants"
   },
   "default" => "/etc/mysql/applied_grants"
@@ -218,7 +218,6 @@ directory "/var/run/mysqld/" do
   mode "0755"
   action :create
 end
-
 
 execute "mysql-install-privileges" do
   command "/usr/bin/mysql -u root #{node['mysql']['server_root_password'].empty? ? '' : '-p' }#{node['mysql']['server_root_password']} < #{grants_path}"

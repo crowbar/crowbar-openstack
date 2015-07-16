@@ -40,30 +40,30 @@ service_user = node[:swift][:dispersion][:service_user]
 service_password = node[:swift][:dispersion][:service_password]
 
 keystone_register "swift dispersion wakeup keystone" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   action :wakeup
 end
 
 keystone_register "create tenant #{service_tenant} for dispersion" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   tenant_name service_tenant
   action :add_tenant
 end
 
 keystone_register "add #{service_user}:#{service_tenant} user" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   user_name service_user
   user_password service_password
   tenant_name service_tenant
@@ -71,11 +71,11 @@ keystone_register "add #{service_user}:#{service_tenant} user" do
 end
 
 keystone_register "add #{service_user}:#{service_tenant} user admin role" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   user_name service_user
   role_name "admin"
   tenant_name service_tenant
@@ -83,19 +83,19 @@ keystone_register "add #{service_user}:#{service_tenant} user admin role" do
 end
 
 dispersion_cmd="swift-dispersion-populate"
-if keystone_settings['insecure']
+if keystone_settings["insecure"]
   swift_cmd="swift --insecure"
 else
   swift_cmd="swift"
 end
 
 template "/etc/swift/dispersion.conf" do
-  source     "dispersion.conf.erb"
-  mode       "0640"
-  owner       "root"
-  group       node[:swift][:group]
+  source "dispersion.conf.erb"
+  mode "0640"
+  owner "root"
+  group node[:swift][:group]
   variables(
-    :keystone_settings => keystone_settings
+    keystone_settings: keystone_settings
   )
   #only_if "swift-recon --md5 | grep -q '0 error'"
   #notifies :run, "execute[populate-dispersion]", :immediately

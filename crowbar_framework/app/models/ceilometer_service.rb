@@ -16,7 +16,6 @@
 #
 
 class CeilometerService < PacemakerServiceObject
-
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "ceilometer"
@@ -100,15 +99,15 @@ class CeilometerService < PacemakerServiceObject
     nodes.delete_if { |n| n.nil? or n.admin? }
 
     server_nodes = nodes.select { |n| n.intended_role == "controller" }
-    server_nodes = [ nodes.first ] if server_nodes.empty?
+    server_nodes = [nodes.first] if server_nodes.empty?
 
     swift_proxy_nodes = NodeObject.find("roles:swift-proxy")
 
     base["deployment"]["ceilometer"]["elements"] = {
         "ceilometer-agent" => agent_nodes.map { |x| x.name },
         "ceilometer-agent-hyperv" => hyperv_agent_nodes.map { |x| x.name },
-        "ceilometer-cagent" => [ server_nodes.first.name ],
-        "ceilometer-server" => [ server_nodes.first.name ],
+        "ceilometer-cagent" => [server_nodes.first.name],
+        "ceilometer-server" => [server_nodes.first.name],
         "ceilometer-swift-proxy-middleware" => swift_proxy_nodes.map { |x| x.name }
     } unless agent_nodes.nil? or server_nodes.nil?
 
@@ -213,7 +212,7 @@ class CeilometerService < PacemakerServiceObject
       dirty = false
 
       node = NodeObject.find_node_by_name(new_member)
-      node[:ceilometer] ||= {:ha => {:mongodb => {:replica_set => {}}}}
+      node[:ceilometer] ||= {ha: {mongodb: {replica_set: {}}}}
 
       # explicit check for true; otherwise it doesn't work
       unless node[:ceilometer][:ha][:mongodb][:replica_set][:member] == true
@@ -256,7 +255,6 @@ class CeilometerService < PacemakerServiceObject
   end
 
   def hyperv_available?
-    return File.exist?('/opt/dell/chef/cookbooks/hyperv')
+    return File.exist?("/opt/dell/chef/cookbooks/hyperv")
   end
-
 end

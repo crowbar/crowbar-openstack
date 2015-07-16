@@ -16,7 +16,6 @@
 #
 
 class GlanceService < PacemakerServiceObject
-
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "glance"
@@ -59,7 +58,7 @@ class GlanceService < PacemakerServiceObject
     if nodes.size >= 1
       controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
       base["deployment"]["glance"]["elements"] = {
-        "glance-server" => [ controller[:fqdn] ]
+        "glance-server" => [controller[:fqdn]]
       }
     end
 
@@ -79,7 +78,6 @@ class GlanceService < PacemakerServiceObject
 
     super
   end
-
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Glance apply_role_pre_chef_call: entering #{all_nodes.inspect}")
@@ -127,6 +125,5 @@ class GlanceService < PacemakerServiceObject
 
     @logger.debug("Glance apply_role_pre_chef_call: leaving")
   end
-
 end
 

@@ -87,12 +87,12 @@ node[:keystone][:api][:versioned_internal_URL] = \
 node[:keystone][:api][:public_URL_host] = my_public_host
 node[:keystone][:api][:internal_URL_host] = my_admin_host
 
-if node[:keystone][:frontend] == 'uwsgi'
+if node[:keystone][:frontend] == "uwsgi"
 
   service "keystone" do
     service_name node[:keystone][:service_name]
-    supports :status => true, :restart => true
-    action [ :disable, :stop ]
+    supports status: true, restart: true
+    action [:disable, :stop]
   end
 
   directory "/usr/lib/cgi-bin/keystone/" do
@@ -110,31 +110,31 @@ if node[:keystone][:frontend] == 'uwsgi'
 
   uwsgi "keystone" do
     options({
-      :chdir => "/usr/lib/cgi-bin/keystone/",
-      :callable => :application,
-      :module => :application,
-      :user => node[:keystone][:user],
-      :log => "/var/log/keystone/keystone.log"
+      chdir: "/usr/lib/cgi-bin/keystone/",
+      callable: :application,
+      module: :application,
+      user: node[:keystone][:user],
+      log: "/var/log/keystone/keystone.log"
     })
     instances ([
-      {:socket => "#{bind_service_host}:#{bind_service_port}", :env => "name=main"},
-      {:socket => "#{bind_admin_host}:#{bind_admin_port}", :env => "name=admin"}
+      {socket: "#{bind_service_host}:#{bind_service_port}", env: "name=main"},
+      {socket: "#{bind_admin_host}:#{bind_admin_port}", env: "name=admin"}
     ])
     service_name "keystone-uwsgi"
   end
 
   service "keystone-uwsgi" do
-    supports :status => true, :restart => true, :start => true
+    supports status: true, restart: true, start: true
     action :start
     subscribes :restart, "template[/usr/lib/cgi-bin/keystone/application.py]", :immediately
   end
 
-elsif node[:keystone][:frontend] == 'apache'
+elsif node[:keystone][:frontend] == "apache"
 
   service "keystone" do
     service_name node[:keystone][:service_name]
-    supports :status => true, :restart => true
-    action [ :disable, :stop ]
+    supports status: true, restart: true
+    action [:disable, :stop]
   end
 
   include_recipe "apache2"
@@ -144,7 +144,6 @@ elsif node[:keystone][:frontend] == 'apache'
     package "mod_wsgi"
   end
   include_recipe "apache2::mod_rewrite"
-
 
   directory "/usr/lib/cgi-bin/keystone/" do
     owner "root"
@@ -172,14 +171,14 @@ elsif node[:keystone][:frontend] == 'apache'
     path "/etc/httpd/sites-available/keystone.conf" if %w(redhat centos).include?(node.platform)
     source "apache_keystone.conf.erb"
     variables(
-      :bind_admin_port => bind_admin_port, # Auth port
-      :bind_admin_host => bind_admin_host,
-      :bind_service_port => bind_service_port, # public port
-      :bind_service_host => bind_service_host,
-      :processes => 3,
-      :threads => 10
+      bind_admin_port: bind_admin_port, # Auth port
+      bind_admin_host: bind_admin_host,
+      bind_service_port: bind_service_port, # public port
+      bind_service_host: bind_service_host,
+      processes: 3,
+      threads: 10
     )
-    notifies :restart, resources(:service => "apache2"), :immediately
+    notifies :restart, resources(service: "apache2"), :immediately
   end
 
   apache_site "keystone.conf" do
@@ -207,7 +206,7 @@ database_user "create keystone database user" do
     connection db_settings[:connection]
     username node[:keystone][:db][:user]
     password node[:keystone][:db][:password]
-    host '%'
+    host "%"
     provider db_settings[:user_provider]
     action :create
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -218,7 +217,7 @@ database_user "grant database access for keystone database user" do
     username node[:keystone][:db][:user]
     password node[:keystone][:db][:password]
     database_name node[:keystone][:db][:database]
-    host '%'
+    host "%"
     privileges db_settings[:privs]
     provider db_settings[:user_provider]
     action :grant
@@ -235,35 +234,35 @@ template "/etc/keystone/keystone.conf" do
     group node[:keystone][:group]
     mode 0640
     variables(
-      :sql_connection => sql_connection,
-      :sql_idle_timeout => node[:keystone][:sql][:idle_timeout],
-      :debug => node[:keystone][:debug],
-      :verbose => node[:keystone][:verbose],
-      :admin_token => node[:keystone][:service][:token],
-      :bind_admin_host => bind_admin_host,
-      :bind_service_host => bind_service_host,
-      :bind_admin_port => bind_admin_port,
-      :bind_service_port => bind_service_port,
-      :public_endpoint => node[:keystone][:api][:public_URL],
-      :admin_endpoint => node[:keystone][:api][:admin_URL],
-      :use_syslog => node[:keystone][:use_syslog],
-      :signing_token_format => node[:keystone][:signing][:token_format],
-      :signing_certfile => node[:keystone][:signing][:certfile],
-      :signing_keyfile => node[:keystone][:signing][:keyfile],
-      :signing_ca_certs => node[:keystone][:signing][:ca_certs],
-      :protocol => node[:keystone][:api][:protocol],
-      :frontend => node[:keystone][:frontend],
-      :ssl_enable => (node[:keystone][:frontend] == 'native' && node[:keystone][:api][:protocol] == "https"),
-      :ssl_certfile => node[:keystone][:ssl][:certfile],
-      :ssl_keyfile => node[:keystone][:ssl][:keyfile],
-      :ssl_cert_required => node[:keystone][:ssl][:cert_required],
-      :ssl_ca_certs => node[:keystone][:ssl][:ca_certs],
-      :rabbit_settings => fetch_rabbitmq_settings
+      sql_connection: sql_connection,
+      sql_idle_timeout: node[:keystone][:sql][:idle_timeout],
+      debug: node[:keystone][:debug],
+      verbose: node[:keystone][:verbose],
+      admin_token: node[:keystone][:service][:token],
+      bind_admin_host: bind_admin_host,
+      bind_service_host: bind_service_host,
+      bind_admin_port: bind_admin_port,
+      bind_service_port: bind_service_port,
+      public_endpoint: node[:keystone][:api][:public_URL],
+      admin_endpoint: node[:keystone][:api][:admin_URL],
+      use_syslog: node[:keystone][:use_syslog],
+      signing_token_format: node[:keystone][:signing][:token_format],
+      signing_certfile: node[:keystone][:signing][:certfile],
+      signing_keyfile: node[:keystone][:signing][:keyfile],
+      signing_ca_certs: node[:keystone][:signing][:ca_certs],
+      protocol: node[:keystone][:api][:protocol],
+      frontend: node[:keystone][:frontend],
+      ssl_enable: (node[:keystone][:frontend] == "native" && node[:keystone][:api][:protocol] == "https"),
+      ssl_certfile: node[:keystone][:ssl][:certfile],
+      ssl_keyfile: node[:keystone][:ssl][:keyfile],
+      ssl_cert_required: node[:keystone][:ssl][:cert_required],
+      ssl_ca_certs: node[:keystone][:ssl][:ca_certs],
+      rabbit_settings: fetch_rabbitmq_settings
     )
-    if node[:keystone][:frontend] == 'apache'
-      notifies :restart, resources(:service => "apache2"), :immediately
-    elsif node[:keystone][:frontend] == 'uwsgi'
-      notifies :restart, resources(:service => "keystone-uwsgi"), :immediately
+    if node[:keystone][:frontend] == "apache"
+      notifies :restart, resources(service: "apache2"), :immediately
+    elsif node[:keystone][:frontend] == "uwsgi"
+      notifies :restart, resources(service: "keystone-uwsgi"), :immediately
     end
 end
 
@@ -330,9 +329,9 @@ ruby_block "synchronize PKI keys for founder and remember them for non-HA case" 
   only_if { (!ha_enabled || (ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node))) &&
             (node[:keystone][:signing][:token_format] == "PKI" || node.platform == "suse") }
   block do
-    ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb") {|io| io.read} rescue ""
-    signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb") {|io| io.read} rescue ""
-    signing_key = File.open("/etc/keystone/ssl/private/signing_key.pem", "rb") {|io| io.read} rescue ""
+    ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb") { |io| io.read } rescue ""
+    signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb") { |io| io.read } rescue ""
+    signing_key = File.open("/etc/keystone/ssl/private/signing_key.pem", "rb") { |io| io.read } rescue ""
 
     node[:keystone][:pki] ||= {}
     node[:keystone][:pki][:content] ||= {}
@@ -359,9 +358,9 @@ end
 ruby_block "synchronize PKI keys for non-founder" do
   only_if { ha_enabled && !CrowbarPacemakerHelper.is_cluster_founder?(node) && (node[:keystone][:signing][:token_format] == "PKI" || node.platform == "suse") }
   block do
-    ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb") {|io| io.read} rescue ""
-    signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb") {|io| io.read} rescue ""
-    signing_key = File.open("/etc/keystone/ssl/private/signing_key.pem", "rb") {|io| io.read} rescue ""
+    ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb") { |io| io.read } rescue ""
+    signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb") { |io| io.read } rescue ""
+    signing_key = File.open("/etc/keystone/ssl/private/signing_key.pem", "rb") { |io| io.read } rescue ""
 
     founder = CrowbarPacemakerHelper.cluster_founder(node)
 
@@ -373,25 +372,25 @@ ruby_block "synchronize PKI keys for non-founder" do
     # the code below
     dirty = false
     if ca != cluster_ca
-      File.open("/etc/keystone/ssl/certs/ca.pem", 'w') {|f| f.write(cluster_ca) }
+      File.open("/etc/keystone/ssl/certs/ca.pem", "w") { |f| f.write(cluster_ca) }
       dirty = true
     end
     if signing_cert != cluster_signing_cert
-      File.open("/etc/keystone/ssl/certs/signing_cert.pem", 'w') {|f| f.write(cluster_signing_cert) }
+      File.open("/etc/keystone/ssl/certs/signing_cert.pem", "w") { |f| f.write(cluster_signing_cert) }
       dirty = true
     end
     if signing_key != cluster_signing_key
-      File.open("/etc/keystone/ssl/private/signing_key.pem", 'w') {|f| f.write(cluster_signing_key) }
+      File.open("/etc/keystone/ssl/private/signing_key.pem", "w") { |f| f.write(cluster_signing_key) }
       dirty = true
     end
 
     if dirty
-      if node[:keystone][:frontend] == 'native'
-        resources(:service => "keystone").run_action(:restart)
-      elsif node[:keystone][:frontend] == 'apache'
-        resources(:service => "apache2").run_action(:restart)
-      elsif node[:keystone][:frontend] == 'uwsgi'
-        resources(:service => "keystone-uwsgi").run_action(:restart)
+      if node[:keystone][:frontend] == "native"
+        resources(service: "keystone").run_action(:restart)
+      elsif node[:keystone][:frontend] == "apache"
+        resources(service: "apache2").run_action(:restart)
+      elsif node[:keystone][:frontend] == "uwsgi"
+        resources(service: "keystone-uwsgi").run_action(:restart)
       end
     end
   end # block
@@ -399,7 +398,7 @@ end
 
 crowbar_pacemaker_sync_mark "create-keystone_pki"
 
-if node[:keystone][:api][:protocol] == 'https'
+if node[:keystone][:api][:protocol] == "https"
   if node[:keystone][:ssl][:generate_certs]
     package "openssl"
     ruby_block "generate_certs for keystone" do
@@ -464,14 +463,14 @@ if node[:keystone][:api][:protocol] == 'https'
   end
 end
 
-if node[:keystone][:frontend] == 'native'
+if node[:keystone][:frontend] == "native"
   # We define the service after we define all our config files, so that it's
   # started only when all files are created.
   service "keystone" do
     service_name node[:keystone][:service_name]
-    supports :status => true, :start => true, :restart => true
-    action [ :enable, :start ]
-    subscribes :restart, resources(:template => "/etc/keystone/keystone.conf"), :immediately
+    supports status: true, start: true, restart: true
+    action [:enable, :start]
+    subscribes :restart, resources(template: "/etc/keystone/keystone.conf"), :immediately
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 end
@@ -499,7 +498,7 @@ end
 
 # Create tenants
 openstack_command = "openstack --os-token \"#{node[:keystone][:service][:token]}\" --os-url \"#{node[:keystone][:api][:versioned_admin_URL]}\" --os-region \"#{node[:keystone][:api][:region]}\""
-if node[:keystone][:api][:version] != '2.0'
+if node[:keystone][:api][:version] != "2.0"
   openstack_command <<  " --os-identity-api-version #{node[:keystone][:api][:version]} --os-project-domain-id default --os-user-domain-id default"
 end
 
@@ -528,8 +527,8 @@ end
 end
 
 # Create users
-[ [ node[:keystone][:admin][:username], node[:keystone][:admin][:password], node[:keystone][:admin][:tenant] ],
-  [ node[:keystone][:default][:username], node[:keystone][:default][:password], node[:keystone][:default][:tenant] ]
+[[node[:keystone][:admin][:username], node[:keystone][:admin][:password], node[:keystone][:admin][:tenant]],
+  [node[:keystone][:default][:username], node[:keystone][:default][:password], node[:keystone][:default][:tenant]]
 ].each do |user_data|
   keystone_register "add default #{user_data[0]} user" do
     protocol node[:keystone][:api][:protocol]
@@ -543,7 +542,6 @@ end
     action :add_user
   end
 end
-
 
 # Create roles
 ## Member is used by horizon (see OPENSTACK_KEYSTONE_DEFAULT_ROLE option)
@@ -580,7 +578,6 @@ user_roles.each do |args|
   end
 end
 
-
 # Create EC2 creds for our users
 ec2_creds = [
   [node[:keystone][:admin][:username], node[:keystone][:admin][:tenant]],
@@ -593,9 +590,9 @@ ec2_creds.each do |args|
     insecure keystone_insecure
     host my_admin_host
     auth ({
-        :tenant => node[:keystone][:admin][:tenant],
-        :user => node[:keystone][:admin][:username],
-        :password => node[:keystone][:admin][:password]
+        tenant: node[:keystone][:admin][:tenant],
+        user: node[:keystone][:admin][:username],
+        password: node[:keystone][:admin][:password]
     })
     port node[:keystone][:api][:admin_port]
     user_name args[0]
@@ -625,9 +622,9 @@ keystone_register "register keystone endpoint" do
   port node[:keystone][:api][:admin_port]
   token node[:keystone][:service][:token]
   endpoint_service "keystone"
-  endpoint_region      node[:keystone][:api][:region]
-  endpoint_publicURL   node[:keystone][:api][:versioned_public_URL]
-  endpoint_adminURL    node[:keystone][:api][:versioned_admin_URL]
+  endpoint_region node[:keystone][:api][:region]
+  endpoint_publicURL node[:keystone][:api][:versioned_public_URL]
+  endpoint_adminURL node[:keystone][:api][:versioned_admin_URL]
   endpoint_internalURL node[:keystone][:api][:versioned_internal_URL]
 #  endpoint_global true
 #  endpoint_enabled true
@@ -647,6 +644,6 @@ template "/root/.openrc" do
   group "root"
   mode 0600
   variables(
-    :keystone_settings => KeystoneHelper.keystone_settings(node, @cookbook_name)
+    keystone_settings: KeystoneHelper.keystone_settings(node, @cookbook_name)
     )
 end

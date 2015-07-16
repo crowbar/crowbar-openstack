@@ -35,42 +35,42 @@ lbaas_agent_primitive =  "neutron-lbaas-agent"
 pacemaker_primitive l3_agent_primitive do
   agent node[:neutron][:ha][:network][:l3_ra]
   op node[:neutron][:ha][:network][:op]
-  action [ :create ]
+  action [:create]
   only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive dhcp_agent_primitive do
   agent node[:neutron][:ha][:network][:dhcp_ra]
   op node[:neutron][:ha][:network][:op]
-  action [ :create ]
+  action [:create]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive metadatda_agent_primitive do
   agent node[:neutron][:ha][:network][:metadata_ra]
   op node[:neutron][:ha][:network][:op]
-  action [ :create ]
+  action [:create]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive metering_agent_primitive do
   agent node[:neutron][:ha][:network][:metering_ra]
   op node[:neutron][:ha][:network][:op]
-  action [ :create ]
+  action [:create]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_primitive lbaas_agent_primitive do
   agent node[:neutron][:ha][:network][:lbaas_ra]
   op node[:neutron][:ha][:network][:op]
-  action [ :create ]
+  action [:create]
   only_if { use_lbaas_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 networking_plugin = node[:neutron][:networking_plugin]
 
 case networking_plugin
-when 'ml2'
+when "ml2"
   ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
   case
   when ml2_mech_drivers.include?("openvswitch")
@@ -81,24 +81,24 @@ when 'ml2'
     neutron_agent_ra = node[:neutron][:ha][:network]["linuxbridge_ra"]
   end
 when "vmware"
-  neutron_agent = ''
-  neutron_agent_ra = ''
+  neutron_agent = ""
+  neutron_agent_ra = ""
 end
 neutron_agent_primitive = neutron_agent.sub(/^openstack-/, "")
 
 pacemaker_primitive neutron_agent_primitive do
   agent neutron_agent_ra
   op node[:neutron][:ha][:network][:op]
-  action [ :create ]
+  action [:create]
   only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 group_members = []
 group_members << l3_agent_primitive if use_l3_agent
 group_members << lbaas_agent_primitive if use_lbaas_agent
-group_members += [ dhcp_agent_primitive,
+group_members += [dhcp_agent_primitive,
                    metadatda_agent_primitive,
-                   metering_agent_primitive ]
+                   metering_agent_primitive]
 group_members << neutron_agent_primitive if use_l3_agent
 
 agents_group_name = "g-neutron-agents"
@@ -106,13 +106,13 @@ agents_clone_name = "cl-#{agents_group_name}"
 
 pacemaker_group agents_group_name do
   members group_members
-  action [ :create ]
+  action [:create]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 pacemaker_clone agents_clone_name do
   rsc agents_group_name
-  action [ :create, :start ]
+  action [:create, :start]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
@@ -131,9 +131,9 @@ ha_tool_primitive_name = "neutron-ha-tool"
 # we just rely on the correct CA files being installed in a system wide default
 # location.
 file "/etc/neutron/os_password" do
-  owner 'root'
-  group 'root'
-  mode '0600'
+  owner "root"
+  group "root"
+  mode "0600"
   content keystone_settings["admin_password"]
   # Our Chef is apparently too old for this :-/
   #sensitive true
@@ -150,12 +150,12 @@ pacemaker_primitive ha_tool_primitive_name do
     "os_insecure"    => keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
   })
   op node[:neutron][:ha][:network][:op]
-  action [ :create, :start ]
+  action [:create, :start]
   only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_order_only_existing "o-#{ha_tool_primitive_name}" do
-  ordering [ "g-haproxy", "cl-neutron-server", agents_clone_name, ha_tool_primitive_name ]
+  ordering ["g-haproxy", "cl-neutron-server", agents_clone_name, ha_tool_primitive_name]
   score "Mandatory"
   action :create
   only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }

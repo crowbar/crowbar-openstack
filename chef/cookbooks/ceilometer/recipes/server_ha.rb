@@ -31,12 +31,12 @@ crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources"
 
 primitives = []
 
-["collector", "agent_notification", "api", "alarm_evaluator", "alarm_notifier" ].each do |service|
+["collector", "agent_notification", "api", "alarm_evaluator", "alarm_notifier"].each do |service|
   primitive_name = "ceilometer-#{service}"
 
   pacemaker_primitive primitive_name do
     agent node[:ceilometer][:ha][service.to_sym][:agent]
-    op    node[:ceilometer][:ha][service.to_sym][:op]
+    op node[:ceilometer][:ha][service.to_sym][:op]
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
@@ -53,11 +53,11 @@ end
 
 pacemaker_clone "cl-#{group_name}" do
   rsc group_name
-  action [ :create, :start]
+  action [:create, :start]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-order_only_existing = [ "rabbitmq", "cl-keystone", "cl-#{group_name}" ]
+order_only_existing = ["rabbitmq", "cl-keystone", "cl-#{group_name}"]
 
 if node[:ceilometer][:use_mongodb]
   pacemaker_order "o-ceilometer-mongo" do

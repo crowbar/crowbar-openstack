@@ -23,7 +23,7 @@
 # (This example re-uses)
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
-node.set_unless['testnamespace']['db_test_user_password']
+node.set_unless["testnamespace"]["db_test_user_password"]
 
 include_recipe "mysql::client"
 
@@ -36,7 +36,7 @@ include_recipe "mysql::client"
 db_server = search(:node, "fqdn:#{node['mysql-server']}")
 
 # This saves the password so that we're idempotent.
-# Doesn't work on chef solo since there's no place to 
+# Doesn't work on chef solo since there's no place to
 # save node data there.
 unless Chef::Config[:solo]
   ruby_block "save node data" do

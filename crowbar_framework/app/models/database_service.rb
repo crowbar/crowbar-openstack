@@ -16,7 +16,6 @@
 #
 
 class DatabaseService < PacemakerServiceObject
-
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "database"
@@ -52,7 +51,7 @@ class DatabaseService < PacemakerServiceObject
     if nodes.size >= 1
       controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
       base["deployment"]["database"]["elements"] = {
-        "database-server" => [ controller[:fqdn] ]
+        "database-server" => [controller[:fqdn]]
       }
     end
 
@@ -137,6 +136,5 @@ class DatabaseService < PacemakerServiceObject
 
     @logger.debug("Database apply_role_pre_chef_call: leaving")
   end
-
 end
 

@@ -17,8 +17,8 @@
 # limitations under the License.
 #
 
-require File.join(File.dirname(__FILE__), 'resource_database')
-require File.join(File.dirname(__FILE__), 'provider_database_postgresql')
+require File.join(File.dirname(__FILE__), "resource_database")
+require File.join(File.dirname(__FILE__), "provider_database_postgresql")
 
 class Chef
   class Resource

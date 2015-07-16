@@ -63,7 +63,7 @@ end
 ceph_user = node[:glance][:rbd][:store_user]
 ceph_pool = node[:glance][:rbd][:store_pool]
 
-ceph_caps = { 'mon' => 'allow r', 'osd' => "allow class-read object_prefix rbd_children, allow rwx pool=#{ceph_pool}" }
+ceph_caps = { "mon" => "allow r", "osd" => "allow class-read object_prefix rbd_children, allow rwx pool=#{ceph_pool}" }
 
 ceph_client ceph_user do
   ceph_conf ceph_conf

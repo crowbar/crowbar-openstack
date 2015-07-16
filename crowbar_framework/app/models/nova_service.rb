@@ -16,7 +16,6 @@
 #
 
 class NovaService < PacemakerServiceObject
-
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "nova"
@@ -108,8 +107,8 @@ class NovaService < PacemakerServiceObject
   end
 
   def node_supports_kvm(node)
-    return false if node[:cpu].nil? || node[:cpu]['0'].nil?
-    node[:cpu]['0'][:flags].include?("vmx") or node[:cpu]['0'][:flags].include?("svm")
+    return false if node[:cpu].nil? || node[:cpu]["0"].nil?
+    node[:cpu]["0"][:flags].include?("vmx") or node[:cpu]["0"][:flags].include?("svm")
   end
 
   #
@@ -127,9 +126,9 @@ class NovaService < PacemakerServiceObject
     nodes.delete_if { |n| n.admin? } if nodes.size > 1
     nodes.delete_if { |n| n.intended_role == "storage" }
 
-    controller  = nodes.delete nodes.detect { |n| n if n.intended_role == "controller"}
+    controller  = nodes.delete nodes.detect { |n| n if n.intended_role == "controller" }
     controller ||= nodes.shift
-    nodes = [ controller ] if nodes.empty?
+    nodes = [controller] if nodes.empty?
 
     # restrict nodes to 'compute' roles only if compute role was defined
     if nodes.detect { |n| n if n.intended_role == "compute" }
@@ -140,14 +139,14 @@ class NovaService < PacemakerServiceObject
     non_hyperv = nodes - hyperv
     kvm = non_hyperv.select { |n| n if node_supports_kvm(n) }
     non_kvm = non_hyperv - kvm
-    xen = non_kvm.select { |n| n unless n[:block_device].include?('vda') or !node_platform_supports_xen(n) }
+    xen = non_kvm.select { |n| n unless n[:block_device].include?("vda") or !node_platform_supports_xen(n) }
     qemu = non_kvm - xen
 
     # do not use docker by default
     # do not use zvm by default
     #   TODO add it here once a compute node can run inside z/VM
     base["deployment"]["nova"]["elements"] = {
-      "nova-multi-controller" => [ controller.name ],
+      "nova-multi-controller" => [controller.name],
       "nova-multi-compute-hyperv" => hyperv.map { |x| x.name },
       "nova-multi-compute-kvm" => kvm.map { |x| x.name },
       "nova-multi-compute-qemu" => qemu.map { |x| x.name },
@@ -294,7 +293,6 @@ class NovaService < PacemakerServiceObject
   private
 
   def hyperv_available?
-    return File.exist?('/opt/dell/chef/cookbooks/hyperv')
+    return File.exist?("/opt/dell/chef/cookbooks/hyperv")
   end
-
 end

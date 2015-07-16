@@ -12,7 +12,7 @@ end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-if node[:glance][:api][:protocol] == 'https'
+if node[:glance][:api][:protocol] == "https"
   if node[:glance][:ssl][:generate_certs]
     package "openssl"
     ruby_block "generate_certs for glance" do
@@ -83,7 +83,7 @@ cinder_api_insecure = false
 cinders = search(:node, "roles:cinder-controller") || []
 if cinders.length > 0
   cinder = cinders[0]
-  cinder_api_insecure = cinder[:cinder][:api][:protocol] == 'https' && cinder[:cinder][:ssl][:insecure]
+  cinder_api_insecure = cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
 end
 
 #TODO: similarly with nova
@@ -107,15 +107,15 @@ template node[:glance][:api][:config_file] do
   group node[:glance][:group]
   mode 0640
   variables(
-      :bind_host => network_settings[:api][:bind_host],
-      :bind_port => network_settings[:api][:bind_port],
-      :registry_bind_host => network_settings[:registry][:bind_host],
-      :registry_bind_port => network_settings[:registry][:bind_port],
-      :keystone_settings => keystone_settings,
-      :rabbit_settings => fetch_rabbitmq_settings,
-      :cinder_api_insecure => cinder_api_insecure,
-      :use_docker => use_docker,
-      :glance_stores => glance_stores.join(",")
+      bind_host: network_settings[:api][:bind_host],
+      bind_port: network_settings[:api][:bind_port],
+      registry_bind_host: network_settings[:registry][:bind_host],
+      registry_bind_port: network_settings[:registry][:bind_port],
+      keystone_settings: keystone_settings,
+      rabbit_settings: fetch_rabbitmq_settings,
+      cinder_api_insecure: cinder_api_insecure,
+      use_docker: use_docker,
+      glance_stores: glance_stores.join(",")
 
   )
 end
@@ -140,11 +140,11 @@ glance_protocol = node[:glance][:api][:protocol]
 crowbar_pacemaker_sync_mark "wait-glance_register_service"
 
 keystone_register "register glance service" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   service_name "glance"
   service_type "image"
   service_description "Openstack Glance Service"
@@ -152,13 +152,13 @@ keystone_register "register glance service" do
 end
 
 keystone_register "register glance endpoint" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   endpoint_service "glance"
-  endpoint_region keystone_settings['endpoint_region']
+  endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{glance_protocol}://#{endpoint_public_ip}:#{api_port}"
   endpoint_adminURL "#{glance_protocol}://#{endpoint_admin_ip}:#{api_port}"
   endpoint_internalURL "#{glance_protocol}://#{endpoint_admin_ip}:#{api_port}"

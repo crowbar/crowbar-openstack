@@ -1,6 +1,6 @@
 svcs = []
 ports = {}
-node.default[:heat][:platform][:services].each {|svc| svcs << svc}
+node.default[:heat][:platform][:services].each { |svc| svcs << svc }
 node.default[:heat][:api].each do |k,v|
     next if k !~ /port*/
     ports[k] = v
@@ -16,9 +16,9 @@ template "/etc/nagios/nrpe.d/heat_nrpe.cfg" do
   group node[:nagios][:group]
   owner node[:nagios][:user]
   variables( {
-    :heat_services => svcs,
-    :heat_ports => ports,
-    :heat_ip => node.ipaddress
+    heat_services: svcs,
+    heat_ports: ports,
+    heat_ip: node.ipaddress
   })
    notifies :restart, "service[nagios-nrpe-server]"
 end if node["roles"].include?("nagios-client")

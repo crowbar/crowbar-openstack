@@ -32,7 +32,7 @@ template mongo_conf do
   mode 0644
   source "mongodb.conf.erb"
   variables(
-    :listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+    listen_addr: Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
     )
   notifies :restart, "service[#{mongo_service}]", :immediately
 end
@@ -40,7 +40,7 @@ end
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
 service mongo_service do
-  supports :status => true, :restart => true
+  supports status: true, restart: true
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
@@ -69,15 +69,15 @@ if ha_enabled
     package("ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-mongo").run_action(:install)
 
     members = search(:node,
-      "ceilometer_ha_mongodb_replica_set_member:true AND "\
-      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}")
+                     "ceilometer_ha_mongodb_replica_set_member:true AND "\
+                     "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}")
 
     # configure replica set in a ruby block where we also wait for mongodb
     # because we need mongodb to be started (which is not the case in compile
     # phase)
     ruby_block "Configure MongoDB replica set" do
       block do
-        require 'timeout'
+        require "timeout"
         begin
           mongodb_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 

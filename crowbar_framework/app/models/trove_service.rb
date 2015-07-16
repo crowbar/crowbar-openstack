@@ -51,7 +51,7 @@ class TroveService < ServiceObject
     if nodes.size >= 1
       controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
       base["deployment"]["trove"]["elements"] = {
-        "trove-server" => [ controller[:fqdn] ]
+        "trove-server" => [controller[:fqdn]]
       }
     end
 

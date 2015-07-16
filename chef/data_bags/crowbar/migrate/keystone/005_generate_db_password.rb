@@ -12,13 +12,13 @@ def upgrade ta, td, a, d
       unless node[:keystone][:db][:password].empty?
         @@keystone_db_password = node[:keystone][:db][:password]
       end
-      node[:keystone][:db].delete('password')
+      node[:keystone][:db].delete("password")
       node.save
     end
   end
 
-  if a['db']['password'].nil? || a['db']['password'].empty?
-    a['db']['password'] = @@keystone_db_password
+  if a["db"]["password"].nil? || a["db"]["password"].empty?
+    a["db"]["password"] = @@keystone_db_password
   end
 
   return a, d

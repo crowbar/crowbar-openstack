@@ -6,11 +6,11 @@ if node[:ceilometer][:use_mongodb]
 
   if node[:ceilometer][:ha][:server][:enabled]
     db_hosts = search(:node,
-      "ceilometer_ha_mongodb_replica_set_member:true AND roles:ceilometer-server AND "\
-      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
+                      "ceilometer_ha_mongodb_replica_set_member:true AND roles:ceilometer-server AND "\
+                      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
       )
     unless db_hosts.empty?
-      mongodb_servers = db_hosts.map {|s| "#{Chef::Recipe::Barclamp::Inventory.get_network_by_type(s, "admin").address}:#{s[:ceilometer][:mongodb][:port]}"}
+      mongodb_servers = db_hosts.map { |s| "#{Chef::Recipe::Barclamp::Inventory.get_network_by_type(s, "admin").address}:#{s[:ceilometer][:mongodb][:port]}" }
       db_connection = "mongodb://#{mongodb_servers.sort.join(',')}/ceilometer?replicaSet=#{node[:ceilometer][:ha][:mongodb][:replica_set][:name]}"
     end
   end
@@ -31,7 +31,7 @@ else
   include_recipe "#{db_settings[:backend_name]}::client"
   include_recipe "#{db_settings[:backend_name]}::python-client"
 
-  db_password = ''
+  db_password = ""
   if node.roles.include? "ceilometer-server"
     # password is already created because common recipe comes
     # after the server recipe
@@ -47,7 +47,7 @@ else
   db_connection = "#{db_settings[:url_scheme]}://#{node[:ceilometer][:db][:user]}:#{db_password}@#{db_settings[:address]}/#{node[:ceilometer][:db][:database]}"
 end
 
-is_compute_agent = node.roles.include?("ceilometer-agent") && node.roles.any?{|role| /^nova-multi-compute-/ =~ role}
+is_compute_agent = node.roles.include?("ceilometer-agent") && node.roles.any?{ |role| /^nova-multi-compute-/ =~ role }
 is_swift_proxy = node.roles.include?("ceilometer-swift-proxy-middleware") && node.roles.include?("swift-proxy")
 
 # Find hypervisor inspector
@@ -83,19 +83,19 @@ template "/etc/ceilometer/ceilometer.conf" do
     group node[:ceilometer][:group]
     mode "0640"
     variables(
-      :debug => node[:ceilometer][:debug],
-      :verbose => node[:ceilometer][:verbose],
-      :rabbit_settings => fetch_rabbitmq_settings,
-      :keystone_settings => keystone_settings,
-      :bind_host => bind_host,
-      :bind_port => bind_port,
-      :metering_secret => node[:ceilometer][:metering_secret],
-      :database_connection => db_connection,
-      :node_hostname => node['hostname'],
-      :hypervisor_inspector => hypervisor_inspector,
-      :libvirt_type => libvirt_type,
-      :time_to_live => time_to_live,
-      :alarm_threshold_evaluation_interval => node[:ceilometer][:alarm_threshold_evaluation_interval]
+      debug: node[:ceilometer][:debug],
+      verbose: node[:ceilometer][:verbose],
+      rabbit_settings: fetch_rabbitmq_settings,
+      keystone_settings: keystone_settings,
+      bind_host: bind_host,
+      bind_port: bind_port,
+      metering_secret: node[:ceilometer][:metering_secret],
+      database_connection: db_connection,
+      node_hostname: node["hostname"],
+      hypervisor_inspector: hypervisor_inspector,
+      libvirt_type: libvirt_type,
+      time_to_live: time_to_live,
+      alarm_threshold_evaluation_interval: node[:ceilometer][:alarm_threshold_evaluation_interval]
     )
     if is_compute_agent
       notifies :restart, "service[nova-compute]"
@@ -111,10 +111,10 @@ template "/etc/ceilometer/pipeline.yaml" do
   group "root"
   mode "0644"
   variables({
-      :meters_interval => node[:ceilometer][:meters_interval],
-      :cpu_interval => node[:ceilometer][:cpu_interval],
-      :disk_interval => node[:ceilometer][:disk_interval],
-      :network_interval => node[:ceilometer][:network_interval]
+      meters_interval: node[:ceilometer][:meters_interval],
+      cpu_interval: node[:ceilometer][:cpu_interval],
+      disk_interval: node[:ceilometer][:disk_interval],
+      network_interval: node[:ceilometer][:network_interval]
   })
   if is_compute_agent
     notifies :restart, "service[nova-compute]"
