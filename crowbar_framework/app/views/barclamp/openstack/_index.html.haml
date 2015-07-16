@@ -1,0 +1,9 @@
+.panel-body
+  %p
+    = t(".instructions")
+
+    - unless t(".hint").empty?
+      %em
+        = t(".hint")
+
+= render :partial => "barclamp/index"
