@@ -1,0 +1,132 @@
+#
+# Copyright 2011-2013, Dell
+# Copyright 2013-2014, SUSE LINUX Products GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+en:
+  nav:
+    cinder: 'Cinder'
+  barclamp:
+    cinder:
+      edit_attributes:
+        rabbitmq_instance: 'RabbitMQ'
+        database_instance: 'Database Instance'
+        keystone_instance: 'Keystone'
+        glance_instance: 'Glance'
+        volumes:
+          "0":
+            backend_driver: 'Type of Volume'
+          addheader: 'Add new Cinder Backend'
+          backend_name: 'Name for Backend'
+          backend_driver: 'Type of Volume'
+          loading_text: 'Loading Backends...'
+          listheader: 'Cinder Backends'
+          emc_parameters: 'EMC Parameters'
+          emc_volume_driver: 'EMC'
+          eqlx_parameters: 'EqualLogic Parameters'
+          eqlx_volume_driver: 'EqualLogic'
+          eternus_parameters: 'Fujitsu ETERNUS DX Parameters'
+          eternus_volume_driver: 'Fujitsu ETERNUS DX'
+          local_parameters: 'Local File Parameters'
+          local_volume_driver: 'Local File'
+          manual_parameters: 'Other driver parameters'
+          manual_volume_driver: 'Other Driver'
+          manual:
+            config_hint: 'Each line will be added to cinder.conf. If the driver needs an external file, this file must be manually uploaded.'
+            driver_hint: 'For instance, cinder.volume.drivers.netapp.iscsi.NetAppISCSIDriver'
+            not_supported: 'Manually picking a driver can be used to specify a Cinder driver not available in the list of drivers above. This is however not supported.'
+          netapp_parameters: 'NetApp Parameters'
+          netapp_volume_driver: 'NetApp'
+          netapp:
+            nfs_shares_config_hint: 'Format one entry per line in the form hostname:/vol/path optional-nfs-mount-options'
+            vfiler_hint: 'Only Use this option when utilizing the MultiStore feature on the NetApp storage with iSCSI'
+            vserver_hint: 'If using the NFS storage protocol, this parameter is mandatory for storage service catalog support'
+            volume_list_hint: 'Optional comma separated list of NetApp controller volume names'
+          raw_parameters: 'Raw Devices Parameters'
+          raw_volume_driver: 'Raw Devices'
+          rbd_parameters: 'RADOS Parameters'
+          rbd_volume_driver: 'RADOS'
+          vmware_parameters: 'VMware Parameters'
+          vmware_volume_driver: 'VMware'
+          index:
+            emc:
+              ecom_server_ip: 'IP address of the ECOM server'
+              ecom_server_password: 'Password for accessing the ECOM server'
+              ecom_server_port: 'Port of the ECOM server'
+              ecom_server_username: 'Username for accessing the ECOM server'
+              emc_storage_type: 'Thin pool where user wants to create volume from'
+              masking_view: 'Unisphere for VMAX Masking View'
+            eqlx:
+              eqlx_chap_login: 'EQLX chap login for targets'
+              eqlx_chap_password: 'EQLX chap password for targets'
+              eqlx_cli_timeout: 'EQLX CLI command execution timeout'
+              eqlx_group_name: 'EQLX group name (prompt)'
+              eqlx_pool: 'EQLX pool name'
+              eqlx_use_chap: 'Use chap auth for targets'
+              san_ip: 'EQLX SAN IP'
+              san_login: 'EQLX SAN login'
+              san_password: 'EQLX SAN password'
+              san_thin_provision: 'Use thin provision for volumes'
+            eternus:
+              protocol: 'Connection Protocol'
+              ip: 'IP for SMI-S'
+              port: 'Port for SMI-S'
+              user: 'Username for SMI-S'
+              password: 'Password for SMI-S'
+              pool: 'Snapshot (Thick/RAID Group) Pool Name'
+              iscsi_ip: 'iSCSI IP'
+            manual:
+              config: 'Options'
+              driver: 'Driver'
+            netapp:
+              netapp_login: 'Username for accessing NetApp'
+              netapp_password: 'Password for accessing NetApp'
+              netapp_server_hostname: 'Server host name'
+              netapp_server_port: 'Server port'
+              netapp_transport_type: 'Transport Type'
+              netapp_volume_list: 'Restrict provisioning on iSCSI to these volumes (netapp_volume_list)'
+              netapp_vfiler: 'The vFiler unit name for provisioning OpenStack volumes (netapp_vfiler)'
+              nfs_shares: 'List of Netapp NFS Exports'
+              storage_family: 'Storage Family Type'
+              storage_protocol: 'Storage Protocol'
+              vserver: 'Name of the Virtual Storage Server (netapp_vserver)'
+            raw:
+              cinder_raw_method: 'Disk selection method'
+              volume_name: 'Name of Volume'
+            rbd:
+              use_crowbar: 'Use Ceph deployed by Crowbar'
+              admin_keyring: 'Path to Ceph admin keyring'
+              config_file: 'Path to Ceph configuration file'
+              pool: 'RADOS pool for Cinder volumes'
+              user: 'RADOS user (Set only if using CephX authentication)'
+            vmware:
+              host: 'vCenter Host/IP Address'
+              user: 'vCenter Username'
+              password: 'vCenter Password'
+              volume_folder: 'Folder for Volumes'
+            local:
+              file_name: 'Volume File Name'
+              file_size: 'Maximum File Size (GB)'
+              volume_name: 'Name of Volume'
+        api:
+          protocol: 'Protocol'
+        ssl:
+          header: 'SSL Support'
+          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          certfile: 'SSL Certificate File'
+          keyfile: 'SSL (Private) Key File'
+          generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          cert_required: 'Require Client Certificate'
+          ca_certs: 'SSL CA Certificates File'

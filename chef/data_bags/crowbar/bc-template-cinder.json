@@ -1,0 +1,151 @@
+{
+  "id": "bc-template-cinder",
+  "description": "Installation for Cinder",
+  "attributes": {
+    "cinder": {
+      "debug": false,
+      "verbose": true,
+      "max_header_line": 16384,
+      "use_syslog": false,
+      "rabbitmq_instance": "none",
+      "keystone_instance": "none",
+      "glance_instance": "none",
+      "database_instance": "none",
+      "service_user": "cinder",
+      "service_password": "",
+      "max_pool_size": 30,
+      "max_overflow": 10,
+      "pool_timeout": 30,
+      "use_multi_backend": true,
+      "volume_defaults": {
+        "raw": {
+          "volume_name": "cinder-volumes",
+          "cinder_raw_method": "first"
+        },
+        "local": {
+          "volume_name": "cinder-volumes",
+          "file_name": "/var/lib/cinder/volume.raw",
+          "file_size": 2000
+        },
+        "eqlx": {
+          "san_ip": "192.168.124.11",
+          "san_login": "grpadmin",
+          "san_password": "12345",
+          "san_thin_provision": false,
+          "eqlx_group_name": "group-0",
+          "eqlx_use_chap": false,
+          "eqlx_chap_login": "chapadmin",
+          "eqlx_chap_password": "12345",
+          "eqlx_cli_timeout": 30,
+          "eqlx_pool": "default"
+        },
+        "netapp": {
+          "storage_family": "ontap_7mode",
+          "storage_protocol": "iscsi",
+          "nfs_shares": "",
+          "vserver": "",
+          "netapp_server_hostname": "192.168.124.11",
+          "netapp_server_port": 443,
+          "netapp_login": "admin",
+          "netapp_password": "",
+          "netapp_vfiler": "",
+          "netapp_transport_type": "https",
+          "netapp_volume_list": ""
+        },
+        "emc": {
+          "emc_storage_type": "",
+          "ecom_server_ip": "192.168.124.11",
+          "ecom_server_port": 0,
+          "masking_view": "",
+          "ecom_server_username": "admin",
+          "ecom_server_password": ""
+        },
+        "eternus": {
+          "protocol": "fc",
+          "ip": "",
+          "port": 5988,
+          "user": "",
+          "password": "",
+          "pool": "",
+          "iscsi_ip": ""
+        },
+        "rbd": {
+          "use_crowbar": true,
+          "config_file": "/etc/ceph/ceph.conf",
+          "admin_keyring": "/etc/ceph/ceph.client.admin.keyring",
+          "pool": "volumes",
+          "user": "cinder",
+          "secret_uuid": ""
+        },
+        "vmware": {
+          "host": "",
+          "user": "",
+          "password": "",
+          "volume_folder": "cinder-volume"
+        },
+        "manual": {
+          "driver": "",
+          "config": ""
+        }
+      },
+      "volumes": [
+        {
+          "backend_driver": "raw",
+          "backend_name": "default",
+          "raw": {
+              "volume_name": "cinder-volumes",
+              "cinder_raw_method": "first"
+          }
+        }
+      ],
+      "api": {
+        "protocol": "http",
+        "bind_open_address": true,
+        "bind_port": 8776
+      },
+      "strict_ssh_host_key_policy": false,
+      "default_availability_zone": "",
+      "ssl": {
+        "certfile": "/etc/cinder/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/cinder/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
+        "cert_required": false,
+        "ca_certs": "/etc/cinder/ssl/certs/ca.pem"
+      },
+      "db": {
+        "password": "",
+        "user": "cinder",
+        "database": "cinder"
+      }
+    }
+  },
+  "deployment": {
+    "cinder": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 42,
+      "element_states": {
+          "cinder-controller": [ "readying", "ready", "applying" ],
+          "cinder-volume": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+          [ "cinder-controller" ],
+          [ "cinder-volume" ]
+      ],
+      "element_run_list_order": {
+          "cinder-controller": 92,
+          "cinder-volume": 93
+      },
+      "config": {
+        "environment": "cinder-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
+
