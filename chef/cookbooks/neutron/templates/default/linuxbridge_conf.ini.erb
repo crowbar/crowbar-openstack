@@ -34,7 +34,7 @@
 #
 # physical_interface_mappings =
 # Example: physical_interface_mappings = physnet1:eth1
-physical_interface_mappings = physnet1:<%=@physnet%>
+physical_interface_mappings = <%= @interface_mappings %>
 
 [vxlan]
 # (BoolOpt) enable VXLAN on the agent

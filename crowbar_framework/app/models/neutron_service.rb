@@ -145,6 +145,24 @@ class NeutronService < PacemakerServiceObject
     end
   end
 
+  def validate_external_networks external_networks
+    net_svc = NetworkService.new @logger
+    network_proposal = ProposalObject.find_proposal(net_svc.bc_name, "default")
+    blacklist = ['bmc', 'bmc_admin', 'admin', 'nova_fixed', 'nova_floating',
+                 'os_sdn', 'public', 'storage'] 
+
+    external_networks.each do |ext_net|
+      # Exclude a few default networks from network.json from being used as
+      # additional external networks in neutron
+      if blacklist.include? ext_net
+        validation_error("Network '#{ext_net}' cannot be used as an additional external network")
+      end
+      if network_proposal["attributes"]["network"]["networks"][ext_net].nil?
+        validation_error("External Network '#{ext_net}' is not defined in the configuration of the network barclamp")
+      end
+    end
+  end
+
   def validate_proposal_after_save proposal
     validate_one_for_role proposal, "neutron-server"
     validate_at_least_n_for_role proposal, "neutron-network", 1
@@ -244,6 +262,10 @@ class NeutronService < PacemakerServiceObject
       end
     end
 
+    unless proposal["attributes"]["neutron"]["additional_external_networks"].empty?
+      validate_external_networks proposal["attributes"]["neutron"]["additional_external_networks"]
+    end
+
     super
   end
 
@@ -277,6 +299,9 @@ class NeutronService < PacemakerServiceObject
 
     network_nodes.each do |n|
       net_svc.allocate_ip "default", "public", "host",n
+      role.default_attributes["neutron"]["additional_external_networks"].each do |extnet|
+        net_svc.enable_interface "default", extnet, n
+      end
       # TODO(toabctl): The same code is in the nova barclamp. Should be extracted and reused!
       #                (see crowbar_framework/app/models/nova_service.rb)
       if role.default_attributes["neutron"]["networking_plugin"] == "ml2"
