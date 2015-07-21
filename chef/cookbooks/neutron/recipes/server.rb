@@ -13,8 +13,14 @@
 # limitations under the License.
 #
 
+zvm_compute_node = search(:node, "roles:nova-compute-zvm") || []
+use_zvm = node[:neutron][:networking_plugin] == "ml2" && !zvm_compute_node.empty?
+
 pkgs = node[:neutron][:platform][:pkgs] + node[:neutron][:platform][:pkgs_fwaas]
 pkgs += node[:neutron][:platform][:pkgs_lbaas] if node[:neutron][:use_lbaas]
+if use_zvm
+  pkgs << node[:neutron][:platform][:zvm_agent_pkg] if node[:neutron][:networking_plugin] == "ml2"
+end
 pkgs.each { |p| package p }
 
 include_recipe "neutron::database"
@@ -159,6 +165,10 @@ when "ml2"
   # on whether one of the external networks will share the physical interface
   # with "nova_fixed".
   external_networks = ["nova_floating"]
+
+  if use_zvm
+    external_networks.push("xcatvsw1")
+  end
   external_networks.concat(node[:neutron][:additional_external_networks])
   network_node = NeutronHelper.get_network_node_from_neutron_attributes(node)
   physnet_map = NeutronHelper.get_neutron_physnets(network_node, external_networks)
@@ -169,6 +179,9 @@ when "ml2"
   #TODO(vuntz): temporarily disable the hyperv mechanism since we're lacking networking-hyperv from stackforge
   #ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
   ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
+  if use_zvm
+    ml2_mechanism_drivers.push("zvm")
+  end
   if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
     ml2_mechanism_drivers.push("l2population") if node[:neutron][:use_dvr]
     mtu_value = 1400
