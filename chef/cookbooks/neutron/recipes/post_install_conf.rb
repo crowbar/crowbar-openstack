@@ -29,20 +29,23 @@ fixed_last_ip = IPAddr.new("#{fixed_range}").to_range().to_a[-2]
 fixed_pool_start = fixed_first_ip if fixed_first_ip > fixed_pool_start
 fixed_pool_end = fixed_last_ip if fixed_last_ip < fixed_pool_end
 
-
-#this code seems to be broken in case complicated network when floating network outside of public network
 public_net = node[:network][:networks]["public"]
-public_range = "#{public_net["subnet"]}/#{mask_to_bits(public_net["netmask"])}"
-public_router = "#{public_net["router"]}"
 floating_net = node[:network][:networks]["nova_floating"]
-floating_range = "#{floating_net["subnet"]}/#{mask_to_bits(floating_net["netmask"])}"
+
+public_net_addr = IPAddr.new("#{public_net["subnet"]}/#{public_net["netmask"]}")
+floating_net_addr = IPAddr.new("#{floating_net["subnet"]}/#{floating_net["netmask"]}")
+
+# For backwards compatibility, if floating is a subnet of public use the
+# router and range/netmask from public (otherwise router creation will fail)
+if public_net_addr.include?(floating_net_addr)
+  floating_router = public_net["router"]
+  floating_range = "#{public_net["subnet"]}/#{mask_to_bits(public_net["netmask"])}"
+else
+  floating_router = floating_net["router"]
+  floating_range = "#{floating_net["subnet"]}/#{mask_to_bits(floating_net["netmask"])}"
+end
 floating_pool_start = floating_net[:ranges][:host][:start]
 floating_pool_end = floating_net[:ranges][:host][:end]
-
-floating_first_ip = IPAddr.new("#{public_range}").to_range().to_a[2]
-floating_last_ip = IPAddr.new("#{public_range}").to_range().to_a[-2]
-floating_pool_start = floating_first_ip if floating_first_ip > floating_pool_start
-floating_pool_end = floating_last_ip if floating_last_ip < floating_pool_end
 
 vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 
@@ -123,7 +126,7 @@ execute "create_fixed_subnet" do
 end
 
 execute "create_floating_subnet" do
-  command "#{neutron_cmd} subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} --gateway #{public_router} floating #{public_range} --enable_dhcp False"
+  command "#{neutron_cmd} subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} --gateway #{floating_router} floating #{floating_range} --enable_dhcp False"
   not_if "out=$(#{neutron_cmd} subnet-list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
   retries 5
   retry_delay 10
