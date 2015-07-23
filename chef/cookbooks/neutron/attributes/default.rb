@@ -57,6 +57,8 @@ case node["platform"]
 when "suse"
   default[:neutron][:platform] = {
     :pkgs => [ "openstack-neutron-server" ],
+    :pkgs_fwaas => [ "openstack-neutron-fwaas" ],
+    :pkgs_lbaas => [ "openstack-neutron-lbaas" ],
     :service_name => "openstack-neutron",
     :ovs_agent_pkg => "openstack-neutron-openvswitch-agent",
     :ovs_agent_name => "openstack-neutron-openvswitch-agent",
@@ -88,6 +90,8 @@ when "suse"
 when "centos", "redhat"
   default[:neutron][:platform] = {
     :pkgs => [ "openstack-neutron" ],
+    :pkgs_fwaas => [ "openstack-neutron-fwaas" ],
+    :pkgs_lbaas => [ "openstack-neutron-lbaas" ],
     :service_name => "neutron-server",
     :ovs_agent_pkg => "openstack-neutron-openvswitch",
     :ovs_agent_name => "neutron-openvswitch-agent",
@@ -116,6 +120,8 @@ else
   default[:neutron][:platform] = {
     :pkgs => [ "neutron-server",
                "neutron-plugin-openvswitch" ],
+    :pkgs_fwaas => [ "neutron-fwaas" ],
+    :pkgs_lbaas => [ "neutron-lbaas" ],
     :service_name => "neutron-server",
     :ovs_agent_pkg => "neutron-plugin-openvswitch-agent",
     :ovs_agent_name => "neutron-plugin-openvswitch-agent",

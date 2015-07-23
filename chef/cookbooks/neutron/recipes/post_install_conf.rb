@@ -110,7 +110,7 @@ execute "create_fixed_network" do
 end
 
 execute "create_floating_network" do
-  command "#{neutron_cmd} net-create floating --router:external=True #{floating_network_type}"
+  command "#{neutron_cmd} net-create floating --router:external #{floating_network_type}"
   not_if "out=$(#{neutron_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
   retries 5
   retry_delay 10
