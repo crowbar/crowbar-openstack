@@ -83,7 +83,15 @@ else
   bind_port = neutron[:neutron][:api][:service_port]
 end
 
-nova = get_instance("roles:nova-multi-controller")
+#TODO: nova should depend on neutron, but neutron also depends on nova
+# so we have to do something like this
+novas = search(:node, "roles:nova-multi-controller") || []
+if novas.length > 0
+  nova = novas[0]
+  nova = node if nova.name == node.name
+else
+  nova = node
+end
 nova_notify = {}
 
 unless nova[:nova].nil? or nova[:nova][:ssl].nil?
