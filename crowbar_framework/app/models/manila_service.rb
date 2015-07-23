@@ -71,21 +71,19 @@ end
     @logger.debug("Manila create_proposal: entering")
     base = super
 
-    # TODO(toabctl): select useful defaults. Currently (Cloud 5)
-    # Manila must run on SLE12 so selecting another controller is wrong
-    # nodes = NodeObject.all
-    # controllers = select_nodes_for_role(
-    #   nodes, "manila-server", "controller") || []
-    # # FIXME(toabctl): I think there no reason to use storage nodes
-    # # for manila-share
-    # storage = select_nodes_for_role(
-    #   nodes, "manila-share", "storage") || []
+    nodes = NodeObject.all
+    controllers = select_nodes_for_role(
+      nodes, "manila-server", "controller") || []
+    # NOTE(toabctl): Use storage nodes for the share service, but that
+    # could be any other node, too
+    storage = select_nodes_for_role(
+      nodes, "manila-share", "storage") || []
 
-    # base["deployment"][@bc_name]["elements"] = {
-    #   "manila-server" => controllers.empty? ?
-    # [] : [controllers.first.name],
-    #   "manila-share" => storage.map(&:name)
-    # }
+    base["deployment"][@bc_name]["elements"] = {
+      "manila-server" => controllers.empty? ?
+    [] : [controllers.first.name],
+      "manila-share" => storage.map(&:name)
+    }
 
     base["attributes"][@bc_name]["database_instance"] =
       find_dep_proposal("database")
