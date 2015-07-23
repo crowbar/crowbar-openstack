@@ -153,7 +153,9 @@ tenant_network_types = [[node[:neutron][:ml2_type_drivers_default_tenant_network
 case node[:neutron][:networking_plugin]
 when 'ml2'
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
-  ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
+  #TODO(vuntz): temporarily disable the hyperv mechanism since we're lacking networking-hyperv from stackforge
+  #ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
+  ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
   if node[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"))
     ml2_mechanism_drivers.push("l2population")
   end
