@@ -13,7 +13,8 @@
 # limitations under the License.
 #
 
-pkgs = node[:neutron][:platform][:pkgs]
+pkgs = node[:neutron][:platform][:pkgs] + node[:neutron][:platform][:pkgs_fwaas]
+pkgs += node[:neutron][:platform][:pkgs_lbaas] if node[:neutron][:use_lbaas]
 pkgs.each { |p| package p }
 
 include_recipe "neutron::database"
