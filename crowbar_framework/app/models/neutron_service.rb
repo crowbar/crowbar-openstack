@@ -147,9 +147,9 @@ class NeutronService < PacemakerServiceObject
 
   def validate_external_networks external_networks
     net_svc = NetworkService.new @logger
-    network_proposal = ProposalObject.find_proposal(net_svc.bc_name, "default")
+    network_proposal = Proposal.where(barclamp: net_svc.bc_name, name: "default").first
     blacklist = ['bmc', 'bmc_admin', 'admin', 'nova_fixed', 'nova_floating',
-                 'os_sdn', 'public', 'storage'] 
+                 'os_sdn', 'public', 'storage']
 
     external_networks.each do |ext_net|
       # Exclude a few default networks from network.json from being used as
