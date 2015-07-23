@@ -36,7 +36,7 @@ class ManilaService < PacemakerServiceObject
         "exclude_platform" => {
           "windows" => "/.*/",
           "suse" => "11.3"
-        },
+        }
       },
       "manila-share" => {
         "unique" => false,
