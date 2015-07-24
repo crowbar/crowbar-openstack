@@ -28,7 +28,7 @@ for f in `keystone role-list | grep -E 'role[0-9]+|role-[0-9]+' | awk '{print $2
 echo -e "Cleaning up services..."
 for f in `keystone service-list | grep -E 'service-[0-9]+' | awk '{print $2}'` ; do keystone service-delete $f ; done
 echo -e "Cleaning up security-groups..."
-for f in `neutron security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do neutron security-group-delete $f ; done
+for f in `neutron security-group-list -c id -c name | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name' | awk '{print $2}'` ; do neutron security-group-delete $f ; done
 echo -e "Cleaning up images..."
 for f in `nova image-list | grep -E '.image[0-9]+' | awk {'print $2'}`; do nova image-delete $f ; done
 
@@ -65,7 +65,7 @@ export OS_USERNAME=<%= @comp_user %>
 export OS_PASSWORD=<%= @comp_pass %>
 export OS_TENANT_NAME=<%= @comp_tenant %>
 echo -e "Cleaning up security-groups..."
-for f in `neutron security-group-list | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name.*description' | awk '{print $2}'` ; do neutron security-group-delete $f ; done
+for f in `neutron security-group-list -c id -c name | grep -v default | grep -v '\-\{5\}' | grep -v 'id.*name' | awk '{print $2}'` ; do neutron security-group-delete $f ; done
 echo -e "Cleaning up volume snapshots..."
 for f in `nova volume-snapshot-list | awk {'print $2'} | grep -v '^ID$' | grep -v '^$'` ; do nova volume-snapshot-delete $f ; done
 echo -e "Cleaning up volumes..."
