@@ -360,7 +360,6 @@ DOCKER_IMAGE_ID=$(glance #{insecure} image-list \
 [ -n "$DOCKER_IMAGE_ID" ] && echo "$DOCKER_IMAGE_ID" > #{docker_image_id_file}
 EOH
     environment ({
-      'IMAGE_URL' => node[:tempest][:tempest_test_image],
       'OS_USERNAME' => tempest_adm_user,
       'OS_PASSWORD' => tempest_adm_pass,
       'OS_TENANT_NAME' => tempest_comp_tenant,
