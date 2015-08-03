@@ -88,8 +88,13 @@ class TempestService < ServiceObject
       # substitute the admin web portal
       tempest_tarball_path = role.default_attributes["tempest"]["tempest_tarball"].gsub("<ADMINWEB>", "#{admin_ip}:#{web_port}")
       tempest_test_image_path = role.default_attributes["tempest"]["tempest_test_image"].gsub("<ADMINWEB>", "#{admin_ip}:#{web_port}")
+      tempest_test_docker_image_path =
+        role.default_attributes["tempest"]["tempest_test_docker_image"].gsub(
+          "<ADMINWEB>", "#{admin_ip}:#{web_port}")
       role.default_attributes["tempest"]["tempest_tarball"] = tempest_tarball_path
       role.default_attributes["tempest"]["tempest_test_image"] = tempest_test_image_path
+      role.default_attributes["tempest"]["tempest_test_docker_image"] =
+        tempest_test_docker_image_path
     end
 
     role.save
