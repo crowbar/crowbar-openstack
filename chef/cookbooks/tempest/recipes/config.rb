@@ -346,6 +346,31 @@ use_livemigration = nova[:nova][:use_migration] && kvm_compute_nodes.length > 1
 
 if !docker_compute_nodes.empty? && kvm_compute_nodes.empty?
   image_name = "cirros"
+  docker_nodes = docker_compute_nodes.map(&:name)
+
+  bash "load docker image" do
+    code <<-EOH
+
+TEMP=$(mktemp -d)
+IMG_FILE=$(basename $IMAGE_URL)
+
+echo "Downloading image ... "
+wget --no-verbose $IMAGE_URL --directory-prefix=$TEMP 2>&1 || exit $?
+
+echo "Deploying image in docker nodes ... "
+for node in $NODES ; do
+  scp $TEMP/$IMG_FILE $node:/tmp
+  ssh $node docker load --input=/tmp/$IMG_FILE
+  ssh $node rm /tmp/$IMG_FILE
+done
+
+rm -fr $TEMP
+EOH
+    environment ({
+      'IMAGE_URL' => node[:tempest][:tempest_test_docker_image],
+      'NODES' => docker_nodes.join(" "),
+    })
+  end
 
   bash "find tempest test image for docker" do
     code <<-EOH
