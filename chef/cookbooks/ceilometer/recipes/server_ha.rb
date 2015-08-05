@@ -27,7 +27,9 @@ end.run_action(:create)
 crowbar_pacemaker_sync_mark "sync-ceilometer_server_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources"
+crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources" do
+  timeout 120
+end
 
 primitives = []
 
