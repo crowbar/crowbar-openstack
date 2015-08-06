@@ -256,6 +256,42 @@ ruby_block "mark node for neutron db_sync" do
   subscribes :create, "execute[neutron-db-manage migrate]", :immediately
 end
 
+# See comments for "neutron-db-manage migrate" above
+execute "neutron-db-manage migrate fwaas" do
+  user node[:neutron][:user]
+  group node[:neutron][:group]
+  command "neutron-db-manage --service fwaas upgrade head"
+  only_if { !node[:neutron][:db_synced_fwaas] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+end
+
+ruby_block "mark node for neutron db_sync fwaas" do
+  block do
+    node[:neutron][:db_synced_fwaas] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[neutron-db-manage migrate fwaas]", :immediately
+end
+
+if node[:neutron][:use_lbaas]
+  # See comments for "neutron-db-manage migrate" above
+  execute "neutron-db-manage migrate lbaas" do
+    user node[:neutron][:user]
+    group node[:neutron][:group]
+    command "neutron-db-manage --service lbaas upgrade head"
+    only_if { !node[:neutron][:db_synced_lbaas] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+  end
+
+  ruby_block "mark node for neutron db_sync lbaas" do
+    block do
+      node[:neutron][:db_synced_lbaas] = true
+      node.save
+    end
+    action :nothing
+    subscribes :create, "execute[neutron-db-manage migrate lbaas]", :immediately
+  end
+end
+
 crowbar_pacemaker_sync_mark "create-neutron_db_sync"
 
 service node[:neutron][:platform][:service_name] do
