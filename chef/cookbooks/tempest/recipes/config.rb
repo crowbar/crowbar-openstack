@@ -364,23 +364,22 @@ for node in $NODES ; do
   ssh $node rm /tmp/$IMG_FILE
 done
 
-rm -fr $TEMP
-EOH
-    environment ({
-      'IMAGE_URL' => node[:tempest][:tempest_test_docker_image],
-      'NODES' => docker_nodes.join(" "),
-    })
-  end
-
-  bash "find tempest test image for docker" do
-    code <<-EOH
-DOCKER_IMAGE_ID=$(glance #{insecure} image-list \
+echo "Registering in glance ..."
+DOCKER_IMAGE_ID=$(glance #{insecure} image-create \
     --name #{image_name} \
     --container-format docker \
-    --is-public True \
-    --page-size 1 \
-    2> /dev/null | tail -n 2 | head -n 1 | awk '{ print $2 }')
+    --property hypervisor_type=docker \
+    --disk-format raw \
+    --is-public True  \
+    --file $TEMP/$IMG_FILE \
+    | grep ' id ' | awk '{ print $4 }')
+
 [ -n "$DOCKER_IMAGE_ID" ] && echo "$DOCKER_IMAGE_ID" > #{docker_image_id_file}
+rm -fr $TEMP
+
+echo "Checking that deployment status ..."
+[ -f #{docker_image_id_file} ] || exit 127
+
 EOH
     environment ({
       "OS_USERNAME" => tempest_adm_user,
@@ -389,7 +388,9 @@ EOH
       "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
       "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
       "OS_USER_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
-      "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : ""
+      "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
+      "IMAGE_URL" => node[:tempest][:tempest_test_docker_image],
+      "IMAGE_NAME" => image_name
     })
     not_if { File.exists?(docker_image_id_file) }
   end
