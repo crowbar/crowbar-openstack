@@ -61,7 +61,7 @@ metadata_proxy_shared_secret = <%= @metadata_proxy_shared_secret %>
 # Number of separate worker processes for metadata server. Defaults to
 # half the number of CPU cores
 # metadata_workers =
-metadata_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+metadata_workers = <%= [node["cpu"]["total"]/2, 4].min %>
 
 # Number of backlog requests to configure the metadata server socket with
 # metadata_backlog = 4096
