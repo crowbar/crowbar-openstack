@@ -319,7 +319,9 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
   # L3 agent
   if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
-    package node[:neutron][:platform][:l3_agent_pkg]
+    pkgs = [node[:neutron][:platform][:l3_agent_pkg]] + \
+           node[:neutron][:platform][:pkgs_fwaas]
+    pkgs.each { |p| package p }
 
     template "/etc/neutron/l3_agent.ini" do
       source "l3_agent.ini.erb"
