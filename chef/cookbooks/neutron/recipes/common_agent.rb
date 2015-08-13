@@ -89,11 +89,7 @@ if neutron[:neutron][:networking_plugin] == 'vmware' or
   end
 end
 
-# NOTE(toabctl): Disable multiple external networks support for now
-# TODO: reenable!
-# multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty? && node.roles.include?("neutron-network")
-multiple_external_networks = false
-
+multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty? && node.roles.include?("neutron-network")
 # openvswitch configuration specific to ML2
 if neutron[:neutron][:networking_plugin] == 'ml2' and
    neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch")
