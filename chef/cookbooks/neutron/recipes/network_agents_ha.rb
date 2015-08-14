@@ -24,7 +24,9 @@ use_lbaas_agent = node[:neutron][:use_lbaas]
 crowbar_pacemaker_sync_mark "sync-neutron-network_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-neutron-network_ha_resources"
+crowbar_pacemaker_sync_mark "wait-neutron-network_ha_resources" do
+  timeout 180
+end
 
 l3_agent_primitive = "neutron-l3-agent"
 dhcp_agent_primitive = "neutron-dhcp-agent"
