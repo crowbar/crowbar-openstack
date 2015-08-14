@@ -21,14 +21,16 @@ use_lbaas_agent = node[:neutron][:use_lbaas]
 # Wait for all "neutron-network" nodes to reach this point so we know that they will
 # have all the required packages installed and configuration files updated
 # before we create the pacemaker resources.
-crowbar_pacemaker_sync_mark "sync-neutron-network_before_ha"
+crowbar_pacemaker_sync_mark "sync-neutron-agents_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-neutron-network_ha_resources"
+crowbar_pacemaker_sync_mark "wait-neutron-agents_ha_resources" do
+  timeout 180
+end
 
 l3_agent_primitive = "neutron-l3-agent"
 dhcp_agent_primitive = "neutron-dhcp-agent"
-metadatda_agent_primitive = "neutron-metadata-agent"
+metadata_agent_primitive = "neutron-metadata-agent"
 metering_agent_primitive =  "neutron-metering-agent"
 lbaas_agent_primitive =  "neutron-lbaas-agent"
 
@@ -46,7 +48,7 @@ pacemaker_primitive dhcp_agent_primitive do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-pacemaker_primitive metadatda_agent_primitive do
+pacemaker_primitive metadata_agent_primitive do
   agent node[:neutron][:ha][:network][:metadata_ra]
   op node[:neutron][:ha][:network][:op]
   action [ :create ]
@@ -97,7 +99,7 @@ group_members = []
 group_members << l3_agent_primitive if use_l3_agent
 group_members << lbaas_agent_primitive if use_lbaas_agent
 group_members += [ dhcp_agent_primitive,
-                   metadatda_agent_primitive,
+                   metadata_agent_primitive,
                    metering_agent_primitive ]
 group_members << neutron_agent_primitive if use_l3_agent
 
@@ -161,4 +163,4 @@ crowbar_pacemaker_order_only_existing "o-#{ha_tool_primitive_name}" do
   only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-neutron-network_ha_resources"
+crowbar_pacemaker_sync_mark "create-neutron-agents_ha_resources"
