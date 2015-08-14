@@ -21,10 +21,10 @@ use_lbaas_agent = node[:neutron][:use_lbaas]
 # Wait for all "neutron-network" nodes to reach this point so we know that they will
 # have all the required packages installed and configuration files updated
 # before we create the pacemaker resources.
-crowbar_pacemaker_sync_mark "sync-neutron-network_before_ha"
+crowbar_pacemaker_sync_mark "sync-neutron-agents_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-neutron-network_ha_resources" do
+crowbar_pacemaker_sync_mark "wait-neutron-agents_ha_resources" do
   timeout 180
 end
 
@@ -163,4 +163,4 @@ crowbar_pacemaker_order_only_existing "o-#{ha_tool_primitive_name}" do
   only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-neutron-network_ha_resources"
+crowbar_pacemaker_sync_mark "create-neutron-agents_ha_resources"
