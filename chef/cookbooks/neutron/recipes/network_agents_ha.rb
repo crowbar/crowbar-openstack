@@ -30,7 +30,7 @@ end
 
 l3_agent_primitive = "neutron-l3-agent"
 dhcp_agent_primitive = "neutron-dhcp-agent"
-metadatda_agent_primitive = "neutron-metadata-agent"
+metadata_agent_primitive = "neutron-metadata-agent"
 metering_agent_primitive =  "neutron-metering-agent"
 lbaas_agent_primitive =  "neutron-lbaas-agent"
 
@@ -48,7 +48,7 @@ pacemaker_primitive dhcp_agent_primitive do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-pacemaker_primitive metadatda_agent_primitive do
+pacemaker_primitive metadata_agent_primitive do
   agent node[:neutron][:ha][:network][:metadata_ra]
   op node[:neutron][:ha][:network][:op]
   action [ :create ]
@@ -99,7 +99,7 @@ group_members = []
 group_members << l3_agent_primitive if use_l3_agent
 group_members << lbaas_agent_primitive if use_lbaas_agent
 group_members += [ dhcp_agent_primitive,
-                   metadatda_agent_primitive,
+                   metadata_agent_primitive,
                    metering_agent_primitive ]
 group_members << neutron_agent_primitive if use_l3_agent
 
