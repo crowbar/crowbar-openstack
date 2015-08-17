@@ -1,0 +1,91 @@
+{
+  "id": "bc-template-manila",
+  "description": "Installation for Manila",
+  "attributes": {
+    "manila": {
+      "debug": false,
+      "verbose": true,
+      "use_syslog": false,
+      "service_user": "manila",
+      "service_password": "",
+      "rabbitmq_instance": "none",
+      "keystone_instance": "none",
+      "database_instance": "none",
+      "api": {
+        "protocol": "http",
+        "bind_open_address": true,
+        "bind_port": 8786
+      },
+      "db": {
+        "password": "",
+        "user": "manila",
+        "database": "manila"
+      },
+      "ssl": {
+        "certfile": "/etc/manila/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/manila/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
+        "cert_required": false,
+        "ca_certs": "/etc/manila/ssl/certs/ca.pem"
+      },
+      "share_defaults": {
+        "generic": {
+          "service_instance_user": "root",
+          "service_instance_password": "",
+          "service_image_name": "manila-service-image",
+          "driver_handles_share_servers": true
+        },
+        "netapp": {
+          "netapp_storage_family": "ontap_cluster",
+          "netapp_server_hostname": "",
+          "netapp_server_port": 80,
+          "netapp_login": "admin",
+          "netapp_password": "",
+          "netapp_vserver": "",
+          "netapp_transport_type": "https"
+        }
+      },
+      "shares": [
+        {
+          "backend_driver": "generic",
+          "backend_name": "default",
+          "generic": {
+            "service_instance_user": "root",
+            "service_instance_password": "",
+            "service_image_name": "manila-service-image",
+            "driver_handles_share_servers": true
+          }
+        }
+      ]
+    }
+  },
+  "deployment": {
+    "manila": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 0,
+      "element_states": {
+        "manila-server": [ "readying", "ready", "applying" ],
+        "manila-share": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "manila-server" ],
+        [ "manila-share" ]
+      ],
+      "element_run_list_order": {
+          "manila-server": 92,
+          "manila-share": 93
+      },
+      "config": {
+        "environment": "manila-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
+
