@@ -1,0 +1,1 @@
+Wrapper cookbook for openstack-database_service to handle Trove installation/configuration.

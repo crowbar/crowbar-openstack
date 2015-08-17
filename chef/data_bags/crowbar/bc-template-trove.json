@@ -1,0 +1,42 @@
+{
+  "id": "bc-template-trove",
+  "description": "Sets up OpenStack Trove Database Service",
+  "attributes": {
+    "trove": {
+      "debug": false,
+      "verbose": true,
+      "keystone_instance": "none",
+      "nova_instance": "none",
+      "swift_instance": "none",
+      "cinder_instance": "none",
+      "rabbitmq_instance": "none",
+      "volume_support": false,
+      "db": {
+        "password": "",
+        "user": "trove",
+        "database": "trove"
+      }
+    }
+  },
+  "deployment": {
+    "trove": {
+      "crowbar-revision": 1,
+      "crowbar-applied": false,
+      "element_states": {
+        "trove-server": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "trove-server" ]
+      ],
+      "config": {
+        "environment": "trove-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
+
