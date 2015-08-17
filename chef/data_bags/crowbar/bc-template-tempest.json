@@ -1,0 +1,37 @@
+{
+  "id": "bc-template-tempest",
+  "description": "provides a tempest installation",
+  "attributes": {
+    "tempest": {
+      "tempest_tarball": "http://<ADMINWEB>/files/tempest/juno.tar.gz",
+      "tempest_test_image": "http://<ADMINWEB>/files/tempest/cirros-0.3.3-x86_64-uec.tar.gz",
+      "tempest_adm_password": "tempest",
+      "tempest_adm_username": "tempest",
+      "tempest_user_password": "tempest",
+      "tempest_user_username": "tempest",
+      "tempest_user_tenant": "tempest",
+      "nova_instance": "none"
+    }
+  },
+  "deployment": {
+    "tempest": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 10,
+      "element_states": {
+        "tempest": [ "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "tempest" ]
+      ],
+      "config": {
+        "environment": "tempest-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": []
+      }
+    }
+  }
+}
+

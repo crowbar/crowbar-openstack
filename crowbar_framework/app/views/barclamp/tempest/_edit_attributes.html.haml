@@ -1,0 +1,16 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header show_raw_deployment?, true
+
+  .panel-body
+    = instance_field :nova
+
+    %fieldset
+      %legend
+        = t(".tempest_user")
+
+      = string_field %w(tempest_user_username)
+      = password_field %w(tempest_user_password)
+      = string_field %w(tempest_user_tenant)
+      = string_field %w(tempest_adm_username)
+      = password_field %w(tempest_adm_password)
