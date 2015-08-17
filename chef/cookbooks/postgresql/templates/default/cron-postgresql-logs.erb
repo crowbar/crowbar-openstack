@@ -1,0 +1,5 @@
+#!/bin/bash
+LOG_DIR=/var/lib/pgsql/data/pg_log
+AGE=2
+
+find ${LOG_DIR}/ -name "postgresql.log-*" -not -name "*bz2" -mtime +${AGE} -type f | xargs -r bzip2
