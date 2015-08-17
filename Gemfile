@@ -25,11 +25,13 @@ group :development do
   gem "rspec", "~> 3.1.0"
 end
 
-group :test do
-  gem "simplecov", require: false
+unless ENV["PACKAGING"] && ENV["PACKAGING"] == "yes"
+  group :test do
+    gem "simplecov", require: false
 
-  if ENV["CODECLIMATE_REPO_TOKEN"]
-    gem "coveralls", require: false
-    gem "codeclimate-test-reporter", require: false
+    if ENV["CODECLIMATE_REPO_TOKEN"]
+      gem "coveralls", require: false
+      gem "codeclimate-test-reporter", require: false
+    end
   end
 end
