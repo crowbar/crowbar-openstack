@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Recreate the database and free space
+/usr/bin/mongo <%= @listen_addr %>/ceilometer --eval "db.runCommand({repairDatabase: 1})"

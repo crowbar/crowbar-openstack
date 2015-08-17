@@ -1,0 +1,36 @@
+#
+# Copyright 2011-2013, Dell
+# Copyright 2013-2014, SUSE LINUX Products GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+en:
+  nav:
+    ceilometer: 'Ceilometer'
+  barclamp:
+    ceilometer:
+      edit_attributes:
+        database_instance: 'Database'
+        keystone_instance: 'Keystone'
+        rabbitmq_instance: 'RabbitMQ'
+        alarm_threshold_evaluation_interval: 'Evaluation interval for threshold alarms (in seconds).'
+        cpu_interval: 'Interval used for CPU meter updates (in seconds)'
+        disk_interval: 'Interval used for disk meter updates (in seconds)'
+        network_interval: 'Interval used for network meter updates (in seconds)'
+        meters_interval: 'Interval used for other meter updates (in seconds)'
+        use_mongodb: 'Use MongoDB instead of standard database'
+        verbose: 'Verbose Logging'
+        database:
+          time_to_live: 'How long are samples kept in the database (in days)'
+          time_to_live_hint: '-1 means that samples are kept in the database forever'

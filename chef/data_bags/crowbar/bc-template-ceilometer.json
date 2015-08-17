@@ -1,0 +1,71 @@
+{
+  "id": "bc-template-ceilometer",
+  "description": "Installation for Ceilometer",
+  "attributes": {
+    "ceilometer": {
+      "debug": false,
+      "verbose": true,
+      "use_mongodb": false,
+      "alarm_threshold_evaluation_interval": 600,
+      "cpu_interval": 600,
+      "disk_interval": 600,
+      "network_interval": 600,
+      "meters_interval": 600,
+      "metering_secret": "",
+      "rabbitmq_instance": "none",
+      "database_instance": "none",
+      "keystone_instance": "none",
+      "service_user": "ceilometer",
+      "service_password": "",
+      "api": {
+        "protocol": "http",
+        "port": 8777
+      },
+      "db": {
+        "password": "",
+        "user": "ceilometer",
+        "database": "ceilometer"
+      },
+      "database": {
+        "time_to_live": 30
+      }
+    }
+  },
+  "deployment": {
+    "ceilometer": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 20,
+      "element_states": {
+        "ceilometer-server": [ "readying", "ready", "applying" ],
+        "ceilometer-cagent": [ "readying", "ready", "applying" ],
+        "ceilometer-agent": [ "readying", "ready", "applying" ],
+        "ceilometer-agent-hyperv": [ "readying", "ready", "applying" ],
+        "ceilometer-swift-proxy-middleware": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "ceilometer-server" ],
+        [ "ceilometer-cagent" ], 
+        [ "ceilometer-agent" ],
+        [ "ceilometer-agent-hyperv" ],
+        [ "ceilometer-swift-proxy-middleware" ]
+      ],
+      "element_run_list_order": {
+        "ceilometer-server": 101,
+        "ceilometer-cagent": 102,
+        "ceilometer-agent": 103,
+        "ceilometer-agent-hyperv": 104,
+        "ceilometer-swift-proxy-middleware" : 80
+      },
+      "config": {
+        "environment": "ceilometer-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
+
