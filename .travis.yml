@@ -1,6 +1,0 @@
-# Docker Infrastructure (see http://blog.travis-ci.com/2014-12-17-faster-builds-with-container-based-infrastructure/ )
-sudo: false
-
-language: ruby
-rvm:
-  - 2.1.0
