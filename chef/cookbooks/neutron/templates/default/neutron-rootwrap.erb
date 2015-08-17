@@ -1,0 +1,3 @@
+Cmnd_Alias NEUTRON_ROOTWRAP = <%=@binary%> /etc/neutron/rootwrap.conf *
+Defaults!NEUTRON_ROOTWRAP !syslog
+<%= @user %> ALL=(root) NOPASSWD: NEUTRON_ROOTWRAP
