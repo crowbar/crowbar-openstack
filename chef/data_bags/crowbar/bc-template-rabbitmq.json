@@ -1,0 +1,53 @@
+{
+  "id": "bc-template-rabbitmq",
+  "description": "Installation for rabbitmq",
+  "attributes": {
+    "rabbitmq": {
+      "listen_public": false,
+      "port": 5672,
+      "password": "",
+      "user": "nova",
+      "vhost": "/nova",
+      "ha": {
+        "storage": {
+          "mode": "shared",
+          "drbd": {
+            "size": 50
+          },
+          "shared": {
+            "device": "",
+            "fstype": "",
+            "options": ""
+          }
+        }
+      },
+      "trove": {
+        "enabled": false,
+        "password": "",
+        "user": "trove",
+        "vhost": "/trove"
+      }
+    }
+  },
+  "deployment": {
+    "rabbitmq": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 11,
+      "element_states": {
+        "rabbitmq-server": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "rabbitmq-server" ]
+      ],
+      "config": {
+        "environment": "rabbitmq-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [ ]
+      }
+    }
+  }
+}
+
