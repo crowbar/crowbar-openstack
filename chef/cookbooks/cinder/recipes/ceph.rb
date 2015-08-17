@@ -122,12 +122,12 @@ unless ceph_clients.empty?
     ceph_pools.each_pair do |cinder_user, cinder_pools|
       cinder_pools << glance_pool unless glance_pool.nil?
 
-      allow_pools = cinder_pools.map{|p| "allow rwx pool=#{p}"}.join(", ")
-      ceph_caps = { 'mon' => 'allow r', 'osd' => "allow class-read object_prefix rbd_children, #{allow_pools}" }
+      allow_pools = cinder_pools.map{ |p| "allow rwx pool=#{p}" }.join(", ")
+      ceph_caps = { "mon" => "allow r", "osd" => "allow class-read object_prefix rbd_children, #{allow_pools}" }
 
       ceph_client cinder_user do
-        ceph_conf  ceph_conf
-        admin_keyring  ceph_keyrings[ceph_conf]
+        ceph_conf ceph_conf
+        admin_keyring ceph_keyrings[ceph_conf]
         caps ceph_caps
         keyname "client.#{cinder_user}"
         filename "/etc/ceph/ceph.client.#{cinder_user}.keyring"
@@ -135,7 +135,6 @@ unless ceph_clients.empty?
         group node[:cinder][:group]
         mode 0640
       end
-
     end
   end
 end

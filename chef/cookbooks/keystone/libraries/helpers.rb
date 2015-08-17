@@ -4,10 +4,10 @@ module KeystoneHelper
   end
 
   def self.versioned_service_URL(protocol, host, port, version)
-    unless version.start_with?('v')
+    unless version.start_with?("v")
       version = "v#{version}"
     end
-    service_URL(protocol, host, port) + '/' + version + '/'
+    service_URL(protocol, host, port) + "/" + version + "/"
   end
 
   def self.keystone_settings(current_node, cookbook_name)
@@ -65,8 +65,8 @@ module KeystoneHelper
         "service_tenant_id" => node["keystone"]["service"]["tenant_id"]
       }
 
-      @keystone_settings[cookbook_name]['service_user'] = current_node[cookbook_name][:service_user]
-      @keystone_settings[cookbook_name]['service_password'] = current_node[cookbook_name][:service_password]
+      @keystone_settings[cookbook_name]["service_user"] = current_node[cookbook_name][:service_user]
+      @keystone_settings[cookbook_name]["service_password"] = current_node[cookbook_name][:service_password]
     end
 
     @keystone_settings[cookbook_name]

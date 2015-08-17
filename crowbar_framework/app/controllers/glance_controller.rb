@@ -16,7 +16,6 @@
 #
 
 class GlanceController < BarclampController
-
   protected
 
   def initialize_service

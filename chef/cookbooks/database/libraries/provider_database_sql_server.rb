@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-require 'chef/provider'
+require "chef/provider"
 
 class Chef
   class Provider
@@ -26,7 +26,7 @@ class Chef
 
         def load_current_resource
           Gem.clear_paths
-          require 'tiny_tds'
+          require "tiny_tds"
           @current_resource = Chef::Resource::Database.new(@new_resource.name)
           @current_resource.database_name(@new_resource.database_name)
           @current_resource
@@ -75,9 +75,9 @@ class Chef
         def exists?
           exists = false
           begin
-            result = db.execute('SELECT name FROM sys.databases')
+            result = db.execute("SELECT name FROM sys.databases")
             result.each do |row|
-              if row['name'] == @new_resource.database_name
+              if row["name"] == @new_resource.database_name
                 exists = true
                 break
               end
@@ -92,10 +92,10 @@ class Chef
         def db
           @db ||= begin
             ::TinyTds::Client.new(
-              :host => @new_resource.connection[:host],
-              :username => @new_resource.connection[:username],
-              :password => @new_resource.connection[:password],
-              :port => @new_resource.connection[:port] || 1433
+              host: @new_resource.connection[:host],
+              username: @new_resource.connection[:username],
+              password: @new_resource.connection[:password],
+              port: @new_resource.connection[:port] || 1433
             )
           end
         end

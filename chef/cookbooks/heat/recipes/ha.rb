@@ -51,7 +51,7 @@ primitives = []
   primitive_name = "heat-#{service}".gsub("_","-")
   pacemaker_primitive primitive_name do
     agent node[:heat][:ha][service.to_sym][:agent]
-    op    node[:heat][:ha][service.to_sym][:op]
+    op node[:heat][:ha][service.to_sym][:op]
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
@@ -68,12 +68,12 @@ end
 
 pacemaker_clone "cl-#{group_name}" do
   rsc group_name
-  action [ :create, :start]
+  action [:create, :start]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_order_only_existing "o-cl-#{group_name}" do
-  ordering [ "postgresql", "rabbitmq", "cl-keystone", "cl-g-nova-controller", "cl-#{group_name}" ]
+  ordering ["postgresql", "rabbitmq", "cl-keystone", "cl-g-nova-controller", "cl-#{group_name}"]
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

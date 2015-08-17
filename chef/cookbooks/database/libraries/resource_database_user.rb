@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-require File.join(File.dirname(__FILE__), 'resource_database')
+require File.join(File.dirname(__FILE__), "resource_database")
 
 class Chef
   class Resource
@@ -28,7 +28,7 @@ class Chef
 
         @database_name = nil
         @table = nil
-        @host = 'localhost'
+        @host = "localhost"
         @privileges = [:all]
         @grant_option = false
 
@@ -40,7 +40,7 @@ class Chef
         set_or_return(
           :database_name,
           arg,
-          :kind_of => String
+          kind_of: String
         )
       end
 
@@ -48,7 +48,7 @@ class Chef
         set_or_return(
           :username,
           arg,
-          :kind_of => String
+          kind_of: String
         )
       end
 
@@ -56,7 +56,7 @@ class Chef
         set_or_return(
           :password,
           arg,
-          :kind_of => String
+          kind_of: String
         )
       end
 
@@ -64,7 +64,7 @@ class Chef
         set_or_return(
           :table,
           arg,
-          :kind_of => String
+          kind_of: String
         )
       end
 
@@ -72,7 +72,7 @@ class Chef
         set_or_return(
           :host,
           arg,
-          :kind_of => String
+          kind_of: String
         )
       end
 
@@ -80,7 +80,7 @@ class Chef
         set_or_return(
           :privileges,
           arg,
-          :kind_of => Array
+          kind_of: Array
         )
       end
 
@@ -88,7 +88,7 @@ class Chef
         set_or_return(
           :grant_option,
           arg,
-          :kind_of => [TrueClass, FalseClass], :default => false
+          kind_of: [TrueClass, FalseClass], default: false
         )
       end
     end

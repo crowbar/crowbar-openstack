@@ -40,8 +40,8 @@ template "/etc/nagios/nrpe.d/keystone_nrpe.cfg" do
   group node[:nagios][:group]
   owner node[:nagios][:user]
   variables( {
-    :svcs => svcs ,
-    :ports => ports
+    svcs: svcs ,
+    ports: ports
   })
    notifies :restart, "service[nagios-nrpe-server]"
 end if node["roles"].include?("nagios-client")

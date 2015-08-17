@@ -34,6 +34,6 @@ end
 file "/var/log/ceilometer/swift-proxy-server.log" do
   owner node[:ceilometer][:user]
   group node[:ceilometer][:group]
-  mode  "0664"
+  mode "0664"
   action :create_if_missing
 end

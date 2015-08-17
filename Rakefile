@@ -106,7 +106,7 @@ task :syntaxcheck do
   exit $?.exitstatus
 end
 
-task :default => [
+task default: [
   :spec,
   :syntaxcheck
 ]

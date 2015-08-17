@@ -20,8 +20,8 @@
 #
 
 if node[:ec2]
-  include_recipe 'aws'
-  include_recipe 'xfs'
+  include_recipe "aws"
+  include_recipe "xfs"
 
   begin
     aws = Chef::DataBagItem.load(:aws, :main)
@@ -31,34 +31,34 @@ if node[:ec2]
     raise
   end
 
-  ebs_vol_dev = node['mysql']['ebs_vol_dev']
-  if platform?('ubuntu') && node['platform_version'].to_f >= 11.04
-    ebs_vol_dev_mount =  ebs_vol_dev.sub(/^\/dev\/sd/, '/dev/xvd')
+  ebs_vol_dev = node["mysql"]["ebs_vol_dev"]
+  if platform?("ubuntu") && node["platform_version"].to_f >= 11.04
+    ebs_vol_dev_mount =  ebs_vol_dev.sub(/^\/dev\/sd/, "/dev/xvd")
   else
     ebs_vol_dev_mount = ebs_vol_dev
   end
-  ebs_vol_id = ''
-  db_type = ''
-  db_role = ''
-  master_role = ''
-  slave_role = ''
-  root_pw = ''
-  snapshots_to_keep = ''
-  snapshot_cron_schedule = '00 * * * *' # default to hourly snapshots
+  ebs_vol_id = ""
+  db_type = ""
+  db_role = ""
+  master_role = ""
+  slave_role = ""
+  root_pw = ""
+  snapshots_to_keep = ""
+  snapshot_cron_schedule = "00 * * * *" # default to hourly snapshots
 
   search(:apps) do |app|
-    if (app['database_master_role'] & node.run_list.roles).length == 1 || (app['database_slave_role'] & node.run_list.roles).length == 1
-      master_role = app['database_master_role'] & node.run_list.roles
-      slave_role = app['database_slave_role'] & node.run_list.roles
-      root_pw = app['mysql_root_password'][node.chef_environment]
-      snapshots_to_keep = app['snapshots_to_keep'][node.chef_environment]
-      snapshot_cron_schedule = app['snapshot_cron_schedule'][node.chef_environment] if app['snapshot_cron_schedule'] && app['snapshot_cron_schedule'][node.chef_environment]
+    if (app["database_master_role"] & node.run_list.roles).length == 1 || (app["database_slave_role"] & node.run_list.roles).length == 1
+      master_role = app["database_master_role"] & node.run_list.roles
+      slave_role = app["database_slave_role"] & node.run_list.roles
+      root_pw = app["mysql_root_password"][node.chef_environment]
+      snapshots_to_keep = app["snapshots_to_keep"][node.chef_environment]
+      snapshot_cron_schedule = app["snapshot_cron_schedule"][node.chef_environment] if app["snapshot_cron_schedule"] && app["snapshot_cron_schedule"][node.chef_environment]
 
       if (master_role & node.run_list.roles).length == 1
-        db_type = 'master'
+        db_type = "master"
         db_role = RUBY_VERSION.to_f <= 1.8 ? master_role : master_role.join
       elsif (slave_role & node.run_list.roles).length == 1
-        db_type = 'slave'
+        db_type = "slave"
         db_role = RUBY_VERSION.to_f <= 1.8 ? slave_role : slave_role.join
       end
 
@@ -78,21 +78,21 @@ if node[:ec2]
     master_info = Chef::DataBagItem.load(:aws, "ebs_#{master_role}_#{node.chef_environment}")
     Chef::Log.info "Loaded #{master_info['volume_id']} from DataBagItem aws[#{master_info['id']}]"
   rescue
-    Chef::Application.fatal! 'Could not load replication masters snapshot details', -41 if db_type == 'slave'
+    Chef::Application.fatal! "Could not load replication masters snapshot details", -41 if db_type == "slave"
   end
 
   ruby_block "store_#{db_role}_#{node.chef_environment}_volid" do
     block do
       ebs_vol_id = node[:aws][:ebs_volume]["#{db_role}_#{node.chef_environment}"][:volume_id]
 
-      unless ebs_info['volume_id']
+      unless ebs_info["volume_id"]
         item = {
-          'id' => "ebs_#{db_role}_#{node.chef_environment}",
-          'volume_id' => ebs_vol_id
+          "id" => "ebs_#{db_role}_#{node.chef_environment}",
+          "volume_id" => ebs_vol_id
         }
         Chef::Log.info "Storing volume_id #{item.inspect}"
         databag_item = Chef::DataBagItem.new
-        databag_item.data_bag('aws')
+        databag_item.data_bag("aws")
         databag_item.raw_data = item
         databag_item.save
         Chef::Log.info("Created #{item['id']} in #{databag_item.data_bag}")
@@ -102,79 +102,79 @@ if node[:ec2]
   end
 
   aws_ebs_volume "#{db_role}_#{node.chef_environment}" do
-    aws_access_key aws['aws_access_key_id']
-    aws_secret_access_key aws['aws_secret_access_key']
+    aws_access_key aws["aws_access_key_id"]
+    aws_secret_access_key aws["aws_secret_access_key"]
     size 50
     device ebs_vol_dev
     snapshots_to_keep snapshots_to_keep
     case db_type
-    when 'master'
-      if ebs_info['volume_id'] && ebs_info['volume_id'] =~ /vol/
-        volume_id ebs_info['volume_id']
+    when "master"
+      if ebs_info["volume_id"] && ebs_info["volume_id"] =~ /vol/
+        volume_id ebs_info["volume_id"]
         action :attach
-      elsif ebs_info['volume_id'] && ebs_info['volume_id'] =~ /snap/
-        snapshot_id ebs_info['volume_id']
+      elsif ebs_info["volume_id"] && ebs_info["volume_id"] =~ /snap/
+        snapshot_id ebs_info["volume_id"]
         action [:create, :attach]
       else
         action [:create, :attach]
       end
-      notifies :create, resources(:ruby_block => "store_#{db_role}_#{node.chef_environment}_volid")
-    when 'slave'
-      if master_info['volume_id']
-        snapshot_id master_info['volume_id']
+      notifies :create, resources(ruby_block: "store_#{db_role}_#{node.chef_environment}_volid")
+    when "slave"
+      if master_info["volume_id"]
+        snapshot_id master_info["volume_id"]
         action [:create, :attach]
       else
         Chef::Log.warn("Couldn't detect snapshot ID.")
         action :nothing
       end
     end
-    provider 'aws_ebs_volume'
+    provider "aws_ebs_volume"
   end
 
-  if db_type == 'master'
-    Chef::Log.info 'Setting up templates for chef-solo snapshots'
-    template '/etc/chef/chef-solo-database-snapshot.rb' do
-      source 'chef-solo-database-snapshot.rb.erb'
-      variables :cookbook_path => Chef::Config[:cookbook_path]
-      owner 'root'
-      group 'root'
+  if db_type == "master"
+    Chef::Log.info "Setting up templates for chef-solo snapshots"
+    template "/etc/chef/chef-solo-database-snapshot.rb" do
+      source "chef-solo-database-snapshot.rb.erb"
+      variables cookbook_path: Chef::Config[:cookbook_path]
+      owner "root"
+      group "root"
       mode 0600
     end
 
-    template '/etc/chef/chef-solo-database-snapshot.json' do
-      source 'chef-solo-database-snapshot.json.erb'
+    template "/etc/chef/chef-solo-database-snapshot.json" do
+      source "chef-solo-database-snapshot.json.erb"
       variables(
-        :output => {
-          'db_snapshot' => {
-            'ebs_vol_dev' => node.mysql.ec2_path,
-            'db_role' => db_role,
-            'app_environment' => node.chef_environment,
-            'username' => 'root',
-            'password' => root_pw,
-            'aws_access_key_id' => aws['aws_access_key_id'],
-            'aws_secret_access_key' => aws['aws_secret_access_key'],
-            'snapshots_to_keep' => snapshots_to_keep,
-            'volume_id' => ebs_info['volume_id']
+        output: {
+          "db_snapshot" => {
+            "ebs_vol_dev" => node.mysql.ec2_path,
+            "db_role" => db_role,
+            "app_environment" => node.chef_environment,
+            "username" => "root",
+            "password" => root_pw,
+            "aws_access_key_id" => aws["aws_access_key_id"],
+            "aws_secret_access_key" => aws["aws_secret_access_key"],
+            "snapshots_to_keep" => snapshots_to_keep,
+            "volume_id" => ebs_info["volume_id"]
           },
-          'run_list' => [
-            'recipe[database::snapshot]'
+          "run_list" => [
+            "recipe[database::snapshot]"
           ]
         }
       )
-      owner 'root'
-      group 'root'
+      owner "root"
+      group "root"
       mode 0600
     end
 
-    template '/etc/cron.d/chef-solo-database-snapshot' do
-      source 'chef-solo-database-snapshot.cron.erb'
+    template "/etc/cron.d/chef-solo-database-snapshot" do
+      source "chef-solo-database-snapshot.cron.erb"
       variables(
-        :json_attribs => '/etc/chef/chef-solo-database-snapshot.json',
-        :config_file => '/etc/chef/chef-solo-database-snapshot.rb',
-        :schedule => snapshot_cron_schedule
+        json_attribs: "/etc/chef/chef-solo-database-snapshot.json",
+        config_file: "/etc/chef/chef-solo-database-snapshot.rb",
+        schedule: snapshot_cron_schedule
       )
-      owner 'root'
-      group 'root'
+      owner "root"
+      group "root"
       mode 0600
     end
   end
@@ -184,21 +184,21 @@ if node[:ec2]
   end
 
   %w(ec2_path data_dir).each do |dir|
-    directory node['mysql'][dir] do
+    directory node["mysql"][dir] do
       mode 0755
     end
   end
 
-  mount node['mysql']['ec2_path'] do
+  mount node["mysql"]["ec2_path"] do
     device ebs_vol_dev_mount
-    fstype 'xfs'
+    fstype "xfs"
     action :mount
   end
 
-  mount node['mysql']['data_dir'] do
-    device node['mysql']['ec2_path']
-    fstype 'none'
-    options 'bind,rw'
+  mount node["mysql"]["data_dir"] do
+    device node["mysql"]["ec2_path"]
+    fstype "none"
+    options "bind,rw"
     action :mount
   end
 end

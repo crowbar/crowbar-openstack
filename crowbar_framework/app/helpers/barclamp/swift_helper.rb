@@ -60,11 +60,11 @@ module Barclamp
       end
 
       status_link = if report["status"] == "running"
-        t(report["status"], :scope => "barclamp.swift.dashboard.report_run.status")
+        t(report["status"], scope: "barclamp.swift.dashboard.report_run.status")
       else
         link_to(
-          t(report["status"], :scope => "barclamp.swift.dashboard.report_run.status"),
-          swift_show_report_path(:id => report["uuid"])
+          t(report["status"], scope: "barclamp.swift.dashboard.report_run.status"),
+          swift_show_report_path(id: report["uuid"])
         )
       end
 
@@ -72,7 +72,7 @@ module Barclamp
         content_tag(
           :span,
           "",
-          :class => led_class
+          class: led_class
         ),
         status_link
       ].join("\n")

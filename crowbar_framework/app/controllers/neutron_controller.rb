@@ -16,7 +16,6 @@
 #
 
 class NeutronController < BarclampController
-
   protected
 
   def initialize_service

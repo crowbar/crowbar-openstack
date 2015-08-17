@@ -26,21 +26,19 @@ if node[:nova][:trusted_flavors]
     "mem"=>4096}
  }
 
-
   nova = node
   keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
   nova_insecure = node[:nova][:ssl][:insecure]
-  ssl_insecure = keystone_settings['insecure'] || nova_insecure
+  ssl_insecure = keystone_settings["insecure"] || nova_insecure
 
   novacmd = "nova --os-username #{keystone_settings['service_user']} --os-password #{keystone_settings['service_password']} --os-tenant-name #{keystone_settings['service_tenant']} --os-auth-url #{keystone_settings['internal_auth_url']} --endpoint-type internalURL --os-region-name '#{keystone_settings['endpoint_region']}'"
   if ssl_insecure
     novacmd = "#{novacmd} --insecure"
   end
-  if keystone_settings['api_version'] != "2.0"
+  if keystone_settings["api_version"] != "2.0"
     novacmd = "#{novacmd} --os-user-domain-name Default --os-project-domain-name Default"
   end
-
 
   flavors.keys.each do |id|
     execute "register_#{flavors[id]["name"]}_flavor" do

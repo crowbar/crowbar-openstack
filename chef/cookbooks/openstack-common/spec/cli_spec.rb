@@ -39,8 +39,8 @@ describe 'openstack-common::default' do
           }
         subject.stub(:shell_out).with(
           ['keystone', 'user-list'],
-          :env => env
-          ).and_return double('shell_out', :exitstatus => 0, :stdout => 'good', :stderr => '')
+          env: env
+          ).and_return double('shell_out', exitstatus: 0, stdout: 'good', stderr: '')
 
         result = subject.openstack_command('keystone', 'user-list', env)
         expect(result).to eq('good')
@@ -56,8 +56,8 @@ describe 'openstack-common::default' do
           }
         subject.stub(:shell_out).with(
           %w(keystone user-list --key1 value1 --key2 value2),
-          :env => env
-          ).and_return double('shell_out', :exitstatus => 0, :stdout => 'good', :stderr => '')
+          env: env
+          ).and_return double('shell_out', exitstatus: 0, stdout: 'good', stderr: '')
 
         result = subject.openstack_command('keystone', 'user-list', env, 'key1' => 'value1', 'key2' => 'value2')
         expect(result).to eq('good')
@@ -73,8 +73,8 @@ describe 'openstack-common::default' do
           }
         subject.stub(:shell_out).with(
           ['keystone', 'user-list'],
-          :env => env
-          ).and_return double('shell_out', :exitstatus => 123, :stdout => 'fail', :stderr => '')
+          env: env
+          ).and_return double('shell_out', exitstatus: 123, stdout: 'fail', stderr: '')
 
         # TODO: need to figure out why this won't work.
         # expect(subject.openstack_command('keystone', 'user-list', env)).to fail

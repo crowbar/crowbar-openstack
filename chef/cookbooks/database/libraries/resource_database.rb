@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-require 'chef/resource'
+require "chef/resource"
 
 class Chef
   class Resource
@@ -33,7 +33,7 @@ class Chef
         set_or_return(
           :database_name,
           arg,
-          :kind_of => String
+          kind_of: String
         )
       end
 
@@ -41,7 +41,7 @@ class Chef
         set_or_return(
           :connection,
           arg,
-          :required => true
+          required: true
         )
       end
 
@@ -50,7 +50,7 @@ class Chef
         set_or_return(
           :sql,
           arg,
-          :kind_of => [String, Proc]
+          kind_of: [String, Proc]
         )
       end
 
@@ -66,8 +66,8 @@ class Chef
         set_or_return(
           :template,
           arg,
-          :kind_of => String,
-          :default => 'DEFAULT'
+          kind_of: String,
+          default: "DEFAULT"
         )
       end
 
@@ -75,7 +75,7 @@ class Chef
         set_or_return(
           :collation,
           arg,
-          :kind_of => String
+          kind_of: String
         )
       end
 
@@ -83,8 +83,8 @@ class Chef
         set_or_return(
           :encoding,
           arg,
-          :kind_of => String,
-          :default => 'DEFAULT'
+          kind_of: String,
+          default: "DEFAULT"
         )
       end
 
@@ -92,8 +92,8 @@ class Chef
         set_or_return(
           :tablespace,
           arg,
-          :kind_of => String,
-          :default => 'DEFAULT'
+          kind_of: String,
+          default: "DEFAULT"
         )
       end
 
@@ -101,8 +101,8 @@ class Chef
         set_or_return(
           :connection_limit,
           arg,
-          :kind_of => String,
-          :default => '-1'
+          kind_of: String,
+          default: "-1"
         )
       end
 
@@ -110,7 +110,7 @@ class Chef
         set_or_return(
           :owner,
           arg,
-          :kind_of => String
+          kind_of: String
         )
       end
     end

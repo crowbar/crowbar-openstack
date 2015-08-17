@@ -10,11 +10,11 @@ def upgrade ta, td, a, d
     @@heat_auth_encryption_key = encryption_key
   end
 
-  a['auth_encryption_key'] = @@heat_auth_encryption_key
+  a["auth_encryption_key"] = @@heat_auth_encryption_key
   return a, d
 end
 
 def downgrade ta, td, a, d
-  a.delete('auth_encryption_key')
+  a.delete("auth_encryption_key")
   return a, d
 end

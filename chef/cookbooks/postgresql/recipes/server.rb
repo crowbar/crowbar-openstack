@@ -27,33 +27,33 @@ include_recipe "postgresql::client"
 
 # For Crowbar, we need to set the address to bind - default to admin node.
 newaddr = CrowbarDatabaseHelper.get_listen_address(node)
-if node['postgresql']['config']['listen_addresses'] != newaddr
-  node.set['postgresql']['config']['listen_addresses'] = newaddr
+if node["postgresql"]["config"]["listen_addresses"] != newaddr
+  node.set["postgresql"]["config"]["listen_addresses"] = newaddr
   node.save
 end
 
 # We also need to add the network + mask to give access to other nodes
 # in pg_hba.conf
 # XXX this assumes that crowbar is the only one changing pg_hba attributes
-if node['postgresql']['pg_hba'][4]
-  netaddr, netmask = node['postgresql']['pg_hba'][4][:addr].split
+if node["postgresql"]["pg_hba"][4]
+  netaddr, netmask = node["postgresql"]["pg_hba"][4][:addr].split
 else
-  pg_hba = node['postgresql']['pg_hba']
+  pg_hba = node["postgresql"]["pg_hba"]
   pg_hba << {
-    :type => 'host',
-    :db => 'all',
-    :user => 'all',
-    :method => 'md5',
+    type: "host",
+    db: "all",
+    user: "all",
+    method: "md5"
   }
-  netaddr, netmask = '', ''
-  node.set['postgresql']['pg_hba'] = pg_hba
+  netaddr, netmask = "", ""
+  node.set["postgresql"]["pg_hba"] = pg_hba
 end
 
 newnetaddr = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").subnet
 newnetmask = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").netmask
 
 if netaddr != newnetaddr or netmask != newnetmask
-  node.set['postgresql']['pg_hba'][4][:addr] = [newnetaddr, newnetmask].join('    ')
+  node.set["postgresql"]["pg_hba"][4][:addr] = [newnetaddr, newnetmask].join("    ")
   node.save
 end
 
@@ -62,14 +62,14 @@ if Chef::Config[:solo]
   missing_attrs = %w{
     postgres
   }.select do |attr|
-    node['postgresql']['password'][attr].nil?
+    node["postgresql"]["password"][attr].nil?
   end.map { |attr| "node['postgresql']['password']['#{attr}']" }
 
   if !missing_attrs.empty?
     Chef::Application.fatal!([
         "You must set #{missing_attrs.join(', ')} in chef-solo mode.",
         "For more information, see https://github.com/opscode-cookbooks/postgresql#chef-solo-note"
-      ].join(' '))
+      ].join(" "))
   end
 else
   # TODO: The "secure_password" is randomly generated plain text, so it
@@ -78,7 +78,7 @@ else
   # login for user 'postgres'). However, a random password wouldn't be
   # useful if it weren't saved as clear text in Chef Server for later
   # retrieval.
-  node.set_unless['postgresql']['password']['postgres'] = secure_password
+  node.set_unless["postgresql"]["password"]["postgres"] = secure_password
   node.save
 end
 
@@ -89,21 +89,21 @@ end
 
 # Include the right "family" recipe for installing the server
 # since they do things slightly differently.
-case node['platform_family']
+case node["platform_family"]
 when "rhel", "fedora", "suse"
   include_recipe "postgresql::server_redhat"
 when "debian"
   include_recipe "postgresql::server_debian"
 end
 
-change_notify = node['postgresql']['server']['config_change_notify']
+change_notify = node["postgresql"]["server"]["config_change_notify"]
 
 template "#{node['postgresql']['dir']}/postgresql.conf" do
   source "postgresql.conf.erb"
   owner "postgres"
   group "postgres"
   mode 0600
-  notifies change_notify, 'service[postgresql]', :immediately
+  notifies change_notify, "service[postgresql]", :immediately
 end
 
 template "#{node['postgresql']['dir']}/pg_hba.conf" do
@@ -111,7 +111,7 @@ template "#{node['postgresql']['dir']}/pg_hba.conf" do
   owner "postgres"
   group "postgres"
   mode 00600
-  notifies change_notify, 'service[postgresql]', :immediately
+  notifies change_notify, "service[postgresql]", :immediately
 end
 
 ha_enabled = node[:database][:ha][:enabled]
@@ -137,7 +137,7 @@ end
 #     the plain text password, and testing the encrypted (md5 digest)
 #     version is not straight-forward.
 bash "assign-postgres-password" do
-  user 'postgres'
+  user "postgres"
   code <<-EOH
 echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node['postgresql']['password']['postgres']}';" | psql -p #{node['postgresql']['config']['port']}
   EOH
@@ -148,7 +148,7 @@ end
 
 # For Crowbar we also need the "db_maker" user
 bash "assign-db_maker-password" do
-  user 'postgres'
+  user "postgres"
   code <<-EOH
     echo "SELECT rolname FROM pg_roles WHERE rolname='db_maker';" | psql | grep -q db_maker
     if [ $? -ne 0 ]; then

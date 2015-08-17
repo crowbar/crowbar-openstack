@@ -3,7 +3,6 @@ def upgrade ta, td, a, d
   return a, d
 end
 
-
 def downgrade ta, td, a, d
   a["volume"]["netapp"].delete("nfs_shares")
   return a, d

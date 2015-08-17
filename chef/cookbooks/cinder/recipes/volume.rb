@@ -38,7 +38,7 @@ def make_loopback_file(volume)
   # Cap size at 90% of free space
   encl_dir=fdir
   while not File.directory?(encl_dir)
-    encl_dir=encl_dir.sub(/\/[^\/]*$/,'')
+    encl_dir=encl_dir.sub(/\/[^\/]*$/,"")
   end
   max_fsize = ((`df -Pk #{encl_dir}`.split("\n")[1].split(" ")[3].to_i * 1024) * 0.90).to_i rescue 0
   fsize = max_fsize if fsize > max_fsize
@@ -127,7 +127,7 @@ def make_volume(node, backend_id, volume)
 
   # Make our volume group.
   bash "Create volume group #{volname}" do
-    code "vgcreate #{volname} #{claimed_disks.map{|d|d.name}.join(' ')}"
+    code "vgcreate #{volname} #{claimed_disks.map{ |d|d.name }.join(' ')}"
     not_if "vgs #{volname}"
   end
 end
@@ -157,11 +157,11 @@ if (%w(suse).include? node.platform) && (node.platform_version.to_f < 12.0)
       owner "root"
       group "root"
       mode 0755
-      variables(:loop_lvm_paths => loop_lvm_paths.map{|x| Shellwords.shellescape(x)}.join(" "))
+      variables(loop_lvm_paths: loop_lvm_paths.map{ |x| Shellwords.shellescape(x) }.join(" "))
     end
 
     service "boot.looplvm" do
-      supports :start => true, :stop => true
+      supports start: true, stop: true
       action [:enable]
       # We cannot use reload/restart, since status doesn't return 0 (which is expected since it's not running)
       subscribes :start, "template[boot.looplvm]", :immediately
@@ -184,7 +184,7 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
         group node[:cinder][:group]
         mode 0640
         variables(
-          :emc_params => volume['emc']
+          emc_params: volume["emc"]
         )
         notifies :restart, "service[cinder-volume]"
       end
@@ -215,7 +215,7 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
         group node[:cinder][:group]
         mode 0640
         variables(
-          :eternus_params => volume['eternus']
+          eternus_params: volume["eternus"]
         )
         notifies :restart, "service[cinder-volume]"
       end
@@ -254,7 +254,7 @@ if (%w(suse).include? node.platform) && (node.platform_version.to_f < 12.0)
 end
 
 service "tgt" do
-  supports :status => true, :restart => true, :reload => true
+  supports status: true, restart: true, reload: true
   action [:enable, :start]
   service_name "tgtd" if %w(redhat centos suse).include? node.platform
   # Restart doesn't work correct for this service.

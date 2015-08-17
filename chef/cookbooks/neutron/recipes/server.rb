@@ -19,7 +19,7 @@ pkgs.each { |p| package p }
 
 include_recipe "neutron::database"
 
-if node[:neutron][:api][:protocol] == 'https'
+if node[:neutron][:api][:protocol] == "https"
   if node[:neutron][:ssl][:generate_certs]
     package "openssl"
     ruby_block "generate_certs for neutron" do
@@ -101,11 +101,11 @@ template "/etc/sysconfig/neutron" do
   # to neutron-db-manage too
   if node[:neutron][:networking_plugin] == "ml2" and node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
     variables(
-      :plugin_config_file => plugin_cfg_path +  " /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
+      plugin_config_file: plugin_cfg_path +  " /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
     )
   else
     variables(
-      :plugin_config_file => plugin_cfg_path
+      plugin_config_file: plugin_cfg_path
     )
   end
   only_if { node[:platform] == "suse" }
@@ -117,7 +117,7 @@ template "/etc/default/neutron-server" do
   owner "root"
   group node[:neutron][:platform][:group]
   variables(
-      :neutron_plugin_config => "/etc/neutron/plugins/ml2/ml2_conf.ini"
+      neutron_plugin_config: "/etc/neutron/plugins/ml2/ml2_conf.ini"
     )
   only_if { node[:platform] == "ubuntu" }
 end
@@ -152,7 +152,7 @@ end
 tenant_network_types = [[node[:neutron][:ml2_type_drivers_default_tenant_network]] + node[:neutron][:ml2_type_drivers]].flatten.uniq
 
 case node[:neutron][:networking_plugin]
-when 'ml2'
+when "ml2"
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
   #TODO(vuntz): temporarily disable the hyperv mechanism since we're lacking networking-hyperv from stackforge
   #ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
@@ -167,16 +167,16 @@ when 'ml2'
     group node[:neutron][:platform][:group]
     mode "0640"
     variables(
-      :ml2_mechanism_drivers => ml2_mechanism_drivers,
-      :ml2_type_drivers => node[:neutron][:ml2_type_drivers],
-      :tenant_network_types => tenant_network_types,
-      :vlan_start => vlan_start,
-      :vlan_end => vlan_end,
-      :gre_start => gre_start,
-      :gre_end => gre_end,
-      :vxlan_start => vni_start,
-      :vxlan_end => vni_end,
-      :vxlan_mcast_group => node[:neutron][:vxlan][:multicast_group]
+      ml2_mechanism_drivers: ml2_mechanism_drivers,
+      ml2_type_drivers: node[:neutron][:ml2_type_drivers],
+      tenant_network_types: tenant_network_types,
+      vlan_start: vlan_start,
+      vlan_end: vlan_end,
+      gre_start: gre_start,
+      gre_end: gre_end,
+      vxlan_start: vni_start,
+      vxlan_end: vni_end,
+      vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group]
     )
   end
 when "vmware"
@@ -196,11 +196,10 @@ when "vmware"
     group node[:neutron][:platform][:group]
     mode "0640"
     variables(
-      :vmware_config => node[:neutron][:vmware]
+      vmware_config: node[:neutron][:vmware]
     )
   end
 end
-
 
 if node[:neutron][:networking_plugin] == "ml2" and node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
   include_recipe "neutron::cisco_support"
@@ -295,13 +294,12 @@ end
 crowbar_pacemaker_sync_mark "create-neutron_db_sync"
 
 service node[:neutron][:platform][:service_name] do
-  supports :status => true, :restart => true
+  supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources("template[#{plugin_cfg_path}]")
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
-
 
 include_recipe "neutron::api_register"
 

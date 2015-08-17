@@ -17,15 +17,14 @@
 #
 
 # Generate Excel spreadsheet comparing two tempest result sets or simply format a single result set
-# The main usecase is to compare two sets of test results to see the delta but 
-# it will accept a single filename as input as well if you just want a simple spreadsheet from saved xml output. 
+# The main usecase is to compare two sets of test results to see the delta but
+# it will accept a single filename as input as well if you just want a simple spreadsheet from saved xml output.
 
-require 'rubygems'
-require 'xmlsimple'
-require 'axlsx'
+require "rubygems"
+require "xmlsimple"
+require "axlsx"
 
 class TempestResultsProcessor
-  
  DOES_NOT_EXIST = 0
  ERROR = 1
  FAILED = 2
@@ -33,41 +32,41 @@ class TempestResultsProcessor
  DELTA_BG = "FFD0D0"
  HEADER_BG = "004586"
  HEADER_FG = "FFFFFF"
- 
+
  def  run(args, options={"ForceArray" => false})
      p = Axlsx::Package.new
 
-     styles = p.workbook.styles 
-     delta_style = styles.add_style :bg_color => DELTA_BG,
-                            :alignment => { :horizontal => :left,
-                                            :vertical => :top ,
-                                            :wrap_text => true}
-                            
-     header_style = styles.add_style :fg_color=> HEADER_FG,
-                            :b => true,
-                            :bg_color => HEADER_BG,
-                            :sz => 12,
-                            :border => { :style => :thin, :color => "00" },
-                            :alignment => { :horizontal => :left,
-                                            :vertical => :top ,
-                                            :wrap_text => false}
-    normal_style = styles.add_style :alignment => { :horizontal => :left,
-                                            :vertical => :top ,
-                                            :wrap_text => true}
+     styles = p.workbook.styles
+     delta_style = styles.add_style bg_color: DELTA_BG,
+                            alignment: { horizontal: :left,
+                                            vertical: :top ,
+                                            wrap_text: true}
+
+     header_style = styles.add_style fg_color: HEADER_FG,
+                            b: true,
+                            bg_color: HEADER_BG,
+                            sz: 12,
+                            border: { style: :thin, color: "00" },
+                            alignment: { horizontal: :left,
+                                            vertical: :top ,
+                                            wrap_text: false}
+    normal_style = styles.add_style alignment: { horizontal: :left,
+                                            vertical: :top ,
+                                            wrap_text: true}
 
     no_compare = true if args.size==1
     currXml = args[0]
     prevXml = args[1] unless no_compare
     currHash = XmlSimple.xml_in(currXml, options)
     prevHash = XmlSimple.xml_in(prevXml, options) unless no_compare
-    
-    p.workbook.add_worksheet(:name => "Test Summary") do |sheet|
-        sheet.add_row ["File Name","Tests","Errors","Failures","Skipped"], :style=>header_style
-        sheet.add_row [currXml, currHash['tests'], currHash['errors'],currHash['failures'],currHash['skip']], :style=>normal_style
-        sheet.add_row [prevXml, prevHash['tests'], prevHash['errors'],prevHash['failures'],prevHash['skip']], :style=>normal_style unless no_compare  
+
+    p.workbook.add_worksheet(name: "Test Summary") do |sheet|
+        sheet.add_row ["File Name","Tests","Errors","Failures","Skipped"], style: header_style
+        sheet.add_row [currXml, currHash["tests"], currHash["errors"],currHash["failures"],currHash["skip"]], style: normal_style
+        sheet.add_row [prevXml, prevHash["tests"], prevHash["errors"],prevHash["failures"],prevHash["skip"]], style: normal_style unless no_compare
     end
 
-    p.workbook.add_worksheet(:name => "Test Results") do |sheet|
+    p.workbook.add_worksheet(name: "Test Results") do |sheet|
       row = sheet.add_row ["Test Class","Test Name",currXml]
       row.add_cell prevXml unless no_compare
       row.style=header_style
@@ -75,9 +74,9 @@ class TempestResultsProcessor
       prevcases =   prevHash["testcase"]  unless no_compare
       classnames =  currcases.uniq { |tc| tc["classname"] }.map { |tcc| tcc["classname"] }
       classnames.each do |cn|
-        currcases.select {|tc| tc["classname"]==cn}.each do |cnn|
+        currcases.select { |tc| tc["classname"]==cn }.each do |cnn|
           row = sheet.add_row [cn]
-          row.add_cell cnn['name']
+          row.add_cell cnn["name"]
           res1 = nil
           res2 = nil
           if !cnn["skipped"].nil?
@@ -95,7 +94,7 @@ class TempestResultsProcessor
 
           unless no_compare
             # find previous result
-            prevcase = prevcases.select {|ptc| ptc["classname"]==cn && ptc["name"]==cnn["name"]}.first
+            prevcase = prevcases.select { |ptc| ptc["classname"]==cn && ptc["name"]==cnn["name"] }.first
             if prevcase.nil?
               row.add_cell "NA"
               res2 = DOES_NOT_EXIST
@@ -124,10 +123,10 @@ class TempestResultsProcessor
     time_stamp = "#{tm.year}#{tm.month}#{tm.day}#{tm.hour}#{tm.min}#{tm.sec}"
     filename = "tempest_results_#{time_stamp}.xlsx"
     p.use_shared_strings = true
-    
+
     p.serialize(filename)
- 
-    puts  "Output generated, file name: #{filename}" 
+
+    puts "Output generated, file name: #{filename}"
   end
 end
 

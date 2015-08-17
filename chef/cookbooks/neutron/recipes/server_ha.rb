@@ -45,7 +45,7 @@ pacemaker_clone "cl-#{primitive_name}" do
 end
 
 crowbar_pacemaker_order_only_existing "o-cl-#{primitive_name}" do
-  ordering [ "postgresql", "rabbitmq", "cl-keystone", "cl-#{primitive_name}" ]
+  ordering ["postgresql", "rabbitmq", "cl-keystone", "cl-#{primitive_name}"]
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

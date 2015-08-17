@@ -26,44 +26,44 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 crowbar_pacemaker_sync_mark "wait-neutron_register"
 
 keystone_register "neutron api wakeup keystone" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   action :wakeup
 end
 
 keystone_register "register neutron user" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  user_password keystone_settings['service_password']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  user_password keystone_settings["service_password"]
+  tenant_name keystone_settings["service_tenant"]
   action :add_user
 end
 
 keystone_register "give neutron user access" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
 
 keystone_register "register neutron service" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   service_name "neutron"
   service_type "network"
   service_description "Openstack Neutron Service"
@@ -71,13 +71,13 @@ keystone_register "register neutron service" do
 end
 
 keystone_register "register neutron endpoint" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   endpoint_service "neutron"
-  endpoint_region keystone_settings['endpoint_region']
+  endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{neutron_protocol}://#{my_public_host}:#{api_port}/"
   endpoint_adminURL "#{neutron_protocol}://#{my_admin_host}:#{api_port}/"
   endpoint_internalURL "#{neutron_protocol}://#{my_admin_host}:#{api_port}/"

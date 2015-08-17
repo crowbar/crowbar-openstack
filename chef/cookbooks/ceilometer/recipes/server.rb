@@ -24,21 +24,21 @@ if node[:ceilometer][:use_mongodb]
 
   if ha_enabled
     mongodb_nodes = search(:node,
-      "ceilometer_ha_mongodb_replica_set_member:true AND "\
-      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
+                           "ceilometer_ha_mongodb_replica_set_member:true AND "\
+                           "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
       )
   end
 
   # if we don't have HA enabled, then mongodb should be on the current host; if
   # we have HA enabled and the node is part of the replica set, then we're fine
   # too
-  mongodb_nodes ||= [ node ]
+  mongodb_nodes ||= [node]
 
-  mongodb_addresses = mongodb_nodes.map{|n| Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address}
+  mongodb_addresses = mongodb_nodes.map{ |n| Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address }
 
   ruby_block "wait for mongodb start" do
     block do
-      require 'timeout'
+      require "timeout"
       begin
         Timeout.timeout(120) do
           master_available = false
@@ -81,7 +81,7 @@ else
   end
 
   database_user "create ceilometer database user" do
-      host '%'
+      host "%"
       connection db_settings[:connection]
       username node[:ceilometer][:db][:user]
       password node[:ceilometer][:db][:password]
@@ -95,13 +95,13 @@ else
       username node[:ceilometer][:db][:user]
       password node[:ceilometer][:db][:password]
       database_name node[:ceilometer][:db][:database]
-      host '%'
+      host "%"
       privileges db_settings[:privs]
       provider db_settings[:user_provider]
       action :grant
       only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-    
+
   crowbar_pacemaker_sync_mark "create-ceilometer_database"
 end
 
@@ -172,8 +172,8 @@ crowbar_pacemaker_sync_mark "create-ceilometer_db_sync"
 
 service "ceilometer-collector" do
   service_name node[:ceilometer][:collector][:service_name]
-  supports :status => true, :restart => true, :start => true, :stop => true
-  action [ :enable, :start ]
+  supports status: true, restart: true, start: true, stop: true
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
@@ -181,8 +181,8 @@ end
 
 service "ceilometer-agent-notification" do
   service_name node[:ceilometer][:agent_notification][:service_name]
-  supports :status => true, :restart => true, :start => true, :stop => true
-  action [ :enable, :start ]
+  supports status: true, restart: true, start: true, stop: true
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
@@ -190,8 +190,8 @@ end
 
 service "ceilometer-api" do
   service_name node[:ceilometer][:api][:service_name]
-  supports :status => true, :restart => true, :start => true, :stop => true
-  action [ :enable, :start ]
+  supports status: true, restart: true, start: true, stop: true
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
@@ -199,8 +199,8 @@ end
 
 service "ceilometer-alarm-evaluator" do
   service_name node["ceilometer"]["alarm_evaluator"]["service_name"]
-  supports :status => true, :restart => true, :start => true, :stop => true
-  action [ :enable, :start ]
+  supports status: true, restart: true, start: true, stop: true
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
@@ -208,8 +208,8 @@ end
 
 service "ceilometer-alarm-notifier" do
   service_name node["ceilometer"]["alarm_notifier"]["service_name"]
-  supports :status => true, :restart => true, :start => true, :stop => true
-  action [ :enable, :start ]
+  supports status: true, restart: true, start: true, stop: true
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
@@ -225,34 +225,34 @@ end
 crowbar_pacemaker_sync_mark "wait-ceilometer_register"
 
 keystone_register "ceilometer wakeup keystone" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   action :wakeup
 end
 
 keystone_register "register ceilometer user" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  user_password keystone_settings['service_password']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  user_password keystone_settings["service_password"]
+  tenant_name keystone_settings["service_tenant"]
   action :add_user
 end
 
 keystone_register "give ceilometer user access" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -261,13 +261,13 @@ env_filter = " AND ceilometer_config_environment:#{node[:ceilometer][:config][:e
 swift_middlewares = search(:node, "roles:ceilometer-swift-proxy-middleware#{env_filter}") || []
 unless swift_middlewares.empty?
   keystone_register "give ceilometer user ResellerAdmin role" do
-    protocol keystone_settings['protocol']
-    insecure keystone_settings['insecure']
-    host keystone_settings['internal_url_host']
-    port keystone_settings['admin_port']
-    token keystone_settings['admin_token']
-    user_name keystone_settings['service_user']
-    tenant_name keystone_settings['service_tenant']
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    token keystone_settings["admin_token"]
+    user_name keystone_settings["service_user"]
+    tenant_name keystone_settings["service_tenant"]
     role_name "ResellerAdmin"
     action :add_access
   end
@@ -275,11 +275,11 @@ end
 
 # Create ceilometer service
 keystone_register "register ceilometer service" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   service_name "ceilometer"
   service_type "metering"
   service_description "Openstack Telemetry Service"
@@ -287,13 +287,13 @@ keystone_register "register ceilometer service" do
 end
 
 keystone_register "register ceilometer endpoint" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   endpoint_service "ceilometer"
-  endpoint_region keystone_settings['endpoint_region']
+  endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{node[:ceilometer][:api][:protocol]}://#{my_public_host}:#{node[:ceilometer][:api][:port]}"
   endpoint_adminURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
   endpoint_internalURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
@@ -306,25 +306,25 @@ end
 # /etc/cron.daily/.  In tex/juno this cronjob is moved into the
 # package, and is renamed as openstack-ceilometer-expirer.  We remove
 # the old cronjob here.
-file '/etc/cron.daily/crowbar-ceilometer-expirer' do
+file "/etc/cron.daily/crowbar-ceilometer-expirer" do
   action :delete
 end
 
 # Cronjob to repair the database and free space for mongodb.  This
 # only makes sense when the time_to_live > 0
 if node[:ceilometer][:use_mongodb] && node[:ceilometer][:database][:time_to_live] > 0
-  template '/etc/cron.weekly/crowbar-repairdatabase-mongodb' do
-    source 'cronjob-repairdatabase-mongodb.erb'
-    owner 'root'
-    group 'root'
+  template "/etc/cron.weekly/crowbar-repairdatabase-mongodb" do
+    source "cronjob-repairdatabase-mongodb.erb"
+    owner "root"
+    group "root"
     mode 0755
     backup false
     variables(
-      :listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+      listen_addr: Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
     )
   end
 else
-  file '/etc/cron.weekly/crowbar-repairdatabase-mongodb' do
+  file "/etc/cron.weekly/crowbar-repairdatabase-mongodb" do
     action :delete
   end
 end

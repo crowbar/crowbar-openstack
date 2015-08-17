@@ -14,13 +14,13 @@
 # limitations under the License.
 #
 
-require File.expand_path('../support/helpers', __FILE__)
+require File.expand_path("../support/helpers", __FILE__)
 
-describe 'postgresql::default' do
+describe "postgresql::default" do
   include Helpers::Postgresql
 
-  it 'installs the postgresql client packages' do
-    node['postgresql']['client']['packages'].each do |pkg|
+  it "installs the postgresql client packages" do
+    node["postgresql"]["client"]["packages"].each do |pkg|
       package(pkg).must_be_installed
     end
   end

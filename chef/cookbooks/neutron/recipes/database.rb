@@ -20,21 +20,21 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-props = [ {'db_name' => node[:neutron][:db][:database],
-          'db_user' => node[:neutron][:db][:user],
-          'db_pass' => node[:neutron][:db][:password],
-          'db_conn_name' => 'sql_connection'  }
+props = [{"db_name" => node[:neutron][:db][:database],
+          "db_user" => node[:neutron][:db][:user],
+          "db_pass" => node[:neutron][:db][:password],
+          "db_conn_name" => "sql_connection"  }
         ]
 
 crowbar_pacemaker_sync_mark "wait-neutron_database"
 
 # Create the Neutron Databases
 props.each do |prop|
-  db_name = prop['db_name']
-  db_user = prop['db_user']
-  db_pass = prop['db_pass']
-  db_conn_name = prop['db_conn_name']
-  sql_address_name = prop['sql_address_name']
+  db_name = prop["db_name"]
+  db_user = prop["db_user"]
+  db_pass = prop["db_pass"]
+  db_conn_name = prop["db_conn_name"]
+  sql_address_name = prop["sql_address_name"]
 
     database "create #{db_name} neutron database" do
         connection db_settings[:connection]
@@ -48,7 +48,7 @@ props.each do |prop|
         connection db_settings[:connection]
         username "#{db_user}"
         password "#{db_pass}"
-        host '%'
+        host "%"
         provider db_settings[:user_provider]
         action :create
         only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -59,7 +59,7 @@ props.each do |prop|
         username "#{db_user}"
         password "#{db_pass}"
         database_name "#{db_name}"
-        host '%'
+        host "%"
         privileges db_settings[:privs]
         provider db_settings[:user_provider]
         action :grant

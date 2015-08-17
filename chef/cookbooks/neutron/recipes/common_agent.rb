@@ -26,7 +26,7 @@ end
 ruby_block "edit /etc/sysctl.conf for rp_filter" do
   block do
     rc = Chef::Util::FileEdit.new("/etc/sysctl.conf")
-    rc.search_file_replace_line(/^net.ipv4.conf.all.rp_filter/, 'net.ipv4.conf.all.rp_filter = 0')
+    rc.search_file_replace_line(/^net.ipv4.conf.all.rp_filter/, "net.ipv4.conf.all.rp_filter = 0")
     rc.write_file
   end
   only_if { node[:platform] == "suse" }
@@ -46,17 +46,17 @@ end
 bash "reload disable-rp_filter-sysctl" do
   code "/sbin/sysctl -e -q -p #{disable_rp_filter_file}"
   action :nothing
-  subscribes :run, resources(:cookbook_file=> disable_rp_filter_file), :delayed
+  subscribes :run, resources(cookbook_file: disable_rp_filter_file), :delayed
 end
 
 # openvswitch installation and configuration
-if neutron[:neutron][:networking_plugin] == 'vmware' or
-  (neutron[:neutron][:networking_plugin] == 'ml2' and
+if neutron[:neutron][:networking_plugin] == "vmware" or
+  (neutron[:neutron][:networking_plugin] == "ml2" and
    neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch"))
   if node.platform == "ubuntu"
     # If we expect to install the openvswitch module via DKMS, but the module
     # does not exist, rmmod the openvswitch module before continuing.
-    if node[:neutron][:platform][:ovs_pkgs].any?{|e|e == "openvswitch-datapath-dkms"} &&
+    if node[:neutron][:platform][:ovs_pkgs].any?{ |e|e == "openvswitch-datapath-dkms" } &&
         !File.exists?("/lib/modules/#{%x{uname -r}.strip}/updates/dkms/openvswitch.ko") &&
         File.directory?("/sys/module/openvswitch")
       if IO.read("/sys/module/openvswitch/refcnt").strip != "0"
@@ -84,14 +84,14 @@ if neutron[:neutron][:networking_plugin] == 'vmware' or
 
   service "openvswitch_service" do
     service_name openvswitch_service
-    supports :status => true, :restart => true
-    action [ :start, :enable ]
+    supports status: true, restart: true
+    action [:start, :enable]
   end
 end
 
 multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty? && node.roles.include?("neutron-network")
 # openvswitch configuration specific to ML2
-if neutron[:neutron][:networking_plugin] == 'ml2' and
+if neutron[:neutron][:networking_plugin] == "ml2" and
    neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch")
 
   # Install the package now as neutron-ovs-cleanup service is shipped with this
@@ -101,7 +101,7 @@ if neutron[:neutron][:networking_plugin] == 'ml2' and
     # Note: this must not be started! This service only makes sense on boot.
     service "neutron-ovs-cleanup" do
       service_name "openstack-neutron-ovs-cleanup" if %w(suse).include?(node.platform)
-      action [ :enable ]
+      action [:enable]
     end
   else
     # Arrange for neutron-ovs-cleanup to be run on bootup of compute nodes only
@@ -133,7 +133,7 @@ if neutron[:neutron][:networking_plugin] == 'ml2' and
 
   # Create the bridges Neutron needs.
   # Usurp config as needed.
-  networks = [[ "nova_fixed", "fixed" ], [ "nova_floating", "public" ]]
+  networks = [["nova_fixed", "fixed"], ["nova_floating", "public"]]
   neutron[:neutron][:additional_external_networks].each do |net|
     networks << [net, net]
   end
@@ -167,10 +167,10 @@ if neutron[:neutron][:networking_plugin] == 'ml2' and
       group "root"
       mode "0755"
       variables(
-        :source => bound_if,
-        :dest => name,
-        :addresses => addresses,
-        :routes => routes
+        source: bound_if,
+        dest: name,
+        addresses: addresses,
+        routes: routes
       )
       # After the ruby_block "Have #{name} usurp config from #{bound_if}" was
       # executed for the first time, the physical interface (eth) will not have
@@ -225,7 +225,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       bridge_mappings = "floating:br-public"
       if multiple_external_networks
         bridge_mappings += ", "
-        bridge_mappings += neutron[:neutron][:additional_external_networks].collect { |n| n + ":" + "br-" + n }.join ','
+        bridge_mappings += neutron[:neutron][:additional_external_networks].collect { |n| n + ":" + "br-" + n }.join ","
       end
     end
     if ml2_type_drivers.include?("vlan")
@@ -273,11 +273,11 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       group node[:neutron][:platform][:group]
       mode "0640"
       variables(
-        :ml2_type_drivers => ml2_type_drivers,
-        :tunnel_types => ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
-        :use_l2pop => neutron[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")),
-        :dvr_enabled => neutron[:neutron][:use_dvr],
-        :bridge_mappings => bridge_mappings
+        ml2_type_drivers: ml2_type_drivers,
+        tunnel_types: ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
+        use_l2pop: neutron[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")),
+        dvr_enabled: neutron[:neutron][:use_dvr],
+        bridge_mappings: bridge_mappings
       )
     end
   when ml2_mech_drivers.include?("linuxbridge")
@@ -297,16 +297,16 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       group node[:neutron][:platform][:group]
       mode "0640"
       variables(
-        :ml2_type_drivers => ml2_type_drivers,
-        :vxlan_mcast_group => neutron[:neutron][:vxlan][:multicast_group],
-        :use_l2pop => neutron[:neutron][:use_l2pop] && ml2_type_drivers.include?("vxlan"),
-        :interface_mappings => interface_mappings
+        ml2_type_drivers: ml2_type_drivers,
+        vxlan_mcast_group: neutron[:neutron][:vxlan][:multicast_group],
+        use_l2pop: neutron[:neutron][:use_l2pop] && ml2_type_drivers.include?("vxlan"),
+        interface_mappings: interface_mappings
        )
     end
   end
 
   service neutron_agent do
-    supports :status => true, :restart => true
+    supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources("template[#{agent_config_path}]")
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
@@ -325,21 +325,21 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       group node[:neutron][:platform][:group]
       mode "0640"
       variables(
-        :debug => neutron[:neutron][:debug],
-        :interface_driver => interface_driver,
-        :use_namespaces => "True",
-        :handle_internal_only_routers => "True",
-        :metadata_port => 9697,
-        :send_arp_for_ha => 3,
-        :periodic_interval => 40,
-        :periodic_fuzzy_delay => 5,
-        :dvr_enabled => neutron[:neutron][:use_dvr],
-        :dvr_mode => node.roles.include?("neutron-network") ? "dvr_snat" : "dvr"
+        debug: neutron[:neutron][:debug],
+        interface_driver: interface_driver,
+        use_namespaces: "True",
+        handle_internal_only_routers: "True",
+        metadata_port: 9697,
+        send_arp_for_ha: 3,
+        periodic_interval: 40,
+        periodic_fuzzy_delay: 5,
+        dvr_enabled: neutron[:neutron][:use_dvr],
+        dvr_mode: node.roles.include?("neutron-network") ? "dvr_snat" : "dvr"
       )
     end
 
     service node[:neutron][:platform][:l3_agent_name] do
-      supports :status => true, :restart => true
+      supports status: true, restart: true
       action [:enable, :start]
       subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
       subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
@@ -365,7 +365,7 @@ if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
   metadata_port = nova[:nova][:ports][:metadata] rescue 8775
   metadata_protocol = (nova[:nova][:ssl][:enabled] ? "https" : "http") rescue "http"
   metadata_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
-  metadata_proxy_shared_secret = (nova[:nova][:neutron_metadata_proxy_shared_secret] rescue '')
+  metadata_proxy_shared_secret = (nova[:nova][:neutron_metadata_proxy_shared_secret] rescue "")
 
   keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
@@ -375,20 +375,20 @@ if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
     group node[:neutron][:platform][:group]
     mode "0640"
     variables(
-      :debug => neutron[:neutron][:debug],
-      :keystone_settings => keystone_settings,
-      :auth_region => keystone_settings['endpoint_region'],
-      :neutron_insecure => neutron[:neutron][:ssl][:insecure],
-      :nova_metadata_host => metadata_host,
-      :nova_metadata_port => metadata_port,
-      :nova_metadata_protocol => metadata_protocol,
-      :nova_metadata_insecure => metadata_insecure,
-      :metadata_proxy_shared_secret => metadata_proxy_shared_secret
+      debug: neutron[:neutron][:debug],
+      keystone_settings: keystone_settings,
+      auth_region: keystone_settings["endpoint_region"],
+      neutron_insecure: neutron[:neutron][:ssl][:insecure],
+      nova_metadata_host: metadata_host,
+      nova_metadata_port: metadata_port,
+      nova_metadata_protocol: metadata_protocol,
+      nova_metadata_insecure: metadata_insecure,
+      metadata_proxy_shared_secret: metadata_proxy_shared_secret
     )
   end
 
   service node[:neutron][:platform][:metadata_agent_name] do
-    supports :status => true, :restart => true
+    supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
     subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")

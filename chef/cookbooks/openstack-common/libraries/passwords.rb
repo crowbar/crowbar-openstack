@@ -50,9 +50,9 @@ module ::Openstack # rubocop:disable Documentation
   def secret(bag_name, index)
     if node['openstack']['developer_mode']
       ::Chef::Log.warn(
-        "Developer mode for reading passwords is DEPRECATED and will "\
-        "be removed. Please use attributes (and the get_password method) "\
-        "instead.")
+        'Developer mode for reading passwords is DEPRECATED and will '\
+        'be removed. Please use attributes (and the get_password method) '\
+        'instead.')
 
       return (node['openstack']['secret'][index] || index)
     end
@@ -66,7 +66,7 @@ module ::Openstack # rubocop:disable Documentation
   # attribute-specified openstack secrets databag.
   def get_secret(key)
     ::Chef::Log.warn(
-      "The get_secret method is DEPRECATED. "\
+      'The get_secret method is DEPRECATED. '\
       "Use get_password(key, 'token') instead")
 
     if node['openstack']['use_databags']

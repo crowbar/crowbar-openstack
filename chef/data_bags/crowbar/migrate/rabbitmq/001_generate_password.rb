@@ -12,13 +12,13 @@ def upgrade ta, td, a, d
       unless node[:rabbitmq][:password].empty?
         @@rabbitmq_password = node[:rabbitmq][:password]
       end
-      node[:rabbitmq].delete('password')
+      node[:rabbitmq].delete("password")
       node.save
     end
   end
 
-  if a['password'].nil? || a['password'].empty?
-    a['password'] = @@rabbitmq_password
+  if a["password"].nil? || a["password"].empty?
+    a["password"] = @@rabbitmq_password
   end
 
   return a, d

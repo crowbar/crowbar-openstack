@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-require File.join(File.dirname(__FILE__), 'provider_database_postgresql')
+require File.join(File.dirname(__FILE__), "provider_database_postgresql")
 
 class Chef
   class Provider
@@ -26,7 +26,7 @@ class Chef
 
         def load_current_resource
           Gem.clear_paths
-          require 'pg'
+          require "pg"
           @current_resource = Chef::Resource::PostgresqlDatabaseSchema.new(@new_resource.name)
           @current_resource.schema_name(@new_resource.schema_name)
           @current_resource

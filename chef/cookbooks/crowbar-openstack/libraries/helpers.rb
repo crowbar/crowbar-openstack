@@ -66,16 +66,16 @@ class CrowbarOpenStackHelper
         backend_name = DatabaseLibrary::Database::Util.get_backend_name(database)
 
         @database_settings[instance] = {
-          :address => address,
-          :url_scheme => backend_name,
-          :backend_name => backend_name,
-          :provider => DatabaseLibrary::Database::Util.get_database_provider(database),
-          :user_provider => DatabaseLibrary::Database::Util.get_user_provider(database),
-          :privs => DatabaseLibrary::Database::Util.get_default_priviledges(database),
-          :connection => {
-            :host => address,
-            :username => "db_maker",
-            :password => database["database"][:db_maker_password]
+          address: address,
+          url_scheme: backend_name,
+          backend_name: backend_name,
+          provider: DatabaseLibrary::Database::Util.get_database_provider(database),
+          user_provider: DatabaseLibrary::Database::Util.get_user_provider(database),
+          privs: DatabaseLibrary::Database::Util.get_default_priviledges(database),
+          connection: {
+            host: address,
+            username: "db_maker",
+            password: database["database"][:db_maker_password]
           }
         }
 
@@ -100,11 +100,11 @@ class CrowbarOpenStackHelper
         Chef::Log.warn("No RabbitMQ server found!")
       else
         @rabbitmq_settings[instance] = {
-          :address => rabbit[:rabbitmq][:address],
-          :port => rabbit[:rabbitmq][:port],
-          :user => rabbit[:rabbitmq][:user],
-          :password => rabbit[:rabbitmq][:password],
-          :vhost => rabbit[:rabbitmq][:vhost]
+          address: rabbit[:rabbitmq][:address],
+          port: rabbit[:rabbitmq][:port],
+          user: rabbit[:rabbitmq][:user],
+          password: rabbit[:rabbitmq][:password],
+          vhost: rabbit[:rabbitmq][:vhost]
         }
 
         Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]}")

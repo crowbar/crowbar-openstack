@@ -4,9 +4,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,11 +18,11 @@
 
 skip_setup = node[:swift][:devs].nil?
 
-include_recipe 'swift::disks'
-#include_recipe 'swift::auth' 
+include_recipe "swift::disks"
+#include_recipe 'swift::auth'
 # Note: we always want to setup rsync, even if we do not do anything else; this
 # will allow the ring-compute node to push the rings.
-include_recipe 'swift::rsync'
+include_recipe "swift::rsync"
 
 if skip_setup
   # If we have no device yet, then it simply means that we haven't looked for
@@ -62,16 +62,15 @@ storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
     source "#{service}.conf.erb"
     owner "root"
     group node[:swift][:group]
-    variables({ 
-      :uid => node[:swift][:user],
-      :gid => node[:swift][:group],
-      :storage_net_ip => storage_ip,
-      :server_num => 1,  ## could allow multiple servers on the same machine
-      :debug => node[:swift][:debug]      
-    })    
+    variables({
+      uid: node[:swift][:user],
+      gid: node[:swift][:group],
+      storage_net_ip: storage_ip,
+      server_num: 1,  ## could allow multiple servers on the same machine
+      debug: node[:swift][:debug]
+    })
   end
 end
-
 
 svcs = %w{swift-object swift-object-auditor swift-object-replicator swift-object-updater}
 svcs = svcs + %w{swift-container swift-container-auditor swift-container-replicator swift-container-updater}
@@ -82,9 +81,9 @@ env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment
 compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
 if (!compute_nodes.nil? and compute_nodes.length > 0 )
   compute_node_addr  = Swift::Evaluator.get_ip_by_type(compute_nodes[0],:storage_ip_expr)
-  log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") {level :debug}  
+  log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") { level :debug }
 
-  %w{container account object}.each { |ring| 
+  %w{container account object}.each { |ring|
     execute "pull #{ring} ring" do
       user node[:swift][:user]
       group node[:swift][:group]
@@ -93,7 +92,7 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       ignore_failure true
     end
   }
-    
+
   svcs.each { |x|
     ring = x.gsub("swift-", "").gsub(/-.*/, "")
     unless %w{container account object}.include? ring
@@ -110,10 +109,10 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
         start_command "start #{x}"
         status_command "status #{x} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
       end
-      supports :status => true, :restart => true
+      supports status: true, restart: true
       action [:enable, :start]
-      subscribes :restart, resources(:template => "/etc/swift/swift.conf")
-      subscribes :restart, resources(:template => "/etc/swift/#{ring}-server.conf")
+      subscribes :restart, resources(template: "/etc/swift/swift.conf")
+      subscribes :restart, resources(template: "/etc/swift/#{ring}-server.conf")
       only_if { ::File.exists? "/etc/swift/#{ring}.ring.gz" }
     end
   }
@@ -121,15 +120,14 @@ end
 
 node["swift"]["storage_init_done"] = true
 
-### 
+###
 # let the monitoring tools know what services should be running on this node.
 node[:swift][:monitor] = {}
 node[:swift][:monitor][:svcs] = svcs
-node[:swift][:monitor][:ports] = {:object =>6000, :container =>6001, :account =>6002}
+node[:swift][:monitor][:ports] = {object: 6000, container: 6001, account: 6002}
 node.save
 
-
 if node["swift"]["use_slog"]
-  log ("installing slogging") {level :info}
+  log ("installing slogging") { level :info }
   include_recipe "swift::slog"
 end

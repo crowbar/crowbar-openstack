@@ -35,12 +35,12 @@ pacemaker_primitive service_name do
   #  "use_service"    => true,
   #  "service" => node[:ceilometer][:central][:service_name]
   #})
-  action [ :create, :start ]
+  action [:create, :start]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_order_only_existing "o-#{service_name}" do
-  ordering [ "rabbitmq", "cl-keystone", service_name ]
+  ordering ["rabbitmq", "cl-keystone", service_name]
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

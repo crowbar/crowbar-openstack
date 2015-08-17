@@ -93,21 +93,21 @@ class SwiftService < PacemakerServiceObject
     base["attributes"]["swift"]["dispersion"]["service_password"] = random_password
 
     base["deployment"]["swift"]["elements"] = {
-        "swift-proxy" => [  ],
-        "swift-ring-compute" => [  ],
+        "swift-proxy" => [],
+        "swift-ring-compute" => [],
         "swift-storage" => []
     }
 
     if nodes.size > 0
-      controller        = nodes.detect { |n| n if n.intended_role == "controller"} || nodes.shift
+      controller        = nodes.detect { |n| n if n.intended_role == "controller" } || nodes.shift
       storage_nodes     = nodes.select { |n| n if n.intended_role == "storage" }
       if storage_nodes.empty?
         storage_nodes = nodes.select { |n| n if n.intended_role != "controller" }
       end
       base["deployment"]["swift"]["elements"] = {
-        "swift-dispersion"      => [ controller[:fqdn] ],
-        "swift-proxy"           => [ controller[:fqdn] ],
-        "swift-ring-compute"    => [ controller[:fqdn] ],
+        "swift-dispersion"      => [controller[:fqdn]],
+        "swift-proxy"           => [controller[:fqdn]],
+        "swift-ring-compute"    => [controller[:fqdn]],
         "swift-storage"         => storage_nodes.map { |x| x[:fqdn] }
       }
     end
@@ -146,13 +146,13 @@ class SwiftService < PacemakerServiceObject
 
   def get_report_run_by_uuid(uuid)
     get_dispersion_reports.each do |r|
-        return r if r['uuid'] == uuid
+        return r if r["uuid"] == uuid
     end
     nil
   end
 
   def get_all_nodes_hash
-    Hash[ NodeObject.find_all_nodes.map {|n| [n.name, n]} ]
+    Hash[NodeObject.find_all_nodes.map { |n| [n.name, n] }]
   end
 
   def get_ready_nodes
@@ -161,7 +161,7 @@ class SwiftService < PacemakerServiceObject
   end
 
   def get_ready_proposals
-    Proposal.where(barclamp: @bc_name).select {|p| p.status == 'ready'}.compact
+    Proposal.where(barclamp: @bc_name).select { |p| p.status == "ready" }.compact
   end
 
   def _get_or_create_db
@@ -216,20 +216,20 @@ class SwiftService < PacemakerServiceObject
 
     swift_db = _get_or_create_db
 
-    @logger.info('cleaning out report runs and results')
-    swift_db['dispersion_reports'].delete_if do |report_run|
-      if report_run['status'] == 'running'
-        if report_run['pid'] and not process_exists(report_run['pid'])
+    @logger.info("cleaning out report runs and results")
+    swift_db["dispersion_reports"].delete_if do |report_run|
+      if report_run["status"] == "running"
+        if report_run["pid"] and not process_exists(report_run["pid"])
           @logger.warn("running dispersion run #{report_run['uuid']} seems to be stale")
-        elsif Time.now.utc.to_i - report_run['started'] > 60 * 60 * 4 # older than 4 hours
+        elsif Time.now.utc.to_i - report_run["started"] > 60 * 60 * 4 # older than 4 hours
           @logger.warn("running dispersion run #{report_run['uuid']} seems to be outdated, started at #{Time.at(report_run['started']).to_s}")
         else
           @logger.debug("omitting running dispersion run #{report_run['uuid']} while cleaning")
           next
         end
       else
-        delete_file(report_run['results.html'])
-        delete_file(report_run['results.json'])
+        delete_file(report_run["results.html"])
+        delete_file(report_run["results.json"])
       end
       @logger.debug("removing dispersion run #{report_run['uuid']}")
       true
@@ -251,8 +251,8 @@ class SwiftService < PacemakerServiceObject
 
     swift_db = _get_or_create_db
 
-    swift_db['dispersion_reports'].each do |dr|
-      raise ServiceError, I18n.t("barclamp.#{@bc_name}.run.duplicate") if dr['node'] == node and dr['status'] == 'running'
+    swift_db["dispersion_reports"].each do |dr|
+      raise ServiceError, I18n.t("barclamp.#{@bc_name}.run.duplicate") if dr["node"] == node and dr["status"] == "running"
     end
 
     lock = acquire_lock(@bc_name)
@@ -281,7 +281,7 @@ class SwiftService < PacemakerServiceObject
     Process.detach pid
 
     # saving the PID to prevent
-    report_run['pid'] = pid
+    report_run["pid"] = pid
     lock = acquire_lock(@bc_name)
     swift_db.save
     release_lock(lock)
@@ -300,7 +300,7 @@ class SwiftService < PacemakerServiceObject
     Proposal.where(barclamp: "ceph").each {|p|
       next unless (p.status == "ready") || (p.status == "pending")
       elements = (p.status == "ready") ? p.role.elements : p.elements
-      if elements.keys.include?("ceph-radosgw") && !elements['ceph-radosgw'].empty?
+      if elements.keys.include?("ceph-radosgw") && !elements["ceph-radosgw"].empty?
         @logger.warn("node #{elements['ceph-radosgw']} has ceph-radosgw role")
         validation_error("Ceph with RadosGW support is already deployed. Only one of Ceph with RadosGW and Swift can be deployed at any time.")
       end

@@ -16,7 +16,6 @@
 #
 
 class NovaDashboardController < BarclampController
-
   protected
 
   def initialize_service

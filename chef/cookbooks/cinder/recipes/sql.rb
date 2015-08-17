@@ -39,7 +39,7 @@ database "create #{node[:cinder][:db][:database]} database" do
 end
 
 database_user "create cinder database user" do
-    host '%'
+    host "%"
     connection db_settings[:connection]
     username node[:cinder][:db][:user]
     password node[:cinder][:db][:password]
@@ -53,7 +53,7 @@ database_user "grant database access for cinder database user" do
     username node[:cinder][:db][:user]
     password node[:cinder][:db][:password]
     database_name node[:cinder][:db][:database]
-    host '%'
+    host "%"
     privileges db_settings[:privs]
     provider db_settings[:user_provider]
     action :grant

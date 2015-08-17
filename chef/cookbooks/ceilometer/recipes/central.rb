@@ -28,8 +28,8 @@ ha_enabled = node[:ceilometer][:ha][:central][:enabled]
 
 service "ceilometer-agent-central" do
   service_name node[:ceilometer][:central][:service_name]
-  supports :status => true, :restart => true, :start => true, :stop => true
-  action [ :enable, :start ]
+  supports status: true, restart: true, start: true, stop: true
+  action [:enable, :start]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled

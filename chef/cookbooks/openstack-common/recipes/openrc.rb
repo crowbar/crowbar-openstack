@@ -46,13 +46,13 @@ template '/root/openrc' do
   source 'openrc.erb'
   # TODO: (MRV) Consider making the name, location, contents and owner/group
   # of this more flexible with attributes.
-  owner  'root'
-  group  'root'
-  mode   00600
+  owner 'root'
+  group 'root'
+  mode 00600
   variables(
-    :user => ksadmin_user,
-    :tenant => ksadmin_tenant_name,
-    :password => ksadmin_pass,
-    :identity_endpoint => identity_endpoint.to_s
+    user: ksadmin_user,
+    tenant: ksadmin_tenant_name,
+    password: ksadmin_pass,
+    identity_endpoint: identity_endpoint.to_s
   )
 end

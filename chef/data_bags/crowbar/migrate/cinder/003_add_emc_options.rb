@@ -3,7 +3,6 @@ def upgrade ta, td, a, d
   return a, d
 end
 
-
 def downgrade ta, td, a, d
   a["volume"]["emc"].delete("masking_view")
   return a, d

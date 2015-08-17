@@ -14,25 +14,25 @@
 # limitations under the License.
 #
 
-require File.expand_path('../support/helpers', __FILE__)
+require File.expand_path("../support/helpers", __FILE__)
 
-describe 'postgresql::apt_pgdg_postgresql' do
+describe "postgresql::apt_pgdg_postgresql" do
   include Helpers::Postgresql
 
-  it 'removes the Pitti PPA sources.list' do
-    skip unless %w{debian}.include?(node['platform_family'])
+  it "removes the Pitti PPA sources.list" do
+    skip unless %w{debian}.include?(node["platform_family"])
     file("/etc/apt/sources.list.d/pitti-postgresql-ppa").wont_exist
   end
-  it 'creates the PGDG apt sources.list' do
-    skip unless %w{debian}.include?(node['platform_family'])
+  it "creates the PGDG apt sources.list" do
+    skip unless %w{debian}.include?(node["platform_family"])
     file("/etc/apt/sources.list.d/apt.postgresql.org.list").must_exist
   end
 
-  it 'installs postgresql-client-9.3' do
+  it "installs postgresql-client-9.3" do
     package("postgresql-client-9.3").must_be_installed
   end
 
-  it 'makes psql version 9.3 available' do
+  it "makes psql version 9.3 available" do
     psql = shell_out("psql --version")
     assert psql.stdout.include?("psql (PostgreSQL) 9.3")
   end

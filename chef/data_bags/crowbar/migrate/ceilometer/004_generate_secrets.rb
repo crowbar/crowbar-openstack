@@ -16,30 +16,30 @@ def upgrade ta, td, a, d
       unless node[:ceilometer][:db][:password].empty?
         @@ceilometer_db_password = node[:ceilometer][:db][:password]
       end
-      node[:ceilometer][:db].delete('password')
+      node[:ceilometer][:db].delete("password")
       dirty = true
     end
     unless (node[:ceilometer][:metering_secret] rescue nil).nil?
       unless node[:ceilometer][:metering_secret].empty?
         @@ceilometer_metering_secret = node[:ceilometer][:metering_secret]
       end
-      node[:ceilometer].delete('metering_secret')
+      node[:ceilometer].delete("metering_secret")
       dirty = true
     end
     node.save if dirty
   end
 
-  if a['db']['password'].nil? || a['db']['password'].empty?
-    a['db']['password'] = @@ceilometer_db_password
+  if a["db"]["password"].nil? || a["db"]["password"].empty?
+    a["db"]["password"] = @@ceilometer_db_password
   end
-  if a['metering_secret'].nil? || a['metering_secret'].empty?
-    a['metering_secret'] = @@ceilometer_metering_secret
+  if a["metering_secret"].nil? || a["metering_secret"].empty?
+    a["metering_secret"] = @@ceilometer_metering_secret
   end
 
   return a, d
 end
 
 def downgrade ta, td, a, d
-  a.delete('metering_secret')
+  a.delete("metering_secret")
   return a, d
 end

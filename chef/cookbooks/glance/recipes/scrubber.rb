@@ -28,9 +28,9 @@ template node[:glance][:scrubber][:config_file] do
   group node[:glance][:group]
   mode 0640
   variables(
-    :registry_bind_host => network_settings[:registry][:bind_host],
-    :registry_bind_port => network_settings[:registry][:bind_port],
-    :keystone_settings => keystone_settings
+    registry_bind_host: network_settings[:registry][:bind_host],
+    registry_bind_port: network_settings[:registry][:bind_port],
+    keystone_settings: keystone_settings
   )
 end
 
@@ -40,10 +40,10 @@ template "/etc/cron.d/glance-scrubber" do
   group "root"
   mode 0644
   variables(
-    :glance_min => "1",
-    :glance_hour => "*",
-    :glance_user => node[:glance][:user],
-    :glance_command => "/usr/bin/glance-scrubber "\
+    glance_min: "1",
+    glance_hour: "*",
+    glance_user: node[:glance][:user],
+    glance_command: "/usr/bin/glance-scrubber "\
                        "--config-dir #{node[:glance][:config_dir]}")
 end
 

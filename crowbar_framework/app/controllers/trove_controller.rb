@@ -15,7 +15,6 @@
 #
 
 class TroveController < BarclampController
-
   protected
 
   def initialize_service

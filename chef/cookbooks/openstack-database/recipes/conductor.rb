@@ -22,37 +22,37 @@ class ::Chef::Recipe # rubocop:disable Documentation
   include ::Openstack
 end
 
-platform_options = node['openstack']['database']['platform']
+platform_options = node["openstack"]["database"]["platform"]
 
-platform_options['conductor_packages'].each do |pkg|
+platform_options["conductor_packages"].each do |pkg|
   package pkg
 end
 
-service 'trove-conductor' do
-  service_name platform_options['conductor_service']
-  supports :status => true, :restart => true
+service "trove-conductor" do
+  service_name platform_options["conductor_service"]
+  supports status: true, restart: true
 
   action [:enable]
 end
 
-db_user = node['openstack']['db']['database']['username']
-db_pass = get_password 'db', 'database'
-db_uri = db_uri('database', db_user, db_pass).to_s
-rabbit = node['openstack']['mq']['database']['rabbit']
-rabbit_pass = get_password('user', rabbit['userid'])
-identity_uri = endpoint('identity-api')
+db_user = node["openstack"]["db"]["database"]["username"]
+db_pass = get_password "db", "database"
+db_uri = db_uri("database", db_user, db_pass).to_s
+rabbit = node["openstack"]["mq"]["database"]["rabbit"]
+rabbit_pass = get_password("user", rabbit["userid"])
+identity_uri = endpoint("identity-api")
 
-template '/etc/trove/trove-conductor.conf' do
-  source 'trove-conductor.conf.erb'
-  owner node['openstack']['database']['user']
-  group node['openstack']['database']['group']
+template "/etc/trove/trove-conductor.conf" do
+  source "trove-conductor.conf.erb"
+  owner node["openstack"]["database"]["user"]
+  group node["openstack"]["database"]["group"]
   mode 00640
   variables(
-    :database_connection => db_uri,
-    :identity_uri => identity_uri,
-    :rabbit => rabbit,
-    :rabbit_pass => rabbit_pass
+    database_connection: db_uri,
+    identity_uri: identity_uri,
+    rabbit: rabbit,
+    rabbit_pass: rabbit_pass
     )
 
-  notifies :restart, 'service[trove-conductor]', :immediately
+  notifies :restart, "service[trove-conductor]", :immediately
 end

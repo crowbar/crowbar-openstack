@@ -1,9 +1,8 @@
-require 'chef'
+require "chef"
 #require 'pp'
 
 class Rack_awareness
   class By_switch
-
     def initialize(node)
       @node=node
       @rr_counter=0
@@ -85,7 +84,6 @@ class Rack_awareness
         return switch_list
     end
 
-
     def node_to_zone(params)
         n=params[:target_node]
         sw_name=self.get_node_sw(n)
@@ -102,7 +100,6 @@ class Rack_awareness
         @rr_counter += 1
         return zone
     end
-
   end
 end
 

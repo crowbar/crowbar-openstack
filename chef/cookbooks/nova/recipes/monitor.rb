@@ -4,9 +4,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,9 @@ include_recipe "nagios::common"
 
 # Nova scale data holder
 nova_scale = {
-  :computes => [],
-  :schedulers => [],
-  :apis => []
+  computes: [],
+  schedulers: [],
+  apis: []
 }
 
 search_env_filtered(:node, "roles:nova-single-machine") do |n|
@@ -76,8 +76,8 @@ template "/etc/nagios/nrpe.d/nova_nrpe.cfg" do
   group node[:nagios][:group]
   owner node[:nagios][:user]
   variables( {
-    :nova_scale => nova_scale,
-    :nova_admin_ip => nova_admin_ip
+    nova_scale: nova_scale,
+    nova_admin_ip: nova_admin_ip
   })
   notifies :restart, "service[nagios-nrpe-server]"
 end

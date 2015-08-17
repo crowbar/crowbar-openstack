@@ -54,7 +54,7 @@ class TempestService < ServiceObject
     nodes.delete_if { |n| n.nil? or n.admin? }
     unless nodes.empty?
       base["deployment"]["tempest"]["elements"] = {
-        "tempest" => [ nodes.first.name ]
+        "tempest" => [nodes.first.name]
       }
     end
 
@@ -105,13 +105,13 @@ class TempestService < ServiceObject
 
   def get_test_run_by_uuid(uuid)
     get_test_runs.each do |r|
-        return r if r['uuid'] == uuid
+        return r if r["uuid"] == uuid
     end
     nil
   end
 
   def self.get_all_nodes_hash
-    Hash[ NodeObject.find_all_nodes.map {|n| [n.name, n]} ]
+    Hash[NodeObject.find_all_nodes.map { |n| [n.name, n] }]
   end
 
   def get_ready_nodes
@@ -120,7 +120,7 @@ class TempestService < ServiceObject
   end
 
   def get_ready_proposals
-    Proposal.where(barclamp: @bc_name).all.select {|p| p.status == 'ready'}.compact
+    Proposal.where(barclamp: @bc_name).all.select { |p| p.status == "ready" }.compact
   end
 
   def _get_or_create_db
@@ -131,8 +131,8 @@ class TempestService < ServiceObject
 
         db = Chef::DataBagItem.new
         db.data_bag "crowbar"
-        db['id'] = @bc_name
-        db['test_runs'] = []
+        db["id"] = @bc_name
+        db["test_runs"] = []
         db.save
       ensure
         release_lock lock
@@ -142,7 +142,7 @@ class TempestService < ServiceObject
   end
 
   def get_test_runs
-    _get_or_create_db['test_runs']
+    _get_or_create_db["test_runs"]
   end
 
   def clear_test_runs
@@ -161,20 +161,20 @@ class TempestService < ServiceObject
 
     tempest_db = _get_or_create_db
 
-    @logger.info('cleaning out test runs and results')
-    tempest_db['test_runs'].delete_if do |test_run|
-      if test_run['status'] == 'running'
-        if test_run['pid'] and not process_exists(test_run['pid'])
+    @logger.info("cleaning out test runs and results")
+    tempest_db["test_runs"].delete_if do |test_run|
+      if test_run["status"] == "running"
+        if test_run["pid"] and not process_exists(test_run["pid"])
           @logger.warn("running tempest run #{test_run['uuid']} seems to be stale")
-        elsif Time.now.utc.to_i - test_run['started'] > 60 * 60 * 4 # older than 4 hours
+        elsif Time.now.utc.to_i - test_run["started"] > 60 * 60 * 4 # older than 4 hours
           @logger.warn("running tempest run #{test_run['uuid']} seems to be outdated, started at #{Time.at(test_run['started']).to_s}")
         else
           @logger.debug("omitting running test run #{test_run['uuid']} while cleaning")
           next
         end
       else
-        delete_file(test_run['results.html'])
-        delete_file(test_run['results.xml'])
+        delete_file(test_run["results.html"])
+        delete_file(test_run["results.xml"])
       end
       @logger.debug("removing tempest run #{test_run['uuid']}")
       true
@@ -190,18 +190,18 @@ class TempestService < ServiceObject
 
     test_run_uuid = `uuidgen`.strip
     test_run = {
-      'uuid' => test_run_uuid, 'started' => Time.now.utc.to_i, 'ended' => nil, 'pid' => nil,
-      'status' => 'running', 'node' => node, 'results.xml' => "log/#{test_run_uuid}.xml",
-      'results.html' => "log/#{test_run_uuid}.html"}
+      "uuid" => test_run_uuid, "started" => Time.now.utc.to_i, "ended" => nil, "pid" => nil,
+      "status" => "running", "node" => node, "results.xml" => "log/#{test_run_uuid}.xml",
+      "results.html" => "log/#{test_run_uuid}.html"}
 
     tempest_db = _get_or_create_db
 
-    tempest_db['test_runs'].each do |tr|
-      raise ServiceError, I18n.t("barclamp.#{@bc_name}.run.duplicate") if tr['node'] == node and tr['status'] == 'running'
+    tempest_db["test_runs"].each do |tr|
+      raise ServiceError, I18n.t("barclamp.#{@bc_name}.run.duplicate") if tr["node"] == node and tr["status"] == "running"
     end
 
     lock = acquire_lock(@bc_name)
-    tempest_db['test_runs'] << test_run
+    tempest_db["test_runs"] << test_run
     tempest_db.save
     release_lock(lock)
 
@@ -209,11 +209,11 @@ class TempestService < ServiceObject
 
     pid = fork do
       command_line = "/tmp/tempest_smoketest.sh 2>/dev/null"
-      Process.waitpid run_remote_chef_client(node, command_line, test_run['results.xml'])
+      Process.waitpid run_remote_chef_client(node, command_line, test_run["results.xml"])
 
-      test_run['ended'] = Time.now.utc.to_i
-      test_run['status'] = $?.exitstatus.equal?(0) ? 'passed' : 'failed'
-      test_run['pid'] = nil
+      test_run["ended"] = Time.now.utc.to_i
+      test_run["status"] = $?.exitstatus.equal?(0) ? "passed" : "failed"
+      test_run["pid"] = nil
 
       lock = acquire_lock(@bc_name)
       tempest_db.save
@@ -224,7 +224,7 @@ class TempestService < ServiceObject
     Process.detach pid
 
     # saving the PID to prevent
-    test_run['pid'] = pid
+    test_run["pid"] = pid
     lock = acquire_lock(@bc_name)
     tempest_db.save
     release_lock(lock)

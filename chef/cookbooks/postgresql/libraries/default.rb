@@ -99,7 +99,7 @@ def locale_date_order
     res = testtime.strftime("%x")
 
     if res.nil?
-       return 'mdy'
+       return "mdy"
     end
 
     posM = res.index("11")
@@ -107,19 +107,19 @@ def locale_date_order
     posY = res.index("33")
 
     if (posM.nil? || posD.nil? || posY.nil?)
-        return 'mdy'
+        return "mdy"
     elseif (posY < posM && posM < posD)
-        return 'ymd'
+        return "ymd"
     elseif (posD < posM)
-        return 'dmy'
+        return "dmy"
     else
-        return 'mdy'
+        return "mdy"
     end
 end
 
 #######
 # Timezone Configuration
-require 'find'
+require "find"
 
 # Function to determine where the system stored shared timezone data.
 # Used in recipes/config_initdb.rb to detemine where it should have
@@ -145,7 +145,7 @@ def pg_TZDIR()
     if ::File.directory?("/usr/lib/zoneinfo")
         tzdir = "/usr/lib/zoneinfo"
     else
-        share_path = [ ENV['TZDIR'], "/usr/share/zoneinfo" ].compact.first
+        share_path = [ENV["TZDIR"], "/usr/share/zoneinfo"].compact.first
         if ::File.directory?(share_path)
             tzdir = share_path
         end
@@ -260,7 +260,7 @@ def identify_system_timezone(tzdir)
             "Etc/GMT",
             (-std_ofs > 0) ? "+" : "",
             (-std_ofs).to_s
-          ].join('')
+          ].join("")
     end
 
     return resultbuf
@@ -276,7 +276,7 @@ def select_default_timezone(tzdir)
     system_timezone = nil
 
     # Check TZ environment variable
-    tzname = ENV['TZ']
+    tzname = ENV["TZ"]
     if !tzname.nil? && !tzname.empty? && validate_zone(tzname)
         system_timezone = tzname
 
@@ -301,7 +301,7 @@ def get_result_orig(query)
     stdin = query.join("\n")
   end
   @get_result ||= begin
-    cmd = shell_out("cat", :input => stdin)
+    cmd = shell_out("cat", input: stdin)
     cmd.stdout
   end
 end
@@ -318,8 +318,8 @@ def execute_sql(query)
   statement = query.is_a?(String) ? query : query.join("\n")
   @execute_sql ||= begin
     cmd = shell_out("psql -q --tuples-only --no-align -d template1 -f -",
-          :user => "postgres",
-          :input => statement
+                    user: "postgres",
+                    input: statement
     )
     # If psql fails, generally the postgresql service is down.
     # Instead of aborting chef with a fatal error, let's just
@@ -354,11 +354,11 @@ end
 # Links to RPMs for installation are in an attribute so that new versions/platforms
 # can be more easily added. (See attributes/default.rb)
 def pgdgrepo_rpm_info
-  repo_rpm_url = node['postgresql']['pgdg']['repo_rpm_url'].
-    fetch(node['postgresql']['version']).            # e.g., fetch for "9.1"
-    fetch(node['platform']).                         # e.g., fetch for "centos"
-    fetch(node['platform_version'].to_f.to_i.to_s).  # e.g., fetch for "5" (truncated "5.7")
-    fetch(node['kernel']['machine'])                 # e.g., fetch for "i386" or "x86_64"
+  repo_rpm_url = node["postgresql"]["pgdg"]["repo_rpm_url"].
+    fetch(node["postgresql"]["version"]).            # e.g., fetch for "9.1"
+    fetch(node["platform"]).                         # e.g., fetch for "centos"
+    fetch(node["platform_version"].to_f.to_i.to_s).  # e.g., fetch for "5" (truncated "5.7")
+    fetch(node["kernel"]["machine"])                 # e.g., fetch for "i386" or "x86_64"
 
   # Extract the filename portion from the URL for the PGDG repository RPM.
   # E.g., repo_rpm_filename = "pgdg-centos92-9.2-6.noarch.rpm"
@@ -366,9 +366,9 @@ def pgdgrepo_rpm_info
 
   # Extract the package name from the URL for the PGDG repository RPM.
   # E.g., repo_rpm_package = "pgdg-centos92"
-  repo_rpm_package = repo_rpm_filename.split(/-/,3)[0..1].join('-')
+  repo_rpm_package = repo_rpm_filename.split(/-/,3)[0..1].join("-")
 
-  return [ repo_rpm_url, repo_rpm_filename, repo_rpm_package ]
+  return [repo_rpm_url, repo_rpm_filename, repo_rpm_package]
 end
 
 # End the Opscode::PostgresqlHelpers module

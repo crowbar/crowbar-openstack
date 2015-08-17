@@ -24,18 +24,18 @@ network_settings = GlanceHelper.network_settings(node)
 
 haproxy_loadbalancer "glance-api" do
   address network_settings[:api][:ha_bind_host]
-  port    network_settings[:api][:ha_bind_port]
+  port network_settings[:api][:ha_bind_port]
   use_ssl (node[:glance][:api][:protocol] == "https")
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "glance", "glance-server", "api")
-  action  :nothing
+  action :nothing
 end.run_action(:create)
 
 haproxy_loadbalancer "glance-registry" do
   address network_settings[:registry][:ha_bind_host]
-  port    network_settings[:registry][:ha_bind_port]
+  port network_settings[:registry][:ha_bind_port]
   use_ssl false
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "glance", "glance-server", "registry")
-  action  :nothing
+  action :nothing
 end.run_action(:create)
 
 # Wait for all nodes to reach this point so we know that all nodes will have
@@ -53,7 +53,7 @@ primitives = []
 
   pacemaker_primitive primitive_name do
     agent node[:glance][:ha][service.to_sym][:agent]
-    op    node[:glance][:ha][service.to_sym][:op]
+    op node[:glance][:ha][service.to_sym][:op]
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
@@ -70,12 +70,12 @@ end
 
 pacemaker_clone "cl-#{group_name}" do
   rsc group_name
-  action [ :create, :start]
+  action [:create, :start]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_order_only_existing "o-cl-#{group_name}" do
-  ordering [ "postgresql", "rabbitmq", "cl-keystone", "cl-#{group_name}" ]
+  ordering ["postgresql", "rabbitmq", "cl-keystone", "cl-#{group_name}"]
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

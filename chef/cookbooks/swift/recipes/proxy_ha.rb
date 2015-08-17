@@ -35,7 +35,7 @@ service_name = "swift-proxy"
 
 pacemaker_primitive service_name do
   agent node[:swift][:ha]["proxy"][:agent]
-  op    node[:swift][:ha]["proxy"][:op]
+  op node[:swift][:ha]["proxy"][:op]
   action :create
   # Do not even try to start the daemon if we don't have the ring yet
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exists?("/etc/swift/object.ring.gz") }
@@ -43,13 +43,13 @@ end
 
 pacemaker_clone "cl-#{service_name}" do
   rsc service_name
-  action [ :create, :start ]
+  action [:create, :start]
   # Do not even try to start the daemon if we don't have the ring yet
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exists?("/etc/swift/object.ring.gz") }
 end
 
 crowbar_pacemaker_order_only_existing "o-cl-#{service_name}" do
-  ordering [ "cl-keystone", "cl-#{service_name}" ]
+  ordering ["cl-keystone", "cl-#{service_name}"]
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exists?("/etc/swift/object.ring.gz") }

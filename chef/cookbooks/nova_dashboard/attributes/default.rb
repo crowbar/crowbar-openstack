@@ -33,9 +33,9 @@ default[:nova_dashboard][:policy_file][:orchestration] = "heat_policy.json"
 default[:nova_dashboard][:policy_file][:network] = "neutron_policy.json"
 
 default[:nova_dashboard][:apache][:ssl] = false
-default[:nova_dashboard][:apache][:ssl_crt_file] = '/etc/apache2/ssl.crt/openstack-dashboard-server.crt'
-default[:nova_dashboard][:apache][:ssl_key_file] = '/etc/apache2/ssl.key/openstack-dashboard-server.key'
-default[:nova_dashboard][:apache][:ssl_crt_chain_file] = ''
+default[:nova_dashboard][:apache][:ssl_crt_file] = "/etc/apache2/ssl.crt/openstack-dashboard-server.crt"
+default[:nova_dashboard][:apache][:ssl_key_file] = "/etc/apache2/ssl.key/openstack-dashboard-server.key"
+default[:nova_dashboard][:apache][:ssl_crt_chain_file] = ""
 
 default[:nova_dashboard][:ha][:enabled] = false
 # Ports to bind to when haproxy is used for the real ports

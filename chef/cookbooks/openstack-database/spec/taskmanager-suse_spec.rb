@@ -1,34 +1,34 @@
 # encoding: UTF-8
 
-require_relative 'spec_helper'
+require_relative "spec_helper"
 
-describe 'openstack-database::taskmanager' do
+describe "openstack-database::taskmanager" do
   let(:runner) { ChefSpec::Runner.new(SUSE_OPTS) }
   let(:node) { runner.node }
   let(:chef_run) { runner.converge(described_recipe) }
 
-  include_context 'database-stubs'
+  include_context "database-stubs"
 
-  it 'installs the taskmanager packages' do
-    expect(chef_run).to install_package('openstack-trove-taskmanager')
+  it "installs the taskmanager packages" do
+    expect(chef_run).to install_package("openstack-trove-taskmanager")
   end
 
-  it 'starts the taskmanager service' do
-    expect(chef_run).to enable_service('openstack-trove-taskmanager')
+  it "starts the taskmanager service" do
+    expect(chef_run).to enable_service("openstack-trove-taskmanager")
   end
 
-  describe 'trove-taskmanager.conf' do
-    let(:filename) { '/etc/trove/trove-taskmanager.conf' }
+  describe "trove-taskmanager.conf" do
+    let(:filename) { "/etc/trove/trove-taskmanager.conf" }
 
-    it 'creates trove-taskmanager.conf file' do
+    it "creates trove-taskmanager.conf file" do
       expect(chef_run).to create_template(filename).with(
-        :user => 'trove',
-        :group => 'trove',
-        :mode => 0640
+        user: "trove",
+        group: "trove",
+        mode: 0640
         )
     end
 
-    it 'has the default values for configurable attributes' do
+    it "has the default values for configurable attributes" do
       [/^debug = false$/,
        /^verbose = false$/,
        %r{^sql_connection = mysql://trove:db-pass@127.0.0.1:3306/trove\?charset=utf8},

@@ -46,7 +46,7 @@ database "create #{node[:glance][:db][:database]} database" do
 end
 
 database_user "create glance database user" do
-  host '%'
+  host "%"
   connection db_settings[:connection]
   username node[:glance][:db][:user]
   password node[:glance][:db][:password]
@@ -60,7 +60,7 @@ database_user "grant database access for glance database user" do
   username node[:glance][:db][:user]
   password node[:glance][:db][:password]
   database_name node[:glance][:db][:database]
-  host '%'
+  host "%"
   privileges db_settings[:privs]
   provider db_settings[:user_provider]
   action :grant
@@ -80,34 +80,34 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 crowbar_pacemaker_sync_mark "wait-glance_register_user"
 
 keystone_register "glance wakeup keystone" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
   action :wakeup
 end
 
 keystone_register "register glance user" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  user_password keystone_settings['service_password']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  user_password keystone_settings["service_password"]
+  tenant_name keystone_settings["service_tenant"]
   action :add_user
 end
 
 keystone_register "give glance user access" do
-  protocol keystone_settings['protocol']
-  insecure keystone_settings['insecure']
-  host keystone_settings['internal_url_host']
-  port keystone_settings['admin_port']
-  token keystone_settings['admin_token']
-  user_name keystone_settings['service_user']
-  tenant_name keystone_settings['service_tenant']
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end

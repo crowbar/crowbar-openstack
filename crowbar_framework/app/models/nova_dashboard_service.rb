@@ -16,7 +16,6 @@
 #
 
 class NovaDashboardService < PacemakerServiceObject
-
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "nova_dashboard"
@@ -59,7 +58,7 @@ class NovaDashboardService < PacemakerServiceObject
     if nodes.size >= 1
       controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
       base["deployment"]["nova_dashboard"]["elements"] = {
-        "nova_dashboard-server" => [ controller[:fqdn] ]
+        "nova_dashboard-server" => [controller[:fqdn]]
       }
     end
 
@@ -78,7 +77,6 @@ class NovaDashboardService < PacemakerServiceObject
 
     super
   end
-
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Nova_dashboard apply_role_pre_chef_call: entering #{all_nodes.inspect}")
@@ -153,6 +151,5 @@ class NovaDashboardService < PacemakerServiceObject
 
     @logger.debug("Nova_dashboard apply_role_pre_chef_call: leaving")
   end
-
 end
 

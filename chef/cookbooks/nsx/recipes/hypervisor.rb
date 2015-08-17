@@ -17,15 +17,14 @@
 # limitations under the License.
 #
 
-
-include_recipe 'nsx::default'
+include_recipe "nsx::default"
 
 controller = node[:nsx][:controllers].first
 
 nsx_transport_node node[:fqdn] do
   nsx_controller controller
-  client_pem_file '/etc/openvswitch/ovsclient-cert.pem'
-  integration_bridge_id 'br-int'
+  client_pem_file "/etc/openvswitch/ovsclient-cert.pem"
+  integration_bridge_id "br-int"
   tunnel_probe_random_vlan true
   transport_connectors([
     {

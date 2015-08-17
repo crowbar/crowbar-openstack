@@ -5,7 +5,6 @@ def upgrade ta, td, a, d
   return a, d
 end
 
-
 def downgrade ta, td, a, d
   a["volume"].delete("rbd")
   return a, d

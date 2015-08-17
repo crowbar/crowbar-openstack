@@ -21,10 +21,10 @@
 include_recipe "nova::neutron"
 include_recipe "nova::config"
 
-def set_boot_kernel_and_trigger_reboot(flavor='default')
+def set_boot_kernel_and_trigger_reboot(flavor="default")
   # only default and xen flavor is supported by this helper right now
   if node.platform == "suse" && node.platform_version.to_f >= 12.0
-    default_boot = 'SLES12'
+    default_boot = "SLES12"
     grub_env = %x[grub2-editenv list]
     if grub_env.include?("saved_entry")
       current_default = grub_env.strip.split("=")[1]
@@ -33,16 +33,16 @@ def set_boot_kernel_and_trigger_reboot(flavor='default')
     end
 
     # parse grub config, to find boot index for selected flavor
-    File.open('/boot/grub2/grub.cfg') do |f|
+    File.open("/boot/grub2/grub.cfg") do |f|
       f.each_line do |line|
-        if line.start_with?('menuentry')
+        if line.start_with?("menuentry")
           default_boot = line.sub(/^menuentry '([^']*)'.*$/,'\1').strip
-          if flavor.eql?('xen')
+          if flavor.eql?("xen")
             # found boot index
-            break if line.include?('Xen')
+            break if line.include?("Xen")
           else
             # take first non-xen kernel as default
-            break unless line.include?('Xen')
+            break unless line.include?("Xen")
           end
         end
       end
@@ -57,16 +57,16 @@ def set_boot_kernel_and_trigger_reboot(flavor='default')
     current_default = nil
 
     # parse grub config, to find boot index for selected flavor
-    File.open('/boot/grub/menu.lst') do |f|
+    File.open("/boot/grub/menu.lst") do |f|
       f.each_line do |line|
-        current_default = line.scan(/\d/).first.to_i if line.start_with?('default')
-        if line.start_with?('title')
-          if flavor.eql?('xen')
+        current_default = line.scan(/\d/).first.to_i if line.start_with?("default")
+        if line.start_with?("title")
+          if flavor.eql?("xen")
             # found boot index
-            break if line.include?('Xen')
+            break if line.include?("Xen")
           else
             # take first non-xen kernel as default
-            break unless line.include?('Xen')
+            break unless line.include?("Xen")
           end
           default_boot += 1
         end
@@ -90,7 +90,7 @@ if %w(redhat centos suse).include?(node.platform)
   # Start open-iscsi daemon, since nova-compute is going to use it and stumble over the
   # "starting daemon" messages otherwise
   service "open-iscsi" do
-    supports :status => true, :start => true, :stop => true, :restart => true
+    supports status: true, start: true, stop: true, restart: true
     action [:enable, :start]
     if node.platform == "suse"
       if node.platform_version.to_f < 12
@@ -145,10 +145,10 @@ case node[:nova][:libvirt_type]
         owner "root"
         mode 0644
         variables(
-          :libvirtd_host_uuid => node[:nova][:host_uuid],
-          :libvirtd_listen_tcp => node[:nova]["use_migration"] ? 1 : 0,
-          :libvirtd_listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address,
-          :libvirtd_auth_tcp => node[:nova]["use_migration"] ? "none" : "sasl"
+          libvirtd_host_uuid: node[:nova][:host_uuid],
+          libvirtd_listen_tcp: node[:nova]["use_migration"] ? 1 : 0,
+          libvirtd_listen_addr: Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address,
+          libvirtd_auth_tcp: node[:nova]["use_migration"] ? "none" : "sasl"
         )
         notifies :restart, "service[libvirtd]", :delayed
       end
@@ -178,7 +178,7 @@ case node[:nova][:libvirt_type]
                   /sbin/modprobe vhost-net
                   /sbin/modprobe nbd
               EOF
-              only_if { %x[uname -r].include?('default') }
+              only_if { %x[uname -r].include?("default") }
             end
           end
 
@@ -191,9 +191,9 @@ case node[:nova][:libvirt_type]
 
           service "xend" do
             action :nothing
-            supports :status => true, :start => true, :stop => true, :restart => true
+            supports status: true, start: true, stop: true, restart: true
             # restart xend only when xen kernel is already present
-            only_if { %x[uname -r].include?('xen') }
+            only_if { %x[uname -r].include?("xen") }
           end
 
           template "/etc/xen/xend-config.sxp" do
@@ -202,16 +202,16 @@ case node[:nova][:libvirt_type]
             owner "root"
             mode 0644
             variables(
-              :node_platform => node[:platform],
-              :libvirt_migration => node[:nova]["use_migration"],
-              :shared_instances => node[:nova]["use_shared_instance_storage"],
-              :libvirtd_listen_tcp => node[:nova]["use_migration"] ? 1 : 0,
-              :libvirtd_listen_addr => Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+              node_platform: node[:platform],
+              libvirt_migration: node[:nova]["use_migration"],
+              shared_instances: node[:nova]["use_shared_instance_storage"],
+              libvirtd_listen_tcp: node[:nova]["use_migration"] ? 1 : 0,
+              libvirtd_listen_addr: Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
             )
             notifies :restart, "service[xend]", :delayed
           end
 
-          set_boot_kernel_and_trigger_reboot('xen')
+          set_boot_kernel_and_trigger_reboot("xen")
         when "lxc"
           package "lxc"
 
@@ -223,7 +223,7 @@ case node[:nova][:libvirt_type]
       # change libvirt to run qemu as user qemu
       # make sure to only set qemu:kvm for kvm and qemu deployments, use
       # system defaults for xen
-      if ['kvm','qemu'].include?(node[:nova][:libvirt_type])
+      if ["kvm","qemu"].include?(node[:nova][:libvirt_type])
         libvirt_user = "qemu"
         libvirt_group = "kvm"
       else
@@ -237,8 +237,8 @@ case node[:nova][:libvirt_type]
         owner "root"
         mode 0644
         variables(
-            :user => libvirt_user,
-            :group => libvirt_group
+            user: libvirt_user,
+            group: libvirt_group
         )
         notifies :restart, "service[libvirtd]"
       end
@@ -249,7 +249,7 @@ case node[:nova][:libvirt_type]
     else
       service "libvirt-bin" do
         action :nothing
-        supports :status => true, :start => true, :stop => true, :restart => true
+        supports status: true, start: true, stop: true, restart: true
       end
 
       cookbook_file "/etc/libvirt/qemu.conf" do
@@ -302,7 +302,6 @@ end
 unless node[:nova][:user].empty? or node["etc"]["passwd"][node[:nova][:user]].nil?
   nova_home_dir = node["etc"]["passwd"][node[:nova][:user]]["dir"]
 end
-
 
 # Create and distribute ssh keys for nova user on all compute nodes
 
@@ -359,7 +358,7 @@ end
 template "/etc/default/qemu-kvm" do
   source "qemu-kvm.erb"
   variables({
-    :kvm => node[:nova][:kvm]
+    kvm: node[:nova][:kvm]
   })
   mode "0644"
 end if node.platform == "ubuntu"
@@ -367,9 +366,9 @@ end if node.platform == "ubuntu"
 template "/usr/sbin/crowbar-compute-set-sys-options" do
   source "crowbar-compute-set-sys-options.erb"
   variables({
-    :ksm_enabled => node[:nova][:kvm][:ksm_enabled] ? 1 : 0,
-    :tranparent_hugepage_enabled => node[:nova][:hugepage][:tranparent_hugepage_enabled],
-    :tranparent_hugepage_defrag => node[:nova][:hugepage][:tranparent_hugepage_defrag]
+    ksm_enabled: node[:nova][:kvm][:ksm_enabled] ? 1 : 0,
+    tranparent_hugepage_enabled: node[:nova][:hugepage][:tranparent_hugepage_enabled],
+    tranparent_hugepage_defrag: node[:nova][:hugepage][:tranparent_hugepage_defrag]
   })
   mode "0755"
 end

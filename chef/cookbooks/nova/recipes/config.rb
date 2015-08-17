@@ -21,7 +21,6 @@
 
 node.set[:nova][:my_ip] = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 
-
 package "nova-common" do
   if %w(redhat centos suse).include?(node.platform)
     package_name "openstack-nova"
@@ -66,7 +65,7 @@ if glance_servers.length > 0
   glance_server_host = CrowbarHelper.get_host_for_admin_url(glance_server, (glance_server[:glance][:ha][:enabled] rescue false))
   glance_server_port = glance_server[:glance][:api][:bind_port]
   glance_server_protocol = glance_server[:glance][:api][:protocol]
-  glance_server_insecure = glance_server_protocol == 'https' && glance_server[:glance][:ssl][:insecure]
+  glance_server_insecure = glance_server_protocol == "https" && glance_server[:glance][:ssl][:insecure]
 else
   glance_server_host = nil
   glance_server_port = nil
@@ -99,7 +98,6 @@ else
 end
 memcached_servers.sort!
 
-
 directory "/etc/nova" do
    mode 0755
    action :create
@@ -112,11 +110,11 @@ rbd_enabled = false
 cinder_servers = search_env_filtered(:node, "roles:cinder-controller") || []
 if cinder_servers.length > 0
   cinder_server = cinder_servers[0]
-  cinder_insecure = cinder_server[:cinder][:api][:protocol] == 'https' && cinder_server[:cinder][:ssl][:insecure]
+  cinder_insecure = cinder_server[:cinder][:api][:protocol] == "https" && cinder_server[:cinder][:ssl][:insecure]
 
   if node.roles.include? "nova-multi-compute-kvm"
     cinder_server[:cinder][:volumes].each do |volume|
-      rbd_enabled = true if volume['backend_driver'] == "rbd"
+      rbd_enabled = true if volume["backend_driver"] == "rbd"
     end
   end
 else
@@ -128,8 +126,8 @@ if rbd_enabled
 end
 
 # FIXME: These attributes will be removed or re-used
-# with ephemeral storage change. Right now they are 
-# disabled in nova.conf to prevent overwritting 
+# with ephemeral storage change. Right now they are
+# disabled in nova.conf to prevent overwritting
 # multi Ceph backends from Cinder
 ceph_user = node[:nova][:rbd][:user]
 ceph_uuid = node[:nova][:rbd][:secret_uuid]
@@ -141,7 +139,7 @@ if neutron_servers.length > 0
   neutron_protocol = neutron_server[:neutron][:api][:protocol]
   neutron_server_host = CrowbarHelper.get_host_for_admin_url(neutron_server, (neutron_server[:neutron][:ha][:server][:enabled] rescue false))
   neutron_server_port = neutron_server[:neutron][:api][:service_port]
-  neutron_insecure = neutron_protocol == 'https' && neutron_server[:neutron][:ssl][:insecure]
+  neutron_insecure = neutron_protocol == "https" && neutron_server[:neutron][:ssl][:insecure]
   neutron_service_user = neutron_server[:neutron][:service_user]
   neutron_service_password = neutron_server[:neutron][:service_password]
   neutron_dhcp_domain = neutron_server[:neutron][:dhcp_domain]
@@ -246,8 +244,8 @@ if api[:nova][:novnc][:ssl][:enabled]
     api_novnc_ssl_keyfile = api[:nova][:ssl][:keyfile]
   end
 else
-  api_novnc_ssl_certfile = ''
-  api_novnc_ssl_keyfile = ''
+  api_novnc_ssl_certfile = ""
+  api_novnc_ssl_keyfile = ""
 end
 
 if (api_ha_enabled || vncproxy_ha_enabled || api == node) and api[:nova][:novnc][:ssl][:enabled]
@@ -286,51 +284,51 @@ template "/etc/nova/nova.conf" do
   group node[:nova][:group]
   mode 0640
   variables(
-            :bind_host => bind_host,
-            :bind_port_api => bind_port_api,
-            :bind_port_api_ec2 => bind_port_api_ec2,
-            :bind_port_metadata => bind_port_metadata,
-            :bind_port_objectstore => bind_port_objectstore,
-            :bind_port_novncproxy => bind_port_novncproxy,
-            :bind_port_xvpvncproxy => bind_port_xvpvncproxy,
-            :dhcpbridge => "/usr/bin/nova-dhcpbridge",
-            :database_connection => database_connection,
-            :rabbit_settings => fetch_rabbitmq_settings,
-            :libvirt_type => node[:nova][:libvirt_type],
-            :ec2_host => admin_api_host,
-            :ec2_dmz_host => public_api_host,
-            :libvirt_migration => node[:nova]["use_migration"],
-            :libvirt_enable_multipath => node[:nova][:libvirt_use_multipath],
-            :shared_instances => node[:nova]["use_shared_instance_storage"],
-            :glance_server_protocol => glance_server_protocol,
-            :glance_server_host => glance_server_host,
-            :glance_server_port => glance_server_port,
-            :glance_server_insecure => glance_server_insecure || keystone_settings['insecure'],
-            :metadata_bind_address => metadata_bind_address,
-            :vncproxy_public_host => vncproxy_public_host,
-            :vncproxy_ssl_enabled => api[:nova][:novnc][:ssl][:enabled],
-            :vncproxy_cert_file => api_novnc_ssl_certfile,
-            :vncproxy_key_file => api_novnc_ssl_keyfile,
-            :memcached_servers => memcached_servers,
-            :neutron_protocol => neutron_protocol,
-            :neutron_server_host => neutron_server_host,
-            :neutron_server_port => neutron_server_port,
-            :neutron_insecure => neutron_insecure || keystone_settings['insecure'],
-            :neutron_service_user => neutron_service_user,
-            :neutron_service_password => neutron_service_password,
-            :neutron_dhcp_domain => neutron_dhcp_domain,
-            :keystone_settings => keystone_settings,
-            :cinder_insecure => cinder_insecure || keystone_settings['insecure'],
-            :ceph_user => ceph_user,
-            :ceph_uuid => ceph_uuid,
-            :ssl_enabled => api[:nova][:ssl][:enabled],
-            :ssl_cert_file => api[:nova][:ssl][:certfile],
-            :ssl_key_file => api[:nova][:ssl][:keyfile],
-            :ssl_cert_required => api[:nova][:ssl][:cert_required],
-            :ssl_ca_file => api[:nova][:ssl][:ca_certs],
-            :oat_appraiser_host => oat_server[:hostname],
-            :oat_appraiser_port => "8443",
-            :has_itxt => has_itxt
+            bind_host: bind_host,
+            bind_port_api: bind_port_api,
+            bind_port_api_ec2: bind_port_api_ec2,
+            bind_port_metadata: bind_port_metadata,
+            bind_port_objectstore: bind_port_objectstore,
+            bind_port_novncproxy: bind_port_novncproxy,
+            bind_port_xvpvncproxy: bind_port_xvpvncproxy,
+            dhcpbridge: "/usr/bin/nova-dhcpbridge",
+            database_connection: database_connection,
+            rabbit_settings: fetch_rabbitmq_settings,
+            libvirt_type: node[:nova][:libvirt_type],
+            ec2_host: admin_api_host,
+            ec2_dmz_host: public_api_host,
+            libvirt_migration: node[:nova]["use_migration"],
+            libvirt_enable_multipath: node[:nova][:libvirt_use_multipath],
+            shared_instances: node[:nova]["use_shared_instance_storage"],
+            glance_server_protocol: glance_server_protocol,
+            glance_server_host: glance_server_host,
+            glance_server_port: glance_server_port,
+            glance_server_insecure: glance_server_insecure || keystone_settings["insecure"],
+            metadata_bind_address: metadata_bind_address,
+            vncproxy_public_host: vncproxy_public_host,
+            vncproxy_ssl_enabled: api[:nova][:novnc][:ssl][:enabled],
+            vncproxy_cert_file: api_novnc_ssl_certfile,
+            vncproxy_key_file: api_novnc_ssl_keyfile,
+            memcached_servers: memcached_servers,
+            neutron_protocol: neutron_protocol,
+            neutron_server_host: neutron_server_host,
+            neutron_server_port: neutron_server_port,
+            neutron_insecure: neutron_insecure || keystone_settings["insecure"],
+            neutron_service_user: neutron_service_user,
+            neutron_service_password: neutron_service_password,
+            neutron_dhcp_domain: neutron_dhcp_domain,
+            keystone_settings: keystone_settings,
+            cinder_insecure: cinder_insecure || keystone_settings["insecure"],
+            ceph_user: ceph_user,
+            ceph_uuid: ceph_uuid,
+            ssl_enabled: api[:nova][:ssl][:enabled],
+            ssl_cert_file: api[:nova][:ssl][:certfile],
+            ssl_key_file: api[:nova][:ssl][:keyfile],
+            ssl_cert_required: api[:nova][:ssl][:cert_required],
+            ssl_ca_file: api[:nova][:ssl][:ca_certs],
+            oat_appraiser_host: oat_server[:hostname],
+            oat_appraiser_port: "8443",
+            has_itxt: has_itxt
             )
 end
 

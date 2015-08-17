@@ -1,50 +1,50 @@
 # encoding: UTF-8
 
-require_relative 'spec_helper'
+require_relative "spec_helper"
 
-describe 'openstack-database::api' do
+describe "openstack-database::api" do
   let(:runner) { ChefSpec::Runner.new(SUSE_OPTS) }
   let(:node) { runner.node }
   let(:chef_run) { runner.converge(described_recipe) }
 
-  include_context 'database-stubs'
+  include_context "database-stubs"
 
-  it 'installs the api packages' do
-    expect(chef_run).to install_package('openstack-trove-api')
+  it "installs the api packages" do
+    expect(chef_run).to install_package("openstack-trove-api")
   end
 
-  it 'starts the api service' do
-    expect(chef_run).to enable_service('openstack-trove-api')
+  it "starts the api service" do
+    expect(chef_run).to enable_service("openstack-trove-api")
   end
 
-  it 'includes the logging recipe if syslog is enabled' do
+  it "includes the logging recipe if syslog is enabled" do
     chef_run = ChefSpec::Runner.new(::SUSE_OPTS) do |node|
-      node.set['openstack']['database']['syslog']['use'] = true
-    end.converge('openstack-database::api')
+      node.set["openstack"]["database"]["syslog"]["use"] = true
+    end.converge("openstack-database::api")
 
-    expect(chef_run).to include_recipe 'openstack-common::logging'
+    expect(chef_run).to include_recipe "openstack-common::logging"
   end
 
-  it 'creates the /var/cache/trove directory' do
-    expect(chef_run).to create_directory('/var/cache/trove').with(
-      :user => 'trove',
-      :group => 'trove',
-      :mode => 0700
+  it "creates the /var/cache/trove directory" do
+    expect(chef_run).to create_directory("/var/cache/trove").with(
+      user: "trove",
+      group: "trove",
+      mode: 0700
       )
   end
 
-  describe 'trove.conf' do
-    let(:filename) { '/etc/trove/trove.conf' }
+  describe "trove.conf" do
+    let(:filename) { "/etc/trove/trove.conf" }
 
-    it 'creates trove.conf file' do
+    it "creates trove.conf file" do
       expect(chef_run).to create_template(filename).with(
-        :user => 'trove',
-        :group => 'trove',
-        :mode => 0640
+        user: "trove",
+        group: "trove",
+        mode: 0640
         )
     end
 
-    it 'has the default values for configurable attributes' do
+    it "has the default values for configurable attributes" do
       [/^debug = false$/,
        /^verbose = false$/,
        %r{^sql_connection = mysql://trove:db-pass@127.0.0.1:3306/trove\?charset=utf8$},
@@ -69,18 +69,18 @@ describe 'openstack-database::api' do
     end
   end
 
-  describe 'api-paste.ini' do
-    let(:filename) { '/etc/trove/api-paste.ini' }
+  describe "api-paste.ini" do
+    let(:filename) { "/etc/trove/api-paste.ini" }
 
-    it 'creates the file' do
+    it "creates the file" do
       expect(chef_run).to create_template(filename).with(
-        :user => 'trove',
-        :group => 'trove',
-        :mode => 0640
+        user: "trove",
+        group: "trove",
+        mode: 0640
         )
     end
 
-    it 'has the default values for configurable attributes' do
+    it "has the default values for configurable attributes" do
       [%r{^auth_uri = http://127.0.0.1:5000/v2.0$},
        /^auth_host = 127.0.0.1$/,
        /^auth_port = 35357$/,
@@ -92,16 +92,16 @@ describe 'openstack-database::api' do
     end
   end
 
-  describe 'database initialization' do
-    let(:manage_cmd) { 'trove-manage db_sync' }
+  describe "database initialization" do
+    let(:manage_cmd) { "trove-manage db_sync" }
 
-    it 'runs trove-manage' do
+    it "runs trove-manage" do
       expect(chef_run).to run_execute(manage_cmd)
     end
 
-    it 'restarts the trove-api service' do
+    it "restarts the trove-api service" do
       res = chef_run.execute(manage_cmd)
-      expect(res).to notify('service[trove-api]').to(:restart)
+      expect(res).to notify("service[trove-api]").to(:restart)
     end
   end
 end
