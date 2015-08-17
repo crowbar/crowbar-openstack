@@ -1,0 +1,208 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header show_raw_deployment?, true
+
+  .panel-body
+    = instance_field :database
+    = instance_field :rabbitmq
+    = instance_field :keystone
+    = instance_field :glance
+
+    %script#backend_entries{ :type => "text/x-handlebars-template" }
+      %div#cinder_backends
+        {{#each entries}}
+        %ul.list-group(id="volume-entry-{{@index}}")
+          {{#if ../use_multi_backend }}
+          %li.list-group-item.active
+            %h3.list-group-item-heading
+              Backend: {{ backend_name }}
+              {{#if ../is_only_backend }}
+              {{else}}
+              = link_to icon_tag("trash"), "#", :class => "volume-backend-delete pull-right delete", "data-volumeid" => "{{@index}}"
+              {{/if}}
+          {{/if}}
+
+          {{#if_eq backend_driver 'raw'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.raw_parameters')
+
+              = select_field %w(volumes {{@index}} raw cinder_raw_method), :collection => :raw_methods_for_cinder
+              = string_field %w(volumes {{@index}} raw volume_name)
+
+          {{/if_eq}}
+          {{#if_eq backend_driver 'local'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.local_parameters')
+
+              = string_field %w(volumes {{@index}} local file_name)
+              = integer_field %w(volumes {{@index}} local file_size)
+              = string_field %w(volumes {{@index}} local volume_name)
+
+          {{/if_eq}}
+          {{#if_eq backend_driver 'netapp'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.netapp_parameters')
+
+              = select_field %w(volumes {{@index}} netapp storage_family), :collection => :netapp_storage_family, "data-showit" => "ontap_7mode;ontap_cluster", "data-showit-target" => "#netapp_7mode_container_{{@index}};#netapp_cmode_container_{{@index}}", "data-showit-direct" => "true"
+              = select_field %w(volumes {{@index}} netapp storage_protocol), :collection => :netapp_storage_protocol, "data-showit" => "nfs", "data-showit-target" => "#netapp_nfs_container_{{@index}}", "data-showit-direct" => "true"
+              = string_field %w(volumes {{@index}} netapp netapp_server_hostname)
+              = select_field %w(volumes {{@index}} netapp netapp_transport_type), :collection => :netapp_transports_for_cinder
+              = integer_field %w(volumes {{@index}} netapp netapp_server_port)
+              = string_field %w(volumes {{@index}} netapp netapp_login)
+              = password_field %w(volumes {{@index}} netapp netapp_password)
+
+              %div{ :id => "netapp_7mode_container_{{@index}}" }
+                = string_field %w(volumes {{@index}} netapp netapp_vfiler)
+                %span.help-block
+                  = t(".volumes.netapp.vfiler_hint")
+
+                = string_field %w(volumes {{@index}} netapp netapp_volume_list)
+                %span.help-block
+                  = t(".volumes.netapp.volume_list_hint")
+
+              %div{ :id => "netapp_cmode_container_{{@index}}" }
+                = string_field %w(volumes {{@index}} netapp vserver)
+
+                %span.help-block
+                  = t(".volumes.netapp.vserver_hint")
+
+              %div{ :id => "netapp_nfs_container_{{@index}}" }
+                = text_field %w(volumes {{@index}} netapp nfs_shares), :size => "80x5"
+
+                %span.help-block
+                  = t(".volumes.netapp.nfs_shares_config_hint")
+
+          {{/if_eq}}
+          {{#if_eq backend_driver 'emc'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.emc_parameters')
+
+              = string_field %w(volumes {{@index}} emc ecom_server_ip)
+              = string_field %w(volumes {{@index}} emc masking_view)
+              = integer_field %w(volumes {{@index}} emc ecom_server_port)
+              = string_field %w(volumes {{@index}} emc ecom_server_username)
+              = password_field %w(volumes {{@index}} emc ecom_server_password)
+              = string_field %w(volumes {{@index}} emc emc_storage_type)
+
+          {{/if_eq}}
+          {{#if_eq backend_driver 'eqlx'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.eqlx_parameters')
+
+              = string_field %w(volumes {{@index}} eqlx san_ip)
+              = string_field %w(volumes {{@index}} eqlx san_login)
+              = password_field %w(volumes {{@index}} eqlx san_password)
+              = string_field %w(volumes {{@index}} eqlx eqlx_group_name)
+              = string_field %w(volumes {{@index}} eqlx eqlx_pool)
+              = boolean_field %w(volumes {{@index}} eqlx san_thin_provision)
+              = boolean_field %w(volumes {{@index}} eqlx eqlx_use_chap)
+              = string_field %w(volumes {{@index}} eqlx eqlx_chap_login)
+              = password_field %w(volumes {{@index}} eqlx eqlx_chap_password)
+              = integer_field %w(volumes {{@index}} eqlx eqlx_cli_timeout)
+
+          {{/if_eq}}
+          {{#if_eq backend_driver 'eternus'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.eternus_parameters')
+
+              = select_field %w(volumes {{@index}} eternus protocol), :collection => :eternus_protocols_for_cinder, "data-showit" => "iscsi", "data-showit-target" => "#volumes_{{@index}}_eternus_iscsi_ip"
+              = string_field %w(volumes {{@index}} eternus ip)
+              = integer_field %w(volumes {{@index}} eternus port)
+              = string_field %w(volumes {{@index}} eternus user)
+              = password_field %w(volumes {{@index}} eternus password)
+              = string_field %w(volumes {{@index}} eternus pool)
+              = string_field %w(volumes {{@index}} eternus iscsi_ip)
+
+          {{/if_eq}}
+          {{#if_eq backend_driver 'rbd'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.rbd_parameters')
+
+              = boolean_field %w(volumes {{@index}} rbd use_crowbar), "data-hideit" => "true", "data-hideit-target" => "#rbd_config_file_{{@index}}", "data-hideit-direct" => "true"
+              %div{:id => "rbd_config_file_{{@index}}"}
+                = string_field %w(volumes {{@index}} rbd config_file)
+                = string_field %w(volumes {{@index}} rbd admin_keyring)
+
+              = string_field %w(volumes {{@index}} rbd pool)
+              = string_field %w(volumes {{@index}} rbd user)
+
+          {{/if_eq}}
+          {{#if_eq backend_driver 'vmware'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.vmware_parameters')
+
+              = string_field %w(volumes {{@index}} vmware host)
+              = string_field %w(volumes {{@index}} vmware user)
+              = password_field %w(volumes {{@index}} vmware password)
+              = string_field %w(volumes {{@index}} vmware volume_folder)
+
+          {{/if_eq}}
+          {{#if_eq backend_driver 'manual'}}
+          %li.list-group-item
+            %fieldset
+            %legend
+              = t(".volumes.manual_parameters")
+
+            .alert.alert-warning
+              = t(".volumes.manual.not_supported")
+
+            = string_field %w(volumes {{@index}} manual driver)
+            %span.help-block
+              = t(".volumes.manual.driver_hint")
+
+            = text_field %w(volumes {{@index}} manual config), :size => "80x5"
+            %span.help-block
+              = t(".volumes.manual.config_hint")
+          {{/if_eq}}
+        {{/each}}
+
+    %fieldset
+      %legend
+        = t(".volumes.listheader")
+
+      - if !@proposal.pretty_attributes.use_multi_backend
+        = select_field ["volumes", 0, "backend_driver"], :collection => :volume_driver_for_cinder
+
+      %div#cinder_backends
+        = t(".volumes.loading_text")
+
+    - if @proposal.pretty_attributes.use_multi_backend
+      %fieldset
+        %legend
+          = t(".volumes.addheader")
+
+        = select_field %w(volumes backend_driver), :collection => :volume_driver_for_cinder
+        = string_field %w(volumes backend_name)
+
+        %div.form-group.pull-left
+          %input(id='add_cinder_backend' class="form-control" type="button" value="Add Backend")
+
+    %fieldset
+      %legend
+        = t(".ssl.header")
+
+      = select_field %w(api protocol), :collection => :api_protocols_for_cinder, "data-sslprefix" => "ssl", "data-sslcert" => "/etc/cinder/ssl/certs/signing_cert.pem", "data-sslkey" => "/etc/cinder/ssl/private/signing_key.pem"
+
+      #ssl_container
+        = boolean_field %w(ssl generate_certs)
+        = string_field %w(ssl certfile)
+        = string_field %w(ssl keyfile)
+        = boolean_field %w(ssl insecure)
+        = boolean_field %w(ssl cert_required), "data-enabler" => "true", "data-enabler-target" => "#ssl_ca_certs"
+        = string_field %w(ssl ca_certs)

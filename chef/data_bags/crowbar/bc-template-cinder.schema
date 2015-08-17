@@ -1,0 +1,324 @@
+{
+  "type": "map",
+  "required": true,
+  "mapping": {
+    "id": { "type": "str", "required": true, "pattern": "/^bc-cinder-|^bc-template-cinder$/" },
+    "description": { "type": "str", "required": true },
+    "attributes": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "cinder": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "debug": { "type": "bool", "required": true },
+            "verbose": { "type": "bool", "required": true },
+            "max_header_line": { "type": "int", "required": true },
+            "use_syslog": { "type": "bool", "required": true },
+            "rabbitmq_instance": { "type": "str", "required": true },
+            "keystone_instance": { "type": "str", "required": true },
+            "database_instance": { "type": "str", "required": true },
+            "glance_instance": { "type": "str", "required": true },
+            "service_user": { "type": "str", "required": true },
+            "service_password": { "type": "str", "required": true },
+            "max_pool_size": { "type": "int", "required": true },
+            "max_overflow": { "type": "int", "required": true },
+            "pool_timeout": { "type": "int", "required": true },
+            "use_multi_backend": { "type": "bool", "required": true },
+            "volume_defaults": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "local": {
+                "type": "map", "mapping": {
+                    "volume_name": { "type": "str", "required": true },
+                    "file_name": { "type": "str", "required": true },
+                    "file_size": { "type": "int", "required": true }
+                }
+                },
+                "raw": {
+                "type": "map", "mapping": {
+                    "volume_name": { "type": "str", "required": true },
+                    "cinder_raw_method": { "type": "str", "required": true }
+                }
+                },
+                "eqlx": {
+                "type": "map", "mapping": {
+                    "san_ip": { "type": "str", "required": true },
+                    "san_login": { "type": "str", "required": true },
+                    "san_password": { "type": "str", "required": true },
+                    "san_thin_provision": { "type": "bool", "required": true },
+                    "eqlx_group_name": { "type": "str", "required": true },
+                    "eqlx_use_chap": { "type": "bool", "required": true },
+                    "eqlx_chap_login": { "type": "str", "required": true },
+                    "eqlx_chap_password": { "type": "str", "required": true },
+                    "eqlx_cli_timeout": { "type": "int", "required": true },
+                    "eqlx_pool": { "type": "str", "required": true }
+                }
+                },
+                "netapp": {
+                "type": "map", "mapping": {
+                    "storage_family": { "type": "str", "required": true },
+                    "storage_protocol": { "type": "str", "required": true },
+                    "nfs_shares": { "type": "str", "required": true },
+                    "vserver": { "type": "str", "required": true },
+                    "netapp_server_hostname": { "type": "str", "required": true },
+                    "netapp_server_port": { "type": "int", "required": true },
+                    "netapp_login": { "type": "str", "required": true },
+                    "netapp_password": { "type": "str", "required": true },
+                    "netapp_vfiler": { "type": "str", "required": true },
+                    "netapp_transport_type": { "type": "str", "required": true },
+                    "netapp_volume_list": { "type": "str", "required": true }
+                }
+                },
+                "emc": {
+                "type": "map", "mapping": {
+                    "ecom_server_ip": { "type": "str", "required": true },
+                    "emc_storage_type": { "type": "str", "required": true },
+                    "masking_view": { "type": "str", "required": true },
+                    "ecom_server_port": { "type": "int", "required": true },
+                    "ecom_server_username": { "type": "str", "required": true },
+                    "ecom_server_password": { "type": "str", "required": true }
+                }
+                },
+                "eternus": {
+                "type": "map", "mapping": {
+                    "protocol": { "type": "str", "required": true },
+                    "ip": { "type": "str", "required": true },
+                    "port": { "type": "int", "required": true },
+                    "user": { "type": "str", "required": true },
+                    "password": { "type": "str", "required": true },
+                    "pool": { "type": "str", "required": true },
+                    "iscsi_ip": { "type": "str", "required": true }
+                }
+                },
+                "rbd": {
+                "type": "map", "mapping": {
+                    "use_crowbar": { "type": "bool", "required": true },
+                    "config_file": { "type": "str", "required": true },
+                    "admin_keyring": { "type": "str", "required": true },
+                    "pool": { "type": "str", "required": true },
+                    "user": { "type": "str", "required": true },
+                    "secret_uuid": { "type": "str", "required": true }
+                    }
+                },
+                "vmware": {
+                "type": "map", "mapping": {
+                    "host": { "type": "str", "required": true },
+                    "user": { "type": "str", "required": true },
+                    "password": { "type": "str", "required": true },
+                    "volume_folder": { "type": "str", "required": true }
+                }
+                },
+                "manual": {
+                "type": "map", "mapping": {
+                    "driver": { "type": "str", "required": true },
+                    "config": { "type": "str", "required": true }
+                }
+                }
+              }
+            },
+            "volumes": {
+              "type": "seq",
+              "required": true,
+              "sequence": [ {
+                "type": "map",
+                "required": true,
+                "mapping": {
+                  "backend_driver": { "type": "str", "required": true },
+                  "backend_name": { "type": "str", "required": true },
+                  "local": {
+                    "type": "map", "mapping": {
+                      "volume_name": { "type": "str", "required": true },
+                      "file_name": { "type": "str", "required": true },
+                      "file_size": { "type": "int", "required": true }
+                    }
+                  },
+                  "raw": {
+                    "type": "map", "mapping": {
+                      "volume_name": { "type": "str", "required": true },
+                      "cinder_raw_method": { "type": "str", "required": true }
+                    }
+                  },
+                  "eqlx": {
+                    "type": "map", "mapping": {
+                      "san_ip": { "type": "str", "required": true },
+                      "san_login": { "type": "str", "required": true },
+                      "san_password": { "type": "str", "required": true },
+                      "san_thin_provision": { "type": "bool", "required": true },
+                      "eqlx_group_name": { "type": "str", "required": true },
+                      "eqlx_use_chap": { "type": "bool", "required": true },
+                      "eqlx_chap_login": { "type": "str", "required": true },
+                      "eqlx_chap_password": { "type": "str", "required": true },
+                      "eqlx_cli_timeout": { "type": "int", "required": true },
+                      "eqlx_pool": { "type": "str", "required": true }
+                    }
+                  },
+                  "netapp": {
+                    "type": "map", "mapping": {
+                      "storage_family": { "type": "str", "required": true },
+                      "storage_protocol": { "type": "str", "required": true },
+                      "nfs_shares": { "type": "str", "required": true },
+                      "vserver": { "type": "str", "required": true },
+                      "netapp_server_hostname": { "type": "str", "required": true },
+                      "netapp_server_port": { "type": "int", "required": true },
+                      "netapp_login": { "type": "str", "required": true },
+                      "netapp_password": { "type": "str", "required": true },
+                      "netapp_vfiler": { "type": "str", "required": true },
+                      "netapp_transport_type": { "type": "str", "required": true },
+                      "netapp_volume_list": { "type": "str", "required": true }
+                    }
+                  },
+                  "emc": {
+                    "type": "map", "mapping": {
+                      "ecom_server_ip": { "type": "str", "required": true },
+                      "emc_storage_type": { "type": "str", "required": true },
+                      "masking_view": { "type": "str", "required": true },
+                      "ecom_server_port": { "type": "int", "required": true },
+                      "ecom_server_username": { "type": "str", "required": true },
+                      "ecom_server_password": { "type": "str", "required": true }
+                    }
+                  },
+                  "eternus": {
+                    "type": "map", "mapping": {
+                      "protocol": { "type": "str", "required": true },
+                      "ip": { "type": "str", "required": true },
+                      "port": { "type": "int", "required": true },
+                      "user": { "type": "str", "required": true },
+                      "password": { "type": "str", "required": true },
+                      "pool": { "type": "str", "required": true },
+                      "iscsi_ip": { "type": "str", "required": true }
+                    }
+                  },
+                  "rbd": {
+                    "type": "map", "mapping": {
+                      "use_crowbar": { "type": "bool", "required": true },
+                      "config_file": { "type": "str", "required": true },
+                      "admin_keyring": { "type": "str", "required": true },
+                      "pool": { "type": "str", "required": true },
+                      "user": { "type": "str", "required": true },
+                      "secret_uuid" : { "type": "str", "required": true }
+                    }
+                  },
+                  "vmware": {
+                    "type": "map", "mapping": {
+                      "host": { "type": "str", "required": true },
+                      "user": { "type": "str", "required": true },
+                      "password": { "type": "str", "required": true },
+                      "volume_folder": { "type": "str", "required": true }
+                      }
+                  },
+                  "manual": {
+                    "type": "map", "mapping": {
+                      "driver": { "type": "str", "required": true },
+                      "config": { "type": "str", "required": true }
+                    }
+                  }
+                }
+              } ]
+            },
+            "api": {
+              "type": "map", "required": true, "mapping": {
+                "protocol": { "type" : "str", "required" : true },
+                "bind_open_address": { "type": "bool", "required": true },
+                "bind_port": { "type": "int", "required": true }
+              }
+            },
+            "strict_ssh_host_key_policy": { "type": "bool", "required": true },
+            "default_availability_zone": { "type": "str", "required": true },
+            "ssl": { "type": "map", "required": true, "mapping": {
+              "certfile": { "type" : "str", "required" : true },
+              "keyfile": { "type" : "str", "required" : true },
+              "generate_certs": { "type" : "bool", "required" : true },
+              "insecure": { "type" : "bool", "required" : true },
+              "cert_required": { "type" : "bool", "required" : true },
+              "ca_certs": { "type" : "str", "required" : true }
+            }},
+            "db": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "password": { "type": "str", "required": true },
+                "user": { "type": "str", "required": true },
+                "database": { "type": "str", "required": true }
+              }
+            }
+          }
+        }
+      }
+    },
+    "deployment": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "cinder": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "crowbar-revision": { "type": "int", "required": true },
+            "crowbar-committing": { "type": "bool" },
+            "crowbar-applied": { "type": "bool" },
+            "crowbar-status": { "type": "str" },
+            "crowbar-failed": { "type": "str" },
+            "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
+            "element_states": {
+              "type": "map",
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "elements": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "element_order": {
+              "type": "seq",
+              "required": true,
+              "sequence": [ {
+                "type": "seq",
+                "sequence": [ { "type": "str" } ]
+              } ]
+            },
+            "element_run_list_order": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                = : {
+                  "type": "int",
+                  "required": true
+                }
+              }
+            },
+            "config": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "environment": { "type": "str", "required": true },
+                "mode": { "type": "str", "required": true },
+                "transitions": { "type": "bool", "required": true },
+                "transition_list": {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
