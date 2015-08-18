@@ -133,6 +133,8 @@ if neutron[:neutron][:networking_plugin] == "ml2" and
 
   # Create the bridges Neutron needs.
   # Usurp config as needed.
+  has_ovs_bridge = false
+
   networks = [["nova_fixed", "fixed"], ["nova_floating", "public"]]
   neutron[:neutron][:additional_external_networks].each do |net|
     networks << [net, net]
@@ -140,6 +142,9 @@ if neutron[:neutron][:networking_plugin] == "ml2" and
   networks.each do |net|
     bound_if = (node[:crowbar_wall][:network][:nets][net[0]].last rescue nil)
     next unless bound_if
+
+    has_ovs_bridge = true
+
     name = "br-#{net[1]}"
     execute "Neutron: create #{name}" do
       command "ovs-vsctl add-br #{name}; ip link set #{name} up"
@@ -157,53 +162,139 @@ if neutron[:neutron][:networking_plugin] == "ml2" and
         Chef::Log.info("#{name} usurped #{res[1].join(", ")} routes from #{bound_if}") unless res[1].empty?
       end
     end
+
     source = ::Nic.new(bound_if)
     # filter out cluster VIPs that a currently assigned to the interface
     addresses = source.addresses.select { |address| my_addresses.include? address }
     routes = source.routes
-    template "/etc/init.d/ovs-usurp-config-#{name}" do
-      source "ovs-usurp-config.erb"
-      owner "root"
-      group "root"
-      mode "0755"
-      variables(
-        source: bound_if,
-        dest: name,
-        addresses: addresses,
-        routes: routes
-      )
-      # After the ruby_block "Have #{name} usurp config from #{bound_if}" was
-      # executed for the first time, the physical interface (eth) will not have
-      # any addresses or routes assigned anymore. So we should not recreate the
-      # init script in that case. Neither should it be removed.
-      not_if { addresses.empty? and routes.empty? }
-    end
-    service "ovs-usurp-config-#{name}" do
-      # Don't start it here. It only needs to be executed during boot.
-      action [:nothing]
-      subscribes :enable, resources("template[/etc/init.d/ovs-usurp-config-#{name}]")
+    if node[:platform] == "suse" && node[:platform_version].to_f >= 12.0
+      # on SLE12, we create proper network configuration for OVS bridges, see
+      # https://en.opensuse.org/Portal:Wicked/OpenvSwitch
+
+      # We need to create a static ifcfg file so that wicked will know that the
+      # ovs bridge usurps the interface address. This also means that we need
+      # to override the variables we pass to the template for the ifcfg of the
+      # interface.
+      bound_if_resource = resources(template: "/etc/sysconfig/network/ifcfg-#{bound_if}")
+      bound_if_variables = bound_if_resource.variables
+
+      ifs = bound_if_variables[:interfaces]
+      ifs[name] = Hash.new
+      ifs[name]["type"] = "ovs_bridge"
+      ifs[name]["addresses"] = ifs[bound_if]["addresses"]
+
+      ifs[bound_if]["addresses"] = Array.new
+      ifs[bound_if]["ovs_slave"] = true
+      ifs[bound_if]["slave"] = true
+
+      bound_if_variables[:interfaces] = ifs
+      bound_if_resource.variables(bound_if_variables)
+
+      # Note that we pass nic_name, not a nic object as the ovs bridge will not
+      # exist on the first run
+      template "/etc/sysconfig/network/ifcfg-#{name}" do
+        cookbook "network"
+        source "suse-cfg.erb"
+        variables(
+          ethtool_options: "",
+          interfaces: ifs,
+          nic_name: name
+        )
+      end
+
+      # Usurp route config too
+      if ifs[bound_if]["gateway"]
+        bound_if_route_resource = resources(template: "/etc/sysconfig/network/ifroute-#{bound_if}")
+        bound_if_route_resource.path("/etc/sysconfig/network/ifroute-#{name}")
+
+        file "/etc/sysconfig/network/ifroute-#{bound_if}" do
+          action :delete
+        end
+      end
+    else
+      template "/etc/init.d/ovs-usurp-config-#{name}" do
+        source "ovs-usurp-config.erb"
+        owner "root"
+        group "root"
+        mode "0755"
+        variables(
+          source: bound_if,
+          dest: name,
+          addresses: addresses,
+          routes: routes
+        )
+        # After the ruby_block "Have #{name} usurp config from #{bound_if}" was
+        # executed for the first time, the physical interface (eth) will not have
+        # any addresses or routes assigned anymore. So we should not recreate the
+        # init script in that case. Neither should it be removed.
+        not_if { addresses.empty? && routes.empty? }
+      end
+      service "ovs-usurp-config-#{name}" do
+        # Don't start it here. It only needs to be executed during boot.
+        action [:nothing]
+        subscribes :enable, resources("template[/etc/init.d/ovs-usurp-config-#{name}]")
+      end
     end
   end
 else
-  # Cleanup the ovs-usurp init scripts if we're not using openvswitch anymore.
-  # Note: As moving between network plugins is currently not supported by this
-  #       cookbook this code is mostly just sitting here and waiting for the
-  #       plugin switching support to be implemented.
-  bridges = ["br-public", "br-fixed"]
-  neutron[:neutron][:additional_external_networks].each do |net|
-    bridges << "br-#{net}"
-  end
-  bridges.each do |name|
-    service "ovs-usurp-config-#{name}" do
-      # FIXME: Don't stop it here until we handle the shutdown of openvswitch
-      #        and the neutron-ovs-agent correctly. Otherwise we might be cut
-      #        off of the network immediately.
-      action [:disable]
-      only_if { ::File.exists?("/etc/init.d/ovs-usurp-config-#{name}") }
+  unless node[:platform] == "suse" && node[:platform_version].to_f >= 12.0
+    # Cleanup the ovs-usurp init scripts if we're not using openvswitch anymore.
+    # Note: As moving between network plugins is currently not supported by this
+    #       cookbook this code is mostly just sitting here and waiting for the
+    #       plugin switching support to be implemented.
+    bridges = ["br-public", "br-fixed"]
+    neutron[:neutron][:additional_external_networks].each do |net|
+      bridges << "br-#{net}"
     end
-    file "/etc/init.d/ovs-usurp-config-#{name}" do
+    bridges.each do |name|
+      service "ovs-usurp-config-#{name}" do
+        # FIXME: Don't stop it here until we handle the shutdown of openvswitch
+        #        and the neutron-ovs-agent correctly. Otherwise we might be cut
+        #        off of the network immediately.
+        action [:disable]
+        only_if { ::File.exists?("/etc/init.d/ovs-usurp-config-#{name}") }
+      end
+      file "/etc/init.d/ovs-usurp-config-#{name}" do
+        action :delete
+      end
+    end
+  end
+end
+
+if node[:platform] == "suse" && node[:platform_version].to_f >= 12.0
+  # See https://en.opensuse.org/Portal:Wicked/OpenvSwitch
+
+  if has_ovs_bridge
+    cookbook_file "/etc/sysconfig/network/ifcfg-ovs-system" do
+      cookbook "neutron"
+      source "ifcfg-ovs-system"
+      mode "0644"
+    end
+
+    use_nanny = true
+  else
+    file "/etc/sysconfig/network/ifcfg-ovs-system" do
       action :delete
     end
+
+    use_nanny = false
+  end
+
+  service "wicked" do
+    supports status: true, restart: true
+    action :nothing
+  end
+
+  template "/etc/wicked/local.conf" do
+    cookbook "neutron"
+    source "wicked-local.conf.erb"
+    owner "root"
+    group "root"
+    mode "0644"
+    variables(
+      use_nanny: use_nanny
+    )
+    notifies :restart, "service[wicked]"
   end
 end
 
