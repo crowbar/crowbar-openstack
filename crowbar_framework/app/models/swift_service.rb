@@ -167,16 +167,15 @@ class SwiftService < PacemakerServiceObject
   def _get_or_create_db
     db = Chef::DataBag.load("crowbar/swift") rescue nil
     if db.nil?
-      begin
-        lock = acquire_lock @bc_name
-
+      Crowbar::Lock.new(
+        logger: @logger,
+        path: Rails.root.join("tmp", "#{@bc_name}.lock")
+      ).with_lock do
         db = Chef::DataBagItem.new
         db.data_bag "crowbar"
         db["id"] = "swift"
         db["dispersion_reports"] = []
         db.save
-      ensure
-        release_lock lock
       end
     end
     db
@@ -235,9 +234,12 @@ class SwiftService < PacemakerServiceObject
       true
     end
 
-    lock = acquire_lock(@bc_name)
-    swift_db.save
-    release_lock(lock)
+    Crowbar::Lock.new(
+      logger: @logger,
+      path: Rails.root.join("tmp", "#{@bc_name}.lock")
+    ).with_lock do
+      swift_db.save
+    end
   end
 
   def run_report(node)
@@ -255,10 +257,13 @@ class SwiftService < PacemakerServiceObject
       raise ServiceError, I18n.t("barclamp.#{@bc_name}.run.duplicate") if dr["node"] == node and dr["status"] == "running"
     end
 
-    lock = acquire_lock(@bc_name)
-    swift_db["dispersion_reports"] << report_run
-    swift_db.save
-    release_lock(lock)
+    Crowbar::Lock.new(
+      logger: @logger,
+      path: Rails.root.join("tmp", "#{@bc_name}.lock")
+    ).with_lock do
+      swift_db["dispersion_reports"] << report_run
+      swift_db.save
+    end
 
     nobj = NodeObject.find_node_by_name(node)
     swift_user = nobj[@bc_name]["user"]
@@ -272,9 +277,12 @@ class SwiftService < PacemakerServiceObject
       report_run["status"] = $?.exitstatus.equal?(0) ? "passed" : "failed"
       report_run["pid"] = nil
 
-      lock = acquire_lock(@bc_name)
-      swift_db.save
-      release_lock(lock)
+      Crowbar::Lock.new(
+        logger: @logger,
+        path: Rails.root.join("tmp", "#{@bc_name}.lock")
+      ).with_lock do
+        swift_db.save
+      end
 
       @logger.info("report run #{report_run['uuid']} complete, status '#{report_run['status']}'")
     end
@@ -282,9 +290,12 @@ class SwiftService < PacemakerServiceObject
 
     # saving the PID to prevent
     report_run["pid"] = pid
-    lock = acquire_lock(@bc_name)
-    swift_db.save
-    release_lock(lock)
+    Crowbar::Lock.new(
+      logger: @logger,
+      path: Rails.root.join("tmp", "#{@bc_name}.lock")
+    ).with_lock do
+      swift_db.save
+    end
     report_run
   end
 
