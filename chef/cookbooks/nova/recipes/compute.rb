@@ -285,16 +285,22 @@ end unless node.platform == "suse"
 
 env_filter = " AND nova_config_environment:#{node[:nova][:config][:environment]}"
 nova_controller = search(:node, "roles:nova-multi-controller#{env_filter}")
+nova_controller_ips = []
+
+if !nova_controller.nil? && nova_controller.length > 0
+  nova_controller.each do |nova_controller_node|
+    nova_controller_ips.push Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova_controller_node, "admin").address
+  end
+end
 
 # Note: since we do not allow shared storage with a cluster, we know that the
 # first controller is the right one to use (ie, the only one)
 if !nova_controller.nil? and nova_controller.length > 0 and nova_controller[0].name != node.name
-  nova_controller_ip =  Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova_controller[0], "admin").address
   mount node[:nova][:instances_path] do
     action node[:nova]["use_shared_instance_storage"] ? [:mount, :enable] : [:umount, :disable]
     fstype "nfs"
     options "rw,auto"
-    device nova_controller_ip + ":" +  node[:nova][:instances_path]
+    device nova_controller_ips[0] + ":" + node[:nova][:instances_path]
   end
 
 end
@@ -417,4 +423,37 @@ end
 # restarted (in case of a config change and if we're also a controller)
 execute "trigger-nova-own-az-config" do
   command "true"
+end
+
+# Set iptables rules for blocking VNC Access for all but the nova-controller node.
+bash "nova_compute_vncblock_reject_all" do
+  code <<-EOH
+    iptables -D INPUT -j VNCBLOCK -p tcp --match multiport --dports 5900:15900
+    iptables -I INPUT -j VNCBLOCK -p tcp --match multiport --dports 5900:15900
+    iptables -F VNCBLOCK
+    iptables -I VNCBLOCK -p tcp \
+        -m connbytes --connbytes 0:1024 \
+        --connbytes-dir both --connbytes-mode bytes \
+        -m state --state ESTABLISHED \
+        -m u32 --u32 "0>>22&0x3C@ 12>>26&0x3C@ 0=0x52464220" \
+        -m string --algo kmp --string "RFB 003." --to 130 \
+        -j REJECT --reject-with tcp-reset
+    EOH
+end
+
+# Filter out packets which use VNC protocol as per RFB 003 using the u32 module
+# for all possible hosts with role nova_multi_controller.
+nova_controller_ips.each do |nova_controller_ip|
+  bash "nova_compute_vncblock_allow_few" do
+    code <<-EOH
+      iptables -I VNCBLOCK -p tcp \
+        -m connbytes --connbytes 0:1024 \
+        --connbytes-dir both --connbytes-mode bytes \
+        -m state --state ESTABLISHED \
+        -m u32 --u32 "0>>22&0x3C@ 12>>26&0x3C@ 0=0x52464220" \
+        -m string --algo kmp --string "RFB 003." --to 130 \
+        -s #{nova_controller_ip} \
+        -j ACCEPT
+    EOH
+  end
 end
