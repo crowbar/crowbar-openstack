@@ -1,6 +1,6 @@
 #
 # Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2013-2015, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,23 +15,24 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'horizon'
-  display: 'Horizon'
-  description: 'OpenStack Dashboard: Web User Interface to access, provision and automate Cloud-based resources'
-  version: 0
-  user_managed: true
-  requires:
-    - 'pacemaker'
-    - 'database'
-    - 'keystone'
-    - 'nova'
-  member:
-    - 'openstack'
+class RabbitmqBarclamp < Crowbar::Registry::Barclamp
+  name "rabbitmq"
+  display "RabbitMQ"
+  description "AMQP Messaging Middleware: Robust enterprise messaging system"
 
-crowbar:
-  layout: 1
-  order: 96
-  run_order: 96
-  chef_order: 96
-  proposal_schema_version: 3
+  member [
+    "openstack"
+  ]
+
+  requires [
+    "pacemaker"
+  ]
+
+  listed true
+
+  layout 1
+  version 0
+  schema 3
+
+  order 76
+end

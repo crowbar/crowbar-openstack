@@ -1,5 +1,6 @@
 #
-# Copyright 2014, SUSE LINUX Products GmbH
+# Copyright 2011-2013, Dell
+# Copyright 2013-2015, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,24 +15,29 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'trove'
-  display: 'Trove'
-  description: 'OpenStack Database: Scalable and reliable Database-as-a-Service provisioning'
-  version: 0
-  user_managed: true
-  requires:
-    - 'cinder'
-    - 'keystone'
-    - 'nova'
-    - 'rabbitmq'
-    - 'swift'
-  member:
-    - 'openstack'
+class CinderBarclamp < Crowbar::Registry::Barclamp
+  name "cinder"
+  display "Cinder"
+  description "OpenStack Block Storage: Management of volumes (persistent block level storage)"
 
-crowbar:
-  layout: 1
-  order: 102
-  run_order: 102
-  chef_order: 102
-  proposal_schema_version: 3
+  member [
+    "openstack"
+  ]
+
+  requires [
+    "@crowbar",
+    "pacemaker",
+    "database",
+    "rabbitmq",
+    "keystone",
+    "glance"
+  ]
+
+  listed true
+
+  layout 1
+  version 0
+  schema 3
+
+  order 92
+end

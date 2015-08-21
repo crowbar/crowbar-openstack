@@ -1,6 +1,6 @@
 #
 # Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2013-2015, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,22 +15,35 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'keystone'
-  display: 'Keystone'
-  description: 'OpenStack Identity: Authentication and authorization service'
-  version: 0
-  user_managed: true
-  requires:
-    - 'pacemaker'
-    - 'database'
-    - 'rabbitmq'
-  member:
-    - 'openstack'
+class SwiftBarclamp < Crowbar::Registry::Barclamp
+  name "swift"
+  display "Swift"
+  description "OpenStack Object Storage: Scale-out object store"
 
-crowbar:
-  layout: 1
-  order: 78
-  run_order: 78
-  chef_order: 78
-  proposal_schema_version: 3
+  member [
+    "openstack"
+  ]
+
+  requires [
+    "@crowbar",
+    "pacemaker",
+    "keystone"
+  ]
+
+  listed true
+
+  layout 1
+  version 0
+  schema 3
+
+  order 80
+
+  nav(
+    utils: {
+      swift: {
+        order: 20,
+        route: "swift_dashboard_path"
+      }
+    }
+  )
+end
