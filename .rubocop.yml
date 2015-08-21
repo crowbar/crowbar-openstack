@@ -13,6 +13,10 @@ Style/FileName:
   Exclude:
     - "lib/crowbar-*"
 
+Style/AlignHash:
+  EnforcedHashRocketStyle: key
+  EnforcedColonStyle: key
+
 Style/Documentation:
   Enabled: false
 
