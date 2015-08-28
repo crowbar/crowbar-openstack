@@ -300,6 +300,7 @@ template "/etc/nova/nova.conf" do
             libvirt_migration: node[:nova]["use_migration"],
             libvirt_enable_multipath: node[:nova][:libvirt_use_multipath],
             shared_instances: node[:nova]["use_shared_instance_storage"],
+            force_config_drive: node[:nova]["force_config_drive"],
             glance_server_protocol: glance_server_protocol,
             glance_server_host: glance_server_host,
             glance_server_port: glance_server_port,
