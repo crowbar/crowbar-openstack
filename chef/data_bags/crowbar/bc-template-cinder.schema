@@ -25,6 +25,7 @@
             "max_pool_size": { "type": "int", "required": true },
             "max_overflow": { "type": "int", "required": true },
             "pool_timeout": { "type": "int", "required": true },
+            "rpc_response_timeout": { "type": "int", "required": true },
             "use_multi_backend": { "type": "bool", "required": true },
             "volume_defaults": {
               "type": "map",
