@@ -1,0 +1,79 @@
+# Example input file for 'crowbar batch build' command which sets up a
+# cloud with a single controller and a single KVM compute node.
+#
+# Assumes that the controller node is aliased 'controller1', and the
+# compute node is aliased 'compute1'.
+---
+global_options:
+- action_for_existing_proposals: skip   # could also be e.g. 'recreate' or 'overwrite'
+proposals:
+- barclamp: provisioner
+  attributes:
+    shell_prompt: USER@ALIAS:CWD SUFFIX
+- barclamp: database
+  # Proposal name defaults to 'default'.
+  # Default attributes are good enough, so we just need to assign
+  # nodes to roles:
+  deployment:
+    elements:
+      database-server:
+        - "@@controller1@@"
+- barclamp: rabbitmq
+  deployment:
+    elements:
+      rabbitmq-server:
+        - "@@controller1@@"
+- barclamp: keystone
+  deployment:
+    elements:
+      keystone-server:
+        - "@@controller1@@"
+- barclamp: glance
+  deployment:
+    elements:
+      glance-server:
+        - "@@controller1@@"
+- barclamp: cinder
+  wipe_attributes:
+    - volumes
+  attributes:
+    volumes:
+      - backend_name: local
+        backend_driver: local
+        local:
+          file_size: 2000
+          volume_name: cinder-volumes
+          file_name: /var/lib/cinder/volume.raw
+  deployment:
+    elements:
+      cinder-controller:
+        - "@@controller1@@"
+      cinder-volume:
+        - "@@compute1@@"
+- barclamp: neutron
+  deployment:
+    elements:
+      neutron-server:
+        - "@@controller1@@"
+      neutron-network:
+        - "@@controller1@@"
+- barclamp: nova
+  attributes:
+    kvm:
+      ksm_enabled: true
+  deployment:
+    elements:
+      nova-multi-controller:
+        - "@@controller1@@"
+      nova-multi-compute-qemu:
+        - "@@compute1@@"
+- barclamp: nova_dashboard
+  deployment:
+    elements:
+      nova_dashboard-server:
+        - "@@controller1@@"
+- barclamp: heat
+  deployment:
+    elements:
+      heat-server:
+        - "@@controller1@@"
