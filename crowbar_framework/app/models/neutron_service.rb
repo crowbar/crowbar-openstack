@@ -304,6 +304,8 @@ class NeutronService < PacemakerServiceObject
       # TODO(toabctl): The same code is in the nova barclamp. Should be extracted and reused!
       #                (see crowbar_framework/app/models/nova_service.rb)
       if role.default_attributes["neutron"]["networking_plugin"] == "ml2"
+        node = NodeObject.find_node_by_name n
+        needs_save = false
         ml2_type_drivers = role.default_attributes["neutron"]["ml2_type_drivers"]
         if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
           net_svc.allocate_ip "default","os_sdn","host", n
@@ -313,13 +315,31 @@ class NeutronService < PacemakerServiceObject
           # Force "use_vlan" to false in VLAN mode (linuxbridge and ovs). We
           # need to make sure that the network recipe does NOT create the
           # VLAN interfaces (ethX.VLAN)
-          node = NodeObject.find_node_by_name n
           if node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"]
             @logger.info("Forcing use_vlan to false for the nova_fixed network on node #{n}")
             node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"] = false
-            node.save
+            needs_save = true
           end
         end
+        if role.default_attributes["neutron"]["ml2_mechanism_drivers"].include?("openvswitch")
+          # We need to create ovs bridges for floating and (when vlan type driver
+          # is enabled) nova_fixed.  Adjust the network attribute accordingly
+          ovs_bridge_networks = ["nova_floating"]
+          ovs_bridge_networks.concat role.default_attributes["neutron"]["additional_external_networks"]
+          if ml2_type_drivers.include?("vlan")
+            ovs_bridge_networks << "nova_fixed"
+          end
+          logger.info("bridge_nets: #{ovs_bridge_networks.inspect}")
+          ovs_bridge_networks.each do |net|
+            logger.info("Network: #{net}")
+            unless node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"]
+              @logger.info("Forcing add_ovs_bridge to true for the #{net} network on node #{n}")
+              node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = true
+              needs_save = true
+            end
+          end
+        end
+        node.save if needs_save
       elsif role.default_attributes["neutron"]["networking_plugin"] == "vmware"
         net_svc.allocate_ip "default","os_sdn","host", n
       end
