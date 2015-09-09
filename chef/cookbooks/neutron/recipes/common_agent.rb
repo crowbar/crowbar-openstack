@@ -49,14 +49,19 @@ bash "reload disable-rp_filter-sysctl" do
   subscribes :run, resources(cookbook_file: disable_rp_filter_file), :delayed
 end
 
-# openvswitch installation and configuration
-if neutron[:neutron][:networking_plugin] == "vmware" or
-  (neutron[:neutron][:networking_plugin] == "ml2" and
-   neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch"))
+# openvswitch installation and configuration. It is only needed when using nsx or
+# when deploying on SLE11. Otherwise it's done as part of the network barclamp.
+# FIXME: This code can be cleaned up and moved to the vmware_suppport recipe
+# once SLE11 is no longer supported
+if neutron[:neutron][:networking_plugin] == "vmware" ||
+    (node[:platform] == "suse" && node[:platform_version].to_f < 12.0 &&
+      neutron[:neutron][:networking_plugin] == "ml2" &&
+      neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch"))
+
   if node.platform == "ubuntu"
     # If we expect to install the openvswitch module via DKMS, but the module
     # does not exist, rmmod the openvswitch module before continuing.
-    if node[:neutron][:platform][:ovs_pkgs].any?{ |e|e == "openvswitch-datapath-dkms" } &&
+    if node[:network][:ovs_pkgs].any?{ |e|e == "openvswitch-datapath-dkms" } &&
         !File.exists?("/lib/modules/#{%x{uname -r}.strip}/updates/dkms/openvswitch.ko") &&
         File.directory?("/sys/module/openvswitch")
       if IO.read("/sys/module/openvswitch/refcnt").strip != "0"
@@ -69,21 +74,14 @@ if neutron[:neutron][:networking_plugin] == "vmware" or
     end
   end
 
-  node[:neutron][:platform][:ovs_pkgs].each { |p| package p }
+  node[:network][:ovs_pkgs].each { |p| package p }
 
   bash "Load openvswitch module" do
-    code node[:neutron][:platform][:ovs_modprobe]
-    not_if do ::File.directory?("/sys/module/openvswitch") end
+    code "modeprobe #{node[:network][:ovs_module]}"
+    not_if do ::File.directory?("/sys/module/#{node[:network][:ovs_module]}") end
   end
 
-  if %w(redhat centos).include?(node.platform)
-    openvswitch_service = "openvswitch"
-  else
-    openvswitch_service = "openvswitch-switch"
-  end
-
-  service "openvswitch_service" do
-    service_name openvswitch_service
+  service node[:network][:ovs_service] do
     supports status: true, restart: true
     action [:start, :enable]
   end
