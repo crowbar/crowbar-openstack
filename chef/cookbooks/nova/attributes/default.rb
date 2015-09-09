@@ -28,6 +28,11 @@ default[:nova][:db][:password] = nil
 default[:nova][:db][:user] = "nova"
 default[:nova][:db][:database] = "nova"
 
+# Sqlalchemy parameters
+default[:nova][:db][:max_pool_size] = 30
+default[:nova][:db][:max_overflow] = 10
+default[:nova][:db][:pool_timeout] = 30
+
 # Feature settings
 default[:nova][:use_migration] = false
 default[:nova][:use_shared_instance_storage] = false

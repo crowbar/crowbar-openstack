@@ -8,8 +8,8 @@
       "type": "map",
       "required": true,
       "mapping": {
-        "nova": { 
-          "type": "map", 
+        "nova": {
+          "type": "map",
           "required": true,
           "mapping": {
             "debug": { "type": "bool", "required": true },
@@ -34,6 +34,9 @@
             "neutron_url_timeout": {"type": "int"},
             "force_config_drive": { "type": "bool", "required": true },
             "vnc_keymap": { "type": "str" , "required": true },
+            "max_pool_size": { "type": "int", "required": true },
+            "max_overflow": { "type": "int", "required": true },
+            "pool_timeout": { "type": "int", "required": true },
             "scheduler": {
               "type": "map",
               "mapping": {
@@ -54,7 +57,7 @@
               "type": "map", "required": false, "mapping": {
                 "user": { "type": "str", "required": true },
                 "secret_uuid": { "type": "str", "required": true }
-              }  
+              }
             },
             "kvm": {
               "type": "map", "required": true, "mapping": {

@@ -30,7 +30,10 @@
       "db": {
         "password": "",
         "user": "nova",
-        "database": "nova"
+        "database": "nova",
+        "max_pool_size": 30,
+        "max_overflow": 10,
+        "pool_timeout": 30
       },
       "rbd": {
         "user": "",
@@ -80,7 +83,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 33,
+      "schema-revision": 34,
       "element_states": {
         "nova-multi-controller": [ "readying", "ready", "applying" ],
         "nova-multi-compute-docker": [ "readying", "ready", "applying" ],
