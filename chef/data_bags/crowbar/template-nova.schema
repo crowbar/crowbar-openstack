@@ -47,7 +47,11 @@
               "mapping": {
                 "password": { "type": "str", "required": true },
                 "user": { "type": "str", "required": true },
-                "database": { "type": "str", "required": true }
+                "database": { "type": "str", "required": true },
+                "max_pool_size": { "type": "int", "required": true },
+                "max_overflow": { "type": "int", "required": true },
+                "pool_timeout": { "type": "int", "required": true },
+                "min_pool_size": { "type": "int", "required": true }
               }
             },
             "rbd": {
