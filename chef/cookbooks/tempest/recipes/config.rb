@@ -480,7 +480,8 @@ template "/etc/tempest/tempest.conf" do
     cinder_backend1_name: cinder_backend1_name,
     cinder_backend2_name: cinder_backend2_name,
     storage_protocol: storage_protocol,
-    vendor_name: vendor_name
+    vendor_name: vendor_name,
+    use_docker: use_docker
   )
 end
 
