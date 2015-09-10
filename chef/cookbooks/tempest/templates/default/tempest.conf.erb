@@ -944,6 +944,13 @@ img_file = cirros-<%= @cirros_version %>-x86_64-disk.img
 # ssh username for the image file (string value)
 ssh_user = cirros
 
+# DHCP client used by images to renew DCHP lease. If left empty,
+# update operation will be skipped. Supported clients: "udhcpc",
+# "dhclient" (string value)
+# Allowed values: udhcpc, dhclient
+<% if @use_docker %>
+dhcp_client =
+<% end %>
 
 [service_available]
 
