@@ -1,8 +1,8 @@
 {
-  "id": "bc-template-nova_dashboard",
+  "id": "bc-template-horizon",
   "description": "User Interface for OpenStack projects (code name Horizon)",
   "attributes": {
-    "nova_dashboard": {
+    "horizon": {
       "debug": false,
       "nova_instance": "none",
       "keystone_instance": "none",
@@ -43,19 +43,19 @@
     }
   },
   "deployment": {
-    "nova_dashboard": {
+    "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
       "schema-revision": 32,
       "element_states": {
-        "nova_dashboard-server": [ "readying", "ready", "applying" ]
+        "horizon-server": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-        [ "nova_dashboard-server" ]
+        [ "horizon-server" ]
       ],
       "config": {
-        "environment": "nova_dashboard-base-config",
+        "environment": "horizon-base-config",
         "mode": "full",
         "transitions": false,
         "transition_list": [

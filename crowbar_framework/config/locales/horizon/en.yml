@@ -17,7 +17,7 @@
 
 en:
   barclamp:
-    nova_dashboard:
+    horizon:
       edit_attributes:
         database_instance: 'Database Instance'
         keystone_instance: 'Keystone Instance'

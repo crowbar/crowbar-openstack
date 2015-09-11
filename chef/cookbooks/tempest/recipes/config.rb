@@ -404,7 +404,7 @@ else
 end
 
 # FIXME: should avoid search with no environment in query
-horizons = search(:node, "roles:nova_dashboard-server") || []
+horizons = search(:node, "roles:horizon-server") || []
 if horizons.empty?
   use_horizon = false
   horizon_host = "localhost"
@@ -412,8 +412,8 @@ if horizons.empty?
 else
   horizon = horizons[0]
   use_horizon = true
-  horizon_host = CrowbarHelper.get_host_for_admin_url(horizon, horizon[:nova_dashboard][:ha][:enabled])
-  horizon_protocol = horizon[:nova_dashboard][:apache][:ssl] ? "https" : "http"
+  horizon_host = CrowbarHelper.get_host_for_admin_url(horizon, horizon[:horizon][:ha][:enabled])
+  horizon_protocol = horizon[:horizon][:apache][:ssl] ? "https" : "http"
 end
 
 template "/etc/tempest/tempest.conf" do

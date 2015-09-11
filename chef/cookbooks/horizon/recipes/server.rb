@@ -29,7 +29,7 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 keystone_api_version = keystone_settings["api_version"]
 keystone_internal_auth_url = keystone_settings["internal_auth_url"]
 
-if node["nova_dashboard"]["use_keystone_v3"] && keystone_api_version.to_f < 3
+if node["horizon"]["use_keystone_v3"] && keystone_api_version.to_f < 3
   keystone_api_version = "3"
   keystone_internal_auth_url = KeystoneHelper.versioned_service_URL(
     keystone_settings["protocol"],
@@ -44,7 +44,7 @@ else
   dashboard_path = "/usr/share/openstack-dashboard"
 end
 
-if node[:nova_dashboard][:apache][:ssl]
+if node[:horizon][:apache][:ssl]
   include_recipe "apache2::mod_ssl"
 end
 
@@ -71,8 +71,8 @@ else
   package "openstack-dashboard"
 
   # Install the configured branding
-  unless node[:nova_dashboard][:site_theme].empty?
-    package "openstack-dashboard-theme-#{node[:nova_dashboard][:site_theme]}" do
+  unless node[:horizon][:site_theme].empty?
+    package "openstack-dashboard-theme-#{node[:horizon][:site_theme]}" do
       action :install
       notifies :reload, resources(service: "apache2")
     end
@@ -123,7 +123,7 @@ else
   end
 end
 
-ha_enabled = node[:nova_dashboard][:ha][:enabled]
+ha_enabled = node[:horizon][:ha][:enabled]
 
 db_settings = fetch_database_settings
 include_recipe "database::client"
@@ -137,12 +137,12 @@ when "postgresql"
     django_db_backend = "'django.db.backends.postgresql_psycopg2'"
 end
 
-crowbar_pacemaker_sync_mark "wait-nova_dashboard_database"
+crowbar_pacemaker_sync_mark "wait-horizon_database"
 
 # Create the Dashboard Database
-database "create #{node[:nova_dashboard][:db][:database]} database" do
+database "create #{node[:horizon][:db][:database]} database" do
     connection db_settings[:connection]
-    database_name node[:nova_dashboard][:db][:database]
+    database_name node[:horizon][:db][:database]
     provider db_settings[:provider]
     action :create
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -150,9 +150,9 @@ end
 
 database_user "create dashboard database user" do
     connection db_settings[:connection]
-    database_name node[:nova_dashboard][:db][:database]
-    username node[:nova_dashboard][:db][:user]
-    password node[:nova_dashboard][:db][:password]
+    database_name node[:horizon][:db][:database]
+    username node[:horizon][:db][:user]
+    password node[:horizon][:db][:password]
     host "%"
     provider db_settings[:user_provider]
     action :create
@@ -161,9 +161,9 @@ end
 
 database_user "grant database access for dashboard database user" do
     connection db_settings[:connection]
-    database_name node[:nova_dashboard][:db][:database]
-    username node[:nova_dashboard][:db][:user]
-    password node[:nova_dashboard][:db][:password]
+    database_name node[:horizon][:db][:database]
+    username node[:horizon][:db][:user]
+    password node[:horizon][:db][:password]
     host "%"
     privileges db_settings[:privs]
     provider db_settings[:user_provider]
@@ -171,13 +171,13 @@ database_user "grant database access for dashboard database user" do
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-nova_dashboard_database"
+crowbar_pacemaker_sync_mark "create-horizon_database"
 
 db_settings = {
   "ENGINE" => django_db_backend,
-  "NAME" => "'#{node[:nova_dashboard][:db][:database]}'",
-  "USER" => "'#{node[:nova_dashboard][:db][:user]}'",
-  "PASSWORD" => "'#{node[:nova_dashboard][:db][:password]}'",
+  "NAME" => "'#{node[:horizon][:db][:database]}'",
+  "USER" => "'#{node[:horizon][:db][:user]}'",
+  "PASSWORD" => "'#{node[:horizon][:db][:password]}'",
   "HOST" => "'#{db_settings[:address]}'",
   "default-character-set" => "'utf8'"
 }
@@ -233,7 +233,7 @@ node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "adm
 node[:memcached][:listen] = node_admin_ip
 
 if ha_enabled
-  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "nova_dashboard-server")
+  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "horizon-server")
   memcached_locations = memcached_nodes.map do |n|
     node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
     "#{node_admin_ip}:#{n[:memcached][:port] rescue node[:memcached][:port]}"
@@ -253,7 +253,7 @@ when "redhat", "centos"
   package "python-memcached"
 end
 
-crowbar_pacemaker_sync_mark "wait-nova_dashboard_config"
+crowbar_pacemaker_sync_mark "wait-horizon_config"
 
 local_settings = "#{dashboard_path}/openstack_dashboard/local/local_settings.py"
 
@@ -278,40 +278,40 @@ template local_settings do
   group "root"
   mode "0640"
   variables(
-    debug: node[:nova_dashboard][:debug],
+    debug: node[:horizon][:debug],
     keystone_settings: keystone_settings,
     insecure: keystone_settings["insecure"] || glance_insecure || cinder_insecure || neutron_insecure || nova_insecure,
     db_settings: db_settings,
     enable_lb: neutron_use_lbaas,
     enable_vpn: neutron_use_vpnaas,
     timezone: (node[:provisioner][:timezone] rescue "UTC") || "UTC",
-    use_ssl: node[:nova_dashboard][:apache][:ssl],
-    password_validator_regex: node[:nova_dashboard][:password_validator][:regex],
-    password_validator_help_text: node[:nova_dashboard][:password_validator][:help_text],
-    site_branding: node[:nova_dashboard][:site_branding],
-    site_branding_link: node[:nova_dashboard][:site_branding_link],
+    use_ssl: node[:horizon][:apache][:ssl],
+    password_validator_regex: node[:horizon][:password_validator][:regex],
+    password_validator_help_text: node[:horizon][:password_validator][:help_text],
+    site_branding: node[:horizon][:site_branding],
+    site_branding_link: node[:horizon][:site_branding_link],
     neutron_ml2_type_drivers: neutron_ml2_type_drivers,
-    help_url: node[:nova_dashboard][:help_url],
-    session_timeout: node[:nova_dashboard][:session_timeout],
+    help_url: node[:horizon][:help_url],
+    session_timeout: node[:horizon][:session_timeout],
     memcached_locations: memcached_locations,
-    can_set_mount_point: node["nova_dashboard"]["can_set_mount_point"],
-    can_set_password: node["nova_dashboard"]["can_set_password"],
+    can_set_mount_point: node["horizon"]["can_set_mount_point"],
+    can_set_password: node["horizon"]["can_set_password"],
     keystone_api_version: keystone_api_version,
     keystone_internal_auth_url: keystone_internal_auth_url,
-    policy_file_path: node["nova_dashboard"]["policy_file_path"],
-    policy_file: node["nova_dashboard"]["policy_file"]
+    policy_file_path: node["horizon"]["policy_file_path"],
+    policy_file: node["horizon"]["policy_file"]
   )
   action :create
 end
 
-crowbar_pacemaker_sync_mark "create-nova_dashboard_config"
+crowbar_pacemaker_sync_mark "create-horizon_config"
 
 if ha_enabled
   log "HA support for horizon is enabled"
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
   bind_host = admin_address
-  bind_port = node[:nova_dashboard][:ha][:ports][:plain]
-  bind_port_ssl = node[:nova_dashboard][:ha][:ports][:ssl]
+  bind_port = node[:horizon][:ha][:ports][:plain]
+  bind_port_ssl = node[:horizon][:ha][:ports][:ssl]
 else
   log "HA support for horizon is disabled"
   bind_host = "*"
@@ -321,14 +321,14 @@ end
 
 node.normal[:apache][:listen_ports_crowbar] ||= {}
 
-if node[:nova_dashboard][:apache][:ssl]
-  node.normal[:apache][:listen_ports_crowbar][:nova_dashboard] = { plain: [bind_port], ssl: [bind_port_ssl] }
+if node[:horizon][:apache][:ssl]
+  node.normal[:apache][:listen_ports_crowbar][:horizon] = { plain: [bind_port], ssl: [bind_port_ssl] }
 else
-  node.normal[:apache][:listen_ports_crowbar][:nova_dashboard] = { plain: [bind_port] }
+  node.normal[:apache][:listen_ports_crowbar][:horizon] = { plain: [bind_port] }
 end
 
 # we can only include the recipe after having defined the listen_ports_crowbar attribute
-include_recipe "nova_dashboard::ha" if ha_enabled
+include_recipe "horizon::ha" if ha_enabled
 
 # Override what the apache2 cookbook does since it enforces the ports
 resource = resources(template: "#{node[:apache][:dir]}/ports.conf")
@@ -348,10 +348,10 @@ template "#{node[:apache][:dir]}/sites-available/nova-dashboard.conf" do
     horizon_dir: dashboard_path,
     user: node[:apache][:user],
     group: node[:apache][:group],
-    use_ssl: node[:nova_dashboard][:apache][:ssl],
-    ssl_crt_file: node[:nova_dashboard][:apache][:ssl_crt_file],
-    ssl_key_file: node[:nova_dashboard][:apache][:ssl_key_file],
-    ssl_crt_chain_file: node[:nova_dashboard][:apache][:ssl_crt_chain_file]
+    use_ssl: node[:horizon][:apache][:ssl],
+    ssl_crt_file: node[:horizon][:apache][:ssl_crt_file],
+    ssl_key_file: node[:horizon][:apache][:ssl_key_file],
+    ssl_crt_chain_file: node[:horizon][:apache][:ssl_crt_chain_file]
   )
   if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/nova-dashboard.conf") or node.platform == "suse"
     notifies :reload, resources(service: "apache2")
@@ -362,5 +362,5 @@ apache_site "nova-dashboard.conf" do
   enable true
 end
 
-node[:nova_dashboard][:monitor][:svcs] <<["nova_dashboard-server"]
+node[:horizon][:monitor][:svcs] << ["horizon-server"]
 node.save

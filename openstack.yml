@@ -25,7 +25,7 @@ barclamp:
     - 'openstack'
   requires:
     - '@crowbar'
-    - 'nova_dashboard'
+    - 'horizon'
     - 'keystone'
   os_support:
     - 'ubuntu-10.10'

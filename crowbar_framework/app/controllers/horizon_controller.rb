@@ -15,19 +15,11 @@
 # limitations under the License.
 #
 
-root:
-  topic_meta_data:
-    author: 'Multiple authors'
-    license: 'Apache 2'
-    copyright: '2014 by Dell, Inc'
-    date: 'June 1, 2012'
-    order: 'alpha'
-    url: '/crowbar/openstack/1.0'
-    format: 'markdown'
+class HorizonController < BarclampController
+  protected
 
-  barclamps:
-    nova_dashboard:
-      topic_meta_data:
-        file: 'index'
-        url: '/crowbar/openstack/1.0?selected=nova_dashboard'
-        order: 100
+  def initialize_service
+    @service_object = HorizonService.new logger
+  end
+end
+
