@@ -312,6 +312,8 @@ class NeutronService < PacemakerServiceObject
         end
         if ml2_type_drivers.include?("vlan")
           net_svc.enable_interface "default", "nova_fixed", n
+          # reload node as 'enable_interface' updates the node in chef
+          node = NodeObject.find_node_by_name n
           # Force "use_vlan" to false in VLAN mode (linuxbridge and ovs). We
           # need to make sure that the network recipe does NOT create the
           # VLAN interfaces (ethX.VLAN)
