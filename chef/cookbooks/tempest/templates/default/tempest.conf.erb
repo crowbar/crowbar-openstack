@@ -963,7 +963,7 @@ dhcp_client =
 ceilometer = <%= @use_ceilometer %>
 
 # Whether or not cinder is expected to be available (boolean value)
-#cinder = true
+cinder = <%= @use_docker ? false : true %>
 
 # Whether or not glance is expected to be available (boolean value)
 #glance = true
