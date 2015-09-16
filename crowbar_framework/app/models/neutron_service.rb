@@ -274,7 +274,7 @@ class NeutronService < PacemakerServiceObject
     if attributes["ml2_mechanism_drivers"].include?("openvswitch")
       # We need to create ovs bridges for floating and (when vlan type driver
       # is enabled) nova_fixed.  Adjust the network attribute accordingly.
-      # We only do that on the node attributes and not the proposal itself as 
+      # We only do that on the node attributes and not the proposal itself as
       # the requirement to have the bridge setup is really node-specifc. (E.g.
       # a tempest node that might get an IP allocated in "nova_floating" won't
       # need the bridges)
@@ -296,7 +296,7 @@ class NeutronService < PacemakerServiceObject
     node.save if needs_save
   end
 
-  def enable_neutron_networks(attributes, nodename, net_svc, needs_external=true)
+  def enable_neutron_networks(attributes, nodename, net_svc, needs_external = true)
     if needs_external
       net_svc.enable_interface "default", "nova_floating", nodename
       attributes["additional_external_networks"].each do |extnet|
@@ -307,7 +307,7 @@ class NeutronService < PacemakerServiceObject
     if attributes["networking_plugin"] == "ml2"
       ml2_type_drivers = attributes["ml2_type_drivers"]
       if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
-        net_svc.allocate_ip "default","os_sdn","host", nodename
+        net_svc.allocate_ip "default", "os_sdn", "host", nodename
       end
       if ml2_type_drivers.include?("vlan")
         net_svc.enable_interface "default", "nova_fixed", nodename
@@ -325,7 +325,7 @@ class NeutronService < PacemakerServiceObject
       node = NodeObject.find_node_by_name nodename
       update_ovs_bridge_attributes(attributes, node)
     elsif attributes["networking_plugin"] == "vmware"
-      net_svc.allocate_ip "default","os_sdn","host", node
+      net_svc.allocate_ip "default", "os_sdn", "host", node
     end
   end
 

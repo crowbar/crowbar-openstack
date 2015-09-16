@@ -96,7 +96,7 @@ if node[:platform] == "suse" && node[:platform_version].to_f >= 12.0
   end
   bridges.each do |name|
     service "ovs-usurp-config-#{name}" do
-      # There's no need to stop anything here. I might even cut us off the 
+      # There's no need to stop anything here. I might even cut us off the
       # network.
       action [:disable]
       only_if { ::File.exists?("/etc/init.d/ovs-usurp-config-#{name}") }
