@@ -22,9 +22,12 @@
         "port": 8777
       },
       "db": {
-        "password": "",
+        "backend": [ "mongodb", "mysql", "postgresql" ],
+        "host": "",
+        "port": "",
+        "database": "ceilometer",
         "user": "ceilometer",
-        "database": "ceilometer"
+        "password": ""
       },
       "database": {
         "time_to_live": 30

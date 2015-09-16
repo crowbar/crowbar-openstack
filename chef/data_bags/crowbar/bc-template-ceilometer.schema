@@ -37,10 +37,13 @@
             "db": {
               "type": "map",
               "required": true,
-              "mapping": {
-                "password": { "type": "str", "required": true },
+              "mapping": {             
+                "backend": { "type": "str", "required": true },
+                "host": { "type": "str", "required": true },
+                "port": { "type": "str", "required": true },
+                "database": { "type": "str", "required": true },
                 "user": { "type": "str", "required": true },
-                "database": { "type": "str", "required": true }
+                "password": { "type": "str", "required": true },
               }
             },
             "database": {
