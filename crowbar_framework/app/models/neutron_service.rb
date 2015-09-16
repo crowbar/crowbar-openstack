@@ -268,6 +268,67 @@ class NeutronService < PacemakerServiceObject
     super
   end
 
+  def update_ovs_bridge_attributes(attributes, node)
+    needs_save = false
+    ml2_type_drivers = attributes["ml2_type_drivers"]
+    if attributes["ml2_mechanism_drivers"].include?("openvswitch")
+      # We need to create ovs bridges for floating and (when vlan type driver
+      # is enabled) nova_fixed.  Adjust the network attribute accordingly.
+      # We only do that on the node attributes and not the proposal itself as 
+      # the requirement to have the bridge setup is really node-specifc. (E.g.
+      # a tempest node that might get an IP allocated in "nova_floating" won't
+      # need the bridges)
+      ovs_bridge_networks = ["nova_floating"]
+      ovs_bridge_networks.concat attributes["additional_external_networks"]
+      if ml2_type_drivers.include?("vlan")
+        ovs_bridge_networks << "nova_fixed"
+      end
+      ovs_bridge_networks.each do |net|
+        if node.crowbar["crowbar"]["network"][net]
+          unless node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"]
+            @logger.info("Forcing add_ovs_bridge to true for the #{net} network on node #{node.name}")
+            node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = true
+            needs_save = true
+          end
+        end
+      end
+    end
+    node.save if needs_save
+  end
+
+  def enable_neutron_networks(attributes, nodename, net_svc, needs_external=true)
+    if needs_external
+      net_svc.enable_interface "default", "nova_floating", nodename
+      attributes["additional_external_networks"].each do |extnet|
+        net_svc.enable_interface "default", extnet, nodename
+      end
+    end
+
+    if attributes["networking_plugin"] == "ml2"
+      ml2_type_drivers = attributes["ml2_type_drivers"]
+      if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
+        net_svc.allocate_ip "default","os_sdn","host", nodename
+      end
+      if ml2_type_drivers.include?("vlan")
+        net_svc.enable_interface "default", "nova_fixed", nodename
+        # reload node as the above enable_interface call might have changed it
+        node = NodeObject.find_node_by_name nodename
+        # Force "use_vlan" to false in VLAN mode (linuxbridge and ovs). We
+        # need to make sure that the network recipe does NOT create the
+        # VLAN interfaces (ethX.VLAN)
+        if node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"]
+          @logger.info("Forcing use_vlan to false for the nova_fixed network on node #{nodename}")
+          node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"] = false
+          node.save
+        end
+      end
+      node = NodeObject.find_node_by_name nodename
+      update_ovs_bridge_attributes(attributes, node)
+    elsif attributes["networking_plugin"] == "vmware"
+      net_svc.allocate_ip "default","os_sdn","host", node
+    end
+  end
+
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Neutron apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
@@ -297,54 +358,7 @@ class NeutronService < PacemakerServiceObject
     allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
 
     network_nodes.each do |n|
-      net_svc.enable_interface "default", "nova_floating", n
-      role.default_attributes["neutron"]["additional_external_networks"].each do |extnet|
-        net_svc.enable_interface "default", extnet, n
-      end
-      # TODO(toabctl): The same code is in the nova barclamp. Should be extracted and reused!
-      #                (see crowbar_framework/app/models/nova_service.rb)
-      if role.default_attributes["neutron"]["networking_plugin"] == "ml2"
-        node = NodeObject.find_node_by_name n
-        needs_save = false
-        ml2_type_drivers = role.default_attributes["neutron"]["ml2_type_drivers"]
-        if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
-          net_svc.allocate_ip "default","os_sdn","host", n
-        end
-        if ml2_type_drivers.include?("vlan")
-          net_svc.enable_interface "default", "nova_fixed", n
-          # reload node as 'enable_interface' updates the node in chef
-          node = NodeObject.find_node_by_name n
-          # Force "use_vlan" to false in VLAN mode (linuxbridge and ovs). We
-          # need to make sure that the network recipe does NOT create the
-          # VLAN interfaces (ethX.VLAN)
-          if node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"]
-            @logger.info("Forcing use_vlan to false for the nova_fixed network on node #{n}")
-            node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"] = false
-            needs_save = true
-          end
-        end
-        if role.default_attributes["neutron"]["ml2_mechanism_drivers"].include?("openvswitch")
-          # We need to create ovs bridges for floating and (when vlan type driver
-          # is enabled) nova_fixed.  Adjust the network attribute accordingly
-          ovs_bridge_networks = ["nova_floating"]
-          ovs_bridge_networks.concat role.default_attributes["neutron"]["additional_external_networks"]
-          if ml2_type_drivers.include?("vlan")
-            ovs_bridge_networks << "nova_fixed"
-          end
-          logger.info("bridge_nets: #{ovs_bridge_networks.inspect}")
-          ovs_bridge_networks.each do |net|
-            logger.info("Network: #{net}")
-            unless node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"]
-              @logger.info("Forcing add_ovs_bridge to true for the #{net} network on node #{n}")
-              node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = true
-              needs_save = true
-            end
-          end
-        end
-        node.save if needs_save
-      elsif role.default_attributes["neutron"]["networking_plugin"] == "vmware"
-        net_svc.allocate_ip "default","os_sdn","host", n
-      end
+      enable_neutron_networks(role.default_attributes["neutron"], n, net_svc)
     end
     @logger.debug("Neutron apply_role_pre_chef_call: leaving")
   end
