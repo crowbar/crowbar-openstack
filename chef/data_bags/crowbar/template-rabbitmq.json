@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-rabbitmq",
+  "id": "template-rabbitmq",
   "description": "Installation for rabbitmq",
   "attributes": {
     "rabbitmq": {

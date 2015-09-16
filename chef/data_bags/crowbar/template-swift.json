@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-swift",
+  "id": "template-swift",
   "description": "part of Openstack, and provides a distributed blob storage",
   "attributes": {
     "swift": {

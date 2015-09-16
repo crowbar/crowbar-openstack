@@ -1,6 +1,6 @@
 {
   "type": "map", "required": true, "mapping": {
-    "id": { "type": "str", "required": true, "pattern": "/^bc-manila-|^bc-template-manila$/" },
+    "id": { "type": "str", "required": true, "pattern": "/^manila-|^template-manila$/" },
     "description": { "type": "str", "required": true },
     "attributes": {
       "type": "map", "required": true, "mapping": {

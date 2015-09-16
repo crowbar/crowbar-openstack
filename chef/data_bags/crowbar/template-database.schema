@@ -2,21 +2,43 @@
   "type": "map",
   "required": true,
   "mapping": {
-    "id": { "type": "str", "required": true, "pattern": "/^bc-rabbitmq-|^bc-template-rabbitmq$/" },
+    "id": { "type": "str", "required": true, "pattern": "/^database-|^template-database$/" },
     "description": { "type": "str", "required": true },
     "attributes": {
       "type": "map",
       "required": true,
       "mapping": {
-        "rabbitmq": {
+        "database": {
           "type": "map",
           "required": true,
           "mapping": {
-            "listen_public": { "type": "bool", "required": true },
-            "port": { "type": "int", "required": true },
-            "password": { "type": "str", "required": true },
-            "user": { "type": "str", "required": true },
-            "vhost": { "type": "str", "required": true },
+            "sql_engine": { "type": "str", "required": true },
+            "db_maker_password": { "type": "str" },
+            "mysql" : {
+              "type": "map",
+              "required": false,
+              "mapping" : {
+                "server_debian_password": { "type": "str" },
+                "server_repl_password": { "type": "str" },
+                "server_root_password": { "type": "str" },
+                "datadir": { "type": "str", "required": true }
+              }
+            },
+            "postgresql" : {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                "config": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": {
+                    "max_connections": { "type": "int" },
+                    "log_truncate_on_rotation": { "type": "bool" },
+                    "log_filename": {"type": "str" }
+                  }
+                }
+              }
+            },
             "ha" : {
               "type": "map",
               "required": true,
@@ -45,16 +67,6 @@
                   }
                 }
               }
-            },
-            "trove": {
-              "type": "map",
-              "required": true,
-              "mapping" : {
-                "enabled": { "type": "bool", "required": true },
-                "password": { "type": "str", "required": true },
-                "user": { "type": "str", "required": true },
-                "vhost": { "type": "str", "required": true }
-              }
             }
           }
         }
@@ -64,7 +76,7 @@
       "type": "map",
       "required": true,
       "mapping": {
-        "rabbitmq": {
+        "database": {
           "type": "map",
           "required": true,
           "mapping": {

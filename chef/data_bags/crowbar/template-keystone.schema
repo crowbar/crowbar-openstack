@@ -1,7 +1,7 @@
 {
   "type": "map", "required": true,
   "mapping": {
-    "id": { "type": "str", "required": true, "pattern": "/^bc-keystone-|^bc-template-keystone$/" },
+    "id": { "type": "str", "required": true, "pattern": "/^keystone-|^template-keystone$/" },
     "description": { "type": "str", "required": true },
     "attributes": { "type": "map", "required": true, 
       "mapping": {

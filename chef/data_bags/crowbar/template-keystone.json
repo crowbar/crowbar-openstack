@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-keystone",
+  "id": "template-keystone",
   "description": "Centralized authentication and authorization service for OpenStack",
   "attributes": {
     "keystone": {

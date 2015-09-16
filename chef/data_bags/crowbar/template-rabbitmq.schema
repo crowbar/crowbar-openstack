@@ -1,0 +1,126 @@
+{
+  "type": "map",
+  "required": true,
+  "mapping": {
+    "id": { "type": "str", "required": true, "pattern": "/^rabbitmq-|^template-rabbitmq$/" },
+    "description": { "type": "str", "required": true },
+    "attributes": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "rabbitmq": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "listen_public": { "type": "bool", "required": true },
+            "port": { "type": "int", "required": true },
+            "password": { "type": "str", "required": true },
+            "user": { "type": "str", "required": true },
+            "vhost": { "type": "str", "required": true },
+            "ha" : {
+              "type": "map",
+              "required": true,
+              "mapping" : {
+                "storage": {
+                  "type": "map",
+                  "required": true,
+                  "mapping" : {
+                    "mode": { "type": "str", "required": true },
+                    "drbd": {
+                      "type": "map",
+                      "required": true,
+                      "mapping" : {
+                        "size": { "type": "int", "required": true }
+                      }
+                    },
+                    "shared": {
+                      "type": "map",
+                      "required": true,
+                      "mapping" : {
+                        "device": { "type": "str", "required": true },
+                        "fstype": { "type": "str", "required": true },
+                        "options": { "type": "str", "required": true }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "trove": {
+              "type": "map",
+              "required": true,
+              "mapping" : {
+                "enabled": { "type": "bool", "required": true },
+                "password": { "type": "str", "required": true },
+                "user": { "type": "str", "required": true },
+                "vhost": { "type": "str", "required": true }
+              }
+            }
+          }
+        }
+      }
+    },
+    "deployment": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "rabbitmq": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "crowbar-revision": { "type": "int", "required": true },
+            "crowbar-committing": { "type": "bool" },
+            "crowbar-applied": { "type": "bool" },
+            "crowbar-status": { "type": "str" },
+            "crowbar-failed": { "type": "str" },
+            "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
+            "element_states": {
+              "type": "map",
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "elements": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "element_order": {
+              "type": "seq",
+              "required": true,
+              "sequence": [ {
+                "type": "seq",
+                "sequence": [ { "type": "str" } ]
+              } ]
+            },
+            "config": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "environment": { "type": "str", "required": true },
+                "mode": { "type": "str", "required": true },
+                "transitions": { "type": "bool", "required": true },
+                "transition_list": {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

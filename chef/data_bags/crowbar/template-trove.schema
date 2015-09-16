@@ -2,70 +2,31 @@
   "type": "map",
   "required": true,
   "mapping": {
-    "id": { "type": "str", "required": true, "pattern": "/^bc-database-|^bc-template-database$/" },
+    "id": { "type": "str", "required": true, "pattern": "/^trove-|^template-trove$/" },
     "description": { "type": "str", "required": true },
     "attributes": {
       "type": "map",
       "required": true,
       "mapping": {
-        "database": {
+        "trove": {
           "type": "map",
           "required": true,
           "mapping": {
-            "sql_engine": { "type": "str", "required": true },
-            "db_maker_password": { "type": "str" },
-            "mysql" : {
-              "type": "map",
-              "required": false,
-              "mapping" : {
-                "server_debian_password": { "type": "str" },
-                "server_repl_password": { "type": "str" },
-                "server_root_password": { "type": "str" },
-                "datadir": { "type": "str", "required": true }
-              }
-            },
-            "postgresql" : {
-              "type": "map",
-              "required": false,
-              "mapping": {
-                "config": {
-                  "type": "map",
-                  "required": false,
-                  "mapping": {
-                    "max_connections": { "type": "int" },
-                    "log_truncate_on_rotation": { "type": "bool" },
-                    "log_filename": {"type": "str" }
-                  }
-                }
-              }
-            },
-            "ha" : {
+            "debug": { "type": "bool", "required": true },
+            "verbose": { "type": "bool", "required": true },
+            "nova_instance": { "type": "str", "required": true },
+            "cinder_instance": { "type": "str", "required": true },
+            "keystone_instance": { "type": "str", "required": true },
+            "swift_instance": { "type": "str", "required": true },
+            "rabbitmq_instance": { "type": "str", "required": true },
+            "volume_support": { "type": "bool", "required": true },
+            "db": {
               "type": "map",
               "required": true,
-              "mapping" : {
-                "storage": {
-                  "type": "map",
-                  "required": true,
-                  "mapping" : {
-                    "mode": { "type": "str", "required": true },
-                    "drbd": {
-                      "type": "map",
-                      "required": true,
-                      "mapping" : {
-                        "size": { "type": "int", "required": true }
-                      }
-                    },
-                    "shared": {
-                      "type": "map",
-                      "required": true,
-                      "mapping" : {
-                        "device": { "type": "str", "required": true },
-                        "fstype": { "type": "str", "required": true },
-                        "options": { "type": "str", "required": true }
-                      }
-                    }
-                  }
-                }
+              "mapping": {
+                "password": { "type": "str", "required": true },
+                "user": { "type": "str", "required": true },
+                "database": { "type": "str", "required": true }
               }
             }
           }
@@ -76,7 +37,7 @@
       "type": "map",
       "required": true,
       "mapping": {
-        "database": {
+        "trove": {
           "type": "map",
           "required": true,
           "mapping": {
@@ -86,7 +47,6 @@
             "crowbar-status": { "type": "str" },
             "crowbar-failed": { "type": "str" },
             "crowbar-queued": { "type": "bool" },
-            "schema-revision": { "type": "int" },
             "element_states": {
               "type": "map",
               "mapping": {

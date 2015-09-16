@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-database",
+  "id": "template-database",
   "description": "Installation for Database",
   "attributes": {
     "database": {

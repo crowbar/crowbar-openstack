@@ -2,7 +2,7 @@
   "type": "map",
   "required": true,
   "mapping": {
-    "id": { "type": "str", "required": true, "pattern": "/^bc-swift-|^bc-template-swift$/" },
+    "id": { "type": "str", "required": true, "pattern": "/^swift-|^template-swift$/" },
     "description": { "type": "str", "required": true },
     "attributes": {
       "type": "map",

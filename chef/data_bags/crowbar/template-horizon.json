@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-horizon",
+  "id": "template-horizon",
   "description": "User Interface for OpenStack projects (code name Horizon)",
   "attributes": {
     "horizon": {

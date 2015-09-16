@@ -25,7 +25,7 @@ en:
         switch_ip: 'Cisco Switch IP'
         switch_port: 'Cisco Switch Port'
       deploy:
-        missing_os_sdn_network: 'The os_sdn network must be defined in bc-template-network.json'
+        missing_os_sdn_network: 'The os_sdn network must be defined in template-network.json'
       edit_attributes:
         database_instance: 'Database Instance'
         rabbitmq_instance: 'RabbitMQ Instance'

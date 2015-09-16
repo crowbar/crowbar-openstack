@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-manila",
+  "id": "template-manila",
   "description": "Installation for Manila",
   "attributes": {
     "manila": {

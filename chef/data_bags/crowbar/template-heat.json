@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-heat",
+  "id": "template-heat",
   "description": "Installation for Heat",
   "attributes": {
     "heat": {
