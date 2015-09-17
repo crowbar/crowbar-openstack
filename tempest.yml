@@ -23,7 +23,7 @@ barclamp:
   user_managed: true
   requires:
     - 'nova'
-    - 'nova_dashboard'
+    - 'horizon'
   member:
     - 'openstack'
 

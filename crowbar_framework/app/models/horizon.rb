@@ -15,10 +15,10 @@
 # limitations under the License.
 #
 
-class NovaDashboardService < PacemakerServiceObject
+class HorizonService < PacemakerServiceObject
   def initialize(thelogger)
     super(thelogger)
-    @bc_name = "nova_dashboard"
+    @bc_name = "horizon"
   end
 
 # Turn off multi proposal support till it really works and people ask for it.
@@ -29,7 +29,7 @@ class NovaDashboardService < PacemakerServiceObject
   class << self
     def role_constraints
       {
-        "nova_dashboard-server" => {
+        "horizon-server" => {
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
@@ -43,22 +43,22 @@ class NovaDashboardService < PacemakerServiceObject
 
   def proposal_dependencies(role)
     answer = []
-    answer << { "barclamp" => "database", "inst" => role.default_attributes["nova_dashboard"]["database_instance"] }
-    answer << { "barclamp" => "keystone", "inst" => role.default_attributes["nova_dashboard"]["keystone_instance"] }
-    answer << { "barclamp" => "nova", "inst" => role.default_attributes["nova_dashboard"]["nova_instance"] }
+    answer << { "barclamp" => "database", "inst" => role.default_attributes["horizon"]["database_instance"] }
+    answer << { "barclamp" => "keystone", "inst" => role.default_attributes["horizon"]["keystone_instance"] }
+    answer << { "barclamp" => "nova", "inst" => role.default_attributes["horizon"]["nova_instance"] }
     answer
   end
 
   def create_proposal
-    @logger.debug("Nova_dashboard create_proposal: entering")
+    @logger.debug("Horizon create_proposal: entering")
     base = super
 
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
     if nodes.size >= 1
       controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
-      base["deployment"]["nova_dashboard"]["elements"] = {
-        "nova_dashboard-server" => [controller[:fqdn]]
+      base["deployment"]["horizon"]["elements"] = {
+        "horizon-server" => [controller[:fqdn]]
       }
     end
 
@@ -68,26 +68,26 @@ class NovaDashboardService < PacemakerServiceObject
 
     base["attributes"][@bc_name][:db][:password] = random_password
 
-    @logger.debug("Nova_dashboard create_proposal: exiting")
+    @logger.debug("Horizon create_proposal: exiting")
     base
   end
 
   def validate_proposal_after_save proposal
-    validate_one_for_role proposal, "nova_dashboard-server"
+    validate_one_for_role proposal, "horizon-server"
 
     super
   end
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
-    @logger.debug("Nova_dashboard apply_role_pre_chef_call: entering #{all_nodes.inspect}")
+    @logger.debug("Horizon apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
-    server_elements, server_nodes, ha_enabled = role_expand_elements(role, "nova_dashboard-server")
+    server_elements, server_nodes, ha_enabled = role_expand_elements(role, "horizon-server")
 
     vip_networks = ["admin", "public"]
 
     dirty = false
-    dirty = prepare_role_for_ha_with_haproxy(role, ["nova_dashboard", "ha", "enabled"], ha_enabled, server_elements, vip_networks)
+    dirty = prepare_role_for_ha_with_haproxy(role, ["horizon", "ha", "enabled"], ha_enabled, server_elements, vip_networks)
     role.save if dirty
 
     net_svc = NetworkService.new @logger
@@ -102,7 +102,7 @@ class NovaDashboardService < PacemakerServiceObject
     allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
 
     # Make sure the nodes have a link to the dashboard on them.
-    if role.default_attributes["nova_dashboard"]["apache"]["ssl"]
+    if role.default_attributes["horizon"]["apache"]["ssl"]
       protocol = "https"
     else
       protocol = "http"
@@ -110,7 +110,7 @@ class NovaDashboardService < PacemakerServiceObject
 
     if ha_enabled
       # This assumes that there can only be one cluster assigned to the
-      # nova_dashboard-server role (otherwise, we'd need to check to which
+      # horizon-server role (otherwise, we'd need to check to which
       # cluster each node belongs to create the link).
       # Good news, the assumption is correct :-)
       public_db = Chef::DataBag.load("crowbar/public_network") rescue nil
@@ -149,7 +149,7 @@ class NovaDashboardService < PacemakerServiceObject
       node.save
     end
 
-    @logger.debug("Nova_dashboard apply_role_pre_chef_call: leaving")
+    @logger.debug("Horizon apply_role_pre_chef_call: leaving")
   end
 end
 

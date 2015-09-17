@@ -120,7 +120,7 @@ CACHES = {
 <% end -%>
         ],
         'OPTIONS': {
-          'KEY_PREFIX': '<%= node[:nova_dashboard][:config][:environment] %>'
+          'KEY_PREFIX': '<%= node[:horizon][:config][:environment] %>'
         }
     }
 }
@@ -572,9 +572,9 @@ SITE_BRANDING = "<%= @site_branding %>"
 SITE_BRANDING_LINK = "<%= @site_branding_link %>"
 <% end -%>
 
-<% if node[:nova_dashboard].has_key?(:external_monitoring) -%>
+<% if node[:horizon].has_key?(:external_monitoring) -%>
 EXTERNAL_MONITORING = [
-  <% node[:nova_dashboard][:external_monitoring].each do |name, url| -%>
+  <% node[:horizon][:external_monitoring].each do |name, url| -%>
     ['<%= name %>', '<%= url %>'],
   <% end -%>
 ]

@@ -67,10 +67,10 @@ proposals:
         - "@@controller1@@"
       nova-multi-compute-qemu:
         - "@@compute1@@"
-- barclamp: nova_dashboard
+- barclamp: horizon
   deployment:
     elements:
-      nova_dashboard-server:
+      horizon-server:
         - "@@controller1@@"
 - barclamp: heat
   deployment:

@@ -15,11 +15,23 @@
 # limitations under the License.
 #
 
-class NovaDashboardController < BarclampController
-  protected
+barclamp:
+  name: 'horizon'
+  display: 'Horizon'
+  description: 'OpenStack Dashboard: Web User Interface to access, provision and automate Cloud-based resources'
+  version: 0
+  user_managed: true
+  requires:
+    - 'pacemaker'
+    - 'database'
+    - 'keystone'
+    - 'nova'
+  member:
+    - 'openstack'
 
-  def initialize_service
-    @service_object = NovaDashboardService.new logger
-  end
-end
-
+crowbar:
+  layout: 1
+  order: 96
+  run_order: 96
+  chef_order: 96
+  proposal_schema_version: 3

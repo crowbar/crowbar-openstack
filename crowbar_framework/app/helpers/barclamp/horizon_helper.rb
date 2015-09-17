@@ -15,23 +15,16 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'nova_dashboard'
-  display: 'Horizon'
-  description: 'OpenStack Dashboard: Web User Interface to access, provision and automate Cloud-based resources'
-  version: 0
-  user_managed: true
-  requires:
-    - 'pacemaker'
-    - 'database'
-    - 'keystone'
-    - 'nova'
-  member:
-    - 'openstack'
-
-crowbar:
-  layout: 1
-  order: 96
-  run_order: 96
-  chef_order: 96
-  proposal_schema_version: 3
+module Barclamp
+  module HorizonHelper
+    def ssl_protocols_for_horizon(selected)
+      options_for_select(
+        [
+          ["HTTP", "false"],
+          ["HTTPS", "true"]
+        ],
+        selected.to_s
+      )
+    end
+  end
+end
