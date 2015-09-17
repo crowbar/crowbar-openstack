@@ -131,16 +131,15 @@ class TempestService < ServiceObject
   def _get_or_create_db
     db = Chef::DataBag.load "crowbar/#{@bc_name}" rescue nil
     if db.nil?
-      begin
-        lock = acquire_lock @bc_name
-
+      Crowbar::Lock.new(
+        logger: @logger,
+        path: Rails.root.join("tmp", "#{@bc_name}.lock")
+      ).with_lock do
         db = Chef::DataBagItem.new
         db.data_bag "crowbar"
         db["id"] = @bc_name
         db["test_runs"] = []
         db.save
-      ensure
-        release_lock lock
       end
     end
     db
@@ -185,9 +184,12 @@ class TempestService < ServiceObject
       true
     end
 
-    lock = acquire_lock(@bc_name)
-    tempest_db.save
-    release_lock(lock)
+    Crowbar::Lock.new(
+      logger: @logger,
+      path: Rails.root.join("tmp", "#{@bc_name}.lock")
+    ).with_lock do
+      tempest_db.save
+    end
   end
 
   def run_test(node)
@@ -205,10 +207,13 @@ class TempestService < ServiceObject
       raise ServiceError, I18n.t("barclamp.#{@bc_name}.run.duplicate") if tr["node"] == node and tr["status"] == "running"
     end
 
-    lock = acquire_lock(@bc_name)
-    tempest_db["test_runs"] << test_run
-    tempest_db.save
-    release_lock(lock)
+    Crowbar::Lock.new(
+      logger: @logger,
+      path: Rails.root.join("tmp", "#{@bc_name}.lock")
+    ).with_lock do
+      tempest_db["test_runs"] << test_run
+      tempest_db.save
+    end
 
     @logger.info("starting tempest on node #{node}, test run uuid #{test_run['uuid']}")
 
@@ -220,9 +225,12 @@ class TempestService < ServiceObject
       test_run["status"] = $?.exitstatus.equal?(0) ? "passed" : "failed"
       test_run["pid"] = nil
 
-      lock = acquire_lock(@bc_name)
-      tempest_db.save
-      release_lock(lock)
+      Crowbar::Lock.new(
+        logger: @logger,
+        path: Rails.root.join("tmp", "#{@bc_name}.lock")
+      ).with_lock do
+        tempest_db.save
+      end
 
       @logger.info("test run #{test_run['uuid']} complete, status '#{test_run['status']}'")
     end
@@ -230,9 +238,12 @@ class TempestService < ServiceObject
 
     # saving the PID to prevent
     test_run["pid"] = pid
-    lock = acquire_lock(@bc_name)
-    tempest_db.save
-    release_lock(lock)
+    Crowbar::Lock.new(
+      logger: @logger,
+      path: Rails.root.join("tmp", "#{@bc_name}.lock")
+    ).with_lock do
+      tempest_db.save
+    end
     test_run
   end
 
