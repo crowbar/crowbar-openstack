@@ -83,6 +83,14 @@ class HorizonService < PacemakerServiceObject
       if keystone["attributes"][ks_svc.bc_name]["api"]["version"].to_f < 3.0
         validation_error("Multi domain support requires enabling Keystone V3 API in the keystone proposal first.")
       end
+
+    horizon_timeout = proposal["attributes"]["nova_dashboard"]["session_timeout"]
+    keystone_proposal = Proposal.where(barclamp: "keystone", name: "default").first
+    keystone_timeout = keystone_proposal["attributes"]["keystone"]["token_expiration"]
+
+    # keystone_timeout is in seconds and horizon_timeout is in minutes
+    if horizon_timeout * 60 > keystone_timeout
+      validation_error("Horizon timeout is bigger than keystone token expiration and these may cause problems.")
     end
 
     super

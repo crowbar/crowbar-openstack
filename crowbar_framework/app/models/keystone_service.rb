@@ -83,6 +83,15 @@ class KeystoneService < PacemakerServiceObject
       validation_error("API version 3 or newer is required when enabling domain specific drivers.")
     end
 
+    keystone_timeout = proposal["attributes"]["keystone"]["token_expiration"]
+    horizon_proposal = Proposal.where(barclamp: "nova_dashboard", name: "default").first
+    horizon_timeout = horizon_proposal["attributes"]["nova_dashboard"]["session_timeout"]
+
+    # keystone_timeout is in seconds and horizon_timeout is in minutes
+    if horizon_timeout * 60 > keystone_timeout
+      validation_error("Horizon timeout is bigger than keystone token expiration and these may cause problems.")
+    end
+
     super
   end
 
