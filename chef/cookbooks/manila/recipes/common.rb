@@ -36,17 +36,23 @@ sql_connection = "#{db_settings[:url_scheme]}://#{node[:manila][:db][:user]}:"\
                  "#{db_password}@#{db_settings[:address]}/"\
                  "#{node[:manila][:db][:database]}"
 
+# address/port binding
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
   node, "admin").address
-node[:manila][:api][:bind_host] = my_ipaddress
 node[:manila][:my_ip] = my_ipaddress
+node[:manila][:api][:bind_host] = my_ipaddress
 
-if node[:manila][:api][:bind_open_address]
-  bind_host = "0.0.0.0"
+if node[:manila][:ha][:enabled]
+  bind_port = node[:manila][:ha][:ports][:api]
 else
-  bind_host = node[:manila][:api][:bind_host]
+  if node[:manila][:api][:bind_open_address]
+    bind_host = "0.0.0.0"
+  else
+    bind_host = node[:manila][:api][:bind_host]
+  end
+  bind_port = node[:manila][:api][:bind_port]
 end
-bind_port = node[:manila][:api][:bind_port]
+
 
 # get Neutron data (copied from nova.conf.erb)
 # TODO(toabctl): Seems that this code is used in different barclamps.
