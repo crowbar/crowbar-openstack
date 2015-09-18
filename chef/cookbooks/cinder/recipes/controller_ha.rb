@@ -20,8 +20,13 @@ end
 
 log "HA support for cinder is enabled"
 
+cluster_vhostname = CrowbarPacemakerHelper.cluster_vhostname(node)
+
+admin_net_db = Chef::DataBagItem.load("crowbar", "admin_network").raw_data
+cluster_admin_ip = admin_net_db["allocated_by_name"]["#{cluster_vhostname}.#{node[:domain]}"]["address"]
+
 haproxy_loadbalancer "cinder-api" do
-  address node[:cinder][:api][:bind_open_address] ? "0.0.0.0" : node[:cinder][:api][:bind_host]
+  address node[:cinder][:api][:bind_open_address] ? "0.0.0.0" : cluster_admin_ip
   port node[:cinder][:api][:bind_port]
   use_ssl (node[:cinder][:api][:protocol] == "https")
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "cinder", "cinder-controller", "api")
