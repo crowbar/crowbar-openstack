@@ -270,26 +270,39 @@ class NeutronService < PacemakerServiceObject
 
   def update_ovs_bridge_attributes(attributes, node)
     needs_save = false
-    ml2_type_drivers = attributes["ml2_type_drivers"]
-    if attributes["ml2_mechanism_drivers"].include?("openvswitch")
-      # We need to create ovs bridges for floating and (when vlan type driver
-      # is enabled) nova_fixed.  Adjust the network attribute accordingly.
-      # We only do that on the node attributes and not the proposal itself as
-      # the requirement to have the bridge setup is really node-specifc. (E.g.
-      # a tempest node that might get an IP allocated in "nova_floating" won't
-      # need the bridges)
-      ovs_bridge_networks = ["nova_floating"]
-      ovs_bridge_networks.concat attributes["additional_external_networks"]
-      if ml2_type_drivers.include?("vlan")
-        ovs_bridge_networks << "nova_fixed"
-      end
-      ovs_bridge_networks.each do |net|
-        if node.crowbar["crowbar"]["network"][net]
-          unless node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"]
-            @logger.info("Forcing add_ovs_bridge to true for the #{net} network on node #{node.name}")
-            node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = true
-            needs_save = true
+    ovs_bridge_networks = []
+    if attributes["networking_plugin"] == "ml2"
+      ml2_type_drivers = attributes["ml2_type_drivers"]
+      if attributes["ml2_mechanism_drivers"].include?("openvswitch")
+        # We need to create ovs bridges for floating and (when vlan type driver
+        # is enabled) nova_fixed.  Adjust the network attribute accordingly.
+        # We only do that on the node attributes and not the proposal itself as
+        # the requirement to have the bridge setup is really node-specifc. (E.g.
+        # a tempest node that might get an IP allocated in "nova_floating" won't
+        # need the bridges)
+        ovs_bridge_networks = ["nova_floating"]
+        ovs_bridge_networks.concat attributes["additional_external_networks"]
+        if ml2_type_drivers.include?("vlan")
+          ovs_bridge_networks << "nova_fixed"
+        end
+        ovs_bridge_networks.each do |net|
+          if node.crowbar["crowbar"]["network"][net]
+            unless node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"]
+              @logger.info("Forcing add_ovs_bridge to true for the #{net} network on node #{node.name}")
+              node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = true
+              needs_save = true
+            end
           end
+        end
+      end
+    end
+    # Cleanup the add_ovs_bridge bridge flag on all other networks.
+    node.crowbar["crowbar"]["network"].keys.each do |net|
+      unless ovs_bridge_networks.include?(net)
+        if node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"]
+          @logger.info("Forcing add_ovs_bridge to false for the #{net} network on node #{node.name}")
+          node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = false
+          needs_save = true
         end
       end
     end
@@ -322,11 +335,11 @@ class NeutronService < PacemakerServiceObject
           node.save
         end
       end
-      node = NodeObject.find_node_by_name nodename
-      update_ovs_bridge_attributes(attributes, node)
     elsif attributes["networking_plugin"] == "vmware"
       net_svc.allocate_ip "default", "os_sdn", "host", node
     end
+    node = NodeObject.find_node_by_name nodename
+    update_ovs_bridge_attributes(attributes, node)
   end
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
