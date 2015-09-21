@@ -21,6 +21,34 @@ else
   neutron = node
 end
 
+if node.platform == "ubuntu"
+  # If we expect to install the openvswitch module via DKMS, but the module
+  # does not exist, rmmod the openvswitch module before continuing.
+  if node[:network][:ovs_pkgs].any? { |e| e == "openvswitch-datapath-dkms" } &&
+      !File.exists?("/lib/modules/#{`uname -r`.strip}/updates/dkms/openvswitch.ko") &&
+      File.directory?("/sys/module/openvswitch")
+    if IO.read("/sys/module/openvswitch/refcnt").strip != "0"
+      Chef::Log.error("Kernel openvswitch module already loaded and in use! Please reboot me!")
+    else
+      bash "Unload non-DKMS openvswitch module" do
+        code "rmmod openvswitch"
+      end
+    end
+  end
+end
+
+node[:network][:ovs_pkgs].each { |p| package p }
+
+bash "Load openvswitch module" do
+  code "modeprobe #{node[:network][:ovs_module]}"
+  not_if { ::File.directory?("/sys/module/#{node[:network][:ovs_module]}") }
+end
+
+service node[:network][:ovs_service] do
+  supports status: true, restart: true
+  action [:start, :enable]
+end
+
 node[:neutron][:platform][:nsx_pkgs].each { |p| package p }
 
 nsx_controller = neutron[:neutron][:vmware][:controllers].split(",")[0]

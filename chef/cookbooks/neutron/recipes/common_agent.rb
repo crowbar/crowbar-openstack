@@ -49,47 +49,8 @@ bash "reload disable-rp_filter-sysctl" do
   subscribes :run, resources(cookbook_file: disable_rp_filter_file), :delayed
 end
 
-# openvswitch installation and configuration
-if neutron[:neutron][:networking_plugin] == "vmware" or
-  (neutron[:neutron][:networking_plugin] == "ml2" and
-   neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch"))
-  if node.platform == "ubuntu"
-    # If we expect to install the openvswitch module via DKMS, but the module
-    # does not exist, rmmod the openvswitch module before continuing.
-    if node[:neutron][:platform][:ovs_pkgs].any?{ |e|e == "openvswitch-datapath-dkms" } &&
-        !File.exists?("/lib/modules/#{%x{uname -r}.strip}/updates/dkms/openvswitch.ko") &&
-        File.directory?("/sys/module/openvswitch")
-      if IO.read("/sys/module/openvswitch/refcnt").strip != "0"
-        Chef::Log.error("Kernel openvswitch module already loaded and in use! Please reboot me!")
-      else
-        bash "Unload non-DKMS openvswitch module" do
-          code "rmmod openvswitch"
-        end
-      end
-    end
-  end
-
-  node[:neutron][:platform][:ovs_pkgs].each { |p| package p }
-
-  bash "Load openvswitch module" do
-    code node[:neutron][:platform][:ovs_modprobe]
-    not_if do ::File.directory?("/sys/module/openvswitch") end
-  end
-
-  if %w(redhat centos).include?(node.platform)
-    openvswitch_service = "openvswitch"
-  else
-    openvswitch_service = "openvswitch-switch"
-  end
-
-  service "openvswitch_service" do
-    service_name openvswitch_service
-    supports status: true, restart: true
-    action [:start, :enable]
-  end
-end
-
 multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty? && node.roles.include?("neutron-network")
+
 # openvswitch configuration specific to ML2
 if neutron[:neutron][:networking_plugin] == "ml2" and
    neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch")
@@ -124,80 +85,19 @@ if neutron[:neutron][:networking_plugin] == "ml2" and
       end
     end
   end
+end
 
-  # This only includes the IP addresses allocated to the node by crowbar. It
-  # does not include e.g. virtual IP addresses allocated to a cluster. Which is
-  # important as we need to filter those out from being added to the
-  # ovs-usurp-config init script that is being created below.
-  my_addresses = node.all_addresses
-
-  # Create the bridges Neutron needs.
-  # Usurp config as needed.
-  networks = [["nova_fixed", "fixed"], ["nova_floating", "public"]]
-  neutron[:neutron][:additional_external_networks].each do |net|
-    networks << [net, net]
-  end
-  networks.each do |net|
-    bound_if = (node[:crowbar_wall][:network][:nets][net[0]].last rescue nil)
-    next unless bound_if
-    name = "br-#{net[1]}"
-    execute "Neutron: create #{name}" do
-      command "ovs-vsctl add-br #{name}; ip link set #{name} up"
-      not_if "ovs-vsctl list-br |grep -q #{name}"
-    end
-    execute "Neutron: add #{bound_if} to #{name}" do
-      command "ovs-vsctl del-port #{name} #{bound_if} ; ovs-vsctl add-port #{name} #{bound_if}"
-      not_if "ovs-dpctl show system@#{name} | grep -q #{bound_if}"
-    end
-    ruby_block "Have #{name} usurp config from #{bound_if}" do
-      block do
-        target = ::Nic.new(name)
-        res = target.usurp(bound_if)
-        Chef::Log.info("#{name} usurped #{res[0].join(", ")} addresses from #{bound_if}") unless res[0].empty?
-        Chef::Log.info("#{name} usurped #{res[1].join(", ")} routes from #{bound_if}") unless res[1].empty?
-      end
-    end
-    source = ::Nic.new(bound_if)
-    # filter out cluster VIPs that a currently assigned to the interface
-    addresses = source.addresses.select { |address| my_addresses.include? address }
-    routes = source.routes
-    template "/etc/init.d/ovs-usurp-config-#{name}" do
-      source "ovs-usurp-config.erb"
-      owner "root"
-      group "root"
-      mode "0755"
-      variables(
-        source: bound_if,
-        dest: name,
-        addresses: addresses,
-        routes: routes
-      )
-      # After the ruby_block "Have #{name} usurp config from #{bound_if}" was
-      # executed for the first time, the physical interface (eth) will not have
-      # any addresses or routes assigned anymore. So we should not recreate the
-      # init script in that case. Neither should it be removed.
-      not_if { addresses.empty? and routes.empty? }
-    end
-    service "ovs-usurp-config-#{name}" do
-      # Don't start it here. It only needs to be executed during boot.
-      action [:nothing]
-      subscribes :enable, resources("template[/etc/init.d/ovs-usurp-config-#{name}]")
-    end
-  end
-else
-  # Cleanup the ovs-usurp init scripts if we're not using openvswitch anymore.
-  # Note: As moving between network plugins is currently not supported by this
-  #       cookbook this code is mostly just sitting here and waiting for the
-  #       plugin switching support to be implemented.
+# Cleanup the ovs-usurp init scripts that might still be existing from an old
+# install (before the network barclamp created the ovs-bridge configuration).
+if node[:platform] == "suse" && node[:platform_version].to_f >= 12.0
   bridges = ["br-public", "br-fixed"]
   neutron[:neutron][:additional_external_networks].each do |net|
     bridges << "br-#{net}"
   end
   bridges.each do |name|
     service "ovs-usurp-config-#{name}" do
-      # FIXME: Don't stop it here until we handle the shutdown of openvswitch
-      #        and the neutron-ovs-agent correctly. Otherwise we might be cut
-      #        off of the network immediately.
+      # There's no need to stop anything here. I might even cut us off the
+      # network.
       action [:disable]
       only_if { ::File.exists?("/etc/init.d/ovs-usurp-config-#{name}") }
     end
