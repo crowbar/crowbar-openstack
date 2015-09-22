@@ -17,8 +17,8 @@
 # Recipe:: api
 #
 
-include_recipe "#{@cookbook_name}::sql"
 include_recipe "#{@cookbook_name}::common"
+include_recipe "#{@cookbook_name}::sql"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, :manila)
 
@@ -30,6 +30,8 @@ ha_enabled = node[:manila][:ha][:enabled]
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(
   node, node[:manila][:api][:protocol] == "https", ha_enabled)
+
+crowbar_pacemaker_sync_mark "wait-manila_register"
 
 keystone_register "manila api wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -94,6 +96,8 @@ keystone_register "register manila endpoint" do
   #  endpoint_enabled true
   action :add_endpoint_template
 end
+
+crowbar_pacemaker_sync_mark "create-manila_register"
 
 manila_service "api" do
   use_pacemaker_provider ha_enabled

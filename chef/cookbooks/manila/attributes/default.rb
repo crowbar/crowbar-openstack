@@ -20,5 +20,15 @@ override[:manila][:group] = "manila"
 
 default[:manila][:api][:protocol] = "http"
 
-# FIXME (toabctl): currently only non-HA is supported
+# HA attributes
 default[:manila][:ha][:enabled] = false
+if %w(redhat centos suse).include? node.platform
+  default[:manila][:ha][:api_ra] = "lsb:openstack-manila-api"
+  default[:manila][:ha][:scheduler_ra] = "lsb:openstack-manila-scheduler"
+else
+  default[:manila][:ha][:api_ra] = "lsb:manila-api"
+  default[:manila][:ha][:scheduler_ra] = "lsb:manila-scheduler"
+end
+default[:manila][:ha][:op][:monitor][:interval] = "10s"
+# Ports to bind to when haproxy is used for the real ports
+default[:manila][:ha][:ports][:api] = 5525
