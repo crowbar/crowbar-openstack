@@ -37,6 +37,7 @@ mechanism_drivers = <%= @ml2_mechanism_drivers.join(",") %>
 # flat_networks =
 # Example:flat_networks = physnet1,physnet2
 # Example:flat_networks = *
+flat_networks = <%= @external_networks.join(",") %>
 
 [ml2_type_vlan]
 # (ListOpt) List of <physical_network>[:<vlan_min>:<vlan_max>] tuples
