@@ -75,6 +75,16 @@ class HorizonService < PacemakerServiceObject
   def validate_proposal_after_save proposal
     validate_one_for_role proposal, "horizon-server"
 
+    if proposal["attributes"][@bc_name]["multi_domain_support"]
+      ks_svc = KeystoneService.new @logger
+      keystone = Proposal.where(barclamp: ks_svc.bc_name,
+                                name: proposal["attributes"]["horizon"]["keystone_instance"]).first
+      # Using domains requires API Version 3 or newer
+      if keystone["attributes"][ks_svc.bc_name]["api"]["version"].to_f < 3.0
+        validation_error("Multi domain support requires enabling Keystone V3 API in the keystone proposal first.")
+      end
+    end
+
     super
   end
 

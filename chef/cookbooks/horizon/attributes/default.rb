@@ -51,6 +51,5 @@ default["horizon"]["can_set_mount_point"] = false
 # Display password fields for Nova password injection
 default["horizon"]["can_set_password"] = false
 
-# Transient attribute.  Remove it when all OpenStack is deployed with
-# Keystone v3
-default["horizon"]["use_keystone_v3"] = false
+# Display "Domain" text field on login page
+default[:horizon][:multi_domain_support] = false
