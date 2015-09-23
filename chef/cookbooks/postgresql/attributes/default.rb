@@ -134,7 +134,7 @@ when "suse"
       "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-pg"]
     default["postgresql"]["server"]["packages"] = ["postgresql91-server"]
     default["postgresql"]["contrib"]["packages"] = ["postgresql91-contrib"]
-  when node["platform_version"].to_f == 12.0
+  when node["platform_version"].to_f >= 12.0
     default["postgresql"]["version"] = "9.3"
     default["postgresql"]["client"]["packages"] = ["postgresql93",
       "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-pg"]
