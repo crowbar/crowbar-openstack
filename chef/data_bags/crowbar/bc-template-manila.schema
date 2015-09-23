@@ -64,6 +64,12 @@
                     "netapp_transport_type": { "type": "str", "required": true },
                     "netapp_aggregate_name_search_pattern": { "type": "str", "required": false }
                   }
+                },
+                "manual": {
+                "type": "map", "mapping": {
+                    "driver": { "type": "str", "required": true },
+                    "config": { "type": "str", "required": true }
+                  }
                 }
               }
             },
@@ -95,6 +101,12 @@
                       "netapp_transport_type": { "type": "str", "required": true },
                       "netapp_aggregate_name_search_pattern": { "type": "str", "required": false }
                      }
+                  },
+                  "manual": {
+                    "type": "map", "mapping": {
+                      "driver": { "type": "str", "required": true },
+                      "config": { "type": "str", "required": true }
+                    }
                   }
                 }
               } ]

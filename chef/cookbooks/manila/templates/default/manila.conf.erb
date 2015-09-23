@@ -1855,7 +1855,6 @@ neutron_net_id=<%= share['generic']['neutron_net_id'] %>
 neutron_subnet_id=<%= share['generic']['neutron_subnet_id'] %>
 <% end -%>
 <% end -%> <%# generic driver %>
-
 <% if share['backend_driver'] == 'netapp' -%>
 share_driver=manila.share.drivers.netapp.common.NetAppDriver
 share_backend_name=<%= share['backend_name'] %>
@@ -1873,8 +1872,11 @@ netapp_transport_type=<%= share['netapp']['netapp_transport_type'] %>
 netapp_aggregate_name_search_pattern=<%= share['netapp']['netapp_aggregate_name_search_pattern'] %>
 <% end -%>
 <% end -%> <%# netapp driver %>
-
-
+<% if share['backend_driver'] == 'manual' -%>
+share_backend_name=<%= share['backend_name'] %>
+share_driver=<%= share['manual']['driver'] %>
+<%= share['manual']['config'] %>
+<% end -%> <%# manual driver %>
 <% end -%> <%# shares loop %>
 #############################################################################
 #############################################################################

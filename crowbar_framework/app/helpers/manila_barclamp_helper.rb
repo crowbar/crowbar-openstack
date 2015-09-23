@@ -29,7 +29,8 @@ module ManilaBarclampHelper
     options_for_select(
       [
         [t(".shares.generic_share_driver"), "generic"],
-        [t(".shares.netapp_share_driver"), "netapp"]
+        [t(".shares.netapp_share_driver"), "netapp"],
+        [t(".shares.manual_share_driver"), "manual"]
       ],
       selected.to_s
     )

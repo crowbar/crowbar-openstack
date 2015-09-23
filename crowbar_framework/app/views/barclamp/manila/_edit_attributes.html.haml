@@ -44,6 +44,23 @@
               = password_field %w(shares {{@index}} netapp netapp_password)
               = select_field %w(shares {{@index}} netapp netapp_transport_type), :collection => :netapp_transports_for_manila
           {{/if_eq}}
+          {{#if_eq backend_driver 'manual'}}
+          %li.list-group-item
+            %fieldset
+            %legend
+              = t(".shares.manual_parameters")
+
+            .alert.alert-warning
+              = t(".shares.manual.not_supported")
+
+            = string_field %w(shares {{@index}} manual driver)
+            %span.help-block
+              = t(".shares.manual.driver_hint")
+
+            = text_field %w(shares {{@index}} manual config), :size => "80x5"
+            %span.help-block
+              = t(".shares.manual.config_hint")
+          {{/if_eq}}
         {{/each}}
 
     %fieldset

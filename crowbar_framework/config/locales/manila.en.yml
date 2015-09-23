@@ -33,8 +33,14 @@ en:
           loading_text: 'Loading Backends...'
           generic_parameters: 'Generic backend parameters'
           netapp_parameters: "NetApp parameters"
+          manual_parameters: 'Other driver parameters'
           generic_share_driver: 'Generic driver'
           netapp_share_driver: 'NetApp driver'
+          manual_share_driver: 'Other driver'
+          manual:
+            config_hint: 'Each line will be added to manila.conf. If the driver needs an external file, this file must be manually uploaded.'
+            driver_hint: 'For instance, manila.share.drivers.generic.GenericShareDriver'
+            not_supported: 'Manually picking a driver can be used to specify a Manila driver not available in the list of drivers above. This is however not supported.'
           index:
             generic:
               service_instance_user: 'Service instance user'
@@ -48,3 +54,6 @@ en:
               netapp_server_hostname: 'Server host name'
               netapp_server_port: 'Server port'
               netapp_transport_type: 'Transport Type'
+            manual:
+              config: 'Options'
+              driver: 'Driver'

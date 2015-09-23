@@ -29,6 +29,8 @@ node[:manila][:shares].each_with_index do |share, share_idx|
     # nothing special needs to be done for the generic driver
   when share[:backend_driver] == "netapp"
     # FIXME (toabctl): Do some NetApp config magic.
+  when share[:backend_driver] == "manual"
+    # nothing special needs to be done for the generic driver
   end
 end
 
