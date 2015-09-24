@@ -74,20 +74,15 @@ networking_plugin = node[:neutron][:networking_plugin]
 ml2_type_drivers_default_provider_network = node[:neutron][:ml2_type_drivers_default_provider_network]
 case networking_plugin
 when "ml2"
+  # For ml2 always create the floating network as a flat provider network
+  floating_network_type = "--provider:network_type flat --provider:physical_network floating"
   case ml2_type_drivers_default_provider_network
   when "vlan"
     fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
-    if node[:network][:networks][:nova_floating][:use_vlan]
-      floating_network_type = "--provider:network_type vlan --provider:segmentation_id #{floating_net["vlan"]} --provider:physical_network floating"
-    else
-      floating_network_type = "--provider:network_type flat --provider:physical_network floating"
-    end
   when "gre"
     fixed_network_type = "--provider:network_type gre --provider:segmentation_id 1"
-    floating_network_type = "--provider:network_type flat --provider:physical_network floating"
   when "vxlan"
     fixed_network_type = "--provider:network_type vxlan --provider:segmentation_id #{vni_start}"
-    floating_network_type = "--provider:network_type vxlan --provider:segmentation_id #{vni_start + 1}"
   else
     Chef::Log.error("default provider network ml2 type driver '#{ml2_type_drivers_default_provider_network}' invalid for creating provider networks")
   end

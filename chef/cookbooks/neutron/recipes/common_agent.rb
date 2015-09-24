@@ -140,12 +140,16 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
     physnet = node[:crowbar_wall][:network][:nets][:nova_fixed].first
     interface_mappings = "physnet1:" + physnet
-    if multiple_external_networks
-      neutron[:neutron][:additional_external_networks].each do |net|
-        ext_iface = node[:crowbar_wall][:network][:nets][net].first
-        if ext_iface != physnet
-          mapping = ", " + net + ":" + ext_iface
-          interface_mappings += mapping
+    if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
+      floatingphys = node[:crowbar_wall][:network][:nets][:nova_floating].last
+      interface_mappings += ", floating:" + floatingphys
+      if multiple_external_networks
+        neutron[:neutron][:additional_external_networks].each do |net|
+          ext_iface = node[:crowbar_wall][:network][:nets][net].last
+          if ext_iface != physnet
+            mapping = ", " + net + ":" + ext_iface
+            interface_mappings += mapping
+          end
         end
       end
     end

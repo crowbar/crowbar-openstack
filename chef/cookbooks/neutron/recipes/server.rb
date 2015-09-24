@@ -151,6 +151,9 @@ end
 #                so the order is important
 tenant_network_types = [[node[:neutron][:ml2_type_drivers_default_tenant_network]] + node[:neutron][:ml2_type_drivers]].flatten.uniq
 
+external_networks = ["floating"]
+external_networks.concat(node[:neutron][:additional_external_networks])
+
 case node[:neutron][:networking_plugin]
 when "ml2"
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
@@ -176,7 +179,8 @@ when "ml2"
       gre_end: gre_end,
       vxlan_start: vni_start,
       vxlan_end: vni_end,
-      vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group]
+      vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group],
+      external_networks: external_networks
     )
   end
 when "vmware"
