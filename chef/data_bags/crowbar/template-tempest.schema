@@ -2,33 +2,25 @@
   "type": "map",
   "required": true,
   "mapping": {
-    "id": { "type": "str", "required": true, "pattern": "/^bc-trove-|^bc-template-trove$/" },
+    "id": { "type": "str", "required": true, "pattern": "/^tempest-|^template-tempest$/" },
     "description": { "type": "str", "required": true },
     "attributes": {
       "type": "map",
       "required": true,
       "mapping": {
-        "trove": {
+        "tempest": {
           "type": "map",
           "required": true,
           "mapping": {
-            "debug": { "type": "bool", "required": true },
-            "verbose": { "type": "bool", "required": true },
+            "tempest_tarball": { "type": "str", "required": true },
             "nova_instance": { "type": "str", "required": true },
-            "cinder_instance": { "type": "str", "required": true },
-            "keystone_instance": { "type": "str", "required": true },
-            "swift_instance": { "type": "str", "required": true },
-            "rabbitmq_instance": { "type": "str", "required": true },
-            "volume_support": { "type": "bool", "required": true },
-            "db": {
-              "type": "map",
-              "required": true,
-              "mapping": {
-                "password": { "type": "str", "required": true },
-                "user": { "type": "str", "required": true },
-                "database": { "type": "str", "required": true }
-              }
-            }
+            "tempest_adm_username": { "type": "str", "required": true },
+            "tempest_adm_password": { "type": "str", "required": true },
+            "tempest_user_password": { "type": "str", "required": true },
+            "tempest_user_username": { "type": "str", "required": true },
+            "tempest_user_tenant": { "type": "str", "required": true },
+            "tempest_test_image": { "type": "str", "required": true },
+            "tempest_test_docker_image": { "type": "str", "required": true }
           }
         }
       }
@@ -37,16 +29,18 @@
       "type": "map",
       "required": true,
       "mapping": {
-        "trove": {
+        "tempest": {
           "type": "map",
           "required": true,
           "mapping": {
             "crowbar-revision": { "type": "int", "required": true },
+            "schema-revision": { "type": "int" },
             "crowbar-committing": { "type": "bool" },
             "crowbar-applied": { "type": "bool" },
             "crowbar-status": { "type": "str" },
             "crowbar-failed": { "type": "str" },
             "crowbar-queued": { "type": "bool" },
+
             "element_states": {
               "type": "map",
               "mapping": {

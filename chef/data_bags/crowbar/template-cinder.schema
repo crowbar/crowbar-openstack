@@ -2,7 +2,7 @@
   "type": "map",
   "required": true,
   "mapping": {
-    "id": { "type": "str", "required": true, "pattern": "/^bc-cinder-|^bc-template-cinder$/" },
+    "id": { "type": "str", "required": true, "pattern": "/^cinder-|^template-cinder$/" },
     "description": { "type": "str", "required": true },
     "attributes": {
       "type": "map",

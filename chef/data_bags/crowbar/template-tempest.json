@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-tempest",
+  "id": "template-tempest",
   "description": "provides a tempest installation",
   "attributes": {
     "tempest": {

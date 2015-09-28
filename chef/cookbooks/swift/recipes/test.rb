@@ -18,7 +18,7 @@ require "net/http"
 
 t = <<END
 {
-  "id": "bc-template-swift",
+  "id": "template-swift",
   "description": "The default proposal for swift",
   "attributes": {
     "swift": {

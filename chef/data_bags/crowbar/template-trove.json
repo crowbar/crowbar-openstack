@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-trove",
+  "id": "template-trove",
   "description": "Sets up OpenStack Trove Database Service",
   "attributes": {
     "trove": {

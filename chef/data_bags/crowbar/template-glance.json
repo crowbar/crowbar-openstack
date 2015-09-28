@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-glance",
+  "id": "template-glance",
   "description": "Glance service (image registry and delivery service) for the cloud",
   "attributes": {
     "glance": {

@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-neutron",
+  "id": "template-neutron",
   "description": "API-enabled, pluggable virtual network service for OpenStack",
   "attributes": {
     "neutron": {

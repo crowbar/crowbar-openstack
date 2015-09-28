@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-nova",
+  "id": "template-nova",
   "description": "installs and configures the Openstack Nova component. It relies upon the network and glance barclamps for normal operation.",
   "attributes": {
     "nova": {

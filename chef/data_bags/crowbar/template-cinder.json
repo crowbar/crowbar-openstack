@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-cinder",
+  "id": "template-cinder",
   "description": "Installation for Cinder",
   "attributes": {
     "cinder": {

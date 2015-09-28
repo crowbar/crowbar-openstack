@@ -1,7 +1,7 @@
 {
   "type": "map", "required": true,
   "mapping": {
-    "id": { "type": "str", "required": true, "pattern": "/^bc-neutron-|^bc-template-neutron$/" },
+    "id": { "type": "str", "required": true, "pattern": "/^neutron-|^template-neutron$/" },
     "description": { "type": "str", "required": true },
     "attributes": { "type": "map", "required": true,
       "mapping": {

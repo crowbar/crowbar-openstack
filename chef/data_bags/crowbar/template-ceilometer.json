@@ -1,5 +1,5 @@
 {
-  "id": "bc-template-ceilometer",
+  "id": "template-ceilometer",
   "description": "Installation for Ceilometer",
   "attributes": {
     "ceilometer": {
