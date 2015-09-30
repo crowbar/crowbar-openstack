@@ -20,7 +20,7 @@
 
 include_recipe "nova::config"
 
-unless %w(redhat centos suse).include?(node.platform)
+unless %w(rhel suse).include?(node[:platform_family])
   pkgs=%w[python-numpy nova-console nova-consoleauth]
   pkgs.each do |pkg|
     package pkg
@@ -29,11 +29,9 @@ end
 
 # forcing novnc is deliberate on suse
 if node[:nova][:use_novnc]
-  if %w(redhat centos suse).include?(node.platform)
+  if %w(rhel suse).include?(node[:platform_family])
     package "openstack-nova-novncproxy"
-    unless %w(redhat centos).include?(node.platform)
-      package "openstack-nova-consoleauth"
-    end
+    package "openstack-nova-consoleauth" if node[:platform_family] == "suse"
   else
     package "nova-novncproxy"
     execute "Fix permission Bug" do
@@ -42,7 +40,7 @@ if node[:nova][:use_novnc]
     end
   end
   service "nova-novncproxy" do
-    service_name "openstack-nova-novncproxy" if %w(redhat centos suse).include?(node.platform)
+    service_name "openstack-nova-novncproxy" if %w(rhel suse).include?(node[:platform_family])
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources(template: "/etc/nova/nova.conf"), :delayed
@@ -50,7 +48,7 @@ if node[:nova][:use_novnc]
   end
 end
 service "nova-consoleauth" do
-  service_name "openstack-nova-consoleauth" if %w(redhat centos suse).include?(node.platform)
+  service_name "openstack-nova-consoleauth" if %w(rhel suse).include?(node[:platform_family])
   supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources(template: "/etc/nova/nova.conf"), :delayed

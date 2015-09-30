@@ -22,7 +22,7 @@
 node.set[:nova][:my_ip] = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 
 package "nova-common" do
-  if %w(redhat centos suse).include?(node.platform)
+  if %w(rhel suse).include?(node[:platform_family])
     package_name "openstack-nova"
   end
   action :install
@@ -37,7 +37,7 @@ include_recipe "#{db_settings[:backend_name]}::python-client"
 # don't expose database connection to the compute clients
 database_connection = if node["roles"].include?("nova-multi-controller")
   db_conn_scheme = db_settings[:url_scheme]
-  if node[:platform] == "suse" && db_settings[:backend_name] == "mysql"
+  if node[:platform_family] == "suse" && db_settings[:backend_name] == "mysql"
     # The C-extensions (python-mysql) can't be monkey-patched by eventlet. Therefore, when only one nova-conductor is present,
     # all DB queries are serialized. By using the pure-Python driver by default, eventlet can do it's job:
     db_conn_scheme = "mysql+pymysql"

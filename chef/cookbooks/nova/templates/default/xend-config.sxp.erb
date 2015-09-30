@@ -192,7 +192,7 @@
 # so there is no need to specify it explicitly.  The default is to use
 # the bridge which is listed first in the output from brctl.
 #
-<% if @node_platform == "suse" -%>
+<% if @node_platform_family == "suse" -%>
 # SuSE users note:
 # On openSUSE >= 11.1 and SLES >= 11, networks should be configured using
 # native platform tool - YaST.  vif-bridge and qemu-ifup can be used to
