@@ -33,14 +33,14 @@ ruby_block "edit /etc/sysconfig/sysctl for IP_FORWARD" do
   only_if { node[:platform] == "suse" && node[:platform_version].to_f < 12.0 }
 end
 
-# Enable ip forwarding on network node for SLE12
+# Enable ip forwarding on network node for new SUSE platforms
 ruby_block "edit /etc/sysctl.d/99-sysctl.conf for net.ipv4.ip_forward" do
   block do
     rc = Chef::Util::FileEdit.new("/etc/sysctl.d/99-sysctl.conf")
     rc.search_file_replace_line(/^net.ipv4.ip_forward =/, "net.ipv4.ip_forward = 1")
     rc.write_file
   end
-  only_if { node[:platform] == "suse" && node[:platform_version].to_f >= 12.0 }
+  only_if { node[:platform_family] == "suse" && (node[:platform] != "suse" || node[:platform_version].to_f >= 12.0) }
 end
 
 # The rest of this logic will be compatible for all the platforms.

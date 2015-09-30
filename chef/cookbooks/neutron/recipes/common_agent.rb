@@ -29,7 +29,7 @@ ruby_block "edit /etc/sysctl.conf for rp_filter" do
     rc.search_file_replace_line(/^net.ipv4.conf.all.rp_filter/, "net.ipv4.conf.all.rp_filter = 0")
     rc.write_file
   end
-  only_if { node[:platform] == "suse" }
+  only_if { node[:platform_family] == "suse" }
 end
 
 directory "create /etc/sysctl.d for disable-rp_filter" do
@@ -58,13 +58,7 @@ if neutron[:neutron][:networking_plugin] == "ml2" and
   # Install the package now as neutron-ovs-cleanup service is shipped with this
   package node[:neutron][:platform][:ovs_agent_pkg]
 
-  unless %w(debian ubuntu).include? node.platform
-    # Note: this must not be started! This service only makes sense on boot.
-    service "neutron-ovs-cleanup" do
-      service_name "openstack-neutron-ovs-cleanup" if %w(suse).include?(node.platform)
-      action [:enable]
-    end
-  else
+  if node[:platform_family] == "debian"
     # Arrange for neutron-ovs-cleanup to be run on bootup of compute nodes only
     unless neutron.name == node.name
       cookbook_file "/etc/init.d/neutron-ovs-cleanup" do
@@ -84,12 +78,18 @@ if neutron[:neutron][:networking_plugin] == "ml2" and
         to "../init.d/neutron-ovs-cleanup"
       end
     end
+  else
+    # Note: this must not be started! This service only makes sense on boot.
+    service "neutron-ovs-cleanup" do
+      service_name "openstack-neutron-ovs-cleanup" if node[:platform_family] == "suse"
+      action [:enable]
+    end
   end
 end
 
 # Cleanup the ovs-usurp init scripts that might still be existing from an old
 # install (before the network barclamp created the ovs-bridge configuration).
-if node[:platform] == "suse" && node[:platform_version].to_f >= 12.0
+unless (node[:platform] == "suse" && node[:platform_version].to_f < 12.0)
   bridges = ["br-public", "br-fixed"]
   neutron[:neutron][:additional_external_networks].each do |net|
     bridges << "br-#{net}"
@@ -167,7 +167,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       group node[:neutron][:platform][:group]
       action :create
       recursive true
-      not_if { node[:platform] == "suse" }
+      not_if { node[:platform_family] == "suse" }
     end
 
     template agent_config_path do
@@ -191,7 +191,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       group node[:neutron][:platform][:group]
       action :create
       recursive true
-      not_if { node[:platform] == "suse" }
+      not_if { node[:platform_family] == "suse" }
     end
 
     template agent_config_path do

@@ -21,7 +21,7 @@ else
   neutron = node
 end
 
-if node.platform == "ubuntu"
+if node[:platform_family] == "debian"
   # If we expect to install the openvswitch module via DKMS, but the module
   # does not exist, rmmod the openvswitch module before continuing.
   if node[:network][:ovs_pkgs].any? { |e| e == "openvswitch-datapath-dkms" } &&

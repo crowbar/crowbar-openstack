@@ -23,7 +23,7 @@ else
 end
 
 # RDO package magic (non-standard packages)
-if %w(redhat centos).include?(node.platform)
+if node[:platform_family] == "rhel"
   net_core_pkgs=%w(kernel-*openstack* iproute-*el6ost.netns* iputils)
 
   ruby_block "unset_reboot" do
@@ -67,7 +67,7 @@ template neutron[:neutron][:platform][:neutron_rootwrap_sudo_template] do
   mode 0440
   variables(user: neutron[:neutron][:platform][:user],
             binary: "/usr/bin/neutron-rootwrap")
-  not_if { node.platform == "suse" }
+  not_if { node[:platform_family] == "suse" }
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
@@ -151,7 +151,7 @@ template "/etc/neutron/neutron.conf" do
     }.merge(nova_notify))
 end
 
-if %w(redhat centos).include?(node.platform)
+if node[:platform_family] == "rhel"
   link "/etc/neutron/plugin.ini" do
     to "/etc/neutron/neutron.conf"
   end
