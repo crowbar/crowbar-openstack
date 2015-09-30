@@ -105,28 +105,28 @@ else
   crowbar_pacemaker_sync_mark "create-ceilometer_database"
 end
 
-case node["platform"]
-  when "suse"
-    package "openstack-ceilometer-collector"
-    package "openstack-ceilometer-agent-notification"
-    package "openstack-ceilometer-api"
-    package "openstack-ceilometer-alarm-evaluator"
-    package "openstack-ceilometer-alarm-notifier"
-  when "centos", "redhat"
-    package "openstack-ceilometer-common"
-    package "openstack-ceilometer-collector"
-    package "openstack-ceilometer-agent-notification"
-    package "openstack-ceilometer-api"
-    package "openstack-ceilometer-alarm"
-    package "python-ceilometerclient"
-  else
-    package "python-ceilometerclient"
-    package "ceilometer-common"
-    package "ceilometer-collector"
-    package "ceilometer-agent-notification"
-    package "ceilometer-api"
-    package "ceilometer-alarm-evaluator"
-    package "ceilometer-alarm-notifier"
+case node[:platform_family]
+when "suse"
+  package "openstack-ceilometer-collector"
+  package "openstack-ceilometer-agent-notification"
+  package "openstack-ceilometer-api"
+  package "openstack-ceilometer-alarm-evaluator"
+  package "openstack-ceilometer-alarm-notifier"
+when "rhel"
+  package "openstack-ceilometer-common"
+  package "openstack-ceilometer-collector"
+  package "openstack-ceilometer-agent-notification"
+  package "openstack-ceilometer-api"
+  package "openstack-ceilometer-alarm"
+  package "python-ceilometerclient"
+else
+  package "python-ceilometerclient"
+  package "ceilometer-common"
+  package "ceilometer-collector"
+  package "ceilometer-agent-notification"
+  package "ceilometer-api"
+  package "ceilometer-alarm-evaluator"
+  package "ceilometer-alarm-notifier"
 end
 
 include_recipe "#{@cookbook_name}::common"
@@ -136,7 +136,7 @@ directory "/var/cache/ceilometer" do
   group "root"
   mode 00755
   action :create
-end unless node.platform == "suse"
+end unless node[:platform_family] == "suse"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 

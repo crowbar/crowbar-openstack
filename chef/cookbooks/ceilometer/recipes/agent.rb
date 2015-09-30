@@ -14,9 +14,9 @@
 #
 
 package "ceilometer-agent-compute" do
-  if %w(suse).include?(node.platform)
+  if %w(suse).include?(node[:platform_family])
     package_name "openstack-ceilometer-agent-compute"
-  elsif %w(redhat centos).include?(node.platform)
+  elsif %w(rhel).include?(node[:platform_family])
     package_name "openstack-ceilometer-compute"
   end
   action :install
@@ -27,9 +27,9 @@ include_recipe "#{@cookbook_name}::common"
 is_compute = node.roles.any?{ |role| /^nova-multi-compute-/ =~ role }
 
 service "ceilometer-agent-compute" do
-  if %w(suse).include?(node.platform)
+  if %w(suse).include?(node[:platform_family])
     service_name "openstack-ceilometer-agent-compute"
-  elsif %w(redhat centos).include?(node.platform)
+  elsif %w(rhel).include?(node[:platform_family])
     service_name "openstack-ceilometer-compute"
   end
   supports status: true, restart: true

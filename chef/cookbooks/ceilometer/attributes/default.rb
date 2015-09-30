@@ -17,34 +17,23 @@ default[:ceilometer][:user]="ceilometer"
 default[:ceilometer][:group]="ceilometer"
 
 central_service_name = "ceilometer-agent-central"
-if %w(suse).include?(node[:platform])
+if %w(suse).include?(node[:platform_family])
   central_service_name = "openstack-ceilometer-agent-central"
-elsif %w(redhat centos).include?(node[:platform])
+elsif %w(rhel).include?(node[:platform_family])
   central_service_name = "openstack-ceilometer-central"
 end
 
 api_service_name = "ceilometer-api"
-if %w(redhat centos suse).include?(node[:platform])
-  api_service_name = "openstack-ceilometer-api"
-end
-
 collector_service_name = "ceilometer-collector"
-if %w(redhat centos suse).include?(node[:platform])
-  collector_service_name = "openstack-ceilometer-collector"
-end
-
 agent_notification_service_name = "ceilometer-agent-notification"
-if %w(redhat centos suse).include?(node[:platform])
-  agent_notification_service_name = "openstack-ceilometer-agent-notification"
-end
-
 alarm_evaluator_service_name = "ceilometer-alarm-evaluator"
-if %w(redhat centos suse).include?(node[:platform])
-  alarm_evaluator_service_name = "openstack-ceilometer-alarm-evaluator"
-end
-
 alarm_notifier_service_name = "ceilometer-alarm-notifier"
-if %w(redhat centos suse).include?(node[:platform])
+
+if %w(rhel suse).include?(node[:platform_family])
+  api_service_name = "openstack-ceilometer-api"
+  collector_service_name = "openstack-ceilometer-collector"
+  agent_notification_service_name = "openstack-ceilometer-agent-notification"
+  alarm_evaluator_service_name = "openstack-ceilometer-alarm-evaluator"
   alarm_notifier_service_name = "openstack-ceilometer-alarm-notifier"
 end
 
