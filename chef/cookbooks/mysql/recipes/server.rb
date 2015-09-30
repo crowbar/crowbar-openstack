@@ -19,7 +19,7 @@
 
 include_recipe "mysql::client"
 
-if platform?(%w{debian ubuntu})
+if platform_family?("debian")
 
   directory "/var/cache/local/preseeding" do
     owner "root"
@@ -58,12 +58,12 @@ if addr != newaddr
 end
 
 package "mysql-server" do
-  package_name "mysql" if node.platform == "suse"
+  package_name "mysql" if node[:platform_family] == "suse"
   action :install
 end
 
-case node[:platform]
-when "centos", "redhat", "fedora"
+case node[:platform_family]
+when "rhel", "fedora"
   mysql_service_name = "mysqld"
 else
   mysql_service_name = "mysql"
@@ -80,7 +80,7 @@ service "mysql" do
   action :enable
 end
 
-link value_for_platform(["centos", "redhat", "suse" , "fedora"] => {"default" => "/etc/my.cnf"}, "default" => "/etc/mysql/my.cnf") do
+link value_for_platform_family(["rhel", "suse", "fedora"] => { "default" => "/etc/my.cnf" }, "default" => "/etc/mysql/my.cnf") do
   to "#{node[:mysql][:datadir]}/my.cnf"
 end
 
@@ -113,8 +113,8 @@ template "#{node[:mysql][:datadir]}/my.cnf" do
   owner "root"
   group "root"
   mode "0644"
-   notifies :run, resources(script: "handle mysql restart"), :immediately if platform?(%w{debian ubuntu})
-   notifies :restart, "service[mysql]", :immediately if platform?(%w{centos redhat suse fedora})
+  notifies :run, resources(script: "handle mysql restart"), :immediately if platform_family?("debian")
+  notifies :restart, "service[mysql]", :immediately if platform_family?(%w{rhel suse fedora})
 end
 
 unless Chef::Config[:solo]
@@ -128,7 +128,7 @@ end
 
 # set the root password on platforms
 # that don't support pre-seeding
-unless platform?(%w{debian ubuntu})
+unless platform_family?("debian")
 
   execute "assign-root-password" do
     command "/usr/bin/mysqladmin -u root password \"#{node['mysql']['server_root_password']}\""
@@ -182,15 +182,15 @@ end
 
 # End hackness
 
-grants_path = value_for_platform(
-  ["centos", "redhat", "suse", "fedora"] => {
+grants_path = value_for_platform_family(
+  ["rhel", "suse", "fedora"] => {
     "default" => "/etc/mysql_grants.sql"
   },
   "default" => "/etc/mysql/grants.sql"
 )
 
-grants_key = value_for_platform(
-  ["centos", "redhat", "suse", "fedora"] => {
+grants_key = value_for_platform_family(
+  ["rhel", "suse", "fedora"] => {
     "default" => "/etc/applied_grants"
   },
   "default" => "/etc/mysql/applied_grants"

@@ -175,8 +175,8 @@ key_buffer              = <%= node['mysql']['tunable']['key_buffer'] %>
 # [MYSQL_CLUSTER]
 # ndb-connectstring=127.0.0.1
 
-<% case node['platform'] -%>
-<% when "centos", "redhat", "fedora", "suse" -%>
+<% case node[:platform_family] -%>
+<% when "rhel", "fedora", "suse" -%>
 #
 # * BerkeleyDB
 #

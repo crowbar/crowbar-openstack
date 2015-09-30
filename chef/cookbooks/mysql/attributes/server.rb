@@ -23,8 +23,8 @@ default["mysql"]["datadir"]                   = "/var/lib/mysql"
 default["mysql"]["tmpdir"]                    = "/var/lib/mysqltmp"
 default["mysql"]["logdir"]                    = "/var/lib/mysqllogs"
 
-case node["platform"]
-when "centos", "redhat", "fedora", "suse"
+case node[:platform_family]
+when "rhel", "fedora", "suse"
   set["mysql"]["socket"]                      = "/var/lib/mysql/mysql.sock"
   set["mysql"]["pid_file"]                    = "/var/run/mysqld/mysqld.pid"
   set["mysql"]["old_passwords"]               = 1
