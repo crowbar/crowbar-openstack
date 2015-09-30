@@ -5,12 +5,6 @@ verbose = <%= node[:glance][:verbose] ? "True" : "False" %>
 # Show debugging output in logs (sets DEBUG log level output)
 debug = <%= node[:glance][:debug] ? "True" : "False" %>
 
-# Which backend scheme should Glance use by default is not specified
-# in a request to add a new image to Glance? Known schemes are determined
-# by the known_stores option below.
-# Default: 'file'
-default_store = <%= node[:glance][:default_store] %>
-
 # Maximum image size (in bytes) that may be uploaded through the
 # Glance API server. Defaults to 1 TB.
 # WARNING: this value should only be increased after careful consideration
@@ -453,6 +447,13 @@ trace_sqlalchemy = False
 #      glance.store.gridfs.Store,
 #      glance.store.vmware_datastore.Store,
 stores = <%= @glance_stores %>
+
+# Which backend scheme should Glance use by default is not specified
+# in a request to add a new image to Glance? Known schemes are determined
+# by the stores option.
+# Deprecated group/name - [DEFAULT]/default_store
+# Default: 'file'
+default_store = <%= node[:glance][:default_store] %>
 
 # ============ Filesystem Store Options ========================
 
