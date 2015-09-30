@@ -37,22 +37,9 @@ if node.roles.include?("swift-ring-compute") && !(::File.exists? "/etc/swift/obj
   return
 end
 
-case node[:platform]
-when "suse", "centos", "redhat"
-  %w{openstack-swift-container
-     openstack-swift-object
-     openstack-swift-account}.each do |pkg|
-    package pkg do
-      action :install
-    end
-  end
-else
-  %w{swift-container swift-object swift-account}.each do |pkg|
-    pkg = "openstack-#{pkg}" if %w(redhat centos suse).include?(node.platform)
-    package pkg do
-      action :install
-    end
-  end
+%w{swift-container swift-object swift-account}.each do |pkg|
+  pkg = "openstack-#{pkg}" if %w(rhel suse).include?(node[:platform_family])
+  package pkg
 end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
@@ -101,7 +88,7 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       raise message
     end
 
-    x = "openstack-#{x}" if %w(redhat centos suse).include?(node.platform)
+    x = "openstack-#{x}" if %w(rhel suse).include?(node[:platform_family])
     service x do
       if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
         restart_command "status #{x} 2>&1 | grep -q Unknown || restart #{x}"
