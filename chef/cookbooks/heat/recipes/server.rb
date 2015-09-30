@@ -373,7 +373,7 @@ template "/etc/heat/loadbalancer.template" do
   group node[:heat][:group]
   mode "0640"
   notifies :restart, "service[heat-engine]", :delayed
-  only_if { node[:platform] == "suse" }
+  only_if { node[:platform_family] == "suse" }
 end
 
 service "heat-api" do

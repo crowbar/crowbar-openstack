@@ -18,26 +18,45 @@ default[:heat][:api][:service_name] = "heat-api"
 default[:heat][:api_cfn][:service_name] = "heat-api-cfn"
 default[:heat][:api_cloudwatch][:service_name] = "heat-api-cloudwatch"
 
-case node["platform"]
-  when "ubuntu"
-    default[:heat][:platform] = {
-      packages: ["heat-engine", "heat-api", "heat-api-cfn",
-                    "heat-api-cloudwatch", "python-heat", "heat-common",
-                    "python-heatclient"],
-      services: ["heat-engine","heat-api","heat-api-cfn","heat-api-cloudwatch"]
-    }
-   when "suse"
-    default[:heat][:platform] = {
-      packages: ["openstack-heat-engine", "openstack-heat-api",
-                    "openstack-heat-api-cfn", "openstack-heat-api-cloudwatch",
-                    "python-heatclient"],
-      services: ["openstack-heat-engine", "openstack-heat-api",
-                    "openstack-heat-api-cfn", "openstack-heat-api-cloudwatch"]
-    }
-    default[:heat][:engine][:service_name] = "openstack-heat-engine"
-    default[:heat][:api][:service_name] = "openstack-heat-api"
-    default[:heat][:api_cfn][:service_name] = "openstack-heat-api-cfn"
-    default[:heat][:api_cloudwatch][:service_name] = "openstack-heat-api-cloudwatch"
+case node[:platform_family]
+when "debian"
+  default[:heat][:platform] = {
+    packages: [
+      "heat-engine",
+      "heat-api",
+      "heat-api-cfn",
+      "heat-api-cloudwatch",
+      "python-heat",
+      "heat-common",
+      "python-heatclient"
+    ],
+    services: [
+      "heat-engine",
+      "heat-api",
+      "heat-api-cfn",
+      "heat-api-cloudwatch"
+    ]
+  }
+when "rhel", "suse"
+  default[:heat][:platform] = {
+    packages: [
+      "openstack-heat-engine",
+      "openstack-heat-api",
+      "openstack-heat-api-cfn",
+      "openstack-heat-api-cloudwatch",
+      "python-heatclient"
+    ],
+    services: [
+      "openstack-heat-engine",
+      "openstack-heat-api",
+      "openstack-heat-api-cfn",
+      "openstack-heat-api-cloudwatch"
+    ]
+  }
+  default[:heat][:engine][:service_name] = "openstack-heat-engine"
+  default[:heat][:api][:service_name] = "openstack-heat-api"
+  default[:heat][:api_cfn][:service_name] = "openstack-heat-api-cfn"
+  default[:heat][:api_cloudwatch][:service_name] = "openstack-heat-api-cloudwatch"
 end
 
 default[:heat][:debug] = false
