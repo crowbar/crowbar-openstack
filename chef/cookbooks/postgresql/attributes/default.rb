@@ -20,7 +20,7 @@
 default["postgresql"]["enable_pgdg_apt"] = false
 default["postgresql"]["server"]["config_change_notify"] = :restart
 
-case node["platform"]
+case node[:platform]
 when "debian"
 
   case
@@ -151,6 +151,19 @@ when "suse"
   default["postgresql"]["dir"] = "/var/lib/pgsql/data"
   default["postgresql"]["sysconfig"] = "/etc/sysconfig/postgresql"
 
+when "opensuse"
+
+  default["postgresql"]["version"] = "9.3"
+  default["postgresql"]["client"]["packages"] = [
+    "postgresql93",
+    "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-pg"
+  ]
+  default["postgresql"]["server"]["packages"] = ["postgresql93-server"]
+  default["postgresql"]["contrib"]["packages"] = ["postgresql93-contrib"]
+
+  default["postgresql"]["dir"] = "/var/lib/pgsql/data"
+  default["postgresql"]["sysconfig"] = "/etc/sysconfig/postgresql"
+
 else
   default["postgresql"]["version"] = "8.4"
   default["postgresql"]["dir"]         = "/etc/postgresql/#{node['postgresql']['version']}/main"
@@ -172,7 +185,7 @@ end
 #
 # The ssl config attribute is generated in the recipe to avoid awkward
 # merge/precedence order during the Chef run.
-case node["platform_family"]
+case node[:platform_family]
 when "debian"
   default["postgresql"]["config"]["data_directory"] = "/var/lib/postgresql/#{node['postgresql']['version']}/main"
   default["postgresql"]["config"]["hba_file"] = "/etc/postgresql/#{node['postgresql']['version']}/main/pg_hba.conf"
@@ -219,7 +232,7 @@ default["postgresql"]["pg_hba"] = [
 
 default["postgresql"]["password"] = Hash.new
 
-case node["platform_family"]
+case node[:platform_family]
 when "debian"
   default["postgresql"]["pgdg"]["release_apt_codename"] = node["lsb"]["codename"]
 end
