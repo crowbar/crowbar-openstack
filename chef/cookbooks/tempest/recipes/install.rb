@@ -18,7 +18,7 @@
 # limitations under the License.
 #
 
-if %w(suse).include?(node.platform)
+if node[:platform_family] == "suse"
   #needed for tempest.tests.test_wrappers.TestWrappers.test_pretty_tox
   package "git-core"
 else
