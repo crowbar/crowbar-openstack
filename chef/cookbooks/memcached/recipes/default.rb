@@ -17,12 +17,12 @@
 # limitations under the License.
 #
 
-case node[:platform]
-when "suse", "centos", "redhat"
+case node[:platform_family]
+when "suse", "rhel"
   package "memcached" do
     action :install
   end
-when "debian", "ubuntu"
+when "debian"
   %w{libmemcache-dev memcached}.each do |pkg|
     package pkg do
       action :install
@@ -36,8 +36,8 @@ service "memcached" do
 end
 
 template "/etc/memcached.conf" do
-  case node[:platform]
-  when "suse", "centos", "redhat"
+  case node[:platform_family]
+  when "suse", "rhel"
     source "memcached.sysconfig.erb"
     path "/etc/sysconfig/memcached"
   else
