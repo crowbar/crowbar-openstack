@@ -19,7 +19,7 @@
 #
 
 package "rabbitmq-server"
-package "rabbitmq-server-plugins" if node.platform == "suse"
+package "rabbitmq-server-plugins" if node[:platform_family] == "suse"
 
 directory "/etc/rabbitmq/" do
   owner "root"
@@ -44,10 +44,10 @@ template "/etc/rabbitmq/rabbitmq.config" do
   notifies :restart, "service[rabbitmq-server]"
 end
 
-case node["platform"]
+case node[:platform_family]
 when "suse"
   rabbitmq_plugins = "/usr/sbin/rabbitmq-plugins"
-when "redhat", "centos"
+when "rhel"
   rabbitmq_plugins = "/usr/lib/rabbitmq/bin/rabbitmq-plugins"
 else
   rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
