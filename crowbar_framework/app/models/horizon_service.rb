@@ -90,7 +90,8 @@ class HorizonService < PacemakerServiceObject
 
     # keystone_timeout is in seconds and horizon_timeout is in minutes
     if horizon_timeout * 60 > keystone_timeout
-      validation_error("Horizon timeout is bigger than keystone token expiration and these may cause problems.")
+      validation_error("Setting the Horizon timeout (#{horizon_timeout * 60} minutes) longer than the Keystone token expiration timeout" \ 
+        "(#{keystone_timeout} minutes) is not supported. Please lower the Horizon token timeout.")
     end
 
     super

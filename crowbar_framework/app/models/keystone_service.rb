@@ -85,11 +85,14 @@ class KeystoneService < PacemakerServiceObject
 
     keystone_timeout = proposal["attributes"]["keystone"]["token_expiration"]
     horizon_proposal = Proposal.where(barclamp: "nova_dashboard", name: "default").first
-    horizon_timeout = horizon_proposal["attributes"]["nova_dashboard"]["session_timeout"]
+    unless horizon_proposal.nil?
+      horizon_timeout = horizon_proposal["attributes"]["nova_dashboard"]["session_timeout"]
 
-    # keystone_timeout is in seconds and horizon_timeout is in minutes
-    if horizon_timeout * 60 > keystone_timeout
-      validation_error("Horizon timeout is bigger than keystone token expiration and these may cause problems.")
+      # keystone_timeout is in seconds and horizon_timeout is in minutes
+      if horizon_timeout * 60 > keystone_timeout
+        validation_error("Setting the Horizon timeout (#{horizon_timeout * 60} minutes) longer than the Keystone token expiration timeout" \ 
+          "(#{keystone_timeout} minutes) is not supported. Please lower the Horizon token timeout.")
+      end
     end
 
     super
