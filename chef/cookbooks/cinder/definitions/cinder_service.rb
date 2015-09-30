@@ -1,12 +1,12 @@
 define :cinder_service, use_pacemaker_provider: false do
   cinder_service_name="cinder-#{params[:name]}"
   cinder_name = cinder_service_name
-  cinder_name="openstack-cinder-#{params[:name]}" if %w(redhat centos suse).include? node.platform
+  cinder_name = "openstack-cinder-#{params[:name]}" if %w(rhel suse).include? node[:platform_family]
 
   #TODO(agordeev):
   # be carefull, dpkg will not overwrite upstart configs
   # even if it be asked about that by 'confnew' option
-  package cinder_name unless %w(redhat centos).include? node.platform
+  package cinder_name unless node[:platform_family] == "rhel"
 
   service cinder_service_name do
     if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)

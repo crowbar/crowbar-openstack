@@ -39,7 +39,7 @@ default[:cinder][:max_overflow] = 10
 default[:cinder][:pool_timeout] = 30
 
 default[:cinder][:ha][:enabled] = false
-if %w(redhat centos suse).include? node.platform
+if %w(rhel suse).include? node[:platform_family]
   default[:cinder][:ha][:api_ra] = "lsb:openstack-cinder-api"
   default[:cinder][:ha][:scheduler_ra] = "lsb:openstack-cinder-scheduler"
 else
