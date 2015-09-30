@@ -35,7 +35,7 @@ else
   # we have to install ceph client packages
   return if (ceph_conf.empty? || !File.exists?(ceph_conf))
 
-  if node[:platform] == "suse"
+  if node[:platform_family] == "suse"
     # install package in compile phase because we will run "ceph -s"
     package "ceph-common" do
       action :nothing

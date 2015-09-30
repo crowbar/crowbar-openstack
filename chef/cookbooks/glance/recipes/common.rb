@@ -18,13 +18,9 @@
 # limitations under the License.
 #
 
-package "curl" do
-  action :install
-end
-
+package "curl"
 package "glance" do
-  package_name "openstack-glance" if %w(redhat centos suse).include?(node.platform)
-  action :install
+  package_name "openstack-glance" if %w(rhel suse).include?(node[:platform_family])
 end
 
 ha_enabled = node[:glance][:ha][:enabled]

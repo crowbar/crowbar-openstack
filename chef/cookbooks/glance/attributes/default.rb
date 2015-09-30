@@ -83,7 +83,7 @@ default[:glance][:ssl][:insecure] = false
 default[:glance][:ssl][:cert_required] = false
 default[:glance][:ssl][:ca_certs] = "/etc/glance/ssl/certs/ca.pem"
 
-if %w(redhat centos suse).include?(node[:platform])
+if %w(rhel suse).include?(node[:platform_family])
   default[:glance][:api][:service_name] = "openstack-glance-api"
   default[:glance][:registry][:service_name] = "openstack-glance-registry"
 end
