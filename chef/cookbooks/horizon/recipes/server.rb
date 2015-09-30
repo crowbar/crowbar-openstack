@@ -17,7 +17,7 @@ include_recipe "apache2"
 include_recipe "apache2::mod_wsgi"
 include_recipe "apache2::mod_rewrite"
 
-if %w(suse).include? node.platform
+if %w(suse).include? node[:platform_family]
   dashboard_path = "/srv/www/openstack-dashboard"
 else
   dashboard_path = "/usr/share/openstack-dashboard"
@@ -27,7 +27,8 @@ if node[:horizon][:apache][:ssl]
   include_recipe "apache2::mod_ssl"
 end
 
-if %w(debian ubuntu).include?(node.platform)
+case node[:platform_family]
+when "debian"
   # Explicitly added client dependencies for now.
   packages = ["python-lesscpy", "python-ply", "openstack-dashboard", "python-novaclient", "python-glance", "python-swift", "python-keystone", "openstackx", "python-django", "python-django-horizon", "python-django-nose"]
   packages.each do |pkg|
@@ -42,7 +43,7 @@ if %w(debian ubuntu).include?(node.platform)
       action :purge
     end
   end
-elsif %w(redhat centos).include?(node.platform)
+when "rhel"
   package "openstack-dashboard"
   package "python-lesscpy"
 else
@@ -58,7 +59,27 @@ else
   end
 end
 
-if node.platform != "suse"
+if node[:platform_family] == "suse"
+  # Get rid of unwanted vhost config files:
+  ["#{node[:apache][:dir]}/vhosts.d/default-redirect.conf",
+   "#{node[:apache][:dir]}/vhosts.d/nova-dashboard.conf"].each do |f|
+    file f do
+      action :delete
+    end
+  end
+
+  template "/etc/logrotate.d/openstack-dashboard" do
+    source "openstack-dashboard.logrotate.erb"
+    mode 0644
+    owner "root"
+    group "root"
+  end
+
+  apache_module "deflate" do
+    conf false
+    enable true
+  end
+else
   directory "#{dashboard_path}/.blackhole" do
     owner node[:apache][:user]
     group node[:apache][:group]
@@ -84,26 +105,6 @@ if node.platform != "suse"
   # remove old apache config file
   file "#{node[:apache][:dir]}/sites-available/nova-dashboard.conf" do
     action :delete
-  end
-else
-  # Get rid of unwanted vhost config files:
-  ["#{node[:apache][:dir]}/vhosts.d/default-redirect.conf",
-   "#{node[:apache][:dir]}/vhosts.d/nova-dashboard.conf"].each do |f|
-    file f do
-      action :delete
-    end
-  end
-
-  template "/etc/logrotate.d/openstack-dashboard" do
-    source "openstack-dashboard.logrotate.erb"
-    mode 0644
-    owner "root"
-    group "root"
-  end
-
-  apache_module "deflate" do
-    conf false
-    enable true
   end
 end
 
@@ -230,12 +231,12 @@ end
 memcached_locations.sort!
 
 memcached_instance "openstack-dashboard"
-case node[:platform]
+case node[:platform_family]
 when "suse"
   package "python-python-memcached"
-when "debian", "ubuntu"
+when "debian"
   package "python-memcache"
-when "redhat", "centos"
+when "rhel"
   package "python-memcached"
 end
 
@@ -324,7 +325,7 @@ resource = resources(template: "#{node[:apache][:dir]}/ports.conf")
 resource.variables({apache_listen_ports: node.normal[:apache][:listen_ports_crowbar].values.map{ |p| p.values }.flatten.uniq.sort})
 
 template "#{node[:apache][:dir]}/sites-available/openstack-dashboard.conf" do
-  if node.platform == "suse"
+  if node[:platform_family] == "suse"
     path "#{node[:apache][:dir]}/vhosts.d/openstack-dashboard.conf"
   end
   source "openstack-dashboard.conf.erb"
@@ -342,7 +343,7 @@ template "#{node[:apache][:dir]}/sites-available/openstack-dashboard.conf" do
     ssl_key_file: node[:horizon][:apache][:ssl_key_file],
     ssl_crt_chain_file: node[:horizon][:apache][:ssl_crt_chain_file]
   )
-  if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/openstack-dashboard.conf") || node.platform == "suse"
+  if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/openstack-dashboard.conf") || node[:platform_family] == "suse"
     notifies :reload, resources(service: "apache2")
   end
 end
