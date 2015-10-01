@@ -103,7 +103,7 @@ class NovaService < PacemakerServiceObject
   end
 
   def node_platform_supports_xen(node)
-    node[:platform] == "suse"
+    node[:platform_family] == "suse"
   end
 
   def node_supports_kvm(node)
