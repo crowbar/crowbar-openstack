@@ -8,8 +8,8 @@
       "type": "map",
       "required": true,
       "mapping": {
-        "nova": { 
-          "type": "map", 
+        "nova": {
+          "type": "map",
           "required": true,
           "mapping": {
             "debug": { "type": "bool", "required": true },
@@ -54,7 +54,7 @@
               "type": "map", "required": false, "mapping": {
                 "user": { "type": "str", "required": true },
                 "secret_uuid": { "type": "str", "required": true }
-              }  
+              }
             },
             "kvm": {
               "type": "map", "required": true, "mapping": {
