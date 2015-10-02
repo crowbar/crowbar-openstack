@@ -83,8 +83,8 @@ class NovaService < PacemakerServiceObject
         "nova-multi-compute-xen" => {
           "unique" => false,
           "count" => -1,
-          "exclude_platform" => {
-            "windows" => "/.*/"
+          "platform" => {
+            "suse" => "/.*/"
           }
         }
       }
