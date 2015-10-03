@@ -43,7 +43,9 @@ end.run_action(:create)
 crowbar_pacemaker_sync_mark "sync-heat_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-heat_ha_resources"
+crowbar_pacemaker_sync_mark "wait-heat_ha_resources" do
+  timeout 300
+end
 
 primitives = []
 
