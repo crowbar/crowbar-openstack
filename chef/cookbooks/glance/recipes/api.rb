@@ -6,8 +6,12 @@
 
 include_recipe "#{@cookbook_name}::common"
 
-if node.platform == "ubuntu"
- package "qemu-utils"
+# Install qemu-img (dependency present in suse packages)
+case node[:platform_family]
+when "debian"
+  package "qemu-utils"
+when "rhel", "fedora"
+  package "qemu-img"
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
