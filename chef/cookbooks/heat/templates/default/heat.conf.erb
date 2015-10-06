@@ -82,6 +82,7 @@ trusts_delegated_roles=heat_stack_owner
 # Enables engine with convergence architecture. All stacks with this option
 # will be created using convergence engine . (boolean value)
 #convergence_engine = false
+convergence_engine = <%= @use_convergence_engine %>
 
 # Template default for how the server should receive the metadata required for
 # software configuration. POLL_SERVER_CFN will allow calls to the cfn API
