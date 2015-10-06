@@ -626,6 +626,7 @@ insecure = <%= @keystone_settings['insecure'] %>
 
 # Unversioned keystone url in format like http://0.0.0.0:5000. (string value)
 #auth_uri =
+auth_uri = <%= @keystone_settings['protocol'] %>://<%= @keystone_settings['public_url_host'] %>:<%= @keystone_settings['service_port'] %>
 
 
 [clients_neutron]
