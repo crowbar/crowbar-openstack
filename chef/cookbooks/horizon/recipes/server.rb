@@ -80,6 +80,11 @@ if node.platform != "suse"
   file "/etc/apache2/conf.d/openstack-dashboard.conf" do
     action :delete
   end
+
+  # remove old apache config file
+  file "#{node[:apache][:dir]}/sites-available/nova-dashboard.conf" do
+    action :delete
+  end
 else
   # Get rid of unwanted vhost config files:
   ["#{node[:apache][:dir]}/vhosts.d/default-redirect.conf",
@@ -90,7 +95,7 @@ else
   end
 
   template "/etc/logrotate.d/openstack-dashboard" do
-    source "nova-dashboard.logrotate.erb"
+    source "openstack-dashboard.logrotate.erb"
     mode 0644
     owner "root"
     group "root"
@@ -224,7 +229,7 @@ else
 end
 memcached_locations.sort!
 
-memcached_instance "nova-dashboard"
+memcached_instance "openstack-dashboard"
 case node[:platform]
 when "suse"
   package "python-python-memcached"
@@ -318,11 +323,11 @@ include_recipe "horizon::ha" if ha_enabled
 resource = resources(template: "#{node[:apache][:dir]}/ports.conf")
 resource.variables({apache_listen_ports: node.normal[:apache][:listen_ports_crowbar].values.map{ |p| p.values }.flatten.uniq.sort})
 
-template "#{node[:apache][:dir]}/sites-available/nova-dashboard.conf" do
+template "#{node[:apache][:dir]}/sites-available/openstack-dashboard.conf" do
   if node.platform == "suse"
     path "#{node[:apache][:dir]}/vhosts.d/openstack-dashboard.conf"
   end
-  source "nova-dashboard.conf.erb"
+  source "openstack-dashboard.conf.erb"
   mode 0644
   variables(
     behind_proxy: ha_enabled,
@@ -337,12 +342,12 @@ template "#{node[:apache][:dir]}/sites-available/nova-dashboard.conf" do
     ssl_key_file: node[:horizon][:apache][:ssl_key_file],
     ssl_crt_chain_file: node[:horizon][:apache][:ssl_crt_chain_file]
   )
-  if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/nova-dashboard.conf") or node.platform == "suse"
+  if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/openstack-dashboard.conf") or node.platform == "suse"
     notifies :reload, resources(service: "apache2")
   end
 end
 
-apache_site "nova-dashboard.conf" do
+apache_site "openstack-dashboard.conf" do
   enable true
 end
 
