@@ -1,4 +1,4 @@
-inherit_from: .rubocop.suse.yml
+inherit_from: .hound.suse.yml
 
 AllCops:
   RunRailsCops: true
