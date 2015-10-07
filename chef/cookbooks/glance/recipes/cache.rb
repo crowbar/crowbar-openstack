@@ -26,19 +26,7 @@ directory node[:glance][:image_cache_datadir] do
   action :create
 end
 
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
-#TODO: glance should depend on cinder, but cinder already depends on glance :/
-# so we have to do something like this
-cinder_api_insecure = false
-cinders = search(:node, "roles:cinder-controller") || []
-if cinders.length > 0
-  cinder = cinders[0]
-  cinder_api_insecure = cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
-end
-
-glance_stores = node.default[:glance][:glance_stores]
-glance_stores += ["glance.store.vmware_datastore.Store"] unless node[:glance][:vsphere][:host].empty?
+network_settings = GlanceHelper.network_settings(node)
 
 template node[:glance][:cache][:config_file] do
   source "glance-cache.conf.erb"
@@ -46,9 +34,8 @@ template node[:glance][:cache][:config_file] do
   group node[:glance][:group]
   mode 0640
   variables(
-      keystone_settings: keystone_settings,
-      cinder_api_insecure: cinder_api_insecure,
-      glance_stores: glance_stores.join(",")
+    registry_bind_host: network_settings[:registry][:bind_host],
+    registry_bind_port: network_settings[:registry][:bind_port]
   )
 end
 
