@@ -878,7 +878,6 @@ vmware_server_password = <%= node[:glance][:vsphere][:password] %>
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #vmware_datacenter_path = ha-datacenter
-vmware_datacenter_path = <%= node[:glance][:vsphere][:datacenter_path] %>
 
 # DEPRECATED. Datastore associated with the datacenter. This option is
 # deprecated in favor of vmware_datastores and will be removed in the
@@ -886,7 +885,6 @@ vmware_datacenter_path = <%= node[:glance][:vsphere][:datacenter_path] %>
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #vmware_datastore_name = <None>
-vmware_datastore_name = <%= node[:glance][:vsphere][:datastore] %>
 
 # Number of times VMware ESX/VC server API must be retried upon
 # connection related issues. (integer value)
@@ -919,6 +917,7 @@ vmware_store_image_dir = <%= node[:glance][:vsphere][:store_image_dir] %>
 # the one with the most free space available is selected. (multi
 # valued)
 #vmware_datastores =
+vmware_datastores = <%= node[:glance][:vsphere][:datacenter_path] %>:<%= node[:glance][:vsphere][:datastore] %>
 
 # The host where the S3 server is listening. (string value)
 #s3_store_host = <None>
