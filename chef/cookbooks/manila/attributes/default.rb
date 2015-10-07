@@ -18,6 +18,8 @@ default[:manila][:debug] = false
 override[:manila][:user] = "manila"
 override[:manila][:group] = "manila"
 
+default[:manila][:max_header_line] = 16384
+
 default[:manila][:api][:protocol] = "http"
 
 # HA attributes
