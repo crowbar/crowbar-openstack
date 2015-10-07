@@ -9,6 +9,13 @@ include_recipe "#{@cookbook_name}::common"
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 network_settings = GlanceHelper.network_settings(node)
 
+template node[:glance][:manage][:config_file] do
+  source "glance-manage.conf.erb"
+  owner "root"
+  group node[:glance][:group]
+  mode 0640
+end
+
 template node[:glance][:registry][:config_file] do
   source "glance-registry.conf.erb"
   owner "root"
