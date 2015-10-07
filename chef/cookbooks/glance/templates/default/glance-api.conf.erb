@@ -749,6 +749,7 @@ filesystem_store_datadir = <%= node[:glance][:filesystem_store_datadir] %>
 # If True, swiftclient won't check for a valid SSL certificate when
 # authenticating. (boolean value)
 #swift_store_auth_insecure = false
+swift_store_auth_insecure = <%= @swift_api_insecure || @keystone_settings['insecure'] ? 'True' : 'False' %>
 
 # A string giving the CA certificate file to use in SSL connections
 # for verifying certs. (string value)
