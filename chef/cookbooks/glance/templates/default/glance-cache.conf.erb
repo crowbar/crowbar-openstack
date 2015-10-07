@@ -73,6 +73,7 @@
 
 # Deploy the v3 OpenStack Objects API. (boolean value)
 #enable_v3_api = false
+enable_v3_api = <%= node[:glance][:enable_v3_api] %>
 
 # Deploy the v1 OpenStack Registry API. (boolean value)
 #enable_v1_registry = true

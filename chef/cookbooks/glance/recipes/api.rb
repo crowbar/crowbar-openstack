@@ -129,7 +129,6 @@ template node[:glance][:api][:config_file] do
       cinder_api_insecure: cinder_api_insecure,
       use_docker: use_docker,
       glance_stores: glance_stores.join(",")
-
   )
 end
 
