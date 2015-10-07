@@ -1598,6 +1598,7 @@ flavor = keystone
 # estimations and you should do them based on the worst case scenario
 # and be prepared to act in case they were wrong. (string value)
 #work_dir = <None>
+work_dir = <%= node[:glance][:conversion][:work_dir] %>
 
 
 [taskflow_executor]
@@ -1616,3 +1617,7 @@ flavor = keystone
 # 'parallel'. (integer value)
 # Deprecated group/name - [task]/eventlet_executor_pool_size
 #max_workers = 10
+
+<% if node[:glance][:conversion][:enabled] -%>
+conversion_format = <%= node[:glance][:conversion][:conversion_format] %>
+<% end -%>
