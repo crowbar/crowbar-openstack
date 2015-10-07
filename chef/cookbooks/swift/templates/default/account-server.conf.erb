@@ -95,19 +95,15 @@ use = egg:swift#recon
 # log_level = INFO
 # log_address = /dev/log
 #
-# vm_test_mode = no
 # per_diff = 1000
 # max_diffs = 100
 # concurrency = 8
+#
+# Time in seconds to wait between replication passes
 # interval = 30
 interval = <%= node[:swift][:replication_interval] %>
-#
-# How long without an error before a node's error count is reset. This will
-# also be how long before a node is reenabled after suppression is triggered.
-# error_suppression_interval = 60
-#
-# How many errors can accumulate before a node is temporarily ignored.
-# error_suppression_limit = 10
+# run_pause is deprecated, use interval instead
+# run_pause = 30
 #
 # node_timeout = 10
 # conn_timeout = 0.5
@@ -115,10 +111,14 @@ interval = <%= node[:swift][:replication_interval] %>
 # The replicator also performs reclamation
 # reclaim_age = 604800
 #
-# Time in seconds to wait between replication passes
-# Note: if the parameter 'interval' is defined then it will be used in place
-# of run_pause.
-# run_pause = 30
+# Allow rsync to compress data which is transmitted to destination node
+# during sync. However, this is applicable only when destination node is in
+# a different region than the local one.
+# rsync_compress = no
+#
+# Format of the rysnc module where the replicator will send data. See
+# etc/rsyncd.conf-sample for some usage examples.
+# rsync_module = {replication_ip}::account
 #
 # recon_cache_path = /var/cache/swift
 
