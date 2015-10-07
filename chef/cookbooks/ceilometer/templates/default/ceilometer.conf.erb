@@ -501,11 +501,12 @@ workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 # means forever). (integer value)
 # Deprecated group/name - [database]/time_to_live
 #metering_time_to_live = -1
-metering_time_to_live = <%= @time_to_live %>
+metering_time_to_live = <%= @metering_time_to_live %>
 
 # Number of seconds that events are kept in the database for (<= 0
 # means forever). (integer value)
 #event_time_to_live = -1
+event_time_to_live = <%= @event_time_to_live %>
 
 # The connection string used to connect to the metering database. (if
 # unset, connection is used) (string value)

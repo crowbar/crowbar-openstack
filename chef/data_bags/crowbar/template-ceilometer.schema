@@ -47,7 +47,8 @@
               "type": "map",
               "required": true,
               "mapping": {
-                "time_to_live": { "type": "int", "required": true }
+                "metering_time_to_live": { "type": "int", "required": true },
+                "event_time_to_live": { "type": "int", "required": true }
               }
 	    }
           }
