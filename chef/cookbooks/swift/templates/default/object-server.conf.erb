@@ -14,9 +14,16 @@ user = <%= node[:swift][:user] %>
 # expiring_objects_account_name = expiring_objects
 #
 # Use an integer to override the number of pre-forked processes that will
-# accept connections.
+# accept connections.  NOTE: if servers_per_port is set, this setting is
+# ignored.
 # workers = auto
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+#
+# Make object-server run this many worker processes per unique port of
+# "local" ring devices across all storage policies.  This can help provide
+# the isolation of threads_per_disk without the severe overhead.  The default
+# value of 0 disables this feature.
+# servers_per_port = 0
 #
 # Maximum concurrent requests per worker
 # max_clients = 1024
@@ -58,6 +65,8 @@ log_level = <%= @debug? "DEBUG": "INFO" %>
 # conn_timeout = 0.5
 # Time to wait while sending each chunk of data to another backend node.
 # node_timeout = 3
+# Time to wait while sending a container update on object update.
+# container_update_timeout = 1.0
 # Time to wait while receiving each chunk of data from a client or another
 # backend node.
 # client_timeout = 60
@@ -82,7 +91,7 @@ log_requests = true
 # slow = 0
 #
 # Objects smaller than this are not evicted from the buffercache once read
-# keep_cache_size = 5424880
+# keep_cache_size = 5242880
 #
 # If true, objects for authenticated GET requests may be kept in buffer cache
 # if small enough
@@ -160,10 +169,14 @@ use = egg:swift#recon
 # log_level = INFO
 # log_address = /dev/log
 #
-# vm_test_mode = no
 # daemonize = on
+#
+# Time in seconds to wait between replication passes
+# interval = 30
+interval = <%= node[:swift][:replication_interval] %>
+# run_pause is deprecated, use interval instead
 # run_pause = 30
-run_pause = <%= node[:swift][:replication_interval] %>
+#
 # concurrency = 1
 # stats_interval = 300
 #
@@ -181,6 +194,17 @@ run_pause = <%= node[:swift][:replication_interval] %>
 #
 # passed to rsync for io op timeout
 # rsync_io_timeout = 30
+#
+# Allow rsync to compress data which is transmitted to destination node
+# during sync. However, this is applicable only when destination node is in
+# a different region than the local one.
+# NOTE: Objects that are already compressed (for example: .tar.gz, .mp3) might
+# slow down the syncing process.
+# rsync_compress = no
+#
+# Format of the rysnc module where the replicator will send data. See
+# etc/rsyncd.conf-sample for some usage examples.
+# rsync_module = {replication_ip}::object
 #
 # node_timeout = <whatever's in the DEFAULT section or 10>
 # max duration of an http request; this is for REPLICATE finalization calls and
@@ -218,6 +242,34 @@ run_pause = <%= node[:swift][:replication_interval] %>
 # than or equal to this number. By default(auto), handoff partitions will be
 # removed  when it has successfully replicated to all the canonical nodes.
 # handoff_delete = auto
+
+[object-reconstructor]
+# You can override the default log routing for this app here (don't use set!):
+# Unless otherwise noted, each setting below has the same meaning as described
+# in the [object-replicator] section, however these settings apply to the EC
+# reconstructor
+#
+# log_name = object-reconstructor
+# log_facility = LOG_LOCAL0
+# log_level = INFO
+# log_address = /dev/log
+#
+# daemonize = on
+#
+# Time in seconds to wait between reconstruction passes
+# interval = 30
+# run_pause is deprecated, use interval instead
+# run_pause = 30
+#
+# concurrency = 1
+# stats_interval = 300
+# node_timeout = 10
+# http_timeout = 60
+# lockup_timeout = 1800
+# reclaim_age = 604800
+# ring_check_interval = 15
+# recon_cache_path = /var/cache/swift
+# handoffs_first = False
 
 [object-updater]
 # You can override the default log routing for this app here (don't use set!):
