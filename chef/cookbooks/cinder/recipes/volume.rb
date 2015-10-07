@@ -67,6 +67,10 @@ def setup_loopback_device(volume)
     cmd = ["losetup", "-f", fname]
     attach_loopback_device = Mixlib::ShellOut.new(cmd)
     attach_loopback_device.run_command
+    # restart cinder-volume service so that it reloads the vgs state on start
+    cmd = ["service", "openstack-cinder-volume", "restart"]
+    restart_cinder = Mixlib::ShellOut.new(cmd)
+    restart_cinder.run_command
   end
 end
 
