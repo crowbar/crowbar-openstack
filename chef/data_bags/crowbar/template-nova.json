@@ -41,6 +41,7 @@
       },
       "vcenter": {
         "host": "",
+        "port": 443,
         "user": "",
         "password": "",
         "clusters": [],

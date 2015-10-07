@@ -402,6 +402,7 @@ host = <%= @bind_host %>
 # Minimum value: 1
 # Deprecated group/name - [DEFAULT]/api_workers
 #workers = 1
+workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
 
 [central]
@@ -1473,13 +1474,14 @@ host_ip = <%= node[:nova][:vcenter][:host] rescue "" %>
 # Minimum value: 1
 # Maximum value: 65535
 #host_port = 443
+host_port = <%= node[:nova][:vcenter][:port] rescue "443" %>
 
 # Username of VMware vSphere. (string value)
 #host_username =
 host_username = <%= node[:nova][:vcenter][:user] rescue "" %>
 
 # Password of VMware vSphere. (string value)
-#host_password =q
+#host_password =
 host_password = <%= node[:nova][:vcenter][:password] rescue "" %>
 
 # CA bundle file to use in verifying the vCenter server certificate.
