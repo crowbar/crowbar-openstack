@@ -13,6 +13,7 @@
 # from different compute agents, shuffle start time of polling task.
 # (integer value)
 #shuffle_time_before_polling_task = 0
+shuffle_time_before_polling_task = 15
 
 # Configuration file for WSGI definition of API. (string value)
 #api_paste_config = api_paste.ini
@@ -420,6 +421,7 @@ workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 # from different compute agents, shuffle start time of polling task.
 # (integer value)
 #shuffle_time_before_polling_task = 0
+shuffle_time_before_polling_task = 15
 
 
 [collector]
