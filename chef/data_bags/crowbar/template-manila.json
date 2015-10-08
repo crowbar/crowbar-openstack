@@ -11,6 +11,7 @@
       "rabbitmq_instance": "none",
       "keystone_instance": "none",
       "database_instance": "none",
+      "max_header_line": 16384,
       "api": {
         "protocol": "http",
         "bind_open_address": true,
@@ -68,7 +69,7 @@
     "manila": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 10,
+      "schema-revision": 11,
       "element_states": {
         "manila-server": [ "readying", "ready", "applying" ],
         "manila-share": [ "readying", "ready", "applying" ]

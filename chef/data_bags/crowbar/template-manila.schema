@@ -12,6 +12,7 @@
             "rabbitmq_instance": { "type": "str", "required": true },
             "keystone_instance": { "type": "str", "required": true },
             "database_instance": { "type": "str", "required": true },
+            "max_header_line": { "type": "int", "required": true },
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str", "required": true },
             "default_share_type": { "type": "str", "required": false },
