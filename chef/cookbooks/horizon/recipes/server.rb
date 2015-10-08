@@ -289,7 +289,8 @@ template local_settings do
     can_set_password: node["horizon"]["can_set_password"],
     multi_domain_support: multi_domain_support,
     policy_file_path: node["horizon"]["policy_file_path"],
-    policy_file: node["horizon"]["policy_file"]
+    policy_file: node["horizon"]["policy_file"],
+    token_hash_enabled: node["horizon"]["token_hash_enabled"]
   )
   action :create
 end

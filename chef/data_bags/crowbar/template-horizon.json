@@ -40,14 +40,15 @@
         "ssl_key_file": "/etc/apache2/ssl.key/openstack-dashboard-server.key",
         "ssl_crt_chain_file": ""
       },
-      "external_monitoring": {}
+      "external_monitoring": {},
+      "token_hash_enabled": true
     }
   },
   "deployment": {
     "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 35,
+      "schema-revision": 36,
       "element_states": {
         "horizon-server": [ "readying", "ready", "applying" ]
       },

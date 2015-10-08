@@ -69,7 +69,8 @@
               "mapping": {
                 =: { "type": "str",  "required": false }
               }
-            }
+            },
+	    "token_hash_enabled": { "type": "bool", "required": true }
           }
         }
       }

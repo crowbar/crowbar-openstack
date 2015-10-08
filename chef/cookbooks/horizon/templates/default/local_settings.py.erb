@@ -673,6 +673,7 @@ SECURITY_GROUP_RULES = {
 # set it to False if using PKI tokens and there are 401 errors due to token
 # hashing.
 #OPENSTACK_TOKEN_HASH_ENABLED = True
+OPENSTACK_TOKEN_HASH_ENABLED = <%= @token_hash_enabled ? "True" : "False" %>
 
 # AngularJS requires some settings to be made available to
 # the client side. Some settings are required by in-tree / built-in horizon
