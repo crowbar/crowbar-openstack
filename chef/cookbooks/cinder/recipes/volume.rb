@@ -51,25 +51,6 @@ def make_loopback_file(volume)
   end
 end
 
-def setup_loopback_device(volume)
-  fname = volume[:local][:file_name]
-
-  unless File.exists?(fname)
-    Chef::Log.info("Loopback file #{fname} doesn't exist")
-    return
-  end
-
-  sleep 1
-  cmd = ["losetup", "-j", fname]
-  check_loopback_device = Mixlib::ShellOut.new(cmd)
-  if check_loopback_device.run_command.stdout.empty?
-    Chef::Log.info("Attach #{fname} file to loop device")
-    cmd = ["losetup", "-f", fname]
-    attach_loopback_device = Mixlib::ShellOut.new(cmd)
-    attach_loopback_device.run_command
-  end
-end
-
 def make_loopback_volume(backend_id, volume)
   volname = volume[:local][:volume_name]
   fname = volume[:local][:file_name]
@@ -140,33 +121,72 @@ loop_lvm_paths = []
 node[:cinder][:volumes].each do |volume|
   if volume[:backend_driver] == "local"
     make_loopback_file(volume)
-    if node[:platform] != "suse" || node[:platform_version].to_f >= 12.0
-      setup_loopback_device(volume)
-    end
     loop_lvm_paths << volume[:local][:file_name]
   end
 end
 
-# for older SLES
-if node[:platform] == "suse" && node[:platform_version].to_f < 12.0
-  # We need to create boot.looplvm before we create the volume groups; note
-  # that the loopback files need to exist before we can use this script
-  unless loop_lvm_paths.empty?
-    template "boot.looplvm" do
-      path "/etc/init.d/boot.looplvm"
-      source "boot.looplvm.erb"
+unless loop_lvm_paths.empty?
+  # Helper script that can be used to mount loopback files
+  template "/usr/bin/cinder-looplvm" do
+    source "cinder-looplvm.erb"
+    owner "root"
+    group "root"
+    mode 0755
+    variables(loop_lvm_paths: loop_lvm_paths.map { |x| Shellwords.shellescape(x) }.join(" "))
+  end
+
+  if %w(rhel suse).include? node[:platform_family]
+    cinder_looplvm_service = "openstack-cinder-looplvm"
+  else
+    cinder_looplvm_service = "cinder-looplvm"
+  end
+
+  if node[:platform] == "suse" && node.platform_version.to_f < 12.0
+    template "/etc/init.d/#{cinder_looplvm_service}" do
+      source "cinder-looplvm.init.erb"
       owner "root"
       group "root"
-      mode 0755
-      variables(loop_lvm_paths: loop_lvm_paths.map{ |x| Shellwords.shellescape(x) }.join(" "))
+      mode "0755"
+      variables(service_name: cinder_looplvm_service)
     end
 
-    service "boot.looplvm" do
-      supports start: true, stop: true
-      action [:enable]
-      # We cannot use reload/restart, since status doesn't return 0 (which is expected since it's not running)
-      subscribes :start, "template[boot.looplvm]", :immediately
+    link "/usr/sbin/rc#{cinder_looplvm_service}" do
+      action :create
+      to "/etc/init.d/#{cinder_looplvm_service}"
     end
+
+    # Make sure that any dependency change is taken into account
+    bash "insserv #{cinder_looplvm_service} service" do
+      code "insserv #{cinder_looplvm_service}"
+      action :nothing
+      subscribes :run, resources("template[/etc/init.d/#{cinder_looplvm_service}]"), :delayed
+    end
+  else
+    template "/etc/systemd/system/#{cinder_looplvm_service}.service" do
+      source "cinder-looplvm.service.erb"
+      owner "root"
+      group "root"
+      mode "0644"
+      variables(service_name: cinder_looplvm_service)
+    end
+
+    # Make sure that any dependency change is taken into account
+    bash "reload systemd after #{cinder_looplvm_service} update" do
+      code "systemctl daemon-reload"
+      action :nothing
+      subscribes :run, resources("template[/etc/systemd/system/#{cinder_looplvm_service}.service]"), :immediately
+    end
+
+    link "/usr/sbin/rc#{cinder_looplvm_service}" do
+      action :create
+      to "service"
+    end
+  end
+
+  service cinder_looplvm_service do
+    supports start: true, stop: true, reload: true
+    action [:enable, :start]
+    subscribes :reload, "template[/usr/bin/cinder-looplvm]", :immediately
   end
 end
 

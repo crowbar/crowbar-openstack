@@ -1,0 +1,66 @@
+#! /bin/sh
+#
+# Copyright (c) 2013 SUSE, Inc.
+#
+# /etc/init.d/<%= @service_name %>
+#
+### BEGIN INIT INFO
+# Provides:          <%= @service_name %>
+# Required-Start:    boot.localfs boot.device-mapper
+# Should-Start:
+# Required-Stop:     boot.localfs boot.device-mapper
+# Should-Stop:
+# Default-Start:     B
+# Default-Stop:
+# Description:       start loopback mount for LVM VGs used by cinder
+### END INIT INFO
+
+. /etc/rc.status
+
+rc_reset
+
+case "$1" in
+    start)
+        echo -n "Enabling cinder loop mounts"
+        cinder-looplvm start
+        true
+        case "$?" in
+            0)
+                 rc_status -v
+                ;;
+            100)
+                if [ -f /etc/init.d/boot.lvm ]; then
+                    /etc/init.d/boot.lvm start
+                    rc_status -v
+		else
+		    rc_failed 0
+                    rc_status -v
+                fi
+                ;;
+            *)
+                 rc_failed 1
+                 rc_status -v
+                ;;
+        esac
+    ;;
+    stop)
+        echo -n "Disabling cinder loop mounts"
+        cinder-looplvm stop
+        true
+        rc_status -v
+        ;;
+
+    status)
+        rc_failed 4
+        rc_status -v
+        ;;
+    reload)
+        $0 start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status|reload}"
+        exit 1
+        ;;
+esac
+
+rc_exit
