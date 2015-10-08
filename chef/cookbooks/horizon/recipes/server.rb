@@ -342,7 +342,7 @@ template "#{node[:apache][:dir]}/sites-available/openstack-dashboard.conf" do
     ssl_key_file: node[:horizon][:apache][:ssl_key_file],
     ssl_crt_chain_file: node[:horizon][:apache][:ssl_crt_chain_file]
   )
-  if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/openstack-dashboard.conf") or node.platform == "suse"
+  if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/openstack-dashboard.conf") || node.platform == "suse"
     notifies :reload, resources(service: "apache2")
   end
 end
