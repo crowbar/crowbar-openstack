@@ -9,7 +9,7 @@ address =  <%= @storage_net_ip %>
 [account]
 # max connections = 2
 max connections = 64
-path = /srv/node/
+path = /srv/node
 read only = false
 # lock file = /var/lock/account.lock
 lock file = /var/run/swift/account.lock
@@ -17,7 +17,7 @@ lock file = /var/run/swift/account.lock
 [container]
 # max connections = 4
 max connections = 64
-path = /srv/node/
+path = /srv/node
 read only = false
 # lock file = /var/lock/container.lock
 lock file = /var/run/swift/container.lock
@@ -25,7 +25,7 @@ lock file = /var/run/swift/container.lock
 [object]
 # max connections = 8
 max connections = 64
-path = /srv/node/
+path = /srv/node
 read only = false
 # lock file = /var/lock/object.lock
 lock file = /var/run/swift/object.lock
@@ -35,3 +35,59 @@ max connections = 64
 path = /etc/swift
 read only = false
 lock file = /var/run/swift/ring.lock
+
+
+# If rsync_module includes the device, you can tune rsyncd to permit 4
+# connections per device instead of simply allowing 8 connections for all
+# devices:
+# rsync_module = {replication_ip}::object_{device}
+#
+# (if devices in your object ring are named sda, sdb and sdc)
+#
+#[object_sda]
+#max connections = 4
+#path = /srv/node
+#read only = false
+#lock file = /var/lock/object_sda.lock
+#
+#[object_sdb]
+#max connections = 4
+#path = /srv/node
+#read only = false
+#lock file = /var/lock/object_sdb.lock
+#
+#[object_sdc]
+#max connections = 4
+#path = /srv/node
+#read only = false
+#lock file = /var/lock/object_sdc.lock
+
+
+# To emulate the deprecated option vm_test_mode = yes, set:
+# rsync_module = {replication_ip}::object{replication_port}
+#
+# So, on your SAIO, you have to set the following rsyncd configuration:
+#
+#[object6010]
+#max connections = 25
+#path = /srv/1/node/
+#read only = false
+#lock file = /var/lock/object6010.lock
+#
+#[object6020]
+#max connections = 25
+#path = /srv/2/node/
+#read only = false
+#lock file = /var/lock/object6020.lock
+#
+#[object6030]
+#max connections = 25
+#path = /srv/3/node/
+#read only = false
+#lock file = /var/lock/object6030.lock
+#
+#[object6040]
+#max connections = 25
+#path = /srv/4/node/
+#read only = false
+#lock file = /var/lock/object6040.lock
