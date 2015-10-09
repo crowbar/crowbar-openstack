@@ -344,6 +344,7 @@ delay_auth_decision = <%= @keystone_delay_auth_decision ? "True" : "False" %>
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
+region_name = <%= @keystone_settings['endpoint_region'] %>
 signing_dir = /var/cache/swift/keystone-signing
 #
 [filter:keystoneauth]
