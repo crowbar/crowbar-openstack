@@ -47,6 +47,7 @@ class NeutronService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
+            "suse" => "< 12.1",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -56,6 +57,7 @@ class NeutronService < PacemakerServiceObject
           "count" => 1,
           "admin" => false,
           "exclude_platform" => {
+            "suse" => "< 12.1",
             "windows" => "/.*/"
           },
           "cluster" => true

@@ -32,6 +32,7 @@ class KeystoneService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
+            "suse" => "< 12.1",
             "windows" => "/.*/"
           },
           "cluster" => true
