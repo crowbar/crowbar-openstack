@@ -9,13 +9,9 @@
 # NOTE: If you want to use keystone (auth version 2.0), then its configuration
 # would look something like:
 # auth_url = http://localhost:5000/v2.0/
-auth_url = <%= @keystone_settings['internal_auth_url'] %>
 # auth_user = tenant:user
-auth_user = <%= node["swift"]["dispersion"]["service_tenant"] %>:<%= node["swift"]["dispersion"]["service_user"] %>
 # auth_key = password
-auth_key = <%= node["swift"]["dispersion"]["service_password"] %>
 # auth_version = 2.0
-auth_version = 2.0
 #
 # NOTE: If you want to use keystone (auth version 3.0), then its configuration
 # would look something like:
@@ -26,6 +22,21 @@ auth_version = 2.0
 # project_name = project
 # project_domain_name = project_domain
 # user_domain_name = user_domain
+
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
+auth_key = <%= node["swift"]["dispersion"]["service_password"] %>
+
+<% if node[:keystone][:api][:version].to_f <= 3.0 -%>
+auth_user = <%= node["swift"]["dispersion"]["service_tenant"] %>:<%= node["swift"]["dispersion"]["service_user"] %>
+auth_version = 2.0
+<% else -%>
+auth_user = <%= node["swift"]["dispersion"]["service_user"] %>
+auth_version = 3.0
+project_name = <%= node["swift"]["dispersion"]["service_tenant"] %>
+project_domain_name = <%= node["swift"]["dispersion"]["project_domain_name"] %>
+user_domain_name = <%= node["swift"]["dispersion"]["user_domain_name"] %>
+<% end -%>
+
 #
 # endpoint_type = publicURL
 # keystone_api_insecure = no

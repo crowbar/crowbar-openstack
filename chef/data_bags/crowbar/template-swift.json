@@ -7,6 +7,8 @@
         "service_user": "dispersion",
         "service_password": "dispersion",
         "service_tenant": "dispersion",
+        "project_domain_name": "default",
+        "user_domain_name": "default",
         "dispersion_coverage": 0.1,
         "retries": 5,
         "concurrency": 25
@@ -96,7 +98,7 @@
     "swift": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 21,
+      "schema-revision": 22,
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],
