@@ -35,6 +35,7 @@ class CinderService < PacemakerServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
+            "suse" => "< 12.1",
             "windows" => "/.*/"
           }
         },
@@ -43,6 +44,7 @@ class CinderService < PacemakerServiceObject
           "count" => -1,
           "admin" => false,
           "exclude_platform" => {
+            "suse" => "< 12.1",
             "windows" => "/.*/"
           }
         }

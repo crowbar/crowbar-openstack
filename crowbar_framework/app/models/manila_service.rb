@@ -34,8 +34,8 @@ class ManilaService < PacemakerServiceObject
         "cluster" => true,
         "admin" => false,
         "exclude_platform" => {
-          "windows" => "/.*/",
-          "suse" => "11.3"
+          "suse" => "< 12.1",
+          "windows" => "/.*/"
         }
       },
       "manila-share" => {
@@ -43,8 +43,8 @@ class ManilaService < PacemakerServiceObject
         "count" => -1,
         "admin" => false,
         "exclude_platform" => {
-          "windows" => "/.*/",
-          "suse" => "11.3"
+          "suse" => "< 12.1",
+          "windows" => "/.*/"
         }
       }
     }
