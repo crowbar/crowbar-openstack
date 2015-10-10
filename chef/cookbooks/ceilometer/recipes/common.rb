@@ -47,7 +47,7 @@ else
   db_connection = "#{db_settings[:url_scheme]}://#{node[:ceilometer][:db][:user]}:#{db_password}@#{db_settings[:address]}/#{node[:ceilometer][:db][:database]}"
 end
 
-is_compute_agent = node.roles.include?("ceilometer-agent") && node.roles.any?{ |role| /^nova-compute-/ =~ role }
+is_compute_agent = node.roles.include?("ceilometer-agent") && node.roles.any? { |role| /^nova-compute-/ =~ role }
 is_swift_proxy = node.roles.include?("ceilometer-swift-proxy-middleware") && node.roles.include?("swift-proxy")
 
 # Find hypervisor inspector

@@ -152,10 +152,10 @@ class NovaService < PacemakerServiceObject
     #   TODO add it here once a compute node can run inside z/VM
     base["deployment"]["nova"]["elements"] = {
       "nova-controller" => [controller.name],
-      "nova-compute-hyperv" => hyperv.map { |x| x.name },
-      "nova-compute-kvm" => kvm.map { |x| x.name },
-      "nova-compute-qemu" => qemu.map { |x| x.name },
-      "nova-compute-xen" => xen.map { |x| x.name }
+      "nova-compute-hyperv" => hyperv.map(&:name),
+      "nova-compute-kvm" => kvm.map(&:name),
+      "nova-compute-qemu" => qemu.map(&:name),
+      "nova-compute-xen" => xen.map(&:name)
     }
 
     base["attributes"][@bc_name]["itxt_instance"] = find_dep_proposal("itxt", true)
@@ -232,7 +232,9 @@ class NovaService < PacemakerServiceObject
     if proposal["attributes"][@bc_name]["use_shared_instance_storage"]
       elements["nova-controller"].each do |element|
         if is_cluster? element
-          validation_error("Shared storage cannot be automatically setup when a cluster has the nova-controller role. Please consider using the NFS Client barclamp instead.")
+          validation_error("Shared storage cannot be automatically setup when "\
+            "a cluster has the nova-controller role. Please consider using "\
+            "the NFS Client barclamp instead.")
           break
         end
       end unless elements["nova-controller"].nil?

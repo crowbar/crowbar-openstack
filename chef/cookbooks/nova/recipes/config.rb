@@ -169,7 +169,7 @@ else
 end
 
 # only require certs for nova controller
-if (api_ha_enabled || vncproxy_ha_enabled || api == node) and api[:nova][:ssl][:enabled] and node["roles"].include?("nova-controller")
+if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
   if api[:nova][:ssl][:generate_certs]
     package "openssl"
     ruby_block "generate_certs for nova" do
