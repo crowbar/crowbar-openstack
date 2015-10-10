@@ -202,7 +202,7 @@ else
   neutron_use_vpnaas = false
 end
 
-nova = get_instance("roles:nova-multi-controller")
+nova = get_instance("roles:nova-controller")
 nova_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
 
 directory "/var/lib/openstack-dashboard" do

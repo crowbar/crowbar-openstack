@@ -20,7 +20,7 @@
 command_no_arg = NovaAvailabilityZone.fetch_set_az_command_no_arg(node, @cookbook_name)
 
 # non-hyperv nodes set their AZ themselves, so only look for hyperv nodes
-search_env_filtered(:node, "roles:nova-multi-compute-hyperv") do |n|
+search_env_filtered(:node, "roles:nova-compute-hyperv") do |n|
   command = NovaAvailabilityZone.add_arg_to_set_az_command(command_no_arg, n)
 
   execute "Set availability zone for #{n.hostname}" do

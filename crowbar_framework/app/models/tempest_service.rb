@@ -51,7 +51,7 @@ class TempestService < ServiceObject
     base = super
     @logger.debug("Tempest create_proposal: leaving base part")
 
-    nodes = NodeObject.find("roles:nova-multi-controller")
+    nodes = NodeObject.find("roles:nova-controller")
     nodes.delete_if { |n| n.nil? or n.admin? }
     unless nodes.empty?
       base["deployment"]["tempest"]["elements"] = {

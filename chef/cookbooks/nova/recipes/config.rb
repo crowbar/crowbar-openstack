@@ -35,7 +35,7 @@ include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 # don't expose database connection to the compute clients
-database_connection = if node["roles"].include?("nova-multi-controller")
+database_connection = if node["roles"].include?("nova-controller")
   db_conn_scheme = db_settings[:url_scheme]
   if node[:platform] == "suse" && db_settings[:backend_name] == "mysql"
     # The C-extensions (python-mysql) can't be monkey-patched by eventlet. Therefore, when only one nova-conductor is present,
@@ -87,7 +87,7 @@ Chef::Log.info("VNCProxy server at #{vncproxy_public_host}")
 
 # use memcached as a cache backend for nova-novncproxy
 if vncproxy_ha_enabled
-  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "nova-multi-controller")
+  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller")
   memcached_servers = memcached_nodes.map do |n|
     node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
     "#{node_admin_ip}:#{n[:memcached][:port] rescue node[:memcached][:port]}"
@@ -112,7 +112,7 @@ if cinder_servers.length > 0
   cinder_server = cinder_servers[0]
   cinder_insecure = cinder_server[:cinder][:api][:protocol] == "https" && cinder_server[:cinder][:ssl][:insecure]
 
-  if node.roles.include? "nova-multi-compute-kvm"
+  if node.roles.include? "nova-compute-kvm"
     cinder_server[:cinder][:volumes].each do |volume|
       rbd_enabled = true if volume["backend_driver"] == "rbd"
     end
@@ -169,7 +169,7 @@ else
 end
 
 # only require certs for nova controller
-if (api_ha_enabled || vncproxy_ha_enabled || api == node) and api[:nova][:ssl][:enabled] and node["roles"].include?("nova-multi-controller")
+if (api_ha_enabled || vncproxy_ha_enabled || api == node) and api[:nova][:ssl][:enabled] and node["roles"].include?("nova-controller")
   if api[:nova][:ssl][:generate_certs]
     package "openssl"
     ruby_block "generate_certs for nova" do

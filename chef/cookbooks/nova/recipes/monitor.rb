@@ -36,36 +36,36 @@ search_env_filtered(:node, "roles:nova-single-machine") do |n|
   nova_scale[:apis] << n
 end
 
-search_env_filtered(:node, "roles:nova-multi-controller") do |n|
+search_env_filtered(:node, "roles:nova-controller") do |n|
   nova_scale[:schedulers] << n
   nova_scale[:apis] << n
 end
 
-search_env_filtered(:node, "roles:nova-multi-compute-docker") do |n|
+search_env_filtered(:node, "roles:nova-compute-docker") do |n|
   nova_scale[:computes] << n
 end
 
-search_env_filtered(:node, "roles:nova-multi-compute-hyperv") do |n|
+search_env_filtered(:node, "roles:nova-compute-hyperv") do |n|
   nova_scale[:computes] << n
 end
 
-search_env_filtered(:node, "roles:nova-multi-compute-kvm") do |n|
+search_env_filtered(:node, "roles:nova-compute-kvm") do |n|
   nova_scale[:computes] << n
 end
 
-search_env_filtered(:node, "roles:nova-multi-compute-qemu") do |n|
+search_env_filtered(:node, "roles:nova-compute-qemu") do |n|
   nova_scale[:computes] << n
 end
 
-search_env_filtered(:node, "roles:nova-multi-compute-vmware") do |n|
+search_env_filtered(:node, "roles:nova-compute-vmware") do |n|
   nova_scale[:computes] << n
 end
 
-search_env_filtered(:node, "roles:nova-multi-compute-xen") do |n|
+search_env_filtered(:node, "roles:nova-compute-xen") do |n|
   nova_scale[:computes] << n
 end
 
-search_env_filtered(:node, "roles:nova-multi-compute-zvm") do |n|
+search_env_filtered(:node, "roles:nova-compute-zvm") do |n|
   nova_scale[:computes] << n
 end
 

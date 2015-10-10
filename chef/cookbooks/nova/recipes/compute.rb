@@ -284,7 +284,7 @@ cookbook_file "/etc/nova/nova-compute.conf" do
 end unless node.platform == "suse"
 
 env_filter = " AND nova_config_environment:#{node[:nova][:config][:environment]}"
-nova_controller = search(:node, "roles:nova-multi-controller#{env_filter}")
+nova_controller = search(:node, "roles:nova-controller#{env_filter}")
 
 # Note: since we do not allow shared storage with a cluster, we know that the
 # first controller is the right one to use (ie, the only one)
@@ -332,19 +332,19 @@ ruby_block "nova_read_ssh_public_key" do
 end
 
 ssh_auth_keys = ""
-search_env_filtered(:node, "roles:nova-multi-compute-kvm") do |n|
+search_env_filtered(:node, "roles:nova-compute-kvm") do |n|
   ssh_auth_keys += n[:nova][:service_ssh_key]
 end
-search_env_filtered(:node, "roles:nova-multi-compute-xen") do |n|
+search_env_filtered(:node, "roles:nova-compute-xen") do |n|
   ssh_auth_keys += n[:nova][:service_ssh_key]
 end
-search_env_filtered(:node, "roles:nova-multi-compute-docker") do |n|
+search_env_filtered(:node, "roles:nova-compute-docker") do |n|
   ssh_auth_keys += n[:nova][:service_ssh_key]
 end
-search_env_filtered(:node, "roles:nova-multi-compute-qemu") do |n|
+search_env_filtered(:node, "roles:nova-compute-qemu") do |n|
   ssh_auth_keys += n[:nova][:service_ssh_key]
 end
-search_env_filtered(:node, "roles:nova-multi-compute-zvm") do |n|
+search_env_filtered(:node, "roles:nova-compute-zvm") do |n|
   ssh_auth_keys += n[:nova][:service_ssh_key]
 end
 

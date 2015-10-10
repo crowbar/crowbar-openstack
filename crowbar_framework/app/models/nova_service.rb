@@ -29,7 +29,7 @@ class NovaService < PacemakerServiceObject
   class << self
     def role_constraints
       {
-        "nova-multi-controller" => {
+        "nova-controller" => {
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
@@ -38,7 +38,7 @@ class NovaService < PacemakerServiceObject
           },
           "cluster" => true
         },
-        "nova-multi-compute-docker" => {
+        "nova-compute-docker" => {
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
@@ -46,14 +46,14 @@ class NovaService < PacemakerServiceObject
             "windows" => "/.*/"
           }
         },
-        "nova-multi-compute-hyperv" => {
+        "nova-compute-hyperv" => {
           "unique" => false,
           "count" => -1,
           "platform" => {
             "windows" => "/.*/"
           }
         },
-        "nova-multi-compute-kvm" => {
+        "nova-compute-kvm" => {
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
@@ -61,7 +61,7 @@ class NovaService < PacemakerServiceObject
             "windows" => "/.*/"
           }
         },
-        "nova-multi-compute-qemu" => {
+        "nova-compute-qemu" => {
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
@@ -69,7 +69,7 @@ class NovaService < PacemakerServiceObject
             "windows" => "/.*/"
           }
         },
-        "nova-multi-compute-vmware" => {
+        "nova-compute-vmware" => {
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
@@ -77,7 +77,7 @@ class NovaService < PacemakerServiceObject
             "windows" => "/.*/"
           }
         },
-        "nova-multi-compute-zvm" => {
+        "nova-compute-zvm" => {
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
@@ -85,7 +85,7 @@ class NovaService < PacemakerServiceObject
             "windows" => "/.*/"
           }
         },
-        "nova-multi-compute-xen" => {
+        "nova-compute-xen" => {
           "unique" => false,
           "count" => -1,
           "platform" => {
@@ -151,11 +151,11 @@ class NovaService < PacemakerServiceObject
     # do not use zvm by default
     #   TODO add it here once a compute node can run inside z/VM
     base["deployment"]["nova"]["elements"] = {
-      "nova-multi-controller" => [controller.name],
-      "nova-multi-compute-hyperv" => hyperv.map { |x| x.name },
-      "nova-multi-compute-kvm" => kvm.map { |x| x.name },
-      "nova-multi-compute-qemu" => qemu.map { |x| x.name },
-      "nova-multi-compute-xen" => xen.map { |x| x.name }
+      "nova-controller" => [controller.name],
+      "nova-compute-hyperv" => hyperv.map { |x| x.name },
+      "nova-compute-kvm" => kvm.map { |x| x.name },
+      "nova-compute-qemu" => qemu.map { |x| x.name },
+      "nova-compute-xen" => xen.map { |x| x.name }
     }
 
     base["attributes"][@bc_name]["itxt_instance"] = find_dep_proposal("itxt", true)
@@ -179,10 +179,10 @@ class NovaService < PacemakerServiceObject
     return if all_nodes.empty?
 
     unless hyperv_available?
-      role.override_attributes["nova"]["elements"]["nova-multi-compute-hyperv"] = []
+      role.override_attributes["nova"]["elements"]["nova-compute-hyperv"] = []
     end
 
-    controller_elements, controller_nodes, ha_enabled = role_expand_elements(role, "nova-multi-controller")
+    controller_elements, controller_nodes, ha_enabled = role_expand_elements(role, "nova-controller")
 
     vip_networks = ["admin", "public"]
 
@@ -204,9 +204,9 @@ class NovaService < PacemakerServiceObject
     compute_nodes_for_network = []
     role.override_attributes["nova"]["elements"].each do |role, nodes|
       # only care about compute nodes
-      next unless role =~ /^nova-multi-compute-/
+      next unless role =~ /^nova-compute-/
       # vmware compute nodes do not need access to the networking
-      next if role == "nova-multi-compute-vmware"
+      next if role == "nova-compute-vmware"
 
       compute_nodes_for_network << nodes
     end
@@ -224,53 +224,53 @@ class NovaService < PacemakerServiceObject
   end
 
   def validate_proposal_after_save proposal
-    validate_one_for_role proposal, "nova-multi-controller"
+    validate_one_for_role proposal, "nova-controller"
 
     elements = proposal["deployment"]["nova"]["elements"]
     nodes = Hash.new(0)
 
     if proposal["attributes"][@bc_name]["use_shared_instance_storage"]
-      elements["nova-multi-controller"].each do |element|
+      elements["nova-controller"].each do |element|
         if is_cluster? element
-          validation_error("Shared storage cannot be automatically setup when a cluster has the nova-multi-controller role. Please consider using the NFS Client barclamp instead.")
+          validation_error("Shared storage cannot be automatically setup when a cluster has the nova-controller role. Please consider using the NFS Client barclamp instead.")
           break
         end
-      end unless elements["nova-multi-controller"].nil?
+      end unless elements["nova-controller"].nil?
     end
 
-    unless elements["nova-multi-compute-hyperv"].empty? || hyperv_available?
+    unless elements["nova-compute-hyperv"].empty? || hyperv_available?
       validation_error("Hyper-V support is not available.")
     end
 
-    elements["nova-multi-compute-docker"].each do |n|
+    elements["nova-compute-docker"].each do |n|
       nodes[n] += 1
-    end unless elements["nova-multi-compute-docker"].nil?
-    elements["nova-multi-compute-hyperv"].each do |n|
+    end unless elements["nova-compute-docker"].nil?
+    elements["nova-compute-hyperv"].each do |n|
       nodes[n] += 1
-    end unless elements["nova-multi-compute-hyperv"].nil?
-    elements["nova-multi-compute-kvm"].each do |n|
+    end unless elements["nova-compute-hyperv"].nil?
+    elements["nova-compute-kvm"].each do |n|
       nodes[n] += 1
-    end unless elements["nova-multi-compute-kvm"].nil?
-    elements["nova-multi-compute-qemu"].each do |n|
+    end unless elements["nova-compute-kvm"].nil?
+    elements["nova-compute-qemu"].each do |n|
       nodes[n] += 1
-    end unless elements["nova-multi-compute-qemu"].nil?
-    elements["nova-multi-compute-vmware"].each do |n|
+    end unless elements["nova-compute-qemu"].nil?
+    elements["nova-compute-vmware"].each do |n|
       nodes[n] += 1
-    end unless elements["nova-multi-compute-vmware"].nil?
-    elements["nova-multi-compute-zvm"].each do |n|
+    end unless elements["nova-compute-vmware"].nil?
+    elements["nova-compute-zvm"].each do |n|
       nodes[n] += 1
-    end unless elements["nova-multi-compute-zvm"].nil?
-    elements["nova-multi-compute-xen"].each do |n|
+    end unless elements["nova-compute-zvm"].nil?
+    elements["nova-compute-xen"].each do |n|
       nodes[n] += 1
       node = NodeObject.find_node_by_name(n)
       unless node.nil? || node_platform_supports_xen(node)
         validation_error("Platform of node #{n} (#{node[:platform]}-#{node[:platform_version]}) does not support Xen.")
       end
-    end unless elements["nova-multi-compute-xen"].nil?
+    end unless elements["nova-compute-xen"].nil?
 
     nodes.each do |key,value|
       if value > 1
-        validation_error("Node #{key} has been assigned to a nova-multi-compute role more than once")
+        validation_error("Node #{key} has been assigned to a nova-compute role more than once")
       end
     end unless nodes.nil?
 

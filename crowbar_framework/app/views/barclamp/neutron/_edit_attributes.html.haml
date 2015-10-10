@@ -113,7 +113,7 @@
                 .empty.alert.alert-info.text-center
                   = t(".port_hint")
 
-            - nodes_by_role("nova-multi-compute-*").each do |node|
+            - nodes_by_role("nova-compute-*").each do |node|
               %tr.edit
                 %td
                   = text_field_tag "port[node]", node.alias, :placeholder => t(".port_node"), :class => "form-control", :disabled => "disabled"

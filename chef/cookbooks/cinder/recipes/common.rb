@@ -42,7 +42,7 @@ else
 end
 Chef::Log.info("Glance server at #{glance_server_host}")
 
-nova_apis = search(:node, "roles:nova-multi-controller") || []
+nova_apis = search(:node, "roles:nova-controller") || []
 if nova_apis.length > 0
   nova_api = nova_apis[0]
   nova_api_insecure = nova_api[:nova][:ssl][:enabled] && nova_api[:nova][:ssl][:insecure]

@@ -24,7 +24,7 @@ end
 
 include_recipe "#{@cookbook_name}::common"
 
-is_compute = node.roles.any?{ |role| /^nova-multi-compute-/ =~ role }
+is_compute = node.roles.any?{ |role| /^nova-compute-/ =~ role }
 
 service "ceilometer-agent-compute" do
   if %w(suse).include?(node.platform)

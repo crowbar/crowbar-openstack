@@ -29,7 +29,7 @@ haproxy_loadbalancer "nova-api" do
   address "0.0.0.0"
   port node[:nova][:ports][:api]
   use_ssl node[:nova][:ssl][:enabled]
-  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-multi-controller", "api")
+  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "api")
   action :nothing
 end.run_action(:create)
 
@@ -37,7 +37,7 @@ haproxy_loadbalancer "nova-api-ec2" do
   address "0.0.0.0"
   port node[:nova][:ports][:api_ec2]
   use_ssl node[:nova][:ssl][:enabled]
-  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-multi-controller", "api_ec2")
+  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "api_ec2")
   action :nothing
 end.run_action(:create)
 
@@ -45,7 +45,7 @@ haproxy_loadbalancer "nova-metadata" do
   address cluster_admin_ip
   port node[:nova][:ports][:metadata]
   use_ssl node[:nova][:ssl][:enabled]
-  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-multi-controller", "metadata")
+  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "metadata")
   action :nothing
 end.run_action(:create)
 
@@ -53,7 +53,7 @@ haproxy_loadbalancer "nova-objectstore" do
   address "0.0.0.0"
   port node[:nova][:ports][:objectstore]
   use_ssl false
-  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-multi-controller", "objectstore")
+  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "objectstore")
   action :nothing
 end.run_action(:create)
 
@@ -62,7 +62,7 @@ if node[:nova][:use_novnc]
     address "0.0.0.0"
     port node[:nova][:ports][:novncproxy]
     use_ssl node[:nova][:novnc][:ssl][:enabled]
-    servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-multi-controller", "novncproxy")
+    servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "novncproxy")
     action :nothing
   end.run_action(:create)
 else
@@ -70,7 +70,7 @@ else
     address "0.0.0.0"
     port node[:nova][:ports][:xvpvncproxy]
     use_ssl false
-    servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-multi-controller", "xvpvncproxy")
+    servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "xvpvncproxy")
     action :nothing
   end.run_action(:create)
 end

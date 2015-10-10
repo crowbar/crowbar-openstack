@@ -82,7 +82,7 @@ else
 end
 
 # get Nova data
-nova = search(:node, "roles:nova-multi-controller") || []
+nova = search(:node, "roles:nova-controller") || []
 if nova.length > 0
   nova = nova[0]
   nova_insecure = (

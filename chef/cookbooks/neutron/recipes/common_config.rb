@@ -83,7 +83,7 @@ end
 
 #TODO: nova should depend on neutron, but neutron also depends on nova
 # so we have to do something like this
-novas = search(:node, "roles:nova-multi-controller") || []
+novas = search(:node, "roles:nova-controller") || []
 if novas.length > 0
   nova = novas[0]
   nova = node if nova.name == node.name

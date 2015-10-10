@@ -34,7 +34,7 @@ en:
           ram_allocation_ratio: 'Virtual RAM to Physical RAM allocation ratio'
           cpu_allocation_ratio: 'Virtual CPU to Physical CPU allocation ratio'
         live_migration_header: 'Live Migration Support'
-        use_shared_instance_storage: 'Set up Shared Storage on nova-multi-controller for Nova instances'
+        use_shared_instance_storage: 'Set up Shared Storage on nova-controller for Nova instances'
         use_migration: 'Enable Libvirt Migration'
         kvm_header: 'KVM Options'
         kvm:

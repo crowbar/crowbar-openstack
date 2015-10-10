@@ -39,8 +39,8 @@ node["openstack"]["endpoints"]["identity-admin"]["host"] = keystone_server["fqdn
 node["openstack"]["endpoints"]["identity-admin"]["scheme"] = keystone_server["keystone"]["api"]["protocol"]
 node["openstack"]["endpoints"]["identity-admin"]["port"] = keystone_server["keystone"]["api"]["admin_port"]
 
-nova_multi_controller = get_instance("roles:nova-multi-controller")
-Chef::Log.info("Found nova-multi-controller instance on #{nova_multi_controller}.")
+nova_multi_controller = get_instance("roles:nova-controller")
+Chef::Log.info("Found nova-controller instance on #{nova_multi_controller}.")
 node.set_unless["openstack"]["endpoints"]["compute-api"] = {}
 node["openstack"]["endpoints"]["compute-api"]["host"] = nova_multi_controller["fqdn"]
 node["openstack"]["endpoints"]["compute-api"]["scheme"] = nova_multi_controller["nova"]["ssl"]["enabled"] ? "https" : "http"
