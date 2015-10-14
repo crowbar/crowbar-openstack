@@ -33,6 +33,13 @@ default[:cinder][:ssl][:insecure] = false
 default[:cinder][:ssl][:cert_required] = false
 default[:cinder][:ssl][:ca_certs] = "/etc/cinder/ssl/certs/ca.pem"
 
+# Keep in sync with nova cookbook
+if node[:platform_family] == "suse"
+  default[:cinder][:use_multipath_for_xfer] = true
+else
+  default[:cinder][:use_multipath_for_xfer] = false
+end
+
 #sqlalchemy parameters
 default[:cinder][:max_pool_size] = 30
 default[:cinder][:max_overflow] = 10
