@@ -86,6 +86,18 @@ class HorizonService < PacemakerServiceObject
       end
     end
 
+    horizon_timeout = proposal["attributes"]["horizon"]["session_timeout"]
+    keystone_proposal = Proposal.where(barclamp: "keystone", name: "default").first
+    unless keystone_proposal.nil?
+      keystone_timeout = keystone_proposal["attributes"]["keystone"]["token_expiration"]
+
+      # keystone_timeout is in seconds and horizon_timeout is in minutes
+      if horizon_timeout * 60 > keystone_timeout
+        validation_error("Setting the Horizon timeout (#{horizon_timeout} minutes) longer than the "\
+          "Keystone token expiration timeout (#{keystone_timeout / 60} minutes) is not supported.")
+      end
+    end
+
     super
   end
 

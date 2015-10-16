@@ -84,6 +84,18 @@ class KeystoneService < PacemakerServiceObject
       validation_error("Keystone API version 3 needs to be enabled in order to use domain specific drivers.")
     end
 
+    keystone_timeout = proposal["attributes"]["keystone"]["token_expiration"]
+    horizon_proposal = Proposal.where(barclamp: "horizon", name: "default").first
+    unless horizon_proposal.nil?
+      horizon_timeout = horizon_proposal["attributes"]["horizon"]["session_timeout"]
+
+      # keystone_timeout is in seconds and horizon_timeout is in minutes
+      if horizon_timeout * 60 > keystone_timeout
+        validation_error("Setting the Horizon timeout (#{horizon_timeout} minutes) longer than the "\
+          "Keystone token expiration timeout (#{keystone_timeout / 60} minutes) is not supported.")
+      end
+    end
+
     super
   end
 
