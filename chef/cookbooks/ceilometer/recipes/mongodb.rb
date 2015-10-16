@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-case node["platform"]
-when "centos", "redhat"
+case node[:platform_family]
+when "rhel"
   mongo_conf = "/etc/mongod.conf"
   mongo_service = "mongod"
   package "mongo-10gen"
@@ -23,9 +23,7 @@ when "centos", "redhat"
 else
   mongo_conf = "/etc/mongodb.conf"
   mongo_service = "mongodb"
-  package "mongodb" do
-    action :install
-  end
+  package "mongodb"
 end
 
 template mongo_conf do

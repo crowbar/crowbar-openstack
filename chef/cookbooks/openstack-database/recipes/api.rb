@@ -107,4 +107,4 @@ execute "trove-manage db_sync" do
 
   notifies :restart, "service[trove-api]", :immediately
 # Skip run on SUSE. FIXME: needs to be readded once HA support is implemented
-end unless node.platform == "suse"
+end unless node[:platform_family] == "suse"

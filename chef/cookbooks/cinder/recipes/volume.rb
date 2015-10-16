@@ -140,14 +140,15 @@ loop_lvm_paths = []
 node[:cinder][:volumes].each do |volume|
   if volume[:backend_driver] == "local"
     make_loopback_file(volume)
-    if (%w(suse).include? node.platform) && (node.platform_version.to_f >= 12.0)
+    if node[:platform] != "suse" || node[:platform_version].to_f >= 12.0
       setup_loopback_device(volume)
     end
     loop_lvm_paths << volume[:local][:file_name]
   end
 end
 
-if (%w(suse).include? node.platform) && (node.platform_version.to_f < 12.0)
+# for older SLES
+if node[:platform] == "suse" && node[:platform_version].to_f < 12.0
   # We need to create boot.looplvm before we create the volume groups; note
   # that the loopback files need to exist before we can use this script
   unless loop_lvm_paths.empty?
@@ -234,20 +235,21 @@ if rbd_enabled
   include_recipe "cinder::ceph"
 end
 
-unless %w(redhat centos).include? node.platform
- package "tgt"
+if %w(rhel).include? node[:platform_family]
+  package "scsi-target-utils"
 else
- package "scsi-target-utils"
+  package "tgt"
 end
 # Note: Ubuntu provides cinder_tgt.conf with the package
-if %w(redhat centos suse).include? node.platform
+if %w(rhel suse).include? node[:platform_family]
   cookbook_file "/etc/tgt/targets.conf" do
     source "cinder-volume.conf"
     notifies :restart, "service[tgt]"
   end
 end
 
-if (%w(suse).include? node.platform) && (node.platform_version.to_f < 12.0)
+# for older SLES
+if node[:platform] == "suse" && node[:platform_version].to_f < 12.0
   service "boot.lvm" do
     action [:enable]
   end
@@ -256,9 +258,9 @@ end
 service "tgt" do
   supports status: true, restart: true, reload: true
   action [:enable, :start]
-  service_name "tgtd" if %w(redhat centos suse).include? node.platform
+  service_name "tgtd" if %w(rhel suse).include? node[:platform_family]
   # Restart doesn't work correct for this service.
-  if %w(redhat centos suse).include? node.platform
+  if %w(rhel suse).include? node[:platform_family]
     restart_command "service tgtd stop; service tgtd start"
   else
     restart_command "stop tgt; start tgt"

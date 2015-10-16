@@ -76,13 +76,12 @@ end
 #     Also, on SUSE, there's no single initdb argument to the init script. So
 #     we need to do a quick start / stop just for that :/
 execute "Initial population of #{node.postgresql.dir}" do
-  if node.platform == "suse"
+  if node[:platform_family] == "suse"
     command "service postgresql start; service postgresql stop"
   else
     command "/sbin/service #{node['postgresql']['server']['service_name']} initdb #{node['postgresql']['initdb_locale']}"
   end
-  not_if { (node.platform == "suse" && !ha_enabled) ||
-           ::FileTest.exist?(File.join(node.postgresql.dir, "PG_VERSION")) }
+  not_if { (node[:platform_family] == "suse" && !ha_enabled) || ::FileTest.exist?(File.join(node.postgresql.dir, "PG_VERSION")) }
 end
 
 service "postgresql" do

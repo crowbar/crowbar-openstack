@@ -105,28 +105,24 @@ cross_domain_policy_l = cross_domain_policy.split("\n").each_with_index.map do |
 end
 proxy_config[:cross_domain_policy] = cross_domain_policy_l.join("\n")
 
-case node[:platform]
-  when "centos", "redhat"
-    pkg_list=%w{curl memcached python-dns}
-  else
-    pkg_list=%w{curl memcached python-dnspython}
+if node[:platform_family] == "rhel"
+  pkg_list = %w{curl memcached python-dns}
+else
+  pkg_list = %w{curl memcached python-dnspython}
 end
 
 pkg_list.each do |pkg|
-  package pkg do
-    action :install
-  end
+  package pkg
 end
 
-case node[:platform]
-when "suse", "centos", "redhat"
+if %w(rhel suse).include?(node[:platform_family])
   package "openstack-swift-proxy"
 else
   package "swift-proxy"
 end
 
 if node[:swift][:middlewares][:s3][:enabled]
-  if %w(redhat centos suse).include?(node.platform)
+  if %w(rhel suse).include?(node[:platform_family])
     package "python-swift3"
   else
     package "swift-plugin-s3"
@@ -353,7 +349,7 @@ end
 if node[:swift][:frontend]=="native"
   service "swift-proxy" do
     service_name node[:swift][:proxy][:service_name]
-    if %w(redhat centos suse).include?(node.platform)
+    if %w(rhel suse).include?(node[:platform_family])
       supports status: true, restart: true
     else
       restart_command "stop swift-proxy ; start swift-proxy"
@@ -432,7 +428,7 @@ elsif node[:swift][:frontend]=="uwsgi"
 
 end
 
-unless %w(redhat centos suse).include?(node.platform)
+if node[:platform_family] == "debian"
   bash "restart swift proxy things" do
     code <<-EOH
 EOH

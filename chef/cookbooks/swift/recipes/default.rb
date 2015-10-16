@@ -18,8 +18,8 @@
 
 package "curl"
 
-case node[:platform]
-when "suse", "centos", "redhat"
+case node[:platform_family]
+when "suse", "rhel"
   package "openstack-swift"
 else
   package "swift"
@@ -41,5 +41,5 @@ template "/etc/rsyslog.d/11-swift.conf" do
   mode "0644"
   variables(rsyslog_version: rsyslog_version)
   notifies :restart, "service[rsyslog]"
-  only_if    { node[:platform] == "suse" } # other distros might not have /var/log/swift
+  only_if { node[:platform_family] == "suse" } # other distros might not have /var/log/swift
 end

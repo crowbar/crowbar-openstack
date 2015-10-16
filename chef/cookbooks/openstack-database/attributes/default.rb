@@ -33,8 +33,7 @@ default["openstack"]["database"]["syslog"]["use"] = false
 default["openstack"]["database"]["user"] = "trove"
 default["openstack"]["database"]["group"] = "trove"
 
-case platform
-when "suse"
+if node[:platform_family] == "suse"
   default["openstack"]["database"]["platform"] = {
     "api_packages" => ["openstack-trove-api"],
     "api_service" => "openstack-trove-api",

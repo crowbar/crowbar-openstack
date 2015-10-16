@@ -14,11 +14,10 @@
 #
 
 package "keystone" do
-  package_name "openstack-keystone" if %w(redhat centos suse).include?(node.platform)
-  action :install
+  package_name "openstack-keystone" if %w(rhel suse).include?(node[:platform_family])
 end
 
-if %w(redhat centos).include?(node.platform)
+if %w(rhel).include?(node[:platform_family])
   #pastedeploy is not installed properly by yum, here is workaround
   bash "fix_broken_pastedeploy" do
     not_if "echo 'from paste import deploy' | python -"
@@ -138,10 +137,10 @@ elsif node[:keystone][:frontend] == "apache"
   end
 
   include_recipe "apache2"
-  unless %w(redhat centos).include?(node.platform)
-    include_recipe "apache2::mod_wsgi"
-  else
+  if %w(rhel).include?(node[:platform_family])
     package "mod_wsgi"
+  else
+    include_recipe "apache2::mod_wsgi"
   end
   include_recipe "apache2::mod_rewrite"
 
@@ -168,7 +167,7 @@ elsif node[:keystone][:frontend] == "apache"
   end
 
   template "/etc/apache2/sites-available/keystone.conf" do
-    path "/etc/httpd/sites-available/keystone.conf" if %w(redhat centos).include?(node.platform)
+    path "/etc/httpd/sites-available/keystone.conf" if %w(rhel).include?(node[:platform_family])
     source "apache_keystone.conf.erb"
     variables(
       bind_admin_port: bind_admin_port, # Auth port
@@ -267,7 +266,7 @@ template "/etc/keystone/keystone.conf" do
     end
 end
 
-if %w(redhat centos).include?(node.platform)
+if %w(rhel).include?(node[:platform_family])
   # Permissions for /etc/keystone are wrong in the RDO repo
   directory "/etc/keystone" do
     action :create
@@ -317,7 +316,7 @@ crowbar_pacemaker_sync_mark "wait-keystone_pki" do
   fatal true
 end
 
-unless node.platform == "suse"
+unless node[:platform_family] == "suse"
   if node[:keystone][:signing][:token_format] == "PKI"
     execute "keystone-manage ssl_setup" do
       user node[:keystone][:user]
@@ -336,7 +335,7 @@ end
 
 ruby_block "synchronize PKI keys for founder and remember them for non-HA case" do
   only_if { (!ha_enabled || (ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node))) &&
-            (node[:keystone][:signing][:token_format] == "PKI" || node.platform == "suse") }
+            (node[:keystone][:signing][:token_format] == "PKI" || node[:platform_family] == "suse") }
   block do
     ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb") { |io| io.read } rescue ""
     signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb") { |io| io.read } rescue ""
@@ -365,7 +364,7 @@ ruby_block "synchronize PKI keys for founder and remember them for non-HA case" 
 end
 
 ruby_block "synchronize PKI keys for non-founder" do
-  only_if { ha_enabled && !CrowbarPacemakerHelper.is_cluster_founder?(node) && (node[:keystone][:signing][:token_format] == "PKI" || node.platform == "suse") }
+  only_if { ha_enabled && !CrowbarPacemakerHelper.is_cluster_founder?(node) && (node[:keystone][:signing][:token_format] == "PKI" || node[:platform_family] == "suse") }
   block do
     ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb") { |io| io.read } rescue ""
     signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb") { |io| io.read } rescue ""

@@ -25,10 +25,8 @@ glance_args = "#{glance_args} --os-region-name '#{keystone_settings["endpoint_re
 # If the json file changes, we need to update this procedure.
 #
 
-if %w(redhat centos suse).include?(node.platform)
-  package "python-glanceclient" do
-    action :install
-  end
+if %w(rhel suse).include?(node[:platform_family])
+  package "python-glanceclient"
 end
 
 (node[:glance][:images] or []).each do |image|

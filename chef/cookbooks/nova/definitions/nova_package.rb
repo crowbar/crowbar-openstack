@@ -16,12 +16,12 @@ define :nova_package, enable: true, use_pacemaker_provider: false do
   nova_name="nova-#{params[:name]}"
 
   package nova_name do
-    package_name "openstack-#{nova_name}" if %w(redhat centos suse).include?(node.platform)
+    package_name "openstack-#{nova_name}" if %w(rhel suse).include?(node[:platform_family])
     action :install
   end
 
   service nova_name do
-    service_name "openstack-#{nova_name}" if %w(redhat centos suse).include?(node.platform)
+    service_name "openstack-#{nova_name}" if %w(rhel suse).include?(node[:platform_family])
     if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
       restart_command "stop #{nova_name} ; start #{nova_name}"
       stop_command "stop #{nova_name}"
@@ -39,11 +39,11 @@ define :nova_package, enable: true, use_pacemaker_provider: false do
         # start will happen after reboot, and potentially even fail before
         # reboot (ie. on installing kernel-xen + expecting libvirt to already
         # use xen before)
-        unless %w(redhat centos).include?(node.platform)
-          action [:enable]
-        else
+        if node[:platform_family] == "rhel"
           #needed until https://bugs.launchpad.net/oslo/+bug/1177184 is solved
           action [:enable, :start]
+        else
+          action [:enable]
         end
       end
     end

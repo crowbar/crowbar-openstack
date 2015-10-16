@@ -36,10 +36,10 @@ default[:nova][:use_shared_instance_storage] = false
 # Hypervisor Settings
 #
 default[:nova][:libvirt_type] = "kvm"
-unless %w(suse).include?(node.platform)
-  default[:nova][:libvirt_use_multipath] = false
-else
+if node[:platform_family] == "suse"
   default[:nova][:libvirt_use_multipath] = true
+else
+  default[:nova][:libvirt_use_multipath] = false
 end
 
 #

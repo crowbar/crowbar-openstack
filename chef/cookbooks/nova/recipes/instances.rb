@@ -22,8 +22,8 @@ if node[:nova]["use_shared_instance_storage"]
   package "nfs-kernel-server"
 
   service "nfs-kernel-server" do
-    service_name "nfs" if node[:platform] =~ /^(redhat|centos)$/
-    service_name "nfsserver" if node[:platform] == "suse"
+    service_name "nfs" if node[:platform_family] == "rhel"
+    service_name "nfsserver" if node[:platform_family] == "suse"
     supports restart: true, status: true, reload: true
     running true
     enabled true

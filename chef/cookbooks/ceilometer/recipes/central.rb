@@ -14,9 +14,9 @@
 #
 
 package "ceilometer-agent-central" do
-  if %w(suse).include?(node.platform)
+  if %w(suse).include?(node[:platform_family])
     package_name "openstack-ceilometer-agent-central"
-  elsif %w(redhat centos).include?(node.platform)
+  elsif %w(rhel).include?(node[:platform_family])
     package_name "openstack-ceilometer-central"
   end
   action :install

@@ -16,12 +16,12 @@
 # Recipe:: common
 #
 
-unless %w(redhat centos suse).include? node.platform
+if %w(rhel suse).include? node[:platform_family]
+  package "openstack-cinder"
+else
   package "cinder-common"
   package "python-mysqldb"
   package "python-cinder"
-else
-  package "openstack-cinder"
 end
 
 glance_env_filter = " AND glance_config_environment:glance-config-#{node[:cinder][:glance_instance]}"

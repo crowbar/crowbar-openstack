@@ -45,7 +45,7 @@ end
 
 if has_external
   # Ensure ceph is available here
-  if node[:platform] == "suse"
+  if node[:platform_family] == "suse"
     # install package in compile phase because we will run "ceph -s"
     package "ceph-common" do
       action :nothing

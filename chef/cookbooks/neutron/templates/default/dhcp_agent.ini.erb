@@ -95,7 +95,7 @@ dnsmasq_dns_servers = <%= @nameservers %>
 # you are sure that your version of iproute does not suffer from the problem.
 # If True, namespaces will be deleted when a dhcp server is disabled.
 # dhcp_delete_namespaces = False
-<% if node[:platform]=="suse" -%>
+<% if node[:platform_family] == "suse" -%>
 dhcp_delete_namespaces = True
 <% end -%>
 

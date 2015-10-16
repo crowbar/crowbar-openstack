@@ -35,20 +35,13 @@ template "/etc/rsyncd.conf" do
   })
 end
 
-case node[:platform]
-when "suse", "centos", "redhat"
-else
+if node[:platform_family] == "debian"
   cookbook_file "/etc/default/rsync" do
     source "default-rsync"
   end
 end
 
-unless %w(redhat centos).include?(node.platform)
-  service "rsync" do
-    action [:enable, :start]
-    service_name "rsyncd" if %w(suse).include?(node.platform)
-  end
-else
+if node[:platform_family] == "rhel"
   package "xinetd"
   service "xinetd" do
     action [:start, :enable]
@@ -56,6 +49,11 @@ else
   cookbook_file "/etc/xinetd.d/rsync" do
     source "rsync_xinetd"
     notifies :restart, resources(service: "xinetd")
+  end
+else
+  service "rsync" do
+    action [:enable, :start]
+    service_name "rsyncd" if node[:platform_family] == "suse"
   end
 end
 

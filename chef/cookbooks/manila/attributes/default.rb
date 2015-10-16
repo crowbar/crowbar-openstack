@@ -24,7 +24,7 @@ default[:manila][:api][:protocol] = "http"
 
 # HA attributes
 default[:manila][:ha][:enabled] = false
-if %w(redhat centos suse).include? node.platform
+if %w(rhel suse).include? node[:platform_family]
   default[:manila][:ha][:api_ra] = "lsb:openstack-manila-api"
   default[:manila][:ha][:scheduler_ra] = "lsb:openstack-manila-scheduler"
 else

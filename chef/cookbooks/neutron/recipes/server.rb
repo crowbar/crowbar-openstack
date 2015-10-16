@@ -108,7 +108,7 @@ template "/etc/sysconfig/neutron" do
       plugin_config_file: plugin_cfg_path
     )
   end
-  only_if { node[:platform] == "suse" }
+  only_if { node[:platform_family] == "suse" }
   notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
 end
 
@@ -119,7 +119,7 @@ template "/etc/default/neutron-server" do
   variables(
       neutron_plugin_config: "/etc/neutron/plugins/ml2/ml2_conf.ini"
     )
-  only_if { node[:platform] == "ubuntu" }
+  only_if { node[:platform_family] == "debian" }
 end
 
 directory "/var/cache/neutron" do
@@ -127,7 +127,7 @@ directory "/var/cache/neutron" do
   group node[:neutron][:group]
   mode 0755
   action :create
-  only_if { node[:platform] == "ubuntu" }
+  only_if { node[:platform_family] == "debian" }
 end
 
 vlan_start = node[:network][:networks][:nova_fixed][:vlan]
@@ -143,7 +143,7 @@ vni_end = [node[:neutron][:vxlan][:vni_end], 16777215].min
 directory "/etc/neutron/plugins/ml2" do
   mode 0755
   action :create
-  only_if { node[:platform] == "ubuntu" }
+  only_if { node[:platform_family] == "debian" }
 end
 
 # NOTE(toabctl): tenant_network types should have as first element 'ml2_type_drivers_default_tenant_network' and then the rest of the selected type drivers.
@@ -190,7 +190,7 @@ when "vmware"
      group node[:neutron][:platform][:group]
      action :create
      recursive true
-     not_if { node[:platform] == "suse" }
+     not_if { node[:platform_family] == "suse" }
   end
 
   template plugin_cfg_path do
@@ -216,14 +216,14 @@ crowbar_pacemaker_sync_mark "wait-neutron_db_sync"
 execute "neutron-db-manage migrate" do
   user node[:neutron][:user]
   group node[:neutron][:group]
-  case node["platform"]
+  case node[:platform_family]
   when "suse"
     command 'source /etc/sysconfig/neutron; \
              for i in $NEUTRON_PLUGIN_CONF; do \
                CONF_ARGS="$CONF_ARGS --config-file $i"; \
              done; \
              neutron-db-manage --config-file /etc/neutron/neutron.conf $CONF_ARGS upgrade head'
-  when "ubuntu"
+  when "debian"
     command 'source /etc/default/neutron-server; \
              neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file $NEUTRON_PLUGIN_CONFIG upgrade head'
   else

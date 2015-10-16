@@ -89,7 +89,7 @@ end
 
 # Include the right "family" recipe for installing the server
 # since they do things slightly differently.
-case node["platform_family"]
+case node[:platform_family]
 when "rhel", "fedora", "suse"
   include_recipe "postgresql::server_redhat"
 when "debian"

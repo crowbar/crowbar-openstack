@@ -17,8 +17,8 @@
 # Author: Judd Maltin
 #
 
-case node[:platform]
-when "suse", "centos", "redhat"
+case node[:platform_family]
+when "suse", "rhel"
   package "openstack-swift-account"
 else
   package "swift-account"

@@ -13,13 +13,13 @@
 # limitations under the License.
 #
 
-case node["platform"]
-  when "ubuntu", "debian"
-    package "ceilometer-common"
-    package "swift-proxy"
-  else
-    package "openstack-ceilometer"
-    package "openstack-swift-proxy" # we need it for swift user presence
+case node[:platform_family]
+when "debian"
+  package "ceilometer-common"
+  package "swift-proxy"
+else
+  package "openstack-ceilometer"
+  package "openstack-swift-proxy" # we need it for swift user presence
 end
 
 include_recipe "#{@cookbook_name}::common"

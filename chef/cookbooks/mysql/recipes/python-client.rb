@@ -17,11 +17,11 @@
 # limitations under the License.
 #
 
-case node[:platform]
+case node[:platform_family]
 when "suse"
   package "python-mysql"     # C-extensions MySQL driver
   package "python-PyMySQL"   # pure-Python MySQL driver
-when "redhat", "centos"
+when "rhel"
   package "MySQL-python"
 else
   package "python-mysqldb"

@@ -85,7 +85,7 @@ default[:swift][:ssl][:generate_certs] = true
 default[:swift][:ssl][:insecure] = false
 
 default[:swift][:proxy][:service_name]  = "swift-proxy"
-if %w(redhat centos suse).include?(node[:platform])
+if %w(rhel suse).include?(node[:platform_family])
   default[:swift][:proxy][:service_name] = "openstack-swift-proxy"
 end
 

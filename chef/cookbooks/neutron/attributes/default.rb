@@ -52,7 +52,7 @@ default[:neutron][:ssl][:insecure] = false
 default[:neutron][:ssl][:cert_required] = false
 default[:neutron][:ssl][:ca_certs] = "/etc/neutron/ssl/certs/ca.pem"
 
-case node["platform"]
+case node[:platform_family]
 when "suse"
   default[:neutron][:platform] = {
     pkgs: ["openstack-neutron-server"],
@@ -82,7 +82,7 @@ when "suse"
     group: "neutron",
     neutron_rootwrap_sudo_template: "/etc/sudoers.d/openstack-neutron"
   }
-when "centos", "redhat"
+when "rhel"
   default[:neutron][:platform] = {
     pkgs: ["openstack-neutron"],
     pkgs_fwaas: ["openstack-neutron-fwaas"],

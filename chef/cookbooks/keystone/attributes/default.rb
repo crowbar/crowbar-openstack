@@ -14,11 +14,11 @@
 # limitations under the License.
 #
 
-case node["platform"]
-  when "centos", "redhat", "suse"
-    default[:keystone][:service_name] = "openstack-keystone"
-  else
-    default[:keystone][:service_name] = "keystone"
+case node[:platform_family]
+when "rhel", "suse"
+  default[:keystone][:service_name] = "openstack-keystone"
+else
+  default[:keystone][:service_name] = "keystone"
 end
 
 default[:keystone][:user] = "keystone"

@@ -96,7 +96,7 @@ end
 
 services.each do |service|
   primitive_name = "nova-#{service}"
-  if %w(redhat centos suse).include?(node.platform)
+  if %w(rhel suse).include?(node[:platform_family])
     primitive_ra = "lsb:openstack-nova-#{service}"
   else
     primitive_ra = "lsb:nova-#{service}"

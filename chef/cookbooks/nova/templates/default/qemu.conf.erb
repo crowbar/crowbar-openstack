@@ -58,7 +58,7 @@
 #vnc_tls_x509_verify = 1
 
 
-# The default VNC password. Only 8 letters are significant for
+# The default VNC password. Only 8 bytes are significant for
 # VNC passwords. This parameter is only used if the per-domain
 # XML config does not already provide a password. To allow
 # access without passwords, leave this commented out. An empty
@@ -140,6 +140,31 @@
 #spice_password = "XYZ12345"
 
 
+# Enable use of SASL encryption on the SPICE server. This requires
+# a SPICE client which supports the SASL protocol extension.
+#
+# It is necessary to configure /etc/sasl2/qemu.conf to choose
+# the desired SASL plugin (eg, GSSPI for Kerberos)
+#
+#spice_sasl = 1
+
+# The default SASL configuration file is located in /etc/sasl2/
+# When running libvirtd unprivileged, it may be desirable to
+# override the configs in this location. Set this parameter to
+# point to the directory, and create a qemu.conf in that location
+#
+#spice_sasl_dir = "/some/directory/sasl2"
+
+
+# By default, if no graphical front end is configured, libvirt will disable
+# QEMU audio output since directly talking to alsa/pulseaudio may not work
+# with various security settings. If you know what you're doing, enable
+# the setting below and libvirt will passthrough the QEMU_AUDIO_DRV
+# environment variable when using nographics.
+#
+#nographics_allow_host_audio = 1
+
+
 # Override the port for creating both VNC and SPICE sessions (min).
 # This defaults to 5900 and increases for consecutive sessions
 # or when ports are occupied, until it hits the maximum.
@@ -153,6 +178,12 @@
 #remote_display_port_min = 5900
 #remote_display_port_max = 65535
 
+# VNC WebSocket port policies, same rules apply as with remote display
+# ports.  VNC WebSockets use similar display <-> port mappings, with
+# the exception being that ports start from 5700 instead of 5900.
+#
+#remote_websocket_port_min = 5700
+#remote_websocket_port_max = 65535
 
 # The default security driver is SELinux. If SELinux is disabled
 # on the host, then the security driver will automatically disable
@@ -263,17 +294,23 @@ group = "<%= @group %>"
 # saving a domain in order to save disk space; the list above is in descending
 # order by performance and ascending order by compression ratio.
 #
-# save_image_format is used when you use 'virsh save' at scheduled
-# saving, and it is an error if the specified save_image_format is
-# not valid, or the requested compression program can't be found.
+# save_image_format is used when you use 'virsh save' or 'virsh managedsave'
+# at scheduled saving, and it is an error if the specified save_image_format
+# is not valid, or the requested compression program can't be found.
 #
 # dump_image_format is used when you use 'virsh dump' at emergency
 # crashdump, and if the specified dump_image_format is not valid, or
 # the requested compression program can't be found, this falls
 # back to "raw" compression.
 #
+# snapshot_image_format specifies the compression algorithm of the memory save
+# image when an external snapshot of a domain is taken. This does not apply
+# on disk image format. It is an error if the specified format isn't valid,
+# or the requested compression program can't be found.
+#
 #save_image_format = "raw"
 #dump_image_format = "raw"
+#snapshot_image_format = "raw"
 
 # When a domain is configured to be auto-dumped when libvirtd receives a
 # watchdog event from qemu guest, libvirtd will save dump files in directory
@@ -305,7 +342,7 @@ group = "<%= @group %>"
 # disable guest hugepage backing.
 #
 # NB, within this mount point, guests will create memory backing files
-# in a location of  $MOUNTPOINT/libvirt/qemu
+# in a location of $MOUNTPOINT/libvirt/qemu
 #
 #hugetlbfs_mount = "/dev/hugepages"
 
@@ -375,20 +412,23 @@ group = "<%= @group %>"
 
 
 # SUSE note:
-# Many lock managers, sanlock included, will kill the resources
-# they protect when terminated.  E.g. the sanlock daemon will kill
-# any virtual machines for which it holds disk leases when the
-# daemon is stopped or restarted.  Administrators must be vigilant
-# when enabling a lock manager since simply updating the manager
-# may cause it to be restarted, potentially killing the resources
-# it protects.
+# Two lock managers are supported: lockd and sanlock.  lockd, which
+# is provided by the virtlockd service, uses advisory locks (flock(2))
+# to protect virtual machine disks.  sanlock uses the notion of leases
+# to protect virtual machine disks and is more appropriate in a SAN
+# environment.
 #
-# To enable 'Sanlock' project based locking of the file
-# content (to prevent two VMs writing to the same
-# disk), uncomment this
+# For most deployments that require virtual machine disk protection,
+# lockd is recommended since it is easy to configure and the virtlockd
+# service can be restarted without terminating any running virtual
+# machines.  sanlock, which may be preferred in some SAN environments,
+# has the disadvantage of not being able to be restarted without
+# first terminating all virtual machines for which it holds leases.
 #
-#lock_manager = "sanlock"
-
+# Specify lockd or sanlock to enable protection of virtual machine disk
+# content.
+#
+#lock_manager = "lockd"
 
 
 # Set limit of maximum APIs queued on one domain. All other APIs
@@ -402,14 +442,14 @@ group = "<%= @group %>"
 # Keepalive protocol:
 # This allows qemu driver to detect broken connections to remote
 # libvirtd during peer-to-peer migration.  A keepalive message is
-# sent to the deamon after keepalive_interval seconds of inactivity
-# to check if the deamon is still responding; keepalive_count is a
+# sent to the daemon after keepalive_interval seconds of inactivity
+# to check if the daemon is still responding; keepalive_count is a
 # maximum number of keepalive messages that are allowed to be sent
-# to the deamon without getting any response before the connection
+# to the daemon without getting any response before the connection
 # is considered broken.  In other words, the connection is
 # automatically closed approximately after
 # keepalive_interval * (keepalive_count + 1) seconds since the last
-# message received from the deamon.  If keepalive_interval is set to
+# message received from the daemon.  If keepalive_interval is set to
 # -1, qemu driver will not send keepalive requests during
 # peer-to-peer migration; however, the remote libvirtd can still
 # send them and source libvirtd will send responses.  When
@@ -429,6 +469,19 @@ group = "<%= @group %>"
 #seccomp_sandbox = 1
 
 
+# Override the listen address for all incoming migrations. Defaults to
+# 0.0.0.0, or :: if both host and qemu are capable of IPv6.
+#migration_address = "127.0.0.1"
+
+
+# The default hostname or IP address which will be used by a migration
+# source for transferring migration data to this host.  The migration
+# source has to be able to resolve this hostname and connect to it so
+# setting "localhost" will not work.  By default, the host's configured
+# hostname is used.
+#migration_host = "host.example.com"
+
+
 # Override the port range used for incoming migrations.
 #
 # Minimum must be greater than 0, however when QEMU is not running as root,
@@ -438,3 +491,11 @@ group = "<%= @group %>"
 #
 #migration_port_min = 49152
 #migration_port_max = 49215
+
+
+
+# Timestamp QEMU's log messages (if QEMU supports it)
+#
+# Defaults to 1.
+#
+#log_timestamp = 0
