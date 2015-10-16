@@ -174,21 +174,24 @@ rm -rf #{node[:tempest][:tempest_path]}/etc/cirros/*
 cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
 
 echo -n "Adding kernel ... "
-KERNEL_ID=$(glance #{insecure} image-create --name "$IMG_NAME-tempest-kernel" \
+KERNEL_ID=$(glance #{insecure} --os-image-api-version 1 image-create \
+    --name "$IMG_NAME-tempest-kernel" \
     --is-public True --container-format aki \
     --disk-format aki < $(findfirst '*-vmlinuz') | extract_id)
 echo "done."
 [ -n "$KERNEL_ID" ] || exit 1
 
 echo -n "Adding ramdisk ... "
-RAMDISK_ID=$(glance #{insecure} image-create --name="$IMG_NAME-tempest-ramdisk" \
+RAMDISK_ID=$(glance #{insecure} --os-image-api-version 1 image-create \
+    --name="$IMG_NAME-tempest-ramdisk" \
     --is-public True --container-format ari \
     --disk-format ari < $(findfirst '*-initrd') | extract_id)
 echo "done."
 [ -n "$RAMDISK_ID" ] || exit 1
 
 echo -n "Adding image ... "
-MACHINE_ID=$(glance #{insecure} image-create --name="$IMG_NAME-tempest-machine" \
+MACHINE_ID=$(glance #{insecure} --os-image-api-version 1 image-create \
+    --name="$IMG_NAME-tempest-machine" \
     --is-public True --container-format ami --disk-format ami \
     --property kernel_id=$KERNEL_ID \
     --property ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
