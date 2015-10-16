@@ -349,7 +349,7 @@ template "/etc/heat/heat.conf" do
     cloud_watch_port: cloud_watch_port,
     instance_user: node[:heat][:default_instance_user],
     cfn_port: cfn_port,
-    auth_encryption_key: node[:heat][:auth_encryption_key],
+    auth_encryption_key: node[:heat][:auth_encryption_key][0, 32],
     heat_metadata_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
     heat_waitcondition_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
     heat_watch_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}",
