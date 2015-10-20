@@ -1,7 +1,7 @@
-name "nova-multi-compute-zvm"
+name "nova-compute-kvm"
 description "Installs requirements to run a Compute node in a Nova cluster"
 run_list(
-         "recipe[nova::zvm]",
+         "recipe[nova::kvm]",
          "recipe[nova::compute]",
          "recipe[nova::monitor]"
          )

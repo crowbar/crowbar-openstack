@@ -91,7 +91,7 @@ if cinders.length > 0
 end
 
 #TODO: similarly with nova
-use_docker = !search(:node, "roles:nova-multi-compute-docker").empty?
+use_docker = !search(:node, "roles:nova-compute-docker").empty?
 
 network_settings = GlanceHelper.network_settings(node)
 

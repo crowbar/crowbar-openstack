@@ -1,7 +1,7 @@
-name "nova-multi-compute-qemu"
+name "nova-compute-xen"
 description "Installs requirements to run a Compute node in a Nova cluster"
 run_list(
-         "recipe[nova::qemu]",
+         "recipe[nova::xen]",
          "recipe[nova::compute]",
          "recipe[nova::monitor]"
          )

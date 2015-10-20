@@ -18,7 +18,7 @@
 # limitations under the License.
 #
 
-nova = get_instance("roles:nova-multi-controller")
+nova = get_instance("roles:nova-controller")
 keystone_settings = KeystoneHelper.keystone_settings(nova, "nova")
 
 alt_comp_user = keystone_settings["default_user"]
@@ -341,8 +341,8 @@ if backend_names.length > 1
   cinder_backend2_name = backend_names[1]
 end
 
-kvm_compute_nodes = search(:node, "roles:nova-multi-compute-kvm") || []
-docker_compute_nodes = search(:node, "roles:nova-multi-compute-docker") || []
+kvm_compute_nodes = search(:node, "roles:nova-compute-kvm") || []
+docker_compute_nodes = search(:node, "roles:nova-compute-docker") || []
 
 use_resize = kvm_compute_nodes.length > 1
 use_livemigration = nova[:nova][:use_migration] && kvm_compute_nodes.length > 1

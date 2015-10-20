@@ -92,12 +92,12 @@ class CeilometerService < PacemakerServiceObject
     base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
 
-    agent_nodes = NodeObject.find("roles:nova-multi-compute-kvm") +
-      NodeObject.find("roles:nova-multi-compute-qemu") +
-      NodeObject.find("roles:nova-multi-compute-vmware") +
-      NodeObject.find("roles:nova-multi-compute-xen")
+    agent_nodes = NodeObject.find("roles:nova-compute-kvm") +
+      NodeObject.find("roles:nova-compute-qemu") +
+      NodeObject.find("roles:nova-compute-vmware") +
+      NodeObject.find("roles:nova-compute-xen")
 
-    hyperv_agent_nodes = NodeObject.find("roles:nova-multi-compute-hyperv")
+    hyperv_agent_nodes = NodeObject.find("roles:nova-compute-hyperv")
 
     nodes       = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }

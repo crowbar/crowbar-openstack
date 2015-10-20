@@ -84,39 +84,39 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 34,
+      "schema-revision": 35,
       "element_states": {
-        "nova-multi-controller": [ "readying", "ready", "applying" ],
-        "nova-multi-compute-docker": [ "readying", "ready", "applying" ],
-        "nova-multi-compute-hyperv": [ "readying", "ready", "applying" ],
-        "nova-multi-compute-kvm": [ "readying", "ready", "applying" ],
-        "nova-multi-compute-qemu": [ "readying", "ready", "applying" ],
-        "nova-multi-compute-vmware": [ "readying", "ready", "applying" ],
-        "nova-multi-compute-xen": [ "readying", "ready", "applying" ],
-        "nova-multi-compute-zvm": [ "readying", "ready", "applying" ]
+        "nova-controller": [ "readying", "ready", "applying" ],
+        "nova-compute-docker": [ "readying", "ready", "applying" ],
+        "nova-compute-hyperv": [ "readying", "ready", "applying" ],
+        "nova-compute-kvm": [ "readying", "ready", "applying" ],
+        "nova-compute-qemu": [ "readying", "ready", "applying" ],
+        "nova-compute-vmware": [ "readying", "ready", "applying" ],
+        "nova-compute-xen": [ "readying", "ready", "applying" ],
+        "nova-compute-zvm": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-        [ "nova-multi-controller" ],
+        [ "nova-controller" ],
         [
-          "nova-multi-compute-docker",
-          "nova-multi-compute-hyperv",
-          "nova-multi-compute-kvm",
-          "nova-multi-compute-qemu",
-          "nova-multi-compute-vmware",
-          "nova-multi-compute-xen",
-          "nova-multi-compute-zvm"
+          "nova-compute-docker",
+          "nova-compute-hyperv",
+          "nova-compute-kvm",
+          "nova-compute-qemu",
+          "nova-compute-vmware",
+          "nova-compute-xen",
+          "nova-compute-zvm"
         ]
       ],
       "element_run_list_order": {
-        "nova-multi-controller": 95,
-        "nova-multi-compute-docker": 97,
-        "nova-multi-compute-hyperv": 97,
-        "nova-multi-compute-kvm": 97,
-        "nova-multi-compute-qemu": 97,
-        "nova-multi-compute-vmware": 97,
-        "nova-multi-compute-xen": 97,
-        "nova-multi-compute-zvm": 97
+        "nova-controller": 95,
+        "nova-compute-docker": 97,
+        "nova-compute-hyperv": 97,
+        "nova-compute-kvm": 97,
+        "nova-compute-qemu": 97,
+        "nova-compute-vmware": 97,
+        "nova-compute-xen": 97,
+        "nova-compute-zvm": 97
       },
       "config": {
         "environment": "nova-config-base",

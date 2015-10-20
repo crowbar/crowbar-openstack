@@ -106,9 +106,9 @@ proposals:
       ksm_enabled: true
   deployment:
     elements:
-      nova-multi-controller:
+      nova-controller:
         - cluster:cluster1
-      nova-multi-compute-qemu:
+      nova-compute-qemu:
         - "@@compute1@@"
 - barclamp: horizon
   deployment:
