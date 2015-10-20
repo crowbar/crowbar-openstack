@@ -90,6 +90,7 @@ proxy_config[:protocol] = swift_protocol
 proxy_config[:ssl_enabled] = node[:swift][:ssl][:enabled]
 proxy_config[:ssl_certfile] = node[:swift][:ssl][:certfile]
 proxy_config[:ssl_keyfile] = node[:swift][:ssl][:keyfile]
+proxy_config[:rabbit_settings] = fetch_rabbitmq_settings
 proxy_config[:max_containers_per_extraction] = node[:swift][:middlewares][:bulk][:max_containers_per_extraction]
 proxy_config[:max_failed_extractions] = node[:swift][:middlewares][:bulk][:max_failed_extractions]
 proxy_config[:max_deletes_per_request] = node[:swift][:middlewares][:bulk][:max_deletes_per_request]
@@ -133,6 +134,10 @@ end
 node[:swift][:middlewares]["ceilometer"] = {
   "enabled" => (node.roles.include? "ceilometer-swift-proxy-middleware")
 }
+
+if node[:swift][:middlewares]["ceilometer"]["enabled"]
+  package "python-ceilometermiddleware"
+end
 
 case proxy_config[:auth_method]
    when "swauth"
