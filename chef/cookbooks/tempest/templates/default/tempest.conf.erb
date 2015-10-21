@@ -594,6 +594,12 @@ domain_name = Default
 # The endpoint type to use for the identity service. (string value)
 endpoint_type = internalURL
 
+# Fix bug#1484127
+# https://bugs.launchpad.net/tempest/+bug/1484127
+# Revert when tempest package is updated (fix is now in upstream)
+v2_admin_endpoint_type = adminURL
+v3_admin_endpoint_type = adminURL
+
 # API key to use when authenticating. (string value)
 password = <%= @comp_pass %>
 
