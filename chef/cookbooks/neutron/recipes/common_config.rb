@@ -107,9 +107,9 @@ unless nova[:nova].nil? or nova[:nova][:ssl].nil?
 end
 
 service_plugins = "neutron.services.metering.metering_plugin.MeteringPlugin"
-service_plugins = "#{service_plugins}, neutron.services.firewall.fwaas_plugin.FirewallPlugin"
+service_plugins = "#{service_plugins}, neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"
 if neutron[:neutron][:use_lbaas] then
-  service_plugins = "#{service_plugins}, neutron.services.loadbalancer.plugin.LoadBalancerPlugin"
+  service_plugins = "#{service_plugins}, neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPlugin"
 end
 
 network_nodes_count = neutron[:neutron][:elements]["neutron-network"].count

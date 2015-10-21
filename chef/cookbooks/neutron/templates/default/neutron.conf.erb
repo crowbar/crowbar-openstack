@@ -708,5 +708,5 @@ pool_timeout = <%= @sql_pool_timeout %>
 # Uncomment the following line to test the LBaaS v2 API _WITHOUT_ a real backend
 # service_provider = LOADBALANCER:LoggingNoop:neutron.services.loadbalancer.drivers.logging_noop.driver.LoggingNoopLoadBalancerDriver:default
 <% if node[:neutron][:use_lbaas] %>
-service_provider=LOADBALANCER:Haproxy:neutron.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
+service_provider=LOADBALANCER:Haproxy:neutron_lbaas.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
 <% end %>

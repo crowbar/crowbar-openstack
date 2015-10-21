@@ -144,7 +144,7 @@ if node[:neutron][:use_lbaas] then
       debug: node[:neutron][:debug],
       interface_driver: interface_driver,
       user_group: node[:neutron][:platform][:lbaas_haproxy_group],
-      device_driver: "neutron.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver"
+      device_driver: "neutron_lbaas.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver"
     )
   end
 end
