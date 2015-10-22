@@ -104,7 +104,11 @@ class CrowbarOpenStackHelper
           port: rabbit[:rabbitmq][:port],
           user: rabbit[:rabbitmq][:user],
           password: rabbit[:rabbitmq][:password],
-          vhost: rabbit[:rabbitmq][:vhost]
+          vhost: rabbit[:rabbitmq][:vhost],
+          url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
+            "#{rabbit[:rabbitmq][:password]}@" \
+            "#{rabbit[:rabbitmq][:address]}:#{rabbit[:rabbitmq][:port]}/" \
+            "#{rabbit[:rabbitmq][:vhost]}"
         }
 
         Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]}")
