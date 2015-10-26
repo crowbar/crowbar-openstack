@@ -19,8 +19,4 @@
 name "swift-storage"
 description "configures a swift storage node, including partitioning disks, formatting them as XFS"
 
-run_list(
-    "recipe[swift::default]",
-    "recipe[swift::storage]",
-    "recipe[swift::monitor]"
-)
+run_list("recipe[swift::role_swift_storage]")

@@ -11,3 +11,5 @@ depends "database"
 depends "crowbar-openstack"
 depends "crowbar-pacemaker"
 depends "utils"
+
+recommends "hyperv"

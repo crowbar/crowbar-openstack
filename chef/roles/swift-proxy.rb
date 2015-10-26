@@ -18,8 +18,4 @@
 
 name "swift-proxy"
 description "provides the proxy and authentication components to swift"
-run_list(
-    "recipe[swift::default]",
-    "recipe[swift::proxy]",
-    "recipe[swift::monitor]"
-)
+run_list("recipe[swift::role_swift_proxy]")

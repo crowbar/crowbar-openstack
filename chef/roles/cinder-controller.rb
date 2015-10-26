@@ -1,10 +1,5 @@
 name "cinder-controller"
 description "Cinder API and Scheduler Role"
-run_list(
-  "recipe[cinder::api]",
-  "recipe[cinder::scheduler]",
-  "recipe[cinder::controller_ha]",
-  "recipe[cinder::monitor]"
-)
+run_list("recipe[cinder::role_cinder_controller]")
 default_attributes()
 override_attributes()
