@@ -23,4 +23,6 @@ states_for_role = node[barclamp]["element_states"][role]
 if states_for_role.nil? || states_for_role.include?("all") || states_for_role.include?(node[:state])
   include_recipe "hyperv::do_setup"
   include_recipe "hyperv::do_ceilometer"
+else
+  Chef::Log.info("Skipping role \"#{role}\" because node is in state \"#{node[:state]}\".")
 end

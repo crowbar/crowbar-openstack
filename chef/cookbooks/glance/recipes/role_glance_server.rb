@@ -28,4 +28,6 @@ if states_for_role.nil? || states_for_role.include?("all") || states_for_role.in
   include_recipe "glance::ha"
   include_recipe "glance::setup"
   include_recipe "glance::monitor"
+else
+  Chef::Log.info("Skipping role \"#{role}\" because node is in state \"#{node[:state]}\".")
 end

@@ -25,4 +25,6 @@ if states_for_role.nil? || states_for_role.include?("all") || states_for_role.in
   include_recipe "cinder::scheduler"
   include_recipe "cinder::controller_ha"
   include_recipe "cinder::monitor"
+else
+  Chef::Log.info("Skipping role \"#{role}\" because node is in state \"#{node[:state]}\".")
 end

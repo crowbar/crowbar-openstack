@@ -33,4 +33,6 @@ if states_for_role.nil? || states_for_role.include?("all") || states_for_role.in
   include_recipe "nova::availability_zones"
   include_recipe "nova::trusted_flavors"
   include_recipe "nova::monitor"
+else
+  Chef::Log.info("Skipping role \"#{role}\" because node is in state \"#{node[:state]}\".")
 end
