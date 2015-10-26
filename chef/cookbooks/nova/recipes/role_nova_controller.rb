@@ -1,0 +1,36 @@
+#
+# Copyright 2016, SUSE LINUX GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+barclamp = "nova"
+role = "nova-controller"
+
+# if nil, then this means all states are valid
+states_for_role = node[barclamp]["element_states"][role]
+
+if states_for_role.nil? || states_for_role.include?("all") || states_for_role.include?(node[:state])
+  include_recipe "nova::config"
+  include_recipe "nova::database"
+  include_recipe "nova::api"
+  include_recipe "nova::cert"
+  include_recipe "nova::instances"
+  include_recipe "nova::scheduler"
+  include_recipe "nova::memcached"
+  include_recipe "nova::vncproxy"
+  include_recipe "nova::controller_ha"
+  include_recipe "nova::availability_zones"
+  include_recipe "nova::trusted_flavors"
+  include_recipe "nova::monitor"
+end
