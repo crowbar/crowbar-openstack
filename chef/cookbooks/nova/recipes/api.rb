@@ -103,15 +103,15 @@ keystone_register "register ec2 service" do
   action :add_service
 end
 
-keystone_register "register computev21 service" do
+keystone_register "register nova_legacy service" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   token keystone_settings["admin_token"]
-  service_name "novav21"
-  service_type "computev21"
-  service_description "Openstack Nova Compute Service V2.1"
+  service_name "nova_legacy"
+  service_type "compute_legacy"
+  service_description "Openstack Nova Compute Service (Legacy 2.0)"
   action :add_service
 end
 
@@ -123,9 +123,9 @@ keystone_register "register nova endpoint" do
   token keystone_settings["admin_token"]
   endpoint_service "nova"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{api_protocol}://#{public_api_host}:#{api_port}/v2/$(tenant_id)s"
-  endpoint_adminURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2/$(tenant_id)s"
-  endpoint_internalURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2/$(tenant_id)s"
+  endpoint_publicURL "#{api_protocol}://#{public_api_host}:#{api_port}/v2.1/$(tenant_id)s"
+  endpoint_adminURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2.1/$(tenant_id)s"
+  endpoint_internalURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2.1/$(tenant_id)s"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template
@@ -147,17 +147,17 @@ keystone_register "register nova ec2 endpoint" do
   action :add_endpoint_template
 end
 
-keystone_register "register computev21 endpoint" do
+keystone_register "register nova_legacy endpoint" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   token keystone_settings["admin_token"]
-  endpoint_service "novav21"
+  endpoint_service "nova_legacy"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{api_protocol}://#{public_api_host}:#{api_port}/v2.1/$(tenant_id)s"
-  endpoint_adminURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2.1/$(tenant_id)s"
-  endpoint_internalURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2.1/$(tenant_id)s"
+  endpoint_publicURL "#{api_protocol}://#{public_api_host}:#{api_port}/v2/$(tenant_id)s"
+  endpoint_adminURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2/$(tenant_id)s"
+  endpoint_internalURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2/$(tenant_id)s"
   action :add_endpoint_template
 end
 
