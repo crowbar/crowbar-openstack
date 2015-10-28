@@ -27,7 +27,8 @@
         "database": "ceilometer"
       },
       "database": {
-        "time_to_live": 30
+          "metering_time_to_live": 30,
+          "event_time_to_live": 30
       }
     }
   },
@@ -35,7 +36,7 @@
     "ceilometer": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 20,
+      "schema-revision": 22,
       "element_states": {
         "ceilometer-server": [ "readying", "ready", "applying" ],
         "ceilometer-cagent": [ "readying", "ready", "applying" ],

@@ -64,6 +64,7 @@
             "vcenter": {
               "type": "map", "required": true, "mapping": {
                 "host": { "type": "str", "required": true },
+                "port": { "type": "int", "required": true },
                 "user": { "type": "str", "required": true },
                 "password": { "type": "str", "required": true },
                 "clusters": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },

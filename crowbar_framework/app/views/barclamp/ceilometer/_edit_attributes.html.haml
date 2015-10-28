@@ -15,8 +15,11 @@
 
     = boolean_field :use_mongodb
 
-    = integer_field %w(database time_to_live)
+    = integer_field %w(database metering_time_to_live)
     %span.help-block
-      = t(".database.time_to_live_hint")
+      = t(".database.metering_time_to_live_hint")
+    = integer_field %w(database event_time_to_live)
+    %span.help-block
+      = t(".database.event_time_to_live_hint")
 
     = boolean_field :verbose

@@ -53,6 +53,7 @@ default[:nova][:kvm][:ksm_enabled] = false
 #
 
 default[:nova][:vcenter][:host] = ""
+default[:nova][:vcenter][:port] = 443
 default[:nova][:vcenter][:user] = ""
 default[:nova][:vcenter][:password] = ""
 default[:nova][:vcenter][:clusters] = []

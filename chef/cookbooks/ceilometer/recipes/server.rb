@@ -311,8 +311,11 @@ file "/etc/cron.daily/crowbar-ceilometer-expirer" do
 end
 
 # Cronjob to repair the database and free space for mongodb.  This
-# only makes sense when the time_to_live > 0
-if node[:ceilometer][:use_mongodb] && node[:ceilometer][:database][:time_to_live] > 0
+# only makes sense when the metering_time_to_live or
+# event_time_to_leave > 0
+time_to_live_set = node[:ceilometer][:database][:metering_time_to_live] > 0 \
+                   || node[:ceilometer][:database][:event_time_to_live] > 0
+if node[:ceilometer][:use_mongodb] && time_to_live_set
   template "/etc/cron.weekly/crowbar-repairdatabase-mongodb" do
     source "cronjob-repairdatabase-mongodb.erb"
     owner "root"
