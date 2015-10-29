@@ -28,7 +28,8 @@
         "volume": "cinder_policy.json",
         "image": "glance_policy.json",
         "orchestration": "heat_policy.json",
-        "network": "neutron_policy.json"
+        "network": "neutron_policy.json",
+        "telemetry": "ceilometer_policy.json"
       },
       "can_set_mount_point": false,
       "can_set_password": false,
@@ -39,14 +40,15 @@
         "ssl_key_file": "/etc/apache2/ssl.key/openstack-dashboard-server.key",
         "ssl_crt_chain_file": ""
       },
-      "external_monitoring": {}
+      "external_monitoring": {},
+      "token_hash_enabled": true
     }
   },
   "deployment": {
     "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 34,
+      "schema-revision": 36,
       "element_states": {
         "horizon-server": [ "readying", "ready", "applying" ]
       },

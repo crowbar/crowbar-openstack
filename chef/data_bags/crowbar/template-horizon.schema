@@ -48,7 +48,8 @@
                 "volume" : { "type": "str", "required": true },
                 "image" : { "type": "str", "required": true },
                 "orchestration" : { "type": "str", "required": true },
-                "network" : { "type": "str", "required": true }
+                "network" : { "type": "str", "required": true },
+                "telemetry" : { "type": "str", "required": true }
               }
             },
             "can_set_mount_point": { "type": "bool", "required": false },
@@ -68,7 +69,8 @@
               "mapping": {
                 =: { "type": "str",  "required": false }
               }
-            }
+            },
+	    "token_hash_enabled": { "type": "bool", "required": true }
           }
         }
       }
