@@ -23,7 +23,7 @@
             "stack_domain_admin": { "type": "str", "required": true },
             "stack_domain_admin_password": { "type": "str", "required": true },
             "auth_encryption_key": { "type": "str", "required": true },
-            "default_instance_user": { "type": "str", "required": true },
+            "use_convergence_engine": { "type": "bool", "required": true },
             "api": {
               "type": "map",
               "required": true,

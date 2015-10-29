@@ -347,7 +347,6 @@ template "/etc/heat/heat.conf" do
     bind_host: bind_host,
     api_port: api_port,
     cloud_watch_port: cloud_watch_port,
-    instance_user: node[:heat][:default_instance_user],
     cfn_port: cfn_port,
     auth_encryption_key: node[:heat][:auth_encryption_key][0, 32],
     heat_metadata_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
@@ -355,7 +354,8 @@ template "/etc/heat/heat.conf" do
     heat_watch_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}",
     stack_user_domain: %x[ #{shell_get_stack_user_domain} ].chomp,
     stack_domain_admin: node[:heat]["stack_domain_admin"],
-    stack_domain_admin_password: node[:heat]["stack_domain_admin_password"]
+    stack_domain_admin_password: node[:heat]["stack_domain_admin_password"],
+    use_convergence_engine: node[:heat][:use_convergence_engine]
   )
 end
 

@@ -14,7 +14,7 @@
       "service_user": "heat",
       "service_password": "",
       "auth_encryption_key": "",
-      "default_instance_user": "ec2-user",
+      "use_convergence_engine": false,
       "api": {
         "protocol": "http",
         "cfn_port": 8000,
@@ -33,7 +33,7 @@
     "heat": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 21,
+      "schema-revision": 23,
       "element_states": {
         "heat-server": [ "readying", "ready", "applying" ]
       },
