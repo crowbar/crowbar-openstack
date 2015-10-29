@@ -5,6 +5,7 @@
     "glance": {
       "verbose": true,
       "debug": false,
+      "enable_v3_api": false,
       "max_header_line": 16384,
       "images": [
       ],
@@ -37,6 +38,11 @@
       "use_syslog": false,
       "default_store": "file",
       "filesystem_store_datadir": "/var/lib/glance/images",
+      "conversion": {
+        "enabled": false,
+        "conversion_format": "raw",
+        "work_dir": "/var/lib/glance/taskflow"
+      },
       "swift": {
         "store_container": "glance",
         "store_create_container_on_put": true
@@ -66,7 +72,7 @@
     "glance": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 21,
+      "schema-revision": 23,
       "element_states": {
         "glance-server": [ "readying", "ready", "applying" ]
       },

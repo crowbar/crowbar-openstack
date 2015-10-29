@@ -14,6 +14,7 @@
           "mapping": {
             "verbose": { "type": "bool", "required": true },
             "debug": { "type": "bool", "required": true },
+            "enable_v3_api": { "type": "bool", "required": true },
             "max_header_line": { "type": "int", "required": true },
             "rabbitmq_instance": { "type": "str", "required": true },
             "images": {
@@ -60,6 +61,13 @@
             "use_syslog": { "type": "bool", "required": true },
             "default_store": { "type": "str", "required": true, "pattern": "/^(file|rbd|swift|vsphere)$/"  },
             "filesystem_store_datadir": { "type": "str", "required": true },
+            "conversion": {
+              "type": "map", "required": true, "mapping": {
+                "enabled": { "type": "bool", "required": true },
+                "conversion_format": { "type": "str", "required": true },
+                "work_dir": { "type": "str", "required": true }
+              }
+            },
             "swift": {
               "type": "map", "required": true, "mapping": {
                 "store_container": { "type": "str", "required": true },

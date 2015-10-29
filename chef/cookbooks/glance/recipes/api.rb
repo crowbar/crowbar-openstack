@@ -81,6 +81,14 @@ if node[:glance][:api][:protocol] == "https"
   end
 end
 
+# TODO: there's no dependency in terms of proposal on swift
+swift_api_insecure = false
+swifts = search(:node, "roles:swift-proxy") || []
+if swifts.length > 0
+  swift = swifts[0]
+  swift_api_insecure = swift[:swift][:ssl][:enabled] && swift[:swift][:ssl][:insecure]
+end
+
 #TODO: glance should depend on cinder, but cinder already depends on glance :/
 # so we have to do something like this
 cinder_api_insecure = false
@@ -122,10 +130,10 @@ template node[:glance][:api][:config_file] do
       registry_bind_port: network_settings[:registry][:bind_port],
       keystone_settings: keystone_settings,
       rabbit_settings: fetch_rabbitmq_settings,
+      swift_api_insecure: swift_api_insecure,
       cinder_api_insecure: cinder_api_insecure,
       use_docker: use_docker,
       glance_stores: glance_stores.join(",")
-
   )
 end
 

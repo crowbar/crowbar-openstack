@@ -27,7 +27,12 @@ default[:glance][:debug] = "False"
 
 default[:glance][:config_dir] = "/etc/glance"
 
+default[:glance][:enable_v3_api] = false
 default[:glance][:max_header_line] = 16384
+
+default[:glance][:conversion][:enabled] = false
+default[:glance][:conversion][:conversion_format] = "raw"
+default[:glance][:conversion][:work_dir] = "/var/lib/glance/taskflow"
 
 default[:glance][:db][:password] = "" # set by wrapper
 default[:glance][:db][:user] = "glance"
@@ -46,6 +51,9 @@ default[:glance][:registry][:service_name] = "glance-registry"
 
 default[:glance][:cache][:log_file] = "/var/log/glance/cache.log"
 default[:glance][:cache][:config_file]="/etc/glance/glance-cache.conf"
+
+default[:glance][:manage][:log_file] = "/var/log/glance/manage.log"
+default[:glance][:manage][:config_file] = "/etc/glance/glance-manage.conf"
 
 default[:glance][:scrubber][:log_file] = "/var/log/glance/scrubber.log"
 default[:glance][:scrubber][:config_file]="/etc/glance/glance-scrubber.conf"
