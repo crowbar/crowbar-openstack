@@ -275,6 +275,19 @@ if node[:platform] == "suse" && node[:platform_version].to_f < 12.0
   end
 end
 
+if node[:platform_family] == "suse"
+  node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+
+  template "/etc/sysconfig/tgt" do
+    source "tgt.sysconfig.erb"
+    owner "root"
+    group "root"
+    mode 0644
+    variables(admin_ip: node_admin_ip)
+    notifies :restart, "service[tgt]"
+  end
+end
+
 service "tgt" do
   supports status: true, restart: true, reload: true
   action [:enable, :start]
