@@ -302,7 +302,7 @@ class SwiftService < PacemakerServiceObject
       elements = (p.status == "ready") ? p.role.elements : p.elements
       if elements.keys.include?("ceph-radosgw") && !elements["ceph-radosgw"].empty?
         @logger.warn("node #{elements['ceph-radosgw']} has ceph-radosgw role")
-        validation_error("Ceph with RadosGW support is already deployed. Only one of Ceph with RadosGW and Swift can be deployed at any time.")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.radosgw")
       end
     }
 
@@ -311,23 +311,31 @@ class SwiftService < PacemakerServiceObject
     validate_at_least_n_for_role proposal, "swift-storage", 1
 
     if proposal["attributes"]["swift"]["replicas"] <= 0
-      validation_error("Need at least 1 replica")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.replica")
     end
 
     elements = proposal["deployment"]["swift"]["elements"]
 
     if elements["swift-storage"].length < proposal["attributes"]["swift"]["zones"]
       if elements["swift-storage"].length == 1
-        validation_error("Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage node was set for #{proposal["attributes"]["swift"]["zones"]} zones")
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.zone",
+          swift_storage: elements["swift-storage"].length,
+          swift_zone: proposal["attributes"]["swift"]["zones"]
+        )
       else
-        validation_error("Need at least as many swift-storage nodes as zones; only #{elements["swift-storage"].length} swift-storage nodes were set for #{proposal["attributes"]["swift"]["zones"]} zones")
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.zones",
+          swift_storage: elements["swift-storage"].length,
+          swift_zone: proposal["attributes"]["swift"]["zones"]
+        )
       end
     end
 
     middlewares = proposal["attributes"]["swift"]["middlewares"]
     if (middlewares["tempurl"]["enabled"] || middlewares["staticweb"]["enabled"] || middlewares["formpost"]["enabled"])
       unless proposal["attributes"]["swift"]["keystone_delay_auth_decision"]
-        validation_error("Public containers must be allowed (keystone_delay_auth_decision attribute) when one of the FormPOST, StaticWeb and TempURL middlewares is enabled.")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.public_containers")
       end
     end
 
@@ -335,7 +343,9 @@ class SwiftService < PacemakerServiceObject
       begin
         REXML::Document.new(line)
       rescue REXML::ParseException
-        validation_error("Cross-domain policy line #{html_escape(line)} does not look like valid XML.")
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.no_valid_xml", html_escape: html_escape(line)
+        )
       end
     end
 

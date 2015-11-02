@@ -77,3 +77,8 @@ en:
             keyfile: 'SSL (Private) Key File'
         logging_header: 'Logging'
         verbose: 'Verbose Logging'
+      validation:
+        shared_storage: 'Shared storage cannot be automatically setup when a cluster has the nova-controller role. Please consider using the NFS Client barclamp instead.'
+        hyperv_support: 'Hyper-V support is not available.'
+        xen: 'Platform of node %{n} (%{node_platform}-%{platform_version}) does not support Xen.'
+        assigned_node: 'Node %{key} has been assigned to a nova-compute role more than once.'

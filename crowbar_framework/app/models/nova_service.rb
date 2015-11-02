@@ -232,16 +232,14 @@ class NovaService < PacemakerServiceObject
     if proposal["attributes"][@bc_name]["use_shared_instance_storage"]
       elements["nova-controller"].each do |element|
         if is_cluster? element
-          validation_error("Shared storage cannot be automatically setup when "\
-            "a cluster has the nova-controller role. Please consider using "\
-            "the NFS Client barclamp instead.")
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.shared_storage")
           break
         end
       end unless elements["nova-controller"].nil?
     end
 
     unless elements["nova-compute-hyperv"].empty? || hyperv_available?
-      validation_error("Hyper-V support is not available.")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.hyperv_support")
     end
 
     elements["nova-compute-docker"].each do |n|
@@ -266,13 +264,17 @@ class NovaService < PacemakerServiceObject
       nodes[n] += 1
       node = NodeObject.find_node_by_name(n)
       unless node.nil? || node_platform_supports_xen(node)
-        validation_error("Platform of node #{n} (#{node[:platform]}-#{node[:platform_version]}) does not support Xen.")
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.xen",
+          node_platform: node[:platform],
+          platform_version: node[:platform_version]
+        )
       end
     end unless elements["nova-compute-xen"].nil?
 
     nodes.each do |key,value|
       if value > 1
-        validation_error("Node #{key} has been assigned to a nova-compute role more than once")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.assigned_node", key: key)
       end
     end unless nodes.nil?
 

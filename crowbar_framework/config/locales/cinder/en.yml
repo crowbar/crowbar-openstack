@@ -130,3 +130,13 @@ en:
           generate_certs: 'Generate (self-signed) certificates (implies insecure)'
           cert_required: 'Require Client Certificate'
           ca_certs: 'SSL CA Certificates File'
+        validation:
+          invalid_proposal: 'Invalid proposal: backend with driver %{backend_driver} is missing the backend-specific attributes.'
+          volume_name: '%{count} backends are using \"%{volume_name}\" as LVM volume name.'
+          empty_filename: 'Invalid file name \"%{file_name}\" for local file-based LVM: file name cannot be empty.'
+          invalid_filename: 'Invalid file name \"%{file_name}\" for local file-based LVM: file name must be an absolute path.'
+          invalid_whitespaces_in_filename: 'Invalid file name \"%{file_name}\" for local file-based LVM: file name cannot contain whitespaces.'
+          invalid_backend_filename: '%{count} backends are using \"%{file_name}\" for local file-based LVM.'
+          raw_device_backend: 'There cannot be multiple raw devices backends when one raw device backend is configured to use all disks.'
+          missing_unclaimed_disk: 'Nodes %{nodes_without_suitable_drives} for cinder volume role are missing at least one unclaimed disk, required when using raw devices.'
+          RADOS_backends: 'RADOS backends not deployed with Crowbar cannot use /etc/ceph/ceph.conf as configuration files when also using the RADOS backend deployed with Crowbar.'

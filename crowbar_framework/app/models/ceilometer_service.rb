@@ -130,14 +130,14 @@ class CeilometerService < PacemakerServiceObject
     validate_minimum_three_nodes_in_cluster(proposal)
 
     unless (proposal["deployment"]["ceilometer"]["elements"]["ceilometer-agent-hyperv"] || []).empty? || hyperv_available?
-      validation_error("Hyper-V support is not available.")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.hyper_v_support")
     end
 
     swift_proxy_nodes = NodeObject.find("roles:swift-proxy").map { |x| x.name }
     if proposal["deployment"]["ceilometer"]["elements"]["ceilometer-swift-proxy-middleware"]
       proposal["deployment"]["ceilometer"]["elements"]["ceilometer-swift-proxy-middleware"].each do |n|
         unless swift_proxy_nodes.include? n
-          validation_error("Nodes with the ceilometer-swift-proxy-middleware role must also have the swift-proxy role.")
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.swift_proxy")
         end
       end
     end
@@ -145,7 +145,7 @@ class CeilometerService < PacemakerServiceObject
     alarm_eval_interval = proposal["attributes"][@bc_name]["alarm_threshold_evaluation_interval"]
     ["cpu_interval", "disk_interval", "network_interval", "meters_interval"].each do |i|
       if alarm_eval_interval < proposal["attributes"][@bc_name][i]
-        validation_error("The threshold alarm evaluation interval needs be greater than (or equal to) all the meter update intervals.")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.alarm_evaluation_interval")
         break
       end
     end
@@ -251,10 +251,7 @@ class CeilometerService < PacemakerServiceObject
         "items that we failed to expand: #{failures.join(", ")}"
         ) unless failures.nil? || failures.empty?
 
-      validation_error(
-        "The cluster assigned to the ceilometer-server "\
-        "role should have at least 3 nodes, but it only has #{nodes.count}."
-        ) if nodes.length < 3
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.nodes_count", nodes_count: nodes.count) if nodes.length < 3
     end
   end
 

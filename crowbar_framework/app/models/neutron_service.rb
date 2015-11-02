@@ -104,32 +104,32 @@ class NeutronService < PacemakerServiceObject
 
   def validate_gre gre_settings
     if gre_settings["tunnel_id_start"] < 1 || gre_settings["tunnel_id_start"] > 2147483647
-      validation_error("Start of GRE tunnel ID range must be between 0 and 2147483647")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.start_id")
     end
     if gre_settings["tunnel_id_end"]  < 1 || gre_settings["tunnel_id_end"] > 2147483647
-      validation_error("End of GRE tunnel ID range must be between 0 and 2147483647")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.end_id")
     end
     if gre_settings["tunnel_id_start"] > gre_settings["tunnel_id_end"]
-      validation_error("End of GRE tunnel ID range must be higher than start of GRE tunnel ID range")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.end_id_higher_than_start")
     elsif gre_settings["tunnel_id_start"] == gre_settings["tunnel_id_end"]
-      validation_error("GRE tunnel ID range is too small")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.id_too_small")
     elsif gre_settings["tunnel_id_end"] + 1 - gre_settings["tunnel_id_start"] > 1000000
       # test being done in neutron for unreasonable ranges
-      validation_error("GRE tunnel ID range is unreasonable for neutron")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.id_unreasonable")
     end
   end
 
   def validate_vxlan vxlan_settings
     if vxlan_settings["vni_start"] < 0 || vxlan_settings["vni_start"] > 16777215
-      validation_error("Start of VXLAN VNI range must be between 0 and 16777215")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.VXLAN_VNI_start")
     end
     if vxlan_settings["vni_end"]  < 0 || vxlan_settings["vni_end"] > 16777215
-      validation_error("End of VXLAN VNI range must be between 0 and 16777215")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.VXLAN_VNI_end")
     end
     if vxlan_settings["vni_start"] > vxlan_settings["vni_end"]
-      validation_error("End of VXLAN VNI range must be higher than start of VXLAN VNI range")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.end_VXLAN_VNI_higher_than_start")
     elsif vxlan_settings["vni_start"] == vxlan_settings["vni_end"]
-      validation_error("VXLAN VNI range is too small")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.VXLAN_VNI_higher_too_small")
     end
 
     mcast_group = vxlan_settings["multicast_group"]
@@ -137,11 +137,15 @@ class NeutronService < PacemakerServiceObject
       begin
         IPAddr.new(mcast_group)
       rescue ArgumentError
-        validation_error("Multicast group for VXLAN broadcast emulation #{mcast_group} is not a valid IP address")
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.no_valid_ip", mcast_group: mcast_group
+        )
       end
       mcast_first = mcast_group.split(".")[0].to_i
       if mcast_first < 224 || mcast_first > 239
-        validation_error("Multicast group for VXLAN broadcast emulation #{mcast_group} is not a valid multicast IP address")
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.no_valid_multicast_ip", mcast_group: mcast_group
+        )
       end
     end
   end
@@ -156,10 +160,10 @@ class NeutronService < PacemakerServiceObject
       # Exclude a few default networks from network.json from being used as
       # additional external networks in neutron
       if blacklist.include? ext_net
-        validation_error("Network '#{ext_net}' cannot be used as an additional external network")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.network", ext_net: extnet)
       end
       if network_proposal["attributes"]["network"]["networks"][ext_net].nil?
-        validation_error("External Network '#{ext_net}' is not defined in the configuration of the network barclamp")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.external_network", ext_net: extnet)
       end
     end
   end
@@ -179,38 +183,56 @@ class NeutronService < PacemakerServiceObject
 
     # at least one ml2 type driver must be selected for ml2 as core plugin
     if plugin == "ml2" && ml2_type_drivers.length == 0
-      validation_error("At least one ml2 type driver must be selected")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.m12_type_driver")
     end
 
     # at least one ml2 mech driver must be selected for ml2 as core plugin
     if plugin == "ml2" && ml2_mechanism_drivers.length == 0
-      validation_error("At least one ml2 mechanism driver must be selected")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.m12_mechanism")
     end
 
     # only allow valid ml2 type drivers
     ml2_type_drivers.each do |drv|
       unless ml2_type_drivers_valid.include? drv
-        validation_error("Selected ml2 type driver \"#{drv}\" is not a valid option. Valid drivers are #{ml2_type_drivers_valid.join(',')}")
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.no_vaild_m12_type_driver",
+          drv: drv, 
+          ml2_type_drivers_valid: ml2_type_drivers_valid.join(",")
+        )
       end
     end
 
     # only allow valid ml2 mechanism drivers
     ml2_mechanism_drivers.each do |drv|
       unless ml2_mechanism_drivers_valid.include? drv
-        validation_error("Selected ml2 mechansim driver \"#{drv}\" is not a valid option. Valid drivers are #{ml2_mechanism_drivers_valid.join(',')}")
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.no_vaild_m12_type_driver", 
+          drv: drv,
+          m12_mechanism_drivers_valid: ml2_mechanism_drivers_valid.join(",")
+        )
       end
     end
 
     # default provider network ml2 type driver must be a driver from the selected ml2 type drivers
     # TODO(toabctl): select the ml2_type_driver automatically if used as default? Or directly check in the ui via js?
     unless ml2_type_drivers.include?(ml2_type_drivers_default_provider_network)
-      validation_error("The default provider network type driver \"#{ml2_type_drivers_default_provider_network}\" is not a selected ml2 type driver")
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.default_provider_network",
+        ml2_type_drivers_default_provider_network: ml2_type_drivers_default_provider_network
+      )
     end
 
     # default tenant network ml2 type driver must be a driver from the selected ml2 type drivers
     # TODO(toabctl): select the ml2_type_driver automatically if used as default? Or directly check in the ui via js?
     unless ml2_type_drivers.include?(ml2_type_drivers_default_tenant_network)
-      validation_error("The default tenant network type driver \"#{ml2_type_drivers_default_tenant_network}\" is not a selected ml2 type driver")
+<<<<<<< HEAD
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.default_tentant_network_driver", ml2_type_drivers_default_tenant_network: ml2_type_drivers_default_tenant_network)
+=======
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.default_tentant_network_driver",
+        ml2_type_drivers_default_tenant_network: ml2_type_drivers_default_tenant_network
+      )
+>>>>>>> Move error strings in barclamps to i18n file
     end
 
     if ml2_type_drivers.include? "gre"
@@ -225,40 +247,40 @@ class NeutronService < PacemakerServiceObject
     # TODO(toabctl): select vlan type driver automatically if linuxbridge or cisco were selected!?
     %w(linuxbridge cisco_nexus).each do |drv|
       if ml2_mechanism_drivers.include? drv and not ml2_type_drivers.include? "vlan"
-        validation_error("The mechanism driver \"#{drv}\" needs the type driver \"vlan\"")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.mechanism_driver", drv: drv)
       end
     end
 
     # cisco_nexus mech driver needs also openvswitch mech driver
     if ml2_mechanism_drivers.include? "cisco_nexus" and not ml2_mechanism_drivers.include? "openvswitch"
-      validation_error("The 'cisco_nexus' mechanism driver needs also the 'openvswitch' mechanism driver")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_nexus")
     end
 
     # for now, openvswitch and linuxbrige can't be used in parallel
     if ml2_mechanism_drivers.include? "openvswitch" and ml2_mechanism_drivers.include? "linuxbridge"
-      validation_error("The 'openvswitch' and 'linuxbridge' mechanism drivers can't be used in parallel. Only select one of them")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.openvswitch_linuxbridge")
     end
 
     if proposal["attributes"]["neutron"]["use_l2pop"]
       unless ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
-        validation_error("L2 population requires GRE and/or VXLAN")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.L2_population")
       end
     end
 
     if proposal["attributes"]["neutron"]["use_dvr"]
       if !ml2_mechanism_drivers.include?("openvswitch") ||
          (!ml2_type_drivers.include?("gre") && !ml2_type_drivers.include?("vxlan"))
-        validation_error("DVR can only be used with openvswitch and gre/vxlan")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr")
       end
 
       if !proposal["attributes"]["neutron"]["use_l2pop"]
-        validation_error("DVR requires L2 population")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_requires_L2")
       end
 
       unless proposal["deployment"]["neutron"]["elements"].fetch("neutron-network", []).empty?
         network_node = proposal["deployment"]["neutron"]["elements"]["neutron-network"][0]
         if is_cluster? network_node
-          validation_error("DVR is not compatible with High Availability for neutron-network")
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_ha")
         end
       end
     end

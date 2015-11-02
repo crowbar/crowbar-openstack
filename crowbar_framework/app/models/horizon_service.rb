@@ -82,7 +82,7 @@ class HorizonService < PacemakerServiceObject
                                 name: proposal["attributes"]["horizon"]["keystone_instance"]).first
       # Using domains requires API Version 3 or newer
       if keystone["attributes"][ks_svc.bc_name]["api"]["version"].to_f < 3.0
-        validation_error("Multi domain support requires enabling Keystone V3 API in the keystone proposal first.")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.enable_keystone")
       end
     end
 
@@ -93,8 +93,11 @@ class HorizonService < PacemakerServiceObject
 
       # keystone_timeout is in seconds and horizon_timeout is in minutes
       if horizon_timeout * 60 > keystone_timeout
-        validation_error("Setting the Horizon timeout (#{horizon_timeout} minutes) longer than the "\
-          "Keystone token expiration timeout (#{keystone_timeout / 60} minutes) is not supported.")
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.timeout",
+          horizon_timeout: horizon_timeout,
+          keystone_minutes: (keystone_timeout / 60)
+        )
       end
     end
 

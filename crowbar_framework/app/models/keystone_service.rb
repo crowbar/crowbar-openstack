@@ -75,13 +75,16 @@ class KeystoneService < PacemakerServiceObject
 
     api_versions = ["2.0", "3"]
     unless api_versions.include? proposal["attributes"][@bc_name]["api"]["version"]
-      validation_error("API version #{proposal[:attributes][@bc_name][:api][:version]} not recognized.")
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.api_version",
+        api_version: proposal[:attributes][@bc_name][:api][:version]
+      )
     end
 
     # Using domains requires API Version 3 or newer
     if proposal["attributes"][@bc_name]["domain_specific_drivers"] &&
         proposal["attributes"][@bc_name]["api"]["version"].to_f < 3.0
-      validation_error("Keystone API version 3 needs to be enabled in order to use domain specific drivers.")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.enable_keystone_api")
     end
 
     keystone_timeout = proposal["attributes"]["keystone"]["token_expiration"]
@@ -91,8 +94,11 @@ class KeystoneService < PacemakerServiceObject
 
       # keystone_timeout is in seconds and horizon_timeout is in minutes
       if horizon_timeout * 60 > keystone_timeout
-        validation_error("Setting the Horizon timeout (#{horizon_timeout} minutes) longer than the "\
-          "Keystone token expiration timeout (#{keystone_timeout / 60} minutes) is not supported.")
+        validation_error I18.t(
+          "barclamp.#{@bc_name}.validation.timeout",
+          horizon_timeout: horizon_timeout,
+          keystone_minutes: (keystone_timeout / 60)
+        )
       end
     end
 

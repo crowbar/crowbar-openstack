@@ -33,3 +33,6 @@ en:
           ssl_crt_file: 'SSL Certificate File'
           ssl_key_file: 'SSL (Private) Key File'
           ssl_crt_chain_file: 'SSL Certificate Chain File'
+      validation:
+        enable_keystone: 'Multi domain support requires enabling Keystone V3 API in the keystone proposal first.'
+        timeout: 'Setting the Horizon timeout (%{horizon_timeout} minutes) longer than the Keystone token expiration timeout (%{keystone_timeout} minutes) is not supported.'

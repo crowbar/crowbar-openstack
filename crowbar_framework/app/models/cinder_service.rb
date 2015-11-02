@@ -100,7 +100,7 @@ class CinderService < PacemakerServiceObject
       backend_driver = volume["backend_driver"]
 
       if volume[backend_driver].nil?
-        validation_error("Invalid proposal: backend with driver #{backend_driver} is missing the backend-specific attributes.")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.invalid_proposal", backend_driver: backend_driver)
         next
       end
 
@@ -128,29 +128,29 @@ class CinderService < PacemakerServiceObject
 
     volume_names.each do |volume_name, count|
       if count > 1
-        validation_error("#{count} backends are using \"#{volume_name}\" as LVM volume name.")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.volume_name", count: count, volume_name: volume_name)
       end
     end
 
     local_file_names.each do |file_name, count|
       if file_name.empty?
-        validation_error("Invalid file name \"#{file_name}\" for local file-based LVM: file name cannot be empty.")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.empty_filename", file_name: file_name)
       elsif file_name[0,1] != "/"
-        validation_error("Invalid file name \"#{file_name}\" for local file-based LVM: file name must be an absolute path.")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.invalid_filename", file_name: file_name)
       end
 
       if file_name =~ /\s/
-        validation_error("Invalid file name \"#{file_name}\" for local file-based LVM: file name cannot contain whitespaces.")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.invalid_whitespaces_in_filename", file_name: file_name)
       end
 
       if count > 1
-        validation_error("#{count} backends are using \"#{file_name}\" for local file-based LVM.")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.invalid_backend_filename", count: count, file_name: file_name)
       end
     end
 
     if raw_count > 0
         if raw_count > 1 && raw_want_all
-          validation_error("There cannot be multiple raw devices backends when one raw device backend is configured to use all disks.")
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.raw_device_backend")
         else
           nodes_without_suitable_drives = proposal["deployment"][@bc_name]["elements"]["cinder-volume"].select do |node_name|
             node = NodeObject.find_node_by_name(node_name)
@@ -162,13 +162,13 @@ class CinderService < PacemakerServiceObject
             end
           end
           unless nodes_without_suitable_drives.empty?
-            validation_error("Nodes #{nodes_without_suitable_drives.to_sentence} for cinder volume role are missing at least one unclaimed disk, required when using raw devices.")
+            validation_error I18n.t("barclamp.#{@bc_name}.validation.missing_unclaimed_disk", nodes_without_suitable_drives: nodes_without_suitable_drives.to_sentence)
           end
         end
     end
 
     if rbd_crowbar && rbd_ceph_conf
-      validation_error("RADOS backends not deployed with Crowbar cannot use /etc/ceph/ceph.conf as configuration files when also using the RADOS backend deployed with Crowbar.")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.RADOS_backends")
     end
 
     super
