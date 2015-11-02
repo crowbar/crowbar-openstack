@@ -1095,6 +1095,9 @@ volume_backend_name=<%= volume['backend_name'] %>
 # volume to image and image to volume transfers? (boolean
 # value)
 #use_multipath_for_image_xfer=false
+<% if node[:cinder][:use_multipath_for_xfer] -%>
+use_multipath_for_image_xfer=true
+<% end -%>
 
 # Method used to wipe old volumes (valid options are: none,
 # zero, shred) (string value)

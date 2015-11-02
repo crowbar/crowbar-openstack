@@ -36,6 +36,8 @@ default[:nova][:use_shared_instance_storage] = false
 # Hypervisor Settings
 #
 default[:nova][:libvirt_type] = "kvm"
+
+# Keep in sync with cinder cookbook
 if node[:platform_family] == "suse"
   default[:nova][:libvirt_use_multipath] = true
 else
