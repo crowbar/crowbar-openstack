@@ -121,15 +121,15 @@ class NeutronService < PacemakerServiceObject
 
   def validate_vxlan vxlan_settings
     if vxlan_settings["vni_start"] < 0 || vxlan_settings["vni_start"] > 16777215
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.VXLAN_VNI_start")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.vxlan_vni_start")
     end
     if vxlan_settings["vni_end"]  < 0 || vxlan_settings["vni_end"] > 16777215
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.VXLAN_VNI_end")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.vxlan_vni_end")
     end
     if vxlan_settings["vni_start"] > vxlan_settings["vni_end"]
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.end_VXLAN_VNI_higher_than_start")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.end_vxlan_vni_higher_than_start")
     elsif vxlan_settings["vni_start"] == vxlan_settings["vni_end"]
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.VXLAN_VNI_higher_too_small")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.vxlan_vni_higher_too_small")
     end
 
     mcast_group = vxlan_settings["multicast_group"]
@@ -183,20 +183,20 @@ class NeutronService < PacemakerServiceObject
 
     # at least one ml2 type driver must be selected for ml2 as core plugin
     if plugin == "ml2" && ml2_type_drivers.length == 0
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.m12_type_driver")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.ml2_type_driver")
     end
 
     # at least one ml2 mech driver must be selected for ml2 as core plugin
     if plugin == "ml2" && ml2_mechanism_drivers.length == 0
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.m12_mechanism")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.ml2_mechanism")
     end
 
     # only allow valid ml2 type drivers
     ml2_type_drivers.each do |drv|
       unless ml2_type_drivers_valid.include? drv
         validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.no_vaild_m12_type_driver",
-          drv: drv, 
+          "barclamp.#{@bc_name}.validation.no_vaild_ml2_type_driver",
+          drv: drv,
           ml2_type_drivers_valid: ml2_type_drivers_valid.join(",")
         )
       end
@@ -206,9 +206,9 @@ class NeutronService < PacemakerServiceObject
     ml2_mechanism_drivers.each do |drv|
       unless ml2_mechanism_drivers_valid.include? drv
         validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.no_vaild_m12_type_driver", 
+          "barclamp.#{@bc_name}.validation.no_vaild_ml2_type_driver",
           drv: drv,
-          m12_mechanism_drivers_valid: ml2_mechanism_drivers_valid.join(",")
+          ml2_mechanism_drivers_valid: ml2_mechanism_drivers_valid.join(",")
         )
       end
     end
@@ -225,14 +225,10 @@ class NeutronService < PacemakerServiceObject
     # default tenant network ml2 type driver must be a driver from the selected ml2 type drivers
     # TODO(toabctl): select the ml2_type_driver automatically if used as default? Or directly check in the ui via js?
     unless ml2_type_drivers.include?(ml2_type_drivers_default_tenant_network)
-<<<<<<< HEAD
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.default_tentant_network_driver", ml2_type_drivers_default_tenant_network: ml2_type_drivers_default_tenant_network)
-=======
       validation_error I18n.t(
         "barclamp.#{@bc_name}.validation.default_tentant_network_driver",
         ml2_type_drivers_default_tenant_network: ml2_type_drivers_default_tenant_network
       )
->>>>>>> Move error strings in barclamps to i18n file
     end
 
     if ml2_type_drivers.include? "gre"
@@ -263,7 +259,7 @@ class NeutronService < PacemakerServiceObject
 
     if proposal["attributes"]["neutron"]["use_l2pop"]
       unless ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.L2_population")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.l2_population")
       end
     end
 
@@ -274,7 +270,7 @@ class NeutronService < PacemakerServiceObject
       end
 
       if !proposal["attributes"]["neutron"]["use_l2pop"]
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_requires_L2")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_requires_l2")
       end
 
       unless proposal["deployment"]["neutron"]["elements"].fetch("neutron-network", []).empty?

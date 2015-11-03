@@ -139,4 +139,4 @@ en:
           invalid_backend_filename: '%{count} backends are using \"%{file_name}\" for local file-based LVM.'
           raw_device_backend: 'There cannot be multiple raw devices backends when one raw device backend is configured to use all disks.'
           missing_unclaimed_disk: 'Nodes %{nodes_without_suitable_drives} for cinder volume role are missing at least one unclaimed disk, required when using raw devices.'
-          RADOS_backends: 'RADOS backends not deployed with Crowbar cannot use /etc/ceph/ceph.conf as configuration files when also using the RADOS backend deployed with Crowbar.'
+          rados_backends: 'RADOS backends not deployed with Crowbar cannot use /etc/ceph/ceph.conf as configuration files when also using the RADOS backend deployed with Crowbar.'

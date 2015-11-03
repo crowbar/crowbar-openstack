@@ -100,7 +100,10 @@ class CinderService < PacemakerServiceObject
       backend_driver = volume["backend_driver"]
 
       if volume[backend_driver].nil?
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.invalid_proposal", backend_driver: backend_driver)
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.invalid_proposal",
+          backend_driver: backend_driver
+        )
         next
       end
 
@@ -128,23 +131,38 @@ class CinderService < PacemakerServiceObject
 
     volume_names.each do |volume_name, count|
       if count > 1
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.volume_name", count: count, volume_name: volume_name)
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.volume_name",
+          count: count, volume_name: volume_name
+        )
       end
     end
 
     local_file_names.each do |file_name, count|
       if file_name.empty?
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.empty_filename", file_name: file_name)
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.empty_filename",
+          file_name: file_name
+        )
       elsif file_name[0,1] != "/"
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.invalid_filename", file_name: file_name)
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.invalid_filename",
+          file_name: file_name
+        )
       end
 
       if file_name =~ /\s/
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.invalid_whitespaces_in_filename", file_name: file_name)
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.invalid_whitespaces_in_filename",
+          file_name: file_name
+        )
       end
 
       if count > 1
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.invalid_backend_filename", count: count, file_name: file_name)
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.invalid_backend_filename",
+          count: count, file_name: file_name
+        )
       end
     end
 
@@ -162,13 +180,16 @@ class CinderService < PacemakerServiceObject
             end
           end
           unless nodes_without_suitable_drives.empty?
-            validation_error I18n.t("barclamp.#{@bc_name}.validation.missing_unclaimed_disk", nodes_without_suitable_drives: nodes_without_suitable_drives.to_sentence)
+            validation_error I18n.t(
+              "barclamp.#{@bc_name}.validation.missing_unclaimed_disk",
+              nodes_without_suitable_drives: nodes_without_suitable_drives.to_sentence
+            )
           end
         end
     end
 
     if rbd_crowbar && rbd_ceph_conf
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.RADOS_backends")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.rados_backends")
     end
 
     super

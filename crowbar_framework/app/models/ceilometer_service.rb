@@ -251,7 +251,10 @@ class CeilometerService < PacemakerServiceObject
         "items that we failed to expand: #{failures.join(", ")}"
         ) unless failures.nil? || failures.empty?
 
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.nodes_count", nodes_count: nodes.count) if nodes.length < 3
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.nodes_count",
+        nodes_count: nodes.count
+      ) if nodes.length < 3
     end
   end
 
