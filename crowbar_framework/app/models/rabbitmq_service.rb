@@ -109,16 +109,26 @@ class RabbitmqService < PacemakerServiceObject
     servers = proposal["deployment"][@bc_name]["elements"]["rabbitmq-server"]
     unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
       storage_mode = attributes["ha"]["storage"]["mode"]
-      validation_error("Unknown mode for HA storage: #{storage_mode}.") unless %w(shared drbd).include?(storage_mode)
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.unknown_mode", storage_mode: storage_mode
+      ) unless %w(shared drbd).include?(storage_mode)
 
       if storage_mode == "shared"
-        validation_error("No device specified for shared storage.") if attributes["ha"]["storage"]["shared"]["device"].blank?
-        validation_error("No filesystem type specified for shared storage.") if attributes["ha"]["storage"]["shared"]["fstype"].blank?
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.no_device"
+        ) if attributes["ha"]["storage"]["shared"]["device"].blank?
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.no_filesystem"
+        ) if attributes["ha"]["storage"]["shared"]["fstype"].blank?
       elsif storage_mode == "drbd"
         cluster = servers.first
         role = available_clusters[cluster]
-        validation_error("DRBD is not enabled for cluster #{cluster_name(cluster)}.") unless role.default_attributes["pacemaker"]["drbd"]["enabled"]
-        validation_error("Invalid size for DRBD device.") if attributes["ha"]["storage"]["drbd"]["size"] <= 0
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.drbd", cluster_name: cluster_name(cluster)
+        ) unless role.default_attributes["pacemaker"]["drbd"]["enabled"]
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.invalid_size"
+        ) if attributes["ha"]["storage"]["drbd"]["size"] <= 0
       end
     end
 

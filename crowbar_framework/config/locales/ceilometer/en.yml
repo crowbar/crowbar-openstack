@@ -36,3 +36,8 @@ en:
           metering_time_to_live_hint: '-1 means that samples are kept in the database forever'
           event_time_to_live: 'How long are event samples kept in the database (in days)'
           event_time_to_live_hint: '-1 means that samples are kept in the database forever'
+      validation:
+        hyper_v_support: 'Hyper-V support is not available.'
+        swift_proxy: 'Nodes with the ceilometer-swift-proxy-middleware role must also have the swift-proxy role.'
+        alarm_evaluation_interval: 'The threshold alarm evaluation interval needs be greater than (or equal to) all the meter update intervals.'
+        nodes: 'The cluster assigned to the ceilometer-server role should have at least 3 nodes, but it only has %{nodes_count}.'

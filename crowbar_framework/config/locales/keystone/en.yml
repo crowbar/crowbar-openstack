@@ -43,3 +43,7 @@ en:
           insecure: 'SSL Certificate is insecure (for instance, self-signed)'
           cert_required: 'Require Client Certificate'
           ca_certs: 'SSL CA Certificates File'
+      validation:
+        api_version: 'API version %{api_version} not recognized.'
+        enable_keystone_api: 'Keystone API version 3 needs to be enabled in order to use domain specific drivers.'
+        timeout: 'Setting the Horizon timeout (%{horizon_timeout} minutes) longer than the Keystone token expiration timeout (%{keystone_timeout} minutes) is not supported.'
