@@ -49,7 +49,7 @@ bash "reload disable-rp_filter-sysctl" do
   subscribes :run, resources(cookbook_file: disable_rp_filter_file), :delayed
 end
 
-multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty? && node.roles.include?("neutron-network")
+multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty?
 
 # openvswitch configuration specific to ML2
 if neutron[:neutron][:networking_plugin] == "ml2" and
