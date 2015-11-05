@@ -258,6 +258,26 @@ execute "python manage.py syncdb" do
   notifies :restart, resources(service: "apache2"), :immediately
 end
 
+execute "python manage.py collectstatic" do
+  cwd dashboard_path
+  environment(PYTHONPATH: dashboard_path)
+  command "python manage.py collectstatic --noinput"
+  user node[:apache][:user]
+  group node[:apache][:group]
+  action :nothing
+  subscribes :run, "template[#{local_settings}]"
+end
+
+execute "python manage.py compress" do
+  cwd dashboard_path
+  environment(PYTHONPATH: dashboard_path)
+  command "python manage.py compress"
+  user node[:apache][:user]
+  group node[:apache][:group]
+  action :nothing
+  subscribes :run, "template[#{local_settings}]"
+end
+
 # Force-disable multidomain support when the default keystoneapi version is too
 # old
 multi_domain_support = keystone_settings["api_version"].to_f < 3.0 ? false : node["horizon"]["multi_domain_support"]
