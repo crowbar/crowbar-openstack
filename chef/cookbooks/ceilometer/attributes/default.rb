@@ -43,6 +43,7 @@ default[:ceilometer][:debug] = false
 default[:ceilometer][:verbose] = false
 
 default[:ceilometer][:use_mongodb] = false
+default[:ceilometer][:radosgw_backend] = true
 
 default[:ceilometer][:meters_interval] = 600
 default[:ceilometer][:cpu_interval] = 600

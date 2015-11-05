@@ -48,7 +48,8 @@ else
 end
 
 is_compute_agent = node.roles.include?("ceilometer-agent") && node.roles.any? { |role| /^nova-compute-/ =~ role }
-is_swift_proxy = node.roles.include?("ceilometer-swift-proxy-middleware") && node.roles.include?("swift-proxy")
+is_swift_proxy = node.roles.include?("ceilometer-swift-proxy-middleware") && node.roles.include?("swift-proxy") && !node[:ceilometer][:radosgw_backend]
+is_ceph_radosgw = node[:ceilometer][:radosgw_backend] && !get_instance("roles:ceph-radosgw").empty?
 
 # Find hypervisor inspector
 hypervisor_inspector = nil
@@ -83,6 +84,23 @@ if event_time_to_live > 0
   event_time_to_live = event_time_to_live * 3600 * 24
 end
 
+# Obtain radosgw access and secret keys for rgw admin
+rgw_access_key = "<None>"
+rgw_secret_key = "<None>"
+
+if is_ceph_radosgw
+  if node.roles.include?("ceph-radosgw")
+    cmd = "radosgw-admin user info --uid=rgw_admin"
+    shell_cmd = Chef::ShellOut.new(cmd)
+    out = shell_cmd.run_command.stdout
+    if !shell_cmd.run_command.error && !out.empty?
+      rgw_keys = JSON.parse(out)
+      rgw_access_key = rgw_keys["keys"][0]["access_key"]
+      rgw_secret_key = rgw_keys["keys"][0]["secret_key"]
+    end
+  end
+end
+
 template "/etc/ceilometer/ceilometer.conf" do
     source "ceilometer.conf.erb"
     owner "root"
@@ -102,6 +120,8 @@ template "/etc/ceilometer/ceilometer.conf" do
       libvirt_type: libvirt_type,
       metering_time_to_live: metering_time_to_live,
       event_time_to_live: event_time_to_live,
+      rgw_access: rgw_access_key,
+      rgw_secret: rgw_secret_key,
       alarm_threshold_evaluation_interval: node[:ceilometer][:alarm_threshold_evaluation_interval]
     )
     if is_compute_agent
