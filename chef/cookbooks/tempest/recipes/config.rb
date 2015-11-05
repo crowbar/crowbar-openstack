@@ -360,7 +360,7 @@ echo "Downloading image ... "
 wget --no-verbose $IMAGE_URL --directory-prefix=$TEMP 2>&1 || exit $?
 
 echo "Registering in glance ..."
-DOCKER_IMAGE_ID=$(glance #{insecure} image-create \
+DOCKER_IMAGE_ID=$(glance #{insecure} --os-image-api-version 1 image-create \
     --name #{image_name} \
     --container-format docker \
     --property hypervisor_type=docker \
