@@ -9,31 +9,6 @@ bind_port = <%= @bind_port %>
 # user = swift
 user = <%= @user %>
 
-# The RabbitMQ broker address where a single node is used.
-# (string value)
-#rabbit_host=localhost
-rabbit_host=<%= @rabbit_settings[:address] %>
-
-# The RabbitMQ broker port where a single node is used.
-# (integer value)
-#rabbit_port=5672
-rabbit_port=<%= @rabbit_settings[:port] %>
-
-# The RabbitMQ userid. (string value)
-#rabbit_userid=guest
-rabbit_userid=<%= @rabbit_settings[:user] %>
-
-# The RabbitMQ password. (string value)
-#rabbit_password=guest
-rabbit_password=<%= @rabbit_settings[:password] %>
-
-# the RabbitMQ login method (string value)
-#rabbit_login_method=AMQPLAIN
-
-# The RabbitMQ virtual host. (string value)
-#rabbit_virtual_host=/
-rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
-
 # Enables exposing configuration settings via HTTP GET /info.
 # expose_info = true
 
@@ -761,6 +736,10 @@ super_admin_key = <%= @admin_key %>
 
 [filter:ceilometer]
 paste.filter_factory = ceilometermiddleware.swift:filter_factory
+control_exchange = swift
+url = <%= @rabbit_settings[:url] %>
+driver = rabbit
+topic = notifications
 set log_level = WARN
 
 <% if !@cross_domain_policy.empty? %>
