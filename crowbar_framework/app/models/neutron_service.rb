@@ -291,9 +291,17 @@ class NeutronService < PacemakerServiceObject
   def update_ovs_bridge_attributes(attributes, node)
     needs_save = false
     ovs_bridge_networks = []
+    ml2_mechanism_drivers = []
     if attributes["networking_plugin"] == "ml2"
       ml2_type_drivers = attributes["ml2_type_drivers"]
-      if attributes["ml2_mechanism_drivers"].include?("openvswitch")
+      ml2_mechanism_drivers = attributes["ml2_mechanism_drivers"]
+      if ml2_mechanism_drivers.include?("openvswitch")
+        # This node needs the ovs packages installed and the service started
+        node.crowbar["network"] ||= {}
+        unless node.crowbar["network"]["needs_openvswitch"]
+          node.crowbar["network"]["needs_openvswitch"] = true
+          needs_save = true
+        end
         # We need to create ovs bridges for floating and (when vlan type driver
         # is enabled) nova_fixed.  Adjust the network attribute accordingly.
         # We only do that on the node attributes and not the proposal itself as
@@ -324,6 +332,12 @@ class NeutronService < PacemakerServiceObject
           node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = false
           needs_save = true
         end
+      end
+    end
+    if ovs_bridge_networks.empty? && !ml2_mechanism_drivers.include?("openvswitch")
+      if node.crowbar["network"] && node.crowbar["network"]["needs_openvswitch"]
+        node.crowbar["network"]["needs_openvswitch"] = false
+        needs_save = true
       end
     end
     node.save if needs_save
