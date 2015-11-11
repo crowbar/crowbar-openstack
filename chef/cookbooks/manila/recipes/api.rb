@@ -102,18 +102,3 @@ crowbar_pacemaker_sync_mark "create-manila_register"
 manila_service "api" do
   use_pacemaker_provider ha_enabled
 end
-
-# NOTE(toabctl): We modified the upstream api-paste.ini and the manila.conf.erb
-# to use keystonemiddleware and a [keystone_auth] section in manila.conf instead
-# of the parameters from api-paste.ini. So the api-paste.ini is different than
-# in the version from the package.
-# TODO(toabctl): Remove this in Kilo because the api-paste.ini then no longer
-# contains the auth parameters
-cookbook_file "api-paste.ini" do
-  path "/etc/manila/api-paste.ini"
-  owner "root"
-  group node[:manila][:group]
-  mode "0640"
-  action :create
-  notifies :restart, "service[manila-api]"
-end
