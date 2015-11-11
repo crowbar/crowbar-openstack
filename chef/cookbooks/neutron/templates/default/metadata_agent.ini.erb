@@ -11,13 +11,20 @@ auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol
                                                     @keystone_settings["internal_url_host"],
                                                     @keystone_settings["service_port"],
                                                     "2.0") %>
+
 # auth_region = RegionOne
 auth_region = <%= @auth_region %>
+
 # Turn off verification of the certificate for ssl
 # auth_insecure = False
 auth_insecure = <%= (@keystone_settings['insecure'] || @neutron_insecure) ? "True" : "False" %>
+
 # Certificate Authority public key (CA cert) file for ssl
 # auth_ca_cert =
+
+# admin_tenant_name = %SERVICE_TENANT_NAME%
+# admin_user = %SERVICE_USER%
+# admin_password = %SERVICE_PASSWORD%
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
@@ -35,10 +42,12 @@ nova_metadata_ip = <%= @nova_metadata_host %>
 nova_metadata_port = <%= @nova_metadata_port %>
 
 # Which protocol to use for requests to Nova metadata server, http or https
+# nova_metadata_protocol = http
 nova_metadata_protocol = <%= @nova_metadata_protocol %>
 
 # Whether insecure SSL connection should be accepted for Nova metadata server
 # requests
+# nova_metadata_insecure = False
 nova_metadata_insecure = <%= @nova_metadata_insecure ? "True" : "False" %>
 
 # Client certificate for nova api, needed when nova api requires client
@@ -51,12 +60,21 @@ nova_metadata_insecure = <%= @nova_metadata_insecure ? "True" : "False" %>
 # When proxying metadata requests, Neutron signs the Instance-ID header with a
 # shared secret to prevent spoofing.  You may select any string for a secret,
 # but it must match here and in the configuration used by the Nova Metadata
-# Server. NOTE: Nova uses a different key: neutron_metadata_proxy_shared_secret
+# Server. NOTE: Nova uses the same config key, but in [neutron] section.
 # metadata_proxy_shared_secret =
 metadata_proxy_shared_secret = <%= @metadata_proxy_shared_secret %>
 
 # Location of Metadata Proxy UNIX domain socket
 # metadata_proxy_socket = $state_path/metadata_proxy
+
+# Metadata Proxy UNIX domain socket mode, 4 values allowed:
+# 'deduce': deduce mode from metadata_proxy_user/group values,
+# 'user': set metadata proxy socket mode to 0o644, to use when
+# metadata_proxy_user is agent effective user or root,
+# 'group': set metadata proxy socket mode to 0o664, to use when
+# metadata_proxy_group is agent effective group,
+# 'all': set metadata proxy socket mode to 0o666, to use otherwise.
+# metadata_proxy_socket_mode = deduce
 
 # Number of separate worker processes for metadata server. Defaults to
 # half the number of CPU cores
@@ -75,3 +93,7 @@ metadata_workers = <%= [node["cpu"]["total"]/2, 4].min %>
 # Missing in upstream template
 # Ensure that metadata server listening on UNIX socket is not expecting SSL
 use_ssl = False
+
+[AGENT]
+# Log agent heartbeats from this Metadata agent
+# log_agent_heartbeats = False

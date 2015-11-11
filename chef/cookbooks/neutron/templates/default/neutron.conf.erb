@@ -13,6 +13,7 @@ verbose = <%= @verbose ? "True" : "False" %>
 <% if @dvr_enabled -%>
 router_distributed = True
 <% end -%>
+
 #
 # ===========End Global Config Option for Distributed L3 Router===============
 
@@ -23,10 +24,6 @@ debug = <%= @debug ? "True" : "False" %>
 # Where to store Neutron state files.  This directory must be writable by the
 # user executing the agent.
 # state_path = /var/lib/neutron
-
-# Where to store lock files
-# lock_path = $state_path/lock
-lock_path = /var/run/neutron
 
 # log_format = %(asctime)s %(levelname)8s [%(name)s] %(message)s
 # log_date_format = %Y-%m-%d %H:%M:%S
@@ -74,6 +71,14 @@ bind_port = <%= @bind_port %>
 # Example: core_plugin = ml2
 core_plugin = <%= @core_plugin %>
 
+# (StrOpt) Neutron IPAM (IP address management) driver to be loaded from the
+# neutron.ipam_drivers namespace. See setup.cfg for the entry point names.
+# If ipam_driver is not set (default behavior), no ipam driver is used.
+# Example: ipam_driver =
+# In order to use the reference implementation of neutron ipam driver, use
+# 'internal'.
+# Example: ipam_driver = internal
+
 # (ListOpt) List of service plugin entrypoints to be loaded from the
 # neutron.service_plugins namespace. See setup.cfg for the entrypoint names of
 # the plugins included in the neutron source distribution. For compatibility
@@ -81,7 +86,7 @@ core_plugin = <%= @core_plugin %>
 # of its entrypoint name.
 #
 # service_plugins =
-# Example: service_plugins = router,firewall,lbaas,vpnaas,metering
+# Example: service_plugins = router,firewall,lbaas,vpnaas,metering,qos
 <% if @core_plugin == "ml2" -%>
 service_plugins = neutron.services.l3_router.l3_router_plugin.L3RouterPlugin, <%= @service_plugins -%>
 <% else -%>
@@ -91,8 +96,16 @@ service_plugins = <%= @service_plugins -%>
 # Paste configuration file
 # api_paste_config = api-paste.ini
 
+# (StrOpt) Hostname to be used by the neutron server, agents and services
+# running on this machine. All the agents and services running on this machine
+# must use the same host value.
+# The default value is hostname of the machine.
+#
+# host =
+
 # The strategy to be used for auth.
 # Supported values are 'keystone'(default), 'noauth'.
+# auth_strategy = keystone
 # Note: explicitely set this because of RHEL (where noauth is used)
 auth_strategy = keystone
 
@@ -119,6 +132,10 @@ auth_strategy = keystone
 # tell dnsmasq to use infinite lease times.
 # dhcp_lease_duration = 86400
 
+# Domain to use for building the hostnames
+# dns_domain = openstacklocal
+dns_domain = <%= @dns_domain %>
+
 # Allow sending resource operation notification to DHCP agent
 # dhcp_agent_notification = True
 
@@ -142,7 +159,6 @@ allow_overlapping_ips = False
 # K release, at which point the check will be mandatory.
 # force_gateway_on_subnet = True
 
-
 # Default maximum number of items returned in a single response,
 # value == infinite and value < 0 means no max limit, and value must
 # be greater than 0. If the number of items requested is greater than
@@ -162,19 +178,64 @@ allow_overlapping_ips = False
 # Maximum number of routes per router
 # max_routes = 30
 
+# Default Subnet Pool to be used for IPv4 subnet-allocation.
+# Specifies by UUID the pool to be used in case of subnet-create being called
+# without a subnet-pool ID.  The default of None means that no pool will be
+# used unless passed explicitly to subnet create.  If no pool is used, then a
+# CIDR must be passed to create a subnet and that subnet will not be allocated
+# from any pool; it will be considered part of the tenant's private address
+# space.
+# default_ipv4_subnet_pool =
+
+# Default Subnet Pool to be used for IPv6 subnet-allocation.
+# Specifies by UUID the pool to be used in case of subnet-create being
+# called without a subnet-pool ID.  Set to "prefix_delegation"
+# to enable IPv6 Prefix Delegation in a PD-capable environment.
+# See the description for default_ipv4_subnet_pool for more information.
+# default_ipv6_subnet_pool =
+
+# =========== items for MTU selection and advertisement =============
+# Advertise MTU.  If True, effort is made to advertise MTU
+# settings to VMs via network methods (ie. DHCP and RA MTU options)
+# when the network's preferred MTU is known.
+# advertise_mtu = False
+# ======== end of items for MTU selection and advertisement =========
+
 # =========== items for agent management extension =============
 # Seconds to regard the agent as down; should be at least twice
 # report_interval, to be sure the agent is down for good
 # agent_down_time = 75
+
+# Agent starts with admin_state_up=False when enable_new_agents=False.
+# In the case, user's resources will not be scheduled automatically to the
+# agent until admin changes admin_state_up to True.
+# enable_new_agents = True
 # ===========  end of items for agent management extension =====
 
 # =========== items for agent scheduler extension =============
 # Driver to use for scheduling network to DHCP agent
-# network_scheduler_driver = neutron.scheduler.dhcp_agent_scheduler.ChanceScheduler
+# network_scheduler_driver = neutron.scheduler.dhcp_agent_scheduler.WeightScheduler
 # Driver to use for scheduling router to a default L3 agent
-# router_scheduler_driver = neutron.scheduler.l3_agent_scheduler.ChanceScheduler
+# router_scheduler_driver = neutron.scheduler.l3_agent_scheduler.LeastRoutersScheduler
 # Driver to use for scheduling a loadbalancer pool to an lbaas agent
 # loadbalancer_pool_scheduler_driver = neutron.services.loadbalancer.agent_scheduler.ChanceScheduler
+
+# (StrOpt) Representing the resource type whose load is being reported by
+# the agent.
+# This can be 'networks','subnets' or 'ports'. When specified (Default is networks),
+# the server will extract particular load sent as part of its agent configuration object
+# from the agent report state, which is the number of resources being consumed, at
+# every report_interval.
+# dhcp_load_type can be used in combination with network_scheduler_driver =
+# neutron.scheduler.dhcp_agent_scheduler.WeightScheduler
+# When the network_scheduler_driver is WeightScheduler, dhcp_load_type can
+# be configured to represent the choice for the resource being balanced.
+# Example: dhcp_load_type = networks
+# Values:
+#   networks - number of networks hosted on the agent
+#   subnets -  number of subnets associated with the networks hosted on the agent
+#   ports   -  number of ports associated with the networks hosted on the agent
+# dhcp_load_type = networks
 
 # Allow auto scheduling networks to DHCP agent. It will schedule non-hosted
 # networks to first DHCP agent which sends get_active_networks message to
@@ -189,9 +250,25 @@ allow_overlapping_ips = False
 # admin_state_up set to True to alive agents.
 # allow_automatic_l3agent_failover = False
 
-# Number of DHCP agents scheduled to host a network. This enables redundant
-# DHCP agents for configured networks.
+# Allow automatic removal of networks from dead DHCP agents with
+# admin_state_up set to True.
+# Networks could then be rescheduled if network_auto_schedule is True
+# allow_automatic_dhcp_failover = True
+
+# Number of DHCP agents scheduled to host a tenant network.
+# If this number is greater than 1, the scheduler automatically
+# assigns multiple DHCP agents for a given tenant network,
+# providing high availability for DHCP service.
+# dhcp_agents_per_network = 1
 dhcp_agents_per_network = <%= @network_nodes_count %>
+
+# Enable services on agents with admin_state_up False.
+# If this option is False, when admin_state_up of an agent is turned to
+# False, services on it will be disabled. If this option is True, services
+# on agents with admin_state_up False keep available and manual scheduling
+# to such agents is available. Agents with admin_state_up False are not
+# selected for automatic scheduling regardless of this option.
+# enable_services_on_agents_with_admin_state_down = False
 
 # ===========  end of items for agent scheduler extension =====
 
@@ -209,22 +286,72 @@ dhcp_agents_per_network = <%= @network_nodes_count %>
 #
 # CIDR of the administrative network if HA mode is enabled
 # l3_ha_net_cidr = 169.254.192.0/18
+#
+# Enable snat by default on external gateway when available
+# enable_snat_by_default = True
+#
+# The network type to use when creating the HA network for an HA router.
+# By default or if empty, the first 'tenant_network_types'
+# is used. This is helpful when the VRRP traffic should use a specific
+# network which not the default one.
+# ha_network_type =
+# Example: ha_network_type = flat
+#
+# The physical network name with which the HA network can be created.
+# ha_network_physical_name =
+# Example: ha_network_physical_name = physnet1
 # =========== end of items for l3 extension =======
 
+# =========== items for metadata proxy configuration ==============
+# User (uid or name) running metadata proxy after its initialization
+# (if empty: agent effective user)
+# metadata_proxy_user =
+
+# Group (gid or name) running metadata proxy after its initialization
+# (if empty: agent effective group)
+# metadata_proxy_group =
+
+# Enable/Disable log watch by metadata proxy, it should be disabled when
+# metadata_proxy_user/group is not allowed to read/write its log file and
+# 'copytruncate' logrotate option must be used if logrotate is enabled on
+# metadata proxy log files. Option default value is deduced from
+# metadata_proxy_user: watch log is enabled if metadata_proxy_user is agent
+# effective user id/name.
+# metadata_proxy_watch_log =
+
+# Location of Metadata Proxy UNIX domain socket
+# metadata_proxy_socket = $state_path/metadata_proxy
+# =========== end of items for metadata proxy configuration ==============
+
+# ========== items for VLAN trunking networks ==========
+# Setting this flag to True will allow plugins that support it to
+# create VLAN transparent networks. This flag has no effect for
+# plugins that do not support VLAN transparent networks.
+# vlan_transparent = False
+# ========== end of items for VLAN trunking networks ==========
+
 # =========== WSGI parameters related to the API server ==============
-# Number of separate worker processes to spawn.  The default, 0, runs the
-# worker thread in the current process.  Greater than 0 launches that number of
-# child processes as workers.  The parent process manages them.
-# api_workers = 0
+# Number of separate API worker processes to spawn. If not specified or < 1,
+# the default value is equal to the number of CPUs available.
+# api_workers = <number of CPUs>
 api_workers = 0
 
-# Number of separate RPC worker processes to spawn.  The default, 0, runs the
-# worker thread in the current process.  Greater than 0 launches that number of
-# child processes as RPC workers.  The parent process manages them.
-# This feature is experimental until issues are addressed and testing has been
-# enabled for various plugins for compatibility.
-# rpc_workers = 0
+# Number of separate RPC worker processes to spawn. If not specified or < 1,
+# a single RPC worker process is spawned by the parent process.
+# rpc_workers = 1
 rpc_workers = 0
+
+# Timeout for client connections socket operations. If an
+# incoming connection is idle for this number of seconds it
+# will be closed. A value of '0' means wait forever. (integer
+# value)
+# client_socket_timeout = 900
+
+# wsgi keepalive option. Determines if connections are allowed to be held open
+# by clients after a request is fulfilled. A value of False will ensure that
+# the socket connection will be explicitly closed once a response has been
+# sent to the client.
+# wsgi_keep_alive = True
 
 # Sets the value of TCP_KEEPIDLE in seconds to use for each server socket when
 # starting API server. Not supported on OS X.
@@ -237,6 +364,7 @@ rpc_workers = 0
 # backlog = 4096
 
 # Max header line to accommodate large tokens
+# max_header_line = 16384
 max_header_line = <%= node[:neutron][:max_header_line] %>
 
 # Enable SSL on the API server
@@ -262,7 +390,6 @@ ssl_ca_file = <%= @ssl_ca_file %>
 
 # ======== end of WSGI parameters related to the API server ==========
 
-
 # ======== neutron nova interactions ==========
 # Send notification to nova when port status is active.
 # notify_nova_on_port_status_changes = True
@@ -286,6 +413,11 @@ nova_admin_username = <%= @nova_admin_username if @nova_admin_username %>
 # The uuid of the admin nova tenant
 # nova_admin_tenant_id =
 nova_admin_tenant_id = <%= @nova_admin_tenant_id if @nova_admin_tenant_id %>
+
+# The name of the admin nova tenant. If the uuid of the admin nova tenant
+# is set, this is optional.  Useful for cases where the uuid of the admin
+# nova tenant is not available when configuration is being done.
+# nova_admin_tenant_name =
 
 # Password for connection to nova in admin context.
 # nova_admin_password =
@@ -318,42 +450,42 @@ nova_api_insecure = <%= @nova_insecure %>
 
 # Use durable queues in amqp. (boolean value)
 # Deprecated group/name - [DEFAULT]/rabbit_durable_queues
-#amqp_durable_queues=false
+# amqp_durable_queues=false
 
 # Auto-delete queues in amqp. (boolean value)
-#amqp_auto_delete=false
+# amqp_auto_delete=false
 
 # Size of RPC connection pool. (integer value)
-#rpc_conn_pool_size=30
+# rpc_conn_pool_size=30
 
 # Qpid broker hostname. (string value)
-#qpid_hostname=localhost
+# qpid_hostname=localhost
 
 # Qpid broker port. (integer value)
-#qpid_port=5672
+# qpid_port=5672
 
 # Qpid HA cluster host:port pairs. (list value)
-#qpid_hosts=$qpid_hostname:$qpid_port
+# qpid_hosts=$qpid_hostname:$qpid_port
 
 # Username for Qpid connection. (string value)
-#qpid_username=
+# qpid_username=
 
 # Password for Qpid connection. (string value)
-#qpid_password=
+# qpid_password=
 
 # Space separated list of SASL mechanisms to use for auth.
 # (string value)
-#qpid_sasl_mechanisms=
+# qpid_sasl_mechanisms=
 
 # Seconds between connection keepalive heartbeats. (integer
 # value)
-#qpid_heartbeat=60
+# qpid_heartbeat=60
 
 # Transport to use, either 'tcp' or 'ssl'. (string value)
-#qpid_protocol=tcp
+# qpid_protocol=tcp
 
 # Whether to disable the Nagle algorithm. (boolean value)
-#qpid_tcp_nodelay=true
+# qpid_tcp_nodelay=true
 
 # The qpid topology version to use.  Version 1 is what was
 # originally used by impl_qpid.  Version 2 includes some
@@ -361,149 +493,141 @@ nova_api_insecure = <%= @nova_insecure %>
 # to work.  Users should update to version 2 when they are
 # able to take everything down, as it requires a clean break.
 # (integer value)
-#qpid_topology_version=1
+# qpid_topology_version=1
 
 # SSL version to use (valid only if SSL enabled). valid values
 # are TLSv1, SSLv23 and SSLv3. SSLv2 may be available on some
 # distributions. (string value)
-#kombu_ssl_version=
+# kombu_ssl_version=
 
 # SSL key file (valid only if SSL enabled). (string value)
-#kombu_ssl_keyfile=
+# kombu_ssl_keyfile=
 
 # SSL cert file (valid only if SSL enabled). (string value)
-#kombu_ssl_certfile=
+# kombu_ssl_certfile=
 
 # SSL certification authority file (valid only if SSL
 # enabled). (string value)
-#kombu_ssl_ca_certs=
+# kombu_ssl_ca_certs=
 
 # How long to wait before reconnecting in response to an AMQP
 # consumer cancel notification. (floating point value)
-#kombu_reconnect_delay=1.0
+# kombu_reconnect_delay=1.0
 
-<% if @rabbit_settings -%>
 # The RabbitMQ broker address where a single node is used.
 # (string value)
-#rabbit_host=localhost
-rabbit_host=<%= @rabbit_settings[:address] %>
+# rabbit_host=localhost
 
 # The RabbitMQ broker port where a single node is used.
 # (integer value)
-#rabbit_port=5672
-<% unless @rabbit_settings[:port].nil? -%>
-rabbit_port=<%= @rabbit_settings[:port] %>
-<% end -%>
+# rabbit_port=5672
 
 # RabbitMQ HA cluster host:port pairs. (list value)
-#rabbit_hosts=$rabbit_host:$rabbit_port
+# rabbit_hosts=$rabbit_host:$rabbit_port
 
 # Connect over SSL for RabbitMQ. (boolean value)
-#rabbit_use_ssl=false
+# rabbit_use_ssl=false
 
 # The RabbitMQ userid. (string value)
-#rabbit_userid=guest
-rabbit_userid=<%= @rabbit_settings[:user] %>
+# rabbit_userid=guest
 
 # The RabbitMQ password. (string value)
-#rabbit_password=guest
-rabbit_password=<%= @rabbit_settings[:password] %>
+# rabbit_password=guest
 
 # the RabbitMQ login method (string value)
-#rabbit_login_method=AMQPLAIN
+# rabbit_login_method=AMQPLAIN
 
 # The RabbitMQ virtual host. (string value)
-#rabbit_virtual_host=/
-rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
-
-<% end -%>
+# rabbit_virtual_host=/
 
 # How frequently to retry connecting with RabbitMQ. (integer
 # value)
-#rabbit_retry_interval=1
+# rabbit_retry_interval=1
 
 # How long to backoff for between retries when connecting to
 # RabbitMQ. (integer value)
-#rabbit_retry_backoff=2
+# rabbit_retry_backoff=2
 
 # Maximum number of RabbitMQ connection retries. Default is 0
 # (infinite retry count). (integer value)
-#rabbit_max_retries=0
+# rabbit_max_retries=0
 
 # Use HA queues in RabbitMQ (x-ha-policy: all). If you change
 # this option, you must wipe the RabbitMQ database. (boolean
 # value)
-#rabbit_ha_queues=false
+# rabbit_ha_queues=false
 
 # If passed, use a fake RabbitMQ provider. (boolean value)
-#fake_rabbit=false
+# fake_rabbit=false
 
 # ZeroMQ bind address. Should be a wildcard (*), an ethernet
 # interface, or IP. The "host" option should point or resolve
 # to this address. (string value)
-#rpc_zmq_bind_address=*
+# rpc_zmq_bind_address=*
 
 # MatchMaker driver. (string value)
-#rpc_zmq_matchmaker=oslo.messaging._drivers.matchmaker.MatchMakerLocalhost
+# rpc_zmq_matchmaker=oslo.messaging._drivers.matchmaker.MatchMakerLocalhost
 
 # ZeroMQ receiver listening port. (integer value)
-#rpc_zmq_port=9501
+# rpc_zmq_port=9501
 
 # Number of ZeroMQ contexts, defaults to 1. (integer value)
-#rpc_zmq_contexts=1
+# rpc_zmq_contexts=1
 
 # Maximum number of ingress messages to locally buffer per
 # topic. Default is unlimited. (integer value)
-#rpc_zmq_topic_backlog=<None>
+# rpc_zmq_topic_backlog=
 
 # Directory for holding IPC sockets. (string value)
-#rpc_zmq_ipc_dir=/var/run/openstack
+# rpc_zmq_ipc_dir=/var/run/openstack
 
 # Name of this node. Must be a valid hostname, FQDN, or IP
 # address. Must match "host" option, if running Nova. (string
 # value)
-#rpc_zmq_host=oslo
+# rpc_zmq_host=oslo
 
 # Seconds to wait before a cast expires (TTL). Only supported
 # by impl_zmq. (integer value)
-#rpc_cast_timeout=30
+# rpc_cast_timeout=30
 
 # Heartbeat frequency. (integer value)
-#matchmaker_heartbeat_freq=300
+# matchmaker_heartbeat_freq=300
 
 # Heartbeat time-to-live. (integer value)
-#matchmaker_heartbeat_ttl=600
+# matchmaker_heartbeat_ttl=600
 
 # Size of RPC greenthread pool. (integer value)
-#rpc_thread_pool_size=64
+# rpc_thread_pool_size=64
 
 # Driver or drivers to handle sending notifications. (multi
 # valued)
-#notification_driver=
+# notification_driver=
 notification_driver = neutron.openstack.common.notifier.rpc_notifier
 
 # AMQP topic used for OpenStack notifications. (list value)
 # Deprecated group/name - [rpc_notifier2]/topics
-#notification_topics=notifications
+# notification_topics=notifications
 
 # Seconds to wait for a response from a call. (integer value)
-#rpc_response_timeout=60
+# rpc_response_timeout=60
 
 # A URL representing the messaging driver to use and its full
 # configuration. If not set, we fall back to the rpc_backend
 # option and driver specific configuration. (string value)
-#transport_url=<None>
+# transport_url=
 
 # The messaging driver to use, defaults to rabbit. Other
 # drivers include qpid and zmq. (string value)
-# Note: explicitely set this because of RHEL (where qpid is used by default)
-rpc_backend=rabbit
+# rpc_backend=rabbit
+# Note: keep this explicitely set
+rpc_backend = rabbit
 
 # The default exchange under which topics are scoped. May be
 # overridden by an exchange name specified in the
 # transport_url option. (string value)
-#control_exchange=openstack
+# control_exchange=openstack
 control_exchange = neutron
+
 
 [matchmaker_redis]
 
@@ -512,13 +636,13 @@ control_exchange = neutron
 #
 
 # Host to locate redis. (string value)
-#host=127.0.0.1
+# host=127.0.0.1
 
 # Use this port to connect to redis host. (integer value)
-#port=6379
+# port=6379
 
 # Password for Redis server (optional). (string value)
-#password=<None>
+# password=
 
 
 [matchmaker_ring]
@@ -529,13 +653,14 @@ control_exchange = neutron
 
 # Matchmaker ring file (JSON). (string value)
 # Deprecated group/name - [DEFAULT]/matchmaker_ringfile
-#ringfile=/etc/oslo/matchmaker_ring.json
+# ringfile=/etc/oslo/matchmaker_ring.json
 
 [quotas]
 # Default driver to use for quota checks
-# quota_driver = neutron.db.quota_db.DbQuotaDriver
+# quota_driver = neutron.db.quota.driver.DbQuotaDriver
 
 # Resource name(s) that are supported in quota features
+# This option is deprecated for removal in the M release, please refrain from using it
 # quota_items = network,subnet,port
 
 # Default number of resource allowed per tenant. A negative value means
@@ -578,6 +703,16 @@ control_exchange = neutron
 # and that is the reason why quota is possible.
 # quota_health_monitor = -1
 
+# Number of loadbalancers allowed per tenant. A negative value means unlimited.
+# quota_loadbalancer = 10
+
+# Number of listeners allowed per tenant. A negative value means unlimited.
+# quota_listener = -1
+
+# Number of v2 health monitors allowed per tenant. A negative value means
+# unlimited. These health monitors exist under the lbaas v2 API
+# quota_healthmonitor = -1
+
 # Number of routers allowed per tenant. A negative value means unlimited.
 # quota_router = 10
 
@@ -598,9 +733,30 @@ control_exchange = neutron
 [agent]
 # Use "sudo neutron-rootwrap /etc/neutron/rootwrap.conf" to use the real
 # root filter facility.
-# Change to "sudo" to skip the filtering and just run the comand directly
+# Change to "sudo" to skip the filtering and just run the command directly
 # root_helper = sudo
 root_helper=sudo neutron-rootwrap /etc/neutron/rootwrap.conf
+
+# Set to true to add comments to generated iptables rules that describe
+# each rule's purpose. (System must support the iptables comments module.)
+# comment_iptables_rules = True
+
+# Root helper daemon application to use when possible.
+# root_helper_daemon =
+
+# Use the root helper when listing the namespaces on a system. This may not
+# be required depending on the security configuration. If the root helper is
+# not required, set this to False for a performance improvement.
+# use_helper_for_ns_read = True
+
+# The interval to check external processes for failure in seconds (0=disabled)
+# check_child_processes_interval = 60
+
+# Action to take when an external process spawned by an agent dies
+# Values:
+#   respawn - Respawns the external process
+#   exit - Exits the agent
+# check_child_processes_action = respawn
 
 # =========== items for agent management extension =============
 # seconds between nodes reporting state to server; should be less than
@@ -630,7 +786,7 @@ insecure = <%= @keystone_settings['insecure'] %>
 [database]
 # This line MUST be changed to actually run the plugin.
 # Example:
-# connection = mysql://root:pass@127.0.0.1:3306/neutron
+# connection = mysql+pymysql://root:pass@127.0.0.1:3306/neutron
 # Replace 127.0.0.1 above with the IP address of the database used by the
 # main neutron server. (Leave it as is if the database runs on this host.)
 # connection = sqlite://
@@ -681,32 +837,278 @@ max_overflow = <%= @sql_max_pool_overflow %>
 # pool_timeout = 10
 pool_timeout = <%= @sql_pool_timeout %>
 
-[service_providers]
-# Specify service providers (drivers) for advanced services like loadbalancer, VPN, Firewall.
-# Must be in form:
-# service_provider=<service_type>:<name>:<driver>[:default]
-# List of allowed service types includes LOADBALANCER, FIREWALL, VPN
-# Combination of <service type> and <name> must be unique; <driver> must also be unique
-# This is multiline option, example for default provider:
-# service_provider=LOADBALANCER:name:lbaas_plugin_driver_path:default
-# example of non-default provider:
-# service_provider=FIREWALL:name2:firewall_driver_path
-# --- Reference implementations ---
-# service_provider=VPN:openswan:neutron.services.vpn.service_drivers.ipsec.IPsecVPNDriver:default
-# In order to activate Radware's lbaas driver you need to uncomment the next line.
-# If you want to keep the HA Proxy as the default lbaas driver, remove the attribute default from the line below.
-# Otherwise comment the HA Proxy line
-# service_provider = LOADBALANCER:Radware:neutron.services.loadbalancer.drivers.radware.driver.LoadBalancerDriver:default
-# uncomment the following line to make the 'netscaler' LBaaS provider available.
-# service_provider=LOADBALANCER:NetScaler:neutron.services.loadbalancer.drivers.netscaler.netscaler_driver.NetScalerPluginDriver
-# Uncomment the following line (and comment out the OpenSwan VPN line) to enable Cisco's VPN driver.
-# service_provider=VPN:cisco:neutron.services.vpn.service_drivers.cisco_ipsec.CiscoCsrIPsecVPNDriver:default
-# Uncomment the line below to use Embrane heleos as Load Balancer service provider.
-# service_provider=LOADBALANCER:Embrane:neutron.services.loadbalancer.drivers.embrane.driver.EmbraneLbaas:default
-# Uncomment the line below to use the A10 Networks LBaaS driver.  Requires 'pip install a10-neutron-lbaas'.
-#service_provider = LOADBALANCER:A10Networks:neutron.services.loadbalancer.drivers.a10networks.driver_v1.ThunderDriver:default
-# Uncomment the following line to test the LBaaS v2 API _WITHOUT_ a real backend
-# service_provider = LOADBALANCER:LoggingNoop:neutron.services.loadbalancer.drivers.logging_noop.driver.LoggingNoopLoadBalancerDriver:default
-<% if node[:neutron][:use_lbaas] %>
-service_provider=LOADBALANCER:Haproxy:neutron_lbaas.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
-<% end %>
+[nova]
+# Name of the plugin to load
+# auth_plugin =
+
+# Config Section from which to load plugin specific options
+# auth_section =
+
+# PEM encoded Certificate Authority to use when verifying HTTPs connections.
+# cafile =
+
+# PEM encoded client certificate cert file
+# certfile =
+
+# Verify HTTPS connections.
+# insecure = False
+
+# PEM encoded client certificate key file
+# keyfile =
+
+# Name of nova region to use. Useful if keystone manages more than one region.
+# region_name =
+region_name = <%= @keystone_settings['endpoint_region'] %>
+
+# Timeout value for http requests
+# timeout =
+
+[oslo_concurrency]
+
+# Directory to use for lock files. For security, the specified directory should
+# only be writable by the user running the processes that need locking.
+# Defaults to environment variable OSLO_LOCK_PATH. If external locks are used,
+# a lock path must be set.
+# lock_path = $state_path/lock
+lock_path = /var/run/neutron
+
+# Enables or disables inter-process locks.
+# disable_process_locking = False
+
+[oslo_policy]
+
+# The JSON file that defines policies.
+# policy_file = policy.json
+
+# Default rule. Enforced when a requested rule is not found.
+# policy_default_rule = default
+
+# Directories where policy configuration files are stored.
+# They can be relative to any directory in the search path defined by the
+# config_dir option, or absolute paths. The file defined by policy_file
+# must exist for these directories to be searched. Missing or empty
+# directories are ignored.
+# policy_dirs = policy.d
+
+[oslo_messaging_amqp]
+
+#
+# From oslo.messaging
+#
+
+# Address prefix used when sending to a specific server (string value)
+# Deprecated group/name - [amqp1]/server_request_prefix
+# server_request_prefix = exclusive
+
+# Address prefix used when broadcasting to all servers (string value)
+# Deprecated group/name - [amqp1]/broadcast_prefix
+# broadcast_prefix = broadcast
+
+# Address prefix when sending to any server in group (string value)
+# Deprecated group/name - [amqp1]/group_request_prefix
+# group_request_prefix = unicast
+
+# Name for the AMQP container (string value)
+# Deprecated group/name - [amqp1]/container_name
+# container_name =
+
+# Timeout for inactive connections (in seconds) (integer value)
+# Deprecated group/name - [amqp1]/idle_timeout
+# idle_timeout = 0
+
+# Debug: dump AMQP frames to stdout (boolean value)
+# Deprecated group/name - [amqp1]/trace
+# trace = false
+
+# CA certificate PEM file for verifing server certificate (string value)
+# Deprecated group/name - [amqp1]/ssl_ca_file
+# ssl_ca_file =
+
+# Identifying certificate PEM file to present to clients (string value)
+# Deprecated group/name - [amqp1]/ssl_cert_file
+# ssl_cert_file =
+
+# Private key PEM file used to sign cert_file certificate (string value)
+# Deprecated group/name - [amqp1]/ssl_key_file
+# ssl_key_file =
+
+# Password for decrypting ssl_key_file (if encrypted) (string value)
+# Deprecated group/name - [amqp1]/ssl_key_password
+# ssl_key_password =
+
+# Accept clients using either SSL or plain TCP (boolean value)
+# Deprecated group/name - [amqp1]/allow_insecure_clients
+# allow_insecure_clients = false
+
+
+[oslo_messaging_qpid]
+
+#
+# From oslo.messaging
+#
+
+# Use durable queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/rabbit_durable_queues
+# amqp_durable_queues = false
+
+# Auto-delete queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_auto_delete
+# amqp_auto_delete = false
+
+# Size of RPC connection pool. (integer value)
+# Deprecated group/name - [DEFAULT]/rpc_conn_pool_size
+# rpc_conn_pool_size = 30
+
+# Qpid broker hostname. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_hostname
+# qpid_hostname = localhost
+
+# Qpid broker port. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_port
+# qpid_port = 5672
+
+# Qpid HA cluster host:port pairs. (list value)
+# Deprecated group/name - [DEFAULT]/qpid_hosts
+# qpid_hosts = $qpid_hostname:$qpid_port
+
+# Username for Qpid connection. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_username
+# qpid_username =
+
+# Password for Qpid connection. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_password
+# qpid_password =
+
+# Space separated list of SASL mechanisms to use for auth. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_sasl_mechanisms
+# qpid_sasl_mechanisms =
+
+# Seconds between connection keepalive heartbeats. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_heartbeat
+# qpid_heartbeat = 60
+
+# Transport to use, either 'tcp' or 'ssl'. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_protocol
+# qpid_protocol = tcp
+
+# Whether to disable the Nagle algorithm. (boolean value)
+# Deprecated group/name - [DEFAULT]/qpid_tcp_nodelay
+# qpid_tcp_nodelay = true
+
+# The number of prefetched messages held by receiver. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_receiver_capacity
+# qpid_receiver_capacity = 1
+
+# The qpid topology version to use.  Version 1 is what was originally used by
+# impl_qpid.  Version 2 includes some backwards-incompatible changes that allow
+# broker federation to work.  Users should update to version 2 when they are
+# able to take everything down, as it requires a clean break. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_topology_version
+# qpid_topology_version = 1
+
+
+[oslo_messaging_rabbit]
+
+#
+# From oslo.messaging
+#
+
+# Use durable queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/rabbit_durable_queues
+# amqp_durable_queues = false
+
+# Auto-delete queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_auto_delete
+# amqp_auto_delete = false
+
+# Size of RPC connection pool. (integer value)
+# Deprecated group/name - [DEFAULT]/rpc_conn_pool_size
+# rpc_conn_pool_size = 30
+
+# SSL version to use (valid only if SSL enabled). Valid values are TLSv1 and
+# SSLv23. SSLv2, SSLv3, TLSv1_1, and TLSv1_2 may be available on some
+# distributions. (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_version
+# kombu_ssl_version =
+
+# SSL key file (valid only if SSL enabled). (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_keyfile
+# kombu_ssl_keyfile =
+
+# SSL cert file (valid only if SSL enabled). (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_certfile
+# kombu_ssl_certfile =
+
+# SSL certification authority file (valid only if SSL enabled). (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_ca_certs
+# kombu_ssl_ca_certs =
+
+# How long to wait before reconnecting in response to an AMQP consumer cancel
+# notification. (floating point value)
+# Deprecated group/name - [DEFAULT]/kombu_reconnect_delay
+# kombu_reconnect_delay = 1.0
+
+# The RabbitMQ broker address where a single node is used. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_host
+# rabbit_host = localhost
+rabbit_host=<%= @rabbit_settings[:address] %>
+
+# The RabbitMQ broker port where a single node is used. (integer value)
+# Deprecated group/name - [DEFAULT]/rabbit_port
+# rabbit_port = 5672
+<% unless @rabbit_settings[:port].nil? -%>
+rabbit_port=<%= @rabbit_settings[:port] %>
+<% end -%>
+
+# RabbitMQ HA cluster host:port pairs. (list value)
+# Deprecated group/name - [DEFAULT]/rabbit_hosts
+# rabbit_hosts = $rabbit_host:$rabbit_port
+
+# Connect over SSL for RabbitMQ. (boolean value)
+# Deprecated group/name - [DEFAULT]/rabbit_use_ssl
+# rabbit_use_ssl = false
+
+# The RabbitMQ userid. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_userid
+# rabbit_userid = guest
+rabbit_userid=<%= @rabbit_settings[:user] %>
+
+# The RabbitMQ password. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_password
+# rabbit_password = guest
+rabbit_password=<%= @rabbit_settings[:password] %>
+
+# The RabbitMQ login method. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_login_method
+# rabbit_login_method = AMQPLAIN
+
+# The RabbitMQ virtual host. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_virtual_host
+# rabbit_virtual_host = /
+rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
+
+# How frequently to retry connecting with RabbitMQ. (integer value)
+# rabbit_retry_interval = 1
+
+# How long to backoff for between retries when connecting to RabbitMQ. (integer
+# value)
+# Deprecated group/name - [DEFAULT]/rabbit_retry_backoff
+# rabbit_retry_backoff = 2
+
+# Maximum number of RabbitMQ connection retries. Default is 0 (infinite retry
+# count). (integer value)
+# Deprecated group/name - [DEFAULT]/rabbit_max_retries
+# rabbit_max_retries = 0
+
+# Use HA queues in RabbitMQ (x-ha-policy: all). If you change this option, you
+# must wipe the RabbitMQ database. (boolean value)
+# Deprecated group/name - [DEFAULT]/rabbit_ha_queues
+# rabbit_ha_queues = false
+
+# Deprecated, use rpc_backend=kombu+memory or rpc_backend=fake (boolean value)
+# Deprecated group/name - [DEFAULT]/fake_rabbit
+# fake_rabbit = false
+
+[qos]
+# Drivers list to use to send the update notification
+# notification_drivers = message_queue
