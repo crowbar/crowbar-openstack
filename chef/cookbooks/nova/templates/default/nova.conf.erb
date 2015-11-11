@@ -4,126 +4,8 @@
 # Options defined in oslo.messaging
 #
 
-# Use durable queues in amqp. (boolean value)
-# Deprecated group/name - [DEFAULT]/rabbit_durable_queues
-#amqp_durable_queues=false
-
-# Auto-delete queues in amqp. (boolean value)
-#amqp_auto_delete=false
-
 # Size of RPC connection pool. (integer value)
 rpc_conn_pool_size=64
-
-# Qpid broker hostname. (string value)
-#qpid_hostname=localhost
-
-# Qpid broker port. (integer value)
-#qpid_port=5672
-
-# Qpid HA cluster host:port pairs. (list value)
-#qpid_hosts=$qpid_hostname:$qpid_port
-
-# Username for Qpid connection. (string value)
-#qpid_username=
-
-# Password for Qpid connection. (string value)
-#qpid_password=
-
-# Space separated list of SASL mechanisms to use for auth.
-# (string value)
-#qpid_sasl_mechanisms=
-
-# Seconds between connection keepalive heartbeats. (integer
-# value)
-#qpid_heartbeat=60
-
-# Transport to use, either 'tcp' or 'ssl'. (string value)
-#qpid_protocol=tcp
-
-# Whether to disable the Nagle algorithm. (boolean value)
-#qpid_tcp_nodelay=true
-
-# The number of prefetched messages held by receiver. (integer
-# value)
-#qpid_receiver_capacity=1
-
-# The qpid topology version to use.  Version 1 is what was
-# originally used by impl_qpid.  Version 2 includes some
-# backwards-incompatible changes that allow broker federation
-# to work.  Users should update to version 2 when they are
-# able to take everything down, as it requires a clean break.
-# (integer value)
-#qpid_topology_version=1
-
-# SSL version to use (valid only if SSL enabled). valid values
-# are TLSv1, SSLv23 and SSLv3. SSLv2 may be available on some
-# distributions. (string value)
-#kombu_ssl_version=
-
-# SSL key file (valid only if SSL enabled). (string value)
-#kombu_ssl_keyfile=
-
-# SSL cert file (valid only if SSL enabled). (string value)
-#kombu_ssl_certfile=
-
-# SSL certification authority file (valid only if SSL
-# enabled). (string value)
-#kombu_ssl_ca_certs=
-
-# How long to wait before reconnecting in response to an AMQP
-# consumer cancel notification. (floating point value)
-#kombu_reconnect_delay=1.0
-
-# The RabbitMQ broker address where a single node is used.
-# (string value)
-#rabbit_host=localhost
-rabbit_host=<%= @rabbit_settings[:address] %>
-
-# The RabbitMQ broker port where a single node is used.
-# (integer value)
-#rabbit_port=5672
-<%= "rabbit_port=#{@rabbit_settings[:port]}" unless @rabbit_settings[:port].nil? %>
-
-# RabbitMQ HA cluster host:port pairs. (list value)
-#rabbit_hosts=$rabbit_host:$rabbit_port
-
-# Connect over SSL for RabbitMQ. (boolean value)
-#rabbit_use_ssl=false
-
-# The RabbitMQ userid. (string value)
-#rabbit_userid=guest
-rabbit_userid=<%= @rabbit_settings[:user] %>
-
-# The RabbitMQ password. (string value)
-#rabbit_password=guest
-rabbit_password=<%= @rabbit_settings[:password] %>
-
-# the RabbitMQ login method (string value)
-#rabbit_login_method=AMQPLAIN
-
-# The RabbitMQ virtual host. (string value)
-#rabbit_virtual_host=/
-rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
-
-# How frequently to retry connecting with RabbitMQ. (integer
-# value)
-#rabbit_retry_interval=1
-
-# How long to backoff for between retries when connecting to
-# RabbitMQ. (integer value)
-#rabbit_retry_backoff=2
-
-# Maximum number of RabbitMQ connection retries. Default is 0
-# (infinite retry count). (integer value)
-#rabbit_max_retries=0
-
-# Use HA queues in RabbitMQ (x-ha-policy: all). If you change
-# this option, you must wipe the RabbitMQ database. (boolean
-# value)
-#rabbit_ha_queues=false
-
-# If passed, use a fake RabbitMQ provider. (boolean value)
-#fake_rabbit=false
 
 # ZeroMQ bind address. Should be a wildcard (*), an ethernet
 # interface, or IP. The "host" option should point or resolve
@@ -725,15 +607,6 @@ ec2_scheme=<%= @ssl_enabled ? "https" : "http" %>
 # hypervisor does not support password injection then the
 # password returned will not be correct (boolean value)
 #enable_instance_password=true
-
-
-#
-# Options defined in nova.api.sizelimit
-#
-
-# The maximum body size per each osapi request(bytes) (integer
-# value)
-#osapi_max_request_body_size=114688
 
 
 #
@@ -3492,285 +3365,530 @@ api_insecure=<%= @neutron_insecure ? 'True' : 'False' %>
 #allow_duplicate_networks=false
 
 
-[osapi_v3]
+[oslo_messaging_amqp]
 
 #
-# Options defined in nova.api.openstack
+# From oslo.messaging
 #
 
-# Whether the V3 API is enabled or not (boolean value)
-enabled=true
+# address prefix used when sending to a specific server (string value)
+# Deprecated group/name - [amqp1]/server_request_prefix
+#server_request_prefix = exclusive
 
-# A list of v3 API extensions to never load. Specify the
-# extension aliases here. (list value)
-#extensions_blacklist=
+# address prefix used when broadcasting to all servers (string value)
+# Deprecated group/name - [amqp1]/broadcast_prefix
+#broadcast_prefix = broadcast
 
-# If the list is not empty then a v3 API extension will only
-# be loaded if it exists in this list. Specify the extension
-# aliases here. (list value)
-#extensions_whitelist=
+# address prefix when sending to any server in group (string value)
+# Deprecated group/name - [amqp1]/group_request_prefix
+#group_request_prefix = unicast
+
+# Name for the AMQP container (string value)
+# Deprecated group/name - [amqp1]/container_name
+#container_name = <None>
+
+# Timeout for inactive connections (in seconds) (integer value)
+# Deprecated group/name - [amqp1]/idle_timeout
+#idle_timeout = 0
+
+# Debug: dump AMQP frames to stdout (boolean value)
+# Deprecated group/name - [amqp1]/trace
+#trace = false
+
+# CA certificate PEM file to verify server certificate (string value)
+# Deprecated group/name - [amqp1]/ssl_ca_file
+#ssl_ca_file =
+
+# Identifying certificate PEM file to present to clients (string value)
+# Deprecated group/name - [amqp1]/ssl_cert_file
+#ssl_cert_file =
+
+# Private key PEM file used to sign cert_file certificate (string value)
+# Deprecated group/name - [amqp1]/ssl_key_file
+#ssl_key_file =
+
+# Password for decrypting ssl_key_file (if encrypted) (string value)
+# Deprecated group/name - [amqp1]/ssl_key_password
+#ssl_key_password = <None>
+
+# Accept clients using either SSL or plain TCP (boolean value)
+# Deprecated group/name - [amqp1]/allow_insecure_clients
+#allow_insecure_clients = false
+
+# Space separated list of acceptable SASL mechanisms (string value)
+# Deprecated group/name - [amqp1]/sasl_mechanisms
+#sasl_mechanisms =
+
+# Path to directory that contains the SASL configuration (string value)
+# Deprecated group/name - [amqp1]/sasl_config_dir
+#sasl_config_dir =
+
+# Name of configuration file (without .conf suffix) (string value)
+# Deprecated group/name - [amqp1]/sasl_config_name
+#sasl_config_name =
+
+# User name for message broker authentication (string value)
+# Deprecated group/name - [amqp1]/username
+#username =
+
+# Password for message broker authentication (string value)
+# Deprecated group/name - [amqp1]/password
+#password =
+
+
+[oslo_messaging_qpid]
+
+#
+# From oslo.messaging
+#
+
+# Use durable queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_durable_queues
+# Deprecated group/name - [DEFAULT]/rabbit_durable_queues
+#amqp_durable_queues = false
+
+# Auto-delete queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_auto_delete
+#amqp_auto_delete = false
+
+# Send a single AMQP reply to call message. The current behaviour since oslo-
+# incubator is to send two AMQP replies - first one with the payload, a second
+# one to ensure the other have finish to send the payload. We are going to
+# remove it in the N release, but we must keep backward compatible at the same
+# time. This option provides such compatibility - it defaults to False in
+# Liberty and can be turned on for early adopters with a new installations or
+# for testing. Please note, that this option will be removed in the Mitaka
+# release. (boolean value)
+#send_single_reply = false
+
+# Qpid broker hostname. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_hostname
+#qpid_hostname = localhost
+
+# Qpid broker port. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_port
+#qpid_port = 5672
+
+# Qpid HA cluster host:port pairs. (list value)
+# Deprecated group/name - [DEFAULT]/qpid_hosts
+#qpid_hosts = $qpid_hostname:$qpid_port
+
+# Username for Qpid connection. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_username
+#qpid_username =
+
+# Password for Qpid connection. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_password
+#qpid_password =
+
+# Space separated list of SASL mechanisms to use for auth. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_sasl_mechanisms
+#qpid_sasl_mechanisms =
+
+# Seconds between connection keepalive heartbeats. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_heartbeat
+#qpid_heartbeat = 60
+
+# Transport to use, either 'tcp' or 'ssl'. (string value)
+# Deprecated group/name - [DEFAULT]/qpid_protocol
+#qpid_protocol = tcp
+
+# Whether to disable the Nagle algorithm. (boolean value)
+# Deprecated group/name - [DEFAULT]/qpid_tcp_nodelay
+#qpid_tcp_nodelay = true
+
+# The number of prefetched messages held by receiver. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_receiver_capacity
+#qpid_receiver_capacity = 1
+
+# The qpid topology version to use.  Version 1 is what was originally used by
+# impl_qpid.  Version 2 includes some backwards-incompatible changes that allow
+# broker federation to work.  Users should update to version 2 when they are
+# able to take everything down, as it requires a clean break. (integer value)
+# Deprecated group/name - [DEFAULT]/qpid_topology_version
+#qpid_topology_version = 1
+
+
+[oslo_messaging_rabbit]
+
+#
+# From oslo.messaging
+#
+
+# Use durable queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_durable_queues
+# Deprecated group/name - [DEFAULT]/rabbit_durable_queues
+#amqp_durable_queues = false
+
+# Auto-delete queues in AMQP. (boolean value)
+# Deprecated group/name - [DEFAULT]/amqp_auto_delete
+#amqp_auto_delete = false
+
+# Send a single AMQP reply to call message. The current behaviour since oslo-
+# incubator is to send two AMQP replies - first one with the payload, a second
+# one to ensure the other have finish to send the payload. We are going to
+# remove it in the N release, but we must keep backward compatible at the same
+# time. This option provides such compatibility - it defaults to False in
+# Liberty and can be turned on for early adopters with a new installations or
+# for testing. Please note, that this option will be removed in the Mitaka
+# release. (boolean value)
+#send_single_reply = false
+
+# SSL version to use (valid only if SSL enabled). Valid values are TLSv1 and
+# SSLv23. SSLv2, SSLv3, TLSv1_1, and TLSv1_2 may be available on some
+# distributions. (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_version
+#kombu_ssl_version =
+
+# SSL key file (valid only if SSL enabled). (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_keyfile
+#kombu_ssl_keyfile =
+
+# SSL cert file (valid only if SSL enabled). (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_certfile
+#kombu_ssl_certfile =
+
+# SSL certification authority file (valid only if SSL enabled). (string value)
+# Deprecated group/name - [DEFAULT]/kombu_ssl_ca_certs
+#kombu_ssl_ca_certs =
+
+# How long to wait before reconnecting in response to an AMQP consumer cancel
+# notification. (floating point value)
+# Deprecated group/name - [DEFAULT]/kombu_reconnect_delay
+#kombu_reconnect_delay = 1.0
+
+# How long to wait a missing client beforce abandoning to send it its replies.
+# This value should not be longer than rpc_response_timeout. (integer value)
+# Deprecated group/name - [DEFAULT]/kombu_reconnect_timeout
+#kombu_missing_consumer_retry_timeout = 5
+
+# Determines how the next RabbitMQ node is chosen in case the one we are
+# currently connected to becomes unavailable. Takes effect only if more than
+# one RabbitMQ node is provided in config. (string value)
+# Allowed values: round-robin, shuffle
+#kombu_failover_strategy = round-robin
+
+# The RabbitMQ broker address where a single node is used. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_host
+#rabbit_host = localhost
+rabbit_host = <%= @rabbit_settings[:address] %>
+
+# The RabbitMQ broker port where a single node is used. (integer value)
+# Deprecated group/name - [DEFAULT]/rabbit_port
+#rabbit_port = 5672
+<%= "rabbit_port = #{@rabbit_settings[:port]}" unless @rabbit_settings[:port].nil? %>
+
+# RabbitMQ HA cluster host:port pairs. (list value)
+# Deprecated group/name - [DEFAULT]/rabbit_hosts
+#rabbit_hosts = $rabbit_host:$rabbit_port
+
+# Connect over SSL for RabbitMQ. (boolean value)
+# Deprecated group/name - [DEFAULT]/rabbit_use_ssl
+#rabbit_use_ssl = false
+
+# The RabbitMQ userid. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_userid
+#rabbit_userid = guest
+rabbit_userid = <%= @rabbit_settings[:user] %>
+
+# The RabbitMQ password. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_password
+#rabbit_password = guest
+rabbit_password = <%= @rabbit_settings[:password] %>
+
+# The RabbitMQ login method. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_login_method
+#rabbit_login_method = AMQPLAIN
+
+# The RabbitMQ virtual host. (string value)
+# Deprecated group/name - [DEFAULT]/rabbit_virtual_host
+#rabbit_virtual_host = /
+rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
+
+# How frequently to retry connecting with RabbitMQ. (integer value)
+#rabbit_retry_interval = 1
+
+# How long to backoff for between retries when connecting to RabbitMQ. (integer
+# value)
+# Deprecated group/name - [DEFAULT]/rabbit_retry_backoff
+#rabbit_retry_backoff = 2
+
+# Maximum number of RabbitMQ connection retries. Default is 0 (infinite retry
+# count). (integer value)
+# Deprecated group/name - [DEFAULT]/rabbit_max_retries
+#rabbit_max_retries = 0
+
+# Use HA queues in RabbitMQ (x-ha-policy: all). If you change this option, you
+# must wipe the RabbitMQ database. (boolean value)
+# Deprecated group/name - [DEFAULT]/rabbit_ha_queues
+#rabbit_ha_queues = false
+
+# Number of seconds after which the Rabbit broker is considered down if
+# heartbeat's keep-alive fails (0 disable the heartbeat). EXPERIMENTAL (integer
+# value)
+#heartbeat_timeout_threshold = 60
+
+# How often times during the heartbeat_timeout_threshold we check the
+# heartbeat. (integer value)
+#heartbeat_rate = 2
+
+# Deprecated, use rpc_backend=kombu+memory or rpc_backend=fake (boolean value)
+# Deprecated group/name - [DEFAULT]/fake_rabbit
+#fake_rabbit = false
+
+
+[oslo_middleware]
+
+#
+# From oslo.middleware
+#
+
+# The maximum body size for each  request, in bytes. (integer value)
+# Deprecated group/name - [DEFAULT]/osapi_max_request_body_size
+# Deprecated group/name - [DEFAULT]/max_request_body_size
+#max_request_body_size = 114688
+
+#
+# From oslo.middleware
+#
+
+# The HTTP Header that will be used to determine what the original request
+# protocol scheme was, even if it was hidden by an SSL termination proxy.
+# (string value)
+#secure_proxy_ssl_header = X-Forwarded-Proto
 
 
 [rdp]
 
 #
-# Options defined in nova.rdp
+# From nova
 #
 
-# Location of RDP html5 console proxy, in the form
-# "http://127.0.0.1:6083/" (string value)
-#html5_proxy_base_url=http://127.0.0.1:6083/
+# Location of RDP html5 console proxy, in the form "http://127.0.0.1:6083/"
+# (string value)
+#html5_proxy_base_url = http://127.0.0.1:6083/
 
 # Enable RDP related features (boolean value)
-#enabled=false
+#enabled = false
 
 
 [serial_console]
 
 #
-# Options defined in nova.cmd.serialproxy
+# From nova
 #
 
 # Host on which to listen for incoming requests (string value)
-#serialproxy_host=0.0.0.0
+#serialproxy_host = 0.0.0.0
 
-# Port on which to listen for incoming requests (integer
-# value)
-#serialproxy_port=6083
-
-
-#
-# Options defined in nova.console.serial
-#
+# Port on which to listen for incoming requests (integer value)
+# Minimum value: 1
+# Maximum value: 65535
+#serialproxy_port = 6083
 
 # Enable serial console related features (boolean value)
-#enabled=false
+#enabled = false
 
-# Range of TCP ports to use for serial ports on compute hosts
-# (string value)
-#port_range=10000:20000
+# Range of TCP ports to use for serial ports on compute hosts (string value)
+#port_range = 10000:20000
 
 # Location of serial console proxy. (string value)
-#base_url=ws://127.0.0.1:6083/
+#base_url = ws://127.0.0.1:6083/
 
-# IP address on which instance serial console should listen
+# IP address on which instance serial console should listen (string value)
+#listen = 127.0.0.1
+
+# The address to which proxy clients (like nova-serialproxy) should connect
 # (string value)
-#listen=127.0.0.1
-
-# The address to which proxy clients (like nova-serialproxy)
-# should connect (string value)
-#proxyclient_address=127.0.0.1
+#proxyclient_address = 127.0.0.1
 
 
 [spice]
 
 #
-# Options defined in nova.cmd.spicehtml5proxy
+# From nova
 #
 
 # Host on which to listen for incoming requests (string value)
-# Deprecated group/name - [DEFAULT]/spicehtml5proxy_host
-#html5proxy_host=0.0.0.0
+#html5proxy_host = 0.0.0.0
 
-# Port on which to listen for incoming requests (integer
-# value)
-# Deprecated group/name - [DEFAULT]/spicehtml5proxy_port
-#html5proxy_port=6082
-
-
-#
-# Options defined in nova.spice
-#
+# Port on which to listen for incoming requests (integer value)
+# Minimum value: 1
+# Maximum value: 65535
+#html5proxy_port = 6082
 
 # Location of spice HTML5 console proxy, in the form
 # "http://127.0.0.1:6082/spice_auto.html" (string value)
-#html5proxy_base_url=http://127.0.0.1:6082/spice_auto.html
+#html5proxy_base_url = http://127.0.0.1:6082/spice_auto.html
 
-# IP address on which instance spice server should listen
+# IP address on which instance spice server should listen (string value)
+#server_listen = 127.0.0.1
+
+# The address to which proxy clients (like nova-spicehtml5proxy) should connect
 # (string value)
-#server_listen=127.0.0.1
-
-# The address to which proxy clients (like nova-
-# spicehtml5proxy) should connect (string value)
-#server_proxyclient_address=127.0.0.1
+#server_proxyclient_address = 127.0.0.1
 
 # Enable spice related features (boolean value)
-#enabled=false
+#enabled = false
 
 # Enable spice guest agent support (boolean value)
-#agent_enabled=true
+#agent_enabled = true
 
 # Keymap for spice (string value)
-#keymap=en-us
+#keymap = en-us
 
 
 [ssl]
 
 #
-# Options defined in nova.openstack.common.sslutils
+# From oslo.service.sslutils
 #
 
-# CA certificate file to use to verify connecting clients.
-# (string value)
-#ca_file=<None>
+# CA certificate file to use to verify connecting clients. (string value)
+#ca_file = <None>
+<%= "ca_file = #{@ssl_ca_file}" if @ssl_cert_required %>
 
-# Certificate file to use when starting the server securely.
-# (string value)
-#cert_file=<None>
+# Certificate file to use when starting the server securely. (string value)
+#cert_file = <None>
+cert_file = <%= @ssl_cert_file %>
 
-# Private key file to use when starting the server securely.
-# (string value)
-#key_file=<None>
+# Private key file to use when starting the server securely. (string value)
+#key_file = <None>
+key_file = <%= @ssl_key_file %>
 
 
 [trusted_computing]
 
 #
-# Options defined in nova.scheduler.filters.trusted_filter
+# From nova.scheduler
 #
 
 # Attestation server HTTP (string value)
-#attestation_server=<None>
+#attestation_server = <None>
 <% if @has_itxt %>attestation_server=<%= @oat_appraiser_host %><% end %>
 
-# Attestation server Cert file for Identity verification
-# (string value)
-#attestation_server_ca_file=<None>
+# Attestation server Cert file for Identity verification (string value)
+#attestation_server_ca_file = <None>
 <% if @has_itxt %>attestation_server_ca_file=/etc/nova/oat_certfile.cer<% end %>
 
 # Attestation server port (string value)
-#attestation_port=8443
+#attestation_port = 8443
 <% if @has_itxt %>attestation_port=<%= @oat_appraiser_port %><% end %>
 
 # Attestation web API URL (string value)
-#attestation_api_url=/OpenAttestationWebServices/V1.0
+#attestation_api_url = /OpenAttestationWebServices/V1.0
 <% if @has_itxt %>attestation_api_url=/AttestationService/resources<% end %>
 
 # Attestation authorization blob - must change (string value)
-#attestation_auth_blob=<None>
+#attestation_auth_blob = <None>
 
 # Attestation status cache valid period length (integer value)
-#attestation_auth_timeout=60
+#attestation_auth_timeout = 60
 
-# Disable SSL cert verification for Attestation service
-# (boolean value)
-#attestation_insecure_ssl=false
+# Disable SSL cert verification for Attestation service (boolean value)
+#attestation_insecure_ssl = false
 
 
 [upgrade_levels]
 
 #
-# Options defined in nova.baserpc
+# From nova
 #
 
-# Set a version cap for messages sent to the base api in any
-# service (string value)
-#baseapi=<None>
-
-
-#
-# Options defined in nova.cells.rpc_driver
-#
-
-# Set a version cap for messages sent between cells services
-# (string value)
-#intercell=<None>
-
-
-#
-# Options defined in nova.cells.rpcapi
-#
-
-# Set a version cap for messages sent to local cells services
-# (string value)
-#cells=<None>
-
-
-#
-# Options defined in nova.cert.rpcapi
-#
-
-# Set a version cap for messages sent to cert services (string
+# Set a version cap for messages sent to the base api in any service (string
 # value)
-#cert=<None>
+#baseapi = <None>
 
+# Set a version cap for messages sent to cert services (string value)
+#cert = <None>
+
+# Set a version cap for messages sent to conductor services (string value)
+#conductor = <None>
+
+# Set a version cap for messages sent to console services (string value)
+#console = <None>
+
+# Set a version cap for messages sent to consoleauth services (string value)
+#consoleauth = <None>
 
 #
-# Options defined in nova.compute.rpcapi
+# From nova.cells
 #
 
-# Set a version cap for messages sent to compute services. If
-# you plan to do a live upgrade from havana to icehouse, you
-# should set this option to "icehouse-compat" before beginning
+# Set a version cap for messages sent between cells services (string value)
+#intercell = <None>
+
+# Set a version cap for messages sent to local cells services (string value)
+#cells = <None>
+
+#
+# From nova.compute
+#
+
+# Set a version cap for messages sent to compute services. If you plan to do a
+# live upgrade from an old version to a newer version, you should set this
+# option to the old version before beginning the live upgrade procedure. Only
+# upgrading to the next version is supported, so you cannot skip a release for
 # the live upgrade procedure. (string value)
-#compute=<None>
-
-
-#
-# Options defined in nova.conductor.rpcapi
-#
-
-# Set a version cap for messages sent to conductor services
-# (string value)
-#conductor=<None>
-
+#compute = <None>
 
 #
-# Options defined in nova.console.rpcapi
+# From nova.network
 #
 
-# Set a version cap for messages sent to console services
-# (string value)
-#console=<None>
-
+# Set a version cap for messages sent to network services (string value)
+#network = <None>
 
 #
-# Options defined in nova.consoleauth.rpcapi
+# From nova.scheduler
 #
 
-# Set a version cap for messages sent to consoleauth services
-# (string value)
-#consoleauth=<None>
-
-
-#
-# Options defined in nova.network.rpcapi
-#
-
-# Set a version cap for messages sent to network services
-# (string value)
-#network=<None>
-
-
-#
-# Options defined in nova.scheduler.rpcapi
-#
-
-# Set a version cap for messages sent to scheduler services
-# (string value)
-#scheduler=<None>
+# Set a version cap for messages sent to scheduler services (string value)
+#scheduler = <None>
 
 
 [vmware]
 
 #
-# Options defined in nova.virt.vmwareapi.driver
+# From nova.virt
 #
 
-# Hostname or IP address for connection to VMware ESX/VC host.
+# The maximum number of ObjectContent data objects that should be returned in a
+# single result. A positive value will cause the operation to suspend the
+# retrieval when the count of objects reaches the specified maximum. The server
+# may still limit the count to something less than the configured value. Any
+# remaining objects may be retrieved with additional requests. (integer value)
+#maximum_objects = 100
+
+# The PBM status. (boolean value)
+#pbm_enabled = false
+
+# PBM service WSDL file location URL. e.g.
+# file:///opt/SDK/spbm/wsdl/pbmService.wsdl Not setting this will disable
+# storage policy based placement of instances. (string value)
+#pbm_wsdl_location = <None>
+
+# The PBM default policy. If pbm_wsdl_location is set and there is no defined
+# storage policy for the specific request then this policy will be used.
 # (string value)
-#host_ip=<None>
-<%= "host_ip=#{node[:nova][:vcenter][:host]}" if @libvirt_type.eql?('vmware') %>
+#pbm_default_policy = <None>
 
-# Username for connection to VMware ESX/VC host. (string
-# value)
-#host_username=<None>
-<%= "host_username=#{node[:nova][:vcenter][:user]}" if @libvirt_type.eql?('vmware') %>
+# Hostname or IP address for connection to VMware vCenter host. (string value)
+#host_ip = <None>
+<%= "host_ip = #{node[:nova][:vcenter][:host]}" if @libvirt_type.eql?('vmware') %>
 
-# Password for connection to VMware ESX/VC host. (string
-# value)
-#host_password=<None>
-<%= "host_password=#{node[:nova][:vcenter][:password]}" if @libvirt_type.eql?('vmware') %>
+# Port for connection to VMware vCenter host. (integer value)
+# Minimum value: 1
+# Maximum value: 65535
+#host_port = 443
+
+# Username for connection to VMware vCenter host. (string value)
+#host_username = <None>
+<%= "host_username = #{node[:nova][:vcenter][:user]}" if @libvirt_type.eql?('vmware') %>
+
+# Password for connection to VMware vCenter host. (string value)
+#host_password = <None>
+<%= "host_password = #{node[:nova][:vcenter][:password]}" if @libvirt_type.eql?('vmware') %>
 
 # Specify a CA bundle file to use in verifying the vCenter server certificate.
 # (string value)
@@ -3783,339 +3901,313 @@ enabled=true
 #insecure = false
 <%= "insecure=#{node[:nova][:vcenter][:insecure]}" if @libvirt_type.eql?('vmware') && node[:nova][:vcenter][:insecure] %>
 
-# Name of a VMware Cluster ComputeResource. Used only if
-# compute_driver is vmwareapi.VMwareVCDriver. (multi valued)
-#cluster_name=<None>
+# Name of a VMware Cluster ComputeResource. (string value)
+#cluster_name = <None>
 <% if @libvirt_type.eql?('vmware') -%>
  <% node[:nova][:vcenter][:clusters].each do |cluster| -%>
-cluster_name="<%= cluster %>"
+cluster_name = "<%= cluster %>"
  <% end -%>
 <% end -%>
 
 # Regex to match the name of a datastore. (string value)
-#datastore_regex=<None>
-<%= "datastore_regex=#{node[:nova][:vcenter][:datastore]}" if @libvirt_type.eql?('vmware') %>
+#datastore_regex = <None>
+<%= "datastore_regex = #{node[:nova][:vcenter][:datastore]}" if @libvirt_type.eql?('vmware') %>
 
-# The interval used for polling of remote tasks. (floating
-# point value)
-#task_poll_interval=0.5
+# The interval used for polling of remote tasks. (floating point value)
+#task_poll_interval = 0.5
 
-# The number of times we retry on failures, e.g., socket
-# error, etc. (integer value)
-#api_retry_count=10
+# The number of times we retry on failures, e.g., socket error, etc. (integer
+# value)
+#api_retry_count = 10
 
 # VNC starting port (integer value)
-#vnc_port=5900
+# Minimum value: 1
+# Maximum value: 65535
+#vnc_port = 5900
 
 # Total number of VNC ports (integer value)
-#vnc_port_total=10000
+#vnc_port_total = 10000
 
 # Whether to use linked clone (boolean value)
-#use_linked_clone=true
+#use_linked_clone = true
 
+# Optional VIM Service WSDL Location e.g http://<server>/vimService.wsdl.
+# Optional over-ride to default location for bug work-arounds (string value)
+#wsdl_location = <None>
 
-#
-# Options defined in nova.virt.vmwareapi.vif
-#
-
-# Physical ethernet adapter name for vlan networking (string
-# value)
-#vlan_interface=vmnic0
-<%= "vlan_interface=#{node[:nova][:vcenter][:interface]}" if @libvirt_type.eql?('vmware') %>
-
-
-#
-# Options defined in nova.virt.vmwareapi.vim
-#
-
-# Optional VIM Service WSDL Location e.g
-# http://<server>/vimService.wsdl. Optional over-ride to
-# default location for bug work-arounds (string value)
-#wsdl_location=<None>
-
-
-#
-# Options defined in nova.virt.vmwareapi.vim_util
-#
-
-# The maximum number of ObjectContent data objects that should
-# be returned in a single result. A positive value will cause
-# the operation to suspend the retrieval when the count of
-# objects reaches the specified maximum. The server may still
-# limit the count to something less than the configured value.
-# Any remaining objects may be retrieved with additional
-# requests. (integer value)
-#maximum_objects=100
-
-
-#
-# Options defined in nova.virt.vmwareapi.vmops
-#
+# Physical ethernet adapter name for vlan networking (string value)
+#vlan_interface = vmnic0
+<%= "vlan_interface = #{node[:nova][:vcenter][:interface]}" if @libvirt_type.eql?('vmware') %>
 
 # Name of Integration Bridge (string value)
-#integration_bridge=br-int
+#integration_bridge = br-int
+
+# Set this value if affected by an increased network latency causing repeated
+# characters when typing in a remote console. (integer value)
+#console_delay_seconds = <None>
+
+# Identifies the remote system that serial port traffic will be sent to. If
+# this is not set, no serial ports will be added to the created VMs. (string
+# value)
+#serial_port_service_uri = <None>
+
+# Identifies a proxy service that provides network access to the
+# serial_port_service_uri. This option is ignored if serial_port_service_uri is
+# not specified. (string value)
+#serial_port_proxy_uri = <None>
+
+# The prefix for where cached images are stored. This is NOT the full path -
+# just a folder prefix. This should only be used when a datastore cache should
+# be shared between compute nodes. Note: this should only be used when the
+# compute nodes have a shared file system. (string value)
+#cache_prefix = <None>
+
+
+[workarounds]
+
+#
+# From nova
+#
+
+# This option allows a fallback to sudo for performance reasons. For example
+# see https://bugs.launchpad.net/nova/+bug/1415106 (boolean value)
+#disable_rootwrap = false
+
+# When using libvirt 1.2.2 live snapshots fail intermittently under load.  This
+# config option provides a mechanism to enable live snapshot while this is
+# resolved.  See https://bugs.launchpad.net/nova/+bug/1334398 (boolean value)
+#disable_libvirt_livesnapshot = true
+
+# DEPRECATED: Whether to destroy instances on startup when we suspect they have
+# previously been evacuated. This can result in data loss if undesired. See
+# https://launchpad.net/bugs/1419785 (boolean value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#destroy_after_evacuate = true
+
+# Whether or not to handle events raised from the compute driver's 'emit_event'
+# method. These are lifecycle events raised from compute drivers that implement
+# the method. An example of a lifecycle event is an instance starting or
+# stopping. If the instance is going through task state changes due to an API
+# operation, like resize, the events are ignored. However, this is an advanced
+# feature which allows the hypervisor to signal to the compute service that an
+# unexpected state change has occurred in an instance and the instance can be
+# shutdown automatically - which can inherently race in reboot operations or
+# when the compute service or host is rebooted, either planned or due to an
+# unexpected outage. Care should be taken when using this and
+# sync_power_state_interval is negative since then if any instances are out of
+# sync between the hypervisor and the Nova database they will have to be
+# synchronized manually. See https://bugs.launchpad.net/bugs/1444630 (boolean
+# value)
+#handle_virt_lifecycle_events = true
 
 
 [xenserver]
 
 #
-# Options defined in nova.virt.xenapi.agent
+# From nova.virt
 #
+
+# Name of Integration Bridge used by Open vSwitch (string value)
+#ovs_integration_bridge = xapi1
 
 # Number of seconds to wait for agent reply (integer value)
-#agent_timeout=30
+#agent_timeout = 30
 
-# Number of seconds to wait for agent to be fully operational
-# (integer value)
-#agent_version_timeout=300
+# Number of seconds to wait for agent to be fully operational (integer value)
+#agent_version_timeout = 300
 
-# Number of seconds to wait for agent reply to resetnetwork
-# request (integer value)
-#agent_resetnetwork_timeout=60
+# Number of seconds to wait for agent reply to resetnetwork request (integer
+# value)
+#agent_resetnetwork_timeout = 60
 
-# Specifies the path in which the XenAPI guest agent should be
-# located. If the agent is present, network configuration is
-# not injected into the image. Used if
-# compute_driver=xenapi.XenAPIDriver and flat_injected=True
-# (string value)
-#agent_path=usr/sbin/xe-update-networking
+# Specifies the path in which the XenAPI guest agent should be located. If the
+# agent is present, network configuration is not injected into the image. Used
+# if compute_driver=xenapi.XenAPIDriver and flat_injected=True (string value)
+#agent_path = usr/sbin/xe-update-networking
 
-# Disables the use of the XenAPI agent in any image regardless
-# of what image properties are present. (boolean value)
-#disable_agent=false
+# Disables the use of the XenAPI agent in any image regardless of what image
+# properties are present. (boolean value)
+#disable_agent = false
 
-# Determines if the XenAPI agent should be used when the image
-# used does not contain a hint to declare if the agent is
-# present or not. The hint is a glance property
-# "xenapi_use_agent" that has the value "True" or "False".
-# Note that waiting for the agent when it is not present will
-# significantly increase server boot times. (boolean value)
-#use_agent_default=false
-
-
-#
-# Options defined in nova.virt.xenapi.client.session
-#
+# Determines if the XenAPI agent should be used when the image used does not
+# contain a hint to declare if the agent is present or not. The hint is a
+# glance property "xenapi_use_agent" that has the value "True" or "False". Note
+# that waiting for the agent when it is not present will significantly increase
+# server boot times. (boolean value)
+#use_agent_default = false
 
 # Timeout in seconds for XenAPI login. (integer value)
-#login_timeout=10
+#login_timeout = 10
 
-# Maximum number of concurrent XenAPI connections. Used only
-# if compute_driver=xenapi.XenAPIDriver (integer value)
-#connection_concurrent=5
+# Maximum number of concurrent XenAPI connections. Used only if
+# compute_driver=xenapi.XenAPIDriver (integer value)
+#connection_concurrent = 5
 
-
-#
-# Options defined in nova.virt.xenapi.driver
-#
-
-# URL for connection to XenServer/Xen Cloud Platform. A
-# special value of unix://local can be used to connect to the
-# local unix socket.  Required if
+# URL for connection to XenServer/Xen Cloud Platform. A special value of
+# unix://local can be used to connect to the local unix socket.  Required if
 # compute_driver=xenapi.XenAPIDriver (string value)
-#connection_url=<None>
+#connection_url = <None>
 
-# Username for connection to XenServer/Xen Cloud Platform.
-# Used only if compute_driver=xenapi.XenAPIDriver (string
-# value)
-#connection_username=root
+# Username for connection to XenServer/Xen Cloud Platform. Used only if
+# compute_driver=xenapi.XenAPIDriver (string value)
+#connection_username = root
 
-# Password for connection to XenServer/Xen Cloud Platform.
-# Used only if compute_driver=xenapi.XenAPIDriver (string
-# value)
-#connection_password=<None>
+# Password for connection to XenServer/Xen Cloud Platform. Used only if
+# compute_driver=xenapi.XenAPIDriver (string value)
+#connection_password = <None>
 
-# The interval used for polling of coalescing vhds. Used only
-# if compute_driver=xenapi.XenAPIDriver (floating point value)
-#vhd_coalesce_poll_interval=5.0
+# The interval used for polling of coalescing vhds. Used only if
+# compute_driver=xenapi.XenAPIDriver (floating point value)
+#vhd_coalesce_poll_interval = 5.0
 
-# Ensure compute service is running on host XenAPI connects
-# to. (boolean value)
-#check_host=true
+# Ensure compute service is running on host XenAPI connects to. (boolean value)
+#check_host = true
 
-# Max number of times to poll for VHD to coalesce. Used only
-# if compute_driver=xenapi.XenAPIDriver (integer value)
-#vhd_coalesce_max_attempts=20
+# Max number of times to poll for VHD to coalesce. Used only if
+# compute_driver=xenapi.XenAPIDriver (integer value)
+#vhd_coalesce_max_attempts = 20
 
 # Base path to the storage repository (string value)
-#sr_base_path=/var/run/sr-mount
+#sr_base_path = /var/run/sr-mount
 
 # The iSCSI Target Host (string value)
-#target_host=<None>
+#target_host = <None>
 
 # The iSCSI Target Port, default is port 3260 (string value)
-#target_port=3260
+#target_port = 3260
 
 # IQN Prefix (string value)
-#iqn_prefix=iqn.2010-10.org.openstack
+#iqn_prefix = iqn.2010-10.org.openstack
 
-# Used to enable the remapping of VBD dev (Works around an
-# issue in Ubuntu Maverick) (boolean value)
-#remap_vbd_dev=false
+# Used to enable the remapping of VBD dev (Works around an issue in Ubuntu
+# Maverick) (boolean value)
+#remap_vbd_dev = false
 
-# Specify prefix to remap VBD dev to (ex. /dev/xvdb ->
-# /dev/sdb) (string value)
-#remap_vbd_dev_prefix=sd
+# Specify prefix to remap VBD dev to (ex. /dev/xvdb -> /dev/sdb) (string value)
+#remap_vbd_dev_prefix = sd
 
+# Base URL for torrent files; must contain a slash character (see RFC 1808,
+# step 6) (string value)
+#torrent_base_url = <None>
 
-#
-# Options defined in nova.virt.xenapi.image.bittorrent
-#
+# Probability that peer will become a seeder. (1.0 = 100%) (floating point
+# value)
+#torrent_seed_chance = 1.0
 
-# Base URL for torrent files. (string value)
-#torrent_base_url=<None>
+# Number of seconds after downloading an image via BitTorrent that it should be
+# seeded for other peers. (integer value)
+#torrent_seed_duration = 3600
 
-# Probability that peer will become a seeder. (1.0 = 100%)
-# (floating point value)
-#torrent_seed_chance=1.0
-
-# Number of seconds after downloading an image via BitTorrent
-# that it should be seeded for other peers. (integer value)
-#torrent_seed_duration=3600
-
-# Cached torrent files not accessed within this number of
-# seconds can be reaped (integer value)
-#torrent_max_last_accessed=86400
+# Cached torrent files not accessed within this number of seconds can be reaped
+# (integer value)
+#torrent_max_last_accessed = 86400
 
 # Beginning of port range to listen on (integer value)
-#torrent_listen_port_start=6881
+# Minimum value: 1
+# Maximum value: 65535
+#torrent_listen_port_start = 6881
 
 # End of port range to listen on (integer value)
-#torrent_listen_port_end=6891
+# Minimum value: 1
+# Maximum value: 65535
+#torrent_listen_port_end = 6891
 
-# Number of seconds a download can remain at the same progress
-# percentage w/o being considered a stall (integer value)
-#torrent_download_stall_cutoff=600
+# Number of seconds a download can remain at the same progress percentage w/o
+# being considered a stall (integer value)
+#torrent_download_stall_cutoff = 600
 
-# Maximum number of seeder processes to run concurrently
-# within a given dom0. (-1 = no limit) (integer value)
-#torrent_max_seeder_processes_per_host=1
-
-
-#
-# Options defined in nova.virt.xenapi.pool
-#
+# Maximum number of seeder processes to run concurrently within a given dom0.
+# (-1 = no limit) (integer value)
+#torrent_max_seeder_processes_per_host = 1
 
 # To use for hosts with different CPUs (boolean value)
-#use_join_force=true
+#use_join_force = true
 
+# Cache glance images locally. `all` will cache all images, `some` will only
+# cache images that have the image_property `cache_in_nova=True`, and `none`
+# turns off caching entirely (string value)
+# Allowed values: all, some, none
+#cache_images = all
 
-#
-# Options defined in nova.virt.xenapi.vif
-#
-
-# Name of Integration Bridge used by Open vSwitch (string
-# value)
-#ovs_integration_bridge=xapi1
-
-
-#
-# Options defined in nova.virt.xenapi.vm_utils
-#
-
-# Cache glance images locally. `all` will cache all images,
-# `some` will only cache images that have the image_property
-# `cache_in_nova=True`, and `none` turns off caching entirely
-# (string value)
-#cache_images=all
-
-# Compression level for images, e.g., 9 for gzip -9. Range is
-# 1-9, 9 being most compressed but most CPU intensive on dom0.
-# (integer value)
-#image_compression_level=<None>
+# Compression level for images, e.g., 9 for gzip -9. Range is 1-9, 9 being most
+# compressed but most CPU intensive on dom0. (integer value)
+# Minimum value: 1
+# Maximum value: 9
+#image_compression_level = <None>
 
 # Default OS type (string value)
-#default_os_type=linux
+#default_os_type = linux
 
-# Time to wait for a block device to be created (integer
-# value)
-#block_device_creation_timeout=10
+# Time to wait for a block device to be created (integer value)
+#block_device_creation_timeout = 10
 
-# Maximum size in bytes of kernel or ramdisk images (integer
-# value)
-#max_kernel_ramdisk_size=16777216
+# Maximum size in bytes of kernel or ramdisk images (integer value)
+#max_kernel_ramdisk_size = 16777216
 
-# Filter for finding the SR to be used to install guest
-# instances on. To use the Local Storage in default
-# XenServer/XCP installations set this flag to other-config
-# :i18n-key=local-storage. To select an SR with a different
-# matching criteria, you could set it to other-
-# config:my_favorite_sr=true. On the other hand, to fall back
-# on the Default SR, as displayed by XenCenter, set this flag
-# to: default-sr:true (string value)
-#sr_matching_filter=default-sr:true
+# Filter for finding the SR to be used to install guest instances on. To use
+# the Local Storage in default XenServer/XCP installations set this flag to
+# other-config:i18n-key=local-storage. To select an SR with a different
+# matching criteria, you could set it to other-config:my_favorite_sr=true. On
+# the other hand, to fall back on the Default SR, as displayed by XenCenter,
+# set this flag to: default-sr:true (string value)
+#sr_matching_filter = default-sr:true
 
-# Whether to use sparse_copy for copying data on a resize down
-# (False will use standard dd). This speeds up resizes down
-# considerably since large runs of zeros won't have to be
-# rsynced (boolean value)
-#sparse_copy=true
+# Whether to use sparse_copy for copying data on a resize down (False will use
+# standard dd). This speeds up resizes down considerably since large runs of
+# zeros won't have to be rsynced (boolean value)
+#sparse_copy = true
 
-# Maximum number of retries to unplug VBD (integer value)
-#num_vbd_unplug_retries=10
+# Maximum number of retries to unplug VBD. if <=0, should try once and no retry
+# (integer value)
+#num_vbd_unplug_retries = 10
 
-# Whether or not to download images via Bit Torrent
-# (all|some|none). (string value)
-#torrent_images=none
+# Whether or not to download images via Bit Torrent. (string value)
+# Allowed values: all, some, none
+#torrent_images = none
 
 # Name of network to use for booting iPXE ISOs (string value)
-#ipxe_network_name=<None>
+#ipxe_network_name = <None>
 
 # URL to the iPXE boot menu (string value)
-#ipxe_boot_menu_url=<None>
+#ipxe_boot_menu_url = <None>
 
-# Name and optionally path of the tool used for ISO image
-# creation (string value)
-#ipxe_mkisofs_cmd=mkisofs
-
-
-#
-# Options defined in nova.virt.xenapi.vmops
-#
-
-# Number of seconds to wait for instance to go to running
-# state (integer value)
-#running_timeout=60
-
-# The XenAPI VIF driver using XenServer Network APIs. (string
+# Name and optionally path of the tool used for ISO image creation (string
 # value)
-#vif_driver=nova.virt.xenapi.vif.XenAPIBridgeDriver
+#ipxe_mkisofs_cmd = mkisofs
 
-# Dom0 plugin driver used to handle image uploads. (string
-# value)
-#image_upload_handler=nova.virt.xenapi.image.glance.GlanceStore
+# Number of seconds to wait for instance to go to running state (integer value)
+#running_timeout = 60
 
+# The XenAPI VIF driver using XenServer Network APIs. (string value)
+#vif_driver = nova.virt.xenapi.vif.XenAPIBridgeDriver
 
-#
-# Options defined in nova.virt.xenapi.volume_utils
-#
+# Dom0 plugin driver used to handle image uploads. (string value)
+#image_upload_handler = nova.virt.xenapi.image.glance.GlanceStore
 
-# Number of seconds to wait for an SR to settle if the VDI
-# does not exist when first introduced (integer value)
-#introduce_vdi_retry_wait=20
+# Number of seconds to wait for an SR to settle if the VDI does not exist when
+# first introduced (integer value)
+#introduce_vdi_retry_wait = 20
 
 
 [zookeeper]
 
 #
-# Options defined in nova.servicegroup.drivers.zk
+# From nova
 #
 
-# The ZooKeeper addresses for servicegroup service in the
-# format of host1:port,host2:port,host3:port (string value)
-#address=<None>
+# The ZooKeeper addresses for servicegroup service in the format of
+# host1:port,host2:port,host3:port (string value)
+#address = <None>
 
-# The recv_timeout parameter for the zk session (integer
-# value)
-#recv_timeout=4000
+# The recv_timeout parameter for the zk session (integer value)
+#recv_timeout = 4000
 
-# The prefix used in ZooKeeper to store ephemeral nodes
-# (string value)
-#sg_prefix=/servicegroups
+# The prefix used in ZooKeeper to store ephemeral nodes (string value)
+#sg_prefix = /servicegroups
 
-# Number of seconds to wait until retrying to join the session
-# (integer value)
-#sg_retry_interval=5
+# Number of seconds to wait until retrying to join the session (integer value)
+#sg_retry_interval = 5
 
 
 [zvm]
