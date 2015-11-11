@@ -1533,6 +1533,7 @@ insecure = <%= @keystone_settings['insecure'] %>
 
 # The region in which the identity server can be found. (string value)
 #region_name = <None>
+region_name = <%= @keystone_settings['endpoint_region'] %>
 
 # Directory used to cache files related to PKI tokens. (string value)
 #signing_dir = <None>
