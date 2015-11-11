@@ -97,6 +97,36 @@ keystone_register "register manila endpoint" do
   action :add_endpoint_template
 end
 
+# v2 API is new since Liberty
+keystone_register "register manila service v2" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  service_name "manilav2"
+  service_type "sharev2"
+  service_description "Openstack Manila shared filesystem service V2"
+  action :add_service
+end
+
+keystone_register "register manila endpoint v2" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  endpoint_service "manilav2"
+  endpoint_region keystone_settings["endpoint_region"]
+  endpoint_publicURL "#{manila_protocol}://"\
+                     "#{my_public_host}:#{manila_port}/v2/$(tenant_id)s"
+  endpoint_adminURL "#{manila_protocol}://"\
+                    "#{my_admin_host}:#{manila_port}/v2/$(tenant_id)s"
+  endpoint_internalURL "#{manila_protocol}://"\
+                       "#{my_admin_host}:#{manila_port}/v2/$(tenant_id)s"
+  action :add_endpoint_template
+end
+
 crowbar_pacemaker_sync_mark "create-manila_register"
 
 manila_service "api" do
