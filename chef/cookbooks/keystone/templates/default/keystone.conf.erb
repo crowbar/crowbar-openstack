@@ -281,146 +281,138 @@ use_syslog = <%= @use_syslog ? "True" : "False" %>
 [assignment]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# Assignment backend driver. (string value)
+# Entrypoint for the assignment backend driver in the keystone.assignment
+# namespace. Supplied drivers are ldap and sql. If an assignment driver is not
+# specified, the identity driver will choose the assignment driver. (string
+# value)
+#driver = <None>
 driver = <%= node[:keystone][:assignment][:driver] %>
-
-# Toggle for assignment caching. This has no effect unless
-# global caching is enabled. (boolean value)
-#caching=true
-
-# TTL (in seconds) to cache assignment data. This has no
-# effect unless global caching is enabled. (integer value)
-#cache_time=<None>
-
-# Maximum number of entities that will be returned in an
-# assignment collection. (integer value)
-#list_limit=<None>
 
 
 [auth]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# Default auth methods. (list value)
-#methods=external,password,token
+# Allowed authentication methods. (list value)
+#methods = external,password,token,oauth1
 
-# The password auth plugin module. (string value)
-#password=keystone.auth.plugins.password.Password
+# Entrypoint for the password auth plugin module in the keystone.auth.password
+# namespace. (string value)
+#password = <None>
 
-# The token auth plugin module. (string value)
-#token=keystone.auth.plugins.token.Token
+# Entrypoint for the token auth plugin module in the keystone.auth.token
+# namespace. (string value)
+#token = <None>
 
-# The external (REMOTE_USER) auth plugin module. (string
-# value)
-#external=keystone.auth.plugins.external.DefaultDomain
+# Entrypoint for the external (REMOTE_USER) auth plugin module in the
+# keystone.auth.external namespace. Supplied drivers are DefaultDomain and
+# Domain. The default driver is DefaultDomain. (string value)
+#external = <None>
+
+# Entrypoint for the oAuth1.0 auth plugin module in the keystone.auth.oauth1
+# namespace. (string value)
+#oauth1 = <None>
 
 
 [cache]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# Prefix for building the configuration dictionary for the
-# cache region. This should not need to be changed unless
-# there is another dogpile.cache region with the same
-# configuration name. (string value)
-#config_prefix=cache.keystone
+# Prefix for building the configuration dictionary for the cache region. This
+# should not need to be changed unless there is another dogpile.cache region
+# with the same configuration name. (string value)
+#config_prefix = cache.keystone
 
-# Default TTL, in seconds, for any cached item in the
-# dogpile.cache region. This applies to any cached method that
-# doesn't have an explicit cache expiration time defined for
-# it. (integer value)
-#expiration_time=600
+# Default TTL, in seconds, for any cached item in the dogpile.cache region.
+# This applies to any cached method that doesn't have an explicit cache
+# expiration time defined for it. (integer value)
+#expiration_time = 600
 
-# Dogpile.cache backend module. It is recommended that
-# Memcache with pooling (keystone.cache.memcache_pool) or
-# Redis (dogpile.cache.redis) be used in production
-# deployments.  Small workloads (single process) like devstack
-# can use the dogpile.cache.memory backend. (string value)
-#backend=keystone.common.cache.noop
+# Dogpile.cache backend module. It is recommended that Memcache with pooling
+# (keystone.cache.memcache_pool) or Redis (dogpile.cache.redis) be used in
+# production deployments.  Small workloads (single process) like devstack can
+# use the dogpile.cache.memory backend. (string value)
+#backend = keystone.common.cache.noop
 
-# Arguments supplied to the backend module. Specify this
-# option once per argument to be passed to the dogpile.cache
-# backend. Example format: "<argname>:<value>". (multi valued)
-#backend_argument=
+# Arguments supplied to the backend module. Specify this option once per
+# argument to be passed to the dogpile.cache backend. Example format:
+# "<argname>:<value>". (multi valued)
+#backend_argument =
 
-# Proxy classes to import that will affect the way the
-# dogpile.cache backend functions. See the dogpile.cache
-# documentation on changing-backend-behavior. (list value)
-#proxies=
+# Proxy classes to import that will affect the way the dogpile.cache backend
+# functions. See the dogpile.cache documentation on changing-backend-behavior.
+# (list value)
+#proxies =
 
-# Global toggle for all caching using the should_cache_fn
-# mechanism. (boolean value)
-#enabled=false
-
-# Extra debugging from the cache backend (cache keys,
-# get/set/delete/etc calls). This is only really useful if you
-# need to see the specific cache-backend get/set/delete calls
-# with the keys/values.  Typically this should be left set to
-# false. (boolean value)
-#debug_cache_backend=false
-
-# Memcache servers in the format of "host:port".
-# (dogpile.cache.memcache and keystone.cache.memcache_pool
-# backends only) (list value)
-#memcache_servers=localhost:11211
-
-# Number of seconds memcached server is considered dead before
-# it is tried again. (dogpile.cache.memcache and
-# keystone.cache.memcache_pool backends only) (integer value)
-#memcache_dead_retry=300
-
-# Timeout in seconds for every call to a server.
-# (dogpile.cache.memcache and keystone.cache.memcache_pool
-# backends only) (integer value)
-#memcache_socket_timeout=3
-
-# Max total number of open connections to every memcached
-# server. (keystone.cache.memcache_pool backend only) (integer
+# Global toggle for all caching using the should_cache_fn mechanism. (boolean
 # value)
-#memcache_pool_maxsize=10
+#enabled = false
 
-# Number of seconds a connection to memcached is held unused
-# in the pool before it is closed.
-# (keystone.cache.memcache_pool backend only) (integer value)
-#memcache_pool_unused_timeout=60
+# Extra debugging from the cache backend (cache keys, get/set/delete/etc
+# calls). This is only really useful if you need to see the specific cache-
+# backend get/set/delete calls with the keys/values.  Typically this should be
+# left set to false. (boolean value)
+#debug_cache_backend = false
 
-# Number of seconds that an operation will wait to get a
-# memcache client connection. (integer value)
-#memcache_pool_connection_get_timeout=10
+# Memcache servers in the format of "host:port". (dogpile.cache.memcache and
+# keystone.cache.memcache_pool backends only). (list value)
+#memcache_servers = localhost:11211
+
+# Number of seconds memcached server is considered dead before it is tried
+# again. (dogpile.cache.memcache and keystone.cache.memcache_pool backends
+# only). (integer value)
+#memcache_dead_retry = 300
+
+# Timeout in seconds for every call to a server. (dogpile.cache.memcache and
+# keystone.cache.memcache_pool backends only). (integer value)
+#memcache_socket_timeout = 3
+
+# Max total number of open connections to every memcached server.
+# (keystone.cache.memcache_pool backend only). (integer value)
+#memcache_pool_maxsize = 10
+
+# Number of seconds a connection to memcached is held unused in the pool before
+# it is closed. (keystone.cache.memcache_pool backend only). (integer value)
+#memcache_pool_unused_timeout = 60
+
+# Number of seconds that an operation will wait to get a memcache client
+# connection. (integer value)
+#memcache_pool_connection_get_timeout = 10
 
 
 [catalog]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# Catalog template file name for use with the template catalog
-# backend. (string value)
-#template_file=default_catalog.templates
-
-# Catalog backend driver. (string value)
-#driver=keystone.catalog.backends.sql.Catalog
-
-# Toggle for catalog caching. This has no effect unless global
-# caching is enabled. (boolean value)
-#caching=true
-
-# Time to cache catalog data (in seconds). This has no effect
-# unless global and catalog caching are enabled. (integer
+# Catalog template file name for use with the template catalog backend. (string
 # value)
-#cache_time=<None>
+#template_file = default_catalog.templates
 
-# Maximum number of entities that will be returned in a
-# catalog collection. (integer value)
-#list_limit=<None>
+# Entrypoint for the catalog backend driver in the keystone.catalog namespace.
+# Supplied drivers are kvs, sql, templated, and endpoint_filter.sql (string
+# value)
+#driver = sql
+
+# Toggle for catalog caching. This has no effect unless global caching is
+# enabled. (boolean value)
+#caching = true
+
+# Time to cache catalog data (in seconds). This has no effect unless global and
+# catalog caching are enabled. (integer value)
+#cache_time = <None>
+
+# Maximum number of entities that will be returned in a catalog collection.
+# (integer value)
+#list_limit = <None>
 
 
 [cors]
