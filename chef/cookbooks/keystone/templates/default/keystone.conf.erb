@@ -612,63 +612,162 @@ driver=keystone.contrib.ec2.backends.sql.Ec2
 #driver=keystone.contrib.endpoint_policy.backends.sql.EndpointPolicy
 
 
+[eventlet_server_ssl]
+
+#
+# From keystone
+#
+
+# Toggle for SSL support on the Keystone eventlet servers. (boolean value)
+# Deprecated group/name - [ssl]/enable
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#enable = false
+enable = <%= @ssl_enable %>
+
+# Path of the certfile for SSL. For non-production environments, you may be
+# interested in using `keystone-manage ssl_setup` to generate self-signed
+# certificates. (string value)
+# Deprecated group/name - [ssl]/certfile
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#certfile = /etc/keystone/ssl/certs/keystone.pem
+certfile = <%= @ssl_certfile %>
+
+# Path of the keyfile for SSL. (string value)
+# Deprecated group/name - [ssl]/keyfile
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#keyfile = /etc/keystone/ssl/private/keystonekey.pem
+keyfile = <%= @ssl_keyfile %>
+
+# Path of the CA cert file for SSL. (string value)
+# Deprecated group/name - [ssl]/ca_certs
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#ca_certs = /etc/keystone/ssl/certs/ca.pem
+ca_certs = <%= @ssl_ca_certs %>
+
+# Require client certificate. (boolean value)
+# Deprecated group/name - [ssl]/cert_required
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#cert_required = false
+cert_required = <%= @ssl_cert_required %>
+
+
 [federation]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# Federation backend driver. (string value)
-#driver=keystone.contrib.federation.backends.sql.Federation
+# Entrypoint for the federation backend driver in the keystone.federation
+# namespace. (string value)
+#driver = sql
 
-# Value to be used when filtering assertion parameters from
-# the environment. (string value)
-#assertion_prefix=
+# Value to be used when filtering assertion parameters from the environment.
+# (string value)
+#assertion_prefix =
+
+# Value to be used to obtain the entity ID of the Identity Provider from the
+# environment (e.g. if using the mod_shib plugin this value is `Shib-Identity-
+# Provider`). (string value)
+#remote_id_attribute = <None>
+
+# A domain name that is reserved to allow federated ephemeral users to have a
+# domain concept. Note that an admin will not be able to create a domain with
+# this name or update an existing domain to this name. You are not advised to
+# change this value unless you really have to. (string value)
+#federated_domain_name = Federated
+
+# A list of trusted dashboard hosts. Before accepting a Single Sign-On request
+# to return a token, the origin host must be a member of the trusted_dashboard
+# list. This configuration option may be repeated for multiple values. For
+# example: trusted_dashboard=http://acme.com trusted_dashboard=http://beta.com
+# (multi valued)
+#trusted_dashboard =
+
+# Location of Single Sign-On callback handler, will return a token to a trusted
+# dashboard host. (string value)
+#sso_callback_template = /etc/keystone/sso_callback_template.html
+
+
+[fernet_tokens]
+
+#
+# From keystone
+#
+
+# Directory containing Fernet token keys. (string value)
+#key_repository = /etc/keystone/fernet-keys/
+
+# This controls how many keys are held in rotation by keystone-manage
+# fernet_rotate before they are discarded. The default value of 3 means that
+# keystone will maintain one staged key, one primary key, and one secondary
+# key. Increasing this value means that additional secondary keys will be kept
+# in the rotation. (integer value)
+#max_active_keys = 3
 
 
 [identity]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# This references the domain to use for all Identity API v2
-# requests (which are not aware of domains). A domain with
-# this ID will be created for you by keystone-manage db_sync
-# in migration 008. The domain referenced by this ID cannot be
-# deleted on the v3 API, to prevent accidentally breaking the
-# v2 API. There is nothing special about this domain, other
-# than the fact that it must exist to order to maintain
-# support for your v2 clients. (string value)
-#default_domain_id=default
+# This references the domain to use for all Identity API v2 requests (which are
+# not aware of domains). A domain with this ID will be created for you by
+# keystone-manage db_sync in migration 008. The domain referenced by this ID
+# cannot be deleted on the v3 API, to prevent accidentally breaking the v2 API.
+# There is nothing special about this domain, other than the fact that it must
+# exist to order to maintain support for your v2 clients. (string value)
+#default_domain_id = default
 
-# A subset (or all) of domains can have their own identity
-# driver, each with their own partial configuration file in a
-# domain configuration directory. Only values specific to the
-# domain need to be placed in the domain specific
-# configuration file. This feature is disabled by default; set
-# to true to enable. (boolean value)
-#domain_specific_drivers_enabled=false
+# A subset (or all) of domains can have their own identity driver, each with
+# their own partial configuration options, stored in either the resource
+# backend or in a file in a domain configuration directory (depending on the
+# setting of domain_configurations_from_database). Only values specific to the
+# domain need to be specified in this manner. This feature is disabled by
+# default; set to true to enable. (boolean value)
+#domain_specific_drivers_enabled = false
 domain_specific_drivers_enabled = <%= node[:keystone][:domain_specific_drivers] ? "True" : "False" %>
 
-# Path for Keystone to locate the domain specific identity
-# configuration files if domain_specific_drivers_enabled is
-# set to true. (string value)
-#domain_config_dir=/etc/keystone/domains
+# Extract the domain specific configuration options from the resource backend
+# where they have been stored with the domain data. This feature is disabled by
+# default (in which case the domain specific options will be loaded from files
+# in the domain configuration directory); set to true to enable. (boolean
+# value)
+#domain_configurations_from_database = false
+
+# Path for Keystone to locate the domain specific identity configuration files
+# if domain_specific_drivers_enabled is set to true. (string value)
+#domain_config_dir = /etc/keystone/domains
 <% if node[:keystone][:domain_specific_drivers] %>
 domain_config_dir = <%= node[:keystone][:domain_config_dir] %>
 <% end %>
 
-# Keystone Identity backend driver. (string value)
+# Entrypoint for the identity backend driver in the keystone.identity
+# namespace. Supplied drivers are ldap and sql. (string value)
+#driver = sql
 driver = <%= node[:keystone][:identity][:driver] %>
 
-# Maximum supported length for user passwords; decrease to
-# improve performance. (integer value)
-#max_password_length=4096
+# Toggle for identity caching. This has no effect unless global caching is
+# enabled. (boolean value)
+#caching = true
 
-# Maximum number of entities that will be returned in an
-# identity collection. (integer value)
-#list_limit=<None>
+# Time to cache identity data (in seconds). This has no effect unless global
+# and identity caching are enabled. (integer value)
+#cache_time = 600
+
+# Maximum supported length for user passwords; decrease to improve performance.
+# (integer value)
+# Maximum value: 4096
+#max_password_length = 4096
+
+# Maximum number of entities that will be returned in an identity collection.
+# (integer value)
+#list_limit = <None>
 
 
 [identity_mapping]
