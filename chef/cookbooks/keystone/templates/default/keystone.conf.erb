@@ -1314,137 +1314,164 @@ use_pool = <%= node[:keystone][:ldap][:use_pool] %>
 [revoke]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# An implementation of the backend for persisting revocation
-# events. (string value)
-driver=keystone.contrib.revoke.backends.sql.Revoke
+# Entrypoint for an implementation of the backend for persisting revocation
+# events in the keystone.revoke namespace. Supplied drivers are kvs and sql.
+# (string value)
+#driver = sql
 
-# This value (calculated in seconds) is added to token
-# expiration before a revocation event may be removed from the
-# backend. (integer value)
-#expiration_buffer=1800
+# This value (calculated in seconds) is added to token expiration before a
+# revocation event may be removed from the backend. (integer value)
+#expiration_buffer = 1800
 
-# Toggle for revocation event caching. This has no effect
-# unless global caching is enabled. (boolean value)
-#caching=true
+# Toggle for revocation event caching. This has no effect unless global caching
+# is enabled. (boolean value)
+#caching = true
+
+# Time to cache the revocation list and the revocation events (in seconds).
+# This has no effect unless global and token caching are enabled. (integer
+# value)
+# Deprecated group/name - [token]/revocation_cache_time
+#cache_time = 3600
+
+
+[role]
+
+#
+# From keystone
+#
+
+# Entrypoint for the role backend driver in the keystone.role namespace.
+# Supplied drivers are ldap and sql. (string value)
+#driver = <None>
+driver = sql
+
+# Toggle for role caching. This has no effect unless global caching is enabled.
+# (boolean value)
+#caching = true
+
+# TTL (in seconds) to cache role data. This has no effect unless global caching
+# is enabled. (integer value)
+#cache_time = <None>
+
+# Maximum number of entities that will be returned in a role collection.
+# (integer value)
+#list_limit = <None>
 
 
 [saml]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# Default TTL, in seconds, for any generated SAML assertion
-# created by Keystone. (integer value)
-#assertion_expiration_time=3600
+# Default TTL, in seconds, for any generated SAML assertion created by
+# Keystone. (integer value)
+#assertion_expiration_time = 3600
 
-# Binary to be called for XML signing. Install the appropriate
-# package, specify absolute path or adjust your PATH
-# environment variable if the binary cannot be found. (string
+# Binary to be called for XML signing. Install the appropriate package, specify
+# absolute path or adjust your PATH environment variable if the binary cannot
+# be found. (string value)
+#xmlsec1_binary = xmlsec1
+
+# Path of the certfile for SAML signing. For non-production environments, you
+# may be interested in using `keystone-manage pki_setup` to generate self-
+# signed certificates. Note, the path cannot contain a comma. (string value)
+#certfile = /etc/keystone/ssl/certs/signing_cert.pem
+
+# Path of the keyfile for SAML signing. Note, the path cannot contain a comma.
+# (string value)
+#keyfile = /etc/keystone/ssl/private/signing_key.pem
+
+# Entity ID value for unique Identity Provider identification. Usually FQDN is
+# set with a suffix. A value is required to generate IDP Metadata. For example:
+# https://keystone.example.com/v3/OS-FEDERATION/saml2/idp (string value)
+#idp_entity_id = <None>
+
+# Identity Provider Single-Sign-On service value, required in the Identity
+# Provider's metadata. A value is required to generate IDP Metadata. For
+# example: https://keystone.example.com/v3/OS-FEDERATION/saml2/sso (string
 # value)
-#xmlsec1_binary=xmlsec1
-
-# Path of the certfile for SAML signing. For non-production
-# environments, you may be interested in using `keystone-
-# manage pki_setup` to generate self-signed certificates.
-# Note, the path cannot contain a comma. (string value)
-#certfile=/etc/keystone/ssl/certs/signing_cert.pem
-
-# Path of the keyfile for SAML signing. Note, the path cannot
-# contain a comma. (string value)
-#keyfile=/etc/keystone/ssl/private/signing_key.pem
-
-# Entity ID value for unique Identity Provider identification.
-# Usually FQDN is set with a suffix. A value is required to
-# generate IDP Metadata. For example:
-# https://keystone.example.com/v3/OS-FEDERATION/saml2/idp
-# (string value)
-#idp_entity_id=<None>
-
-# Identity Provider Single-Sign-On service value, required in
-# the Identity Provider's metadata. A value is required to
-# generate IDP Metadata. For example:
-# https://keystone.example.com/v3/OS-FEDERATION/saml2/sso
-# (string value)
-#idp_sso_endpoint=<None>
+#idp_sso_endpoint = <None>
 
 # Language used by the organization. (string value)
-#idp_lang=en
+#idp_lang = en
 
-# Organization name the installation belongs to. (string
-# value)
-#idp_organization_name=<None>
+# Organization name the installation belongs to. (string value)
+#idp_organization_name = <None>
 
 # Organization name to be displayed. (string value)
-#idp_organization_display_name=<None>
+#idp_organization_display_name = <None>
 
 # URL of the organization. (string value)
-#idp_organization_url=<None>
+#idp_organization_url = <None>
 
 # Company of contact person. (string value)
-#idp_contact_company=<None>
+#idp_contact_company = <None>
 
 # Given name of contact person (string value)
-#idp_contact_name=<None>
+#idp_contact_name = <None>
 
 # Surname of contact person. (string value)
-#idp_contact_surname=<None>
+#idp_contact_surname = <None>
 
 # Email address of contact person. (string value)
-#idp_contact_email=<None>
+#idp_contact_email = <None>
 
 # Telephone number of contact person. (string value)
-#idp_contact_telephone=<None>
+#idp_contact_telephone = <None>
 
-# Contact type. Allowed values are: technical, support,
-# administrative billing, and other (string value)
-#idp_contact_type=other
+# The contact type describing the main point of contact for the identity
+# provider. (string value)
+# Allowed values: technical, support, administrative, billing, other
+#idp_contact_type = other
 
-# Path to the Identity Provider Metadata file. This file
-# should be generated with the keystone-manage
-# saml_idp_metadata command. (string value)
-#idp_metadata_path=/etc/keystone/saml2_idp_metadata.xml
+# Path to the Identity Provider Metadata file. This file should be generated
+# with the keystone-manage saml_idp_metadata command. (string value)
+#idp_metadata_path = /etc/keystone/saml2_idp_metadata.xml
+
+# The prefix to use for the RelayState SAML attribute, used when generating ECP
+# wrapped assertions. (string value)
+#relay_state_prefix = ss:mem:
 
 
 [signing]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# Deprecated in favor of provider in the [token] section.
-# (string value)
-#token_format=<None>
-
-# Path of the certfile for token signing. For non-production
-# environments, you may be interested in using `keystone-
-# manage pki_setup` to generate self-signed certificates.
-# (string value)
+# Path of the certfile for token signing. For non-production environments, you
+# may be interested in using `keystone-manage pki_setup` to generate self-
+# signed certificates. (string value)
+#certfile = /etc/keystone/ssl/certs/signing_cert.pem
 certfile = <%= @signing_certfile %>
 
 # Path of the keyfile for token signing. (string value)
+#keyfile = /etc/keystone/ssl/private/signing_key.pem
 keyfile = <%= @signing_keyfile %>
 
 # Path of the CA for token signing. (string value)
+#ca_certs = /etc/keystone/ssl/certs/ca.pem
 ca_certs = <%= @signing_ca_certs %>
 
 # Path of the CA key for token signing. (string value)
-#ca_key=/etc/keystone/ssl/private/cakey.pem
+#ca_key = /etc/keystone/ssl/private/cakey.pem
 
-# Key size (in bits) for token signing cert (auto generated
-# certificate). (integer value)
-#key_size=2048
+# Key size (in bits) for token signing cert (auto generated certificate).
+# (integer value)
+# Minimum value: 1024
+#key_size = 2048
 
-# Days the token signing cert is valid for (auto generated
-# certificate). (integer value)
-#valid_days=3650
+# Days the token signing cert is valid for (auto generated certificate).
+# (integer value)
+#valid_days = 3650
 
-# Certificate subject (auto generated certificate) for token
-# signing. (string value)
-#cert_subject=/C=US/ST=Unset/L=Unset/O=Unset/CN=www.example.com
+# Certificate subject (auto generated certificate) for token signing. (string
+# value)
+#cert_subject = /C=US/ST=Unset/L=Unset/O=Unset/CN=www.example.com
 
 
 [ssl]
