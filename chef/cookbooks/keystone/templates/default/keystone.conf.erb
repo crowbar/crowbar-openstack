@@ -434,19 +434,6 @@ use_syslog = <%= @use_syslog ? "True" : "False" %>
 #syslog_log_facility=LOG_USER
 
 
-#
-# Options defined in keystone.openstack.common.policy
-#
-
-# The JSON file that defines policies. (string value)
-#policy_file=policy.json
-policy_file = <%= node[:keystone][:policy_file] %>
-
-# Default rule. Enforced when a requested rule is not found.
-# (string value)
-#policy_default_rule=default
-
-
 [assignment]
 
 #
@@ -1286,29 +1273,85 @@ use_pool = <%= node[:keystone][:ldap][:use_pool] %>
 #enabled=false
 
 
+[oslo_policy]
+
+#
+# From oslo.policy
+#
+
+# The JSON file that defines policies. (string value)
+# Deprecated group/name - [DEFAULT]/policy_file
+#policy_file = policy.json
+policy_file = <%= node[:keystone][:policy_file] %>
+
+# Default rule. Enforced when a requested rule is not found. (string value)
+# Deprecated group/name - [DEFAULT]/policy_default_rule
+#policy_default_rule = default
+
+# Directories where policy configuration files are stored. They can be relative
+# to any directory in the search path defined by the config_dir option, or
+# absolute paths. The file defined by policy_file must exist for these
+# directories to be searched.  Missing or empty directories are ignored. (multi
+# valued)
+# Deprecated group/name - [DEFAULT]/policy_dirs
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#policy_dirs = policy.d
+
+
 [paste_deploy]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# Name of the paste configuration file that defines the
-# available pipelines. (string value)
-#config_file=keystone-paste.ini
+# Name of the paste configuration file that defines the available pipelines.
+# (string value)
+#config_file = keystone-paste.ini
 
 
 [policy]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# Policy backend driver. (string value)
-#driver=keystone.policy.backends.sql.Policy
+# Entrypoint for the policy backend driver in the keystone.policy namespace.
+# Supplied drivers are rules and sql. (string value)
+#driver = sql
 
-# Maximum number of entities that will be returned in a policy
-# collection. (integer value)
-#list_limit=<None>
+# Maximum number of entities that will be returned in a policy collection.
+# (integer value)
+#list_limit = <None>
+
+
+[resource]
+
+#
+# From keystone
+#
+
+# Entrypoint for the resource backend driver in the keystone.resource
+# namespace. Supplied drivers are ldap and sql. If a resource driver is not
+# specified, the assignment driver will choose the resource driver. (string
+# value)
+#driver = <None>
+driver = sql
+
+# Toggle for resource caching. This has no effect unless global caching is
+# enabled. (boolean value)
+# Deprecated group/name - [assignment]/caching
+#caching = true
+
+# TTL (in seconds) to cache resource data. This has no effect unless global
+# caching is enabled. (integer value)
+# Deprecated group/name - [assignment]/cache_time
+#cache_time = <None>
+
+# Maximum number of entities that will be returned in a resource collection.
+# (integer value)
+# Deprecated group/name - [assignment]/list_limit
+#list_limit = <None>
 
 
 [revoke]
