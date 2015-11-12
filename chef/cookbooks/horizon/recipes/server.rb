@@ -206,13 +206,6 @@ end
 nova = get_instance("roles:nova-controller")
 nova_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
 
-directory "/var/lib/openstack-dashboard" do
-  owner node[:apache][:user]
-  group node[:apache][:group]
-  mode "0700"
-  action :create
-end
-
 # We're going to use memcached as a cache backend for Django
 
 # make sure our memcache only listens on the admin IP address
