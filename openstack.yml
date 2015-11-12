@@ -45,14 +45,3 @@ nav:
       route: 'index_barclamp_path'
       params:
         controller: 'openstack'
-  help:
-    crowbar_deployment:
-      order: 30
-      path: '/docs/crowbar_deployment_guide.pdf'
-      html:
-        target: '_blank'
-    openstack_users:
-      order: 40
-      path: '/docs/openstack_users_guide.pdf'
-      html:
-        target: '_blank'
