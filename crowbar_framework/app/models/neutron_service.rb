@@ -257,20 +257,10 @@ class NeutronService < PacemakerServiceObject
       validation_error I18n.t("barclamp.#{@bc_name}.validation.openvswitch_linuxbridge")
     end
 
-    if proposal["attributes"]["neutron"]["use_l2pop"]
-      unless ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.l2_population")
-      end
-    end
-
     if proposal["attributes"]["neutron"]["use_dvr"]
       if !ml2_mechanism_drivers.include?("openvswitch") ||
          (!ml2_type_drivers.include?("gre") && !ml2_type_drivers.include?("vxlan"))
         validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr")
-      end
-
-      if !proposal["attributes"]["neutron"]["use_l2pop"]
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_requires_l2")
       end
 
       unless proposal["deployment"]["neutron"]["elements"].fetch("neutron-network", []).empty?
