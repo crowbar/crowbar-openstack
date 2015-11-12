@@ -1450,129 +1450,128 @@ ca_certs = <%= @signing_ca_certs %>
 [ssl]
 
 #
-# Options defined in keystone
+# From keystone
 #
-
-# Toggle for SSL support on the Keystone eventlet servers.
-# (boolean value)
-enable = <%= @ssl_enable %>
-
-# Path of the certfile for SSL. For non-production
-# environments, you may be interested in using `keystone-
-# manage ssl_setup` to generate self-signed certificates.
-# (string value)
-certfile = <%= @ssl_certfile %>
-
-# Path of the keyfile for SSL. (string value)
-keyfile = <%= @ssl_keyfile %>
-
-# Path of the ca cert file for SSL. (string value)
-ca_certs = <%= @ssl_ca_certs %>
 
 # Path of the CA key file for SSL. (string value)
-#ca_key=/etc/keystone/ssl/private/cakey.pem
+#ca_key = /etc/keystone/ssl/private/cakey.pem
 
-# Require client certificate. (boolean value)
-cert_required = <%= @ssl_cert_required %>
+# SSL key length (in bits) (auto generated certificate). (integer value)
+# Minimum value: 1024
+#key_size = 1024
 
-# SSL key length (in bits) (auto generated certificate).
+# Days the certificate is valid for once signed (auto generated certificate).
 # (integer value)
-#key_size=1024
+#valid_days = 3650
 
-# Days the certificate is valid for once signed (auto
-# generated certificate). (integer value)
-#valid_days=3650
-
-# SSL certificate subject (auto generated certificate).
-# (string value)
-#cert_subject=/C=US/ST=Unset/L=Unset/O=Unset/CN=localhost
-
-
-[stats]
-
-#
-# Options defined in keystone
-#
-
-# Stats backend driver. (string value)
-#driver=keystone.contrib.stats.backends.kvs.Stats
+# SSL certificate subject (auto generated certificate). (string value)
+#cert_subject = /C=US/ST=Unset/L=Unset/O=Unset/CN=localhost
 
 
 [token]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# External auth mechanisms that should add bind information to
-# token, e.g., kerberos,x509. (list value)
-#bind=
+# External auth mechanisms that should add bind information to token, e.g.,
+# kerberos,x509. (list value)
+#bind =
 
-# Enforcement policy on tokens presented to Keystone with bind
-# information. One of disabled, permissive, strict, required
-# or a specifically required bind mode, e.g., kerberos or x509
-# to require binding to that authentication. (string value)
-#enforce_token_bind=permissive
+# Enforcement policy on tokens presented to Keystone with bind information. One
+# of disabled, permissive, strict, required or a specifically required bind
+# mode, e.g., kerberos or x509 to require binding to that authentication.
+# (string value)
+#enforce_token_bind = permissive
 
-# Amount of time a token should remain valid (in seconds).
-# (integer value)
+# Amount of time a token should remain valid (in seconds). (integer value)
+#expiration = 3600
 expiration=<%= @token_expiration %>
 
-# Controls the token construction, validation, and revocation
-# operations. Core providers are
-# "keystone.token.providers.[pkiz|pki|uuid].Provider". The
-# default provider is uuid. (string value)
+# Controls the token construction, validation, and revocation operations.
+# Entrypoint in the keystone.token.provider namespace. Core providers are
+# [fernet|pkiz|pki|uuid]. (string value)
+#provider = uuid
 <% if @signing_token_format == "PKI" %>
-provider = keystone.token.providers.pki.Provider
+provider = pki
 <% else %>
-provider = keystone.token.providers.uuid.Provider
+provider = uuid
 <%end %>
 
-# Token persistence backend driver. (string value)
-#driver=keystone.token.persistence.backends.sql.Token
+# Entrypoint for the token persistence backend driver in the
+# keystone.token.persistence namespace. Supplied drivers are kvs, memcache,
+# memcache_pool, and sql. (string value)
+#driver = sql
 
-# Toggle for token system caching. This has no effect unless
-# global caching is enabled. (boolean value)
-#caching=true
+# Toggle for token system caching. This has no effect unless global caching is
+# enabled. (boolean value)
+#caching = true
 
-# Time to cache the revocation list and the revocation events
-# if revoke extension is enabled (in seconds). This has no
-# effect unless global and token caching are enabled. (integer
+# Time to cache tokens (in seconds). This has no effect unless global and token
+# caching are enabled. (integer value)
+#cache_time = <None>
+
+# Revoke token by token identifier. Setting revoke_by_id to true enables
+# various forms of enumerating tokens, e.g. `list tokens for user`. These
+# enumerations are processed to determine the list of tokens to revoke. Only
+# disable if you are switching to using the Revoke extension with a backend
+# other than KVS, which stores events in memory. (boolean value)
+#revoke_by_id = true
+
+# Allow rescoping of scoped token. Setting allow_rescoped_scoped_token to false
+# prevents a user from exchanging a scoped token for any other token. (boolean
 # value)
-#revocation_cache_time=3600
+#allow_rescope_scoped_token = true
 
-# Time to cache tokens (in seconds). This has no effect unless
-# global and token caching are enabled. (integer value)
-#cache_time=<None>
-
-# Revoke token by token identifier. Setting revoke_by_id to
-# true enables various forms of enumerating tokens, e.g. `list
-# tokens for user`. These enumerations are processed to
-# determine the list of tokens to revoke. Only disable if you
-# are switching to using the Revoke extension with a backend
-# other than KVS, which stores events in memory. (boolean
-# value)
-#revoke_by_id=true
-
-# The hash algorithm to use for PKI tokens. This can be set to
-# any algorithm that hashlib supports. WARNING: Before
-# changing this value, the auth_token middleware must be
-# configured with the hash_algorithms, otherwise token
+# The hash algorithm to use for PKI tokens. This can be set to any algorithm
+# that hashlib supports. WARNING: Before changing this value, the auth_token
+# middleware must be configured with the hash_algorithms, otherwise token
 # revocation will not be processed correctly. (string value)
-#hash_algorithm=md5
+#hash_algorithm = md5
+
+
+[tokenless_auth]
+
+#
+# From keystone
+#
+
+# The list of trusted issuers to further filter the certificates that are
+# allowed to participate in the X.509 tokenless authorization. If the option is
+# absent then no certificates will be allowed. The naming format for the
+# attributes of a Distinguished Name(DN) must be separated by a comma and
+# contain no spaces. This configuration option may be repeated for multiple
+# values. For example: trusted_issuer=CN=john,OU=keystone,O=openstack
+# trusted_issuer=CN=mary,OU=eng,O=abc (multi valued)
+#trusted_issuer =
+
+# The protocol name for the X.509 tokenless authorization along with the option
+# issuer_attribute below can look up its corresponding mapping. (string value)
+#protocol = x509
+
+# The issuer attribute that is served as an IdP ID for the X.509 tokenless
+# authorization along with the protocol to look up its corresponding mapping.
+# It is the environment variable in the WSGI environment that references to the
+# issuer of the client certificate. (string value)
+#issuer_attribute = SSL_CLIENT_I_DN
 
 
 [trust]
 
 #
-# Options defined in keystone
+# From keystone
 #
 
-# Delegation and impersonation features can be optionally
-# disabled. (boolean value)
-#enabled=true
+# Delegation and impersonation features can be optionally disabled. (boolean
+# value)
+#enabled = true
 
-# Trust backend driver. (string value)
-driver = keystone.trust.backends.sql.Trust
+# Enable redelegation feature. (boolean value)
+#allow_redelegation = false
 
+# Maximum depth of trust redelegation. (integer value)
+#max_redelegation_count = 3
 
+# Entrypoint for the trust backend driver in the keystone.trust namespace.
+# (string value)
+#driver = sql
