@@ -1,849 +1,576 @@
 [DEFAULT]
 
 #
-# Options defined in oslo.messaging
+# From cinder
 #
 
-# ZeroMQ bind address. Should be a wildcard (*), an ethernet
-# interface, or IP. The "host" option should point or resolve
-# to this address. (string value)
-#rpc_zmq_bind_address=*
+# The full class name of the compute API class to use (string value)
+#compute_api_class = cinder.compute.nova.API
 
-# MatchMaker driver. (string value)
-#rpc_zmq_matchmaker=oslo.messaging._drivers.matchmaker.MatchMakerLocalhost
+# Storage system storage pool for volumes (string value)
+#storwize_svc_volpool_name = volpool
 
-# ZeroMQ receiver listening port. (integer value)
-#rpc_zmq_port=9501
-
-# Number of ZeroMQ contexts, defaults to 1. (integer value)
-#rpc_zmq_contexts=1
-
-# Maximum number of ingress messages to locally buffer per
-# topic. Default is unlimited. (integer value)
-#rpc_zmq_topic_backlog=<None>
-
-# Directory for holding IPC sockets. (string value)
-#rpc_zmq_ipc_dir=/var/run/openstack
-
-# Name of this node. Must be a valid hostname, FQDN, or IP
-# address. Must match "host" option, if running Nova. (string
+# Storage system space-efficiency parameter for volumes (percentage) (integer
 # value)
-#rpc_zmq_host=cinder
+# Minimum value: -1
+# Maximum value: 100
+#storwize_svc_vol_rsize = 2
 
-# Seconds to wait before a cast expires (TTL). Only supported
-# by impl_zmq. (integer value)
-#rpc_cast_timeout=30
-
-# Heartbeat frequency. (integer value)
-#matchmaker_heartbeat_freq=300
-
-# Heartbeat time-to-live. (integer value)
-#matchmaker_heartbeat_ttl=600
-
-# Size of RPC greenthread pool. (integer value)
-#rpc_thread_pool_size=64
-
-# Driver or drivers to handle sending notifications. (multi
-# valued)
-#notification_driver=
-
-# AMQP topic used for OpenStack notifications. (list value)
-# Deprecated group/name - [rpc_notifier2]/topics
-#notification_topics=notifications
-
-# Seconds to wait for a response from a call. (integer value)
-#rpc_response_timeout=60
-rpc_response_timeout=<%= node[:cinder][:rpc_response_timeout] %>
-
-# A URL representing the messaging driver to use and its full
-# configuration. If not set, we fall back to the rpc_backend
-# option and driver specific configuration. (string value)
-#transport_url=<None>
-
-# The messaging driver to use, defaults to rabbit. Other
-# drivers include qpid and zmq. (string value)
-rpc_backend=rabbit
-
-# The default exchange under which topics are scoped. May be
-# overridden by an exchange name specified in the
-# transport_url option. (string value)
-control_exchange=cinder
-
-
-#
-# Options defined in cinder.quota
-#
-
-# Number of volumes allowed per project (integer value)
-#quota_volumes=10
-
-# Number of volume snapshots allowed per project (integer
+# Storage system threshold for volume capacity warnings (percentage) (integer
 # value)
-#quota_snapshots=10
+# Minimum value: -1
+# Maximum value: 100
+#storwize_svc_vol_warning = 0
 
-# Number of consistencygroups allowed per project (integer
+# Storage system autoexpand parameter for volumes (True/False) (boolean value)
+#storwize_svc_vol_autoexpand = true
+
+# Storage system grain size parameter for volumes (32/64/128/256) (integer
 # value)
-#quota_consistencygroups=10
+#storwize_svc_vol_grainsize = 256
 
-# Total amount of storage, in gigabytes, allowed for volumes
-# and snapshots per project (integer value)
-#quota_gigabytes=1000
+# Storage system compression option for volumes (boolean value)
+#storwize_svc_vol_compression = false
 
-# Number of volume backups allowed per project (integer value)
-#quota_backups=10
+# Enable Easy Tier for volumes (boolean value)
+#storwize_svc_vol_easytier = true
 
-# Total amount of storage, in gigabytes, allowed for backups
-# per project (integer value)
-#quota_backup_gigabytes=1000
+# The I/O group in which to allocate volumes (integer value)
+#storwize_svc_vol_iogrp = 0
 
-# Number of seconds until a reservation expires (integer
+# Maximum number of seconds to wait for FlashCopy to be prepared. (integer
 # value)
-#reservation_expire=86400
+# Minimum value: 1
+# Maximum value: 600
+#storwize_svc_flashcopy_timeout = 120
 
-# Count of reservations until usage is refreshed (integer
-# value)
-#until_refresh=0
+# Connection protocol (iSCSI/FC) (string value)
+#storwize_svc_connection_protocol = iSCSI
 
-# number of seconds between subsequent usage refreshes
-# (integer value)
-#max_age=0
+# Configure CHAP authentication for iSCSI connections (Default: Enabled)
+# (boolean value)
+#storwize_svc_iscsi_chap_enabled = true
 
-# default driver to use for quota checks (string value)
-#quota_driver=cinder.quota.DbQuotaDriver
+# Connect with multipath (FC only; iSCSI multipath is controlled by Nova)
+# (boolean value)
+#storwize_svc_multipath_enabled = false
 
-# Enables or disables use of default quota class with default
-# quota. (boolean value)
-#use_default_quota_class=true
+# Allows vdisk to multi host mapping (boolean value)
+#storwize_svc_multihostmap_enabled = true
 
+# Indicate whether svc driver is compatible for NPIV setup. If it is
+# compatible, it will allow no wwpns being returned on get_conn_fc_wwpns during
+# initialize_connection. It should always be set to True. It will be deprecated
+# and removed in M release. (boolean value)
+#storwize_svc_npiv_compatibility_mode = true
 
-#
-# Options defined in cinder.service
-#
+# Allow tenants to specify QOS on create (boolean value)
+#storwize_svc_allow_tenant_qos = false
 
-# Interval, in seconds, between nodes reporting state to
-# datastore (integer value)
-#report_interval=10
+# If operating in stretched cluster mode, specify the name of the pool in which
+# mirrored copies are stored.Example: "pool2" (string value)
+#storwize_svc_stretched_cluster_partner = <None>
 
-# Interval, in seconds, between running periodic tasks
-# (integer value)
-#periodic_interval=60
+# The maximum number of items that a collection resource returns in a single
+# response (integer value)
+#osapi_max_limit = 1000
 
-# Range, in seconds, to randomly delay when starting the
-# periodic task scheduler to reduce stampeding. (Disable by
-# setting to 0) (integer value)
-#periodic_fuzzy_delay=60
-
-# IP address on which OpenStack Volume API listens (string
-# value)
-osapi_volume_listen=<%= @bind_host %>
-
-# Port on which OpenStack Volume API listens (integer value)
-osapi_volume_listen_port=<%= @bind_port %>
-
-# Number of workers for OpenStack Volume API service. The
-# default is equal to the number of CPUs available. (integer
-# value)
-osapi_volume_workers=<%= [node["cpu"]["total"], 2, 4].sort[1] %>
-
-
-#
-# Options defined in cinder.ssh_utils
-#
-
-# Option to enable strict host key checking.  When set to
-# "True" Cinder will only connect to systems with a host key
-# present in the configured "ssh_hosts_key_file".  When set to
-# "False" the host key will be saved upon first connection and
-# used for subsequent connections.  Default=False (boolean
-# value)
-strict_ssh_host_key_policy=<%= @strict_ssh_host_key_policy ? 'true' : 'false' %>
-
-# File containing SSH host keys for the systems with which
-# Cinder needs to communicate.  OPTIONAL:
-# Default=$state_path/ssh_known_hosts (string value)
-#ssh_hosts_key_file=$state_path/ssh_known_hosts
-
-
-#
-# Options defined in cinder.test
-#
-
-# File name of clean sqlite db (string value)
-#sqlite_clean_db=clean.sqlite
-
-
-#
-# Options defined in cinder.wsgi
-#
-
-# Maximum line size of message headers to be accepted.
-# max_header_line may need to be increased when using large
-# tokens (typically those generated by the Keystone v3 API
-# with big service catalogs). (integer value)
-max_header_line = <%= node[:cinder][:max_header_line] %>
-
-# Sets the value of TCP_KEEPALIVE (True/False) for each server
-# socket. (boolean value)
-#tcp_keepalive=true
-
-# Sets the value of TCP_KEEPIDLE in seconds for each server
-# socket. Not supported on OS X. (integer value)
-#tcp_keepidle=600
-
-# Sets the value of TCP_KEEPINTVL in seconds for each server
-# socket. Not supported on OS X. (integer value)
-tcp_keepalive_interval=30
-
-# Sets the value of TCP_KEEPCNT for each server socket. Not
-# supported on OS X. (integer value)
-#tcp_keepalive_count=<None>
-
-# CA certificate file to use to verify connecting clients
+# Base URL that will be presented to users in links to the OpenStack Volume API
 # (string value)
-ssl_ca_file=<%= node[:cinder][:ssl][:ca_certs] if node[:cinder][:api][:protocol] == 'https' && node[:cinder][:ssl][:cert_required] %>
-
-# Certificate file to use when starting the server securely
-# (string value)
-ssl_cert_file=<%= node[:cinder][:ssl][:certfile] if node[:cinder][:api][:protocol] == 'https' %>
-
-# Private key file to use when starting the server securely
-# (string value)
-ssl_key_file=<%= node[:cinder][:ssl][:keyfile] if node[:cinder][:api][:protocol] == 'https' %>
-
-
-#
-# Options defined in cinder.api.common
-#
-
-# The maximum number of items that a collection resource
-# returns in a single response (integer value)
-#osapi_max_limit=1000
-
-# Base URL that will be presented to users in links to the
-# OpenStack Volume API (string value)
 # Deprecated group/name - [DEFAULT]/osapi_compute_link_prefix
-#osapi_volume_base_URL=<None>
+#osapi_volume_base_URL = <None>
 
-
-#
-# Options defined in cinder.api.middleware.auth
-#
-
-# Treat X-Forwarded-For as the canonical remote address. Only
-# enable this if you have a sanitizing proxy. (boolean value)
-#use_forwarded_for=false
-
-
-#
-# Options defined in cinder.backup.driver
-#
-
-# Backup metadata version to be used when backing up volume
-# metadata. If this number is bumped, make sure the service
-# doing the restore supports the new version. (integer value)
-#backup_metadata_version=1
-
-
-#
-# Options defined in cinder.backup.drivers.ceph
-#
-
-# Ceph configuration file to use. (string value)
-#backup_ceph_conf=/etc/ceph/ceph.conf
-
-# The Ceph user to connect with. Default here is to use the
-# same user as for Cinder volumes. If not using cephx this
-# should be set to None. (string value)
-#backup_ceph_user=cinder
-
-# The chunk size, in bytes, that a backup is broken into
-# before transfer to the Ceph object store. (integer value)
-#backup_ceph_chunk_size=134217728
-
-# The Ceph pool where volume backups are stored. (string
-# value)
-#backup_ceph_pool=backups
-
-# RBD stripe unit to use when creating a backup image.
-# (integer value)
-#backup_ceph_stripe_unit=0
-
-# RBD stripe count to use when creating a backup image.
-# (integer value)
-#backup_ceph_stripe_count=0
-
-# If True, always discard excess bytes when restoring volumes
-# i.e. pad with zeroes. (boolean value)
-#restore_discard_excess_bytes=true
-
-
-#
-# Options defined in cinder.backup.drivers.swift
-#
-
-# The URL of the Swift endpoint (string value)
-#backup_swift_url=http://localhost:8080/v1/AUTH_
-
-# Info to match when looking for swift in the service catalog.
-# Format is: separated values of the form:
-# <service_type>:<service_name>:<endpoint_type> - Only used if
-# backup_swift_url is unset (string value)
-#swift_catalog_info=object-store:swift:publicURL
-
-# Swift authentication mechanism (string value)
-#backup_swift_auth=per_user
-
-# Swift authentication version. Specify "1" for auth 1.0, or
-# "2" for auth 2.0 (string value)
-#backup_swift_auth_version=1
-
-# Swift tenant/account name. Required when connecting to an
-# auth 2.0 system (string value)
-#backup_swift_tenant=<None>
-
-# Swift user name (string value)
-#backup_swift_user=<None>
-
-# Swift key for authentication (string value)
-#backup_swift_key=<None>
-
-# The default Swift container to use (string value)
-#backup_swift_container=volumebackups
-
-# The size in bytes of Swift backup objects (integer value)
-#backup_swift_object_size=52428800
-
-# The number of retries to make for Swift operations (integer
-# value)
-#backup_swift_retry_attempts=3
-
-# The backoff time in seconds between Swift retries (integer
-# value)
-#backup_swift_retry_backoff=2
+# Public url to use for versions endpoint. The default is None, which will use
+# the request's host_url attribute to populate the URL base. If Cinder is
+# operating behind a proxy, you will want to change this to represent the
+# proxy's URL. (string value)
+#public_endpoint = <None>
 
 # Compression algorithm (None to disable) (string value)
-#backup_compression_algorithm=zlib
+#backup_compression_algorithm = zlib
 
+# Backup metadata version to be used when backing up volume metadata. If this
+# number is bumped, make sure the service doing the restore supports the new
+# version. (integer value)
+#backup_metadata_version = 2
 
-#
-# Options defined in cinder.backup.drivers.tsm
-#
+# The number of chunks or objects, for which one Ceilometer notification will
+# be sent (integer value)
+#backup_object_number_per_notification = 10
 
-# Volume prefix for the backup id when backing up to TSM
+# Interval, in seconds, between two progress notifications reporting the backup
+# status (integer value)
+#backup_timer_interval = 120
+
+# Ceph configuration file to use. (string value)
+#backup_ceph_conf = /etc/ceph/ceph.conf
+
+# The Ceph user to connect with. Default here is to use the same user as for
+# Cinder volumes. If not using cephx this should be set to None. (string value)
+#backup_ceph_user = cinder
+
+# The chunk size, in bytes, that a backup is broken into before transfer to the
+# Ceph object store. (integer value)
+#backup_ceph_chunk_size = 134217728
+
+# The Ceph pool where volume backups are stored. (string value)
+#backup_ceph_pool = backups
+
+# RBD stripe unit to use when creating a backup image. (integer value)
+#backup_ceph_stripe_unit = 0
+
+# RBD stripe count to use when creating a backup image. (integer value)
+#backup_ceph_stripe_count = 0
+
+# If True, always discard excess bytes when restoring volumes i.e. pad with
+# zeroes. (boolean value)
+#restore_discard_excess_bytes = true
+
+# Base dir containing mount point for gluster share. (string value)
+#glusterfs_backup_mount_point = $state_path/backup_mount
+
+# GlusterFS share in <hostname|ipv4addr|ipv6addr>:<gluster_vol_name> format.
+# Eg: 1.2.3.4:backup_vol (string value)
+#glusterfs_backup_share = <None>
+
+# Base dir containing mount point for NFS share. (string value)
+#backup_mount_point_base = $state_path/backup_mount
+
+# NFS share in hostname:path, ipv4addr:path, or "[ipv6addr]:path" format.
 # (string value)
-#backup_tsm_volume_prefix=backup
+#backup_share = <None>
+
+# Mount options passed to the NFS client. See NFS man page for details. (string
+# value)
+#backup_mount_options = <None>
+
+# The maximum size in bytes of the files used to hold backups. If the volume
+# being backed up exceeds this size, then it will be backed up into multiple
+# files.backup_file_size must be a multiple of backup_sha_block_size_bytes.
+# (integer value)
+#backup_file_size = 1999994880
+
+# The size in bytes that changes are tracked for incremental backups.
+# backup_file_size has to be multiple of backup_sha_block_size_bytes. (integer
+# value)
+#backup_sha_block_size_bytes = 32768
+
+# Enable or Disable the timer to send the periodic progress notifications to
+# Ceilometer when backing up the volume to the backend storage. The default
+# value is True to enable the timer. (boolean value)
+#backup_enable_progress_timer = true
+
+# Path specifying where to store backups. (string value)
+#backup_posix_path = $state_path/backup
+
+# Custom directory to use for backups. (string value)
+#backup_container = <None>
+
+# The URL of the Swift endpoint (string value)
+#backup_swift_url = <None>
+
+# Info to match when looking for swift in the service catalog. Format is:
+# separated values of the form: <service_type>:<service_name>:<endpoint_type> -
+# Only used if backup_swift_url is unset (string value)
+#swift_catalog_info = object-store:swift:publicURL
+
+# Swift authentication mechanism (string value)
+#backup_swift_auth = per_user
+
+# Swift authentication version. Specify "1" for auth 1.0, or "2" for auth 2.0
+# (string value)
+#backup_swift_auth_version = 1
+
+# Swift tenant/account name. Required when connecting to an auth 2.0 system
+# (string value)
+#backup_swift_tenant = <None>
+
+# Swift user name (string value)
+#backup_swift_user = <None>
+
+# Swift key for authentication (string value)
+#backup_swift_key = <None>
+
+# The default Swift container to use (string value)
+#backup_swift_container = volumebackups
+
+# The size in bytes of Swift backup objects (integer value)
+#backup_swift_object_size = 52428800
+
+# The size in bytes that changes are tracked for incremental backups.
+# backup_swift_object_size has to be multiple of backup_swift_block_size.
+# (integer value)
+#backup_swift_block_size = 32768
+
+# The number of retries to make for Swift operations (integer value)
+#backup_swift_retry_attempts = 3
+
+# The backoff time in seconds between Swift retries (integer value)
+#backup_swift_retry_backoff = 2
+
+# Enable or Disable the timer to send the periodic progress notifications to
+# Ceilometer when backing up the volume to the Swift backend storage. The
+# default value is True to enable the timer. (boolean value)
+#backup_swift_enable_progress_timer = true
+
+# Location of the CA certificate file to use for swift client requests. (string
+# value)
+#backup_swift_ca_cert_file = <None>
+
+# Volume prefix for the backup id when backing up to TSM (string value)
+#backup_tsm_volume_prefix = backup
 
 # TSM password for the running username (string value)
-#backup_tsm_password=password
+#backup_tsm_password = password
 
 # Enable or Disable compression for backups (boolean value)
-#backup_tsm_compression=true
-
-
-#
-# Options defined in cinder.backup.manager
-#
+#backup_tsm_compression = true
 
 # Driver to use for backups. (string value)
-# Deprecated group/name - [DEFAULT]/backup_service
-#backup_driver=cinder.backup.drivers.swift
+#backup_driver = cinder.backup.drivers.swift
 
+# Offload pending backup delete during backup service startup. (boolean value)
+#backup_service_inithost_offload = false
 
-#
-# Options defined in cinder.common.config
-#
-
-# File name for the paste.deploy config for cinder-api (string
-# value)
-#api_paste_config=api-paste.ini
-
-# Top-level directory for maintaining cinder's state (string
-# value)
-# Deprecated group/name - [DEFAULT]/pybasedir
-state_path=/var/lib/cinder
+state_path = /var/lib/cinder
 
 # IP address of this host (string value)
-my_ip=<%= node[:cinder][:my_ip] %>
+#my_ip = 127.0.0.1
+my_ip = <%= node[:cinder][:my_ip] %>
 
-# Default glance hostname or IP (string value)
-#glance_host=$my_ip
+# Default glance host name or IP (string value)
+#glance_host = $my_ip
 
 # Default glance port (integer value)
-#glance_port=9292
+# Minimum value: 1
+# Maximum value: 65535
+#glance_port = 9292
 
-# A list of the glance API servers available to cinder
-# ([hostname|ip]:port) (list value)
-glance_api_servers=<%= @glance_server_protocol %>://<%= @glance_server_host %>:<%= @glance_server_port %>
+# A list of the glance API servers available to cinder ([hostname|ip]:port)
+# (list value)
+#glance_api_servers = $glance_host:$glance_port
+glance_api_servers = <%= @glance_server_protocol %>://<%= @glance_server_host %>:<%= @glance_server_port %>
 
 # Version of the glance API to use (integer value)
-#glance_api_version=1
-glance_api_version=2
+#glance_api_version = 1
+glance_api_version = 2
 
-# Number retries when downloading an image from glance
-# (integer value)
-#glance_num_retries=0
+# Number retries when downloading an image from glance (integer value)
+#glance_num_retries = 0
 
-# Allow to perform insecure SSL (https) requests to glance
-# (boolean value)
+# Allow to perform insecure SSL (https) requests to glance (boolean value)
+#glance_api_insecure = false
 <% unless @glance_server_insecure.nil? -%>
-glance_api_insecure=<%= @glance_server_insecure %>
+glance_api_insecure = <%= @glance_server_insecure %>
 <% end -%>
 
-# Enables or disables negotiation of SSL layer compression. In
-# some cases disabling compression can improve data
-# throughput, such as when high network bandwidth is available
-# and you use compressed image formats like qcow2. (boolean
+# Enables or disables negotiation of SSL layer compression. In some cases
+# disabling compression can improve data throughput, such as when high network
+# bandwidth is available and you use compressed image formats like qcow2.
+# (boolean value)
+#glance_api_ssl_compression = false
+
+# Location of ca certificates file to use for glance client requests. (string
 # value)
-#glance_api_ssl_compression=false
+#glance_ca_certificates_file = <None>
 
-# Location of ca certificates file to use for glance client
-# requests. (string value)
-#glance_ca_certificates_file=<None>
-
-# http/https timeout value for glance operations. If no value
-# (None) is supplied here, the glanceclient default value is
-# used. (integer value)
-#glance_request_timeout=<None>
+# http/https timeout value for glance operations. If no value (None) is
+# supplied here, the glanceclient default value is used. (integer value)
+#glance_request_timeout = <None>
 
 # The topic that scheduler nodes listen on (string value)
-#scheduler_topic=cinder-scheduler
+#scheduler_topic = cinder-scheduler
 
 # The topic that volume nodes listen on (string value)
-#volume_topic=cinder-volume
+#volume_topic = cinder-volume
 
 # The topic that volume backup nodes listen on (string value)
-#backup_topic=cinder-backup
+#backup_topic = cinder-backup
 
 # DEPRECATED: Deploy v1 of the Cinder API. (boolean value)
-#enable_v1_api=true
+#enable_v1_api = true
 
 # Deploy v2 of the Cinder API. (boolean value)
-#enable_v2_api=true
+#enable_v2_api = true
 
 # Enables or disables rate limit of the API. (boolean value)
-#api_rate_limit=true
+#api_rate_limit = true
 
-# Specify list of extensions to load when using
-# osapi_volume_extension option with
-# cinder.api.contrib.select_extensions (list value)
-#osapi_volume_ext_list=
+# Specify list of extensions to load when using osapi_volume_extension option
+# with cinder.api.contrib.select_extensions (list value)
+#osapi_volume_ext_list =
 
 # osapi volume extension to load (multi valued)
-#osapi_volume_extension=cinder.api.contrib.standard_extensions
+#osapi_volume_extension = cinder.api.contrib.standard_extensions
 
 # Full class name for the Manager for volume (string value)
-#volume_manager=cinder.volume.manager.VolumeManager
+#volume_manager = cinder.volume.manager.VolumeManager
 
-# Full class name for the Manager for volume backup (string
-# value)
-#backup_manager=cinder.backup.manager.BackupManager
+# Full class name for the Manager for volume backup (string value)
+#backup_manager = cinder.backup.manager.BackupManager
 
 # Full class name for the Manager for scheduler (string value)
-#scheduler_manager=cinder.scheduler.manager.SchedulerManager
+#scheduler_manager = cinder.scheduler.manager.SchedulerManager
 
-# Name of this node.  This can be an opaque identifier. It is
-# not necessarily a host name, FQDN, or IP address. (string
-# value)
-#host=cinder
+# Name of this node.  This can be an opaque identifier. It is not necessarily a
+# host name, FQDN, or IP address. (string value)
+#host = build22
 
 # Availability zone of this node (string value)
-#storage_availability_zone=nova
+#storage_availability_zone = nova
 <% unless @availability_zone.nil? -%>
-storage_availability_zone=<%= @availability_zone %>
+storage_availability_zone = <%= @availability_zone %>
 <% end -%>
 
 # Default availability zone for new volumes. If not set, the
-# storage_availability_zone option value is used as the
-# default for new volumes. (string value)
-#default_availability_zone=<None>
+# storage_availability_zone option value is used as the default for new
+# volumes. (string value)
+#default_availability_zone = <None>
 <% unless @default_availability_zone.nil? or @default_availability_zone == "" -%>
-default_availability_zone=<%= @default_availability_zone %>
+default_availability_zone = <%= @default_availability_zone %>
 <% end -%>
+
+# If the requested Cinder availability zone is unavailable, fall back to the
+# value of default_availability_zone, then storage_availability_zone, instead
+# of failing. (boolean value)
+#allow_availability_zone_fallback = false
 
 # Default volume type to use (string value)
-#default_volume_type=<None>
+#default_volume_type = <None>
 
-# Time period for which to generate volume usages. The options
-# are hour, day, month, or year. (string value)
-#volume_usage_audit_period=month
+# Time period for which to generate volume usages. The options are hour, day,
+# month, or year. (string value)
+#volume_usage_audit_period = month
 
-# Path to the rootwrap configuration file to use for running
-# commands as root (string value)
-#rootwrap_config=/etc/cinder/rootwrap.conf
+# Path to the rootwrap configuration file to use for running commands as root
+# (string value)
+#rootwrap_config = /etc/cinder/rootwrap.conf
 
 # Enable monkey patching (boolean value)
-#monkey_patch=false
+#monkey_patch = false
 
 # List of modules/decorators to monkey patch (list value)
-#monkey_patch_modules=
+#monkey_patch_modules =
 
-# Maximum time since last check-in for a service to be
-# considered up (integer value)
-#service_down_time=60
-
-# The full class name of the volume API class to use (string
+# Maximum time since last check-in for a service to be considered up (integer
 # value)
-#volume_api_class=cinder.volume.api.API
+#service_down_time = 60
 
-# The full class name of the volume backup API class (string
-# value)
-#backup_api_class=cinder.backup.api.API
+# The full class name of the volume API class to use (string value)
+#volume_api_class = cinder.volume.api.API
 
-# The strategy to use for auth. Supports noauth, keystone, and
-# deprecated. (string value)
-auth_strategy=keystone
+# The full class name of the volume backup API class (string value)
+#backup_api_class = cinder.backup.api.API
 
-# A list of backend names to use. These backend names should
-# be backed by a unique [CONFIG] group with its options (list
-# value)
-#enabled_backends=<None>
-<% if @use_multi_backend -%>
-enabled_backends=<%= @volumes.each_with_index.collect { |backend,idx|
-    "backend-#{backend['backend_driver']}-#{idx}"
-}.join(',') %>
-<% end -%>
-
-# Whether snapshots count against GigaByte quota (boolean
-# value)
-#no_snapshot_gb_quota=false
-
-# The full class name of the volume transfer API class (string
-# value)
-#transfer_api_class=cinder.transfer.api.API
-
-# The full class name of the volume replication API class
+# The strategy to use for auth. Supports noauth, keystone, and deprecated.
 # (string value)
-#replication_api_class=cinder.replication.api.API
+# Allowed values: noauth, keystone, deprecated
+#auth_strategy = keystone
 
-# The full class name of the consistencygroup API class
+# A list of backend names to use. These backend names should be backed by a
+# unique [CONFIG] group with its options (list value)
+#enabled_backends = <None>
+
+# Whether snapshots count against gigabyte quota (boolean value)
+#no_snapshot_gb_quota = false
+
+# The full class name of the volume transfer API class (string value)
+#transfer_api_class = cinder.transfer.api.API
+
+# The full class name of the volume replication API class (string value)
+#replication_api_class = cinder.replication.api.API
+
+# The full class name of the consistencygroup API class (string value)
+#consistencygroup_api_class = cinder.consistencygroup.api.API
+
+# OpenStack privileged account username. Used for requests to other services
+# (such as Nova) that require an account with special rights. (string value)
+#os_privileged_user_name = <None>
+
+# Password associated with the OpenStack privileged account. (string value)
+#os_privileged_user_password = <None>
+
+# Tenant name associated with the OpenStack privileged account. (string value)
+#os_privileged_user_tenant = <None>
+
+# Auth URL associated with the OpenStack privileged account. (string value)
+#os_privileged_user_auth_url = <None>
+
+# Match this value when searching for nova in the service catalog. Format is:
+# separated values of the form: <service_type>:<service_name>:<endpoint_type>
 # (string value)
-#consistencygroup_api_class=cinder.consistencygroup.api.API
+#nova_catalog_info = compute:Compute Service:publicURL
+nova_catalog_info = compute:Compute Service:internalURL
 
+# Same as nova_catalog_info, but for admin endpoint. (string value)
+#nova_catalog_admin_info = compute:Compute Service:adminURL
 
-#
-# Options defined in cinder.compute
-#
+# Override service catalog lookup with template for nova endpoint e.g.
+# http://localhost:8774/v2/%(project_id)s (string value)
+#nova_endpoint_template = <None>
 
-# The full class name of the compute API class to use (string
-# value)
-#compute_api_class=cinder.compute.nova.API
-
-
-#
-# Options defined in cinder.compute.nova
-#
-
-# Match this value when searching for nova in the service
-# catalog. Format is: separated values of the form:
-# <service_type>:<service_name>:<endpoint_type> (string value)
-nova_catalog_info=compute:nova:internalURL
-
-# Same as nova_catalog_info, but for admin endpoint. (string
-# value)
-nova_catalog_admin_info=compute:nova:adminURL
-
-# Override service catalog lookup with template for nova
-# endpoint e.g. http://localhost:8774/v2/%(project_id)s
-# (string value)
-#nova_endpoint_template=<None>
-
-# Same as nova_endpoint_template, but for admin endpoint.
-# (string value)
-#nova_endpoint_admin_template=<None>
+# Same as nova_endpoint_template, but for admin endpoint. (string value)
+#nova_endpoint_admin_template = <None>
 
 # Region name of this node (string value)
-os_region_name= <%= @keystone_settings['endpoint_region'] %>
+#os_region_name = <None>
+os_region_name = <%= @keystone_settings['endpoint_region'] %>
 
-# Location of ca certificates file to use for nova client
-# requests. (string value)
-#nova_ca_certificates_file=<None>
-
-# Allow to perform insecure SSL requests to nova (boolean
+# Location of ca certificates file to use for nova client requests. (string
 # value)
-nova_api_insecure=<%= @nova_api_insecure %>
+#nova_ca_certificates_file = <None>
 
+# Allow to perform insecure SSL requests to nova (boolean value)
+#nova_api_insecure = false
+nova_api_insecure = <%= @nova_api_insecure %>
 
-#
-# Options defined in cinder.db.api
-#
-
-# The backend to use for db (string value)
-#db_backend=sqlalchemy
-
-# Services to be added to the available pool on create
-# (boolean value)
-#enable_new_services=true
-
-# Template string to be used to generate volume names (string
+# ID of the project which will be used as the Cinder internal tenant. (string
 # value)
-#volume_name_template=volume-%s
+#cinder_internal_tenant_project_id = <None>
 
-# Template string to be used to generate snapshot names
+# ID of the user to be used in volume operations as the Cinder internal tenant.
 # (string value)
-#snapshot_name_template=snapshot-%s
+#cinder_internal_tenant_user_id = <None>
 
-# Template string to be used to generate backup names (string
-# value)
-#backup_name_template=backup-%s
+# Services to be added to the available pool on create (boolean value)
+#enable_new_services = true
 
+# Template string to be used to generate volume names (string value)
+#volume_name_template = volume-%s
 
-#
-# Options defined in cinder.db.base
-#
+# Template string to be used to generate snapshot names (string value)
+#snapshot_name_template = snapshot-%s
 
-# Driver to use for database access (string value)
-#db_driver=cinder.db
+# Template string to be used to generate backup names (string value)
+#backup_name_template = backup-%s
 
-
-#
-# Options defined in cinder.image.glance
-#
+# Make exception message format errors fatal. (boolean value)
+#fatal_exception_format_errors = false
 
 # Default core properties of image (list value)
-#glance_core_properties=checksum,container_format,disk_format,image_name,image_id,min_disk,min_ram,name,size
+#glance_core_properties = checksum,container_format,disk_format,image_name,image_id,min_disk,min_ram,name,size
 
-# A list of url schemes that can be downloaded directly via
-# the direct_url.  Currently supported schemes: [file]. (list
-# value)
-#allowed_direct_url_schemes=
+# A list of url schemes that can be downloaded directly via the direct_url.
+# Currently supported schemes: [file]. (list value)
+#allowed_direct_url_schemes =
 <% if @show_storage_location -%>
 ### Enable file and rbd if available
-allowed_direct_url_schemes=cinder
+allowed_direct_url_schemes = cinder
 <% end -%>
 
+# Directory used for temporary storage during image conversion (string value)
+#image_conversion_dir = $state_path/conversion
 
-#
-# Options defined in cinder.image.image_utils
-#
+# Number of volumes allowed per project (integer value)
+#quota_volumes = 10
 
-# Directory used for temporary storage during image conversion
-# (string value)
-#image_conversion_dir=$state_path/conversion
+# Number of volume snapshots allowed per project (integer value)
+#quota_snapshots = 10
 
+# Number of consistencygroups allowed per project (integer value)
+#quota_consistencygroups = 10
 
-#
-# Options defined in cinder.openstack.common.eventlet_backdoor
-#
+# Total amount of storage, in gigabytes, allowed for volumes and snapshots per
+# project (integer value)
+#quota_gigabytes = 1000
 
-# Enable eventlet backdoor.  Acceptable values are 0, <port>,
-# and <start>:<end>, where 0 results in listening on a random
-# tcp port number; <port> results in listening on the
-# specified port number (and not enabling backdoor if that
-# port is in use); and <start>:<end> results in listening on
-# the smallest unused port number within the specified range
-# of port numbers.  The chosen port is displayed in the
-# service's log file. (string value)
-#backdoor_port=<None>
+# Number of volume backups allowed per project (integer value)
+#quota_backups = 10
 
+# Total amount of storage, in gigabytes, allowed for backups per project
+# (integer value)
+#quota_backup_gigabytes = 1000
 
-#
-# Options defined in cinder.openstack.common.log
-#
+# Number of seconds until a reservation expires (integer value)
+#reservation_expire = 86400
 
-# Print debugging output (set logging level to DEBUG instead
-# of default WARNING level). (boolean value)
-debug=<%= node[:cinder][:debug] %>
+# Count of reservations until usage is refreshed (integer value)
+#until_refresh = 0
 
-# Print more verbose output (set logging level to INFO instead
-# of default WARNING level). (boolean value)
-verbose=<%= node[:cinder][:verbose] %>
+# Number of seconds between subsequent usage refreshes (integer value)
+#max_age = 0
 
-# Log output to standard error. (boolean value)
-#use_stderr=true
+# Default driver to use for quota checks (string value)
+#quota_driver = cinder.quota.DbQuotaDriver
 
-# Format string to use for log messages with context. (string
+# Enables or disables use of default quota class with default quota. (boolean
 # value)
-#logging_context_format_string=%(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user_identity)s] %(instance)s%(message)s
+#use_default_quota_class = true
 
-# Format string to use for log messages without context.
-# (string value)
-#logging_default_format_string=%(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [-] %(instance)s%(message)s
-
-# Data to append to log format when level is DEBUG. (string
-# value)
-#logging_debug_format_suffix=%(funcName)s %(pathname)s:%(lineno)d
-
-# Prefix each line of exception output with this format.
-# (string value)
-#logging_exception_prefix=%(asctime)s.%(msecs)03d %(process)d TRACE %(name)s %(instance)s
-
-# List of logger=LEVEL pairs. (list value)
-#default_log_levels=amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN
-
-# Enables or disables publication of error events. (boolean
-# value)
-#publish_errors=false
-
-# Enables or disables fatal status of deprecations. (boolean
-# value)
-#fatal_deprecations=false
-
-# The format for an instance that is passed with the log
-# message. (string value)
-#instance_format="[instance: %(uuid)s] "
-
-# The format for an instance UUID that is passed with the log
-# message. (string value)
-#instance_uuid_format="[instance: %(uuid)s] "
-
-# The name of a logging configuration file. This file is
-# appended to any existing logging configuration files. For
-# details about logging configuration files, see the Python
-# logging module documentation. (string value)
-# Deprecated group/name - [DEFAULT]/log_config
-#log_config_append=<None>
-
-# DEPRECATED. A logging.Formatter log message format string
-# which may use any of the available logging.LogRecord
-# attributes. This option is deprecated.  Please use
-# logging_context_format_string and
-# logging_default_format_string instead. (string value)
-#log_format=<None>
-
-# Format string for %%(asctime)s in log records. Default:
-# %(default)s . (string value)
-#log_date_format=%Y-%m-%d %H:%M:%S
-
-# (Optional) Name of log file to output to. If no default is
-# set, logging will go to stdout. (string value)
-# Deprecated group/name - [DEFAULT]/logfile
-#log_file=<None>
-
-# (Optional) The base directory used for relative --log-file
-# paths. (string value)
-# Deprecated group/name - [DEFAULT]/logdir
-#log_dir=<None>
-log_dir=/var/log/cinder
-
-# Use syslog for logging. Existing syslog format is DEPRECATED
-# during I, and will change in J to honor RFC5424. (boolean
-# value)
-use_syslog=<%= node[:cinder][:use_syslog] ? "True" : "False" %>
-
-# (Optional) Enables or disables syslog rfc5424 format for
-# logging. If enabled, prefixes the MSG part of the syslog
-# message with APP-NAME (RFC5424). The format without the APP-
-# NAME is deprecated in I, and will be removed in J. (boolean
-# value)
-#use_syslog_rfc_format=false
-
-# Syslog facility to receive log lines. (string value)
-#syslog_log_facility=LOG_USER
-
-
-#
-# Options defined in cinder.openstack.common.periodic_task
-#
-
-# Some periodic tasks can be run in a separate process. Should
-# we run them here? (boolean value)
-#run_external_periodic_tasks=true
-
-
-#
-# Options defined in cinder.scheduler.driver
-#
+# Max size allowed per volume, in gigabytes (integer value)
+#per_volume_size_limit = -1
 
 # The scheduler host manager class to use (string value)
-#scheduler_host_manager=cinder.scheduler.host_manager.HostManager
+#scheduler_host_manager = cinder.scheduler.host_manager.HostManager
 
-# Maximum number of attempts to schedule an volume (integer
+# Maximum number of attempts to schedule an volume (integer value)
+#scheduler_max_attempts = 3
+
+# Which filter class names to use for filtering hosts when not specified in the
+# request. (list value)
+#scheduler_default_filters = AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter
+
+# Which weigher class names to use for weighing hosts. (list value)
+#scheduler_default_weighers = CapacityWeigher
+
+# Multiplier used for weighing volume capacity. Negative numbers mean to stack
+# vs spread. (floating point value)
+#capacity_weight_multiplier = 1.0
+
+# Multiplier used for weighing volume capacity. Negative numbers mean to stack
+# vs spread. (floating point value)
+#allocated_capacity_weight_multiplier = -1.0
+
+# Multiplier used for weighing volume number. Negative numbers mean to spread
+# vs stack. (floating point value)
+#volume_number_multiplier = -1.0
+
+# Interval, in seconds, between nodes reporting state to datastore (integer
 # value)
-#scheduler_max_attempts=3
+#report_interval = 10
 
+# Interval, in seconds, between running periodic tasks (integer value)
+#periodic_interval = 60
 
-#
-# Options defined in cinder.scheduler.host_manager
-#
+# Range, in seconds, to randomly delay when starting the periodic task
+# scheduler to reduce stampeding. (Disable by setting to 0) (integer value)
+#periodic_fuzzy_delay = 60
 
-# Which filter class names to use for filtering hosts when not
-# specified in the request. (list value)
-#scheduler_default_filters=AvailabilityZoneFilter,CapacityFilter,CapabilitiesFilter
+# IP address on which OpenStack Volume API listens (string value)
+#osapi_volume_listen = 0.0.0.0
+osapi_volume_listen = <%= @bind_host %>
 
-# Which weigher class names to use for weighing hosts. (list
+# Port on which OpenStack Volume API listens (integer value)
+# Minimum value: 1
+# Maximum value: 65535
+#osapi_volume_listen_port = 8776
+osapi_volume_listen_port = <%= @bind_port %>
+
+# Number of workers for OpenStack Volume API service. The default is equal to
+# the number of CPUs available. (integer value)
+#osapi_volume_workers = <None>
+osapi_volume_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+
+# Option to enable strict host key checking.  When set to "True" Cinder will
+# only connect to systems with a host key present in the configured
+# "ssh_hosts_key_file".  When set to "False" the host key will be saved upon
+# first connection and used for subsequent connections.  Default=False (boolean
 # value)
-#scheduler_default_weighers=CapacityWeigher
+#strict_ssh_host_key_policy = false
+strict_ssh_host_key_policy = <%= @strict_ssh_host_key_policy ? 'true' : 'false' %>
 
+# File containing SSH host keys for the systems with which Cinder needs to
+# communicate.  OPTIONAL: Default=$state_path/ssh_known_hosts (string value)
+#ssh_hosts_key_file = $state_path/ssh_known_hosts
 
-#
-# Options defined in cinder.scheduler.manager
-#
-
-# Default scheduler driver to use (string value)
-#scheduler_driver=cinder.scheduler.filter_scheduler.FilterScheduler
-
-
-#
-# Options defined in cinder.scheduler.scheduler_options
-#
-
-# Absolute path to scheduler configuration JSON file. (string
-# value)
-#scheduler_json_config_location=
-
-
-#
-# Options defined in cinder.scheduler.simple
-#
-
-# This configure option has been deprecated along with the
-# SimpleScheduler.  New scheduler is able to gather capacity
-# information for each host, thus setting the maximum number
-# of volume gigabytes for host is no longer needed.  It's safe
-# to remove this configure from cinder.conf. (integer value)
-#max_gigabytes=10000
-
-
-#
-# Options defined in cinder.scheduler.weights.capacity
-#
-
-# Multiplier used for weighing volume capacity. Negative
-# numbers mean to stack vs spread. (floating point value)
-#capacity_weight_multiplier=1.0
-
-# Multiplier used for weighing volume capacity. Negative
-# numbers mean to stack vs spread. (floating point value)
-#allocated_capacity_weight_multiplier=-1.0
-
-
-#
-# Options defined in cinder.scheduler.weights.volume_number
-#
-
-# Multiplier used for weighing volume number. Negative numbers
-# mean to spread vs stack. (floating point value)
-#volume_number_multiplier=-1.0
-
-
-#
-# Options defined in cinder.transfer.api
-#
+# File name of clean sqlite db (string value)
+#sqlite_clean_db = clean.sqlite
 
 # The number of characters in the salt. (integer value)
-#volume_transfer_salt_length=8
+#volume_transfer_salt_length = 8
 
-# The number of characters in the autogenerated auth key.
-# (integer value)
-#volume_transfer_key_length=16
-
-
-#
-# Options defined in cinder.volume.api
-#
-
-# Cache volume availability zones in memory for the provided
-# duration in seconds (integer value)
-#az_cache_duration=3600
-
-
-# Create volume from snapshot at the host where snapshot
-# resides (boolean value)
-#snapshot_same_host=true
-
-# Ensure that the new volumes are the same AZ as snapshot or
-# source volume (boolean value)
-#cloned_volume_same_az=true
+# The number of characters in the autogenerated auth key. (integer value)
+#volume_transfer_key_length = 16
 
 
 #############################################################################
@@ -866,10 +593,6 @@ use_syslog=<%= node[:cinder][:use_syslog] ? "True" : "False" %>
 image_upload_use_cinder_backend = True
 image_upload_use_internal_tenant = False
 <% end -%>
-
-#
-# Options defined in cinder.volume.driver
-#
 
 # The maximum number of times to rescan iSER targetto find volume (integer
 # value)
@@ -898,13 +621,9 @@ image_upload_use_internal_tenant = False
 
 # Prefix for iSCSI volumes (string value)
 #iscsi_target_prefix = iqn.2010-10.org.openstack:
+#iscsi_target_prefix = iqn.2010-10.org.openstack:
 <% if volume['backend_driver'] == 'emc' -%>
-    <% case volume["emc"]["emc_storage_type"].downcase -%>
-    <% when "vnx" -%>
-iscsi_target_prefix = iqn.2001-07.com.vnx
-    <% when "vmax" -%>
 iscsi_target_prefix = iqn.1992-04.com.em
-    <% end -%>
 <% elsif volume['backend_driver'] == 'eternus' -%>
 iscsi_target_prefix = iqn.2000-09.com.fujitsu
 <% end -%>
@@ -1104,26 +823,45 @@ iscsi_write_cache = off
 # (integer value)
 #image_volume_cache_max_count = 0
 
-#
-# Options defined in cinder.volume.drivers.block_device
-#
+
+<% if volume['backend_driver'] == 'blockbridge' -%>
+
+# IP address/hostname of Blockbridge API. (string value)
+#blockbridge_api_host = <None>
+
+# Override HTTPS port to connect to Blockbridge API server. (integer value)
+#blockbridge_api_port = <None>
+
+# Blockbridge API authentication scheme (token or password) (string value)
+# Allowed values: token, password
+#blockbridge_auth_scheme = token
+
+# Blockbridge API token (for auth scheme 'token') (string value)
+#blockbridge_auth_token = <None>
+
+# Blockbridge API user (for auth scheme 'password') (string value)
+#blockbridge_auth_user = <None>
+
+# Blockbridge API password (for auth scheme 'password') (string value)
+#blockbridge_auth_password = <None>
+
+# Defines the set of exposed pools and their associated backend query strings
+# (dict value)
+#blockbridge_pools = OpenStack:+openstack
+
+# Default pool name if unspecified. (string value)
+#blockbridge_default_pool = <None>
+
+<% end -%>
 
 # List of all available devices (list value)
 #available_devices =
 
-
 <% if volume['backend_driver'] == 'cloudbyte' -%>
-#
-# Options defined in cinder.volume.drivers.cloudbyte
-#
 
 # These values will be used for CloudByte storage's addQos API call. (dict
 # value)
 #cb_add_qosgroup = graceallowed:false,iops:10,iopscontrol:true,latency:15,memlimit:0,networkspeed:0,throughput:0,tpcontrol:false
-
-# These values will be used for CloudByte storage's createVolume API call.
-# (dict value)
-#cb_create_volume = blocklength:512B,compression:off,deduplication:off,protocoltype:ISCSI,recordsize:16k,sync:always
 
 # Driver will use this API key to authenticate against the CloudByte storage's
 # management interface. (string value)
@@ -1158,12 +896,48 @@ iscsi_write_cache = off
 # group. Default value is None. (string value)
 #cb_auth_group = None
 
+# These values will be used for CloudByte storage's createVolume API call.
+# (dict value)
+#cb_create_volume = blocklength:512B,compression:off,deduplication:off,protocoltype:ISCSI,recordsize:16k,sync:always
+
+<% end -%>
+<% if volume['backend_driver'] == 'datera' -%>
+
+# DEPRECATED: This will be removed in the Liberty release. Use san_login and
+# san_password instead. This directly sets the Datera API token. (string value)
+#datera_api_token = <None>
+
+# Datera API port. (string value)
+#datera_api_port = 7717
+
+# Datera API version. (string value)
+#datera_api_version = 1
+
+# Number of replicas to create of an inode. (string value)
+#datera_num_replicas = 3
+
+<% end -%>
+<% if volume['backend_driver'] == 'dell' -%>
+
+# Storage Center System Serial Number (integer value)
+#dell_sc_ssn = 64702
+
+# Dell API port (integer value)
+# Minimum value: 1
+# Maximum value: 65535
+#dell_sc_api_port = 3033
+
+# Name of the server folder to use on the Storage Center (string value)
+#dell_sc_server_folder = openstack
+
+# Name of the volume folder to use on the Storage Center (string value)
+#dell_sc_volume_folder = openstack
+
+# Enable HTTPS SC certificate verification. (boolean value)
+#dell_sc_verify_cert = false
 
 <% end -%>
 <% if volume['backend_driver'] == 'dothill' -%>
-#
-# Options defined in cinder.volume.drivers.dothill.dothill_common
-#
 
 # Pool or Vdisk name to use for volume creation. (string value)
 #dothill_backend_name = A
@@ -1185,329 +959,15 @@ iscsi_write_cache = off
 # List of comma-separated target iSCSI IP addresses. (list value)
 #dothill_iscsi_ips =
 
-
 <% end -%>
-<% if volume['backend_driver'] == 'lenovo' -%>
-#
-# Options defined in cinder.volume.drivers.lenovo.lenovo_common
-#
 
-# Pool or Vdisk name to use for volume creation. (string value)
-#lenovo_backend_name = A
+# Number of nodes that should replicate the data. (string value)
+#drbdmanage_redundancy = 1
 
-# linear (for VDisk) or virtual (for Pool). (string value)
-# Allowed values: linear, virtual
-#lenovo_backend_type = virtual
-
-# Lenovo api interface protocol. (string value)
-# Allowed values: http, https
-#lenovo_api_protocol = https
-
-# Whether to verify Lenovo array SSL certificate. (boolean value)
-#lenovo_verify_certificate = false
-
-# Lenovo array SSL certificate path. (string value)
-#lenovo_verify_certificate_path = <None>
-
-# List of comma-separated target iSCSI IP addresses. (list value)
-#lenovo_iscsi_ips =
-
-
-<% end -%>
-<% if volume['backend_driver'] == 'flashsystem' -%>
-#
-# Options defined in cinder.volume.drivers.ibm.flashsystem
-#
-
-# Connect with multipath (FC only).(Default is false.) (boolean value)
-#flashsystem_multipath_enabled = false
-
-# Default iSCSI Port ID of FlashSystem. (Default port is 0.) (integer value)
-#flashsystem_iscsi_portid = 0
-
-# Connection protocol should be FC. (Default is FC.) (string value)
-#flashsystem_connection_protocol = FC
-
-# Allows vdisk to multi host mapping. (Default is True) (boolean value)
-#flashsystem_multihostmap_enabled = true
-
-
-<% end -%>
-<% if volume['backend_driver'] == 'datera' -%>
-#
-# Options defined in cinder.volume.drivers.datera
-#
-
-# DEPRECATED: This will be removed in the Liberty release. Use san_login and
-# san_password instead. This directly sets the Datera API token. (string value)
-#datera_api_token = <None>
-
-# Datera API port. (string value)
-#datera_api_port = 7717
-
-# Datera API version. (string value)
-#datera_api_version = 1
-
-# Number of replicas to create of an inode. (string value)
-#datera_num_replicas = 3
-
-
-<% end -%>
-<% if volume['backend_driver'] == 'xio' -%>
-#
-# Options defined in cinder.volume.drivers.xio
-#
-
-# Default storage pool for volumes. (integer value)
-#ise_storage_pool = 1
-
-# Raid level for ISE volumes. (integer value)
-#ise_raid = 1
-
-# Number of retries (per port) when establishing connection to ISE management
-# port. (integer value)
-#ise_connection_retries = 5
-
-# Interval (secs) between retries. (integer value)
-#ise_retry_interval = 1
-
-
-<% end -%>
-<% if volume['backend_driver'] == 'dell' -%>
-#
-# Options defined in cinder.volume.drivers.dell.dell_storagecenter_common
-#
-
-# Storage Center System Serial Number (integer value)
-#dell_sc_ssn = 64702
-
-# Dell API port (integer value)
-# Minimum value: 1
-# Maximum value: 65535
-#dell_sc_api_port = 3033
-
-# Name of the server folder to use on the Storage Center (string value)
-#dell_sc_server_folder = openstack
-
-# Name of the volume folder to use on the Storage Center (string value)
-#dell_sc_volume_folder = openstack
-
-# Enable HTTPS SC certificate verification. (boolean value)
-#dell_sc_verify_cert = false
-
-
-<% end -%>
-<% if volume['backend_driver'] == 'tintri' -%>
-#
-# Options defined in cinder.volume.drivers.tintri
-#
-
-# The hostname (or IP address) for the storage system (string value)
-#tintri_server_hostname = <None>
-
-# User name for the storage system (string value)
-#tintri_server_username = <None>
-
-# Password for the storage system (string value)
-#tintri_server_password = <None>
-
-# API version for the storage system (string value)
-#tintri_api_version = v310
-
-
-<% end -%>
-<% if volume['backend_driver'] == 'infortrend' -%>
-#
-# Options defined in cinder.volume.drivers.infortrend.eonstor_ds_cli.common_cli
-#
-
-# Infortrend raid pool name list. It is separated with comma. (string value)
-#infortrend_pools_name =
-
-# The Infortrend CLI absolute path. By default, it is at
-# /opt/bin/Infortrend/raidcmd_ESDS10.jar (string value)
-#infortrend_cli_path = /opt/bin/Infortrend/raidcmd_ESDS10.jar
-
-# Maximum retry time for cli. Default is 5. (integer value)
-#infortrend_cli_max_retries = 5
-
-# Default timeout for CLI copy operations in minutes. Support: migrate volume,
-# create cloned volume and create volume from snapshot. By Default, it is 30
-# minutes. (integer value)
-#infortrend_cli_timeout = 30
-
-# Infortrend raid channel ID list on Slot A for OpenStack usage. It is
-# separated with comma. By default, it is the channel 0~7. (string value)
-#infortrend_slots_a_channels_id = 0,1,2,3,4,5,6,7
-
-# Infortrend raid channel ID list on Slot B for OpenStack usage. It is
-# separated with comma. By default, it is the channel 0~7. (string value)
-#infortrend_slots_b_channels_id = 0,1,2,3,4,5,6,7
-
-# Let the volume use specific provisioning. By default, it is the full
-# provisioning. The supported options are full or thin. (string value)
-#infortrend_provisioning = full
-
-# Let the volume use specific tiering level. By default, it is the level 0. The
-# supported levels are 0,2,3,4. (string value)
-#infortrend_tiering = 0
-
-
-<% end -%>
-<% if volume['backend_driver'] == 'blockbridge' -%>
-#
-# Options defined in cinder.volume.drivers.blockbridge
-#
-
-# IP address/hostname of Blockbridge API. (string value)
-#blockbridge_api_host = <None>
-
-# Override HTTPS port to connect to Blockbridge API server. (integer value)
-#blockbridge_api_port = <None>
-
-# Blockbridge API authentication scheme (token or password) (string value)
-# Allowed values: token, password
-#blockbridge_auth_scheme = token
-
-# Blockbridge API token (for auth scheme 'token') (string value)
-#blockbridge_auth_token = <None>
-
-# Blockbridge API user (for auth scheme 'password') (string value)
-#blockbridge_auth_user = <None>
-
-# Blockbridge API password (for auth scheme 'password') (string value)
-#blockbridge_auth_password = <None>
-
-# Defines the set of exposed pools and their associated backend query strings
-# (dict value)
-#blockbridge_pools = OpenStack:+openstack
-
-# Default pool name if unspecified. (string value)
-#blockbridge_default_pool = <None>
-
-
-<% end -%>
-<% if volume['backend_driver'] == 'hgst' -%>
-#
-# Options defined in cinder.volume.drivers.hgst
-#
-
-# Space network name to use for data transfer (string value)
-#hgst_net = Net 1 (IPv4)
-
-# Comma separated list of Space storage servers:devices. ex:
-# os1_stor:gbd0,os2_stor:gbd0 (string value)
-#hgst_storage_servers = os:gbd0
-
-# Should spaces be redundantly stored (1/0) (string value)
-#hgst_redundancy = 0
-
-# User to own created spaces (string value)
-#hgst_space_user = root
-
-# Group to own created spaces (string value)
-#hgst_space_group = disk
-
-# UNIX mode for created spaces (string value)
-#hgst_space_mode = 0600
-
-
-<% end -%>
-<% if volume['backend_driver'] == 'vzstorage' -%>
-#
-# Options defined in cinder.volume.drivers.vzstorage
-#
-
-# File with the list of available vzstorage shares. (string value)
-#vzstorage_shares_config = /etc/cinder/vzstorage_shares
-
-# Create volumes as sparsed files which take no space rather than regular files
-# when using raw format, in which case volume creation takes lot of time.
-# (boolean value)
-#vzstorage_sparsed_volumes = true
-
-# Percent of ACTUAL usage of the underlying volume before no new volumes can be
-# allocated to the volume destination. (floating point value)
-#vzstorage_used_ratio = 0.95
-
-# Base dir containing mount points for vzstorage shares. (string value)
-#vzstorage_mount_point_base = $state_path/mnt
-
-# Mount options passed to the vzstorage client. See section of the pstorage-
-# mount man page for details. (list value)
-#vzstorage_mount_options = <None>
-
-
-<% end -%>
-<% if volume['backend_driver'] == 'xtremio' -%>
-#
-# Options defined in cinder.volume.drivers.emc.xtremio
-#
-
-# XMS cluster id in multi-cluster environment (string value)
-#xtremio_cluster_name =
-
-# Number of retries in case array is busy (integer value)
-#xtremio_array_busy_retry_count = 5
-
-# Interval between retries in case array is busy (integer value)
-#xtremio_array_busy_retry_interval = 5
-
-
-<% end -%>
-<% if volume['backend_driver'] == 'scaleio' -%>
-#
-# Options defined in cinder.volume.drivers.emc.scaleio
-#
-
-# REST server port. (string value)
-#sio_rest_server_port = 443
-
-# Whether to verify server certificate. (boolean value)
-#sio_verify_server_certificate = false
-
-# Server certificate path. (string value)
-#sio_server_certificate_path = <None>
-
-# Whether to round volume capacity. (boolean value)
-#sio_round_volume_capacity = true
-
-# Whether to allow force delete. (boolean value)
-#sio_force_delete = false
-
-# Whether to unmap volume before deletion. (boolean value)
-#sio_unmap_volume_before_deletion = false
-
-# Protection domain id. (string value)
-#sio_protection_domain_id = <None>
-
-# Protection domain name. (string value)
-#sio_protection_domain_name = <None>
-
-# Storage pools. (string value)
-#sio_storage_pools = <None>
-
-# Storage pool name. (string value)
-#sio_storage_pool_name = <None>
-
-# Storage pool id. (string value)
-#sio_storage_pool_id = <None>
-
-
-<% end -%>
 <% if volume['backend_driver'] == 'emc' -%>
-#
-# Options defined in cinder.volume.drivers.emc.emc_vmax_common
-#
 
 # use this file for cinder emc plugin config data (string value)
 #cinder_emc_config_file = /etc/cinder/cinder_emc_config.xml
-cinder_emc_config_file = /etc/cinder/cinder_emc_config-<%= backend_id %>.xml
-
-
-#
-# Options defined in cinder.volume.drivers.emc.emc_vnx_cli
-#
 
 # VNX authentication scope type. (string value)
 #storage_vnx_authentication_type = global
@@ -1567,12 +1027,56 @@ initiator_auto_registration = true
 # value)
 #ignore_pool_full_threshold = false
 
+<% end -%>
+<% if volume['backend_driver'] == 'scaleio' -%>
+
+# REST server port. (string value)
+#sio_rest_server_port = 443
+
+# Whether to verify server certificate. (boolean value)
+#sio_verify_server_certificate = false
+
+# Server certificate path. (string value)
+#sio_server_certificate_path = <None>
+
+# Whether to round volume capacity. (boolean value)
+#sio_round_volume_capacity = true
+
+# Whether to allow force delete. (boolean value)
+#sio_force_delete = false
+
+# Whether to unmap volume before deletion. (boolean value)
+#sio_unmap_volume_before_deletion = false
+
+# Protection domain id. (string value)
+#sio_protection_domain_id = <None>
+
+# Protection domain name. (string value)
+#sio_protection_domain_name = <None>
+
+# Storage pools. (string value)
+#sio_storage_pools = <None>
+
+# Storage pool name. (string value)
+#sio_storage_pool_name = <None>
+
+# Storage pool id. (string value)
+#sio_storage_pool_id = <None>
+
+<% end -%>
+<% if volume['backend_driver'] == 'xtremio' -%>
+
+# XMS cluster id in multi-cluster environment (string value)
+#xtremio_cluster_name =
+
+# Number of retries in case array is busy (integer value)
+#xtremio_array_busy_retry_count = 5
+
+# Interval between retries in case array is busy (integer value)
+#xtremio_array_busy_retry_interval = 5
 
 <% end -%>
 <% if volume['backend_driver'] == 'eqlx' -%>
-#
-# Options defined in cinder.volume.drivers.eqlx
-#
 
 # Group name to use for creating volumes. Defaults to "group-0". (string value)
 #eqlx_group_name = group-0
@@ -1583,7 +1087,6 @@ eqlx_group_name = <%= volume['eqlx']["eqlx_group_name"] %>
 # cinder/volume/drivers/san/san.py and will be removed in M release. (integer
 # value)
 #eqlx_cli_timeout = 30
-eqlx_group_name = <%= volume['eqlx']["eqlx_group_name"] %>
 
 # Maximum retry count for reconnection. Default is 5. (integer value)
 #eqlx_cli_max_retries = 5
@@ -1610,7 +1113,6 @@ eqlx_chap_password = <%= volume['eqlx']["eqlx_chap_password"] %>
 #eqlx_pool = default
 eqlx_pool = <%= volume['eqlx']["eqlx_pool"] %>
 
-
 <% end -%>
 <% if volume['backend_driver'] == 'eternus' -%>
 #
@@ -1624,9 +1126,6 @@ cinder_smis_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.x
 
 <% end -%>
 <% if volume['backend_driver'] == 'glusterfs' -%>
-#
-# Options defined in cinder.volume.drivers.glusterfs
-#
 
 # File with the list of available gluster shares (string value)
 #glusterfs_shares_config = /etc/cinder/glusterfs_shares
@@ -1634,30 +1133,30 @@ cinder_smis_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.x
 # Base dir containing mount points for gluster shares. (string value)
 #glusterfs_mount_point_base = $state_path/mnt
 
-
 <% end -%>
-<% if volume['backend_driver'] == 'hds' -%>
-#
-# Options defined in cinder.volume.drivers.hds.iscsi
-#
+<% if volume['backend_driver'] == 'hgst' -%>
 
-# Configuration file for HDS iSCSI cinder plugin (string value)
-#hds_hnas_iscsi_config_file = /opt/hds/hnas/cinder_iscsi_conf.xml
+# Space network name to use for data transfer (string value)
+#hgst_net = Net 1 (IPv4)
 
+# Comma separated list of Space storage servers:devices. ex:
+# os1_stor:gbd0,os2_stor:gbd0 (string value)
+#hgst_storage_servers = os:gbd0
 
-#
-# Options defined in cinder.volume.drivers.hds.nfs
-#
+# Should spaces be redundantly stored (1/0) (string value)
+#hgst_redundancy = 0
 
-# Configuration file for HDS NFS cinder plugin (string value)
-#hds_hnas_nfs_config_file = /opt/hds/hnas/cinder_nfs_conf.xml
+# User to own created spaces (string value)
+#hgst_space_user = root
 
+# Group to own created spaces (string value)
+#hgst_space_group = disk
+
+# UNIX mode for created spaces (string value)
+#hgst_space_mode = 0600
 
 <% end -%>
 <% if volume['backend_driver'] == 'hitachi' -%>
-#
-# Options defined in cinder.volume.drivers.hitachi.hbsd_common
-#
 
 # Serial number of storage system (string value)
 #hitachi_serial_number = <None>
@@ -1695,17 +1194,8 @@ cinder_smis_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.x
 # Request for creating HostGroup or iSCSI Target (boolean value)
 #hitachi_group_request = false
 
-
-#
-# Options defined in cinder.volume.drivers.hitachi.hbsd_fc
-#
-
 # Request for FC Zone creating HostGroup (boolean value)
 #hitachi_zoning_request = false
-
-#
-# Options defined in cinder.volume.drivers.hitachi.hbsd_horcm
-#
 
 # Instance numbers for HORCM (string value)
 #hitachi_horcm_numbers = 200,201
@@ -1723,11 +1213,6 @@ cinder_smis_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.x
 # between 0 and 7200. (integer value)
 #hitachi_horcm_resource_lock_timeout = 600
 
-
-#
-# Options defined in cinder.volume.drivers.hitachi.hbsd_iscsi
-#
-
 # Add CHAP user (boolean value)
 #hitachi_add_chap_user = false
 
@@ -1740,22 +1225,35 @@ cinder_smis_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.x
 # iSCSI authentication password (string value)
 #hitachi_auth_password = HBSD-CHAP-password
 
+# Configuration file for HDS iSCSI cinder plugin (string value)
+#hds_hnas_iscsi_config_file = /opt/hds/hnas/cinder_iscsi_conf.xml
+
+# Configuration file for HDS NFS cinder plugin (string value)
+#hds_hnas_nfs_config_file = /opt/hds/hnas/cinder_nfs_conf.xml
 
 <% end -%>
 <% if volume['backend_driver'] == 'huawei' -%>
-#
-# Options defined in cinder.volume.drivers.huawei
-#
 
 # The configuration file for the Cinder Huawei driver. (string value)
 #cinder_huawei_conf_file = /etc/cinder/cinder_huawei_conf.xml
 
+<% end -%>
+<% if volume['backend_driver'] == 'flashsystem' -%>
+
+# Connection protocol should be FC. (Default is FC.) (string value)
+#flashsystem_connection_protocol = FC
+
+# Allows vdisk to multi host mapping. (Default is True) (boolean value)
+#flashsystem_multihostmap_enabled = true
+
+# Connect with multipath (FC only).(Default is false.) (boolean value)
+#flashsystem_multipath_enabled = false
+
+# Default iSCSI Port ID of FlashSystem. (Default port is 0.) (integer value)
+#flashsystem_iscsi_portid = 0
 
 <% end -%>
 <% if volume['backend_driver'] == 'gpfs' -%>
-#
-# Options defined in cinder.volume.drivers.ibm.gpfs
-#
 
 # Specifies the path of the GPFS directory where Block Storage volume and
 # snapshot files are stored. (string value)
@@ -1790,83 +1288,15 @@ cinder_smis_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.x
 # system storage pool is used. (string value)
 #gpfs_storage_pool = system
 
-
 <% end -%>
-<% if volume['backend_driver'] == 'storewize_svc' -%>
-#
-# Options defined in cinder.volume.drivers.ibm.storwize_svc
-#
 
-# Storage system storage pool for volumes (string value)
-#storwize_svc_volpool_name = volpool
+# IBMNAS platform type to be used as backend storage; valid values are - v7ku :
+# for using IBM Storwize V7000 Unified, sonas : for using IBM Scale Out NAS,
+# gpfs-nas : for using NFS based IBM GPFS deployments. (string value)
+# Allowed values: v7ku, sonas, gpfs-nas
+#ibmnas_platform_type = v7ku
 
-# Storage system space-efficiency parameter for volumes (percentage) (integer
-# value)
-# Minimum value: -1
-# Maximum value: 100
-#storwize_svc_vol_rsize = 2
-
-# Storage system threshold for volume capacity warnings (percentage) (integer
-# value)
-# Minimum value: -1
-# Maximum value: 100
-#storwize_svc_vol_warning = 0
-
-# Storage system autoexpand parameter for volumes (True/False) (boolean value)
-#storwize_svc_vol_autoexpand = true
-
-# Storage system grain size parameter for volumes (32/64/128/256) (integer
-# value)
-#storwize_svc_vol_grainsize = 256
-
-# Storage system compression option for volumes (boolean value)
-#storwize_svc_vol_compression = false
-
-# Enable Easy Tier for volumes (boolean value)
-#storwize_svc_vol_easytier = true
-
-# The I/O group in which to allocate volumes (integer value)
-#storwize_svc_vol_iogrp = 0
-
-# Maximum number of seconds to wait for FlashCopy to be prepared. (integer
-# value)
-# Minimum value: 1
-# Maximum value: 600
-#storwize_svc_flashcopy_timeout = 120
-
-# Connection protocol (iSCSI/FC) (string value)
-#storwize_svc_connection_protocol = iSCSI
-
-# Configure CHAP authentication for iSCSI connections (Default: Enabled)
-# (boolean value)
-#storwize_svc_iscsi_chap_enabled = true
-
-# Connect with multipath (FC only; iSCSI multipath is controlled by Nova)
-# (boolean value)
-#storwize_svc_multipath_enabled = false
-
-# Allows vdisk to multi host mapping (boolean value)
-#storwize_svc_multihostmap_enabled = true
-
-# Indicate whether svc driver is compatible for NPIV setup. If it is
-# compatible, it will allow no wwpns being returned on get_conn_fc_wwpns during
-# initialize_connection. It should always be set to True. It will be deprecated
-# and removed in M release. (boolean value)
-#storwize_svc_npiv_compatibility_mode = true
-
-# Allow tenants to specify QOS on create (boolean value)
-#storwize_svc_allow_tenant_qos = false
-
-# If operating in stretched cluster mode, specify the name of the pool in which
-# mirrored copies are stored.Example: "pool2" (string value)
-#storwize_svc_stretched_cluster_partner = <None>
-
-
-<% end -%>
 <% if volume['backend_driver'] == 'xiv_ds8k' -%>
-#
-# Options defined in cinder.volume.drivers.ibm.xiv_ds8k
-#
 
 # Proxy driver that connects to the IBM Storage Array (string value)
 #xiv_ds8k_proxy = xiv_ds8k_openstack.nova_proxy.XIVDS8KNovaProxy
@@ -1883,12 +1313,65 @@ cinder_smis_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.x
 # List of Management IP addresses (separated by commas) (string value)
 #management_ips =
 
+<% end -%>
+<% if volume['backend_driver'] == 'infortrend' -%>
+
+# Let the volume use specific provisioning. By default, it is the full
+# provisioning. The supported options are full or thin. (string value)
+#infortrend_provisioning = full
+
+# Let the volume use specific tiering level. By default, it is the level 0. The
+# supported levels are 0,2,3,4. (string value)
+#infortrend_tiering = 0
+
+# Infortrend raid pool name list. It is separated with comma. (string value)
+#infortrend_pools_name =
+
+# The Infortrend CLI absolute path. By default, it is at
+# /opt/bin/Infortrend/raidcmd_ESDS10.jar (string value)
+#infortrend_cli_path = /opt/bin/Infortrend/raidcmd_ESDS10.jar
+
+# Maximum retry time for cli. Default is 5. (integer value)
+#infortrend_cli_max_retries = 5
+
+# Default timeout for CLI copy operations in minutes. Support: migrate volume,
+# create cloned volume and create volume from snapshot. By Default, it is 30
+# minutes. (integer value)
+#infortrend_cli_timeout = 30
+
+# Infortrend raid channel ID list on Slot A for OpenStack usage. It is
+# separated with comma. By default, it is the channel 0~7. (string value)
+#infortrend_slots_a_channels_id = 0,1,2,3,4,5,6,7
+
+# Infortrend raid channel ID list on Slot B for OpenStack usage. It is
+# separated with comma. By default, it is the channel 0~7. (string value)
+#infortrend_slots_b_channels_id = 0,1,2,3,4,5,6,7
+
+<% end -%>
+<% if volume['backend_driver'] == 'lenovo' -%>
+
+# Pool or Vdisk name to use for volume creation. (string value)
+#lenovo_backend_name = A
+
+# linear (for VDisk) or virtual (for Pool). (string value)
+# Allowed values: linear, virtual
+#lenovo_backend_type = virtual
+
+# Lenovo api interface protocol. (string value)
+# Allowed values: http, https
+#lenovo_api_protocol = https
+
+# Whether to verify Lenovo array SSL certificate. (boolean value)
+#lenovo_verify_certificate = false
+
+# Lenovo array SSL certificate path. (string value)
+#lenovo_verify_certificate_path = <None>
+
+# List of comma-separated target iSCSI IP addresses. (list value)
+#lenovo_iscsi_ips =
 
 <% end -%>
 <% if ['local', 'raw'].include? volume['backend_driver'] -%>
-#
-# Options defined in cinder.volume.drivers.lvm
-#
 
 # Name for the VG that will contain exported volumes (string value)
 #volume_group = cinder-volumes
@@ -1913,42 +1396,8 @@ lvm_type = thin
 # conf file even if one exists). (string value)
 #lvm_conf_file = /etc/cinder/lvm.conf
 
-
 <% end -%>
 <% if volume['backend_driver'] == 'netapp' -%>
-#
-# Options defined in cinder.volume.drivers.netapp.options
-#
-
-# The storage family type used on the storage system; valid values are
-# ontap_7mode for using Data ONTAP operating in 7-Mode, ontap_cluster for using
-# clustered Data ONTAP, or eseries for using E-Series. (string value)
-# Allowed values: ontap_7mode, ontap_cluster, eseries
-#netapp_storage_family = ontap_cluster
-netapp_storage_family = <%= volume['netapp']['storage_family'] %>
-
-# The storage protocol to be used on the data path with the storage system.
-# (string value)
-# Allowed values: iscsi, fc, nfs
-#netapp_storage_protocol = <None>
-netapp_storage_protocol = <%= volume['netapp']['storage_protocol'] %>
-
-# The hostname (or IP address) for the storage system or proxy server. (string
-# value)
-#netapp_server_hostname = <None>
-netapp_server_hostname = <%= volume['netapp']['netapp_server_hostname'] %>
-
-# The TCP port to use for communication with the storage system or proxy
-# server. If not specified, Data ONTAP drivers will use 80 for HTTP and 443 for
-# HTTPS; E-Series will use 8080 for HTTP and 8443 for HTTPS. (integer value)
-#netapp_server_port = <None>
-netapp_server_port = <%= volume['netapp']['netapp_server_port'] %>
-
-# The transport protocol used when communicating with the storage system or
-# proxy server. (string value)
-# Allowed values: http, https
-#netapp_transport_type = http
-netapp_transport_type = <%= volume['netapp']['netapp_transport_type'] %>
 
 # Administrative user account name used to access the storage system or proxy
 # server. (string value)
@@ -1960,56 +1409,16 @@ netapp_login = <%= volume['netapp']['netapp_login'] %>
 #netapp_password = <None>
 netapp_password = <%= volume['netapp']['netapp_password'] %>
 
-# This option specifies the virtual storage server (Vserver) name on the
-# storage cluster on which provisioning of block storage volumes should occur.
-# (string value)
-#netapp_vserver = <None>
-netapp_vserver = <%= volume['netapp']['vserver'] %>
-
-# The vFiler unit on which provisioning of block storage volumes will be done.
-# This option is only used by the driver when connecting to an instance with a
-# storage family of Data ONTAP operating in 7-Mode. Only use this option when
-# utilizing the MultiStore feature on the NetApp storage system. (string value)
-#netapp_vfiler = <None>
-netapp_vfiler = <%= volume['netapp']['netapp_vfiler'] %>
-
-# The name of the config.conf stanza for a Data ONTAP (7-mode) HA partner.
-# This option is only used by the driver when connecting to an instance with a
-# storage family of Data ONTAP operating in 7-Mode, and it is required if the
-# storage protocol selected is FC. (string value)
-#netapp_partner_backend_name = <None>
-
-# The quantity to be multiplied by the requested volume size to ensure enough
-# space is available on the virtual storage server (Vserver) to fulfill the
-# volume creation request.  Note: this option is deprecated and will be removed
-# in favor of "reserved_percentage" in the Mitaka release. (floating point
+# The hostname (or IP address) for the storage system or proxy server. (string
 # value)
-#netapp_size_multiplier = 1.2
+#netapp_server_hostname = <None>
+netapp_server_hostname = <%= volume['netapp']['netapp_server_hostname'] %>
 
-# This option determines if storage space is reserved for LUN allocation. If
-# enabled, LUNs are thick provisioned. If space reservation is disabled,
-# storage space is allocated on demand. (string value)
-# Allowed values: enabled, disabled
-#netapp_lun_space_reservation = enabled
-
-# If the percentage of available space for an NFS share has dropped below the
-# value specified by this option, the NFS image cache will be cleaned. (integer
-# value)
-#thres_avl_size_perc_start = 20
-
-# When the percentage of available space on an NFS share has reached the
-# percentage specified by this option, the driver will stop clearing files from
-# the NFS image cache that have not been accessed in the last M minutes, where
-# M is the value of the expiry_thres_minutes configuration option. (integer
-# value)
-#thres_avl_size_perc_stop = 60
-
-# This option specifies the threshold for last access time for images in the
-# NFS image cache. When a cache cleaning cycle begins, images in the cache that
-# have not been accessed in the last M minutes, where M is the value of this
-# parameter, will be deleted from the cache to create free space on the NFS
-# share. (integer value)
-#expiry_thres_minutes = 720
+# The TCP port to use for communication with the storage system or proxy
+# server. If not specified, Data ONTAP drivers will use 80 for HTTP and 443 for
+# HTTPS; E-Series will use 8080 for HTTP and 8443 for HTTPS. (integer value)
+#netapp_server_port = <None>
+netapp_server_port = <%= volume['netapp']['netapp_server_port'] %>
 
 # This option is used to specify the path to the E-Series proxy application on
 # a proxy server. The value is combined with the value of the
@@ -2035,11 +1444,6 @@ netapp_vfiler = <%= volume['netapp']['netapp_vfiler'] %>
 # one host. (boolean value)
 #netapp_enable_multiattach = false
 
-# This option specifies the path of the NetApp copy offload tool binary. Ensure
-# that the binary has execute permissions set which allow the effective user of
-# the cinder-volume process to execute the file. (string value)
-#netapp_copyoffload_tool_path = <None>
-
 # This option defines the type of operating system that will access a LUN
 # exported from Data ONTAP; it is assigned to the LUN at the time it is
 # created. (string value)
@@ -2061,12 +1465,149 @@ netapp_vfiler = <%= volume['netapp']['netapp_vfiler'] %>
 #netapp_pool_name_search_pattern = (.+)
 netapp_pool_name_search_pattern = <%= volume['netapp']['netapp_volume_list'] %>
 
+# The transport protocol used when communicating with the storage system or
+# proxy server. (string value)
+# Allowed values: http, https
+#netapp_transport_type = http
+netapp_transport_type = <%= volume['netapp']['netapp_transport_type'] %>
+
+# The vFiler unit on which provisioning of block storage volumes will be done.
+# This option is only used by the driver when connecting to an instance with a
+# storage family of Data ONTAP operating in 7-Mode. Only use this option when
+# utilizing the MultiStore feature on the NetApp storage system. (string value)
+#netapp_vfiler = <None>
+netapp_vfiler = <%= volume['netapp']['netapp_vfiler'] %>
+
+# The name of the config.conf stanza for a Data ONTAP (7-mode) HA partner.
+# This option is only used by the driver when connecting to an instance with a
+# storage family of Data ONTAP operating in 7-Mode, and it is required if the
+# storage protocol selected is FC. (string value)
+#netapp_partner_backend_name = <None>
+
+# Administrative user account name used to access the storage system or proxy
+# server. (string value)
+#netapp_login = <None>
+
+# Password for the administrative user account specified in the netapp_login
+# option. (string value)
+#netapp_password = <None>
+
+# This option specifies the virtual storage server (Vserver) name on the
+# storage cluster on which provisioning of block storage volumes should occur.
+# (string value)
+#netapp_vserver = <None>
+netapp_vserver = <%= volume['netapp']['vserver'] %>
+
+# The hostname (or IP address) for the storage system or proxy server. (string
+# value)
+#netapp_server_hostname = <None>
+
+# The TCP port to use for communication with the storage system or proxy
+# server. If not specified, Data ONTAP drivers will use 80 for HTTP and 443 for
+# HTTPS; E-Series will use 8080 for HTTP and 8443 for HTTPS. (integer value)
+#netapp_server_port = <None>
+
+# This option is used to specify the path to the E-Series proxy application on
+# a proxy server. The value is combined with the value of the
+# netapp_transport_type, netapp_server_hostname, and netapp_server_port options
+# to create the URL used by the driver to connect to the proxy application.
+# (string value)
+#netapp_webservice_path = /devmgr/v2
+
+# This option is only utilized when the storage family is configured to
+# eseries. This option is used to restrict provisioning to the specified
+# controllers. Specify the value of this option to be a comma separated list of
+# controller hostnames or IP addresses to be used for provisioning. (string
+# value)
+#netapp_controller_ips = <None>
+
+# Password for the NetApp E-Series storage array. (string value)
+#netapp_sa_password = <None>
+
+# This option specifies whether the driver should allow operations that require
+# multiple attachments to a volume. An example would be live migration of
+# servers that have volumes attached. When enabled, this backend is limited to
+# 256 total volumes in order to guarantee volumes can be accessed by more than
+# one host. (boolean value)
+#netapp_enable_multiattach = false
+
+# If the percentage of available space for an NFS share has dropped below the
+# value specified by this option, the NFS image cache will be cleaned. (integer
+# value)
+#thres_avl_size_perc_start = 20
+
+# When the percentage of available space on an NFS share has reached the
+# percentage specified by this option, the driver will stop clearing files from
+# the NFS image cache that have not been accessed in the last M minutes, where
+# M is the value of the expiry_thres_minutes configuration option. (integer
+# value)
+#thres_avl_size_perc_stop = 60
+
+# This option specifies the threshold for last access time for images in the
+# NFS image cache. When a cache cleaning cycle begins, images in the cache that
+# have not been accessed in the last M minutes, where M is the value of this
+# parameter, will be deleted from the cache to create free space on the NFS
+# share. (integer value)
+#expiry_thres_minutes = 720
+
+# This option specifies the path of the NetApp copy offload tool binary. Ensure
+# that the binary has execute permissions set which allow the effective user of
+# the cinder-volume process to execute the file. (string value)
+#netapp_copyoffload_tool_path = <None>
+
+# The quantity to be multiplied by the requested volume size to ensure enough
+# space is available on the virtual storage server (Vserver) to fulfill the
+# volume creation request.  Note: this option is deprecated and will be removed
+# in favor of "reserved_percentage" in the Mitaka release. (floating point
+# value)
+#netapp_size_multiplier = 1.2
+
+# This option determines if storage space is reserved for LUN allocation. If
+# enabled, LUNs are thick provisioned. If space reservation is disabled,
+# storage space is allocated on demand. (string value)
+# Allowed values: enabled, disabled
+#netapp_lun_space_reservation = enabled
+
+# The storage family type used on the storage system; valid values are
+# ontap_7mode for using Data ONTAP operating in 7-Mode, ontap_cluster for using
+# clustered Data ONTAP, or eseries for using E-Series. (string value)
+# Allowed values: ontap_7mode, ontap_cluster, eseries
+#netapp_storage_family = ontap_cluster
+netapp_storage_family = <%= volume['netapp']['storage_family'] %>
+
+# The storage protocol to be used on the data path with the storage system.
+# (string value)
+# Allowed values: iscsi, fc, nfs
+#netapp_storage_protocol = <None>
+netapp_storage_protocol = <%= volume['netapp']['storage_protocol'] %>
+
+# This option defines the type of operating system that will access a LUN
+# exported from Data ONTAP; it is assigned to the LUN at the time it is
+# created. (string value)
+#netapp_lun_ostype = <None>
+
+# This option defines the type of operating system for all initiators that can
+# access a LUN. This information is used when mapping LUNs to individual hosts
+# or groups of hosts. (string value)
+# Deprecated group/name - [DEFAULT]/netapp_eseries_host_type
+#netapp_host_type = <None>
+
+# This option is used to restrict provisioning to the specified pools. Specify
+# the value of this option to be a regular expression which will be applied to
+# the names of objects from the storage backend which represent pools in
+# Cinder. This option is only utilized when the storage protocol is configured
+# to use iSCSI or FC. (string value)
+# Deprecated group/name - [DEFAULT]/netapp_volume_list
+# Deprecated group/name - [DEFAULT]/netapp_storage_pools
+#netapp_pool_name_search_pattern = (.+)
+
+# The transport protocol used when communicating with the storage system or
+# proxy server. (string value)
+# Allowed values: http, https
+#netapp_transport_type = http
 
 <% end -%>
 <% if volume['backend_driver'] == 'netapp' && volume['netapp']['storage_protocol'] == 'nfs' -%>
-#
-# Options defined in cinder.volume.drivers.nfs
-#
 
 # File with the list of available nfs shares (string value)
 #nfs_shares_config = /etc/cinder/nfs_shares
@@ -2101,12 +1642,8 @@ nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
 # specified. (integer value)
 #nfs_mount_attempts = 3
 
-
 <% end -%>
 <% if volume['backend_driver'] == 'nimble' -%>
-#
-# Options defined in cinder.volume.drivers.nimble
-#
 
 # Nimble Controller pool name (string value)
 #nimble_pool_name = default
@@ -2114,12 +1651,8 @@ nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
 # Nimble Subnet Label (string value)
 #nimble_subnet_label = *
 
-
 <% end -%>
 <% if volume['backend_driver'] == 'peophetstor' -%>
-#
-# Options defined in cinder.volume.drivers.prophetstor.dplcommon
-#
 
 # DPL pool uuid in which DPL volumes are stored. (string value)
 #dpl_pool =
@@ -2129,22 +1662,37 @@ nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
 # Maximum value: 65535
 #dpl_port = 8357
 
-
 <% end -%>
 <% if volume['backend_driver'] == 'pure' -%>
-#
-# Options defined in cinder.volume.drivers.pure
-#
 
 # REST API authorization token. (string value)
 #pure_api_token = <None>
 
+<% end -%>
+<% if volume['backend_driver'] == 'quobyte' -%>
+
+# URL to the Quobyte volume e.g., quobyte://<DIR host>/<volume name> (string
+# value)
+#quobyte_volume_url = <None>
+
+# Path to a Quobyte Client configuration file. (string value)
+#quobyte_client_cfg = <None>
+
+# Create volumes as sparse files which take no space. If set to False, volume
+# is created as regular file.In such case volume creation takes a lot of time.
+# (boolean value)
+# (boolean value)
+#quobyte_sparsed_volumes = true
+
+# Create volumes as QCOW2 files rather than raw files. (boolean value)
+#quobyte_qcow2_volumes = true
+
+# Base dir containing the mount point for the Quobyte volume. (string value)
+#quobyte_mount_point_base = $state_path/mnt
 
 <% end -%>
 <% if volume['backend_driver'] == 'rbd' -%>
-#
-# Options defined in cinder.volume.drivers.rbd
-#
+
 
 # The name of ceph cluster (string value)
 #rbd_cluster_name = ceph
@@ -2200,12 +1748,8 @@ rbd_secret_uuid = <%= volume['rbd']['secret_uuid'] %>
 # (integer value)
 #rados_connection_interval = 5
 
-
 <% end -%>
 <% if volume['backend_driver'] == 'remotefs' -%>
-#
-# Options defined in cinder.volume.drivers.remotefs
-#
 
 # IP address or Hostname of NAS system. (string value)
 #nas_ip =
@@ -2254,18 +1798,8 @@ rbd_secret_uuid = <%= volume['rbd']['secret_uuid'] %>
 # Deprecated group/name - [DEFAULT]/glusterfs_qcow2_volumes
 #nas_volume_prov_type = thin
 
-# IBMNAS platform type to be used as backend storage; valid values are - v7ku :
-# for using IBM Storwize V7000 Unified, sonas : for using IBM Scale Out NAS,
-# gpfs-nas : for using NFS based IBM GPFS deployments. (string value)
-# Allowed values: v7ku, sonas, gpfs-nas
-#ibmnas_platform_type = v7ku
-
-
 <% end -%>
 <% if volume['backend_driver'] == 'hp_3par' -%>
-#
-# Options defined in cinder.volume.drivers.san.hp.hp_3par_common
-#
 
 # 3PAR WSAPI Server Url like https://<3par ip>:8080/api/v1 (string value)
 #hp3par_api_url =
@@ -2300,12 +1834,8 @@ rbd_secret_uuid = <%= volume['rbd']['secret_uuid'] %>
 # Enable CHAP authentication for iSCSI connections. (boolean value)
 #hp3par_iscsi_chap_enabled = false
 
-
 <% end -%>
 <% if volume['backend_driver'] == 'hp_lefthand' -%>
-#
-# Options defined in cinder.volume.drivers.san.hp.hp_lefthand_rest_proxy
-#
 
 # HP LeftHand WSAPI Server Url like https://<LeftHand ip>:8081/lhos (string
 # value)
@@ -2327,12 +1857,8 @@ rbd_secret_uuid = <%= volume['rbd']['secret_uuid'] %>
 # Enable HTTP debugging to LeftHand (boolean value)
 #hplefthand_debug = false
 
-
 <% end -%>
 <% if volume['backend_driver'] == 'hp_msa' -%>
-#
-# Options defined in cinder.volume.drivers.san.hp.hp_msa_common
-#
 
 # Pool or Vdisk name to use for volume creation. (string value)
 #hpmsa_backend_name = A
@@ -2354,15 +1880,8 @@ rbd_secret_uuid = <%= volume['rbd']['secret_uuid'] %>
 # List of comma-separated target iSCSI IP addresses. (list value)
 #hpmsa_iscsi_ips =
 
-
 <% end -%>
 <% if volume['backend_driver'] == 'hp_xp' -%>
-#
-# Options defined in cinder.volume.drivers.san.hp.hp_xp_opts
-#
-
-# Request for FC Zone creating host group (boolean value)
-#hpxp_zoning_request = false
 
 # Type of storage command line interface (string value)
 #hpxp_storage_cli = <None>
@@ -2402,6 +1921,9 @@ rbd_secret_uuid = <%= volume['rbd']['secret_uuid'] %>
 # Request for creating host group or iSCSI target (boolean value)
 #hpxp_group_request = false
 
+# Request for FC Zone creating host group (boolean value)
+#hpxp_zoning_request = false
+
 # Instance numbers for HORCM (list value)
 #hpxp_horcm_numbers = 200,201
 
@@ -2417,12 +1939,8 @@ rbd_secret_uuid = <%= volume['rbd']['secret_uuid'] %>
 # Only discover a specific name of host group or iSCSI target (boolean value)
 #hpxp_horcm_name_only_discovery = false
 
-
 <% end -%>
 <% if ['eqlx'].include? volume['backend_driver'] -%>
-#
-# Options defined in cinder.volume.drivers.san.san
-#
 
 # Use thin provisioning for SAN volumes? (boolean value)
 #san_thin_provision = true
@@ -2464,12 +1982,8 @@ san_password = <%= volume['eqlx']["san_password"] %>
 # Maximum ssh connections in the pool (integer value)
 #ssh_max_pool_conn = 5
 
-
 <% end -%>
 <% if volume['backend_driver'] == 'scality' -%>
-#
-# Options defined in cinder.volume.drivers.scality
-#
 
 # Path or URL to Scality SOFS configuration file (string value)
 #scality_sofs_config = <None>
@@ -2480,12 +1994,51 @@ san_password = <%= volume['eqlx']["san_password"] %>
 # Path from Scality SOFS root to volume dir (string value)
 #scality_sofs_volume_dir = cinder/volumes
 
+<% end -%>
+<% if volume['backend_driver'] == 'sheepdog' -%>
+
+# IP address of sheep daemon. (string value)
+#sheepdog_store_address = 127.0.0.1
+
+# Port of sheep daemon. (integer value)
+# Minimum value: 1
+# Maximum value: 65535
+#sheepdog_store_port = 7000
+
+<% end -%>
+<% if volume['backend_driver'] == 'smbfs' -%>
+
+# File with the list of available smbfs shares. (string value)
+#smbfs_shares_config = /etc/cinder/smbfs_shares
+
+# Default format that will be used when creating volumes if no volume format is
+# specified. (string value)
+# Allowed values: raw, qcow2, vhd, vhdx
+#smbfs_default_volume_format = qcow2
+
+# Create volumes as sparsed files which take no space rather than regular files
+# when using raw format, in which case volume creation takes lot of time.
+# (boolean value)
+#smbfs_sparsed_volumes = true
+
+# Percent of ACTUAL usage of the underlying volume before no new volumes can be
+# allocated to the volume destination. (floating point value)
+#smbfs_used_ratio = 0.95
+
+# This will compare the allocated to available space on the volume destination.
+# If the ratio exceeds this number, the destination will no longer be valid.
+# (floating point value)
+#smbfs_oversub_ratio = 1.0
+
+# Base dir containing mount points for smbfs shares. (string value)
+#smbfs_mount_point_base = $state_path/mnt
+
+# Mount options passed to the smbfs client. See mount.cifs man page for
+# details. (string value)
+#smbfs_mount_options = noperm,file_mode=0775,dir_mode=0775
 
 <% end -%>
 <% if volume['backend_driver'] == 'solidfire' -%>
-#
-# Options defined in cinder.volume.drivers.solidfire
-#
 
 # Set 512 byte emulation on volume creation;  (boolean value)
 #sf_emulate_512 = true
@@ -2524,48 +2077,48 @@ san_password = <%= volume['eqlx']["san_password"] %>
 # Maximum value: 65535
 #sf_api_port = 443
 
+<% end -%>
+<% if volume['backend_driver'] == 'srb' -%>
+
+# Comma-separated list of REST servers IP to connect to. (eg
+# http://IP1/,http://IP2:81/path (string value)
+#srb_base_urls = <None>
 
 <% end -%>
-<% if volume['backend_driver'] == 'smbfs' -%>
-#
-# Options defined in cinder.volume.drivers.smbfs
-#
+<% if volume['backend_driver'] == 'tintri' -%>
 
-# File with the list of available smbfs shares. (string value)
-#smbfs_shares_config = /etc/cinder/smbfs_shares
+# The hostname (or IP address) for the storage system (string value)
+#tintri_server_hostname = <None>
 
-# Default format that will be used when creating volumes if no volume format is
-# specified. (string value)
-# Allowed values: raw, qcow2, vhd, vhdx
-#smbfs_default_volume_format = qcow2
+# User name for the storage system (string value)
+#tintri_server_username = <None>
 
-# Create volumes as sparsed files which take no space rather than regular files
-# when using raw format, in which case volume creation takes lot of time.
-# (boolean value)
-#smbfs_sparsed_volumes = true
+# Password for the storage system (string value)
+#tintri_server_password = <None>
 
-# Percent of ACTUAL usage of the underlying volume before no new volumes can be
-# allocated to the volume destination. (floating point value)
-#smbfs_used_ratio = 0.95
+# API version for the storage system (string value)
+#tintri_api_version = v310
 
-# This will compare the allocated to available space on the volume destination.
-# If the ratio exceeds this number, the destination will no longer be valid.
-# (floating point value)
-#smbfs_oversub_ratio = 1.0
+<% end -%>
+<% if volume['backend_driver'] == 'mga' -%>
 
-# Base dir containing mount points for smbfs shares. (string value)
-#smbfs_mount_point_base = $state_path/mnt
+# IP address or hostname of mg-a (string value)
+#gateway_mga = <None>
 
-# Mount options passed to the smbfs client. See mount.cifs man page for
-# details. (string value)
-#smbfs_mount_options = noperm,file_mode=0775,dir_mode=0775
+# IP address or hostname of mg-b (string value)
+#gateway_mgb = <None>
 
+# Use igroups to manage targets and initiators (boolean value)
+#use_igroups = false
+
+# Global backend request timeout, in seconds (integer value)
+#request_timeout = 300
+
+# Global backend request timeout, in seconds. (integer value)
+#violin_request_timeout = 300
 
 <% end -%>
 <% if volume['backend_driver'] == 'vmware' -%>
-#
-# Options defined in cinder.volume.drivers.vmware.vmdk
-#
 
 # IP address for connecting to VMware ESX/vCenter server. (string value)
 #vmware_host_ip = <None>
@@ -2619,19 +2172,6 @@ vmware_volume_folder = <%= volume['vmware']["volume_folder"] %>
 # CA bundle file to use in verifying the vCenter server certificate. (string
 # value)
 #vmware_ca_file = <None>
-
-# If true, the vCenter server certificate is not verified. If false, then the
-# default CA truststore is used for verification. This option is ignored if
-# "vmware_ca_file" is set. (boolean value)
-#vmware_insecure = false
-
-# Name of a vCenter compute cluster where volumes should be created. (multi
-# valued)
-#vmware_cluster_name =
-
-# CA bundle file to use in verifying the vCenter server certificate. (string
-# value)
-#vmware_ca_file = 
 <%= "vmware_ca_file = #{volume['vmware']['ca_file']}" unless volume['vmware']['ca_file'].empty? %>
 
 # If true, the vCenter server certificate is not verified. If false, then the
@@ -2647,22 +2187,56 @@ vmware_volume_folder = <%= volume['vmware']["volume_folder"] %>
 vmware_cluster_name ="<%= cluster %>"
 <% end -%>
 
+<% end -%>
+<% if volume['backend_driver'] == 'vzstorage' -%>
+
+# File with the list of available vzstorage shares. (string value)
+#vzstorage_shares_config = /etc/cinder/vzstorage_shares
+
+# Create volumes as sparsed files which take no space rather than regular files
+# when using raw format, in which case volume creation takes lot of time.
+# (boolean value)
+#vzstorage_sparsed_volumes = true
+
+# Percent of ACTUAL usage of the underlying volume before no new volumes can be
+# allocated to the volume destination. (floating point value)
+#vzstorage_used_ratio = 0.95
+
+# Base dir containing mount points for vzstorage shares. (string value)
+#vzstorage_mount_point_base = $state_path/mnt
+
+# Mount options passed to the vzstorage client. See section of the pstorage-
+# mount man page for details. (list value)
+#vzstorage_mount_options = <None>
 
 <% end -%>
 <% if volume['backend_driver'] == 'windows' -%>
-#
-# Options defined in cinder.volume.drivers.windows.windows
-#
 
 # Path to store VHD backed volumes (string value)
 #windows_iscsi_lun_path = C:\iSCSIVirtualDisks
 
+<% end -%>
+<% if volume['backend_driver'] == 'xio' -%>
+
+# Default storage pool for volumes. (integer value)
+#ise_storage_pool = 1
+
+# Raid level for ISE volumes. (integer value)
+#ise_raid = 1
+
+# Number of retries (per port) when establishing connection to ISE management
+# port. (integer value)
+#ise_connection_retries = 5
+
+# Interval (secs) between retries. (integer value)
+#ise_retry_interval = 1
+
+# Number on retries to get completion status after issuing a command to ISE.
+# (integer value)
+#ise_completion_retries = 30
 
 <% end -%>
-<% if volume['backend_driver'] == 'zfssaiscsi' -%>
-#
-# Options defined in cinder.volume.drivers.zfssa.zfssaiscsi
-#
+<% if volume['backend_driver'] == 'zfssa' -%>
 
 # Storage pool name. (string value)
 #zfssa_pool = <None>
@@ -2728,13 +2302,6 @@ vmware_cluster_name ="<%= cluster %>"
 # Name of ZFSSA project where cache volumes are stored. (string value)
 #zfssa_cache_project = os-cinder-cache
 
-
-<% end -%>
-<% if volume['backend_driver'] == 'zfssanfs' -%>
-#
-# Options defined in cinder.volume.drivers.zfssa.zfssanfs
-#
-
 # Data path IP address (string value)
 #zfssa_data_ip = <None>
 
@@ -2771,16 +2338,12 @@ vmware_cluster_name ="<%= cluster %>"
 # (string value)
 #zfssa_cache_directory = os-cinder-cache
 
-
 <% end -%>
 
-#
-# Options defined in cinder.volume.manager
-#
-
 # Driver to use for volume creation (string value)
+#volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
 <% if ['local', 'raw'].include? volume['backend_driver'] -%>
-volume_driver = cinder.volume.drivers.lvm.LVMISCSIDriver
+volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
 <% end -%>
 <% if volume['backend_driver'] == 'emc' -%>
 volume_driver = cinder.volume.drivers.emc.emc_smis_iscsi.EMCSMISISCSIDriver
@@ -2790,22 +2353,16 @@ volume_driver = cinder.volume.drivers.eqlx.DellEQLSanISCSIDriver
 <% end -%>
 <% if volume['backend_driver'] == 'eternus' -%>
   <% if volume['eternus']['protocol'] == "iscsi" -%>
-volume_driver = cinder.volume.drivers.fujitsu_eternus_dx_iscsi.FJDXISCSIDriver
+volume_driver = cinder.volume.drivers.fujitsu.eternus_dx_iscsi.FJDXISCSIDriver
   <% else -%>
-volume_driver = cinder.volume.drivers.fujitsu_eternus_dx_fc.FJDXFCDriver
+volume_driver = cinder.volume.drivers.fujitsu.eternus_dx_fc.FJDXFCDriver
   <% end -%>
 <% end -%>
 <% if volume['backend_driver'] == 'netapp' -%>
 volume_driver = cinder.volume.drivers.netapp.common.NetAppDriver
 <% end -%>
-<% if volume['backend_driver'] == 'coraid' -%>
-volume_driver = cinder.volume.drivers.coraid.CoraidDriver
-<% end -%>
 <% if volume['backend_driver'] == 'datera' -%>
 volume_driver = cinder.volume.drivers.datera.DateraDriver
-<% end -%>
-<% if volume['backend_driver'] == 'fusionio' -%>
-volume_driver = cinder.volume.drivers.fusionio.ioControl.FIOioControlDriver
 <% end -%>
 <% if volume['backend_driver'] == 'rbd' -%>
 volume_driver = cinder.volume.drivers.rbd.RBDDriver
@@ -2851,6 +2408,285 @@ volume_driver = <%= volume['manual']['driver'] %>
 ## END Cinder backends
 #############################################################################
 #############################################################################
+
+# Maximum line size of message headers to be accepted. max_header_line may need
+# to be increased when using large tokens (typically those generated by the
+# Keystone v3 API with big service catalogs). (integer value)
+#max_header_line = 16384
+max_header_line = <%= node[:cinder][:max_header_line] %>
+
+# Timeout for client connections' socket operations. If an incoming connection
+# is idle for this number of seconds it will be closed. A value of '0' means
+# wait forever. (integer value)
+#client_socket_timeout = 900
+
+# If False, closes the client socket connection explicitly. Setting it to True
+# to maintain backward compatibility. Recommended setting is set it to False.
+# (boolean value)
+#wsgi_keep_alive = true
+
+# Sets the value of TCP_KEEPALIVE (True/False) for each server socket. (boolean
+# value)
+#tcp_keepalive = true
+
+# Sets the value of TCP_KEEPIDLE in seconds for each server socket. Not
+# supported on OS X. (integer value)
+#tcp_keepidle = 600
+
+# Sets the value of TCP_KEEPINTVL in seconds for each server socket. Not
+# supported on OS X. (integer value)
+#tcp_keepalive_interval = <None>
+tcp_keepalive_interval = 30
+
+# Sets the value of TCP_KEEPCNT for each server socket. Not supported on OS X.
+# (integer value)
+#tcp_keepalive_count = <None>
+
+# CA certificate file to use to verify connecting clients (string value)
+#ssl_ca_file = <None>
+ssl_ca_file = <%= node[:cinder][:ssl][:ca_certs] if node[:cinder][:api][:protocol] == 'https' && node[:cinder][:ssl][:cert_required] %>
+
+# Certificate file to use when starting the server securely (string value)
+#ssl_cert_file = <None>
+ssl_cert_file = <%= node[:cinder][:ssl][:certfile] if node[:cinder][:api][:protocol] == 'https' %>
+
+# Private key file to use when starting the server securely (string value)
+#ssl_key_file = <None>
+ssl_key_file = <%= node[:cinder][:ssl][:keyfile] if node[:cinder][:api][:protocol] == 'https' %>
+
+#
+# From oslo.log
+#
+
+# Print debugging output (set logging level to DEBUG instead of default INFO
+# level). (boolean value)
+#debug = false
+debug = <%= node[:cinder][:debug] %>
+
+# If set to false, will disable INFO logging level, making WARNING the default.
+# (boolean value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#verbose = true
+verbose = <%= node[:cinder][:verbose] %>
+
+# The name of a logging configuration file. This file is appended to any
+# existing logging configuration files. For details about logging configuration
+# files, see the Python logging module documentation. (string value)
+# Deprecated group/name - [DEFAULT]/log_config
+#log_config_append = <None>
+
+# DEPRECATED. A logging.Formatter log message format string which may use any
+# of the available logging.LogRecord attributes. This option is deprecated.
+# Please use logging_context_format_string and logging_default_format_string
+# instead. (string value)
+#log_format = <None>
+
+# Format string for %%(asctime)s in log records. Default: %(default)s . (string
+# value)
+#log_date_format = %Y-%m-%d %H:%M:%S
+
+# (Optional) Name of log file to output to. If no default is set, logging will
+# go to stdout. (string value)
+# Deprecated group/name - [DEFAULT]/logfile
+#log_file = <None>
+
+# (Optional) The base directory used for relative --log-file paths. (string
+# value)
+# Deprecated group/name - [DEFAULT]/logdir
+#log_dir = <None>
+log_dir = /var/log/cinder
+
+# Use syslog for logging. Existing syslog format is DEPRECATED and will be
+# changed later to honor RFC5424. (boolean value)
+#use_syslog = false
+use_syslog = <%= node[:cinder][:use_syslog] ? "True" : "False" %>
+
+# (Optional) Enables or disables syslog rfc5424 format for logging. If enabled,
+# prefixes the MSG part of the syslog message with APP-NAME (RFC5424). The
+# format without the APP-NAME is deprecated in Kilo, and will be removed in
+# Mitaka, along with this option. (boolean value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
+#use_syslog_rfc_format = true
+
+# Syslog facility to receive log lines. (string value)
+#syslog_log_facility = LOG_USER
+
+# Log output to standard error. (boolean value)
+#use_stderr = true
+
+# Format string to use for log messages with context. (string value)
+#logging_context_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user_identity)s] %(instance)s%(message)s
+
+# Format string to use for log messages without context. (string value)
+#logging_default_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [-] %(instance)s%(message)s
+
+# Data to append to log format when level is DEBUG. (string value)
+#logging_debug_format_suffix = %(funcName)s %(pathname)s:%(lineno)d
+
+# Prefix each line of exception output with this format. (string value)
+#logging_exception_prefix = %(asctime)s.%(msecs)03d %(process)d ERROR %(name)s %(instance)s
+
+# List of logger=LEVEL pairs. (list value)
+#default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,requests.packages.urllib3.util.retry=WARN,urllib3.util.retry=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN,taskflow=WARN
+
+# Enables or disables publication of error events. (boolean value)
+#publish_errors = false
+
+# The format for an instance that is passed with the log message. (string
+# value)
+#instance_format = "[instance: %(uuid)s] "
+
+# The format for an instance UUID that is passed with the log message. (string
+# value)
+#instance_uuid_format = "[instance: %(uuid)s] "
+
+# Enables or disables fatal status of deprecations. (boolean value)
+#fatal_deprecations = false
+
+#
+# From oslo.messaging
+#
+
+# Size of RPC connection pool. (integer value)
+# Deprecated group/name - [DEFAULT]/rpc_conn_pool_size
+#rpc_conn_pool_size = 30
+
+# ZeroMQ bind address. Should be a wildcard (*), an ethernet interface, or IP.
+# The "host" option should point or resolve to this address. (string value)
+#rpc_zmq_bind_address = *
+
+# MatchMaker driver. (string value)
+#rpc_zmq_matchmaker = local
+
+# ZeroMQ receiver listening port. (integer value)
+#rpc_zmq_port = 9501
+
+# Number of ZeroMQ contexts, defaults to 1. (integer value)
+#rpc_zmq_contexts = 1
+
+# Maximum number of ingress messages to locally buffer per topic. Default is
+# unlimited. (integer value)
+#rpc_zmq_topic_backlog = <None>
+
+# Directory for holding IPC sockets. (string value)
+#rpc_zmq_ipc_dir = /var/run/openstack
+
+# Name of this node. Must be a valid hostname, FQDN, or IP address. Must match
+# "host" option, if running Nova. (string value)
+#rpc_zmq_host = localhost
+
+# Seconds to wait before a cast expires (TTL). Only supported by impl_zmq.
+# (integer value)
+#rpc_cast_timeout = 30
+
+# Heartbeat frequency. (integer value)
+#matchmaker_heartbeat_freq = 300
+
+# Heartbeat time-to-live. (integer value)
+#matchmaker_heartbeat_ttl = 600
+
+# Size of executor thread pool. (integer value)
+# Deprecated group/name - [DEFAULT]/rpc_thread_pool_size
+#executor_thread_pool_size = 64
+
+# The Drivers(s) to handle sending notifications. Possible values are
+# messaging, messagingv2, routing, log, test, noop (multi valued)
+#notification_driver =
+
+# AMQP topic used for OpenStack notifications. (list value)
+# Deprecated group/name - [rpc_notifier2]/topics
+#notification_topics = notifications
+
+# Seconds to wait for a response from a call. (integer value)
+#rpc_response_timeout = 60
+
+# A URL representing the messaging driver to use and its full configuration. If
+# not set, we fall back to the rpc_backend option and driver specific
+# configuration. (string value)
+#transport_url = <None>
+
+# The messaging driver to use, defaults to rabbit. Other drivers include qpid
+# and zmq. (string value)
+#rpc_backend = rabbit
+
+# The default exchange under which topics are scoped. May be overridden by an
+# exchange name specified in the transport_url option. (string value)
+#control_exchange = openstack
+
+#
+# From oslo.messaging
+#
+
+# Size of RPC connection pool. (integer value)
+# Deprecated group/name - [DEFAULT]/rpc_conn_pool_size
+#rpc_conn_pool_size = 30
+
+# ZeroMQ bind address. Should be a wildcard (*), an ethernet interface, or IP.
+# The "host" option should point or resolve to this address. (string value)
+#rpc_zmq_bind_address = *
+
+# MatchMaker driver. (string value)
+#rpc_zmq_matchmaker = local
+
+# ZeroMQ receiver listening port. (integer value)
+#rpc_zmq_port = 9501
+
+# Number of ZeroMQ contexts, defaults to 1. (integer value)
+#rpc_zmq_contexts = 1
+
+# Maximum number of ingress messages to locally buffer per topic. Default is
+# unlimited. (integer value)
+#rpc_zmq_topic_backlog = <None>
+
+# Directory for holding IPC sockets. (string value)
+#rpc_zmq_ipc_dir = /var/run/openstack
+
+# Name of this node. Must be a valid hostname, FQDN, or IP address. Must match
+# "host" option, if running Nova. (string value)
+#rpc_zmq_host = localhost
+
+# Seconds to wait before a cast expires (TTL). Only supported by impl_zmq.
+# (integer value)
+#rpc_cast_timeout = 30
+
+# Heartbeat frequency. (integer value)
+#matchmaker_heartbeat_freq = 300
+
+# Heartbeat time-to-live. (integer value)
+#matchmaker_heartbeat_ttl = 600
+
+# Size of executor thread pool. (integer value)
+# Deprecated group/name - [DEFAULT]/rpc_thread_pool_size
+#executor_thread_pool_size = 64
+
+# The Drivers(s) to handle sending notifications. Possible values are
+# messaging, messagingv2, routing, log, test, noop (multi valued)
+#notification_driver =
+
+# AMQP topic used for OpenStack notifications. (list value)
+# Deprecated group/name - [rpc_notifier2]/topics
+#notification_topics = notifications
+
+# Seconds to wait for a response from a call. (integer value)
+#rpc_response_timeout = 60
+rpc_response_timeout = <%= node[:cinder][:rpc_response_timeout] %>
+
+# A URL representing the messaging driver to use and its full configuration. If
+# not set, we fall back to the rpc_backend option and driver specific
+# configuration. (string value)
+#transport_url = <None>
+
+# The messaging driver to use, defaults to rabbit. Other drivers include qpid
+# and zmq. (string value)
+#rpc_backend = rabbit
+rpc_backend = rabbit
+
+# The default exchange under which topics are scoped. May be overridden by an
+# exchange name specified in the transport_url option. (string value)
+#control_exchange = openstack
+control_exchange = cinder
 
 
 [BRCD_FABRIC_EXAMPLE]
