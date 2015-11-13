@@ -377,6 +377,7 @@ osapi_share_listen_port=<%= @bind_port %>
 
 # Number of workers for OpenStack Share API service. (integer value)
 #osapi_share_workers = 1
+osapi_share_workers=<%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
 # If set to False, then share creation from snapshot will be performed
 # on the same host. If set to True, then scheduling step will be used.
