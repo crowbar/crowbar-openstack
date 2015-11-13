@@ -1487,6 +1487,9 @@ security_group_api=neutron
 # DEPRECATED: THIS VALUE SHOULD BE SET WHEN CREATING THE
 # NETWORK. MTU setting for network interface. (integer value)
 #network_device_mtu=<None>
+<% if @libvirt_type.eql?('docker') && @neutron_has_tunnel -%>
+network_device_mtu=1400
+<% end -%>
 
 
 #
