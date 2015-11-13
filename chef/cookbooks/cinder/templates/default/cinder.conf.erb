@@ -2513,252 +2513,219 @@ pool_timeout=<%= node[:cinder][:pool_timeout] %>
 [fc-zone-manager]
 
 #
-# Options defined in cinder.zonemanager.drivers.brocade.brcd_fc_zone_driver
+# From cinder
 #
+
+# FC Zone Driver responsible for zone management (string value)
+#zone_driver = cinder.zonemanager.drivers.brocade.brcd_fc_zone_driver.BrcdFCZoneDriver
+
+# Zoning policy configured by user; valid values include "initiator-target" or
+# "initiator" (string value)
+#zoning_policy = initiator-target
+
+# Comma separated list of Fibre Channel fabric names. This list of names is
+# used to retrieve other SAN credentials for connecting to each SAN fabric
+# (string value)
+#fc_fabric_names = <None>
+
+# FC SAN Lookup Service (string value)
+#fc_san_lookup_service = cinder.zonemanager.drivers.brocade.brcd_fc_san_lookup_service.BrcdFCSanLookupService
 
 # Southbound connector for zoning operation (string value)
-#brcd_sb_connector=cinder.zonemanager.drivers.brocade.brcd_fc_zone_client_cli.BrcdFCZoneClientCLI
-
-
-#
-# Options defined in cinder.zonemanager.drivers.cisco.cisco_fc_zone_driver
-#
+#brcd_sb_connector = cinder.zonemanager.drivers.brocade.brcd_fc_zone_client_cli.BrcdFCZoneClientCLI
 
 # Southbound connector for zoning operation (string value)
-#cisco_sb_connector=cinder.zonemanager.drivers.cisco.cisco_fc_zone_client_cli.CiscoFCZoneClientCLI
-
-
-#
-# Options defined in cinder.zonemanager.fc_zone_manager
-#
-
-# FC Zone Driver responsible for zone management (string
-# value)
-#zone_driver=cinder.zonemanager.drivers.brocade.brcd_fc_zone_driver.BrcdFCZoneDriver
-
-# Zoning policy configured by user (string value)
-#zoning_policy=initiator-target
-
-# Comma separated list of fibre channel fabric names. This
-# list of names is used to retrieve other SAN credentials for
-# connecting to each SAN fabric (string value)
-#fc_fabric_names=<None>
-
-# FC San Lookup Service (string value)
-#fc_san_lookup_service=cinder.zonemanager.drivers.brocade.brcd_fc_san_lookup_service.BrcdFCSanLookupService
+#cisco_sb_connector = cinder.zonemanager.drivers.cisco.cisco_fc_zone_client_cli.CiscoFCZoneClientCLI
 
 
 [keymgr]
 
 #
-# Options defined in cinder.keymgr
-#
-
-# The full class name of the key manager API class (string
-# value)
-#api_class=cinder.keymgr.conf_key_mgr.ConfKeyManager
-
-
-#
-# Options defined in cinder.keymgr.conf_key_mgr
-#
-
-# Fixed key returned by key manager, specified in hex (string
-# value)
-#fixed_key=<None>
-
-
-#
-# Options defined in cinder.keymgr.key_mgr
+# From cinder
 #
 
 # Authentication url for encryption service. (string value)
 #encryption_auth_url=http://localhost:5000/v2.0
 
 # Url for encryption service. (string value)
-#encryption_api_url=http://localhost:9311/v1
+#encryption_api_url = http://localhost:9311/v1
+
+# The full class name of the key manager API class (string value)
+#api_class = cinder.keymgr.conf_key_mgr.ConfKeyManager
+
+# Fixed key returned by key manager, specified in hex (string value)
+#fixed_key = <None>
 
 
 [keystone_authtoken]
 
 #
-# Options defined in keystoneclient.middleware.auth_token
+# From keystonemiddleware.auth_token
 #
 
-# Prefix to prepend at the beginning of the path. Deprecated,
-# use identity_uri. (string value)
-#auth_admin_prefix=
-
-# Host providing the admin Identity API endpoint. Deprecated,
-# use identity_uri. (string value)
-#auth_host=127.0.0.1
-
-# Port of the admin Identity API endpoint. Deprecated, use
-# identity_uri. (integer value)
-#auth_port=35357
-
-# Protocol of the admin Identity API endpoint (http or https).
-# Deprecated, use identity_uri. (string value)
-#auth_protocol=https
-
-# Complete public Identity API endpoint (string value)
+# Complete public Identity API endpoint. (string value)
+#auth_uri = <None>
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
 
-# Complete admin Identity API endpoint. This should specify
-# the unversioned root endpoint e.g. https://localhost:35357/
-# (string value)
-identity_uri = <%= @keystone_settings['admin_auth_url'] %>
-
-# API version of the admin Identity API endpoint (string
-# value)
+# API version of the admin Identity API endpoint. (string value)
+#auth_version = <None>
 auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
 
-# Do not handle authorization requests within the middleware,
-# but delegate the authorization decision to downstream WSGI
-# components (boolean value)
-#delay_auth_decision=false
+# Do not handle authorization requests within the middleware, but delegate the
+# authorization decision to downstream WSGI components. (boolean value)
+#delay_auth_decision = false
 
-# Request timeout value for communicating with Identity API
-# server. (boolean value)
-#http_connect_timeout=<None>
+# Request timeout value for communicating with Identity API server. (integer
+# value)
+#http_connect_timeout = <None>
 
-# How many times are we trying to reconnect when communicating
-# with Identity API Server. (integer value)
-#http_request_max_retries=3
+# How many times are we trying to reconnect when communicating with Identity
+# API Server. (integer value)
+#http_request_max_retries = 3
 
-# This option is deprecated and may be removed in a future
-# release. Single shared secret with the Keystone
-# configuration used for bootstrapping a Keystone
-# installation, or otherwise bypassing the normal
-# authentication process. This option should not be used, use
-# `admin_user` and `admin_password` instead. (string value)
-#admin_token=<None>
+# Env key for the swift cache. (string value)
+#cache = <None>
 
-# Keystone account username (string value)
-admin_user = <%= @keystone_settings['service_user'] %>
+# Required if identity server requires client certificate (string value)
+#certfile = <None>
 
-# Keystone account password (string value)
-admin_password = <%= @keystone_settings['service_password'] %>
+# Required if identity server requires client certificate (string value)
+#keyfile = <None>
 
-# Keystone service account tenant name to validate user tokens
-# (string value)
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
-
-# Env key for the swift cache (string value)
-#cache=<None>
-
-# Required if Keystone server requires client certificate
-# (string value)
-#certfile=<None>
-
-# Required if Keystone server requires client certificate
-# (string value)
-#keyfile=<None>
-
-# A PEM encoded Certificate Authority to use when verifying
-# HTTPs connections. Defaults to system CAs. (string value)
-#cafile=<None>
+# A PEM encoded Certificate Authority to use when verifying HTTPs connections.
+# Defaults to system CAs. (string value)
+#cafile = <None>
 
 # Verify HTTPS connections. (boolean value)
+#insecure = false
 insecure = <%= @keystone_settings['insecure'] %>
 
-# Directory used to cache files related to PKI tokens (string
-# value)
-signing_dir=/var/cache/cinder/keystone-signing
+# The region in which the identity server can be found. (string value)
+region_name = <%= @keystone_settings['endpoint_region'] %>
 
-# Optionally specify a list of memcached server(s) to use for
-# caching. If left undefined, tokens will instead be cached
-# in-process. (list value)
+# Directory used to cache files related to PKI tokens. (string value)
+#signing_dir = <None>
+signing_dir = /var/cache/cinder/keystone-signing
+
+# Optionally specify a list of memcached server(s) to use for caching. If left
+# undefined, tokens will instead be cached in-process. (list value)
 # Deprecated group/name - [DEFAULT]/memcache_servers
-#memcached_servers=<None>
+#memcached_servers = <None>
 
-# In order to prevent excessive effort spent validating
-# tokens, the middleware caches previously-seen tokens for a
-# configurable duration (in seconds). Set to -1 to disable
-# caching completely. (integer value)
-#token_cache_time=300
+# In order to prevent excessive effort spent validating tokens, the middleware
+# caches previously-seen tokens for a configurable duration (in seconds). Set
+# to -1 to disable caching completely. (integer value)
+#token_cache_time = 300
 
-# Determines the frequency at which the list of revoked tokens
-# is retrieved from the Identity service (in seconds). A high
-# number of revocation events combined with a low cache
-# duration may significantly reduce performance. (integer
-# value)
-#revocation_cache_time=10
+# Determines the frequency at which the list of revoked tokens is retrieved
+# from the Identity service (in seconds). A high number of revocation events
+# combined with a low cache duration may significantly reduce performance.
+# (integer value)
+#revocation_cache_time = 10
 
-# (optional) if defined, indicate whether token data should be
-# authenticated or authenticated and encrypted. Acceptable
-# values are MAC or ENCRYPT.  If MAC, token data is
-# authenticated (with HMAC) in the cache. If ENCRYPT, token
-# data is encrypted and authenticated in the cache. If the
-# value is not one of these options or empty, auth_token will
-# raise an exception on initialization. (string value)
-#memcache_security_strategy=<None>
+# (Optional) If defined, indicate whether token data should be authenticated or
+# authenticated and encrypted. Acceptable values are MAC or ENCRYPT.  If MAC,
+# token data is authenticated (with HMAC) in the cache. If ENCRYPT, token data
+# is encrypted and authenticated in the cache. If the value is not one of these
+# options or empty, auth_token will raise an exception on initialization.
+# (string value)
+#memcache_security_strategy = <None>
 
-# (optional, mandatory if memcache_security_strategy is
-# defined) this string is used for key derivation. (string
-# value)
-#memcache_secret_key=<None>
+# (Optional, mandatory if memcache_security_strategy is defined) This string is
+# used for key derivation. (string value)
+#memcache_secret_key = <None>
 
-# (optional) number of seconds memcached server is considered
-# dead before it is tried again. (integer value)
-#memcache_pool_dead_retry=300
+# (Optional) Number of seconds memcached server is considered dead before it is
+# tried again. (integer value)
+#memcache_pool_dead_retry = 300
 
-# (optional) max total number of open connections to every
-# memcached server. (integer value)
-#memcache_pool_maxsize=10
+# (Optional) Maximum total number of open connections to every memcached
+# server. (integer value)
+#memcache_pool_maxsize = 10
 
-# (optional) socket timeout in seconds for communicating with
-# a memcache server. (integer value)
-#memcache_pool_socket_timeout=3
+# (Optional) Socket timeout in seconds for communicating with a memcached
+# server. (integer value)
+#memcache_pool_socket_timeout = 3
 
-# (optional) number of seconds a connection to memcached is
-# held unused in the pool before it is closed. (integer value)
-#memcache_pool_unused_timeout=60
+# (Optional) Number of seconds a connection to memcached is held unused in the
+# pool before it is closed. (integer value)
+#memcache_pool_unused_timeout = 60
 
-# (optional) number of seconds that an operation will wait to
-# get a memcache client connection from the pool. (integer
-# value)
-#memcache_pool_conn_get_timeout=10
+# (Optional) Number of seconds that an operation will wait to get a memcached
+# client connection from the pool. (integer value)
+#memcache_pool_conn_get_timeout = 10
 
-# (optional) use the advanced (eventlet safe) memcache client
-# pool. The advanced pool will only work under python 2.x.
-# (boolean value)
-#memcache_use_advanced_pool=false
+# (Optional) Use the advanced (eventlet safe) memcached client pool. The
+# advanced pool will only work under python 2.x. (boolean value)
+#memcache_use_advanced_pool = false
 
+# (Optional) Indicate whether to set the X-Service-Catalog header. If False,
+# middleware will not ask for service catalog on token validation and will not
+# set the X-Service-Catalog header. (boolean value)
+#include_service_catalog = true
 
-# (optional) indicate whether to set the X-Service-Catalog
-# header. If False, middleware will not ask for service
-# catalog on token validation and will not set the X-Service-
-# Catalog header. (boolean value)
-#include_service_catalog=true
+# Used to control the use and type of token binding. Can be set to: "disabled"
+# to not check token binding. "permissive" (default) to validate binding
+# information if the bind type is of a form known to the server and ignore it
+# if not. "strict" like "permissive" but if the bind type is unknown the token
+# will be rejected. "required" any form of token binding is needed to be
+# allowed. Finally the name of a binding method that must be present in tokens.
+# (string value)
+#enforce_token_bind = permissive
 
-# Used to control the use and type of token binding. Can be
-# set to: "disabled" to not check token binding. "permissive"
-# (default) to validate binding information if the bind type
-# is of a form known to the server and ignore it if not.
-# "strict" like "permissive" but if the bind type is unknown
-# the token will be rejected. "required" any form of token
-# binding is needed to be allowed. Finally the name of a
-# binding method that must be present in tokens. (string
-# value)
-#enforce_token_bind=permissive
+# If true, the revocation list will be checked for cached tokens. This requires
+# that PKI tokens are configured on the identity server. (boolean value)
+#check_revocations_for_cached = false
 
-# If true, the revocation list will be checked for cached
-# tokens. This requires that PKI tokens are configured on the
-# Keystone server. (boolean value)
-#check_revocations_for_cached=false
+# Hash algorithms to use for hashing PKI tokens. This may be a single algorithm
+# or multiple. The algorithms are those supported by Python standard
+# hashlib.new(). The hashes will be tried in the order given, so put the
+# preferred one first for performance. The result of the first hash will be
+# stored in the cache. This will typically be set to multiple values only while
+# migrating from a less secure algorithm to a more secure one. Once all the old
+# tokens are expired this option should be set to a single value for better
+# performance. (list value)
+#hash_algorithms = md5
 
-# Hash algorithms to use for hashing PKI tokens. This may be a
-# single algorithm or multiple. The algorithms are those
-# supported by Python standard hashlib.new(). The hashes will
-# be tried in the order given, so put the preferred one first
-# for performance. The result of the first hash will be stored
-# in the cache. This will typically be set to multiple values
-# only while migrating from a less secure algorithm to a more
-# secure one. Once all the old tokens are expired this option
-# should be set to a single value for better performance.
-# (list value)
-#hash_algorithms=md5
+# Prefix to prepend at the beginning of the path. Deprecated, use identity_uri.
+# (string value)
+#auth_admin_prefix =
+
+# Host providing the admin Identity API endpoint. Deprecated, use identity_uri.
+# (string value)
+#auth_host = 127.0.0.1
+
+# Port of the admin Identity API endpoint. Deprecated, use identity_uri.
+# (integer value)
+#auth_port = 35357
+
+# Protocol of the admin Identity API endpoint (http or https). Deprecated, use
+# identity_uri. (string value)
+#auth_protocol = https
+
+# Complete admin Identity API endpoint. This should specify the unversioned
+# root endpoint e.g. https://localhost:35357/ (string value)
+#identity_uri = <None>
+identity_uri = <%= @keystone_settings['admin_auth_url'] %>
+
+# This option is deprecated and may be removed in a future release. Single
+# shared secret with the Keystone configuration used for bootstrapping a
+# Keystone installation, or otherwise bypassing the normal authentication
+# process. This option should not be used, use `admin_user` and
+# `admin_password` instead. (string value)
+#admin_token = <None>
+
+# Service username. (string value)
+#admin_user = <None>
+admin_user = <%= @keystone_settings['service_user'] %>
+
+# Service user password. (string value)
+#admin_password = <None>
+admin_password = <%= @keystone_settings['service_password'] %>
+
+# Service tenant name. (string value)
+#admin_tenant_name = admin
+admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 
 
 [matchmaker_redis]
