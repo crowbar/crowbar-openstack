@@ -70,6 +70,7 @@
 # security risk, so use this setting with caution!  The overrides
 # show_image_direct_url. (boolean value)
 #show_multiple_locations = false
+show_multiple_locations = <%= node[:glance][:show_storage_location] %>
 
 # Maximum size of image a user can upload in bytes. Defaults to
 # 1099511627776 bytes (1 TB).WARNING: this value should only be
