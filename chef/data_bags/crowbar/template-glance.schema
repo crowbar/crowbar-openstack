@@ -59,7 +59,7 @@
             "image_cache_stall_timeout": { "type": "int", "required": true },
             "image_cache_max_size": { "type": "int", "required": true },
             "use_syslog": { "type": "bool", "required": true },
-            "default_store": { "type": "str", "required": true, "pattern": "/^(file|rbd|swift|vsphere)$/"  },
+            "default_store": { "type": "str", "required": true, "pattern": "/^(file|cinder|rbd|swift|vsphere)$/"  },
             "filesystem_store_datadir": { "type": "str", "required": true },
             "conversion": {
               "type": "map", "required": true, "mapping": {

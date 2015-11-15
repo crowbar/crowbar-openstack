@@ -31,6 +31,7 @@ module Barclamp
       options_for_select(
         [
           ["File", "file"],
+          ["Cinder", "cinder"],
           ["Swift", "swift"],
           ["Rados", "rbd"],
           ["VMware", "vsphere"]
