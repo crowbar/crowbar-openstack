@@ -745,6 +745,7 @@ idle_timeout = <%= node[:glance][:sql_idle_timeout] %>
 # is : separated values of the form:
 # <service_type>:<service_name>:<endpoint_type> (string value)
 #cinder_catalog_info = volume:cinder:publicURL
+cinder_catalog_info = volumev2:cinderv2:internalURL
 
 # Override service catalog lookup with template for cinder endpoint
 # e.g. http://localhost:8776/v1/%(project_id)s (string value)
