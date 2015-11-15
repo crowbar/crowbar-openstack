@@ -63,11 +63,7 @@ default[:glance][:image_cache_datadir] = "/var/lib/glance/image-cache/"
 
 default[:glance][:sql_idle_timeout] = "3600"
 
-default[:glance][:glance_stores] = ["glance.store.filesystem.Store",
-                                    "glance.store.http.Store",
-                                    "glance.store.cinder.Store",
-                                    "glance.store.rbd.Store",
-                                    "glance.store.swift.Store"]
+default[:glance][:glance_stores] = ["file", "http", "cinder", "rbd", "swift"]
 
 #default_store choices are: file, http, https, rbd, swift, s3
 default[:glance][:default_store] = "file"
