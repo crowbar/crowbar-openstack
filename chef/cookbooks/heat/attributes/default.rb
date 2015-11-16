@@ -30,6 +30,7 @@ when "debian"
       "heat-common",
       "python-heatclient"
     ],
+    plugin_packages: [],
     services: [
       "heat-engine",
       "heat-api",
@@ -46,6 +47,7 @@ when "rhel", "suse"
       "openstack-heat-api-cloudwatch",
       "python-heatclient"
     ],
+    plugin_packages: [],
     services: [
       "openstack-heat-engine",
       "openstack-heat-api",
@@ -57,6 +59,10 @@ when "rhel", "suse"
   default[:heat][:api][:service_name] = "openstack-heat-api"
   default[:heat][:api_cfn][:service_name] = "openstack-heat-api-cfn"
   default[:heat][:api_cloudwatch][:service_name] = "openstack-heat-api-cloudwatch"
+end
+
+if node[:platform_family] == "suse"
+  default[:heat][:platform][:plugin_packages] = ["openstack-heat-plugin-heat_docker"]
 end
 
 default[:heat][:debug] = false

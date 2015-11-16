@@ -60,6 +60,10 @@ node[:heat][:platform][:packages].each do |p|
   package p
 end
 
+node[:heat][:platform][:plugin_packages].each do |p|
+  package p
+end
+
 directory "/var/cache/heat" do
   owner node[:heat][:user]
   group node[:heat][:group]
