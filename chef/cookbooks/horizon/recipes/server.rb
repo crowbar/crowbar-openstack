@@ -59,6 +59,26 @@ else
   end
 end
 
+# install horizon manila plugin if needed
+case node[:platform_family]
+when "suse"
+  manila_ui_pkgname = "openstack-horizon-plugin-manila-ui"
+when "rhel"
+  manila_ui_pkgname = "openstack-manila-ui"
+else
+  manila_ui_pkgname = nil
+end
+
+unless manila_ui_pkgname.nil?
+  manila_servers = search(:node, "roles:manila-server") || []
+  unless manila_servers.empty?
+    package manila_ui_pkgname do
+      action :install
+      notifies :reload, resources(service: "apache2")
+    end
+  end
+end
+
 if node[:platform_family] == "suse"
   # Get rid of unwanted vhost config files:
   ["#{node[:apache][:dir]}/vhosts.d/default-redirect.conf",
