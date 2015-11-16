@@ -35,6 +35,7 @@ en:
           listheader: 'Cinder Backends'
           emc_parameters: 'EMC Parameters'
           emc_volume_driver: 'EMC'
+          emc_server_portgroups_hint: 'A comma-separated list of port groups'
           eqlx_parameters: 'EqualLogic Parameters'
           eqlx_volume_driver: 'EqualLogic'
           eternus_parameters: 'Fujitsu ETERNUS DX Parameters'
@@ -64,11 +65,13 @@ en:
           index:
             emc:
               ecom_server_ip: 'IP address of the ECOM server'
-              ecom_server_password: 'Password for accessing the ECOM server'
               ecom_server_port: 'Port of the ECOM server'
               ecom_server_username: 'Username for accessing the ECOM server'
-              emc_storage_type: 'Thin pool where user wants to create volume from'
-              masking_view: 'Unisphere for VMAX Masking View'
+              ecom_server_password: 'Password for accessing the ECOM server'
+              ecom_server_portgroups: 'VMAX port groups to expose volumes managed by this backend'
+              ecom_server_array: 'Serial number of the VMAX Array'
+              ecom_server_pool: 'Pool name within a given array'
+              ecom_server_policy: 'FAST Policy name to be used'
             eqlx:
               eqlx_chap_login: 'EQLX chap login for targets'
               eqlx_chap_password: 'EQLX chap password for targets'

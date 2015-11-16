@@ -86,12 +86,15 @@
                 = t('.volumes.emc_parameters')
 
               = string_field %w(volumes {{@index}} emc ecom_server_ip)
-              = string_field %w(volumes {{@index}} emc masking_view)
               = integer_field %w(volumes {{@index}} emc ecom_server_port)
               = string_field %w(volumes {{@index}} emc ecom_server_username)
               = password_field %w(volumes {{@index}} emc ecom_server_password)
-              = string_field %w(volumes {{@index}} emc emc_storage_type)
-
+              = array_string_field %w(volumes {{@index}} emc ecom_server_portgroups), :only_comma => true
+              %span.help-block
+                = t('.volumes.emc_server_portgroups_hint')
+              = string_field %w(volumes {{@index}} emc ecom_server_array)
+              = string_field %w(volumes {{@index}} emc ecom_server_pool)
+              = string_field %w(volumes {{@index}} emc ecom_server_policy)
           {{/if_eq}}
           {{#if_eq backend_driver 'eqlx'}}
           %li.list-group-item

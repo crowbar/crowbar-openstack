@@ -366,10 +366,16 @@ default_availability_zone = <%= @default_availability_zone %>
 # (string value)
 # Allowed values: noauth, keystone, deprecated
 #auth_strategy = keystone
+auth_strategy = keystone
 
 # A list of backend names to use. These backend names should be backed by a
 # unique [CONFIG] group with its options (list value)
 #enabled_backends = <None>
+<% if @use_multi_backend -%>
+enabled_backends=<%= @volumes.each_with_index.collect { |backend,idx|
+    "backend-#{backend['backend_driver']}-#{idx}"
+}.join(',') %>
+<% end -%>
 
 # Whether snapshots count against gigabyte quota (boolean value)
 #no_snapshot_gb_quota = false
@@ -620,7 +626,6 @@ image_upload_use_internal_tenant = False
 #reserved_percentage = 0
 
 # Prefix for iSCSI volumes (string value)
-#iscsi_target_prefix = iqn.2010-10.org.openstack:
 #iscsi_target_prefix = iqn.2010-10.org.openstack:
 <% if volume['backend_driver'] == 'emc' -%>
 iscsi_target_prefix = iqn.1992-04.com.em
@@ -968,6 +973,7 @@ iscsi_write_cache = off
 
 # use this file for cinder emc plugin config data (string value)
 #cinder_emc_config_file = /etc/cinder/cinder_emc_config.xml
+cinder_emc_config_file=/etc/cinder/cinder_emc_config-<%= backend_id %>.xml
 
 # VNX authentication scope type. (string value)
 #storage_vnx_authentication_type = global
@@ -1087,6 +1093,7 @@ eqlx_group_name = <%= volume['eqlx']["eqlx_group_name"] %>
 # cinder/volume/drivers/san/san.py and will be removed in M release. (integer
 # value)
 #eqlx_cli_timeout = 30
+eqlx_cli_timeout=<%= volume['eqlx']["eqlx_cli_timeout"] %>
 
 # Maximum retry count for reconnection. Default is 5. (integer value)
 #eqlx_cli_max_retries = 5
@@ -2346,7 +2353,7 @@ vmware_cluster_name ="<%= cluster %>"
 volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
 <% end -%>
 <% if volume['backend_driver'] == 'emc' -%>
-volume_driver = cinder.volume.drivers.emc.emc_smis_iscsi.EMCSMISISCSIDriver
+volume_driver = cinder.volume.drivers.emc.emc_vmax_iscsi.EMCVMAXISCSIDriver
 <% end -%>
 <% if volume['backend_driver'] == 'eqlx' -%>
 volume_driver = cinder.volume.drivers.eqlx.DellEQLSanISCSIDriver

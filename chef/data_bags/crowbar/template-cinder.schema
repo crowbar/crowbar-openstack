@@ -76,11 +76,13 @@
                 "emc": {
                 "type": "map", "mapping": {
                     "ecom_server_ip": { "type": "str", "required": true },
-                    "emc_storage_type": { "type": "str", "required": true },
-                    "masking_view": { "type": "str", "required": true },
                     "ecom_server_port": { "type": "int", "required": true },
                     "ecom_server_username": { "type": "str", "required": true },
-                    "ecom_server_password": { "type": "str", "required": true }
+                    "ecom_server_password": { "type": "str", "required": true },
+                    "ecom_server_portgroups": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
+                    "ecom_server_array": { "type": "str", "required": true },
+                    "ecom_server_pool": { "type": "str", "required": true },
+                    "ecom_server_policy": { "type": "str", "required": true }
                 }
                 },
                 "eternus": {
@@ -177,11 +179,13 @@
                   "emc": {
                     "type": "map", "mapping": {
                       "ecom_server_ip": { "type": "str", "required": true },
-                      "emc_storage_type": { "type": "str", "required": true },
-                      "masking_view": { "type": "str", "required": true },
                       "ecom_server_port": { "type": "int", "required": true },
                       "ecom_server_username": { "type": "str", "required": true },
-                      "ecom_server_password": { "type": "str", "required": true }
+                      "ecom_server_password": { "type": "str", "required": true },
+                      "ecom_server_portgroups": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
+                      "ecom_server_array": { "type": "str", "required": true },
+                      "ecom_server_pool": { "type": "str", "required": true },
+                      "ecom_server_policy": { "type": "str", "required": true }
                     }
                   },
                   "eternus": {
