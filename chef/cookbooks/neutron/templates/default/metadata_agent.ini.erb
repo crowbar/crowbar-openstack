@@ -71,3 +71,7 @@ metadata_workers = <%= [node["cpu"]["total"]/2, 4].min %>
 # Otherwise default_ttl specifies time in seconds a cache entry is valid for.
 # No cache is used in case no value is passed.
 # cache_url = memory://?default_ttl=5
+
+# Missing in upstream template
+# Ensure that metadata server listening on UNIX socket is not expecting SSL
+use_ssl = False
