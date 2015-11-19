@@ -60,6 +60,7 @@ en:
           rbd_volume_driver: 'RADOS'
           vmware_parameters: 'VMware Parameters'
           vmware_volume_driver: 'VMware'
+          vmware_cluster_hint: 'A comma-separated list of cluster names'
           index:
             emc:
               ecom_server_ip: 'IP address of the ECOM server'
@@ -115,6 +116,7 @@ en:
               host: 'vCenter Host/IP Address'
               user: 'vCenter Username'
               password: 'vCenter Password'
+              cluster_name: 'vCenter Cluster Names for Volumes'
               volume_folder: 'Folder for Volumes'
               ca_file: 'CA file for verifying the vCenter certificate'
               insecure: 'vCenter SSL Certificate is insecure (for instance, self-signed)'

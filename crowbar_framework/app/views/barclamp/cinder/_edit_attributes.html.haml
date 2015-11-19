@@ -150,6 +150,9 @@
               = string_field %w(volumes {{@index}} vmware host)
               = string_field %w(volumes {{@index}} vmware user)
               = password_field %w(volumes {{@index}} vmware password)
+              = array_string_field %w(volumes {{@index}} vmware cluster_name), :only_comma => true
+              %span.help-block
+                = t('.volumes.vmware_cluster_hint')
               = string_field %w(volumes {{@index}} vmware volume_folder)
               = string_field %w(volumes {{@index}} vmware ca_file)
               = boolean_field %w(volumes {{@index}} vmware insecure)
