@@ -2705,6 +2705,8 @@ pool_timeout=<%= node[:cinder][:pool_timeout] %>
 
 # Authentication url for encryption service. (string value)
 #encryption_auth_url=http://localhost:5000/v2.0
+# FIXME: this is really a bug in cinder which is abusing this option for fetching info about quotas (lp#1516085) and requires v3 API (lp#1517043)
+encryption_auth_url=<%= "#{@keystone_settings['protocol']}://#{@keystone_settings['internal_url_host']}:#{@keystone_settings['service_port']}/v3" %>
 
 # Url for encryption service. (string value)
 #encryption_api_url=http://localhost:9311/v1
