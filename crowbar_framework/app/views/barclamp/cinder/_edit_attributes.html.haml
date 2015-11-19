@@ -151,6 +151,8 @@
               = string_field %w(volumes {{@index}} vmware user)
               = password_field %w(volumes {{@index}} vmware password)
               = string_field %w(volumes {{@index}} vmware volume_folder)
+              = string_field %w(volumes {{@index}} vmware ca_file)
+              = boolean_field %w(volumes {{@index}} vmware insecure)
 
           {{/if_eq}}
           {{#if_eq backend_driver 'manual'}}
