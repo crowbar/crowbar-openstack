@@ -904,6 +904,7 @@ vmware_store_image_dir = <%= node[:glance][:vsphere][:store_image_dir] %>
 
 # Allow to perform insecure SSL requests to ESX/VC. (boolean value)
 #vmware_api_insecure = false
+<%= "vmware_api_insecure = #{node[:glance][:vsphere][:api_insecure]}" if node[:glance][:vsphere][:api_insecure] %>
 
 # A list of datastores where the image can be stored. This option may
 # be specified multiple times for specifying multiple datastores.
