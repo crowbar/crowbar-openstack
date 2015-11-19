@@ -11,7 +11,6 @@
       "verbose": true,
       "dhcp_domain": "openstack.local",
       "use_lbaas": true,
-      "use_l2pop": true,
       "use_dvr": false,
       "additional_external_networks": [],
       "networking_plugin": "ml2",
@@ -68,7 +67,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 43,
+      "schema-revision": 44,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]
