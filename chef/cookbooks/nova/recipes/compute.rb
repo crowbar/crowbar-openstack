@@ -111,9 +111,6 @@ case node[:nova][:libvirt_type]
   when "zvm"
     package "openstack-nova-virt-zvm"
 
-  when "vmware"
-    package "python-suds"
-
   when "docker"
     package "docker"
     package "openstack-nova-docker"
