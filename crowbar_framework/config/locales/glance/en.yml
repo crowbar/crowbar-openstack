@@ -40,8 +40,9 @@ en:
           host: 'vCenter Host/IP Address'
           user: 'vCenter Username'
           password: 'vCenter Password'
-          datastore: 'Datastore Name'
-          datacenter_path: 'Datacenter Path'
+          datastores: 'Datastores for Storing Images'
+          datastores_hint: 'A comma-separated list of datastores specified in the following format: <datacenter_name>:<datastore_name>'
+          store_image_dir: 'Path on the datastore, where the glance images will be stored'
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'

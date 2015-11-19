@@ -37,8 +37,10 @@
       = string_field %w(vsphere host)
       = string_field %w(vsphere user)
       = password_field %w(vsphere password)
-      = string_field %w(vsphere datastore)
-      = string_field %w(vsphere datacenter_path)
+      = array_string_field %w(vsphere datastores), :only_comma => true
+      %span.help-block
+        = t('.vsphere.datastores_hint')
+      = string_field %w(vsphere store_image_dir)
 
     %fieldset
       %legend
