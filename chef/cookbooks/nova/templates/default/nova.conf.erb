@@ -3772,6 +3772,17 @@ enabled=true
 #host_password=<None>
 <%= "host_password=#{node[:nova][:vcenter][:password]}" if @libvirt_type.eql?('vmware') %>
 
+# Specify a CA bundle file to use in verifying the vCenter server certificate.
+# (string value)
+#ca_file = <None>
+<%= "ca_file=#{node[:nova][:vcenter][:ca_file]}" if @libvirt_type.eql?('vmware') && ! node[:nova][:vcenter][:ca_file].empty? %>
+
+# If true, the vCenter server certificate is not verified. If false, then the
+# default CA truststore is used for verification. This option is ignored if
+# "ca_file" is set. (boolean value)
+#insecure = false
+<%= "insecure=#{node[:nova][:vcenter][:insecure]}" if @libvirt_type.eql?('vmware') && node[:nova][:vcenter][:insecure] %>
+
 # Name of a VMware Cluster ComputeResource. Used only if
 # compute_driver is vmwareapi.VMwareVCDriver. (multi valued)
 #cluster_name=<None>

@@ -47,6 +47,8 @@ en:
           clusters: 'Cluster Names'
           datastore: 'Datastore Name'
           interface: 'VLAN Interface'
+          ca_file: 'CA file for verifying the vCenter certificate'
+          insecure: 'Do not verify vCenter certificate'
         vmware_cluster_hint: 'A comma-separated list of cluster names'
         zvm_header: 'z/VM Configuration'
         zvm:
