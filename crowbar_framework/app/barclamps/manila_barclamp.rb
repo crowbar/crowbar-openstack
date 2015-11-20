@@ -1,6 +1,6 @@
 #
 # Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2013-2015, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,30 +15,32 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'tempest'
-  display: 'Tempest'
-  description: 'OpenStack Integration Test Suite'
-  version: 1
-  user_managed: true
-  requires:
-    - 'nova'
-    - 'horizon'
-  member:
-    - 'openstack'
+class ManilaBarclamp < Crowbar::Registry::Barclamp
+  name "manila"
+  display "Manila"
+  description "OpenStack File Share: Management of shared filesystems"
 
-crowbar:
-  layout: 1
-  order: 199
-  run_order: 199
-  chef_order: 199
-  proposal_schema_version: 3
+  member [
+    "openstack"
+  ]
 
-smoketest:
-  timeout: 2400
+  requires [
+    "@crowbar",
+    "pacemaker",
+    "database",
+    "rabbitmq",
+    "keystone",
+    "nova",
+    "cinder",
+    "glance",
+    "neutron"
+  ]
 
-nav:
-  utils:
-    tempest:
-      order: 30
-      route: 'tempest_dashboard_path'
+  listed true
+
+  layout 1
+  version 0
+  schema 3
+
+  order 92
+end

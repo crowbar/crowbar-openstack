@@ -1,6 +1,6 @@
 #
 # Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2013-2015, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,20 +15,24 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'database'
-  display: 'Database'
-  description: 'Resource for accessing Database Servers'
-  version: 0
-  user_managed: true
-  requires:
-    - 'pacemaker'
-  member:
-    - 'openstack'
+class DatabaseBarclamp < Crowbar::Registry::Barclamp
+  name "database"
+  display "Database"
+  description "Database Resource: Resource for accessing Database Servers"
 
-crowbar:
-  layout: 1
-  order: 74
-  run_order: 74
-  chef_order: 74
-  proposal_schema_version: 3
+  member [
+    "openstack"
+  ]
+
+  requires [
+    "pacemaker"
+  ]
+
+  listed true
+
+  layout 1
+  version 0
+  schema 3
+
+  order 74
+end

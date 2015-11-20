@@ -1,6 +1,6 @@
 #
 # Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2013-2015, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,29 +15,28 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'heat'
-  display: 'Heat'
-  description: 'Orchestration Module: Orchestration engine for composite cloud applications'
-  version: 0
-  user_managed: true
-  requires:
-    - '@crowbar'
-    - 'pacemaker'
-    - 'git'
-    - 'database'
-    - 'rabbitmq'
-    - 'keystone'
-    - 'neutron'
-    - 'cinder'
-    - 'glance'
-    - 'nova'
-  member:
-    - 'openstack'
+class CeilometerBarclamp < Crowbar::Registry::Barclamp
+  name "ceilometer"
+  display "Ceilometer"
+  description "OpenStack Telemetry: Measurements collection for monitoring and metering"
 
-crowbar:
-  layout: 1
-  order: 97
-  run_order: 97
-  chef_order: 97
-  proposal_schema_version: 3
+  member [
+    "openstack"
+  ]
+
+  requires [
+    "@crowbar",
+    "pacemaker",
+    "database",
+    "rabbitmq",
+    "keystone"
+  ]
+
+  listed true
+
+  layout 1
+  version 0
+  schema 3
+
+  order 98
+end

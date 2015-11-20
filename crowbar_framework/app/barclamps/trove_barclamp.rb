@@ -1,6 +1,6 @@
 #
 # Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2013-2015, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,22 +15,28 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'glance'
-  display: 'Glance'
-  description: 'OpenStack Image Service: Discovery, registration and delivery services for virtual machine images'
-  version: 0
-  user_managed: true
-  requires:
-    - 'keystone'
-    - 'rabbitmq'
-    - 'pacemaker'
-  member:
-    - 'openstack'
+class TroveBarclamp < Crowbar::Registry::Barclamp
+  name "trove"
+  display "Trove"
+  description "OpenStack Database: Scalable and reliable Database-as-a-Service provisioning"
 
-crowbar:
-  layout: 1
-  order: 85
-  run_order: 85
-  chef_order: 85
-  proposal_schema_version: 3
+  member [
+    "openstack"
+  ]
+
+  requires [
+    "cinder",
+    "keystone",
+    "nova",
+    "rabbitmq",
+    "swift"
+  ]
+
+  listed true
+
+  layout 1
+  version 0
+  schema 3
+
+  order 102
+end

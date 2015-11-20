@@ -1,6 +1,6 @@
 #
 # Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2013-2015, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,30 +15,27 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'nova'
-  display: 'Nova'
-  description: 'OpenStack Compute: Provision and manage large network of virtual machines'
-  version: 0
-  user_managed: true
-  requires:
-    - '@crowbar'
-    - 'pacemaker'
-    - 'database'
-    - 'rabbitmq'
-    - 'glance'
-    - 'keystone'
-    - 'cinder'
-    - 'neutron'
-  member:
-    - 'openstack'
+class HorizonBarclamp < Crowbar::Registry::Barclamp
+  name "horizon"
+  display "Horizon"
+  description "OpenStack Dashboard: Web User Interface to access, provision and automate Cloud-based resources"
 
-crowbar:
-  layout: 1
-  order: 95
-  run_order: 95
-  chef_order: 95
-  proposal_schema_version: 3
+  member [
+    "openstack"
+  ]
 
-smoketest:
-  timeout: 2400
+  requires [
+    "pacemaker",
+    "database",
+    "keystone",
+    "nova"
+  ]
+
+  listed true
+
+  layout 1
+  version 0
+  schema 3
+
+  order 96
+end

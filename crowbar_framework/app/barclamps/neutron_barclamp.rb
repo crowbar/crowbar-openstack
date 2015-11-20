@@ -1,6 +1,6 @@
 #
 # Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2013-2015, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,24 +15,27 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'cinder'
-  display: 'Cinder'
-  description: 'OpenStack Block Storage: Management of volumes (persistent block level storage)'
-  version: 0
-  requires:
-    - '@crowbar'
-    - 'pacemaker'
-    - 'database'
-    - 'rabbitmq'
-    - 'keystone'
-    - 'glance'
-  member:
-    - 'openstack'
+class NeutronBarclamp < Crowbar::Registry::Barclamp
+  name "neutron"
+  display "Neutron"
+  description "OpenStack Networking: Pluggable, scalable, API-driven network and IP management"
 
-crowbar:
-  layout: 1
-  order: 92
-  run_order: 92
-  chef_order: 92
-  proposal_schema_version: 3
+  member [
+    "openstack"
+  ]
+
+  requires [
+    "pacemaker",
+    "database",
+    "rabbitmq",
+    "keystone"
+  ]
+
+  listed true
+
+  layout 1
+  version 0
+  schema 3
+
+  order 94
+end

@@ -1,6 +1,6 @@
 #
 # Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2013-2015, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,20 +15,34 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'rabbitmq'
-  display: 'RabbitMQ'
-  description: 'AMQP Messaging Middleware: robust enterprise messaging system'
-  version: 0
-  user_managed: true
-  requires:
-    - 'pacemaker'
-  member:
-    - 'openstack'
+class TempestBarclamp < Crowbar::Registry::Barclamp
+  name "tempest"
+  display "Tempest"
+  description "OpenStack Tempest: Integration Test Suite"
 
-crowbar:
-  layout: 1
-  order: 76
-  run_order: 76
-  chef_order: 76
-  proposal_schema_version: 3
+  member [
+    "openstack"
+  ]
+
+  requires [
+    "nova",
+    "horizon"
+  ]
+
+  listed true
+
+  layout 1
+  version 0
+  schema 3
+
+  order 199
+
+  nav(
+    utils: {
+      tempest: {
+        order: 30,
+        route: "tempest_dashboard_path"
+      }
+    }
+  )
+end

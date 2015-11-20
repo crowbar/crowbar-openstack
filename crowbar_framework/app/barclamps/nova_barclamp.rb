@@ -1,6 +1,6 @@
 #
 # Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2013-2015, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,23 +15,31 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'neutron'
-  display: 'Neutron'
-  description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management'
-  version: 0
-  user_managed: true
-  requires:
-    - 'pacemaker'
-    - 'database'
-    - 'rabbitmq'
-    - 'keystone'
-  member:
-    - 'openstack'
+class NovaBarclamp < Crowbar::Registry::Barclamp
+  name "nova"
+  display "Nova"
+  description "OpenStack Compute: Provision and manage large network of virtual machines"
 
-crowbar:
-  layout: 1
-  order: 94
-  run_order: 94
-  chef_order: 94
-  proposal_schema_version: 3
+  member [
+    "openstack"
+  ]
+
+  requires [
+    "@crowbar",
+    "pacemaker",
+    "database",
+    "rabbitmq",
+    "glance",
+    "keystone",
+    "cinder",
+    "neutron"
+  ]
+
+  listed true
+
+  layout 1
+  version 0
+  schema 3
+
+  order 95
+end
