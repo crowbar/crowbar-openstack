@@ -124,9 +124,9 @@ class CrowbarOpenStackHelper
     result = nil
 
     if node.roles.include?(role) && \
-      node.has_key?(barclamp) && \
-      node[barclamp].has_key?("config") && \
-      node[barclamp]["config"]["environment"] == "#{barclamp}-config-#{instance}"
+        node.key?(barclamp) && \
+        node[barclamp].key?("config") && \
+        node[barclamp]["config"]["environment"] == "#{barclamp}-config-#{instance}"
       result = node
     else
       nodes, _, _ = Chef::Search::Query.new.search(:node, "roles:#{role} AND #{barclamp}_config_environment:#{barclamp}-config-#{instance}")

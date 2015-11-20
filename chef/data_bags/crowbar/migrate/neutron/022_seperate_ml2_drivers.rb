@@ -31,7 +31,7 @@ def upgrade ta, td, a, d
 end
 
 def downgrade ta, td, a, d
-  if a.has_key? "ml2_type_drivers"
+  if a.key? "ml2_type_drivers"
     if a["ml2_type_drivers"].include? "vlan"
       a["networking_mode"] = "vlan"
     elsif a["ml2_type_drivers"].include? "gre"

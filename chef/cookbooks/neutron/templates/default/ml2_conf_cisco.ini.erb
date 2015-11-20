@@ -48,7 +48,7 @@ managed_physical_network = physnet1
 # password=mySecretPassword
 <% @switches.keys.each do |ip| -%>
 [ml2_mech_cisco_nexus:<%=ip%>]
-<%   if @switches[ip].has_key?(:switch_ports) -%>
+<%   if @switches[ip].key?(:switch_ports) -%>
 <%     @switches[ip][:switch_ports].each do |name, values| -%>
 <%=      name %>=<%= values[:switch_port] %>
 <%     end -%>
