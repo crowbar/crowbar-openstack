@@ -38,10 +38,10 @@ class Rack_awareness
             #get storage iface
             iface=""
             n[:network][:interfaces].keys.each do |ifn|
-                if n[:network][:interfaces]["#{ifn}"][:addresses].has_key?(storage_ip)
-                    iface=ifn
-                    break
-                end
+              if n[:network][:interfaces]["#{ifn}"][:addresses].key?(storage_ip)
+                iface=ifn
+                break
+              end
             end
             #this may lead us to eth0, or eth0.123, or even br0, br0.123, vlan231 and so on, so
             #TODO: some cases for complicated network configuration with bridges, vlans
@@ -61,7 +61,7 @@ class Rack_awareness
         zone_list=zone_count.times.to_a
         switch_list=@switch_list
         switch_list.keys.each do |sw_name|
-             switch_list["#{sw_name}"]["zones"]=[] if not switch_list["#{sw_name}"].has_key?("zones")
+          switch_list["#{sw_name}"]["zones"] = [] unless switch_list["#{sw_name}"].key?("zones")
         end
 
         if switch_list.size >= zone_list.size

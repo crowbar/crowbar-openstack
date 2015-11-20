@@ -1850,10 +1850,10 @@ service_image_name=<%= share['generic']['service_image_name'] %>
 path_to_private_key=<%= share['generic']['path_to_private_key'] %>
 path_to_public_key=<%= share['generic']['path_to_public_key'] %>
 driver_handles_share_servers=<%= share['generic']['driver_handles_share_servers'] %>
-<% if share['generic'].has_key?('neutron_net_id') -%>
+<% if share['generic'].key?('neutron_net_id') -%>
 neutron_net_id=<%= share['generic']['neutron_net_id'] %>
 <% end -%>
-<% if share['generic'].has_key?('neutron_subnet_id') -%>
+<% if share['generic'].key?('neutron_subnet_id') -%>
 neutron_subnet_id=<%= share['generic']['neutron_subnet_id'] %>
 <% end -%>
 <% end -%> <%# generic driver %>
@@ -1863,14 +1863,14 @@ share_backend_name=<%= share['backend_name'] %>
 driver_handles_share_servers=False
 netapp_storage_family=<%= share['netapp']['netapp_storage_family'] %>
 netapp_server_hostname=<%= share['netapp']['netapp_server_hostname'] %>
-<% if share['netapp'].has_key?('netapp_server_port') -%>
+<% if share['netapp'].key?('netapp_server_port') -%>
 netapp_server_port=<%= share['netapp']['netapp_server_port'] %>
 <% end -%>
 netapp_login=<%= share['netapp']['netapp_login'] %>
 netapp_password=<%= share['netapp']['netapp_password'] %>
 netapp_vserver=<%= share['netapp']['netapp_vserver'] %>
 netapp_transport_type=<%= share['netapp']['netapp_transport_type'] %>
-<% if share['netapp'].has_key?('netapp_aggregate_name_search_pattern') -%>
+<% if share['netapp'].key?('netapp_aggregate_name_search_pattern') -%>
 netapp_aggregate_name_search_pattern=<%= share['netapp']['netapp_aggregate_name_search_pattern'] %>
 <% end -%>
 <% end -%> <%# netapp driver %>

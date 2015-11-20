@@ -729,7 +729,7 @@ SITE_BRANDING = "<%= @site_branding %>"
 SITE_BRANDING_LINK = "<%= @site_branding_link %>"
 <% end -%>
 
-<% if node[:horizon].has_key?(:external_monitoring) -%>
+<% if node[:horizon].key?(:external_monitoring) -%>
 EXTERNAL_MONITORING = [
   <% node[:horizon][:external_monitoring].each do |name, url| -%>
     ['<%= name %>', '<%= url %>'],
