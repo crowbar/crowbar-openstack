@@ -37,7 +37,7 @@ class NeutronService < PacemakerServiceObject
   end
 
   def self.networking_ml2_mechanism_drivers_valid
-    ["linuxbridge", "openvswitch", "cisco_nexus"]
+    ["linuxbridge", "openvswitch", "cisco_nexus", "hyperv"]
   end
 
   class << self
