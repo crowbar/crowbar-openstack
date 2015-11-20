@@ -19,9 +19,6 @@ en:
   nav:
     barclamps:
       openstack: 'OpenStack'
-    help:
-      crowbar_deployment: 'Crowbar Deployment Guide'
-      openstack_users: 'OpenStack Users Guide'
   barclamp:
     openstack:
       edit_attributes:
