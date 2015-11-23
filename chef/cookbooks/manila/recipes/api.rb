@@ -97,23 +97,38 @@ keystone_register "register manila endpoint" do
   action :add_endpoint_template
 end
 
+# v2 API is new since Liberty
+keystone_register "register manila service v2" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  service_name "manilav2"
+  service_type "sharev2"
+  service_description "Openstack Manila shared filesystem service V2"
+  action :add_service
+end
+
+keystone_register "register manila endpoint v2" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  token keystone_settings["admin_token"]
+  endpoint_service "manilav2"
+  endpoint_region keystone_settings["endpoint_region"]
+  endpoint_publicURL "#{manila_protocol}://"\
+                     "#{my_public_host}:#{manila_port}/v2/$(tenant_id)s"
+  endpoint_adminURL "#{manila_protocol}://"\
+                    "#{my_admin_host}:#{manila_port}/v2/$(tenant_id)s"
+  endpoint_internalURL "#{manila_protocol}://"\
+                       "#{my_admin_host}:#{manila_port}/v2/$(tenant_id)s"
+  action :add_endpoint_template
+end
+
 crowbar_pacemaker_sync_mark "create-manila_register"
 
 manila_service "api" do
   use_pacemaker_provider ha_enabled
-end
-
-# NOTE(toabctl): We modified the upstream api-paste.ini and the manila.conf.erb
-# to use keystonemiddleware and a [keystone_auth] section in manila.conf instead
-# of the parameters from api-paste.ini. So the api-paste.ini is different than
-# in the version from the package.
-# TODO(toabctl): Remove this in Kilo because the api-paste.ini then no longer
-# contains the auth parameters
-cookbook_file "api-paste.ini" do
-  path "/etc/manila/api-paste.ini"
-  owner "root"
-  group node[:manila][:group]
-  mode "0640"
-  action :create
-  notifies :restart, "service[manila-api]"
 end
