@@ -151,13 +151,19 @@ end
 #                so the order is important
 tenant_network_types = [[node[:neutron][:ml2_type_drivers_default_tenant_network]] + node[:neutron][:ml2_type_drivers]].flatten.uniq
 
-external_networks = ["floating"]
-external_networks.concat(node[:neutron][:additional_external_networks])
-
 interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
 
 case node[:neutron][:networking_plugin]
 when "ml2"
+  # Find out which physical interfaces we need to define in the config (depends
+  # on whether one of the external networks will share the physical interface
+  # with "nova_fixed".
+  external_networks = ["nova_floating"]
+  external_networks.concat(node[:neutron][:additional_external_networks])
+  network_node = NeutronHelper.get_network_node_from_neutron_attributes(node)
+  physnet_map = NeutronHelper.get_neutron_physnets(network_node, external_networks)
+  physnets = physnet_map.values
+
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
   #TODO(vuntz): temporarily disable the hyperv mechanism since we're lacking networking-hyperv from stackforge
   #ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
@@ -187,7 +193,7 @@ when "ml2"
       vxlan_start: vni_start,
       vxlan_end: vni_end,
       vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group],
-      external_networks: external_networks
+      external_networks: physnets
     )
   end
 when "vmware"
