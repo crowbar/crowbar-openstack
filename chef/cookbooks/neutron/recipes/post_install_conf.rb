@@ -82,13 +82,17 @@ when "ml2"
       "--provider:physical_network #{ext_physnet_map["nova_floating"]}"
   case ml2_type_drivers_default_provider_network
   when "vlan"
-    fixed_network_type = "--provider:network_type vlan --provider:segmentation_id #{fixed_net["vlan"]} --provider:physical_network physnet1"
+    fixed_network_type = "--provider:network_type vlan " \
+        "--provider:segmentation_id #{fixed_net["vlan"]} " \
+        "--provider:physical_network physnet1"
   when "gre"
     fixed_network_type = "--provider:network_type gre --provider:segmentation_id 1"
   when "vxlan"
-    fixed_network_type = "--provider:network_type vxlan --provider:segmentation_id #{vni_start}"
+    fixed_network_type = "--provider:network_type vxlan " \
+        "--provider:segmentation_id #{vni_start}"
   else
-    Chef::Log.error("default provider network ml2 type driver '#{ml2_type_drivers_default_provider_network}' invalid for creating provider networks")
+    Chef::Log.error("default provider network ml2 type driver " \
+        "'#{ml2_type_drivers_default_provider_network}' invalid for creating provider networks")
   end
 when "vmware"
   fixed_network_type = ""
