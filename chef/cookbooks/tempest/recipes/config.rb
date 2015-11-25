@@ -189,10 +189,11 @@ RAMDISK_ID=$(glance #{insecure} --os-image-api-version 1 image-create \
 echo "done."
 [ -n "$RAMDISK_ID" ] || exit 1
 
-echo -n "Adding image ... "
+echo -n "Adding image for KVM ... "
 MACHINE_ID=$(glance #{insecure} --os-image-api-version 1 image-create \
     --name="$IMG_NAME-tempest-machine" \
     --is-public True --container-format ami --disk-format ami \
+    --property hypervisor_type=kvm \
     --property kernel_id=$KERNEL_ID \
     --property ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
 echo "done."
