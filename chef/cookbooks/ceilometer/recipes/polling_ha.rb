@@ -16,24 +16,24 @@
 # Wait for all nodes to reach this point so we know that they will have
 # all the required packages installed and configuration files updated
 # before we create the pacemaker resources.
-crowbar_pacemaker_sync_mark "sync-ceilometer_central_before_ha"
+crowbar_pacemaker_sync_mark "sync-ceilometer_polling_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-ceilometer_central_ha_resources"
+crowbar_pacemaker_sync_mark "wait-ceilometer_polling_ha_resources"
 
-service_name = "ceilometer-agent-central"
+service_name = "ceilometer-polling"
 
 # Allow one retry, to avoid races where two nodes create the primitive at the
 # same time when it wasn't created yet (only one can obviously succeed)
 pacemaker_primitive service_name do
-  agent node[:ceilometer][:ha][:central][:agent]
-  op node[:ceilometer][:ha][:central][:op]
-  # use these params with ocf:openstack:ceilometer-agent-central:
+  agent node[:ceilometer][:ha][:polling][:agent]
+  op node[:ceilometer][:ha][:polling][:op]
+  # use these params with ocf:openstack:ceilometer-polling:
   #params ({
   #  "user"    => node[:ceilometer][:user],
-  #  "binary"  => "/usr/bin/ceilometer-agent-central",
+  #  "binary"  => "/usr/bin/ceilometer-polling",
   #  "use_service"    => true,
-  #  "service" => node[:ceilometer][:central][:service_name]
+  #  "service" => node[:ceilometer][:polling][:service_name]
   #})
   action [:create, :start]
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -46,4 +46,4 @@ crowbar_pacemaker_order_only_existing "o-#{service_name}" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-ceilometer_central_ha_resources"
+crowbar_pacemaker_sync_mark "create-ceilometer_polling_ha_resources"

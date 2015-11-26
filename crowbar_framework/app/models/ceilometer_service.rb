@@ -44,7 +44,7 @@ class CeilometerService < PacemakerServiceObject
             "windows" => "/.*/"
           }
         },
-        "ceilometer-cagent" => {
+        "ceilometer-polling" => {
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
@@ -110,7 +110,7 @@ class CeilometerService < PacemakerServiceObject
     base["deployment"]["ceilometer"]["elements"] = {
         "ceilometer-agent" => agent_nodes.map { |x| x.name },
         "ceilometer-agent-hyperv" => hyperv_agent_nodes.map { |x| x.name },
-        "ceilometer-cagent" => [server_nodes.first.name],
+        "ceilometer-polling" => [server_nodes.first.name],
         "ceilometer-server" => [server_nodes.first.name],
         "ceilometer-swift-proxy-middleware" => swift_proxy_nodes.map { |x| x.name }
     } unless agent_nodes.nil? or server_nodes.nil?
@@ -124,7 +124,7 @@ class CeilometerService < PacemakerServiceObject
   end
 
   def validate_proposal_after_save proposal
-    validate_one_for_role proposal, "ceilometer-cagent"
+    validate_one_for_role proposal, "ceilometer-polling"
     validate_one_for_role proposal, "ceilometer-server"
 
     validate_minimum_three_nodes_in_cluster(proposal)
@@ -182,9 +182,12 @@ class CeilometerService < PacemakerServiceObject
     # the VIP of the cluster to be setup
     allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
 
-    central_elements, central_nodes, central_ha_enabled = role_expand_elements(role, "ceilometer-cagent")
+    _polling_elements, _polling_nodes, polling_ha_enabled = \
+        role_expand_elements(role, "ceilometer-polling")
 
-    role.save if prepare_role_for_ha(role, ["ceilometer", "ha", "central", "enabled"], central_ha_enabled)
+    role.save if prepare_role_for_ha(role,\
+                                     ["ceilometer", "ha", "polling", "enabled"],\
+                                     polling_ha_enabled)
 
     @logger.debug("Ceilometer apply_role_pre_chef_call: leaving")
   end

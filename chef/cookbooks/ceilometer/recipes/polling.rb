@@ -13,21 +13,19 @@
 # limitations under the License.
 #
 
-package "ceilometer-agent-central" do
-  if %w(suse).include?(node[:platform_family])
-    package_name "openstack-ceilometer-agent-central"
-  elsif %w(rhel).include?(node[:platform_family])
-    package_name "openstack-ceilometer-central"
+package "ceilometer-polling" do
+  if %w(rhel suse).include?(node[:platform_family])
+    package_name "openstack-ceilometer-polling"
   end
   action :install
 end
 
 include_recipe "#{@cookbook_name}::common"
 
-ha_enabled = node[:ceilometer][:ha][:central][:enabled]
+ha_enabled = node[:ceilometer][:ha][:polling][:enabled]
 
-service "ceilometer-agent-central" do
-  service_name node[:ceilometer][:central][:service_name]
+service "ceilometer-polling" do
+  service_name node[:ceilometer][:polling][:service_name]
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
@@ -36,8 +34,8 @@ service "ceilometer-agent-central" do
 end
 
 if ha_enabled
-  log "HA support for ceilometer-central is enabled"
-  include_recipe "ceilometer::central_ha"
+  log "HA support for ceilometer-polling is enabled"
+  include_recipe "ceilometer::polling_ha"
 else
-  log "HA support for ceilometer-central is disabled"
+  log "HA support for ceilometer-polling is disabled"
 end

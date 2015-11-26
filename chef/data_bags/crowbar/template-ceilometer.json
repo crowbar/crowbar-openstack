@@ -36,10 +36,10 @@
     "ceilometer": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 22,
+      "schema-revision": 23,
       "element_states": {
         "ceilometer-server": [ "readying", "ready", "applying" ],
-        "ceilometer-cagent": [ "readying", "ready", "applying" ],
+        "ceilometer-polling": [ "readying", "ready", "applying" ],
         "ceilometer-agent": [ "readying", "ready", "applying" ],
         "ceilometer-agent-hyperv": [ "readying", "ready", "applying" ],
         "ceilometer-swift-proxy-middleware": [ "readying", "ready", "applying" ]
@@ -47,14 +47,14 @@
       "elements": {},
       "element_order": [
         [ "ceilometer-server" ],
-        [ "ceilometer-cagent" ], 
+        [ "ceilometer-polling" ], 
         [ "ceilometer-agent" ],
         [ "ceilometer-agent-hyperv" ],
         [ "ceilometer-swift-proxy-middleware" ]
       ],
       "element_run_list_order": {
         "ceilometer-server": 101,
-        "ceilometer-cagent": 102,
+        "ceilometer-polling": 102,
         "ceilometer-agent": 103,
         "ceilometer-agent-hyperv": 104,
         "ceilometer-swift-proxy-middleware" : 80
