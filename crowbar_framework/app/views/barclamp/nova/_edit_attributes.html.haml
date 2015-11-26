@@ -46,6 +46,8 @@
         = t('.vmware_cluster_hint')
       = string_field %w(vcenter datastore)
       = string_field %w(vcenter interface)
+      = string_field %w(vcenter ca_file)
+      = boolean_field %w(vcenter insecure)
 
     %fieldset
       %legend

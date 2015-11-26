@@ -2275,6 +2275,17 @@ vmware_volume_folder=<%= volume['vmware']["volume_folder"] %>
 # backup and restore. (string value)
 #vmware_tmp_dir=/tmp
 
+# CA bundle file to use in verifying the vCenter server certificate. (string
+# value)
+#vmware_ca_file = 
+<%= "vmware_ca_file = #{volume['vmware']['ca_file']}" unless volume['vmware']['ca_file'].empty? %>
+
+# If true, the vCenter server certificate is not verified. If false, then the
+# default CA truststore is used for verification. This option is ignored if
+# "vmware_ca_file" is set. (boolean value)
+#vmware_insecure = false
+<%= "vmware_insecure = #{volume['vmware']['insecure']}" if volume['vmware']['insecure'] %>
+
 
 <% end -%>
 <% if volume['backend_driver'] == 'windows' -%>

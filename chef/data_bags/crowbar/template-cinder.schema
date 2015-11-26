@@ -109,7 +109,9 @@
                     "host": { "type": "str", "required": true },
                     "user": { "type": "str", "required": true },
                     "password": { "type": "str", "required": true },
-                    "volume_folder": { "type": "str", "required": true }
+                    "volume_folder": { "type": "str", "required": true },
+                    "ca_file": { "type": "str", "required": true },
+                    "insecure": { "type" : "bool", "required" : true }
                 }
                 },
                 "manual": {
@@ -207,7 +209,9 @@
                       "host": { "type": "str", "required": true },
                       "user": { "type": "str", "required": true },
                       "password": { "type": "str", "required": true },
-                      "volume_folder": { "type": "str", "required": true }
+                      "volume_folder": { "type": "str", "required": true },
+                      "ca_file": { "type": "str", "required": true },
+                      "insecure": { "type" : "bool", "required" : true }
                       }
                   },
                   "manual": {

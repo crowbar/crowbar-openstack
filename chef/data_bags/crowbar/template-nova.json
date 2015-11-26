@@ -46,7 +46,9 @@
         "password": "",
         "clusters": [],
         "datastore": "",
-        "interface": "vmnic0"
+        "interface": "vmnic0",
+        "ca_file": "",
+        "insecure": false
       },
       "zvm": {
         "zvm_xcat_server": "",
@@ -85,7 +87,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 37,
+      "schema-revision": 38,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-docker": [ "readying", "ready", "applying" ],
