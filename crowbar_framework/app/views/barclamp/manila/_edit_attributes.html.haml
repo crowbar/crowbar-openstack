@@ -25,6 +25,9 @@
               %legend
                 = t('.shares.generic_parameters')
 
+              .alert.alert-warning
+                = t(".shares.generic.not_supported")
+
               = string_field %w(shares {{@index}} generic service_instance_user)
               = password_field %w(shares {{@index}} generic service_instance_password)
               = string_field %w(shares {{@index}} generic service_image_name)
