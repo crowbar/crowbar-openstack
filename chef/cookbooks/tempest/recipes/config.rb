@@ -132,7 +132,6 @@ end
 
 machine_id_file = node[:tempest][:tempest_path] + "/machine.id"
 docker_image_id_file = node[:tempest][:tempest_path] + "/docker_machine.id"
-heat_machine_id_file = node[:tempest][:tempest_path] + "/heat_machine.id"
 
 glance_node = search(:node, "roles:glance-server").first
 insecure = "--insecure"
@@ -217,31 +216,6 @@ EOH
     "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : ""
   })
   not_if { File.exists?(machine_id_file) }
-end
-
-bash "upload tempest heat-cfntools image" do
-    code <<-EOF
-OS_USERNAME=${OS_USERNAME:-admin}
-OS_TENANT_NAME=${OS_TENANT_NAME:-admin}
-OS_PASSWORD=${OS_PASSWORD:-admin}
-
-id=$(glance #{insecure} image-show ${IMAGE_NAME} | awk '/id/ { print $4}')
-[ -n "$id" ] && echo $id > #{heat_machine_id_file}
-
-true
-EOF
-  environment ({
-    "IMAGE_NAME" => node[:tempest][:heat_test_image_name],
-    "OS_USERNAME" => tempest_adm_user,
-    "OS_PASSWORD" => tempest_adm_pass,
-    "OS_TENANT_NAME" => tempest_comp_tenant,
-    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
-    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
-    "OS_USER_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
-    "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : ""
-  })
-
-  not_if { node[:tempest][:heat_test_image_name].nil? or File.exists?(heat_machine_id_file) }
 end
 
 flavor_ref = "6"
@@ -474,7 +448,6 @@ template "/etc/tempest/tempest.conf" do
     object_versioning: swift_allow_versions,
     # orchestration settings
     heat_flavor_ref: heat_flavor_ref,
-    heat_machine_id_file: heat_machine_id_file,
     # scenario settings
     cirros_version: cirros_version,
     image_regex: image_regex,
