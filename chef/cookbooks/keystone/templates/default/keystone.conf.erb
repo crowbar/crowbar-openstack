@@ -841,9 +841,9 @@ domain_specific_drivers_enabled = <%= node[:keystone][:domain_specific_drivers] 
 # Path for Keystone to locate the domain specific identity configuration files
 # if domain_specific_drivers_enabled is set to true. (string value)
 #domain_config_dir = /etc/keystone/domains
-<% if node[:keystone][:domain_specific_drivers] %>
+<% if node[:keystone][:domain_specific_drivers] -%>
 domain_config_dir = <%= node[:keystone][:domain_config_dir] %>
-<% end %>
+<% end -%>
 
 # Entrypoint for the identity backend driver in the keystone.identity
 # namespace. Supplied drivers are ldap and sql. (string value)
@@ -923,11 +923,11 @@ driver = <%= node[:keystone][:identity][:driver] %>
 #default_lock_timeout = 5
 
 
-<% if node[:keystone][:assignment][:driver] == 'hybrid' %>
+<% if node[:keystone][:assignment][:driver] == 'hybrid' -%>
 [ldap_hybrid]
 default_roles = Member
 default_project = <%= node[:keystone][:default][:tenant] %>
-<% end %>
+<% end -%>
 
 
 [ldap]
@@ -2016,11 +2016,11 @@ expiration=<%= @token_expiration %>
 # Entrypoint in the keystone.token.provider namespace. Core providers are
 # [fernet|pkiz|pki|uuid]. (string value)
 #provider = uuid
-<% if @signing_token_format == "PKI" %>
+<% if @signing_token_format == "PKI" -%>
 provider = pki
-<% else %>
+<% else -%>
 provider = uuid
-<%end %>
+<% end -%>
 
 # Entrypoint for the token persistence backend driver in the
 # keystone.token.persistence namespace. Supplied drivers are kvs, memcache,
