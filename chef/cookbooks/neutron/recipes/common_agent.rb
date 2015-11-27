@@ -196,7 +196,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
     template agent_config_path do
       cookbook "neutron"
-      source "linuxbridge_conf.ini.erb"
+      source "linuxbridge_agent.ini.erb"
       owner "root"
       group node[:neutron][:platform][:group]
       mode "0640"
