@@ -48,7 +48,7 @@ en:
           datastore: 'Datastore Name'
           interface: 'VLAN Interface'
           ca_file: 'CA file for verifying the vCenter certificate'
-          insecure: 'Do not verify vCenter certificate'
+          insecure: 'vCenter SSL Certificate is insecure (for instance, self-signed)'
         vmware_cluster_hint: 'A comma-separated list of cluster names'
         zvm_header: 'z/VM Configuration'
         zvm:

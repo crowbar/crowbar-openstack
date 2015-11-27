@@ -117,7 +117,7 @@ en:
               password: 'vCenter Password'
               volume_folder: 'Folder for Volumes'
               ca_file: 'CA file for verifying the vCenter certificate'
-              insecure: 'Do not verify vCenter certificate'
+              insecure: 'vCenter SSL Certificate is insecure (for instance, self-signed)'
             local:
               file_name: 'Volume File Name'
               file_size: 'Maximum File Size (GB)'
