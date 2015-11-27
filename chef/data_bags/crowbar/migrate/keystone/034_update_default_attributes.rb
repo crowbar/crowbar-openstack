@@ -1,8 +1,8 @@
 def upgrade(ta, td, a, d)
-  if a["identity"]["driver"] == "keystone.identity.backends.sql.Identity"
+  if a["identity"]["driver"] =~ /keystone.identity.backends.([^\.]*).Identity/
     a["identity"]["driver"] = ta["identity"]["driver"]
   end
-  if a["assignment"]["driver"] == "keystone.assignment.backends.sql.Assignment"
+  if a["assignment"]["driver"] =~ /keystone.assignment.backends.([^\.]*).Assignment/
     a["assignment"]["driver"] = ta["assignment"]["driver"]
   end
   if a["ldap"]["dumb_member"] == "cn=dumb,dc=example,dc=com"
@@ -18,11 +18,11 @@ def upgrade(ta, td, a, d)
 end
 
 def downgrade(ta, td, a, d)
-  if a["identity"]["driver"] == "sql"
-    a["identity"]["driver"] = ta["identity"]["driver"]
+  unless a["identity"]["driver"].include?(".")
+    a["identity"]["driver"] = "keystone.identity.backends.#{a["identity"]["driver"]}.Identity"
   end
-  if a["assignment"]["driver"] == "sql"
-    a["assignment"]["driver"] = ta["assignment"]["driver"]
+  unless a["assignment"]["driver"].include?(".")
+    a["assignment"]["driver"] = "keystone.assignment.backends.#{a["assignment"]["driver"]}.Assignment"
   end
   if a["ldap"]["dumb_member"] == "cn=dumb,dc=nonexistent"
     a["ldap"]["dumb_member"] = ta["ldap"]["dumb_member"]
