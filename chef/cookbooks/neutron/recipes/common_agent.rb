@@ -172,7 +172,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
     template agent_config_path do
       cookbook "neutron"
-      source "ovs_neutron_plugin.ini.erb"
+      source "openvswitch_agent.ini.erb"
       owner "root"
       group node[:neutron][:platform][:group]
       mode "0640"
