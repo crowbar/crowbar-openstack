@@ -102,6 +102,36 @@ end
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "manila-server"
     validate_at_least_n_for_role proposal, "manila-share", 1
+
+    proposal["attributes"][@bc_name]["shares"].each do |share|
+      backend_driver = share["backend_driver"]
+
+      # validate generic driver
+      if backend_driver == "generic"
+        # mandatory parameters
+        if share[backend_driver]["service_instance_user"].empty?
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.generic.service_instance_user")
+        end
+        if share[backend_driver]["service_instance_name_or_id"].empty?
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.generic.service_instance_name_or_id")
+        end
+        if share[backend_driver]["service_net_name_or_ip"].empty?
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.generic.service_net_name_or_ip")
+        end
+        if share[backend_driver]["tenant_net_name_or_ip"].empty?
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.generic.tenant_net_name_or_ip")
+        end
+        # there must be a private ssh key path or a password
+        unless ["service_instance_password", "path_to_private_key"].any? { |s| share[backend_driver].key? s }
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.generic.password_or_private_key")
+        end
+      end
+    end
     super
   end
 

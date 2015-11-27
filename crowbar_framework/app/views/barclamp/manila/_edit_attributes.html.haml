@@ -30,8 +30,9 @@
 
               = string_field %w(shares {{@index}} generic service_instance_user)
               = password_field %w(shares {{@index}} generic service_instance_password)
-              = string_field %w(shares {{@index}} generic service_image_name)
-              = boolean_field %w(shares {{@index}} generic driver_handles_share_servers)
+              = string_field %w(shares {{@index}} generic service_instance_name_or_id)
+              = string_field %w(shares {{@index}} generic service_net_name_or_ip)
+              = string_field %w(shares {{@index}} generic tenant_net_name_or_ip)
 
           {{/if_eq}}
           {{#if_eq backend_driver 'netapp'}}

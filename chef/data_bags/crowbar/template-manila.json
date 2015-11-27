@@ -34,8 +34,11 @@
         "generic": {
           "service_instance_user": "root",
           "service_instance_password": "",
-          "service_image_name": "manila-service-image",
-          "driver_handles_share_servers": true
+          "path_to_private_key": "",
+          "service_instance_name_or_id": "",
+          "service_net_name_or_ip": "",
+          "tenant_net_name_or_ip": "",
+          "share_volume_fstype": "ext4"
         },
         "netapp": {
           "netapp_storage_family": "ontap_cluster",
@@ -57,9 +60,9 @@
           "backend_name": "default",
           "generic": {
             "service_instance_user": "root",
-            "service_instance_password": "",
-            "service_image_name": "manila-service-image",
-            "driver_handles_share_servers": true
+            "service_instance_name_or_id": "",
+            "service_net_name_or_ip": "",
+            "tenant_net_name_or_ip": ""
           }
         }
       ]
@@ -69,7 +72,7 @@
     "manila": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 11,
+      "schema-revision": 12,
       "element_states": {
         "manila-server": [ "readying", "ready", "applying" ],
         "manila-share": [ "readying", "ready", "applying" ]
