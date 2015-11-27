@@ -26,7 +26,7 @@ default[:keystone][:group] = "keystone"
 
 default[:keystone][:debug] = false
 default[:keystone][:frontend] = "apache"
-default[:keystone][:verbose] = false
+default[:keystone][:verbose] = true
 default[:keystone][:domain_specific_drivers] = false
 default[:keystone][:domain_config_dir] = "/etc/keystone/domains"
 
@@ -44,8 +44,8 @@ default[:keystone][:api][:api_host] = "0.0.0.0"
 default[:keystone][:api][:version] = "2.0"
 default[:keystone][:api][:region] = "RegionOne"
 
-default[:keystone][:identity][:driver] = "keystone.identity.backends.sql.Identity"
-default[:keystone][:assignment][:driver] = "keystone.assignment.backends.sql.Assignment"
+default[:keystone][:identity][:driver] = "sql"
+default[:keystone][:assignment][:driver] = "sql"
 
 default[:keystone][:sql][:idle_timeout] = 30
 
@@ -67,7 +67,7 @@ default[:keystone][:ldap][:password] = ""
 default[:keystone][:ldap][:suffix] = "cn=example,cn=com"
 default[:keystone][:ldap][:use_dumb_member] = false
 default[:keystone][:ldap][:allow_subtree_delete] = false
-default[:keystone][:ldap][:dumb_member] = "cn=dumb,dc=example,dc=com"
+default[:keystone][:ldap][:dumb_member] = "cn=dumb,dc=nonexistent"
 default[:keystone][:ldap][:page_size] = 0
 default[:keystone][:ldap][:alias_dereferencing] = "default"
 default[:keystone][:ldap][:query_scope] = "one"
@@ -77,13 +77,13 @@ default[:keystone][:ldap][:user_filter] = ""
 default[:keystone][:ldap][:user_objectclass] = "inetOrgPerson"
 default[:keystone][:ldap][:user_id_attribute] = "cn"
 default[:keystone][:ldap][:user_name_attribute] = "sn"
-default[:keystone][:ldap][:user_mail_attribute] = "email"
+default[:keystone][:ldap][:user_mail_attribute] = "mail"
 default[:keystone][:ldap][:user_pass_attribute] = "userPassword"
 default[:keystone][:ldap][:user_enabled_attribute] = "enabled"
 default[:keystone][:ldap][:user_enabled_invert] = false
 default[:keystone][:ldap][:user_enabled_mask] = 0
 default[:keystone][:ldap][:user_enabled_default] = "True"
-default[:keystone][:ldap][:user_attribute_ignore] = "tenant_id,tenants"
+default[:keystone][:ldap][:user_attribute_ignore] = "default_project_id"
 default[:keystone][:ldap][:user_default_project_id_attribute] = ""
 default[:keystone][:ldap][:user_allow_create] = true
 default[:keystone][:ldap][:user_allow_update] = true

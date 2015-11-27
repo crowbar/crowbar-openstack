@@ -52,10 +52,10 @@
         "password": "crowbar"
       },
       "identity": {
-        "driver": "keystone.identity.backends.sql.Identity"
+        "driver": "sql"
       },
       "assignment": {
-        "driver": "keystone.assignment.backends.sql.Assignment"
+        "driver": "sql"
       },
       "signing": {
         "token_format": "PKI",
@@ -70,7 +70,7 @@
         "suffix": "cn=example,cn=com",
         "use_dumb_member": false,
         "allow_subtree_delete": false,
-        "dumb_member": "cn=dumb,dc=example,dc=com",
+        "dumb_member": "cn=dumb,dc=nonexistent",
         "page_size": 0,
         "alias_dereferencing": "default",
         "query_scope": "one",
@@ -79,12 +79,12 @@
         "user_objectclass": "inetOrgPerson",
         "user_id_attribute": "cn",
         "user_name_attribute": "sn",
-        "user_mail_attribute": "email",
+        "user_mail_attribute": "mail",
         "user_pass_attribute": "userPassword",
         "user_enabled_attribute": "enabled",
         "user_enabled_mask": 0,
         "user_enabled_default": "True",
-        "user_attribute_ignore": "tenant_id,tenants",
+        "user_attribute_ignore": "default_project_id",
         "user_default_project_id_attribute": "",
         "user_allow_create": true,
         "user_allow_update": true,
@@ -139,7 +139,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 33,
+      "schema-revision": 34,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },
