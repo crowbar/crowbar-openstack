@@ -42,7 +42,6 @@ en:
           password: 'vCenter Password'
           datastore: 'Datastore Name'
           datacenter_path: 'Datacenter Path'
-          api_insecure: 'Insecure SSL requests to vCenter'
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'
