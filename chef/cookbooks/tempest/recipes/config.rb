@@ -461,17 +461,14 @@ template "/etc/tempest/tempest.conf" do
   )
 end
 
-["#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh",
- "#{node[:tempest][:tempest_path]}/bin/tempest_cleanup.sh"].each do |p|
-  template "#{p}" do
-    mode 0755
-    source "#{(p.rpartition '/')[2]}.erb"
-    variables(
-      comp_pass: tempest_comp_pass,
-      comp_tenant: tempest_comp_tenant,
-      comp_user: tempest_comp_user,
-      keystone_settings: keystone_settings,
-      tempest_path: node[:tempest][:tempest_path]
-    )
-  end
+template "#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh" do
+  mode 0755
+  source "tempest_smoketest.sh.erb"
+  variables(
+    comp_pass: tempest_comp_pass,
+    comp_tenant: tempest_comp_tenant,
+    comp_user: tempest_comp_user,
+    keystone_settings: keystone_settings,
+    tempest_path: node[:tempest][:tempest_path]
+  )
 end

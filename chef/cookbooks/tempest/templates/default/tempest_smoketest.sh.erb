@@ -27,9 +27,11 @@ euca-bundle-image -i ${s3_materials_path}/cirros-*-initrd --ramdisk true -d ${s3
 euca-bundle-image -i ${s3_materials_path}/cirros-*-vmlinuz --kernel true -d ${s3_materials_path}
 ) 1>&2
 
+/usr/bin/tempest cleanup --init-saved-state || :
+
 <%= @tempest_path %>/run_tempest.sh -N -t -s
 tresult=$?
 
-<%= @tempest_path %>/bin/tempest_cleanup.sh || :
+/usr/bin/tempest cleanup --delete-tempest-conf-objects || :
 
 exit ${tresult}
