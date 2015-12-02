@@ -37,6 +37,7 @@ mechanism_drivers = <%= @ml2_mechanism_drivers.join(",") %>
 # path_mtu - max encap header size).  If <=0, the path MTU is
 # indeterminate and no calculation takes place.
 # path_mtu = 0
+path_mtu = <%= @path_mtu %>
 
 # (IntOpt) Segment MTU.  The maximum permissible size of an
 # unfragmented packet travelling a L2 network segment.  If <=0,

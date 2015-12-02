@@ -164,12 +164,14 @@ when "ml2"
   physnet_map = NeutronHelper.get_neutron_physnets(network_node, external_networks)
   physnets = physnet_map.values
 
+  mtu_value = 0
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
   #TODO(vuntz): temporarily disable the hyperv mechanism since we're lacking networking-hyperv from stackforge
   #ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
   ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
   if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
     ml2_mechanism_drivers.push("l2population")
+    mtu_value = 1400
   end
 
   ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
@@ -193,7 +195,8 @@ when "ml2"
       vxlan_start: vni_start,
       vxlan_end: vni_end,
       vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group],
-      external_networks: physnets
+      external_networks: physnets,
+      path_mtu: mtu_value
     )
   end
 when "vmware"
