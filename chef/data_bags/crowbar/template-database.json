@@ -3,7 +3,7 @@
   "description": "Installation for Database",
   "attributes": {
     "database": {
-      "sql_engine": "mysql",
+      "sql_engine": "postgresql",
       "mysql": {
         "datadir": "/var/lib/mysql"
       },
