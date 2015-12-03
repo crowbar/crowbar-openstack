@@ -66,7 +66,7 @@
           "insecure": false
       },
       "replication_interval": 60,
-      "frontend": "uwsgi",
+      "frontend": "native",
       "cluster_hash": "",
       "cluster_admin_pw": "swauth",
       "replicas": 3,

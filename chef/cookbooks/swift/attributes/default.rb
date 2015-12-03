@@ -76,7 +76,7 @@ default[:swift][:max_header_size] = 16384
 
 default[:swift][:install_slog_from_dev] = false
 
-default[:swift][:frontend] = "uwsgi"
+default[:swift][:frontend] = "native"
 
 default[:swift][:ssl][:enabled] = false
 default[:swift][:ssl][:certfile] = "/etc/swift/cert.crt"

@@ -4,7 +4,7 @@
   "attributes": {
     "keystone": {
       "debug": false,
-      "frontend": "uwsgi",
+      "frontend": "native",
       "verbose": true,
       "use_syslog": false,
       "policy_file": "policy.json",
