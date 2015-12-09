@@ -93,69 +93,83 @@ def load_current_resource
   compute_deltas
 end
 
-def scan_ring_desc(input)
+def parse_gen_info_line(line, ringinfo)
+  Chef::Log.debug("parsing gen info: " + line)
 
-  r = RingInfo.new
+  line =~ /^(\d+) partitions, ([0-9.]+) replicas, (\d+) regions, (\d+) zones, (\d+) devices,.*$/
+  if $~.nil?
+    raise "failed to parse gen info: #{line}"
+  end
+
+  ringinfo.partitions = $1
+  ringinfo.replicas = $2
+  _regions = $3
+  ringinfo.zones = $4
+  ringinfo.device_num = $5
+end
+
+def parse_dev_info_line(line, ringinfo)
+  Chef::Log.debug("parsing dev info: " + line)
+
+  # Line looks like this:
+  #   id  region  zone      ip address  port  replication ip  replication port      name weight partitions balance meta
+  #   0       1     0  192.168.125.14  6000  192.168.125.14              6000 2d4dc9923ed244dc9cac8f283ca79748  99.00          0 -100.00
+  line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
+  if $~.nil?
+    raise "failed to parse dev info: #{line}"
+  end
+
+  dev = RingInfo::RingDeviceInfo.new
+  dev.id = $1
+  dev.region = $2
+  dev.zone = $3
+  dev.ip = $4
+  dev.port = $5
+  _replication_ip = $6
+  _replication_port = $7
+  dev.name = $8
+  dev.weight = $9
+  dev.partitions = $10
+
+  ringinfo.add_device dev
+end
+
+def scan_ring_desc(input)
+  ringinfo = RingInfo.new
+
+  # if the current state is :ignore, this is the next state
+  ignore_next_state = ""
+  # regexp to ignore lines until this match (this line will be ignored too)
+  ignore_until = nil
+
   state = :init
-  next_state = "" # if the current state is ignore, this is the next state
-  ignore_until = nil # regexp to ignore lines until this match
-  ignore_count = 0 # the number of lines to ignore, used if ignore_count is nil
-  input.each { |line|
+
+  input.each do |line|
     case state
+
     when :init
       state = :gen_info
-      next
 
     when :ignore
       Chef::Log.debug("ignoring line: " + line)
-      if ignore_until.nil?
-        ignore_count -= 1
-        if (ignore_count == 0)
-          state = next_state
-        end
-      else
-        state = next_state if line =~ ignore_until
-      end
-      next
+      state = ignore_next_state if ignore_until.nil? || line =~ ignore_until
 
     when :gen_info
-      Chef::Log.debug("reading gen info: " + line)
-      line =~ /^(\d+) partitions, ([0-9.]+) replicas, (\d+) regions, (\d+) zones, (\d+) devices,.*$/
-      r.partitions = $1
-      r.replicas = $2
-      r.zones = $4
-      r.device_num = $5
+      parse_gen_info_line(line, ringinfo)
       state = :ignore
-      next_state = :dev_info
+      ignore_next_state = :dev_info
       ignore_until = /^Devices: /
-      next
 
     when :dev_info
-      # Line looks like this:
-      #   id  region  zone      ip address  port  replication ip  replication port      name weight partitions balance meta
-      #   0       1     0  192.168.125.14  6000  192.168.125.14              6000 2d4dc9923ed244dc9cac8f283ca79748  99.00          0 -100.00
-      Chef::Log.debug("reading dev info: " + line)
-      line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
-      if $~.nil?
-        raise "failed to parse: #{line}"
-      else
-        Chef::Log.debug("matched: #{$~[0]}")
-      end
-      dev = RingInfo::RingDeviceInfo.new
-      dev.id = $1
-      dev.region = $2
-      dev.zone = $3
-      dev.ip = $4
-      dev.port = $5
-      _replication_ip = $6
-      _replication_port = $7
-      dev.name = $8
-      dev.weight = $9
-      dev.partitions = $10
-      r.add_device dev
+      parse_dev_info_line(line, ringinfo)
+
+    else
+      raise "Internal error: unknown state \"#{state}\""
+
     end
-  }
-  r
+  end
+
+  ringinfo
 end
 
 ###
