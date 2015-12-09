@@ -23,6 +23,19 @@
 # It currently does not change parameters (zone assignment or weight).
 # to achieve that, you'd have to remove and readd the disk.
 
+if __FILE__ == $0
+  def action(sym)
+  end
+
+  class Chef
+    class Log
+      def self.debug(s)
+        puts s
+      end
+    end
+  end
+end
+
 ##
 # some internal data structs to hold ring info read from existing files
 
@@ -111,7 +124,10 @@ def scan_ring_desc(input)
       ignore_count =2
       next
 
-      when :dev_info  #              0     1 192.168.124.131  6002      sdb1 100.00          0 -100.00
+      when :dev_info
+      # Line looks like this:
+      #   id  region  zone      ip address  port  replication ip  replication port      name weight partitions balance meta
+      #   0       1     0  192.168.125.14  6000  192.168.125.14              6000 2d4dc9923ed244dc9cac8f283ca79748  99.00          0 -100.00
       Chef::Log.debug "reading dev info:" + line
       line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
       if $~.nil?
@@ -247,19 +263,35 @@ def create_ring
 end
 
 if __FILE__ == $0
-# produced by:
-# root@d00-0c-29-14-30-92:/etc/swift# swift-ring-builder account.builder
-
-test_str=<<TEST
-account.builder, build version 1
-262144 partitions, 1 replicas, 1 zones, 1 devices, 100.00 balance
-The minimum number of hours before a partition can be reassigned is 1
-Devices:    id  zone      ip address  port      name weight partitions balance meta
-             0     1 192.168.124.131  6002      sdb1 100.00          0 -100.00
+  test_str_juno = <<TEST
+/etc/swift/account.builder, build version 1
+65536 partitions, 3.000000 replicas, 1 regions, 1 zones, 1 devices, 0.00 balance
+The minimum number of hours before a partition can be reassigned is 24
+Devices:    id  region  zone      ip address  port  replication ip  replication port      name weight partitions balance meta
+             0       1     0  192.168.125.10  6002  192.168.125.10              6002 04cc15ee94ff41169b5c30c927e82bd7  99.00     196608    0.00
 TEST
 
-r = scan_ring_desc test_str.lines
-puts "no r for you \n\n\n" if r.nil?
-puts r.to_s
+  test_str_liberty = <<TEST
+/etc/swift/object.builder, build version 4
+65536 partitions, 3.000000 replicas, 1 regions, 2 zones, 4 devices, 100.00 balance, 0.00 dispersion
+The minimum number of hours before a partition can be reassigned is 24
+The overload factor is 0.00% (0.000000)
+Devices:    id  region  zone      ip address  port  replication ip  replication port      name weight partitions balance meta
+             0       1     0  192.168.125.14  6000  192.168.125.14              6000 2d4dc9923ed244dc9cac8f283ca79748  99.00          0 -100.00
+             1       1     1  192.168.125.15  6000  192.168.125.15              6000 98efd70297d547f2b90b697362e10b2c  99.00          0 -100.00
+             2       1     0  192.168.125.15  6000  192.168.125.15              6000 bd0e9f3cc6ab4a67abf99d3789f8daaa  99.00          0 -100.00
+             3       1     1  192.168.125.13  6000  192.168.125.13              6000 69cb18d1fac847269b6183242db5c731  99.00          0 -100.00
+TEST
 
+  puts "=== Juno ==="
+  r = scan_ring_desc test_str_juno.lines
+  puts "no r for you \n\n\n" if r.nil?
+  puts r.to_s
+
+  puts ""
+
+  puts "=== Liberty ==="
+  r = scan_ring_desc test_str_liberty.lines
+  puts "no r for you \n\n\n" if r.nil?
+  puts r.to_s
 end
