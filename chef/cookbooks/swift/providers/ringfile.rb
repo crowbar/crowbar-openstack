@@ -98,7 +98,8 @@ def scan_ring_desc(input)
   r = RingInfo.new
   state = :init
   next_state = "" # if the current state is ignore, this is the next state
-  ignore_count = 0 # the number of lines to ignore
+  ignore_until = nil # regexp to ignore lines until this match
+  ignore_count = 0 # the number of lines to ignore, used if ignore_count is nil
   input.each { |line|
     case state
     when :init
@@ -107,9 +108,13 @@ def scan_ring_desc(input)
 
     when :ignore
       Chef::Log.debug("ignoring line: " + line)
-      ignore_count -= 1
-      if (ignore_count == 0)
-        state = next_state
+      if ignore_until.nil?
+        ignore_count -= 1
+        if (ignore_count == 0)
+          state = next_state
+        end
+      else
+        state = next_state if line =~ ignore_until
       end
       next
 
@@ -122,7 +127,7 @@ def scan_ring_desc(input)
       r.device_num = $5
       state = :ignore
       next_state = :dev_info
-      ignore_count = 2
+      ignore_until = /^Devices: /
       next
 
     when :dev_info
