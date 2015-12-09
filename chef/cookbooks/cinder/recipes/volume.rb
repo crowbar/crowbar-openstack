@@ -69,8 +69,11 @@ def make_volume(node, backend_id, volume)
 
   return if volume_exists(volname)
 
-  unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
-  claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node, "Cinder")
+  claim_string = "Cinder"
+  # claim only disks with Cinder role; when there is none, take disks without role
+  cinder_disks, disks_without_role = BarclampLibrary::Barclamp::Inventory::Disk.prepared_for(node, claim_string)
+  unclaimed_disks = cinder_disks.empty? ? disks_without_role : cinder_disks
+  claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node, claim_string)
 
   Chef::Log.info("Cinder: Using raw disks for volume backing (#{backend_id})")
 
@@ -85,7 +88,7 @@ def make_volume(node, backend_id, volume)
                     else
                       unclaimed_disks
                     end.select do |d|
-      if d.claim("Cinder")
+      if d.claim(claim_string)
         Chef::Log.info("Cinder: Claimed #{d.name}")
         true
       else
