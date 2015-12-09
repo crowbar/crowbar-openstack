@@ -30,12 +30,14 @@ def get_uuid(disk)
   nil
 end
 
-unclaimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.unclaimed(node)
-to_use_disks = []
-unclaimed_disks.each do |k|
-  to_use_disks << k
-end
-claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node, "Swift")
+claim_string = "Swift"
+
+# take only disks with Swift role; when there is none, take disks without role
+swift_disks, disks_without_role =
+  BarclampLibrary::Barclamp::Inventory::Disk.prepared_for(node, claim_string)
+to_use_disks = swift_disks.empty? ? disks_without_role : swift_disks
+
+claimed_disks = BarclampLibrary::Barclamp::Inventory::Disk.claimed(node, claim_string)
 claimed_disks.each do |k|
   to_use_disks << k
 end
@@ -78,7 +80,7 @@ to_use_disks.each do |d|
     next
   elsif disk[:uuid].nil?
     # No filesystem.  Format that bad boy and claim it as our own.
-    d.claim("Swift")
+    d.claim(claim_string)
     Chef::Log.info("Swift - formatting #{target_dev_part}")
     ::Kernel.exec "mkfs.xfs -i size=1024 -f #{target_dev_part}" unless ::Process.fork
     disk[:state] = "Fresh"
