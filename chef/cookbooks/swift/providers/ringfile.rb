@@ -106,7 +106,7 @@ def scan_ring_desc(input)
       next
 
       when :ignore
-      Chef::Log.debug("ignoring line:" + line )
+      Chef::Log.debug("ignoring line: " + line)
       ignore_count -= 1
       if (ignore_count ==0)
         state = next_state
@@ -128,12 +128,12 @@ def scan_ring_desc(input)
       # Line looks like this:
       #   id  region  zone      ip address  port  replication ip  replication port      name weight partitions balance meta
       #   0       1     0  192.168.125.14  6000  192.168.125.14              6000 2d4dc9923ed244dc9cac8f283ca79748  99.00          0 -100.00
-      Chef::Log.debug "reading dev info:" + line
+      Chef::Log.debug("reading dev info: " + line)
       line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
       if $~.nil?
         raise "failed to parse: #{line}"
       else
-        Chef::Log.debug "matched: #{$~[0]}"
+        Chef::Log.debug("matched: #{$~[0]}")
       end
       dev = RingInfo::RingDeviceInfo.new
       dev.id = $1
@@ -174,8 +174,8 @@ def compute_deltas
     @to_rem << d unless keyed_req[key] # remove unless still requested
   } if cur
 
-  Chef::Log.info("disks, to add #{@to_add.length} , to remove: #{@to_rem.length}" )
-  Chef::Log.debug("disks, to add #{@to_add.join(";")} , to remove: #{@to_rem.join(";")}" )
+  Chef::Log.info("disks, to add #{@to_add.length} , to remove: #{@to_rem.length}")
+  Chef::Log.debug("disks, to add #{@to_add.join(";")} , to remove: #{@to_rem.join(";")}")
 
 end
 
