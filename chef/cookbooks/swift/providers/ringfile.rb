@@ -70,7 +70,7 @@ class RingInfo
   end
 
   def to_s
-    s=""
+    s = ""
     #s <<"r:" << @replicas <<"z:" << @zones
     devices.each { |d|
       s << "\n  " << d.to_s
@@ -85,7 +85,7 @@ def load_current_resource
   @ring_test = nil
   Chef::Log.info("parsing ring-file for #{name}")
   IO.popen("swift-ring-builder #{name}") { |pipe|
-    ring_txt=pipe.readlines
+    ring_txt = pipe.readlines
     Chef::Log.debug("raw ring info:#{ring_txt}")
     @ring_test = scan_ring_desc ring_txt
     Chef::Log.debug("at end of load, current ring is: #{@ring_test.to_s}")
@@ -97,35 +97,35 @@ def scan_ring_desc(input)
 
   r = RingInfo.new
   state = :init
-  next_state =""  # if the current state is ignore, this is the next state
-  ignore_count = 0  # the number of lines to ignore
+  next_state = "" # if the current state is ignore, this is the next state
+  ignore_count = 0 # the number of lines to ignore
   input.each { |line|
     case state
-      when :init
-      state=:gen_info
+    when :init
+      state = :gen_info
       next
 
-      when :ignore
+    when :ignore
       Chef::Log.debug("ignoring line: " + line)
       ignore_count -= 1
-      if (ignore_count ==0)
+      if (ignore_count == 0)
         state = next_state
       end
       next
 
-      when :gen_info
+    when :gen_info
       Chef::Log.debug("reading gen info: " + line)
-      line =~/^(\d+) partitions, ([0-9.]+) replicas, (\d+) regions, (\d+) zones, (\d+) devices,.*$/
-      r.partitions=$1
-      r.replicas=$2
-      r.zones=$4
-      r.device_num=$5
+      line =~ /^(\d+) partitions, ([0-9.]+) replicas, (\d+) regions, (\d+) zones, (\d+) devices,.*$/
+      r.partitions = $1
+      r.replicas = $2
+      r.zones = $4
+      r.device_num = $5
       state = :ignore
       next_state = :dev_info
-      ignore_count =2
+      ignore_count = 2
       next
 
-      when :dev_info
+    when :dev_info
       # Line looks like this:
       #   id  region  zone      ip address  port  replication ip  replication port      name weight partitions balance meta
       #   0       1     0  192.168.125.14  6000  192.168.125.14              6000 2d4dc9923ed244dc9cac8f283ca79748  99.00          0 -100.00
@@ -140,7 +140,7 @@ def scan_ring_desc(input)
       dev.id = $1
       dev.region = $2
       dev.zone = $3
-      dev.ip=$4
+      dev.ip = $4
       dev.port = $5
       replication_ip = $6
       replication_port = $7
@@ -182,7 +182,7 @@ end
 
 action :apply do
   name = @new_resource.name
-  cur=@ring_test
+  cur = @ring_test
   Chef::Log.info("current content of: #{name} #{(cur.nil? ? "-not there" : cur.to_s)}")
 
   ## make sure file exists
@@ -216,7 +216,7 @@ action :rebalance do
   name = @current_resource.name
   dirty = false
 
-  ring_data_mtime= ::File.new(name).mtime   if ::File.exist?(name)
+  ring_data_mtime = ::File.new(name).mtime   if ::File.exist?(name)
   ring_data_mtime ||= File.new(name).mtime   if ::File.exist?(name)
   ring_data_mtime ||= 0
   ring_name = name.sub(/^(.*)\..*$/, '\1.ring.gz')
