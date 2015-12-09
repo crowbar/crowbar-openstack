@@ -299,7 +299,8 @@ class SwiftService < PacemakerServiceObject
     # first, check for conflict with ceph
     Proposal.where(barclamp: "ceph").each {|p|
       next unless (p.status == "ready") || (p.status == "pending")
-      elements = (p.status == "ready") ? p.role.elements : p.elements
+      ceph_role = p.role
+      elements = (p.status == "ready" && !ceph_role.nil?) ? ceph_role.elements : p.elements
       if elements.keys.include?("ceph-radosgw") && !elements["ceph-radosgw"].empty?
         @logger.warn("node #{elements['ceph-radosgw']} has ceph-radosgw role")
         validation_error I18n.t("barclamp.#{@bc_name}.validation.radosgw")
