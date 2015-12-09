@@ -112,7 +112,7 @@ class NovaService < PacemakerServiceObject
   end
 
   def node_supports_kvm(node)
-    return false if node[:cpu].nil? || node[:cpu]["0"].nil?
+    return false if node[:cpu].nil? || node[:cpu]["0"].nil? || node[:cpu]["0"][:flags].nil?
     node[:cpu]["0"][:flags].include?("vmx") or node[:cpu]["0"][:flags].include?("svm")
   end
 
