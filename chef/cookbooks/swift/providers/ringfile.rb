@@ -147,8 +147,8 @@ def scan_ring_desc(input)
       dev.zone = $3
       dev.ip = $4
       dev.port = $5
-      replication_ip = $6
-      replication_port = $7
+      _replication_ip = $6
+      _replication_port = $7
       dev.name = $8
       dev.weight = $9
       dev.partitions = $10
