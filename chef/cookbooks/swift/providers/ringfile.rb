@@ -114,11 +114,12 @@ def scan_ring_desc(input)
       next
 
       when :gen_info
-      line =~/^(\d+).+,(\d+).+,(\d+).+,(\d+).*,([0-9.]+).+$/
+      Chef::Log.debug("reading gen info: " + line)
+      line =~/^(\d+) partitions, ([0-9.]+) replicas, (\d+) regions, (\d+) zones, (\d+) devices,.*$/
       r.partitions=$1
       r.replicas=$2
-      r.zones=$3
-      r.device_num=$4
+      r.zones=$4
+      r.device_num=$5
       state = :ignore
       next_state = :dev_info
       ignore_count =2
