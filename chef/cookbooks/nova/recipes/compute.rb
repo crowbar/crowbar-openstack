@@ -91,6 +91,7 @@ end
 if %w(rhel suse).include?(node[:platform_family])
   # Start open-iscsi daemon, since nova-compute is going to use it and stumble over the
   # "starting daemon" messages otherwise
+  package "open-iscsi"
   service "open-iscsi" do
     supports status: true, start: true, stop: true, restart: true
     action [:enable, :start]
