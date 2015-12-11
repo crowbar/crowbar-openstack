@@ -36,10 +36,10 @@ def pg_hash_only_merge(merge_onto, merge_with)
 end
 
 if Chef::VERSION.split(".")[0].to_i >= 11
-  raise "Your chef version has hash_only_merge; consider removing the local copy."
-else
-  node.default["postgresql"] = pg_hash_only_merge(node.default["postgresql"].to_hash, node.default["database"]["postgresql"].to_hash)
+  Chef::Log.warn("Your chef version has hash_only_merge; consider removing the local copy.")
 end
+
+node.default["postgresql"] = pg_hash_only_merge(node.default["postgresql"].to_hash, node.default["database"]["postgresql"].to_hash)
 
 # stoney had a bug where we were merging all attributes (including default and
 # override) as normal attributes, so fix it here
