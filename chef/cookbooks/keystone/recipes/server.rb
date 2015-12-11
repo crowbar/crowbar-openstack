@@ -302,7 +302,7 @@ end
 # could possibly not be reached in case of errors).
 ruby_block "mark node for keystone db_sync" do
   block do
-    node[:keystone][:db_synced] = true
+    node.set[:keystone][:db_synced] = true
     node.save
   end
   action :nothing

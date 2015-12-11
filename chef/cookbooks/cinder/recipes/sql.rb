@@ -75,7 +75,7 @@ end
 # could possibly not be reached in case of errors).
 ruby_block "mark node for cinder db_sync" do
   block do
-    node[:cinder][:db_synced] = true
+    node.set[:cinder][:db_synced] = true
     node.save
   end
   action :nothing
