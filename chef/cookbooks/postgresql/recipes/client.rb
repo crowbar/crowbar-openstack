@@ -19,9 +19,11 @@
 # limitations under the License.
 #
 
-if platform_family?("ubuntu", "debian") && node["postgresql"]["version"].to_f > 9.1
-    node.default["postgresql"]["enable_pgdg_apt"] = true
-end
+# No, we don't want to automatically do this, it has to be explicitly agreed on
+# by user
+# if platform_family?("ubuntu", "debian") && node["postgresql"]["version"].to_f > 9.1
+#   node.default["postgresql"]["enable_pgdg_apt"] = true
+# end
 
 if(node["postgresql"]["enable_pgdg_apt"])
   include_recipe "postgresql::apt_pgdg_postgresql"
