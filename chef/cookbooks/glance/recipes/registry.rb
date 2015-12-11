@@ -57,5 +57,3 @@ end
 crowbar_pacemaker_sync_mark "create-glance_db_sync"
 
 glance_service "registry"
-
-node[:glance][:monitor][:svcs] << ["glance-registry"]

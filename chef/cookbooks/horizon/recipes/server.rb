@@ -365,6 +365,3 @@ end
 apache_site "openstack-dashboard.conf" do
   enable true
 end
-
-node[:horizon][:monitor][:svcs] << ["horizon-server"]
-node.save
