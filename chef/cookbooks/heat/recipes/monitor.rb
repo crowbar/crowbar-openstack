@@ -1,3 +1,5 @@
+return unless node["roles"].include?("nagios-client")
+
 svcs = []
 ports = {}
 node.default[:heat][:platform][:services].each { |svc| svcs << svc }
@@ -8,7 +10,7 @@ end
 
 log ("Will monitor heat services: #{svcs.inspect}")
 
-include_recipe "nagios::common" if node["roles"].include?("nagios-client")
+include_recipe "nagios::common"
 
 template "/etc/nagios/nrpe.d/heat_nrpe.cfg" do
   source "heat_nrpe.cfg.erb"
@@ -21,4 +23,4 @@ template "/etc/nagios/nrpe.d/heat_nrpe.cfg" do
     heat_ip: node.ipaddress
   })
    notifies :restart, "service[nagios-nrpe-server]"
-end if node["roles"].include?("nagios-client")
+end

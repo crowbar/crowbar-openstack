@@ -16,6 +16,8 @@
 # Author: andi abes
 #
 
+return unless node["roles"].include?("nagios-client")
+
 ####
 # if monitored by nagios, install the nrpe commands
 
@@ -29,7 +31,7 @@ svcs = node[:glance][:monitor][:svcs]
 ports = node[:glance][:monitor][:ports]
 log ("will monitor glance svcs: #{svcs.join(',')} and ports #{ports.values.join(',')}")
 
-include_recipe "nagios::common" if node["roles"].include?("nagios-client")
+include_recipe "nagios::common"
 
 template "/etc/nagios/nrpe.d/glance_nrpe.cfg" do
   source "glance_nrpe.cfg.erb"
@@ -41,5 +43,4 @@ template "/etc/nagios/nrpe.d/glance_nrpe.cfg" do
     ports: ports
   })
    notifies :restart, "service[nagios-nrpe-server]"
-end if node["roles"].include?("nagios-client")
-
+end

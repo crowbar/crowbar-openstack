@@ -16,6 +16,8 @@
 # Author: andi abes
 #
 
+return unless node["roles"].include?("nagios-client")
+
 ####
 # if monitored by nagios, install the nrpe commands
 
@@ -28,7 +30,7 @@ ports = node[:manila][:monitor][:ports]
 log ("will monitor manila svcs: #{svcs.join(',')} "\
      "and ports #{ports.values.join(',')}")
 
-include_recipe "nagios::common" if node["roles"].include?("nagios-client")
+include_recipe "nagios::common"
 
 template "/etc/nagios/nrpe.d/manila_nrpe.cfg" do
   source "manila_nrpe.cfg.erb"
@@ -38,4 +40,4 @@ template "/etc/nagios/nrpe.d/manila_nrpe.cfg" do
   variables(svcs: svcs,
             ports: ports)
   notifies :restart, "service[nagios-nrpe-server]"
-end if node["roles"].include?("nagios-client")
+end
