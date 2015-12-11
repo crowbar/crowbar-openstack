@@ -76,9 +76,9 @@ default[:glance][:swift][:store_create_container_on_put] = true
 default[:glance][:tty_linux_image] = "http://c3226372.r72.cf0.rackcdn.com/tty_linux.tar.gz"
 
 # declare what needs to be monitored
-node[:glance][:monitor]={}
-node[:glance][:monitor][:svcs] = []
-node[:glance][:monitor][:ports]={}
+default[:glance][:monitor] = {}
+default[:glance][:monitor][:svcs] = []
+default[:glance][:monitor][:ports] = {}
 
 default[:glance][:ssl][:certfile] = "/etc/glance/ssl/certs/signing_cert.pem"
 default[:glance][:ssl][:keyfile] = "/etc/glance/ssl/private/signing_key.pem"

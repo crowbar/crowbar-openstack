@@ -131,7 +131,7 @@ if node[:swift][:middlewares][:s3][:enabled]
 end
 
 # enable ceilometer middleware if ceilometer is configured
-node[:swift][:middlewares]["ceilometer"] = {
+node.set[:swift][:middlewares]["ceilometer"] = {
   "enabled" => (node.roles.include? "ceilometer-swift-proxy-middleware")
 }
 
@@ -322,8 +322,8 @@ end
 
 ## install a default memcached instsance.
 ## default configuration is take from: node[:memcached] / [:memory], [:port] and [:user]
-node[:memcached][:listen] = local_ip
-node[:memcached][:name] = "swift-proxy"
+node.set[:memcached][:listen] = local_ip
+node.set[:memcached][:name] = "swift-proxy"
 memcached_instance "swift-proxy" do
 end
 
@@ -468,4 +468,4 @@ if node["swift"]["use_slog"] and node["swift"]["proxy_init_done"]
   include_recipe "swift::slog"
 end
 
-node["swift"]["proxy_init_done"] = true
+node.set["swift"]["proxy_init_done"] = true

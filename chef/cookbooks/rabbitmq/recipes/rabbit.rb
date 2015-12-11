@@ -27,7 +27,7 @@ addresses << CrowbarRabbitmqHelper.get_public_listen_address(node) if node[:rabb
 node.set[:rabbitmq][:addresses] = addresses
 
 if ha_enabled
-  node[:rabbitmq][:nodename] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
+  node.set[:rabbitmq][:nodename] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
 end
 
 include_recipe "rabbitmq::default"

@@ -230,7 +230,8 @@ nova_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) re
 
 # make sure our memcache only listens on the admin IP address
 node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-node[:memcached][:listen] = node_admin_ip
+node.set[:memcached][:listen] = node_admin_ip
+node.save
 
 if ha_enabled
   memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "horizon-server")

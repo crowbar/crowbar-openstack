@@ -20,9 +20,9 @@ override[:cinder][:user]="cinder"
 override[:cinder][:group]="cinder"
 
 # declare what needs to be monitored
-node[:cinder][:monitor]={}
-node[:cinder][:monitor][:svcs] = []
-node[:cinder][:monitor][:ports]={}
+default[:cinder][:monitor] = {}
+default[:cinder][:monitor][:svcs] = []
+default[:cinder][:monitor][:ports] = {}
 
 default[:cinder][:api][:protocol] = "http"
 

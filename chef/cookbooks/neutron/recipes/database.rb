@@ -66,9 +66,9 @@ props.each do |prop|
         only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
 
-    node[@cookbook_name][:db][db_conn_name] = "#{db_settings[:url_scheme]}://#{db_user}:#{db_pass}@#{db_settings[:address]}/#{db_name}"
+    node.set[@cookbook_name][:db][db_conn_name] = "#{db_settings[:url_scheme]}://#{db_user}:#{db_pass}@#{db_settings[:address]}/#{db_name}"
     unless sql_address_name.nil?
-        node[@cookbook_name][:db][sql_address_name] = sql_address
+        node.set[@cookbook_name][:db][sql_address_name] = sql_address
     end
 end
 

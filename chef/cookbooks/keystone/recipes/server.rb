@@ -347,15 +347,15 @@ ruby_block "synchronize PKI keys for founder and remember them for non-HA case" 
     dirty = false
 
     if node[:keystone][:pki][:content][:ca] != ca
-      node[:keystone][:pki][:content][:ca] = ca
+      node.set[:keystone][:pki][:content][:ca] = ca
       dirty = true
     end
     if node[:keystone][:pki][:content][:signing_cert] != signing_cert
-      node[:keystone][:pki][:content][:signing_cert] = signing_cert
+      node.set[:keystone][:pki][:content][:signing_cert] = signing_cert
       dirty = true
     end
     if node[:keystone][:pki][:content][:signing_key] != signing_key
-      node[:keystone][:pki][:content][:signing_key] = signing_key
+      node.set[:keystone][:pki][:content][:signing_key] = signing_key
       dirty = true
     end
 
@@ -529,7 +529,7 @@ openstack_command << " --insecure" if keystone_insecure
     block do
       tenant_id = %x[#{openstack_command} project show -f value -c id #{tenant}].chomp
       if !tenant_id.empty? && node[:keystone][tenant_type][:tenant_id] != tenant_id
-        node[:keystone][tenant_type][:tenant_id] = tenant_id
+        node.set[:keystone][tenant_type][:tenant_id] = tenant_id
         node.save
       end
     end

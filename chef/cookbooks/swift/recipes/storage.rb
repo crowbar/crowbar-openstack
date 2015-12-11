@@ -105,7 +105,7 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
   }
 end
 
-node["swift"]["storage_init_done"] = true
+node.set["swift"]["storage_init_done"] = true
 
 ###
 # let the monitoring tools know what services should be running on this node.

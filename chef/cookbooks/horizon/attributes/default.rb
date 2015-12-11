@@ -44,9 +44,9 @@ default[:horizon][:ha][:ports][:plain] = 5580
 default[:horizon][:ha][:ports][:ssl] = 5581
 
 # declare what needs to be monitored
-node[:horizon][:monitor] = {}
-node[:horizon][:monitor][:svcs] = []
-node[:horizon][:monitor][:ports] = {}
+default[:horizon][:monitor] = {}
+default[:horizon][:monitor][:svcs] = []
+default[:horizon][:monitor][:ports] = {}
 
 default["horizon"]["can_set_mount_point"] = false
 # Display password fields for Nova password injection
