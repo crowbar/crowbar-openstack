@@ -42,7 +42,7 @@ when "debian"
     default["postgresql"]["server"]["service_name"] = "postgresql"
   end
 
-  default["postgresql"]["client"]["packages"] = ["postgresql-client-#{node['postgresql']['version']}","libpq-dev"]
+  default["postgresql"]["client"]["packages"] = ["postgresql-client-#{node['postgresql']['version']}", "ruby-pg"]
   default["postgresql"]["server"]["packages"] = ["postgresql-#{node['postgresql']['version']}"]
   default["postgresql"]["contrib"]["packages"] = ["postgresql-contrib-#{node['postgresql']['version']}"]
 
