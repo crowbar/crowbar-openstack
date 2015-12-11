@@ -47,15 +47,18 @@ end
 case node[:platform_family]
 when "suse"
   rabbitmq_plugins = "/usr/sbin/rabbitmq-plugins"
+  rabbitmq_plugins_param = "--offline"
 when "rhel"
   rabbitmq_plugins = "/usr/lib/rabbitmq/bin/rabbitmq-plugins"
+  rabbitmq_plugins_param = "--offline"
 else
   rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
+  rabbitmq_plugins_param = ""
 end
 
 bash "enabling rabbit management" do
   environment "HOME" => "/root/"
-  code "#{rabbitmq_plugins} --offline enable rabbitmq_management > /dev/null"
+  code "#{rabbitmq_plugins} #{rabbitmq_plugins_param} enable rabbitmq_management > /dev/null"
   not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q", environment: {"HOME" => "/root/"}
   notifies :restart, "service[rabbitmq-server]"
 end
