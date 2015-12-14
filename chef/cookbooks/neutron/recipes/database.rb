@@ -36,40 +36,40 @@ props.each do |prop|
   db_conn_name = prop["db_conn_name"]
   sql_address_name = prop["sql_address_name"]
 
-    database "create #{db_name} neutron database" do
-        connection db_settings[:connection]
-        database_name "#{db_name}"
-        provider db_settings[:provider]
-        action :create
-        only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-    end
+  database "create #{db_name} neutron database" do
+    connection db_settings[:connection]
+    database_name "#{db_name}"
+    provider db_settings[:provider]
+    action :create
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 
-    database_user "create #{db_user} user in #{db_name} neutron database" do
-        connection db_settings[:connection]
-        username "#{db_user}"
-        password "#{db_pass}"
-        host "%"
-        provider db_settings[:user_provider]
-        action :create
-        only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-    end
+  database_user "create #{db_user} user in #{db_name} neutron database" do
+    connection db_settings[:connection]
+    username "#{db_user}"
+    password "#{db_pass}"
+    host "%"
+    provider db_settings[:user_provider]
+    action :create
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 
-    database_user "grant database access for #{db_user} user in #{db_name} neutron database" do
-        connection db_settings[:connection]
-        username "#{db_user}"
-        password "#{db_pass}"
-        database_name "#{db_name}"
-        host "%"
-        privileges db_settings[:privs]
-        provider db_settings[:user_provider]
-        action :grant
-        only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-    end
+  database_user "grant database access for #{db_user} user in #{db_name} neutron database" do
+    connection db_settings[:connection]
+    username "#{db_user}"
+    password "#{db_pass}"
+    database_name "#{db_name}"
+    host "%"
+    privileges db_settings[:privs]
+    provider db_settings[:user_provider]
+    action :grant
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 
-    node.set[@cookbook_name][:db][db_conn_name] = "#{db_settings[:url_scheme]}://#{db_user}:#{db_pass}@#{db_settings[:address]}/#{db_name}"
-    unless sql_address_name.nil?
-        node.set[@cookbook_name][:db][sql_address_name] = sql_address
-    end
+  node.set[@cookbook_name][:db][db_conn_name] = "#{db_settings[:url_scheme]}://#{db_user}:#{db_pass}@#{db_settings[:address]}/#{db_name}"
+  unless sql_address_name.nil?
+    node.set[@cookbook_name][:db][sql_address_name] = sql_address
+  end
 end
 
 crowbar_pacemaker_sync_mark "create-neutron_database"

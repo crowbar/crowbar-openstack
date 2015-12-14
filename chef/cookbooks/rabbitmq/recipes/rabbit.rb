@@ -23,7 +23,9 @@ ha_enabled = node[:rabbitmq][:ha][:enabled]
 node.set[:rabbitmq][:address] = CrowbarRabbitmqHelper.get_listen_address(node)
 node.set[:rabbitmq][:management_address] = node[:rabbitmq][:address]
 addresses = [node[:rabbitmq][:address]]
-addresses << CrowbarRabbitmqHelper.get_public_listen_address(node) if node[:rabbitmq][:listen_public]
+if node[:rabbitmq][:listen_public]
+  addresses << CrowbarRabbitmqHelper.get_public_listen_address(node)
+end
 node.set[:rabbitmq][:addresses] = addresses
 
 if ha_enabled

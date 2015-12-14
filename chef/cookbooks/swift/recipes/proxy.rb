@@ -457,7 +457,7 @@ end
 # let the monitoring tools know what services should be running on this node.
 node.set[:swift][:monitor] = {}
 node.set[:swift][:monitor][:svcs] = ["swift-proxy", "memcached"]
-node.set[:swift][:monitor][:ports] = {proxy: node[:swift][:ports][:proxy]}
+node.set[:swift][:monitor][:ports] = { proxy: node[:swift][:ports][:proxy] }
 node.save
 
 ##

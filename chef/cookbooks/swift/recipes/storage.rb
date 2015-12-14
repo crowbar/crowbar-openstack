@@ -111,7 +111,7 @@ node.set["swift"]["storage_init_done"] = true
 # let the monitoring tools know what services should be running on this node.
 node.set[:swift][:monitor] = {}
 node.set[:swift][:monitor][:svcs] = svcs
-node.set[:swift][:monitor][:ports] = {object: 6000, container: 6001, account: 6002}
+node.set[:swift][:monitor][:ports] = { object: 6000, container: 6001, account: 6002 }
 node.save
 
 if node["swift"]["use_slog"]
