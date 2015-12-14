@@ -36,10 +36,10 @@ template "/etc/nagios/nrpe.d/swift_nrpe.cfg" do
   mode "0644"
   group node[:nagios][:group]
   owner node[:nagios][:user]
-  variables( {
-    svcs: swift_svcs ,
+  variables(
+    svcs: swift_svcs,
     swift_ports: swift_ports,
     storage_net_ip: storage_net_ip
-  })
-   notifies :restart, "service[nagios-nrpe-server]"
+  )
+  notifies :restart, "service[nagios-nrpe-server]"
 end

@@ -38,9 +38,9 @@ template "/etc/nagios/nrpe.d/glance_nrpe.cfg" do
   mode "0644"
   group node[:nagios][:group]
   owner node[:nagios][:user]
-  variables( {
-    svcs: svcs ,
+  variables(
+    svcs: svcs,
     ports: ports
-  })
-   notifies :restart, "service[nagios-nrpe-server]"
+  )
+  notifies :restart, "service[nagios-nrpe-server]"
 end

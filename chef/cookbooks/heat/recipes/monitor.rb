@@ -17,10 +17,10 @@ template "/etc/nagios/nrpe.d/heat_nrpe.cfg" do
   mode "0644"
   group node[:nagios][:group]
   owner node[:nagios][:user]
-  variables( {
+  variables(
     heat_services: svcs,
     heat_ports: ports,
     heat_ip: node.ipaddress
-  })
-   notifies :restart, "service[nagios-nrpe-server]"
+  )
+  notifies :restart, "service[nagios-nrpe-server]"
 end

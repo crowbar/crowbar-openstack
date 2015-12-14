@@ -75,10 +75,10 @@ template "/etc/nagios/nrpe.d/nova_nrpe.cfg" do
   mode "0644"
   group node[:nagios][:group]
   owner node[:nagios][:user]
-  variables( {
+  variables(
     nova_scale: nova_scale,
     nova_admin_ip: nova_admin_ip
-  })
+  )
   notifies :restart, "service[nagios-nrpe-server]"
 end
 

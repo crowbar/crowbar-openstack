@@ -28,7 +28,5 @@ template "/etc/nagios/nrpe.d/rabbitmq_nrpe.cfg" do
   mode "0644"
   group node[:nagios][:group]
   owner node[:nagios][:user]
-  variables({
-  })
-   notifies :restart, "service[nagios-nrpe-server]"
+  notifies :restart, "service[nagios-nrpe-server]"
 end

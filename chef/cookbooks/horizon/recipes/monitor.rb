@@ -36,9 +36,9 @@ template "/etc/nagios/nrpe.d/horizon_nrpe.cfg" do
   mode "0644"
   group node[:nagios][:group]
   owner node[:nagios][:user]
-  variables( {
+  variables(
     svcs: svcs,
     ports: ports
-  })
+  )
   notifies :restart, "service[nagios-nrpe-server]"
 end
