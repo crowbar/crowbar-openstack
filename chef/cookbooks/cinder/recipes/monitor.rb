@@ -16,6 +16,8 @@
 # Author: andi abes
 #
 
+return unless node["roles"].include?("nagios-client")
+
 ####
 # if monitored by nagios, install the nrpe commands
 
@@ -26,17 +28,16 @@ svcs = node[:cinder][:monitor][:svcs]
 ports = node[:cinder][:monitor][:ports]
 log ("will monitor cinder svcs: #{svcs.join(',')} and ports #{ports.values.join(',')}")
 
-include_recipe "nagios::common" if node["roles"].include? "nagios-client"
+include_recipe "nagios::common"
 
 template "/etc/nagios/nrpe.d/cinder_nrpe.cfg" do
   source "cinder_nrpe.cfg.erb"
   mode "0644"
   group node[:nagios][:group]
   owner node[:nagios][:user]
-  variables( {
-    svcs: svcs ,
+  variables(
+    svcs: svcs,
     ports: ports
-  })
-   notifies :restart, "service[nagios-nrpe-server]"
-end if node["roles"].include? "nagios-client"
-
+  )
+  notifies :restart, "service[nagios-nrpe-server]"
+end

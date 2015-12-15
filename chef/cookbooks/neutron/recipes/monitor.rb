@@ -16,6 +16,8 @@
 # Author: andi abes
 #
 
+return unless node["roles"].include?("nagios-client")
+
 ####
 # if monitored by nagios, install the nrpe commands
 
@@ -31,17 +33,16 @@ svcs = node[:neutron][:monitor][:svcs]
 ports = node[:neutron][:monitor][:ports]
 log ("will monitor neutron svcs: #{svcs.join(',')} and ports #{ports.values.join(',')}")
 
-include_recipe "nagios::common" if node["roles"].include?("nagios-client")
+include_recipe "nagios::common"
 
 template "/etc/nagios/nrpe.d/neutron_nrpe.cfg" do
   source "neutron_nrpe.cfg.erb"
   mode "0644"
   group node[:nagios][:group]
   owner node[:nagios][:user]
-  variables( {
-    svcs: svcs ,
+  variables(
+    svcs: svcs,
     ports: ports
-  })
-   notifies :restart, "service[nagios-nrpe-server]"
-end if node["roles"].include?("nagios-client")
-
+  )
+  notifies :restart, "service[nagios-nrpe-server]"
+end

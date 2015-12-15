@@ -16,6 +16,8 @@
 # Author: andi abes
 #
 
+return unless node["roles"].include?("nagios-client")
+
 ####
 # if monitored by nagios, install the nrpe commands
 
@@ -27,18 +29,17 @@ storage_net_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
 log ("will monitor swift svcs: #{swift_svcs.join(',')} and ports #{swift_ports.values.join(',')} on storage_net_ip #{storage_net_ip}")
 
-include_recipe "nagios::common" if node["roles"].include?("nagios-client")
+include_recipe "nagios::common"
 
 template "/etc/nagios/nrpe.d/swift_nrpe.cfg" do
   source "swift_nrpe.cfg.erb"
   mode "0644"
   group node[:nagios][:group]
   owner node[:nagios][:user]
-  variables( {
-    svcs: swift_svcs ,
+  variables(
+    svcs: swift_svcs,
     swift_ports: swift_ports,
     storage_net_ip: storage_net_ip
-  })
-   notifies :restart, "service[nagios-nrpe-server]"
-end if node["roles"].include?("nagios-client")
-
+  )
+  notifies :restart, "service[nagios-nrpe-server]"
+end

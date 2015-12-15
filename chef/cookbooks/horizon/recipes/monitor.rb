@@ -16,6 +16,8 @@
 # Author: andi abes
 #
 
+return unless node["roles"].include?("nagios-client")
+
 ####
 # if monitored by nagios, install the nrpe commands
 
@@ -27,22 +29,16 @@ ports = node[:horizon][:monitor][:ports]
 
 log ("will monitor horizon svcs: #{svcs.join(",")} and ports #{ports.values.join(",")}")
 
-use_nagios = node["roles"].include?("nagios-client")
-use_nagios = false if svcs.size == 0 and ports.size == 0
+include_recipe "nagios::common"
 
-if use_nagios
-  include_recipe "nagios::common"
-
-  template "/etc/nagios/nrpe.d/horizon_nrpe.cfg" do
-    source "horizon_nrpe.cfg.erb"
-    mode "0644"
-    group node[:nagios][:group]
-    owner node[:nagios][:user]
-    variables( {
-      svcs: svcs,
-      ports: ports
-    })
-    notifies :restart, "service[nagios-nrpe-server]"
-  end
+template "/etc/nagios/nrpe.d/horizon_nrpe.cfg" do
+  source "horizon_nrpe.cfg.erb"
+  mode "0644"
+  group node[:nagios][:group]
+  owner node[:nagios][:user]
+  variables(
+    svcs: svcs,
+    ports: ports
+  )
+  notifies :restart, "service[nagios-nrpe-server]"
 end
-

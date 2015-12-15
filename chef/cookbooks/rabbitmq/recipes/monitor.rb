@@ -16,18 +16,17 @@
 # Author: Greg Althaus
 #
 
+return unless node["roles"].include?("nagios-client")
+
 ####
 # if monitored by nagios, install the nrpe commands
 
-include_recipe "nagios::common" if node["roles"].include?("nagios-client")
+include_recipe "nagios::common"
 
 template "/etc/nagios/nrpe.d/rabbitmq_nrpe.cfg" do
   source "rabbitmq_nrpe.cfg.erb"
   mode "0644"
   group node[:nagios][:group]
   owner node[:nagios][:user]
-  variables({
-  })
-   notifies :restart, "service[nagios-nrpe-server]"
-end if node["roles"].include?("nagios-client")
-
+  notifies :restart, "service[nagios-nrpe-server]"
+end
