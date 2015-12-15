@@ -30,7 +30,7 @@ if node.roles.include?("swift-storage") && node[:swift][:devs].nil?
   return
 end
 
-if node.roles.include?("swift-ring-compute") && !(::File.exists? "/etc/swift/object.ring.gz")
+if node.roles.include?("swift-ring-compute") && !(::File.exist? "/etc/swift/object.ring.gz")
   # Similarly to above; the difference is that we will have the rings in the
   # execute phase, but we do not want to be the only proxy node with the rings
   # (which would be the case, since we're in the ring-compute pass of swift
@@ -107,9 +107,9 @@ end
 proxy_config[:cross_domain_policy] = cross_domain_policy_l.join("\n")
 
 if node[:platform_family] == "rhel"
-  pkg_list = %w{curl memcached python-dns}
+  pkg_list = %w(curl memcached python-dns)
 else
-  pkg_list = %w{curl memcached python-dnspython}
+  pkg_list = %w(curl memcached python-dnspython)
 end
 
 pkg_list.each do |pkg|
@@ -140,150 +140,150 @@ if node[:swift][:middlewares]["ceilometer"]["enabled"]
 end
 
 case proxy_config[:auth_method]
-   when "swauth"
-     package "python-swauth"
-     proxy_config[:admin_key] =node[:swift][:cluster_admin_pw]
+when "swauth"
+  package "python-swauth"
+  proxy_config[:admin_key] = node[:swift][:cluster_admin_pw]
 
-   when "keystone"
-     keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+when "keystone"
+  keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-     package "python-keystoneclient"
+  package "python-keystoneclient"
 
-     proxy_config[:keystone_settings] = keystone_settings
-     proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
-     proxy_config[:keystone_delay_auth_decision] = node["swift"]["keystone_delay_auth_decision"]
+  proxy_config[:keystone_settings] = keystone_settings
+  proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
+  proxy_config[:keystone_delay_auth_decision] = node["swift"]["keystone_delay_auth_decision"]
 
-     crowbar_pacemaker_sync_mark "wait-swift_register"
+  crowbar_pacemaker_sync_mark "wait-swift_register"
 
-     keystone_register "swift proxy wakeup keystone" do
-       protocol keystone_settings["protocol"]
-       insecure keystone_settings["insecure"]
-       host keystone_settings["internal_url_host"]
-       port keystone_settings["admin_port"]
-       token keystone_settings["admin_token"]
-       action :wakeup
-     end
+  keystone_register "swift proxy wakeup keystone" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    token keystone_settings["admin_token"]
+    action :wakeup
+  end
 
-     # ResellerAdmin is used by swift (see reseller_admin_role option)
-     role = "ResellerAdmin"
-     keystone_register "add #{role} role for swift" do
-       protocol keystone_settings["protocol"]
-       insecure keystone_settings["insecure"]
-       host keystone_settings["internal_url_host"]
-       port keystone_settings["admin_port"]
-       token keystone_settings["admin_token"]
-       role_name role
-       action :add_role
-     end
+  # ResellerAdmin is used by swift (see reseller_admin_role option)
+  role = "ResellerAdmin"
+  keystone_register "add #{role} role for swift" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    token keystone_settings["admin_token"]
+    role_name role
+    action :add_role
+  end
 
-     keystone_register "register swift user" do
-       protocol keystone_settings["protocol"]
-       insecure keystone_settings["insecure"]
-       host keystone_settings["internal_url_host"]
-       port keystone_settings["admin_port"]
-       token keystone_settings["admin_token"]
-       user_name keystone_settings["service_user"]
-       user_password keystone_settings["service_password"]
-       tenant_name keystone_settings["service_tenant"]
-       action :add_user
-     end
+  keystone_register "register swift user" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    token keystone_settings["admin_token"]
+    user_name keystone_settings["service_user"]
+    user_password keystone_settings["service_password"]
+    tenant_name keystone_settings["service_tenant"]
+    action :add_user
+  end
 
-     keystone_register "give swift user access" do
-       protocol keystone_settings["protocol"]
-       insecure keystone_settings["insecure"]
-       host keystone_settings["internal_url_host"]
-       port keystone_settings["admin_port"]
-       token keystone_settings["admin_token"]
-       user_name keystone_settings["service_user"]
-       tenant_name keystone_settings["service_tenant"]
-       role_name "admin"
-       action :add_access
-     end
+  keystone_register "give swift user access" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    token keystone_settings["admin_token"]
+    user_name keystone_settings["service_user"]
+    tenant_name keystone_settings["service_tenant"]
+    role_name "admin"
+    action :add_access
+  end
 
-     keystone_register "register swift service" do
-       protocol keystone_settings["protocol"]
-       insecure keystone_settings["insecure"]
-       host keystone_settings["internal_url_host"]
-       token keystone_settings["admin_token"]
-       port keystone_settings["admin_port"]
-       service_name "swift"
-       service_type "object-store"
-       service_description "Openstack Swift Object Store Service"
-       action :add_service
-     end
+  keystone_register "register swift service" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    token keystone_settings["admin_token"]
+    port keystone_settings["admin_port"]
+    service_name "swift"
+    service_type "object-store"
+    service_description "Openstack Swift Object Store Service"
+    action :add_service
+  end
 
-     keystone_register "register swift-proxy endpoint" do
-         protocol keystone_settings["protocol"]
-         insecure keystone_settings["insecure"]
-         host keystone_settings["internal_url_host"]
-         token keystone_settings["admin_token"]
-         port keystone_settings["admin_port"]
-         endpoint_service "swift"
-         endpoint_region keystone_settings["endpoint_region"]
-         endpoint_publicURL "#{swift_protocol}://#{public_host}:#{node[:swift][:ports][:proxy]}/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
-         endpoint_adminURL "#{swift_protocol}://#{admin_host}:#{node[:swift][:ports][:proxy]}/v1/"
-         endpoint_internalURL "#{swift_protocol}://#{admin_host}:#{node[:swift][:ports][:proxy]}/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
-         #  endpoint_global true
-         #  endpoint_enabled true
-        action :add_endpoint_template
-     end
+  keystone_register "register swift-proxy endpoint" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    token keystone_settings["admin_token"]
+    port keystone_settings["admin_port"]
+    endpoint_service "swift"
+    endpoint_region keystone_settings["endpoint_region"]
+    endpoint_publicURL "#{swift_protocol}://#{public_host}:#{node[:swift][:ports][:proxy]}/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
+    endpoint_adminURL "#{swift_protocol}://#{admin_host}:#{node[:swift][:ports][:proxy]}/v1/"
+    endpoint_internalURL "#{swift_protocol}://#{admin_host}:#{node[:swift][:ports][:proxy]}/v1/#{node[:swift][:reseller_prefix]}$(tenant_id)s"
+    #  endpoint_global true
+    #  endpoint_enabled true
+    action :add_endpoint_template
+  end
 
-     crowbar_pacemaker_sync_mark "create-swift_register"
+  crowbar_pacemaker_sync_mark "create-swift_register"
 
-   when "tempauth"
-     ## uses defaults...
+when "tempauth"
+  ## uses defaults...
 end
 
 if node[:swift][:ssl][:enabled]
   if node[:swift][:ssl][:generate_certs]
     package "openssl"
     ruby_block "generate_certs for swift" do
-        block do
-          unless ::File.exists? node[:swift][:ssl][:certfile] and ::File.exists? node[:swift][:ssl][:keyfile]
-            require "fileutils"
+      block do
+        unless ::File.exist? node[:swift][:ssl][:certfile] and ::File.exist? node[:swift][:ssl][:keyfile]
+          require "fileutils"
 
-            Chef::Log.info("Generating SSL certificate for swift...")
+          Chef::Log.info("Generating SSL certificate for swift...")
 
-            [:certfile, :keyfile].each do |k|
-              dir = File.dirname(node[:swift][:ssl][k])
-              FileUtils.mkdir_p(dir) unless File.exists?(dir)
-            end
+          [:certfile, :keyfile].each do |k|
+            dir = File.dirname(node[:swift][:ssl][k])
+            FileUtils.mkdir_p(dir) unless File.exist?(dir)
+          end
 
-            # Generate private key
-            %x(openssl genrsa -out #{node[:swift][:ssl][:keyfile]} 4096)
-            if $?.exitstatus != 0
-              message = "SSL private key generation failed"
-              Chef::Log.fatal(message)
-              raise message
-            end
-            FileUtils.chown "root", node[:swift][:group], node[:swift][:ssl][:keyfile]
-            FileUtils.chmod 0640, node[:swift][:ssl][:keyfile]
+          # Generate private key
+          %x(openssl genrsa -out #{node[:swift][:ssl][:keyfile]} 4096)
+          if $?.exitstatus != 0
+            message = "SSL private key generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
+          FileUtils.chown "root", node[:swift][:group], node[:swift][:ssl][:keyfile]
+          FileUtils.chmod 0640, node[:swift][:ssl][:keyfile]
 
-            # Generate certificate signing requests (CSR)
-            conf_dir = File.dirname node[:swift][:ssl][:certfile]
-            ssl_csr_file = "#{conf_dir}/signing_key.csr"
-            ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{node[:fqdn]}\""
-            %x(openssl req -new -key #{node[:swift][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
-            if $?.exitstatus != 0
-              message = "SSL certificate signed requests generation failed"
-              Chef::Log.fatal(message)
-              raise message
-            end
+          # Generate certificate signing requests (CSR)
+          conf_dir = File.dirname node[:swift][:ssl][:certfile]
+          ssl_csr_file = "#{conf_dir}/signing_key.csr"
+          ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{node[:fqdn]}\""
+          %x(openssl req -new -key #{node[:swift][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
+          if $?.exitstatus != 0
+            message = "SSL certificate signed requests generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
 
-            # Generate self-signed certificate with above CSR
-            %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{node[:swift][:ssl][:keyfile]} -out #{node[:swift][:ssl][:certfile]})
-            if $?.exitstatus != 0
-              message = "SSL self-signed certificate generation failed"
-              Chef::Log.fatal(message)
-              raise message
-            end
+          # Generate self-signed certificate with above CSR
+          %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{node[:swift][:ssl][:keyfile]} -out #{node[:swift][:ssl][:certfile]})
+          if $?.exitstatus != 0
+            message = "SSL self-signed certificate generation failed"
+            Chef::Log.fatal(message)
+            raise message
+          end
 
-            File.delete ssl_csr_file  # Nobody should even try to use this
-          end # unless files exist
+          File.delete ssl_csr_file  # Nobody should even try to use this
+        end # unless files exist
       end # block
     end # ruby_block
   else # if generate_certs
-    unless ::File.exists? node[:swift][:ssl][:certfile]
+    unless ::File.exist? node[:swift][:ssl][:certfile]
       message = "Certificate \"#{node[:swift][:ssl][:certfile]}\" is not present."
       Chef::Log.fatal(message)
       raise message
@@ -295,14 +295,14 @@ end
 
 ## Find other nodes that are swift-auth nodes, and make sure
 ## we use their memcached!
-servers =""
+servers = ""
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
-result= search(:node, "roles:swift-proxy #{env_filter}")
-if !result.nil? and (result.length > 0)
-  memcached_servers = result.map {|x|
+result = search(:node, "roles:swift-proxy #{env_filter}")
+if !result.nil? && result.length > 0
+  memcached_servers = result.map do |x|
     s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)
-    s += ":11211 "
-  }
+    s + ":11211 "
+  end
   memcached_servers.sort!
   log("memcached servers" + memcached_servers.join(",")) { level :debug }
   servers = memcached_servers.join(",")
@@ -330,10 +330,10 @@ end
 ## make sure to fetch ring files from the ring compute node
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
 compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
-if (!compute_nodes.nil? and compute_nodes.length > 0 and node[:fqdn]!=compute_nodes[0][:fqdn] )
+if !compute_nodes.nil? and compute_nodes.length > 0 and node[:fqdn] != compute_nodes[0][:fqdn]
   compute_node_addr  = Swift::Evaluator.get_ip_by_type(compute_nodes[0],:storage_ip_expr)
   log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") { level :debug }
-  %w{container account object}.each { |ring|
+  %w(container account object).each do |ring|
     execute "pull #{ring} ring" do
       user node[:swift][:user]
       group node[:swift][:group]
@@ -341,17 +341,17 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 and node[:fqdn]!=compute_no
       cwd "/etc/swift"
       ignore_failure true
     end
-  }
+  end
 end
 
 ruby_block "Check if ring is present" do
   block do
     Chef::Log.info("Not setting up swift-proxy daemon; ring-compute node hasn't pushed the rings yet.")
   end
-  not_if { ::File.exists? "/etc/swift/object.ring.gz" }
+  not_if { ::File.exist? "/etc/swift/object.ring.gz" }
 end
 
-if node[:swift][:frontend]=="native"
+if node[:swift][:frontend] == "native"
   service "swift-proxy" do
     service_name node[:swift][:proxy][:service_name]
     if %w(rhel suse).include?(node[:platform_family])
@@ -364,9 +364,9 @@ if node[:swift][:frontend]=="native"
     subscribes :restart, resources(template: "/etc/swift/proxy-server.conf"), :immediately
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
     # Do not even try to start the daemon if we don't have the ring yet
-    only_if { ::File.exists? "/etc/swift/object.ring.gz" }
+    only_if { ::File.exist? "/etc/swift/object.ring.gz" }
   end
-elsif node[:swift][:frontend]=="uwsgi"
+elsif node[:swift][:frontend] == "uwsgi"
 
   service "swift-proxy" do
     service_name node[:swift][:proxy][:service_name]
@@ -401,7 +401,7 @@ elsif node[:swift][:frontend]=="uwsgi"
   end
 
   uwsgi "swift-proxy" do
-    options({
+    options(
       :chdir => "/usr/lib/cgi-bin/swift/",
       :callable => :application,
       :module => :proxy,
@@ -418,8 +418,8 @@ elsif node[:swift][:frontend]=="uwsgi"
       :"buffer-size" => 65535,
       :harakiri => 60,
       :log => "/var/log/swift-proxy-uwsgi.log"
-    })
-    instances (uwsgi_instances)
+    )
+    instances uwsgi_instances
     service_name "swift-proxy-uwsgi"
   end
 
@@ -428,7 +428,7 @@ elsif node[:swift][:frontend]=="uwsgi"
     action :start
     subscribes :restart, "template[/usr/lib/cgi-bin/swift/proxy.py]"
     # Do not even try to start the daemon if we don't have the ring yet
-    only_if { ::File.exists? "/etc/swift/object.ring.gz" }
+    only_if { ::File.exist? "/etc/swift/object.ring.gz" }
   end
 
 end
@@ -440,7 +440,7 @@ EOH
     action :nothing
     subscribes :run, resources(template: "/etc/swift/proxy-server.conf")
     notifies :restart, resources(service: "memcached-swift-proxy")
-    if node[:swift][:frontend]=="native"
+    if node[:swift][:frontend] == "native"
       notifies :restart, resources(service: "swift-proxy")
     end
   end
@@ -464,7 +464,7 @@ node.save
 # only run slog init code if enabled, and the proxy has been fully setup
 #(after the storage nodes have come up as well)
 if node["swift"]["use_slog"] and node["swift"]["proxy_init_done"]
-  log ("installing slogging") { level :info }
+  Chef::Log.info("installing slogging")
   include_recipe "swift::slog"
 end
 
