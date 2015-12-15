@@ -59,6 +59,7 @@ en:
         switch_password: 'Password'
         add_switch: 'Add'
         remove_switch: 'Remove'
+        use_dvr: 'Use Distributed Virtual Router setup'
         vmware:
           user: 'VMware NSX Username'
           password: 'VMware NSX Password'

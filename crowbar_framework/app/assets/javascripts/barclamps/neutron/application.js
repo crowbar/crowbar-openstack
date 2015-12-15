@@ -236,6 +236,7 @@ function networking_plugin_check() {
     $('#ml2_type_drivers_container').show();
     $('#ml2_type_drivers_default_provider_network_container').show();
     $('#ml2_type_drivers_default_tenant_network_container').show();
+    $('#dvr_container').show();
     ml2_type_drivers_check();
     ml2_mechanism_drivers_check();
     break;
@@ -245,6 +246,7 @@ function networking_plugin_check() {
     $('#ml2_type_drivers_container').hide();
     $('#ml2_type_drivers_default_provider_network_container').hide();
     $('#ml2_type_drivers_default_tenant_network_container').hide();
+    $('#dvr_container').hide();
     $('#num_vlans_container').hide();
     $('#gre_container').hide();
     $('#vxlan_container').hide();
@@ -313,6 +315,7 @@ function ml2_mechanism_drivers_check() {
     $('#ml2_type_drivers_container').hide();
     $('#ml2_type_drivers_default_provider_network_container').hide();
     $('#ml2_type_drivers_default_tenant_network_container').hide();
+    $('#dvr_container').hide();
     $('#vxlan_group_container').show();
     // remember previously selected values for ovs, avoid overwriting remembered
     // values, e.g. when switching back to ml2 from vmware.
@@ -330,6 +333,7 @@ function ml2_mechanism_drivers_check() {
     $('#ml2_type_drivers_container').show();
     $('#ml2_type_drivers_default_provider_network_container').show();
     $('#ml2_type_drivers_default_tenant_network_container').show();
+    $('#dvr_container').show();
     $('#vxlan_group_container').hide();
   }
 
