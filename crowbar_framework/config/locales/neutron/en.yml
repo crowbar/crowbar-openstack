@@ -106,7 +106,6 @@ en:
         mechanism_driver: 'The mechanism driver "%{drv}" needs the type driver "vlan"'
         cisco_nexus: 'The "cisco_nexus" mechanism driver needs also the "openvswitch" mechanism driver'
         openvswitch_linuxbridge: 'The "openvswitch" and "linuxbridge" mechanism drivers cannot be used in parallel. Only select one of them'
-        dvr: 'DVR can only be used with openvswitch and GRE/VXLAN'
         dvr_vmware: 'DVR is not compatible with VMware NSX plugin'
         dvr_linuxbridge: 'DVR is not compatible with Linux Bridge ML2 driver'
         dvr_ha: 'DVR is not compatible with High Availability for neutron-network'
