@@ -263,6 +263,14 @@ class NeutronService < PacemakerServiceObject
         validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr")
       end
 
+      if plugin == "vmware"
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_vmware")
+      end
+
+      if ml2_mechanism_drivers.include? "linuxbridge"
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_linuxbridge")
+      end
+
       unless proposal["deployment"]["neutron"]["elements"].fetch("neutron-network", []).empty?
         network_node = proposal["deployment"]["neutron"]["elements"]["neutron-network"][0]
         if is_cluster? network_node
