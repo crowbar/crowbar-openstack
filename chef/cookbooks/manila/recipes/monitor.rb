@@ -22,7 +22,7 @@ return unless node["roles"].include?("nagios-client")
 # if monitored by nagios, install the nrpe commands
 
 # Node addresses are dynamic and can't be set from attributes only.
-node[:manila][:monitor][:ports]["manila-api"] =
+node.set[:manila][:monitor][:ports]["manila-api"] =
   [node[:manila][:api_bind_host], node[:manila][:api_bind_port]]
 
 svcs = node[:manila][:monitor][:svcs]

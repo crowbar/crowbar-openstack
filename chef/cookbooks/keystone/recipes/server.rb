@@ -55,36 +55,36 @@ my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:keystone][:api][:protocol] == "https", ha_enabled)
 
 # These are used in keystone.conf
-node[:keystone][:api][:public_URL] = \
+node.set[:keystone][:api][:public_URL] = \
   KeystoneHelper.service_URL(node[:keystone][:api][:protocol],
                              my_public_host,
                              node[:keystone][:api][:service_port])
 # This is also used for admin requests of keystoneclient
-node[:keystone][:api][:admin_URL] = \
+node.set[:keystone][:api][:admin_URL] = \
   KeystoneHelper.service_URL(node[:keystone][:api][:protocol],
                              my_admin_host,
                              node[:keystone][:api][:admin_port])
 
 # These URLs will be registered as endpoints in keystone's database
-node[:keystone][:api][:versioned_public_URL] = \
+node.set[:keystone][:api][:versioned_public_URL] = \
   KeystoneHelper.versioned_service_URL(node[:keystone][:api][:protocol],
                                        my_public_host,
                                        node[:keystone][:api][:service_port],
                                        node[:keystone][:api][:version])
-node[:keystone][:api][:versioned_admin_URL] = \
+node.set[:keystone][:api][:versioned_admin_URL] = \
   KeystoneHelper.versioned_service_URL(node[:keystone][:api][:protocol],
                                        my_admin_host,
                                        node[:keystone][:api][:admin_port],
                                        node[:keystone][:api][:version])
-node[:keystone][:api][:versioned_internal_URL] = \
+node.set[:keystone][:api][:versioned_internal_URL] = \
   KeystoneHelper.versioned_service_URL(node[:keystone][:api][:protocol],
                                        my_admin_host,
                                        node[:keystone][:api][:service_port],
                                        node[:keystone][:api][:version])
 
 # Other barclamps need to know the hostname to reach keystone
-node[:keystone][:api][:public_URL_host] = my_public_host
-node[:keystone][:api][:internal_URL_host] = my_admin_host
+node.set[:keystone][:api][:public_URL_host] = my_public_host
+node.set[:keystone][:api][:internal_URL_host] = my_admin_host
 
 if node[:keystone][:frontend] == "uwsgi"
 
@@ -302,7 +302,7 @@ end
 # could possibly not be reached in case of errors).
 ruby_block "mark node for keystone db_sync" do
   block do
-    node[:keystone][:db_synced] = true
+    node.set[:keystone][:db_synced] = true
     node.save
   end
   action :nothing
@@ -347,15 +347,15 @@ ruby_block "synchronize PKI keys for founder and remember them for non-HA case" 
     dirty = false
 
     if node[:keystone][:pki][:content][:ca] != ca
-      node[:keystone][:pki][:content][:ca] = ca
+      node.set[:keystone][:pki][:content][:ca] = ca
       dirty = true
     end
     if node[:keystone][:pki][:content][:signing_cert] != signing_cert
-      node[:keystone][:pki][:content][:signing_cert] = signing_cert
+      node.set[:keystone][:pki][:content][:signing_cert] = signing_cert
       dirty = true
     end
     if node[:keystone][:pki][:content][:signing_key] != signing_key
-      node[:keystone][:pki][:content][:signing_key] = signing_key
+      node.set[:keystone][:pki][:content][:signing_key] = signing_key
       dirty = true
     end
 
@@ -529,7 +529,7 @@ openstack_command << " --insecure" if keystone_insecure
     block do
       tenant_id = %x[#{openstack_command} project show -f value -c id #{tenant}].chomp
       if !tenant_id.empty? && node[:keystone][tenant_type][:tenant_id] != tenant_id
-        node[:keystone][tenant_type][:tenant_id] = tenant_id
+        node.set[:keystone][tenant_type][:tenant_id] = tenant_id
         node.save
       end
     end
@@ -643,9 +643,8 @@ end
 
 crowbar_pacemaker_sync_mark "create-keystone_register"
 
-node[:keystone][:monitor] = {} if node[:keystone][:monitor].nil?
-node[:keystone][:monitor][:svcs] = [] if node[:keystone][:monitor][:svcs].nil?
-node[:keystone][:monitor][:svcs] << ["keystone"] if node[:keystone][:monitor][:svcs].empty?
+node.set[:keystone][:monitor] = {} if node[:keystone][:monitor].nil?
+node.set[:keystone][:monitor][:svcs] = ["keystone"] if node[:keystone][:monitor][:svcs] != ["keystone"]
 node.save
 
 template "/root/.openrc" do

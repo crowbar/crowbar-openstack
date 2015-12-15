@@ -47,7 +47,7 @@ end
 # could possibly not be reached in case of errors).
 ruby_block "mark node for glance db_sync" do
   block do
-    node[:glance][:db_synced] = true
+    node.set[:glance][:db_synced] = true
     node.save
   end
   action :nothing
@@ -57,5 +57,3 @@ end
 crowbar_pacemaker_sync_mark "create-glance_db_sync"
 
 glance_service "registry"
-
-node[:glance][:monitor][:svcs] << ["glance-registry"]

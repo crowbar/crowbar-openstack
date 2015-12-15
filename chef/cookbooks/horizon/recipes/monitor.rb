@@ -21,8 +21,9 @@ return unless node["roles"].include?("nagios-client")
 ####
 # if monitored by nagios, install the nrpe commands
 
+node.set[:horizon][:monitor][:svcs] = ["horizon-server"]
 # Node addresses are dynamic and can't be set from attributes only.
-node[:horizon][:monitor][:ports]["horizon-server"] = [node[:horizon][:api_bind_host], node[:horizon][:api_bind_port]]
+node.set[:horizon][:monitor][:ports]["horizon-server"] = [node[:horizon][:api_bind_host], node[:horizon][:api_bind_port]]
 
 svcs = node[:horizon][:monitor][:svcs]
 ports = node[:horizon][:monitor][:ports]

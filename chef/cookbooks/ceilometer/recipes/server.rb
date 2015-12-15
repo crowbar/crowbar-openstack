@@ -161,7 +161,7 @@ end
 # could possibly not be reached in case of errors).
 ruby_block "mark node for ceilometer db_sync" do
   block do
-    node[:ceilometer][:db_synced] = true
+    node.set[:ceilometer][:db_synced] = true
     node.save
   end
   action :nothing

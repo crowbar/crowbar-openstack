@@ -26,6 +26,6 @@ case node[:platform_family]
     package "python-python-memcached"
 end
 
-node[:memcached][:listen] = node[:nova][:my_ip]
+node.set[:memcached][:listen] = node[:nova][:my_ip]
 
 memcached_instance "nova"

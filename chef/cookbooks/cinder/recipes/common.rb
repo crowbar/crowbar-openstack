@@ -70,9 +70,9 @@ end
 sql_connection = "#{db_settings[:url_scheme]}://#{node[:cinder][:db][:user]}:#{db_password}@#{db_settings[:address]}/#{node[:cinder][:db][:database]}"
 
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-node[:cinder][:api][:bind_host] = my_ipaddress
+node.set[:cinder][:api][:bind_host] = my_ipaddress
 
-node[:cinder][:my_ip] = my_ipaddress
+node.set[:cinder][:my_ip] = my_ipaddress
 
 if node[:cinder][:api][:protocol] == "https"
   if node[:cinder][:ssl][:generate_certs]

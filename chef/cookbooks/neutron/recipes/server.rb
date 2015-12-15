@@ -252,7 +252,7 @@ end
 # could possibly not be reached in case of errors).
 ruby_block "mark node for neutron db_sync" do
   block do
-    node[:neutron][:db_synced] = true
+    node.set[:neutron][:db_synced] = true
     node.save
   end
   action :nothing
@@ -269,7 +269,7 @@ end
 
 ruby_block "mark node for neutron db_sync fwaas" do
   block do
-    node[:neutron][:db_synced_fwaas] = true
+    node.set[:neutron][:db_synced_fwaas] = true
     node.save
   end
   action :nothing
@@ -287,7 +287,7 @@ if node[:neutron][:use_lbaas]
 
   ruby_block "mark node for neutron db_sync lbaas" do
     block do
-      node[:neutron][:db_synced_lbaas] = true
+      node.set[:neutron][:db_synced_lbaas] = true
       node.save
     end
     action :nothing
@@ -332,7 +332,7 @@ if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
   include_recipe "neutron::post_install_conf"
 end
 
-node[:neutron][:monitor] = {} if node[:neutron][:monitor].nil?
-node[:neutron][:monitor][:svcs] = [] if node[:neutron][:monitor][:svcs].nil?
-node[:neutron][:monitor][:svcs] << ["neutron"] if node[:neutron][:monitor][:svcs].empty?
+node.set[:neutron][:monitor] = {} if node[:neutron][:monitor].nil?
+node.set[:neutron][:monitor][:svcs] = [] if node[:neutron][:monitor][:svcs].nil?
+node.set[:neutron][:monitor][:svcs] << ["neutron"] if node[:neutron][:monitor][:svcs].empty?
 node.save

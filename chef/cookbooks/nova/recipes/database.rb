@@ -76,7 +76,7 @@ end
 # could possibly not be reached in case of errors).
 ruby_block "mark node for nova db_sync" do
   block do
-    node[:nova][:db_synced] = true
+    node.set[:nova][:db_synced] = true
     node.save
   end
   action :nothing

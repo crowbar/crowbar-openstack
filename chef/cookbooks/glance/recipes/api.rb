@@ -187,6 +187,3 @@ end
 crowbar_pacemaker_sync_mark "create-glance_register_service"
 
 glance_service "api"
-
-node[:glance][:monitor][:svcs] <<["glance-api"]
-

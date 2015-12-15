@@ -55,7 +55,7 @@ end
 # could possibly not be reached in case of errors).
 ruby_block "mark node for manila db_sync" do
   block do
-    node[:manila][:db_synced] = true
+    node.set[:manila][:db_synced] = true
     node.save
   end
   action :nothing

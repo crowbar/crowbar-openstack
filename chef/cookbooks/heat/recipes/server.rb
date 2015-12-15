@@ -421,7 +421,7 @@ end
 # could possibly not be reached in case of errors).
 ruby_block "mark node for heat db_sync" do
   block do
-    node[:heat][:db_synced] = true
+    node.set[:heat][:db_synced] = true
     node.save
   end
   action :nothing

@@ -38,7 +38,7 @@ end
 if node["postgresql"]["pg_hba"][4]
   netaddr, netmask = node["postgresql"]["pg_hba"][4][:addr].split
 else
-  pg_hba = node["postgresql"]["pg_hba"]
+  pg_hba = node["postgresql"]["pg_hba"].dup # we're modifying this, so dup it
   pg_hba << {
     type: "host",
     db: "all",

@@ -23,9 +23,10 @@ return unless node["roles"].include?("nagios-client")
 
 network_settings = GlanceHelper.network_settings(node)
 
+node.set[:glance][:monitor][:svcs] = ["glance-api", "glance-registry"]
 # Node addresses are dynamic and can't be set from attributes only.
-node[:glance][:monitor][:ports]["glance-registry"] = [network_settings[:ip], network_settings[:registry][:bind_port]]
-node[:glance][:monitor][:ports]["glance-api"] = [network_settings[:ip], network_settings[:api][:bind_port]]
+node.set[:glance][:monitor][:ports]["glance-registry"] = [network_settings[:ip], network_settings[:registry][:bind_port]]
+node.set[:glance][:monitor][:ports]["glance-api"] = [network_settings[:ip], network_settings[:api][:bind_port]]
 
 svcs = node[:glance][:monitor][:svcs]
 ports = node[:glance][:monitor][:ports]

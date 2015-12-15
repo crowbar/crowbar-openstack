@@ -20,13 +20,16 @@
 
 ha_enabled = node[:rabbitmq][:ha][:enabled]
 
-node[:rabbitmq][:address] = CrowbarRabbitmqHelper.get_listen_address(node)
-node[:rabbitmq][:management_address] = node[:rabbitmq][:address]
-node[:rabbitmq][:addresses] = [node[:rabbitmq][:address]]
-node[:rabbitmq][:addresses] << CrowbarRabbitmqHelper.get_public_listen_address(node) if node[:rabbitmq][:listen_public]
+node.set[:rabbitmq][:address] = CrowbarRabbitmqHelper.get_listen_address(node)
+node.set[:rabbitmq][:management_address] = node[:rabbitmq][:address]
+addresses = [node[:rabbitmq][:address]]
+if node[:rabbitmq][:listen_public]
+  addresses << CrowbarRabbitmqHelper.get_public_listen_address(node)
+end
+node.set[:rabbitmq][:addresses] = addresses
 
 if ha_enabled
-  node[:rabbitmq][:nodename] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
+  node.set[:rabbitmq][:nodename] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
 end
 
 include_recipe "rabbitmq::default"

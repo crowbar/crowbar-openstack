@@ -113,7 +113,7 @@ found_disks.each do |disk|
     disk[:state] = "Operational"
     disk[:name] = disk[:uuid].delete("-")
     Chef::Log.info("Adding new disk #{disk[:device]} with UUID #{disk[:uuid]} to the Swift config")
-    node[:swift][:devs][disk[:uuid]] = disk.dup
+    node.set[:swift][:devs][disk[:uuid]] = disk.dup
   end
 end
 
@@ -128,7 +128,7 @@ node[:swift][:devs].each do |uuid,disk|
       Chef::Log.warn("Disk #{disk[:device]} with UUID #{current_uuid} not matching expected UUID #{disk[:uuid]}")
       Chef::Log.info("Setting disk #{disk[:device]} to Stale")
       disk[:state] = "UUID_Stale"
-      node[:swift][:devs][disk[:uuid]] = disk.dup
+      node.set[:swift][:devs][disk[:uuid]] = disk.dup
     end
   end
 end

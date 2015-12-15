@@ -22,7 +22,7 @@ return unless node["roles"].include?("nagios-client")
 # if monitored by nagios, install the nrpe commands
 
 # Node addresses are dynamic and can't be set from attributes only.
-node[:cinder][:monitor][:ports]["cinder-api"] = [node[:cinder][:api_bind_host], node[:cinder][:api_bind_port]]
+node.set[:cinder][:monitor][:ports]["cinder-api"] = [node[:cinder][:api_bind_host], node[:cinder][:api_bind_port]]
 
 svcs = node[:cinder][:monitor][:svcs]
 ports = node[:cinder][:monitor][:ports]
