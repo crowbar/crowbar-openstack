@@ -156,12 +156,14 @@ external_networks.concat(node[:neutron][:additional_external_networks])
 
 case node[:neutron][:networking_plugin]
 when "ml2"
+  mtu_value = 0
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
   #TODO(vuntz): temporarily disable the hyperv mechanism since we're lacking networking-hyperv from stackforge
   #ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
   ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
   if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
     ml2_mechanism_drivers.push("l2population")
+    mtu_value = 1400
   end
 
   template plugin_cfg_path do
@@ -180,7 +182,8 @@ when "ml2"
       vxlan_start: vni_start,
       vxlan_end: vni_end,
       vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group],
-      external_networks: external_networks
+      external_networks: external_networks,
+      path_mtu: mtu_value
     )
   end
 when "vmware"
