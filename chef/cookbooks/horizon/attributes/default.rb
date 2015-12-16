@@ -36,6 +36,7 @@ default[:horizon][:policy_file][:telemetry] = "ceilometer_policy.json"
 default[:horizon][:apache][:ssl] = false
 default[:horizon][:apache][:ssl_crt_file] = "/etc/apache2/ssl.crt/openstack-dashboard-server.crt"
 default[:horizon][:apache][:ssl_key_file] = "/etc/apache2/ssl.key/openstack-dashboard-server.key"
+default[:horizon][:apache][:generate_certs] = false
 default[:horizon][:apache][:ssl_crt_chain_file] = ""
 
 default[:horizon][:ha][:enabled] = false

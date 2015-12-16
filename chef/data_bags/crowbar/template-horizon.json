@@ -36,6 +36,7 @@
       "multi_domain_support": false,
       "apache": {
         "ssl": false,
+        "generate_certs": false,
         "ssl_crt_file": "/etc/apache2/ssl.crt/openstack-dashboard-server.crt",
         "ssl_key_file": "/etc/apache2/ssl.key/openstack-dashboard-server.key",
         "ssl_crt_chain_file": ""
@@ -48,7 +49,7 @@
     "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 36,
+      "schema-revision": 37,
       "element_states": {
         "horizon-server": [ "readying", "ready", "applying" ]
       },

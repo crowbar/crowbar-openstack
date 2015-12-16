@@ -339,6 +339,27 @@ include_recipe "horizon::ha" if ha_enabled
 resource = resources(template: "#{node[:apache][:dir]}/ports.conf")
 resource.variables({apache_listen_ports: node.normal[:apache][:listen_ports_crowbar].values.map{ |p| p.values }.flatten.uniq.sort})
 
+if node[:horizon][:apache][:ssl]
+  if node[:horizon][:apache][:generate_certs]
+    package "apache2-utils"
+
+    bash "Generate Apache certificate" do
+      code <<-EOH
+        (umask 377 ; /usr/bin/gensslcert -C openstack-dashboard )
+  EOH
+      not_if { File.size?(node[:horizon][:apache][:ssl_crt_file]) }
+    end
+  else
+    unless ::File.exist? node[:horizon][:apache][:ssl_crt_file]
+      message = "Certificate \"#{node[:horizon][:apache][:ssl_crt_file]}\" is not present."
+      Chef::Log.fatal(message)
+      raise message
+    end
+    # we do not check for existence of keyfile, as the private key is allowed
+    # to be in the certfile
+  end
+end
+
 template "#{node[:apache][:dir]}/sites-available/openstack-dashboard.conf" do
   if node[:platform_family] == "suse"
     path "#{node[:apache][:dir]}/vhosts.d/openstack-dashboard.conf"
