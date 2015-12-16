@@ -24,7 +24,7 @@ if node[:neutron][:api][:protocol] == "https"
     package "openssl"
     ruby_block "generate_certs for neutron" do
       block do
-        unless ::File.exist? node[:neutron][:ssl][:certfile] and ::File.exist? node[:neutron][:ssl][:keyfile]
+        unless ::File.exist?(node[:neutron][:ssl][:certfile]) && ::File.exist?(node[:neutron][:ssl][:keyfile])
           require "fileutils"
 
           Chef::Log.info("Generating SSL certificate for neutron...")
@@ -77,7 +77,7 @@ if node[:neutron][:api][:protocol] == "https"
     # to be in the certfile
   end # if generate_certs
 
-  if node[:neutron][:ssl][:cert_required] and !::File.exist? node[:neutron][:ssl][:ca_certs]
+  if node[:neutron][:ssl][:cert_required] && !::File.exist?(node[:neutron][:ssl][:ca_certs])
     message = "Certificate CA \"#{node[:neutron][:ssl][:ca_certs]}\" is not present."
     Chef::Log.fatal(message)
     raise message

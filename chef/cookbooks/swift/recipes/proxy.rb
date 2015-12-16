@@ -30,7 +30,7 @@ if node.roles.include?("swift-storage") && node[:swift][:devs].nil?
   return
 end
 
-if node.roles.include?("swift-ring-compute") && !(::File.exist? "/etc/swift/object.ring.gz")
+if node.roles.include?("swift-ring-compute") && !::File.exist?("/etc/swift/object.ring.gz")
   # Similarly to above; the difference is that we will have the rings in the
   # execute phase, but we do not want to be the only proxy node with the rings
   # (which would be the case, since we're in the ring-compute pass of swift
@@ -239,7 +239,7 @@ if node[:swift][:ssl][:enabled]
     package "openssl"
     ruby_block "generate_certs for swift" do
         block do
-          unless ::File.exist? node[:swift][:ssl][:certfile] and ::File.exist? node[:swift][:ssl][:keyfile]
+          unless ::File.exist?(node[:swift][:ssl][:certfile]) && ::File.exist?(node[:swift][:ssl][:keyfile])
             require "fileutils"
 
             Chef::Log.info("Generating SSL certificate for swift...")

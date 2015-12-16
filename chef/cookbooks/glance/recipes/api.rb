@@ -21,7 +21,7 @@ if node[:glance][:api][:protocol] == "https"
     package "openssl"
     ruby_block "generate_certs for glance" do
       block do
-        unless ::File.exist? node[:glance][:ssl][:certfile] and ::File.exist? node[:glance][:ssl][:keyfile]
+        unless ::File.exist?(node[:glance][:ssl][:certfile]) && ::File.exist?(node[:glance][:ssl][:keyfile])
           require "fileutils"
 
           Chef::Log.info("Generating SSL certificate for glance...")
@@ -74,7 +74,7 @@ if node[:glance][:api][:protocol] == "https"
     # to be in the certfile
   end # if generate_certs
 
-  if node[:glance][:ssl][:cert_required] and !::File.exist? node[:glance][:ssl][:ca_certs]
+  if node[:glance][:ssl][:cert_required] && !::File.exist?(node[:glance][:ssl][:ca_certs])
     message = "Certificate CA \"#{node[:glance][:ssl][:ca_certs]}\" is not present."
     Chef::Log.fatal(message)
     raise message

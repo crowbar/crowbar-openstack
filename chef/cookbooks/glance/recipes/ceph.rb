@@ -33,7 +33,7 @@ else
 
   # If Ceph configuration file is present, external Ceph cluster will be used,
   # we have to install ceph client packages
-  return if (ceph_conf.empty? || !File.exist?(ceph_conf))
+  return if ceph_conf.empty? || !File.exist?(ceph_conf)
 
   if node[:platform_family] == "suse"
     # install package in compile phase because we will run "ceph -s"

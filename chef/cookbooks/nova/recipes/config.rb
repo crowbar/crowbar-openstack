@@ -177,7 +177,7 @@ if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:ssl][:e
     package "openssl"
     ruby_block "generate_certs for nova" do
       block do
-        unless ::File.exist? api[:nova][:ssl][:certfile] and ::File.exist? api[:nova][:ssl][:keyfile]
+        unless ::File.exist?(api[:nova][:ssl][:certfile]) && ::File.exist?(api[:nova][:ssl][:keyfile])
           require "fileutils"
 
           Chef::Log.info("Generating SSL certificate for nova...")
@@ -230,7 +230,7 @@ if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:ssl][:e
     # to be in the certfile
   end # if generate_certs
 
-  if api[:nova][:ssl][:cert_required] and !::File.exist? api[:nova][:ssl][:ca_certs]
+  if api[:nova][:ssl][:cert_required] && !::File.exist?(api[:nova][:ssl][:ca_certs])
     message = "Certificate CA \"#{api[:nova][:ssl][:ca_certs]}\" is not present."
     Chef::Log.fatal(message)
     raise message
@@ -253,7 +253,7 @@ end
 
 if (api_ha_enabled || vncproxy_ha_enabled || api == node) and api[:nova][:novnc][:ssl][:enabled]
   # No check if we're using certificate info from nova-api
-  unless ::File.exist? api_novnc_ssl_certfile or api[:nova][:novnc][:ssl][:certfile].empty?
+  unless ::File.exist?(api_novnc_ssl_certfile) || api[:nova][:novnc][:ssl][:certfile].empty?
     message = "Certificate \"#{api_novnc_ssl_certfile}\" is not present."
     Chef::Log.fatal(message)
     raise message

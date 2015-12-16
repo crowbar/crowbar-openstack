@@ -79,7 +79,7 @@ if node[:cinder][:api][:protocol] == "https"
     package "openssl"
     ruby_block "generate_certs for cinder" do
       block do
-        unless ::File.exist? node[:cinder][:ssl][:certfile] and ::File.exist? node[:cinder][:ssl][:keyfile]
+        unless ::File.exist?(node[:cinder][:ssl][:certfile]) && ::File.exist?(node[:cinder][:ssl][:keyfile])
           require "fileutils"
 
           Chef::Log.info("Generating SSL certificate for cinder...")
@@ -123,7 +123,7 @@ if node[:cinder][:api][:protocol] == "https"
       end # block
     end # ruby_block
   else # if generate_certs
-    unless ::File.exist? node[:cinder][:ssl][:certfile]
+    unless ::File.exist?(node[:cinder][:ssl][:certfile])
       message = "Certificate \"#{node[:cinder][:ssl][:certfile]}\" is not present."
       Chef::Log.fatal(message)
       raise message
@@ -132,7 +132,7 @@ if node[:cinder][:api][:protocol] == "https"
     # to be in the certfile
   end # if generate_certs
 
-  if node[:cinder][:ssl][:cert_required] and !::File.exist? node[:cinder][:ssl][:ca_certs]
+  if node[:cinder][:ssl][:cert_required] && !::File.exist?(node[:cinder][:ssl][:ca_certs])
     message = "Certificate CA \"#{node[:cinder][:ssl][:ca_certs]}\" is not present."
     Chef::Log.fatal(message)
     raise message

@@ -411,7 +411,7 @@ if node[:keystone][:api][:protocol] == "https"
     package "openssl"
     ruby_block "generate_certs for keystone" do
       block do
-        unless ::File.exist? node[:keystone][:ssl][:certfile] and ::File.exist? node[:keystone][:ssl][:keyfile]
+        unless ::File.exist?(node[:keystone][:ssl][:certfile]) && ::File.exist?(node[:keystone][:ssl][:keyfile])
           require "fileutils"
 
           Chef::Log.info("Generating SSL certificate for keystone...")
@@ -464,7 +464,7 @@ if node[:keystone][:api][:protocol] == "https"
     # to be in the certfile
   end # if generate_certs
 
-  if node[:keystone][:ssl][:cert_required] and !::File.exist? node[:keystone][:ssl][:ca_certs]
+  if node[:keystone][:ssl][:cert_required] && !::File.exist?(node[:keystone][:ssl][:ca_certs])
     message = "Certificate CA \"#{node[:keystone][:ssl][:ca_certs]}\" is not present."
     Chef::Log.fatal(message)
     raise message
