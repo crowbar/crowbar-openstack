@@ -258,9 +258,12 @@ class NeutronService < PacemakerServiceObject
     end
 
     if proposal["attributes"]["neutron"]["use_dvr"]
-      if !ml2_mechanism_drivers.include?("openvswitch") ||
-         (!ml2_type_drivers.include?("gre") && !ml2_type_drivers.include?("vxlan"))
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr")
+      if plugin == "vmware"
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_vmware")
+      end
+
+      if ml2_mechanism_drivers.include? "linuxbridge"
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_linuxbridge")
       end
 
       unless proposal["deployment"]["neutron"]["elements"].fetch("neutron-network", []).empty?
