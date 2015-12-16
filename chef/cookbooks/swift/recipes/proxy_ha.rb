@@ -28,7 +28,7 @@ crowbar_pacemaker_sync_mark "sync-swift_before_ha"
 
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-swift_ha_resources" do
-  only_if { ::File.exists? "/etc/swift/object.ring.gz" }
+  only_if { ::File.exist? "/etc/swift/object.ring.gz" }
 end
 
 service_name = "swift-proxy"
@@ -38,23 +38,23 @@ pacemaker_primitive service_name do
   op node[:swift][:ha]["proxy"][:op]
   action :create
   # Do not even try to start the daemon if we don't have the ring yet
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exists?("/etc/swift/object.ring.gz") }
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exist?("/etc/swift/object.ring.gz") }
 end
 
 pacemaker_clone "cl-#{service_name}" do
   rsc service_name
   action [:create, :start]
   # Do not even try to start the daemon if we don't have the ring yet
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exists?("/etc/swift/object.ring.gz") }
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exist?("/etc/swift/object.ring.gz") }
 end
 
 crowbar_pacemaker_order_only_existing "o-cl-#{service_name}" do
   ordering ["cl-keystone", "cl-#{service_name}"]
   score "Optional"
   action :create
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exists?("/etc/swift/object.ring.gz") }
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exist?("/etc/swift/object.ring.gz") }
 end
 
 crowbar_pacemaker_sync_mark "create-swift_ha_resources" do
-  only_if { ::File.exists? "/etc/swift/object.ring.gz" }
+  only_if { ::File.exist? "/etc/swift/object.ring.gz" }
 end

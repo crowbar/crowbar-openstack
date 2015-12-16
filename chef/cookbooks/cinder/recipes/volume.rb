@@ -27,7 +27,7 @@ def make_loopback_file(volume)
   fname = volume[:local][:file_name]
   fsize = volume[:local][:file_size] * 1024 * 1024 * 1024 # Convert from GB to Bytes
 
-  return if File.exists?(fname)
+  return if File.exist?(fname)
 
   fdir = ::File.dirname(fname)
   # this code will be executed at compile-time so we have to use ruby block
@@ -46,7 +46,7 @@ def make_loopback_file(volume)
   bash "Create local volume file #{fname}" do
     code "truncate -s #{fsize} #{fname}"
     not_if do
-      File.exists?(fname)
+      File.exist?(fname)
     end
   end
 end

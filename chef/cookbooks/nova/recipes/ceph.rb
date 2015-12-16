@@ -67,12 +67,12 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
     ceph_conf = volume[:rbd][:config_file]
     admin_keyring = volume[:rbd][:admin_keyring]
 
-    if ceph_conf.empty? || !File.exists?(ceph_conf)
+    if ceph_conf.empty? || !File.exist?(ceph_conf)
       Chef::Log.info("Ceph configuration file is missing; skipping the ceph setup for backend #{volume[:backend_name]}")
       next
     end
 
-    if !admin_keyring.empty? && File.exists?(admin_keyring)
+    if !admin_keyring.empty? && File.exist?(admin_keyring)
       cmd = ["ceph", "-k", admin_keyring, "-c", ceph_conf, "-s"]
       check_ceph = Mixlib::ShellOut.new(cmd)
 
@@ -83,7 +83,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
     else
       # Check if rbd keyring was uploaded manually by user
       client_keyring = "/etc/ceph/ceph.client.#{rbd_user}.keyring"
-      unless File.exists?(client_keyring)
+      unless File.exist?(client_keyring)
         Chef::Log.info("Ceph user keyring wasn't provided for backend #{volume[:backend_name]}")
         next
       end
@@ -134,7 +134,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
           end
         end
 
-        if !admin_keyring.empty? && File.exists?(admin_keyring)
+        if !admin_keyring.empty? && File.exist?(admin_keyring)
           # Now add our secret and its value
           cmd = ["ceph", "-k", admin_keyring, "-c", ceph_conf, "auth", "get-key", "client.#{rbd_user}"]
           ceph_get_key = Mixlib::ShellOut.new(cmd)
@@ -143,7 +143,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
         else
           # Check if rbd keyring was uploaded manually by user
           client_keyring = "/etc/ceph/ceph.client.#{rbd_user}.keyring"
-          if File.exists?(client_keyring)
+          if File.exist?(client_keyring)
             f = File.open(client_keyring)
             f.each do |line|
               if match = line.match("key\s*=\s*(.+)")

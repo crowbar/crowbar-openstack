@@ -99,7 +99,7 @@ unless (node[:platform] == "suse" && node[:platform_version].to_f < 12.0)
       # There's no need to stop anything here. I might even cut us off the
       # network.
       action [:disable]
-      only_if { ::File.exists?("/etc/init.d/ovs-usurp-config-#{name}") }
+      only_if { ::File.exist?("/etc/init.d/ovs-usurp-config-#{name}") }
     end
     file "/etc/init.d/ovs-usurp-config-#{name}" do
       action :delete

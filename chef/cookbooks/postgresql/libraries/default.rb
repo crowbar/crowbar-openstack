@@ -195,7 +195,7 @@ def scan_available_timezones(tzdir)
 
     if (tzdir.nil?)
         Chef::Log.error("The zoneinfo directory not found (looked for /usr/share/zoneinfo and /usr/lib/zoneinfo)")
-    elsif !::File.exists?("/etc/localtime")
+    elsif !::File.exist?("/etc/localtime")
         Chef::Log.error("The system zoneinfo file not found (looked for /etc/localtime)")
     elsif ::File.directory?("/etc/localtime")
         Chef::Log.error("The system zoneinfo file not found (/etc/localtime is a directory instead)")

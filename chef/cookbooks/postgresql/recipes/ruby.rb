@@ -29,7 +29,7 @@ rescue LoadError
     e = execute "apt-get update" do
       action :nothing
     end
-    e.run_action(:run) unless ::File.exists?("/var/lib/apt/periodic/update-success-stamp")
+    e.run_action(:run) unless ::File.exist?("/var/lib/apt/periodic/update-success-stamp")
   end
 
   node.set["build-essential"]["compile_time"] = true

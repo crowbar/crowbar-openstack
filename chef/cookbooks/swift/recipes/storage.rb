@@ -32,7 +32,7 @@ if skip_setup
   return
 end
 
-if node.roles.include?("swift-ring-compute") && !(::File.exists? "/etc/swift/object.ring.gz")
+if node.roles.include?("swift-ring-compute") && !(::File.exist? "/etc/swift/object.ring.gz")
   Chef::Log.info("Not setting up swift-{account,container,object} daemons; this chef run is only used to compute the rings.")
   return
 end
@@ -100,7 +100,7 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       action [:enable, :start]
       subscribes :restart, resources(template: "/etc/swift/swift.conf")
       subscribes :restart, resources(template: "/etc/swift/#{ring}-server.conf")
-      only_if { ::File.exists? "/etc/swift/#{ring}.ring.gz" }
+      only_if { ::File.exist? "/etc/swift/#{ring}.ring.gz" }
     end
   }
 end

@@ -21,7 +21,7 @@ if node["swift"]["install_slog_from_dev"] or true
    slog_pkg = "#{slog_ver}.tar.gz"
    cookbook_file "/opt/#{slog_pkg}" do
      source "slogging-1.1.3.dev.tar.gz"
-     not_if { File.exists?("/opt/#{slog_pkg}") }
+     not_if { File.exist?("/opt/#{slog_pkg}") }
    end
 
    execute "extract slogging" do
@@ -30,7 +30,7 @@ if node["swift"]["install_slog_from_dev"] or true
       tar -xzvf #{slog_pkg}
       easy_install #{slog_ver}
       EOH
-      not_if { File.exists?("/usr/local/bin/swift-access-log-delivery") }
+      not_if { File.exist?("/usr/local/bin/swift-access-log-delivery") }
    end
 else
    package "python-slogging" do

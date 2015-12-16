@@ -18,7 +18,7 @@
 # to have the rings before we run dispersion. If we don't, then it simply means
 # we're not at the point where we can do dispersion, and the last chef-client
 # run for dispersion will be used instead.
-if (node.roles.include?("swift-ring-compute") || node.roles.include?("swift-storage") || node.roles.include?("swift-proxy")) && !(::File.exists? "/etc/swift/object.ring.gz")
+if (node.roles.include?("swift-ring-compute") || node.roles.include?("swift-storage") || node.roles.include?("swift-proxy")) && !(::File.exist? "/etc/swift/object.ring.gz")
   Chef::Log.info("Not proceeding with dispersion yet; waiting for the rings.")
   return
 end

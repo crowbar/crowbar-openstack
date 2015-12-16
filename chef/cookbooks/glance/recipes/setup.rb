@@ -37,7 +37,7 @@ end
     path "#{node[:glance][:working_directory]}/raw_images/#{filename}"
     action :create_if_missing
     not_if do
-      ::File.exists?("#{node[:glance][:working_directory]}/raw_images/#{filename}.keep")
+      ::File.exist?("#{node[:glance][:working_directory]}/raw_images/#{filename}.keep")
     end
   end
 end
@@ -50,7 +50,7 @@ ruby_block "load glance images" do
       next unless node[:glance][:images].map{ |n|n.split("/").last }.member?(name)
       basename = name.split("-")[0..1].join("-")
       tmpdir = "#{rawdir}/#{basename}"
-      Dir.mkdir("#{tmpdir}") unless File.exists?("#{tmpdir}")
+      Dir.mkdir("#{tmpdir}") unless File.exist?("#{tmpdir}")
       Chef::Log.info("Extracting #{name} into #{tmpdir}")
       ::Kernel.system("tar -zxf \"#{rawdir}/#{name}\" -C \"#{tmpdir}/\"")
       if wait
