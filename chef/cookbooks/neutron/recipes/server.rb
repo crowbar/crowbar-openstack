@@ -154,6 +154,8 @@ tenant_network_types = [[node[:neutron][:ml2_type_drivers_default_tenant_network
 external_networks = ["floating"]
 external_networks.concat(node[:neutron][:additional_external_networks])
 
+interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+
 case node[:neutron][:networking_plugin]
 when "ml2"
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
@@ -162,6 +164,11 @@ when "ml2"
   ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
   if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
     ml2_mechanism_drivers.push("l2population")
+  end
+
+  ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
+  if ml2_mech_drivers.include?("linuxbridge")
+    interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
   end
 
   template plugin_cfg_path do
@@ -207,6 +214,31 @@ end
 
 if node[:neutron][:networking_plugin] == "ml2" and node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
   include_recipe "neutron::cisco_support"
+end
+
+if node[:neutron][:use_lbaas]
+  keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
+  template "/etc/neutron/neutron_lbaas.conf" do
+    source "neutron_lbaas.conf.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    variables(
+      interface_driver: interface_driver,
+      keystone_settings: keystone_settings
+    )
+  end
+
+  template "/etc/neutron/services_lbaas.conf" do
+    source "services_lbaas.conf.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    variables(
+      interface_driver: interface_driver
+    )
+  end
 end
 
 ha_enabled = node[:neutron][:ha][:server][:enabled]

@@ -18,5 +18,7 @@ driver = neutron.services.metering.drivers.iptables.iptables_driver.IptablesMete
 # interface_driver = neutron.agent.linux.interface.OVSInterfaceDriver
 interface_driver = <%= @interface_driver %>
 
+# This option is deprecated and will be removed in a future release,
+# at which point the old behavior of use_namespaces = True will be enforced.
 # use_namespaces = True
 use_namespaces = <%= @use_namespaces %>
