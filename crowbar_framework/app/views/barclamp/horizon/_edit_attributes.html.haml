@@ -23,6 +23,7 @@
       = boolean_field %w(apache ssl), :collection => :ssl_protocols_for_horizon, "data-sslprefix" => "apache", "data-sslcert" => "", "data-sslkey" => ""
 
       #apache_container
+        = boolean_field %w(apache generate_certs)
         = string_field %w(apache ssl_crt_file)
         = string_field %w(apache ssl_key_file)
         = string_field %w(apache ssl_crt_chain_file)
