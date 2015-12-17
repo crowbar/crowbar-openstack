@@ -78,6 +78,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     params drbd_params
     op postgres_op
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_primitive[#{drbd_primitive}]"
 
@@ -91,6 +92,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
       "notify" => "true"
     })
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_ms[#{ms_name}]"
 end
@@ -100,6 +102,7 @@ pacemaker_primitive fs_primitive do
   params fs_params
   op postgres_op
   action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
 
@@ -109,6 +112,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     score "inf"
     resources "#{fs_primitive} #{ms_name}:Master"
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_colocation[#{colocation_constraint}]"
 
@@ -117,6 +121,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     score "Mandatory"
     ordering "#{ms_name}:promote #{fs_primitive}:start"
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_order[#{order_constraint}]"
 end

@@ -56,6 +56,7 @@ pacemaker_primitive vip_primitive do
   })
   op postgres_op
   action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 transaction_objects << "pacemaker_primitive[#{vip_primitive}]"
 
@@ -80,6 +81,7 @@ pacemaker_primitive service_name do
   agent agent_name
   op postgres_op
   action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 transaction_objects << "pacemaker_primitive[#{service_name}]"
 
@@ -90,6 +92,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     score "inf"
     resources "( #{fs_primitive} #{vip_primitive} ) #{service_name}"
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_colocation[#{colocation_constraint}]"
 
@@ -98,6 +101,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     score "Mandatory"
     ordering "( #{fs_primitive} #{vip_primitive} ) #{service_name}"
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_order[#{order_constraint}]"
 
@@ -108,6 +112,7 @@ else
     # that they are available for the service to bind to.
     members [fs_primitive, vip_primitive, service_name]
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_group[#{group_name}]"
 
