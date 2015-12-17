@@ -48,34 +48,46 @@ crowbar_pacemaker_sync_mark "wait-heat_ha_resources" do
 end
 
 primitives = []
+transaction_objects = []
 
 ["engine", "api", "api_cfn", "api_cloudwatch"].each do |service|
   primitive_name = "heat-#{service}".gsub("_","-")
   pacemaker_primitive primitive_name do
     agent node[:heat][:ha][service.to_sym][:agent]
     op node[:heat][:ha][service.to_sym][:op]
-    action :create
+    action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   primitives << primitive_name
+  transaction_objects << "pacemaker_primitive[#{primitive_name}]"
 end
 
 group_name = "g-heat"
 
 pacemaker_group group_name do
   members primitives
-  action :create
+  action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+transaction_objects << "pacemaker_group[#{group_name}]"
 
-pacemaker_clone "cl-#{group_name}" do
+clone_name = "cl-#{group_name}"
+pacemaker_clone clone_name do
   rsc group_name
-  action [:create, :start]
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+transaction_objects << "pacemaker_clone[#{clone_name}]"
+
+pacemaker_transaction "#{clone_name} clone" do
+  cib_objects transaction_objects
+  # note that this will also automatically start the resources
+  action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_order_only_existing "o-cl-#{group_name}" do
-  ordering ["postgresql", "rabbitmq", "cl-keystone", "cl-g-nova-controller", "cl-#{group_name}"]
+crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
+  ordering ["postgresql", "rabbitmq", "cl-keystone", "cl-g-nova-controller", clone_name]
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
