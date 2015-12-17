@@ -74,6 +74,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     params drbd_params
     op rabbitmq_op
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   storage_transaction_objects << "pacemaker_primitive[#{drbd_primitive}]"
 
@@ -87,6 +88,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
       "notify" => "true"
     })
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   storage_transaction_objects << "pacemaker_ms[#{ms_name}]"
 end
@@ -96,6 +98,7 @@ pacemaker_primitive fs_primitive do
   params fs_params
   op rabbitmq_op
   action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 storage_transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
 
@@ -105,6 +108,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     score "inf"
     resources "#{fs_primitive} #{ms_name}:Master"
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   storage_transaction_objects << "pacemaker_colocation[#{colocation_constraint}]"
 
@@ -113,6 +117,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     score "Mandatory"
     ordering "#{ms_name}:promote #{fs_primitive}:start"
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   storage_transaction_objects << "pacemaker_order[#{order_constraint}]"
 end
@@ -232,6 +237,7 @@ pacemaker_primitive admin_vip_primitive do
   })
   op rabbitmq_op
   action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 service_transaction_objects << "pacemaker_primitive[#{admin_vip_primitive}]"
 
@@ -243,6 +249,7 @@ if node[:rabbitmq][:listen_public]
     })
     op rabbitmq_op
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   service_transaction_objects << "pacemaker_primitive[#{public_vip_primitive}]"
   # Note: The "else" part of this, to remove the VIP for rabbitmq again, is
@@ -257,6 +264,7 @@ pacemaker_primitive service_name do
   })
   op rabbitmq_op
   action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 service_transaction_objects << "pacemaker_primitive[#{service_name}]"
 
@@ -273,6 +281,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     score "inf"
     resources primitives
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   service_transaction_objects << "pacemaker_colocation[#{colocation_constraint}]"
 
@@ -281,6 +290,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     score "Mandatory"
     ordering primitives
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   service_transaction_objects << "pacemaker_order[#{order_constraint}]"
 
@@ -293,6 +303,7 @@ else
     # that they are available for the service to bind to.
     members primitives
     action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   service_transaction_objects << "pacemaker_group[#{group_name}]"
 
@@ -311,6 +322,7 @@ unless node[:rabbitmq][:listen_public]
     agent "ocf:heartbeat:IPaddr2"
     action [:stop, :delete]
     only_if "crm configure show #{public_vip_primitive}"
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 
