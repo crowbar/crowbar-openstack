@@ -29,6 +29,7 @@ crowbar_pacemaker_sync_mark "sync-ceilometer_server_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources"
 
+transaction_objects = []
 primitives = []
 
 ["collector", "agent_notification", "api", "alarm_evaluator", "alarm_notifier"].each do |service|
@@ -37,35 +38,40 @@ primitives = []
   pacemaker_primitive primitive_name do
     agent node[:ceilometer][:ha][service.to_sym][:agent]
     op node[:ceilometer][:ha][service.to_sym][:op]
-    action :create
+    action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+
   primitives << primitive_name
+  transaction_objects << "pacemaker_primitive[#{primitive_name}]"
 end
 
 group_name = "g-ceilometer-server"
-
 pacemaker_group group_name do
   members primitives
-  action :create
+  action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+transaction_objects << "pacemaker_group[#{group_name}]"
 
-pacemaker_clone "cl-#{group_name}" do
+clone_name = "cl-#{group_name}"
+pacemaker_clone clone_name do
   rsc group_name
-  action [:create, :start]
+  action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+transaction_objects << "pacemaker_clone[#{clone_name}]"
 
-order_only_existing = ["rabbitmq", "cl-keystone", "cl-#{group_name}"]
+order_only_existing = ["rabbitmq", "cl-keystone", clone_name]
 
 if node[:ceilometer][:use_mongodb]
   pacemaker_order "o-ceilometer-mongo" do
     score "Mandatory"
-    ordering "cl-mongodb cl-#{group_name}"
-    action :create
+    ordering "cl-mongodb #{clone_name}"
+    action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  transaction_objects << "pacemaker_order[o-ceilometer-mongo]"
 else
   # we don't make the db mandatory if not mongodb; this is debatable, but
   # oslo.db is supposed to deal well with reconnections; it's less clear about
@@ -73,7 +79,14 @@ else
   order_only_existing.unshift "postgresql"
 end
 
-crowbar_pacemaker_order_only_existing "o-cl-#{group_name}" do
+pacemaker_transaction "ceilometer server" do
+  cib_objects transaction_objects
+  # note that this will also automatically start the resources
+  action :commit_new
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
   ordering order_only_existing
   score "Optional"
   action :create
