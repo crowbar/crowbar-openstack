@@ -127,7 +127,6 @@ vxlan_group = <%= @vxlan_mcast_group %>
 # Example: max_header_size = 50 (Geneve headers with no additional options)
 
 [securitygroup]
-firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 # Controls if neutron security group is enabled or not.
 # It should be false when you use nova security group.
 # enable_security_group = True

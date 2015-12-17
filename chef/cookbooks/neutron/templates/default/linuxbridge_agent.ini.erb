@@ -66,10 +66,10 @@ l2_population = True
 # quitting_rpc_timeout = 10
 
 [securitygroup]
-firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 # Firewall driver for realizing neutron security group function
 # firewall_driver = neutron.agent.firewall.NoopFirewallDriver
 # Example: firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
 
 # Controls if neutron security group is enabled or not.
 # It should be false when you use nova security group.
