@@ -91,6 +91,8 @@ node.set["openstack"]["mq"]["database"]["rabbit"]["userid"] = rabbitmq[:trove][:
 node.set["openstack"]["mq"]["database"]["rabbit"]["vhost"] = rabbitmq[:trove][:vhost]
 node.set["openstack"]["secret"][rabbitmq[:trove][:user]]["user"] = rabbitmq[:trove][:password]
 
+node.set["openstack"]["insecure"] = keystone_settings["insecure"]
+node.set["openstack"]["database"]["insecure"] = keystone_settings["insecure"]
 node.set["openstack"]["region"] = keystone_settings["endpoint_region"]
 node.set["openstack"]["database"]["region"] = keystone_settings["endpoint_region"]
 # XXX mysql configuration

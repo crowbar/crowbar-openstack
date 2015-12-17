@@ -32,12 +32,14 @@ service_user = node["openstack"]["database"]["service_user"]
 service_role = node["openstack"]["database"]["service_role"]
 service_tenant_name = node["openstack"]["database"]["service_tenant_name"]
 database_service_api_endpoint = endpoint "database-api"
+insecure = node["openstack"]["database"]["insecure"]
 region = node["openstack"]["database"]["region"]
 
 # Register Service Tenant
 openstack_identity_register "Register Service Tenant" do
   auth_uri auth_uri
   bootstrap_token bootstrap_token
+  insecure insecure
   tenant_name service_tenant_name
   tenant_description "Service Tenant"
 
@@ -48,6 +50,7 @@ end
 openstack_identity_register "Register Service User" do
   auth_uri auth_uri
   bootstrap_token bootstrap_token
+  insecure insecure
   tenant_name service_tenant_name
   user_name service_user
   user_pass service_pass
@@ -59,6 +62,7 @@ end
 openstack_identity_register "Grant '#{service_role}' Role to Service User for Service Tenant" do
   auth_uri auth_uri
   bootstrap_token bootstrap_token
+  insecure insecure
   tenant_name service_tenant_name
   user_name service_user
   role_name service_role
@@ -70,6 +74,7 @@ end
 openstack_identity_register "Register Database Service" do
   auth_uri auth_uri
   bootstrap_token bootstrap_token
+  insecure insecure
   service_name "trove"
   service_type "database"
   service_description "Trove Service"
@@ -81,6 +86,7 @@ end
 openstack_identity_register "Register Database Endpoint" do
   auth_uri auth_uri
   bootstrap_token bootstrap_token
+  insecure insecure
   service_type "database"
   endpoint_region region
   endpoint_adminurl ::URI.decode database_service_api_endpoint.to_s
