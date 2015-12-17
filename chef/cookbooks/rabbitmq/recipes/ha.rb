@@ -63,39 +63,19 @@ crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha_storage"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_storage"
 
+storage_transaction_objects = []
+
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   drbd_params = {}
   drbd_params["drbd_resource"] = drbd_resource
-
-  # Careful here: when creating the DRBD resources, we should in theory create
-  # the primitive and the ms resources in one transaction. This is what is
-  # expected by the drbd OCF agent, which checks (for the primitive) that the
-  # meta bits (like clone-max), that are supposed to be inherited from the
-  # required ms resource, are present.
-  #
-  # When that check fails, we can see this error:
-  #   ERROR: meta parameter misconfigured, expected clone-max -le 2, but found unset.
-  # which will cause fencing (the resource is not supposed to start, but the
-  # monitoring op fails, so pacemaker tries to stop the resource to be safe,
-  # and that fails too, leading to fencing).
-  #
-  # However, we cannot create the two resources in one transaction. So what we
-  # do instead is on initial creation (and only in that case), we mark the drbd
-  # primitive as unmanaged (that will cause the failure to not be fatal, with
-  # no fencing), and we clean it up + mark it as managed after we create the ms
-  # resource.
 
   pacemaker_primitive drbd_primitive do
     agent "ocf:linbit:drbd"
     params drbd_params
     op rabbitmq_op
-    # See big comment above as to why we do that. We know that the founder will
-    # go first here, so we only do this on the founder.
-    meta ({
-      "is-managed" => "false"
-    }) if (CrowbarPacemakerHelper.is_cluster_founder?(node) && ! ::Kernel.system("crm configure show #{drbd_primitive} &> /dev/null"))
-    action :create
+    action :update
   end
+  storage_transaction_objects << "pacemaker_primitive[#{drbd_primitive}]"
 
   pacemaker_ms ms_name do
     rsc drbd_primitive
@@ -106,51 +86,42 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
       "clone-node-max" => "1",
       "notify" => "true"
     })
-    action :create
+    action :update
   end
-
-  # See big comment above as to why we do that. We know that the founder will
-  # go first here, so we only do this on the founder, but in short: this is
-  # needed because we don't create all the pacemaker resources in the same
-  # transaction.
-  # Note that we don't use "crm resource manage" because it will change
-  # is-managed of the ms resource...
-  execute "Cleanup and manage #{drbd_primitive} on #{ms_name} start" do
-    command "sleep 2; crm resource cleanup #{drbd_primitive}; crm_resource --resource #{drbd_primitive} --delete-parameter \"is-managed\" --meta || :"
-    action :nothing
-    subscribes :run, "pacemaker_ms[#{ms_name}]", :immediately
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+  storage_transaction_objects << "pacemaker_ms[#{ms_name}]"
 end
 
 pacemaker_primitive fs_primitive do
   agent "ocf:heartbeat:Filesystem"
   params fs_params
   op rabbitmq_op
-  action :create
+  action :update
 end
+storage_transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
 
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
-  pacemaker_colocation "col-#{fs_primitive}" do
+  colocation_constraint = "col-#{fs_primitive}"
+  pacemaker_colocation colocation_constraint do
     score "inf"
     resources "#{fs_primitive} #{ms_name}:Master"
-    action :create
+    action :update
   end
+  storage_transaction_objects << "pacemaker_colocation[#{colocation_constraint}]"
 
-  pacemaker_order "o-#{fs_primitive}" do
+  order_constraint = "o-#{fs_primitive}"
+  pacemaker_order order_constraint do
     score "Mandatory"
     ordering "#{ms_name}:promote #{fs_primitive}:start"
-    # This is our last constraint, so we can finally start fs_primitive
-    notifies :run, "execute[Cleanup #{fs_primitive} after constraints]", :immediately
-    notifies :start, "pacemaker_primitive[#{fs_primitive}]", :immediately
+    action :update
   end
+  storage_transaction_objects << "pacemaker_order[#{order_constraint}]"
+end
 
-  # This is needed because we don't create all the pacemaker resources in the
-  # same transaction, so we will need to cleanup before starting
-  execute "Cleanup #{fs_primitive} after constraints" do
-    command "sleep 2; crm resource cleanup #{fs_primitive}"
-    action :nothing
-  end
+pacemaker_transaction "rabbitmq storage" do
+  cib_objects storage_transaction_objects
+  # note that this will also automatically start the resources
+  action :commit_new
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-rabbitmq_ha_storage"
@@ -252,14 +223,17 @@ ruby_block "wait for rabbitmq vhostname" do
   end # block
 end # ruby_block
 
+service_transaction_objects = []
+
 pacemaker_primitive admin_vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
   params ({
     "ip" => admin_ip_addr
   })
   op rabbitmq_op
-  action :create
+  action :update
 end
+service_transaction_objects << "pacemaker_primitive[#{admin_vip_primitive}]"
 
 if node[:rabbitmq][:listen_public]
   pacemaker_primitive public_vip_primitive do
@@ -268,8 +242,9 @@ if node[:rabbitmq][:listen_public]
       "ip" => public_ip_addr
     })
     op rabbitmq_op
-    action :create
+    action :update
   end
+  service_transaction_objects << "pacemaker_primitive[#{public_vip_primitive}]"
   # Note: The "else" part of this, to remove the VIP for rabbitmq again, is
   #       located further down below, because we first need to update the
   #       constraints before we can stop and delete the primitive.
@@ -281,8 +256,9 @@ pacemaker_primitive service_name do
     "nodename" => node[:rabbitmq][:nodename]
   })
   op rabbitmq_op
-  action :create
+  action :update
 end
+service_transaction_objects << "pacemaker_primitive[#{service_name}]"
 
 dependencies = [fs_primitive, admin_vip_primitive]
 if node[:rabbitmq][:listen_public]
@@ -292,31 +268,21 @@ end
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   primitives = "( #{dependencies.join ' '} ) " + service_name
 
-  pacemaker_colocation "col-#{service_name}" do
+  colocation_constraint = "col-#{service_name}"
+  pacemaker_colocation colocation_constraint do
     score "inf"
     resources primitives
-    action :create
+    action :update
   end
+  service_transaction_objects << "pacemaker_colocation[#{colocation_constraint}]"
 
-  pacemaker_order "o-#{service_name}" do
+  order_constraint = "o-#{service_name}"
+  pacemaker_order order_constraint do
     score "Mandatory"
     ordering primitives
-    action :create
-    # This is our last constraint, so we can finally start service_name
-    notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
-    notifies :start, "pacemaker_primitive[#{admin_vip_primitive}]", :immediately
-    if node[:rabbitmq][:listen_public]
-      notifies :start, "pacemaker_primitive[#{public_vip_primitive}]", :immediately
-    end
-    notifies :start, "pacemaker_primitive[#{service_name}]", :immediately
+    action :update
   end
-
-  # This is needed because we don't create all the pacemaker resources in the
-  # same transaction, so we will need to cleanup before starting
-  execute "Cleanup #{service_name} after constraints" do
-    command "sleep 2; crm resource cleanup #{service_name}"
-    action :nothing
-  end
+  service_transaction_objects << "pacemaker_order[#{order_constraint}]"
 
 else
   # Pacemaker groups do not support parallel startup ordering :-(
@@ -326,9 +292,17 @@ else
     # Membership order *is* significant; VIPs should come first so
     # that they are available for the service to bind to.
     members primitives
-    action [:create, :start]
+    action :update
   end
+  service_transaction_objects << "pacemaker_group[#{group_name}]"
 
+end
+
+pacemaker_transaction "rabbitmq service" do
+  cib_objects service_transaction_objects
+  # note that this will also automatically start the resources
+  action :commit_new
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 # When listen_public is disabled remove the VIP primitive for rabbitmq
