@@ -40,4 +40,4 @@ en:
         hyper_v_support: 'Hyper-V support is not available.'
         swift_proxy: 'Nodes with the ceilometer-swift-proxy-middleware role must also have the swift-proxy role.'
         alarm_evaluation_interval: 'The threshold alarm evaluation interval needs be greater than (or equal to) all the meter update intervals.'
-        nodes: 'The cluster assigned to the ceilometer-server role should have at least 3 nodes, but it only has %{nodes_count}.'
+        nodes_count: 'The cluster assigned to the ceilometer-server role should have at least 3 nodes, but it only has %{nodes_count}.'
