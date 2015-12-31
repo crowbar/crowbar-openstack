@@ -105,6 +105,22 @@ if node[:database][:ha][:storage][:mode] == "drbd"
   end
   transaction_objects << "pacemaker_order[#{order_constraint}]"
 
+  vip_location_name = "l-#{vip_primitive}-controller"
+  pacemaker_location vip_location_name do
+    definition controller_only_location(vip_location_name, vip_primitive)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_location[#{vip_location_name}]"
+
+  location_name = "l-#{service_name}-controller"
+  pacemaker_location location_name do
+    definition controller_only_location(location_name, service_name)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_location[#{location_name}]"
+
 else
 
   pacemaker_group group_name do
@@ -115,6 +131,14 @@ else
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_group[#{group_name}]"
+
+  location_name = "l-#{group_name}-controller"
+  pacemaker_location location_name do
+    definition controller_only_location(location_name, group_name)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_location[#{location_name}]"
 
 end
 
