@@ -57,7 +57,7 @@ v2_auth_url = KeystoneHelper.versioned_service_URL(
     keystone_settings["service_port"], "2.0")
 keystonev2 = "keystone --insecure --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{v2_auth_url}"
 
-%x{#{keystonev2} endpoint-get --service orchestration &> /dev/null}
+`#{keystonev2} endpoint-get --service orchestration &> /dev/null`
 use_heat = $?.success?
 
 users = [
@@ -244,9 +244,9 @@ ec2_access = `#{keystonev2} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tai
 ec2_secret = `#{keystonev2} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`.strip
 raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
 
-%x{#{keystonev2} endpoint-get --service metering &> /dev/null}
+`#{keystonev2} endpoint-get --service metering &> /dev/null`
 use_ceilometer = $?.success?
-%x{#{keystonev2} endpoint-get --service database &> /dev/null}
+`#{keystonev2} endpoint-get --service database &> /dev/null`
 use_trove = $?.success?
 
 # FIXME: should avoid search with no environment in query
@@ -266,7 +266,7 @@ raise("Cannot fetch ID of floating network") if public_network_id.empty?
 
 # FIXME: the command above should be good enough, but radosgw is broken with
 # tempest; also should avoid search with no environment in query
-#%x{#{keystone} endpoint-get --service object-store &> /dev/null}
+#`#{keystone} endpoint-get --service object-store &> /dev/null`
 #use_swift = $?.success?
 swifts = search(:node, "roles:swift-proxy") || []
 use_swift = !swifts.empty?

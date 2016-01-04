@@ -74,10 +74,10 @@ ruby_block "load glance images" do
           cmd << " --property kernel_id=#{ids["kernel"]}" if ids["kernel"]
           cmd << " --property ramdisk_id=#{ids["initrd"]}" if ids["initrd"]
         end
-        res = %x{glance #{glance_args} image-list| grep #{basename}-#{part[0]} 2>&1}
+        res = `glance #{glance_args} image-list| grep #{basename}-#{part[0]} 2>&1`
         if res.nil? || res.empty?
           Chef::Log.info("Loading #{image_part} for #{basename}-#{part[0]}")
-          res = %x{#{cmd} < "#{image_part}"}
+          res = `#{cmd} < "#{image_part}"`
         else
           Chef::Log.info("#{basename}-#{part[0]} already loaded.")
         end
