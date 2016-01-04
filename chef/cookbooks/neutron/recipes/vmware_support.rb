@@ -25,7 +25,7 @@ if node[:platform_family] == "debian"
   # If we expect to install the openvswitch module via DKMS, but the module
   # does not exist, rmmod the openvswitch module before continuing.
   if node[:network][:ovs_pkgs].any? { |e| e == "openvswitch-datapath-dkms" } &&
-      !File.exists?("/lib/modules/#{`uname -r`.strip}/updates/dkms/openvswitch.ko") &&
+      !File.exist?("/lib/modules/#{`uname -r`.strip}/updates/dkms/openvswitch.ko") &&
       File.directory?("/sys/module/openvswitch")
     if IO.read("/sys/module/openvswitch/refcnt").strip != "0"
       Chef::Log.error("Kernel openvswitch module already loaded and in use! Please reboot me!")

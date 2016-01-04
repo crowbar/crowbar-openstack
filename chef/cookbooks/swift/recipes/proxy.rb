@@ -30,7 +30,7 @@ if node.roles.include?("swift-storage") && node[:swift][:devs].nil?
   return
 end
 
-if node.roles.include?("swift-ring-compute") && !(::File.exists? "/etc/swift/object.ring.gz")
+if node.roles.include?("swift-ring-compute") && !::File.exist?("/etc/swift/object.ring.gz")
   # Similarly to above; the difference is that we will have the rings in the
   # execute phase, but we do not want to be the only proxy node with the rings
   # (which would be the case, since we're in the ring-compute pass of swift
@@ -239,14 +239,14 @@ if node[:swift][:ssl][:enabled]
     package "openssl"
     ruby_block "generate_certs for swift" do
         block do
-          unless ::File.exists? node[:swift][:ssl][:certfile] and ::File.exists? node[:swift][:ssl][:keyfile]
+          unless ::File.exist?(node[:swift][:ssl][:certfile]) && ::File.exist?(node[:swift][:ssl][:keyfile])
             require "fileutils"
 
             Chef::Log.info("Generating SSL certificate for swift...")
 
             [:certfile, :keyfile].each do |k|
               dir = File.dirname(node[:swift][:ssl][k])
-              FileUtils.mkdir_p(dir) unless File.exists?(dir)
+              FileUtils.mkdir_p(dir) unless File.exist?(dir)
             end
 
             # Generate private key
@@ -283,7 +283,7 @@ if node[:swift][:ssl][:enabled]
       end # block
     end # ruby_block
   else # if generate_certs
-    unless ::File.exists? node[:swift][:ssl][:certfile]
+    unless ::File.exist? node[:swift][:ssl][:certfile]
       message = "Certificate \"#{node[:swift][:ssl][:certfile]}\" is not present."
       Chef::Log.fatal(message)
       raise message
@@ -348,7 +348,7 @@ ruby_block "Check if ring is present" do
   block do
     Chef::Log.info("Not setting up swift-proxy daemon; ring-compute node hasn't pushed the rings yet.")
   end
-  not_if { ::File.exists? "/etc/swift/object.ring.gz" }
+  not_if { ::File.exist? "/etc/swift/object.ring.gz" }
 end
 
 if node[:swift][:frontend]=="native"
@@ -364,7 +364,7 @@ if node[:swift][:frontend]=="native"
     subscribes :restart, resources(template: "/etc/swift/proxy-server.conf"), :immediately
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
     # Do not even try to start the daemon if we don't have the ring yet
-    only_if { ::File.exists? "/etc/swift/object.ring.gz" }
+    only_if { ::File.exist? "/etc/swift/object.ring.gz" }
   end
 elsif node[:swift][:frontend]=="uwsgi"
 
@@ -428,7 +428,7 @@ elsif node[:swift][:frontend]=="uwsgi"
     action :start
     subscribes :restart, "template[/usr/lib/cgi-bin/swift/proxy.py]"
     # Do not even try to start the daemon if we don't have the ring yet
-    only_if { ::File.exists? "/etc/swift/object.ring.gz" }
+    only_if { ::File.exist? "/etc/swift/object.ring.gz" }
   end
 
 end

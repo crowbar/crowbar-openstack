@@ -13,5 +13,5 @@ bash "tty linux setup" do
   curl #{node[:manila][:tty_linux_image]} | tar xvz -C /tmp/
   touch /var/lib/manila/tty_setup
   EOH
-  not_if { File.exists?("/var/lib/manila/tty_setup") }
+  not_if { File.exist?("/var/lib/manila/tty_setup") }
 end

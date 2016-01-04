@@ -41,7 +41,7 @@ if has_internal
     # osd nodes temporarily lost the role (while rebooting, for instance).
     # So check if the ceph setup was done once already, to decide whether
     # to fail or just to emit a warning.
-    if File.exists?("/etc/ceph/ceph.client.admin.keyring")
+    if File.exist?("/etc/ceph/ceph.client.admin.keyring")
       Chef::Log.warn("Ceph nodes seem to not be running; RBD backends might not work.")
     else
       message = "Ceph was not deployed with Crowbar yet!"
@@ -72,12 +72,12 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
     ceph_conf = volume[:rbd][:config_file]
     admin_keyring = volume[:rbd][:admin_keyring]
 
-    if ceph_conf.empty? || !File.exists?(ceph_conf)
+    if ceph_conf.empty? || !File.exist?(ceph_conf)
       Chef::Log.info("Ceph configuration file is missing; skipping the ceph setup for backend #{volume[:backend_name]}")
       next
     end
 
-    if !admin_keyring.empty? && File.exists?(admin_keyring)
+    if !admin_keyring.empty? && File.exist?(admin_keyring)
       Chef::Log.info("Using external ceph cluster for cinder #{volume[:backend_name]} backend, with automatic setup.")
     else
       Chef::Log.info("Using external ceph cluster for cinder #{volume[:backend_name]} backend, with no automatic setup.")

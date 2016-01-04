@@ -315,7 +315,7 @@ end
 # if for some reason, we only have one of the two keys, we recreate the keys
 # (no need to check the case where public key doesn't exist, as the execute
 # resource deals with that)
-if ::File.exist?("#{node[:nova][:home_dir]}/.ssh/id_rsa.pub") and !::File.exist?("#{node[:nova][:home_dir]}/.ssh/id_rsa")
+if ::File.exist?("#{node[:nova][:home_dir]}/.ssh/id_rsa.pub") && !::File.exist?("#{node[:nova][:home_dir]}/.ssh/id_rsa")
   file "#{node[:nova][:home_dir]}/.ssh/id_rsa.pub" do
     action :delete
   end

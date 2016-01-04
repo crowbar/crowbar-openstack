@@ -24,14 +24,14 @@ if node[:neutron][:api][:protocol] == "https"
     package "openssl"
     ruby_block "generate_certs for neutron" do
       block do
-        unless ::File.exists? node[:neutron][:ssl][:certfile] and ::File.exists? node[:neutron][:ssl][:keyfile]
+        unless ::File.exist?(node[:neutron][:ssl][:certfile]) && ::File.exist?(node[:neutron][:ssl][:keyfile])
           require "fileutils"
 
           Chef::Log.info("Generating SSL certificate for neutron...")
 
           [:certfile, :keyfile].each do |k|
             dir = File.dirname(node[:neutron][:ssl][k])
-            FileUtils.mkdir_p(dir) unless File.exists?(dir)
+            FileUtils.mkdir_p(dir) unless File.exist?(dir)
           end
 
           # Generate private key
@@ -68,7 +68,7 @@ if node[:neutron][:api][:protocol] == "https"
       end # block
     end # ruby_block
   else # if generate_certs
-    unless ::File.exists? node[:neutron][:ssl][:certfile]
+    unless ::File.exist? node[:neutron][:ssl][:certfile]
       message = "Certificate \"#{node[:neutron][:ssl][:certfile]}\" is not present."
       Chef::Log.fatal(message)
       raise message
@@ -77,7 +77,7 @@ if node[:neutron][:api][:protocol] == "https"
     # to be in the certfile
   end # if generate_certs
 
-  if node[:neutron][:ssl][:cert_required] and !::File.exists? node[:neutron][:ssl][:ca_certs]
+  if node[:neutron][:ssl][:cert_required] && !::File.exist?(node[:neutron][:ssl][:ca_certs])
     message = "Certificate CA \"#{node[:neutron][:ssl][:ca_certs]}\" is not present."
     Chef::Log.fatal(message)
     raise message

@@ -215,7 +215,7 @@ EOH
     "OS_USER_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
     "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : ""
   })
-  not_if { File.exists?(machine_id_file) }
+  not_if { File.exist?(machine_id_file) }
 end
 
 flavor_ref = "6"
@@ -361,7 +361,7 @@ EOH
       "IMAGE_URL" => node[:tempest][:tempest_test_docker_image],
       "IMAGE_NAME" => image_name
     })
-    not_if { File.exists?(docker_image_id_file) }
+    not_if { File.exist?(docker_image_id_file) }
   end
 
   use_docker = true

@@ -202,7 +202,7 @@ template grants_path do
   group "root"
   mode "0600"
   action :create
-  not_if { File.exists?("#{grants_key}") }
+  not_if { File.exist?("#{grants_key}") }
 end
 
 directory "/var/log/mysql/" do
