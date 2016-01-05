@@ -70,7 +70,7 @@ if node[:keystone][:frontend] == "native"
   end
   transaction_objects << "pacemaker_clone[#{clone_name}]"
 
-  pacemaker_transaction "#{clone_name} clone" do
+  pacemaker_transaction "keystone server" do
     cib_objects transaction_objects
     # note that this will also automatically start the resources
     action :commit_new
