@@ -55,6 +55,7 @@ if ha_enabled
 
   pacemaker_clone "cl-mongodb" do
     rsc "mongodb"
+    meta ({ "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node) })
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
