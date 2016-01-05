@@ -47,14 +47,18 @@ crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
 
+transaction_objects = []
+
 pacemaker_primitive vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
   params ({
     "ip" => ip_addr
   })
   op postgres_op
-  action :create
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+transaction_objects << "pacemaker_primitive[#{vip_primitive}]"
 
 # We run the resource agent "ocf:heartbeat:pgsql" without params, instead of
 # something like:
@@ -76,33 +80,30 @@ end
 pacemaker_primitive service_name do
   agent agent_name
   op postgres_op
-  action :create
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+transaction_objects << "pacemaker_primitive[#{service_name}]"
 
 if node[:database][:ha][:storage][:mode] == "drbd"
 
-  pacemaker_colocation "col-#{service_name}" do
+  colocation_constraint = "col-#{service_name}"
+  pacemaker_colocation colocation_constraint do
     score "inf"
     resources "( #{fs_primitive} #{vip_primitive} ) #{service_name}"
-    action :create
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  transaction_objects << "pacemaker_colocation[#{colocation_constraint}]"
 
-  pacemaker_order "o-#{service_name}" do
+  order_constraint = "o-#{service_name}"
+  pacemaker_order order_constraint do
     score "Mandatory"
     ordering "( #{fs_primitive} #{vip_primitive} ) #{service_name}"
-    action :create
-    # This is our last constraint, so we can finally start service_name
-    notifies :run, "execute[Cleanup #{service_name} after constraints]", :immediately
-    notifies :start, "pacemaker_primitive[#{vip_primitive}]", :immediately
-    notifies :start, "pacemaker_primitive[#{service_name}]", :immediately
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-
-  # This is needed because we don't create all the pacemaker resources in the
-  # same transaction, so we will need to cleanup before starting
-  execute "Cleanup #{service_name} after constraints" do
-    command "sleep 2; crm resource cleanup #{service_name}"
-    action :nothing
-  end
+  transaction_objects << "pacemaker_order[#{order_constraint}]"
 
 else
 
@@ -110,9 +111,18 @@ else
     # Membership order *is* significant; VIPs should come first so
     # that they are available for the service to bind to.
     members [fs_primitive, vip_primitive, service_name]
-    action [:create, :start]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  transaction_objects << "pacemaker_group[#{group_name}]"
 
+end
+
+pacemaker_transaction "database service" do
+  cib_objects transaction_objects
+  # note that this will also automatically start the resources
+  action :commit_new
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-database_ha_resources" do

@@ -67,39 +67,20 @@ crowbar_pacemaker_sync_mark "wait-database_ha_storage" do
   revision node[:database]["crowbar-revision"]
 end
 
+transaction_objects = []
+
 if node[:database][:ha][:storage][:mode] == "drbd"
   drbd_params = {}
   drbd_params["drbd_resource"] = drbd_resource
-
-  # Careful here: when creating the DRBD resources, we should in theory create
-  # the primitive and the ms resources in one transaction. This is what is
-  # expected by the drbd OCF agent, which checks (for the primitive) that the
-  # meta bits (like clone-max), that are supposed to be inherited from the
-  # required ms resource, are present.
-  #
-  # When that check fails, we can see this error:
-  #   ERROR: meta parameter misconfigured, expected clone-max -le 2, but found unset.
-  # which will cause fencing (the resource is not supposed to start, but the
-  # monitoring op fails, so pacemaker tries to stop the resource to be safe,
-  # and that fails too, leading to fencing).
-  #
-  # However, we cannot create the two resources in one transaction. So what we
-  # do instead is on initial creation (and only in that case), we mark the drbd
-  # primitive as unmanaged (that will cause the failure to not be fatal, with
-  # no fencing), and we clean it up + mark it as managed after we create the ms
-  # resource.
 
   pacemaker_primitive drbd_primitive do
     agent "ocf:linbit:drbd"
     params drbd_params
     op postgres_op
-    # See big comment above as to why we do that. We know that the founder will
-    # go first here, so we only do this on the founder.
-    meta ({
-      "is-managed" => "false"
-    }) if (CrowbarPacemakerHelper.is_cluster_founder?(node) && ! ::Kernel.system("crm configure show #{drbd_primitive} &> /dev/null"))
-    action :create
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  transaction_objects << "pacemaker_primitive[#{drbd_primitive}]"
 
   pacemaker_ms ms_name do
     rsc drbd_primitive
@@ -110,52 +91,46 @@ if node[:database][:ha][:storage][:mode] == "drbd"
       "clone-node-max" => "1",
       "notify" => "true"
     })
-    action :create
-  end
-
-  # See big comment above as to why we do that. We know that the founder will
-  # go first here, so we only do this on the founder, but in short: this is
-  # needed because we don't create all the pacemaker resources in the same
-  # transaction.
-  # Note that we don't use "crm resource manage" because it will change
-  # is-managed of the ms resource...
-  execute "Cleanup and manage #{drbd_primitive} on #{ms_name} start" do
-    command "sleep 2; crm resource cleanup #{drbd_primitive}; crm_resource --resource #{drbd_primitive} --delete-parameter \"is-managed\" --meta || :"
-    action :nothing
-    subscribes :run, "pacemaker_ms[#{ms_name}]", :immediately
+    action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  transaction_objects << "pacemaker_ms[#{ms_name}]"
 end
 
 pacemaker_primitive fs_primitive do
   agent "ocf:heartbeat:Filesystem"
   params fs_params
   op postgres_op
-  action :create
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
 
 if node[:database][:ha][:storage][:mode] == "drbd"
-  pacemaker_colocation "col-#{fs_primitive}" do
+  colocation_constraint = "col-#{fs_primitive}"
+  pacemaker_colocation colocation_constraint do
     score "inf"
     resources "#{fs_primitive} #{ms_name}:Master"
-    action :create
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  transaction_objects << "pacemaker_colocation[#{colocation_constraint}]"
 
-  pacemaker_order "o-#{fs_primitive}" do
+  order_constraint = "o-#{fs_primitive}"
+  pacemaker_order order_constraint do
     score "Mandatory"
     ordering "#{ms_name}:promote #{fs_primitive}:start"
-    action :create
-    # This is our last constraint, so we can finally start fs_primitive
-    notifies :run, "execute[Cleanup #{fs_primitive} after constraints]", :immediately
-    notifies :start, "pacemaker_primitive[#{fs_primitive}]", :immediately
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  transaction_objects << "pacemaker_order[#{order_constraint}]"
+end
 
-  # This is needed because we don't create all the pacemaker resources in the
-  # same transaction, so we will need to cleanup before starting
-  execute "Cleanup #{fs_primitive} after constraints" do
-    command "sleep 2; crm resource cleanup #{fs_primitive}"
-    action :nothing
-  end
+pacemaker_transaction "database storage" do
+  cib_objects transaction_objects
+  # note that this will also automatically start the resources
+  action :commit_new
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-database_ha_storage" do

@@ -49,13 +49,22 @@ if ha_enabled
   pacemaker_primitive "mongodb" do
     agent node[:ceilometer][:ha][:mongodb][:agent]
     op node[:ceilometer][:ha][:mongodb][:op]
-    action :create
+    action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
   pacemaker_clone "cl-mongodb" do
     rsc "mongodb"
-    action [:create, :start]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  pacemaker_transaction "mongodb" do
+    cib_objects [
+      "pacemaker_primitive[mongodb]",
+      "pacemaker_clone[cl-mongodb]"
+    ]
+    action :commit_new
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
