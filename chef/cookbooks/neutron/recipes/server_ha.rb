@@ -29,23 +29,34 @@ crowbar_pacemaker_sync_mark "sync-neutron_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-neutron_ha_resources"
 
-primitive_name = "neutron-server"
+transaction_objects = []
 
+primitive_name = "neutron-server"
 pacemaker_primitive primitive_name do
   agent node[:neutron][:ha][:server][:server_ra]
   op node[:neutron][:ha][:server][:op]
-  action :create
+  action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+transaction_objects << "pacemaker_primitive[#{primitive_name}]"
 
-pacemaker_clone "cl-#{primitive_name}" do
+clone_name = "cl-#{primitive_name}"
+pacemaker_clone clone_name do
   rsc primitive_name
-  action [:create, :start]
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+transaction_objects << "pacemaker_clone[#{clone_name}]"
+
+pacemaker_transaction "neutron server" do
+  cib_objects transaction_objects
+  # note that this will also automatically start the resources
+  action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_order_only_existing "o-cl-#{primitive_name}" do
-  ordering ["postgresql", "rabbitmq", "cl-keystone", "cl-#{primitive_name}"]
+crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
+  ordering ["postgresql", "rabbitmq", "cl-keystone", clone_name]
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

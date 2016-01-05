@@ -28,45 +28,62 @@ crowbar_pacemaker_sync_mark "wait-neutron-agents_ha_resources" do
   timeout 180
 end
 
+group_members = []
+transaction_objects = []
+
 l3_agent_primitive = "neutron-l3-agent"
 dhcp_agent_primitive = "neutron-dhcp-agent"
 metadata_agent_primitive = "neutron-metadata-agent"
 metering_agent_primitive =  "neutron-metering-agent"
 lbaas_agent_primitive =  "neutron-lbaas-agent"
 
-pacemaker_primitive l3_agent_primitive do
-  agent node[:neutron][:ha][:network][:l3_ra]
-  op node[:neutron][:ha][:network][:op]
-  action [:create]
-  only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+if use_l3_agent
+  pacemaker_primitive l3_agent_primitive do
+    agent node[:neutron][:ha][:network][:l3_ra]
+    op node[:neutron][:ha][:network][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  group_members << l3_agent_primitive
+  transaction_objects << "pacemaker_primitive[#{l3_agent_primitive}]"
 end
 
 pacemaker_primitive dhcp_agent_primitive do
   agent node[:neutron][:ha][:network][:dhcp_ra]
   op node[:neutron][:ha][:network][:op]
-  action [:create]
+  action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+group_members << dhcp_agent_primitive
+transaction_objects << "pacemaker_primitive[#{dhcp_agent_primitive}]"
 
 pacemaker_primitive metadata_agent_primitive do
   agent node[:neutron][:ha][:network][:metadata_ra]
   op node[:neutron][:ha][:network][:op]
-  action [:create]
+  action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+group_members << metadata_agent_primitive
+transaction_objects << "pacemaker_primitive[#{metadata_agent_primitive}]"
 
 pacemaker_primitive metering_agent_primitive do
   agent node[:neutron][:ha][:network][:metering_ra]
   op node[:neutron][:ha][:network][:op]
-  action [:create]
+  action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+group_members << metering_agent_primitive
+transaction_objects << "pacemaker_primitive[#{metering_agent_primitive}]"
 
-pacemaker_primitive lbaas_agent_primitive do
-  agent node[:neutron][:ha][:network][:lbaas_ra]
-  op node[:neutron][:ha][:network][:op]
-  action [:create]
-  only_if { use_lbaas_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+if use_lbaas_agent
+  pacemaker_primitive lbaas_agent_primitive do
+    agent node[:neutron][:ha][:network][:lbaas_ra]
+    op node[:neutron][:ha][:network][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  group_members << lbaas_agent_primitive
+  transaction_objects << "pacemaker_primitive[#{lbaas_agent_primitive}]"
 end
 
 networking_plugin = node[:neutron][:networking_plugin]
@@ -88,33 +105,38 @@ when "vmware"
 end
 neutron_agent_primitive = neutron_agent.sub(/^openstack-/, "")
 
-pacemaker_primitive neutron_agent_primitive do
-  agent neutron_agent_ra
-  op node[:neutron][:ha][:network][:op]
-  action [:create]
-  only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+if use_l3_agent
+  pacemaker_primitive neutron_agent_primitive do
+    agent neutron_agent_ra
+    op node[:neutron][:ha][:network][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  group_members << neutron_agent_primitive
+  transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
 end
-
-group_members = []
-group_members << l3_agent_primitive if use_l3_agent
-group_members << lbaas_agent_primitive if use_lbaas_agent
-group_members += [dhcp_agent_primitive,
-                   metadata_agent_primitive,
-                   metering_agent_primitive]
-group_members << neutron_agent_primitive if use_l3_agent
 
 agents_group_name = "g-neutron-agents"
 agents_clone_name = "cl-#{agents_group_name}"
 
 pacemaker_group agents_group_name do
   members group_members
-  action [:create]
+  action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+transaction_objects << "pacemaker_group[#{agents_group_name}]"
 
 pacemaker_clone agents_clone_name do
   rsc agents_group_name
-  action [:create, :start]
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+transaction_objects << "pacemaker_clone[#{agents_clone_name}]"
+
+pacemaker_transaction "neutron agents" do
+  cib_objects transaction_objects
+  # note that this will also automatically start the resources
+  action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
