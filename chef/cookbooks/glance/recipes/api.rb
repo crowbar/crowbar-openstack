@@ -32,7 +32,7 @@ if node[:glance][:api][:protocol] == "https"
           end
 
           # Generate private key
-          %x(openssl genrsa -out #{node[:glance][:ssl][:keyfile]} 4096)
+          `openssl genrsa -out #{node[:glance][:ssl][:keyfile]} 4096`
           if $?.exitstatus != 0
             message = "SSL private key generation failed"
             Chef::Log.fatal(message)
@@ -45,7 +45,7 @@ if node[:glance][:api][:protocol] == "https"
           conf_dir = File.dirname node[:glance][:ssl][:certfile]
           ssl_csr_file = "#{conf_dir}/signing_key.csr"
           ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{node[:fqdn]}\""
-          %x(openssl req -new -key #{node[:glance][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
+          `openssl req -new -key #{node[:glance][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject}`
           if $?.exitstatus != 0
             message = "SSL certificate signed requests generation failed"
             Chef::Log.fatal(message)
@@ -53,7 +53,7 @@ if node[:glance][:api][:protocol] == "https"
           end
 
           # Generate self-signed certificate with above CSR
-          %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{node[:glance][:ssl][:keyfile]} -out #{node[:glance][:ssl][:certfile]})
+          `openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{node[:glance][:ssl][:keyfile]} -out #{node[:glance][:ssl][:certfile]}`
           if $?.exitstatus != 0
             message = "SSL self-signed certificate generation failed"
             Chef::Log.fatal(message)

@@ -188,7 +188,7 @@ if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:ssl][:e
           end
 
           # Generate private key
-          %x(openssl genrsa -out #{api[:nova][:ssl][:keyfile]} 4096)
+          `openssl genrsa -out #{api[:nova][:ssl][:keyfile]} 4096`
           if $?.exitstatus != 0
             message = "SSL private key generation failed"
             Chef::Log.fatal(message)
@@ -201,7 +201,7 @@ if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:ssl][:e
           conf_dir = File.dirname api[:nova][:ssl][:certfile]
           ssl_csr_file = "#{conf_dir}/signing_key.csr"
           ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{api[:fqdn]}\""
-          %x(openssl req -new -key #{api[:nova][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject})
+          `openssl req -new -key #{api[:nova][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject}`
           if $?.exitstatus != 0
             message = "SSL certificate signed requests generation failed"
             Chef::Log.fatal(message)
@@ -209,7 +209,7 @@ if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:ssl][:e
           end
 
           # Generate self-signed certificate with above CSR
-          %x(openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{api[:nova][:ssl][:keyfile]} -out #{api[:nova][:ssl][:certfile]})
+          `openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{api[:nova][:ssl][:keyfile]} -out #{api[:nova][:ssl][:certfile]}`
           if $?.exitstatus != 0
             message = "SSL self-signed certificate generation failed"
             Chef::Log.fatal(message)

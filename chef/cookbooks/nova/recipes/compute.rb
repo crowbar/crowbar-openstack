@@ -83,7 +83,7 @@ def set_boot_kernel_and_trigger_reboot(flavor="default")
 
   # trigger reboot through reboot_handler, if kernel-$flavor is not yet
   # running
-  unless %x[uname -r].include?(flavor)
+  unless `uname -r`.include?(flavor)
     node.run_state[:reboot] = true
   end
 end
@@ -178,7 +178,7 @@ case node[:nova][:libvirt_type]
                   /sbin/modprobe vhost-net
                   /sbin/modprobe nbd
               EOF
-              only_if { %x[uname -r].include?("default") }
+              only_if { `uname -r`.include?("default") }
             end
           end
 
@@ -193,7 +193,7 @@ case node[:nova][:libvirt_type]
             action :nothing
             supports status: true, start: true, stop: true, restart: true
             # restart xend only when xen kernel is already present
-            only_if { %x[uname -r].include?("xen") }
+            only_if { `uname -r`.include?("xen") }
           end
 
           template "/etc/xen/xend-config.sxp" do
