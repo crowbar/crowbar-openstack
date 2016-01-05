@@ -110,6 +110,7 @@ class KeystoneService < PacemakerServiceObject
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "keystone-server")
     reset_sync_marks_on_clusters_founders(server_elements)
+    Openstack::HA.set_controller_role(server_nodes) if ha_enabled
 
     vip_networks = ["admin", "public"]
 

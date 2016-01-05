@@ -72,6 +72,8 @@ class RabbitmqService < PacemakerServiceObject
     return if all_nodes.empty?
 
     rabbitmq_elements, rabbitmq_nodes, rabbitmq_ha_enabled = role_expand_elements(role, "rabbitmq-server")
+    Openstack::HA.set_controller_role(rabbitmq_nodes) if rabbitmq_ha_enabled
+
     role.save if prepare_role_for_ha(role, ["rabbitmq", "ha", "enabled"], rabbitmq_ha_enabled)
     reset_sync_marks_on_clusters_founders(rabbitmq_elements)
 

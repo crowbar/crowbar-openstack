@@ -201,6 +201,7 @@ class CinderService < PacemakerServiceObject
 
     controller_elements, controller_nodes, ha_enabled = role_expand_elements(role, "cinder-controller")
     reset_sync_marks_on_clusters_founders(controller_elements)
+    Openstack::HA.set_controller_role(controller_nodes) if ha_enabled
 
     vip_networks = ["admin", "public"]
 
