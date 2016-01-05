@@ -44,6 +44,8 @@ if node[:keystone][:frontend] == "native"
   # then we will avoid races there too as pacemaker will start the service).
   crowbar_pacemaker_sync_mark "wait-keystone_ha_resources"
 
+  transaction_objects = []
+
   service_name = "keystone"
   pacemaker_primitive service_name do
     agent node[:keystone][:ha][:agent]
@@ -55,18 +57,28 @@ if node[:keystone][:frontend] == "native"
     #   "user"           => node[:keystone][:user]
     # })
     op node[:keystone][:ha][:op]
-    action :create
+    action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  transaction_objects << "pacemaker_primitive[#{service_name}]"
 
-  pacemaker_clone "cl-#{service_name}" do
+  clone_name = "cl-#{service_name}"
+  pacemaker_clone clone_name do
     rsc service_name
-    action [:create, :start]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_clone[#{clone_name}]"
+
+  pacemaker_transaction "#{clone_name} clone" do
+    cib_objects transaction_objects
+    # note that this will also automatically start the resources
+    action :commit_new
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
-  crowbar_pacemaker_order_only_existing "o-cl-#{service_name}" do
-    ordering ["postgresql", "rabbitmq", "cl-#{service_name}"]
+  crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
+    ordering ["postgresql", "rabbitmq", clone_name]
     score "Optional"
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
