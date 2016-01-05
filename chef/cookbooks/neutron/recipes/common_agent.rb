@@ -140,7 +140,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
     physnet = node[:crowbar_wall][:network][:nets][:nova_fixed].first
     interface_mappings = "physnet1:" + physnet
-    if node.roles.include?("neutron-network")
+    if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
       external_networks = ["nova_floating"]
       external_networks.concat(node[:neutron][:additional_external_networks])
       ext_physnet_map = NeutronHelper.get_neutron_physnets(node, external_networks)
