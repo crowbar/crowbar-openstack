@@ -21,3 +21,4 @@ end
 end
 
 depends "openssl"
+depends "crowbar-openstack"

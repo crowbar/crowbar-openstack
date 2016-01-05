@@ -65,10 +65,18 @@ if node[:keystone][:frontend] == "native"
   clone_name = "cl-#{service_name}"
   pacemaker_clone clone_name do
     rsc service_name
+    meta ({ "clone-max" => 2 })
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_clone[#{clone_name}]"
+
+  location_name = "l-#{clone_name}-controller"
+  pacemaker_location location_name do
+    definition controller_only_location(location_name, clone_name)
+    action :update
+  end
+  transaction_objects << "pacemaker_location[#{location_name}]"
 
   pacemaker_transaction "#{clone_name} clone" do
     cib_objects transaction_objects
