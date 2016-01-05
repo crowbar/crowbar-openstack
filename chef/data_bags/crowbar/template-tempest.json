@@ -4,8 +4,8 @@
   "attributes": {
     "tempest": {
       "tempest_tarball": "http://<ADMINWEB>/files/tempest/juno.tar.gz",
-      "tempest_test_image": "http://<ADMINWEB>/files/tempest/cirros-0.3.3-x86_64-uec.tar.gz",
-      "tempest_test_docker_image": "http://<ADMINWEB>/files/tempest/cirros-0.3.3-docker.tar",
+      "tempest_test_image": "http://<ADMINWEB>/files/tempest/cirros-0.3.4-x86_64-uec.tar.gz",
+      "tempest_test_docker_image": "http://<ADMINWEB>/files/tempest/cirros-0.3.4-docker.tar",
       "tempest_adm_password": "tempest",
       "tempest_adm_username": "tempest",
       "tempest_user_password": "tempest",
