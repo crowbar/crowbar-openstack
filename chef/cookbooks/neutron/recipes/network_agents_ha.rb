@@ -151,8 +151,6 @@ if use_l3_agent
                                                          keystone_settings["service_port"],
                                                          "2.0")
 
-  ha_tool_primitive_name = "neutron-ha-tool"
-
   # FIXME: While the neutron-ha-tool resource agent allows specifying a CA
   # Certificate to use for SSL Certificate verification, it's hard to select
   # right CA file as we allow Keystone's and Neutron's to use different CAs.  So
@@ -168,6 +166,9 @@ if use_l3_agent
     action :create
   end
 
+  ha_tool_transaction_objects = []
+
+  ha_tool_primitive_name = "neutron-ha-tool"
   pacemaker_primitive ha_tool_primitive_name do
     agent node[:neutron][:ha][:network][:ha_tool_ra]
     params ({
@@ -178,7 +179,23 @@ if use_l3_agent
       "os_insecure"    => keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
     })
     op node[:neutron][:ha][:network][:op]
-    action [:create, :start]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  ha_tool_transaction_objects << "pacemaker_primitive[#{ha_tool_primitive_name}]"
+
+  ha_tool_location_name = "l-#{ha_tool_primitive_name}-controller"
+  pacemaker_location ha_tool_location_name do
+    definition OpenStackHAHelper.controller_only_location(ha_tool_location_name, ha_tool_primitive_name)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  ha_tool_transaction_objects << "pacemaker_location[#{ha_tool_location_name}]"
+
+  pacemaker_transaction "neutron ha tool" do
+    cib_objects ha_tool_transaction_objects
+    # note that this will also automatically start the resources
+    action :commit_new
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
