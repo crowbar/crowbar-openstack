@@ -143,55 +143,57 @@ pacemaker_transaction "neutron agents" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-# FIXME: neutron-ha-tool can't do keystone v3 currently
-os_auth_url_v2 = KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
-                                                       keystone_settings["internal_url_host"],
-                                                       keystone_settings["service_port"],
-                                                       "2.0")
+if use_l3_agent
+  keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+  # FIXME: neutron-ha-tool can't do keystone v3 currently
+  os_auth_url_v2 = KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
+                                                         keystone_settings["internal_url_host"],
+                                                         keystone_settings["service_port"],
+                                                         "2.0")
 
-ha_tool_primitive_name = "neutron-ha-tool"
+  ha_tool_primitive_name = "neutron-ha-tool"
 
-# FIXME: While the neutron-ha-tool resource agent allows specifying a CA
-# Certificate to use for SSL Certificate verification, it's hard to select
-# right CA file as we allow Keystone's and Neutron's to use different CAs.  So
-# we just rely on the correct CA files being installed in a system wide default
-# location.
-file "/etc/neutron/os_password" do
-  owner "root"
-  group "root"
-  mode "0600"
-  content keystone_settings["admin_password"]
-  # Our Chef is apparently too old for this :-/
-  #sensitive true
-  action :create
-end
+  # FIXME: While the neutron-ha-tool resource agent allows specifying a CA
+  # Certificate to use for SSL Certificate verification, it's hard to select
+  # right CA file as we allow Keystone's and Neutron's to use different CAs.  So
+  # we just rely on the correct CA files being installed in a system wide default
+  # location.
+  file "/etc/neutron/os_password" do
+    owner "root"
+    group "root"
+    mode "0600"
+    content keystone_settings["admin_password"]
+    # Our Chef is apparently too old for this :-/
+    #sensitive true
+    action :create
+  end
 
-pacemaker_primitive ha_tool_primitive_name do
-  agent node[:neutron][:ha][:network][:ha_tool_ra]
-  params ({
-    "os_auth_url"    => os_auth_url_v2,
-    "os_region_name" => keystone_settings["endpoint_region"],
-    "os_tenant_name" => keystone_settings["admin_tenant"],
-    "os_username"    => keystone_settings["admin_user"],
-    "os_insecure"    => keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
-  })
-  op node[:neutron][:ha][:network][:op]
-  action [:create, :start]
-  only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
+  pacemaker_primitive ha_tool_primitive_name do
+    agent node[:neutron][:ha][:network][:ha_tool_ra]
+    params ({
+      "os_auth_url"    => os_auth_url_v2,
+      "os_region_name" => keystone_settings["endpoint_region"],
+      "os_tenant_name" => keystone_settings["admin_tenant"],
+      "os_username"    => keystone_settings["admin_user"],
+      "os_insecure"    => keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
+    })
+    op node[:neutron][:ha][:network][:op]
+    action [:create, :start]
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 
-crowbar_pacemaker_order_only_existing "o-#{ha_tool_primitive_name}" do
-  # While neutron-ha-tool technically doesn't directly depend on postgresql or
-  # rabbitmq, if these bits are not running, then neutron-server can run but
-  # can't do what it's being asked. Note that neutron-server does have a
-  # constraint on these services, but it's optional, not mandatory (because it
-  # doesn't need to be restarted when postgresql or rabbitmq are restarted).
-  # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
-  ordering "( postgresql rabbitmq g-haproxy cl-neutron-server #{agents_clone_name} ) #{ha_tool_primitive_name}"
-  score "Mandatory"
-  action :create
-  only_if { use_l3_agent && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  crowbar_pacemaker_order_only_existing "o-#{ha_tool_primitive_name}" do
+    # While neutron-ha-tool technically doesn't directly depend on postgresql or
+    # rabbitmq, if these bits are not running, then neutron-server can run but
+    # can't do what it's being asked. Note that neutron-server does have a
+    # constraint on these services, but it's optional, not mandatory (because it
+    # doesn't need to be restarted when postgresql or rabbitmq are restarted).
+    # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
+    ordering "( postgresql rabbitmq g-haproxy cl-neutron-server #{agents_clone_name} ) #{ha_tool_primitive_name}"
+    score "Mandatory"
+    action :create
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 end
 
 crowbar_pacemaker_sync_mark "create-neutron-agents_ha_resources"
