@@ -71,6 +71,14 @@ if node[:keystone][:frontend] == "native"
   end
   transaction_objects << "pacemaker_clone[#{clone_name}]"
 
+  location_name = "l-#{clone_name}-controller"
+  pacemaker_location location_name do
+    definition OpenStackHAHelper.controller_only_location(location_name, clone_name)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_location[#{location_name}]"
+
   pacemaker_transaction "keystone server" do
     cib_objects transaction_objects
     # note that this will also automatically start the resources
