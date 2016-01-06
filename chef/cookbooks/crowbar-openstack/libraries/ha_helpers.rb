@@ -23,24 +23,20 @@
 #   service_name = "keystone"
 #   location_name = "l-#{service_name}-controller"
 #   pacemaker_location location_name do
-#     definition controller_only_location(location_name, service_name)
+#     definition OpenStackHAHelper.controller_only_location(location_name, service_name)
 #     action :update
 #     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 #   end
 #   transaction_objects << "pacemaker_location[#{location_name}]"
 
-class Chef
-  class Resource
-    class PacemakerLocation
-      def controller_only_location(location, service)
-        "location #{location} #{service} resource-discovery=exclusive " +
-          "rule 0: OpenStack-role eq controller"
-      end
+module OpenStackHAHelper
+  def self.controller_only_location(location, service)
+    "location #{location} #{service} resource-discovery=exclusive " \
+      "rule 0: OpenStack-role eq controller"
+  end
 
-      def compute_only_location(location, service)
-        "location #{location} #{service} resource-discovery=exclusive " +
-          "rule 0: OpenStack-role eq compute"
-      end
-    end
+  def self.compute_only_location(location, service)
+    "location #{location} #{service} resource-discovery=exclusive " \
+      "rule 0: OpenStack-role eq compute"
   end
 end

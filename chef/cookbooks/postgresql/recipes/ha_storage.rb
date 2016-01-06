@@ -98,7 +98,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
 
   location_name = "l-#{ms_name}-controller"
   pacemaker_location location_name do
-    definition controller_only_location(location_name, ms_name)
+    definition OpenStackHAHelper.controller_only_location(location_name, ms_name)
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
@@ -116,7 +116,7 @@ transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
 
 location_name = "l-#{fs_primitive}-controller"
 pacemaker_location location_name do
-  definition controller_only_location(location_name, fs_primitive)
+  definition OpenStackHAHelper.controller_only_location(location_name, fs_primitive)
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
