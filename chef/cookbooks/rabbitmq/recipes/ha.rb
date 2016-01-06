@@ -91,6 +91,14 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   storage_transaction_objects << "pacemaker_ms[#{ms_name}]"
+
+  location_name = "l-#{ms_name}-controller"
+  pacemaker_location location_name do
+    definition OpenStackHAHelper.controller_only_location(location_name, ms_name)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  storage_transaction_objects << "pacemaker_location[#{location_name}]"
 end
 
 pacemaker_primitive fs_primitive do
@@ -101,6 +109,14 @@ pacemaker_primitive fs_primitive do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 storage_transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
+
+location_name = "l-#{fs_primitive}-controller"
+pacemaker_location location_name do
+  definition OpenStackHAHelper.controller_only_location(location_name, fs_primitive)
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+storage_transaction_objects << "pacemaker_location[#{location_name}]"
 
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   colocation_constraint = "col-#{fs_primitive}"
@@ -294,6 +310,32 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   end
   service_transaction_objects << "pacemaker_order[#{order_constraint}]"
 
+  admin_vip_location_name = "l-#{admin_vip_primitive}-controller"
+  pacemaker_location admin_vip_location_name do
+    definition controller_only_location(admin_vip_location_name, admin_vip_primitive)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_location[#{admin_vip_location_name}]"
+
+  if node[:rabbitmq][:listen_public]
+    public_vip_location_name = "l-#{public_vip_primitive}-controller"
+    pacemaker_location public_vip_location_name do
+      definition controller_only_location(public_vip_location_name, public_vip_primitive)
+      action :update
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
+    transaction_objects << "pacemaker_location[#{public_vip_location_name}]"
+  end
+
+  location_name = "l-#{service_name}-controller"
+  pacemaker_location location_name do
+    definition OpenStackHAHelper.controller_only_location(location_name, service_name)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  service_transaction_objects << "pacemaker_location[#{location_name}]"
+
 else
   # Pacemaker groups do not support parallel startup ordering :-(
   primitives = dependencies + [service_name]
@@ -306,6 +348,14 @@ else
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   service_transaction_objects << "pacemaker_group[#{group_name}]"
+
+  location_name = "l-#{group_name}-controller"
+  pacemaker_location location_name do
+    definition OpenStackHAHelper.controller_only_location(location_name, group_name)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  service_transaction_objects << "pacemaker_location[#{location_name}]"
 
 end
 
