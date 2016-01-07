@@ -47,37 +47,52 @@ crowbar_pacemaker_sync_mark "sync-manila_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-manila_ha_resources"
 
-pacemaker_primitive "manila-api" do
+transaction_objects = []
+
+api_primitive = "manila-api"
+pacemaker_primitive api_primitive do
   agent node[:manila][:ha][:api_ra]
   op node[:manila][:ha][:op]
-  action :create
+  action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+transaction_objects << "pacemaker_primitive[#{api_primitive}]"
 
-pacemaker_primitive "manila-scheduler" do
+scheduler_primitive = "manila-scheduler"
+pacemaker_primitive scheduler_primitive do
   agent node[:manila][:ha][:scheduler_ra]
   op node[:manila][:ha][:op]
-  action :create
+  action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+transaction_objects << "pacemaker_primitive[#{scheduler_primitive}]"
 
 group_name = "g-manila-controller"
-
 pacemaker_group group_name do
   members ["manila-api", "manila-scheduler"]
-  action :create
+  action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+transaction_objects << "pacemaker_group[#{group_name}]"
 
-pacemaker_clone "cl-#{group_name}" do
+clone_name = "cl-#{group_name}"
+pacemaker_clone clone_name do
   rsc group_name
-  action [:create, :start]
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+transaction_objects << "pacemaker_clone[#{clone_name}]"
+
+pacemaker_transaction "manila controller" do
+  cib_objects transaction_objects
+  # note that this will also automatically start the resources
+  action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_order_only_existing "o-cl-#{group_name}" do
+crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
   ordering ["postgresql", "rabbitmq", "cl-keystone", "cl-glance", "cl-cinder",
-            "cl-neutron", "cl-nova", "cl-#{group_name}"]
+            "cl-neutron", "cl-nova", clone_name]
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
