@@ -79,7 +79,7 @@ pacemaker_clone clone_name do
 end
 transaction_objects << "pacemaker_clone[#{clone_name}]"
 
-pacemaker_transaction "#{clone_name} clone" do
+pacemaker_transaction "glance server" do
   cib_objects transaction_objects
   # note that this will also automatically start the resources
   action :commit_new
