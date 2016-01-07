@@ -37,9 +37,7 @@ end
 crowbar_pacemaker_sync_mark "sync-horizon_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-horizon_ha_resources" do
-  timeout 180
-end
+crowbar_pacemaker_sync_mark "wait-horizon_ha_resources"
 
 include_recipe "crowbar-pacemaker::apache"
 

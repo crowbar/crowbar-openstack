@@ -114,6 +114,7 @@ end
     controller_elements,
     controller_nodes,
     ha_enabled = role_expand_elements(role, "manila-server")
+    reset_sync_marks_on_clusters_founders(controller_elements)
     vip_networks = ["admin", "public"]
 
     dirty = prepare_role_for_ha_with_haproxy(

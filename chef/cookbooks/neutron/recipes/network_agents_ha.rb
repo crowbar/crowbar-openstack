@@ -24,9 +24,7 @@ use_lbaas_agent = node[:neutron][:use_lbaas]
 crowbar_pacemaker_sync_mark "sync-neutron-agents_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-neutron-agents_ha_resources" do
-  timeout 180
-end
+crowbar_pacemaker_sync_mark "wait-neutron-agents_ha_resources"
 
 group_members = []
 transaction_objects = []

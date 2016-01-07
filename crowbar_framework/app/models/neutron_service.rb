@@ -380,7 +380,9 @@ class NeutronService < PacemakerServiceObject
     end
 
     server_elements, server_nodes, server_ha_enabled = role_expand_elements(role, "neutron-server")
+    reset_sync_marks_on_clusters_founders(server_elements)
     network_elements, network_nodes, network_ha_enabled = role_expand_elements(role, "neutron-network")
+    reset_sync_marks_on_clusters_founders(network_elements)
 
     vip_networks = ["admin", "public"]
 

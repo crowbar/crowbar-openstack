@@ -109,6 +109,7 @@ class HorizonService < PacemakerServiceObject
     return if all_nodes.empty?
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "horizon-server")
+    reset_sync_marks_on_clusters_founders(server_elements)
 
     vip_networks = ["admin", "public"]
 

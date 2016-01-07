@@ -109,6 +109,7 @@ class KeystoneService < PacemakerServiceObject
     @logger.debug("Keystone apply_role_pre_chef_call: entering #{all_nodes.inspect}")
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "keystone-server")
+    reset_sync_marks_on_clusters_founders(server_elements)
 
     vip_networks = ["admin", "public"]
 

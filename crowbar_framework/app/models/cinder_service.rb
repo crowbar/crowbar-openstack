@@ -200,6 +200,7 @@ class CinderService < PacemakerServiceObject
     return if all_nodes.empty?
 
     controller_elements, controller_nodes, ha_enabled = role_expand_elements(role, "cinder-controller")
+    reset_sync_marks_on_clusters_founders(controller_elements)
 
     vip_networks = ["admin", "public"]
 

@@ -86,6 +86,7 @@ class GlanceService < PacemakerServiceObject
 
     # Role can be assigned to clusters, so we need to expand the elements to get the actual list of nodes.
     server_elements, server_nodes, has_expanded = role_expand_elements(role, "glance-server")
+    reset_sync_marks_on_clusters_founders(server_elements)
 
     # If glance_elements != glance_nodes, has_expanded will be true, which currently means we want to use HA.
     ha_enabled = has_expanded
