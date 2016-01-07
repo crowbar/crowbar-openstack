@@ -287,16 +287,15 @@ cookbook_file "/etc/nova/nova-compute.conf" do
   notifies :restart, "service[nova-compute]"
 end unless node[:platform_family] == "suse"
 
-env_filter = " AND nova_config_environment:#{node[:nova][:config][:environment]}"
-nova_controller = search(:node, "roles:nova-controller#{env_filter}")
+nova_controllers = search_env_filtered(:node, "roles:nova-controller")
 
-nova_controller_ips = nova_controller.map do |nova_controller_node|
+nova_controller_ips = nova_controllers.map do |nova_controller_node|
   Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova_controller_node, "admin").address
 end
 
 # Note: since we do not allow shared storage with a cluster, we know that the
 # first controller is the right one to use (ie, the only one)
-if !nova_controller.nil? and nova_controller.length > 0 and nova_controller[0].name != node.name
+if !nova_controllers.nil? and nova_controllers.length > 0 and nova_controllers[0].name != node.name
   mount node[:nova][:instances_path] do
     action node[:nova]["use_shared_instance_storage"] ? [:mount, :enable] : [:umount, :disable]
     fstype "nfs"
