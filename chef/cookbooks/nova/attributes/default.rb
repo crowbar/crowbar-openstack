@@ -129,6 +129,17 @@ default[:nova][:ha][:ports][:objectstore] = 5553
 default[:nova][:ha][:ports][:novncproxy] = 5554
 default[:nova][:ha][:ports][:xvpvncproxy] = 5555
 
+default[:nova][:ha][:compute][:enabled] = false
+default[:nova][:ha][:compute][:compute][:op][:monitor][:interval] = "10s"
+default[:nova][:ha][:compute][:compute][:op][:monitor][:timeout] = "20s"
+default[:nova][:ha][:compute][:compute][:op][:start][:timeout] = "600s"
+default[:nova][:ha][:compute][:compute][:op][:stop][:timeout] = "300s"
+default[:nova][:ha][:compute][:evacuate][:op][:monitor][:interval] = "10s"
+default[:nova][:ha][:compute][:evacuate][:op][:monitor][:timeout] = "600s"
+default[:nova][:ha][:compute][:evacuate][:op][:start][:timeout] = "20s"
+default[:nova][:ha][:compute][:evacuate][:op][:stop][:timeout] = "20s"
+default[:nova][:ha][:compute][:fence][:op][:monitor][:interval] = "10m"
+
 #
 # Block device settings
 #
