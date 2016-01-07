@@ -295,7 +295,7 @@ end
 
 # Note: since we do not allow shared storage with a cluster, we know that the
 # first controller is the right one to use (ie, the only one)
-if !nova_controllers.nil? and nova_controllers.length > 0 and nova_controllers[0].name != node.name
+if !nova_controllers.nil? && nova_controllers.length > 0 && nova_controllers[0].name != node.name
   mount node[:nova][:instances_path] do
     action node[:nova]["use_shared_instance_storage"] ? [:mount, :enable] : [:umount, :disable]
     fstype "nfs"
