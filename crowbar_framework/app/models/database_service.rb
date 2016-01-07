@@ -112,6 +112,7 @@ class DatabaseService < PacemakerServiceObject
 
     database_elements, database_nodes, database_ha_enabled = role_expand_elements(role, "database-server")
     prepare_role_for_ha(role, ["database", "ha", "enabled"], database_ha_enabled)
+    reset_sync_marks_on_clusters_founders(database_elements)
 
     if database_ha_enabled
       net_svc = NetworkService.new @logger

@@ -161,6 +161,7 @@ class CeilometerService < PacemakerServiceObject
     end
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "ceilometer-server")
+    reset_sync_marks_on_clusters_founders(server_elements)
 
     vip_networks = ["admin", "public"]
 
@@ -182,8 +183,9 @@ class CeilometerService < PacemakerServiceObject
     # the VIP of the cluster to be setup
     allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
 
-    _polling_elements, _polling_nodes, polling_ha_enabled = \
+    polling_elements, _polling_nodes, polling_ha_enabled = \
         role_expand_elements(role, "ceilometer-polling")
+    reset_sync_marks_on_clusters_founders(polling_elements)
 
     role.save if prepare_role_for_ha(role,\
                                      ["ceilometer", "ha", "polling", "enabled"],\

@@ -94,6 +94,7 @@ class HeatService < PacemakerServiceObject
     vip_networks = ["admin", "public"]
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "heat-server")
+    reset_sync_marks_on_clusters_founders(server_elements)
 
     role.save if prepare_role_for_ha_with_haproxy(role, ["heat", "ha", "enabled"], ha_enabled, server_elements, vip_networks)
 

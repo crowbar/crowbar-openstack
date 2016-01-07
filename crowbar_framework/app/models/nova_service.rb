@@ -183,6 +183,7 @@ class NovaService < PacemakerServiceObject
     end
 
     controller_elements, controller_nodes, ha_enabled = role_expand_elements(role, "nova-controller")
+    reset_sync_marks_on_clusters_founders(controller_elements)
 
     vip_networks = ["admin", "public"]
 

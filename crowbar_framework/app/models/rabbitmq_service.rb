@@ -73,6 +73,7 @@ class RabbitmqService < PacemakerServiceObject
 
     rabbitmq_elements, rabbitmq_nodes, rabbitmq_ha_enabled = role_expand_elements(role, "rabbitmq-server")
     role.save if prepare_role_for_ha(role, ["rabbitmq", "ha", "enabled"], rabbitmq_ha_enabled)
+    reset_sync_marks_on_clusters_founders(rabbitmq_elements)
 
     net_svc = NetworkService.new @logger
     # Allocate public IP if rabbitmq should listen on public interface
