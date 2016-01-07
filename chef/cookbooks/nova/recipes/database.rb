@@ -27,7 +27,7 @@ db_settings = fetch_database_settings
 
 crowbar_pacemaker_sync_mark "wait-nova_database" do
   # the db sync is very slow for nova
-  timeout 240
+  timeout 120
 end
 
 # Creates empty nova database
