@@ -381,8 +381,10 @@ class NeutronService < PacemakerServiceObject
 
     server_elements, server_nodes, server_ha_enabled = role_expand_elements(role, "neutron-server")
     reset_sync_marks_on_clusters_founders(server_elements)
+    Openstack::HA.set_controller_role(server_nodes) if server_ha_enabled
     network_elements, network_nodes, network_ha_enabled = role_expand_elements(role, "neutron-network")
     reset_sync_marks_on_clusters_founders(network_elements)
+    Openstack::HA.set_controller_role(network_nodes) if network_ha_enabled
 
     vip_networks = ["admin", "public"]
 

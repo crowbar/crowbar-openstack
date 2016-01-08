@@ -91,6 +91,8 @@ class GlanceService < PacemakerServiceObject
     # If glance_elements != glance_nodes, has_expanded will be true, which currently means we want to use HA.
     ha_enabled = has_expanded
 
+    Openstack::HA.set_controller_role(server_nodes) if ha_enabled
+
     # FIXME: this deserves a comment
     if role.default_attributes["glance"]["api"]["bind_open_address"]
       vip_networks = ["admin", "public"]

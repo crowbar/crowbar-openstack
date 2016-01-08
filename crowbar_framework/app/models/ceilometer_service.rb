@@ -162,6 +162,7 @@ class CeilometerService < PacemakerServiceObject
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "ceilometer-server")
     reset_sync_marks_on_clusters_founders(server_elements)
+    Openstack::HA.set_controller_role(server_nodes) if ha_enabled
 
     vip_networks = ["admin", "public"]
 
@@ -183,9 +184,10 @@ class CeilometerService < PacemakerServiceObject
     # the VIP of the cluster to be setup
     allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
 
-    polling_elements, _polling_nodes, polling_ha_enabled = \
+    polling_elements, polling_nodes, polling_ha_enabled = \
         role_expand_elements(role, "ceilometer-polling")
     reset_sync_marks_on_clusters_founders(polling_elements)
+    Openstack::HA.set_controller_role(polling_nodes) if polling_ha_enabled
 
     role.save if prepare_role_for_ha(role,\
                                      ["ceilometer", "ha", "polling", "enabled"],\

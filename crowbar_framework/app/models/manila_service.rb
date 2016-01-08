@@ -115,6 +115,8 @@ end
     controller_nodes,
     ha_enabled = role_expand_elements(role, "manila-server")
     reset_sync_marks_on_clusters_founders(controller_elements)
+    Openstack::HA.set_controller_role(controller_nodes) if ha_enabled
+
     vip_networks = ["admin", "public"]
 
     dirty = prepare_role_for_ha_with_haproxy(
