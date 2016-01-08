@@ -339,20 +339,14 @@ ruby_block "nova_read_ssh_public_key" do
 end
 
 ssh_auth_keys = ""
-search_env_filtered(:node, "roles:nova-compute-kvm") do |n|
-  ssh_auth_keys += n[:nova][:service_ssh_key]
+%w(kvm xen docker qemu zvm).each do |hypervisor|
+  search_env_filtered(:node, "roles:nova-compute-#{hypervisor}") do |n|
+    ssh_auth_keys += n[:nova][:service_ssh_key]
+  end
 end
-search_env_filtered(:node, "roles:nova-compute-xen") do |n|
-  ssh_auth_keys += n[:nova][:service_ssh_key]
-end
-search_env_filtered(:node, "roles:nova-compute-docker") do |n|
-  ssh_auth_keys += n[:nova][:service_ssh_key]
-end
-search_env_filtered(:node, "roles:nova-compute-qemu") do |n|
-  ssh_auth_keys += n[:nova][:service_ssh_key]
-end
-search_env_filtered(:node, "roles:nova-compute-zvm") do |n|
-  ssh_auth_keys += n[:nova][:service_ssh_key]
+
+if node["roles"].include?("nova-compute-zvm")
+  ssh_auth_keys += node[:nova][:zvm][:zvm_xcat_ssh_key]
 end
 
 file "#{node[:nova][:home_dir]}/.ssh/authorized_keys" do

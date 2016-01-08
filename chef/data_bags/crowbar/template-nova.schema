@@ -88,7 +88,8 @@
                 "zvm_host": { "type": "str", "required": true },
                 "zvm_scsi_pool": { "type": "str", "required": true },
                 "zvm_user_profile": { "type": "str", "required": true },
-                "zvm_xcat_master": { "type": "str", "required": true }
+                "zvm_xcat_master": { "type": "str", "required": true },
+                "zvm_xcat_ssh_key": { "type": "str", "required": true }
               }
             },
             "ssl": {
