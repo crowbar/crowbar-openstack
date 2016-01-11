@@ -171,6 +171,7 @@ workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 # have to set this option to False when you create a wsgi server.
 # (boolean value)
 #http_keepalive = true
+http_keepalive = false
 
 # Timeout for client connections' socket operations. If an incoming
 # connection is idle for this number of seconds it will be closed. A
