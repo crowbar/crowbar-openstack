@@ -107,12 +107,14 @@ class NovaService < PacemakerServiceObject
     answer
   end
 
-  def node_platform_supports_xen(node)
-    node[:platform_family] == "suse"
+  def node_supports_xen(node)
+    return false if node[:platform_family] != "suse"
+    return false if node[:block_device].include?("vda")
+    node["kernel"]["machine"] =~ /x86_64/
   end
 
   def node_supports_kvm(node)
-    return false if node[:cpu].nil? || node[:cpu]["0"].nil?
+    return false if node[:cpu].nil? || node[:cpu]["0"].nil? || node[:cpu]["0"][:flags].nil?
     node[:cpu]["0"][:flags].include?("vmx") or node[:cpu]["0"][:flags].include?("svm")
   end
 
@@ -144,7 +146,7 @@ class NovaService < PacemakerServiceObject
     non_hyperv = nodes - hyperv
     kvm = non_hyperv.select { |n| n if node_supports_kvm(n) }
     non_kvm = non_hyperv - kvm
-    xen = non_kvm.select { |n| n unless n[:block_device].include?("vda") or !node_platform_supports_xen(n) }
+    xen = non_kvm.select { |n| n if node_supports_xen(n) }
     qemu = non_kvm - xen
 
     # do not use docker by default
