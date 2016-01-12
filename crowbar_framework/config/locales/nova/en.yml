@@ -61,6 +61,7 @@ en:
           zvm_scsi_pool: 'Default zFCP SCSI Disk Pool'
           zvm_user_profile: 'User profile for creating a z/VM userid'
           zvm_xcat_master: 'The xCAT MN node name'
+          zvm_xcat_ssh_key: 'The xCAT MN node public SSH key'
         ssl_header: 'SSL Support'
         ssl:
           enabled: 'Protocol'
