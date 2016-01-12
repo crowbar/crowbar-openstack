@@ -316,10 +316,17 @@ if backend_names.length > 1
 end
 
 kvm_compute_nodes = search(:node, "roles:nova-compute-kvm") || []
+xen_compute_nodes = search(:node, "roles:nova-compute-xen") || []
 docker_compute_nodes = search(:node, "roles:nova-compute-docker") || []
 
 use_resize = kvm_compute_nodes.length > 1
 use_livemigration = nova[:nova][:use_migration] && kvm_compute_nodes.length > 1
+
+# create a flag to disable some test for xen (lp#1443898)
+xen_only = !xen_compute_nodes.empty? && kvm_compute_nodes.empty?
+file "#{node[:tempest][:tempest_path]}/flag-xen_only" do
+  action xen_only ? :create : :delete
+end
 
 if !docker_compute_nodes.empty? && kvm_compute_nodes.empty?
   image_name = "cirros"
