@@ -350,8 +350,8 @@ if node[:horizon][:apache][:ssl]
       not_if { File.size?(node[:horizon][:apache][:ssl_crt_file]) }
     end
   else
-    unless ::File.exist? node[:horizon][:apache][:ssl_crt_file]
-      message = "Certificate \"#{node[:horizon][:apache][:ssl_crt_file]}\" is not present."
+    unless ::File.size? node[:horizon][:apache][:ssl_crt_file]
+      message = "The file \"#{node[:horizon][:apache][:ssl_crt_file]}\" does not exist or is empty."
       Chef::Log.fatal(message)
       raise message
     end
