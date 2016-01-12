@@ -267,7 +267,7 @@ class NovaService < PacemakerServiceObject
     elements["nova-compute-xen"].each do |n|
       nodes[n] += 1
       node = NodeObject.find_node_by_name(n)
-      unless node.nil? || node_platform_supports_xen(node)
+      unless node.nil? || node_supports_xen(node)
         validation_error I18n.t(
           "barclamp.#{@bc_name}.validation.xen",
           node_platform: node[:platform],
