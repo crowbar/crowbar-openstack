@@ -139,6 +139,10 @@
 
               = string_field %w(volumes {{@index}} rbd pool)
               = string_field %w(volumes {{@index}} rbd user)
+              = string_field %w(volumes {{@index}} rbd caps)
+              %span.help-block
+                = t('.volumes.index.rbd.caps_hint')
+
 
           {{/if_eq}}
           {{#if_eq backend_driver 'vmware'}}

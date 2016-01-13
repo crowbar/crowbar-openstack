@@ -76,6 +76,7 @@
           "admin_keyring": "/etc/ceph/ceph.client.admin.keyring",
           "pool": "volumes",
           "user": "cinder",
+          "caps": "",
           "secret_uuid": ""
         },
         "vmware": {
@@ -127,7 +128,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 44,
+      "schema-revision": 45,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

@@ -111,6 +111,8 @@ en:
               config_file: 'Path to Ceph configuration file'
               pool: 'RADOS pool for Cinder volumes'
               user: 'RADOS user (Set only if using CephX authentication)'
+              caps: 'RADOS additional custom capabilities (Set only if using CephX authentication)'
+              caps_hint: 'A comma-separated list of capabilities specified in the following format: allow [rwx] pool=<pool_name>'
             vmware:
               host: 'vCenter Host/IP Address'
               user: 'vCenter Username'

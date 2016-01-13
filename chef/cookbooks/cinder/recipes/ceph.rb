@@ -97,12 +97,18 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
 
   cinder_user = volume[:rbd][:user]
   cinder_pool = volume[:rbd][:pool]
+  custom_caps = volume[:rbd][:caps]
 
   ceph_clients[ceph_conf] = {} unless ceph_clients[ceph_conf]
   ceph_keyrings[ceph_conf] = admin_keyring unless ceph_keyrings[ceph_conf]
+  unless ceph_clients[ceph_conf][cinder_user]
+    ceph_clients[ceph_conf][cinder_user] = {}
+    ceph_clients[ceph_conf][cinder_user]["pools"] = []
+    ceph_clients[ceph_conf][cinder_user]["caps"] = []
+  end
 
-  cinder_pools = (ceph_clients[ceph_conf][cinder_user] || []) << cinder_pool
-  ceph_clients[ceph_conf][cinder_user] = cinder_pools
+  ceph_clients[ceph_conf][cinder_user]["pools"] << cinder_pool
+  ceph_clients[ceph_conf][cinder_user]["caps"] << custom_caps unless custom_caps.empty?
 
   ceph_pool cinder_pool do
     ceph_conf ceph_conf
@@ -118,11 +124,12 @@ unless ceph_clients.empty?
     glance_pool = nil
   end
 
-  ceph_clients.each do |ceph_conf, ceph_pools|
-    ceph_pools.each_pair do |cinder_user, cinder_pools|
+  ceph_clients.each do |ceph_conf, ceph_hash|
+    ceph_hash.each do |cinder_user, cinder_hash|
 
-      allow_pools = cinder_pools.map{ |p| "allow rwx pool=#{p}" }.join(", ")
+      allow_pools = cinder_hash["pools"].map { |p| "allow rwx pool=#{p}" }.join(", ")
       allow_pools += ", allow rx pool=#{glance_pool}" if glance_pool
+      allow_pools += ", " + cinder_hash["caps"].join(", ") unless cinder_hash["caps"].empty?
       ceph_caps = { "mon" => "allow r", "osd" => "allow class-read object_prefix rbd_children, #{allow_pools}" }
 
       ceph_client cinder_user do
