@@ -276,6 +276,17 @@ end
 # old
 multi_domain_support = keystone_settings["api_version"].to_f < 3.0 ? false : node["horizon"]["multi_domain_support"]
 
+# Verify that we have the certificate available before configuring things to use it
+if node[:horizon][:apache][:ssl] && !node[:horizon][:apache][:generate_certs]
+  unless ::File.size? node[:horizon][:apache][:ssl_crt_file]
+    message = "The file \"#{node[:horizon][:apache][:ssl_crt_file]}\" does not exist or is empty."
+    Chef::Log.fatal(message)
+    raise message
+  end
+  # we do not check for existence of keyfile, as the private key is allowed
+  # to be in the certfile
+end
+
 # Need to template the "EXTERNAL_MONITORING" array
 template local_settings do
   source "local_settings.py.erb"
@@ -339,24 +350,14 @@ include_recipe "horizon::ha" if ha_enabled
 resource = resources(template: "#{node[:apache][:dir]}/ports.conf")
 resource.variables({apache_listen_ports: node.normal[:apache][:listen_ports_crowbar].values.map{ |p| p.values }.flatten.uniq.sort})
 
-if node[:horizon][:apache][:ssl]
-  if node[:horizon][:apache][:generate_certs]
-    package "apache2-utils"
+if node[:horizon][:apache][:ssl] && node[:horizon][:apache][:generate_certs]
+  package "apache2-utils"
 
-    bash "Generate Apache certificate" do
-      code <<-EOH
-        (umask 377 ; /usr/bin/gensslcert -C openstack-dashboard )
-  EOH
-      not_if { File.size?(node[:horizon][:apache][:ssl_crt_file]) }
-    end
-  else
-    unless ::File.exist? node[:horizon][:apache][:ssl_crt_file]
-      message = "Certificate \"#{node[:horizon][:apache][:ssl_crt_file]}\" is not present."
-      Chef::Log.fatal(message)
-      raise message
-    end
-    # we do not check for existence of keyfile, as the private key is allowed
-    # to be in the certfile
+  bash "Generate Apache certificate" do
+    code <<-EOH
+      (umask 377 ; /usr/bin/gensslcert -C openstack-dashboard )
+EOH
+    not_if { File.size?(node[:horizon][:apache][:ssl_crt_file]) }
   end
 end
 
