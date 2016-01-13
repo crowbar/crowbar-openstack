@@ -83,5 +83,5 @@ en:
       validation:
         shared_storage: 'Shared storage cannot be automatically setup when a cluster has the nova-controller role. Please consider using the NFS Client barclamp instead.'
         hyperv_support: 'Hyper-V support is not available.'
-        xen: 'Platform of node %{n} (%{node_platform}-%{platform_version}) does not support Xen.'
+        xen: 'Node %{n} is running %{platform} (%{arch}), which does not support Xen.'
         assigned_node: 'Node %{key} has been assigned to a nova-compute role more than once.'

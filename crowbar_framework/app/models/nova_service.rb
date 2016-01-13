@@ -268,10 +268,12 @@ class NovaService < PacemakerServiceObject
       nodes[n] += 1
       node = NodeObject.find_node_by_name(n)
       unless node.nil? || node_supports_xen(node)
+        node_platform = "#{node[:platform]}-#{node[:platform_version]}"
         validation_error I18n.t(
           "barclamp.#{@bc_name}.validation.xen",
-          node_platform: node[:platform],
-          platform_version: node[:platform_version]
+          n: n,
+          platform: CrowbarService.pretty_target_platform(node_platform),
+          arch: node["kernel"]["machine"]
         )
       end
     end unless elements["nova-compute-xen"].nil?
