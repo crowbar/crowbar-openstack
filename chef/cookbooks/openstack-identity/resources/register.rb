@@ -31,6 +31,7 @@ BOOLEAN = [TrueClass, FalseClass]
 
 attribute :auth_uri, kind_of: String
 attribute :bootstrap_token, kind_of: String
+attribute :insecure, kind_of: BOOLEAN, default: false
 
 # Used by both :create_service and :create_endpoint
 attribute :service_type, kind_of: String
