@@ -11,8 +11,8 @@
           - else
             = t("barclamp.#{@bc_name}.dashboard.n_test_runs", :n => @test_runs.count)
             %input{:type=> 'submit', :class => 'button', :value => t("barclamp.#{@bc_name}.dashboard.clear.do")}
-        
-      %form{:method => :post, :id => 'run_test', :action => "/#{@bc_name}/test_runs" } 
+
+      %form{:method => :post, :id => 'run_test', :action => "/#{@bc_name}/test_runs" }
         - if @ready_nodes.empty?
           %span{:class => 'no_nodes'}= t "barclamp.#{@bc_name}.dashboard.run.no_nodes"
         - else
@@ -20,9 +20,9 @@
             = t "barclamp.#{@bc_name}.dashboard.run.label"
             %select{:name => 'node'}
               - @ready_nodes.each do |node|
-                %option{ :value => node.name }= node.alias  
+                %option{ :value => node.name }= node.alias
           %input{:type=>'submit', :class=>'button', :value => t("barclamp.#{@bc_name}.dashboard.run.do") }
-      
+
   - if not @test_runs.empty?
     %table.data.box.test_runs
       %tbody
@@ -46,7 +46,7 @@
                 %span
                   - if test_run['status'] == 'running'
                     = t("barclamp.#{@bc_name}.dashboard.test_run.status_.#{test_run['status']}")
-                  - else 
+                  - else
                     = link_to t("barclamp.#{@bc_name}.dashboard.test_run.status_.#{test_run['status']}"), "/#{@bc_name}/results/#{test_run['uuid']}.html"
               %td.started
                 = Time.at(test_run['started']).to_s
