@@ -921,7 +921,9 @@ vmware_store_image_dir = <%= node[:glance][:vsphere][:store_image_dir] %>
 # the one with the most free space available is selected. (multi
 # valued)
 #vmware_datastores =
-vmware_datastores = <%= node[:glance][:vsphere][:datacenter_path] %>:<%= node[:glance][:vsphere][:datastore] %>
+<% node[:glance][:vsphere][:datastores].each do |datastore| -%>
+vmware_datastores ="<%= datastore %>"
+<% end -%>
 
 # The host where the S3 server is listening. (string value)
 #s3_store_host = <None>

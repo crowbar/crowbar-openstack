@@ -82,6 +82,7 @@
           "host": "",
           "user": "",
           "password": "",
+          "cluster_name": [],
           "volume_folder": "cinder-volume",
           "ca_file": "",
           "insecure": false
@@ -127,7 +128,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 44,
+      "schema-revision": 45,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

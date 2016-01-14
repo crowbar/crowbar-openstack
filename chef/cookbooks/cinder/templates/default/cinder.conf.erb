@@ -2286,6 +2286,13 @@ vmware_volume_folder=<%= volume['vmware']["volume_folder"] %>
 #vmware_insecure = false
 <%= "vmware_insecure = #{volume['vmware']['insecure']}" if volume['vmware']['insecure'] %>
 
+# Name of a vCenter compute cluster where volumes should be created. (multi
+# valued)
+#vmware_cluster_name =
+<% volume['vmware']['cluster_name'].each do |cluster| -%>
+vmware_cluster_name ="<%= cluster %>"
+<% end -%>
+
 
 <% end -%>
 <% if volume['backend_driver'] == 'windows' -%>
