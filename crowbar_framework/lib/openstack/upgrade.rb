@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-module Crowbar
+module Openstack
   class Upgrade
     # pre-upgrade actions needed for the nodes
     def self.pre_upgrade
