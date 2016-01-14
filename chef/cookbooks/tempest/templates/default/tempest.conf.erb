@@ -1154,6 +1154,9 @@ trove = <%= @use_trove %>
 # Whether or not Zaqar is expected to be available (boolean value)
 #zaqar = false
 
+# Whether or not Manila is expected to be available (boolean value)
+manila = <%= @use_manila %>
+
 
 [stress]
 
@@ -1363,3 +1366,65 @@ backup = false
 # (boolean value)
 #bootable = false
 bootable = true
+
+
+[share]
+
+#
+# From tempest.config
+#
+
+# Catalog type of the Share service. Should be changed only if it is changed in Manila itself
+catalog_type = share
+
+# The endpoint type to use for the share service
+# Expected values are 'public', 'admin', 'internal', 'publicURL', 'adminURL' and 'internalURL'
+# endpoint_type = publicURL
+endpoint_type = internal_URL
+
+# This option is used to determine backend driver type, multitenant driver uses share-networks,
+# but single-tenant doesn't
+multitenancy_enabled = True
+
+# The first value of the list is protocol by default, items of the list show enabled protocols
+enable_protocols = nfs, cifs
+
+# Whether allow running of ip rules tests or not, and which share protocols should be used
+#enable_ip_rules_for_protocols = nfs, cifs
+
+# Whether allow running of sid (username/usergroup) rules tests or not, and which share protocols should be used
+#enable_sid_rules_for_protocols=""
+
+# What name should be used with user rule tests? Specify it if 'user rule' tests are enabled
+#username_for_user_rules = Administrator
+
+# If you want Tempest to use some specific share-network instead of autocreated, specify it
+# This value is used for member creds
+#storage_protocol = ""
+
+# If you want Tempest to use some specific share-network instead of autocreated, specify it
+# This value is used for member creds
+#shared_network_id = ""
+
+# If you want Tempest to use some specific share-network instead of autocreated, specify it
+# This value is used for alternative member creds. At the moment there are no tests,
+# that use share_network with creds for alternative user
+#alt_share_network_id = ""
+
+# If you want Tempest to use some specific share-network instead of autocreated, specify it
+# This value is used for admin creds
+#admin_share_network_id = ""
+
+# Does your environment has more than 1 backend or not?
+# If yes, than you can set it to True to enable multibackend tests in tempest
+#multi_backend = False
+
+# names of backends in Manila, that Tempest should use
+# Tempest will use first two values from list and will use it only if option "multi_backend" is Enabled
+#backend_names = ""
+
+# time to wait between resend of requests
+build_interval = 3
+
+# time to wait until raise of Exception with timeout
+build_timeout = 500

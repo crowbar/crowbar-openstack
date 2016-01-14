@@ -248,6 +248,8 @@ raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
 use_ceilometer = $?.success?
 `#{keystonev2} endpoint-get --service database &> /dev/null`
 use_trove = $?.success?
+`#{keystonev2} endpoint-get --service share &> /dev/null`
+use_manila = $?.success?
 
 # FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
@@ -413,6 +415,7 @@ template "/etc/tempest/tempest.conf" do
     use_heat: use_heat,
     use_ceilometer: use_ceilometer,
     use_trove: use_trove,
+    use_manila: use_manila,
     # boto settings
     ec2_protocol: nova[:nova][:ssl][:enabled] ? "https" : "http",
     ec2_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
