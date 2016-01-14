@@ -506,6 +506,7 @@ max_header_line = <%= node[:nova][:max_header_line] %>
 
 # If False, closes the client socket connection explicitly. (boolean value)
 #wsgi_keep_alive = true
+wsgi_keep_alive = false
 
 # Timeout for client connections' socket operations. If an incoming connection
 # is idle for this number of seconds it will be closed. A value of '0' means
