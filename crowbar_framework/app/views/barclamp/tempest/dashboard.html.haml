@@ -17,13 +17,17 @@
         - else
           %label
             = t "barclamp.#{@bc_name}.dashboard.run.label"
-            %select{:name => 'node'}
+            %select.form-control{:name => 'node'}
               - @ready_nodes.each do |node|
                 %option{ :value => node.name }= node.alias
           %input{:type=>'submit', :class=>'button', :value => t("barclamp.#{@bc_name}.dashboard.run.do") }
 
   - if not @test_runs.empty?
-    %table.data.box.test_runs
+    .panel.panel-default
+      .panel-heading
+        %h2
+          Previous tempest run results
+    %table.table.table-hover.table-middle.test_runs
       %tbody
         %thead
           %th.node= t "barclamp.#{@bc_name}.dashboard.test_run.node"
