@@ -266,14 +266,17 @@ class NovaService < PacemakerServiceObject
     end unless elements["nova-compute-zvm"].nil?
     elements["nova-compute-xen"].each do |n|
       nodes[n] += 1
+
       node = NodeObject.find_node_by_name(n)
-      unless node.nil? || node_platform_supports_xen(node)
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.xen",
-          node_platform: node[:platform],
-          platform_version: node[:platform_version]
-        )
-      end
+      next if node.nil? || node_supports_xen(node)
+
+      node_platform = "#{node[:platform]}-#{node[:platform_version]}"
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.xen",
+        n: n,
+        platform: CrowbarService.pretty_target_platform(node_platform),
+        arch: node["kernel"]["machine"]
+      )
     end unless elements["nova-compute-xen"].nil?
 
     nodes.each do |key,value|
