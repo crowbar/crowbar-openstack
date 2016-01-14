@@ -23,71 +23,6 @@ include_recipe "nova::config"
 
 sles11 = node[:platform] == "suse" && node[:platform_version].to_f < 12.0
 
-def set_boot_kernel_and_trigger_reboot(flavor="default")
-  # only default and xen flavor is supported by this helper right now
-  if node[:platform] == "suse" && node[:platform_version].to_f < 12.0
-    default_boot = 0
-    current_default = nil
-
-    # parse grub config, to find boot index for selected flavor
-    File.open("/boot/grub/menu.lst") do |f|
-      f.each_line do |line|
-        current_default = line.scan(/\d/).first.to_i if line.start_with?("default")
-        if line.start_with?("title")
-          if flavor.eql?("xen")
-            # found boot index
-            break if line.include?("Xen")
-          else
-            # take first non-xen kernel as default
-            break unless line.include?("Xen")
-          end
-          default_boot += 1
-        end
-      end
-    end
-    # change default option for grub config
-    unless current_default.eql?(default_boot)
-      Chef::Log.info("changed grub default to #{default_boot}")
-      `sed -i -e "s;^default.*;default #{default_boot};" /boot/grub/menu.lst`
-    end
-  else
-    default_boot = "SLES12"
-    grub_env = `grub2-editenv list`
-    if grub_env.include?("saved_entry")
-      current_default = grub_env.strip.split("=")[1]
-    else
-      current_default = nil
-    end
-
-    # parse grub config, to find boot index for selected flavor
-    File.open("/boot/grub2/grub.cfg") do |f|
-      f.each_line do |line|
-        if line.start_with?("menuentry")
-          default_boot = line.sub(/^menuentry '([^']*)'.*$/, '\1').strip
-          if flavor.eql?("xen")
-            # found boot index
-            break if line.include?("Xen")
-          else
-            # take first non-xen kernel as default
-            break unless line.include?("Xen")
-          end
-        end
-      end
-    end
-    # change default option for grub config
-    unless current_default.eql?(default_boot)
-      Chef::Log.info("changed grub default to #{default_boot}")
-      `grub2-set-default '#{default_boot}'`
-    end
-  end
-
-  # trigger reboot through reboot_handler, if kernel-$flavor is not yet
-  # running
-  unless `uname -r`.include?(flavor)
-    node.run_state[:reboot] = true
-  end
-end
-
 if %w(rhel suse).include?(node[:platform_family])
   # Start open-iscsi daemon, since nova-compute is going to use it and stumble over the
   # "starting daemon" messages otherwise
@@ -161,7 +96,12 @@ case node[:nova][:libvirt_type]
             package "qemu"
           end
 
-          set_boot_kernel_and_trigger_reboot
+          # Use a ruby block for consistency with the other call
+          ruby_block "set boot kernel" do
+            block do
+              NovaBootKernel.set_boot_kernel_and_trigger_reboot(node)
+            end
+          end
 
           if node[:nova][:libvirt_type] == "kvm"
             unless sles11
@@ -211,7 +151,12 @@ case node[:nova][:libvirt_type]
             notifies :restart, "service[xend]", :delayed
           end
 
-          set_boot_kernel_and_trigger_reboot("xen")
+          # Use a ruby block as we need the kernel to be installed when running this
+          ruby_block "set boot kernel" do
+            block do
+              NovaBootKernel.set_boot_kernel_and_trigger_reboot(node, "xen")
+            end
+          end
         when "lxc"
           package "lxc"
 
