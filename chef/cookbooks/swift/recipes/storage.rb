@@ -84,15 +84,15 @@ template "/etc/swift/container-sync-realms.conf" do
 end
 
 svcs = %w{swift-object swift-object-auditor swift-object-expirer swift-object-replicator swift-object-updater}
-svcs = svcs + %w{swift-container swift-container-auditor swift-container-replicator swift-container-sync swift-container-updater}
-svcs = svcs + %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
+svcs += %w{swift-container swift-container-auditor swift-container-replicator swift-container-sync swift-container-updater}
+svcs += %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
 
 ## make sure to fetch ring files from the ring compute node
 if (!compute_nodes.nil? and compute_nodes.length > 0 )
   compute_node_addr  = Swift::Evaluator.get_ip_by_type(compute_nodes[0],:storage_ip_expr)
   log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") { level :debug }
 
-  %w{container account object}.each { |ring|
+  %w{container account object}.each do |ring|
     execute "pull #{ring} ring" do
       user node[:swift][:user]
       group node[:swift][:group]
@@ -100,9 +100,9 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       cwd "/etc/swift"
       ignore_failure true
     end
-  }
+  end
 
-  svcs.each { |svc|
+  svcs.each do |svc|
     ring = svc.gsub("swift-", "").gsub(/-.*/, "")
     unless %w{container account object}.include? ring
       message = "Internal error: cannot find ring matching service \"#{svc}\""
@@ -129,7 +129,7 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       end
       only_if { ::File.exist? "/etc/swift/#{ring}.ring.gz" }
     end
-  }
+  end
 end
 
 node.set["swift"]["storage_init_done"] = true
