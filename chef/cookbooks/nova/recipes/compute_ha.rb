@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-remote_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "pacemaker-remote")
+remote_nodes = CrowbarPacemakerHelper.remote_nodes(node)
 return if remote_nodes.empty?
 
 nova = remote_nodes.first
