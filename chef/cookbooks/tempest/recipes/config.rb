@@ -274,8 +274,11 @@ swifts = search(:node, "roles:swift-proxy") || []
 use_swift = !swifts.empty?
 if use_swift
   swift_allow_versions = swifts[0][:swift][:allow_versions]
+  swift_proposal_name = swifts[0][:swift][:config][:environment].gsub(/^swift-config-/, "")
+  swift_cluster_name = "#{node[:domain]}_#{swift_proposal_name}"
 else
   swift_allow_versions = false
+  swift_cluster_name = nil
 end
 
 # FIXME: should avoid search with no environment in query
@@ -455,6 +458,7 @@ template "/etc/tempest/tempest.conf" do
     public_network_id: public_network_id,
     neutron_api_extensions: neutron_api_extensions,
     # object storage settings
+    swift_cluster_name: swift_cluster_name,
     object_versioning: swift_allow_versions,
     # orchestration settings
     heat_flavor_ref: heat_flavor_ref,

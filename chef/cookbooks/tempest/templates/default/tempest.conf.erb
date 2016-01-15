@@ -959,6 +959,9 @@ endpoint_type = internalURL
 # 'realm_name' item in this file. Set the same cluster name as Swift's
 # container-sync-realms.conf (string value)
 #cluster_name = name1
+<% if @use_swift -%>
+cluster_name = <%= @swift_cluster_name %>
+<% end -%>
 
 
 [object-storage-feature-enabled]
