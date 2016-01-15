@@ -44,10 +44,6 @@ end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
-env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
-compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
-proxy_nodes = search(:node, "roles:swift-proxy#{env_filter}")
-
 %w{account-server object-expirer object-server container-server}.each do |service|
   template "/etc/swift/#{service}.conf" do
     source "#{service}.conf.erb"
@@ -66,7 +62,7 @@ end
 ha_enabled = node[:swift][:ha][:enabled]
 ssl_enabled = node[:swift][:ssl][:enabled]
 swift_protocol = ssl_enabled ? "https" : "http"
-proxy_node = proxy_nodes.first || node
+proxy_node = get_instance("roles:swift-proxy")
 public_proxy_host = CrowbarHelper.get_host_for_public_url(proxy_node, ssl_enabled, ha_enabled)
 
 proposal_name = node[:swift][:config][:environment].gsub(/^swift-config-/, "")
@@ -88,6 +84,7 @@ svcs += %w{swift-container swift-container-auditor swift-container-replicator sw
 svcs += %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
 
 ## make sure to fetch ring files from the ring compute node
+compute_nodes = search_env_filtered(:node, "roles:swift-ring-compute")
 if (!compute_nodes.nil? and compute_nodes.length > 0 )
   compute_node_addr  = Swift::Evaluator.get_ip_by_type(compute_nodes[0],:storage_ip_expr)
   log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") { level :debug }
