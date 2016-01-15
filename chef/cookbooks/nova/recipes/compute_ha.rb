@@ -206,19 +206,36 @@ pacemaker_primitive fence_primitive do
 end
 controller_transaction_objects << "pacemaker_primitive[#{fence_primitive}]"
 
-#TODO
-#crm configure <<EOF
-#    # less fancy way
-#    fencing_topology \
-#        remote-d52-54-03-77-77-03: stonith-d52-54-03-77-77-03,fence-nova \
-#        remote-d52-54-04-77-77-04: stonith-d52-54-04-77-77-04,fence-nova
-#EOF
-
 pacemaker_transaction "nova compute (non-remote bits)" do
   cib_objects controller_transaction_objects
   # note that this will also automatically start the resources
   action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+unless %w(disabled manual).include? node[:pacemaker][:stonith][:mode]
+  case node[:pacemaker][:stonith][:mode]
+  when "sbd"
+    stonith_resource = "stonith-sbd"
+  when "shared"
+    stonith_resource = "stonith-shared"
+  when "per_node"
+    stonith_resource = nil
+  else
+    raise "Unknown STONITH mode: #{node[:pacemaker][:stonith][:mode]}."
+  end
+
+  topology = remote_nodes.map do |remote_node|
+    remote_stonith = stonith_resource
+    remote_stonith ||= "stonith-remote-#{remote_node[:hostname]}"
+    "remote-#{remote_node[:hostname]}: #{remote_stonith},#{fence_primitive}"
+  end
+
+  # TODO: implement proper LWRP for this, and move this as part of the
+  # transaction for controller bits
+  bash "crm configure fencing_topology" do
+    code "echo fencing_topology #{topology.join(" ")} | crm configure load update -"
+  end
 end
 
 crowbar_pacemaker_order_only_existing "o-#{evacuate_primitive}" do
