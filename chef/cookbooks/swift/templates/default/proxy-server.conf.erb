@@ -738,7 +738,7 @@ super_admin_key = <%= @admin_key %>
 paste.filter_factory = ceilometermiddleware.swift:filter_factory
 control_exchange = swift
 url = <%= @rabbit_settings[:url] %>
-driver = rabbit
+driver = messaging
 topic = notifications
 set log_level = WARN
 
