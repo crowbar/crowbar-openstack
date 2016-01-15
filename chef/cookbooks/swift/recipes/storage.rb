@@ -88,8 +88,8 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       raise message
     end
 
-    x = "openstack-#{x}" if %w(rhel suse).include?(node[:platform_family])
     service x do
+      service_name "openstack-#{x}" if %w(rhel suse).include?(node[:platform_family])
       if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
         restart_command "status #{x} 2>&1 | grep -q Unknown || restart #{x}"
         stop_command "stop #{x}"
