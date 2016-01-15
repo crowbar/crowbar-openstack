@@ -80,21 +80,21 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
     end
   }
 
-  svcs.each { |x|
-    ring = x.gsub("swift-", "").gsub(/-.*/, "")
+  svcs.each { |svc|
+    ring = svc.gsub("swift-", "").gsub(/-.*/, "")
     unless %w{container account object}.include? ring
-      message = "Internal error: cannot find ring matching service \"#{x}\""
+      message = "Internal error: cannot find ring matching service \"#{svc}\""
       Chef::Log.fatal(message)
       raise message
     end
 
-    service x do
-      service_name "openstack-#{x}" if %w(rhel suse).include?(node[:platform_family])
+    service svc do
+      service_name "openstack-#{svc}" if %w(rhel suse).include?(node[:platform_family])
       if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
-        restart_command "status #{x} 2>&1 | grep -q Unknown || restart #{x}"
-        stop_command "stop #{x}"
-        start_command "start #{x}"
-        status_command "status #{x} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
+        restart_command "status #{svc} 2>&1 | grep -q Unknown || restart #{svc}"
+        stop_command "stop #{svc}"
+        start_command "start #{svc}"
+        status_command "status #{svc} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
       end
       supports status: true, restart: true
       action [:enable, :start]
