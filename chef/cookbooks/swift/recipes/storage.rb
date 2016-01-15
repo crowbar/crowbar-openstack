@@ -44,6 +44,10 @@ end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
+env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
+compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
+proxy_nodes = search(:node, "roles:swift-proxy#{env_filter}")
+
 %w{account-server object-server container-server}.each do |service|
   template "/etc/swift/#{service}.conf" do
     source "#{service}.conf.erb"
@@ -59,13 +63,31 @@ storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
   end
 end
 
+ha_enabled = node[:swift][:ha][:enabled]
+ssl_enabled = node[:swift][:ssl][:enabled]
+swift_protocol = ssl_enabled ? "https" : "http"
+proxy_node = proxy_nodes.first || node
+public_proxy_host = CrowbarHelper.get_host_for_public_url(proxy_node, ssl_enabled, ha_enabled)
+
+proposal_name = node[:swift][:config][:environment].gsub(/^swift-config-/, "")
+
+template "/etc/swift/container-sync-realms.conf" do
+  source "container-sync-realms.conf.erb"
+  owner "root"
+  group node[:swift][:group]
+  variables(
+    key: node[:swift][:container_sync][:key],
+    key2: node[:swift][:container_sync][:key2],
+    cluster_name: "#{node[:domain]}_#{proposal_name}",
+    proxy_url: "#{swift_protocol}://#{public_proxy_host}:#{node[:swift][:ports][:proxy]}/v1/"
+  )
+end
+
 svcs = %w{swift-object swift-object-auditor swift-object-replicator swift-object-updater}
-svcs = svcs + %w{swift-container swift-container-auditor swift-container-replicator swift-container-updater}
+svcs = svcs + %w{swift-container swift-container-auditor swift-container-replicator swift-container-sync swift-container-updater}
 svcs = svcs + %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
 
 ## make sure to fetch ring files from the ring compute node
-env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
-compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
 if (!compute_nodes.nil? and compute_nodes.length > 0 )
   compute_node_addr  = Swift::Evaluator.get_ip_by_type(compute_nodes[0],:storage_ip_expr)
   log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") { level :debug }
@@ -100,6 +122,9 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       action [:enable, :start]
       subscribes :restart, resources(template: "/etc/swift/swift.conf")
       subscribes :restart, resources(template: "/etc/swift/#{ring}-server.conf")
+      if svc == "swift-container-sync"
+        subscribes :restart, resources(template: "/etc/swift/container-sync-realms.conf")
+      end
       only_if { ::File.exist? "/etc/swift/#{ring}.ring.gz" }
     end
   }
