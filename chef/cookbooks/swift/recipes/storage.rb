@@ -48,7 +48,7 @@ env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment
 compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
 proxy_nodes = search(:node, "roles:swift-proxy#{env_filter}")
 
-%w{account-server object-server container-server}.each do |service|
+%w{account-server object-expirer object-server container-server}.each do |service|
   template "/etc/swift/#{service}.conf" do
     source "#{service}.conf.erb"
     owner "root"
@@ -83,7 +83,7 @@ template "/etc/swift/container-sync-realms.conf" do
   )
 end
 
-svcs = %w{swift-object swift-object-auditor swift-object-replicator swift-object-updater}
+svcs = %w{swift-object swift-object-auditor swift-object-expirer swift-object-replicator swift-object-updater}
 svcs = svcs + %w{swift-container swift-container-auditor swift-container-replicator swift-container-sync swift-container-updater}
 svcs = svcs + %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
 
@@ -124,6 +124,8 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       subscribes :restart, resources(template: "/etc/swift/#{ring}-server.conf")
       if svc == "swift-container-sync"
         subscribes :restart, resources(template: "/etc/swift/container-sync-realms.conf")
+      elsif svc == "swift-object-expirer"
+        subscribes :restart, resources(template: "/etc/swift/object-expirer.conf")
       end
       only_if { ::File.exist? "/etc/swift/#{ring}.ring.gz" }
     end
