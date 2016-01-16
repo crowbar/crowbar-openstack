@@ -105,20 +105,10 @@ if node[:database][:ha][:storage][:mode] == "drbd"
   end
   transaction_objects << "pacemaker_order[#{order_constraint}]"
 
-  vip_location_name = "l-#{vip_primitive}-controller"
-  pacemaker_location vip_location_name do
-    definition controller_only_location(vip_location_name, vip_primitive)
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+  vip_location_name = openstack_pacemaker_controller_only_location_for vip_primitive
   transaction_objects << "pacemaker_location[#{vip_location_name}]"
 
-  location_name = "l-#{service_name}-controller"
-  pacemaker_location location_name do
-    definition OpenStackHAHelper.controller_only_location(location_name, service_name)
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+  location_name = openstack_pacemaker_controller_only_location_for service_name
   transaction_objects << "pacemaker_location[#{location_name}]"
 
 else
@@ -132,12 +122,7 @@ else
   end
   transaction_objects << "pacemaker_group[#{group_name}]"
 
-  location_name = "l-#{group_name}-controller"
-  pacemaker_location location_name do
-    definition OpenStackHAHelper.controller_only_location(location_name, group_name)
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+  location_name = openstack_pacemaker_controller_only_location_for group_name
   transaction_objects << "pacemaker_location[#{location_name}]"
 
 end

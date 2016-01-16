@@ -128,12 +128,7 @@ pacemaker_clone agents_clone_name do
 end
 transaction_objects << "pacemaker_clone[#{agents_clone_name}]"
 
-location_name = "l-#{agents_clone_name}-controller"
-pacemaker_location location_name do
-  definition OpenStackHAHelper.controller_only_location(location_name, agents_clone_name)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
+location_name = openstack_pacemaker_controller_only_location_for agents_clone_name
 transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "neutron agents" do
@@ -184,12 +179,7 @@ if use_l3_agent
   end
   ha_tool_transaction_objects << "pacemaker_primitive[#{ha_tool_primitive_name}]"
 
-  ha_tool_location_name = "l-#{ha_tool_primitive_name}-controller"
-  pacemaker_location ha_tool_location_name do
-    definition OpenStackHAHelper.controller_only_location(ha_tool_location_name, ha_tool_primitive_name)
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+  ha_tool_location_name = openstack_pacemaker_controller_only_location_for ha_tool_primitive_name
   ha_tool_transaction_objects << "pacemaker_location[#{ha_tool_location_name}]"
 
   pacemaker_transaction "neutron ha tool" do

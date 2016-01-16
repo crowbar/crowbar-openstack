@@ -39,12 +39,7 @@ pacemaker_primitive service_name do
 end
 transaction_objects << "pacemaker_primitive[#{service_name}]"
 
-location_name = "l-#{service_name}-controller"
-pacemaker_location location_name do
-  definition OpenStackHAHelper.controller_only_location(location_name, service_name)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
+location_name = openstack_pacemaker_controller_only_location_for service_name
 transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "ceilometer polling" do

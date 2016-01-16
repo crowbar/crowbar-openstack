@@ -80,12 +80,7 @@ else
   order_only_existing.unshift "postgresql"
 end
 
-location_name = "l-#{clone_name}-controller"
-pacemaker_location location_name do
-  definition OpenStackHAHelper.controller_only_location(location_name, clone_name)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
+location_name = openstack_pacemaker_controller_only_location_for clone_name
 transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "ceilometer server" do
