@@ -34,12 +34,14 @@ template "/etc/swift/swift.conf" do
  })
 end
 
-rsyslog_version = `rsyslogd -v | head -1 | sed -e "s/^rsyslogd \\(.*\\), .*$/\\1/"`
-# log swift components into separate log files
-template "/etc/rsyslog.d/11-swift.conf" do
-  source "11-swift.conf.erb"
-  mode "0644"
-  variables(rsyslog_version: rsyslog_version)
-  notifies :restart, "service[rsyslog]"
-  only_if { node[:platform_family] == "suse" } # other distros might not have /var/log/swift
+if node.roles.include?("logging-client")
+  rsyslog_version = `rsyslogd -v | head -1 | sed -e "s/^rsyslogd \\(.*\\), .*$/\\1/"`
+  # log swift components into separate log files
+  template "/etc/rsyslog.d/11-swift.conf" do
+    source "11-swift.conf.erb"
+    mode "0644"
+    variables(rsyslog_version: rsyslog_version)
+    notifies :restart, "service[rsyslog]"
+    only_if { node[:platform_family] == "suse" } # other distros might not have /var/log/swift
+  end
 end
