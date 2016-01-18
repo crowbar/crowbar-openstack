@@ -56,8 +56,7 @@ end
     # NOTE(toabctl): nova, cinder, glance and neutron are just needed
     # for the generic driver. So this could be optional depending on the used
     # driver
-    deps = ["database", "keystone", "rabbitmq"]
-    # ["nova", "cinder", "glance", "neutron"]
+    deps = ["database", "rabbitmq", "keystone", "nova", "cinder", "glance", "neutron"]
     deps.each do |dep|
       answer << {
         "barclamp" => dep,
@@ -91,6 +90,14 @@ end
       find_dep_proposal("rabbitmq")
     base["attributes"][@bc_name]["keystone_instance"] =
       find_dep_proposal("keystone")
+    base["attributes"][@bc_name]["nova_instance"] =
+      find_dep_proposal("nova")
+    base["attributes"][@bc_name]["cinder_instance"] =
+      find_dep_proposal("cinder")
+    base["attributes"][@bc_name]["glance_instance"] =
+      find_dep_proposal("glance")
+    base["attributes"][@bc_name]["neutron_instance"] =
+      find_dep_proposal("neutron")
 
     base["attributes"][@bc_name]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
