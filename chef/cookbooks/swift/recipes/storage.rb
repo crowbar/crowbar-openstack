@@ -44,7 +44,7 @@ end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
-%w{account-server object-server container-server}.each do |service|
+%w{account-server object-expirer object-server container-server}.each do |service|
   template "/etc/swift/#{service}.conf" do
     source "#{service}.conf.erb"
     owner "root"
@@ -59,18 +59,37 @@ storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
   end
 end
 
-svcs = %w{swift-object swift-object-auditor swift-object-replicator swift-object-updater}
-svcs = svcs + %w{swift-container swift-container-auditor swift-container-replicator swift-container-updater}
-svcs = svcs + %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
+ha_enabled = node[:swift][:ha][:enabled]
+ssl_enabled = node[:swift][:ssl][:enabled]
+swift_protocol = ssl_enabled ? "https" : "http"
+proxy_node = get_instance("roles:swift-proxy")
+public_proxy_host = CrowbarHelper.get_host_for_public_url(proxy_node, ssl_enabled, ha_enabled)
+
+proposal_name = node[:swift][:config][:environment].gsub(/^swift-config-/, "")
+
+template "/etc/swift/container-sync-realms.conf" do
+  source "container-sync-realms.conf.erb"
+  owner "root"
+  group node[:swift][:group]
+  variables(
+    key: node[:swift][:container_sync][:key],
+    key2: node[:swift][:container_sync][:key2],
+    cluster_name: "#{node[:domain]}_#{proposal_name}",
+    proxy_url: "#{swift_protocol}://#{public_proxy_host}:#{node[:swift][:ports][:proxy]}/v1/"
+  )
+end
+
+svcs = %w{swift-object swift-object-auditor swift-object-expirer swift-object-replicator swift-object-updater}
+svcs += %w{swift-container swift-container-auditor swift-container-replicator swift-container-sync swift-container-updater}
+svcs += %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
 
 ## make sure to fetch ring files from the ring compute node
-env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
-compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
+compute_nodes = search_env_filtered(:node, "roles:swift-ring-compute")
 if (!compute_nodes.nil? and compute_nodes.length > 0 )
   compute_node_addr  = Swift::Evaluator.get_ip_by_type(compute_nodes[0],:storage_ip_expr)
   log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") { level :debug }
 
-  %w{container account object}.each { |ring|
+  %w{container account object}.each do |ring|
     execute "pull #{ring} ring" do
       user node[:swift][:user]
       group node[:swift][:group]
@@ -78,31 +97,36 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       cwd "/etc/swift"
       ignore_failure true
     end
-  }
+  end
 
-  svcs.each { |x|
-    ring = x.gsub("swift-", "").gsub(/-.*/, "")
+  svcs.each do |svc|
+    ring = svc.gsub("swift-", "").gsub(/-.*/, "")
     unless %w{container account object}.include? ring
-      message = "Internal error: cannot find ring matching service \"#{x}\""
+      message = "Internal error: cannot find ring matching service \"#{svc}\""
       Chef::Log.fatal(message)
       raise message
     end
 
-    x = "openstack-#{x}" if %w(rhel suse).include?(node[:platform_family])
-    service x do
+    service svc do
+      service_name "openstack-#{svc}" if %w(rhel suse).include?(node[:platform_family])
       if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
-        restart_command "status #{x} 2>&1 | grep -q Unknown || restart #{x}"
-        stop_command "stop #{x}"
-        start_command "start #{x}"
-        status_command "status #{x} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
+        restart_command "status #{svc} 2>&1 | grep -q Unknown || restart #{svc}"
+        stop_command "stop #{svc}"
+        start_command "start #{svc}"
+        status_command "status #{svc} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
       end
       supports status: true, restart: true
       action [:enable, :start]
       subscribes :restart, resources(template: "/etc/swift/swift.conf")
       subscribes :restart, resources(template: "/etc/swift/#{ring}-server.conf")
+      if svc == "swift-container-sync"
+        subscribes :restart, resources(template: "/etc/swift/container-sync-realms.conf")
+      elsif svc == "swift-object-expirer"
+        subscribes :restart, resources(template: "/etc/swift/object-expirer.conf")
+      end
       only_if { ::File.exist? "/etc/swift/#{ring}.ring.gz" }
     end
-  }
+  end
 end
 
 node.set["swift"]["storage_init_done"] = true

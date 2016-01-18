@@ -65,6 +65,10 @@
           "generate_certs": false,
           "insecure": false
       },
+      "container_sync": {
+        "key": "",
+        "key2": ""
+      },
       "replication_interval": 60,
       "frontend": "native",
       "cluster_hash": "",
@@ -96,7 +100,7 @@
     "swift": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 21,
+      "schema-revision": 22,
       "element_states": {
         "swift-dispersion": [ "readying", "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],

@@ -118,6 +118,10 @@
               "generate_certs": { "type" : "bool", "required" : true },
               "insecure": { "type" : "bool", "required" : true }
             }},
+            "container_sync": { "type": "map", "required": true, "mapping": {
+              "key": { "type" : "str", "required" : true },
+              "key2": { "type" : "str", "required" : true }
+            }},
             "cluster_hash": { "type": "str", "required": true },
             "cluster_admin_pw": { "type": "str", "required": true },
             "replicas": { "type": "int", "required": true },
