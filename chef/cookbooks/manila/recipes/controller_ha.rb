@@ -69,7 +69,7 @@ transaction_objects << "pacemaker_primitive[#{scheduler_primitive}]"
 
 group_name = "g-manila-controller"
 pacemaker_group group_name do
-  members ["manila-api", "manila-scheduler"]
+  members [api_primitive, scheduler_primitive]
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
