@@ -37,6 +37,8 @@ en:
           generic_share_driver: 'Generic driver'
           netapp_share_driver: 'NetApp driver'
           manual_share_driver: 'Other driver'
+          generic:
+            not_supported: 'The generic driver can be used for testing but is not supported.'
           manual:
             config_hint: 'Each line will be added to manila.conf. If the driver needs an external file, this file must be manually uploaded.'
             driver_hint: 'For instance, manila.share.drivers.generic.GenericShareDriver'
@@ -45,8 +47,10 @@ en:
             generic:
               service_instance_user: 'Service instance user'
               service_instance_password: 'Service instance password'
-              service_image_name: 'Glance image name used for service instance'
-              driver_handles_share_servers: 'Driver handles the share servers'
+              path_to_private_key: 'Path to private key'
+              service_instance_name_or_id: 'Name or UUID of the service instance VM'
+              service_net_name_or_ip: 'Service network name or IP'
+              tenant_net_name_or_ip: 'Tenant network name or IP'
             netapp:
               netapp_vserver: 'Name of the Virtual Storage Server (vserver)'
               netapp_login: 'Username for accessing NetApp'
@@ -57,3 +61,10 @@ en:
             manual:
               config: 'Options'
               driver: 'Driver'
+      validation:
+        generic:
+          service_instance_user: 'Service instance user can not be empty'
+          service_instance_name_or_id: 'Service instance Name/ID can not be empty'
+          service_net_name_or_ip: 'Service network name/IP can not be empty'
+          tenant_net_name_or_ip: 'Tenant network name/IP can not be empty'
+          password_or_private_key: 'Password or private key path must be given'
