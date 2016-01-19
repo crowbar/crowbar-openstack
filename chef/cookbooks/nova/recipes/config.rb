@@ -186,12 +186,12 @@ end
 
 # if there's no certificate for novnc, use the ones from nova-api
 if api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
-  unless api[:nova][:novnc][:ssl][:certfile].empty?
-    api_novnc_ssl_certfile = api[:nova][:novnc][:ssl][:certfile]
-    api_novnc_ssl_keyfile = api[:nova][:novnc][:ssl][:keyfile]
-  else
+  if api[:nova][:novnc][:ssl][:certfile].empty?
     api_novnc_ssl_certfile = api[:nova][:ssl][:certfile]
     api_novnc_ssl_keyfile = api[:nova][:ssl][:keyfile]
+  else
+    api_novnc_ssl_certfile = api[:nova][:novnc][:ssl][:certfile]
+    api_novnc_ssl_keyfile = api[:nova][:novnc][:ssl][:keyfile]
   end
 else
   api_novnc_ssl_certfile = ""
@@ -199,7 +199,8 @@ else
 end
 
 # only require certs for nova controller
-if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
+if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
+    api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
   if api[:nova][:ssl][:generate_certs]
     package "openssl"
     ruby_block "generate_certs for nova" do
@@ -264,7 +265,8 @@ if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:ssl][:e
   end
 end
 
-if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
+if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
+    api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
   # No check if we're using certificate info from nova-api
   unless ::File.exist?(api_novnc_ssl_certfile) || api[:nova][:novnc][:ssl][:certfile].empty?
     message = "Certificate \"#{api_novnc_ssl_certfile}\" is not present."
