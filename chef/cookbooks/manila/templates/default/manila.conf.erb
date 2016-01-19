@@ -170,7 +170,11 @@ nova_admin_tenant_name=<%= @keystone_settings['service_tenant'] %>
 
 # Identity service URL. (string value)
 #nova_admin_auth_url = http://localhost:5000/v2.0
-nova_admin_auth_url=<%= @keystone_settings['internal_auth_url'] %>
+nova_admin_auth_url = <%= KeystoneHelper.versioned_service_URL(
+                      @keystone_settings["protocol"],
+                      @keystone_settings["internal_url_host"],
+                      @keystone_settings["service_port"],
+                      "2.0") %>
 
 # Version of Nova API to be used. (string value)
 #nova_api_microversion = 2.10
@@ -232,7 +236,11 @@ neutron_admin_project_name=<%= @keystone_settings['service_tenant'] %>
 # Auth URL for connecting to neutron in admin context. (string value)
 # Deprecated group/name - [DEFAULT]/neutron_admin_auth_url
 #neutron_admin_auth_url = http://localhost:5000/v2.0
-neutron_admin_auth_url=<%= @keystone_settings['internal_auth_url'] %>
+neutron_admin_auth_url = <%= KeystoneHelper.versioned_service_URL(
+                      @keystone_settings["protocol"],
+                      @keystone_settings["internal_url_host"],
+                      @keystone_settings["service_port"],
+                      "2.0") %>
 
 # If set, ignore any SSL validation issues. (boolean value)
 # Deprecated group/name - [DEFAULT]/neutron_api_insecure
@@ -1059,7 +1067,11 @@ cinder_admin_tenant_name=<%= @keystone_settings['service_tenant'] %>
 
 # Identity service URL. (string value)
 #cinder_admin_auth_url = http://localhost:5000/v2.0
-cinder_admin_auth_url=<%= @keystone_settings['internal_auth_url'] %>
+cinder_admin_auth_url = <%= KeystoneHelper.versioned_service_URL(
+                      @keystone_settings["protocol"],
+                      @keystone_settings["internal_url_host"],
+                      @keystone_settings["service_port"],
+                      "2.0") %>
 
 # Maximum line size of message headers to be accepted. Option
 # max_header_line may need to be increased when using large tokens
