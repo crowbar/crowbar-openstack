@@ -171,6 +171,33 @@ else
   oat_server = node
 end
 
+# only put certificates in nova.conf for controllers; on compute nodes, we
+# don't need them and specifying them results in the certificates being queried
+# when creating clients for glance
+if api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
+  api_ssl_certfile = api[:nova][:ssl][:certfile]
+  api_ssl_keyfile = api[:nova][:ssl][:keyfile]
+  api_ssl_cafile = api[:nova][:ssl][:ca_certs]
+else
+  api_ssl_certfile = ""
+  api_ssl_keyfile = ""
+  api_ssl_cafile = ""
+end
+
+# if there's no certificate for novnc, use the ones from nova-api
+if api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
+  unless api[:nova][:novnc][:ssl][:certfile].empty?
+    api_novnc_ssl_certfile = api[:nova][:novnc][:ssl][:certfile]
+    api_novnc_ssl_keyfile = api[:nova][:novnc][:ssl][:keyfile]
+  else
+    api_novnc_ssl_certfile = api[:nova][:ssl][:certfile]
+    api_novnc_ssl_keyfile = api[:nova][:ssl][:keyfile]
+  end
+else
+  api_novnc_ssl_certfile = ""
+  api_novnc_ssl_keyfile = ""
+end
+
 # only require certs for nova controller
 if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
   if api[:nova][:ssl][:generate_certs]
@@ -237,21 +264,7 @@ if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:ssl][:e
   end
 end
 
-# if there's no certificate for novnc, use the ones from nova-api
-if api[:nova][:novnc][:ssl][:enabled]
-  unless api[:nova][:novnc][:ssl][:certfile].empty?
-    api_novnc_ssl_certfile = api[:nova][:novnc][:ssl][:certfile]
-    api_novnc_ssl_keyfile = api[:nova][:novnc][:ssl][:keyfile]
-  else
-    api_novnc_ssl_certfile = api[:nova][:ssl][:certfile]
-    api_novnc_ssl_keyfile = api[:nova][:ssl][:keyfile]
-  end
-else
-  api_novnc_ssl_certfile = ""
-  api_novnc_ssl_keyfile = ""
-end
-
-if (api_ha_enabled || vncproxy_ha_enabled || api == node) and api[:nova][:novnc][:ssl][:enabled]
+if (api_ha_enabled || vncproxy_ha_enabled || api == node) && api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
   # No check if we're using certificate info from nova-api
   unless ::File.exist?(api_novnc_ssl_certfile) || api[:nova][:novnc][:ssl][:certfile].empty?
     message = "Certificate \"#{api_novnc_ssl_certfile}\" is not present."
@@ -327,10 +340,10 @@ template "/etc/nova/nova.conf" do
             ceph_user: ceph_user,
             ceph_uuid: ceph_uuid,
             ssl_enabled: api[:nova][:ssl][:enabled],
-            ssl_cert_file: api[:nova][:ssl][:certfile],
-            ssl_key_file: api[:nova][:ssl][:keyfile],
+            ssl_cert_file: api_ssl_certfile,
+            ssl_key_file: api_ssl_keyfile,
             ssl_cert_required: api[:nova][:ssl][:cert_required],
-            ssl_ca_file: api[:nova][:ssl][:ca_certs],
+            ssl_ca_file: api_ssl_cafile,
             oat_appraiser_host: oat_server[:hostname],
             oat_appraiser_port: "8443",
             has_itxt: has_itxt
