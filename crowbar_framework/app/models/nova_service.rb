@@ -59,7 +59,8 @@ class NovaService < PacemakerServiceObject
           "exclude_platform" => {
             "suse" => "< 12.1",
             "windows" => "/.*/"
-          }
+          },
+          "remotes" => true
         },
         "nova-compute-qemu" => {
           "unique" => false,
@@ -67,7 +68,8 @@ class NovaService < PacemakerServiceObject
           "exclude_platform" => {
             "suse" => "< 12.1",
             "windows" => "/.*/"
-          }
+          },
+          "remotes" => true
         },
         "nova-compute-vmware" => {
           "unique" => false,
@@ -90,7 +92,8 @@ class NovaService < PacemakerServiceObject
           "count" => -1,
           "platform" => {
             "suse" => "12.1",
-          }
+          },
+          "remotes" => true
         }
       }
     end
