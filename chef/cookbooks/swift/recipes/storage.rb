@@ -42,6 +42,8 @@ end
   package pkg
 end
 
+include_recipe "swift::common_config"
+
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
 %w{account-server object-expirer object-server container-server}.each do |service|
@@ -57,26 +59,6 @@ storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
       debug: node[:swift][:debug]
     })
   end
-end
-
-ha_enabled = node[:swift][:ha][:enabled]
-ssl_enabled = node[:swift][:ssl][:enabled]
-swift_protocol = ssl_enabled ? "https" : "http"
-proxy_node = get_instance("roles:swift-proxy")
-public_proxy_host = CrowbarHelper.get_host_for_public_url(proxy_node, ssl_enabled, ha_enabled)
-
-proposal_name = node[:swift][:config][:environment].gsub(/^swift-config-/, "")
-
-template "/etc/swift/container-sync-realms.conf" do
-  source "container-sync-realms.conf.erb"
-  owner "root"
-  group node[:swift][:group]
-  variables(
-    key: node[:swift][:container_sync][:key],
-    key2: node[:swift][:container_sync][:key2],
-    cluster_name: "#{node[:domain]}_#{proposal_name}",
-    proxy_url: "#{swift_protocol}://#{public_proxy_host}:#{node[:swift][:ports][:proxy]}/v1/"
-  )
 end
 
 svcs = %w{swift-object swift-object-auditor swift-object-expirer swift-object-replicator swift-object-updater}
