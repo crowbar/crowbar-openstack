@@ -45,5 +45,38 @@ module Openstack
         node.save if save_it
       end
     end
+
+    def self.enable_repos_for_feature(feature)
+      Crowbar::Repository.check_all_repos.each do |repo|
+        # enable disabled repos now
+        if (repo.config["features"] || []).include? feature
+          Rails.logger.info("enabling repository #{repo.id}")
+          @provisioner_service.enable_repository(repo.platform, repo.arch, repo.id)
+        end
+      end
+    end
+
+    # Check if the additional repositories (HAE, SES) are present
+    # after the upgrade of the admin node
+    def self.check_additional_repositories_presence(thelogger)
+      @provisioner_service = ProvisionerService.new thelogger
+      # check if HA repos are needed
+      pacemaker_proposal = Proposal.where(barclamp: "pacemaker").first
+      unless pacemaker_proposal.nil?
+        unless Crowbar::Repository.provided? "ha"
+          raise I18n.t("barclamp.pacemaker.validation.hae_repo")
+        end
+        enable_repos_for_feature "ha"
+      end
+
+      # check if Storage repos are neededa
+      ceph_proposal = Proposal.where(barclamp: "ceph").first
+      unless ceph_proposal.nil?
+        unless Crowbar::Repository.provided? "ceph"
+          raise I18n.t("barclamp.pacemaker.validation.ses_repos")
+        end
+        enable_repos_for_feature "ceph"
+      end
+    end
   end
 end
