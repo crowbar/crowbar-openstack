@@ -47,6 +47,7 @@ template "/etc/swift/container-sync-realms.conf" do
   source "container-sync-realms.conf.erb"
   owner "root"
   group node[:swift][:group]
+  mode "0640"
   variables(
     key: node[:swift][:container_sync][:key],
     key2: node[:swift][:container_sync][:key2],
