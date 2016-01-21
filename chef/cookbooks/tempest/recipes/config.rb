@@ -249,7 +249,9 @@ use_ceilometer = $?.success?
 `#{keystonev2} endpoint-get --service database &> /dev/null`
 use_trove = $?.success?
 `#{keystonev2} endpoint-get --service share &> /dev/null`
-use_manila = $?.success?
+# FIXME(toabctl): temporary disable manila tempest tests
+# use_manila = $?.success?
+use_manila = false
 
 # FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
