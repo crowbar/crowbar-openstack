@@ -61,6 +61,45 @@
         "protocol": "http",
         "service_port": 9696,
         "service_host": "0.0.0.0"
+      },
+      "use_infoblox": false,
+      "infoblox": {
+        "ib_wapi": "",
+        "ib_username": "admin",
+        "ib_password": "",
+        "ib_members": "",
+        "ib_dnsserver": [],
+        "use_host_records_for_ip_allocation": true,
+        "bind_dns_records_to_fixed_address": "record:a,record:ptr",
+        "unbind_dns_records_from_fixed_address": "record:a,record:ptr",
+        "delete_dns_records_associated_with_fixed_address": "record:a,record:ptr,record:txt",
+        "use_dhcp_for_ip_allocation_record": true,
+        "enable_dhcp_relay": false,
+        "dhcp_relay_interface": "br-fixed",
+        "dhcp_relay_management_network": "",
+        "dhcp_relay_management_network_view": "",
+        "ib_conditionals": [
+          {
+            "condition": "tenant",
+            "is_external": false,
+            "network_view": "default",
+            "dns_view": "default",
+            "dhcp_members": "\"<next-available-member>\"",
+            "dns_members": "\"<next-available-member>\"",
+            "domain_suffix_pattern": "{subnet_name}.cloud-test.com",
+            "hostname_pattern": "host-{ip_address}"
+          },
+          {
+            "condition": "global",
+            "is_external": true,
+            "network_view": "default",
+            "dns_view": "default",
+            "dhcp_members": "\"<next-available-member>\"",
+            "dns_members": "\"<next-available-member>\"",
+            "domain_suffix_pattern": "{subnet_name}.cloud-test.com",
+            "hostname_pattern": "host-{ip_address}"
+          }
+        ]
       }
     }
   },
@@ -68,7 +107,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 45,
+      "schema-revision": 46,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

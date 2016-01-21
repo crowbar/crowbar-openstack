@@ -95,7 +95,47 @@
                       "protocol": { "type" : "str", "required" : true },
                       "service_port": { "type" : "int", "required" : true },
                       "service_host": { "type" : "str", "required" : true }
-                    }}
+                    }},
+                    "use_infoblox": { "type": "bool", "required": true },
+                    "infoblox": { "type": "map", "required": false, "mapping": {
+                        "ib_wapi": { "type": "str", "required": true },
+                        "ib_username": { "type": "str", "required": true },
+                        "ib_password": { "type": "str", "required": true },
+                        "ib_members": { "type": "str", "required": true },
+                        "ib_dnsserver": {
+                            "type": "seq",
+                            "required": true,
+                            "sequence": [ { "type": "str" } ]
+                        },
+                        "use_host_records_for_ip_allocation": { "type": "bool", "required": true },
+                        "bind_dns_records_to_fixed_address": { "type": "str", "required": true },
+                        "unbind_dns_records_from_fixed_address": { "type": "str", "required": true },
+                        "delete_dns_records_associated_with_fixed_address": { "type": "str", "required": true },
+                        "use_dhcp_for_ip_allocation_record": { "type": "bool", "required": true },
+                        "enable_dhcp_relay": { "type": "bool", "required": true },
+                        "dhcp_relay_interface": {"type": "str", "required": true},
+                        "dhcp_relay_management_network": { "type": "str", "required": true },
+                        "dhcp_relay_management_network_view": { "type": "str", "required": true },
+                        "ib_conditionals": {
+                          type: "seq",
+                          "required": true,
+                          "sequence": [{
+                            "type": "map",
+                            "required": false,
+                            "mapping": {
+                              "condition": { "type": "str", "required": true },
+                              "is_external": { "type": "bool", "required": true },
+                              "network_view": { "type": "str", "required": true },
+                              "dns_view": { "type": "str", "required": true },
+                              "dhcp_members": { "type": "str", "required": true },
+                              "dns_members": { "type": "str", "required": true },
+                              "domain_suffix_pattern": { "type": "str", "required": true },
+                              "hostname_pattern": { "type": "str", "required": true }
+                            }
+                          }]
+                        }
+                      }
+                    }
               }}
      }},
     "deployment": { "type": "map", "required": true,
