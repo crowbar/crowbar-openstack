@@ -512,6 +512,7 @@ glance_api_servers=<%= @glance_server_protocol %>://<%= @glance_server_host %>:<
 
 # Version of the glance API to use (integer value)
 #glance_api_version=1
+glance_api_version=2
 
 # Number retries when downloading an image from glance
 # (integer value)
@@ -740,6 +741,10 @@ nova_api_insecure=<%= @nova_api_insecure %>
 # the direct_url.  Currently supported schemes: [file]. (list
 # value)
 #allowed_direct_url_schemes=
+<% if @show_storage_location -%>
+### Enable file and rbd if available
+allowed_direct_url_schemes=cinder
+<% end -%>
 
 
 #
@@ -1014,6 +1019,11 @@ use_syslog=<%= node[:cinder][:use_syslog] ? "True" : "False" %>
 
 <% if @use_multi_backend -%>
 [<%= backend_id %>]
+<% end -%>
+
+<% if @show_storage_location -%>
+image_upload_use_cinder_backend = True
+image_upload_use_internal_tenant = False
 <% end -%>
 
 #

@@ -34,11 +34,13 @@ if glance_servers.length > 0
   glance_server_protocol = glance_server[:glance][:api][:protocol]
   glance_server_port = glance_server[:glance][:api][:bind_port]
   glance_server_insecure = glance_server_protocol == "https" && glance_server[:glance][:ssl][:insecure]
+  glance_show_storage_location = glance_server[:glance][:show_storage_location]
 else
   glance_server_host = nil
   glance_server_port = nil
   glance_server_protocol = nil
   glance_server_insecure = nil
+  glance_show_storage_location = false
 end
 Chef::Log.info("Glance server at #{glance_server_host}")
 
@@ -171,6 +173,7 @@ template "/etc/cinder/cinder.conf" do
     glance_server_host: glance_server_host,
     glance_server_port: glance_server_port,
     glance_server_insecure: glance_server_insecure,
+    show_storage_location: glance_show_storage_location,
     nova_api_insecure: nova_api_insecure,
     availability_zone: availability_zone,
     keystone_settings: KeystoneHelper.keystone_settings(node, :cinder),
