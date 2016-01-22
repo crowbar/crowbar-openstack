@@ -100,12 +100,12 @@ pacemaker_primitive nova_primitive do
   agent "ocf:openstack:NovaCompute"
   params ({
     "auth_url"       => keystone_settings["internal_auth_url"],
-    "region_name"    => keystone_settings["endpoint_region"],
+    # "region_name"    => keystone_settings["endpoint_region"],
     "endpoint_type"  => "internalURL",
     "username"       => keystone_settings["admin_user"],
     "password"       => keystone_settings["admin_password"],
     "tenant_name"    => keystone_settings["admin_tenant"],
-    "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure],
+    # "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure],
     "domain"         => node[:domain]
   })
   op nova[:nova][:ha][:compute][:compute][:op]
@@ -154,12 +154,12 @@ pacemaker_primitive evacuate_primitive do
   agent "ocf:openstack:NovaEvacuate"
   params ({
     "auth_url"       => keystone_settings["internal_auth_url"],
-    "region_name"    => keystone_settings["endpoint_region"],
+    # "region_name"    => keystone_settings["endpoint_region"],
     "endpoint_type"  => "internalURL",
     "username"       => keystone_settings["admin_user"],
     "password"       => keystone_settings["admin_password"],
-    "tenant_name"    => keystone_settings["admin_tenant"],
-    "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure]
+    "tenant_name"    => keystone_settings["admin_tenant"]
+    # "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure]
   })
   op nova[:nova][:ha][:compute][:evacuate][:op]
   action :update
@@ -189,12 +189,12 @@ pacemaker_primitive fence_primitive do
   agent "stonith:fence_compute"
   params ({
     "auth-url"       => keystone_settings["internal_auth_url"],
-    "region-name"    => keystone_settings["endpoint_region"],
+    # "region-name"    => keystone_settings["endpoint_region"],
     "endpoint-type"  => "internalURL",
     "login"          => keystone_settings["admin_user"],
     "passwd"         => keystone_settings["admin_password"],
     "tenant-name"    => keystone_settings["admin_tenant"],
-    "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure],
+    # "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure],
     "domain"         => node[:domain],
     "record-only"    => "1",
     "verbose"        => "1",
