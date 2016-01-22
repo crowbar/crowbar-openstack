@@ -18,7 +18,7 @@
 barclamp:
   name: 'ceilometer'
   display: 'Ceilometer'
-  description: 'Telemetry Module: Measurements collection for monitoring and metering'
+  description: 'OpenStack Telemetry: Measurements collection for monitoring and metering'
   version: 0
   user_managed: true
   requires:

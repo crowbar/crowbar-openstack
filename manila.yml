@@ -27,7 +27,7 @@
 barclamp:
   name: 'manila'
   display: 'Manila'
-  description: 'File Share Module: Management of shared filesystems'
+  description: 'OpenStack File Share: Management of shared filesystems'
   version: 0
   requires:
     - '@crowbar'

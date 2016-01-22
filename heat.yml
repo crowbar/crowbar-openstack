@@ -18,7 +18,7 @@
 barclamp:
   name: 'heat'
   display: 'Heat'
-  description: 'Orchestration Module: Orchestration engine for composite cloud applications'
+  description: 'OpenStack Orchestration: Orchestration engine for composite cloud applications'
   version: 0
   user_managed: true
   requires:
