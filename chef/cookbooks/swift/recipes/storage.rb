@@ -42,8 +42,6 @@ end
   package pkg
 end
 
-include_recipe "swift::common_config"
-
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
 %w{account-server object-expirer object-server container-server}.each do |service|

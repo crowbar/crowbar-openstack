@@ -311,8 +311,6 @@ else
 end
 proxy_config[:memcached_ips] = servers
 
-include_recipe "swift::common_config"
-
 ## Create the proxy server configuraiton file
 template "/etc/swift/proxy-server.conf" do
   source "proxy-server.conf.erb"
