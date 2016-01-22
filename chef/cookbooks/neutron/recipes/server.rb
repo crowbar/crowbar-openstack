@@ -369,7 +369,8 @@ end
 # have multiple routers with the same name). To avoid this race-condition we
 # make sure that the post_install_conf recipe is only executed on a single node
 # of the cluster.
-if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
+if node[:neutron][:create_default_networks] && \
+    (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
   include_recipe "neutron::post_install_conf"
 end
 

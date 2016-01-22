@@ -9,6 +9,7 @@
       "max_header_line": 16384,
       "debug": false,
       "verbose": true,
+      "create_default_networks": true,
       "dhcp_domain": "openstack.local",
       "use_lbaas": true,
       "use_dvr": false,
@@ -67,7 +68,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 44,
+      "schema-revision": 45,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]
