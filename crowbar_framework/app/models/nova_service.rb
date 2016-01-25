@@ -235,6 +235,8 @@ class NovaService < PacemakerServiceObject
             set_ha_compute(remote_node, true)
           end
           nodes.concat(remote_nodes)
+
+          Openstack::HA.set_compute_role(remote_nodes)
         else
           set_ha_compute(element, false)
           nodes << element
