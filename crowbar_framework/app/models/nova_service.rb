@@ -179,6 +179,17 @@ class NovaService < PacemakerServiceObject
     base
   end
 
+  def set_ha_compute(node, enabled)
+    n = NodeObject.find_node_by_name(node)
+    n[:nova] ||= {}
+    n[:nova][:ha] ||= {}
+    n[:nova][:ha][:compute] ||= {}
+    if n[:nova][:ha][:compute][:enabled] != enabled
+      n[:nova][:ha][:compute][:enabled] = enabled
+      n.save
+    end
+  end
+
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Nova apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
@@ -209,11 +220,26 @@ class NovaService < PacemakerServiceObject
     neutron = Proposal.where(barclamp: "neutron", name: role.default_attributes["nova"]["neutron_instance"]).first
 
     compute_nodes_for_network = []
-    role.override_attributes["nova"]["elements"].each do |role, nodes|
+    role.override_attributes["nova"]["elements"].each do |role, elements|
       # only care about compute nodes
       next unless role =~ /^nova-compute-/
       # vmware compute nodes do not need access to the networking
       next if role == "nova-compute-vmware"
+
+      nodes = []
+
+      elements.each do |element|
+        if is_remotes? element
+          remote_nodes = expand_remote_nodes(element)
+          remote_nodes.each do |remote_node|
+            set_ha_compute(remote_node, true)
+          end
+          nodes.concat(remote_nodes)
+        else
+          set_ha_compute(element, false)
+          nodes << element
+        end
+      end
 
       compute_nodes_for_network << nodes
     end
