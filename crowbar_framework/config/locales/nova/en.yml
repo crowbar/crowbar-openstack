@@ -85,3 +85,4 @@ en:
         hyperv_support: 'Hyper-V support is not available.'
         xen: 'Node %{n} is running %{platform} (%{arch}), which does not support Xen.'
         assigned_node: 'Node %{key} has been assigned to a nova-compute role more than once.'
+        assigned_remotes: 'Remotes %{key} has been assigned to a nova-compute role more than once.'

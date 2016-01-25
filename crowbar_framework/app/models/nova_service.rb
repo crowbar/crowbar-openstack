@@ -308,9 +308,19 @@ class NovaService < PacemakerServiceObject
       )
     end unless elements["nova-compute-xen"].nil?
 
-    nodes.each do |key,value|
+    nodes.each do |key, value|
       if value > 1
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.assigned_node", key: key)
+        if is_remotes? key
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.assigned_remotes",
+            key: cluster_name(key)
+          )
+        else
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.assigned_node",
+            key: key
+          )
+        end
       end
     end unless nodes.nil?
 
