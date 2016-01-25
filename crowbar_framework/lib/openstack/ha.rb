@@ -18,12 +18,28 @@ module Openstack
   class HA
     def self.set_role(nodes, role)
       nodes.each do |nodename|
+        save_it = false
         node = NodeObject.find_node_by_name nodename
-        node[:pacemaker][:attributes] ||= {}
-        next if node[:pacemaker][:attributes]["OpenStack-role"] == role
 
-        node[:pacemaker][:attributes]["OpenStack-role"] = role
-        node.save
+        node[:pacemaker][:attributes] ||= {}
+        if node[:pacemaker][:attributes]["OpenStack-role"] != role
+          node[:pacemaker][:attributes]["OpenStack-role"] = role
+          save_it = true
+        end
+
+        if role == "controller"
+          unless node[:pacemaker][:apache2][:for_openstack]
+            node[:pacemaker][:apache2][:for_openstack] = true
+            save_it = true
+          end
+
+          unless node[:pacemaker][:haproxy][:for_openstack]
+            node[:pacemaker][:haproxy][:for_openstack] = true
+            save_it = true
+          end
+        end
+
+        node.save if save_it
       end
     end
 
