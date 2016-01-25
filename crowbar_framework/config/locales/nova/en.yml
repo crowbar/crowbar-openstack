@@ -86,3 +86,4 @@ en:
         xen: 'Node %{n} is running %{platform} (%{arch}), which does not support Xen.'
         assigned_node: 'Node %{key} has been assigned to a nova-compute role more than once.'
         assigned_remotes: 'Remotes %{key} has been assigned to a nova-compute role more than once.'
+        assigned_node_and_remote: 'Node %{node} has been assigned to a nova-compute role as individual node and as remote node of cluster %{cluster}.'

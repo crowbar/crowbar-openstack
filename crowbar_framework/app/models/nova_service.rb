@@ -326,6 +326,20 @@ class NovaService < PacemakerServiceObject
       end
     end unless nodes.nil?
 
+    all_elements = elements.values.flatten.compact
+    remote_clusters = all_elements.select { |element| is_remotes? element }
+    remote_clusters.each do |remote_cluster|
+      remote_nodes = expand_remote_nodes(remote_cluster)
+      remote_nodes.each do |remote_node|
+        next unless all_elements.include? remote_node
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.assigned_node_and_remote",
+          node: remote_node,
+          cluster: cluster_name(remote_cluster)
+        )
+      end
+    end
+
     super
   end
 
