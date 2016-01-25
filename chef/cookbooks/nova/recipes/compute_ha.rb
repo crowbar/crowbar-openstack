@@ -29,6 +29,41 @@ keystone_settings = KeystoneHelper.keystone_settings(nova, @cookbook_name)
 neutrons = search(:node, "roles:neutron-server AND roles:neutron-config-#{nova[:nova][:neutron_instance]}")
 neutron = neutrons.first || raise("Neutron instance '#{nova[:nova][:neutron_instance]}' for nova not found")
 
+# Install basic nova package to have /var/log/nova (used by fence_compute) as
+# well as nova user (to not have some weird permissions in /var/log/nova in
+# case nova is installed later)
+package "nova-common" do
+  if %w(rhel suse).include?(node[:platform_family])
+    package_name "openstack-nova"
+  end
+end
+
+# We have to install libvirt and neutron packages on the corosync nodes so that
+# pacemaker can know about the resource agents.
+package "libvirt"
+
+case neutron[:neutron][:networking_plugin]
+when "ml2"
+  ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
+  case
+  when ml2_mech_drivers.include?("openvswitch")
+    neutron_agent = neutron[:neutron][:platform][:ovs_agent_name]
+    neutron_agent_pkg = neutron[:neutron][:platform][:ovs_agent_pkg]
+    neutron_agent_ra = neutron[:neutron][:ha][:network]["openvswitch_ra"]
+  when ml2_mech_drivers.include?("linuxbridge")
+    neutron_agent = neutron[:neutron][:platform][:lb_agent_name]
+    neutron_agent_pkg = neutron[:neutron][:platform][:lb_agent_pkg]
+    neutron_agent_ra = neutron[:neutron][:ha][:network]["linuxbridge_ra"]
+  end
+
+  package neutron_agent_pkg
+end
+
+if neutron[:neutron][:use_dvr]
+  package neutron[:neutron][:platform][:l3_agent_pkg]
+  package neutron[:neutron][:platform][:metadata_agent_pkg]
+end
+
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required packages installed before we create the pacemaker
 # resources
@@ -52,16 +87,6 @@ compute_transaction_objects << "pacemaker_primitive[#{libvirtd_primitive}]"
 
 case neutron[:neutron][:networking_plugin]
 when "ml2"
-  ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
-  case
-  when ml2_mech_drivers.include?("openvswitch")
-    neutron_agent = neutron[:neutron][:platform][:ovs_agent_name]
-    neutron_agent_ra = neutron[:neutron][:ha][:network]["openvswitch_ra"]
-  when ml2_mech_drivers.include?("linuxbridge")
-    neutron_agent = neutron[:neutron][:platform][:lb_agent_name]
-    neutron_agent_ra = neutron[:neutron][:ha][:network]["linuxbridge_ra"]
-  end
-
   neutron_agent_primitive = "#{neutron_agent.sub(/^openstack-/, "")}-compute"
   pacemaker_primitive neutron_agent_primitive do
     agent neutron_agent_ra
