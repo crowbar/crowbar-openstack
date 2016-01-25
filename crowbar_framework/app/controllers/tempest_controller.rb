@@ -50,7 +50,7 @@ class TempestController < BarclampController
 
         respond_to do |format|
           format.json { render json: @test_runs }
-          format.html { redirect_to tempest_dashboard_path }
+          format.html { redirect_to tempest_dashboard_url }
         end
       end
 
@@ -74,7 +74,7 @@ class TempestController < BarclampController
       @test_runs = @service_object.get_test_runs
       respond_to do |format|
         format.json { render json: @test_runs }
-        format.html { redirect_to tempest_dashboard_path }
+        format.html { redirect_to tempest_dashboard_url }
       end
     end
   end
