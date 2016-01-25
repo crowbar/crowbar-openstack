@@ -242,7 +242,6 @@ template "/etc/keystone/keystone.conf" do
       bind_service_host: bind_service_host,
       bind_admin_port: bind_admin_port,
       bind_service_port: bind_service_port,
-      public_endpoint: node[:keystone][:api][:public_URL],
       admin_endpoint: node[:keystone][:api][:admin_URL],
       use_syslog: node[:keystone][:use_syslog],
       signing_token_format: node[:keystone][:signing][:token_format],
