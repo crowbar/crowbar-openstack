@@ -225,6 +225,9 @@ class NovaService < PacemakerServiceObject
       next unless role =~ /^nova-compute-/
       # vmware compute nodes do not need access to the networking
       next if role == "nova-compute-vmware"
+      # compute-ha is obviously not a compute role, but the HA setup for
+      # compute
+      next if role == "nova-compute-ha"
 
       nodes = []
 
