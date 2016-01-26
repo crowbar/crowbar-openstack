@@ -179,6 +179,52 @@ class NovaService < PacemakerServiceObject
     base
   end
 
+  # Override this so we can change elements and element_order dynamically on
+  # apply:
+  #  - when there are compute roles using clusters with remote nodes, we need
+  #    to have some compute-ha role with the corosync nodes of the clusters,
+  #    running after the compute roles
+  #  - when that is not the case, we of course do not need that. We still keep
+  #    the element_order addition in order to deal with clusters that are
+  #    removed (because apply_role looks at element_order to decide what role
+  #    to look at)
+  # Note that we do not put compute-ha in element_order in the proposal to keep
+  # it hidden from the user: this is something that should never be changed by
+  # the user, as it's handled automatically.
+  def active_update(proposal, inst, in_queue)
+    deployment = proposal["deployment"]["nova"]
+    elements = deployment["elements"]
+
+    # always reset elements of nova-compute-ha in case the user tried to
+    # provide that in the proposal
+    elements["nova-compute-ha"] = []
+    # always include nova-compute-ha in the batches for apply_role (see long
+    # comment above)
+    unless deployment["element_order"].flatten.include?("nova-compute-ha")
+      deployment["element_order"].push(["nova-compute-ha"])
+    end
+
+    # find list of roles which accept clusters with remote nodes
+    roles_with_remote = role_constraints.select do |role, constraints|
+      constraints["remotes"]
+    end.keys
+
+    # now examine all elements in these roles, and look for clusters
+    roles_with_remote.each do |role|
+      next unless elements.key? role
+      elements[role].each do |element|
+        next unless is_remotes? element
+
+        cluster = PacemakerServiceObject.cluster_from_remotes(element)
+        @logger.debug("nova: Ensuring that #{cluster} has nova-compute-ha role")
+        elements["nova-compute-ha"].push(cluster)
+      end
+    end
+
+    # no need to save proposal, it's just data that is passed to later methods
+    super
+  end
+
   def set_ha_compute(node, enabled)
     n = NodeObject.find_node_by_name(node)
     n[:nova] ||= {}

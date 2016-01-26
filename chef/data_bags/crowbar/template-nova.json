@@ -88,7 +88,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 39,
+      "schema-revision": 40,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-docker": [ "readying", "ready", "applying" ],
@@ -97,7 +97,8 @@
         "nova-compute-qemu": [ "readying", "ready", "applying" ],
         "nova-compute-vmware": [ "readying", "ready", "applying" ],
         "nova-compute-xen": [ "readying", "ready", "applying" ],
-        "nova-compute-zvm": [ "readying", "ready", "applying" ]
+        "nova-compute-zvm": [ "readying", "ready", "applying" ],
+        "nova-compute-ha": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
@@ -120,7 +121,8 @@
         "nova-compute-qemu": 97,
         "nova-compute-vmware": 97,
         "nova-compute-xen": 97,
-        "nova-compute-zvm": 97
+        "nova-compute-zvm": 97,
+        "nova-compute-ha": 97
       },
       "config": {
         "environment": "nova-config-base",
