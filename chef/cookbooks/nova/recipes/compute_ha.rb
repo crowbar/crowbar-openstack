@@ -67,11 +67,17 @@ end
 
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required packages installed before we create the pacemaker
-# resources
-crowbar_pacemaker_sync_mark "sync-nova_compute_before_ha"
+# resources.
+# We use the revision of the nova node we found as the goal is to not require
+# the corosync nodes to be part of the nova proposal.
+crowbar_pacemaker_sync_mark "sync-nova_compute_before_ha" do
+  revision nova[:nova]["crowbar-revision"]
+end
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-nova_compute_ha_resources"
+crowbar_pacemaker_sync_mark "wait-nova_compute_ha_resources" do
+  revision nova[:nova]["crowbar-revision"]
+end
 
 compute_primitives = []
 compute_transaction_objects = []
@@ -272,4 +278,6 @@ crowbar_pacemaker_order_only_existing "o-#{evacuate_primitive}" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-nova_compute_ha_resources"
+crowbar_pacemaker_sync_mark "create-nova_compute_ha_resources" do
+  revision nova[:nova]["crowbar-revision"]
+end
