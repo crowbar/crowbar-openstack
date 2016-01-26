@@ -1451,6 +1451,7 @@ bootable = true
 # is used instead. If no such region is found in the service catalog,
 # the first found one is used. (string value)
 #region =
+region = <%= @keystone_settings['endpoint_region'] %>
 
 # Catalog type of the Share service. Should be changed only if it is changed in Manila itself
 #catalog_type = share
