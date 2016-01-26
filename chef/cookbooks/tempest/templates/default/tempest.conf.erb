@@ -122,9 +122,11 @@ verbose = false
 # requires that OpenStack Identity API admin credentials are known. If
 # false, isolated test cases and parallel execution, can still be
 # achieved configuring a list of test accounts (boolean value)
+# Deprecated group/name - [auth]/allow_tenant_isolation
 # Deprecated group/name - [compute]/allow_tenant_isolation
 # Deprecated group/name - [orchestration]/allow_tenant_isolation
-#allow_tenant_isolation = true
+#use_dynamic_credentials = true
+
 
 # Roles to assign to all users created by tempest (list value)
 #tempest_roles =
@@ -134,13 +136,40 @@ verbose = false
 # Deprecated group/name - [auth]/tenant_isolation_domain_name
 #default_credentials_domain_name = Default
 
-# If allow_tenant_isolation is set to True and Neutron is enabled
+# If use_dynamic_credentials is set to True and Neutron is enabled
 # Tempest will try to create a usable network, subnet, and router when
-# needed for each tenant it  creates. However in some neutron
+# needed for each tenant it creates. However in some neutron
 # configurations, like with VLAN provider networks, this doesn't work.
 # So if set to False the isolated networks will not be created
 # (boolean value)
 #create_isolated_networks = true
+
+# Username for an administrative user. This is needed for
+# authenticating requests made by tenant isolation to create users and
+# projects (string value)
+# Deprecated group/name - [identity]/admin_username
+#admin_username = <None>
+admin_username = <%= @keystone_settings['admin_user'] %>
+
+# Tenant name to use for an  administrative user. This is needed for
+# authenticating requests made by tenant isolation to create users and
+# projects (string value)
+# Deprecated group/name - [identity]/admin_tenant_name
+#admin_tenant_name = <None>
+admin_tenant_name = <%= @keystone_settings['default_tenant'] %>
+
+# Password to use for an  administrative user. This is needed for
+# authenticating requests made by tenant isolation to create users and
+# projects (string value)
+# Deprecated group/name - [identity]/admin_password
+#admin_password = <None>
+admin_password = <%= @keystone_settings['admin_password'] %>
+
+# Admin domain name for authentication (Keystone V3).The same domain
+# applies to user and project (string value)
+# Deprecated group/name - [identity]/admin_domain_name
+#admin_domain_name = <None>
+admin_domain_name = Default
 
 
 [baremetal]
@@ -456,6 +485,13 @@ interface_attach = <%= @use_interface_attach %>
 # Does the test environment have the ec2 api running? (boolean value)
 #ec2_api = true
 
+# Does the test environment have the nova cert running? (boolean
+# value)
+#nova_cert = true
+
+# Does the test environment support server personality (boolean value)
+#personality = true
+
 # Does Nova preserve preexisting ports from Neutron when deleting an
 # instance? This should be set to True if testing Kilo+ Nova. (boolean
 # value)
@@ -472,6 +508,9 @@ preserve_ports = true
 # ports on the same network? This is only valid when using Neutron.
 # (boolean value)
 #allow_duplicate_networks = false
+
+# Enable special configuration drive with metadata. (boolean value)
+#config_drive = true
 
 
 [dashboard]
@@ -491,29 +530,32 @@ dashboard_url = <%= @horizon_protocol %>://<%= @horizon_host %>/
 login_url = <%= @horizon_protocol %>://<%= @horizon_host %>/auth/login/
 
 
-[data_processing]
+[data-processing]
 
 #
 # From tempest.config
 #
 
 # Catalog type of the data processing service. (string value)
-#catalog_type = data_processing
+# Deprecated group/name - [data_processing]/catalog_type
+#catalog_type = data-processing
 
 # The endpoint type to use for the data processing service. (string
 # value)
 # Allowed values: public, admin, internal, publicURL, adminURL, internalURL
+# Deprecated group/name - [data_processing]/endpoint_type
 #endpoint_type = publicURL
 endpoint_type = internalURL
 
 
-[data_processing-feature-enabled]
+[data-processing-feature-enabled]
 
 #
 # From tempest.config
 #
 
 # List of enabled data processing plugins (list value)
+# Deprecated group/name - [data_processing-feature-enabled]/plugins
 #plugins = vanilla,hdp
 
 
@@ -620,10 +662,14 @@ v2_public_endpoint_type = internalURL
 v3_endpoint_type = internalURL
 
 # Username to use for Nova API requests. (string value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
 #username = <None>
 username = <%= @comp_user %>
 
 # Tenant name to use for Nova API requests. (string value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
 #tenant_name = <None>
 tenant_name = <%= @comp_tenant %>
 
@@ -631,51 +677,44 @@ tenant_name = <%= @comp_tenant %>
 #admin_role = admin
 
 # API key to use when authenticating. (string value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
 #password = <None>
 password = <%= @comp_password %>
 
 # Domain name for authentication (Keystone V3).The same domain applies
 # to user and project (string value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
 #domain_name = <None>
 domain_name = Default
 
 # Username of alternate user to use for Nova API requests. (string
 # value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
 #alt_username = <None>
 alt_username = <%= @alt_comp_user %>
 
 # Alternate user's Tenant name to use for Nova API requests. (string
 # value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
 #alt_tenant_name = <None>
 alt_tenant_name = <%= @alt_comp_tenant %>
 
 # API key to use when authenticating as alternate user. (string value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
 #alt_password = <None>
 alt_password = <%= @alt_comp_pass %>
 
 # Alternate domain name for authentication (Keystone V3).The same
 # domain applies to user and project (string value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
 #alt_domain_name = <None>
 alt_domain_name = Default
-
-# Administrative Username to use for Keystone API requests. (string
-# value)
-#admin_username = <None>
-admin_username = <%= @keystone_settings['admin_user'] %>
-
-# Administrative Tenant name to use for Keystone API requests. (string
-# value)
-#admin_tenant_name = <None>
-admin_tenant_name = <%= @keystone_settings['default_tenant'] %>
-
-# API key to use when authenticating as admin. (string value)
-#admin_password = <None>
-admin_password = <%= @keystone_settings['admin_password'] %>
-
-# Admin domain name for authentication (Keystone V3).The same domain
-# applies to user and project (string value)
-#admin_domain_name = <None>
-admin_domain_name = Default
 
 # ID of the default domain (string value)
 #default_domain_id = default
@@ -696,6 +735,12 @@ admin_domain_name = Default
 
 # Is the v3 identity API enabled (boolean value)
 #api_v3 = true
+
+# A list of enabled identity extensions with a special entry all which
+# indicates every extension is enabled. Empty list indicates all
+# extensions are disabled. To get the list of extensions run:
+# 'keystone discover' (list value)
+#api_extensions = all
 
 
 [image]
@@ -729,6 +774,12 @@ http_image = <%= @http_image %>
 # Time in seconds between image operation status checks. (integer
 # value)
 #build_interval = 1
+
+# A list of image's container formats users can specify. (list value)
+#container_formats = ami,ari,aki,bare,ovf,ova
+
+# A list of image's disk formats users can specify. (list value)
+#disk_formats = ami,ari,aki,vhd,vmdk,raw,qcow2,vdi,iso
 
 
 [image-feature-enabled]
@@ -886,6 +937,9 @@ public_network_id = <%= @public_network_id %>
 # Supported ports are: ['normal','direct','macvtap'] (string value)
 # Allowed values: <None>, normal, direct, macvtap
 #port_vnic_type = <None>
+
+# List of ip pools for subnetpools creation (list value)
+#default_network = 1.0.0.0/16,2.0.0.0/16
 
 
 [network-feature-enabled]
@@ -1219,6 +1273,8 @@ endpoint_type = internalURL
 
 # This variable is used as flag to enable notification tests (boolean
 # value)
+# This option is deprecated for removal.
+# Its value may be silently ignored in the future.
 #too_slow_to_test = true
 too_slow_to_test = false
 
@@ -1244,6 +1300,12 @@ events = true
 # resources to enable remote access (boolean value)
 # Deprecated group/name - [compute]/run_ssh
 #run_validation = false
+
+# Enable/disable security groups. (boolean value)
+#security_group = true
+
+# Enable/disable security group rules. (boolean value)
+#security_group_rules = true
 
 # Default IP type used for validation: -fixed: uses the first IP
 # belonging to the fixed network -floating: creates and uses a
