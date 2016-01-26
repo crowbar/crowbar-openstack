@@ -170,7 +170,7 @@ when "ml2"
   #ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
   ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
   if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
-    ml2_mechanism_drivers.push("l2population")
+    ml2_mechanism_drivers.push("l2population") if node[:neutron][:use_dvr]
     mtu_value = 1400
   end
 
