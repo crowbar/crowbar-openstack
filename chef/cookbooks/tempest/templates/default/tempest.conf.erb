@@ -1377,8 +1377,21 @@ bootable = true
 # From tempest.config
 #
 
+# The minimum api microversion is configured to be the value of the
+# minimum microversion supported by Manila. (string value)
+#min_api_microversion = 2.0
+
+# The maximum api microversion is configured to be the value of the
+# latest microversion supported by Manila. (string value)
+#max_api_microversion = 2.6
+
+# The share region name to use. If empty, the value of identity.region
+# is used instead. If no such region is found in the service catalog,
+# the first found one is used. (string value)
+#region =
+
 # Catalog type of the Share service. Should be changed only if it is changed in Manila itself
-catalog_type = share
+#catalog_type = share
 
 # The endpoint type to use for the share service
 # Expected values are 'public', 'admin', 'internal', 'publicURL', 'adminURL' and 'internalURL'
@@ -1387,47 +1400,118 @@ endpoint_type = internalURL
 
 # This option is used to determine backend driver type, multitenant driver uses share-networks,
 # but single-tenant doesn't
-multitenancy_enabled = True
+#multitenancy_enabled = True
+multitenancy_enabled = False
 
 # The first value of the list is protocol by default, items of the list show enabled protocols
-enable_protocols = nfs, cifs
+#enable_protocols = nfs, cifs
 
 # Whether allow running of ip rules tests or not, and which share protocols should be used
 #enable_ip_rules_for_protocols = nfs, cifs
 
-# Whether allow running of sid (username/usergroup) rules tests or not, and which share protocols should be used
-#enable_sid_rules_for_protocols=""
+# Selection of protocols, that should be covered with user rule tests
+# (list value)
+#enable_user_rules_for_protocols =
 
-# What name should be used with user rule tests? Specify it if 'user rule' tests are enabled
+# Protocols that should be covered with cert rule tests. (list value)
+#enable_cert_rules_for_protocols = glusterfs
+
+# Username, that will be used in user tests. (string value)
 #username_for_user_rules = Administrator
 
-# If you want Tempest to use some specific share-network instead of autocreated, specify it
-# This value is used for member creds
-#storage_protocol = ""
+# List of protocols to run tests with ro access level. (list value)
+#enable_ro_access_level_for_protocols = nfs
 
-# If you want Tempest to use some specific share-network instead of autocreated, specify it
-# This value is used for member creds
-#shared_network_id = ""
+# Backend protocol to target when creating volume types. (string
+# value)
+# Deprecated group/name - [DEFAULT]/storage_protocol
+#capability_storage_protocol = NFS_CIFS
 
-# If you want Tempest to use some specific share-network instead of autocreated, specify it
-# This value is used for alternative member creds. At the moment there are no tests,
-# that use share_network with creds for alternative user
-#alt_share_network_id = ""
+# Defines extra spec that satisfies specific back end capability
+# called 'snapshot_support' and will be used for setting up custom
+# share type. Defaults to value of other config option
+# 'run_snapshot_tests'. (boolean value)
+#capability_snapshot_support = <None>
 
-# If you want Tempest to use some specific share-network instead of autocreated, specify it
-# This value is used for admin creds
-#admin_share_network_id = ""
+# Some backend drivers requires share network for share creation.
+# Share network id, that will be used for shares. If not set, it won't
+# be used. (string value)
+#share_network_id =
 
-# Does your environment has more than 1 backend or not?
-# If yes, than you can set it to True to enable multibackend tests in tempest
-#multi_backend = False
+# Share network id, that will be used for shares in alt tenant. If not
+# set, it won't be used (string value)
+#alt_share_network_id =
 
-# names of backends in Manila, that Tempest should use
-# Tempest will use first two values from list and will use it only if option "multi_backend" is Enabled
-#backend_names = ""
+# Share network id, that will be used for shares in admin tenant. If
+# not set, it won't be used (string value)
+#admin_share_network_id =
 
-# time to wait between resend of requests
-build_interval = 3
+# Runs Manila multi-backend tests. (boolean value)
+#multi_backend = false
 
-# time to wait until raise of Exception with timeout
-build_timeout = 500
+# Names of share backends, that will be used with multibackend tests.
+# Tempest will use first two values. (list value)
+#backend_names =
+
+# Defines number of retries for share creation. It is useful to avoid
+# failures caused by unstable environment. (integer value)
+#share_creation_retry_number = 0
+
+# Time in seconds between share availability checks. (integer value)
+#build_interval = 3
+
+# Timeout in seconds to wait for a share to becomeavailable. (integer
+# value)
+#build_timeout = 500
+
+# Whether to suppress errors with clean up operation or not. There are
+# cases when we may want to skip such errors and catch only test
+# errors. (boolean value)
+#suppress_errors_in_cleanup = false
+suppress_errors_in_cleanup = true
+
+# Defines whether to run manage/unmanage tests or not. These test may
+# leave orphaned resources, so be careful enabling this opt. (boolean
+# value)
+#run_manage_unmanage_tests = false
+
+# Defines whether to run share extend tests or not. Disable this
+# feature if used driver doesn't support it. (boolean value)
+#run_extend_tests = true
+
+# Defines whether to run share shrink tests or not. Disable this
+# feature if used driver doesn't support it. (boolean value)
+#run_shrink_tests = true
+
+# Defines whether to run tests that use share snapshots or not.
+# Disable this feature if used driver doesn't support it. (boolean
+# value)
+#run_snapshot_tests = true
+
+# Defines whether to run consistency group tests or not. Disable this
+# feature if used driver doesn't support it. (boolean value)
+#run_consistency_group_tests = true
+
+# Enable or disable migration tests. (boolean value)
+#run_migration_tests = false
+
+# Image name for vm booting with nfs/smb clients tool. (string value)
+#image_with_share_tools = manila-service-image
+
+# Image username. (string value)
+#image_username = manila
+
+# Image password. Should be used for 'image_with_share_tools' without
+# Nova Metadata support. (string value)
+#image_password = <None>
+
+# Flavor used for client vm in scenario tests. (string value)
+#client_vm_flavor_ref = 100
+
+# Time to wait for share migration before timing out (seconds).
+# (integer value)
+#migration_timeout = 1200
+
+# Default share type name to use in tempest tests. (string value)
+#default_share_type_name = <None>
+default_share_type_name = default
