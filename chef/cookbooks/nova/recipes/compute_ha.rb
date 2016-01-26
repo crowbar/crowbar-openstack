@@ -206,7 +206,7 @@ controller_transaction_objects << "pacemaker_primitive[#{evacuate_primitive}]"
 
 controller_location_name = "l-#{evacuate_primitive}-controller"
 pacemaker_location controller_location_name do
-  definition OpenStackHAHelper.controller_only_location(controller_location_name, evacuate_primitive)
+  definition OpenStackHAHelper.no_compute_location(controller_location_name, evacuate_primitive)
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
