@@ -266,14 +266,14 @@ class NovaService < PacemakerServiceObject
     neutron = Proposal.where(barclamp: "neutron", name: role.default_attributes["nova"]["neutron_instance"]).first
 
     compute_nodes_for_network = []
-    role.override_attributes["nova"]["elements"].each do |role, elements|
+    role.override_attributes["nova"]["elements"].each do |role_name, elements|
       # only care about compute nodes
-      next unless role =~ /^nova-compute-/
+      next unless role_name =~ /^nova-compute-/
       # vmware compute nodes do not need access to the networking
-      next if role == "nova-compute-vmware"
+      next if role_name == "nova-compute-vmware"
       # compute-ha is obviously not a compute role, but the HA setup for
       # compute
-      next if role == "nova-compute-ha"
+      next if role_name == "nova-compute-ha"
 
       nodes = []
 
