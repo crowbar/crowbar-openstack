@@ -25,6 +25,11 @@ unless nova[:nova][:ha][:compute][:enabled]
   raise "HA for compute nodes is not enabled!"
 end
 
+unless nova[:nova][:ha][:compute][:setup]
+  Chef::Log.info("Skipping setup of HA for compute nodes as compute nodes have not been prepared yet.")
+  return
+end
+
 keystone_settings = KeystoneHelper.keystone_settings(nova, @cookbook_name)
 neutrons = search(:node, "roles:neutron-server AND roles:neutron-config-#{nova[:nova][:neutron_instance]}")
 neutron = neutrons.first || \
