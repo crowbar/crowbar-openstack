@@ -46,36 +46,38 @@ module Openstack
       end
     end
 
-    def self.enable_repos_for_feature(feature)
-      Crowbar::Repository.check_all_repos.each do |repo|
-        # enable disabled repos now
-        if (repo.config["features"] || []).include? feature
-          Rails.logger.info("enabling repository #{repo.id}")
-          @provisioner_service.enable_repository(repo.platform, repo.arch, repo.id)
+    class << self
+      def enable_repos_for_feature(feature, logger)
+        Crowbar::Repository.check_all_repos.each do |repo|
+          next unless (repo.config["features"] || []).include? feature
+
+          # enable disabled repos now
+          logger.info("enabling repository #{repo.id}")
+          provisioner_service = ProvisionerService.new(logger)
+          provisioner_service.enable_repository(repo.platform, repo.arch, repo.id)
         end
       end
-    end
 
-    # Check if the additional repositories (HAE, SES) are present
-    # after the upgrade of the admin node
-    def self.check_additional_repositories_presence(thelogger)
-      @provisioner_service = ProvisionerService.new thelogger
-      # check if HA repos are needed
-      pacemaker_proposal = Proposal.where(barclamp: "pacemaker").first
-      unless pacemaker_proposal.nil?
-        unless Crowbar::Repository.provided? "ha"
-          raise I18n.t("barclamp.pacemaker.validation.hae_repo")
+      def check_ha_repo(logger)
+        return nil unless Proposal.where(barclamp: "pacemaker")
+        return false unless Crowbar::Repository.provided?("ha")
+
+        unless Crowbar::Repository.provided_and_enabled?("ha")
+          enable_repos_for_feature("ha", logger)
         end
-        enable_repos_for_feature "ha"
+
+        true
       end
 
-      # check if Storage repos are neededa
-      ceph_proposal = Proposal.where(barclamp: "ceph").first
-      unless ceph_proposal.nil?
-        unless Crowbar::Repository.provided? "ceph"
-          raise I18n.t("barclamp.pacemaker.validation.ses_repos")
+      def check_ceph_repo(logger)
+        return nil unless Proposal.where(barclamp: "ceph")
+        return false unless Crowbar::Repository.provided?("ceph")
+
+        unless Crowbar::Repository.provided_and_enabled?("ceph")
+          enable_repos_for_feature("ceph", logger)
         end
-        enable_repos_for_feature "ceph"
+
+        true
       end
     end
   end
