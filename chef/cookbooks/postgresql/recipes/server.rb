@@ -128,6 +128,10 @@ else
   log "HA support for postgresql is disabled"
 end
 
+db_dump = node[:crowbar].fetch(:upgrade, {})[:db_dump_location]
+if !db_dump.nil? && File.exist?(db_dump)
+  include_recipe "postgresql::db_restore"
+end
 # NOTE: Consider two facts before modifying "assign-postgres-password":
 # (1) Passing the "ALTER ROLE ..." through the psql command only works
 #     if passwordless authorization was configured for local connections.
