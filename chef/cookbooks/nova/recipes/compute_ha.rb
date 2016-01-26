@@ -27,7 +27,8 @@ end
 
 keystone_settings = KeystoneHelper.keystone_settings(nova, @cookbook_name)
 neutrons = search(:node, "roles:neutron-server AND roles:neutron-config-#{nova[:nova][:neutron_instance]}")
-neutron = neutrons.first || raise("Neutron instance '#{nova[:nova][:neutron_instance]}' for nova not found")
+neutron = neutrons.first || \
+  raise("Neutron instance '#{nova[:nova][:neutron_instance]}' for nova not found")
 
 # Install basic nova package to have /var/log/nova (used by fence_compute) as
 # well as nova user (to not have some weird permissions in /var/log/nova in
@@ -264,7 +265,7 @@ unless %w(disabled manual).include? node[:pacemaker][:stonith][:mode]
 end
 
 crowbar_pacemaker_order_only_existing "o-#{evacuate_primitive}" do
-# TODO: pretty sure we shouldn't have all of these in the order
+  # TODO: pretty sure we shouldn't have all of these in the order
   ordering "( postgresql rabbitmq cl-keystone cl-g-glance cl-g-cinder-controller cl-neutron-server cl-g-neutron-agents cl-g-nova-controller ) #{evacuate_primitive}"
   score "Mandatory"
   action :create
