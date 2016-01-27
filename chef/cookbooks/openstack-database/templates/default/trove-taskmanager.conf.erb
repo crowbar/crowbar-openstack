@@ -37,10 +37,14 @@ sql_idle_timeout = 3600
 db_api_implementation = trove.db.sqlalchemy.api
 
 # Configuration options for talking to nova via the novaclient.
+api_insecure = <%= @insecure %>
 trove_auth_url = <%= @identity_uri %>
 nova_compute_url = <%= @compute_uri %>
+nova_api_insecure = <%= @compute_insecure %>
 cinder_url = <%= @block_storage_uri %>
+cinder_api_insecure = <%= @block_storage_insecure %>
 swift_url = <%= @object_storage_uri %>
+swift_api_insecure = <%= @object_storage_insecure %>
 
 # Config options for enabling volume service
 trove_volume_support = <%= node['openstack']['database']['volume_support'] %>

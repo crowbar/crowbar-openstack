@@ -47,6 +47,11 @@ object_storage_uri = endpoint("object-storage-api")
 rabbit = node["openstack"]["mq"]["database"]["rabbit"]
 rabbit_pass = get_password("user", rabbit["userid"])
 
+insecure = node["openstack"]["insecure"]
+compute_insecure = node["openstack"]["compute"]["insecure"]
+block_storage_insecure = node["openstack"]["block-storage"]["insecure"]
+object_storage_insecure = node["openstack"]["object-storage"]["insecure"]
+
 template "/etc/trove/trove-taskmanager.conf" do
   source "trove-taskmanager.conf.erb"
   owner node["openstack"]["database"]["user"]
@@ -57,9 +62,13 @@ template "/etc/trove/trove-taskmanager.conf" do
     rabbit: rabbit,
     rabbit_pass: rabbit_pass,
     identity_uri: identity_uri,
+    insecure: insecure,
     compute_uri: compute_uri,
+    compute_insecure: compute_insecure,
     block_storage_uri: block_storage_uri,
-    object_storage_uri: object_storage_uri
+    block_storage_insecure: block_storage_insecure,
+    object_storage_uri: object_storage_uri,
+    object_storage_insecure: object_storage_insecure
     )
 
   notifies :restart, "service[trove-taskmanager]", :immediately
