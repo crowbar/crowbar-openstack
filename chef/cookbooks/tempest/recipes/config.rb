@@ -32,6 +32,9 @@ tempest_comp_tenant = node[:tempest][:tempest_user_tenant]
 tempest_adm_user = node[:tempest][:tempest_adm_username]
 tempest_adm_pass = node[:tempest][:tempest_adm_password]
 
+# manila (share)
+tempest_manila_settings = node[:tempest][:manila]
+
 keystone_register "tempest tempest wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
@@ -473,7 +476,9 @@ template "/etc/tempest/tempest.conf" do
     cinder_backend2_name: cinder_backend2_name,
     storage_protocol: storage_protocol,
     vendor_name: vendor_name,
-    use_docker: use_docker
+    use_docker: use_docker,
+    # manila (share) settings
+    manila_settings: tempest_manila_settings
   )
 end
 
