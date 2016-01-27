@@ -15,6 +15,7 @@ recipe "database::snapshot", "Locks tables and freezes XFS filesystem for replic
 depends "mysql"
 depends "postgresql", ">= 1.0.0"
 depends "xfs"
+depends "crowbar-openstack"
 depends "crowbar-pacemaker"
 
 %w(debian ubuntu centos suse fedora redhat scientific amazon).each do |os|

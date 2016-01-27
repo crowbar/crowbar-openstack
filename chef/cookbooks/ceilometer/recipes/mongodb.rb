@@ -46,25 +46,31 @@ end
 if ha_enabled
   crowbar_pacemaker_sync_mark "wait-mongodb_service"
 
-  pacemaker_primitive "mongodb" do
+  transaction_objects = []
+
+  service_name = "mongodb"
+  pacemaker_primitive service_name do
     agent node[:ceilometer][:ha][:mongodb][:agent]
     op node[:ceilometer][:ha][:mongodb][:op]
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  transaction_objects << "pacemaker_primitive[#{service_name}]"
 
-  pacemaker_clone "cl-mongodb" do
-    rsc "mongodb"
+  clone_name = "cl-#{service_name}"
+  pacemaker_clone clone_name do
+    rsc service_name
     meta ({ "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node) })
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  transaction_objects << "pacemaker_clone[#{clone_name}]"
+
+  location_name = openstack_pacemaker_controller_only_location_for clone_name
+  transaction_objects << "pacemaker_location[#{location_name}]"
 
   pacemaker_transaction "mongodb" do
-    cib_objects [
-      "pacemaker_primitive[mongodb]",
-      "pacemaker_clone[cl-mongodb]"
-    ]
+    cib_objects transaction_objects
     action :commit_new
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end

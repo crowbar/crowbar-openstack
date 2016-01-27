@@ -91,6 +91,9 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   storage_transaction_objects << "pacemaker_ms[#{ms_name}]"
+
+  ms_location_name = openstack_pacemaker_controller_only_location_for ms_name
+  storage_transaction_objects << "pacemaker_location[#{ms_location_name}]"
 end
 
 pacemaker_primitive fs_primitive do
@@ -101,6 +104,9 @@ pacemaker_primitive fs_primitive do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 storage_transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
+
+fs_location_name = openstack_pacemaker_controller_only_location_for fs_primitive
+storage_transaction_objects << "pacemaker_location[#{fs_location_name}]"
 
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   colocation_constraint = "col-#{fs_primitive}"
@@ -294,6 +300,17 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   end
   service_transaction_objects << "pacemaker_order[#{order_constraint}]"
 
+  admin_vip_location_name = openstack_pacemaker_controller_only_location_for admin_vip_primitive
+  service_transaction_objects << "pacemaker_location[#{admin_vip_location_name}]"
+
+  if node[:rabbitmq][:listen_public]
+    public_vip_location_name = openstack_pacemaker_controller_only_location_for public_vip_primitive
+    service_transaction_objects << "pacemaker_location[#{public_vip_location_name}]"
+  end
+
+  location_name = openstack_pacemaker_controller_only_location_for service_name
+  service_transaction_objects << "pacemaker_location[#{location_name}]"
+
 else
   # Pacemaker groups do not support parallel startup ordering :-(
   primitives = dependencies + [service_name]
@@ -306,6 +323,9 @@ else
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   service_transaction_objects << "pacemaker_group[#{group_name}]"
+
+  location_name = openstack_pacemaker_controller_only_location_for group_name
+  service_transaction_objects << "pacemaker_location[#{location_name}]"
 
 end
 

@@ -1,5 +1,5 @@
 #
-# Copyright 2011, Dell
+# Copyright 2016, SUSE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,18 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# Author: andi abes
-#
-maintainer "Dell, Inc."
-maintainer_email "crowbar@dell.com"
-license "Apache 2.0"
-description "Installs/Configures Openstack Swift"
-long_description IO.read(File.join(File.dirname(__FILE__), "README.rdoc"))
-version "0.1"
 
-depends "memcached"
-depends "keystone"
-depends "nagios"
-depends "uwsgi"
-depends "crowbar-openstack"
-depends "crowbar-pacemaker"
+define :openstack_pacemaker_controller_only_location_for do
+  resource = params[:name]
+  location_name = "l-#{resource}-controller"
+  pacemaker_location location_name do
+    definition OpenStackHAHelper.controller_only_location(location_name, resource)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  location_name
+end

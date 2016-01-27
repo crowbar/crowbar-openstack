@@ -105,6 +105,12 @@ if node[:database][:ha][:storage][:mode] == "drbd"
   end
   transaction_objects << "pacemaker_order[#{order_constraint}]"
 
+  vip_location_name = openstack_pacemaker_controller_only_location_for vip_primitive
+  transaction_objects << "pacemaker_location[#{vip_location_name}]"
+
+  location_name = openstack_pacemaker_controller_only_location_for service_name
+  transaction_objects << "pacemaker_location[#{location_name}]"
+
 else
 
   pacemaker_group group_name do
@@ -115,6 +121,9 @@ else
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_group[#{group_name}]"
+
+  location_name = openstack_pacemaker_controller_only_location_for group_name
+  transaction_objects << "pacemaker_location[#{location_name}]"
 
 end
 

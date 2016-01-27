@@ -95,6 +95,9 @@ if node[:database][:ha][:storage][:mode] == "drbd"
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_ms[#{ms_name}]"
+
+  location_name = openstack_pacemaker_controller_only_location_for ms_name
+  transaction_objects << "pacemaker_location[#{location_name}]"
 end
 
 pacemaker_primitive fs_primitive do
@@ -105,6 +108,9 @@ pacemaker_primitive fs_primitive do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
+
+location_name = openstack_pacemaker_controller_only_location_for fs_primitive
+transaction_objects << "pacemaker_location[#{location_name}]"
 
 if node[:database][:ha][:storage][:mode] == "drbd"
   colocation_constraint = "col-#{fs_primitive}"

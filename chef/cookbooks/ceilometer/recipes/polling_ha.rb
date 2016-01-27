@@ -21,10 +21,9 @@ crowbar_pacemaker_sync_mark "sync-ceilometer_polling_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-ceilometer_polling_ha_resources"
 
-service_name = "ceilometer-polling"
+transaction_objects = []
 
-# Allow one retry, to avoid races where two nodes create the primitive at the
-# same time when it wasn't created yet (only one can obviously succeed)
+service_name = "ceilometer-polling"
 pacemaker_primitive service_name do
   agent node[:ceilometer][:ha][:polling][:agent]
   op node[:ceilometer][:ha][:polling][:op]
@@ -35,7 +34,18 @@ pacemaker_primitive service_name do
   #  "use_service"    => true,
   #  "service" => node[:ceilometer][:polling][:service_name]
   #})
-  action [:create, :start]
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+transaction_objects << "pacemaker_primitive[#{service_name}]"
+
+location_name = openstack_pacemaker_controller_only_location_for service_name
+transaction_objects << "pacemaker_location[#{location_name}]"
+
+pacemaker_transaction "ceilometer polling" do
+  cib_objects transaction_objects
+  # note that this will also automatically start the resources
+  action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 

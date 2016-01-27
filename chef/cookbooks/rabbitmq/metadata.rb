@@ -6,6 +6,7 @@ version "1.2.0"
 recipe "rabbitmq", "Install and configure RabbitMQ"
 recipe "rabbitmq::cluster", "Set up RabbitMQ clustering."
 
+depends "crowbar-openstack"
 depends "crowbar-pacemaker"
 depends "nagios"
 # depends           "apt"

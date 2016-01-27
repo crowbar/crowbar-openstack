@@ -80,6 +80,9 @@ else
   order_only_existing.unshift "postgresql"
 end
 
+location_name = openstack_pacemaker_controller_only_location_for clone_name
+transaction_objects << "pacemaker_location[#{location_name}]"
+
 pacemaker_transaction "ceilometer server" do
   cib_objects transaction_objects
   # note that this will also automatically start the resources
