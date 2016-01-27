@@ -1451,6 +1451,7 @@ bootable = true
 # is used instead. If no such region is found in the service catalog,
 # the first found one is used. (string value)
 #region =
+region = <%= @keystone_settings['endpoint_region'] %>
 
 # Catalog type of the Share service. Should be changed only if it is changed in Manila itself
 #catalog_type = share
@@ -1559,13 +1560,16 @@ suppress_errors_in_cleanup = true
 
 # Image name for vm booting with nfs/smb clients tool. (string value)
 #image_with_share_tools = manila-service-image
+image_with_share_tools = <%= @manila_settings['image_with_share_tools'] %>
 
 # Image username. (string value)
 #image_username = manila
+image_username = <%= @manila_settings['image_username'] %>
 
 # Image password. Should be used for 'image_with_share_tools' without
 # Nova Metadata support. (string value)
 #image_password = <None>
+image_password = <%= @manila_settings['image_password'] %>
 
 # Flavor used for client vm in scenario tests. (string value)
 #client_vm_flavor_ref = 100
@@ -1576,4 +1580,4 @@ suppress_errors_in_cleanup = true
 
 # Default share type name to use in tempest tests. (string value)
 #default_share_type_name = <None>
-default_share_type_name = default
+default_share_type_name = <%= @manila_settings['default_share_type_name'] %>
