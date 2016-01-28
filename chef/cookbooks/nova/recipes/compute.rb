@@ -364,6 +364,17 @@ execute "trigger-nova-own-az-config" do
   command "true"
 end
 
+if node[:nova][:ha][:compute][:enabled]
+  # NovaCompute ocf agent requires crudini
+  package "crudini"
+
+  # Mark the node as ready for HA compute setup
+  unless node[:nova][:ha][:compute][:setup]
+    node[:nova][:ha][:compute][:setup] = true
+    node.save
+  end
+end
+
 # Set iptables rules for blocking VNC Access for all but the nova-controller node.
 # Using iptables u32 module to check for the first 1024 bits of a tcp packet in
 # port range 5900 to 15900. Do a string matching with RFB-003 protocol to verify
