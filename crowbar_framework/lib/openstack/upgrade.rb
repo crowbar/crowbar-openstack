@@ -38,7 +38,7 @@ module Openstack
       NodeObject.all.each do |node|
         save_it = false
         components.each do |component|
-          next unless node[component][:db_synced]
+          next unless node[component] && node[component][:db_synced]
           node[component][:db_synced] = false
           save_it = true
         end
