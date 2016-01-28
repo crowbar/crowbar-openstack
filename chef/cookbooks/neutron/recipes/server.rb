@@ -166,9 +166,12 @@ when "ml2"
 
   mtu_value = 0
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
-  #TODO(vuntz): temporarily disable the hyperv mechanism since we're lacking networking-hyperv from stackforge
-  #ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
-  ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
+  ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
+  if node[:platform_family] == "windows"
+    ["openstack-networking-hyperv", "python-networking-hyperv"].each do |name|
+      package name
+    end
+  end
   if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
     ml2_mechanism_drivers.push("l2population") if node[:neutron][:use_dvr]
     mtu_value = 1400
