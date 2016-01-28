@@ -98,7 +98,7 @@
         "nova-compute-vmware": [ "readying", "ready", "applying" ],
         "nova-compute-xen": [ "readying", "ready", "applying" ],
         "nova-compute-zvm": [ "readying", "ready", "applying" ],
-        "nova-compute-ha": [ "readying", "ready", "applying" ]
+        "nova-ha-compute": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
@@ -122,7 +122,7 @@
         "nova-compute-vmware": 97,
         "nova-compute-xen": 97,
         "nova-compute-zvm": 97,
-        "nova-compute-ha": 97
+        "nova-ha-compute": 97
       },
       "config": {
         "environment": "nova-config-base",
