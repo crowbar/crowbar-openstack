@@ -76,6 +76,7 @@
           "admin_keyring": "/etc/ceph/ceph.client.admin.keyring",
           "pool": "volumes",
           "user": "cinder",
+          "caps": "",
           "secret_uuid": ""
         },
         "vmware": {
