@@ -1,9 +1,15 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <EMC>
-    <StorageType><%= @emc_params["emc_storage_type"] %></StorageType>
-    <MaskingView><%= @emc_params["masking_view"] %></MaskingView>
     <EcomServerIp><%= @emc_params["ecom_server_ip"] %></EcomServerIp>
     <EcomServerPort><%= @emc_params["ecom_server_port"] %></EcomServerPort>
     <EcomUserName><%= @emc_params["ecom_server_username"] %></EcomUserName>
     <EcomPassword><%= @emc_params["ecom_server_password"] %></EcomPassword>
+    <PortGroups>
+<% @emc_params["ecom_server_portgroups"].each do |portgroup| -%>
+      <PortGroup><%= portgroup -%></PortGroup>
+<% end -%>
+    </PortGroups>
+   <Array><%= @emc_params["ecom_server_array"] %></Array>
+   <Pool><%= @emc_params["ecom_server_pool"] %></Pool>
+   <FastPolicy><%= @emc_params["ecom_server_policy"] %></FastPolicy>
 </EMC>

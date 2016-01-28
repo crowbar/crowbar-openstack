@@ -54,12 +54,14 @@
           "netapp_volume_list": ""
         },
         "emc": {
-          "emc_storage_type": "",
           "ecom_server_ip": "192.168.124.11",
           "ecom_server_port": 0,
-          "masking_view": "",
           "ecom_server_username": "admin",
-          "ecom_server_password": ""
+          "ecom_server_password": "",
+          "ecom_server_portgroups": [ "OS-PORTGROUP1-PG", "OS-PORTGROUP2-PG" ],
+          "ecom_server_array": "111111111111",
+          "ecom_server_pool": "FC_GOLD1",
+          "ecom_server_policy": "GOLD1"
         },
         "eternus": {
           "protocol": "fc",
@@ -128,7 +130,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 45,
+      "schema-revision": 46,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
