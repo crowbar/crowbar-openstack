@@ -60,8 +60,13 @@ pacemaker_transaction "neutron server" do
 end
 
 crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
-  ordering ["postgresql", "rabbitmq", "cl-keystone", clone_name]
-  score "Optional"
+  # While technically the agents depend on the neutron-server being up,
+  # the neutron-server also is trying to communicate with the agents and when those
+  # are down, the port is set to vif_binding failed state and left DOWN
+  # Since neutron never retries, the broken ports are more disturbing the
+  # functionality
+  ordering "( postgresql rabbitmq g-haproxy cl-keystone cl-g-neutron-agents ) cl-neutron-server"
+  score "Mandatory"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
