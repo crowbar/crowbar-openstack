@@ -13,11 +13,16 @@
 # limitations under the License.
 #
 
+hyperv_compute_node = search(:node, "roles:nova-compute-hyperv") || []
+use_hyperv = node[:neutron][:networking_plugin] == "ml2" && !hyperv_compute_node.empty?
 zvm_compute_node = search(:node, "roles:nova-compute-zvm") || []
 use_zvm = node[:neutron][:networking_plugin] == "ml2" && !zvm_compute_node.empty?
 
 pkgs = node[:neutron][:platform][:pkgs] + node[:neutron][:platform][:pkgs_fwaas]
 pkgs += node[:neutron][:platform][:pkgs_lbaas] if node[:neutron][:use_lbaas]
+if use_hyperv
+  pkgs << node[:neutron][:platform][:hyperv_pkg]
+end
 if use_zvm
   pkgs << node[:neutron][:platform][:zvm_agent_pkg]
 end
@@ -176,9 +181,10 @@ when "ml2"
 
   mtu_value = 0
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
-  #TODO(vuntz): temporarily disable the hyperv mechanism since we're lacking networking-hyperv from stackforge
-  #ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup.push("hyperv")
   ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
+  if use_hyperv
+    ml2_mechanism_drivers.push("hyperv")
+  end
   if use_zvm
     ml2_mechanism_drivers.push("zvm")
   end
