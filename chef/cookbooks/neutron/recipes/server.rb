@@ -19,7 +19,7 @@ use_zvm = node[:neutron][:networking_plugin] == "ml2" && !zvm_compute_node.empty
 pkgs = node[:neutron][:platform][:pkgs] + node[:neutron][:platform][:pkgs_fwaas]
 pkgs += node[:neutron][:platform][:pkgs_lbaas] if node[:neutron][:use_lbaas]
 if use_zvm
-  pkgs << node[:neutron][:platform][:zvm_agent_pkg] if node[:neutron][:networking_plugin] == "ml2"
+  pkgs << node[:neutron][:platform][:zvm_agent_pkg]
 end
 pkgs.each { |p| package p }
 

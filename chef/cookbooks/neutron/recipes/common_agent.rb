@@ -14,9 +14,6 @@
 # limitations under the License.
 #
 
-zvm_compute_node = search(:node, "roles:nova-compute-zvm") || []
-use_zvm = node[:neutron][:networking_plugin] == "ml2" && !zvm_compute_node.empty?
-
 neutron = nil
 if node.attribute?(:cookbook) and node[:cookbook] == "nova"
   neutrons = search(:node, "roles:neutron-server AND roles:neutron-config-#{node[:nova][:neutron_instance]}")
@@ -115,7 +112,7 @@ neutron_network_ha = node.roles.include?("neutron-network") && neutron[:neutron]
 # ML2 configuration: L2 agent and L3 agent
 if neutron[:neutron][:networking_plugin] == "ml2"
   ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
-  if use_zvm && node.roles.include?("nova-compute-zvm")
+  if node.roles.include?("nova-compute-zvm")
     ml2_mech_drivers.push("zvm")
   end
   ml2_type_drivers = neutron[:neutron][:ml2_type_drivers]
