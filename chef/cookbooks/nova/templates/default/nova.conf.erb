@@ -1122,6 +1122,7 @@ security_group_api = neutron
 
 # Memcached servers or None for in process cache. (list value)
 #memcached_servers = <None>
+memcached_servers = <%= @memcached_servers.join(',') %>
 
 #
 # From nova.openstack.common.policy
