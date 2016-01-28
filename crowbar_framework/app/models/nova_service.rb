@@ -182,21 +182,25 @@ class NovaService < PacemakerServiceObject
   # Override this so we can change elements and element_order dynamically on
   # apply:
   #  - when there are compute roles using clusters with remote nodes, we need
-  #    to have some compute-ha role with the corosync nodes of the clusters,
-  #    running after the compute roles
+  #    to have some role on the corosync nodes of the clusters, running after
+  #    the compute roles (this will be nova-compute-ha)
   #  - when that is not the case, we of course do not need that. We still keep
   #    the element_order addition in order to deal with clusters that are
   #    removed (because apply_role looks at element_order to decide what role
   #    to look at)
-  # Note that we do not put compute-ha in element_order in the proposal to keep
-  # it hidden from the user: this is something that should never be changed by
-  # the user, as it's handled automatically.
+  # Note that we do not put nova-compute-ha in element_order in the proposal to
+  # keep it hidden from the user: this is something that should never be
+  # changed by the user, as it's handled automatically.
   def active_update(proposal, inst, in_queue)
     deployment = proposal["deployment"]["nova"]
     elements = deployment["elements"]
 
     # always reset elements of nova-compute-ha in case the user tried to
     # provide that in the proposal
+    unless elements.fetch("nova-compute-ha", []).empty?
+      @logger.warn("nova: discarding nova-compute-ha elements from proposal; " \
+        "this role is automatically filled")
+    end
     elements["nova-compute-ha"] = []
     # always include nova-compute-ha in the batches for apply_role (see long
     # comment above)
