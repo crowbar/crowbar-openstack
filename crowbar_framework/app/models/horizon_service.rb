@@ -78,8 +78,8 @@ class HorizonService < PacemakerServiceObject
 
     if proposal["attributes"][@bc_name]["multi_domain_support"]
       ks_svc = KeystoneService.new @logger
-      keystone = Proposal.where(barclamp: ks_svc.bc_name,
-                                name: proposal["attributes"]["horizon"]["keystone_instance"]).first
+      keystone = Proposal.find_by(barclamp: ks_svc.bc_name,
+                                  name: proposal["attributes"]["horizon"]["keystone_instance"])
       # Using domains requires API Version 3 or newer
       if keystone["attributes"][ks_svc.bc_name]["api"]["version"].to_f < 3.0
         validation_error I18n.t("barclamp.#{@bc_name}.validation.enable_keystone")

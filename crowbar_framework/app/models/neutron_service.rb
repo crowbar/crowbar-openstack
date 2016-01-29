@@ -152,7 +152,7 @@ class NeutronService < PacemakerServiceObject
 
   def validate_external_networks external_networks
     net_svc = NetworkService.new @logger
-    network_proposal = Proposal.where(barclamp: net_svc.bc_name, name: "default").first
+    network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
     blacklist = ["bmc", "bmc_admin", "admin", "nova_fixed", "nova_floating",
                  "os_sdn", "public", "storage"]
 
@@ -374,7 +374,7 @@ class NeutronService < PacemakerServiceObject
     return if all_nodes.empty?
 
     net_svc = NetworkService.new @logger
-    network_proposal = Proposal.where(barclamp: net_svc.bc_name, name: "default").first
+    network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
     if network_proposal["attributes"]["network"]["networks"]["os_sdn"].nil?
       raise I18n.t("barclamp.neutron.deploy.missing_os_sdn_network")
     end
