@@ -59,7 +59,8 @@ class NovaService < PacemakerServiceObject
           "exclude_platform" => {
             "suse" => "< 12.1",
             "windows" => "/.*/"
-          }
+          },
+          "remotes" => true
         },
         "nova-compute-qemu" => {
           "unique" => false,
@@ -67,7 +68,8 @@ class NovaService < PacemakerServiceObject
           "exclude_platform" => {
             "suse" => "< 12.1",
             "windows" => "/.*/"
-          }
+          },
+          "remotes" => true
         },
         "nova-compute-vmware" => {
           "unique" => false,
@@ -90,7 +92,8 @@ class NovaService < PacemakerServiceObject
           "count" => -1,
           "platform" => {
             "suse" => "12.1",
-          }
+          },
+          "remotes" => true
         }
       }
     end
@@ -176,6 +179,67 @@ class NovaService < PacemakerServiceObject
     base
   end
 
+  # Override this so we can change elements and element_order dynamically on
+  # apply:
+  #  - when there are compute roles using clusters with remote nodes, we need
+  #    to have some role on the corosync nodes of the clusters, running after
+  #    the compute roles (this will be nova-ha-compute)
+  #  - when that is not the case, we of course do not need that. We still keep
+  #    the element_order addition in order to deal with clusters that are
+  #    removed (because apply_role looks at element_order to decide what role
+  #    to look at)
+  # Note that we do not put nova-ha-compute in element_order in the proposal to
+  # keep it hidden from the user: this is something that should never be
+  # changed by the user, as it's handled automatically.
+  def active_update(proposal, inst, in_queue)
+    deployment = proposal["deployment"]["nova"]
+    elements = deployment["elements"]
+
+    # always reset elements of nova-ha-compute in case the user tried to
+    # provide that in the proposal
+    unless elements.fetch("nova-ha-compute", []).empty?
+      @logger.warn("nova: discarding nova-ha-compute elements from proposal; " \
+        "this role is automatically filled")
+    end
+    elements["nova-ha-compute"] = []
+    # always include nova-ha-compute in the batches for apply_role (see long
+    # comment above)
+    unless deployment["element_order"].flatten.include?("nova-ha-compute")
+      deployment["element_order"].push(["nova-ha-compute"])
+    end
+
+    # find list of roles which accept clusters with remote nodes
+    roles_with_remote = role_constraints.select do |role, constraints|
+      constraints["remotes"]
+    end.keys
+
+    # now examine all elements in these roles, and look for clusters
+    roles_with_remote.each do |role|
+      next unless elements.key? role
+      elements[role].each do |element|
+        next unless is_remotes? element
+
+        cluster = PacemakerServiceObject.cluster_from_remotes(element)
+        @logger.debug("nova: Ensuring that #{cluster} has nova-ha-compute role")
+        elements["nova-ha-compute"].push(cluster)
+      end
+    end
+
+    # no need to save proposal, it's just data that is passed to later methods
+    super
+  end
+
+  def set_ha_compute(node, enabled)
+    n = NodeObject.find_node_by_name(node)
+    n[:nova] ||= {}
+    n[:nova][:ha] ||= {}
+    n[:nova][:ha][:compute] ||= {}
+    if n[:nova][:ha][:compute][:enabled] != enabled
+      n[:nova][:ha][:compute][:enabled] = enabled
+      n.save
+    end
+  end
+
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Nova apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
@@ -206,11 +270,28 @@ class NovaService < PacemakerServiceObject
     neutron = Proposal.where(barclamp: "neutron", name: role.default_attributes["nova"]["neutron_instance"]).first
 
     compute_nodes_for_network = []
-    role.override_attributes["nova"]["elements"].each do |role, nodes|
+    role.override_attributes["nova"]["elements"].each do |role_name, elements|
       # only care about compute nodes
-      next unless role =~ /^nova-compute-/
+      next unless role_name =~ /^nova-compute-/
       # vmware compute nodes do not need access to the networking
-      next if role == "nova-compute-vmware"
+      next if role_name == "nova-compute-vmware"
+
+      nodes = []
+
+      elements.each do |element|
+        if is_remotes? element
+          remote_nodes = expand_remote_nodes(element)
+          remote_nodes.each do |remote_node|
+            set_ha_compute(remote_node, true)
+          end
+          nodes.concat(remote_nodes)
+
+          Openstack::HA.set_compute_role(remote_nodes)
+        else
+          set_ha_compute(element, false)
+          nodes << element
+        end
+      end
 
       compute_nodes_for_network << nodes
     end
@@ -279,11 +360,35 @@ class NovaService < PacemakerServiceObject
       )
     end unless elements["nova-compute-xen"].nil?
 
-    nodes.each do |key,value|
+    nodes.each do |key, value|
       if value > 1
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.assigned_node", key: key)
+        if is_remotes? key
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.assigned_remotes",
+            key: cluster_name(key)
+          )
+        else
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.assigned_node",
+            key: key
+          )
+        end
       end
     end unless nodes.nil?
+
+    all_elements = elements.values.flatten.compact
+    remote_clusters = all_elements.select { |element| is_remotes? element }
+    remote_clusters.each do |remote_cluster|
+      remote_nodes = expand_remote_nodes(remote_cluster)
+      remote_nodes.each do |remote_node|
+        next unless all_elements.include? remote_node
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.assigned_node_and_remote",
+          node: remote_node,
+          cluster: cluster_name(remote_cluster)
+        )
+      end
+    end
 
     super
   end

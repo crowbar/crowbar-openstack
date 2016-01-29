@@ -46,5 +46,9 @@ module Openstack
     def self.set_controller_role(nodes)
       set_role(nodes, "controller")
     end
+
+    def self.set_compute_role(nodes)
+      set_role(nodes, "compute")
+    end
   end
 end
