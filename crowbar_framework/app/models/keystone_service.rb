@@ -88,7 +88,7 @@ class KeystoneService < PacemakerServiceObject
     end
 
     keystone_timeout = proposal["attributes"]["keystone"]["token_expiration"]
-    horizon_proposal = Proposal.where(barclamp: "horizon", name: "default").first
+    horizon_proposal = Proposal.find_by(barclamp: "horizon", name: "default")
     unless horizon_proposal.nil?
       horizon_timeout = horizon_proposal["attributes"]["horizon"]["session_timeout"]
 

@@ -203,7 +203,8 @@ class NovaService < PacemakerServiceObject
 
     allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(controller_elements, vip_networks)
 
-    neutron = Proposal.where(barclamp: "neutron", name: role.default_attributes["nova"]["neutron_instance"]).first
+    neutron = Proposal.find_by(barclamp: "neutron",
+                               name: role.default_attributes["nova"]["neutron_instance"])
 
     compute_nodes_for_network = []
     role.override_attributes["nova"]["elements"].each do |role, nodes|
