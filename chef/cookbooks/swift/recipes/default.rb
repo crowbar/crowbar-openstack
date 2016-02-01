@@ -34,26 +34,30 @@ template "/etc/swift/swift.conf" do
  })
 end
 
-ha_enabled = node[:swift][:ha][:enabled]
-ssl_enabled = node[:swift][:ssl][:enabled]
-swift_protocol = ssl_enabled ? "https" : "http"
-proxy_node = get_instance("roles:swift-proxy")
-public_proxy_host = CrowbarHelper.get_host_for_public_url(proxy_node, ssl_enabled, ha_enabled)
+proxy_nodes = search_env_filtered(:node, "roles:swift-proxy")
+unless proxy_nodes.empty?
+  proxy_node = proxy_nodes.first
+  ha_enabled = node[:swift][:ha][:enabled]
+  ssl_enabled = node[:swift][:ssl][:enabled]
 
-proposal_name = node[:swift][:config][:environment].gsub(/^swift-config-/, "")
+  swift_protocol = ssl_enabled ? "https" : "http"
+  public_proxy_host = CrowbarHelper.get_host_for_public_url(proxy_node, ssl_enabled, ha_enabled)
 
-# this needs to be both on storage nodes and proxy nodes
-template "/etc/swift/container-sync-realms.conf" do
-  source "container-sync-realms.conf.erb"
-  owner "root"
-  group node[:swift][:group]
-  mode "0640"
-  variables(
-    key: node[:swift][:container_sync][:key],
-    key2: node[:swift][:container_sync][:key2],
-    cluster_name: "#{node[:domain]}_#{proposal_name}",
-    proxy_url: "#{swift_protocol}://#{public_proxy_host}:#{node[:swift][:ports][:proxy]}/v1/"
-  )
+  proposal_name = node[:swift][:config][:environment].gsub(/^swift-config-/, "")
+
+  # this needs to be both on storage nodes and proxy nodes
+  template "/etc/swift/container-sync-realms.conf" do
+    source "container-sync-realms.conf.erb"
+    owner "root"
+    group node[:swift][:group]
+    mode "0640"
+    variables(
+      key: node[:swift][:container_sync][:key],
+      key2: node[:swift][:container_sync][:key2],
+      cluster_name: "#{node[:domain]}_#{proposal_name}",
+      proxy_url: "#{swift_protocol}://#{public_proxy_host}:#{node[:swift][:ports][:proxy]}/v1/"
+    )
+  end
 end
 
 if node.roles.include?("logging-client") || node.roles.include?("logging-server")
