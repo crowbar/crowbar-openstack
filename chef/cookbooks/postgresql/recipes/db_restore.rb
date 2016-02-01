@@ -22,8 +22,8 @@ dump_location = node[:crowbar][:upgrade][:db_dump_location]
 
 if node[:database][:ha][:enabled]
   # Checks that the service is available, if it's running on this node.
-  service_available = "crm resource show #{service_name} | grep \" #{node.hostname} *$\" \
-                      | grep -q 'running'"
+  service_available = "crm resource show #{service_name} | " \
+    "grep \" #{node.hostname} *$\" | grep -q 'running'"
   execute "restore database from #{dump_location}" do
     command "/usr/lib/postgresql94/bin/psql -d postgres -f #{dump_location}"
     user "postgres"
