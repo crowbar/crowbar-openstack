@@ -595,11 +595,6 @@ strict_ssh_host_key_policy = <%= @strict_ssh_host_key_policy ? 'true' : 'false' 
 [<%= backend_id %>]
 <% end -%>
 
-<% if @show_storage_location -%>
-image_upload_use_cinder_backend = True
-image_upload_use_internal_tenant = False
-<% end -%>
-
 # The maximum number of times to rescan iSER targetto find volume (integer
 # value)
 #num_iser_scan_tries = 3
@@ -811,6 +806,9 @@ iscsi_write_cache = off
 # content. The cinder backend and locations support must be enabled in the
 # image service, and glance_api_version must be set to 2. (boolean value)
 #image_upload_use_cinder_backend = false
+<% if @show_storage_location -%>
+image_upload_use_cinder_backend = true
+<% end -%>
 
 # If set to True, the image volume created by upload-to-image will be placed in
 # the internal tenant. Otherwise, the image volume is created in the current
