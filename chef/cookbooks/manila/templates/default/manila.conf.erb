@@ -2061,10 +2061,10 @@ share_driver=manila.share.drivers.generic.GenericShareDriver
 share_backend_name=<%= share['backend_name'] %>
 driver_handles_share_servers=False
 service_instance_user=<%= share['generic']['service_instance_user'] %>
-<% if share['generic'].key?('service_instance_password') -%>
+<% if share['generic'].key?('service_instance_password') && !share['generic']['service_instance_password'].empty? -%>
 service_instance_password=<%= share['generic']['service_instance_password'] %>
 <% end -%>
-<% if share['generic'].key?('path_to_private_key') -%>
+<% if share['generic'].key?('path_to_private_key') && !share['generic']['path_to_private_key'].empty? -%>
 path_to_private_key=<%= share['generic']['path_to_private_key'] %>
 <% end -%>
 service_instance_name_or_id=<%= share['generic']['service_instance_name_or_id'] %>
