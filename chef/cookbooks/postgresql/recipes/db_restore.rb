@@ -36,6 +36,7 @@ else
   end
 end
 
-file dump_location do
-  action :delete
+# Creates file to indicate successful restore of database.
+file "#{dump_location}.restored-ok" do
+  action :create
 end
