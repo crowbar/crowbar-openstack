@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-define :nova_package, enable: true, use_pacemaker_provider: false, restart_crm_resource: false do
+define :nova_package, enable: true, use_pacemaker_provider: false, restart_crm_resource: false, no_crm_maintenance_mode: false do
   nova_name="nova-#{params[:name]}"
   use_crm_resource = params[:use_pacemaker_provider] && params[:restart_crm_resource]
 
@@ -32,8 +32,8 @@ define :nova_package, enable: true, use_pacemaker_provider: false, restart_crm_r
       status_command "status #{nova_name} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
     end
 
-    if use_crm_resource
-      supports restart_crm_resource: true
+    if params[:use_pacemaker_provider]
+      supports restart_crm_resource: params[:restart_crm_resource], no_crm_maintenance_mode: params[:no_crm_maintenance_mode]
     else
       supports status: true, restart: true
     end

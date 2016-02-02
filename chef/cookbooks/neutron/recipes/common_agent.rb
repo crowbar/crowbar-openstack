@@ -237,12 +237,16 @@ if neutron[:neutron][:networking_plugin] == "ml2"
   end
 
   service neutron_agent do
-    supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources("template[#{agent_config_path}]")
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
     if neutron_network_ha || nova_compute_ha_enabled
       provider Chef::Provider::CrowbarPacemakerService
+    end
+    if nova_compute_ha_enabled
+      supports no_crm_maintenance_mode: true
+    else
+      supports status: true, restart: true
     end
   end
 
@@ -272,12 +276,16 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     end
 
     service node[:neutron][:platform][:l3_agent_name] do
-      supports status: true, restart: true
       action [:enable, :start]
       subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
       subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
       if neutron_network_ha || nova_compute_ha_enabled
         provider Chef::Provider::CrowbarPacemakerService
+      end
+      if nova_compute_ha_enabled
+        supports no_crm_maintenance_mode: true
+      else
+        supports status: true, restart: true
       end
     end
   end
@@ -323,12 +331,16 @@ if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
   end
 
   service node[:neutron][:platform][:metadata_agent_name] do
-    supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
     subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
     if neutron_network_ha || nova_compute_ha_enabled
       provider Chef::Provider::CrowbarPacemakerService
+    end
+    if nova_compute_ha_enabled
+      supports no_crm_maintenance_mode: true
+    else
+      supports status: true, restart: true
     end
   end
 end
