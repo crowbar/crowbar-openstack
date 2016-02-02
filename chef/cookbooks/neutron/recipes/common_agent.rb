@@ -18,8 +18,10 @@ neutron = nil
 if node.attribute?(:cookbook) and node[:cookbook] == "nova"
   neutrons = search(:node, "roles:neutron-server AND roles:neutron-config-#{node[:nova][:neutron_instance]}")
   neutron = neutrons.first || raise("Neutron instance '#{node[:nova][:neutron_instance]}' for nova not found")
+  nova_compute_ha_enabled = node[:nova][:ha][:compute][:enabled]
 else
   neutron = node
+  nova_compute_ha_enabled = false
 end
 
 # Disable rp_filter
@@ -239,7 +241,9 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     action [:enable, :start]
     subscribes :restart, resources("template[#{agent_config_path}]")
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
-    provider Chef::Provider::CrowbarPacemakerService if neutron_network_ha
+    if neutron_network_ha || nova_compute_ha_enabled
+      provider Chef::Provider::CrowbarPacemakerService
+    end
   end
 
   # L3 agent
@@ -272,7 +276,9 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       action [:enable, :start]
       subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
       subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
-      provider Chef::Provider::CrowbarPacemakerService if neutron_network_ha
+      if neutron_network_ha || nova_compute_ha_enabled
+        provider Chef::Provider::CrowbarPacemakerService
+      end
     end
   end
 end
@@ -321,7 +327,9 @@ if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
     action [:enable, :start]
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
     subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
-    provider Chef::Provider::CrowbarPacemakerService if neutron_network_ha
+    if neutron_network_ha || nova_compute_ha_enabled
+      provider Chef::Provider::CrowbarPacemakerService
+    end
   end
 end
 

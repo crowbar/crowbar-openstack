@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-define :nova_package, enable: true, use_pacemaker_provider: false do
+define :nova_package, enable: true, use_pacemaker_provider: false, restart_crm_resource: false do
   nova_name="nova-#{params[:name]}"
+  use_crm_resource = params[:use_pacemaker_provider] && params[:restart_crm_resource]
 
   package nova_name do
     package_name "openstack-#{nova_name}" if %w(rhel suse).include?(node[:platform_family])
@@ -21,14 +22,21 @@ define :nova_package, enable: true, use_pacemaker_provider: false do
   end
 
   service nova_name do
-    service_name "openstack-#{nova_name}" if %w(rhel suse).include?(node[:platform_family])
+    unless use_crm_resource
+      service_name "openstack-#{nova_name}" if %w(rhel suse).include?(node[:platform_family])
+    end
     if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
       restart_command "stop #{nova_name} ; start #{nova_name}"
       stop_command "stop #{nova_name}"
       start_command "start #{nova_name}"
       status_command "status #{nova_name} | cut -d' ' -f2 | cut -d'/' -f1 | grep start"
     end
-    supports status: true, restart: true
+
+    if use_crm_resource
+      supports restart_crm_resource: true
+    else
+      supports status: true, restart: true
+    end
 
     if params[:enable] != false
       # only enable and start the service, unless a reboot has been triggered
