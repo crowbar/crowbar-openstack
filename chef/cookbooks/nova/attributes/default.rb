@@ -36,6 +36,7 @@ default[:nova][:db][:min_pool_size] = nil
 
 # Feature settings
 default[:nova][:use_migration] = false
+default[:nova][:setup_shared_instance_storage] = false
 default[:nova][:use_shared_instance_storage] = false
 
 #

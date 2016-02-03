@@ -34,7 +34,8 @@ en:
           ram_allocation_ratio: 'Virtual RAM to Physical RAM allocation ratio'
           cpu_allocation_ratio: 'Virtual CPU to Physical CPU allocation ratio'
         live_migration_header: 'Live Migration Support'
-        use_shared_instance_storage: 'Set up Shared Storage on nova-controller for Nova instances'
+        setup_shared_instance_storage: 'Set up Shared Storage on nova-controller for Nova instances'
+        use_shared_instance_storage: 'Shared Storage for Nova instances has been manually configured'
         use_migration: 'Enable Libvirt Migration'
         kvm_header: 'KVM Options'
         kvm:
@@ -81,7 +82,8 @@ en:
         logging_header: 'Logging'
         verbose: 'Verbose Logging'
       validation:
-        shared_storage: 'Shared storage cannot be automatically setup when a cluster has the nova-controller role. Please consider using the NFS Client barclamp instead.'
+        no_shared_storage_cluster: 'Shared storage cannot be automatically setup when a cluster has the nova-controller role. Please consider using the NFS Client barclamp instead.'
+        setup_use_shared_storage: 'When automatically setting up shared storage, it must also be used.'
         hyperv_support: 'Hyper-V support is not available.'
         xen: 'Node %{n} is running %{platform} (%{arch}), which does not support Xen.'
         assigned_node: 'Node %{key} has been assigned to a nova-compute role more than once.'

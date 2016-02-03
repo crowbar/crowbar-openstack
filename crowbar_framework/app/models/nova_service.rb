@@ -315,13 +315,16 @@ class NovaService < PacemakerServiceObject
     elements = proposal["deployment"]["nova"]["elements"]
     nodes = Hash.new(0)
 
-    if proposal["attributes"][@bc_name]["use_shared_instance_storage"]
+    if proposal["attributes"][@bc_name]["setup_shared_instance_storage"]
       elements["nova-controller"].each do |element|
         if is_cluster? element
-          validation_error I18n.t("barclamp.#{@bc_name}.validation.shared_storage")
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.no_shared_storage_cluster")
           break
         end
       end unless elements["nova-controller"].nil?
+      unless proposal["attributes"][@bc_name]["use_shared_instance_storage"]
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.setup_use_shared_storage")
+      end
     end
 
     unless elements["nova-compute-hyperv"].empty? || hyperv_available?
