@@ -55,7 +55,7 @@ hypervisor_inspector = nil
 libvirt_type = nil
 if is_compute_agent
   if node.roles.include?("nova-compute-vmware")
-    hypervisor_inspector = "vsphere"
+    hypervisor_inspector = "vmware"
   else
     hypervisor_inspector = "libvirt"
     libvirt_type = node[:nova][:libvirt_type]
