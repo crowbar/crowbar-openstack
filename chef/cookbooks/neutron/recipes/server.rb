@@ -79,8 +79,8 @@ if node[:neutron][:api][:protocol] == "https"
       end # block
     end # ruby_block
   else # if generate_certs
-    unless ::File.exist? node[:neutron][:ssl][:certfile]
-      message = "Certificate \"#{node[:neutron][:ssl][:certfile]}\" is not present."
+    unless ::File.size? node[:neutron][:ssl][:certfile]
+      message = "Certificate \"#{node[:neutron][:ssl][:certfile]}\" is not present or empty."
       Chef::Log.fatal(message)
       raise message
     end
@@ -88,8 +88,8 @@ if node[:neutron][:api][:protocol] == "https"
     # to be in the certfile
   end # if generate_certs
 
-  if node[:neutron][:ssl][:cert_required] && !::File.exist?(node[:neutron][:ssl][:ca_certs])
-    message = "Certificate CA \"#{node[:neutron][:ssl][:ca_certs]}\" is not present."
+  if node[:neutron][:ssl][:cert_required] && !::File.size?(node[:neutron][:ssl][:ca_certs])
+    message = "Certificate CA \"#{node[:neutron][:ssl][:ca_certs]}\" is not present or empty."
     Chef::Log.fatal(message)
     raise message
   end
