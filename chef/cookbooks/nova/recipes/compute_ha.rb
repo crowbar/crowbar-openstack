@@ -195,8 +195,9 @@ pacemaker_primitive evacuate_primitive do
     "endpoint_type"  => "internalURL",
     "username"       => keystone_settings["admin_user"],
     "password"       => keystone_settings["admin_password"],
-    "tenant_name"    => keystone_settings["admin_tenant"]
-    # "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure]
+    "tenant_name"    => keystone_settings["admin_tenant"],
+    # "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure],
+    "domain"         => node[:domain]
   })
   op nova[:nova][:ha][:compute][:evacuate][:op]
   action :update
