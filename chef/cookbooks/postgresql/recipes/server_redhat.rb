@@ -45,6 +45,18 @@ directory node["postgresql"]["dir"] do
   action :create
 end
 
+# Workaround for https://bugzilla.suse.com/show_bug.cgi?id=964254
+# There is some update-alternatives leftover from the old postgresql install
+# after upgrading a node to SLES12. Remove that.
+# TODO: Remove this again after either the above bug is fixed or we don't need
+#       to upgrade from SLES11 anymore
+execute "cleanup alternatives leftover" do
+  command "update-alternatives --remove-all psql"
+  only_if do
+    node[:platform_family] == "suse" && ::FileTest.exist?("/var/lib/rpm/alternatives/psql")
+  end
+end
+
 node["postgresql"]["server"]["packages"].each do |pg_pack|
   package pg_pack
 end
