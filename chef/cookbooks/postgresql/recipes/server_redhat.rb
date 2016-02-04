@@ -76,6 +76,19 @@ template "#{node['postgresql']['sysconfig']}" do
   notifies :restart, "service[postgresql]", :delayed
 end
 
+# Renames any old data directory if present.
+backup = "#{node.postgresql.dir}.upgrade-backup"
+execute "Move old data directory" do
+  command "mv '#{node.postgresql.dir}' '#{backup}'"
+  only_if do
+    if node[:platform_family] == "suse" && File.exist?("#{node.postgresql.dir}/PG_VERSION")
+      File.foreach("#{node.postgresql.dir}/PG_VERSION").grep(/^9.1$/).any?
+    else
+      false
+    end
+  end
+end
+
 # We need initdb to populate /var/lib/pgsql/data before we generate the config
 # files (otherwise, later calls to initdb don't do anything and postgresql
 # doesn't want to start).
