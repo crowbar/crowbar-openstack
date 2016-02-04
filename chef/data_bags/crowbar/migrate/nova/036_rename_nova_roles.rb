@@ -4,8 +4,10 @@ def upgrade(ta, td, a, d)
   d["element_run_list_order"] = td["element_run_list_order"]
 
   %w(controller compute-docker compute-hyperv compute-kvm compute-qemu compute-vmware compute-xen compute-zvm).each do |role|
-    d["elements"]["nova-#{role}"] = d["elements"]["nova-multi-#{role}"]
-    d["elements"].delete("nova-multi-#{role}")
+    if d["elements"]["nova-multi-#{role}"]
+      d["elements"]["nova-#{role}"] = d["elements"]["nova-multi-#{role}"]
+      d["elements"].delete("nova-multi-#{role}")
+    end
     if d.fetch("elements_expanded", {}).key? "nova-multi-#{role}"
       d["elements_expanded"]["nova-#{role}"] = d["elements_expanded"]["nova-multi-#{role}"]
       d["elements_expanded"].delete("nova-multi-#{role}")
