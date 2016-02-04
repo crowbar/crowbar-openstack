@@ -178,7 +178,8 @@ template "/etc/cinder/cinder.conf" do
     availability_zone: availability_zone,
     keystone_settings: KeystoneHelper.keystone_settings(node, :cinder),
     strict_ssh_host_key_policy: node[:cinder][:strict_ssh_host_key_policy],
-    default_availability_zone: node[:cinder][:default_availability_zone]
+    default_availability_zone: node[:cinder][:default_availability_zone],
+    default_volume_type: node[:cinder][:default_volume_type]
     )
 end
 

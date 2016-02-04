@@ -337,6 +337,9 @@ default_availability_zone = <%= @default_availability_zone %>
 
 # Default volume type to use (string value)
 #default_volume_type = <None>
+<% unless @default_volume_type.empty? -%>
+default_volume_type = <%= @default_volume_type %>
+<% end -%>
 
 # Time period for which to generate volume usages. The options are hour, day,
 # month, or year. (string value)
