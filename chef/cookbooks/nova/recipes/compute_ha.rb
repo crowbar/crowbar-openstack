@@ -226,10 +226,15 @@ pacemaker_order order_name do
 end
 controller_transaction_objects << "pacemaker_order[#{order_name}]"
 
+hostmap = remote_nodes.map do |remote_node|
+  "remote-#{remote_node[:hostname]}:#{remote_node[:hostname]}"
+end.sort.join(";")
+
 fence_primitive = "fence-nova"
 pacemaker_primitive fence_primitive do
   agent "stonith:fence_compute"
   params ({
+    "pcmk_host_map"  => hostmap,
     "auth-url"       => keystone_settings["internal_auth_url"],
     # "region-name"    => keystone_settings["endpoint_region"],
     "endpoint-type"  => "internalURL",
