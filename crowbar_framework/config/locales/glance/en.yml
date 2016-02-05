@@ -59,3 +59,5 @@ en:
         use_cachemanagement: 'Turn On Cache Management'
         logging_header: 'Logging'
         verbose: 'Verbose Logging'
+      validation:
+        default_store_no_cinder: 'Cannot set default store to Cinder without Cinder being active.'

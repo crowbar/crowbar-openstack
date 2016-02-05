@@ -77,6 +77,14 @@ class GlanceService < PacemakerServiceObject
   def validate_proposal_after_save proposal
     validate_one_for_role proposal, "glance-server"
 
+    if proposal["attributes"]["glance"]["default_store"] == "cinder"
+      if Proposal.where(barclamp: "cinder").empty?
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.default_store_no_cinder"
+        )
+      end
+    end
+
     super
   end
 
