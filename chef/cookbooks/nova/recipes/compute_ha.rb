@@ -35,6 +35,8 @@ neutrons = search(:node, "roles:neutron-server AND roles:neutron-config-#{nova[:
 neutron = neutrons.first || \
   raise("Neutron instance '#{nova[:nova][:neutron_instance]}' for nova not found")
 
+no_shared_storage = nova[:nova]["use_shared_instance_storage"] ? "0" : "1"
+
 # Install basic nova package to have /var/log/nova (used by fence_compute) as
 # well as nova user (to not have some weird permissions in /var/log/nova in
 # case nova is installed later)
@@ -143,7 +145,8 @@ pacemaker_primitive nova_primitive do
     "password"       => keystone_settings["admin_password"],
     "tenant_name"    => keystone_settings["admin_tenant"],
     # "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure],
-    "domain"         => node[:domain]
+    "domain"         => node[:domain],
+    "no_shared_storage" => no_shared_storage
   })
   op nova[:nova][:ha][:compute][:compute][:op]
   action :update
@@ -195,8 +198,10 @@ pacemaker_primitive evacuate_primitive do
     "endpoint_type"  => "internalURL",
     "username"       => keystone_settings["admin_user"],
     "password"       => keystone_settings["admin_password"],
-    "tenant_name"    => keystone_settings["admin_tenant"]
-    # "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure]
+    "tenant_name"    => keystone_settings["admin_tenant"],
+    # "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure],
+    "domain"         => node[:domain],
+    "no_shared_storage" => no_shared_storage
   })
   op nova[:nova][:ha][:compute][:evacuate][:op]
   action :update
@@ -221,10 +226,15 @@ pacemaker_order order_name do
 end
 controller_transaction_objects << "pacemaker_order[#{order_name}]"
 
+hostmap = remote_nodes.map do |remote_node|
+  "remote-#{remote_node[:hostname]}:#{remote_node[:hostname]}"
+end.sort.join(";")
+
 fence_primitive = "fence-nova"
 pacemaker_primitive fence_primitive do
   agent "stonith:fence_compute"
   params ({
+    "pcmk_host_map"  => hostmap,
     "auth-url"       => keystone_settings["internal_auth_url"],
     # "region-name"    => keystone_settings["endpoint_region"],
     "endpoint-type"  => "internalURL",
@@ -233,6 +243,7 @@ pacemaker_primitive fence_primitive do
     "tenant-name"    => keystone_settings["admin_tenant"],
     # "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure],
     "domain"         => node[:domain],
+    "no-shared-storage" => no_shared_storage,
     "record-only"    => "1",
     "verbose"        => "1",
     "debug"          => "/var/log/nova/fence_compute.log"

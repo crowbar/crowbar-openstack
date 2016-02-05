@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-if node[:nova]["use_shared_instance_storage"]
+if node[:nova]["setup_shared_instance_storage"]
 
   package "nfs-kernel-server"
 
