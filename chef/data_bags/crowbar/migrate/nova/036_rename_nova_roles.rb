@@ -15,7 +15,7 @@ def upgrade(ta, td, a, d)
 
     # Make sure that all nodes that have the multi role
     # in their run_list are migrated to new name
-    nodes = NodeObject.find("roles:nova-multi-#{role}")
+    nodes = NodeObject.find("run_list_map:nova-multi-#{role}")
     nodes.each do |node|
       node.add_to_run_list("nova-#{role}",
                            td["element_run_list_order"]["nova-#{role}"],
@@ -43,7 +43,7 @@ def downgrade(ta, td, a, d)
 
     # Make sure that all nodes that have the multi role
     # in their run_list are migrated to new name
-    nodes = NodeObject.find("roles:nova-#{role}")
+    nodes = NodeObject.find("run_list_map:nova-#{role}")
     nodes.each do |node|
       node.add_to_run_list("nova-multi-#{role}",
                            td["element_run_list_order"]["nova-multi-#{role}"],
