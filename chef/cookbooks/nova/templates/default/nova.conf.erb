@@ -2876,14 +2876,12 @@ url = <%= @neutron_protocol %>://<%= @neutron_server_host %>:<%= @neutron_server
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #admin_username = <None>
-admin_username = <%= @neutron_service_user %>
 
 # Password for connecting to neutron in admin context DEPRECATED: specify an
 # auth_plugin and appropriate credentials instead. (string value)
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #admin_password = <None>
-admin_password = <%= @neutron_service_password %>
 
 # Tenant id for connecting to neutron in admin context DEPRECATED: specify an
 # auth_plugin and appropriate credentials instead. (string value)
@@ -2898,7 +2896,6 @@ admin_password = <%= @neutron_service_password %>
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #admin_tenant_name = <None>
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 
 # Region name for connecting to neutron in admin context (string value)
 #region_name = <None>
@@ -2909,10 +2906,6 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #admin_auth_url = http://localhost:5000/v2.0
-admin_auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol"],
-                                      @keystone_settings["internal_url_host"],
-                                      @keystone_settings["service_port"],
-                                      "2.0") %>
 
 # Authorization strategy for connecting to neutron in admin context.
 # DEPRECATED: specify an auth_plugin and appropriate credentials instead. If an
@@ -2920,7 +2913,6 @@ admin_auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["pr
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #auth_strategy = keystone
-auth_strategy = keystone
 
 # Name of Integration Bridge used by Open vSwitch (string value)
 #ovs_bridge = br-int
@@ -2934,9 +2926,14 @@ auth_strategy = keystone
 
 # Authentication URL (string value)
 #auth_url = <None>
+auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol"],
+               @keystone_settings["internal_url_host"],
+               @keystone_settings["service_port"],
+               "2.0") %>
 
 # Name of the plugin to load (string value)
 #auth_plugin = <None>
+auth_plugin = password
 
 # PEM encoded Certificate Authority to use when verifying HTTPs connections.
 # (string value)
@@ -2962,6 +2959,7 @@ insecure = <%= @neutron_insecure ? 'True' : 'False' %>
 
 # User's password (string value)
 #password = <None>
+password = <%= @neutron_service_password %>
 
 # Domain ID containing project (string value)
 #project_domain_id = <None>
@@ -2974,12 +2972,14 @@ insecure = <%= @neutron_insecure ? 'True' : 'False' %>
 
 # Project name to scope to (string value)
 #project_name = <None>
+project_name = <%= @keystone_settings['service_tenant'] %>
 
 # Tenant ID to scope to (string value)
 #tenant_id = <None>
 
 # Tenant name to scope to (string value)
 #tenant_name = <None>
+tenant_name = <%= @keystone_settings['service_tenant'] %>
 
 # Timeout value for http requests (integer value)
 # Deprecated group/name - [neutron]/url_timeout
@@ -3001,6 +3001,7 @@ timeout = <%= node[:nova][:neutron_url_timeout] %>
 # Username (string value)
 # Deprecated group/name - [DEFAULT]/username
 #username = <None>
+username = <%= @neutron_service_user %>
 
 
 [osapi_v21]
