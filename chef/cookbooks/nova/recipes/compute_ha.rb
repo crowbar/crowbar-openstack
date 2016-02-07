@@ -282,7 +282,7 @@ unless %w(disabled manual).include? node[:pacemaker][:stonith][:mode]
   # TODO: implement proper LWRP for this, and move this as part of the
   # transaction for controller bits
   bash "crm configure fencing_topology" do
-    code "echo fencing_topology #{topology.join(" ")} | crm configure load update -"
+    code "echo fencing_topology #{topology.sort.join(" ")} | crm configure load update -"
   end
 end
 
