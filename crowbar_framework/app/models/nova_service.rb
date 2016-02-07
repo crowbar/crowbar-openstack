@@ -287,6 +287,8 @@ class NovaService < PacemakerServiceObject
           end
           nodes.concat(remote_nodes)
 
+          cluster = PacemakerServiceObject.cluster_from_remotes(element)
+          reset_sync_marks_on_clusters_founders([cluster])
           Openstack::HA.set_compute_role(remote_nodes)
         else
           set_ha_compute(element, false)
