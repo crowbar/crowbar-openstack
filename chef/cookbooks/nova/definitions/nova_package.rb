@@ -14,7 +14,6 @@
 #
 define :nova_package, enable: true, use_pacemaker_provider: false, restart_crm_resource: false, no_crm_maintenance_mode: false do
   nova_name="nova-#{params[:name]}"
-  use_crm_resource = params[:use_pacemaker_provider] && params[:restart_crm_resource]
 
   package nova_name do
     package_name "openstack-#{nova_name}" if %w(rhel suse).include?(node[:platform_family])
@@ -22,9 +21,7 @@ define :nova_package, enable: true, use_pacemaker_provider: false, restart_crm_r
   end
 
   service nova_name do
-    unless use_crm_resource
-      service_name "openstack-#{nova_name}" if %w(rhel suse).include?(node[:platform_family])
-    end
+    service_name "openstack-#{nova_name}" if %w(rhel suse).include?(node[:platform_family])
     if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
       restart_command "stop #{nova_name} ; start #{nova_name}"
       stop_command "stop #{nova_name}"
@@ -33,7 +30,9 @@ define :nova_package, enable: true, use_pacemaker_provider: false, restart_crm_r
     end
 
     if params[:use_pacemaker_provider]
-      supports restart_crm_resource: params[:restart_crm_resource], no_crm_maintenance_mode: params[:no_crm_maintenance_mode]
+      supports restart_crm_resource: params[:restart_crm_resource], \
+               no_crm_maintenance_mode: params[:no_crm_maintenance_mode], \
+               pacemaker_resource_name: nova_name
     else
       supports status: true, restart: true
     end
