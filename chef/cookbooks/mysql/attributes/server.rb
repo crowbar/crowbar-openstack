@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-default["mysql"]["bind_address"]              = ipaddress
+default["mysql"]["bind_address"]              = node["ipaddress"]
 default["mysql"]["storage_engine"]            = "InnoDB"
 default["mysql"]["datadir"]                   = "/var/lib/mysql"
 default["mysql"]["tmpdir"]                    = "/var/lib/mysqltmp"
