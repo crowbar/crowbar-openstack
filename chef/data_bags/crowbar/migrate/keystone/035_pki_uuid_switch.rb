@@ -1,7 +1,7 @@
 def upgrade(ta, td, a, d)
   # This migration (if part of the release) will only run when upgrading
   # from Tex. Switch keystone to use UUID tokens after the upgrade for those
-  # systems
+  # systems to avoid CVE-2015-7546 by default.
   if a["signing"]["token_format"] == "PKI"
     a["signing"]["token_format"] = ta["signing"]["token_format"]
   end
