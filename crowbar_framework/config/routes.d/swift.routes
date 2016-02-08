@@ -18,4 +18,4 @@
 post 'swift/create' => 'swift#create', as: 'swift_create_report'
 get 'swift/dashboard' => 'swift#dashboard', as: 'swift_dashboard'
 get 'swift/clear' => 'swift#clear', as: 'swift_clear_report'
-get 'swift/results/:id.:format' => 'swift#results', as: 'swift_show_report'
+get 'swift/results/:id(.:format)' => 'swift#results', as: 'swift_show_report'

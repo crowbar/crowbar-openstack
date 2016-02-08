@@ -47,7 +47,7 @@
             %td
               = link_to report["alias"], node_path(:name => report["node"]), :title => report["node"]
             %td
-              = swift_report_status_for(report)
+              = swift_report_status_for(report).html_safe
             %td
               - if report["started"]
                 = l(report["started"], :format => :short)
