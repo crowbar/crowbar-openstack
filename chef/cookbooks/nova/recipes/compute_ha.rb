@@ -287,7 +287,11 @@ unless %w(disabled manual).include? node[:pacemaker][:stonith][:mode]
 end
 
 crowbar_pacemaker_order_only_existing "o-#{evacuate_primitive}" do
-  # TODO: pretty sure we shouldn't have all of these in the order
+  # We need services required to boot an instance; most of these services are
+  # obviously required. Some additional notes:
+  #  - cinder is used in case of boot from volume
+  #  - neutron agents are used even with DVR, if only to have a DHCP server for
+  #    the instance to get an IP address
   ordering "( postgresql rabbitmq cl-keystone cl-g-glance cl-g-cinder-controller cl-neutron-server cl-g-neutron-agents cl-g-nova-controller ) #{evacuate_primitive}"
   score "Mandatory"
   action :create
