@@ -38,5 +38,5 @@ crowbar:
 nav:
   utils:
     swift:
-      order: 20
+      order: 25
       route: 'swift_dashboard_path'
