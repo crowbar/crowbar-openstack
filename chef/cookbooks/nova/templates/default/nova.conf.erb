@@ -2064,6 +2064,7 @@ pool_timeout = <%= node[:nova][:db][:pool_timeout] %>
 # (string value)
 # Allowed values: http, https
 #protocol = http
+protocol = <%= @glance_server_protocol %>
 
 # A list of the glance api servers available to nova. Prefix with https:// for
 # ssl-based glance api servers. ([hostname|ip]:port) (list value)
