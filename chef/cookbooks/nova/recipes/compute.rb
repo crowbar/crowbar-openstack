@@ -194,6 +194,10 @@ case node[:nova][:libvirt_type]
 
       service "libvirtd" do
         action [:enable, :start]
+        if node[:nova][:ha][:compute][:enabled]
+          provider Chef::Provider::CrowbarPacemakerService
+          supports no_crm_maintenance_mode: true
+        end
       end
     else
       service "libvirt-bin" do
@@ -222,7 +226,11 @@ case node[:nova][:libvirt_type]
 
 end
 
-nova_package("compute")
+nova_package "compute" do
+  use_pacemaker_provider node[:nova][:ha][:compute][:enabled]
+  restart_crm_resource true
+  no_crm_maintenance_mode true
+end
 
 cookbook_file "/etc/nova/nova-compute.conf" do
   source "nova-compute.conf"
