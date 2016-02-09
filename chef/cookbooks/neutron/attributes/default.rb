@@ -77,7 +77,7 @@ when "suse"
     l3_agent_name: "openstack-neutron-l3-agent",
     l3_agent_pkg: "openstack-neutron-l3-agent",
     ha_tool_pkg: "openstack-neutron-ha-tool",
-    hyperv_pkg: "openstack-networking-hyperv",
+    hyperv_pkg: "python-networking-hyperv",
     nsx_pkgs: ["openvswitch-pki",
                    "ruby2.1-rubygem-faraday"],
     cisco_pkgs: ["openstack-neutron-plugin-cisco"],
