@@ -31,6 +31,7 @@
         "network": "neutron_policy.json",
         "telemetry": "ceilometer_policy.json"
       },
+      "use_launch_instance_ng": false,
       "can_set_mount_point": false,
       "can_set_password": false,
       "multi_domain_support": false,
@@ -49,7 +50,7 @@
     "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 37,
+      "schema-revision": 38,
       "element_states": {
         "horizon-server": [ "readying", "ready", "applying" ]
       },
