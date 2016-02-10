@@ -80,7 +80,7 @@ when "suse"
     hyperv_pkg: "python-networking-hyperv",
     nsx_pkgs: ["openvswitch-pki",
                    "ruby2.1-rubygem-faraday"],
-    cisco_pkgs: ["openstack-neutron-plugin-cisco"],
+    cisco_pkgs: ["python-networking-cisco"],
     user: "neutron",
     group: "neutron",
     neutron_rootwrap_sudo_template: "/etc/sudoers.d/openstack-neutron"
@@ -111,7 +111,7 @@ when "rhel"
     ha_tool_pkg: "",
     hyperv_pkg: "",
     nsx_pkgs: [""],
-    cisco_pkgs: [""],
+    cisco_pkgs: ["python-networking-cisco"],
     user: "neutron",
     group: "neutron",
     neutron_rootwrap_sudo_template: "/etc/sudoers.d/openstack-neutron"
