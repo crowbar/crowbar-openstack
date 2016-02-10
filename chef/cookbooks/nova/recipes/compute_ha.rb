@@ -18,7 +18,8 @@ return if remote_nodes.empty?
 
 nova = remote_nodes.first
 unless nova.roles.any? { |role| /^nova-compute-/ =~ role }
-  raise "Remote nodes don't have a nova compute role!"
+  Chef::Log.info("Skipping setup of HA for compute nodes as remote nodes don't have a nova compute role yet.")
+  return
 end
 
 unless nova[:nova][:ha][:compute][:enabled]
