@@ -133,7 +133,9 @@ end
             "barclamp.#{@bc_name}.validation.generic.tenant_net_name_or_ip")
         end
         # there must be a private ssh key path or a password
-        unless ["service_instance_password", "path_to_private_key"].any? { |s| share[backend_driver].key? s }
+        unless ["service_instance_password", "path_to_private_key"].any? do |s|
+          !share[backend_driver][s].empty?
+        end
           validation_error I18n.t(
             "barclamp.#{@bc_name}.validation.generic.password_or_private_key")
         end

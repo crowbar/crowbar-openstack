@@ -64,9 +64,12 @@
           "backend_name": "default",
           "generic": {
             "service_instance_user": "root",
+            "service_instance_password": "",
+            "path_to_private_key": "",
             "service_instance_name_or_id": "",
             "service_net_name_or_ip": "",
-            "tenant_net_name_or_ip": ""
+            "tenant_net_name_or_ip": "",
+            "share_volume_fstype": "ext4"
           }
         }
       ]
@@ -76,7 +79,7 @@
     "manila": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 13,
+      "schema-revision": 14,
       "element_states": {
         "manila-server": [ "readying", "ready", "applying" ],
         "manila-share": [ "readying", "ready", "applying" ]

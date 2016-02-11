@@ -85,8 +85,8 @@
                   "generic": {
                     "type": "map", "mapping": {
                       "service_instance_user": { "type": "str", "required": true },
-                      "service_instance_password": { "type": "str", "required": false },
-                      "path_to_private_key": { "type": "str", "required": false },
+                      "service_instance_password": { "type": "str", "required": true },
+                      "path_to_private_key": { "type": "str", "required": true },
                       "service_instance_name_or_id": { "type": "str", "required": true },
                       "service_net_name_or_ip": { "type": "str", "required": true },
                       "tenant_net_name_or_ip": { "type": "str", "required": true },
