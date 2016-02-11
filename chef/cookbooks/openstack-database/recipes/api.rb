@@ -89,6 +89,7 @@ end
 
 admin_token = get_password("token", "openstack_identity_bootstrap_token")
 identity_admin_uri = endpoint("identity-admin")
+identity_insecure = node["openstack"]["identity"]["insecure"]
 
 directory ::File.dirname(node["openstack"]["database"]["api"]["auth"]["cache_dir"]) do
   owner node["openstack"]["database"]["user"]
@@ -104,6 +105,7 @@ template "/etc/trove/api-paste.ini" do
   variables(
     identity_admin_uri: identity_admin_uri,
     identity_uri: identity_uri,
+    identity_insecure: identity_insecure,
     admin_token: admin_token
     )
 

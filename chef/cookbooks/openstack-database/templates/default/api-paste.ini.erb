@@ -26,6 +26,7 @@ admin_token = <%= @admin_token %>
 # middleware should be sufficient.  It will create a temporary directory
 # in the home directory for the user the trove process is running as.
 signing_dir = <%= node["openstack"]["database"]["api"]["auth"]["cache_dir"] %>
+insecure = <%= @identity_insecure %>
 
 [filter:authorization]
 paste.filter_factory = trove.common.auth:AuthorizationMiddleware.factory
