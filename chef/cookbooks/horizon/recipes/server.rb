@@ -261,10 +261,10 @@ local_settings = "#{dashboard_path}/openstack_dashboard/local/local_settings.py"
 # We need to protect syncdb with crowbar_pacemaker_sync_mark. Since it's run in
 # an immmediate notification of the creation of the config file, we put the two
 # between the crowbar_pacemaker_sync_mark calls.
-execute "python manage.py syncdb" do
+execute "python manage.py migrate" do
   cwd dashboard_path
   environment ({"PYTHONPATH" => dashboard_path})
-  command "python manage.py syncdb --noinput"
+  command "python manage.py migrate --fake-initial --noinput"
   user node[:apache][:user]
   group node[:apache][:group]
   action :nothing
