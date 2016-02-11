@@ -11,7 +11,17 @@ module KeystoneHelper
   end
 
   def self.keystone_settings(current_node, cookbook_name)
-    # cache the result for each cookbook in an instance variable hash
+    # Cache the result for each cookbook in an instance variable hash. This
+    # cache needs to be invalidated for each chef-client run from chef-client
+    # daemon (which are all in the same process); so use the ohai time as a
+    # marker for that.
+    if @keystone_settings_cache_time != current_node[:ohai_time]
+      Chef::Log.info("Invalidating keystone settings cache") if @keystone_settings
+      @keystone_settings = nil
+      @keystone_node = nil
+      @keystone_settings_cache_time = current_node[:ohai_time]
+    end
+
     unless @keystone_settings && @keystone_settings.include?(cookbook_name)
       node = search_for_keystone(current_node, cookbook_name)
 
