@@ -92,6 +92,7 @@ node.set["openstack"]["mq"]["database"]["rabbit"]["vhost"] = rabbitmq[:trove][:v
 node.set["openstack"]["secret"][rabbitmq[:trove][:user]]["user"] = rabbitmq[:trove][:password]
 
 node.set["openstack"]["insecure"] = keystone_settings["insecure"]
+node.set["openstack"]["identity"]["insecure"] = keystone_settings["insecure"]
 node.set["openstack"]["compute"]["insecure"] = nova_multi_controller[:nova][:ssl][:insecure]
 node.set["openstack"]["block-storage"]["insecure"] = cinder_controller[:cinder][:ssl][:insecure]
 node.set["openstack"]["object-storage"]["insecure"] = swift_proxy[:swift][:ssl][:insecure]
