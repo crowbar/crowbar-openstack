@@ -415,12 +415,12 @@ nova_admin_username = <%= @nova_admin_username if @nova_admin_username %>
 
 # The uuid of the admin nova tenant
 # nova_admin_tenant_id =
-nova_admin_tenant_id = <%= @nova_admin_tenant_id if @nova_admin_tenant_id %>
 
 # The name of the admin nova tenant. If the uuid of the admin nova tenant
 # is set, this is optional.  Useful for cases where the uuid of the admin
 # nova tenant is not available when configuration is being done.
 # nova_admin_tenant_name =
+nova_admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 
 # Password for connection to nova in admin context.
 # nova_admin_password =
