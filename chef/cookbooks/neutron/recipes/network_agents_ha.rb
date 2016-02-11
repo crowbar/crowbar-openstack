@@ -30,15 +30,31 @@ group_members = []
 transaction_objects = []
 
 if use_l3_agent
-  l3_agent_primitive = "neutron-l3-agent"
-  pacemaker_primitive l3_agent_primitive do
-    agent node[:neutron][:ha][:network][:l3_ra]
+  case node[:neutron][:networking_plugin]
+  when "ml2"
+    ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
+    case
+    when ml2_mech_drivers.include?("openvswitch")
+      neutron_agent = node[:neutron][:platform][:ovs_agent_name]
+      neutron_agent_ra = node[:neutron][:ha][:network]["openvswitch_ra"]
+    when ml2_mech_drivers.include?("linuxbridge")
+      neutron_agent = node[:neutron][:platform][:lb_agent_name]
+      neutron_agent_ra = node[:neutron][:ha][:network]["linuxbridge_ra"]
+    end
+  when "vmware"
+    neutron_agent = ""
+    neutron_agent_ra = ""
+  end
+  neutron_agent_primitive = neutron_agent.sub(/^openstack-/, "")
+
+  pacemaker_primitive neutron_agent_primitive do
+    agent neutron_agent_ra
     op node[:neutron][:ha][:network][:op]
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  group_members << l3_agent_primitive
-  transaction_objects << "pacemaker_primitive[#{l3_agent_primitive}]"
+  group_members << neutron_agent_primitive
+  transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
 end
 
 dhcp_agent_primitive = "neutron-dhcp-agent"
@@ -50,6 +66,18 @@ pacemaker_primitive dhcp_agent_primitive do
 end
 group_members << dhcp_agent_primitive
 transaction_objects << "pacemaker_primitive[#{dhcp_agent_primitive}]"
+
+if use_l3_agent
+  l3_agent_primitive = "neutron-l3-agent"
+  pacemaker_primitive l3_agent_primitive do
+    agent node[:neutron][:ha][:network][:l3_ra]
+    op node[:neutron][:ha][:network][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  group_members << l3_agent_primitive
+  transaction_objects << "pacemaker_primitive[#{l3_agent_primitive}]"
+end
 
 metadata_agent_primitive = "neutron-metadata-agent"
 pacemaker_primitive metadata_agent_primitive do
@@ -81,34 +109,6 @@ if use_lbaas_agent
   end
   group_members << lbaas_agent_primitive
   transaction_objects << "pacemaker_primitive[#{lbaas_agent_primitive}]"
-end
-
-if use_l3_agent
-  case node[:neutron][:networking_plugin]
-  when "ml2"
-    ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
-    case
-    when ml2_mech_drivers.include?("openvswitch")
-      neutron_agent = node[:neutron][:platform][:ovs_agent_name]
-      neutron_agent_ra = node[:neutron][:ha][:network]["openvswitch_ra"]
-    when ml2_mech_drivers.include?("linuxbridge")
-      neutron_agent = node[:neutron][:platform][:lb_agent_name]
-      neutron_agent_ra = node[:neutron][:ha][:network]["linuxbridge_ra"]
-    end
-  when "vmware"
-    neutron_agent = ""
-    neutron_agent_ra = ""
-  end
-  neutron_agent_primitive = neutron_agent.sub(/^openstack-/, "")
-
-  pacemaker_primitive neutron_agent_primitive do
-    agent neutron_agent_ra
-    op node[:neutron][:ha][:network][:op]
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-  group_members << neutron_agent_primitive
-  transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
 end
 
 agents_group_name = "g-neutron-agents"
