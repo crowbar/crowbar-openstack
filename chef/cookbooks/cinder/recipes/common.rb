@@ -125,8 +125,8 @@ if node[:cinder][:api][:protocol] == "https"
       end # block
     end # ruby_block
   else # if generate_certs
-    unless ::File.exist?(node[:cinder][:ssl][:certfile])
-      message = "Certificate \"#{node[:cinder][:ssl][:certfile]}\" is not present."
+    unless ::File.size?(node[:cinder][:ssl][:certfile])
+      message = "Certificate \"#{node[:cinder][:ssl][:certfile]}\" is not present or empty."
       Chef::Log.fatal(message)
       raise message
     end
@@ -134,8 +134,8 @@ if node[:cinder][:api][:protocol] == "https"
     # to be in the certfile
   end # if generate_certs
 
-  if node[:cinder][:ssl][:cert_required] && !::File.exist?(node[:cinder][:ssl][:ca_certs])
-    message = "Certificate CA \"#{node[:cinder][:ssl][:ca_certs]}\" is not present."
+  if node[:cinder][:ssl][:cert_required] && !::File.size?(node[:cinder][:ssl][:ca_certs])
+    message = "Certificate CA \"#{node[:cinder][:ssl][:ca_certs]}\" is not present or empty."
     Chef::Log.fatal(message)
     raise message
   end

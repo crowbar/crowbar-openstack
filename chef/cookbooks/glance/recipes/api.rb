@@ -65,8 +65,8 @@ if node[:glance][:api][:protocol] == "https"
       end # block
     end # ruby_block
   else # if generate_certs
-    unless ::File.exist? node[:glance][:ssl][:certfile]
-      message = "Certificate \"#{node[:glance][:ssl][:certfile]}\" is not present."
+    unless ::File.size? node[:glance][:ssl][:certfile]
+      message = "Certificate \"#{node[:glance][:ssl][:certfile]}\" is not present or empty."
       Chef::Log.fatal(message)
       raise message
     end
@@ -74,8 +74,8 @@ if node[:glance][:api][:protocol] == "https"
     # to be in the certfile
   end # if generate_certs
 
-  if node[:glance][:ssl][:cert_required] && !::File.exist?(node[:glance][:ssl][:ca_certs])
-    message = "Certificate CA \"#{node[:glance][:ssl][:ca_certs]}\" is not present."
+  if node[:glance][:ssl][:cert_required] && !::File.size?(node[:glance][:ssl][:ca_certs])
+    message = "Certificate CA \"#{node[:glance][:ssl][:ca_certs]}\" is not present or empty."
     Chef::Log.fatal(message)
     raise message
   end

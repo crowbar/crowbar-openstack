@@ -283,8 +283,8 @@ if node[:swift][:ssl][:enabled]
       end # block
     end # ruby_block
   else # if generate_certs
-    unless ::File.exist? node[:swift][:ssl][:certfile]
-      message = "Certificate \"#{node[:swift][:ssl][:certfile]}\" is not present."
+    unless ::File.size? node[:swift][:ssl][:certfile]
+      message = "Certificate \"#{node[:swift][:ssl][:certfile]}\" is not present or empty."
       Chef::Log.fatal(message)
       raise message
     end
