@@ -8,8 +8,8 @@ def upgrade(ta, td, a, d)
   d["elements"].delete("ceilometer-cagent")
 
   # Update the run_list for controller node
-  node = NodeObject.find("run_list_map:ceilometer-cagent").first
-  if node
+  nodes = NodeObject.find("run_list_map:ceilometer-cagent")
+  nodes.each do |node|
     node.add_to_run_list("ceilometer-polling",
                          td["element_run_list_order"]["ceilometer-polling"],
                          td["element_states"]["ceilometer-polling"])
@@ -30,8 +30,8 @@ def downgrade(ta, td, a, d)
   d["elements"].delete("ceilometer-polling")
 
   # Update the run_list for controller node
-  node = NodeObject.find("run_list_map:ceilometer-polling").first
-  if node
+  nodes = NodeObject.find("run_list_map:ceilometer-polling")
+  nodes.each do |node|
     node.add_to_run_list("ceilometer-cagent",
                          td["element_run_list_order"]["ceilometer-cagent"],
                          td["element_states"]["ceilometer-cagent"])
