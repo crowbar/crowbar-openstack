@@ -102,7 +102,7 @@ cinder = search(:node, "roles:cinder-controller") || []
 if cinder.length > 0
   cinder = cinder[0]
   cinder_insecure = (
-    cinder[:cinder][:ssl][:enabled] && cinder[:cinder][:ssl][:insecure]
+    cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
   )
 
   cinder_admin_username = cinder[:cinder][:service_user]
