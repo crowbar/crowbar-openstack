@@ -1048,6 +1048,7 @@ os_region_name= <%= @keystone_settings['endpoint_region'] %>
 
 # Allow to perform insecure SSL requests to cinder. (boolean value)
 #cinder_api_insecure = false
+cinder_api_insecure=<%= @cinder_insecure %>
 
 # Allow attaching between instances and volumes in different
 # availability zones. (boolean value)

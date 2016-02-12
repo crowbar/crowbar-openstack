@@ -72,7 +72,7 @@ if neutron_servers.length > 0
   neutron_service_password = neutron_server[:neutron][:service_password]
   Chef::Log.info("Neutron server at #{neutron_server_host}")
 else
-  neutron_insecure = nil
+  neutron_insecure = false
   neutron_protocol = nil
   neutron_server_host = nil
   neutron_server_port = nil
@@ -91,7 +91,7 @@ if nova.length > 0
   nova_admin_username = nova[:nova][:service_user]
   nova_admin_password = nova[:nova][:service_password]
 else
-  nova_insecure = nil
+  nova_insecure = false
   nova_admin_username = nil
   nova_admin_password = nil
   Chef::Log.warn("nova-controller not found")
@@ -102,13 +102,13 @@ cinder = search(:node, "roles:cinder-controller") || []
 if cinder.length > 0
   cinder = cinder[0]
   cinder_insecure = (
-    cinder[:cinder][:ssl][:enabled] && cinder[:cinder][:ssl][:insecure]
+    cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
   )
 
   cinder_admin_username = cinder[:cinder][:service_user]
   cinder_admin_password = cinder[:cinder][:service_password]
 else
-  cinder_insecure = nil
+  cinder_insecure = false
   cinder_admin_username = nil
   cinder_admin_password = nil
   Chef::Log.warn("cinder-controller not found")
