@@ -52,7 +52,16 @@ class CrowbarOpenStackHelper
   def self.database_settings(node, barclamp)
     instance = node[barclamp][:database_instance] || "default"
 
-    # cache the result
+    # Cache the result for each cookbook in an instance variable hash. This
+    # cache needs to be invalidated for each chef-client run from chef-client
+    # daemon (which are all in the same process); so use the ohai time as a
+    # marker for that.
+    if @database_settings_cache_time != node[:ohai_time]
+      Chef::Log.info("Invalidating database settings cache") if @database_settings
+      @database_settings = nil
+      @database_settings_cache_time = node[:ohai_time]
+    end
+
     if @database_settings && @database_settings.include?(instance)
       Chef::Log.info("Database server found at #{@database_settings[instance][:address]} [cached]")
     else
@@ -89,7 +98,16 @@ class CrowbarOpenStackHelper
   def self.rabbitmq_settings(node, barclamp)
     instance = node[barclamp][:rabbitmq_instance] || "default"
 
-    # cache the result
+    # Cache the result for each cookbook in an instance variable hash. This
+    # cache needs to be invalidated for each chef-client run from chef-client
+    # daemon (which are all in the same process); so use the ohai time as a
+    # marker for that.
+    if @rabbitmq_settings_cache_time != node[:ohai_time]
+      Chef::Log.info("Invalidating rabbitmq settings cache") if @rabbitmq_settings
+      @rabbitmq_settings = nil
+      @rabbitmq_settings_cache_time = node[:ohai_time]
+    end
+
     if @rabbitmq_settings && @rabbitmq_settings.include?(instance)
       Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]} [cached]")
     else
