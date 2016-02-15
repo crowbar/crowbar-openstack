@@ -13,6 +13,9 @@
 # limitations under the License.
 #
 
+# vmware compute nodes do not need access to the networking
+return if node.roles.include?("nova-compute-vmware")
+
 node.set[:cookbook] = cookbook_name
 include_recipe "neutron::common_agent"
 node.delete(:cookbook)
