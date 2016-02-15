@@ -89,7 +89,7 @@ OPENSTACK_KEYSTONE_MULTIDOMAIN_SUPPORT = <%= @multi_domain_support ? 'True' : 'F
 #}
 HORIZON_CONFIG["password_validator"] = {
     "regex": '<%= @password_validator_regex != "" ? @password_validator_regex : ".*" %>',
-    "help_text": <%= @password_validator_help_text != "" ? "'#{@password_validator_help_text}'" : '_("Your password does not meet the requirements.")' %>
+    "help_text": <%= @password_validator_help_text != "" ? "'#{@password_validator_help_text.gsub("'"){ "\\'" }}'" : '_("Your password does not meet the requirements.")' %>
 }
 
 # Disable simplified floating IP address management for deployments with
