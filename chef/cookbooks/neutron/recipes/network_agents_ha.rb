@@ -189,14 +189,12 @@ if use_l3_agent
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
+  ha_tool_ordering_deps = "postgresql rabbitmq g-haproxy #{agents_clone_name} cl-neutron-server"
+
   crowbar_pacemaker_order_only_existing "o-#{ha_tool_primitive_name}" do
-    # While neutron-ha-tool technically doesn't directly depend on postgresql or
-    # rabbitmq, if these bits are not running, then neutron-server can run but
-    # can't do what it's being asked. Note that neutron-server does have a
-    # constraint on these services, but it's optional, not mandatory (because it
-    # doesn't need to be restarted when postgresql or rabbitmq are restarted).
-    # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
-    ordering "( postgresql rabbitmq g-haproxy cl-neutron-server #{agents_clone_name} ) #{ha_tool_primitive_name}"
+    # While neutron-ha-tool technically doesn't directly depend on neutron-server,
+    # if these bits are not running, then it can't do what it's being asked.
+    ordering "( #{ha_tool_ordering_deps} ) #{ha_tool_primitive_name}"
     score "Mandatory"
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
