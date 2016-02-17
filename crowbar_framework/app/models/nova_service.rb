@@ -274,8 +274,6 @@ class NovaService < PacemakerServiceObject
     role.override_attributes["nova"]["elements"].each do |role_name, elements|
       # only care about compute nodes
       next unless role_name =~ /^nova-compute-/
-      # vmware compute nodes do not need access to the networking
-      next if role_name == "nova-compute-vmware"
 
       nodes = []
 
