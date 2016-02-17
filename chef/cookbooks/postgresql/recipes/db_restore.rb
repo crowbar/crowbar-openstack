@@ -20,6 +20,8 @@
 service_name = "postgresql"
 dump_location = node[:crowbar][:upgrade][:db_dump_location]
 
+dump_needed_cond = "[ ! -f \"#{dump_location}.restore-ok\" -a -f \"#{dump_location}\" ]"
+
 if node[:database][:ha][:enabled]
   # Checks that the service is available, if it's running on this node.
   service_available = "crm resource show #{service_name} | " \
@@ -27,16 +29,19 @@ if node[:database][:ha][:enabled]
   execute "restore database from #{dump_location}" do
     command "/usr/lib/postgresql94/bin/psql -d postgres -f #{dump_location}"
     user "postgres"
-    only_if service_available
+    only_if "#{dump_needed_cond} && #{service_available}"
+    notifies :create, "file[#{dump_location}.restored-ok]", :immediately
   end
 else
   execute "restore database from #{dump_location}" do
     command "/usr/lib/postgresql94/bin/psql -d postgres -f #{dump_location}"
     user "postgres"
+    only_if dump_needed_cond
+    notifies :create, "file[#{dump_location}.restored-ok]", :immediately
   end
 end
 
 # Creates file to indicate successful restore of database.
 file "#{dump_location}.restored-ok" do
-  action :create
+  action :nothing
 end
