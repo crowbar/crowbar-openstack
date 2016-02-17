@@ -1421,7 +1421,7 @@ os_tenant_name = <%= @keystone_settings['service_tenant'] %>
 # Auth URL to use for OpenStack service access. (string value)
 # Deprecated group/name - [DEFAULT]/os_auth_url
 #os_auth_url = http://localhost:5000/v2.0
-os_auth_url = <%= @keystone_settings['internal_auth_url'] %>
+os_auth_url = <%= @internal_auth_url_v2 %>
 
 # Region name to use for OpenStack service endpoints. (string value)
 # Deprecated group/name - [DEFAULT]/os_region_name
