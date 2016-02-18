@@ -1,10 +1,10 @@
 define :congress_service, use_pacemaker_provider: false do
-  congress_service_name = "congress-#{params[:name]}"
+  congress_service_name = "congress-server"
   congress_name = congress_service_name
-  congress_name = "openstack-congress-#{params[:name]}"\
+  congress_name = "openstack-congress-server"\
                 if %w(rhel suse).include? node[:platform_family]
 
-  package congress_name if %w(rhel suse).include? node[:platform_family]
+  # package congress_name if %w(rhel suse).include? node[:platform_family]
 
   service congress_service_name do
     service_name congress_name

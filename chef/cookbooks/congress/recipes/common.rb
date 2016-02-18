@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-package "openstack-congress"
+# package "openstack-congress"
 
 db_settings = fetch_database_settings
 
