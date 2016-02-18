@@ -5,12 +5,22 @@
     "congress": {
       "debug": false,
       "verbose": true,
+      "use_syslog": false,
+      "service_user": "congress",
+      "service_password": "",
       "keystone_instance": "none",
+      "database_instance": "none",
+      "glance_instance": "none",
+      "neutron_instance": "none", 
       "nova_instance": "none",
-      "swift_instance": "none",
       "cinder_instance": "none",
       "rabbitmq_instance": "none",
-      "volume_support": false,
+      "max_header_line": 16384,
+      "api": {
+        "protocol": "http",
+        "bind_open_address": true,
+        "bind_port": 1789
+      },
       "db": {
         "password": "",
         "user": "congress",
@@ -20,8 +30,9 @@
   },
   "deployment": {
     "congress": {
-      "crowbar-revision": 1,
+      "crowbar-revision": 0,
       "crowbar-applied": false,
+      "schema-revision": 1,
       "element_states": {
         "congress-server": [ "readying", "ready", "applying" ]
       },
@@ -29,6 +40,9 @@
       "element_order": [
         [ "congress-server" ]
       ],
+      "element_run_list_order": {
+          "congress-server": 105
+      },
       "config": {
         "environment": "congress-base-config",
         "mode": "full",
