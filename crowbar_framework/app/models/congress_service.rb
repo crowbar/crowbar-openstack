@@ -77,11 +77,19 @@ end
       find_dep_proposal("rabbitmq")
     base["attributes"][@bc_name]["keystone_instance"] =
       find_dep_proposal("keystone")
+    base["attributes"][@bc_name]["nova_instance"] =
+      find_dep_proposal("nova")
+    base["attributes"][@bc_name]["cinder_instance"] =
+      find_dep_proposal("cinder")
+    base["attributes"][@bc_name]["glance_instance"] =
+      find_dep_proposal("glance")
+    base["attributes"][@bc_name]["neutron_instance"] =
+      find_dep_proposal("neutron")
 
     base["attributes"][@bc_name]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
-    @logger.debug("Congres create_proposal: exiting")
+    @logger.debug("Congress create_proposal: exiting")
     base
   end
 
