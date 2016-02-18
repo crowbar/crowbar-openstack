@@ -15,7 +15,7 @@ auth_user = <%= node["swift"]["dispersion"]["service_tenant"] %>:<%= node["swift
 # auth_key = password
 auth_key = <%= node["swift"]["dispersion"]["service_password"] %>
 # auth_version = 2.0
-auth_version = 2.0
+auth_version = <%= @keystone_settings['api_version'] %>
 #
 # endpoint_type = publicURL
 # keystone_api_insecure = no
