@@ -21,7 +21,7 @@ end
 database_user "create congress database user" do
   host "%"
   connection db_settings[:connection]
-  username node[:congres][:db][:user]
+  username node[:congress][:db][:user]
   password node[:congress][:db][:password]
   provider db_settings[:user_provider]
   action :create
@@ -41,7 +41,7 @@ database_user "grant database access for congress database user" do
 end
 
 execute "congress-manage db sync" do
-  command "congress-manage db sync"
+  command "congress-db-manage sync"
   user node[:congress][:user]
   group node[:congress][:group]
   # We only do the sync the first time, and only if we're not doing HA or if we
