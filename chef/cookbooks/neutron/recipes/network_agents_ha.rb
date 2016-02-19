@@ -13,10 +13,30 @@
 # limitations under the License.
 #
 
-package node[:neutron][:platform][:ha_tool_pkg] unless node[:neutron][:platform][:ha_tool_pkg] == ""
-
 use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
 use_lbaas_agent = node[:neutron][:use_lbaas]
+
+if use_l3_agent
+  # do the setup required for neutron-ha-tool
+  package node[:neutron][:platform][:ha_tool_pkg] unless node[:neutron][:platform][:ha_tool_pkg] == ""
+
+  keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
+  # FIXME: While the neutron-ha-tool resource agent allows specifying a CA
+  # Certificate to use for SSL Certificate verification, it's hard to select
+  # right CA file as we allow Keystone's and Neutron's to use different CAs.  So
+  # we just rely on the correct CA files being installed in a system wide default
+  # location.
+  file "/etc/neutron/os_password" do
+    owner "root"
+    group "root"
+    mode "0600"
+    content keystone_settings["admin_password"]
+    # Our Chef is apparently too old for this :-/
+    #sensitive true
+    action :create
+  end
+end
 
 # Wait for all "neutron-network" nodes to reach this point so we know that they will
 # have all the required packages installed and configuration files updated
@@ -139,27 +159,11 @@ pacemaker_transaction "neutron agents" do
 end
 
 if use_l3_agent
-  keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
   # FIXME: neutron-ha-tool can't do keystone v3 currently
   os_auth_url_v2 = KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
                                                          keystone_settings["internal_url_host"],
                                                          keystone_settings["service_port"],
                                                          "2.0")
-
-  # FIXME: While the neutron-ha-tool resource agent allows specifying a CA
-  # Certificate to use for SSL Certificate verification, it's hard to select
-  # right CA file as we allow Keystone's and Neutron's to use different CAs.  So
-  # we just rely on the correct CA files being installed in a system wide default
-  # location.
-  file "/etc/neutron/os_password" do
-    owner "root"
-    group "root"
-    mode "0600"
-    content keystone_settings["admin_password"]
-    # Our Chef is apparently too old for this :-/
-    #sensitive true
-    action :create
-  end
 
   ha_tool_transaction_objects = []
 
