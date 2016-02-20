@@ -45,5 +45,6 @@ template "/etc/cron.d/glance-scrubber" do
     glance_user: node[:glance][:user],
     glance_command: "/usr/bin/glance-scrubber "\
                        "--config-dir #{node[:glance][:config_dir]}")
+  not_if { node[:platform_family] == "suse" }
 end
 
