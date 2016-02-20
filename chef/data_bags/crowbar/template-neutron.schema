@@ -87,8 +87,10 @@
                       "zvm_xcat_server": { "type": "str", "required": true },
                       "zvm_xcat_username": { "type": "str", "required": true },
                       "zvm_xcat_password": { "type": "str", "required": true },
+                      "zvm_xcat_zhcp_nodename": { "type": "str", "required": true },
                       "zvm_physnet_rdev": { "type": "str", "required": true },
                       "xcat_mgt_ip": { "type": "str", "required": true },
+                      "zvm_xcat_mgt_vswitch": { "type": "str", "required": true },
                       "xcat_mgt_mask": { "type": "str", "required": true }
                     }},
                     "ssl": { "type": "map", "required": true, "mapping": {

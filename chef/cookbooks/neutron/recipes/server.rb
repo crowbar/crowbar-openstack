@@ -172,7 +172,7 @@ when "ml2"
   external_networks = ["nova_floating"]
 
   if use_zvm
-    external_networks.push("xcatvsw1")
+    external_networks.push(node[:neutron][:zvm][:zvm_xcat_mgt_vswitch])
   end
   external_networks.concat(node[:neutron][:additional_external_networks])
   network_node = NeutronHelper.get_network_node_from_neutron_attributes(node)

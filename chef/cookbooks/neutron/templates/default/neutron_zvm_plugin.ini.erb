@@ -15,6 +15,7 @@ zvm_xcat_server = <%= @zvm[:zvm_xcat_server] %>
 # (StrOpt) xCat zHCP nodename in xCAT, default value is zhcp
 # xcat_zhcp_nodename = zhcp
 # Example: xcat_zhcp_nodename = myzhcp1
+xcat_zhcp_nodename = <%= @zvm[:zvm_xcat_zhcp_nodename] %>
 
 # (StrOpt) The compute node name neutron-zvm-agent work on, same as 'host'in nova.conf
 # This property is optional. If it is not specified, 'host' in neutron.conf will be
@@ -50,8 +51,10 @@ network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
 
 <% unless @zvm[:xcat_mgt_ip].empty? -%>
 [ml2_type_flat]
-flat_networks = xcatvsw1
+flat_networks = <%= @zvm[:zvm_xcat_mgt_vswitch] %>
 <%end -%>
+
+[<%= @svm[:zvm_xcat_mgt_vswitch] %>]
 
 # (StrOpt ) rdev_list for each vswitch's uplink real device(s), seperated by ','.
 # If a vswitch does not connect an OSA, which means it does not connect to
@@ -62,8 +65,8 @@ flat_networks = xcatvsw1
 # [xcatvsw3]
 # rdev_list = 6000,6003,6005
 #
-<% unless @zvm[:zvm_physnet_rdev].empty? -%>
 [physnet1]
+<% unless @zvm[:zvm_physnet_rdev].empty? -%>
 rdev_list = <%= @zvm[:zvm_physnet_rdev] -%>
 <%end -%>
 

@@ -54,8 +54,10 @@
         "zvm_xcat_username": "",
         "zvm_xcat_password": "",
         "zvm_physnet_rdev": "",
+        "zvm_xcat_zhcp_nodename": "zhcp",
         "xcat_mgt_ip": "10.1.0.1",
-        "xcat_mgt_mask": "255.255.0.0"
+        "xcat_mgt_mask": "255.255.0.0",
+        "zvm_xcat_mgt_vswitch": "xcatvsw2"
       },
       "ssl": {
         "certfile": "/etc/neutron/ssl/certs/signing_cert.pem",
@@ -115,7 +117,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 47,
+      "schema-revision": 48,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]
