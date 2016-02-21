@@ -166,7 +166,10 @@ admin_tenant_name =  <%= @keystone_settings['service_tenant'] %>
 # effect and using keystone auth, then URL of keystone can be
 # specified. (string value)
 #auth_url = <None>
-auth_url = <%= @keystone_settings['public_auth_url'] %>
+auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol"],
+                                                    @keystone_settings["internal_url_host"],
+                                                    @keystone_settings["service_port"],
+                                                    "2.0") %>
 
 # The strategy to use for authentication. If "use_user_token" is not
 # in effect, then auth strategy can be specified. (string value)
