@@ -94,10 +94,10 @@ class KeystoneService < PacemakerServiceObject
 
       # keystone_timeout is in seconds and horizon_timeout is in minutes
       if horizon_timeout * 60 > keystone_timeout
-        validation_error I18.t(
+        validation_error I18n.t(
           "barclamp.#{@bc_name}.validation.timeout",
           horizon_timeout: horizon_timeout,
-          keystone_minutes: (keystone_timeout / 60)
+          keystone_timeout: (keystone_timeout / 60)
         )
       end
     end
