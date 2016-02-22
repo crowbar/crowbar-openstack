@@ -120,6 +120,14 @@ if neutron[:neutron][:networking_plugin] == "ml2"
   ml2_type_drivers = neutron[:neutron][:ml2_type_drivers]
 
   case
+  when ml2_mech_drivers.include?("zvm")
+    package node[:neutron][:platform][:zvm_agent_pkg]
+
+    neutron_agent = node[:neutron][:platform][:zvm_agent_name]
+    agent_config_path = "/etc/neutron/plugins/zvm/neutron_zvm_plugin.ini"
+    physnet = node[:crowbar_wall][:network][:nets][:nova_fixed].first
+    interface_mappings = "physnet1:" + physnet
+
   when ml2_mech_drivers.include?("openvswitch")
     # package is already installed
     neutron_agent = node[:neutron][:platform][:ovs_agent_name]
@@ -156,13 +164,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         interface_mappings += mapping
       end
     end
-  when ml2_mech_drivers.include?("zvm")
-    package node[:neutron][:platform][:zvm_agent_pkg]
-
-    neutron_agent = node[:neutron][:platform][:zvm_agent_name]
-    agent_config_path = "/etc/neutron/plugins/zvm/neutron_zvm_plugin.ini"
-    physnet = node[:crowbar_wall][:network][:nets][:nova_fixed].first
-    interface_mappings = "physnet1:" + physnet
   end
 
   # include neutron::common_config only now, after we've installed packages
@@ -170,6 +171,23 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
   # L2 agent
   case
+  when ml2_mech_drivers.include?("zvm")
+    vlan_start = neutron[:network][:networks][:nova_fixed][:vlan]
+    num_vlans = neutron[:neutron][:num_vlans]
+    vlan_end = [vlan_start + num_vlans - 1, 4094].min
+
+    template agent_config_path do
+      cookbook "neutron"
+      source "neutron_zvm_plugin.ini.erb"
+      owner "root"
+      group node[:neutron][:platform][:group]
+      mode "0640"
+      variables(
+        zvm: neutron[:neutron][:zvm],
+        vlan_start: vlan_start,
+        vlan_end: vlan_end,
+      )
+    end
   when ml2_mech_drivers.include?("openvswitch")
     directory "/etc/neutron/plugins/openvswitch/" do
       mode 00755
@@ -216,23 +234,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         use_l2pop: ml2_type_drivers.include?("vxlan") && neutron[:neutron][:use_dvr],
         interface_mappings: interface_mappings
        )
-    end
-  when ml2_mech_drivers.include?("zvm")
-    vlan_start = neutron[:network][:networks][:nova_fixed][:vlan]
-    num_vlans = neutron[:neutron][:num_vlans]
-    vlan_end = [vlan_start + num_vlans - 1, 4094].min
-
-    template agent_config_path do
-      cookbook "neutron"
-      source "neutron_zvm_plugin.ini.erb"
-      owner "root"
-      group node[:neutron][:platform][:group]
-      mode "0640"
-      variables(
-        zvm: neutron[:neutron][:zvm],
-        vlan_start: vlan_start,
-        vlan_end: vlan_end,
-      )
     end
   end
 

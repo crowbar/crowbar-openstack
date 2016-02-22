@@ -1537,6 +1537,128 @@ control_exchange = nova
 #log_options = true
 
 
+#
+# From nova.virt.zvm
+#
+
+# Host name or IP address of xCAT management_node (string value)
+#zvm_xcat_server = <None>
+<%= "zvm_xcat_server=#{node[:nova][:zvm][:zvm_xcat_server]}" if @libvirt_type.eql?('zvm') %>
+
+# XCAT username (string value)
+#zvm_xcat_username = <None>
+<%= "zvm_xcat_username=#{node[:nova][:zvm][:zvm_xcat_username]}" if @libvirt_type.eql?('zvm') %>
+
+# Password of the xCAT user (string value)
+#zvm_xcat_password = <None>
+<%= "zvm_xcat_password=#{node[:nova][:zvm][:zvm_xcat_password]}" if @libvirt_type.eql?('zvm') %>
+
+# Z/VM disk pool for ephemeral disks (string value)
+#zvm_diskpool = <None>
+<%= "zvm_diskpool=#{node[:nova][:zvm][:zvm_diskpool]}" if @libvirt_type.eql?('zvm') %>
+
+# Z/VM host that managed by xCAT MN. (string value)
+#zvm_host = <None>
+<%= "zvm_host=#{node[:nova][:zvm][:zvm_host]}" if @libvirt_type.eql?('zvm') %>
+
+# XCAT group for OpenStack (string value)
+#zvm_xcat_group = all
+
+# Default zfcp scsi disk pool (string value)
+#zvm_scsi_pool = xcatzfcp
+<%= "zvm_scsi_pool=#{node[:nova][:zvm][:zvm_scsi_pool]}" if @libvirt_type.eql?('zvm') %>
+
+# Does use multiple FCP for attaching a volume (boolean value)
+#zvm_multiple_fcp = false
+
+# Configured fcp list can be used (string value)
+#zvm_fcp_list = <None>
+
+# Configured fcp list dedicated to hcp (string value)
+#zvm_zhcp_fcp_list = <None>
+
+# Default disk type for root disk, can be ECKD/FBA (string value)
+#zvm_diskpool_type = ECKD
+<%= "zvm_diskpool_type=#{node[:nova][:zvm][:zvm_diskpool_type]}" if @libvirt_type.eql?('zvm') %>
+
+# Sets the admin password in the config drive (boolean value)
+#zvm_config_drive_inject_password = false
+
+# Force can be: (ARCHITECTURE) attempt relocation even though hardware
+# architecture facilities or CP features are not available on destination
+# system, (DOMAIN) attempt relocation even though VM would be moved outside of
+# its domain, or (STORAGE) relocation should proceed even if CP determines that
+# there are insufficient storage resources on destination system. (string
+# value)
+#zvm_vmrelocate_force = <None>
+
+# Immediate can be: (YES) VMRELOCATE command will do one early pass through
+# virtual machine storage and then go directly to the quiesce stage, or (NO)
+# specifies immediate processing. (string value)
+#zvm_vmrelocate_immediate = yes
+
+# Maximum wait time(seconds) for relocation to complete (string value)
+#zvm_vmrelocate_max_total = nolimit
+
+# Maximum quiesce time(seconds) a VM may be stopped during a relocation attempt
+# (string value)
+#zvm_vmrelocate_max_quiesce = nolimit
+
+# Timeout(seconds) when start an instance. (integer value)
+#zvm_reachable_timeout = 300
+
+# XCAT connection read timeout(seconds) (integer value)
+#zvm_xcat_connection_timeout = 3600
+
+# Max console log size(kilobyte) get from xCAT (integer value)
+#zvm_console_log_size = 100
+
+# User profile for creating a z/VM userid (string value)
+#zvm_user_profile = <None>
+<%= "zvm_user_profile=#{node[:nova][:zvm][:zvm_user_profile]}" if @libvirt_type.eql?('zvm') %>
+
+# Default password for a new created z/VM user (string value)
+#zvm_user_default_password = dfltpass
+
+# Default privilege level for a new created z/VM user (string value)
+#zvm_user_default_privilege = g
+
+# Virtual device number for ephemeral root disk (string value)
+#zvm_user_root_vdev = 0100
+
+# Virtual device number for additional ephemeral disk (string value)
+#zvm_user_adde_vdev = 0101
+
+# Virtual device number for persistent volume, if there are more then one
+# volumes, will use next vdev (string value)
+#zvm_user_volume_vdev = 0200
+
+# The path to store the z/VM image files (string value)
+#zvm_image_tmp_path = /var/lib/nova/images
+
+# The path to which the ephemeral disk be mounted (string value)
+#zvm_default_ephemeral_mntdir = /mnt/ephemeral
+
+# Default os root password for a new created vm (string value)
+#zvm_image_default_password = rootpass
+
+# The period(days) to clean up an image that not be used for deploy in one xCAT
+# MN within the defined time (integer value)
+#xcat_image_clean_period = 30
+
+# The threshold for xCAT free space, if snapshot or spawn check xCAT free space
+# not enough for its image operations, it will prune image to meet the
+# threshold (integer value)
+#xcat_free_space_threshold = 50
+
+# The xCAT MM node name (string value)
+#zvm_xcat_master = <None>
+<%= "zvm_xcat_master=#{node[:nova][:zvm][:zvm_xcat_master]}" if @libvirt_type.eql?('zvm') %>
+
+# The level of gzip compression used when capturing disk (string value)
+#zvm_image_compression_level = <None>
+
+
 [api_database]
 
 #
@@ -2092,128 +2214,6 @@ protocol = <%= @glance_server_protocol %>
 
 # Enable guestfs debug (boolean value)
 #debug = false
-
-#
-# From nova.virt.zvm
-#
-
-# Host name or IP address of xCAT management_node (string value)
-#zvm_xcat_server = <None>
-<%= "zvm_xcat_server=#{node[:nova][:zvm][:zvm_xcat_server]}" if @libvirt_type.eql?('zvm') %>
-
-# XCAT username (string value)
-#zvm_xcat_username = <None>
-<%= "zvm_xcat_username=#{node[:nova][:zvm][:zvm_xcat_username]}" if @libvirt_type.eql?('zvm') %>
-
-# Password of the xCAT user (string value)
-#zvm_xcat_password = <None>
-<%= "zvm_xcat_password=#{node[:nova][:zvm][:zvm_xcat_password]}" if @libvirt_type.eql?('zvm') %>
-
-# Z/VM disk pool for ephemeral disks (string value)
-#zvm_diskpool = <None>
-<%= "zvm_diskpool=#{node[:nova][:zvm][:zvm_diskpool]}" if @libvirt_type.eql?('zvm') %>
-
-# Z/VM host that managed by xCAT MN. (string value)
-#zvm_host = <None>
-<%= "zvm_host=#{node[:nova][:zvm][:zvm_host]}" if @libvirt_type.eql?('zvm') %>
-
-# XCAT group for OpenStack (string value)
-#zvm_xcat_group = all
-
-# Default zfcp scsi disk pool (string value)
-#zvm_scsi_pool = xcatzfcp
-<%= "zvm_scsi_pool=#{node[:nova][:zvm][:zvm_scsi_pool]}" if @libvirt_type.eql?('zvm') %>
-
-# Does use multiple FCP for attaching a volume (boolean value)
-#zvm_multiple_fcp = false
-
-# Configured fcp list can be used (string value)
-#zvm_fcp_list = <None>
-
-# Configured fcp list dedicated to hcp (string value)
-#zvm_zhcp_fcp_list = <None>
-
-# Default disk type for root disk, can be ECKD/FBA (string value)
-#zvm_diskpool_type = ECKD
-<%= "zvm_diskpool_type=#{node[:nova][:zvm][:zvm_diskpool_type]}" if @libvirt_type.eql?('zvm') %>
-
-# Sets the admin password in the config drive (boolean value)
-#zvm_config_drive_inject_password = false
-
-# Force can be: (ARCHITECTURE) attempt relocation even though hardware
-# architecture facilities or CP features are not available on destination
-# system, (DOMAIN) attempt relocation even though VM would be moved outside of
-# its domain, or (STORAGE) relocation should proceed even if CP determines that
-# there are insufficient storage resources on destination system. (string
-# value)
-#zvm_vmrelocate_force = <None>
-
-# Immediate can be: (YES) VMRELOCATE command will do one early pass through
-# virtual machine storage and then go directly to the quiesce stage, or (NO)
-# specifies immediate processing. (string value)
-#zvm_vmrelocate_immediate = yes
-
-# Maximum wait time(seconds) for relocation to complete (string value)
-#zvm_vmrelocate_max_total = nolimit
-
-# Maximum quiesce time(seconds) a VM may be stopped during a relocation attempt
-# (string value)
-#zvm_vmrelocate_max_quiesce = nolimit
-
-# Timeout(seconds) when start an instance. (integer value)
-#zvm_reachable_timeout = 300
-
-# XCAT connection read timeout(seconds) (integer value)
-#zvm_xcat_connection_timeout = 3600
-
-# Max console log size(kilobyte) get from xCAT (integer value)
-#zvm_console_log_size = 100
-
-# User profile for creating a z/VM userid (string value)
-#zvm_user_profile = <None>
-<%= "zvm_user_profile=#{node[:nova][:zvm][:zvm_user_profile]}" if @libvirt_type.eql?('zvm') %>
-
-# Default password for a new created z/VM user (string value)
-#zvm_user_default_password = dfltpass
-
-# Default privilege level for a new created z/VM user (string value)
-#zvm_user_default_privilege = g
-
-# Virtual device number for ephemeral root disk (string value)
-#zvm_user_root_vdev = 0100
-
-# Virtual device number for additional ephemeral disk (string value)
-#zvm_user_adde_vdev = 0101
-
-# Virtual device number for persistent volume, if there are more then one
-# volumes, will use next vdev (string value)
-#zvm_user_volume_vdev = 0200
-
-# The path to store the z/VM image files (string value)
-#zvm_image_tmp_path = /var/lib/nova/images
-
-# The path to which the ephemeral disk be mounted (string value)
-#zvm_default_ephemeral_mntdir = /mnt/ephemeral
-
-# Default os root password for a new created vm (string value)
-#zvm_image_default_password = rootpass
-
-# The period(days) to clean up an image that not be used for deploy in one xCAT
-# MN within the defined time (integer value)
-#xcat_image_clean_period = 30
-
-# The threshold for xCAT free space, if snapshot or spawn check xCAT free space
-# not enough for its image operations, it will prune image to meet the
-# threshold (integer value)
-#xcat_free_space_threshold = 50
-
-# The xCAT MM node name (string value)
-#zvm_xcat_master = <None>
-<%= "zvm_xcat_master=#{node[:nova][:zvm][:zvm_xcat_master]}" if @libvirt_type.eql?('zvm') %>
-
-# The level of gzip compression used when capturing disk (string value)
-#zvm_image_compression_level = <None>
-
 
 
 [hyperv]
