@@ -22,7 +22,7 @@ en:
   barclamp:
     swift:
       run:
-        success: 'Sucessfully started dispersion report on node %{node}'
+        success: 'Successfully started dispersion report on node %{node}'
         failure: 'Failed to run dispersion report on node %{node}: %{error}'
         duplicate: 'There is already an active dispersion report run'
         no_node: 'Please select a node that got to generate a report'
