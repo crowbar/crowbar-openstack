@@ -39,6 +39,8 @@ db_api_implementation = trove.db.sqlalchemy.api
 # Configuration options for talking to nova via the novaclient.
 api_insecure = <%= @insecure %>
 trove_auth_url = <%= @identity_uri %>
+os_region_name = <%= @region_name %>
+
 nova_compute_url = <%= @compute_uri %>
 nova_compute_endpoint_type = internalURL
 nova_api_insecure = <%= @compute_insecure %>

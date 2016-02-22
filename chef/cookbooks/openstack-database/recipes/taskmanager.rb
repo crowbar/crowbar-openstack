@@ -47,6 +47,7 @@ object_storage_uri = endpoint("object-storage-api")
 rabbit = node["openstack"]["mq"]["database"]["rabbit"]
 rabbit_pass = get_password("user", rabbit["userid"])
 
+region_name = node["openstack"]["database"]["region"]
 insecure = node["openstack"]["insecure"]
 compute_insecure = node["openstack"]["compute"]["insecure"]
 block_storage_insecure = node["openstack"]["block-storage"]["insecure"]
@@ -62,6 +63,7 @@ template "/etc/trove/trove-taskmanager.conf" do
     rabbit: rabbit,
     rabbit_pass: rabbit_pass,
     identity_uri: identity_uri,
+    region_name: region_name,
     insecure: insecure,
     compute_uri: compute_uri,
     compute_insecure: compute_insecure,
