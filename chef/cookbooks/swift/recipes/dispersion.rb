@@ -104,6 +104,7 @@ end
 execute "populate-dispersion" do
   command "#{dispersion_cmd}"
   user node[:swift][:user]
+  group node[:swift][:group]
   action :run
   ignore_failure true
   only_if "#{swift_cmd} -V #{keystone_settings["api_version"]} --os-tenant-name #{service_tenant} --os-username #{service_user} --os-password '#{service_password}' --os-auth-url #{keystone_settings["internal_auth_url"]} --os-endpoint-type internalURL stat dispersion_objects 2>&1 | grep 'Container.*not found'"
