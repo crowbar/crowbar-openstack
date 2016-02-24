@@ -41,7 +41,7 @@ database_user "grant database access for congress database user" do
 end
 
 execute "congress-manage db sync" do
-  command "congress-db-manage upgrade head"
+  command "congress-db-manage upgrade head --config-file /etc/congress/congress.conf"
   user node[:congress][:user]
   group node[:congress][:group]
   # We only do the sync the first time, and only if we're not doing HA or if we

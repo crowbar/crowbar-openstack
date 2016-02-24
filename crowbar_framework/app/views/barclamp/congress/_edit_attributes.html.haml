@@ -7,13 +7,22 @@
     = instance_field :rabbitmq
     = instance_field :keystone
     = instance_field :glance
-    = instance_field :ceilometer
     = instance_field :nova
-    = instance_field :neutron
-    = instance_field :swift
     = instance_field :cinder
+    = instance_field :neutron
+    = instance_field :ceilometer
+    
     %fieldset
-      %legeng
+      %legend
         = t(".logging_header")
       = boolean_field :verbose
+
+    %fieldset
+      %legend
+        = t(".logging_header")
       = boolean_field :debug
+
+    %fieldset
+      %legend
+        = t(".datasource_header")
+      = string_field %w(drivers)

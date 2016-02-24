@@ -21,14 +21,6 @@ override[:congress][:group] = "congress"
 default[:congress][:max_header_line] = 16384
 
 default[:congress][:api][:protocol] = "http"
-
-# HA attributes
-default[:congress][:ha][:enabled] = false
-if %w(rhel suse).include? node[:platform_family]
-  default[:congress][:ha][:api_ra] = "lsb:openstack-congress-server"
-else
-  default[:congress][:ha][:api_ra] = "lsb:congress-server"
-end
-default[:congress][:ha][:op][:monitor][:interval] = "10s"
-# Ports to bind to when haproxy is used for the real ports
-default[:congress][:ha][:ports][:api] = 5525
+default[:congress][:service_user] = "congress"
+default[:congress][:service_password] = "crowbar"
+default[:congress][:drivers] = ""

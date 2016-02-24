@@ -47,8 +47,7 @@ end
     # NOTE(toabctl): nova, cinder, glance and neutron are just needed
     # for the generic driver. So this could be optional depending on the used
     # driver
-    deps = ["database", "keystone", "rabbitmq"]
-    # ["nova", "cinder", "glance", "neutron"]
+    deps = ["database", "keystone", "rabbitmq", "nova", "cinder", "glance", "neutron"]
     deps.each do |dep|
       answer << {
         "barclamp" => dep,
@@ -86,8 +85,8 @@ end
     base["attributes"][@bc_name]["neutron_instance"] =
       find_dep_proposal("neutron")
 
-    base["attributes"][@bc_name]["service_password"] = random_password
-    base["attributes"][@bc_name][:db][:password] = random_password
+    base["attributes"][@bc_name]["service_password"] = "crowbar"
+    base["attributes"][@bc_name][:db][:password] = "crowbar"
 
     @logger.debug("Congress create_proposal: exiting")
     base

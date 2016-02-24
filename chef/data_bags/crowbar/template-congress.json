@@ -30,7 +30,7 @@
   },
   "deployment": {
     "congress": {
-      "crowbar-revision": 0,
+      "crowbar-revision": 1,
       "crowbar-applied": false,
       "schema-revision": 1,
       "element_states": {

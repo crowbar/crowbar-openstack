@@ -73,7 +73,7 @@ keystone_register "register congress service" do
   port keystone_settings["admin_port"]
   token keystone_settings["admin_token"]
   service_name "congress"
-  service_type "share"
+  service_type "policy"
   service_description "Openstack Congress Policy As A Service"
   action :add_service
 end

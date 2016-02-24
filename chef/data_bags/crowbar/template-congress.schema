@@ -1,11 +1,17 @@
 {
-  "type": "map", "required": true, "mapping": {
+  "type": "map",
+  "required": true,
+  "mapping": {
     "id": {"type": "str", "required": true, "pattern": "/^congress-|^template-congress$/" },
     "description": { "type": "str", "required": true },
     "attributes": {
-      "type": "map", "required": true, "mapping": {
+      "type": "map",
+      "required": true,
+      "mapping": {
         "congress": {
-          "type": "map", "required": true, "mapping": {
+          "type": "map",
+          "required": true,
+          "mapping": {
             "debug": { "type": "bool", "required": true },
             "verbose": { "type": "bool", "required": true },
             "use_syslog": {"type": "bool", "required": true },
@@ -20,7 +26,9 @@
             "service_user": {"type": "str", "required": true },
             "service_password": {"type": "str", "required": true },
             "api": {
-              "type": "map", "required": true, "mapping": {
+              "type": "map",
+              "required": true,
+              "mapping": {
                 "protocol": { "type" : "str", "required" : true },
                 "bind_open_address": { "type": "bool", "required": true },
                 "bind_port": { "type": "int", "required": true }

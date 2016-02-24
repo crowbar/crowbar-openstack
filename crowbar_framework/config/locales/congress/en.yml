@@ -16,16 +16,18 @@
 
 en:
   barclamp:
-    trove:
+    congress:
       edit_attributes:
+        database_instance: 'Database Instance'
+        rabbitmq_instance: 'RabbitMQ'
+        keystone_instance: 'Keystone Instance'
+        glance_instance: 'Glance Instance'
+        nova_instance: 'Nova Instance'
+        cinder_instance: 'Cinder Instance'
+        neutron_instance: 'Neutron Instance'
+        ceilometer_instance: 'Telemetry Instance'
         logging_header: 'Logging'
         verbose: 'Verbose'
         debug: 'Debug'
-        rabbitmq_instance: 'RabbitMQ'
-        keystone_instance: 'Keystone Instance'
-        cinder_instance: 'Cinder Instance'
-        nova_instance: 'Nova Instance'
-        swift_instance: 'Swift Instance'
-        volume_support: 'Enable Trove Volume Support'
-        ceilometer_instance: 'Telemetry Instance'
-        neutron_instance: 'Neutron Instance'
+        datasource_header: 'Datasources'
+        drivers: 'Supported DataSource Drivers'

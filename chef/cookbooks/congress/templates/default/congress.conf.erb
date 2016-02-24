@@ -41,10 +41,11 @@
 
 # The type of authentication to use (string value)
 #auth_strategy = keystone
-auth_strategy = keystone
+auth_strategy = noauth
 
 # List of driver class paths to import. (list value)
-#drivers =
+# drivers = 
+drivers = congress.datasources.neutronv2_driver.NeutronV2Driver,congress.datasources.glancev2_driver.GlanceV2Driver,congress.datasources.nova_driver.NovaDriver,congress.datasources.keystone_driver.KeystoneDriver,congress.datasources.ceilometer_driver.CeilometerDriver,congress.datasources.cinder_driver.CinderDriver
 
 # The number of seconds to wait between synchronizing datasource config from
 # the database  (integer value)
