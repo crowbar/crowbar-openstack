@@ -81,7 +81,7 @@ class HeatService < PacemakerServiceObject
     base
   end
 
-  def validate_proposal_after_save proposal
+  def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "heat-server"
 
     super

@@ -298,7 +298,7 @@ class SwiftService < PacemakerServiceObject
     nil
   end
 
-  def validate_proposal_after_save proposal
+  def validate_proposal_after_save(proposal)
     # first, check for conflict with ceph
     Proposal.where(barclamp: "ceph").each {|p|
       next unless (p.status == "ready") || (p.status == "pending")

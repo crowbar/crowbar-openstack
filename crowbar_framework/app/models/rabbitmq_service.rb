@@ -103,7 +103,7 @@ class RabbitmqService < PacemakerServiceObject
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
   end
 
-  def validate_proposal_after_save proposal
+  def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "rabbitmq-server"
 
     attributes = proposal["attributes"][@bc_name]
