@@ -27,3 +27,5 @@ en:
         nova_instance: 'Nova Instance'
         swift_instance: 'Swift Instance'
         volume_support: 'Enable Trove Volume Support'
+      validation:
+        rabbitmq_enabled: 'Trove support has to be enabled in the RabbitMQ proposal first.'

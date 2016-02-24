@@ -72,4 +72,18 @@ class TroveService < ServiceObject
 
     answer
   end
+
+  def validate_proposal_after_save(proposal)
+    validate_one_for_role proposal, "trove-server"
+
+    rabbitmq_proposal = Proposal.find_by(
+      barclamp: "rabbitmq",
+      name: proposal["attributes"][@bc_name]["rabbitmq_instance"])
+
+    unless rabbitmq_proposal && rabbitmq_proposal["attributes"]["rabbitmq"]["trove"]["enabled"]
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.rabbitmq_enabled")
+    end
+    super
+  end
 end
