@@ -39,6 +39,13 @@
                 }
               }
             },
+            "upgrade": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "db_dump_location" : { "type": "str" }
+              }
+            },
             "ha" : {
               "type": "map",
               "required": true,
