@@ -1,0 +1,43 @@
+#!/usr/bin/python
+
+import sqlalchemy
+import sys
+from neutron.plugins.common import constants as p_const
+from oslo_config import cfg
+
+_db_opts = [
+    cfg.StrOpt('connection',
+               deprecated_name='sql_connection',
+               default='',
+               secret=True,
+               help='URL to database'),
+]
+
+CONF = cfg.ConfigOpts()
+CONF.register_cli_opts(_db_opts, 'database')
+CONF(project='neutron')
+
+db_uri = CONF.database.connection
+
+db = sqlalchemy.create_engine(db_uri)
+try:
+    connection = db.connect()
+except sqlalchemy.exc.SQLAlchemyError as e:
+    print >>sys.stderr, 'Cannot connect to database: %s' % e
+    sys.exit(1)
+
+ret = connection.execute(
+    "UPDATE networks SET mtu=%s "
+    "FROM ml2_network_segments "
+    "WHERE ml2_network_segments.network_type=%s "
+    "AND networks.mtu IS NULL "
+    "AND networks.id=ml2_network_segments.network_id;",
+    1500 - p_const.GRE_ENCAP_OVERHEAD, "gre")
+
+ret = connection.execute(
+    "UPDATE networks SET mtu=%s "
+    "FROM ml2_network_segments "
+    "WHERE ml2_network_segments.network_type=%s "
+    "AND networks.mtu IS NULL "
+    "AND networks.id=ml2_network_segments.network_id;",
+    1500 - p_const.VXLAN_ENCAP_OVERHEAD, "vxlan")
