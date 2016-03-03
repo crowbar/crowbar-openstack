@@ -57,7 +57,10 @@ class CrowbarOpenStackHelper
     # daemon (which are all in the same process); so use the ohai time as a
     # marker for that.
     if @database_settings_cache_time != node[:ohai_time]
-      Chef::Log.info("Invalidating database settings cache") if @database_settings
+      if @database_settings
+        Chef::Log.info("Invalidating database settings cache " \
+                       "on behalf of #{barclamp}")
+      end
       @database_settings = nil
       @database_settings_cache_time = node[:ohai_time]
     end
@@ -103,7 +106,10 @@ class CrowbarOpenStackHelper
     # daemon (which are all in the same process); so use the ohai time as a
     # marker for that.
     if @rabbitmq_settings_cache_time != node[:ohai_time]
-      Chef::Log.info("Invalidating rabbitmq settings cache") if @rabbitmq_settings
+      if @rabbitmq_settings
+        Chef::Log.info("Invalidating rabbitmq settings cache " \
+                       "on behalf of #{barclamp}")
+      end
       @rabbitmq_settings = nil
       @rabbitmq_settings_cache_time = node[:ohai_time]
     end

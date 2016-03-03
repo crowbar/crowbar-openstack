@@ -16,7 +16,10 @@ module KeystoneHelper
     # daemon (which are all in the same process); so use the ohai time as a
     # marker for that.
     if @keystone_settings_cache_time != current_node[:ohai_time]
-      Chef::Log.info("Invalidating keystone settings cache") if @keystone_settings
+      if @keystone_settings
+        Chef::Log.info("Invalidating keystone settings cache " \
+                       "on behalf of #{cookbook_name}")
+      end
       @keystone_settings = nil
       @keystone_node = nil
       @keystone_settings_cache_time = current_node[:ohai_time]
