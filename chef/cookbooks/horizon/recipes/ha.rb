@@ -36,9 +36,6 @@ end
 # resources
 crowbar_pacemaker_sync_mark "sync-horizon_before_ha"
 
-# Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-horizon_ha_resources"
+# no wait/create sync mark as it's done in crowbar-pacemaker itself
 
 include_recipe "crowbar-pacemaker::apache"
-
-crowbar_pacemaker_sync_mark "create-horizon_ha_resources"
