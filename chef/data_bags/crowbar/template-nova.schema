@@ -39,7 +39,8 @@
               "type": "map",
               "mapping": {
                 "ram_allocation_ratio": { "type": "number" },
-                "cpu_allocation_ratio": { "type": "number" }
+                "cpu_allocation_ratio": { "type": "number" },
+                "disk_allocation_ratio": { "type": "number" }
               }
             },
             "db": {
