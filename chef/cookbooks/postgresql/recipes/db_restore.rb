@@ -18,7 +18,7 @@
 #
 
 service_name = "postgresql"
-dump_location = node[:crowbar][:upgrade][:db_dump_location]
+dump_location = node[:database][:upgrade][:db_dump_location]
 
 dump_needed_cond = "[ ! -f \"#{dump_location}.restore-ok\" -a -f \"#{dump_location}\" ]"
 

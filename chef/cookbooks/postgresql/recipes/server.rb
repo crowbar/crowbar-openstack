@@ -128,7 +128,7 @@ else
   log "HA support for postgresql is disabled"
 end
 
-db_dump = node["crowbar"].fetch("upgrade", {})["db_dump_location"]
+db_dump = node["database"].fetch("upgrade", {})["db_dump_location"]
 if !db_dump.nil? && !File.exist?("#{db_dump}.restored-ok")
   include_recipe "postgresql::db_restore"
 end

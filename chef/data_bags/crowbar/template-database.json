@@ -14,6 +14,9 @@
           "log_truncate_on_rotation": false
         }
       },
+      "upgrade": {
+        "db_dump_location" : "/var/lib/pgsql/db-before-cloud6.dump"
+      },
       "ha": {
         "storage": {
           "mode": "shared",
@@ -33,7 +36,7 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 4,
+      "schema-revision": 5,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },
