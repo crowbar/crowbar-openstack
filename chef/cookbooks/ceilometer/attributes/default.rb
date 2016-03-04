@@ -88,7 +88,11 @@ default[:ceilometer][:ha][:polling][:agent] = "lsb:#{polling_service_name}"
 default[:ceilometer][:ha][:polling][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:ceilometer][:ha][:ports][:api] = 5561
-default[:ceilometer][:ha][:mongodb][:agent] = "lsb:mongodb"
+if node[:platform] == "suse" && node[:platform_version].to_f < 12.0
+  default[:ceilometer][:ha][:mongodb][:agent] = "lsb:mongodb"
+else
+  default[:ceilometer][:ha][:mongodb][:agent] = "systemd:mongodb"
+end
 default[:ceilometer][:ha][:mongodb][:op][:monitor][:interval] = "10s"
 default[:ceilometer][:ha][:mongodb][:replica_set][:name] = "crowbar-ceilometer"
 default[:ceilometer][:ha][:mongodb][:replica_set][:member] = false
