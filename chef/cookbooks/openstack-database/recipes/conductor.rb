@@ -41,6 +41,7 @@ db_uri = db_uri("database", db_user, db_pass).to_s
 rabbit = node["openstack"]["mq"]["database"]["rabbit"]
 rabbit_pass = get_password("user", rabbit["userid"])
 identity_uri = endpoint("identity-api")
+region_name = node["openstack"]["database"]["region"]
 
 template "/etc/trove/trove-conductor.conf" do
   source "trove-conductor.conf.erb"
@@ -50,6 +51,7 @@ template "/etc/trove/trove-conductor.conf" do
   variables(
     database_connection: db_uri,
     identity_uri: identity_uri,
+    region_name: region_name,
     rabbit: rabbit,
     rabbit_pass: rabbit_pass
     )
