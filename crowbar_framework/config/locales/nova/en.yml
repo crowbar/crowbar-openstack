@@ -46,7 +46,7 @@ en:
           user: 'vCenter Username'
           password: 'vCenter Password'
           clusters: 'Cluster Names'
-          datastore: 'Datastore Name'
+          datastore: 'Regular Expression to match the name of a datastore'
           interface: 'VLAN Interface'
           ca_file: 'CA file for verifying the vCenter certificate'
           insecure: 'vCenter SSL Certificate is insecure (for instance, self-signed)'
