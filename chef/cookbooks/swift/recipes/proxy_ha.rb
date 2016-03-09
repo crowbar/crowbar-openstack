@@ -46,7 +46,10 @@ transaction_objects << "pacemaker_primitive[#{service_name}]"
 clone_name = "cl-#{service_name}"
 pacemaker_clone clone_name do
   rsc service_name
-  meta ({ "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node) })
+  meta ({
+    "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node),
+    "interleave" => "true",
+  })
   action :update
   # Do not even try to start the daemon if we don't have the ring yet
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exist?("/etc/swift/object.ring.gz") }

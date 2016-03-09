@@ -142,7 +142,10 @@ transaction_objects << "pacemaker_group[#{agents_group_name}]"
 agents_clone_name = "cl-#{agents_group_name}"
 pacemaker_clone agents_clone_name do
   rsc agents_group_name
-  meta ({ "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node) })
+  meta ({
+    "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node),
+    "interleave" => "true",
+  })
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
