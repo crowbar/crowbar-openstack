@@ -322,6 +322,7 @@ registry_client_protocol = http
 # equivalent of specifying --insecure on the command line using
 # glanceclient for the API. (boolean value)
 #registry_client_insecure = false
+registry_client_insecure = <%= @keystone_settings["insecure"] %>
 
 # The period of time, in seconds, that the API server will wait for a
 # registry request to complete. A value of 0 implies no timeout.
