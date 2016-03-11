@@ -1147,6 +1147,7 @@ memcached_servers = <%= @memcached_servers.join(',') %>
 
 # Virtual disk to physical disk allocation ratio (floating point value)
 #disk_allocation_ratio = 1.0
+disk_allocation_ratio = <%= node[:nova][:scheduler][:disk_allocation_ratio] %>
 
 # Tells filters to ignore hosts that have this many or more instances currently
 # in build, resize, snapshot, migrate, rescue or unshelve task states (integer
