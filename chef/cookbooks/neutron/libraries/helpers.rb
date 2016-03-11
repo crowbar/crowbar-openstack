@@ -29,11 +29,15 @@ module NeutronHelper
     end
 
     # Now check if any of the external network will share the physical interface
-    # with "nova_fixed".
-    fixed_conduit = node[:network][:networks][:nova_fixed][:conduit]
-    fixed_interface = BarclampLibrary::Barclamp::Inventory.lookup_interface_info(
-      node, fixed_conduit)[0]
-    fixed_physnet = "physnet1"
+    # with "nova_fixed" if the node has "nova_fixed" enabled.
+    fixed_interface = ""
+    fixed_physnet = ""
+    if node[:crowbar_wall][:network][:nets][:nova_fixed]
+      fixed_conduit = node[:network][:networks][:nova_fixed][:conduit]
+      fixed_interface = BarclampLibrary::Barclamp::Inventory.lookup_interface_info(
+        node, fixed_conduit)[0]
+      fixed_physnet = "physnet1"
+    end
 
     physmap = Hash.new
     networks.each do |net, values|
