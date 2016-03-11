@@ -17,8 +17,6 @@
 
 source "https://rubygems.org"
 
-gem "rake", "~> 10.3.2"
-
 group :development do
   gem "closure-compiler", "~> 1.1.10"
   gem "sass", "~> 3.2.19"
