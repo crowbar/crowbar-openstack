@@ -35,7 +35,7 @@ deferred_auth_method = trusts
 # Subset of trustor roles to be delegated to heat. If left unset, all roles of
 # a user will be delegated to heat when creating a stack. (list value)
 #trusts_delegated_roles =
-trusts_delegated_roles=heat_stack_owner
+trusts_delegated_roles= <%= @trusts_delegated_roles.join(',') %>
 
 # Maximum resources allowed per top-level stack. -1 stands for unlimited.
 # (integer value)
