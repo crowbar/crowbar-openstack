@@ -24,6 +24,11 @@
             "stack_domain_admin_password": { "type": "str", "required": true },
             "auth_encryption_key": { "type": "str", "required": true },
             "use_convergence_engine": { "type": "bool", "required": true },
+            "trusts_delegated_roles": {
+              "type": "seq",
+              "required": true,
+              "sequence": [ { "type": "str" } ]
+            },
             "api": {
               "type": "map",
               "required": true,
