@@ -70,6 +70,7 @@
           "user": "",
           "password": "",
           "pool": "",
+          "snappool": "",
           "iscsi_ip": ""
         },
         "rbd": {
@@ -131,7 +132,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 47,
+      "schema-revision": 100,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
