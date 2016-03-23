@@ -246,16 +246,24 @@ nova_controller_ips = nova_controllers.map do |nova_controller_node|
   Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova_controller_node, "admin").address
 end
 
-# Note: since we do not allow shared storage with a cluster, we know that the
-# first controller is the right one to use (ie, the only one)
-if !nova_controllers.nil? && nova_controllers.length > 0 && nova_controllers[0].name != node.name
-  mount node[:nova][:instances_path] do
-    action node[:nova]["use_shared_instance_storage"] ? [:mount, :enable] : [:umount, :disable]
-    fstype "nfs"
-    options "rw,auto"
-    device nova_controller_ips[0] + ":" + node[:nova][:instances_path]
+if node[:nova]["setup_shared_instance_storage"]
+  # Note: since we do not allow setting up shared storage with a cluster, we
+  # know that the first controller is the right one to use (ie, the only one)
+  unless nova_controllers.empty?
+    mount node[:nova][:instances_path] do
+      action nova_controllers[0].name != node.name ? [:mount, :enable] : [:umount, :disable]
+      fstype "nfs"
+      options "rw,auto"
+      device nova_controller_ips[0] + ":" + node[:nova][:instances_path]
+    end
   end
-
+elsif !node[:nova]["use_shared_instance_storage"]
+  unless nova_controllers.empty?
+    mount node[:nova][:instances_path] do
+      action [:umount, :disable]
+      device nova_controller_ips[0] + ":" + node[:nova][:instances_path]
+    end
+  end
 end
 
 unless node[:nova][:user].empty? or node["etc"]["passwd"][node[:nova][:user]].nil?
