@@ -1670,7 +1670,9 @@ control_exchange = nova
 
 # The SQLAlchemy connection string to use to connect to the Nova API database.
 # (string value)
-#connection = <None>
+<% if @api_database_connection -%>
+connection = <%= @api_database_connection %>
+<% end -%>
 
 # If True, SQLite uses synchronous mode. (boolean value)
 #sqlite_synchronous = true

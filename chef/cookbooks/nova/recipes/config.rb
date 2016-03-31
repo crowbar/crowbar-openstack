@@ -38,11 +38,25 @@ include_recipe "#{db_settings[:backend_name]}::python-client"
 database_connection = if node["roles"].include?("nova-controller")
   db_conn_scheme = db_settings[:url_scheme]
   if node[:platform_family] == "suse" && db_settings[:backend_name] == "mysql"
-    # The C-extensions (python-mysql) can't be monkey-patched by eventlet. Therefore, when only one nova-conductor is present,
-    # all DB queries are serialized. By using the pure-Python driver by default, eventlet can do it's job:
+    # The C-extensions (python-mysql) can't be monkey-patched by eventlet. Therefore,
+    # when only one nova-conductor is present, all DB queries are serialized.
+    # By using the pure-Python driver by default, eventlet can do it's job:
     db_conn_scheme = "mysql+pymysql"
   end
-  "#{db_conn_scheme}://#{node[:nova][:db][:user]}:#{node[:nova][:db][:password]}@#{db_settings[:address]}/#{node[:nova][:db][:database]}"
+  db = node[:nova][:db]
+  "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
+end
+
+api_database_connection = if node["roles"].include?("nova-controller")
+  db_conn_scheme = db_settings[:url_scheme]
+  if node[:platform_family] == "suse" && db_settings[:backend_name] == "mysql"
+    # The C-extensions (python-mysql) can't be monkey-patched by eventlet. Therefore,
+    # when only one nova-conductor is present, all DB queries are serialized.
+    # By using the pure-Python driver by default, eventlet can do it's job:
+    db_conn_scheme = "mysql+pymysql"
+  end
+  db = node[:nova][:api_db]
+  "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
 end
 
 apis = search_env_filtered(:node, "roles:nova-controller")
@@ -261,6 +275,7 @@ template "/etc/nova/nova.conf" do
             bind_port_xvpvncproxy: bind_port_xvpvncproxy,
             dhcpbridge: "/usr/bin/nova-dhcpbridge",
             database_connection: database_connection,
+            api_database_connection: api_database_connection,
             rabbit_settings: fetch_rabbitmq_settings,
             libvirt_type: node[:nova][:libvirt_type],
             ec2_host: admin_api_host,
