@@ -49,14 +49,6 @@ haproxy_loadbalancer "nova-metadata" do
   action :nothing
 end.run_action(:create)
 
-haproxy_loadbalancer "nova-objectstore" do
-  address "0.0.0.0"
-  port node[:nova][:ports][:objectstore]
-  use_ssl false
-  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "objectstore")
-  action :nothing
-end.run_action(:create)
-
 if node[:nova][:use_novnc]
   haproxy_loadbalancer "nova-novncproxy" do
     address "0.0.0.0"
@@ -86,7 +78,7 @@ crowbar_pacemaker_sync_mark "wait-nova_ha_resources"
 transaction_objects = []
 primitives = []
 
-services = %w(api cert conductor consoleauth objectstore scheduler)
+services = %w(api cert conductor consoleauth scheduler)
 if node[:nova][:use_novnc]
   services << "novncproxy"
 else

@@ -24,9 +24,6 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 nova_package "api" do
   use_pacemaker_provider node[:nova][:ha][:enabled]
 end
-nova_package "objectstore" do
-  use_pacemaker_provider node[:nova][:ha][:enabled]
-end
 
 apis = search_env_filtered(:node, "roles:nova-controller")
 if apis.length > 0
