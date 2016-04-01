@@ -1064,6 +1064,9 @@ endpoint_type = internalURL
 
 # Role required for users to be able to manage stacks (string value)
 #stack_owner_role = heat_stack_owner
+<% if @heat_trusts_delegated_roles -%>
+stack_owner_role = <%= @heat_trusts_delegated_roles[0] %>
+<% end -%>
 
 # Time in seconds between build status checks. (integer value)
 #build_interval = 1
