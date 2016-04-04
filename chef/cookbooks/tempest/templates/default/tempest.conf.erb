@@ -298,6 +298,7 @@ image_ssh_password = cubswin:)
 # User name used to authenticate to an instance using the alternate
 # image. (string value)
 #image_alt_ssh_user = root
+image_alt_ssh_user = cirros
 
 # Time in seconds between build status checks. (integer value)
 #build_interval = 1
@@ -821,7 +822,7 @@ flavor_regex = ^tempest-stuff$
 
 # List of user mapped to regex to matching image names. (string value)
 #ssh_user_regex = [["^.*[Cc]irros.*$", "cirros"]]
-ssh_user_regex = [["^.*[Cc]irros.*$", "root"]]
+ssh_user_regex = [["^.*[Cc]irros.*$", "cirros"]]
 
 
 [messaging]
@@ -1304,6 +1305,7 @@ events = true
 # resources to enable remote access (boolean value)
 # Deprecated group/name - [compute]/run_ssh
 #run_validation = false
+run_validation = true
 
 # Enable/disable security groups. (boolean value)
 #security_group = true
