@@ -54,7 +54,7 @@ network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
 flat_networks = <%= @zvm[:zvm_xcat_mgt_vswitch] %>
 <%end -%>
 
-[<%= @svm[:zvm_xcat_mgt_vswitch] %>]
+[<%= @zvm[:zvm_xcat_mgt_vswitch] %>]
 
 # (StrOpt ) rdev_list for each vswitch's uplink real device(s), seperated by ','.
 # If a vswitch does not connect an OSA, which means it does not connect to
