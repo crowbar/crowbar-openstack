@@ -140,6 +140,7 @@ end.run_action(:add_access)
 end
 
 machine_id_file = node[:tempest][:tempest_path] + "/machine.id"
+alt_machine_id_file = node[:tempest][:tempest_path] + "/alt_machine.id"
 docker_image_id_file = node[:tempest][:tempest_path] + "/docker_machine.id"
 
 glance_node = search(:node, "roles:glance-server").first
@@ -196,6 +197,18 @@ RAMDISK_ID=$(glance #{insecure} --os-image-api-version 1 image-create \
     --disk-format ari < $(findfirst '*-initrd') | extract_id)
 echo "done."
 [ -n "$RAMDISK_ID" ] || exit 1
+
+echo -n "Adding alt image ... "
+ALT_MACHINE_ID=$(glance #{insecure} --os-image-api-version 1 image-create \
+    --name="$IMG_NAME-tempest-machine-alt" \
+    --is-public True --container-format ami --disk-format ami \
+    --property kernel_id=$KERNEL_ID \
+    --property ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
+echo "done."
+[ -n "$ALT_MACHINE_ID" ] || exit 1
+
+echo -n "Saving alt machine id ..."
+echo $ALT_MACHINE_ID > #{alt_machine_id_file}
 
 echo -n "Adding image ... "
 MACHINE_ID=$(glance #{insecure} --os-image-api-version 1 image-create \
@@ -421,6 +434,7 @@ template "/etc/tempest/tempest.conf" do
     # general settings
     keystone_settings: keystone_settings,
     machine_id_file: use_docker ? docker_image_id_file : machine_id_file,
+    alt_machine_id_file: alt_machine_id_file,
     tempest_path: node[:tempest][:tempest_path],
     use_swift: use_swift,
     use_horizon: use_horizon,

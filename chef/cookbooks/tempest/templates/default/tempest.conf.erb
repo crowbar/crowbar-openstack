@@ -1,6 +1,7 @@
 [DEFAULT]
 
 <% img_id = `cat #{@machine_id_file}`.strip %>
+<% alt_img_id = `cat #{@alt_machine_id_file}`.strip %>
 
 #
 # From oslo.log
@@ -277,7 +278,7 @@ image_ref = <%= img_id %>
 # required option, but if only one image is available duplicate the
 # value of image_ref above (string value)
 #image_ref_alt = <None>
-image_ref_alt = <%= img_id %>
+image_ref_alt = <%= alt_img_id %>
 
 # Valid primary flavor to use in tests. (string value)
 #flavor_ref = 1
