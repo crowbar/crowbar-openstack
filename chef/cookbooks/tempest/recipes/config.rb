@@ -25,6 +25,9 @@ alt_comp_user = keystone_settings["default_user"]
 alt_comp_pass = keystone_settings["default_password"]
 alt_comp_tenant = keystone_settings["default_tenant"]
 
+# Will only be set if this cloud is actually running heat
+heat_trusts_delegated_roles = nil
+
 tempest_comp_user = node[:tempest][:tempest_user_username]
 tempest_comp_pass = node[:tempest][:tempest_user_password]
 tempest_comp_tenant = node[:tempest][:tempest_user_tenant]
@@ -69,7 +72,10 @@ users = [
         ]
 
 if use_heat
-  users.push({"name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "heat_stack_owner"})
+  heat_trusts_delegated_roles = node[:heat][:trusts_delegated_roles]
+  heat_trusts_delegated_roles.each do |role|
+    users.push("name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => role)
+  end
 end
 
 users.each do |user|
@@ -465,6 +471,11 @@ template "/etc/tempest/tempest.conf" do
     object_versioning: swift_allow_versions,
     # orchestration settings
     heat_flavor_ref: heat_flavor_ref,
+    # FIXME: until https://bugs.launchpad.net/tempest/+bug/1559078 only the
+    # first element of this list will be used in the template (this works fine
+    # for all of our default settings for stack_delegated_roles (single values)
+    # but breaks in the (unlikely) case of anybody configuring multiple roles).
+    heat_trusts_delegated_roles: heat_trusts_delegated_roles,
     # scenario settings
     cirros_version: cirros_version,
     image_regex: image_regex,

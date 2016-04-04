@@ -145,28 +145,30 @@ keystone_register "add heat stack user role" do
   action :add_role
 end
 
-keystone_register "add heat stack owner role" do
-  protocol keystone_settings["protocol"]
-  insecure keystone_settings["insecure"]
-  host keystone_settings["internal_url_host"]
-  port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
-  user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
-  role_name "heat_stack_owner"
-  action :add_role
-end
+node[:heat][:trusts_delegated_roles].each do |role|
+  keystone_register "Create stack owner role #{role}" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    token keystone_settings["admin_token"]
+    user_name keystone_settings["service_user"]
+    tenant_name keystone_settings["service_tenant"]
+    role_name role
+    action :add_role
+  end
 
-keystone_register "give admin access to stack owner role" do
-  protocol keystone_settings["protocol"]
-  insecure keystone_settings["insecure"]
-  host keystone_settings["internal_url_host"]
-  port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
-  user_name keystone_settings["admin_user"]
-  tenant_name keystone_settings["default_tenant"]
-  role_name "heat_stack_owner"
-  action :add_access
+  keystone_register "give admin access to stack owner role #{role}" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    token keystone_settings["admin_token"]
+    user_name keystone_settings["admin_user"]
+    tenant_name keystone_settings["default_tenant"]
+    role_name role
+    action :add_access
+  end
 end
 
 package "python-openstackclient" do
@@ -359,7 +361,8 @@ template "/etc/heat/heat.conf" do
     stack_user_domain: %x[ #{shell_get_stack_user_domain} ].chomp,
     stack_domain_admin: node[:heat]["stack_domain_admin"],
     stack_domain_admin_password: node[:heat]["stack_domain_admin_password"],
-    use_convergence_engine: node[:heat][:use_convergence_engine]
+    use_convergence_engine: node[:heat][:use_convergence_engine],
+    trusts_delegated_roles: node[:heat][:trusts_delegated_roles]
   )
 end
 
