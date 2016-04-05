@@ -177,7 +177,7 @@ if use_l3_agent
       "os_username"    => keystone_settings["admin_user"],
       "os_insecure"    => keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
     })
-    op node[:neutron][:ha][:network][:op]
+    op node[:neutron][:ha][:neutron_ha_tool][:op]
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
