@@ -167,7 +167,10 @@ compute_transaction_objects << "pacemaker_group[#{compute_group_name}]"
 compute_clone_name = "cl-#{compute_group_name}"
 pacemaker_clone compute_clone_name do
   rsc compute_group_name
-  meta ({ "clone-max" => CrowbarPacemakerHelper.num_remote_nodes(node) })
+  meta ({
+    "clone-max" => CrowbarPacemakerHelper.num_remote_nodes(node),
+    "interleave" => "true",
+  })
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
