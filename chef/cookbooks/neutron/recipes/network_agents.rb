@@ -181,8 +181,15 @@ if !node[:neutron][:network_mtu_fix] &&
       mode "0755"
     end
 
+    if node.roles.include?("neutron-server")
+      neutron_server_node = node
+    else
+      neutron_server_node = search(:node, "roles:neutron-server").first
+    end
+
     execute "fix mtu of tunnel networks" do
-      command "/usr/bin/crowbar-fix-tunnel-networks-mtu"
+      command "/usr/bin/crowbar-fix-tunnel-networks-mtu \
+        #{neutron_server_node[:neutron][:db][:sql_connection]}"
       action :run
       # restart local dhcp agent to get dnsmasq restarted so it advertises the
       # correct mtu; this is why we run this on all nodes even with HA
