@@ -181,10 +181,10 @@ if !node[:neutron][:network_mtu_fix] &&
       mode "0755"
     end
 
-    if node.roles.include?("neutron-server")
-      neutron_server_node = node
+    neutron_server_node = if node.roles.include?("neutron-server")
+      node
     else
-      neutron_server_node = search(:node, "roles:neutron-server").first
+      search(:node, "roles:neutron-server").first
     end
 
     execute "fix mtu of tunnel networks" do
