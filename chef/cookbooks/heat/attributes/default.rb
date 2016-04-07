@@ -81,7 +81,7 @@ default[:heat][:db][:password] = "" # Set by Recipe
 default[:heat][:service_user] = "heat"
 default[:heat][:service_password] = ""
 
-default[:heat][:api][:protocol] = "http"
+default[:heat][:api][:protocol] = "https"
 default[:heat][:api][:cfn_port] = 8000
 default[:heat][:api][:engine_port] = 8001
 default[:heat][:api][:cloud_watch_port] = 8003
