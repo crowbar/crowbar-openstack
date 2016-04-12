@@ -21,6 +21,27 @@
 package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node[:platform_family] == "suse"
 
+# Increase ulimit for file handlers
+ruby_block "ulimit hard nofile for rabbitmq" do
+  block do
+    rc = Chef::Util::FileEdit.new("/etc/security/limits.conf")
+    rc.insert_line_if_no_match(/^rabbitmq hard/,
+                               "rabbitmq hard nofile 65535")
+    rc.write_file
+  end
+  only_if { node[:platform_family] == "suse" }
+end
+
+ruby_block "ulimit soft nofile for rabbitmq" do
+  block do
+    rc = Chef::Util::FileEdit.new("/etc/security/limits.conf")
+    rc.insert_line_if_no_match(/^rabbitmq soft/,
+                               "rabbitmq soft nofile 65535")
+    rc.write_file
+  end
+  only_if { node[:platform_family] == "suse" }
+end
+
 directory "/etc/rabbitmq/" do
   owner "root"
   group "root"
