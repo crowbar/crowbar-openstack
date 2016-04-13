@@ -26,5 +26,15 @@ module Barclamp
         selected.to_s
       )
     end
+
+    def zvm_diskpool_types(selected)
+      options_for_select(
+        [
+          ["Extended Count Key Data (ECKD)", "ECKD"],
+          ["Fixed Block Access (FBA)", "FBA"]
+        ],
+        selected.to_s
+      )
+    end
   end
 end
