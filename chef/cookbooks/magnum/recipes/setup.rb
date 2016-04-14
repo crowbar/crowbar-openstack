@@ -10,7 +10,7 @@ bash "tty linux setup" do
   user "root"
   code <<-EOH
   mkdir -p /var/lib/magnum/
-  curl #{node[:manila][:tty_linux_image]} | tar xvz -C /tmp/
+  curl #{node[:magnum][:tty_linux_image]} | tar xvz -C /tmp/
   touch /var/lib/magnum/tty_setup
   EOH
   not_if { File.exist?("/var/lib/magnum/tty_setup") }

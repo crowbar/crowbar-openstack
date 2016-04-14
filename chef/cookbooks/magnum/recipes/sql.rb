@@ -58,7 +58,7 @@ database_user "grant database access for magnum database user" do
 end
 
 execute "magnum-manage db sync" do
-  command "magnum-db-manage db sync"
+  command "magnum-db-manage upgrade"
   user node[:magnum][:user]
   group node[:magnum][:group]
   # We only do the sync the first time, and only if we're not doing HA or if we

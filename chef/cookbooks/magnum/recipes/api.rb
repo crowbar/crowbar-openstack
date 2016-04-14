@@ -25,7 +25,7 @@ keystone_settings = KeystoneHelper.keystone_settings(node, :magnum)
 magnum_port = node[:magnum][:api][:bind_port]
 magnum_protocol = node[:magnum][:api][:protocol]
 
-ha_enabled = node[:manila][:ha][:enabled]
+ha_enabled = node[:magnum][:ha][:enabled]
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(
@@ -97,6 +97,6 @@ end
 
 crowbar_pacemaker_sync_mark "create-magnum_register"
 
-magnum_service "api" do
-  use_pacemaker_provider ha_enabled
-end
+# magnum_service "api" do
+#  use_pacemaker_provider ha_enabled
+# end

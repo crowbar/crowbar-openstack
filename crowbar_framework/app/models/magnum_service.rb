@@ -77,10 +77,17 @@ class MagnumService < ServiceObject
     base["attributes"][@bc_name]["neutron_instance"] =
       find_dep_proposal("neutron")
 
+    base["attributes"][@bc_name]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
     @logger.debug("Magnum create_proposal: exiting")
     base
+  end
+
+  def validate_proposal_after_save(proposal)
+    validate_one_for_role proposal, "magnum-server"
+    validate_at_least_n_for_role proposal, "magnum-server", 1
+    super
   end
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
@@ -88,6 +95,7 @@ class MagnumService < ServiceObject
     return if all_nodes.empty?
 
     @logger.debug("Magnum apply_role_pre_chef_call: leaving")
+    node.save
   end
 
   # Similar to above - delete or uncomment for actions to be run after

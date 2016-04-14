@@ -20,6 +20,15 @@
             "nova_instance": { "type": "str", "required": true },
             "neutron_instance": { "type": "str", "required": true },
             "rabbitmq_instance": { "type": "str", "required": true },
+            "service_user": { "type": "str", "required": true },
+            "service_password": { "type": "str", "required": true },
+            "api": {
+              "type": "map", "required": true, "mapping": {
+                "protocol": { "type" : "str", "required" : true },
+                "bind_open_address": { "type": "bool", "required": true },
+                "bind_port": { "type": "int", "required": true }
+              }
+            },
             "db": {
               "type": "map",
               "required": true,

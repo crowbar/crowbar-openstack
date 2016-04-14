@@ -54,13 +54,13 @@ else
   bind_port = node[:magnum][:api][:bind_port]
 end
 
-
 template "/etc/magnum/magnum.conf" do
   source "magnum.conf.erb"
   owner "root"
   group node[:magnum][:group]
   mode 0640
   variables(
+    trustee: node[:magnum][:trustee],
     bind_host: bind_host,
     bind_port: bind_port,
     sql_connection: sql_connection,

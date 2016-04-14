@@ -1,6 +1,6 @@
 {
   "id": "template-magnum",
-  "description": "Sets up OpenStack Magnum Container as a Service",
+  "description": "Sets up OpenStack Magnum Containers as a Service",
   "attributes": {
     "magnum": {
       "debug": false,
@@ -11,6 +11,13 @@
       "nova_instance": "none",
       "neutron_instance": "none",
       "rabbitmq_instance": "none",
+      "service_user": "magnum",
+      "service_password": "",
+      "api": {
+        "protocol": "http",
+        "bind_open_address": true,
+        "bind_port": 9511
+      },
       "db": {
         "password": "",
         "user": "magnum",
