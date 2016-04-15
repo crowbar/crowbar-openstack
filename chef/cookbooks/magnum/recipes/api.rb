@@ -17,9 +17,6 @@
 # Recipe:: api
 #
 
-include_recipe "#{@cookbook_name}::common"
-include_recipe "#{@cookbook_name}::sql"
-
 keystone_settings = KeystoneHelper.keystone_settings(node, :magnum)
 
 magnum_port = node[:magnum][:api][:bind_port]
@@ -87,16 +84,15 @@ keystone_register "register magnum endpoint" do
   endpoint_service "magnum"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{magnum_protocol}://"\
-                     "#{my_public_host}:#{magnum_port}/v1/$(tenant_id)s"
+                     "#{my_public_host}:#{magnum_port}/v1/"
   endpoint_adminURL "#{magnum_protocol}://"\
-                    "#{my_admin_host}:#{magnum_port}/v1/$(tenant_id)s"
+                    "#{my_admin_host}:#{magnum_port}/v1/"
   endpoint_internalURL "#{magnum_protocol}://"\
-                       "#{my_admin_host}:#{magnum_port}/v1/$(tenant_id)s"
+                       "#{my_admin_host}:#{magnum_port}/v1/"
   action :add_endpoint_template
 end
 
 crowbar_pacemaker_sync_mark "create-magnum_register"
-
-# magnum_service "api" do
-#  use_pacemaker_provider ha_enabled
-# end
+magnum_service "api" do
+  use_pacemaker_provider ha_enabled
+end

@@ -17,10 +17,8 @@
 # Recipe:: conductor
 #
 
-include_recipe "#{@cookbook_name}::common"
+ha_enabled = node[:magnum][:ha][:enabled]
 
-#ha_enabled = node[:magnum][:ha][:enabled]
-
-# magnum_service "conductor" do
-#  use_pacemaker_provider ha_enabled
-#end
+magnum_service "conductor" do
+  use_pacemaker_provider ha_enabled
+end

@@ -29,7 +29,7 @@ if node.roles.include? "magnum-server"
 else
   # pickup password to database from magnum-server node
   node_servers = search(:node, "roles:magnum-server") || []
-  if node_servers.length > 0
+  if !node_servers.empty?
     db_password = node_servers[0][:magnum][:db][:password]
   end
 end
@@ -43,16 +43,10 @@ my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
 node.set[:magnum][:my_ip] = my_ipaddress
 node.set[:magnum][:api][:bind_host] = my_ipaddress
 
-if node[:magnum][:ha][:enabled]
-  bind_port = node[:magnum][:ha][:ports][:api]
-else
-  if node[:magnum][:api][:bind_open_address]
-    bind_host = "0.0.0.0"
-  else
-    bind_host = node[:magnum][:api][:bind_host]
-  end
-  bind_port = node[:magnum][:api][:bind_port]
-end
+# TODO : Handle HA condition
+bind_port = node[:magnum][:api][:bind_port]
+bind_host = node[:magnum][:api][:bind_host]
+bind_host = "0.0.0.0" if node[:magnum][:api][:bind_open_address]
 
 template "/etc/magnum/magnum.conf" do
   source "magnum.conf.erb"

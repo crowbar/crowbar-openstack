@@ -1,4 +1,4 @@
-define :magnum_service: do
+define :magnum_service, use_pacemaker_provider: false do
   magnum_service_name = "magnum-#{params[:name]}"
   magnum_name = magnum_service_name
   magnum_name = "openstack-magnum-#{params[:name]}"\
@@ -11,4 +11,7 @@ define :magnum_service: do
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources(template: "/etc/magnum/magnum.conf")
+    provider Chef::Provider::CrowbarPacemakerService \
+               if params[:use_pacemaker_provider]
   end
+end

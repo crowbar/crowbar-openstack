@@ -17,7 +17,6 @@
 #
 
 class MagnumController < BarclampController
-
   protected
 
   def initialize_service

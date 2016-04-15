@@ -17,7 +17,6 @@
 #
 
 class MagnumService < ServiceObject
-
   def initialize(thelogger)
     @bc_name = "magnum"
     @logger = thelogger
@@ -63,7 +62,7 @@ class MagnumService < ServiceObject
     base["deployment"][@bc_name]["elements"] = {
       "magnum-server" => controllers.empty? ? [] : [controllers.first.name],
     }
-    
+   
     base["attributes"][@bc_name]["database_instance"] =
       find_dep_proposal("database")
     base["attributes"][@bc_name]["rabbitmq_instance"] =
@@ -104,6 +103,4 @@ class MagnumService < ServiceObject
   #   @logger.debug("Magnum apply_role_post_chef_call: entering #{all_nodes.inspect}")
   #   @logger.debug("Magnum apply_role_post_chef_call: leaving")
   # end
-
 end
-
