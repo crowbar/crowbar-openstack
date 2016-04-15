@@ -36,6 +36,9 @@
       "element_order": [
         [ "magnum-server" ]
       ],
+      "element_run_list_order": {
+          "magnum-server": 110
+      },
       "config": {
         "environment": "magnum-base-config",
         "mode": "full",
