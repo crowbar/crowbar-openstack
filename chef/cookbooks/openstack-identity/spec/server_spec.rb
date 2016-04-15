@@ -43,7 +43,7 @@ describe "openstack-identity::server" do
     end
 
     it "upgrades mysql python packages" do
-      expect(chef_run).to upgrade_package("python-mysqldb")
+      expect(chef_run).to upgrade_package("python-PyMySQL")
     end
 
     it "upgrades postgresql python packages if explicitly told" do

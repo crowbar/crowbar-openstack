@@ -205,7 +205,7 @@ when 'rhel'
   default['openstack']['db']['python_packages']['mysql'] = ['MySQL-python']
   default['openstack']['db']['python_packages']['db2'] = ['python-ibm-db', 'python-ibm-db-sa']
 when 'suse'
-  default['openstack']['db']['python_packages']['mysql'] = ['python-mysql']
+  default['openstack']['db']['python_packages']['mysql'] = ['python-PyMySQL']
 when 'debian'
   default['openstack']['db']['python_packages']['mysql'] = ['python-mysqldb']
 end

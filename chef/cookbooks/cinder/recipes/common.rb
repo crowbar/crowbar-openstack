@@ -20,7 +20,7 @@ if %w(rhel suse).include? node[:platform_family]
   package "openstack-cinder"
 else
   package "cinder-common"
-  package "python-mysqldb"
+  package "python-PyMySQL"
   package "python-cinder"
 end
 
