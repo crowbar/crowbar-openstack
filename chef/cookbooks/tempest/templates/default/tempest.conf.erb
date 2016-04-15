@@ -1,6 +1,7 @@
 [DEFAULT]
 
 <% img_id = `cat #{@machine_id_file}`.strip %>
+<% alt_img_id = `cat #{@alt_machine_id_file}`.strip %>
 
 #
 # From oslo.log
@@ -277,7 +278,7 @@ image_ref = <%= img_id %>
 # required option, but if only one image is available duplicate the
 # value of image_ref above (string value)
 #image_ref_alt = <None>
-image_ref_alt = <%= img_id %>
+image_ref_alt = <%= alt_img_id %>
 
 # Valid primary flavor to use in tests. (string value)
 #flavor_ref = 1
@@ -298,6 +299,7 @@ image_ssh_password = cubswin:)
 # User name used to authenticate to an instance using the alternate
 # image. (string value)
 #image_alt_ssh_user = root
+image_alt_ssh_user = cirros
 
 # Time in seconds between build status checks. (integer value)
 #build_interval = 1
@@ -821,7 +823,7 @@ flavor_regex = ^tempest-stuff$
 
 # List of user mapped to regex to matching image names. (string value)
 #ssh_user_regex = [["^.*[Cc]irros.*$", "cirros"]]
-ssh_user_regex = [["^.*[Cc]irros.*$", "root"]]
+ssh_user_regex = [["^.*[Cc]irros.*$", "cirros"]]
 
 
 [messaging]
@@ -1304,6 +1306,7 @@ events = true
 # resources to enable remote access (boolean value)
 # Deprecated group/name - [compute]/run_ssh
 #run_validation = false
+run_validation = true
 
 # Enable/disable security groups. (boolean value)
 #security_group = true
