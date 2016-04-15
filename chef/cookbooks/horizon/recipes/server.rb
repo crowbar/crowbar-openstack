@@ -79,6 +79,26 @@ unless manila_ui_pkgname.nil?
   end
 end
 
+# install horizon magnum plugin if needed
+case node[:platform_family]
+when "suse"
+  magnum_ui_pkgname = "openstack-horizon-plugin-magnum-ui"
+when "rhel"
+  magnum_ui_pkgname = "openstack-magnum-ui"
+else
+  magnum_ui_pkgname = nil
+end
+
+unless magnum_ui_pkgname.nil?
+  magnum_servers = search(:node, "roles:magnum-server") || []
+  unless magnum_servers.empty?
+    package magnum_ui_pkgname do
+      action :install
+      notifies :reload, resources(service: "apache2")
+    end
+  end
+end
+
 if node[:platform_family] == "suse"
   # Get rid of unwanted vhost config files:
   ["#{node[:apache][:dir]}/vhosts.d/default-redirect.conf",
