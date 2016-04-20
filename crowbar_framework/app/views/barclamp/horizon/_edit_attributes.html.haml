@@ -6,7 +6,6 @@
     = instance_field :database
     = instance_field :keystone
     = instance_field :nova
-
     = integer_field :session_timeout
 
     %fieldset
@@ -20,7 +19,11 @@
       %legend
         = t(".ssl_header")
 
-      = boolean_field %w(apache ssl), :collection => :ssl_protocols_for_horizon, "data-sslprefix" => "apache", "data-sslcert" => "", "data-sslkey" => ""
+      = boolean_field %w(apache ssl),
+        :collection => :ssl_protocols_for_horizon,
+        "data-sslprefix" => "apache",
+        "data-sslcert" => "",
+        "data-sslkey" => ""
 
       #apache_container
         = boolean_field %w(apache generate_certs)

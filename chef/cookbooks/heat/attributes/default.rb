@@ -1,4 +1,4 @@
-# Copyright 2013, SUSE Inc., Inc.
+# Copyright 2016, SUSE Inc., Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -78,10 +78,17 @@ default[:heat][:db][:database] = "heat"
 default[:heat][:db][:user] = "heat"
 default[:heat][:db][:password] = "" # Set by Recipe
 
+default[:heat][:ssl][:certfile] = "/etc/heat/ssl/certs/signing_cert.pem"
+default[:heat][:ssl][:keyfile] = "/etc/heat/ssl/private/signing_key.pem"
+default[:heat][:ssl][:generate_certs] = false
+default[:heat][:ssl][:insecure] = false
+default[:heat][:ssl][:cert_required] = false
+default[:heat][:ssl][:ca_certs] = "/etc/heat/ssl/certs/ca.pem"
+
 default[:heat][:service_user] = "heat"
 default[:heat][:service_password] = ""
 
-default[:heat][:api][:protocol] = "https"
+default[:heat][:api][:protocol] = "http"
 default[:heat][:api][:cfn_port] = 8000
 default[:heat][:api][:engine_port] = 8001
 default[:heat][:api][:cloud_watch_port] = 8003

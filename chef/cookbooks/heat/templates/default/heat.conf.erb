@@ -454,7 +454,7 @@ control_exchange=heat
 # Type of endpoint in Identity service catalog to use for communication with
 # the OpenStack service. (string value)
 #endpoint_type = publicURL
-endpoint_type=internalURL
+endpoint_type = internalURL
 
 # Optional CA cert file to use in SSL connections. (string value)
 #ca_file = <None>
@@ -944,10 +944,16 @@ bind_port=<%= @api_port %>
 # Location of the SSL certificate file to use for SSL mode. (string value)
 # Deprecated group/name - [DEFAULT]/cert_file
 #cert_file = <None>
+<% if node[:heat][:api][:protocol] == "https" %>
+cert_file = <%= @heat_ssl[:certfile] %>
+<% end %>
 
 # Location of the SSL key file to use for enabling SSL mode. (string value)
 # Deprecated group/name - [DEFAULT]/key_file
 #key_file = <None>
+<% if node[:heat][:api][:protocol] == "https" %>
+key_file = <%= @heat_ssl[:keyfile] %>
+<% end %>
 
 # Number of workers for Heat service. (integer value)
 # Deprecated group/name - [DEFAULT]/workers
@@ -992,10 +998,16 @@ bind_port=<%= @cfn_port %>
 # Location of the SSL certificate file to use for SSL mode. (string value)
 # Deprecated group/name - [DEFAULT]/cert_file
 #cert_file = <None>
+<% if node[:heat][:api][:protocol] == "https" %>
+cert_file = <%= @heat_ssl[:certfile] %>
+<% end %>
 
 # Location of the SSL key file to use for enabling SSL mode. (string value)
 # Deprecated group/name - [DEFAULT]/key_file
 #key_file = <None>
+<% if node[:heat][:api][:protocol] == "https" %>
+key_file = <%= @heat_ssl[:keyfile] %>
+<% end %>
 
 # Number of workers for Heat service. (integer value)
 # Deprecated group/name - [DEFAULT]/workers
@@ -1040,10 +1052,16 @@ bind_port=<%= @cloud_watch_port %>
 # Location of the SSL certificate file to use for SSL mode. (string value)
 # Deprecated group/name - [DEFAULT]/cert_file
 #cert_file = <None>
+<% if node[:heat][:api][:protocol] == "https" %>
+cert_file = <%= @heat_ssl[:certfile] %>
+<% end %>
 
 # Location of the SSL key file to use for enabling SSL mode. (string value)
 # Deprecated group/name - [DEFAULT]/key_file
 #key_file = <None>
+<% if node[:heat][:api][:protocol] == "https" %>
+key_file = <%= @heat_ssl[:keyfile] %>
+<% end %>
 
 # Number of workers for Heat service. (integer value)
 # Deprecated group/name - [DEFAULT]/workers
@@ -1579,9 +1597,18 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 
 # CA certificate file to use to verify connecting clients. (string value)
 #ca_file = <None>
+<% if node[:heat][:api][:protocol] == "https" && node[:heat][:ssl][:cert_required] %>
+ca_file = <%= @heat_ssl[:ca_certs] %>
+<% end %>
 
 # Certificate file to use when starting the server securely. (string value)
 #cert_file = <None>
+<% if node[:heat][:api][:protocol] == "https" %>
+cert_file = <%= @heat_ssl[:certfile] %>
+<% end %>
 
 # Private key file to use when starting the server securely. (string value)
 #key_file = <None>
+<% if node[:heat][:api][:protocol] == "https" %>
+key_file = <%= @heat_ssl[:keyfile] %>
+<% end %>

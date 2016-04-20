@@ -226,6 +226,14 @@ end
 nova = get_instance("roles:nova-controller")
 nova_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
 
+heats = search(:node, "roles:heat-server") || []
+if !heats.empty?
+  heat = heats[0]
+  heat_insecure = heat[:heat][:api][:protocol] == "https" && heat[:heat][:ssl][:insecure]
+else
+  heat_insecure = false
+end
+
 # We're going to use memcached as a cache backend for Django
 
 # make sure our memcache only listens on the admin IP address
@@ -296,7 +304,12 @@ template local_settings do
   variables(
     debug: node[:horizon][:debug],
     keystone_settings: keystone_settings,
-    insecure: keystone_settings["insecure"] || glance_insecure || cinder_insecure || neutron_insecure || nova_insecure,
+    insecure: keystone_settings["insecure"] \
+    || glance_insecure \
+    || cinder_insecure \
+    || neutron_insecure \
+    || nova_insecure \
+    || heat_insecure,
     db_settings: db_settings,
     enable_lb: neutron_use_lbaas,
     enable_vpn: neutron_use_vpnaas,
