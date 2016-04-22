@@ -1242,7 +1242,7 @@ disk_allocation_ratio = <%= node[:nova][:scheduler][:disk_allocation_ratio] %>
 # Config drive format. (string value)
 # Allowed values: iso9660, vfat
 #config_drive_format = iso9660
-<% if @force_config_drive %>
+<% if @force_config_drive and !@libvirt_type.eql?('zvm') %>
 # We need to set it to vfat then, see https://review.openstack.org/#/c/168646/
 config_drive_format = vfat
 <% end -%>
