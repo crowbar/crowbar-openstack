@@ -1,11 +1,10 @@
 [DEFAULT]
-
 #
 # From magnum
 #
 
 # Directory where the magnum python module is installed. (string value)
-#pybasedir = /home/mmohan/Project/OpenSource/magnum/magnum
+#pybasedir = /home/abuild/rpmbuild/BUILD/magnum-2.0.1.dev1/magnum
 
 # Directory where magnum binaries are installed. (string value)
 #bindir = $pybasedir/bin
@@ -35,7 +34,7 @@ state_path = /var/lib/magnum
 # hostname, FQDN, or IP address. However, the node name must be valid within an
 # AMQP key, and if using ZeroMQ, a valid hostname, FQDN, or IP address. (string
 # value)
-#host = f119.suse.de
+#host = cumulus2
 
 #
 # From oslo.log
@@ -44,7 +43,7 @@ state_path = /var/lib/magnum
 # If set to true, the logging level will be set to DEBUG instead of the default
 # INFO level. (boolean value)
 #debug = false
-debug = true
+debug=<%= node[:magnum][:debug] %>
 
 # If set to false, the logging level will be set to WARNING instead of the
 # default INFO level. (boolean value)
@@ -76,6 +75,7 @@ debug = true
 # is ignored if log_config_append is set. (string value)
 # Deprecated group/name - [DEFAULT]/logdir
 #log_dir = <None>
+log_dir=/var/log/magnum 
 
 # Uses logging handler designed to watch file system. When log file is moved or
 # removed this handler will open a new log file with specified path
@@ -88,6 +88,7 @@ debug = true
 # changed later to honor RFC5424. This option is ignored if log_config_append
 # is set. (boolean value)
 #use_syslog = false
+use_syslog=<%= node[:magnum][:use_syslog] ? "True" : "False" %>
 
 # Syslog facility to receive log lines. This option is ignored if
 # log_config_append is set. (string value)
@@ -96,6 +97,7 @@ debug = true
 # Log output to standard error. This option is ignored if log_config_append is
 # set. (boolean value)
 #use_stderr = true
+use_stderr = false
 
 # Format string to use for log messages with context. (string value)
 #logging_context_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user_identity)s] %(instance)s%(message)s
@@ -370,6 +372,8 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 
 
 [certificates]
+cert_manager_type = local
+storage_path = /var/lib/magnum/certificates/
 
 #
 # From magnum
@@ -466,7 +470,6 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 
 
 [database]
-
 #
 # From magnum
 #
@@ -652,72 +655,6 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 #api_version = 1
 
 
-[keystone_auth]
-
-#
-# From magnum
-#
-
-# Authentication type to load (unknown value)
-# Deprecated group/name - [DEFAULT]/auth_plugin
-#auth_type = <None>
-
-# Config Section from which to load plugin specific options (unknown value)
-#auth_section = <None>
-
-# Authentication URL (unknown value)
-#auth_url = <None>
-
-# Domain ID to scope to (unknown value)
-#domain_id = <None>
-
-# Domain name to scope to (unknown value)
-#domain_name = <None>
-
-# Project ID to scope to (unknown value)
-# Deprecated group/name - [DEFAULT]/tenant-id
-#project_id = <None>
-
-# Project name to scope to (unknown value)
-# Deprecated group/name - [DEFAULT]/tenant-name
-#project_name = <None>
-
-# Domain ID containing project (unknown value)
-#project_domain_id = <None>
-
-# Domain name containing project (unknown value)
-#project_domain_name = <None>
-
-# Trust ID (unknown value)
-#trust_id = <None>
-
-# Optional domain ID to use with v3 and v2 parameters. It will be used for both
-# the user and project domain in v3 and ignored in v2 authentication. (unknown
-# value)
-#default_domain_id = <None>
-
-# Optional domain name to use with v3 API and v2 parameters. It will be used
-# for both the user and project domain in v3 and ignored in v2 authentication.
-# (unknown value)
-#default_domain_name = <None>
-
-# User id (unknown value)
-#user_id = <None>
-
-# Username (unknown value)
-# Deprecated group/name - [DEFAULT]/user-name
-#username = <None>
-
-# User's domain id (unknown value)
-#user_domain_id = <None>
-
-# User's domain name (unknown value)
-#user_domain_name = <None>
-
-# User's password (unknown value)
-#password = <None>
-
-
 [keystone_authtoken]
 
 #
@@ -786,12 +723,12 @@ signing_dir = /var/cache/magnum/keystone-signing
 #revocation_cache_time = 10
 
 # (Optional) If defined, indicate whether token data should be authenticated or
-# authenticated and encrypted. If MAC, token data is authenticated (with HMAC)
-# in the cache. If ENCRYPT, token data is encrypted and authenticated in # cache. If the value is not one of these options or empty, auth_token will
-# cache. If the value is not one of these options or empty, auth_token will
-# raise an exception on initialization. (string value)
-# Allowed values: None, MAC, ENCRYPT
-#memcache_security_strategy = None
+# authenticated and encrypted. Acceptable values are MAC or ENCRYPT.  If MAC,
+# token data is authenticated (with HMAC) in the cache. If ENCRYPT, token data
+# is encrypted and authenticated in the cache. If the value is not one of these
+# options or empty, auth_token will raise an exception on initialization.
+# (string value)
+#memcache_security_strategy = <None>
 
 # (Optional, mandatory if memcache_security_strategy is defined) This string is
 # used for key derivation. (string value)
@@ -849,40 +786,32 @@ signing_dir = /var/cache/magnum/keystone-signing
 # performance. (list value)
 #hash_algorithms = md5
 
-# Authentication type to load (unknown value)
-# Deprecated group/name - [DEFAULT]/auth_plugin
-#auth_type = <None>
-
-# Config Section from which to load plugin specific options (unknown value)
-#auth_section = <None>
-
-# Prefix to prepend at the beginning of the path. Deprecated, use
-# identity_uri. (string value)
+# Prefix to prepend at the beginning of the path. Deprecated, use identity_uri.
+# (string value)
 #auth_admin_prefix =
 
-# Host providing the admin Identity API endpoint. Deprecated, use
-# identity_uri. (string value)
+# Host providing the admin Identity API endpoint. Deprecated, use identity_uri.
+# (string value)
 #auth_host = 127.0.0.1
 
-# Port of the admin Identity API endpoint. Deprecated, use
-# identity_uri. (integer value)
+# Port of the admin Identity API endpoint. Deprecated, use identity_uri.
+# (integer value)
 #auth_port = 35357
 
-# Protocol of the admin Identity API endpoint (http or https).
-# Deprecated, use identity_uri. (string value)
+# Protocol of the admin Identity API endpoint (http or https). Deprecated, use
+# identity_uri. (string value)
 #auth_protocol = https
 
-# Complete admin Identity API endpoint. This should specify the
-# unversioned root endpoint e.g. https://localhost:35357/ (string
-# value)
+# Complete admin Identity API endpoint. This should specify the unversioned
+# root endpoint e.g. https://localhost:35357/ (string value)
 #identity_uri = <None>
 identity_uri = <%= @keystone_settings['admin_auth_url'] %>
 
-# This option is deprecated and may be removed in a future release.
-# Single shared secret with the Keystone configuration used for
-# bootstrapping a Keystone installation, or otherwise bypassing the
-# normal authentication process. This option should not be used, use
-# `admin_user` and `admin_password` instead. (string value)
+# This option is deprecated and may be removed in a future release. Single
+# shared secret with the Keystone configuration used for bootstrapping a
+# Keystone installation, or otherwise bypassing the normal authentication
+# process. This option should not be used, use `admin_user` and
+# `admin_password` instead. (string value)
 #admin_token = <None>
 
 # Service username. (string value)
@@ -896,6 +825,13 @@ admin_password = <%= @keystone_settings['service_password'] %>
 # Service tenant name. (string value)
 #admin_tenant_name = admin
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+
+# Authentication type to load (unknown value)
+# Deprecated group/name - [DEFAULT]/auth_plugin
+#auth_type = <None>
+
+# Config Section from which to load plugin specific options (unknown value)
+#auth_section = <None>
 
 
 [magnum_client]
@@ -985,6 +921,7 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 
 
 [oslo_concurrency]
+lock_path = /var/run/magnum
 
 #
 # From oslo.concurrency
@@ -1000,7 +937,6 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 # a lock path must be set. (string value)
 # Deprecated group/name - [DEFAULT]/lock_path
 #lock_path = <None>
-lock_path = /var/run/magnum
 
 
 [oslo_messaging_amqp]
@@ -1339,6 +1275,7 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 
 
 [oslo_policy]
+policy_file = /etc/magnum/policy.json
 
 #
 # From oslo.policy
@@ -1369,16 +1306,16 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 
 # Id of the domain to create trustee for bays (string value)
 #trustee_domain_id = <None>
-trustee_domain_id = <%= @trustee["trustee_domain_id"] %>
+trustee_domain_id = <%= @trustee["domain_id"] %>
 
 # Id of the admin with roles sufficient to manage users in the trustee_domain
 # (string value)
 #trustee_domain_admin_id = <None>
-trustee_domain_admin_id = <%= @trustee["trustee_domain_admin_id"] %>
+trustee_domain_admin_id = <%= @trustee["domain_admin_id"] %>
 
 # Password of trustee_domain_admin (string value)
 #trustee_domain_admin_password = <None>
-trustee_domain_admin_password = "password"
+trustee_domain_admin_password = <%= @trustee["domain_admin_password"] %>
 
 # The roles which are delegated to the trustee by the trustor (list value)
 #roles =

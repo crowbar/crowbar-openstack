@@ -70,7 +70,7 @@ keystone_register "register magnum service" do
   port keystone_settings["admin_port"]
   token keystone_settings["admin_token"]
   service_name "magnum"
-  service_type "containers"
+  service_type "container"
   service_description "Openstack Magnum - Containers as a Service"
   action :add_service
 end

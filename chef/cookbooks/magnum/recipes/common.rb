@@ -23,16 +23,7 @@ include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 # get Database data
-db_password = ""
-if node.roles.include? "magnum-server"
-  db_password = node[:magnum][:db][:password]
-else
-  # pickup password to database from magnum-server node
-  node_servers = search(:node, "roles:magnum-server") || []
-  if !node_servers.empty?
-    db_password = node_servers[0][:magnum][:db][:password]
-  end
-end
+db_password = node[:magnum][:db][:password]
 sql_connection = "#{db_settings[:url_scheme]}://#{node[:magnum][:db][:user]}:"\
                  "#{db_password}@#{db_settings[:address]}/"\
                  "#{node[:magnum][:db][:database]}"
@@ -40,7 +31,6 @@ sql_connection = "#{db_settings[:url_scheme]}://#{node[:magnum][:db][:user]}:"\
 # address/port binding
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
   node, "admin").address
-node.set[:magnum][:my_ip] = my_ipaddress
 node.set[:magnum][:api][:bind_host] = my_ipaddress
 
 # TODO : Handle HA condition

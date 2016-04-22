@@ -21,10 +21,15 @@ class MagnumService < ServiceObject
     @bc_name = "magnum"
     @logger = thelogger
   end
-  
+
+  # Turn off multi proposal support till it really works and people ask for it
+  def self.allow_multiple_proposals?
+    false
+  end
+
   def proposal_dependencies(role)
     answer = []
-    deps = ["database", "rabbitmq", "keystone", "nova", "glance", "neutron"]
+    deps = ["database", "rabbitmq", "keystone", "nova", "glance", "neutron", "heat"]
     deps.each do |dep|
       answer << {
         "barclamp" => dep,
@@ -33,7 +38,7 @@ class MagnumService < ServiceObject
     end
     answer
   end
-  
+
   class << self
     def role_constraints
       {
@@ -50,7 +55,7 @@ class MagnumService < ServiceObject
       }
     end
   end
-  
+
   def create_proposal
     @logger.debug("Magnum create_proposal: entering")
     base = super
@@ -58,11 +63,11 @@ class MagnumService < ServiceObject
     nodes = NodeObject.all
     controllers = select_nodes_for_role(
       nodes, "magnum-server", "controller") || []
-    
+
     base["deployment"][@bc_name]["elements"] = {
-      "magnum-server" => controllers.empty? ? [] : [controllers.first.name],
+      "magnum-server" => controllers.empty? ? [] : [controllers.first.name]
     }
-   
+ 
     base["attributes"][@bc_name]["database_instance"] =
       find_dep_proposal("database")
     base["attributes"][@bc_name]["rabbitmq_instance"] =
@@ -75,9 +80,12 @@ class MagnumService < ServiceObject
       find_dep_proposal("glance")
     base["attributes"][@bc_name]["neutron_instance"] =
       find_dep_proposal("neutron")
+    base["attributes"][@bc_name]["heat_instance"] =
+      find_dep_proposal("heat")
 
     base["attributes"][@bc_name]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
+    base["attributes"][@bc_name][:trustee][:domain_admin_password] = random_password
 
     @logger.debug("Magnum create_proposal: exiting")
     base
@@ -94,13 +102,5 @@ class MagnumService < ServiceObject
     return if all_nodes.empty?
 
     @logger.debug("Magnum apply_role_pre_chef_call: leaving")
-    node.save
   end
-
-  # Similar to above - delete or uncomment for actions to be run after
-  # chef-client runs.
-  # def apply_role_post_chef_call(old_role, role, all_nodes)
-  #   @logger.debug("Magnum apply_role_post_chef_call: entering #{all_nodes.inspect}")
-  #   @logger.debug("Magnum apply_role_post_chef_call: leaving")
-  # end
 end
