@@ -91,6 +91,8 @@
                 "zvm_scsi_pool": { "type": "str", "required": true },
                 "zvm_user_profile": { "type": "str", "required": true },
                 "zvm_xcat_master": { "type": "str", "required": true },
+                "zvm_image_default_password": { "type": "str", "required": true },
+                "zvm_config_drive_inject_password": { "type": "bool", "required": true },
                 "zvm_xcat_ssh_key": { "type": "str", "required": true }
               }
             },

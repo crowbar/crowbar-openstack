@@ -1584,6 +1584,7 @@ control_exchange = nova
 
 # Sets the admin password in the config drive (boolean value)
 #zvm_config_drive_inject_password = false
+<%= "zvm_config_drive_inject_password=#{node[:nova][:zvm][:zvm_config_drive_inject_password]}" if @libvirt_type.eql?('zvm') %>
 
 # Force can be: (ARCHITECTURE) attempt relocation even though hardware
 # architecture facilities or CP features are not available on destination
@@ -1642,6 +1643,7 @@ control_exchange = nova
 
 # Default os root password for a new created vm (string value)
 #zvm_image_default_password = rootpass
+<%= "zvm_image_default_password = #{node[:nova][:zvm][:zvm_image_default_password]}" if @libvirt_type.eql?('zvm') %>
 
 # The period(days) to clean up an image that not be used for deploy in one xCAT
 # MN within the defined time (integer value)
