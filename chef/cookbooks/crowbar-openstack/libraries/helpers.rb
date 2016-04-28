@@ -14,12 +14,12 @@
 # limitations under the License.
 #
 
-# Helpers wrapping CrowbarOpenStackHelper, provided for convenience for direct
-# calls from recipes.
-# We prefix the method names with "fetch_" because the return value should
-# still be put in a local variable (to avoid spamming the logs).
 class Chef
   class Recipe
+    # Helpers wrapping CrowbarOpenStackHelper, provided for convenience for
+    # direct calls from recipes.
+    # We prefix the method names with "fetch_" because the return value should
+    # still be put in a local variable (to avoid spamming the logs).
     def fetch_database_settings(barclamp=@cookbook_name)
       CrowbarOpenStackHelper.database_settings(node, barclamp)
     end

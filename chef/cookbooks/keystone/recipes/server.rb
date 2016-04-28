@@ -408,65 +408,15 @@ crowbar_pacemaker_sync_mark "create-keystone_pki"
 if node[:keystone][:api][:protocol] == "https"
   if node[:keystone][:ssl][:generate_certs]
     package "openssl"
-    ruby_block "generate_certs for keystone" do
-      block do
-        unless ::File.exist?(node[:keystone][:ssl][:certfile]) && ::File.exist?(node[:keystone][:ssl][:keyfile])
-          require "fileutils"
-
-          Chef::Log.info("Generating SSL certificate for keystone...")
-
-          [:certfile, :keyfile].each do |k|
-            dir = File.dirname(node[:keystone][:ssl][k])
-            FileUtils.mkdir_p(dir) unless File.exist?(dir)
-          end
-
-          # Generate private key
-          `openssl genrsa -out #{node[:keystone][:ssl][:keyfile]} 4096`
-          if $?.exitstatus != 0
-            message = "SSL private key generation failed"
-            Chef::Log.fatal(message)
-            raise message
-          end
-          FileUtils.chown "root", node[:keystone][:group], node[:keystone][:ssl][:keyfile]
-          FileUtils.chmod 0640, node[:keystone][:ssl][:keyfile]
-
-          # Generate certificate signing requests (CSR)
-          conf_dir = File.dirname node[:keystone][:ssl][:certfile]
-          ssl_csr_file = "#{conf_dir}/signing_key.csr"
-          ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{node[:fqdn]}\""
-          `openssl req -new -key #{node[:keystone][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject}`
-          if $?.exitstatus != 0
-            message = "SSL certificate signed requests generation failed"
-            Chef::Log.fatal(message)
-            raise message
-          end
-
-          # Generate self-signed certificate with above CSR
-          `openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{node[:keystone][:ssl][:keyfile]} -out #{node[:keystone][:ssl][:certfile]}`
-          if $?.exitstatus != 0
-            message = "SSL self-signed certificate generation failed"
-            Chef::Log.fatal(message)
-            raise message
-          end
-
-          File.delete ssl_csr_file  # Nobody should even try to use this
-        end # unless files exist
-      end # block
-    end # ruby_block
-  else # if generate_certs
-    unless ::File.size? node[:keystone][:ssl][:certfile]
-      message = "Certificate \"#{node[:keystone][:ssl][:certfile]}\" is not present or empty."
-      Chef::Log.fatal(message)
-      raise message
-    end
-    # we do not check for existence of keyfile, as the private key is allowed
-    # to be in the certfile
-  end # if generate_certs
-
-  if node[:keystone][:ssl][:cert_required] && !::File.size?(node[:keystone][:ssl][:ca_certs])
-    message = "Certificate CA \"#{node[:keystone][:ssl][:ca_certs]}\" is not present or empty."
-    Chef::Log.fatal(message)
-    raise message
+  end
+  ssl_setup "setting up ssl for keystone" do
+    generate_certs node[:keystone][:ssl][:generate_certs]
+    certfile node[:keystone][:ssl][:certfile]
+    keyfile node[:keystone][:ssl][:keyfile]
+    group node[:keystone][:group]
+    fqdn node[:fqdn]
+    cert_required node[:keystone][:ssl][:cert_required]
+    ca_certs node[:keystone][:ssl][:ca_certs]
   end
 end
 

@@ -33,65 +33,15 @@ include_recipe "neutron::database"
 if node[:neutron][:api][:protocol] == "https"
   if node[:neutron][:ssl][:generate_certs]
     package "openssl"
-    ruby_block "generate_certs for neutron" do
-      block do
-        unless ::File.exist?(node[:neutron][:ssl][:certfile]) && ::File.exist?(node[:neutron][:ssl][:keyfile])
-          require "fileutils"
-
-          Chef::Log.info("Generating SSL certificate for neutron...")
-
-          [:certfile, :keyfile].each do |k|
-            dir = File.dirname(node[:neutron][:ssl][k])
-            FileUtils.mkdir_p(dir) unless File.exist?(dir)
-          end
-
-          # Generate private key
-          `openssl genrsa -out #{node[:neutron][:ssl][:keyfile]} 4096`
-          if $?.exitstatus != 0
-            message = "SSL private key generation failed"
-            Chef::Log.fatal(message)
-            raise message
-          end
-          FileUtils.chown "root", node[:neutron][:group], node[:neutron][:ssl][:keyfile]
-          FileUtils.chmod 0640, node[:neutron][:ssl][:keyfile]
-
-          # Generate certificate signing requests (CSR)
-          conf_dir = File.dirname node[:neutron][:ssl][:certfile]
-          ssl_csr_file = "#{conf_dir}/signing_key.csr"
-          ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{node[:fqdn]}\""
-          `openssl req -new -key #{node[:neutron][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject}`
-          if $?.exitstatus != 0
-            message = "SSL certificate signed requests generation failed"
-            Chef::Log.fatal(message)
-            raise message
-          end
-
-          # Generate self-signed certificate with above CSR
-          `openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{node[:neutron][:ssl][:keyfile]} -out #{node[:neutron][:ssl][:certfile]}`
-          if $?.exitstatus != 0
-            message = "SSL self-signed certificate generation failed"
-            Chef::Log.fatal(message)
-            raise message
-          end
-
-          File.delete ssl_csr_file  # Nobody should even try to use this
-        end # unless files exist
-      end # block
-    end # ruby_block
-  else # if generate_certs
-    unless ::File.size? node[:neutron][:ssl][:certfile]
-      message = "Certificate \"#{node[:neutron][:ssl][:certfile]}\" is not present or empty."
-      Chef::Log.fatal(message)
-      raise message
-    end
-    # we do not check for existence of keyfile, as the private key is allowed
-    # to be in the certfile
-  end # if generate_certs
-
-  if node[:neutron][:ssl][:cert_required] && !::File.size?(node[:neutron][:ssl][:ca_certs])
-    message = "Certificate CA \"#{node[:neutron][:ssl][:ca_certs]}\" is not present or empty."
-    Chef::Log.fatal(message)
-    raise message
+  end
+  ssl_setup "setting up ssl for neutron" do
+    generate_certs node[:neutron][:ssl][:generate_certs]
+    certfile node[:neutron][:ssl][:certfile]
+    keyfile node[:neutron][:ssl][:keyfile]
+    group node[:neutron][:group]
+    fqdn node[:fqdn]
+    cert_required node[:neutron][:ssl][:cert_required]
+    ca_certs node[:neutron][:ssl][:ca_certs]
   end
 end
 
