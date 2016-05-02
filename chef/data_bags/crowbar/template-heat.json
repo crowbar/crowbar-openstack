@@ -27,6 +27,14 @@
         "password": "",
         "user": "heat",
         "database": "heat"
+      },
+      "ssl": {
+        "certfile": "/etc/heat/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/heat/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
+        "cert_required": false,
+        "ca_certs": "/etc/heat/ssl/certs/ca.pem"
       }
     }
   },
@@ -34,7 +42,7 @@
     "heat": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "heat-server": [ "readying", "ready", "applying" ]
       },
