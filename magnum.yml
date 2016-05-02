@@ -21,11 +21,15 @@ barclamp:
   version: 0
   user_managed: true
   requires:
+    - '@crowbar'
+    - 'pacemaker'
+    - 'database'
+    - 'rabbitmq'
     - 'keystone'
+    - 'glance'
+    - 'nova'
     - 'heat'
     - 'neutron'
-    - 'nova'
-    - 'rabbitmq'
   member:
     - 'openstack'
 

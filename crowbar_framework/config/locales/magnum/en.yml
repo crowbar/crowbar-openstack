@@ -18,3 +18,16 @@ en:
   barclamp:
     magnum:
       edit_attributes:
+        logging_header: 'Logging'
+        verbose: 'Verbose'
+        debug: 'Debug'
+        rabbitmq_instance: 'RabbitMQ'
+        keystone_instance: 'Keystone Instance'
+        cinder_instance: 'Cinder Instance'
+        nova_instance: 'Nova Instance'
+        heat_instance: 'Heat Instance'
+        trustee_header: 'Trustee Domain'
+        trustee:
+          domain_name: 'Domain Name'
+          
+

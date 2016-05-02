@@ -18,7 +18,7 @@ default[:magnum][:debug] = false
 override[:magnum][:user] = "magnum"
 override[:magnum][:group] = "magnum"
 
-default[:magnum][:max_header_line] = 16384
+default[:magnum][:max_header_line] = 16_384
 
 default[:magnum][:api][:protocol] = "http"
 

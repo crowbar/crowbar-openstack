@@ -24,6 +24,16 @@ trustee_domain_admin = node["magnum"]["trustee"]["domain_admin_name"]
 trustee_domain_admin_password = node["magnum"]["trustee"]["domain_admin_password"]
 
 insecure = keystone_settings["insecure"] ? "--insecure" : ""
+auth_url = "#{keystone_settings["protocol"]}://"\
+           "#{keystone_settings["internal_url_host"]}:"\
+           "#{keystone_settings["service_port"]}/v3"
+
+domain_env = { "OS_USERNAME"             => keystone_settings["admin_user"],
+               "OS_PASSWORD"             => keystone_settings["admin_password"],
+               "OS_TENANT_NAME"          => keystone_settings["admin_tenant"],
+               "OS_AUTH_URL"             => auth_url,
+               "OS_REGION_NAME"          => keystone_settings["endpoint_region"],
+               "OS_IDENTITY_API_VERSION" => "3" }
 
 bash "register magnum domain" do
   user "root"
@@ -54,14 +64,7 @@ bash "register magnum domain" do
         --user $TRUSTEE_DOMAIN_ADMIN_ID \
         --domain $TRUSTEE_DOMAIN_ID admin)
   EOF
-  environment({
-    "OS_USERNAME" => keystone_settings["admin_user"],
-    "OS_PASSWORD" => keystone_settings["admin_password"],
-    "OS_TENANT_NAME" => keystone_settings["admin_tenant"],
-    "OS_AUTH_URL" => "#{keystone_settings["protocol"]}://#{keystone_settings["internal_url_host"]}:#{keystone_settings["service_port"]}/v3",
-    "OS_REGION_NAME" => keystone_settings["endpoint_region"],
-    "OS_IDENTITY_API_VERSION" => "3"
-  })
+  environment domain_env
 end
 
 ruby_block "Update node parameters" do
