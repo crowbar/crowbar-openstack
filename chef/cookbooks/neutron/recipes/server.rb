@@ -216,6 +216,19 @@ if node[:neutron][:use_lbaas]
   end
 end
 
+if node[:neutron][:use_vpnaas]
+  template "/etc/neutron/neutron_vpnaas.conf" do
+    source "neutron_vpnaas.conf.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    variables(
+      service_provider:
+        "VPN:openswan:neutron_vpnaas.services.vpn.service_drivers.ipsec.IPsecVPNDriver:default"
+    )
+  end
+end
+
 ha_enabled = node[:neutron][:ha][:server][:enabled]
 
 crowbar_pacemaker_sync_mark "wait-neutron_db_sync"
@@ -299,6 +312,27 @@ if node[:neutron][:use_lbaas]
     end
     action :nothing
     subscribes :create, "execute[neutron-db-manage migrate lbaas]", :immediately
+  end
+end
+
+if node[:neutron][:use_vpnaas]
+  # See comments for "neutron-db-manage migrate" above
+  execute "neutron-db-manage migrate vpnaas" do
+    user node[:neutron][:user]
+    group node[:neutron][:group]
+    command "neutron-db-manage --service vpnaas upgrade head"
+    only_if { !node[:neutron][:db_synced_vpnaas] &&
+              (!ha_enabled ||
+               CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+  end
+
+  ruby_block "mark node for neutron db_sync vpnaas" do
+    block do
+      node.set[:neutron][:db_synced_vpnaas] = true
+      node.save
+    end
+    action :nothing
+    subscribes :create, "execute[neutron-db-manage migrate vpnaas]", :immediately
   end
 end
 

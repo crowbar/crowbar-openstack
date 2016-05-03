@@ -110,6 +110,9 @@ service_plugins = "#{service_plugins}, neutron_fwaas.services.firewall.fwaas_plu
 if neutron[:neutron][:use_lbaas] then
   service_plugins = "#{service_plugins}, neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPlugin"
 end
+if node[:neutron][:use_vpnaas] then
+  service_plugins = "#{service_plugins}, neutron_vpnaas.services.vpn.plugin.VPNDriverPlugin"
+end
 
 network_nodes_count = neutron[:neutron][:elements]["neutron-network"].count
 if neutron[:neutron][:elements_expanded]
