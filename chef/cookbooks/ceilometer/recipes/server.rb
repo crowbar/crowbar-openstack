@@ -110,8 +110,14 @@ when "suse"
   package "openstack-ceilometer-collector"
   package "openstack-ceilometer-agent-notification"
   package "openstack-ceilometer-api"
-  package "openstack-ceilometer-alarm-evaluator"
-  package "openstack-ceilometer-alarm-notifier"
+# TODO: move package lists into the attributes
+  package "openstack-aodh"
+  package "openstack-aodh-api"
+  package "openstack-aodh-evaluator"
+  package "openstack-aodh-expirer"
+  package "openstack-aodh-listener"
+  package "openstack-aodh-notifier"
+  package "python-aodhclient"
 when "rhel"
   package "openstack-ceilometer-common"
   package "openstack-ceilometer-collector"
@@ -130,6 +136,7 @@ else
 end
 
 include_recipe "#{@cookbook_name}::common"
+include_recipe "#{@cookbook_name}::aodh"
 
 directory "/var/cache/ceilometer" do
   owner node[:ceilometer][:user]
@@ -145,6 +152,7 @@ my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:
 
 crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync"
 
+# FIXME: is it needed? should be done by package post script (for suse at least)
 execute "ceilometer-dbsync" do
   command "ceilometer-dbsync"
   action :run
@@ -197,23 +205,6 @@ service "ceilometer-api" do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
-service "ceilometer-alarm-evaluator" do
-  service_name node["ceilometer"]["alarm_evaluator"]["service_name"]
-  supports status: true, restart: true, start: true, stop: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
-  subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-end
-
-service "ceilometer-alarm-notifier" do
-  service_name node["ceilometer"]["alarm_notifier"]["service_name"]
-  supports status: true, restart: true, start: true, stop: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
-  subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-end
 
 if ha_enabled
   log "HA support for ceilometer is enabled"

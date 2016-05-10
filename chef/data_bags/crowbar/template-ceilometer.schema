@@ -50,7 +50,32 @@
                 "metering_time_to_live": { "type": "int", "required": true },
                 "event_time_to_live": { "type": "int", "required": true }
               }
-	    }
+	    },
+            "aodh": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "service_user": { "type": "str", "required": true },
+                "service_password": { "type": "str", "required": true },
+                "api": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "protocol": { "type": "str", "required": true },
+                    "port": { "type": "int", "required": true }
+                  }
+                },
+                "db": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "password": { "type": "str", "required": true },
+                    "user": { "type": "str", "required": true },
+                    "database": { "type": "str", "required": true }
+                  }
+                }
+              }
+            }
           }
         }
       }

@@ -116,6 +116,8 @@ class CeilometerService < PacemakerServiceObject
     } unless agent_nodes.nil? or server_nodes.nil?
 
     base["attributes"]["ceilometer"]["service_password"] = random_password
+    base["attributes"]["ceilometer"]["aodh"]["service_password"] = random_password
+    base["attributes"]["ceilometer"]["aodh"][:db]["password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name][:metering_secret] = random_password
 
