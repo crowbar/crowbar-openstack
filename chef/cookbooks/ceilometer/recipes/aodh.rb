@@ -179,3 +179,10 @@ service "aodh-listener" do
   subscribes :restart, resources("template[/etc/aodh/aodh.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
+
+if ha_enabled
+  log "HA support for aodh is enabled"
+  include_recipe "ceilometer::aodh_ha"
+else
+  log "HA support for aodh is disabled"
+end

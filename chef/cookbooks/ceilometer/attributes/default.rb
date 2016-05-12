@@ -106,11 +106,14 @@ default[:ceilometer][:ha][:collector][:op][:monitor][:interval] = "10s"
 default[:ceilometer][:ha][:agent_notification][:agent] = "lsb:#{agent_notification_service_name}"
 default[:ceilometer][:ha][:agent_notification][:op][:monitor][:interval] = "10s"
 
-# FIXME: aodh here!
-# default["ceilometer"]["ha"]["alarm_evaluator"]["agent"] = "lsb:#{alarm_evaluator_service_name}"
-# default["ceilometer"]["ha"]["alarm_evaluator"]["op"]["monitor"]["interval"] = "10s"
-# default["ceilometer"]["ha"]["alarm_notifier"]["agent"] = "lsb:#{alarm_notifier_service_name}"
-# default["ceilometer"]["ha"]["alarm_notifier"]["op"]["monitor"]["interval"] = "10s"
+default[:ceilometer][:aodh][:ha][:api][:agent] = "lsb:#{aodh_api_service_name}"
+default[:ceilometer][:aodh][:ha][:api][:op][:monitor][:interval] = "10s"
+default[:ceilometer][:aodh][:ha][:evaluator][:agent] = "lsb:#{aodh_evaluator_service_name}"
+default[:ceilometer][:aodh][:ha][:evaluator][:op][:monitor][:interval] = "10s"
+default[:ceilometer][:aodh][:ha][:notifier][:agent] = "lsb:#{aodh_notifier_service_name}"
+default[:ceilometer][:aodh][:ha][:notifier][:op][:monitor][:interval] = "10s"
+default[:ceilometer][:aodh][:ha][:listener][:agent] = "lsb:#{aodh_listener_service_name}"
+default[:ceilometer][:aodh][:ha][:listener][:op][:monitor][:interval] = "10s"
 
 default[:ceilometer][:ha][:polling][:enabled] = false
 default[:ceilometer][:ha][:polling][:agent] = "lsb:#{polling_service_name}"
