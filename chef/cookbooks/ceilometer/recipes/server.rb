@@ -130,6 +130,7 @@ else
 end
 
 include_recipe "#{@cookbook_name}::common"
+include_recipe "aodh::aodh"
 
 directory "/var/cache/ceilometer" do
   owner node[:ceilometer][:user]
