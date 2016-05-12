@@ -20,24 +20,52 @@ polling_service_name = "ceilometer-polling"
 api_service_name = "ceilometer-api"
 collector_service_name = "ceilometer-collector"
 agent_notification_service_name = "ceilometer-agent-notification"
-alarm_evaluator_service_name = "ceilometer-alarm-evaluator"
-alarm_notifier_service_name = "ceilometer-alarm-notifier"
+
+aodh_api_service_name = "aodh-api"
+aodh_evaluator_service_name = "aodh-evaluator"
+aodh_notifier_service_name = "aodh-notifier"
+aodh_listener_service_name = "aodh-listener"
 
 if %w(rhel suse).include?(node[:platform_family])
   polling_service_name = "openstack-ceilometer-polling"
   api_service_name = "openstack-ceilometer-api"
   collector_service_name = "openstack-ceilometer-collector"
   agent_notification_service_name = "openstack-ceilometer-agent-notification"
-  alarm_evaluator_service_name = "openstack-ceilometer-alarm-evaluator"
-  alarm_notifier_service_name = "openstack-ceilometer-alarm-notifier"
+  aodh_api_service_name = "openstack-aodh-api"
+  aodh_evaluator_service_name = "openstack-aodh-evaluator"
+  aodh_notifier_service_name = "openstack-aodh-notifier"
+  aodh_listener_service_name = "openstack-aodh-listener"
 end
 
 default[:ceilometer][:api][:service_name] = api_service_name
 default[:ceilometer][:collector][:service_name] = collector_service_name
 default[:ceilometer][:agent_notification][:service_name] = agent_notification_service_name
 default[:ceilometer][:polling][:service_name] = polling_service_name
-default["ceilometer"]["alarm_evaluator"]["service_name"] = alarm_evaluator_service_name
-default["ceilometer"]["alarm_notifier"]["service_name"] = alarm_notifier_service_name
+
+default[:ceilometer][:aodh][:api][:service_name] = aodh_api_service_name
+default[:ceilometer][:aodh][:evaluator][:service_name] = aodh_evaluator_service_name
+default[:ceilometer][:aodh][:notifier][:service_name]  = aodh_notifier_service_name
+default[:ceilometer][:aodh][:listener][:service_name]  = aodh_listener_service_name
+# FIXME: expirer not mentioned in install guides... ?
+# default[:ceilometer][:aodh][:expirer][:service_name]  = aodh_expirer_service_name
+
+default[:ceilometer][:aodh][:user] = "aodh"
+default[:ceilometer][:aodh][:group] = "aodh"
+
+default[:ceilometer][:aodh][:service_user] = "aodh"
+default[:ceilometer][:aodh][:service_password] = ""
+
+default[:ceilometer][:aodh][:api][:protocol] = "http"
+default[:ceilometer][:aodh][:api][:host] = "0.0.0.0"
+default[:ceilometer][:aodh][:api][:port] = 8042
+
+# Ports to bind to when haproxy is used for the real ports
+default[:ceilometer][:aodh][:ha][:ports][:api] = 5562
+# FIXME: could we use 5562?
+
+default[:ceilometer][:aodh][:db][:database] = "aodh"
+default[:ceilometer][:aodh][:db][:user] = "aodh"
+default[:ceilometer][:aodh][:db][:password] = ""
 
 default[:ceilometer][:debug] = false
 default[:ceilometer][:verbose] = false
@@ -78,10 +106,14 @@ default[:ceilometer][:ha][:collector][:op][:monitor][:interval] = "10s"
 default[:ceilometer][:ha][:agent_notification][:agent] = "lsb:#{agent_notification_service_name}"
 default[:ceilometer][:ha][:agent_notification][:op][:monitor][:interval] = "10s"
 
-default["ceilometer"]["ha"]["alarm_evaluator"]["agent"] = "lsb:#{alarm_evaluator_service_name}"
-default["ceilometer"]["ha"]["alarm_evaluator"]["op"]["monitor"]["interval"] = "10s"
-default["ceilometer"]["ha"]["alarm_notifier"]["agent"] = "lsb:#{alarm_notifier_service_name}"
-default["ceilometer"]["ha"]["alarm_notifier"]["op"]["monitor"]["interval"] = "10s"
+default[:ceilometer][:aodh][:ha][:api][:agent] = "lsb:#{aodh_api_service_name}"
+default[:ceilometer][:aodh][:ha][:api][:op][:monitor][:interval] = "10s"
+default[:ceilometer][:aodh][:ha][:evaluator][:agent] = "lsb:#{aodh_evaluator_service_name}"
+default[:ceilometer][:aodh][:ha][:evaluator][:op][:monitor][:interval] = "10s"
+default[:ceilometer][:aodh][:ha][:notifier][:agent] = "lsb:#{aodh_notifier_service_name}"
+default[:ceilometer][:aodh][:ha][:notifier][:op][:monitor][:interval] = "10s"
+default[:ceilometer][:aodh][:ha][:listener][:agent] = "lsb:#{aodh_listener_service_name}"
+default[:ceilometer][:aodh][:ha][:listener][:op][:monitor][:interval] = "10s"
 
 default[:ceilometer][:ha][:polling][:enabled] = false
 default[:ceilometer][:ha][:polling][:agent] = "lsb:#{polling_service_name}"

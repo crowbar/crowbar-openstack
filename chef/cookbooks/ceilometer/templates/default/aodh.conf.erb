@@ -1,125 +1,80 @@
 [DEFAULT]
 
+auth_strategy = keystone
+
 #
-# From ceilometer
+# From aodh
 #
 
-# To reduce polling agent load, samples are sent to the notification
-# agent in a batch. To gain higher throughput at the cost of load set
-# this to False. (boolean value)
-#batch_polled_samples = true
+# Record alarm change events. (boolean value)
+# Deprecated group/name - [alarm]/record_history
+#record_history = true
 
-# To reduce large requests at same time to Nova or other components
-# from different compute agents, shuffle start time of polling task.
+# TTL of event alarm caches, in seconds. Set to 0 to disable caching.
 # (integer value)
-#shuffle_time_before_polling_task = 0
-shuffle_time_before_polling_task = 15
+#event_alarm_cache_ttl = 60
 
-# Configuration file for WSGI definition of API. (string value)
-#api_paste_config = api_paste.ini
+# URL to Gnocchi. (string value)
+# Deprecated group/name - [alarm]/gnocchi_url
+#gnocchi_url = http://localhost:8041
 
-# Polling namespace(s) to be used while resource polling (unknown
-# type)
-#polling_namespaces = ['compute', 'central']
+# The topic that aodh uses for event alarm evaluation. (string value)
+#event_alarm_topic = alarm.all
 
-# List of pollsters (or wildcard templates) to be used while polling
-# (unknown type)
-#pollster_list = []
+# SSL Client certificate for REST notifier. (string value)
+# Deprecated group/name - [alarm]/rest_notifier_certificate_file
+#rest_notifier_certificate_file =
 
-# Exchange name for Nova notifications. (string value)
-#nova_control_exchange = nova
+# SSL Client private key for REST notifier. (string value)
+# Deprecated group/name - [alarm]/rest_notifier_certificate_key
+#rest_notifier_certificate_key =
 
-# List of metadata prefixes reserved for metering use. (list value)
-#reserved_metadata_namespace = metering.
+# Whether to verify the SSL Server certificate when calling alarm
+# action. (boolean value)
+# Deprecated group/name - [alarm]/rest_notifier_ssl_verify
+#rest_notifier_ssl_verify = true
 
-# Limit on length of reserved metadata values. (integer value)
-#reserved_metadata_length = 256
-
-# List of metadata keys reserved for metering use. And these keys are
-# additional to the ones included in the namespace. (list value)
-#reserved_metadata_keys =
-
-# Inspector to use for inspecting the hypervisor layer. Known
-# inspectors are libvirt, hyperv, vmware, xenapi and powervm. (string
-# value)
-#hypervisor_inspector = libvirt
-hypervisor_inspector = <%= @hypervisor_inspector %>
-
-# Libvirt domain type. (string value)
-# Allowed values: kvm, lxc, qemu, uml, xen
-#libvirt_type = kvm
-libvirt_type = <%= @libvirt_type %>
-
-# Override the default libvirt URI (which is dependent on
-# libvirt_type). (string value)
-#libvirt_uri =
-
-# Dispatcher to process data. (multi valued)
-# Deprecated group/name - [collector]/dispatcher
-#dispatcher = database
-
-# Number of items to request in each paginated Glance API request
-# (parameter used by glancecelient). If this is less than or equal to
-# 0, page size is not specified (default value in glanceclient is
-# used). (integer value)
-#glance_page_size = 0
-
-# Exchange name for Ironic notifications. (string value)
-#ironic_exchange = ironic
-
-# Exchanges name to listen for notifications. (multi valued)
-#http_control_exchanges = nova
-#http_control_exchanges = glance
-#http_control_exchanges = neutron
-#http_control_exchanges = cinder
-
-# Exchange name for Neutron notifications. (string value)
-# Deprecated group/name - [DEFAULT]/quantum_control_exchange
-#neutron_control_exchange = neutron
-
-# Allow novaclient's debug log output. (boolean value)
-#nova_http_log_debug = false
-nova_http_log_debug = <%= @debug ? "true" : "false" %>
-
-# Swift reseller prefix. Must be on par with reseller_prefix in proxy-
-# server.conf. (string value)
-#reseller_prefix = AUTH_
-
-# Configuration file for pipeline definition. (string value)
-#pipeline_cfg_file = pipeline.yaml
-
-# Configuration file for event pipeline definition. (string value)
-#event_pipeline_cfg_file = event_pipeline.yaml
-
-# Refresh Pipeline configuration on-the-fly. (boolean value)
-#refresh_pipeline_cfg = false
-
-# Refresh Event Pipeline configuration on-the-fly. (boolean value)
-#refresh_event_pipeline_cfg = false
-
-# Polling interval for pipeline file configuration in seconds.
-# (integer value)
-#pipeline_polling_interval = 20
-
-# Source for samples emitted on this instance. (string value)
-# Deprecated group/name - [DEFAULT]/counter_source
-#sample_source = openstack
+# Number of retries for REST notifier (integer value)
+# Deprecated group/name - [alarm]/rest_notifier_max_retries
+#rest_notifier_max_retries = 0
 
 # Name of this node, which must be valid in an AMQP key. Can be an
 # opaque identifier. For ZeroMQ only, must be a valid host name, FQDN,
 # or IP address. (string value)
+#host = sheep26
 host = <%= @node_hostname %>
+
+# Number of workers for notification service. A single notification
+# agent is enabled by default. (integer value)
+#notification_workers = 1
 
 # Timeout seconds for HTTP requests. Set it to None to disable
 # timeout. (integer value)
 #http_timeout = 600
 
-# DEPRECATED - Database connection string. (string value)
-#database_connection = <None>
+# Period of evaluation cycle, should be >= than configured pipeline
+# interval for collection of underlying meters. (integer value)
+# Deprecated group/name - [alarm]/threshold_evaluation_interval
+# Deprecated group/name - [alarm]/evaluation_interval
+#evaluation_interval = 60
+evaluation_interval = <%= @alarm_threshold_evaluation_interval %>
 
-# Path to the rootwrap configuration file touse for running commands
-# as root (string value)
-#rootwrap_config = /etc/ceilometer/rootwrap.conf
+# The topic that aodh uses for alarm notifier messages. (string value)
+# Deprecated group/name - [alarm]/notifier_rpc_topic
+#notifier_rpc_topic = alarm_notifier
+
+# Maximum number of alarms defined for a user. (integer value)
+# Deprecated group/name - [alarm]/user_alarm_quota
+#user_alarm_quota = <None>
+
+# Maximum number of alarms defined for a project. (integer value)
+# Deprecated group/name - [alarm]/project_alarm_quota
+#project_alarm_quota = <None>
+
+# Maximum count of actions for each state of an alarm, non-positive
+# number means no limit. (integer value)
+# Deprecated group/name - [alarm]/alarm_max_actions
+#alarm_max_actions = -1
 
 #
 # From oslo.log
@@ -163,7 +118,7 @@ verbose = <%= @verbose ? "true" : "false" %>
 # (string value)
 # Deprecated group/name - [DEFAULT]/logdir
 #log_dir = <None>
-log_dir = /var/log/ceilometer
+log_dir = /var/log/aodh
 
 # Use syslog for logging. Existing syslog format is DEPRECATED and
 # will be changed later to honor RFC5424. (boolean value)
@@ -183,7 +138,6 @@ log_dir = /var/log/ceilometer
 
 # Log output to standard error. (boolean value)
 #use_stderr = true
-use_stderr = false
 
 # Format string to use for log messages with context. (string value)
 #logging_context_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user_identity)s] %(instance)s%(message)s
@@ -306,175 +260,40 @@ use_stderr = false
 #log_options = true
 
 
-[alarm]
-
-#
-# From ceilometer
-#
-
-# SSL Client certificate for REST notifier. (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#rest_notifier_certificate_file =
-
-# SSL Client private key for REST notifier. (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#rest_notifier_certificate_key =
-
-# Whether to verify the SSL Server certificate when calling alarm
-# action. (boolean value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#rest_notifier_ssl_verify = true
-
-# Number of retries for REST notifier (integer value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#rest_notifier_max_retries = 0
-
-# Period of evaluation cycle, should be >= than configured pipeline
-# interval for collection of underlying meters. (integer value)
-# Deprecated group/name - [alarm]/threshold_evaluation_interval
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#evaluation_interval = 60
-
-# The topic that ceilometer uses for alarm notifier messages. (string
-# value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#notifier_rpc_topic = alarm_notifier
-
-# URL to Gnocchi. (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#gnocchi_url = http://localhost:8041
-
-# Record alarm change events. (boolean value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#record_history = true
-
-# Maximum number of alarms defined for a user. (integer value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#user_alarm_quota = <None>
-
-# Maximum number of alarms defined for a project. (integer value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#project_alarm_quota = <None>
-
-# Maximum count of actions for each state of an alarm, non-positive
-# number means no limit. (integer value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#alarm_max_actions = -1
-
-
 [api]
 
 #
-# From ceilometer
+# From aodh
 #
 
-# The port for the ceilometer API server. (integer value)
-# Minimum value: 1
-# Maximum value: 65535
-# Deprecated group/name - [DEFAULT]/metering_api_port
-#port = 8777
+# The port for the aodh API server. (integer value)
+# Deprecated group/name - [DEFAULT]/port
+#port = 8042
 port = <%= @bind_port %>
 
-# The listen IP for the ceilometer API server. (string value)
+# The listen IP for the aodh API server. (string value)
 #host = 0.0.0.0
 host = <%= @bind_host %>
 
-# Toggle Pecan Debug Middleware. (boolean value)
-#pecan_debug = false
+# Configuration file for WSGI definition of API. (string value)
+# Deprecated group/name - [DEFAULT]/api_paste_config
+#paste_config = api_paste.ini
 
-# Default maximum number of items returned by API request. (integer
-# value)
-# Minimum value: 1
-#default_api_return_limit = 100
-
-# Number of workers for api, default value is 1. (integer value)
+# Number of workers for aodh API server. (integer value)
 # Minimum value: 1
 # Deprecated group/name - [DEFAULT]/api_workers
 #workers = 1
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
 
-[central]
-
-#
-# From ceilometer
-#
-
-# To reduce polling agent load, samples are sent to the notification
-# agent in a batch. To gain higher throughput at the cost of load set
-# this to False. (boolean value)
-#batch_polled_samples = true
-
-# To reduce large requests at same time to Nova or other components
-# from different compute agents, shuffle start time of polling task.
-# (integer value)
-#shuffle_time_before_polling_task = 0
-shuffle_time_before_polling_task = 15
-
-
-[collector]
-
-#
-# From ceilometer
-#
-
-# Address to which the UDP socket is bound. Set to an empty string to
-# disable. (string value)
-#udp_address = 0.0.0.0
-
-# Port to which the UDP socket is bound. (integer value)
-# Minimum value: 1
-# Maximum value: 65535
-#udp_port = 4952
-
-# Requeue the sample on the collector sample queue when the collector
-# fails to dispatch it. This is only valid if the sample come from the
-# notifier publisher. (boolean value)
-#requeue_sample_on_dispatcher_error = false
-
-# Requeue the event on the collector event queue when the collector
-# fails to dispatch it. (boolean value)
-#requeue_event_on_dispatcher_error = false
-
-# Enable the RPC functionality of collector. This functionality is now
-# deprecated in favour of notifier publisher and queues. (boolean
-# value)
-#enable_rpc = false
-
-# Number of workers for collector service. default value is 1.
-# (integer value)
-# Minimum value: 1
-# Deprecated group/name - [DEFAULT]/collector_workers
-#workers = 1
-workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
-
-
-[compute]
-
-#
-# From ceilometer
-#
-
-# Enable work-load partitioning, allowing multiple compute agents to
-# be run simultaneously. (boolean value)
-#workload_partitioning = false
+# Toggle Pecan Debug Middleware. (boolean value)
+#pecan_debug = false
 
 
 [coordination]
 
 #
-# From ceilometer
+# From aodh
 #
 
 # The backend URL to use for distributed coordination. If left empty,
@@ -495,51 +314,18 @@ workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 [database]
 
 #
-# From ceilometer
+# From aodh
 #
-
-# Number of seconds that samples are kept in the database for (<= 0
-# means forever). (integer value)
-# Deprecated group/name - [database]/time_to_live
-#metering_time_to_live = -1
-metering_time_to_live = <%= @metering_time_to_live %>
-
-# Number of seconds that events are kept in the database for (<= 0
-# means forever). (integer value)
-#event_time_to_live = -1
-event_time_to_live = <%= @event_time_to_live %>
-
-# The connection string used to connect to the metering database. (if
-# unset, connection is used) (string value)
-#metering_connection = <None>
-
-# The connection string used to connect to the alarm database. (if
-# unset, connection is used) (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#alarm_connection = <None>
 
 # Number of seconds that alarm histories are kept in the database for
 # (<= 0 means forever). (integer value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
 #alarm_history_time_to_live = -1
 
-# The connection string used to connect to the event database. (if
-# unset, connection is used) (string value)
-#event_connection = <None>
-
-# The max length of resources id in DB2 nosql, the value should be
-# larger than len(hostname) * 2 as compute node's resource id is
-# <hostname>_<nodename>. (integer value)
-#db2nosql_resource_id_maxlen = 512
-
-# The name of the replica set which is used to connect to MongoDB
-# database. Add "?replicaSet=myreplicatset" in your connection URI
-# instead. (string value)
+# The connection string used to connect to the alarm database - rather
+# use ${database.connection} (string value)
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
-#mongodb_replica_set =
+#alarm_connection = <None>
 
 #
 # From oslo.db
@@ -646,108 +432,6 @@ connection = <%= @database_connection %>
 #db_max_retries = 20
 
 
-[dispatcher_file]
-
-#
-# From ceilometer
-#
-
-# Name and the location of the file to record meters. (string value)
-#file_path = <None>
-
-# The max size of the file. (integer value)
-#max_bytes = 0
-
-# The max number of the files to keep. (integer value)
-#backup_count = 0
-
-
-[event]
-
-#
-# From ceilometer
-#
-
-# Configuration file for event definitions. (string value)
-#definitions_cfg_file = event_definitions.yaml
-
-# Drop notifications if no event definition matches. (Otherwise, we
-# convert them with just the default traits) (boolean value)
-#drop_unmatched_notifications = false
-
-# Store the raw notification for select priority levels (info and/or
-# error). By default, raw details are not captured. (multi valued)
-#store_raw =
-
-
-[exchange_control]
-
-#
-# From ceilometer
-#
-
-# Exchange name for Heat notifications (string value)
-#heat_control_exchange = heat
-
-# Exchange name for Glance notifications. (string value)
-#glance_control_exchange = glance
-
-# Exchange name for Magnetodb notifications. (string value)
-#magnetodb_control_exchange = magnetodb
-
-# Exchange name for Keystone notifications. (string value)
-#keystone_control_exchange = keystone
-
-# Exchange name for Cinder notifications. (string value)
-#cinder_control_exchange = cinder
-
-# Exchange name for Data Processing notifications. (string value)
-#sahara_control_exchange = sahara
-
-# Exchange name for Swift notifications. (string value)
-#swift_control_exchange = swift
-
-# Exchange name for Magnum notifications. (string value)
-#magnum_control_exchange = magnum
-
-# Exchange name for DBaaS notifications. (string value)
-#trove_control_exchange = trove
-
-# Exchange name for Messaging service notifications. (string value)
-#zaqar_control_exchange = zaqar
-
-
-[hardware]
-
-#
-# From ceilometer
-#
-
-# URL scheme to use for hardware nodes. (string value)
-#url_scheme = snmp://
-
-# SNMPd user name of all nodes running in the cloud. (string value)
-#readonly_user_name = ro_snmp_user
-
-# SNMPd password of all the nodes running in the cloud. (string value)
-#readonly_user_password = password
-
-
-[ipmi]
-
-#
-# From ceilometer
-#
-
-# Number of retries upon Intel Node Manager initialization failure
-# (integer value)
-#node_manager_init_retry = 3
-
-# Tolerance of IPMI/NM polling failures before disable this pollster.
-# Negative indicates retrying forever. (integer value)
-#polling_retry = 3
-
-
 [keystone_authtoken]
 
 #
@@ -802,7 +486,7 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 
 # Directory used to cache files related to PKI tokens. (string value)
 #signing_dir = <None>
-signing_dir = /var/cache/ceilometer/keystone-signing
+signing_dir = /var/cache/aodh/keystone-signing
 
 # Optionally specify a list of memcached server(s) to use for caching.
 # If left undefined, tokens will instead be cached in-process. (list
@@ -920,11 +604,11 @@ identity_uri = <%= @keystone_settings['admin_auth_url'] %>
 
 # Service username. (string value)
 #admin_user = <None>
-admin_user = <%= @keystone_settings['service_user'] %>
+admin_user = <%= @aodh_service_user %>
 
 # Service user password. (string value)
 #admin_password = <None>
-admin_password = <%= @keystone_settings['service_password'] %>
+admin_password = <%= @aodh_service_password %>
 
 # Service tenant name. (string value)
 #admin_tenant_name = admin
@@ -956,77 +640,6 @@ admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 # Matchmaker ring file (JSON). (string value)
 # Deprecated group/name - [DEFAULT]/matchmaker_ringfile
 #ringfile = /etc/oslo/matchmaker_ring.json
-
-
-[meter]
-
-#
-# From ceilometer
-#
-
-# Configuration file for defining meter notifications. (string value)
-#meter_definitions_cfg_file = meters.yaml
-
-
-[notification]
-
-#
-# From ceilometer
-#
-
-# Number of queues to parallelize workload across. This value should
-# be larger than the number of active notification agents for optimal
-# results. (integer value)
-# Minimum value: 1
-#pipeline_processing_queues = 10
-
-# Acknowledge message when event persistence fails. (boolean value)
-# Deprecated group/name - [collector]/ack_on_event_error
-#ack_on_event_error = true
-
-# Save event details. (boolean value)
-# Deprecated group/name - [collector]/store_events
-#store_events = false
-
-# WARNING: Ceilometer historically offered the ability to store events
-# as meters. This usage is NOT advised as it can flood the metering
-# database and cause performance degradation. (boolean value)
-#disable_non_metric_meters = true
-
-# Enable workload partitioning, allowing multiple notification agents
-# to be run simultaneously. (boolean value)
-#workload_partitioning = false
-
-# Messaging URLs to listen for notifications. Example:
-# transport://user:pass@host1:port[,hostN:portN]/virtual_host
-# (DEFAULT/transport_url is used if empty) (multi valued)
-#messaging_urls =
-
-# Number of workers for notification service, default value is 1.
-# (integer value)
-# Minimum value: 1
-# Deprecated group/name - [DEFAULT]/notification_workers
-#workers = 1
-workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
-
-
-[oslo_concurrency]
-
-#
-# From oslo.concurrency
-#
-
-# Enables or disables inter-process locks. (boolean value)
-# Deprecated group/name - [DEFAULT]/disable_process_locking
-#disable_process_locking = false
-
-# Directory to use for lock files.  For security, the specified
-# directory should only be writable by the user running the processes
-# that need locking. Defaults to environment variable OSLO_LOCK_PATH.
-# If external locks are used, a lock path must be set. (string value)
-# Deprecated group/name - [DEFAULT]/lock_path
-#lock_path = <None>
-lock_path = /var/run/ceilometer
 
 
 [oslo_messaging_amqp]
@@ -1252,6 +865,7 @@ rabbit_password = <%= @rabbit_settings[:password] %>
 #rabbit_virtual_host = /
 rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 
+
 # How frequently to retry connecting with RabbitMQ. (integer value)
 #rabbit_retry_interval = 1
 
@@ -1311,106 +925,24 @@ rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 #policy_dirs = policy.d
 
 
-[polling]
-
-#
-# From ceilometer
-#
-
-# To reduce polling agent load, samples are sent to the notification
-# agent in a batch. To gain higher throughput at the cost of load set
-# this to False. (boolean value)
-#batch_polled_samples = true
-
-# To reduce large requests at same time to Nova or other components
-# from different compute agents, shuffle start time of polling task.
-# (integer value)
-#shuffle_time_before_polling_task = 0
-
-
-[publisher]
-
-#
-# From ceilometer
-#
-
-# Secret value for signing messages. Set value empty if signing is not
-# required to avoid computational overhead. (string value)
-# Deprecated group/name - [DEFAULT]/metering_secret
-# Deprecated group/name - [publisher_rpc]/metering_secret
-# Deprecated group/name - [publisher]/metering_secret
-#telemetry_secret = change this for valid signing
-telemetry_secret = <%= @metering_secret %>
-
-
-[publisher_notifier]
-
-#
-# From ceilometer
-#
-
-# The topic that ceilometer uses for metering notifications. (string
-# value)
-#metering_topic = metering
-
-# The topic that ceilometer uses for event notifications. (string
-# value)
-#event_topic = event
-
-# The driver that ceilometer uses for metering notifications. (string
-# value)
-# Deprecated group/name - [DEFAULT]/metering_driver
-#telemetry_driver = messagingv2
-
-
-[publisher_rpc]
-
-#
-# From ceilometer
-#
-
-# The topic that ceilometer uses for metering messages. (string value)
-# Deprecated group/name - [DEFAULT]/metering_topic
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#metering_topic = metering
-
-
-[rgw_admin_credentials]
-
-#
-# From ceilometer
-#
-
-# Access key for Radosgw Admin. (string value)
-#access_key = <None>
-
-# Secret key for Radosgw Admin. (string value)
-#secret_key = <None>
-
-
 [service_credentials]
 
 #
-# From ceilometer
+# From aodh
 #
 
 # User name to use for OpenStack service access. (string value)
-# Deprecated group/name - [DEFAULT]/os_username
-#os_username = ceilometer
-os_username = <%= @keystone_settings['service_user'] %>
+#os_username = aodh
+os_username = <%= @aodh_service_user %>
 
 # Password to use for OpenStack service access. (string value)
-# Deprecated group/name - [DEFAULT]/os_password
 #os_password = admin
-os_password = <%= @keystone_settings['service_password'] %>
+os_username = <%= @aodh_service_password %>
 
 # Tenant ID to use for OpenStack service access. (string value)
-# Deprecated group/name - [DEFAULT]/os_tenant_id
 #os_tenant_id =
 
 # Tenant name to use for OpenStack service access. (string value)
-# Deprecated group/name - [DEFAULT]/os_tenant_name
 #os_tenant_name = admin
 os_tenant_name = <%= @keystone_settings['service_tenant'] %>
 
@@ -1418,12 +950,10 @@ os_tenant_name = <%= @keystone_settings['service_tenant'] %>
 #os_cacert = <None>
 
 # Auth URL to use for OpenStack service access. (string value)
-# Deprecated group/name - [DEFAULT]/os_auth_url
 #os_auth_url = http://localhost:5000/v2.0
 os_auth_url = <%= @internal_auth_url_v2 %>
-
+ 
 # Region name to use for OpenStack service endpoints. (string value)
-# Deprecated group/name - [DEFAULT]/os_region_name
 #os_region_name = <None>
 os_region_name = <%= @keystone_settings['endpoint_region'] %>
 
@@ -1437,100 +967,11 @@ os_endpoint_type = internalURL
 #insecure = false
 insecure= <%= @keystone_settings['insecure'] %>
 
+# The domain id of the user (string value)
+#os_user_domain_id = default
 
-[service_types]
+# The domain id of the user project (string value)
+#os_project_domain_id = default
 
-#
-# From ceilometer
-#
-
-# Kwapi service type. (string value)
-#kwapi = energy
-
-# Glance service type. (string value)
-#glance = image
-
-# Neutron service type. (string value)
-#neutron = network
-
-# Nova service type. (string value)
-#nova = compute
-
-# Radosgw service type. (string value)
-#radosgw = object-store
-
-# Swift service type. (string value)
-#swift = object-store
-
-
-[vmware]
-
-#
-# From ceilometer
-#
-
-# IP address of the VMware vSphere host. (string value)
-#host_ip =
-host_ip = <%= node[:nova][:vcenter][:host] rescue "" %>
-
-# Port of the VMware vSphere host. (integer value)
-# Minimum value: 1
-# Maximum value: 65535
-#host_port = 443
-host_port = <%= node[:nova][:vcenter][:port] rescue "443" %>
-
-# Username of VMware vSphere. (string value)
-#host_username =
-host_username = <%= node[:nova][:vcenter][:user] rescue "" %>
-
-# Password of VMware vSphere. (string value)
-#host_password =
-host_password = <%= node[:nova][:vcenter][:password] rescue "" %>
-
-# CA bundle file to use in verifying the vCenter server certificate.
-# (string value)
-#ca_file = <None>
-<% if @hypervisor_inspector == "vmware" && !node[:nova][:vcenter][:ca_file].empty? -%>
-ca_file = <%= node[:nova][:vcenter][:ca_file] -%>
-<% end -%>
-
-# If true, the vCenter server certificate is not verified. If false,
-# then the default CA truststore is used for verification. This option
-# is ignored if "ca_file" is set. (boolean value)
-#insecure = false
-<% if @hypervisor_inspector == "vmware" && node[:nova][:vcenter][:insecure] -%>
-insecure = <%= node[:nova][:vcenter][:insecure] %>
-<% end -%>
-
-# Number of times a VMware vSphere API may be retried. (integer value)
-#api_retry_count = 10
-
-# Sleep time in seconds for polling an ongoing async task. (floating
-# point value)
-#task_poll_interval = 0.5
-
-# Optional vim service WSDL location e.g
-# http://<server>/vimService.wsdl. Optional over-ride to default
-# location for bug work-arounds. (string value)
-#wsdl_location = <None>
-
-
-[xenapi]
-
-#
-# From ceilometer
-#
-
-# URL for connection to XenServer/Xen Cloud Platform. (string value)
-#connection_url = <None>
-
-# Username for connection to XenServer/Xen Cloud Platform. (string
-# value)
-#connection_username = root
-
-# Password for connection to XenServer/Xen Cloud Platform. (string
-# value)
-#connection_password = <None>
-
-# Timeout in seconds for XenAPI login. (integer value)
-#login_timeout = 10
+# The user project name (string value)
+#os_project_name = admin

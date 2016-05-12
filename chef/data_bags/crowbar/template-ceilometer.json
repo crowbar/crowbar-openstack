@@ -29,6 +29,19 @@
       "database": {
           "metering_time_to_live": 30,
           "event_time_to_live": 30
+      },
+      "aodh" : {
+        "service_user": "aodh",
+        "service_password": "",
+        "api": {
+          "protocol": "http",
+          "port": 8042
+        },
+        "db": {
+          "password": "",
+          "user": "aodh",
+          "database": "aodh"
+        }
       }
     }
   },
@@ -36,7 +49,7 @@
     "ceilometer": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 23,
+      "schema-revision": 100,
       "element_states": {
         "ceilometer-server": [ "readying", "ready", "applying" ],
         "ceilometer-polling": [ "readying", "ready", "applying" ],

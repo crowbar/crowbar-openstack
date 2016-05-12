@@ -104,8 +104,7 @@ template "/etc/ceilometer/ceilometer.conf" do
       hypervisor_inspector: hypervisor_inspector,
       libvirt_type: libvirt_type,
       metering_time_to_live: metering_time_to_live,
-      event_time_to_live: event_time_to_live,
-      alarm_threshold_evaluation_interval: node[:ceilometer][:alarm_threshold_evaluation_interval]
+      event_time_to_live: event_time_to_live
     )
     if is_compute_agent
       notifies :restart, "service[nova-compute]"
