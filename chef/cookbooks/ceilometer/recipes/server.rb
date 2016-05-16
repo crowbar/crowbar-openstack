@@ -110,14 +110,11 @@ when "suse"
   package "openstack-ceilometer-collector"
   package "openstack-ceilometer-agent-notification"
   package "openstack-ceilometer-api"
-  package "openstack-ceilometer-alarm-evaluator"
-  package "openstack-ceilometer-alarm-notifier"
 when "rhel"
   package "openstack-ceilometer-common"
   package "openstack-ceilometer-collector"
   package "openstack-ceilometer-agent-notification"
   package "openstack-ceilometer-api"
-  package "openstack-ceilometer-alarm"
   package "python-ceilometerclient"
 else
   package "python-ceilometerclient"
@@ -125,8 +122,6 @@ else
   package "ceilometer-collector"
   package "ceilometer-agent-notification"
   package "ceilometer-api"
-  package "ceilometer-alarm-evaluator"
-  package "ceilometer-alarm-notifier"
 end
 
 include_recipe "#{@cookbook_name}::common"
@@ -191,24 +186,6 @@ end
 
 service "ceilometer-api" do
   service_name node[:ceilometer][:api][:service_name]
-  supports status: true, restart: true, start: true, stop: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
-  subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-end
-
-service "ceilometer-alarm-evaluator" do
-  service_name node["ceilometer"]["alarm_evaluator"]["service_name"]
-  supports status: true, restart: true, start: true, stop: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
-  subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-end
-
-service "ceilometer-alarm-notifier" do
-  service_name node["ceilometer"]["alarm_notifier"]["service_name"]
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
