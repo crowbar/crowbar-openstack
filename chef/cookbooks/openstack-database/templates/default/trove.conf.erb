@@ -8,7 +8,8 @@ verbose = <%= node["openstack"]["database"]["verbose"] %>
 debug = <%= node["openstack"]["database"]["debug"] %>
 
 # Address to bind the API server
-bind_host = <%= @endpoint.host %>
+#XXX endpoint.host is a hostname, service expects an ip address
+# bind_host = <%= @endpoint.host %>
 
 # Port the bind the API server to
 bind_port = <%= @endpoint.port %>
