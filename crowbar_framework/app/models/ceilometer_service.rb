@@ -29,14 +29,6 @@ class CeilometerService < PacemakerServiceObject
   class << self
     def role_constraints
       {
-        "ceilometer-agent" => {
-          "unique" => false,
-          "count" => -1,
-          "exclude_platform" => {
-            "suse" => "< 12.1",
-            "windows" => "/.*/"
-          }
-        },
         "ceilometer-agent-hyperv" => {
           "unique" => false,
           "count" => -1,
@@ -46,7 +38,7 @@ class CeilometerService < PacemakerServiceObject
         },
         "ceilometer-polling" => {
           "unique" => false,
-          "count" => 1,
+          "count" => -1,
           "exclude_platform" => {
             "suse" => "< 12.1",
             "windows" => "/.*/"
@@ -108,11 +100,10 @@ class CeilometerService < PacemakerServiceObject
     swift_proxy_nodes = NodeObject.find("roles:swift-proxy")
 
     base["deployment"]["ceilometer"]["elements"] = {
-        "ceilometer-agent" => agent_nodes.map { |x| x.name },
-        "ceilometer-agent-hyperv" => hyperv_agent_nodes.map { |x| x.name },
-        "ceilometer-polling" => [server_nodes.first.name],
-        "ceilometer-server" => [server_nodes.first.name],
-        "ceilometer-swift-proxy-middleware" => swift_proxy_nodes.map { |x| x.name }
+      "ceilometer-agent-hyperv" => hyperv_agent_nodes.map(&:name),
+      "ceilometer-polling" => agent_nodes.map(&:name),
+      "ceilometer-server" => [server_nodes.first.name],
+      "ceilometer-swift-proxy-middleware" => swift_proxy_nodes.map(&:name)
     } unless agent_nodes.nil? or server_nodes.nil?
 
     base["attributes"]["ceilometer"]["service_password"] = random_password
@@ -124,7 +115,6 @@ class CeilometerService < PacemakerServiceObject
   end
 
   def validate_proposal_after_save proposal
-    validate_one_for_role proposal, "ceilometer-polling"
     validate_one_for_role proposal, "ceilometer-server"
 
     validate_minimum_three_nodes_in_cluster(proposal)
