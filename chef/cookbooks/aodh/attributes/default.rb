@@ -15,8 +15,9 @@
 
 api_service_name = "aodh-api"
 evaluator_service_name = "aodh-evaluator"
-notifier_service_name = "aodh-notifier"
+expirer_service_name = "aodh-expirer"
 listener_service_name = "aodh-listener"
+notifier_service_name = "aodh-notifier"
 
 case node[:platform_family]
 when "debian"
@@ -46,16 +47,16 @@ when "rhel", "suse"
   }
   api_service_name = "openstack-aodh-api"
   evaluator_service_name = "openstack-aodh-evaluator"
-  notifier_service_name = "openstack-aodh-notifier"
+  expirer_service_name = "openstack-aodh-expirer"
   listener_service_name = "openstack-aodh-listener"
+  notifier_service_name = "openstack-aodh-notifier"
 end
 
 default[:aodh][:api][:service_name] = api_service_name
 default[:aodh][:evaluator][:service_name] = evaluator_service_name
 default[:aodh][:notifier][:service_name]  = notifier_service_name
 default[:aodh][:listener][:service_name]  = listener_service_name
-# FIXME: expirer not mentioned in install guides... ?
-# default[:ceilometer][:aodh][:expirer][:service_name]  = expirer_service_name
+default[:aodh][:expirer][:service_name] = expirer_service_name
 
 default[:aodh][:user] = "aodh"
 default[:aodh][:group] = "aodh"
@@ -69,7 +70,6 @@ default[:aodh][:api][:port] = 8042
 
 # Ports to bind to when haproxy is used for the real ports
 default[:aodh][:ha][:ports][:api] = 5562
-# FIXME: could we use 5562?
 
 default[:aodh][:db][:database] = "aodh"
 default[:aodh][:db][:user] = "aodh"
