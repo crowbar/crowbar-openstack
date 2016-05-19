@@ -73,7 +73,7 @@ class HorizonService < PacemakerServiceObject
     base
   end
 
-  def validate_proposal_after_save proposal
+  def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "horizon-server"
 
     if proposal["attributes"][@bc_name]["multi_domain_support"]

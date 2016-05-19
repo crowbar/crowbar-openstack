@@ -168,7 +168,7 @@ class NeutronService < PacemakerServiceObject
     end
   end
 
-  def validate_proposal_after_save proposal
+  def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "neutron-server"
     validate_at_least_n_for_role proposal, "neutron-network", 1
 

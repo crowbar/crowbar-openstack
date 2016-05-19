@@ -74,7 +74,7 @@ class GlanceService < PacemakerServiceObject
     base
   end
 
-  def validate_proposal_after_save proposal
+  def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "glance-server"
 
     if proposal["attributes"]["glance"]["default_store"] == "cinder"

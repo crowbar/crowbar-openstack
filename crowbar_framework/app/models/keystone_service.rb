@@ -70,7 +70,7 @@ class KeystoneService < PacemakerServiceObject
     base
   end
 
-  def validate_proposal_after_save proposal
+  def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "keystone-server"
 
     api_versions = ["2.0", "3"]

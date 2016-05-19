@@ -309,7 +309,7 @@ class NovaService < PacemakerServiceObject
     @logger.debug("Nova apply_role_pre_chef_call: leaving")
   end
 
-  def validate_proposal_after_save proposal
+  def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "nova-controller"
 
     elements = proposal["deployment"]["nova"]["elements"]
