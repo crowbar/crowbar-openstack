@@ -28,8 +28,10 @@ when "debian"
     default["postgresql"]["version"] = "8.3"
   when node["platform_version"].to_f < 7.0 # All 6.X
     default["postgresql"]["version"] = "8.4"
-  else
+  when node["platform_version"].to_f < 8.0 # All 7.X
     default["postgresql"]["version"] = "9.1"
+  else
+    default["postgresql"]["version"] = "9.4"
   end
 
   default["postgresql"]["dir"] = "/etc/postgresql/#{node['postgresql']['version']}/main"
@@ -40,7 +42,7 @@ when "debian"
     default["postgresql"]["server"]["service_name"] = "postgresql"
   end
 
-  default["postgresql"]["client"]["packages"] = ["postgresql-client-#{node['postgresql']['version']}","libpq-dev"]
+  default["postgresql"]["client"]["packages"] = ["postgresql-client-#{node['postgresql']['version']}", "ruby-pg"]
   default["postgresql"]["server"]["packages"] = ["postgresql-#{node['postgresql']['version']}"]
   default["postgresql"]["contrib"]["packages"] = ["postgresql-contrib-#{node['postgresql']['version']}"]
 
