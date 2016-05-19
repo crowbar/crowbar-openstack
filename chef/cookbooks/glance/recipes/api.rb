@@ -156,12 +156,16 @@ glance_protocol = node[:glance][:api][:protocol]
 
 crowbar_pacemaker_sync_mark "wait-glance_register_service"
 
+register_auth_hash = { user: keystone_settings["admin_user"],
+                       password: keystone_settings["admin_password"],
+                       tenant: keystone_settings["admin_tenant"] }
+
 keystone_register "register glance service" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   service_name "glance"
   service_type "image"
   service_description "Openstack Glance Service"
@@ -173,7 +177,7 @@ keystone_register "register glance endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   endpoint_service "glance"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{glance_protocol}://#{endpoint_public_ip}:#{api_port}"

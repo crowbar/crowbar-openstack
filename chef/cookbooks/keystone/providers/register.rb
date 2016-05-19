@@ -106,34 +106,26 @@ action :add_user do
     raise "Failed to talk to keystone in add_user"
   end
 
+  ret = false
   unless item_id
     # User does not exist yet
     body = _build_user_object(new_resource.user_name, new_resource.user_password, tenant_id)
     ret = _create_item(http, headers, path, body, new_resource.user_name)
-    new_resource.updated_by_last_action(ret)
   else
-    path = "/v2.0/tokens"
-    body = _build_auth(new_resource.user_name, new_resource.user_password, tenant_id)
-    resp = http.send_request("POST", path, JSON.generate(body), headers)
-    if resp.is_a?(Net::HTTPCreated) or resp.is_a?(Net::HTTPOK)
-      Chef::Log.info "User '#{new_resource.user_name}' already exists. No password change."
-      new_resource.updated_by_last_action(false)
-      data = JSON.parse(resp.read_body)
-      token_id = data["access"]["token"]["id"]
-      resp = http.delete("#{path}/#{token_id}", headers)
-      if !resp.is_a?(Net::HTTPNoContent) and !resp.is_a?(Net::HTTPOK)
-        Chef::Log.warn("Failed to delete temporary token")
-        Chef::Log.warn("Response Code: #{resp.code}")
-        Chef::Log.warn("Response Message: #{resp.message}")
-      end
+    auth_token = _get_token(http,
+                            new_resource.user_name,
+                            new_resource.user_password)
+    if auth_token
+      Chef::Log.debug "User '#{new_resource.user_name}' already exists and password still works."
+      http.delete("/v2.0/tokens/#{auth_token}", headers)
     else
-      Chef::Log.info "User '#{new_resource.user_name}' already exists. Updating password."
+      Chef::Log.debug "User '#{new_resource.user_name}' already exists. Updating Password."
       path = "/v2.0/users/#{item_id}/OS-KSADM/password"
       body = _build_user_password_object(item_id, new_resource.user_password)
       ret = _update_item(http, headers, path, body, new_resource.user_name)
-      new_resource.updated_by_last_action(ret)
     end
   end
+  new_resource.updated_by_last_action(ret)
 end
 
 # :add_role specific attributes
@@ -194,11 +186,6 @@ end
 # attribute :tenant_name, :kind_of => String
 action :add_ec2 do
   http, headers = _build_connection(new_resource)
-
-  headers.delete("X-Auth-Token")
-  resp = http.send_request("POST", "/v2.0/tokens", JSON.generate({auth: {tenantName: new_resource.auth[:tenant], passwordCredentials: {username: new_resource.auth[:user], password: new_resource.auth[:password]}}}),headers)
-  data = JSON.parse(resp.read_body)
-  headers.store("X-Auth-Token", data["access"]["token"]["id"])
 
   # Lets verify that the item does not exist yet
   tenant = new_resource.tenant_name
@@ -356,8 +343,23 @@ def _build_connection(new_resource)
   http.use_ssl = true if new_resource.protocol == "https"
   http.verify_mode = OpenSSL::SSL::VERIFY_NONE if new_resource.insecure
 
+  auth_token = nil
+  if new_resource.token
+    auth_token = new_resource.token
+  elsif new_resource.auth
+    auth_token = _get_token(http,
+                            new_resource.auth[:user],
+                            new_resource.auth[:password],
+                            new_resource.auth[:tenant])
+    unless auth_token
+      raise "Authentication failed for user #{new_resource.auth[:user]}"
+    end
+  else
+    raise "Neither token nor auth parameter present. Failed to authenticate"
+  end
+
   # Fill out the headers
-  headers = _build_headers(new_resource.token)
+  headers = _build_headers(auth_token)
 
   [http, headers]
 end
@@ -410,16 +412,35 @@ def _build_user_object(user_name, password, tenant_id)
 end
 
 private
-def _build_auth(user_name, password, tenant_id)
+def _build_auth(user_name, password, tenant = "")
   password_obj = Hash.new
   password_obj.store("username", user_name)
   password_obj.store("password", password)
   auth_obj = Hash.new
-  auth_obj.store("tenantId", tenant_id)
+  if tenant
+    auth_obj.store("tenantName", tenant)
+  end
   auth_obj.store("passwordCredentials", password_obj)
   ret = Hash.new
   ret.store("auth", auth_obj)
   return ret
+end
+
+private
+def _get_token(http, user_name, password, tenant = "")
+  path = "/v2.0/tokens"
+  headers = _build_headers
+  body = _build_auth(user_name, password, tenant)
+  resp = http.send_request("POST", path, JSON.generate(body), headers)
+  if resp.is_a?(Net::HTTPCreated) || resp.is_a?(Net::HTTPOK)
+    data = JSON.parse(resp.read_body)
+    data["access"]["token"]["id"]
+  else
+    Chef::Log.info "Failed to get token for User '#{user_name}' Tenant '#{tenant}'"
+    Chef::Log.info "Response Code: #{resp.code}"
+    Chef::Log.info "Response Message: #{resp.message}"
+    nil
+  end
 end
 
 private

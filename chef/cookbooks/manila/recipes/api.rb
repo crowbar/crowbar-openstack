@@ -33,12 +33,16 @@ my_public_host = CrowbarHelper.get_host_for_public_url(
 
 crowbar_pacemaker_sync_mark "wait-manila_register"
 
+register_auth_hash = { user: keystone_settings["admin_user"],
+                       password: keystone_settings["admin_password"],
+                       tenant: keystone_settings["admin_tenant"] }
+
 keystone_register "manila api wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   action :wakeup
 end
 
@@ -47,7 +51,7 @@ keystone_register "register manila user" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
   tenant_name keystone_settings["service_tenant"]
@@ -59,7 +63,7 @@ keystone_register "give manila user access" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["service_user"]
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"
@@ -71,7 +75,7 @@ keystone_register "register manila service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   service_name "manila"
   service_type "share"
   service_description "Openstack Manila shared filesystem service"
@@ -83,7 +87,7 @@ keystone_register "register manila endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   endpoint_service "manila"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{manila_protocol}://"\
@@ -103,7 +107,7 @@ keystone_register "register manila service v2" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   service_name "manilav2"
   service_type "sharev2"
   service_description "Openstack Manila shared filesystem service V2"
@@ -115,7 +119,7 @@ keystone_register "register manila endpoint v2" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   endpoint_service "manilav2"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{manila_protocol}://"\
