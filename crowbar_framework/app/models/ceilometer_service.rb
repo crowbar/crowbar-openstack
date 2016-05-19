@@ -44,7 +44,7 @@ class CeilometerService < PacemakerServiceObject
             "windows" => "/.*/"
           }
         },
-        "ceilometer-polling" => {
+        "ceilometer-central" => {
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
@@ -110,7 +110,7 @@ class CeilometerService < PacemakerServiceObject
     base["deployment"]["ceilometer"]["elements"] = {
         "ceilometer-agent" => agent_nodes.map { |x| x.name },
         "ceilometer-agent-hyperv" => hyperv_agent_nodes.map { |x| x.name },
-        "ceilometer-polling" => [server_nodes.first.name],
+        "ceilometer-central" => [server_nodes.first.name],
         "ceilometer-server" => [server_nodes.first.name],
         "ceilometer-swift-proxy-middleware" => swift_proxy_nodes.map { |x| x.name }
     } unless agent_nodes.nil? or server_nodes.nil?
@@ -123,8 +123,8 @@ class CeilometerService < PacemakerServiceObject
     base
   end
 
-  def validate_proposal_after_save proposal
-    validate_one_for_role proposal, "ceilometer-polling"
+  def validate_proposal_after_save(proposal)
+    validate_one_for_role proposal, "ceilometer-central"
     validate_one_for_role proposal, "ceilometer-server"
 
     validate_minimum_three_nodes_in_cluster(proposal)
@@ -184,14 +184,14 @@ class CeilometerService < PacemakerServiceObject
     # the VIP of the cluster to be setup
     allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
 
-    polling_elements, polling_nodes, polling_ha_enabled = \
-        role_expand_elements(role, "ceilometer-polling")
-    reset_sync_marks_on_clusters_founders(polling_elements)
-    Openstack::HA.set_controller_role(polling_nodes) if polling_ha_enabled
+    central_elements, central_nodes, central_ha_enabled = \
+      role_expand_elements(role, "ceilometer-central")
+    reset_sync_marks_on_clusters_founders(central_elements)
+    Openstack::HA.set_controller_role(central_nodes) if central_ha_enabled
 
     role.save if prepare_role_for_ha(role,\
-                                     ["ceilometer", "ha", "polling", "enabled"],\
-                                     polling_ha_enabled)
+                                     ["ceilometer", "ha", "central", "enabled"],\
+                                     central_ha_enabled)
 
     @logger.debug("Ceilometer apply_role_pre_chef_call: leaving")
   end

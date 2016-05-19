@@ -1,9 +1,8 @@
 name "ceilometer-agent"
 description "Ceilometer Agent Role"
 run_list(
-         "recipe[ceilometer::agent]",
-         "recipe[ceilometer::common]"
+  "recipe[ceilometer::agent]"
 )
-default_attributes()
-override_attributes()
+default_attributes
+override_attributes
 

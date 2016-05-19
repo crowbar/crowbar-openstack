@@ -1,9 +1,8 @@
 name "ceilometer-server"
 description "Ceilometer Server Role"
 run_list(
-         "recipe[ceilometer::server]",
-         "recipe[ceilometer::common]"
+  "recipe[ceilometer::server]"
 )
-default_attributes()
-override_attributes()
+default_attributes
+override_attributes
 
