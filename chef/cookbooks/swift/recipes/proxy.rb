@@ -237,60 +237,14 @@ end
 if node[:swift][:ssl][:enabled]
   if node[:swift][:ssl][:generate_certs]
     package "openssl"
-    ruby_block "generate_certs for swift" do
-        block do
-          unless ::File.exist?(node[:swift][:ssl][:certfile]) && ::File.exist?(node[:swift][:ssl][:keyfile])
-            require "fileutils"
-
-            Chef::Log.info("Generating SSL certificate for swift...")
-
-            [:certfile, :keyfile].each do |k|
-              dir = File.dirname(node[:swift][:ssl][k])
-              FileUtils.mkdir_p(dir) unless File.exist?(dir)
-            end
-
-            # Generate private key
-            `openssl genrsa -out #{node[:swift][:ssl][:keyfile]} 4096`
-            if $?.exitstatus != 0
-              message = "SSL private key generation failed"
-              Chef::Log.fatal(message)
-              raise message
-            end
-            FileUtils.chown "root", node[:swift][:group], node[:swift][:ssl][:keyfile]
-            FileUtils.chmod 0640, node[:swift][:ssl][:keyfile]
-
-            # Generate certificate signing requests (CSR)
-            conf_dir = File.dirname node[:swift][:ssl][:certfile]
-            ssl_csr_file = "#{conf_dir}/signing_key.csr"
-            ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=#{node[:fqdn]}\""
-            `openssl req -new -key #{node[:swift][:ssl][:keyfile]} -out #{ssl_csr_file} -subj #{ssl_subject}`
-            if $?.exitstatus != 0
-              message = "SSL certificate signed requests generation failed"
-              Chef::Log.fatal(message)
-              raise message
-            end
-
-            # Generate self-signed certificate with above CSR
-            `openssl x509 -req -days 3650 -in #{ssl_csr_file} -signkey #{node[:swift][:ssl][:keyfile]} -out #{node[:swift][:ssl][:certfile]}`
-            if $?.exitstatus != 0
-              message = "SSL self-signed certificate generation failed"
-              Chef::Log.fatal(message)
-              raise message
-            end
-
-            File.delete ssl_csr_file  # Nobody should even try to use this
-          end # unless files exist
-      end # block
-    end # ruby_block
-  else # if generate_certs
-    unless ::File.size? node[:swift][:ssl][:certfile]
-      message = "Certificate \"#{node[:swift][:ssl][:certfile]}\" is not present or empty."
-      Chef::Log.fatal(message)
-      raise message
-    end
-    # we do not check for existence of keyfile, as the private key is allowed
-    # to be in the certfile
-  end # if generate_certs
+  end
+  ssl_setup "setting up ssl for swift" do
+    generate_certs node[:swift][:ssl][:generate_certs]
+    certfile node[:swift][:ssl][:certfile]
+    keyfile node[:swift][:ssl][:keyfile]
+    group node[:swift][:group]
+    fqdn node[:fqdn]
+  end
 end
 
 ## Find other nodes that are swift-auth nodes, and make sure
