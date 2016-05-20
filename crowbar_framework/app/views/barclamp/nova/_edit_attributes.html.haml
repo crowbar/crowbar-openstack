@@ -60,7 +60,7 @@
       = string_field %w(zvm zvm_xcat_username)
       = password_field %w(zvm zvm_xcat_password)
       = string_field %w(zvm zvm_diskpool)
-      = string_field %w(zvm zvm_diskpool_type)
+      = select_field %w(zvm zvm_diskpool_type), :collection => :zvm_diskpool_types
       = string_field %w(zvm zvm_host)
       = string_field %w(zvm zvm_user_profile)
       = string_field %w(zvm zvm_scsi_pool)
