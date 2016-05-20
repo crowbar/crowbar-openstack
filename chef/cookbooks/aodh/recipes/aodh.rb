@@ -4,6 +4,7 @@ node[:aodh][:platform][:packages].each do |p|
   package p
 end
 
+# mongdb setup has been already done by server.rb recipe
 unless node[:ceilometer][:use_mongodb]
 
   db_settings = fetch_database_settings
@@ -47,7 +48,6 @@ unless node[:ceilometer][:use_mongodb]
 
   crowbar_pacemaker_sync_mark "create-aodh_database"
 end
-# FIXME: nothing for mongdb...?
 
 directory "/var/cache/aodh" do
   owner node[:aodh][:user]
@@ -153,6 +153,33 @@ template "/etc/aodh/aodh.conf" do
     alarm_threshold_evaluation_interval: node[:ceilometer][:alarm_threshold_evaluation_interval]
   )
 end
+
+crowbar_pacemaker_sync_mark "wait-aodh_db_sync"
+
+execute "aodh-dbsync" do
+  command "aodh-dbsync"
+  action :run
+  user node[:aodh][:user]
+  group node[:aodh][:group]
+  # We only do the sync the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if { !node[:aodh][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+end
+
+# We want to keep a note that we've done db_sync, so we don't do it again.
+# If we were doing that outside a ruby_block, we would add the note in the
+# compile phase, before the actual db_sync is done (which is wrong, since it
+# could possibly not be reached in case of errors).
+ruby_block "mark node for aodh db_sync" do
+  block do
+    node.set[:aodh][:db_synced] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[aodh-dbsync]", :immediately
+end
+
+crowbar_pacemaker_sync_mark "create-aodh_db_sync"
 
 service "aodh-api" do
   service_name node[:aodh][:api][:service_name]
