@@ -49,4 +49,22 @@ crowbar_pacemaker_order_only_existing "o-#{service_name}" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
+# We need to check if ceilometer-polling service was configured at some time,
+# and if so, stop and deleted relevant pacemaker resource.
+# The correct setup should involve ceilometer-polling to be executed
+# by ceilometer-central service only.
+crowbar_pacemaker_order_only_existing "o-ceilometer-polling" do
+  action :delete
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+pacemaker_primitive "ceilometer-polling" do
+  agent node[:ceilometer][:ha][:polling][:agent]
+  action [:stop, :delete]
+  only_if {
+    CrowbarPacemakerHelper.is_cluster_founder?(node) &&
+      ::Kernel.system("crm resource show ceilometer-polling")
+  }
+end
+
 crowbar_pacemaker_sync_mark "create-ceilometer_central_ha_resources"

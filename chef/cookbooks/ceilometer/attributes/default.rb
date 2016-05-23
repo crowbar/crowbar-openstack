@@ -17,6 +17,7 @@ default[:ceilometer][:user]="ceilometer"
 default[:ceilometer][:group]="ceilometer"
 
 central_service_name = "ceilometer-agent-central"
+polling_service_name = "ceilometer-polling"
 api_service_name = "ceilometer-api"
 collector_service_name = "ceilometer-collector"
 agent_notification_service_name = "ceilometer-agent-notification"
@@ -25,6 +26,7 @@ alarm_notifier_service_name = "ceilometer-alarm-notifier"
 
 if %w(rhel suse).include?(node[:platform_family])
   central_service_name = "openstack-ceilometer-agent-central"
+  polling_service_name = "openstack-ceilometer-polling"
   api_service_name = "openstack-ceilometer-api"
   collector_service_name = "openstack-ceilometer-collector"
   agent_notification_service_name = "openstack-ceilometer-agent-notification"
@@ -36,6 +38,7 @@ default[:ceilometer][:api][:service_name] = api_service_name
 default[:ceilometer][:collector][:service_name] = collector_service_name
 default[:ceilometer][:agent_notification][:service_name] = agent_notification_service_name
 default[:ceilometer][:central][:service_name] = central_service_name
+default[:ceilometer][:polling][:service_name] = polling_service_name
 default["ceilometer"]["alarm_evaluator"]["service_name"] = alarm_evaluator_service_name
 default["ceilometer"]["alarm_notifier"]["service_name"] = alarm_notifier_service_name
 
@@ -82,6 +85,9 @@ default["ceilometer"]["ha"]["alarm_evaluator"]["agent"] = "lsb:#{alarm_evaluator
 default["ceilometer"]["ha"]["alarm_evaluator"]["op"]["monitor"]["interval"] = "10s"
 default["ceilometer"]["ha"]["alarm_notifier"]["agent"] = "lsb:#{alarm_notifier_service_name}"
 default["ceilometer"]["ha"]["alarm_notifier"]["op"]["monitor"]["interval"] = "10s"
+
+# only because we have to delete polling
+default[:ceilometer][:ha][:polling][:agent] = "lsb:#{polling_service_name}"
 
 default[:ceilometer][:ha][:central][:enabled] = false
 default[:ceilometer][:ha][:central][:agent] = "lsb:#{central_service_name}"

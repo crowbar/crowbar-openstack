@@ -33,6 +33,13 @@ service "ceilometer-agent-central" do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
+# stop and remove polling service; it is supposed to be started by ceilomter-central
+service "ceilometer-polling" do
+  service_name node[:ceilometer][:polling][:service_name]
+  action [:disable, :stop]
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+end
+
 if ha_enabled
   log "HA support for ceilometer-central is enabled"
   include_recipe "ceilometer::central_ha"
