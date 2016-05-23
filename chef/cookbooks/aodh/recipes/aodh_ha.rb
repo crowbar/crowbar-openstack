@@ -1,4 +1,4 @@
-# Copyright 2014 SUSE
+# Copyright 2016 SUSE, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,31 +13,31 @@
 # limitations under the License.
 #
 
-haproxy_loadbalancer "ceilometer-api" do
+haproxy_loadbalancer "aodh-api" do
   address "0.0.0.0"
-  port node[:ceilometer][:api][:port]
+  port node[:aodh][:api][:port]
   use_ssl false
-  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "ceilometer", "ceilometer-server", "api")
+  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "aodh", "ceilometer-server", "api")
   action :nothing
 end.run_action(:create)
 
 # Wait for all nodes to reach this point so we know that they will have
 # all the required packages installed and configuration files updated
 # before we create the pacemaker resources.
-crowbar_pacemaker_sync_mark "sync-ceilometer_server_before_ha"
+crowbar_pacemaker_sync_mark "sync-aodh_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources"
+crowbar_pacemaker_sync_mark "wait-aodh_ha_resources"
 
 transaction_objects = []
 primitives = []
 
-["collector", "agent_notification", "api"].each do |service|
-  primitive_name = "ceilometer-#{service}"
+node.default[:aodh][:platform][:services].each do |service|
+  primitive_name = "aodh-#{service}"
 
   pacemaker_primitive primitive_name do
-    agent node[:ceilometer][:ha][service.to_sym][:agent]
-    op node[:ceilometer][:ha][service.to_sym][:op]
+    agent node[:aodh][:ha][service.to_sym][:agent]
+    op node[:aodh][:ha][service.to_sym][:op]
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
@@ -46,7 +46,7 @@ primitives = []
   transaction_objects << "pacemaker_primitive[#{primitive_name}]"
 end
 
-group_name = "g-ceilometer-server"
+group_name = "g-aodh"
 pacemaker_group group_name do
   members primitives
   action :update
@@ -83,7 +83,7 @@ end
 location_name = openstack_pacemaker_controller_only_location_for clone_name
 transaction_objects << "pacemaker_location[#{location_name}]"
 
-pacemaker_transaction "ceilometer server" do
+pacemaker_transaction "aodh" do
   cib_objects transaction_objects
   # note that this will also automatically start the resources
   action :commit_new
@@ -97,4 +97,4 @@ crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-ceilometer_server_ha_resources"
+crowbar_pacemaker_sync_mark "create-aodh_ha_resources"
