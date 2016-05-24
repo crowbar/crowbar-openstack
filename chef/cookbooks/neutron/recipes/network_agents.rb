@@ -79,7 +79,7 @@ case node[:neutron][:networking_plugin]
 when "ml2"
   ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
   case
-  when ml2_mech_drivers.include?("openvswitch")
+  when ml2_mech_drivers.include?("openvswitch") || ml2_mech_drivers.include?("cisco_apic_ml2")
     interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
   when ml2_mech_drivers.include?("linuxbridge")
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"

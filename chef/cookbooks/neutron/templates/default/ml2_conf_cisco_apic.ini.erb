@@ -1,0 +1,104 @@
+[DEFAULT]
+
+# apic_system_id = openstack
+apic_system_id=<%= node[:neutron][:apic][:system_id] %>
+
+[opflex]
+networks = *
+
+[ml2_cisco_apic]
+
+# Hostname:port list of APIC controllers
+# apic_hosts = 1.1.1.1:80, 1.1.1.2:8080, 1.1.1.3:80
+apic_hosts=<%= node[:neutron][:apic][:hosts] %>
+
+# Username for the APIC controller
+# apic_username = user
+apic_username=<%= node[:neutron][:apic][:username] %>
+
+# Password for the APIC controller
+# apic_password = password
+apic_password=<%= node[:neutron][:apic][:password] %>
+
+# Whether use SSl for connecting to the APIC controller or not
+# apic_use_ssl = True
+apic_use_ssl = True
+
+# How to map names to APIC: use_uuid or use_name
+# apic_name_mapping = use_name
+apic_name_mapping = use_name
+
+# Names for APIC objects used by Neutron
+# Note: When deploying multiple clouds against one APIC,
+#       these names must be unique between the clouds.
+# apic_vmm_domain = openstack
+# apic_vlan_ns_name = openstack_ns
+# apic_node_profile = openstack_profile
+# apic_entity_profile = openstack_entity
+# apic_function_profile = openstack_function
+# apic_app_profile_name = openstack_app
+# Agent timers for State reporting and topology discovery
+# apic_agent_report_interval = 30
+# apic_agent_poll_interval = 2
+apic_clear_node_profiles = True
+enable_aci_routing = True
+apic_arp_flooding = True
+enable_optimized_metadata = True
+apic_provision_infra = True
+apic_provision_hostlinks = True
+
+# File where network constraints are described (defaults to no constraints)
+# network_constraints_filename = /etc/neutron/plugins/ml2/cisco_apic_network_constraints.ini
+
+# Use integrated topology service for better host mobility in ACI.
+# If se to True, the apic_topology service should be disabled, while the agents
+# will keep working as usual.
+# integrated_topology_service=False
+
+# Specify your network topology.
+# This section indicates how your compute nodes are connected to the fabric's
+# switches and ports. The format is as follows:
+#
+# [apic_switch:<swich_id_from_the_apic>]
+# <compute_host>,<compute_host> = <switchport_the_host(s)_are_connected_to>
+#
+# You can have multiple sections, one for each switch in your fabric that is
+# participating in Openstack. e.g.
+#
+# [apic_switch:17]
+# ubuntu,ubuntu1 = 1/10
+# ubuntu2,ubuntu3 = 1/11
+#
+# [apic_switch:18]
+# ubuntu5,ubuntu6 = 1/1
+# ubuntu7,ubuntu8 = 1/2
+
+<% @apic_switches.keys.each do |ip| -%>
+[apic_switch:<%=ip%>]
+<%    if @apic_switches[ip].key?(:switch_ports) -%>
+<%      @apic_switches[ip][:switch_ports].each do |name, values| -%>
+<%=       name %> = <%= values[:switch_port] %>
+<%      end -%>
+<%    end -%>
+<% end -%>
+
+# Describe external connectivity.
+# In this section you can specify the external network configuration in order
+# for the plugin to be able to teach the fabric how to route the internal
+# traffic to the outside world. The external connectivity configuration
+# format is as follows:
+#
+# [apic_external_network:<externalNetworkName>]
+# switch = <switch_id_from_the_apic>
+# port = <switchport_the_external_router_is_connected_to>
+# encap = <encapsulation>
+# cidr_exposed = <cidr_exposed_to_the_external_router>
+# gateway_ip = <ip_of_the_external_gateway>
+#
+# An example follows:
+# [apic_external_network:network_ext]
+# switch=203
+# port=1/34
+# encap=vlan-100
+# cidr_exposed=10.10.40.2/16
+# gateway_ip=10.10.40.1

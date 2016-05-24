@@ -34,6 +34,12 @@
                       "vni_end": { "type" : "int", "required" : true },
                       "multicast_group": { "type" : "str", "required": true }
                     }},
+                    "apic": { "type": "map", "required": false, "mapping": {
+                      "hosts": { "type" : "str", "required" : true },
+                      "system_id": { "type" : "str", "required" : true },
+                      "username": { "type" : "str", "required": true },
+                      "password": { "type" : "str", "required": true }
+                    }},
                     "allow_overlapping_ips": { "type": "bool", "required": true },
                     "cisco_switches": {
                       "type" : "map",
@@ -46,6 +52,31 @@
                             "port": { "type": "str", "required": true },
                             "user": { "type": "str", "required": true },
                             "password": { "type": "str", "required": true },
+                            "switch_ports": {
+                              "type" : "map",
+                              "required" : false,
+                              "mapping" : {
+                                = : {
+                                  "type" : "map",
+                                  "required" : false,
+                                  "mapping" : {
+                                    "switch_port": { "type": "str", "required": true }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "apic_switches": {
+                      "type" : "map",
+                      "required" : false,
+                      "mapping" : {
+                        = : {
+                          "type" : "map",
+                          "required" : false,
+                          "mapping" : {
                             "switch_ports": {
                               "type" : "map",
                               "required" : false,
