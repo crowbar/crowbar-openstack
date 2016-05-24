@@ -91,7 +91,7 @@ class NovaService < PacemakerServiceObject
           "unique" => false,
           "count" => -1,
           "platform" => {
-            "suse" => "12.1",
+            "suse" => ">= 12.1",
           },
           "remotes" => true
         }
