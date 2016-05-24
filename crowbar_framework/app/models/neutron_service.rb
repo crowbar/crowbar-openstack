@@ -33,11 +33,11 @@ class NeutronService < PacemakerServiceObject
   end
 
   def self.networking_ml2_type_drivers_valid
-    ["vlan", "gre", "vxlan"]
+    ["vlan", "gre", "vxlan", "opflex"]
   end
 
   def self.networking_ml2_mechanism_drivers_valid
-    ["linuxbridge", "openvswitch", "cisco_nexus"]
+    ["linuxbridge", "openvswitch", "cisco_nexus", "cisco_apic_ml2"]
   end
 
   class << self

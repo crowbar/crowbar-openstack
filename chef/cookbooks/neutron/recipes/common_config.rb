@@ -110,6 +110,14 @@ service_plugins = "#{service_plugins}, neutron_fwaas.services.firewall.fwaas_plu
 if neutron[:neutron][:use_lbaas] then
   service_plugins = "#{service_plugins}, neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPlugin"
 end
+if neutron[:neutron][:networking_plugin] == "ml2"
+  if neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
+    service_plugins = "cisco_apic_l3"
+  else
+    service_plugins = "neutron.services.l3_router.l3_router_plugin.L3RouterPlugin, \
+                       #{service_plugins}"
+  end
+end
 
 network_nodes_count = neutron[:neutron][:elements]["neutron-network"].count
 if neutron[:neutron][:elements_expanded]

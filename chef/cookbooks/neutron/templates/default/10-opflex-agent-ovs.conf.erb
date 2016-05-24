@@ -1,0 +1,67 @@
+{
+    "log": {
+      "level": "debug2"
+    },
+
+    "opflex": {
+    "domain": "comp/prov-OpenStack/ctrlr-[<%= @opflex_apic_domain_name %>]-<%= @opflex_apic_domain_name %>/sw-InsiemeLSOid",
+       "name": "<%= @hostname %>",
+       "peers": [
+          {"hostname": "<%= @opflex_peer_ip %>", "port": "<%= @opflex_peer_port %>"}
+        ],
+       "ssl": {
+          "mode": "enabled",
+          "ca-store": "/etc/ssl/certs/"
+       },
+       "inspector": {
+       "enabled": true,
+           "socket-name": "/var/run/opflex-agent-ovs-inspect.sock"
+       },
+       "notif": {
+           "enabled": true,
+       "socket-name": "/var/run/opflex-agent-ovs-notif.sock",
+       // "socket-owner": "root",
+       "socket-group": "<%= @socketgroup %>",
+       "socket-permissions": "770"
+       }
+
+    },
+
+    "endpoint-sources": {
+        "filesystem": ["/var/lib/opflex-agent-ovs/endpoints"]
+    },
+
+    "service-sources": {
+        "filesystem": ["/var/lib/opflex-agent-ovs/services"]
+    },
+
+    "renderers": {
+         "stitched-mode": {
+             "ovs-bridge-name": "br-int",
+             "encap": {
+                 "vxlan" : {
+                     "encap-iface": "br-int_vxlan0",
+                     "uplink-iface": "vlan.4093",
+                     "uplink-vlan": 4093,
+                     "remote-ip": "<%= @opflex_remote_ip %>",
+                     "remote-port": <%= @opflex_remote_port %>
+                 }
+             },
+             "forwarding": {
+             "virtual-router": {
+             "enabled": true,
+                     "mac": "00:22:bd:f8:19:ff",
+                     "ipv6": {
+                 "router-advertisement": "false"
+             }
+         },
+         "virtual-dhcp": {
+             "enabled": "true",
+             "mac": "00:22:bd:f8:19:ff"
+         }
+             },
+             "flowid-cache-dir": "/var/lib/opflex-agent-ovs/ids",
+             "mcast-group-file": "/var/lib/opflex-agent-ovs/mcast/opflex-groups.json"
+        }
+    }
+}

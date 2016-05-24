@@ -51,10 +51,16 @@ bash "reload disable-rp_filter-sysctl" do
   subscribes :run, resources(cookbook_file: disable_rp_filter_file), :delayed
 end
 
+if neutron[:neutron][:networking_plugin] == "ml2" &&
+    neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
+  include_recipe "neutron::cisco_apic_agents"
+  return # skip anything else in this recipe
+end
+
 multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty?
 
 # openvswitch configuration specific to ML2
-if neutron[:neutron][:networking_plugin] == "ml2" and
+if neutron[:neutron][:networking_plugin] == "ml2" &&
    neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch")
 
   # Install the package now as neutron-ovs-cleanup service is shipped with this
