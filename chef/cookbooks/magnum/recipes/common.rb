@@ -32,7 +32,9 @@ sql_connection = "#{db_settings[:url_scheme]}://#{node[:magnum][:db][:user]}:"\
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
   node, "admin").address
 node.set[:magnum][:api][:bind_host] = my_ipaddress
-
+magnum_ha_enabled = node[:magnum][:ha][:enabled]
+public_api_host = CrowbarHelper.get_host_for_public_url(
+  node, (node[:magnum][:api][:protocol] == "http"), magnum_ha_enabled)
 # TODO : Handle HA condition
 bind_port = node[:magnum][:api][:bind_port]
 bind_host = node[:magnum][:api][:bind_host]
@@ -45,6 +47,7 @@ template "/etc/magnum/magnum.conf" do
   mode 0640
   variables(
     trustee: node[:magnum][:trustee],
+    api_host: public_api_host,
     bind_host: bind_host,
     bind_port: bind_port,
     sql_connection: sql_connection,

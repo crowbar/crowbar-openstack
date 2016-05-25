@@ -57,13 +57,16 @@ database_user "grant database access for magnum database user" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
+is_cluster_founder = CrowbarPaceMakerHelper.is_cluster_founder?(node)
+is_db_synced = node[:magnum][:db_synced]
+
 execute "magnum-manage db sync" do
   command "magnum-db-manage upgrade"
   user node[:magnum][:user]
   group node[:magnum][:group]
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
-  only_if { !node[:magnum][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+  only_if { !is_db_synced && (!ha_enabled || is_cluster_founder) }
 end
 
 # We want to keep a note that we've done db_sync, so we don't do it again.

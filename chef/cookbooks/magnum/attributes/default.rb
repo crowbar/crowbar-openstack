@@ -23,4 +23,3 @@ default[:magnum][:max_header_line] = 16_384
 default[:magnum][:api][:protocol] = "http"
 
 default[:magnum][:ha][:enabled] = false
-#TODO: HA attributes

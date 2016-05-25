@@ -93,7 +93,6 @@ class MagnumService < ServiceObject
 
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "magnum-server"
-    validate_at_least_n_for_role proposal, "magnum-server", 1
     super
   end
 

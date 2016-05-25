@@ -4,7 +4,7 @@
 #
 
 # Directory where the magnum python module is installed. (string value)
-#pybasedir = /home/abuild/rpmbuild/BUILD/magnum-2.0.1.dev1/magnum
+#pybasedir = /usr/lib/python2.7/site-packages/magnum
 
 # Directory where magnum binaries are installed. (string value)
 #bindir = $pybasedir/bin
@@ -50,6 +50,7 @@ debug=<%= node[:magnum][:debug] %>
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #verbose = true
+verbose=<%= node[:magnum][:verbose] %>
 
 # The name of a logging configuration file. This file is appended to any
 # existing logging configuration files. For details about logging configuration
@@ -142,6 +143,7 @@ use_stderr = false
 # Size of RPC connection pool. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_conn_pool_size
 #rpc_conn_pool_size = 30
+rpc_conn_pool_size = 64
 
 # ZeroMQ bind address. Should be a wildcard (*), an ethernet interface, or IP.
 # The "host" option should point or resolve to this address. (string value)
@@ -203,6 +205,7 @@ use_stderr = false
 # Size of executor thread pool. (integer value)
 # Deprecated group/name - [DEFAULT]/rpc_thread_pool_size
 #executor_thread_pool_size = 64
+executor_thread_pool_size = 256
 
 # Seconds to wait for a response from a call. (integer value)
 #rpc_response_timeout = 60
@@ -215,10 +218,12 @@ use_stderr = false
 # The messaging driver to use, defaults to rabbit. Other drivers include amqp
 # and zmq. (string value)
 #rpc_backend = rabbit
+rpc_backend = rabbit
 
 # The default exchange under which topics are scoped. May be overridden by an
 # exchange name specified in the transport_url option. (string value)
 #control_exchange = openstack
+control_exchange = magnum
 
 #
 # From oslo.service.periodic_task
@@ -268,6 +273,7 @@ use_stderr = false
 
 # The listen IP for the Magnum API server. (IP address value)
 #host = 127.0.0.1
+host=<%= @api_host %>
 
 # The maximum number of items returned in a single response from a collection
 # resource. (integer value)
@@ -372,8 +378,6 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 
 
 [certificates]
-cert_manager_type = local
-storage_path = /var/lib/magnum/certificates/
 
 #
 # From magnum
@@ -381,10 +385,12 @@ storage_path = /var/lib/magnum/certificates/
 
 # Certificate Manager plugin. Defaults to barbican. (string value)
 #cert_manager_type = barbican
+cert_manager_type = local
 
 # Absolute path of the certificate storage directory. Defaults to
 # /var/lib/magnum/certificates/. (string value)
 #storage_path = /var/lib/magnum/certificates/
+storage_path = /var/lib/magnum/certificates/
 
 
 [cinder_client]
@@ -604,6 +610,18 @@ connection=<%= @sql_connection %>
 # (string value)
 #key_file = <None>
 
+[docker_registry]
+
+#
+# From magnum
+#
+
+# Region name of Swift (string value)
+#swift_region = <None>
+
+# Name of the container in Swift which docker registry stores images in (string
+# value)
+#swift_registry_container = docker_registry
 
 [glance_client]
 
@@ -1020,6 +1038,7 @@ lock_path = /var/run/magnum
 # messaging, messagingv2, routing, log, test, noop (multi valued)
 # Deprecated group/name - [DEFAULT]/notification_driver
 #driver =
+driver = messaging
 
 # A URL representing the messaging driver to use for notifications. If not set,
 # we fall back to the same configuration used for RPC. (string value)
@@ -1275,7 +1294,6 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 
 
 [oslo_policy]
-policy_file = /etc/magnum/policy.json
 
 #
 # From oslo.policy
@@ -1284,6 +1302,7 @@ policy_file = /etc/magnum/policy.json
 # The JSON file that defines policies. (string value)
 # Deprecated group/name - [DEFAULT]/policy_file
 #policy_file = policy.json
+policy_file = /etc/magnum/policy.json
 
 # Default rule. Enforced when a requested rule is not found. (string value)
 # Deprecated group/name - [DEFAULT]/policy_default_rule

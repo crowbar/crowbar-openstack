@@ -30,12 +30,16 @@ my_public_host = CrowbarHelper.get_host_for_public_url(
 
 crowbar_pacemaker_sync_mark "wait-magnum_register"
 
+register_auth_hash = { user: keystone_settings["admin_user"],
+                       password: keystone_settings["admin_password"],
+                       tenant: keystone_settings["admin_tenant"] }
+
 keystone_register "magnum api wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   action :wakeup
 end
 
@@ -44,7 +48,7 @@ keystone_register "register magnum user" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
   tenant_name keystone_settings["service_tenant"]
@@ -56,7 +60,7 @@ keystone_register "give magnum user access" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["service_user"]
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"
@@ -68,7 +72,7 @@ keystone_register "register magnum service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   service_name "magnum"
   service_type "container"
   service_description "Openstack Magnum - Containers as a Service"
@@ -80,7 +84,7 @@ keystone_register "register magnum endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   endpoint_service "magnum"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{magnum_protocol}://"\
@@ -93,6 +97,7 @@ keystone_register "register magnum endpoint" do
 end
 
 crowbar_pacemaker_sync_mark "create-magnum_register"
+
 magnum_service "api" do
   use_pacemaker_provider ha_enabled
 end

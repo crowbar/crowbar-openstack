@@ -23,6 +23,11 @@ trustee_domain_name = node["magnum"]["trustee"]["domain_name"]
 trustee_domain_admin = node["magnum"]["trustee"]["domain_admin_name"]
 trustee_domain_admin_password = node["magnum"]["trustee"]["domain_admin_password"]
 
+# Install magnumclient package
+if %w(rhel suse).include?(node[:platform_family])
+  package "python-magnumclient"
+end
+
 insecure = keystone_settings["insecure"] ? "--insecure" : ""
 auth_url = "#{keystone_settings["protocol"]}://"\
            "#{keystone_settings["internal_url_host"]}:"\
@@ -73,10 +78,13 @@ ruby_block "Update node parameters" do
     openstack_command << " --os-auth-type password --os-identity-api-version 3"
     openstack_command << " --os-password #{keystone_settings["admin_password"]}"
     openstack_command << " --os-tenant-name #{keystone_settings["admin_tenant"]}"
-    openstack_command << " --os-auth-url #{keystone_settings["protocol"]}://#{keystone_settings["internal_url_host"]}:#{keystone_settings["service_port"]}/v3/"
+    openstack_command << " --os-auth-url #{auth_url}"
 
-    trustee_domain_id = `#{openstack_command} domain show #{trustee_domain_name} -f value -c id`.chomp
-    trustee_domain_admin_id = `#{openstack_command} user show #{trustee_domain_admin} -f value -c id --domain #{trustee_domain_name}`.chomp
+    domain_id_cmd = "#{openstack_command} domain show #{trustee_domain_name} -f value -c id"
+    trustee_domain_id = `#{domain_id_cmd}`.chomp
+    admin_id_cmd = "#{openstack_command} user show #{trustee_domain_admin}"
+    admin_id_cmd << " -f value -c id --domain #{trustee_domain_name}"
+    trustee_domain_admin_id = `#{admin_id_cmd}`.chomp
 
     node.set[:magnum][:trustee][:domain_id] = trustee_domain_id
     node.set[:magnum][:trustee][:domain_admin_id] = trustee_domain_admin_id
