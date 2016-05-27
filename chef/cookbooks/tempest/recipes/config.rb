@@ -404,6 +404,10 @@ EOH
   use_suspend = false
   # no vnc support: https://bugs.launchpad.net/nova-docker/+bug/1321818
   use_vnc = false
+  # uptime inside docker in the same that in the host
+  use_run_validation = false
+  # blkid inside docker does not return attached devices
+  use_config_drive = false
   image_regex = "^#{image_name}$"
 else
   use_docker = false
@@ -411,6 +415,8 @@ else
   use_rescue = true
   use_suspend = true
   use_vnc = true
+  use_run_validation = true
+  use_config_drive = true
   image_regex = "^cirros-#{cirros_version}-x86_64-tempest-machine$"
 end
 
@@ -462,6 +468,8 @@ template "/etc/tempest/tempest.conf" do
     use_suspend: use_suspend,
     use_vnc: use_vnc,
     use_livemigration: use_livemigration,
+    # compute-feature-enabled settings
+    use_config_drive: use_config_drive,
     # dashboard settings
     horizon_host: horizon_host,
     horizon_protocol: horizon_protocol,
@@ -493,6 +501,8 @@ template "/etc/tempest/tempest.conf" do
     # scenario settings
     cirros_version: cirros_version,
     image_regex: image_regex,
+    # validation settings
+    use_run_validation: use_run_validation,
     # volume settings
     cinder_multi_backend: cinder_multi_backend,
     cinder_backend1_name: cinder_backend1_name,
