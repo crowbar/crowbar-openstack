@@ -514,6 +514,7 @@ preserve_ports = true
 
 # Enable special configuration drive with metadata. (boolean value)
 #config_drive = true
+config_drive = <%= @use_config_drive %>
 
 
 [dashboard]
@@ -1306,7 +1307,7 @@ events = true
 # resources to enable remote access (boolean value)
 # Deprecated group/name - [compute]/run_ssh
 #run_validation = false
-run_validation = true
+run_validation = <%= @use_run_validation %>
 
 # Enable/disable security groups. (boolean value)
 #security_group = true
