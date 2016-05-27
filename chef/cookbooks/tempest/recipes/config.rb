@@ -38,12 +38,16 @@ tempest_adm_pass = node[:tempest][:tempest_adm_password]
 # manila (share)
 tempest_manila_settings = node[:tempest][:manila]
 
+register_auth_hash = { user: keystone_settings["admin_user"],
+                       password: keystone_settings["admin_password"],
+                       tenant: keystone_settings["admin_tenant"] }
+
 keystone_register "tempest tempest wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   action :wakeup
 end.run_action(:wakeup)
 
@@ -52,8 +56,7 @@ keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
-
+  auth register_auth_hash
   tenant_name tempest_comp_tenant
   action :add_tenant
 end.run_action(:add_tenant)
@@ -84,7 +87,7 @@ users.each do |user|
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    token keystone_settings["admin_token"]
+    auth register_auth_hash
     user_name user["name"]
     user_password user["pass"]
     tenant_name tempest_comp_tenant
@@ -96,7 +99,7 @@ users.each do |user|
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    token keystone_settings["admin_token"]
+    auth register_auth_hash
     user_name user["name"]
     role_name user["role"]
     tenant_name tempest_comp_tenant
@@ -108,11 +111,7 @@ users.each do |user|
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    auth ({
-      tenant: keystone_settings["admin_tenant"],
-      user: keystone_settings["admin_user"],
-      password: keystone_settings["admin_password"]
-    })
+    auth register_auth_hash
     user_name user["name"]
     tenant_name tempest_comp_tenant
     action :nothing
@@ -125,7 +124,7 @@ keystone_register "add #{keystone_settings['admin_user']}:#{tempest_comp_tenant}
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["admin_user"]
   role_name "admin"
   tenant_name tempest_comp_tenant
@@ -419,7 +418,7 @@ horizons = search(:node, "roles:horizon-server") || []
 if horizons.empty?
   use_horizon = false
   horizon_host = "localhost"
-  horizont_protocol = "http"
+  horizon_protocol = "http"
 else
   horizon = horizons[0]
   use_horizon = true

@@ -115,12 +115,16 @@ db_connection = "#{db_settings[:url_scheme]}://#{node[:heat][:db][:user]}:#{node
 
 crowbar_pacemaker_sync_mark "wait-heat_register"
 
+register_auth_hash = { user: keystone_settings["admin_user"],
+                       password: keystone_settings["admin_password"],
+                       tenant: keystone_settings["admin_tenant"] }
+
 keystone_register "heat wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   action :wakeup
 end
 
@@ -129,7 +133,7 @@ keystone_register "register heat user" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
   tenant_name keystone_settings["service_tenant"]
@@ -141,7 +145,7 @@ keystone_register "give heat user access" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["service_user"]
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"
@@ -153,7 +157,7 @@ keystone_register "add heat stack user role" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["service_user"]
   tenant_name keystone_settings["service_tenant"]
   role_name "heat_stack_user"
@@ -166,7 +170,7 @@ node[:heat][:trusts_delegated_roles].each do |role|
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    token keystone_settings["admin_token"]
+    auth register_auth_hash
     user_name keystone_settings["service_user"]
     tenant_name keystone_settings["service_tenant"]
     role_name role
@@ -178,7 +182,7 @@ node[:heat][:trusts_delegated_roles].each do |role|
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    token keystone_settings["admin_token"]
+    auth register_auth_hash
     user_name keystone_settings["admin_user"]
     tenant_name keystone_settings["default_tenant"]
     role_name role
@@ -291,7 +295,7 @@ keystone_register "register Heat CloudFormation Service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   service_name "heat-cfn"
   service_type "cloudformation"
   service_description "Heat CloudFormation Service"
@@ -303,7 +307,7 @@ keystone_register "register heat Cfn endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   endpoint_service "heat-cfn"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1"
@@ -320,7 +324,7 @@ keystone_register "register Heat Service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   service_name "heat"
   service_type "orchestration"
   service_description "Heat Service"
@@ -332,7 +336,7 @@ keystone_register "register heat endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   endpoint_service "heat"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:port]}/v1/$(tenant_id)s"
@@ -346,10 +350,13 @@ end
 crowbar_pacemaker_sync_mark "create-heat_register"
 
 shell_get_stack_user_domain = <<-EOF
-  export OS_URL="#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3"
-  eval $(openstack --os-token #{keystone_settings['admin_token']} \
+  export OS_URL="#{keystone_settings["protocol"]}://#{keystone_settings["internal_url_host"]}:#{keystone_settings["service_port"]}/v3"
+  eval $(openstack \
+    --os-username #{keystone_settings["admin_user"]} \
+    --os-password #{keystone_settings["admin_password"]} \
+    --os-tenant-name #{keystone_settings["admin_tenant"]} \
     --os-url=$OS_URL \
-    --os-region-name='#{keystone_settings['endpoint_region']}' \
+    --os-region-name='#{keystone_settings["endpoint_region"]}' \
     --os-identity-api-version=3 #{insecure} domain show -f shell --variable id #{stack_user_domain_name});
   echo $id
 EOF

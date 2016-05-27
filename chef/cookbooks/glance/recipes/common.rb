@@ -75,12 +75,16 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 crowbar_pacemaker_sync_mark "wait-glance_register_user"
 
+register_auth_hash = { user: keystone_settings["admin_user"],
+                       password: keystone_settings["admin_password"],
+                       tenant:  keystone_settings["admin_tenant"] }
+
 keystone_register "glance wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   action :wakeup
 end
 
@@ -89,7 +93,7 @@ keystone_register "register glance user" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
   tenant_name keystone_settings["service_tenant"]
@@ -101,7 +105,7 @@ keystone_register "give glance user access" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["service_user"]
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"

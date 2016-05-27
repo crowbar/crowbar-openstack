@@ -25,12 +25,16 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 crowbar_pacemaker_sync_mark "wait-neutron_register"
 
+register_auth_hash = { user: keystone_settings["admin_user"],
+                       password: keystone_settings["admin_password"],
+                       tenant: keystone_settings["admin_tenant"] }
+
 keystone_register "neutron api wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   action :wakeup
 end
 
@@ -39,7 +43,7 @@ keystone_register "register neutron user" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
   tenant_name keystone_settings["service_tenant"]
@@ -51,7 +55,7 @@ keystone_register "give neutron user access" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   user_name keystone_settings["service_user"]
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"
@@ -63,7 +67,7 @@ keystone_register "register neutron service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   service_name "neutron"
   service_type "network"
   service_description "Openstack Neutron Service"
@@ -75,7 +79,7 @@ keystone_register "register neutron endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  token keystone_settings["admin_token"]
+  auth register_auth_hash
   endpoint_service "neutron"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{neutron_protocol}://#{my_public_host}:#{api_port}/"
