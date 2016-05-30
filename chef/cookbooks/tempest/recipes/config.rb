@@ -354,6 +354,17 @@ file "#{node[:tempest][:tempest_path]}/flag-xen_only" do
   action xen_only ? :create : :delete
 end
 
+# tempest timeouts for ssh and connection can be different for XEN, a
+# `nil` value will use the tempest default value
+validation_connect_timeout = nil
+validation_ssh_timeout = nil
+if xen_only
+  # Default: 60
+  validation_connect_timeout = 90
+  # Default: 300
+  validation_ssh_timeout = 450
+end
+
 if !docker_compute_nodes.empty? && kvm_compute_nodes.empty?
   image_name = "cirros"
 
@@ -502,6 +513,8 @@ template "/etc/tempest/tempest.conf" do
     image_regex: image_regex,
     # validation settings
     use_run_validation: use_run_validation,
+    validation_connect_timeout: validation_connect_timeout,
+    validation_ssh_timeout: validation_ssh_timeout,
     # volume settings
     cinder_multi_backend: cinder_multi_backend,
     cinder_backend1_name: cinder_backend1_name,

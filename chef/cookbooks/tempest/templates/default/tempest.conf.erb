@@ -1339,10 +1339,16 @@ ip_version_for_ssh = 4
 # (integer value)
 # Deprecated group/name - [compute]/ssh_channel_timeout
 #connect_timeout = 60
+<% if @validation_connect_timeout -%>
+connect_timeout = <%= @validation_connect_timeout %>
+<% end -%>
 
 # Timeout in seconds to wait for the ssh banner. (integer value)
 # Deprecated group/name - [compute]/ssh_timeout
 #ssh_timeout = 300
+<% if @validation_ssh_timeout -%>
+ssh_timeout = <%= @validation_ssh_timeout %>
+<% end -%>
 
 
 [volume]
