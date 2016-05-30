@@ -16,24 +16,17 @@
 # Wait for all nodes to reach this point so we know that they will have
 # all the required packages installed and configuration files updated
 # before we create the pacemaker resources.
-crowbar_pacemaker_sync_mark "sync-ceilometer_polling_before_ha"
+crowbar_pacemaker_sync_mark "sync-ceilometer_central_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-ceilometer_polling_ha_resources"
+crowbar_pacemaker_sync_mark "wait-ceilometer_central_ha_resources"
 
 transaction_objects = []
 
-service_name = "ceilometer-polling"
+service_name = "ceilometer-central"
 pacemaker_primitive service_name do
-  agent node[:ceilometer][:ha][:polling][:agent]
-  op node[:ceilometer][:ha][:polling][:op]
-  # use these params with ocf:openstack:ceilometer-polling:
-  #params ({
-  #  "user"    => node[:ceilometer][:user],
-  #  "binary"  => "/usr/bin/ceilometer-polling",
-  #  "use_service"    => true,
-  #  "service" => node[:ceilometer][:polling][:service_name]
-  #})
+  agent node[:ceilometer][:ha][:central][:agent]
+  op node[:ceilometer][:ha][:central][:op]
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
@@ -42,7 +35,7 @@ transaction_objects << "pacemaker_primitive[#{service_name}]"
 location_name = openstack_pacemaker_controller_only_location_for service_name
 transaction_objects << "pacemaker_location[#{location_name}]"
 
-pacemaker_transaction "ceilometer polling" do
+pacemaker_transaction "ceilometer central" do
   cib_objects transaction_objects
   # note that this will also automatically start the resources
   action :commit_new
@@ -56,4 +49,22 @@ crowbar_pacemaker_order_only_existing "o-#{service_name}" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-ceilometer_polling_ha_resources"
+# We need to check if ceilometer-polling service was configured at some time,
+# and if so, stop and deleted relevant pacemaker resource.
+# The correct setup should involve ceilometer-polling to be executed
+# by ceilometer-central service only.
+crowbar_pacemaker_order_only_existing "o-ceilometer-polling" do
+  action :delete
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+pacemaker_primitive "ceilometer-polling" do
+  agent node[:ceilometer][:ha][:polling][:agent]
+  action [:stop, :delete]
+  only_if {
+    CrowbarPacemakerHelper.is_cluster_founder?(node) &&
+      ::Kernel.system("crm resource show ceilometer-polling")
+  }
+end
+
+crowbar_pacemaker_sync_mark "create-ceilometer_central_ha_resources"

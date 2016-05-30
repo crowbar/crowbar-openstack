@@ -13,19 +13,19 @@
 # limitations under the License.
 #
 
-package "ceilometer-polling" do
+package "ceilometer-agent-central" do
   if %w(rhel suse).include?(node[:platform_family])
-    package_name "openstack-ceilometer-polling"
+    package_name "openstack-ceilometer-agent-central"
   end
   action :install
 end
 
 include_recipe "#{@cookbook_name}::common"
 
-ha_enabled = node[:ceilometer][:ha][:polling][:enabled]
+ha_enabled = node[:ceilometer][:ha][:central][:enabled]
 
-service "ceilometer-polling" do
-  service_name node[:ceilometer][:polling][:service_name]
+service "ceilometer-agent-central" do
+  service_name node[:ceilometer][:central][:service_name]
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
@@ -33,9 +33,16 @@ service "ceilometer-polling" do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
+# stop and remove polling service; it is supposed to be started by ceilomter-central
+service "ceilometer-polling" do
+  service_name node[:ceilometer][:polling][:service_name]
+  action [:disable, :stop]
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+end
+
 if ha_enabled
-  log "HA support for ceilometer-polling is enabled"
-  include_recipe "ceilometer::polling_ha"
+  log "HA support for ceilometer-central is enabled"
+  include_recipe "ceilometer::central_ha"
 else
-  log "HA support for ceilometer-polling is disabled"
+  log "HA support for ceilometer-central is disabled"
 end
