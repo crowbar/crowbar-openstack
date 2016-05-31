@@ -220,7 +220,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       variables(
         ml2_type_drivers: ml2_type_drivers,
         tunnel_types: ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
-        use_l2pop: (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")) && neutron[:neutron][:use_dvr],
+        use_l2pop: ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"),
         dvr_enabled: neutron[:neutron][:use_dvr],
         bridge_mappings: bridge_mappings
       )
@@ -244,7 +244,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       variables(
         ml2_type_drivers: ml2_type_drivers,
         vxlan_mcast_group: neutron[:neutron][:vxlan][:multicast_group],
-        use_l2pop: ml2_type_drivers.include?("vxlan") && neutron[:neutron][:use_dvr],
+        use_l2pop: ml2_type_drivers.include?("vxlan"),
         interface_mappings: interface_mappings
        )
     end
