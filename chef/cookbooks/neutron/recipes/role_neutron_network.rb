@@ -14,12 +14,4 @@
 # limitations under the License.
 #
 
-barclamp = "neutron"
-role = "neutron-network"
-
-# if nil, then this means all states are valid
-states_for_role = node[barclamp]["element_states"][role]
-
-if states_for_role.nil? || states_for_role.include?("all") || states_for_role.include?(node[:state])
-  include_recipe "neutron::network_agents"
-end
+include_recipe "neutron::network_agents"

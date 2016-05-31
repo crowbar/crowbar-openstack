@@ -14,15 +14,7 @@
 # limitations under the License.
 #
 
-barclamp = "cinder"
-role = "cinder-controller"
-
-# if nil, then this means all states are valid
-states_for_role = node[barclamp]["element_states"][role]
-
-if states_for_role.nil? || states_for_role.include?("all") || states_for_role.include?(node[:state])
-  include_recipe "cinder::api"
-  include_recipe "cinder::scheduler"
-  include_recipe "cinder::controller_ha"
-  include_recipe "cinder::monitor"
-end
+include_recipe "cinder::api"
+include_recipe "cinder::scheduler"
+include_recipe "cinder::controller_ha"
+include_recipe "cinder::monitor"

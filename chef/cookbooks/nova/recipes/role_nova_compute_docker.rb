@@ -14,14 +14,6 @@
 # limitations under the License.
 #
 
-barclamp = "nova"
-role = "nova-compute-docker"
-
-# if nil, then this means all states are valid
-states_for_role = node[barclamp]["element_states"][role]
-
-if states_for_role.nil? || states_for_role.include?("all") || states_for_role.include?(node[:state])
-  include_recipe "nova::docker"
-  include_recipe "nova::compute"
-  include_recipe "nova::monitor"
-end
+include_recipe "nova::docker"
+include_recipe "nova::compute"
+include_recipe "nova::monitor"

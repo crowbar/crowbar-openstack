@@ -14,13 +14,5 @@
 # limitations under the License.
 #
 
-barclamp = "database"
-role = "database-server"
-
-# if nil, then this means all states are valid
-states_for_role = node[barclamp]["element_states"][role]
-
-if states_for_role.nil? || states_for_role.include?("all") || states_for_role.include?(node[:state])
-  include_recipe "database::crowbar"
-  include_recipe "database::server"
-end
+include_recipe "database::crowbar"
+include_recipe "database::server"

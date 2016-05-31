@@ -14,13 +14,5 @@
 # limitations under the License.
 #
 
-barclamp = "horizon"
-role = "horizon-server"
-
-# if nil, then this means all states are valid
-states_for_role = node[barclamp]["element_states"][role]
-
-if states_for_role.nil? || states_for_role.include?("all") || states_for_role.include?(node[:state])
-  include_recipe "horizon::server"
-  include_recipe "horizon::monitor"
-end
+include_recipe "horizon::server"
+include_recipe "horizon::monitor"

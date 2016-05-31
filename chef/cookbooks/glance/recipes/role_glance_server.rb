@@ -14,18 +14,10 @@
 # limitations under the License.
 #
 
-barclamp = "glance"
-role = "glance-server"
-
-# if nil, then this means all states are valid
-states_for_role = node[barclamp]["element_states"][role]
-
-if states_for_role.nil? || states_for_role.include?("all") || states_for_role.include?(node[:state])
-  include_recipe "glance::registry"
-  include_recipe "glance::api"
-  include_recipe "glance::cache"
-  include_recipe "glance::scrubber"
-  include_recipe "glance::ha"
-  include_recipe "glance::setup"
-  include_recipe "glance::monitor"
-end
+include_recipe "glance::registry"
+include_recipe "glance::api"
+include_recipe "glance::cache"
+include_recipe "glance::scrubber"
+include_recipe "glance::ha"
+include_recipe "glance::setup"
+include_recipe "glance::monitor"

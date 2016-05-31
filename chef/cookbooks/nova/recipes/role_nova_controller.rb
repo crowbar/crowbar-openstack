@@ -14,23 +14,15 @@
 # limitations under the License.
 #
 
-barclamp = "nova"
-role = "nova-controller"
-
-# if nil, then this means all states are valid
-states_for_role = node[barclamp]["element_states"][role]
-
-if states_for_role.nil? || states_for_role.include?("all") || states_for_role.include?(node[:state])
-  include_recipe "nova::config"
-  include_recipe "nova::database"
-  include_recipe "nova::api"
-  include_recipe "nova::cert"
-  include_recipe "nova::instances"
-  include_recipe "nova::scheduler"
-  include_recipe "nova::memcached"
-  include_recipe "nova::vncproxy"
-  include_recipe "nova::controller_ha"
-  include_recipe "nova::availability_zones"
-  include_recipe "nova::trusted_flavors"
-  include_recipe "nova::monitor"
-end
+include_recipe "nova::config"
+include_recipe "nova::database"
+include_recipe "nova::api"
+include_recipe "nova::cert"
+include_recipe "nova::instances"
+include_recipe "nova::scheduler"
+include_recipe "nova::memcached"
+include_recipe "nova::vncproxy"
+include_recipe "nova::controller_ha"
+include_recipe "nova::availability_zones"
+include_recipe "nova::trusted_flavors"
+include_recipe "nova::monitor"

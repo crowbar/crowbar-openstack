@@ -14,13 +14,5 @@
 # limitations under the License.
 #
 
-barclamp = "nova"
-role = "nova-compute-hyperv"
-
-# if nil, then this means all states are valid
-states_for_role = node[barclamp]["element_states"][role]
-
-if states_for_role.nil? || states_for_role.include?("all") || states_for_role.include?(node[:state])
-  include_recipe "hyperv::do_setup"
-  include_recipe "hyperv::do_nova"
-end
+include_recipe "hyperv::do_setup"
+include_recipe "hyperv::do_nova"
