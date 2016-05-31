@@ -14,4 +14,4 @@
 # limitations under the License.
 #
 
-include_recipe "ceilometer::cagent"
+include_recipe "ceilometer::central"
