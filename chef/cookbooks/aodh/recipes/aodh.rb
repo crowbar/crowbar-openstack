@@ -213,14 +213,6 @@ service "aodh-listener" do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
-service "aodh-expirer" do
-  service_name node[:aodh][:expirer][:service_name]
-  supports status: true, restart: true, start: true, stop: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/aodh/aodh.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-end
-
 if ha_enabled
   log "HA support for aodh is enabled"
   include_recipe "aodh::aodh_ha"
