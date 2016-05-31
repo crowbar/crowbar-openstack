@@ -15,7 +15,6 @@
 
 api_service_name = "aodh-api"
 evaluator_service_name = "aodh-evaluator"
-expirer_service_name = "aodh-expirer"
 listener_service_name = "aodh-listener"
 notifier_service_name = "aodh-notifier"
 
@@ -47,7 +46,6 @@ when "rhel", "suse"
   }
   api_service_name = "openstack-aodh-api"
   evaluator_service_name = "openstack-aodh-evaluator"
-  expirer_service_name = "openstack-aodh-expirer"
   listener_service_name = "openstack-aodh-listener"
   notifier_service_name = "openstack-aodh-notifier"
 end
@@ -56,7 +54,6 @@ default[:aodh][:api][:service_name] = api_service_name
 default[:aodh][:evaluator][:service_name] = evaluator_service_name
 default[:aodh][:notifier][:service_name]  = notifier_service_name
 default[:aodh][:listener][:service_name]  = listener_service_name
-default[:aodh][:expirer][:service_name] = expirer_service_name
 
 default[:aodh][:user] = "aodh"
 default[:aodh][:group] = "aodh"
