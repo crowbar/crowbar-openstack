@@ -312,8 +312,7 @@ user_test_tester3 = testing3
 #
 
 [filter:authtoken]
-# paste.filter_factory = keystonemiddleware.auth_token:filter_factory
-paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+paste.filter_factory = keystonemiddleware.auth_token:filter_factory
 # auth_host = keystonehost
 auth_host = <%= @keystone_settings['internal_url_host'] %>
 # auth_port = 35357

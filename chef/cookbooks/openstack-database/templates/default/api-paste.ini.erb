@@ -16,7 +16,7 @@ pipeline = faultwrapper tokenauth authorization contextwrapper ratelimit extensi
 paste.filter_factory = trove.common.extensions:factory
 
 [filter:tokenauth]
-paste.filter_factory = keystoneclient.middleware.auth_token:filter_factory
+paste.filter_factory = keystonemiddleware.auth_token:filter_factory
 auth_uri = <%= @identity_uri.to_s %>
 auth_host = <%= @identity_admin_uri.host %>
 auth_port = <%= @identity_admin_uri.port %>
