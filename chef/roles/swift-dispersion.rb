@@ -16,7 +16,4 @@
 
 name "swift-dispersion"
 description "provides the health check service to swift"
-run_list(
-    "recipe[swift::dispersion]"
-)
-
+run_list("recipe[swift::role_swift_dispersion]")
