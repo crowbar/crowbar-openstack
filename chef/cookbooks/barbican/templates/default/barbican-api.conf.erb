@@ -1,0 +1,17 @@
+# OpenStack Barbican Apache2 configuration
+# Required Apache2 Modules
+#   - mod_wsgi
+
+<VirtualHost <%= @bind_host%>:<%= @bind_port%>>
+    WSGIScriptAlias / <%= @application_exec_path %>
+    WSGIDaemonProcess barbican-api user=<%= @barbican_user %> group=<%= @barbican_group%> processes=<%= @processes %> threads=<%= @threads %>
+    WSGIProcessGroup barbican-api
+    ErrorLog <%= @logfile %>
+    CustomLog <%= @logfile %> combined
+
+    <Directory <%= @application_path %>>
+        Options FollowSymLinks MultiViews
+        AllowOverride None
+        Require all granted
+    </Directory>
+</VirtualHost>
