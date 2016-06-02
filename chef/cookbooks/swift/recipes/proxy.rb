@@ -295,21 +295,9 @@ end
 
 ## Find other nodes that are swift-auth nodes, and make sure
 ## we use their memcached!
-servers =""
-env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
-result= search(:node, "roles:swift-proxy #{env_filter}")
-if !result.nil? and (result.length > 0)
-  memcached_servers = result.map {|x|
-    s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)
-    s += ":11211 "
-  }
-  memcached_servers.sort!
-  log("memcached servers" + memcached_servers.join(",")) { level :debug }
-  servers = memcached_servers.join(",")
-else
-  log("found no swift-proxy nodes") { level :warn }
-end
-proxy_config[:memcached_ips] = servers
+proxy_config[:memcached_ips] = search_env_filtered(:node, "roles:swift-proxy").map do |x|
+  "#{Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)}:11211"
+end.sort
 
 ## Create the proxy server configuraiton file
 template "/etc/swift/proxy-server.conf" do

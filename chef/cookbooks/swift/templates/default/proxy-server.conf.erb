@@ -386,7 +386,7 @@ log_name = cache
 # default to the value below. You can specify multiple servers separated with
 # commas, as in: 10.1.2.3:11211,10.1.2.4:11211
 # memcache_servers = 127.0.0.1:11211
-memcache_servers = <%= @memcached_ips %>
+memcache_servers = <%= @memcached_ips.join(", ") %>
 #
 # Sets how memcache values are serialized and deserialized:
 # 0 = older, insecure pickle serialization
