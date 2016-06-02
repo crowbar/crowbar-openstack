@@ -215,6 +215,7 @@ if node[:neutron][:use_lbaas]
     variables(
       interface_driver: interface_driver,
       use_lbaasv2: node[:neutron][:use_lbaasv2],
+      lbaasv2_driver: node[:neutron][:lbaasv2_driver],
       keystone_settings: keystone_settings
     )
   end

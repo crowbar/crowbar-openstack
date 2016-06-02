@@ -14,7 +14,8 @@
 #
 
 use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
-use_lbaas_agent = node[:neutron][:use_lbaas]
+use_lbaas_agent = node[:neutron][:use_lbaas] &&
+  (!node[:neutron][:use_lbaasv2] || [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver]))
 
 if use_l3_agent
   # do the setup required for neutron-ha-tool
