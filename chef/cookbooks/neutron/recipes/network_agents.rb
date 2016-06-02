@@ -20,7 +20,7 @@ package node[:neutron][:platform][:dhcp_agent_pkg]
 package node[:neutron][:platform][:metering_agent_pkg]
 
 if node[:neutron][:use_lbaas]
-  package node[:neutron][:platform][:lbaas_agent_pkg]
+  package node[:neutron][:platform][:lbaasv2_agent_pkg]
 end
 
 # Enable ip forwarding on network node for SLE11
@@ -155,7 +155,7 @@ service node[:neutron][:platform][:metering_agent_name] do
 end
 
 if node[:neutron][:use_lbaas] then
-  service node[:neutron][:platform][:lbaas_agent_name] do
+  service node[:neutron][:platform][:lbaasv2_agent_name] do
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
