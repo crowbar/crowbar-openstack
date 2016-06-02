@@ -12,6 +12,7 @@
       "create_default_networks": true,
       "dhcp_domain": "openstack.local",
       "use_lbaas": true,
+      "use_lbaasv2": false,
       "use_dvr": false,
       "additional_external_networks": [],
       "networking_plugin": "ml2",
