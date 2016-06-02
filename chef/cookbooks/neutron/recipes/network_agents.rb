@@ -20,7 +20,7 @@ package node[:neutron][:platform][:dhcp_agent_pkg]
 package node[:neutron][:platform][:metering_agent_pkg]
 
 if node[:neutron][:use_lbaas]
-  if node[:neutron][:use_lbaasv2]
+  if node[:neutron][:use_lbaasv2] && [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver])
     package node[:neutron][:platform][:lbaas_agent_pkg]
   else
     package node[:neutron][:platform][:lbaasv2_agent_pkg]
@@ -132,7 +132,8 @@ template "/etc/neutron/dhcp_agent.ini" do
   )
 end
 
-if node[:neutron][:use_lbaas] then
+if node[:neutron][:use_lbaas] &&
+    (!node[:neutron][:use_lbaasv2] || [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver]))
   template "/etc/neutron/lbaas_agent.ini" do
     cookbook "neutron"
     source "lbaas_agent.ini.erb"
@@ -158,7 +159,8 @@ service node[:neutron][:platform][:metering_agent_name] do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
-if node[:neutron][:use_lbaas] then
+if node[:neutron][:use_lbaas] &&
+    (!node[:neutron][:use_lbaasv2] || [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver]))
   lbaas_agent = if node[:neutron][:use_lbaasv2]
     node[:neutron][:platform][:lbaasv2_agent_name]
   else
