@@ -266,6 +266,7 @@ if node[:neutron][:use_lbaas]
     mode "0640"
     variables(
       interface_driver: interface_driver,
+      use_lbaasv2: node[:neutron][:use_lbaasv2],
       keystone_settings: keystone_settings
     )
   end

@@ -82,6 +82,8 @@ when "suse"
     zvm_agent_name: "openstack-neutron-zvm-agent",
     lbaas_agent_pkg: "openstack-neutron-lbaas-agent",
     lbaas_agent_name: "openstack-neutron-lbaas-agent",
+    lbaasv2_agent_pkg: "openstack-neutron-lbaas-agent",
+    lbaasv2_agent_name: "openstack-neutron-lbaasv2-agent",
     lbaas_haproxy_group: "haproxy",
     infoblox_agent_name: "openstack-neutron-infoblox-ipam-agent",
     metadata_agent_name: "openstack-neutron-metadata-agent",
@@ -125,6 +127,8 @@ when "rhel"
     zvm_agent_name: "openstack-neutron-zvm-agent",
     lbaas_agent_pkg: "openstack-neutron-lbaas-agent",
     lbaas_agent_name: "neutron-lbaas-agent",
+    lbaasv2_agent_pkg: "openstack-neutron-lbaas-agent",
+    lbaasv2_agent_name: "neutron-lbaasv2-agent",
     lbaas_haproxy_group: "nogroup",
     infoblox_agent_name: "",
     metadata_agent_name: "neutron-metadata-agent",
@@ -166,6 +170,8 @@ else
     zvm_agent_name: "neutron-zvm-agent",
     lbaas_agent_pkg: "neutron-lbaas-agent",
     lbaas_agent_name: "neutron-lbaas-agent",
+    lbaasv2_agent_pkg: "neutron-lbaas-agent",
+    lbaasv2_agent_name: "neutron-lbaasv2-agent",
     lbaas_haproxy_group: "nogroup",
     infoblox_agent_name: "",
     metadata_agent_name: "neutron-metadata-agent",
@@ -193,6 +199,7 @@ end
 default[:neutron][:ha][:network][:enabled] = false
 default[:neutron][:ha][:network][:l3_ra] = "lsb:#{node[:neutron][:platform][:l3_agent_name]}"
 default[:neutron][:ha][:network][:lbaas_ra] = "lsb:#{node[:neutron][:platform][:lbaas_agent_name]}"
+default[:neutron][:ha][:network][:lbaasv2_ra] = "lsb:#{node[:neutron][:platform][:lbaasv2_agent_name]}"
 default[:neutron][:ha][:network][:dhcp_ra] = "lsb:#{node[:neutron][:platform][:dhcp_agent_name]}"
 default[:neutron][:ha][:network][:metadata_ra] = "lsb:#{node[:neutron][:platform][:metadata_agent_name]}"
 default[:neutron][:ha][:network][:metering_ra] = "lsb:#{node[:neutron][:platform][:metering_agent_name]}"
