@@ -44,6 +44,21 @@ end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
+memcached_ips = ""
+env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
+result= search(:node, "roles:swift-proxy #{env_filter}")
+if !result.nil? and (result.length > 0)
+  memcached_servers = result.map {|x|
+    s = Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)
+    s += ":11211 "
+  }
+  memcached_servers.sort!
+  log("memcached servers" + memcached_servers.join(",")) { level :debug }
+  memcached_ips = memcached_servers.join(",")
+else
+  log("found no swift-proxy nodes") { level :warn }
+end
+
 %w{account-server object-expirer object-server container-server}.each do |service|
   template "/etc/swift/#{service}.conf" do
     source "#{service}.conf.erb"
@@ -53,6 +68,7 @@ storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
       uid: node[:swift][:user],
       gid: node[:swift][:group],
       storage_net_ip: storage_ip,
+      memcached_ips: memcached_ips,
       server_num: 1,  ## could allow multiple servers on the same machine
       debug: node[:swift][:debug]
     })

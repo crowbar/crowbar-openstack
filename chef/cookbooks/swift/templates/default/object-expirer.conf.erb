@@ -65,6 +65,7 @@ use = egg:swift#proxy
 [filter:cache]
 use = egg:swift#memcache
 # See proxy-server.conf-sample for options
+memcache_servers = <%= @memcached_ips %>
 
 [filter:catch_errors]
 use = egg:swift#catch_errors
