@@ -22,7 +22,7 @@ import random
 import string
 import sys
 
-from novaclient.v1_1 import client as nova_client
+from novaclient import client as nova_client
 
 
 debug = False
@@ -108,7 +108,8 @@ if not args.os_auth_url:
     print >> sys.stderr, 'You must provide an auth url via either --os-auth-url or via env[OS_AUTH_URL]'
     sys.exit(1)
 
-c = nova_client.Client(args.os_username,
+c = nova_client.Client("2",
+                       args.os_username,
                        args.os_password,
                        args.os_tenant_name,
                        auth_url=args.os_auth_url,

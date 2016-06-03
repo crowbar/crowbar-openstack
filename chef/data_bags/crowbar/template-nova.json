@@ -34,6 +34,12 @@
         "user": "nova",
         "database": "nova"
       },
+      "api_db": {
+        "password": "",
+        "user": "nova_api",
+        "database": "nova_api"
+      },
+
       "rbd": {
         "user": "",
         "secret_uuid": ""
@@ -92,7 +98,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-docker": [ "readying", "ready", "applying" ],

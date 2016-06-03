@@ -841,30 +841,116 @@ max_overflow = <%= @sql_max_pool_overflow %>
 pool_timeout = <%= @sql_pool_timeout %>
 
 [nova]
-# Name of the plugin to load
-# auth_plugin =
 
-# Config Section from which to load plugin specific options
-# auth_section =
-
-# PEM encoded Certificate Authority to use when verifying HTTPs connections.
-# cafile =
-
-# PEM encoded client certificate cert file
-# certfile =
-
-# Verify HTTPS connections.
-# insecure = False
-
-# PEM encoded client certificate key file
-# keyfile =
+#
+# From neutron
+#
 
 # Name of nova region to use. Useful if keystone manages more than one region.
-# region_name =
+# (string value)
+#region_name = <None>
 region_name = <%= @keystone_settings['endpoint_region'] %>
 
-# Timeout value for http requests
-# timeout =
+# Type of the nova endpoint to use.  This endpoint will be looked up in the
+# keystone catalog and should be one of public, internal or admin. (string
+# value)
+# Allowed values: public, admin, internal
+#endpoint_type = public
+endpoint_type = internal
+
+#
+# From nova.auth
+#
+
+# Authentication URL (unknown value)
+#auth_url = <None>
+auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol"],
+               @keystone_settings["internal_url_host"],
+               @keystone_settings["service_port"],
+               "2.0") %>
+
+# Authentication type to load (unknown value)
+# Deprecated group/name - [DEFAULT]/auth_plugin
+#auth_type = <None>
+auth_type = password
+
+# PEM encoded Certificate Authority to use when verifying HTTPs connections.
+# (string value)
+#cafile = <None>
+
+# PEM encoded client certificate cert file (string value)
+#certfile = <None>
+
+# Optional domain ID to use with v3 and v2 parameters. It will be used for both
+# the user and project domain in v3 and ignored in v2 authentication. (unknown
+# value)
+#default_domain_id = <None>
+
+# Optional domain name to use with v3 API and v2 parameters. It will be used
+# for both the user and project domain in v3 and ignored in v2 authentication.
+# (unknown value)
+#default_domain_name = <None>
+
+# Domain ID to scope to (unknown value)
+#domain_id = <None>
+
+# Domain name to scope to (unknown value)
+#domain_name = <None>
+
+# Verify HTTPS connections. (boolean value)
+#insecure = false
+<% if @nova_insecure -%>
+insecure = <%= @nova_insecure %>
+<% end -%>
+
+# PEM encoded client certificate key file (string value)
+#keyfile = <None>
+
+# User's password (unknown value)
+#password = <None>
+password = <%= @nova_admin_password if @nova_admin_password %>
+
+# Domain ID containing project (unknown value)
+#project_domain_id = <None>
+
+# Domain name containing project (unknown value)
+#project_domain_name = <None>
+
+# Project ID to scope to (unknown value)
+# Deprecated group/name - [DEFAULT]/tenant-id
+#project_id = <None>
+
+# Project name to scope to (unknown value)
+# Deprecated group/name - [DEFAULT]/tenant-name
+#project_name = <None>
+project_name = <%= @keystone_settings['service_tenant'] %>
+
+# Tenant ID (unknown value)
+#tenant_id = <None>
+
+# Tenant Name (unknown value)
+#tenant_name = <None>
+
+# Timeout value for http requests (integer value)
+#timeout = <None>
+
+# Trust ID (unknown value)
+#trust_id = <None>
+
+# User's domain id (unknown value)
+#user_domain_id = <None>
+
+# User's domain name (unknown value)
+#user_domain_name = <None>
+
+# User id (unknown value)
+#user_id = <None>
+
+# Username (unknown value)
+# Deprecated group/name - [DEFAULT]/username
+#username = <None>
+username = <%= @nova_admin_username if @nova_admin_username %>
+
 
 [oslo_concurrency]
 

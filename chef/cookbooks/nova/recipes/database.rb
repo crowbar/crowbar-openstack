@@ -30,34 +30,36 @@ crowbar_pacemaker_sync_mark "wait-nova_database" do
   timeout 120
 end
 
-# Creates empty nova database
-database "create #{node[:nova][:db][:database]} database" do
-  connection db_settings[:connection]
-  database_name node[:nova][:db][:database]
-  provider db_settings[:provider]
-  action :create
-  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
+[node[:nova][:db], node[:nova][:api_db]].each do |d|
+  # Creates empty nova database
+  database "create #{d[:database]} database" do
+    connection db_settings[:connection]
+    database_name d[:database]
+    provider db_settings[:provider]
+    action :create
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 
-database_user "create nova database user" do
-  connection db_settings[:connection]
-  username node[:nova][:db][:user]
-  password node[:nova][:db][:password]
-  provider db_settings[:user_provider]
-  action :create
-  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
+  database_user "create #{d[:user]} database user" do
+    connection db_settings[:connection]
+    username d[:user]
+    password d[:password]
+    provider db_settings[:user_provider]
+    action :create
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 
-database_user "grant privileges to the nova database user" do
-  connection db_settings[:connection]
-  database_name node[:nova][:db][:database]
-  username node[:nova][:db][:user]
-  password node[:nova][:db][:password]
-  host "%"
-  privileges db_settings[:privs]
-  provider db_settings[:user_provider]
-  action :grant
-  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  database_user "grant privileges to the #{d[:user]} database user" do
+    connection db_settings[:connection]
+    database_name d[:database]
+    username d[:user]
+    password d[:password]
+    host "%"
+    privileges db_settings[:privs]
+    provider db_settings[:user_provider]
+    action :grant
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 end
 
 # if we're upgrading from juno, we first need to upgrade to the kilo state,
@@ -113,7 +115,10 @@ execute "nova-manage db sync" do
   action :run
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
-  only_if { !node[:nova][:db_synced] && (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+  only_if do
+    !node[:nova][:db_synced] &&
+      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
 end
 
 # We want to keep a note that we've done db_sync, so we don't do it again.
@@ -127,6 +132,33 @@ ruby_block "mark node for nova db_sync" do
   end
   action :nothing
   subscribes :create, "execute[nova-manage db sync]", :immediately
+end
+
+# and finally the rest of the migrations
+execute "nova-manage api_db sync" do
+  user node[:nova][:user]
+  group node[:nova][:group]
+  command "nova-manage api_db sync"
+  action :run
+  # We only do the sync the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if do
+    !node[:nova][:api_db_synced] &&
+      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
+# We want to keep a note that we've done db_sync, so we don't do it again.
+# If we were doing that outside a ruby_block, we would add the note in the
+# compile phase, before the actual db_sync is done (which is wrong, since it
+# could possibly not be reached in case of errors).
+ruby_block "mark node for nova api_db_sync" do
+  block do
+    node.set[:nova][:api_db_synced] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[nova-manage api_db sync]", :immediately
 end
 
 crowbar_pacemaker_sync_mark "create-nova_database"
