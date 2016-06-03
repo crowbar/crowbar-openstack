@@ -27,44 +27,45 @@ node.set["openstack"]["database"]["volume_support"] = node[:trove][:volume_suppo
 # we need this in order for nova file injection to work for trove
 node.set["openstack"]["database"]["use_nova_server_config_drive"] = true
 
-keystone_server = get_instance("roles:keystone-server")
-Chef::Log.info("Found keystone-server instance on #{keystone_server}.")
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 node.set_unless["openstack"]["endpoints"]["identity-api"] = {}
-node["openstack"]["endpoints"]["identity-api"]["host"] = keystone_server["fqdn"]
-node["openstack"]["endpoints"]["identity-api"]["scheme"] = keystone_server["keystone"]["api"]["protocol"]
-node["openstack"]["endpoints"]["identity-api"]["port"] = keystone_server["keystone"]["api"]["service_port"]
+node["openstack"]["endpoints"]["identity-api"]["host"] = keystone_settings["internal_url_host"]
+node["openstack"]["endpoints"]["identity-api"]["scheme"] = keystone_settings["protocol"]
+node["openstack"]["endpoints"]["identity-api"]["port"] = keystone_settings["service_port"]
 
 node.set_unless["openstack"]["endpoints"]["identity-admin"] = {}
-node["openstack"]["endpoints"]["identity-admin"]["host"] = keystone_server["fqdn"]
-node["openstack"]["endpoints"]["identity-admin"]["scheme"] = keystone_server["keystone"]["api"]["protocol"]
-node["openstack"]["endpoints"]["identity-admin"]["port"] = keystone_server["keystone"]["api"]["admin_port"]
+node["openstack"]["endpoints"]["identity-admin"]["host"] = keystone_settings["internal_url_host"]
+node["openstack"]["endpoints"]["identity-admin"]["scheme"] = keystone_settings["protocol"]
+node["openstack"]["endpoints"]["identity-admin"]["port"] = keystone_settings["admin_port"]
 
 nova_multi_controller = get_instance("roles:nova-controller")
 Chef::Log.info("Found nova-controller instance on #{nova_multi_controller}.")
+nova_ha_enabled = nova_multi_controller[:nova][:ha][:enabled]
 node.set_unless["openstack"]["endpoints"]["compute-api"] = {}
-node["openstack"]["endpoints"]["compute-api"]["host"] = nova_multi_controller["fqdn"]
+node["openstack"]["endpoints"]["compute-api"]["host"] = CrowbarHelper.get_host_for_admin_url(nova_multi_controller, nova_ha_enabled)
 node["openstack"]["endpoints"]["compute-api"]["scheme"] = nova_multi_controller["nova"]["ssl"]["enabled"] ? "https" : "http"
 node["openstack"]["endpoints"]["compute-api"]["port"] = nova_multi_controller["nova"]["ports"]["api"]
 
 cinder_controller = get_instance("roles:cinder-controller")
 Chef::Log.info("Found cinder-controller instance on #{cinder_controller}.")
+cinder_ha_enabled = cinder_controller[:cinder][:ha][:enabled]
 node.set_unless["openstack"]["endpoints"]["block-storage-api"] = {}
-node["openstack"]["endpoints"]["block-storage-api"]["host"] = cinder_controller["fqdn"]
+node["openstack"]["endpoints"]["block-storage-api"]["host"] = CrowbarHelper.get_host_for_admin_url(cinder_controller, cinder_ha_enabled)
 node["openstack"]["endpoints"]["block-storage-api"]["scheme"] = cinder_controller["cinder"]["api"]["protocol"]
 node["openstack"]["endpoints"]["block-storage-api"]["port"] = cinder_controller["cinder"]["api"]["bind_port"]
 
 swift_proxy = get_instance("roles:swift-proxy")
 if swift_proxy  # swift is optional
   Chef::Log.info("Found swift-proxy instance on #{swift_proxy}.")
+  swift_ha_enabled = swift_proxy[:swift][:ha][:enabled]
   node.set_unless["openstack"]["endpoints"]["object-storage-api"] = {}
-  node["openstack"]["endpoints"]["object-storage-api"]["host"] = swift_proxy["fqdn"]
+  node["openstack"]["endpoints"]["object-storage-api"]["host"] = CrowbarHelper.get_host_for_admin_url(swift_proxy, swift_ha_enabled)
   node["openstack"]["endpoints"]["object-storage-api"]["scheme"] = swift_proxy["swift"]["ssl"]["enabled"] ? "https" : "http"
   node["openstack"]["endpoints"]["object-storage-api"]["port"] = swift_proxy["swift"]["ports"]["proxy"]
 else
   Chef::Log.info("Did not find a swift-proxy instance.")
 end
 
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 # talking to nova via the novaclient, this should be an admin user in
 # the keystone config (see the attributes in trove-taskmanager.conf and
 # others)
@@ -82,11 +83,11 @@ node.set_unless["openstack"]["endpoints"]["database-api"] = {}
 node.set["openstack"]["endpoints"]["database-api"]["host"] = node["fqdn"]
 node.set["openstack"]["endpoints"]["database-api"]["bind-host"] = node["fqdn"]
 
+rabbit_settings = fetch_rabbitmq_settings
 rabbitmq = get_instance("roles:rabbitmq-server")[:rabbitmq]
-Chef::Log.info("Found rabbitmq server on #{rabbitmq}.")
 node.set["openstack"]["mq"]["service_type"] = "rabbitmq"
-node.set["openstack"]["mq"]["database"]["rabbit"]["host"] = rabbitmq[:address]
-node.set["openstack"]["mq"]["database"]["rabbit"]["port"] = rabbitmq[:port] if rabbitmq[:port]
+node.set["openstack"]["mq"]["database"]["rabbit"]["host"] = rabbit_settings[:address]
+node.set["openstack"]["mq"]["database"]["rabbit"]["port"] = rabbit_settings[:port] if rabbitmq[:port]
 node.set["openstack"]["mq"]["database"]["rabbit"]["userid"] = rabbitmq[:trove][:user]
 node.set["openstack"]["mq"]["database"]["rabbit"]["vhost"] = rabbitmq[:trove][:vhost]
 node.set["openstack"]["secret"][rabbitmq[:trove][:user]]["user"] = rabbitmq[:trove][:password]
