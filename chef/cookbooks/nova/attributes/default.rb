@@ -28,11 +28,23 @@ default[:nova][:db][:password] = nil
 default[:nova][:db][:user] = "nova"
 default[:nova][:db][:database] = "nova"
 
-# SQLAlchemy parameters
+# DB SQLAlchemy parameters
 default[:nova][:db][:max_pool_size] = nil
 default[:nova][:db][:max_overflow] = nil
 default[:nova][:db][:pool_timeout] = nil
 default[:nova][:db][:min_pool_size] = nil
+
+#
+# Api Database Settings
+#
+default[:nova][:api_db][:password] = nil
+default[:nova][:api_db][:user] = "nova_api"
+default[:nova][:api_db][:database] = "nova_api"
+
+# Api DB SQLAlchemy parameters
+default[:nova][:api_db][:max_pool_size] = nil
+default[:nova][:api_db][:max_overflow] = nil
+default[:nova][:api_db][:pool_timeout] = nil
 
 # Feature settings
 default[:nova][:use_migration] = false
