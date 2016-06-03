@@ -1,0 +1,58 @@
+{
+  "id": "template-magnum",
+  "description": "Sets up OpenStack Magnum Containers as a Service",
+  "attributes": {
+    "magnum": {
+      "debug": false,
+      "verbose": true,
+      "keystone_instance": "none",
+      "database_instance": "none",
+      "glance_instance": "none",
+      "nova_instance": "none",
+      "heat_instance": "none",
+      "neutron_instance": "none",
+      "rabbitmq_instance": "none",
+      "service_user": "magnum",
+      "service_password": "",
+      "trustee": {
+          "domain_name": "magnum",
+          "domain_admin_name": "magnum_domain_admin",
+          "domain_admin_password": ""
+      },
+      "api": {
+        "protocol": "http",
+        "bind_open_address": true,
+        "bind_port": 9511
+      },
+      "db": {
+        "password": "",
+        "user": "magnum",
+        "database": "magnum"
+      }
+    }
+  },
+  "deployment": {
+    "magnum": {
+      "crowbar-revision": 1,
+      "crowbar-applied": false,
+      "element_states": {
+        "magnum-server": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "magnum-server" ]
+      ],
+      "element_run_list_order": {
+          "magnum-server": 110
+      },
+      "config": {
+        "environment": "magnum-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
+

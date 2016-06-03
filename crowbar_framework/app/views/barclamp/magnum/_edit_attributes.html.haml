@@ -1,0 +1,19 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header show_raw_deployment?, true
+
+  .panel-body
+    = instance_field :rabbitmq
+    = instance_field :keystone
+    = instance_field :nova
+    = instance_field :cinder
+
+    %fieldset
+      %legend
+        = t('.logging_header')
+      = boolean_field :verbose
+      = boolean_field :debug
+    %fieldset
+      %legend
+        = t('.trustee_header')
+      = string_field %w(trustee domain_name)

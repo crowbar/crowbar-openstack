@@ -60,19 +60,37 @@ else
 end
 
 # install horizon manila plugin if needed
-case node[:platform_family]
-when "suse"
-  manila_ui_pkgname = "openstack-horizon-plugin-manila-ui"
-when "rhel"
-  manila_ui_pkgname = "openstack-manila-ui"
-else
-  manila_ui_pkgname = nil
-end
+manila_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-manila-ui"
+  when "rhel"
+    "openstack-manila-ui"
+  end
 
 unless manila_ui_pkgname.nil?
   manila_servers = search(:node, "roles:manila-server") || []
   unless manila_servers.empty?
     package manila_ui_pkgname do
+      action :install
+      notifies :reload, resources(service: "apache2")
+    end
+  end
+end
+
+# install horizon magnum plugin if needed
+magnum_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-magnum-ui"
+  when "rhel"
+    "openstack-magnum-ui"
+  end
+
+unless magnum_ui_pkgname.nil?
+  magnum_servers = search(:node, "roles:magnum-server") || []
+  unless magnum_servers.empty?
+    package magnum_ui_pkgname do
       action :install
       notifies :reload, resources(service: "apache2")
     end
