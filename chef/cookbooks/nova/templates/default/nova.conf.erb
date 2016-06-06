@@ -1692,6 +1692,9 @@ connection = <%= @api_database_connection %>
 
 # Maximum number of SQL connections to keep open in a pool. (integer value)
 #max_pool_size = <None>
+<% unless node[:nova][:api_db][:max_pool_size].nil? -%>
+max_pool_size = <%= node[:nova][:api_db][:max_pool_size] %>
+<% end -%>
 
 # Maximum number of database connection retries during startup. Set to -1 to
 # specify an infinite retry count. (integer value)
@@ -1702,6 +1705,9 @@ connection = <%= @api_database_connection %>
 
 # If set, use this value for max_overflow with SQLAlchemy. (integer value)
 #max_overflow = <None>
+<% unless node[:nova][:api_db][:max_overflow].nil? -%>
+max_overflow = <%= node[:nova][:api_db][:max_overflow] %>
+<% end -%>
 
 # Verbosity of SQL debugging information: 0=None, 100=Everything. (integer
 # value)
@@ -1712,6 +1718,9 @@ connection = <%= @api_database_connection %>
 
 # If set, use this value for pool_timeout with SQLAlchemy. (integer value)
 #pool_timeout = <None>
+<% unless node[:nova][:api_db][:pool_timeout].nil? -%>
+pool_timeout = <%= node[:nova][:api_db][:pool_timeout] %>
+<% end -%>
 
 
 [barbican]
