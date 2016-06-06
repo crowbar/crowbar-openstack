@@ -15,8 +15,10 @@
 
 neutron = nil
 if node.attribute?(:cookbook) and node[:cookbook] == "nova"
-  neutrons = search(:node, "roles:neutron-server AND roles:neutron-config-#{node[:nova][:neutron_instance]}")
-  neutron = neutrons.first || raise("Neutron instance '#{node[:nova][:neutron_instance]}' for nova not found")
+  neutrons = fetch_nodes("roles:neutron-server AND " \
+                         "roles:neutron-config-#{node[:nova][:neutron_instance]}")
+  neutron = neutrons.first || raise("Neutron instance " \
+                                    "'#{node[:nova][:neutron_instance]}' for nova not found")
 else
   neutron = node
 end

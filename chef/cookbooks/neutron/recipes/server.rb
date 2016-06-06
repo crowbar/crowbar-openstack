@@ -13,9 +13,9 @@
 # limitations under the License.
 #
 
-hyperv_compute_node = search(:node, "roles:nova-compute-hyperv") || []
+hyperv_compute_node = fetch_nodes_with_roles("nova-compute-hyperv") || []
 use_hyperv = node[:neutron][:networking_plugin] == "ml2" && !hyperv_compute_node.empty?
-zvm_compute_node = search(:node, "roles:nova-compute-zvm") || []
+zvm_compute_node = fetch_nodes_with_roles("nova-compute-zvm") || []
 use_zvm = node[:neutron][:networking_plugin] == "ml2" && !zvm_compute_node.empty?
 
 pkgs = node[:neutron][:platform][:pkgs] + node[:neutron][:platform][:pkgs_fwaas]

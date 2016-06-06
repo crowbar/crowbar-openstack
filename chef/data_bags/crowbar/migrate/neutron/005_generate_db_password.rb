@@ -7,7 +7,7 @@ def upgrade ta, td, a, d
     @@neutron_db_password = service.random_password
   end
 
-  Chef::Search::Query.new.search(:node) do |node|
+  fetch_nodes do |node|
     unless (node[:neutron][:db][:password] rescue nil).nil?
       unless node[:neutron][:db][:password].empty?
         @@neutron_db_password = node[:neutron][:db][:password]

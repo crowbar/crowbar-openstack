@@ -16,8 +16,10 @@
 
 neutron = nil
 if node.attribute?(:cookbook) and node[:cookbook] == "nova"
-  neutrons = search(:node, "roles:neutron-server AND roles:neutron-config-#{node[:nova][:neutron_instance]}")
-  neutron = neutrons.first || raise("Neutron instance '#{node[:nova][:neutron_instance]}' for nova not found")
+  neutrons = fetch_nodes("roles:neutron-server AND " \
+                         "roles:neutron-config-#{node[:nova][:neutron_instance]}")
+  neutron = neutrons.first || raise("Neutron instance " \
+                                    "'#{node[:nova][:neutron_instance]}' for nova not found")
   nova_compute_ha_enabled = node[:nova][:ha][:compute][:enabled]
 else
   neutron = node
@@ -298,7 +300,7 @@ if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
 
   #TODO: nova should depend on neutron, but neutron also depends on nova
   # so we have to do something like this
-  novas = search(:node, "roles:nova-controller") || []
+  novas = fetch_nodes_with_roles("nova-controller") || []
   if novas.length > 0
     nova = novas[0]
     nova = node if nova.name == node.name

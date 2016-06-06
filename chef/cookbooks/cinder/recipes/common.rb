@@ -25,7 +25,7 @@ else
 end
 
 glance_env_filter = " AND glance_config_environment:glance-config-#{node[:cinder][:glance_instance]}"
-glance_servers = search(:node, "roles:glance-server#{glance_env_filter}") || []
+glance_servers = fetch_nodes("roles:glance-server#{glance_env_filter}") || []
 
 if glance_servers.length > 0
   glance_server = glance_servers[0]
@@ -44,7 +44,7 @@ else
 end
 Chef::Log.info("Glance server at #{glance_server_host}")
 
-nova_apis = search(:node, "roles:nova-controller") || []
+nova_apis = fetch_nodes_with_roles("nova-controller") || []
 if nova_apis.length > 0
   nova_api = nova_apis[0]
   nova_api_insecure = nova_api[:nova][:ssl][:enabled] && nova_api[:nova][:ssl][:insecure]
@@ -63,7 +63,7 @@ if node.roles.include? "cinder-controller"
   db_password = node[:cinder][:db][:password]
 else
   # pickup password to database from cinder-controller node
-  node_controllers = search(:node, "roles:cinder-controller") || []
+  node_controllers = fetch_nodes_with_roles("cinder-controller") || []
   if node_controllers.length > 0
     db_password = node_controllers[0][:cinder][:db][:password]
   end

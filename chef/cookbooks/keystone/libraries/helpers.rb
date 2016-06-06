@@ -86,6 +86,7 @@ module KeystoneHelper
   end
 
   private
+
   def self.search_for_keystone(node, cookbook_name)
     instance = node[cookbook_name][:keystone_instance] || "default"
 
@@ -94,7 +95,8 @@ module KeystoneHelper
       return @keystone_node[instance]
     end
 
-    nodes, _, _ = Chef::Search::Query.new.search(:node, "roles:keystone-server AND keystone_config_environment:keystone-config-#{instance}")
+    nodes = CrowbarOpenStackHelper.fetch_nodes(
+      "roles:keystone-server AND keystone_config_environment:keystone-config-#{instance}")
     if nodes.first
       keystone_node = nodes.first
       keystone_node = node if keystone_node.name == node.name

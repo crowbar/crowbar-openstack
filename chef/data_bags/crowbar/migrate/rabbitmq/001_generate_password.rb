@@ -7,7 +7,7 @@ def upgrade ta, td, a, d
     @@rabbitmq_password = service.random_password
   end
 
-  Chef::Search::Query.new.search(:node) do |node|
+  fetch_nodes do |node|
     unless (node[:rabbitmq][:password] rescue nil).nil?
       unless node[:rabbitmq][:password].empty?
         @@rabbitmq_password = node[:rabbitmq][:password]

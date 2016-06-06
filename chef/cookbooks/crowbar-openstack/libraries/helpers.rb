@@ -27,6 +27,14 @@ class Chef
     def fetch_rabbitmq_settings(barclamp=@cookbook_name)
       CrowbarOpenStackHelper.rabbitmq_settings(node, barclamp)
     end
+
+    def fetch_nodes_with_roles(roles)
+      CrowbarOpenStackHelper.fetch_nodes_with_roles(roles)
+    end
+
+    def fetch_nodes(expression)
+      CrowbarOpenStackHelper.fetch_nodes(expression)
+    end
   end
 end
 
@@ -43,6 +51,14 @@ class Chef
 
       def fetch_rabbitmq_settings(barclamp=@cookbook_name)
         CrowbarOpenStackHelper.rabbitmq_settings(node, barclamp)
+      end
+
+      def fetch_nodes_with_roles(roles)
+        CrowbarOpenStackHelper.fetch_nodes_with_roles(roles)
+      end
+
+      def fetch_nodes(expression)
+        CrowbarOpenStackHelper.fetch_nodes(expression)
       end
     end
   end
@@ -142,6 +158,16 @@ class CrowbarOpenStackHelper
     @rabbitmq_settings[instance]
   end
 
+  def self.fetch_nodes_with_roles(roles)
+    nodes, = Chef::Search::Query.new.search(:node, "roles:#{roles}")
+    nodes
+  end
+
+  def self.fetch_nodes(expression)
+    nodes, = Chef::Search::Query.new.search(:node, expression)
+    nodes
+  end
+
   private
 
   def self.get_node(node, role, barclamp, instance)
@@ -153,7 +179,9 @@ class CrowbarOpenStackHelper
         node[barclamp]["config"]["environment"] == "#{barclamp}-config-#{instance}"
       result = node
     else
-      nodes, _, _ = Chef::Search::Query.new.search(:node, "roles:#{role} AND #{barclamp}_config_environment:#{barclamp}-config-#{instance}")
+      nodes, = Chef::Search::Query.new.search(
+        :node,
+        "roles:#{role} AND #{barclamp}_config_environment:#{barclamp}-config-#{instance}")
       result = nodes.first unless nodes.empty?
     end
 

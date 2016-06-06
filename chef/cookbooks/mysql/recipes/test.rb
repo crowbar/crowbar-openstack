@@ -33,7 +33,7 @@ include_recipe "mysql::client"
 # via your barclamp, you'll need to adjust this.
 # Because of this, we know it's the first one
 # Thus, the db_server[0] bit.
-db_server = search(:node, "fqdn:#{node['mysql-server']}")
+db_server = fetch_nodes("fqdn:#{node["mysql-server"]}")
 
 # This saves the password so that we're idempotent.
 # Doesn't work on chef solo since there's no place to

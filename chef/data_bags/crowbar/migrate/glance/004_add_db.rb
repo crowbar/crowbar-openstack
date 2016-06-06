@@ -9,7 +9,7 @@ def upgrade ta, td, a, d
     @@glance_db_password = service.random_password
   end
 
-  Chef::Search::Query.new.search(:node) do |node|
+  fetch_nodes do |node|
     dirty = false
     unless (node[:glance][:db][:password] rescue nil).nil?
       unless node[:glance][:db][:password].empty?

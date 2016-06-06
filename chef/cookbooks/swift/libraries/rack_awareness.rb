@@ -14,7 +14,7 @@ class Rack_awareness
         switch_list=Hash.new()
         #get all swift nodes
         env_filter = " AND swift_config_environment:#{@node[:swift][:config][:environment]}"
-        nodes = Chef::Search::Query.new.search(:node, "roles:swift-storage#{env_filter}")[0]
+        nodes = CrowbarOpenStackHelper.fetch_nodes("roles:swift-storage#{env_filter}")
         #PP.pp(nodes.size, $>, 40)
         nodes.each do |n|
             sw_name=self.get_node_sw(n)

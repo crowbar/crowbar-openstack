@@ -33,7 +33,7 @@ end
 
 if has_internal
   ceph_env_filter = " AND ceph_config_environment:ceph-config-default"
-  ceph_servers = search(:node, "roles:ceph-osd#{ceph_env_filter}") || []
+  ceph_servers = fetch_nodes("roles:ceph-osd#{ceph_env_filter}") || []
   if ceph_servers.length > 0
     include_recipe "ceph::keyring"
   else
@@ -111,7 +111,7 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
 end
 
 unless ceph_clients.empty?
-  glance_servers = search(:node, "roles:glance-server")
+  glance_servers = fetch_nodes_with_roles("glance-server")
   if glance_servers.length > 0
     glance_pool = glance_servers[0][:glance][:rbd][:store_pool]
   else

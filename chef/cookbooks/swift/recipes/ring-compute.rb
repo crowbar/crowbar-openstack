@@ -48,7 +48,7 @@ target_nodes = []
 
 ####
 # collect the current contents of the ring files.
-nodes = search(:node, "roles:swift-storage#{env_filter}")
+nodes = fetch_nodes("roles:swift-storage#{env_filter}")
 
 disks_a = []
 disks_c = []
@@ -125,7 +125,7 @@ swift_ringfile "object.builder" do
   action [:apply, :rebalance]
 end
 
-proxy_nodes = search(:node, "roles:swift-proxy#{env_filter}")
+proxy_nodes = fetch_nodes("roles:swift-proxy#{env_filter}")
 proxy_nodes.each do |p|
   storage_ip = Swift::Evaluator.get_ip_by_type(p, :storage_ip_expr)
   target_nodes << storage_ip

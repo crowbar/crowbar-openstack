@@ -27,7 +27,7 @@ if node.roles.include? "manila-server"
   db_password = node[:manila][:db][:password]
 else
   # pickup password to database from manila-server node
-  node_servers = search(:node, "roles:manila-server") || []
+  node_servers = fetch_nodes_with_roles("manila-server") || []
   if node_servers.length > 0
     db_password = node_servers[0][:manila][:db][:password]
   end
@@ -57,7 +57,7 @@ end
 # get Neutron data (copied from nova.conf.erb)
 # TODO(toabctl): Seems that this code is used in different barclamps.
 # Should be shared
-neutron_servers = search(:node, "roles:neutron-server") || []
+neutron_servers = fetch_nodes_with_roles("neutron-server") || []
 if neutron_servers.length > 0
   neutron_server = neutron_servers[0]
   neutron_server = node if neutron_server.name == node.name
@@ -82,7 +82,7 @@ else
 end
 
 # get Nova data
-nova = search(:node, "roles:nova-controller") || []
+nova = fetch_nodes_with_roles("nova-controller") || []
 if nova.length > 0
   nova = nova[0]
   nova_insecure = (
@@ -98,7 +98,7 @@ else
 end
 
 # get Cinder data
-cinder = search(:node, "roles:cinder-controller") || []
+cinder = fetch_nodes_with_roles("cinder-controller") || []
 if cinder.length > 0
   cinder = cinder[0]
   cinder_insecure = (
