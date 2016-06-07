@@ -110,6 +110,12 @@
                       "service_port": { "type" : "int", "required" : true },
                       "service_host": { "type" : "str", "required" : true }
                     }},
+                    "odl": { "type": "map", "required": false, "mapping": {
+                      "controller_ip": { "type" : "str", "required" : true },
+                      "controller_port": { "type" : "str", "required" : true },
+                      "username": { "type" : "str", "required" : true },
+                      "password": { "type" : "str", "required" : true }
+                    }},
                     "use_infoblox": { "type": "bool", "required": true },
                     "infoblox": { "type": "map", "required": false, "mapping": {
                         "ib_wapi": { "type": "str", "required": true },
