@@ -15,7 +15,8 @@
 
 use_l3_agent = (node[:neutron][:networking_plugin] != "vmware" &&
                 !node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") &&
-                !node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
+                !node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp") &&
+                !node[:neutron][:ml2_mechanism_drivers].include?("opendaylight"))
 use_lbaas_agent = node[:neutron][:use_lbaas]
 use_metadata_agent = (!node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") &&
                       !node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))

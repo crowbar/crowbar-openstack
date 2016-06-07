@@ -100,7 +100,8 @@ when "ml2"
   case
   when ml2_mech_drivers.include?("openvswitch") ||
     ml2_mech_drivers.include?("cisco_apic_ml2") ||
-    ml2_mech_drivers.include?("apic_gbp")
+    ml2_mech_drivers.include?("apic_gbp") ||
+    ml2_mech_drivers.include?("opendaylight")
     interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
   when ml2_mech_drivers.include?("linuxbridge")
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
@@ -230,15 +231,19 @@ elsif node[:neutron][:use_lbaas] &&
   end
 end
 
-service node[:neutron][:platform][:dhcp_agent_name] do
-  supports status: true, restart: true
-  action [:enable, :start]
-  subscribes :restart, resources(template: node[:neutron][:config_file])
-  subscribes :restart, resources("template[/etc/neutron/dhcp_agent.ini]")
-  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
-end
-utils_systemd_service_restart node[:neutron][:platform][:dhcp_agent_name] do
-  action use_crowbar_pacemaker_service ? :disable : :enable
+unless node[:neutron][:networking_plugin] == "ml2" &&
+    node[:neutron][:ml2_mechanism_drivers].include?("opendaylight")
+  Chef::Log.warn("Starting DHCP Agent.")
+  service node[:neutron][:platform][:dhcp_agent_name] do
+    supports status: true, restart: true
+    action [:enable, :start]
+    subscribes :restart, resources(template: node[:neutron][:config_file])
+    subscribes :restart, resources("template[/etc/neutron/dhcp_agent.ini]")
+    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
+  end
+  utils_systemd_service_restart node[:neutron][:platform][:dhcp_agent_name] do
+    action use_crowbar_pacemaker_service ? :disable : :enable
+  end
 end
 
 if ha_enabled

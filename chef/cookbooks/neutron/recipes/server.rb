@@ -90,6 +90,19 @@ link "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" do
   notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
 end
 
+# enable/disable ml2_conf_odl for neutron-server
+odl_link_action = if node[:neutron][:networking_plugin] == "ml2" &&
+    node[:neutron][:ml2_mechanism_drivers].include?("opendaylight")
+  "create"
+else
+  "delete"
+end
+link "/etc/neutron/neutron-server.conf.d/100-ml2_conf_odl.ini.conf" do
+  to "/etc/neutron/plugins/ml2/ml2_conf_odl.ini"
+  action odl_link_action
+  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+end
+
 template "/etc/default/neutron-server" do
   source "neutron-server.erb"
   owner "root"
@@ -235,6 +248,8 @@ if node[:neutron][:networking_plugin] == "ml2"
   elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
       node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
     include_recipe "neutron::cisco_apic_support"
+  elsif node[:neutron][:ml2_mechanism_drivers].include?("opendaylight")
+    include_recipe "neutron::odl_support"
   end
 end
 
@@ -382,6 +397,27 @@ if node[:neutron][:networking_plugin] == "ml2"
       end
       action :nothing
       subscribes :create, "execute[gbp-db-manage upgrade head]", :immediately
+    end
+  elsif node[:neutron][:ml2_mechanism_drivers].include?("opendaylight")
+    db_synced = node[:neutron][:db_synced_odl]
+    is_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
+    execute "odl-db-manage upgrade head" do
+      user node[:neutron][:user]
+      group node[:neutron][:group]
+      command "neutron-db-manage --config-dir /etc/neutron/neutron.conf.d \
+                                 --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
+                                 --config-file /etc/neutron/plugins/ml2/ml2_conf_odl.ini \
+                                 upgrade head"
+      only_if { !db_synced && (!ha_enabled || is_founder) }
+    end
+
+    ruby_block "mark node for odl-db-manage upgrade head" do
+      block do
+        node.set[:neutron][:db_synced_odl] = true
+        node.save
+      end
+      action :nothing
+      subscribes :create, "execute[odl-db-manage upgrade head]", :immediately
     end
   end
 end
