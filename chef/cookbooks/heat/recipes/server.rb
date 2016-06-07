@@ -355,7 +355,7 @@ shell_get_stack_user_domain = <<-EOF
     --os-username #{keystone_settings["admin_user"]} \
     --os-password #{keystone_settings["admin_password"]} \
     --os-tenant-name #{keystone_settings["admin_tenant"]} \
-    --os-url=$OS_URL \
+    --os-auth-url=$OS_URL \
     --os-region-name='#{keystone_settings["endpoint_region"]}' \
     --os-identity-api-version=3 #{insecure} domain show -f shell --variable id #{stack_user_domain_name});
   echo $id
