@@ -196,6 +196,9 @@ end
 
 stack_user_domain_name = "heat"
 insecure = keystone_settings["insecure"] ? "--insecure" : ""
+auth_url = "#{keystone_settings["protocol"]}://"\
+           "#{keystone_settings["internal_url_host"]}:"\
+           "#{keystone_settings["service_port"]}/v3"
 
 bash "register heat domain" do
   user "root"
@@ -204,21 +207,11 @@ bash "register heat domain" do
     # Find domain ID
     id=
     eval $(openstack #{insecure} \
-        domain show \
-        -f shell --variable id \
+        domain create \
+        --or-show -f shell --variable id \
+        --description "Owns users and projects created by heat" \
         #{stack_user_domain_name})
-
     HEAT_DOMAIN_ID=$id
-
-    if [ -z "$HEAT_DOMAIN_ID" ]; then
-        id=
-        eval $(openstack #{insecure} \
-            domain create \
-            -f shell --variable id \
-            --description "Owns users and projects created by heat" \
-            #{stack_user_domain_name})
-        HEAT_DOMAIN_ID=$id
-    fi
 
     [ -n "$HEAT_DOMAIN_ID" ] || exit 1
 
@@ -283,7 +276,7 @@ bash "register heat domain" do
     "OS_USERNAME" => keystone_settings["admin_user"],
     "OS_PASSWORD" => keystone_settings["admin_password"],
     "OS_TENANT_NAME" => keystone_settings["admin_tenant"],
-    "OS_AUTH_URL" => "#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3",
+    "OS_AUTH_URL" => auth_url,
     "OS_REGION_NAME" => keystone_settings["endpoint_region"],
     "OS_IDENTITY_API_VERSION" => "3"
   })
@@ -349,17 +342,20 @@ end
 
 crowbar_pacemaker_sync_mark "create-heat_register"
 
-shell_get_stack_user_domain = <<-EOF
-  export OS_URL="#{keystone_settings["protocol"]}://#{keystone_settings["internal_url_host"]}:#{keystone_settings["service_port"]}/v3"
-  eval $(openstack \
-    --os-username #{keystone_settings["admin_user"]} \
-    --os-password #{keystone_settings["admin_password"]} \
-    --os-tenant-name #{keystone_settings["admin_tenant"]} \
-    --os-url=$OS_URL \
-    --os-region-name='#{keystone_settings["endpoint_region"]}' \
-    --os-identity-api-version=3 #{insecure} domain show -f shell --variable id #{stack_user_domain_name});
-  echo $id
-EOF
+ruby_block "Update node heat parameters" do
+  block do
+    openstack_command = "openstack --os-username #{keystone_settings["admin_user"]}"
+    openstack_command << " --os-auth-type password --os-identity-api-version 3"
+    openstack_command << " --os-password #{keystone_settings["admin_password"]}"
+    openstack_command << " --os-tenant-name #{keystone_settings["admin_tenant"]}"
+    openstack_command << " --os-auth-url #{auth_url}"
+
+    domain_id_cmd = "#{openstack_command} domain show #{stack_user_domain_name} -f value -c id"
+
+    node.set[:heat][:stack_user_domain_id] = `#{domain_id_cmd}`.chomp
+    node.save
+  end
+end
 
 template "/etc/heat/heat.conf" do
   source "heat.conf.erb"
@@ -380,7 +376,7 @@ template "/etc/heat/heat.conf" do
     heat_metadata_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
     heat_waitcondition_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
     heat_watch_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}",
-    stack_user_domain: %x[ #{shell_get_stack_user_domain} ].chomp,
+    stack_user_domain: node[:heat][:stack_user_domain_id],
     stack_domain_admin: node[:heat]["stack_domain_admin"],
     stack_domain_admin_password: node[:heat]["stack_domain_admin_password"],
     use_convergence_engine: node[:heat][:use_convergence_engine],
