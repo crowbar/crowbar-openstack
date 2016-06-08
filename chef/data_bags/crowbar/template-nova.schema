@@ -136,6 +136,15 @@
                 "allocate_retries": { "type": "number", "required" : true },
                 "allocate_retries_interval": { "type": "number", "required" : true }
               }
+            },
+            "metadata": {
+              "type": "map", "required": true, "mapping": {
+                "vendordata": {
+                  "type": "map", "required": true, "mapping": {
+                    "json": { "type": "str", "required" : true }
+                  }
+                }
+              }
             }
           }
         }

@@ -522,6 +522,9 @@ wsgi_keep_alive = false
 
 # File to load JSON formatted vendor data from (string value)
 #vendordata_jsonfile_path = <None>
+<% if @vendordata_jsonfile %>
+vendordata_jsonfile_path = <%= @vendordata_jsonfile %>
+<% end -%>
 
 # Permit instance snapshot operations. (boolean value)
 #allow_instance_snapshots = true

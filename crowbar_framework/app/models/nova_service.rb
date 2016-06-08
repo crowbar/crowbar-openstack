@@ -395,6 +395,13 @@ class NovaService < PacemakerServiceObject
       end
     end
 
+    # vendordata must be valid json
+    begin
+      JSON.parse(proposal["attributes"][@bc_name]["metadata"]["vendordata"]["json"])
+    rescue JSON::ParserError
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.vendor_data_invalid_json")
+    end
+
     super
   end
 
