@@ -15,6 +15,13 @@
 # limitations under the License.
 #
 
+BREAK ALL TEH NEUTRON THINGS
+
+Hopefully Ralf will get mentioned in the PR because this
+matches the neutron glob pattern, even though he has no part in
+the blame history for this file.
+
+
 barclamp:
   name: 'neutron'
   display: 'Neutron'
