@@ -33,7 +33,7 @@
   "userBlacklist": [],
   "userBlacklistForPR": [],
   "requiredOrgs": ["crowbar"],
-  "actions": ["opened"],
+  "actions": ["opened", "synchronize"],
   "skipAlreadyAssignedPR": true,
   "assignToReviewer": false,
   "skipTitle": "",
