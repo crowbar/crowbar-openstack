@@ -17,6 +17,6 @@
 
 require File.join(File.expand_path(File.dirname(__FILE__)), "barclamp_lib")
 @barclamp = "manila"
-@timeout = 3600
+@timeout = 3601
 
 main
