@@ -53,15 +53,29 @@ node["openstack"]["endpoints"]["block-storage-api"]["host"] = cinder_controller[
 node["openstack"]["endpoints"]["block-storage-api"]["scheme"] = cinder_controller["cinder"]["api"]["protocol"]
 node["openstack"]["endpoints"]["block-storage-api"]["port"] = cinder_controller["cinder"]["api"]["bind_port"]
 
-swift_proxy = get_instance("roles:swift-proxy")
-if swift_proxy  # swift is optional
+swift_proxy = search_env_filtered(:node, "roles:swift-proxy").first
+if swift_proxy
   Chef::Log.info("Found swift-proxy instance on #{swift_proxy}.")
   node.set_unless["openstack"]["endpoints"]["object-storage-api"] = {}
   node["openstack"]["endpoints"]["object-storage-api"]["host"] = swift_proxy["fqdn"]
   node["openstack"]["endpoints"]["object-storage-api"]["scheme"] = swift_proxy["swift"]["ssl"]["enabled"] ? "https" : "http"
   node["openstack"]["endpoints"]["object-storage-api"]["port"] = swift_proxy["swift"]["ports"]["proxy"]
+  object_storage_insecure = swift_proxy["swift"]["ssl"]["insecure"]
 else
-  Chef::Log.info("Did not find a swift-proxy instance.")
+  radosgw = search(:node, "roles:ceph-radosgw").first
+  if radosgw
+    Chef::Log.info("Found radosgw instance on #{radosgw}.")
+    radosgw_ssl_enabled = radosgw["ceph"]["radosgw"]["ssl"]["enabled"]
+    radosgw_ha_enabled = radosgw[:ceph][:ha][:radosgw][:enabled]
+    node.set_unless["openstack"]["endpoints"]["object-storage-api"] = {}
+    node["openstack"]["endpoints"]["object-storage-api"]["host"] = CrowbarHelper.get_host_for_admin_url(radosgw, radosgw_ha_enabled)
+    node["openstack"]["endpoints"]["object-storage-api"]["scheme"] = radosgw_ssl_enabled ? "https" : "http"
+    node["openstack"]["endpoints"]["object-storage-api"]["port"] = radosgw_ssl_enabled ? node["ceph"]["radosgw"]["rgw_port_ssl"] : node["ceph"]["radosgw"]["rgw_port"]
+    object_storage_insecure = radosgw["ceph"]["radosgw"]["ssl"]["insecure"]
+  else
+    Chef::Log.info("Did not find a swift-proxy or radosgw instance.")
+    object_storage_insecure = false
+  end
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -95,7 +109,7 @@ node.set["openstack"]["insecure"] = keystone_settings["insecure"]
 node.set["openstack"]["identity"]["insecure"] = keystone_settings["insecure"]
 node.set["openstack"]["compute"]["insecure"] = nova_multi_controller[:nova][:ssl][:insecure]
 node.set["openstack"]["block-storage"]["insecure"] = cinder_controller[:cinder][:ssl][:insecure]
-node.set["openstack"]["object-storage"]["insecure"] = swift_proxy[:swift][:ssl][:insecure]
+node.set["openstack"]["object-storage"]["insecure"] = object_storage_insecure
 node.set["openstack"]["database"]["insecure"] = keystone_settings["insecure"]
 node.set["openstack"]["region"] = keystone_settings["endpoint_region"]
 node.set["openstack"]["database"]["region"] = keystone_settings["endpoint_region"]
