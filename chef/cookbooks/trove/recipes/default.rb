@@ -85,6 +85,7 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 node.set["openstack"]["database"]["nova_proxy_user"] = keystone_settings["admin_user"]
 node.set["openstack"]["database"]["nova_proxy_password"] = keystone_settings["admin_password"]
 node.set["openstack"]["database"]["nova_proxy_tenant"] = keystone_settings["admin_tenant"]
+node.set["openstack"]["database"]["nova_proxy_tenant_id"] = keystone_settings["admin_tenant_id"]
 
 node.set["openstack"]["use_databags"] = false
 node.set["openstack"]["secret"]["openstack_identity_bootstrap_token"] = {token: keystone_settings["admin_token"] }
