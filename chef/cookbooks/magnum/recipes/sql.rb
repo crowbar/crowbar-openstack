@@ -26,13 +26,14 @@ include_recipe "#{db_settings[:backend_name]}::python-client"
 
 crowbar_pacemaker_sync_mark "wait-magnum_database"
 
+is_cluster_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
 # Create the Magnum Database
 database "create #{node[:magnum][:db][:database]} database" do
   connection db_settings[:connection]
   database_name node[:magnum][:db][:database]
   provider db_settings[:provider]
   action :create
-  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  only_if { !ha_enabled || is_cluster_founder }
 end
 
 database_user "create magnum database user" do
@@ -42,7 +43,7 @@ database_user "create magnum database user" do
   password node[:magnum][:db][:password]
   provider db_settings[:user_provider]
   action :create
-  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  only_if { !ha_enabled || is_cluster_founder }
 end
 
 database_user "grant database access for magnum database user" do
@@ -54,7 +55,7 @@ database_user "grant database access for magnum database user" do
   privileges db_settings[:privs]
   provider db_settings[:user_provider]
   action :grant
-  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  only_if { !ha_enabled || is_cluster_founder }
 end
 
 is_cluster_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)

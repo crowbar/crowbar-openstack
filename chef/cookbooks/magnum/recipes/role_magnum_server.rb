@@ -14,28 +14,8 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'magnum'
-  display: 'Magnum'
-  description: 'OpenStack Containers: Container Infrastructure Management Service'
-  version: 0
-  user_managed: true
-  requires:
-    - '@crowbar'
-    - 'pacemaker'
-    - 'database'
-    - 'rabbitmq'
-    - 'keystone'
-    - 'glance'
-    - 'nova'
-    - 'heat'
-    - 'neutron'
-  member:
-    - 'openstack'
-
-crowbar:
-  layout: 1
-  order: 110
-  run_order: 110
-  chef_order: 110
-  proposal_schema_version: 3
+include_recipe "magnum::setup"
+include_recipe "magnum::common"
+include_recipe "magnum::sql"
+include_recipe "magnum::api"
+include_recipe "magnum::conductor"
