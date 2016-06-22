@@ -426,7 +426,7 @@ else
   use_interface_attach = true
   use_rescue = true
   use_suspend = true
-  use_vnc = true
+  use_vnc = node[:kernel][:machine] != "aarch64"
   use_run_validation = true
   use_config_drive = true
   image_regex = "^cirros-#{cirros_version}-x86_64-tempest-machine$"

@@ -3699,6 +3699,7 @@ vncserver_proxyclient_address = <%= node[:nova][:my_ip] %>
 # Enable VNC related features (boolean value)
 # Deprecated group/name - [DEFAULT]/vnc_enabled
 #enabled = true
+enabled = <%= @vnc_enabled ? "True" : "False" %>
 
 # Keymap for VNC (string value)
 # Deprecated group/name - [DEFAULT]/vnc_keymap
