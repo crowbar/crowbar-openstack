@@ -83,6 +83,11 @@ case node[:nova][:libvirt_type]
         when "kvm", "qemu"
           package "qemu"
 
+          if node[:kernel][:machine] == "aarch64"
+            package "qemu-arm"
+            package "qemu-uefi-aarch64"
+          end
+
           # Use a ruby block for consistency with the other call
           ruby_block "set boot kernel" do
             block do
