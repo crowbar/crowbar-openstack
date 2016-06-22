@@ -29,7 +29,7 @@ class MagnumService < ServiceObject
 
   def proposal_dependencies(role)
     answer = []
-    deps = ["database", "rabbitmq", "keystone", "nova", "glance", "neutron", "heat"]
+    deps = ["database", "rabbitmq", "keystone", "nova", "glance", "neutron", "heat", "barbican"]
     deps.each do |dep|
       answer << {
         "barclamp" => dep,
@@ -82,6 +82,9 @@ class MagnumService < ServiceObject
       find_dep_proposal("neutron")
     base["attributes"][@bc_name]["heat_instance"] =
       find_dep_proposal("heat")
+    base["attributes"][@bc_name]["barbican_instance"] =
+      find_dep_proposal("barbican")
+
 
     base["attributes"][@bc_name]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
