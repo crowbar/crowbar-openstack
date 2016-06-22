@@ -158,7 +158,7 @@ case node[:nova][:libvirt_type]
       # change libvirt to run qemu as user qemu
       # make sure to only set qemu:kvm for kvm and qemu deployments, use
       # system defaults for xen
-      if ["kvm","qemu"].include?(node[:nova][:libvirt_type])
+      if ["kvm", "qemu"].include?(node[:nova][:libvirt_type])
         libvirt_user = "qemu"
         libvirt_group = "kvm"
       else
