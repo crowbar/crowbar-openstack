@@ -21,8 +21,6 @@
 include_recipe "nova::neutron"
 include_recipe "nova::config"
 
-sles11 = node[:platform] == "suse" && node[:platform_version].to_f < 12.0
-
 if %w(rhel suse).include?(node[:platform_family])
   # Start open-iscsi daemon, since nova-compute is going to use it and stumble over the
   # "starting daemon" messages otherwise
@@ -31,14 +29,7 @@ if %w(rhel suse).include?(node[:platform_family])
     supports status: true, start: true, stop: true, restart: true
     action [:enable, :start]
     if node[:platform_family] == "suse"
-      if sles11
-        # Workaround broken open-iscsi init scripts that return a failed code
-        # but start the service anyway. run a status command afterwards to
-        # see what the real status is (bnc#885834)
-        start_command "/etc/init.d/open-iscsi start; /etc/init.d/open-iscsi status"
-      else
-        service_name "iscsid"
-      end
+      service_name "iscsid"
     end
   end
 end
@@ -90,11 +81,7 @@ case node[:nova][:libvirt_type]
 
       case node[:nova][:libvirt_type]
         when "kvm", "qemu"
-          if sles11
-            package "kvm"
-          else
-            package "qemu"
-          end
+          package "qemu"
 
           # Use a ruby block for consistency with the other call
           ruby_block "set boot kernel" do
@@ -104,10 +91,8 @@ case node[:nova][:libvirt_type]
           end
 
           if node[:nova][:libvirt_type] == "kvm"
-            unless sles11
-              package "qemu-kvm" if node[:kernel][:machine] == "x86_64"
-              package "qemu-block-rbd"
-            end
+            package "qemu-kvm" if node[:kernel][:machine] == "x86_64"
+            package "qemu-block-rbd"
 
             # load modules only when appropriate kernel is present
             execute "loading kvm modules" do
@@ -177,11 +162,7 @@ case node[:nova][:libvirt_type]
       end
 
       template "/etc/libvirt/qemu.conf" do
-        if sles11
-          source "qemu.conf.sle11.erb"
-        else
-          source "qemu.conf.erb"
-        end
+        source "qemu.conf.erb"
         group "root"
         owner "root"
         mode 0644
@@ -351,12 +332,6 @@ if node[:nova][:libvirt_use_multipath]
 
   service "multipathd" do
     action [:enable, :start]
-  end
-
-  service "boot.multipath" do
-    action [:enable]
-    # on recent SUSE, there is no boot.multipath service, because of systemd
-    only_if { sles11 }
   end
 end
 
