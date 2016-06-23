@@ -23,6 +23,11 @@ if node[:neutron][:use_lbaas]
   package node[:neutron][:platform][:lbaas_agent_pkg]
 end
 
+if node[:neutron][:use_vpnaas]
+  package node[:neutron][:platform][:vpnaas_agent_pkg]
+  node[:neutron][:platform][:vpnaas_agent_device_driver_pkgs].each { |p| package p }
+end
+
 # Enable ip forwarding on network node for SLE11
 ruby_block "edit /etc/sysconfig/sysctl for IP_FORWARD" do
   block do
@@ -142,6 +147,24 @@ if node[:neutron][:use_lbaas] then
   end
 end
 
+if node[:neutron][:use_vpnaas]
+  cookbook_file "/etc/strongswan.d/charon/stroke.conf" do
+    source "strongswan_charon_stroke.conf"
+  end
+
+  template "/etc/neutron/vpn_agent.ini" do
+    cookbook "neutron"
+    source "vpn_agent.ini.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    variables(
+      vpn_device_drivers:
+        ["neutron_vpnaas.services.vpn.device_drivers.strongswan_ipsec.StrongSwanDriver"]
+    )
+  end
+end
+
 ha_enabled = node[:neutron][:ha][:network][:enabled]
 
 service node[:neutron][:platform][:metering_agent_name] do
@@ -158,6 +181,17 @@ if node[:neutron][:use_lbaas] then
     action [:enable, :start]
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
     subscribes :restart, resources("template[/etc/neutron/lbaas_agent.ini]")
+    provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  end
+end
+
+if node[:neutron][:use_vpnaas]
+  service node[:neutron][:platform][:vpnaas_agent_name] do
+    supports status: true, restart: true
+    action [:enable, :start]
+    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources("template[/etc/neutron/vpn_agent.ini]")
+    subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 end

@@ -15,6 +15,7 @@
 
 use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
 use_lbaas_agent = node[:neutron][:use_lbaas]
+use_vpnaas_agent = node[:neutron][:use_vpnaas]
 
 if use_l3_agent
   # do the setup required for neutron-ha-tool
@@ -129,6 +130,18 @@ if use_lbaas_agent
   end
   group_members << lbaas_agent_primitive
   transaction_objects << "pacemaker_primitive[#{lbaas_agent_primitive}]"
+end
+
+if use_vpnaas_agent
+  vpnaas_agent_primitive = "neutron-vpnaas-agent"
+  pacemaker_primitive vpnaas_agent_primitive do
+    agent node[:neutron][:ha][:network][:vpnaas_ra]
+    op node[:neutron][:ha][:network][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  group_members << vpnaas_agent_primitive
+  transaction_objects << "pacemaker_primitive[#{vpnaas_agent_primitive}]"
 end
 
 agents_group_name = "g-neutron-agents"
