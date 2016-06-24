@@ -38,12 +38,12 @@ module NeutronHelper
 
     physmap = Hash.new
     networks.each do |net, net_object|
-      if net_object.interface == fixed_interface
-        physmap[net] = fixed_physnet
+      physmap[net] = if net_object.interface == fixed_interface
+        fixed_physnet
       elsif net == "nova_floating"
-        physmap[net] = "floating"
+        "floating"
       else
-        physmap[net] = net
+        net
       end
     end
     physmap
