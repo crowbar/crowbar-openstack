@@ -11,20 +11,16 @@ module NeutronHelper
     networks = Hash.new
     interfaces_used = Hash.new
     external_networks.each do |net|
-      networks[net] = node["network"]["networks"][net].to_hash
-      networks[net]["interface"] =
-        BarclampLibrary::Barclamp::Inventory.lookup_interface_info(
-          node, networks[net]["conduit"]).first
-      networks[net]["interface"] += ".#{networks[net]["vlan"]}" if networks[net]["use_vlan"]
+      networks[net] = BarclampLibrary::Barclamp::Inventory.get_network_by_type(node, net)
 
-      if interfaces_used[networks[net]["interface"]]
+      if interfaces_used[networks[net].interface]
         Chef::Log.error(
-          "Networks '#{net}' and '#{interfaces_used[networks[net]["interface"]]}' " \
-          "will use the same physical interface (#{networks[net]["interface"]}) " \
+          "Networks '#{net}' and '#{interfaces_used[networks[net].interface]}' " \
+          "will use the same physical interface (#{networks[net].interface}) " \
           "on node #{node.name}.")
         raise "Two or more external networks will end up on the same physical interface."
       else
-        interfaces_used[networks[net]["interface"]] = net
+        interfaces_used[networks[net].interface] = net
       end
     end
 
@@ -33,15 +29,16 @@ module NeutronHelper
     fixed_interface = ""
     fixed_physnet = ""
     if node[:crowbar_wall][:network][:nets][:nova_fixed]
-      fixed_conduit = node[:network][:networks][:nova_fixed][:conduit]
+      nova_fixed_net = BarclampLibrary::Barclamp::Inventory.get_network_by_type(node, "nova_fixed")
+      fixed_conduit = nova_fixed_net.conduit
       fixed_interface = BarclampLibrary::Barclamp::Inventory.lookup_interface_info(
         node, fixed_conduit)[0]
       fixed_physnet = "physnet1"
     end
 
     physmap = Hash.new
-    networks.each do |net, values|
-      if values["interface"] == fixed_interface
+    networks.each do |net, net_object|
+      if net_object.interface == fixed_interface
         physmap[net] = fixed_physnet
       elsif net == "nova_floating"
         physmap[net] = "floating"

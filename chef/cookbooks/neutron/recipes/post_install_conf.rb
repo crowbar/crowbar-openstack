@@ -19,33 +19,39 @@ def mask_to_bits(mask)
   IPAddr.new(mask).to_i.to_s(2).count("1")
 end
 
+# accessing the network definition directly, since the node is not using this
+# network
 fixed_net = node[:network][:networks]["nova_fixed"]
+fixed_net_ranges = fixed_net[:ranges]
 fixed_range = "#{fixed_net["subnet"]}/#{mask_to_bits(fixed_net["netmask"])}"
-fixed_pool_start = fixed_net[:ranges][:dhcp][:start]
-fixed_pool_end = fixed_net[:ranges][:dhcp][:end]
+fixed_pool_start = fixed_net_ranges[:dhcp][:start]
+fixed_pool_end = fixed_net_ranges[:dhcp][:end]
 fixed_first_ip = IPAddr.new("#{fixed_range}").to_range().to_a[2]
 fixed_last_ip = IPAddr.new("#{fixed_range}").to_range().to_a[-2]
 
 fixed_pool_start = fixed_first_ip if fixed_first_ip > fixed_pool_start
 fixed_pool_end = fixed_last_ip if fixed_last_ip < fixed_pool_end
 
-public_net = node[:network][:networks]["public"]
+public_net = Barclamp::Inventory.get_network_by_type(node, "public")
+# accessing the network definition directly, since the node is not necessarily
+# using this network
 floating_net = node[:network][:networks]["nova_floating"]
+floating_net_ranges = floating_net[:ranges]
 
-public_net_addr = IPAddr.new("#{public_net["subnet"]}/#{public_net["netmask"]}")
+public_net_addr = IPAddr.new("#{public_net.subnet}/#{public_net.netmask}")
 floating_net_addr = IPAddr.new("#{floating_net["subnet"]}/#{floating_net["netmask"]}")
 
 # For backwards compatibility, if floating is a subnet of public use the
 # router and range/netmask from public (otherwise router creation will fail)
 if public_net_addr.include?(floating_net_addr)
-  floating_router = public_net["router"]
-  floating_range = "#{public_net["subnet"]}/#{mask_to_bits(public_net["netmask"])}"
+  floating_router = public_net.router
+  floating_range = "#{public_net.subnet}/#{mask_to_bits(public_net.netmask)}"
 else
   floating_router = floating_net["router"]
   floating_range = "#{floating_net["subnet"]}/#{mask_to_bits(floating_net["netmask"])}"
 end
-floating_pool_start = floating_net[:ranges][:host][:start]
-floating_pool_end = floating_net[:ranges][:host][:end]
+floating_pool_start = floating_net_ranges[:host][:start]
+floating_pool_end = floating_net_ranges[:host][:end]
 
 vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 

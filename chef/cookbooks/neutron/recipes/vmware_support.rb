@@ -150,6 +150,8 @@ nsx_data["port"] = neutron[:neutron][:vmware][:port]
 nsx_data["username"] = neutron[:neutron][:vmware][:user]
 nsx_data["password"] = neutron[:neutron][:vmware][:password]
 
+os_sdn_net = Barclamp::Inventory.get_network_by_type(node, "os_sdn")
+
 nsx_transport_node node.name.split(".").first do
   nsx_controller nsx_data
   client_pem_file "/etc/openvswitch/ovsclient-cert.pem"
@@ -158,7 +160,7 @@ nsx_transport_node node.name.split(".").first do
   transport_connectors([
     {
       "transport_zone_uuid" => neutron[:neutron][:vmware][:tz_uuid],
-      "ip_address" => node[:crowbar][:network][:os_sdn][:address],
+      "ip_address" => os_sdn_net.address,
       "type" => "STTConnector"
     },
     {

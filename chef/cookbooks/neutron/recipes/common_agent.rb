@@ -172,6 +172,8 @@ if neutron[:neutron][:networking_plugin] == "ml2"
   # L2 agent
   case
   when ml2_mech_drivers.include?("zvm")
+    # accessing the network definition directly, since the node is not using
+    # this network
     vlan_start = neutron[:network][:networks][:nova_fixed][:vlan]
     num_vlans = neutron[:neutron][:num_vlans]
     vlan_end = [vlan_start + num_vlans - 1, 4094].min
