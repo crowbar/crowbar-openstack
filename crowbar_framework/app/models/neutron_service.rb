@@ -307,25 +307,24 @@ class NeutronService < PacemakerServiceObject
           ovs_bridge_networks << "nova_fixed"
         end
         ovs_bridge_networks.each do |net|
-          if node.crowbar["crowbar"]["network"][net]
-            unless node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"]
-              @logger.info("Forcing add_ovs_bridge to true for the #{net} network on node #{node.name}")
-              node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = true
-              needs_save = true
-            end
-          end
+          net_def = node.get_network_by_type(net)
+          next if net_def.nil?
+          next if net_def["add_ovs_bridge"]
+
+          @logger.info("Forcing add_ovs_bridge to true for the #{net} network on node #{node.name}")
+          node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = true
+          needs_save = true
         end
       end
     end
     # Cleanup the add_ovs_bridge bridge flag on all other networks.
-    node.crowbar["crowbar"]["network"].keys.each do |net|
-      unless ovs_bridge_networks.include?(net)
-        if node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"]
-          @logger.info("Forcing add_ovs_bridge to false for the #{net} network on node #{node.name}")
-          node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = false
-          needs_save = true
-        end
-      end
+    node.networks.each do |net, net_def|
+      next if ovs_bridge_networks.include?(net)
+      next unless net_def["add_ovs_bridge"]
+
+      @logger.info("Forcing add_ovs_bridge to false for the #{net} network on node #{node.name}")
+      node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = false
+      needs_save = true
     end
     if ovs_bridge_networks.empty? && !ml2_mechanism_drivers.include?("openvswitch")
       if node.crowbar["network"] && node.crowbar["network"]["needs_openvswitch"]
@@ -356,7 +355,8 @@ class NeutronService < PacemakerServiceObject
         # Force "use_vlan" to false in VLAN mode (linuxbridge and ovs). We
         # need to make sure that the network recipe does NOT create the
         # VLAN interfaces (ethX.VLAN)
-        if node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"]
+        net_def = node.get_network_by_type("nova_fixed")
+        if net_def["use_vlan"]
           @logger.info("Forcing use_vlan to false for the nova_fixed network on node #{nodename}")
           node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"] = false
           node.save
