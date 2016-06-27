@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
-include_recipe "ceilometer::agent"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "ceilometer", "ceilometer-agent")
+  include_recipe "ceilometer::agent"
+end

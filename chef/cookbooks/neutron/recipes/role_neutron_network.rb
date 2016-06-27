@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
-include_recipe "neutron::network_agents"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "neutron", "neutron-network")
+  include_recipe "neutron::network_agents"
+end

@@ -14,5 +14,7 @@
 # limitations under the License.
 #
 
-include_recipe "hyperv::do_setup"
-include_recipe "hyperv::do_nova"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "nova", "nova-compute-hyperv")
+  include_recipe "hyperv::do_setup"
+  include_recipe "hyperv::do_nova"
+end

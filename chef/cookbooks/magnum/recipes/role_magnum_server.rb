@@ -14,8 +14,10 @@
 # limitations under the License.
 #
 
-include_recipe "magnum::setup"
-include_recipe "magnum::common"
-include_recipe "magnum::sql"
-include_recipe "magnum::api"
-include_recipe "magnum::conductor"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "magnum", "magnum-server")
+  include_recipe "magnum::setup"
+  include_recipe "magnum::common"
+  include_recipe "magnum::sql"
+  include_recipe "magnum::api"
+  include_recipe "magnum::conductor"
+end

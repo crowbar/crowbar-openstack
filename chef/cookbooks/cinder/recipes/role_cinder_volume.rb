@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
-include_recipe "cinder::volume"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "cinder", "cinder-volume")
+  include_recipe "cinder::volume"
+end

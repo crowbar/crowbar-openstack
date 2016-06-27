@@ -14,5 +14,7 @@
 # limitations under the License.
 #
 
-include_recipe "database::crowbar"
-include_recipe "database::server"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "database", "database-server")
+  include_recipe "database::crowbar"
+  include_recipe "database::server"
+end

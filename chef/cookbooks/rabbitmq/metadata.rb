@@ -8,6 +8,7 @@ recipe "rabbitmq::cluster", "Set up RabbitMQ clustering."
 
 depends "crowbar-openstack"
 depends "crowbar-pacemaker"
+depends "utils"
 depends "nagios"
 # depends           "apt"
 

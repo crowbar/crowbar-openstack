@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
-include_recipe "manila::api"
-include_recipe "manila::scheduler"
-include_recipe "manila::controller_ha"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "manila", "manila-server")
+  include_recipe "manila::api"
+  include_recipe "manila::scheduler"
+  include_recipe "manila::controller_ha"
+end

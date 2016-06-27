@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
-include_recipe "nova::xen"
-include_recipe "nova::compute"
-include_recipe "nova::monitor"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "nova", "nova-compute-xen")
+  include_recipe "nova::xen"
+  include_recipe "nova::compute"
+  include_recipe "nova::monitor"
+end

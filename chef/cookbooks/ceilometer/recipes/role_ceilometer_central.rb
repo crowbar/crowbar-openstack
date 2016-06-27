@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
-include_recipe "ceilometer::central"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "ceilometer", "ceilometer-central")
+  include_recipe "ceilometer::central"
+end

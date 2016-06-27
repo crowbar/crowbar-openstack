@@ -14,5 +14,7 @@
 # limitations under the License.
 #
 
-include_recipe "swift::default"
-include_recipe "swift::ring-compute"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "swift", "swift-ring-compute")
+  include_recipe "swift::default"
+  include_recipe "swift::ring-compute"
+end

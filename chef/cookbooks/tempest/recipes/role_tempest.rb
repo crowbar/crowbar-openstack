@@ -14,5 +14,7 @@
 # limitations under the License.
 #
 
-include_recipe "tempest::install"
-include_recipe "tempest::config"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "tempest", "tempest")
+  include_recipe "tempest::install"
+  include_recipe "tempest::config"
+end

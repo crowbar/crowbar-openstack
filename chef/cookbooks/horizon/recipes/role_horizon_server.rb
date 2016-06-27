@@ -14,5 +14,7 @@
 # limitations under the License.
 #
 
-include_recipe "horizon::server"
-include_recipe "horizon::monitor"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "horizon", "horizon-server")
+  include_recipe "horizon::server"
+  include_recipe "horizon::monitor"
+end

@@ -14,5 +14,7 @@
 # limitations under the License.
 #
 
-include_recipe "keystone::server"
-include_recipe "keystone::monitor"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "keystone", "keystone-server")
+  include_recipe "keystone::server"
+  include_recipe "keystone::monitor"
+end

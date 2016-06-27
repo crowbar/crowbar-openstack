@@ -14,5 +14,7 @@
 # limitations under the License.
 #
 
-include_recipe "heat::server"
-include_recipe "heat::monitor"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "heat", "heat-server")
+  include_recipe "heat::server"
+  include_recipe "heat::monitor"
+end

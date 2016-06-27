@@ -14,5 +14,7 @@
 # limitations under the License.
 #
 
-include_recipe "hyperv::do_setup"
-include_recipe "hyperv::do_ceilometer"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "ceilometer", "ceilometer-agent-hyperv")
+  include_recipe "hyperv::do_setup"
+  include_recipe "hyperv::do_ceilometer"
+end
