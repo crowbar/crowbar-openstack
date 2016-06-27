@@ -93,7 +93,8 @@ end
 
 # accessing the network definition directly, since the node is not using this
 # network
-vlan_start = node[:network][:networks][:nova_fixed][:vlan]
+fixed_net_def = Barclamp::Inventory.get_network_definition(node, "nova_fixed")
+vlan_start = fixed_net_def["vlan"]
 num_vlans = node[:neutron][:num_vlans]
 vlan_end = [vlan_start + num_vlans - 1, 4094].min
 

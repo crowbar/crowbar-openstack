@@ -21,8 +21,8 @@ end
 
 # accessing the network definition directly, since the node is not using this
 # network
-fixed_net = node[:network][:networks]["nova_fixed"]
-fixed_net_ranges = fixed_net[:ranges]
+fixed_net = Barclamp::Inventory.get_network_definition(node, "nova_fixed")
+fixed_net_ranges = fixed_net["ranges"]
 fixed_range = "#{fixed_net["subnet"]}/#{mask_to_bits(fixed_net["netmask"])}"
 fixed_pool_start = fixed_net_ranges[:dhcp][:start]
 fixed_pool_end = fixed_net_ranges[:dhcp][:end]
@@ -35,8 +35,8 @@ fixed_pool_end = fixed_last_ip if fixed_last_ip < fixed_pool_end
 public_net = Barclamp::Inventory.get_network_by_type(node, "public")
 # accessing the network definition directly, since the node is not necessarily
 # using this network
-floating_net = node[:network][:networks]["nova_floating"]
-floating_net_ranges = floating_net[:ranges]
+floating_net = Barclamp::Inventory.get_network_definition(node, "nova_floating")
+floating_net_ranges = floating_net["ranges"]
 
 public_net_addr = IPAddr.new("#{public_net.subnet}/#{public_net.netmask}")
 floating_net_addr = IPAddr.new("#{floating_net["subnet"]}/#{floating_net["netmask"]}")
