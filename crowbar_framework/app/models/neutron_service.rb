@@ -312,7 +312,7 @@ class NeutronService < PacemakerServiceObject
           next if net_def["add_ovs_bridge"]
 
           @logger.info("Forcing add_ovs_bridge to true for the #{net} network on node #{node.name}")
-          node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = true
+          node.set_network_attribute(net, "add_ovs_bridge", true)
           needs_save = true
         end
       end
@@ -323,7 +323,7 @@ class NeutronService < PacemakerServiceObject
       next unless net_def["add_ovs_bridge"]
 
       @logger.info("Forcing add_ovs_bridge to false for the #{net} network on node #{node.name}")
-      node.crowbar["crowbar"]["network"][net]["add_ovs_bridge"] = false
+      node.set_network_attribute(net, "add_ovs_bridge", false)
       needs_save = true
     end
     if ovs_bridge_networks.empty? && !ml2_mechanism_drivers.include?("openvswitch")
@@ -358,7 +358,7 @@ class NeutronService < PacemakerServiceObject
         net_def = node.get_network_by_type("nova_fixed")
         if net_def["use_vlan"]
           @logger.info("Forcing use_vlan to false for the nova_fixed network on node #{nodename}")
-          node.crowbar["crowbar"]["network"]["nova_fixed"]["use_vlan"] = false
+          node.set_network_attribute("nova_fixed", "use_vlan", false)
           node.save
         end
       end
