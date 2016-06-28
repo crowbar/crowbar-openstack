@@ -143,33 +143,23 @@ elsif node[:keystone][:frontend] == "apache"
     include_recipe "apache2::mod_wsgi"
   end
   include_recipe "apache2::mod_rewrite"
-
-  directory "/usr/lib/cgi-bin/keystone/" do
-    owner "root"
-    group "root"
-    mode 0755
-    action :create
-    recursive true
-  end
-
-  template "/usr/lib/cgi-bin/keystone/main" do
-    source "keystone_wsgi_bin.py.erb"
-    mode 0755
-  end
-
-  template "/usr/lib/cgi-bin/keystone/admin" do
-    source "keystone_wsgi_bin.py.erb"
-    mode 0755
-  end
+  apache_module "version"
 
   apache_site "000-default" do
     enable false
   end
 
-  template "/etc/apache2/sites-available/keystone.conf" do
-    path "/etc/httpd/sites-available/keystone.conf" if %w(rhel).include?(node[:platform_family])
+  apache_log_dir = if node[:platform_family] == "suse"
+    "/var/log/apache2"
+  else
+    "${APACHE_LOG_DIR}"
+  end
+
+  template "#{node[:apache][:dir]}/sites-available/keystone.conf" do
+    path "#{node[:apache][:dir]}/vhosts.d/keystone.conf" if node[:platform_family] == "suse"
     source "apache_keystone.conf.erb"
     variables(
+      apache_log_dir: apache_log_dir,
       bind_admin_port: bind_admin_port, # Auth port
       bind_admin_host: bind_admin_host,
       bind_service_port: bind_service_port, # public port
