@@ -88,6 +88,8 @@ when "suse"
     cisco_pkgs: ["python-networking-cisco"],
     cisco_apic_pkgs: ["python-apicapi",
                       "python-neutron-ml2-driver-apic"],
+    cisco_apic_gbp_pkgs: ["openstack-neutron-gbp",
+                          "python-gbpclient"],
     cisco_opflex_pkgs: ["agent-ovs",
                         "lldpd",
                         "openstack-neutron-opflex-agent"],

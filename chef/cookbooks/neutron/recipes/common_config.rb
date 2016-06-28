@@ -113,6 +113,8 @@ end
 if neutron[:neutron][:networking_plugin] == "ml2"
   if neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
     service_plugins = "cisco_apic_l3"
+  elsif neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+    service_plugins = "group_policy,servicechain,apic_gbp_l3"
   else
     service_plugins = "neutron.services.l3_router.l3_router_plugin.L3RouterPlugin, \
                        #{service_plugins}"

@@ -80,8 +80,10 @@ flat_networks = <%= @external_networks.join(",") %>
 #
 # network_vlan_ranges =
 # Example: network_vlan_ranges = physnet1:1000:2999,physnet2
-<% if @ml2_type_drivers.include?("vlan") -%>
+<% unless @ml2_mechanism_drivers.include?("cisco_apic_ml2") || @ml2_mechanism_drivers.include?("apic_gbp") -%>
+<%   if @ml2_type_drivers.include?("vlan") -%>
 network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
+<%   end -%>
 <% end -%>
 
 [ml2_type_gre]
