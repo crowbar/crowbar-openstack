@@ -89,6 +89,7 @@ when "suse"
     cisco_apic_pkgs: ["python-apicapi",
                       "python-neutron-ml2-driver-apic"],
     cisco_opflex_pkgs: ["agent-ovs",
+                        "lldpd",
                         "openstack-neutron-opflex-agent"],
     cisco_opflex_ovs_pkgs: ["openvswitch",
                             "openvswitch-kmp-default",

@@ -23,6 +23,11 @@ if ml2_mech_drivers.include?("cisco_apic_ml2")
   # apply configurations to compute node
   if node.roles.include?("nova-compute-kvm")
     node[:neutron][:platform][:cisco_opflex_pkgs].each { |p| package p }
+
+    service "lldpd" do
+      action [:enable, :start]
+    end
+
     # include neutron::common_config only now, after we've installed packages
     include_recipe "neutron::common_config"
 
