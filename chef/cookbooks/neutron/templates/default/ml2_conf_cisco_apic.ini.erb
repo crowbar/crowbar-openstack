@@ -102,3 +102,11 @@ apic_provision_hostlinks = True
 # encap=vlan-100
 # cidr_exposed=10.10.40.2/16
 # gateway_ip=10.10.40.1
+
+<% if @ml2_mechanism_drivers.include?("apic_gbp") -%>
+[group_policy]
+policy_drivers = <%= @policy_drivers %>
+
+[group_policy_implicit_policy]
+default_ip_pool = <%= @default_ip_pool %>
+<% end -%>

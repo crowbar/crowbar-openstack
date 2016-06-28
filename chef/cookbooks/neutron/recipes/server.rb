@@ -199,7 +199,8 @@ if node[:neutron][:networking_plugin] == "ml2"
   if node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
     include_recipe "neutron::cisco_support"
   end
-  if node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
+  if node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
+      if node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
     include_recipe "neutron::cisco_apic_support"
   end
 end
@@ -315,27 +316,49 @@ if node[:neutron][:use_lbaas]
   end
 end
 
-if node[:neutron][:networking_plugin] == "ml2" && \
-    node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
-  # See comments for "neutron-db-manage migrate" above
-  execute "apic-ml2-db-manage upgrade head" do
-    user node[:neutron][:user]
-    group node[:neutron][:group]
-    command "apic-ml2-db-manage --config-file /etc/neutron/neutron.conf \
-                                --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
-                                --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
-                                upgrade head"
-    only_if { !node[:neutron][:db_synced_apic_ml2] && \
-              (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
-  end
-
-  ruby_block "mark node for apic-ml2-db-manage upgrade head" do
-    block do
-      node.set[:neutron][:db_synced_apic_ml2] = true
-      node.save
+if node[:neutron][:networking_plugin] == "ml2"
+  if node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
+    # See comments for "neutron-db-manage migrate" above
+    execute "apic-ml2-db-manage upgrade head" do
+      user node[:neutron][:user]
+      group node[:neutron][:group]
+      command "apic-ml2-db-manage --config-file /etc/neutron/neutron.conf \
+                                  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
+                                  --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
+                                  upgrade head"
+      only_if { !node[:neutron][:db_synced_apic_ml2] && \
+                (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
     end
-    action :nothing
-    subscribes :create, "execute[apic-ml2-db-manage upgrade head]", :immediately
+
+    ruby_block "mark node for apic-ml2-db-manage upgrade head" do
+      block do
+        node.set[:neutron][:db_synced_apic_ml2] = true
+        node.save
+      end
+      action :nothing
+      subscribes :create, "execute[apic-ml2-db-manage upgrade head]", :immediately
+    end
+  elsif node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+    # See comments for "neutron-db-manage migrate" above
+    execute "gbp-db-manage upgrade head" do
+      user node[:neutron][:user]
+      group node[:neutron][:group]
+      command "gbp-db-manage --config-file /etc/neutron/neutron.conf \
+                             --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
+                             --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
+                             upgrade head"
+      only_if { !node[:neutron][:db_synced_apic_gbp] && \
+                (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+    end
+
+    ruby_block "mark node for gbp-db-manage upgrade head" do
+      block do
+        node.set[:neutron][:db_synced_apic_gbp] = true
+        node.save
+      end
+      action :nothing
+      subscribes :create, "execute[gbp-db-manage upgrade head]", :immediately
+    end
   end
 end
 
