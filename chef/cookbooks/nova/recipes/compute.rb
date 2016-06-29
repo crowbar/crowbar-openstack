@@ -183,6 +183,15 @@ case node[:nova][:libvirt_type]
         notifies :restart, "service[libvirtd]"
       end
 
+      service "virtlogd" do
+        action [:enable, :start]
+        if node[:nova][:ha][:compute][:enabled]
+          provider Chef::Provider::CrowbarPacemakerService
+          supports no_crm_maintenance_mode: true
+        end
+        only_if { node[:platform_family] == "suse" && node[:platform_version].to_f > 12.1 }
+      end
+
       service "libvirtd" do
         action [:enable, :start]
         if node[:nova][:ha][:compute][:enabled]
