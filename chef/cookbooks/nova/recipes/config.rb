@@ -289,6 +289,7 @@ template "/etc/nova/nova.conf" do
             glance_server_port: glance_server_port,
             glance_server_insecure: glance_server_insecure || keystone_settings["insecure"],
             metadata_bind_address: metadata_bind_address,
+            vnc_enabled: node[:kernel][:machine] != "aarch64",
             vncproxy_public_host: vncproxy_public_host,
             vncproxy_ssl_enabled: api[:nova][:novnc][:ssl][:enabled],
             vncproxy_cert_file: api_novnc_ssl_certfile,

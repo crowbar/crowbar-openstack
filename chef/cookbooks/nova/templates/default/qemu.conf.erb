@@ -200,21 +200,22 @@
 # a special value; security_driver can be set to that value in
 # isolation, but it cannot appear in a list of drivers.
 #
-# SUSE Note:
-# Currently, Apparmor is the default security framework in SUSE
-# distros.  If Apparmor is enabled on the host, libvirtd is
-# generously confined but users must opt-in to confine qemu
-# instances.  Change this to 'apparmor' to enable Apparmor
-# confinement of qemu instances.
-#
 #security_driver = "selinux"
-# security_driver = "apparmor"
+#security_driver = "apparmor"
 security_driver = "none"
 
 # If set to non-zero, then the default security labeling
 # will make guests confined. If set to zero, then guests
-# will be unconfined by default. Defaults to 1.
-#security_default_confined = 1
+# will be unconfined by default. Defaults to 0.
+#
+# SUSE Note:
+# Currently, Apparmor is the default security framework in SUSE
+# distros.  If Apparmor is enabled on the host, libvirtd is
+# generously confined but users must opt-in to confine qemu
+# instances.  Change this to a non-zero value to enable default
+# Apparmor confinement of qemu instances.
+#
+security_default_confined = 0
 
 # If set to non-zero, then attempts to create unconfined
 # guests will be blocked. Defaults to 0.
@@ -283,6 +284,14 @@ group = "<%= @group %>"
 #    "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
 #    "/dev/rtc","/dev/hpet", "/dev/vfio/vfio"
 #]
+#
+# RDMA migration requires the following extra files to be added to the list:
+#   "/dev/infiniband/rdma_cm",
+#   "/dev/infiniband/issm0",
+#   "/dev/infiniband/issm1",
+#   "/dev/infiniband/umad0",
+#   "/dev/infiniband/umad1",
+#   "/dev/infiniband/uverbs0"
 
 
 # The default format for Qemu/KVM guest save images is raw; that is, the
@@ -339,10 +348,17 @@ group = "<%= @group %>"
 # unspecified here, determination of a host mount point in /proc/mounts
 # will be attempted.  Specifying an explicit mount overrides detection
 # of the same in /proc/mounts.  Setting the mount point to "" will
-# disable guest hugepage backing.
+# disable guest hugepage backing. If desired, multiple mount points can
+# be specified at once, separated by comma and enclosed in square
+# brackets, for example:
 #
-# NB, within this mount point, guests will create memory backing files
-# in a location of $MOUNTPOINT/libvirt/qemu
+#     hugetlbfs_mount = ["/dev/hugepages2M", "/dev/hugepages1G"]
+#
+# The size of huge page served by specific mount point is determined by
+# libvirt at the daemon startup.
+#
+# NB, within these mount points, guests will create memory backing
+# files in a location of $MOUNTPOINT/libvirt/qemu
 #
 #hugetlbfs_mount = "/dev/hugepages"
 
@@ -431,6 +447,7 @@ group = "<%= @group %>"
 #lock_manager = "lockd"
 
 
+
 # Set limit of maximum APIs queued on one domain. All other APIs
 # over this threshold will fail on acquiring job lock. Specially,
 # setting to zero turns this feature off.
@@ -471,7 +488,7 @@ group = "<%= @group %>"
 
 # Override the listen address for all incoming migrations. Defaults to
 # 0.0.0.0, or :: if both host and qemu are capable of IPv6.
-#migration_address = "127.0.0.1"
+#migration_address = "0.0.0.0"
 
 
 # The default hostname or IP address which will be used by a migration
@@ -499,3 +516,43 @@ group = "<%= @group %>"
 # Defaults to 1.
 #
 #log_timestamp = 0
+
+
+# Location of master nvram file
+#
+# When a domain is configured to use UEFI instead of standard
+# BIOS it may use a separate storage for UEFI variables. If
+# that's the case libvirt creates the variable store per domain
+# using this master file as image. Each UEFI firmware can,
+# however, have different variables store. Therefore the nvram is
+# a list of strings when a single item is in form of:
+#   ${PATH_TO_UEFI_FW}:${PATH_TO_UEFI_VARS}.
+# Later, when libvirt creates per domain variable store, this list is
+# searched for the master image. The UEFI firmware can be called
+# differently for different guest architectures. For instance, it's OVMF
+# for x86_64 and i686, but it's AAVMF for aarch64. The libvirt default
+# follows this scheme.
+#nvram = [
+#   "/usr/share/qemu/ovmf-x86_64-ms-code.bin:/usr/share/qemu/ovmf-x86_64-ms-vars.bin",
+#   "/usr/share/qemu/aavmf-aarch64-code.bin:/usr/share/qemu/aavmf-aarch64-vars.bin"
+#]
+
+nvram = [
+   "/usr/share/qemu/ovmf-x86_64-ms-code.bin:/usr/share/qemu/ovmf-x86_64-ms-vars.bin",
+   "/usr/share/qemu/aavmf-aarch64-code.bin:/usr/share/qemu/aavmf-aarch64-vars.bin"
+]
+
+# The backend to use for handling stdout/stderr output from
+# QEMU processes.
+#
+#  'file': QEMU writes directly to a plain file. This is the
+#          historical default, but allows QEMU to inflict a
+#          denial of service attack on the host by exhausting
+#          filesystem space
+#
+#  'logd': QEMU writes to a pipe provided by virtlogd daemon.
+#          This is the current default, providing protection
+#          against denial of service by performing log file
+#          rollover when a size limit is hit.
+#
+#stdio_handler = "logd"
