@@ -175,17 +175,17 @@ class NeutronService < PacemakerServiceObject
       end
     end
 
-    # linuxbridge and cisco_nexus mech drivers need vlan type driver
-    # TODO(toabctl): select vlan type driver automatically if linuxbridge or cisco were selected!?
-    %w(linuxbridge cisco_nexus).each do |drv|
-      if ml2_mechanism_drivers.include? drv and not ml2_type_drivers.include? "vlan"
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.mechanism_driver", drv: drv)
-      end
+    if ml2_mechanism_drivers.include?("linuxbridge") && ml2_type_drivers.include?("gre")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.linuxbridge_gre")
     end
 
-    # cisco_nexus mech driver needs also openvswitch mech driver
+    # cisco_nexus mech driver needs also openvswitch mech driver and vlan type driver
     if ml2_mechanism_drivers.include? "cisco_nexus" and not ml2_mechanism_drivers.include? "openvswitch"
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_nexus")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_nexus_ovs")
+    end
+
+    if ml2_mechanism_drivers.include?("cisco_nexus") && !ml2_type_drivers.include?("vlan")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_nexus_vlan")
     end
 
     # for now, openvswitch and linuxbrige can't be used in parallel
