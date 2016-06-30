@@ -88,7 +88,8 @@ case node[:nova][:libvirt_type]
             package "qemu-uefi-aarch64"
           end
 
-          if node[:kernel][:machine] == "x86_64"
+          if node[:kernel][:machine] == "x86_64" &&
+              node[:platform_family] == "suse" && node[:platform_version].to_f > 12.1
             package "qemu-ovmf-x86_64"
           end
 
