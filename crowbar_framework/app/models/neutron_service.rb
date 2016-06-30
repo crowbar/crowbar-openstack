@@ -227,7 +227,7 @@ class NeutronService < PacemakerServiceObject
       )
     end
 
-    if ml2_type_drivers.include? "gre"
+    if ml2_mechanism_drivers.include?("openvswitch") && ml2_type_drivers.include?("gre")
       validate_gre proposal["attributes"]["neutron"]["gre"]
     end
 
