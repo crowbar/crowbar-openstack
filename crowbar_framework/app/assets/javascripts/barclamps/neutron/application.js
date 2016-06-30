@@ -336,6 +336,13 @@ function ml2_mechanism_drivers_check() {
     }
   }
 
+  // multicast group for vxlan is linuxbridge only
+  if (values.indexOf("linuxbridge") >= 0) {
+    $('#vxlan_group_container').show();
+  } else {
+    $('#vxlan_group_container').hide();
+  }
+
   // we might have updated the type drivers
   ml2_type_drivers_check();
 }
