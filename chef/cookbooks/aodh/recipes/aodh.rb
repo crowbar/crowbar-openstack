@@ -6,7 +6,6 @@ end
 
 # mongdb setup has been already done by server.rb recipe
 unless node[:ceilometer][:use_mongodb]
-
   db_settings = fetch_database_settings
 
   include_recipe "database::client"
@@ -116,11 +115,36 @@ keystone_register "register aodh endpoint" do
   action :add_endpoint_template
 end
 
-db_name = node[:aodh][:db][:database]
-db_user = node[:aodh][:db][:user]
-db_password = node[:aodh][:db][:password]
-db_connection =
-  "#{db_settings[:url_scheme]}://#{db_user}:#{db_password}@#{db_settings[:address]}/#{db_name}"
+if node[:ceilometer][:use_mongodb]
+  db_connection = nil
+
+  if node[:ceilometer][:ha][:server][:enabled]
+    db_hosts = search(:node,
+                      "ceilometer_ha_mongodb_replica_set_member:true AND roles:ceilometer-server AND "\
+                      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
+                     )
+    unless db_hosts.empty?
+      mongodb_servers = db_hosts.map { |s| "#{Chef::Recipe::Barclamp::Inventory.get_network_by_type(s, "admin").address}:#{s[:ceilometer][:mongodb][:port]}" }
+      db_connection = "mongodb://#{mongodb_servers.sort.join(",")}/ceilometer?replicaSet=#{node[:ceilometer][:ha][:mongodb][:replica_set][:name]}"
+    end
+  end
+
+  # if this is a cluster, but the replica set member attribute hasn't
+  # been set on any node (yet), we just fallback to using the first
+  # ceilometer-server node
+  if db_connection.nil?
+    db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
+    db_host = db_hosts.first || node
+    mongodb_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
+    db_connection = "mongodb://#{mongodb_ip}:#{db_host[:ceilometer][:mongodb][:port]}/ceilometer"
+  end
+else
+  db_name = node[:aodh][:db][:database]
+  db_user = node[:aodh][:db][:user]
+  db_password = node[:aodh][:db][:password]
+  db_connection =
+    "#{db_settings[:url_scheme]}://#{db_user}:#{db_password}@#{db_settings[:address]}/#{db_name}"
+end
 
 if node[:ceilometer][:ha][:server][:enabled]
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
