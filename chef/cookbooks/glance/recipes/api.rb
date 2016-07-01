@@ -53,7 +53,7 @@ use_docker = !search(:node, "roles:nova-compute-docker").empty?
 
 network_settings = GlanceHelper.network_settings(node)
 
-glance_stores = node.default[:glance][:glance_stores]
+glance_stores = node.default[:glance][:glance_stores].dup
 glance_stores += ["vmware"] unless node[:glance][:vsphere][:host].empty?
 
 # glance_stores unconditionally enables cinder and swift stores, so we need
