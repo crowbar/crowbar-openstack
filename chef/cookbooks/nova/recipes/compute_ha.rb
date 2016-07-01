@@ -90,6 +90,18 @@ end
 compute_primitives = []
 compute_transaction_objects = []
 
+if node[:platform_family] == "suse" && node[:platform_version].to_f > 12.1
+  virtlogd_primitive = "virtlogd-compute"
+  pacemaker_primitive virtlogd_primitive do
+    agent "systemd:virtlogd"
+    op nova[:nova][:ha][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  compute_primitives << virtlogd_primitive
+  compute_transaction_objects << "pacemaker_primitive[#{virtlogd_primitive}]"
+end
+
 libvirtd_primitive = "libvirtd-compute"
 pacemaker_primitive libvirtd_primitive do
   agent "systemd:libvirtd"
