@@ -1,15 +1,23 @@
+#
+# Copyright 2016 SUSE Linux GmBH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 node[:neutron][:platform][:cisco_apic_pkgs].each { |p| package p }
 
 if node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
   node[:neutron][:platform][:cisco_apic_gbp_pkgs].each { |p| package p }
-end
-
-# Explicitly Stop and disable L3 and Metadata Agents if APIC is enabled
-service node[:neutron][:platform][:metadata_agent_name] do
-  action [:disable, :stop]
-end
-service node[:neutron][:platform][:l3_agent_name] do
-  action [:disable, :stop]
 end
 
 aciswitches = node[:neutron][:apic_switches].to_hash

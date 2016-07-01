@@ -105,21 +105,21 @@ unless nova[:nova].nil? or nova[:nova][:ssl].nil?
   }
 end
 
-service_plugins = "neutron.services.metering.metering_plugin.MeteringPlugin"
-service_plugins = "#{service_plugins}, neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"
-if neutron[:neutron][:use_lbaas] then
-  service_plugins = "#{service_plugins}, neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPlugin"
+service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
+                   "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
+if neutron[:neutron][:use_lbaas]
+  service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPlugin")
 end
+
 if neutron[:neutron][:networking_plugin] == "ml2"
+  service_plugins.unshift("neutron.services.l3_router.l3_router_plugin.L3RouterPlugin")
   if neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
-    service_plugins = "cisco_apic_l3"
+    service_plugins = ["cisco_apic_l3"]
   elsif neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
-    service_plugins = "group_policy,servicechain,apic_gbp_l3"
-  else
-    service_plugins = "neutron.services.l3_router.l3_router_plugin.L3RouterPlugin, \
-                       #{service_plugins}"
+    service_plugins = ["group_policy", "servicechain", "apic_gbp_l3"]
   end
 end
+service_plugins = service_plugins.join(", ")
 
 network_nodes_count = neutron[:neutron][:elements]["neutron-network"].count
 if neutron[:neutron][:elements_expanded]

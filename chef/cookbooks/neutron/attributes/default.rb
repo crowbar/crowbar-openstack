@@ -53,9 +53,19 @@ default[:neutron][:ssl][:cert_required] = false
 default[:neutron][:ssl][:ca_certs] = "/etc/neutron/ssl/certs/ca.pem"
 
 default[:neutron][:apic][:system_id] = "SOC"
-default[:neutron][:apic][:hosts] = ""
+default[:neutron][:apic][:hosts] = "10.105.1.10"
 default[:neutron][:apic][:username] = "admin"
-default[:neutron][:apic][:password] = ""
+default[:neutron][:apic][:password] = "cisco123"
+
+default[:neutron][:opflex][:peer_ip] = "10.0.0.30"
+default[:neutron][:opflex][:peer_port] = 8009
+default[:neutron][:opflex][:encap] = "vxlan"
+default[:neutron][:opflex][:vxlan][:uplink_iface] = "vlan.4093"
+default[:neutron][:opflex][:vxlan][:uplink_vlan] = 4093
+default[:neutron][:opflex][:vxlan][:encap_iface] = "br-int_vxlan0"
+default[:neutron][:opflex][:vxlan][:remote_ip] = "10.0.0.32"
+default[:neutron][:opflex][:vxlan][:remote_port] = 8472
+default[:neutron][:opflex][:vlan][:encap_iface] = ""
 
 case node[:platform_family]
 when "suse"
@@ -93,9 +103,6 @@ when "suse"
     cisco_opflex_pkgs: ["agent-ovs",
                         "lldpd",
                         "openstack-neutron-opflex-agent"],
-    cisco_opflex_ovs_pkgs: ["openvswitch",
-                            "openvswitch-kmp-default",
-                            "openvswitch-switch"],
     user: "neutron",
     group: "neutron",
     neutron_rootwrap_sudo_template: "/etc/sudoers.d/openstack-neutron"
@@ -127,7 +134,13 @@ when "rhel"
     hyperv_pkg: "",
     nsx_pkgs: [""],
     cisco_pkgs: ["python-networking-cisco"],
-    cisco_apic_pkgs: [""],
+    cisco_apic_pkgs: ["python-apicapi",
+                      "python-neutron-ml2-driver-apic"],
+    cisco_apic_gbp_pkgs: ["openstack-neutron-gbp",
+                          "python-gbpclient"],
+    cisco_opflex_pkgs: ["agent-ovs",
+                        "lldpd",
+                        "neutron-opflex-agent"],
     user: "neutron",
     group: "neutron",
     neutron_rootwrap_sudo_template: "/etc/sudoers.d/openstack-neutron"
@@ -161,6 +174,8 @@ else
     nsx_pkgs: [""],
     cisco_pkgs: [""],
     cisco_apic_pkgs: [""],
+    cisco_apic_gbp_pkgs: [""],
+    cisco_opflex_pkgs: [""],
     user: "neutron",
     group: "neutron",
     neutron_rootwrap_sudo_template: "/etc/sudoers.d/neutron-rootwrap"
