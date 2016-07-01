@@ -2,8 +2,8 @@ return unless node["roles"].include?("nagios-client")
 
 svcs = []
 ports = {}
-node.default[:heat][:platform][:services].each { |svc| svcs << svc }
-node.default[:heat][:api].each do |k,v|
+node[:heat][:platform][:services].each { |svc| svcs << svc }
+node[:heat][:api].each do |k, v|
     next if k !~ /port*/
     ports[k] = v
 end

@@ -32,7 +32,7 @@ crowbar_pacemaker_sync_mark "wait-aodh_ha_resources"
 transaction_objects = []
 primitives = []
 
-node.default[:aodh][:platform][:services].each do |service|
+node[:aodh][:platform][:services].each do |service|
   primitive_name = "aodh-#{service}"
 
   pacemaker_primitive primitive_name do
