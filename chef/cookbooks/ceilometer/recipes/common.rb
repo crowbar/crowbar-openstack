@@ -8,10 +8,10 @@ if node[:ceilometer][:use_mongodb]
     db_hosts = search(:node,
                       "ceilometer_ha_mongodb_replica_set_member:true AND roles:ceilometer-server AND "\
                       "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
-      )
+                     )
     unless db_hosts.empty?
       mongodb_servers = db_hosts.map { |s| "#{Chef::Recipe::Barclamp::Inventory.get_network_by_type(s, "admin").address}:#{s[:ceilometer][:mongodb][:port]}" }
-      db_connection = "mongodb://#{mongodb_servers.sort.join(',')}/ceilometer?replicaSet=#{node[:ceilometer][:ha][:mongodb][:replica_set][:name]}"
+      db_connection = "mongodb://#{mongodb_servers.sort.join(",")}/ceilometer?replicaSet=#{node[:ceilometer][:ha][:mongodb][:replica_set][:name]}"
     end
   end
 
