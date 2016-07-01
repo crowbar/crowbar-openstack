@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
-include_recipe "swift::dispersion"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "swift", "swift-dispersion")
+  include_recipe "swift::dispersion"
+end

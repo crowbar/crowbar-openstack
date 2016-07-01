@@ -17,6 +17,7 @@ depends "postgresql", ">= 1.0.0"
 depends "xfs"
 depends "crowbar-openstack"
 depends "crowbar-pacemaker"
+depends "utils"
 
 %w(debian ubuntu centos suse fedora redhat scientific amazon).each do |os|
   supports os

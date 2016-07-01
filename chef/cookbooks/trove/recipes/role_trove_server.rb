@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
-include_recipe "trove::default"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "trove", "trove-server")
+  include_recipe "trove::default"
+end

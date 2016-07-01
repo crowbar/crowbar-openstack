@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
-include_recipe "ceilometer::swift"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "ceilometer", "ceilometer-swift-proxy-middleware")
+  include_recipe "ceilometer::swift"
+end

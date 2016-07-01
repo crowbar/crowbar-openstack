@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
-include_recipe "nova::compute_ha"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "nova", "nova-ha-compute")
+  include_recipe "nova::compute_ha"
+end

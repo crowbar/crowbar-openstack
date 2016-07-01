@@ -14,7 +14,9 @@
 # limitations under the License.
 #
 
-include_recipe "cinder::api"
-include_recipe "cinder::scheduler"
-include_recipe "cinder::controller_ha"
-include_recipe "cinder::monitor"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "cinder", "cinder-controller")
+  include_recipe "cinder::api"
+  include_recipe "cinder::scheduler"
+  include_recipe "cinder::controller_ha"
+  include_recipe "cinder::monitor"
+end

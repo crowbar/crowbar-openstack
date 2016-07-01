@@ -14,4 +14,6 @@
 # limitations under the License.
 #
 
-include_recipe "manila::share"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "manila", "manila-share")
+  include_recipe "manila::share"
+end

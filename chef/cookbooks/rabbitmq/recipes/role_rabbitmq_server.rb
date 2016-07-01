@@ -14,5 +14,7 @@
 # limitations under the License.
 #
 
-include_recipe "rabbitmq::rabbit"
-include_recipe "rabbitmq::monitor"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "rabbitmq", "rabbitmq-server")
+  include_recipe "rabbitmq::rabbit"
+  include_recipe "rabbitmq::monitor"
+end
