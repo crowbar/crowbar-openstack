@@ -69,7 +69,7 @@ manila_ui_pkgname =
   end
 
 unless manila_ui_pkgname.nil?
-  manila_servers = search(:node, "roles:manila-server") || []
+  manila_servers = fetch_nodes_with_roles("manila-server") || []
   unless manila_servers.empty?
     package manila_ui_pkgname do
       action :install
@@ -88,7 +88,7 @@ magnum_ui_pkgname =
   end
 
 unless magnum_ui_pkgname.nil?
-  magnum_servers = search(:node, "roles:magnum-server") || []
+  magnum_servers = fetch_nodes_with_roles("magnum-server") || []
   unless magnum_servers.empty?
     package magnum_ui_pkgname do
       action :install
@@ -207,7 +207,7 @@ db_settings = {
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-glances = search(:node, "roles:glance-server") || []
+glances = fetch_nodes_with_roles("glance-server") || []
 if glances.length > 0
   glance = glances[0]
   glance_insecure = glance[:glance][:api][:protocol] == "https" && glance[:glance][:ssl][:insecure]
@@ -215,7 +215,7 @@ else
   glance_insecure = false
 end
 
-cinders = search(:node, "roles:cinder-controller") || []
+cinders = fetch_nodes_with_roles("cinder-controller") || []
 if cinders.length > 0
   cinder = cinders[0]
   cinder_insecure = cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
@@ -223,7 +223,7 @@ else
   cinder_insecure = false
 end
 
-neutrons = search(:node, "roles:neutron-server") || []
+neutrons = fetch_nodes_with_roles("neutron-server") || []
 if neutrons.length > 0
   neutron = neutrons[0]
   neutron_insecure = neutron[:neutron][:api][:protocol] == "https" && neutron[:neutron][:ssl][:insecure]
@@ -244,7 +244,7 @@ end
 nova = get_instance("roles:nova-controller")
 nova_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
 
-heats = search(:node, "roles:heat-server") || []
+heats = fetch_nodes_with_roles("heat-server") || []
 if !heats.empty?
   heat = heats[0]
   heat_insecure = heat[:heat][:api][:protocol] == "https" && heat[:heat][:ssl][:insecure]

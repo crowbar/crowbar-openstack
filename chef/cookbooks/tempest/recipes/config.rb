@@ -142,7 +142,6 @@ machine_id_file = node[:tempest][:tempest_path] + "/machine.id"
 alt_machine_id_file = node[:tempest][:tempest_path] + "/alt_machine.id"
 docker_image_id_file = node[:tempest][:tempest_path] + "/docker_machine.id"
 
-glance_node = search(:node, "roles:glance-server").first
 insecure = "--insecure"
 
 cirros_version = File.basename(node[:tempest][:tempest_test_image]).gsub(/^cirros-/, "").gsub(/-.*/, "")
@@ -275,7 +274,7 @@ use_trove = $?.success?
 use_manila = $?.success?
 
 # FIXME: should avoid search with no environment in query
-neutrons = search(:node, "roles:neutron-server") || []
+neutrons = fetch_nodes_with_roles("neutron-server") || []
 # FIXME: this should be 'all' instead
 #
 neutron_api_extensions = "provider,security-group,dhcp_agent_scheduler,external-net,ext-gw-mode,binding,agent,quotas,l3_agent_scheduler,multi-provider,router,extra_dhcp_opt,allowed-address-pairs,extraroute,metering,fwaas,service-type"
@@ -293,7 +292,7 @@ raise("Cannot fetch ID of floating network") if public_network_id.empty?
 # tempest; also should avoid search with no environment in query
 #`#{keystone} endpoint-get --service object-store &> /dev/null`
 #use_swift = $?.success?
-swifts = search(:node, "roles:swift-proxy") || []
+swifts = fetch_nodes_with_roles("swift-proxy") || []
 use_swift = !swifts.empty?
 if use_swift
   swift_allow_versions = swifts[0][:swift][:allow_versions]
@@ -305,7 +304,7 @@ else
 end
 
 # FIXME: should avoid search with no environment in query
-cinders = search(:node, "roles:cinder-controller") || []
+cinders = fetch_nodes_with_roles("cinder-controller") || []
 storage_protocol = "iSCSI"
 vendor_name = "Open Source"
 cinders[0][:cinder][:volumes].each do |volume|
@@ -343,9 +342,9 @@ if backend_names.length > 1
   cinder_backend2_name = backend_names[1]
 end
 
-kvm_compute_nodes = search(:node, "roles:nova-compute-kvm") || []
-xen_compute_nodes = search(:node, "roles:nova-compute-xen") || []
-docker_compute_nodes = search(:node, "roles:nova-compute-docker") || []
+kvm_compute_nodes = fetch_nodes_with_roles("nova-compute-kvm") || []
+xen_compute_nodes = fetch_nodes_with_roles("nova-compute-xen") || []
+docker_compute_nodes = fetch_nodes_with_roles("nova-compute-docker") || []
 
 use_resize = kvm_compute_nodes.length > 1
 use_livemigration = nova[:nova][:use_migration] && kvm_compute_nodes.length > 1
@@ -433,7 +432,7 @@ else
 end
 
 # FIXME: should avoid search with no environment in query
-horizons = search(:node, "roles:horizon-server") || []
+horizons = fetch_nodes_with_roles("horizon-server") || []
 if horizons.empty?
   use_horizon = false
   horizon_host = "localhost"

@@ -7,7 +7,7 @@ def upgrade ta, td, a, d
     @@keystone_db_password = service.random_password
   end
 
-  Chef::Search::Query.new.search(:node) do |node|
+  fetch_nodes do |node|
     unless (node[:keystone][:db][:password] rescue nil).nil?
       unless node[:keystone][:db][:password].empty?
         @@keystone_db_password = node[:keystone][:db][:password]

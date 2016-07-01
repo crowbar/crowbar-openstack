@@ -33,7 +33,7 @@ end
 
 # TODO: there's no dependency in terms of proposal on swift
 swift_api_insecure = false
-swifts = search(:node, "roles:swift-proxy") || []
+swifts = fetch_nodes_with_roles("swift-proxy") || []
 if swifts.length > 0
   swift = swifts[0]
   swift_api_insecure = swift[:swift][:ssl][:enabled] && swift[:swift][:ssl][:insecure]
@@ -42,14 +42,14 @@ end
 #TODO: glance should depend on cinder, but cinder already depends on glance :/
 # so we have to do something like this
 cinder_api_insecure = false
-cinders = search(:node, "roles:cinder-controller") || []
+cinders = fetch_nodes_with_roles("cinder-controller") || []
 if cinders.length > 0
   cinder = cinders[0]
   cinder_api_insecure = cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
 end
 
 #TODO: similarly with nova
-use_docker = !search(:node, "roles:nova-compute-docker").empty?
+use_docker = !fetch_nodes_with_roles("nova-compute-docker").empty?
 
 network_settings = GlanceHelper.network_settings(node)
 

@@ -7,7 +7,7 @@ def upgrade ta, td, a, d
     @@cinder_db_password = service.random_password
   end
 
-  Chef::Search::Query.new.search(:node) do |node|
+  fetch_nodes do |node|
     unless (node[:cinder][:db][:password] rescue nil).nil?
       unless node[:cinder][:db][:password].empty?
         @@cinder_db_password = node[:cinder][:db][:password]

@@ -82,9 +82,9 @@ if ha_enabled
     # replicaset
     package("ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-mongo").run_action(:install)
 
-    members = search(:node,
-                     "ceilometer_ha_mongodb_replica_set_member:true AND "\
-                     "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}")
+    members = fetch_nodes(
+      "ceilometer_ha_mongodb_replica_set_member:true AND "\
+      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}")
 
     # configure replica set in a ruby block where we also wait for mongodb
     # because we need mongodb to be started (which is not the case in compile

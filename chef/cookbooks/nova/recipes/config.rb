@@ -170,7 +170,7 @@ end
 Chef::Log.info("Neutron server at #{neutron_server_host}")
 
 env_filter = " AND inteltxt_config_environment:inteltxt-config-#{node[:nova][:itxt_instance]}"
-oat_servers = search(:node, "roles:oat-server#{env_filter}") || []
+oat_servers = fetch_nodes("roles:oat-server#{env_filter}") || []
 if oat_servers.length > 0
   has_itxt = true
   oat_server = oat_servers[0]

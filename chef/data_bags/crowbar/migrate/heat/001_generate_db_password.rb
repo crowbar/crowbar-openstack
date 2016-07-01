@@ -7,7 +7,7 @@ def upgrade ta, td, a, d
     @@heat_db_password = service.random_password
   end
 
-  Chef::Search::Query.new.search(:node) do |node|
+  fetch_nodes do |node|
     unless (node[:heat][:db][:password] rescue nil).nil?
       unless node[:heat][:db][:password].empty?
         @@heat_db_password = node[:heat][:db][:password]

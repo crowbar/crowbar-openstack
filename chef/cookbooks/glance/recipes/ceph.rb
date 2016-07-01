@@ -18,7 +18,7 @@
 #
 
 ceph_env_filter = " AND ceph_config_environment:ceph-config-default"
-ceph_servers = search(:node, "roles:ceph-osd#{ceph_env_filter}") || []
+ceph_servers = fetch_nodes("roles:ceph-osd#{ceph_env_filter}") || []
 if ceph_servers.length > 0
   include_recipe "ceph::keyring"
 

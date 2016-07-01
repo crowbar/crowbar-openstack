@@ -10,7 +10,7 @@ def upgrade ta, td, a, d
     @@ceilometer_metering_secret = service.random_password
   end
 
-  Chef::Search::Query.new.search(:node) do |node|
+  fetch_nodes do |node|
     dirty = false
     unless (node[:ceilometer][:db][:password] rescue nil).nil?
       unless node[:ceilometer][:db][:password].empty?
