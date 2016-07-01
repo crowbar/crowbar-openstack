@@ -1,0 +1,16 @@
+# glance-swift.conf
+#
+# Specify the reference name in []
+# For each section, specify the auth_address, user and key.
+#
+# WARNING:
+# * If any of auth_address, user or key is not specified,
+# the glance-api's swift store will fail to configure
+
+[crowbar]
+auth_version = <%= @keystone_settings['api_version'] %>
+auth_address = <%= @keystone_settings['internal_auth_url'] %>
+user = <%= @keystone_settings['service_tenant'] %>:<%= @keystone_settings['service_user'] %>
+key = <%= @keystone_settings['service_password'] %>
+user_domain_id = default
+project_domain_id = default

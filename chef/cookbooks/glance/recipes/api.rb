@@ -87,6 +87,17 @@ template node[:glance][:api][:config_file] do
   )
 end
 
+template "/etc/glance/glance-swift.conf" do
+  source "glance-swift.conf.erb"
+  owner "root"
+  group node[:glance][:group]
+  mode 0640
+  variables(
+    keystone_settings: keystone_settings
+  )
+  notifies :restart, "service[#{node[:glance][:api][:service_name]}]"
+end
+
 ha_enabled = node[:glance][:ha][:enabled]
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:glance][:api][:protocol] == "https", ha_enabled)
