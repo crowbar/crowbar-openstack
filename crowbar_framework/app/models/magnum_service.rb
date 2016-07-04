@@ -98,7 +98,28 @@ class MagnumService < ServiceObject
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Magnum apply_role_pre_chef_call: entering #{all_nodes.inspect}")
-    return if all_nodes.empty?
+
+    server_elements, server_nodes, ha_enabled = role_expand_elements(role, "magnum-server")
+# FIXME: uncomment commented out code when enabling HA
+#    reset_sync_marks_on_clusters_founders(server_elements)
+#    Openstack::HA.set_controller_role(server_nodes) if ha_enabled
+#
+#    vip_networks = ["admin", "public"]
+#
+#    dirty = false
+#    dirty = prepare_role_for_ha_with_haproxy(role, ["magnum", "ha", "enabled"], ha_enabled, server_elements, vip_networks)
+#    role.save if dirty
+
+    unless all_nodes.empty? || server_elements.empty?
+      net_svc = NetworkService.new @logger
+      # All nodes must have a public IP, even if part of a cluster; otherwise
+      # the VIP can't be moved to the nodes
+      server_nodes.each do |node|
+        net_svc.allocate_ip "default", "public", "host", node
+      end
+
+#      allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
+    end
 
     @logger.debug("Magnum apply_role_pre_chef_call: leaving")
   end
