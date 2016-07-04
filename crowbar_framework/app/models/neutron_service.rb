@@ -168,7 +168,7 @@ class NeutronService < PacemakerServiceObject
     ml2_mechanism_drivers.each do |drv|
       next if ml2_mechanism_drivers_valid.include? drv
       validation_error I18n.t(
-        "barclamp.#{@bc_name}.validation.no_vaild_ml2_type_driver",
+        "barclamp.#{@bc_name}.validation.no_valid_ml2_mechanism",
         drv: drv,
         ml2_mechanism_drivers_valid: ml2_mechanism_drivers_valid.join(",")
       )
@@ -205,7 +205,7 @@ class NeutronService < PacemakerServiceObject
     ml2_type_drivers.each do |drv|
       next if ml2_type_drivers_valid.include? drv
       validation_error I18n.t(
-        "barclamp.#{@bc_name}.validation.no_vaild_ml2_type_driver",
+        "barclamp.#{@bc_name}.validation.no_valid_ml2_type_driver",
         drv: drv,
         ml2_type_drivers_valid: ml2_type_drivers_valid.join(",")
       )
