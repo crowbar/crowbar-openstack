@@ -276,26 +276,32 @@ function ml2_type_drivers_check() {
     $('#vxlan_container').hide();
   }
 
+  // hide uneeded default type drivers if only one is set
   if (values.length <= 1) {
     $('#ml2_type_drivers_default_provider_network_container').hide();
     $('#ml2_type_drivers_default_tenant_network_container').hide();
-    if (values.length == 1) {
-      $('#ml2_type_drivers_default_tenant_network').val(values[0]).trigger('change');
-      $('#ml2_type_drivers_default_provider_network').val(values[0]).trigger('change');
-    }
   } else {
     $('#ml2_type_drivers_default_provider_network_container').show();
     $('#ml2_type_drivers_default_tenant_network_container').show();
   }
-}
 
-var ovsSelection = null
+  // ensure default type drivers are from one of the picked values
+  if (values.length >= 1) {
+    if (values.indexOf($('#ml2_type_drivers_default_provider_network').val()) < 0) {
+      $('#ml2_type_drivers_default_tenant_network').val(values[0]).trigger('change');
+    }
+    if (values.indexOf($('#ml2_type_drivers_default_provider_network').val()) < 0) {
+      $('#ml2_type_drivers_default_provider_network').val(values[0]).trigger('change');
+    }
+  }
+}
 
 function ml2_mechanism_drivers_check() {
   var values = $('#ml2_mechanism_drivers').val() || [];
+
+  // auto-select openvswitch & vlan if cisco is selected
   if (values.indexOf("cisco_nexus") >= 0) {
     $('#cisco_switches').show();
-    // auto-select openvswitch if cisco is selected
     if (values.indexOf("openvswitch") < 0) {
       values.push("openvswitch");
       $("#ml2_mechanism_drivers").val(values).trigger('change');
@@ -309,43 +315,32 @@ function ml2_mechanism_drivers_check() {
     $('#cisco_switches').hide();
   }
 
-  // hide uneeded typedriver fields if only linuxbrige is selected
-  // and autoselect the vlan type driver
-  if (values.length == 1 && values[0] == "linuxbridge") {
-    $('#ml2_type_drivers_container').hide();
-    $('#ml2_type_drivers_default_provider_network_container').hide();
-    $('#ml2_type_drivers_default_tenant_network_container').hide();
-    $('#dvr_container').hide();
-    $('#vxlan_group_container').show();
-    // remember previously selected values for ovs, avoid overwriting remembered
-    // values, e.g. when switching back to ml2 from vmware.
-    if (ovsSelection == null) {
-      ovsSelection = {
-        type_drivers: $('#ml2_type_drivers').val(),
-        provider_type: $('#ml2_type_drivers_default_provider_network').val(),
-        tenant_type: $('#ml2_type_drivers_default_tenant_network').val()
-      };
-    }
-    $('#ml2_type_drivers').val(['vlan']).trigger('change');
-    $('#ml2_type_drivers_default_tenant_network').val('vlan').trigger('change');
-    $('#ml2_type_drivers_default_provider_network').val('vlan').trigger('change');
-  } else {
-    $('#ml2_type_drivers_container').show();
-    $('#ml2_type_drivers_default_provider_network_container').show();
-    $('#ml2_type_drivers_default_tenant_network_container').show();
+  // show/hide DVR and GRE options depending on openvswitch
+  if (values.indexOf("openvswitch") >= 0) {
     $('#dvr_container').show();
-    $('#vxlan_group_container').hide();
+    $('#ml2_type_drivers option[value="gre"]').show()
+  } else {
+    $('#dvr_container').hide();
+    $('#ml2_type_drivers option[value="gre"]').hide()
+
+    var type_drivers = $('#ml2_type_drivers').val() || [];
+    var non_ovs_type_drivers = $.grep(type_drivers, function(value) {
+      return value != "gre";
+    });
+
+    if (type_drivers != non_ovs_type_drivers) {
+      if (non_ovs_type_drivers.length == 0) {
+        non_ovs_type_drivers = ['vxlan']
+      }
+      $('#ml2_type_drivers').val(non_ovs_type_drivers).trigger('change');
+    }
   }
 
-  if (values.indexOf("openvswitch") >= 0) {
-    if (ovsSelection != null ) {
-      // We must be switching back from "linuxbridge", restore previously
-      // selected values.
-      $('#ml2_type_drivers').val(ovsSelection.type_drivers).trigger('change');
-      $('#ml2_type_drivers_default_tenant_network').val(ovsSelection.tenant_type).trigger('change');
-      $('#ml2_type_drivers_default_provider_network').val(ovsSelection.provider_type).trigger('change');
-      ovsSelection = null;
-    }
+  // multicast group for vxlan is linuxbridge only
+  if (values.indexOf("linuxbridge") >= 0) {
+    $('#vxlan_group_container').show();
+  } else {
+    $('#vxlan_group_container').hide();
   }
 
   // we might have updated the type drivers
