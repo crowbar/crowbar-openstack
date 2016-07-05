@@ -122,7 +122,8 @@ case node[:nova][:libvirt_type]
             package pkg
           end
           # openSUSE and SLES12SP2 use the module shipped with upstream kernel
-          if node[:platform] == "suse" && node[:platform_version].to_f < 12.2
+          if node[:network][:needs_openvswitch] &&
+              node[:platform] == "suse" && node[:platform_version].to_f < 12.2
             package "openvswitch-kmp-xen"
           end
 
