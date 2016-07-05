@@ -270,10 +270,11 @@ control_exchange = magnum
 # Minimum value: 0
 # Maximum value: 65535
 #port = 9511
+port = <%= @bind_port %>
 
 # The listen IP for the Magnum API server. (IP address value)
 #host = 127.0.0.1
-host=<%= @api_host %>
+host = <%= @bind_host %>
 
 # The maximum number of items returned in a single response from a collection
 # resource. (integer value)
