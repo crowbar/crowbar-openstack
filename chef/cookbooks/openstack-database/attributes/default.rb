@@ -58,5 +58,6 @@ default["openstack"]["database"]["api"]["auth"]["cache_dir"] = "/var/cache/trove
 default["openstack"]["database"]["nova_proxy_user"] = "admin"
 default["openstack"]["database"]["nova_proxy_password"] = "admin"
 default["openstack"]["database"]["nova_proxy_tenant"] = "admin"
+default["openstack"]["database"]["nova_proxy_tenant_id"] = ""
 
 default["openstack"]["database"]["use_nova_server_config_drive"] = false
