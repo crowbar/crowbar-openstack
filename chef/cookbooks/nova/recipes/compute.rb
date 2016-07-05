@@ -118,10 +118,19 @@ case node[:nova][:libvirt_type]
           end
 
         when "xen"
-          %w{kernel-xen xen xen-tools openvswitch-kmp-xen}.each do |pkg|
+          %w{kernel-xen xen xen-tools}.each do |pkg|
             package pkg do
               action :install
             end
+          end
+
+          if node[:platform] == "suse"
+            # on SLES (but not Leap!), we need a xen-specific package for ovs
+            install_xen_module = false
+            node[:crowbar][:network].keys.each do |name|
+              install_xen_module ||= node[:crowbar][:network][name]["add_ovs_bridge"]
+            end
+            package "openvswitch-kmp-xen" if install_xen_module
           end
 
           service "xend" do
