@@ -118,10 +118,13 @@ case node[:nova][:libvirt_type]
           end
 
         when "xen"
-          %w{kernel-xen xen xen-tools openvswitch-kmp-xen}.each do |pkg|
-            package pkg do
-              action :install
-            end
+          %w{kernel-xen xen xen-tools}.each do |pkg|
+            package pkg
+          end
+          # openSUSE and SLES12SP2 use the module shipped with upstream kernel
+          if node[:network][:needs_openvswitch] &&
+              node[:platform] == "suse" && node[:platform_version].to_f < 12.2
+            package "openvswitch-kmp-xen"
           end
 
           service "xend" do
