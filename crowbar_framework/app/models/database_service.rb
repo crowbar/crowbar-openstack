@@ -124,7 +124,7 @@ class DatabaseService < PacemakerServiceObject
       cluster = database_elements[0]
       # Any change in the generation of the vhostname here must be reflected in
       # CrowbarDatabaseHelper.get_ha_vhostname
-      database_vhostname = "#{role.name.gsub("-config", "")}-#{PacemakerServiceObject.cluster_name(cluster)}.#{ChefObject.cloud_domain}".gsub("_", "-")
+      database_vhostname = "#{role.name.gsub("-config", "")}-#{PacemakerServiceObject.cluster_name(cluster)}.#{Crowbar::Settings.domain}".gsub("_", "-")
       net_svc.allocate_virtual_ip "default", "admin", "host", database_vhostname
     end
 

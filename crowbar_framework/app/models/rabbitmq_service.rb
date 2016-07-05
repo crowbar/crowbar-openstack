@@ -90,7 +90,7 @@ class RabbitmqService < PacemakerServiceObject
         raise "Internal error: HA enabled, but element is not a cluster"
       end
       cluster = rabbitmq_elements[0]
-      rabbitmq_vhostname = "#{role.name.gsub("-config", "")}-#{PacemakerServiceObject.cluster_name(cluster)}.#{ChefObject.cloud_domain}".gsub("_", "-")
+      rabbitmq_vhostname = "#{role.name.gsub("-config", "")}-#{PacemakerServiceObject.cluster_name(cluster)}.#{Crowbar::Settings.domain}".gsub("_", "-")
       net_svc.allocate_virtual_ip "default", "admin", "host", rabbitmq_vhostname
       if role.default_attributes["rabbitmq"]["listen_public"]
         net_svc.allocate_virtual_ip "default", "public", "host", rabbitmq_vhostname
