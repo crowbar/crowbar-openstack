@@ -192,7 +192,7 @@ class NovaService < PacemakerServiceObject
   # Note that we do not put nova-ha-compute in element_order in the proposal to
   # keep it hidden from the user: this is something that should never be
   # changed by the user, as it's handled automatically.
-  def active_update(proposal, inst, in_queue)
+  def active_update(proposal, inst, in_queue, bootstrap = false)
     deployment = proposal["deployment"]["nova"]
     elements = deployment["elements"]
 
