@@ -1,21 +1,59 @@
-WSGIDaemonProcess keystone user=keystone group=nogroup processes=<%= @processes %> threads=<%= @threads %>
-
 Listen <%= @bind_service_host %>:<%= @bind_service_port %>
 <VirtualHost <%= @bind_service_host %>:<%= @bind_service_port %>>
-    AddDefaultCharset utf-8
-    LogLevel warn
-    ErrorLog ${APACHE_LOG_DIR}/keystone_error.log
+    WSGIDaemonProcess keystone-public user=keystone group=keystone processes=<%= @processes %> threads=<%= @threads %>
+    WSGIProcessGroup keystone-public
+    WSGIScriptAlias / /usr/bin/keystone-wsgi-public
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
+    LimitRequestBody 114688
 
-    WSGIScriptAlias /  /usr/lib/cgi-bin/keystone/main
-    WSGIProcessGroup keystone
+    <IfVersion >= 2.4>
+      ErrorLogFormat "%M"
+    </IfVersion>
+
+    ErrorLog <%= @apache_log_dir %>/keystone_error.log
+    CustomLog <%= @apache_log_dir %>/keystone_access.log combined
+    LogLevel warn
+
+    <Directory /usr/bin>
+        <IfVersion >= 2.4>
+            Require all granted
+        </IfVersion>
+        <IfVersion < 2.4>
+            Order allow,deny#
+            Allow from all
+        </IfVersion>
+    </Directory>
+
+    AddDefaultCharset utf-8
 </VirtualHost>
 
 Listen <%= @bind_admin_host %>:<%= @bind_admin_port %>
 <VirtualHost <%= @bind_admin_host %>:<%= @bind_admin_port %>>
-    AddDefaultCharset utf-8
-    LogLevel warn
-    ErrorLog ${APACHE_LOG_DIR}/keystone_error.log
+    WSGIDaemonProcess keystone-admin user=keystone group=keystone processes=<%= @processes %> threads=<%= @threads %>
+    WSGIProcessGroup keystone-admin
+    WSGIScriptAlias / /usr/bin/keystone-wsgi-admin
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
+    LimitRequestBody 114688
 
-    WSGIScriptAlias / /usr/lib/cgi-bin/keystone/admin
-    WSGIProcessGroup keystone
+    <IfVersion >= 2.4>
+      ErrorLogFormat "%M"
+    </IfVersion>
+
+    ErrorLog <%= @apache_log_dir %>/keystone_error.log
+    CustomLog <%= @apache_log_dir %>/keystone_access.log combined
+    LogLevel warn
+
+    <Directory /usr/bin/>
+        <IfVersion >= 2.4>
+            Require all granted
+        </IfVersion>
+        <IfVersion < 2.4>
+            Order allow,deny#
+            Allow from all
+        </IfVersion>
+    </Directory>
+
+    AddDefaultCharset utf-8
 </VirtualHost>
