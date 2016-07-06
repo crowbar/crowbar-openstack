@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-class MagnumService < ServiceObject
+class MagnumService < PacemakerServiceObject
   def initialize(thelogger)
     @bc_name = "magnum"
     @logger = thelogger
