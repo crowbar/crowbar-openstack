@@ -476,9 +476,21 @@ openstack_command << " --insecure" if keystone_insecure
 end
 
 # Create users
-[[node[:keystone][:admin][:username], node[:keystone][:admin][:password], node[:keystone][:admin][:tenant]],
-  [node[:keystone][:default][:username], node[:keystone][:default][:password], node[:keystone][:default][:tenant]]
-].each do |user_data|
+user_datas = [
+  [
+    node[:keystone][:admin][:username],
+    node[:keystone][:admin][:password],
+    node[:keystone][:admin][:tenant]
+  ]
+]
+if node[:keystone][:default][:create_user]
+  user_datas << [
+    node[:keystone][:default][:username],
+    node[:keystone][:default][:password],
+    node[:keystone][:default][:tenant]
+  ]
+end
+user_datas.each do |user_data|
   keystone_register "add default #{user_data[0]} user" do
     protocol node[:keystone][:api][:protocol]
     insecure keystone_insecure
@@ -510,9 +522,11 @@ end
 # Create Access info
 user_roles = [
   [node[:keystone][:admin][:username], "admin", node[:keystone][:admin][:tenant]],
-  [node[:keystone][:admin][:username], "admin", node[:keystone][:default][:tenant]],
-  [node[:keystone][:default][:username], "Member", node[:keystone][:default][:tenant]]
+  [node[:keystone][:admin][:username], "admin", node[:keystone][:default][:tenant]]
 ]
+if node[:keystone][:default][:create_user]
+  user_roles << [node[:keystone][:default][:username], "Member", node[:keystone][:default][:tenant]]
+end
 user_roles.each do |args|
   keystone_register "add default #{args[2]}:#{args[0]} -> #{args[1]} role" do
     protocol node[:keystone][:api][:protocol]
@@ -530,9 +544,11 @@ end
 # Create EC2 creds for our users
 ec2_creds = [
   [node[:keystone][:admin][:username], node[:keystone][:admin][:tenant]],
-  [node[:keystone][:admin][:username], node[:keystone][:default][:tenant]],
-  [node[:keystone][:default][:username], node[:keystone][:default][:tenant]]
+  [node[:keystone][:admin][:username], node[:keystone][:default][:tenant]]
 ]
+if node[:keystone][:default][:create_user]
+  ec2_creds << [node[:keystone][:default][:username], node[:keystone][:default][:tenant]]
+end
 ec2_creds.each do |args|
   keystone_register "add default ec2 creds for #{args[1]}:#{args[0]}" do
     protocol node[:keystone][:api][:protocol]

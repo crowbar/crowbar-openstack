@@ -74,6 +74,13 @@ class TempestService < ServiceObject
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "tempest"
 
+    ks_svc = KeystoneService.new @logger
+    keystone = Proposal.find_by(barclamp: ks_svc.bc_name)
+
+    unless keystone[:attributes][:keystone][:default][:create_user]
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.no_alt_user")
+    end
+
     super
   end
 

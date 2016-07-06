@@ -52,6 +52,7 @@
                       "token": { "type": "str", "required" : true }
                     }},
                     "default" : { "type" : "map", "required" : true, "mapping": {
+                      "create_user": { "type" : "bool", "required" : true },
                       "tenant": { "type" : "str", "required" : true },
                       "username": { "type" : "str", "required" : true },
                       "password": { "type" : "str", "required" : true }

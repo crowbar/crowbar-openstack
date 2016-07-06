@@ -47,6 +47,7 @@
         "token": "999888777666"
       },
       "default": {
+        "create_user": true,
         "tenant": "openstack",
         "username": "crowbar",
         "password": "crowbar"
@@ -139,7 +140,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 35,
+      "schema-revision": 100,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },
