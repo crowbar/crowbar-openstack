@@ -267,10 +267,8 @@ raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
 
 `#{keystonev2} endpoint-get --service metering &> /dev/null`
 use_ceilometer = $?.success?
-# `#{keystonev2} endpoint-get --service alarming &> /dev/null`
-# use_aodh = $?.success?
-# FIXME(toabctl): enable when tempest tests pass
-use_aodh = false
+`#{keystonev2} endpoint-get --service alarming &> /dev/null`
+use_aodh = $?.success?
 `#{keystonev2} endpoint-get --service database &> /dev/null`
 use_trove = $?.success?
 `#{keystonev2} endpoint-get --service share &> /dev/null`
