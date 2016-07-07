@@ -1207,6 +1207,9 @@ heat = <%= @use_heat %>
 #ceilometer = true
 ceilometer = <%= @use_ceilometer %>
 
+# Whether or not Aodh plugin is expected to be available (boolean value)
+aodh_plugin = <%= @use_aodh %>
+
 # Whether or not Horizon is expected to be available (boolean value)
 #horizon = true
 horizon = <%= @use_horizon %>
@@ -1226,6 +1229,9 @@ trove = <%= @use_trove %>
 
 # Whether or not Manila is expected to be available (boolean value)
 manila = <%= @use_manila %>
+
+# Whether or not Magnum is expected to be available (boolean value)
+magnum = <%= @use_magnum %>
 
 
 [stress]
