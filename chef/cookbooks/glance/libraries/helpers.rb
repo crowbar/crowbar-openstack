@@ -5,9 +5,7 @@ module GlanceHelper
       @cluster_admin_ip ||= nil
 
       if node[:glance][:ha][:enabled] && !@cluster_admin_ip
-        cluster_vhostname = CrowbarPacemakerHelper.cluster_vhostname(node)
-        admin_net_db = Chef::DataBagItem.load("crowbar", "admin_network").raw_data
-        @cluster_admin_ip = admin_net_db["allocated_by_name"]["#{cluster_vhostname}.#{node[:domain]}"]["address"]
+        @cluster_admin_ip = CrowbarPacemakerHelper.cluster_vip(node, "admin")
       end
 
       @network_settings ||= {

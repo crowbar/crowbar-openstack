@@ -141,9 +141,6 @@ class HorizonService < PacemakerServiceObject
       # horizon-server role (otherwise, we'd need to check to which
       # cluster each node belongs to create the link).
       # Good news, the assumption is correct :-)
-      public_db = Chef::DataBag.load("crowbar/public_network") rescue nil
-      admin_db = Chef::DataBag.load("crowbar/admin_network") rescue nil
-
       hostname = nil
       server_elements.each do |element|
         if is_cluster? element
@@ -154,8 +151,8 @@ class HorizonService < PacemakerServiceObject
 
       raise "Cannot find hostname for VIP of cluster" if hostname.nil?
 
-      public_server_ip = public_db["allocated_by_name"]["#{hostname}"]["address"]
-      admin_server_ip = admin_db["allocated_by_name"]["#{hostname}"]["address"]
+      public_server_ip = PacemakerServiceObject.vhostname_to_vip(hostname, "public")
+      admin_server_ip = PacemakerServiceObject.vhostname_to_vip(hostname, "admin")
     end
 
     server_nodes.each do |n|
