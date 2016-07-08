@@ -29,6 +29,14 @@
                 "image_password": { "type": "str", "required": true },
                 "default_share_type_name": { "type": "str", "required": true }
               }
+            },
+            "magnum": {
+              "type": "map",
+              "mapping": {
+                "image_id": { "type": "str", "required": true },
+                "flavor_id": { "type": "str", "required": true },
+                "master_flavor_id": { "type": "str", "required": true }
+              }
             }
           }
         }
