@@ -260,6 +260,18 @@ else
   bind_port_xvpvncproxy = node[:nova][:ports][:xvpvncproxy]
 end
 
+vendordata_jsonfile = "/etc/nova/suse-vendor-data.json"
+
+template vendordata_jsonfile do
+  source "suse-vendor-data.json.erb"
+  user "root"
+  group node[:nova][:group]
+  mode 0640
+  variables(
+    vendor_data: node[:nova][:metadata][:vendordata][:json]
+  )
+end
+
 template "/etc/nova/nova.conf" do
   source "nova.conf.erb"
   user "root"
@@ -290,6 +302,7 @@ template "/etc/nova/nova.conf" do
             glance_server_insecure: glance_server_insecure || keystone_settings["insecure"],
             metadata_bind_address: metadata_bind_address,
             vnc_enabled: node[:kernel][:machine] != "aarch64",
+            vendordata_jsonfile: vendordata_jsonfile,
             vncproxy_public_host: vncproxy_public_host,
             vncproxy_ssl_enabled: api[:nova][:novnc][:ssl][:enabled],
             vncproxy_cert_file: api_novnc_ssl_certfile,
