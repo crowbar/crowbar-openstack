@@ -102,7 +102,7 @@ class NeutronService < PacemakerServiceObject
     base
   end
 
-  def validate_gre gre_settings
+  def validate_gre(gre_settings)
     if gre_settings["tunnel_id_start"] < 1 || gre_settings["tunnel_id_start"] > 2147483647
       validation_error I18n.t("barclamp.#{@bc_name}.validation.start_id")
     end
@@ -119,7 +119,7 @@ class NeutronService < PacemakerServiceObject
     end
   end
 
-  def validate_vxlan vxlan_settings
+  def validate_vxlan(vxlan_settings)
     if vxlan_settings["vni_start"] < 0 || vxlan_settings["vni_start"] > 16777215
       validation_error I18n.t("barclamp.#{@bc_name}.validation.vxlan_vni_start")
     end
@@ -150,29 +150,7 @@ class NeutronService < PacemakerServiceObject
     end
   end
 
-  def validate_external_networks external_networks
-    net_svc = NetworkService.new @logger
-    network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
-    blacklist = ["bmc", "bmc_admin", "admin", "nova_fixed", "nova_floating",
-                 "os_sdn", "public", "storage"]
-
-    external_networks.each do |ext_net|
-      # Exclude a few default networks from network.json from being used as
-      # additional external networks in neutron
-      if blacklist.include? ext_net
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.network", ext_net: extnet)
-      end
-      if network_proposal["attributes"]["network"]["networks"][ext_net].nil?
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.external_network", ext_net: extnet)
-      end
-    end
-  end
-
-  def validate_proposal_after_save proposal
-    validate_one_for_role proposal, "neutron-server"
-    validate_at_least_n_for_role proposal, "neutron-network", 1
-
-    plugin = proposal["attributes"]["neutron"]["networking_plugin"]
+  def validate_ml2(proposal)
     ml2_mechanism_drivers = proposal["attributes"]["neutron"]["ml2_mechanism_drivers"]
     ml2_type_drivers = proposal["attributes"]["neutron"]["ml2_type_drivers"]
     ml2_type_drivers_default_provider_network = proposal["attributes"]["neutron"]["ml2_type_drivers_default_provider_network"]
@@ -181,36 +159,56 @@ class NeutronService < PacemakerServiceObject
     ml2_type_drivers_valid = NeutronService.networking_ml2_type_drivers_valid
     ml2_mechanism_drivers_valid = NeutronService.networking_ml2_mechanism_drivers_valid
 
-    # at least one ml2 type driver must be selected for ml2 as core plugin
-    if plugin == "ml2" && ml2_type_drivers.length == 0
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.ml2_type_driver")
-    end
-
     # at least one ml2 mech driver must be selected for ml2 as core plugin
-    if plugin == "ml2" && ml2_mechanism_drivers.length == 0
+    if ml2_mechanism_drivers.empty?
       validation_error I18n.t("barclamp.#{@bc_name}.validation.ml2_mechanism")
-    end
-
-    # only allow valid ml2 type drivers
-    ml2_type_drivers.each do |drv|
-      unless ml2_type_drivers_valid.include? drv
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.no_vaild_ml2_type_driver",
-          drv: drv,
-          ml2_type_drivers_valid: ml2_type_drivers_valid.join(",")
-        )
-      end
     end
 
     # only allow valid ml2 mechanism drivers
     ml2_mechanism_drivers.each do |drv|
-      unless ml2_mechanism_drivers_valid.include? drv
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.no_vaild_ml2_type_driver",
-          drv: drv,
-          ml2_mechanism_drivers_valid: ml2_mechanism_drivers_valid.join(",")
-        )
-      end
+      next if ml2_mechanism_drivers_valid.include? drv
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.no_valid_ml2_mechanism",
+        drv: drv,
+        ml2_mechanism_drivers_valid: ml2_mechanism_drivers_valid.join(",")
+      )
+    end
+
+    if ml2_mechanism_drivers.include?("linuxbridge") &&
+        ml2_type_drivers.include?("gre")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.linuxbridge_gre")
+    end
+
+    # cisco_nexus mech driver needs also openvswitch mech driver and vlan type driver
+    if ml2_mechanism_drivers.include?("cisco_nexus") &&
+        !ml2_mechanism_drivers.include?("openvswitch")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_nexus_ovs")
+    end
+
+    if ml2_mechanism_drivers.include?("cisco_nexus") &&
+        !ml2_type_drivers.include?("vlan")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_nexus_vlan")
+    end
+
+    # for now, openvswitch and linuxbrige can't be used in parallel
+    if ml2_mechanism_drivers.include?("openvswitch") &&
+        ml2_mechanism_drivers.include?("linuxbridge")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.openvswitch_linuxbridge")
+    end
+
+    # at least one ml2 type driver must be selected for ml2 as core plugin
+    if ml2_type_drivers.empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.ml2_type_driver")
+    end
+
+    # only allow valid ml2 type drivers
+    ml2_type_drivers.each do |drv|
+      next if ml2_type_drivers_valid.include? drv
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.no_valid_ml2_type_driver",
+        drv: drv,
+        ml2_type_drivers_valid: ml2_type_drivers_valid.join(",")
+      )
     end
 
     # default provider network ml2 type driver must be a driver from the selected ml2 type drivers
@@ -231,31 +229,18 @@ class NeutronService < PacemakerServiceObject
       )
     end
 
-    if ml2_type_drivers.include? "gre"
+    if ml2_mechanism_drivers.include?("openvswitch") && ml2_type_drivers.include?("gre")
       validate_gre proposal["attributes"]["neutron"]["gre"]
     end
 
     if ml2_type_drivers.include? "vxlan"
       validate_vxlan proposal["attributes"]["neutron"]["vxlan"]
     end
+  end
 
-    # linuxbridge and cisco_nexus mech drivers need vlan type driver
-    # TODO(toabctl): select vlan type driver automatically if linuxbridge or cisco were selected!?
-    %w(linuxbridge cisco_nexus).each do |drv|
-      if ml2_mechanism_drivers.include? drv and not ml2_type_drivers.include? "vlan"
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.mechanism_driver", drv: drv)
-      end
-    end
-
-    # cisco_nexus mech driver needs also openvswitch mech driver
-    if ml2_mechanism_drivers.include? "cisco_nexus" and not ml2_mechanism_drivers.include? "openvswitch"
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_nexus")
-    end
-
-    # for now, openvswitch and linuxbrige can't be used in parallel
-    if ml2_mechanism_drivers.include? "openvswitch" and ml2_mechanism_drivers.include? "linuxbridge"
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.openvswitch_linuxbridge")
-    end
+  def validate_dvr(proposal)
+    plugin = proposal["attributes"]["neutron"]["networking_plugin"]
+    ml2_mechanism_drivers = proposal["attributes"]["neutron"]["ml2_mechanism_drivers"]
 
     if proposal["attributes"]["neutron"]["use_dvr"]
       if plugin == "vmware"
@@ -273,6 +258,34 @@ class NeutronService < PacemakerServiceObject
         end
       end
     end
+  end
+
+  def validate_external_networks(external_networks)
+    net_svc = NetworkService.new @logger
+    network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
+    blacklist = ["bmc", "bmc_admin", "admin", "nova_fixed", "nova_floating",
+                 "os_sdn", "public", "storage"]
+
+    external_networks.each do |ext_net|
+      # Exclude a few default networks from network.json from being used as
+      # additional external networks in neutron
+      if blacklist.include? ext_net
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.network", ext_net: extnet)
+      end
+      if network_proposal["attributes"]["network"]["networks"][ext_net].nil?
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.external_network", ext_net: extnet)
+      end
+    end
+  end
+
+  def validate_proposal_after_save(proposal)
+    validate_one_for_role proposal, "neutron-server"
+    validate_at_least_n_for_role proposal, "neutron-network", 1
+
+    plugin = proposal["attributes"]["neutron"]["networking_plugin"]
+
+    validate_ml2(proposal) if plugin == "ml2"
+    validate_dvr(proposal)
 
     unless proposal["attributes"]["neutron"]["additional_external_networks"].empty?
       validate_external_networks proposal["attributes"]["neutron"]["additional_external_networks"]

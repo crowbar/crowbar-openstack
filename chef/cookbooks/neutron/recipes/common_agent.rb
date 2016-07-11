@@ -151,8 +151,13 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     neutron_agent = node[:neutron][:platform][:lb_agent_name]
     agent_config_path = "/etc/neutron/plugins/ml2/linuxbridge_agent.ini"
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
-    physnet = node[:crowbar_wall][:network][:nets][:nova_fixed].first
-    interface_mappings = "physnet1:" + physnet
+    interface_mappings = []
+
+    if ml2_type_drivers.include?("vlan")
+      physnet = node[:crowbar_wall][:network][:nets][:nova_fixed].first
+      interface_mappings.push("physnet1:" + physnet)
+    end
+
     if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
       external_networks = ["nova_floating"]
       external_networks.concat(node[:neutron][:additional_external_networks])
@@ -160,10 +165,11 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       external_networks.each do |net|
         ext_iface = node[:crowbar_wall][:network][:nets][net].last
         next if ext_physnet_map[net] == "physnet1"
-        mapping = ", " + ext_physnet_map[net] + ":" + ext_iface
-        interface_mappings += mapping
+        interface_mappings.push(ext_physnet_map[net] + ":" + ext_iface)
       end
     end
+
+    interface_mappings = interface_mappings.join(", ")
   end
 
   # include neutron::common_config only now, after we've installed packages
