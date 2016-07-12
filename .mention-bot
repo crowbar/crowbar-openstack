@@ -32,7 +32,7 @@
   "fileBlacklist": [],
   "userBlacklist": [],
   "userBlacklistForPR": [],
-  "requiredOrgs": ["crowbar"],
+  "requiredOrgs": ["SUSE"],
   "actions": ["opened", "synchronize"],
   "skipAlreadyAssignedPR": true,
   "assignToReviewer": false,
