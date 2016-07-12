@@ -36,10 +36,6 @@ taskmanager
 ----
 - Installs the taskmanager service.
 
-identity_registration
-----
-- Registers the endpoints with Keystone.
-
 Attributes
 ==========
 

@@ -1,0 +1,101 @@
+#
+# Copyright 2016 SUSE Linux GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Cookbook Name:: trove
+# Recipe:: api
+#
+
+keystone_settings = KeystoneHelper.keystone_settings(node, :trove)
+
+trove_port = node[:trove][:api][:bind_port]
+trove_protocol = node[:trove][:api][:protocol]
+
+ha_enabled = false
+
+my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
+my_public_host = CrowbarHelper.get_host_for_public_url(
+  node, node[:trove][:api][:protocol] == "https", ha_enabled)
+
+crowbar_pacemaker_sync_mark "wait-trove_register"
+
+register_auth_hash = { user: keystone_settings["admin_user"],
+                       password: keystone_settings["admin_password"],
+                       tenant: keystone_settings["admin_tenant"] }
+
+keystone_register "trove api wakeup keystone" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  action :wakeup
+end
+
+keystone_register "register trove user" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  user_password keystone_settings["service_password"]
+  tenant_name keystone_settings["service_tenant"]
+  action :add_user
+end
+
+keystone_register "give trove user access" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
+  role_name "admin"
+  action :add_access
+end
+
+keystone_register "register trove service" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  service_name "trove"
+  service_type "database"
+  service_description "Openstack Trove database service"
+  action :add_service
+end
+
+keystone_register "register trove endpoint" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  endpoint_service "trove"
+  endpoint_region keystone_settings["endpoint_region"]
+  endpoint_publicURL "#{trove_protocol}://"\
+                     "#{my_public_host}:#{trove_port}/v1.0/$(tenant_id)s"
+  endpoint_adminURL "#{trove_protocol}://"\
+                    "#{my_admin_host}:#{trove_port}/v1.0/$(tenant_id)s"
+  endpoint_internalURL "#{trove_protocol}://"\
+                       "#{my_admin_host}:#{trove_port}/v1.0/$(tenant_id)s"
+  #  endpoint_global true
+  #  endpoint_enabled true
+  action :add_endpoint_template
+end
+
+crowbar_pacemaker_sync_mark "create-trove_register"

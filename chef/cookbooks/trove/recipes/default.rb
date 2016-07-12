@@ -164,7 +164,7 @@ database_user node[:trove][:db][:user] do
   action :grant
 end
 
-include_recipe "openstack-database::identity_registration"
+include_recipe "trove::api"
 include_recipe "openstack-database::api"
 include_recipe "openstack-database::conductor"
 include_recipe "openstack-database::taskmanager"
