@@ -390,6 +390,23 @@ template "/etc/heat/heat.conf" do
   )
 end
 
+magnum_env_filter = "magnum-server AND magnum_config_environment:magnum-config-default"
+magnum_servers = search(:node, "roles:#{magnum_env_filter}") || []
+unless magnum_servers.empty?
+
+  # https://bugs.launchpad.net/magnum/+bug/1589955
+  # enable stacks global_index search so that magnum can use
+  # list(global_tenant=True)
+  ruby_block "update_heat_policy" do
+    block do
+      file = Chef::Util::FileEdit.new("/etc/heat/policy.json")
+      file.search_file_replace_line("stacks:global_index",
+                                    '    "stacks:global_index": "role:admin",')
+      file.write_file
+    end
+  end
+end
+
 service "heat-engine" do
   service_name node[:heat][:engine][:service_name]
   supports status: true, restart: true
