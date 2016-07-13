@@ -33,12 +33,16 @@ reserved_host_memory_mb = <%= node[:nova][:scheduler][:reserved_host_memory_mb] 
 cpu_allocation_ratio = <%= node[:nova][:scheduler][:cpu_allocation_ratio] %>
 ram_allocation_ratio = <%= node[:nova][:scheduler][:ram_allocation_ratio] %>
 disk_allocation_ratio = <%= node[:nova][:scheduler][:disk_allocation_ratio] %>
+<% if @use_baremetal_filters %>scheduler_use_baremetal_filters = true<% end -%>
 <% if @has_itxt -%>scheduler_available_filters = nova.scheduler.filters.standard_filters<% end %>
 <% if @has_itxt %>scheduler_default_filters = RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,TrustedFilter<% end %>
+<% unless @track_instance_changes %>scheduler_tracks_instance_changes = false<% end %>
 <% if @libvirt_type.eql?('vmware') -%>
 compute_driver = vmwareapi.VMwareVCDriver
 <% elsif @libvirt_type.eql?('zvm') -%>
 compute_driver = nova.virt.zvm.ZVMDriver
+<% elsif @libvirt_type.eql?('ironic') -%>
+compute_driver = ironic.IronicDriver
 <% else -%>
 compute_driver = libvirt.LibvirtDriver
 <% end -%>
@@ -137,6 +141,15 @@ pool_timeout = <%= node[:nova][:db][:pool_timeout] %>
 protocol = <%= @glance_server_protocol %>
 <%= "api_servers = #{@glance_server_protocol}://#{@glance_server_host}:#{@glance_server_port}" unless @glance_server_host.nil? %>
 <%= "api_insecure = #{@glance_server_insecure ? 'True' : 'False'}" unless @glance_server_host.nil? %>
+
+<% unless @ironic_settings.nil? -%>
+[ironic]
+api_endpoint = <%= @ironic_settings[:api_protocol] %>://<%= @ironic_settings[:public_host] %>:<%= @ironic_settings[:api_port] %>
+admin_username = <%= @ironic_settings[:service_user] %>
+admin_password = <%= @ironic_settings[:service_password] %>
+admin_url = <%= @keystone_settings['protocol'] %>://<%= @keystone_settings['internal_url_host'] %>:<%= @keystone_settings['admin_port'] %>/<%= @ironic_settings[:keystone_version] %>/
+admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+<% end -%>
 
 [key_manager]
 <% unless @keymgr_fixed_key.empty? -%>
