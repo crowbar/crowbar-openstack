@@ -60,15 +60,18 @@ template "/etc/sysconfig/neutron" do
   mode 0640
   # whenever changing plugin_config_file here, keep in mind to change the call
   # to neutron-db-manage too
-  if node[:neutron][:networking_plugin] == "ml2" and node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
-    variables(
-      plugin_config_file: plugin_cfg_path +  " /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
-    )
-  else
-    variables(
-      plugin_config_file: plugin_cfg_path
-    )
+  plugin_cfgs = plugin_cfg_path
+  if node[:neutron][:networking_plugin] == "ml2"
+    if node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
+      plugin_cfgs += " /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
+    elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
+        node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+      plugin_cfgs += " /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini"
+    end
   end
+  variables(
+    plugin_config_file: plugin_cfgs
+  )
   only_if { node[:platform_family] == "suse" }
   notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
 end
@@ -154,7 +157,7 @@ when "ml2"
     mode "0640"
     variables(
       ml2_mechanism_drivers: ml2_mechanism_drivers,
-      ml2_type_drivers: node[:neutron][:ml2_type_drivers],
+      ml2_type_drivers: ml2_type_drivers,
       tenant_network_types: tenant_network_types,
       vlan_start: vlan_start,
       vlan_end: vlan_end,
@@ -188,8 +191,13 @@ when "vmware"
   end
 end
 
-if node[:neutron][:networking_plugin] == "ml2" and node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
-  include_recipe "neutron::cisco_support"
+if node[:neutron][:networking_plugin] == "ml2"
+  if node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
+    include_recipe "neutron::cisco_support"
+  elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
+      node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+    include_recipe "neutron::cisco_apic_support"
+  end
 end
 
 if node[:neutron][:use_lbaas]
@@ -300,6 +308,54 @@ if node[:neutron][:use_lbaas]
     end
     action :nothing
     subscribes :create, "execute[neutron-db-manage migrate lbaas]", :immediately
+  end
+end
+
+if node[:neutron][:networking_plugin] == "ml2"
+  if node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
+    # See comments for "neutron-db-manage migrate" above
+    db_synced = node[:neutron][:db_synced_apic_ml2]
+    is_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
+    execute "apic-ml2-db-manage upgrade head" do
+      user node[:neutron][:user]
+      group node[:neutron][:group]
+      command "apic-ml2-db-manage --config-file /etc/neutron/neutron.conf \
+                                  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
+                                  --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
+                                  upgrade head"
+      only_if { !db_synced && (!ha_enabled || is_founder) }
+    end
+
+    ruby_block "mark node for apic-ml2-db-manage upgrade head" do
+      block do
+        node.set[:neutron][:db_synced_apic_ml2] = true
+        node.save
+      end
+      action :nothing
+      subscribes :create, "execute[apic-ml2-db-manage upgrade head]", :immediately
+    end
+  elsif node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+    # See comments for "neutron-db-manage migrate" above
+    db_synced = node[:neutron][:db_synced_apic_gbp]
+    is_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
+    execute "gbp-db-manage upgrade head" do
+      user node[:neutron][:user]
+      group node[:neutron][:group]
+      command "gbp-db-manage --config-file /etc/neutron/neutron.conf \
+                             --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
+                             --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
+                             upgrade head"
+      only_if { !db_synced && (!ha_enabled || is_founder) }
+    end
+
+    ruby_block "mark node for gbp-db-manage upgrade head" do
+      block do
+        node.set[:neutron][:db_synced_apic_gbp] = true
+        node.save
+      end
+      action :nothing
+      subscribes :create, "execute[gbp-db-manage upgrade head]", :immediately
+    end
   end
 end
 
