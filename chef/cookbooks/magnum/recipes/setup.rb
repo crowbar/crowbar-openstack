@@ -23,9 +23,11 @@ trustee_domain_name = node["magnum"]["trustee"]["domain_name"]
 trustee_domain_admin = node["magnum"]["trustee"]["domain_admin_name"]
 trustee_domain_admin_password = node["magnum"]["trustee"]["domain_admin_password"]
 
-# Install magnumclient package
+# Install openstack and magnum client packages
 if %w(rhel suse).include?(node[:platform_family])
-  package "python-magnumclient"
+  ["python-magnumclient", "python-openstackclient"].each do |pkg|
+    package pkg
+  end
 end
 
 insecure = keystone_settings["insecure"] ? "--insecure" : ""
@@ -43,31 +45,61 @@ domain_env = { "OS_USERNAME"             => keystone_settings["admin_user"],
 bash "register magnum domain" do
   user "root"
   code <<-EOF
+    # Find domain ID
     id=
-    eval $(openstack #{insecure} domain create \
-        #{trustee_domain_name} \
-        --description 'Owns users and projects created by magnum' \
-        --or-show -f value -c id)
-    TRUSTEE_DOMAIN_ID=$id
-
-    id=
-    eval $(openstack #{insecure} user create \
-        --domain #{trustee_domain_name} \
-        --or-show -f value -c id \
-        #{trustee_domain_admin})
-    TRUSTEE_DOMAIN_ADMIN_ID=$id
-
-    ret=
     eval $(openstack #{insecure} \
-        user set \
-        --domain $TRUSTEE_DOMAIN_ID \
-        --password #{trustee_domain_admin_password} \
-        --description "Manages users and projects created by magnum" \
-        #{trustee_domain_admin})
-    ret=
-    eval $(openstack #{insecure} role add \
-        --user $TRUSTEE_DOMAIN_ADMIN_ID \
-        --domain $TRUSTEE_DOMAIN_ID admin)
+        domain show \
+        -f shell --variable id \
+        #{trustee_domain_name})
+    MAGNUM_DOMAIN_ID=$id
+
+    if [ -z "$MAGNUM_DOMAIN_ID" ]; then
+        id=
+        eval $(openstack #{insecure} \
+            domain create \
+            -f shell --variable id \
+            --description "Owns users and projects created by magnum" \
+            #{trustee_domain_name})
+        MAGNUM_DOMAIN_ID=$id
+    fi
+
+    [ -n "$MAGNUM_DOMAIN_ID" ] || exit 1
+
+    id=
+    eval $(openstack #{insecure} \
+        user show #{trustee_domain_admin} \
+        -f shell -c id --domain #{trustee_domain_name})
+    MAGNUM_DOMAIN_ADMIN_ID=$id
+
+    if [ -z "$MAGNUM_DOMAIN_ADMIN_ID" ]; then
+        id=
+        eval $(openstack #{insecure} \
+            user create \
+            --domain #{trustee_domain_name} \
+            --or-show -f shell -c id #{trustee_domain_admin})
+        MAGNUM_DOMAIN_ADMIN_ID=$id
+
+        openstack #{insecure} \
+            user set \
+            --password #{trustee_domain_admin_password} \
+            --description "Manages users and projects created by magnum" \
+            #{trustee_domain_admin}
+    fi
+
+    [ -n "$MAGNUM_DOMAIN_ADMIN_ID" ] || exit 1
+
+    # Make domain user as admin for the role
+    if ! openstack #{insecure} \
+            role list \
+            -f csv --column Name \
+            --domain $MAGNUM_DOMAIN_ID \
+            --user $MAGNUM_DOMAIN_ADMIN_ID \
+            | grep -q \"admin\"; then
+        openstack #{insecure} \
+            role add \
+            --user $MAGNUM_DOMAIN_ADMIN_ID \
+            --domain $MAGNUM_DOMAIN_ID admin
+    fi
   EOF
   environment domain_env
 end
