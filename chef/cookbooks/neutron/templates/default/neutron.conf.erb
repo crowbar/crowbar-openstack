@@ -197,7 +197,17 @@ allow_overlapping_ips = False
 # when the network's preferred MTU is known.
 # advertise_mtu = False
 advertise_mtu = True
+
+# MTU of the underlying physical network. Neutron uses this value to calculate
+# MTU for all virtual network components. For flat and VLAN networks, neutron
+# uses this value without modification. For overlay networks such as VXLAN,
+# neutron automatically subtracts the overlay protocol overhead from this value.
+# Defaults to 1500, the standard value for Ethernet. If using the ML2 plug-in
+# with overlay/tunnel networks, also configure the ml2 path_mtu option with the
+# same value as the global_physnet_mtu option.
+global_physnet_mtu = <%= @mtu_value %>
 # ======== end of items for MTU selection and advertisement =========
+
 
 # =========== items for agent management extension =============
 # Seconds to regard the agent as down; should be at least twice
