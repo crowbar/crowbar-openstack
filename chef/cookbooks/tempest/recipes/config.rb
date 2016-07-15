@@ -38,6 +38,9 @@ tempest_adm_pass = node[:tempest][:tempest_adm_password]
 # manila (share)
 tempest_manila_settings = node[:tempest][:manila]
 
+# magnum (container)
+tempest_magnum_settings = node[:tempest][:magnum]
+
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
                        tenant: keystone_settings["admin_tenant"] }
@@ -273,10 +276,8 @@ use_aodh = $?.success?
 use_trove = $?.success?
 `#{keystonev2} endpoint-get --service share &> /dev/null`
 use_manila = $?.success?
-# `#{keystonev2} endpoint-get --service container &> /dev/null`
-# use_magnum = $?.success?
-# FIXME(toabctl): enable when tempest tests pass
-use_magnum = false
+`#{keystonev2} endpoint-get --service container &> /dev/null`
+use_magnum = $?.success?
 
 # FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
@@ -531,7 +532,9 @@ template "/etc/tempest/tempest.conf" do
     vendor_name: vendor_name,
     use_docker: use_docker,
     # manila (share) settings
-    manila_settings: tempest_manila_settings
+    manila_settings: tempest_manila_settings,
+    # magnum (container) settings
+    magnum_settings: tempest_magnum_settings
   )
 end
 

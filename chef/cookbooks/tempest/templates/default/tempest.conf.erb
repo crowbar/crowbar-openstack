@@ -869,6 +869,41 @@ ssh_user_regex = [["^.*[Cc]irros.*$", "cirros"]]
 #max_claim_grace = 43200
 
 
+[magnum]
+
+#
+# From tempest.config
+#
+
+# Image id to be used for baymodel. (string value)
+#image_id = fedora-21-atomic-5
+image_id = <%= @magnum_settings['image_id'] %>
+
+# NIC id. (string value)
+#nic_id = public
+nic_id = floating
+
+# Keypair id to use to log into nova instances. (string value)
+#keypair_id = default
+
+# Flavor id to use for baymodels. (string value)
+#flavor_id = s1.magnum
+flavor_id = <%= @magnum_settings['flavor_id'] %>
+
+# Bypass URL for Magnum to skip service catalog lookup (string value)
+#magnum_url = <None>
+
+# Master flavor id to use for baymodels. (string value)
+#master_flavor_id = m1.magnum
+master_flavor_id = <%= @magnum_settings['master_flavor_id'] %>
+
+# CSR location for certificates. (string value)
+#csr_location = /opt/stack/new/magnum/default.csr
+
+# Specify whether to copy nova server logs on failure. (string value)
+#copy_logs = True
+
+
 [negative]
 
 #

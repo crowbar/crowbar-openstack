@@ -17,6 +17,11 @@
         "image_username": "root",
         "image_password": "",
         "default_share_type_name": "default"
+      },
+      "magnum": {
+        "image_id": "magnum-service-image",
+        "flavor_id": "m1.small",
+        "master_flavor_id": "m1.medium"
       }
     }
   },
@@ -24,7 +29,7 @@
     "tempest": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 12,
+      "schema-revision": 100,
       "element_states": {
         "tempest": [ "ready", "applying" ]
       },
