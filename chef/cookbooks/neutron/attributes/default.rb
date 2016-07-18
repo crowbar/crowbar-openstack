@@ -58,15 +58,15 @@ default[:neutron][:apic][:hosts] = "10.105.1.10"
 default[:neutron][:apic][:username] = "admin"
 default[:neutron][:apic][:password] = "cisco123"
 
-default[:neutron][:opflex][:peer_ip] = "10.0.0.30"
-default[:neutron][:opflex][:peer_port] = 8009
-default[:neutron][:opflex][:encap] = "vxlan"
-default[:neutron][:opflex][:vxlan][:uplink_iface] = "vlan.4093"
-default[:neutron][:opflex][:vxlan][:uplink_vlan] = 4093
-default[:neutron][:opflex][:vxlan][:encap_iface] = "br-int_vxlan0"
-default[:neutron][:opflex][:vxlan][:remote_ip] = "10.0.0.32"
-default[:neutron][:opflex][:vxlan][:remote_port] = 8472
-default[:neutron][:opflex][:vlan][:encap_iface] = ""
+default[:neutron][:apic][:opflex][:peer_ip] = "10.0.0.30"
+default[:neutron][:apic][:opflex][:peer_port] = 8009
+default[:neutron][:apic][:opflex][:encap] = "vxlan"
+default[:neutron][:apic][:opflex][:vxlan][:uplink_iface] = "vlan.4093"
+default[:neutron][:apic][:opflex][:vxlan][:uplink_vlan] = 4093
+default[:neutron][:apic][:opflex][:vxlan][:encap_iface] = "br-int_vxlan0"
+default[:neutron][:apic][:opflex][:vxlan][:remote_ip] = "10.0.0.32"
+default[:neutron][:apic][:opflex][:vxlan][:remote_port] = 8472
+default[:neutron][:apic][:opflex][:vlan][:encap_iface] = ""
 
 case node[:platform_family]
 when "suse"
