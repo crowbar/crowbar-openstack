@@ -37,6 +37,27 @@
         "of_interface": "native",
         "ovsdb_interface": "native"
       },
+      "apic": { 
+        "hosts": "10.105.1.10",
+        "system_id": "soc6",
+        "username": "admin",
+        "password": "cisco123"
+      },
+      "opflex": { 
+        "peer_ip": "10.0.0.30",
+        "peer_port": 8009,
+        "encap": "vxlan",
+        "vxlan": {
+            "encap_iface": "br-int_vxlan0",
+            "uplink_iface": "vlan.4093",
+            "uplink_vlan": 4093,
+            "remote_ip": "10.0.0.32",
+            "remote_port": 8472
+        },
+        "vlan": {
+            "encap_iface": ""
+        }
+      },
       "allow_overlapping_ips": true,
       "use_syslog": false,
       "database_instance": "none",
@@ -92,6 +113,28 @@
         "protocol": "http",
         "service_port": 9696,
         "service_host": "0.0.0.0"
+      },
+      "apic_switches": {
+        "101": {
+          "switch_ports": {
+            "d58-00-00-00-00-00" : {
+              "switch_port": "1/2" 
+            },
+            "d58-00-00-00-00-01" : {
+              "switch_port": "1/33"
+            }
+          }
+        },
+        "102": {
+          "switch_ports": {
+            "d58-00-00-00-00-02" : {
+              "switch_port": "1/3" 
+            },
+            "d58-00-00-00-00-03" : {
+              "switch_port": "1/34"
+            }
+          }
+        }
       },
       "use_infoblox": false,
       "infoblox": {

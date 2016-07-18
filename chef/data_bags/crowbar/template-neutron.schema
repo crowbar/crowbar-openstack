@@ -42,6 +42,27 @@
                       "ovsdb_interface": { "type": "str", "required": true },
                       "of_interface": { "type": "str", "required": true }
                     }},
+                    "apic": { "type": "map", "required": true, "mapping": {
+                      "hosts": { "type" : "str", "required" : true },
+                      "system_id": { "type" : "str", "required" : true },
+                      "username": { "type" : "str", "required": true },
+                      "password": { "type" : "str", "required": true }
+                    }},
+                    "opflex": { "type": "map", "required": true, "mapping": {
+                      "peer_ip": { "type": "str", "required" : true },
+                      "peer_port": { "type": "int", "required" : true },
+                      "encap": { "type": "str", "required": true },
+                      "vxlan": { "type": "map", "required": true, "mapping" : {
+                          "encap_iface": {"type": "str", "required": true },
+                          "uplink_iface": { "type": "str", "required": true },
+                          "uplink_vlan": { "type": "int", "required": true },
+                          "remote_ip": { "type": "str", "required": true },
+                          "remote_port": { "type": "int", "required": true }
+                      }},
+                      "vlan": { "type": "map", "required": false, "mapping": {
+                          "encap_iface": { "type": "str", "required": true }
+                      }}
+                    }},
                     "allow_overlapping_ips": { "type": "bool", "required": true },
                     "cisco_switches": {
                       "type" : "map",
@@ -127,6 +148,15 @@
                       "service_port": { "type" : "int", "required" : true },
                       "service_host": { "type" : "str", "required" : true }
                     }},
+                    "apic_switches": { "type" : "map", "required" : true, "mapping" : {
+                      = : { "type" : "map", "required" : true, "mapping" : {
+                        "switch_ports": { "type" : "map", "required" : false, "mapping" : {
+                          = : { "type" : "map", "required" : false, "mapping" : {
+                            "switch_port": { "type": "str", "required": true }}
+                          }}
+                        }}
+                      }}
+                    },
                     "use_infoblox": { "type": "bool", "required": true },
                     "infoblox": { "type": "map", "required": false, "mapping": {
                         "cloud_data_center_id": { "type": "int", "required": true },
