@@ -172,34 +172,6 @@ service node[:neutron][:platform][:dhcp_agent_name] do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
-# Fix broken MTU on upgrade from Juno (bsc#968426)
-# This is only an issue on upgrade (hence the check for an existence of an old
-# file) and for tunnels (gre/vxlan -- was only available with ovs)
-if !node[:neutron][:network_mtu_fix] &&
-    File.exist?("/etc/neutron/plugins/openvswitch/ovs_neutron_plugin.ini.rpmsave")
-  if node[:neutron][:networking_plugin] == "ml2" && ml2_mech_drivers.include?("openvswitch")
-    cookbook_file "crowbar-fix-tunnel-networks-mtu" do
-      path "/usr/bin/crowbar-fix-tunnel-networks-mtu"
-      mode "0755"
-    end
-
-    execute "fix mtu of tunnel networks" do
-      command "/usr/bin/crowbar-fix-tunnel-networks-mtu"
-      action :run
-      # restart local dhcp agent to get dnsmasq restarted so it advertises the
-      # correct mtu; this is why we run this on all nodes even with HA
-      notifies :restart, "service[#{node[:neutron][:platform][:dhcp_agent_name]}]"
-    end
-  end
-
-  ruby_block "mark node for having the networks mtus fixed (bsc#968426)" do
-    block do
-      node[:neutron][:network_mtu_fix] = true
-      node.save
-    end
-  end
-end
-
 if ha_enabled
   log "HA support for neutron agents is enabled"
   include_recipe "neutron::network_agents_ha"
