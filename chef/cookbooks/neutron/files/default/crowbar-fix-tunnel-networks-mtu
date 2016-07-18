@@ -3,11 +3,21 @@
 import sqlalchemy
 import sys
 from neutron.plugins.common import constants as p_const
+from oslo_config import cfg
 
-if len(sys.argv) != 2:
-    raise ValueError('One and only one argument must be passed: database connection uri')
+_db_opts = [
+    cfg.StrOpt('connection',
+               deprecated_name='sql_connection',
+               default='',
+               secret=True,
+               help='URL to database'),
+]
 
-db_uri = sys.argv[1]
+CONF = cfg.ConfigOpts()
+CONF.register_cli_opts(_db_opts, 'database')
+CONF(project='neutron')
+
+db_uri = CONF.database.connection
 
 db = sqlalchemy.create_engine(db_uri)
 try:
