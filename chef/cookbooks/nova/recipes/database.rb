@@ -62,52 +62,6 @@ end
   end
 end
 
-# if we're upgrading from juno, we first need to upgrade to the kilo state,
-# then run nova-manage db migrate_flavor_data and after that, run the rest
-# of the db migrations.
-db_version_cmd = "nova-manage db version"
-last_juno_migration = 254
-last_kilo_migration = 290
-
-execute "nova-manage db sync (kilo migrations)" do
-  user node[:nova][:user]
-  group node[:nova][:group]
-  command "nova-manage db sync --version #{last_kilo_migration}"
-  action :run
-  # We only do the sync the first time, and only if we're not doing HA or if we
-  # are the founder of the HA cluster (so that it's really only done once).
-  only_if do
-    if !node[:nova][:db_synced] &&
-        (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
-      cmd = Mixlib::ShellOut.new(db_version_cmd,
-                                 user: node[:nova][:user],
-                                 group: node[:nova][:group])
-      cmd.run_command
-      db_version = cmd.stdout.to_i
-      if db_version >= last_juno_migration && db_version < last_kilo_migration
-        true
-      else
-        false
-      end
-    else
-      false
-    end
-  end
-  notifies :run, "execute[nova-manage db migrate_flavor_data]", :immediately
-end
-
-# now run the db migrate_flavor tool if needed
-execute "nova-manage db migrate_flavor_data" do
-  user node[:nova][:user]
-  group node[:nova][:group]
-  command "nova-manage db migrate_flavor_data --force"
-  # We only run this step on explicit notification of the previous
-  # "db sync (kilo migrations)" step to avoid another complex "only_if"
-  # condition.
-  action :nothing
-end
-
-# and finally the rest of the migrations
 execute "nova-manage db sync" do
   user node[:nova][:user]
   group node[:nova][:group]
