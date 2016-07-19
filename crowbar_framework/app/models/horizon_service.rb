@@ -96,7 +96,7 @@ class HorizonService < PacemakerServiceObject
         validation_error I18n.t(
           "barclamp.#{@bc_name}.validation.timeout",
           horizon_timeout: horizon_timeout,
-          keystone_minutes: (keystone_timeout / 60)
+          keystone_timeout: (keystone_timeout / 60)
         )
       end
     end
