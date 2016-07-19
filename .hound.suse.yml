@@ -57,13 +57,17 @@ Style/StringLiteralsInInterpolation:
   StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#stylestringliteralsininterpolation
   EnforcedStyle: double_quotes
 
+Style/SymbolArray:
+  StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#stylesymbolarray
+  EnforcedStyle: brackets
+
 Style/WordArray:
-  StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#deviations-from-the-upstream-style-guide
-  Enabled: false
+  StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#stylewordarray
+  EnforcedStyle: brackets
 
 Style/RegexpLiteral:
-  StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#deviations-from-the-upstream-style-guide
-  Enabled: false
+  StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#styleregexpliteral
+  EnforcedStyle: slashes
 
 Style/SignalException:
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#fail-method
