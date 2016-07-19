@@ -1,7 +1,0 @@
-# general
-- Add HA support
-- Add SSL support
-
-# drivers
-- add HP, EMC, ... drivers
-- netapp: allow multiSVM deployment
