@@ -1035,7 +1035,7 @@ linuxnet_interface_driver = ""
 
 # Whether to attempt to inject network setup into guest (boolean value)
 #flat_injected = false
-<% if @force_config_drive %>
+<% if @force_config_drive || @libvirt_type.eql?('zvm') %>
 flat_injected = true
 <% end -%>
 
@@ -1251,7 +1251,7 @@ config_drive_format = vfat
 # "always" will be deprecated in the Liberty release cycle. (string value)
 # Allowed values: always, True, False
 #force_config_drive = <None>
-<% if @force_config_drive %>
+<% if @force_config_drive || @libvirt_type.eql?('zvm') %>
 force_config_drive = True
 <% end -%>
 
