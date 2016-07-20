@@ -167,4 +167,4 @@ end
 include_recipe "trove::api"
 include_recipe "openstack-database::api"
 include_recipe "trove::conductor"
-include_recipe "openstack-database::taskmanager"
+include_recipe "trove::taskmanager"

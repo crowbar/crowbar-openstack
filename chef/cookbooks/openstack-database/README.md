@@ -28,10 +28,6 @@ api
 ----
 - Installs the API service.
 
-taskmanager
-----
-- Installs the taskmanager service.
-
 Attributes
 ==========
 

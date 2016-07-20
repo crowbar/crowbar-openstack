@@ -1,28 +1,30 @@
-<%= node["openstack"]["database"]["custom_template_banner"] %>
-
 [DEFAULT]
 # Show more verbose log output (sets INFO log level output)
-verbose = <%= node["openstack"]["database"]["verbose"] %>
+verbose = <%= node[:trove][:verbose] %>
 
 # Show debugging output in logs (sets DEBUG log level output)
-debug = <%= node["openstack"]["database"]["debug"] %>
+debug = <%= node[:trove][:debug] %>
 
 # Updates service and instance task statuses if instance failed become active
 update_status_on_fail = True
 
 # AMQP Connection info
-rabbit_host = <%= @rabbit['host'] %>
-rabbit_userid = <%= @rabbit['userid'] %>
-rabbit_password = <%= @rabbit_pass %>
-rabbit_virtual_host = <%= @rabbit['vhost'] %>
-rabbit_port = <%= @rabbit['port'] %>
-rabbit_use_ssl = <%= @rabbit['use_ssl'] %>
+rabbit_host=<%= @rabbit_default_settings[:address] %>
+<% unless @rabbit_default_settings[:port].nil? -%>
+rabbit_port=<%= @rabbit_default_settings[:port] %>
+<% end -%>
+<% unless @rabbit_trove_settings.nil? -%>
+rabbit_userid=<%= @rabbit_trove_settings[:user] %>
+rabbit_password=<%= @rabbit_trove_settings[:password] %>
+rabbit_virtual_host=<%= @rabbit_trove_settings[:vhost] %>
+<% end -%>
+rabbit_use_ssl = false
 
 # SQLAlchemy connection string for the reference implementation
 # registry server. Any valid SQLAlchemy connection string is fine.
 # See: http://www.sqlalchemy.org/docs/05/reference/sqlalchemy/connections.html#sqlalchemy.create_engine
-sql_connection = <%= @database_connection %>
 # sql_connection = mysql://root:root@localhost/trove
+sql_connection = <%= @sql_connection %>
 
 # Period in seconds after which SQLAlchemy should reestablish its connection
 # to the database.
@@ -37,22 +39,37 @@ sql_idle_timeout = 3600
 db_api_implementation = trove.db.sqlalchemy.api
 
 # Configuration options for talking to nova via the novaclient.
-api_insecure = <%= @insecure %>
-trove_auth_url = <%= @identity_uri %>
-os_region_name = <%= @region_name %>
+api_insecure = <%= @keystone_settings['insecure'] %>
+trove_auth_url = <%= KeystoneHelper.versioned_service_URL(
+                      @keystone_settings["protocol"],
+                      @keystone_settings["internal_url_host"],
+                      @keystone_settings["service_port"],
+                      "2.0") %>
+os_region_name= <%= @keystone_settings['endpoint_region'] %>
 
-nova_compute_url = <%= @compute_uri %>
+# Nova
+<% unless @nova_url.nil? -%>
+nova_compute_url = <%= @nova_url %>
+<% end -%>
 nova_compute_endpoint_type = internalURL
-nova_api_insecure = <%= @compute_insecure %>
-cinder_url = <%= @block_storage_uri %>
+nova_api_insecure = <%= @nova_insecure %>
+
+# Cinder
+<% unless @cinder_url.nil? -%>
+cinder_url = <%= @cinder_url %>
+<% end -%>
 cinder_endpoint_type = internalURL
-cinder_api_insecure = <%= @block_storage_insecure %>
-swift_url = <%= @object_storage_uri %>
+cinder_api_insecure = <%= @cinder_insecure %>
+
+# Swift
+<% unless @object_store_url.nil? -%>
+swift_url = <%= @object_store_url %>
+<% end -%>
 swift_endpoint_type = internalURL
-swift_api_insecure = <%= @object_storage_insecure %>
+swift_api_insecure = <%= @object_store_insecure %>
 
 # Config options for enabling volume service
-trove_volume_support = <%= node['openstack']['database']['volume_support'] %>
+trove_volume_support = <%= node[:trove][:volume_support] %>
 block_device_mapping = vdb
 device_path = /dev/vdb
 mount_point = /var/lib/mysql
@@ -62,16 +79,16 @@ server_delete_time_out=480
 # Nova server boot options
 # sets the --config-drive argument when doing a nova boot
 # (controls how file injection is handled by nova)
-use_nova_server_config_drive = <%= node['openstack']['database']['use_nova_server_config_drive'] %>
+use_nova_server_config_drive = true
 
 # Configuration options for talking to nova via the novaclient.
 # These options are for an admin user in your keystone config.
 # It proxy's the token received from the user to send to nova via this admin users creds,
 # basically acting like the client via that proxy token.
-nova_proxy_admin_user = <%= node['openstack']['database']['nova_proxy_user'] %>
-nova_proxy_admin_pass = <%= node['openstack']['database']['nova_proxy_password'] %>
-nova_proxy_admin_tenant_name = <%= node['openstack']['database']['nova_proxy_tenant'] %>
-nova_proxy_admin_tenant_id = <%= node['openstack']['database']['nova_proxy_tenant_id'] %>
+nova_proxy_admin_user = <%= @keystone_settings["admin_user"] %>
+nova_proxy_admin_pass = <%= @keystone_settings["admin_password"] %>
+nova_proxy_admin_tenant_name = <%= @keystone_settings["admin_tenant"] %>
+nova_proxy_admin_tenant_id = <%= @keystone_settings["admin_tenant_id"] %>
 
 # Manager impl for the taskmanager
 taskmanager_manager=trove.taskmanager.manager.Manager

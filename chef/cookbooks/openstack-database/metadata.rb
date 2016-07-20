@@ -6,7 +6,6 @@ description "Installs/Configures trove"
 long_description IO.read(File.join(File.dirname(__FILE__), "README.md"))
 version "9.0.1"
 recipe "openstack-database::api", "Installs API service"
-recipe "openstack-database::taskmanager", "Installs TaskManager service"
 
 depends "openstack-common", "~> 9.6"
 
