@@ -17,11 +17,13 @@
 # Recipe:: setup
 #
 
+return if node["magnum"]["trustee"]["domain_id"] && node["magnum"]["trustee"]["domain_admin_id"]
+
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-trustee_domain_name = node["magnum"]["trustee"]["domain_name"]
-trustee_domain_admin = node["magnum"]["trustee"]["domain_admin_name"]
-trustee_domain_admin_password = node["magnum"]["trustee"]["domain_admin_password"]
+magnum_domain_name = node["magnum"]["trustee"]["domain_name"]
+magnum_domain_admin = node["magnum"]["trustee"]["domain_admin_name"]
+magnum_domain_admin_pass = node["magnum"]["trustee"]["domain_admin_password"]
 
 # Install openstack and magnum client packages
 if %w(rhel suse).include?(node[:platform_family])
@@ -35,92 +37,47 @@ auth_url = "#{keystone_settings["protocol"]}://"\
            "#{keystone_settings["internal_url_host"]}:"\
            "#{keystone_settings["service_port"]}/v3"
 
-domain_env = { "OS_USERNAME"             => keystone_settings["admin_user"],
-               "OS_PASSWORD"             => keystone_settings["admin_password"],
-               "OS_TENANT_NAME"          => keystone_settings["admin_tenant"],
-               "OS_AUTH_URL"             => auth_url,
-               "OS_REGION_NAME"          => keystone_settings["endpoint_region"],
-               "OS_IDENTITY_API_VERSION" => "3" }
+openstack_command = "openstack --os-username #{keystone_settings["admin_user"]}"
+openstack_command << " --os-auth-type password --os-identity-api-version 3"
+openstack_command << " --os-password #{keystone_settings["admin_password"]}"
+openstack_command << " --os-tenant-name #{keystone_settings["admin_tenant"]}"
+openstack_command << " --os-auth-url #{auth_url} #{insecure}"
 
-bash "register magnum domain" do
-  user "root"
-  code <<-EOF
-    # Find domain ID
-    id=
-    eval $(openstack #{insecure} \
-        domain show \
-        -f shell --variable id \
-        #{trustee_domain_name})
-    MAGNUM_DOMAIN_ID=$id
+get_magnum_domain_id = "#{openstack_command} domain show #{magnum_domain_name} -f value -c id"
+magnum_domain_id = Mixlib::ShellOut.new(get_magnum_domain_id).run_command.stdout.chomp
 
-    if [ -z "$MAGNUM_DOMAIN_ID" ]; then
-        id=
-        eval $(openstack #{insecure} \
-            domain create \
-            -f shell --variable id \
-            --description "Owns users and projects created by magnum" \
-            #{trustee_domain_name})
-        MAGNUM_DOMAIN_ID=$id
-    fi
-
-    [ -n "$MAGNUM_DOMAIN_ID" ] || exit 1
-
-    id=
-    eval $(openstack #{insecure} \
-        user show #{trustee_domain_admin} \
-        -f shell -c id --domain #{trustee_domain_name})
-    MAGNUM_DOMAIN_ADMIN_ID=$id
-
-    if [ -z "$MAGNUM_DOMAIN_ADMIN_ID" ]; then
-        id=
-        eval $(openstack #{insecure} \
-            user create \
-            --domain #{trustee_domain_name} \
-            --or-show -f shell -c id #{trustee_domain_admin})
-        MAGNUM_DOMAIN_ADMIN_ID=$id
-
-        openstack #{insecure} \
-            user set \
-            --password #{trustee_domain_admin_password} \
-            --description "Manages users and projects created by magnum" \
-            #{trustee_domain_admin}
-    fi
-
-    [ -n "$MAGNUM_DOMAIN_ADMIN_ID" ] || exit 1
-
-    # Make domain user as admin for the role
-    if ! openstack #{insecure} \
-            role list \
-            -f csv --column Name \
-            --domain $MAGNUM_DOMAIN_ID \
-            --user $MAGNUM_DOMAIN_ADMIN_ID \
-            | grep -q \"admin\"; then
-        openstack #{insecure} \
-            role add \
-            --user $MAGNUM_DOMAIN_ADMIN_ID \
-            --domain $MAGNUM_DOMAIN_ID admin
-    fi
-  EOF
-  environment domain_env
+if magnum_domain_id.nil? || magnum_domain_id.empty?
+  create_magnum_domain = "#{openstack_command} domain create -f value -c id"
+  create_magnum_domain << ' --description "Owns users and projects created by magnum"'
+  create_magnum_domain << " #{magnum_domain_name}"
+  magnum_domain_id = Mixlib::ShellOut.new(create_magnum_domain).run_command.stdout.chomp
 end
 
-ruby_block "Update node parameters" do
-  block do
-    openstack_command = "openstack --os-username #{keystone_settings["admin_user"]}"
-    openstack_command << " --os-auth-type password --os-identity-api-version 3"
-    openstack_command << " --os-password #{keystone_settings["admin_password"]}"
-    openstack_command << " --os-tenant-name #{keystone_settings["admin_tenant"]}"
-    openstack_command << " --os-auth-url #{auth_url}"
+get_magnum_domain_admin_id = "#{openstack_command} user show #{magnum_domain_admin}"
+get_magnum_domain_admin_id << " -f value -c id --domain #{magnum_domain_name}"
+magnum_domain_admin_id = Mixlib::ShellOut.new(get_magnum_domain_admin_id).run_command.stdout.chomp
 
-    domain_id_cmd = "#{openstack_command} domain show #{trustee_domain_name} -f value -c id"
-    trustee_domain_id = `#{domain_id_cmd}`.chomp
-    admin_id_cmd = "#{openstack_command} user show #{trustee_domain_admin}"
-    admin_id_cmd << " -f value -c id --domain #{trustee_domain_name}"
-    trustee_domain_admin_id = `#{admin_id_cmd}`.chomp
+if magnum_domain_admin_id.nil? || magnum_domain_admin_id.empty?
+  create_magnum_domain_admin = "#{openstack_command} user create --domain #{magnum_domain_name}"
+  create_magnum_domain_admin << " --or-show -f value -c id #{magnum_domain_admin}"
+  magnum_domain_admin_id = Mixlib::ShellOut.new(create_magnum_domain_admin).run_command.stdout.chomp
 
-    node.set[:magnum][:trustee][:domain_id] = trustee_domain_id
-    node.set[:magnum][:trustee][:domain_admin_id] = trustee_domain_admin_id
-
-    node.save
-  end
+  set_magnum_domain_admin = "#{openstack_command} user set --password #{magnum_domain_admin_pass}"
+  set_magnum_domain_admin << ' --description "Manages users and projects created by magnum"'
+  set_magnum_domain_admin << " #{magnum_domain_admin}"
+  Mixlib::ShellOut.new(set_magnum_domain_admin).run_command
 end
+
+check_magnum_domain_role = "#{openstack_command} role list -f csv --column Name"
+check_magnum_domain_role << " --domain #{magnum_domain_id} --user #{magnum_domain_admin_id}"
+magnum_domain_role = Mixlib::ShellOut.new(check_magnum_domain_role).run_command.stdout
+
+unless magnum_domain_role.include? "admin"
+  create_magnum_domain_role = "#{openstack_command} role add --user #{magnum_domain_admin_id}"
+  create_magnum_domain_role << " --domain #{magnum_domain_id} admin"
+  Mixlib::ShellOut.new(create_magnum_domain_role).run_command
+end
+
+node.set["magnum"]["trustee"]["domain_id"] = magnum_domain_id
+node.set["magnum"]["trustee"]["domain_admin_id"] = magnum_domain_admin_id
+node.save
