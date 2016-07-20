@@ -85,16 +85,19 @@ class BarbicanService < PacemakerServiceObject
     @logger.debug("Barbican create_proposal: entering")
     base = super
 
-    nodes = NodeObject.all
-    controllers = select_nodes_for_role(
-      nodes, "barbican-server", "controller") || []
+    node_roles = NodeObject.find("roles:barbican-server") +
+      NodeObject.find("roles:barbican-worker") +
+      NodeObject.find("roles:barbican-retry")
 
-    base["deployment"][@bc_name]["elements"] =
-      if controllers.empty?
-        { "barbican-server" => [] }
-      else
-        { "barbican-server" => [controllers.first.name] }
-      end
+    nodes = NodeObject.all
+    server_nodes = nodes.select { |n| n.intended_role == "controller" }
+    server_nodes = [nodes.first] if server_nodes.empty?
+
+    base["deployment"][@bc_name]["elements"] = {
+      "barbican-server" => [server_nodes.first.name],
+      "barbican-worker" => [server_nodes.first.name],
+      "barbican-retry" => [server_nodes.first.name]
+    } unless node_roles.nil? || server_nodes.nil?
 
     base["attributes"][@bc_name]["database_instance"] =
       find_dep_proposal("database")
@@ -112,6 +115,7 @@ class BarbicanService < PacemakerServiceObject
 
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "barbican-server"
+    validate_one_for_role proposal, "barbican-worker"
 
     super
   end
