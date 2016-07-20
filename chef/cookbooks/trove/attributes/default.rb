@@ -20,6 +20,9 @@
 default[:trove][:verbose] = true
 default[:trove][:debug] = false
 
+default[:trove][:user] = "trove"
+default[:trove][:group] = "trove"
+
 default[:trove][:volume_support] = false
 
 default[:trove][:service_user] = "trove"
