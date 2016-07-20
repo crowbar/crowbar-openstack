@@ -28,10 +28,6 @@ api
 ----
 - Installs the API service.
 
-conductor
-----
-- Installs conductor service.
-
 taskmanager
 ----
 - Installs the taskmanager service.
