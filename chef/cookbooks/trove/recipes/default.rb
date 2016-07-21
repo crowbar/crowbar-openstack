@@ -115,55 +115,8 @@ node.set["openstack"]["object-storage"]["insecure"] = object_storage_insecure
 node.set["openstack"]["database"]["insecure"] = keystone_settings["insecure"]
 node.set["openstack"]["region"] = keystone_settings["endpoint_region"]
 node.set["openstack"]["database"]["region"] = keystone_settings["endpoint_region"]
-# XXX mysql configuration
-# this part should go away once trove supports postgresl
 
-# rubygem-mysql is installed here, although it would normally be the
-# database cookbook's responsibility. The database cookbook uses a
-# special mysql-chef_gem for this which is Chef 0.11 only.
-pkgs = ["mariadb", "python-mysql"]
-pkgs.push("ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-mysql")
-pkgs.each do |pkg|
-  package pkg
-end
-
-service "mysql" do
-  action [:start, :enable]
-end
-
-# copied from openstack-common/database/db_create_with_user
-conn = {
-    host: "127.0.0.1",
-    port: 3306,
-    username: "root"
-  }
-
-database "create trove database" do
-  provider ::Chef::Provider::Database::Mysql
-  connection conn
-  database_name node[:trove][:db][:database]
-  action :create
-end
-
-# create user
-database_user node[:trove][:db][:user] do
-  provider ::Chef::Provider::Database::MysqlUser
-  connection conn
-  password node[:trove][:db][:password]
-  action :create
-end
-
-# grant privs to user
-database_user node[:trove][:db][:user] do
-  provider ::Chef::Provider::Database::MysqlUser
-  connection conn
-  password node[:trove][:db][:password]
-  database_name node[:trove][:db][:database]
-  host "%"
-  privileges [:all]
-  action :grant
-end
-
+include_recipe "trove::sql"
 include_recipe "trove::api"
 include_recipe "openstack-database::api"
 include_recipe "trove::conductor"
