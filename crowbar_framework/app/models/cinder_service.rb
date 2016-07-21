@@ -42,6 +42,7 @@ class CinderService < PacemakerServiceObject
         "cinder-volume" => {
           "unique" => false,
           "count" => -1,
+          "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
             "suse" => "< 12.1",
@@ -91,6 +92,7 @@ class CinderService < PacemakerServiceObject
 
     volume_names = {}
     local_file_names = {}
+    local_count = 0
     raw_count = 0
     raw_want_all = false
     rbd_crowbar = false
@@ -113,6 +115,8 @@ class CinderService < PacemakerServiceObject
 
         file_name = volume["local"]["file_name"]
         local_file_names[file_name] = (local_file_names[file_name] || 0) + 1
+
+        local_count += 1
       end
 
       if backend_driver == "raw"
@@ -166,11 +170,16 @@ class CinderService < PacemakerServiceObject
       end
     end
 
-    if raw_count > 0
+    volume_elements = proposal["deployment"][@bc_name]["elements"]["cinder-volume"]
+    volume_clusters = volume_elements.select { |n| is_cluster? n }
+
+    if (local_count > 0 || raw_count > 0) && volume_clusters.any?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.lvm_ha")
+    elsif raw_count > 0
         if raw_count > 1 && raw_want_all
           validation_error I18n.t("barclamp.#{@bc_name}.validation.raw_device_backend")
         else
-          nodes_without_suitable_drives = proposal["deployment"][@bc_name]["elements"]["cinder-volume"].select do |node_name|
+          nodes_without_suitable_drives = volume_elements.select do |node_name|
             node = NodeObject.find_node_by_name(node_name)
             if node.nil?
               false
@@ -202,6 +211,15 @@ class CinderService < PacemakerServiceObject
     controller_elements, controller_nodes, ha_enabled = role_expand_elements(role, "cinder-controller")
     reset_sync_marks_on_clusters_founders(controller_elements)
     Openstack::HA.set_controller_role(controller_nodes) if ha_enabled
+
+    volume_elements = role.override_attributes[@bc_name]["elements"]["cinder-volume"] || []
+    volume_ha_elements = volume_elements.select { |e| PacemakerServiceObject.is_cluster? e }
+    unless volume_ha_elements.empty?
+      reset_sync_marks_on_clusters_founders(volume_ha_elements)
+      volume_ha_nodes = volume_ha_elements.map { |e| PacemakerServiceObject.expand_nodes(e) }
+      volume_ha_nodes.flatten!
+      Openstack::HA.set_controller_role(volume_ha_nodes)
+    end
 
     vip_networks = ["admin", "public"]
 
