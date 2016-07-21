@@ -1,1 +1,3 @@
-Wrapper cookbook for openstack-database_service to handle Trove installation/configuration.
+DESCRIPTION
+===========
+Chef Cookbook to install and configure Trove
