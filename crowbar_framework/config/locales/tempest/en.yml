@@ -70,3 +70,6 @@ en:
         tempest_adm_password: 'Choose Tempest admin password'
         tempest_user_tenant: 'Choose tenant'
         nova_instance: 'Nova'
+
+      validation:
+        no_alt_user: 'Creation of the regular user is required in the Keystone proposal.'

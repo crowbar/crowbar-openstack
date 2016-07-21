@@ -16,8 +16,15 @@
       = string_field %w(default tenant)
       = string_field %w(admin username)
       = password_field %w(admin password)
-      = string_field %w(default username)
-      = password_field %w(default password)
+
+      = boolean_field %w(default create_user),
+        "data-showit" => "true",
+        "data-showit-target" => "#default_user_container",
+        "data-showit-direct" => "true"
+
+      #default_user_container
+        = string_field %w(default username)
+        = password_field %w(default password)
 
     %fieldset
       %legend
