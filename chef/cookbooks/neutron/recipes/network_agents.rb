@@ -20,8 +20,13 @@ package node[:neutron][:platform][:dhcp_agent_pkg]
 package node[:neutron][:platform][:metering_agent_pkg]
 
 if node[:neutron][:use_lbaas]
-  if node[:neutron][:use_lbaasv2] && [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver])
-    package node[:neutron][:platform][:lbaas_agent_pkg]
+  if node[:neutron][:use_lbaasv2]
+    if [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver])
+      package node[:neutron][:platform][:lbaas_agent_pkg]
+    elsif node[:neutron][:lbaasv2_driver] == "f5" &&
+        !node[:neutron][:platform][:f5_agent_pkg].empty?
+      package node[:neutron][:platform][:f5_agent_pkg]
+    end
   else
     package node[:neutron][:platform][:lbaasv2_agent_pkg]
   end
