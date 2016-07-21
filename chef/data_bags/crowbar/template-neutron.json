@@ -29,6 +29,9 @@
         "vni_end": 99999,
         "multicast_group": "239.1.1.1"
       },
+      "ovs": {
+        "tunnel_csum": false
+      },
       "allow_overlapping_ips": true,
       "use_syslog": false,
       "database_instance": "none",
@@ -117,7 +120,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 48,
+      "schema-revision": 100,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

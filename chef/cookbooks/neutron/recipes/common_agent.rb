@@ -215,6 +215,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         tunnel_types: ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
         use_l2pop: (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")) && neutron[:neutron][:use_dvr],
         dvr_enabled: neutron[:neutron][:use_dvr],
+        tunnel_csum: neutron[:neutron][:ovs][:tunnel_csum],
         bridge_mappings: bridge_mappings
       )
     end
