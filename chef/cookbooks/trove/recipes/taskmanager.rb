@@ -19,32 +19,9 @@
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-# get Database data
-db_password = ""
-if node.roles.include? "trove-server"
-  db_password = node[:trove][:db][:password]
-else
-  # pickup password to database from trove-server node
-  node_servers = search(:node, "roles:trove-server") || []
-  if node_servers.length > 0
-    db_password = node_servers[0][:trove][:db][:password]
-  end
-end
+sql_connection = get_sql_connection
 
-# FIXME: trove uses mysql and the mysql server is currently always
-# running on the same node
-sql_connection = "mysql://#{node[:trove][:db][:user]}:"\
-                 "#{db_password}@127.0.0.1/"\
-                 "#{node[:trove][:db][:database]}"
-
-# get rabbitmq-server information
-# NOTE: Trove uses it's own vhost instead of the default one
-rabbitmq_servers = search(:node, "roles:rabbitmq-server") || []
-unless rabbitmq_servers.empty?
-  rabbitmq_trove_settings = rabbitmq_servers[0][:rabbitmq][:trove]
-else
-  rabbitmq_trove_settings = nil
-end
+rabbitmq_trove_settings = get_rabbitmq_trove_settings
 
 # get nova information
 nova_controllers = search(:node, "roles:nova-controller") || []
