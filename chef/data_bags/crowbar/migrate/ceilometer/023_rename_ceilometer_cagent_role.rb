@@ -3,6 +3,9 @@ def upgrade(ta, td, a, d)
   d["element_order"] = td["element_order"]
   d["element_run_list_order"] = td["element_run_list_order"]
 
+  # the role might have been already removed from package, see next migration
+  return a, d unless File.exist? "/opt/dell/chef/roles/ceilometer-polling.rb"
+
   # Change the elements to ceilometer-polling
   d["elements"]["ceilometer-polling"] = d["elements"]["ceilometer-cagent"]
   d["elements"].delete("ceilometer-cagent")
@@ -24,6 +27,8 @@ def downgrade(ta, td, a, d)
   d["element_states"] = td["element_states"]
   d["element_order"] = td["element_order"]
   d["element_run_list_order"] = td["element_run_list_order"]
+
+  return a, d unless File.exist? "/opt/dell/chef/roles/ceilometer-polling.rb"
 
   # Change the elements to ceilometer-polling
   d["elements"]["ceilometer-cagent"] = d["elements"]["ceilometer-polling"]
