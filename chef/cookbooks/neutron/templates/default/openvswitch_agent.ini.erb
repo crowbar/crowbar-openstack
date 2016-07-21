@@ -186,6 +186,9 @@ enable_distributed_routing = True
 # carrying GRE/VXLAN tunnel. The default value is False.
 #
 # tunnel_csum = False
+<% if @tunnel_csum -%>
+tunnel_csum = True
+<% end -%>
 
 # (StrOpt) agent_type to report.
 # This config entry allows configuration of the neutron agent type reported
