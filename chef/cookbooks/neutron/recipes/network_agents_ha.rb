@@ -14,8 +14,7 @@
 #
 
 use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
-use_lbaas_agent = node[:neutron][:use_lbaas] &&
-  (!node[:neutron][:use_lbaasv2] || [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver]))
+use_lbaas_agent = node[:neutron][:use_lbaas]
 
 if use_l3_agent
   # do the setup required for neutron-ha-tool
@@ -122,8 +121,13 @@ transaction_objects << "pacemaker_primitive[#{metering_agent_primitive}]"
 
 if use_lbaas_agent
   if node[:neutron][:use_lbaasv2]
-    lbaas_agent_primitive = "neutron-lbaasv2-agent"
-    lbaas_ra = node[:neutron][:ha][:network][:lbaasv2_ra]
+    if node[:neutron][:lbaasv2_driver] == "f5"
+      lbaas_agent_primitive = "neutron-f5-agent"
+      lbaas_ra = node[:neutron][:ha][:network][:f5_ra]
+    else
+      lbaas_agent_primitive = "neutron-lbaasv2-agent"
+      lbaas_ra = node[:neutron][:ha][:network][:lbaasv2_ra]
+    end
   else
     lbaas_agent_primitive = "neutron-lbaas-agent"
     lbaas_ra = node[:neutron][:ha][:network][:lbaas_ra]

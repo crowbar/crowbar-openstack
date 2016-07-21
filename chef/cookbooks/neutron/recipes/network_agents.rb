@@ -135,7 +135,6 @@ end
 if node[:neutron][:use_lbaas] &&
     (!node[:neutron][:use_lbaasv2] || [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver]))
   template "/etc/neutron/lbaas_agent.ini" do
-    cookbook "neutron"
     source "lbaas_agent.ini.erb"
     owner "root"
     group node[:neutron][:platform][:group]
@@ -145,6 +144,32 @@ if node[:neutron][:use_lbaas] &&
       interface_driver: interface_driver,
       user_group: node[:neutron][:platform][:lbaas_haproxy_group],
       device_driver: "neutron_lbaas.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver"
+    )
+  end
+elsif node[:neutron][:use_lbaas] && node[:neutron][:use_lbaasv2] &&
+    node[:neutron][:lbaasv2_driver] == "f5"
+  ml2_type_drivers = node[:neutron][:ml2_type_drivers]
+  keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
+  template "/etc/neutron/f5-openstack-agent.ini" do
+    source "f5-openstack-agent.ini.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    variables(
+      use_namespaces: "True",
+      tunnel_types: ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
+      use_l2pop: ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"),
+      keystone_settings: keystone_settings,
+      external_physical_mappings: node[:neutron][:lbaas][:f5][:external_physical_mappings],
+      vtep_folder: node[:neutron][:lbaas][:f5][:vtep_folder],
+      vtep_selfip_name: node[:neutron][:lbaas][:f5][:vtep_selfip_name],
+      max_namespaces_per_tenant: node[:neutron][:lbaas][:f5][:max_namespaces_per_tenant],
+      route_domain_strictness: node[:neutron][:lbaas][:f5][:route_domain_strictness],
+      icontrol_hostname: node[:neutron][:lbaas][:f5][:icontrol_hostname],
+      icontrol_username: node[:neutron][:lbaas][:f5][:icontrol_username],
+      icontrol_password: node[:neutron][:lbaas][:f5][:icontrol_password],
+      parent_ssl_profile: node[:neutron][:lbaas][:f5][:parent_ssl_profile]
     )
   end
 end
@@ -171,6 +196,15 @@ if node[:neutron][:use_lbaas] &&
     action [:enable, :start]
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
     subscribes :restart, resources("template[/etc/neutron/lbaas_agent.ini]")
+    provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  end
+elsif node[:neutron][:use_lbaas] && node[:neutron][:use_lbaasv2] &&
+    node[:neutron][:lbaasv2_driver] == "f5"
+  service node[:neutron][:platform][:f5_agent_name] do
+    supports status: true, restart: true
+    action [:enable, :start]
+    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources("template[/etc/neutron/f5-openstack-agent.ini]")
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 end
