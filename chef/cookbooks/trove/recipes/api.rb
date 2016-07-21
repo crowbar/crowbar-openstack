@@ -19,14 +19,31 @@
 
 keystone_settings = KeystoneHelper.keystone_settings(node, :trove)
 
-trove_port = node[:trove][:api][:bind_port]
-trove_protocol = node[:trove][:api][:protocol]
-
 ha_enabled = false
+
+# address/port binding
+my_ipaddress = Barclamp::Inventory.get_network_by_type(
+  node, "admin").address
+node.set[:trove][:my_ip] = my_ipaddress
+node.set[:trove][:api][:bind_host] = my_ipaddress
+
+bind_host = node[:trove][:api][:bind_host]
+if ha_enabled
+  bind_port = node[:trove][:ha][:ports][:api]
+else
+  if node[:trove][:api][:bind_open_address]
+    bind_host = "0.0.0.0"
+  end
+  bind_port = node[:trove][:api][:bind_port]
+end
+
+trove_protocol = node[:trove][:api][:protocol]
+trove_port = node[:trove][:api][:bind_port]
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(
   node, node[:trove][:api][:protocol] == "https", ha_enabled)
+
 
 crowbar_pacemaker_sync_mark "wait-trove_register"
 
@@ -99,3 +116,49 @@ keystone_register "register trove endpoint" do
 end
 
 crowbar_pacemaker_sync_mark "create-trove_register"
+
+
+sql_connection = get_sql_connection
+rabbitmq_trove_settings = get_rabbitmq_trove_settings
+nova_url, nova_insecure = get_nova_details
+cinder_url, cinder_insecure = get_cinder_details
+object_store_url, object_store_insecure = get_objectstore_details
+
+# install the package before adjusting the templates (/etc/trove, /var/log/trove, ... are created via the package)
+package "openstack-trove"
+
+# crowbar 3.0 had a customized api-paste.ini .
+# Since crowbar 4.0 (OpenStack >= Mitaka) it's the api-paste from upstream
+template "/etc/trove/api-paste.ini" do
+  source "api-paste.ini.erb"
+  owner node[:trove][:user]
+  group node[:trove][:group]
+  mode 00640
+  notifies :restart, "service[trove-api]"
+end
+
+
+template "/etc/trove/trove.conf" do
+  source "trove.conf.erb"
+  owner node[:trove][:user]
+  group node[:trove][:group]
+  mode 00640
+  variables(
+    keystone_settings: keystone_settings,
+    sql_connection: sql_connection,
+    rabbit_default_settings: fetch_rabbitmq_settings,
+    rabbit_trove_settings: rabbitmq_trove_settings,
+    nova_url: nova_url,
+    nova_insecure: nova_insecure,
+    cinder_url: cinder_url,
+    cinder_insecure: cinder_insecure,
+    object_store_url: object_store_url,
+    object_store_insecure: object_store_insecure,
+    bind_host: bind_host,
+    bind_port: bind_port
+    )
+
+  notifies :restart, "service[trove-api]"
+end
+
+trove_service("api")
