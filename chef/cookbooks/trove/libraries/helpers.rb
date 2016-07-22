@@ -23,7 +23,7 @@ class Chef
         db_password = node[:trove][:db][:password]
       else
         # pickup password to database from trove-server node
-        node_servers = search(:node, "roles:trove-server") || []
+        node_servers = search_env_filtered(:node, "roles:trove-server")
         if node_servers.length > 0
           db_password = node_servers[0][:trove][:db][:password]
         end
@@ -38,7 +38,7 @@ class Chef
     def get_rabbitmq_trove_settings
       # get rabbitmq-server information
       # NOTE: Trove uses it's own vhost instead of the default one
-      rabbitmq_servers = search(:node, "roles:rabbitmq-server") || []
+      rabbitmq_servers = search_env_filtered(:node, "roles:rabbitmq-server")
       unless rabbitmq_servers.empty?
         rabbitmq_trove_settings = rabbitmq_servers[0][:rabbitmq][:trove]
       else
@@ -49,7 +49,7 @@ class Chef
 
     def get_nova_details
       # get nova information
-      nova_controllers = search(:node, "roles:nova-controller") || []
+      nova_controllers = search_env_filtered(:node, "roles:nova-controller")
       unless nova_controllers.empty?
         nova = nova_controllers[0]
         keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -69,7 +69,7 @@ class Chef
 
     def get_cinder_details
       # get cinder information
-      cinder_controllers = search(:node, "roles:cinder-controller") || []
+      cinder_controllers = search_env_filtered(:node, "roles:cinder-controller")
       unless cinder_controllers.empty?
         cinder = cinder_controllers[0]
         cinder_api_host = CrowbarHelper.get_host_for_admin_url(
@@ -89,7 +89,7 @@ class Chef
 
     def get_objectstore_details
       # get swift information
-      swift_proxies = search(:node, "roles:swift-proxy") || []
+      swift_proxies = search_env_filtered(:node, "roles:swift-proxy")
       unless swift_proxies.empty?
         swift = swift_proxies[0]
         swift_api_host = CrowbarHelper.get_host_for_admin_url(
@@ -101,7 +101,7 @@ class Chef
         object_store_insecure = swift["swift"]["ssl"]["insecure"]
       else
         # maybe radosgw instead of swift?
-        ceph_radosgws = search(:node, "roles:ceph-radosgw") || []
+        ceph_radosgws = search_env_filtered(:node, "roles:ceph-radosgw")
         unless ceph_radosgws.empty?
           radosgw = ceph_radosgws[0]
           radosgw_api_host = CrowbarHelper.get_host_for_admin_url(
