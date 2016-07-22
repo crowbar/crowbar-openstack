@@ -19,13 +19,21 @@
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-sql_connection = get_sql_connection
+trove_server = get_instance("roles:trove-server")
+sql_connection = TroveHelper.get_sql_connection trove_server
 
-rabbitmq_trove_settings = get_rabbitmq_trove_settings
+rabbitmq_servers = search_env_filtered(:node, "roles:rabbitmq-server")
+rabbitmq_trove_settings = TroveHelper.get_rabbitmq_trove_settings rabbitmq_servers
 
-nova_url, nova_insecure = get_nova_details
-cinder_url, cinder_insecure = get_cinder_details
-object_store_url, object_store_insecure = get_objectstore_details
+nova_controllers = search_env_filtered(:node, "roles:nova-controller")
+nova_url, nova_insecure = TroveHelper.get_nova_details nova_controllers, keystone_settings
+
+cinder_controllers = search_env_filtered(:node, "roles:cinder-controller")
+cinder_url, cinder_insecure = TroveHelper.get_cinder_details cinder_controllers
+
+swift_proxies = search_env_filtered(:node, "roles:swift-proxy")
+ceph_radosgws = search_env_filtered(:node, "roles:ceph-radosgw")
+object_store_url, object_store_insecure = TroveHelper.get_objectstore_details swift_proxies, ceph_radosgws
 
 template "/etc/trove/trove-taskmanager.conf" do
   source "trove-taskmanager.conf.erb"

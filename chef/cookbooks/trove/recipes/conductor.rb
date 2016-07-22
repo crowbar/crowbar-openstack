@@ -17,9 +17,11 @@
 # Recipe:: conductor
 #
 
-sql_connection = get_sql_connection
+trove_server = get_instance("roles:trove-server")
+sql_connection = TroveHelper.get_sql_connection trove_server
 
-rabbitmq_trove_settings = get_rabbitmq_trove_settings
+rabbitmq_servers = search_env_filtered(:node, "roles:rabbitmq-server")
+rabbitmq_trove_settings = TroveHelper.get_rabbitmq_trove_settings rabbitmq_servers
 
 template "/etc/trove/trove-conductor.conf" do
   source "trove-conductor.conf.erb"
