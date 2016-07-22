@@ -64,12 +64,24 @@ keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   action :add_tenant
 end.run_action(:add_tenant)
 
-v2_auth_url = KeystoneHelper.versioned_service_URL(
+auth_url = KeystoneHelper.service_URL(
     keystone_settings["protocol"], keystone_settings["internal_url_host"],
-    keystone_settings["service_port"], "2.0")
-keystonev2 = "keystone --insecure --os_username #{tempest_comp_user} --os_password #{tempest_comp_pass} --os_tenant_name #{tempest_comp_tenant} --os_auth_url #{v2_auth_url}"
+    keystone_settings["service_port"])
+# for non-admin usage
+openstackcli = "openstack --insecure --os-username #{tempest_comp_user}"
+openstackcli << " --os-identity-api-version #{keystone_settings["api_version"]}"
+openstackcli << " --os-password #{tempest_comp_pass}"
+openstackcli << " --os-project-name #{tempest_comp_tenant}"
+openstackcli << " --os-auth-url #{auth_url}"
 
-`#{keystonev2} endpoint-get --service orchestration &> /dev/null`
+# for admin usage (listing the available services)
+openstackcli_adm = "openstack --insecure --os-username #{tempest_adm_user}"
+openstackcli_adm << " --os-identity-api-version #{keystone_settings["api_version"]}"
+openstackcli_adm << " --os-password #{tempest_adm_pass}"
+openstackcli_adm << " --os-project-name #{tempest_comp_tenant}"
+openstackcli_adm << " --os-auth-url #{auth_url}"
+
+`#{openstackcli}_adm service show orchestration &> /dev/null`
 use_heat = $?.success?
 
 users = [
@@ -264,19 +276,19 @@ EOH
   })
 end
 
-ec2_access = `#{keystonev2} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $2}'`.strip
-ec2_secret = `#{keystonev2} ec2-credentials-list | grep -v -- '\\-\\{5\\}' | tail -n 1 | tr -d '|' | awk '{print $3}'`.strip
+ec2_access = `#{openstackcli} ec2 credentials list -f value -c Access`.strip
+ec2_secret = `#{openstackcli} ec2 credentials list -f value -c Secret`.strip
 raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
 
-`#{keystonev2} endpoint-get --service metering &> /dev/null`
+`#{openstackcli_adm} service show metering &> /dev/null`
 use_ceilometer = $?.success?
-`#{keystonev2} endpoint-get --service alarming &> /dev/null`
+`#{openstackcli_adm} service show alarming &> /dev/null`
 use_aodh = $?.success?
-`#{keystonev2} endpoint-get --service database &> /dev/null`
+`#{openstackcli_adm} service show database &> /dev/null`
 use_trove = $?.success?
-`#{keystonev2} endpoint-get --service share &> /dev/null`
+`#{openstackcli_adm} service show share &> /dev/null`
 use_manila = $?.success?
-`#{keystonev2} endpoint-get --service container &> /dev/null`
+`#{openstackcli_adm} service show container &> /dev/null`
 use_magnum = $?.success?
 
 # FIXME: should avoid search with no environment in query
