@@ -132,10 +132,13 @@ cinder_url, cinder_insecure = TroveHelper.get_cinder_details cinder_controllers
 
 swift_proxies = search_env_filtered(:node, "roles:swift-proxy")
 ceph_radosgws = search_env_filtered(:node, "roles:ceph-radosgw")
-object_store_url, object_store_insecure = TroveHelper.get_objectstore_details swift_proxies, ceph_radosgws
 
-# install the package before adjusting the templates (/etc/trove, /var/log/trove, ... are created via the package)
+# install the package before adjusting the templates
+# (/etc/trove, /var/log/trove, ... are created via the package)
 package "openstack-trove"
+
+object_store_url, object_store_insecure =
+  TroveHelper.get_objectstore_details swift_proxies, ceph_radosgws
 
 # crowbar 3.0 had a customized api-paste.ini .
 # Since crowbar 4.0 (OpenStack >= Mitaka) it's the api-paste from upstream
@@ -146,7 +149,6 @@ template "/etc/trove/api-paste.ini" do
   mode 00640
   notifies :restart, "service[trove-api]"
 end
-
 
 template "/etc/trove/trove.conf" do
   source "trove.conf.erb"
