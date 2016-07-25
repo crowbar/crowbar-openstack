@@ -1,0 +1,8 @@
+[MIDONET]
+# MidoNet API URL
+midonet_uri = http://<%= @midonet_config["host"] %>:<%= @midonet_config["port"] %>/midonet-api
+# MidoNet administrative user in Keystone
+username = <%= @midonet_config["username"] %>
+password = <%= @midonet_config["password"] %>
+# MidoNet administrative user's tenant
+project_id = <%= @keystone_settings["service_tenant"] %>

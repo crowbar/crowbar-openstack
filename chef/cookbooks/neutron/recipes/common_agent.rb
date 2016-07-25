@@ -56,6 +56,10 @@ if neutron[:neutron][:networking_plugin] == "ml2" &&
     neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
   include_recipe "neutron::cisco_apic_agents"
   return # skip anything else in this recipe
+elsif neutron[:neutron][:networking_plugin] == "midonet"
+  # nothing to do in the case of midonet
+  include_recipe "neutron::midonet_agents"
+  return
 end
 
 multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty?
