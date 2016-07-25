@@ -274,8 +274,10 @@ use_ceilometer = $?.success?
 use_aodh = $?.success?
 `#{keystonev2} endpoint-get --service database &> /dev/null`
 use_trove = $?.success?
-`#{keystonev2} endpoint-get --service share &> /dev/null`
-use_manila = $?.success?
+# FIXME(toabctl): disable tests for now
+# `#{keystonev2} endpoint-get --service share &> /dev/null`
+# use_manila = $?.success?
+use_manila = false
 `#{keystonev2} endpoint-get --service container &> /dev/null`
 use_magnum = $?.success?
 
