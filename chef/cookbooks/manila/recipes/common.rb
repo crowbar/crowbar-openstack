@@ -142,4 +142,17 @@ template "/etc/manila/manila.conf" do
   )
 end
 
+# ssl
+if node[:manila][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for manila" do
+    generate_certs node[:manila][:ssl][:generate_certs]
+    certfile node[:manila][:ssl][:certfile]
+    keyfile node[:manila][:ssl][:keyfile]
+    group node[:manila][:group]
+    fqdn node[:fqdn]
+    cert_required node[:manila][:ssl][:cert_required]
+    ca_certs node[:manila][:ssl][:ca_certs]
+  end
+end
+
 node.save
