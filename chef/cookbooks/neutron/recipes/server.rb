@@ -31,9 +31,6 @@ pkgs.each { |p| package p }
 include_recipe "neutron::database"
 
 if node[:neutron][:api][:protocol] == "https"
-  if node[:neutron][:ssl][:generate_certs]
-    package "openssl"
-  end
   ssl_setup "setting up ssl for neutron" do
     generate_certs node[:neutron][:ssl][:generate_certs]
     certfile node[:neutron][:ssl][:certfile]

@@ -396,9 +396,6 @@ end
 crowbar_pacemaker_sync_mark "create-keystone_pki"
 
 if node[:keystone][:api][:protocol] == "https"
-  if node[:keystone][:ssl][:generate_certs]
-    package "openssl"
-  end
   ssl_setup "setting up ssl for keystone" do
     generate_certs node[:keystone][:ssl][:generate_certs]
     certfile node[:keystone][:ssl][:certfile]

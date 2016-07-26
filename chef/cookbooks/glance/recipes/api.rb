@@ -17,9 +17,6 @@ end
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 if node[:glance][:api][:protocol] == "https"
-  if node[:glance][:ssl][:generate_certs]
-    package "openssl"
-  end
   ssl_setup "setting up ssl for glance" do
     generate_certs node[:glance][:ssl][:generate_certs]
     certfile node[:glance][:ssl][:certfile]

@@ -215,9 +215,6 @@ end
 # only require certs for nova controller
 if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
     api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
-  if api[:nova][:ssl][:generate_certs]
-    package "openssl"
-  end
   ssl_setup "setting up ssl for nova" do
     generate_certs api[:nova][:ssl][:generate_certs]
     certfile api[:nova][:ssl][:certfile]
