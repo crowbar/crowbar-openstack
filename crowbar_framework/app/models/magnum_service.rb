@@ -87,6 +87,12 @@ class MagnumService < PacemakerServiceObject
     base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name][:trustee][:domain_admin_password] = random_password
 
+    if select_nodes_for_role(nodes, "barbican-server", "controller").empty?
+      base["attributes"][@bc_name][:cert][:cert_manager_type] = "local"
+    else
+      base["attributes"][@bc_name][:cert][:cert_manager_type] = "barbican"
+    end
+
     @logger.debug("Magnum create_proposal: exiting")
     base
   end

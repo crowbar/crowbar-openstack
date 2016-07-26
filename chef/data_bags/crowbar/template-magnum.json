@@ -28,6 +28,9 @@
         "password": "",
         "user": "magnum",
         "database": "magnum"
+      },
+      "cert": {
+        "cert_manager_type": "local"
       }
     }
   },
@@ -35,6 +38,7 @@
     "magnum": {
       "crowbar-revision": 1,
       "crowbar-applied": false,
+      "schema-revision": 100,
       "element_states": {
         "magnum-server": [ "readying", "ready", "applying" ]
       },
