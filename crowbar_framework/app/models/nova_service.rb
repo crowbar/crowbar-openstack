@@ -304,6 +304,10 @@ class NovaService < PacemakerServiceObject
       neutron_service.enable_neutron_networks(neutron["attributes"]["neutron"],
                                               n, net_svc,
                                               neutron["attributes"]["neutron"]["use_dvr"])
+      if role.default_attributes["nova"]["use_migration"]
+        net_svc.allocate_ip("default", role.default_attributes["nova"]["migration"]["network"],
+                            "host", n)
+      end
     end unless all_nodes.nil?
 
     # Allocate IP for xcat_management network for z/VM nodes, if we're
@@ -412,6 +416,16 @@ class NovaService < PacemakerServiceObject
           node: remote_node,
           cluster: cluster_name(remote_cluster)
         )
+      end
+    end
+
+    if proposal["attributes"][@bc_name]["use_migration"]
+      migration_net = proposal["attributes"][@bc_name]["migration"]["network"]
+
+      net_svc = NetworkService.new @logger
+      network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
+      if network_proposal["attributes"]["network"]["networks"][migration_net].nil?
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.invalid_migration_network", network: migration_net)
       end
     end
 
