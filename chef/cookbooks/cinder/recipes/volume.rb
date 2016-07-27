@@ -178,65 +178,65 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
   backend_id = "backend-#{volume['backend_driver']}-#{volid}"
 
   case
-    when volume[:backend_driver] == "emc"
-      template "/etc/cinder/cinder_emc_config-#{backend_id}.xml" do
-        source "cinder_emc_config.xml.erb"
-        owner "root"
-        group node[:cinder][:group]
-        mode 0640
-        variables(
-          emc_params: volume["emc"]
-        )
-        notifies :restart, "service[cinder-volume]"
-      end
+  when volume[:backend_driver] == "emc"
+    template "/etc/cinder/cinder_emc_config-#{backend_id}.xml" do
+      source "cinder_emc_config.xml.erb"
+      owner "root"
+      group node[:cinder][:group]
+      mode 0640
+      variables(
+        emc_params: volume["emc"]
+      )
+      notifies :restart, "service[cinder-volume]"
+    end
 
-    when volume[:backend_driver] == "eqlx"
+  when volume[:backend_driver] == "eqlx"
 
-    when volume[:backend_driver] == "local"
-      make_loopback_volume(backend_id, volume)
+  when volume[:backend_driver] == "local"
+    make_loopback_volume(backend_id, volume)
 
-    when volume[:backend_driver] == "raw"
-      make_volume(node, backend_id, volume)
+  when volume[:backend_driver] == "raw"
+    make_volume(node, backend_id, volume)
 
-    when volume[:backend_driver] == "netapp"
-      file "/etc/cinder/nfs_shares-#{backend_id}" do
-        content volume[:netapp][:nfs_shares]
-        owner "root"
-        group node[:cinder][:group]
-        mode "0640"
-        action :create
-        notifies :restart, "service[cinder-volume]"
-        only_if { volume[:netapp][:storage_protocol] == "nfs" }
-      end
+  when volume[:backend_driver] == "netapp"
+    file "/etc/cinder/nfs_shares-#{backend_id}" do
+      content volume[:netapp][:nfs_shares]
+      owner "root"
+      group node[:cinder][:group]
+      mode "0640"
+      action :create
+      notifies :restart, "service[cinder-volume]"
+      only_if { volume[:netapp][:storage_protocol] == "nfs" }
+    end
 
-    when volume[:backend_driver] == "nfs"
-      file "/etc/cinder/nfs_shares-#{backend_id}" do
-        content volume[:nfs][:nfs_shares]
-        owner "root"
-        group node[:cinder][:group]
-        mode "0640"
-        action :create
-        notifies :restart, "service[cinder-volume]"
-      end
+  when volume[:backend_driver] == "nfs"
+    file "/etc/cinder/nfs_shares-#{backend_id}" do
+      content volume[:nfs][:nfs_shares]
+      owner "root"
+      group node[:cinder][:group]
+      mode "0640"
+      action :create
+      notifies :restart, "service[cinder-volume]"
+    end
 
-    when volume[:backend_driver] == "eternus"
-      template "/etc/cinder/cinder_eternus_dx_config-#{backend_id}.xml" do
-        source "cinder_eternus_dx_config.xml.erb"
-        owner "root"
-        group node[:cinder][:group]
-        mode 0640
-        variables(
-          eternus_params: volume["eternus"]
-        )
-        notifies :restart, "service[cinder-volume]"
-      end
+  when volume[:backend_driver] == "eternus"
+    template "/etc/cinder/cinder_eternus_dx_config-#{backend_id}.xml" do
+      source "cinder_eternus_dx_config.xml.erb"
+      owner "root"
+      group node[:cinder][:group]
+      mode 0640
+      variables(
+        eternus_params: volume["eternus"]
+      )
+      notifies :restart, "service[cinder-volume]"
+    end
 
-    when volume[:backend_driver] == "manual"
+  when volume[:backend_driver] == "manual"
 
-    when volume[:backend_driver] == "rbd"
-      rbd_enabled = true
+  when volume[:backend_driver] == "rbd"
+    rbd_enabled = true
 
-    when volume[:backend_driver] == "vmware"
+  when volume[:backend_driver] == "vmware"
 
   end
 end
