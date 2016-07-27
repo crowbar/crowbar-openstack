@@ -183,7 +183,9 @@ when "ml2"
     physnets.push(node[:neutron][:zvm][:zvm_xcat_mgt_vswitch])
   end
 
-  mtu_value = 0
+  os_sdn_net = Barclamp::Inventory.get_network_definition(node, "os_sdn")
+  mtu_value = os_sdn_net.nil? ? 1500 : os_sdn_net["mtu"].to_i
+
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
   ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
   if use_hyperv
@@ -194,7 +196,6 @@ when "ml2"
   end
   if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
     ml2_mechanism_drivers.push("l2population") if node[:neutron][:use_dvr]
-    mtu_value = 1400
   end
 
   ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
@@ -219,7 +220,7 @@ when "ml2"
       vxlan_end: vni_end,
       vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group],
       external_networks: physnets,
-      path_mtu: mtu_value
+      mtu_value: mtu_value
     )
   end
 when "vmware"
