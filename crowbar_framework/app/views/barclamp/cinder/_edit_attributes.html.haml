@@ -135,9 +135,9 @@
               %legend
                 = t('.volumes.nfs_parameters')
 
-              = text_field %w(volumes {{@index}} nfs nfs_shares), :size => "80x5"
+              = text_field %w(volumes {{@index}} nfs nfs_shares), size: "80x5"
               %span.help-block
-                = t(".volumes.nfs.nfs_shares_config_hint")
+                = t('.volumes.nfs.nfs_shares_config_hint')
 
               = string_field %w(volumes {{@index}} nfs nfs_mount_options)
 
