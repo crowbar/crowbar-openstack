@@ -33,9 +33,11 @@ en:
           loading_text: 'Loading Backends...'
           generic_parameters: 'Generic backend parameters'
           netapp_parameters: "NetApp parameters"
+          hitachi_parameters: "Hitachi parameters"
           manual_parameters: 'Other driver parameters'
           generic_share_driver: 'Generic driver'
           netapp_share_driver: 'NetApp driver'
+          hitachi_share_driver: 'Hitachi driver'
           manual_share_driver: 'Other driver'
           generic:
             not_supported: 'The generic driver can be used for testing but is not supported.'
@@ -58,6 +60,16 @@ en:
               netapp_server_hostname: 'Server host name'
               netapp_server_port: 'Server port'
               netapp_transport_type: 'Transport Type'
+            hitachi:
+              hds_hnas_cluster_admin_ip0: 'The IP of the clusters admin node. Only set in HNAS multinode clusters.'
+              hds_hnas_evs_id: 'Specify which EVS this backend is assigned to.'
+              hds_hnas_evs_ip: 'Specify IP for mounting shares.'
+              hds_hnas_file_system_name: 'Specify file-system name for creating shares.'
+              hds_hnas_ip: 'HNAS management interface IP for communication between Manila controller and HNAS.'
+              hds_hnas_password: 'HNAS user password. Required only if private key is not provided.'
+              hds_hnas_ssh_private_key: 'RSA/DSA private key value used to connect into HNAS. Required only if password is not provided.'
+              hds_hnas_stalled_job_timeout: 'The time (in seconds) to wait for stalled HNAS jobs before aborting.'
+              hds_hnas_user: 'HNAS username Base64 String in order to perform tasks such as create file-systems and network interfaces.'
             manual:
               config: 'Options'
               driver: 'Driver'
