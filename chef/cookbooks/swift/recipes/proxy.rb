@@ -239,9 +239,6 @@ case proxy_config[:auth_method]
 end
 
 if node[:swift][:ssl][:enabled]
-  if node[:swift][:ssl][:generate_certs]
-    package "openssl"
-  end
   ssl_setup "setting up ssl for swift" do
     generate_certs node[:swift][:ssl][:generate_certs]
     certfile node[:swift][:ssl][:certfile]

@@ -77,9 +77,6 @@ node.set[:cinder][:api][:bind_host] = my_ipaddress
 node.set[:cinder][:my_ip] = my_ipaddress
 
 if node[:cinder][:api][:protocol] == "https"
-  if node[:cinder][:ssl][:generate_certs]
-    package "openssl"
-  end
   ssl_setup "setting up ssl for cinder" do
     generate_certs node[:cinder][:ssl][:generate_certs]
     certfile node[:cinder][:ssl][:certfile]

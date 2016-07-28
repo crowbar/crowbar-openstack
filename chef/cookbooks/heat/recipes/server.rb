@@ -79,9 +79,6 @@ directory "/etc/heat/environment.d" do
 end
 
 if node[:heat][:api][:protocol] == "https"
-  if node[:heat][:ssl][:generate_certs]
-    package "openssl"
-  end
   ssl_setup "setting up ssl for heat" do
     generate_certs node[:heat][:ssl][:generate_certs]
     certfile node[:heat][:ssl][:certfile]

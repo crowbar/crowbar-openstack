@@ -19,9 +19,12 @@ class Chef
         if @current_resource.generate_certs
           unless ::File.exist?(@current_resource.certfile) \
             && ::File.exist?(@current_resource.keyfile)
+
             require "fileutils"
 
             Chef::Log.info("Generating SSL certificate...")
+
+            package "openssl"
 
             [@current_resource.certfile, @current_resource.keyfile].each do |k|
               dir = ::File.dirname(k)
