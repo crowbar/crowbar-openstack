@@ -366,6 +366,7 @@ instance_usage_audit_period = hour
 # root privileges. This option is usually enabled on nodes that run nova
 # compute processes (boolean value)
 #use_rootwrap_daemon = false
+use_rootwrap_daemon = <%= @use_rootwrap_daemon %>
 
 # Path to the rootwrap configuration file to use for running commands as root
 # (string value)
