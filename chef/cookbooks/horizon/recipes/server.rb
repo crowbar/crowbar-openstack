@@ -252,6 +252,14 @@ else
   heat_insecure = false
 end
 
+manilas = search(:node, "roles:manila-server")
+if !manilas.empty?
+  manila = manilas[0]
+  manila_insecure = manila[:manila][:api][:protocol] == "https" && manila[:manila][:ssl][:insecure]
+else
+  manila_insecure = false
+end
+
 # We're going to use memcached as a cache backend for Django
 
 # make sure our memcache only listens on the admin IP address
@@ -327,7 +335,8 @@ template local_settings do
     || cinder_insecure \
     || neutron_insecure \
     || nova_insecure \
-    || heat_insecure,
+    || heat_insecure \
+    || manila_insecure,
     db_settings: db_settings,
     enable_lb: neutron_use_lbaas,
     enable_vpn: neutron_use_vpnaas,

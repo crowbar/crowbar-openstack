@@ -61,6 +61,16 @@ en:
             manual:
               config: 'Options'
               driver: 'Driver'
+        ssl_header: 'SSL Support'
+        ssl:
+          generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          certfile: 'SSL Certificate File'
+          keyfile: 'SSL (Private) Key File'
+          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          cert_required: 'Require Client Certificate'
+          ca_certs: 'SSL CA Certificates File'
+        api:
+          protocol: 'Protocol'
       validation:
         generic:
           service_instance_user: 'Service instance user can not be empty'

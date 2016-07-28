@@ -34,3 +34,10 @@ end
 default[:manila][:ha][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:manila][:ha][:ports][:api] = 5525
+
+default[:manila][:ssl][:certfile] = "/etc/manila/ssl/certs/signing_cert.pem"
+default[:manila][:ssl][:keyfile] = "/etc/manila/ssl/private/signing_key.pem"
+default[:manila][:ssl][:generate_certs] = false
+default[:manila][:ssl][:insecure] = false
+default[:manila][:ssl][:cert_required] = false
+default[:manila][:ssl][:ca_certs] = "/etc/manila/ssl/certs/ca.pem"

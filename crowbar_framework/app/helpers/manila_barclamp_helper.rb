@@ -45,4 +45,14 @@ module ManilaBarclampHelper
       selected.to_s
     )
   end
+
+  def api_protocols_for_manila(selected)
+    options_for_select(
+      [
+        ["HTTP", "http"],
+        ["HTTPS", "https"]
+      ],
+      selected.to_s
+    )
+  end
 end
