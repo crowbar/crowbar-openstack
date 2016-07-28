@@ -14,6 +14,7 @@
       "trusted_flavors": false,
       "libvirt_type": "kvm",
       "use_novnc": true,
+      "use_serial": false,
       "debug": false,
       "verbose": true,
       "max_header_line": 16384,
@@ -110,7 +111,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 105,
+      "schema-revision": 106,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-docker": [ "readying", "ready", "applying" ],

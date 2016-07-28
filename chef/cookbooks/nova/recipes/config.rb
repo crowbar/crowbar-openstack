@@ -124,6 +124,19 @@ else
 end
 memcached_servers.sort!
 
+serialproxies = search_env_filtered(:node, "roles:nova-controller")
+if serialproxies.empty?
+  serialproxy = node
+else
+  serialproxy = serialproxies[0]
+  serialproxy = node if serialproxy.name == node.name
+end
+serialproxy_ha_enabled = serialproxy[:nova][:ha][:enabled]
+serialproxy_public_host = CrowbarHelper.get_host_for_public_url(serialproxy,
+  serialproxy[:nova][:serial][:ssl][:enabled],
+  serialproxy_ha_enabled)
+Chef::Log.info("serialproxy server at #{serialproxy_public_host}")
+
 directory "/etc/nova" do
    mode 0755
    action :create
@@ -228,7 +241,7 @@ else
 end
 
 # only require certs for nova controller
-if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
+if (api_ha_enabled || serialproxy_ha_enabled || vncproxy_ha_enabled || api == node) && \
     api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
   ssl_setup "setting up ssl for nova" do
     generate_certs api[:nova][:ssl][:generate_certs]
@@ -241,7 +254,7 @@ if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
   end
 end
 
-if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
+if (api_ha_enabled || serialproxy_ha_enabled || vncproxy_ha_enabled || api == node) && \
     api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
   # No check if we're using certificate info from nova-api
   unless ::File.size?(api_novnc_ssl_certfile) || api[:nova][:novnc][:ssl][:certfile].empty?
@@ -262,6 +275,7 @@ if node[:nova][:ha][:enabled]
   bind_port_objectstore = node[:nova][:ha][:ports][:objectstore]
   bind_port_novncproxy = node[:nova][:ha][:ports][:novncproxy]
   bind_port_xvpvncproxy = node[:nova][:ha][:ports][:xvpvncproxy]
+  bind_port_serialproxy = node[:nova][:ha][:ports][:serialproxy]
 else
   bind_host = "0.0.0.0"
   bind_port_api = node[:nova][:ports][:api]
@@ -270,6 +284,7 @@ else
   bind_port_objectstore = node[:nova][:ports][:objectstore]
   bind_port_novncproxy = node[:nova][:ports][:novncproxy]
   bind_port_xvpvncproxy = node[:nova][:ports][:xvpvncproxy]
+  bind_port_serialproxy = node[:nova][:ports][:serialproxy]
 end
 
 vendordata_jsonfile = "/etc/nova/suse-vendor-data.json"
@@ -304,6 +319,7 @@ template "/etc/nova/nova.conf" do
             bind_port_objectstore: bind_port_objectstore,
             bind_port_novncproxy: bind_port_novncproxy,
             bind_port_xvpvncproxy: bind_port_xvpvncproxy,
+            bind_port_serialproxy: bind_port_serialproxy,
             dhcpbridge: "/usr/bin/nova-dhcpbridge",
             database_connection: database_connection,
             api_database_connection: api_database_connection,
@@ -320,12 +336,14 @@ template "/etc/nova/nova.conf" do
             glance_server_port: glance_server_port,
             glance_server_insecure: glance_server_insecure || keystone_settings["insecure"],
             metadata_bind_address: metadata_bind_address,
-            vnc_enabled: node[:kernel][:machine] != "aarch64",
+            vnc_enabled: node[:nova][:use_novnc],
+            serial_enabled: node[:nova][:use_serial],
             vendordata_jsonfile: vendordata_jsonfile,
             vncproxy_public_host: vncproxy_public_host,
             vncproxy_ssl_enabled: api[:nova][:novnc][:ssl][:enabled],
             vncproxy_cert_file: api_novnc_ssl_certfile,
             vncproxy_key_file: api_novnc_ssl_keyfile,
+            serialproxy_public_host: serialproxy_public_host,
             memcached_servers: memcached_servers,
             neutron_protocol: neutron_protocol,
             neutron_server_host: neutron_server_host,

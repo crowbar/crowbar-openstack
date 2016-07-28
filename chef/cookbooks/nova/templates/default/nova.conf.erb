@@ -5206,6 +5206,7 @@ rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 # * None
 #  (boolean value)
 #enabled = false
+enabled = <%= @serial_enabled ? "True" : "False" %>
 
 #
 # A range of TCP ports a guest can use for its backend.
@@ -5255,6 +5256,7 @@ rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 #   and ``key`` in the ``[DEFAULT]`` section have to be set for that.
 #  (string value)
 #base_url = ws://127.0.0.1:6083/
+base_url = ws://<%= @serialproxy_public_host %>:<%= node[:nova][:ports][:serialproxy] %>/
 
 #
 # DEPRECATED: this option has no effect anymore. Please use
@@ -5283,6 +5285,7 @@ rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 # * None
 #  (string value)
 #proxyclient_address = 127.0.0.1
+proxyclient_address = <%= node[:nova][:my_ip] %>
 
 #
 # The IP address which is used by the ``nova-serialproxy`` service to listen
@@ -5305,6 +5308,7 @@ rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 #   ``base_url`` of this section or use ``0.0.0.0`` to listen on all addresses.
 #  (string value)
 #serialproxy_host = 0.0.0.0
+serialproxy_host = 0.0.0.0
 
 #
 # The port number which is used by the ``nova-serialproxy`` service to listen
@@ -5329,6 +5333,7 @@ rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 # Minimum value: 1
 # Maximum value: 65535
 #serialproxy_port = 6083
+serialproxy_port = 6083
 
 
 [spice]

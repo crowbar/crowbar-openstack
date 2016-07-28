@@ -63,7 +63,18 @@ else
     action :nothing
   end.run_action(:create)
 end
-
+if node[:nova][:use_serial]
+  haproxy_loadbalancer "nova-serialproxy" do
+    address "0.0.0.0"
+    port node[:nova][:ports][:serialproxy]
+    use_ssl node[:nova][:serial][:ssl][:enabled]
+    servers CrowbarPacemakerHelper.haproxy_servers_for_service(node,
+      "nova",
+      "nova-controller",
+      "serialproxy")
+    action :nothing
+  end.run_action(:create)
+end
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required packages installed before we create the pacemaker
 # resources
@@ -80,6 +91,9 @@ if node[:nova][:use_novnc]
   services << "novncproxy"
 else
   services << "xvpvncproxy"
+end
+if node[:nova][:use_serial]
+  services << "serialproxy"
 end
 
 services.each do |service|

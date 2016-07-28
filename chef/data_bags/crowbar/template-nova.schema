@@ -23,6 +23,7 @@
             "neutron_instance": { "type": "str", "required": true },
             "libvirt_type": { "type": "str", "required": true },
             "use_novnc": { "type": "bool", "required": true },
+            "use_serial": { "type": "bool", "required": true },
             "verbose": { "type": "bool", "required": true },
             "max_header_line": { "type": "int", "required": true },
             "trusted_flavors": { "type": "bool", "required": true },

@@ -125,6 +125,7 @@ default[:nova][:ports][:metadata] = 8775
 default[:nova][:ports][:objectstore] = 3333
 default[:nova][:ports][:novncproxy] = 6080
 default[:nova][:ports][:xvpvncproxy] = 6081
+default[:nova][:ports][:serialproxy] = 6083
 
 default[:nova][:ha][:enabled] = false
 default[:nova][:ha][:op][:monitor][:interval] = "10s"
@@ -135,6 +136,7 @@ default[:nova][:ha][:ports][:metadata] = 5552
 default[:nova][:ha][:ports][:objectstore] = 5553
 default[:nova][:ha][:ports][:novncproxy] = 5554
 default[:nova][:ha][:ports][:xvpvncproxy] = 5555
+default[:nova][:ha][:ports][:serialproxy] = 5556
 
 default[:nova][:ha][:compute][:enabled] = false
 default[:nova][:ha][:compute][:compute][:op][:monitor][:interval] = "10s"
@@ -152,6 +154,11 @@ default[:nova][:ha][:compute][:fence][:op][:monitor][:interval] = "10m"
 #
 default[:nova][:block_device][:allocate_retries] = 60
 default[:nova][:block_device][:allocate_retries_interval] = 3
+
+#
+# Serial device settings
+#
+default[:nova][:serial][:ssl][:enabled] = false
 
 #
 # metadata/vendordata
