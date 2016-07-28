@@ -27,7 +27,7 @@
 barclamp:
   name: 'barbican'
   display: 'Barbican'
-  description: 'OpenStack key and management service'
+  description: 'OpenStack Key Manager: Secure storage, provisioning and management of secret data'
   version: 0
   requires:
     - '@crowbar'
