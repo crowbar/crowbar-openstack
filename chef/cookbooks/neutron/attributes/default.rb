@@ -106,7 +106,6 @@ when "suse"
                         "openstack-neutron-opflex-agent"],
     user: "neutron",
     group: "neutron",
-    neutron_rootwrap_sudo_template: "/etc/sudoers.d/openstack-neutron"
   }
 when "rhel"
   default[:neutron][:platform] = {
@@ -144,7 +143,6 @@ when "rhel"
                         "neutron-opflex-agent"],
     user: "neutron",
     group: "neutron",
-    neutron_rootwrap_sudo_template: "/etc/sudoers.d/openstack-neutron"
   }
 else
   default[:neutron][:platform] = {
@@ -179,7 +177,6 @@ else
     cisco_opflex_pkgs: [""],
     user: "neutron",
     group: "neutron",
-    neutron_rootwrap_sudo_template: "/etc/sudoers.d/neutron-rootwrap"
   }
 end
 
