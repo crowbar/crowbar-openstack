@@ -38,7 +38,8 @@ class Rack_awareness
             #get storage iface
             iface=""
             n[:network][:interfaces].keys.each do |ifn|
-              if n[:network][:interfaces]["#{ifn}"][:addresses].key?(storage_ip)
+              addresses = n[:network][:interfaces][ifn.to_s][:addresses]
+              if !addresses.nil? && addresses.key?(storage_ip)
                 iface=ifn
                 break
               end
