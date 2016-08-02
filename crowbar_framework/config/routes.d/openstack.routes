@@ -1,0 +1,11 @@
+namespace :api,
+  constraints: ApiConstraint.new(2.0) do
+  resources :openstack,
+    param: :name,
+    only: [:index, :show] do
+    collection do
+      post :backup
+      post :services
+    end
+  end
+end
