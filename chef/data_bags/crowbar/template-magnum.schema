@@ -45,6 +45,13 @@
                 "user": { "type": "str", "required": true },
                 "database": { "type": "str", "required": true }
               }
+            },
+            "cert": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "cert_manager_type": { "type": "str", "required": true }
+              }
             }
           }
         }
@@ -60,6 +67,7 @@
           "mapping": {
             "crowbar-revision": { "type": "int", "required": true },
             "crowbar-committing": { "type": "bool" },
+            "schema-revision": { "type": "int" },
             "crowbar-applied": { "type": "bool" },
             "crowbar-status": { "type": "str" },
             "crowbar-failed": { "type": "str" },

@@ -1,10 +1,12 @@
-# Copyright 2015, SUSE, Inc.
+#
+# Copyright 2011-2013, Dell
+# Copyright 2013-2014, SUSE LINUX Products GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,15 +15,16 @@
 # limitations under the License.
 #
 
-default[:magnum][:debug] = false
-
-override[:magnum][:user] = "magnum"
-override[:magnum][:group] = "magnum"
-
-default[:magnum][:max_header_line] = 16_384
-
-default[:magnum][:api][:protocol] = "http"
-
-default[:magnum][:ha][:enabled] = false
-
-default[:magnum][:cert][:cert_manager_type] = "local"
+module Barclamp
+  module MagnumHelper
+    def cert_manager_types(selected)
+      options_for_select(
+        [
+          ["Local", "local"],
+          ["Barbican", "barbican"]
+        ],
+        selected.to_s
+      )
+    end
+  end
+end

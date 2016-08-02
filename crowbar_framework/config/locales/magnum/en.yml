@@ -29,5 +29,7 @@ en:
         trustee_header: 'Trustee Domain'
         trustee:
           domain_name: 'Domain Name'
-          
+        cert_header: 'Certificate Manager'
+        cert:
+          cert_manager_type: 'Plugin'
 
