@@ -169,8 +169,6 @@ template "/etc/trove/trove.conf" do
     bind_host: bind_host,
     bind_port: bind_port
     )
-
-  notifies :restart, "service[trove-api]"
 end
 
 trove_service("api")
