@@ -44,7 +44,7 @@ register_auth_hash = { user: keystone_settings["admin_user"],
 
 node.normal[:apache][:listen_ports_crowbar] ||= {}
 
-node.normal[:apache][:listen_ports_crowbar][:barbican] = { plain: bind_port }
+node.normal[:apache][:listen_ports_crowbar][:barbican] = { plain: [bind_port] }
 
 # Override what the apache2 cookbook does since it enforces the ports
 resource = resources(template: "#{node[:apache][:dir]}/ports.conf")
