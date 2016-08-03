@@ -33,7 +33,8 @@ cinder_url, cinder_insecure = TroveHelper.get_cinder_details cinder_controllers
 
 swift_proxies = search_env_filtered(:node, "roles:swift-proxy")
 ceph_radosgws = search_env_filtered(:node, "roles:ceph-radosgw")
-object_store_url, object_store_insecure = TroveHelper.get_objectstore_details swift_proxies, ceph_radosgws
+object_store_url, object_store_insecure =
+  TroveHelper.get_objectstore_details swift_proxies, ceph_radosgws
 
 template "/etc/trove/trove-taskmanager.conf" do
   source "trove-taskmanager.conf.erb"

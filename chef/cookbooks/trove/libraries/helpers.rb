@@ -27,10 +27,10 @@ module TroveHelper
   def self.get_rabbitmq_trove_settings(rabbitmq_servers)
     # get rabbitmq-server information
     # NOTE: Trove uses it's own vhost instead of the default one
-    if rabbitmq_servers.empty?
-      rabbitmq_trove_settings = nil
+    rabbitmq_trove_settings = if rabbitmq_servers.empty?
+      nil
     else
-      rabbitmq_trove_settings = rabbitmq_servers[0][:rabbitmq][:trove]
+      rabbitmq_servers[0][:rabbitmq][:trove]
     end
     rabbitmq_trove_settings
   end
@@ -43,7 +43,8 @@ module TroveHelper
     else
       nova = nova_controllers[0]
       nova_api_host = CrowbarHelper.get_host_for_admin_url(
-        nova, (nova[:nova][:ha][:enabled] rescue false))
+        nova, nova[:nova][:ha][:enabled]
+      )
       nova_api_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
       nova_url = "#{nova_api_protocol}://#{nova_api_host}:#{nova[:nova][:ports][:api]}/v2/"
       nova_insecure = keystone_settings["insecure"] || (
@@ -61,7 +62,7 @@ module TroveHelper
     else
       cinder = cinder_controllers[0]
       cinder_api_host = CrowbarHelper.get_host_for_admin_url(
-        cinder, (cinder[:cinder][:ha][:enabled] rescue false)
+        cinder, cinder[:cinder][:ha][:enabled]
       )
       cinder_api_protocol = cinder[:cinder][:ssl][:enabled] ? "https" : "http"
       cinder_port = cinder[:cinder][:api][:bind_port]
@@ -82,11 +83,14 @@ module TroveHelper
       else
         radosgw = ceph_radosgws[0]
         radosgw_api_host = CrowbarHelper.get_host_for_admin_url(
-          radosgw, (radosgw[:ceph][:ha][:radosgw][:enabled] rescue false)
+          radosgw, radosgw[:ceph][:ha][:radosgw][:enabled]
         )
         radosgw_api_protocol = radosgw[:ceph][:radosgw][:ssl][:enabled] ? "https" : "http"
-        radosgw_api_port = radosgw[:ceph][:radosgw][:ssl][:enabled] ?
-          node[:ceph][:radosgw][:rgw_port_ssl] : node[:ceph][:radosgw][:rgw_port]
+        radosgw_api_port = if radosgw[:ceph][:radosgw][:ssl][:enabled]
+          node[:ceph][:radosgw][:rgw_port_ssl]
+        else
+          node[:ceph][:radosgw][:rgw_port]
+        end
         object_store_url = "#{radosgw_api_protocol}://#{radosgw_api_host}:"\
                            "#{radosgw_api_port}/swift/v1"
         object_store_insecure = radosgw[:ceph][:radosgw][:ssl][:insecure]
@@ -94,7 +98,7 @@ module TroveHelper
     else
       swift = swift_proxies[0]
       swift_api_host = CrowbarHelper.get_host_for_admin_url(
-        swift, (swift[:swift][:ha][:enabled] rescue false)
+        swift, swift[:swift][:ha][:enabled]
       )
       swift_api_protocol = swift[:swift][:ssl][:enabled] ? "https" : "http"
       swift_api_port = swift[:swift][:ports][:api]

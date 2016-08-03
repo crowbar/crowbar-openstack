@@ -44,7 +44,6 @@ my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(
   node, node[:trove][:api][:protocol] == "https", ha_enabled)
 
-
 crowbar_pacemaker_sync_mark "wait-trove_register"
 
 register_auth_hash = { user: keystone_settings["admin_user"],
@@ -117,7 +116,6 @@ end
 
 crowbar_pacemaker_sync_mark "create-trove_register"
 
-
 trove_server = get_instance("roles:trove-server")
 sql_connection = TroveHelper.get_sql_connection trove_server
 
@@ -168,7 +166,7 @@ template "/etc/trove/trove.conf" do
     object_store_insecure: object_store_insecure,
     bind_host: bind_host,
     bind_port: bind_port
-    )
+  )
 end
 
 trove_service("api")

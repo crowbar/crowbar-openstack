@@ -35,10 +35,10 @@ end
 
 # copied from openstack-common/database/db_create_with_user
 conn = {
-    host: "127.0.0.1",
-    port: 3306,
-    username: "root"
-  }
+  host: "127.0.0.1",
+  port: 3306,
+  username: "root"
+}
 
 database "create trove database" do
   provider ::Chef::Provider::Database::Mysql
