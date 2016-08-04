@@ -227,7 +227,6 @@ template "/etc/keystone/keystone.conf" do
       sql_idle_timeout: node[:keystone][:sql][:idle_timeout],
       debug: node[:keystone][:debug],
       verbose: node[:keystone][:verbose],
-      admin_token: node[:keystone][:service][:token],
       bind_admin_host: bind_admin_host,
       bind_service_host: bind_service_host,
       bind_admin_port: bind_admin_port,
@@ -427,6 +426,29 @@ crowbar_pacemaker_sync_mark "wait-keystone_register"
 
 keystone_insecure = node["keystone"]["api"]["protocol"] == "https" && node[:keystone][:ssl][:insecure]
 
+# Creates admin user, admin role and admin project
+execute "keystone-manage bootstrap" do
+  command "keystone-manage bootstrap \
+  --bootstrap-password #{node[:keystone][:admin][:password]} \
+  --bootstrap-username #{node[:keystone][:admin][:username]} \
+  --bootstrap-project-name #{node[:keystone][:admin][:tenant]} \
+  --bootstrap-role-name admin \
+  --bootstrap-service-name keystone \
+  --bootstrap-region-id #{node[:keystone][:api][:region]} \
+  --bootstrap-admin-url #{node[:keystone][:api][:versioned_admin_URL]} \
+  --bootstrap-public-url #{node[:keystone][:api][:versioned_public_URL]} \
+  --bootstrap-internal-url #{node[:keystone][:api][:versioned_internal_URL]}"
+  action :run
+  only_if do
+    !node[:keystone][:bootstrap] &&
+      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
+register_auth_hash = { user: node[:keystone][:admin][:username],
+                       password: node[:keystone][:admin][:password],
+                       tenant: node[:keystone][:admin][:tenant] }
+
 # Silly wake-up call - this is a hack; we use retries because the server was
 # just (re)started, and might not answer on the first try
 keystone_register "wakeup keystone" do
@@ -434,21 +456,38 @@ keystone_register "wakeup keystone" do
   insecure keystone_insecure
   host my_admin_host
   port node[:keystone][:api][:admin_port]
-  token node[:keystone][:service][:token]
+  auth register_auth_hash
   retries 5
   retry_delay 10
   action :wakeup
 end
 
+# We want to keep a note that we've done bootstrap, so we don't do it again.
+# If we were doing that outside a ruby_block, we would add the note in the
+# compile phase, before the actual db_sync is done (which is wrong, since it
+# could possibly not be reached in case of errors).
+ruby_block "mark node for keystone bootstrap" do
+  block do
+    node.set[:keystone][:bootstrap] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[keystone-manage bootstrap]", :immediately
+end
+
 # Create tenants
-openstack_command = "openstack --os-token \"#{node[:keystone][:service][:token]}\" --os-url \"#{node[:keystone][:api][:versioned_admin_URL]}\" --os-region \"#{node[:keystone][:api][:region]}\""
+openstack_command = "openstack \
+--os-username \"#{node[:keystone][:admin][:username]}\" \
+--os-password \"#{node[:keystone][:admin][:password]}\" \
+--os-url \"#{node[:keystone][:api][:versioned_admin_URL]}\" \
+--os-region \"#{node[:keystone][:api][:region]}\""
 if node[:keystone][:api][:version] != "2.0"
   openstack_command <<  " --os-identity-api-version #{node[:keystone][:api][:version]} --os-project-domain-id default --os-user-domain-id default"
 end
 
 openstack_command << " --insecure" if keystone_insecure
 
-[:admin, :service, :default].each do |tenant_type|
+[:service, :default].each do |tenant_type|
   tenant = node[:keystone][tenant_type][:tenant]
 
   keystone_register "add default #{tenant} tenant" do
@@ -456,7 +495,7 @@ openstack_command << " --insecure" if keystone_insecure
     insecure keystone_insecure
     host my_admin_host
     port node[:keystone][:api][:admin_port]
-    token node[:keystone][:service][:token]
+    auth register_auth_hash
     tenant_name tenant
     action :add_tenant
   end
@@ -472,48 +511,30 @@ openstack_command << " --insecure" if keystone_insecure
   end
 end
 
-# Create users
-user_datas = [
-  [
-    node[:keystone][:admin][:username],
-    node[:keystone][:admin][:password],
-    node[:keystone][:admin][:tenant]
-  ]
-]
+# Create default user
 if node[:keystone][:default][:create_user]
-  user_datas << [
-    node[:keystone][:default][:username],
-    node[:keystone][:default][:password],
-    node[:keystone][:default][:tenant]
-  ]
-end
-user_datas.each do |user_data|
-  keystone_register "add default #{user_data[0]} user" do
+  keystone_register "add default #{node[:keystone][:default][:username]} user" do
     protocol node[:keystone][:api][:protocol]
     insecure keystone_insecure
     host my_admin_host
     port node[:keystone][:api][:admin_port]
-    token node[:keystone][:service][:token]
-    user_name user_data[0]
-    user_password user_data[1]
-    tenant_name user_data[2]
+    auth register_auth_hash
+    user_name node[:keystone][:default][:username]
+    user_password node[:keystone][:default][:password]
+    tenant_name node[:keystone][:default][:tenant]
     action :add_user
   end
 end
 
-# Create roles
-## Member is used by horizon (see OPENSTACK_KEYSTONE_DEFAULT_ROLE option)
-roles = %w[admin Member]
-roles.each do |role|
-  keystone_register "add default #{role} role" do
-    protocol node[:keystone][:api][:protocol]
-    insecure keystone_insecure
-    host my_admin_host
-    port node[:keystone][:api][:admin_port]
-    token node[:keystone][:service][:token]
-    role_name role
-    action :add_role
-  end
+# Create Member role used by horizon (see OPENSTACK_KEYSTONE_DEFAULT_ROLE option)
+keystone_register "add default Member role" do
+  protocol node[:keystone][:api][:protocol]
+  insecure keystone_insecure
+  host my_admin_host
+  port node[:keystone][:api][:admin_port]
+  auth register_auth_hash
+  role_name "Member"
+  action :add_role
 end
 
 # Create Access info
@@ -530,7 +551,7 @@ user_roles.each do |args|
     insecure keystone_insecure
     host my_admin_host
     port node[:keystone][:api][:admin_port]
-    token node[:keystone][:service][:token]
+    auth register_auth_hash
     user_name args[0]
     role_name args[1]
     tenant_name args[2]
@@ -551,46 +572,12 @@ ec2_creds.each do |args|
     protocol node[:keystone][:api][:protocol]
     insecure keystone_insecure
     host my_admin_host
-    auth ({
-        tenant: node[:keystone][:admin][:tenant],
-        user: node[:keystone][:admin][:username],
-        password: node[:keystone][:admin][:password]
-    })
+    auth register_auth_hash
     port node[:keystone][:api][:admin_port]
     user_name args[0]
     tenant_name args[1]
     action :add_ec2
   end
-end
-
-# Create keystone service
-keystone_register "register keystone service" do
-  protocol node[:keystone][:api][:protocol]
-  insecure keystone_insecure
-  host my_admin_host
-  port node[:keystone][:api][:admin_port]
-  token node[:keystone][:service][:token]
-  service_name "keystone"
-  service_type "identity"
-  service_description "Openstack Identity Service"
-  action :add_service
-end
-
-# Create keystone endpoint
-keystone_register "register keystone endpoint" do
-  protocol node[:keystone][:api][:protocol]
-  insecure keystone_insecure
-  host my_admin_host
-  port node[:keystone][:api][:admin_port]
-  token node[:keystone][:service][:token]
-  endpoint_service "keystone"
-  endpoint_region node[:keystone][:api][:region]
-  endpoint_publicURL node[:keystone][:api][:versioned_public_URL]
-  endpoint_adminURL node[:keystone][:api][:versioned_admin_URL]
-  endpoint_internalURL node[:keystone][:api][:versioned_internal_URL]
-#  endpoint_global true
-#  endpoint_enabled true
-  action :add_endpoint_template
 end
 
 crowbar_pacemaker_sync_mark "create-keystone_register"
