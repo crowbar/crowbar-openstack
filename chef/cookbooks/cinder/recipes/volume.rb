@@ -55,11 +55,9 @@ def make_loopback_volume(backend_id, volume)
   volname = volume[:local][:volume_name]
   fname = volume[:local][:file_name]
 
-  return if volume_exists(volname)
-
   bash "Create volume group #{volname}" do
     code "vgcreate #{volname} `losetup -j #{fname} | cut -f1 -d:`"
-    not_if "vgs #{volname}"
+    not_if { `vgs "#{volname}"`.include?(volname) }
   end
 end
 
