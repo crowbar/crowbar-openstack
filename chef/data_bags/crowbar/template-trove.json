@@ -15,6 +15,11 @@
         "password": "",
         "user": "trove",
         "database": "trove"
+      },
+      "api": {
+        "protocol": "http",
+        "bind_open_address": true,
+        "bind_port": 8779
       }
     }
   },
@@ -22,6 +27,7 @@
     "trove": {
       "crowbar-revision": 1,
       "crowbar-applied": false,
+      "schema-revision": 100,
       "element_states": {
         "trove-server": [ "readying", "ready", "applying" ]
       },

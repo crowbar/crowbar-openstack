@@ -1,12 +1,14 @@
 def upgrade ta, td, a, d
-  a["trove"]["db"] = {}
-  a["trove"]["db"]["password"] = nil
-  a["trove"]["db"]["user"] = "trove"
-  a["trove"]["db"]["database"] = "trove"
+  unless a.key? "db"
+    a["db"] = {}
+    a["db"]["password"] = nil
+    a["db"]["user"] = "trove"
+    a["db"]["database"] = "trove"
+  end
   return a, d
 end
 
 def downgrade ta, td, a, d
-  a["trove"].delete "db"
+  a.delete "db"
   return a, d
 end
