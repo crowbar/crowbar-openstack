@@ -1,0 +1,57 @@
+{
+  "id": "template-sahara",
+  "description": "Sets up OpenStack Sahara Data Processing",
+  "attributes": {
+    "sahara": {
+      "debug": false,
+      "verbose": true,
+      "keystone_instance": "none",
+      "database_instance": "none",
+      "glance_instance": "none",
+      "nova_instance": "none",
+      "heat_instance": "none",
+      "neutron_instance": "none",
+      "rabbitmq_instance": "none",
+      "service_user": "sahara",
+      "service_password": "",
+      "trustee": {
+          "domain_name": "sahara",
+          "domain_admin_name": "sahara_domain_admin",
+          "domain_admin_password": ""
+      },
+      "api": {
+        "protocol": "http",
+        "bind_open_address": true,
+        "bind_port": 9511
+      },
+      "db": {
+        "password": "",
+        "user": "sahara",
+        "database": "sahara"
+      }
+    }
+  },
+  "deployment": {
+    "sahara": {
+      "crowbar-revision": 1,
+      "crowbar-applied": false,
+      "element_states": {
+        "sahara-server": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "sahara-server" ]
+      ],
+      "element_run_list_order": {
+          "sahara-server": 110
+      },
+      "config": {
+        "environment": "sahara-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
