@@ -5,7 +5,6 @@ Before=<%= @service_name %>.service
 [Service]
 Type=oneshot
 RemainAfterExit=true
-SuccessExitStatus=100
 ExecStart=/usr/bin/cinder-looplvm start
 ExecReload=/usr/bin/cinder-looplvm start
 ExecStop=/usr/bin/cinder-looplvm stop
