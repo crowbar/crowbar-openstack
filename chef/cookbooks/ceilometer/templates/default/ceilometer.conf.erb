@@ -1494,12 +1494,14 @@ telemetry_secret = <%= @metering_secret %>
 # Region name to use for OpenStack service endpoints. (string value)
 # Deprecated group/name - [DEFAULT]/os_region_name
 #region_name = <None>
+region_name = <%= @keystone_settings['endpoint_region'] %>
 
 # Type of endpoint in Identity service catalog to use for communication with
 # OpenStack services. (string value)
 # Allowed values: public, internal, admin, auth, publicURL, internalURL, adminURL
 # Deprecated group/name - [DEFAULT]/os_endpoint_type
 #interface = public
+interface = internalURL
 
 # Authentication type to load (string value)
 # Deprecated group/name - [DEFAULT]/auth_plugin
@@ -1510,6 +1512,7 @@ telemetry_secret = <%= @metering_secret %>
 
 # Authentication URL (string value)
 #auth_url = <None>
+auth_url = <%= @internal_auth_url_v2 %>
 
 # Domain ID to scope to (string value)
 #domain_id = <None>
@@ -1524,6 +1527,7 @@ telemetry_secret = <%= @metering_secret %>
 # Project name to scope to (string value)
 # Deprecated group/name - [DEFAULT]/tenant-name
 #project_name = <None>
+project_name = <%= @keystone_settings['service_tenant'] %>
 
 # Domain ID containing project (string value)
 #project_domain_id = <None>
@@ -1550,6 +1554,7 @@ telemetry_secret = <%= @metering_secret %>
 # Username (string value)
 # Deprecated group/name - [DEFAULT]/username
 #username = <None>
+username = <%= @keystone_settings['service_user'] %>
 
 # User's domain id (string value)
 #user_domain_id = <None>
@@ -1559,6 +1564,7 @@ telemetry_secret = <%= @metering_secret %>
 
 # User's password (string value)
 #password = <None>
+password = <%= @keystone_settings['service_password'] %>
 
 
 [service_types]
