@@ -22,8 +22,6 @@ find_associated_loopdev()
 
 case "$1" in
     start)
-        rescan=0
-
         for LOOP_LVM in $LOOP_LVMS; do
              if [ -f $LOOP_LVM ]; then
                  loopdev=$(find_associated_loopdev)
@@ -32,18 +30,15 @@ case "$1" in
                      losetup -f $LOOP_LVM
                      echo_status
 
-                     # Need to tell LVM to rescan
-                     rescan=1
+                     # tell LVM to rescan the new device
+                     loopdev=$(find_associated_loopdev)
+                     /sbin/lvm pvscan --cache $loopdev
 
                  elif [ -b "$loopdev" ]; then
                      echo "Loop mount unnecessary; $LOOP_LVM already available via $loopdev"
                  fi
              fi
         done
-
-        if [ $rescan -ne 0 ]; then
-            exit 100
-        fi
     ;;
     stop)
         for LOOP_LVM in $LOOP_LVMS; do

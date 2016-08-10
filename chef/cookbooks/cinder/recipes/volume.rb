@@ -141,46 +141,26 @@ unless loop_lvm_paths.empty?
     cinder_looplvm_service = "cinder-looplvm"
   end
 
-  if node[:platform] == "suse" && node.platform_version.to_f < 12.0
-    template "/etc/init.d/#{cinder_looplvm_service}" do
-      source "cinder-looplvm.init.erb"
-      owner "root"
-      group "root"
-      mode "0755"
-      variables(service_name: cinder_looplvm_service)
-    end
+  template "/etc/systemd/system/#{cinder_looplvm_service}.service" do
+    source "cinder-looplvm.service.erb"
+    owner "root"
+    group "root"
+    mode "0644"
+    variables(service_name: cinder_looplvm_service)
+  end
 
-    link "/usr/sbin/rc#{cinder_looplvm_service}" do
-      action :create
-      to "/etc/init.d/#{cinder_looplvm_service}"
-    end
+  # Make sure that any dependency change is taken into account
+  bash "reload systemd after #{cinder_looplvm_service} update" do
+    code "systemctl daemon-reload"
+    action :nothing
+    subscribes :run,
+      "template[/etc/systemd/system/#{cinder_looplvm_service}.service]",
+      :immediately
+  end
 
-    # Make sure that any dependency change is taken into account
-    bash "insserv #{cinder_looplvm_service} service" do
-      code "insserv #{cinder_looplvm_service}"
-      action :nothing
-      subscribes :run, resources("template[/etc/init.d/#{cinder_looplvm_service}]"), :delayed
-    end
-  else
-    template "/etc/systemd/system/#{cinder_looplvm_service}.service" do
-      source "cinder-looplvm.service.erb"
-      owner "root"
-      group "root"
-      mode "0644"
-      variables(service_name: cinder_looplvm_service)
-    end
-
-    # Make sure that any dependency change is taken into account
-    bash "reload systemd after #{cinder_looplvm_service} update" do
-      code "systemctl daemon-reload"
-      action :nothing
-      subscribes :run, resources("template[/etc/systemd/system/#{cinder_looplvm_service}.service]"), :immediately
-    end
-
-    link "/usr/sbin/rc#{cinder_looplvm_service}" do
-      action :create
-      to "service"
-    end
+  link "/usr/sbin/rc#{cinder_looplvm_service}" do
+    action :create
+    to "service"
   end
 
   service cinder_looplvm_service do
@@ -265,13 +245,6 @@ if %w(rhel suse).include? node[:platform_family]
   cookbook_file "/etc/tgt/targets.conf" do
     source "cinder-volume.conf"
     notifies :restart, "service[tgt]"
-  end
-end
-
-# for older SLES
-if node[:platform] == "suse" && node[:platform_version].to_f < 12.0
-  service "boot.lvm" do
-    action [:enable]
   end
 end
 
