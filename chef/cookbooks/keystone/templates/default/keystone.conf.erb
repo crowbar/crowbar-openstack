@@ -1073,7 +1073,8 @@ user_id_attribute = <%= node[:keystone][:ldap][:user_id_attribute] %>
 user_name_attribute = <%= node[:keystone][:ldap][:user_name_attribute] %>
 
 # LDAP attribute mapped to user description. (string value)
-#user_description_attribute = description
+# user_description_attribute = description
+user_description_attribute = <%= node[:keystone][:ldap][:user_description_attribute] %>
 
 # LDAP attribute mapped to user email. (string value)
 #user_mail_attribute = mail
@@ -1157,6 +1158,7 @@ user_enabled_emulation_dn = <%= node[:keystone][:ldap][:user_enabled_emulation_d
 # Use the "group_member_attribute" and "group_objectclass" settings to
 # determine membership in the emulated enabled group. (boolean value)
 #user_enabled_emulation_use_group_config = false
+user_enabled_emulation_use_group_config = <%= node[:keystone][:ldap][:user_enabled_emulation_use_group_config] %>
 
 # List of additional LDAP attributes used for mapping additional attribute
 # mappings for users. Attribute mapping format is <ldap_attr>:<user_attr>,
@@ -1280,6 +1282,7 @@ use_pool = <%= node[:keystone][:ldap][:use_pool] %>
 # this to true. This is the case when using posixGroup as the group objectclass
 # and OpenDirectory. (boolean value)
 #group_members_are_ids = false
+group_members_are_ids = <%= node[:keystone][:ldap][:group_members_are_ids] %>
 
 
 [matchmaker_redis]

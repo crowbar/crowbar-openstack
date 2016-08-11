@@ -85,6 +85,7 @@
                       "user_objectclass": { "type": "str" },
                       "user_id_attribute": { "type": "str" },
                       "user_name_attribute": { "type": "str" },
+                      "user_description_attribute": { "type": "str" },
                       "user_mail_attribute": { "type": "str" },
                       "user_pass_attribute": { "type": "str" },
                       "user_enabled_attribute": { "type": "str" },
@@ -98,6 +99,7 @@
                       "user_enabled_invert": { "type": "bool" },
                       "user_enabled_emulation": { "type": "bool" },
                       "user_enabled_emulation_dn": { "type": "str" },
+                      "user_enabled_emulation_use_group_config": { "type": "bool" },
                       "group_tree_dn": { "type": "str" },
                       "group_filter": { "type": "str" },
                       "group_objectclass": { "type": "str" },
@@ -112,6 +114,7 @@
                       "tls_cacertdir": { "type": "str" },
                       "use_tls": { "type": "bool" },
                       "use_pool": { "type": "bool" },
+                      "group_members_are_ids": { "type": "bool" },
                       "tls_req_cert": { "type": "str" }
                     }}
               }}

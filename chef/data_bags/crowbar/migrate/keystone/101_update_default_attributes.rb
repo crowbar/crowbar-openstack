@@ -1,4 +1,8 @@
 def upgrade(ta, td, a, d)
+  a["ldap"]["user_description_attribute"] = ta["ldap"]["user_description_attribute"]
+  a["ldap"]["group_members_are_ids"] = ta["ldap"]["group_members_are_ids"]
+  a["ldap"]["user_enabled_emulaton_use_group_config"] =
+    ta["ldap"]["user_enabled_emulaton_use_group_config"]
   a["ldap"].delete("project_tree_dn")
   a["ldap"].delete("project_filter")
   a["ldap"].delete("project_objectclass")
@@ -28,6 +32,9 @@ def upgrade(ta, td, a, d)
 end
 
 def downgrade(ta, td, a, d)
+  a["ldap"].delete("user_description_attribute")
+  a["ldap"].delete("group_members_are_ids")
+  a["ldap"].delete("user_enabled_emulaton_use_group_config")
   a["ldap"]["project_tree_dn"] = ta["ldap"]["project_tree_dn"]
   a["ldap"]["project_filter"] = ta["ldap"]["project_filter"]
   a["ldap"]["project_objectclass"] = ta["ldap"]["project_objectclass"]

@@ -80,6 +80,7 @@
         "user_objectclass": "inetOrgPerson",
         "user_id_attribute": "cn",
         "user_name_attribute": "sn",
+        "user_description_attribute": "description",
         "user_mail_attribute": "mail",
         "user_pass_attribute": "userPassword",
         "user_enabled_attribute": "enabled",
@@ -93,6 +94,7 @@
         "user_enabled_invert": false,
         "user_enabled_emulation": false,
         "user_enabled_emulation_dn": "",
+        "user_enabled_emulation_use_group_config": false,
         "group_tree_dn": "",
         "group_filter": "",
         "group_objectclass": "groupOfNames",
@@ -107,7 +109,8 @@
         "tls_cacertdir": "",
         "use_tls": false,
         "tls_req_cert": "demand",
-        "use_pool": true
+        "use_pool": true,
+        "group_members_are_ids": false
       }
     }
   },
