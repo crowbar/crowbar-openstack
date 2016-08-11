@@ -45,18 +45,6 @@ directory node["postgresql"]["dir"] do
   action :create
 end
 
-# Workaround for https://bugzilla.suse.com/show_bug.cgi?id=964254
-# There is some update-alternatives leftover from the old postgresql install
-# after upgrading a node to SLES12. Remove that.
-# TODO: Remove this again after either the above bug is fixed or we don't need
-#       to upgrade from SLES11 anymore
-execute "cleanup alternatives leftover" do
-  command "update-alternatives --remove-all psql"
-  only_if do
-    node[:platform_family] == "suse" && ::FileTest.exist?("/var/lib/rpm/alternatives/psql")
-  end
-end
-
 node["postgresql"]["server"]["packages"].each do |pg_pack|
   package pg_pack
 end
@@ -74,19 +62,6 @@ template "#{node['postgresql']['sysconfig']}" do
   source "pgsql.sysconfig.erb"
   mode "0644"
   notifies :restart, "service[postgresql]", :delayed
-end
-
-# Renames any old data directory if present.
-backup = "#{node.postgresql.dir}.upgrade-backup"
-execute "Move old data directory" do
-  command "mv '#{node.postgresql.dir}' '#{backup}'"
-  only_if do
-    if node[:platform_family] == "suse" && File.exist?("#{node.postgresql.dir}/PG_VERSION")
-      File.foreach("#{node.postgresql.dir}/PG_VERSION").grep(/^9.1$/).any?
-    else
-      false
-    end
-  end
 end
 
 # We need initdb to populate /var/lib/pgsql/data before we generate the config
