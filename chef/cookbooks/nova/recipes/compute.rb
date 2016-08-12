@@ -192,7 +192,7 @@ case node[:nova][:libvirt_type]
           provider Chef::Provider::CrowbarPacemakerService
           supports no_crm_maintenance_mode: true
         end
-        only_if { node[:platform_family] == "suse" && node[:platform_version].to_f > 12.1 }
+        only_if { node[:platform_family] == "suse" && node[:platform_version].to_f > 12.0 }
       end
 
       service "libvirtd" do
