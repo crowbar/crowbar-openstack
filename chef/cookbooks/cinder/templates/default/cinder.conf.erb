@@ -2374,6 +2374,9 @@ volume_driver = cinder.volume.drivers.fujitsu.eternus_dx_fc.FJDXFCDriver
 <% if volume['backend_driver'] == 'netapp' -%>
 volume_driver = cinder.volume.drivers.netapp.common.NetAppDriver
 <% end -%>
+<% if volume['backend_driver'] == 'nfs' -%>
+volume_driver = cinder.volume.drivers.nfs.NfsDriver
+<% end -%>
 <% if volume['backend_driver'] == 'datera' -%>
 volume_driver = cinder.volume.drivers.datera.DateraDriver
 <% end -%>
