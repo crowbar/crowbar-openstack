@@ -532,6 +532,7 @@ insecure = <%= @keystone_settings['insecure'] %>
 # Type of endpoint in Identity service catalog to use for communication with
 # the OpenStack service. (string value)
 #endpoint_type = <None>
+endpoint_type=internalURL
 
 # Optional CA cert file to use in SSL connections. (string value)
 #ca_file = <None>
@@ -544,6 +545,9 @@ insecure = <%= @keystone_settings['insecure'] %>
 
 # If set, then the server's certificate will not be verified. (boolean value)
 #insecure = <None>
+<% if @keystone_settings['insecure'] -%>
+insecure = <%= @keystone_settings['insecure'] %>
+<% end -%>
 
 
 [clients_ceilometer]
@@ -713,6 +717,7 @@ insecure = <%= @keystone_settings['insecure'] %>
 
 # Unversioned keystone url in format like http://0.0.0.0:5000. (string value)
 #auth_uri =
+auth_uri = <%= @keystone_settings['public_auth_url'] %>
 
 
 [clients_magnum]
@@ -724,6 +729,7 @@ insecure = <%= @keystone_settings['insecure'] %>
 # Type of endpoint in Identity service catalog to use for communication with
 # the OpenStack service. (string value)
 #endpoint_type = <None>
+endpoint_type=internalURL
 
 # Optional CA cert file to use in SSL connections. (string value)
 #ca_file = <None>
@@ -736,6 +742,9 @@ insecure = <%= @keystone_settings['insecure'] %>
 
 # If set, then the server's certificate will not be verified. (boolean value)
 #insecure = <None>
+<% if @keystone_settings['insecure'] -%>
+insecure = <%= @keystone_settings['insecure'] %>
+<% end -%>
 
 
 [clients_manila]
@@ -747,6 +756,7 @@ insecure = <%= @keystone_settings['insecure'] %>
 # Type of endpoint in Identity service catalog to use for communication with
 # the OpenStack service. (string value)
 #endpoint_type = <None>
+endpoint_type=internalURL
 
 # Optional CA cert file to use in SSL connections. (string value)
 #ca_file = <None>
@@ -759,6 +769,9 @@ insecure = <%= @keystone_settings['insecure'] %>
 
 # If set, then the server's certificate will not be verified. (boolean value)
 #insecure = <None>
+<% if @keystone_settings['insecure'] -%>
+insecure = <%= @keystone_settings['insecure'] %>
+<% end -%>
 
 
 [clients_mistral]
