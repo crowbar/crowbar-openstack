@@ -1512,7 +1512,7 @@ interface = internalURL
 
 # Authentication URL (string value)
 #auth_url = <None>
-auth_url = <%= @internal_auth_url_v2 %>
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
 
 # Domain ID to scope to (string value)
 #domain_id = <None>

@@ -93,9 +93,6 @@ template "/etc/ceilometer/ceilometer.conf" do
       verbose: node[:ceilometer][:verbose],
       rabbit_settings: fetch_rabbitmq_settings,
       keystone_settings: keystone_settings,
-      internal_auth_url_v2: KeystoneHelper.versioned_service_URL(
-        keystone_settings["protocol"], keystone_settings["internal_url_host"],
-        keystone_settings["service_port"], "2.0"),
       bind_host: bind_host,
       bind_port: bind_port,
       metering_secret: node[:ceilometer][:metering_secret],
