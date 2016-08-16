@@ -77,6 +77,7 @@ default[:keystone][:ldap][:user_filter] = ""
 default[:keystone][:ldap][:user_objectclass] = "inetOrgPerson"
 default[:keystone][:ldap][:user_id_attribute] = "cn"
 default[:keystone][:ldap][:user_name_attribute] = "sn"
+default[:keystone][:ldap][:user_description_attribute] = "description"
 default[:keystone][:ldap][:user_mail_attribute] = "mail"
 default[:keystone][:ldap][:user_pass_attribute] = "userPassword"
 default[:keystone][:ldap][:user_enabled_attribute] = "enabled"
@@ -90,33 +91,7 @@ default[:keystone][:ldap][:user_allow_update] = true
 default[:keystone][:ldap][:user_allow_delete] = true
 default[:keystone][:ldap][:user_enabled_emulation] = false
 default[:keystone][:ldap][:user_enabled_emulation_dn] = ""
-
-default[:keystone][:ldap][:project_tree_dn] = ""
-default[:keystone][:ldap][:project_filter] = ""
-default[:keystone][:ldap][:project_objectclass] = "groupOfNames"
-default[:keystone][:ldap][:project_domain_id_attribute] = "businessCategory"
-default[:keystone][:ldap][:project_id_attribute] = "cn"
-default[:keystone][:ldap][:project_member_attribute] = "member"
-default[:keystone][:ldap][:project_name_attribute] = "ou"
-default[:keystone][:ldap][:project_desc_attribute] = "description"
-default[:keystone][:ldap][:project_enabled_attribute] = "enabled"
-default[:keystone][:ldap][:project_attribute_ignore] = ""
-default[:keystone][:ldap][:project_allow_create] = true
-default[:keystone][:ldap][:project_allow_update] = true
-default[:keystone][:ldap][:project_allow_delete] = true
-default[:keystone][:ldap][:project_enabled_emulation] = false
-default[:keystone][:ldap][:project_enabled_emulation_dn] = ""
-
-default[:keystone][:ldap][:role_tree_dn] = ""
-default[:keystone][:ldap][:role_filter] = ""
-default[:keystone][:ldap][:role_objectclass] = "organizationalRole"
-default[:keystone][:ldap][:role_id_attribute] = "cn"
-default[:keystone][:ldap][:role_name_attribute] = "ou"
-default[:keystone][:ldap][:role_member_attribute] = "roleOccupant"
-default[:keystone][:ldap][:role_attribute_ignore] = ""
-default[:keystone][:ldap][:role_allow_create] = true
-default[:keystone][:ldap][:role_allow_update] = true
-default[:keystone][:ldap][:role_allow_delete] = true
+default[:keystone][:ldap][:user_enabled_emulation_use_group_config] = false
 
 default[:keystone][:ldap][:group_tree_dn] = ""
 default[:keystone][:ldap][:group_filter] = ""
@@ -128,7 +103,8 @@ default[:keystone][:ldap][:group_attribute_ignore] = ""
 default[:keystone][:ldap][:group_allow_create] = true
 default[:keystone][:ldap][:group_allow_update] = true
 default[:keystone][:ldap][:group_allow_delete] = true
-default[:keystone][:ldap][:use_pool] = false
+default[:keystone][:ldap][:use_pool] = true
+default[:keystone][:ldap][:group_members_are_ids] = false
 
 default[:keystone][:ha][:enabled] = false
 # Ports to bind to when haproxy is used for the real ports
