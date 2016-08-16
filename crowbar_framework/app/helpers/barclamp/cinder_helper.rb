@@ -25,6 +25,7 @@ module Barclamp
           [t(".volumes.eqlx_volume_driver"), "eqlx"],
           [t(".volumes.eternus_volume_driver"), "eternus"],
           [t(".volumes.netapp_volume_driver"), "netapp"],
+          [t(".volumes.nfs_volume_driver"), "nfs"],
           [t(".volumes.rbd_volume_driver"), "rbd"],
           [t(".volumes.vmware_volume_driver"), "vmware"],
           [t(".volumes.local_volume_driver"), "local"],
