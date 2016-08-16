@@ -1128,10 +1128,9 @@ eqlx_pool = <%= volume['eqlx']["eqlx_pool"] %>
 # Options defined in cinder.volume.drivers.fujitsu_eternus_dx_common
 #
 
-# The configuration file for the Cinder SMI-S driver (string
-# value)
-cinder_smis_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.xml
-
+# config file for cinder fujitsu_eternus_dx volume driver
+#cinder_eternus_config_file=/etc/cinder/cinder_fujitsu_eternus_dx.xml
+cinder_eternus_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.xml
 
 <% end -%>
 <% if volume['backend_driver'] == 'glusterfs' -%>

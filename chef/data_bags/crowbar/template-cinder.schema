@@ -93,6 +93,7 @@
                     "user": { "type": "str", "required": true },
                     "password": { "type": "str", "required": true },
                     "pool": { "type": "str", "required": true },
+                    "snappool": { "type": "str", "required": true },
                     "iscsi_ip": { "type": "str", "required": true }
                 }
                 },
@@ -196,6 +197,7 @@
                       "user": { "type": "str", "required": true },
                       "password": { "type": "str", "required": true },
                       "pool": { "type": "str", "required": true },
+                      "snappool": { "type": "str", "required": true },
                       "iscsi_ip": { "type": "str", "required": true }
                     }
                   },
