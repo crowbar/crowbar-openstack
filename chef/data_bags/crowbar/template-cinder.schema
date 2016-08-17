@@ -96,12 +96,6 @@
                     "iscsi_ip": { "type": "str", "required": true }
                 }
                 },
-                "nfs": {
-                "type": "map", "mapping": {
-                    "nfs_shares": { "type": "str", "required": true },
-                    "nfs_mount_options": { "type": "str", "required": true }
-                }
-                },
                 "rbd": {
                 "type": "map", "mapping": {
                     "use_crowbar": { "type": "bool", "required": true },
@@ -203,12 +197,6 @@
                       "password": { "type": "str", "required": true },
                       "pool": { "type": "str", "required": true },
                       "iscsi_ip": { "type": "str", "required": true }
-                    }
-                  },
-                  "nfs": {
-                    "type": "map", "mapping": {
-                      "nfs_shares": { "type": "str", "required": true },
-                      "nfs_mount_options": { "type": "str", "required": true }
                     }
                   },
                   "rbd": {
