@@ -2065,6 +2065,7 @@ key_file = <%= @heat_ssl[:keyfile] %>
 
 # Authentication URL (string value)
 #auth_url = <None>
+auth_url=<%= @keystone_settings['public_auth_url'] %>
 
 # Domain ID to scope to (string value)
 #domain_id = <None>
@@ -2077,6 +2078,7 @@ key_file = <%= @heat_ssl[:keyfile] %>
 
 # Project name to scope to (string value)
 #project_name = <None>
+project_name=<%= @keystone_settings['service_tenant'] %>
 
 # Domain ID containing project (string value)
 #project_domain_id = <None>
@@ -2093,6 +2095,7 @@ key_file = <%= @heat_ssl[:keyfile] %>
 # Username (string value)
 # Deprecated group/name - [DEFAULT]/user_name
 #username = <None>
+username=<%= @keystone_settings['service_user'] %>
 
 # User's domain id (string value)
 #user_domain_id = <None>
@@ -2102,3 +2105,4 @@ key_file = <%= @heat_ssl[:keyfile] %>
 
 # User's password (string value)
 #password = <None>
+password=<%= @keystone_settings['service_password'] %>
