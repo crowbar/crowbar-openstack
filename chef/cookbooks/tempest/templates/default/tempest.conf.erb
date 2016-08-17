@@ -124,6 +124,7 @@ use_stderr = false
 # The endpoint type to use for the alarming service. (string value)
 # Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
+endpoint_type = internalURL
 
 
 [alarming_plugin]
@@ -138,6 +139,7 @@ use_stderr = false
 # The endpoint type to use for the alarming service. (string value)
 # Allowed values: public, admin, internal, publicURL, adminURL, internalURL
 #endpoint_type = publicURL
+endpoint_type = internalURL
 
 
 [auth]
@@ -1252,6 +1254,7 @@ manila = <%= @use_manila %>
 
 # Whether or not ec2-api is expected to be available (boolean value)
 #ec2api = true
+ec2api = false
 
 # Whether or not magnum is expected to be available (boolean value)
 #magnum = true
@@ -1705,7 +1708,6 @@ backup = false
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #bootable = true
-bootable = true
 
 # Extract correct host info from host@backend (boolean value)
 #volume_services = false
