@@ -48,6 +48,8 @@ module KeystoneHelper
                                                 node[:keystone][:api][:version])
 
       has_default_user = node["keystone"]["default"]["create_user"]
+      default_domain = "Default"
+      default_domain_id = "default"
 
       @keystone_settings ||= Hash.new
       @keystone_settings[cookbook_name] = {
@@ -71,10 +73,14 @@ module KeystoneHelper
         "admin_tenant" => node["keystone"]["admin"]["tenant"],
         "admin_tenant_id" => node["keystone"]["admin"]["tenant_id"],
         "admin_user" => node["keystone"]["admin"]["username"],
+        "admin_domain" => default_domain,
+        "admin_domain_id" => default_domain_id,
         "admin_password" => node["keystone"]["admin"]["password"],
         "default_tenant" => node["keystone"]["default"]["tenant"],
         "default_tenant_id" => node["keystone"]["default"]["tenant_id"],
         "default_user" => has_default_user ? node["keystone"]["default"]["username"] : nil,
+        "default_user_domain" => has_default_user ? default_domain : nil,
+        "default_user_domain_id" => has_default_user ? default_domain_id : nil,
         "default_password" => has_default_user ? node["keystone"]["default"]["password"] : nil,
         "service_tenant" => node["keystone"]["service"]["tenant"],
         "service_tenant_id" => node["keystone"]["service"]["tenant_id"]
