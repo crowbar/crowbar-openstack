@@ -969,7 +969,6 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 
 
 [oslo_concurrency]
-lock_path = /var/run/magnum
 
 #
 # From oslo.concurrency
@@ -985,6 +984,7 @@ lock_path = /var/run/magnum
 # a lock path must be set. (string value)
 # Deprecated group/name - [DEFAULT]/lock_path
 #lock_path = <None>
+lock_path = /var/run/magnum
 
 
 [oslo_messaging_amqp]
@@ -1371,6 +1371,7 @@ trustee_domain_admin_password = <%= @trustee["domain_admin_password"] %>
 
 # If set, then the server's certificate will not be verified. (boolean value)
 #insecure = false
+insecure = <%= @keystone_settings['insecure'] %>
 
 
 [x509]
