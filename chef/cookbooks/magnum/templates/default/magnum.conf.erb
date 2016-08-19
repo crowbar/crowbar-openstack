@@ -1,4 +1,5 @@
 [DEFAULT]
+
 #
 # From magnum
 #
@@ -313,6 +314,9 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 # Location of template to build a k8s cluster on CoreOS. (string value)
 #k8s_coreos_template_path = $pybasedir/templates/kubernetes/kubecluster-coreos.yaml
 
+# Location of template to build a k8s cluster on jeos. (string value)
+#k8s_jeos_template_path = $pybasedir/templates/kubernetes/kubecluster-jeos.yaml
+
 # Url for etcd public discovery endpoint. (string value)
 #etcd_discovery_service_endpoint_format = https://discovery.etcd.io/new?size=%(size)d
 
@@ -323,7 +327,7 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 #mesos_ubuntu_template_path = $pybasedir/templates/mesos/mesoscluster.yaml
 
 # Enabled bay definition entry points. (list value)
-#enabled_definitions = magnum_vm_atomic_k8s,magnum_vm_coreos_k8s,magnum_vm_atomic_swarm,magnum_vm_ubuntu_mesos
+#enabled_definitions = magnum_vm_atomic_k8s,magnum_vm_coreos_k8s,magnum_vm_jeos_k8s,magnum_vm_atomic_swarm,magnum_vm_ubuntu_mesos
 
 
 [bay_heat]
@@ -477,6 +481,7 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 
 
 [database]
+
 #
 # From magnum
 #
@@ -611,18 +616,6 @@ connection=<%= @sql_connection %>
 # (string value)
 #key_file = <None>
 
-[docker_registry]
-
-#
-# From magnum
-#
-
-# Region name of Swift (string value)
-#swift_region = <None>
-
-# Name of the container in Swift which docker registry stores images in (string
-# value)
-#swift_registry_container = docker_registry
 
 [glance_client]
 
@@ -642,6 +635,18 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 # Version of Glance API to use in glanceclient. (string value)
 #api_version = 2
 
+# Optional CA cert file to use in SSL connections. (string value)
+#ca_file = <None>
+
+# Optional PEM-formatted certificate chain file. (string value)
+#cert_file = <None>
+
+# Optional PEM-formatted file that contains the private key. (string value)
+#key_file = <None>
+
+# If set, then the server's certificate will not be verified. (boolean value)
+#insecure = false
+
 
 [heat_client]
 
@@ -658,6 +663,9 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 # the OpenStack service. (string value)
 #endpoint_type = publicURL
 
+# Version of Heat API to use in heatclient. (string value)
+#api_version = 1
+
 # Optional CA cert file to use in SSL connections. (string value)
 #ca_file = <None>
 
@@ -670,8 +678,6 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 # If set, then the server's certificate will not be verified. (boolean value)
 #insecure = false
 
-# Version of Heat API to use in heatclient. (string value)
-#api_version = 1
 
 
 [keystone_authtoken]
@@ -864,7 +870,6 @@ admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 #region_name = <None>
 region_name = <%= @keystone_settings['endpoint_region'] %>
 
-
 # Type of endpoint in Identity service catalog to use for communication with
 # the OpenStack service. (string value)
 #endpoint_type = publicURL
@@ -919,6 +924,18 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 # the OpenStack service. (string value)
 #endpoint_type = publicURL
 
+# Optional CA cert file to use in SSL connections. (string value)
+#ca_file = <None>
+
+# Optional PEM-formatted certificate chain file. (string value)
+#cert_file = <None>
+
+# Optional PEM-formatted file that contains the private key. (string value)
+#key_file = <None>
+
+# If set, then the server's certificate will not be verified. (boolean value)
+#insecure = false
+
 
 [nova_client]
 
@@ -938,9 +955,20 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 # Version of Nova API to use in novaclient. (string value)
 #api_version = 2
 
+# Optional CA cert file to use in SSL connections. (string value)
+#ca_file = <None>
+
+# Optional PEM-formatted certificate chain file. (string value)
+#cert_file = <None>
+
+# Optional PEM-formatted file that contains the private key. (string value)
+#key_file = <None>
+
+# If set, then the server's certificate will not be verified. (boolean value)
+#insecure = false
+
 
 [oslo_concurrency]
-lock_path = /var/run/magnum
 
 #
 # From oslo.concurrency
@@ -956,6 +984,7 @@ lock_path = /var/run/magnum
 # a lock path must be set. (string value)
 # Deprecated group/name - [DEFAULT]/lock_path
 #lock_path = <None>
+lock_path = /var/run/magnum
 
 
 [oslo_messaging_amqp]
@@ -1339,6 +1368,10 @@ trustee_domain_admin_password = <%= @trustee["domain_admin_password"] %>
 
 # The roles which are delegated to the trustee by the trustor (list value)
 #roles =
+
+# If set, then the server's certificate will not be verified. (boolean value)
+#insecure = false
+insecure = <%= @keystone_settings['insecure'] %>
 
 
 [x509]
