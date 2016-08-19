@@ -159,10 +159,6 @@ else
   bind_port = node[:aodh][:api][:port]
 end
 
-internal_auth_url_v2 = KeystoneHelper.versioned_service_URL(
-  keystone_settings["protocol"], keystone_settings["internal_url_host"],
-  keystone_settings["service_port"], "2.0")
-
 template "/etc/aodh/aodh.conf" do
   source "aodh.conf.erb"
   owner "root"
@@ -173,7 +169,6 @@ template "/etc/aodh/aodh.conf" do
     verbose: node[:ceilometer][:verbose],
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: keystone_settings,
-    internal_auth_url_v2: internal_auth_url_v2,
     bind_host: bind_host,
     bind_port: bind_port,
     database_connection: db_connection,
