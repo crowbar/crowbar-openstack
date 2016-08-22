@@ -488,7 +488,6 @@ auth_strategy = keystone
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #memcached_servers = <None>
-memcached_servers = <%= @memcached_servers.join(',') %>
 
 #
 # From nova.compute
@@ -1728,13 +1727,13 @@ wsgi_keep_alive = false
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #network_api_class = nova.network.api.API
-network_api_class = nova.network.neutronv2.api.API
 
 #
 # Whether to use Neutron or Nova Network as the back end for networking.
 # Defaults to False (indicating Nova network). Set to True to use neutron.
 #  (boolean value)
 #use_neutron = false
+use_neutron = true
 
 # Driver to use for network creation (string value)
 #network_driver = nova.network.linux_net
@@ -2627,6 +2626,7 @@ os_region_name=<%= @keystone_settings['endpoint_region'] %>
 # Memcache servers in the format of "host:port". (dogpile.cache.memcache and
 # oslo_cache.memcache_pool backends only). (list value)
 #memcache_servers = localhost:11211
+memcache_servers = <%= @memcached_servers.join(',') %>
 
 # Number of seconds memcached server is considered dead before it is tried
 # again. (dogpile.cache.memcache and oslo_cache.memcache_pool backends only).
