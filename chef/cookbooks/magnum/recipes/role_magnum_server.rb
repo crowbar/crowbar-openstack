@@ -20,4 +20,5 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "magnum", "magnum-server")
   include_recipe "magnum::sql"
   include_recipe "magnum::api"
   include_recipe "magnum::conductor"
+  include_recipe "magnum::ha"
 end

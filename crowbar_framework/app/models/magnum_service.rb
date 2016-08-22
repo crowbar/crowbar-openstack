@@ -106,15 +106,14 @@ class MagnumService < PacemakerServiceObject
     @logger.debug("Magnum apply_role_pre_chef_call: entering #{all_nodes.inspect}")
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "magnum-server")
-# FIXME: uncomment commented out code when enabling HA
-#    reset_sync_marks_on_clusters_founders(server_elements)
-#    Openstack::HA.set_controller_role(server_nodes) if ha_enabled
-#
-#    vip_networks = ["admin", "public"]
-#
-#    dirty = false
-#    dirty = prepare_role_for_ha_with_haproxy(role, ["magnum", "ha", "enabled"], ha_enabled, server_elements, vip_networks)
-#    role.save if dirty
+    reset_sync_marks_on_clusters_founders(server_elements)
+    Openstack::HA.set_controller_role(server_nodes) if ha_enabled
+
+    vip_networks = ["admin", "public"]
+
+    dirty = prepare_role_for_ha_with_haproxy(role, ["magnum", "ha", "enabled"],
+                                             ha_enabled, server_elements, vip_networks)
+    role.save if dirty
 
     unless all_nodes.empty? || server_elements.empty?
       net_svc = NetworkService.new @logger
@@ -124,7 +123,7 @@ class MagnumService < PacemakerServiceObject
         net_svc.allocate_ip "default", "public", "host", node
       end
 
-#      allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
+      allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
     end
 
     @logger.debug("Magnum apply_role_pre_chef_call: leaving")
