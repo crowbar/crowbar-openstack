@@ -45,6 +45,7 @@ class TroveService < ServiceObject
     base["attributes"][@bc_name]["swift_instance"] = find_dep_proposal("swift", true)
     base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
     base["attributes"][@bc_name]["db"]["password"] = random_password
+    base["attributes"][@bc_name]["service_password"] = random_password
 
     # assign a default node to the trove-server role
     nodes = NodeObject.all
