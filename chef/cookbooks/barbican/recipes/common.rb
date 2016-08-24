@@ -20,8 +20,9 @@ include_recipe "apache2::mod_rewrite"
 
 package "openstack-barbican"
 
-db_settings = fetch_database_settings
+ha_enabled = node[:barbican][:ha][:enabled]
 
+db_settings = fetch_database_settings
 db_conn_scheme = db_settings[:url_scheme]
 
 public_host = CrowbarHelper.get_host_for_public_url(node, false, false)
@@ -38,12 +39,15 @@ database_connection = "#{db_conn_scheme}://" \
   "@#{db_settings[:address]}" \
   "/#{node[:barbican][:db][:database]}"
 
+crowbar_pacemaker_sync_mark "wait-barbican_database"
+
 # Create the Barbican Database
 database "create #{node[:barbican][:db][:database]} database" do
   connection db_settings[:connection]
   database_name node[:barbican][:db][:database]
   provider db_settings[:provider]
   action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 database_user "create #{@cookbook_name} database user" do
@@ -54,6 +58,7 @@ database_user "create #{@cookbook_name} database user" do
   host "%"
   provider db_settings[:user_provider]
   action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 database_user "grant database access for #{@cookbook_name} database user" do
@@ -65,6 +70,7 @@ database_user "grant database access for #{@cookbook_name} database user" do
   privileges db_settings[:privs]
   provider db_settings[:user_provider]
   action :grant
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 template "/etc/barbican/barbican.conf" do

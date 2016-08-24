@@ -3,6 +3,7 @@ define :barbican_service do
   barbican_name = barbican_service_name
   barbican_name = "openstack-barbican-#{params[:name]}"\
                 if %w(rhel suse).include? node[:platform_family]
+  ha_enabled = node[:barbican][:ha][:enabled]
 
   package barbican_name if %w(rhel suse).include? node[:platform_family]
 
@@ -11,5 +12,6 @@ define :barbican_service do
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources(template: "/etc/barbican/barbican.conf")
+    provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 end

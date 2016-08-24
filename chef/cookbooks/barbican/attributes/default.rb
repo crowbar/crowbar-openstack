@@ -26,3 +26,17 @@ default[:barbican][:api][:bind_host] = "*"
 default[:barbican][:api][:ssl] = false
 
 default[:barbican][:logfile] = "/var/log/barbican/barbican-api.log"
+
+# HA attributes
+default[:barbican][:ha][:enabled] = false
+
+# Ports to bind to when haproxy is used for the real ports
+default[:barbican][:ha][:ports][:api] = 5621
+
+# pacemaker definitions
+default[:barbican][:ha][:api][:op][:monitor][:interval] = "10s"
+default[:barbican][:ha][:worker][:op][:monitor][:interval] = "10s"
+default[:barbican][:ha][:keystone_listener][:op][:monitor][:interval] = "10s"
+default[:barbican][:ha][:api][:agent] = "lsb:openstack-barbican-api"
+default[:barbican][:ha][:worker][:agent] = "lsb:openstack-barbican-worker"
+default[:barbican][:ha][:keystone_listener][:agent] = "lsb:openstack-barbican-keystone-listener"

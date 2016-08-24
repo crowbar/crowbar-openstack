@@ -34,8 +34,10 @@ apache_site "000-default" do
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+network_settings = BarbicanHelper.network_settings(node)
 
-bind_port = node[:barbican][:api][:bind_port]
+bind_port = network_settings[:api][:bind_port]
+barbican_port = node[:barbican][:api][:bind_port]
 admin_host = CrowbarHelper.get_host_for_admin_url(node, false)
 public_host = CrowbarHelper.get_host_for_public_url(node, false, false)
 register_auth_hash = { user: keystone_settings["admin_user"],
@@ -84,9 +86,9 @@ keystone_register "register barbican endpoint" do
   endpoint_service "barbican"
   service_type "key-manager"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "http://#{public_host}:#{bind_port}"
-  endpoint_adminURL "http://#{admin_host}:#{bind_port}"
-  endpoint_internalURL "http://#{admin_host}:#{bind_port}"
+  endpoint_publicURL "http://#{public_host}:#{barbican_port}"
+  endpoint_adminURL "http://#{admin_host}:#{barbican_port}"
+  endpoint_internalURL "http://#{admin_host}:#{barbican_port}"
   action :add_endpoint_template
 end
 
@@ -124,7 +126,7 @@ template "#{node[:apache][:dir]}/vhosts.d/barbican-api.conf" do
     barbican_user: node[:barbican][:user],
     barbican_group: node[:barbican][:group],
     bind_host: node[:barbican][:api][:bind_host],
-    bind_port: node[:barbican][:api][:bind_port],
+    bind_port: bind_port,
     logfile: node[:barbican][:api][:logfile],
     processes: node[:barbican][:api][:processes],
     threads: node[:barbican][:api][:threads],
