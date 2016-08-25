@@ -81,28 +81,15 @@ else
   bind_port = neutron[:neutron][:api][:service_port]
 end
 
-#TODO: nova should depend on neutron, but neutron also depends on nova
-# so we have to do something like this
-novas = search(:node, "roles:nova-controller") || []
-if novas.length > 0
-  nova = novas[0]
-  nova = node if nova.name == node.name
+# Get Nova's insecure setting
+nova = search(:node, "roles:nova-controller") || []
+if !nova.empty?
+  nova = nova[0]
+  nova_insecure = keystone_settings["insecure"] || (
+    nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure])
 else
-  nova = node
-end
-nova_notify = {}
-
-unless nova[:nova].nil? or nova[:nova][:ssl].nil?
-  nova_api_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
-  nova_api_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
-  nova_insecure = keystone_settings["insecure"] || (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure])
-
-  nova_notify = {
-    nova_url: "#{nova_api_protocol}://#{nova_api_host}:#{nova[:nova][:ports][:api]}/v2",
-    nova_insecure: nova_insecure,
-    nova_admin_username: nova[:nova][:service_user],
-    nova_admin_password: nova[:nova][:service_password]
-  }
+  nova_insecure = keystone_settings["insecure"]
+  Chef::Log.warn("nova-controller not found")
 end
 
 service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
@@ -135,7 +122,7 @@ template "/etc/neutron/neutron.conf" do
     mode "0640"
     owner "root"
     group neutron[:neutron][:platform][:group]
-    variables({
+    variables(
       sql_connection: neutron[:neutron][:db][:sql_connection],
       sql_min_pool_size: neutron[:neutron][:sql][:min_pool_size],
       sql_max_pool_overflow: neutron[:neutron][:sql][:max_pool_overflow],
@@ -154,6 +141,7 @@ template "/etc/neutron/neutron.conf" do
       ssl_key_file: neutron[:neutron][:ssl][:keyfile],
       ssl_cert_required: neutron[:neutron][:ssl][:cert_required],
       ssl_ca_file: neutron[:neutron][:ssl][:ca_certs],
+      nova_insecure: nova_insecure,
       core_plugin: neutron[:neutron][:networking_plugin],
       service_plugins: service_plugins,
       use_namespaces: true,
@@ -162,7 +150,7 @@ template "/etc/neutron/neutron.conf" do
       network_nodes_count: network_nodes_count,
       dns_domain: neutron[:neutron][:dhcp_domain],
       mtu_value: mtu_value
-    }.merge(nova_notify))
+    )
 end
 
 if node[:platform_family] == "rhel"

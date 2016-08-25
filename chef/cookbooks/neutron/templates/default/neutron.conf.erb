@@ -1073,7 +1073,7 @@ insecure = <%= @nova_insecure %>
 
 # User's password (string value)
 #password = <None>
-password = <%= @nova_admin_password if @nova_admin_password %>
+password = <%= @keystone_settings['service_password'] %>
 
 # Domain ID containing project (string value)
 #project_domain_id = <None>
@@ -1114,7 +1114,7 @@ project_name = <%= @keystone_settings['service_tenant'] %>
 # Username (string value)
 # Deprecated group/name - [DEFAULT]/username
 #username = <None>
-username = <%= @nova_admin_username if @nova_admin_username %>
+username = <%= @keystone_settings['service_user'] %>
 
 
 [oslo_concurrency]
