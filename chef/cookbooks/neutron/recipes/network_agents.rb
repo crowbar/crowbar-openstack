@@ -139,6 +139,11 @@ end
 
 if node[:neutron][:use_lbaas] &&
     (!node[:neutron][:use_lbaasv2] || [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver]))
+  device_driver = if node[:neutron][:use_lbaasv2]
+    "neutron_lbaas.drivers.haproxy.namespace_driver.HaproxyNSDriver"
+  else
+    "neutron_lbaas.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver"
+  end
   template "/etc/neutron/lbaas_agent.ini" do
     source "lbaas_agent.ini.erb"
     owner "root"
@@ -148,7 +153,7 @@ if node[:neutron][:use_lbaas] &&
       debug: node[:neutron][:debug],
       interface_driver: interface_driver,
       user_group: node[:neutron][:platform][:lbaas_haproxy_group],
-      device_driver: "neutron_lbaas.services.loadbalancer.drivers.haproxy.namespace_driver.HaproxyNSDriver"
+      device_driver: device_driver
     )
   end
 elsif node[:neutron][:use_lbaas] && node[:neutron][:use_lbaasv2] &&
