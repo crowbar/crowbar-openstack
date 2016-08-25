@@ -1032,10 +1032,7 @@ endpoint_type = internal
 
 # Authentication URL (string value)
 #auth_url = <None>
-auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol"],
-                                    @keystone_settings["internal_url_host"],
-                                    @keystone_settings["service_port"],
-                                    "2.0") %>
+auth_url = "<%= @keystone_settings["protocol"] %>://<%= @keystone_settings["internal_url_host"] %>:<%= @keystone_settings["service_port"] %>"
 
 # Authentication type to load (string value)
 # Deprecated group/name - [DEFAULT]/auth_plugin
