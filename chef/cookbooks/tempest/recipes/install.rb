@@ -31,6 +31,7 @@ package "euca2ools"
 
 package "openstack-tempest-test"
 
-%w(keystone swift glance cinder neutron nova heat ceilometer).each do |component|
+["keystone", "swift", "glance", "cinder", "neutron", "nova",
+ "heat", "ceilometer", "sahara"].each do |component|
   package "python-#{component}client"
 end

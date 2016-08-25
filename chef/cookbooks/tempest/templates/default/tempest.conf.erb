@@ -942,7 +942,7 @@ public_network_id = <%= @public_network_id %>
 
 # Default floating network name. Used to allocate floating IPs when
 # neutron is enabled. (string value)
-#floating_network_name = <None>
+floating_network_name = floating
 
 # Id of the public router that provides external connectivity. This
 # should only be used when Neutron's 'allow_overlapping_ips' is set to
@@ -1239,7 +1239,7 @@ aodh_plugin = <%= @use_aodh %>
 horizon = <%= @use_horizon %>
 
 # Whether or not Sahara is expected to be available (boolean value)
-#sahara = false
+sahara = <%= @use_sahara %>
 
 # Whether or not Ironic is expected to be available (boolean value)
 #ironic = false
