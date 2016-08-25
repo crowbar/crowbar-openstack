@@ -279,7 +279,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       variables(
         debug: neutron[:neutron][:debug],
         interface_driver: interface_driver,
-        use_namespaces: "True",
         handle_internal_only_routers: "True",
         metadata_port: 9697,
         send_arp_for_ha: 3,

@@ -144,7 +144,6 @@ template "/etc/neutron/neutron.conf" do
       nova_insecure: nova_insecure,
       core_plugin: neutron[:neutron][:networking_plugin],
       service_plugins: service_plugins,
-      use_namespaces: true,
       allow_overlapping_ips: neutron[:neutron][:allow_overlapping_ips],
       dvr_enabled: neutron[:neutron][:use_dvr],
       network_nodes_count: network_nodes_count,
