@@ -75,6 +75,7 @@
                     }},
                     "sql": { "type": "map", "required": true, "mapping": {
                       "min_pool_size": { "type" : "int", "required" : true },
+                      "max_pool_size": { "type" : "int", "required" : true },
                       "max_pool_overflow": { "type" : "int", "required" : true },
                       "pool_timeout": { "type" : "int", "required" : true }
                     }},
