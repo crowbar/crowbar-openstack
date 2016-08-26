@@ -269,6 +269,13 @@ template vendordata_jsonfile do
   )
 end
 
+# Allow to use some specific NICs for live migration
+migration_host = if node[:nova][:migration][:network] == "admin"
+  "%s"
+else
+  "#{node[:nova][:migration][:network]}.%s"
+end
+
 template "/etc/nova/nova.conf" do
   source "nova.conf.erb"
   user "root"
@@ -290,6 +297,7 @@ template "/etc/nova/nova.conf" do
             ec2_host: admin_api_host,
             ec2_dmz_host: public_api_host,
             libvirt_migration: node[:nova]["use_migration"],
+            migration_host: migration_host,
             libvirt_enable_multipath: node[:nova][:libvirt_use_multipath],
             shared_instances: node[:nova]["use_shared_instance_storage"],
             force_config_drive: node[:nova]["force_config_drive"],
