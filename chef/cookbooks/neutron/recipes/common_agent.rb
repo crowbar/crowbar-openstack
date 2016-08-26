@@ -333,9 +333,6 @@ if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
     mode "0640"
     variables(
       debug: neutron[:neutron][:debug],
-      keystone_settings: keystone_settings,
-      auth_region: keystone_settings["endpoint_region"],
-      neutron_insecure: neutron[:neutron][:ssl][:insecure],
       nova_metadata_host: metadata_host,
       nova_metadata_port: metadata_port,
       nova_metadata_protocol: metadata_protocol,
