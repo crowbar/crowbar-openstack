@@ -1,8 +1,8 @@
 def upgrade(ta, td, a, d)
   a["ldap"]["user_description_attribute"] = ta["ldap"]["user_description_attribute"]
   a["ldap"]["group_members_are_ids"] = ta["ldap"]["group_members_are_ids"]
-  a["ldap"]["user_enabled_emulaton_use_group_config"] =
-    ta["ldap"]["user_enabled_emulaton_use_group_config"]
+  a["ldap"]["user_enabled_emulation_use_group_config"] =
+    ta["ldap"]["user_enabled_emulation_use_group_config"]
   a["ldap"].delete("project_tree_dn")
   a["ldap"].delete("project_filter")
   a["ldap"].delete("project_objectclass")
@@ -11,13 +11,13 @@ def upgrade(ta, td, a, d)
   a["ldap"].delete("project_member_attribute")
   a["ldap"].delete("project_name_attribute")
   a["ldap"].delete("project_desc_attribute")
-  a["ldap"].delete("project_enable_attribute")
+  a["ldap"].delete("project_enabled_attribute")
   a["ldap"].delete("project_attribute_ignore")
   a["ldap"].delete("project_allow_create")
   a["ldap"].delete("project_allow_update")
   a["ldap"].delete("project_allow_delete")
-  a["ldap"].delete("project_enable_emulation")
-  a["ldap"].delete("project_enable_emulation_dn")
+  a["ldap"].delete("project_enabled_emulation")
+  a["ldap"].delete("project_enabled_emulation_dn")
   a["ldap"].delete("role_tree_dn")
   a["ldap"].delete("role_filter")
   a["ldap"].delete("role_objectclass")
@@ -34,7 +34,7 @@ end
 def downgrade(ta, td, a, d)
   a["ldap"].delete("user_description_attribute")
   a["ldap"].delete("group_members_are_ids")
-  a["ldap"].delete("user_enabled_emulaton_use_group_config")
+  a["ldap"].delete("user_enabled_emulation_use_group_config")
   a["ldap"]["project_tree_dn"] = ta["ldap"]["project_tree_dn"]
   a["ldap"]["project_filter"] = ta["ldap"]["project_filter"]
   a["ldap"]["project_objectclass"] = ta["ldap"]["project_objectclass"]
@@ -43,13 +43,13 @@ def downgrade(ta, td, a, d)
   a["ldap"]["project_member_attribute"] = ta["ldap"]["project_member_attribute"]
   a["ldap"]["project_name_attribute"] = ta["ldap"]["project_name_attribute"]
   a["ldap"]["project_desc_attribute"] = ta["ldap"]["project_desc_attribute"]
-  a["ldap"]["project_enable_attribute"] = ta["ldap"]["project_enable_attribute"]
+  a["ldap"]["project_enabled_attribute"] = ta["ldap"]["project_enabled_attribute"]
   a["ldap"]["project_attribute_ignore"] = ta["ldap"]["project_attribute_ignore"]
   a["ldap"]["project_allow_create"] = ta["ldap"]["project_allow_create"]
   a["ldap"]["project_allow_update"] = ta["ldap"]["project_allow_update"]
   a["ldap"]["project_allow_delete"] = ta["ldap"]["project_allow_delete"]
-  a["ldap"]["project_enable_emulation"] = ta["ldap"]["project_enable_emulation"]
-  a["ldap"]["project_enable_emulation_dn"] = ta["ldap"]["project_enable_emulation_dn"]
+  a["ldap"]["project_enabled_emulation"] = ta["ldap"]["project_enabled_emulation"]
+  a["ldap"]["project_enabled_emulation_dn"] = ta["ldap"]["project_enabled_emulation_dn"]
   a["ldap"]["role_tree_dn"] = ta["ldap"]["role_tree_dn"]
   a["ldap"]["role_filter"] = ta["ldap"]["role_filter"]
   a["ldap"]["role_objectclass"] = ta["ldap"]["role_objectclass"]
