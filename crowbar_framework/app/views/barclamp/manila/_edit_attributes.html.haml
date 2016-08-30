@@ -48,6 +48,22 @@
               = password_field %w(shares {{@index}} netapp netapp_password)
               = select_field %w(shares {{@index}} netapp netapp_transport_type), :collection => :netapp_transports_for_manila
           {{/if_eq}}
+          {{#if_eq backend_driver 'hitachi'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.shares.hitachi_parameters')
+
+              = string_field %w(shares {{@index}} hitachi hds_hnas_cluster_admin_ip0)
+              = string_field %w(shares {{@index}} hitachi hds_hnas_evs_id)
+              = string_field %w(shares {{@index}} hitachi hds_hnas_evs_ip)
+              = string_field %w(shares {{@index}} hitachi hds_hnas_file_system_name)
+              = string_field %w(shares {{@index}} hitachi hds_hnas_ip)
+              = string_field %w(shares {{@index}} hitachi hds_hnas_user)
+              = password_field %w(shares {{@index}} hitachi hds_hnas_password)
+              = string_field %w(shares {{@index}} hitachi hds_hnas_ssh_private_key)
+              = integer_field %w(shares {{@index}} hitachi hds_hnas_stalled_job_timeout)
+          {{/if_eq}}
           {{#if_eq backend_driver 'manual'}}
           %li.list-group-item
             %fieldset

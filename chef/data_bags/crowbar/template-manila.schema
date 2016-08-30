@@ -69,6 +69,19 @@
                     "netapp_aggregate_name_search_pattern": { "type": "str", "required": false }
                   }
                 },
+                "hitachi": {
+                   "type": "map", "mapping": {
+                     "hds_hnas_cluster_admin_ip0": { "type": "str", "required": true },
+                     "hds_hnas_evs_id": { "type": "str", "required": true },
+                     "hds_hnas_evs_ip": { "type": "str", "required": true },
+                     "hds_hnas_file_system_name": { "type": "str", "required": true },
+                     "hds_hnas_ip": { "type": "str", "required": true },
+                     "hds_hnas_password": { "type": "str", "required": true },
+                     "hds_hnas_ssh_private_key": { "type": "str", "required": true },
+                     "hds_hnas_stalled_job_timeout": { "type": "int", "required": true },
+                     "hds_hnas_user": { "type": "str", "required": true }
+                   }
+                },
                 "manual": {
                 "type": "map", "mapping": {
                     "driver": { "type": "str", "required": true },
@@ -103,7 +116,20 @@
                       "netapp_vserver": { "type": "str", "required": true },
                       "netapp_transport_type": { "type": "str", "required": true },
                       "netapp_aggregate_name_search_pattern": { "type": "str", "required": false }
-                     }
+                    }
+                  },
+                  "hitachi": {
+                    "type": "map", "mapping": {
+                      "hds_hnas_cluster_admin_ip0": { "type": "str", "required": true },
+                      "hds_hnas_evs_id": { "type": "str", "required": true },
+                      "hds_hnas_evs_ip": { "type": "str", "required": true },
+                      "hds_hnas_file_system_name": { "type": "str", "required": true },
+                      "hds_hnas_ip": { "type": "str", "required": true },
+                      "hds_hnas_password": { "type": "str", "required": true },
+                      "hds_hnas_ssh_private_key": { "type": "str", "required": true },
+                      "hds_hnas_stalled_job_timeout": { "type": "int", "required": true },
+                      "hds_hnas_user": { "type": "str", "required": true }
+                    }
                   },
                   "manual": {
                     "type": "map", "mapping": {

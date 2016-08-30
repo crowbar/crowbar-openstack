@@ -53,6 +53,17 @@
           "netapp_vserver": "",
           "netapp_transport_type": "https"
         },
+        "hitachi": {
+          "hds_hnas_cluster_admin_ip0": "None",
+          "hds_hnas_evs_id": "None",
+          "hds_hnas_evs_ip": "None",
+          "hds_hnas_file_system_name": "None",
+          "hds_hnas_ip": "None",
+          "hds_hnas_password": "None",
+          "hds_hnas_ssh_private_key": "None",
+          "hds_hnas_stalled_job_timeout": 30,
+          "hds_hnas_user": "None"
+        },
         "manual": {
           "driver": "",
           "config": ""
@@ -79,7 +90,7 @@
     "manila": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 14,
+      "schema-revision": 100,
       "element_states": {
         "manila-server": [ "readying", "ready", "applying" ],
         "manila-share": [ "readying", "ready", "applying" ]
