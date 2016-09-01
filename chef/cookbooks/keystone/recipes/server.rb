@@ -479,7 +479,8 @@ end
 openstack_command = "openstack \
 --os-username \"#{node[:keystone][:admin][:username]}\" \
 --os-password \"#{node[:keystone][:admin][:password]}\" \
---os-url \"#{node[:keystone][:api][:versioned_admin_URL]}\" \
+--os-project-name \"#{node[:keystone][:admin][:tenant]}\" \
+--os-auth-url \"#{node[:keystone][:api][:versioned_admin_URL]}\" \
 --os-region \"#{node[:keystone][:api][:region]}\""
 if node[:keystone][:api][:version] != "2.0"
   openstack_command <<  " --os-identity-api-version #{node[:keystone][:api][:version]} --os-project-domain-id default --os-user-domain-id default"
