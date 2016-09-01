@@ -248,7 +248,10 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
 
     when volume[:backend_driver] == "vmware"
 
+  when volume[:backend_driver] == "hitachi"
+    package "python-pexpect"
   end
+
 end
 
 if rbd_enabled

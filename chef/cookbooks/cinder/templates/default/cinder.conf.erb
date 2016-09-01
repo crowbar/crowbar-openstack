@@ -1168,71 +1168,71 @@ cinder_smis_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.x
 <% if volume['backend_driver'] == 'hitachi' -%>
 
 # Serial number of storage system (string value)
-#hitachi_serial_number = <None>
+hitachi_serial_number = <%= volume['hitachi']['hitachi_serial_number'] %>
 
 # Name of an array unit (string value)
-#hitachi_unit_name = <None>
+hitachi_unit_name = <%= volume['hitachi']['hitachi_unit_name'] %>
 
 # Pool ID of storage system (integer value)
-#hitachi_pool_id = <None>
+hitachi_pool_id = <%= volume['hitachi']['hitachi_pool_id'] %>
 
 # Thin pool ID of storage system (integer value)
-#hitachi_thin_pool_id = <None>
+hitachi_thin_pool_id = <%= volume['hitachi']['hitachi_thin_pool_id'] %>
 
 # Range of logical device of storage system (string value)
-#hitachi_ldev_range = <None>
+hitachi_ldev_range = <%= volume['hitachi']['hitachi_ldev_range'] %>
 
 # Default copy method of storage system (string value)
-#hitachi_default_copy_method = FULL
+hitachi_default_copy_method = <%= volume['hitachi']['hitachi_default_copy_method'] %>
 
 # Copy speed of storage system (integer value)
-#hitachi_copy_speed = 3
+hitachi_copy_speed = <%= volume['hitachi']['hitachi_copy_speed'] %>
 
 # Interval to check copy (integer value)
-#hitachi_copy_check_interval = 3
+hitachi_copy_check_interval = <%= volume['hitachi']['hitachi_copy_check_interval'] %>
 
 # Interval to check copy asynchronously (integer value)
-#hitachi_async_copy_check_interval = 10
+hitachi_async_copy_check_interval = <%= volume['hitachi']['hitachi_async_copy_check_interval'] %>
 
 # Control port names for HostGroup or iSCSI Target (string value)
-#hitachi_target_ports = <None>
+hitachi_target_ports = <%= volume['hitachi']['hitachi_target_ports'] %>
 
 # Range of group number (string value)
-#hitachi_group_range = <None>
+hitachi_group_range = <%= volume['hitachi']['hitachi_group_range'] %>
 
 # Request for creating HostGroup or iSCSI Target (boolean value)
-#hitachi_group_request = false
+hitachi_group_request = <%= volume['hitachi']['hitachi_group_request'] %>
 
 # Request for FC Zone creating HostGroup (boolean value)
-#hitachi_zoning_request = false
+hitachi_zoning_request = <%= volume['hitachi']['hitachi_zoning_request'] %>
 
 # Instance numbers for HORCM (string value)
-#hitachi_horcm_numbers = 200,201
+hitachi_horcm_numbers = <%= volume['hitachi']['hitachi_horcm_numbers'] %>
 
 # Username of storage system for HORCM (string value)
-#hitachi_horcm_user = <None>
+hitachi_horcm_user = <%= volume['hitachi']['hitachi_horcm_user'] %>
 
 # Password of storage system for HORCM (string value)
-#hitachi_horcm_password = <None>
+hitachi_horcm_password = <%= volume['hitachi']['hitachi_horcm_password'] %>
 
 # Add to HORCM configuration (boolean value)
-#hitachi_horcm_add_conf = true
+hitachi_horcm_add_conf = <%= volume['hitachi']['hitachi_horcm_add_conf'] %>
 
 # Timeout until a resource lock is released, in seconds. The value must be
 # between 0 and 7200. (integer value)
-#hitachi_horcm_resource_lock_timeout = 600
+hitachi_horcm_resource_lock_timeout = <%= volume['hitachi']['hitachi_horcm_resource_lock_timeout'] %>
 
 # Add CHAP user (boolean value)
-#hitachi_add_chap_user = false
+hitachi_add_chap_user = <%= volume['hitachi']['hitachi_add_chap_user'] %>
 
 # iSCSI authentication method (string value)
-#hitachi_auth_method = <None>
+hitachi_auth_method = <%= volume['hitachi']['hitachi_auth_method'] %>
 
 # iSCSI authentication username (string value)
-#hitachi_auth_user = HBSD-CHAP-user
+hitachi_auth_user = <%= volume['hitachi']['hitachi_auth_user'] %>
 
 # iSCSI authentication password (string value)
-#hitachi_auth_password = HBSD-CHAP-password
+hitachi_auth_password = <%= volume['hitachi']['hitachi_auth_password'] %>
 
 # Configuration file for HDS iSCSI cinder plugin (string value)
 #hds_hnas_iscsi_config_file = /opt/hds/hnas/cinder_iscsi_conf.xml
@@ -2384,6 +2384,13 @@ volume_driver = cinder.volume.drivers.zfssaiscsi.ZFSSAISCSIDriver
 <% end -%>
 <% if volume['backend_driver'] == 'glusterfs' -%>
 volume_driver = cinder.volume.drivers.glusterfs.GlusterfsDriver
+<% end -%>
+<% if volume['backend_driver'] == 'hitachi' -%>
+  <% if volume['hitachi']['hitachi_storage_protocol'] == 'iscsi' -%>
+volume_driver = cinder.volume.drivers.hitachi.hbsd_iscsi.HBSDISCSIDriver
+  <% elsif volume['hitachi']['hitachi_storage_protocol'] == 'fc' -%>
+volume_driver = cinder.volume.drivers.hitachi.hbsd_fc.HBSDFCDriver
+  <% end -%>
 <% end -%>
 <% if volume['backend_driver'] == 'manual' -%>
 volume_driver = <%= volume['manual']['driver'] %>
