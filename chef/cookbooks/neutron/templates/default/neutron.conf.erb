@@ -156,6 +156,14 @@ allow_overlapping_ips = False
 # K release, at which point the check will be mandatory.
 # force_gateway_on_subnet = True
 
+# Neutron IPAM (IP address management) driver to use. If ipam_driver is not set
+# (default behavior), no IPAM driver is used. In order to use the reference
+# implementation of Neutron IPAM driver, use 'internal'. (string value)
+#ipam_driver = <None>
+<% unless @ipam_driver.nil? -%>
+ipam_driver = <%= @ipam_driver %>
+<% end -%>
+
 # Default maximum number of items returned in a single response,
 # value == infinite and value < 0 means no max limit, and value must
 # be greater than 0. If the number of items requested is greater than
@@ -1111,3 +1119,74 @@ rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 [qos]
 # Drivers list to use to send the update notification
 # notification_drivers = message_queue
+
+<% if @infoblox -%>
+
+[infoblox]
+
+# ID used for selecting a particular grid from one or  more grids to serve
+# networks in Infoblox backend.
+
+# cloud_data_center_id = 0
+cloud_data_center_id = <%= @infoblox[:cloud_data_center_id] %>
+
+# Number of Infoblox IPAM agent workers to run
+# ipam_agent_workers = 1
+ipam_agent_workers = <%= @infoblox[:ipam_agent_workers] %>
+
+<% @infoblox[:grids].each_index do |grid| -%>
+# Per-grid configuration for infoblox grid <%= grid %>
+[infoblox-dc:<%= grid %>]
+
+# Admin user name to access the grid master or cloud platform appliance.
+# admin_user_name =
+admin_user_name = <%= @infoblox[:grids][grid][:admin_user_name] %>
+
+# Admin user password to access the grid master or cloud platform appliance.
+# admin_password =
+admin_password = <%= @infoblox[:grids][grid][:admin_password] %>
+
+# The name of the Grid Master (GM) This has to be the exact GM name registered
+# in the Infoblox grid.
+grid_master_name = <%= @infoblox[:grids][grid][:grid_master_name] %>
+
+# Host IP or name of the grid master.
+# grid_master_host =
+grid_master_host = <%= @infoblox[:grids][grid][:grid_master_host] %>
+
+# The name of data center to identify.
+# data_center_name =
+data_center_name = <%= @infoblox[:grids][grid][:data_center_name] %>
+
+# The WAPI version to use. Version 2.2.2 or later is recommended, if your grid
+# supports it (WAPI version 2.3 is supported in NIOS 7.3)
+# wapi_version =
+wapi_version = <%= @infoblox[:grids][grid][:wapi_version] %>
+
+# Maximum number of objects to be returned. If set to a negative number the
+# appliance will return an error when the number of returned objects would
+# exceed the setting. If this is set to a positive number, the results will be
+# truncated when necessary.
+# wapi_max_results = -1000
+
+wapi_max_results = <%= @infoblox[:grids][grid][:wapi_max_results] %>
+
+# Ensure whether WAPI requests sent over HTTPS require SSL verification.
+# ssl_verify = False
+ssl_verify = <%= @infoblox[:grids][grid][:ssl_verify] %>
+
+# HTTP pool connections.
+# http_pool_connections = 100
+http_pool_connections = <%= @infoblox[:grids][grid][:http_pool_connections] %>
+
+# HTTP pool max size.
+# http_pool_maxsize = 100
+http_pool_maxsize = <%= @infoblox[:grids][grid][:http_pool_maxsize] %>
+
+# HTTP request timeout.
+# http_request_timeout = 120
+http_request_timeout = <%= @infoblox[:grids][grid][:http_request_timeout] %>
+
+<% end -%>
+
+<% end -%>

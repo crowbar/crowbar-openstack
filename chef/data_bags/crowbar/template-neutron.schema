@@ -108,39 +108,38 @@
                     }},
                     "use_infoblox": { "type": "bool", "required": true },
                     "infoblox": { "type": "map", "required": false, "mapping": {
-                        "ib_wapi": { "type": "str", "required": true },
-                        "ib_username": { "type": "str", "required": true },
-                        "ib_password": { "type": "str", "required": true },
-                        "ib_members": { "type": "str", "required": true },
-                        "ib_dnsserver": {
-                            "type": "seq",
-                            "required": true,
-                            "sequence": [ { "type": "str" } ]
+                        "cloud_data_center_id": { "type": "int", "required": true },
+                        "ipam_agent_workers": { "type": "int", "required": true },
+                        "grid_defaults": {
+                          "type": "map",
+                          "required": true,
+                          "mapping": {
+                            "http_pool_connections": { "type": "int", "required": true },
+                            "http_pool_maxsize": { "type": "int", "required": true },
+                            "http_request_timeout": { "type": "int", "required": true },
+                            "ssl_verify": { "type": "bool", "required": true },
+                            "wapi_max_results": { "type": "int", "required": false },
+                            "wapi_version": { "type": "str", "required": true }
+                          }
                         },
-                        "use_host_records_for_ip_allocation": { "type": "bool", "required": true },
-                        "bind_dns_records_to_fixed_address": { "type": "str", "required": true },
-                        "unbind_dns_records_from_fixed_address": { "type": "str", "required": true },
-                        "delete_dns_records_associated_with_fixed_address": { "type": "str", "required": true },
-                        "use_dhcp_for_ip_allocation_record": { "type": "bool", "required": true },
-                        "enable_dhcp_relay": { "type": "bool", "required": true },
-                        "dhcp_relay_interface": {"type": "str", "required": true},
-                        "dhcp_relay_management_network": { "type": "str", "required": true },
-                        "dhcp_relay_management_network_view": { "type": "str", "required": true },
-                        "ib_conditionals": {
-                          type: "seq",
+                        "grids": {
+                          "type": "seq",
                           "required": true,
                           "sequence": [{
                             "type": "map",
-                            "required": false,
+                            "required": true,
                             "mapping": {
-                              "condition": { "type": "str", "required": true },
-                              "is_external": { "type": "bool", "required": true },
-                              "network_view": { "type": "str", "required": true },
-                              "dns_view": { "type": "str", "required": true },
-                              "dhcp_members": { "type": "str", "required": true },
-                              "dns_members": { "type": "str", "required": true },
-                              "domain_suffix_pattern": { "type": "str", "required": true },
-                              "hostname_pattern": { "type": "str", "required": true }
+                              "admin_user_name": { "type": "str", "required": true },
+                              "admin_password": { "type": "str", "required": true },
+                              "grid_master_name": { "type": "str", "required": true },
+                              "grid_master_host": { "type": "str", "required": true },
+                              "data_center_name": { "type": "str", "required": true },
+                              "http_pool_connections": { "type": "int", "required": false },
+                              "http_pool_maxsize": { "type": "int", "required": false },
+                              "http_request_timeout": { "type": "int", "required": false },
+                              "ssl_verify": { "type": "bool", "required": false },
+                              "wapi_max_results": { "type": "int", "required": false },
+                              "wapi_version": { "type": "str", "required": false }
                             }
                           }]
                         }

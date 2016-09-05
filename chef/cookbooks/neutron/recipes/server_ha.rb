@@ -29,20 +29,42 @@ crowbar_pacemaker_sync_mark "sync-neutron_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-neutron_ha_resources"
 
+primitives = []
 transaction_objects = []
 
-primitive_name = "neutron-server"
-pacemaker_primitive primitive_name do
+server_primitive_name = "neutron-server"
+pacemaker_primitive server_primitive_name do
   agent node[:neutron][:ha][:server][:server_ra]
   op node[:neutron][:ha][:server][:op]
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
-transaction_objects << "pacemaker_primitive[#{primitive_name}]"
+transaction_objects << "pacemaker_primitive[#{server_primitive_name}]"
+primitives << server_primitive_name
 
-clone_name = "cl-#{primitive_name}"
+if node[:neutron][:use_infoblox]
+  infoblox_primitive_name = "infoblox-agent"
+  pacemaker_primitive infoblox_primitive_name do
+    agent node[:neutron][:ha][:infoblox][:infoblox_ra]
+    op node[:neutron][:ha][:infoblox][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_primitive[#{infoblox_primitive_name}]"
+  primitives << infoblox_primitive_name
+end
+
+group_name = "g-neutron"
+pacemaker_group group_name do
+  members primitives
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+transaction_objects << "pacemaker_group[#{group_name}]"
+
+clone_name = "cl-#{group_name}"
 pacemaker_clone clone_name do
-  rsc primitive_name
+  rsc group_name
   meta ({
     "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node),
     "interleave" => "true",
