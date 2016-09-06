@@ -22,6 +22,14 @@ default[:magnum][:max_header_line] = 16_384
 
 default[:magnum][:api][:protocol] = "http"
 
+# HA
 default[:magnum][:ha][:enabled] = false
+# When HAproxy listens on the API port, make service listen elsewhere
+default[:magnum][:ha][:ports][:api] = 5611
+# pacemaker definitions
+default[:magnum][:ha][:api][:op][:monitor][:interval] = "10s"
+default[:magnum][:ha][:api][:agent] = "lsb:openstack-magnum-api"
+default[:magnum][:ha][:conductor][:op][:monitor][:interval] = "10s"
+default[:magnum][:ha][:conductor][:agent] = "lsb:openstack-magnum-conductor"
 
 default[:magnum][:cert][:cert_manager_type] = "local"

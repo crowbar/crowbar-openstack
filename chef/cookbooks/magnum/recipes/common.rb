@@ -17,6 +17,7 @@
 package "openstack-magnum"
 
 db_settings = fetch_database_settings
+network_settings = MagnumHelper.network_settings(node)
 
 include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
@@ -32,11 +33,9 @@ sql_connection = "#{db_settings[:url_scheme]}://#{node[:magnum][:db][:user]}:"\
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
   node, "admin").address
 node.set[:magnum][:api][:bind_host] = my_ipaddress
-magnum_ha_enabled = node[:magnum][:ha][:enabled]
-# TODO : Handle HA condition
-bind_port = node[:magnum][:api][:bind_port]
-bind_host = node[:magnum][:api][:bind_host]
-bind_host = "0.0.0.0" if node[:magnum][:api][:bind_open_address]
+
+bind_port = network_settings[:api][:bind_port]
+bind_host = network_settings[:api][:bind_host]
 
 template "/etc/magnum/magnum.conf" do
   source "magnum.conf.erb"
