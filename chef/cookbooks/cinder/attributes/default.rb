@@ -49,9 +49,11 @@ default[:cinder][:ha][:enabled] = false
 if %w(rhel suse).include? node[:platform_family]
   default[:cinder][:ha][:api_ra] = "lsb:openstack-cinder-api"
   default[:cinder][:ha][:scheduler_ra] = "lsb:openstack-cinder-scheduler"
+  default[:cinder][:ha][:volume_ra] = "lsb:openstack-cinder-volume"
 else
   default[:cinder][:ha][:api_ra] = "lsb:cinder-api"
   default[:cinder][:ha][:scheduler_ra] = "lsb:cinder-scheduler"
+  default[:cinder][:ha][:volume_ra] = "lsb:cinder-volume"
 end
 default[:cinder][:ha][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
