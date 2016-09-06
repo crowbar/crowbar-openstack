@@ -957,9 +957,12 @@ image_upload_use_cinder_backend = true
 
 <% end -%>
 
+<% if volume['backend_driver'] == 'coho' -%>
+
 # RPC port to connect to Coha Data MicroArray (integer value)
 #coho_rpc_port = 2049
 
+<% end -%>
 <% if volume['backend_driver'] == 'datera' -%>
 
 # Datera API port. (string value)
@@ -992,6 +995,8 @@ image_upload_use_cinder_backend = true
 #dell_sc_verify_cert = false
 
 <% end -%>
+<% if volume['backend_driver'] == 'disco' -%>
+
 # The IP of DMS client socket server (IP address value)
 #disco_client = 127.0.0.1
 
@@ -1007,6 +1012,8 @@ image_upload_use_cinder_backend = true
 # Prefix before volume name to differenciate DISCO volume created through
 # openstack and the other ones (string value)
 #volume_name_prefix = openstack-
+
+<% end -%>
 
 # How long we check whether a snapshot is finished before we give up (integer
 # value)
@@ -1046,6 +1053,8 @@ image_upload_use_cinder_backend = true
 #dothill_iscsi_ips =
 
 <% end -%>
+<% if volume['backend_driver'] == 'drbdmanage' -%>
+
 # Number of nodes that should replicate the data. (integer value)
 #drbdmanage_redundancy = 1
 
@@ -1075,6 +1084,7 @@ image_upload_use_cinder_backend = true
 # value)
 #drbdmanage_devs_on_controller = true
 
+<% end -%>
 <% if volume['backend_driver'] == 'emc' -%>
 
 # use this file for cinder emc plugin config data (string value)
@@ -1583,6 +1593,7 @@ hitachi_auth_password = <%= volume['hitachi']['hitachi_auth_password'] %>
 #gpfs_storage_pool = system
 
 <% end -%>
+<% if volume['backend_driver'] == 'storewize' -%>
 
 # Comma separated list of storage system storage pools for volumes. (list
 # value)
@@ -1657,6 +1668,7 @@ hitachi_auth_password = <%= volume['hitachi']['hitachi_auth_password'] %>
 # (boolean value)
 #storwize_svc_iscsi_chap_enabled = true
 
+<% end -%>
 <% if volume['backend_driver'] == 'xiv_ds8k' -%>
 
 # Proxy driver that connects to the IBM Storage Array (string value)
@@ -1907,6 +1919,7 @@ netapp_vfiler = <%= volume['netapp']['netapp_vfiler'] %>
 netapp_pool_name_search_pattern = <%= volume['netapp']['netapp_volume_list'] %>
 
 <% end -%>
+<% if volume['backend_driver'] == 'nexenta' -%>
 
 # IP address of Nexenta SA (string value)
 #nexenta_host =
@@ -2004,6 +2017,7 @@ netapp_pool_name_search_pattern = <%= volume['netapp']['netapp_volume_list'] %>
 # NexentaEdge iSCSI LUN object chunk size (integer value)
 #nexenta_chunksize = 16384
 
+<% end -%>
 <% if volume['backend_driver'] == 'nfs' || (volume['backend_driver'] == 'netapp' && volume['netapp']['storage_protocol'] == 'nfs') -%>
 
 # File with the list of available NFS shares (string value)
@@ -2383,6 +2397,7 @@ san_password = <%= volume['eqlx']["san_password"] %>
 #sf_enable_vag = false
 
 <% end -%>
+<% if volume['backend_driver'] == 'tegile' -%>
 
 # Create volumes in this pool (string value)
 #tegile_default_pool = <None>
@@ -2390,6 +2405,7 @@ san_password = <%= volume['eqlx']["san_password"] %>
 # Create volumes in this project (string value)
 #tegile_default_project = <None>
 
+<% end -%>
 <% if volume['backend_driver'] == 'tintri' -%>
 
 # The hostname (or IP address) for the storage system (string value)
@@ -2411,10 +2427,12 @@ san_password = <%= volume['eqlx']["san_password"] %>
 #tintri_image_shares_config = <None>
 
 <% end -%>
+<% if volume['backend_driver'] == 'violin' -%>
 
 # Global backend request timeout, in seconds. (integer value)
 #violin_request_timeout = 300
 
+<% end -%>
 <% if volume['backend_driver'] == 'vmware' -%>
 
 # IP address for connecting to VMware vCenter server. (string value)
