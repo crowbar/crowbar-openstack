@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-class TroveService < ServiceObject
+class TroveService < PacemakerServiceObject
   def initialize(thelogger)
     super(thelogger)
     @bc_name = "trove"
@@ -86,5 +86,32 @@ class TroveService < ServiceObject
         "barclamp.#{@bc_name}.validation.rabbitmq_enabled")
     end
     super
+  end
+
+  def apply_role_pre_chef_call(old_role, role, all_new_nodes)
+    @logger.debug("Trove apply_role_pre_chef_call: entering #{all_new_nodes.inspect}")
+
+    server_elements, server_nodes, ha_enabled = role_expand_elements(role, "trove-server")
+    # FIXME: uncomment commented out code when enabling HA
+    # reset_sync_marks_on_clusters_founders(server_elements)
+    # Openstack::HA.set_controller_role(server_nodes) if ha_enabled
+    #
+    # vip_networks = ["admin", "public"]
+    #
+    # dirty = prepare_role_for_ha_with_haproxy(role, ["trove", "ha", "enabled"],
+    #                                          ha_enabled, server_elements,
+    #                                          vip_networks)
+    # role.save if dirty
+
+    net_svc = NetworkService.new @logger
+    # All nodes must have a public IP, even if part of a cluster; otherwise
+    # the VIP can't be moved to the nodes
+    server_nodes.each do |node|
+      net_svc.allocate_ip "default", "public", "host", node
+    end
+
+    # allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
+
+    @logger.debug("Trove apply_role_pre_chef_call: leaving")
   end
 end
