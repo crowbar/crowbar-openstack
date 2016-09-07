@@ -279,7 +279,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       variables(
         debug: neutron[:neutron][:debug],
         interface_driver: interface_driver,
-        use_namespaces: "True",
         handle_internal_only_routers: "True",
         metadata_port: 9697,
         send_arp_for_ha: 3,
@@ -334,9 +333,6 @@ if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
     mode "0640"
     variables(
       debug: neutron[:neutron][:debug],
-      keystone_settings: keystone_settings,
-      auth_region: keystone_settings["endpoint_region"],
-      neutron_insecure: neutron[:neutron][:ssl][:insecure],
       nova_metadata_host: metadata_host,
       nova_metadata_port: metadata_port,
       nova_metadata_protocol: metadata_protocol,

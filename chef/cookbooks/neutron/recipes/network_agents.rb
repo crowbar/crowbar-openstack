@@ -99,7 +99,6 @@ template "/etc/neutron/metering_agent.ini" do
   variables(
     debug: node[:neutron][:debug],
     interface_driver: interface_driver,
-    use_namespaces: "True"
   )
 end
 
@@ -118,7 +117,6 @@ template "/etc/neutron/dhcp_agent.ini" do
   variables(
     debug: node[:neutron][:debug],
     interface_driver: interface_driver,
-    use_namespaces: "True",
     resync_interval: 5,
     dhcp_driver: "neutron.agent.linux.dhcp.Dnsmasq",
     dhcp_domain: node[:neutron][:dhcp_domain],
