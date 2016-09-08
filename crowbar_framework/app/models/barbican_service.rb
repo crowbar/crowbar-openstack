@@ -28,37 +28,10 @@ class BarbicanService < PacemakerServiceObject
 
     def role_constraints
       {
-        "barbican-server" => {
+        "barbican-controller" => {
           "unique" => false,
           "count" => 1,
           "cluster" => true,
-          "admin" => false,
-          "exclude_platform" => {
-            "suse" => "< 12.1",
-            "windows" => "/.*/"
-          }
-        },
-        "barbican-worker" => {
-          "unique" => false,
-          "count" => -1,
-          "admin" => false,
-          "exclude_platform" => {
-            "suse" => "< 12.1",
-            "windows" => "/.*/"
-          }
-        },
-        "barbican-retry" => {
-          "unique" => false,
-          "count" => -1,
-          "admin" => false,
-          "exclude_platform" => {
-            "suse" => "< 12.1",
-            "windows" => "/.*/"
-          }
-        },
-        "barbican-keystone-listener" => {
-          "unique" => false,
-          "count" => -1,
           "admin" => false,
           "exclude_platform" => {
             "suse" => "< 12.1",
@@ -85,19 +58,13 @@ class BarbicanService < PacemakerServiceObject
     @logger.debug("Barbican create_proposal: entering")
     base = super
 
-    node_roles = NodeObject.find("roles:barbican-server") +
-      NodeObject.find("roles:barbican-worker") +
-      NodeObject.find("roles:barbican-retry")
-
     nodes = NodeObject.all
     server_nodes = nodes.select { |n| n.intended_role == "controller" }
     server_nodes = [nodes.first] if server_nodes.empty?
 
     base["deployment"][@bc_name]["elements"] = {
-      "barbican-server" => [server_nodes.first.name],
-      "barbican-worker" => [server_nodes.first.name],
-      "barbican-retry" => [server_nodes.first.name]
-    } unless node_roles.nil? || server_nodes.nil?
+      "barbican-controller" => [server_nodes.first.name]
+    } unless NodeObject.find("roles:barbican-controller").nil? || server_nodes.nil?
 
     base["attributes"][@bc_name]["database_instance"] =
       find_dep_proposal("database")
@@ -114,8 +81,7 @@ class BarbicanService < PacemakerServiceObject
   end
 
   def validate_proposal_after_save(proposal)
-    validate_one_for_role proposal, "barbican-server"
-    validate_one_for_role proposal, "barbican-worker"
+    validate_one_for_role proposal, "barbican-controller"
 
     super
   end
@@ -126,7 +92,7 @@ class BarbicanService < PacemakerServiceObject
 
     server_elements,
     server_nodes,
-    _ha_enabled = role_expand_elements(role, "barbican-server")
+    _ha_enabled = role_expand_elements(role, "barbican-controller")
 
     unless all_nodes.empty? || server_elements.empty?
       net_svc = NetworkService.new @logger

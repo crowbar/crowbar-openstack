@@ -34,23 +34,14 @@
       "crowbar-applied": false,
       "schema-revision": 100,
       "element_states": {
-        "barbican-server": [ "readying", "ready", "applying" ],
-        "barbican-worker": [ "readying", "ready", "applying" ],
-        "barbican-retry": [ "readying", "ready", "applying" ],
-        "barbican-keystone-listener": [ "readying", "ready", "applying" ]
+        "barbican-controller": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-        [ "barbican-server" ],
-        [ "barbican-worker" ],
-        [ "barbican-retry" ],
-        [ "barbican-keystone-listener" ]
+        [ "barbican-controller" ]
       ],
       "element_run_list_order": {
-        "barbican-server": 110,
-        "barbican-worker": 111,
-        "barbican-retry": 112,
-        "barbican-keystone-listener": 113
+        "barbican-controller": 110
       },
       "config": {
         "environment": "barbican-base-config",
