@@ -11,6 +11,7 @@
       "cinder_instance": "none",
       "rabbitmq_instance": "none",
       "volume_support": false,
+      "service_user": "trove",
       "db": {
         "password": "",
         "user": "trove",
@@ -22,6 +23,7 @@
     "trove": {
       "crowbar-revision": 1,
       "crowbar-applied": false,
+      "schema-revision": 2,
       "element_states": {
         "trove-server": [ "readying", "ready", "applying" ]
       },
