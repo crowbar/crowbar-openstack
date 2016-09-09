@@ -1616,7 +1616,7 @@ netapp_storage_protocol = <%= volume['netapp']['storage_protocol'] %>
 #netapp_transport_type = http
 
 <% end -%>
-<% if volume['backend_driver'] == 'netapp' && volume['netapp']['storage_protocol'] == 'nfs' -%>
+<% if volume['backend_driver'] == 'nfs' || (volume['backend_driver'] == 'netapp' && volume['netapp']['storage_protocol'] == 'nfs') -%>
 
 # File with the list of available nfs shares (string value)
 #nfs_shares_config = /etc/cinder/nfs_shares
@@ -1644,7 +1644,11 @@ nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
 
 # Mount options passed to the nfs client. See section of the nfs man page for
 # details. (string value)
+<% if volume['backend_driver'] == 'nfs' -%>
+nfs_mount_options = <%= volume['nfs']['nfs_mount_options'] %>
+<% else -%>
 #nfs_mount_options = <None>
+<% end -%>
 
 # The number of attempts to mount nfs shares before raising an error.  At least
 # one attempt will be made to mount an nfs share, regardless of the value
@@ -2369,6 +2373,9 @@ volume_driver = cinder.volume.drivers.fujitsu.eternus_dx_fc.FJDXFCDriver
 <% end -%>
 <% if volume['backend_driver'] == 'netapp' -%>
 volume_driver = cinder.volume.drivers.netapp.common.NetAppDriver
+<% end -%>
+<% if volume['backend_driver'] == 'nfs' -%>
+volume_driver = cinder.volume.drivers.nfs.NfsDriver
 <% end -%>
 <% if volume['backend_driver'] == 'datera' -%>
 volume_driver = cinder.volume.drivers.datera.DateraDriver

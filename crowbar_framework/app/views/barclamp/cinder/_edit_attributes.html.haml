@@ -129,6 +129,19 @@
               = string_field %w(volumes {{@index}} eternus iscsi_ip)
 
           {{/if_eq}}
+          {{#if_eq backend_driver 'nfs'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.nfs_parameters')
+
+              = text_field %w(volumes {{@index}} nfs nfs_shares), size: "80x5"
+              %span.help-block
+                = t('.volumes.nfs.nfs_shares_config_hint')
+
+              = string_field %w(volumes {{@index}} nfs nfs_mount_options)
+
+          {{/if_eq}}
           {{#if_eq backend_driver 'rbd'}}
           %li.list-group-item
             %fieldset
