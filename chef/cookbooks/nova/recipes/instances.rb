@@ -30,7 +30,7 @@ if node[:nova]["setup_shared_instance_storage"]
     action [:enable, :start]
   end
 
-  admin_net = node[:network][:networks][:admin]
+  admin_net = Barclamp::Inventory.get_network_by_type(node, "admin")
 
   template "/etc/exports" do
     source "exports.erb"
@@ -38,7 +38,7 @@ if node[:nova]["setup_shared_instance_storage"]
     owner "root"
     mode 0644
     variables(
-      admin_subnet: admin_net[:subnet]  + "/" + admin_net[:netmask],
+      admin_subnet: "#{admin_net.subnet}/#{admin_net.netmask}",
       instances_path: node[:nova][:instances_path]
     )
     notifies :run, "execute[nfs-export]", :delayed
