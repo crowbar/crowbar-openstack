@@ -61,15 +61,6 @@ if node[:platform_family] == "rhel"
   end
 end
 
-template neutron[:neutron][:platform][:neutron_rootwrap_sudo_template] do
-  cookbook "neutron"
-  source "neutron-rootwrap.erb"
-  mode 0440
-  variables(user: neutron[:neutron][:platform][:user],
-            binary: "/usr/bin/neutron-rootwrap")
-  not_if { node[:platform_family] == "suse" }
-end
-
 keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
 if neutron[:neutron][:ha][:server][:enabled]
