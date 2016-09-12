@@ -24,6 +24,7 @@ module Barclamp
           [t(".volumes.emc_volume_driver"), "emc"],
           [t(".volumes.eqlx_volume_driver"), "eqlx"],
           [t(".volumes.eternus_volume_driver"), "eternus"],
+          [t(".volumes.hitachi_volume_driver"), "hitachi"],
           [t(".volumes.netapp_volume_driver"), "netapp"],
           [t(".volumes.nfs_volume_driver"), "nfs"],
           [t(".volumes.rbd_volume_driver"), "rbd"],
@@ -90,6 +91,16 @@ module Barclamp
         [
           ["HTTP", "http"],
           ["HTTPS", "https"]
+        ],
+        selected.to_s
+      )
+    end
+
+    def hitachi_storage_protocol(selected)
+      options_for_select(
+        [
+          ["iSCSI", "iscsi"],
+          ["FibreChannel", "fc"]
         ],
         selected.to_s
       )
