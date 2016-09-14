@@ -19,8 +19,11 @@
 
 include_recipe "#{@cookbook_name}::common"
 
-package "openstack-barbican-keystone-listener"
+if node[:barbican][:enable_keystone_listener]
+  package "openstack-barbican-keystone-listener"
+end
 
 service "openstack-barbican-keystone-listener" do
-  action [:enable, :start]
+  action [:enable, :start] if node[:barbican][:enable_keystone_listener]
+  action [:disable, :stop] unless node[:barbican][:enable_keystone_listener]
 end
