@@ -81,7 +81,8 @@ when "ml2"
   case
   when ml2_mech_drivers.include?("openvswitch") ||
     ml2_mech_drivers.include?("cisco_apic_ml2") ||
-    ml2_mech_drivers.include?("apic_gbp")
+    ml2_mech_drivers.include?("apic_gbp") ||
+    ml2_mech_drivers.include?("opendaylight")
     interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
   when ml2_mech_drivers.include?("linuxbridge")
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"

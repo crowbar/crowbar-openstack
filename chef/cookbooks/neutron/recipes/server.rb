@@ -64,6 +64,8 @@ template "/etc/sysconfig/neutron" do
     elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
         node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
       plugin_cfgs += " /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini"
+    elsif node[:neutron][:ml2_mechanism_drivers].include?("opendaylight")
+      plugin_cfgs += " /etc/neutron/plugins/ml2/ml2_conf_odl.ini"
     end
   end
   variables(
@@ -201,6 +203,8 @@ if node[:neutron][:networking_plugin] == "ml2"
   elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
       node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
     include_recipe "neutron::cisco_apic_support"
+  elsif node[:neutron][:ml2_mechanism_drivers].include?("opendaylight")
+    include_recipe "neutron::odl_support"
   end
 end
 

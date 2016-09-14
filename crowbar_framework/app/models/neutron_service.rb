@@ -37,7 +37,7 @@ class NeutronService < PacemakerServiceObject
   end
 
   def self.networking_ml2_mechanism_drivers_valid
-    ["linuxbridge", "openvswitch", "cisco_nexus"]
+    ["linuxbridge", "openvswitch", "cisco_nexus", "opendaylight"]
   end
 
   class << self
@@ -241,6 +241,11 @@ class NeutronService < PacemakerServiceObject
   def validate_dvr(proposal)
     plugin = proposal["attributes"]["neutron"]["networking_plugin"]
     ml2_mechanism_drivers = proposal["attributes"]["neutron"]["ml2_mechanism_drivers"]
+
+    if ml2_mechanism_drivers.include?("opendaylight") && \
+        !(ml2_mechanism_drivers == ["opendaylight"])
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.opendaylight_standalone")
+    end
 
     if proposal["attributes"]["neutron"]["use_dvr"]
       if plugin == "vmware"

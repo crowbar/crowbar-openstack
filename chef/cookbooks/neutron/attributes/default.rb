@@ -104,6 +104,7 @@ when "suse"
     cisco_opflex_pkgs: ["agent-ovs",
                         "lldpd",
                         "openstack-neutron-opflex-agent"],
+    odl_pkgs: ["python-networking-odl"],
     user: "neutron",
     group: "neutron",
   }
@@ -141,6 +142,7 @@ when "rhel"
     cisco_opflex_pkgs: ["agent-ovs",
                         "lldpd",
                         "neutron-opflex-agent"],
+    odl_pkgs: ["python-networking-odl"],
     user: "neutron",
     group: "neutron",
   }
@@ -175,6 +177,7 @@ else
     cisco_apic_pkgs: [""],
     cisco_apic_gbp_pkgs: [""],
     cisco_opflex_pkgs: [""],
+    odl_pkgs: [""],
     user: "neutron",
     group: "neutron",
   }
