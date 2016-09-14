@@ -25,7 +25,7 @@ search_env_filtered(:node, "roles:nova-compute-hyperv") do |n|
 
   execute "Set availability zone for #{n.hostname}" do
     command command
-    timeout 15
+    timeout 60
     returns [0, 68]
     action :nothing
     subscribes :run, "execute[trigger-nova-az-config]", :delayed
