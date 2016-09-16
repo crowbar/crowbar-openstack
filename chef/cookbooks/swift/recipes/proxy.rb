@@ -147,6 +147,7 @@ case proxy_config[:auth_method]
    when "keystone"
      keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
+     package "python-keystonemiddleware"
      package "python-keystoneclient"
 
      proxy_config[:keystone_settings] = keystone_settings
