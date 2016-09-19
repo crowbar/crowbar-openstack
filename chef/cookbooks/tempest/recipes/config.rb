@@ -462,6 +462,9 @@ else
   horizon_protocol = horizon[:horizon][:apache][:ssl] ? "https" : "http"
 end
 
+`#{openstackcli_adm} service show data-processing &> /dev/null`
+use_sahara = $?.success?
+
 template "/etc/tempest/tempest.conf" do
   source "tempest.conf.erb"
   mode 0644
@@ -479,6 +482,7 @@ template "/etc/tempest/tempest.conf" do
     use_trove: use_trove,
     use_manila: use_manila,
     use_magnum: use_magnum,
+    use_sahara: use_sahara,
     # boto settings
     ec2_protocol: nova[:nova][:ssl][:enabled] ? "https" : "http",
     ec2_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
