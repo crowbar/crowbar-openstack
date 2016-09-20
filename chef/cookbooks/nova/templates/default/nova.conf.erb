@@ -2402,6 +2402,7 @@ control_exchange = nova
 #     will not be deleted when the instance is marked in ERROR state.
 #  (integer value)
 #zvm_reachable_timeout = 300
+<%= "zvm_reachable_timeout=#{node[:nova][:zvm][:zvm_reachable_timeout]}" if @libvirt_type.eql?('zvm') %>
 
 #
 # Timeout (seconds) for an xCAT HTTP request.
@@ -2428,9 +2429,11 @@ control_exchange = nova
 
 # Default password for a new created z/VM user (string value)
 #zvm_user_default_password = dfltpass
+<%= "zvm_user_default_password=#{node[:nova][:zvm][:zvm_user_default_password]}" if @libvirt_type.eql?('zvm') %>
 
 # Default privilege level for a new created z/VM user (string value)
 #zvm_user_default_privilege = g
+<%= "zvm_user_default_privilege=#{node[:nova][:zvm][:zvm_user_default_privilege]}" if @libvirt_type.eql?('zvm') %>
 
 #
 # Virtual device number for root disk.
