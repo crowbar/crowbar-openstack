@@ -1608,6 +1608,7 @@ control_exchange = nova
 
 # Timeout(seconds) when start an instance. (integer value)
 #zvm_reachable_timeout = 300
+<%= "zvm_reachable_timeout=#{node[:nova][:zvm][:zvm_reachable_timeout]}" if @libvirt_type.eql?('zvm') %>
 
 # XCAT connection read timeout(seconds) (integer value)
 #zvm_xcat_connection_timeout = 3600
@@ -1621,9 +1622,11 @@ control_exchange = nova
 
 # Default password for a new created z/VM user (string value)
 #zvm_user_default_password = dfltpass
+<%= "zvm_user_default_password=#{node[:nova][:zvm][:zvm_user_default_password]}" if @libvirt_type.eql?('zvm') %>
 
 # Default privilege level for a new created z/VM user (string value)
 #zvm_user_default_privilege = g
+<%= "zvm_user_default_privilege=#{node[:nova][:zvm][:zvm_user_default_privilege]}" if @libvirt_type.eql?('zvm') %>
 
 # Virtual device number for ephemeral root disk (string value)
 #zvm_user_root_vdev = 0100
