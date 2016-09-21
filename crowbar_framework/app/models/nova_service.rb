@@ -402,4 +402,10 @@ class NovaService < PacemakerServiceObject
   def hyperv_available?
     return File.exist?("/opt/dell/chef/cookbooks/hyperv")
   end
+
+  def network_present?(network_name)
+    net_svc = NetworkService.new @logger
+    network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
+    !network_proposal["attributes"]["network"]["networks"][network_name].nil?
+  end
 end
