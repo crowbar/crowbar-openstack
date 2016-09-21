@@ -400,12 +400,11 @@ class NovaService < PacemakerServiceObject
     end
 
     if proposal["attributes"][@bc_name]["use_migration"]
-      migration_net = proposal["attributes"][@bc_name]["migration"]["network"]
-
-      net_svc = NetworkService.new @logger
-      network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
-      if network_proposal["attributes"]["network"]["networks"][migration_net].nil?
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.invalid_migration_network", network: migration_net)
+      unless network_present? proposal["attributes"][@bc_name]["migration"]["network"]
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.invalid_migration_network",
+          network: proposal["attributes"][@bc_name]["migration"]["network"]
+        )
       end
     end
 
@@ -423,5 +422,11 @@ class NovaService < PacemakerServiceObject
 
   def hyperv_available?
     return File.exist?("/opt/dell/chef/cookbooks/hyperv")
+  end
+
+  def network_present?(network_name)
+    net_svc = NetworkService.new @logger
+    network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
+    !network_proposal["attributes"]["network"]["networks"][network_name].nil?
   end
 end
