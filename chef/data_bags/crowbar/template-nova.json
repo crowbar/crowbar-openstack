@@ -62,6 +62,11 @@
         "zvm_scsi_pool": "",
         "zvm_user_profile": "",
         "zvm_xcat_master": "",
+        "zvm_image_default_password": "rootpass",
+        "zvm_config_drive_inject_password": true,
+        "zvm_reachable_timeout": 600,
+        "zvm_user_default_password": "dfltpass",
+        "zvm_user_default_privilege": "g",
         "zvm_xcat_ssh_key": ""
       },
       "ssl": {
@@ -90,7 +95,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 42,
+      "schema-revision": 44,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-docker": [ "readying", "ready", "applying" ],
