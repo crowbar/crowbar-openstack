@@ -118,6 +118,7 @@ class NovaService < PacemakerServiceObject
 
   def node_supports_kvm(node)
     return false if node[:cpu].nil? || node[:cpu]["0"].nil? || node[:cpu]["0"][:flags].nil?
+    return true if node["kernel"]["machine"] =~ /(aarch64|s390x)/
     node[:cpu]["0"][:flags].include?("vmx") or node[:cpu]["0"][:flags].include?("svm")
   end
 
