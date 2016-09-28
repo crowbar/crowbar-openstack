@@ -108,8 +108,9 @@ end
 # NOTE(aplanas): swift-dispersion-populate process can be slow, and
 # produce a timeout in the sync-marks in other HA recipes.  The more
 # correct approach is to create a one-shot service for this command.
+output = "/var/log/swift/chef-populate-dispersion.log"
 execute "populate-dispersion" do
-  command "nohup #{dispersion_cmd} &> /dev/null &"
+  command "nohup #{dispersion_cmd} &> #{output} &"
   user node[:swift][:user]
   group node[:swift][:group]
   action :run
