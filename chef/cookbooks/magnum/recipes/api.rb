@@ -20,7 +20,7 @@
 keystone_settings = KeystoneHelper.keystone_settings(node, :magnum)
 network_settings = MagnumHelper.network_settings(node)
 
-magnum_port = network_settings[:api][:bind_port]
+magnum_port = node[:magnum][:api][:bind_port]
 magnum_protocol = node[:magnum][:api][:protocol]
 
 ha_enabled = node[:magnum][:ha][:enabled]
