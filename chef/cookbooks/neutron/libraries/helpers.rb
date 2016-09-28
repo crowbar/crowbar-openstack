@@ -30,9 +30,7 @@ module NeutronHelper
     fixed_physnet = ""
     if node[:crowbar_wall][:network][:nets][:nova_fixed]
       nova_fixed_net = BarclampLibrary::Barclamp::Inventory.get_network_by_type(node, "nova_fixed")
-      fixed_conduit = nova_fixed_net.conduit
-      fixed_interface = BarclampLibrary::Barclamp::Inventory.lookup_interface_info(
-        node, fixed_conduit)[0]
+      fixed_interface = nova_fixed_net.interface
       fixed_physnet = "physnet1"
     end
 
