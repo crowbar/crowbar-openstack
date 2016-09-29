@@ -48,13 +48,6 @@ nova_insecure = nova[:nova][:ssl][:insecure]
 ceilometers = search_env_filtered(:node, "roles:ceilometer-server")
 use_ceilometer = !ceilometers.empty?
 
-template "/etc/sudoers.d/openstack-sahara" do
-  source "sahara-rootwrap.erb"
-  owner "root"
-  group "root"
-  mode "0440"
-end
-
 template "/etc/sahara/sahara.conf" do
   source "sahara.conf.erb"
   owner "root"
