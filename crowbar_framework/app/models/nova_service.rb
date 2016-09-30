@@ -312,6 +312,18 @@ class NovaService < PacemakerServiceObject
       end
     end unless all_nodes.nil?
 
+    # Allocate IP for xcat_management network for z/VM nodes, if we're
+    # configured to use something else than the "admin" network for it.
+    zvm_compute_nodes = role.override_attributes["nova"]["elements"]["nova-compute-zvm"]
+    unless zvm_compute_nodes.nil? || zvm_compute_nodes.empty?
+      zvm_xcat_network = role.default_attributes["nova"]["zvm"]["zvm_xcat_network"]
+      unless zvm_xcat_network == "admin"
+        zvm_compute_nodes.each do |n|
+          net_svc.allocate_ip("default", zvm_xcat_network, "host", n)
+        end
+      end
+    end
+
     @logger.debug("Nova apply_role_pre_chef_call: leaving")
   end
 
@@ -335,6 +347,15 @@ class NovaService < PacemakerServiceObject
 
     unless elements["nova-compute-hyperv"].empty? || hyperv_available?
       validation_error I18n.t("barclamp.#{@bc_name}.validation.hyperv_support")
+    end
+
+    unless elements["nova-compute-zvm"].nil? || elements["nova-compute-zvm"].empty?
+      unless network_present? proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_network"]
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.invalid_zvm_xcat_network",
+          network: proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_network"]
+        )
+      end
     end
 
     elements["nova-compute-docker"].each do |n|
@@ -401,12 +422,11 @@ class NovaService < PacemakerServiceObject
     end
 
     if proposal["attributes"][@bc_name]["use_migration"]
-      migration_net = proposal["attributes"][@bc_name]["migration"]["network"]
-
-      net_svc = NetworkService.new @logger
-      network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
-      if network_proposal["attributes"]["network"]["networks"][migration_net].nil?
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.invalid_migration_network", network: migration_net)
+      unless network_present? proposal["attributes"][@bc_name]["migration"]["network"]
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.invalid_migration_network",
+          network: proposal["attributes"][@bc_name]["migration"]["network"]
+        )
       end
     end
 
@@ -424,5 +444,11 @@ class NovaService < PacemakerServiceObject
 
   def hyperv_available?
     return File.exist?("/opt/dell/chef/cookbooks/hyperv")
+  end
+
+  def network_present?(network_name)
+    net_svc = NetworkService.new @logger
+    network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
+    !network_proposal["attributes"]["network"]["networks"][network_name].nil?
   end
 end
