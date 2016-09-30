@@ -585,6 +585,11 @@ osapi_volume_listen_port = <%= @bind_port %>
 #osapi_volume_workers = <None>
 osapi_volume_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
+# Wraps the socket in a SSL context if True is set. A certificate file and key
+# file must be specified. (boolean value)
+#osapi_volume_use_ssl = false
+osapi_volume_use_ssl = <%= node["cinder"]["api"]["protocol"] == "https" %>
+
 # Option to enable strict host key checking.  When set to "True" Cinder will
 # only connect to systems with a host key present in the configured
 # "ssh_hosts_key_file".  When set to "False" the host key will be saved upon
