@@ -280,7 +280,7 @@ state_path = /var/lib/nova
 
 # A list of APIs with enabled SSL (list value)
 #enabled_ssl_apis =
-enabled_ssl_apis = <%= @ssl_enabled ? "ec2,osapi_compute,metadata" : "" %>
+enabled_ssl_apis = <%= @ssl_enabled ? "osapi_compute,metadata" : "" %>
 
 # The IP address on which the OpenStack API will listen. (string value)
 #osapi_compute_listen = 0.0.0.0
