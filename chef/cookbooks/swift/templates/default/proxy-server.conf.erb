@@ -32,7 +32,10 @@ user = <%= @user %>
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 #
 # Maximum concurrent requests per worker
+# Workaround for bsc#989683. Sometimes swift-proxy service get blocked
+# in the evenlet loop, and the worker become useless.
 # max_clients = 1024
+max_clients = 128
 #
 # Set the following two lines to enable SSL. This is for testing only.
 # cert_file = /etc/swift/proxy.crt
