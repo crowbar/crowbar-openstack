@@ -73,6 +73,33 @@ database_user "grant database access for #{@cookbook_name} database user" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
+execute "barbican-manage db upgrade" do
+  user node[:barbican][:user]
+  group node[:barbican][:group]
+  command "barbican-manage db upgrade -d #{database_connection} -v head "
+  # We only do the sync the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if do
+    !node[:barbican][:db_synced] &&
+      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
+# We want to keep a note that we've done db_sync, so we don't do it again.
+# If we were doing that outside a ruby_block, we would add the note in the
+# compile phase, before the actual db_sync is done (which is wrong, since it
+# could possibly not be reached in case of errors).
+ruby_block "mark node for barbican db_sync" do
+  block do
+    node.set[:barbican][:db_synced] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[barbican-manage db upgrade]", :immediately
+end
+
+crowbar_pacemaker_sync_mark "create-barbican_database"
+
 template "/etc/barbican/barbican.conf" do
   source "barbican.conf.erb"
   owner "root"
