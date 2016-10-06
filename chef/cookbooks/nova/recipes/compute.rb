@@ -143,7 +143,7 @@ case node[:nova][:libvirt_type]
             action :nothing
             supports status: true, start: true, stop: true, restart: true
             # restart xend only when xen kernel is already present
-            only_if { `uname -r`.include?("xen") }
+            only_if { Dir.exist?("/proc/xen") }
           end
 
           template "/etc/xen/xend-config.sxp" do
