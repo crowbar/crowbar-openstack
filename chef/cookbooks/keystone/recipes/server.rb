@@ -134,6 +134,8 @@ elsif node[:keystone][:frontend] == "apache"
     service_name node[:keystone][:service_name]
     supports status: true, restart: true
     action [:disable, :stop]
+    # allow to fail here because there may not be a service "keystone"
+    ignore_failure true
   end
 
   include_recipe "apache2"
