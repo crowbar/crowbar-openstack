@@ -25,7 +25,10 @@ module NovaBootKernel
 
     # trigger reboot through reboot_handler, if kernel-$flavor is not yet
     # running
-    node.run_state[:reboot] = true unless `uname -r`.include?(flavor)
+    unless Dir.exist?("/proc/xen") && flavor == "xen" ||
+        !Dir.exist?("/proc/xen") && flavor == "default"
+      node.run_state[:reboot] = true
+    end
   end
 
   protected
