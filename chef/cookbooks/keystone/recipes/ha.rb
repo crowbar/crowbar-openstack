@@ -74,6 +74,11 @@ if node[:keystone][:frontend] == "native"
   location_name = openstack_pacemaker_controller_only_location_for clone_name
   transaction_objects << "pacemaker_location[#{location_name}]"
 
+  if CrowbarPacemakerHelper.being_upgraded?(node)
+    upgrade_location_name = upgraded_only_location_for clone_name
+    transaction_objects << "pacemaker_location[#{upgrade_location_name}]"
+  end
+
   pacemaker_transaction "keystone server" do
     cib_objects transaction_objects
     # note that this will also automatically start the resources

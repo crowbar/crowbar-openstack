@@ -94,6 +94,11 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
 
   ms_location_name = openstack_pacemaker_controller_only_location_for ms_name
   storage_transaction_objects << "pacemaker_location[#{ms_location_name}]"
+
+  if CrowbarPacemakerHelper.being_upgraded?(node)
+    upgrade_location_name = upgraded_only_location_for ms_name
+    storage_transaction_objects << "pacemaker_location[#{upgrade_location_name}]"
+  end
 end
 
 pacemaker_primitive fs_primitive do
@@ -107,6 +112,11 @@ storage_transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
 
 fs_location_name = openstack_pacemaker_controller_only_location_for fs_primitive
 storage_transaction_objects << "pacemaker_location[#{fs_location_name}]"
+
+if CrowbarPacemakerHelper.being_upgraded?(node)
+  upgrade_location_name = upgraded_only_location_for fs_primitive
+  storage_transaction_objects << "pacemaker_location[#{upgrade_location_name}]"
+end
 
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   colocation_constraint = "col-#{fs_primitive}"
@@ -303,14 +313,28 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   admin_vip_location_name = openstack_pacemaker_controller_only_location_for admin_vip_primitive
   service_transaction_objects << "pacemaker_location[#{admin_vip_location_name}]"
 
+  if CrowbarPacemakerHelper.being_upgraded?(node)
+    upgrade_admin_location_name = upgraded_only_location_for admin_vip_primitive
+    service_transaction_objects << "pacemaker_location[#{upgrade_admin_location_name}]"
+  end
+
   if node[:rabbitmq][:listen_public]
     public_vip_location_name = openstack_pacemaker_controller_only_location_for public_vip_primitive
     service_transaction_objects << "pacemaker_location[#{public_vip_location_name}]"
+
+    if CrowbarPacemakerHelper.being_upgraded?(node)
+      upgrade_public_location_name = upgraded_only_location_for public_vip_primitive
+      service_transaction_objects << "pacemaker_location[#{upgrade_public_location_name}]"
+    end
   end
 
   location_name = openstack_pacemaker_controller_only_location_for service_name
   service_transaction_objects << "pacemaker_location[#{location_name}]"
 
+  if CrowbarPacemakerHelper.being_upgraded?(node)
+    upgrade_location_name = upgraded_only_location_for service_name
+    service_transaction_objects << "pacemaker_location[#{upgrade_location_name}]"
+  end
 else
   # Pacemaker groups do not support parallel startup ordering :-(
   primitives = dependencies + [service_name]
@@ -326,6 +350,11 @@ else
 
   location_name = openstack_pacemaker_controller_only_location_for group_name
   service_transaction_objects << "pacemaker_location[#{location_name}]"
+
+  if CrowbarPacemakerHelper.being_upgraded?(node)
+    upgrade_location_name = upgraded_only_location_for group_name
+    service_transaction_objects << "pacemaker_location[#{upgrade_location_name}]"
+  end
 
 end
 
