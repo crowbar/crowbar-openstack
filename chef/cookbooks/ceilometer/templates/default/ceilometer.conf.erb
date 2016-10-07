@@ -1506,6 +1506,7 @@ interface = internalURL
 # Authentication type to load (string value)
 # Deprecated group/name - [DEFAULT]/auth_plugin
 #auth_type = <None>
+auth_type = password
 
 # Config Section from which to load plugin specific options (string value)
 #auth_section = <None>
@@ -1554,7 +1555,8 @@ project_name = <%= @keystone_settings['service_tenant'] %>
 # Username (string value)
 # Deprecated group/name - [DEFAULT]/username
 #username = <None>
-username = <%= @keystone_settings['service_user'] %>
+# NOTE(aplanas) not a typo. The new key is user-name.
+user-name = <%= @keystone_settings['service_user'] %>
 
 # User's domain id (string value)
 #user_domain_id = <None>
