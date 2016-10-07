@@ -116,11 +116,19 @@ end
 # NOTE(aplanas): swift-dispersion-populate process can be slow, and
 # produce a timeout in the sync-marks in other HA recipes.  The more
 # correct approach is to create a one-shot service for this command.
+output = "/var/log/swift/chef-populate-dispersion.log"
 execute "populate-dispersion" do
-  command "nohup #{dispersion_cmd} &> /dev/null &"
+  command "nohup #{dispersion_cmd} &> #{output} &"
   user node[:swift][:user]
   group node[:swift][:group]
   action :run
   ignore_failure true
-  only_if "#{swift_cmd} -V #{keystone_settings["api_version"]} --os-tenant-name #{service_tenant} --os-username #{service_user} --os-password '#{service_password}' --os-auth-url #{keystone_settings["internal_auth_url"]} --os-endpoint-type internalURL stat dispersion_objects 2>&1 | grep 'Container.*not found'"
+  only_if "#{swift_cmd} \
+               -V #{keystone_settings["api_version"]} \
+               --os-tenant-name #{service_tenant} \
+               --os-username #{service_user} \
+               --os-password '#{service_password}' \
+               --os-auth-url #{keystone_settings["internal_auth_url"]} \
+               --os-endpoint-type internalURL \
+               stat dispersion_objects 2>&1 | grep 'Container.*not found'"
 end
