@@ -283,7 +283,7 @@ end
 execute "neutron-db-manage migrate fwaas" do
   user node[:neutron][:user]
   group node[:neutron][:group]
-  command "neutron-db-manage --service fwaas upgrade head"
+  command "neutron-db-manage --subproject neutron-fwaas upgrade head"
   only_if { !node[:neutron][:db_synced_fwaas] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
 end
 
@@ -301,7 +301,7 @@ if node[:neutron][:use_lbaas]
   execute "neutron-db-manage migrate lbaas" do
     user node[:neutron][:user]
     group node[:neutron][:group]
-    command "neutron-db-manage --service lbaas upgrade head"
+    command "neutron-db-manage --subproject neutron-lbaas upgrade head"
     only_if { !node[:neutron][:db_synced_lbaas] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
   end
 
