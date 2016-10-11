@@ -375,7 +375,7 @@ command = NovaAvailabilityZone.add_arg_to_set_az_command(command_no_arg, node)
 
 execute "Set availability zone for #{node.hostname}" do
   command command
-  timeout 15
+  timeout 60
   # Any exit code in the range 60-69 is a tempfail
   returns [0] + (60..69).to_a
   action :nothing
