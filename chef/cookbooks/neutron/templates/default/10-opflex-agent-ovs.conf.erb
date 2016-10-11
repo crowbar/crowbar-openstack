@@ -14,7 +14,7 @@
       "ca-store": "/etc/ssl/certs/"
     },
     "inspector": {
-    "enabled": true,
+      "enabled": true,
       "socket-name": "/var/run/opflex-agent-ovs-inspect.sock"
     },
     "notif": {
@@ -39,8 +39,8 @@
       "ovs-bridge-name": "br-int",
       "encap": {
         "vxlan" : {
-          "encap-iface": <%= @opflex_vxlan_encap_iface %>,
-          "uplink-iface": <%= @opflex_vxlan_uplink_iface %>,
+          "encap-iface": "<%= @opflex_vxlan_encap_iface %>",
+          "uplink-iface": "<%= @opflex_vxlan_uplink_iface %>",
           "uplink-vlan": <%= @opflex_vxlan_uplink_vlan %>,
           "remote-ip": "<%= @opflex_vxlan_remote_ip %>",
           "remote-port": <%= @opflex_vxlan_remote_port %>
@@ -51,11 +51,11 @@
           "enabled": true,
           "mac": "00:22:bd:f8:19:ff",
           "ipv6": {
-            "router-advertisement": "false"
+            "router-advertisement": false
           }
         },
         "virtual-dhcp": {
-          "enabled": "true",
+          "enabled": true,
           "mac": "00:22:bd:f8:19:ff"
         }
       },
