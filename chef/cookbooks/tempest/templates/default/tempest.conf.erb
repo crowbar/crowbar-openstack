@@ -514,6 +514,8 @@ interface_attach = <%= @use_interface_attach %>
 
 # Does the test environment support server personality (boolean value)
 #personality = true
+# NOTE(toabctl): to use this, we need to enable inject_partition in nova.conf
+personality = false
 
 # Does the test environment support attaching an encrypted volume to a
 # running server instance? This may depend on the combination of
