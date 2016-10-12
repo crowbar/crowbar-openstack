@@ -1406,11 +1406,13 @@ auth_type = password
 # for both the user and project domain in v3 and ignored in v2
 # authentication. (unknown value)
 #default_domain_id = <None>
+default_domain_id = <%= @keystone_settings["admin_domain_id"] %>
 
 # Optional domain name to use with v3 API and v2 parameters. It will
 # be used for both the user and project domain in v3 and ignored in v2
 # authentication. (unknown value)
 #default_domain_name = <None>
+default_domain_name = <%= @keystone_settings["admin_domain"] %>
 
 # Domain ID to scope to (unknown value)
 #domain_id = <None>
@@ -1974,11 +1976,13 @@ auth_type = password
 # for both the user and project domain in v3 and ignored in v2
 # authentication. (unknown value)
 #default_domain_id = <None>
+default_domain_id = <%= @keystone_settings["admin_domain_id"] %>
 
 # Optional domain name to use with v3 API and v2 parameters. It will
 # be used for both the user and project domain in v3 and ignored in v2
 # authentication. (unknown value)
 #default_domain_name = <None>
+default_domain_name = <%= @keystone_settings["admin_domain"] %>
 
 # Domain ID to scope to (unknown value)
 #domain_id = <None>
@@ -2073,11 +2077,13 @@ auth_type = password
 # for both the user and project domain in v3 and ignored in v2
 # authentication. (unknown value)
 #default_domain_id = <None>
+default_domain_id = <%= @keystone_settings["admin_domain_id"] %>
 
 # Optional domain name to use with v3 API and v2 parameters. It will
 # be used for both the user and project domain in v3 and ignored in v2
 # authentication. (unknown value)
 #default_domain_name = <None>
+default_domain_name = <%= @keystone_settings["admin_domain"] %>
 
 # Domain ID to scope to (unknown value)
 #domain_id = <None>
