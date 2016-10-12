@@ -386,7 +386,7 @@ class NovaService < PacemakerServiceObject
       validation_error I18n.t(
         "barclamp.#{@bc_name}.validation.xen",
         n: n,
-        platform: CrowbarService.pretty_target_platform(node_platform),
+        platform: Crowbar::Platform.pretty_target_platform(node_platform),
         arch: node["kernel"]["machine"]
       )
     end unless elements["nova-compute-xen"].nil?
