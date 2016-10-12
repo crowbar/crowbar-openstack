@@ -335,11 +335,11 @@ use_identity_api_v3 = true
 
 # The name of the domain to which the admin user belongs. (string value)
 #admin_user_domain_name = default
-admin_user_domain_name = <%= @keystone_settings["default_domain"] %>
+admin_user_domain_name = <%= @keystone_settings["admin_domain"] %>
 
 # The name of the domain for the service project(ex. tenant). (string value)
 #admin_project_domain_name = default
-admin_project_domain_name = <%= @keystone_settings["default_domain"]%>
+admin_project_domain_name = <%= @keystone_settings["admin_domain"]%>
 
 # Maximum number of remote operations that will be running at the same time.
 # Note that each remote operation requires its own process to run. (integer
