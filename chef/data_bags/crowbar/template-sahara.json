@@ -16,6 +16,7 @@
       "cinder_instance": "none",
       "service_user": "sahara",
       "service_password": "",
+      "plugins": "vanilla,spark,cdh,ambari",
       "api": {
         "protocol": "http",
         "bind_open_address": true,
@@ -32,7 +33,7 @@
     "sahara": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "sahara-server": [ "readying", "ready", "applying" ]
       },

@@ -308,6 +308,7 @@ use_rootwrap = true
 # List of plugins to be loaded. Sahara preserves the order of the list when
 # returning it. (list value)
 #plugins = vanilla,spark,cdh,ambari
+plugins = <%= node[:sahara][:plugins] %>
 
 # Enables data locality for hadoop cluster. Also enables data locality for
 # Swift used by hadoop. If enabled, 'compute_topology' and 'swift_topology'
