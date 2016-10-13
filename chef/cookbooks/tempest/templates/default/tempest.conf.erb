@@ -1201,7 +1201,7 @@ dhcp_client =
 
 # Whether or not cinder is expected to be available (boolean value)
 #cinder = true
-cinder = <%= @use_docker ? false : true %>
+cinder = <%= @use_cinder %>
 
 # Whether or not neutron is expected to be available (boolean value)
 #neutron = false
