@@ -16,8 +16,7 @@ echo_status()
 
 find_associated_loopdev()
 {
-    loopdev=$(losetup -j $LOOP_LVM 2>/dev/null | head -n1 | cut -d: -f1)
-    echo $loopdev
+    losetup -j $LOOP_LVM 2>/dev/null | head -n1 | cut -d: -f1
 }
 
 case "$1" in
