@@ -133,10 +133,13 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 rbd_enabled = false
 
+use_multipath = false
+
 cinder_servers = search_env_filtered(:node, "roles:cinder-controller") || []
 if cinder_servers.length > 0
   cinder_server = cinder_servers[0]
   cinder_insecure = cinder_server[:cinder][:api][:protocol] == "https" && cinder_server[:cinder][:ssl][:insecure]
+  use_multipath = cinder_server[:cinder][:use_multipath]
 
   if node.roles.include? "nova-compute-kvm"
     cinder_server[:cinder][:volumes].each do |volume|
@@ -310,7 +313,6 @@ template "/etc/nova/nova.conf" do
             ec2_dmz_host: public_api_host,
             libvirt_migration: node[:nova]["use_migration"],
             migration_host: migration_host,
-            libvirt_enable_multipath: node[:nova][:libvirt_use_multipath],
             shared_instances: node[:nova]["use_shared_instance_storage"],
             force_config_drive: node[:nova]["force_config_drive"],
             glance_server_protocol: glance_server_protocol,
@@ -335,6 +337,7 @@ template "/etc/nova/nova.conf" do
             neutron_has_tunnel: neutron_has_tunnel,
             keystone_settings: keystone_settings,
             cinder_insecure: cinder_insecure || keystone_settings["insecure"],
+            use_multipath: use_multipath,
             ceph_user: ceph_user,
             ceph_uuid: ceph_uuid,
             ssl_enabled: api[:nova][:ssl][:enabled],
