@@ -44,13 +44,6 @@ default[:nova][:use_shared_instance_storage] = false
 #
 default[:nova][:libvirt_type] = "kvm"
 
-# Keep in sync with cinder cookbook
-if node[:platform_family] == "suse"
-  default[:nova][:libvirt_use_multipath] = true
-else
-  default[:nova][:libvirt_use_multipath] = false
-end
-
 #
 # KVM Settings
 #

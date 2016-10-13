@@ -27,6 +27,7 @@
             "pool_timeout": { "type": "int", "required": true },
             "rpc_response_timeout": { "type": "int", "required": true },
             "use_multi_backend": { "type": "bool", "required": true },
+            "use_multipath": { "type": "bool", "required": true },
             "volume_defaults": {
               "type": "map",
               "required": true,

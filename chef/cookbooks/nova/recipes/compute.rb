@@ -346,11 +346,15 @@ execute "set vhost_net module" do
   command "grep -q 'vhost_net' /etc/modules || echo 'vhost_net' >> /etc/modules"
 end
 
-if node[:nova][:libvirt_use_multipath]
-  package "multipath-tools"
+cinder_servers = search_env_filtered(:node, "roles:cinder-controller") || []
+unless cinder_servers.empty?
+  cinder_server = cinder_servers[0]
+  if cinder_server[:cinder][:use_multipath]
+    package "multipath-tools"
 
-  service "multipathd" do
-    action [:enable, :start]
+    service "multipathd" do
+      action [:enable, :start]
+    end
   end
 
   service "boot.multipath" do

@@ -2776,7 +2776,7 @@ block_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_M
 
 # Use multipath connection of the iSCSI volume (boolean value)
 #iscsi_use_multipath = false
-<%= "iscsi_use_multipath = true" if @libvirt_enable_multipath %>
+<%= "iscsi_use_multipath = true" if @use_multipath %>
 
 # The iSCSI transport iface to use to connect to target in case offload support
 # is desired. Default format is of the form <transport_name>.<hwaddress> where
@@ -2792,7 +2792,7 @@ block_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_M
 
 # Use multipath connection of the iSER volume (boolean value)
 #iser_use_multipath = false
-<%= "iser_use_multipath = true" if @libvirt_enable_multipath %>
+<%= "iser_use_multipath = true" if @use_multipath %>
 
 
 [matchmaker_redis]

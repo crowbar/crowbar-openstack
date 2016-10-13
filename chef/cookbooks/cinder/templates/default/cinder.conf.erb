@@ -660,9 +660,7 @@ volume_backend_name = <%= volume['backend_name'] %>
 # Do we attach/detach volumes in cinder using multipath for volume to image and
 # image to volume transfers? (boolean value)
 #use_multipath_for_image_xfer = false
-<% if node[:cinder][:use_multipath_for_xfer] -%>
-use_multipath_for_image_xfer = true
-<% end -%>
+<%= "use_multipath_for_image_xfer = true" if node[:cinder][:use_multipath] %>
 
 # If this is set to True, attachment of volumes for image transfer will be
 # aborted when multipathd is not running. Otherwise, it will fallback to single
