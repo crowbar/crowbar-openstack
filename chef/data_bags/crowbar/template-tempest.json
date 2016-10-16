@@ -3,8 +3,12 @@
   "description": "provides a tempest installation",
   "attributes": {
     "tempest": {
-      "tempest_tarball": "http://<ADMINWEB>/files/tempest/juno.tar.gz",
-      "tempest_test_image": "http://<ADMINWEB>/files/tempest/cirros-0.3.4-x86_64-uec.tar.gz",
+      "tempest_test_images": {
+          "aarch64": "http://<ADMINWEB>/files/tempest/cirros-d160722-aarch64-uec.tar.gz",
+          "x86_64": "http://<ADMINWEB>/files/tempest/cirros-0.3.4-x86_64-uec.tar.gz",
+          "ppc64le": "http://<ADMINWEB>/files/tempest/FIXME",
+          "s390x": "http://<ADMINWEB>/files/tempest/FIXME"
+      },
       "tempest_test_docker_image": "http://<ADMINWEB>/files/tempest/cirros-0.3.4-docker.tar",
       "tempest_adm_password": "tempest",
       "tempest_adm_username": "tempest",
@@ -29,7 +33,7 @@
     "tempest": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "tempest": [ "ready", "applying" ]
       },

@@ -160,12 +160,13 @@ docker_image_id_file = node[:tempest][:tempest_path] + "/docker_machine.id"
 glance_node = search(:node, "roles:glance-server").first
 insecure = "--insecure"
 
-cirros_version = File.basename(node[:tempest][:tempest_test_image]).gsub(/^cirros-/, "").gsub(/-.*/, "")
+tempest_test_image = node[:tempest][:tempest_test_images][node[:kernel][:machine]]
+
+cirros_version = File.basename(tempest_test_image).split("-")[1]
+cirros_arch = File.basename(tempest_test_image).split("-")[2]
 
 bash "upload tempest test image" do
   code <<-EOH
-IMAGE_URL=${IMAGE_URL:-"http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-uec.tar.gz"}
-
 export OS_USERNAME=${OS_USERNAME:-admin}
 export OS_TENANT_NAME=${OS_TENANT_NAME:-admin}
 export OS_PASSWORD=${OS_PASSWORD:-admin}
@@ -242,7 +243,7 @@ rm -rf $TEMP
 glance #{insecure} image-list
 EOH
   environment ({
-    "IMAGE_URL" => node[:tempest][:tempest_test_image],
+    "IMAGE_URL" => tempest_test_image,
     "OS_USERNAME" => tempest_adm_user,
     "OS_PASSWORD" => tempest_adm_pass,
     "OS_TENANT_NAME" => tempest_comp_tenant,
@@ -446,7 +447,7 @@ else
   use_vnc = node[:kernel][:machine] != "aarch64"
   use_run_validation = true
   use_config_drive = true
-  image_regex = "^cirros-#{cirros_version}-x86_64-tempest-machine$"
+  image_regex = "^cirros-#{cirros_version}-#{cirros_arch}-tempest-machine$"
 end
 
 # FIXME: should avoid search with no environment in query

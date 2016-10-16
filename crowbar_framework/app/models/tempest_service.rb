@@ -88,19 +88,19 @@ class TempestService < ServiceObject
     @logger.debug("Tempest apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
-    # Update tempest_tarball path
+    # Update tempest_testimage path
     nodes = NodeObject.find("roles:provisioner-server")
     unless nodes.nil? or nodes.length < 1
       admin_ip = nodes[0].get_network_by_type("admin")["address"]
       web_port = nodes[0]["provisioner"]["web_port"]
       # substitute the admin web portal
-      tempest_tarball_path = role.default_attributes["tempest"]["tempest_tarball"].gsub("<ADMINWEB>", "#{admin_ip}:#{web_port}")
-      tempest_test_image_path = role.default_attributes["tempest"]["tempest_test_image"].gsub("<ADMINWEB>", "#{admin_ip}:#{web_port}")
+      role.default_attributes["tempest"]["tempest_test_images"].each do |img_arch, img_path|
+        img_path = img_path.gsub("<ADMINWEB>", "#{admin_ip}:#{web_port}")
+        role.default_attributes["tempest"]["tempest_test_images"][img_arch] = img_path
+      end
       tempest_test_docker_image_path =
         role.default_attributes["tempest"]["tempest_test_docker_image"].gsub(
           "<ADMINWEB>", "#{admin_ip}:#{web_port}")
-      role.default_attributes["tempest"]["tempest_tarball"] = tempest_tarball_path
-      role.default_attributes["tempest"]["tempest_test_image"] = tempest_test_image_path
       role.default_attributes["tempest"]["tempest_test_docker_image"] =
         tempest_test_docker_image_path
     end
