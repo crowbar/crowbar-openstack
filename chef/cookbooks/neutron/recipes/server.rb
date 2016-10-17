@@ -177,11 +177,11 @@ when "ml2"
   end
 when "vmware"
   directory "/etc/neutron/plugins/vmware/" do
-     mode 0755
-     owner "root"
-     group node[:neutron][:platform][:group]
-     action :create
-     not_if { node[:platform_family] == "suse" }
+    mode "0755"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    action :create
+    not_if { node[:platform_family] == "suse" }
   end
 
   template plugin_cfg_path do
@@ -195,10 +195,10 @@ when "vmware"
   end
 when "midonet"
   directory "/etc/neutron/plugins/midonet/" do
-     mode 0755
-     owner "root"
-     group node[:neutron][:platform][:group]
-     action :create
+    mode "0755"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    action :create
   end
 
   keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -389,11 +389,12 @@ if node[:neutron][:networking_plugin] == "ml2"
   end
 elsif node[:neutron][:networking_plugin] == "midonet"
   # See comments for "neutron-db-manage migrate" above
+  is_cluster_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
   execute "neutron-db-manage migrate midonet" do
     user node[:neutron][:user]
     group node[:neutron][:group]
     command "neutron-db-manage --subproject networking-midonet upgrade head"
-    only_if { !node[:neutron][:db_synced_midonet] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+    only_if { !node[:neutron][:db_synced_midonet] && (!ha_enabled || is_cluster_founder) }
   end
 
   ruby_block "mark node for neutron db_sync midonet" do
