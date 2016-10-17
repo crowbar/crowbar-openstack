@@ -99,7 +99,7 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
   end
 %>
 service_provider=<%= service_provider %>
-<% else -%>
+<% elsif @use_lbaas -%>
 service_provider=LOADBALANCER:Haproxy:neutron_lbaas.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
 <% end -%>
 
