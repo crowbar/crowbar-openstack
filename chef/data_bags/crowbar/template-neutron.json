@@ -54,6 +54,14 @@
         "tz_uuid": "",
         "l3_gw_uuid": ""
       },
+      "midonet": {
+        "host": "",
+        "port": "8080",
+        "username": "",
+        "password": "",
+        "openstack_user": "midonet",
+        "openstack_password": ""
+      },
       "zvm": {
         "zvm_xcat_server": "",
         "zvm_xcat_username": "",

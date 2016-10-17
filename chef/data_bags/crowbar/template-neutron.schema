@@ -88,6 +88,14 @@
                       "tz_uuid": { "type" : "str", "required" : true },
                       "l3_gw_uuid": { "type" : "str", "required" : true }
                     }},
+                    "midonet": { "type": "map", "required": true, "mapping": {
+                      "host": { "type" : "str", "required" : true },
+                      "port": { "type" : "str", "required" : true },
+                      "username": { "type" : "str", "required" : true },
+                      "password": { "type" : "str", "required" : true },
+                      "openstack_user": { "type" : "str", "required" : true },
+                      "openstack_password": { "type" : "str", "required" : true }
+                    }},
                     "zvm": { "type": "map", "required": true, "mapping": {
                       "zvm_xcat_server": { "type": "str", "required": true },
                       "zvm_xcat_username": { "type": "str", "required": true },

@@ -66,6 +66,13 @@ en:
           controllers: 'VMware NSX Controllers'
           tz_uuid: 'UUID of the NSX Transport Zone'
           l3_gw_uuid: 'UUID of the NSX Gateway Service'
+        midonet:
+          host: 'Midonet Host'
+          port: 'Midonet Port'
+          username: 'Midonet Username'
+          password: 'Midonet Password'
+          openstack_user: 'Midonet OpenStack Username'
+          openstack_password: 'Midonet OpenStack User password'
         zvm_header: 'z/VM Configuration'
         zvm:
           zvm_xcat_server: 'xCAT Host/IP Address'
@@ -117,5 +124,6 @@ en:
         cisco_nexus_ovs: 'The "cisco_nexus" mechanism driver needs also the "openvswitch" mechanism driver'
         openvswitch_linuxbridge: 'The "openvswitch" and "linuxbridge" mechanism drivers cannot be used in parallel. Only select one of them'
         dvr_vmware: 'DVR is not compatible with VMware NSX plugin'
+        dvr_midonet: 'DVR is not compatible with Midonet plugin'
         dvr_linuxbridge: 'DVR is not compatible with Linux Bridge ML2 driver'
         dvr_ha: 'DVR is not compatible with High Availability for neutron-network'

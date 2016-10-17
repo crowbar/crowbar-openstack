@@ -232,6 +232,7 @@ function networking_plugin_check() {
   switch ($('#networking_plugin').val()) {
   case 'ml2':
     $('#vmware_container').hide();
+    $('#midonet_container').hide();
     $('#ml2_mechanism_drivers_container').show();
     $('#ml2_type_drivers_container').show();
     $('#ml2_type_drivers_default_provider_network_container').show();
@@ -242,6 +243,21 @@ function networking_plugin_check() {
     break;
   case 'vmware':
     $('#vmware_container').show();
+    $('#midonet_container').hide();
+    $('#ml2_mechanism_drivers_container').hide();
+    $('#ml2_type_drivers_container').hide();
+    $('#ml2_type_drivers_default_provider_network_container').hide();
+    $('#ml2_type_drivers_default_tenant_network_container').hide();
+    $('#dvr_container').hide();
+    $('#num_vlans_container').hide();
+    $('#gre_container').hide();
+    $('#vxlan_container').hide();
+    $('#cisco_switches').hide();
+    $('#cisco_ports').hide();
+    break;
+  case 'midonet':
+    $('#midonet_container').show();
+    $('#vmware_container').hide();
     $('#ml2_mechanism_drivers_container').hide();
     $('#ml2_type_drivers_container').hide();
     $('#ml2_type_drivers_default_provider_network_container').hide();
