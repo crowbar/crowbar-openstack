@@ -120,9 +120,20 @@ group_members << metering_agent_primitive
 transaction_objects << "pacemaker_primitive[#{metering_agent_primitive}]"
 
 if use_lbaas_agent
-  lbaas_agent_primitive = "neutron-lbaas-agent"
+  if node[:neutron][:use_lbaasv2]
+    if node[:neutron][:lbaasv2_driver] == "f5"
+      lbaas_agent_primitive = "neutron-f5-agent"
+      lbaas_ra = node[:neutron][:ha][:network][:f5_ra]
+    else
+      lbaas_agent_primitive = "neutron-lbaasv2-agent"
+      lbaas_ra = node[:neutron][:ha][:network][:lbaasv2_ra]
+    end
+  else
+    lbaas_agent_primitive = "neutron-lbaas-agent"
+    lbaas_ra = node[:neutron][:ha][:network][:lbaas_ra]
+  end
   pacemaker_primitive lbaas_agent_primitive do
-    agent node[:neutron][:ha][:network][:lbaas_ra]
+    agent lbaas_ra
     op node[:neutron][:ha][:network][:op]
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

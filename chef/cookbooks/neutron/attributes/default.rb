@@ -83,7 +83,11 @@ when "suse"
     zvm_agent_name: "openstack-neutron-zvm-agent",
     lbaas_agent_pkg: "openstack-neutron-lbaas-agent",
     lbaas_agent_name: "openstack-neutron-lbaas-agent",
+    lbaasv2_agent_pkg: "openstack-neutron-lbaas-agent",
+    lbaasv2_agent_name: "openstack-neutron-lbaasv2-agent",
     lbaas_haproxy_group: "haproxy",
+    f5_agent_pkg: "",
+    f5_agent_name: "f5-openstack-agent",
     metadata_agent_name: "openstack-neutron-metadata-agent",
     metadata_agent_pkg: "openstack-neutron-metadata-agent",
     metering_agent_pkg: "openstack-neutron-metering-agent",
@@ -121,7 +125,11 @@ when "rhel"
     zvm_agent_name: "openstack-neutron-zvm-agent",
     lbaas_agent_pkg: "openstack-neutron-lbaas-agent",
     lbaas_agent_name: "neutron-lbaas-agent",
+    lbaasv2_agent_pkg: "openstack-neutron-lbaas-agent",
+    lbaasv2_agent_name: "neutron-lbaasv2-agent",
     lbaas_haproxy_group: "nogroup",
+    f5_agent_pkg: "",
+    f5_agent_name: "f5-openstack-agent",
     metadata_agent_name: "neutron-metadata-agent",
     metadata_agent_pkg: "openstack-neutron",
     metering_agent_pkg: "openstack-neutron-metering-agent",
@@ -159,7 +167,11 @@ else
     zvm_agent_name: "neutron-zvm-agent",
     lbaas_agent_pkg: "neutron-lbaas-agent",
     lbaas_agent_name: "neutron-lbaas-agent",
+    lbaasv2_agent_pkg: "neutron-lbaas-agent",
+    lbaasv2_agent_name: "neutron-lbaasv2-agent",
     lbaas_haproxy_group: "nogroup",
+    f5_agent_pkg: "",
+    f5_agent_name: "f5-oslbaasv2-agent",
     metadata_agent_name: "neutron-metadata-agent",
     metadata_agent_pkg: "neutron-metadata-agent",
     metering_agent_pkg: "neutron-plugin-metering-agent",
@@ -180,9 +192,21 @@ else
   }
 end
 
+default[:neutron][:lbaas][:f5][:external_physical_mappings] = "default:1.1:True"
+default[:neutron][:lbaas][:f5][:vtep_folder] = "Common"
+default[:neutron][:lbaas][:f5][:vtep_selfip_name] = "vtep"
+default[:neutron][:lbaas][:f5][:max_namespaces_per_tenant] = 1
+default[:neutron][:lbaas][:f5][:route_domain_strictness] = false
+default[:neutron][:lbaas][:f5][:icontrol_hostname] = ""
+default[:neutron][:lbaas][:f5][:icontrol_username] = "admin"
+default[:neutron][:lbaas][:f5][:icontrol_password] = "admin"
+default[:neutron][:lbaas][:f5][:parent_ssl_profile] = "clientssl"
+
 default[:neutron][:ha][:network][:enabled] = false
 default[:neutron][:ha][:network][:l3_ra] = "lsb:#{node[:neutron][:platform][:l3_agent_name]}"
 default[:neutron][:ha][:network][:lbaas_ra] = "lsb:#{node[:neutron][:platform][:lbaas_agent_name]}"
+default[:neutron][:ha][:network][:lbaasv2_ra] = "lsb:#{node[:neutron][:platform][:lbaasv2_agent_name]}"
+default[:neutron][:ha][:network][:f5_ra] = "systemd:#{node[:neutron][:platform][:f5_agent_name]}"
 default[:neutron][:ha][:network][:dhcp_ra] = "lsb:#{node[:neutron][:platform][:dhcp_agent_name]}"
 default[:neutron][:ha][:network][:metadata_ra] = "lsb:#{node[:neutron][:platform][:metadata_agent_name]}"
 default[:neutron][:ha][:network][:metering_ra] = "lsb:#{node[:neutron][:platform][:metering_agent_name]}"
