@@ -52,7 +52,6 @@
                 "telemetry" : { "type": "str", "required": true }
               }
             },
-            "use_launch_instance_ng": { "type": "bool", "required": true },
             "can_set_mount_point": { "type": "bool", "required": false },
             "can_set_password": { "type": "bool", "required": false },
             "multi_domain_support": { "type": "bool", "required": true },
