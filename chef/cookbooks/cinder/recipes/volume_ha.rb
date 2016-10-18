@@ -34,6 +34,9 @@ transaction_objects << "pacemaker_primitive[#{service_name}]"
 
 location_name = openstack_pacemaker_controller_only_location_for service_name
 transaction_objects << "pacemaker_location[#{location_name}]"
+transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+  node, transaction_objects, service_name
+)
 
 pacemaker_transaction "cinder volume" do
   cib_objects transaction_objects

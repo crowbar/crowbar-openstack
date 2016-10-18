@@ -98,6 +98,9 @@ if node[:database][:ha][:storage][:mode] == "drbd"
 
   location_name = openstack_pacemaker_controller_only_location_for ms_name
   transaction_objects << "pacemaker_location[#{location_name}]"
+  transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+    node, transaction_objects, ms_name
+  )
 end
 
 pacemaker_primitive fs_primitive do
@@ -111,6 +114,9 @@ transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
 
 location_name = openstack_pacemaker_controller_only_location_for fs_primitive
 transaction_objects << "pacemaker_location[#{location_name}]"
+transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+  node, transaction_objects, fs_primitive
+)
 
 if node[:database][:ha][:storage][:mode] == "drbd"
   colocation_constraint = "col-#{fs_primitive}"
