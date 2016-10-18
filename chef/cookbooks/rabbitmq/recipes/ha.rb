@@ -94,6 +94,9 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
 
   ms_location_name = openstack_pacemaker_controller_only_location_for ms_name
   storage_transaction_objects << "pacemaker_location[#{ms_location_name}]"
+  storage_transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+    node, storage_transaction_objects, ms_name
+  )
 end
 
 pacemaker_primitive fs_primitive do
@@ -107,6 +110,9 @@ storage_transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
 
 fs_location_name = openstack_pacemaker_controller_only_location_for fs_primitive
 storage_transaction_objects << "pacemaker_location[#{fs_location_name}]"
+storage_transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+  node, storage_transaction_objects, fs_primitive
+)
 
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   colocation_constraint = "col-#{fs_primitive}"
@@ -246,6 +252,9 @@ pacemaker_primitive admin_vip_primitive do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 service_transaction_objects << "pacemaker_primitive[#{admin_vip_primitive}]"
+service_transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+  node, service_transaction_objects, admin_vip_primitive
+)
 
 if node[:rabbitmq][:listen_public]
   pacemaker_primitive public_vip_primitive do
@@ -302,14 +311,23 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
 
   admin_vip_location_name = openstack_pacemaker_controller_only_location_for admin_vip_primitive
   service_transaction_objects << "pacemaker_location[#{admin_vip_location_name}]"
+  service_transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+    node, service_transaction_objects, admin_vip_primitive
+  )
 
   if node[:rabbitmq][:listen_public]
     public_vip_location_name = openstack_pacemaker_controller_only_location_for public_vip_primitive
     service_transaction_objects << "pacemaker_location[#{public_vip_location_name}]"
+    service_transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+      node, service_transaction_objects, public_vip_primitive
+    )
   end
 
   location_name = openstack_pacemaker_controller_only_location_for service_name
   service_transaction_objects << "pacemaker_location[#{location_name}]"
+  service_transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+    node, service_transaction_objects, service_name
+  )
 
 else
   # Pacemaker groups do not support parallel startup ordering :-(
@@ -326,6 +344,9 @@ else
 
   location_name = openstack_pacemaker_controller_only_location_for group_name
   service_transaction_objects << "pacemaker_location[#{location_name}]"
+  service_transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+    node, service_transaction_objects, group_name
+  )
 
 end
 

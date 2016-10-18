@@ -161,6 +161,9 @@ transaction_objects << "pacemaker_clone[#{agents_clone_name}]"
 
 location_name = openstack_pacemaker_controller_only_location_for agents_clone_name
 transaction_objects << "pacemaker_location[#{location_name}]"
+transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+  node, transaction_objects, agents_clone_name
+)
 
 pacemaker_transaction "neutron agents" do
   cib_objects transaction_objects
@@ -196,6 +199,9 @@ if use_l3_agent
 
   ha_tool_location_name = openstack_pacemaker_controller_only_location_for ha_tool_primitive_name
   ha_tool_transaction_objects << "pacemaker_location[#{ha_tool_location_name}]"
+  ha_tool_transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+    node, ha_tool_transaction_objects, ha_tool_primitive_name
+  )
 
   pacemaker_transaction "neutron ha tool" do
     cib_objects ha_tool_transaction_objects

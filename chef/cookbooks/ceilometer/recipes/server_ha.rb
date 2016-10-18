@@ -82,6 +82,9 @@ end
 
 location_name = openstack_pacemaker_controller_only_location_for clone_name
 transaction_objects << "pacemaker_location[#{location_name}]"
+transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+  node, transaction_objects, clone_name
+)
 
 pacemaker_transaction "ceilometer server" do
   cib_objects transaction_objects

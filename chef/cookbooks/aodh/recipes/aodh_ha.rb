@@ -62,6 +62,9 @@ pacemaker_clone clone_name do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 transaction_objects << "pacemaker_clone[#{clone_name}]"
+transaction_objects = CrowbarPacemakerHelper.add_upgraded_only_location(
+  node, transaction_objects, clone_name
+)
 
 order_only_existing = ["rabbitmq", "cl-keystone", clone_name]
 
