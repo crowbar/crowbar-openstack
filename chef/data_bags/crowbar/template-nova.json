@@ -96,6 +96,32 @@
           "keyfile": ""
         }
       },
+      "compute": {
+        "kvm-aarch64": {
+          "cpu_mode": "host-passthrough",
+          "cpu_model": ""
+        },
+        "qemu-aarch64": {
+          "cpu_mode": "custom",
+          "cpu_model": "cortex-a57"
+        },
+        "kvm-x86_64": {
+          "cpu_mode": "",
+          "cpu_model": ""
+        },
+        "qemu-x86_64": {
+          "cpu_mode": "",
+          "cpu_model": ""
+        },
+        "kvm-s390x": {
+          "cpu_mode": "",
+          "cpu_model": ""
+        },
+        "qemu-s390x": {
+          "cpu_mode": "",
+          "cpu_model": ""
+        }
+      },
       "block_device": {
         "allocate_retries": 60,
         "allocate_retries_interval": 3
@@ -111,7 +137,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 106,
+      "schema-revision": 107,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-docker": [ "readying", "ready", "applying" ],

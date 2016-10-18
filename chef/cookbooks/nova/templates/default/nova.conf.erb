@@ -4251,11 +4251,13 @@ block_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_M
 # value)
 # Allowed values: host-model, host-passthrough, custom, none
 #cpu_mode = <None>
+<%= "cpu_mode = #{@cpu_mode}" unless @cpu_mode.empty? -%>
 
 # Set to a named libvirt CPU model (see names listed in
 # /usr/share/libvirt/cpu_map.xml). Only has effect if cpu_mode="custom" and
 # virt_type="kvm|qemu" (string value)
 #cpu_model = <None>
+<%= "cpu_model = #{@cpu_model}" unless @cpu_model.empty? -%>
 
 # Location where libvirt driver will store snapshots before uploading them to
 # image service (string value)

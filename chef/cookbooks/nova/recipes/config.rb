@@ -306,12 +306,32 @@ else
   "#{node[:nova][:migration][:network]}.%s"
 end
 
+# Select libvirt compute flags for this particular compute node
+# type. Differentiate between qemu and kvm as for aarch64 that
+# makes a difference.
+
+cpu_mode = ""
+cpu_model = ""
+
+if node.roles.include? "nova-compute-kvm"
+  compute_flags = node[:nova][:compute]["kvm-#{node[:kernel][:machine]}"]
+elsif node.roles.include? "nova-compute-qemu"
+  compute_flags = node[:nova][:compute]["qemu-#{node[:kernel][:machine]}"]
+end
+
+if compute_flags
+  cpu_model = compute_flags["cpu_model"]
+  cpu_mode = compute_flags["cpu_mode"]
+end
+
 template "/etc/nova/nova.conf" do
   source "nova.conf.erb"
   user "root"
   group node[:nova][:group]
   mode 0640
   variables(
+            cpu_mode: cpu_mode,
+            cpu_model: cpu_model,
             bind_host: bind_host,
             bind_port_api: bind_port_api,
             bind_port_api_ec2: bind_port_api_ec2,
