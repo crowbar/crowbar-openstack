@@ -20,11 +20,12 @@
 
 package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node[:platform_family] == "suse"
+tuning_file = "/etc/sysctl.d/60-sysctl-rabbitmq.conf"
 
 directory "/etc/rabbitmq/" do
   owner "root"
   group "root"
-  mode 0755
+  mode "0755"
   action :create
 end
 
@@ -54,6 +55,25 @@ when "rhel"
 else
   rabbitmq_plugins = "#{RbConfig::CONFIG["libdir"]}/rabbitmq/bin/rabbitmq-plugins"
   rabbitmq_plugins_param = ""
+end
+
+# Ensure directory is present
+directory "/etc/sysctl.d" do
+  mode "0755"
+end
+
+# Tuning rabbitmq
+template "sysctl-rabbitmq" do
+  path tuning_file
+  source "sysctl-rabbitmq.conf.erb"
+  mode "0644"
+end
+
+# Reload sysctl
+bash "reload sysctl" do
+  code "/bin/sysctl -e -p #{tuning_file}"
+  action :nothing
+  subscribes :run, resources(template: "sysctl-rabbitmq"), :delayed
 end
 
 bash "enabling rabbit management" do
