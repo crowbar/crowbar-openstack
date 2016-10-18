@@ -114,6 +114,9 @@ else
   Chef::Log.warn("cinder-controller not found")
 end
 
+enabled_share_protocols = ["NFS", "CIFS"]
+enabled_share_protocols << ["CEPHFS"] if ManilaHelper.has_cephfs_share? node
+
 template "/etc/manila/manila.conf" do
   source "manila.conf.erb"
   owner "root"
@@ -121,6 +124,7 @@ template "/etc/manila/manila.conf" do
   mode 0640
   variables(
     shares: node[:manila][:shares],
+    enabled_share_protocols: enabled_share_protocols,
     bind_host: bind_host,
     bind_port: bind_port,
     sql_connection: sql_connection,

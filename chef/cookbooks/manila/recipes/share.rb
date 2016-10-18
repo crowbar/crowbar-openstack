@@ -34,4 +34,8 @@ node[:manila][:shares].each_with_index do |share, share_idx|
   end
 end
 
+if ManilaHelper.has_cephfs_share? node
+  include_recipe "#{@cookbook_name}::cephfs"
+end
+
 manila_service("share")

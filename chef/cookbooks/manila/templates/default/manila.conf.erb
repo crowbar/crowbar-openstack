@@ -141,6 +141,7 @@ enabled_share_backends=<%= @shares.each_with_index.collect { |share, share_idx|
 # Available values are '('NFS', 'CIFS', 'GLUSTERFS', 'HDFS',
 # 'CEPHFS')' (list value)
 #enabled_share_protocols = NFS,CIFS
+enabled_share_protocols = <%= @enabled_share_protocols.join(',') %>
 
 # The full class name of the Compute API class to use. (string value)
 #compute_api_class = manila.compute.nova.API
@@ -2613,6 +2614,21 @@ hds_hnas_ssh_private_key = <%= share['hitachi']['hds_hnas_ssh_private_key'] %>
 hds_hnas_stalled_job_timeout = <%= share['hitachi']['hds_hnas_stalled_job_timeout'] %>
 hds_hnas_user = <%= share['hitachi']['hds_hnas_user'] %>
 <% end -%> <%# hitachi driver %>
+<% if share['backend_driver'] == 'cephfs' -%>
+share_backend_name=<%= share['backend_name'] %>
+share_driver = manila.share.drivers.cephfs.cephfs_native.CephFSNativeDriver
+driver_handles_share_servers = False
+<% if share['use_crowbar'] -%>
+cephfs_conf_path = /etc/ceph/ceph.conf
+cephfs_auth_id = manila
+cephfs_cluster_name = ceph
+<% else -%>
+cephfs_conf_path = <%= share['cephfs']['cephfs_conf_path'] %>
+cephfs_auth_id = <%= share['cephfs']['cephfs_auth_id'] %>
+cephfs_cluster_name = <%= share['cephfs']['cephfs_cluster_name'] %>
+<% end -%>
+cephfs_enable_snapshots = False
+<% end -%> <%# cephfs driver %>
 <% if share['backend_driver'] == 'manual' -%>
 share_backend_name=<%= share['backend_name'] %>
 share_driver=<%= share['manual']['driver'] %>

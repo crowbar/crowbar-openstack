@@ -34,10 +34,12 @@ en:
           generic_parameters: 'Generic backend parameters'
           netapp_parameters: "NetApp parameters"
           hitachi_parameters: "Hitachi parameters"
+          cephfs_parameters: "CephFS parameters"
           manual_parameters: 'Other driver parameters'
           generic_share_driver: 'Generic driver'
           netapp_share_driver: 'NetApp driver'
           hitachi_share_driver: 'Hitachi driver'
+          cephfs_share_driver: 'CephFS driver'
           manual_share_driver: 'Other driver'
           generic:
             not_supported: 'The generic driver can be used for testing but is not supported.'
@@ -70,6 +72,11 @@ en:
               hds_hnas_ssh_private_key: 'RSA/DSA private key value used to connect into HNAS. Required only if password is not provided.'
               hds_hnas_stalled_job_timeout: 'The time (in seconds) to wait for stalled HNAS jobs before aborting.'
               hds_hnas_user: 'HNAS username Base64 String in order to perform tasks such as create file-systems and network interfaces.'
+            cephfs:
+              use_crowbar: 'Use Ceph deployed by Crowbar'
+              cephfs_conf_path: 'Path to Ceph configuration file'
+              cephfs_clustername: 'Cluster name'
+              cephfs_auth_id: 'Authentication ID'
             manual:
               config: 'Options'
               driver: 'Driver'
@@ -90,3 +97,5 @@ en:
           service_net_name_or_ip: 'Service network name/IP can not be empty'
           tenant_net_name_or_ip: 'Tenant network name/IP can not be empty'
           password_or_private_key: 'Password or private key path must be given'
+        cephfs:
+          ceph_mds_not_deployed: 'The "ceph-mds" role is not deployed. Please check the Ceph proposal or use an external Ceph cluster'

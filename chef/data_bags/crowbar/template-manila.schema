@@ -82,6 +82,14 @@
                      "hds_hnas_user": { "type": "str", "required": true }
                    }
                 },
+                "cephfs": {
+                   "type": "map", "mapping": {
+                     "use_crowbar": { "type": "bool", "required": true },
+                     "cephfs_conf_path": { "type": "str", "required": true },
+                     "cephfs_auth_id": { "type": "str", "required": true },
+                     "cephfs_cluster_name": { "type": "str", "required": true }
+                   }
+                },
                 "manual": {
                 "type": "map", "mapping": {
                     "driver": { "type": "str", "required": true },
@@ -129,6 +137,14 @@
                       "hds_hnas_ssh_private_key": { "type": "str", "required": true },
                       "hds_hnas_stalled_job_timeout": { "type": "int", "required": true },
                       "hds_hnas_user": { "type": "str", "required": true }
+                    }
+                  },
+                  "cephfs": {
+                    "type": "map", "mapping": {
+                      "use_crowbar": { "type": "bool", "required": true },
+                      "cephfs_conf_path": { "type": "str", "required": true },
+                      "cephfs_auth_id": { "type": "str", "required": true },
+                      "cephfs_cluster_name": { "type": "str", "required": true }
                     }
                   },
                   "manual": {
