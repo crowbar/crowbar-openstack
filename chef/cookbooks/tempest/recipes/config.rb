@@ -81,7 +81,7 @@ openstackcli_adm << " --os-password #{tempest_adm_pass}"
 openstackcli_adm << " --os-project-name #{tempest_comp_tenant}"
 openstackcli_adm << " --os-auth-url #{auth_url}"
 
-`#{openstackcli}_adm service show orchestration &> /dev/null`
+`#{openstackcli_adm} service show orchestration &> /dev/null`
 use_heat = $?.success?
 
 users = [
