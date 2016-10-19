@@ -113,12 +113,6 @@ default[:nova][:novnc][:ssl][:enabled] = false
 default[:nova][:novnc][:ssl][:certfile] = ""
 default[:nova][:novnc][:ssl][:keyfile] = ""
 
-#
-# Transparent Hugepage Settings
-#
-default[:nova][:hugepage][:tranparent_hugepage_enabled] = "always"
-default[:nova][:hugepage][:tranparent_hugepage_defrag] = "always"
-
 default[:nova][:ports][:api_ec2] = 8773
 default[:nova][:ports][:api] = 8774
 default[:nova][:ports][:metadata] = 8775

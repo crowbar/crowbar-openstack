@@ -343,8 +343,8 @@ template "/usr/sbin/crowbar-compute-set-sys-options" do
   source "crowbar-compute-set-sys-options.erb"
   variables({
     ksm_enabled: node[:nova][:kvm][:ksm_enabled] ? 1 : 0,
-    tranparent_hugepage_enabled: node[:nova][:hugepage][:tranparent_hugepage_enabled],
-    tranparent_hugepage_defrag: node[:nova][:hugepage][:tranparent_hugepage_defrag]
+    tranparent_hugepage_enabled: node[:nova][:kvm][:ksm_enabled] ? "never" : "always",
+    tranparent_hugepage_defrag: node[:nova][:kvm][:ksm_enabled] ? "never" : "always"
   })
   mode "0755"
 end
