@@ -63,6 +63,16 @@ module Barclamp
                          selected.to_s)
     end
 
+    def networking_lbaasv2_drivers(selected)
+      options_for_select(
+        [
+          ["HAProxy", "haproxy"],
+          ["F5", "f5"]
+        ],
+        selected.to_s
+      )
+    end
+
     def api_protocols_for_neutron(selected)
       options_for_select(
         [

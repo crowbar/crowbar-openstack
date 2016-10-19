@@ -77,6 +77,17 @@
                       "max_pool_overflow": { "type" : "int", "required" : true },
                       "pool_timeout": { "type" : "int", "required" : true }
                     }},
+                    "f5": { "type": "map", "required": true, "mapping": {
+                      "icontrol_hostname": { "type" : "str", "required" : true },
+                      "icontrol_username": { "type" : "str", "required" : true },
+                      "icontrol_password": { "type" : "str", "required" : true },
+                      "parent_ssl_profile": { "type" : "str", "required" : true },
+                      "external_physical_mappings": { "type" : "str", "required" : true },
+                      "vtep_folder": { "type" : "str", "required" : true },
+                      "vtep_selfip_name": { "type" : "str", "required" : true },
+                      "max_namespaces_per_tenant": { "type" : "str", "required" : true },
+                      "route_domain_strictness_tenant": { "type" : "str", "required" : true }
+                    }},
                     "vmware": { "type": "map", "required": true, "mapping": {
                       "user": { "type" : "str", "required" : true },
                       "password": { "type" : "str", "required" : true },

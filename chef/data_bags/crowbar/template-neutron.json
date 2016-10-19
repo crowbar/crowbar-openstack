@@ -43,6 +43,17 @@
         "max_pool_overflow": 10,
         "pool_timeout": 30
       },
+      "f5": {
+        "icontrol_hostname": "",
+        "icontrol_username": "",
+        "icontrol_password": "",
+        "parent_ssl_profile": "",
+        "external_physical_mappings": "",
+        "vtep_folder": "",
+        "vtep_selfip_name": "",
+        "max_namespaces_per_tenant": "",
+        "route_domain_strictness_tenant": ""
+      },
       "vmware": {
         "user": "",
         "password": "",
@@ -103,7 +114,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 51,
+      "schema-revision": 52,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]
