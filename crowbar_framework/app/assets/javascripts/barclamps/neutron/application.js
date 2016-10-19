@@ -228,6 +228,23 @@
   };
 }(jQuery, document, window));
 
+function lbaasCheck() {
+  if ($('#use_lbaas').val() == 'true') {
+    $('#lbaasv2_driver_container').show();
+  } else {
+    $('#lbaasv2_driver_container').hide();
+    $('#f5_driver_container').hide();
+  }
+}
+
+function lbaasv2DriverCheck() {
+  if ($('#lbaasv2_driver').val() == 'f5') {
+    $('#f5_driver_container').show();
+  } else {
+    $('#f5_driver_container').hide();
+  }
+}
+
 function networking_plugin_check() {
   switch ($('#networking_plugin').val()) {
   case 'ml2':
@@ -237,8 +254,13 @@ function networking_plugin_check() {
     $('#ml2_type_drivers_default_provider_network_container').show();
     $('#ml2_type_drivers_default_tenant_network_container').show();
     $('#dvr_container').show();
+    $('#lbaas_container').show();
+    $('#lbaasv2_driver_container').show();
+    $('#f5_driver_container').show();
     ml2_type_drivers_check();
     ml2_mechanism_drivers_check();
+    lbaasCheck();
+    lbaasv2DriverCheck();
     break;
   case 'vmware':
     $('#vmware_container').show();
@@ -247,6 +269,9 @@ function networking_plugin_check() {
     $('#ml2_type_drivers_default_provider_network_container').hide();
     $('#ml2_type_drivers_default_tenant_network_container').hide();
     $('#dvr_container').hide();
+    $('#lbaas_container').hide();
+    $('#lbaasv2_driver_container').hide();
+    $('#f5_driver_container').hide();
     $('#num_vlans_container').hide();
     $('#gre_container').hide();
     $('#vxlan_container').hide();
@@ -350,10 +375,14 @@ function ml2_mechanism_drivers_check() {
 $(document).ready(function($) {
   networking_plugin_check();
   ml2_mechanism_drivers_check();
+  lbaasCheck();
+  lbaasv2DriverCheck();
 
   $('#networking_plugin').on('change', networking_plugin_check).trigger('change');
   $('#ml2_type_drivers').on('change', ml2_type_drivers_check);
   $('#ml2_mechanism_drivers').on('change', ml2_mechanism_drivers_check);
+  $('#use_lbaas').on('change', lbaasCheck).trigger('change');
+  $('#lbaasv2_driver').on('change', lbaasv2DriverCheck).trigger('change');
 
   $('#cisco_ports table').ciscoPorts();
 });
