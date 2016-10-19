@@ -88,11 +88,7 @@ end
 service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
                    "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
 if neutron[:neutron][:use_lbaas]
-  if neutron[:neutron][:use_lbaasv2]
-    service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2")
-  else
-    service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPlugin")
-  end
+  service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2")
 end
 
 if neutron[:neutron][:networking_plugin] == "ml2"
