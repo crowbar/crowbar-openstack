@@ -18,6 +18,7 @@
       "pool_timeout": 30,
       "rpc_response_timeout": 60,
       "use_multi_backend": true,
+      "use_multipath": false,
       "volume_defaults": {
         "raw": {
           "volume_name": "cinder-volumes",
@@ -160,7 +161,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 48,
+      "schema-revision": 49,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
