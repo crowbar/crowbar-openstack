@@ -25,11 +25,11 @@ default[:manila][:api][:protocol] = "http"
 # HA attributes
 default[:manila][:ha][:enabled] = false
 if %w(rhel suse).include? node[:platform_family]
-  default[:manila][:ha][:api_ra] = "lsb:openstack-manila-api"
-  default[:manila][:ha][:scheduler_ra] = "lsb:openstack-manila-scheduler"
+  default[:manila][:ha][:api_ra] = "service:openstack-manila-api"
+  default[:manila][:ha][:scheduler_ra] = "service:openstack-manila-scheduler"
 else
-  default[:manila][:ha][:api_ra] = "lsb:manila-api"
-  default[:manila][:ha][:scheduler_ra] = "lsb:manila-scheduler"
+  default[:manila][:ha][:api_ra] = "service:manila-api"
+  default[:manila][:ha][:scheduler_ra] = "service:manila-scheduler"
 end
 default[:manila][:ha][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports

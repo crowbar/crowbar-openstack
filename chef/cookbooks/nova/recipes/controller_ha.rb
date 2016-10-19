@@ -85,9 +85,9 @@ end
 services.each do |service|
   primitive_name = "nova-#{service}"
   if %w(rhel suse).include?(node[:platform_family])
-    primitive_ra = "lsb:openstack-nova-#{service}"
+    primitive_ra = "service:openstack-nova-#{service}"
   else
-    primitive_ra = "lsb:nova-#{service}"
+    primitive_ra = "service:nova-#{service}"
   end
 
   pacemaker_primitive primitive_name do
