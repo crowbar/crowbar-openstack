@@ -32,7 +32,7 @@
 module OpenStackHAHelper
   def self.controller_only_location(location, service)
     "location #{location} #{service} resource-discovery=exclusive " \
-      "rule 0: OpenStack-role eq controller"
+      "rule 0: OpenStack-role eq controller and pre-upgrade eq false"
   end
 
   def self.no_compute_location(location, service)
