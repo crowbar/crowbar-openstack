@@ -23,6 +23,7 @@
             "neutron_instance": { "type": "str", "required": true },
             "libvirt_type": { "type": "str", "required": true },
             "use_novnc": { "type": "bool", "required": true },
+            "use_serial": { "type": "bool", "required": true },
             "verbose": { "type": "bool", "required": true },
             "max_header_line": { "type": "int", "required": true },
             "trusted_flavors": { "type": "bool", "required": true },
@@ -146,6 +147,46 @@
               "type": "map", "required": true, "mapping": {
                 "allocate_retries": { "type": "number", "required" : true },
                 "allocate_retries_interval": { "type": "number", "required" : true }
+              }
+            },
+            "compute": {
+              "type": "map", "required": true, "mapping": {
+                "qemu-aarch64": {
+                  "type": "map", "required": true, "mapping": {
+                    "cpu_mode": { "type": "str", "required" : true },
+                    "cpu_model": { "type": "str", "required" : true }
+                  }
+                },
+                "kvm-aarch64": {
+                  "type": "map", "required": true, "mapping": {
+                    "cpu_mode": { "type": "str", "required" : true },
+                    "cpu_model": { "type": "str", "required" : true }
+                  }
+                },
+                "qemu-x86_64": {
+                  "type": "map", "required": true, "mapping": {
+                    "cpu_mode": { "type": "str", "required" : true },
+                    "cpu_model": { "type": "str", "required" : true }
+                  }
+                },
+                "kvm-x86_64": {
+                  "type": "map", "required": true, "mapping": {
+                    "cpu_mode": { "type": "str", "required" : true },
+                    "cpu_model": { "type": "str", "required" : true }
+                  }
+                },
+                "qemu-s390x": {
+                  "type": "map", "required": true, "mapping": {
+                    "cpu_mode": { "type": "str", "required" : true },
+                    "cpu_model": { "type": "str", "required" : true }
+                  }
+                },
+                "kvm-s390x": {
+                  "type": "map", "required": true, "mapping": {
+                    "cpu_mode": { "type": "str", "required" : true },
+                    "cpu_model": { "type": "str", "required" : true }
+                  }
+                }
               }
             },
             "metadata": {

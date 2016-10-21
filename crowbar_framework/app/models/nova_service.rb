@@ -141,6 +141,10 @@ class NovaService < PacemakerServiceObject
     controller ||= nodes.shift
     nodes = [controller] if nodes.empty?
 
+    # Defaults for AArch64: disable VNC, enable Serial
+    base["attributes"]["nova"]["use_serial"] = controller[:kernel][:machine] == "aarch64"
+    base["attributes"]["nova"]["use_novnc"] = controller[:kernel][:machine] != "aarch64"
+
     # restrict nodes to 'compute' roles only if compute role was defined
     if nodes.detect { |n| n if n.intended_role == "compute" }
       nodes       = nodes.select { |n| n if n.intended_role == "compute" }

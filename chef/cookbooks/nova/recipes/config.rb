@@ -124,6 +124,19 @@ else
 end
 memcached_servers.sort!
 
+serialproxies = search_env_filtered(:node, "roles:nova-controller")
+if serialproxies.empty?
+  serialproxy = node
+else
+  serialproxy = serialproxies[0]
+  serialproxy = node if serialproxy.name == node.name
+end
+serialproxy_ha_enabled = serialproxy[:nova][:ha][:enabled]
+serialproxy_public_host = CrowbarHelper.get_host_for_public_url(serialproxy,
+  serialproxy[:nova][:serial][:ssl][:enabled],
+  serialproxy_ha_enabled)
+Chef::Log.info("serialproxy server at #{serialproxy_public_host}")
+
 directory "/etc/nova" do
    mode 0755
    action :create
@@ -228,7 +241,7 @@ else
 end
 
 # only require certs for nova controller
-if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
+if (api_ha_enabled || serialproxy_ha_enabled || vncproxy_ha_enabled || api == node) && \
     api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
   ssl_setup "setting up ssl for nova" do
     generate_certs api[:nova][:ssl][:generate_certs]
@@ -241,7 +254,7 @@ if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
   end
 end
 
-if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
+if (api_ha_enabled || serialproxy_ha_enabled || vncproxy_ha_enabled || api == node) && \
     api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
   # No check if we're using certificate info from nova-api
   unless ::File.size?(api_novnc_ssl_certfile) || api[:nova][:novnc][:ssl][:certfile].empty?
@@ -262,6 +275,7 @@ if node[:nova][:ha][:enabled]
   bind_port_objectstore = node[:nova][:ha][:ports][:objectstore]
   bind_port_novncproxy = node[:nova][:ha][:ports][:novncproxy]
   bind_port_xvpvncproxy = node[:nova][:ha][:ports][:xvpvncproxy]
+  bind_port_serialproxy = node[:nova][:ha][:ports][:serialproxy]
 else
   bind_host = "0.0.0.0"
   bind_port_api = node[:nova][:ports][:api]
@@ -270,6 +284,7 @@ else
   bind_port_objectstore = node[:nova][:ports][:objectstore]
   bind_port_novncproxy = node[:nova][:ports][:novncproxy]
   bind_port_xvpvncproxy = node[:nova][:ports][:xvpvncproxy]
+  bind_port_serialproxy = node[:nova][:ports][:serialproxy]
 end
 
 vendordata_jsonfile = "/etc/nova/suse-vendor-data.json"
@@ -291,65 +306,88 @@ else
   "#{node[:nova][:migration][:network]}.%s"
 end
 
+# Select libvirt compute flags for this particular compute node
+# type. Differentiate between qemu and kvm as for aarch64 that
+# makes a difference.
+
+cpu_mode = ""
+cpu_model = ""
+
+if node.roles.include? "nova-compute-kvm"
+  compute_flags = node[:nova][:compute]["kvm-#{node[:kernel][:machine]}"]
+elsif node.roles.include? "nova-compute-qemu"
+  compute_flags = node[:nova][:compute]["qemu-#{node[:kernel][:machine]}"]
+end
+
+if compute_flags
+  cpu_model = compute_flags["cpu_model"]
+  cpu_mode = compute_flags["cpu_mode"]
+end
+
 template "/etc/nova/nova.conf" do
   source "nova.conf.erb"
   user "root"
   group node[:nova][:group]
   mode 0640
   variables(
-            bind_host: bind_host,
-            bind_port_api: bind_port_api,
-            bind_port_api_ec2: bind_port_api_ec2,
-            bind_port_metadata: bind_port_metadata,
-            bind_port_objectstore: bind_port_objectstore,
-            bind_port_novncproxy: bind_port_novncproxy,
-            bind_port_xvpvncproxy: bind_port_xvpvncproxy,
-            dhcpbridge: "/usr/bin/nova-dhcpbridge",
-            database_connection: database_connection,
-            api_database_connection: api_database_connection,
-            rabbit_settings: fetch_rabbitmq_settings,
-            libvirt_type: node[:nova][:libvirt_type],
-            ec2_host: admin_api_host,
-            ec2_dmz_host: public_api_host,
-            libvirt_migration: node[:nova]["use_migration"],
-            migration_host: migration_host,
-            shared_instances: node[:nova]["use_shared_instance_storage"],
-            force_config_drive: node[:nova]["force_config_drive"],
-            glance_server_protocol: glance_server_protocol,
-            glance_server_host: glance_server_host,
-            glance_server_port: glance_server_port,
-            glance_server_insecure: glance_server_insecure || keystone_settings["insecure"],
-            metadata_bind_address: metadata_bind_address,
-            vnc_enabled: node[:kernel][:machine] != "aarch64",
-            vendordata_jsonfile: vendordata_jsonfile,
-            vncproxy_public_host: vncproxy_public_host,
-            vncproxy_ssl_enabled: api[:nova][:novnc][:ssl][:enabled],
-            vncproxy_cert_file: api_novnc_ssl_certfile,
-            vncproxy_key_file: api_novnc_ssl_keyfile,
-            memcached_servers: memcached_servers,
-            neutron_protocol: neutron_protocol,
-            neutron_server_host: neutron_server_host,
-            neutron_server_port: neutron_server_port,
-            neutron_insecure: neutron_insecure || keystone_settings["insecure"],
-            neutron_service_user: neutron_service_user,
-            neutron_service_password: neutron_service_password,
-            neutron_dhcp_domain: neutron_dhcp_domain,
-            neutron_has_tunnel: neutron_has_tunnel,
-            keystone_settings: keystone_settings,
-            cinder_insecure: cinder_insecure || keystone_settings["insecure"],
-            use_multipath: use_multipath,
-            ceph_user: ceph_user,
-            ceph_uuid: ceph_uuid,
-            ssl_enabled: api[:nova][:ssl][:enabled],
-            ssl_cert_file: api_ssl_certfile,
-            ssl_key_file: api_ssl_keyfile,
-            ssl_cert_required: api[:nova][:ssl][:cert_required],
-            ssl_ca_file: api_ssl_cafile,
-            use_rootwrap_daemon: use_rootwrap_daemon,
-            oat_appraiser_host: oat_server[:hostname],
-            oat_appraiser_port: "8443",
-            has_itxt: has_itxt
-            )
+    cpu_mode: cpu_mode,
+    cpu_model: cpu_model,
+    bind_host: bind_host,
+    bind_port_api: bind_port_api,
+    bind_port_api_ec2: bind_port_api_ec2,
+    bind_port_metadata: bind_port_metadata,
+    bind_port_objectstore: bind_port_objectstore,
+    bind_port_novncproxy: bind_port_novncproxy,
+    bind_port_xvpvncproxy: bind_port_xvpvncproxy,
+    bind_port_serialproxy: bind_port_serialproxy,
+    dhcpbridge: "/usr/bin/nova-dhcpbridge",
+    database_connection: database_connection,
+    api_database_connection: api_database_connection,
+    rabbit_settings: fetch_rabbitmq_settings,
+    libvirt_type: node[:nova][:libvirt_type],
+    ec2_host: admin_api_host,
+    ec2_dmz_host: public_api_host,
+    libvirt_migration: node[:nova]["use_migration"],
+    migration_host: migration_host,
+    shared_instances: node[:nova]["use_shared_instance_storage"],
+    force_config_drive: node[:nova]["force_config_drive"],
+    glance_server_protocol: glance_server_protocol,
+    glance_server_host: glance_server_host,
+    glance_server_port: glance_server_port,
+    glance_server_insecure: glance_server_insecure || keystone_settings["insecure"],
+    metadata_bind_address: metadata_bind_address,
+    vnc_enabled: node[:nova][:use_novnc],
+    serial_enabled: node[:nova][:use_serial],
+    vendordata_jsonfile: vendordata_jsonfile,
+    vncproxy_public_host: vncproxy_public_host,
+    vncproxy_ssl_enabled: api[:nova][:novnc][:ssl][:enabled],
+    vncproxy_cert_file: api_novnc_ssl_certfile,
+    vncproxy_key_file: api_novnc_ssl_keyfile,
+    serialproxy_public_host: serialproxy_public_host,
+    memcached_servers: memcached_servers,
+    neutron_protocol: neutron_protocol,
+    neutron_server_host: neutron_server_host,
+    neutron_server_port: neutron_server_port,
+    neutron_insecure: neutron_insecure || keystone_settings["insecure"],
+    neutron_service_user: neutron_service_user,
+    neutron_service_password: neutron_service_password,
+    neutron_dhcp_domain: neutron_dhcp_domain,
+    neutron_has_tunnel: neutron_has_tunnel,
+    keystone_settings: keystone_settings,
+    cinder_insecure: cinder_insecure || keystone_settings["insecure"],
+    use_multipath: use_multipath,
+    ceph_user: ceph_user,
+    ceph_uuid: ceph_uuid,
+    ssl_enabled: api[:nova][:ssl][:enabled],
+    ssl_cert_file: api_ssl_certfile,
+    ssl_key_file: api_ssl_keyfile,
+    ssl_cert_required: api[:nova][:ssl][:cert_required],
+    ssl_ca_file: api_ssl_cafile,
+    use_rootwrap_daemon: use_rootwrap_daemon,
+    oat_appraiser_host: oat_server[:hostname],
+    oat_appraiser_port: "8443",
+    has_itxt: has_itxt
+  )
 end
 
 # dependency for crowbar-nova-set-availability-zone
