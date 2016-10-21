@@ -92,7 +92,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   end
   storage_transaction_objects << "pacemaker_ms[#{ms_name}]"
 
-  ms_location_name = openstack_pacemaker_controller_only_location_for ms_name
+  ms_location_name = openstack_pacemaker_controller_location_ignoring_upgrade_for ms_name
   storage_transaction_objects << "pacemaker_location[#{ms_location_name}]"
 end
 

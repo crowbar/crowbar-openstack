@@ -96,7 +96,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
   end
   transaction_objects << "pacemaker_ms[#{ms_name}]"
 
-  location_name = openstack_pacemaker_controller_only_location_for ms_name
+  location_name = openstack_pacemaker_controller_location_ignoring_upgrade_for ms_name
   transaction_objects << "pacemaker_location[#{location_name}]"
 end
 
