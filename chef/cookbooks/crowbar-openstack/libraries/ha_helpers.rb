@@ -35,6 +35,11 @@ module OpenStackHAHelper
       "rule 0: OpenStack-role eq controller and pre-upgrade ne true"
   end
 
+  def self.controller_only_location_ignoring_upgrade(location, service)
+    "location #{location} #{service} resource-discovery=exclusive " \
+      "rule 0: OpenStack-role eq controller"
+  end
+
   def self.no_compute_location(location, service)
     "location #{location} #{service} resource-discovery=exclusive " \
       "rule 0: OpenStack-role ne compute"
