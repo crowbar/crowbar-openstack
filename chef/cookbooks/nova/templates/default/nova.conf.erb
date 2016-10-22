@@ -6111,7 +6111,6 @@ xvpvncproxy_host = <%= @bind_host %>
 # Maximum value: 65535
 # Deprecated group/name - [DEFAULT]/xvpvncproxy_port
 #xvpvncproxy_port = 6081
-xvpvncproxy_port = <%= @bind_port_xvpvncproxy %>
 
 #
 # Public address of XVP VNC console proxy.
@@ -6141,7 +6140,6 @@ xvpvncproxy_port = <%= @bind_port_xvpvncproxy %>
 #  (string value)
 # Deprecated group/name - [DEFAULT]/xvpvncproxy_base_url
 #xvpvncproxy_base_url = http://127.0.0.1:6081/console
-xvpvncproxy_base_url = http://<%= @vncproxy_public_host %>:<%= node[:nova][:ports][:xvpvncproxy] %>/console
 
 
 [workarounds]
