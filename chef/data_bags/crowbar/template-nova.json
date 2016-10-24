@@ -31,7 +31,8 @@
       "scheduler": {
         "ram_allocation_ratio": 1.0,
         "cpu_allocation_ratio": 16.0,
-        "disk_allocation_ratio": 1.0
+        "disk_allocation_ratio": 1.0,
+        "reserved_host_memory_mb": 1024
       },
       "db": {
         "password": "",
@@ -137,7 +138,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 107,
+      "schema-revision": 108,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-docker": [ "readying", "ready", "applying" ],
