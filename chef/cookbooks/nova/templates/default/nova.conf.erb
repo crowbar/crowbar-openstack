@@ -650,6 +650,7 @@ block_device_allocate_retries_interval = <%= node[:nova][:block_device][:allocat
 
 # Amount of memory in MB to reserve for the host (integer value)
 #reserved_host_memory_mb = 512
+reserved_host_memory_mb = <%= node[:nova][:scheduler][:reserved_host_memory_mb %>
 
 # DEPRECATED: Class that will manage stats for the local compute host (string
 # value)
