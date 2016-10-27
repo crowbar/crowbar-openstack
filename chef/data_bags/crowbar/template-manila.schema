@@ -69,6 +69,19 @@
                     "netapp_aggregate_name_search_pattern": { "type": "str", "required": false }
                   }
                 },
+                "netapp-managed": {
+                  "type": "map", "mapping": {
+                    "netapp_storage_family": { "type": "str", "required": true },
+                    "netapp_server_hostname": { "type": "str", "required": true },
+                    "netapp_server_port": { "type": "str", "required": true },
+                    "netapp_login": { "type": "str", "required": true },
+                    "netapp_password": { "type": "str", "required": true },
+                    "netapp_transport_type": { "type": "str", "required": true },
+                    "netapp_root_volume_aggregate": { "type": "str", "required": true },
+                    "netapp_aggregate_name_search_pattern": { "type": "str", "required": false },
+                    "netapp_port_name_search_pattern": { "type": "str", "required": true }
+                  }
+                },
                 "hitachi": {
                    "type": "map", "mapping": {
                      "hds_hnas_cluster_admin_ip0": { "type": "str", "required": true },
@@ -116,6 +129,19 @@
                       "netapp_vserver": { "type": "str", "required": true },
                       "netapp_transport_type": { "type": "str", "required": true },
                       "netapp_aggregate_name_search_pattern": { "type": "str", "required": false }
+                    }
+                  },
+                  "netapp-managed": {
+                    "type": "map", "mapping": {
+                      "netapp_storage_family": { "type": "str", "required": true },
+                      "netapp_server_hostname": { "type": "str", "required": true },
+                      "netapp_server_port": { "type": "str", "required": true },
+                      "netapp_login": { "type": "str", "required": true },
+                      "netapp_password": { "type": "str", "required": true },
+                      "netapp_transport_type": { "type": "str", "required": true },
+                      "netapp_root_volume_aggregate": { "type": "str", "required": true },
+                      "netapp_aggregate_name_search_pattern": { "type": "str", "required": false },
+                      "netapp_port_name_search_pattern": { "type": "str", "required": true }
                     }
                   },
                   "hitachi": {

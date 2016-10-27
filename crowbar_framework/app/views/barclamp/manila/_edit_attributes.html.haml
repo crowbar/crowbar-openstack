@@ -48,6 +48,21 @@
               = password_field %w(shares {{@index}} netapp netapp_password)
               = select_field %w(shares {{@index}} netapp netapp_transport_type), :collection => :netapp_transports_for_manila
           {{/if_eq}}
+          {{#if_eq backend_driver 'netapp-managed'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.shares.netapp_managed_parameters')
+
+              = string_field %w(shares {{@index}} netapp-managed netapp_server_hostname)
+              = string_field %w(shares {{@index}} netapp-managed netapp_server_port)
+              = string_field %w(shares {{@index}} netapp-managed netapp_login)
+              = password_field %w(shares {{@index}} netapp-managed netapp_password)
+              = select_field %w(shares {{@index}} netapp-managed netapp_transport_type), :collection => :netapp_transports_for_manila
+              = string_field %w(shares {{@index}} netapp-managed netapp_root_volume_aggregate)
+              = string_field %w(shares {{@index}} netapp-managed netapp_aggregate_name_search_pattern)
+              = string_field %w(shares {{@index}} netapp-managed netapp_port_name_search_pattern)
+          {{/if_eq}}
           {{#if_eq backend_driver 'hitachi'}}
           %li.list-group-item
             %fieldset

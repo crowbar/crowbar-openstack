@@ -33,10 +33,12 @@ en:
           loading_text: 'Loading Backends...'
           generic_parameters: 'Generic backend parameters'
           netapp_parameters: "NetApp parameters"
+          netapp_managed_parameters: "NetApp parameters (managed mode)"
           hitachi_parameters: "Hitachi parameters"
           manual_parameters: 'Other driver parameters'
           generic_share_driver: 'Generic driver'
           netapp_share_driver: 'NetApp driver'
+          netapp_managed_share_driver: 'NetApp driver (managed)'
           hitachi_share_driver: 'Hitachi driver'
           manual_share_driver: 'Other driver'
           generic:
@@ -60,6 +62,9 @@ en:
               netapp_server_hostname: 'Server host name'
               netapp_server_port: 'Server port'
               netapp_transport_type: 'Transport Type'
+              netapp_root_volume_aggregate: 'Root volume aggregate'
+              netapp_aggregate_name_search_pattern: 'Aggregate name search pattern'
+              netapp_port_name_search_pattern: 'Port name search pattern'
             hitachi:
               hds_hnas_cluster_admin_ip0: 'The IP of the clusters admin node. Only set in HNAS multinode clusters.'
               hds_hnas_evs_id: 'Specify which EVS this backend is assigned to.'

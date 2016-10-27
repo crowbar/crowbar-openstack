@@ -2598,6 +2598,20 @@ netapp_transport_type=<%= share['netapp']['netapp_transport_type'] %>
 netapp_aggregate_name_search_pattern=<%= share['netapp']['netapp_aggregate_name_search_pattern'] %>
 <% end -%>
 <% end -%> <%# netapp driver %>
+<% if share['backend_driver'] == 'netapp-managed' -%>
+share_driver=manila.share.drivers.netapp.common.NetAppDriver
+share_backend_name=<%= share['backend_name'] %>
+driver_handles_share_servers=True
+netapp_storage_family=<%= share['netapp-managed']['netapp_storage_family'] %>
+netapp_server_hostname=<%= share['netapp-managed']['netapp_server_hostname'] %>
+netapp_server_port=<%= share['netapp-managed']['netapp_server_port'] %>
+netapp_login=<%= share['netapp-managed']['netapp_login'] %>
+netapp_password=<%= share['netapp-managed']['netapp_password'] %>
+netapp_transport_type=<%= share['netapp-managed']['netapp_transport_type'] %>
+netapp_root_volume_aggregate=<%= share['netapp-managed']['netapp_root_volume_aggregate'] %>
+netapp_aggregate_name_search_pattern=<%= share['netapp-managed']['netapp_aggregate_name_search_pattern'] %>
+netapp_port_name_search_pattern=<%= share['netapp-managed']['netapp_port_name_search_pattern'] %>
+<% end -%> <%# netapp-managed driver %>
 <% if share['backend_driver'] == 'hitachi' -%>
 share_backend_name=<%= share['backend_name'] %>
 share_driver = manila.share.drivers.hitachi.hds_hnas.HDSHNASDriver

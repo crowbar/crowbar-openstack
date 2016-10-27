@@ -53,6 +53,17 @@
           "netapp_vserver": "",
           "netapp_transport_type": "https"
         },
+        "netapp-managed": {
+          "netapp_storage_family": "ontap_cluster",
+          "netapp_server_hostname": "",
+          "netapp_server_port": "",
+          "netapp_login": "admin",
+          "netapp_password": "",
+          "netapp_transport_type": "https",
+          "netapp_root_volume_aggregate": "",
+          "netapp_aggregate_name_search_pattern": "(.*)",
+          "netapp_port_name_search_pattern": "(.*)"
+        },
         "hitachi": {
           "hds_hnas_cluster_admin_ip0": "None",
           "hds_hnas_evs_id": "None",
@@ -90,7 +101,7 @@
     "manila": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "manila-server": [ "readying", "ready", "applying" ],
         "manila-share": [ "readying", "ready", "applying" ]
