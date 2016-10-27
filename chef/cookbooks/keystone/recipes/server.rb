@@ -157,6 +157,8 @@ elsif node[:keystone][:frontend] == "apache"
     "${APACHE_LOG_DIR}"
   end
 
+  apache_module "ssl" if node[:keystone][:api][:protocol] == "https"
+
   template "#{node[:apache][:dir]}/sites-available/keystone.conf" do
     path "#{node[:apache][:dir]}/vhosts.d/keystone.conf" if node[:platform_family] == "suse"
     source "apache_keystone.conf.erb"
@@ -166,6 +168,10 @@ elsif node[:keystone][:frontend] == "apache"
       bind_admin_host: bind_admin_host,
       bind_service_port: bind_service_port, # public port
       bind_service_host: bind_service_host,
+      ssl_enable: node[:keystone][:api][:protocol] == "https",
+      ssl_certfile: node[:keystone][:ssl][:certfile],
+      ssl_keyfile: node[:keystone][:ssl][:keyfile],
+      ssl_ca_certs: node[:keystone][:ssl][:ca_certs],
       processes: 3,
       threads: 10
     )
@@ -245,7 +251,6 @@ template "/etc/keystone/keystone.conf" do
       ssl_enable: (node[:keystone][:frontend] == "native" && node[:keystone][:api][:protocol] == "https"),
       ssl_certfile: node[:keystone][:ssl][:certfile],
       ssl_keyfile: node[:keystone][:ssl][:keyfile],
-      ssl_cert_required: node[:keystone][:ssl][:cert_required],
       ssl_ca_certs: node[:keystone][:ssl][:ca_certs],
       rabbit_settings: fetch_rabbitmq_settings
     )
@@ -403,7 +408,6 @@ if node[:keystone][:api][:protocol] == "https"
     keyfile node[:keystone][:ssl][:keyfile]
     group node[:keystone][:group]
     fqdn node[:fqdn]
-    cert_required node[:keystone][:ssl][:cert_required]
     ca_certs node[:keystone][:ssl][:ca_certs]
   end
 end

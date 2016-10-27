@@ -7,6 +7,13 @@ Listen <%= @bind_service_host %>:<%= @bind_service_port %>
     WSGIPassAuthorization On
     LimitRequestBody 114688
 
+<% if @ssl_enable %>
+    SSLEngine on
+    SSLCertificateFile <%= @ssl_certfile %>
+    SSLCertificateKeyFile <%= @ssl_keyfile %>
+    SSLCACertificateFile <%= @ssl_ca_certs %>
+<% end %>
+
     <IfVersion >= 2.4>
       ErrorLogFormat "%M"
     </IfVersion>
@@ -36,6 +43,13 @@ Listen <%= @bind_admin_host %>:<%= @bind_admin_port %>
     WSGIApplicationGroup %{GLOBAL}
     WSGIPassAuthorization On
     LimitRequestBody 114688
+
+<% if @ssl_enable %>
+    SSLEngine on
+    SSLCertificateFile <%= @ssl_certfile %>
+    SSLCertificateKeyFile <%= @ssl_keyfile %>
+    SSLCACertificateFile <%= @ssl_ca_certs %>
+<% end %>
 
     <IfVersion >= 2.4>
       ErrorLogFormat "%M"
