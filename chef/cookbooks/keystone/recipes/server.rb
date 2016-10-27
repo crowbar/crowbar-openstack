@@ -166,6 +166,11 @@ elsif node[:keystone][:frontend] == "apache"
       bind_admin_host: bind_admin_host,
       bind_service_port: bind_service_port, # public port
       bind_service_host: bind_service_host,
+      ssl_enable: node[:keystone][:api][:protocol] == "https",
+      ssl_certfile: node[:keystone][:ssl][:certfile],
+      ssl_keyfile: node[:keystone][:ssl][:keyfile],
+      ssl_cert_required: node[:keystone][:ssl][:cert_required],
+      ssl_ca_certs: node[:keystone][:ssl][:ca_certs],
       processes: 3,
       threads: 10
     )
