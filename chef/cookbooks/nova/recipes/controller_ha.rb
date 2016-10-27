@@ -54,14 +54,6 @@ if node[:nova][:use_novnc]
     servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "novncproxy")
     action :nothing
   end.run_action(:create)
-else
-  haproxy_loadbalancer "nova-xvpvncproxy" do
-    address "0.0.0.0"
-    port node[:nova][:ports][:xvpvncproxy]
-    use_ssl false
-    servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "xvpvncproxy")
-    action :nothing
-  end.run_action(:create)
 end
 if node[:nova][:use_serial]
   haproxy_loadbalancer "nova-serialproxy" do
@@ -89,8 +81,6 @@ primitives = []
 services = %w(api cert conductor consoleauth scheduler)
 if node[:nova][:use_novnc]
   services << "novncproxy"
-else
-  services << "xvpvncproxy"
 end
 if node[:nova][:use_serial]
   services << "serialproxy"

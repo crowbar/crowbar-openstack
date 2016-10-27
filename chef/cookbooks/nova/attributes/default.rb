@@ -118,7 +118,6 @@ default[:nova][:ports][:api] = 8774
 default[:nova][:ports][:metadata] = 8775
 default[:nova][:ports][:objectstore] = 3333
 default[:nova][:ports][:novncproxy] = 6080
-default[:nova][:ports][:xvpvncproxy] = 6081
 default[:nova][:ports][:serialproxy] = 6083
 
 default[:nova][:ha][:enabled] = false
@@ -129,7 +128,6 @@ default[:nova][:ha][:ports][:api] = 5551
 default[:nova][:ha][:ports][:metadata] = 5552
 default[:nova][:ha][:ports][:objectstore] = 5553
 default[:nova][:ha][:ports][:novncproxy] = 5554
-default[:nova][:ha][:ports][:xvpvncproxy] = 5555
 default[:nova][:ha][:ports][:serialproxy] = 5556
 
 default[:nova][:ha][:compute][:enabled] = false

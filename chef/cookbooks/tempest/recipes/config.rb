@@ -535,6 +535,7 @@ template "/etc/tempest/tempest.conf" do
     # but breaks in the (unlikely) case of anybody configuring multiple roles).
     heat_trusts_delegated_roles: heat_trusts_delegated_roles,
     # scenario settings
+    cirros_arch: cirros_arch,
     cirros_version: cirros_version,
     image_regex: image_regex,
     # validation settings

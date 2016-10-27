@@ -34,11 +34,8 @@ if node[:nova][:use_novnc]
     package "openstack-nova-consoleauth" if node[:platform_family] == "suse"
   else
     package "nova-novncproxy"
-    execute "Fix permission Bug" do
-      command "sed -i 's/nova$/root/g' /etc/init/nova-novncproxy.conf"
-      action :run
-    end
   end
+
   service "nova-novncproxy" do
     service_name "openstack-nova-novncproxy" if %w(rhel suse).include?(node[:platform_family])
     supports status: true, restart: true

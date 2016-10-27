@@ -274,7 +274,6 @@ if node[:nova][:ha][:enabled]
   bind_port_metadata = node[:nova][:ha][:ports][:metadata]
   bind_port_objectstore = node[:nova][:ha][:ports][:objectstore]
   bind_port_novncproxy = node[:nova][:ha][:ports][:novncproxy]
-  bind_port_xvpvncproxy = node[:nova][:ha][:ports][:xvpvncproxy]
   bind_port_serialproxy = node[:nova][:ha][:ports][:serialproxy]
 else
   bind_host = "0.0.0.0"
@@ -283,7 +282,6 @@ else
   bind_port_metadata = node[:nova][:ports][:metadata]
   bind_port_objectstore = node[:nova][:ports][:objectstore]
   bind_port_novncproxy = node[:nova][:ports][:novncproxy]
-  bind_port_xvpvncproxy = node[:nova][:ports][:xvpvncproxy]
   bind_port_serialproxy = node[:nova][:ports][:serialproxy]
 end
 
@@ -338,7 +336,6 @@ template "/etc/nova/nova.conf" do
     bind_port_metadata: bind_port_metadata,
     bind_port_objectstore: bind_port_objectstore,
     bind_port_novncproxy: bind_port_novncproxy,
-    bind_port_xvpvncproxy: bind_port_xvpvncproxy,
     bind_port_serialproxy: bind_port_serialproxy,
     dhcpbridge: "/usr/bin/nova-dhcpbridge",
     database_connection: database_connection,

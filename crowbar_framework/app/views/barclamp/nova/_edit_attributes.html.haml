@@ -87,7 +87,6 @@
 
       = string_field :vnc_keymap
 
-      = boolean_field :use_novnc
       = boolean_field %w(novnc ssl enabled), :collection => :ssl_protocols_for_nova, "data-sslprefix" => "novnc_ssl", "data-sslcert" => "", "data-sslkey" => ""
 
       #novnc_ssl_container
