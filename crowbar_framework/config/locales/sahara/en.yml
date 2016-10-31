@@ -28,5 +28,3 @@ en:
         cinder_instance: 'Cinder'
         logging_header: 'Logging'
         verbose: 'Verbose'
-        debug: 'Debug'
-        use_syslog: 'Use syslog'
