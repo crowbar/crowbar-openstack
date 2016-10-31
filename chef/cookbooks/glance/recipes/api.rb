@@ -6,6 +6,10 @@
 
 include_recipe "#{@cookbook_name}::common"
 
+package "glance-api" do
+  package_name "openstack-glance-api" if ["rhel", "suse"].include?(node[:platform_family])
+end
+
 # Install qemu-img (dependency present in suse packages)
 case node[:platform_family]
 when "debian"
