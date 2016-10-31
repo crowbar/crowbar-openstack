@@ -27,11 +27,12 @@ unless %w(rhel suse).include?(node[:platform_family])
   end
 end
 
+package "openstack-nova-consoleauth" if %w(rhel suse).include?(node[:platform_family])
+
 # forcing novnc is deliberate on suse
 if node[:nova][:use_novnc]
   if %w(rhel suse).include?(node[:platform_family])
     package "openstack-nova-novncproxy"
-    package "openstack-nova-consoleauth" if node[:platform_family] == "suse"
   else
     package "nova-novncproxy"
   end
