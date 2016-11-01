@@ -6,6 +6,10 @@
 
 include_recipe "#{@cookbook_name}::common"
 
+package "glance-registry" do
+  package_name "openstack-glance-registry" if ["rhel", "suse"].include?(node[:platform_family])
+end
+
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 network_settings = GlanceHelper.network_settings(node)
 

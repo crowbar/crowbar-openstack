@@ -18,7 +18,6 @@
 # limitations under the License.
 #
 
-package "curl"
 package "glance" do
   package_name "openstack-glance" if %w(rhel suse).include?(node[:platform_family])
 end
