@@ -97,6 +97,25 @@ unless magnum_ui_pkgname.nil?
   end
 end
 
+# install horizon trove plugin if needed
+trove_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-trove-ui"
+  when "rhel"
+    "openstack-trove-ui"
+  end
+
+unless trove_ui_pkgname.nil?
+  trove_servers = search(:node, "roles:trove-server") || []
+  unless trove_servers.empty?
+    package trove_ui_pkgname do
+      action :install
+      notifies :reload, resources(service: "apache2")
+    end
+  end
+end
+
 if node[:platform_family] == "suse"
   # Get rid of unwanted vhost config files:
   ["#{node[:apache][:dir]}/vhosts.d/default-redirect.conf",
