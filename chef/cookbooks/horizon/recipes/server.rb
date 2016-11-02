@@ -116,6 +116,25 @@ unless trove_ui_pkgname.nil?
   end
 end
 
+# install horizon sahara plugin if needed
+sahara_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-sahara-ui"
+  when "rhel"
+    "openstack-sahara-ui"
+  end
+
+unless sahara_ui_pkgname.nil?
+  sahara_servers = search(:node, "roles:sahara-server") || []
+  unless sahara_servers.empty?
+    package sahara_ui_pkgname do
+      action :install
+      notifies :reload, resources(service: "apache2")
+    end
+  end
+end
+
 if node[:platform_family] == "suse"
   # Get rid of unwanted vhost config files:
   ["#{node[:apache][:dir]}/vhosts.d/default-redirect.conf",
