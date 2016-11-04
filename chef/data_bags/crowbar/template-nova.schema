@@ -49,7 +49,7 @@
                 "ram_allocation_ratio": { "type": "number" },
                 "cpu_allocation_ratio": { "type": "number" },
                 "disk_allocation_ratio": { "type": "number" },
-                "reserved_host_memory_mb": { "type", "number" }
+                "reserved_host_memory_mb": { "type": "number" }
               }
             },
             "db": {
