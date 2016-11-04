@@ -146,7 +146,8 @@ if node[:neutron][:use_lbaas] &&
       debug: node[:neutron][:debug],
       interface_driver: interface_driver,
       user_group: node[:neutron][:platform][:lbaas_haproxy_group],
-      device_driver: "neutron_lbaas.drivers.haproxy.namespace_driver.HaproxyNSDriver"
+      device_driver: "neutron_lbaas.services.loadbalancer.drivers" \
+                     ".haproxy.namespace_driver.HaproxyNSDriver"
     )
   end
 elsif node[:neutron][:use_lbaas] && node[:neutron][:use_lbaasv2] &&
