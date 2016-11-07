@@ -18,6 +18,9 @@ node[:neutron][:platform][:midonet_pkgs].each { |p| package p }
 
 if node.roles.include?("neutron-server")
   keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+  register_auth_hash = { user: keystone_settings["admin_user"],
+                         password: keystone_settings["admin_password"],
+                         tenant: keystone_settings["admin_tenant"] }
 
   crowbar_pacemaker_sync_mark "wait-midonet_register"
 
@@ -26,7 +29,7 @@ if node.roles.include?("neutron-server")
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    token keystone_settings["admin_token"]
+    auth register_auth_hash
     service_name "midonet"
     service_type "midonet"
     service_description "MidoNet API Service"
@@ -38,7 +41,7 @@ if node.roles.include?("neutron-server")
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    token keystone_settings["admin_token"]
+    auth register_auth_hash
     user_name node[:neutron][:midonet][:openstack_user]
     user_password node[:neutron][:midonet][:openstack_password]
     tenant_name keystone_settings["service_tenant"]
@@ -50,7 +53,7 @@ if node.roles.include?("neutron-server")
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    token keystone_settings["admin_token"]
+    auth register_auth_hash
     user_name node[:neutron][:midonet][:openstack_user]
     role_name "admin"
     tenant_name keystone_settings["service_tenant"]
