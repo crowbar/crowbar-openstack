@@ -1861,8 +1861,7 @@ flavor = keystone
 # estimations and you should do them based on the worst case scenario
 # and be prepared to act in case they were wrong. (string value)
 #work_dir = <None>
-work_dir = <%= node[:glance][:conversion][:work_dir] %>
-
+work_dir = /var/lib/glance/taskflow
 
 [taskflow_executor]
 
@@ -1885,6 +1884,3 @@ work_dir = <%= node[:glance][:conversion][:work_dir] %>
 # using the RBD backend, this should be set to 'raw' (string value)
 # Allowed values: qcow2, raw, vmdk
 #conversion_format = <None>
-<% if node[:glance][:conversion][:enabled] -%>
-conversion_format = <%= node[:glance][:conversion][:conversion_format] %>
-<% end -%>

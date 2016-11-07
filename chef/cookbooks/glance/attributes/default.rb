@@ -30,10 +30,6 @@ default[:glance][:config_dir] = "/etc/glance"
 default[:glance][:enable_v3_api] = false
 default[:glance][:max_header_line] = 16384
 
-default[:glance][:conversion][:enabled] = false
-default[:glance][:conversion][:conversion_format] = "raw"
-default[:glance][:conversion][:work_dir] = "/var/lib/glance/taskflow"
-
 default[:glance][:db][:password] = "" # set by wrapper
 default[:glance][:db][:user] = "glance"
 default[:glance][:db][:database] = "glance"

@@ -61,13 +61,6 @@
             "use_syslog": { "type": "bool", "required": true },
             "default_store": { "type": "str", "required": true, "pattern": "/^(file|cinder|rbd|swift|vsphere)$/"  },
             "filesystem_store_datadir": { "type": "str", "required": true },
-            "conversion": {
-              "type": "map", "required": true, "mapping": {
-                "enabled": { "type": "bool", "required": true },
-                "conversion_format": { "type": "str", "required": true },
-                "work_dir": { "type": "str", "required": true }
-              }
-            },
             "swift": {
               "type": "map", "required": true, "mapping": {
                 "store_container": { "type": "str", "required": true },
