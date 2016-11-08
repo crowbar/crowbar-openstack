@@ -91,11 +91,11 @@ keystone_register "register manila endpoint" do
   endpoint_service "manila"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{manila_protocol}://"\
-                     "#{my_public_host}:#{manila_port}/v1/$(tenant_id)s"
+                     "#{my_public_host}:#{manila_port}/v1/$(project_id)s"
   endpoint_adminURL "#{manila_protocol}://"\
-                    "#{my_admin_host}:#{manila_port}/v1/$(tenant_id)s"
+                    "#{my_admin_host}:#{manila_port}/v1/$(project_id)s"
   endpoint_internalURL "#{manila_protocol}://"\
-                       "#{my_admin_host}:#{manila_port}/v1/$(tenant_id)s"
+                       "#{my_admin_host}:#{manila_port}/v1/$(project_id)s"
   #  endpoint_global true
   #  endpoint_enabled true
   action :add_endpoint_template
@@ -123,11 +123,11 @@ keystone_register "register manila endpoint v2" do
   endpoint_service "manilav2"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{manila_protocol}://"\
-                     "#{my_public_host}:#{manila_port}/v2/$(tenant_id)s"
+                     "#{my_public_host}:#{manila_port}/v2/$(project_id)s"
   endpoint_adminURL "#{manila_protocol}://"\
-                    "#{my_admin_host}:#{manila_port}/v2/$(tenant_id)s"
+                    "#{my_admin_host}:#{manila_port}/v2/$(project_id)s"
   endpoint_internalURL "#{manila_protocol}://"\
-                       "#{my_admin_host}:#{manila_port}/v2/$(tenant_id)s"
+                       "#{my_admin_host}:#{manila_port}/v2/$(project_id)s"
   action :add_endpoint_template
 end
 

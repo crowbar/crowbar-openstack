@@ -90,9 +90,12 @@ keystone_register "register cinder endpoint" do
   auth register_auth_hash
   endpoint_service "cinder"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{cinder_protocol}://#{my_public_host}:#{cinder_port}/v1/$(tenant_id)s"
-  endpoint_adminURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v1/$(tenant_id)s"
-  endpoint_internalURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v1/$(tenant_id)s"
+  endpoint_publicURL "#{cinder_protocol}://"\
+                     "#{my_public_host}:#{cinder_port}/v1/$(project_id)s"
+  endpoint_adminURL "#{cinder_protocol}://"\
+                    "#{my_admin_host}:#{cinder_port}/v1/$(project_id)s"
+  endpoint_internalURL "#{cinder_protocol}://"\
+                       "#{my_admin_host}:#{cinder_port}/v1/$(project_id)s"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template
@@ -118,9 +121,12 @@ keystone_register "register cinder endpoint v2" do
   auth register_auth_hash
   endpoint_service "cinderv2"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{cinder_protocol}://#{my_public_host}:#{cinder_port}/v2/$(tenant_id)s"
-  endpoint_adminURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v2/$(tenant_id)s"
-  endpoint_internalURL "#{cinder_protocol}://#{my_admin_host}:#{cinder_port}/v2/$(tenant_id)s"
+  endpoint_publicURL "#{cinder_protocol}://"\
+                     "#{my_public_host}:#{cinder_port}/v2/$(project_id)s"
+  endpoint_adminURL "#{cinder_protocol}://"\
+                    "#{my_admin_host}:#{cinder_port}/v2/$(project_id)s"
+  endpoint_internalURL "#{cinder_protocol}://"\
+                       "#{my_admin_host}:#{cinder_port}/v2/$(project_id)s"
   action :add_endpoint_template
 end
 

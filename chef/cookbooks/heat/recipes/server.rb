@@ -336,9 +336,15 @@ keystone_register "register heat endpoint" do
   auth register_auth_hash
   endpoint_service "heat"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:port]}/v1/$(tenant_id)s"
-  endpoint_adminURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:port]}/v1/$(tenant_id)s"
-  endpoint_internalURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:port]}/v1/$(tenant_id)s"
+  endpoint_publicURL "#{node[:heat][:api][:protocol]}://"\
+                     "#{my_public_host}:"\
+                     "#{node[:heat][:api][:port]}/v1/$(project_id)s"
+  endpoint_adminURL "#{node[:heat][:api][:protocol]}://"\
+                    "#{my_admin_host}:"\
+                    "#{node[:heat][:api][:port]}/v1/$(project_id)s"
+  endpoint_internalURL "#{node[:heat][:api][:protocol]}://"\
+                       "#{my_admin_host}:"\
+                       "#{node[:heat][:api][:port]}/v1/$(project_id)s"
   #  endpoint_global true
   #  endpoint_enabled true
   action :add_endpoint_template
