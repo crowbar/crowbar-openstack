@@ -59,6 +59,9 @@ case node[:nova][:libvirt_type]
         action :nothing
       end.run_action(:install)
 
+      # install libosinfo to provide hardware properties when driver is libvirt
+      package "typelib-1_0-Libosinfo-1_0"
+
       # Generate a UUID, as DMI's system uuid is unreliable
       if node[:nova][:host_uuid].nil?
         node.normal[:nova][:host_uuid] = `uuidgen`.strip
