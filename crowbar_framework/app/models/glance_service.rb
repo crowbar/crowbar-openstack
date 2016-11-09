@@ -132,6 +132,25 @@ class GlanceService < PacemakerServiceObject
       end
     end
 
+    # allocate a IP from the ceph_client network if Ceph is used
+    ceph_proposal = Proposal.find_by(barclamp: "ceph")
+    network_proposal = Proposal.find_by(barclamp: "network")
+
+    if ceph_proposal
+      ceph_client = ceph_proposal["attributes"]["ceph"]["client_network"]
+      # is the ceph_client network really available?
+      if network_proposal["attributes"]["network"]["networks"][ceph_client].nil?
+        raise I18n.t(
+          "barclamp.#{@bc_name}.validation.ceph_client_network_not_available",
+          ceph_client: ceph_client
+        )
+      end
+      server_nodes.each do |n|
+        @logger.info("Allocating an IP from the Ceph client network '#{ceph_client}' for node #{n}")
+        net_svc.allocate_ip "default", ceph_client, "host", n
+      end
+    end
+
     # Setup virtual IPs for the clusters
     allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
 
