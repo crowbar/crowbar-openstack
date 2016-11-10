@@ -38,11 +38,6 @@
       "use_syslog": false,
       "default_store": "file",
       "filesystem_store_datadir": "/var/lib/glance/images",
-      "conversion": {
-        "enabled": false,
-        "conversion_format": "raw",
-        "work_dir": "/var/lib/glance/taskflow"
-      },
       "swift": {
         "store_container": "glance",
         "store_create_container_on_put": true
@@ -71,7 +66,7 @@
     "glance": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "glance-server": [ "readying", "ready", "applying" ]
       },
