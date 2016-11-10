@@ -40,6 +40,7 @@ class ManilaService < PacemakerServiceObject
         },
         "manila-share" => {
           "unique" => false,
+          "cluster" => true,
           "count" => -1,
           "admin" => false,
           "exclude_platform" => {
@@ -167,6 +168,14 @@ class ManilaService < PacemakerServiceObject
     reset_sync_marks_on_clusters_founders(controller_elements)
     Openstack::HA.set_controller_role(controller_nodes) if ha_enabled
 
+    share_elements = role.override_attributes[@bc_name]["elements"]["manila-share"] || []
+    share_ha_elements = share_elements.select { |e| PacemakerServiceObject.is_cluster? e }
+    unless share_ha_elements.empty?
+      reset_sync_marks_on_clusters_founders(share_ha_elements)
+      share_ha_nodes = share_ha_elements.map { |e| PacemakerServiceObject.expand_nodes(e) }
+      share_ha_nodes.flatten!
+      Openstack::HA.set_controller_role(share_ha_nodes)
+    end
     vip_networks = ["admin", "public"]
 
     dirty = prepare_role_for_ha_with_haproxy(

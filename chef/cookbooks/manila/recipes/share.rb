@@ -38,4 +38,37 @@ if ManilaHelper.has_cephfs_share? node
   include_recipe "#{@cookbook_name}::cephfs"
 end
 
-manila_service("share")
+share_elements = node[:manila][:elements]["manila-share"]
+ha_enabled = CrowbarPacemakerHelper.cluster_enabled?(node) &&
+  share_elements.include?("cluster:#{CrowbarPacemakerHelper.cluster_name(node)}")
+
+manila_service "share" do
+  use_pacemaker_provider ha_enabled
+end
+
+if ha_enabled
+  log "HA support for manila share is enabled"
+
+  # Create manila-share HA specific config file
+  service_host = CrowbarPacemakerHelper.cluster_vhostname(node)
+
+  template "/etc/manila/manila-share.conf" do
+    source "manila-share.conf.erb"
+    owner "root"
+    group node[:manila][:group]
+    mode 0o640
+    variables(
+      host: service_host
+    )
+    notifies :restart, "service[manila-share]"
+  end
+
+  include_recipe "manila::share_ha"
+else
+  log "HA support for manila share is disabled"
+
+  file "/etc/manila/manila-share.conf" do
+    action :delete
+    notifies :restart, "service[manila-share]"
+  end
+end

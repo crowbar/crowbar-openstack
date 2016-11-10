@@ -16,4 +16,5 @@
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "manila", "manila-share")
   include_recipe "manila::share"
+  include_recipe "manila::share_ha"
 end
