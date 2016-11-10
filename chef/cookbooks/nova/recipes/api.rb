@@ -124,9 +124,12 @@ keystone_register "register nova endpoint" do
   auth register_auth_hash
   endpoint_service "nova"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{api_protocol}://#{public_api_host}:#{api_port}/v2.1/$(tenant_id)s"
-  endpoint_adminURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2.1/$(tenant_id)s"
-  endpoint_internalURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2.1/$(tenant_id)s"
+  endpoint_publicURL "#{api_protocol}://"\
+                     "#{public_api_host}:#{api_port}/v2.1/$(project_id)s"
+  endpoint_adminURL "#{api_protocol}://"\
+                    "#{admin_api_host}:#{api_port}/v2.1/$(project_id)s"
+  endpoint_internalURL "#{api_protocol}://"\
+                       "#{admin_api_host}:#{api_port}/v2.1/$(project_id)s"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template
@@ -156,9 +159,12 @@ keystone_register "register nova_legacy endpoint" do
   auth register_auth_hash
   endpoint_service "nova_legacy"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{api_protocol}://#{public_api_host}:#{api_port}/v2/$(tenant_id)s"
-  endpoint_adminURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2/$(tenant_id)s"
-  endpoint_internalURL "#{api_protocol}://#{admin_api_host}:#{api_port}/v2/$(tenant_id)s"
+  endpoint_publicURL "#{api_protocol}://"\
+                     "#{public_api_host}:#{api_port}/v2/$(project_id)s"
+  endpoint_adminURL "#{api_protocol}://"\
+                    "#{admin_api_host}:#{api_port}/v2/$(project_id)s"
+  endpoint_internalURL "#{api_protocol}://"\
+                       "#{admin_api_host}:#{api_port}/v2/$(project_id)s"
   action :add_endpoint_template
 end
 

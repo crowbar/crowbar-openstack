@@ -104,11 +104,11 @@ keystone_register "register trove endpoint" do
   endpoint_service "trove"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{trove_protocol}://"\
-                     "#{my_public_host}:#{trove_port}/v1.0/$(tenant_id)s"
+                     "#{my_public_host}:#{trove_port}/v1.0/$(project_id)s"
   endpoint_adminURL "#{trove_protocol}://"\
-                    "#{my_admin_host}:#{trove_port}/v1.0/$(tenant_id)s"
+                    "#{my_admin_host}:#{trove_port}/v1.0/$(project_id)s"
   endpoint_internalURL "#{trove_protocol}://"\
-                       "#{my_admin_host}:#{trove_port}/v1.0/$(tenant_id)s"
+                       "#{my_admin_host}:#{trove_port}/v1.0/$(project_id)s"
   #  endpoint_global true
   #  endpoint_enabled true
   action :add_endpoint_template
