@@ -2609,6 +2609,7 @@ os_region_name=<%= @keystone_settings['endpoint_region'] %>
 # production deployments.  Small workloads (single process) like devstack can
 # use the dogpile.cache.memory backend. (string value)
 #backend = dogpile.cache.null
+backend = dogpile.cache.memcached
 
 # Arguments supplied to the backend module. Specify this option once per
 # argument to be passed to the dogpile.cache backend. Example format:
@@ -2622,6 +2623,7 @@ os_region_name=<%= @keystone_settings['endpoint_region'] %>
 
 # Global toggle for caching. (boolean value)
 #enabled = false
+enabled = true
 
 # Extra debugging from the cache backend (cache keys, get/set/delete/etc
 # calls). This is only really useful if you need to see the specific cache-
