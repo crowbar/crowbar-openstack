@@ -306,6 +306,9 @@ class NovaService < PacemakerServiceObject
 
     neutron_service = NeutronService.new @logger
 
+    ceph_proposal = Proposal.find_by(barclamp: "ceph")
+    network_proposal = Proposal.find_by(barclamp: "network")
+
     compute_nodes_for_network.each do |n|
       neutron_service.enable_neutron_networks(neutron["attributes"]["neutron"],
                                               n, net_svc,
@@ -313,6 +316,20 @@ class NovaService < PacemakerServiceObject
       if role.default_attributes["nova"]["use_migration"]
         net_svc.allocate_ip("default", role.default_attributes["nova"]["migration"]["network"],
                             "host", n)
+      end
+
+      # allocate a IP from the ceph_client network if Ceph is used
+      if ceph_proposal
+        ceph_client = ceph_proposal["attributes"]["ceph"]["client_network"]
+        # is the ceph_client network really available?
+        if network_proposal["attributes"]["network"]["networks"][ceph_client].nil?
+          raise I18n.t(
+            "barclamp.#{@bc_name}.validation.ceph_client_network_not_available",
+            ceph_client: ceph_client
+          )
+        end
+        @logger.info("Allocating an IP from the Ceph client network '#{ceph_client}' for node #{n}")
+        net_svc.allocate_ip "default", ceph_client, "host", n
       end
     end unless all_nodes.nil?
 
