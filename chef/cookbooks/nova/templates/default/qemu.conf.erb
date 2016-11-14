@@ -292,6 +292,16 @@ group = "<%= @group %>"
 #   "/dev/infiniband/umad0",
 #   "/dev/infiniband/umad1",
 #   "/dev/infiniband/uverbs0"
+#
+<% if @dev_net_tun_acl -%>
+cgroup_device_acl = [
+    "/dev/null", "/dev/full", "/dev/zero",
+    "/dev/random", "/dev/urandom",
+    "/dev/ptmx", "/dev/kvm", "/dev/kqemu",
+    "/dev/rtc","/dev/hpet", "/dev/vfio/vfio",
+    "/dev/net/tun"
+]
+<% end -%>
 
 
 # The default format for Qemu/KVM guest save images is raw; that is, the

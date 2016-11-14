@@ -100,10 +100,10 @@ when "ml2"
     Chef::Log.error("default provider network ml2 type driver " \
         "'#{ml2_type_drivers_default_provider_network}' invalid for creating provider networks")
   end
-when "vmware"
+when "midonet", "vmware"
   fixed_network_type = ""
   # We would like to be sure that floating network will be created
-  # without any additional options, NSX will take care about everything.
+  # without any additional options, the SDN will take care of everything.
   floating_network_type = ""
 else
   Chef::Log.error("networking plugin '#{networking_plugin}' invalid for creating provider networks")
