@@ -489,6 +489,7 @@ auth_strategy = keystone
 # This option is deprecated for removal.
 # Its value may be silently ignored in the future.
 #memcached_servers = <None>
+memcached_servers = <%= @memcached_servers.join(',') %>
 
 #
 # From nova.compute
