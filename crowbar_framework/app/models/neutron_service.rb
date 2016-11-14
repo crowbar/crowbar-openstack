@@ -29,7 +29,7 @@ class NeutronService < PacemakerServiceObject
   end
 
   def self.networking_plugins_valid
-    ["ml2", "vmware"]
+    ["ml2", "vmware", "midonet"]
   end
 
   def self.networking_ml2_type_drivers_valid
@@ -245,6 +245,10 @@ class NeutronService < PacemakerServiceObject
     if proposal["attributes"]["neutron"]["use_dvr"]
       if plugin == "vmware"
         validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_vmware")
+      end
+
+      if plugin == "midonet"
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_midonet")
       end
 
       if ml2_mechanism_drivers.include? "linuxbridge"

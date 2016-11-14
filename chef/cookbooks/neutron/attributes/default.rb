@@ -108,6 +108,7 @@ when "suse"
     cisco_opflex_pkgs: ["agent-ovs",
                         "lldpd",
                         "openstack-neutron-opflex-agent"],
+    midonet_pkgs: ["python-networking-midonet"],
     user: "neutron",
     group: "neutron",
   }
@@ -149,6 +150,7 @@ when "rhel"
     cisco_opflex_pkgs: ["agent-ovs",
                         "lldpd",
                         "neutron-opflex-agent"],
+    midonet_pkgs: ["python-networking-midonet"],
     user: "neutron",
     group: "neutron",
   }
@@ -187,6 +189,7 @@ else
     cisco_apic_pkgs: [""],
     cisco_apic_gbp_pkgs: [""],
     cisco_opflex_pkgs: [""],
+    midonet_pkgs: ["python-networking-midonet"],
     user: "neutron",
     group: "neutron",
   }
@@ -201,6 +204,13 @@ default[:neutron][:lbaas][:f5][:icontrol_hostname] = ""
 default[:neutron][:lbaas][:f5][:icontrol_username] = "admin"
 default[:neutron][:lbaas][:f5][:icontrol_password] = "admin"
 default[:neutron][:lbaas][:f5][:parent_ssl_profile] = "clientssl"
+
+default[:neutron][:midonet][:host] = ""
+default[:neutron][:midonet][:port] = "8080"
+default[:neutron][:midonet][:username] = ""
+default[:neutron][:midonet][:password] = ""
+default[:neutron][:midonet][:openstack_user] = "midonet"
+default[:neutron][:midonet][:openstack_password] = ""
 
 default[:neutron][:ha][:network][:enabled] = false
 default[:neutron][:ha][:network][:l3_ra] = "service:#{node[:neutron][:platform][:l3_agent_name]}"

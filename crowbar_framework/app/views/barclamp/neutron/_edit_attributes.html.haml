@@ -40,6 +40,14 @@
         = string_field %w(vmware tz_uuid)
         = string_field %w(vmware l3_gw_uuid)
 
+      #midonet_container
+        = string_field %w(midonet host)
+        = string_field %w(midonet port)
+        = string_field %w(midonet username)
+        = password_field %w(midonet password)
+        = string_field %w(midonet openstack_user)
+        = password_field %w(midonet openstack_password)
+
       #num_vlans_container
         %fieldset
           %legend
