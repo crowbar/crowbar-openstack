@@ -130,6 +130,35 @@ keystone_register "register cinder endpoint v2" do
   action :add_endpoint_template
 end
 
+keystone_register "register cinder service v3" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  service_name "cinderv3"
+  service_type "volumev3"
+  service_description "Openstack Cinder Service V3"
+  action :add_service
+end
+
+keystone_register "register cinder endpoint v3" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  endpoint_service "cinderv3"
+  endpoint_region keystone_settings["endpoint_region"]
+  endpoint_publicURL "#{cinder_protocol}://"\
+                     "#{my_public_host}:#{cinder_port}/v3/$(project_id)s"
+  endpoint_adminURL "#{cinder_protocol}://"\
+                    "#{my_admin_host}:#{cinder_port}/v3/$(project_id)s"
+  endpoint_internalURL "#{cinder_protocol}://"\
+                       "#{my_admin_host}:#{cinder_port}/v3/$(project_id)s"
+  action :add_endpoint_template
+end
+
 crowbar_pacemaker_sync_mark "create-cinder_register"
 
 cinder_service "api" do
