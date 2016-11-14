@@ -88,6 +88,7 @@ when "suse"
     lbaas_haproxy_group: "haproxy",
     f5_agent_pkg: "",
     f5_agent_name: "f5-openstack-agent",
+    infoblox_agent_name: "openstack-neutron-infoblox-ipam-agent",
     metadata_agent_name: "openstack-neutron-metadata-agent",
     metadata_agent_pkg: "openstack-neutron-metadata-agent",
     metering_agent_pkg: "openstack-neutron-metering-agent",
@@ -108,6 +109,9 @@ when "suse"
     cisco_opflex_pkgs: ["agent-ovs",
                         "lldpd",
                         "openstack-neutron-opflex-agent"],
+    infoblox_pkgs: ["python-infoblox-client",
+                    "openstack-neutron-infoblox",
+                    "openstack-neutron-infoblox-ipam-agent"],
     user: "neutron",
     group: "neutron",
   }
@@ -130,6 +134,7 @@ when "rhel"
     lbaas_haproxy_group: "nogroup",
     f5_agent_pkg: "",
     f5_agent_name: "f5-openstack-agent",
+    infoblox_agent_name: "",
     metadata_agent_name: "neutron-metadata-agent",
     metadata_agent_pkg: "openstack-neutron",
     metering_agent_pkg: "openstack-neutron-metering-agent",
@@ -149,6 +154,7 @@ when "rhel"
     cisco_opflex_pkgs: ["agent-ovs",
                         "lldpd",
                         "neutron-opflex-agent"],
+    infoblox_pkgs: [],
     user: "neutron",
     group: "neutron",
   }
@@ -172,6 +178,7 @@ else
     lbaas_haproxy_group: "nogroup",
     f5_agent_pkg: "",
     f5_agent_name: "f5-oslbaasv2-agent",
+    infoblox_agent_name: "",
     metadata_agent_name: "neutron-metadata-agent",
     metadata_agent_pkg: "neutron-metadata-agent",
     metering_agent_pkg: "neutron-plugin-metering-agent",
@@ -187,6 +194,7 @@ else
     cisco_apic_pkgs: [""],
     cisco_apic_gbp_pkgs: [""],
     cisco_opflex_pkgs: [""],
+    infoblox_pkgs: [],
     user: "neutron",
     group: "neutron",
   }
@@ -220,5 +228,9 @@ default[:neutron][:ha][:neutron_ha_tool][:op][:start][:timeout] = "120s"
 default[:neutron][:ha][:server][:enabled] = false
 default[:neutron][:ha][:server][:server_ra] = "service:#{node[:neutron][:platform][:service_name]}"
 default[:neutron][:ha][:server][:op][:monitor][:interval] = "10s"
+default[:neutron][:ha][:infoblox][:enabled] = false
+default[:neutron][:ha][:infoblox][:infoblox_ra] =
+  "lsb:#{node[:neutron][:platform][:infoblox_agent_name]}"
+default[:neutron][:ha][:infoblox][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:neutron][:ha][:ports][:server] = 5530

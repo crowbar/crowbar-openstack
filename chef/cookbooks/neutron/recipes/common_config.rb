@@ -111,6 +111,14 @@ end
 os_sdn_net = Barclamp::Inventory.get_network_definition(node, "os_sdn")
 mtu_value = os_sdn_net.nil? ? 1500 : os_sdn_net["mtu"].to_i
 
+ipam_driver = nil
+infoblox_settings = nil
+
+if neutron[:neutron][:use_infoblox]
+  ipam_driver = "infoblox"
+  infoblox_settings = neutron[:neutron][:infoblox]
+end
+
 template "/etc/neutron/neutron.conf" do
     cookbook "neutron"
     source "neutron.conf.erb"
@@ -143,7 +151,9 @@ template "/etc/neutron/neutron.conf" do
       dvr_enabled: neutron[:neutron][:use_dvr],
       network_nodes_count: network_nodes_count,
       dns_domain: neutron[:neutron][:dhcp_domain],
-      mtu_value: mtu_value
+      mtu_value: mtu_value,
+      infoblox: infoblox_settings,
+      ipam_driver: ipam_driver
     )
 end
 
