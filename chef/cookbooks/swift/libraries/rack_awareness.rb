@@ -37,9 +37,8 @@ class Rack_awareness
             storage_ip = Swift::Evaluator.get_ip_by_type(n, :storage_ip_expr)
             #get storage iface
             iface=""
-            n[:network][:interfaces].keys.each do |ifn|
-              addresses = n[:network][:interfaces][ifn.to_s][:addresses]
-              if !addresses.nil? && addresses.key?(storage_ip)
+            n[:crowbar_wall][:network][:interfaces].keys.each do |ifn|
+              if n[:crowbar_wall][:network][:interfaces][ifn.to_s][:addresses].include?(storage_ip)
                 iface=ifn
                 break
               end
