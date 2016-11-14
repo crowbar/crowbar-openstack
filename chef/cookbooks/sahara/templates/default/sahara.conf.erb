@@ -16,6 +16,7 @@ admin_user_domain_name = <%= @keystone_settings["admin_domain"] %>
 admin_project_domain_name = <%= @keystone_settings["admin_domain"]%>
 os_region_name = <%= @keystone_settings['endpoint_region'] %>
 api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+use_barbican_key_manager = <%= node[:sahara][:use_barbican_key_manager] %>
 
 [cinder]
 api_insecure = <%= @cinder_insecure %>

@@ -41,7 +41,8 @@
                 "user": { "type": "str", "required": true },
                 "database": { "type": "str", "required": true }
               }
-            }
+            },
+            "use_barbican_key_manager": { "type": "bool", "required": true }
           }
         }
       }

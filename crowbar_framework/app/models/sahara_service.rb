@@ -84,6 +84,14 @@ class SaharaService < PacemakerServiceObject
 
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "sahara-server"
+
+    # check if barbican is deployed in case we are using use_barbican_key_manager
+    if proposal["attributes"][@bc_name]["use_barbican_key_manager"]
+      if NodeObject.find("roles:barbican-controller").empty?
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.barbican_deployed")
+      end
+    end
+
     super
   end
 
