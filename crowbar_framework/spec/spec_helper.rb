@@ -22,7 +22,6 @@ if ENV["CODECLIMATE_REPO_TOKEN"]
   require "codeclimate-test-reporter"
 
   Coveralls.wear!
-  CodeClimate::TestReporter.start
 
   SimpleCov.start do
     add_filter "/spec"
