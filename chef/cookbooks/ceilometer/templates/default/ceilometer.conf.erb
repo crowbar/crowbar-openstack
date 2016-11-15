@@ -1543,11 +1543,13 @@ project_name = <%= @keystone_settings['service_tenant'] %>
 # the user and project domain in v3 and ignored in v2 authentication. (string
 # value)
 #default_domain_id = <None>
+default_domain_id = <%= @keystone_settings["admin_domain_id"] %>
 
 # Optional domain name to use with v3 API and v2 parameters. It will be used
 # for both the user and project domain in v3 and ignored in v2 authentication.
 # (string value)
 #default_domain_name = <None>
+default_domain_name = <%= @keystone_settings["admin_domain"] %>
 
 # User id (string value)
 #user_id = <None>
