@@ -69,26 +69,26 @@ default[:ceilometer][:mongodb][:port] = 27017
 
 default[:ceilometer][:ha][:server][:enabled] = false
 
-default[:ceilometer][:ha][:api][:agent] = "service:#{api_service_name}"
+default[:ceilometer][:ha][:api][:agent] = "systemd:#{api_service_name}"
 default[:ceilometer][:ha][:api][:op][:monitor][:interval] = "10s"
 # increase default timeout: ceilometer has to wait until mongodb is ready
 default[:ceilometer][:ha][:api][:op][:start][:timeout] = "60s"
-default[:ceilometer][:ha][:collector][:agent] = "service:#{collector_service_name}"
+default[:ceilometer][:ha][:collector][:agent] = "systemd:#{collector_service_name}"
 default[:ceilometer][:ha][:collector][:op][:monitor][:interval] = "10s"
-default[:ceilometer][:ha][:agent_notification][:agent] = "service:#{agent_notification_service_name}"
+default[:ceilometer][:ha][:agent_notification][:agent] = "systemd:#{agent_notification_service_name}"
 default[:ceilometer][:ha][:agent_notification][:op][:monitor][:interval] = "10s"
 
-default["ceilometer"]["ha"]["alarm_evaluator"]["agent"] = "service:#{alarm_evaluator_service_name}"
+default["ceilometer"]["ha"]["alarm_evaluator"]["agent"] = "systemd:#{alarm_evaluator_service_name}"
 default["ceilometer"]["ha"]["alarm_evaluator"]["op"]["monitor"]["interval"] = "10s"
-default["ceilometer"]["ha"]["alarm_notifier"]["agent"] = "service:#{alarm_notifier_service_name}"
+default["ceilometer"]["ha"]["alarm_notifier"]["agent"] = "systemd:#{alarm_notifier_service_name}"
 default["ceilometer"]["ha"]["alarm_notifier"]["op"]["monitor"]["interval"] = "10s"
 
 default[:ceilometer][:ha][:central][:enabled] = false
-default[:ceilometer][:ha][:central][:agent] = "service:#{central_service_name}"
+default[:ceilometer][:ha][:central][:agent] = "systemd:#{central_service_name}"
 default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:ceilometer][:ha][:ports][:api] = 5561
-default[:ceilometer][:ha][:mongodb][:agent] = "service:mongodb"
+default[:ceilometer][:ha][:mongodb][:agent] = "systemd:mongodb"
 default[:ceilometer][:ha][:mongodb][:op][:monitor][:interval] = "10s"
 default[:ceilometer][:ha][:mongodb][:replica_set][:name] = "crowbar-ceilometer"
 default[:ceilometer][:ha][:mongodb][:replica_set][:member] = false

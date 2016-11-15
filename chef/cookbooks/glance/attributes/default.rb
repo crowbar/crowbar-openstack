@@ -95,6 +95,6 @@ default[:glance][:ha][:ports][:api]      = 5510
 default[:glance][:ha][:ports][:registry] = 5511
 # pacemaker definitions
 default[:glance][:ha][:api][:op][:monitor][:interval] = "10s"
-default[:glance][:ha][:api][:agent]     = "service:#{default[:glance][:api][:service_name]}"
+default[:glance][:ha][:api][:agent] = "systemd:#{default[:glance][:api][:service_name]}"
 default[:glance][:ha][:registry][:op][:monitor][:interval] = "10s"
-default[:glance][:ha][:registry][:agent]= "service:#{default[:glance][:registry][:service_name]}"
+default[:glance][:ha][:registry][:agent] = "systemd:#{default[:glance][:registry][:service_name]}"
