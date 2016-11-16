@@ -1,0 +1,21 @@
+
+Listen <%= @bind_host %>:<%= @bind_port %>
+
+<VirtualHost <%= @bind_host %>:<%= @bind_port %>>
+    WSGIDaemonProcess aodh-api user=aodh group=aodh processes=<%= @processes %> threads=<%= @threads %> user=aodh group=aodh display-name=%{GROUP}
+    WSGIProcessGroup aodh-api
+    WSGIScriptAlias / /srv/www/aodh-api/app.wsgi
+    WSGIApplicationGroup %{GLOBAL}
+    ErrorLogFormat "%{cu}t %M"
+    ErrorLog <%= @apache_log_dir %>/aodh_error.log
+    CustomLog <%= @apache_log_dir %>/aodh_access.log combined
+    <Directory /srv/www/aodh-api>
+        <IfVersion >= 2.4>
+            Require all granted
+        </IfVersion>
+        <IfVersion < 2.4>
+            Order allow,deny
+            Allow from all
+        </IfVersion>
+    </Directory>
+</VirtualHost>
