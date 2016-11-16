@@ -19,4 +19,5 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "barbican", "barbican-cont
   include_recipe "barbican::common"
   include_recipe "barbican::worker"
   include_recipe "barbican::keystone-listener"
+  include_recipe "barbican::ha"
 end

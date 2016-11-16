@@ -64,7 +64,7 @@ class BarbicanService < PacemakerServiceObject
 
     base["deployment"][@bc_name]["elements"] = {
       "barbican-controller" => [server_nodes.first.name]
-    } unless NodeObject.find("roles:barbican-controller").nil? || server_nodes.nil?
+    } unless server_nodes.nil?
 
     base["attributes"][@bc_name]["database_instance"] =
       find_dep_proposal("database")
@@ -92,7 +92,17 @@ class BarbicanService < PacemakerServiceObject
 
     server_elements,
     server_nodes,
-    _ha_enabled = role_expand_elements(role, "barbican-controller")
+    ha_enabled = role_expand_elements(role, "barbican-controller")
+    reset_sync_marks_on_clusters_founders(server_elements)
+    Openstack::HA.set_controller_role(server_nodes) if ha_enabled
+
+    vip_networks = ["admin", "public"]
+
+    dirty = prepare_role_for_ha_with_haproxy(
+      role, ["barbican", "ha", "enabled"],
+      ha_enabled, server_elements, vip_networks
+    )
+    role.save if dirty
 
     unless all_nodes.empty? || server_elements.empty?
       net_svc = NetworkService.new @logger
@@ -101,6 +111,7 @@ class BarbicanService < PacemakerServiceObject
       server_nodes.each do |node|
         net_svc.allocate_ip "default", "public", "host", node
       end
+      allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
     end
 
     @logger.debug("Barbican apply_role_pre_chef_call: leaving")
