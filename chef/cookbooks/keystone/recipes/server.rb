@@ -225,6 +225,18 @@ crowbar_pacemaker_sync_mark "create-keystone_database"
 
 sql_connection = "#{db_settings[:url_scheme]}://#{node[:keystone][:db][:user]}:#{node[:keystone][:db][:password]}@#{db_settings[:address]}/#{node[:keystone][:db][:database]}"
 
+if ha_enabled
+  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server")
+  memcached_servers = memcached_nodes.map do |n|
+    node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
+    "#{node_admin_ip}:#{n[:memcached][:port]}"
+  end
+else
+  node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  memcached_servers = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
+end
+memcached_servers.sort!
+
 template "/etc/keystone/keystone.conf" do
     source "keystone.conf.erb"
     owner "root"
@@ -240,6 +252,7 @@ template "/etc/keystone/keystone.conf" do
       bind_admin_port: bind_admin_port,
       bind_service_port: bind_service_port,
       admin_endpoint: node[:keystone][:api][:admin_URL],
+      memcached_servers: memcached_servers,
       use_syslog: node[:keystone][:use_syslog],
       signing_token_format: node[:keystone][:signing][:token_format],
       signing_certfile: node[:keystone][:signing][:certfile],
