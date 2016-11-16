@@ -1,0 +1,21 @@
+
+Listen <%= @bind_host %>:<%= @bind_port %>
+
+<VirtualHost <%= @bind_host %>:<%= @bind_port %>>
+    WSGIDaemonProcess ceilometer-api user=ceilometer group=ceilometer processes=<%= @processes %> threads=<%= @threads %> user=ceilometer group=ceilometer display-name=%{GROUP}
+    WSGIProcessGroup ceilometer-api
+    WSGIScriptAlias / /srv/www/ceilometer-api/app.wsgi
+    WSGIApplicationGroup %{GLOBAL}
+    ErrorLogFormat "%{cu}t %M"
+    ErrorLog <%= @apache_log_dir %>/ceilometer_error.log
+    CustomLog <%= @apache_log_dir %>/ceilometer_access.log combined
+    <Directory /srv/www/ceilometer-api>
+        <IfVersion >= 2.4>
+            Require all granted
+        </IfVersion>
+        <IfVersion < 2.4>
+            Order allow,deny
+            Allow from all
+        </IfVersion>
+    </Directory>
+</VirtualHost>
