@@ -140,6 +140,17 @@ class ManilaService < PacemakerServiceObject
             "barclamp.#{@bc_name}.validation.generic.password_or_private_key")
         end
       end
+
+      # validate cephfs driver
+      if backend_driver == "cephfs"
+        # check that Ceph with an MDS role is deployed
+        if share["cephfs"]["use_crowbar"]
+          ceph_mds_nodes = NodeObject.find("roles:ceph-mds")
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.cephfs.ceph_mds_not_deployed"
+          ) if ceph_mds_nodes.empty?
+        end
+      end
     end
     super
   end
@@ -185,6 +196,22 @@ class ManilaService < PacemakerServiceObject
 
       node.save
     end
+
+    # manila-share service needs a extra section in ceph.conf
+    ceph_conf_extra_section = %q(
+client mount uid = 0
+client mount gid = 0
+log file = /var/log/manila/ceph-client.manila.log
+admin socket = /var/run/manila/ceph-$name.$pid.asok
+keyring = /etc/ceph/ceph.client.manila.keyring
+)
+
+    all_nodes.each do |n|
+      node = NodeObject.find_node_by_name n
+      node["ceph"]["config_sections"]["client.manila"] = ceph_conf_extra_section
+      node.save
+    end
+
     @logger.debug("Manila apply_role_pre_chef_call: leaving")
   end
 end

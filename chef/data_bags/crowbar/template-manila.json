@@ -64,6 +64,12 @@
           "hds_hnas_stalled_job_timeout": 30,
           "hds_hnas_user": "None"
         },
+        "cephfs": {
+          "use_crowbar": true,
+          "cephfs_conf_path": "/etc/ceph/ceph.conf",
+          "cephfs_auth_id": "manila",
+          "cephfs_cluster_name": "ceph"
+        },
         "manual": {
           "driver": "",
           "config": ""
@@ -90,7 +96,7 @@
     "manila": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "manila-server": [ "readying", "ready", "applying" ],
         "manila-share": [ "readying", "ready", "applying" ]

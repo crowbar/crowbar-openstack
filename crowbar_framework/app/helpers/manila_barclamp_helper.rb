@@ -31,6 +31,7 @@ module ManilaBarclampHelper
         [t(".shares.generic_share_driver"), "generic"],
         [t(".shares.hitachi_share_driver"), "hitachi"],
         [t(".shares.netapp_share_driver"), "netapp"],
+        [t(".shares.cephfs_share_driver"), "cephfs"],
         [t(".shares.manual_share_driver"), "manual"]
       ],
       selected.to_s
