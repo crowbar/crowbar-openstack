@@ -131,7 +131,7 @@ template "#{node[:apache][:dir]}/vhosts.d/barbican-api.conf" do
     processes: node[:barbican][:api][:processes],
     threads: node[:barbican][:api][:threads],
   )
-  notifies :reload, resources(service: "apache2")
+  notifies :restart, resources(service: "apache2"), :immediately
 end
 
 apache_site "barbican-api.conf" do
