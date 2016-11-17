@@ -47,9 +47,9 @@ transaction_objects = []
 
 services =
   if node[:barbican][:enable_keystone_listener]
-    ["worker", "api", "keystone-listner"]
+    ["worker", "keystone-listner"]
   else
-    ["worker", "api"]
+    ["worker"]
   end
 
 services.each do |service|
