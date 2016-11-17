@@ -1300,10 +1300,12 @@ multitenancy_enabled = False
 # First value of list is protocol by default, items of list show
 # enabled protocols at all. (list value)
 #enable_protocols = nfs,cifs
+enable_protocols = <%= @manila_settings['enable_protocols'] %>
 
 # Selection of protocols, that should be covered with ip rule tests
 # (list value)
 #enable_ip_rules_for_protocols = nfs,cifs
+enable_ip_rules_for_protocols = <%= @manila_settings['enable_ip_rules_for_protocols'] %>
 
 # Selection of protocols, that should be covered with user rule tests
 # (list value)
@@ -1311,6 +1313,7 @@ multitenancy_enabled = False
 
 # Protocols that should be covered with cert rule tests. (list value)
 #enable_cert_rules_for_protocols = glusterfs
+enable_cert_rules_for_protocols = <%= @manila_settings['enable_cert_rules_for_protocols'] %>
 
 # Protocols to be covered with cephx rule tests. (list value)
 #enable_cephx_rules_for_protocols = cephfs
@@ -1384,10 +1387,12 @@ suppress_errors_in_cleanup = true
 # Disable this feature if used driver doesn't support it. (boolean
 # value)
 #run_snapshot_tests = true
+run_snapshot_tests =<%= @manila_settings['run_snapshot_tests'] %>
 
 # Defines whether to run consistency group tests or not. Disable this
 # feature if used driver doesn't support it. (boolean value)
 #run_consistency_group_tests = true
+run_consistency_group_tests =<%= @manila_settings['run_consistency_group_tests'] %>
 
 # Defines whether to run replication tests or not. Enable this feature
 # if the driver is configured for replication. (boolean value)
