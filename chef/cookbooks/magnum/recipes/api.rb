@@ -75,8 +75,8 @@ keystone_register "register magnum service" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   service_name "magnum"
-  service_type "container"
-  service_description "Openstack Magnum - Containers as a Service"
+  service_type "container-infra"
+  service_description "Container Infrastructure Management Service"
   action :add_service
 end
 
