@@ -29,7 +29,7 @@ haproxy_loadbalancer "barbican-api" do
   port network_settings[:api][:ha_bind_port]
   use_ssl ssl_enabled
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(
-    node, "babrican", "babrican-controller", "api"
+    node, "barbican", "barbican-controller", "api"
   )
   action :nothing
 end.run_action(:create)
