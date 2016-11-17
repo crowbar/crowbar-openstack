@@ -19,7 +19,7 @@ module BarbicanHelper
 
         api: {
           bind_port: bind_port,
-          ha_bind_host: @cluster_admin_ip,
+          ha_bind_host: node[:barbican][:api][:bind_host] == "*" ? "0.0.0.0" : @cluster_admin_ip,
           ha_bind_port: node[:barbican][:api][:bind_port].to_i
         },
       }
