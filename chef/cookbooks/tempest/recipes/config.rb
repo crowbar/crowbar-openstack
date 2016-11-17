@@ -157,7 +157,6 @@ machine_id_file = node[:tempest][:tempest_path] + "/machine.id"
 alt_machine_id_file = node[:tempest][:tempest_path] + "/alt_machine.id"
 docker_image_id_file = node[:tempest][:tempest_path] + "/docker_machine.id"
 
-glance_node = search(:node, "roles:glance-server").first
 insecure = "--insecure"
 
 tempest_test_image = node[:tempest][:tempest_test_images][node[:kernel][:machine]]
