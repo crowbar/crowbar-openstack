@@ -37,7 +37,7 @@ node.set[:magnum][:api][:bind_host] = my_ipaddress
 bind_port = network_settings[:api][:bind_port]
 bind_host = network_settings[:api][:bind_host]
 
-template "/etc/magnum/magnum.conf" do
+template "/etc/magnum/magnum.conf.d/100-magnum.conf" do
   source "magnum.conf.erb"
   owner "root"
   group node[:magnum][:group]

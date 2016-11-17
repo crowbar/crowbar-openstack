@@ -10,7 +10,7 @@ define :magnum_service, use_pacemaker_provider: false do
     service_name magnum_name
     supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(template: "/etc/magnum/magnum.conf")
+    subscribes :restart, resources(template: "/etc/magnum/magnum.conf.d/100-magnum.conf")
     provider Chef::Provider::CrowbarPacemakerService \
                if params[:use_pacemaker_provider]
   end
