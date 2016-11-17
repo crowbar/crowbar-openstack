@@ -20,7 +20,12 @@
         "image_with_share_tools": "manila-service-image",
         "image_username": "root",
         "image_password": "",
-        "default_share_type_name": "default"
+        "default_share_type_name": "default",
+        "enable_cert_rules_for_protocols": "glusterfs",
+        "enable_ip_rules_for_protocols": "nfs,cifs",
+        "run_consistency_group_tests": true,
+        "run_snapshot_tests": true,
+        "enable_protocols": "nfs,cifs"
       },
       "magnum": {
         "image_id": "magnum-service-image",
@@ -33,7 +38,7 @@
     "tempest": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 101,
+      "schema-revision": 102,
       "element_states": {
         "tempest": [ "ready", "applying" ]
       },
@@ -50,4 +55,3 @@
     }
   }
 }
-
