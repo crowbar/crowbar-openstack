@@ -41,13 +41,13 @@ default[:cinder][:pool_timeout] = 30
 
 default[:cinder][:ha][:enabled] = false
 if %w(rhel suse).include? node[:platform_family]
-  default[:cinder][:ha][:api_ra] = "service:openstack-cinder-api"
-  default[:cinder][:ha][:scheduler_ra] = "service:openstack-cinder-scheduler"
-  default[:cinder][:ha][:volume_ra] = "service:openstack-cinder-volume"
+  default[:cinder][:ha][:api_ra] = "systemd:openstack-cinder-api"
+  default[:cinder][:ha][:scheduler_ra] = "systemd:openstack-cinder-scheduler"
+  default[:cinder][:ha][:volume_ra] = "systemd:openstack-cinder-volume"
 else
-  default[:cinder][:ha][:api_ra] = "service:cinder-api"
-  default[:cinder][:ha][:scheduler_ra] = "service:cinder-scheduler"
-  default[:cinder][:ha][:volume_ra] = "service:cinder-volume"
+  default[:cinder][:ha][:api_ra] = "systemd:cinder-api"
+  default[:cinder][:ha][:scheduler_ra] = "systemd:cinder-scheduler"
+  default[:cinder][:ha][:volume_ra] = "systemd:cinder-volume"
 end
 default[:cinder][:ha][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
