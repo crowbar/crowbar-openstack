@@ -89,8 +89,9 @@ users = [
           {"name" => tempest_adm_user, "pass" => tempest_adm_pass, "role" => "admin" }
         ]
 
-if use_heat
-  heat_trusts_delegated_roles = node[:heat][:trusts_delegated_roles]
+heat_server = search(:node, "roles:heat-server").first
+if use_heat && !heat_server.nil?
+  heat_trusts_delegated_roles = heat_server[:heat][:trusts_delegated_roles]
   heat_trusts_delegated_roles.each do |role|
     users.push("name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => role)
   end
