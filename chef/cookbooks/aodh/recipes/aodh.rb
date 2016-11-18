@@ -207,9 +207,44 @@ crowbar_pacemaker_sync_mark "create-aodh_db_sync"
 service "aodh-api" do
   service_name node[:aodh][:api][:service_name]
   supports status: true, restart: true, start: true, stop: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/aodh/aodh.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  action [:disable, :stop]
+  ignore_failure true
+end
+
+include_recipe "apache2"
+if node[:platform_family] == "rhel"
+  package "mod_wsgi"
+else
+  include_recipe "apache2::mod_wsgi"
+end
+apache_module "version"
+
+apache_site "000-default" do
+  enable false
+end
+
+apache_log_dir = if node[:platform_family] == "suse"
+  "/var/log/apache2"
+else
+  "${APACHE_LOG_DIR}"
+end
+
+template "#{node[:apache][:dir]}/sites-available/aodh-api.conf" do
+  path "#{node[:apache][:dir]}/vhosts.d/aodh-api.conf" if node[:platform_family] == "suse"
+  source "apache_aodh.conf.erb"
+  variables(
+    apache_log_dir: apache_log_dir,
+    bind_host: bind_host,
+    bind_port: bind_port,
+    # There is tough science behind those numbers..
+    processes: 3,
+    threads: 3
+  )
+  notifies :restart, resources(service: "apache2"), :immediately
+end
+
+apache_site "aodh.conf" do
+  enable true
 end
 
 service "aodh-evaluator" do

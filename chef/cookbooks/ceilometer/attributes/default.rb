@@ -69,8 +69,6 @@ default[:ceilometer][:mongodb][:port] = 27017
 
 default[:ceilometer][:ha][:server][:enabled] = false
 
-default[:ceilometer][:ha][:api][:agent] = "systemd:#{api_service_name}"
-default[:ceilometer][:ha][:api][:op][:monitor][:interval] = "10s"
 # increase default timeout: ceilometer has to wait until mongodb is ready
 default[:ceilometer][:ha][:api][:op][:start][:timeout] = "60s"
 default[:ceilometer][:ha][:collector][:agent] = "systemd:#{collector_service_name}"

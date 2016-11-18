@@ -187,10 +187,53 @@ end
 service "ceilometer-api" do
   service_name node[:ceilometer][:api][:service_name]
   supports status: true, restart: true, start: true, stop: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
-  subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  action [:disable, :stop]
+  ignore_failure true
+end
+
+include_recipe "apache2"
+if node[:platform_family] == "rhel"
+  package "mod_wsgi"
+else
+  include_recipe "apache2::mod_wsgi"
+end
+apache_module "version"
+
+apache_site "000-default" do
+  enable false
+end
+
+apache_log_dir = if node[:platform_family] == "suse"
+  "/var/log/apache2"
+else
+  "${APACHE_LOG_DIR}"
+end
+
+if node[:ceilometer][:ha][:server][:enabled]
+  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  bind_host = admin_address
+  bind_port = node[:ceilometer][:ha][:ports][:api]
+else
+  bind_host = node[:ceilometer][:api][:host]
+  bind_port = node[:ceilometer][:api][:port]
+end
+
+template "#{node[:apache][:dir]}/sites-available/ceilometer.conf" do
+  path "#{node[:apache][:dir]}/vhosts.d/ceilometer.conf" if node[:platform_family] == "suse"
+  source "apache_ceilometer.conf.erb"
+  variables(
+    apache_log_dir: apache_log_dir,
+    bind_host: bind_host,
+    bind_port: bind_port,
+    # There is tough science behind those numbers..
+    processes: 3,
+    threads: 3
+  )
+  notifies :restart, resources(service: "apache2"), :immediately
+end
+
+apache_site "ceilometer.conf" do
+  enable true
 end
 
 if ha_enabled

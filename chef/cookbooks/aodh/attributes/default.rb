@@ -29,7 +29,7 @@ when "debian"
       "aodh-notifier",
       "python-ceilometerclient"
     ],
-    services: ["api", "evaluator", "notifier", "listener"]
+    services: ["evaluator", "notifier", "listener"]
   }
 when "rhel", "suse"
   default[:aodh][:platform] = {
@@ -42,7 +42,7 @@ when "rhel", "suse"
       "openstack-aodh-notifier",
       "python-aodhclient"
     ],
-    services: ["api", "evaluator", "notifier", "listener"]
+    services: ["evaluator", "notifier", "listener"]
   }
   api_service_name = "openstack-aodh-api"
   evaluator_service_name = "openstack-aodh-evaluator"
@@ -72,8 +72,6 @@ default[:aodh][:db][:database] = "aodh"
 default[:aodh][:db][:user] = "aodh"
 default[:aodh][:db][:password] = ""
 
-default[:aodh][:ha][:api][:agent] = "systemd:#{api_service_name}"
-default[:aodh][:ha][:api][:op][:monitor][:interval] = "10s"
 default[:aodh][:ha][:evaluator][:agent] = "systemd:#{evaluator_service_name}"
 default[:aodh][:ha][:evaluator][:op][:monitor][:interval] = "10s"
 default[:aodh][:ha][:notifier][:agent] = "systemd:#{notifier_service_name}"
