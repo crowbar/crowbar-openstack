@@ -22,6 +22,8 @@ package "glance" do
   package_name "openstack-glance" if %w(rhel suse).include?(node[:platform_family])
 end
 
+GlanceHelper.verify_user_and_group_ids(node)
+
 ha_enabled = node[:glance][:ha][:enabled]
 
 db_settings = fetch_database_settings
