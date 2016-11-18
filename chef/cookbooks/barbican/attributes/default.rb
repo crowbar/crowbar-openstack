@@ -37,6 +37,5 @@ default[:barbican][:ha][:ports][:api] = 5621
 default[:barbican][:ha][:api][:op][:monitor][:interval] = "10s"
 default[:barbican][:ha][:worker][:op][:monitor][:interval] = "10s"
 default[:barbican][:ha][:keystone_listener][:op][:monitor][:interval] = "10s"
-default[:barbican][:ha][:api][:agent] = "lsb:openstack-barbican-api"
 default[:barbican][:ha][:worker][:agent] = "lsb:openstack-barbican-worker"
 default[:barbican][:ha][:keystone_listener][:agent] = "lsb:openstack-barbican-keystone-listener"

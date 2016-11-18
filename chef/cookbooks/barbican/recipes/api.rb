@@ -38,8 +38,10 @@ network_settings = BarbicanHelper.network_settings(node)
 
 bind_port = network_settings[:api][:bind_port]
 barbican_port = node[:barbican][:api][:bind_port]
-admin_host = CrowbarHelper.get_host_for_admin_url(node, false)
-public_host = CrowbarHelper.get_host_for_public_url(node, false, false)
+admin_host = CrowbarHelper.get_host_for_admin_url(node, node[:barbican][:ha][:enabled])
+public_host = CrowbarHelper.get_host_for_public_url(node,
+                                                    node[:barbican][:api][:ssl],
+                                                    node[:barbican][:ha][:enabled])
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
                        tenant: keystone_settings["admin_tenant"] }
@@ -131,7 +133,7 @@ template "#{node[:apache][:dir]}/vhosts.d/barbican-api.conf" do
     processes: node[:barbican][:api][:processes],
     threads: node[:barbican][:api][:threads],
   )
-  notifies :reload, resources(service: "apache2")
+  notifies :restart, resources(service: "apache2"), :immediately
 end
 
 apache_site "barbican-api.conf" do

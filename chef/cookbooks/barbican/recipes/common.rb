@@ -25,7 +25,9 @@ ha_enabled = node[:barbican][:ha][:enabled]
 db_settings = fetch_database_settings
 db_conn_scheme = db_settings[:url_scheme]
 
-public_host = CrowbarHelper.get_host_for_public_url(node, false, false)
+public_host = CrowbarHelper.get_host_for_public_url(node,
+                                                    node[:barbican][:api][:ssl],
+                                                    node[:barbican][:ha][:enabled])
 
 barbican_protocol = node[:barbican][:api][:ssl] ? "https" : "http"
 
