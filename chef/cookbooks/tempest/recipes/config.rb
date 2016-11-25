@@ -295,8 +295,7 @@ use_magnum = $?.success?
 # FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
 # FIXME: this should be 'all' instead
-#
-neutron_api_extensions = "provider,security-group,dhcp_agent_scheduler,external-net,ext-gw-mode,binding,agent,quotas,l3_agent_scheduler,multi-provider,router,extra_dhcp_opt,allowed-address-pairs,extraroute,metering,fwaas,service-type"
+neutron_api_extensions = "provider,security-group,dhcp_agent_scheduler,external-net,ext-gw-mode,binding,agent,quotas,l3_agent_scheduler,multi-provider,router,extra_dhcp_opt,allowed-address-pairs,extraroute,metering,fwaas,service-type,project-id,sorting,pagination"
 
 unless neutrons[0].nil?
   if neutrons[0][:neutron][:use_lbaas] then
