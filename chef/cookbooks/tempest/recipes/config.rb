@@ -41,6 +41,9 @@ tempest_manila_settings = node[:tempest][:manila]
 # magnum (container)
 tempest_magnum_settings = node[:tempest][:magnum]
 
+# heat (orchestration)
+tempest_heat_settings = node[:tempest][:heat]
+
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
                        tenant: keystone_settings["admin_tenant"] }
@@ -552,7 +555,9 @@ template "/etc/tempest/tempest.conf" do
     # manila (share) settings
     manila_settings: tempest_manila_settings,
     # magnum (container) settings
-    magnum_settings: tempest_magnum_settings
+    magnum_settings: tempest_magnum_settings,
+    # heat (orchestration) settings
+    heat_settings: tempest_heat_settings
   )
 end
 
