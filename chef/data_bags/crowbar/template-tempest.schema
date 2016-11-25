@@ -49,6 +49,12 @@
                 "flavor_id": { "type": "str", "required": true },
                 "master_flavor_id": { "type": "str", "required": true }
               }
+            },
+            "heat": {
+              "type": "map",
+              "mapping": {
+                "image_ref": { "type": "str", "required": true }
+              }
             }
           }
         }
