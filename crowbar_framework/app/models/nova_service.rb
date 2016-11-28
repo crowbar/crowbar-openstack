@@ -94,6 +94,14 @@ class NovaService < PacemakerServiceObject
             "suse" => ">= 12.2",
           },
           "remotes" => true
+        },
+        "ec2-api" => {
+          "unique" => false,
+          "count" => -1,
+          "exclude_platform" => {
+            "suse" => "< 12.2",
+            "windows" => "/.*/"
+          }
         }
       }
     end

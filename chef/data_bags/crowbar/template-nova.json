@@ -148,11 +148,15 @@
         "nova-compute-vmware": [ "readying", "ready", "applying" ],
         "nova-compute-xen": [ "readying", "ready", "applying" ],
         "nova-compute-zvm": [ "readying", "ready", "applying" ],
-        "nova-ha-compute": [ "readying", "ready", "applying" ]
+        "nova-ha-compute": [ "readying", "ready", "applying" ],
+        "ec2-api": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-        [ "nova-controller" ],
+        [
+          "nova-controller",
+          "ec2-api"
+        ],
         [
           "nova-compute-docker",
           "nova-compute-hyperv",
@@ -165,6 +169,7 @@
       ],
       "element_run_list_order": {
         "nova-controller": 95,
+        "ec2-api": 96,
         "nova-compute-docker": 97,
         "nova-compute-hyperv": 97,
         "nova-compute-kvm": 97,
