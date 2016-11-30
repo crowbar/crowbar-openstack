@@ -21,7 +21,8 @@ module Barclamp
       options_for_select(
         [
           ["Local", "local"],
-          ["Barbican", "barbican"]
+          ["Barbican", "barbican"],
+          ["Magnum Database (x509keypair)", "x509keypair"]
         ],
         selected.to_s
       )
