@@ -169,6 +169,11 @@ pacemaker_transaction "neutron agents" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
+if CrowbarPacemakerHelper.being_upgraded?(node)
+  log "Skipping neutron-ha-tool resource creation during the upgrade"
+  use_l3_agent = false
+end
+
 if use_l3_agent
   # FIXME: neutron-ha-tool can't do keystone v3 currently
   os_auth_url_v2 = KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
