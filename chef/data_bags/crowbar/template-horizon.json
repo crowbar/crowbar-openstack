@@ -4,7 +4,6 @@
   "attributes": {
     "horizon": {
       "debug": false,
-      "nova_instance": "none",
       "keystone_instance": "none",
       "database_instance": "none",
       "site_branding": "OpenStack Dashboard",
@@ -49,7 +48,7 @@
     "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "horizon-server": [ "readying", "ready", "applying" ]
       },

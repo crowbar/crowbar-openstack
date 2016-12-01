@@ -46,7 +46,6 @@ class HorizonService < PacemakerServiceObject
     answer = []
     answer << { "barclamp" => "database", "inst" => role.default_attributes["horizon"]["database_instance"] }
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes["horizon"]["keystone_instance"] }
-    answer << { "barclamp" => "nova", "inst" => role.default_attributes["horizon"]["nova_instance"] }
     answer
   end
 
@@ -65,7 +64,6 @@ class HorizonService < PacemakerServiceObject
 
     base["attributes"][@bc_name]["database_instance"] = find_dep_proposal("database")
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
-    base["attributes"][@bc_name]["nova_instance"] = find_dep_proposal("nova")
 
     base["attributes"][@bc_name][:db][:password] = random_password
 
@@ -177,4 +175,3 @@ class HorizonService < PacemakerServiceObject
     @logger.debug("Horizon apply_role_pre_chef_call: leaving")
   end
 end
-
