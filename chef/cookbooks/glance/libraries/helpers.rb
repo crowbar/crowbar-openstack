@@ -28,52 +28,9 @@ module GlanceHelper
     end
   end
 
-  def self.check_user(node, expected_username, expected_uid)
-    node["etc"]["passwd"].each do |username, attrs|
-      if username == expected_username
-        if attrs["uid"] != expected_uid
-          message = "#{username} user exists on the system, "\
-                    "but it's uid is different from #{expected_uid}"
-          Chef::Log.fatal(message)
-          raise message
-        else
-          break
-        end
-      end
-
-      if attrs["uid"] == expected_uid
-        message = "#{expected_uid} already in use by user #{username}"
-        Chef::Log.fatal(message)
-        raise message
-      end
-    end
-  end
-
-  def self.check_group(node, expected_groupname, expected_gid)
-    node["etc"]["group"].each do |groupname, attrs|
-      if groupname == expected_groupname
-        if attrs["gid"] != expected_gid
-          message = "#{groupname} group exists on the system, "\
-                    "but it's gid is different from #{expected_gid}"
-          Chef::Log.fatal(message)
-          raise message
-        else
-          break
-        end
-      end
-
-      if attrs["gid"] == expected_gid
-        message = "#{expected_gid} already in use by user #{groupname}"
-        Chef::Log.fatal(message)
-        raise message
-      end
-    end
-  end
-
   def self.verify_user_and_group_ids(node)
-    Chef::Log.info("verifying user and group ids")
-    check_user(node, node[:glance][:user], node[:glance][:uid])
-    check_group(node, node[:glance][:group], node[:glance][:gid])
+    Chef::Log.info("Verifying user and group ids")
+    CrowbarOpenStackHelper.check_user(node, node[:glance][:user], node[:glance][:uid])
+    CrowbarOpenStackHelper.check_group(node, node[:glance][:group], node[:glance][:gid])
   end
-
 end
