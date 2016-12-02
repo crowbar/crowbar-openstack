@@ -59,6 +59,25 @@ else
   end
 end
 
+# install horizon neutron lbaas plugin if needed
+neutron_lbaas_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-neutron-lbaas-ui"
+  when "rhel"
+    "openstack-neutron-lbaas-ui"
+  end
+
+unless neutron_lbaas_ui_pkgname.nil?
+  neutron_servers = search(:node, "roles:neutron-server") || []
+  unless neutron_servers.empty?
+    package neutron_lbaas_ui_pkgname do
+      action :install
+      notifies :reload, resources(service: "apache2")
+    end
+  end
+end
+
 # install horizon manila plugin if needed
 manila_ui_pkgname =
   case node[:platform_family]
