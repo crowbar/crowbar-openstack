@@ -28,11 +28,13 @@ module Openstack
         end
 
         if role == "controller"
+          node[:pacemaker][:apache2] ||= {}
           unless node[:pacemaker][:apache2][:for_openstack]
             node[:pacemaker][:apache2][:for_openstack] = true
             save_it = true
           end
 
+          node[:pacemaker][:haproxy] ||= {}
           unless node[:pacemaker][:haproxy][:for_openstack]
             node[:pacemaker][:haproxy][:for_openstack] = true
             save_it = true
