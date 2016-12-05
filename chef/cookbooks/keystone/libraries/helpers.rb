@@ -46,6 +46,9 @@ module KeystoneHelper
                                                 node[:fqdn],
                                                 node[:keystone][:api][:service_port],
                                                 node[:keystone][:api][:version])
+      unversioned_internal_auth_url = service_URL(node[:keystone][:api][:protocol],
+                                                  node[:fqdn],
+                                                  node[:keystone][:api][:service_port])
 
       has_default_user = node["keystone"]["default"]["create_user"]
       default_domain = "Default"
@@ -61,6 +64,8 @@ module KeystoneHelper
         "admin_auth_url" => node[:keystone][:api][:admin_URL] || admin_auth_url,
         "public_auth_url" => node[:keystone][:api][:versioned_public_URL] || public_auth_url,
         "internal_auth_url" => node[:keystone][:api][:versioned_internal_URL] || internal_auth_url,
+        "unversioned_internal_auth_url" => node[:keystone][:api][:unversioned_internal_URL] || \
+          unversioned_internal_auth_url,
         "use_ssl" => use_ssl,
         "endpoint_region" => node["keystone"]["api"]["region"],
         "insecure" => use_ssl && node[:keystone][:ssl][:insecure],
