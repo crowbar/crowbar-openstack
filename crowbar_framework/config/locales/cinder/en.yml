@@ -42,9 +42,9 @@ en:
           eternus_volume_driver: 'Fujitsu ETERNUS DX'
           local_parameters: 'Local File Parameters'
           local_volume_driver: 'Local File'
-          hitachi_parameters: 'Hitachi HUSVM parameters'
+          hitachi_parameters: 'Hitachi HUSVM Parameters'
           hitachi_volume_driver: 'Hitachi HUSVM'
-          manual_parameters: 'Other driver parameters'
+          manual_parameters: 'Other driver Parameters'
           manual_volume_driver: 'Other Driver'
           manual:
             config_hint: 'Each line will be added to cinder.conf. If the driver needs an external file, this file must be manually uploaded.'
