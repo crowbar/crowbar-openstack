@@ -28,8 +28,8 @@ default[:magnum][:ha][:enabled] = false
 default[:magnum][:ha][:ports][:api] = 5611
 # pacemaker definitions
 default[:magnum][:ha][:api][:op][:monitor][:interval] = "10s"
-default[:magnum][:ha][:api][:agent] = "service:openstack-magnum-api"
+default[:magnum][:ha][:api][:agent] = "systemd:openstack-magnum-api"
 default[:magnum][:ha][:conductor][:op][:monitor][:interval] = "10s"
-default[:magnum][:ha][:conductor][:agent] = "service:openstack-magnum-conductor"
+default[:magnum][:ha][:conductor][:agent] = "systemd:openstack-magnum-conductor"
 
 default[:magnum][:cert][:cert_manager_type] = "local"
