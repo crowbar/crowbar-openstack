@@ -322,6 +322,23 @@ if compute_flags
   cpu_mode = compute_flags["cpu_mode"]
 end
 
+# lock path prevents race conditions for cinder-volume and nova-compute on same
+# node. Keep code in sync between cinder and nova recipes. For reference check
+# http://docs.openstack.org/releasenotes/nova/newton.html
+need_shared_lock_path = node.roles.include?("cinder-volume") && \
+  node.roles.any? { |role| /^nova-compute-/ =~ role }
+if need_shared_lock_path
+  group "openstack" do
+    members "nova"
+    append true
+  end
+  directory "/var/run/openstack" do
+    owner "root"
+    group "openstack"
+    mode "0775"
+  end
+end
+
 template "/etc/nova/nova.conf" do
   source "nova.conf.erb"
   user "root"
@@ -352,6 +369,7 @@ template "/etc/nova/nova.conf" do
     glance_server_host: glance_server_host,
     glance_server_port: glance_server_port,
     glance_server_insecure: glance_server_insecure || keystone_settings["insecure"],
+    need_shared_lock_path: need_shared_lock_path,
     metadata_bind_address: metadata_bind_address,
     vnc_enabled: node[:nova][:use_novnc],
     serial_enabled: node[:nova][:use_serial],

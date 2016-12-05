@@ -4795,7 +4795,11 @@ username = <%= @neutron_service_user %>
 # a lock path must be set. (string value)
 # Deprecated group/name - [DEFAULT]/lock_path
 #lock_path = <None>
+<% if @need_shared_lock_path -%>
+lock_path = /var/run/openstack
+<% else -%>
 lock_path = /var/run/nova
+<% end -%>
 
 
 [oslo_messaging_amqp]
