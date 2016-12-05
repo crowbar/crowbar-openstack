@@ -24,8 +24,7 @@ barclamp:
   requires:
     - 'pacemaker'
     - 'database'
-    - 'keystone'
-    - 'nova'
+    - 'keystone'    
   member:
     - 'openstack'
 

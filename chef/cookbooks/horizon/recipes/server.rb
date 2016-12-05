@@ -298,8 +298,13 @@ else
   neutron_use_vpnaas = false
 end
 
-nova = get_instance("roles:nova-controller")
-nova_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
+novas = search(:node, "roles:nova-controller") || []
+if !novas.empty?
+  nova = novas[0]
+  nova_insecure = nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]
+else
+  nova_insecure = false
+end
 
 heats = search(:node, "roles:heat-server") || []
 if !heats.empty?
