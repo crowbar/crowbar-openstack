@@ -53,7 +53,7 @@ default[:neutron][:ssl][:insecure] = false
 default[:neutron][:ssl][:cert_required] = false
 default[:neutron][:ssl][:ca_certs] = "/etc/neutron/ssl/certs/ca.pem"
 
-default[:neutron][:apic][:system_id] = "SOC"
+default[:neutron][:apic][:system_id] = "soc"
 default[:neutron][:apic][:hosts] = "10.105.1.10"
 default[:neutron][:apic][:username] = "admin"
 default[:neutron][:apic][:password] = "cisco123"
