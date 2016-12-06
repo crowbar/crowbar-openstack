@@ -38,6 +38,8 @@ fs_params = {}
 fs_params["directory"] = "/var/lib/pgsql"
 
 if node[:database][:ha][:storage][:mode] == "drbd"
+  include_recipe "crowbar-pacemaker::drbd"
+
   crowbar_pacemaker_drbd drbd_resource do
     size "#{node[:database][:ha][:storage][:drbd][:size]}G"
     action :nothing
