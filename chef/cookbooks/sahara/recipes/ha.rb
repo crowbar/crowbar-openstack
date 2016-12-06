@@ -20,6 +20,8 @@ end
 
 network_settings = SaharaHelper.network_settings(node)
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "sahara-api" do
   address network_settings[:api][:ha_bind_host]
   port network_settings[:api][:ha_bind_port]

@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "aodh-api" do
   address "0.0.0.0"
   port node[:aodh][:api][:port]

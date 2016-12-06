@@ -24,6 +24,8 @@ network_settings = BarbicanHelper.network_settings(node)
 
 ssl_enabled = node[:barbican][:api][:ssl]
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "barbican-api" do
   address network_settings[:api][:ha_bind_host]
   port network_settings[:api][:ha_bind_port]
