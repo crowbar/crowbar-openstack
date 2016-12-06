@@ -3584,7 +3584,11 @@ admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 # a lock path must be set. (string value)
 # Deprecated group/name - [DEFAULT]/lock_path
 #lock_path = <None>
+<% if @need_shared_lock_path -%>
+lock_path = /var/run/openstack
+<% else -%>
 lock_path = /var/run/cinder
+<% end -%>
 
 
 [oslo_messaging_amqp]
