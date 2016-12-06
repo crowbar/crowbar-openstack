@@ -31,16 +31,16 @@ en:
           backend_name: 'Name for Backend'
           backend_driver: 'Type of Share'
           loading_text: 'Loading Backends...'
-          generic_parameters: 'Generic backend parameters'
-          netapp_parameters: "NetApp parameters"
-          hitachi_parameters: "Hitachi parameters"
-          cephfs_parameters: "CephFS parameters"
-          manual_parameters: 'Other driver parameters'
-          generic_share_driver: 'Generic driver'
-          netapp_share_driver: 'NetApp driver'
-          hitachi_share_driver: 'Hitachi driver'
-          cephfs_share_driver: 'CephFS driver'
-          manual_share_driver: 'Other driver'
+          generic_parameters: 'Generic backend Parameters'
+          netapp_parameters: "NetApp Parameters"
+          hitachi_parameters: "Hitachi Parameters"
+          cephfs_parameters: "CephFS Parameters"
+          manual_parameters: 'Other driver Parameters'
+          generic_share_driver: 'Generic'
+          netapp_share_driver: 'NetApp'
+          hitachi_share_driver: 'Hitachi HNAS'
+          cephfs_share_driver: 'CephFS'
+          manual_share_driver: 'Other Driver'
           generic:
             not_supported: 'The generic driver can be used for testing but is not supported.'
           manual:
