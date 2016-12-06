@@ -79,6 +79,32 @@ unless manila_ui_pkgname.nil?
   end
 end
 
+# install Cisco GBP plugin if needed
+case node[:platform_family]
+when "suse"
+  apic_gbp_ui_pkgname = "openstack-horizon-plugin-gbp-ui"
+when "rhel"
+  apic_gbp_ui_pkgname = nil
+else
+  apic_gbp_ui_pkgname = nil
+end
+
+unless apic_gbp_ui_pkgname.nil?
+  if node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+    package apic_gbp_ui_pkgname do
+      action :install
+      notifies :reload, resources(service: "apache2")
+    end
+  elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
+  # Remove GBP plugin is Cisco APIC driver is set to ml2 networking
+    package apic_gbp_ui_pkgname do
+      ignore_failure true
+      action :remove
+      notifies :reload, resources(service: "apache2")
+    end
+  end
+end
+
 if node[:platform_family] == "suse"
   # Get rid of unwanted vhost config files:
   ["#{node[:apache][:dir]}/vhosts.d/default-redirect.conf",
