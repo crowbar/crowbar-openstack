@@ -64,6 +64,29 @@ node[:heat][:platform][:plugin_packages].each do |p|
   package p
 end
 
+# install Cisco GBP plugin if needed
+case node[:platform_family]
+when "suse"
+  apic_gbp_heat_pkgname = "openstack-heat-gbp"
+when "rhel"
+  apic_gbp_heat_pkgname = nil
+else
+  apic_gbp_heat_pkgname = nil
+end
+
+unless apic_gbp_heat_pkgname.nil?
+  if node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+    package apic_gbp_heat_pkgname do
+      action :install
+    end
+  elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
+    rpm_package apic_gbp_heat_pkgname do
+      ignore_failure true
+      action :remove
+    end
+  end
+end
+
 directory "/var/cache/heat" do
   owner node[:heat][:user]
   group node[:heat][:group]
