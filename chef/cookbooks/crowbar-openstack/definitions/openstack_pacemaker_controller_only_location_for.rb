@@ -15,6 +15,9 @@
 #
 
 define :openstack_pacemaker_controller_only_location_for do
+  # ensure attributes are set
+  include_recipe "crowbar-pacemaker::attributes"
+
   resource = params[:name]
   location_name = "l-#{resource}-controller"
   pacemaker_location location_name do
