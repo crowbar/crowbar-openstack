@@ -66,7 +66,9 @@ ALLOWED_HOSTS = ['*']
 OPENSTACK_API_VERSIONS = {
     "data_processing": 1.1,
     "identity": <%= @keystone_settings['api_version'] %>,
+    "image": 2,
     "volume": 2,
+    "compute": 2
 }
 
 # Set this to True if running on multi-domain model. When this is enabled, it
@@ -754,7 +756,8 @@ OPENSTACK_TOKEN_HASH_ENABLED = <%= @token_hash_enabled ? "True" : "False" %>
 # You should not add settings to this list for out of tree extensions.
 # See: https://wiki.openstack.org/wiki/Horizon/RESTAPI
 REST_API_REQUIRED_SETTINGS = ['OPENSTACK_HYPERVISOR_FEATURES',
-                              'LAUNCH_INSTANCE_DEFAULTS']
+                              'LAUNCH_INSTANCE_DEFAULTS',
+                              'OPENSTACK_IMAGE_FORMATS']
 
 # Additional settings can be made available to the client side for
 # extensibility by specifying them in REST_API_ADDITIONAL_SETTINGS
