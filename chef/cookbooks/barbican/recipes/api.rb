@@ -57,6 +57,8 @@ resource.variables(
     node.normal[:apache][:listen_ports_crowbar].values.map(&:values).flatten.uniq.sort
 )
 
+crowbar_pacemaker_sync_mark "wait-barbican_register"
+
 keystone_register "barbican api wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
@@ -117,6 +119,8 @@ keystone_register "give barbican user access" do
   role_name "admin"
   action :add_access
 end
+
+crowbar_pacemaker_sync_mark "create-barbican_register"
 
 template "#{node[:apache][:dir]}/vhosts.d/barbican-api.conf" do
   path "#{node[:apache][:dir]}/vhosts.d/barbican-api.conf"
