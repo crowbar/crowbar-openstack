@@ -1,3 +1,4 @@
+include_recipe "apache2"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
@@ -110,6 +111,7 @@ template "/etc/ceilometer/ceilometer.conf" do
     if is_swift_proxy
       notifies :restart, "service[swift-proxy]"
     end
+    notifies :reload, resources(service: "apache2")
 end
 
 template "/etc/ceilometer/pipeline.yaml" do
