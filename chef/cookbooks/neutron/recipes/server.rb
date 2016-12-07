@@ -46,32 +46,43 @@ end
 
 include_recipe "neutron::common_config"
 
+# set core plugin for neutron-server
 if node[:neutron][:networking_plugin] == "vmware"
-  plugin_cfg_path = "/etc/neutron/plugins/vmware/nsx.ini"
+  core_link = "/etc/neutron/plugins/vmware/nsx.ini"
 else
-  plugin_cfg_path = "/etc/neutron/plugins/ml2/ml2_conf.ini"
+  core_link = "/etc/neutron/plugins/ml2/ml2_conf.ini"
 end
 
-template "/etc/sysconfig/neutron" do
-  source "sysconfig.neutron.erb"
-  owner "root"
-  group "root"
-  mode 0640
-  # whenever changing plugin_config_file here, keep in mind to change the call
-  # to neutron-db-manage too
-  plugin_cfgs = plugin_cfg_path
-  if node[:neutron][:networking_plugin] == "ml2"
-    if node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
-      plugin_cfgs += " /etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
-    elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
-        node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
-      plugin_cfgs += " /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini"
-    end
-  end
-  variables(
-    plugin_config_file: plugin_cfgs
-  )
-  only_if { node[:platform_family] == "suse" }
+link "/etc/neutron/plugin.ini" do
+  to core_link
+  action :create
+  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+end
+
+# enable/disable ml2_conf_cisco for neutron-server
+if node[:neutron][:networking_plugin] == "ml2" and
+  node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
+  cisco_nexus_link_action = "create"
+else
+  cisco_nexus_link_action = "delete"
+end
+link "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco.ini.conf" do
+  to "/etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
+  action cisco_nexus_link_action
+  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+end
+
+# enable/disable ml2_conf_cisco_apic for neutron-server
+if node[:neutron][:networking_plugin] == "ml2" &&
+  (node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
+   node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
+  cisco_apic_link_action = "create"
+else
+  cisco_apic_link_action = "delete"
+end
+link "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" do
+  to "/etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini"
+  action cisco_apic_link_action
   notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
 end
 
@@ -155,7 +166,7 @@ when "ml2"
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
   end
 
-  template plugin_cfg_path do
+  template "/etc/neutron/plugins/ml2/ml2_conf.ini" do
     source "ml2_conf.ini.erb"
     owner "root"
     group node[:neutron][:platform][:group]
@@ -174,6 +185,7 @@ when "ml2"
       external_networks: physnets,
       mtu_value: mtu_value
     )
+    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end
 when "vmware"
   directory "/etc/neutron/plugins/vmware/" do
@@ -185,7 +197,7 @@ when "vmware"
      not_if { node[:platform_family] == "suse" }
   end
 
-  template plugin_cfg_path do
+  template "/etc/neutron/plugins/vmware/nsx.ini" do
     cookbook "neutron"
     source "nsx.ini.erb"
     owner "root"
@@ -194,6 +206,7 @@ when "vmware"
     variables(
       vmware_config: node[:neutron][:vmware]
     )
+    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end
 end
 
@@ -242,17 +255,11 @@ execute "neutron-db-manage migrate" do
   user node[:neutron][:user]
   group node[:neutron][:group]
   case node[:platform_family]
-  when "suse"
-    command 'source /etc/sysconfig/neutron; \
-             for i in $NEUTRON_PLUGIN_CONF; do \
-               CONF_ARGS="$CONF_ARGS --config-file $i"; \
-             done; \
-             neutron-db-manage --config-file /etc/neutron/neutron.conf $CONF_ARGS upgrade head'
   when "debian"
     command 'source /etc/default/neutron-server; \
              neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file $NEUTRON_PLUGIN_CONFIG upgrade head'
   else
-    command "neutron-db-manage --config-file /etc/neutron/neutron.conf upgrade head"
+    command "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugin.ini upgrade head"
   end
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
@@ -373,7 +380,6 @@ crowbar_pacemaker_sync_mark "create-neutron_db_sync"
 service node[:neutron][:platform][:service_name] do
   supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources("template[#{plugin_cfg_path}]")
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
