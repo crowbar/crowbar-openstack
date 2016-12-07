@@ -103,11 +103,11 @@ default[:heat][:ha][:ports][:api_port] = 5571
 default[:heat][:ha][:ports][:cloud_watch_port] = 5572
 
 # Pacemaker bits
-default[:heat][:ha][:engine][:agent] = "service:#{default[:heat][:engine][:service_name]}"
+default[:heat][:ha][:engine][:agent] = "systemd:#{default[:heat][:engine][:service_name]}"
 default[:heat][:ha][:engine][:op][:monitor][:interval] = "10s"
-default[:heat][:ha][:api][:agent] = "service:#{default[:heat][:api][:service_name]}"
+default[:heat][:ha][:api][:agent] = "systemd:#{default[:heat][:api][:service_name]}"
 default[:heat][:ha][:api][:op][:monitor][:interval] = "10s"
-default[:heat][:ha][:api_cfn][:agent] = "service:#{default[:heat][:api_cfn][:service_name]}"
+default[:heat][:ha][:api_cfn][:agent] = "systemd:#{default[:heat][:api_cfn][:service_name]}"
 default[:heat][:ha][:api_cfn][:op][:monitor][:interval] = "10s"
-default[:heat][:ha][:api_cloudwatch][:agent] = "service:#{default[:heat][:api_cloudwatch][:service_name]}"
+default[:heat][:ha][:api_cloudwatch][:agent] = "systemd:#{default[:heat][:api_cloudwatch][:service_name]}"
 default[:heat][:ha][:api_cloudwatch][:op][:monitor][:interval] = "10s"
