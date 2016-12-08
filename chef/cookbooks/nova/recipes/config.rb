@@ -153,6 +153,7 @@ if cinder_servers.length > 0
   cinder_server = cinder_servers[0]
   cinder_insecure = cinder_server[:cinder][:api][:protocol] == "https" && cinder_server[:cinder][:ssl][:insecure]
   use_multipath = cinder_server[:cinder][:use_multipath]
+  keymgr_fixed_key = cinder_server[:cinder][:keymgr_fixed_key]
 
   if node.roles.include? "nova-compute-kvm"
     cinder_server[:cinder][:volumes].each do |volume|
@@ -161,6 +162,7 @@ if cinder_servers.length > 0
   end
 else
   cinder_insecure = false
+  keymgr_fixed_key = ""
 end
 
 if rbd_enabled
@@ -391,6 +393,7 @@ template "/etc/nova/nova.conf" do
     keystone_settings: keystone_settings,
     cinder_insecure: cinder_insecure || keystone_settings["insecure"],
     use_multipath: use_multipath,
+    keymgr_fixed_key: keymgr_fixed_key,
     ceph_user: ceph_user,
     ceph_uuid: ceph_uuid,
     ssl_enabled: api[:nova][:ssl][:enabled],
