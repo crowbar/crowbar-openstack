@@ -62,6 +62,19 @@ end
   end
 end
 
+execute "nova-manage api_db sync" do
+  user node[:nova][:user]
+  group node[:nova][:group]
+  command "nova-manage api_db sync"
+  action :run
+  # We only do the sync the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if do
+    !node[:nova][:api_db_synced] &&
+      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
 execute "nova-manage db sync" do
   user node[:nova][:user]
   group node[:nova][:group]
@@ -86,20 +99,6 @@ ruby_block "mark node for nova db_sync" do
   end
   action :nothing
   subscribes :create, "execute[nova-manage db sync]", :immediately
-end
-
-# and finally the rest of the migrations
-execute "nova-manage api_db sync" do
-  user node[:nova][:user]
-  group node[:nova][:group]
-  command "nova-manage api_db sync"
-  action :run
-  # We only do the sync the first time, and only if we're not doing HA or if we
-  # are the founder of the HA cluster (so that it's really only done once).
-  only_if do
-    !node[:nova][:api_db_synced] &&
-      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
-  end
 end
 
 # We want to keep a note that we've done db_sync, so we don't do it again.
