@@ -3187,6 +3187,9 @@ wsgi_keep_alive = false
 
 # Fixed key returned by key manager, specified in hex (string value)
 #fixed_key = <None>
+<% unless node[:cinder][:keymgr_fixed_key].empty? -%>
+fixed_key = <%= node[:cinder][:keymgr_fixed_key].each_byte.map { |b| b.to_s(16) }.join %>
+<% end -%>
 
 # Authentication url for encryption service. (string value)
 #encryption_auth_url = http://localhost:5000/v3

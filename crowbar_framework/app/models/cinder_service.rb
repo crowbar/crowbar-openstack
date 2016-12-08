@@ -81,6 +81,7 @@ class CinderService < PacemakerServiceObject
 
     base["attributes"][@bc_name]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
+    base["attributes"][@bc_name]["keymgr_fixed_key"] = random_password
 
     @logger.debug("Cinder create_proposal: exiting")
     base
