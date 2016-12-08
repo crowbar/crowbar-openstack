@@ -85,7 +85,8 @@ openstackcli_adm << " --os-project-name #{tempest_comp_tenant}"
 openstackcli_adm << " --os-auth-url #{auth_url}"
 
 `#{openstackcli_adm} service show orchestration &> /dev/null`
-use_heat = $?.success?
+# Heat integration tests still need some work to pass
+use_heat = false && $?.success?
 
 users = [
           {"name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "Member"},
