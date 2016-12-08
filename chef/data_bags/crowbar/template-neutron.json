@@ -74,42 +74,26 @@
       },
       "use_infoblox": false,
       "infoblox": {
-        "ib_wapi": "",
-        "ib_username": "admin",
-        "ib_password": "",
-        "ib_members": "",
-        "ib_dnsserver": [],
-        "use_host_records_for_ip_allocation": true,
-        "bind_dns_records_to_fixed_address": "record:a,record:ptr",
-        "unbind_dns_records_from_fixed_address": "record:a,record:ptr",
-        "delete_dns_records_associated_with_fixed_address": "record:a,record:ptr,record:txt",
-        "use_dhcp_for_ip_allocation_record": true,
-        "enable_dhcp_relay": false,
-        "dhcp_relay_interface": "br-fixed",
-        "dhcp_relay_management_network": "",
-        "dhcp_relay_management_network_view": "",
-        "ib_conditionals": [
+        "cloud_data_center_id": 0,
+        "ipam_agent_workers": 1,
+        "grids": [
+            {
+            "admin_user_name": "admin",
+            "admin_password": "password",
+            "grid_master_host": "gridmaster1.example.net",
+            "grid_master_name": "gridmaster1",
+            "data_center_name": "dc1"
+            }
+          ],
+        "grid_defaults":
           {
-            "condition": "tenant",
-            "is_external": false,
-            "network_view": "default",
-            "dns_view": "default",
-            "dhcp_members": "\"<next-available-member>\"",
-            "dns_members": "\"<next-available-member>\"",
-            "domain_suffix_pattern": "{subnet_name}.cloud-test.com",
-            "hostname_pattern": "host-{ip_address}"
-          },
-          {
-            "condition": "global",
-            "is_external": true,
-            "network_view": "default",
-            "dns_view": "default",
-            "dhcp_members": "\"<next-available-member>\"",
-            "dns_members": "\"<next-available-member>\"",
-            "domain_suffix_pattern": "{subnet_name}.cloud-test.com",
-            "hostname_pattern": "host-{ip_address}"
+          "http_pool_connections": 100,
+          "http_pool_maxsize": 100,
+          "http_request_timeout": 120,
+          "ssl_verify": false,
+          "wapi_version": "2.2.2",
+          "wapi_max_results": -1000
           }
-        ]
       }
     }
   },
@@ -117,7 +101,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 48,
+      "schema-revision": 49,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

@@ -20,6 +20,8 @@ use_zvm = node[:neutron][:networking_plugin] == "ml2" && !zvm_compute_node.empty
 
 pkgs = node[:neutron][:platform][:pkgs] + node[:neutron][:platform][:pkgs_fwaas]
 pkgs += node[:neutron][:platform][:pkgs_lbaas] if node[:neutron][:use_lbaas]
+pkgs += node[:neutron][:platform][:infoblox_pkgs] if node[:neutron][:use_infoblox]
+
 if use_hyperv
   pkgs << node[:neutron][:platform][:hyperv_pkg]
 end
@@ -421,6 +423,15 @@ service node[:neutron][:platform][:service_name] do
   subscribes :restart, resources("template[#{plugin_cfg_path}]")
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+end
+
+if node[:neutron][:use_infoblox]
+  service node[:neutron][:platform][:infoblox_agent_name] do
+    supports status: true, restart: true
+    action [:enable, :start]
+    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  end
 end
 
 include_recipe "neutron::api_register"

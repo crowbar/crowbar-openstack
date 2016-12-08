@@ -74,6 +74,22 @@ class NeutronService < PacemakerServiceObject
     answer
   end
 
+  def save_proposal!(prop, options = {})
+    # Fill in missing defaults for infoblox grid configurations
+    if prop.raw_data[:attributes][:neutron][:use_infoblox]
+      prop.raw_data[:attributes][:neutron][:infoblox][:grids].each do |grid|
+        defaults = prop.raw_data["attributes"]["neutron"]["infoblox"]["grid_defaults"]
+        defaults.each_key.each do |d|
+          unless grid.key?(d)
+            grid[d] = defaults[d]
+          end
+        end
+      end
+    end
+
+    super(prop, options)
+  end
+
   def create_proposal
     base = super
 
@@ -272,6 +288,20 @@ class NeutronService < PacemakerServiceObject
     end
   end
 
+  def validate_infoblox(proposal)
+    # Validation for grids list
+    if proposal["attributes"]["neutron"]["infoblox"]["grids"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.infoblox_grids")
+    end
+
+    dc_id = proposal["attributes"]["neutron"]["infoblox"]["cloud_data_center_id"]
+    grids_length = proposal["attributes"]["neutron"]["infoblox"]["grids"].length
+    if dc_id.to_i >= grids_length
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.infoblox_dc_id",
+                              dc_id: dc_id, grids_len: grids_length)
+    end
+  end
+
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "neutron-server"
     validate_at_least_n_for_role proposal, "neutron-network", 1
@@ -280,6 +310,9 @@ class NeutronService < PacemakerServiceObject
 
     validate_ml2(proposal) if plugin == "ml2"
     validate_dvr(proposal)
+    if proposal[:attributes][:neutron][:use_infoblox]
+      validate_infoblox(proposal)
+    end
 
     unless proposal["attributes"]["neutron"]["additional_external_networks"].empty?
       validate_external_networks proposal["attributes"]["neutron"]["additional_external_networks"]

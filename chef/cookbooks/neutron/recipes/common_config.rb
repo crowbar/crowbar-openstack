@@ -126,6 +126,14 @@ if neutron[:neutron][:elements_expanded]
   network_nodes_count = neutron[:neutron][:elements_expanded]["neutron-network"].count
 end
 
+ipam_driver = nil
+infoblox_settings = nil
+
+if neutron[:neutron][:use_infoblox]
+  ipam_driver = "infoblox"
+  infoblox_settings = neutron[:neutron][:infoblox]
+end
+
 template "/etc/neutron/neutron.conf" do
     cookbook "neutron"
     source "neutron.conf.erb"
@@ -157,7 +165,9 @@ template "/etc/neutron/neutron.conf" do
       allow_overlapping_ips: neutron[:neutron][:allow_overlapping_ips],
       dvr_enabled: neutron[:neutron][:use_dvr],
       network_nodes_count: network_nodes_count,
-      dns_domain: neutron[:neutron][:dhcp_domain]
+      dns_domain: neutron[:neutron][:dhcp_domain],
+      infoblox: infoblox_settings,
+      ipam_driver: ipam_driver
     }.merge(nova_notify))
 end
 
