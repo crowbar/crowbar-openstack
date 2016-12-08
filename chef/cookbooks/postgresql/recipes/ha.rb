@@ -111,6 +111,14 @@ if node[:database][:ha][:storage][:mode] == "drbd"
   location_name = openstack_pacemaker_controller_only_location_for service_name
   transaction_objects << "pacemaker_location[#{location_name}]"
 
+  if CrowbarPacemakerHelper.being_upgraded?(node)
+    upgrade_vip_location_name = upgraded_only_location_for vip_primitive
+    transaction_objects << "pacemaker_location[#{upgrade_vip_location_name}]"
+
+    upgrade_location_name = upgraded_only_location_for service_name
+    transaction_objects << "pacemaker_location[#{upgrade_location_name}]"
+  end
+
 else
 
   pacemaker_group group_name do
@@ -124,6 +132,11 @@ else
 
   location_name = openstack_pacemaker_controller_only_location_for group_name
   transaction_objects << "pacemaker_location[#{location_name}]"
+
+  if CrowbarPacemakerHelper.being_upgraded?(node)
+    upgrade_location_name = upgraded_only_location_for group_name
+    transaction_objects << "pacemaker_location[#{upgrade_location_name}]"
+  end
 
 end
 
