@@ -364,7 +364,7 @@ shell_get_stack_user_domain = <<-EOF
   echo $id
 EOF
 
-template "/etc/heat/heat.conf" do
+template "/etc/heat/heat.conf.d/100-heat.conf" do
   source "heat.conf.erb"
   owner "root"
   group node[:heat][:group]
@@ -414,7 +414,7 @@ service "heat-engine" do
   service_name node[:heat][:engine][:service_name]
   supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
@@ -431,7 +431,7 @@ service "heat-api" do
   service_name node[:heat][:api][:service_name]
   supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
@@ -439,7 +439,7 @@ service "heat-api-cfn" do
   service_name node[:heat][:api_cfn][:service_name]
   supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
@@ -447,7 +447,7 @@ service "heat-api-cloudwatch" do
   service_name node[:heat][:api_cloudwatch][:service_name]
   supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/heat/heat.conf]")
+  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
