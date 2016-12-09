@@ -183,29 +183,17 @@
               = select_field %w(volumes {{@index}} hitachi storage_protocol), :collection => :hitachi_storage_protocol,
                "data-showit" => "iscsi", "data-showit-target" => "#hitachi_iscsi_container_{{@index}}",
                "data-showit-direct" => "true"
-              = boolean_field %w(volumes {{@index}} hitachi hitachi_add_chap_user)
-              = integer_field %w(volumes {{@index}} hitachi hitachi_async_copy_check_interval)
-              = integer_field %w(volumes {{@index}} hitachi hitachi_copy_check_interval)
-              = integer_field %w(volumes {{@index}} hitachi hitachi_copy_speed)
-              = string_field %w(volumes {{@index}} hitachi hitachi_default_copy_method)
               = string_field %w(volumes {{@index}} hitachi hitachi_group_range)
               = boolean_field %w(volumes {{@index}} hitachi hitachi_horcm_add_conf)
-              = string_field %w(volumes {{@index}} hitachi hitachi_horcm_numbers)
-              = password_field %w(volumes {{@index}} hitachi hitachi_horcm_password)
-              = integer_field %w(volumes {{@index}} hitachi hitachi_horcm_resource_lock_timeout)
               = string_field %w(volumes {{@index}} hitachi hitachi_horcm_user)
+              = password_field %w(volumes {{@index}} hitachi hitachi_horcm_password)
               = string_field %w(volumes {{@index}} hitachi hitachi_ldev_range)
               = string_field %w(volumes {{@index}} hitachi hitachi_pool_id)
               = string_field %w(volumes {{@index}} hitachi hitachi_serial_number)
-              = string_field %w(volumes {{@index}} hitachi hitachi_target_ports)
               = string_field %w(volumes {{@index}} hitachi hitachi_thin_pool_id)
-              = string_field %w(volumes {{@index}} hitachi hitachi_unit_name)
-              = boolean_field %w(volumes {{@index}} hitachi hitachi_zoning_request)
+              = string_field %w(volumes {{@index}} hitachi hitachi_target_ports)
 
               %div{ :id => "hitachi_iscsi_container_{{@index}}" }
-                = string_field %w(volumes {{@index}} hitachi hitachi_auth_method)
-                = password_field %w(volumes {{@index}} hitachi hitachi_auth_password)
-                = string_field %w(volumes {{@index}} hitachi hitachi_auth_user)
                 = boolean_field %w(volumes {{@index}} hitachi hitachi_group_request)
 
           {{/if_eq}}
