@@ -388,6 +388,7 @@ driver = <%= node[:keystone][:assignment][:driver] %>
 # production deployments.  Small workloads (single process) like devstack can
 # use the dogpile.cache.memory backend. (string value)
 #backend = dogpile.cache.null
+backend = dogpile.cache.memcached
 
 # Arguments supplied to the backend module. Specify this option once per
 # argument to be passed to the dogpile.cache backend. Example format:
@@ -401,6 +402,7 @@ driver = <%= node[:keystone][:assignment][:driver] %>
 
 # Global toggle for caching. (boolean value)
 #enabled = false
+enabled = True
 
 # Extra debugging from the cache backend (cache keys, get/set/delete/etc
 # calls). This is only really useful if you need to see the specific cache-
@@ -411,6 +413,7 @@ driver = <%= node[:keystone][:assignment][:driver] %>
 # Memcache servers in the format of "host:port". (dogpile.cache.memcache and
 # oslo_cache.memcache_pool backends only). (list value)
 #memcache_servers = localhost:11211
+memcache_servers = <%= @memcached_servers.join(',') %>
 
 # Number of seconds memcached server is considered dead before it is tried
 # again. (dogpile.cache.memcache and oslo_cache.memcache_pool backends only).

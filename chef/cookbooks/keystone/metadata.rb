@@ -8,6 +8,7 @@ version "1.0"
 
 depends "apache2"
 depends "database"
+depends "memcached"
 depends "nagios"
 depends "uwsgi"
 depends "crowbar-openstack"
