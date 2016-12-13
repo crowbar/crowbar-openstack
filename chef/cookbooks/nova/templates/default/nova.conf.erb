@@ -3389,6 +3389,7 @@ insecure = <%= @cinder_insecure ? 'True' : 'False' %>
 # create request will fail and the instance will fail the build request.
 # (boolean value)
 #cross_az_attach = true
+cross_az_attach = <%= node[:nova][:cross_az_attach] %>
 
 
 [conductor]
