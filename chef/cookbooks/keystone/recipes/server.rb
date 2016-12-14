@@ -237,7 +237,7 @@ else
 end
 memcached_servers.sort!
 
-template "/etc/keystone/keystone.conf" do
+template node[:keystone][:config_file] do
     source "keystone.conf.erb"
     owner "root"
     group node[:keystone][:group]
@@ -432,7 +432,7 @@ if node[:keystone][:frontend] == "native"
     service_name node[:keystone][:service_name]
     supports status: true, start: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(template: "/etc/keystone/keystone.conf"), :immediately
+    subscribes :restart, resources(template: node[:keystone][:config_file]), :immediately
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 end
