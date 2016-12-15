@@ -27,15 +27,15 @@ default[:sahara][:ha][:enabled] = false
 default[:sahara][:ha][:ports][:api_port] = 5573
 
 default[:sahara][:ha][:api][:ra] = if ["rhel", "suse"].include? node[:platform_family]
-  "service:openstack-sahara-api"
+  "systemd:openstack-sahara-api"
 else
-  "service:sahara-api"
+  "systemd:sahara-api"
 end
 
 default[:sahara][:ha][:engine][:ra] = if ["rhel", "suse"].include? node[:platform_family]
-  "service:openstack-sahara-engine"
+  "systemd:openstack-sahara-engine"
 else
-  "service:sahara-engine"
+  "systemd:sahara-engine"
 end
 
 default[:sahara][:ha][:op][:monitor][:interval] = "10s"
