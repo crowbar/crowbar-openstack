@@ -41,7 +41,6 @@ endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
-[clients_designate]
 [clients_glance]
 endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
@@ -102,8 +101,6 @@ bind_host = <%= @bind_host %>
 bind_port = <%= @api_port %>
 <% if node[:heat][:api][:protocol] == "https" %>
 cert_file = <%= @heat_ssl[:certfile] %>
-<% end %>
-<% if node[:heat][:api][:protocol] == "https" %>
 key_file = <%= @heat_ssl[:keyfile] %>
 <% end %>
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
@@ -113,8 +110,6 @@ bind_host = <%= @bind_host %>
 bind_port = <%= @cfn_port %>
 <% if node[:heat][:api][:protocol] == "https" %>
 cert_file = <%= @heat_ssl[:certfile] %>
-<% end %>
-<% if node[:heat][:api][:protocol] == "https" %>
 key_file = <%= @heat_ssl[:keyfile] %>
 <% end %>
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
@@ -124,8 +119,6 @@ bind_host = <%= @bind_host %>
 bind_port = <%= @cloud_watch_port %>
 <% if node[:heat][:api][:protocol] == "https" %>
 cert_file = <%= @heat_ssl[:certfile] %>
-<% end %>
-<% if node[:heat][:api][:protocol] == "https" %>
 key_file = <%= @heat_ssl[:keyfile] %>
 <% end %>
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
@@ -142,14 +135,12 @@ identity_uri = <%= @keystone_settings['admin_auth_url'] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+<% if node[:heat][:api][:protocol] == "https" %>
 [ssl]
-<% if node[:heat][:api][:protocol] == "https" && node[:heat][:ssl][:cert_required] %>
+<% if node[:heat][:ssl][:cert_required] %>
 ca_file = <%= @heat_ssl[:ca_certs] %>
 <% end %>
-<% if node[:heat][:api][:protocol] == "https" %>
 cert_file = <%= @heat_ssl[:certfile] %>
-<% end %>
-<% if node[:heat][:api][:protocol] == "https" %>
 key_file = <%= @heat_ssl[:keyfile] %>
 <% end %>
 [trustee]
