@@ -1,147 +1,147 @@
 [DEFAULT]
 deferred_auth_method = trusts
 reauthentication_auth_method = trusts
-trusts_delegated_roles= <%= @trusts_delegated_roles.join(',') %>
+trusts_delegated_roles = <%= @trusts_delegated_roles.join(',') %>
 convergence_engine = <%= @use_convergence_engine %>
-heat_metadata_server_url=<%= @heat_metadata_server_url %>
-heat_waitcondition_server_url=<%= @heat_waitcondition_server_url %>
-heat_watch_server_url=<%= @heat_watch_server_url %>
-region_name_for_services=<%= @keystone_settings['endpoint_region'] %>
-stack_user_domain_id=<%= @stack_user_domain %>
-stack_domain_admin=<%= @stack_domain_admin %>
-stack_domain_admin_password=<%= @stack_domain_admin_password %>
-num_engine_workers=<%= [node["cpu"]["total"], 2, 4].sort[1] %>
-auth_encryption_key=<%= @auth_encryption_key %>
+heat_metadata_server_url = <%= @heat_metadata_server_url %>
+heat_waitcondition_server_url = <%= @heat_waitcondition_server_url %>
+heat_watch_server_url = <%= @heat_watch_server_url %>
+region_name_for_services = <%= @keystone_settings['endpoint_region'] %>
+stack_user_domain_id = <%= @stack_user_domain %>
+stack_domain_admin = <%= @stack_domain_admin %>
+stack_domain_admin_password = <%= @stack_domain_admin_password %>
+num_engine_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+auth_encryption_key = <%= @auth_encryption_key %>
 <% if node[:platform_family] == "suse" -%>
-loadbalancer_template=/etc/heat/loadbalancer.template
+loadbalancer_template = /etc/heat/loadbalancer.template
 <% end -%>
-debug=<%= node[:heat][:debug] ? 'true' : 'false' %>
-verbose=<%= node[:heat][:verbose] ? 'true' : 'false' %>
-log_dir=/var/log/heat
-use_stderr=false
+debug = <%= node[:heat][:debug] ? 'true' : 'false' %>
+verbose = <%= node[:heat][:verbose] ? 'true' : 'false' %>
+log_dir = /var/log/heat
+use_stderr = false
 transport_url = <%= @transport_url %>
-control_exchange=heat
+control_exchange = heat
 [clients]
 endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_barbican]
-endpoint_type=internalURL
+endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_ceilometer]
-endpoint_type=internalURL
+endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_cinder]
-endpoint_type=internalURL
+endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_designate]
 [clients_glance]
-endpoint_type=internalURL
+endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_heat]
-endpoint_type=publicURL
+endpoint_type = publicURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_keystone]
-endpoint_type=internalURL
+endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
 [clients_magnum]
-endpoint_type=publicURL
+endpoint_type = publicURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_manila]
-endpoint_type=internalURL
+endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_neutron]
-endpoint_type=internalURL
+endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_nova]
-endpoint_type=internalURL
+endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_sahara]
-endpoint_type=internalURL
+endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_swift]
-endpoint_type=internalURL
+endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [clients_trove]
-endpoint_type=internalURL
+endpoint_type = internalURL
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 [database]
-connection=<%= @database_connection %>
+connection = <%= @database_connection %>
 [eventlet_opts]
 wsgi_keep_alive = false
 [heat_api]
-bind_host=<%= @bind_host %>
-bind_port=<%= @api_port %>
+bind_host = <%= @bind_host %>
+bind_port = <%= @api_port %>
 <% if node[:heat][:api][:protocol] == "https" %>
 cert_file = <%= @heat_ssl[:certfile] %>
 <% end %>
 <% if node[:heat][:api][:protocol] == "https" %>
 key_file = <%= @heat_ssl[:keyfile] %>
 <% end %>
-workers=<%= [node["cpu"]["total"], 2, 4].sort[1] %>
-max_header_line=<%= node[:heat][:max_header_line] %>
+workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+max_header_line = <%= node[:heat][:max_header_line] %>
 [heat_api_cfn]
-bind_host=<%= @bind_host %>
-bind_port=<%= @cfn_port %>
+bind_host = <%= @bind_host %>
+bind_port = <%= @cfn_port %>
 <% if node[:heat][:api][:protocol] == "https" %>
 cert_file = <%= @heat_ssl[:certfile] %>
 <% end %>
 <% if node[:heat][:api][:protocol] == "https" %>
 key_file = <%= @heat_ssl[:keyfile] %>
 <% end %>
-workers=<%= [node["cpu"]["total"], 2, 4].sort[1] %>
-max_header_line=<%= node[:heat][:max_header_line] %>
+workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+max_header_line = <%= node[:heat][:max_header_line] %>
 [heat_api_cloudwatch]
-bind_host=<%= @bind_host %>
-bind_port=<%= @cloud_watch_port %>
+bind_host = <%= @bind_host %>
+bind_port = <%= @cloud_watch_port %>
 <% if node[:heat][:api][:protocol] == "https" %>
 cert_file = <%= @heat_ssl[:certfile] %>
 <% end %>
 <% if node[:heat][:api][:protocol] == "https" %>
 key_file = <%= @heat_ssl[:keyfile] %>
 <% end %>
-workers=<%= [node["cpu"]["total"], 2, 4].sort[1] %>
-max_header_line=<%= node[:heat][:max_header_line] %>
+workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+max_header_line = <%= node[:heat][:max_header_line] %>
 [keystone_authtoken]
-auth_uri=<%= @keystone_settings['public_auth_url'] %>
-auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
+auth_uri = <%= @keystone_settings['public_auth_url'] %>
+auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
-region_name=<%= @keystone_settings['endpoint_region'] %>
-signing_dir=/var/cache/heat/keystone-signing
-identity_uri=<%= @keystone_settings['admin_auth_url'] %>
-admin_user=<%= @keystone_settings['service_user'] %>
-admin_password=<%= @keystone_settings['service_password'] %>
-admin_tenant_name=<%= @keystone_settings['service_tenant'] %>
+region_name = <%= @keystone_settings['endpoint_region'] %>
+signing_dir = /var/cache/heat/keystone-signing
+identity_uri = <%= @keystone_settings['admin_auth_url'] %>
+admin_user = <%= @keystone_settings['service_user'] %>
+admin_password = <%= @keystone_settings['service_password'] %>
+admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 [ssl]
 <% if node[:heat][:api][:protocol] == "https" && node[:heat][:ssl][:cert_required] %>
 ca_file = <%= @heat_ssl[:ca_certs] %>
@@ -153,7 +153,7 @@ cert_file = <%= @heat_ssl[:certfile] %>
 key_file = <%= @heat_ssl[:keyfile] %>
 <% end %>
 [trustee]
-auth_url=<%= @keystone_settings['public_auth_url'] %>
-project_name=<%= @keystone_settings['service_tenant'] %>
-username=<%= @keystone_settings['service_user'] %>
-password=<%= @keystone_settings['service_password'] %>
+auth_url = <%= @keystone_settings['public_auth_url'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
