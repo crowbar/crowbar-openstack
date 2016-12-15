@@ -1,0 +1,28 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header show_raw_deployment?, true
+
+  .panel-body
+    = instance_field :database
+    = instance_field :rabbitmq
+    = instance_field :keystone
+    = instance_field :glance
+    = instance_field :nova
+    = instance_field :cinder
+    = instance_field :neutron
+    = instance_field :ceilometer
+    
+    %fieldset
+      %legend
+        = t(".logging_header")
+      = boolean_field :verbose
+
+    %fieldset
+      %legend
+        = t(".logging_header")
+      = boolean_field :debug
+
+    %fieldset
+      %legend
+        = t(".datasource_header")
+      = string_field %w(drivers)
