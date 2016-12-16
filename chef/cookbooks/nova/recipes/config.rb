@@ -100,19 +100,8 @@ else
 end
 Chef::Log.info("Glance server at #{glance_server_host}")
 
-vncproxies = search_env_filtered(:node, "roles:nova-controller")
-if vncproxies.length > 0
-  vncproxy = vncproxies[0]
-  vncproxy = node if vncproxy.name == node.name
-else
-  vncproxy = node
-end
-vncproxy_ha_enabled = vncproxy[:nova][:ha][:enabled]
-vncproxy_public_host = CrowbarHelper.get_host_for_public_url(vncproxy, vncproxy[:nova][:novnc][:ssl][:enabled], vncproxy_ha_enabled)
-Chef::Log.info("VNCProxy server at #{vncproxy_public_host}")
-
 # use memcached as a cache backend for nova-novncproxy
-if vncproxy_ha_enabled
+if api_ha_enabled
   memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller")
   memcached_servers = memcached_nodes.map do |n|
     node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
@@ -123,19 +112,6 @@ else
   memcached_servers = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
 end
 memcached_servers.sort!
-
-serialproxies = search_env_filtered(:node, "roles:nova-controller")
-if serialproxies.empty?
-  serialproxy = node
-else
-  serialproxy = serialproxies[0]
-  serialproxy = node if serialproxy.name == node.name
-end
-serialproxy_ha_enabled = serialproxy[:nova][:ha][:enabled]
-serialproxy_public_host = CrowbarHelper.get_host_for_public_url(serialproxy,
-  serialproxy[:nova][:serial][:ssl][:enabled],
-  serialproxy_ha_enabled)
-Chef::Log.info("serialproxy server at #{serialproxy_public_host}")
 
 directory "/etc/nova" do
    mode 0755
@@ -243,7 +219,7 @@ else
 end
 
 # only require certs for nova controller
-if (api_ha_enabled || serialproxy_ha_enabled || vncproxy_ha_enabled || api == node) && \
+if (api_ha_enabled || api == node) && \
     api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
   ssl_setup "setting up ssl for nova" do
     generate_certs api[:nova][:ssl][:generate_certs]
@@ -256,7 +232,7 @@ if (api_ha_enabled || serialproxy_ha_enabled || vncproxy_ha_enabled || api == no
   end
 end
 
-if (api_ha_enabled || serialproxy_ha_enabled || vncproxy_ha_enabled || api == node) && \
+if (api_ha_enabled || api == node) && \
     api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
   # No check if we're using certificate info from nova-api
   unless ::File.size?(api_novnc_ssl_certfile) || api[:nova][:novnc][:ssl][:certfile].empty?
@@ -376,11 +352,11 @@ template "/etc/nova/nova.conf" do
     vnc_enabled: node[:nova][:use_novnc],
     serial_enabled: node[:nova][:use_serial],
     vendordata_jsonfile: vendordata_jsonfile,
-    vncproxy_public_host: vncproxy_public_host,
+    vncproxy_public_host: public_api_host,
     vncproxy_ssl_enabled: api[:nova][:novnc][:ssl][:enabled],
     vncproxy_cert_file: api_novnc_ssl_certfile,
     vncproxy_key_file: api_novnc_ssl_keyfile,
-    serialproxy_public_host: serialproxy_public_host,
+    serialproxy_public_host: public_api_host,
     memcached_servers: memcached_servers,
     neutron_protocol: neutron_protocol,
     neutron_server_host: neutron_server_host,
