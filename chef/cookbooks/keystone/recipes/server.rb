@@ -488,19 +488,6 @@ ruby_block "mark node for keystone bootstrap" do
   subscribes :create, "execute[keystone-manage bootstrap]", :immediately
 end
 
-# Create tenants
-openstack_command = "openstack \
---os-username \"#{node[:keystone][:admin][:username]}\" \
---os-password \"#{node[:keystone][:admin][:password]}\" \
---os-project-name \"#{node[:keystone][:admin][:tenant]}\" \
---os-auth-url \"#{node[:keystone][:api][:versioned_admin_URL]}\" \
---os-region \"#{node[:keystone][:api][:region]}\""
-if node[:keystone][:api][:version] != "2.0"
-  openstack_command <<  " --os-identity-api-version #{node[:keystone][:api][:version]} --os-project-domain-id default --os-user-domain-id default"
-end
-
-openstack_command << " --insecure" if keystone_insecure
-
 [:service, :default].each do |tenant_type|
   tenant = node[:keystone][tenant_type][:tenant]
 
@@ -512,16 +499,6 @@ openstack_command << " --insecure" if keystone_insecure
     auth register_auth_hash
     tenant_name tenant
     action :add_tenant
-  end
-
-  ruby_block "saving id for default #{tenant} tenant" do
-    block do
-      tenant_id = `#{openstack_command} project show -f value -c id #{tenant}`.chomp
-      if !tenant_id.empty? && node[:keystone][tenant_type][:tenant_id] != tenant_id
-        node.set[:keystone][tenant_type][:tenant_id] = tenant_id
-        node.save
-      end
-    end
   end
 end
 

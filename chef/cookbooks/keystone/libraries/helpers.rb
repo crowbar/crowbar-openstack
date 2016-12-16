@@ -11,6 +11,8 @@ module KeystoneHelper
   end
 
   def self.keystone_settings(current_node, cookbook_name)
+    instance = current_node[cookbook_name][:keystone_instance] || "default"
+
     # Cache the result for each cookbook in an instance variable hash. This
     # cache needs to be invalidated for each chef-client run from chef-client
     # daemon (which are all in the same process); so use the ohai time as a
@@ -25,8 +27,9 @@ module KeystoneHelper
       @keystone_settings_cache_time = current_node[:ohai_time]
     end
 
-    unless @keystone_settings && @keystone_settings.include?(cookbook_name)
-      node = search_for_keystone(current_node, cookbook_name)
+
+    unless @keystone_settings && @keystone_settings.include?(instance)
+      node = search_for_keystone(current_node, instance)
 
       use_ssl = node["keystone"]["api"]["protocol"] == "https"
       if node[:keystone][:api][:versioned_public_URL].nil? || node[:keystone][:api][:public_URL_host].nil?
@@ -55,7 +58,7 @@ module KeystoneHelper
       default_domain_id = "default"
 
       @keystone_settings ||= Hash.new
-      @keystone_settings[cookbook_name] = {
+      @keystone_settings[instance] = {
         "api_version" => node[:keystone][:api][:version],
         # This is somehwat ugly but the Juno keystonemiddleware expects the
         # version to be a "v3.0" for the v3 API instead of the "v3" or "3" that
@@ -76,32 +79,25 @@ module KeystoneHelper
         "admin_port" => node["keystone"]["api"]["admin_port"],
         "admin_token" => node["keystone"]["service"]["token"],
         "admin_tenant" => node["keystone"]["admin"]["tenant"],
-        "admin_tenant_id" => node["keystone"]["admin"]["tenant_id"],
         "admin_user" => node["keystone"]["admin"]["username"],
         "admin_domain" => default_domain,
         "admin_domain_id" => default_domain_id,
         "admin_password" => node["keystone"]["admin"]["password"],
         "default_tenant" => node["keystone"]["default"]["tenant"],
-        "default_tenant_id" => node["keystone"]["default"]["tenant_id"],
         "default_user" => has_default_user ? node["keystone"]["default"]["username"] : nil,
         "default_user_domain" => has_default_user ? default_domain : nil,
         "default_user_domain_id" => has_default_user ? default_domain_id : nil,
         "default_password" => has_default_user ? node["keystone"]["default"]["password"] : nil,
         "service_tenant" => node["keystone"]["service"]["tenant"],
-        "service_tenant_id" => node["keystone"]["service"]["tenant_id"]
       }
-
-      @keystone_settings[cookbook_name]["service_user"] = current_node[cookbook_name][:service_user]
-      @keystone_settings[cookbook_name]["service_password"] = current_node[cookbook_name][:service_password]
     end
 
-    @keystone_settings[cookbook_name]
+    @keystone_settings[instance].merge(
+      "service_user" => current_node[cookbook_name][:service_user],
+      "service_password" => current_node[cookbook_name][:service_password])
   end
 
-  private
-  def self.search_for_keystone(node, cookbook_name)
-    instance = node[cookbook_name][:keystone_instance] || "default"
-
+  private_class_method def self.search_for_keystone(node, instance)
     if @keystone_node && @keystone_node.include?(instance)
       Chef::Log.info("Keystone server found at #{@keystone_node[instance][:keystone][:api][:internal_URL_host]} [cached]")
       return @keystone_node[instance]

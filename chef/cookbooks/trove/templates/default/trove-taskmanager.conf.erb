@@ -88,7 +88,6 @@ use_nova_server_config_drive = true
 nova_proxy_admin_user = <%= @keystone_settings["admin_user"] %>
 nova_proxy_admin_pass = <%= @keystone_settings["admin_password"] %>
 nova_proxy_admin_tenant_name = <%= @keystone_settings["admin_tenant"] %>
-nova_proxy_admin_tenant_id = <%= @keystone_settings["admin_tenant_id"] %>
 
 # Manager impl for the taskmanager
 taskmanager_manager=trove.taskmanager.manager.Manager
