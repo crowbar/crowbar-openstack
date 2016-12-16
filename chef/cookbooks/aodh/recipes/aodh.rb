@@ -175,6 +175,7 @@ template "/etc/aodh/aodh.conf" do
     node_hostname: node["hostname"],
     alarm_threshold_evaluation_interval: node[:ceilometer][:alarm_threshold_evaluation_interval]
   )
+  notifies :reload, resources(service: "apache2")
 end
 
 crowbar_pacemaker_sync_mark "wait-aodh_db_sync"
@@ -211,39 +212,15 @@ service "aodh-api" do
   ignore_failure true
 end
 
-include_recipe "apache2"
-if node[:platform_family] == "rhel"
-  package "mod_wsgi"
-else
-  include_recipe "apache2::mod_wsgi"
-end
-apache_module "version"
-
-apache_site "000-default" do
-  enable false
+crowbar_openstack_wsgi "WSGI entry for aodh-api" do
+  bind_host bind_host
+  bind_port bind_port
+  daemon_process "aodh-api"
+  user node[:aodh][:user]
+  group node[:aodh][:group]
 end
 
-apache_log_dir = if node[:platform_family] == "suse"
-  "/var/log/apache2"
-else
-  "${APACHE_LOG_DIR}"
-end
-
-template "#{node[:apache][:dir]}/sites-available/aodh-api.conf" do
-  path "#{node[:apache][:dir]}/vhosts.d/aodh-api.conf" if node[:platform_family] == "suse"
-  source "apache_aodh.conf.erb"
-  variables(
-    apache_log_dir: apache_log_dir,
-    bind_host: bind_host,
-    bind_port: bind_port,
-    # There is tough science behind those numbers..
-    processes: 3,
-    threads: 3
-  )
-  notifies :restart, resources(service: "apache2"), :immediately
-end
-
-apache_site "aodh.conf" do
+apache_site "aodh-api.conf" do
   enable true
 end
 

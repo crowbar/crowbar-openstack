@@ -138,47 +138,41 @@ elsif node[:keystone][:frontend] == "apache"
     ignore_failure true
   end
 
-  include_recipe "apache2"
-  if %w(rhel).include?(node[:platform_family])
-    package "mod_wsgi"
-  else
-    include_recipe "apache2::mod_wsgi"
-  end
-  include_recipe "apache2::mod_rewrite"
-  apache_module "version"
-
-  apache_site "000-default" do
-    enable false
-  end
-
-  apache_log_dir = if node[:platform_family] == "suse"
-    "/var/log/apache2"
-  else
-    "${APACHE_LOG_DIR}"
+  crowbar_openstack_wsgi "WSGI entry for keystone-public" do
+    bind_host bind_service_host
+    bind_port bind_service_port
+    daemon_process "keystone-public"
+    user node[:keystone][:user]
+    group node[:keystone][:group]
+    script_alias "/usr/bin/keystone-wsgi-public"
+    pass_authorization true
+    limit_request_body 114688
+    ssl_enable node[:keystone][:api][:protocol] == "https"
+    ssl_certfile node[:keystone][:ssl][:certfile]
+    ssl_keyfile node[:keystone][:ssl][:keyfile]
+    ssl_cacert node[:keystone][:ssl][:ca_certs]
   end
 
-  apache_module "ssl" if node[:keystone][:api][:protocol] == "https"
-
-  template "#{node[:apache][:dir]}/sites-available/keystone.conf" do
-    path "#{node[:apache][:dir]}/vhosts.d/keystone.conf" if node[:platform_family] == "suse"
-    source "apache_keystone.conf.erb"
-    variables(
-      apache_log_dir: apache_log_dir,
-      bind_admin_port: bind_admin_port, # Auth port
-      bind_admin_host: bind_admin_host,
-      bind_service_port: bind_service_port, # public port
-      bind_service_host: bind_service_host,
-      ssl_enable: node[:keystone][:api][:protocol] == "https",
-      ssl_certfile: node[:keystone][:ssl][:certfile],
-      ssl_keyfile: node[:keystone][:ssl][:keyfile],
-      ssl_ca_certs: node[:keystone][:ssl][:ca_certs],
-      processes: 3,
-      threads: 10
-    )
-    notifies :restart, resources(service: "apache2"), :immediately
+  apache_site "keystone-public.conf" do
+    enable true
   end
 
-  apache_site "keystone.conf" do
+  crowbar_openstack_wsgi "WSGI entry for keystone-admin" do
+    bind_host bind_admin_host
+    bind_port bind_admin_port
+    daemon_process "keystone-admin"
+    user node[:keystone][:user]
+    group node[:keystone][:group]
+    script_alias "/usr/bin/keystone-wsgi-admin"
+    pass_authorization true
+    limit_request_body 114688
+    ssl_enable node[:keystone][:api][:protocol] == "https"
+    ssl_certfile node[:keystone][:ssl][:certfile]
+    ssl_keyfile node[:keystone][:ssl][:keyfile]
+    ssl_cacert node[:keystone][:ssl][:ca_certs]
+  end
+
+  apache_site "keystone-admin.conf" do
     enable true
   end
 end

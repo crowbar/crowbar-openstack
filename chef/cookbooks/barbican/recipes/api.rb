@@ -50,13 +50,6 @@ node.normal[:apache][:listen_ports_crowbar] ||= {}
 
 node.normal[:apache][:listen_ports_crowbar][:barbican] = { plain: [bind_port] }
 
-# Override what the apache2 cookbook does since it enforces the ports
-resource = resources(template: "#{node[:apache][:dir]}/ports.conf")
-resource.variables(
-  apache_listen_ports:
-    node.normal[:apache][:listen_ports_crowbar].values.map(&:values).flatten.uniq.sort
-)
-
 crowbar_pacemaker_sync_mark "wait-barbican_register"
 
 keystone_register "barbican api wakeup keystone" do
@@ -122,22 +115,23 @@ end
 
 crowbar_pacemaker_sync_mark "create-barbican_register"
 
-template "#{node[:apache][:dir]}/vhosts.d/barbican-api.conf" do
-  path "#{node[:apache][:dir]}/vhosts.d/barbican-api.conf"
-  source "barbican-api.conf.erb"
-  mode 0644
-  variables(
-    application_path: application_path,
-    application_exec_path: application_exec_path,
-    barbican_user: node[:barbican][:user],
-    barbican_group: node[:barbican][:group],
-    bind_host: node[:barbican][:api][:bind_host],
-    bind_port: bind_port,
-    logfile: node[:barbican][:api][:logfile],
-    processes: node[:barbican][:api][:processes],
-    threads: node[:barbican][:api][:threads],
-  )
-  notifies :restart, resources(service: "apache2"), :immediately
+if node[:barbican][:ha][:enabled]
+  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  bind_host = admin_address
+  bind_port = node[:barbican][:ha][:ports][:api]
+else
+  bind_host = node[:barbican][:api][:host]
+  bind_port = node[:barbican][:api][:port]
+end
+
+crowbar_openstack_wsgi "WSGI entry for barbican-api" do
+  bind_host bind_host
+  bind_port bind_port
+  daemon_process "barbican-api"
+  user node[:barbican][:user]
+  group node[:barbican][:group]
+  processes node[:barbican][:api][:processes]
+  threads node[:barbican][:api][:threads]
 end
 
 apache_site "barbican-api.conf" do

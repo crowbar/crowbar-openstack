@@ -191,24 +191,6 @@ service "ceilometer-api" do
   ignore_failure true
 end
 
-include_recipe "apache2"
-if node[:platform_family] == "rhel"
-  package "mod_wsgi"
-else
-  include_recipe "apache2::mod_wsgi"
-end
-apache_module "version"
-
-apache_site "000-default" do
-  enable false
-end
-
-apache_log_dir = if node[:platform_family] == "suse"
-  "/var/log/apache2"
-else
-  "${APACHE_LOG_DIR}"
-end
-
 if node[:ceilometer][:ha][:server][:enabled]
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
   bind_host = admin_address
@@ -218,21 +200,15 @@ else
   bind_port = node[:ceilometer][:api][:port]
 end
 
-template "#{node[:apache][:dir]}/sites-available/ceilometer.conf" do
-  path "#{node[:apache][:dir]}/vhosts.d/ceilometer.conf" if node[:platform_family] == "suse"
-  source "apache_ceilometer.conf.erb"
-  variables(
-    apache_log_dir: apache_log_dir,
-    bind_host: bind_host,
-    bind_port: bind_port,
-    # There is tough science behind those numbers..
-    processes: 3,
-    threads: 3
-  )
-  notifies :restart, resources(service: "apache2"), :immediately
+crowbar_openstack_wsgi "WSGI entry for ceilometer-api" do
+  bind_host bind_host
+  bind_port bind_port
+  daemon_process "ceilometer-api"
+  user node[:ceilometer][:user]
+  group node[:ceilometer][:group]
 end
 
-apache_site "ceilometer.conf" do
+apache_site "ceilometer-api.conf" do
   enable true
 end
 
