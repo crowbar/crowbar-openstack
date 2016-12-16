@@ -7,6 +7,8 @@
       "port": 5672,
       "password": "",
       "user": "nova",
+      "uid": 91,
+      "gid": 91,
       "vhost": "/nova",
       "ha": {
         "storage": {
@@ -33,7 +35,7 @@
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 11,
+      "schema-revision": 100,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },

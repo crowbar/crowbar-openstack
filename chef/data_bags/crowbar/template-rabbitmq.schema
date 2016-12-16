@@ -16,6 +16,8 @@
             "port": { "type": "int", "required": true },
             "password": { "type": "str", "required": true },
             "user": { "type": "str", "required": true },
+            "uid": { "type": "int", "required": true },
+            "gid": { "type": "int", "required": true },
             "vhost": { "type": "str", "required": true },
             "ha" : {
               "type": "map",
