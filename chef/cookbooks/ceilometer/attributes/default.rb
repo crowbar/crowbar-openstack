@@ -15,6 +15,7 @@
 
 default[:ceilometer][:user]="ceilometer"
 default[:ceilometer][:group]="ceilometer"
+default[:ceilometer][:config_file] = "/etc/ceilometer/ceilometer.conf.d/100-ceilometer.conf"
 
 central_service_name = "ceilometer-agent-central"
 api_service_name = "ceilometer-api"

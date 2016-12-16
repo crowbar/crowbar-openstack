@@ -170,7 +170,7 @@ service "ceilometer-collector" do
   service_name node[:ceilometer][:collector][:service_name]
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
+  subscribes :restart, resources(template: node[:ceilometer][:config_file])
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
@@ -179,7 +179,7 @@ service "ceilometer-agent-notification" do
   service_name node[:ceilometer][:agent_notification][:service_name]
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
+  subscribes :restart, resources(template: node[:ceilometer][:config_file])
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
