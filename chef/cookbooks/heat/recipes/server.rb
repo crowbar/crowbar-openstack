@@ -364,6 +364,8 @@ shell_get_stack_user_domain = <<-EOF
   echo $id
 EOF
 
+rabbit_settings = fetch_rabbitmq_settings
+
 template "/etc/heat/heat.conf.d/100-heat.conf" do
   source "heat.conf.erb"
   owner "root"
@@ -372,7 +374,11 @@ template "/etc/heat/heat.conf.d/100-heat.conf" do
   variables(
     debug: node[:heat][:debug],
     verbose: node[:heat][:verbose],
-    rabbit_settings: fetch_rabbitmq_settings,
+    transport_url: "rabbit://#{rabbit_settings[:user]}:"\
+                            "#{rabbit_settings[:password]}@"\
+                            "#{rabbit_settings[:address]}:"\
+                            "#{rabbit_settings[:port]}/"\
+                            "#{rabbit_settings[:vhost]}",
     keystone_settings: keystone_settings,
     database_connection: db_connection,
     bind_host: bind_host,
