@@ -23,7 +23,7 @@ define :sahara_service do
     service_name "openstack-#{sahara_service_name}"
     supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(template: "/etc/sahara/sahara.conf")
+    subscribes :restart, resources(template: node[:sahara][:config_file])
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 end

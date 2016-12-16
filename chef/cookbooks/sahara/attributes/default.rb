@@ -21,6 +21,7 @@ default[:sahara][:max_header_line] = 16384
 default[:sahara][:api][:protocol] = "http"
 default[:sahara][:api][:bind_port] = 8386
 default[:sahara][:use_syslog] = false
+default[:sahara][:config_file] = "/etc/sahara/sahara.conf.d/100-sahara.conf"
 
 default[:sahara][:ha][:enabled] = false
 # Ports to bind to when haproxy is used for the real ports
