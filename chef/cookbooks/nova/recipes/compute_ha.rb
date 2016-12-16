@@ -39,7 +39,7 @@ keystone_settings = KeystoneHelper.keystone_settings(nova, @cookbook_name)
 internal_auth_url_v2 = \
   "#{keystone_settings["protocol"]}://" \
   "#{keystone_settings["internal_url_host"]}:#{keystone_settings["service_port"]}/v2.0/"
-neutrons = search(:node, "roles:neutron-server AND roles:neutron-config-#{nova[:nova][:neutron_instance]}")
+neutrons = node_search_with_cache("roles:neutron-server")
 neutron = neutrons.first || \
   raise("Neutron instance '#{nova[:nova][:neutron_instance]}' for nova not found")
 
