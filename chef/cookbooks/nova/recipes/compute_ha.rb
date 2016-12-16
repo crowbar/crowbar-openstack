@@ -32,7 +32,7 @@ unless nova[:nova][:ha][:compute][:setup]
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(nova, @cookbook_name)
-neutrons = search(:node, "roles:neutron-server AND roles:neutron-config-#{nova[:nova][:neutron_instance]}")
+neutrons = node_search_with_cache("roles:neutron-server")
 neutron = neutrons.first || \
   raise("Neutron instance '#{nova[:nova][:neutron_instance]}' for nova not found")
 
