@@ -57,6 +57,7 @@ default[:aodh][:listener][:service_name]  = listener_service_name
 
 default[:aodh][:user] = "aodh"
 default[:aodh][:group] = "aodh"
+default[:aodh][:config_file] = "/etc/aodh/aodh.conf.d/100-aodh.conf"
 
 default[:aodh][:service_user] = "aodh"
 default[:aodh][:service_password] = ""
