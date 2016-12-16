@@ -299,10 +299,8 @@ ruby_block "nova_read_ssh_public_key" do
 end
 
 ssh_auth_keys = ""
-%w(kvm xen docker qemu zvm).each do |hypervisor|
-  search_env_filtered(:node, "roles:nova-compute-#{hypervisor}") do |n|
-    ssh_auth_keys += n[:nova][:service_ssh_key]
-  end
+search_env_filtered(:node, "roles:nova-compute-#{node[:nova][:libvirt_type]}") do |n|
+  ssh_auth_keys += n[:nova][:service_ssh_key]
 end
 
 if node["roles"].include?("nova-compute-zvm")
