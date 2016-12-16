@@ -34,7 +34,7 @@ template "/etc/swift/swift.conf" do
  })
 end
 
-proxy_nodes = search_env_filtered(:node, "roles:swift-proxy")
+proxy_nodes = node_search_with_cache("roles:swift-proxy")
 unless proxy_nodes.empty?
   proxy_node = proxy_nodes.first
   ha_enabled = node[:swift][:ha][:enabled]
