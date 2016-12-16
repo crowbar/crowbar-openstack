@@ -83,19 +83,8 @@ else
 end
 Chef::Log.info("Glance server at #{glance_server_host}")
 
-vncproxies = search_env_filtered(:node, "roles:nova-controller")
-if vncproxies.length > 0
-  vncproxy = vncproxies[0]
-  vncproxy = node if vncproxy.name == node.name
-else
-  vncproxy = node
-end
-vncproxy_ha_enabled = vncproxy[:nova][:ha][:enabled]
-vncproxy_public_host = CrowbarHelper.get_host_for_public_url(vncproxy, vncproxy[:nova][:novnc][:ssl][:enabled], vncproxy_ha_enabled)
-Chef::Log.info("VNCProxy server at #{vncproxy_public_host}")
-
 # use memcached as a cache backend for nova-novncproxy
-if vncproxy_ha_enabled
+if api_ha_enabled
   memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller")
   memcached_servers = memcached_nodes.map do |n|
     node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
@@ -211,7 +200,7 @@ else
 end
 
 # only require certs for nova controller
-if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
+if (api_ha_enabled || api == node) && \
     api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
   if api[:nova][:ssl][:generate_certs]
     package "openssl"
@@ -277,7 +266,7 @@ if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
   end
 end
 
-if (api_ha_enabled || vncproxy_ha_enabled || api == node) && \
+if (api_ha_enabled || api == node) && \
     api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
   # No check if we're using certificate info from nova-api
   unless ::File.size?(api_novnc_ssl_certfile) || api[:nova][:novnc][:ssl][:certfile].empty?
@@ -335,7 +324,7 @@ template "/etc/nova/nova.conf" do
             glance_server_port: glance_server_port,
             glance_server_insecure: glance_server_insecure || keystone_settings["insecure"],
             metadata_bind_address: metadata_bind_address,
-            vncproxy_public_host: vncproxy_public_host,
+            vncproxy_public_host: public_api_host,
             vncproxy_ssl_enabled: api[:nova][:novnc][:ssl][:enabled],
             vncproxy_cert_file: api_novnc_ssl_certfile,
             vncproxy_key_file: api_novnc_ssl_keyfile,
