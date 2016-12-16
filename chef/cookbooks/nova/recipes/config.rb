@@ -161,7 +161,7 @@ oat_server = node
 unless node[:nova][:itxt_instance].nil? || node[:nova][:itxt_instance].empty?
   env_filter = " AND inteltxt_config_environment:inteltxt-config-#{node[:nova][:itxt_instance]}"
   oat_servers = search(:node, "roles:oat-server#{env_filter}") || []
-  if oat_servers.length > 0
+  unless oat_servers.empty?
     has_itxt = true
     oat_server = oat_servers[0]
     execute "fill_cert" do
