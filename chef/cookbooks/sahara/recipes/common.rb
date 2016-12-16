@@ -48,7 +48,7 @@ nova_insecure = nova[:nova][:ssl][:insecure]
 ceilometers = search_env_filtered(:node, "roles:ceilometer-server")
 use_ceilometer = !ceilometers.empty?
 
-template "/etc/sahara/sahara.conf" do
+template node[:sahara][:config_file] do
   source "sahara.conf.erb"
   owner "root"
   group node[:sahara][:group]
