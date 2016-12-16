@@ -5,10 +5,9 @@ if node[:ceilometer][:use_mongodb]
   db_connection = nil
 
   if node[:ceilometer][:ha][:server][:enabled]
-    db_hosts = search(:node,
-                      "ceilometer_ha_mongodb_replica_set_member:true AND roles:ceilometer-server AND "\
-                      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
-      )
+    db_hosts = node_search_with_cache("roles:ceilometer-server").select do |n|
+      n[:ceilometer][:ha][:mongodb][:replica_set][:member] rescue false
+    end
     unless db_hosts.empty?
       mongodb_servers = db_hosts.map { |s| "#{Chef::Recipe::Barclamp::Inventory.get_network_by_type(s, "admin").address}:#{s[:ceilometer][:mongodb][:port]}" }
       db_connection = "mongodb://#{mongodb_servers.sort.join(',')}/ceilometer?replicaSet=#{node[:ceilometer][:ha][:mongodb][:replica_set][:name]}"
@@ -19,7 +18,7 @@ if node[:ceilometer][:use_mongodb]
   # been set on any node (yet), we just fallback to using the first
   # ceilometer-server node
   if db_connection.nil?
-    db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
+    db_hosts = node_search_with_cache("roles:ceilometer-server")
     db_host = db_hosts.first || node
     mongodb_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
     db_connection = "mongodb://#{mongodb_ip}:#{db_host[:ceilometer][:mongodb][:port]}/ceilometer"
@@ -38,7 +37,7 @@ else
     db_password = node[:ceilometer][:db][:password]
   else
     # pickup password to database from ceilometer-server node
-    node_controllers = search(:node, "roles:ceilometer-server") || []
+    node_controllers = node_search_with_cache("roles:ceilometer-server")
     if node_controllers.length > 0
       db_password = node_controllers[0][:ceilometer][:db][:password]
     end
