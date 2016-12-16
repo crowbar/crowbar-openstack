@@ -295,7 +295,7 @@ end
 
 ## Find other nodes that are swift-auth nodes, and make sure
 ## we use their memcached!
-proxy_config[:memcached_ips] = search_env_filtered(:node, "roles:swift-proxy").map do |x|
+proxy_config[:memcached_ips] = node_search_with_cache("roles:swift-proxy").map do |x|
   "#{Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)}:11211"
 end.sort
 
@@ -316,8 +316,7 @@ memcached_instance "swift-proxy" do
 end
 
 ## make sure to fetch ring files from the ring compute node
-env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
-compute_nodes = search(:node, "roles:swift-ring-compute#{env_filter}")
+compute_nodes = node_search_with_cache("roles:swift-ring-compute")
 if (!compute_nodes.nil? and compute_nodes.length > 0 and node[:fqdn]!=compute_nodes[0][:fqdn] )
   compute_node_addr  = Swift::Evaluator.get_ip_by_type(compute_nodes[0],:storage_ip_expr)
   log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") { level :debug }

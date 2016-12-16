@@ -44,7 +44,7 @@ end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
-memcached_ips = search_env_filtered(:node, "roles:swift-proxy").map do |x|
+memcached_ips = node_search_with_cache("roles:swift-proxy").map do |x|
   "#{Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)}:11211"
 end.sort
 
@@ -69,7 +69,7 @@ svcs += %w{swift-container swift-container-auditor swift-container-replicator sw
 svcs += %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
 
 ## make sure to fetch ring files from the ring compute node
-compute_nodes = search_env_filtered(:node, "roles:swift-ring-compute")
+compute_nodes = node_search_with_cache("roles:swift-ring-compute")
 if (!compute_nodes.nil? and compute_nodes.length > 0 )
   compute_node_addr  = Swift::Evaluator.get_ip_by_type(compute_nodes[0],:storage_ip_expr)
   log("ring compute found on: #{compute_nodes[0][:fqdn]} using: #{compute_node_addr}") { level :debug }
