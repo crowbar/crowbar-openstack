@@ -84,7 +84,7 @@ if event_time_to_live > 0
   event_time_to_live = event_time_to_live * 3600 * 24
 end
 
-template "/etc/ceilometer/ceilometer.conf" do
+template node[:ceilometer][:config_file] do
     source "ceilometer.conf.erb"
     owner "root"
     group node[:ceilometer][:group]
