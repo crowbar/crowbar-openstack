@@ -111,7 +111,7 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
 end
 
 unless ceph_clients.empty?
-  glance_servers = search(:node, "roles:glance-server")
+  glance_servers = node_search_with_cache("roles:glance-server")
   if glance_servers.length > 0
     glance_pool = glance_servers[0][:glance][:rbd][:store_pool]
   else
