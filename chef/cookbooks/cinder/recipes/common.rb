@@ -24,8 +24,7 @@ else
   package "python-cinder"
 end
 
-glance_env_filter = " AND glance_config_environment:glance-config-#{node[:cinder][:glance_instance]}"
-glance_servers = search(:node, "roles:glance-server#{glance_env_filter}") || []
+glance_servers = node_search_with_cache("roles:glance-server")
 
 if glance_servers.length > 0
   glance_server = glance_servers[0]
@@ -63,7 +62,7 @@ if node.roles.include? "cinder-controller"
   db_password = node[:cinder][:db][:password]
 else
   # pickup password to database from cinder-controller node
-  node_controllers = search(:node, "roles:cinder-controller") || []
+  node_controllers = node_search_with_cache("roles:cinder-controller")
   if node_controllers.length > 0
     db_password = node_controllers[0][:cinder][:db][:password]
   end
