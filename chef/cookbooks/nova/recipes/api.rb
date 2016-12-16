@@ -28,21 +28,13 @@ nova_package "objectstore" do
   use_pacemaker_provider node[:nova][:ha][:enabled]
 end
 
-apis = search_env_filtered(:node, "roles:nova-controller")
-if apis.length > 0
-  api = apis[0]
-  api = node if api.name == node.name
-else
-  api = node
-end
+api_ha_enabled = node[:nova][:ha][:enabled]
+admin_api_host = CrowbarHelper.get_host_for_admin_url(node, api_ha_enabled)
+public_api_host = CrowbarHelper.get_host_for_public_url(node, node[:nova][:ssl][:enabled], api_ha_enabled)
+api_port = node[:nova][:ports][:api]
+api_ec2_port = node[:nova][:ports][:api_ec2]
 
-api_ha_enabled = api[:nova][:ha][:enabled]
-admin_api_host = CrowbarHelper.get_host_for_admin_url(api, api_ha_enabled)
-public_api_host = CrowbarHelper.get_host_for_public_url(api, api[:nova][:ssl][:enabled], api_ha_enabled)
-api_port = api[:nova][:ports][:api]
-api_ec2_port = api[:nova][:ports][:api_ec2]
-
-api_protocol = api[:nova][:ssl][:enabled] ? "https" : "http"
+api_protocol = node[:nova][:ssl][:enabled] ? "https" : "http"
 
 crowbar_pacemaker_sync_mark "wait-nova_register"
 
