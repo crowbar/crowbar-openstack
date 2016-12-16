@@ -1349,9 +1349,6 @@ aki_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-vmlinuz
 # "dhclient" (string value)
 # Allowed values: udhcpc, dhclient, ''
 #dhcp_client = udhcpc
-<% if @use_docker %>
-dhcp_client =
-<% end %>
 
 
 [service_available]
@@ -1362,7 +1359,6 @@ dhcp_client =
 
 # Whether or not cinder is expected to be available (boolean value)
 #cinder = true
-cinder = <%= @use_docker ? false : true %>
 
 # Whether or not neutron is expected to be available (boolean value)
 #neutron = false
