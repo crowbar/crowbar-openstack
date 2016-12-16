@@ -156,20 +156,21 @@ else
 end
 Chef::Log.info("Neutron server at #{neutron_server_host}")
 
-env_filter = " AND inteltxt_config_environment:inteltxt-config-#{node[:nova][:itxt_instance]}"
-oat_servers = search(:node, "roles:oat-server#{env_filter}") || []
-if oat_servers.length > 0
-  has_itxt = true
-  oat_server = oat_servers[0]
-  execute "fill_cert" do
-    command <<-EOF
-      echo | openssl s_client -connect "#{oat_server[:hostname]}:8443" -cipher DHE-RSA-AES256-SHA > /etc/nova/oat_certfile.cer || rm -fv /etc/nova/oat_certfile.cer
-    EOF
-    not_if { File.exist? "/etc/nova/oat_certfile.cer" }
+has_itxt = false
+oat_server = node
+unless node[:nova][:itxt_instance].nil? || node[:nova][:itxt_instance].empty?
+  env_filter = " AND inteltxt_config_environment:inteltxt-config-#{node[:nova][:itxt_instance]}"
+  oat_servers = search(:node, "roles:oat-server#{env_filter}") || []
+  if oat_servers.length > 0
+    has_itxt = true
+    oat_server = oat_servers[0]
+    execute "fill_cert" do
+      command <<-EOF
+        echo | openssl s_client -connect "#{oat_server[:hostname]}:8443" -cipher DHE-RSA-AES256-SHA > /etc/nova/oat_certfile.cer || rm -fv /etc/nova/oat_certfile.cer
+      EOF
+      not_if { File.exist? "/etc/nova/oat_certfile.cer" }
+    end
   end
-else
-  has_itxt = false
-  oat_server = node
 end
 
 # only put certificates in nova.conf for controllers; on compute nodes, we
