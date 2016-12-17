@@ -19,6 +19,8 @@
 # limitations under the License.
 #
 
+is_controller = node["roles"].include?("nova-controller")
+
 my_ip_net = "admin"
 
 # z/VM compute nodes might need a different "my_ip" setting to be accessible
@@ -38,7 +40,7 @@ package "nova-common" do
 end
 
 # don't expose database connection to the compute clients
-if node["roles"].include?("nova-controller")
+if is_controller
   db_settings = fetch_database_settings
 
   include_recipe "database::client"
@@ -59,7 +61,7 @@ else
   database_connection = nil
 end
 
-api = if node["roles"].include?("nova-controller")
+api = if is_controller
   node
 else
   search_env_filtered(:node, "roles:nova-controller").first
@@ -179,7 +181,7 @@ end
 # only put certificates in nova.conf for controllers; on compute nodes, we
 # don't need them and specifying them results in the certificates being queried
 # when creating clients for glance
-if api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
+if api[:nova][:ssl][:enabled] && is_controller
   api_ssl_certfile = api[:nova][:ssl][:certfile]
   api_ssl_keyfile = api[:nova][:ssl][:keyfile]
   api_ssl_cafile = api[:nova][:ssl][:ca_certs]
@@ -190,7 +192,7 @@ else
 end
 
 # if there's no certificate for novnc, use the ones from nova-api
-if api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
+if api[:nova][:novnc][:ssl][:enabled] && is_controller
   if api[:nova][:novnc][:ssl][:certfile].empty?
     api_novnc_ssl_certfile = api[:nova][:ssl][:certfile]
     api_novnc_ssl_keyfile = api[:nova][:ssl][:keyfile]
@@ -205,7 +207,7 @@ end
 
 # only require certs for nova controller
 if (api_ha_enabled || api == node) && \
-    api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
+    api[:nova][:ssl][:enabled] && is_controller
   if api[:nova][:ssl][:generate_certs]
     package "openssl"
     ruby_block "generate_certs for nova" do
@@ -271,7 +273,7 @@ if (api_ha_enabled || api == node) && \
 end
 
 if (api_ha_enabled || api == node) && \
-    api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
+    api[:nova][:novnc][:ssl][:enabled] && is_controller
   # No check if we're using certificate info from nova-api
   unless ::File.size?(api_novnc_ssl_certfile) || api[:nova][:novnc][:ssl][:certfile].empty?
     message = "Certificate \"#{api_novnc_ssl_certfile}\" is not present or empty."
