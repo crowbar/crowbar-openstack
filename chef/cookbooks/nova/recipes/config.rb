@@ -65,12 +65,10 @@ else
   api_database_connection = nil
 end
 
-apis = search_env_filtered(:node, "roles:nova-controller")
-if apis.length > 0
-  api = apis[0]
-  api = node if api.name == node.name
+api = if node["roles"].include?("nova-controller")
+  node
 else
-  api = node
+  search_env_filtered(:node, "roles:nova-controller").first
 end
 
 # use nova-rootwrap daemon on compute-only nodes
