@@ -35,7 +35,7 @@ service "ceilometer-agent-compute" do
   supports status: true, restart: true
   if is_compute
     action [:enable, :start]
-    subscribes :restart, resources("template[/etc/ceilometer/ceilometer.conf]")
+    subscribes :restart, resources(template: node[:ceilometer][:config_file])
     subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
   else
     action [:disable, :stop]
