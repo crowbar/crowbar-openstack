@@ -31,8 +31,8 @@ end.run_action(:create)
 
 ## Pacemaker is only used with native frontend
 if node[:keystone][:frontend] == "native"
-  proposal_name = node[:keystone][:config][:environment]
-  monitor_creds = node[:keystone][:admin]
+  # proposal_name = node[:keystone][:config][:environment]
+  # monitor_creds = node[:keystone][:admin]
 
   # Wait for all nodes to reach this point so we know that all nodes will have
   # all the required packages installed before we create the pacemaker
