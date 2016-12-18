@@ -10,6 +10,28 @@ module KeystoneHelper
     service_URL(protocol, host, port) + "/" + version + "/"
   end
 
+  def self.admin_auth_url(node, admin_host)
+    service_URL(node[:keystone][:api][:protocol], admin_host, node[:keystone][:api][:admin_port])
+  end
+
+  def self.public_auth_url(node, public_host)
+    versioned_service_URL(node[:keystone][:api][:protocol],
+                          public_host,
+                          node[:keystone][:api][:service_port],
+                          node[:keystone][:api][:version])
+  end
+
+  def self.internal_auth_url(node, admin_host)
+    versioned_service_URL(node[:keystone][:api][:protocol],
+                          admin_host,
+                          node[:keystone][:api][:service_port],
+                          node[:keystone][:api][:version])
+  end
+
+  def self.unversioned_internal_auth_url(node, admin_host)
+    service_URL(node[:keystone][:api][:protocol], admin_host, node[:keystone][:api][:service_port])
+  end
+
   def self.keystone_settings(current_node, cookbook_name)
     instance = current_node[cookbook_name][:keystone_instance] || "default"
 
@@ -32,26 +54,10 @@ module KeystoneHelper
       node = search_for_keystone(current_node, instance)
 
       use_ssl = node["keystone"]["api"]["protocol"] == "https"
-      if node[:keystone][:api][:versioned_public_URL].nil? || node[:keystone][:api][:public_URL_host].nil?
-        # only compute this if we don't have the right attributes yet; this will
-        # be fixed on next run of chef-client on keystone node
-        public_host = CrowbarHelper.get_host_for_public_url(node, use_ssl)
-      end
+      public_host = CrowbarHelper.get_host_for_public_url(node, use_ssl)
 
-      admin_auth_url = service_URL(node[:keystone][:api][:protocol],
-                                   node[:fqdn],
-                                   node[:keystone][:api][:admin_port])
-      public_auth_url = versioned_service_URL(node[:keystone][:api][:protocol],
-                                              public_host,
-                                              node[:keystone][:api][:service_port],
-                                              node[:keystone][:api][:version])
-      internal_auth_url = versioned_service_URL(node[:keystone][:api][:protocol],
-                                                node[:fqdn],
-                                                node[:keystone][:api][:service_port],
-                                                node[:keystone][:api][:version])
-      unversioned_internal_auth_url = service_URL(node[:keystone][:api][:protocol],
-                                                  node[:fqdn],
-                                                  node[:keystone][:api][:service_port])
+      ha_enabled = node[:keystone][:ha][:enabled]
+      admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 
       has_default_user = node["keystone"]["default"]["create_user"]
       default_domain = "Default"
@@ -63,17 +69,16 @@ module KeystoneHelper
         # version to be a "v3.0" for the v3 API instead of the "v3" or "3" that
         # is used everywhere else.
         "api_version_for_middleware" => "v%.1f" % node[:keystone][:api][:version],
-        "admin_auth_url" => node[:keystone][:api][:admin_URL] || admin_auth_url,
-        "public_auth_url" => node[:keystone][:api][:versioned_public_URL] || public_auth_url,
-        "internal_auth_url" => node[:keystone][:api][:versioned_internal_URL] || internal_auth_url,
-        "unversioned_internal_auth_url" => node[:keystone][:api][:unversioned_internal_URL] || \
-          unversioned_internal_auth_url,
+        "admin_auth_url" => admin_auth_url(node, admin_host),
+        "public_auth_url" => public_auth_url(node, public_host),
+        "internal_auth_url" => internal_auth_url(node, admin_host),
+        "unversioned_internal_auth_url" => unversioned_internal_auth_url(node, admin_host),
         "use_ssl" => use_ssl,
         "endpoint_region" => node["keystone"]["api"]["region"],
         "insecure" => use_ssl && node[:keystone][:ssl][:insecure],
         "protocol" => node["keystone"]["api"]["protocol"],
-        "public_url_host" => node[:keystone][:api][:public_URL_host] || public_host,
-        "internal_url_host" => node[:keystone][:api][:internal_URL_host] || node[:fqdn],
+        "public_url_host" => public_host,
+        "internal_url_host" => admin_host,
         "service_port" => node["keystone"]["api"]["service_port"],
         "admin_port" => node["keystone"]["api"]["admin_port"],
         "admin_token" => node["keystone"]["service"]["token"],
@@ -98,7 +103,7 @@ module KeystoneHelper
 
   private_class_method def self.search_for_keystone(node, instance)
     if @keystone_node && @keystone_node.include?(instance)
-      Chef::Log.info("Keystone server found at #{@keystone_node[instance][:keystone][:api][:internal_URL_host]} [cached]")
+      Chef::Log.info("Keystone server found at #{@keystone_node[instance].name} [cached]")
       return @keystone_node[instance]
     end
 
@@ -113,7 +118,7 @@ module KeystoneHelper
     @keystone_node ||= Hash.new
     @keystone_node[instance] = keystone_node
 
-    Chef::Log.info("Keystone server found at #{@keystone_node[instance][:keystone][:api][:internal_URL_host]}")
+    Chef::Log.info("Keystone server found at #{@keystone_node[instance].name}")
     return @keystone_node[instance]
   end
 end

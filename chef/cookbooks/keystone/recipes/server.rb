@@ -54,40 +54,7 @@ end
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:keystone][:api][:protocol] == "https", ha_enabled)
 
-# These are used in keystone.conf
-node.set[:keystone][:api][:public_URL] = \
-  KeystoneHelper.service_URL(node[:keystone][:api][:protocol],
-                             my_public_host,
-                             node[:keystone][:api][:service_port])
-# This is also used for admin requests of keystoneclient
-node.set[:keystone][:api][:admin_URL] = \
-  KeystoneHelper.service_URL(node[:keystone][:api][:protocol],
-                             my_admin_host,
-                             node[:keystone][:api][:admin_port])
-
-# These URLs will be registered as endpoints in keystone's database
-node.set[:keystone][:api][:versioned_public_URL] = \
-  KeystoneHelper.versioned_service_URL(node[:keystone][:api][:protocol],
-                                       my_public_host,
-                                       node[:keystone][:api][:service_port],
-                                       node[:keystone][:api][:version])
-node.set[:keystone][:api][:versioned_admin_URL] = \
-  KeystoneHelper.versioned_service_URL(node[:keystone][:api][:protocol],
-                                       my_admin_host,
-                                       node[:keystone][:api][:admin_port],
-                                       node[:keystone][:api][:version])
-node.set[:keystone][:api][:versioned_internal_URL] = \
-  KeystoneHelper.versioned_service_URL(node[:keystone][:api][:protocol],
-                                       my_admin_host,
-                                       node[:keystone][:api][:service_port],
-                                       node[:keystone][:api][:version])
-node.set[:keystone][:api][:unversioned_internal_URL] = \
-  KeystoneHelper.service_URL(node[:keystone][:api][:protocol],
-                             my_admin_host,
-                             node[:keystone][:api][:service_port])
-
 # Other barclamps need to know the hostname to reach keystone
-node.set[:keystone][:api][:public_URL_host] = my_public_host
 node.set[:keystone][:api][:internal_URL_host] = my_admin_host
 
 if node[:keystone][:frontend] == "uwsgi"
@@ -249,7 +216,10 @@ template node[:keystone][:config_file] do
       bind_service_host: bind_service_host,
       bind_admin_port: bind_admin_port,
       bind_service_port: bind_service_port,
-      admin_endpoint: node[:keystone][:api][:admin_URL],
+      admin_endpoint: KeystoneHelper.service_URL(
+        node[:keystone][:api][:protocol],
+        my_admin_host, node[:keystone][:api][:admin_port]
+      ),
       memcached_servers: memcached_servers,
       signing_token_format: node[:keystone][:signing][:token_format],
       signing_certfile: node[:keystone][:signing][:certfile],
@@ -451,9 +421,9 @@ execute "keystone-manage bootstrap" do
   --bootstrap-role-name admin \
   --bootstrap-service-name keystone \
   --bootstrap-region-id #{node[:keystone][:api][:region]} \
-  --bootstrap-admin-url #{node[:keystone][:api][:versioned_admin_URL]} \
-  --bootstrap-public-url #{node[:keystone][:api][:versioned_public_URL]} \
-  --bootstrap-internal-url #{node[:keystone][:api][:versioned_internal_URL]}"
+  --bootstrap-admin-url #{KeystoneHelper.admin_auth_url(node, my_admin_host)} \
+  --bootstrap-public-url #{KeystoneHelper.public_auth_url(node, my_public_host)} \
+  --bootstrap-internal-url #{KeystoneHelper.internal_auth_url(node, my_admin_host)}"
   action :run
   only_if do
     !node[:keystone][:bootstrap] &&
