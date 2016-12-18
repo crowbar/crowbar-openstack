@@ -56,7 +56,6 @@ module KeystoneHelper
       has_default_user = node["keystone"]["default"]["create_user"]
       default_domain = "Default"
       default_domain_id = "default"
-
       @keystone_settings ||= Hash.new
       @keystone_settings[instance] = {
         "api_version" => node[:keystone][:api][:version],

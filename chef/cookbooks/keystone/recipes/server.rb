@@ -81,6 +81,10 @@ node.set[:keystone][:api][:versioned_internal_URL] = \
                                        my_admin_host,
                                        node[:keystone][:api][:service_port],
                                        node[:keystone][:api][:version])
+node.set[:keystone][:api][:unversioned_internal_URL] = \
+  KeystoneHelper.service_URL(node[:keystone][:api][:protocol],
+                             my_admin_host,
+                             node[:keystone][:api][:service_port])
 
 # Other barclamps need to know the hostname to reach keystone
 node.set[:keystone][:api][:public_URL_host] = my_public_host
