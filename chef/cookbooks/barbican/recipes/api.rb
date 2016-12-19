@@ -46,10 +46,6 @@ register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
                        tenant: keystone_settings["admin_tenant"] }
 
-node.normal[:apache][:listen_ports_crowbar] ||= {}
-
-node.normal[:apache][:listen_ports_crowbar][:barbican] = { plain: [bind_port] }
-
 crowbar_pacemaker_sync_mark "wait-barbican_register"
 
 keystone_register "barbican api wakeup keystone" do
