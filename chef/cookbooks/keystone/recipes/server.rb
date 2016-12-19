@@ -573,10 +573,6 @@ end
 
 crowbar_pacemaker_sync_mark "create-keystone_register"
 
-node.set[:keystone][:monitor] = {} if node[:keystone][:monitor].nil?
-node.set[:keystone][:monitor][:svcs] = ["keystone"] if node[:keystone][:monitor][:svcs] != ["keystone"]
-node.save
-
 template "/root/.openrc" do
   source "openrc.erb"
   owner "root"
