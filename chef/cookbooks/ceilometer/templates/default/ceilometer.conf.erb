@@ -8,18 +8,16 @@ debug = <%= @debug ? "true" : "false" %>
 verbose = <%= @verbose ? "true" : "false" %>
 log_dir = /var/log/ceilometer
 use_stderr = false
-[api]
-port = <%= @bind_port %>
-host = <%= @bind_host %>
-workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
-[central]
-shuffle_time_before_polling_task = 15
+transport_url = <%= @rabbit_settings[:url] %>
+
 [collector]
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+
 [database]
 metering_time_to_live = <%= @metering_time_to_live %>
 event_time_to_live = <%= @event_time_to_live %>
 connection = <%= @database_connection %>
+
 [keystone_authtoken]
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
@@ -32,18 +30,16 @@ identity_uri = <%= @keystone_settings['admin_auth_url'] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+
 [notification]
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+
 [oslo_concurrency]
 lock_path = /var/run/ceilometer
-[oslo_messaging_rabbit]
-rabbit_host = <%= @rabbit_settings[:address] %>
-rabbit_port = <%= @rabbit_settings[:port] %>
-rabbit_userid = <%= @rabbit_settings[:user] %>
-rabbit_password = <%= @rabbit_settings[:password] %>
-rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
+
 [publisher]
 telemetry_secret = <%= @metering_secret %>
+
 [service_credentials]
 region_name = <%= @keystone_settings['endpoint_region'] %>
 interface = internalURL
@@ -52,10 +48,12 @@ auth_url = <%= @keystone_settings['internal_auth_url'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
 default_domain_id = <%= @keystone_settings["admin_domain_id"] %>
 default_domain_name = <%= @keystone_settings["admin_domain"] %>
-user-name = <%= @keystone_settings['service_user'] %>
+username = <%= @keystone_settings['service_user'] %>
 password = <%= @keystone_settings['service_password'] %>
+
 [service_types]
-neutron_lbaas_version = v1
+neutron_lbaas_version = v2
+
 [vmware]
 host_ip = <%= node[:nova][:vcenter][:host] rescue "" %>
 host_port = <%= node[:nova][:vcenter][:port] rescue "443" %>
