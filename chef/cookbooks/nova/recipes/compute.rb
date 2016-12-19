@@ -64,7 +64,7 @@ case node[:nova][:libvirt_type]
 
       # Generate a UUID, as DMI's system uuid is unreliable
       if node[:nova][:host_uuid].nil?
-        node.normal[:nova][:host_uuid] = `uuidgen`.strip
+        node.set[:nova][:host_uuid] = `uuidgen`.strip
         node.save
       end
 
