@@ -20,17 +20,34 @@
 
 ha_enabled = node[:rabbitmq][:ha][:enabled]
 
-node.set[:rabbitmq][:address] = CrowbarRabbitmqHelper.get_listen_address(node)
-node.set[:rabbitmq][:management_address] = node[:rabbitmq][:address]
+dirty = false
+
+listen_address = CrowbarRabbitmqHelper.get_listen_address(node)
+if node[:rabbitmq][:address] != listen_address
+  node.set[:rabbitmq][:address] = listen_address
+  dirty = true
+end
+if node[:rabbitmq][:management_address] != listen_address
+  node.set[:rabbitmq][:management_address] = listen_address
+  dirty = true
+end
+
 addresses = [node[:rabbitmq][:address]]
 if node[:rabbitmq][:listen_public]
   addresses << CrowbarRabbitmqHelper.get_public_listen_address(node)
 end
-node.set[:rabbitmq][:addresses] = addresses
-
-if ha_enabled
-  node.set[:rabbitmq][:nodename] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
+if node[:rabbitmq][:addresses] != addresses
+  node.set[:rabbitmq][:addresses] = addresses
+  dirty = true
 end
+
+nodename = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
+if ha_enabled && node[:rabbitmq][:nodename] != nodename
+  node.set[:rabbitmq][:nodename] = nodename
+  dirty = true
+end
+
+node.save if dirty
 
 include_recipe "rabbitmq::default"
 
@@ -122,6 +139,3 @@ else
     only_if only_if_command if ha_enabled
   end
 end
-
-# save data so it can be found by search
-node.save
