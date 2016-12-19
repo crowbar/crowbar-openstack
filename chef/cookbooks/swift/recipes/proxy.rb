@@ -22,6 +22,8 @@ include_recipe "swift::auth"
 # will allow the ring-compute node to push the rings.
 include_recipe "swift::rsync"
 
+dirty = false
+
 if node.roles.include?("swift-storage") && node[:swift][:devs].nil?
   # If we're a storage node and have no device yet, then it simply means that we
   # haven't looked for devices yet, which also means that we won't have rings at
@@ -131,9 +133,13 @@ if node[:swift][:middlewares][:s3][:enabled]
 end
 
 # enable ceilometer middleware if ceilometer is configured
-node.set[:swift][:middlewares]["ceilometer"] = {
-  "enabled" => (node.roles.include? "ceilometer-swift-proxy-middleware")
-}
+ceilometer_swift_enabled = node.roles.include?("ceilometer-swift-proxy-middleware")
+node.set[:swift] ||= {}
+node.set[:swift][:middlewares] ||= {}
+if node[:swift][:middlewares]["ceilometer"] != ceilometer_swift_enabled
+  node.set[:swift][:middlewares]["ceilometer"] = { "enabled" => ceilometer_swift_enabled }
+  dirty = true
+end
 
 if node[:swift][:middlewares]["ceilometer"]["enabled"]
   package "python-ceilometermiddleware"
@@ -271,10 +277,15 @@ end
 
 ## install a default memcached instsance.
 ## default configuration is take from: node[:memcached] / [:memory], [:port] and [:user]
-node.set[:memcached][:listen] = local_ip
-node.set[:memcached][:name] = "swift-proxy"
-memcached_instance "swift-proxy" do
+if node[:memcached][:listen] != local_ip
+  node.set[:memcached][:listen] = local_ip
+  dirty = true
 end
+if node[:memcached][:name] != "swift-proxy"
+  node.set[:memcached][:name] = "swift-proxy"
+  dirty = true
+end
+memcached_instance "swift-proxy"
 
 ## make sure to fetch ring files from the ring compute node
 env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment]}"
@@ -410,4 +421,9 @@ if node["swift"]["use_slog"] and node["swift"]["proxy_init_done"]
   include_recipe "swift::slog"
 end
 
-node.set["swift"]["proxy_init_done"] = true
+unless node["swift"]["proxy_init_done"]
+  node.set["swift"]["proxy_init_done"] = true
+  dirty = true
+end
+
+node.save if dirty

@@ -16,6 +16,7 @@
 # Author: andi abes
 #
 
+dirty = false
 skip_setup = node[:swift][:devs].nil?
 
 include_recipe "swift::disks"
@@ -115,9 +116,14 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
   end
 end
 
-node.set["swift"]["storage_init_done"] = true
-
 if node["swift"]["use_slog"]
   log ("installing slogging") { level :info }
   include_recipe "swift::slog"
 end
+
+unless node["swift"]["storage_init_done"]
+  node.set["swift"]["storage_init_done"] = true
+  dirty = true
+end
+
+node.save if dirty
