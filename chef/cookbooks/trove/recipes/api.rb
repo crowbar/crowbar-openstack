@@ -22,10 +22,19 @@ keystone_settings = KeystoneHelper.keystone_settings(node, :trove)
 ha_enabled = false
 
 # address/port binding
-my_ipaddress = Barclamp::Inventory.get_network_by_type(
-  node, "admin").address
-node.set[:trove][:my_ip] = my_ipaddress
-node.set[:trove][:api][:bind_host] = my_ipaddress
+dirty = false
+
+my_ipaddress = Barclamp::Inventory.get_network_by_type(node, "admin").address
+if node[:trove][:my_ip] != my_ipaddress
+  node.set[:trove][:my_ip] = my_ipaddress
+  dirty = true
+end
+if node[:trove][:api][:bind_host] != my_ipaddress
+  node.set[:trove][:api][:bind_host] = my_ipaddress
+  dirty = true
+end
+
+node.save if dirty
 
 bind_host = node[:trove][:api][:bind_host]
 if ha_enabled
