@@ -26,19 +26,11 @@ include_recipe "nagios::common"
 # Nova scale data holder
 nova_scale = {
   computes: [],
-  schedulers: [],
-  apis: []
+  schedulers: []
 }
-
-search_env_filtered(:node, "roles:nova-single-machine") do |n|
-  nova_scale[:computes] << n
-  nova_scale[:schedulers] << n
-  nova_scale[:apis] << n
-end
 
 search_env_filtered(:node, "roles:nova-controller") do |n|
   nova_scale[:schedulers] << n
-  nova_scale[:apis] << n
 end
 
 search_env_filtered(:node, "roles:nova-compute-docker") do |n|
