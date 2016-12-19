@@ -77,8 +77,6 @@ template "/etc/ec2api/ec2api.conf" do
   )
 end
 
-node.save
-
 service "openstack-ec2-api-api" do
   action [:enable, :start]
 end
