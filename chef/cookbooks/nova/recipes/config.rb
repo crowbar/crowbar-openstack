@@ -341,7 +341,7 @@ if need_shared_lock_path
   end
 end
 
-template "/etc/nova/nova.conf" do
+template node[:nova][:config_file] do
   source "nova.conf.erb"
   user "root"
   group node[:nova][:group]
