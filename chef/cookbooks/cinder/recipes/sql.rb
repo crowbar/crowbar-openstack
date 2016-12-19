@@ -83,7 +83,3 @@ ruby_block "mark node for cinder db_sync" do
 end
 
 crowbar_pacemaker_sync_mark "create-cinder_database"
-
-# save data so it can be found by search
-node.save
-
