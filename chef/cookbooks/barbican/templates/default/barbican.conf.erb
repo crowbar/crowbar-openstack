@@ -2,13 +2,7 @@
 
 debug=<%= node[:barbican][:debug] %>
 host_href = <%= @host_href %>
-backlog = 4096
-max_allowed_secret_in_bytes = 10000
-max_allowed_request_size_in_bytes = 1000000
 sql_connection = <%= @database_connection %>
-sql_idle_timeout = 3600
-default_limit_paging = 10
-max_limit_paging = 100
 
 [oslo_messaging_rabbit]
 
@@ -19,122 +13,15 @@ rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 rabbit_port = <%= @rabbit_settings[:port] %>
 rabbit_hosts = <%= @rabbit_settings[:address] %>
 
-log_dir = /var/log/barbican
-auth_strategy = keystone
-state_path = /var/lib/barbican
-
-[oslo_policy]
-
-policy_file=/etc/barbican/policy.json
-policy_default_rule=default
-
 [queue]
 
-enable = False
-namespace = 'barbican'
-topic = 'barbican.workers'
-version = '1.1'
-server_name = 'barbican.queue'
 asynchronous_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
-
-[retry_scheduler]
-
-initial_delay_seconds = 10.0
-periodic_interval_max_seconds = 10.0
-
-[quotas]
-
-quota_secrets = -1
-quota_orders = -1
-quota_containers = -1
-quota_consumers = -1
-quota_cas = -1
-
 
 [keystone_notifications]
 
 enable = <%= @keystone_listener %>
 control_exchange = 'keystone'
-topic = 'notifications'
-allow_requeue = False
-version = '1.0'
-thread_pool_size = 10
-
-[secretstore]
-
-namespace = barbican.secretstore.plugin
-enabled_secretstore_plugins = store_crypto
-
-[crypto]
-
-namespace = barbican.crypto.plugin
-enabled_crypto_plugins = simple_crypto
 
 [simple_crypto_plugin]
 
 kek = <%= @kek %>
-
-[dogtag_plugin]
-
-pem_path = '/etc/barbican/kra_admin_cert.pem'
-dogtag_host = localhost
-dogtag_port = 8443
-nss_db_path = '/etc/barbican/alias'
-nss_db_path_ca = '/etc/barbican/alias-ca'
-nss_password = 'password123'
-simple_cmc_profile = 'caOtherCert'
-ca_expiration_time = 1
-plugin_working_dir = '/etc/barbican/dogtag'
-
-[p11_crypto_plugin]
-
-library_path = '/usr/lib/libCryptoki2_64.so'
-login = 'mypassword'
-mkek_label = 'an_mkek'
-mkek_length = 32
-hmac_label = 'my_hmac_label'
-
-[kmip_plugin]
-
-username = 'admin'
-password = 'password'
-host = localhost
-port = 5696
-keyfile = '/path/to/certs/cert.key'
-certfile = '/path/to/certs/cert.crt'
-ca_certs = '/path/to/certs/LocalCA.crt'
-
-[certificate]
-
-namespace = barbican.certificate.plugin
-enabled_certificate_plugins = simple_certificate
-
-[certificate_event]
-
-namespace = barbican.certificate.event.plugin
-enabled_certificate_event_plugins = simple_certificate_event
-
-[snakeoil_ca_plugin]
-
-ca_cert_path = /etc/barbican/snakeoil-ca.crt
-ca_cert_key_path = /etc/barbican/snakeoil-ca.key
-ca_cert_chain_path = /etc/barbican/snakeoil-ca.chain
-ca_cert_pkcs7_path = /etc/barbican/snakeoil-ca.p7b
-subca_cert_key_directory=/etc/barbican/snakeoil-cas
-
-[keystone_authtoken]
-
-signing_dir = /var/cache/barbican/keystone-signing
-auth_type = password
-user_domain_id = default
-project_domain_id = default
-auth_url = <%= @keystone_settings['admin_auth_url'] %>
-auth_uri = <%= @keystone_settings['public_auth_url'] %>
-auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
-username = <%= @keystone_settings['service_user'] %>
-password = <%= @keystone_settings['service_password'] %>
-project_name = <%= @keystone_settings['service_tenant'] %>
-
-[oslo_concurrency]
-
-lock_path = /var/run/barbican
