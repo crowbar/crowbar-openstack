@@ -1861,6 +1861,7 @@ insecure = <%= @cinder_insecure ? 'True' : 'False' %>
 # Allow attach between instance and volume in different availability zones.
 # (boolean value)
 #cross_az_attach = true
+cross_az_attach = <%= node[:nova][:cross_az_attach] %>
 
 
 [conductor]
