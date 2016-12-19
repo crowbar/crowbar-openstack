@@ -64,6 +64,7 @@ end.sort
   end
 end
 
+# keep in sync with definition in monitor.rb
 svcs = %w{swift-object swift-object-auditor swift-object-expirer swift-object-replicator swift-object-updater}
 svcs += %w{swift-container swift-container-auditor swift-container-replicator swift-container-sync swift-container-updater}
 svcs += %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
@@ -115,13 +116,6 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
 end
 
 node.set["swift"]["storage_init_done"] = true
-
-###
-# let the monitoring tools know what services should be running on this node.
-node.set[:swift][:monitor] = {}
-node.set[:swift][:monitor][:svcs] = svcs
-node.set[:swift][:monitor][:ports] = { object: 6000, container: 6001, account: 6002 }
-node.save
 
 if node["swift"]["use_slog"]
   log ("installing slogging") { level :info }

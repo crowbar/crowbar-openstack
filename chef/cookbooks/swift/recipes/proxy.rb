@@ -402,13 +402,6 @@ else
   log "HA support for swift is disabled"
 end
 
-###
-# let the monitoring tools know what services should be running on this node.
-node.set[:swift][:monitor] = {}
-node.set[:swift][:monitor][:svcs] = ["swift-proxy", "memcached"]
-node.set[:swift][:monitor][:ports] = { proxy: node[:swift][:ports][:proxy] }
-node.save
-
 ##
 # only run slog init code if enabled, and the proxy has been fully setup
 #(after the storage nodes have come up as well)
