@@ -121,7 +121,7 @@ if need_shared_lock_path
   end
 end
 
-template "/etc/cinder/cinder.conf" do
+template node[:cinder][:config_file] do
   source "cinder.conf.erb"
   owner "root"
   group node[:cinder][:group]

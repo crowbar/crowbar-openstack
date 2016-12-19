@@ -18,7 +18,7 @@ define :cinder_service, use_pacemaker_provider: false do
     service_name cinder_name
     supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(template: "/etc/cinder/cinder.conf")
+    subscribes :restart, resources(template: node[:cinder][:config_file])
     provider Chef::Provider::CrowbarPacemakerService if params[:use_pacemaker_provider]
   end
 end
