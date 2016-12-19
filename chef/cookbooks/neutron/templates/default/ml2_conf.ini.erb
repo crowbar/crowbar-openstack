@@ -28,6 +28,7 @@ mechanism_drivers = <%= @ml2_mechanism_drivers.join(",") %>
 # to be loaded from the neutron.ml2.extension_drivers namespace.
 # extension_drivers =
 # Example: extension_drivers = anewextensiondriver
+extension_drivers = <%= @ml2_extension_drivers.join(",") %>
 
 # =========== items for MTU selection and advertisement =============
 # (IntOpt) Path MTU.  The maximum permissible size of an unfragmented
