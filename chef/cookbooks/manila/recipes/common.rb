@@ -117,7 +117,7 @@ end
 enabled_share_protocols = ["NFS", "CIFS"]
 enabled_share_protocols << ["CEPHFS"] if ManilaHelper.has_cephfs_share? node
 
-template "/etc/manila/manila.conf" do
+template node[:manila][:config_file] do
   source "manila.conf.erb"
   owner "root"
   group node[:manila][:group]

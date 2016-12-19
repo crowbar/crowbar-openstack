@@ -20,6 +20,8 @@ override[:manila][:group] = "manila"
 
 default[:manila][:max_header_line] = 16384
 
+default[:manila][:config_file] = "/etc/manila/manila.conf.d/100-manila.conf"
+
 default[:manila][:api][:protocol] = "http"
 
 # HA attributes

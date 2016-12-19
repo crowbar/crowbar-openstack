@@ -10,7 +10,7 @@ define :manila_service, use_pacemaker_provider: false do
     service_name manila_name
     supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(template: "/etc/manila/manila.conf")
+    subscribes :restart, resources(template: node[:manila][:config_file])
     provider Chef::Provider::CrowbarPacemakerService \
                if params[:use_pacemaker_provider]
   end
