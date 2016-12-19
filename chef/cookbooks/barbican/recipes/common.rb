@@ -102,7 +102,7 @@ end
 
 crowbar_pacemaker_sync_mark "create-barbican_database"
 
-template "/etc/barbican/barbican.conf" do
+template node[:barbican][:config_file] do
   source "barbican.conf.erb"
   owner "root"
   group node[:barbican][:group]

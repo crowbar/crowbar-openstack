@@ -25,6 +25,7 @@ default[:barbican][:debug] = false
 default[:barbican][:api][:bind_host] = "*"
 default[:barbican][:api][:ssl] = false
 
+default[:barbican][:config_file] = "/etc/barbican/barbican.conf.d/100-barbican.conf"
 default[:barbican][:logfile] = "/var/log/barbican/barbican-api.log"
 
 # HA attributes

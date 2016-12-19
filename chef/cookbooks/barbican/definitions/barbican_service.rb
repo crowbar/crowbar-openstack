@@ -11,7 +11,7 @@ define :barbican_service do
     service_name barbican_name
     supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(template: "/etc/barbican/barbican.conf")
+    subscribes :restart, resources(template: node[:barbican][:config_file])
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 end
