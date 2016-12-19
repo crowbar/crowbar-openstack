@@ -41,7 +41,7 @@ if node[:nova][:use_novnc]
     service_name "openstack-nova-novncproxy" if %w(rhel suse).include?(node[:platform_family])
     supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(template: "/etc/nova/nova.conf"), :delayed
+    subscribes :restart, resources(template: node[:nova][:config_file]), :delayed
     provider Chef::Provider::CrowbarPacemakerService if node[:nova][:ha][:enabled]
   end
 end
@@ -54,7 +54,7 @@ if node[:nova][:use_serial]
     service_name "openstack-nova-serialproxy" if ["rhel", "suse"].include?(node[:platform_family])
     supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources(template: "/etc/nova/nova.conf"), :delayed
+    subscribes :restart, resources(template: node[:nova][:config_file]), :delayed
     provider Chef::Provider::CrowbarPacemakerService if node[:nova][:ha][:enabled]
   end
 end
@@ -63,6 +63,6 @@ service "nova-consoleauth" do
   service_name "openstack-nova-consoleauth" if %w(rhel suse).include?(node[:platform_family])
   supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources(template: "/etc/nova/nova.conf"), :delayed
+  subscribes :restart, resources(template: node[:nova][:config_file]), :delayed
   provider Chef::Provider::CrowbarPacemakerService if node[:nova][:ha][:enabled]
 end
