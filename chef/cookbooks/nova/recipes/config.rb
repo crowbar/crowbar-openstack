@@ -19,6 +19,8 @@
 # limitations under the License.
 #
 
+is_controller = node["roles"].include?("nova-controller")
+
 my_ip_net = "admin"
 
 # z/VM compute nodes might need a different "my_ip" setting to be accessible
@@ -37,14 +39,14 @@ package "nova-common" do
   action :install
 end
 
-db_settings = fetch_database_settings
-
-include_recipe "database::client"
-include_recipe "#{db_settings[:backend_name]}::client"
-include_recipe "#{db_settings[:backend_name]}::python-client"
-
 # don't expose database connection to the compute clients
-database_connection = if node["roles"].include?("nova-controller")
+if is_controller
+  db_settings = fetch_database_settings
+
+  include_recipe "database::client"
+  include_recipe "#{db_settings[:backend_name]}::client"
+  include_recipe "#{db_settings[:backend_name]}::python-client"
+
   db_conn_scheme = db_settings[:url_scheme]
   if node[:platform_family] == "suse" && db_settings[:backend_name] == "mysql"
     # The C-extensions (python-mysql) can't be monkey-patched by eventlet. Therefore,
@@ -52,32 +54,27 @@ database_connection = if node["roles"].include?("nova-controller")
     # By using the pure-Python driver by default, eventlet can do it's job:
     db_conn_scheme = "mysql+pymysql"
   end
+
   db = node[:nova][:db]
-  "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
-end
+  database_connection = \
+    "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
 
-api_database_connection = if node["roles"].include?("nova-controller")
-  db_conn_scheme = db_settings[:url_scheme]
-  if node[:platform_family] == "suse" && db_settings[:backend_name] == "mysql"
-    # The C-extensions (python-mysql) can't be monkey-patched by eventlet. Therefore,
-    # when only one nova-conductor is present, all DB queries are serialized.
-    # By using the pure-Python driver by default, eventlet can do it's job:
-    db_conn_scheme = "mysql+pymysql"
-  end
   db = node[:nova][:api_db]
-  "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
+  api_database_connection = \
+    "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
+else
+  database_connection = nil
+  api_database_connection = nil
 end
 
-apis = search_env_filtered(:node, "roles:nova-controller")
-if apis.length > 0
-  api = apis[0]
-  api = node if api.name == node.name
+api = if is_controller
+  node
 else
-  api = node
+  search_env_filtered(:node, "roles:nova-controller").first
 end
 
 # use nova-rootwrap daemon on compute-only nodes
-use_rootwrap_daemon = !node["roles"].include?("nova-controller")
+use_rootwrap_daemon = !is_controller
 
 api_ha_enabled = api[:nova][:ha][:enabled]
 admin_api_host = CrowbarHelper.get_host_for_admin_url(api, api_ha_enabled)
@@ -100,19 +97,8 @@ else
 end
 Chef::Log.info("Glance server at #{glance_server_host}")
 
-vncproxies = search_env_filtered(:node, "roles:nova-controller")
-if vncproxies.length > 0
-  vncproxy = vncproxies[0]
-  vncproxy = node if vncproxy.name == node.name
-else
-  vncproxy = node
-end
-vncproxy_ha_enabled = vncproxy[:nova][:ha][:enabled]
-vncproxy_public_host = CrowbarHelper.get_host_for_public_url(vncproxy, vncproxy[:nova][:novnc][:ssl][:enabled], vncproxy_ha_enabled)
-Chef::Log.info("VNCProxy server at #{vncproxy_public_host}")
-
 # use memcached as a cache backend for nova-novncproxy
-if vncproxy_ha_enabled
+if api_ha_enabled
   memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller")
   memcached_servers = memcached_nodes.map do |n|
     node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
@@ -123,19 +109,6 @@ else
   memcached_servers = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
 end
 memcached_servers.sort!
-
-serialproxies = search_env_filtered(:node, "roles:nova-controller")
-if serialproxies.empty?
-  serialproxy = node
-else
-  serialproxy = serialproxies[0]
-  serialproxy = node if serialproxy.name == node.name
-end
-serialproxy_ha_enabled = serialproxy[:nova][:ha][:enabled]
-serialproxy_public_host = CrowbarHelper.get_host_for_public_url(serialproxy,
-  serialproxy[:nova][:serial][:ssl][:enabled],
-  serialproxy_ha_enabled)
-Chef::Log.info("serialproxy server at #{serialproxy_public_host}")
 
 directory "/etc/nova" do
    mode 0755
@@ -199,26 +172,27 @@ else
 end
 Chef::Log.info("Neutron server at #{neutron_server_host}")
 
-env_filter = " AND inteltxt_config_environment:inteltxt-config-#{node[:nova][:itxt_instance]}"
-oat_servers = search(:node, "roles:oat-server#{env_filter}") || []
-if oat_servers.length > 0
-  has_itxt = true
-  oat_server = oat_servers[0]
-  execute "fill_cert" do
-    command <<-EOF
-      echo | openssl s_client -connect "#{oat_server[:hostname]}:8443" -cipher DHE-RSA-AES256-SHA > /etc/nova/oat_certfile.cer || rm -fv /etc/nova/oat_certfile.cer
-    EOF
-    not_if { File.exist? "/etc/nova/oat_certfile.cer" }
+has_itxt = false
+oat_server = node
+unless node[:nova][:itxt_instance].nil? || node[:nova][:itxt_instance].empty?
+  env_filter = " AND inteltxt_config_environment:inteltxt-config-#{node[:nova][:itxt_instance]}"
+  oat_servers = search(:node, "roles:oat-server#{env_filter}") || []
+  unless oat_servers.empty?
+    has_itxt = true
+    oat_server = oat_servers[0]
+    execute "fill_cert" do
+      command <<-EOF
+        echo | openssl s_client -connect "#{oat_server[:hostname]}:8443" -cipher DHE-RSA-AES256-SHA > /etc/nova/oat_certfile.cer || rm -fv /etc/nova/oat_certfile.cer
+      EOF
+      not_if { File.exist? "/etc/nova/oat_certfile.cer" }
+    end
   end
-else
-  has_itxt = false
-  oat_server = node
 end
 
 # only put certificates in nova.conf for controllers; on compute nodes, we
 # don't need them and specifying them results in the certificates being queried
 # when creating clients for glance
-if api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
+if api[:nova][:ssl][:enabled] && is_controller
   api_ssl_certfile = api[:nova][:ssl][:certfile]
   api_ssl_keyfile = api[:nova][:ssl][:keyfile]
   api_ssl_cafile = api[:nova][:ssl][:ca_certs]
@@ -229,7 +203,7 @@ else
 end
 
 # if there's no certificate for novnc, use the ones from nova-api
-if api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
+if api[:nova][:novnc][:ssl][:enabled] && is_controller
   if api[:nova][:novnc][:ssl][:certfile].empty?
     api_novnc_ssl_certfile = api[:nova][:ssl][:certfile]
     api_novnc_ssl_keyfile = api[:nova][:ssl][:keyfile]
@@ -243,8 +217,8 @@ else
 end
 
 # only require certs for nova controller
-if (api_ha_enabled || serialproxy_ha_enabled || vncproxy_ha_enabled || api == node) && \
-    api[:nova][:ssl][:enabled] && node["roles"].include?("nova-controller")
+if (api_ha_enabled || api == node) && \
+    api[:nova][:ssl][:enabled] && is_controller
   ssl_setup "setting up ssl for nova" do
     generate_certs api[:nova][:ssl][:generate_certs]
     certfile api[:nova][:ssl][:certfile]
@@ -256,8 +230,8 @@ if (api_ha_enabled || serialproxy_ha_enabled || vncproxy_ha_enabled || api == no
   end
 end
 
-if (api_ha_enabled || serialproxy_ha_enabled || vncproxy_ha_enabled || api == node) && \
-    api[:nova][:novnc][:ssl][:enabled] && node["roles"].include?("nova-controller")
+if (api_ha_enabled || api == node) && \
+    api[:nova][:novnc][:ssl][:enabled] && is_controller
   # No check if we're using certificate info from nova-api
   unless ::File.size?(api_novnc_ssl_certfile) || api[:nova][:novnc][:ssl][:certfile].empty?
     message = "Certificate \"#{api_novnc_ssl_certfile}\" is not present or empty."
@@ -376,11 +350,11 @@ template "/etc/nova/nova.conf" do
     vnc_enabled: node[:nova][:use_novnc],
     serial_enabled: node[:nova][:use_serial],
     vendordata_jsonfile: vendordata_jsonfile,
-    vncproxy_public_host: vncproxy_public_host,
+    vncproxy_public_host: public_api_host,
     vncproxy_ssl_enabled: api[:nova][:novnc][:ssl][:enabled],
     vncproxy_cert_file: api_novnc_ssl_certfile,
     vncproxy_key_file: api_novnc_ssl_keyfile,
-    serialproxy_public_host: serialproxy_public_host,
+    serialproxy_public_host: public_api_host,
     memcached_servers: memcached_servers,
     neutron_protocol: neutron_protocol,
     neutron_server_host: neutron_server_host,
