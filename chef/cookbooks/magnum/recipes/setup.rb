@@ -78,6 +78,13 @@ unless magnum_domain_role.include? "admin"
   Mixlib::ShellOut.new(create_magnum_domain_role).run_command
 end
 
-node.set["magnum"]["trustee"]["domain_id"] = magnum_domain_id
-node.set["magnum"]["trustee"]["domain_admin_id"] = magnum_domain_admin_id
-node.save
+dirty = false
+if node["magnum"]["trustee"]["domain_id"] != magnum_domain_id
+  node.set["magnum"]["trustee"]["domain_id"] = magnum_domain_id
+  dirty = true
+end
+if node["magnum"]["trustee"]["domain_admin_id"] != magnum_domain_admin_id
+  node.set["magnum"]["trustee"]["domain_admin_id"] = magnum_domain_admin_id
+  dirty = true
+end
+node.save if dirty
