@@ -117,5 +117,3 @@ template "/etc/barbican/barbican.conf" do
   )
   notifies :reload, resources(service: "apache2")
 end
-
-node.save
