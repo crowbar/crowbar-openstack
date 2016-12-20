@@ -64,7 +64,7 @@ case node[:nova][:libvirt_type]
 
       # Generate a UUID, as DMI's system uuid is unreliable
       if node[:nova][:host_uuid].nil?
-        node.normal[:nova][:host_uuid] = `uuidgen`.strip
+        node.set[:nova][:host_uuid] = `uuidgen`.strip
         node.save
       end
 
@@ -400,7 +400,7 @@ if node[:nova][:ha][:compute][:enabled]
 
   # Mark the node as ready for HA compute setup
   unless node[:nova][:ha][:compute][:setup]
-    node[:nova][:ha][:compute][:setup] = true
+    node.set[:nova][:ha][:compute][:setup] = true
     node.save
   end
 end

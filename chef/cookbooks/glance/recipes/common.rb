@@ -64,9 +64,12 @@ end
 
 crowbar_pacemaker_sync_mark "create-glance_database"
 
-node.set[:glance][:sql_connection] = "#{db_settings[:url_scheme]}://#{node[:glance][:db][:user]}:#{node[:glance][:db][:password]}@#{db_settings[:address]}/#{node[:glance][:db][:database]}"
-
-node.save
+glance_db = node[:glance][:db]
+sql_connection = "#{db_settings[:url_scheme]}://#{glance_db[:user]}:#{glance_db[:password]}@#{db_settings[:address]}/#{glance_db[:database]}"
+if node[:glance][:sql_connection] != sql_connection
+  node.set[:glance][:sql_connection] = sql_connection
+  node.save
+end
 
 # Register glance service user
 

@@ -55,36 +55,65 @@ my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:keystone][:api][:protocol] == "https", ha_enabled)
 
 # These are used in keystone.conf
-node.set[:keystone][:api][:public_URL] = \
+public_url = \
   KeystoneHelper.service_URL(node[:keystone][:api][:protocol],
                              my_public_host,
                              node[:keystone][:api][:service_port])
 # This is also used for admin requests of keystoneclient
-node.set[:keystone][:api][:admin_URL] = \
+admin_url = \
   KeystoneHelper.service_URL(node[:keystone][:api][:protocol],
                              my_admin_host,
                              node[:keystone][:api][:admin_port])
 
 # These URLs will be registered as endpoints in keystone's database
-node.set[:keystone][:api][:versioned_public_URL] = \
+versioned_public_url = \
   KeystoneHelper.versioned_service_URL(node[:keystone][:api][:protocol],
                                        my_public_host,
                                        node[:keystone][:api][:service_port],
                                        node[:keystone][:api][:version])
-node.set[:keystone][:api][:versioned_admin_URL] = \
+versioned_admin_url = \
   KeystoneHelper.versioned_service_URL(node[:keystone][:api][:protocol],
                                        my_admin_host,
                                        node[:keystone][:api][:admin_port],
                                        node[:keystone][:api][:version])
-node.set[:keystone][:api][:versioned_internal_URL] = \
+versioned_internal_url = \
   KeystoneHelper.versioned_service_URL(node[:keystone][:api][:protocol],
                                        my_admin_host,
                                        node[:keystone][:api][:service_port],
                                        node[:keystone][:api][:version])
 
+if node[:keystone][:api][:public_URL] != public_url
+  node.set[:keystone][:api][:public_URL] = public_url
+  dirty = true
+end
+if node[:keystone][:api][:admin_URL] != admin_url
+  node.set[:keystone][:api][:admin_URL] = admin_url
+  dirty = true
+end
+if node[:keystone][:api][:versioned_public_URL] != versioned_public_url
+  node.set[:keystone][:api][:versioned_public_URL] = versioned_public_url
+  dirty = true
+end
+if node[:keystone][:api][:versioned_admin_URL] != versioned_admin_url
+  node.set[:keystone][:api][:versioned_admin_URL] = versioned_admin_url
+  dirty = true
+end
+if node[:keystone][:api][:versioned_internal_URL] != versioned_internal_url
+  node.set[:keystone][:api][:versioned_internal_URL] = versioned_internal_url
+  dirty = true
+end
+
 # Other barclamps need to know the hostname to reach keystone
-node.set[:keystone][:api][:public_URL_host] = my_public_host
-node.set[:keystone][:api][:internal_URL_host] = my_admin_host
+if node[:keystone][:api][:public_URL_host] != my_public_host
+  node.set[:keystone][:api][:public_URL_host] = my_public_host
+  dirty = true
+end
+if node[:keystone][:api][:internal_URL_host] != my_admin_host
+  node.set[:keystone][:api][:internal_URL_host] = my_admin_host
+  dirty = true
+end
+
+node.save if dirty
 
 if node[:keystone][:frontend] == "uwsgi"
 
@@ -572,10 +601,6 @@ ec2_creds.each do |args|
 end
 
 crowbar_pacemaker_sync_mark "create-keystone_register"
-
-node.set[:keystone][:monitor] = {} if node[:keystone][:monitor].nil?
-node.set[:keystone][:monitor][:svcs] = ["keystone"] if node[:keystone][:monitor][:svcs] != ["keystone"]
-node.save
 
 template "/root/.openrc" do
   source "openrc.erb"

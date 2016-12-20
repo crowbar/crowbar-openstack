@@ -18,4 +18,7 @@
 # limitations under the License.
 #
 
-node.set[:nova][:libvirt_type] = "docker"
+if node[:nova][:libvirt_type] != "docker"
+  node.set[:nova][:libvirt_type] = "docker"
+  node.save
+end

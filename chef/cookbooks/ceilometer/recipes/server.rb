@@ -334,5 +334,3 @@ else
 end
 
 crowbar_pacemaker_sync_mark "create-ceilometer_register"
-
-node.save

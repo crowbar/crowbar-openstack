@@ -117,5 +117,3 @@ template node[:barbican][:config_file] do
   )
   notifies :reload, resources(service: "apache2")
 end
-
-node.save
