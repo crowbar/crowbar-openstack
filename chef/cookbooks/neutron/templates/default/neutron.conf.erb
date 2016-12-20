@@ -3,7 +3,7 @@ bind_host = <%= @bind_host %>
 bind_port = <%= @bind_port %>
 auth_strategy = keystone
 core_plugin = <%= @core_plugin %>
-service_plugins = <%= @service_plugins -%>
+service_plugins = <%= @service_plugins %>
 dns_domain = <%= @dns_domain %>
 allow_overlapping_ips = <%= @allow_overlapping_ips ? "True" : "False" %>
 <% unless @ipam_driver.nil? -%>
