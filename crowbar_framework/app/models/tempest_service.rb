@@ -98,11 +98,6 @@ class TempestService < ServiceObject
         img_path = img_path.gsub("<ADMINWEB>", "#{admin_ip}:#{web_port}")
         role.default_attributes["tempest"]["tempest_test_images"][img_arch] = img_path
       end
-      tempest_test_docker_image_path =
-        role.default_attributes["tempest"]["tempest_test_docker_image"].gsub(
-          "<ADMINWEB>", "#{admin_ip}:#{web_port}")
-      role.default_attributes["tempest"]["tempest_test_docker_image"] =
-        tempest_test_docker_image_path
     end
 
     role.save

@@ -38,20 +38,6 @@ case node[:nova][:libvirt_type]
   when "zvm"
     package "openstack-nova-virt-zvm"
 
-  when "docker"
-    package "docker"
-    package "openstack-nova-docker"
-
-    group "docker" do
-      action :modify
-      members [node[:nova][:user]]
-      append true
-    end
-
-    service "docker" do
-      action [:enable, :start]
-    end
-
   when "kvm", "lxc", "qemu", "xen"
     if %w(rhel suse).include?(node[:platform_family])
       # make sure that the libvirt package is present before other actions try to access /etc/qemu.conf

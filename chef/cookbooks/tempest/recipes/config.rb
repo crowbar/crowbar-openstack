@@ -160,7 +160,6 @@ end
 
 machine_id_file = node[:tempest][:tempest_path] + "/machine.id"
 alt_machine_id_file = node[:tempest][:tempest_path] + "/alt_machine.id"
-docker_image_id_file = node[:tempest][:tempest_path] + "/docker_machine.id"
 
 insecure = "--insecure"
 
@@ -366,7 +365,6 @@ end
 
 kvm_compute_nodes = search(:node, "roles:nova-compute-kvm") || []
 xen_compute_nodes = search(:node, "roles:nova-compute-xen") || []
-docker_compute_nodes = search(:node, "roles:nova-compute-docker") || []
 
 use_resize = kvm_compute_nodes.length > 1
 use_livemigration = nova[:nova][:use_migration] && kvm_compute_nodes.length > 1
@@ -388,62 +386,7 @@ if xen_only
   validation_ssh_timeout = 450
 end
 
-if !docker_compute_nodes.empty? && kvm_compute_nodes.empty?
-  image_name = "cirros"
-
-  bash "load docker image" do
-    code <<-EOH
-
-TEMP=$(mktemp -d)
-IMG_FILE=$(basename $IMAGE_URL)
-
-echo "Downloading image ... "
-wget --no-verbose $IMAGE_URL --directory-prefix=$TEMP 2>&1 || exit $?
-
-echo "Registering in glance ..."
-DOCKER_IMAGE_ID=$(glance #{insecure} --os-image-api-version 1 image-create \
-    --name #{image_name} \
-    --container-format docker \
-    --property hypervisor_type=docker \
-    --disk-format raw \
-    --is-public True  \
-    --file $TEMP/$IMG_FILE \
-    | grep ' id ' | awk '{ print $4 }')
-
-[ -n "$DOCKER_IMAGE_ID" ] && echo "$DOCKER_IMAGE_ID" > #{docker_image_id_file}
-rm -fr $TEMP
-
-echo "Checking that deployment status ..."
-[ -f #{docker_image_id_file} ] || exit 127
-
-EOH
-    environment ({
-      "OS_USERNAME" => tempest_adm_user,
-      "OS_PASSWORD" => tempest_adm_pass,
-      "OS_TENANT_NAME" => tempest_comp_tenant,
-      "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
-      "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
-      "OS_USER_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
-      "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
-      "IMAGE_URL" => node[:tempest][:tempest_test_docker_image],
-      "IMAGE_NAME" => image_name
-    })
-    not_if { File.exist?(docker_image_id_file) }
-  end
-
-  use_docker = true
-  use_interface_attach = false
-  use_rescue = false
-  use_suspend = false
-  # no vnc support: https://bugs.launchpad.net/nova-docker/+bug/1321818
-  use_vnc = false
-  # uptime inside docker in the same that in the host
-  use_run_validation = false
-  # blkid inside docker does not return attached devices
-  use_config_drive = false
-  image_regex = "^#{image_name}$"
-else
-  use_docker = false
+unless kvm_compute_nodes.empty?
   use_interface_attach = true
   use_rescue = true
   use_suspend = true
@@ -475,7 +418,7 @@ template "/etc/tempest/tempest.conf" do
   variables(
     # general settings
     keystone_settings: keystone_settings,
-    machine_id_file: use_docker ? docker_image_id_file : machine_id_file,
+    machine_id_file: machine_id_file,
     alt_machine_id_file: alt_machine_id_file,
     tempest_path: node[:tempest][:tempest_path],
     use_swift: use_swift,
@@ -551,7 +494,6 @@ template "/etc/tempest/tempest.conf" do
     cinder_backend2_name: cinder_backend2_name,
     storage_protocol: storage_protocol,
     vendor_name: vendor_name,
-    use_docker: use_docker,
     # manila (share) settings
     manila_settings: tempest_manila_settings,
     # magnum (container) settings

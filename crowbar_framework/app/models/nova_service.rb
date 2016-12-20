@@ -38,14 +38,6 @@ class NovaService < PacemakerServiceObject
           },
           "cluster" => true
         },
-        "nova-compute-docker" => {
-          "unique" => false,
-          "count" => -1,
-          "exclude_platform" => {
-            "suse" => "< 12.2",
-            "windows" => "/.*/"
-          }
-        },
         "nova-compute-hyperv" => {
           "unique" => false,
           "count" => -1,
@@ -165,7 +157,6 @@ class NovaService < PacemakerServiceObject
     xen = non_kvm.select { |n| n if node_supports_xen(n) }
     qemu = non_kvm - xen
 
-    # do not use docker by default
     # do not use zvm by default
     #   TODO add it here once a compute node can run inside z/VM
     base["deployment"]["nova"]["elements"] = {
@@ -387,9 +378,6 @@ class NovaService < PacemakerServiceObject
       end
     end
 
-    elements["nova-compute-docker"].each do |n|
-      nodes[n] += 1
-    end unless elements["nova-compute-docker"].nil?
     elements["nova-compute-hyperv"].each do |n|
       nodes[n] += 1
     end unless elements["nova-compute-hyperv"].nil?

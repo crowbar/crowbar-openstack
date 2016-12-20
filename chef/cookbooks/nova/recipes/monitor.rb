@@ -41,10 +41,6 @@ search_env_filtered(:node, "roles:nova-controller") do |n|
   nova_scale[:apis] << n
 end
 
-search_env_filtered(:node, "roles:nova-compute-docker") do |n|
-  nova_scale[:computes] << n
-end
-
 search_env_filtered(:node, "roles:nova-compute-hyperv") do |n|
   nova_scale[:computes] << n
 end
