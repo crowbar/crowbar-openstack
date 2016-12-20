@@ -29,6 +29,7 @@ default[:keystone][:frontend] = "native"
 default[:keystone][:verbose] = true
 default[:keystone][:domain_specific_drivers] = false
 default[:keystone][:domain_config_dir] = "/etc/keystone/domains"
+default[:keystone][:config_file] = "/etc/keystone/keystone.conf.d/100-keystone.conf"
 
 default[:keystone][:policy_file] = "policy.json"
 
