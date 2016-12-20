@@ -6,7 +6,6 @@
       "debug": false,
       "frontend": "apache",
       "verbose": true,
-      "use_syslog": false,
       "policy_file": "policy.json",
       "database_instance": "none",
       "rabbitmq_instance": "none",

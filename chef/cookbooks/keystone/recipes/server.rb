@@ -247,7 +247,6 @@ template node[:keystone][:config_file] do
       bind_service_port: bind_service_port,
       admin_endpoint: node[:keystone][:api][:admin_URL],
       memcached_servers: memcached_servers,
-      use_syslog: node[:keystone][:use_syslog],
       signing_token_format: node[:keystone][:signing][:token_format],
       signing_certfile: node[:keystone][:signing][:certfile],
       signing_keyfile: node[:keystone][:signing][:keyfile],
