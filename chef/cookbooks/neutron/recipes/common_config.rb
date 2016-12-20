@@ -117,7 +117,7 @@ if neutron[:neutron][:use_infoblox]
   infoblox_settings = neutron[:neutron][:infoblox]
 end
 
-template "/etc/neutron/neutron.conf" do
+template neutron[:neutron][:config_file] do
     cookbook "neutron"
     source "neutron.conf.erb"
     mode "0640"
@@ -157,7 +157,7 @@ end
 
 if node[:platform_family] == "rhel"
   link "/etc/neutron/plugin.ini" do
-    to "/etc/neutron/neutron.conf"
+    to node[:neutron][:config_file]
   end
 end
 

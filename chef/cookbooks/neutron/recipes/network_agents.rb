@@ -178,7 +178,7 @@ ha_enabled = node[:neutron][:ha][:network][:enabled]
 service node[:neutron][:platform][:metering_agent_name] do
   supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+  subscribes :restart, resources(template: node[:neutron][:config_file])
   subscribes :restart, resources("template[/etc/neutron/metering_agent.ini]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
@@ -189,7 +189,7 @@ if node[:neutron][:use_lbaas] &&
   service lbaas_agent do
     supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources(template: node[:neutron][:config_file])
     subscribes :restart, resources("template[/etc/neutron/lbaas_agent.ini]")
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
@@ -198,7 +198,7 @@ elsif node[:neutron][:use_lbaas] &&
   service node[:neutron][:platform][:f5_agent_name] do
     supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources(template: node[:neutron][:config_file])
     subscribes :restart, resources("template[/etc/neutron/f5-openstack-agent.ini]")
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
@@ -207,7 +207,7 @@ end
 service node[:neutron][:platform][:dhcp_agent_name] do
   supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+  subscribes :restart, resources(template: node[:neutron][:config_file])
   subscribes :restart, resources("template[/etc/neutron/dhcp_agent.ini]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
