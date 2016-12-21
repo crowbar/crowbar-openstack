@@ -121,7 +121,7 @@ mechanism_drivers = <%= @ml2_mechanism_drivers.join(",") %>
 # An ordered list of extension driver entrypoints to be loaded from the
 # neutron.ml2.extension_drivers namespace. For example: extension_drivers =
 # port_security,qos (list value)
-#extension_drivers =
+extension_drivers = <%= @ml2_extension_drivers.join(",") %>
 
 # Maximum size of an IP packet (MTU) that can traverse the underlying physical
 # network infrastructure without fragmentation for overlay/tunnel networks. In
