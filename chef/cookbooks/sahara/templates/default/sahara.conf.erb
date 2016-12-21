@@ -2,6 +2,7 @@
 debug = <%= node[:sahara][:debug] %>
 verbose = <%= node[:sahara][:verbose] %>
 log_dir = /var/log/sahara
+transport_url = <%= @rabbit_settings[:url] %>
 use_syslog=<%= node[:sahara][:use_syslog] ? "True" : "False" %>
 wsgi_keep_alive = false
 host = <%= @bind_host %>
@@ -15,36 +16,37 @@ admin_user_domain_name = <%= @keystone_settings["admin_domain"] %>
 admin_project_domain_name = <%= @keystone_settings["admin_domain"]%>
 os_region_name = <%= @keystone_settings['endpoint_region'] %>
 api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+
 [cinder]
 api_insecure = <%= @cinder_insecure %>
+
 [database]
 connection=<%= @sql_connection %>
+
 [heat]
 api_insecure = <%= @heat_insecure %>
+
 [keystone]
 api_insecure = <%= @keystone_settings["insecure"] %>
+
 [keystone_authtoken]
 auth_uri = <%= @keystone_settings["public_auth_url"] %>
-identity_uri = <%= @keystone_settings["admin_auth_url"] %>
-admin_user = <%= node[:sahara][:service_user] %>
-admin_password = <%= node[:sahara][:service_password] %>
-admin_tenant_name = <%= @keystone_settings["service_tenant"] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
+auth_url = <%= @keystone_settings['admin_auth_url'] %>
+auth_type = password
 insecure = <%= @keystone_settings["insecure"] %>
 region_name = <%= @keystone_settings["endpoint_region"] %>
 signing_dir = "/var/cache/sahara/keystone-signing"
+
 [neutron]
 api_insecure = <%= @neutron_insecure %>
+
 [nova]
 api_insecure = <%= @nova_insecure %>
+
 [oslo_concurrency]
 lock_path = "/var/run/sahara"
-[oslo_messaging_notifications]
-enable = <%= @use_ceilometer %>
-[oslo_messaging_rabbit]
-rabbit_host=<%= @rabbit_settings[:address] %>
-<% unless @rabbit_settings[:port].nil? -%>
-rabbit_port=<%= @rabbit_settings[:port] %>
-<% end -%>
-rabbit_userid=<%= @rabbit_settings[:user] %>
-rabbit_password=<%= @rabbit_settings[:password] %>
-rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
