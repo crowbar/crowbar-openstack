@@ -4,8 +4,8 @@ debug = <%= node[:cinder][:debug] %>
 log_dir = /var/log/cinder
 use_syslog = <%= node[:cinder][:use_syslog] ? "true" : "false" %>
 use_stderr = false
+transport_url = <%= @rabbit_settings[:url] %>
 rpc_response_timeout = <%= node[:cinder][:rpc_response_timeout] %>
-rpc_backend = rabbit
 control_exchange = cinder
 max_header_line = <%= node[:cinder][:max_header_line] %>
 wsgi_keep_alive = false
@@ -301,15 +301,6 @@ lock_path = /var/run/openstack
 <% else -%>
 lock_path = /var/run/cinder
 <% end -%>
-
-[oslo_messaging_rabbit]
-rabbit_host = <%= @rabbit_settings[:address] %>
-<% unless @rabbit_settings[:port].nil? -%>
-rabbit_port = <%= @rabbit_settings[:port] %>
-<% end -%>
-rabbit_userid = <%= @rabbit_settings[:user] %>
-rabbit_password = <%= @rabbit_settings[:password] %>
-rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 
 [ssl]
 ca_file = <%= node[:cinder][:ssl][:ca_certs] if node[:cinder][:api][:protocol] == 'https' && node[:cinder][:ssl][:cert_required] %>
