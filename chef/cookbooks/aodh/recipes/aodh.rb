@@ -159,7 +159,7 @@ else
   bind_port = node[:aodh][:api][:port]
 end
 
-template "/etc/aodh/aodh.conf" do
+template node[:aodh][:config_file] do
   source "aodh.conf.erb"
   owner "root"
   group node[:aodh][:group]
@@ -228,7 +228,7 @@ service "aodh-evaluator" do
   service_name node[:aodh][:evaluator][:service_name]
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/aodh/aodh.conf]")
+  subscribes :restart, resources(template: node[:aodh][:config_file])
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
@@ -236,7 +236,7 @@ service "aodh-notifier" do
   service_name node[:aodh][:notifier][:service_name]
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/aodh/aodh.conf]")
+  subscribes :restart, resources(template: node[:aodh][:config_file])
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
@@ -244,7 +244,7 @@ service "aodh-listener" do
   service_name node[:aodh][:listener][:service_name]
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/aodh/aodh.conf]")
+  subscribes :restart, resources(template: node[:aodh][:config_file])
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
