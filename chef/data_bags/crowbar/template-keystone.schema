@@ -10,7 +10,6 @@
                     "verbose": { "type": "bool", "required": true },
                     "debug": { "type": "bool", "required": true },
                     "frontend": { "type": "str", "required": true },
-                    "use_syslog": { "type": "bool", "required": true },
                     "policy_file": { "type": "str", "required": true },
                     "database_instance": { "type": "str", "required": true },
                     "rabbitmq_instance": { "type": "str", "required": true },
