@@ -273,7 +273,7 @@ image_upload_use_cinder_backend = true
   <% break unless @use_multi_backend -%>
 <% end -%>
 
-[KEYMGR]
+[key_manager]
 <% unless node[:cinder][:keymgr_fixed_key].empty? -%>
 fixed_key = <%= node[:cinder][:keymgr_fixed_key].each_byte.map { |b| b.to_s(16) }.join %>
 <% end -%>
