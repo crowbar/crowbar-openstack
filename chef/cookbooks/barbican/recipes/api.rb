@@ -120,8 +120,8 @@ if node[:barbican][:ha][:enabled]
   bind_host = admin_address
   bind_port = node[:barbican][:ha][:ports][:api]
 else
-  bind_host = node[:barbican][:api][:host]
-  bind_port = node[:barbican][:api][:port]
+  bind_host = node[:barbican][:api][:bind_host]
+  bind_port = node[:barbican][:api][:bind_port]
 end
 
 crowbar_openstack_wsgi "WSGI entry for barbican-api" do
