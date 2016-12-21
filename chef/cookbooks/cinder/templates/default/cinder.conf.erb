@@ -1,4 +1,15 @@
 [DEFAULT]
+tcp_keepalive_interval = 30
+debug = <%= node[:cinder][:debug] %>
+verbose = <%= node[:cinder][:verbose] %>
+log_dir = /var/log/cinder
+use_syslog = <%= node[:cinder][:use_syslog] ? "true" : "false" %>
+use_stderr = false
+rpc_response_timeout = <%= node[:cinder][:rpc_response_timeout] %>
+rpc_backend = rabbit
+control_exchange = cinder
+max_header_line = <%= node[:cinder][:max_header_line] %>
+wsgi_keep_alive = false
 state_path = /var/lib/cinder
 my_ip = <%= node[:cinder][:my_ip] %>
 
@@ -262,19 +273,6 @@ image_upload_use_cinder_backend = true
 
   <% break unless @use_multi_backend -%>
 <% end -%>
-
-[DEFAULT]
-tcp_keepalive_interval = 30
-debug = <%= node[:cinder][:debug] %>
-verbose = <%= node[:cinder][:verbose] %>
-log_dir = /var/log/cinder
-use_syslog = <%= node[:cinder][:use_syslog] ? "true" : "false" %>
-use_stderr = false
-rpc_response_timeout = <%= node[:cinder][:rpc_response_timeout] %>
-rpc_backend = rabbit
-control_exchange = cinder
-max_header_line = <%= node[:cinder][:max_header_line] %>
-wsgi_keep_alive = false
 
 [KEYMGR]
 <% unless node[:cinder][:keymgr_fixed_key].empty? -%>
