@@ -285,15 +285,17 @@ max_overflow = <%= node[:cinder][:max_overflow] %>
 pool_timeout = <%= node[:cinder][:pool_timeout] %>
 
 [keystone_authtoken]
+auth_type = password
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
 insecure = <%= @keystone_settings['insecure'] %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
-signing_dir = /var/cache/cinder/keystone-signing
-identity_uri = <%= @keystone_settings['admin_auth_url'] %>
-admin_user = <%= @keystone_settings['service_user'] %>
-admin_password = <%= @keystone_settings['service_password'] %>
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
 
 [oslo_concurrency]
 <% if @need_shared_lock_path -%>
