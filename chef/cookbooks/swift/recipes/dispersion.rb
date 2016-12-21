@@ -105,14 +105,6 @@ template "/etc/swift/dispersion.conf" do
   #notifies :run, "execute[populate-dispersion]", :immediately
 end
 
-# FIXME(aplanas): extreme workaround to bsc#1003366. Python 2.7.9 and
-# greenlet 0.4.5 produce GIL deadlock in this service. A restart
-# usually resolves the issue in local testing. This needs to be
-# removed once the bug is fixed.
-service "swift-proxy" do
-  action :restart
-end
-
 # NOTE(aplanas): swift-dispersion-populate process can be slow, and
 # produce a timeout in the sync-marks in other HA recipes.  The more
 # correct approach is to create a one-shot service for this command.
