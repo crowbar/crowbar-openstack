@@ -4,7 +4,6 @@
   "attributes": {
     "cinder": {
       "debug": false,
-      "verbose": true,
       "max_header_line": 16384,
       "use_syslog": false,
       "rabbitmq_instance": "none",
@@ -162,7 +161,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 103,
+      "schema-revision": 104,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

@@ -1,7 +1,6 @@
 [DEFAULT]
 tcp_keepalive_interval = 30
 debug = <%= node[:cinder][:debug] %>
-verbose = <%= node[:cinder][:verbose] %>
 log_dir = /var/log/cinder
 use_syslog = <%= node[:cinder][:use_syslog] ? "true" : "false" %>
 use_stderr = false
