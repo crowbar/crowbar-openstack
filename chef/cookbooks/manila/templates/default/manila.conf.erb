@@ -25,6 +25,7 @@ verbose=<%= node[:manila][:verbose] %>
 log_dir=/var/log/manila
 use_syslog=<%= node[:manila][:use_syslog] ? "True" : "False" %>
 use_stderr = false
+transport_url = <%= @rabbit_settings[:url] %>
 
 [cinder]
 
@@ -84,16 +85,6 @@ username=<%= @nova_admin_username %>
 
 lock_path = /var/run/manila
 
-[oslo_messaging_rabbit]
-
-rabbit_host=<%= @rabbit_settings[:address] %>
-<% unless @rabbit_settings[:port].nil? -%>
-rabbit_port=<%= @rabbit_settings[:port] %>
-<% end -%>
-rabbit_userid=<%= @rabbit_settings[:user] %>
-rabbit_password=<%= @rabbit_settings[:password] %>
-rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
-
 #############################################################################
 #############################################################################
 ## BEGIN Manila backends (which are enabled with 'enabled_share_backends')
@@ -150,18 +141,18 @@ netapp_aggregate_name_search_pattern=<%= share['netapp']['netapp_aggregate_name_
 
 <% if share['backend_driver'] == 'hitachi' -%>
 share_backend_name=<%= share['backend_name'] %>
-share_driver = manila.share.drivers.hitachi.hds_hnas.HDSHNASDriver
-hds_hnas_driver_helper = manila.share.drivers.hitachi.ssh.HNASSSHBackend
+share_driver = manila.share.drivers.hitachi.hnas.HitachiHNASDriver
 driver_handles_share_servers = False
-hds_hnas_cluster_admin_ip0 = <%= share['hitachi']['hds_hnas_cluster_admin_ip0'] %>
-hds_hnas_evs_id = <%= share['hitachi']['hds_hnas_evs_id'] %>
-hds_hnas_evs_ip = <%= share['hitachi']['hds_hnas_evs_ip'] %>
-hds_hnas_file_system_name = <%= share['hitachi']['hds_hnas_file_system_name'] %>
-hds_hnas_ip = <%= share['hitachi']['hds_hnas_ip'] %>
-hds_hnas_password = <%= share['hitachi']['hds_hnas_password'] %>
-hds_hnas_ssh_private_key = <%= share['hitachi']['hds_hnas_ssh_private_key'] %>
-hds_hnas_stalled_job_timeout = <%= share['hitachi']['hds_hnas_stalled_job_timeout'] %>
-hds_hnas_user = <%= share['hitachi']['hds_hnas_user'] %>
+hitachi_hnas_driver_helper = manila.share.drivers.hitachi.ssh.HNASSSHBackend
+hitachi_hnas_cluster_admin_ip0 = <%= share['hitachi']['hitachi_hnas_cluster_admin_ip0'] %>
+hitachi_hnas_evs_id = <%= share['hitachi']['hitachi_hnas_evs_id'] %>
+hitachi_hnas_evs_ip = <%= share['hitachi']['hitachi_hnas_evs_ip'] %>
+hitachi_hnas_file_system_name = <%= share['hitachi']['hitachi_hnas_file_system_name'] %>
+hitachi_hnas_ip = <%= share['hitachi']['hitachi_hnas_ip'] %>
+hitachi_hnas_password = <%= share['hitachi']['hitachi_hnas_password'] %>
+hitachi_hnas_ssh_private_key = <%= share['hitachi']['hitachi_hnas_ssh_private_key'] %>
+hitachi_hnas_stalled_job_timeout = <%= share['hitachi']['hitachi_hnas_stalled_job_timeout'] %>
+hitachi_hnas_user = <%= share['hitachi']['hitachi_hnas_user'] %>
 <% end -%> <%# hitachi driver %>
 
 <% if share['backend_driver'] == 'cephfs' -%>
