@@ -20,16 +20,18 @@ connection = <%= @database_connection %>
 
 [keystone_authtoken]
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
+auth_url = <%= @keystone_settings['admin_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 region_name = <%= @keystone_settings['endpoint_region'] %>
-signing_dir = /var/cache/ceilometer/keystone-signing
-identity_uri = <%= @keystone_settings['admin_auth_url'] %>
-admin_user = <%= @keystone_settings['service_user'] %>
-admin_password = <%= @keystone_settings['service_password'] %>
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
+auth_type = password
 
 [notification]
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
