@@ -300,7 +300,7 @@ if ha_enabled
   # Create cinder-volume HA specific config file
   service_host = CrowbarPacemakerHelper.cluster_vhostname(node)
 
-  template "/etc/cinder/cinder-volume.conf" do
+  template node[:cinder][:config_file_cinder_volume] do
     source "cinder-volume.conf.erb"
     owner "root"
     group node[:cinder][:group]

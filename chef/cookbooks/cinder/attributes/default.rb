@@ -17,6 +17,7 @@ default[:cinder][:debug] = false
 default[:cinder][:verbose] = false
 default[:cinder][:max_header_line] = 16384
 default[:cinder][:config_file] = "/etc/cinder/cinder.conf.d/100-cinder.conf"
+default[:cinder][:config_file_cinder_volume] = "/etc/cinder/cinder-volume.conf.d/100-cinder-volume.conf"
 
 override[:cinder][:user]="cinder"
 override[:cinder][:group]="cinder"

@@ -1,4 +1,14 @@
 [DEFAULT]
+tcp_keepalive_interval = 30
+debug = <%= node[:cinder][:debug] %>
+log_dir = /var/log/cinder
+use_syslog = <%= node[:cinder][:use_syslog] ? "true" : "false" %>
+use_stderr = false
+transport_url = <%= @rabbit_settings[:url] %>
+rpc_response_timeout = <%= node[:cinder][:rpc_response_timeout] %>
+control_exchange = cinder
+max_header_line = <%= node[:cinder][:max_header_line] %>
+wsgi_keep_alive = false
 state_path = /var/lib/cinder
 my_ip = <%= node[:cinder][:my_ip] %>
 
@@ -8,7 +18,6 @@ glance_api_version = 2
 glance_api_insecure = <%= @glance_server_insecure %>
 <% end -%>
 
-enable_v1_api = false
 enable_v3_api = true
 
 <% unless @availability_zone.nil? -%>
@@ -79,9 +88,9 @@ volume_driver = cinder.volume.drivers.emc.emc_vmax_iscsi.EMCVMAXISCSIDriver
   <% if volume['backend_driver'] == 'eqlx' -%>
 eqlx_group_name = <%= volume['eqlx']["eqlx_group_name"] %>
 eqlx_cli_timeout=<%= volume['eqlx']["eqlx_cli_timeout"] %>
-eqlx_use_chap = <%= volume['eqlx']["eqlx_use_chap"] %>
-eqlx_chap_login = <%= volume['eqlx']["eqlx_chap_login"] %>
-eqlx_chap_password = <%= volume['eqlx']["eqlx_chap_password"] %>
+use_chap_auth = <%= volume['eqlx']["use_chap_auth"] %>
+chap_username = <%= volume['eqlx']["chap_username"] %>
+chap_password = <%= volume['eqlx']["chap_password"] %>
 eqlx_pool = <%= volume['eqlx']["eqlx_pool"] %>
 
 san_thin_provision = <%= volume['eqlx']["san_thin_provision"] %>
@@ -263,20 +272,7 @@ image_upload_use_cinder_backend = true
   <% break unless @use_multi_backend -%>
 <% end -%>
 
-[DEFAULT]
-tcp_keepalive_interval = 30
-debug = <%= node[:cinder][:debug] %>
-verbose = <%= node[:cinder][:verbose] %>
-log_dir = /var/log/cinder
-use_syslog = <%= node[:cinder][:use_syslog] ? "true" : "false" %>
-use_stderr = false
-rpc_response_timeout = <%= node[:cinder][:rpc_response_timeout] %>
-rpc_backend = rabbit
-control_exchange = cinder
-max_header_line = <%= node[:cinder][:max_header_line] %>
-wsgi_keep_alive = false
-
-[KEYMGR]
+[key_manager]
 <% unless node[:cinder][:keymgr_fixed_key].empty? -%>
 fixed_key = <%= node[:cinder][:keymgr_fixed_key].each_byte.map { |b| b.to_s(16) }.join %>
 <% end -%>
@@ -288,15 +284,17 @@ max_overflow = <%= node[:cinder][:max_overflow] %>
 pool_timeout = <%= node[:cinder][:pool_timeout] %>
 
 [keystone_authtoken]
+auth_type = password
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
 insecure = <%= @keystone_settings['insecure'] %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
-signing_dir = /var/cache/cinder/keystone-signing
-identity_uri = <%= @keystone_settings['admin_auth_url'] %>
-admin_user = <%= @keystone_settings['service_user'] %>
-admin_password = <%= @keystone_settings['service_password'] %>
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
 
 [oslo_concurrency]
 <% if @need_shared_lock_path -%>
@@ -304,15 +302,6 @@ lock_path = /var/run/openstack
 <% else -%>
 lock_path = /var/run/cinder
 <% end -%>
-
-[oslo_messaging_rabbit]
-rabbit_host = <%= @rabbit_settings[:address] %>
-<% unless @rabbit_settings[:port].nil? -%>
-rabbit_port = <%= @rabbit_settings[:port] %>
-<% end -%>
-rabbit_userid = <%= @rabbit_settings[:user] %>
-rabbit_password = <%= @rabbit_settings[:password] %>
-rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 
 [ssl]
 ca_file = <%= node[:cinder][:ssl][:ca_certs] if node[:cinder][:api][:protocol] == 'https' && node[:cinder][:ssl][:cert_required] %>

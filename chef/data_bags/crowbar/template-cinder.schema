@@ -13,7 +13,6 @@
           "required": true,
           "mapping": {
             "debug": { "type": "bool", "required": true },
-            "verbose": { "type": "bool", "required": true },
             "max_header_line": { "type": "int", "required": true },
             "use_syslog": { "type": "bool", "required": true },
             "rabbitmq_instance": { "type": "str", "required": true },
@@ -53,9 +52,9 @@
                     "san_password": { "type": "str", "required": true },
                     "san_thin_provision": { "type": "bool", "required": true },
                     "eqlx_group_name": { "type": "str", "required": true },
-                    "eqlx_use_chap": { "type": "bool", "required": true },
-                    "eqlx_chap_login": { "type": "str", "required": true },
-                    "eqlx_chap_password": { "type": "str", "required": true },
+                    "use_chap_auth": { "type": "bool", "required": true },
+                    "chap_username": { "type": "str", "required": true },
+                    "chap_password": { "type": "str", "required": true },
                     "eqlx_cli_timeout": { "type": "int", "required": true },
                     "eqlx_pool": { "type": "str", "required": true }
                 }

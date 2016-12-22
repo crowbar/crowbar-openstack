@@ -4,7 +4,6 @@
   "attributes": {
     "cinder": {
       "debug": false,
-      "verbose": true,
       "max_header_line": 16384,
       "use_syslog": false,
       "rabbitmq_instance": "none",
@@ -36,9 +35,9 @@
           "san_password": "12345",
           "san_thin_provision": false,
           "eqlx_group_name": "group-0",
-          "eqlx_use_chap": false,
-          "eqlx_chap_login": "chapadmin",
-          "eqlx_chap_password": "12345",
+          "use_chap_auth": false,
+          "chap_username": "chapadmin",
+          "chap_password": "12345",
           "eqlx_cli_timeout": 30,
           "eqlx_pool": "default"
         },
@@ -162,7 +161,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 103,
+      "schema-revision": 105,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
