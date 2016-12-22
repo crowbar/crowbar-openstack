@@ -22,7 +22,7 @@ verbose = <%= @verbose ? "True" : "False" %>
 log_dir = /var/log/neutron
 use_syslog = <%= @use_syslog ? "True" : "False" %>
 use_stderr = false
-rpc_backend = rabbit
+transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = neutron
 max_header_line = <%= node[:neutron][:max_header_line] %>
 wsgi_keep_alive = false
@@ -38,17 +38,17 @@ max_pool_size = <%= @sql_max_pool_size %>
 max_overflow = <%= @sql_max_pool_overflow %>
 pool_timeout = <%= @sql_pool_timeout %>
 [keystone_authtoken]
+auth_type = password
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 region_name = <%= @keystone_settings['endpoint_region'] %>
-signing_dir = /var/cache/neutron/keystone-signing
-identity_uri = <%= @keystone_settings['admin_auth_url'] %>
-admin_user = <%= @keystone_settings['service_user'] %>
-admin_password = <%= @keystone_settings['service_password'] %>
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings['admin_domain'] %>
+user_domain_name = <%= @keystone_settings['admin_domain'] %>
 [nova]
 region_name = <%= @keystone_settings['endpoint_region'] %>
 endpoint_type = internal
@@ -64,14 +64,6 @@ username = <%= @keystone_settings['service_user'] %>
 lock_path = /var/run/neutron
 [oslo_messaging_notifications]
 driver = neutron.openstack.common.notifier.rpc_notifier
-[oslo_messaging_rabbit]
-rabbit_host=<%= @rabbit_settings[:address] %>
-<% unless @rabbit_settings[:port].nil? -%>
-rabbit_port=<%= @rabbit_settings[:port] %>
-<% end -%>
-rabbit_userid=<%= @rabbit_settings[:user] %>
-rabbit_password=<%= @rabbit_settings[:password] %>
-rabbit_virtual_host=<%= @rabbit_settings[:vhost] %>
 [ssl]
 <% if @ssl_cert_required -%>
 ca_file = <%= @ssl_ca_file %>
