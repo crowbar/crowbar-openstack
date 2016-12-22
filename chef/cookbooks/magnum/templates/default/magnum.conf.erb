@@ -7,7 +7,7 @@ use_syslog = <%= node[:magnum][:use_syslog] ? "True" : "False" %>
 use_stderr = false
 rpc_conn_pool_size = 64
 executor_thread_pool_size = 256
-transport_url = <%= @transport_url %>
+transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = magnum
 
 [api]
