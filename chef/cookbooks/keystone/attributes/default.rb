@@ -92,6 +92,7 @@ default[:keystone][:ldap][:user_allow_delete] = true
 default[:keystone][:ldap][:user_enabled_emulation] = false
 default[:keystone][:ldap][:user_enabled_emulation_dn] = ""
 default[:keystone][:ldap][:user_enabled_emulation_use_group_config] = false
+default[:keystone][:ldap][:user_additional_attribute_mapping] = ""
 
 default[:keystone][:ldap][:group_tree_dn] = ""
 default[:keystone][:ldap][:group_filter] = ""
@@ -99,12 +100,18 @@ default[:keystone][:ldap][:group_objectclass] = "groupOfNames"
 default[:keystone][:ldap][:group_id_attribute] = "cn"
 default[:keystone][:ldap][:group_name_attribute] = "ou"
 default[:keystone][:ldap][:group_member_attribute] = "member"
-default[:keystone][:ldap][:group_attribute_ignore] = ""
-default[:keystone][:ldap][:group_allow_create] = true
-default[:keystone][:ldap][:group_allow_update] = true
-default[:keystone][:ldap][:group_allow_delete] = true
-default[:keystone][:ldap][:use_pool] = true
 default[:keystone][:ldap][:group_members_are_ids] = false
+default[:keystone][:ldap][:group_additional_attribute_mapping] = ""
+default[:keystone][:ldap][:group_ad_nesting] = false
+default[:keystone][:ldap][:use_pool] = true
+default[:keystone][:ldap][:pool_size] = 10
+default[:keystone][:ldap][:pool_retry_max] = 3
+default[:keystone][:ldap][:pool_retry_delay] = 0.1
+default[:keystone][:ldap][:pool_connection_timeout] = -1
+default[:keystone][:ldap][:pool_connection_lifetime] = 600
+default[:keystone][:ldap][:use_auth_pool] = true
+default[:keystone][:ldap][:auth_pool_size] = 100
+default[:keystone][:ldap][:auth_pool_connection_lifetime] = 60
 
 default[:keystone][:ha][:enabled] = false
 # Ports to bind to when haproxy is used for the real ports

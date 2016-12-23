@@ -87,23 +87,30 @@ user_allow_delete = <%= node[:keystone][:ldap][:user_allow_delete] %>
 user_enabled_emulation = <%= node[:keystone][:ldap][:user_enabled_emulation] %>
 user_enabled_emulation_dn = <%= node[:keystone][:ldap][:user_enabled_emulation_dn] %>
 user_enabled_emulation_use_group_config = <%= node[:keystone][:ldap][:user_enabled_emulation_use_group_config] %>
+user_additional_attribute_mapping = <%= node[:keystone][:ldap][:user_additional_attribute_mapping] %>
 group_tree_dn = <%= node[:keystone][:ldap][:group_tree_dn] %>
 group_filter = <%= node[:keystone][:ldap][:group_filter] %>
 group_objectclass = <%= node[:keystone][:ldap][:group_objectclass] %>
 group_id_attribute = <%= node[:keystone][:ldap][:group_id_attribute] %>
 group_name_attribute = <%= node[:keystone][:ldap][:group_name_attribute]%>
 group_member_attribute = <%= node[:keystone][:ldap][:group_member_attribute] %>
+group_members_are_ids = <%= node[:keystone][:ldap][:group_members_are_ids] %>
 group_desc_attribute = <%= node[:keystone][:ldap][:group_desc_attribute] %>
-group_attribute_ignore = <%= node[:keystone][:ldap][:group_attribute_ignore] %>
-group_allow_create = <%= node[:keystone][:ldap][:group_allow_create] %>
-group_allow_update = <%= node[:keystone][:ldap][:group_allow_update] %>
-group_allow_delete = <%= node[:keystone][:ldap][:group_allow_delete] %>
+group_additional_attribute_mapping = <%= node[:keystone][:ldap][:group_additional_attribute_mapping] %>
+group_ad_nesting = <%= node[:keystone][:ldap][:group_ad_nesting] %>
 tls_cacertfile = <%= node[:keystone][:ldap][:tls_cacertfile] %>
 tls_cacertdir = <%= node[:keystone][:ldap][:tls_cacertdir] %>
 use_tls = <%= node[:keystone][:ldap][:use_tls] %>
 tls_req_cert = <%= node[:keystone][:ldap][:tls_req_cert] %>
 use_pool = <%= node[:keystone][:ldap][:use_pool] %>
-group_members_are_ids = <%= node[:keystone][:ldap][:group_members_are_ids] %>
+pool_size = <%= node[:keystone][:ldap][:pool_size] %>
+pool_retry_max = <%= node[:keystone][:ldap][:pool_retry_max] %>
+pool_retry_delay = <%= node[:keystone][:ldap][:pool_retry_delay] %>
+pool_connection_timeout = <%= node[:keystone][:ldap][:pool_connection_timeout] %>
+pool_connection_lifetime = <%= node[:keystone][:ldap][:pool_connection_lifetime] %>
+use_auth_pool = <%= node[:keystone][:ldap][:use_auth_pool] %>
+auth_pool_size = <%= node[:keystone][:ldap][:auth_pool_size] %>
+auth_pool_connection_lifetime = <%= node[:keystone][:ldap][:auth_pool_connection_lifetime] %>
 
 [oslo_messaging_rabbit]
 
