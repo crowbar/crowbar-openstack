@@ -352,7 +352,8 @@ end
 
 crowbar_pacemaker_sync_mark "wait-horizon_config"
 
-local_settings = "#{dashboard_path}/openstack_dashboard/local/local_settings.py"
+local_settings = "#{dashboard_path}/openstack_dashboard/local/" \
+                 "local_settings.d/_100_local_settings.py"
 
 # We need to protect syncdb with crowbar_pacemaker_sync_mark. Since it's run in
 # an immmediate notification of the creation of the config file, we put the two
