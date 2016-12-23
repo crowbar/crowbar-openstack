@@ -65,9 +65,7 @@ default[:keystone][:ldap][:url] = "ldap://localhost"
 default[:keystone][:ldap][:user] = "dc=Manager,dc=example,dc=com"
 default[:keystone][:ldap][:password] = ""
 default[:keystone][:ldap][:suffix] = "cn=example,cn=com"
-default[:keystone][:ldap][:use_dumb_member] = false
 default[:keystone][:ldap][:allow_subtree_delete] = false
-default[:keystone][:ldap][:dumb_member] = "cn=dumb,dc=nonexistent"
 default[:keystone][:ldap][:page_size] = 0
 default[:keystone][:ldap][:alias_dereferencing] = "default"
 default[:keystone][:ldap][:query_scope] = "one"
@@ -101,6 +99,7 @@ default[:keystone][:ldap][:group_id_attribute] = "cn"
 default[:keystone][:ldap][:group_name_attribute] = "ou"
 default[:keystone][:ldap][:group_member_attribute] = "member"
 default[:keystone][:ldap][:group_members_are_ids] = false
+default[:keystone][:ldap][:group_desc_attribute] = "description"
 default[:keystone][:ldap][:group_additional_attribute_mapping] = ""
 default[:keystone][:ldap][:group_ad_nesting] = false
 default[:keystone][:ldap][:use_pool] = true

@@ -72,9 +72,7 @@
                       "user": { "type": "str" },
                       "password": { "type": "str" },
                       "suffix": { "type": "str" },
-                      "use_dumb_member": { "type": "bool" },
                       "allow_subtree_delete": { "type": "bool" },
-                      "dumb_member": { "type": "str" },
                       "page_size": { "type": "int" },
                       "alias_dereferencing": { "type": "str" },
                       "query_scope": { "type": "str" },
@@ -106,6 +104,7 @@
                       "group_name_attribute": { "type": "str" },
                       "group_member_attribute": { "type": "str" },
                       "group_members_are_ids": { "type": "bool" },
+                      "group_desc_attribute": { "type": "str" },
                       "group_additional_attribute_mapping": { "type": "str" },
                       "group_ad_nesting": { "type": "bool" },
                       "tls_cacertfile": { "type": "str" },
@@ -120,7 +119,7 @@
                       "pool_connection_lifetime": { "type": "int" },
                       "use_auth_pool": { "type": "bool" },
                       "auth_pool_size": { "type": "int" },
-                      "auth_pool_connection_lifetime": { "type": "int" },
+                      "auth_pool_connection_lifetime": { "type": "int" }
                     }}
               }}
      }},

@@ -3,6 +3,9 @@ def upgrade(ta, td, a, d)
   a["ldap"].delete("group_allow_create")
   a["ldap"].delete("group_allow_update")
   a["ldap"].delete("group_allow_delete")
+  a["ldap"].delete("use_dumb_member")
+  a["ldap"].delete("dumb_member")
+  a["ldap"]["group_desc_attribute"] = ta["ldap"]["group_desc_attribute"]
   a["ldap"]["user_additional_attribute_mapping"] = ta["ldap"]["user_additional_attribute_mapping"]
   a["ldap"]["group_additional_attribute_mapping"] = ta["ldap"]["group_additional_attribute_mapping"]
   a["ldap"]["group_ad_nesting"] = ta["ldap"]["group_ad_nesting"]
@@ -22,6 +25,9 @@ def downgrade(ta, td, a, d)
   a["ldap"]["group_allow_create"] = ta["ldap"]["group_allow_create"]
   a["ldap"]["group_allow_update"] = ta["ldap"]["group_allow_update"]
   a["ldap"]["group_allow_delete"] = ta["ldap"]["group_allow_delete"]
+  a["ldap"]["use_dumb_member"] = ta["ldap"]["use_dumb_member"]
+  a["ldap"]["dumb_member"] = ta["ldap"]["dumb_member"]
+  a["ldap"].delete("group_desc_attribute")
   a["ldap"].delete("user_additional_attribute_mapping")
   a["ldap"].delete("group_additional_attribute_mapping")
   a["ldap"].delete("group_ad_nesting")
