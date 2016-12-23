@@ -74,7 +74,7 @@ use_syslog = <%= node[:nova][:use_syslog] ? 'True' : 'False' %>
 use_stderr = false
 rpc_conn_pool_size = 64
 executor_thread_pool_size = 256
-rpc_backend = rabbit
+transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = nova
 <%= "zvm_image_default_password = #{node[:nova][:zvm][:zvm_image_default_password]}" if @libvirt_type.eql?('zvm') %>
 <%= "zvm_xcat_server=#{node[:nova][:zvm][:zvm_xcat_server]}" if @libvirt_type.eql?('zvm') %>
@@ -216,13 +216,6 @@ lock_path = /var/run/nova
 
 [oslo_messaging_notifications]
 driver = messagingv2
-
-[oslo_messaging_rabbit]
-rabbit_host = <%= @rabbit_settings[:address] %>
-<%= "rabbit_port = #{@rabbit_settings[:port]}" unless @rabbit_settings[:port].nil? %>
-rabbit_userid = <%= @rabbit_settings[:user] %>
-rabbit_password = <%= @rabbit_settings[:password] %>
-rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 
 [serial_console]
 enabled = <%= @serial_enabled ? "True" : "False" %>
