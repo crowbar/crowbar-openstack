@@ -59,6 +59,11 @@ en:
         use_cachemanagement: 'Turn On Cache Management'
         logging_header: 'Logging'
         verbose: 'Verbose Logging'
+        crossdomain:
+          header: 'Cross-domain'
+          enabled: 'Enabled'
+          cross_domain_hosts: 'Cross-domain allowed hosts'
+          cross_domain_hosts_hint: 'A comma-separated list of hosts allowed for CORS (http(s)://hostname)'
       validation:
         default_store_no_cinder: 'Cannot set default store to Cinder without Cinder being active.'
         ceph_client_network_not_available: "The ceph_client network '%{ceph_client}' is not available in the network proposal"

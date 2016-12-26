@@ -66,6 +66,18 @@
 
     %fieldset
       %legend
+        = t(".crossdomain.header")
+
+      = boolean_field %w(crossdomain enabled), "data-showit" => "true",
+       "data-showit-target" => "#crossdomain_container", "data-showit-direct" => "true"
+
+      #crossdomain_container
+        %span.help-block
+          = t('.crossdomain.cross_domain_hosts_hint')
+        = array_string_field %w(crossdomain cross_domain_hosts),  :only_comma => true
+
+    %fieldset
+      %legend
         = t(".logging_header")
 
       = boolean_field :verbose

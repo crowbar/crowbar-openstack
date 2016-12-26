@@ -587,6 +587,10 @@ control_exchange = glance
 # received in the requests "origin" header. (list value)
 #allowed_origin = <None>
 
+<% unless node[:glance][:crossdomain][:cross_domain_hosts].empty? -%>
+allowed_origin = <%= node[:glance][:crossdomain][:cross_domain_hosts].join(",") %>
+<% end -%>
+
 # Indicate that the actual request can include user credentials
 # (boolean value)
 #allow_credentials = true
