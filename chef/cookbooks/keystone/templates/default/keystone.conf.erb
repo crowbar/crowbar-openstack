@@ -135,8 +135,4 @@ ca_certs = <%= @signing_ca_certs %>
 
 expiration=<%= @token_expiration %>
 
-<% if @signing_token_format == "PKI" -%>
-provider = pki
-<% else -%>
 provider = uuid
-<% end -%>
