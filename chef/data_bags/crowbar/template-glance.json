@@ -55,6 +55,10 @@
         "datastores": [],
         "store_image_dir": "/openstack_glance"
       },
+      "crossdomain": {
+        "enabled": false,
+        "cross_domain_hosts": []
+      },
       "sql_idle_timeout": 3600,
       "keystone_instance": "none",
       "service_user": "glance",

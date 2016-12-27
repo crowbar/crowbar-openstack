@@ -84,6 +84,12 @@
                 "store_image_dir": { "type": "str", "required": true }
               }
             },
+            "crossdomain": {
+              "type": "map", "required": true, "mapping": {
+                "enabled": { "type": "bool", "required": true },
+                "cross_domain_hosts": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] }
+              }
+            },
             "sql_idle_timeout": { "type": "int", "required": true },
             "keystone_instance": { "type": "str", "required": true },
             "service_user": { "type": "str", "required": true },
