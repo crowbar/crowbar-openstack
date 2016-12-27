@@ -23,7 +23,7 @@ sql_connection = TroveHelper.get_sql_connection trove_server
 rabbitmq_servers = search_env_filtered(:node, "roles:rabbitmq-server")
 rabbitmq_trove_settings = TroveHelper.get_rabbitmq_trove_settings rabbitmq_servers
 
-template "/etc/trove/trove-conductor.conf" do
+template node[:trove][:conductor][:config_file] do
   source "trove-conductor.conf.erb"
   owner node[:trove][:user]
   group node[:trove][:group]

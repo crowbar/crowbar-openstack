@@ -148,7 +148,7 @@ template "/etc/trove/api-paste.ini" do
   notifies :restart, "service[trove-api]"
 end
 
-template "/etc/trove/trove.conf" do
+template node[:trove][:api][:config_file] do
   source "trove.conf.erb"
   owner node[:trove][:user]
   group node[:trove][:group]

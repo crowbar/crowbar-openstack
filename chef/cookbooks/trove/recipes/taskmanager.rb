@@ -36,7 +36,7 @@ ceph_radosgws = search_env_filtered(:node, "roles:ceph-radosgw")
 object_store_url, object_store_insecure =
   TroveHelper.get_objectstore_details swift_proxies, ceph_radosgws
 
-template "/etc/trove/trove-taskmanager.conf" do
+template node[:trove][:taskmanager][:config_file] do
   source "trove-taskmanager.conf.erb"
   owner node[:trove][:user]
   group node[:trove][:group]
