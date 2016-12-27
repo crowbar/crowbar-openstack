@@ -5,8 +5,6 @@ from openstack_dashboard import exceptions
 from openstack_dashboard.settings import HORIZON_CONFIG
 
 DEBUG = <%= @debug ? 'True' : 'False' %>
-TEMPLATE_DEBUG = DEBUG
-WEBROOT = '/'
 ALLOWED_HOSTS = ['*']
 <%= @use_ssl ? '' : '# ' %>SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 <%= @use_ssl ? '' : '# ' %>CSRF_COOKIE_SECURE = True
@@ -51,25 +49,12 @@ OPENSTACK_KEYSTONE_URL = "<%= @keystone_settings['unversioned_internal_auth_url'
 OPENSTACK_KEYSTONE_DEFAULT_ROLE = "Member"
 OPENSTACK_SSL_NO_VERIFY = <%= @insecure ? "True" : "False" %>
 
-OPENSTACK_KEYSTONE_BACKEND = {
-    'name': 'native',
-    'can_edit_user': True,
-    'can_edit_group': True,
-    'can_edit_project': True,
-    'can_edit_domain': True,
-    'can_edit_role': True,
-}
-
 OPENSTACK_ENABLE_PASSWORD_RETRIEVE = True
 
 OPENSTACK_HYPERVISOR_FEATURES = {
     'can_set_mount_point': <%= @can_set_mount_point ? "True" : "False"  %>,
     'can_set_password': <%= @can_set_password ? "True" : "False"  %>,
     'requires_keypair': False,
-}
-
-OPENSTACK_CINDER_FEATURES = {
-    'enable_backup': False,
 }
 
 OPENSTACK_NEUTRON_NETWORK = {
@@ -114,26 +99,7 @@ OPENSTACK_NEUTRON_NETWORK = {
     'supported_vnic_types': ['*'],
 }
 
-OPENSTACK_HEAT_STACK = {
-    'enable_user_pass': True,
-}
-
-
-IMAGE_CUSTOM_PROPERTY_TITLES = {
-    "architecture": _("Architecture"),
-    "kernel_id": _("Kernel ID"),
-    "ramdisk_id": _("Ramdisk ID"),
-    "image_state": _("Euca2ools state"),
-    "project_id": _("Project ID"),
-    "image_type": _("Image Type"),
-}
-
-IMAGE_RESERVED_CUSTOM_PROPERTIES = []
 OPENSTACK_ENDPOINT_TYPE = "internalURL"
-API_RESULT_LIMIT = 1000
-API_RESULT_PAGE_SIZE = 20
-SWIFT_FILE_TRANSFER_CHUNK_SIZE = 512 * 1024
-DROPDOWN_MAX_ITEMS = 30
 TIME_ZONE = "<%= @timezone %>"
 ENFORCE_PASSWORD_CHECK = True
 
@@ -262,115 +228,8 @@ LOGGING = {
     }
 }
 
-SECURITY_GROUP_RULES = {
-    'all_tcp': {
-        'name': _('All TCP'),
-        'ip_protocol': 'tcp',
-        'from_port': '1',
-        'to_port': '65535',
-    },
-    'all_udp': {
-        'name': _('All UDP'),
-        'ip_protocol': 'udp',
-        'from_port': '1',
-        'to_port': '65535',
-    },
-    'all_icmp': {
-        'name': _('All ICMP'),
-        'ip_protocol': 'icmp',
-        'from_port': '-1',
-        'to_port': '-1',
-    },
-    'ssh': {
-        'name': 'SSH',
-        'ip_protocol': 'tcp',
-        'from_port': '22',
-        'to_port': '22',
-    },
-    'smtp': {
-        'name': 'SMTP',
-        'ip_protocol': 'tcp',
-        'from_port': '25',
-        'to_port': '25',
-    },
-    'dns': {
-        'name': 'DNS',
-        'ip_protocol': 'tcp',
-        'from_port': '53',
-        'to_port': '53',
-    },
-    'http': {
-        'name': 'HTTP',
-        'ip_protocol': 'tcp',
-        'from_port': '80',
-        'to_port': '80',
-    },
-    'pop3': {
-        'name': 'POP3',
-        'ip_protocol': 'tcp',
-        'from_port': '110',
-        'to_port': '110',
-    },
-    'imap': {
-        'name': 'IMAP',
-        'ip_protocol': 'tcp',
-        'from_port': '143',
-        'to_port': '143',
-    },
-    'ldap': {
-        'name': 'LDAP',
-        'ip_protocol': 'tcp',
-        'from_port': '389',
-        'to_port': '389',
-    },
-    'https': {
-        'name': 'HTTPS',
-        'ip_protocol': 'tcp',
-        'from_port': '443',
-        'to_port': '443',
-    },
-    'smtps': {
-        'name': 'SMTPS',
-        'ip_protocol': 'tcp',
-        'from_port': '465',
-        'to_port': '465',
-    },
-    'imaps': {
-        'name': 'IMAPS',
-        'ip_protocol': 'tcp',
-        'from_port': '993',
-        'to_port': '993',
-    },
-    'pop3s': {
-        'name': 'POP3S',
-        'ip_protocol': 'tcp',
-        'from_port': '995',
-        'to_port': '995',
-    },
-    'ms_sql': {
-        'name': 'MS SQL',
-        'ip_protocol': 'tcp',
-        'from_port': '1433',
-        'to_port': '1433',
-    },
-    'mysql': {
-        'name': 'MYSQL',
-        'ip_protocol': 'tcp',
-        'from_port': '3306',
-        'to_port': '3306',
-    },
-    'rdp': {
-        'name': 'RDP',
-        'ip_protocol': 'tcp',
-        'from_port': '3389',
-        'to_port': '3389',
-    },
-}
 
 OPENSTACK_TOKEN_HASH_ENABLED = <%= @token_hash_enabled ? "True" : "False" %>
-REST_API_REQUIRED_SETTINGS = ['OPENSTACK_HYPERVISOR_FEATURES',
-                              'LAUNCH_INSTANCE_DEFAULTS',
-                              'OPENSTACK_IMAGE_FORMATS']
 HORIZON_CONFIG['help_url'] = "<%= @help_url %>"
 COMPRESS_CACHE_KEY_FUNCTION='compressor.cache.socket_cachekey'
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
