@@ -252,3 +252,6 @@ EXTERNAL_MONITORING = [
 
 SESSION_TIMEOUT = <%= @session_timeout * 60 %>
 SECRET_KEY = "<%= @secret_key %>"
+<% if @glance_cors_enabled -%>
+IMAGES_ALLOW_LOCATION = True
+<% end -%>

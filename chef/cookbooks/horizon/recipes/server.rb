@@ -356,7 +356,8 @@ django_db_settings = {
 
 db_ca_certs = database_ssl ? db_settings[:connection][:ssl][:ca_certs] : ""
 
-glance_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "glance"))
+glance_settings = Barclamp::Config.load("openstack", "glance")
+glance_insecure = CrowbarOpenStackHelper.insecure(glance_settings)
 cinder_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "cinder"))
 neutron_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "neutron"))
 nova_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "nova"))
@@ -368,6 +369,7 @@ manila_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("opensta
 magnum_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "magnum"))
 trove_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "trove"))
 sahara_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "sahara"))
+glance_cors_enabled = glance_settings[:crossdomain][:enabled] ? true : false
 
 neutrons = search(:node, "roles:neutron-server") || []
 if neutrons.length > 0
@@ -463,7 +465,8 @@ template local_settings do
     multi_domain_support: multi_domain_support,
     policy_file_path: node["horizon"]["policy_file_path"],
     policy_file: node["horizon"]["policy_file"],
-    token_hash_enabled: node["horizon"]["token_hash_enabled"]
+    token_hash_enabled: node["horizon"]["token_hash_enabled"],
+    glance_cors_enabled: glance_cors_enabled
   )
   action :create
   notifies :reload, "service[horizon]"
