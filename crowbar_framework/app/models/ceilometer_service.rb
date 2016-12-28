@@ -141,14 +141,6 @@ class CeilometerService < PacemakerServiceObject
         end
       end
     end
-
-    alarm_eval_interval = proposal["attributes"][@bc_name]["alarm_threshold_evaluation_interval"]
-    ["cpu_interval", "disk_interval", "network_interval", "meters_interval"].each do |i|
-      if alarm_eval_interval < proposal["attributes"][@bc_name][i]
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.alarm_evaluation_interval")
-        break
-      end
-    end
     super
   end
 

@@ -24,7 +24,6 @@ en:
         database_instance: 'Database'
         keystone_instance: 'Keystone'
         rabbitmq_instance: 'RabbitMQ'
-        alarm_threshold_evaluation_interval: 'Evaluation interval for threshold alarms (in seconds).'
         cpu_interval: 'Interval used for CPU meter updates (in seconds)'
         disk_interval: 'Interval used for disk meter updates (in seconds)'
         network_interval: 'Interval used for network meter updates (in seconds)'
@@ -39,5 +38,4 @@ en:
       validation:
         hyper_v_support: 'Hyper-V support is not available.'
         swift_proxy: 'Nodes with the ceilometer-swift-proxy-middleware role must also have the swift-proxy role.'
-        alarm_evaluation_interval: 'The threshold alarm evaluation interval needs be greater than (or equal to) all the meter update intervals.'
         nodes_count: 'The cluster assigned to the ceilometer-server role should have at least 3 nodes, but it only has %{nodes_count}.'
