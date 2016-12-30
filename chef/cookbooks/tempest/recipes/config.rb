@@ -384,6 +384,12 @@ if xen_only
   validation_connect_timeout = 90
   # Default: 300
   validation_ssh_timeout = 450
+  use_interface_attach = false
+  use_rescue = false
+  use_suspend = false
+  use_vnc = node[:kernel][:machine] != "aarch64"
+  use_run_validation = false
+  use_config_drive = false
 end
 
 unless kvm_compute_nodes.empty?
