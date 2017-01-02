@@ -4,6 +4,7 @@ bind_host = <%= @bind_host %>
 bind_port = <%= @bind_port %>
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 http_keepalive = false
+transport_url = <%= @rabbit_settings[:url] %>
 debug = <%= node[:glance][:debug] ? "True" : "False" %>
 verbose = <%= node[:glance][:verbose] ? "True" : "False" %>
 log_file = <%= node[:glance][:registry][:log_file] %>
@@ -22,31 +23,24 @@ cinder_catalog_info = volumev2:cinderv2:internalURL
 
 [keystone_authtoken]
 
-auth_uri=<%= @keystone_settings['public_auth_url'] %>
-auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
+auth_uri = <%= @keystone_settings['public_auth_url'] %>
+auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 <% if @keystone_settings['insecure'] -%>
-insecure = <%= @keystone_settings['insecure'] %>
+    insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
-region_name = <%= @keystone_settings['endpoint_region'] %>
-signing_dir=/var/cache/glance/keystone-signing
-identity_uri=<%= @keystone_settings['admin_auth_url'] %>
-admin_user = <%= @keystone_settings['service_user'] %>
-admin_password = <%= @keystone_settings['service_password'] %>
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+region_name=<%= @keystone_settings['endpoint_region'] %>
+signing_dir = /var/cache/glance/keystone-signing
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
+auth_url = <%= @keystone_settings['admin_auth_url'] %>
+auth_type = password
 
 [oslo_messaging_notifications]
 
 driver = messaging
-
-[oslo_messaging_rabbit]
-
-rabbit_host = <%= @rabbit_settings[:address] %>
-<% unless @rabbit_settings[:port].nil? -%>
-rabbit_port = <%= @rabbit_settings[:port] %>
-<% end -%>
-rabbit_userid = <%= @rabbit_settings[:user] %>
-rabbit_password = <%= @rabbit_settings[:password] %>
-rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 
 [paste_deploy]
 
