@@ -48,10 +48,6 @@ use_cow_images = false
 <% end -%>
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 <%= "ssl_ca_file = #{@ssl_ca_file}" if @ssl_cert_required %>
-ssl_cert_file = <%= @ssl_cert_file %>
-ssl_key_file = <%= @ssl_key_file %>
-max_header_line = <%= node[:nova][:max_header_line] %>
-wsgi_keep_alive = false
 use_neutron = true
 default_floating_pool = floating
 dhcpbridge = <%= @dhcpbridge %>
@@ -105,10 +101,6 @@ max_overflow = <%= node[:nova][:api_db][:max_overflow] %>
 pool_timeout = <%= node[:nova][:api_db][:pool_timeout] %>
 <% end -%>
 
-[barbican]
-catalog_info = key-manager:barbican:internal
-os_region_name=<%= @keystone_settings['endpoint_region'] %>
-
 [cache]
 backend = dogpile.cache.memcached
 enabled = true
@@ -147,7 +139,7 @@ protocol = <%= @glance_server_protocol %>
 <%= "api_servers = #{@glance_server_protocol}://#{@glance_server_host}:#{@glance_server_port}" unless @glance_server_host.nil? %>
 <%= "api_insecure = #{@glance_server_insecure ? 'True' : 'False'}" unless @glance_server_host.nil? %>
 
-[keymgr]
+[key_manager]
 <% unless @keymgr_fixed_key.empty? -%>
 fixed_key = <%= @keymgr_fixed_key.each_byte.map { |b| b.to_s(16) }.join %>
 <% end -%>
@@ -260,3 +252,9 @@ novncproxy_host = <%= @bind_host %>
 novncproxy_port = <%= @bind_port_novncproxy %>
 novncproxy_base_url = <%= @vncproxy_ssl_enabled ? "https" : "http" %>://<%= @vncproxy_public_host %>:<%= node[:nova][:ports][:novncproxy] %>/vnc_auto.html
 xvpvncproxy_host = <%= @bind_host %>
+
+[wsgi]
+max_header_line = <%= node[:nova][:max_header_line] %>
+ssl_cert_file = <%= @ssl_cert_file %>
+ssl_key_file = <%= @ssl_key_file %>
+keep_alive = false
