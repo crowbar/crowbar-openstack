@@ -122,7 +122,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 105,
+      "schema-revision": 106,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },
