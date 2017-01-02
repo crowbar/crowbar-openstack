@@ -189,7 +189,7 @@ block_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_M
 <%= "cpu_mode = #{@cpu_mode}" unless @cpu_mode.empty? -%>
 <%= "cpu_model = #{@cpu_model}" unless @cpu_model.empty? -%>
 <% if @libvirt_type.eql?('kvm') %>use_virtio_for_bridges = true<% end %>
-<%= "iscsi_use_multipath = true" if @use_multipath %>
+<%= "volume_use_multipath = true" if @use_multipath %>
 <%= "iser_use_multipath = true" if @use_multipath %>
 
 [neutron]
