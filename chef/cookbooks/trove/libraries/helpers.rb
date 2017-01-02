@@ -87,9 +87,9 @@ module TroveHelper
         )
         radosgw_api_protocol = radosgw[:ceph][:radosgw][:ssl][:enabled] ? "https" : "http"
         radosgw_api_port = if radosgw[:ceph][:radosgw][:ssl][:enabled]
-          node[:ceph][:radosgw][:rgw_port_ssl]
+          radosgw[:ceph][:radosgw][:rgw_port_ssl]
         else
-          node[:ceph][:radosgw][:rgw_port]
+          radosgw[:ceph][:radosgw][:rgw_port]
         end
         object_store_url = "#{radosgw_api_protocol}://#{radosgw_api_host}:"\
                            "#{radosgw_api_port}/swift/v1"
