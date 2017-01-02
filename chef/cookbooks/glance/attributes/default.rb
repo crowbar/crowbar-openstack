@@ -25,8 +25,6 @@ override[:glance][:group]="glance"
 default[:glance][:verbose] = "False"
 default[:glance][:debug] = "False"
 
-default[:glance][:config_dir] = "/etc/glance"
-
 default[:glance][:enable_v3_api] = false
 default[:glance][:max_header_line] = 16384
 
@@ -37,22 +35,24 @@ default[:glance][:db][:database] = "glance"
 default[:glance][:api][:protocol] = "http"
 default[:glance][:api][:bind_port] = "9292"
 default[:glance][:api][:log_file] = "/var/log/glance/api.log"
-default[:glance][:api][:config_file]="/etc/glance/glance-api.conf"
+default[:glance][:api][:config_file] = "/etc/glance/glance-api.conf.d/100-glance-api.conf"
 default[:glance][:api][:service_name] = "glance-api"
 
 default[:glance][:registry][:bind_port] = "9191"
 default[:glance][:registry][:log_file] = "/var/log/glance/registry.log"
-default[:glance][:registry][:config_file]="/etc/glance/glance-registry.conf"
+default[:glance][:registry][:config_file] = \
+  "/etc/glance/glance-registry.conf.d/100-glance-registry.conf"
+
 default[:glance][:registry][:service_name] = "glance-registry"
 
 default[:glance][:cache][:log_file] = "/var/log/glance/cache.log"
-default[:glance][:cache][:config_file]="/etc/glance/glance-cache.conf"
+default[:glance][:cache][:config_file] = "/etc/glance/glance.conf.d/100-glance-cache.conf"
 
 default[:glance][:manage][:log_file] = "/var/log/glance/manage.log"
-default[:glance][:manage][:config_file] = "/etc/glance/glance-manage.conf"
+default[:glance][:manage][:config_file] = "/etc/glance/glance.conf.d/100-glance-manage.conf"
 
 default[:glance][:scrubber][:log_file] = "/var/log/glance/scrubber.log"
-default[:glance][:scrubber][:config_file]="/etc/glance/glance-scrubber.conf"
+default[:glance][:scrubber][:config_file] = "/etc/glance/glance.conf.d/100-glance-scrubber.conf"
 
 default[:glance][:working_directory]="/var/lib/glance"
 default[:glance][:image_cache_datadir] = "/var/lib/glance/image-cache/"
