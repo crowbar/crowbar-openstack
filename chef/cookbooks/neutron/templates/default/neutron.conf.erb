@@ -204,7 +204,7 @@ use_ssl = <%= @ssl_enabled ? "True" : "False" %>
 # default is equal to the number of CPUs available for best performance.
 # (integer value)
 #api_workers = <None>
-api_workers = 0
+api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
 # Number of RPC worker processes for service (integer value)
 #rpc_workers = 1
