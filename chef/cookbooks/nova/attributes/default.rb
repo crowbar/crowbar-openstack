@@ -20,6 +20,7 @@
 
 default[:nova][:debug] = false
 default[:nova][:max_header_line] = 16384
+default[:nova][:config_file] = "/etc/nova/nova.conf.d/100-nova.conf"
 
 #
 # Database Settings
