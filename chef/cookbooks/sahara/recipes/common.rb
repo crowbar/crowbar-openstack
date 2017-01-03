@@ -38,9 +38,7 @@ heat_insecure = Barclamp::Config.load("openstack", "heat", heat_instance)["insec
 neutron_insecure = Barclamp::Config.load("openstack", "neutron", neutron_instance)["insecure"] || false
 nova_insecure = Barclamp::Config.load("openstack", "nova", nova_instance)["insecure"] || false
 
-# use ceilometer?
-ceilometers = search_env_filtered(:node, "roles:ceilometer-server")
-use_ceilometer = !ceilometers.empty?
+use_ceilometer = !Barclamp::Config.load("openstack", "ceilometer").empty?
 
 template node[:sahara][:config_file] do
   source "sahara.conf.erb"

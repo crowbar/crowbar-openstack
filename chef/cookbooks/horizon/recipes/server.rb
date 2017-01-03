@@ -69,8 +69,7 @@ neutron_lbaas_ui_pkgname =
   end
 
 unless neutron_lbaas_ui_pkgname.nil?
-  neutron_servers = search(:node, "roles:neutron-server") || []
-  unless neutron_servers.empty?
+  unless Barclamp::Config.load("openstack", "neutron").empty?
     package neutron_lbaas_ui_pkgname do
       action :install
       notifies :reload, resources(service: "apache2")
@@ -88,8 +87,7 @@ manila_ui_pkgname =
   end
 
 unless manila_ui_pkgname.nil?
-  manila_servers = search(:node, "roles:manila-server") || []
-  unless manila_servers.empty?
+  unless Barclamp::Config.load("openstack", "manila").empty?
     package manila_ui_pkgname do
       action :install
       notifies :reload, resources(service: "apache2")
@@ -107,8 +105,7 @@ magnum_ui_pkgname =
   end
 
 unless magnum_ui_pkgname.nil?
-  magnum_servers = search(:node, "roles:magnum-server") || []
-  unless magnum_servers.empty?
+  unless Barclamp::Config.load("openstack", "magnum").empty?
     package magnum_ui_pkgname do
       action :install
       notifies :reload, resources(service: "apache2")
@@ -126,8 +123,7 @@ trove_ui_pkgname =
   end
 
 unless trove_ui_pkgname.nil?
-  trove_servers = search(:node, "roles:trove-server") || []
-  unless trove_servers.empty?
+  unless Barclamp::Config.load("openstack", "trove").empty?
     package trove_ui_pkgname do
       action :install
       notifies :reload, resources(service: "apache2")
@@ -145,8 +141,7 @@ sahara_ui_pkgname =
   end
 
 unless sahara_ui_pkgname.nil?
-  sahara_servers = search(:node, "roles:sahara-server") || []
-  unless sahara_servers.empty?
+  unless Barclamp::Config.load("openstack", "sahara").empty?
     package sahara_ui_pkgname do
       action :install
       notifies :reload, resources(service: "apache2")
