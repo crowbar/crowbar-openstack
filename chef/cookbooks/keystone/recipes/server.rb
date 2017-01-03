@@ -755,6 +755,31 @@ template "/root/.openrc" do
     )
 end
 
+directory "/root/.config/openstack/" do
+  owner "root"
+  group "root"
+  mode 0o700
+  action :create
+  recursive true
+end
+
+template "/root/.config/openstack/clouds.yaml" do
+  source "clouds.erb"
+  owner "root"
+  group "root"
+  mode 0o600
+  variables(
+    keystone_settings: KeystoneHelper.keystone_settings(node, @cookbook_name)
+  )
+end
+
+template "/etc/profile.d/crowbar-cloud.sh" do
+  source "crowbar-cloud.sh.erb"
+  owner "root"
+  group "root"
+  mode 0o644
+end
+
 # Set new endpoint URL.
 node.set[:keystone][:api][:internal_url_host] = keystone_settings["internal_url_host"]
 node.save

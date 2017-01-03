@@ -1,0 +1,13 @@
+clouds:
+  <%= node[:domain] %>-admin:
+    auth:
+      auth_url: <%= @keystone_settings['internal_auth_url'] %>
+      password: <%= @keystone_settings['admin_password'] %>
+      username: <%= @keystone_settings['admin_user'] %>
+<% if @keystone_settings['api_version'] != '2.0' %>
+      project_domain_name: Default
+      user_domain_name: Default
+      project_name: <%= @keystone_settings['default_tenant'] %>
+    identity_api_version: '<%= @keystone_settings['api_version'] %>'
+<% end %>
+    region_name: <%= @keystone_settings['endpoint_region'] %>
