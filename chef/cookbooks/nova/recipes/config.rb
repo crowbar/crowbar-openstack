@@ -119,8 +119,6 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 rbd_enabled = false
 
-use_multipath = false
-
 cinder_servers = node_search_with_cache("roles:cinder-controller")
 if cinder_servers.length > 0
   cinder_server = cinder_servers[0]
@@ -135,6 +133,7 @@ if cinder_servers.length > 0
   end
 else
   cinder_insecure = false
+  use_multipath = false
   keymgr_fixed_key = ""
 end
 
