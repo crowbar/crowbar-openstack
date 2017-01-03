@@ -1,1888 +1,220 @@
 [DEFAULT]
-
 <% img_id = `cat #{@machine_id_file}`.strip %>
 <% alt_img_id = `cat #{@alt_machine_id_file}`.strip %>
-
-#
-# From oslo.log
-#
-
-# If set to true, the logging level will be set to DEBUG instead of
-# the default INFO level. (boolean value)
-#debug = false
-
-# If set to false, the logging level will be set to WARNING instead of
-# the default INFO level. (boolean value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#verbose = true
 verbose = false
-
-# The name of a logging configuration file. This file is appended to
-# any existing logging configuration files. For details about logging
-# configuration files, see the Python logging module documentation.
-# Note that when logging configuration files are used then all logging
-# configuration is set in the configuration file and other logging
-# configuration options are ignored (for example,
-# logging_context_format_string). (string value)
-# Deprecated group/name - [DEFAULT]/log_config
-#log_config_append = <None>
-
-# Defines the format string for %%(asctime)s in log records. Default:
-# %(default)s . This option is ignored if log_config_append is set.
-# (string value)
-#log_date_format = %Y-%m-%d %H:%M:%S
-
-# (Optional) Name of log file to send logging output to. If no default
-# is set, logging will go to stderr as defined by use_stderr. This
-# option is ignored if log_config_append is set. (string value)
-# Deprecated group/name - [DEFAULT]/logfile
-#log_file = <None>
-
-# (Optional) The base directory used for relative log_file  paths.
-# This option is ignored if log_config_append is set. (string value)
-# Deprecated group/name - [DEFAULT]/logdir
-#log_dir = <None>
-
-# Uses logging handler designed to watch file system. When log file is
-# moved or removed this handler will open a new log file with
-# specified path instantaneously. It makes sense only if log_file
-# option is specified and Linux platform is used. This option is
-# ignored if log_config_append is set. (boolean value)
-#watch_log_file = false
-
-# Use syslog for logging. Existing syslog format is DEPRECATED and
-# will be changed later to honor RFC5424. This option is ignored if
-# log_config_append is set. (boolean value)
-#use_syslog = false
-
-# Syslog facility to receive log lines. This option is ignored if
-# log_config_append is set. (string value)
-#syslog_log_facility = LOG_USER
-
-# Log output to standard error. This option is ignored if
-# log_config_append is set. (boolean value)
-#use_stderr = true
 use_stderr = false
 
-# Format string to use for log messages with context. (string value)
-#logging_context_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user_identity)s] %(instance)s%(message)s
-
-# Format string to use for log messages when context is undefined.
-# (string value)
-#logging_default_format_string = %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [-] %(instance)s%(message)s
-
-# Additional data to append to log message when logging level for the
-# message is DEBUG. (string value)
-#logging_debug_format_suffix = %(funcName)s %(pathname)s:%(lineno)d
-
-# Prefix each line of exception output with this format. (string
-# value)
-#logging_exception_prefix = %(asctime)s.%(msecs)03d %(process)d ERROR %(name)s %(instance)s
-
-# Defines the format string for %(user_identity)s that is used in
-# logging_context_format_string. (string value)
-#logging_user_identity_format = %(user)s %(tenant)s %(domain)s %(user_domain)s %(project_domain)s
-
-# List of package logging levels in logger=LEVEL pairs. This option is
-# ignored if log_config_append is set. (list value)
-#default_log_levels = amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,oslo.messaging=INFO,iso8601=WARN,requests.packages.urllib3.connectionpool=WARN,urllib3.connectionpool=WARN,websocket=WARN,requests.packages.urllib3.util.retry=WARN,urllib3.util.retry=WARN,keystonemiddleware=WARN,routes.middleware=WARN,stevedore=WARN,taskflow=WARN,keystoneauth=WARN,oslo.cache=INFO,dogpile.core.dogpile=INFO
-
-# Enables or disables publication of error events. (boolean value)
-#publish_errors = false
-
-# The format for an instance that is passed with the log message.
-# (string value)
-#instance_format = "[instance: %(uuid)s] "
-
-# The format for an instance UUID that is passed with the log message.
-# (string value)
-#instance_uuid_format = "[instance: %(uuid)s] "
-
-# Enables or disables fatal status of deprecations. (boolean value)
-#fatal_deprecations = false
-
-#
-# From tempest.config
-#
-
-# Prefix to be added when generating the name for test resources. It
-# can be used to discover all resources associated with a specific
-# test run when running tempest on a real-life cloud (string value)
-#resources_prefix = tempest
-
-
 [alarming]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the Alarming service. (string value)
-#catalog_type = alarming
-
-# The endpoint type to use for the alarming service. (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#endpoint_type = publicURL
 endpoint_type = internalURL
-
 
 [alarming_plugin]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the Alarming service. (string value)
-#catalog_type = alarming
-
-# The endpoint type to use for the alarming service. (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#endpoint_type = publicURL
 endpoint_type = internalURL
-
 
 [auth]
-
-#
-# From tempest.config
-#
-
-# Path to the yaml file that contains the list of credentials to use
-# for running tests. If used when running in parallel you have to make
-# sure sufficient credentials are provided in the accounts file. For
-# example if no tests with roles are being run it requires at least `2
-# * CONC` distinct accounts configured in  the `test_accounts_file`,
-# with CONC == the number of concurrent test processes. (string value)
-#test_accounts_file = <None>
-
-# Allows test cases to create/destroy tenants and users. This option
-# requires that OpenStack Identity API admin credentials are known. If
-# false, isolated test cases and parallel execution, can still be
-# achieved configuring a list of test accounts (boolean value)
-# Deprecated group/name - [auth]/allow_tenant_isolation
-# Deprecated group/name - [compute]/allow_tenant_isolation
-# Deprecated group/name - [orchestration]/allow_tenant_isolation
-#use_dynamic_credentials = true
-
-# Roles to assign to all users created by tempest (list value)
-#tempest_roles =
-
-# Default domain used when getting v3 credentials. This is the name
-# keystone uses for v2 compatibility. (string value)
-# Deprecated group/name - [auth]/tenant_isolation_domain_name
-#default_credentials_domain_name = Default
-
-# If use_dynamic_credentials is set to True and Neutron is enabled
-# Tempest will try to create a usable network, subnet, and router when
-# needed for each tenant it creates. However in some neutron
-# configurations, like with VLAN provider networks, this doesn't work.
-# So if set to False the isolated networks will not be created
-# (boolean value)
-#create_isolated_networks = true
-
-# Username for an administrative user. This is needed for
-# authenticating requests made by tenant isolation to create users and
-# projects (string value)
-# Deprecated group/name - [identity]/admin_username
-#admin_username = <None>
 admin_username = <%= @keystone_settings['admin_user'] %>
-
-# Tenant name to use for an  administrative user. This is needed for
-# authenticating requests made by tenant isolation to create users and
-# projects (string value)
-# Deprecated group/name - [identity]/admin_tenant_name
-#admin_tenant_name = <None>
 admin_tenant_name = <%= @keystone_settings['default_tenant'] %>
-
-# Password to use for an  administrative user. This is needed for
-# authenticating requests made by tenant isolation to create users and
-# projects (string value)
-# Deprecated group/name - [identity]/admin_password
-#admin_password = <None>
 admin_password = <%= @keystone_settings['admin_password'] %>
-
-# Admin domain name for authentication (Keystone V3).The same domain
-# applies to user and project (string value)
-# Deprecated group/name - [identity]/admin_domain_name
-#admin_domain_name = <None>
 admin_domain_name = Default
 
-
 [aws]
-
-#
-# From tempest.config
-#
-
-# EC2 URL (string value)
-#ec2_url = http://localhost:8788/
 ec2_url = <%= @ec2_protocol %>://<%= @ec2_host %>:<%= @ec2_port %>/
-
-# S3 URL (string value)
-#s3_url = http://localhost:3334/
 s3_url = http://<%= @s3_host %>:<%= @s3_port %>/
-
-# The CA certificate bundle to use when verifying SSL certificates. Or
-# True/False to pass to botocore. (string value)
-#ca_bundle = <None>
-
-# AWS Secret Key (string value)
-#aws_secret = <None>
 aws_secret = <%= @ec2_secret %>
-
-# AWS Access Key (string value)
-#aws_access = <None>
 aws_access = <%= @ec2_access %>
 
-# AWS region for EC2 tests (string value)
-#aws_region = RegionOne
-
-# AWS zone inside region for EC2 tests (string value)
-#aws_zone = nova
-
-# Status Change Timeout (integer value)
-#build_timeout = 120
-
-# Status Change Test Interval (integer value)
-#build_interval = 1
-
-# Instance type (string value)
-#instance_type = m1.tiny
-
-# Instance type (string value)
-#instance_type_alt = <None>
-
-# Image ID for instance running(can be cirros). It must be any
-# instance with instance-store root device type. (string value)
-#image_id = <None>
-
-# EBS Image ID for testing snapshots, volumes, instances. (string
-# value)
-#ebs_image_id = <None>
-
-# User for sshing into instance based on configured image (string
-# value)
-#image_user = cirros
-
-# Fully functional image ID for instance running. For some tests it
-# must be ubuntu-trusty-i386. (string value)
-#image_id_ubuntu = <None>
-
-# User for sshing into instance based on configured image (string
-# value)
-#image_user_ubuntu = ubuntu
-
-# Will run all tests plus incompatible with Amazon. (boolean value)
-#run_incompatible_tests = false
-
-# Will run all long tests also. (boolean value)
-#run_long_tests = false
-
-# S3 URL with manifest of AMI Machine Image. (string value)
-#ami_image_location = <None>
-
-# Can block all tests that wants to ssh into instance. (boolean value)
-#run_ssh = true
-
-
 [baremetal]
-# When enabling baremetal tests, Nova must be configured to use the
-# Ironic driver. The following parameters for the [compute] section
-# must be disabled: console_output, interface_attach, live_migration,
-# pause, rescue, resize shelve, snapshot, and suspend
-
-#
-# From tempest.config
-#
-
-# Catalog type of the baremetal provisioning service (string value)
-#catalog_type = baremetal
-
-# Whether the Ironic nova-compute driver is enabled (boolean value)
-#driver_enabled = false
-
-# Driver name which Ironic uses (string value)
-#driver = fake
-
-# The endpoint type to use for the baremetal provisioning service
-# (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#endpoint_type = publicURL
 endpoint_type = internalURL
-
-# Timeout for Ironic node to completely provision (integer value)
-#active_timeout = 300
-
-# Timeout for association of Nova instance and Ironic node (integer
-# value)
-#association_timeout = 30
-
-# Timeout for Ironic power transitions. (integer value)
-#power_timeout = 60
-
-# Timeout for unprovisioning an Ironic node. Takes longer since Kilo
-# as Ironic performs an extra step in Node cleaning. (integer value)
-#unprovision_timeout = 300
-
 
 [compute]
-
-#
-# From tempest.config
-#
-
-# Valid primary image reference to be used in tests. This is a
-# required option (string value)
-#image_ref = <None>
 image_ref = <%= img_id %>
-
-# Valid secondary image reference to be used in tests. This is a
-# required option, but if only one image is available duplicate the
-# value of image_ref above (string value)
-#image_ref_alt = <None>
 image_ref_alt = <%= alt_img_id %>
-
-# Valid primary flavor to use in tests. (string value)
-#flavor_ref = 1
 flavor_ref = <%= @flavor_ref %>
-
-# Valid secondary flavor to be used in tests. (string value)
-#flavor_ref_alt = 2
 flavor_ref_alt = <%= @alt_flavor_ref %>
-
-# Time in seconds between build status checks. (integer value)
-#build_interval = 1
-
-# Timeout in seconds to wait for an instance to build. Other services
-# that do not define build_timeout will inherit this value. (integer
-# value)
-#build_timeout = 300
-
-# Additional wait time for clean state, when there is no OS-EXT-STS
-# extension available (integer value)
-#ready_wait = 0
-
-# Name of the fixed network that is visible to all test tenants. If
-# multiple networks are available for a tenant this is the network
-# which will be used for creating servers if tempest does not create a
-# network or a network is not specified elsewhere. It may be used for
-# ssh validation only if floating IPs are disabled. (string value)
-#fixed_network_name = <None>
 fixed_network_name = fixed
-
-# Catalog type of the Compute service. (string value)
-#catalog_type = compute
-
-# The compute region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found in the
-# service catalog, the first found one is used. (string value)
-#region =
 region = <%= @keystone_settings['endpoint_region'] %>
-
-# The endpoint type to use for the compute service. (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#endpoint_type = publicURL
 endpoint_type = internalURL
-
-# Expected device name when a volume is attached to an instance
-# (string value)
-#volume_device_name = vdb
-
-# Time in seconds before a shelved instance is eligible for removing
-# from a host.  -1 never offload, 0 offload when shelved. This time
-# should be the same as the time of nova.conf, and some tests will run
-# for as long as the time. (integer value)
-#shelved_offload_time = 0
-
-# The minimum number of compute nodes expected. This will be utilized
-# by some multinode specific tests to ensure that requests match the
-# expected size of the cluster you are testing with. (integer value)
-#min_compute_nodes = 1
 min_compute_nodes = <%= @use_livemigration ? 2 : 1 %>
 
-# Lower version of the test target microversion range. The format is
-# 'X.Y', where 'X' and 'Y' are int values. Tempest selects tests based
-# on the range between min_microversion and max_microversion. If both
-# values are not specified, Tempest avoids tests which require a
-# microversion. Valid values are string with format 'X.Y' or string
-# 'latest' (string value)
-# Deprecated group/name - [compute-feature-enabled]/min_microversion
-#min_microversion = <None>
-
-# Upper version of the test target microversion range. The format is
-# 'X.Y', where 'X' and 'Y' are int values. Tempest selects tests based
-# on the range between min_microversion and max_microversion. If both
-# values are not specified, Tempest avoids tests which require a
-# microversion. Valid values are string with format 'X.Y' or string
-# 'latest' (string value)
-# Deprecated group/name - [compute-feature-enabled]/max_microversion
-#max_microversion = <None>
-
-
 [compute-feature-enabled]
-
-#
-# From tempest.config
-#
-
-# If false, skip disk config tests (boolean value)
-#disk_config = true
-
-# A list of enabled compute extensions with a special entry all which
-# indicates every extension is enabled. Each extension should be
-# specified with alias name. Empty list indicates all extensions are
-# disabled (list value)
-#api_extensions = all
-
-# Does the test environment support changing the admin password?
-# (boolean value)
-#change_password = false
-
-# Does the test environment support obtaining instance serial console
-# output? (boolean value)
-#console_output = true
-
-# Does the test environment support resizing? (boolean value)
-#resize = false
 resize = <%= @use_resize %>
-
-# Does the test environment support pausing? (boolean value)
-#pause = true
-
-# Does the test environment support shelving/unshelving? (boolean
-# value)
-#shelve = true
-
-# Does the test environment support suspend/resume? (boolean value)
-#suspend = true
 suspend = <%= @use_suspend %>
-
-# Does the test environment support live migration available? (boolean
-# value)
-#live_migration = true
 live_migration = <%= @use_livemigration %>
-
-# Does the test environment support metadata service? Ignored unless
-# validation.run_validation=true. (boolean value)
-#metadata_service = true
-
-# Does the test environment use block devices for live migration
-# (boolean value)
-#block_migration_for_live_migration = false
 block_migration_for_live_migration = true
-
-# Does the test environment block migration support cinder iSCSI
-# volumes. Note, libvirt doesn't support this, see
-# https://bugs.launchpad.net/nova/+bug/1398999 (boolean value)
-#block_migrate_cinder_iscsi = false
-
-# Enable VNC console. This configuration value should be same as
-# [nova.vnc]->vnc_enabled in nova.conf (boolean value)
-#vnc_console = false
 vnc_console = <%= @use_vnc %>
-
-# Enable Spice console. This configuration value should be same as
-# [nova.spice]->enabled in nova.conf (boolean value)
-#spice_console = false
-
-# Enable RDP console. This configuration value should be same as
-# [nova.rdp]->enabled in nova.conf (boolean value)
-#rdp_console = false
-
-# Does the test environment support instance rescue mode? (boolean
-# value)
-#rescue = true
 rescue = <%= @use_rescue %>
-
-# Enables returning of the instance password by the relevant server
-# API calls such as create, rebuild or rescue. (boolean value)
-#enable_instance_password = true
-
-# Does the test environment support dynamic network interface
-# attachment? (boolean value)
-#interface_attach = true
 interface_attach = <%= @use_interface_attach %>
-
-# Does the test environment support creating snapshot images of
-# running instances? (boolean value)
-#snapshot = true
-
-# Does the test environment have the nova cert running? (boolean
-# value)
-#nova_cert = true
-
-# Does the test environment support server personality (boolean value)
-#personality = true
-# NOTE(toabctl): to use this, we need to enable inject_partition in nova.conf
 personality = false
-
-# Does the test environment support attaching an encrypted volume to a
-# running server instance? This may depend on the combination of
-# compute_driver in nova and the volume_driver(s) in cinder. (boolean
-# value)
-#attach_encrypted_volume = true
-
-# Does the test environment support creating instances with multiple
-# ports on the same network? This is only valid when using Neutron.
-# (boolean value)
-#allow_duplicate_networks = false
-
-# Enable special configuration drive with metadata. (boolean value)
-#config_drive = true
 config_drive = <%= @use_config_drive %>
 
-# A list of enabled filters that nova will accept as hints to the
-# scheduler when creating a server. A special entry 'all' indicates
-# all filters are enabled. Empty list indicates all filters are
-# disabled. The full available list of filters is in nova.conf:
-# DEFAULT.scheduler_available_filters (list value)
-#scheduler_available_filters = all
-
-
 [dashboard]
-
-#
-# From tempest.config
-#
-
-# Where the dashboard can be found (string value)
-#dashboard_url = http://localhost/
 dashboard_url = <%= @horizon_protocol %>://<%= @horizon_host %>/
-
-# Login page for the dashboard (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#login_url = http://localhost/auth/login/
 login_url = <%= @horizon_protocol %>://<%= @horizon_host %>/auth/login/
 
-
 [data-processing]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the data processing service. (string value)
-# Deprecated group/name - [data_processing]/catalog_type
-#catalog_type = data-processing
-
-# The endpoint type to use for the data processing service. (string
-# value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-# Deprecated group/name - [data_processing]/endpoint_type
-#endpoint_type = publicURL
 endpoint_type = internalURL
 
-
-[data-processing-feature-enabled]
-
-#
-# From tempest.config
-#
-
-# List of enabled data processing plugins (list value)
-# Deprecated group/name - [data_processing-feature-enabled]/plugins
-#plugins = vanilla,cdh
-
-
-[database]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the Database service. (string value)
-#catalog_type = database
-
-# Valid primary flavor to use in database tests. (string value)
-#db_flavor_ref = 1
-
-# Current database version to use in database tests. (string value)
-#db_current_version = v1.0
-
-
-[debug]
-
-#
-# From tempest.config
-#
-
-# A regex to determine which requests should be traced.
-#
-# This is a regex to match the caller for rest client requests to be
-# able to
-# selectively trace calls out of specific classes and methods. It
-# largely
-# exists for test development, and is not expected to be used in a
-# real deploy
-# of tempest. This will be matched against the discovered
-# ClassName:method
-# in the test environment.
-#
-# Expected values for this field are:
-#
-#  * ClassName:test_method_name - traces one test_method
-#  * ClassName:setUp(Class) - traces specific setup functions
-#  * ClassName:tearDown(Class) - traces specific teardown functions
-#  * ClassName:_run_cleanups - traces the cleanup functions
-#
-# If nothing is specified, this feature is not enabled. To trace
-# everything
-# specify .* as the regex.
-#  (string value)
-#trace_requests =
-
-
 [heat_plugin]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the orchestration service. (string value)
-#catalog_type = orchestration
-
-# Username to use for non admin API requests. (string value)
-#username = <None>
 username = <%= @comp_user %>
-
-# Non admin API key to use when authenticating. (string value)
-#password = <None>
 password = <%= @comp_pass %>
-
-# Username to use for admin API requests. (string value)
-#admin_username = <None>
 admin_username = <%= @keystone_settings['admin_user'] %>
-
-# Admin API key to use when authentication. (string value)
-#admin_password = <None>
 admin_password = <%= @keystone_settings['admin_password'] %>
-
-# Tenant name to use for API requests. (string value)
-#tenant_name = <None>
 tenant_name = <%= @comp_tenant %>
-
-# Admin tenant name to use for admin API requests. (string value)
-#admin_tenant_name = admin
 admin_tenant_name = <%= @keystone_settings['default_tenant'] %>
-
-# Full URI of the OpenStack Identity API (Keystone) (string value)
-#auth_url = <None>
 auth_url = <%= @keystone_settings['internal_auth_url'].chomp('/') %>
-
-# User domain name, if keystone v3 auth_urlis used (string value)
-#user_domain_name = <None>
 user_domain_name = Default
-
-# Project domain name, if keystone v3 auth_urlis used (string value)
-#project_domain_name = <None>
 project_domain_name = Default
-
-# The region name to use (string value)
-#region = <None>
 region = <%= @keystone_settings['endpoint_region'] %>
-
-# Instance type for tests. Needs to be big enough for a full OS plus
-# the test workload (string value)
-#instance_type = <None>
 instance_type = <%= @heat_flavor_ref %>
-
-# Instance type enough for simplest cases. (string value)
-#minimal_instance_type = <None>
 minimal_instance_type = tempest-stuff
-
-# Name of image to use for tests which boot servers. (string value)
-#image_ref = <None>
 <% unless @heat_settings['image_ref'].empty? -%>
 image_ref = <%= @heat_settings['image_ref'] %>
 <% end -%>
-
-# Name of existing keypair to launch servers with. (string value)
-#keypair_name = <None>
-
-# Name of minimal (e.g cirros) image to use when launching test
-# instances. (string value)
-#minimal_image_ref = <None>
 minimal_image_ref = <%= `cat #{@machine_id_file}`.strip %>
-
-# Set to True if using self-signed SSL certificates. (boolean value)
-#disable_ssl_certificate_validation = false
-
-# CA certificate to pass for servers that have https endpoint. (string
-# value)
-#ca_file = <None>
-
-# Time in seconds between build status checks. (integer value)
-#build_interval = 4
-
-# Timeout in seconds to wait for a stack to build. (integer value)
-#build_timeout = 1200
 build_timeout = 2000
-
-# Network used for SSH connections. (string value)
-#network_for_ssh = heat-net
-
-# Visible fixed network name  (string value)
-#fixed_network_name = heat-net
 fixed_network_name = fixed
-
-# Visible floating network name  (string value)
-#floating_network_name = public
 floating_network_name = floating
-
-# Path to environment file which defines the resource type
-# Heat::InstallConfigAgent. Needs to be appropriate for the image_ref.
-# (string value)
-#boot_config_env = heat_integrationtests/scenario/templates/boot_config_none_env.yaml
-
-# Visible fixed sub-network name  (string value)
-#fixed_subnet_name = heat-subnet
-
-# Timeout in seconds to wait for authentication to succeed. (integer
-# value)
-#ssh_timeout = 300
-
-# IP version used for SSH connections. (integer value)
-#ip_version_for_ssh = 4
-
-# Timeout in seconds to wait for output from ssh channel. (integer
-# value)
-#ssh_channel_timeout = 60
-
-# The mask bits for tenant ipv4 subnets (integer value)
-#tenant_network_mask_bits = 28
-
-# Skip all scenario tests (boolean value)
-#skip_scenario_tests = false
-
-# Skip all functional tests (boolean value)
-#skip_functional_tests = false
-
-# List of functional test class or class.method names to skip ex.
-# AutoscalingGroupTest,InstanceGroupBasicTest.test_size_updates_work
-# (list value)
-#skip_functional_test_list = <None>
-
-# List of scenario test class or class.method names to skip ex.
-# NeutronLoadBalancerTest, AodhAlarmTest.test_alarm (list value)
-#skip_scenario_test_list = <None>
-
-# List of stack actions in tests to skip ex. ABANDON, ADOPT, SUSPEND,
-# RESUME (list value)
-#skip_test_stack_action_list = <None>
-
-# Default size in GB for volumes created by volumes tests (integer
-# value)
-#volume_size = 1
-
-# Timeout in seconds to wait for connectivity to server. (integer
-# value)
-#connectivity_timeout = 120
-
-# Timeout in seconds to wait for adding or removing childprocess after
-# receiving of sighup signal (integer value)
-#sighup_timeout = 120
-
-# Count of retries to edit config file during sighup. If another
-# worker already edit config file, file can be busy, so need to wait
-# and try edit file again. (integer value)
-#sighup_config_edit_retries = 10
-
-# Path to the script heat-config-notify (string value)
-#heat_config_notify_script = heat-config-notify
-
 
 [identity]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the Identity service. (string value)
-#catalog_type = identity
-
-# Set to True if using self-signed SSL certificates. (boolean value)
-#disable_ssl_certificate_validation = false
 disable_ssl_certificate_validation = <%= @ssl_insecure ? 'true' : 'false' %>
-
-# Specify a CA bundle file to use in verifying a TLS (https) server
-# certificate. (string value)
-#ca_certificates_file = <None>
-
-# Full URI of the OpenStack Identity API (Keystone), v2 (string value)
-#uri = <None>
 uri = <%= @keystone_settings["protocol"] %>://<%= @keystone_settings["internal_url_host"] %>:<%= @keystone_settings["service_port"] %>/v2.0
-
-# Full URI of the OpenStack Identity API (Keystone), v3 (string value)
-#uri_v3 = <None>
 uri_v3 = <%= @keystone_settings["protocol"] %>://<%= @keystone_settings["internal_url_host"] %>:<%= @keystone_settings["service_port"] %>/v3
-
-# Identity API version to be used for authentication for API tests.
-# (string value)
-#auth_version = v2
 auth_version = <%= "v#{@keystone_settings['api_version'].to_i}" %>
-
-# The identity region name to use. Also used as the other services'
-# region name unless they are set explicitly. If no such region is
-# found in the service catalog, the first found one is used. (string
-# value)
-#region = RegionOne
 region = <%= @keystone_settings['endpoint_region'] %>
-
-# The admin endpoint type to use for OpenStack Identity (Keystone) API
-# v2 (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#v2_admin_endpoint_type = adminURL
-
-# The public endpoint type to use for OpenStack Identity (Keystone)
-# API v2 (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-# Deprecated group/name - [identity]/endpoint_type
-#v2_public_endpoint_type = publicURL
 v2_public_endpoint_type = internalURL
-
-# The endpoint type to use for OpenStack Identity (Keystone) API v3
-# (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#v3_endpoint_type = adminURL
 v3_endpoint_type = internalURL
-
-# Username to use for Nova API requests. (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#username = <None>
 username = <%= @comp_user %>
-
-# Tenant name to use for Nova API requests. (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#tenant_name = <None>
 tenant_name = <%= @comp_tenant %>
-
-# Role required to administrate keystone. (string value)
-#admin_role = admin
-
-# API key to use when authenticating. (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#password = <None>
 password = <%= @comp_pass %>
-
-# Domain name for authentication (Keystone V3).The same domain applies
-# to user and project (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#domain_name = <None>
 domain_name = Default
-
-# Username of alternate user to use for Nova API requests. (string
-# value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#alt_username = <None>
 alt_username = <%= @alt_comp_user %>
-
-# Alternate user's Tenant name to use for Nova API requests. (string
-# value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#alt_tenant_name = <None>
 alt_tenant_name = <%= @alt_comp_tenant %>
-
-# API key to use when authenticating as alternate user. (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#alt_password = <None>
 alt_password = <%= @alt_comp_pass %>
-
-# Alternate domain name for authentication (Keystone V3).The same
-# domain applies to user and project (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#alt_domain_name = <None>
 alt_domain_name = Default
 
-# ID of the default domain (string value)
-#default_domain_id = default
-
-
-[identity-feature-enabled]
-
-#
-# From tempest.config
-#
-
-# Does the identity service have delegation and impersonation enabled
-# (boolean value)
-#trust = true
-
-# Is the v2 identity API enabled (boolean value)
-#api_v2 = true
-
-# Is the v3 identity API enabled (boolean value)
-#api_v3 = true
-
-# A list of enabled identity extensions with a special entry all which
-# indicates every extension is enabled. Empty list indicates all
-# extensions are disabled. To get the list of extensions run:
-# 'keystone discover' (list value)
-#api_extensions = all
-
-
 [image]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the Image service. (string value)
-#catalog_type = image
-
-# The image region name to use. If empty, the value of identity.region
-# is used instead. If no such region is found in the service catalog,
-# the first found one is used. (string value)
-#region =
 region = <%= @keystone_settings['endpoint_region'] %>
-
-# The endpoint type to use for the image service. (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#endpoint_type = publicURL
 endpoint_type = internalURL
-
-# http accessible image (string value)
-#http_image = http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz
 http_image = <%= @http_image %>
 
-# Timeout in seconds to wait for an image to become available.
-# (integer value)
-#build_timeout = 300
-
-# Time in seconds between image operation status checks. (integer
-# value)
-#build_interval = 1
-
-# A list of image's container formats users can specify. (list value)
-#container_formats = ami,ari,aki,bare,ovf,ova
-
-# A list of image's disk formats users can specify. (list value)
-#disk_formats = ami,ari,aki,vhd,vmdk,raw,qcow2,vdi,iso
-
-
 [image-feature-enabled]
-
-#
-# From tempest.config
-#
-
-# Is the v2 image API enabled (boolean value)
-#api_v2 = true
-
-# Is the v1 image API enabled (boolean value)
-#api_v1 = true
-
-# Is the deactivate-image feature enabled. The feature has been
-# integrated since Kilo. (boolean value)
-#deactivate_image = false
 deactivate_image = true
 
-
 [input-scenario]
-
-#
-# From tempest.config
-#
-
-# Matching images become parameters for scenario tests (string value)
-#image_regex = ^cirros-0.3.1-x86_64-uec$
 image_regex = <%= @image_regex %>
-
-# Matching flavors become parameters for scenario tests (string value)
-#flavor_regex = ^m1.nano$
 flavor_regex = ^tempest-stuff$
-
-# SSH verification in tests is skippedfor matching images (string
-# value)
-#non_ssh_image_regex = ^.*[Ww]in.*$
-
-# List of user mapped to regex to matching image names. (string value)
-#ssh_user_regex = [["^.*[Cc]irros.*$", "cirros"]]
 ssh_user_regex = [["^.*[Cc]irros.*$", "cirros"]]
 
-
 [magnum]
-
-#
-# From tempest.config
-#
-
-# Image id to be used for baymodel. (string value)
-#image_id = fedora-21-atomic-5
 image_id = <%= @magnum_settings['image_id'] %>
-
-# NIC id. (string value)
-#nic_id = public
 nic_id = floating
-
-# Keypair id to use to log into nova instances. (string value)
-#keypair_id = default
-
-# Flavor id to use for baymodels. (string value)
-#flavor_id = s1.magnum
 flavor_id = <%= @magnum_settings['flavor_id'] %>
-
-# Bypass URL for Magnum to skip service catalog lookup (string value)
-#magnum_url = <None>
-
-# Master flavor id to use for baymodels. (string value)
-#master_flavor_id = m1.magnum
 master_flavor_id = <%= @magnum_settings['master_flavor_id'] %>
 
-# CSR location for certificates. This option is no longer used for
-# anything. (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#
-#csr_location = /opt/stack/new/magnum/default.csr
-
-# Specify whether to copy nova server logs on failure. (string value)
-#copy_logs = True
-
-
-[negative]
-
-#
-# From tempest.config
-#
-
-# Test generator class for all negative tests (string value)
-#test_generator = tempest.common.generator.negative_generator.NegativeTestGenerator
-
-
 [network]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the Neutron service. (string value)
-#catalog_type = network
-
-# The network region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found in the
-# service catalog, the first found one is used. (string value)
-#region =
 region = <%= @keystone_settings['endpoint_region'] %>
-
-# The endpoint type to use for the network service. (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#endpoint_type = publicURL
 endpoint_type = internalURL
-
-# The cidr block to allocate tenant ipv4 subnets from (string value)
-#tenant_network_cidr = 10.100.0.0/16
-
-# The mask bits for tenant ipv4 subnets (integer value)
-#tenant_network_mask_bits = 28
-
-# The cidr block to allocate tenant ipv6 subnets from (string value)
-#tenant_network_v6_cidr = 2003::/48
-
-# The mask bits for tenant ipv6 subnets (integer value)
-#tenant_network_v6_mask_bits = 64
-
-# Whether tenant networks can be reached directly from the test
-# client. This must be set to True when the 'fixed' ssh_connect_method
-# is selected. (boolean value)
-#tenant_networks_reachable = false
-
-# Id of the public network that provides external connectivity (string
-# value)
-#public_network_id =
 public_network_id = <%= @public_network_id %>
-
-# Default floating network name. Used to allocate floating IPs when
-# neutron is enabled. (string value)
 floating_network_name = floating
 
-# Id of the public router that provides external connectivity. This
-# should only be used when Neutron's 'allow_overlapping_ips' is set to
-# 'False' in neutron.conf. usually not needed past 'Grizzly' release
-# (string value)
-#public_router_id =
-
-# Timeout in seconds to wait for network operation to complete.
-# (integer value)
-#build_timeout = 300
-
-# Time in seconds between network operation status checks. (integer
-# value)
-#build_interval = 1
-
-# List of dns servers which should be used for subnet creation (list
-# value)
-#dns_servers = 8.8.8.8,8.8.4.4
-
-# vnic_type to use when Launching instances with pre-configured ports.
-# Supported ports are: ['normal','direct','macvtap'] (string value)
-# Allowed values: <None>, normal, direct, macvtap
-#port_vnic_type = <None>
-
-# List of ip pools for subnetpools creation (list value)
-#default_network = 1.0.0.0/16,2.0.0.0/16
-
-
 [network-feature-enabled]
-
-#
-# From tempest.config
-#
-
-# Allow the execution of IPv6 tests (boolean value)
-#ipv6 = true
-
-# A list of enabled network extensions with a special entry all which
-# indicates every extension is enabled. Empty list indicates all
-# extensions are disabled. To get the list of extensions run: 'neutron
-# ext-list' (list value)
-#api_extensions = all
 api_extensions = <%= @neutron_api_extensions %>
 
-# Allow the execution of IPv6 subnet tests that use the extended IPv6
-# attributes ipv6_ra_mode and ipv6_address_mode (boolean value)
-#ipv6_subnet_attributes = false
-
-# Does the test environment support changing port admin state (boolean
-# value)
-#port_admin_state_change = true
-
-
 [object-storage]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the Object-Storage service. (string value)
-#catalog_type = object-store
-
-# The object-storage region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found in the
-# service catalog, the first found one is used. (string value)
-#region =
 region = <%= @keystone_settings['endpoint_region'] %>
-
-# The endpoint type to use for the object-store service. (string
-# value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#endpoint_type = publicURL
 endpoint_type = internalURL
-
-# Number of seconds to time on waiting for a container to container
-# synchronization complete. (integer value)
-#container_sync_timeout = 600
-
-# Number of seconds to wait while looping to check the status of a
-# container to container synchronization (integer value)
-#container_sync_interval = 5
-
-# Role to add to users created for swift tests to enable creating
-# containers (string value)
-#operator_role = Member
-
-# User role that has reseller admin (string value)
-#reseller_admin_role = ResellerAdmin
-
-# Name of sync realm. A sync realm is a set of clusters that have
-# agreed to allow container syncing with each other. Set the same
-# realm name as Swift's container-sync-realms.conf (string value)
-#realm_name = realm1
-
-# One name of cluster which is set in the realm whose name is set in
-# 'realm_name' item in this file. Set the same cluster name as Swift's
-# container-sync-realms.conf (string value)
-#cluster_name = name1
 <% if @use_swift -%>
 cluster_name = <%= @swift_cluster_name %>
 <% end -%>
 
-
 [object-storage-feature-enabled]
-
-#
-# From tempest.config
-#
-
-# A list of the enabled optional discoverable apis. A single entry,
-# all, indicates that all of these features are expected to be enabled
-# (list value)
-#discoverable_apis = all
-
-# Execute (old style) container-sync tests (boolean value)
-#container_sync = true
-
-# Execute object-versioning tests (boolean value)
-#object_versioning = true
 object_versioning = <%= @object_versioning ? 'true' : 'false' %>
 
-# Execute discoverability tests (boolean value)
-#discoverability = true
-
-
 [orchestration]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the Orchestration service. (string value)
-#catalog_type = orchestration
-
-# The orchestration region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found in the
-# service catalog, the first found one is used. (string value)
-#region =
 region = <%= @keystone_settings['endpoint_region'] %>
-
-# The endpoint type to use for the orchestration service. (string
-# value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#endpoint_type = publicURL
 endpoint_type = internalURL
-
-# Role required for users to be able to manage stacks (string value)
-#stack_owner_role = heat_stack_owner
 <% if @heat_trusts_delegated_roles -%>
 stack_owner_role = <%= @heat_trusts_delegated_roles[0] %>
 <% end -%>
-
-# Time in seconds between build status checks. (integer value)
-#build_interval = 1
-
-# Timeout in seconds to wait for a stack to build. (integer value)
-#build_timeout = 1200
 build_timeout = 2000
-
-# Instance type for tests. Needs to be big enough for a full OS plus
-# the test workload (string value)
-#instance_type = m1.micro
 instance_type = <%= @heat_flavor_ref %>
 
-# Name of existing keypair to launch servers with. (string value)
-#keypair_name = <None>
-
-# Value must match heat configuration of the same name. (integer
-# value)
-#max_template_size = 524288
-
-# Value must match heat configuration of the same name. (integer
-# value)
-#max_resources_per_stack = 1000
-
-
 [oslo_concurrency]
-
-#
-# From oslo.concurrency
-#
-
-# Enables or disables inter-process locks. (boolean value)
-# Deprecated group/name - [DEFAULT]/disable_process_locking
-#disable_process_locking = false
-
-# Directory to use for lock files.  For security, the specified
-# directory should only be writable by the user running the processes
-# that need locking. Defaults to environment variable OSLO_LOCK_PATH.
-# If external locks are used, a lock path must be set. (string value)
-# Deprecated group/name - [DEFAULT]/lock_path
-#lock_path = <None>
 lock_path = /var/run/tempest
 
-
 [scenario]
-
-#
-# From tempest.config
-#
-
-# Directory containing image files (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#img_dir = /opt/stack/new/devstack/files/images/cirros-0.3.1-x86_64-uec
 img_dir = <%= @tempest_path %>/etc/cirros/
-
-# Image file name (string value)
-# Deprecated group/name - [DEFAULT]/qcow2_img_file
-#img_file = cirros-0.3.1-x86_64-disk.img
 img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-disk.img
-
-# Image disk format (string value)
-#img_disk_format = qcow2
-
-# Image container format (string value)
-#img_container_format = bare
-
-# Glance image properties. Use for custom images which require them
-# (dict value)
-#img_properties = <None>
-
-# AMI image file name (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#ami_img_file = cirros-0.3.1-x86_64-blank.img
 ami_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-blank.img
-
-# ARI image file name (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#ari_img_file = cirros-0.3.1-x86_64-initrd
 ari_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-initrd
-
-# AKI image file name (string value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#aki_img_file = cirros-0.3.1-x86_64-vmlinuz
 aki_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-vmlinuz
 
-# DHCP client used by images to renew DCHP lease. If left empty,
-# update operation will be skipped. Supported clients: "udhcpc",
-# "dhclient" (string value)
-# Allowed values: udhcpc, dhclient, ''
-#dhcp_client = udhcpc
-
-
 [service_available]
-
-#
-# From tempest.config
-#
-
-# Whether or not cinder is expected to be available (boolean value)
-#cinder = true
-
-# Whether or not neutron is expected to be available (boolean value)
-#neutron = false
 neutron = true
-
-# Whether or not glance is expected to be available (boolean value)
-#glance = true
-
-# Whether or not swift is expected to be available (boolean value)
-#swift = true
 swift = <%= @use_swift %>
-
-# Whether or not nova is expected to be available (boolean value)
-#nova = true
-
-# Whether or not Heat is expected to be available (boolean value)
-#heat = false
 heat = <%= @use_heat %>
-# heat_plugin contains the tests from the heat tempest plugin
 heat_plugin = <%= @use_heat %>
-
-# Whether or not Ceilometer is expected to be available (boolean
-# value)
-#ceilometer = true
 ceilometer = <%= @use_ceilometer %>
-
-# Whether or not Aodh is expected to be available (boolean value)
-#aodh = false
 aodh = <%= @use_aodh %>
-
-# Whether or not Aodh is expected to be available (boolean value)
-#aodh_plugin = false
 aodh_plugin = <%= @use_aodh %>
-
-# Whether or not Horizon is expected to be available (boolean value)
-#horizon = true
 horizon = <%= @use_horizon %>
-
-# Whether or not Sahara is expected to be available (boolean value)
 sahara = <%= @use_sahara %>
-
-# Whether or not Ironic is expected to be available (boolean value)
-#ironic = false
-
-# Whether or not Trove is expected to be available (boolean value)
-#trove = false
 trove = <%= @use_trove %>
-
-# Whether or not manila is expected to be available (boolean value)
-#manila = true
 manila = <%= @use_manila %>
-
-# Whether or not ec2-api is expected to be available (boolean value)
-#ec2api = true
 ec2api = false
-
-# Whether or not magnum is expected to be available (boolean value)
-#magnum = true
 magnum = <%= @use_magnum %>
 
-
 [share]
-
-#
-# From tempest.config
-#
-
-# The minimum api microversion is configured to be the value of the
-# minimum microversion supported by Manila. (string value)
-#min_api_microversion = 2.0
-
-# The maximum api microversion is configured to be the value of the
-# latest microversion supported by Manila. (string value)
-#max_api_microversion = 2.15
-
-# The share region name to use. If empty, the value of identity.region
-# is used instead. If no such region is found in the service catalog,
-# the first found one is used. (string value)
-#region =
 region = <%= @keystone_settings['endpoint_region'] %>
-
-# Catalog type of the Share service. (string value)
-#catalog_type = share
-
-# The endpoint type to use for the share service. (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#endpoint_type = publicURL
 endpoint_type = internalURL
-
-# This option used to determine backend driver type, multitenant
-# driver uses share-networks, but single-tenant doesn't. (boolean
-# value)
-#multitenancy_enabled = true
 multitenancy_enabled = False
-
-# First value of list is protocol by default, items of list show
-# enabled protocols at all. (list value)
-#enable_protocols = nfs,cifs
 enable_protocols = <%= @manila_settings['enable_protocols'] %>
-
-# Selection of protocols, that should be covered with ip rule tests
-# (list value)
-#enable_ip_rules_for_protocols = nfs,cifs
 enable_ip_rules_for_protocols = <%= @manila_settings['enable_ip_rules_for_protocols'] %>
-
-# Selection of protocols, that should be covered with user rule tests
-# (list value)
-#enable_user_rules_for_protocols =
-
-# Protocols that should be covered with cert rule tests. (list value)
-#enable_cert_rules_for_protocols = glusterfs
 enable_cert_rules_for_protocols = <%= @manila_settings['enable_cert_rules_for_protocols'] %>
-
-# Protocols to be covered with cephx rule tests. (list value)
-#enable_cephx_rules_for_protocols = cephfs
-
-# Username, that will be used in user tests. (string value)
-#username_for_user_rules = Administrator
-
-# List of protocols to run tests with ro access level. (list value)
-#enable_ro_access_level_for_protocols = nfs
-
-# Backend protocol to target when creating volume types. (string
-# value)
-# Deprecated group/name - [DEFAULT]/storage_protocol
-#capability_storage_protocol = NFS_CIFS
-
-# Defines extra spec that satisfies specific back end capability
-# called 'snapshot_support' and will be used for setting up custom
-# share type. Defaults to value of other config option
-# 'run_snapshot_tests'. (boolean value)
-#capability_snapshot_support = <None>
-
-# Some backend drivers requires share network for share creation.
-# Share network id, that will be used for shares. If not set, it won't
-# be used. (string value)
-#share_network_id =
-
-# Share network id, that will be used for shares in alt tenant. If not
-# set, it won't be used (string value)
-#alt_share_network_id =
-
-# Share network id, that will be used for shares in admin tenant. If
-# not set, it won't be used (string value)
-#admin_share_network_id =
-
-# Runs Manila multi-backend tests. (boolean value)
-#multi_backend = false
-
-# Names of share backends, that will be used with multibackend tests.
-# Tempest will use first two values. (list value)
-#backend_names =
-
-# Defines number of retries for share creation. It is useful to avoid
-# failures caused by unstable environment. (integer value)
-#share_creation_retry_number = 0
-
-# Time in seconds between share availability checks. (integer value)
-#build_interval = 3
-
-# Timeout in seconds to wait for a share to becomeavailable. (integer
-# value)
-#build_timeout = 500
-
-# Whether to suppress errors with clean up operation or not. There are
-# cases when we may want to skip such errors and catch only test
-# errors. (boolean value)
-#suppress_errors_in_cleanup = false
 suppress_errors_in_cleanup = true
-
-# Defines whether to run quota tests or not. (boolean value)
-#run_quota_tests = true
-
-# Defines whether to run share extend tests or not. Disable this
-# feature if used driver doesn't support it. (boolean value)
-#run_extend_tests = true
-
-# Defines whether to run share shrink tests or not. Disable this
-# feature if used driver doesn't support it. (boolean value)
-#run_shrink_tests = true
-
-# Defines whether to run tests that use share snapshots or not.
-# Disable this feature if used driver doesn't support it. (boolean
-# value)
-#run_snapshot_tests = true
 run_snapshot_tests =<%= @manila_settings['run_snapshot_tests'] %>
-
-# Defines whether to run consistency group tests or not. Disable this
-# feature if used driver doesn't support it. (boolean value)
-#run_consistency_group_tests = true
 run_consistency_group_tests =<%= @manila_settings['run_consistency_group_tests'] %>
-
-# Defines whether to run replication tests or not. Enable this feature
-# if the driver is configured for replication. (boolean value)
-#run_replication_tests = false
-
-# Enable or disable migration tests. (boolean value)
-#run_migration_tests = false
-
-# Defines whether to run manage/unmanage tests or not. These test may
-# leave orphaned resources, so be careful enabling this opt. (boolean
-# value)
-#run_manage_unmanage_tests = false
-
-# Defines whether to run manage/unmanage snapshot tests or not. These
-# tests may leave orphaned resources, so be careful enabling this opt.
-# (boolean value)
-#run_manage_unmanage_snapshot_tests = false
-
-# Image name for vm booting with nfs/smb clients tool. (string value)
-#image_with_share_tools = manila-service-image
 image_with_share_tools = <%= @manila_settings['image_with_share_tools'] %>
-
-# Image username. (string value)
-#image_username = manila
 image_username = <%= @manila_settings['image_username'] %>
-
-# Image password. Should be used for 'image_with_share_tools' without
-# Nova Metadata support. (string value)
-#image_password = <None>
 image_password = <%= @manila_settings['image_password'] %>
-
-# Flavor used for client vm in scenario tests. (string value)
-#client_vm_flavor_ref = 100
-
-# Time to wait for share migration before timing out (seconds).
-# (integer value)
-#migration_timeout = 1500
-
-# Default share type name to use in tempest tests. (string value)
-#default_share_type_name = <None>
 default_share_type_name = <%= @manila_settings['default_share_type_name'] %>
 
-# Specify the replication type supported by the backend. (string
-# value)
-# Allowed values: none, writable, readable, dr
-#backend_replication_type = none
-
-
-[stress]
-
-#
-# From tempest.config
-#
-
-# Directory containing log files on the compute nodes (string value)
-#nova_logdir = <None>
-
-# Maximum number of instances to create during test. (integer value)
-#max_instances = 16
-
-# Controller host. (string value)
-#controller = <None>
-
-# Controller host. (string value)
-#target_controller = <None>
-
-# ssh user. (string value)
-#target_ssh_user = <None>
-
-# Path to private key. (string value)
-#target_private_key_path = <None>
-
-# regexp for list of log files. (string value)
-#target_logfiles = <None>
-
-# time (in seconds) between log file error checks. (integer value)
-#log_check_interval = 60
-
-# The number of threads created while stress test. (integer value)
-#default_thread_number_per_action = 4
-
-# Prevent the cleaning (tearDownClass()) between each stress test run
-# if an exception occurs during this run. (boolean value)
-#leave_dirty_stack = false
-
-# Allows a full cleaning process after a stress test. Caution : this
-# cleanup will remove every objects of every tenant. (boolean value)
-#full_clean_stack = false
-
-
 [telemetry]
-
-#
-# From tempest.config
-#
-
-# Catalog type of the Telemetry service. (string value)
-#catalog_type = metering
-
-# The endpoint type to use for the telemetry service. (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#endpoint_type = publicURL
 endpoint_type = internalURL
-
-# This variable is used as flag to enable notification tests (boolean
-# value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#too_slow_to_test = true
 too_slow_to_test = false
 
-# Runs Ceilometer event-related tests (boolean value)
-#event_enabled = true
-
-
 [telemetry-feature-enabled]
-
-#
-# From tempest.config
-#
-
-# Runs Ceilometer event-related tests (boolean value)
-#events = false
 events = true
 
-
 [validation]
-
-#
-# From tempest.config
-#
-
-# Enable ssh on created servers and creation of additional validation
-# resources to enable remote access (boolean value)
-#run_validation = false
 run_validation = <%= @use_run_validation %>
-
-# Enable/disable security groups. (boolean value)
-#security_group = true
-
-# Enable/disable security group rules. (boolean value)
-#security_group_rules = true
-
-# Default IP type used for validation: -fixed: uses the first IP
-# belonging to the fixed network -floating: creates and uses a
-# floating IP (string value)
-# Allowed values: fixed, floating
-# Deprecated group/name - [compute]/use_floatingip_for_ssh
-#connect_method = floating
 connect_method = floating
-
-# Default authentication method to the instance. Only ssh via keypair
-# is supported for now. Additional methods will be handled in a
-# separate spec. (string value)
-# Allowed values: keypair
-# Deprecated group/name - [compute]/ssh_auth_method
-#auth_method = keypair
-
-# Default IP version for ssh connections. (integer value)
-#ip_version_for_ssh = 4
 ip_version_for_ssh = 4
-
-# Timeout in seconds to wait for ping to succeed. (integer value)
-# Deprecated group/name - [compute]/ping_timeout
-#ping_timeout = 120
-
-# Timeout in seconds to wait for the TCP connection to be successful.
-# (integer value)
-#connect_timeout = 60
 <% if @validation_connect_timeout -%>
 connect_timeout = <%= @validation_connect_timeout %>
 <% end -%>
-
-# Timeout in seconds to wait for the ssh banner. (integer value)
-#ssh_timeout = 300
 <% if @validation_ssh_timeout -%>
 ssh_timeout = <%= @validation_ssh_timeout %>
 <% end -%>
-
-# User name used to authenticate to an instance. (string value)
-# Deprecated group/name - [compute]/image_ssh_user
-# Deprecated group/name - [compute]/ssh_user
-# Deprecated group/name - [scenario]/ssh_user
-#image_ssh_user = root
 image_ssh_user = cirros
-
-# Password used to authenticate to an instance. (string value)
-# Deprecated group/name - [compute]/image_ssh_password
-#image_ssh_password = password
 image_ssh_password = cubswin:)
-
-# Shell fragments to use before executing a command when sshing to a
-# guest. (string value)
-# Deprecated group/name - [compute]/ssh_shell_prologue
-#ssh_shell_prologue = set -eu -o pipefail; PATH=$$PATH:/sbin;
-
-# The packet size for ping packets originating from remote linux hosts
-# (integer value)
-# Deprecated group/name - [compute]/ping_size
-#ping_size = 56
-
-# The number of ping packets originating from remote linux hosts
-# (integer value)
-# Deprecated group/name - [compute]/ping_count
-#ping_count = 1
-
-# Unallocated floating IP range, which will be used to test the
-# floating IP bulk feature for CRUD operation. This block must not
-# overlap an existing floating IP pool. (string value)
-# Deprecated group/name - [compute]/floating_ip_range
-#floating_ip_range = 10.0.0.0/29
-
-# Network used for SSH connections. Ignored if
-# use_floatingip_for_ssh=true or run_validation=false. (string value)
-# Deprecated group/name - [compute]/network_for_ssh
-#network_for_ssh = public
 network_for_ssh = fixed
 
-
 [volume]
-
-#
-# From tempest.config
-#
-
-# Time in seconds between volume availability checks. (integer value)
-#build_interval = 1
-
-# Timeout in seconds to wait for a volume to become available.
-# (integer value)
-#build_timeout = 300
-
-# Catalog type of the Volume Service (string value)
-#catalog_type = volume
-
-# The volume region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found in the
-# service catalog, the first found one is used. (string value)
-#region =
 region = <%= @keystone_settings['endpoint_region'] %>
-
-# The endpoint type to use for the volume service. (string value)
-# Allowed values: public, admin, internal, publicURL, adminURL, internalURL
-#endpoint_type = publicURL
 endpoint_type = internalURL
-
-# Name of the backend1 (must be declared in cinder.conf) (string
-# value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#backend1_name =
 <% if @cinder_multi_backend -%>
 backend1_name = <%= @cinder_backend1_name %>
 <% end -%>
-
-# Name of the backend2 (must be declared in cinder.conf) (string
-# value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#backend2_name =
 <% if @cinder_multi_backend -%>
 backend2_name = <%= @cinder_backend2_name %>
 <% end -%>
-
-# A list of backend names separated by comma. The backend name must be
-# declared in cinder.conf (list value)
-# Deprecated group/name - [volume]/BACKEND_1
-# Deprecated group/name - [volume]/BACKEND_2
-#backend_names = BACKEND_1,BACKEND_2
-
-# Backend protocol to target when creating volume types (string value)
-#storage_protocol = iSCSI
 storage_protocol = <%= @storage_protocol %>
-
-# Backend vendor to target when creating volume types (string value)
-#vendor_name = Open Source
 vendor_name = <%= @vendor_name %>
 
-# Disk format to use when copying a volume to image (string value)
-#disk_format = raw
-
-# Default size in GB for volumes created by volumes tests (integer
-# value)
-#volume_size = 1
-
-
 [volume-feature-enabled]
-
-#
-# From tempest.config
-#
-
-# Runs Cinder multi-backend test (requires 2 backends) (boolean value)
-#multi_backend = false
 multi_backend = <%= @cinder_multi_backend ? 'true' : 'false' %>
-
-# Runs Cinder volumes backup test (boolean value)
-#backup = true
 backup = false
 
-# Runs Cinder volume snapshot test (boolean value)
-#snapshot = true
-
-# Runs Cinder volume clone test (boolean value)
-#clone = true
-
-# A list of enabled volume extensions with a special entry all which
-# indicates every extension is enabled. Empty list indicates all
-# extensions are disabled (list value)
-#api_extensions = all
-
-# Is the v1 volume API enabled (boolean value)
-#api_v1 = true
-
-# Is the v2 volume API enabled (boolean value)
-#api_v2 = true
-
-# Update bootable status of a volume Not implemented on icehouse
-# (boolean value)
-# This option is deprecated for removal.
-# Its value may be silently ignored in the future.
-#bootable = true
-
-# Extract correct host info from host@backend (boolean value)
-#volume_services = false
-
-
 [boto]
-
-# S3 URL (string value)
-#s3_url = http://localhost:8080
 s3_url = http://<%= @s3_host %>:<%= @s3_port %>/
-
-# S3 Materials Path (string value)
-#s3_materials_path = /opt/stack/devstack/files/images/s3-materials/cirros-0.3.0
 s3_materials_path = <%= @tempest_path %>/etc/cirros/
