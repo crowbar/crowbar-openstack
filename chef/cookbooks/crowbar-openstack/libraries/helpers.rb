@@ -101,45 +101,10 @@ class CrowbarOpenStackHelper
   def self.rabbitmq_settings(node, barclamp)
     instance = node[barclamp][:rabbitmq_instance] || "default"
 
-    # Cache the result for each cookbook in an instance variable hash. This
-    # cache needs to be invalidated for each chef-client run from chef-client
-    # daemon (which are all in the same process); so use the ohai time as a
-    # marker for that.
-    if @rabbitmq_settings_cache_time != node[:ohai_time]
-      if @rabbitmq_settings
-        Chef::Log.info("Invalidating rabbitmq settings cache " \
-                       "on behalf of #{barclamp}")
-      end
-      @rabbitmq_settings = nil
-      @rabbitmq_settings_cache_time = node[:ohai_time]
-    end
+    config = BarclampLibrary::Barclamp::Config.load("openstack", "rabbitmq", instance)
+    Chef::Log.warn("No RabbitMQ server found!") if config.empty?
 
-    if @rabbitmq_settings && @rabbitmq_settings.include?(instance)
-      Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]} [cached]")
-    else
-      @rabbitmq_settings ||= Hash.new
-      rabbit = get_node(node, "rabbitmq-server", "rabbitmq", instance)
-
-      if rabbit.nil?
-        Chef::Log.warn("No RabbitMQ server found!")
-      else
-        @rabbitmq_settings[instance] = {
-          address: rabbit[:rabbitmq][:address],
-          port: rabbit[:rabbitmq][:port],
-          user: rabbit[:rabbitmq][:user],
-          password: rabbit[:rabbitmq][:password],
-          vhost: rabbit[:rabbitmq][:vhost],
-          url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
-            "#{rabbit[:rabbitmq][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{rabbit[:rabbitmq][:port]}/" \
-            "#{rabbit[:rabbitmq][:vhost]}"
-        }
-
-        Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]}")
-      end
-    end
-
-    @rabbitmq_settings[instance]
+    config
   end
 
   private

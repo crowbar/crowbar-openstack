@@ -103,6 +103,41 @@ class RabbitmqService < PacemakerServiceObject
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
   end
 
+  def apply_role_post_chef_call(old_role, role, all_nodes)
+    @logger.debug("Rabbitmq apply_role_post_chef_call: entering")
+    # do this in post, because we depend on values that are computed in the
+    # cookbook
+    save_config_to_databag(old_role, role)
+    @logger.debug("Rabbitmq apply_role_post_chef_call: leaving")
+  end
+
+  def save_config_to_databag(old_role, role)
+    if role.nil?
+      config = nil
+    else
+      _elements, nodes, _ha_enabled = role_expand_elements(role, "rabbitmq-server")
+      node = NodeObject.find_node_by_name(nodes.first)
+
+      address = node[:rabbitmq][:address]
+      port = role.default_attributes["rabbitmq"]["port"]
+      user = role.default_attributes["rabbitmq"]["user"]
+      password = role.default_attributes["rabbitmq"]["password"]
+      vhost = role.default_attributes["rabbitmq"]["vhost"]
+
+      config = {
+        address: address,
+        port: port,
+        user: user,
+        password: password,
+        vhost: "/#{vhost}",
+        url: "rabbit://#{user}:#{password}@#{address}:#{port}/#{vhost}"
+      }
+    end
+
+    instance = Crowbar::DataBagConfig.instance_from_role(old_role, role)
+    Crowbar::DataBagConfig.save("openstack", instance, @bc_name, config)
+  end
+
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "rabbitmq-server"
 
