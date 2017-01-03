@@ -20,13 +20,9 @@ package node[:neutron][:platform][:dhcp_agent_pkg]
 package node[:neutron][:platform][:metering_agent_pkg]
 
 if node[:neutron][:use_lbaas]
-  if node[:neutron][:use_lbaasv2]
-    if [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver])
-      package node[:neutron][:platform][:lbaas_agent_pkg]
-    elsif node[:neutron][:lbaasv2_driver] == "f5" &&
-        !node[:neutron][:platform][:f5_agent_pkg].empty?
-      package node[:neutron][:platform][:f5_agent_pkg]
-    end
+  if node[:neutron][:lbaasv2_driver] == "f5" &&
+      !node[:neutron][:platform][:f5_agent_pkg].empty?
+    package node[:neutron][:platform][:f5_agent_pkg]
   else
     package node[:neutron][:platform][:lbaasv2_agent_pkg]
   end
@@ -136,7 +132,7 @@ template "/etc/neutron/dhcp_agent.ini" do
 end
 
 if node[:neutron][:use_lbaas] &&
-    (!node[:neutron][:use_lbaasv2] || [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver]))
+    [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver])
   template "/etc/neutron/lbaas_agent.ini" do
     source "lbaas_agent.ini.erb"
     owner "root"
@@ -149,7 +145,7 @@ if node[:neutron][:use_lbaas] &&
       device_driver: "neutron_lbaas.drivers.haproxy.namespace_driver.HaproxyNSDriver"
     )
   end
-elsif node[:neutron][:use_lbaas] && node[:neutron][:use_lbaasv2] &&
+elsif node[:neutron][:use_lbaas] &&
     node[:neutron][:lbaasv2_driver] == "f5"
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
   keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -188,12 +184,8 @@ service node[:neutron][:platform][:metering_agent_name] do
 end
 
 if node[:neutron][:use_lbaas] &&
-    (!node[:neutron][:use_lbaasv2] || [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver]))
-  lbaas_agent = if node[:neutron][:use_lbaasv2]
-    node[:neutron][:platform][:lbaasv2_agent_name]
-  else
-    node[:neutron][:platform][:lbaas_agent_name]
-  end
+    [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver])
+  lbaas_agent = node[:neutron][:platform][:lbaasv2_agent_name]
   service lbaas_agent do
     supports status: true, restart: true
     action [:enable, :start]
@@ -201,7 +193,7 @@ if node[:neutron][:use_lbaas] &&
     subscribes :restart, resources("template[/etc/neutron/lbaas_agent.ini]")
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
-elsif node[:neutron][:use_lbaas] && node[:neutron][:use_lbaasv2] &&
+elsif node[:neutron][:use_lbaas] &&
     node[:neutron][:lbaasv2_driver] == "f5"
   service node[:neutron][:platform][:f5_agent_name] do
     supports status: true, restart: true

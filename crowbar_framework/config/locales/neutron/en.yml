@@ -60,6 +60,18 @@ en:
         add_switch: 'Add'
         remove_switch: 'Remove'
         use_dvr: 'Use Distributed Virtual Router setup'
+        use_lbaas: 'Use Neutron LoadBalancer agent'
+        lbaasv2_driver: 'Select LoadBalancer v2 driver'
+        f5:
+          icontrol_hostname: 'Icontrol Hostname'
+          icontrol_username: 'Icontrol Username'
+          icontrol_password: 'Icontrol Password'
+          parent_ssl_profile: 'Parent SSL profile'
+          external_physical_mappings: 'External Physical Mappings'
+          vtep_folder: 'Vtep Folder'
+          vtep_selfip_name: 'Vtep Self IP Name'
+          max_namespaces_per_tenant: 'Max Namespaces per Tenant'
+          route_domain_strictness_tenant: 'Route Domain Strictness Tenant'
         vmware:
           user: 'VMware NSX Username'
           password: 'VMware NSX Password'

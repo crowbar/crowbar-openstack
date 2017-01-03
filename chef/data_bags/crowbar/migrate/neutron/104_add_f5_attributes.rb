@@ -1,9 +1,9 @@
 def upgrade(ta, td, a, d)
-  a["use_lbaasv2"] = ta["use_lbaasv2"]
+  a["f5"] = ta["f5"]
   return a, d
 end
 
 def downgrade(ta, td, a, d)
-  a.delete("use_lbaasv2")
+  a.delete("f5")
   return a, d
 end

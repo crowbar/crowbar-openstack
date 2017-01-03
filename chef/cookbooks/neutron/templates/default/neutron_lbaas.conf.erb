@@ -89,7 +89,7 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 # service_provider = LOADBALANCERV2:A10Networks:neutron_lbaas.drivers.a10networks.driver_v2.ThunderDriver:default
 # service_provider = LOADBALANCERV2:brocade:neutron_lbaas.drivers.brocade.driver_v2.BrocadeLoadBalancerDriver:default
 # service_provider = LOADBALANCERV2:kemptechnologies:neutron_lbaas.drivers.kemptechnologies.driver_v2.KempLoadMasterDriver:default
-<% if @use_lbaasv2 -%>
+<% if @use_lbaas -%>
 <%
   service_provider = case @lbaasv2_driver
     when "f5"
@@ -99,8 +99,6 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
   end
 %>
 service_provider=<%= service_provider %>
-<% elsif @use_lbaas -%>
-service_provider=LOADBALANCER:Haproxy:neutron_lbaas.services.loadbalancer.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default
 <% end -%>
 
 [certificates]
