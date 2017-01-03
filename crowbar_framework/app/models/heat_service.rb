@@ -110,4 +110,27 @@ class HeatService < PacemakerServiceObject
 
     @logger.debug("Heat apply_role_pre_chef_call: leaving")
   end
+
+  def apply_role_post_chef_call(old_role, role, all_nodes)
+    @logger.debug("Heat apply_role_post_chef_call: entering")
+    # do this in post, because we depend on values that are computed in the
+    # cookbook
+    save_config_to_databag(old_role, role)
+    @logger.debug("Heat apply_role_post_chef_call: leaving")
+  end
+
+  def save_config_to_databag(old_role, role)
+    if role.nil?
+      config = nil
+    else
+      insecure = Openstack::DataBagConfig.insecure(@bc_name, role)
+
+      config = {
+        insecure: insecure
+      }
+    end
+
+    instance = Crowbar::DataBagConfig.instance_from_role(old_role, role)
+    Crowbar::DataBagConfig.save("openstack", instance, @bc_name, config)
+  end
 end

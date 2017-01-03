@@ -31,25 +31,15 @@ if provisioner_server.nil?
 end
 provisioner_address = Barclamp::Inventory.get_network_by_type(provisioner_server, "admin").address
 
-# the image is uploaded via the glance API so we need a glance-server
-glance_server = node_search_with_cache("roles:glance-server").first
-if glance_server.nil?
-  Chef::Log.warn("No glance-server found. Can not upload #{service_sles_image_name}")
-  return
-end
+# the image is uploaded via the glance API
 # extra argument if the --insecure is needed when talking to glance-api
-openstack_args_glance = (glance_server[:glance][:api][:protocol] == "https" &&
-  glance_server[:glance][:ssl][:insecure]) || keystone_settings["insecure"] ? "--insecure" : ""
+glance_config = Barclamp::Config.load("openstack", "glance", node[:magnum][:glance_instance])
+openstack_args_glance = (glance_config["insecure"] || false) ? "--insecure" : ""
 
-# the flavor is created via the nova API so we need a nova-controller
-nova_controller = node_search_with_cache("roles:nova-controller").first
-if nova_controller.nil?
-  Chef::Log.warn("No nova-controller found. Can not create magnum flavors")
-  return
-end
+# the flavor is created via the nova API
 # extra argument if the --insecure is needed when talking to nova-api
-openstack_args_nova = (nova_controller[:nova][:ssl][:enabled] &&
-  nova_controller[:nova][:ssl][:insecure]) || keystone_settings["insecure"] ? "--insecure" : ""
+nova_config = Barclamp::Config.load("openstack", "nova", node[:magnum][:nova_instance])
+openstack_args_nova = (nova_config["insecure"] || false) ? "--insecure" : ""
 
 
 # create basic arguments for openstack client
