@@ -263,8 +263,14 @@ glance_insecure = Barclamp::Config.load("openstack", "glance")["insecure"] || fa
 cinder_insecure = Barclamp::Config.load("openstack", "cinder")["insecure"] || false
 neutron_insecure = Barclamp::Config.load("openstack", "neutron")["insecure"] || false
 nova_insecure = Barclamp::Config.load("openstack", "nova")["insecure"] || false
+aodh_insecure = Barclamp::Config.load("openstack", "aodh")["insecure"] || false
+barbican_insecure = Barclamp::Config.load("openstack", "barbican")["insecure"] || false
+ceilometer_insecure = Barclamp::Config.load("openstack", "ceilometer")["insecure"] || false
 heat_insecure = Barclamp::Config.load("openstack", "heat")["insecure"] || false
 manila_insecure = Barclamp::Config.load("openstack", "manila")["insecure"] || false
+magnum_insecure = Barclamp::Config.load("openstack", "magnum")["insecure"] || false
+trove_insecure = Barclamp::Config.load("openstack", "trove")["insecure"] || false
+sahara_insecure = Barclamp::Config.load("openstack", "sahara")["insecure"] || false
 
 neutrons = search(:node, "roles:neutron-server") || []
 if neutrons.length > 0
@@ -358,8 +364,14 @@ template local_settings do
     || cinder_insecure \
     || neutron_insecure \
     || nova_insecure \
+    || aodh_insecure \
+    || barbican_insecure \
+    || ceilometer_insecure \
     || heat_insecure \
-    || manila_insecure,
+    || manila_insecure \
+    || magnum_insecure \
+    || trove_insecure \
+    || sahara_insecure,
     db_settings: db_settings,
     enable_lb: neutron_use_lbaas,
     enable_vpn: neutron_use_vpnaas,
