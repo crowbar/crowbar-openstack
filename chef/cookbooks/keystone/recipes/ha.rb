@@ -30,3 +30,7 @@ haproxy_loadbalancer "keystone-admin" do
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "keystone", "keystone-server", "admin_port")
   action :nothing
 end.run_action(:create)
+
+if node[:keystone][:frontend] == "apache"
+  include_recipe "crowbar-pacemaker::apache"
+end

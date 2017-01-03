@@ -199,6 +199,9 @@ else
   bind_port = node[:ceilometer][:api][:port]
 end
 
+node.normal[:apache][:listen_ports_crowbar] ||= {}
+node.normal[:apache][:listen_ports_crowbar][:ceilometer] = { plain: [bind_port] }
+
 crowbar_openstack_wsgi "WSGI entry for ceilometer-api" do
   bind_host bind_host
   bind_port bind_port
