@@ -15,6 +15,7 @@ image_cache_dir = <%= node[:glance][:image_cache_datadir] %>
 default_publisher_id = <%= @node_hostname %>
 registry_host = <%= @registry_bind_host %>
 registry_port = <%= @registry_bind_port %>
+transport_url = <%= @rabbit_settings[:url] %>
 registry_client_insecure = <%= @keystone_settings["insecure"] %>
 debug = <%= node[:glance][:debug] ? "True" : "False" %>
 verbose = <%= node[:glance][:verbose] ? "True" : "False" %>
@@ -71,10 +72,13 @@ insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 region_name=<%= @keystone_settings['endpoint_region'] %>
 signing_dir = /var/cache/glance/keystone-signing
-identity_uri = <%= @keystone_settings['admin_auth_url'] %>
-admin_user = <%= @keystone_settings['service_user'] %>
-admin_password = <%= @keystone_settings['service_password'] %>
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
+auth_url = <%= @keystone_settings['admin_auth_url'] %>
+auth_type = password
 
 [oslo_concurrency]
 
@@ -83,16 +87,6 @@ lock_path = /var/run/glance
 [oslo_messaging_notifications]
 
 driver = messaging
-
-[oslo_messaging_rabbit]
-
-rabbit_host = <%= @rabbit_settings[:address] %>
-<% unless @rabbit_settings[:port].nil? -%>
-rabbit_port = <%= @rabbit_settings[:port] %>
-<% end -%>
-rabbit_userid = <%= @rabbit_settings[:user] %>
-rabbit_password = <%= @rabbit_settings[:password] %>
-rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 
 [paste_deploy]
 
