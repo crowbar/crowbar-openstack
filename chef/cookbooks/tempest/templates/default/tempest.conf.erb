@@ -213,7 +213,3 @@ vendor_name = <%= @vendor_name %>
 [volume-feature-enabled]
 multi_backend = <%= @cinder_multi_backend ? 'true' : 'false' %>
 backup = false
-
-[boto]
-s3_url = http://<%= @s3_host %>:<%= @s3_port %>/
-s3_materials_path = <%= @tempest_path %>/etc/cirros/
