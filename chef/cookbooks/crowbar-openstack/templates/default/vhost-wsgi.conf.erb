@@ -16,7 +16,9 @@ Listen <%= @bind_host %>:<%= @bind_port %>
     SSLEngine on
     SSLCertificateFile <%= @ssl_certfile %>
     SSLCertificateKeyFile <%= @ssl_keyfile %>
+    <% unless @ssl_cacert.nil? -%>
     SSLCACertificateFile <%= @ssl_cacert %>
+    <% end -%>
 <% end %>
 
     ErrorLogFormat "%{cu}t %M"
