@@ -284,16 +284,7 @@ ec2_access = `#{openstackcli} ec2 credentials list -f value -c Access`.strip
 ec2_secret = `#{openstackcli} ec2 credentials list -f value -c Secret`.strip
 raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
 
-`#{openstackcli_adm} service show metering &> /dev/null`
-use_ceilometer = $?.success?
-`#{openstackcli_adm} service show alarming &> /dev/null`
-use_aodh = $?.success?
-`#{openstackcli_adm} service show database &> /dev/null`
-use_trove = $?.success?
-`#{openstackcli_adm} service show share &> /dev/null`
-use_manila = $?.success?
-`#{openstackcli_adm} service show container &> /dev/null`
-use_magnum = $?.success?
+enabled_services = `#{openstackcli_adm} service list -f value -c Type`
 
 # FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
@@ -415,9 +406,6 @@ else
   horizon_protocol = horizon[:horizon][:apache][:ssl] ? "https" : "http"
 end
 
-`#{openstackcli_adm} service show data-processing &> /dev/null`
-use_sahara = $?.success?
-
 template "/etc/tempest/tempest.conf" do
   source "tempest.conf.erb"
   mode 0644
@@ -430,12 +418,7 @@ template "/etc/tempest/tempest.conf" do
     use_swift: use_swift,
     use_horizon: use_horizon,
     use_heat: use_heat,
-    use_ceilometer: use_ceilometer,
-    use_aodh: use_aodh,
-    use_trove: use_trove,
-    use_manila: use_manila,
-    use_magnum: use_magnum,
-    use_sahara: use_sahara,
+    enabled_services: enabled_services,
     # boto settings
     ec2_protocol: nova[:nova][:ssl][:enabled] ? "https" : "http",
     ec2_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),

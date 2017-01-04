@@ -153,15 +153,14 @@ neutron = true
 swift = <%= @use_swift %>
 heat = <%= @use_heat %>
 heat_plugin = <%= @use_heat %>
-ceilometer = <%= @use_ceilometer %>
-aodh = <%= @use_aodh %>
-aodh_plugin = <%= @use_aodh %>
+ceilometer = <%= @enabled_services.include? "metering" ? "True" : "False" %>
+aodh = <%= @enabled_services.include? "alarming" ? "True" : "False" %>
+aodh_plugin = <%= @enabled_services.include? "alarming" ? "True" : "False" %>
 horizon = <%= @use_horizon %>
-sahara = <%= @use_sahara %>
-trove = <%= @use_trove %>
-manila = <%= @use_manila %>
-ec2api = false
-magnum = <%= @use_magnum %>
+sahara = <%= @enabled_services.include? "data-processing" ? "True" : "False" %>
+trove = <%= @enabled_services.include? "database" ? "True" : "False" %>
+manila = <%= @enabled_services.include? "share" ? "True" : "False" %>
+magnum = <%= @enabled_services.include? "container" ? "True" : "False" %>
 
 [share]
 region = <%= @keystone_settings['endpoint_region'] %>
