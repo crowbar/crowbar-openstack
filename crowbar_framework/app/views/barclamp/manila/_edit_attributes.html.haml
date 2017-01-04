@@ -54,14 +54,14 @@
               %legend
                 = t('.shares.hitachi_parameters')
 
-              = string_field %w(shares {{@index}} hitachi hds_hnas_evs_id)
-              = string_field %w(shares {{@index}} hitachi hds_hnas_evs_ip)
-              = string_field %w(shares {{@index}} hitachi hds_hnas_file_system_name)
-              = string_field %w(shares {{@index}} hitachi hds_hnas_ip)
-              = string_field %w(shares {{@index}} hitachi hds_hnas_user)
-              = password_field %w(shares {{@index}} hitachi hds_hnas_password)
-              = string_field %w(shares {{@index}} hitachi hds_hnas_ssh_private_key)
-              = integer_field %w(shares {{@index}} hitachi hds_hnas_stalled_job_timeout)
+              = string_field %w(shares {{@index}} hitachi hitachi_hnas_evs_id)
+              = string_field %w(shares {{@index}} hitachi hitachi_hnas_evs_ip)
+              = string_field %w(shares {{@index}} hitachi hitachi_hnas_file_system_name)
+              = string_field %w(shares {{@index}} hitachi hitachi_hnas_ip)
+              = string_field %w(shares {{@index}} hitachi hitachi_hnas_user)
+              = password_field %w(shares {{@index}} hitachi hitachi_hnas_password)
+              = string_field %w(shares {{@index}} hitachi hitachi_hnas_ssh_private_key)
+              = integer_field %w(shares {{@index}} hitachi hitachi_hnas_stalled_job_timeout)
           {{/if_eq}}
           {{#if_eq backend_driver 'cephfs'}}
           %li.list-group-item
