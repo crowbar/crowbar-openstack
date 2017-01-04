@@ -10,7 +10,7 @@ define :trove_service, use_pacemaker_provider: false do
     service_name trove_name
     supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, "template[/etc/trove/trove.conf]"
+    subscribes :restart, resources(template: default[:trove][params[:name].to_sym][:config_file])
     provider Chef::Provider::CrowbarPacemakerService \
                if params[:use_pacemaker_provider]
   end

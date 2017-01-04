@@ -168,4 +168,21 @@ template node[:trove][:api][:config_file] do
   )
 end
 
+execute "trove-manage db sync" do
+  command "trove-manage --config-file #{node[:trove][:api][:config_file]} db_sync"
+  user node[:trove][:user]
+  group node[:trove][:group]
+  action :nothing
+  only_if { !node[:trove][:db_synced] }
+end
+
+ruby_block "mark node for trove db_sync" do
+  block do
+    node.set[:trove][:db_synced] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[trove-manage db sync]", :immediately
+end
+
 trove_service("api")
