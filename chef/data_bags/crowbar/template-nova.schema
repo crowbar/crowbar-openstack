@@ -8,7 +8,7 @@
       "type": "map",
       "required": true,
       "mapping": {
-        "nova": {
+         "nova": {
           "type": "map",
           "required": true,
           "mapping": {
@@ -51,6 +51,21 @@
                 "cpu_allocation_ratio": { "type": "number" },
                 "disk_allocation_ratio": { "type": "number" },
                 "reserved_host_memory_mb": { "type": "number" }
+              }
+            },
+            "ec2-api": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "db": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "password": { "type": "str", "required": true },
+                    "user": { "type": "str", "required": true },
+                    "database": { "type": "str", "required": true }
+                  }
+                }
               }
             },
             "db": {

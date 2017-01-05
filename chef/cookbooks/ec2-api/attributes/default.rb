@@ -13,10 +13,12 @@
 # limitations under the License.
 #
 
-default["ec2-api"][:db][:database] = "ec2"
-default["ec2-api"][:db][:user] = "ec2"
-default["ec2-api"][:db][:password] = nil # must be set by wrapper
-default["ec2-api"][:user] = "ec2-api"
-default["ec2-api"][:group] = "ec2-api"
+# NOTE: keep it under the nova namespace as long as ec2-api does not
+# have its own barclamp
+default[:nova]["ec2-api"][:db][:database] = "ec2"
+default[:nova]["ec2-api"][:db][:user] = "ec2"
+default[:nova]["ec2-api"][:db][:password] = nil # must be set by wrapper
+default[:nova]["ec2-api"][:user] = "ec2-api"
+default[:nova]["ec2-api"][:group] = "ec2-api"
 
-default["ec2-api"][:config_file] = "/etc/ec2api/ec2api.conf.d/100-ec2api.conf"
+default[:nova]["ec2-api"][:config_file] = "/etc/ec2api/ec2api.conf.d/100-ec2api.conf"

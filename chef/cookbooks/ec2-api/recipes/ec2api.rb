@@ -21,7 +21,8 @@ package "openstack-ec2-api-api"
 package "openstack-ec2-api-metadata"
 package "openstack-ec2-api-s3"
 
-db_settings = fetch_database_settings "ec2-api"
+# NOTE: ec2 is deployed via the nova barclamp
+db_settings = fetch_database_settings "nova"
 
 db_conn_scheme = db_settings[:url_scheme]
 
@@ -30,24 +31,24 @@ if db_settings[:backend_name] == "mysql"
 end
 
 database_connection = "#{db_conn_scheme}://" \
-  "#{node["ec2-api"][:db][:user]}" \
-  ":#{node["ec2-api"][:db][:password]}" \
+  "#{node[:nova]["ec2-api"][:db][:user]}" \
+  ":#{node[:nova]["ec2-api"][:db][:password]}" \
   "@#{db_settings[:address]}" \
-  "/#{node["ec2-api"][:db][:database]}"
+  "/#{node[:nova]["ec2-api"][:db][:database]}"
 
 # Create the ec2 Database
-database "create #{node["ec2-api"][:db][:database]} database" do
+database "create #{node[:nova]["ec2-api"][:db][:database]} database" do
   connection db_settings[:connection]
-  database_name node["ec2-api"][:db][:database]
+  database_name node[:nova]["ec2-api"][:db][:database]
   provider db_settings[:provider]
   action :create
 end
 
 database_user "create #{@cookbook_name} database user" do
   connection db_settings[:connection]
-  database_name node["ec2-api"][:db][:database]
-  username node["ec2-api"][:db][:user]
-  password node["ec2-api"][:db][:password]
+  database_name node[:nova]["ec2-api"][:db][:database]
+  username node[:nova]["ec2-api"][:db][:user]
+  password node[:nova]["ec2-api"][:db][:password]
   host "%"
   provider db_settings[:user_provider]
   action :create
@@ -55,25 +56,27 @@ end
 
 database_user "grant database access for #{@cookbook_name} database user" do
   connection db_settings[:connection]
-  database_name node["ec2-api"][:db][:database]
-  username node["ec2-api"][:db][:user]
-  password node["ec2-api"][:db][:password]
+  database_name node[:nova]["ec2-api"][:db][:database]
+  username node[:nova]["ec2-api"][:db][:user]
+  password node[:nova]["ec2-api"][:db][:password]
   host "%"
   privileges db_settings[:privs]
   provider db_settings[:user_provider]
   action :grant
 end
 
-template node["ec2-api"][:config_file] do
+rabbit_settings = fetch_rabbitmq_settings "nova"
+
+template node[:nova]["ec2-api"][:config_file] do
   source "ec2api.conf.erb"
   owner "root"
-  group node["ec2-api"][:group]
+  group node[:nova]["ec2-api"][:group]
   mode 0o640
   variables(
     debug: node[:nova][:debug],
     verbose: node[:nova][:verbose],
     database_connection: database_connection,
-    rabbit_settings: fetch_rabbitmq_settings,
+    rabbit_settings: rabbit_settings,
   )
 end
 
