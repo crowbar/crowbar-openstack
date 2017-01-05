@@ -392,7 +392,6 @@ template "/etc/heat/heat.conf.d/100-heat.conf" do
     stack_user_domain: %x[ #{shell_get_stack_user_domain} ].chomp,
     stack_domain_admin: node[:heat]["stack_domain_admin"],
     stack_domain_admin_password: node[:heat]["stack_domain_admin_password"],
-    use_convergence_engine: node[:heat][:use_convergence_engine],
     trusts_delegated_roles: node[:heat][:trusts_delegated_roles],
     insecure: keystone_settings["insecure"],
     heat_ssl: node[:heat][:ssl]
