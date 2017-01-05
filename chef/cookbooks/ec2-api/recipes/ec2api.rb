@@ -66,6 +66,7 @@ database_user "grant database access for #{@cookbook_name} database user" do
 end
 
 rabbit_settings = fetch_rabbitmq_settings "nova"
+keystone_settings = KeystoneHelper.keystone_settings(node, "nova")
 
 template node[:nova]["ec2-api"][:config_file] do
   source "ec2api.conf.erb"
@@ -77,6 +78,7 @@ template node[:nova]["ec2-api"][:config_file] do
     verbose: node[:nova][:verbose],
     database_connection: database_connection,
     rabbit_settings: rabbit_settings,
+    keystone_settings: keystone_settings,
   )
 end
 
