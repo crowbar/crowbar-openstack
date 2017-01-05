@@ -180,6 +180,8 @@ class NovaService < PacemakerServiceObject
     base["attributes"]["nova"]["db"]["password"] = random_password
     base["attributes"]["nova"]["neutron_metadata_proxy_shared_secret"] = random_password
 
+    base["attributes"]["nova"]["ec2-api"]["db"]["password"] = random_password
+
     @logger.debug("Nova create_proposal: exiting")
     base
   end
