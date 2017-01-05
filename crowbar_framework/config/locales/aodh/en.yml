@@ -38,4 +38,4 @@ en:
           cert_required: 'Require Client Certificate'
           ca_certs: 'SSL CA Certificates File'
       validation:
-        evaluation_interval: 'Evaluation interval shall be equal or higher then the interval of meters set in Ceilometer'
+        evaluation_interval: 'Evaluation interval shall be equal or higher than the interval of meters set in Ceilometer'
