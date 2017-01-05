@@ -181,16 +181,6 @@ class CeilometerService < PacemakerServiceObject
     reset_sync_marks_on_clusters_founders(central_elements)
     Openstack::HA.set_controller_role(central_nodes) if central_ha_enabled
 
-    # set aodh attributes (outside of ceilometer cookbook)
-    role.default_attributes["aodh"] ||= {}
-    role.default_attributes["aodh"]["db"] ||= {}
-    role.default_attributes["aodh"]["service_password"] ||= random_password
-    role.default_attributes["aodh"]["db"]["password"] ||= random_password
-
-    # required for sync-mark mechanism
-    role.default_attributes["aodh"]["crowbar-revision"] =
-      role.override_attributes["ceilometer"]["crowbar-revision"]
-
     role.save if prepare_role_for_ha(role,\
                                      ["ceilometer", "ha", "central", "enabled"],\
                                      central_ha_enabled)
