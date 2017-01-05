@@ -1,131 +1,22 @@
 [AGENT]
-# (StrOpt) xCat REST API username, default value is admin.
-# zvm_xcat_username = admin
-# Example: zvm_xcat_username = guest
 zvm_xcat_username = <%= @zvm[:zvm_xcat_username] %>
-
-# (StrOpt) Password of the xCat REST API user, default value is admin
-# zvm_xcat_password = admin
 zvm_xcat_password = <%= @zvm[:zvm_xcat_password] %>
-
-# (StrOpt) xCat MN server address, IP address or host name
-# zvm_xcat_server = YourxCATMNServerAddress
 zvm_xcat_server = <%= @zvm[:zvm_xcat_server] %>
-
-# (StrOpt) xCat zHCP nodename in xCAT, default value is zhcp
-# xcat_zhcp_nodename = zhcp
-# Example: xcat_zhcp_nodename = myzhcp1
 xcat_zhcp_nodename = <%= @zvm[:zvm_xcat_zhcp_nodename] %>
-
-# (StrOpt) The compute node name neutron-zvm-agent work on, same as 'host'in nova.conf
-# This property is optional. If it is not specified, 'host' in neutron.conf will be
-# used. Moreover, 'host' in neutron.conf is recommended and this property is deprecated.
-# zvm_host = opnstk1
-# Example: zvm_host = opnstk1
-
-# (IntOpt) Agent's polling interval in seconds, default value is 2 seconds
-# polling_interval = 2
-# Example: polling_interval = 5
-
-# (IntOpt) The number of seconds the agent will wait for
-# xCAT MN response, default value is 300 seconds
-# zvm_xcat_timeout = 300
-# Example: zvm_xcat_timeout = 600
-
-# (StrOpt ) xcat management NIC IP.
-# xcat_mgt_ip = 10.1.0.1
-# Example: xcat_mgt_ip=10.1.0.1
 <% unless @zvm[:xcat_mgt_ip].empty? -%>
 xcat_mgt_ip = <%= @zvm[:xcat_mgt_ip] %>
 <%end -%>
-
-# (StrOpt ) xcat management NIC mask.
-# xcat_mgt_mask=255.255.0.0
-# Example: xcat_mgt_mask=255.255.0.0
 <% unless @zvm[:xcat_mgt_mask].empty? -%>
 xcat_mgt_mask = <%= @zvm[:xcat_mgt_mask] %>
 <%end -%>
-
 [ml2_type_vlan]
 network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
-
 <% unless @zvm[:xcat_mgt_ip].empty? -%>
 [ml2_type_flat]
 flat_networks = <%= @zvm[:zvm_xcat_mgt_vswitch] %>
 <%end -%>
-
 [<%= @zvm[:zvm_xcat_mgt_vswitch] %>]
-
-# (StrOpt ) rdev_list for each vswitch's uplink real device(s), seperated by ','.
-# If a vswitch does not connect an OSA, which means it does not connect to
-# external network, rdev_list can be ignored.
-# A new section is required for each vswitch which has a uplink port.
-# rdev_list = 6000
-# Example:
-# [xcatvsw3]
-# rdev_list = 6000,6003,6005
-#
 [physnet1]
 <% unless @zvm[:zvm_physnet_rdev].empty? -%>
 rdev_list = <%= @zvm[:zvm_physnet_rdev] -%>
 <%end -%>
-
-#-----------------------------------------------------------------------------
-# Sample Configurations.
-#-----------------------------------------------------------------------------
-
-# 1. Single FLAT Mode
-# Physical network names should be identical to z/VM vswitch names. In
-# this sample, xcatvsw2 is used for xCAT Management Network, it should be a
-# Layer 2, VLAN UNAWARE vswitch in z/VM. When create neutron network, set
-# xcatvsw2 provider network_type to flat
-
-# Neutron server:
-#
-# [database]
-# connection = mysql://root:nova@127.0.0.1:3306/neutron
-# [ml2_type_flat]
-# flat_networks = xcatvsw2
-
-# Neutron z/VM Agent:
-#
-# [AGENT]
-# zvm_xcat_username = admin
-# zvm_xcat_password = admin
-# zvm_xcat_server = 10.0.0.1
-# xcat_zhcp_nodename = zhcp
-# polling_interval = 2
-# zvm_xcat_timeout = 300
-# xcat_mgt_ip = 10.1.0.1
-# xcat_mgt_mask=255.255.0.0
-
-# 2. FLAT, VLAN mixed Mode
-# Physical network names should be identical to z/VM vswitch names. In
-# this sample, xcatvsw2 is used for xCAT Management Network, it should be a
-# Layer 2, VLAN UNAWARE vswitch in z/VM, xcatvsw3 is used for OpenStack
-# Compute/Data Network, it is a Layer 2, VLAN AWARE vswitch in z/VM. xCAT
-# Management Network MUST be the first created network. This configuration
-# also can used for single FLAT network mode if you only create only one
-# FLAT network with xcatvsw2
-
-# Neutron server:
-#
-# [database]
-# connection = mysql://root:nova@127.0.0.1:3306/neutron
-# [ml2_type_vlan]
-# network_vlan_ranges = xcatvsw3:10:100
-#
-# Neutron z/VM Agent:
-#
-# [AGENT]
-# zvm_xcat_username = admin
-# zvm_xcat_password = admin
-# zvm_xcat_server = 10.0.0.1
-# xcat_zhcp_nodename = zhcp
-# polling_interval = 2
-# zvm_xcat_timeout = 300
-# xcat_mgt_ip = 10.1.0.1
-# xcat_mgt_mask=255.255.0.0
-#
-# [xcatvsw3]
-# rdev_list=6243
