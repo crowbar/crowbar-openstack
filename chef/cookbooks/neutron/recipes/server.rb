@@ -250,7 +250,13 @@ end
 
 ha_enabled = node[:neutron][:ha][:server][:enabled]
 
-crowbar_pacemaker_sync_mark "wait-neutron_db_sync"
+# use an increased timeout here because there are plenty of db syncs
+# inside of the sync mark and also a neutron-server start/stop
+crowbar_pacemaker_sync_mark "wait sync mark for neutron db sync" do
+  mark "neutron_db_sync"
+  action :wait
+  timeout 120
+end
 
 execute "neutron-db-manage migrate" do
   user node[:neutron][:user]
