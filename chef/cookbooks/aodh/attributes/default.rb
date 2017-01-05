@@ -54,7 +54,7 @@ default[:aodh][:api][:service_name] = api_service_name
 default[:aodh][:evaluator][:service_name] = evaluator_service_name
 default[:aodh][:notifier][:service_name]  = notifier_service_name
 default[:aodh][:listener][:service_name]  = listener_service_name
-default[:aodh][:alarm_threshold_evaluation_interval] = 600
+default[:aodh][:evaluation_interval] = 600
 
 default[:aodh][:debug] = false
 default[:aodh][:verbose] = false

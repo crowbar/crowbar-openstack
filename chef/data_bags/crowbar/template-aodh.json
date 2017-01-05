@@ -5,7 +5,7 @@
     "aodh": {
       "debug": false,
       "verbose": true,
-      "alarm_threshold_evaluation_interval": 600,
+      "evaluation_interval": 600,
       "rabbitmq_instance": "none",
       "database_instance": "none",
       "keystone_instance": "none",

@@ -81,12 +81,12 @@ class AodhService < PacemakerServiceObject
 
     validate_at_least_n_for_role proposal, "aodh-server", 1
 
-    alarm_eval_interval = proposal["attributes"][@bc_name]["alarm_threshold_evaluation_interval"]
+    alarm_eval_interval = proposal["attributes"][@bc_name]["evaluation_interval"]
 
     ceilometer_proposal = Proposal.where(barclamp: "ceilometer", name: "default").first
     ["cpu_interval", "disk_interval", "network_interval", "meters_interval"].each do |i|
       if alarm_eval_interval < ceilometer_proposal["attributes"]["ceilometer"][i]
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.alarm_evaluation_interval")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.evaluation_interval")
         break
       end
     end

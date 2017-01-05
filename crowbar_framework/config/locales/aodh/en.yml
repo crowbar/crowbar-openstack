@@ -24,7 +24,7 @@ en:
         keystone_instance: 'Keystone'
         rabbitmq_instance: 'RabbitMQ'
         ceilometer_instance: 'Ceilometer'
-        alarm_threshold_evaluation_interval: 'Evaluation interval for threshold alarms (in seconds).'
+        evaluation_interval: 'Evaluation interval for threshold alarms (in seconds).'
         verbose: 'Verbose Logging'
         debug: 'Debug'
         api:
@@ -38,4 +38,4 @@ en:
           cert_required: 'Require Client Certificate'
           ca_certs: 'SSL CA Certificates File'
       validation:
-        alarm_evaluation_interval: 'Evaluation interval shall be equal or higher then the interval of meters set in Ceilometer'
+        evaluation_interval: 'Evaluation interval shall be equal or higher then the interval of meters set in Ceilometer'

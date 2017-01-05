@@ -159,7 +159,7 @@ template node[:aodh][:config_file] do
     database_connection: db_connection,
     node_hostname: node["hostname"],
     aodh_ssl: node[:aodh][:ssl],
-    alarm_threshold_evaluation_interval: node[:aodh][:alarm_threshold_evaluation_interval]
+    evaluation_interval: node[:aodh][:evaluation_interval]
   )
   notifies :reload, resources(service: "apache2")
 end
