@@ -64,7 +64,7 @@ database_user "grant database access for #{@cookbook_name} database user" do
   action :grant
 end
 
-template "/etc/ec2api/ec2api.conf" do
+template node["ec2-api"][:config_file] do
   source "ec2api.conf.erb"
   owner "root"
   group node["ec2-api"][:group]
@@ -81,12 +81,15 @@ node.save
 
 service "openstack-ec2-api-api" do
   action [:enable, :start]
+  subscribes :restart, resources(template: node["ec2-api"][:config_file])
 end
 
 service "openstack-ec2-api-metadata" do
   action [:enable, :start]
+  subscribes :restart, resources(template: node["ec2-api"][:config_file])
 end
 
 service "openstack-ec2-api-s3" do
   action [:enable, :start]
+  subscribes :restart, resources(template: node["ec2-api"][:config_file])
 end
