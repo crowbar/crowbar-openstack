@@ -1,55 +1,12 @@
 [DEFAULT]
-# Show more verbose log output (sets INFO log level output)
 verbose = <%= node[:trove][:verbose] %>
-
-# Show debugging output in logs (sets DEBUG log level output)
 debug = <%= node[:trove][:debug] %>
-
-# Address to bind the API server
-#XXX endpoint.host is a hostname, service expects an ip address
 bind_host = <%= @bind_host %>
-
-# Port the bind the API server to
 bind_port = <%= @bind_port %>
+transport_url = <%= @rabbit_trove_url %>
 
-# Number of child processes to run
-#trove_api_workers=5
 
-# AMQP Connection info
-rabbit_host=<%= @rabbit_default_settings[:address] %>
-<% unless @rabbit_default_settings[:port].nil? -%>
-rabbit_port=<%= @rabbit_default_settings[:port] %>
-<% end -%>
-<% unless @rabbit_trove_settings.nil? -%>
-rabbit_userid=<%= @rabbit_trove_settings[:user] %>
-rabbit_password=<%= @rabbit_trove_settings[:password] %>
-rabbit_virtual_host=<%= @rabbit_trove_settings[:vhost] %>
-<% end -%>
-rabbit_use_ssl = false
-
-# SQLAlchemy connection string for the reference implementation
-# registry server. Any valid SQLAlchemy connection string is fine.
-# See: http://www.sqlalchemy.org/docs/05/reference/sqlalchemy/connections.html#sqlalchemy.create_engine
-# sql_connection = sqlite:///trove_test.sqlite
-sql_connection = <%= @sql_connection %>
-#sql_connection = postgresql://trove:trove@localhost/trove
-
-# Period in seconds after which SQLAlchemy should reestablish its connection
-# to the database.
-#
-# MySQL uses a default `wait_timeout` of 8 hours, after which it will drop
-# idle connections. This can result in 'MySQL Gone Away' exceptions. If you
-# notice this, you can lower this value to ensure that SQLAlchemy reconnects
-# before MySQL can drop the connection.
-sql_idle_timeout = 3600
-
-#DB Api Implementation
-db_api_implementation = "trove.db.sqlalchemy.api"
-
-# Path to the extensions
 api_extensions_path = $pybasedir/extensions/routes
-
-# Configuration options for talking to nova via the novaclient.
 api_insecure = <%= @keystone_settings['insecure'] %>
 trove_auth_url = <%= KeystoneHelper.versioned_service_URL(
                       @keystone_settings["protocol"],
@@ -58,290 +15,52 @@ trove_auth_url = <%= KeystoneHelper.versioned_service_URL(
                       "2.0") %>
 os_region_name= <%= @keystone_settings['endpoint_region'] %>
 
-# nova
 <% unless @nova_url.nil? -%>
 nova_compute_url = <%= @nova_url %>
 <% end -%>
 nova_compute_endpoint_type = internalURL
 nova_api_insecure = <%= @nova_insecure %>
-# cinder
-# Cinder
 <% unless @cinder_url.nil? -%>
 cinder_url = <%= @cinder_url %>
 <% end -%>
 cinder_endpoint_type = internalURL
 cinder_api_insecure = <%= @cinder_insecure %>
-# Swift
 <% unless @object_store_url.nil? -%>
 swift_url = <%= @object_store_url %>
 <% end -%>
 swift_endpoint_type = internalURL
 swift_api_insecure = <%= @object_store_insecure %>
-
-# Config option for showing the IP address that nova doles out
 add_addresses = True
 network_label_regex = ^private$
-#ip_regex = ^(15.|123.)
-
-# Config options for enabling volume service
 trove_volume_support = <%= node[:trove][:volume_support] %>
-block_device_mapping = vdb
-device_path = /dev/vdb
-mount_point = /var/lib/mysql
-max_accepted_volume_size = 10
-max_instances_per_user = 5
-max_volumes_per_user = 100
-max_backups_per_user = 5
-volume_time_out=30
-
-# Config options for rate limits
-http_get_rate = 200
-http_post_rate = 200
-http_put_rate = 200
-http_delete_rate = 200
-
-# Trove DNS
-trove_dns_support = False
 dns_account_id = 123456
 dns_auth_url = <%= KeystoneHelper.versioned_service_URL(
                       @keystone_settings["protocol"],
                       @keystone_settings["internal_url_host"],
                       @keystone_settings["service_port"],
                       "2.0") %>
-dns_username = user
-dns_passkey = password
-dns_ttl = 3600
-dns_domain_name = 'trove.com.'
-dns_domain_id = 11111111-1111-1111-1111-111111111111
-dns_driver = trove.dns.designate.driver.DesignateDriver
-dns_instance_entry_factory = trove.dns.designate.driver.DesignateInstanceEntryFactory
-dns_endpoint_url = http://127.0.0.1/v1/
-dns_service_type = dns
-
-# Taskmanager queue name
-taskmanager_queue = taskmanager
-
-# Auth
-admin_roles = admin
-
 root_on_create = False
-
-# Users to ignore for user create/list/delete operations
 ignore_users = os_admin, root
 ignore_dbs = lost+found, mysql, information_schema
-
-# Guest related conf
 agent_heartbeat_time = 10
 agent_call_low_timeout = 5
 agent_call_high_timeout = 150
-
-# Reboot time out for instances
 reboot_time_out = 60
-
-# Trove api-paste file name
 api_paste_config = api-paste.ini
-
-
-# ============ notifer queue kombu connection options ========================
-
 notifier_queue_transport = memory
-
 control_exchange = trove
-
-# ============ Logging information =============================
 log_dir = /var/log/trove
-#log_file = trove-api.log
 
-
-# ============ SSL configuration (and enablement) =============================
-# In order to enable SSL for the trove api server, uncomment
-# the cert_file and key_file - and of course have those files
-# accessible. The existance of those setting and files will
-# enable SSL.
-
-[ssl]
-
-#cert_file = /path/to/server.crt
-#key_file = /path/to/server.key
-#optional:
-#ca_file = /path/to/ca_file
+[database]
+connection = <%= @sql_connection %>
 
 [keystone_authtoken]
-
-#
-# From keystonemiddleware.auth_token
-#
-
-# Complete public Identity API endpoint. (string value)
-#auth_uri = <None>
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
-
-# API version of the admin Identity API endpoint. (string value)
-#auth_version = <None>
 auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
-
-# Do not handle authorization requests within the middleware, but
-# delegate the authorization decision to downstream WSGI components.
-# (boolean value)
-#delay_auth_decision = false
-
-# Request timeout value for communicating with Identity API server.
-# (integer value)
-#http_connect_timeout = <None>
-
-# How many times are we trying to reconnect when communicating with
-# Identity API Server. (integer value)
-#http_request_max_retries = 3
-
-# Env key for the swift cache. (string value)
-#cache = <None>
-
-# Required if identity server requires client certificate (string
-# value)
-#certfile = <None>
-
-# Required if identity server requires client certificate (string
-# value)
-#keyfile = <None>
-
-# A PEM encoded Certificate Authority to use when verifying HTTPs
-# connections. Defaults to system CAs. (string value)
-#cafile = <None>
-
-# Verify HTTPS connections. (boolean value)
-#insecure = false
 insecure = <%= @keystone_settings['insecure'] %>
-
-# The region in which the identity server can be found. (string value)
-#region_name = <None>
 region_name = <%= @keystone_settings['endpoint_region'] %>
-
-# Directory used to cache files related to PKI tokens. (string value)
-#signing_dir = <None>
 signing_dir=/var/cache/trove/keystone-signing
-
-# Optionally specify a list of memcached server(s) to use for caching.
-# If left undefined, tokens will instead be cached in-process. (list
-# value)
-# Deprecated group/name - [DEFAULT]/memcache_servers
-#memcached_servers = <None>
-
-# In order to prevent excessive effort spent validating tokens, the
-# middleware caches previously-seen tokens for a configurable duration
-# (in seconds). Set to -1 to disable caching completely. (integer
-# value)
-#token_cache_time = 300
-
-# Determines the frequency at which the list of revoked tokens is
-# retrieved from the Identity service (in seconds). A high number of
-# revocation events combined with a low cache duration may
-# significantly reduce performance. (integer value)
-#revocation_cache_time = 10
-
-# (Optional) If defined, indicate whether token data should be
-# authenticated or authenticated and encrypted. Acceptable values are
-# MAC or ENCRYPT.  If MAC, token data is authenticated (with HMAC) in
-# the cache. If ENCRYPT, token data is encrypted and authenticated in
-# the cache. If the value is not one of these options or empty,
-# auth_token will raise an exception on initialization. (string value)
-#memcache_security_strategy = <None>
-
-# (Optional, mandatory if memcache_security_strategy is defined) This
-# string is used for key derivation. (string value)
-#memcache_secret_key = <None>
-
-# (Optional) Number of seconds memcached server is considered dead
-# before it is tried again. (integer value)
-#memcache_pool_dead_retry = 300
-
-# (Optional) Maximum total number of open connections to every
-# memcached server. (integer value)
-#memcache_pool_maxsize = 10
-
-# (Optional) Socket timeout in seconds for communicating with a
-# memcached server. (integer value)
-#memcache_pool_socket_timeout = 3
-
-# (Optional) Number of seconds a connection to memcached is held
-# unused in the pool before it is closed. (integer value)
-#memcache_pool_unused_timeout = 60
-
-# (Optional) Number of seconds that an operation will wait to get a
-# memcached client connection from the pool. (integer value)
-#memcache_pool_conn_get_timeout = 10
-
-# (Optional) Use the advanced (eventlet safe) memcached client pool.
-# The advanced pool will only work under python 2.x. (boolean value)
-#memcache_use_advanced_pool = false
-
-# (Optional) Indicate whether to set the X-Service-Catalog header. If
-# False, middleware will not ask for service catalog on token
-# validation and will not set the X-Service-Catalog header. (boolean
-# value)
-#include_service_catalog = true
-
-# Used to control the use and type of token binding. Can be set to:
-# "disabled" to not check token binding. "permissive" (default) to
-# validate binding information if the bind type is of a form known to
-# the server and ignore it if not. "strict" like "permissive" but if
-# the bind type is unknown the token will be rejected. "required" any
-# form of token binding is needed to be allowed. Finally the name of a
-# binding method that must be present in tokens. (string value)
-#enforce_token_bind = permissive
-
-# If true, the revocation list will be checked for cached tokens. This
-# requires that PKI tokens are configured on the identity server.
-# (boolean value)
-#check_revocations_for_cached = false
-
-# Hash algorithms to use for hashing PKI tokens. This may be a single
-# algorithm or multiple. The algorithms are those supported by Python
-# standard hashlib.new(). The hashes will be tried in the order given,
-# so put the preferred one first for performance. The result of the
-# first hash will be stored in the cache. This will typically be set
-# to multiple values only while migrating from a less secure algorithm
-# to a more secure one. Once all the old tokens are expired this
-# option should be set to a single value for better performance. (list
-# value)
-#hash_algorithms = md5
-
-# Prefix to prepend at the beginning of the path. Deprecated, use
-# identity_uri. (string value)
-#auth_admin_prefix =
-
-# Host providing the admin Identity API endpoint. Deprecated, use
-# identity_uri. (string value)
-#auth_host = 127.0.0.1
-
-# Port of the admin Identity API endpoint. Deprecated, use
-# identity_uri. (integer value)
-#auth_port = 35357
-
-# Protocol of the admin Identity API endpoint (http or https).
-# Deprecated, use identity_uri. (string value)
-#auth_protocol = https
-
-# Complete admin Identity API endpoint. This should specify the
-# unversioned root endpoint e.g. https://localhost:35357/ (string
-# value)
-#identity_uri = <None>
 identity_uri = <%= @keystone_settings['admin_auth_url'] %>
-
-# This option is deprecated and may be removed in a future release.
-# Single shared secret with the Keystone configuration used for
-# bootstrapping a Keystone installation, or otherwise bypassing the
-# normal authentication process. This option should not be used, use
-# `admin_user` and `admin_password` instead. (string value)
-#admin_token = <None>
-
-# Service username. (string value)
-#admin_user = <None>
 admin_user = <%= @keystone_settings['service_user'] %>
-
-# Service user password. (string value)
-#admin_password = <None>
 admin_password = <%= @keystone_settings['service_password'] %>
-
-# Service tenant name. (string value)
-#admin_tenant_name = admin
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>

@@ -22,6 +22,11 @@ default[:trove][:debug] = false
 
 default[:trove][:user] = "trove"
 default[:trove][:group] = "trove"
+default[:trove][:api][:config_file] = "/etc/trove/trove-api.conf.d/100-trove-api.conf"
+default[:trove][:conductor][:config_file] = \
+  "/etc/trove/trove-conductor.conf.d/100-trove-conductor.conf"
+default[:trove][:taskmanager][:config_file] = \
+  "/etc/trove/trove-taskmanager.conf.d/100-trove-taskmanager.conf"
 
 default[:trove][:volume_support] = false
 

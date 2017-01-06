@@ -11,18 +11,8 @@ os_region_name= <%= @keystone_settings['endpoint_region'] %>
 nova_proxy_admin_user = <%= @keystone_settings["admin_user"] %>
 nova_proxy_admin_pass = <%= @keystone_settings["admin_password"] %>
 nova_proxy_admin_tenant_name = <%= @keystone_settings["admin_tenant"] %>
-sql_connection = <%= @sql_connection %>
-
-# AMQP Connection info
-rabbit_host=<%= @rabbit_default_settings[:address] %>
-<% unless @rabbit_default_settings[:port].nil? -%>
-rabbit_port=<%= @rabbit_default_settings[:port] %>
-<% end -%>
-<% unless @rabbit_trove_settings.nil? -%>
-rabbit_userid=<%= @rabbit_trove_settings[:user] %>
-rabbit_password=<%= @rabbit_trove_settings[:password] %>
-rabbit_virtual_host=<%= @rabbit_trove_settings[:vhost] %>
-<% end -%>
-rabbit_use_ssl = false
-
+transport_url = <%= @rabbit_trove_url %>
 log_dir = /var/log/trove
+
+[database]
+connection = <%= @sql_connection %>
