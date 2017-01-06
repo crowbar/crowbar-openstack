@@ -158,7 +158,9 @@ aodh = <%= @enabled_services.include? "alarming" %>
 aodh_plugin = <%= @enabled_services.include? "alarming" %>
 horizon = <%= @use_horizon %>
 sahara = <%= @enabled_services.include? "data-processing" %>
-trove = <%= @enabled_services.include? "database" %>
+# disable trove until bsc1018614 is fixed so we dont block all ci jobs
+trove = false
+#trove = <%= @enabled_services.include? "database" %>
 manila = <%= @enabled_services.include? "sharev2" %>
 magnum = <%= @enabled_services.include? "container-infra" %>
 
