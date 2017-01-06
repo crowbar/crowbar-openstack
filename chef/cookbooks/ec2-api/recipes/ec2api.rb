@@ -86,15 +86,15 @@ node.save
 
 service "openstack-ec2-api-api" do
   action [:enable, :start]
-  subscribes :restart, resources(template: node["ec2-api"][:config_file])
+  subscribes :restart, resources(template: node[:nova]["ec2-api"][:config_file])
 end
 
 service "openstack-ec2-api-metadata" do
   action [:enable, :start]
-  subscribes :restart, resources(template: node["ec2-api"][:config_file])
+  subscribes :restart, resources(template: node[:nova]["ec2-api"][:config_file])
 end
 
 service "openstack-ec2-api-s3" do
   action [:enable, :start]
-  subscribes :restart, resources(template: node["ec2-api"][:config_file])
+  subscribes :restart, resources(template: node[:nova]["ec2-api"][:config_file])
 end
