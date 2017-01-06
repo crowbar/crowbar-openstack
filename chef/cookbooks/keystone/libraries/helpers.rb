@@ -53,10 +53,10 @@ module KeystoneHelper
     unless @keystone_settings && @keystone_settings.include?(instance)
       node = search_for_keystone(current_node, instance)
 
-      use_ssl = node["keystone"]["api"]["protocol"] == "https"
-      public_host = CrowbarHelper.get_host_for_public_url(node, use_ssl)
-
       ha_enabled = node[:keystone][:ha][:enabled]
+      use_ssl = node["keystone"]["api"]["protocol"] == "https"
+      public_host = CrowbarHelper.get_host_for_public_url(node, use_ssl, ha_enabled)
+
       admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 
       has_default_user = node["keystone"]["default"]["create_user"]
