@@ -160,7 +160,7 @@ horizon = <%= @use_horizon %>
 sahara = <%= @enabled_services.include? "data-processing" %>
 trove = <%= @enabled_services.include? "database" %>
 manila = <%= @enabled_services.include? "share" %>
-magnum = <%= @enabled_services.include? "container" %>
+magnum = <%= @enabled_services.include? "container-infra" %>
 
 [share]
 region = <%= @keystone_settings['endpoint_region'] %>
