@@ -22,6 +22,8 @@ log "HA support for manila is enabled"
 
 cluster_admin_ip = CrowbarPacemakerHelper.cluster_vip(node, "admin")
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "manila-api" do
   address node[:manila][:api][:bind_open_address] ?
     "0.0.0.0" : cluster_admin_ip

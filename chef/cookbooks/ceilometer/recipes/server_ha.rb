@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "ceilometer-api" do
   address "0.0.0.0"
   port node[:ceilometer][:api][:port]

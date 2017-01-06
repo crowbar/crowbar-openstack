@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "heat-api" do
   address "0.0.0.0"
   port node[:heat][:api][:port]

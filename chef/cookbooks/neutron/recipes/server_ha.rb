@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "neutron-server" do
   address node[:neutron][:api][:service_host]
   port node[:neutron][:api][:service_port]

@@ -22,6 +22,8 @@ log "Setting up glance HA support"
 
 network_settings = GlanceHelper.network_settings(node)
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "glance-api" do
   address network_settings[:api][:ha_bind_host]
   port network_settings[:api][:ha_bind_port]

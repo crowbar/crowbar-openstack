@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "keystone-service" do
   address node[:keystone][:api][:api_host]
   port node[:keystone][:api][:service_port]

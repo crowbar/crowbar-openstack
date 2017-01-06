@@ -33,6 +33,8 @@ end
 fs_params = {}
 fs_params["directory"] = "/var/lib/rabbitmq"
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
+  include_recipe "crowbar-pacemaker::drbd"
+
   crowbar_pacemaker_drbd drbd_resource do
     size "#{node[:rabbitmq][:ha][:storage][:drbd][:size]}G"
     action :nothing

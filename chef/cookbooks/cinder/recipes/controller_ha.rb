@@ -22,6 +22,8 @@ log "HA support for cinder is enabled"
 
 cluster_admin_ip = CrowbarPacemakerHelper.cluster_vip(node, "admin")
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "cinder-api" do
   address node[:cinder][:api][:bind_open_address] ? "0.0.0.0" : cluster_admin_ip
   port node[:cinder][:api][:bind_port]

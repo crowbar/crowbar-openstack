@@ -22,6 +22,8 @@ log "HA support for nova is enabled"
 
 cluster_admin_ip = CrowbarPacemakerHelper.cluster_vip(node, "admin")
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "nova-api" do
   address "0.0.0.0"
   port node[:nova][:ports][:api]

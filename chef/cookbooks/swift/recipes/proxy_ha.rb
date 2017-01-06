@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "swift-proxy" do
   address "0.0.0.0"
   port node[:swift][:ports][:proxy]

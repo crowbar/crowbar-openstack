@@ -24,6 +24,8 @@ network_settings = MagnumHelper.network_settings(node)
 
 ssl_enabled = (node[:magnum][:api][:protocol] == "https")
 
+include_recipe "crowbar-pacemaker::haproxy"
+
 haproxy_loadbalancer "magnum-api" do
   address network_settings[:api][:ha_bind_host]
   port network_settings[:api][:ha_bind_port]

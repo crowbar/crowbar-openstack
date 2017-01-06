@@ -31,6 +31,10 @@ unless nova[:nova][:ha][:compute][:setup]
   return
 end
 
+# ensure attributes are set
+include_recipe "crowbar-pacemaker::attributes"
+include_recipe "crowbar-pacemaker::remote_attributes"
+
 keystone_settings = KeystoneHelper.keystone_settings(nova, @cookbook_name)
 internal_auth_url_v2 = \
   "#{keystone_settings["protocol"]}://" \
