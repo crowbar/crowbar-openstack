@@ -172,7 +172,6 @@ execute "trove-manage db sync" do
   command "trove-manage --config-file #{node[:trove][:api][:config_file]} db_sync"
   user node[:trove][:user]
   group node[:trove][:group]
-  action :nothing
   only_if { !node[:trove][:db_synced] }
 end
 
