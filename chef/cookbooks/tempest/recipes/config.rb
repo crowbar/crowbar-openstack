@@ -455,7 +455,7 @@ template "/etc/tempest/tempest.conf" do
     alt_comp_tenant: alt_comp_tenant,
     alt_comp_pass: alt_comp_pass,
     # image settings
-    http_image: node[:tempest][:tempest_test_image],
+    http_image: tempest_test_image,
     # network settings
     public_network_id: public_network_id,
     neutron_api_extensions: neutron_api_extensions,
