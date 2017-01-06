@@ -284,7 +284,7 @@ ec2_access = `#{openstackcli} ec2 credentials list -f value -c Access`.strip
 ec2_secret = `#{openstackcli} ec2 credentials list -f value -c Secret`.strip
 raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
 
-enabled_services = `#{openstackcli_adm} service list -f value -c Type`
+enabled_services = `#{openstackcli_adm} service list -f value -c Type`.split
 
 # FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
