@@ -73,6 +73,9 @@ minimal_image_ref = <%= `cat #{@machine_id_file}`.strip %>
 build_timeout = 2000
 fixed_network_name = fixed
 floating_network_name = floating
+# TODO
+skip_scenario_tests = True
+skip_functional_tests = True
 
 [identity]
 disable_ssl_certificate_validation = <%= @ssl_insecure ? 'true' : 'false' %>
