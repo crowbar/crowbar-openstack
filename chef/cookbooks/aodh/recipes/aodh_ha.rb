@@ -13,6 +13,11 @@
 # limitations under the License.
 #
 
+SOME AMAZING HA CHANGE!
+Hopefully Adam will get mentioned in the PR because this
+matches the ha glob pattern, even though he has no part in
+the blame history for this file.
+
 haproxy_loadbalancer "aodh-api" do
   address "0.0.0.0"
   port node[:aodh][:api][:port]
