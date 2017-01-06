@@ -294,6 +294,11 @@ cinder_service "volume" do
   use_pacemaker_provider ha_enabled
 end
 
+# remove file used for HA in 3.0 branch
+file "/etc/cinder/cinder-volume.conf" do
+  action :delete
+end
+
 if ha_enabled
   log "HA support for cinder volume is enabled"
 
@@ -315,7 +320,7 @@ if ha_enabled
 else
   log "HA support for cinder volume is disabled"
 
-  file "/etc/cinder/cinder-volume.conf" do
+  file node[:cinder][:config_file_cinder_volume] do
     action :delete
     notifies :restart, "service[cinder-volume]"
   end
