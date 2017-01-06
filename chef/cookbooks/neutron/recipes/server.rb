@@ -224,7 +224,7 @@ end
 if node[:neutron][:use_lbaas]
   keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-  template "/etc/neutron/neutron_lbaas.conf" do
+  template node[:neutron][:lbaas_config_file] do
     source "neutron_lbaas.conf.erb"
     owner "root"
     group node[:neutron][:platform][:group]
@@ -237,7 +237,7 @@ if node[:neutron][:use_lbaas]
     )
   end
 
-  template "/etc/neutron/services_lbaas.conf" do
+  template node[:neutron][:lbaas_service_file] do
     source "services_lbaas.conf.erb"
     owner "root"
     group node[:neutron][:platform][:group]
@@ -342,7 +342,7 @@ if node[:neutron][:networking_plugin] == "ml2"
     execute "apic-ml2-db-manage upgrade head" do
       user node[:neutron][:user]
       group node[:neutron][:group]
-      command "apic-ml2-db-manage --config-file /etc/neutron/neutron.conf \
+      command "apic-ml2-db-manage --config-dir /etc/neutron/neutron.conf.d \
                                   --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
                                   --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
                                   upgrade head"
@@ -364,7 +364,7 @@ if node[:neutron][:networking_plugin] == "ml2"
     execute "gbp-db-manage upgrade head" do
       user node[:neutron][:user]
       group node[:neutron][:group]
-      command "gbp-db-manage --config-file /etc/neutron/neutron.conf \
+      command "gbp-db-manage --config-dir /etc/neutron/neutron.conf.d \
                              --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
                              --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
                              upgrade head"
@@ -387,7 +387,7 @@ crowbar_pacemaker_sync_mark "create-neutron_db_sync"
 service node[:neutron][:platform][:service_name] do
   supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+  subscribes :restart, resources(template: node[:neutron][:config_file])
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
@@ -395,7 +395,7 @@ if node[:neutron][:use_infoblox]
   service node[:neutron][:platform][:infoblox_agent_name] do
     supports status: true, restart: true
     action [:enable, :start]
-    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources(template: node[:neutron][:config_file])
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 end

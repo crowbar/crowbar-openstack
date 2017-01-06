@@ -23,6 +23,10 @@ default[:neutron][:max_header_line] = 16384
 default[:neutron][:dhcp_domain] = "openstack.local"
 default[:neutron][:networking_plugin] = "ml2"
 default[:neutron][:additional_external_networks] = []
+default[:neutron][:config_file] = "/etc/neutron/neutron.conf.d/100-neutron.conf"
+default[:neutron][:lbaas_service_file] = "/etc/neutron/neutron-server.conf.d/100-neutron_service_lbaas.conf"
+default[:neutron][:lbaas_config_file] = "/etc/neutron/neutron.conf.d/110-neutron_lbaas.conf"
+default[:neutron][:l3_agent_config_file] = "/etc/neutron/neutron-l3-agent.conf.d/100-agent.conf"
 
 default[:neutron][:db][:database] = "neutron"
 default[:neutron][:db][:user] = "neutron"

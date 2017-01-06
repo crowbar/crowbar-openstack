@@ -257,7 +257,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
   service neutron_agent do
     action [:enable, :start]
     subscribes :restart, resources("template[#{agent_config_path}]")
-    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources(template: node[:neutron][:config_file])
     if neutron_network_ha || nova_compute_ha_enabled
       provider Chef::Provider::CrowbarPacemakerService
     end
@@ -274,7 +274,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
            node[:neutron][:platform][:pkgs_fwaas]
     pkgs.each { |p| package p }
 
-    template "/etc/neutron/l3_agent.ini" do
+    template node[:neutron][:l3_agent_config_file] do
       source "l3_agent.ini.erb"
       owner "root"
       group node[:neutron][:platform][:group]
@@ -294,8 +294,8 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
     service node[:neutron][:platform][:l3_agent_name] do
       action [:enable, :start]
-      subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
-      subscribes :restart, resources("template[/etc/neutron/l3_agent.ini]")
+      subscribes :restart, resources(template: node[:neutron][:config_file])
+      subscribes :restart, resources(template: node[:neutron][:l3_agent_config_file])
       if neutron_network_ha || nova_compute_ha_enabled
         provider Chef::Provider::CrowbarPacemakerService
       end
@@ -346,7 +346,7 @@ if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
 
   service node[:neutron][:platform][:metadata_agent_name] do
     action [:enable, :start]
-    subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources(template: node[:neutron][:config_file])
     subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
     if neutron_network_ha || nova_compute_ha_enabled
       provider Chef::Provider::CrowbarPacemakerService
