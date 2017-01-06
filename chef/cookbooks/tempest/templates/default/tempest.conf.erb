@@ -159,7 +159,7 @@ aodh_plugin = <%= @enabled_services.include? "alarming" %>
 horizon = <%= @use_horizon %>
 sahara = <%= @enabled_services.include? "data-processing" %>
 trove = <%= @enabled_services.include? "database" %>
-manila = <%= @enabled_services.include? "share" %>
+manila = <%= @enabled_services.include? "sharev2" %>
 magnum = <%= @enabled_services.include? "container-infra" %>
 
 [share]
