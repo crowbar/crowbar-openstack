@@ -113,7 +113,7 @@ def parse_dev_info_line(line, ringinfo)
 
   # Line looks like this:
   # id region zone  ip address:port      replication ip:port  name                              weight partitions balance meta
-  #  0      1    0  192.168.125.14:6000  192.168.125.14:6000  2d4dc9923ed244dc9cac8f283ca79748  99.00           0 -100.00
+  #  0      1    0  192.168.125.14:6200  192.168.125.14:6200  2d4dc9923ed244dc9cac8f283ca79748  99.00           0 -100.00
   line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)[:\s+](\d+)\s+(\d+\.\d+\.\d+\.\d+)[:\s+](\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
   if $~.nil?
     raise "failed to parse dev info: #{line}"
@@ -288,7 +288,7 @@ if __FILE__ == $0
 65536 partitions, 3.000000 replicas, 1 regions, 1 zones, 1 devices, 0.00 balance
 The minimum number of hours before a partition can be reassigned is 24
 Devices:    id  region  zone      ip address  port  replication ip  replication port      name weight partitions balance meta
-             0       1     0  192.168.125.10  6002  192.168.125.10              6002 04cc15ee94ff41169b5c30c927e82bd7  99.00     196608    0.00
+             0       1     0  192.168.125.10  6202  192.168.125.10              6202 04cc15ee94ff41169b5c30c927e82bd7  99.00     196608    0.00
 TEST
 
   test_str_liberty = <<TEST
@@ -297,10 +297,10 @@ TEST
 The minimum number of hours before a partition can be reassigned is 24
 The overload factor is 0.00% (0.000000)
 Devices:    id  region  zone      ip address  port  replication ip  replication port      name weight partitions balance meta
-             0       1     0  192.168.125.14  6000  192.168.125.14              6000 2d4dc9923ed244dc9cac8f283ca79748  99.00          0 -100.00
-             1       1     1  192.168.125.15  6000  192.168.125.15              6000 98efd70297d547f2b90b697362e10b2c  99.00          0 -100.00
-             2       1     0  192.168.125.15  6000  192.168.125.15              6000 bd0e9f3cc6ab4a67abf99d3789f8daaa  99.00          0 -100.00
-             3       1     1  192.168.125.13  6000  192.168.125.13              6000 69cb18d1fac847269b6183242db5c731  99.00          0 -100.00
+             0       1     0  192.168.125.14  6200  192.168.125.14              6200 2d4dc9923ed244dc9cac8f283ca79748  99.00          0 -100.00
+             1       1     1  192.168.125.15  6200  192.168.125.15              6200 98efd70297d547f2b90b697362e10b2c  99.00          0 -100.00
+             2       1     0  192.168.125.15  6200  192.168.125.15              6200 bd0e9f3cc6ab4a67abf99d3789f8daaa  99.00          0 -100.00
+             3       1     1  192.168.125.13  6200  192.168.125.13              6200 69cb18d1fac847269b6183242db5c731  99.00          0 -100.00
 TEST
 
   puts "=== Juno ==="
