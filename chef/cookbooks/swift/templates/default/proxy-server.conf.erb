@@ -316,29 +316,26 @@ user_test_tester3 = testing3
 
 [filter:authtoken]
 paste.filter_factory = keystonemiddleware.auth_token:filter_factory
-# auth_host = keystonehost
-auth_host = <%= @keystone_settings['internal_url_host'] %>
-# auth_port = 35357
-auth_port = <%= @keystone_settings['admin_port'] %>
-# auth_protocol = http
-auth_protocol = <%= @keystone_settings['protocol'] %>
-# auth_uri = http://keystonehost:5000/
+auth_type = password
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
-# admin_tenant_name = service
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
-# admin_user = swift
-admin_user = <%= @keystone_settings['service_user'] %>
-# admin_password = password
-admin_password = <%= @keystone_settings['service_password'] %>
+
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
-auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
+auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 # delay_auth_decision = 1
 delay_auth_decision = <%= @keystone_delay_auth_decision %>
-# cache = swift.cache
-# include_service_catalog = False
 signing_dir = /var/cache/swift/keystone-signing
+include_service_catalog = False
+cache = swift.cache
+memcached_servers = <%= @memcached_ips.join(", ") %>
+
 #
 [filter:keystoneauth]
 # use = egg:swift#keystoneauth
