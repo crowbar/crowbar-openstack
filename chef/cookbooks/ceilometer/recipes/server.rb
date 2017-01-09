@@ -23,9 +23,7 @@ if node[:ceilometer][:use_mongodb]
   mongodb_nodes = nil
 
   if ha_enabled
-    mongodb_nodes = node_search_with_cache("roles:ceilometer-server").select do |n|
-      n[:ceilometer][:ha][:mongodb][:replica_set][:member] rescue false
-    end
+    mongodb_nodes = CeilometerHelper.replica_set_members(node)
   end
 
   # if we don't have HA enabled, then mongodb should be on the current host; if
