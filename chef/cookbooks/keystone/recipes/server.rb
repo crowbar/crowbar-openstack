@@ -286,6 +286,79 @@ end
 
 crowbar_pacemaker_sync_mark "create-keystone_db_sync"
 
+ruby_block "synchronize signing keys for founder and remember them for non-HA case" do
+  only_if { (!ha_enabled || (ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node))) &&
+            (node[:platform_family] == "suse") }
+  block do
+    ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb") { |io| io.read } rescue ""
+    signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb") { |io| io.read } rescue ""
+    signing_key = File.open("/etc/keystone/ssl/private/signing_key.pem", "rb") { |io| io.read } rescue ""
+
+    node[:keystone][:certificates] ||= {}
+    node[:keystone][:certificates][:content] ||= {}
+
+    dirty = false
+
+    if node[:keystone][:certificates][:content][:ca] != ca
+      node.set[:keystone][:certificates][:content][:ca] = ca
+      dirty = true
+    end
+    if node[:keystone][:certificates][:content][:signing_cert] != signing_cert
+      node.set[:keystone][:certificates][:content][:signing_cert] = signing_cert
+      dirty = true
+    end
+    if node[:keystone][:certificates][:content][:signing_key] != signing_key
+      node.set[:keystone][:certificates][:content][:signing_key] = signing_key
+      dirty = true
+    end
+
+    node.save if dirty
+  end
+end
+
+ruby_block "synchronize signing keys for non-founder" do
+  only_if { ha_enabled && !CrowbarPacemakerHelper.is_cluster_founder?(node) && (node[:platform_family] == "suse") }
+  block do
+    ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb") { |io| io.read } rescue ""
+    signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb") { |io| io.read } rescue ""
+    signing_key = File.open("/etc/keystone/ssl/private/signing_key.pem", "rb") { |io| io.read } rescue ""
+
+    founder = CrowbarPacemakerHelper.cluster_founder(node)
+
+    cluster_ca = founder[:keystone][:certificates][:content][:ca]
+    cluster_signing_cert = founder[:keystone][:certificates][:content][:signing_cert]
+    cluster_signing_key = founder[:keystone][:certificates][:content][:signing_key]
+
+    # The files exist; we will keep ownership / permissions with
+    # the code below
+    dirty = false
+    if ca != cluster_ca
+      File.open("/etc/keystone/ssl/certs/ca.pem", "w") { |f| f.write(cluster_ca) }
+      dirty = true
+    end
+    if signing_cert != cluster_signing_cert
+      File.open("/etc/keystone/ssl/certs/signing_cert.pem", "w") { |f| f.write(cluster_signing_cert) }
+      dirty = true
+    end
+    if signing_key != cluster_signing_key
+      File.open("/etc/keystone/ssl/private/signing_key.pem", "w") { |f| f.write(cluster_signing_key) }
+      dirty = true
+    end
+
+    if dirty
+      if node[:keystone][:frontend] == "native"
+        resources(service: "keystone").run_action(:restart)
+      elsif node[:keystone][:frontend] == "apache"
+        resources(service: "apache2").run_action(:restart)
+      elsif node[:keystone][:frontend] == "uwsgi"
+        resources(service: "keystone-uwsgi").run_action(:restart)
+      end
+    end
+  end # block
+end
+
+crowbar_pacemaker_sync_mark "create-keystone_certificates"
+
 if node[:keystone][:api][:protocol] == "https"
   ssl_setup "setting up ssl for keystone" do
     generate_certs node[:keystone][:ssl][:generate_certs]
