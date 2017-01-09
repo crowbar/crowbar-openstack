@@ -2,27 +2,7 @@
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 if node[:ceilometer][:use_mongodb]
-  db_connection = nil
-
-  if node[:ceilometer][:ha][:server][:enabled]
-    db_hosts = node_search_with_cache("roles:ceilometer-server").select do |n|
-      n[:ceilometer][:ha][:mongodb][:replica_set][:member] rescue false
-    end
-    unless db_hosts.empty?
-      mongodb_servers = db_hosts.map { |s| "#{Chef::Recipe::Barclamp::Inventory.get_network_by_type(s, "admin").address}:#{s[:ceilometer][:mongodb][:port]}" }
-      db_connection = "mongodb://#{mongodb_servers.sort.join(',')}/ceilometer?replicaSet=#{node[:ceilometer][:ha][:mongodb][:replica_set][:name]}"
-    end
-  end
-
-  # if this is a cluster, but the replica set member attribute hasn't
-  # been set on any node (yet), we just fallback to using the first
-  # ceilometer-server node
-  if db_connection.nil?
-    db_hosts = node_search_with_cache("roles:ceilometer-server")
-    db_host = db_hosts.first || node
-    mongodb_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
-    db_connection = "mongodb://#{mongodb_ip}:#{db_host[:ceilometer][:mongodb][:port]}/ceilometer"
-  end
+  db_connection = CeilometerHelper.mongodb_connection_string(node, cookbook_name)
 else
   db_settings = fetch_database_settings
 
