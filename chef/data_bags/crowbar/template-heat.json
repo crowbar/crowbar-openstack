@@ -14,7 +14,6 @@
       "service_user": "heat",
       "service_password": "",
       "auth_encryption_key": "",
-      "use_convergence_engine": false,
       "trusts_delegated_roles": [ "Member" ],
       "api": {
         "protocol": "http",
@@ -42,7 +41,7 @@
     "heat": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 101,
+      "schema-revision": 102,
       "element_states": {
         "heat-server": [ "readying", "ready", "applying" ]
       },
