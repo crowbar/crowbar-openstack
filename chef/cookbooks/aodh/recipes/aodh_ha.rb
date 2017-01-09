@@ -65,9 +65,7 @@ pacemaker_clone clone_name do
 end
 transaction_objects << "pacemaker_clone[#{clone_name}]"
 
-order_only_existing = ["rabbitmq", "cl-keystone", clone_name]
-
-order_only_existing.unshift "postgresql"
+order_only_existing = ["postgresql", "rabbitmq", "cl-keystone", clone_name]
 
 location_name = openstack_pacemaker_controller_only_location_for clone_name
 transaction_objects << "pacemaker_location[#{location_name}]"
