@@ -112,9 +112,9 @@ def parse_dev_info_line(line, ringinfo)
   Chef::Log.debug("parsing dev info: " + line)
 
   # Line looks like this:
-  #   id  region  zone      ip address  port  replication ip  replication port      name weight partitions balance meta
-  #   0       1     0  192.168.125.14  6000  192.168.125.14              6000 2d4dc9923ed244dc9cac8f283ca79748  99.00          0 -100.00
-  line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)\s+(\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
+  # id region zone  ip address:port      replication ip:port  name                              weight partitions balance meta
+  #  0      1    0  192.168.125.14:6000  192.168.125.14:6000  2d4dc9923ed244dc9cac8f283ca79748  99.00           0 -100.00
+  line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)[:\s+](\d+)\s+(\d+\.\d+\.\d+\.\d+)[:\s+](\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
   if $~.nil?
     raise "failed to parse dev info: #{line}"
   end
