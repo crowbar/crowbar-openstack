@@ -166,6 +166,24 @@ unless sahara_ui_pkgname.nil?
   end
 end
 
+monasca_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-monasca-ui"
+  when "rhel"
+    "openstack-monasca-ui"
+  end
+
+unless monasca_ui_pkgname.nil?
+  monasca_servers = search(:node, "roles:monasca-server") || []
+  unless monasca_servers.empty?
+    package monasca_ui_pkgname do
+      action :install
+      notifies :reload, resources(service: "apache2")
+    end
+  end
+end
+
 if node[:platform_family] == "suse"
   # Get rid of unwanted vhost config files:
   ["#{node[:apache][:dir]}/vhosts.d/default-redirect.conf",
