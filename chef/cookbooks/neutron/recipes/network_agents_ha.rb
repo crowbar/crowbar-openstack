@@ -13,8 +13,12 @@
 # limitations under the License.
 #
 
-use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
+use_l3_agent = (node[:neutron][:networking_plugin] != "vmware" &&
+                !node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") &&
+                !node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
 use_lbaas_agent = node[:neutron][:use_lbaas]
+use_metadata_agent = (!node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") &&
+                      !node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
 
 if use_l3_agent
   # do the setup required for neutron-ha-tool
@@ -72,9 +76,6 @@ if use_l3_agent
     when ml2_mech_drivers.include?("linuxbridge")
       neutron_agent = node[:neutron][:platform][:lb_agent_name]
       neutron_agent_ra = node[:neutron][:ha][:network]["linuxbridge_ra"]
-    when ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
-      neutron_agent = ""
-      neutron_agent_ra = ""
     end
   when "vmware"
     neutron_agent = ""
@@ -82,13 +83,11 @@ if use_l3_agent
   end
   neutron_agent_primitive = neutron_agent.sub(/^openstack-/, "")
 
-  unless ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
-    objects = openstack_pacemaker_controller_clone_for_transaction neutron_agent_primitive do
-      agent neutron_agent_ra
-      op node[:neutron][:ha][:network][:op]
-    end
-    transaction_objects.push(objects)
+  objects = openstack_pacemaker_controller_clone_for_transaction neutron_agent_primitive do
+    agent neutron_agent_ra
+    op node[:neutron][:ha][:network][:op]
   end
+  transaction_objects.push(objects)
 end
 
 dhcp_agent_primitive = "neutron-dhcp-agent"
@@ -110,19 +109,17 @@ if use_l3_agent
   end
   transaction_objects << "pacemaker_order[#{l2_dhcp_order_name}]"
 
-  unless ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
-    l3_agent_primitive = "neutron-l3-agent"
-    objects = openstack_pacemaker_controller_clone_for_transaction l3_agent_primitive do
-      agent node[:neutron][:ha][:network][:l3_ra]
-      op node[:neutron][:ha][:network][:op]
-    end
-    transaction_objects.push(objects)
-
-    l3_agent_clone = "cl-#{l3_agent_primitive}"
+  l3_agent_primitive = "neutron-l3-agent"
+  objects = openstack_pacemaker_controller_clone_for_transaction l3_agent_primitive do
+    agent node[:neutron][:ha][:network][:l3_ra]
+    op node[:neutron][:ha][:network][:op]
   end
+  transaction_objects.push(objects)
+
+  l3_agent_clone = "cl-#{l3_agent_primitive}"
 end
 
-unless ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
+if use_metadata_agent
   metadata_agent_primitive = "neutron-metadata-agent"
   objects = openstack_pacemaker_controller_clone_for_transaction metadata_agent_primitive do
     agent node[:neutron][:ha][:network][:metadata_ra]

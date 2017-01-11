@@ -220,11 +220,20 @@ class NeutronService < PacemakerServiceObject
     end
     
     # Checks for Cisco ACI ml2 driver
+    if ml2_mechanism_drivers.include?("cisco_apic_ml2") &&
+        ml2_mechanism_drivers.include?("apic_gbp")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_ml2_gbp")
+    end
+
     if ml2_mechanism_drivers.include?("cisco_apic_ml2") ||
         ml2_mechanism_drivers.include?("apic_gbp")
       # openvswitch should not be used when cisco_apic_ml2 mechanism driver is used
       if ml2_mechanism_drivers.include?("openvswitch")
         validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_ml2")
+      end
+
+      if ml2_mechanism_drivers.include?("linuxbridge")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_linuxbridge")
       end
 
       # cisco_apic_ml2 mechanism driver needs opflex as the type_driver
