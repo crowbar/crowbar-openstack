@@ -80,27 +80,30 @@ unless manila_ui_pkgname.nil?
 end
 
 # install Cisco GBP plugin if needed
-case node[:platform_family]
-when "suse"
-  apic_gbp_ui_pkgname = "openstack-horizon-plugin-gbp-ui"
-when "rhel"
-  apic_gbp_ui_pkgname = nil
-else
-  apic_gbp_ui_pkgname = nil
-end
+apic_gbp_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-gbp-ui"
+  when "rhel"
+    "openstack-dashboard-gbp"
+  end
 
 unless apic_gbp_ui_pkgname.nil?
-  if node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
-    package apic_gbp_ui_pkgname do
-      action :install
-      notifies :reload, resources(service: "apache2")
-    end
-  elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
-  # Remove GBP plugin is Cisco APIC driver is set to ml2 networking
-    rpm_package apic_gbp_ui_pkgname do
-      ignore_failure true
-      action :remove
-      notifies :reload, resources(service: "apache2")
+  neutron_server = search(:node, "roles:neutron-server").first || []
+  unless neutron_server.empty?
+    if neutron_server[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+      # Install GBP plugin if Cisco APIC driver is set to apic_gbp
+      package apic_gbp_ui_pkgname do
+        action :install
+        notifies :reload, resources(service: "apache2")
+      end
+    elsif neutron_server[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
+      # Remove GBP plugin if Cisco APIC driver is set to cisco_apic_ml2
+      rpm_package apic_gbp_ui_pkgname do
+        ignore_failure true
+        action :remove
+        notifies :reload, resources(service: "apache2")
+      end
     end
   end
 end
