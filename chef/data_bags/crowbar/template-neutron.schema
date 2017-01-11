@@ -41,7 +41,7 @@
                     "ovs": { "type": "map", "required": true, "mapping": {
                       "tunnel_csum": { "type": "bool", "required": true }
                     }},
-                    "apic": { "type": "map", "required": false, "mapping": {
+                    "apic": { "type": "map", "required": true, "mapping": {
                       "hosts": { "type" : "str", "required" : true },
                       "system_id": { "type" : "str", "required" : true },
                       "username": { "type" : "str", "required": true },
@@ -57,14 +57,14 @@
                           "remote_ip": { "type": "str", "required": true },
                           "remote_port": { "type": "int", "required": true }
                         }},
-                        "vlan": { "type": "map", "required": false, "mapping": {
+                        "vlan": { "type": "map", "required": true, "mapping": {
                           "encap_iface": { "type": "str", "required": true }
                         }}
                       }},
                       "apic_switches": { "type" : "map", "required" : true, "mapping" : {
                         = : { "type" : "map", "required" : true, "mapping" : {
-                          "switch_ports": { "type" : "map", "required" : false, "mapping" : {
-                            = : { "type" : "map", "required" : false, "mapping" : {
+                          "switch_ports": { "type" : "map", "required" : true, "mapping" : {
+                            = : { "type" : "map", "required" : true, "mapping" : {
                               "switch_port": { "type": "str", "required": true }}
                             }}
                           }}

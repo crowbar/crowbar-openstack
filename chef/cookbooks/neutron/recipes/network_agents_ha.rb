@@ -13,8 +13,12 @@
 # limitations under the License.
 #
 
-use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
+use_l3_agent = (node[:neutron][:networking_plugin] != "vmware" &&
+                !node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") &&
+                !node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
 use_lbaas_agent = node[:neutron][:use_lbaas]
+use_metadata_agent = (!node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") &&
+                      !node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
 
 if use_l3_agent
   # do the setup required for neutron-ha-tool
@@ -73,9 +77,6 @@ if use_l3_agent
     when ml2_mech_drivers.include?("linuxbridge")
       neutron_agent = node[:neutron][:platform][:lb_agent_name]
       neutron_agent_ra = node[:neutron][:ha][:network]["linuxbridge_ra"]
-    when ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
-      neutron_agent = ""
-      neutron_agent_ra = ""
     end
   when "vmware"
     neutron_agent = ""
@@ -83,16 +84,14 @@ if use_l3_agent
   end
   neutron_agent_primitive = neutron_agent.sub(/^openstack-/, "")
 
-  unless ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
-    pacemaker_primitive neutron_agent_primitive do
-      agent neutron_agent_ra
-      op node[:neutron][:ha][:network][:op]
-      action :update
-      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-    end
-    group_members << neutron_agent_primitive
-    transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
+  pacemaker_primitive neutron_agent_primitive do
+    agent neutron_agent_ra
+    op node[:neutron][:ha][:network][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  group_members << neutron_agent_primitive
+  transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
 end
 
 dhcp_agent_primitive = "neutron-dhcp-agent"
@@ -106,20 +105,18 @@ group_members << dhcp_agent_primitive
 transaction_objects << "pacemaker_primitive[#{dhcp_agent_primitive}]"
 
 if use_l3_agent
-  unless ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
-    l3_agent_primitive = "neutron-l3-agent"
-    pacemaker_primitive l3_agent_primitive do
-      agent node[:neutron][:ha][:network][:l3_ra]
-      op node[:neutron][:ha][:network][:op]
-      action :update
-      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-    end
-    group_members << l3_agent_primitive
-    transaction_objects << "pacemaker_primitive[#{l3_agent_primitive}]"
+  l3_agent_primitive = "neutron-l3-agent"
+  pacemaker_primitive l3_agent_primitive do
+    agent node[:neutron][:ha][:network][:l3_ra]
+    op node[:neutron][:ha][:network][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  group_members << l3_agent_primitive
+  transaction_objects << "pacemaker_primitive[#{l3_agent_primitive}]"
 end
 
-unless ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
+if use_metadata_agent
   metadata_agent_primitive = "neutron-metadata-agent"
   pacemaker_primitive metadata_agent_primitive do
     agent node[:neutron][:ha][:network][:metadata_ra]
