@@ -286,6 +286,11 @@ end
 
 crowbar_pacemaker_sync_mark "create-keystone_db_sync"
 
+# Make sure the certificates code is run on the founder first
+crowbar_pacemaker_sync_mark "wait-keystone_certificates" do
+  fatal true
+end
+
 ruby_block "synchronize signing keys for founder and remember them for non-HA case" do
   only_if { (!ha_enabled || (ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node))) }
   block do
