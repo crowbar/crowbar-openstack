@@ -1,0 +1,5 @@
+#!/bin/bash
+
+su keystone -s /bin/bash -c "keystone-manage fernet_rotate"
+
+<%= @rsync_command %>
