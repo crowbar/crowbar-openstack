@@ -1,13 +1,11 @@
 def upgrade(ta, td, a, d)
-  unless a.key? "f5"
-    a["f5"] = ta["f5"]
-  end
+  a.delete("use_lbaasv2")
   return a, d
 end
 
 def downgrade(ta, td, a, d)
-  unless ta.key? "f5"
-    a.delete("f5")
+  if ta.key? "use_lbaasv2"
+    a["use_lbaasv2"] = ta["use_lbaasv2"]
   end
   return a, d
 end
