@@ -254,11 +254,25 @@ class NeutronService < PacemakerServiceObject
     end
   end
 
+  def validate_l2pop(proposal)
+    ml2_type_drivers = proposal["attributes"]["neutron"]["ml2_type_drivers"]
+
+    if proposal["attributes"]["neutron"]["use_l2pop"]
+      unless ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.l2_population")
+      end
+    end
+  end
+
   def validate_dvr(proposal)
     plugin = proposal["attributes"]["neutron"]["networking_plugin"]
     ml2_mechanism_drivers = proposal["attributes"]["neutron"]["ml2_mechanism_drivers"]
 
     if proposal["attributes"]["neutron"]["use_dvr"]
+      if !proposal["attributes"]["neutron"]["use_l2pop"]
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_requires_l2")
+      end
+
       if plugin == "vmware"
         validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_vmware")
       end
@@ -309,6 +323,7 @@ class NeutronService < PacemakerServiceObject
     plugin = proposal["attributes"]["neutron"]["networking_plugin"]
 
     validate_ml2(proposal) if plugin == "ml2"
+    validate_l2pop(proposal)
     validate_dvr(proposal)
     if proposal[:attributes][:neutron][:use_infoblox]
       validate_infoblox(proposal)

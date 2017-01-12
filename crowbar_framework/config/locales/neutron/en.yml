@@ -130,5 +130,7 @@ en:
         cisco_nexus_vlan: 'The "cisco_nexus" mechanism driver needs the type driver "vlan"'
         cisco_nexus_ovs: 'The "cisco_nexus" mechanism driver needs also the "openvswitch" mechanism driver'
         openvswitch_linuxbridge: 'The "openvswitch" and "linuxbridge" mechanism drivers cannot be used in parallel. Only select one of them'
+        l2_population: 'L2 population requires GRE and/or VXLAN'
+        dvr_requires_l2: 'DVR requires L2 population'
         dvr_vmware: 'DVR is not compatible with VMware NSX plugin'
         dvr_linuxbridge: 'DVR is not compatible with Linux Bridge ML2 driver'
