@@ -230,6 +230,7 @@ if node[:neutron][:use_lbaas]
     variables(
       interface_driver: interface_driver
     )
+    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end
 end
 
