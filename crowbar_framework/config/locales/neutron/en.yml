@@ -60,6 +60,7 @@ en:
         add_switch: 'Add'
         remove_switch: 'Remove'
         use_dvr: 'Use Distributed Virtual Router setup'
+        lbaas_header: 'Load Balancer as a Service'
         use_lbaas: 'Use Neutron LoadBalancer agent'
         lbaasv2_driver: 'Select LoadBalancer v2 driver'
         f5_header: 'F5 Load Balancer'
