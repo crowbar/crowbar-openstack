@@ -175,6 +175,28 @@ template "/etc/neutron/neutron.conf" do
     }.merge(nova_notify))
 end
 
+if neutron[:neutron][:use_lbaas]
+  interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+  if neutron[:neutron][:networking_plugin] == "ml2" &&
+      neutron[:neutron][:ml2_mechanism_drivers].include?("linuxbridge")
+    interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
+  end
+
+  template "/etc/neutron/neutron_lbaas.conf" do
+    source "neutron_lbaas.conf.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    variables(
+      interface_driver: interface_driver,
+      use_lbaas: neutron[:neutron][:use_lbaas],
+      use_lbaasv2: neutron[:neutron][:use_lbaasv2],
+      lbaasv2_driver: neutron[:neutron][:lbaasv2_driver],
+      keystone_settings: keystone_settings
+    )
+  end
+end
+
 if node[:platform_family] == "rhel"
   link "/etc/neutron/plugin.ini" do
     to "/etc/neutron/neutron.conf"

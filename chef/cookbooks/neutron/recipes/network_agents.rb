@@ -205,6 +205,7 @@ if node[:neutron][:use_lbaas] &&
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+    subscribes :restart, resources("template[/etc/neutron/neutron_lbaas.conf]")
     subscribes :restart, resources("template[/etc/neutron/lbaas_agent.ini]")
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end

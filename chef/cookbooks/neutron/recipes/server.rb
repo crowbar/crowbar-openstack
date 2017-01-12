@@ -261,22 +261,6 @@ if node[:neutron][:networking_plugin] == "ml2"
 end
 
 if node[:neutron][:use_lbaas]
-  keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
-  template "/etc/neutron/neutron_lbaas.conf" do
-    source "neutron_lbaas.conf.erb"
-    owner "root"
-    group node[:neutron][:platform][:group]
-    mode "0640"
-    variables(
-      interface_driver: interface_driver,
-      use_lbaas: node[:neutron][:use_lbaas],
-      use_lbaasv2: node[:neutron][:use_lbaasv2],
-      lbaasv2_driver: node[:neutron][:lbaasv2_driver],
-      keystone_settings: keystone_settings
-    )
-  end
-
   template "/etc/neutron/services_lbaas.conf" do
     source "services_lbaas.conf.erb"
     owner "root"
@@ -429,6 +413,9 @@ service node[:neutron][:platform][:service_name] do
   action [:enable, :start]
   subscribes :restart, resources("template[#{plugin_cfg_path}]")
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+  if node[:neutron][:use_lbaas]
+    subscribes :restart, resources("template[/etc/neutron/neutron_lbaas.conf]")
+  end
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
