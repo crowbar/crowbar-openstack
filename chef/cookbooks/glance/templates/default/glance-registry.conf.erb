@@ -26,7 +26,7 @@ cinder_catalog_info = volumev2:cinderv2:internalURL
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 <% if @keystone_settings['insecure'] -%>
-    insecure = <%= @keystone_settings['insecure'] %>
+insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 region_name=<%= @keystone_settings['endpoint_region'] %>
 signing_dir = /var/cache/glance/keystone-signing
