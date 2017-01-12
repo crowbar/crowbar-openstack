@@ -52,8 +52,8 @@
         "external_physical_mappings": "",
         "vtep_folder": "",
         "vtep_selfip_name": "",
-        "max_namespaces_per_tenant": "",
-        "route_domain_strictness_tenant": ""
+        "max_namespaces_per_tenant": 1,
+        "route_domain_strictness": false
       },
       "vmware": {
         "user": "",
@@ -115,7 +115,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 53,
+      "schema-revision": 54,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

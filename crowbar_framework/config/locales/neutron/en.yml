@@ -73,7 +73,7 @@ en:
           vtep_folder: 'Vtep Folder'
           vtep_selfip_name: 'Vtep Self IP Name'
           max_namespaces_per_tenant: 'Max Namespaces per Tenant'
-          route_domain_strictness_tenant: 'Route Domain Strictness Tenant'
+          route_domain_strictness: 'Route Domain Strictness'
         vmware:
           user: 'VMware NSX Username'
           password: 'VMware NSX Password'

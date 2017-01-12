@@ -86,8 +86,8 @@
                       "external_physical_mappings": { "type" : "str", "required" : true },
                       "vtep_folder": { "type" : "str", "required" : true },
                       "vtep_selfip_name": { "type" : "str", "required" : true },
-                      "max_namespaces_per_tenant": { "type" : "str", "required" : true },
-                      "route_domain_strictness_tenant": { "type" : "str", "required" : true }
+                      "max_namespaces_per_tenant": { "type" : "int", "required" : true },
+                      "route_domain_strictness": { "type" : "bool", "required" : true }
                     }},
                     "vmware": { "type": "map", "required": true, "mapping": {
                       "user": { "type" : "str", "required" : true },

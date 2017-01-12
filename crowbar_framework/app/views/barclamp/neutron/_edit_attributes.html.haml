@@ -147,8 +147,8 @@
             = string_field %w(f5 external_physical_mappings)
             = string_field %w(f5 vtep_folder)
             = string_field %w(f5 vtep_selfip_name)
-            = string_field %w(f5 max_namespaces_per_tenant)
-            = string_field %w(f5 route_domain_strictness_tenant)
+            = integer_field %w(f5 max_namespaces_per_tenant)
+            = boolean_field %w(f5 route_domain_strictness)
 
     %fieldset
       %legend
