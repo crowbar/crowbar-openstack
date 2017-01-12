@@ -267,9 +267,11 @@ class NeutronService < PacemakerServiceObject
   def validate_dvr(proposal)
     plugin = proposal["attributes"]["neutron"]["networking_plugin"]
     ml2_mechanism_drivers = proposal["attributes"]["neutron"]["ml2_mechanism_drivers"]
+    ml2_type_drivers = proposal["attributes"]["neutron"]["ml2_type_drivers"]
 
     if proposal["attributes"]["neutron"]["use_dvr"]
-      if !proposal["attributes"]["neutron"]["use_l2pop"]
+      if (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")) &&
+          !proposal["attributes"]["neutron"]["use_l2pop"]
         validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_requires_l2")
       end
 
