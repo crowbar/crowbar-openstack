@@ -232,9 +232,18 @@ function lbaasCheck() {
   var use_lbaas = $('#proposal_attributes').readJsonAttribute('use_lbaas');
   if (use_lbaas) {
     $('#lbaas_container').show();
-    lbaasv2DriverCheck();
+    lbaasv2Check();
   } else {
     $('#lbaas_container').hide();
+  }
+}
+
+function lbaasv2Check() {
+  if ($('#use_lbaasv2').val() == 'true') {
+    $('#lbaasv2_container').show();
+    lbaasv2DriverCheck();
+  } else {
+    $('#lbaasv2_container').hide();
   }
 }
 
@@ -391,6 +400,7 @@ $(document).ready(function($) {
   $('#networking_plugin').on('change', networking_plugin_check).trigger('change');
   $('#ml2_type_drivers').on('change', ml2_type_drivers_check);
   $('#ml2_mechanism_drivers').on('change', ml2_mechanism_drivers_check);
+  $('#use_lbaasv2').on('change', lbaasv2Check).trigger('change');
   $('#lbaasv2_driver').on('change', lbaasv2DriverCheck).trigger('change');
 
   $('#cisco_ports table').ciscoPorts();
