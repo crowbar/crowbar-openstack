@@ -119,21 +119,21 @@ end
 group_members << metering_agent_primitive
 transaction_objects << "pacemaker_primitive[#{metering_agent_primitive}]"
 
-if use_lbaas_agent
-  if node[:neutron][:use_lbaasv2]
-    if node[:neutron][:lbaasv2_driver] == "f5"
-      lbaas_agent_primitive = "neutron-f5-agent"
-      lbaas_ra = node[:neutron][:ha][:network][:f5_ra]
-    else
-      lbaas_agent_primitive = "neutron-lbaasv2-agent"
-      lbaas_ra = node[:neutron][:ha][:network][:lbaasv2_ra]
-    end
-  else
-    lbaas_agent_primitive = "neutron-lbaas-agent"
-    lbaas_ra = node[:neutron][:ha][:network][:lbaas_ra]
-  end
+if use_lbaas_agent && node[:neutron][:use_lbaasv2] &&
+    [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver])
+  lbaas_agent_primitive = "neutron-lbaasv2-agent"
   pacemaker_primitive lbaas_agent_primitive do
-    agent lbaas_ra
+    agent node[:neutron][:ha][:network][:lbaasv2_ra]
+    op node[:neutron][:ha][:network][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  group_members << lbaas_agent_primitive
+  transaction_objects << "pacemaker_primitive[#{lbaas_agent_primitive}]"
+elsif use_lbaas_agent && !node[:neutron][:use_lbaasv2]
+  lbaas_agent_primitive = "neutron-lbaas-agent"
+  pacemaker_primitive lbaas_agent_primitive do
+    agent node[:neutron][:ha][:network][:lbaas_ra]
     op node[:neutron][:ha][:network][:op]
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -164,6 +164,31 @@ transaction_objects << "pacemaker_clone[#{agents_clone_name}]"
 
 location_name = openstack_pacemaker_controller_only_location_for agents_clone_name
 transaction_objects << "pacemaker_location[#{location_name}]"
+
+if use_lbaas_agent && node[:neutron][:use_lbaasv2] && node[:neutron][:lbaasv2_driver] == "f5"
+  # Note: this won't end up in the group as F5 users don't want this to be
+  # impacted by other services
+  f5_agent_primitive = "neutron-f5-agent"
+  pacemaker_primitive f5_agent_primitive do
+    agent node[:neutron][:ha][:network][:f5_ra]
+    op node[:neutron][:ha][:network][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_primitive[#{f5_agent_primitive}]"
+
+  f5_clone_name = "cl-#{f5_agent_primitive}"
+  pacemaker_clone f5_clone_name do
+    rsc f5_agent_primitive
+    meta ({ "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node) })
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_clone[#{f5_clone_name}]"
+
+  f5_location_name = openstack_pacemaker_controller_only_location_for f5_clone_name
+  transaction_objects << "pacemaker_location[#{f5_location_name}]"
+end
 
 pacemaker_transaction "neutron agents" do
   cib_objects transaction_objects
