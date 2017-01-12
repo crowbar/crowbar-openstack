@@ -415,6 +415,7 @@ service node[:neutron][:platform][:service_name] do
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
   if node[:neutron][:use_lbaas]
     subscribes :restart, resources("template[/etc/neutron/neutron_lbaas.conf]")
+    subscribes :restart, resources("template[/etc/neutron/services_lbaas.conf]")
   end
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
