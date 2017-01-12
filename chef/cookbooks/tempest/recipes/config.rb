@@ -84,9 +84,7 @@ openstackcli_adm << " --os-password #{tempest_adm_pass}"
 openstackcli_adm << " --os-project-name #{tempest_comp_tenant}"
 openstackcli_adm << " --os-auth-url #{auth_url}"
 
-`#{openstackcli_adm} service show orchestration &> /dev/null`
-# Heat integration tests still need some work to pass
-use_heat = false && $?.success?
+enabled_services = `#{openstackcli_adm} service list -f value -c Type`.split
 
 users = [
           {"name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "Member"},
@@ -94,7 +92,7 @@ users = [
         ]
 
 heat_server = search(:node, "roles:heat-server").first
-if use_heat && !heat_server.nil?
+if enabled_services.include?("orchestration") && !heat_server.nil?
   heat_trusts_delegated_roles = heat_server[:heat][:trusts_delegated_roles]
   heat_trusts_delegated_roles.each do |role|
     users.push("name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => role)
@@ -284,8 +282,6 @@ ec2_access = `#{openstackcli} ec2 credentials list -f value -c Access`.strip
 ec2_secret = `#{openstackcli} ec2 credentials list -f value -c Secret`.strip
 raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
 
-enabled_services = `#{openstackcli_adm} service list -f value -c Type`.split
-
 # FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
 # FIXME: this should be 'all' instead
@@ -417,7 +413,6 @@ template "/etc/tempest/tempest.conf" do
     tempest_path: node[:tempest][:tempest_path],
     use_swift: use_swift,
     use_horizon: use_horizon,
-    use_heat: use_heat,
     enabled_services: enabled_services,
     # boto settings
     ec2_protocol: nova[:nova][:ssl][:enabled] ? "https" : "http",
@@ -455,7 +450,7 @@ template "/etc/tempest/tempest.conf" do
     alt_comp_tenant: alt_comp_tenant,
     alt_comp_pass: alt_comp_pass,
     # image settings
-    http_image: node[:tempest][:tempest_test_image],
+    http_image: tempest_test_image,
     # network settings
     public_network_id: public_network_id,
     neutron_api_extensions: neutron_api_extensions,

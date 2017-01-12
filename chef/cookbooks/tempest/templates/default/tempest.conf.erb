@@ -1,8 +1,6 @@
 [DEFAULT]
 <% img_id = `cat #{@machine_id_file}`.strip %>
 <% alt_img_id = `cat #{@alt_machine_id_file}`.strip %>
-verbose = false
-use_stderr = false
 
 [alarming]
 endpoint_type = internalURL
@@ -73,6 +71,9 @@ minimal_image_ref = <%= `cat #{@machine_id_file}`.strip %>
 build_timeout = 2000
 fixed_network_name = fixed
 floating_network_name = floating
+# TODO
+skip_scenario_tests = True
+skip_functional_tests = True
 
 [identity]
 disable_ssl_certificate_validation = <%= @ssl_insecure ? 'true' : 'false' %>
@@ -151,8 +152,8 @@ aki_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-vmlinuz
 [service_available]
 neutron = true
 swift = <%= @use_swift %>
-heat = <%= @use_heat %>
-heat_plugin = <%= @use_heat %>
+heat = <%= @enabled_services.include? "orchestration" %>
+heat_plugin = <%= @enabled_services.include? "orchestration" %>
 ceilometer = <%= @enabled_services.include? "metering" %>
 aodh = <%= @enabled_services.include? "alarming" %>
 aodh_plugin = <%= @enabled_services.include? "alarming" %>
@@ -213,3 +214,4 @@ vendor_name = <%= @vendor_name %>
 [volume-feature-enabled]
 multi_backend = <%= @cinder_multi_backend ? 'true' : 'false' %>
 backup = false
+api_v3 = True
