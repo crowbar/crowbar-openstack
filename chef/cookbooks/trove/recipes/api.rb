@@ -148,7 +148,7 @@ template "/etc/trove/api-paste.ini" do
   notifies :restart, "service[trove-api]"
 end
 
-template node[:trove][:api][:config_file] do
+template node[:trove][:config_file] do
   source "trove.conf.erb"
   owner node[:trove][:user]
   group node[:trove][:group]
@@ -169,7 +169,7 @@ template node[:trove][:api][:config_file] do
 end
 
 execute "trove-manage db sync" do
-  command "trove-manage --config-file #{node[:trove][:api][:config_file]} db_sync"
+  command "trove-manage db_sync"
   user node[:trove][:user]
   group node[:trove][:group]
   only_if { !node[:trove][:db_synced] }
