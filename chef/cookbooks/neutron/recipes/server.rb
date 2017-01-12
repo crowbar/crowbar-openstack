@@ -121,6 +121,9 @@ template "/etc/sysconfig/neutron" do
       plugin_cfgs += " /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini"
     end
   end
+  if node[:neutron][:use_lbaas]
+    plugin_cfgs += " /etc/neutron/neutron_lbaas.conf /etc/neutron/services_lbaas.conf"
+  end
   variables(
     plugin_config_file: plugin_cfgs
   )
