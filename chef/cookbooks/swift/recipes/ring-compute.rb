@@ -36,11 +36,11 @@ env_filter = " AND swift_config_environment:#{node[:swift][:config][:environment
 =begin
   http://swift.openstack.org/howto_installmultinode.html
 
-swift-ring-builder account.builder add z$ZONE-$STORAGE_LOCAL_NET_IP:6002/$DEVICE $WEIGHT
-swift-ring-builder container.builder add z$ZONE-$STORAGE_LOCAL_NET_IP:6001/$DEVICE $WEIGHT
-swift-ring-builder object.builder add z$ZONE-$STORAGE_LOCAL_NET_IP:6000/$DEVICE $WEIGHT
+swift-ring-builder account.builder add z$ZONE-$STORAGE_LOCAL_NET_IP:6202/$DEVICE $WEIGHT
+swift-ring-builder container.builder add z$ZONE-$STORAGE_LOCAL_NET_IP:6201/$DEVICE $WEIGHT
+swift-ring-builder object.builder add z$ZONE-$STORAGE_LOCAL_NET_IP:6200/$DEVICE $WEIGHT
 
-      command  "swift-ring-builder object.builder add z#{zone}-#{storage_ip_addr}:6000/#{disk[:name]} #{weight}"
+      command  "swift-ring-builder object.builder add z#{zone}-#{storage_ip_addr}:6200/#{disk[:name]} #{weight}"
 =end
 
 ## collect the nodes that need to be notified when ring files are updated
@@ -76,20 +76,26 @@ nodes.each { |node|
 
     log("obj: #{z_o}/#{w_o} container: #{z_c}/#{w_c} account: #{z_a}/#{w_a}. count: #{$DISK_CNT}") { level :info }
 
-    d = {ip: storage_ip, dev_name: disk[:name], port: 6000}
+    d = { ip: storage_ip, dev_name: disk[:name], port: 6200 }
 
     if z_o
-      d[:port] = 6000; d[:zone] = z_o ; d[:weight] = w_o
+      d[:port] = 6200
+      d[:zone] = z_o
+      d[:weight] = w_o
       disks_o << d
     end
     if z_c
       d = d.dup
-      d[:port] = 6001; d[:zone] = z_c ; d[:weight] = w_c
+      d[:port] = 6201
+      d[:zone] = z_c
+      d[:weight] = w_c
       disks_c << d
     end
     if z_a
       d = d.dup
-      d[:port] = 6002; d[:zone] = z_a ; d[:weight] = w_a
+      d[:port] = 6202
+      d[:zone] = z_a
+      d[:weight] = w_a
       disks_a << d
     end
   }
