@@ -1,8 +1,4 @@
-#
-# Cookbook Name:: trove
-# Recipe:: default
-#
-# Copyright 2016, SUSE Linux GmbH
+# Copyright 2017 SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,8 +13,15 @@
 # limitations under the License.
 #
 
-include_recipe "trove::common"
-include_recipe "trove::sql"
-include_recipe "trove::api"
-include_recipe "trove::conductor"
-include_recipe "trove::taskmanager"
+package "openstack-trove"
+
+# crowbar 3.0 had a customized api-paste.ini .
+# Since crowbar 4.0 (OpenStack >= Mitaka) it's the api-paste from upstream
+# TODO(itxaka): This is probably not needed anymore and we can use the one from the package
+template "/etc/trove/api-paste.ini" do
+  source "api-paste.ini.erb"
+  owner node[:trove][:user]
+  group node[:trove][:group]
+  mode "0640"
+  notifies :restart, "service[trove-api]"
+end

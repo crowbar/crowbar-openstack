@@ -16,11 +16,10 @@
 
 module TroveHelper
   def self.get_sql_connection(node)
-    db_password = node[:trove][:db][:password]
-    # FIXME: trove uses mysql and the mysql server is currently always
-    # running on the same node
-    "mysql://#{node[:trove][:db][:user]}:"\
-    "#{db_password}@127.0.0.1/"\
+    # get Database data
+    db_settings = CrowbarOpenStackHelper.database_settings(node, "trove")
+    "#{db_settings[:url_scheme]}://#{node[:trove][:db][:user]}:"\
+    "#{node[:trove][:db][:password]}@#{db_settings[:address]}/"\
     "#{node[:trove][:db][:database]}"
   end
 
@@ -32,12 +31,11 @@ module TroveHelper
     default_rabbit_settings = CrowbarOpenStackHelper.rabbitmq_settings(node, "trove")
     trove_rabbit_settings = rabbitmq_servers[0][:rabbitmq][:trove]
 
-    rabbit_url = "rabbit://#{trove_rabbit_settings[:user]}:" \
-            "#{trove_rabbit_settings[:password]}@" \
-            "#{default_rabbit_settings[:address]}:" \
-            "#{default_rabbit_settings[:port]}/" \
-            "#{trove_rabbit_settings[:vhost]}"
-    rabbit_url
+    "rabbit://#{trove_rabbit_settings[:user]}:" \
+    "#{trove_rabbit_settings[:password]}@" \
+    "#{default_rabbit_settings[:address]}:" \
+    "#{default_rabbit_settings[:port]}/" \
+    "#{trove_rabbit_settings[:vhost]}"
   end
 
   def self.get_nova_details(nova_controllers, keystone_settings)

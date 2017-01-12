@@ -18,12 +18,18 @@
 #
 
 keystone_settings = KeystoneHelper.keystone_settings(node, :trove)
-
 ha_enabled = false
+trove_protocol = node[:trove][:api][:protocol]
+trove_port = node[:trove][:api][:bind_port]
+
+my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
+my_public_host = CrowbarHelper.get_host_for_public_url(
+  node, node[:trove][:api][:protocol] == "https", ha_enabled
+)
+
 
 # address/port binding
-my_ipaddress = Barclamp::Inventory.get_network_by_type(
-  node, "admin").address
+my_ipaddress = Barclamp::Inventory.get_network_by_type(node, "admin").address
 node.set[:trove][:my_ip] = my_ipaddress
 node.set[:trove][:api][:bind_host] = my_ipaddress
 
@@ -37,12 +43,23 @@ else
   bind_port = node[:trove][:api][:bind_port]
 end
 
-trove_protocol = node[:trove][:api][:protocol]
-trove_port = node[:trove][:api][:bind_port]
+sql_connection = TroveHelper.get_sql_connection node
 
-my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
-my_public_host = CrowbarHelper.get_host_for_public_url(
-  node, node[:trove][:api][:protocol] == "https", ha_enabled)
+rabbitmq_servers = search_env_filtered(:node, "roles:rabbitmq-server")
+rabbitmq_trove_settings = TroveHelper.get_rabbitmq_trove_url(node, rabbitmq_servers)
+
+nova_controllers = search_env_filtered(:node, "roles:nova-controller")
+nova_url, nova_insecure = TroveHelper.get_nova_details nova_controllers, keystone_settings
+
+cinder_controllers = search_env_filtered(:node, "roles:cinder-controller")
+cinder_url, cinder_insecure = TroveHelper.get_cinder_details cinder_controllers
+
+swift_proxies = search_env_filtered(:node, "roles:swift-proxy")
+ceph_radosgws = search_env_filtered(:node, "roles:ceph-radosgw")
+
+object_store_url, object_store_insecure =
+  TroveHelper.get_objectstore_details swift_proxies, ceph_radosgws
+
 
 crowbar_pacemaker_sync_mark "wait-trove_register"
 
@@ -116,47 +133,17 @@ end
 
 crowbar_pacemaker_sync_mark "create-trove_register"
 
-trove_server = get_instance("roles:trove-server")
-sql_connection = TroveHelper.get_sql_connection trove_server
-
-rabbitmq_servers = search_env_filtered(:node, "roles:rabbitmq-server")
-rabbit_trove_url = TroveHelper.get_rabbitmq_trove_url(node, rabbitmq_servers)
-
-nova_controllers = search_env_filtered(:node, "roles:nova-controller")
-nova_url, nova_insecure = TroveHelper.get_nova_details nova_controllers, keystone_settings
-
-cinder_controllers = search_env_filtered(:node, "roles:cinder-controller")
-cinder_url, cinder_insecure = TroveHelper.get_cinder_details cinder_controllers
-
-swift_proxies = search_env_filtered(:node, "roles:swift-proxy")
-ceph_radosgws = search_env_filtered(:node, "roles:ceph-radosgw")
-
-# install the package before adjusting the templates
-# (/etc/trove, /var/log/trove, ... are created via the package)
-package "openstack-trove"
-
-object_store_url, object_store_insecure =
-  TroveHelper.get_objectstore_details swift_proxies, ceph_radosgws
-
-# crowbar 3.0 had a customized api-paste.ini .
-# Since crowbar 4.0 (OpenStack >= Mitaka) it's the api-paste from upstream
-template "/etc/trove/api-paste.ini" do
-  source "api-paste.ini.erb"
-  owner node[:trove][:user]
-  group node[:trove][:group]
-  mode 00640
-  notifies :restart, "service[trove-api]"
-end
 
 template node[:trove][:api][:config_file] do
   source "trove.conf.erb"
   owner node[:trove][:user]
   group node[:trove][:group]
-  mode 00640
+  mode "0640"
   variables(
     keystone_settings: keystone_settings,
     sql_connection: sql_connection,
-    rabbit_trove_url: rabbit_trove_url,
+    rabbit_default_settings: fetch_rabbitmq_settings,
+    rabbit_trove_settings: rabbitmq_trove_settings,
     nova_url: nova_url,
     nova_insecure: nova_insecure,
     cinder_url: cinder_url,
@@ -166,22 +153,7 @@ template node[:trove][:api][:config_file] do
     bind_host: bind_host,
     bind_port: bind_port
   )
-end
-
-execute "trove-manage db sync" do
-  command "trove-manage --config-file #{node[:trove][:api][:config_file]} db_sync"
-  user node[:trove][:user]
-  group node[:trove][:group]
-  only_if { !node[:trove][:db_synced] }
-end
-
-ruby_block "mark node for trove db_sync" do
-  block do
-    node.set[:trove][:db_synced] = true
-    node.save
-  end
-  action :nothing
-  subscribes :create, "execute[trove-manage db sync]", :immediately
+  notifies :restart, "service[trove-api]"
 end
 
 trove_service("api")
