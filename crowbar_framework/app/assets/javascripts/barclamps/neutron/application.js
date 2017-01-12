@@ -256,8 +256,6 @@ function networking_plugin_check() {
     $('#l2pop_container').show();
     $('#dvr_container').show();
     $('#lbaas_container').show();
-    $('#lbaasv2_driver_container').show();
-    $('#f5_driver_container').show();
     ml2_type_drivers_check();
     ml2_mechanism_drivers_check();
     lbaasCheck();
