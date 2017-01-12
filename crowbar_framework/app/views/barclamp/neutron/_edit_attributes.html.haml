@@ -134,24 +134,21 @@
       %fieldset
         %legend
           = t(".lbaas_header")
-        = boolean_field :use_lbaas
+        = select_field :lbaasv2_driver, :collection => :networking_lbaasv2_drivers
 
-        #lbaasv2_driver_container
-          = select_field :lbaasv2_driver, :collection => :networking_lbaasv2_drivers
-
-    #f5_driver_container
-      %fieldset
-        %legend
-          = t(".f5_header")
-        = string_field %w(f5 icontrol_hostname)
-        = string_field %w(f5 icontrol_username)
-        = password_field %w(f5 icontrol_password)
-        = string_field %w(f5 parent_ssl_profile)
-        = string_field %w(f5 external_physical_mappings)
-        = string_field %w(f5 vtep_folder)
-        = string_field %w(f5 vtep_selfip_name)
-        = string_field %w(f5 max_namespaces_per_tenant)
-        = string_field %w(f5 route_domain_strictness_tenant)
+        #f5_driver_container
+          %fieldset
+            %legend
+              = t(".f5_header")
+            = string_field %w(f5 icontrol_hostname)
+            = string_field %w(f5 icontrol_username)
+            = password_field %w(f5 icontrol_password)
+            = string_field %w(f5 parent_ssl_profile)
+            = string_field %w(f5 external_physical_mappings)
+            = string_field %w(f5 vtep_folder)
+            = string_field %w(f5 vtep_selfip_name)
+            = string_field %w(f5 max_namespaces_per_tenant)
+            = string_field %w(f5 route_domain_strictness_tenant)
 
     %fieldset
       %legend

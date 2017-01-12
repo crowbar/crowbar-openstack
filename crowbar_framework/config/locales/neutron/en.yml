@@ -62,7 +62,6 @@ en:
         use_l2pop: 'Use L2 Population'
         use_dvr: 'Use Distributed Virtual Router setup'
         lbaas_header: 'Load Balancer as a Service'
-        use_lbaas: 'Enable Load Balancer as a Service'
         lbaasv2_driver: 'Driver'
         f5_header: 'F5 Load Balancer'
         f5:
