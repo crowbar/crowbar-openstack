@@ -199,7 +199,8 @@ when "ml2"
   if use_zvm
     ml2_mechanism_drivers.push("zvm")
   end
-  if node[:neutron][:use_l2pop] && (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"))
+  if node[:neutron][:use_l2pop] &&
+      (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"))
     ml2_mechanism_drivers.push("l2population")
   end
 
