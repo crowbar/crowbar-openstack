@@ -253,6 +253,7 @@ function networking_plugin_check() {
     $('#ml2_type_drivers_container').show();
     $('#ml2_type_drivers_default_provider_network_container').show();
     $('#ml2_type_drivers_default_tenant_network_container').show();
+    $('#l2pop_container').show();
     $('#dvr_container').show();
     $('#lbaas_container').show();
     $('#lbaasv2_driver_container').show();
@@ -268,6 +269,7 @@ function networking_plugin_check() {
     $('#ml2_type_drivers_container').hide();
     $('#ml2_type_drivers_default_provider_network_container').hide();
     $('#ml2_type_drivers_default_tenant_network_container').hide();
+    $('#l2pop_container').hide();
     $('#dvr_container').hide();
     $('#lbaas_container').hide();
     $('#lbaasv2_driver_container').hide();
@@ -299,6 +301,13 @@ function ml2_type_drivers_check() {
     $('#vxlan_container').show();
   } else {
     $('#vxlan_container').hide();
+  }
+
+  // show/hide l2pop depending on gre/vxlan
+  if (values.indexOf("gre") >= 0 || values.indexOf("vxlan") >= 0) {
+    $('#l2pop_container').show();
+  } else {
+    $('#l2pop_container').hide();
   }
 
   // hide uneeded default type drivers if only one is set
@@ -338,6 +347,13 @@ function ml2_mechanism_drivers_check() {
     }
   } else {
     $('#cisco_switches').hide();
+  }
+
+  // show/hide l2pop depending on openvswitch/linuxbridge
+  if (values.indexOf("openvswitch") >= 0 || values.indexOf("linuxbridge") >= 0) {
+    $('#l2pop_container').show();
+  } else {
+    $('#l2pop_container').hide();
   }
 
   // show/hide DVR and GRE options depending on openvswitch
