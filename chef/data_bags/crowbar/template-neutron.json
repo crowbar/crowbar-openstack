@@ -14,6 +14,7 @@
       "use_lbaas": true,
       "use_lbaasv2": false,
       "lbaasv2_driver": "haproxy",
+      "use_l2pop": false,
       "use_dvr": false,
       "additional_external_networks": [],
       "networking_plugin": "ml2",
@@ -114,7 +115,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 52,
+      "schema-revision": 53,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

@@ -19,6 +19,7 @@
                     "use_lbaas": { "type": "bool", "required": true },
                     "use_lbaasv2": { "type": "bool", "required": true },
                     "lbaasv2_driver": { "type": "str", "required": true },
+                    "use_l2pop": { "type": "bool", "required": true },
                     "use_dvr": { "type": "bool", "required": true },
                     "additional_external_networks": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
                     "networking_plugin": { "type": "str", "required": true },
