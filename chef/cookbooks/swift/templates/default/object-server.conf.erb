@@ -140,7 +140,8 @@ log_requests = true
 # logs at startup, but your object servers should continue to function.
 #
 # splice = no
-splice = yes
+# TODO(aplanas) as a workaround for bsc#1019668 we need to disable splice
+# splice = yes
 
 [filter:healthcheck]
 use = egg:swift#healthcheck
