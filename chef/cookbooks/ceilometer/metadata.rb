@@ -11,6 +11,5 @@ depends "database"
 depends "crowbar-openstack"
 depends "crowbar-pacemaker"
 depends "utils"
-depends "aodh"
 
 recommends "hyperv"

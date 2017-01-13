@@ -141,14 +141,6 @@ class CeilometerService < PacemakerServiceObject
         end
       end
     end
-
-    alarm_eval_interval = proposal["attributes"][@bc_name]["alarm_threshold_evaluation_interval"]
-    ["cpu_interval", "disk_interval", "network_interval", "meters_interval"].each do |i|
-      if alarm_eval_interval < proposal["attributes"][@bc_name][i]
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.alarm_evaluation_interval")
-        break
-      end
-    end
     super
   end
 
@@ -188,16 +180,6 @@ class CeilometerService < PacemakerServiceObject
       role_expand_elements(role, "ceilometer-central")
     reset_sync_marks_on_clusters_founders(central_elements)
     Openstack::HA.set_controller_role(central_nodes) if central_ha_enabled
-
-    # set aodh attributes (outside of ceilometer cookbook)
-    role.default_attributes["aodh"] ||= {}
-    role.default_attributes["aodh"]["db"] ||= {}
-    role.default_attributes["aodh"]["service_password"] ||= random_password
-    role.default_attributes["aodh"]["db"]["password"] ||= random_password
-
-    # required for sync-mark mechanism
-    role.default_attributes["aodh"]["crowbar-revision"] =
-      role.override_attributes["ceilometer"]["crowbar-revision"]
 
     role.save if prepare_role_for_ha(role,\
                                      ["ceilometer", "ha", "central", "enabled"],\

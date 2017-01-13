@@ -18,8 +18,8 @@ include_recipe "crowbar-pacemaker::haproxy"
 haproxy_loadbalancer "aodh-api" do
   address "0.0.0.0"
   port node[:aodh][:api][:port]
-  use_ssl false
-  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "aodh", "ceilometer-server", "api")
+  use_ssl(node[:aodh][:api][:protocol] == "https")
+  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "aodh", "aodh-server", "api")
   action :nothing
 end.run_action(:create)
 
@@ -65,22 +65,7 @@ pacemaker_clone clone_name do
 end
 transaction_objects << "pacemaker_clone[#{clone_name}]"
 
-order_only_existing = ["rabbitmq", "cl-keystone", clone_name]
-
-if node[:ceilometer][:use_mongodb]
-  pacemaker_order "o-ceilometer-mongo" do
-    score "Mandatory"
-    ordering "cl-mongodb #{clone_name}"
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-  transaction_objects << "pacemaker_order[o-ceilometer-mongo]"
-else
-  # we don't make the db mandatory if not mongodb; this is debatable, but
-  # oslo.db is supposed to deal well with reconnections; it's less clear about
-  # mongodb
-  order_only_existing.unshift "postgresql"
-end
+order_only_existing = ["postgresql", "rabbitmq", "cl-keystone", clone_name]
 
 location_name = openstack_pacemaker_controller_only_location_for clone_name
 transaction_objects << "pacemaker_location[#{location_name}]"

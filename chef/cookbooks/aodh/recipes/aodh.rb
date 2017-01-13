@@ -1,52 +1,50 @@
-ha_enabled = node[:ceilometer][:ha][:server][:enabled]
+ha_enabled = node[:aodh][:ha][:server][:enabled]
 
 node[:aodh][:platform][:packages].each do |p|
   package p
 end
 
-# mongdb setup has been already done by server.rb recipe
-unless node[:ceilometer][:use_mongodb]
-  db_settings = fetch_database_settings
 
-  include_recipe "database::client"
-  include_recipe "#{db_settings[:backend_name]}::client"
-  include_recipe "#{db_settings[:backend_name]}::python-client"
+db_settings = fetch_database_settings
 
-  crowbar_pacemaker_sync_mark "wait-aodh_database"
+include_recipe "database::client"
+include_recipe "#{db_settings[:backend_name]}::client"
+include_recipe "#{db_settings[:backend_name]}::python-client"
 
-  # Create the Aodh Database
-  database "create #{node[:aodh][:db][:database]} database" do
-    connection db_settings[:connection]
-    database_name node[:aodh][:db][:database]
-    provider db_settings[:provider]
-    action :create
-    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+crowbar_pacemaker_sync_mark "wait-aodh_database"
 
-  database_user "create aodh database user" do
-    host "%"
-    connection db_settings[:connection]
-    username node[:aodh][:db][:user]
-    password node[:aodh][:db][:password]
-    provider db_settings[:user_provider]
-    action :create
-    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  database_user "grant database access for aodh database user" do
-    connection db_settings[:connection]
-    username node[:aodh][:db][:user]
-    password node[:aodh][:db][:password]
-    database_name node[:aodh][:db][:database]
-    host "%"
-    privileges db_settings[:privs]
-    provider db_settings[:user_provider]
-    action :grant
-    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  crowbar_pacemaker_sync_mark "create-aodh_database"
+# Create the Aodh Database
+database "create #{node[:aodh][:db][:database]} database" do
+  connection db_settings[:connection]
+  database_name node[:aodh][:db][:database]
+  provider db_settings[:provider]
+  action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+
+database_user "create aodh database user" do
+  host "%"
+  connection db_settings[:connection]
+  username node[:aodh][:db][:user]
+  password node[:aodh][:db][:password]
+  provider db_settings[:user_provider]
+  action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+database_user "grant database access for aodh database user" do
+  connection db_settings[:connection]
+  username node[:aodh][:db][:user]
+  password node[:aodh][:db][:password]
+  database_name node[:aodh][:db][:database]
+  host "%"
+  privileges db_settings[:privs]
+  provider db_settings[:user_provider]
+  action :grant
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+crowbar_pacemaker_sync_mark "create-aodh_database"
 
 directory "/var/cache/aodh" do
   owner node[:aodh][:user]
@@ -54,6 +52,18 @@ directory "/var/cache/aodh" do
   mode 00755
   action :create
 end unless node[:platform_family] == "suse"
+
+if node[:aodh][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for aodh" do
+    generate_certs node[:aodh][:ssl][:generate_certs]
+    certfile node[:aodh][:ssl][:certfile]
+    keyfile node[:aodh][:ssl][:keyfile]
+    group node[:aodh][:group]
+    fqdn node[:fqdn]
+    cert_required node[:aodh][:ssl][:cert_required]
+    ca_certs node[:aodh][:ssl][:ca_certs]
+  end
+end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
@@ -119,38 +129,13 @@ keystone_register "register aodh endpoint" do
   action :add_endpoint_template
 end
 
-if node[:ceilometer][:use_mongodb]
-  db_connection = nil
-
-  if node[:ceilometer][:ha][:server][:enabled]
-    db_hosts = search(:node,
-                      "ceilometer_ha_mongodb_replica_set_member:true AND roles:ceilometer-server AND "\
-                      "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
-                     )
-    unless db_hosts.empty?
-      mongodb_servers = db_hosts.map { |s| "#{Chef::Recipe::Barclamp::Inventory.get_network_by_type(s, "admin").address}:#{s[:ceilometer][:mongodb][:port]}" }
-      db_connection = "mongodb://#{mongodb_servers.sort.join(",")}/ceilometer?replicaSet=#{node[:ceilometer][:ha][:mongodb][:replica_set][:name]}"
-    end
-  end
-
-  # if this is a cluster, but the replica set member attribute hasn't
-  # been set on any node (yet), we just fallback to using the first
-  # ceilometer-server node
-  if db_connection.nil?
-    db_hosts = search_env_filtered(:node, "roles:ceilometer-server")
-    db_host = db_hosts.first || node
-    mongodb_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
-    db_connection = "mongodb://#{mongodb_ip}:#{db_host[:ceilometer][:mongodb][:port]}/ceilometer"
-  end
-else
-  db_name = node[:aodh][:db][:database]
-  db_user = node[:aodh][:db][:user]
-  db_password = node[:aodh][:db][:password]
-  db_connection =
+db_name = node[:aodh][:db][:database]
+db_user = node[:aodh][:db][:user]
+db_password = node[:aodh][:db][:password]
+db_connection =
     "#{db_settings[:url_scheme]}://#{db_user}:#{db_password}@#{db_settings[:address]}/#{db_name}"
-end
 
-if node[:ceilometer][:ha][:server][:enabled]
+if node[:aodh][:ha][:server][:enabled]
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
   bind_host = admin_address
   bind_port = node[:aodh][:ha][:ports][:api]
@@ -165,15 +150,16 @@ template node[:aodh][:config_file] do
   group node[:aodh][:group]
   mode "0640"
   variables(
-    debug: node[:ceilometer][:debug],
-    verbose: node[:ceilometer][:verbose],
+    debug: node[:aodh][:debug],
+    verbose: node[:aodh][:verbose],
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: keystone_settings,
     bind_host: bind_host,
     bind_port: bind_port,
     database_connection: db_connection,
     node_hostname: node["hostname"],
-    alarm_threshold_evaluation_interval: node[:ceilometer][:alarm_threshold_evaluation_interval]
+    aodh_ssl: node[:aodh][:ssl],
+    evaluation_interval: node[:aodh][:evaluation_interval]
   )
   notifies :reload, resources(service: "apache2")
 end
@@ -218,6 +204,15 @@ crowbar_openstack_wsgi "WSGI entry for aodh-api" do
   daemon_process "aodh-api"
   user node[:aodh][:user]
   group node[:aodh][:group]
+  script_alias "/srv/www/aodh-api/app.wsgi"
+  pass_authorization true
+  limit_request_body 114688
+  ssl_enable node[:aodh][:api][:protocol] == "https"
+  ssl_certfile node[:aodh][:ssl][:certfile]
+  ssl_keyfile node[:aodh][:ssl][:keyfile]
+  if node[:cinder][:ssl][:cert_required]
+    ssl_cacert node[:aodh][:ssl][:ca_certs]
+  end
 end
 
 apache_site "aodh-api.conf" do

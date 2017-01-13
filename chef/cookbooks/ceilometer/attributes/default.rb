@@ -21,24 +21,18 @@ central_service_name = "ceilometer-agent-central"
 api_service_name = "ceilometer-api"
 collector_service_name = "ceilometer-collector"
 agent_notification_service_name = "ceilometer-agent-notification"
-alarm_evaluator_service_name = "ceilometer-alarm-evaluator"
-alarm_notifier_service_name = "ceilometer-alarm-notifier"
 
 if %w(rhel suse).include?(node[:platform_family])
   central_service_name = "openstack-ceilometer-agent-central"
   api_service_name = "openstack-ceilometer-api"
   collector_service_name = "openstack-ceilometer-collector"
   agent_notification_service_name = "openstack-ceilometer-agent-notification"
-  alarm_evaluator_service_name = "openstack-ceilometer-alarm-evaluator"
-  alarm_notifier_service_name = "openstack-ceilometer-alarm-notifier"
 end
 
 default[:ceilometer][:api][:service_name] = api_service_name
 default[:ceilometer][:collector][:service_name] = collector_service_name
 default[:ceilometer][:agent_notification][:service_name] = agent_notification_service_name
 default[:ceilometer][:central][:service_name] = central_service_name
-default["ceilometer"]["alarm_evaluator"]["service_name"] = alarm_evaluator_service_name
-default["ceilometer"]["alarm_notifier"]["service_name"] = alarm_notifier_service_name
 
 default[:ceilometer][:debug] = false
 default[:ceilometer][:verbose] = false
@@ -76,11 +70,6 @@ default[:ceilometer][:ha][:collector][:agent] = "systemd:#{collector_service_nam
 default[:ceilometer][:ha][:collector][:op][:monitor][:interval] = "10s"
 default[:ceilometer][:ha][:agent_notification][:agent] = "systemd:#{agent_notification_service_name}"
 default[:ceilometer][:ha][:agent_notification][:op][:monitor][:interval] = "10s"
-
-default["ceilometer"]["ha"]["alarm_evaluator"]["agent"] = "systemd:#{alarm_evaluator_service_name}"
-default["ceilometer"]["ha"]["alarm_evaluator"]["op"]["monitor"]["interval"] = "10s"
-default["ceilometer"]["ha"]["alarm_notifier"]["agent"] = "systemd:#{alarm_notifier_service_name}"
-default["ceilometer"]["ha"]["alarm_notifier"]["op"]["monitor"]["interval"] = "10s"
 
 default[:ceilometer][:ha][:central][:enabled] = false
 default[:ceilometer][:ha][:central][:agent] = "systemd:#{central_service_name}"
