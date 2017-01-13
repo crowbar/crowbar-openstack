@@ -190,6 +190,9 @@
         "transitions": false,
         "transition_list": []
       }
+    },
+    "ec2-api": {
+      "crowbar-revision": 0
     }
   }
 }

@@ -93,7 +93,8 @@ class NovaService < PacemakerServiceObject
           "exclude_platform" => {
             "suse" => "< 12.2",
             "windows" => "/.*/"
-          }
+          },
+          "cluster" => true
         }
       }
     end

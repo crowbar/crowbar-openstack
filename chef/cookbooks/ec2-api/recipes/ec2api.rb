@@ -22,6 +22,7 @@ package "openstack-ec2-api-metadata"
 package "openstack-ec2-api-s3"
 
 # NOTE: ec2 is deployed via the nova barclamp
+ha_enabled  = node[:nova]["ec2-api"][:ha][:enabled]
 db_settings = fetch_database_settings "nova"
 
 db_conn_scheme = db_settings[:url_scheme]
@@ -29,6 +30,8 @@ db_conn_scheme = db_settings[:url_scheme]
 if db_settings[:backend_name] == "mysql"
   db_conn_scheme = "mysql+pymysql"
 end
+
+crowbar_pacemaker_sync_mark "wait-ec2_api_database"
 
 database_connection = "#{db_conn_scheme}://" \
   "#{node[:nova]["ec2-api"][:db][:user]}" \
@@ -42,6 +45,7 @@ database "create #{node[:nova]["ec2-api"][:db][:database]} database" do
   database_name node[:nova]["ec2-api"][:db][:database]
   provider db_settings[:provider]
   action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 database_user "create #{@cookbook_name} database user" do
@@ -52,6 +56,7 @@ database_user "create #{@cookbook_name} database user" do
   host "%"
   provider db_settings[:user_provider]
   action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 database_user "grant database access for #{@cookbook_name} database user" do
@@ -63,7 +68,10 @@ database_user "grant database access for #{@cookbook_name} database user" do
   privileges db_settings[:privs]
   provider db_settings[:user_provider]
   action :grant
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+
+crowbar_pacemaker_sync_mark "create-ec2_api_database"
 
 rabbit_settings = fetch_rabbitmq_settings "nova"
 keystone_settings = KeystoneHelper.keystone_settings(node, "nova")
