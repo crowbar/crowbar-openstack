@@ -20,5 +20,7 @@ default[:nova]["ec2-api"][:db][:user] = "ec2"
 default[:nova]["ec2-api"][:db][:password] = nil # must be set by wrapper
 default[:nova]["ec2-api"][:user] = "ec2-api"
 default[:nova]["ec2-api"][:group] = "ec2-api"
+default[:nova]["ec2-api"][:ha][:enabled] = false
+default[:nova]["ec2-api"][:api][:port] = 8788
 
 default[:nova]["ec2-api"][:config_file] = "/etc/ec2api/ec2api.conf.d/100-ec2api.conf"
