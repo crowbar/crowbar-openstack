@@ -13,6 +13,7 @@
       "dhcp_domain": "openstack.local",
       "use_lbaas": true,
       "lbaasv2_driver": "haproxy",
+      "use_l2pop": false,
       "use_dvr": false,
       "additional_external_networks": [],
       "networking_plugin": "ml2",
