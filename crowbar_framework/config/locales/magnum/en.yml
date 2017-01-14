@@ -19,8 +19,7 @@ en:
     magnum:
       edit_attributes:
         logging_header: 'Logging'
-        verbose: 'Verbose'
-        debug: 'Debug'
+        verbose: 'Verbose Logging'
         rabbitmq_instance: 'RabbitMQ'
         keystone_instance: 'Keystone Instance'
         cinder_instance: 'Cinder Instance'

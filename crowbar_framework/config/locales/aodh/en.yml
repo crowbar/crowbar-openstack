@@ -26,7 +26,6 @@ en:
         ceilometer_instance: 'Ceilometer'
         evaluation_interval: 'Evaluation interval for threshold alarms (in seconds).'
         verbose: 'Verbose Logging'
-        debug: 'Debug'
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'

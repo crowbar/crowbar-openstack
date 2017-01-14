@@ -27,4 +27,4 @@ en:
         glance_instance: 'Glance'
         cinder_instance: 'Cinder'
         logging_header: 'Logging'
-        verbose: 'Verbose'
+        verbose: 'Verbose Logging'

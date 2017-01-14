@@ -77,7 +77,6 @@ en:
         min_part_hours: 'Minimum Hours before Partition is reassigned'
         replicas: 'Replicas'
         replication_interval: 'Replication interval (in seconds)'
-        debug: 'Debug'
         middlewares:
           s3:
             header: 'S3 Middleware'

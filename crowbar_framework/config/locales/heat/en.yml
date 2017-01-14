@@ -25,7 +25,6 @@ en:
         database_instance: 'Database'
         keystone_instance: 'Keystone'
         rabbitmq_instance: 'RabbitMQ'
-        debug: 'Debug'
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'
