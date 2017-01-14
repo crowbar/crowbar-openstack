@@ -8,7 +8,6 @@
     = instance_field :rabbitmq
     = instance_field :ceilometer
 
-    = boolean_field :verbose
     = integer_field :evaluation_interval
 
 
@@ -31,3 +30,8 @@
           "data-enabler" => "true",
           "data-enabler-target" => "#ssl_ca_certs"
         = string_field %w(ssl ca_certs)
+
+    %fieldset
+      %legend
+        = t(".logging_header")
+      = boolean_field :verbose

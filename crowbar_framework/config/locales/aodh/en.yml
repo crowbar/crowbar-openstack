@@ -25,6 +25,7 @@ en:
         rabbitmq_instance: 'RabbitMQ'
         ceilometer_instance: 'Ceilometer'
         evaluation_interval: 'Evaluation interval for threshold alarms (in seconds).'
+        logging_header: 'Logging'
         verbose: 'Verbose Logging'
         api:
           protocol: 'Protocol'

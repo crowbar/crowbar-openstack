@@ -21,6 +21,7 @@ en:
   barclamp:
     heat:
       edit_attributes:
+        logging_header: 'Logging'
         verbose: 'Verbose Logging'
         database_instance: 'Database'
         keystone_instance: 'Keystone'
