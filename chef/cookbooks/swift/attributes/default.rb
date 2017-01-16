@@ -89,6 +89,13 @@ end
 
 default[:swift][:ports][:proxy] = 8080
 
+default[:swift][:config_file] = "/etc/swift/swift.conf"
+default[:swift][:dispersion_config_file] = "/etc/swift/dispersion.conf"
+default[:swift][:proxy_config_file] = "/etc/swift/proxy-server.conf"
+default[:swift][:object_config_file] = "/etc/swift/object-expirer.conf"
+default[:swift][:object_server_config_file] = "/etc/swift/object-server.conf"
+default[:swift][:container_config_file] = "/etc/swift/container-sync-realms.conf"
+
 default[:swift][:ha][:enabled] = false
 # Ports to bind to when haproxy is used for the real ports
 default[:swift][:ha][:ports][:proxy] = 5540

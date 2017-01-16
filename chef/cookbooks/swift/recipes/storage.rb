@@ -102,12 +102,12 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       end
       supports status: true, restart: true
       action [:enable, :start]
-      subscribes :restart, resources(template: "/etc/swift/swift.conf")
+      subscribes :restart, resources(template: node[:swift][:config_file])
       subscribes :restart, resources(template: "/etc/swift/#{ring}-server.conf")
       if svc == "swift-container-sync"
-        subscribes :restart, resources(template: "/etc/swift/container-sync-realms.conf")
+        subscribes :restart, resources(template: node[:swift][:container_config_file])
       elsif svc == "swift-object-expirer"
-        subscribes :restart, resources(template: "/etc/swift/object-expirer.conf")
+        subscribes :restart, resources(template: node[:swift][:object_config_file])
       end
       only_if { ::File.exist? "/etc/swift/#{ring}.ring.gz" }
     end

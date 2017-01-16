@@ -261,7 +261,7 @@ proxy_config[:memcached_ips] = node_search_with_cache("roles:swift-proxy").map d
 end.sort
 
 ## Create the proxy server configuraiton file
-template "/etc/swift/proxy-server.conf" do
+template node[:swift][:proxy_config_file] do
   source "proxy-server.conf.erb"
   mode "0640"
   owner "root"
@@ -308,8 +308,8 @@ if node[:swift][:frontend]=="native"
       restart_command "stop swift-proxy ; start swift-proxy"
     end
     action [:enable, :start]
-    subscribes :restart, resources(template: "/etc/swift/swift.conf"), :immediately
-    subscribes :restart, resources(template: "/etc/swift/proxy-server.conf"), :immediately
+    subscribes :restart, resources(template: node[:swift][:config_file]), :immediately
+    subscribes :restart, resources(template: node[:swift][:proxy_config_file]), :immediately
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
     # Do not even try to start the daemon if we don't have the ring yet
     only_if { ::File.exist? "/etc/swift/object.ring.gz" }
@@ -386,7 +386,7 @@ if node[:platform_family] == "debian"
     code <<-EOH
 EOH
     action :nothing
-    subscribes :run, resources(template: "/etc/swift/proxy-server.conf")
+    subscribes :run, resources(template: node[:swift][:proxy_config_file])
     notifies :restart, resources(service: "memcached-swift-proxy")
     if node[:swift][:frontend]=="native"
       notifies :restart, resources(service: "swift-proxy")
