@@ -210,7 +210,7 @@ crowbar_openstack_wsgi "WSGI entry for aodh-api" do
   ssl_enable node[:aodh][:api][:protocol] == "https"
   ssl_certfile node[:aodh][:ssl][:certfile]
   ssl_keyfile node[:aodh][:ssl][:keyfile]
-  if node[:cinder][:ssl][:cert_required]
+  if node[:aodh][:ssl][:cert_required]
     ssl_cacert node[:aodh][:ssl][:ca_certs]
   end
 end
