@@ -12,6 +12,9 @@
       "create_default_networks": true,
       "dhcp_domain": "openstack.local",
       "use_lbaas": true,
+      "use_lbaasv2": false,
+      "lbaasv2_driver": "haproxy",
+      "use_l2pop": false,
       "use_dvr": false,
       "additional_external_networks": [],
       "networking_plugin": "ml2",
@@ -40,6 +43,17 @@
         "min_pool_size": 30,
         "max_pool_overflow": 10,
         "pool_timeout": 30
+      },
+      "f5": {
+        "icontrol_hostname": "",
+        "icontrol_username": "admin",
+        "icontrol_password": "",
+        "parent_ssl_profile": "clientssl",
+        "external_physical_mappings": "default:1.1:True",
+        "vtep_folder": "Common",
+        "vtep_selfip_name": "vtep",
+        "max_namespaces_per_tenant": 1,
+        "route_domain_strictness": false
       },
       "vmware": {
         "user": "",
@@ -101,7 +115,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 49,
+      "schema-revision": 54,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

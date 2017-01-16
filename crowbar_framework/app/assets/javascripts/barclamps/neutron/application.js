@@ -228,6 +228,33 @@
   };
 }(jQuery, document, window));
 
+function lbaasCheck() {
+  var use_lbaas = $('#proposal_attributes').readJsonAttribute('use_lbaas');
+  if (use_lbaas) {
+    $('#lbaas_container').show();
+    lbaasv2Check();
+  } else {
+    $('#lbaas_container').hide();
+  }
+}
+
+function lbaasv2Check() {
+  if ($('#use_lbaasv2').val() == 'true') {
+    $('#lbaasv2_container').show();
+    lbaasv2DriverCheck();
+  } else {
+    $('#lbaasv2_container').hide();
+  }
+}
+
+function lbaasv2DriverCheck() {
+  if ($('#lbaasv2_driver').val() == 'f5') {
+    $('#f5_driver_container').show();
+  } else {
+    $('#f5_driver_container').hide();
+  }
+}
+
 function networking_plugin_check() {
   switch ($('#networking_plugin').val()) {
   case 'ml2':
@@ -236,9 +263,11 @@ function networking_plugin_check() {
     $('#ml2_type_drivers_container').show();
     $('#ml2_type_drivers_default_provider_network_container').show();
     $('#ml2_type_drivers_default_tenant_network_container').show();
+    $('#l2pop_container').show();
     $('#dvr_container').show();
     ml2_type_drivers_check();
     ml2_mechanism_drivers_check();
+    lbaasCheck();
     break;
   case 'vmware':
     $('#vmware_container').show();
@@ -246,7 +275,9 @@ function networking_plugin_check() {
     $('#ml2_type_drivers_container').hide();
     $('#ml2_type_drivers_default_provider_network_container').hide();
     $('#ml2_type_drivers_default_tenant_network_container').hide();
+    $('#l2pop_container').hide();
     $('#dvr_container').hide();
+    $('#lbaas_container').hide();
     $('#num_vlans_container').hide();
     $('#gre_container').hide();
     $('#vxlan_container').hide();
@@ -274,6 +305,13 @@ function ml2_type_drivers_check() {
     $('#vxlan_container').show();
   } else {
     $('#vxlan_container').hide();
+  }
+
+  // show/hide l2pop depending on gre/vxlan
+  if (values.indexOf("gre") >= 0 || values.indexOf("vxlan") >= 0) {
+    $('#l2pop_container').show();
+  } else {
+    $('#l2pop_container').hide();
   }
 
   // hide uneeded default type drivers if only one is set
@@ -315,6 +353,13 @@ function ml2_mechanism_drivers_check() {
     $('#cisco_switches').hide();
   }
 
+  // show/hide l2pop depending on openvswitch/linuxbridge
+  if (values.indexOf("openvswitch") >= 0 || values.indexOf("linuxbridge") >= 0) {
+    $('#l2pop_container').show();
+  } else {
+    $('#l2pop_container').hide();
+  }
+
   // show/hide DVR and GRE options depending on openvswitch
   if (values.indexOf("openvswitch") >= 0) {
     $('#dvr_container').show();
@@ -350,10 +395,13 @@ function ml2_mechanism_drivers_check() {
 $(document).ready(function($) {
   networking_plugin_check();
   ml2_mechanism_drivers_check();
+  lbaasCheck();
 
   $('#networking_plugin').on('change', networking_plugin_check).trigger('change');
   $('#ml2_type_drivers').on('change', ml2_type_drivers_check);
   $('#ml2_mechanism_drivers').on('change', ml2_mechanism_drivers_check);
+  $('#use_lbaasv2').on('change', lbaasv2Check).trigger('change');
+  $('#lbaasv2_driver').on('change', lbaasv2DriverCheck).trigger('change');
 
   $('#cisco_ports table').ciscoPorts();
 });

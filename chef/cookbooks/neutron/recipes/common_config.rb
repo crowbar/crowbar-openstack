@@ -108,7 +108,11 @@ end
 service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
                    "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
 if neutron[:neutron][:use_lbaas]
-  service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPlugin")
+  if neutron[:neutron][:use_lbaasv2]
+    service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2")
+  else
+    service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPlugin")
+  end
 end
 
 if neutron[:neutron][:networking_plugin] == "ml2"
@@ -169,6 +173,28 @@ template "/etc/neutron/neutron.conf" do
       infoblox: infoblox_settings,
       ipam_driver: ipam_driver
     }.merge(nova_notify))
+end
+
+if neutron[:neutron][:use_lbaas]
+  interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+  if neutron[:neutron][:networking_plugin] == "ml2" &&
+      neutron[:neutron][:ml2_mechanism_drivers].include?("linuxbridge")
+    interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
+  end
+
+  template "/etc/neutron/neutron_lbaas.conf" do
+    source "neutron_lbaas.conf.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    variables(
+      interface_driver: interface_driver,
+      use_lbaas: neutron[:neutron][:use_lbaas],
+      use_lbaasv2: neutron[:neutron][:use_lbaasv2],
+      lbaasv2_driver: neutron[:neutron][:lbaasv2_driver],
+      keystone_settings: keystone_settings
+    )
+  end
 end
 
 if node[:platform_family] == "rhel"

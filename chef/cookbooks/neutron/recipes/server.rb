@@ -121,6 +121,9 @@ template "/etc/sysconfig/neutron" do
       plugin_cfgs += " /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini"
     end
   end
+  if node[:neutron][:use_lbaas]
+    plugin_cfgs += " /etc/neutron/neutron_lbaas.conf /etc/neutron/services_lbaas.conf"
+  end
   variables(
     plugin_config_file: plugin_cfgs
   )
@@ -196,8 +199,9 @@ when "ml2"
   if use_zvm
     ml2_mechanism_drivers.push("zvm")
   end
-  if ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")
-    ml2_mechanism_drivers.push("l2population") if node[:neutron][:use_dvr]
+  if node[:neutron][:use_l2pop] &&
+      (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"))
+    ml2_mechanism_drivers.push("l2population")
   end
 
   ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
@@ -257,19 +261,6 @@ if node[:neutron][:networking_plugin] == "ml2"
 end
 
 if node[:neutron][:use_lbaas]
-  keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
-  template "/etc/neutron/neutron_lbaas.conf" do
-    source "neutron_lbaas.conf.erb"
-    owner "root"
-    group node[:neutron][:platform][:group]
-    mode "0640"
-    variables(
-      interface_driver: interface_driver,
-      keystone_settings: keystone_settings
-    )
-  end
-
   template "/etc/neutron/services_lbaas.conf" do
     source "services_lbaas.conf.erb"
     owner "root"
@@ -422,6 +413,10 @@ service node[:neutron][:platform][:service_name] do
   action [:enable, :start]
   subscribes :restart, resources("template[#{plugin_cfg_path}]")
   subscribes :restart, resources("template[/etc/neutron/neutron.conf]")
+  if node[:neutron][:use_lbaas]
+    subscribes :restart, resources("template[/etc/neutron/neutron_lbaas.conf]")
+    subscribes :restart, resources("template[/etc/neutron/services_lbaas.conf]")
+  end
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 

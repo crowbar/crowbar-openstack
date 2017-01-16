@@ -30,6 +30,9 @@
         %span.help-block
           = t('.ml2_type_drivers_default_tenant_network_hint')
 
+      #l2pop_container
+        = boolean_field :use_l2pop
+
       #dvr_container
         = boolean_field :use_dvr
 
@@ -126,6 +129,29 @@
                   = text_field_tag "port[number]", "", :placeholder => t(".port_number"), :class => "form-control", "data-node" => node.handle, "data-name" => "number"
                 %td
                   = link_to t(".clear_port"), "#", :class => "btn btn-default btn-block", "data-clear" => node.handle
+
+    #lbaas_container
+      %fieldset
+        %legend
+          = t(".lbaas_header")
+        = boolean_field :use_lbaasv2
+
+        #lbaasv2_container
+          = select_field :lbaasv2_driver, :collection => :networking_lbaasv2_drivers
+
+          #f5_driver_container
+            %fieldset
+              %legend
+                = t(".f5_header")
+              = string_field %w(f5 icontrol_hostname)
+              = string_field %w(f5 icontrol_username)
+              = password_field %w(f5 icontrol_password)
+              = string_field %w(f5 parent_ssl_profile)
+              = string_field %w(f5 external_physical_mappings)
+              = string_field %w(f5 vtep_folder)
+              = string_field %w(f5 vtep_selfip_name)
+              = integer_field %w(f5 max_namespaces_per_tenant)
+              = boolean_field %w(f5 route_domain_strictness)
 
     %fieldset
       %legend
