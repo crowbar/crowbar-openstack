@@ -6,22 +6,18 @@ log_file = keystone.log
 log_dir = /var/log/keystone
 
 [assignment]
-
 driver = <%= node[:keystone][:assignment][:driver] %>
 
 [cache]
-
 backend = dogpile.cache.memcached
 enabled = True
 memcache_servers = <%= @memcached_servers.join(',') %>
 
 [database]
-
 connection = <%= @sql_connection %>
 idle_timeout = <%= @sql_idle_timeout %>
 
 [eventlet_server]
-
 public_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 admin_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 public_bind_host = <%= @bind_service_host %>
@@ -31,24 +27,20 @@ admin_port = <%= @bind_admin_port %>
 wsgi_keep_alive = false
 
 [eventlet_server_ssl]
-
 enable = <%= @ssl_enable %>
 certfile = <%= @ssl_certfile %>
 keyfile = <%= @ssl_keyfile %>
 ca_certs = <%= @ssl_ca_certs %>
 
 [identity]
-
 domain_specific_drivers_enabled = <%= node[:keystone][:domain_specific_drivers] ? "True" : "False" %>
 
 <% if node[:keystone][:domain_specific_drivers] -%>
 domain_config_dir = <%= node[:keystone][:domain_config_dir] %>
 <% end -%>
-
 driver = <%= node[:keystone][:identity][:driver] %>
 
 [kvs]
-
 <% if node[:keystone][:assignment][:driver] == 'hybrid' -%>
 [ldap_hybrid]
 default_roles = Member
@@ -56,7 +48,6 @@ default_project = <%= node[:keystone][:default][:tenant] %>
 <% end -%>
 
 [ldap]
-
 url = <%= node[:keystone][:ldap][:url] %>
 user = <%= node[:keystone][:ldap][:user] %>
 password = <%= node[:keystone][:ldap][:password] %>
@@ -111,7 +102,6 @@ auth_pool_size = <%= node[:keystone][:ldap][:auth_pool_size] %>
 auth_pool_connection_lifetime = <%= node[:keystone][:ldap][:auth_pool_connection_lifetime] %>
 
 [oslo_messaging_rabbit]
-
 rabbit_host = <%= @rabbit_settings[:address] %>
 <%= "rabbit_port = #{@rabbit_settings[:port]}" unless @rabbit_settings[:port].nil? %>
 rabbit_userid = <%= @rabbit_settings[:user] %>
@@ -119,25 +109,19 @@ rabbit_password = <%= @rabbit_settings[:password] %>
 rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 
 [oslo_policy]
-
 policy_file = <%= node[:keystone][:policy_file] %>
 
 [resource]
-
 driver = sql
 
 [role]
-
 driver = sql
 
 [signing]
-
 certfile = <%= @signing_certfile %>
 keyfile = <%= @signing_keyfile %>
 ca_certs = <%= @signing_ca_certs %>
 
 [token]
-
-expiration=<%= @token_expiration %>
-
+expiration = <%= @token_expiration %>
 provider = uuid
