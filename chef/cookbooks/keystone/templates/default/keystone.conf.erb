@@ -18,19 +18,10 @@ connection = <%= @sql_connection %>
 idle_timeout = <%= @sql_idle_timeout %>
 
 [eventlet_server]
-public_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
-admin_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 public_bind_host = <%= @bind_service_host %>
 public_port = <%= @bind_service_port %>
 admin_bind_host = <%= @bind_admin_host %>
 admin_port = <%= @bind_admin_port %>
-wsgi_keep_alive = false
-
-[eventlet_server_ssl]
-enable = <%= @ssl_enable %>
-certfile = <%= @ssl_certfile %>
-keyfile = <%= @ssl_keyfile %>
-ca_certs = <%= @ssl_ca_certs %>
 
 [identity]
 domain_specific_drivers_enabled = <%= node[:keystone][:domain_specific_drivers] ? "True" : "False" %>

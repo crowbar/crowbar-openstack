@@ -228,10 +228,6 @@ template node[:keystone][:config_file] do
       token_expiration: node[:keystone][:token_expiration],
       protocol: node[:keystone][:api][:protocol],
       frontend: node[:keystone][:frontend],
-      ssl_enable: (node[:keystone][:frontend] == "native" && node[:keystone][:api][:protocol] == "https"),
-      ssl_certfile: node[:keystone][:ssl][:certfile],
-      ssl_keyfile: node[:keystone][:ssl][:keyfile],
-      ssl_ca_certs: node[:keystone][:ssl][:ca_certs],
       rabbit_settings: fetch_rabbitmq_settings
     )
     if node[:keystone][:frontend] == "apache"
