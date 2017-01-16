@@ -20,7 +20,6 @@ module Barclamp
     def server_frontends_for_keystone(selected)
       options_for_select(
         [
-          ["native", "native"],
           ["apache", "apache"],
           ["uwsgi", "uwsgi"]
         ],

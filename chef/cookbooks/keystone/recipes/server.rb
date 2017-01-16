@@ -356,9 +356,7 @@ ruby_block "synchronize signing keys for non-founder" do
     end
 
     if dirty
-      if node[:keystone][:frontend] == "native"
-        resources(service: "keystone").run_action(:restart)
-      elsif node[:keystone][:frontend] == "apache"
+      if node[:keystone][:frontend] == "apache"
         resources(service: "apache2").run_action(:restart)
       elsif node[:keystone][:frontend] == "uwsgi"
         resources(service: "keystone-uwsgi").run_action(:restart)
@@ -377,18 +375,6 @@ if node[:keystone][:api][:protocol] == "https"
     group node[:keystone][:group]
     fqdn node[:fqdn]
     ca_certs node[:keystone][:ssl][:ca_certs]
-  end
-end
-
-if node[:keystone][:frontend] == "native"
-  # We define the service after we define all our config files, so that it's
-  # started only when all files are created.
-  service "keystone" do
-    service_name node[:keystone][:service_name]
-    supports status: true, start: true, restart: true
-    action [:enable, :start]
-    subscribes :restart, resources(template: node[:keystone][:config_file]), :immediately
-    provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 end
 
