@@ -68,5 +68,3 @@ service "rabbitmq-server" do
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if node[:rabbitmq][:ha][:enabled]
 end
-
-
