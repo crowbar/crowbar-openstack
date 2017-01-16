@@ -29,14 +29,6 @@ sql_connection = "#{db_settings[:url_scheme]}://#{node[:magnum][:db][:user]}:"\
                  "#{db_password}@#{db_settings[:address]}/"\
                  "#{node[:magnum][:db][:database]}"
 
-# address/port binding
-my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
-  node, "admin").address
-node.set[:magnum][:api][:bind_host] = my_ipaddress
-
-bind_port = network_settings[:api][:bind_port]
-bind_host = network_settings[:api][:bind_host]
-
 template node[:magnum][:config_file] do
   source "magnum.conf.erb"
   owner "root"
@@ -44,8 +36,6 @@ template node[:magnum][:config_file] do
   mode 0640
   variables(
     trustee: node[:magnum][:trustee],
-    bind_host: bind_host,
-    bind_port: bind_port,
     sql_connection: sql_connection,
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: KeystoneHelper.keystone_settings(node, :magnum),

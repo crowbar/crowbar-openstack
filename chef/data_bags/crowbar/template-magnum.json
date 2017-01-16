@@ -32,6 +32,14 @@
       },
       "cert": {
         "cert_manager_type": "x509keypair"
+      },
+      "ssl": {
+        "certfile": "/etc/magnum/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/magnum/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
+        "cert_required": false,
+        "ca_certs": "/etc/magnum/ssl/certs/ca.pem"
       }
     }
   },
@@ -60,4 +68,3 @@
     }
   }
 }
-

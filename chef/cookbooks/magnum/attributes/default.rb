@@ -23,6 +23,13 @@ default[:magnum][:config_file] = "/etc/magnum/magnum.conf.d/100-magnum.conf"
 
 default[:magnum][:api][:protocol] = "http"
 
+default[:magnum][:ssl][:certfile] = "/etc/magnum/ssl/certs/signing_cert.pem"
+default[:magnum][:ssl][:keyfile] = "/etc/magnum/ssl/private/signing_key.pem"
+default[:magnum][:ssl][:generate_certs] = false
+default[:magnum][:ssl][:insecure] = false
+default[:magnum][:ssl][:cert_required] = false
+default[:magnum][:ssl][:ca_certs] = "/etc/magnum/ssl/certs/ca.pem"
+
 # HA
 default[:magnum][:ha][:enabled] = false
 # When HAproxy listens on the API port, make service listen elsewhere

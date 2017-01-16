@@ -26,7 +26,8 @@ if %w(rhel suse).include?(node[:platform_family])
   end
 end
 
-insecure = keystone_settings["insecure"] ? "--insecure" : ""
+magnum_insecure = node[:magnum][:api][:protocol] == "https" && node[:magnum][:ssl][:insecure]
+insecure = keystone_settings["insecure"] || magnum_insecure ? "--insecure" : ""
 auth_url = "#{keystone_settings["protocol"]}://"\
            "#{keystone_settings["internal_url_host"]}:"\
            "#{keystone_settings["service_port"]}/v3"

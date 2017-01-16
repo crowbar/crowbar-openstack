@@ -11,10 +11,6 @@ transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = magnum
 host = <%= node["hostname"] %>
 
-[api]
-port = <%= @bind_port %>
-host = <%= @bind_host %>
-
 [barbican_client]
 region_name = <%= @keystone_settings['endpoint_region'] %>
 
