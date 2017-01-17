@@ -26,9 +26,11 @@ transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = neutron
 max_header_line = <%= node[:neutron][:max_header_line] %>
 wsgi_keep_alive = false
+
 [agent]
 root_helper = sudo neutron-rootwrap /etc/neutron/rootwrap.conf
 root_helper_daemon = sudo neutron-rootwrap-daemon /etc/neutron/rootwrap.conf
+
 [database]
 <% unless @sql_connection.nil? || @sql_connection.empty? -%>
 connection = <%= @sql_connection %>
@@ -37,6 +39,7 @@ min_pool_size = <%= @sql_min_pool_size %>
 max_pool_size = <%= @sql_max_pool_size %>
 max_overflow = <%= @sql_max_pool_overflow %>
 pool_timeout = <%= @sql_pool_timeout %>
+
 [keystone_authtoken]
 auth_type = password
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
@@ -49,6 +52,7 @@ password = <%= @keystone_settings['service_password'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
 project_domain_name = <%= @keystone_settings['admin_domain'] %>
 user_domain_name = <%= @keystone_settings['admin_domain'] %>
+
 [nova]
 region_name = <%= @keystone_settings['endpoint_region'] %>
 endpoint_type = internal
@@ -60,16 +64,20 @@ insecure = <%= @nova_insecure %>
 password = <%= @keystone_settings['service_password'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
 username = <%= @keystone_settings['service_user'] %>
+
 [oslo_concurrency]
 lock_path = /var/run/neutron
+
 [oslo_messaging_notifications]
 driver = neutron.openstack.common.notifier.rpc_notifier
+
 [ssl]
 <% if @ssl_cert_required -%>
 ca_file = <%= @ssl_ca_file %>
 <% end -%>
 cert_file = <%= @ssl_cert_file %>
 key_file = <%= @ssl_key_file %>
+
 <% if @infoblox -%>
 [infoblox]
 cloud_data_center_id = <%= @infoblox[:cloud_data_center_id] %>
