@@ -333,7 +333,6 @@ auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 delay_auth_decision = <%= @keystone_delay_auth_decision %>
 include_service_catalog = False
 cache = swift.cache
-memcached_servers = <%= @memcached_ips.join(", ") %>
 
 #
 [filter:keystoneauth]
