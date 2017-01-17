@@ -82,35 +82,6 @@ keystone_register "give cinder user access" do
   action :add_access
 end
 
-keystone_register "register cinder service" do
-  protocol keystone_settings["protocol"]
-  insecure keystone_settings["insecure"]
-  host keystone_settings["internal_url_host"]
-  port keystone_settings["admin_port"]
-  auth register_auth_hash
-  service_name "cinder"
-  service_type "volume"
-  service_description "Openstack Cinder Service"
-  action :add_service
-end
-
-keystone_register "register cinder endpoint" do
-  protocol keystone_settings["protocol"]
-  insecure keystone_settings["insecure"]
-  host keystone_settings["internal_url_host"]
-  port keystone_settings["admin_port"]
-  auth register_auth_hash
-  endpoint_service "cinder"
-  endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{cinder_protocol}://"\
-                     "#{my_public_host}:#{cinder_port}/v1/$(project_id)s"
-  endpoint_adminURL "#{cinder_protocol}://"\
-                    "#{my_admin_host}:#{cinder_port}/v1/$(project_id)s"
-  endpoint_internalURL "#{cinder_protocol}://"\
-                       "#{my_admin_host}:#{cinder_port}/v1/$(project_id)s"
-  action :add_endpoint
-end
-
 keystone_register "register cinder service v2" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
