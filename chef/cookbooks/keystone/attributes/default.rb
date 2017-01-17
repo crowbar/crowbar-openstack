@@ -25,7 +25,7 @@ default[:keystone][:user] = "keystone"
 default[:keystone][:group] = "keystone"
 
 default[:keystone][:debug] = false
-default[:keystone][:frontend] = "native"
+default[:keystone][:frontend] = "apache"
 default[:keystone][:verbose] = true
 default[:keystone][:domain_specific_drivers] = false
 default[:keystone][:domain_config_dir] = "/etc/keystone/domains"
