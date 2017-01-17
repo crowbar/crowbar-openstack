@@ -73,9 +73,7 @@ class SwiftService < PacemakerServiceObject
 
   def proposal_dependencies(role)
     answer = []
-    if role.default_attributes["swift"]["auth_method"] == "keystone"
-      answer << { "barclamp" => "keystone", "inst" => role.default_attributes["swift"]["keystone_instance"] }
-    end
+    answer << { "barclamp" => "keystone", "inst" => role.default_attributes["swift"]["keystone_instance"] }
     answer
   end
 
@@ -87,7 +85,7 @@ class SwiftService < PacemakerServiceObject
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
 
-    base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone", true)
+    base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
 
     unless base["attributes"][@bc_name]["keystone_instance"].blank?
       base["attributes"]["swift"]["auth_method"] = "keystone"
