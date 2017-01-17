@@ -25,7 +25,6 @@ auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 region_name=<%= @keystone_settings['endpoint_region'] %>
-signing_dir = /var/cache/glance/keystone-signing
 username = <%= @keystone_settings['service_user'] %>
 password = <%= @keystone_settings['service_password'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
