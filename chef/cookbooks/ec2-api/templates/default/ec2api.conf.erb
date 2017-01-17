@@ -5,6 +5,7 @@ log_dir = /var/log/ec2-api
 use_stderr = false
 keystone_ec2_tokens_url = <%= @keystone_settings['public_auth_url'] %>/ec2tokens
 ec2api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+metadata_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 transport_url = <%= @rabbit_settings[:url] %>
 [database]
 connection = <%= @database_connection %>
