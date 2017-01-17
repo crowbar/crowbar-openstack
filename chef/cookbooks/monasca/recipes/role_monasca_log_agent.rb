@@ -1,5 +1,4 @@
-#
-# Copyright 2016, SUSE LINUX GmbH
+# Copyright 2017 FUJITSU LIMITED
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +13,7 @@
 # limitations under the License.
 #
 
-if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-server")
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-log-agent")
   include_recipe "#{@cookbook_name}::common"
-  include_recipe "#{@cookbook_name}::server"
+  include_recipe "#{@cookbook_name}::log_agent"
 end

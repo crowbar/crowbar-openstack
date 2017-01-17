@@ -15,5 +15,6 @@
 #
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-agent")
-  include_recipe "monasca::agent"
+  include_recipe "#{@cookbook_name}::common"
+  include_recipe "#{@cookbook_name}::agent"
 end

@@ -1,5 +1,6 @@
 #
 # Copyright 2016 SUSE Linux GmbH
+# Copyright 2017 Fujitsu LIMITED
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitation.
 
+monasca_log_agent_service_name = "monasca-log-agent"
+
+default[:monasca][:platform] = {
+  packages: [],
+  services: [monasca_log_agent_service_name]
+}
+
 default[:monasca][:db][:database] = "monasca"
 default[:monasca][:db][:user] = "monasca"
 default[:monasca][:db][:password] = nil # must be set by wrapper
@@ -20,7 +28,9 @@ default[:monasca][:db][:password] = nil # must be set by wrapper
 override[:monasca][:group] = "monasca"
 override[:monasca][:user] = "monasca"
 
-default[:monasca][:debug] = false
-default[:monasca][:ha_enabled] = false
-
 default[:monasca][:api][:bind_host] = "*"
+
+# log-agent default service settings
+default[:monasca][:log_agent][:service_name] = "openstack-monasca-log-agent"
+default[:monasca][:log_agent][:user] = "root"
+default[:monasca][:log_agent][:group] = "root"

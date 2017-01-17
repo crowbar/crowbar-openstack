@@ -1,5 +1,6 @@
 #
 # Copyright 2016, SUSE LINUX GmbH
+# Copyright 2017 FUJITSU LIMITED
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,7 +34,16 @@ class MonascaService < PacemakerServiceObject
           "admin" => true,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.1",
+            "suse" => "< 12.2",
+            "windows" => "/.*/"
+          }
+        },
+        "monasca-log-agent" => {
+          "unique" => false,
+          "admin" => true,
+          "count" => -1,
+          "exclude_platform" => {
+            "suse" => "< 12.2",
             "windows" => "/.*/"
           }
         },
@@ -43,7 +53,7 @@ class MonascaService < PacemakerServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.1",
+            "suse" => "< 12.2",
             "windows" => "/.*/"
           }
         }
@@ -88,6 +98,7 @@ class MonascaService < PacemakerServiceObject
     agent_nodes = nodes
 
     base["deployment"][@bc_name]["elements"]["monasca-agent"] = agent_nodes
+    base["deployment"][@bc_name]["elements"]["monasca-log-agent"] = agent_nodes
     unless server_nodes.nil?
       base["deployment"][@bc_name]["elements"] = {
         "monasca-server" => [server_nodes.first.name]
@@ -98,8 +109,12 @@ class MonascaService < PacemakerServiceObject
       find_dep_proposal("database")
     base["attributes"][@bc_name]["keystone_instance"] =
       find_dep_proposal("keystone")
+
     base["attributes"][@bc_name]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
+    # note(trebskit) once agent is ready, uncomment following line
+    # base["attributes"][@bc_name][:agent][:keystone][:service_password] = random_password
+    base["attributes"][@bc_name][:log_agent][:keystone][:service_password] = random_password
 
     @logger.debug("Monasca create_proposal: exiting")
     base

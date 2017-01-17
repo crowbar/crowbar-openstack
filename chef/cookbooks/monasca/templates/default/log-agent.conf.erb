@@ -1,0 +1,28 @@
+input {
+<% @log_files.each_pair do |path, service| %>
+  <%= "file {
+    add_field => { \"dimensions\" => { \"service\" => \"#{service}\" }}
+    path => \"#{path}\"
+  }"
+ %>
+<% end %>
+}
+
+output {
+  monasca_log_api {
+    ### keystone based settings
+    keystone_api_url => "<%= @keystone_settings['admin_auth_url'] %>/v3"
+    project_name => "<%= @log_agent_keystone['service_tenant'] %>"
+    username => "<%= @log_agent_keystone['service_user'] %>"
+    password => "<%= @log_agent_keystone['service_password'] %>"
+    user_domain_name => "<%= @keystone_settings['admin_domain'] %>"
+    project_domain_name => "<%= @keystone_settings['admin_domain'] %>"
+    ### monasca specific settings
+    monasca_log_api_url => "<%= @monasca_log_api_url %>"
+<%- unless @log_agent_dimensions.nil? then -%>
+    dimensions => [<%= @log_agent_dimensions.map{|k,v| "\"#{k}:#{v}\""}.join(',') %>]
+<%- else -%>
+    dimensions => []
+<%- end -%>
+  }
+}
