@@ -74,6 +74,14 @@ case node[:nova][:libvirt_type]
         node.save
       end
 
+      if node[:nova]["use_migration"]
+        migration_network = node[:nova][:migration][:network]
+        listen_addr = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, migration_network).address
+      else
+        # still put a valid address
+        listen_addr = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+      end
+
       template "/etc/libvirt/libvirtd.conf" do
         source "libvirtd.conf.erb"
         group "root"
@@ -82,7 +90,7 @@ case node[:nova][:libvirt_type]
         variables(
           libvirtd_host_uuid: node[:nova][:host_uuid],
           libvirtd_listen_tcp: node[:nova]["use_migration"] ? 1 : 0,
-          libvirtd_listen_addr: Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address,
+          libvirtd_listen_addr: listen_addr,
           libvirtd_auth_tcp: node[:nova]["use_migration"] ? "none" : "sasl"
         )
         notifies :restart, "service[libvirtd]", :delayed

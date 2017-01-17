@@ -20,6 +20,9 @@
       "setup_shared_instance_storage": false,
       "use_shared_instance_storage": false,
       "use_migration": false,
+      "migration": {
+        "network": "admin"
+      },
       "cross_az_attach": true,
       "use_syslog": false,
       "neutron_url_timeout": 30,
@@ -97,7 +100,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 46,
+      "schema-revision": 47,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-docker": [ "readying", "ready", "applying" ],

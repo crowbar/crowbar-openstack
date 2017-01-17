@@ -2580,7 +2580,7 @@ virt_type = <%= @libvirt_type %>
 # Migration target URI (any included "%s" is replaced with the migration target
 # hostname) (string value)
 #live_migration_uri = qemu+tcp://%s/system
-live_migration_uri = xenmigr://%s/system
+live_migration_uri = xenmigr://<%= @migration_host %>/system
 
 # Migration flags to be set for live migration (string value)
 #live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MIGRATE_LIVE, VIR_MIGRATE_TUNNELLED
@@ -2593,6 +2593,7 @@ live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_LIVE
 # Migration target URI (any included "%s" is replaced with the migration target
 # hostname) (string value)
 #live_migration_uri = qemu+tcp://%s/system
+live_migration_uri = qemu+tcp://<%= @migration_host %>/system
 
   <% if @libvirt_migration -%>
     <% if @shared_instances -%>
