@@ -46,10 +46,6 @@ register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
                        tenant: keystone_settings["admin_tenant"] }
 
-node.normal[:apache][:listen_ports_crowbar] ||= {}
-
-node.normal[:apache][:listen_ports_crowbar][:barbican] = { plain: [bind_port] }
-
 crowbar_pacemaker_sync_mark "wait-barbican_register"
 
 keystone_register "barbican api wakeup keystone" do
@@ -123,6 +119,9 @@ else
   bind_host = node[:barbican][:api][:bind_host]
   bind_port = node[:barbican][:api][:bind_port]
 end
+
+node.normal[:apache][:listen_ports_crowbar] ||= {}
+node.normal[:apache][:listen_ports_crowbar][:barbican] = { plain: [bind_port] }
 
 crowbar_openstack_wsgi "WSGI entry for barbican-api" do
   bind_host bind_host

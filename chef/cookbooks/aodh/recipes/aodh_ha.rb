@@ -85,3 +85,5 @@ crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
 end
 
 crowbar_pacemaker_sync_mark "create-aodh_ha_resources"
+
+include_recipe "crowbar-pacemaker::apache"
