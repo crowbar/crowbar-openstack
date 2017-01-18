@@ -287,13 +287,13 @@
                 }
               }
             }
-          },
-          "ec2-api": {
-            "type": "map",
-            "required": true,
-            "mapping": {
-              "crowbar-revision": { "type": "int", "required": true }
-            }
+          }
+        },
+        "ec2-api": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "crowbar-revision": { "type": "int", "required": true }
           }
         }
       }
