@@ -29,19 +29,19 @@ sql_connection = "#{db_settings[:url_scheme]}://#{node[:sahara][:db][:user]}:"\
                  "#{node[:sahara][:db][:database]}"
 
 # cinder insecure?
-cinder = get_instance("roles:cinder-controller")
+cinder = node_search_with_cache("roles:cinder-controller").first
 cinder_insecure = cinder[:cinder][:ssl][:insecure]
 
 # heat insecure?
-heat = get_instance("roles:heat-server")
+heat = node_search_with_cache("roles:heat-server").first
 heat_insecure = heat[:heat][:ssl][:insecure]
 
 # neutron insecure?
-neutron = get_instance("roles:neutron-server")
+neutron = node_search_with_cache("roles:neutron-server").first
 neutron_insecure = neutron[:neutron][:ssl][:insecure]
 
 # nova insecure?
-nova = get_instance("roles:nova-controller")
+nova = node_search_with_cache("roles:nova-controller").first
 nova_insecure = nova[:nova][:ssl][:insecure]
 
 # use ceilometer?

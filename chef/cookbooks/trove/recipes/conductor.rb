@@ -19,7 +19,7 @@
 
 sql_connection = TroveHelper.get_sql_connection node
 
-rabbitmq_servers = search_env_filtered(:node, "roles:rabbitmq-server")
+rabbitmq_servers = node_search_with_cache("roles:rabbitmq-server")
 rabbit_trove_url = TroveHelper.get_rabbitmq_trove_url(node, rabbitmq_servers)
 
 template node[:trove][:conductor][:config_file] do

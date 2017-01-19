@@ -21,16 +21,16 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 sql_connection = TroveHelper.get_sql_connection node
 
-rabbitmq_servers = search_env_filtered(:node, "roles:rabbitmq-server")
+rabbitmq_servers = node_search_with_cache("roles:rabbitmq-server")
 rabbit_trove_url = TroveHelper.get_rabbitmq_trove_url(node, rabbitmq_servers)
 
-nova_controllers = search_env_filtered(:node, "roles:nova-controller")
+nova_controllers = node_search_with_cache("roles:nova-controller")
 nova_url, nova_insecure = TroveHelper.get_nova_details nova_controllers, keystone_settings
 
-cinder_controllers = search_env_filtered(:node, "roles:cinder-controller")
+cinder_controllers = node_search_with_cache("roles:cinder-controller")
 cinder_url, cinder_insecure = TroveHelper.get_cinder_details cinder_controllers
 
-swift_proxies = search_env_filtered(:node, "roles:swift-proxy")
+swift_proxies = node_search_with_cache("roles:swift-proxy")
 ceph_radosgws = search_env_filtered(:node, "roles:ceph-radosgw")
 object_store_url, object_store_insecure =
   TroveHelper.get_objectstore_details swift_proxies, ceph_radosgws
