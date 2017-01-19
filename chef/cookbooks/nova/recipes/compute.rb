@@ -73,7 +73,7 @@ case node[:nova][:libvirt_type]
           libvirtd_listen_addr: listen_addr,
           libvirtd_auth_tcp: node[:nova]["use_migration"] ? "none" : "sasl"
         )
-        notifies :restart, "service[libvirtd]", :delayed
+        notifies :create, "ruby_block[restart_libvirtd]", :immediately
       end
 
       case node[:nova][:libvirt_type]
@@ -184,7 +184,25 @@ case node[:nova][:libvirt_type]
             user: libvirt_user,
             group: libvirt_group
         )
-        notifies :restart, "service[libvirtd]"
+        notifies :create, "ruby_block[restart_libvirtd]", :immediately
+      end
+
+      # This block is here to allow to restart libvirtd as soon as possible
+      # after configuration changes (notified from the qemu.conf and libvirtd.conf
+      # templates above), while avoiding it to restart multiple times, like it would
+      # when we'd sent an :immediate restart notification directly to the service.
+      # We need a (somewhat) immediate restart of libvirtd to avoid race conditions
+      # and ordering issues with the delayed restart of nova-compute
+      # See: https://bugzilla.suse.com/show_bug.cgi?id=1016302
+      ruby_block "restart_libvirtd" do
+        block do
+          r = resources(service: "libvirtd")
+          a = Array.new(r.action)
+          a << :restart unless a.include?(:restart)
+          a.delete(:start) if a.include?(:restart)
+          r.action(a)
+        end
+        action :nothing
       end
 
       service "virtlogd" do
