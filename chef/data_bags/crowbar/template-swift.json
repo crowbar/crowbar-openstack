@@ -85,10 +85,6 @@
       "allow_versions": false,
       "reseller_prefix" : "AUTH_",
       "debug": false,
-      "use_slog" : false,
-      "slog_account": "system_stats",
-      "slog_user": "swift_sys",
-      "slog_passwd": "swift_pwd",
       "admin_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"admin\").address",
       "storage_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"storage\").address",
       "public_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"public\").address",
@@ -100,7 +96,7 @@
     "swift": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "swift-dispersion": [ "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],

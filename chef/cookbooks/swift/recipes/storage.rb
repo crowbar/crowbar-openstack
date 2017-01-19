@@ -122,8 +122,3 @@ node.set[:swift][:monitor] = {}
 node.set[:swift][:monitor][:svcs] = svcs
 node.set[:swift][:monitor][:ports] = { object: 6200, container: 6201, account: 6202 }
 node.save
-
-if node["swift"]["use_slog"]
-  log ("installing slogging") { level :info }
-  include_recipe "swift::slog"
-end
