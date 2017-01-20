@@ -137,8 +137,10 @@ unless loop_lvm_paths.empty?
 
   if %w(rhel suse).include? node[:platform_family]
     cinder_looplvm_service = "openstack-cinder-looplvm"
+    cinder_volume_service = "openstack-cinder-volume"
   else
     cinder_looplvm_service = "cinder-looplvm"
+    cinder_volume_service = "cinder-volume"
   end
 
   template "/etc/systemd/system/#{cinder_looplvm_service}.service" do
@@ -146,7 +148,7 @@ unless loop_lvm_paths.empty?
     owner "root"
     group "root"
     mode "0644"
-    variables(service_name: cinder_looplvm_service)
+    variables(service_name: cinder_volume_service)
   end
 
   # Make sure that any dependency change is taken into account
