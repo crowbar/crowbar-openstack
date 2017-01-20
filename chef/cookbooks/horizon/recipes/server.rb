@@ -13,6 +13,13 @@
 # limitations under the License.
 #
 
+# Tell the apache service that is defined in apache2/default
+# to use pacemaker provider if needed
+ha_enabled = node[:horizon][:ha][:enabled]
+
+node[:apache][:ha][:enabled] = ha_enabled
+node.save
+
 include_recipe "apache2"
 include_recipe "apache2::mod_wsgi"
 include_recipe "apache2::mod_rewrite"
@@ -127,8 +134,6 @@ else
     action :delete
   end
 end
-
-ha_enabled = node[:horizon][:ha][:enabled]
 
 db_settings = fetch_database_settings
 include_recipe "database::client"
