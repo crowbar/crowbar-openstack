@@ -87,6 +87,7 @@ end
 # the corosync nodes to be part of the nova proposal.
 crowbar_pacemaker_sync_mark "sync-nova_compute_before_ha" do
   revision nova[:nova]["crowbar-revision"]
+  timeout 120
 end
 
 # Avoid races when creating pacemaker resources
