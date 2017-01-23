@@ -418,6 +418,7 @@ if node[:keystone][:signing][:token_format] == "fernet"
     # We would like to propagate fernet keys to all nodes in the cluster
     execute "propagate fernet keys to all nodes in the cluster" do
       command rsync_command
+      ignore_failure true
       action :run
       only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
@@ -432,6 +433,18 @@ if node[:keystone][:signing][:token_format] == "fernet"
     variables(
       rsync_command: rsync_command
     )
+  end
+
+  pacemaker_primitive "keystone-fernet-rotate" do
+    agent node[:keystone][:ha][:fernet][:agent]
+    params({
+      "target" => "/var/lib/keystone/keystone-fernet-rotate",
+      "link" => "/etc/cron.hourly/openstack-keystone-fernet",
+      "backup_suffix" => ".orig"
+    })
+    op node[:keystone][:ha][:fernet][:op]
+    action :create
+    only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 

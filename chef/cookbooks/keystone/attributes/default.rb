@@ -120,3 +120,6 @@ default[:keystone][:ha][:ports][:admin_port] = 5501
 #default[:keystone][:ha][:agent] = "ocf:openstack:keystone"
 default[:keystone][:ha][:agent] = "service:openstack-keystone"
 default[:keystone][:ha][:op][:monitor][:interval] = "10s"
+# Pacemaker Keystone fernet service
+default[:keystone][:ha][:fernet][:agent] = "ocf:heartbeat:symlink"
+default[:keystone][:ha][:fernet][:op][:monitor][:interval] = "10s"
