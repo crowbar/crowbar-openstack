@@ -217,6 +217,30 @@ if use_l3_agent
                                                          keystone_settings["service_port"],
                                                          "2.0")
 
+  neutron_l3_ha_service_options = node[:neutron][:ha][:neutron_l3_ha_service][:service_options]
+  env_vars_for_neutron_l3_ha_service = {
+      'OS_AUTH_URL' => os_auth_url_v2,
+      'OS_REGION_NAME' => keystone_settings['endpoint_region'],
+      'OS_TENANT_NAME' => keystone_settings['admin_tenant'],
+      'OS_USERNAME' => keystone_settings['admin_user'],
+      'OS_INSECURE' => keystone_settings['insecure'] || node[:neutron][:ssl][:insecure],
+      'NHAS_SECONDS_TO_SLEEP_BETWEEN_CHECKS' => neutron_l3_ha_service_options[:seconds_to_sleep_between_checks],
+      'NHAS_AGENT_CHECK_TIMEOUT' => neutron_l3_ha_service_options[:agent_check][:timeout],
+      'NHAS_AGENT_CHECK_SHUTDOWN_TIMEOUT' => neutron_l3_ha_service_options[:agent_check][:shutdown_timeout],
+      'NHAS_REPLICATE_DHCP_TIMEOUT' => neutron_l3_ha_service_options[:replicate_dhcp][:timeout],
+      'NHAS_REPLICATE_DHCP_SHUTDOWN_TIMEOUT' => neutron_l3_ha_service_options[:replicate_dhcp][:shutdown_timeout],
+      'NHAS_AGENT_MIGRATE_TIMEOUT' => neutron_l3_ha_service_options[:agent_migrate][:timeout],
+      'NHAS_AGENT_MIGRATE_SHUTDOWN_TIMEOUT' => neutron_l3_ha_service_options[:agent_migrate][:shutdown_timeout],
+      'NHAS_HA_TOOL' => "/usr/bin/neutron-ha-tool",
+  }
+  file '/etc/neutron/neutron-l3-ha-service.env' do
+    owner 'root'
+    group 'root'
+    mode '0600'
+    content env_vars_for_neutron_l3_ha_service.map {|k, v| [['export', k].join(' '), v].join('=')}.join("\n")
+    action :create
+  end
+
   ha_tool_transaction_objects = []
 
   ha_tool_primitive_name = "neutron-ha-tool"
@@ -257,6 +281,63 @@ if use_l3_agent
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+
+  # Install a script that wraps neutron-ha-tool
+  cookbook_file "neutron-l3-ha-service" do
+    source "neutron-l3-ha-service"
+    path "/usr/bin/neutron-l3-ha-service"
+    mode "0755"
+    owner "root"
+    group "root"
+  end
+
+  # install systemd unit configuration
+  cookbook_file "neutron-l3-ha-service.service" do
+    source "neutron-l3-ha-service.service"
+    path "/etc/systemd/system/neutron-l3-ha-service.service"
+    mode "0644"
+    owner "root"
+    group "root"
+  end
+
+  # Reload systemd when unit file changed
+  bash "reload systemd after neutron-l3-ha-service update" do
+    code "systemctl daemon-reload"
+    action :nothing
+    subscribes :run, resources("cookbook_file[neutron-l3-ha-service.service]"), :immediately
+  end
+
+  # Add pacemaker resource for neutron-l3-ha-service
+  ha_service_transaction_objects = []
+  ha_service_primitive_name = "neutron-l3-ha-service"
+
+  pacemaker_primitive ha_service_primitive_name do
+    agent "systemd:neutron-l3-ha-service"
+    op node[:neutron][:ha][:neutron_l3_ha_service][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  ha_service_transaction_objects << "pacemaker_primitive[#{ha_service_primitive_name}]"
+  ha_service_location_name = openstack_pacemaker_controller_only_location_for ha_service_primitive_name
+  ha_service_transaction_objects << "pacemaker_location[#{ha_service_location_name}]"
+
+  pacemaker_transaction "neutron ha service" do
+    cib_objects ha_service_transaction_objects
+    # note that this will also automatically start the resources
+    action :commit_new
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  # Define dependencies for this resource
+  crowbar_pacemaker_order_only_existing "o-#{ha_service_primitive_name}" do
+    # Please note that the same dependencies are used as for neutron-ha-tool
+    # so the same comments apply here.
+    ordering "( postgresql rabbitmq g-haproxy cl-neutron-server #{agents_clone_name} ) #{ha_service_primitive_name}"
+    score "Mandatory"
+    action :create
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
 end
 
 crowbar_pacemaker_sync_mark "create-neutron-agents_ha_resources"

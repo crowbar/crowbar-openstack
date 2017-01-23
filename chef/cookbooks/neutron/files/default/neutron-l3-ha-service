@@ -1,0 +1,229 @@
+#!/bin/sh
+#
+#
+# Service script to wrap neutron-ha-tool
+#
+# This script was created based on the ocf resource script for neutron-ha-tool
+#
+# Originally neutron-ha-tool.py was called when pacemaker resource was started.
+# Given that the runtime of neutron-ha-tool.py depends heavily on the number
+# of routers, a lengthy migration would have made the start action to fail on
+# the pacemaker resource, because that would have timed out.
+#
+# The timeout would have caused the child process (neutron-ha-tool.py) to be
+# killed, interrupting the router migration (which is a router delete followed
+# by a router add) halfway, removing a router from the cloud.
+#
+# Wrapping neutron-ha-tool.py runs into a service enables long-run migrations
+# and also an opportunity to gracefully react to stop requests.
+set -u
+
+HATOOL=""
+INSECURE=""
+RETRY=""
+TIMEOUT_OPTIONS="--preserve-status"
+
+
+main() {
+    load_rcfile "$@"
+    validate_globals
+    set_hatool_global
+    check_hatool
+    set_insecure_global
+    set_retry_global
+
+    while true; do
+        perform_migration_if_needed
+        if [ "${NHAS_DEBUG_ONESHOT:-0}" = "1" ]; then
+            exit 3
+        fi
+        sleep "$NHAS_SECONDS_TO_SLEEP_BETWEEN_CHECKS"
+    done
+}
+
+
+check_hatool() {
+    if ! [ -f "$HATOOL" ]; then
+        die_with "ERROR: neutron-ha-tool is not a regular file"
+    fi
+    if ! [ -x "$HATOOL" ]; then
+        die_with "ERROR: neutron-ha-tool not executable"
+    fi
+}
+
+
+load_rcfile() {
+    if [ "$#" -ne "1" ]; then
+        die_with "ERROR: Please specify an rc file as the first argument for the script"
+    fi
+    local rcfile
+    rcfile="$1"
+
+    if ! [ -e "$rcfile" ]; then
+        die_with "ERROR: Specified rc file does not exist"
+    fi
+
+    log "INFO: Loading rc file $rcfile"
+    . $rcfile
+}
+
+assert_name_exported() {
+    # Make sure that subprocesses will be able to use a specific environment
+    # variable
+    local var
+    var="$1"
+
+    if /bin/sh -c "[ -n \"\$$var\" ]"; then
+        return 0
+    else
+        die_with "ERROR: environment variable $var is not exported"
+    fi
+}
+
+assert_name_set() {
+    local var
+    var="$1"
+
+    eval ": \${$var:-\$(die_with \"ERROR: environment variable $var is not set\")}"
+}
+
+validate_globals() {
+    local required_exports
+    local required_locals
+    required_exports="\
+        OS_AUTH_URL \
+        OS_REGION_NAME \
+        OS_TENANT_NAME \
+        OS_USERNAME \
+        OS_INSECURE"
+    required_locals="\
+        NHAS_SECONDS_TO_SLEEP_BETWEEN_CHECKS \
+        NHAS_AGENT_CHECK_TIMEOUT \
+        NHAS_AGENT_CHECK_SHUTDOWN_TIMEOUT \
+        NHAS_REPLICATE_DHCP_TIMEOUT \
+        NHAS_REPLICATE_DHCP_SHUTDOWN_TIMEOUT \
+        NHAS_AGENT_MIGRATE_TIMEOUT \
+        NHAS_AGENT_MIGRATE_SHUTDOWN_TIMEOUT \
+        NHAS_HA_TOOL"
+    for var in $required_exports; do
+        assert_name_exported $var
+    done
+
+    for var in $required_locals; do
+        assert_name_set $var
+    done
+}
+
+
+hatool_replicate_dhcp() {
+    timeout \
+        ${TIMEOUT_OPTIONS} \
+        --kill-after=${NHAS_REPLICATE_DHCP_SHUTDOWN_TIMEOUT} \
+        ${NHAS_REPLICATE_DHCP_TIMEOUT} \
+        ${HATOOL} --replicate-dhcp $RETRY $INSECURE
+}
+
+
+hatool_l3_agent_check() {
+    timeout \
+        ${TIMEOUT_OPTIONS} \
+        --kill-after=${NHAS_AGENT_CHECK_TIMEOUT} \
+        ${NHAS_AGENT_CHECK_SHUTDOWN_TIMEOUT} \
+        ${HATOOL} --l3-agent-check --quiet $INSECURE
+}
+
+
+hatool_l3_agent_migrate() {
+    timeout \
+        ${TIMEOUT_OPTIONS} \
+        --kill-after=${NHAS_AGENT_MIGRATE_TIMEOUT} \
+        ${NHAS_AGENT_MIGRATE_SHUTDOWN_TIMEOUT} \
+        ${HATOOL} --l3-agent-migrate $RETRY --now $INSECURE
+}
+
+
+die_if_failed_or_timed_out() {
+    local rc
+    rc="$1"
+
+    if [ "$rc" = "0" ]; then
+        return 0
+    fi
+
+    if [ "$rc" = "143" ]; then
+        log "ERROR: call timed out"
+    else
+        log "ERROR: call failed"
+    fi
+    exit "$rc"
+}
+
+
+perform_migration_if_needed() {
+    if migration_needed; then
+        log "INFO: Replicating dhcp servers"
+        hatool_replicate_dhcp
+        die_if_failed_or_timed_out "$?"
+
+        log "INFO: Migrating agents"
+        hatool_l3_agent_migrate
+        die_if_failed_or_timed_out "$?"
+    else
+        log "INFO: No migration required."
+    fi
+}
+
+
+die_with() {
+    local message
+    message="$1"
+
+    log "$message"
+    exit 1
+}
+
+
+set_hatool_global() {
+    HATOOL="$NHAS_HA_TOOL"
+}
+
+
+set_insecure_global() {
+    if is_true "$OS_INSECURE"; then
+        INSECURE="--insecure"
+    fi
+}
+
+
+set_retry_global() {
+    # Remain backwards-compatible with older neutron-ha-tool.py which
+    # don't support --retry.
+    if $HATOOL --help | grep -q -- --retry; then
+        RETRY="--retry"
+    fi
+}
+
+
+is_true() {
+    [ "$1" = "on" ] || [ "$1" = "true" ] || [ "$1" = "1" ]
+}
+
+
+log() {
+    echo "$(date +%Y-%m-%d:%H:%M:%S) $1" >&2
+}
+
+
+migration_needed() {
+    hatool_l3_agent_check
+
+    rc=$?
+    if [ $rc -eq 2 ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+
+main "$@"

@@ -1,0 +1,11 @@
+[Unit]
+Description=Neutron L3 HA Service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/neutron-ha-l3-service /etc/neutron/neutron-ha-l3-service.env
+# Time to wait for the process to react to the TERM signal
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target
