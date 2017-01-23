@@ -98,3 +98,11 @@ end
 crowbar_pacemaker_sync_mark "create-murano_register"
 
 murano_service "api"
+
+# Load the core app into murano, needed for everything
+execute "murano-manage core package" do
+  command "murano-manage import-package #{node[:murano][:core_package_location]}"
+  user node[:murano][:user]
+  group node[:murano][:group]
+  only_if { File.exist?(node[:murano][:core_package_location]) }
+end

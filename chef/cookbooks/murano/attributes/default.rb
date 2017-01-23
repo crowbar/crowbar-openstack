@@ -21,6 +21,7 @@ default[:murano][:max_header_line] = 16384
 default[:murano][:api][:protocol] = "http"
 default[:murano][:api][:bind_port] = 8082
 default[:murano][:use_syslog] = false
+default[:murano][:core_package_location] = "/usr/lib/murano/io.murano.zip"
 
 default[:murano][:ha][:enabled] = false
 
