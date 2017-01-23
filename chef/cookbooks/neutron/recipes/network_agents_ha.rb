@@ -230,7 +230,7 @@ if use_l3_agent
       "os_insecure"    => keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
     })
     op node[:neutron][:ha][:neutron_ha_tool][:op]
-    action :update
+    action :stop
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   ha_tool_transaction_objects << "pacemaker_primitive[#{ha_tool_primitive_name}]"
