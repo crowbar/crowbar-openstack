@@ -36,6 +36,19 @@ if use_l3_agent
     #sensitive true
     action :create
   end
+
+  # We need .openrc present at network node so the node can use neutron-ha-tool even
+  # when located in separate cluster
+  template "/root/.openrc" do
+    source "openrc.erb"
+    cookbook "keystone"
+    owner "root"
+    group "root"
+    mode 0o600
+    variables(
+      keystone_settings: keystone_settings
+    )
+  end
 end
 
 # Wait for all "neutron-network" nodes to reach this point so we know that they will
