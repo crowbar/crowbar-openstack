@@ -200,6 +200,7 @@ else
   }
 end
 
+default[:neutron][:f5][:ha_type] = "standalone"
 default[:neutron][:f5][:external_physical_mappings] = "default:1.1:True"
 default[:neutron][:f5][:vtep_folder] = "Common"
 default[:neutron][:f5][:vtep_selfip_name] = "vtep"

@@ -73,6 +73,17 @@ module Barclamp
       )
     end
 
+    def f5_ha_type(selected)
+      options_for_select(
+        [
+          [t(".f5.ha_types.standalone"), "standalone"],
+          [t(".f5.ha_types.pair"), "pair"],
+          [t(".f5.ha_types.scalen"), "scalen"]
+        ],
+        selected.to_s
+      )
+    end
+
     def api_protocols_for_neutron(selected)
       options_for_select(
         [

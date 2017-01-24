@@ -1,7 +1,7 @@
 [DEFAULT]
 debug = True
 periodic_interval = 10
-f5_ha_type = standalone
+f5_ha_type = <%= @ha_type %>
 f5_external_physical_mappings = <%= @external_physical_mappings %>
 <% if @tunnel_types.empty? -%>
 f5_vtep_folder = None
