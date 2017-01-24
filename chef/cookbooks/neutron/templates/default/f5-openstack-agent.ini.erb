@@ -92,7 +92,7 @@ periodic_interval = 10
 # If the device is external, the devices must be onboarded for the 
 # appropriate HA mode or else the driver will not provision devices
 #
-f5_ha_type = standalone
+f5_ha_type = <%= @ha_type %>
 #
 ###############################################################################
 #  L2 Segmentation Mode Settings

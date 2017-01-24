@@ -171,6 +171,7 @@ elsif node[:neutron][:use_lbaas] && node[:neutron][:use_lbaasv2] &&
       tunnel_types: ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
       use_l2pop: ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"),
       keystone_settings: keystone_settings,
+      ha_type: node[:neutron][:f5][:ha_type],
       external_physical_mappings: node[:neutron][:f5][:external_physical_mappings],
       vtep_folder: node[:neutron][:f5][:vtep_folder],
       vtep_selfip_name: node[:neutron][:f5][:vtep_selfip_name],

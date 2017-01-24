@@ -45,6 +45,7 @@
         "pool_timeout": 30
       },
       "f5": {
+        "ha_type": "standalone",
         "icontrol_hostname": "",
         "icontrol_username": "admin",
         "icontrol_password": "",
@@ -115,7 +116,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 54,
+      "schema-revision": 55,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

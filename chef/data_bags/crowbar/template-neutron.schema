@@ -79,6 +79,7 @@
                       "pool_timeout": { "type" : "int", "required" : true }
                     }},
                     "f5": { "type": "map", "required": true, "mapping": {
+                      "ha_type": { "type" : "str", "required" : true },
                       "icontrol_hostname": { "type" : "str", "required" : true },
                       "icontrol_username": { "type" : "str", "required" : true },
                       "icontrol_password": { "type" : "str", "required" : true },
