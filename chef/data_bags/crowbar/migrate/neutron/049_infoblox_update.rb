@@ -9,7 +9,7 @@ def upgrade(ta, td, a, d)
   # won't touch it. If, on the other hand, we are dealing with the Cloud 5
   # version from October 2015 we'll just overwrite it since the infoblox plugin
   # changed a great deal since then.
-  unless a.key?("infoblox") && a[:infoblox].key?("grid_defaults")
+  unless a.key?("infoblox") && a["infoblox"].key?("grid_defaults")
     a["infoblox"] = ta["infoblox"]
   end
   return a, d
