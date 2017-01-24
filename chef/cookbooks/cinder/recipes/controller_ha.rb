@@ -40,45 +40,31 @@ crowbar_pacemaker_sync_mark "sync-cinder_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-cinder_ha_resources"
 
+services = ["api", "scheduler"]
 transaction_objects = []
 
-api_primitive = "cinder-api"
-pacemaker_primitive api_primitive do
-  agent node[:cinder][:ha][:api_ra]
-  op node[:cinder][:ha][:op]
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_primitive[#{api_primitive}]"
+services.each do |service|
+  primitive_name = "cinder-#{service}"
+  pacemaker_primitive primitive_name do
+    agent node[:cinder][:ha]["#{service}_ra"]
+    op node[:cinder][:ha][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_primitive[#{primitive_name}]"
 
-scheduler_primitive = "cinder-scheduler"
-pacemaker_primitive scheduler_primitive do
-  agent node[:cinder][:ha][:scheduler_ra]
-  op node[:cinder][:ha][:op]
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_primitive[#{scheduler_primitive}]"
+  clone_name = "cl-#{primitive_name}"
+  pacemaker_clone clone_name do
+    rsc primitive_name
+    meta CrowbarPacemakerHelper.clone_meta(node)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_clone[#{clone_name}]"
 
-group_name = "g-cinder-controller"
-pacemaker_group group_name do
-  members [api_primitive, scheduler_primitive]
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  location_name = openstack_pacemaker_controller_only_location_for clone_name
+  transaction_objects << "pacemaker_location[#{location_name}]"
 end
-transaction_objects << "pacemaker_group[#{group_name}]"
-
-clone_name = "cl-#{group_name}"
-pacemaker_clone clone_name do
-  rsc group_name
-  meta CrowbarPacemakerHelper.clone_meta(node)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-location_name = openstack_pacemaker_controller_only_location_for clone_name
-transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "cinder controller" do
   cib_objects transaction_objects
@@ -87,11 +73,16 @@ pacemaker_transaction "cinder controller" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
-  ordering ["postgresql", "rabbitmq", "cl-keystone", clone_name]
-  score "Optional"
-  action :create
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+services.each do |service|
+  primitive_name = "cinder-#{service}"
+  clone_name = "cl-#{primitive_name}"
+
+  crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
+    ordering ["postgresql", "rabbitmq", "cl-keystone", clone_name]
+    score "Optional"
+    action :create
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 end
 
 crowbar_pacemaker_sync_mark "create-cinder_ha_resources"

@@ -40,7 +40,6 @@ crowbar_pacemaker_sync_mark "sync-sahara before_ha"
 crowbar_pacemaker_sync_mark "wait-sahara_ha_resources"
 
 transaction_objects = []
-primitives = []
 
 ["api", "engine"].each do |service|
   primitive = "sahara-#{service}"
@@ -50,29 +49,20 @@ primitives = []
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  primitives << primitive
   transaction_objects << "pacemaker_primitive[#{primitive}]"
-end
 
-group_name = "g-sahara"
-pacemaker_group group_name do
-  members primitives
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_group[#{group_name}]"
+  clone_name = "cl-#{primitive}"
+  pacemaker_clone clone_name do
+    rsc primitive
+    meta CrowbarPacemakerHelper.clone_meta(node)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_clone[#{clone_name}]"
 
-clone_name = "cl-#{group_name}"
-pacemaker_clone clone_name do
-  rsc group_name
-  meta CrowbarPacemakerHelper.clone_meta(node)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  location_name = openstack_pacemaker_controller_only_location_for clone_name
+  transaction_objects << "pacemaker_location[#{location_name}]"
 end
-transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-location_name = openstack_pacemaker_controller_only_location_for clone_name
-transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "sahara server" do
   cib_objects transaction_objects

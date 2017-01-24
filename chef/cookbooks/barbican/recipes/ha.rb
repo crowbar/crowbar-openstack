@@ -64,28 +64,19 @@ services.each do |service|
   end
   primitives << primitive_name
   transaction_objects << "pacemaker_primitive[#{primitive_name}]"
+
+  clone_name = "cl-#{primitive_name}"
+  pacemaker_clone clone_name do
+    rsc primitive_name
+    meta CrowbarPacemakerHelper.clone_meta(node)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_clone[#{clone_name}]"
+
+  location_name = openstack_pacemaker_controller_only_location_for clone_name
+  transaction_objects << "pacemaker_location[#{location_name}]"
 end
-
-group_name = "g-barbican"
-
-pacemaker_group group_name do
-  members primitives
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_group[#{group_name}]"
-
-clone_name = "cl-#{group_name}"
-pacemaker_clone clone_name do
-  rsc group_name
-  meta CrowbarPacemakerHelper.clone_meta(node)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-location_name = openstack_pacemaker_controller_only_location_for clone_name
-transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "barbican server" do
   cib_objects transaction_objects
@@ -94,11 +85,16 @@ pacemaker_transaction "barbican server" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
-  ordering ["postgresql", "rabbitmq", "cl-keystone", clone_name]
-  score "Optional"
-  action :create
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+services.each do |service|
+  primitive_name = "barbican-#{service}"
+  clone_name = "cl-#{primitive_name}"
+
+  crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
+    ordering ["postgresql", "rabbitmq", "cl-keystone", clone_name]
+    score "Optional"
+    action :create
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 end
 
 crowbar_pacemaker_sync_mark "create-barbican_ha_resources"

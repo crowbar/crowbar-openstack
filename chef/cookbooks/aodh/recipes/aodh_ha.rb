@@ -32,7 +32,6 @@ crowbar_pacemaker_sync_mark "sync-aodh_before_ha"
 crowbar_pacemaker_sync_mark "wait-aodh_ha_resources"
 
 transaction_objects = []
-primitives = []
 
 node[:aodh][:platform][:services].each do |service|
   primitive_name = "aodh-#{service}"
@@ -43,32 +42,20 @@ node[:aodh][:platform][:services].each do |service|
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-
-  primitives << primitive_name
   transaction_objects << "pacemaker_primitive[#{primitive_name}]"
+
+  clone_name = "cl-#{primitive_name}"
+  pacemaker_clone clone_name do
+    rsc primitive_name
+    meta CrowbarPacemakerHelper.clone_meta(node)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_clone[#{clone_name}]"
+
+  location_name = openstack_pacemaker_controller_only_location_for clone_name
+  transaction_objects << "pacemaker_location[#{location_name}]"
 end
-
-group_name = "g-aodh"
-pacemaker_group group_name do
-  members primitives
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_group[#{group_name}]"
-
-clone_name = "cl-#{group_name}"
-pacemaker_clone clone_name do
-  rsc group_name
-  meta CrowbarPacemakerHelper.clone_meta(node)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-order_only_existing = ["postgresql", "rabbitmq", "cl-keystone", clone_name]
-
-location_name = openstack_pacemaker_controller_only_location_for clone_name
-transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "aodh" do
   cib_objects transaction_objects
@@ -77,11 +64,18 @@ pacemaker_transaction "aodh" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
-  ordering order_only_existing
-  score "Optional"
-  action :create
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+node[:aodh][:platform][:services].each do |service|
+  primitive_name = "aodh-#{service}"
+  clone_name = "cl-#{primitive_name}"
+
+  order_only_existing = ["postgresql", "rabbitmq", "cl-keystone", clone_name]
+
+  crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
+    ordering order_only_existing
+    score "Optional"
+    action :create
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 end
 
 crowbar_pacemaker_sync_mark "create-aodh_ha_resources"

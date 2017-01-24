@@ -31,7 +31,6 @@ crowbar_pacemaker_sync_mark "sync-neutron_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-neutron_ha_resources"
 
-primitives = []
 transaction_objects = []
 
 server_primitive_name = "neutron-server"
@@ -42,7 +41,18 @@ pacemaker_primitive server_primitive_name do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 transaction_objects << "pacemaker_primitive[#{server_primitive_name}]"
-primitives << server_primitive_name
+
+server_clone_name = "cl-#{server_primitive_name}"
+pacemaker_clone server_clone_name do
+  rsc server_primitive_name
+  meta CrowbarPacemakerHelper.clone_meta(node)
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+transaction_objects << "pacemaker_clone[#{server_clone_name}]"
+
+server_location_name = openstack_pacemaker_controller_only_location_for server_clone_name
+transaction_objects << "pacemaker_location[#{server_location_name}]"
 
 if node[:neutron][:use_infoblox]
   infoblox_primitive_name = "infoblox-agent"
@@ -53,28 +63,19 @@ if node[:neutron][:use_infoblox]
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
   transaction_objects << "pacemaker_primitive[#{infoblox_primitive_name}]"
-  primitives << infoblox_primitive_name
-end
 
-group_name = "g-neutron"
-pacemaker_group group_name do
-  members primitives
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_group[#{group_name}]"
+  infoblox_clone_name = "cl-#{infoblox_primitive_name}"
+  pacemaker_clone infoblox_clone_name do
+    rsc infoblox_primitive_name
+    meta CrowbarPacemakerHelper.clone_meta(node)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_clone[#{infoblox_clone_name}]"
 
-clone_name = "cl-#{group_name}"
-pacemaker_clone clone_name do
-  rsc group_name
-  meta CrowbarPacemakerHelper.clone_meta(node)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  infoblox_location_name = openstack_pacemaker_controller_only_location_for infoblox_clone_name
+  transaction_objects << "pacemaker_location[#{infoblox_location_name}]"
 end
-transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-location_name = openstack_pacemaker_controller_only_location_for clone_name
-transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "neutron server" do
   cib_objects transaction_objects
@@ -83,8 +84,8 @@ pacemaker_transaction "neutron server" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
-  ordering ["postgresql", "rabbitmq", "cl-keystone", clone_name]
+crowbar_pacemaker_order_only_existing "o-#{server_clone_name}" do
+  ordering ["postgresql", "rabbitmq", "cl-keystone", server_clone_name]
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

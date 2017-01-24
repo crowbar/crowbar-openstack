@@ -59,7 +59,7 @@ crowbar_pacemaker_sync_mark "sync-neutron-agents_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-neutron-agents_ha_resources"
 
-group_members = []
+primitives_to_clone = []
 transaction_objects = []
 
 if use_l3_agent
@@ -86,7 +86,7 @@ if use_l3_agent
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  group_members << neutron_agent_primitive
+  primitives_to_clone << neutron_agent_primitive
   transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
 end
 
@@ -97,7 +97,7 @@ pacemaker_primitive dhcp_agent_primitive do
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
-group_members << dhcp_agent_primitive
+primitives_to_clone << dhcp_agent_primitive
 transaction_objects << "pacemaker_primitive[#{dhcp_agent_primitive}]"
 
 if use_l3_agent
@@ -108,8 +108,10 @@ if use_l3_agent
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  group_members << l3_agent_primitive
+  primitives_to_clone << l3_agent_primitive
   transaction_objects << "pacemaker_primitive[#{l3_agent_primitive}]"
+
+  l3_agent_clone = "cl-#{l3_agent_primitive}"
 end
 
 metadata_agent_primitive = "neutron-metadata-agent"
@@ -119,7 +121,7 @@ pacemaker_primitive metadata_agent_primitive do
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
-group_members << metadata_agent_primitive
+primitives_to_clone << metadata_agent_primitive
 transaction_objects << "pacemaker_primitive[#{metadata_agent_primitive}]"
 
 metering_agent_primitive = "neutron-metering-agent"
@@ -129,7 +131,7 @@ pacemaker_primitive metering_agent_primitive do
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
-group_members << metering_agent_primitive
+primitives_to_clone << metering_agent_primitive
 transaction_objects << "pacemaker_primitive[#{metering_agent_primitive}]"
 
 if use_lbaas_agent &&
@@ -141,29 +143,23 @@ if use_lbaas_agent &&
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  group_members << lbaas_agent_primitive
+  primitives_to_clone << lbaas_agent_primitive
   transaction_objects << "pacemaker_primitive[#{lbaas_agent_primitive}]"
 end
 
-agents_group_name = "g-neutron-agents"
-pacemaker_group agents_group_name do
-  members group_members
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_group[#{agents_group_name}]"
+primitives_to_clone.each do |primitive_to_clone|
+  clone_name = "cl-#{primitive_to_clone}"
+  pacemaker_clone clone_name do
+    rsc primitive_to_clone
+    meta CrowbarPacemakerHelper.clone_meta(node)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_clone[#{clone_name}]"
 
-agents_clone_name = "cl-#{agents_group_name}"
-pacemaker_clone agents_clone_name do
-  rsc agents_group_name
-  meta CrowbarPacemakerHelper.clone_meta(node)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  location_name = openstack_pacemaker_controller_only_location_for clone_name
+  transaction_objects << "pacemaker_location[#{location_name}]"
 end
-transaction_objects << "pacemaker_clone[#{agents_clone_name}]"
-
-location_name = openstack_pacemaker_controller_only_location_for agents_clone_name
-transaction_objects << "pacemaker_location[#{location_name}]"
 
 if use_lbaas_agent && node[:neutron][:lbaasv2_driver] == "f5"
   # Note: this won't end up in the group as F5 users don't want this to be
@@ -244,7 +240,8 @@ if use_l3_agent
     # constraint on these services, but it's optional, not mandatory (because it
     # doesn't need to be restarted when postgresql or rabbitmq are restarted).
     # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
-    ordering "( postgresql rabbitmq g-haproxy cl-neutron-server #{agents_clone_name} ) #{ha_tool_primitive_name}"
+    ordering "( postgresql rabbitmq g-haproxy cl-neutron-server #{l3_agent_clone} ) " \
+        "#{ha_tool_primitive_name}"
     score "Mandatory"
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
