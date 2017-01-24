@@ -10,7 +10,7 @@ f5_vtep_selfip_name = None
 f5_vtep_folder = <%= @vtep_folder %>
 f5_vtep_selfip_name = <%= @vtep_selfip_name %>
 <% end -%>
-advertised_tunnel_types = <%= @tunnel_types %>
+advertised_tunnel_types = <%= @tunnel_types.join(",") %>
 l2_population = <%= @use_l2pop %>
 f5_global_routed_mode = False
 use_namespaces = <%= @use_namespaces %>
