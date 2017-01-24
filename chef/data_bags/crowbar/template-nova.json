@@ -22,6 +22,7 @@
       "use_shared_instance_storage": false,
       "use_migration": false,
       "cross_az_attach": true,
+      "create_default_flavors": true,
       "migration": {
         "network": "admin"
       },
@@ -146,7 +147,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 113,
+      "schema-revision": 114,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-kvm": [ "readying", "ready", "applying" ],
