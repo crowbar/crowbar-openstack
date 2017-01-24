@@ -202,15 +202,15 @@ else
   }
 end
 
-default[:neutron][:lbaas][:f5][:external_physical_mappings] = "default:1.1:True"
-default[:neutron][:lbaas][:f5][:vtep_folder] = "Common"
-default[:neutron][:lbaas][:f5][:vtep_selfip_name] = "vtep"
-default[:neutron][:lbaas][:f5][:max_namespaces_per_tenant] = 1
-default[:neutron][:lbaas][:f5][:route_domain_strictness] = false
-default[:neutron][:lbaas][:f5][:icontrol_hostname] = ""
-default[:neutron][:lbaas][:f5][:icontrol_username] = "admin"
-default[:neutron][:lbaas][:f5][:icontrol_password] = "admin"
-default[:neutron][:lbaas][:f5][:parent_ssl_profile] = "clientssl"
+default[:neutron][:f5][:external_physical_mappings] = "default:1.1:True"
+default[:neutron][:f5][:vtep_folder] = "Common"
+default[:neutron][:f5][:vtep_selfip_name] = "vtep"
+default[:neutron][:f5][:max_namespaces_per_tenant] = 1
+default[:neutron][:f5][:route_domain_strictness] = false
+default[:neutron][:f5][:icontrol_hostname] = ""
+default[:neutron][:f5][:icontrol_username] = "admin"
+default[:neutron][:f5][:icontrol_password] = "admin"
+default[:neutron][:f5][:parent_ssl_profile] = "clientssl"
 
 default[:neutron][:ha][:network][:enabled] = false
 default[:neutron][:ha][:network][:l3_ra] = "lsb:#{node[:neutron][:platform][:l3_agent_name]}"

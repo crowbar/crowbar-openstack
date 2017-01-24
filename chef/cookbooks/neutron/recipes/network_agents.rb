@@ -171,15 +171,15 @@ elsif node[:neutron][:use_lbaas] && node[:neutron][:use_lbaasv2] &&
       tunnel_types: ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
       use_l2pop: ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"),
       keystone_settings: keystone_settings,
-      external_physical_mappings: node[:neutron][:lbaas][:f5][:external_physical_mappings],
-      vtep_folder: node[:neutron][:lbaas][:f5][:vtep_folder],
-      vtep_selfip_name: node[:neutron][:lbaas][:f5][:vtep_selfip_name],
-      max_namespaces_per_tenant: node[:neutron][:lbaas][:f5][:max_namespaces_per_tenant],
-      route_domain_strictness: node[:neutron][:lbaas][:f5][:route_domain_strictness],
-      icontrol_hostname: node[:neutron][:lbaas][:f5][:icontrol_hostname],
-      icontrol_username: node[:neutron][:lbaas][:f5][:icontrol_username],
-      icontrol_password: node[:neutron][:lbaas][:f5][:icontrol_password],
-      parent_ssl_profile: node[:neutron][:lbaas][:f5][:parent_ssl_profile]
+      external_physical_mappings: node[:neutron][:f5][:external_physical_mappings],
+      vtep_folder: node[:neutron][:f5][:vtep_folder],
+      vtep_selfip_name: node[:neutron][:f5][:vtep_selfip_name],
+      max_namespaces_per_tenant: node[:neutron][:f5][:max_namespaces_per_tenant],
+      route_domain_strictness: node[:neutron][:f5][:route_domain_strictness],
+      icontrol_hostname: node[:neutron][:f5][:icontrol_hostname],
+      icontrol_username: node[:neutron][:f5][:icontrol_username],
+      icontrol_password: node[:neutron][:f5][:icontrol_password],
+      parent_ssl_profile: node[:neutron][:f5][:parent_ssl_profile]
     )
   end
 end
