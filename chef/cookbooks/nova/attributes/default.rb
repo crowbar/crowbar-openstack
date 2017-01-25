@@ -115,7 +115,7 @@ default[:nova][:novnc][:ssl][:enabled] = false
 default[:nova][:novnc][:ssl][:certfile] = ""
 default[:nova][:novnc][:ssl][:keyfile] = ""
 
-default[:nova][:ports][:api_ec2] = 8773
+default[:nova][:ports][:api_ec2] = 8788
 default[:nova][:ports][:api] = 8774
 default[:nova][:ports][:metadata] = 8775
 default[:nova][:ports][:objectstore] = 3333
