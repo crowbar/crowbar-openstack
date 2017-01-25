@@ -19,7 +19,6 @@ en:
   barclamp:
     keystone:
       edit_attributes:
-        frontend: 'Frontend'
         database_instance: 'Database Instance'
         rabbitmq_instance: 'RabbitMQ'
         signing:
