@@ -280,7 +280,7 @@ action :add_endpoint do
     if endpoints.empty?
       _create_item(http, headers, path, body, name)
       endpoint_updated = true
-    elsif endpoint_needs_update interface, endpoints, new_resource
+    elsif _not_keystone(new_resource) && endpoint_needs_update(interface, endpoints, new_resource)
       path = "#{path}/#{endpoints[interface]["id"]}"
       endpoint_updated = _update_item(http, headers, path, body, name)
     end
@@ -583,8 +583,31 @@ def _build_headers(token = nil)
 end
 
 def endpoint_needs_update(interface, endpoints, new_resource)
-  !(endpoints[interface]["url"] == new_resource.send("endpoint_#{interface}URL") &&
-      endpoints[interface]["region_id"] == new_resource.endpoint_region)
+  # same URL, same region, no change needed
+  if _url_matches(interface, endpoints, new_resource) &&
+      _region_matches(interface, endpoints, new_resource)
+    return false
+  end
+  # different URL and different region, this doesn't belong to us, don't stomp on it
+  if !_url_matches(interface, endpoints, new_resouce) &&
+      !_region_matches(interface, endpoints, new_resource)
+    return false
+  end
+  # in the same region - it belongs to us, update the url
+  # url matches but region doesn't - single region setup with name change
+  return true
+end
+
+def _url_matches(interface, endpoints, new_resource)
+  endpoints[interface]["url"] == new_resource.send("endpoint_#{interface}URL")
+end
+
+def _region_matches(interface, endpoints, new_resource)
+  endpoints[interface]["region_id"] == new_resource.endpoint_region
+end
+
+def _not_keystone(new_resource)
+  new_resource.endpoint_service != "keystone"
 end
 
 def _get_service_id(http, headers, svc_name)
