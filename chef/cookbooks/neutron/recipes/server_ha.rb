@@ -34,51 +34,25 @@ crowbar_pacemaker_sync_mark "wait-neutron_ha_resources"
 transaction_objects = []
 
 server_primitive_name = "neutron-server"
-pacemaker_primitive server_primitive_name do
+
+objects = openstack_pacemaker_controller_clone_for_transaction server_primitive_name do
   agent node[:neutron][:ha][:server][:server_ra]
   op node[:neutron][:ha][:server][:op]
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
-transaction_objects << "pacemaker_primitive[#{server_primitive_name}]"
-
-server_clone_name = "cl-#{server_primitive_name}"
-pacemaker_clone server_clone_name do
-  rsc server_primitive_name
-  meta CrowbarPacemakerHelper.clone_meta(node)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_clone[#{server_clone_name}]"
-
-server_location_name = openstack_pacemaker_controller_only_location_for server_clone_name
-transaction_objects << "pacemaker_location[#{server_location_name}]"
+transaction_objects.push(objects)
 
 if node[:neutron][:use_infoblox]
   infoblox_primitive_name = "infoblox-agent"
-  pacemaker_primitive infoblox_primitive_name do
+
+  objects = openstack_pacemaker_controller_clone_for_transaction infoblox_primitive_name do
     agent node[:neutron][:ha][:infoblox][:infoblox_ra]
     op node[:neutron][:ha][:infoblox][:op]
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  transaction_objects << "pacemaker_primitive[#{infoblox_primitive_name}]"
-
-  infoblox_clone_name = "cl-#{infoblox_primitive_name}"
-  pacemaker_clone infoblox_clone_name do
-    rsc infoblox_primitive_name
-    meta CrowbarPacemakerHelper.clone_meta(node)
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-  transaction_objects << "pacemaker_clone[#{infoblox_clone_name}]"
-
-  infoblox_location_name = openstack_pacemaker_controller_only_location_for infoblox_clone_name
-  transaction_objects << "pacemaker_location[#{infoblox_location_name}]"
+  transaction_objects.push(objects)
 end
 
 pacemaker_transaction "neutron server" do
-  cib_objects transaction_objects
+  cib_objects transaction_objects.flatten
   # note that this will also automatically start the resources
   action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

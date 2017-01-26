@@ -52,29 +52,16 @@ transaction_objects = []
 
 services.each do |service|
   primitive_name = "heat-#{service}".gsub("_","-")
-  pacemaker_primitive primitive_name do
+
+  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent node[:heat][:ha][service.to_sym][:agent]
     op node[:heat][:ha][service.to_sym][:op]
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  transaction_objects << "pacemaker_primitive[#{primitive_name}]"
-
-  clone_name = "cl-#{primitive_name}"
-  pacemaker_clone clone_name do
-    rsc primitive_name
-    meta CrowbarPacemakerHelper.clone_meta(node)
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-  transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-  location_name = openstack_pacemaker_controller_only_location_for clone_name
-  transaction_objects << "pacemaker_location[#{location_name}]"
+  transaction_objects.push(objects)
 end
 
 pacemaker_transaction "heat server" do
-  cib_objects transaction_objects
+  cib_objects transaction_objects.flatten
   # note that this will also automatically start the resources
   action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

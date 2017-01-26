@@ -48,29 +48,14 @@ if ha_enabled
 
   transaction_objects = []
 
-  service_name = "mongodb"
-  pacemaker_primitive service_name do
+  objects = openstack_pacemaker_controller_clone_for_transaction service_name do
     agent node[:ceilometer][:ha][:mongodb][:agent]
     op node[:ceilometer][:ha][:mongodb][:op]
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  transaction_objects << "pacemaker_primitive[#{service_name}]"
-
-  clone_name = "cl-#{service_name}"
-  pacemaker_clone clone_name do
-    rsc service_name
-    meta CrowbarPacemakerHelper.clone_meta(node)
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-  transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-  location_name = openstack_pacemaker_controller_only_location_for clone_name
-  transaction_objects << "pacemaker_location[#{location_name}]"
+  transaction_objects.push(objects)
 
   pacemaker_transaction "mongodb" do
-    cib_objects transaction_objects
+    cib_objects transaction_objects.flatten
     action :commit_new
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
