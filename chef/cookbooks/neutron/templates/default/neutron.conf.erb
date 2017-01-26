@@ -857,6 +857,11 @@ pool_timeout = <%= @sql_pool_timeout %>
 # PEM encoded client certificate cert file
 # certfile =
 
+# Type of the nova endpoint to use. This endpoint will be looked up in the
+# keystone catalog and should be one of public, internal or admin.
+# endpoint_type = public
+endpoint_type = internal
+
 # Verify HTTPS connections.
 # insecure = False
 
