@@ -38,6 +38,7 @@ server_primitive_name = "neutron-server"
 objects = openstack_pacemaker_controller_clone_for_transaction server_primitive_name do
   agent node[:neutron][:ha][:server][:server_ra]
   op node[:neutron][:ha][:server][:op]
+  order_only_existing ["postgresql", "rabbitmq", "cl-keystone"]
 end
 transaction_objects.push(objects)
 
@@ -47,6 +48,7 @@ if node[:neutron][:use_infoblox]
   objects = openstack_pacemaker_controller_clone_for_transaction infoblox_primitive_name do
     agent node[:neutron][:ha][:infoblox][:infoblox_ra]
     op node[:neutron][:ha][:infoblox][:op]
+    order_only_existing ["postgresql", "rabbitmq", "cl-keystone"]
   end
   transaction_objects.push(objects)
 end
@@ -55,13 +57,6 @@ pacemaker_transaction "neutron server" do
   cib_objects transaction_objects.flatten
   # note that this will also automatically start the resources
   action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-
-crowbar_pacemaker_order_only_existing "o-#{server_clone_name}" do
-  ordering ["postgresql", "rabbitmq", "cl-keystone", server_clone_name]
-  score "Optional"
-  action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 

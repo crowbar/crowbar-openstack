@@ -65,6 +65,7 @@ services.each do |service|
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent primitive_ra
     op node[:nova][:ha][:op]
+    order_only_existing ["rabbitmq", "cl-keystone"]
   end
   transaction_objects.push(objects)
 end
@@ -74,20 +75,6 @@ pacemaker_transaction "ec2-api" do
   # note that this will also automatically start the resources
   action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-
-services.each do |service|
-  primitive_name = "ec2-api-#{service}"
-  clone_name = "cl-#{primitive_name}"
-
-  order_only_existing = ["rabbitmq", "cl-keystone", clone_name]
-
-  crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
-    ordering order_only_existing
-    score "Optional"
-    action :create
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
 end
 
 crowbar_pacemaker_sync_mark "create-ec2_api_ha_resources"

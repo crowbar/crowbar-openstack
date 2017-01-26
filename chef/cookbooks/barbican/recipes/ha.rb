@@ -59,6 +59,7 @@ services.each do |service|
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent node[:barbican][:ha][service.to_sym][:agent]
     op node[:barbican][:ha][service.to_sym][:op]
+    order_only_existing ["postgresql", "rabbitmq", "cl-keystone"]
   end
   transaction_objects.push(objects)
 end
@@ -68,18 +69,6 @@ pacemaker_transaction "barbican server" do
   # note that this will also automatically start the resources
   action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-
-services.each do |service|
-  primitive_name = "barbican-#{service}"
-  clone_name = "cl-#{primitive_name}"
-
-  crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
-    ordering ["postgresql", "rabbitmq", "cl-keystone", clone_name]
-    score "Optional"
-    action :create
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
 end
 
 crowbar_pacemaker_sync_mark "create-barbican_ha_resources"

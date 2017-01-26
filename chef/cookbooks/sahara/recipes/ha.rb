@@ -47,6 +47,7 @@ transaction_objects = []
   objects = openstack_pacemaker_controller_clone_for_transaction primitive do
     agent node[:sahara][:ha][service.to_sym][:ra]
     op node[:sahara][:ha][:op]
+    order_only_existing ["postgresql", "rabbitmq", "cl-keystone"]
   end
   transaction_objects.push(objects)
 end
