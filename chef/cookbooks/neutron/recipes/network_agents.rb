@@ -150,7 +150,7 @@ elsif node[:neutron][:use_lbaas] &&
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
   keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-  template "/etc/neutron/f5-openstack-agent.ini" do
+  template "/etc/neutron/services/f5/f5-openstack-agent.ini" do
     source "f5-openstack-agent.ini.erb"
     owner "root"
     group node[:neutron][:platform][:group]
@@ -200,7 +200,7 @@ elsif node[:neutron][:use_lbaas] &&
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources(template: node[:neutron][:config_file])
-    subscribes :restart, resources("template[/etc/neutron/f5-openstack-agent.ini]")
+    subscribes :restart, resources("template[/etc/neutron/services/f5/f5-openstack-agent.ini]")
     provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
 end
