@@ -319,7 +319,11 @@ crowbar_pacemaker_order_only_existing "o-#{evacuate_primitive}" do
   #  - cinder is used in case of boot from volume
   #  - neutron agents are used even with DVR, if only to have a DHCP server for
   #    the instance to get an IP address
-  ordering "( postgresql rabbitmq cl-keystone cl-swift-proxy cl-g-glance cl-g-cinder-controller cl-neutron-server cl-g-neutron-agents cl-g-nova-controller ) #{evacuate_primitive}"
+  ordering "( " \
+      "postgresql rabbitmq cl-keystone cl-swift-proxy cl-glance-api cl-cinder-api " \
+      "cl-neutron-server cl-neutron-dhcp-agent neutron-l3-agent cl-neutron-metadata-agent " \
+      "cl-nova-api " \
+      ") #{evacuate_primitive}"
   score "Mandatory"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
