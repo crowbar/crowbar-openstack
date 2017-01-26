@@ -200,7 +200,7 @@ f5_vtep_selfip_name = <%= @vtep_selfip_name %>
 # If you are using only vlans only it should be:
 #
 # advertised_tunnel_types =
-advertised_tunnel_types = <%= @tunnel_types %>
+advertised_tunnel_types = <%= @tunnel_types.join(",") %>
 #
 # Static ARP population for members on tunnel networks
 #
