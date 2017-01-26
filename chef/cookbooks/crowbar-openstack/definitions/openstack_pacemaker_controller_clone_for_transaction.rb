@@ -16,10 +16,12 @@
 
 define :openstack_pacemaker_controller_clone_for_transaction,
     agent: nil,
-    op: {} do
+    op: {},
+    order_only_existing: [] do
   primitive_name = params[:name]
   agent = params[:agent]
   op = params[:op]
+  order_only_existing = params[:order_only_existing]
 
   raise "No agent specified for #{primitive_name}!" if agent.nil?
 
@@ -40,9 +42,29 @@ define :openstack_pacemaker_controller_clone_for_transaction,
 
   location_name = openstack_pacemaker_controller_only_location_for clone_name
 
-  [
+  order_name = nil
+  unless order_only_existing.nil? || order_only_existing.empty?
+    filtered_order = CrowbarPacemakerHelper.select_existing_resources(order_only_existing)
+    unless filtered_order.empty?
+      filtered_order.push(clone_name)
+
+      order_name = "o-#{clone_name}"
+      pacemaker_order order_name do
+        score "Optional"
+        ordering filtered_order.join(" ")
+        action :update
+        only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+      end
+    end
+  end
+
+  objects = [
     "pacemaker_primitive[#{primitive_name}]",
     "pacemaker_clone[#{clone_name}]",
     "pacemaker_location[#{location_name}]"
   ]
+
+  objects.push("pacemaker_order[#{order_name}]") unless order_name.nil?
+
+  objects
 end
