@@ -25,9 +25,14 @@ define :openstack_pacemaker_controller_clone_for_transaction,
 
   raise "No agent specified for #{primitive_name}!" if agent.nil?
 
+  fake_params = {}
+
   pacemaker_primitive primitive_name do
     agent agent
     op op
+    # do not inherit params from the definition; yes, they get inherited if not
+    # explicitly specified
+    params fake_params
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
