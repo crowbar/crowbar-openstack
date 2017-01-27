@@ -17,16 +17,6 @@
 
 module Barclamp
   module SwiftHelper
-    def frontends_for_swift(selected)
-      options_for_select(
-        [
-          ["uwsgi", "uwsgi"],
-          ["native", "native"]
-        ],
-        selected.to_s
-      )
-    end
-
     def ssl_protocols_for_swift(selected)
       options_for_select(
         [

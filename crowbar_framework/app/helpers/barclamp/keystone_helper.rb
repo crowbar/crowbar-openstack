@@ -17,16 +17,6 @@
 
 module Barclamp
   module KeystoneHelper
-    def server_frontends_for_keystone(selected)
-      options_for_select(
-        [
-          ["apache", "apache"],
-          ["uwsgi", "uwsgi"]
-        ],
-        selected.to_s
-      )
-    end
-
     def token_formats_for_keystone(selected)
       options_for_select(
         [

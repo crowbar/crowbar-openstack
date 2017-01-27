@@ -72,14 +72,11 @@ en:
         keystone_instance: 'Keystone instance'
         keystone_delay_auth_decision: 'Allow Public Containers (Anonymous access, performance penalty)'
         allow_versions: 'Enable Object Versioning'
-        frontend: 'Frontend'
         zones: 'Zones'
         partitions: 'Create 2^X Logical Partitions'
         min_part_hours: 'Minimum Hours before Partition is reassigned'
         replicas: 'Replicas'
         replication_interval: 'Replication interval (in seconds)'
-        cluster_hash: 'Cluster Hash'
-        cluster_admin_pw: 'Cluster Admin Password'
         debug: 'Debug'
         middlewares:
           s3:
