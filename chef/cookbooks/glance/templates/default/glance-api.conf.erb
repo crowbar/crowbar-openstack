@@ -1,5 +1,4 @@
 [DEFAULT]
-
 show_multiple_locations = <%= node[:glance][:show_storage_location] %>
 bind_host = <%= @bind_host %>
 bind_port = <%= @bind_port %>
@@ -24,12 +23,10 @@ use_syslog = <%= node[:glance][:use_syslog] ? "True" : "False" %>
 use_stderr = false
 
 [database]
-
 connection = <%= node[:glance][:sql_connection] %>
 idle_timeout = <%= node[:glance][:sql_idle_timeout] %>
 
 [glance_store]
-
 stores = <%= @glance_stores %>
 default_store = <%= node[:glance][:default_store] %>
 rbd_store_pool = <%= node[:glance][:rbd][:store_pool] %>
@@ -54,24 +51,20 @@ default_swift_reference = crowbar
 swift_store_config_file = /etc/glance/glance-swift.conf
 
 [image_format]
-
 container_formats = ami,ari,aki,bare,ovf,ova
 
 <% unless node[:glance][:crossdomain][:cross_domain_hosts].empty? -%>
 [cors]
-
 allowed_origin = <%= node[:glance][:crossdomain][:cross_domain_hosts].join(",") %>
 <% end -%>
 
 [keystone_authtoken]
-
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 region_name=<%= @keystone_settings['endpoint_region'] %>
-signing_dir = /var/cache/glance/keystone-signing
 username = <%= @keystone_settings['service_user'] %>
 password = <%= @keystone_settings['service_password'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
@@ -81,15 +74,12 @@ auth_url = <%= @keystone_settings['admin_auth_url'] %>
 auth_type = password
 
 [oslo_concurrency]
-
 lock_path = /var/run/glance
 
 [oslo_messaging_notifications]
-
 driver = messaging
 
 [paste_deploy]
-
 <% if node[:glance][:enable_caching] and node[:glance][:use_cachemanagement] -%>
 flavor = keystone+cachemanagement
 <% elsif node[:glance][:enable_caching] -%>
@@ -99,5 +89,4 @@ flavor = keystone
 <% end -%>
 
 [task]
-
 work_dir = /var/lib/glance/taskflow

@@ -331,10 +331,8 @@ insecure = <%= @keystone_settings['insecure'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 # delay_auth_decision = 1
 delay_auth_decision = <%= @keystone_delay_auth_decision %>
-signing_dir = /var/cache/swift/keystone-signing
 include_service_catalog = False
 cache = swift.cache
-memcached_servers = <%= @memcached_ips.join(", ") %>
 
 #
 [filter:keystoneauth]

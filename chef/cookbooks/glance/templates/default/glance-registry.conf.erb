@@ -1,5 +1,4 @@
 [DEFAULT]
-
 bind_host = <%= @bind_host %>
 bind_port = <%= @bind_port %>
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
@@ -13,23 +12,19 @@ use_stderr = false
 control_exchange = glance
 
 [database]
-
 connection = <%= node[:glance][:sql_connection] %>
 idle_timeout = <%= node[:glance][:sql_idle_timeout] %>
 
 [glance_store]
-
 cinder_catalog_info = volumev2:cinderv2:internalURL
 
 [keystone_authtoken]
-
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
 <% end -%>
 region_name=<%= @keystone_settings['endpoint_region'] %>
-signing_dir = /var/cache/glance/keystone-signing
 username = <%= @keystone_settings['service_user'] %>
 password = <%= @keystone_settings['service_password'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
@@ -39,9 +34,7 @@ auth_url = <%= @keystone_settings['admin_auth_url'] %>
 auth_type = password
 
 [oslo_messaging_notifications]
-
 driver = messaging
 
 [paste_deploy]
-
 flavor = keystone

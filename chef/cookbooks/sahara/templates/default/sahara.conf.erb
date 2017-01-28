@@ -40,7 +40,6 @@ auth_url = <%= @keystone_settings['admin_auth_url'] %>
 auth_type = password
 insecure = <%= @keystone_settings["insecure"] %>
 region_name = <%= @keystone_settings["endpoint_region"] %>
-signing_dir = "/var/cache/sahara/keystone-signing"
 
 [neutron]
 api_insecure = <%= @neutron_insecure %>

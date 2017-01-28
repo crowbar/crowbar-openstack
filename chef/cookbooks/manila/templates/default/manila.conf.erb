@@ -1,5 +1,4 @@
 [DEFAULT]
-
 state_path = /var/lib/manila
 os_region_name= <%= @keystone_settings['endpoint_region'] %>
 my_ip=<%= node[:manila][:my_ip] %>
@@ -28,7 +27,6 @@ use_stderr = false
 transport_url = <%= @rabbit_settings[:url] %>
 
 [cinder]
-
 api_insecure=<%= @cinder_insecure %>
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_type = password
@@ -40,23 +38,19 @@ project_name=<%= @keystone_settings['service_tenant'] %>
 username=<%= @cinder_admin_username %>
 
 [database]
-
 connection=<%= @sql_connection %>
 
 [keystone_authtoken]
-
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
 insecure = <%= @keystone_settings['insecure'] %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
-signing_dir=/var/cache/manila/keystone-signing
 identity_uri = <%= @keystone_settings['admin_auth_url'] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 
 [neutron]
-
 url=<%= @neutron_protocol%>://<%= @neutron_server_host%>:<%= @neutron_server_port%>
 api_insecure=<%= @neutron_insecure %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
@@ -70,7 +64,6 @@ project_name=<%= @keystone_settings['service_tenant'] %>
 username=<%= @neutron_service_user %>
 
 [nova]
-
 api_insecure=<%= @nova_insecure %>
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_type = password
@@ -82,7 +75,6 @@ project_name=<%= @keystone_settings['service_tenant'] %>
 username=<%= @nova_admin_username %>
 
 [oslo_concurrency]
-
 lock_path = /var/run/manila
 
 #############################################################################
