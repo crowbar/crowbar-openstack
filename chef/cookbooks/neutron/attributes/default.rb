@@ -34,6 +34,8 @@ default[:neutron][:db][:password] = "" # Set by Recipe
 default[:neutron][:network][:fixed_router] = "127.0.0.1" # Set by Recipe
 default[:neutron][:network][:private_networks] = [] # Set by Recipe
 
+default[:neutron][:use_vpnaas] = false
+
 default[:neutron][:gre][:tunnel_id_start] = 1
 default[:neutron][:gre][:tunnel_id_stop] = 1000
 
