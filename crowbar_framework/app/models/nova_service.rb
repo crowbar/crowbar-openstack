@@ -93,7 +93,8 @@ class NovaService < PacemakerServiceObject
           "exclude_platform" => {
             "suse" => "< 12.2",
             "windows" => "/.*/"
-          }
+          },
+          "cluster" => true
         }
       }
     end
@@ -260,6 +261,11 @@ class NovaService < PacemakerServiceObject
     Openstack::HA.set_controller_role(controller_nodes) if ha_enabled
 
     vip_networks = ["admin", "public"]
+
+    #required for sync-mark mechanism
+    role.default_attributes["ec2-api"] ||= {}
+    role.default_attributes["ec2-api"]["crowbar-revision"] =
+      role.override_attributes["nova"]["crowbar-revision"]
 
     dirty = false
     dirty = prepare_role_for_ha_with_haproxy(role, ["nova", "ha", "enabled"], ha_enabled, controller_elements, vip_networks)

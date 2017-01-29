@@ -29,7 +29,6 @@ api_ha_enabled = node[:nova][:ha][:enabled]
 admin_api_host = CrowbarHelper.get_host_for_admin_url(node, api_ha_enabled)
 public_api_host = CrowbarHelper.get_host_for_public_url(node, node[:nova][:ssl][:enabled], api_ha_enabled)
 api_port = node[:nova][:ports][:api]
-api_ec2_port = node[:nova][:ports][:api_ec2]
 
 api_protocol = node[:nova][:ssl][:enabled] ? "https" : "http"
 
@@ -84,18 +83,6 @@ keystone_register "register nova service" do
   action :add_service
 end
 
-keystone_register "register ec2 service" do
-  protocol keystone_settings["protocol"]
-  insecure keystone_settings["insecure"]
-  host keystone_settings["internal_url_host"]
-  port keystone_settings["admin_port"]
-  auth register_auth_hash
-  service_name "ec2"
-  service_type "ec2"
-  service_description "EC2 Compatibility Layer"
-  action :add_service
-end
-
 keystone_register "register nova_legacy service" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
@@ -122,22 +109,6 @@ keystone_register "register nova endpoint" do
                     "#{admin_api_host}:#{api_port}/v2.1/$(project_id)s"
   endpoint_internalURL "#{api_protocol}://"\
                        "#{admin_api_host}:#{api_port}/v2.1/$(project_id)s"
-#  endpoint_global true
-#  endpoint_enabled true
-  action :add_endpoint_template
-end
-
-keystone_register "register nova ec2 endpoint" do
-  protocol keystone_settings["protocol"]
-  insecure keystone_settings["insecure"]
-  host keystone_settings["internal_url_host"]
-  port keystone_settings["admin_port"]
-  auth register_auth_hash
-  endpoint_service "ec2"
-  endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{api_protocol}://#{public_api_host}:#{api_ec2_port}/services/Cloud"
-  endpoint_adminURL "#{api_protocol}://#{admin_api_host}:#{api_ec2_port}/services/Admin"
-  endpoint_internalURL "#{api_protocol}://#{admin_api_host}:#{api_ec2_port}/services/Cloud"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template

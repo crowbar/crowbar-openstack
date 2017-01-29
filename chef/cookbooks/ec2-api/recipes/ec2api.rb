@@ -22,12 +22,21 @@ package "openstack-ec2-api-metadata"
 package "openstack-ec2-api-s3"
 
 # NOTE: ec2 is deployed via the nova barclamp
+ha_enabled  = node[:nova][:ha][:enabled]
+ssl_enabled = node[:nova][:ssl][:enabled]
 db_settings = fetch_database_settings "nova"
+api_protocol = node[:nova][:ssl][:enabled] ? "https" : "http"
+ec2_api_port = node[:nova][:ports][:ec2_api]
+ec2_metadata_port = node[:nova][:ports][:ec2_metadata]
 
 db_conn_scheme = db_settings[:url_scheme]
 
 if db_settings[:backend_name] == "mysql"
   db_conn_scheme = "mysql+pymysql"
+end
+
+crowbar_pacemaker_sync_mark "wait-ec2_api_database" do
+  timeout 300
 end
 
 database_connection = "#{db_conn_scheme}://" \
@@ -42,6 +51,7 @@ database "create #{node[:nova]["ec2-api"][:db][:database]} database" do
   database_name node[:nova]["ec2-api"][:db][:database]
   provider db_settings[:provider]
   action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 database_user "create #{@cookbook_name} database user" do
@@ -52,6 +62,7 @@ database_user "create #{@cookbook_name} database user" do
   host "%"
   provider db_settings[:user_provider]
   action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 database_user "grant database access for #{@cookbook_name} database user" do
@@ -63,10 +74,98 @@ database_user "grant database access for #{@cookbook_name} database user" do
   privileges db_settings[:privs]
   provider db_settings[:user_provider]
   action :grant
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+
+crowbar_pacemaker_sync_mark "create-ec2_api_database"
 
 rabbit_settings = fetch_rabbitmq_settings "nova"
 keystone_settings = KeystoneHelper.keystone_settings(node, "nova")
+
+register_auth_hash = { user: keystone_settings["admin_user"],
+                       password: keystone_settings["admin_password"],
+                       tenant: keystone_settings["admin_tenant"] }
+
+my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
+my_public_host = CrowbarHelper.get_host_for_public_url(node, ssl_enabled, ha_enabled)
+
+keystone_register "register ec2 user" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  user_password keystone_settings["service_password"]
+  tenant_name keystone_settings["service_tenant"]
+  action :add_user
+end
+
+keystone_register "give ec2 user access" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
+  role_name "admin"
+  action :add_access
+end
+
+# Create ec2-api service
+keystone_register "register ec2-api service" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  service_name "ec2-api"
+  service_type "ec2"
+  service_description "EC2 Compatibility Layer"
+  action :add_service
+end
+
+keystone_register "register ec2-api endpoint" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  endpoint_service "ec2-api"
+  endpoint_region keystone_settings["endpoint_region"]
+  endpoint_publicURL "#{api_protocol}://#{my_public_host}:#{ec2_api_port}"
+  endpoint_adminURL "#{api_protocol}://#{my_admin_host}:#{ec2_api_port}"
+  endpoint_internalURL "#{api_protocol}://#{my_admin_host}:#{ec2_api_port}"
+  action :add_endpoint_template
+end
+
+# Create ec2-metadata service
+keystone_register "register ec2-metadata service" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  service_name "ec2-metadata"
+  service_type "ec2"
+  service_description "EC2 Compatibility Layer"
+  action :add_service
+end
+
+keystone_register "register ec2-metadata endpoint" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  endpoint_service "ec2-metadata"
+  endpoint_region keystone_settings["endpoint_region"]
+  endpoint_publicURL "#{api_protocol}://#{my_public_host}:#{ec2_metadata_port}"
+  endpoint_adminURL "#{api_protocol}://#{my_admin_host}:#{ec2_metadata_port}"
+  endpoint_internalURL "#{api_protocol}://#{my_admin_host}:#{ec2_metadata_port}"
+  action :add_endpoint_template
+end
 
 template node[:nova]["ec2-api"][:config_file] do
   source "ec2api.conf.erb"
