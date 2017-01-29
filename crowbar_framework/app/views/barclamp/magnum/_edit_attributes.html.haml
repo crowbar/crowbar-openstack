@@ -10,14 +10,13 @@
 
     %fieldset
       %legend
-        = t('.logging_header')
-      = boolean_field :verbose
-      = boolean_field :debug
-    %fieldset
-      %legend
         = t('.trustee_header')
       = string_field %w(trustee domain_name)
     %fieldset
       %legend
         = t('.cert_header')
       = select_field %w(cert cert_manager_type), collection: :cert_manager_types
+    %fieldset
+      %legend
+        = t('.logging_header')
+      = boolean_field :verbose

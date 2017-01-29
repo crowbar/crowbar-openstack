@@ -21,4 +21,7 @@
     %span.help-block
       = t(".database.event_time_to_live_hint")
 
-    = boolean_field :verbose
+    %fieldset
+      %legend
+        = t(".logging_header")
+      = boolean_field :verbose
