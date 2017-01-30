@@ -160,9 +160,10 @@ class NovaService < PacemakerServiceObject
 
     # do not use zvm by default
     #   TODO add it here once a compute node can run inside z/VM
+    # (2017-01-30) Hyper-V is hidden for now
+    # "nova-compute-hyperv" => hyperv.map(&:name),
     base["deployment"]["nova"]["elements"] = {
       "nova-controller" => [controller.name],
-      "nova-compute-hyperv" => hyperv.map(&:name),
       "nova-compute-kvm" => kvm.map(&:name),
       "nova-compute-qemu" => qemu.map(&:name),
       "nova-compute-xen" => xen.map(&:name)
@@ -373,9 +374,9 @@ class NovaService < PacemakerServiceObject
       end
     end
 
-    unless elements["nova-compute-hyperv"].empty? || hyperv_available?
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.hyperv_support")
-    end
+    # unless elements["nova-compute-hyperv"].empty? || hyperv_available?
+    #   validation_error I18n.t("barclamp.#{@bc_name}.validation.hyperv_support")
+    # end
 
     unless elements["nova-compute-zvm"].nil? || elements["nova-compute-zvm"].empty?
       unless network_present? proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_network"]
@@ -386,9 +387,6 @@ class NovaService < PacemakerServiceObject
       end
     end
 
-    elements["nova-compute-hyperv"].each do |n|
-      nodes[n] += 1
-    end unless elements["nova-compute-hyperv"].nil?
     elements["nova-compute-kvm"].each do |n|
       nodes[n] += 1
     end unless elements["nova-compute-kvm"].nil?

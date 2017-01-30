@@ -146,10 +146,9 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 112,
+      "schema-revision": 113,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
-        "nova-compute-hyperv": [ "readying", "ready", "applying" ],
         "nova-compute-kvm": [ "readying", "ready", "applying" ],
         "nova-compute-qemu": [ "readying", "ready", "applying" ],
         "nova-compute-vmware": [ "readying", "ready", "applying" ],
@@ -165,7 +164,6 @@
           "ec2-api"
         ],
         [
-          "nova-compute-hyperv",
           "nova-compute-kvm",
           "nova-compute-qemu",
           "nova-compute-vmware",
@@ -176,7 +174,6 @@
       "element_run_list_order": {
         "nova-controller": 95,
         "ec2-api": 96,
-        "nova-compute-hyperv": 97,
         "nova-compute-kvm": 97,
         "nova-compute-qemu": 97,
         "nova-compute-vmware": 97,
