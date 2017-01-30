@@ -24,7 +24,7 @@ rabbit_trove_url = TroveHelper.get_rabbitmq_trove_url(node, rabbitmq_servers)
 
 template node[:trove][:conductor][:config_file] do
   source "trove-conductor.conf.erb"
-  owner node[:trove][:user]
+  owner "root"
   group node[:trove][:group]
   mode 00640
   variables(

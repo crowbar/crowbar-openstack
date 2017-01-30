@@ -20,7 +20,7 @@ package "openstack-trove"
 # TODO(itxaka): This is probably not needed anymore and we can use the one from the package
 template "/etc/trove/api-paste.ini" do
   source "api-paste.ini.erb"
-  owner node[:trove][:user]
+  owner "root"
   group node[:trove][:group]
   mode "0640"
   notifies :restart, "service[trove-api]"
