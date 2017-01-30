@@ -114,7 +114,8 @@ def parse_dev_info_line(line, ringinfo)
   # Line looks like this:
   # id region zone  ip address:port      replication ip:port  name                              weight partitions balance meta
   #  0      1    0  192.168.125.14:6200  192.168.125.14:6200  2d4dc9923ed244dc9cac8f283ca79748  99.00           0 -100.00
-  line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)[:\s+](\d+)\s+(\d+\.\d+\.\d+\.\d+)[:\s+](\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+)\s*$/
+  #  0      1    0  192.168.125.11:6002  192.168.125.11:6002  f5e3892aad224b2896c1f865a799e96a   0.00       65536  999.99   DEL \n
+  line =~ /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+\.\d+\.\d+\.\d+)[:\s+](\d+)\s+(\d+\.\d+\.\d+\.\d+)[:\s+](\d+)\s+(\S+)\s+([0-9.]+)\s+(\d+)\s*([-0-9.]+).*$/
   if $~.nil?
     raise "failed to parse dev info: #{line}"
   end
