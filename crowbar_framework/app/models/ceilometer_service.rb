@@ -97,7 +97,7 @@ class CeilometerService < PacemakerServiceObject
       NodeObject.find("roles:nova-compute-vmware") +
       NodeObject.find("roles:nova-compute-xen")
 
-    hyperv_agent_nodes = NodeObject.find("roles:nova-compute-hyperv")
+    # hyperv_agent_nodes = NodeObject.find("roles:nova-compute-hyperv")
 
     nodes       = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
@@ -107,9 +107,10 @@ class CeilometerService < PacemakerServiceObject
 
     swift_proxy_nodes = NodeObject.find("roles:swift-proxy")
 
+    # (2017-01-30): Hyper-V is hidden for now
+    # "ceilometer-agent-hyperv" => hyperv_agent_nodes.map { |x| x.name },
     base["deployment"]["ceilometer"]["elements"] = {
         "ceilometer-agent" => agent_nodes.map { |x| x.name },
-        "ceilometer-agent-hyperv" => hyperv_agent_nodes.map { |x| x.name },
         "ceilometer-central" => [server_nodes.first.name],
         "ceilometer-server" => [server_nodes.first.name],
         "ceilometer-swift-proxy-middleware" => swift_proxy_nodes.map { |x| x.name }
@@ -129,9 +130,9 @@ class CeilometerService < PacemakerServiceObject
 
     validate_minimum_three_nodes_in_cluster(proposal)
 
-    unless (proposal["deployment"]["ceilometer"]["elements"]["ceilometer-agent-hyperv"] || []).empty? || hyperv_available?
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.hyper_v_support")
-    end
+    # unless (proposal["deployment"]["ceilometer"]["elements"]["ceilometer-agent-hyperv"] || []).empty? || hyperv_available?
+    #   validation_error I18n.t("barclamp.#{@bc_name}.validation.hyper_v_support")
+    # end
 
     swift_proxy_nodes = NodeObject.find("roles:swift-proxy").map { |x| x.name }
     if proposal["deployment"]["ceilometer"]["elements"]["ceilometer-swift-proxy-middleware"]
