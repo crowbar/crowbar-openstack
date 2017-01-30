@@ -38,7 +38,7 @@ server_primitive_name = "neutron-server"
 objects = openstack_pacemaker_controller_clone_for_transaction server_primitive_name do
   agent node[:neutron][:ha][:server][:server_ra]
   op node[:neutron][:ha][:server][:op]
-  order_only_existing ["postgresql", "rabbitmq", "cl-keystone"]
+  order_only_existing "( postgresql rabbitmq cl-keystone )"
 end
 transaction_objects.push(objects)
 
@@ -48,7 +48,7 @@ if node[:neutron][:use_infoblox]
   objects = openstack_pacemaker_controller_clone_for_transaction infoblox_primitive_name do
     agent node[:neutron][:ha][:infoblox][:infoblox_ra]
     op node[:neutron][:ha][:infoblox][:op]
-    order_only_existing ["postgresql", "rabbitmq", "cl-keystone"]
+    order_only_existing "( postgresql rabbitmq cl-keystone )"
   end
   transaction_objects.push(objects)
 end

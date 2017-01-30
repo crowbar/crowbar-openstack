@@ -40,7 +40,7 @@ service_name = "swift-proxy"
 objects = openstack_pacemaker_controller_clone_for_transaction service_name do
   agent node[:swift][:ha]["proxy"][:agent]
   op node[:swift][:ha]["proxy"][:op]
-  order_only_existing ["cl-keystone"]
+  order_only_existing "cl-keystone"
 end
 transaction_objects.push(objects)
 

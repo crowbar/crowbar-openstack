@@ -38,12 +38,12 @@ services.each do |service|
   primitive_name = "ceilometer-#{service}"
 
   if node[:ceilometer][:use_mongodb]
-    order_only_existing = ["rabbitmq", "cl-keystone"]
+    order_only_existing = "( rabbitmq cl-keystone )"
   else
     # we don't make the db mandatory if not mongodb; this is debatable, but
     # oslo.db is supposed to deal well with reconnections; it's less clear about
     # mongodb
-    order_only_existing = ["postgresql", "rabbitmq", "cl-keystone"]
+    order_only_existing = "( postgresql rabbitmq cl-keystone )"
   end
 
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
