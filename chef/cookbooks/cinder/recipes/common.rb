@@ -113,11 +113,7 @@ if need_shared_lock_path
     members "cinder"
     append true
   end
-  directory "/var/run/openstack" do
-    owner "root"
-    group "openstack"
-    mode "0775"
-  end
+  include_recipe "crowbar-openstack::common"
 end
 
 template node[:cinder][:config_file] do
