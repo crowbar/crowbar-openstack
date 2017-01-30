@@ -143,6 +143,7 @@
             %fieldset
               %legend
                 = t(".f5_header")
+              = select_field %w(f5 ha_type), :collection => :f5_ha_type
               = string_field %w(f5 icontrol_hostname)
               = string_field %w(f5 icontrol_username)
               = password_field %w(f5 icontrol_password)

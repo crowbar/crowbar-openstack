@@ -66,6 +66,11 @@ en:
         lbaasv2_driver: 'Driver'
         f5_header: 'F5 Load Balancer'
         f5:
+          ha_type: 'HA Mode'
+          ha_types:
+            standalone: 'Standalone (no HA)'
+            pair: 'Pair (active/standby)'
+            scalen: 'Scalen (active cluster)'
           icontrol_hostname: 'Icontrol Hostname'
           icontrol_username: 'Icontrol Username'
           icontrol_password: 'Icontrol Password'
