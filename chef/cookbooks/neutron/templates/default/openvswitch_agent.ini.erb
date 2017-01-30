@@ -15,6 +15,8 @@ enable_distributed_routing = True
 <% if @tunnel_csum -%>
 tunnel_csum = True
 <% end -%>
+extensions = qos
+
 [ovs]
 <% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") -%>
 tunnel_bridge = br-tunnel

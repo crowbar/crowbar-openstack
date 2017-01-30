@@ -86,7 +86,8 @@ else
 end
 
 service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
-                   "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
+                   "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin",
+                   "neutron.services.qos.qos_plugin.QoSPlugin"]
 if neutron[:neutron][:use_lbaas]
   service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2")
 end
