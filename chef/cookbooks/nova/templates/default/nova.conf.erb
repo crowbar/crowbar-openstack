@@ -161,13 +161,14 @@ user_domain_name = <%= @keystone_settings["admin_domain"] %>
 <% if %w(kvm lxc qemu uml xen parallels).include? @libvirt_type -%>
 virt_type = <%= @libvirt_type %>
 <% end -%>
+<% if (@libvirt_type.eql?('xen') and @libvirt_migration and @shared_instances) or @libvirt_type.eql?('kvm') -%>
+live_migration_inbound_addr = <%= @live_migration_inbound_fqdn %>
+<% end -%>
 <% if @libvirt_type.eql?('xen') -%>
   <% if @libvirt_migration and @shared_instances -%>
-live_migration_uri = xenmigr://<%= @migration_host %>/system
 live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_LIVE
   <% end %>
 <% elsif @libvirt_type.eql?('kvm') -%>
-live_migration_uri = qemu+tcp://<%= @migration_host %>/system
   <% if @libvirt_migration -%>
     <% if @shared_instances -%>
 live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MIGRATE_LIVE
