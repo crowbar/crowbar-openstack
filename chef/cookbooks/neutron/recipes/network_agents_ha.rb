@@ -94,6 +94,17 @@ end
 transaction_objects.push(objects)
 
 if use_l3_agent
+  # The L2 agent must start before DHCP agent as DHCP agent depends on it.
+  # Otherwise, this can result in port failing to bind.
+  l2_dhcp_order_name = "o-cl-neutron-l2-dhcp-agents"
+  pacemaker_order l2_dhcp_order_name do
+    ordering "cl-#{neutron_agent_primitive} cl-#{dhcp_agent_primitive}"
+    score "Optional"
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_order[#{l2_dhcp_order_name}]"
+
   l3_agent_primitive = "neutron-l3-agent"
   objects = openstack_pacemaker_controller_clone_for_transaction l3_agent_primitive do
     agent node[:neutron][:ha][:network][:l3_ra]
