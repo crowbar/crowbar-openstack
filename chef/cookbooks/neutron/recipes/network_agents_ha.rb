@@ -156,7 +156,7 @@ transaction_objects << "pacemaker_group[#{agents_group_name}]"
 agents_clone_name = "cl-#{agents_group_name}"
 pacemaker_clone agents_clone_name do
   rsc agents_group_name
-  meta ({ "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node) })
+  meta CrowbarPacemakerHelper.clone_meta(node)
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
@@ -180,7 +180,7 @@ if use_lbaas_agent && node[:neutron][:lbaasv2_driver] == "f5"
   f5_clone_name = "cl-#{f5_agent_primitive}"
   pacemaker_clone f5_clone_name do
     rsc f5_agent_primitive
-    meta ({ "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node) })
+    meta CrowbarPacemakerHelper.clone_meta(node)
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
