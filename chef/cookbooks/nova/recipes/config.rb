@@ -308,11 +308,7 @@ if need_shared_lock_path
     members "nova"
     append true
   end
-  directory "/var/run/openstack" do
-    owner "root"
-    group "openstack"
-    mode "0775"
-  end
+  include_recipe "crowbar-openstack::common"
 end
 
 template node[:nova][:config_file] do
