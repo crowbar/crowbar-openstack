@@ -325,9 +325,6 @@ if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
     nova = node
   end
   metadata_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
-  metadata_port = nova[:nova][:ports][:metadata] rescue 8775
-  metadata_protocol = (nova[:nova][:ssl][:enabled] ? "https" : "http") rescue "http"
-  metadata_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
   metadata_proxy_shared_secret = (nova[:nova][:neutron_metadata_proxy_shared_secret] rescue "")
 
   keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
@@ -340,9 +337,6 @@ if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
     variables(
       debug: neutron[:neutron][:debug],
       nova_metadata_host: metadata_host,
-      nova_metadata_port: metadata_port,
-      nova_metadata_protocol: metadata_protocol,
-      nova_metadata_insecure: metadata_insecure,
       metadata_proxy_shared_secret: metadata_proxy_shared_secret
     )
   end
