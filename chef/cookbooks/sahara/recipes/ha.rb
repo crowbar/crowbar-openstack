@@ -40,42 +40,20 @@ crowbar_pacemaker_sync_mark "sync-sahara before_ha"
 crowbar_pacemaker_sync_mark "wait-sahara_ha_resources"
 
 transaction_objects = []
-primitives = []
 
 ["api", "engine"].each do |service|
   primitive = "sahara-#{service}"
-  pacemaker_primitive primitive do
+
+  objects = openstack_pacemaker_controller_clone_for_transaction primitive do
     agent node[:sahara][:ha][service.to_sym][:ra]
     op node[:sahara][:ha][:op]
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    order_only_existing "( postgresql rabbitmq cl-keystone )"
   end
-  primitives << primitive
-  transaction_objects << "pacemaker_primitive[#{primitive}]"
+  transaction_objects.push(objects)
 end
-
-group_name = "g-sahara"
-pacemaker_group group_name do
-  members primitives
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_group[#{group_name}]"
-
-clone_name = "cl-#{group_name}"
-pacemaker_clone clone_name do
-  rsc group_name
-  meta "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-location_name = openstack_pacemaker_controller_only_location_for clone_name
-transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "sahara server" do
-  cib_objects transaction_objects
+  cib_objects transaction_objects.flatten
   # note that this will also automatically start the resources
   action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

@@ -31,71 +31,45 @@ crowbar_pacemaker_sync_mark "sync-ceilometer_server_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources"
 
+services = ["collector", "agent_notification"]
 transaction_objects = []
-primitives = []
 
-["collector", "agent_notification"].each do |service|
+services.each do |service|
   primitive_name = "ceilometer-#{service}"
 
-  pacemaker_primitive primitive_name do
+  if node[:ceilometer][:use_mongodb]
+    order_only_existing = "( rabbitmq cl-keystone )"
+  else
+    # we don't make the db mandatory if not mongodb; this is debatable, but
+    # oslo.db is supposed to deal well with reconnections; it's less clear about
+    # mongodb
+    order_only_existing = "( postgresql rabbitmq cl-keystone )"
+  end
+
+  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent node[:ceilometer][:ha][service.to_sym][:agent]
     op node[:ceilometer][:ha][service.to_sym][:op]
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    order_only_existing order_only_existing
   end
+  transaction_objects.push(objects)
 
-  primitives << primitive_name
-  transaction_objects << "pacemaker_primitive[#{primitive_name}]"
-end
-
-group_name = "g-ceilometer-server"
-pacemaker_group group_name do
-  members primitives
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_group[#{group_name}]"
-
-clone_name = "cl-#{group_name}"
-pacemaker_clone clone_name do
-  rsc group_name
-  meta ({ "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node) })
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-order_only_existing = ["rabbitmq", "cl-keystone", clone_name]
-
-if node[:ceilometer][:use_mongodb]
-  pacemaker_order "o-ceilometer-mongo" do
-    score "Mandatory"
-    ordering "cl-mongodb #{clone_name}"
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  if node[:ceilometer][:use_mongodb]
+    clone_name = "cl-#{primitive_name}"
+    order_name = "o-#{clone_name}-mongo"
+    pacemaker_order order_name do
+      score "Mandatory"
+      ordering "cl-mongodb #{clone_name}"
+      action :update
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
+    transaction_objects << "pacemaker_order[#{order_name}]"
   end
-  transaction_objects << "pacemaker_order[o-ceilometer-mongo]"
-else
-  # we don't make the db mandatory if not mongodb; this is debatable, but
-  # oslo.db is supposed to deal well with reconnections; it's less clear about
-  # mongodb
-  order_only_existing.unshift "postgresql"
 end
-
-location_name = openstack_pacemaker_controller_only_location_for clone_name
-transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "ceilometer server" do
-  cib_objects transaction_objects
+  cib_objects transaction_objects.flatten
   # note that this will also automatically start the resources
   action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-
-crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
-  ordering order_only_existing
-  score "Optional"
-  action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 

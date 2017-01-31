@@ -46,58 +46,25 @@ crowbar_pacemaker_sync_mark "sync-manila_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-manila_ha_resources"
 
+services = ["api", "scheduler"]
 transaction_objects = []
 
-api_primitive = "manila-api"
-pacemaker_primitive api_primitive do
-  agent node[:manila][:ha][:api_ra]
-  op node[:manila][:ha][:op]
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_primitive[#{api_primitive}]"
+services.each do |service|
+  primitive_name = "manila-#{service}"
 
-scheduler_primitive = "manila-scheduler"
-pacemaker_primitive scheduler_primitive do
-  agent node[:manila][:ha][:scheduler_ra]
-  op node[:manila][:ha][:op]
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
+    agent node[:manila][:ha]["#{service}_ra"]
+    op node[:manila][:ha][:op]
+    order_only_existing "( postgresql rabbitmq cl-keystone cl-glance-api cl-cinder-api " \
+        "cl-neutron-server cl-nova-api )"
+  end
+  transaction_objects.push(objects)
 end
-transaction_objects << "pacemaker_primitive[#{scheduler_primitive}]"
-
-group_name = "g-manila-controller"
-pacemaker_group group_name do
-  members [api_primitive, scheduler_primitive]
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_group[#{group_name}]"
-
-clone_name = "cl-#{group_name}"
-pacemaker_clone clone_name do
-  rsc group_name
-  meta ({ "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node) })
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-location_name = openstack_pacemaker_controller_only_location_for clone_name
-transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "manila controller" do
-  cib_objects transaction_objects
+  cib_objects transaction_objects.flatten
   # note that this will also automatically start the resources
   action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-
-crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
-  ordering ["postgresql", "rabbitmq", "cl-keystone", "cl-glance", "cl-cinder",
-            "cl-neutron", "cl-nova", clone_name]
-  score "Optional"
-  action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 

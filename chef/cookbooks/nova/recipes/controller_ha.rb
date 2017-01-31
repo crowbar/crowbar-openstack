@@ -70,7 +70,6 @@ crowbar_pacemaker_sync_mark "sync-nova_before_ha"
 crowbar_pacemaker_sync_mark "wait-nova_ha_resources"
 
 transaction_objects = []
-primitives = []
 
 services = %w(api cert conductor consoleauth scheduler)
 if node[:nova][:use_novnc]
@@ -81,55 +80,26 @@ if node[:nova][:use_serial]
 end
 
 services.each do |service|
-  primitive_name = "nova-#{service}"
   if %w(rhel suse).include?(node[:platform_family])
     primitive_ra = "systemd:openstack-nova-#{service}"
   else
     primitive_ra = "systemd:nova-#{service}"
   end
 
-  pacemaker_primitive primitive_name do
+  primitive_name = "nova-#{service}"
+
+  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent primitive_ra
     op node[:nova][:ha][:op]
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    order_only_existing "( postgresql rabbitmq cl-keystone )"
   end
-
-  primitives << primitive_name
-  transaction_objects << "pacemaker_primitive[#{primitive_name}]"
+  transaction_objects.push(objects)
 end
-
-group_name = "g-nova-controller"
-pacemaker_group group_name do
-  members primitives
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_group[#{group_name}]"
-
-clone_name = "cl-#{group_name}"
-pacemaker_clone clone_name do
-  rsc group_name
-  meta ({ "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node) })
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-location_name = openstack_pacemaker_controller_only_location_for clone_name
-transaction_objects << "pacemaker_location[#{location_name}]"
 
 pacemaker_transaction "nova controller" do
-  cib_objects transaction_objects
+  cib_objects transaction_objects.flatten
   # note that this will also automatically start the resources
   action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-
-crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
-  ordering ["postgresql", "rabbitmq", "cl-keystone", clone_name]
-  score "Optional"
-  action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 

@@ -94,7 +94,8 @@ crowbar_pacemaker_sync_mark "wait-nova_compute_ha_resources" do
   revision nova[:nova]["crowbar-revision"]
 end
 
-compute_primitives = []
+compute_primitives_for_group = []
+compute_primitives_to_clone = []
 compute_transaction_objects = []
 
 if node[:platform_family] == "suse" && node[:platform_version].to_f > 12.1
@@ -105,7 +106,7 @@ if node[:platform_family] == "suse" && node[:platform_version].to_f > 12.1
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  compute_primitives << virtlogd_primitive
+  compute_primitives_for_group << virtlogd_primitive
   compute_transaction_objects << "pacemaker_primitive[#{virtlogd_primitive}]"
 end
 
@@ -116,7 +117,7 @@ pacemaker_primitive libvirtd_primitive do
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
-compute_primitives << libvirtd_primitive
+compute_primitives_for_group << libvirtd_primitive
 compute_transaction_objects << "pacemaker_primitive[#{libvirtd_primitive}]"
 
 case neutron[:neutron][:networking_plugin]
@@ -128,7 +129,7 @@ when "ml2"
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  compute_primitives << neutron_agent_primitive
+  compute_primitives_to_clone << neutron_agent_primitive
   compute_transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
 end
 
@@ -140,7 +141,7 @@ if neutron[:neutron][:use_dvr]
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  compute_primitives << l3_agent_primitive
+  compute_primitives_to_clone << l3_agent_primitive
   compute_transaction_objects << "pacemaker_primitive[#{l3_agent_primitive}]"
 
   metadata_agent_primitive = "neutron-metadata-agent-compute"
@@ -150,7 +151,7 @@ if neutron[:neutron][:use_dvr]
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  compute_primitives << metadata_agent_primitive
+  compute_primitives_to_clone << metadata_agent_primitive
   compute_transaction_objects << "pacemaker_primitive[#{metadata_agent_primitive}]"
 end
 
@@ -172,33 +173,38 @@ pacemaker_primitive nova_primitive do
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
-compute_primitives << nova_primitive
+compute_primitives_for_group << nova_primitive
 compute_transaction_objects << "pacemaker_primitive[#{nova_primitive}]"
 
 compute_group_name = "g-#{nova_primitive}"
 pacemaker_group compute_group_name do
-  members compute_primitives
+  members compute_primitives_for_group
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
+compute_primitives_to_clone << compute_group_name
 compute_transaction_objects << "pacemaker_group[#{compute_group_name}]"
 
-compute_clone_name = "cl-#{compute_group_name}"
-pacemaker_clone compute_clone_name do
-  rsc compute_group_name
-  meta ({ "clone-max" => CrowbarPacemakerHelper.num_remote_nodes(node) })
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-compute_transaction_objects << "pacemaker_clone[#{compute_clone_name}]"
+compute_primitives_to_clone.each do |compute_primitive_to_clone|
+  clone_name = "cl-#{compute_primitive_to_clone}"
+  pacemaker_clone clone_name do
+    rsc compute_primitive_to_clone
+    meta CrowbarPacemakerHelper.clone_meta(node, remote: true)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  compute_transaction_objects << "pacemaker_clone[#{clone_name}]"
 
-compute_location_name = "l-#{compute_clone_name}-compute"
-pacemaker_location compute_location_name do
-  definition OpenStackHAHelper.compute_only_location(compute_location_name, compute_clone_name)
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  location_name = "l-#{clone_name}-compute"
+  definition = OpenStackHAHelper.compute_only_location(location_name, clone_name)
+  pacemaker_location location_name do
+    definition definition
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  compute_transaction_objects << "pacemaker_location[#{location_name}]"
 end
-compute_transaction_objects << "pacemaker_location[#{compute_location_name}]"
+compute_clone_name = "cl-#{compute_group_name}"
 
 pacemaker_transaction "nova compute" do
   cib_objects compute_transaction_objects
@@ -313,7 +319,11 @@ crowbar_pacemaker_order_only_existing "o-#{evacuate_primitive}" do
   #  - cinder is used in case of boot from volume
   #  - neutron agents are used even with DVR, if only to have a DHCP server for
   #    the instance to get an IP address
-  ordering "( postgresql rabbitmq cl-keystone cl-swift-proxy cl-g-glance cl-g-cinder-controller cl-neutron-server cl-g-neutron-agents cl-g-nova-controller ) #{evacuate_primitive}"
+  ordering "( " \
+      "postgresql rabbitmq cl-keystone cl-swift-proxy cl-glance-api cl-cinder-api " \
+      "cl-neutron-server cl-neutron-dhcp-agent neutron-l3-agent cl-neutron-metadata-agent " \
+      "cl-nova-api " \
+      ") #{evacuate_primitive}"
   score "Mandatory"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

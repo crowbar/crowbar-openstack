@@ -36,39 +36,19 @@ end
 transaction_objects = []
 
 service_name = "swift-proxy"
-pacemaker_primitive service_name do
+
+objects = openstack_pacemaker_controller_clone_for_transaction service_name do
   agent node[:swift][:ha]["proxy"][:agent]
   op node[:swift][:ha]["proxy"][:op]
-  action :update
-  # Do not even try to start the daemon if we don't have the ring yet
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exist?("/etc/swift/object.ring.gz") }
+  order_only_existing "cl-keystone"
 end
-transaction_objects << "pacemaker_primitive[#{service_name}]"
-
-clone_name = "cl-#{service_name}"
-pacemaker_clone clone_name do
-  rsc service_name
-  meta ({ "clone-max" => CrowbarPacemakerHelper.num_corosync_nodes(node) })
-  action :update
-  # Do not even try to start the daemon if we don't have the ring yet
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exist?("/etc/swift/object.ring.gz") }
-end
-transaction_objects << "pacemaker_clone[#{clone_name}]"
-
-location_name = openstack_pacemaker_controller_only_location_for clone_name
-transaction_objects << "pacemaker_location[#{location_name}]"
+transaction_objects.push(objects)
 
 pacemaker_transaction "swift proxy" do
-  cib_objects transaction_objects
+  cib_objects transaction_objects.flatten
   # note that this will also automatically start the resources
   action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exist?("/etc/swift/object.ring.gz") }
-end
-
-crowbar_pacemaker_order_only_existing "o-#{clone_name}" do
-  ordering ["cl-keystone", clone_name]
-  score "Optional"
-  action :create
+  # Do not even try to start the daemon if we don't have the ring yet
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exist?("/etc/swift/object.ring.gz") }
 end
 
