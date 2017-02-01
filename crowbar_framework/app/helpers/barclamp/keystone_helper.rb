@@ -20,7 +20,8 @@ module Barclamp
     def token_formats_for_keystone(selected)
       options_for_select(
         [
-          ["UUID", "UUID"]
+          ["UUID", "uuid"],
+          ["Fernet", "fernet"]
         ],
         selected.to_s
       )

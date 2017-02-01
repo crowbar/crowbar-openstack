@@ -23,6 +23,9 @@ public_port = <%= @bind_service_port %>
 admin_bind_host = <%= @bind_admin_host %>
 admin_port = <%= @bind_admin_port %>
 
+[fernet_tokens]
+max_active_keys = <%= @max_active_keys %>
+
 [identity]
 domain_specific_drivers_enabled = <%= node[:keystone][:domain_specific_drivers] ? "True" : "False" %>
 
@@ -115,4 +118,4 @@ ca_certs = <%= @signing_ca_certs %>
 
 [token]
 expiration = <%= @token_expiration %>
-provider = uuid
+provider = <%= node[:keystone][:signing][:token_format] %>

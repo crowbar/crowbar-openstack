@@ -205,6 +205,14 @@ else
 end
 memcached_servers.sort!
 
+# we have to calculate max_active_keys for fernet token provider
+# http://docs.openstack.org/admin-guide/identity-fernet-token-faq.html# \
+#       i-rotated-keys-and-now-tokens-are-invalidating-early-what-did-i-do
+# max_active_keys = (token_expiration / rotation_frequency) + 2
+# keystone fernet_rotate job runs hourly, it means that rotation_frequency = 1
+# node[:keystone][:token_expiration] is in seconds and has to be encoded to hours
+max_active_keys = (node[:keystone][:token_expiration].to_f / 3600).ceil + 2
+
 template node[:keystone][:config_file] do
     source "keystone.conf.erb"
     owner "root"
@@ -229,6 +237,7 @@ template node[:keystone][:config_file] do
       signing_keyfile: node[:keystone][:signing][:keyfile],
       signing_ca_certs: node[:keystone][:signing][:ca_certs],
       token_expiration: node[:keystone][:token_expiration],
+      max_active_keys: max_active_keys,
       protocol: node[:keystone][:api][:protocol],
       frontend: node[:keystone][:frontend],
       rabbit_settings: fetch_rabbitmq_settings
@@ -379,6 +388,64 @@ end
 
 if ha_enabled
   include_recipe "keystone::ha"
+end
+
+# Configure Keystone token fernet backend provider
+if node[:keystone][:signing][:token_format] == "fernet"
+  # To be sure that rsync package is installed
+  package "rsync"
+  rsync_command = ""
+  if ha_enabled
+    cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server")
+    cluster_nodes.map do |n|
+      next if node.name == n.name
+      node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
+      rsync_command += "rsync -a --delete-after /etc/keystone/fernet-keys " \
+                                "#{node_address}:/etc/keystone/;"
+    end
+  end
+
+  unless File.exist?("/etc/keystone/fernet-keys/0")
+    # Setup a key repository for fernet tokens
+    execute "keystone-manage fernet_setup" do
+      command "keystone-manage fernet_setup \
+        --keystone-user #{node[:keystone][:user]} \
+        --keystone-group #{node[:keystone][:group]}"
+      action :run
+      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
+
+    # We would like to propagate fernet keys to all nodes in the cluster
+    execute "propagate fernet keys to all nodes in the cluster" do
+      command rsync_command
+      ignore_failure true
+      action :run
+      only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
+  end
+
+  # Rotate primary key, which is used for new tokens
+  template "/var/lib/keystone/keystone-fernet-rotate" do
+    source "keystone-fernet-rotate.erb"
+    owner "root"
+    group node[:keystone][:group]
+    mode "0750"
+    variables(
+      rsync_command: rsync_command
+    )
+  end
+
+  pacemaker_primitive "keystone-fernet-rotate" do
+    agent node[:keystone][:ha][:fernet][:agent]
+    params({
+      "target" => "/var/lib/keystone/keystone-fernet-rotate",
+      "link" => "/etc/cron.hourly/openstack-keystone-fernet",
+      "backup_suffix" => ".orig"
+    })
+    op node[:keystone][:ha][:fernet][:op]
+    action :create
+    only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 end
 
 crowbar_pacemaker_sync_mark "wait-keystone_register"
