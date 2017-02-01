@@ -272,6 +272,14 @@ class NovaService < PacemakerServiceObject
     dirty = prepare_role_for_ha_with_haproxy(role, ["nova", "ha", "enabled"], ha_enabled, controller_elements, vip_networks)
     role.save if dirty
 
+    ec2_controller_elements, ec2_controller_nodes, ec2_ha_enabled = role_expand_elements(role, "ec2-api")
+    reset_sync_marks_on_clusters_founders(ec2_controller_elements)
+    Openstack::HA.set_controller_role(ec2_controller_nodes) if ec2_ha_enabled
+
+    dirty = false
+    dirty = prepare_role_for_ha_with_haproxy(role, ["nova", "ec2-api", "ha", "enabled"], ec2_ha_enabled,  ec2_controller_elements, vip_networks)
+    role.save if dirty
+
     net_svc = NetworkService.new @logger
     # All nodes must have a public IP, even if part of a cluster; otherwise
     # the VIP can't be moved to the nodes

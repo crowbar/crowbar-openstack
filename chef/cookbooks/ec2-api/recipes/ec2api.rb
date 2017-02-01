@@ -22,12 +22,24 @@ package "openstack-ec2-api-metadata"
 package "openstack-ec2-api-s3"
 
 # NOTE: ec2 is deployed via the nova barclamp
-ha_enabled  = node[:nova][:ha][:enabled]
+ha_enabled  = node[:nova]["ec2-api"][:ha][:enabled]
+# SSL support is for the entire barclamp
 ssl_enabled = node[:nova][:ssl][:enabled]
 db_settings = fetch_database_settings "nova"
 api_protocol = node[:nova][:ssl][:enabled] ? "https" : "http"
 ec2_api_port = node[:nova][:ports][:ec2_api]
 ec2_metadata_port = node[:nova][:ports][:ec2_metadata]
+if ha_enabled
+  bind_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  bind_port_ec2api = node[:nova][:ha][:ports][:ec2_api]
+  bind_port_metadata = node[:nova][:ha][:ports][:ec2_metadata]
+  bind_port_s3 = node[:nova][:ha][:ports][:ec2_s3]
+else
+  bind_host = "0.0.0.0"
+  bind_port_ec2api = node[:nova][:ports][:ec2_api]
+  bind_port_metadata = node[:nova][:ports][:ec2_metadata]
+  bind_port_s3 = node[:nova][:ports][:ec2_s3]
+end
 
 db_conn_scheme = db_settings[:url_scheme]
 
@@ -178,6 +190,10 @@ template node[:nova]["ec2-api"][:config_file] do
     database_connection: database_connection,
     rabbit_settings: rabbit_settings,
     keystone_settings: keystone_settings,
+    bind_host: bind_host,
+    bind_port_ec2api: bind_port_ec2api,
+    bind_port_metadata: bind_port_metadata,
+    bind_port_s3: bind_port_s3,
   )
 end
 
