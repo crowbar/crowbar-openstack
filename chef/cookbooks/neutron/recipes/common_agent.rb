@@ -223,6 +223,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         use_l2pop: neutron[:neutron][:use_l2pop] &&
             (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")),
         dvr_enabled: neutron[:neutron][:use_dvr],
+        tunnel_csum: neutron[:neutron][:ovs][:tunnel_csum],
         bridge_mappings: bridge_mappings
       )
     end
