@@ -33,4 +33,40 @@ end.run_action(:create)
 
 if node[:keystone][:frontend] == "apache"
   include_recipe "crowbar-pacemaker::apache"
+
+  # Wait for all nodes to reach this point so we know that all nodes will have
+  # all the required packages installed before we create the pacemaker
+  # resources
+  crowbar_pacemaker_sync_mark "sync-keystone_before_ha"
+
+  # Avoid races when creating pacemaker resources
+  crowbar_pacemaker_sync_mark "wait-keystone_ha_resources"
+
+  transaction_objects = []
+
+  # let's create a dummy resource for keystone, that can be used for ordering
+  # constraints (as the apache2 resource is too vague)
+  objects = openstack_pacemaker_controller_clone_for_transaction "keystone" do
+    agent "ocf:pacemaker:Dummy"
+    order_only_existing "( postgresql rabbitmq )"
+  end
+  transaction_objects.push(objects)
+
+  order_name = "o-cl-apache2-keystone"
+  pacemaker_order order_name do
+    ordering "cl-apache2 cl-keystone"
+    score "Mandatory"
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  transaction_objects << "pacemaker_order[#{order_name}]"
+
+  pacemaker_transaction "keystone server" do
+    cib_objects transaction_objects.flatten
+    # note that this will also automatically start the resources
+    action :commit_new
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  crowbar_pacemaker_sync_mark "create-keystone_ha_resources"
 end
