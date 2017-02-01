@@ -321,7 +321,7 @@ crowbar_pacemaker_order_only_existing "o-#{evacuate_primitive}" do
   #    the instance to get an IP address
   ordering "( " \
       "postgresql rabbitmq cl-keystone cl-swift-proxy cl-glance-api cl-cinder-api " \
-      "cl-neutron-server cl-neutron-dhcp-agent neutron-l3-agent cl-neutron-metadata-agent " \
+      "cl-neutron-server cl-neutron-dhcp-agent cl-neutron-l3-agent cl-neutron-metadata-agent " \
       "cl-nova-api " \
       ") #{evacuate_primitive}"
   score "Mandatory"
