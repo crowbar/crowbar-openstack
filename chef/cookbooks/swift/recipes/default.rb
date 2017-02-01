@@ -25,7 +25,7 @@ else
   package "swift"
 end
 
-template "/etc/swift/swift.conf" do
+template node[:swift][:config_file] do
   owner "root"
   group node[:swift][:group]
   source "swift.conf.erb"
@@ -46,7 +46,7 @@ unless proxy_nodes.empty?
   proposal_name = node[:swift][:config][:environment].gsub(/^swift-config-/, "")
 
   # this needs to be both on storage nodes and proxy nodes
-  template "/etc/swift/container-sync-realms.conf" do
+  template node[:swift][:container_config_file] do
     source "container-sync-realms.conf.erb"
     owner "root"
     group node[:swift][:group]

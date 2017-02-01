@@ -93,7 +93,7 @@ else
   swift_cmd="swift"
 end
 
-template "/etc/swift/dispersion.conf" do
+template node[:swift][:dispersion_config_file] do
   source "dispersion.conf.erb"
   mode "0640"
   owner "root"
