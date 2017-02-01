@@ -136,7 +136,7 @@ crowbar_pacemaker_sync_mark "create-trove_register"
 
 template node[:trove][:api][:config_file] do
   source "trove.conf.erb"
-  owner node[:trove][:user]
+  owner "root"
   group node[:trove][:group]
   mode "0640"
   variables(

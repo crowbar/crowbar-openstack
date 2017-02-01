@@ -37,7 +37,7 @@ object_store_url, object_store_insecure =
 
 template node[:trove][:taskmanager][:config_file] do
   source "trove-taskmanager.conf.erb"
-  owner node[:trove][:user]
+  owner "root"
   group node[:trove][:group]
   mode 00640
   variables(

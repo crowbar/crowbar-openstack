@@ -39,9 +39,6 @@ dns_auth_url = <%= KeystoneHelper.versioned_service_URL(
                       @keystone_settings["internal_url_host"],
                       @keystone_settings["service_port"],
                       "2.0") %>
-root_on_create = False
-ignore_users = os_admin, root
-ignore_dbs = lost+found, mysql, information_schema
 agent_heartbeat_time = 10
 agent_call_low_timeout = 5
 agent_call_high_timeout = 150
@@ -53,6 +50,11 @@ log_dir = /var/log/trove
 
 [database]
 connection = <%= @sql_connection %>
+
+[mysql]
+root_on_create = False
+ignore_users = os_admin, root
+ignore_dbs = lost+found, mysql, information_schema
 
 [keystone_authtoken]
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
