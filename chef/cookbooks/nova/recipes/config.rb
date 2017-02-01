@@ -274,10 +274,10 @@ template vendordata_jsonfile do
 end
 
 # Allow to use some specific NICs for live migration
-migration_host = if node[:nova][:migration][:network] == "admin"
-  "%s"
+live_migration_inbound_fqdn = if node[:nova][:migration][:network] == "admin"
+  node[:fqdn]
 else
-  "#{node[:nova][:migration][:network]}.%s"
+  "#{node[:nova][:migration][:network]}.#{node[:fqdn]}"
 end
 
 # Select libvirt compute flags for this particular compute node
@@ -334,7 +334,7 @@ template node[:nova][:config_file] do
     ec2_host: admin_api_host,
     ec2_dmz_host: public_api_host,
     libvirt_migration: node[:nova]["use_migration"],
-    migration_host: migration_host,
+    live_migration_inbound_fqdn: live_migration_inbound_fqdn,
     shared_instances: node[:nova]["use_shared_instance_storage"],
     force_config_drive: node[:nova]["force_config_drive"],
     glance_server_protocol: glance_server_protocol,
