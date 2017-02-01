@@ -213,3 +213,7 @@ service "openstack-ec2-api-s3" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:nova]["ec2-api"][:config_file])
 end
+
+if ha_enabled
+  include_recipe "ec2-api::ec2api_ha"
+end

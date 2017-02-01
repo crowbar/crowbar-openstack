@@ -13,13 +13,6 @@
 # limitations under the License.
 #
 
-unless node[:nova][:ha][:enabled]
-  log "HA support for ec2-api is disabled"
-  return
-end
-
-log "Setting up ec2-api HA support"
-
 include_recipe "crowbar-pacemaker::haproxy"
 
 haproxy_loadbalancer "ec2-api" do
