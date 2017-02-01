@@ -16,5 +16,4 @@
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "nova", "ec2-api")
   include_recipe "ec2-api::ec2api"
-  include_recipe "ec2-api::ec2api_ha"
 end
