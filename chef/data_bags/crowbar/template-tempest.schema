@@ -38,7 +38,8 @@
                 "enable_ip_rules_for_protocols": { "type": "str", "required": true },
                 "run_consistency_group_tests": { "type": "bool", "required": true },
                 "run_snapshot_tests": { "type": "bool", "required": true },
-                "enable_protocols": { "type": "str", "required": true }
+                "enable_protocols": { "type": "str", "required": true },
+                "storage_protocol": { "type": "str", "required": true }
               }
             },
             "magnum": {

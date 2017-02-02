@@ -24,7 +24,8 @@
         "enable_ip_rules_for_protocols": "nfs, cifs",
         "run_consistency_group_tests": false,
         "run_snapshot_tests": true,
-        "enable_protocols": "nfs, cifs"
+        "enable_protocols": "nfs, cifs",
+        "storage_protocol": "NFS_CIFS"
       },
       "magnum": {
         "image_id": "magnum-service-image",
@@ -40,7 +41,7 @@
     "tempest": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 104,
+      "schema-revision": 105,
       "element_states": {
         "tempest": [ "ready", "applying" ]
       },
