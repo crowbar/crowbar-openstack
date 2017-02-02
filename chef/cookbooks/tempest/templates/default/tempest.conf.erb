@@ -169,6 +169,7 @@ region = <%= @keystone_settings['endpoint_region'] %>
 endpoint_type = internalURL
 multitenancy_enabled = False
 enable_protocols = <%= @manila_settings['enable_protocols'] %>
+storage_protocol = <%= @manila_settings['storage_protocol'] %>
 enable_ip_rules_for_protocols = <%= @manila_settings['enable_ip_rules_for_protocols'] %>
 enable_cert_rules_for_protocols = <%= @manila_settings['enable_cert_rules_for_protocols'] %>
 suppress_errors_in_cleanup = true
