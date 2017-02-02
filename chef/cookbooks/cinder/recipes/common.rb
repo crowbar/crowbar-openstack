@@ -116,12 +116,21 @@ if need_shared_lock_path
   include_recipe "crowbar-openstack::common"
 end
 
+# set a backend_host override when volume-ha is enabled
+if CrowbarPacemakerHelper.cluster_enabled?(node) &&
+    node[:cinder][:elements]["cinder-volume"].include?(
+      "cluster:#{CrowbarPacemakerHelper.cluster_name(node)}"
+    )
+  backend_host = CrowbarPacemakerHelper.cluster_vhostname(node)
+end
+
 template node[:cinder][:config_file] do
   source "cinder.conf.erb"
   owner "root"
   group node[:cinder][:group]
   mode 0640
   variables(
+    backend_host: backend_host,
     bind_host: bind_host,
     bind_port: bind_port,
     use_multi_backend: node[:cinder][:use_multi_backend],

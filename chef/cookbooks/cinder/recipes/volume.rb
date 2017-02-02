@@ -288,9 +288,10 @@ service "tgt" do
   end
 end
 
-volume_elements = node[:cinder][:elements]["cinder-volume"]
 ha_enabled = CrowbarPacemakerHelper.cluster_enabled?(node) &&
-  volume_elements.include?("cluster:#{CrowbarPacemakerHelper.cluster_name(node)}")
+  node[:cinder][:elements]["cinder-volume"].include?(
+    "cluster:#{CrowbarPacemakerHelper.cluster_name(node)}"
+  )
 
 cinder_service "volume" do
   use_pacemaker_provider ha_enabled
@@ -304,26 +305,5 @@ end
 if ha_enabled
   log "HA support for cinder volume is enabled"
 
-  # Create cinder-volume HA specific config file
-  service_host = CrowbarPacemakerHelper.cluster_vhostname(node)
-
-  template node[:cinder][:config_file_cinder_volume] do
-    source "cinder-volume.conf.erb"
-    owner "root"
-    group node[:cinder][:group]
-    mode 0640
-    variables(
-      host: service_host
-    )
-    notifies :restart, "service[cinder-volume]"
-  end
-
   include_recipe "cinder::volume_ha"
-else
-  log "HA support for cinder volume is disabled"
-
-  file node[:cinder][:config_file_cinder_volume] do
-    action :delete
-    notifies :restart, "service[cinder-volume]"
-  end
 end
