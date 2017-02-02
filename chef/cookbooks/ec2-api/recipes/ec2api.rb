@@ -47,9 +47,7 @@ if db_settings[:backend_name] == "mysql"
   db_conn_scheme = "mysql+pymysql"
 end
 
-crowbar_pacemaker_sync_mark "wait-ec2_api_database" do
-  timeout 300
-end
+crowbar_pacemaker_sync_mark "wait-ec2_api_database"
 
 database_connection = "#{db_conn_scheme}://" \
   "#{node[:nova]["ec2-api"][:db][:user]}" \
@@ -100,6 +98,8 @@ register_auth_hash = { user: keystone_settings["admin_user"],
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, ssl_enabled, ha_enabled)
+
+crowbar_pacemaker_sync_mark "wait-ec2_api_register"
 
 keystone_register "register ec2 user" do
   protocol keystone_settings["protocol"]
@@ -178,6 +178,8 @@ keystone_register "register ec2-metadata endpoint" do
   endpoint_internalURL "#{api_protocol}://#{my_admin_host}:#{ec2_metadata_port}"
   action :add_endpoint_template
 end
+
+crowbar_pacemaker_sync_mark "create-ec2_api_register"
 
 template node[:nova]["ec2-api"][:config_file] do
   source "ec2api.conf.erb"
