@@ -6,12 +6,12 @@ use_stderr = false
 keystone_ec2_tokens_url = <%= @keystone_settings['public_auth_url'] %>/ec2tokens
 ec2api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 metadata_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
-ec2api_listen = <% @bind_host %>
-ec2api_listen_port = <% @bind_port_ec2api %>
-metadata_listen = <% @bind_host %>
-metadata_listen_port = <% @bind_port_metadata %>
-s3_listen = <% @bind_host %>
-s3_listen_port = <% @bind_port_s3 %>
+ec2api_listen = <%= @bind_host %>
+ec2api_listen_port = <%= @bind_port_ec2api %>
+metadata_listen = <%= @bind_host %>
+metadata_listen_port = <%= @bind_port_metadata %>
+s3_listen = <%= @bind_host %>
+s3_listen_port = <%= @bind_port_s3 %>
 transport_url = <%= @rabbit_settings[:url] %>
 full_vpc_support = false
 
