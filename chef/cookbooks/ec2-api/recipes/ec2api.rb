@@ -186,7 +186,6 @@ template node[:nova]["ec2-api"][:config_file] do
   mode 0o640
   variables(
     debug: node[:nova][:debug],
-    verbose: node[:nova][:verbose],
     database_connection: database_connection,
     rabbit_settings: rabbit_settings,
     keystone_settings: keystone_settings,
