@@ -443,7 +443,7 @@ if node[:keystone][:signing][:token_format] == "fernet"
       "backup_suffix" => ".orig"
     })
     op node[:keystone][:ha][:fernet][:op]
-    action :create
+    action [:create, :start]
     only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
