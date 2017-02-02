@@ -435,6 +435,8 @@ if node[:keystone][:signing][:token_format] == "fernet"
     )
   end
 
+  crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate"
+
   pacemaker_primitive "keystone-fernet-rotate" do
     agent node[:keystone][:ha][:fernet][:agent]
     params({
@@ -446,6 +448,8 @@ if node[:keystone][:signing][:token_format] == "fernet"
     action [:create, :start]
     only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+
+  crowbar_pacemaker_sync_mark "create-keystone_fernet_rotate"
 end
 
 crowbar_pacemaker_sync_mark "wait-keystone_register"
