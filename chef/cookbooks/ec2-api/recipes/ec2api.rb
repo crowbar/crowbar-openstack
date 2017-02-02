@@ -47,9 +47,7 @@ if db_settings[:backend_name] == "mysql"
   db_conn_scheme = "mysql+pymysql"
 end
 
-crowbar_pacemaker_sync_mark "wait-ec2_api_database" do
-  timeout 300
-end
+crowbar_pacemaker_sync_mark "wait-ec2_api_database"
 
 database_connection = "#{db_conn_scheme}://" \
   "#{node[:nova]["ec2-api"][:db][:user]}" \
