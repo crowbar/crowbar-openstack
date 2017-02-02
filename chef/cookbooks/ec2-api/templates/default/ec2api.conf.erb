@@ -1,6 +1,5 @@
 [DEFAULT]
 debug = <%= @debug ? "true" : "false" %>
-verbose = <%= @verbose ? "true" : "false" %>
 log_dir = /var/log/ec2-api
 use_stderr = false
 keystone_ec2_tokens_url = <%= @keystone_settings['public_auth_url'] %>/ec2tokens
