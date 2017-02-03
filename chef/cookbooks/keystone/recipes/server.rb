@@ -418,7 +418,6 @@ if node[:keystone][:signing][:token_format] == "fernet"
     # We would like to propagate fernet keys to all nodes in the cluster
     execute "propagate fernet keys to all nodes in the cluster" do
       command rsync_command
-      ignore_failure true
       action :run
       only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
