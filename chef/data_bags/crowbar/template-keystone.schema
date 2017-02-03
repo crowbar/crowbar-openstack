@@ -62,7 +62,7 @@
                       "driver": { "type": "str", "required": true }
                     }},
                     "signing" : { "type" : "map", "required" : true, "mapping": {
-                      "token_format": { "type": "str", "required": true },
+                      "token_format": { "type": "str", "required": true, "pattern": "/^(fernet|uuid)$/" },
                       "certfile": { "type": "str" },
                       "keyfile": { "type": "str" },
                       "ca_certs": { "type": "str" }
