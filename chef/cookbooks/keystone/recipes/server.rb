@@ -418,7 +418,6 @@ if node[:keystone][:signing][:token_format] == "fernet"
     # We would like to propagate fernet keys to all nodes in the cluster
     execute "propagate fernet keys to all nodes in the cluster" do
       command rsync_command
-      ignore_failure true
       action :run
       only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
@@ -437,7 +436,11 @@ if node[:keystone][:signing][:token_format] == "fernet"
 
   crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate"
 
-  pacemaker_primitive "keystone-fernet-rotate" do
+  service_transaction_objects = []
+
+  keystone_fernet_primitive = "keystone-fernet-rotate"
+
+  pacemaker_primitive keystone_fernet_primitive do
     agent node[:keystone][:ha][:fernet][:agent]
     params({
       "target" => "/var/lib/keystone/keystone-fernet-rotate",
@@ -445,7 +448,18 @@ if node[:keystone][:signing][:token_format] == "fernet"
       "backup_suffix" => ".orig"
     })
     op node[:keystone][:ha][:fernet][:op]
-    action [:create, :start]
+    action :update
+    only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  service_transaction_objects << "pacemaker_primitive[#{keystone_fernet_primitive}]"
+
+  fernet_rotate_loc = openstack_pacemaker_controller_only_location_for keystone_fernet_primitive
+  service_transaction_objects << "pacemaker_location[#{fernet_rotate_loc}]"
+
+  pacemaker_transaction "keystone-fernet-rotate cron" do
+    cib_objects service_transaction_objects
+    # note that this will also automatically start the resources
+    action :commit_new
     only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
