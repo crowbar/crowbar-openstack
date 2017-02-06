@@ -101,7 +101,7 @@ if node[:nova][:trusted_flavors]
   #{flavors[id]["disk"]} #{flavors[id]["vcpu"]}
   #{novacmd} flavor-key #{flavors[id]["name"]} set trust:trusted_host=trusted
   EOF
-      not_if { system("#{novacmd} flavor-show #{flavors[id]["name"]}", out: File::NULL) }
+      not_if lazy { system("#{novacmd} flavor-show #{flavors[id]["name"]}", out: File::NULL) }
       action :nothing
       subscribes :run, "execute[trigger-flavor-creation]", :delayed
     end
@@ -116,7 +116,7 @@ if node[:nova][:create_default_flavors]
   #{novacmd} flavor-create #{flavors[id]["name"]} #{id} #{flavors[id]["mem"]} \
   #{flavors[id]["disk"]} #{flavors[id]["vcpu"]}
   EOF
-      not_if { system("#{novacmd} flavor-show #{flavors[id]["name"]}", out: File::NULL) }
+      not_if lazy { system("#{novacmd} flavor-show #{flavors[id]["name"]}", out: File::NULL) }
       action :nothing
       subscribes :run, "execute[trigger-flavor-creation]", :delayed
     end
