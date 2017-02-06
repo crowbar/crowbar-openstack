@@ -413,16 +413,31 @@ end
 if node[:keystone][:signing][:token_format] == "fernet"
   # To be sure that rsync package is installed
   package "rsync"
+
   rsync_command = ""
   if ha_enabled
-    cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server")
+    cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
     cluster_nodes.map do |n|
       next if node.name == n.name
       node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
       rsync_command += "rsync -a --delete-after /etc/keystone/fernet-keys " \
                                 "#{node_address}:/etc/keystone/;"
     end
+    raise "No other cluster members found" if rsync_command.empty?
   end
+
+  # Rotate primary key, which is used for new tokens
+  template "/var/lib/keystone/keystone-fernet-rotate" do
+    source "keystone-fernet-rotate.erb"
+    owner "root"
+    group node[:keystone][:group]
+    mode "0750"
+    variables(
+      rsync_command: rsync_command
+    )
+  end
+
+  crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate"
 
   unless File.exist?("/etc/keystone/fernet-keys/0")
     # Setup a key repository for fernet tokens
@@ -442,23 +457,9 @@ if node[:keystone][:signing][:token_format] == "fernet"
     end
   end
 
-  # Rotate primary key, which is used for new tokens
-  template "/var/lib/keystone/keystone-fernet-rotate" do
-    source "keystone-fernet-rotate.erb"
-    owner "root"
-    group node[:keystone][:group]
-    mode "0750"
-    variables(
-      rsync_command: rsync_command
-    )
-  end
-
-  crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate"
-
   service_transaction_objects = []
 
   keystone_fernet_primitive = "keystone-fernet-rotate"
-
   pacemaker_primitive keystone_fernet_primitive do
     agent node[:keystone][:ha][:fernet][:agent]
     params({
