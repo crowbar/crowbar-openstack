@@ -96,12 +96,13 @@ default_flavors = flavors.select{ |key, value| !value["name"].match(/\.trusted\.
 if node[:nova][:trusted_flavors]
   trusted_flavors.keys.each do |id|
     execute "register_#{flavors[id]["name"]}_flavor" do
+      retries 5
       command <<-EOF
   #{novacmd} flavor-create #{flavors[id]["name"]} #{id} #{flavors[id]["mem"]} \
   #{flavors[id]["disk"]} #{flavors[id]["vcpu"]}
   #{novacmd} flavor-key #{flavors[id]["name"]} set trust:trusted_host=trusted
   EOF
-      not_if { system("#{novacmd} flavor-show #{flavors[id]["name"]}", out: File::NULL) }
+      not_if "#{novacmd} flavor-list | grep -q #{flavors[id]["name"]}"
       action :nothing
       subscribes :run, "execute[trigger-flavor-creation]", :delayed
     end
@@ -112,11 +113,12 @@ end
 if node[:nova][:create_default_flavors]
   default_flavors.keys.each do |id|
     execute "register_#{flavors[id]["name"]}_flavor" do
+      retries 5
       command <<-EOF
   #{novacmd} flavor-create #{flavors[id]["name"]} #{id} #{flavors[id]["mem"]} \
   #{flavors[id]["disk"]} #{flavors[id]["vcpu"]}
   EOF
-      not_if { system("#{novacmd} flavor-show #{flavors[id]["name"]}", out: File::NULL) }
+      not_if "#{novacmd} flavor-list | grep -q #{flavors[id]["name"]}"
       action :nothing
       subscribes :run, "execute[trigger-flavor-creation]", :delayed
     end
