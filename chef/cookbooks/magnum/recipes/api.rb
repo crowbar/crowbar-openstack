@@ -127,7 +127,6 @@ crowbar_openstack_wsgi "WSGI entry for magnum-api" do
   daemon_process "magnum-api"
   user node[:magnum][:user]
   group node[:magnum][:group]
-  script_alias "/srv/www/magnum-api/app.wsgi"
   pass_authorization true
   limit_request_body 114688
   ssl_enable node[:magnum][:api][:protocol] == "https"
