@@ -420,8 +420,9 @@ if node[:keystone][:signing][:token_format] == "fernet"
     cluster_nodes.map do |n|
       next if node.name == n.name
       node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-      rsync_command += "rsync -a --delete-after /etc/keystone/fernet-keys " \
-                                "#{node_address}:/etc/keystone/;"
+      rsync_command += \
+        "rsync -a --timeout=300 --delete-after /etc/keystone/fernet-keys " \
+        "#{node_address}:/etc/keystone/; "
     end
     raise "No other cluster members found" if rsync_command.empty?
   end
