@@ -12,12 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
-# Cookbook Name:: magnum
-# Recipe:: setup
-#
-
-return if node["magnum"]["trustee"]["domain_id"] && node["magnum"]["trustee"]["domain_admin_id"]
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
@@ -43,41 +37,41 @@ openstack_command << " --os-password #{keystone_settings["admin_password"]}"
 openstack_command << " --os-tenant-name #{keystone_settings["admin_tenant"]}"
 openstack_command << " --os-auth-url #{auth_url} #{insecure}"
 
-get_magnum_domain_id = "#{openstack_command} domain show #{magnum_domain_name} -f value -c id"
-magnum_domain_id = Mixlib::ShellOut.new(get_magnum_domain_id).run_command.stdout.chomp
+crowbar_pacemaker_sync_mark "wait-magnum_setup_domain"
 
-if magnum_domain_id.nil? || magnum_domain_id.empty?
-  create_magnum_domain = "#{openstack_command} domain create -f value -c id"
-  create_magnum_domain << ' --description "Owns users and projects created by magnum"'
-  create_magnum_domain << " #{magnum_domain_name}"
+create_magnum_domain = "#{openstack_command} domain create -f value -c id"
+create_magnum_domain << " --description 'Owns users and projects created by magnum'"
+create_magnum_domain << " --or-show"
+create_magnum_domain << " #{magnum_domain_name}"
+
+unless node["magnum"]["trustee"]["domain_id"] && node["magnum"]["trustee"]["domain_admin_id"]
   magnum_domain_id = Mixlib::ShellOut.new(create_magnum_domain).run_command.stdout.chomp
+
+  if magnum_domain_id && !magnum_domain_id.empty?
+    create_magnum_domain_admin = "#{openstack_command} user create --domain #{magnum_domain_name}"
+    create_magnum_domain_admin << " --description 'Manages users and projects created by magnum'"
+    create_magnum_domain_admin << " --password #{magnum_domain_admin_pass}"
+    create_magnum_domain_admin << " --or-show -f value -c id #{magnum_domain_admin}"
+
+    magnum_domain_admin_id = Mixlib::ShellOut.new(create_magnum_domain_admin).run_command.stdout.chomp
+
+    if magnum_domain_admin_id && !magnum_domain_admin_id.empty?
+      check_magnum_domain_role = "#{openstack_command} role assignment list -f csv --column Role"
+      check_magnum_domain_role << " --domain #{magnum_domain_id} --user #{magnum_domain_admin_id} --names"
+
+      magnum_domain_role = Mixlib::ShellOut.new(check_magnum_domain_role).run_command.stdout
+
+      unless magnum_domain_role.include?('"admin"')
+        create_magnum_domain_role = "#{openstack_command} role add --user #{magnum_domain_admin_id}"
+        create_magnum_domain_role << " --domain #{magnum_domain_id} admin"
+        Mixlib::ShellOut.new(create_magnum_domain_role).run_command
+      end
+
+      node.set["magnum"]["trustee"]["domain_id"] = magnum_domain_id
+      node.set["magnum"]["trustee"]["domain_admin_id"] = magnum_domain_admin_id
+      node.save
+    end
+  end
 end
 
-get_magnum_domain_admin_id = "#{openstack_command} user show #{magnum_domain_admin}"
-get_magnum_domain_admin_id << " -f value -c id --domain #{magnum_domain_name}"
-magnum_domain_admin_id = Mixlib::ShellOut.new(get_magnum_domain_admin_id).run_command.stdout.chomp
-
-if magnum_domain_admin_id.nil? || magnum_domain_admin_id.empty?
-  create_magnum_domain_admin = "#{openstack_command} user create --domain #{magnum_domain_name}"
-  create_magnum_domain_admin << " --or-show -f value -c id #{magnum_domain_admin}"
-  magnum_domain_admin_id = Mixlib::ShellOut.new(create_magnum_domain_admin).run_command.stdout.chomp
-
-  set_magnum_domain_admin = "#{openstack_command} user set --password #{magnum_domain_admin_pass}"
-  set_magnum_domain_admin << ' --description "Manages users and projects created by magnum"'
-  set_magnum_domain_admin << " #{magnum_domain_admin}"
-  Mixlib::ShellOut.new(set_magnum_domain_admin).run_command
-end
-
-check_magnum_domain_role = "#{openstack_command} role list -f csv --column Name"
-check_magnum_domain_role << " --domain #{magnum_domain_id} --user #{magnum_domain_admin_id}"
-magnum_domain_role = Mixlib::ShellOut.new(check_magnum_domain_role).run_command.stdout
-
-unless magnum_domain_role.include? "admin"
-  create_magnum_domain_role = "#{openstack_command} role add --user #{magnum_domain_admin_id}"
-  create_magnum_domain_role << " --domain #{magnum_domain_id} admin"
-  Mixlib::ShellOut.new(create_magnum_domain_role).run_command
-end
-
-node.set["magnum"]["trustee"]["domain_id"] = magnum_domain_id
-node.set["magnum"]["trustee"]["domain_admin_id"] = magnum_domain_admin_id
-node.save
+crowbar_pacemaker_sync_mark "create-magnum_setup_domain"
