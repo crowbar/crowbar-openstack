@@ -9,6 +9,7 @@ rpc_conn_pool_size = 64
 executor_thread_pool_size = 256
 transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = magnum
+host = <%= node["hostname"] %>
 
 [api]
 port = <%= @bind_port %>
