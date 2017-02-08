@@ -40,6 +40,7 @@ if node[:horizon][:apache][:ssl]
     use_ssl true
     servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "horizon", "horizon-server", "ssl")
     stick stick_options
+    balance "source"
     action :nothing
   end.run_action(:create)
 end
