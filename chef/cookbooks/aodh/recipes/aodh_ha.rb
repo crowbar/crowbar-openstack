@@ -18,7 +18,7 @@ include_recipe "crowbar-pacemaker::haproxy"
 haproxy_loadbalancer "aodh-api" do
   address "0.0.0.0"
   port node[:aodh][:api][:port]
-  use_ssl(node[:aodh][:api][:protocol] == "https")
+  use_ssl (node[:aodh][:api][:protocol] == "https")
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "aodh", "aodh-server", "api")
   action :nothing
 end.run_action(:create)
