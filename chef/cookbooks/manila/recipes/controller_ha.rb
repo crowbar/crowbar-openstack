@@ -28,9 +28,7 @@ haproxy_loadbalancer "manila-api" do
   address node[:manila][:api][:bind_open_address] ?
     "0.0.0.0" : cluster_admin_ip
   port node[:manila][:api][:bind_port]
-  # FIXME(toabctl): implement SSL support
-  # use_ssl (node[:manila][:api][:protocol] == "https")
-  use_ssl false
+  use_ssl (node[:manila][:api][:protocol] == "https")
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node,
                                                              "manila",
                                                              "manila-server",
