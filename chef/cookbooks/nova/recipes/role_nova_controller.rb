@@ -18,6 +18,7 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "nova", "nova-controller")
   include_recipe "nova::config"
   include_recipe "nova::database"
   include_recipe "nova::api"
+  include_recipe "nova::placement_api"
   include_recipe "nova::cert"
   include_recipe "nova::instances"
   include_recipe "nova::scheduler"
