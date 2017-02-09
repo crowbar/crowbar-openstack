@@ -30,7 +30,7 @@
         "database": "magnum"
       },
       "cert": {
-        "cert_manager_type": "local"
+        "cert_manager_type": "x509keypair"
       }
     }
   },
