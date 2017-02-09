@@ -59,6 +59,10 @@ if is_controller
   database_connection = \
     "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
 
+  db = node[:nova][:placement_db]
+  placement_database_connection = \
+    "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
+
   db = node[:nova][:api_db]
   api_database_connection = \
     "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
@@ -375,6 +379,18 @@ template node[:nova][:config_file] do
     oat_appraiser_host: oat_server[:hostname],
     oat_appraiser_port: "8443",
     has_itxt: has_itxt
+  )
+end
+
+template node[:nova][:placement_config_file] do
+  source "nova-placement.conf.erb"
+  user "root"
+  group node[:nova][:group]
+  mode 0640
+  variables(
+  keystone_settings: keystone_settings,
+  database_connection: placement_database_connection,
+  username: node["nova"]["placement_user"]
   )
 end
 

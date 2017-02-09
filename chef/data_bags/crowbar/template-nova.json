@@ -43,6 +43,11 @@
           "database": "ec2"
         }
       },
+      "placement_db": {
+        "password": "",
+        "user": "placement",
+        "database": "placement"
+      },
       "db": {
         "password": "",
         "user": "nova",
@@ -147,7 +152,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 114,
+      "schema-revision": 115,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-kvm": [ "readying", "ready", "applying" ],

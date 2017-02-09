@@ -1,0 +1,24 @@
+[placement]
+os_region_name = <%= @keystone_settings['endpoint_region'] %>
+auth_type = password
+auth_url = <%= @keystone_settings['admin_auth_url'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"] %>
+username = <%= @username %>
+user_domain_name = <%= @keystone_settings['admin_domain'] %>
+password = <%= @keystone_settings['service_password'] %>
+
+[placement_database]
+<% if @database_connection -%>
+connection = <%= @database_connection %>
+mysql_sql_mode =
+<% unless node[:nova][:api_db][:max_pool_size].nil? -%>
+max_pool_size = <%= node[:nova][:api_db][:max_pool_size] %>
+<% end -%>
+<% unless node[:nova][:api_db][:max_overflow].nil? -%>
+max_overflow = <%= node[:nova][:api_db][:max_overflow] %>
+<% end -%>
+<% unless node[:nova][:api_db][:pool_timeout].nil? -%>
+pool_timeout = <%= node[:nova][:api_db][:pool_timeout] %>
+<% end -%>
+<% end -%>

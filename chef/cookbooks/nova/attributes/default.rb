@@ -21,6 +21,7 @@
 default[:nova][:debug] = false
 default[:nova][:max_header_line] = 16384
 default[:nova][:config_file] = "/etc/nova/nova.conf.d/100-nova.conf"
+default[:nova][:placement_config_file] = "/etc/nova/nova.conf.d/101-nova-placement.conf"
 
 #
 # Database Settings
@@ -83,6 +84,19 @@ default[:nova][:scheduler][:disk_allocation_ratio] = 1.0
 default[:nova][:scheduler][:reserved_host_memory_mb] = 512
 
 #
+# Placement Settings
+#
+default[:nova][:placement_user] = "placement"
+default[:nova][:placement_password] = "placement"
+
+#
+# Database Settings for Placement API
+#
+default[:nova][:placement_db][:password] = nil
+default[:nova][:placement_db][:user] = "placement"
+default[:nova][:placement_db][:database] = "placement"
+
+#
 # Shared Settings
 #
 default[:nova][:hostname] = "nova"
@@ -115,8 +129,11 @@ default[:nova][:novnc][:ssl][:enabled] = false
 default[:nova][:novnc][:ssl][:certfile] = ""
 default[:nova][:novnc][:ssl][:keyfile] = ""
 
+default[:nova][:api][:bind_host] = "*"
+
 default[:nova][:ports][:api_ec2] = 8788
 default[:nova][:ports][:api] = 8774
+default[:nova][:ports][:placement_api] = 8780
 default[:nova][:ports][:metadata] = 8775
 default[:nova][:ports][:objectstore] = 3333
 default[:nova][:ports][:novncproxy] = 6080
@@ -142,6 +159,7 @@ default[:nova][:ha][:ports][:metadata] = 5552
 default[:nova][:ha][:ports][:objectstore] = 5553
 default[:nova][:ha][:ports][:novncproxy] = 5554
 default[:nova][:ha][:ports][:serialproxy] = 5556
+default[:nova][:ha][:ports][:placement_api] = 5557
 
 default[:nova][:ha][:compute][:enabled] = false
 default[:nova][:ha][:compute][:compute][:op][:monitor][:interval] = "10s"
