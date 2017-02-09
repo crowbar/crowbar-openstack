@@ -48,9 +48,11 @@ if is_controller
   include_recipe "#{db_settings[:backend_name]}::python-client"
 
   database_connection = fetch_database_connection_string(node[:nova][:db])
+  placement_database_connection = fetch_database_connection_string(node[:nova][:placement_db])
   api_database_connection = fetch_database_connection_string(node[:nova][:api_db])
 else
   database_connection = nil
+  placement_database_connection = nil
   api_database_connection = nil
 end
 
@@ -323,6 +325,20 @@ if need_shared_lock_path
   end
   include_recipe "crowbar-openstack::common"
 end
+
+template node[:nova][:placement_config_file] do
+  source "nova-placement.conf.erb"
+  user "root"
+  group node[:nova][:group]
+  mode 0640
+  variables(
+  keystone_settings: keystone_settings,
+  placement_database_connection: placement_database_connection,
+  placement_service_user: node["nova"]["placement_service_user"],
+  placement_service_password: node["nova"]["placement_service_password"]
+  )
+end
+
 
 template node[:nova][:config_file] do
   source "nova.conf.erb"
