@@ -173,29 +173,51 @@ if use_l3_agent
                                                          keystone_settings["service_port"],
                                                          "2.0")
 
-  ha_tool_transaction_objects = []
-
+  # Remove old resource
   ha_tool_primitive_name = "neutron-ha-tool"
   pacemaker_primitive ha_tool_primitive_name do
     agent node[:neutron][:ha][:network][:ha_tool_ra]
-    params ({
-      "os_auth_url"    => os_auth_url_v2,
-      "os_region_name" => keystone_settings["endpoint_region"],
-      "os_tenant_name" => keystone_settings["admin_tenant"],
-      "os_username"    => keystone_settings["admin_user"],
-      "os_insecure"    => keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
-    })
-    op node[:neutron][:ha][:neutron_ha_tool][:op]
+    action [:stop, :delete]
+    only_if "crm configure show #{ha_tool_primitive_name}"
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  # Remove old location
+  ha_tool_location_name = "l-#{ha_tool_primitive_name}-controller"
+  pacemaker_location ha_tool_location_name do
+    action :delete
+    only_if "crm configure show #{ha_tool_location_name}"
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  # Remove old ordering
+  ha_tool_ordering_name = "o-#{ha_tool_primitive_name}"
+  pacemaker_order ha_tool_ordering_name do
+    action :delete
+    only_if "crm configure show #{ha_tool_ordering_name}"
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  ha_service_transaction_objects = []
+  ha_service_primitive_name = "neutron-l3-ha-service"
+
+  pacemaker_primitive ha_service_primitive_name do
+    agent "systemd:neutron-l3-ha-service"
+    op node[:neutron][:ha][:neutron_l3_ha_resource][:op]
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  ha_tool_transaction_objects << "pacemaker_primitive[#{ha_tool_primitive_name}]"
 
-  ha_tool_location_name = openstack_pacemaker_controller_only_location_for ha_tool_primitive_name
-  ha_tool_transaction_objects << "pacemaker_location[#{ha_tool_location_name}]"
+  ha_service_transaction_objects << "pacemaker_primitive[#{ha_service_primitive_name}]"
 
-  pacemaker_transaction "neutron ha tool" do
-    cib_objects ha_tool_transaction_objects
+  ha_service_location_name = openstack_pacemaker_controller_only_location_for(
+    ha_service_primitive_name
+  )
+
+  ha_service_transaction_objects << "pacemaker_location[#{ha_service_location_name}]"
+
+  pacemaker_transaction "neutron ha service" do
+    cib_objects ha_service_transaction_objects
     # note that this will also automatically start the resources
     action :commit_new
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
