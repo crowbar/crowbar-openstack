@@ -25,3 +25,16 @@ control_exchange = 'keystone'
 [simple_crypto_plugin]
 
 kek = <%= @kek %>
+
+[keystone_authtoken]
+auth_type = password
+auth_url = <%= @keystone_settings["internal_auth_url"] %>
+auth_uri = <%= @keystone_settings["public_auth_url"] %>
+auth_version = <%= @keystone_settings["api_version_for_middleware"] %>
+username = <%= @keystone_settings["service_user"] %>
+password = <%= @keystone_settings["service_password"] %>
+project_name = <%= @keystone_settings["service_tenant"] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
+region_name = <%= @keystone_settings["endpoint_region"] %>
+insecure = <%= @keystone_settings["insecure"] %>
