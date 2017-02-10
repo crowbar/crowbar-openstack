@@ -30,8 +30,7 @@ crowbar_pacemaker_sync_mark "wait-nova_database" do
   timeout 120
 end
 
-[node[:nova][:db], node[:nova][:placement_db],
- node[:nova][:api_db]].each do |d|
+[node[:nova][:db], node[:nova][:placement_db], node[:nova][:api_db]].each do |d|
   # Creates empty nova database
   database "create #{d[:database]} database" do
     connection db_settings[:connection]

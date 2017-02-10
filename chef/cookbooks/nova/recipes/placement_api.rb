@@ -27,7 +27,9 @@ package "openstack-nova-placement-api"
 
 api_ha_enabled = node[:nova][:ha][:enabled]
 admin_api_host = CrowbarHelper.get_host_for_admin_url(node, api_ha_enabled)
-public_api_host = CrowbarHelper.get_host_for_public_url(node, node[:nova][:ssl][:enabled], api_ha_enabled)
+public_api_host = CrowbarHelper.get_host_for_public_url(
+  node, node[:nova][:ssl][:enabled], api_ha_enabled
+)
 api_port = node[:nova][:ports][:placement_api]
 
 api_protocol = node[:nova][:ssl][:enabled] ? "https" : "http"
@@ -85,8 +87,6 @@ keystone_register "register placement endpoint" do
   endpoint_publicURL "#{api_protocol}://#{public_api_host}:#{api_port}"
   endpoint_adminURL "#{api_protocol}://#{admin_api_host}:#{api_port}"
   endpoint_internalURL "#{api_protocol}://#{admin_api_host}:#{api_port}"
-#  endpoint_global true
-#  endpoint_enabled true
   action :add_endpoint_template
 end
 

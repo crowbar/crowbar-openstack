@@ -386,11 +386,11 @@ template node[:nova][:placement_config_file] do
   source "nova-placement.conf.erb"
   user "root"
   group node[:nova][:group]
-  mode 0640
+  mode 0o640
   variables(
-  keystone_settings: keystone_settings,
-  database_connection: placement_database_connection,
-  username: node["nova"]["placement_user"]
+    keystone_settings: keystone_settings,
+    database_connection: placement_database_connection,
+    username: node["nova"]["placement_user"]
   )
 end
 
