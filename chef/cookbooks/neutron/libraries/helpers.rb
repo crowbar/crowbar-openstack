@@ -67,4 +67,23 @@ module NeutronHelper
       Chef::Node.load(network_node_name)
     end
   end
+
+  def self.stringify_keys_values(value)
+    if value.kind_of? Hash
+      Hash[value.map { |key, val| [stringify_keys_values(key), stringify_keys_values(val)] }]
+    else
+      value.to_s
+    end
+  end
+
+  def self.serialize_to_yaml hash
+    stringify_keys_values(hash).to_yaml
+  end
+
+  def self.make_l3_ha_service_config(default_values, insecure)
+    settings = (Marshal.load(Marshal.dump(default_values)))  # non-elegant deep copy
+    yield settings['hatool']['env']
+    settings['hatool']['insecure'] = insecure
+    serialize_to_yaml(settings)
+  end
 end

@@ -242,18 +242,80 @@ if use_l3_agent
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
+  # Add configuration file
+  insecure_flag = keystone_settings['insecure'] || node[:neutron][:ssl][:insecure]
+  default_settings = node[:neutron][:ha][:neutron_l3_ha_service].to_hash
+  config_file_contents = NeutronHelper.make_l3_ha_service_config default_settings, insecure_flag do |env|
+    env['OS_AUTH_URL'] = os_auth_url_v2
+    env['OS_REGION_NAME'] = keystone_settings['endpoint_region']
+    env['OS_TENANT_NAME'] = keystone_settings['admin_tenant']
+    env['OS_USERNAME'] = keystone_settings['admin_user']
+  end
 
+  file '/etc/neutron/neutron-l3-ha-service.yaml' do
+    owner 'root'
+    group 'root'
+    mode '0600'
+    content config_file_contents
+    action :create
+  end
+
+  # Install service script
+  cookbook_file "neutron-l3-ha-service.rb" do
+    source "neutron-l3-ha-service.rb"
+    path "/usr/bin/neutron-l3-ha-service"
+    mode "0755"
+    owner "root"
+    group "root"
+  end
+
+  # install systemd unit configuration
+  cookbook_file "neutron-l3-ha-service.service" do
+    source "neutron-l3-ha-service.service"
+    path "/etc/systemd/system/neutron-l3-ha-service.service"
+    mode "0644"
+    owner "root"
+    group "root"
+  end
+
+  # Reload systemd when unit file changed
+  bash "reload systemd after neutron-l3-ha-service update" do
+    code "systemctl daemon-reload"
+    action :nothing
+    subscribes :run, resources("cookbook_file[neutron-l3-ha-service.service]"), :immediately
+  end
+
+  # Add pacemaker resource for neutron-l3-ha-service
+  ha_service_transaction_objects = []
+  ha_service_primitive_name = "neutron-l3-ha-service"
+
+  pacemaker_primitive ha_service_primitive_name do
+    agent "systemd:neutron-l3-ha-service"
+    op node[:neutron][:ha][:neutron_l3_ha_resource][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  ha_service_transaction_objects << "pacemaker_primitive[#{ha_service_primitive_name}]"
+
+  ha_service_location_name = openstack_pacemaker_controller_only_location_for ha_service_primitive_name
+  ha_service_transaction_objects << "pacemaker_location[#{ha_service_location_name}]"
+
+  pacemaker_transaction "neutron ha service" do
+    cib_objects ha_service_transaction_objects
     # note that this will also automatically start the resources
     action :commit_new
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
+  # Define dependencies for this resource
+  crowbar_pacemaker_order_only_existing "o-#{ha_service_primitive_name}" do
     # While neutron-ha-tool technically doesn't directly depend on postgresql or
     # rabbitmq, if these bits are not running, then neutron-server can run but
     # can't do what it's being asked. Note that neutron-server does have a
     # constraint on these services, but it's optional, not mandatory (because it
     # doesn't need to be restarted when postgresql or rabbitmq are restarted).
     # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
+    ordering "( postgresql rabbitmq g-haproxy cl-neutron-server #{agents_clone_name} ) #{ha_service_primitive_name}"
     score "Mandatory"
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
