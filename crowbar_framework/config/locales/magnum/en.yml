@@ -31,4 +31,6 @@ en:
         cert_header: 'Certificate Manager'
         cert:
           cert_manager_type: 'Plugin'
-
+      validation:
+        barbican:
+          barbican_not_deployed: 'The "barbican-controller" role is not deployed. Please check the Barbican barclamp'
