@@ -21,4 +21,4 @@ Description=Neutron L3 HA Service
 Type=simple
 ExecStart=/usr/bin/neutron-l3-ha-service /etc/neutron/neutron-l3-ha-service.yaml
 # Time to wait for the process to react to the TERM signal
-TimeoutStopSec=120
+TimeoutStopSec=<%= @timeout_in_seconds %>

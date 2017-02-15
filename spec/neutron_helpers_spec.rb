@@ -75,3 +75,28 @@ describe 'make config' do
     expect(defaults).to eq( {'hatool' => {'env' => {'somekey' => 'somevalue'}}})
   end
 end
+
+
+describe 'max timeout' do
+  context 'some default values' do
+    before do
+      @timeout_records = {
+        :status => {
+          :kill => 12
+        },
+        :some_operation => {
+          :kill => 16
+        },
+        :other_operation => {
+          :kill => 11,
+          :some_other_operation => 43
+        },
+      }
+    end
+    it 'returns with the highest timeout value' do
+      result = NeutronHelper.max_kill_timeout @timeout_records
+
+      expect(result).to eq 16
+    end
+  end
+end

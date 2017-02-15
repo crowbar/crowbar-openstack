@@ -86,4 +86,14 @@ module NeutronHelper
     settings['hatool']['insecure'] = insecure
     serialize_to_yaml(settings)
   end
+
+  def self.max_kill_timeout(timeout_records)
+    timeouts = []
+    timeout_records.each do |component, timeout_record|
+      timeout_record.each do |operation, timeout|
+        timeouts << timeout if operation.to_s == 'kill'
+      end
+    end
+    timeouts.max
+  end
 end

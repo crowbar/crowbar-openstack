@@ -270,19 +270,22 @@ if use_l3_agent
   end
 
   # install systemd unit configuration
-  cookbook_file "neutron-l3-ha-service.service" do
-    source "neutron-l3-ha-service.service"
-    path "/etc/systemd/system/neutron-l3-ha-service.service"
+  systemd_kill_timeout = NeutronHelper.max_kill_timeout(node[:neutron][:ha][:neutron_l3_ha_service][:timeouts]) + 5
+  template "/etc/systemd/system/neutron-l3-ha-service.service" do
+    source "neutron-l3-ha-service.service.erb"
     mode "0644"
     owner "root"
     group "root"
+    variables(
+      timeout_in_seconds: systemd_kill_timeout
+    )
   end
 
   # Reload systemd when unit file changed
   bash "reload systemd after neutron-l3-ha-service update" do
     code "systemctl daemon-reload"
     action :nothing
-    subscribes :run, resources("cookbook_file[neutron-l3-ha-service.service]"), :immediately
+    subscribes :run, resources("template[/etc/systemd/system/neutron-l3-ha-service.service]"), :immediately
   end
 
   # Add pacemaker resource for neutron-l3-ha-service
