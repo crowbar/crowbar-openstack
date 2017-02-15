@@ -285,11 +285,52 @@ raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
 # FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
 # FIXME: this should be 'all' instead
-neutron_api_extensions = "provider,security-group,dhcp_agent_scheduler,external-net,ext-gw-mode,binding,agent,quotas,l3_agent_scheduler,multi-provider,router,extra_dhcp_opt,allowed-address-pairs,extraroute,metering,fwaas,service-type,project-id,sorting,pagination"
+#
+#
+neutron_api_extensions = [
+  "address-scope",
+  "agent",
+  "allowed-address-pairs",
+  "auto-allocated-topology",
+  "binding",
+  "default-subnetpools",
+  "dhcp_agent_scheduler",
+  "external-net",
+  "ext-gw-mode",
+  "extra_dhcp_opt",
+  "extraroute",
+  "flavors",
+  "fwaas",
+  "fwaasrouterinsertion",
+  "hm_max_retries_down",
+  "l3_agent_scheduler",
+  "l3-flavors",
+  "metering",
+  "multi-provider",
+  "net-mtu",
+  "network_availability_zone",
+  "network-ip-availability",
+  "pagination",
+  "port-security",
+  "project-id",
+  "provider",
+  "quotas",
+  "router",
+  "router_availability_zone",
+  "security-group",
+  "service-type",
+  "shared_pools",
+  "sorting",
+  "standard-attr-description",
+  "standard-attr-revisions",
+  "subnet_allocation",
+  "subnet-service-types",
+  "tag",
+].join(",")
 
 unless neutrons[0].nil?
   if neutrons[0][:neutron][:use_lbaas] then
-    neutron_api_extensions += ",lbaas,lbaas_agent_scheduler"
+    neutron_api_extensions += ",lbaasv2,lbaas_agent_schedulerv2,lb-graph,lb_network_vip"
   end
 end
 
