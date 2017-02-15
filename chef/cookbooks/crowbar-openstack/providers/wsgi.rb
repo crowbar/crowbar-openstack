@@ -70,9 +70,7 @@ action :create do
         error_log: current_resource.error_log,
         apache_log_dir: node[:apache][:log_dir],
       )
-      # NOTE(aplanas) a :reload is not enough for apache, we need a
-      # full restart to read the new vhost files
-      notifies :restart, resources(service: "apache2")
+      notifies :reload, resources(service: "apache2"), :delayed
     end
     Chef::Log.info "#{@new_resource} created / updated"
   end
@@ -84,9 +82,7 @@ action :delete do
       file _get_vhost_name do
         action :delete
         only_if { File.exist?(_get_vhost_name) }
-        # NOTE(aplanas) a :reload is not enough for apache, we need a
-        # full restart to read the new vhost files
-        notifies :restart, resources(service: "apache2")
+        notifies :reload, resources(service: "apache2"), :delayed
       end
       Chef::Log.info "#{@new_resource} deleted"
     end
