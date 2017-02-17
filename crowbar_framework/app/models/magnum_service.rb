@@ -93,6 +93,15 @@ class MagnumService < PacemakerServiceObject
 
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "magnum-server"
+    if proposal["attributes"][@bc_name]["cert"]["cert_manager_type"] == "barbican"
+      # Check if barbican barclamp is applied and active
+      barbican_role = NodeObject.find("roles:barbican-controller")
+      if barbican_role.empty?
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.barbican.barbican_not_deployed"
+        )
+      end
+    end
     super
   end
 
