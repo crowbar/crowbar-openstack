@@ -46,6 +46,9 @@
     DocumentRoot <%= @horizon_dir %>
     Alias /media <%= @horizon_dir %>/media
     Alias /static <%= @horizon_dir %>/static
+    <% if @grafana_available %>
+    Alias /grafana /srv/www/grafana
+    <% end %>
 
     Timeout 120
 
@@ -54,6 +57,11 @@
         ExpiresActive on
         ExpiresDefault "access plus 1 month"
     </Location>
+    <% if @grafana_available %>
+    <Location /grafana>
+        Require all granted
+    </Location>
+    <% end %>
 
     <Directory />
         Options None
