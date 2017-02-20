@@ -17,6 +17,8 @@ include_recipe "apache2"
 include_recipe "apache2::mod_wsgi"
 include_recipe "apache2::mod_rewrite"
 
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
 if %w(suse).include? node[:platform_family]
   dashboard_path = "/srv/www/openstack-dashboard"
 else
@@ -177,10 +179,12 @@ monasca_ui_pkgname =
 unless monasca_ui_pkgname.nil?
   monasca_servers = search(:node, "roles:monasca-server") || []
   unless monasca_servers.empty?
+    include_recipe "#{@cookbook_name}::monasca_ui"
     package monasca_ui_pkgname do
       action :install
       notifies :reload, "service[horizon]"
     end
+    grafana_available = true
   end
 end
 
@@ -291,8 +295,6 @@ db_settings = {
   "HOST" => "'#{db_settings[:address]}'",
   "default-character-set" => "'utf8'"
 }
-
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 glances = search(:node, "roles:glance-server") || []
 if glances.length > 0
@@ -520,7 +522,8 @@ template "#{node[:apache][:dir]}/sites-available/openstack-dashboard.conf" do
     use_ssl: node[:horizon][:apache][:ssl],
     ssl_crt_file: node[:horizon][:apache][:ssl_crt_file],
     ssl_key_file: node[:horizon][:apache][:ssl_key_file],
-    ssl_crt_chain_file: node[:horizon][:apache][:ssl_crt_chain_file]
+    ssl_crt_chain_file: node[:horizon][:apache][:ssl_crt_chain_file],
+    grafana_available: defined?(grafana_available) ? grafana_available : false
   )
   if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/openstack-dashboard.conf") || node[:platform_family] == "suse"
     notifies :reload, resources(service: "apache2")
