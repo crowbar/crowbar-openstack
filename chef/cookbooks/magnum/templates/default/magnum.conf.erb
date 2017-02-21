@@ -75,6 +75,7 @@ driver = messaging
 policy_file = /etc/magnum/policy.json
 
 [trust]
+cluster_user_trust = <%= @trustee["cluster_user_trust"] %>
 trustee_domain_id = <%= @trustee["domain_id"] %>
 trustee_domain_admin_id = <%= @trustee["domain_admin_id"] %>
 trustee_domain_admin_password = <%= @trustee["domain_admin_password"] %>

@@ -27,6 +27,7 @@ en:
         heat_instance: 'Heat Instance'
         trustee_header: 'Trustee Domain'
         trustee:
+          cluster_user_trust: 'Delegate trust to cluster users if required'
           domain_name: 'Domain Name'
         cert_header: 'Certificate Manager'
         cert:
