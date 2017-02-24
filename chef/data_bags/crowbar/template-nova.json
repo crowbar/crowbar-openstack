@@ -24,6 +24,7 @@
         "network": "admin"
       },
       "cross_az_attach": true,
+      "default_schedule_zone": "",
       "use_syslog": false,
       "neutron_url_timeout": 30,
       "force_config_drive": false,
@@ -100,7 +101,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 47,
+      "schema-revision": 48,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-docker": [ "readying", "ready", "applying" ],
