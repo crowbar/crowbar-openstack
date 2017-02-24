@@ -1,5 +1,4 @@
 [DEFAULT]
-connection_type = libvirt
 ssl_only = <%= @vncproxy_ssl_enabled ? "True" : "False" %>
 cert = <%= @vncproxy_cert_file %>
 key = <%= @vncproxy_key_file %>
