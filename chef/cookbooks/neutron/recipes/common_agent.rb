@@ -23,6 +23,7 @@ else
   neutron = node
   nova_compute_ha_enabled = false
 end
+is_compute = node.roles.any? { |role| /^nova-compute-/ =~ role }
 
 # Disable rp_filter
 ruby_block "edit /etc/sysctl.conf for rp_filter" do
@@ -49,6 +50,47 @@ bash "reload disable-rp_filter-sysctl" do
   code "/sbin/sysctl -e -q -p #{disable_rp_filter_file}"
   action :nothing
   subscribes :run, resources(cookbook_file: disable_rp_filter_file), :delayed
+end
+
+if is_compute
+  # compute nodes may have many connections tracked by netfilter, so the
+  # default (65k) is non-sense
+  nf_conntrack_max = 1048576
+  # generally, recommendation for buckets is max / 8
+  nf_conntrack_buckets = nf_conntrack_max / 8
+
+  sysctl_nf_conntrack_file = "/etc/sysctl.d/50-neutron-nf_conntrack.conf"
+  template sysctl_nf_conntrack_file do
+    source "sysctl-nf_conntrack.conf.erb"
+    variables(
+      nf_conntrack_max: nf_conntrack_max
+    )
+    mode "0644"
+  end
+
+  bash "reload nf_conntrack-sysctl" do
+    code "/sbin/sysctl -e -q -p #{sysctl_nf_conntrack_file}"
+    action :nothing
+    subscribes :run, resources(template: sysctl_nf_conntrack_file), :delayed
+  end
+
+  # nf_conntrack_buckets cannot be set with sysctl as it's only settable on
+  # loading the module; however, we can write it in /sys/
+  modprobe_nf_conntrack_file = "/etc/modprobe.d/70-neutron-nf_conntrack.conf"
+  template modprobe_nf_conntrack_file do
+    source "modprobe-nf_conntrack.conf.erb"
+    variables(
+      nf_conntrack_buckets: nf_conntrack_buckets
+    )
+    mode "0644"
+  end
+
+  bash "set nf_conntrack_buckets" do
+    code "test -f /sys/module/nf_conntrack/parameters/hashsize && " \
+      "echo #{nf_conntrack_buckets} > /sys/module/nf_conntrack/parameters/hashsize"
+    action :nothing
+    subscribes :run, resources(template: modprobe_nf_conntrack_file), :delayed
+  end
 end
 
 if neutron[:neutron][:networking_plugin] == "ml2" &&
