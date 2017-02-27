@@ -34,7 +34,8 @@
                   "mapping": {
                     "max_connections": { "type": "int" },
                     "log_truncate_on_rotation": { "type": "bool" },
-                    "log_filename": {"type": "str" }
+                    "log_filename": {"type": "str" },
+                    "log_min_duration_statement": { "type": "int" }
                   }
                 }
               }
