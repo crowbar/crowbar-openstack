@@ -30,8 +30,26 @@ end
 
 package "grafana-apache" do
   action :install
+  notifies :reload, resources(service: "apache2")
 end
 
 file "/etc/apache2/vhost.d/grafana.conf" do
   action :delete
+  notifies :reload, resources(service: "apache2")
+end
+
+cookbook_file "/srv/www/grafana/app/dashboards/openstack.json" do
+  source "grafana-openstack.json"
+  owner "root"
+  group "root"
+  mode "0644"
+  notifies :reload, resources(service: "apache2")
+end
+
+cookbook_file "/srv/www/grafana/app/dashboards/monasca.json" do
+  source "grafana-monasca.json"
+  owner "root"
+  group "root"
+  mode "0644"
+  notifies :reload, resources(service: "apache2")
 end
