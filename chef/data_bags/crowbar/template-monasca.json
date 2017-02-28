@@ -45,6 +45,18 @@
         "ssl" : false,
         "threads" : 10
       },
+      "master" : {
+        "influxdb_mon_api_password" : "",
+        "influxdb_mon_persister_password" : "",
+        "database_notification_password" : "",
+        "database_monapi_password" : "",
+        "database_thresh_password" : "",
+        "database_logapi_password" : "",
+        "keystone_monasca_operator_password" : "",
+        "keystone_monasca_agent_password" : "",
+        "keystone_admin_agent_password" : "",
+        "database_grafana_password" : ""
+      },
       "db" : {
         "database" : "monasca",
         "password" : "",
@@ -69,17 +81,20 @@
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-metric-agent": [ "readying", "ready", "applying" ],
+        "monasca-master": [ "readying", "ready", "applying" ],
         "monasca-log-agent": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
         [ "monasca-server" ],
         [ "monasca-metric-agent" ],
+        [ "monasca-master" ],
         [ "monasca-log-agent" ]
       ],
       "element_run_list_order": {
         "monasca-server": 110,
         "monasca-metric-agent": 120,
+        "monasca-master": 115,
         "monasca-log-agent": 120
       },
       "config": {

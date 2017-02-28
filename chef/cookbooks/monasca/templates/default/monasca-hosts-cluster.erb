@@ -1,0 +1,278 @@
+# Copyright 2017 FUJITSU LIMITED
+
+################################################################################
+# Host definitions. Replace monasca_hosts, openstack_host, ex_node_[1-3]_host,
+# ssh_user_monasca, ssh_user_openstack
+# and ssh_user_ex_node_[1-3] with valid information.
+################################################################################
+
+localhost                        ansible_connection=local
+
+# Openstack Hosts
+keystone-node                    ansible_ssh_host=<%= @keystone_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Load balancer hosts
+# TODO
+#monasca-log-api-balancer-node    ansible_ssh_host= ansible_ssh_user=<%= @ansible_ssh_user %>
+#monasca-api-balancer-node        ansible_ssh_host= ansible_ssh_user=<%= @ansible_ssh_user %>
+#kibana-balancer-node             ansible_ssh_host= ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# ElasticSearch nodes for cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "elastic-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Kafka nodes for cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "kafka-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Zookeeper nodes for cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "zookeeper-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Log persister nodes for cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "log-persister-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Log transformer nodes for cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "log-transformer-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Kibana nodes for cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "kibana-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Log api nodes for cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "log-api-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Memcached nodes for cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "memcached-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Monasca-api nodes for cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "monasca-api-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Monasca-notification nodes for cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "monasca-notification-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Monasca-persister nodes
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "monasca-persister-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Monasca-log-metrics nodes for cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "monasca-log-metrics-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Load balancer node
+# TODO
+#balancer-node                    ansible_ssh_host= ansible_ssh_user=<%= @ansible_ssh_user %>
+
+#Storm Nimbus nodes
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "storm-nimbus-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Storm Supervisor nodes
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "storm-supervisor-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Monasca-thresh  hosts
+monasca-thresh-node              ansible_ssh_host=<%= @monasca_hosts[0] %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# MariaDB nodes for Galera cluster
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "mariadb-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# InfluxDB nodes
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "influxdb-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# HAProxy nodes
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "haproxy-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Keepalived nodes
+# TODO
+#keepalived-virtual-node ansible_ssh_host= ansible_ssh_user=<%= @ansible_ssh_user %>
+
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "keepalived-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+# Elasticsearch Curator
+<% @monasca_hosts.each_with_index do |host, index| %>
+<%= "elasticsearch-curator-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<% end %>
+
+################################################################################
+# Other group definition
+################################################################################
+
+[openstack_group]
+keystone-node
+
+[monasca_group]
+balancer-node
+
+[monasca_persister_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "monasca-persister-node-#{index} influxdb_node_for_persister=keepalived-virtual-node" %>
+<% end %>
+
+[monasca_api_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "monasca-api-node-#{index} database_node_for_api=keepalived-virtual-node influxdb_node_for_api=keepalived-virtual-node" %>
+<% end %>
+
+[monasca_notification_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "monasca-notification-node-#{index} database_node_for_notification=keepalived-virtual-node" %>
+<% end %>
+
+[memcached_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "memcached-node-#{index}" %>
+<% end %>
+
+[kafka_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "kafka-node-#{index}" %>
+<% end %>
+
+[zookeeper_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "zookeeper-node-#{index}" %>
+<% end %>
+
+[monasca_log_api_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "log-api-node-#{index}" %>
+<% end %>
+
+[monasca_log_metrics_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "monasca-log-metrics-node-#{index}" %>
+<% end %>
+
+[monasca_log_persister_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "log-persister-node-#{index}" %>
+<% end %>
+
+[monasca_log_transformer_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "log-transformer-node-#{index}" %>
+<% end %>
+
+[elasticsearch_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "elastic-node-#{index}" %>
+<% end %>
+
+# specify host which kibana should use to connect to elasticsearch
+[kibana_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "kibana-node-#{index} es_node_for_kibana=elastic-node-#{index}" %>
+<% end %>
+
+[balancer_group]
+balancer-node
+
+[storm_nimbus_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "storm-nimbus-node-#{index}" %>
+<% end %>
+
+[storm_supervisor_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "storm-supervisor-node-#{index}" %>
+<% end %>
+
+[monasca_thresh_group]
+monasca-thresh-node database_node_for_thresh=keepalived-virtual-node
+
+[mariadb_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "mariadb-node-#{index}" %>
+<% end %>
+
+[influxdb_group]
+influxdb-node-0
+<% (@monasca_hosts.length - 1).times do |index| %>
+influxdb-node-<%= index + 1 %> influxdb_master_node_name=influxdb-node-0
+<% end %>
+
+[haproxy_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "haproxy-node-#{index}" %>
+<% end %>
+
+[keepalived_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "keepalived-node-#{index}" %>
+<% end %>
+
+[elasticsearch_curator_group]
+<% @monasca_hosts.length.times do |index| %>
+<%= "elasticsearch-curator-node-#{index}" %>
+<% end %>
+
+
+################################################################################
+# Group inheritance
+################################################################################
+
+[elkstack_group:children]
+elasticsearch_group
+kibana_group
+monasca_log_persister_group
+monasca_log_transformer_group
+monasca_log_metrics_group
+balancer_group
+elasticsearch_curator_group
+
+[storm_group:children]
+storm_nimbus_group
+storm_supervisor_group
+
+[all_group:children]
+openstack_group
+monasca_group
+
+[monasca_group:children]
+elkstack_group
+memcached_group
+kafka_group
+zookeeper_group
+monasca_log_api_group
+balancer_group
+monasca_api_group
+monasca_notification_group
+monasca_persister_group
+storm_group
+monasca_thresh_group
+database_cluster_group
+
+[database_cluster_group:children]
+mariadb_group
+influxdb_group
+haproxy_group
+keepalived_group

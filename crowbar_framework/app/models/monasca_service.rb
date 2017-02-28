@@ -49,9 +49,22 @@ class MonascaService < PacemakerServiceObject
         },
         "monasca-server" => {
           "unique" => false,
+          # TODO: change for cluster
+          # "count" => -1,
+          # "cluster" => true,
           "count" => 1,
-          "cluster" => true,
+          "cluster" => false,
           "admin" => false,
+          "exclude_platform" => {
+            "suse" => "< 12.2",
+            "windows" => "/.*/"
+          }
+        },
+        "monasca-master" => {
+          "unique" => true,
+          "count" => 1,
+          "cluster" => false,
+          "admin" => true,
           "exclude_platform" => {
             "suse" => "< 12.2",
             "windows" => "/.*/"
@@ -83,7 +96,11 @@ class MonascaService < PacemakerServiceObject
     log_agent_nodes = select_nodes_for_role(nodes, "monasca-log-agent", "compute") || []
     metric_agent_nodes = select_nodes_for_role(nodes, "monasca-metric-agent", "compute") || []
 
+    master_nodes = nodes.select { |n| n.intended_role == "admin" || n.name.start_with?("crowbar.") }
+    master_node = master_nodes.empty? ? nodes.first : master_nodes.first
+
     base["deployment"][@bc_name]["elements"] = {
+      "monasca-master" => [master_node.name],
       "monasca-server" => monasca_server.empty? ? [] : [monasca_server.first.name],
       # "monasca-metric-agent" => metric_agent_nodes.map { |x| x.name },
       "monasca-log-agent" => log_agent_nodes.map { |x| x.name }
@@ -98,14 +115,30 @@ class MonascaService < PacemakerServiceObject
     base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name][:metric_agent][:keystone][:service_password] = random_password
     base["attributes"][@bc_name][:log_agent][:keystone][:service_password] = random_password
+    base["attributes"][@bc_name][:master][:influxdb_mon_api_password] = random_password
+    base["attributes"][@bc_name][:master][:influxdb_mon_persister_password] = random_password
+    base["attributes"][@bc_name][:master][:database_notification_password] = random_password
+    base["attributes"][@bc_name][:master][:database_monapi_password] = random_password
+    base["attributes"][@bc_name][:master][:database_thresh_password] = random_password
+    base["attributes"][@bc_name][:master][:database_logapi_password] = random_password
+    base["attributes"][@bc_name][:master][:keystone_monasca_operator_password] = random_password
+    base["attributes"][@bc_name][:master][:keystone_monasca_agent_password] = random_password
+    base["attributes"][@bc_name][:master][:keystone_admin_agent_password] = random_password
+    base["attributes"][@bc_name][:master][:database_grafana_password] = random_password
 
     @logger.debug("Monasca create_proposal: exiting")
     base
   end
 
   def validate_proposal_after_save(proposal)
+    validate_one_for_role proposal, "monasca-master"
     validate_one_for_role proposal, "monasca-server"
-
+    # TODO: uncomment for cluster support
+    # nodes = proposal["deployment"][@bc_name]["elements"]
+    # if !nodes.key?("monasca-server") ||
+    #     (nodes["monasca-server"].length != 1 && nodes["monasca-server"].length != 3)
+    #   validation_error("Need either one or three monasca-server node(s).")
+    # end
     super
   end
 
