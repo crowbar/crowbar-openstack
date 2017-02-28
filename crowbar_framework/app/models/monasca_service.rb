@@ -49,11 +49,21 @@ class MonascaService < PacemakerServiceObject
         },
         "monasca-server" => {
           "unique" => false,
-          "count" => 1,
+          "count" => -1,
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
             "suse" => "< 12.2",
+            "windows" => "/.*/"
+          }
+        },
+        "monasca-master" => {
+          "unique" => true,
+          "count" => 1,
+          "cluster" => false,
+          "admin" => true,
+          "exclude_platform" => {
+            "suse" => "< 12.1",
             "windows" => "/.*/"
           }
         }
@@ -78,30 +88,22 @@ class MonascaService < PacemakerServiceObject
     base = super
 
     nodes = NodeObject.all
-    # FIXME: Putting the monasca backend services on the controller is
-    # temporary to allow for development right now. We will eventually want the
-    # commented line for server_roles, i.e. have a dedicated Monitoring node
-    # role in Crowbar. Adding that role will require changes to:
-    #
-    #  * https://github.com/crowbar/crowbar-core/blob/master/crowbar_framework/app/helpers/nodes_helper.rb#L366
-    #  * https://github.com/crowbar/crowbar-core/blob/master/bin/crowbar_machines#L362
-    #  * https://github.com/crowbar/crowbar-core/blob/master/crowbar_framework/config/locales/crowbar/en.yml
-    #
-    # at the very least.
-    server_nodes = nodes.select { |n| n.intended_role == "controller" }
-    ### server_nodes = nodes.select { |n| n.intended_role == "monitoring" }
 
+    server_nodes = nodes.select { |n| n.intended_role == "monitoring" }
     server_nodes = [nodes.first] if server_nodes.empty?
+    server_nodes = server_nodes.map { |n| n.name }.compact
 
-    # TODO: do we really want to have the agent on all nodes by
-    # default?
-    agent_nodes = nodes
+    agent_nodes = nodes.map { |n| n.name }.compact
+
+    master_nodes = nodes.select { |n| n.intended_role == "admin" || n.name.start_with?("crowbar.") }
+    master_node = master_nodes.empty? ? nodes.first : master_nodes.first
 
     base["deployment"][@bc_name]["elements"]["monasca-agent"] = agent_nodes
     base["deployment"][@bc_name]["elements"]["monasca-log-agent"] = agent_nodes
     base["deployment"][@bc_name]["elements"]["monasca-metric-agent"] = agent_nodes
     unless server_nodes.nil?
       base["deployment"][@bc_name]["elements"] = {
+        "monasca-master" => [master_node.name],
         "monasca-server" => [server_nodes.first.name]
       }
     end
@@ -115,14 +117,28 @@ class MonascaService < PacemakerServiceObject
     base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name][:metric_agent][:keystone][:service_password] = random_password
     base["attributes"][@bc_name][:log_agent][:keystone][:service_password] = random_password
+    base["attributes"][@bc_name][:master][:influxdb_mon_api_password] = random_password
+    base["attributes"][@bc_name][:master][:influxdb_mon_persister_password] = random_password
+    base["attributes"][@bc_name][:master][:database_notification_password] = random_password
+    base["attributes"][@bc_name][:master][:database_monapi_password] = random_password
+    base["attributes"][@bc_name][:master][:database_thresh_password] = random_password
+    base["attributes"][@bc_name][:master][:database_logapi_password] = random_password
+    base["attributes"][@bc_name][:master][:keystone_cmm_operator_user_password] = random_password
+    base["attributes"][@bc_name][:master][:keystone_cmm_agent_password] = random_password
+    base["attributes"][@bc_name][:master][:keystone_admin_agent_password] = random_password
+    base["attributes"][@bc_name][:master][:database_grafana_password] = random_password
 
     @logger.debug("Monasca create_proposal: exiting")
     base
   end
 
   def validate_proposal_after_save(proposal)
-    validate_one_for_role proposal, "monasca-server"
-
+    validate_one_for_role proposal, "monasca-master"
+    nodes = proposal["deployment"][@bc_name]["elements"]
+    if !nodes.key?("monasca-server") ||
+        (nodes["monasca-server"].length != 1 && nodes["monasca-server"].length != 3)
+      validation_error("Need either one or three monasca-server node(s).")
+    end
     super
   end
 

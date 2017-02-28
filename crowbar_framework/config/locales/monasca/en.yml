@@ -29,6 +29,19 @@ en:
         agent_header: 'Agent Settings'
         agent:
           url: 'Monasca URL'
+        master_header: 'Installation parameters'
+        master:
+          cmm_tarball_url: 'URL of the CMM installer tarball'
+          influxdb_mon_api_password: 'InfluxDB password'
+          influxdb_mon_persister_password: 'Metrics persister password'
+          database_notification_password: 'Notification database password'
+          database_monapi_password: 'Metrics API database password'
+          database_thresh_password: 'Thresh Engine database password'
+          database_logapi_password: 'Log API database password'
+          keystone_cmm_operator_user_password: 'keystone_cmm_operator_user_password'
+          keystone_cmm_agent_password: 'keystone_cmm_agent_password'
+          keystone_admin_agent_password: 'keystone_admin_agent_password'
+          database_grafana_password: 'Grafana database password'
         db_header: 'Database settings'
         db:
           database: 'Database'

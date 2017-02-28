@@ -1,0 +1,107 @@
+---
+# Copyright 2017 FUJITSU LIMITED
+# file: group_vars/all_group
+
+# ports
+monasca_api_client_port: 8070
+monasca_api_admin_port: 8081
+persister_app_connector_port: 8190
+persister_admin_connector_port: 8191
+monasca_log_api_port: 5607
+keystone_port: 5000
+keystone_user_port: 35357
+kibana_port: 5601
+elasticsearch_port: 9200
+kafka_port: 9092
+zookeeper_port: 2181
+memcached_port: 11211
+mysql_port: 3306
+
+# hosts
+offline_host: "{{ hostvars['offline-resources-node']['ansible_ssh_host'] }}"
+monasca_api_ip: "{% if groups['monasca_api_group']|length > 1 %}
+                    {{ hostvars['monasca-api-balancer-node']['ansible_ssh_host'] }}
+                 {% else %}
+                    {{ hostvars['monasca-api-node']['ansible_ssh_host'] }}
+                 {% endif %}
+                "
+monasca_log_api_ip: "{% if groups['monasca_log_api_group']|length > 1 %}
+                        {{ hostvars['monasca-log-api-balancer-node']['ansible_ssh_host'] }}
+                     {% else %}
+                        {{ hostvars['monasca-log-api-node']['ansible_ssh_host'] }}
+                     {% endif %}
+                    "
+kibana_ip: "{% if groups['kibana_group']|length > 1 %}
+                {{ hostvars['kibana-balancer-node']['ansible_ssh_host'] }}
+            {% else %}
+                {{ hostvars['kibana-node']['ansible_ssh_host'] }}
+            {% endif %}
+           "
+keystone_host: "{{ hostvars['keystone-node']['ansible_ssh_host'] }}"
+keepalived_virtual_ip: "{{ hostvars['keepalived-virtual-node']['ansible_ssh_host'] }}"
+
+# monsaca settings
+monasca_conf_dir: "{{ etc_dir }}/monasca"
+monasca_work_dir: "{{ opt_dir }}/monasca"
+
+# keystone
+keystone_version: <%= @keystone_settings['api_version'] %>
+keystone_url: "<%= @keystone_settings['public_auth_url'] %>"
+
+# URL service definition
+balls_repo_url: "http://{{ offline_host }}:8888"
+world_repo_url: "{{ balls_repo_url }}/world"
+monasca_api_url: "http://{{ monasca_api_ip|trim|safe }}:{{ monasca_api_client_port|int }}/v2.0"
+monasca_log_api_url: "http://{{ monasca_log_api_ip|trim|safe }}:{{ monasca_log_api_port|int }}/v3.0"
+kibana_url: "http://{{ kibana_ip|trim|safe }}:{{ kibana_port }}"
+
+# Monasca Api CLI - Credentials
+monasca_user:
+  user: cmm-operator
+  password: "{{ keystone_cmm_operator_user_password }}"
+  project: cmm
+
+# Installation / Download directories
+opt_dir: "/opt"
+etc_dir: "/etc"
+venvs_dir: "{{ opt_dir }}"
+elk_base_dir: "{{ opt_dir }}"
+download_tmp_dir: "{{ opt_dir }}/.download_dir"
+monasca_download_dir: /opt/monasca-downloads
+clean_up_dirs:
+  - "{{ download_tmp_dir }}"
+
+# Installation mode
+offline_mode: True
+
+# Download urls
+logstash_agent_download_url: "{{ world_repo_url }}"
+
+# Keystone Admin credentials
+keystone_admin_token: <%= @keystone_settings['admin_token'] %>
+keystone_admin: '<%= @keystone_settings['admin_user'] %>'
+keystone_admin_project: '<%= @keystone_settings['admin_tenant'] %>'
+
+# Logging
+log_dir: /var/log
+
+# Data directories
+data_dir: /var/data
+
+# Supported varsions of dependencies
+ansible_version_min:
+  ver: "2.2.0.0"
+  constraint: ">="
+ansible_version_max:
+  ver: "2.2.1.0"
+  constraint: "<="
+pip_version_min: 7.0.3
+
+# pip configuration
+pip_base_dir: "/root/.pip"
+pip_config_file: "{{ pip_base_dir }}/.cmm_pip.conf"
+pbr_version: 1.8.1
+
+# try to use this variable for each wait_for like task
+monasca_wait_for_period: 180
+
