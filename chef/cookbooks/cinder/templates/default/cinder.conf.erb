@@ -103,7 +103,7 @@ volume_driver = cinder.volume.drivers.eqlx.DellEQLSanISCSIDriver
 
   <% if volume['backend_driver'] == 'eternus' -%>
 iscsi_target_prefix = iqn.2000-09.com.fujitsu
-iscsi_ip_address = <%= volume["eternus"]["iscsi_ip"] -%>
+iscsi_ip_address = <%= volume["eternus"]["iscsi_ip"] %>
 cinder_eternus_config_file=/etc/cinder/cinder_eternus_dx_config-<%= backend_id %>.xml
     <% if volume['eternus']['protocol'] == "iscsi" -%>
 volume_driver = cinder.volume.drivers.fujitsu.eternus_dx_iscsi.FJDXISCSIDriver
