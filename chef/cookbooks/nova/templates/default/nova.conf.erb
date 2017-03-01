@@ -170,11 +170,8 @@ live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_LIVE
   <% end %>
 <% elsif @libvirt_type.eql?('kvm') -%>
   <% if @libvirt_migration -%>
-    <% if @shared_instances -%>
 live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MIGRATE_LIVE
-    <% else -%>
 block_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MIGRATE_NON_SHARED_INC, VIR_MIGRATE_LIVE
-    <% end -%>
   <% end -%>
 <% end -%>
 <%= "disk_prefix = xvd" if @libvirt_type.eql?('xen') %>
