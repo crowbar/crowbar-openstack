@@ -164,15 +164,11 @@ virt_type = <%= @libvirt_type %>
 <% if (@libvirt_type.eql?('xen') and @libvirt_migration and @shared_instances) or @libvirt_type.eql?('kvm') -%>
 live_migration_inbound_addr = <%= @live_migration_inbound_fqdn %>
 <% end -%>
-<% if @libvirt_type.eql?('xen') -%>
-  <% if @libvirt_migration and @shared_instances -%>
+<% if @libvirt_type.eql?('xen') and @libvirt_migration and @shared_instances -%>
 live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_LIVE
-  <% end %>
-<% elsif @libvirt_type.eql?('kvm') -%>
-  <% if @libvirt_migration -%>
+<% elsif @libvirt_type.eql?('kvm') and @libvirt_migration -%>
 live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MIGRATE_LIVE
 block_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MIGRATE_NON_SHARED_INC, VIR_MIGRATE_LIVE
-  <% end -%>
 <% end -%>
 <%= "disk_prefix = xvd" if @libvirt_type.eql?('xen') %>
 <%= "cpu_mode = #{@cpu_mode}" unless @cpu_mode.empty? -%>
