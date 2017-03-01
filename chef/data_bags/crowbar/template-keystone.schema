@@ -37,6 +37,7 @@
                       "admin_port": { "type" : "int", "required" : true },
                       "api_host": { "type" : "str", "required" : true },
                       "admin_host": { "type" : "str", "required" : true },
+                      "internal_url_host": { "type" : "str", "required" : true },
                       "version": { "type" : "str", "required" : true },
                       "region": { "type" : "str", "required" : true },
                       "processes": { "required": true, "type": "int" },

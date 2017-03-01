@@ -32,6 +32,7 @@
         "api_host": "0.0.0.0",
         "admin_port": 35357,
         "admin_host": "0.0.0.0",
+        "internal_url_host": "0.0.0.0",
         "version": "3",
         "region": "RegionOne",
         "processes" : 8,
@@ -182,7 +183,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 111,
+      "schema-revision": 112,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },

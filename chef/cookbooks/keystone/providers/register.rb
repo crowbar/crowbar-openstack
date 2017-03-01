@@ -274,8 +274,8 @@ action :add_endpoint_template do
   my_service_id, error = _find_id(http, headers, new_resource.endpoint_service, path, dir)
   unless my_service_id
       Chef::Log.error "Couldn't find service #{new_resource.endpoint_service} in keystone"
-      raise "Failed to talk to keystone in add_endpoint_template" if error
       new_resource.updated_by_last_action(false)
+      raise "Failed to talk to keystone in add_endpoint_template" if error
   end
 
   # Construct the path
@@ -334,8 +334,8 @@ action :add_endpoint_template do
               Chef::Log.error("Unable to create endpointTemplate for '#{new_resource.endpoint_service}'")
               Chef::Log.error("Response Code: #{resp.code}")
               Chef::Log.error("Response Message: #{resp.message}")
-              raise "Failed to talk to keystone in add_endpoint_template (2)" if error
               new_resource.updated_by_last_action(false)
+              raise "Failed to talk to keystone in add_endpoint_template (2)" if error
           end
       end
   else
@@ -344,6 +344,63 @@ action :add_endpoint_template do
       Chef::Log.error("Response Message: #{resp.message}")
       new_resource.updated_by_last_action(false)
       raise "Failed to talk to keystone in add_endpoint_template (3)" if error
+  end
+end
+
+action :update_endpoint do
+  http, headers = _build_connection(new_resource)
+
+  path = "/v2.0/OS-KSADM/services"
+  dir = "OS-KSADM:services"
+  my_service_id, error = _find_id(http, headers, new_resource.endpoint_service, path, dir)
+  unless my_service_id
+    Chef::Log.error "Couldn't find service #{new_resource.endpoint_service} in keystone"
+    new_resource.updated_by_last_action(false)
+    raise "Failed to talk to keystone in add_endpoint_template"
+  end
+
+  path = "/v3/endpoints"
+
+  resp = http.request_get(path, headers)
+  if resp.is_a?(Net::HTTPOK)
+    data = JSON.parse(resp.read_body)
+    endpoints = {}
+    data["endpoints"].each do |endpoint|
+      if endpoint["service_id"].to_s == my_service_id.to_s
+        endpoints[endpoint["interface"]] = endpoint
+      end
+    end
+    ["public", "internal", "admin"].each do |interface|
+      if interface == "public"
+        new_url = new_resource.endpoint_publicURL
+      elsif interface == "internal"
+        new_url = new_resource.endpoint_internalURL
+      elsif interface == "admin"
+        new_url = new_resource.endpoint_adminURL
+      end
+      endpoint_template = {}
+      endpoint_template["endpoint"] = {}
+      endpoint_template["endpoint"]["interface"] = interface
+      endpoint_template["endpoint"]["url"] = new_url
+      endpoint_template["endpoint"]["endpoint_id"] = endpoints[interface]["id"]
+      endpoint_template["endpoint"]["service_id"] = endpoints[interface]["service_id"]
+      resp = http.send_request("PATCH",
+                               "#{path}/#{endpoints[interface]["id"]}",
+                               JSON.generate(endpoint_template), headers)
+      if resp.is_a?(Net::HTTPOK)
+        Chef::Log.info("Successfully updated endpoint URL #{interface} #{new_url}")
+      else
+        Chef::Log.error("Unknown response code: #{resp.code}")
+        new_resource.updated_by_last_action(false)
+        raise "Failed to talk to keystone in update_endpoint"
+      end
+    end
+  else
+    Chef::Log.error "Unknown response from Keystone Server"
+    Chef::Log.error("Response Code: #{resp.code}")
+    Chef::Log.error("Response Message: #{resp.message}")
+    new_resource.updated_by_last_action(false)
+    raise "Failed to talk to keystone in add_endpoint_template (3)" if error
   end
 end
 

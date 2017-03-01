@@ -49,7 +49,6 @@ module KeystoneHelper
       @keystone_settings_cache_time = current_node[:ohai_time]
     end
 
-
     unless @keystone_settings && @keystone_settings.include?(instance)
       node = search_for_keystone(current_node, instance)
 
