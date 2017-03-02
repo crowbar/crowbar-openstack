@@ -23,10 +23,16 @@ override[:barbican][:user] = "barbican"
 
 default[:barbican][:debug] = false
 default[:barbican][:api][:bind_host] = "*"
-default[:barbican][:api][:ssl] = false
 
 default[:barbican][:config_file] = "/etc/barbican/barbican.conf.d/100-barbican.conf"
 default[:barbican][:logfile] = "/var/log/barbican/barbican-api.log"
+
+default[:barbican][:ssl][:certfile] = "/etc/barbican/ssl/certs/signing_cert.pem"
+default[:barbican][:ssl][:keyfile] = "/etc/barbican/ssl/private/signing_key.pem"
+default[:barbican][:ssl][:generate_certs] = false
+default[:barbican][:ssl][:insecure] = false
+default[:barbican][:ssl][:cert_required] = false
+default[:barbican][:ssl][:ca_certs] = "/etc/barbican/ssl/certs/ca.pem"
 
 # HA attributes
 default[:barbican][:ha][:enabled] = false

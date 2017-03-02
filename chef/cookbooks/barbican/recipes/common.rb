@@ -25,11 +25,11 @@ ha_enabled = node[:barbican][:ha][:enabled]
 db_settings = fetch_database_settings
 db_conn_scheme = db_settings[:url_scheme]
 
-public_host = CrowbarHelper.get_host_for_public_url(node,
-                                                    node[:barbican][:api][:ssl],
-                                                    node[:barbican][:ha][:enabled])
+barbican_protocol = node[:barbican][:api][:protocol]
 
-barbican_protocol = node[:barbican][:api][:ssl] ? "https" : "http"
+public_host = CrowbarHelper.get_host_for_public_url(node,
+                                                    barbican_protocol == "https",
+                                                    node[:barbican][:ha][:enabled])
 
 if db_settings[:backend_name] == "mysql"
   db_conn_scheme = "mysql+pymysql"

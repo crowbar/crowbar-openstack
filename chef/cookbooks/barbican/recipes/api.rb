@@ -36,11 +36,24 @@ end
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 network_settings = BarbicanHelper.network_settings(node)
 
+if node[:barbican][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for barbican" do
+    generate_certs node[:barbican][:ssl][:generate_certs]
+    certfile node[:barbican][:ssl][:certfile]
+    keyfile node[:barbican][:ssl][:keyfile]
+    group node[:barbican][:group]
+    fqdn node[:fqdn]
+    cert_required node[:barbican][:ssl][:cert_required]
+    ca_certs node[:barbican][:ssl][:ca_certs]
+  end
+end
+
 bind_port = network_settings[:api][:bind_port]
 barbican_port = node[:barbican][:api][:bind_port]
+barbican_protocol = node[:barbican][:api][:protocol]
 admin_host = CrowbarHelper.get_host_for_admin_url(node, node[:barbican][:ha][:enabled])
 public_host = CrowbarHelper.get_host_for_public_url(node,
-                                                    node[:barbican][:api][:ssl],
+                                                    barbican_protocol == "https",
                                                     node[:barbican][:ha][:enabled])
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
@@ -79,9 +92,9 @@ keystone_register "register barbican endpoint" do
   endpoint_service "barbican"
   service_type "key-manager"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "http://#{public_host}:#{barbican_port}"
-  endpoint_adminURL "http://#{admin_host}:#{barbican_port}"
-  endpoint_internalURL "http://#{admin_host}:#{barbican_port}"
+  endpoint_publicURL "#{barbican_protocol}://#{public_host}:#{barbican_port}"
+  endpoint_adminURL "#{barbican_protocol}://#{admin_host}:#{barbican_port}"
+  endpoint_internalURL "#{barbican_protocol}://#{admin_host}:#{barbican_port}"
   action :add_endpoint_template
 end
 
@@ -131,6 +144,12 @@ crowbar_openstack_wsgi "WSGI entry for barbican-api" do
   group node[:barbican][:group]
   processes node[:barbican][:api][:processes]
   threads node[:barbican][:api][:threads]
+  ssl_enable node[:barbican][:api][:protocol] == "https"
+  ssl_certfile node[:barbican][:ssl][:certfile]
+  ssl_keyfile node[:barbican][:ssl][:keyfile]
+  if node[:barbican][:ssl][:cert_required]
+    ssl_cacert node[:barbican][:ssl][:ca_certs]
+  end
 end
 
 apache_site "barbican-api.conf" do

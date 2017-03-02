@@ -4,17 +4,25 @@
   "attributes": {
      "barbican" : {
         "api" : {
+           "protocol": "http",
            "bind_host" : "*",
            "bind_port" : 9311,
            "logfile" : "/var/log/barbican/barbican-api.log",
            "processes" : 3,
-           "ssl" : false,
            "threads" : 10
         },
         "db" : {
            "database" : "barbican",
            "password" : "",
            "user" : "barbican"
+        },
+        "ssl": {
+          "certfile": "/etc/barbican/ssl/certs/signing_cert.pem",
+          "keyfile": "/etc/barbican/ssl/private/signing_key.pem",
+          "generate_certs": false,
+          "insecure": false,
+          "cert_required": false,
+          "ca_certs": "/etc/barbican/ssl/certs/ca.pem"
         },
         "debug" : false,
         "enable_keystone_listener" : false,
@@ -32,7 +40,7 @@
     "barbican" : {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "barbican-controller": [ "readying", "ready", "applying" ]
       },

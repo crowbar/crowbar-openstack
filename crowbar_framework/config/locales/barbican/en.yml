@@ -23,6 +23,7 @@ en:
         keystone_instance: 'Keystone'
         api_header: 'API Settings'
         api:
+          protocol: 'Protocol'
           bind_host: 'Address'
           bind_port: 'Port'
           processes: 'Number of processes'
@@ -35,3 +36,11 @@ en:
         enable_keystone_listener: "Enable Barbican's Keystone listener service"
         group: 'Group for Barbican services'
         user: 'User for Barbican services'
+        ssl_header: 'SSL Support'
+        ssl:
+          generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          certfile: 'SSL Certificate File'
+          keyfile: 'SSL (Private) Key File'
+          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          cert_required: 'Require Client Certificate'
+          ca_certs: 'SSL CA Certificates File'
