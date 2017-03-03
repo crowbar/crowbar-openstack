@@ -84,6 +84,29 @@ action :add_tenant do
   end
 end
 
+# :add_domain specific attributes
+# attribute :tenant_name, :kind_of => String
+action :add_domain do
+  http, headers = _build_connection(new_resource)
+
+  # Construct the path
+  path = "/v3/domains"
+  dir = "domains"
+
+  # Lets verify that the domain does not exist yet
+  item_id, error = _find_id(http, headers, new_resource.domain_name, path, dir)
+  if item_id || error
+    raise "Failed to talk to keystone in add_domain" if error
+    Chef::Log.info "Domain '#{new_resource.domain_name}' already exists. Not creating." unless error
+    new_resource.updated_by_last_action(false)
+  else
+    # Domain does not exist yet
+    body = _build_domain_object(new_resource.domain_name)
+    ret = _create_item(http, headers, path, body, new_resource.domain_name)
+    new_resource.updated_by_last_action(ret)
+  end
+end
+
 # :add_user specific attributes
 # attribute :user_name, :kind_of => String
 # attribute :user_password, :kind_of => String
@@ -473,6 +496,18 @@ def _build_tenant_object(tenant_name)
 end
 
 private
+
+def _build_domain_object(domain_name)
+  svc_obj = {}
+  svc_obj.store("name", domain_name)
+  svc_obj.store("enabled", true)
+  ret = {}
+  ret.store("domain", svc_obj)
+  ret
+end
+
+private
+
 def _build_access_object(role_id, role_name)
   svc_obj = Hash.new
   svc_obj.store("name", role_name)

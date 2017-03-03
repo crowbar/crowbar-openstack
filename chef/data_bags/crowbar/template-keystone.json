@@ -115,6 +115,63 @@
         "use_auth_pool": true,
         "auth_pool_size": 100,
         "auth_pool_connection_lifetime": 60
+      },
+      "domain_specific_config": {
+        "ldap_users": {
+          "identity": {
+            "driver": "ldap"
+          },
+          "ldap" : {
+            "url": "ldap://localhost",
+            "user": "dc=Manager,dc=example,dc=com",
+            "password": "",
+            "suffix": "cn=example,cn=com",
+            "page_size": 0,
+            "alias_dereferencing": "default",
+            "query_scope": "one",
+            "user_tree_dn": "",
+            "user_filter": "",
+            "user_objectclass": "inetOrgPerson",
+            "user_id_attribute": "cn",
+            "user_name_attribute": "sn",
+            "user_description_attribute": "description",
+            "user_mail_attribute": "mail",
+            "user_pass_attribute": "userPassword",
+            "user_enabled_attribute": "enabled",
+            "user_enabled_mask": 0,
+            "user_enabled_default": "True",
+            "user_attribute_ignore": "default_project_id",
+            "user_default_project_id_attribute": "",
+            "user_enabled_invert": false,
+            "user_enabled_emulation": false,
+            "user_enabled_emulation_dn": "",
+            "user_enabled_emulation_use_group_config": false,
+            "user_additional_attribute_mapping": "",
+            "group_tree_dn": "",
+            "group_filter": "",
+            "group_objectclass": "groupOfNames",
+            "group_id_attribute": "cn",
+            "group_name_attribute": "ou",
+            "group_member_attribute": "member",
+            "group_members_are_ids": false,
+            "group_desc_attribute": "description",
+            "group_additional_attribute_mapping": "",
+            "group_ad_nesting": false,
+            "tls_cacertfile": "",
+            "tls_cacertdir": "",
+            "use_tls": false,
+            "tls_req_cert": "demand",
+            "use_pool": true,
+            "pool_size": 10,
+            "pool_retry_max": 3,
+            "pool_retry_delay": 0.1,
+            "pool_connection_timeout": -1,
+            "pool_connection_lifetime": 600,
+            "use_auth_pool": true,
+            "auth_pool_size": 100,
+            "auth_pool_connection_lifetime": 60
+          }
+        }
       }
     }
   },
@@ -122,7 +179,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 108,
+      "schema-revision": 109,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },

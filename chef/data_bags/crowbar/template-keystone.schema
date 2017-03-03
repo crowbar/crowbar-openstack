@@ -120,7 +120,67 @@
                       "use_auth_pool": { "type": "bool" },
                       "auth_pool_size": { "type": "int" },
                       "auth_pool_connection_lifetime": { "type": "int" }
-                    }}
+                    }},
+                    "domain_specific_config" : { "type": "map",
+                      "mapping": {
+                        = : {"type": "map", "mapping": {
+                          "identity": { "type": "map", "mapping": {
+                            "driver": { "type": "str" }
+                          }},
+                          "ldap": { "type": "map", "mapping": {
+                            "url": { "type": "str" },
+                            "user": { "type": "str" },
+                            "password": { "type": "str" },
+                            "suffix": { "type": "str" },
+                            "page_size": { "type": "int" },
+                            "alias_dereferencing": { "type": "str" },
+                            "query_scope": { "type": "str" },
+                            "user_tree_dn": { "type": "str" },
+                            "user_filter": { "type": "str" },
+                            "user_objectclass": { "type": "str" },
+                            "user_id_attribute": { "type": "str" },
+                            "user_name_attribute": { "type": "str" },
+                            "user_description_attribute": { "type": "str" },
+                            "user_mail_attribute": { "type": "str" },
+                            "user_pass_attribute": { "type": "str" },
+                            "user_enabled_attribute": { "type": "str" },
+                            "user_enabled_mask": { "type": "int" },
+                            "user_enabled_default": { "type": "str" },
+                            "user_attribute_ignore": { "type": "str" },
+                            "user_default_project_id_attribute": { "type": "str" },
+                            "user_enabled_invert": { "type": "bool" },
+                            "user_enabled_emulation": { "type": "bool" },
+                            "user_enabled_emulation_dn": { "type": "str" },
+                            "user_enabled_emulation_use_group_config": { "type": "bool" },
+                            "user_additional_attribute_mapping": { "type": "str" },
+                            "group_tree_dn": { "type": "str" },
+                            "group_filter": { "type": "str" },
+                            "group_objectclass": { "type": "str" },
+                            "group_id_attribute": { "type": "str" },
+                            "group_name_attribute": { "type": "str" },
+                            "group_member_attribute": { "type": "str" },
+                            "group_members_are_ids": { "type": "bool" },
+                            "group_desc_attribute": { "type": "str" },
+                            "group_attribute_ignore": { "type": "str" },
+                            "group_additional_attribute_mapping": { "type": "str" },
+                            "group_ad_nesting": { "type": "bool" },
+                            "tls_cacertfile": { "type": "str" },
+                            "tls_cacertdir": { "type": "str" },
+                            "use_tls": { "type": "bool" },
+                            "tls_req_cert": { "type": "str" },
+                            "use_pool": { "type": "bool" },
+                            "pool_size": { "type": "int" },
+                            "pool_retry_max": { "type": "int" },
+                            "pool_retry_delay": { "type": "number" },
+                            "pool_connection_timeout": { "type": "int" },
+                            "pool_connection_lifetime": { "type": "int" },
+                            "use_auth_pool": { "type": "bool" },
+                            "auth_pool_size": { "type": "int" },
+                            "auth_pool_connection_lifetime": { "type": "int" }
+                          }}
+                        }}
+                      }
+                    }
               }}
      }},
     "deployment": { "type": "map", "required": true,
