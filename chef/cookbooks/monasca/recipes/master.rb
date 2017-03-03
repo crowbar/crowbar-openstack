@@ -56,9 +56,10 @@ raise "no nodes with monasca-server role found" if monasca_hosts.nil? or monasca
 
 hosts_template =
   if monasca_hosts.length == 1
-     "cmm-hosts-single.erb"
+    "cmm-hosts-single.erb"
   else
     "cmm-hosts-cluster.erb"
+  end
 
 template "/opt/fujitsu/monasca-installer/cmm-hosts" do
   source hosts_template
