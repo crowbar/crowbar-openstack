@@ -118,6 +118,22 @@ end
 
 crowbar_pacemaker_sync_mark "create-magnum_register" if ha_enabled
 
+service "magnum-api" do
+  service_name node[:magnum][:api][:service_name]
+  supports status: true, restart: true, start: true, stop: true
+  action [:disable, :stop]
+  ignore_failure true
+end
+
+magnum_api_primitive_name = "magnum-api"
+
+pacemaker_primitive magnum_api_resource do
+  agent node[:magnum][:ha][:api][:agent]
+  action [:stop, :delete]
+  only_if "crm configure show #{magnum_api_primitive_name}"
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
 node.normal[:apache][:listen_ports_crowbar] ||= {}
 node.normal[:apache][:listen_ports_crowbar][:magnum] = { plain: [bind_port] }
 

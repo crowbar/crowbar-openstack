@@ -42,7 +42,7 @@ crowbar_pacemaker_sync_mark "sync-magnum_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-magnum_ha_resources"
 
-services = ["conductor", "api"]
+services = ["conductor"]
 transaction_objects = []
 
 services.each do |service|
