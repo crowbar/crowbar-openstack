@@ -30,6 +30,7 @@
             "use_migration": { "type": "bool", "required": true },
             "cross_az_attach": { "type": "bool", "required": true },
             "create_default_flavors": { "type": "bool", "required": true },
+            "image_cache_manager_interval": { "type": "int", "required": true },
             "migration": {
               "type": "map",
               "required": true,
