@@ -1326,6 +1326,7 @@ firewall_driver = nova.virt.firewall.NoopFirewallDriver
 # Number of seconds to wait between runs of the image cache manager. Set to -1
 # to disable. Setting this to 0 will run at the default rate. (integer value)
 #image_cache_manager_interval = 2400
+image_cache_manager_interval = -1
 
 # Where cached images are stored under $instances_path. This is NOT the full
 # path - just a folder name. For per-compute-host cached images, set to
