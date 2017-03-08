@@ -23,3 +23,11 @@ default[:nova]["ec2-api"][:group] = "ec2-api"
 default[:nova]["ec2-api"][:ha][:enabled] = false
 
 default[:nova]["ec2-api"][:config_file] = "/etc/ec2api/ec2api.conf.d/100-ec2api.conf"
+
+default[:nova]["ec2-api"][:ssl][:enabled] = false
+default[:nova]["ec2-api"][:ssl][:certfile] = "/etc/ec2api/ssl/certs/signing_cert.pem"
+default[:nova]["ec2-api"][:ssl][:keyfile] = "/etc/ec2api/ssl/private/signing_key.pem"
+default[:nova]["ec2-api"][:ssl][:generate_certs] = false
+default[:nova]["ec2-api"][:ssl][:insecure] = false
+default[:nova]["ec2-api"][:ssl][:cert_required] = false
+default[:nova]["ec2-api"][:ssl][:ca_certs] = "/etc/ec2api/ssl/certs/ca.pem"
