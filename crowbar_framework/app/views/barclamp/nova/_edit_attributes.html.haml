@@ -84,6 +84,26 @@
 
     %fieldset
       %legend
+        = t('.ec2-api_header')
+
+      = boolean_field %w(ec2-api ssl enabled),
+        :collection => :ssl_protocols_for_nova,
+        'data-sslprefix' => 'ec2-api_ssl',
+        'data-sslcert' => '/etc/ec2api/ssl/certs/signing_cert.pem',
+        'data-sslkey' => '/etc/ec2api/ssl/private/signing_key.pem'
+
+      #ec2-api_ssl_container
+        = boolean_field %w(ec2-api ssl generate_certs)
+        = string_field %w(ec2-api ssl certfile)
+        = string_field %w(ec2-api ssl keyfile)
+        = boolean_field %w(ec2-api ssl insecure)
+        = boolean_field %w(ec2-api ssl cert_required),
+          "data-enabler" => "true",
+          "data-enabler-target" => "#ssl_ca_certs"
+        = string_field %w(ssl ca_certs)
+
+    %fieldset
+      %legend
         = t(".vnc_header")
 
       = string_field :vnc_keymap

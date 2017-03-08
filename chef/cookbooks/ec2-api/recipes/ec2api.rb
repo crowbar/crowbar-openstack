@@ -181,6 +181,19 @@ end
 
 crowbar_pacemaker_sync_mark "create-ec2_api_register"
 
+# ec2-api ssl
+if node[:nova]["ec2-api"][:ssl][:enabled]
+  ssl_setup "setting up ssl for ec2-api" do
+    generate_certs node[:nova]["ec2-api"][:ssl][:generate_certs]
+    certfile node[:nova]["ec2-api"][:ssl][:certfile]
+    keyfile node[:nova]["ec2-api"][:ssl][:keyfile]
+    group node[:nova]["ec2-api"][:group]
+    fqdn node[:fqdn]
+    cert_required node[:nova]["ec2-api"][:ssl][:cert_required]
+    ca_certs node[:nova]["ec2-api"][:ssl][:ca_cert]
+  end
+end
+
 template node[:nova]["ec2-api"][:config_file] do
   source "ec2api.conf.erb"
   owner "root"
