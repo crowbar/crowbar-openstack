@@ -16,11 +16,11 @@
               "required": true,
               "type": "map",
               "mapping": {
+                  "protocol": { "required": true, "type": "str" },
                   "bind_host": { "required": true, "type": "str" },
                   "bind_port": { "required": true, "type": "int" },
                   "logfile": { "required": true, "type": "str" },
                   "processes": { "required": true, "type": "int" },
-                  "ssl": { "required": true, "type": "bool" },
                   "threads": { "required": true, "type": "int" }
                 }
               },
@@ -31,6 +31,16 @@
                   "database": { "required": true, "type": "str" },
                   "password": { "required": true, "type": "str" },
                   "user": { "required": true, "type": "str" }
+              }
+            },
+            "ssl": {
+              "type": "map", "required": true, "mapping": {
+                "certfile": { "type" : "str", "required" : true },
+                "keyfile": { "type" : "str", "required" : true },
+                "generate_certs": { "type" : "bool", "required" : true },
+                "insecure": { "type" : "bool", "required" : true },
+                "cert_required": { "type" : "bool", "required" : true },
+                "ca_certs": { "type" : "str", "required" : true }
               }
             },
             "debug": { "type": "bool" },
