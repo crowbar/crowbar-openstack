@@ -82,7 +82,8 @@
                 "user": { "type": "str", "required": true },
                 "password": { "type": "str", "required": true },
                 "datastores": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
-                "store_image_dir": { "type": "str", "required": true }
+                "store_image_dir": { "type": "str", "required": true },
+                "insecure": { "type" : "bool", "required" : true }
               }
             },
             "crossdomain": {
