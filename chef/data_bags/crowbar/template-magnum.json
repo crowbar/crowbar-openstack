@@ -15,6 +15,7 @@
       "service_user": "magnum",
       "service_password": "",
       "trustee": {
+          "cluster_user_trust": false,
           "domain_name": "magnum",
           "domain_admin_name": "magnum_domain_admin",
           "domain_admin_password": ""
@@ -38,7 +39,7 @@
     "magnum": {
       "crowbar-revision": 1,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "magnum-server": [ "readying", "ready", "applying" ]
       },

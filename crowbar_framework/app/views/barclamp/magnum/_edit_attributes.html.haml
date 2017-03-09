@@ -11,6 +11,7 @@
     %fieldset
       %legend
         = t('.trustee_header')
+      = boolean_field %w(trustee cluster_user_trust)
       = string_field %w(trustee domain_name)
     %fieldset
       %legend

@@ -25,6 +25,7 @@
             "service_password": { "type": "str", "required": true },
             "trustee": {
               "type": "map", "required": true, "mapping": {
+                "cluster_user_trust": { "type" : "bool", "required" : true },
                 "domain_name": { "type" : "str", "required" : true },
                 "domain_admin_name": { "type": "str", "required": true },
                 "domain_admin_password": { "type": "str", "required": true }
