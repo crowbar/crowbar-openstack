@@ -345,7 +345,7 @@ api_workers = 0
 # Number of separate RPC worker processes to spawn. If not specified or < 1,
 # a single RPC worker process is spawned by the parent process.
 # rpc_workers = 1
-rpc_workers = 0
+rpc_workers = <%= @rpc_workers %>
 
 # Timeout for client connections socket operations. If an
 # incoming connection is idle for this number of seconds it

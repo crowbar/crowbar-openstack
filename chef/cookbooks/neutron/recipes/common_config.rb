@@ -171,7 +171,8 @@ template "/etc/neutron/neutron.conf" do
       network_nodes_count: network_nodes_count,
       dns_domain: neutron[:neutron][:dhcp_domain],
       infoblox: infoblox_settings,
-      ipam_driver: ipam_driver
+      ipam_driver: ipam_driver,
+      rpc_workers: neutron[:neutron][:rpc_workers]
     }.merge(nova_notify))
 end
 
