@@ -17,7 +17,8 @@
 # limitations under the License.
 #
 
-actions :add_service, :add_endpoint_template, :add_tenant, :add_user, :add_role, :add_access, :add_ec2, :wakeup
+actions :add_service, :add_endpoint_template, :add_tenant, :add_domain, :add_user, :add_role,
+        :add_access, :add_ec2, :wakeup
 
 attribute :protocol, kind_of: String
 attribute :insecure, kind_of: [TrueClass, FalseClass], default: false
@@ -44,6 +45,9 @@ attribute :endpoint_enabled, default: true
 
 # :add_tenant specific attributes
 attribute :tenant_name, kind_of: String
+
+# :add_domain specific attributes
+attribute :domain_name, kind_of: String
 
 # :add_user specific attributes
 attribute :user_name, kind_of: String

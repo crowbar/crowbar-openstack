@@ -267,6 +267,25 @@ directory node[:keystone][:domain_config_dir] do
   only_if { node[:keystone][:domain_specific_drivers] }
 end
 
+if node[:keystone][:domain_specific_drivers]
+  node[:keystone][:domain_specific_config].keys.each do |domain|
+    template "#{node[:keystone][:domain_config_dir]}/keystone.#{domain}.conf" do
+      source "keystone.domain.conf.erb"
+      owner "root"
+      group node[:keystone][:group]
+      mode 0o0640
+      variables(
+        domain: domain
+      )
+      if node[:keystone][:frontend] == "apache"
+        notifies :restart, resources(service: "apache2"), :immediately
+      elsif node[:keystone][:frontend] == "uwsgi"
+        notifies :restart, resources(service: "keystone-uwsgi"), :immediately
+      end
+    end
+  end
+end
+
 crowbar_pacemaker_sync_mark "wait-keystone_db_sync"
 
 execute "keystone-manage db_sync" do
@@ -530,6 +549,20 @@ end
     auth register_auth_hash
     tenant_name tenant
     action :add_tenant
+  end
+end
+
+if node[:keystone][:domain_specific_drivers]
+  node[:keystone][:domain_specific_config].keys.each do |domain|
+    keystone_register "add default #{domain} domain" do
+      protocol node[:keystone][:api][:protocol]
+      insecure keystone_insecure
+      host my_admin_host
+      port node[:keystone][:api][:admin_port]
+      auth register_auth_hash
+      domain_name domain
+      action :add_domain
+    end
   end
 end
 
