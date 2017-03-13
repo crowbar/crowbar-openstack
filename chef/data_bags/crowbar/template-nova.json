@@ -20,6 +20,7 @@
       "setup_shared_instance_storage": false,
       "use_shared_instance_storage": false,
       "use_migration": false,
+      "image_cache_manager_interval": -1,
       "migration": {
         "network": "admin"
       },
@@ -100,7 +101,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 47,
+      "schema-revision": 48,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-docker": [ "readying", "ready", "applying" ],
