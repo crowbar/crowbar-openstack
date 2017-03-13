@@ -131,7 +131,7 @@ class CrowbarOpenStackHelper
           vhost: rabbit[:rabbitmq][:vhost],
           url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
             "#{rabbit[:rabbitmq][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{rabbit[:rabbitmq][:port]}/" \
+            "#{rabbit[:rabbitmq][:address]}:#{rabbit[:rabbitmq][:port]}" \
             "#{rabbit[:rabbitmq][:vhost]}"
         }
 

@@ -16,7 +16,7 @@
             "port": { "type": "int", "required": true },
             "password": { "type": "str", "required": true },
             "user": { "type": "str", "required": true },
-            "vhost": { "type": "str", "required": true },
+            "vhost": { "type": "str", "required": true, "pattern": "/^\//" },
             "ha" : {
               "type": "map",
               "required": true,
