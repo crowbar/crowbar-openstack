@@ -307,3 +307,6 @@ lock_path = /var/run/cinder
 ca_file = <%= node[:cinder][:ssl][:ca_certs] if node[:cinder][:api][:protocol] == 'https' && node[:cinder][:ssl][:cert_required] %>
 cert_file = <%= node[:cinder][:ssl][:certfile] if node[:cinder][:api][:protocol] == 'https' %>
 key_file = <%= node[:cinder][:ssl][:keyfile] if node[:cinder][:api][:protocol] == 'https' %>
+
+[volumes]
+backups_enabled = false
