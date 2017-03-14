@@ -127,7 +127,7 @@ end
 
 magnum_api_primitive_name = "magnum-api"
 
-pacemaker_primitive magnum_api_resource do
+pacemaker_primitive magnum_api_primitive_name do
   agent node[:magnum][:ha][:api][:agent]
   action [:stop, :delete]
   only_if "crm configure show #{magnum_api_primitive_name}"
