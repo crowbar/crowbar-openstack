@@ -28,6 +28,11 @@ s3_use_ssl = true
 connection = <%= @database_connection %>
 [oslo_concurrency]
 lock_path = /var/run/ec2-api
+[oslo_messaging_rabbit]
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
 [keystone_authtoken]
 auth_type = password
 auth_uri = <%= @keystone_settings['public_auth_url'] %>

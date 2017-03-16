@@ -101,6 +101,10 @@ rabbit_host = <%= @rabbit_settings[:address] %>
 rabbit_userid = <%= @rabbit_settings[:user] %>
 rabbit_password = <%= @rabbit_settings[:password] %>
 rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
 
 [oslo_policy]
 policy_file = <%= node[:keystone][:policy_file] %>

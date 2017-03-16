@@ -374,11 +374,7 @@ template "/etc/heat/heat.conf.d/100-heat.conf" do
   variables(
     debug: node[:heat][:debug],
     verbose: node[:heat][:verbose],
-    transport_url: "rabbit://#{rabbit_settings[:user]}:"\
-                            "#{rabbit_settings[:password]}@"\
-                            "#{rabbit_settings[:address]}:"\
-                            "#{rabbit_settings[:port]}/"\
-                            "#{rabbit_settings[:vhost]}",
+    rabbit_settings: rabbit_settings,
     keystone_settings: keystone_settings,
     database_connection: db_connection,
     bind_host: bind_host,

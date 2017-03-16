@@ -84,6 +84,12 @@ lock_path = /var/run/glance
 [oslo_messaging_notifications]
 driver = messaging
 
+[oslo_messaging_rabbit]
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+
 [paste_deploy]
 <% if node[:glance][:enable_caching] and node[:glance][:use_cachemanagement] -%>
 flavor = keystone+cachemanagement

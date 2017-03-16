@@ -4,9 +4,24 @@
    {tcp_listeners, [
                     <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{node[:rabbitmq][:port]}}" }.join(", ") %>
                    ]},
+<% if node[:rabbitmq][:ssl][:enabled] -%>
+   {ssl_listeners, [
+                    <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{node[:rabbitmq][:ssl][:port]}}" }.join(", ") %>
+                   ]},
+   {ssl_options, [
+   <% if node[:rabbitmq][:ssl][:cert_required] -%>
+                 {cacertfile, "<%= node[:rabbitmq][:ssl][:ca_certs] %>"},
+                 {verify, verify_peer},
+                 {fail_if_no_peer_cert, true},
+   <% else -%>
+                 {verify, verify_none},
+                 {fail_if_no_peer_cert, false},
+   <% end -%>
+                 {certfile, "<%= node[:rabbitmq][:ssl][:certfile] %>"},
+                 {keyfile, "<%= node[:rabbitmq][:ssl][:keyfile] %>"}]},
+<% end -%>
    {disk_free_limit, 50000000}
-  ]
- },
+ ]},
  {rabbitmq_management,
   [
    {listener, [{ip, "<%= node[:rabbitmq][:management_address] %>"}, {port, <%= node[:rabbitmq][:management_port] %>}]}

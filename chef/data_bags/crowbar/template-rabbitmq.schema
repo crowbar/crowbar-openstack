@@ -17,6 +17,19 @@
             "password": { "type": "str", "required": true },
             "user": { "type": "str", "required": true },
             "vhost": { "type": "str", "required": true },
+            "ssl": {
+              "type": "map", "required": true, "mapping": {
+                "enabled": { "type": "bool", "required": true },
+                "port": { "type" : "int", "required" : true },
+                "certfile": { "type" : "str", "required" : true },
+                "keyfile": { "type" : "str", "required" : true },
+                "insecure": { "type": "bool", "required": true },
+                "generate_certs": { "type" : "bool", "required" : true },
+                "cert_required": { "type" : "bool", "required" : true },
+                "ca_certs": { "type" : "str", "required" : true },
+                "client_ca_certs": { "type" : "str", "required" : true }
+              }
+            },
             "ha" : {
               "type": "map",
               "required": true,

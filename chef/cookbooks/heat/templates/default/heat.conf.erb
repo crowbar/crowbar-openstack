@@ -18,7 +18,7 @@ debug = <%= node[:heat][:debug] ? 'true' : 'false' %>
 verbose = <%= node[:heat][:verbose] ? 'true' : 'false' %>
 log_dir = /var/log/heat
 use_stderr = false
-transport_url = <%= @transport_url %>
+transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = heat
 
 [clients]
@@ -168,3 +168,9 @@ auth_url = <%= @keystone_settings['internal_auth_url'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
 username = <%= @keystone_settings['service_user'] %>
 password = <%= @keystone_settings['service_password'] %>
+
+[oslo_messaging_rabbit]
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>

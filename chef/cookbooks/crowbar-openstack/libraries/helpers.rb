@@ -123,15 +123,28 @@ class CrowbarOpenStackHelper
       if rabbit.nil?
         Chef::Log.warn("No RabbitMQ server found!")
       else
+        if rabbit[:rabbitmq][:ssl][:enabled]
+          port = rabbit[:rabbitmq][:ssl][:port]
+          use_ssl = true
+        else
+          port = rabbit[:rabbitmq][:port]
+          use_ssl = false
+        end
+        client_ca_certs = if rabbit[:rabbitmq][:ssl][:enabled] && \
+            !rabbit[:rabbitmq][:ssl][:insecure]
+          rabbit[:rabbitmq][:ssl][:client_ca_certs]
+        end
         @rabbitmq_settings[instance] = {
           address: rabbit[:rabbitmq][:address],
-          port: rabbit[:rabbitmq][:port],
+          port: port,
           user: rabbit[:rabbitmq][:user],
           password: rabbit[:rabbitmq][:password],
           vhost: rabbit[:rabbitmq][:vhost],
+          use_ssl: use_ssl,
+          client_ca_certs: client_ca_certs,
           url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
             "#{rabbit[:rabbitmq][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{rabbit[:rabbitmq][:port]}/" \
+            "#{rabbit[:rabbitmq][:address]}:#{port}/" \
             "#{rabbit[:rabbitmq][:vhost]}"
         }
 

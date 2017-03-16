@@ -303,6 +303,12 @@ lock_path = /var/run/openstack
 lock_path = /var/run/cinder
 <% end -%>
 
+[oslo_messaging_rabbit]
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+
 [ssl]
 ca_file = <%= node[:cinder][:ssl][:ca_certs] if node[:cinder][:api][:protocol] == 'https' && node[:cinder][:ssl][:cert_required] %>
 cert_file = <%= node[:cinder][:ssl][:certfile] if node[:cinder][:api][:protocol] == 'https' %>

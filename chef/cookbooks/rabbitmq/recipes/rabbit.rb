@@ -34,6 +34,18 @@ end
 
 include_recipe "rabbitmq::default"
 
+if node[:rabbitmq][:ssl][:enabled]
+  ssl_setup "setting up ssl for rabbitmq" do
+    generate_certs node[:rabbitmq][:ssl][:generate_certs]
+    certfile node[:rabbitmq][:ssl][:certfile]
+    keyfile node[:rabbitmq][:ssl][:keyfile]
+    group "rabbitmq"
+    fqdn node[:fqdn]
+    cert_required node[:rabbitmq][:ssl][:cert_required]
+    ca_certs node[:rabbitmq][:ssl][:ca_certs]
+  end
+end
+
 if ha_enabled
   log "HA support for rabbitmq is enabled"
   include_recipe "rabbitmq::ha"
