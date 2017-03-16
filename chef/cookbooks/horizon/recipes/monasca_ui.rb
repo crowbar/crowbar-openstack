@@ -33,7 +33,7 @@ package "grafana-apache" do
   notifies :reload, resources(service: "apache2")
 end
 
-file "/etc/apache2/vhost.d/grafana.conf" do
+file "/etc/apache2/vhosts.d/grafana.conf" do
   action :delete
   notifies :reload, resources(service: "apache2")
 end

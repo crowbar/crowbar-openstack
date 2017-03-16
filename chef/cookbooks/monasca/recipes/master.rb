@@ -14,54 +14,28 @@
 # limitation.
 
 package "ansible"
+package "monasca-installer"
 
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
-directory "/opt/fujitsu" do
-  owner "root"
-  group "root"
-  mode "0755"
-end
-
-# TODO: use package "monasca-installer"
-remote_file "/opt/fujitsu/cmm-suse.tgz" do
-  source node[:monasca][:master][:cmm_tarball_url]
+cookbook_file "/etc/ansible/ansible.cfg" do
+  source "ansible.cfg"
   owner "root"
   group "root"
   mode "0644"
-  action :create_if_missing
 end
 
-execute "extract cmm tarball" do
-  command "tar xf cmm-suse.tgz"
-  cwd "/opt/fujitsu/"
-  not_if { Dir.exist?("/opt/fujitsu/monasca-installer") }
-  notifies :run, "execute[run ansible]", :delayed
-end
-
-template "/opt/fujitsu/monasca-installer/credentials.yml" do
-  source "credentials.yml.erb"
-  owner "root"
-  group "root"
-  mode "0600"
-  variables(
-    keystone_settings: keystone_settings
-  )
-  notifies :run, "execute[run ansible]", :delayed
-end
-
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 monasca_hosts = MonascaHelper.monasca_hosts(search(:node, "roles:monasca-server"))
 
-raise "no nodes with monasca-server role found" if monasca_hosts.nil? or monasca_hosts.empty?
+raise "no nodes with monasca-server role found" if monasca_hosts.nil? || monasca_hosts.empty?
 
 hosts_template =
   if monasca_hosts.length == 1
-    "cmm-hosts-single.erb"
+    "monasca-hosts-single.erb"
   else
-    "cmm-hosts-cluster.erb"
+    "monasca-hosts-cluster.erb"
   end
 
-template "/opt/fujitsu/monasca-installer/cmm-hosts" do
+template "/opt/monasca-installer/monasca-hosts" do
   source hosts_template
   owner "root"
   group "root"
@@ -76,7 +50,7 @@ template "/opt/fujitsu/monasca-installer/cmm-hosts" do
   notifies :run, "execute[run ansible]", :delayed
 end
 
-template "/opt/fujitsu/monasca-installer/group_vars/all_group" do
+template "/opt/monasca-installer/group_vars/all_group" do
   source "all_group.erb"
   owner "root"
   group "root"
@@ -90,7 +64,7 @@ end
 # This file is used to mark that ansible installer run successfully.
 # Without this, it could happen that the installer was not re-tried
 # after a failed run.
-file "/opt/fujitsu/monasca-installer/.installed" do
+file "/opt/monasca-installer/.installed" do
   content "cmm installed"
   owner "root"
   group "root"
@@ -99,10 +73,48 @@ file "/opt/fujitsu/monasca-installer/.installed" do
   action :create_if_missing
 end
 
+monasca_node = search(:node, "roles:monasca-server")[0]
+cmm_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_node)
+pub_net_ip = CrowbarHelper.get_host_for_public_url(monasca_node, false, false)
+
+ansible_vars = {
+  influxdb_mon_api_password: node[:monasca][:master][:influxdb_mon_api_password],
+  influxdb_mon_persister_password: node[:monasca][:master][:influxdb_mon_persister_password],
+  database_notification_password: node[:monasca][:master][:database_notification_password],
+  database_monapi_password: node[:monasca][:master][:database_monapi_password],
+  database_thresh_password: node[:monasca][:master][:database_thresh_password],
+  database_logapi_password: node[:monasca][:master][:database_logapi_password],
+  keystone_cmm_operator_user_password:
+    node[:monasca][:master][:keystone_cmm_operator_user_password],
+  keystone_cmm_agent_password: node[:monasca][:master][:keystone_cmm_agent_password],
+  keystone_admin_agent_password: node[:monasca][:master][:keystone_admin_agent_password],
+  keystone_admin_password: keystone_settings["admin_password"],
+  database_grafana_password: node[:monasca][:master][:database_grafana_password],
+
+  memcached_listen_ip: cmm_net_ip,
+  kafka_host: cmm_net_ip,
+  kibana_host: pub_net_ip,
+  log_api_bind_host: pub_net_ip,
+  influxdb_bind_address: cmm_net_ip,
+  monasca_api_bind_host: pub_net_ip,
+  elasticsearch_host: cmm_net_ip,
+  nimbus_host: cmm_net_ip,
+  zookeeper_hosts: cmm_net_ip,
+  kafka_hosts: "#{cmm_net_ip}:9092",
+  mariadb_bind_address: cmm_net_ip,
+  database_host: cmm_net_ip,
+  monasca_api_url: "http://#{pub_net_ip}:8070/v2.0",
+  monasca_log_api_url: "http://#{pub_net_ip}:5607/v2.0",
+  memcached_nodes: "#{cmm_net_ip}:11211",
+  influxdb_url: "http://#{cmm_net_ip}:8086",
+  elasticsearch_nodes: "[#{cmm_net_ip}]",
+  elasticsearch_hosts: cmm_net_ip
+}.to_json
+
 execute "run ansible" do
-  command "rm -f /opt/fujitsu/monasca-installer/.installed"\
-          "&& ansible-playbook -i cmm-hosts monasca.yml"\
-          "&& touch /opt/fujitsu/monasca-installer/.installed"
-  cwd "/opt/fujitsu/monasca-installer"
+  command "rm -f /opt/monasca-installer/.installed"\
+          "&& ansible-playbook -i monasca-hosts -e '#{ansible_vars}' monasca.yml"\
+          "&& touch /opt/monasca-installer/.installed"
+  cwd "/opt/monasca-installer"
   action :nothing
 end

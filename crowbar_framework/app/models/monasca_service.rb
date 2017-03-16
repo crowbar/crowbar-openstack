@@ -31,7 +31,7 @@ class MonascaService < PacemakerServiceObject
       {
         "monasca-metric-agent" => {
           "unique" => false,
-          "admin" => true,
+          "admin" => false,
           "count" => -1,
           "exclude_platform" => {
             "suse" => "< 12.2",
@@ -40,7 +40,7 @@ class MonascaService < PacemakerServiceObject
         },
         "monasca-log-agent" => {
           "unique" => false,
-          "admin" => true,
+          "admin" => false,
           "count" => -1,
           "exclude_platform" => {
             "suse" => "< 12.2",
@@ -49,8 +49,11 @@ class MonascaService < PacemakerServiceObject
         },
         "monasca-server" => {
           "unique" => false,
-          "count" => -1,
-          "cluster" => true,
+          # TODO: change for cluster
+          # "count" => -1,
+          # "cluster" => true,
+          "count" => 1,
+          "cluster" => false,
           "admin" => false,
           "exclude_platform" => {
             "suse" => "< 12.2",
@@ -63,7 +66,7 @@ class MonascaService < PacemakerServiceObject
           "cluster" => false,
           "admin" => true,
           "exclude_platform" => {
-            "suse" => "< 12.1",
+            "suse" => "< 12.2",
             "windows" => "/.*/"
           }
         }
@@ -134,11 +137,13 @@ class MonascaService < PacemakerServiceObject
 
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "monasca-master"
-    nodes = proposal["deployment"][@bc_name]["elements"]
-    if !nodes.key?("monasca-server") ||
-        (nodes["monasca-server"].length != 1 && nodes["monasca-server"].length != 3)
-      validation_error("Need either one or three monasca-server node(s).")
-    end
+    validate_one_for_role proposal, "monasca-server"
+    # TODO: uncomment for cluster support
+    # nodes = proposal["deployment"][@bc_name]["elements"]
+    # if !nodes.key?("monasca-server") ||
+    #     (nodes["monasca-server"].length != 1 && nodes["monasca-server"].length != 3)
+    #   validation_error("Need either one or three monasca-server node(s).")
+    # end
     super
   end
 

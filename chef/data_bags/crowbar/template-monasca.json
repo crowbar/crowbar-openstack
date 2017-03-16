@@ -46,7 +46,6 @@
         "threads" : 10
       },
       "master" : {
-        "cmm_tarball_url": "http://127.0.0.1/cmm/cmm-suse.tgz",
         "influxdb_mon_api_password" : "",
         "influxdb_mon_persister_password" : "",
         "database_notification_password" : "",

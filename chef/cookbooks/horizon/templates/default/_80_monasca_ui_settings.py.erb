@@ -60,7 +60,8 @@ DASHBOARDS = getattr(settings, 'GRAFANA_LINKS', GRAFANA_LINKS)
 #]
 
 ENABLE_KIBANA_BUTTON = getattr(settings, 'ENABLE_KIBANA_BUTTON', <%= @kibana_enabled ? "True" : "False" %>)
-KIBANA_HOST = getattr(settings, 'KIBANA_HOST', '<%= @kibana_host %>')
+# TODO: this needs to be fixed for clustered deployment
+KIBANA_HOST = getattr(settings, 'KIBANA_HOST', 'http://<%= @kibana_host %>:5601/')
 
 OPENSTACK_SSL_NO_VERIFY = getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', False)
 OPENSTACK_SSL_CACERT = getattr(settings, 'OPENSTACK_SSL_CACERT', None)

@@ -53,12 +53,6 @@ monasca-persister-node           ansible_ssh_host=<%= @monasca_host %> ansible_s
 # Monasca-log-metric node
 monasca-log-metrics-node          ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
-# Monasca Agent Hosts
-cmm-monasca-agent                ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
-
-# Monasca Log Agent Hosts
-cmm-monasca-log-agent            ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
-
 # Storm Nimbus node
 storm-nimbus-node                ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
@@ -76,19 +70,6 @@ elasticsearch-curator-node       ansible_ssh_host=<%= @monasca_host %> ansible_s
 
 # InfluxDB node
 influxdb-node                    ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
-
-################################################################################
-# Agent and Log-Agent group definition:
-# To install additional agents (metrics and logs) add nodes to
-# monasca_agent_group or monasca_log_agent_group. Run ansible-playbook
-# monasca-agent.yml or ansible-playbook monasca-log-agent.yml to install agents.
-################################################################################
-
-[monasca_agent_group]
-cmm-monasca-agent
-
-[monasca_log_agent_group]
-cmm-monasca-log-agent
 
 ################################################################################
 # Other group definition
@@ -165,7 +146,6 @@ influxdb-node
 [elkstack_group:children]
 elasticsearch_group
 kibana_group
-monasca_log_agent_group
 monasca_log_persister_group
 monasca_log_transformer_group
 monasca_log_metrics_group
@@ -179,7 +159,6 @@ storm_supervisor_group
 offline_group
 openstack_group
 monasca_group
-monasca_agent_group
 
 [monasca_group:children]
 elkstack_group
