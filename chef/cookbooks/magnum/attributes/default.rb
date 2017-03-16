@@ -18,6 +18,8 @@ default[:magnum][:debug] = false
 override[:magnum][:user] = "magnum"
 override[:magnum][:group] = "magnum"
 
+default[:magnum][:api][:service_name] = "openstack-magnum-api"
+
 default[:magnum][:max_header_line] = 16_384
 default[:magnum][:config_file] = "/etc/magnum/magnum.conf.d/100-magnum.conf"
 
