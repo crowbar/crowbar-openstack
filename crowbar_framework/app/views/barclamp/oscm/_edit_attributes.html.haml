@@ -1,0 +1,71 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header show_raw_deployment?, true
+  
+  .panel-body  
+
+    %fieldset
+      %legend
+        = t(".mail_settings")
+        
+      = string_field %w(mail host)
+      = string_field %w(mail port)
+      = string_fiels %w(mail from)
+     
+      = boolean_field %w(mail auth),
+        "data-showit" => "true",
+        "data-showit-target" => #mail_container,
+        "data-showit-direct" => "true"
+
+      #mail_container
+      = string_field %w(mail user)
+      = password_field %w(mail password)
+
+    %fieldset
+      %legend
+        = t(".docker_settings")
+
+      = boolean_field %w(docker use_registry),
+        "data-showit" => "true",
+        "data-showit-target" => #docker_container,
+        "data-showit-direct" => "true"
+
+      #docker_container
+      = string_field %w(docker host)
+      = string_field %w(docker port)
+
+    %fieldset
+      %legend
+        = t(".proxy_settings")
+
+      = boolean_field %w(proxy use_proxy),
+        "data-showit" => "true",
+        "data-showit-target" => #proxy_container,
+        "data-showit-direct" => "true"
+
+      #proxy_container
+      = string_field %w(proxy http_host)
+      = string_field %w(proxy http_port)
+      = string_field %w(proxy https_host)
+      = string_field %w(proxy https_port)
+
+    %fieldset
+      %legend
+        = t(".ssl_header")
+
+      = select_field %w(api protocol),
+        :collection => :api_protocols_for_oscm,
+        "data-sslprefix" => "ssl",
+        "data-sslcert" => "/etc/oscm/ssl/certs/signing_cert.pem",
+        "data-sslkey" => "/etc/oscm/ssl/private/signing_key.pem"
+
+      #ssl_container
+        = boolean_field %w(ssl generate_certs)
+        = string_field %w(ssl certfile)
+        = string_field %w(ssl keyfile)
+        = boolean_field %w(ssl insecure)
+        = string_field %w(ssl ca_certs)
+
+      
+      
+    

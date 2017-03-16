@@ -1,0 +1,56 @@
+#
+# Copyright 2017, SUSE LINUX GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+en:
+  barclamp:
+    oscm:
+      edit_attributes:
+        heat_instance: 'Heat'
+        
+        mail_settings: 'Mail Settings'
+        mail:
+          auth: 'Authentication Required'
+          host: 'Mail Host'
+          port: 'SMTP Port'
+          user: 'User'
+          password: 'Password'
+          from: 'Oscm Email Address'
+
+        docker_settings: 'Docker Registry'
+        docker:
+          use_registry: 'Install from Local Registry'
+          host: 'Registry Host' 
+          port: 'Registry Port' 
+           
+        proxy_settings: 'Proxy Settings'
+        proxy:
+          use_proxy: "Use Proxy"
+          http_host: "HTTP Host" 
+          http_port: "HTTP Port" 
+          https_host: "HTTPS Host" 
+          https_port: "HTTPS Port" 
+           
+        ssl_header: 'SSL Support'
+        ssl:
+          generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          certfile: 'SSL Certificate File'
+          keyfile: 'SSL (Private) Key File'
+          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          ca_certs: 'SSL CA Certificates File'
+          
+        
+        
+        

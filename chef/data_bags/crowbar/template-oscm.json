@@ -1,0 +1,64 @@
+{
+  "id": "template-oscm",
+  "description": "OSCM",
+  "attributes": {
+    "oscm" : {
+      "timeout": 300,
+      "debug" : false,
+      "heat_template" : {
+        "image" : "sles12-docker",
+        "flavor" : "oscm.small",
+        "keypair": "oscm",
+        "user": "oscm",
+        "project":"oscm"
+      },
+      "mail": {
+        "auth": "true",
+        "host": "",
+        "port": 25,
+        "user": "",
+        "password": "",
+        "from": ""
+      },
+      "docker": {
+        "host": "",
+        "port": 0
+      },
+      "proxy": {
+        "http_host": "",
+        "http_port": 0,
+        "https_host": "",
+        "https_port": 0
+      },
+      "ssl": {
+        "certfile": "/etc/oscm/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/oscm/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
+        "ca_certs": "/etc/oscm/ssl/certs/ca.pem"
+      }
+    }
+  },
+  "deployment": {
+    "oscm" : {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 100,
+      "element_states": {
+        "oscm-server": [ "readying", "ready", "applying" ]
+      },
+      "element_order": [
+        [ "oscm-server" ]
+      ],
+      "elements": {},
+      "element_run_list_order": {
+        "oscm-server": 110
+      },      
+      "config": {
+        "mode": "full",
+        "transitions": false,
+        "transition_list": []
+      }
+    }
+  }
+}
