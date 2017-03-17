@@ -24,6 +24,9 @@ en:
         database_instance: 'Database'
         keystone_instance: 'Keystone'
         rabbitmq_instance: 'RabbitMQ'
+        api_header: 'API Settings'
+        api:
+          protocol: 'Protocol'
         cpu_interval: 'Interval used for CPU meter updates (in seconds)'
         disk_interval: 'Interval used for disk meter updates (in seconds)'
         network_interval: 'Interval used for network meter updates (in seconds)'
@@ -36,6 +39,14 @@ en:
           metering_time_to_live_hint: '-1 means that samples are kept in the database forever'
           event_time_to_live: 'How long are event samples kept in the database (in days)'
           event_time_to_live_hint: '-1 means that samples are kept in the database forever'
+        ssl_header: 'SSL Support'
+        ssl:
+          generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          certfile: 'SSL Certificate File'
+          keyfile: 'SSL (Private) Key File'
+          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          cert_required: 'Require Client Certificate'
+          ca_certs: 'SSL CA Certificates File'
       validation:
         hyper_v_support: 'Hyper-V support is not available.'
         swift_proxy: 'Nodes with the ceilometer-swift-proxy-middleware role must also have the swift-proxy role.'
