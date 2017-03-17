@@ -27,6 +27,18 @@ if node[:horizon][:apache][:ssl]
   include_recipe "apache2::mod_ssl"
 end
 
+# Fake service to take control of the WSGI process from apache that
+# runs Horizon.  We replace the `reload` action, sending manually the
+# signal SIGUSR1 to all the process that are part of `wsgi:horizon`
+service "horizon" do
+  service_name "apache2"
+  if node[:platform_family] == "suse"
+    reload_command "pkill --signal SIGUSR1 -f '(wsgi:horizon)' && sleep 1"
+  end
+  supports reload: true, restart: true, status: true
+  ignore_failure true
+end
+
 case node[:platform_family]
 when "debian"
   # Explicitly added client dependencies for now.
@@ -54,7 +66,7 @@ else
   unless node[:horizon][:site_theme].empty?
     package "openstack-dashboard-theme-#{node[:horizon][:site_theme]}" do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
     end
   end
 end
@@ -73,7 +85,7 @@ unless neutron_lbaas_ui_pkgname.nil?
   unless neutron_servers.empty?
     package neutron_lbaas_ui_pkgname do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
     end
   end
 end
@@ -92,7 +104,7 @@ unless manila_ui_pkgname.nil?
   unless manila_servers.empty?
     package manila_ui_pkgname do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
     end
   end
 end
@@ -111,7 +123,7 @@ unless magnum_ui_pkgname.nil?
   unless magnum_servers.empty?
     package magnum_ui_pkgname do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
     end
   end
 end
@@ -130,7 +142,7 @@ unless trove_ui_pkgname.nil?
   unless trove_servers.empty?
     package trove_ui_pkgname do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
     end
   end
 end
@@ -149,7 +161,7 @@ unless sahara_ui_pkgname.nil?
   unless sahara_servers.empty?
     package sahara_ui_pkgname do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
     end
   end
 end
