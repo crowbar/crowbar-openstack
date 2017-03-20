@@ -14,4 +14,5 @@
 # limitations under the License.
 #
 
+require "openstack/data_bag_config"
 require "openstack/ha"
