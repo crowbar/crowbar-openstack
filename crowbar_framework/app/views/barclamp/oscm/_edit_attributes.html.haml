@@ -1,17 +1,16 @@
 = attributes_for @proposal do
   .panel-sub
     = header show_raw_deployment?, true
-  
-  .panel-body  
 
+  .panel-body
     %fieldset
       %legend
         = t(".mail_settings")
-        
+
       = string_field %w(mail host)
       = string_field %w(mail port)
       = string_field %w(mail from)
-     
+
       = boolean_field %w(mail auth),
         "data-showit" => "true",
         "data-showit-target" => "#mail_container",
@@ -65,7 +64,4 @@
         = string_field %w(ssl keyfile)
         = boolean_field %w(ssl insecure)
         = string_field %w(ssl ca_certs)
-
-      
-      
     
