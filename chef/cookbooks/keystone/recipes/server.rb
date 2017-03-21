@@ -413,7 +413,7 @@ end
 if node[:keystone][:signing][:token_format] == "fernet"
   # To be sure that rsync package is installed
   package "rsync"
-
+  crowbar_pacemaker_sync_mark "sync-keystone_install_rsync"
   rsync_command = ""
   if ha_enabled
     cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
