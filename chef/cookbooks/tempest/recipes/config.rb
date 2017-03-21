@@ -356,6 +356,7 @@ end
 cinders = search(:node, "roles:cinder-controller") || []
 storage_protocol = "iSCSI"
 vendor_name = "Open Source"
+cinder_snapshot = true
 cinders[0][:cinder][:volumes].each do |volume|
   if volume[:backend_driver] == "rbd"
     storage_protocol = "ceph"
@@ -373,6 +374,10 @@ cinders[0][:cinder][:volumes].each do |volume|
   elsif volume[:backend_driver] == "netapp"
     vendor_name = "NetApp"
     storage_protocol = "nfs" if volume[:netapp][:storage_protocol] == "nfs"
+    break
+  elsif volume[:backend_driver] == "nfs"
+    storage_protocol = "nfs"
+    cinder_snapshot = false
     break
   elsif volume[:backend_driver] == "vmware"
     vendor_name = "VMware"
@@ -517,6 +522,7 @@ template "/etc/tempest/tempest.conf" do
     cinder_multi_backend: cinder_multi_backend,
     cinder_backend1_name: cinder_backend1_name,
     cinder_backend2_name: cinder_backend2_name,
+    cinder_snapshot: cinder_snapshot,
     storage_protocol: storage_protocol,
     vendor_name: vendor_name,
     # manila (share) settings
