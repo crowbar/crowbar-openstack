@@ -10,11 +10,11 @@
         
       = string_field %w(mail host)
       = string_field %w(mail port)
-      = string_fiels %w(mail from)
+      = string_field %w(mail from)
      
       = boolean_field %w(mail auth),
         "data-showit" => "true",
-        "data-showit-target" => #mail_container,
+        "data-showit-target" => "#mail_container",
         "data-showit-direct" => "true"
 
       #mail_container
@@ -27,7 +27,7 @@
 
       = boolean_field %w(docker use_registry),
         "data-showit" => "true",
-        "data-showit-target" => #docker_container,
+        "data-showit-target" => "#docker_container",
         "data-showit-direct" => "true"
 
       #docker_container
@@ -40,7 +40,7 @@
 
       = boolean_field %w(proxy use_proxy),
         "data-showit" => "true",
-        "data-showit-target" => #proxy_container,
+        "data-showit-target" => "#proxy_container",
         "data-showit-direct" => "true"
 
       #proxy_container
