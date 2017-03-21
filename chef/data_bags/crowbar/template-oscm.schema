@@ -14,6 +14,7 @@
           "mapping": {
             "timeout": { "type": "int", "required": true },
             "debug": { "type": "bool", "required": true },
+            "heat_instance": { "type": "str", "required": true },
             "heat_template" : {
               "type" : "map",
               "required" : true,

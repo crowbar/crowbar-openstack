@@ -5,6 +5,7 @@
     "oscm" : {
       "timeout": 300,
       "debug" : false,
+      "heat_instance": "none",
       "heat_template" : {
         "image" : "sles12-docker",
         "flavor" : "oscm.small",
@@ -13,7 +14,7 @@
         "project":"oscm"
       },
       "mail": {
-        "auth": "true",
+        "auth": true,
         "host": "",
         "port": 25,
         "user": "",

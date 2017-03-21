@@ -34,7 +34,7 @@ en:
           use_registry: 'Install from Local Registry'
           host: 'Registry Host' 
           port: 'Registry Port' 
-           
+
         proxy_settings: 'Proxy Settings'
         proxy:
           use_proxy: "Use Proxy"
@@ -42,7 +42,7 @@ en:
           http_port: "HTTP Port" 
           https_host: "HTTPS Host" 
           https_port: "HTTPS Port" 
-           
+
         ssl_header: 'SSL Support'
         ssl:
           generate_certs: 'Generate (self-signed) certificates (implies insecure)'
@@ -50,7 +50,5 @@ en:
           keyfile: 'SSL (Private) Key File'
           insecure: 'SSL Certificate is insecure (for instance, self-signed)'
           ca_certs: 'SSL CA Certificates File'
-          
-        
-        
+
         
