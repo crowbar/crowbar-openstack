@@ -98,7 +98,13 @@ compute_primitives_for_group = []
 compute_primitives_to_clone = []
 compute_transaction_objects = []
 
-if node[:platform_family] == "suse" && node[:platform_version].to_f > 12.1
+# virtlogd service exists since 12.2, make sure nodes have been upgraded already
+# check the version of remote's :platform_version
+old_remote_nodes = remote_nodes.select do |remote_node|
+  remote_node[:platform_version].to_f == 12.1
+end
+
+if node[:platform_family] == "suse" && old_remote_nodes.empty?
   virtlogd_primitive = "virtlogd-compute"
   pacemaker_primitive virtlogd_primitive do
     agent "systemd:virtlogd"
