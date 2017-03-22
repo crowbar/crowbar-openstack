@@ -131,9 +131,11 @@ directory "/var/cache/ceilometer" do
 end unless node[:platform_family] == "suse"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
+ceilometer_protocol = node[:ceilometer][:api][:protocol]
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
-my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:api][:protocol] == "https", ha_enabled)
+my_public_host = CrowbarHelper.get_host_for_public_url(node,
+                                                       ceilometer_protocol == "https",
+                                                       ha_enabled)
 
 crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync"
 
@@ -199,12 +201,30 @@ end
 node.normal[:apache][:listen_ports_crowbar] ||= {}
 node.normal[:apache][:listen_ports_crowbar][:ceilometer] = { plain: [bind_port] }
 
+if ceilometer_protocol == "https"
+  ssl_setup "setting up ssl for ceilometer" do
+    generate_certs node[:ceilometer][:ssl][:generate_certs]
+    certfile node[:ceilometer][:ssl][:certfile]
+    keyfile node[:ceilometer][:ssl][:keyfile]
+    group node[:ceilometer][:group]
+    fqdn node[:fqdn]
+    cert_required node[:ceilometer][:ssl][:cert_required]
+    ca_certs node[:ceilometer][:ssl][:ca_certs]
+  end
+end
+
 crowbar_openstack_wsgi "WSGI entry for ceilometer-api" do
   bind_host bind_host
   bind_port bind_port
   daemon_process "ceilometer-api"
   user node[:ceilometer][:user]
   group node[:ceilometer][:group]
+  ssl_enable node[:ceilometer][:api][:protocol] == "https"
+  ssl_certfile node[:ceilometer][:ssl][:certfile]
+  ssl_keyfile node[:ceilometer][:ssl][:keyfile]
+  if node[:ceilometer][:ssl][:cert_required]
+    ssl_cacert node[:ceilometer][:ssl][:ca_certs]
+  end
 end
 
 apache_site "ceilometer-api.conf" do
@@ -293,9 +313,9 @@ keystone_register "register ceilometer endpoint" do
   auth register_auth_hash
   endpoint_service "ceilometer"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{node[:ceilometer][:api][:protocol]}://#{my_public_host}:#{node[:ceilometer][:api][:port]}"
-  endpoint_adminURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
-  endpoint_internalURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
+  endpoint_publicURL "#{ceilometer_protocol}://#{my_public_host}:#{node[:ceilometer][:api][:port]}"
+  endpoint_adminURL "#{ceilometer_protocol}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
+  endpoint_internalURL "#{ceilometer_protocol}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template

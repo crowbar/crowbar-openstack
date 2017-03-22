@@ -322,6 +322,14 @@ else
   manila_insecure = false
 end
 
+ceilometers = search(:node, "roles:ceilometer-server") || []
+if !ceilometers.empty?
+  ceilometer = ceilometers[0][:ceilometer]
+  ceilometer_insecure = ceilometer[:api][:protocol] == "https" && ceilometer[:ssl][:insecure]
+else
+  ceilometer_insecure = false
+end
+
 # We're going to use memcached as a cache backend for Django
 
 # make sure our memcache only listens on the admin IP address
@@ -399,7 +407,8 @@ template local_settings do
     || neutron_insecure \
     || nova_insecure \
     || heat_insecure \
-    || manila_insecure,
+    || manila_insecure \
+    || ceilometer_insecure,
     db_settings: db_settings,
     enable_lb: neutron_use_lbaas,
     enable_vpn: neutron_use_vpnaas,
