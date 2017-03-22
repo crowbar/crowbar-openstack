@@ -86,7 +86,7 @@ default[:nova][:scheduler][:reserved_host_memory_mb] = 512
 # Shared Settings
 #
 default[:nova][:hostname] = "nova"
-default[:nova][:my_ip] = ipaddress
+default[:nova][:my_ip] = node["ipaddress"]
 default[:nova][:user] = "nova"
 default[:nova][:group] = "nova"
 default[:nova][:home_dir] = "/var/lib/nova"
