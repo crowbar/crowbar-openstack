@@ -618,7 +618,7 @@ end
 # Add roles on Default domain
 user_roles = [
   [node[:keystone][:admin][:username], "admin", "Default"],
-  [node[:keystone][:admin][:username], "Member", "Default"],
+  [node[:keystone][:admin][:username], "Member", "Default"]
 ]
 user_roles.each do |args|
   keystone_register "add 'Default' domain role" do

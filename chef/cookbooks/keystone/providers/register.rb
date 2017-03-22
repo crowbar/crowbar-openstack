@@ -222,15 +222,16 @@ action :add_domain_access do
   path = "/v3/domains/#{domain_id}/users/#{user_id}/roles"
   t_role_id, aerror = _find_id(http, headers, role, path, "roles")
 
-  error = (aerror or rerror or uerror or terror)
-  unless role_id == t_role_id or error
+  error = (aerror || rerror || uerror || terror)
+  if role_id == t_role_id || error
+    raise "Failed to talk to keystone in add_access" if error
+    Chef::Log.info("Domain access '#{domain}:#{user} -> #{role}}' " \
+		   "already exists. Not creating.")
+    new_resource.updated_by_last_action(false)
+  else
     # Service does not exist yet
     ret = _update_item(http, headers, "#{path}/#{role_id}", nil, new_resource.role_name)
     new_resource.updated_by_last_action(ret)
-  else
-    raise "Failed to talk to keystone in add_access" if error
-    Chef::Log.info "Domain access '#{domain}:#{user} -> #{role}}' already exists. Not creating." unless error
-    new_resource.updated_by_last_action(false)
   end
 end
 
