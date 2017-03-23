@@ -71,7 +71,7 @@
               "type": "map",
               "required": true,
               "mapping": {
-                "protocol": { "type" : "str", "required" : true },
+                "protocol": { "type" : "str", "required" : true }
               }
             }
           }
