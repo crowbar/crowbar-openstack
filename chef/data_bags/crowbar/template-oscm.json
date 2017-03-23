@@ -22,10 +22,12 @@
         "from": ""
       },
       "docker": {
+        "use_registry": false
         "host": "",
         "port": 0
       },
       "proxy": {
+        "use_proxy": false,
         "http_host": "",
         "http_port": 0,
         "https_host": "",

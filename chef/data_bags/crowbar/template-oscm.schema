@@ -42,6 +42,7 @@
               "type" : "map",
               "required" : true,
               "mapping": {
+                "use_registry": { "type": "bool", "required": true }
                 "host": { "type": "str", "required": true },
                 "port": { "type": "int", "required": true }
               }
@@ -50,6 +51,7 @@
               "type" : "map",
               "required" : true,
               "mapping": {
+                "use_proxy": { "type": "bool", "required": true }
                 "http_host": { "type": "str", "required": true },
                 "http_port": { "type": "int", "required": true },
                 "https_host": { "type": "str", "required": true },
