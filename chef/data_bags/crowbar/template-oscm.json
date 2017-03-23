@@ -37,6 +37,9 @@
         "generate_certs": false,
         "insecure": false,
         "ca_certs": "/etc/oscm/ssl/certs/ca.pem"
+      },
+      "api": {
+        "protocol": "http"
       }
     }
   },

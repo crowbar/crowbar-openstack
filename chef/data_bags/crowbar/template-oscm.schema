@@ -56,15 +56,22 @@
                 "https_port": { "type": "int", "required": true }
               }
             },
-            "ssl": { 
-            "type": "map",
-            "required": true, 
-            "mapping": {
+            "ssl": {
+              "type": "map",
+              "required": true, 
+              "mapping": {
                 "certfile": { "type" : "str", "required" : true },
                 "keyfile": { "type" : "str", "required" : true },
                 "generate_certs": { "type" : "bool", "required" : true },
                 "insecure": { "type" : "bool", "required" : true },
                 "ca_certs": { "type" : "str", "required" : true }
+              }
+            },
+            "api": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "protocol": { "type" : "str", "required" : true },
               }
             }
           }

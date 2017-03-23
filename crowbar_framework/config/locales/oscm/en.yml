@@ -34,11 +34,13 @@ en:
           port: 'Registry Port' 
         proxy_settings: 'Proxy Settings'
         proxy:
-          use_proxy: "Use Proxy"
-          http_host: "HTTP Host" 
-          http_port: "HTTP Port" 
-          https_host: "HTTPS Host" 
-          https_port: "HTTPS Port" 
+          use_proxy: 'Use Proxy'
+          http_host: 'HTTP Host'
+          http_port: 'HTTP Port'
+          https_host: 'HTTPS Host'
+          https_port: 'HTTPS Port'
+        api:
+          protocol: 'Protocol'
         ssl_header: 'SSL Support'
         ssl:
           generate_certs: 'Generate (self-signed) certificates (implies insecure)'
