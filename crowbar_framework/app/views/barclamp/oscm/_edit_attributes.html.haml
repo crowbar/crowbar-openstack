@@ -17,48 +17,45 @@
         "data-showit-direct" => "true"
 
       #mail_container
-      = string_field %w(mail user)
-      = password_field %w(mail password)
+        = string_field %w(mail user)
+        = password_field %w(mail password)
 
     %fieldset
       %legend
         = t(".docker_settings")
 
       = boolean_field %w(docker use_registry),
-        "data-showit" => "false",
+        "data-showit" => "true",
         "data-showit-target" => "#docker_container",
         "data-showit-direct" => "true"
 
       #docker_container
-      = string_field %w(docker host)
-      = integer_field %w(docker port)
-      = boolean_field %w(docker auth)
-        "data-showit" => "false",
-        "data-showit-target" => "#dockerauth_container",
-        "data-showit-direct" => "true"
+        = string_field %w(docker host)
+        = integer_field %w(docker port)
+        = boolean_field %w(docker auth),
+          "data-showit" => "true",
+          "data-showit-target" => "#dockerauth_container",
+          "data-showit-direct" => "true"
 
-      #dockerauth_container
-      = string_field %w(docker user)
-      = password_field %w(docker password)
-
-
-
+        #dockerauth_container
+          = string_field %w(docker user)
+          = password_field %w(docker password)
 
     %fieldset
       %legend
         = t(".proxy_settings")
 
       = boolean_field %w(proxy use_proxy),
-        "data-showit" => "false",
+        "data-showit" => "true",
         "data-showit-target" => "#proxy_container",
         "data-showit-direct" => "true"
 
       #proxy_container
-      = string_field %w(proxy http_host)
-      = integer_field %w(proxy http_port)
-      = string_field %w(proxy https_host)
-      = integer_field %w(proxy https_port)
-      = string_field %w(proxy no_proxy)
+        = string_field %w(proxy http_host)
+        = integer_field %w(proxy http_port)
+        = string_field %w(proxy https_host)
+        = integer_field %w(proxy https_port)
+        = string_field %w(proxy no_proxy)
 
     %fieldset
       %legend
