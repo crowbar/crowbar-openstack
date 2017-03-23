@@ -24,14 +24,18 @@
       "docker": {
         "use_registry": false,
         "host": "",
-        "port": 0
+        "port": 0,
+        "auth": false,
+        "user": "",
+        "password": ""
       },
       "proxy": {
         "use_proxy": false,
         "http_host": "",
         "http_port": 0,
         "https_host": "",
-        "https_port": 0
+        "https_port": 0,
+        "no_proxy": "localhost,127.0.0.1"
       },
       "ssl": {
         "certfile": "/etc/oscm/ssl/certs/signing_cert.pem",

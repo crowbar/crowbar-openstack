@@ -44,7 +44,10 @@
               "mapping": {
                 "use_registry": { "type": "bool", "required": true },
                 "host": { "type": "str", "required": true },
-                "port": { "type": "int", "required": true }
+                "port": { "type": "int", "required": true },
+                "auth": { "type": "bool", "required": true },
+                "user": { "type": "str", "required": true },
+                "password": { "type": "str", "required": true }
               }
             },
             "proxy" : {
@@ -55,7 +58,8 @@
                 "http_host": { "type": "str", "required": true },
                 "http_port": { "type": "int", "required": true },
                 "https_host": { "type": "str", "required": true },
-                "https_port": { "type": "int", "required": true }
+                "https_port": { "type": "int", "required": true },
+                "no_proxy": { "type": "str", "required": true }
               }
             },
             "ssl": {

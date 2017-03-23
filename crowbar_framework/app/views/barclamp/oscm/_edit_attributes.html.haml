@@ -8,7 +8,7 @@
         = t(".mail_settings")
 
       = string_field %w(mail host)
-      = string_field %w(mail port)
+      = integer_field %w(mail port)
       = string_field %w(mail from)
 
       = boolean_field %w(mail auth),
@@ -31,7 +31,18 @@
 
       #docker_container
       = string_field %w(docker host)
-      = string_field %w(docker port)
+      = integer_field %w(docker port)
+      = boolean_field %w(docker auth)
+        "data-showit" => "false",
+        "data-showit-target" => "#dockerauth_container",
+        "data-showit-direct" => "true"
+
+      #dockerauth_container
+      = string_field %w(docker user)
+      = password_field %w(docker password)
+
+
+
 
     %fieldset
       %legend
@@ -44,9 +55,10 @@
 
       #proxy_container
       = string_field %w(proxy http_host)
-      = string_field %w(proxy http_port)
+      = integer_field %w(proxy http_port)
       = string_field %w(proxy https_host)
-      = string_field %w(proxy https_port)
+      = integer_field %w(proxy https_port)
+      = string_field %w(proxy no_proxy)
 
     %fieldset
       %legend
