@@ -25,6 +25,8 @@ barclamp:
     - 'heat'
 
 crowbar:
-  run_order: 100
-  chef_order: 100
+  layout: 1
+  run_order: 135
+  chef_order: 135
+  proposal_schema_version: 1
 
