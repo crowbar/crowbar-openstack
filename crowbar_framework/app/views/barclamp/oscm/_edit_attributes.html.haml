@@ -55,7 +55,16 @@
         = integer_field %w(proxy http_port)
         = string_field %w(proxy https_host)
         = integer_field %w(proxy https_port)
+        %span.help-block
+          = t('.proxy_hint')
         = string_field %w(proxy no_proxy)
+        = boolean_field %w(proxy auth),
+          "data-showit" => "true",
+          "data-showit-target" => "#proxyauth_container",
+          "data-showit-direct" => "true"
+        #proxyauth_container
+          = string_field %w(proxy user)
+          = password_field %w(proxy password)
 
     %fieldset
       %legend

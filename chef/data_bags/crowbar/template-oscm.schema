@@ -59,7 +59,10 @@
                 "http_port": { "type": "int", "required": true },
                 "https_host": { "type": "str", "required": true },
                 "https_port": { "type": "int", "required": true },
-                "no_proxy": { "type": "str", "required": true }
+                "no_proxy": { "type": "str", "required": true },
+                "auth": { "type": "bool", "required": true },
+                "user": { "type": "str", "required": true },
+                "password": { "type": "str", "required": true }
               }
             },
             "ssl": {

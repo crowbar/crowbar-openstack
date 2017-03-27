@@ -35,7 +35,10 @@
         "http_port": 0,
         "https_host": "",
         "https_port": 0,
-        "no_proxy": "localhost,127.0.0.1"
+        "no_proxy": "localhost,127.0.0.1",
+        "auth": false,
+        "user": "",
+        "password": ""
       },
       "ssl": {
         "certfile": "/etc/oscm/ssl/certs/signing_cert.pem",

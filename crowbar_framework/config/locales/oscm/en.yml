@@ -37,12 +37,16 @@ en:
           password: 'Password'
         proxy_settings: 'Proxy Settings'
         proxy:
+          auth: 'Authentication Required'
           use_proxy: 'Use Proxy'
           http_host: 'HTTP Host'
           http_port: 'HTTP Port'
           https_host: 'HTTPS Host'
           https_port: 'HTTPS Port'
           no_proxy: 'No Proxy'
+          user: 'User'
+          password: 'Password'
+        proxy_hint: 'A comma-separated list of hosts which can bypass the proxy'
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'
