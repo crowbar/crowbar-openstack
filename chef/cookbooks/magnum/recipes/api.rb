@@ -132,6 +132,7 @@ pacemaker_primitive magnum_api_primitive_name do
   action [:stop, :delete]
   only_if "crm configure show #{magnum_api_primitive_name}"
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  ignore_failure true
 end
 
 node.normal[:apache][:listen_ports_crowbar] ||= {}
