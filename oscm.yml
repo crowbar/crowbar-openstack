@@ -26,6 +26,7 @@ barclamp:
 
 crowbar:
   layout: 1
+  order: 135
   run_order: 135
   chef_order: 135
   proposal_schema_version: 1
