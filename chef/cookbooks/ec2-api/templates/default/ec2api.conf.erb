@@ -13,6 +13,16 @@ s3_listen = <%= @bind_host %>
 s3_listen_port = <%= @bind_port_s3 %>
 transport_url = <%= @rabbit_settings[:url] %>
 full_vpc_support = false
+<% if node[:nova]["ec2-api"][:ssl][:enabled] %>
+ec2api_use_ssl = true
+metadata_use_ssl = true
+ssl_cert_file = <%= node[:nova]["ec2-api"][:ssl][:certfile] %>
+ssl_key_file = <%= node[:nova]["ec2-api"][:ssl][:keyfile] %>
+<% if node[:nova]["ec2-api"][:ssl][:cert_required] %>
+ssl_ca_file = <%= node[:nova]["ec2-api"][:ssl][:ca_certs] %>
+<% end %>
+s3_use_ssl = true
+<% end %>
 
 [database]
 connection = <%= @database_connection %>

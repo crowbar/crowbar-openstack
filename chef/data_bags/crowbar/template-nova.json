@@ -42,6 +42,15 @@
           "password": "",
           "user": "ec2",
           "database": "ec2"
+        },
+        "ssl": {
+          "enabled": false,
+          "certfile": "/etc/ec2api/ssl/certs/signing_cert.pem",
+          "keyfile": "/etc/ec2api/ssl/certs/signing_key.pem",
+          "generate_certs": false,
+          "insecure": false,
+          "cert_required": false,
+          "ca_certs": "/etc/ec2api/ssl/certs/ca.pem"
         }
       },
       "db": {
@@ -148,7 +157,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 115,
+      "schema-revision": 116,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-kvm": [ "readying", "ready", "applying" ],
