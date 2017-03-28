@@ -33,7 +33,7 @@ end
 
 if has_internal
   ceph_env_filter = " AND ceph_config_environment:ceph-config-default"
-  ceph_servers = search(:node, "roles:ceph-osd#{ceph_env_filter}") || []
+  ceph_servers = search(:node, "run_list_map:ceph-osd#{ceph_env_filter}") || []
   if ceph_servers.length > 0
     include_recipe "ceph::keyring"
   else
