@@ -47,7 +47,7 @@
     "magnum": {
       "crowbar-revision": 1,
       "crowbar-applied": false,
-      "schema-revision": 101,
+      "schema-revision": 102,
       "element_states": {
         "magnum-server": [ "readying", "ready", "applying" ]
       },
