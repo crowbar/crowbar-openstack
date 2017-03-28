@@ -18,6 +18,7 @@ en:
   barclamp:
     oscm:
       edit_attributes:
+        keystone_instance: 'Keystone'
         heat_instance: 'Heat'
         mail_settings: 'Mail Settings'
         mail:

@@ -63,6 +63,7 @@ class OscmService < PacemakerServiceObject
       "oscm-server" => [server_nodes.first.name]
     } unless server_nodes.nil?
     
+    base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
     base["attributes"][@bc_name]["heat_instance"] = find_dep_proposal("heat")
 
     @logger.debug("Oscm create_proposal: exiting")

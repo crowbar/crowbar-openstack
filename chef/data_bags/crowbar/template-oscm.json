@@ -2,13 +2,19 @@
   "id": "template-oscm",
   "description": "OSCM",
   "attributes": {
-    "oscm" : {
+    "oscm": {
       "timeout": 300,
-      "debug" : false,
+      "debug": false,
+      "keystone_instance": "none",
       "heat_instance": "none",
-      "heat_template" : {
-        "image" : "sles12-docker",
-        "flavor" : "oscm.small",
+      "keystone": {
+        "tenant": "oscm",
+        "user": "oscm",
+        "password": "oscm"
+      },
+      "heat_template": {
+        "image": "sles12-docker",
+        "flavor": "oscm.small",
         "keypair": "oscm",
         "user": "oscm",
         "project":"oscm"
@@ -53,7 +59,7 @@
     }
   },
   "deployment": {
-    "oscm" : {
+    "oscm": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
       "schema-revision": 100,
