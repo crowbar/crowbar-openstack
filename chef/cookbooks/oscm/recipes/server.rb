@@ -15,6 +15,8 @@
 #
 
 oscm_tenant = node[:oscm][:keystone][:tenant]
+oscm_user = node[:oscm][:keystone][:user]
+oscm_password = node[:oscm][:keystone][:password]
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
@@ -24,7 +26,7 @@ register_auth_hash = {
   tenant: keystone_settings["admin_tenant"]
 }
 
-keystone_register "oscm server wakeup keystone" do
+keystone_register "oscm wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
@@ -33,12 +35,60 @@ keystone_register "oscm server wakeup keystone" do
   action :wakeup
 end
 
-keystone_register "oscm create tenant oscm" do
+keystone_register "oscm create tenant" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
   tenant_name oscm_tenant
-  action: add_tenant
+  action :add_tenant
+end
+
+keystone_register "oscm register user" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name oscm_user
+  user_password oscm_password
+  tenant_name oscm_tenant
+  action :add_user
+end
+
+keystone_register "oscm give user admin role" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name oscm_user
+  tenant_name oscm_tenant
+  role_name "admin"
+  action :add_access
+end
+
+keystone_register "oscm give user member role" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name oscm_user
+  tenant_name oscm_tenant
+  role_name "Member"
+  action :add_access
+end
+
+keystone_register "oscm give user _member_ role" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name oscm_user
+  tenant_name oscm_tenant
+  role_name "_member_"
+  action :add_access
 end
