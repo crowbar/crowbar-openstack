@@ -44,6 +44,11 @@
           "database": "ec2"
         }
       },
+      "placement_db": {
+        "password": "",
+        "user": "placement",
+        "database": "placement"
+      },
       "db": {
         "password": "",
         "user": "nova",
