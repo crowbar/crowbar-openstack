@@ -85,7 +85,7 @@ class RabbitmqService < PacemakerServiceObject
       end
     end
 
-    if rabbitmq_ha_enabled
+    if rabbitmq_ha_enabled && !role.default_attributes["rabbitmq"]["cluster"]
       unless rabbitmq_elements.length == 1 && PacemakerServiceObject.is_cluster?(rabbitmq_elements[0])
         raise "Internal error: HA enabled, but element is not a cluster"
       end
@@ -100,6 +100,20 @@ class RabbitmqService < PacemakerServiceObject
       ensure_dns_uptodate
     end
 
+    if role.default_attributes["rabbitmq"]["cluster"]
+      role.default_attributes["rabbitmq"]["erlang_cookie"] = \
+          (old_role && old_role.default_attributes["rabbitmq"]["erlang_cookie"]) || random_password
+    end
+
+    unless rabbitmq_ha_enabled
+      # cluster mode requires HA (for now); don't do a validation check as we
+      # still want to have the setting default to true in case people want to
+      # turn HA on, and in this case, result in clustering by default
+      role.default_attributes["rabbitmq"]["cluster"] = false
+    end
+
+    role.save
+
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
   end
 
@@ -108,9 +122,11 @@ class RabbitmqService < PacemakerServiceObject
 
     attributes = proposal["attributes"][@bc_name]
 
-    # HA validation
     servers = proposal["deployment"][@bc_name]["elements"]["rabbitmq-server"]
-    unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
+    ha_enabled = !(servers.nil? || servers.first.nil? || !is_cluster?(servers.first))
+
+    # Shared storage validation for HA
+    if ha_enabled && !attributes["cluster"]
       storage_mode = attributes["ha"]["storage"]["mode"]
       validation_error I18n.t(
         "barclamp.#{@bc_name}.validation.unknown_mode", storage_mode: storage_mode
