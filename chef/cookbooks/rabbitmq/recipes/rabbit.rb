@@ -65,8 +65,9 @@ if ha_enabled
   log "HA support for rabbitmq is enabled"
   if cluster_enabled
     include_recipe "rabbitmq::ha_cluster"
-    # only run the rabbitmqctl commands on the founder node
-    only_if_command = CrowbarPacemakerHelper.is_cluster_founder?(node) ? "true" : "false"
+    # only run the rabbitmqctl commands on the master node
+    ms_name = "ms-rabbitmq"
+    only_if_command = "crm resource show #{ms_name} | grep -q \" #{node.hostname} *Master$\""
   else
     include_recipe "rabbitmq::ha"
     # All the rabbitmqctl commands are local, and can only be run if rabbitmq is

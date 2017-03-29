@@ -18,10 +18,6 @@
 # limitations under the License.
 #
 
-ha_enabled = node[:rabbitmq][:ha][:enabled]
-# we only do cluster if we do HA
-cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
-
 package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node[:platform_family] == "suse"
 
@@ -40,31 +36,11 @@ template "/etc/rabbitmq/rabbitmq-env.conf" do
   notifies :restart, "service[rabbitmq-server]"
 end
 
-if cluster_enabled
-  file "/var/lib/rabbitmq/.erlang.cookie" do
-    content node[:rabbitmq][:erlang_cookie]
-    owner "rabbitmq"
-    group "rabbitmq"
-    mode 0400
-    notifies :restart, "service[rabbitmq-server]"
-  end
-
-  others = CrowbarPacemakerHelper.cluster_nodes(node, "rabbitmq-server").select do |cluster_node|
-    cluster_node[:hostname] != node[:hostname]
-  end
-  other_cluster_nodes = others.map { |n| "rabbit@#{n[:hostname]}" }.join(",")
-else
-  other_cluster_nodes = nil
-end
-
 template "/etc/rabbitmq/rabbitmq.config" do
   source "rabbitmq.config.erb"
   owner "root"
   group "root"
   mode 0644
-  variables(
-    cluster_nodes: other_cluster_nodes
-  )
   notifies :restart, "service[rabbitmq-server]"
 end
 
