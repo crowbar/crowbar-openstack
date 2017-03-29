@@ -3,6 +3,7 @@
 debug=<%= node[:barbican][:debug] %>
 host_href = <%= @host_href %>
 sql_connection = <%= @database_connection %>
+transport_url = <%= @rabbit_settings[:url] %>
 
 [oslo_messaging_rabbit]
 

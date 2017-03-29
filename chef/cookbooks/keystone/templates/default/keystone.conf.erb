@@ -4,6 +4,7 @@ debug = <%= @debug ? "True" : "False" %>
 verbose = <%= @verbose ? "True" : "False" %>
 log_file = keystone.log
 log_dir = /var/log/keystone
+transport_url = <%= @rabbit_settings[:url] %>
 
 [assignment]
 driver = <%= node[:keystone][:assignment][:driver] %>
