@@ -37,6 +37,7 @@ default[:rabbitmq][:logdir] = nil
 default[:rabbitmq][:mnesiadir] = nil
 
 default[:rabbitmq][:cluster] = false
+default[:rabbitmq][:clustername] = "rabbit@#{node[:hostname]}"
 
 # ha
 default[:rabbitmq][:ha][:enabled] = false
