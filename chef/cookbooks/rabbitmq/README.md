@@ -8,10 +8,6 @@ default
 -------
 Installs `rabbitmq-server` from RabbitMQ.com's APT repository. The distribution-provided version was quite old and newer features were needed.
 
-cluster
--------
-Configures nodes to be members of a RabbitMQ cluster, but does not actually join them.
-
 Resources/Providers
 ===================
 There are 2 LWRPs for interacting with RabbitMQ.
@@ -59,8 +55,6 @@ end
 
 Limitations
 ===========
-It is quite useful as is, but clustering configuration does not currently do the dance to join the cluster members to each other.
-
 The rabbitmq::chef recipe was only used for the chef-server cookbook and has been moved to chef-server::rabbitmq.
 
 License and Author
