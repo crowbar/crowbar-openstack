@@ -32,6 +32,7 @@ node.set[:rabbitmq][:addresses] = addresses
 
 if cluster_enabled
   node.set[:rabbitmq][:nodename] = "rabbit@#{node[:hostname]}"
+  node.set[:rabbitmq][:clustername] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
 elsif ha_enabled
   node.set[:rabbitmq][:nodename] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
 end
@@ -115,6 +116,14 @@ if cluster_enabled
 
   execute set_policy_command do
     not_if check_policy_command
+    action :run
+    only_if only_if_command if ha_enabled
+  end
+
+  check_cluster_name_command = "rabbitmqctl cluster_status | " \
+      "grep -q '{cluster_name,<<\"#{node[:rabbitmq][:clustername]}\">>}'"
+  execute "rabbitmqctl set_cluster_name #{node[:rabbitmq][:clustername]}" do
+    not_if check_cluster_name_command
     action :run
     only_if only_if_command if ha_enabled
   end
