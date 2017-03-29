@@ -62,12 +62,15 @@ openstack_args += " --os-endpoint internalURL"
 
 openstack_cmd = "openstack #{openstack_args}"
 
+image_url = "http://#{provisioner_address}:8091/files/" \
+  "#{service_sles_image_name}/" \
+  "#{service_sles_image_name}.#{node[:kernel][:machine]}.qcow2"
 
 execute "create_magnum_image" do
-  command "curl http://#{provisioner_address}:8091/files/#{service_sles_image_name}/\
-  #{service_sles_image_name}.#{node[:kernel][:machine]}.qcow2 | \
+  command "curl #{image_url} | \
   #{openstack_cmd} #{openstack_args_glance} image create --disk-format qcow2 \
-  --container-format bare --public --property os_distro=opensuse #{service_sles_image_name}"
+  --container-format bare --public --property os_distro=opensuse \
+  #{service_sles_image_name}"
   not_if "#{openstack_cmd} #{openstack_args_glance} image list -f value -c Name | grep -q #{service_sles_image_name}"
   action :nothing
 end
