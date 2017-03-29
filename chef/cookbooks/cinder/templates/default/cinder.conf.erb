@@ -207,6 +207,7 @@ volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
   <% end -%>
 
   <% if volume['backend_driver'] == 'rbd' -%>
+rbd_flatten_volume_from_snapshot = <%= volume['rbd']['flatten_volume_from_snapshot'] %>
 rbd_pool = <%= volume['rbd']['pool'] %>
     <% unless volume['rbd']['user'].empty? -%>
 rbd_user = <%= volume['rbd']['user'] %>
