@@ -39,6 +39,14 @@ workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 [oslo_concurrency]
 lock_path = /var/run/ceilometer
 
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+
 [publisher]
 telemetry_secret = <%= @metering_secret %>
 
@@ -66,10 +74,4 @@ ca_file = <%= node[:nova][:vcenter][:ca_file] -%>
 <% end -%>
 <% if @hypervisor_inspector == "vmware" && node[:nova][:vcenter][:insecure] -%>
 insecure = <%= node[:nova][:vcenter][:insecure] %>
-<% end -%>
-
-[oslo_messaging_rabbit]
-rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
-<% if @rabbit_settings[:client_ca_certs] -%>
-kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
