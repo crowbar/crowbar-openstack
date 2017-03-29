@@ -23,6 +23,8 @@
 #
 default[:rabbitmq][:user] = "nova"
 default[:rabbitmq][:vhost] = "/nova"
+default[:rabbitmq][:rabbitmq_user] = "rabbitmq"
+default[:rabbitmq][:rabbitmq_group] = "rabbitmq"
 
 default[:rabbitmq][:nodename]  = "rabbit@#{node[:hostname]}"
 # This is the address for internal usage
@@ -35,10 +37,10 @@ default[:rabbitmq][:management_address] = nil
 default[:rabbitmq][:configfile] = nil
 default[:rabbitmq][:logdir] = nil
 default[:rabbitmq][:mnesiadir] = nil
-#clustering
-default[:rabbitmq][:cluster] = "no"
-default[:rabbitmq][:cluster_config] = "/etc/rabbitmq/rabbitmq_cluster.config"
-default[:rabbitmq][:cluster_disk_nodes] = []
+
+default[:rabbitmq][:cluster] = false
+default[:rabbitmq][:clustername] = "rabbit@#{node[:hostname]}"
+default[:rabbitmq][:erlang_cookie_path] = "/var/lib/rabbitmq/.erlang.cookie"
 
 # ha
 default[:rabbitmq][:ha][:enabled] = false
