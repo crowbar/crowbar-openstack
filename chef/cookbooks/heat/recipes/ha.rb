@@ -47,6 +47,7 @@ crowbar_pacemaker_sync_mark "sync-heat_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-heat_ha_resources"
 
+rabbit_settings = fetch_rabbitmq_settings
 services = ["engine", "api", "api_cfn", "api_cloudwatch"]
 transaction_objects = []
 
@@ -56,7 +57,7 @@ services.each do |service|
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent node[:heat][:ha][service.to_sym][:agent]
     op node[:heat][:ha][service.to_sym][:op]
-    order_only_existing "( postgresql rabbitmq cl-keystone cl-nova-api )"
+    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone cl-nova-api )"
   end
   transaction_objects.push(objects)
 end
