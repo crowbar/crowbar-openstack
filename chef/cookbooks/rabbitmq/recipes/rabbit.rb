@@ -19,6 +19,8 @@
 #
 
 ha_enabled = node[:rabbitmq][:ha][:enabled]
+# we only do cluster if we do HA
+cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
 
 node.set[:rabbitmq][:address] = CrowbarRabbitmqHelper.get_listen_address(node)
 node.set[:rabbitmq][:management_address] = node[:rabbitmq][:address]
@@ -28,7 +30,9 @@ if node[:rabbitmq][:listen_public]
 end
 node.set[:rabbitmq][:addresses] = addresses
 
-if ha_enabled
+if cluster_enabled
+  node.set[:rabbitmq][:nodename] = "rabbit@#{node[:hostname]}"
+elsif ha_enabled
   node.set[:rabbitmq][:nodename] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
 end
 
@@ -55,6 +59,23 @@ if node[:rabbitmq][:ssl][:enabled]
     cert_required node[:rabbitmq][:ssl][:cert_required]
     ca_certs node[:rabbitmq][:ssl][:ca_certs]
   end
+end
+
+if ha_enabled
+  log "HA support for rabbitmq is enabled"
+  if cluster_enabled
+    include_recipe "rabbitmq::ha_cluster"
+    # only run the rabbitmqctl commands on the founder node
+    only_if_command = CrowbarPacemakerHelper.is_cluster_founder?(node) ? "true" : "false"
+  else
+    include_recipe "rabbitmq::ha"
+    # All the rabbitmqctl commands are local, and can only be run if rabbitmq is
+    # local
+    service_name = "rabbitmq"
+    only_if_command = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
+  end
+else
+  log "HA support for rabbitmq is disabled"
 end
 
 # remove guest user
@@ -94,6 +115,19 @@ execute "rabbitmqctl set_user_tags #{node[:rabbitmq][:user]} management" do
   not_if "rabbitmqctl list_users | grep #{node[:rabbitmq][:user]} | grep -q management"
   action :run
   only_if only_if_command if ha_enabled
+end
+
+if cluster_enabled
+  set_policy_command = "rabbitmqctl set_policy -p #{node[:rabbitmq][:vhost]} " \
+      " ha-all '^(?!amq\.).*' '{\"ha-mode\": \"all\"}'"
+  check_policy_command = "rabbitmqctl list_policies -p #{node[:rabbitmq][:vhost]} | " \
+      " grep -q '^#{node[:rabbitmq][:vhost]}\\s*ha-all\\s'"
+
+  execute set_policy_command do
+    not_if check_policy_command
+    action :run
+    only_if only_if_command if ha_enabled
+  end
 end
 
 if node[:rabbitmq][:trove][:enabled]

@@ -20,6 +20,12 @@
                  {certfile, "<%= node[:rabbitmq][:ssl][:certfile] %>"},
                  {keyfile, "<%= node[:rabbitmq][:ssl][:keyfile] %>"}]},
 <% end -%>
+<% unless @cluster_nodes.nil? -%>
+   {cluster_nodes, {[
+                     <%= @cluster_nodes %>
+                    ], disc}
+   },
+<% end -%>
    {disk_free_limit, 50000000}
  ]},
  {rabbitmq_management,
