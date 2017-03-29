@@ -115,38 +115,59 @@ class CrowbarOpenStackHelper
     end
 
     if @rabbitmq_settings && @rabbitmq_settings.include?(instance)
-      Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]} [cached]")
+      Chef::Log.info("RabbitMQ settings found [cached]")
     else
       @rabbitmq_settings ||= Hash.new
-      rabbit = get_node(node, "rabbitmq-server", "rabbitmq", instance)
+      rabbits = get_nodes(node, "rabbitmq-server", "rabbitmq", instance)
 
-      if rabbit.nil?
+      if rabbits.empty?
         Chef::Log.warn("No RabbitMQ server found!")
       else
-        if rabbit[:rabbitmq][:ssl][:enabled]
-          port = rabbit[:rabbitmq][:ssl][:port]
-        else
-          port = rabbit[:rabbitmq][:port]
+        one_rabbit = rabbits.first
+        client_ca_certs = if one_rabbit[:rabbitmq][:ssl][:enabled] && \
+            !one_rabbit[:rabbitmq][:ssl][:insecure]
+          one_rabbit[:rabbitmq][:ssl][:client_ca_certs]
         end
-        client_ca_certs = if rabbit[:rabbitmq][:ssl][:enabled] && \
-            !rabbit[:rabbitmq][:ssl][:insecure]
-          rabbit[:rabbitmq][:ssl][:client_ca_certs]
-        end
-        @rabbitmq_settings[instance] = {
-          address: rabbit[:rabbitmq][:address],
-          port: port,
-          user: rabbit[:rabbitmq][:user],
-          password: rabbit[:rabbitmq][:password],
-          vhost: rabbit[:rabbitmq][:vhost],
-          use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
-          client_ca_certs: client_ca_certs,
-          url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
-            "#{rabbit[:rabbitmq][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{port}/" \
-            "#{rabbit[:rabbitmq][:vhost]}"
-        }
 
-        Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]}")
+        if rabbits.first[:rabbitmq][:cluster]
+          rabbit_hosts = rabbits.map do |rabbit|
+            port = if rabbit[:rabbitmq][:ssl][:enabled]
+              rabbit[:rabbitmq][:ssl][:port]
+            else
+              rabbit[:rabbitmq][:port]
+            end
+
+            "#{rabbit[:rabbitmq][:user]}:" \
+            "#{rabbit[:rabbitmq][:password]}@" \
+            "#{rabbit[:rabbitmq][:address]}:#{port}"
+          end
+
+          @rabbitmq_settings[instance] = {
+            use_ssl: one_rabbit[:rabbitmq][:ssl][:enabled],
+            client_ca_certs: client_ca_certs,
+            url: "rabbit://#{rabbit_hosts.sort.join(",")}/" \
+              "#{rabbits.first[:rabbitmq][:vhost]}"
+          }
+          Chef::Log.info("RabbitMQ cluster found")
+        else
+          rabbit = one_rabbit
+          port = if rabbit[:rabbitmq][:ssl][:enabled]
+            rabbit[:rabbitmq][:ssl][:port]
+          else
+            rabbit[:rabbitmq][:port]
+          end
+
+          @rabbitmq_settings[instance] = {
+            use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
+            client_ca_certs: client_ca_certs,
+            url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
+              "#{rabbit[:rabbitmq][:password]}@" \
+              "#{rabbit[:rabbitmq][:address]}:#{port}/" \
+              "#{rabbit[:rabbitmq][:vhost]}"
+          }
+
+          Chef::Log.info("RabbitMQ server found")
+        end
       end
     end
 
@@ -169,5 +190,10 @@ class CrowbarOpenStackHelper
     end
 
     result
+  end
+
+  def self.get_nodes(node, role, barclamp, instance)
+    nodes, _, _ = Chef::Search::Query.new.search(:node, "roles:#{role} AND #{barclamp}_config_environment:#{barclamp}-config-#{instance}")
+    nodes
   end
 end
