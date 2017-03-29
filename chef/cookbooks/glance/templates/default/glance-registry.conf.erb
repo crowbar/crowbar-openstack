@@ -36,5 +36,9 @@ auth_type = password
 [oslo_messaging_notifications]
 driver = messaging
 
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+
 [paste_deploy]
 flavor = keystone

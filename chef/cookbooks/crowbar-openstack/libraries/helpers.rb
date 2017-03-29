@@ -155,6 +155,8 @@ class CrowbarOpenStackHelper
           end
 
           @rabbitmq_settings[instance] = {
+            ha_queues: true,
+            durable_queues: true,
             use_ssl: one_rabbit[:rabbitmq][:ssl][:enabled],
             client_ca_certs: client_ca_certs,
             url: "rabbit://#{rabbit_hosts.sort.join(",")}/" \
@@ -172,6 +174,8 @@ class CrowbarOpenStackHelper
           end
 
           @rabbitmq_settings[instance] = {
+            ha_queues: false,
+            durable_queues: false,
             use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
             client_ca_certs: client_ca_certs,
             url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
