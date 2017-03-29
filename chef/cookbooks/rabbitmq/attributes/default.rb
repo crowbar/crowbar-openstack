@@ -36,6 +36,8 @@ default[:rabbitmq][:configfile] = nil
 default[:rabbitmq][:logdir] = nil
 default[:rabbitmq][:mnesiadir] = nil
 
+default[:rabbitmq][:cluster] = false
+
 # ha
 default[:rabbitmq][:ha][:enabled] = false
 default[:rabbitmq][:ha][:storage][:mode] = nil
