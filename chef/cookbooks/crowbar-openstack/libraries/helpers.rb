@@ -162,7 +162,8 @@ class CrowbarOpenStackHelper
             url: "rabbit://#{rabbit_hosts.sort.join(",")}/" \
               "#{rabbits.first[:rabbitmq][:vhost]}",
             trove_url: "rabbit://#{trove_rabbit_hosts.sort.join(",")}/" \
-              "#{rabbits.first[:rabbitmq][:trove][:vhost]}"
+              "#{rabbits.first[:rabbitmq][:trove][:vhost]}",
+            pacemaker_resource: "ms-rabbitmq"
           }
           Chef::Log.info("RabbitMQ cluster found")
         else
@@ -185,7 +186,8 @@ class CrowbarOpenStackHelper
             trove_url: "rabbit://#{rabbit[:rabbitmq][:trove][:user]}:" \
               "#{rabbit[:rabbitmq][:trove][:password]}@" \
               "#{rabbit[:rabbitmq][:address]}:#{port}/" \
-              "#{rabbit[:rabbitmq][:trove][:vhost]}"
+              "#{rabbit[:rabbitmq][:trove][:vhost]}",
+            pacemaker_resource: "rabbitmq"
           }
 
           Chef::Log.info("RabbitMQ server found")
