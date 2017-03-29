@@ -21,8 +21,7 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 sql_connection = TroveHelper.get_sql_connection node
 
-rabbitmq_servers = node_search_with_cache("roles:rabbitmq-server")
-rabbit_trove_url = TroveHelper.get_rabbitmq_trove_url(node, rabbitmq_servers)
+rabbit_trove_url = fetch_rabbitmq_settings[:trove_url]
 
 nova_controllers = node_search_with_cache("roles:nova-controller")
 nova_url, nova_insecure = TroveHelper.get_nova_details nova_controllers, keystone_settings

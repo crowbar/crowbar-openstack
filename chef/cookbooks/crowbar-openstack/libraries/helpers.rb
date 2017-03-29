@@ -142,11 +142,25 @@ class CrowbarOpenStackHelper
             "#{rabbit[:rabbitmq][:address]}:#{port}"
           end
 
+          trove_rabbit_hosts = rabbits.map do |rabbit|
+            port = if rabbit[:rabbitmq][:ssl][:enabled]
+              rabbit[:rabbitmq][:ssl][:port]
+            else
+              rabbit[:rabbitmq][:port]
+            end
+
+            "#{rabbit[:rabbitmq][:trove][:user]}:" \
+            "#{rabbit[:rabbitmq][:trove][:password]}@" \
+            "#{rabbit[:rabbitmq][:address]}:#{port}"
+          end
+
           @rabbitmq_settings[instance] = {
             use_ssl: one_rabbit[:rabbitmq][:ssl][:enabled],
             client_ca_certs: client_ca_certs,
             url: "rabbit://#{rabbit_hosts.sort.join(",")}/" \
-              "#{rabbits.first[:rabbitmq][:vhost]}"
+              "#{rabbits.first[:rabbitmq][:vhost]}",
+            trove_url: "rabbit://#{trove_rabbit_hosts.sort.join(",")}/" \
+              "#{rabbits.first[:rabbitmq][:trove][:vhost]}"
           }
           Chef::Log.info("RabbitMQ cluster found")
         else
@@ -163,7 +177,11 @@ class CrowbarOpenStackHelper
             url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
               "#{rabbit[:rabbitmq][:password]}@" \
               "#{rabbit[:rabbitmq][:address]}:#{port}/" \
-              "#{rabbit[:rabbitmq][:vhost]}"
+              "#{rabbit[:rabbitmq][:vhost]}",
+            trove_url: "rabbit://#{rabbit[:rabbitmq][:trove][:user]}:" \
+              "#{rabbit[:rabbitmq][:trove][:password]}@" \
+              "#{rabbit[:rabbitmq][:address]}:#{port}/" \
+              "#{rabbit[:rabbitmq][:trove][:vhost]}"
           }
 
           Chef::Log.info("RabbitMQ server found")

@@ -19,8 +19,7 @@
 
 sql_connection = TroveHelper.get_sql_connection node
 
-rabbitmq_servers = node_search_with_cache("roles:rabbitmq-server")
-rabbit_trove_url = TroveHelper.get_rabbitmq_trove_url(node, rabbitmq_servers)
+rabbit_trove_url = fetch_rabbitmq_settings[:trove_url]
 
 template node[:trove][:conductor][:config_file] do
   source "trove-conductor.conf.erb"
