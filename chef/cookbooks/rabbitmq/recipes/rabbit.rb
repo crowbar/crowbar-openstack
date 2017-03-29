@@ -19,6 +19,8 @@
 #
 
 ha_enabled = node[:rabbitmq][:ha][:enabled]
+# we only do cluster if we do HA
+cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
 
 dirty = false
 
@@ -41,8 +43,19 @@ if node[:rabbitmq][:addresses] != addresses
   dirty = true
 end
 
-if ha_enabled
-  nodename = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
+
+nodename = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
+
+if cluster_enabled
+  if node[:rabbitmq][:nodename] != "rabbit@#{node[:hostname]}"
+    node.set[:rabbitmq][:nodename] = "rabbit@#{node[:hostname]}"
+    dirty = true
+  end
+  if node[:rabbitmq][:clustername] != nodename
+    node.set[:rabbitmq][:clustername] = nodename
+    dirty = true
+  end
+elsif ha_enabled
   if node[:rabbitmq][:nodename] != nodename
     node.set[:rabbitmq][:nodename] = nodename
     dirty = true
@@ -52,17 +65,6 @@ end
 node.save if dirty
 
 include_recipe "rabbitmq::default"
-
-if ha_enabled
-  log "HA support for rabbitmq is enabled"
-  include_recipe "rabbitmq::ha"
-  # All the rabbitmqctl commands are local, and can only be run if rabbitmq is
-  # local
-  service_name = "rabbitmq"
-  only_if_command = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
-else
-  log "HA support for rabbitmq is disabled"
-end
 
 if node[:rabbitmq][:ssl][:enabled]
   ssl_setup "setting up ssl for rabbitmq" do
@@ -74,6 +76,24 @@ if node[:rabbitmq][:ssl][:enabled]
     cert_required node[:rabbitmq][:ssl][:cert_required]
     ca_certs node[:rabbitmq][:ssl][:ca_certs]
   end
+end
+
+if ha_enabled
+  log "HA support for rabbitmq is enabled"
+  if cluster_enabled
+    include_recipe "rabbitmq::ha_cluster"
+    # only run the rabbitmqctl commands on the master node
+    ms_name = "ms-rabbitmq"
+    only_if_command = "crm resource show #{ms_name} | grep -q \" #{node.hostname} *Master$\""
+  else
+    include_recipe "rabbitmq::ha"
+    # All the rabbitmqctl commands are local, and can only be run if rabbitmq is
+    # local
+    service_name = "rabbitmq"
+    only_if_command = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
+  end
+else
+  log "HA support for rabbitmq is disabled"
 end
 
 # remove guest user
@@ -113,6 +133,27 @@ execute "rabbitmqctl set_user_tags #{node[:rabbitmq][:user]} management" do
   not_if "rabbitmqctl list_users | grep #{node[:rabbitmq][:user]} | grep -q management"
   action :run
   only_if only_if_command if ha_enabled
+end
+
+if cluster_enabled
+  set_policy_command = "rabbitmqctl set_policy -p #{node[:rabbitmq][:vhost]} " \
+      " ha-all '^(?!amq\.).*' '{\"ha-mode\": \"all\"}'"
+  check_policy_command = "rabbitmqctl list_policies -p #{node[:rabbitmq][:vhost]} | " \
+      " grep -q '^#{node[:rabbitmq][:vhost]}\\s*ha-all\\s'"
+
+  execute set_policy_command do
+    not_if check_policy_command
+    action :run
+    only_if only_if_command if ha_enabled
+  end
+
+  check_cluster_name_command = "rabbitmqctl cluster_status | " \
+      "grep -q '{cluster_name,<<\"#{node[:rabbitmq][:clustername]}\">>}'"
+  execute "rabbitmqctl set_cluster_name #{node[:rabbitmq][:clustername]}" do
+    not_if check_cluster_name_command
+    action :run
+    only_if only_if_command if ha_enabled
+  end
 end
 
 if node[:rabbitmq][:trove][:enabled]
