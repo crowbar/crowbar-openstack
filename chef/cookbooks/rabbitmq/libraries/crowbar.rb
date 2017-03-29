@@ -8,7 +8,7 @@ module CrowbarRabbitmqHelper
   end
 
   def self.get_listen_address(node)
-    if node[:rabbitmq][:ha][:enabled]
+    if node[:rabbitmq][:ha][:enabled] && !node[:rabbitmq][:cluster]
       vhostname = get_ha_vhostname(node)
       CrowbarPacemakerHelper.cluster_vip(node, "admin", vhostname)
     else
@@ -17,7 +17,7 @@ module CrowbarRabbitmqHelper
   end
 
   def self.get_public_listen_address(node)
-    if node[:rabbitmq][:ha][:enabled]
+    if node[:rabbitmq][:ha][:enabled] && !node[:rabbitmq][:cluster]
       vhostname = get_ha_vhostname(node)
       CrowbarPacemakerHelper.cluster_vip(node, "public", vhostname)
     else

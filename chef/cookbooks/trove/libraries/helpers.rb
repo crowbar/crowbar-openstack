@@ -30,6 +30,14 @@ module TroveHelper
     "#{trove_rabbit_settings[:vhost]}"
   end
 
+  def self.get_sql_connection(node)
+    # get Database data
+    db_settings = CrowbarOpenStackHelper.database_settings(node, "trove")
+    "#{db_settings[:url_scheme]}://#{node[:trove][:db][:user]}:"\
+    "#{node[:trove][:db][:password]}@#{db_settings[:address]}/"\
+    "#{node[:trove][:db][:database]}"
+  end
+
   def self.get_nova_details(nova_controllers, keystone_settings)
     # get nova information
     if nova_controllers.empty?
