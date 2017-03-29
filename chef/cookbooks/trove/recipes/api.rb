@@ -45,8 +45,7 @@ end
 
 sql_connection = TroveHelper.get_sql_connection node
 
-rabbitmq_servers = node_search_with_cache("roles:rabbitmq-server")
-rabbitmq_trove_settings = TroveHelper.get_rabbitmq_trove_url(node, rabbitmq_servers)
+rabbit_trove_url = fetch_rabbitmq_settings[:trove_url]
 
 nova_controllers = node_search_with_cache("roles:nova-controller")
 nova_url, nova_insecure = TroveHelper.get_nova_details nova_controllers, keystone_settings
@@ -142,8 +141,7 @@ template node[:trove][:api][:config_file] do
   variables(
     keystone_settings: keystone_settings,
     sql_connection: sql_connection,
-    rabbit_default_settings: fetch_rabbitmq_settings,
-    rabbit_trove_settings: rabbitmq_trove_settings,
+    rabbit_trove_url: rabbit_trove_url,
     nova_url: nova_url,
     nova_insecure: nova_insecure,
     cinder_url: cinder_url,
