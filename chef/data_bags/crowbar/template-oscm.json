@@ -12,12 +12,13 @@
         "user": "oscm",
         "password": "oscm"
       },
-      "heat_template": {
+      "openstack": {
         "image": "sles12-docker",
-        "flavor": "oscm.small",
+        "flavor_name": "oscm.small",
+        "flavor_ram": 1024,
+        "flavor_vcpus": 1,
+        "flavor_disk": 1,
         "keypair": "oscm",
-        "user": "oscm",
-        "project":"oscm"
       },
       "mail": {
         "auth": true,

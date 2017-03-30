@@ -17,6 +17,10 @@
 oscm_tenant = node[:oscm][:keystone][:tenant]
 oscm_user = node[:oscm][:keystone][:user]
 oscm_password = node[:oscm][:keystone][:password]
+oscm_flavor_name = node[:oscm][:openstack][:flavor_name]
+oscm_flavor_ram = node[:oscm][:openstack][:flavor_ram]
+oscm_flavor_vcpus = node[:oscm][:openstack][:flavor_vcpus]
+oscm_flavor_disk = node[:oscm][:openstack][:flavor_disk]
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
@@ -91,4 +95,19 @@ keystone_register "oscm give user _member_ role" do
   tenant_name oscm_tenant
   role_name "_member_"
   action :add_access
+end
+
+bash "add flavor" do
+  code <<-EOH
+  nova flavor-create #{oscm_flavor_name} auto #{oscm_flavor_ram} #{oscm_flavor_disk} #{oscm_flavor_vcpus} --is-public false &> /dev/null || exit 0
+EOH
+  environment ({
+    "OS_USERNAME" => oscm_user,
+    "OS_PASSWORD" => oscm_password,
+    "OS_TENANT_NAME" => oscm_tenant,
+    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
+    "OS_USER_DOMAIN_NAME" => "Default",
+    "OS_PROJECT_DOMAIN_NAME" => "Default"
+  })
 end

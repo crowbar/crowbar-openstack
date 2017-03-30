@@ -25,15 +25,16 @@
                 "password": { "type": "str", "required": true }
               }
             },
-            "heat_template" : {
+            "openstack" : {
               "type" : "map",
               "required" : true,
               "mapping": {
                 "image": { "type": "str", "required": true },
-                "flavor": { "type": "str", "required": true },
-                "keypair": { "type": "str", "required": true },
-                "user": { "type": "str", "required": true },
-                "project": { "type": "str", "required": true }
+                "flavor_name": { "type": "str", "required": true },
+                "flavor_ram": { "type": "int", "required": true },
+                "flavor_vcpus": { "type": "int", "required": true },
+                "flavor_disk": { "type": "int", "required": true },
+                "keypair": { "type": "str", "required": true }
               }
             },
             "mail" : {
