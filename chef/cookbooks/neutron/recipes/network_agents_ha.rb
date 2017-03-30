@@ -73,6 +73,9 @@ if use_l3_agent
     when ml2_mech_drivers.include?("linuxbridge")
       neutron_agent = node[:neutron][:platform][:lb_agent_name]
       neutron_agent_ra = node[:neutron][:ha][:network]["linuxbridge_ra"]
+    when ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
+      neutron_agent = ""
+      neutron_agent_ra = ""
     end
   when "vmware"
     neutron_agent = ""
@@ -80,14 +83,13 @@ if use_l3_agent
   end
   neutron_agent_primitive = neutron_agent.sub(/^openstack-/, "")
 
-  pacemaker_primitive neutron_agent_primitive do
-    agent neutron_agent_ra
-    op node[:neutron][:ha][:network][:op]
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  if not ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
+    objects = openstack_pacemaker_controller_clone_for_transaction neutron_agent_primitive do
+      agent neutron_agent_ra
+      op node[:neutron][:ha][:network][:op]
+    end
+    transaction_objects.push(objects)
   end
-  group_members << neutron_agent_primitive
-  transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
 end
 
 dhcp_agent_primitive = "neutron-dhcp-agent"
@@ -101,26 +103,37 @@ group_members << dhcp_agent_primitive
 transaction_objects << "pacemaker_primitive[#{dhcp_agent_primitive}]"
 
 if use_l3_agent
-  l3_agent_primitive = "neutron-l3-agent"
-  pacemaker_primitive l3_agent_primitive do
-    agent node[:neutron][:ha][:network][:l3_ra]
-    op node[:neutron][:ha][:network][:op]
+  # The L2 agent must start before DHCP agent as DHCP agent depends on it.
+  # Otherwise, this can result in port failing to bind.
+  l2_dhcp_order_name = "o-cl-neutron-l2-dhcp-agents"
+  pacemaker_order l2_dhcp_order_name do
+    ordering "cl-#{neutron_agent_primitive} cl-#{dhcp_agent_primitive}"
+    score "Optional"
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  group_members << l3_agent_primitive
-  transaction_objects << "pacemaker_primitive[#{l3_agent_primitive}]"
+  transaction_objects << "pacemaker_order[#{l2_dhcp_order_name}]"
+
+  if not ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
+    l3_agent_primitive = "neutron-l3-agent"
+    objects = openstack_pacemaker_controller_clone_for_transaction l3_agent_primitive do
+      agent node[:neutron][:ha][:network][:l3_ra]
+      op node[:neutron][:ha][:network][:op]
+    end
+    transaction_objects.push(objects)
+
+    l3_agent_clone = "cl-#{l3_agent_primitive}"
+  end
 end
 
-metadata_agent_primitive = "neutron-metadata-agent"
-pacemaker_primitive metadata_agent_primitive do
-  agent node[:neutron][:ha][:network][:metadata_ra]
-  op node[:neutron][:ha][:network][:op]
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+if not ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
+  metadata_agent_primitive = "neutron-metadata-agent"
+  objects = openstack_pacemaker_controller_clone_for_transaction metadata_agent_primitive do
+    agent node[:neutron][:ha][:network][:metadata_ra]
+    op node[:neutron][:ha][:network][:op]
+  end
+  transaction_objects.push(objects)
 end
-group_members << metadata_agent_primitive
-transaction_objects << "pacemaker_primitive[#{metadata_agent_primitive}]"
 
 metering_agent_primitive = "neutron-metering-agent"
 pacemaker_primitive metering_agent_primitive do
