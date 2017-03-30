@@ -105,6 +105,7 @@ en:
               netapp_password: 'Password for accessing NetApp'
               netapp_server_hostname: 'Server host name'
               netapp_server_port: 'Server port'
+              max_over_subscription_ratio: 'Maximum Oversubscription Ratio'
               netapp_transport_type: 'Transport Type'
               netapp_volume_list: 'Restrict provisioning on iSCSI to these volumes (netapp_volume_list)'
               netapp_vfiler: 'The vFiler unit name for provisioning OpenStack volumes (netapp_vfiler)'

@@ -269,6 +269,10 @@ iscsi_write_cache = off
 image_upload_use_cinder_backend = true
   <% end -%>
 
+  <% if volume[volume['backend_driver']] && volume[volume['backend_driver']]['max_over_subscription_ratio'] -%>
+max_over_subscription_ratio = <%= volume[volume['backend_driver']]['max_over_subscription_ratio'] %>
+  <% end -%>
+
   <% break unless @use_multi_backend -%>
 <% end -%>
 

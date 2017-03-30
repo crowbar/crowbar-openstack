@@ -71,7 +71,8 @@
                     "netapp_password": { "type": "str", "required": true },
                     "netapp_vfiler": { "type": "str", "required": true },
                     "netapp_transport_type": { "type": "str", "required": true },
-                    "netapp_volume_list": { "type": "str", "required": true }
+                    "netapp_volume_list": { "type": "str", "required": true },
+                    "max_over_subscription_ratio": { "type": "int", "required": true }
                 }
                 },
                 "emc": {
@@ -207,7 +208,8 @@
                       "netapp_password": { "type": "str", "required": true },
                       "netapp_vfiler": { "type": "str", "required": true },
                       "netapp_transport_type": { "type": "str", "required": true },
-                      "netapp_volume_list": { "type": "str", "required": true }
+                      "netapp_volume_list": { "type": "str", "required": true },
+                      "max_over_subscription_ratio": { "type": "int", "required": true }
                     }
                   },
                   "emc": {
