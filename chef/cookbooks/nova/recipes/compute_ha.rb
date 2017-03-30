@@ -63,9 +63,15 @@ when "ml2"
     neutron_agent = neutron[:neutron][:platform][:lb_agent_name]
     neutron_agent_pkg = neutron[:neutron][:platform][:lb_agent_pkg]
     neutron_agent_ra = neutron[:neutron][:ha][:network]["linuxbridge_ra"]
+  when ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
+    neutron_agent = ""
+    neutron_agent_pkg = ""
+    neutron_agent_ra = ""
   end
 
-  package neutron_agent_pkg
+  unless ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
+    package neutron_agent_pkg
+  end
 end
 
 if neutron[:neutron][:use_dvr]
@@ -103,11 +109,15 @@ compute_transaction_objects << "pacemaker_primitive[#{libvirtd_primitive}]"
 case neutron[:neutron][:networking_plugin]
 when "ml2"
   neutron_agent_primitive = "#{neutron_agent.sub(/^openstack-/, "")}-compute"
-  pacemaker_primitive neutron_agent_primitive do
-    agent neutron_agent_ra
-    op neutron[:neutron][:ha][:network][:op]
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  unless ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
+    pacemaker_primitive neutron_agent_primitive do
+      agent neutron_agent_ra
+      op neutron[:neutron][:ha][:network][:op]
+      action :update
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
+    compute_primitives << neutron_agent_primitive
+    compute_transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
   end
   compute_primitives << neutron_agent_primitive
   compute_transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
