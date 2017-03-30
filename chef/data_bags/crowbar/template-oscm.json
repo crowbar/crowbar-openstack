@@ -18,7 +18,7 @@
         "flavor_ram": 1024,
         "flavor_vcpus": 1,
         "flavor_disk": 1,
-        "keypair": "oscm",
+        "keypair": "oscm"
       },
       "mail": {
         "auth": true,
