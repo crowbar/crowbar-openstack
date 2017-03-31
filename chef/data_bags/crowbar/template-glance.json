@@ -54,6 +54,7 @@
         "user": "",
         "password": "",
         "datastores": [],
+        "insecure": false,
         "store_image_dir": "/openstack_glance"
       },
       "crossdomain": {
@@ -71,7 +72,7 @@
     "glance": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 103,
+      "schema-revision": 104,
       "element_states": {
         "glance-server": [ "readying", "ready", "applying" ]
       },

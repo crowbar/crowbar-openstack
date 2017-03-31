@@ -43,6 +43,7 @@ vmware_server_password = <%= node[:glance][:vsphere][:password] %>
 <% node[:glance][:vsphere][:datastores].each do |datastore| -%>
 vmware_datastores ="<%= datastore %>"
 <% end -%>
+vmware_api_insecure = <% node[:glance][:vsphere][:insecure] ? "True" : "False" %>
 cinder_catalog_info = volumev2:cinderv2:internalURL
 cinder_os_region_name = <%= @keystone_settings['endpoint_region'] %>
 cinder_api_insecure = <%= @cinder_api_insecure ? 'True' : 'False' %>

@@ -44,6 +44,7 @@ en:
           datastores: 'Datastores for Storing Images'
           datastores_hint: 'A comma-separated list of datastores specified in the following format: <datacenter_name>:<datastore_name>'
           store_image_dir: 'Path on the datastore, where the glance images will be stored'
+          insecure: 'vCenter SSL Certificate is insecure (for instance, self-signed)'
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'
