@@ -19,7 +19,7 @@ RewriteRule / https://%{HTTP_HOST}%{REQUEST_URI} [L,R]
 <% else %>
 <VirtualHost <%= @bind_host %>:<%= @bind_port %>>
 <% end %>
-    WSGIDaemonProcess horizon user=<%= @user %> group=<%= @group %> processes=3 threads=10 home=<%= @horizon_dir %> 
+    WSGIDaemonProcess horizon user=<%= @user %> group=<%= @group %> processes=3 threads=10 home=<%= @horizon_dir %>  display-name=%{GROUP}
     WSGIScriptAlias / <%= @horizon_dir %>/openstack_dashboard/wsgi/django.wsgi
     SetEnv APACHE_RUN_USER  <%= @user %>
     SetEnv APACHE_RUN_GROUP <%= @group %>
