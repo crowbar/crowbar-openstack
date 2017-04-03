@@ -1,15 +1,11 @@
 # Copyright 2017 FUJITSU LIMITED
 
 ################################################################################
-# Host definitions. Replace monasca_host, openstack_host, offline_resources_host,
-# ansible_ssh_user, ssh_user_openstack and ssh_user_offline_host with
-# valid informations.
+# Host definitions. Replace monasca_host, openstack_host,
+# ansible_ssh_user, ssh_user_openstack with valid informations.
 ################################################################################
 
 localhost                        ansible_connection=local
-
-# Offline Host
-offline-resources-node           ansible_ssh_host=<%= @offline_resources_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Monasca host
 cmm-node                         ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -77,10 +73,6 @@ influxdb-node                    ansible_ssh_host=<%= @monasca_host %> ansible_s
 
 [openstack_group]
 keystone-node
-
-[offline_group]
-offline-resources-node
-localhost
 
 [memcached_group]
 memcached-node
@@ -156,7 +148,6 @@ storm_nimbus_group
 storm_supervisor_group
 
 [all_group:children]
-offline_group
 openstack_group
 monasca_group
 
@@ -173,4 +164,3 @@ storm_group
 monasca_thresh_group
 mariadb_group
 influxdb_group
-

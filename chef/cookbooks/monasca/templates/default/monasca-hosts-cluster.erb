@@ -2,14 +2,11 @@
 
 ################################################################################
 # Host definitions. Replace monasca_host, openstack_host, ex_node_[1-3]_host,
-# offline_resources_host, ssh_user_monasca, ssh_user_openstack, ssh_user_offline_host
+# ssh_user_monasca, ssh_user_openstack
 # and ssh_user_ex_node_[1-3] with valid information.
 ################################################################################
 
 localhost                        ansible_connection=local
-
-# Offline Host
-offline-resources-node           ansible_ssh_host=<%= @offline_resources_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Openstack Hosts
 keystone-node                    ansible_ssh_host=<%= @keystone_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -128,10 +125,6 @@ monasca-thresh-node              ansible_ssh_host=<%= @monasca_host %> ansible_s
 ################################################################################
 # Other group definition
 ################################################################################
-
-[offline_group]
-offline-resources-node
-localhost
 
 [openstack_group]
 keystone-node
@@ -261,7 +254,6 @@ storm_nimbus_group
 storm_supervisor_group
 
 [all_group:children]
-offline_group
 openstack_group
 monasca_group
 

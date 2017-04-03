@@ -18,7 +18,6 @@ memcached_port: 11211
 mysql_port: 3306
 
 # hosts
-offline_host: "{{ hostvars['offline-resources-node']['ansible_ssh_host'] }}"
 monasca_api_ip: "{% if groups['monasca_api_group']|length > 1 %}
                     {{ hostvars['monasca-api-balancer-node']['ansible_ssh_host'] }}
                  {% else %}
@@ -49,8 +48,6 @@ keystone_version: <%= @keystone_settings['api_version'] %>
 keystone_url: "<%= @keystone_settings['public_auth_url'] %>"
 
 # URL service definition
-balls_repo_url: "http://{{ offline_host }}:8888"
-world_repo_url: "{{ balls_repo_url }}/world"
 monasca_api_url: "http://{{ monasca_api_ip|trim|safe }}:{{ monasca_api_client_port|int }}/v2.0"
 monasca_log_api_url: "http://{{ monasca_log_api_ip|trim|safe }}:{{ monasca_log_api_port|int }}/v3.0"
 kibana_url: "http://{{ kibana_ip|trim|safe }}:{{ kibana_port }}"
@@ -70,12 +67,6 @@ download_tmp_dir: "{{ opt_dir }}/.download_dir"
 monasca_download_dir: /opt/monasca-downloads
 clean_up_dirs:
   - "{{ download_tmp_dir }}"
-
-# Installation mode
-offline_mode: True
-
-# Download urls
-logstash_agent_download_url: "{{ world_repo_url }}"
 
 # Keystone Admin credentials
 keystone_admin_token: <%= @keystone_settings['admin_token'] %>
@@ -104,4 +95,3 @@ pbr_version: 1.8.1
 
 # try to use this variable for each wait_for like task
 monasca_wait_for_period: 180
-

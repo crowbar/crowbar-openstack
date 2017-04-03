@@ -44,7 +44,6 @@ template "/opt/monasca-installer/monasca-hosts" do
     monasca_host: monasca_hosts[0],
     monasca_hosts: monasca_hosts,
     ansible_ssh_user: "root",
-    offline_resources_host: CrowbarHelper.get_host_for_admin_url(node),
     keystone_host: keystone_settings["public_url_host"]
   )
   notifies :run, "execute[run ansible]", :delayed
