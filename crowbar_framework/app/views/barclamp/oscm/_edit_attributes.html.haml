@@ -68,6 +68,14 @@
 
     %fieldset
       %legend
+        = t(".openstack_settings")
+
+      %span.help-block
+        = t('.keypair_hint')
+      = text_field %w(openstack keypair_public_key)
+
+    %fieldset
+      %legend
         = t(".ssl_header")
 
       = select_field %w(api protocol),

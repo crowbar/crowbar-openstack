@@ -21,7 +21,7 @@ oscm_flavor_name = node[:oscm][:openstack][:flavor_name]
 oscm_flavor_ram = node[:oscm][:openstack][:flavor_ram]
 oscm_flavor_vcpus = node[:oscm][:openstack][:flavor_vcpus]
 oscm_flavor_disk = node[:oscm][:openstack][:flavor_disk]
-oscm_group = ""
+oscm_group = "root"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
