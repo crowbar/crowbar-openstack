@@ -96,6 +96,7 @@ ansible_vars = {
   kibana_host: pub_net_ip,
   log_api_bind_host: pub_net_ip,
   influxdb_bind_address: cmm_net_ip,
+  influxdb_host: cmm_net_ip,
   monasca_api_bind_host: pub_net_ip,
   elasticsearch_host: cmm_net_ip,
   nimbus_host: cmm_net_ip,
@@ -105,7 +106,7 @@ ansible_vars = {
   database_host: cmm_net_ip,
   monasca_api_url: "http://#{pub_net_ip}:8070/v2.0",
   monasca_log_api_url: "http://#{pub_net_ip}:5607/v2.0",
-  memcached_nodes: "#{cmm_net_ip}:11211",
+  memcached_nodes: ["#{cmm_net_ip}:11211"],
   influxdb_url: "http://#{cmm_net_ip}:8086",
   elasticsearch_nodes: "[#{cmm_net_ip}]",
   elasticsearch_hosts: cmm_net_ip

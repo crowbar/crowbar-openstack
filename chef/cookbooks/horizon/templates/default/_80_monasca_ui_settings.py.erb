@@ -65,3 +65,4 @@ KIBANA_HOST = getattr(settings, 'KIBANA_HOST', 'http://<%= @kibana_host %>:5601/
 
 OPENSTACK_SSL_NO_VERIFY = getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', False)
 OPENSTACK_SSL_CACERT = getattr(settings, 'OPENSTACK_SSL_CACERT', None)
+OPENSTACK_ENDPOINT_TYPE="publicURL"

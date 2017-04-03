@@ -18,4 +18,13 @@ module MonascaUiHelper
     ssl_enabled = node[:monasca][:api][:ssl]
     CrowbarHelper.get_host_for_public_url(node, ssl_enabled, ha_enabled)
   end
+
+  def self.api_public_url(node)
+    host = monasca_public_host(node)
+    # SSL is not supported at this moment
+    # protocol = node[:monasca][:api][:ssl] ? "https" : "http"
+    protocol = "http"
+    port = node[:monasca][:api][:bind_port]
+    "#{protocol}://#{host}:#{port}/v2.0"
+  end
 end

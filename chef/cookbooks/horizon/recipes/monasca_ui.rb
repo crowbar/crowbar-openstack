@@ -38,6 +38,17 @@ file "/etc/apache2/vhosts.d/grafana.conf" do
   notifies :reload, resources(service: "apache2")
 end
 
+template "/srv/www/grafana/config.js" do
+  source "grafana-config.js"
+  variables(
+    api_url: MonascaUiHelper.api_public_url(monasca_server)
+  )
+  owner "root"
+  group "www"
+  mode "0644"
+  notifies :reload, resources(service: "apache2")
+end
+
 cookbook_file "/srv/www/grafana/app/dashboards/openstack.json" do
   source "grafana-openstack.json"
   owner "root"
