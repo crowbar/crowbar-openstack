@@ -21,6 +21,7 @@ oscm_flavor_name = node[:oscm][:openstack][:flavor_name]
 oscm_flavor_ram = node[:oscm][:openstack][:flavor_ram]
 oscm_flavor_vcpus = node[:oscm][:openstack][:flavor_vcpus]
 oscm_flavor_disk = node[:oscm][:openstack][:flavor_disk]
+oscm_group = ""
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
@@ -110,4 +111,15 @@ EOH
     "OS_USER_DOMAIN_NAME" => "Default",
     "OS_PROJECT_DOMAIN_NAME" => "Default"
   })
+end
+
+if node[:oscm][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for oscm" do
+    generate_certs node[:oscm][:ssl][:generate_certs]
+    certfile node[:oscm][:ssl][:certfile]
+    keyfile node[:oscm][:ssl][:keyfile]
+    group oscm_group
+    fqdn node[:fqdn]
+    ca_certs node[:oscm][:ssl][:ca_certs]
+  end
 end
