@@ -21,6 +21,8 @@ oscm_flavor_name = node[:oscm][:openstack][:flavor_name]
 oscm_flavor_ram = node[:oscm][:openstack][:flavor_ram]
 oscm_flavor_vcpus = node[:oscm][:openstack][:flavor_vcpus]
 oscm_flavor_disk = node[:oscm][:openstack][:flavor_disk]
+oscm_keypair_name = node[:oscm][:openstack][:keypair]
+oscm_keypair_public_key = node[:oscm][:openstack][:keypair_public_key]
 oscm_group = "root"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -101,6 +103,21 @@ end
 bash "add flavor" do
   code <<-EOH
   nova flavor-create #{oscm_flavor_name} auto #{oscm_flavor_ram} #{oscm_flavor_disk} #{oscm_flavor_vcpus} --is-public false &> /dev/null || exit 0
+EOH
+  environment ({
+    "OS_USERNAME" => oscm_user,
+    "OS_PASSWORD" => oscm_password,
+    "OS_TENANT_NAME" => oscm_tenant,
+    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
+    "OS_USER_DOMAIN_NAME" => "Default",
+    "OS_PROJECT_DOMAIN_NAME" => "Default"
+  })
+end
+
+bash "add keypair" do
+  code <<-EOH
+  nova keypair-add #{oscm_keypair_name} --pub-key #{oscm_keypair_public_key} &> /dev/null || exit 0
 EOH
   environment ({
     "OS_USERNAME" => oscm_user,
