@@ -35,7 +35,8 @@
                 "flavor_vcpus": { "type": "int", "required": true },
                 "flavor_disk": { "type": "int", "required": true },
                 "keypair": { "type": "str", "required": true },
-                "keypair_public_key": { "type": "str", "required": true }
+                "keypair_publickey": { "type": "str", "required": true },
+                "keypair_publickeyfile": { "type": "str", "required": true }
               }
             },
             "mail" : {

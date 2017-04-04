@@ -22,7 +22,8 @@ oscm_flavor_ram = node[:oscm][:openstack][:flavor_ram]
 oscm_flavor_vcpus = node[:oscm][:openstack][:flavor_vcpus]
 oscm_flavor_disk = node[:oscm][:openstack][:flavor_disk]
 oscm_keypair_name = node[:oscm][:openstack][:keypair]
-oscm_keypair_public_key = node[:oscm][:openstack][:keypair_public_key]
+oscm_keypair_publickey = node[:oscm][:openstack][:keypair_publickey]
+oscm_keypair_publickeyfile = node[:oscm][:openstack][:keypair_publickeyfile]
 oscm_group = "root"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -117,7 +118,9 @@ end
 
 bash "add keypair" do
   code <<-EOH
-  nova keypair-add #{oscm_keypair_name} --pub-key #{oscm_keypair_public_key} &> /dev/null || exit 0
+  publickey = #{oscm_keypair_publickey}
+  [[ !  -z  "${publickey// }" ]] && mkdir -p "$(dirname "#{oscm_keypair_publickeyfile}")" &> /dev/null; echo "&{publickey}" > "#{oscm_keypair_publickeyfile}"
+  nova keypair-add #{oscm_keypair_name} --pub-key #{oscm_keypair_publickeyfile} &> /dev/null || exit 0
 EOH
   environment ({
     "OS_USERNAME" => oscm_user,

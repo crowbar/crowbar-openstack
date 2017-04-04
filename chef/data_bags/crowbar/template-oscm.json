@@ -19,7 +19,8 @@
         "flavor_vcpus": 1,
         "flavor_disk": 1,
         "keypair": "oscm",
-        "keypair_public_key": ""
+        "keypair_publickey": "",
+        "keypair_publickeyfile": "/etc/oscm/ssl/openstack/keypair_publickey.pem"
       },
       "mail": {
         "auth": true,
