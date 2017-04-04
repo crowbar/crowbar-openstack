@@ -50,7 +50,7 @@ en:
         proxy_hint: 'A comma-separated list of hosts which can bypass the proxy'
         openstack_settings: "OpenStack Settings"
         openstack:
-           keypair_public_key: "Public Key"
+           keypair_publickey: "Public Key"
         keypair_hint: 'SSH public key for the openstack instance where the OSCM will be deployed'
         api:
           protocol: 'Protocol'
