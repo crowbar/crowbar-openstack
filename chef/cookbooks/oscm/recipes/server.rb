@@ -118,8 +118,8 @@ end
 
 bash "add keypair" do
   code <<-EOH
-  publickey = #{oscm_keypair_publickey}
-  [[ !  -z  "${publickey// }" ]] && mkdir -p "$(dirname "#{oscm_keypair_publickeyfile}")" &> /dev/null; echo "&{publickey}" > "#{oscm_keypair_publickeyfile}"
+  publickey="#{oscm_keypair_publickey}"
+  [[ !  -z  "${publickey// }" ]] && mkdir -p "$(dirname "#{oscm_keypair_publickeyfile}")" &> /dev/null; echo "${publickey}" > "#{oscm_keypair_publickeyfile}"
   nova keypair-add #{oscm_keypair_name} --pub-key #{oscm_keypair_publickeyfile} &> /dev/null || exit 0
 EOH
   environment ({
