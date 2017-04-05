@@ -32,7 +32,8 @@ pacemaker_primitive service_name do
     "erlang_cookie" => node[:rabbitmq][:erlang_cookie],
     "pid_file" => pid_file,
     "rmq_feature_health_check" => false,
-    "rmq_feature_local_list_queues" => false
+    "rmq_feature_local_list_queues" => false,
+    "default_vhost" => node[:rabbitmq][:vhost]
   })
   op rabbitmq_op
   action :update
