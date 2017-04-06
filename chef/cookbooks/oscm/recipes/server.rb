@@ -101,7 +101,7 @@ keystone_register "oscm give user _member_ role" do
   action :add_access
 end
 
-bash "add flavor" do
+bash "add oscm flavor" do
   code <<-EOH
   nova flavor-create #{oscm_flavor_name} auto #{oscm_flavor_ram} #{oscm_flavor_disk} #{oscm_flavor_vcpus} --is-public false &> /dev/null || exit 0
 EOH
@@ -116,11 +116,15 @@ EOH
   })
 end
 
-bash "add keypair" do
+bash "add oscm keypair" do
   code <<-EOH
   publickey="#{oscm_keypair_publickey}"
-  [[ !  -z  "${publickey// }" ]] && mkdir -p "$(dirname "#{oscm_keypair_publickeyfile}")" &> /dev/null; echo "${publickey}" > "#{oscm_keypair_publickeyfile}"
-  nova keypair-add #{oscm_keypair_name} --pub-key #{oscm_keypair_publickeyfile} &> /dev/null || exit 0
+  if !  -z  "${publickey// }"
+  then
+    mkdir -p "$(dirname "#{oscm_keypair_publickeyfile}")" &> /dev/null
+    echo "${publickey}" > "#{oscm_keypair_publickeyfile}"
+    nova keypair-add #{oscm_keypair_name} --pub-key #{oscm_keypair_publickeyfile} &> /dev/null || exit 0
+  fi
 EOH
   environment ({
     "OS_USERNAME" => oscm_user,
