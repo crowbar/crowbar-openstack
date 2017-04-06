@@ -45,12 +45,14 @@ template monasca_reconfigure_file do
     agent_dimensions: agent_dimensions,
     install_plugins_only: false
   )
+  notifies :run, "execute[monasca-setup detect services]", :delayed
 end
 
 execute "monasca-setup detect services" do
   command monasca_reconfigure_file
   user "root"
   group "root"
+  action :nothing
 end
 
 service "monasca-metric-agent" do
