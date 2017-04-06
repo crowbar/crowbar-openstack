@@ -154,6 +154,7 @@ end
     group 'root'
     mode '0755'
   end
+ end
 
 cookbook_file '/etc/oscm/heat/volumes.yaml' do
   source 'volumes.yaml'
