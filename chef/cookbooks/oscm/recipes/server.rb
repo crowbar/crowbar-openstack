@@ -147,3 +147,11 @@ if node[:oscm][:api][:protocol] == "https"
     ca_certs node[:oscm][:ssl][:ca_certs]
   end
 end
+
+cookbook_file '/etc/oscm/heat/volumes.yaml' do
+  source 'volumes.yaml'
+  owner 'root'
+  group 'root'
+  mode '0755'
+  action :create
+end
