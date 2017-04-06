@@ -148,6 +148,13 @@ if node[:oscm][:api][:protocol] == "https"
   end
 end
 
+%w[ /etc /etc/oscm /etc/oscm/heat ].each do |path|
+  directory path do
+    owner 'root'
+    group 'root'
+    mode '0755'
+  end
+
 cookbook_file '/etc/oscm/heat/volumes.yaml' do
   source 'volumes.yaml'
   owner 'root'
