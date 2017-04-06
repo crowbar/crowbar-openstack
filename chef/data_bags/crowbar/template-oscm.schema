@@ -36,7 +36,9 @@
                 "flavor_disk": { "type": "int", "required": true },
                 "keypair": { "type": "str", "required": true },
                 "keypair_publickey": { "type": "str", "required": true },
-                "keypair_publickeyfile": { "type": "str", "required": true }
+                "keypair_publickeyfile": { "type": "str", "required": true },
+                "db_volume_size": { "type": "int", "required": true },
+                "app_volume_size": { "type": "int", "required": true }
               }
             },
             "mail" : {

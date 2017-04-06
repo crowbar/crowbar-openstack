@@ -20,7 +20,9 @@
         "flavor_disk": 1,
         "keypair": "oscm",
         "keypair_publickey": "",
-        "keypair_publickeyfile": "/etc/oscm/ssl/openstack/keypair_publickey.pem"
+        "keypair_publickeyfile": "/etc/oscm/ssl/openstack/keypair_publickey.pem",
+        "db_volume_size": 1,
+        "app_volume_size": 1
       },
       "mail": {
         "auth": true,
