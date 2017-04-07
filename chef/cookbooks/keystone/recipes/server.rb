@@ -424,21 +424,27 @@ if node[:keystone][:signing][:token_format] == "fernet"
     end
   end
 
-  unless File.exist?("/etc/keystone/fernet-keys/0")
-    # Setup a key repository for fernet tokens
-    execute "keystone-manage fernet_setup" do
-      command "keystone-manage fernet_setup \
-        --keystone-user #{node[:keystone][:user]} \
-        --keystone-group #{node[:keystone][:group]}"
-      action :run
-      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  # Setup a key repository for fernet tokens
+  execute "keystone_fernet_setup" do
+    command "keystone-manage fernet_setup \
+      --keystone-user #{node[:keystone][:user]} \
+      --keystone-group #{node[:keystone][:group]}"
+    action :run
+    only_if do
+      !File.exist?("/etc/keystone/fernet-keys/0") &&
+        (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
     end
+  end
 
-    # We would like to propagate fernet keys to all nodes in the cluster
-    execute "propagate fernet keys to all nodes in the cluster" do
-      command rsync_command
-      action :run
-      only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  # We would like to propagate fernet keys to all nodes in the cluster
+  execute "propagate_fernet_keys" do
+    command "#{rsync_command} touch /var/lib/keystone/.fernet-sync.lock"
+    action :run
+    only_if do
+      !rsync_command.empty? &&
+        File.exist?("/etc/keystone/fernet-keys/0") &&
+        !File.exist?("/var/lib/keystone/.fernet-sync.lock") &&
+        (ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node))
     end
   end
 
