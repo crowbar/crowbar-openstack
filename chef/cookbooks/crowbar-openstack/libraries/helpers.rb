@@ -125,10 +125,8 @@ class CrowbarOpenStackHelper
       else
         if rabbit[:rabbitmq][:ssl][:enabled]
           port = rabbit[:rabbitmq][:ssl][:port]
-          use_ssl = true
         else
           port = rabbit[:rabbitmq][:port]
-          use_ssl = false
         end
         client_ca_certs = if rabbit[:rabbitmq][:ssl][:enabled] && \
             !rabbit[:rabbitmq][:ssl][:insecure]
@@ -140,7 +138,7 @@ class CrowbarOpenStackHelper
           user: rabbit[:rabbitmq][:user],
           password: rabbit[:rabbitmq][:password],
           vhost: rabbit[:rabbitmq][:vhost],
-          use_ssl: use_ssl,
+          use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
           client_ca_certs: client_ca_certs,
           url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
             "#{rabbit[:rabbitmq][:password]}@" \
