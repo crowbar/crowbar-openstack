@@ -151,7 +151,8 @@ template neutron[:neutron][:config_file] do
       dns_domain: neutron[:neutron][:dhcp_domain],
       mtu_value: mtu_value,
       infoblox: infoblox_settings,
-      ipam_driver: ipam_driver
+      ipam_driver: ipam_driver,
+      rpc_workers: neutron[:neutron][:rpc_workers]
     )
 end
 
