@@ -210,6 +210,12 @@ lock_path = /var/run/nova
 [oslo_messaging_notifications]
 driver = messagingv2
 
+[oslo_messaging_rabbit]
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+
 [serial_console]
 enabled = <%= @serial_enabled ? "True" : "False" %>
 base_url = ws://<%= @serialproxy_public_host %>:<%= node[:nova][:ports][:serialproxy] %>/

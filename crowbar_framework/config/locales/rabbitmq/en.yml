@@ -22,6 +22,17 @@ en:
         vhost: 'Virtual host'
         user: 'User'
         port: 'Port'
+        ssl_header: 'SSL Support'
+        ssl:
+          enabled: 'Enable SSL'
+          port: 'SSL Port'
+          generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          certfile: 'SSL Certificate File'
+          keyfile: 'SSL (Private) Key File'
+          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          cert_required: 'Require Client Certificate'
+          ca_certs: 'SSL CA Certificates File'
+          client_ca_certs: 'SSL client CA file (used to validate rabbitmq server certificate)'
         ha_header: 'High Availability'
         ha:
           storage:

@@ -65,3 +65,9 @@ identity_uri = <%= @keystone_settings['admin_auth_url'] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+
+[oslo_messaging_rabbit]
+rabbit_use_ssl = <%= @rabbit_default_settings[:use_ssl] %>
+<% if @rabbit_default_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_default_settings[:client_ca_certs] %>
+<% end -%>
