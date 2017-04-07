@@ -24,6 +24,10 @@ oscm_flavor_disk = node[:oscm][:openstack][:flavor_disk]
 oscm_keypair_name = node[:oscm][:openstack][:keypair]
 oscm_keypair_publickey = node[:oscm][:openstack][:keypair_publickey]
 oscm_keypair_publickeyfile = node[:oscm][:openstack][:keypair_publickeyfile]
+oscm_heattemplate_path = node[:oscm][:openstack][:heattemplate_path]
+oscm_volumestack_name = node[:oscm][:openstack][:volume_stack][:stack_name]
+oscm_db_volume_size = node[:oscm][:openstack][:volume_stack][:db_volume_size]
+oscm_app_volume_size = node[:oscm][:openstack][:volume_stack][:app_volume_size]
 oscm_group = "root"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -101,6 +105,17 @@ keystone_register "oscm give user _member_ role" do
   action :add_access
 end
 
+if node[:oscm][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for oscm" do
+    generate_certs node[:oscm][:ssl][:generate_certs]
+    certfile node[:oscm][:ssl][:certfile]
+    keyfile node[:oscm][:ssl][:keyfile]
+    group oscm_group
+    fqdn node[:fqdn]
+    ca_certs node[:oscm][:ssl][:ca_certs]
+  end
+end
+
 bash "add oscm flavor" do
   code <<-EOH
   nova flavor-create #{oscm_flavor_name} auto #{oscm_flavor_ram} #{oscm_flavor_disk} #{oscm_flavor_vcpus} --is-public false &> /dev/null || exit 0
@@ -137,29 +152,32 @@ EOH
   })
 end
 
-if node[:oscm][:api][:protocol] == "https"
-  ssl_setup "setting up ssl for oscm" do
-    generate_certs node[:oscm][:ssl][:generate_certs]
-    certfile node[:oscm][:ssl][:certfile]
-    keyfile node[:oscm][:ssl][:keyfile]
+directory "#{oscm_heattemplate_path}" do
+    owner oscm_group
     group oscm_group
-    fqdn node[:fqdn]
-    ca_certs node[:oscm][:ssl][:ca_certs]
-  end
-end
-
-%w[ /etc /etc/oscm /etc/oscm/heat ].each do |path|
-  directory path do
-    owner 'root'
-    group 'root'
-    mode '0755'
-  end
+    mode 0755
  end
 
-cookbook_file '/etc/oscm/heat/volumes.yaml' do
-  source 'volumes.yaml'
-  owner 'root'
-  group 'root'
-  mode '0755'
+cookbook_file "#{oscm_heattemplate_path}/volumes.yaml" do
+  source "volumes.yaml"
+  owner oscm_group
+  group oscm_group
+  mode 0755
   action :create
 end
+
+bash "create oscm volumes stack with name #{oscm_volumestack_name}" do
+  code <<-EOH
+  openstack stack create --parameter db_volume_size=#{oscm_db_volume_size} --parameter app_volume_size=#{oscm_app_volume_size} -t #{oscm_heattemplate_path}/volumes.yaml #{oscm_volumestack_name} &> /dev/null || exit 0
+EOH
+  environment ({
+    "OS_USERNAME" => oscm_user,
+    "OS_PASSWORD" => oscm_password,
+    "OS_TENANT_NAME" => oscm_tenant,
+    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
+    "OS_USER_DOMAIN_NAME" => "Default",
+    "OS_PROJECT_DOMAIN_NAME" => "Default"
+  })
+end
+
