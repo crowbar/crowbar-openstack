@@ -3,7 +3,18 @@
   [
    {tcp_listeners, [
                     <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{node[:rabbitmq][:port]}}" }.join(", ") %>
-                   ]},
+                    ]},
+   {tcp_listen_options, [binary,
+                         {packet, raw},
+                         {reuseaddr, true},
+                         {backlog, 4096},
+                         {sndbuf, 16384},
+                         {recbuf, 16384},
+                         {nodelay, true},
+                         {exit_on_close, false},
+                         {keepalive, true}
+                         ]},
+   {hipe_compile, true},
    {disk_free_limit, 50000000}
   ]
  },
