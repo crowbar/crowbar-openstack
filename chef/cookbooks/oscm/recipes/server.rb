@@ -168,7 +168,7 @@ end
 
 bash "create oscm volumes stack with name #{oscm_volumestack_name}" do
   code <<-EOH
-  openstack stack create --parameter db_volume_size=#{oscm_db_volume_size} --parameter app_volume_size=#{oscm_app_volume_size} -t #{oscm_heattemplate_path}/volumes.yaml #{oscm_volumestack_name} &> /dev/null || exit 0
+  openstack stack create --parameter "db_volume_size=#{oscm_db_volume_size}" --parameter "app_volume_size=#{oscm_app_volume_size}" -t #{oscm_heattemplate_path}/volumes.yaml #{oscm_volumestack_name} &> /dev/null || exit 0
 EOH
   environment ({
     "OS_USERNAME" => oscm_user,
