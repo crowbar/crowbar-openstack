@@ -12,7 +12,7 @@
 
 Lint/EndAlignment:
   StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#lintendalignment
-  AlignWith: variable
+  EnforcedStyleAlignWith: variable
 
 Metrics/AbcSize:
   StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#metricsabcsize
@@ -57,17 +57,13 @@ Style/StringLiteralsInInterpolation:
   StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#stylestringliteralsininterpolation
   EnforcedStyle: double_quotes
 
-Style/SymbolArray:
-  StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#stylesymbolarray
-  EnforcedStyle: brackets
-
 Style/WordArray:
-  StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#stylewordarray
-  EnforcedStyle: brackets
+  StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#deviations-from-the-upstream-style-guide
+  Enabled: false
 
 Style/RegexpLiteral:
-  StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#styleregexpliteral
-  EnforcedStyle: slashes
+  StyleGuide: https://github.com/SUSE/style-guides/blob/master/Ruby.md#deviations-from-the-upstream-style-guide
+  Enabled: false
 
 Style/SignalException:
   StyleGuide: https://github.com/bbatsov/ruby-style-guide#fail-method
