@@ -156,6 +156,7 @@ directory "#{oscm_heattemplate_path}" do
     owner oscm_group
     group oscm_group
     mode 0755
+    recursive true
  end
 
 cookbook_file "#{oscm_heattemplate_path}/volumes.yaml" do
