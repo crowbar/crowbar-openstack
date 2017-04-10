@@ -14,13 +14,17 @@
       },
       "openstack": {
         "image": "sles12-docker",
-        "flavor_name": "oscm.small",
-        "flavor_ram": 1024,
-        "flavor_vcpus": 1,
-        "flavor_disk": 1,
-        "keypair": "oscm",
-        "keypair_publickey": "",
-        "keypair_publickeyfile": "/etc/oscm/ssl/openstack/keypair_publickey.pem",
+        "flavor": {
+          "name": "oscm.small",
+          "ram": 1024,
+          "vcpus": 1,
+          "disk": 1
+        },
+        "keypair": {
+          "name": "oscm",
+          "publickey": "",
+          "publickeyfile": "/etc/oscm/ssl/openstack/keypair_publickey.pem"
+        },
         "heattemplate_path": "/etc/oscm/heat/",
         "volume_stack" : {
           "stack_name": "oscm",

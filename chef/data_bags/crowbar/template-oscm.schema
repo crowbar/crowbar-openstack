@@ -30,13 +30,25 @@
               "required" : true,
               "mapping": {
                 "image": { "type": "str", "required": true },
-                "flavor_name": { "type": "str", "required": true },
-                "flavor_ram": { "type": "int", "required": true },
-                "flavor_vcpus": { "type": "int", "required": true },
-                "flavor_disk": { "type": "int", "required": true },
-                "keypair": { "type": "str", "required": true },
-                "keypair_publickey": { "type": "str", "required": true },
-                "keypair_publickeyfile": { "type": "str", "required": true },
+                "flavor": {
+                  "type" : "map",
+                  "required" : true,
+                  "mapping": {
+                    "name": { "type": "str", "required": true },
+                    "ram": { "type": "int", "required": true },
+                    "vcpus": { "type": "int", "required": true },
+                    "disk": { "type": "int", "required": true }
+                  }
+                },
+                "keypair": {
+                  "type" : "map",
+                  "required" : true,
+                  "mapping": {
+                    "name": { "type": "str", "required": true },
+                    "publickey": { "type": "str", "required": true },
+                    "publickeyfile": { "type": "str", "required": true }
+                  }
+                },
                 "heattemplate_path": { "type": "str", "required": true },
                 "volume_stack" : {
                   "type" : "map",
