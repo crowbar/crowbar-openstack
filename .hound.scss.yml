@@ -1,6 +1,0 @@
-linters:
-  NestingDepth:
-    max_depth: 6
-
-exclude:
-  - "crowbar_framework/vendor/**/*"
