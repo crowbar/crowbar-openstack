@@ -26,10 +26,13 @@
           "publickeyfile": "/etc/oscm/ssl/openstack/keypair_publickey.pem"
         },
         "heattemplate_path": "/etc/oscm/heat/",
-        "volume_stack" : {
-          "stack_name": "oscm",
+        "volume_stack": {
+          "stack_name": "oscm-volumes",
           "db_volume_size": 1,
           "app_volume_size": 1
+        },
+       "instance_stack": {
+          "stack_name": "oscm-instances"
         }
       },
       "mail": {
