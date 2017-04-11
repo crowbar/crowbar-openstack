@@ -34,6 +34,7 @@ en:
           ca_certs: 'SSL CA Certificates File'
           client_ca_certs: 'SSL client CA file (used to validate rabbitmq server certificate)'
         ha_header: 'High Availability'
+        cluster: 'Use RabbitMQ Clustering'
         ha:
           storage:
             mode: 'Storage Mode'

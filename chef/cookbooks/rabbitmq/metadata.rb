@@ -4,7 +4,6 @@ license "Apache 2.0"
 description "Installs and configures RabbitMQ server"
 version "1.2.0"
 recipe "rabbitmq", "Install and configure RabbitMQ"
-recipe "rabbitmq::cluster", "Set up RabbitMQ clustering."
 
 depends "crowbar-openstack"
 depends "crowbar-pacemaker"
@@ -45,22 +44,6 @@ attribute "rabbitmq/logdir",
 attribute "rabbitmq/mnesiadir",
           display_name: "RabbitMQ Mnesia database directory",
           description: "Path to the directory for Mnesia database files."
-
-attribute "rabbitmq/cluster",
-          display_name: "RabbitMQ clustering",
-          description: "Whether to activate clustering.",
-          default: "no"
-
-attribute "rabbitmq/cluster_config",
-          display_name: "RabbitMQ clustering configuration file",
-          description: "Path to the clustering configuration file, if cluster is yes.",
-          default: "/etc/rabbitmq/rabbitmq_cluster.config"
-
-attribute "rabbitmq/cluster_disk_nodes",
-          display_name: "RabbitMQ cluster disk nodes",
-          description: "Array of member Erlang nodenames for the disk-based storage nodes in the cluster.",
-          default: [],
-          type: "array"
 
 attribute "rabbitmq/erlang_cookie",
           display_name: "RabbitMQ Erlang cookie",
