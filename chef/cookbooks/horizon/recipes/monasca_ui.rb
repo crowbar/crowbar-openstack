@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-monasca_servers = search(:node, "roles:monasca-server")
-monasca_server = monasca_servers[0]
+monasca_server = node_search_with_cache("roles:monasca-server").first
+if monasca_server.nil?
+  Chef::Log.warn("No monasca-server found.")
+  return
+end
 
 template "/srv/www/openstack-dashboard/openstack_dashboard/"\
          "local/local_settings.d/_80_monasca_ui_settings.py" do
