@@ -63,6 +63,7 @@
                     "required" : true,
                     "mapping": {
                       "stack_name": { "type": "str", "required": true }
+                    }
                   }
                 }
               }
