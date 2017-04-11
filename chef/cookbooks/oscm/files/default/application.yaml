@@ -1,0 +1,288 @@
+# heat stack-create --poll -f application.yaml -P app_volume_id=$app_volume_id -P db_volume_id=$db_volume_id -P key_name=default -P flavor=d1.tiny oscm
+heat_template_version: 2015-10-15
+
+description: |
+  # This is how you deploy the whole thing:
+  # 1) Instantiate volumes.yaml as follows
+  heat stack-create --poll -f volumes.yaml oscm
+
+  # 2) Retrieve outputs from oscm:
+  app_volume_id=$(heat output-show oscm app_volume_id | sed 's/"//g')
+  db_volume_id=$(heat output-show oscm db_volume_id | sed 's/"//g')
+
+  # 3) Create application stack:
+  heat stack-create --poll -f application.yaml -P app_volume_id=$app_volume_id -P db_volume_id=$db_volume_id -P key_name=<your nova keypair's name> oscm
+
+
+
+parameters:
+  floating_network:
+    type: string
+    default: floating
+    description: Network to draw Floating IPs from
+  image:
+    type: string
+    default: sles12-docker
+    description: Glance image to use for servers
+  flavor:
+    type: string
+    default: m1.small
+    description: Nova flavor to use for servers
+  key_name:
+    type: string
+    default: mykey
+    description: SSH key to add to servers' /root/.ssh/authorized_keys
+  app_volume_id:
+    type: string
+    description: The Cinder volume to attach to the application server
+  db_volume_id:
+    type: string
+    description: The Cinder volume to attach to the database server
+  app_name:
+    default: oscm
+    description: The application name
+    type: string
+  db_password:
+    default: postgres
+    type: OS::Heat::RandomString
+    description: Postgres database password
+  keystore_password:
+    default: root123
+    type: type: OS::Heat::RandomString
+    description: Keystore protection password
+  as_admin_password:
+    default: root123
+    type: type: OS::Heat::RandomString
+    description: Asadmin password
+  http_proxy:
+    default: ''
+    type: string
+    description: Http proxy
+  https_proxy:
+    default: ''
+    type: string
+    description: Https proxy
+  registry:
+    default: localhost:5000
+    type: string
+    description: Docker registry
+  mail_address:
+    default: info@oscm.com
+    type: string
+  mail_host:
+    default: oscm.com
+    type: string
+  mail_password:
+    default: secretsecret
+    type: type: OS::Heat::RandomString
+  mail_user:
+    default: oscm
+    type: string
+  mail_port:
+    default: 7171
+    type: string
+  mail_auth:
+    default: oscm
+    type: string
+  keystone_user_pwd:
+    default: secretsecret
+    type: string
+  keystone_user_name:
+    default: admin
+    type: string
+  keystone_url:
+    default: 	http://192.168.53.2:5000/v3/
+    type: string
+  keystone_tenant_id:
+    default: 938ab7ecfc2c4d51b84f251e7bbdbba5
+    type: string
+resources:
+
+  ### Network infrastructure ###
+
+  oscm_network:
+    type: OS::Neutron::Net
+    properties:
+      name: oscm
+
+
+  oscm_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      cidr: 10.0.0.1/24
+      name: oscm
+      network:
+        get_resource: oscm_network
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network:
+          get_param: floating_network
+
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router: { get_resource: router }
+      subnet: { get_resource: oscm_subnet }
+
+  allow_inbound:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: "Allow inbound SSH and HTTP traffic"
+      name: oscm
+      rules:
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 22
+          port_range_max: 22
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 80
+          port_range_max: 80
+        - remote_ip_prefix: 0.0.0.0/0
+          protocol: icmp
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 5000
+          port_range_max: 5000
+        - direction: egress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 5000
+          port_range_max: 5000
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 8080
+          port_range_max: 8080
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 8880
+          port_range_max: 8880
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 8081
+          port_range_max: 8081
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 8048
+          port_range_max: 8048
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 8881
+          port_range_max: 8881
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 8848
+          port_range_max: 8848
+
+
+
+
+  # Parameters that will be available to both user data scripts
+  user_data_params:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: user-data/write-config}
+          params:
+            $APP_VOLUME_DEV:
+              list_join:
+                - ""
+                - - "/dev/disk/by-id/virtio-"
+                  - { get_param: app_volume_id }
+            $DB_VOLUME_DEV:
+              list_join:
+                - ""
+                - - "/dev/disk/by-id/virtio-"
+                  - { get_param: db_volume_id }
+            $DB_PASSWORD: { get_param: db_password }
+            $KEYSTORE_PASSWORD: { get_param: keystore_password }
+            $AS_ADMIN_PASSWORD: { get_param: as_admin_password }
+            $APP_NAME: { get_param: app_name }
+            $HTTP_PROXY: { get_param: http_proxy }
+            $HTTPS_PROXY: { get_param: https_proxy }
+            $REGISTRY: { get_param: registry }
+            $MAIL_ADDRESS: { get_param: mail_address }
+            $MAIL_HOST: { get_param: mail_host }
+            $MAIL_PASSWORD: { get_param: mail_password }
+            $MAIL_USER: { get_param: mail_user }
+            $MAIL_PORT: { get_param: mail_port }
+            $MAIL_AUTH: { get_param: mail_auth }
+            $KEYSTONE_USER_PWD: { get_param: keystone_user_pwd }
+            $KEYSTONE_USER_NAME: { get_param: keystone_user_name }
+            $KEYSTONE_URL: { get_param: keystone_url }
+            $KEYSTONE_TENANT_ID: { get_param: keystone_tenant_id }
+
+  # User data payload for appserver
+  userdata_appserver:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: user_data_params}
+        - config: {get_file: user-data/deploy-oscmserver}
+
+
+  ### Servers ###
+
+  appserver:
+    type: OS::Nova::Server
+    properties:
+      name: appserver
+      config_drive: true
+      flavor: { get_param: flavor }
+      image: { get_param: image }
+      key_name: { get_param: key_name }
+      networks:
+        - port: { get_resource: port_appserver }
+      user_data_format: RAW
+      user_data: { get_resource: userdata_appserver }
+
+  port_appserver:
+    type: OS::Neutron::Port
+    properties:
+      network:
+        get_resource: oscm_network
+      security_groups:
+        - get_resource: allow_inbound
+
+  ip_appserver:
+    type: OS::Neutron::FloatingIP
+    properties:
+      port_id: { get_resource: port_appserver }
+      floating_network:
+        get_param: floating_network
+
+  app_volume_attachment:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: { get_resource: appserver }
+      volume_id: { get_param: app_volume_id }
+
+  db_volume_attachment:
+    type: OS::Cinder::VolumeAttachment
+    properties:
+      instance_uuid: { get_resource: appserver }
+      volume_id: { get_param: db_volume_id }
+
+outputs:
+  # Retrieval after stack creation (presuming stack is named `mystack`):
+  # heat output-show mystack ip_appserver
+  ip_appserver:
+    value:
+      get_attr:
+        - ip_appserver
+        - floating_ip_address

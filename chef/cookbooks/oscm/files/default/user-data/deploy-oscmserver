@@ -1,0 +1,229 @@
+#!/bin/sh
+
+set -x
+set -e
+
+exec &> /var/log/setup-machine.log
+
+source /etc/oscm-variables
+
+
+sudo cat /etc/sysconfig/proxy <<EOF
+PROXY_ENABLED="yes"
+HTTP_PROXY="http://$HTTP_PROXY"
+HTTPS_PROXY="https://$HTTPS_PROXY"
+FTP_PROXY=""
+GOPHER_PROXY=""
+SOCKS_PROXY=""
+SOCKS5_SERVER=""
+NO_PROXY="localhost, 127.0.0.1, $REGISTRY"
+EOF
+
+sudo cat > /etc/sysconfig/docker <<EOF
+DOCKER_OPTS="--insecure-registry=$REGISTRY"
+HTTP_PROXY="http://$HTTP_PROXY"
+HTTPS_PROXY="https://$HTTPS_PROXY"
+NO_PROXY="localhost, 127.0.0.1, $REGISTRY"
+EOF
+
+export http_proxy="http://$HTTP_PROXY"
+export https_proxy="https://$HTTPS_PROXY"
+export no_proxy="localhost, 127.0.0.1, $REGISTRY"
+
+systemctl restart docker
+
+
+# For some reason the volume id is shortened to 27 characters when the device
+# link in /dev/disk/by-id/ is created. Account for this by truncating the
+# device name accordingly.
+
+volume_dev_db=$(printf '%.43s\n' $DB_VOLUME_DEV)
+volume_dev_app=$(printf '%.43s\n' $APP_VOLUME_DEV)
+
+# Only format volume if it hasn't already been formatted.
+
+if ! file -Ls $volume_dev_db | grep -q "filesystem data" ; then
+    mkfs.ext4 "$volume_dev_db"
+fi
+
+if ! file -Ls $volume_dev_app | grep -q "filesystem data" ; then
+    mkfs.ext4 "$volume_dev_app"
+fi
+
+mkdir -p /db
+if ! grep -qs '/db' /proc/mounts; then
+    mount -t ext4 $volume_dev_db /db
+fi
+
+mkdir -p /oscm
+if ! grep -qs '/oscm' /proc/mounts; then
+    mount -t ext4 $volume_dev_app /oscm
+fi
+
+
+OSCM_IMAGE=$REGISTRY/oscm-web
+APP_IMAGE=$REGISTRY/oscm-app
+DB_IMAGE=$REGISTRY/oscm-db
+DB=/db/database
+APP_LOGS_PATH=/oscm/app/logs
+APP_CONFIG_PATH=/oscm/app/config
+BES_LOGS_PATH=/oscm/bes/logs
+BES_CONFIG_PATH=/oscm/bes/config
+MI_LOGS_PATH=/oscm/master-indexer/logs
+MI_CONFIG_PATH=/oscm/master-indexer/config
+CLIENT_CRT_PATH=/oscm/client-crt/
+DB_VOLUME=dbvolume
+BES_VOLUME=besvolume
+APP_VOLUME=appvolume
+
+
+mkdir -p $DB
+mkdir -p $APP_LOGS_PATH
+mkdir -p $APP_CONFIG_PATH
+mkdir -p $BES_LOGS_PATH
+mkdir -p $BES_CONFIG_PATH
+mkdir -p $MI_LOGS_PATH
+mkdir -p $MI_CONFIG_PATH
+
+# Start docker service
+systemctl start docker.service
+
+# Delete all containers before creating if they are already created before
+docker rm -f $APP_VOLUME $BES_VOLUME $DB_VOLUME db web app >/dev/null 2>&1 || true
+
+# Create volume container for database
+docker create -v $DB:/var/lib/pgsql/database --name $DB_VOLUME $DB_IMAGE /bin/true
+
+# create volume container for bes and master-indexer
+docker create \
+  -v $BES_LOGS_PATH:/opt/glassfish3/glassfish/domains/bes-domain/logs \
+  -v $BES_CONFIG_PATH:/opt/glassfish3/glassfish/domains/bes-domain/config \
+  -v $MI_LOGS_PATH:/opt/glassfish3/glassfish/domains/master-indexer-domain/logs \
+  -v $MI_CONFIG_PATH:/opt/glassfish3/glassfish/domains/master-indexer-domain/config \
+  -v $APP_CONFIG_PATH:/opt/glassfish3/glassfish/domains/app-domain/config \
+  -v $CLIENT_CRT_PATH:/tmp/client-crt \
+  --name $BES_VOLUME $OSCM_IMAGE /bin/true
+
+# create volume container for app
+docker create \
+  -v $APP_LOGS_PATH:/opt/glassfish3/glassfish/domains/app-domain/logs \
+  -v $APP_CONFIG_PATH:/opt/glassfish3/glassfish/domains/app-domain/config \
+  -v $BES_CONFIG_PATH:/opt/glassfish3/glassfish/domains/bes-domain/config \
+  -v $CLIENT_CRT_PATH:/tmp/client-crt \
+  --name $APP_VOLUME $APP_IMAGE /bin/true
+
+
+# Docker compose file for the application deployment
+if [ ! -x /oscm/docker-compose.yml ]; then
+cat > /oscm/docker-compose.yml <<EOF
+version: "2"
+services:
+  $OSCM_HOSTNAME:
+    depends_on:
+      - $DB_HOSTNAME
+    image: $OSCM_IMAGE
+    env_file:
+      - /etc/oscm-variables
+    container_name: $OSCM_HOSTNAME
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "8048:8048"
+    volumes_from:
+      - container:$BES_VOLUME:rw
+  $APP_HOSTNAME:
+    depends_on:
+      - $DB_HOSTNAME
+      - $OSCM_HOSTNAME
+    image: $APP_IMAGE
+    env_file:
+      - /etc/oscm-variables
+    container_name: $APP_HOSTNAME
+    ports:
+      - "8880:8880"
+      - "8881:8881"
+      - "8848:8848"
+    volumes_from:
+      - container:$APP_VOLUME:rw
+  $DB_HOSTNAME:
+    image: $DB_IMAGE
+    container_name: $DB_HOSTNAME
+    volumes_from:
+      - container:$DB_VOLUME:rw
+    env_file:
+      - /etc/oscm-variables
+EOF
+echo "# updated at $(date)" >> /oscm/docker-compose.yml
+fi
+
+# OSCM start script
+if [ ! -x /oscm/start-oscm.sh ]; then
+cat > /oscm/start-oscm.sh <<EOF
+#/bin/sh
+# check if docker is running
+if ! docker ps &>/dev/null; then
+  echo "starting docker service"
+  systemctl start docker.service
+fi
+
+if ! grep -qs '/db' /proc/mounts; then
+    mount -t ext4 $volume_dev_db /db
+fi
+
+if ! grep -qs '/oscm' /proc/mounts; then
+    mount -t ext4 $volume_dev_db /oscm
+fi
+
+echo "oscm is being started"
+docker-compose -f /oscm/docker-compose.yml up --force-recreate
+EOF
+echo "# updated at $(date)" >> /oscm/start-oscm.sh
+fi
+chmod +x /oscm/start-oscm.sh
+
+# OSCM Stop script
+if [ ! -x /oscm/stop-oscm.sh ]; then
+cat > /oscm/stop-oscm.sh <<EOF
+#/bin/sh
+
+echo "oscm is being stopped"
+docker-compose -f /oscm/docker-compose.yml stop
+
+EOF
+echo "# updated at $(date)" >> /oscm/stop-oscm.sh
+fi
+chmod +x /oscm/stop-oscm.sh
+
+# OSCM systemd service
+cat > /etc/systemd/system/oscm.service <<EOF
+[Unit]
+Description=OSCM conainerized
+Requires=docker.service
+After=docker.service
+
+[Service]
+ExecStart=/usr/bin/sh /oscm/start-oscm.sh
+ExecStop=/usr/bin/sh /oscm/stop-oscm.sh
+
+[Install]
+WantedBy=default.target
+EOF
+
+echo "# updated at $(date)" >> /etc/systemd/system/oscm.service
+
+systemctl enable oscm.service
+systemctl start oscm.service
+
+cat > /etc/motd <<EOF
+This node has been set up as the mock server for oscm.
+
+You will find
+
+* The application config file in /oscm with a
+  timestamp appended to include redeployment every time the application.yaml
+  template is re-instantiated.
+* A persistent application data volume mounted at /oscm
+* Data directory in /db/database
+* This message in /etc/motd
+
+EOF

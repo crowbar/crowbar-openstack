@@ -153,14 +153,45 @@ EOH
 end
 
 directory "#{oscm_heattemplate_path}" do
-    owner oscm_group
-    group oscm_group
-    mode 0755
-    recursive true
- end
+  owner oscm_group
+  group oscm_group
+  mode 0755
+  recursive true
+end
 
 cookbook_file "#{oscm_heattemplate_path}/volumes.yaml" do
   source "volumes.yaml"
+  owner oscm_group
+  group oscm_group
+  mode 0755
+  action :create
+end
+
+cookbook_file "#{oscm_heattemplate_path}/application.yaml" do
+  source "volumes.yaml"
+  owner oscm_group
+  group oscm_group
+  mode 0755
+  action :create
+end
+
+directory "#{oscm_heattemplate_path}/user-data" do
+  owner oscm_group
+  group oscm_group
+  mode 0755
+  recursive true
+end
+
+cookbook_file "#{oscm_heattemplate_path}/user-data/write-config" do
+  source "write-config"
+  owner oscm_group
+  group oscm_group
+  mode 0755
+  action :create
+end
+
+cookbook_file "#{oscm_heattemplate_path}/user-data/deploy-oscmserver" do
+  source "deploy-oscmserver"
   owner oscm_group
   group oscm_group
   mode 0755
