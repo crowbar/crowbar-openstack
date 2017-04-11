@@ -183,7 +183,7 @@ directory "#{oscm_heattemplate_path}/user-data" do
 end
 
 cookbook_file "#{oscm_heattemplate_path}/user-data/write-config" do
-  source "write-config"
+  source "user-data/write-config"
   owner oscm_group
   group oscm_group
   mode 0755
@@ -191,7 +191,7 @@ cookbook_file "#{oscm_heattemplate_path}/user-data/write-config" do
 end
 
 cookbook_file "#{oscm_heattemplate_path}/user-data/deploy-oscmserver" do
-  source "deploy-oscmserver"
+  source "user-data/deploy-oscmserver"
   owner oscm_group
   group oscm_group
   mode 0755
