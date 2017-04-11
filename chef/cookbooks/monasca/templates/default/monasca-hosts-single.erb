@@ -8,7 +8,7 @@
 localhost                        ansible_connection=local
 
 # Monasca host
-cmm-node                         ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+monasca-node                     ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Openstack hosts
 keystone-node                    ansible_ssh_host=<%= @keystone_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -47,7 +47,7 @@ monasca-notification-node        ansible_ssh_host=<%= @monasca_host %> ansible_s
 monasca-persister-node           ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Monasca-log-metric node
-monasca-log-metrics-node          ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+monasca-log-metrics-node         ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Storm Nimbus node
 storm-nimbus-node                ansible_ssh_host=<%= @monasca_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -84,13 +84,13 @@ kafka-node
 zookeeper-node
 
 [monasca_group]
-cmm-node
+monasca-node
 
 [monasca_api_group]
-monasca-api-node database_node_for_api=cmm-node influxdb_node_for_api=influxdb-node
+monasca-api-node database_node_for_api=monasca-node influxdb_node_for_api=influxdb-node
 
 [monasca_notification_group]
-monasca-notification-node database_node_for_notification=cmm-node
+monasca-notification-node database_node_for_notification=monasca-node
 
 [monasca_persister_group]
 monasca-persister-node influxdb_node_for_persister=influxdb-node
@@ -120,7 +120,7 @@ storm-nimbus-node
 storm-supervisor-node
 
 [monasca_thresh_group]
-monasca-thresh-node database_node_for_thresh=cmm-node
+monasca-thresh-node database_node_for_thresh=monasca-node
 
 [mariadb_group]
 mariadb-node

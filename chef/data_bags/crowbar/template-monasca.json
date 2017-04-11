@@ -71,6 +71,7 @@
       "service_user": "monasca",
       "service_tenant": "monasca",
       "service_roles": ["monasca-agent"]
+    }
   },
   "deployment": {
     "monasca" : {

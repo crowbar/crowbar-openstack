@@ -126,8 +126,8 @@ class MonascaService < PacemakerServiceObject
     base["attributes"][@bc_name][:master][:database_monapi_password] = random_password
     base["attributes"][@bc_name][:master][:database_thresh_password] = random_password
     base["attributes"][@bc_name][:master][:database_logapi_password] = random_password
-    base["attributes"][@bc_name][:master][:keystone_cmm_operator_user_password] = random_password
-    base["attributes"][@bc_name][:master][:keystone_cmm_agent_password] = random_password
+    base["attributes"][@bc_name][:master][:keystone_monasca_operator_password] = random_password
+    base["attributes"][@bc_name][:master][:keystone_monasca_agent_password] = random_password
     base["attributes"][@bc_name][:master][:keystone_admin_agent_password] = random_password
     base["attributes"][@bc_name][:master][:database_grafana_password] = random_password
 

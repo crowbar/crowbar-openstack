@@ -64,7 +64,7 @@ end
 # Without this, it could happen that the installer was not re-tried
 # after a failed run.
 file "/opt/monasca-installer/.installed" do
-  content "cmm installed"
+  content "monasca installed"
   owner "root"
   group "root"
   mode "0644"
@@ -73,7 +73,7 @@ file "/opt/monasca-installer/.installed" do
 end
 
 monasca_node = search(:node, "roles:monasca-server")[0]
-cmm_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_node)
+monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_node)
 pub_net_ip = CrowbarHelper.get_host_for_public_url(monasca_node, false, false)
 
 ansible_vars = {
@@ -83,32 +83,32 @@ ansible_vars = {
   database_monapi_password: node[:monasca][:master][:database_monapi_password],
   database_thresh_password: node[:monasca][:master][:database_thresh_password],
   database_logapi_password: node[:monasca][:master][:database_logapi_password],
-  keystone_cmm_operator_user_password:
-    node[:monasca][:master][:keystone_cmm_operator_user_password],
-  keystone_cmm_agent_password: node[:monasca][:master][:keystone_cmm_agent_password],
+  keystone_monasca_operator_password:
+    node[:monasca][:master][:keystone_monasca_operator_password],
+  keystone_monasca_agent_password: node[:monasca][:master][:keystone_monasca_agent_password],
   keystone_admin_agent_password: node[:monasca][:master][:keystone_admin_agent_password],
   keystone_admin_password: keystone_settings["admin_password"],
   database_grafana_password: node[:monasca][:master][:database_grafana_password],
 
-  memcached_listen_ip: cmm_net_ip,
-  kafka_host: cmm_net_ip,
+  memcached_listen_ip: monasca_net_ip,
+  kafka_host: monasca_net_ip,
   kibana_host: pub_net_ip,
   log_api_bind_host: pub_net_ip,
-  influxdb_bind_address: cmm_net_ip,
-  influxdb_host: cmm_net_ip,
+  influxdb_bind_address: monasca_net_ip,
+  influxdb_host: monasca_net_ip,
   monasca_api_bind_host: pub_net_ip,
-  elasticsearch_host: cmm_net_ip,
-  nimbus_host: cmm_net_ip,
-  zookeeper_hosts: cmm_net_ip,
-  kafka_hosts: "#{cmm_net_ip}:9092",
-  mariadb_bind_address: cmm_net_ip,
-  database_host: cmm_net_ip,
+  elasticsearch_host: monasca_net_ip,
+  nimbus_host: monasca_net_ip,
+  zookeeper_hosts: monasca_net_ip,
+  kafka_hosts: "#{monasca_net_ip}:9092",
+  mariadb_bind_address: monasca_net_ip,
+  database_host: monasca_net_ip,
   monasca_api_url: "http://#{pub_net_ip}:8070/v2.0",
   monasca_log_api_url: "http://#{pub_net_ip}:5607/v2.0",
-  memcached_nodes: ["#{cmm_net_ip}:11211"],
-  influxdb_url: "http://#{cmm_net_ip}:8086",
-  elasticsearch_nodes: "[#{cmm_net_ip}]",
-  elasticsearch_hosts: cmm_net_ip
+  memcached_nodes: ["#{monasca_net_ip}:11211"],
+  influxdb_url: "http://#{monasca_net_ip}:8086",
+  elasticsearch_nodes: "[#{monasca_net_ip}]",
+  elasticsearch_hosts: monasca_net_ip
 }.to_json
 
 execute "run ansible" do

@@ -54,9 +54,9 @@ kibana_url: "http://{{ kibana_ip|trim|safe }}:{{ kibana_port }}"
 
 # Monasca Api CLI - Credentials
 monasca_user:
-  user: cmm-operator
-  password: "{{ keystone_cmm_operator_user_password }}"
-  project: cmm
+  user: monasca-operator
+  password: "{{ keystone_monasca_operator_password }}"
+  project: monasca
 
 # Installation / Download directories
 opt_dir: "/opt"
@@ -90,7 +90,7 @@ pip_version_min: 7.0.3
 
 # pip configuration
 pip_base_dir: "/root/.pip"
-pip_config_file: "{{ pip_base_dir }}/.cmm_pip.conf"
+pip_config_file: "{{ pip_base_dir }}/.monasca_pip.conf"
 pbr_version: 1.8.1
 
 # try to use this variable for each wait_for like task

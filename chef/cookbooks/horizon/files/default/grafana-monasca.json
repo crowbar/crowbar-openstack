@@ -1,7 +1,7 @@
 {
   "id": "sid-14393838984416185642089112666",
-  "title": "CMM Service",
-  "originalTitle": "CMM Service",
+  "title": "Monasca Service",
+  "originalTitle": "Monasca Service",
   "tags": [],
   "style": "light",
   "timezone": "browser",
@@ -10,7 +10,7 @@
   "sharedCrosshair": false,
   "rows": [
     {
-      "title": "CMM Health - metrics",
+      "title": "Monasca Health - metrics",
       "height": "100px",
       "editable": true,
       "collapse": false,
@@ -409,7 +409,7 @@
       "showTitle": true
     },
     {
-      "title": "CMM Health - Logs",
+      "title": "Monasca Health - Logs",
       "height": "100px",
       "editable": true,
       "collapse": false,
@@ -805,7 +805,7 @@
       "showTitle": true
     },
     {
-      "title": "CMM Health - Common",
+      "title": "Monasca Health - Common",
       "height": "100px",
       "editable": true,
       "collapse": false,
