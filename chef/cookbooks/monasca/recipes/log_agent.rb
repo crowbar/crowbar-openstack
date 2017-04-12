@@ -26,7 +26,6 @@ if monasca_server.nil?
 end
 
 log_agent_dimensions = {
-  service: "monitoring",
   hostname: node["hostname"]
 }
 
@@ -34,6 +33,15 @@ log_files = {
   "/var/log/messages" => "system",
   "/var/log/zypper.log" => "system"
 }
+
+ruby_block "find log files" do
+  block do
+    log_dirs =
+      Dir.entries("/var/log")
+         .select { |e| File.directory?("/var/log/#{e}") && !(e == "." || e == "..") }
+    log_dirs.each { |d| log_files["/var/log/#{d}/**/*.log"] = d.downcase }
+  end
+end
 
 template "/etc/monasca-log-agent/agent.conf" do
   source "log-agent.conf.erb"
