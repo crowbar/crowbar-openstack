@@ -172,7 +172,7 @@ cookbook_file "#{oscm_heattemplate_path}/volumes.yaml" do
 end
 
 cookbook_file "#{oscm_heattemplate_path}/application.yaml" do
-  source "volumes.yaml"
+  source "application.yaml"
   owner oscm_group
   group oscm_group
   mode 0755
