@@ -27,7 +27,11 @@ module NovaBootKernel
     # running
     unless Dir.exist?("/proc/xen") && flavor == "xen" ||
         !Dir.exist?("/proc/xen") && flavor == "default"
-      node.run_state[:reboot] = true
+      if node["crowbar_upgrade_step"] == "done_os_upgrade"
+        Chef::Log.info("Skipping reboot in the initial run after upgrade")
+      else
+        node.run_state[:reboot] = true
+      end
     end
   end
 
