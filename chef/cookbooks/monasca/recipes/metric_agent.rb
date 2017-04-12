@@ -61,7 +61,7 @@ end
 service "monasca-metric-agent" do
   service_name agent_settings[:service_name]
   supports status: true, restart: true, start: true, stop: true
-  action [:disable, :stop]
+  action [:enable, :start]
   ignore_failure true
   # provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
