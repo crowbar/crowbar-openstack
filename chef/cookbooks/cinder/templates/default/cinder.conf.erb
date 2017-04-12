@@ -750,6 +750,11 @@ iscsi_write_cache = off
 # lower than 1.0 will be ignored and the default value will be used instead.
 # (floating point value)
 #max_over_subscription_ratio = 20.0
+<% unless volume[volume['backend_driver']].nil? -%>
+<% unless volume[volume['backend_driver']]['max_over_subscription_ratio'].nil? -%>
+max_over_subscription_ratio = <%= volume[volume['backend_driver']]['max_over_subscription_ratio'] %>
+<% end -%>
+<% end -%>
 
 # Certain ISCSI targets have predefined target names, SCST target driver uses
 # this name. (string value)
