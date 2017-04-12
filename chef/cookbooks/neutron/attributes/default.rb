@@ -23,6 +23,7 @@ default[:neutron][:max_header_line] = 16384
 default[:neutron][:dhcp_domain] = "openstack.local"
 default[:neutron][:networking_plugin] = "ml2"
 default[:neutron][:additional_external_networks] = []
+default[:neutron][:rpc_workers] = 1
 
 default[:neutron][:db][:database] = "neutron"
 default[:neutron][:db][:user] = "neutron"
