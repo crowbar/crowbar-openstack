@@ -120,9 +120,9 @@ end
 
 bash "add oscm flavor and flavor access" do
   code <<-EOH
-  nova flavor-create #{oscm_flavor_name} auto #{oscm_flavor_ram} #{oscm_flavor_disk} #{oscm_flavor_vcpus} --is-public false &> /dev/null
-  tenant_id=$(openstack project show -f shell #{oscm_tenant} | grep -Po "(?<=^id=\")[^\"]*")
-  nova flavor-access-add #{oscm_flavor_name} $tenant_id &> /dev/null
+  nova flavor-create #{oscm_flavor_name} auto #{oscm_flavor_ram} #{oscm_flavor_disk} #{oscm_flavor_vcpus} --is-public false &> /dev/null || true
+  tenant_id=$(openstack project show -f shell #{oscm_tenant} | grep -Po '(?<=^id=\")[^\"]*')
+  nova flavor-access-add #{oscm_flavor_name} $tenant_id &> /dev/null || true
 EOH
   environment ({
     "OS_USERNAME" => oscm_user,
@@ -204,10 +204,10 @@ end
 
 bash "create oscm stacks" do
   code <<-EOH
-  openstack stack create --parameter "db_size=#{oscm_db_volume_size}" --parameter "app_size=#{oscm_app_volume_size}" -t #{oscm_heattemplate_path}/volumes.yaml #{oscm_volumestack_name} &> /dev/null
-  app_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po "(?<=^output_value=\")[^\"]*")
-  db_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} db_volume_id | grep -Po "(?<=^output_value=\")[^\"]*")
-  openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}" --parameter "key_name=#{oscm_keypair_name}" --parameter "image=#{oscm_image}" -t #{oscm_heattemplate_path}/application.yaml #{oscm_instancestack_name} &> /dev/null
+  openstack stack create --parameter "db_size=#{oscm_db_volume_size}" --parameter "app_size=#{oscm_app_volume_size}" -t #{oscm_heattemplate_path}/volumes.yaml #{oscm_volumestack_name} &> /dev/null || true
+  app_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
+  db_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} db_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
+  openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}" --parameter "key_name=#{oscm_keypair_name}" --parameter "image=#{oscm_image}" -t #{oscm_heattemplate_path}/application.yaml #{oscm_instancestack_name} &> /dev/null || true
 EOH
   environment ({
     "OS_USERNAME" => oscm_user,
