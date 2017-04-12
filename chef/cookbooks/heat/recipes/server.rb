@@ -64,6 +64,17 @@ node[:heat][:platform][:plugin_packages].each do |p|
   package p
 end
 
+# install Cisco GBP plugin if needed
+neutron_server = search(:node, "roles:neutron-server").first || []
+unless neutron_server.empty?
+  if neutron_server[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+    # Install GBP plugin if Cisco APIC driver is set to apic_gbp
+    node[:heat][:platform][:gbp_plugin_packages].each do |p|
+      package p
+    end
+  end
+end
+
 directory "/var/cache/heat" do
   owner node[:heat][:user]
   group node[:heat][:group]
