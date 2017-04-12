@@ -238,3 +238,19 @@ default[:neutron][:ha][:infoblox][:infoblox_ra] =
 default[:neutron][:ha][:infoblox][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:neutron][:ha][:ports][:server] = 5530
+default[:neutron][:ha][:neutron_l3_ha_service][:op][:monitor][:interval] = "10s"
+# The service script does a sleep in between checking the status of the L3 agents
+# an integer is required here, and it is interpreted as seconds. The value is
+# passed to sleep(1)
+default[:neutron][:ha][:neutron_l3_ha_service][:service_options][:seconds_to_sleep_between_checks] = 10
+# For each operation two timeouts can be specified. The "timeout" specifies how
+# much time does the script have to perform the operation, before it will be
+# sent a TERM signal. Once the TERM has been sent, an additional time of
+# "shutdown_timeout" will be waited and then killed with KILL signal. The time
+# values are interpreted by timeout(1) utility.
+default[:neutron][:ha][:neutron_l3_ha_service][:service_options][:agent_check][:timeout] = "5m"
+default[:neutron][:ha][:neutron_l3_ha_service][:service_options][:agent_check][:shutdown_timeout] = "2m"
+default[:neutron][:ha][:neutron_l3_ha_service][:service_options][:replicate_dhcp][:timeout] = "10m"
+default[:neutron][:ha][:neutron_l3_ha_service][:service_options][:replicate_dhcp][:shutdown_timeout] = "2m"
+default[:neutron][:ha][:neutron_l3_ha_service][:service_options][:agent_migrate][:timeout] = "2h"
+default[:neutron][:ha][:neutron_l3_ha_service][:service_options][:agent_migrate][:shutdown_timeout] = "2m"
