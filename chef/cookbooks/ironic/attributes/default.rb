@@ -55,7 +55,6 @@ when "debian"
 end
 
 default[:ironic][:debug] = false
-default[:ironic][:verbose] = false
 default[:ironic][:max_header_line] = 16384
 
 default[:ironic][:user] = "ironic"
@@ -70,3 +69,5 @@ default[:ironic][:service_password] = "" # Set by Crowbar
 
 default[:ironic][:api][:protocol] = "http"
 default[:ironic][:api][:port] = 6385
+
+default[:ironic][:config_file] = "/etc/ironic/ironic.conf.d/100-ironic.conf"

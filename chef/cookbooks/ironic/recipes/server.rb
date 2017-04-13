@@ -175,7 +175,7 @@ openstack_command << " --os-auth-url #{auth_url} #{insecure}"
 get_ironic_net_id = "#{openstack_command} network show ironic -f value -c id"
 ironic_net_id = Mixlib::ShellOut.new(get_ironic_net_id).run_command.stdout.chomp
 
-template "/etc/ironic/ironic.conf" do
+template node[:ironic][:config_file] do
   source "ironic.conf.erb"
   owner "root"
   group node[:ironic][:group]
@@ -183,7 +183,6 @@ template "/etc/ironic/ironic.conf" do
   variables(
     drivers: ironic_drivers,
     debug: node[:ironic][:debug],
-    verbose: node[:ironic][:verbose],
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: keystone_settings,
     glance_settings: glance_settings,
@@ -202,14 +201,14 @@ service "ironic-api" do
   service_name node[:ironic][:api][:service_name]
   supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/ironic/ironic.conf]")
+  subscribes :restart, resources(template: node[:ironic][:config_file])
 end
 
 service "ironic-conductor" do
   service_name node[:ironic][:conductor][:service_name]
   supports status: true, restart: true
   action [:enable, :start]
-  subscribes :restart, resources("template[/etc/ironic/ironic.conf]")
+  subscribes :restart, resources(template: node[:ironic][:config_file])
 end
 
 execute "ironic-dbsync" do
