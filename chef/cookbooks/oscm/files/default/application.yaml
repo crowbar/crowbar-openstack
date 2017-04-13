@@ -26,7 +26,7 @@ parameters:
     description: Glance image to use for servers
   flavor:
     type: string
-    default: oscm.small
+    default: m1.small
     description: Nova flavor to use for servers
   key_name:
     type: string
@@ -38,8 +38,76 @@ parameters:
   db_volume_id:
     type: string
     description: The Cinder volume to attach to the database server
+  app_name:
+    default: oscm
+    description: The application name
+    type: string
+  http_proxy:
+    default: ''
+    type: string
+    description: Http proxy
+  https_proxy:
+    default: ''
+    type: string
+    description: Https proxy
+  registry:
+    default: localhost:5000
+    type: string
+    description: Docker registry
+  mail_address:
+    default: ""
+    type: string
+  mail_host:
+    default: ""
+    type: string
+  mail_password:
+    default: ""
+    type: string
+  mail_user:
+    default: oscm
+    type: string
+  mail_port:
+    default: 7171
+    type: string
+  mail_auth:
+    default: oscm
+    type: string
+  keystone_user_pwd:
+    default: secretsecret
+    type: string
+  keystone_user_name:
+    default: admin
+    type: string
+  keystone_url:
+    default: 	http://192.168.53.2:5000/v3/
+    type: string
+  keystone_tenant_id:
+    default: 938ab7ecfc2c4d51b84f251e7bbdbba5
+    type: string
+  keystone_domain:
+    default: default
+    type: string
+  oscm_image_name:
+    default: oscm
+    type: string
+  app_image_name:
+    default: app
+    type: string
+  db_image_name:
+    default: db
+    type: string
 
 resources:
+
+
+  db_password:
+    type: OS::Heat::RandomString
+
+  keystore_password:
+    type: OS::Heat::RandomString
+
+  as_admin_password:
+    type: OS::Heat::RandomString
 
   ### Network infrastructure ###
 
@@ -47,6 +115,7 @@ resources:
     type: OS::Neutron::Net
     properties:
       name: oscm
+
 
   oscm_subnet:
     type: OS::Neutron::Subnet
@@ -116,18 +185,74 @@ resources:
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
-          port_range_min: 8048
-          port_range_max: 8048
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
           port_range_min: 8881
           port_range_max: 8881
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
+          port_range_min: 8048
+          port_range_max: 8048
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
           port_range_min: 8848
           port_range_max: 8848
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 8448
+          port_range_max: 8448
+
+
+  # Parameters that will be available to both user data scripts
+  user_data_params:
+    type: OS::Heat::SoftwareConfig
+    properties:
+      group: ungrouped
+      config:
+        str_replace:
+          template: {get_file: user-data/write-config}
+          params:
+            $APP_VOLUME_DEV:
+              list_join:
+                - ""
+                - - "/dev/disk/by-id/virtio-"
+                  - { get_param: app_volume_id }
+            $DB_VOLUME_DEV:
+              list_join:
+                - ""
+                - - "/dev/disk/by-id/virtio-"
+                  - { get_param: db_volume_id }
+            $DB_PASSWORD: { get_attr: [ db_password, value ] }
+            $KEYSTORE_PASSWORD: { get_attr: [ keystore_password, value ] }
+            $AS_ADMIN_PASSWORD: { get_attr: [ as_admin_password, value ] }
+            $APP_NAME: { get_param: app_name }
+            $HTTP_PROXY: { get_param: http_proxy }
+            $HTTPS_PROXY: { get_param: https_proxy }
+            $REGISTRY: { get_param: registry }
+            $MAIL_ADDRESS: { get_param: mail_address }
+            $MAIL_HOST: { get_param: mail_host }
+            $MAIL_PASSWORD: { get_param: mail_password }
+            $MAIL_USER: { get_param: mail_user }
+            $MAIL_PORT: { get_param: mail_port }
+            $MAIL_AUTH: { get_param: mail_auth }
+            $KEYSTONE_USER_PWD: { get_param: keystone_user_pwd }
+            $KEYSTONE_USER_NAME: { get_param: keystone_user_name }
+            $KEYSTONE_URL: { get_param: keystone_url }
+            $KEYSTONE_TENANT_ID: { get_param: keystone_tenant_id }
+            $KEYSTONE_DOMAIN: { get_param: keystone_domain }
+            $OSCM_IMAGE_NAME: { get_param: oscm_image_name }
+            $APP_IMAGE_NAME: { get_param: app_image_name }
+            $DB_IMAGE_NAME: { get_param: db_image_name }
+
+  # User data payload for appserver
+  userdata_appserver:
+    type: OS::Heat::MultipartMime
+    properties:
+      parts:
+        - config: {get_resource: user_data_params}
+        - config: {get_file: user-data/deploy-oscmserver}
+
 
   ### Servers ###
 
@@ -141,6 +266,8 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - port: { get_resource: port_appserver }
+      user_data_format: RAW
+      user_data: { get_resource: userdata_appserver }
 
   port_appserver:
     type: OS::Neutron::Port
