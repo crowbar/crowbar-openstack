@@ -67,22 +67,22 @@ parameters:
     default: oscm
     type: string
   mail_port:
-    default: 7171
+    default: 25
     type: string
   mail_auth:
-    default: oscm
+    default: false
     type: string
   keystone_user_pwd:
-    default: secretsecret
+    default: oscm
     type: string
   keystone_user_name:
-    default: admin
+    default: oscm
     type: string
   keystone_url:
-    default: 	http://192.168.53.2:5000/v3/
+    default: http://192.168.53.2:5000/v3/
     type: string
   keystone_tenant_id:
-    default: 938ab7ecfc2c4d51b84f251e7bbdbba5
+    default: oscm
     type: string
   keystone_domain:
     default: default

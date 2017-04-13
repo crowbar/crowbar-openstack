@@ -36,6 +36,13 @@ oscm_proxy_httphost = node[:oscm][:proxy][:http_host]
 oscm_proxy_httpport = node[:oscm][:proxy][:http_port]
 oscm_proxy_httpshost = node[:oscm][:proxy][:https_host]
 oscm_proxy_httpsport = node[:oscm][:proxy][:https_port]
+oscm_mail_host = node[:oscm][:mail][:host] 
+oscm_mail_port = node[:oscm][:mail][:port] 
+oscm_mail_from = node[:oscm][:mail][:from]
+oscm_mail_auth = node[:oscm][:mail][:auth]
+oscm_mail_user = node[:oscm][:mail][:user]
+oscm_mail_pwd = node[:oscm][:mail][:password]
+
 oscm_group = "root"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -213,7 +220,8 @@ bash "create oscm stacks" do
   openstack stack create --parameter "db_size=#{oscm_db_volume_size}" --parameter "app_size=#{oscm_app_volume_size}" -t #{oscm_heattemplate_path}/volumes.yaml #{oscm_volumestack_name} &> /dev/null || true
   app_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
   db_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} db_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
-  openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}" --parameter "key_name=#{oscm_keypair_name}" --parameter "image=#{oscm_image}"\
+  openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}" --parameter "key_name=#{oscm_keypair_name}" --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
+  --parameter "mail_host=#{oscm_mail_host}" --parameter "mail_port=#{oscm_mail_port}" --parameter "mail_address=#{oscm_mail_from}" --parameter "mail_auth=#{oscm_mail_auth}" --parameter "mail_user=#{oscm_mail_user}" --parameter "mail_password=#{oscm_mail_pwd}"\
   --parameter "http_proxy=#{oscm_proxy_httphost}:#{oscm_proxy_httpport}" --parameter "https_proxy=#{oscm_proxy_httpshost}:#{oscm_proxy_httpsport}" --parameter "registry=#{oscm_docker_host}:#{oscm_docker_port}"\
   -t #{oscm_heattemplate_path}/application.yaml #{oscm_instancestack_name} &> /dev/null || true
 EOH
