@@ -202,6 +202,11 @@ resources:
           protocol: tcp
           port_range_min: 8448
           port_range_max: 8448
+        - direction: egress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: { get_param: mail_port }
+          port_range_max: { get_param: mail_port }
 
 
   # Parameters that will be available to both user data scripts
