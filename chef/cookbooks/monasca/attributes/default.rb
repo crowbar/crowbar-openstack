@@ -14,13 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitation.
 
-monasca_log_agent_service_name = "monasca-log-agent"
-
-default[:monasca][:platform] = {
-  packages: [],
-  services: [monasca_log_agent_service_name]
-}
-
 default[:monasca][:db][:database] = "monasca"
 default[:monasca][:db][:user] = "monasca"
 default[:monasca][:db][:password] = nil # must be set by wrapper
@@ -29,6 +22,13 @@ override[:monasca][:group] = "monasca"
 override[:monasca][:user] = "monasca"
 
 default[:monasca][:api][:bind_host] = "*"
+
+# metric-agent default service settings
+default[:monasca][:metric_agent]["user"] = "monasca-agent"
+default[:monasca][:metric_agent][:group] = "monasca"
+default[:monasca][:metric_agent][:debug] = false
+default[:monasca][:metric_agent]["log_dir"] = "/var/log/monasca-metric-agent"
+default[:monasca][:metric_agent]["agent_service_name"] = "openstack-monasca-metric-agent"
 
 # log-agent default service settings
 default[:monasca][:log_agent][:service_name] = "openstack-monasca-log-agent"

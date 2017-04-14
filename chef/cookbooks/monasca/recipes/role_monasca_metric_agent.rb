@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-agent")
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-metric-agent")
   include_recipe "#{@cookbook_name}::common"
-  include_recipe "#{@cookbook_name}::agent"
+  include_recipe "#{@cookbook_name}::metric_agent"
 end

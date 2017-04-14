@@ -1,4 +1,4 @@
-# # Copyright 2017 FUJITSU LIMITED
+# Copyright 2017 FUJITSU LIMITED
 
 name "monasca-log-agent"
 description "Monasca Log Agent Role"

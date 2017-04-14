@@ -29,7 +29,7 @@ class MonascaService < PacemakerServiceObject
 
     def role_constraints
       {
-        "monasca-agent" => {
+        "monasca-metric-agent" => {
           "unique" => false,
           "admin" => true,
           "count" => -1,
@@ -99,6 +99,7 @@ class MonascaService < PacemakerServiceObject
 
     base["deployment"][@bc_name]["elements"]["monasca-agent"] = agent_nodes
     base["deployment"][@bc_name]["elements"]["monasca-log-agent"] = agent_nodes
+    base["deployment"][@bc_name]["elements"]["monasca-metric-agent"] = agent_nodes
     unless server_nodes.nil?
       base["deployment"][@bc_name]["elements"] = {
         "monasca-server" => [server_nodes.first.name]
@@ -112,8 +113,7 @@ class MonascaService < PacemakerServiceObject
 
     base["attributes"][@bc_name]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
-    # note(trebskit) once agent is ready, uncomment following line
-    # base["attributes"][@bc_name][:agent][:keystone][:service_password] = random_password
+    base["attributes"][@bc_name][:metric_agent][:keystone][:service_password] = random_password
     base["attributes"][@bc_name][:log_agent][:keystone][:service_password] = random_password
 
     @logger.debug("Monasca create_proposal: exiting")
