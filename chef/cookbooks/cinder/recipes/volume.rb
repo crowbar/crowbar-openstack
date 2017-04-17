@@ -276,6 +276,15 @@ if node[:platform_family] == "suse"
   end
 end
 
+# use patched tgtd.service to work around bnc#950946
+template "/usr/lib/systemd/system/tgtd.service" do
+  source "tgtd.service.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  only_if { node[:platform] == "suse" && node[:platform_version].to_f >= 12.0 }
+end
+
 service "tgt" do
   supports status: true, restart: true, reload: true
   action [:enable, :start]

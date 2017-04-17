@@ -1,0 +1,26 @@
+[Unit]
+Description=iSCSI target framework daemon
+Documentation=man:tgtd(8)
+After=network.target
+ConditionPathExists=/etc/tgt/targets.conf
+
+[Service]
+Type=forking
+Environment=TGTD_CONFIG=/etc/tgt/targets.conf
+EnvironmentFile=-/etc/sysconfig/tgt
+
+ExecStart=/usr/sbin/tgtd $TGTD_OPTS
+ExecStartPost=/bin/bash -c "sleep 0.5"
+ExecStartPost=/usr/sbin/tgtadm --op update --mode sys --name State -v offline
+ExecStartPost=/usr/sbin/tgtadm --op update --mode sys --name State -v ready
+ExecStartPost=/usr/sbin/tgt-admin -e -c ${TGTD_CONFIG}
+
+ExecReload=/usr/sbin/tgt-admin --update ALL -f -c ${TGTD_CONFIG}
+
+ExecStop=/usr/sbin/tgtadm --op update --mode sys --name State -v offline
+ExecStop=/usr/sbin/tgt-admin --offline ALL
+ExecStop=/usr/sbin/tgt-admin --update ALL -c /dev/null -f
+ExecStop=/usr/sbin/tgtadm  --op delete --mode system
+
+[Install]
+WantedBy=multi-user.target
