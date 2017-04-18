@@ -26,30 +26,30 @@ class ManilaService < PacemakerServiceObject
   end
 
   class << self
-  def role_constraints
-    {
-      "manila-server" => {
-        "unique" => false,
-        "count" => 1,
-        "cluster" => true,
-        "admin" => false,
-        "exclude_platform" => {
-          "suse" => "< 12.1",
-          "windows" => "/.*/"
-        }
-      },
-      "manila-share" => {
-        "unique" => false,
-        "count" => -1,
-        "admin" => false,
-        "exclude_platform" => {
-          "suse" => "< 12.1",
-          "windows" => "/.*/"
+    def role_constraints
+      {
+        "manila-server" => {
+          "unique" => false,
+          "count" => 1,
+          "cluster" => true,
+          "admin" => false,
+          "exclude_platform" => {
+            "suse" => "< 12.1",
+            "windows" => "/.*/"
+          }
+        },
+        "manila-share" => {
+          "unique" => false,
+          "count" => -1,
+          "admin" => false,
+          "exclude_platform" => {
+            "suse" => "< 12.1",
+            "windows" => "/.*/"
+          }
         }
       }
-    }
+    end
   end
-end
 
   def proposal_dependencies(role)
     answer = []
