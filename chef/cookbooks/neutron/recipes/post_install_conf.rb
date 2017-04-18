@@ -109,6 +109,26 @@ else
   Chef::Log.error("networking plugin '#{networking_plugin}' invalid for creating provider networks")
 end
 
+missing_l2_nodes = search(:node, "roles:neutron-network")
+# wait for all L2 agents to be up
+ruby_block "wait for all L2 agents on network nodes to be started" do
+  block do
+    require "timeout"
+    begin
+      Timeout.timeout(20) do
+        missing_l2_nodes.delete_if {|agent| ::Kernel.system("#{neutron_cmd} agent-list | grep -q #{agent.name}")}
+        while ! missing_l2_nodes.length
+          Chef::Log.debug("#{missing_l2_nodes.name} L2 agent still not started")
+          sleep(2)
+        end
+    rescue Timeout::Error
+      message = "The L2 agents on #{missing_l2_nodes.name} didn't start."
+      Chef::Log.fatal(message)
+      raise message
+    end
+  end # block
+end # ruby_block
+
 execute "create_fixed_network" do
   command "#{neutron_cmd} net-create fixed --shared #{fixed_network_type}"
   not_if "out=$(#{neutron_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
