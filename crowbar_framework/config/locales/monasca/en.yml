@@ -23,12 +23,32 @@ en:
         api_header: 'API Settings'
         api:
           bind_host: 'Address'
-          bind_port: 'Port'
+          log_level: 'Log level'
           processes: 'Number of processes'
           threads: 'Number of concurrent threads'
         agent_header: 'Agent Settings'
         agent:
           url: 'Monasca URL'
+          log_level: 'Log level'
+        log_api_header: 'Log API settings'
+        log_api:
+          log_level: 'Log level'
+        metric_agent_header: 'Metrics Agent Settings'
+        metric_agent:
+          monasca_url: 'Monasca URL'
+          system_only: 'Setting to true will cause Monasca setup to run in `system_only` mode only, configure the base config and system metrics (cpu, disk, load, memory, network)'
+          insecure: 'Do you want insecure connection?'
+          ca_file: 'Sets the path to the ca certs file if using certificates. Required only if insecure is set to False (ca_file)'
+          log_level: 'Log level'
+          statsd_port: 'Monasca Statsd port'
+          check_frequency: 'Time to wait between collection runs (check_frequency)'
+          num_collector_threads: 'Number of Collector Threads to run (num_collector_threads)'
+          pool_full_max_retries: 'Maximum number of collection cycles where all of the threads in the pool are still running plugins before the collector will exit (pool_full_max_retries)'
+          plugin_collect_time_warn: 'Threshold value for warning on collection time of each check (in seconds, plugin_collect_time_warn)'
+          max_buffer_size: 'Maximum number of batches of measurements to buffer while unable to communicate with monasca-api (max_buffer_size)'
+          max_measurement_buffer_size: 'Maximum number of measurements to buffer when unable to communicate with the monasca-api (-1 means no limit, max_measurement_buffer_size)'
+          backlog_send_rate: 'Maximum number of messages to send at one time when communication with the monasca-api is restored (backlog_send_rate)'
+          amplifier: 'Publish extra metrics to the API by adding this number of "amplifier" dimensions. For load testing purposes only; set to 0 for production use (amplifier)'
         master_notification_header: 'Notification configuration'
         master:
           notification_enable_email: 'Enable email notification'

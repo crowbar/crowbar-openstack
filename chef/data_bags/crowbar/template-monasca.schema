@@ -67,13 +67,19 @@
               "required": true,
               "type": "map",
               "mapping": {
-                  "bind_host": { "required": true, "type": "str" },
-                  "bind_port": { "required": true, "type": "int" },
-                  "processes": { "required": true, "type": "int" },
-                  "ssl": { "required": true, "type": "bool" },
-                  "threads": { "required": true, "type": "int" }
-                }
-              },
+                "bind_host": { "required": true, "type": "str" },
+                "processes": { "required": true, "type": "int" },
+                "threads": { "required": true, "type": "int" },
+                "log_level": { "type": "str", "required": true }
+              }
+            },
+            "log_api": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "log_level": { "type": "str", "required": true }
+              }
+            },
             "master": {
               "required": true,
               "type": "map",

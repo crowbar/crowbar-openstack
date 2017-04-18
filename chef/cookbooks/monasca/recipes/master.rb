@@ -111,12 +111,14 @@ ansible_vars = {
   kafka_hosts: "#{monasca_net_ip}:9092",
   mariadb_bind_address: monasca_net_ip,
   database_host: monasca_net_ip,
-  monasca_api_url: "http://#{pub_net_ip}:8070/v2.0",
-  monasca_log_api_url: "http://#{pub_net_ip}:5607/v2.0",
+  monasca_api_url: "http://#{pub_net_ip}:#{node[:monasca][:api][:bind_port]}/v2.0",
+  monasca_log_api_url: "http://#{pub_net_ip}:#{node[:monasca][:log_api][:bind_port]}/v2.0",
   memcached_nodes: ["#{monasca_net_ip}:11211"],
   influxdb_url: "http://#{monasca_net_ip}:8086",
   elasticsearch_nodes: "[#{monasca_net_ip}]",
-  elasticsearch_hosts: monasca_net_ip
+  elasticsearch_hosts: monasca_net_ip,
+  monasca_api_log_level: node[:monasca][:api][:log_level],
+  log_api_log_level: node[:monasca][:log_api][:log_level]
 }.to_json
 
 execute "run ansible" do
