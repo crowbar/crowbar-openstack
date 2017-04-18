@@ -12,34 +12,57 @@
           "required": true,
           "type": "map",
           "mapping": {
-            "agent": {
+            "metric_agent": {
               "required": true,
               "type": "map",
               "mapping": {
-                  "monasca_url": { "type": "str", required: true },
-                  "username": { "type": "str", required: true },
-                  "password": { "type": "str", required: true },
-                  "keystone_url": { "type": "str", required: true },
-                  "user_domain_id": { "type": "str", required: true },
-                  "user_domain_name": { "type": "str", required: true },
-                  "project_name": { "type": "str", required: true },
-                  "project_domain_id": { "type": "str", required: true },
-                  "project_domain_name": { "type": "str", required: true },
-                  "project_id": { "type": "str", required: true },
-                  "insecure": { "type": "bool", required: true },
-                  "ca_file": { "type": "str", required: true },
-                  "max_buffer_size": { "type": "int", required: true },
-                  "max_measurement_buffer_size": { "type": "int", required: true },
-                  "backlog_send_rate": { "type": "int", required: true },
-                  "amplifier": { "type": "int", required: true },
-                  "hostname": { "type": "str", required: true },
-                  "check_frequency": { "type": "int", required: true },
-                  "num_collector_threads": { "type": "int", required: true },
-                  "pool_full_max_retries": { "type": "int", required: true },
-                  "plugin_collect_time_warn": { "type": "int", required: true },
-                  "log_level": { "type": "str", required: true }
+                "password": { "type": "str", required: true },
+                "user_domain_id": { "type": "str", required: true },
+                "user_domain_name": { "type": "str", required: true },
+                "project_name": { "type": "str", required: true },
+                "project_domain_id": { "type": "str", required: true },
+                "project_domain_name": { "type": "str", required: true },
+                "project_id": { "type": "str", required: true },
+                "insecure": { "type": "bool", required: true },
+                "ca_file": { "type": "str", required: true },
+                "max_buffer_size": { "type": "int", required: true },
+                "max_measurement_buffer_size": { "type": "int", required: true },
+                "backlog_send_rate": { "type": "int", required: true },
+                "amplifier": { "type": "int", required: true },
+                "hostname": { "type": "str", required: true },
+                "check_frequency": { "type": "int", required: true },
+                "num_collector_threads": { "type": "int", required: true },
+                "pool_full_max_retries": { "type": "int", required: true },
+                "plugin_collect_time_warn": { "type": "int", required: true },
+                "log_level": { "type": "str", required: true },
+                "keystone": {
+                  "required": true,
+                  "type": "map",
+                  "mapping": {
+                    "service_user": { "type": "str", required: true },
+                    "service_password": { "type": "str", required: true },
+                    "service_tenant": { "type": "str", required: false },
+                    "service_role": { "type": "str", required: false }
+                  }
                 }
-              },
+              }
+            },
+            "log_agent": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "keystone": {
+                  "required": true,
+                  "type": "map",
+                  "mapping": {
+                    "service_user": { "type": "str", required: true },
+                    "service_password": { "type": "str", required: true },
+                    "service_tenant": { "type": "str", required: false },
+                    "service_role": { "type": "str", required: false }
+                  }
+                }
+              }
+            },
             "api": {
               "required": true,
               "type": "map",
@@ -55,9 +78,9 @@
               "required": true,
               "type": "map",
               "mapping": {
-                  "database": { "required": true, "type": "str" },
-                  "password": { "required": true, "type": "str" },
-                  "user": { "required": true, "type": "str" }
+                "database": { "required": true, "type": "str" },
+                "password": { "required": true, "type": "str" },
+                "user": { "required": true, "type": "str" }
               }
             },
             "debug": { "type": "bool" },
@@ -65,6 +88,8 @@
             "keystone_instance": { "type": "str", "required": true },
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str", "required": true },
+            "service_tenant": { "type": "str", "required": true },
+            "service_roles": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
             "group": { "required": true, "type": "str" },
             "user": { "required": true, "type": "str" }
            }

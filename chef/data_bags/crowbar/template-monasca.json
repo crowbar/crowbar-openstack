@@ -2,51 +2,64 @@
   "id": "template-monasca",
   "description": "Logging and Monitoring Service for OpenStack",
   "attributes": {
-     "monasca" : {
-        "agent" : {
-           "monasca_url": "",
-           "username": "",
-           "password": "",
-           "keystone_url": "",
-           "user_domain_id": "",
-           "user_domain_name": "",
-           "project_name": "",
-           "project_domain_id": "",
-           "project_domain_name": "",
-           "project_id": "",
-           "insecure": true,
-           "ca_file": "",
-           "max_buffer_size": 1000,
-           "max_measurement_buffer_size": -1,
-           "backlog_send_rate": 5,
-           "amplifier": 0,
-           "hostname": "",
-           "check_frequency": 15,
-           "num_collector_threads": 1,
-           "pool_full_max_retries": 5,
-           "plugin_collect_time_warn": 6,
-           "log_level": "INFO"
-        },
-        "api" : {
-           "bind_host" : "*",
-           "bind_port" : 8070,
-           "processes" : 3,
-           "ssl" : false,
-           "threads" : 10
-        },
-        "db" : {
-           "database" : "monasca",
-           "password" : "",
-           "user" : "monasca"
-        },
-        "debug" : false,
-        "group" : "monasca",
-        "user" : "monasca",
-        "database_instance": "none",
-        "keystone_instance": "none",
-        "service_password": "none",
-        "service_user": "monasca"
-     }
+    "monasca" : {
+      "metric_agent" : {
+        "password": "",
+        "user_domain_id": "",
+        "user_domain_name": "",
+        "project_name": "",
+        "project_domain_id": "",
+        "project_domain_name": "",
+        "project_id": "",
+        "insecure": true,
+        "ca_file": "",
+        "max_buffer_size": 1000,
+        "max_measurement_buffer_size": -1,
+        "backlog_send_rate": 5,
+        "amplifier": 0,
+        "hostname": "",
+        "check_frequency": 15,
+        "num_collector_threads": 1,
+        "pool_full_max_retries": 5,
+        "plugin_collect_time_warn": 6,
+        "log_level": "INFO",
+        "keystone": {
+          "service_user": "monasca-metrics-agent",
+          "service_password": "",
+          "service_tenant": "monasca",
+          "service_role": "monasca-agent"
+        }
+      },
+      "log_agent": {
+        "keystone": {
+          "service_user": "monasca-log-agent",
+          "service_password": "",
+          "service_tenant": "monasca",
+          "service_role": "monasca-agent"
+        }
+      },
+      "api" : {
+        "bind_host" : "*",
+        "bind_port" : 8070,
+        "processes" : 3,
+        "ssl" : false,
+        "threads" : 10
+      },
+      "db" : {
+        "database" : "monasca",
+        "password" : "",
+        "user" : "monasca"
+      },
+      "debug" : false,
+      "group" : "monasca",
+      "user" : "monasca",
+      "database_instance": "none",
+      "keystone_instance": "none",
+      "service_password": "none",
+      "service_user": "monasca",
+      "service_tenant": "monasca",
+      "service_roles": ["monasca-agent"]
+    }
   },
   "deployment": {
     "monasca" : {
@@ -55,16 +68,19 @@
       "schema-revision": 100,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
-        "monasca-agent": [ "readying", "ready", "applying" ]
+        "monasca-metric-agent": [ "readying", "ready", "applying" ],
+        "monasca-log-agent": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
         [ "monasca-server" ],
-        [ "monasca-agent" ]
+        [ "monasca-metric-agent" ],
+        [ "monasca-log-agent" ]
       ],
       "element_run_list_order": {
         "monasca-server": 110,
-        "monasca-agent": 120
+        "monasca-metric-agent": 120,
+        "monasca-log-agent": 120
       },
       "config": {
         "environment": "monasca-base-config",
