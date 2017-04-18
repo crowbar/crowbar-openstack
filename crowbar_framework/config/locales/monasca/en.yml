@@ -29,6 +29,14 @@ en:
         agent_header: 'Agent Settings'
         agent:
           url: 'Monasca URL'
+        master_notification_header: 'Notification configuration'
+        master:
+          notification_enable_email: 'Enable email notification'
+          smtp_host: 'SMTP host'
+          smtp_port: 'SMTP port'
+          smtp_user: 'SMTP user'
+          smtp_password: 'SMTP password'
+          smtp_from_address: 'SMTP sender (FROM) address'
         db_header: 'Database settings'
         db:
           database: 'Database'

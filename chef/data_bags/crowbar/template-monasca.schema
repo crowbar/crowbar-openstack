@@ -87,9 +87,15 @@
                   "keystone_monasca_operator_password": { "required": true, "type": "str" },
                   "keystone_monasca_agent_password": { "required": true, "type": "str" },
                   "keystone_admin_agent_password": { "required": true, "type": "str" },
-                  "database_grafana_password": { "required": true, "type": "str" }
+                  "database_grafana_password": { "required": true, "type": "str" },
+                  "notification_enable_email": { "required": true, "type": "bool" },
+                  "smtp_host": { "required": true, "type": "str" },
+                  "smtp_port": { "required": true, "type": "int" },
+                  "smtp_user": { "required": true, "type": "str" },
+                  "smtp_password": { "required": true, "type": "str" },
+                  "smtp_from_address": { "required": true, "type": "str" }
                 }
-              },
+            },
             "db": {
               "required": true,
               "type": "map",

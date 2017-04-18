@@ -55,7 +55,13 @@
         "keystone_monasca_operator_password" : "",
         "keystone_monasca_agent_password" : "",
         "keystone_admin_agent_password" : "",
-        "database_grafana_password" : ""
+        "database_grafana_password": "",
+        "notification_enable_email": true,
+        "smtp_host": "localhost",
+        "smtp_port": 25,
+        "smtp_user": "",
+        "smtp_password": "",
+        "smtp_from_address": "monasca@localhost"
       },
       "db" : {
         "database" : "monasca",
