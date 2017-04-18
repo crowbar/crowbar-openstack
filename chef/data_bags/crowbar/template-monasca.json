@@ -38,12 +38,14 @@
           "service_role": "monasca-agent"
         }
       },
-      "api" : {
-        "bind_host" : "*",
-        "bind_port" : 8070,
-        "processes" : 3,
-        "ssl" : false,
-        "threads" : 10
+      "api": {
+        "bind_host": "*",
+        "processes": 3,
+        "threads": 10,
+        "log_level": "INFO"
+      },
+      "log_api": {
+        "log_level": "INFO"
       },
       "master" : {
         "influxdb_mon_api_password" : "",

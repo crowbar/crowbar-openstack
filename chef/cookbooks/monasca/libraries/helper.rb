@@ -57,7 +57,7 @@ module MonascaHelper
     # SSL is not supported at this moment
     # protocol = node[:monasca][:log_api][:ssl] ? "https" : "http"
     protocol = "http"
-    port = 5607
+    port = node[:monasca][:log_api][:bind_port]
     "#{protocol}://#{host}:#{port}/v3.0"
   end
 

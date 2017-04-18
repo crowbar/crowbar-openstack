@@ -6,19 +6,31 @@
 
     %fieldset
       %legend
-        = t(".master_header")
+        = t(".metric_agent_header")
 
-      = string_field %w(master cmm_tarball_url)
-      = password_field %w(master influxdb_mon_api_password)
-      = password_field %w(master influxdb_mon_persister_password)
-      = password_field %w(master database_notification_password)
-      = password_field %w(master database_monapi_password)
-      = password_field %w(master database_thresh_password)
-      = password_field %w(master database_logapi_password)
-      = password_field %w(master keystone_cmm_operator_user_password)
-      = password_field %w(master keystone_cmm_agent_password)
-      = password_field %w(master keystone_admin_agent_password)
-      = password_field %w(master database_grafana_password)
+      = boolean_field %w(metric_agent system_only)
+      = select_field %w(metric_agent log_level), :collection => :metric_agent_log_levels
+      = integer_field %w(metric_agent statsd_port)
+      = integer_field %w(metric_agent check_frequency)
+      = integer_field %w(metric_agent num_collector_threads)
+      = integer_field %w(metric_agent pool_full_max_retries)
+      = integer_field %w(metric_agent plugin_collect_time_warn)
+      = integer_field %w(metric_agent max_buffer_size)
+      = integer_field %w(metric_agent max_measurement_buffer_size)
+      = integer_field %w(metric_agent backlog_send_rate)
+      = integer_field %w(metric_agent amplifier)
+
+    %fieldset
+      %legend
+        = t(".api_header")
+
+      = select_field %w(api log_level), :collection => :api_log_levels
+
+    %fieldset
+      %legend
+        = t(".log_api_header")
+
+      = select_field %w(log_api log_level), :collection => :api_log_levels
 
     %fieldset
       %legend
