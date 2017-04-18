@@ -90,6 +90,13 @@ ansible_vars = {
   keystone_admin_password: keystone_settings["admin_password"],
   database_grafana_password: node[:monasca][:master][:database_grafana_password],
 
+  notification_enable_email: node[:monasca][:master][:notification_enable_email],
+  smtp_host: node[:monasca][:master][:smtp_host],
+  smtp_port: node[:monasca][:master][:smtp_port],
+  smtp_user: node[:monasca][:master][:smtp_user],
+  smtp_password: node[:monasca][:master][:smtp_password],
+  smtp_from_address: node[:monasca][:master][:smtp_from_address],
+
   memcached_listen_ip: monasca_net_ip,
   kafka_host: monasca_net_ip,
   kibana_host: pub_net_ip,

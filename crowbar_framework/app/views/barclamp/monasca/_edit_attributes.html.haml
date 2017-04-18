@@ -20,3 +20,13 @@
       = password_field %w(master keystone_admin_agent_password)
       = password_field %w(master database_grafana_password)
 
+    %fieldset
+      %legend
+        = t(".master_notification_header")
+
+      = boolean_field %w(master notification_enable_email)
+      = string_field %w(master smtp_host)
+      = integer_field %w(master smtp_port)
+      = string_field %w(master smtp_user)
+      = string_field %w(master smtp_password)
+      = string_field %w(master smtp_from_address)
