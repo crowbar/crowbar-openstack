@@ -20,7 +20,7 @@ if node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
   node[:neutron][:platform][:cisco_apic_gbp_pkgs].each { |p| package p }
 end
 
-aciswitches = node[:neutron][:apic_switches].to_hash
+aciswitches = node[:neutron][:apic][:apic_switches].to_hash
 template "/etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini" do
   cookbook "neutron"
   source "ml2_conf_cisco_apic.ini.erb"
