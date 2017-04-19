@@ -31,7 +31,7 @@ class MonascaService < PacemakerServiceObject
       {
         "monasca-metric-agent" => {
           "unique" => false,
-          "admin" => true,
+          "admin" => false,
           "count" => -1,
           "exclude_platform" => {
             "suse" => "< 12.2",
@@ -40,7 +40,7 @@ class MonascaService < PacemakerServiceObject
         },
         "monasca-log-agent" => {
           "unique" => false,
-          "admin" => true,
+          "admin" => false,
           "count" => -1,
           "exclude_platform" => {
             "suse" => "< 12.2",
@@ -78,33 +78,16 @@ class MonascaService < PacemakerServiceObject
     base = super
 
     nodes = NodeObject.all
-    # FIXME: Putting the monasca backend services on the controller is
-    # temporary to allow for development right now. We will eventually want the
-    # commented line for server_roles, i.e. have a dedicated Monitoring node
-    # role in Crowbar. Adding that role will require changes to:
-    #
-    #  * https://github.com/crowbar/crowbar-core/blob/master/crowbar_framework/app/helpers/nodes_helper.rb#L366
-    #  * https://github.com/crowbar/crowbar-core/blob/master/bin/crowbar_machines#L362
-    #  * https://github.com/crowbar/crowbar-core/blob/master/crowbar_framework/config/locales/crowbar/en.yml
-    #
-    # at the very least.
-    server_nodes = nodes.select { |n| n.intended_role == "controller" }
-    ### server_nodes = nodes.select { |n| n.intended_role == "monitoring" }
 
-    server_nodes = [nodes.first] if server_nodes.empty?
+    monasca_server = select_nodes_for_role(nodes, "monasca-server", "monitoring") || []
+    log_agent_nodes = select_nodes_for_role(nodes, "monasca-log-agent", "compute") || []
+    metric_agent_nodes = select_nodes_for_role(nodes, "monasca-metric-agent", "compute") || []
 
-    # TODO: do we really want to have the agent on all nodes by
-    # default?
-    agent_nodes = nodes
-
-    base["deployment"][@bc_name]["elements"]["monasca-agent"] = agent_nodes
-    base["deployment"][@bc_name]["elements"]["monasca-log-agent"] = agent_nodes
-    base["deployment"][@bc_name]["elements"]["monasca-metric-agent"] = agent_nodes
-    unless server_nodes.nil?
-      base["deployment"][@bc_name]["elements"] = {
-        "monasca-server" => [server_nodes.first.name]
-      }
-    end
+    base["deployment"][@bc_name]["elements"] = {
+      "monasca-server" => monasca_server.empty? ? [] : [monasca_server.first.name],
+      # "monasca-metric-agent" => metric_agent_nodes.map { |x| x.name },
+      "monasca-log-agent" => log_agent_nodes.map { |x| x.name }
+    }
 
     base["attributes"][@bc_name]["database_instance"] =
       find_dep_proposal("database")
