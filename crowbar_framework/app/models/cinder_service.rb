@@ -252,12 +252,10 @@ class CinderService < PacemakerServiceObject
       end
     end
     if dirty
-      # This makes the proposal in the UI looked as 'applied', even if you make changes to it
-      proposal.save(applied: true)
+      proposal.save
       role.save
     end
 
     @logger.debug("Cinder apply_role_pre_chef_call: leaving")
   end
 end
-
