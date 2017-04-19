@@ -1,7 +1,14 @@
 ha_enabled = node[:aodh][:ha][:server][:enabled]
 
 node[:aodh][:platform][:packages].each do |p|
-  package p
+  package p do
+    action :install
+    retries 5
+    retry_delay 2
+    package_name p
+    cookbook_name "aodh"
+    recipe_name "aodh"
+  end
 end
 
 
