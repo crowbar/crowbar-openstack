@@ -42,6 +42,7 @@ project_name=<%= @keystone_settings['service_tenant'] %>
 [neutron]
 url=<%= @neutron_settings[:protocol] %>://<%= @neutron_settings[:host] %>:<%= @neutron_settings[:port] %>
 auth_strategy=keystone
+port_setup_delay=15
 <% unless @ironic_net_id.empty? %>
 cleaning_network_uuid=<%= @ironic_net_id %>
 <% end %>
