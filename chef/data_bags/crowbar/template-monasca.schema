@@ -74,6 +74,28 @@
                   "threads": { "required": true, "type": "int" }
                 }
               },
+            "master": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                  "influxdb_mon_api_password": { "required": true, "type": "str" },
+                  "influxdb_mon_persister_password": { "required": true, "type": "str" },
+                  "database_notification_password": { "required": true, "type": "str" },
+                  "database_monapi_password": { "required": true, "type": "str" },
+                  "database_thresh_password": { "required": true, "type": "str" },
+                  "database_logapi_password": { "required": true, "type": "str" },
+                  "keystone_cmm_operator_user_password": { "required": true, "type": "str" },
+                  "keystone_cmm_agent_password": { "required": true, "type": "str" },
+                  "keystone_admin_agent_password": { "required": true, "type": "str" },
+                  "database_grafana_password": { "required": true, "type": "str" },
+                  "notification_enable_email": { "required": true, "type": "bool" },
+                  "smtp_host": { "required": true, "type": "str" },
+                  "smtp_port": { "required": true, "type": "int" },
+                  "smtp_user": { "required": true, "type": "str" },
+                  "smtp_password": { "required": true, "type": "str" },
+                  "smtp_from_address": { "required": true, "type": "str" }
+                }
+            },
             "db": {
               "required": true,
               "type": "map",

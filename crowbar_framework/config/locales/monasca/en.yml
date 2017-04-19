@@ -29,6 +29,26 @@ en:
         agent_header: 'Agent Settings'
         agent:
           url: 'Monasca URL'
+        master_header: 'Installation parameters'
+        master:
+          influxdb_mon_api_password: 'InfluxDB password'
+          influxdb_mon_persister_password: 'Metrics persister password'
+          database_notification_password: 'Notification database password'
+          database_monapi_password: 'Metrics API database password'
+          database_thresh_password: 'Thresh Engine database password'
+          database_logapi_password: 'Log API database password'
+          keystone_cmm_operator_user_password: 'keystone_cmm_operator_user_password'
+          keystone_cmm_agent_password: 'keystone_cmm_agent_password'
+          keystone_admin_agent_password: 'keystone_admin_agent_password'
+          database_grafana_password: 'Grafana database password'
+        master_notification_header: 'Notification configuration'
+        master:
+          notification_enable_email: 'Enable email notification'
+          smtp_host: 'SMTP host'
+          smtp_port: 'SMTP port'
+          smtp_user: 'SMTP user'
+          smtp_password: 'SMTP password'
+          smtp_from_address: 'SMTP sender (FROM) address'
         db_header: 'Database settings'
         db:
           database: 'Database'

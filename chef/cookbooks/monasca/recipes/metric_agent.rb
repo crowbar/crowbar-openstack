@@ -21,8 +21,11 @@ agent_keystone = agent_settings[:keystone]
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-monasca_servers = search(:node, "roles:monasca-server") || []
-monasca_server = monasca_servers[0]
+monasca_server = node_search_with_cache("roles:monasca-server").first
+if monasca_server.nil?
+  Chef::Log.warn("No monasca-server found.")
+  return
+end
 
 monasca_api_url = MonascaHelper.api_public_url(monasca_server)
 
@@ -45,18 +48,20 @@ template monasca_reconfigure_file do
     agent_dimensions: agent_dimensions,
     install_plugins_only: false
   )
+  notifies :run, "execute[monasca-setup detect services]", :delayed
 end
 
 execute "monasca-setup detect services" do
   command monasca_reconfigure_file
   user "root"
   group "root"
+  action :nothing
 end
 
 service "monasca-metric-agent" do
   service_name agent_settings[:service_name]
   supports status: true, restart: true, start: true, stop: true
-  action [:disable, :stop]
+  action [:enable, :start]
   ignore_failure true
   # provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
