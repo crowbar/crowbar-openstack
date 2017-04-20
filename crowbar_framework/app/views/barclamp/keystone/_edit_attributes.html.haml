@@ -14,7 +14,12 @@
 
       = string_field %w(default tenant)
       = string_field %w(admin username)
-      = password_field %w(admin password)
+      - if @proposal.active?
+        = password_field %w(admin updated_password)
+        .alert.alert-info
+          = t('.admin.updated_password_hint')
+      - else
+        = password_field %w(admin password)
 
       = boolean_field %w(default create_user),
         "data-showit" => "true",
