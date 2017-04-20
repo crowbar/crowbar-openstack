@@ -3,7 +3,7 @@ include_recipe "apache2"
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 if node[:ceilometer][:use_mongodb]
-  db_connection = CeilometerHelper.mongodb_connection_string(node, cookbook_name)
+  db_connection = CeilometerHelper.mongodb_connection_string(node)
 else
   db_settings = fetch_database_settings
 
