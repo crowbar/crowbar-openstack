@@ -37,7 +37,9 @@ openstack_command << " --os-password #{keystone_settings["admin_password"]}"
 openstack_command << " --os-tenant-name #{keystone_settings["admin_tenant"]}"
 openstack_command << " --os-auth-url #{auth_url} #{insecure}"
 
-crowbar_pacemaker_sync_mark "wait-magnum_setup_domain"
+ha_enabled = node[:magnum][:ha][:enabled]
+
+crowbar_pacemaker_sync_mark "wait-magnum_setup_domain" if ha_enabled
 
 create_magnum_domain = "#{openstack_command} domain create -f value -c id"
 create_magnum_domain << " --description 'Owns users and projects created by magnum'"
@@ -74,4 +76,4 @@ unless node["magnum"]["trustee"]["domain_id"] && node["magnum"]["trustee"]["doma
   end
 end
 
-crowbar_pacemaker_sync_mark "create-magnum_setup_domain"
+crowbar_pacemaker_sync_mark "create-magnum_setup_domain" if ha_enabled

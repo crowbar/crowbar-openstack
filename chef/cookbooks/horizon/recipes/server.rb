@@ -251,7 +251,7 @@ when "postgresql"
     django_db_backend = "'django.db.backends.postgresql_psycopg2'"
 end
 
-crowbar_pacemaker_sync_mark "wait-horizon_database"
+crowbar_pacemaker_sync_mark "wait-horizon_database" if ha_enabled
 
 # Create the Dashboard Database
 database "create #{node[:horizon][:db][:database]} database" do
@@ -285,7 +285,7 @@ database_user "grant database access for dashboard database user" do
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-horizon_database"
+crowbar_pacemaker_sync_mark "create-horizon_database" if ha_enabled
 
 db_settings = {
   "ENGINE" => django_db_backend,
@@ -390,7 +390,7 @@ when "rhel"
   package "python-memcached"
 end
 
-crowbar_pacemaker_sync_mark "wait-horizon_config"
+crowbar_pacemaker_sync_mark "wait-horizon_config" if ha_enabled
 
 local_settings = "#{dashboard_path}/openstack_dashboard/local/" \
                  "local_settings.d/_100_local_settings.py"
@@ -464,7 +464,7 @@ template local_settings do
   action :create
 end
 
-crowbar_pacemaker_sync_mark "create-horizon_config"
+crowbar_pacemaker_sync_mark "create-horizon_config" if ha_enabled
 
 if ha_enabled
   log "HA support for horizon is enabled"

@@ -46,7 +46,7 @@ if db_settings[:backend_name] == "mysql"
   db_conn_scheme = "mysql+pymysql"
 end
 
-crowbar_pacemaker_sync_mark "wait-ec2_api_database"
+crowbar_pacemaker_sync_mark "wait-ec2_api_database" if ha_enabled
 
 database_connection = "#{db_conn_scheme}://" \
   "#{node[:nova]["ec2-api"][:db][:user]}" \
@@ -86,7 +86,7 @@ database_user "grant database access for #{@cookbook_name} database user" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-ec2_api_database"
+crowbar_pacemaker_sync_mark "create-ec2_api_database" if ha_enabled
 
 rabbit_settings = fetch_rabbitmq_settings "nova"
 keystone_settings = KeystoneHelper.keystone_settings(node, "nova")
@@ -98,7 +98,7 @@ register_auth_hash = { user: keystone_settings["admin_user"],
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, ssl_enabled, ha_enabled)
 
-crowbar_pacemaker_sync_mark "wait-ec2_api_register"
+crowbar_pacemaker_sync_mark "wait-ec2_api_register" if ha_enabled
 
 keystone_register "register ec2 user" do
   protocol keystone_settings["protocol"]
@@ -178,7 +178,7 @@ keystone_register "register ec2-metadata endpoint" do
   action :add_endpoint_template
 end
 
-crowbar_pacemaker_sync_mark "create-ec2_api_register"
+crowbar_pacemaker_sync_mark "create-ec2_api_register" if ha_enabled
 
 # ec2-api ssl
 if node[:nova]["ec2-api"][:ssl][:enabled]

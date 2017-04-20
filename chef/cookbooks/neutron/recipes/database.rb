@@ -26,7 +26,7 @@ props = [{"db_name" => node[:neutron][:db][:database],
           "db_conn_name" => "sql_connection"  }
         ]
 
-crowbar_pacemaker_sync_mark "wait-neutron_database"
+crowbar_pacemaker_sync_mark "wait-neutron_database" if ha_enabled
 
 # Create the Neutron Databases
 props.each do |prop|
@@ -72,6 +72,6 @@ props.each do |prop|
   end
 end
 
-crowbar_pacemaker_sync_mark "create-neutron_database"
+crowbar_pacemaker_sync_mark "create-neutron_database" if ha_enabled
 
 node.save

@@ -33,7 +33,9 @@ template node[:glance][:registry][:config_file] do
   )
 end
 
-crowbar_pacemaker_sync_mark "wait-glance_db_sync"
+ha_enabled = node[:glance][:ha][:enabled]
+
+crowbar_pacemaker_sync_mark "wait-glance_db_sync" if ha_enabled
 
 execute "glance-manage db sync" do
   user node[:glance][:user]
@@ -58,6 +60,6 @@ ruby_block "mark node for glance db_sync" do
   subscribes :create, "execute[glance-manage db sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-glance_db_sync"
+crowbar_pacemaker_sync_mark "create-glance_db_sync" if ha_enabled
 
 glance_service "registry"

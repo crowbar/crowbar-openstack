@@ -112,7 +112,7 @@ end
 api_port = node["glance"]["api"]["bind_port"]
 glance_protocol = node[:glance][:api][:protocol]
 
-crowbar_pacemaker_sync_mark "wait-glance_register_service"
+crowbar_pacemaker_sync_mark "wait-glance_register_service" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
@@ -146,6 +146,6 @@ keystone_register "register glance endpoint" do
   action :add_endpoint_template
 end
 
-crowbar_pacemaker_sync_mark "create-glance_register_service"
+crowbar_pacemaker_sync_mark "create-glance_register_service" if ha_enabled
 
 glance_service "api"

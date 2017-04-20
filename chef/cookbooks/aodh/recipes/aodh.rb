@@ -11,7 +11,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-aodh_database"
+crowbar_pacemaker_sync_mark "wait-aodh_database" if ha_enabled
 
 # Create the Aodh Database
 database "create #{node[:aodh][:db][:database]} database" do
@@ -44,7 +44,7 @@ database_user "grant database access for aodh database user" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-aodh_database"
+crowbar_pacemaker_sync_mark "create-aodh_database" if ha_enabled
 
 directory "/var/cache/aodh" do
   owner node[:aodh][:user]
@@ -167,7 +167,7 @@ template node[:aodh][:config_file] do
   notifies :reload, resources(service: "apache2")
 end
 
-crowbar_pacemaker_sync_mark "wait-aodh_db_sync"
+crowbar_pacemaker_sync_mark "wait-aodh_db_sync" if ha_enabled
 
 execute "aodh-dbsync" do
   command "aodh-dbsync"
@@ -192,7 +192,7 @@ ruby_block "mark node for aodh db_sync" do
   subscribes :create, "execute[aodh-dbsync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-aodh_db_sync"
+crowbar_pacemaker_sync_mark "create-aodh_db_sync" if ha_enabled
 
 service "aodh-api" do
   service_name node[:aodh][:api][:service_name]

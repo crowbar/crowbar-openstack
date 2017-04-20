@@ -21,7 +21,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-heat_database"
+crowbar_pacemaker_sync_mark "wait-heat_database" if ha_enabled
 
 # Create the Heat Database
 database "create #{node[:heat][:db][:database]} database" do
@@ -54,7 +54,7 @@ database_user "grant database access for heat database user" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-heat_database"
+crowbar_pacemaker_sync_mark "create-heat_database" if ha_enabled
 
 node[:heat][:platform][:packages].each do |p|
   package p
@@ -110,7 +110,7 @@ my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:
 
 db_connection = "#{db_settings[:url_scheme]}://#{node[:heat][:db][:user]}:#{node[:heat][:db][:password]}@#{db_settings[:address]}/#{node[:heat][:db][:database]}"
 
-crowbar_pacemaker_sync_mark "wait-heat_register"
+crowbar_pacemaker_sync_mark "wait-heat_register" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
@@ -350,7 +350,7 @@ keystone_register "register heat endpoint" do
   action :add_endpoint_template
 end
 
-crowbar_pacemaker_sync_mark "create-heat_register"
+crowbar_pacemaker_sync_mark "create-heat_register" if ha_enabled
 
 shell_get_stack_user_domain = <<-EOF
   export OS_URL="#{keystone_settings["protocol"]}://#{keystone_settings["internal_url_host"]}:#{keystone_settings["service_port"]}/v3"
@@ -452,7 +452,7 @@ service "heat-api-cloudwatch" do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
-crowbar_pacemaker_sync_mark "wait-heat_db_sync"
+crowbar_pacemaker_sync_mark "wait-heat_db_sync" if ha_enabled
 
 execute "heat-manage db_sync" do
   user node[:heat][:user]
@@ -476,7 +476,7 @@ ruby_block "mark node for heat db_sync" do
   subscribes :create, "execute[heat-manage db_sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-heat_db_sync"
+crowbar_pacemaker_sync_mark "create-heat_db_sync" if ha_enabled
 
 if ha_enabled
   log "HA support for heat is enabled"

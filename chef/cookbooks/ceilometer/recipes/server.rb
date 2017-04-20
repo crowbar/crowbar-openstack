@@ -66,7 +66,7 @@ else
   include_recipe "#{db_settings[:backend_name]}::client"
   include_recipe "#{db_settings[:backend_name]}::python-client"
 
-  crowbar_pacemaker_sync_mark "wait-ceilometer_database"
+  crowbar_pacemaker_sync_mark "wait-ceilometer_database" if ha_enabled
 
   # Create the Ceilometer Database
   database "create #{node[:ceilometer][:db][:database]} database" do
@@ -99,7 +99,7 @@ else
       only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
-  crowbar_pacemaker_sync_mark "create-ceilometer_database"
+  crowbar_pacemaker_sync_mark "create-ceilometer_database" if ha_enabled
 end
 
 case node[:platform_family]
@@ -137,7 +137,7 @@ my_public_host = CrowbarHelper.get_host_for_public_url(node,
                                                        ceilometer_protocol == "https",
                                                        ha_enabled)
 
-crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync"
+crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync" if ha_enabled
 
 execute "ceilometer-dbsync" do
   command "ceilometer-dbsync"
@@ -162,7 +162,7 @@ ruby_block "mark node for ceilometer db_sync" do
   subscribes :create, "execute[ceilometer-dbsync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-ceilometer_db_sync"
+crowbar_pacemaker_sync_mark "create-ceilometer_db_sync" if ha_enabled
 
 service "ceilometer-collector" do
   service_name node[:ceilometer][:collector][:service_name]
@@ -238,7 +238,7 @@ else
   log "HA support for ceilometer is disabled"
 end
 
-crowbar_pacemaker_sync_mark "wait-ceilometer_register"
+crowbar_pacemaker_sync_mark "wait-ceilometer_register" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
@@ -351,6 +351,6 @@ else
   end
 end
 
-crowbar_pacemaker_sync_mark "create-ceilometer_register"
+crowbar_pacemaker_sync_mark "create-ceilometer_register" if ha_enabled
 
 node.save

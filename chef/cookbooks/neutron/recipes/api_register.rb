@@ -23,7 +23,7 @@ neutron_protocol = node["neutron"]["api"]["protocol"]
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-crowbar_pacemaker_sync_mark "wait-neutron_register"
+crowbar_pacemaker_sync_mark "wait-neutron_register" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
@@ -90,4 +90,4 @@ keystone_register "register neutron endpoint" do
   action :add_endpoint_template
 end
 
-crowbar_pacemaker_sync_mark "create-neutron_register"
+crowbar_pacemaker_sync_mark "create-neutron_register" if ha_enabled

@@ -41,7 +41,7 @@ database_connection = "#{db_conn_scheme}://" \
   "@#{db_settings[:address]}" \
   "/#{node[:barbican][:db][:database]}"
 
-crowbar_pacemaker_sync_mark "wait-barbican_database"
+crowbar_pacemaker_sync_mark "wait-barbican_database" if ha_enabled
 
 # Create the Barbican Database
 database "create #{node[:barbican][:db][:database]} database" do
@@ -100,7 +100,7 @@ ruby_block "mark node for barbican db_sync" do
   subscribes :create, "execute[barbican-manage db upgrade]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-barbican_database"
+crowbar_pacemaker_sync_mark "create-barbican_database" if ha_enabled
 
 template node[:barbican][:config_file] do
   source "barbican.conf.erb"
