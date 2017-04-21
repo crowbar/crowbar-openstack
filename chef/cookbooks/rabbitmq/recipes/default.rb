@@ -18,6 +18,23 @@
 # limitations under the License.
 #
 
+# Create rabbitmq user with fixed UID/GID values to allow for HA.
+group "rabbitmq" do
+  gid node[:rabbitmq][:gid]
+  action :create
+  not_if "grep -q rabbitmq:x /etc/group"
+end
+
+user "rabbitmq" do
+  comment "user for RabbitMQ messaging server"
+  uid node[:rabbitmq][:uid]
+  gid node[:rabbitmq][:gid]
+  home "/var/lib/rabbitmq"
+  shell "/sbin/nologin"
+  action :create
+  not_if "grep -q rabbitmq:x /etc/passwd"
+end
+
 package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node[:platform_family] == "suse"
 
@@ -26,6 +43,19 @@ directory "/etc/rabbitmq/" do
   group "root"
   mode 0755
   action :create
+  recursive true
+end
+
+# Update ownerships
+["/var/lib/rabbitmq", "/var/run/rabbitmq", "/var/log/rabbitmq",
+ "/var/log/rabbitmq"].each do |d|
+  directory d do
+    owner "rabbitmq"
+    group "rabbitmq"
+    action :create
+    recursive true
+    notifies :restart, "service[rabbitmq-server]"
+  end
 end
 
 template "/etc/rabbitmq/rabbitmq-env.conf" do
