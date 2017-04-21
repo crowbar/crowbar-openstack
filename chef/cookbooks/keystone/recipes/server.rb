@@ -506,7 +506,9 @@ execute "keystone-manage bootstrap" do
   action :run
   only_if do
     !node[:keystone][:bootstrap] &&
-      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
+      (!ha_enabled || (CrowbarPacemakerHelper.is_cluster_founder?(node) &&
+        !CrowbarPacemakerHelper.being_upgraded?(node))
+      )
   end
 end
 
