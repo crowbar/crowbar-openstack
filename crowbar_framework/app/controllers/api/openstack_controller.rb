@@ -31,7 +31,22 @@ class Api::OpenstackController < ApiController
   api :POST, "/api/openstack/backup", "Create a backup of Openstack"
   api_version "2.0"
   def backup
-    head :not_implemented
+    # FIXME: fake the nodes_db_dump step for now until it is implemented
+    nodes_db_dump = ::Crowbar::UpgradeStatus.new
+    nodes_db_dump.start_step(:nodes_db_dump)
+    nodes_db_dump.end_step
+    head :ok
+  rescue Crowbar::Error::StartStepRunningError,
+         Crowbar::Error::StartStepOrderError,
+         Crowbar::Error::EndStepRunningError => e
+    render json: {
+      errors: {
+        nodes_db_dump: {
+          data: e.message,
+          help: "Please refer to the error message in the response."
+        }
+      }
+    }, status: :unprocessable_entity
   end
 
   api :POST, "/api/openstack/services", "Stop all Openstack services on a node"
