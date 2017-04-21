@@ -49,6 +49,8 @@ if cinders.length > 0
   cinder_api_insecure = cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
 end
 
+ironics = node_search_with_cache("roles:ironic-server") || []
+
 network_settings = GlanceHelper.network_settings(node)
 
 glance_stores = node.default[:glance][:glance_stores].dup
@@ -80,6 +82,11 @@ template node[:glance][:api][:config_file] do
       rabbit_settings: fetch_rabbitmq_settings,
       swift_api_insecure: swift_api_insecure,
       cinder_api_insecure: cinder_api_insecure,
+      # v1 api is (temporarily) enforced by ironic
+      # Newton version of Ironic supports only v1
+      # Ocata and Pike have option to set glance_api_version
+      # Queens will only support v2
+      enable_v1: !ironics.empty? || node[:glance][:enable_v1],
       glance_stores: glance_stores.join(",")
   )
 end
