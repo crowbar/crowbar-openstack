@@ -29,7 +29,7 @@
             {
               "function": "none",
               "column": "value",
-              "series": "http_status",
+              "series": "process.pid_count",
               "condition_filter": true,
               "condition_key": "component",
               "condition_value": "monasca-api"
@@ -44,12 +44,67 @@
             {
               "value": "0",
               "op": "=",
-              "text": "UP"
+              "text": "DOWN"
             },
             {
               "value": "1",
               "op": "=",
-              "text": "DOWN"
+              "text": "UP"
+            },
+            {
+              "value": "2",
+              "op": "=",
+              "text": "UP"
+            },
+            {
+              "value": "3",
+              "op": "=",
+              "text": "UP"
+            },
+            {
+              "value": "4",
+              "op": "=",
+              "text": "UP"
+            },
+            {
+              "value": "5",
+              "op": "=",
+              "text": "UP"
+            },
+            {
+              "value": "6",
+              "op": "=",
+              "text": "UP"
+            },
+            {
+              "value": "7",
+              "op": "=",
+              "text": "UP"
+            },
+            {
+              "value": "8",
+              "op": "=",
+              "text": "UP"
+            },
+            {
+              "value": "9",
+              "op": "=",
+              "text": "UP"
+            },
+            {
+              "value": "10",
+              "op": "=",
+              "text": "UP"
+            },
+            {
+              "value": "11",
+              "op": "=",
+              "text": "UP"
+            },
+            {
+              "value": "12",
+              "op": "=",
+              "text": "UP"
             }
           ],
           "nullPointMode": "connected",
@@ -57,13 +112,13 @@
           "prefixFontSize": "50%",
           "valueFontSize": "80%",
           "postfixFontSize": "50%",
-          "thresholds": "-1.0,0.2,0.8",
+          "thresholds": "0.0,0.2,1.0",
           "colorBackground": true,
           "colorValue": false,
           "colors": [
-            "rgba(71, 212, 59, 0.4)",
+            "rgba(225, 40, 40, 0.59)",
             "rgba(245, 150, 40, 0.73)",
-            "rgba(225, 40, 40, 0.59)"
+            "rgba(71, 212, 59, 0.4)"
           ],
           "sparkline": {
             "show": false,
