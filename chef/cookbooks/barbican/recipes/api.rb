@@ -22,6 +22,8 @@ include_recipe "#{@cookbook_name}::common"
 application_path = "/srv/www/barbican-api"
 application_exec_path = "#{application_path}/app.wsgi"
 
+ha_enabled = node[:barbican][:ha][:enabled]
+
 package "openstack-barbican-api"
 
 apache_module "deflate" do
@@ -59,7 +61,7 @@ register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
                        tenant: keystone_settings["admin_tenant"] }
 
-crowbar_pacemaker_sync_mark "wait-barbican_register"
+crowbar_pacemaker_sync_mark "wait-barbican_register" if ha_enabled
 
 keystone_register "barbican api wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -122,7 +124,7 @@ keystone_register "give barbican user access" do
   action :add_access
 end
 
-crowbar_pacemaker_sync_mark "create-barbican_register"
+crowbar_pacemaker_sync_mark "create-barbican_register" if ha_enabled
 
 if node[:barbican][:ha][:enabled]
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address

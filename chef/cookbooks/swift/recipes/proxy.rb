@@ -161,7 +161,7 @@ case proxy_config[:auth_method]
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
      proxy_config[:keystone_delay_auth_decision] = node["swift"]["keystone_delay_auth_decision"]
 
-     crowbar_pacemaker_sync_mark "wait-swift_register"
+     crowbar_pacemaker_sync_mark "wait-swift_register" if ha_enabled
 
      register_auth_hash = { user: keystone_settings["admin_user"],
                             password: keystone_settings["admin_password"],
@@ -245,7 +245,7 @@ case proxy_config[:auth_method]
         action :add_endpoint_template
      end
 
-     crowbar_pacemaker_sync_mark "create-swift_register"
+     crowbar_pacemaker_sync_mark "create-swift_register" if ha_enabled
 
    when "tempauth"
      ## uses defaults...

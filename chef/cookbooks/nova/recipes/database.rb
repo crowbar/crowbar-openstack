@@ -28,6 +28,7 @@ db_settings = fetch_database_settings
 crowbar_pacemaker_sync_mark "wait-nova_database" do
   # the db sync is very slow for nova
   timeout 120
+  only_if { ha_enabled }
 end
 
 [node[:nova][:db], node[:nova][:api_db]].each do |d|
@@ -152,7 +153,7 @@ ruby_block "mark node for nova api_db_sync" do
   subscribes :create, "execute[nova-manage api_db sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-nova_database"
+crowbar_pacemaker_sync_mark "create-nova_database" if ha_enabled
 
 # save data so it can be found by search
 node.save

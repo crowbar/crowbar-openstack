@@ -7,7 +7,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-manila_database"
+crowbar_pacemaker_sync_mark "wait-manila_database" if ha_enabled
 
 # Create the Manila Database
 database "create #{node[:manila][:db][:database]} database" do
@@ -62,4 +62,4 @@ ruby_block "mark node for manila db_sync" do
   subscribes :create, "execute[manila-manage db sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-manila_database"
+crowbar_pacemaker_sync_mark "create-manila_database" if ha_enabled

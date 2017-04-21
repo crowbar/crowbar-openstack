@@ -156,7 +156,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-keystone_database"
+crowbar_pacemaker_sync_mark "wait-keystone_database" if ha_enabled
 
 # Create the Keystone Database
 database "create #{node[:keystone][:db][:database]} database" do
@@ -189,7 +189,7 @@ database_user "grant database access for keystone database user" do
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-keystone_database"
+crowbar_pacemaker_sync_mark "create-keystone_database" if ha_enabled
 
 sql_connection = "#{db_settings[:url_scheme]}://#{node[:keystone][:db][:user]}:#{node[:keystone][:db][:password]}@#{db_settings[:address]}/#{node[:keystone][:db][:database]}"
 
@@ -286,7 +286,7 @@ if node[:keystone][:domain_specific_drivers]
   end
 end
 
-crowbar_pacemaker_sync_mark "wait-keystone_db_sync"
+crowbar_pacemaker_sync_mark "wait-keystone_db_sync" if ha_enabled
 
 execute "keystone-manage db_sync" do
   command "keystone-manage db_sync"
@@ -311,11 +311,13 @@ ruby_block "mark node for keystone db_sync" do
   subscribes :create, "execute[keystone-manage db_sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-keystone_db_sync"
+if ha_enabled
+  crowbar_pacemaker_sync_mark "create-keystone_db_sync"
 
-# Make sure the certificates code is run on the founder first
-crowbar_pacemaker_sync_mark "wait-keystone_certificates" do
-  fatal true
+  # Make sure the certificates code is run on the founder first
+  crowbar_pacemaker_sync_mark "wait-keystone_certificates" do
+    fatal true
+  end
 end
 
 ruby_block "synchronize signing keys for founder and remember them for non-HA case" do
@@ -392,7 +394,7 @@ ruby_block "synchronize signing keys for non-founder" do
   end # block
 end
 
-crowbar_pacemaker_sync_mark "create-keystone_certificates"
+crowbar_pacemaker_sync_mark "create-keystone_certificates" if ha_enabled
 
 if node[:keystone][:api][:protocol] == "https"
   ssl_setup "setting up ssl for keystone" do
@@ -413,7 +415,7 @@ end
 if node[:keystone][:signing][:token_format] == "fernet"
   # To be sure that rsync package is installed
   package "rsync"
-  crowbar_pacemaker_sync_mark "sync-keystone_install_rsync"
+  crowbar_pacemaker_sync_mark "sync-keystone_install_rsync" if ha_enabled
   rsync_command = ""
   if ha_enabled
     cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
@@ -438,7 +440,7 @@ if node[:keystone][:signing][:token_format] == "fernet"
     )
   end
 
-  crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate"
+  crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate" if ha_enabled
 
   unless File.exist?("/etc/keystone/fernet-keys/0")
     # Setup a key repository for fernet tokens
@@ -484,10 +486,10 @@ if node[:keystone][:signing][:token_format] == "fernet"
     only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
-  crowbar_pacemaker_sync_mark "create-keystone_fernet_rotate"
+  crowbar_pacemaker_sync_mark "create-keystone_fernet_rotate" if ha_enabled
 end
 
-crowbar_pacemaker_sync_mark "wait-keystone_register"
+crowbar_pacemaker_sync_mark "wait-keystone_register" if ha_enabled
 
 keystone_insecure = node["keystone"]["api"]["protocol"] == "https" && node[:keystone][:ssl][:insecure]
 
@@ -637,7 +639,7 @@ ec2_creds.each do |args|
   end
 end
 
-crowbar_pacemaker_sync_mark "create-keystone_register"
+crowbar_pacemaker_sync_mark "create-keystone_register" if ha_enabled
 
 node.set[:keystone][:monitor] = {} if node[:keystone][:monitor].nil?
 node.set[:keystone][:monitor][:svcs] = ["keystone"] if node[:keystone][:monitor][:svcs] != ["keystone"]

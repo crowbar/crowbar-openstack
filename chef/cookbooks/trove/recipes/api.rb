@@ -61,7 +61,7 @@ object_store_url, object_store_insecure =
   TroveHelper.get_objectstore_details swift_proxies, ceph_radosgws
 
 
-crowbar_pacemaker_sync_mark "wait-trove_register"
+crowbar_pacemaker_sync_mark "wait-trove_register" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
@@ -131,7 +131,7 @@ keystone_register "register trove endpoint" do
   action :add_endpoint_template
 end
 
-crowbar_pacemaker_sync_mark "create-trove_register"
+crowbar_pacemaker_sync_mark "create-trove_register" if ha_enabled
 
 
 template node[:trove][:api][:config_file] do

@@ -32,7 +32,7 @@ register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
                        tenant: keystone_settings["admin_tenant"] }
 
-crowbar_pacemaker_sync_mark "wait-sahara_register"
+crowbar_pacemaker_sync_mark "wait-sahara_register" if ha_enabled
 
 keystone_register "sahara api wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -93,6 +93,6 @@ keystone_register "register sahara endpoint" do
   action :add_endpoint_template
 end
 
-crowbar_pacemaker_sync_mark "create-sahara_register"
+crowbar_pacemaker_sync_mark "create-sahara_register" if ha_enabled
 
 sahara_service "api"

@@ -32,7 +32,7 @@ api_port = node[:nova][:ports][:api]
 
 api_protocol = node[:nova][:ssl][:enabled] ? "https" : "http"
 
-crowbar_pacemaker_sync_mark "wait-nova_register"
+crowbar_pacemaker_sync_mark "wait-nova_register" if api_ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
@@ -131,4 +131,4 @@ keystone_register "register nova_legacy endpoint" do
   action :add_endpoint_template
 end
 
-crowbar_pacemaker_sync_mark "create-nova_register"
+crowbar_pacemaker_sync_mark "create-nova_register" if api_ha_enabled

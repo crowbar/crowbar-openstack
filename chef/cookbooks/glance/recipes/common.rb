@@ -29,7 +29,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-glance_database"
+crowbar_pacemaker_sync_mark "wait-glance_database" if ha_enabled
 
 # Create the Glance Database
 database "create #{node[:glance][:db][:database]} database" do
@@ -62,7 +62,7 @@ database_user "grant database access for glance database user" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-glance_database"
+crowbar_pacemaker_sync_mark "create-glance_database" if ha_enabled
 
 node.set[:glance][:sql_connection] = "#{db_settings[:url_scheme]}://#{node[:glance][:db][:user]}:#{node[:glance][:db][:password]}@#{db_settings[:address]}/#{node[:glance][:db][:database]}"
 
@@ -72,7 +72,7 @@ node.save
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-crowbar_pacemaker_sync_mark "wait-glance_register_user"
+crowbar_pacemaker_sync_mark "wait-glance_register_user" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
@@ -111,6 +111,6 @@ keystone_register "give glance user access" do
   action :add_access
 end
 
-crowbar_pacemaker_sync_mark "create-glance_register_user"
+crowbar_pacemaker_sync_mark "create-glance_register_user" if ha_enabled
 
 include_recipe "glance::ceph"

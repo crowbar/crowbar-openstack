@@ -243,6 +243,7 @@ crowbar_pacemaker_sync_mark "wait sync mark for neutron db sync" do
   mark "neutron_db_sync"
   action :wait
   timeout 120
+  only_if { ha_enabled }
 end
 
 execute "neutron-db-manage migrate" do
@@ -369,7 +370,7 @@ if node[:neutron][:networking_plugin] == "ml2"
   end
 end
 
-crowbar_pacemaker_sync_mark "create-neutron_db_sync"
+crowbar_pacemaker_sync_mark "create-neutron_db_sync" if ha_enabled
 
 service node[:neutron][:platform][:service_name] do
   supports status: true, restart: true
