@@ -267,9 +267,43 @@ if ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) && !node[:neut
   # quickly starting and stopping the service.
   # https://bugs.launchpad.net/neutron/+bug/1326634
   # https://bugzilla.novell.com/show_bug.cgi?id=889325
-  service "workaround for races in initial db population" do
+  service "workaround for races in initial db population (starting)" do
     service_name node[:neutron][:platform][:service_name]
-    action [:start, :stop]
+    action :start
+  end
+
+  protocol = node[:neutron][:api][:protocol]
+  insecure = protocol == "https" && node[:neutron][:ssl][:insecure] ? "--insecure" : ""
+  bind_host = Barclamp::Inventory.get_network_by_type(node, "admin").address
+  bind_port = node[:neutron][:ha][:ports][:server]
+
+  bash "workaround for races in initial db population (waiting)" do
+    code <<EOC
+    neutron_server_running () {
+        # Check the response code of the "List API versions" call.
+        # If it's 200, we consider neutron-server is properly running.
+        http_code=$(
+            curl \
+                --silent --write-out %{http_code} --output /dev/null \
+                #{insecure} -X GET #{protocol}://#{bind_host}:#{bind_port}
+        )
+        rc=$?
+        if [ $rc -ne 0 ] || [ $http_code -ne 200 ]; then
+            return 1
+        fi
+        return 0
+    }
+
+    until neutron_server_running; do
+        sleep 2
+    done
+EOC
+    timeout 30
+  end
+
+  service "workaround for races in initial db population (stopping)" do
+    service_name node[:neutron][:platform][:service_name]
+    action :stop
   end
 end
 
