@@ -3,3 +3,41 @@
     = header show_raw_deployment?, true
 
   .panel-body
+    %fieldset
+      %legend
+        = t(".metric_agent_header")
+
+      = boolean_field %w(metric_agent system_only)
+      = select_field %w(metric_agent log_level), :collection => :metric_agent_log_levels
+      = integer_field %w(metric_agent statsd_port)
+      = integer_field %w(metric_agent check_frequency)
+      = integer_field %w(metric_agent num_collector_threads)
+      = integer_field %w(metric_agent pool_full_max_retries)
+      = integer_field %w(metric_agent plugin_collect_time_warn)
+      = integer_field %w(metric_agent max_buffer_size)
+      = integer_field %w(metric_agent max_measurement_buffer_size)
+      = integer_field %w(metric_agent backlog_send_rate)
+      = integer_field %w(metric_agent amplifier)
+
+    %fieldset
+      %legend
+        = t(".api_header")
+
+      = select_field %w(api log_level), :collection => :api_log_levels
+
+    %fieldset
+      %legend
+        = t(".log_api_header")
+
+      = select_field %w(log_api log_level), :collection => :api_log_levels
+
+    %fieldset
+      %legend
+        = t(".master_notification_header")
+
+      = boolean_field %w(master notification_enable_email)
+      = string_field %w(master smtp_host)
+      = integer_field %w(master smtp_port)
+      = string_field %w(master smtp_user)
+      = string_field %w(master smtp_password)
+      = string_field %w(master smtp_from_address)

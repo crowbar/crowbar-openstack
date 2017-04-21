@@ -22,6 +22,9 @@ override[:monasca][:group] = "monasca"
 override[:monasca][:user] = "monasca"
 
 default[:monasca][:api][:bind_host] = "*"
+default[:monasca][:api][:bind_port] = 8070
+
+default[:monasca][:log_api][:bind_port] = 5607
 
 # metric-agent default service settings
 default[:monasca][:metric_agent]["user"] = "monasca-agent"
