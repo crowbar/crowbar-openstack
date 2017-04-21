@@ -57,9 +57,12 @@ module CeilometerHelper
       # if this is a cluster, but the replica set member attribute hasn't
       # been set on any node (yet), we just fallback to using the first
       # ceilometer-server node
-      if db_connection.nil?
-        db_hosts = CrowbarUtilsSearch.node_search_with_cache("roles:ceilometer-server",
-                                                             "ceilometer")
+      if connection_string.nil?
+        db_hosts = CrowbarUtilsSearch.node_search_with_cache(
+          node,
+          "roles:ceilometer-server",
+          "ceilometer"
+        )
         db_host = db_hosts.first || node
         address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
         port = db_host[:ceilometer][:mongodb][:port]
