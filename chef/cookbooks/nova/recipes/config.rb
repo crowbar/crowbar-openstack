@@ -276,11 +276,13 @@ if ironic_servers.any? && (node["roles"] & ["nova-compute-ironic", "nova-control
     ironic_node,
     ironic_settings[:api_protocol] == "https"
   )
+  reserved_host_memory = 0
 else
   use_baremetal_filters = false
   track_instance_changes = true
   override_force_config_drive = false
   ironic_settings = nil
+  reserved_host_memory = node[:nova][:scheduler][:reserved_host_memory_mb]
 end
 
 vendordata_jsonfile = "/etc/nova/suse-vendor-data.json"
@@ -397,6 +399,7 @@ template node[:nova][:config_file] do
     oat_appraiser_host: oat_server[:hostname],
     oat_appraiser_port: "8443",
     has_itxt: has_itxt,
+    reserved_host_memory: reserved_host_memory,
     use_baremetal_filters: use_baremetal_filters,
     track_instance_changes: track_instance_changes,
     ironic_settings: ironic_settings

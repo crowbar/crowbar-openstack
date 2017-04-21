@@ -30,7 +30,7 @@ instances_path = <%= node[:nova][:instances_path] %>
 instance_usage_audit = True
 block_device_allocate_retries = <%= node[:nova][:block_device][:allocate_retries] %>
 block_device_allocate_retries_interval = <%= node[:nova][:block_device][:allocate_retries_interval] %>
-reserved_host_memory_mb = <%= node[:nova][:scheduler][:reserved_host_memory_mb] %>
+reserved_host_memory_mb = <%= @reserved_host_memory %>
 cpu_allocation_ratio = <%= node[:nova][:scheduler][:cpu_allocation_ratio] %>
 ram_allocation_ratio = <%= node[:nova][:scheduler][:ram_allocation_ratio] %>
 disk_allocation_ratio = <%= node[:nova][:scheduler][:disk_allocation_ratio] %>
