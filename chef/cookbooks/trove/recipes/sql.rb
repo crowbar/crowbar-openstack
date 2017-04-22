@@ -22,6 +22,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
+crowbar_pacemaker_sync_mark "wait-trove_database"
 
 database "create #{node[:trove][:db][:database]} database" do
   connection db_settings[:connection]
@@ -49,3 +50,5 @@ database_user "grant database access for trove database user" do
   provider db_settings[:user_provider]
   action :grant
 end
+
+crowbar_pacemaker_sync_mark "create-trove_database"
