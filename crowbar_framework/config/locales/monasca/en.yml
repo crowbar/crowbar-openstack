@@ -33,8 +33,8 @@ en:
         log_api_header: 'Log API settings'
         log_api:
           log_level: 'Log level'
-        metric_agent_header: 'Metrics Agent Settings'
-        metric_agent:
+        agent_header: 'Agent Settings'
+        agent:
           monasca_url: 'Monasca URL'
           system_only: 'Setting to true will cause Monasca setup to run in `system_only` mode only, configure the base config and system metrics (cpu, disk, load, memory, network)'
           insecure: 'Do you want insecure connection?'

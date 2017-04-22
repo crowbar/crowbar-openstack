@@ -26,12 +26,12 @@ default[:monasca][:api][:bind_port] = 8070
 
 default[:monasca][:log_api][:bind_port] = 5607
 
-# metric-agent default service settings
-default[:monasca][:metric_agent]["user"] = "monasca-agent"
-default[:monasca][:metric_agent][:group] = "monasca"
-default[:monasca][:metric_agent][:debug] = false
-default[:monasca][:metric_agent]["log_dir"] = "/var/log/monasca-metric-agent"
-default[:monasca][:metric_agent]["agent_service_name"] = "openstack-monasca-metric-agent"
+# agent default service settings
+default[:monasca][:agent]["user"] = "monasca-agent"
+default[:monasca][:agent][:group] = "monasca"
+default[:monasca][:agent][:debug] = false
+default[:monasca][:agent]["log_dir"] = "/var/log/monasca-agent"
+default[:monasca][:agent]["agent_service_name"] = "openstack-monasca-agent"
 
 # log-agent default service settings
 default[:monasca][:log_agent][:service_name] = "openstack-monasca-log-agent"
