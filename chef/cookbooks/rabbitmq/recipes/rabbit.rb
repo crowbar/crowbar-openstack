@@ -34,6 +34,17 @@ end
 
 include_recipe "rabbitmq::default"
 
+if ha_enabled
+  log "HA support for rabbitmq is enabled"
+  include_recipe "rabbitmq::ha"
+  # All the rabbitmqctl commands are local, and can only be run if rabbitmq is
+  # local
+  service_name = "rabbitmq"
+  only_if_command = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
+else
+  log "HA support for rabbitmq is disabled"
+end
+
 if node[:rabbitmq][:ssl][:enabled]
   ssl_setup "setting up ssl for rabbitmq" do
     generate_certs node[:rabbitmq][:ssl][:generate_certs]
@@ -44,17 +55,6 @@ if node[:rabbitmq][:ssl][:enabled]
     cert_required node[:rabbitmq][:ssl][:cert_required]
     ca_certs node[:rabbitmq][:ssl][:ca_certs]
   end
-end
-
-if ha_enabled
-  log "HA support for rabbitmq is enabled"
-  include_recipe "rabbitmq::ha"
-  # All the rabbitmqctl commands are local, and can only be run if rabbitmq is
-  # local
-  service_name = "rabbitmq"
-  only_if_command = "crm resource show #{service_name} | grep -q \" #{node.hostname} *$\""
-else
-  log "HA support for rabbitmq is disabled"
 end
 
 # remove guest user
