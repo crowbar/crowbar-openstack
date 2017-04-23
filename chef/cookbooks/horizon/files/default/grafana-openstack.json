@@ -609,33 +609,14 @@
           },
           "targets": [
             {
-              "function": "none",
-              "column": "value",
-              "series": "disk.space_used_perc",
-              "merge": false,
-              "dimensions": "",
-              "condition_filter": true,
-              "condition_key": "device",
-              "condition_value": "rootfs"
-            },
-            {
               "target": "",
               "function": "none",
               "column": "value",
               "series": "disk.space_used_perc",
               "condition_filter": true,
               "condition_key": "mount_point",
-              "condition_value": "/boot"
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "disk.space_used_perc",
-              "condition_filter": true,
-              "condition_key": "mount_point",
-              "condition_value": "/srv/node/swiftloopback"
-            }
+              "condition_value": "/"
+           }
           ],
           "aliasColors": {},
           "seriesOverrides": [],
