@@ -1,9 +1,9 @@
 {
   "id": "sid-14394701277644387945359960469",
-  "title": "Openstack Dashboard",
-  "originalTitle": "Openstack Dashboard",
+  "title": "SUSE OpenStack Cloud Monitoring",
+  "originalTitle": "SUSE OpenStack Cloud Monitoring",
   "tags": [],
-  "style": "light",
+  "style": "dark",
   "timezone": "browser",
   "editable": true,
   "hideControls": false,
