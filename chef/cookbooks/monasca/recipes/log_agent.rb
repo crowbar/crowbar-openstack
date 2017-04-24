@@ -38,7 +38,8 @@ ruby_block "find log files" do
   block do
     log_dirs =
       Dir.entries("/var/log")
-         .select { |e| File.directory?("/var/log/#{e}") && !(e == "." || e == "..") }
+         .select { |e| File.directory?("/var/log/#{e}") }
+         .reject { |f| f["."] || f[/^monasca/] }
     log_dirs.each { |d| log_files["/var/log/#{d}/**/*.log"] = d.downcase }
   end
 end
