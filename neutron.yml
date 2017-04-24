@@ -31,7 +31,7 @@ barclamp:
 
 crowbar:
   layout: 1
-  order: 94
-  run_order: 94
-  chef_order: 94
+  order: 93
+  run_order: 93
+  chef_order: 93
   proposal_schema_version: 3
