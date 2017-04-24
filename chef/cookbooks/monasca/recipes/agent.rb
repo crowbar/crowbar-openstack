@@ -16,7 +16,7 @@
 
 package "openstack-monasca-agent"
 
-agent_settings = node[:monasca][:metric_agent]
+agent_settings = node[:monasca][:agent]
 agent_keystone = agent_settings[:keystone]
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -55,7 +55,7 @@ execute "monasca-setup detect services" do
   action :nothing
 end
 
-service "monasca-metric-agent" do
+service "monasca-agent" do
   service_name agent_settings[:service_name]
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]

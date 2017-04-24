@@ -125,7 +125,7 @@ end
 
 agents_settings = []
 
-agents_settings.push(node[:monasca][:metric_agent][:keystone])
+agents_settings.push(node[:monasca][:agent][:keystone])
 la_keystone = node[:monasca][:log_agent][:keystone]
 agents_settings.push(la_keystone)
 

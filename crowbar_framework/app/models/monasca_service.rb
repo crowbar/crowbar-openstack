@@ -29,7 +29,7 @@ class MonascaService < PacemakerServiceObject
 
     def role_constraints
       {
-        "monasca-metric-agent" => {
+        "monasca-agent" => {
           "unique" => false,
           "admin" => false,
           "count" => -1,
@@ -94,7 +94,7 @@ class MonascaService < PacemakerServiceObject
 
     monasca_server = select_nodes_for_role(nodes, "monasca-server", "monitoring") || []
     log_agent_nodes = select_nodes_for_role(nodes, "monasca-log-agent", "compute") || []
-    metric_agent_nodes = select_nodes_for_role(nodes, "monasca-metric-agent", "compute") || []
+    agent_nodes = select_nodes_for_role(nodes, "monasca-agent", "compute") || []
 
     master_nodes = nodes.select { |n| n.intended_role == "admin" || n.name.start_with?("crowbar.") }
     master_node = master_nodes.empty? ? nodes.first : master_nodes.first
@@ -102,7 +102,7 @@ class MonascaService < PacemakerServiceObject
     base["deployment"][@bc_name]["elements"] = {
       "monasca-master" => [master_node.name],
       "monasca-server" => monasca_server.empty? ? [] : [monasca_server.first.name],
-      # "monasca-metric-agent" => metric_agent_nodes.map { |x| x.name },
+      # "monasca-agent" => agent_nodes.map { |x| x.name },
       "monasca-log-agent" => log_agent_nodes.map { |x| x.name }
     }
 
@@ -113,7 +113,7 @@ class MonascaService < PacemakerServiceObject
 
     base["attributes"][@bc_name]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
-    base["attributes"][@bc_name][:metric_agent][:keystone][:service_password] = random_password
+    base["attributes"][@bc_name][:agent][:keystone][:service_password] = random_password
     base["attributes"][@bc_name][:log_agent][:keystone][:service_password] = random_password
     base["attributes"][@bc_name][:master][:influxdb_mon_api_password] = random_password
     base["attributes"][@bc_name][:master][:influxdb_mon_persister_password] = random_password
