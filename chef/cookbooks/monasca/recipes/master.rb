@@ -87,11 +87,11 @@ ansible_vars = {
   smtp_password: node[:monasca][:master][:smtp_password],
   smtp_from_address: node[:monasca][:master][:smtp_from_address],
 
-  keystone_version: keystone_settings['api_version'],
-  keystone_url: keystone_settings['public_auth_url'],
-  keystone_admin_token: keystone_settings['admin_token'],
-  keystone_admin: keystone_settings['admin_user'],
-  keystone_admin_project: keystone_settings['admin_tenant'],
+  keystone_version: keystone_settings["api_version"],
+  keystone_url: keystone_settings["public_auth_url"],
+  keystone_admin_token: keystone_settings["admin_token"],
+  keystone_admin: keystone_settings["admin_user"],
+  keystone_admin_project: keystone_settings["admin_tenant"],
 
   memcached_listen_ip: monasca_net_ip,
   kafka_host: monasca_net_ip,
