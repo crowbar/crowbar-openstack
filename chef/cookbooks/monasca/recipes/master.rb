@@ -50,17 +50,6 @@ template "/opt/monasca-installer/monasca-hosts" do
   notifies :run, "execute[run ansible]", :delayed
 end
 
-template "/opt/monasca-installer/group_vars/all_group" do
-  source "all_group.erb"
-  owner "root"
-  group "root"
-  mode "0644"
-  variables(
-    keystone_settings: keystone_settings
-  )
-  notifies :run, "execute[run ansible]", :delayed
-end
-
 # This file is used to mark that ansible installer run successfully.
 # Without this, it could happen that the installer was not re-tried
 # after a failed run.
@@ -97,6 +86,12 @@ ansible_vars = {
   smtp_user: node[:monasca][:master][:smtp_user],
   smtp_password: node[:monasca][:master][:smtp_password],
   smtp_from_address: node[:monasca][:master][:smtp_from_address],
+
+  keystone_version: keystone_settings['api_version'],
+  keystone_url: keystone_settings['public_auth_url'],
+  keystone_admin_token: keystone_settings['admin_token'],
+  keystone_admin: keystone_settings['admin_user'],
+  keystone_admin_project: keystone_settings['admin_tenant'],
 
   memcached_listen_ip: monasca_net_ip,
   kafka_host: monasca_net_ip,
