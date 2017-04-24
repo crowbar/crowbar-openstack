@@ -1,13 +1,15 @@
 # OPENSTACK ENV VARIABLES
 export OS_USERNAME='<%= @keystone_settings['admin_user'] %>'
 export OS_PASSWORD='<%= @keystone_settings['admin_password'] %>'
-export OS_TENANT_NAME='<%= @keystone_settings['default_tenant'] %>'
 export OS_ENDPOINT_TYPE='internalURL'
 <% if @keystone_settings['api_version'] != '2.0' %>
 export OS_IDENTITY_API_VERSION='<%= @keystone_settings['api_version'] %>'
 export OS_USER_DOMAIN_NAME='Default'
 export OS_PROJECT_DOMAIN_NAME='Default'
+export OS_PROJECT_NAME='<%= @keystone_settings['default_tenant'] %>'
 export OS_AUTH_VERSION='<%= @keystone_settings['api_version'] %>'
+<% else -%>
+export OS_TENANT_NAME='<%= @keystone_settings['default_tenant'] %>'
 <% end %>
 export OS_AUTH_URL='<%= @keystone_settings['internal_auth_url'] %>'
 export OS_AUTH_STRATEGY=keystone
