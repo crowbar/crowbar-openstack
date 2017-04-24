@@ -30,10 +30,6 @@ Api:
   # you may want to throttle the number of messages sent to the API by setting the
   # backlog_send_rate to a lower number.
 
-  # DEPRECATED - please use max_measurement_buffer_size instead
-  # Maximum number of messages (batches of measurements) to buffer when unable to communicate
-  # with the monasca-api (-1 means no limit)
-  max_buffer_size: <%= @agent_settings["max_buffer_size"].to_i %>
   # Maximum number of measurements to buffer when unable to communicate with the monasca-api
   # (-1 means no limit)
   max_measurement_buffer_size: <%= @agent_settings["max_measurement_buffer_size"].to_i %>
