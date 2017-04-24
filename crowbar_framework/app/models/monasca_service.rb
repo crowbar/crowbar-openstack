@@ -102,7 +102,7 @@ class MonascaService < PacemakerServiceObject
     base["deployment"][@bc_name]["elements"] = {
       "monasca-master" => [master_node.name],
       "monasca-server" => monasca_server.empty? ? [] : [monasca_server.first.name],
-      # "monasca-agent" => agent_nodes.map { |x| x.name },
+      "monasca-agent" => agent_nodes.map { |x| x.name },
       "monasca-log-agent" => log_agent_nodes.map { |x| x.name }
     }
 
