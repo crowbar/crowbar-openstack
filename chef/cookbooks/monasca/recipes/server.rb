@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# TODO: Fill this with code that deploys the Monasca backend services
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
@@ -158,4 +157,3 @@ unless agents_settings.empty?
 
   end
 end
-#
