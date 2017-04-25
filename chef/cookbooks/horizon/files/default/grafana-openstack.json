@@ -1,9 +1,9 @@
 {
   "id": "sid-14394701277644387945359960469",
-  "title": "Openstack Dashboard",
-  "originalTitle": "Openstack Dashboard",
+  "title": "SUSE OpenStack Cloud Monitoring",
+  "originalTitle": "SUSE OpenStack Cloud Monitoring",
   "tags": [],
-  "style": "light",
+  "style": "dark",
   "timezone": "browser",
   "editable": true,
   "hideControls": false,
@@ -609,33 +609,14 @@
           },
           "targets": [
             {
-              "function": "none",
-              "column": "value",
-              "series": "disk.space_used_perc",
-              "merge": false,
-              "dimensions": "",
-              "condition_filter": true,
-              "condition_key": "device",
-              "condition_value": "rootfs"
-            },
-            {
               "target": "",
               "function": "none",
               "column": "value",
               "series": "disk.space_used_perc",
               "condition_filter": true,
               "condition_key": "mount_point",
-              "condition_value": "/boot"
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "disk.space_used_perc",
-              "condition_filter": true,
-              "condition_key": "mount_point",
-              "condition_value": "/srv/node/swiftloopback"
-            }
+              "condition_value": "/"
+           }
           ],
           "aliasColors": {},
           "seriesOverrides": [],
