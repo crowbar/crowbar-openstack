@@ -177,7 +177,7 @@ monasca_ui_pkgname =
   end
 
 unless monasca_ui_pkgname.nil?
-  monasca_servers = search(:node, "roles:monasca-server") || []
+  monasca_servers = node_search_with_cache("roles:monasca-server")
   unless monasca_servers.empty?
     include_recipe "#{@cookbook_name}::monasca_ui"
     package monasca_ui_pkgname do

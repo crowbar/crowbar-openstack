@@ -20,6 +20,10 @@ log_agent_keystone = log_agent_settings[:keystone]
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 monasca_server = node_search_with_cache("roles:monasca-server").first
+if monasca_server.nil?
+  Chef::Log.warn("No monasca-server found. Skip monasca-log-agent setup.")
+  return
+end
 
 log_agent_dimensions = {
   service: "monitoring",
