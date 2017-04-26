@@ -75,6 +75,8 @@ my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(
   node, node[:aodh][:api][:protocol] == "https", ha_enabled)
 
+crowbar_pacemaker_sync_mark "wait-aodh_keystone_register" if ha_enabled
+
 keystone_register "register aodh user" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
@@ -128,6 +130,8 @@ keystone_register "register aodh endpoint" do
   endpoint_internalURL "#{aodh_protocol}://#{my_admin_host}:#{aodh_port}"
   action :add_endpoint_template
 end
+
+crowbar_pacemaker_sync_mark "create-aodh_keystone_register" if ha_enabled
 
 db_name = node[:aodh][:db][:database]
 db_user = node[:aodh][:db][:user]
