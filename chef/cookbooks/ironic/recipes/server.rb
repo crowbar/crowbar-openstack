@@ -189,7 +189,7 @@ template node[:ironic][:config_file] do
     neutron_settings: neutron_settings,
     database_connection: db_connection,
     ironic_net_id: ironic_net_id,
-    ironic_ip: node.ipaddress,
+    ironic_ip: ironic_net_ip,
     tftp_ip: ironic_net_ip,
     public_endpoint: public_endpoint,
     api_port: api_port,
