@@ -16,7 +16,7 @@
 #
 
 class NovaService < PacemakerServiceObject
-  def initialize(thelogger)
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "nova"
   end

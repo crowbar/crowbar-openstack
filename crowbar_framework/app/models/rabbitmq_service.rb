@@ -16,7 +16,7 @@
 #
 
 class RabbitmqService < PacemakerServiceObject
-  def initialize(thelogger)
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "rabbitmq"
   end

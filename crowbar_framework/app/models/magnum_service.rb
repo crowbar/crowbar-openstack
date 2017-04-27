@@ -17,7 +17,7 @@
 #
 
 class MagnumService < PacemakerServiceObject
-  def initialize(thelogger)
+  def initialize(thelogger = nil)
     @bc_name = "magnum"
     @logger = thelogger
   end

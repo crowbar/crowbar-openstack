@@ -14,7 +14,7 @@
 #
 
 class SaharaService < PacemakerServiceObject
-  def initialize(thelogger)
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "sahara"
   end
