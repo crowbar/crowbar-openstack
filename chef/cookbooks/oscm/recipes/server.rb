@@ -17,6 +17,10 @@
 oscm_tenant = node[:oscm][:keystone][:tenant]
 oscm_user = node[:oscm][:keystone][:user]
 oscm_password = node[:oscm][:keystone][:password]
+oscm_ssl_certfile = node[:oscm][:ssl][:certfile]
+oscm_ssl_keyfile = node[:oscm][:ssl][:keyfile]
+oscm_ssl_cacerts = node[:oscm][:ssl][:ca_certs]
+oscm_ssl_scp_path = node[:oscm][:ssl][:scp_path]
 oscm_flavor_name = node[:oscm][:openstack][:flavor][:name]
 oscm_flavor_ram = node[:oscm][:openstack][:flavor][:ram]
 oscm_flavor_vcpus = node[:oscm][:openstack][:flavor][:vcpus]
@@ -42,8 +46,12 @@ oscm_mail_from = node[:oscm][:mail][:from]
 oscm_mail_auth = node[:oscm][:mail][:auth]
 oscm_mail_user = node[:oscm][:mail][:user]
 oscm_mail_pwd = node[:oscm][:mail][:password]
-
+oscm_keypair_crowbar_sshkey = "/etc/oscm/ssh/oscm_ssh.key"
 oscm_group = "root"
+
+heat_node = node_search_with_cache("roles:heat-server").first
+heat_public_host =  CrowbarHelper.get_host_for_public_url(heat_node, false)
+heat_port = heat_node[:heat][:api][:port]
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
@@ -217,14 +225,30 @@ end
 
 bash "create oscm stacks" do
   code <<-EOH
-  openstack stack create --parameter "db_size=#{oscm_db_volume_size}" --parameter "app_size=#{oscm_app_volume_size}" -t #{oscm_heattemplate_path}/volumes.yaml #{oscm_volumestack_name} &> /dev/null || true
-  app_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
-  db_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} db_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
-  openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}" --parameter "key_name=#{oscm_keypair_name}" --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
-  --parameter "mail_host=#{oscm_mail_host}" --parameter "mail_port=#{oscm_mail_port}" --parameter "mail_address=#{oscm_mail_from}" --parameter "mail_auth=#{oscm_mail_auth}" --parameter "mail_user=#{oscm_mail_user}" --parameter "mail_password=#{oscm_mail_pwd}"\
-  --parameter "http_proxy=#{oscm_proxy_httphost}:#{oscm_proxy_httpport}" --parameter "https_proxy=#{oscm_proxy_httpshost}:#{oscm_proxy_httpsport}" --parameter "registry=#{oscm_docker_host}:#{oscm_docker_port}"\
-  -t #{oscm_heattemplate_path}/application.yaml #{oscm_instancestack_name} &> /dev/null || true
-EOH
+    openstack stack create --parameter "db_size=#{oscm_db_volume_size}" --parameter "app_size=#{oscm_app_volume_size}" -t #{oscm_heattemplate_path}/volumes.yaml --wait #{oscm_volumestack_name} &> /dev/null || true
+    app_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
+    db_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} db_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
+    mkdir -p "$(dirname "#{oscm_keypair_crowbar_sshkey}")"
+    if [ ! -f #{oscm_keypair_crowbar_sshkey} ];
+    then
+      ssh-keygen -t rsa -f #{oscm_keypair_crowbar_sshkey}
+    fi
+    openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}" --parameter "key_name=#{oscm_keypair_name}" --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
+    --parameter "mail_host=#{oscm_mail_host}" --parameter "mail_port=#{oscm_mail_port}" --parameter "mail_address=#{oscm_mail_from}" --parameter "mail_auth=#{oscm_mail_auth}" --parameter "mail_user=#{oscm_mail_user}" --parameter "mail_password=#{oscm_mail_pwd}"\
+    --parameter "http_proxy=#{oscm_proxy_httphost}:#{oscm_proxy_httpport}" --parameter "https_proxy=#{oscm_proxy_httpshost}:#{oscm_proxy_httpsport}"\
+    --parameter "registry=#{oscm_docker_host}:#{oscm_docker_port}"\
+    --parameter "ssl_path=#{oscm_ssl_scp_path}"\
+    --parameter "heat_host_cidr=#{heat_public_host}/32" --parameter "heat_port=#{heat_port}"\
+    --parameter-file "ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub"\
+    -t #{oscm_heattemplate_path}/application.yaml --wait #{oscm_instancestack_name} &> /dev/null || true
+    ip_appserver=$(openstack stack output show -f shell --variable output_value #{oscm_instancestack_name} ip_appserver | grep -Po '(?<=^output_value=\")[^\"]*')
+    ssh-keygen -R ${ip_appserver} -f /root/.ssh/known_hosts
+    ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_ssl_scp_path}" || true
+    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_certfile} ${ip_appserver}:#{oscm_ssl_scp_path} || true
+    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_keyfile} ${ip_appserver}:#{oscm_ssl_scp_path} || true
+    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_cacerts} ${ip_appserver}:#{oscm_ssl_scp_path} || true
+    ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_ssl_scp_path}/scp_finished"
+  EOH
   environment ({
     "OS_USERNAME" => oscm_user,
     "OS_PASSWORD" => oscm_password,

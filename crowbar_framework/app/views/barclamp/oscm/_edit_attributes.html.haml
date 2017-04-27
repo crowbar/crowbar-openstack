@@ -85,7 +85,6 @@
         "data-sslkey" => "/etc/oscm/ssl/private/signing_key.pem"
 
       #ssl_container
-        = boolean_field %w(ssl generate_certs)
         = string_field %w(ssl certfile)
         = string_field %w(ssl keyfile)
         = boolean_field %w(ssl insecure)

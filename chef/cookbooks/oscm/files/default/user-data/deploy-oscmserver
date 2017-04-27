@@ -7,6 +7,7 @@ exec &> /var/log/setup-machine.log
 
 source /etc/oscm-variables
 
+WEB_CERT_PATH=/var/web_cert
 
 sudo cat /etc/sysconfig/proxy <<EOF
 PROXY_ENABLED="yes"
@@ -31,6 +32,19 @@ export https_proxy="https://$HTTPS_PROXY"
 export no_proxy="localhost, 127.0.0.1, $REGISTRY"
 
 systemctl restart docker
+
+WAIT_CURL="$WAIT_CURL --data-binary '{\"status\": \"SUCCESS\"}' --noproxy '*'"
+eval $WAIT_CURL
+if [ ${SSL_PATH} ]; then
+  until [ -f $SSL_PATH/scp_finished ]
+  do
+    echo "scp for ssl certificate is not finished yet sleeping 5sec."
+    sleep 5
+  done
+  echo "scp for ssl certificate is finished."
+  #TODO: add certificate to a local docker volume folder.
+  # echo $SSL_PATH/somekey.pem > /var/web_cert
+fi
 
 
 # For some reason the volume id is shortened to 27 characters when the device
@@ -65,25 +79,19 @@ OSCM_IMAGE=$REGISTRY/$OSCM_IMAGE_NAME
 APP_IMAGE=$REGISTRY/$APP_IMAGE_NAME
 DB_IMAGE=$REGISTRY/$DB_IMAGE_NAME
 DB=/db/database
-APP_LOGS_PATH=/oscm/app/logs
-APP_CONFIG_PATH=/oscm/app/config
-BES_LOGS_PATH=/oscm/bes/logs
-BES_CONFIG_PATH=/oscm/bes/config
-MI_LOGS_PATH=/oscm/master-indexer/logs
-MI_CONFIG_PATH=/oscm/master-indexer/config
+APP_PATH=/oscm/app/
+BES_PATH=/oscm/bes/
+MI_PATH=/oscm/master-indexer
 CLIENT_CRT_PATH=/oscm/client-crt/
+
 DB_VOLUME=dbvolume
 BES_VOLUME=besvolume
 APP_VOLUME=appvolume
 
-
 mkdir -p $DB
-mkdir -p $APP_LOGS_PATH
-mkdir -p $APP_CONFIG_PATH
-mkdir -p $BES_LOGS_PATH
-mkdir -p $BES_CONFIG_PATH
-mkdir -p $MI_LOGS_PATH
-mkdir -p $MI_CONFIG_PATH
+mkdir -p $APP_PATH
+mkdir -p $BES_PATH
+mkdir -p $MI_PATH
 
 # Start docker service
 systemctl start docker.service
@@ -96,26 +104,25 @@ docker create -v $DB:/var/lib/pgsql/database --name $DB_VOLUME $DB_IMAGE /bin/tr
 
 # create volume container for bes and master-indexer
 docker create \
-  -v $BES_LOGS_PATH:/opt/glassfish3/glassfish/domains/bes-domain/logs \
-  -v $BES_CONFIG_PATH:/opt/glassfish3/glassfish/domains/bes-domain/config \
-  -v $MI_LOGS_PATH:/opt/glassfish3/glassfish/domains/master-indexer-domain/logs \
-  -v $MI_CONFIG_PATH:/opt/glassfish3/glassfish/domains/master-indexer-domain/config \
-  -v $APP_CONFIG_PATH:/opt/glassfish3/glassfish/domains/app-domain/config \
+  -v $BES_PATH:/opt/glassfish3/glassfish/domains/bes-domain/ \
+  -v $MI_PATH:/opt/glassfish3/glassfish/domains/master-indexer-domain/ \
+  -v $APP_PATH:/opt/glassfish3/glassfish/domains/app-domain/ \
   -v $CLIENT_CRT_PATH:/tmp/client-crt \
   --name $BES_VOLUME $OSCM_IMAGE /bin/true
 
 # create volume container for app
 docker create \
-  -v $APP_LOGS_PATH:/opt/glassfish3/glassfish/domains/app-domain/logs \
-  -v $APP_CONFIG_PATH:/opt/glassfish3/glassfish/domains/app-domain/config \
-  -v $BES_CONFIG_PATH:/opt/glassfish3/glassfish/domains/bes-domain/config \
+  -v $APP_PATH:/opt/glassfish3/glassfish/domains/app-domain/ \
+  -v $BES_PATH:/opt/glassfish3/glassfish/domains/bes-domain/ \
   -v $CLIENT_CRT_PATH:/tmp/client-crt \
   --name $APP_VOLUME $APP_IMAGE /bin/true
 
+OSCM_DIR=/opt/oscm
+mkdir -p $OSCM_DIR
 
 # Docker compose file for the application deployment
-if [ ! -x /oscm/docker-compose.yml ]; then
-cat > /oscm/docker-compose.yml <<EOF
+if [ ! -x $OSCM_DIR/docker-compose.yml ]; then
+cat > $OSCM_DIR/docker-compose.yml <<EOF
 version: "2"
 services:
   $OSCM_HOSTNAME:
@@ -154,46 +161,41 @@ services:
     env_file:
       - /etc/oscm-variables
 EOF
-echo "# updated at $(date)" >> /oscm/docker-compose.yml
+echo "# updated at $(date)" >> $OSCM_DIR/docker-compose.yml
 fi
 
 # OSCM start script
-if [ ! -x /oscm/start-oscm.sh ]; then
-cat > /oscm/start-oscm.sh <<EOF
+if [ ! -x $OSCM_DIR/start-oscm.sh ]; then
+cat > $OSCM_DIR/start-oscm.sh <<EOF
 #/bin/sh
 # check if docker is running
 if ! docker ps &>/dev/null; then
   echo "starting docker service"
   systemctl start docker.service
 fi
-
 if ! grep -qs '/db' /proc/mounts; then
     mount -t ext4 $volume_dev_db /db
 fi
-
 if ! grep -qs '/oscm' /proc/mounts; then
     mount -t ext4 $volume_dev_db /oscm
 fi
-
 echo "oscm is being started"
-docker-compose -f /oscm/docker-compose.yml up --force-recreate
+docker-compose -f $OSCM_DIR/docker-compose.yml up --force-recreate
 EOF
-echo "# updated at $(date)" >> /oscm/start-oscm.sh
+echo "# updated at $(date)" >> $OSCM_DIR/start-oscm.sh
 fi
-chmod +x /oscm/start-oscm.sh
+chmod +x $OSCM_DIR/start-oscm.sh
 
 # OSCM Stop script
-if [ ! -x /oscm/stop-oscm.sh ]; then
-cat > /oscm/stop-oscm.sh <<EOF
+if [ ! -x $OSCM_DIR/stop-oscm.sh ]; then
+cat > $OSCM_DIR/stop-oscm.sh <<EOF
 #/bin/sh
-
 echo "oscm is being stopped"
-docker-compose -f /oscm/docker-compose.yml kill
-
+docker-compose -f $OSCM_DIR/docker-compose.yml kill
 EOF
-echo "# updated at $(date)" >> /oscm/stop-oscm.sh
+echo "# updated at $(date)" >> $OSCM_DIR/stop-oscm.sh
 fi
-chmod +x /oscm/stop-oscm.sh
+chmod +x $OSCM_DIR/stop-oscm.sh
 
 # OSCM systemd service
 cat > /etc/systemd/system/oscm.service <<EOF
@@ -201,11 +203,9 @@ cat > /etc/systemd/system/oscm.service <<EOF
 Description=OSCM conainerized
 Requires=docker.service
 After=docker.service
-
 [Service]
-ExecStart=/usr/bin/sh /oscm/start-oscm.sh
-ExecStop=/usr/bin/sh /oscm/stop-oscm.sh
-
+ExecStart=/usr/bin/sh $OSCM_DIR/start-oscm.sh
+ExecStop=/usr/bin/sh $OSCM_DIR/stop-oscm.sh
 [Install]
 WantedBy=default.target
 EOF
@@ -217,14 +217,11 @@ systemctl start oscm.service
 
 cat > /etc/motd <<EOF
 This node has been set up as the mock server for oscm.
-
 You will find
-
 * The application config file in /oscm with a
   timestamp appended to include redeployment every time the application.yaml
   template is re-instantiated.
 * A persistent application data volume mounted at /oscm
 * Data directory in /db/database
 * This message in /etc/motd
-
 EOF
