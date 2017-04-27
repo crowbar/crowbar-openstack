@@ -1,11 +1,11 @@
 #
-# Copyright 2016, SUSE LINUX GmbH
+# Copyright 2017 SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,10 +14,16 @@
 # limitations under the License.
 #
 
-if CrowbarRoleRecipe.node_state_valid_for_role?(node, "cinder", "cinder-controller")
-  include_recipe "cinder::api"
-  include_recipe "cinder::scheduler"
-  include_recipe "cinder::controller_ha"
-  include_recipe "cinder::monitor"
-  include_recipe "cinder::monitor_monasca"
+return unless node["roles"].include?("monasca-agent")
+
+bind_host, bind_port = CinderHelper.get_bind_host_port(node)
+
+monitor_url = "#{node[:cinder][:api][:protocol]}://#{bind_host}:#{bind_port}/"
+
+monasca_agent_plugin_http_check "http_check for cinder-api" do
+  built_by "cinder-controller"
+  name "volume-api"
+  url monitor_url
+  dimensions "service" => "volume-api"
+  match_pattern ".*v3.*"
 end

@@ -94,14 +94,7 @@ unless node[:crowbar_wall].nil? or node[:crowbar_wall][:openstack].nil?
   end
 end
 
-if node[:cinder][:ha][:enabled]
-  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  bind_host = admin_address
-  bind_port = node[:cinder][:ha][:ports][:api]
-else
-  bind_host = node[:cinder][:api][:bind_open_address] ? "0.0.0.0" : node[:cinder][:api][:bind_host]
-  bind_port = node[:cinder][:api][:bind_port]
-end
+bind_host, bind_port = CinderHelper.get_bind_host_port(node)
 
 # lock path prevents race conditions for cinder-volume and nova-compute on same
 # node. Keep code in sync between cinder and nova recipes. For reference check
