@@ -16,7 +16,7 @@
           "enabled": false
         },
         "tempurl": {
-          "enabled": false
+          "enabled": true
         },
         "formpost": {
           "enabled": false
@@ -105,8 +105,8 @@
       },
       "elements": {},
       "element_order": [
-        [ "swift-storage" ],  
-        [ "swift-ring-compute" ], 
+        [ "swift-storage" ],
+        [ "swift-ring-compute" ],
         [ "swift-storage" ],
         [ "swift-proxy" ],
         [ "swift-dispersion" ]
