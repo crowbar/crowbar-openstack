@@ -73,3 +73,5 @@ default[:ironic][:api][:port] = 6385
 default[:ironic][:config_file] = "/etc/ironic/ironic.conf.d/100-ironic.conf"
 
 default[:ironic][:tftproot] = "/var/lib/ironic/tftpboot"
+
+default[:ironic][:enabled_drivers] = []
