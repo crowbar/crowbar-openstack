@@ -23,12 +23,6 @@ is_controller = node["roles"].include?("nova-controller")
 
 my_ip_net = "admin"
 
-# z/VM compute nodes might need a different "my_ip" setting to be accessible
-# from the xCAT management node
-if node["roles"].include?("nova-compute-zvm")
-  my_ip_net = node["nova"]["zvm"]["zvm_xcat_network"]
-end
-
 node.set[:nova][:my_ip] =
   Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, my_ip_net).address
 

@@ -377,18 +377,6 @@ class NovaService < OpenstackServiceObject
       end
     end unless all_nodes.nil?
 
-    # Allocate IP for xcat_management network for z/VM nodes, if we're
-    # configured to use something else than the "admin" network for it.
-    zvm_compute_nodes = role.override_attributes["nova"]["elements"]["nova-compute-zvm"]
-    unless zvm_compute_nodes.nil? || zvm_compute_nodes.empty?
-      zvm_xcat_network = role.default_attributes["nova"]["zvm"]["zvm_xcat_network"]
-      unless zvm_xcat_network == "admin"
-        zvm_compute_nodes.each do |n|
-          net_svc.allocate_ip("default", zvm_xcat_network, "host", n)
-        end
-      end
-    end
-
     @logger.debug("Nova apply_role_pre_chef_call: leaving")
   end
 
@@ -413,24 +401,6 @@ class NovaService < OpenstackServiceObject
     # unless elements["nova-compute-hyperv"].empty? || hyperv_available?
     #   validation_error I18n.t("barclamp.#{@bc_name}.validation.hyperv_support")
     # end
-
-    unless elements["nova-compute-zvm"].nil? || elements["nova-compute-zvm"].empty?
-      unless network_present? proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_network"]
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.invalid_zvm_xcat_network",
-          network: proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_network"]
-        )
-      end
-    end
-
-    unless elements["nova-compute-ironic"].nil? || elements["nova-compute-ironic"].empty?
-      unless network_present?("ironic")
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.ironic_network")
-      end
-      if Proposal.where(barclamp: "ironic").empty?
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.ironic_server")
-      end
-    end
 
     elements["nova-compute-kvm"].each do |n|
       nodes[n] += 1
