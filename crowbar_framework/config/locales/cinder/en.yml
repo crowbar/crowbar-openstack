@@ -53,14 +53,14 @@ en:
           netapp_parameters: 'NetApp Parameters'
           netapp_volume_driver: 'NetApp'
           netapp:
-            nfs_shares_config_hint: 'Format one entry per line in the form hostname:/vol/path optional-nfs-mount-options'
+            nfs_shares_config_hint: 'Format one entry per line in the form hostname:/vol/path -o optional-nfs-mount-options'
             vfiler_hint: 'Only Use this option when utilizing the MultiStore feature on the NetApp storage with iSCSI'
             vserver_hint: 'If using the NFS storage protocol, this parameter is mandatory for storage service catalog support'
             volume_list_hint: 'Optional comma separated list of NetApp controller volume names'
           nfs_parameters: 'NFS Parameters'
           nfs_volume_driver: 'NFS'
           nfs:
-            nfs_shares_config_hint: 'Format one entry per line in the form hostname:/vol/path optional-nfs-mount-options'
+            nfs_shares_config_hint: 'Format one entry per line in the form hostname:/vol/path -o optional-nfs-mount-options'
           raw_parameters: 'Raw Devices Parameters'
           raw_volume_driver: 'Raw Devices'
           rbd_parameters: 'RADOS Parameters'
