@@ -1,4 +1,16 @@
 module NeutronHelper
+  def self.get_bind_host_port(node)
+    if node[:neutron][:ha][:server][:enabled]
+      admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+      bind_host = admin_address
+      bind_port = node[:neutron][:ha][:ports][:server]
+    else
+      bind_host = node[:neutron][:api][:service_host]
+      bind_port = node[:neutron][:api][:service_port]
+    end
+    return bind_host, bind_port
+  end
+
   # Find out how many (and which) physnets we need to define in neutron.
   # Input is the list of external_networks that we'll have. Returns a hash where
   # external_network -> physnet pairs
