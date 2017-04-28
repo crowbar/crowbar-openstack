@@ -102,7 +102,6 @@ en:
         assigned_remotes: 'Remotes %{key} has been assigned to a nova-compute role more than once.'
         assigned_node_and_remote: 'Node %{node} has been assigned to a nova-compute role as individual node and as remote node of cluster %{cluster}.'
         invalid_migration_network: 'Network "%{network}" configured for live migration is not defined in the configuration of the network barclamp.'
-        invalid_zvm_xcat_network: 'Network "%{network}" configured for zvm xcat access is not defined in the configuration of the network barclamp.'
         vendor_data_invalid_json: "The provided vendordata for the metadata server is invalid JSON."
         ceph_client_network_not_available: "The ceph_client network '%{ceph_client}' is not available in the network proposal"
         ironic_network: 'Ironic network is not configured.'

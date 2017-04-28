@@ -96,7 +96,6 @@
         "zvm_xcat_server": "",
         "zvm_xcat_username": "admin",
         "zvm_xcat_password": "admin",
-        "zvm_xcat_network": "admin",
         "zvm_diskpool": "",
         "zvm_diskpool_type": "",
         "zvm_host": "",
