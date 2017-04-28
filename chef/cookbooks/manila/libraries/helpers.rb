@@ -15,6 +15,20 @@
 #
 
 module ManilaHelper
+  def self.get_bind_host_port(node)
+    if node[:manila][:ha][:enabled]
+      bind_port = node[:manila][:ha][:ports][:api]
+    else
+      if node[:manila][:api][:bind_open_address]
+        bind_host = "0.0.0.0"
+      else
+        bind_host = node[:manila][:api][:bind_host]
+      end
+      bind_port = node[:manila][:api][:bind_port]
+    end
+    return bind_host, bind_port
+  end
+
   def self.has_cephfs_share?(node)
     # check if any share uses cephfs
     node[:manila][:shares].each do |share|

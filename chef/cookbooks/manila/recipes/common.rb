@@ -42,17 +42,7 @@ my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
 node.set[:manila][:my_ip] = my_ipaddress
 node.set[:manila][:api][:bind_host] = my_ipaddress
 
-if node[:manila][:ha][:enabled]
-  bind_port = node[:manila][:ha][:ports][:api]
-else
-  if node[:manila][:api][:bind_open_address]
-    bind_host = "0.0.0.0"
-  else
-    bind_host = node[:manila][:api][:bind_host]
-  end
-  bind_port = node[:manila][:api][:bind_port]
-end
-
+bind_host, bind_port = ManilaHelper.get_bind_host_port(node)
 
 # get Neutron data (copied from nova.conf.erb)
 # TODO(toabctl): Seems that this code is used in different barclamps.
