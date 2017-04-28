@@ -230,8 +230,11 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
     end
 
   when volume[:backend_driver] == "nfs"
+    shares_content = volume[:nfs][:nfs_shares]
+    nfs_opts = volume[:nfs][:nfs_mount_options].strip
+    shares_content += " -o #{nfs_opts}" unless nfs_opts.empty?
     file "/etc/cinder/nfs_shares-#{backend_id}" do
-      content volume[:nfs][:nfs_shares]
+      content shares_content
       owner "root"
       group node[:cinder][:group]
       mode "0640"
