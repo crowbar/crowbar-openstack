@@ -35,10 +35,9 @@ end
 service "horizon" do
   service_name "apache2"
   if node[:platform_family] == "suse"
-    reload_command "pkill --signal SIGUSR1 -f '(wsgi:horizon)' && sleep 1"
+    reload_command 'sleep 1 && pkill --signal SIGUSR1 -f "^\(wsgi:horizon\)" && sleep 1'
   end
   supports reload: true, restart: true, status: true
-  ignore_failure true
 end
 
 case node[:platform_family]
