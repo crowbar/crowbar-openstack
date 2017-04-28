@@ -51,13 +51,7 @@ public_ip = Swift::Evaluator.get_ip_by_type(node, :public_ip_expr)
 
 ha_enabled = node[:swift][:ha][:enabled]
 
-if node[:swift][:ha][:enabled]
-  bind_host = local_ip
-  bind_port = node[:swift][:ha][:ports][:proxy]
-else
-  bind_host = "0.0.0.0"
-  bind_port = node[:swift][:ports][:proxy]
-end
+bind_host, bind_port = SwiftHelper.get_bind_host_port(node)
 
 admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 public_host = CrowbarHelper.get_host_for_public_url(node, node[:swift][:ssl][:enabled], ha_enabled)
