@@ -78,6 +78,7 @@ ansible_vars = {
   keystone_monasca_agent_password: node[:monasca][:master][:keystone_monasca_agent_password],
   keystone_admin_agent_password: node[:monasca][:master][:keystone_admin_agent_password],
   keystone_admin_password: keystone_settings["admin_password"],
+  api_region: keystone_settings["endpoint_region"],
   database_grafana_password: node[:monasca][:master][:database_grafana_password],
 
   notification_enable_email: node[:monasca][:master][:notification_enable_email],
