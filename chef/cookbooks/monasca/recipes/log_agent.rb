@@ -26,7 +26,6 @@ if monasca_server.nil?
 end
 
 log_agent_dimensions = {
-  service: "monitoring",
   hostname: node["hostname"]
 }
 

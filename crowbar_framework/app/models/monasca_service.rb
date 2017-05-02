@@ -93,8 +93,8 @@ class MonascaService < PacemakerServiceObject
     nodes = NodeObject.all
 
     monasca_server = select_nodes_for_role(nodes, "monasca-server", "monitoring") || []
-    log_agent_nodes = select_nodes_for_role(nodes, "monasca-log-agent", "compute") || []
     agent_nodes = select_nodes_for_role(nodes, "monasca-agent", "compute") || []
+    log_agent_nodes = select_nodes_for_role(nodes, "monasca-log-agent", "compute") || []
 
     master_nodes = nodes.select { |n| n.intended_role == "admin" || n.name.start_with?("crowbar.") }
     master_node = master_nodes.empty? ? nodes.first : master_nodes.first
@@ -102,8 +102,8 @@ class MonascaService < PacemakerServiceObject
     base["deployment"][@bc_name]["elements"] = {
       "monasca-master" => [master_node.name],
       "monasca-server" => monasca_server.empty? ? [] : [monasca_server.first.name],
-      # "monasca-agent" => agent_nodes.map { |x| x.name },
-      "monasca-log-agent" => log_agent_nodes.map { |x| x.name }
+      "monasca-agent" => agent_nodes.map(&:name),
+      "monasca-log-agent" => log_agent_nodes.map(&:name)
     }
 
     base["attributes"][@bc_name]["database_instance"] =
