@@ -2,33 +2,29 @@
   "id": "template-monasca",
   "description": "Logging and Monitoring Service for OpenStack",
   "attributes": {
-    "monasca" : {
-      "agent" : {
-        "password": "",
-        "user_domain_id": "",
-        "user_domain_name": "",
-        "project_name": "",
-        "project_domain_id": "",
-        "project_domain_name": "",
-        "project_id": "",
-        "insecure": true,
-        "ca_file": "",
-        "max_buffer_size": 1000,
-        "max_measurement_buffer_size": -1,
-        "backlog_send_rate": 5,
-        "amplifier": 0,
-        "hostname": "",
-        "check_frequency": 15,
-        "num_collector_threads": 1,
-        "pool_full_max_retries": 5,
-        "plugin_collect_time_warn": 6,
-        "log_level": "INFO",
+    "monasca": {
+      "agent": {
         "keystone": {
           "service_user": "monasca-agent",
           "service_password": "",
           "service_tenant": "monasca",
           "service_role": "monasca-agent"
-        }
+        },
+        "insecure": true,
+        "system_only": false,
+        "overwrite_config": false,
+        "ca_file": "",
+        "log_dir": "/var/log/monasca-agent/",
+        "log_level": "INFO",
+        "statsd_port": 8125,
+        "check_frequency": 15,
+        "num_collector_threads": 1,
+        "pool_full_max_retries": 5,
+        "plugin_collect_time_warn": 6,
+        "max_buffer_size": 1000,
+        "max_measurement_buffer_size": -1,
+        "backlog_send_rate": 1000,
+        "amplifier": 0
       },
       "log_agent": {
         "keystone": {
@@ -47,16 +43,16 @@
       "log_api": {
         "log_level": "INFO"
       },
-      "master" : {
-        "influxdb_mon_api_password" : "",
-        "influxdb_mon_persister_password" : "",
-        "database_notification_password" : "",
-        "database_monapi_password" : "",
-        "database_thresh_password" : "",
-        "database_logapi_password" : "",
-        "keystone_monasca_operator_password" : "",
-        "keystone_monasca_agent_password" : "",
-        "keystone_admin_agent_password" : "",
+      "master": {
+        "influxdb_mon_api_password": "",
+        "influxdb_mon_persister_password": "",
+        "database_notification_password": "",
+        "database_monapi_password": "",
+        "database_thresh_password": "",
+        "database_logapi_password": "",
+        "keystone_monasca_operator_password": "",
+        "keystone_monasca_agent_password": "",
+        "keystone_admin_agent_password": "",
         "database_grafana_password": "",
         "notification_enable_email": true,
         "smtp_host": "localhost",
@@ -65,14 +61,14 @@
         "smtp_password": "",
         "smtp_from_address": "monasca@localhost"
       },
-      "db" : {
-        "database" : "monasca",
-        "password" : "",
-        "user" : "monasca"
+      "db": {
+        "database": "monasca",
+        "password": "",
+        "user": "monasca"
       },
-      "debug" : false,
-      "group" : "monasca",
-      "user" : "monasca",
+      "debug": false,
+      "group": "monasca",
+      "user": "monasca",
       "database_instance": "none",
       "keystone_instance": "none",
       "service_password": "none",
@@ -82,28 +78,28 @@
     }
   },
   "deployment": {
-    "monasca" : {
+    "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
       "schema-revision": 100,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
-        "monasca-agent": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],
+        "monasca-agent": [ "readying", "ready", "applying" ],
         "monasca-log-agent": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
         [ "monasca-server" ],
-        [ "monasca-agent" ],
         [ "monasca-master" ],
+        [ "monasca-agent" ],
         [ "monasca-log-agent" ]
       ],
       "element_run_list_order": {
         "monasca-server": 110,
-        "monasca-agent": 120,
         "monasca-master": 115,
-        "monasca-log-agent": 120
+        "monasca-agent": 120,
+        "monasca-log-agent": 130
       },
       "config": {
         "environment": "monasca-base-config",

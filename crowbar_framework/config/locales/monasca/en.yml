@@ -26,10 +26,6 @@ en:
           log_level: 'Log level'
           processes: 'Number of processes'
           threads: 'Number of concurrent threads'
-        agent_header: 'Agent Settings'
-        agent:
-          url: 'Monasca URL'
-          log_level: 'Log level'
         log_api_header: 'Log API settings'
         log_api:
           log_level: 'Log level'
