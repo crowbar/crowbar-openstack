@@ -17,4 +17,5 @@
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "neutron", "neutron-server")
   include_recipe "neutron::server"
   include_recipe "neutron::monitor"
+  include_recipe "neutron::monitor_monasca"
 end

@@ -92,18 +92,7 @@ end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-if ha_enabled
-  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  bind_host = admin_address
-  api_port = node[:heat][:ha][:ports][:api_port]
-  cfn_port = node[:heat][:ha][:ports][:cfn_port]
-  cloud_watch_port = node[:heat][:ha][:ports][:cloud_watch_port]
-else
-  bind_host = "0.0.0.0"
-  api_port = node[:heat][:api][:port]
-  cfn_port = node[:heat][:api][:cfn_port]
-  cloud_watch_port = node[:heat][:api][:cloud_watch_port]
-end
+bind_host, api_port, cfn_port, cloud_watch_port = HeatHelper.get_bind_host_port(node)
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:protocol] == "https", ha_enabled)

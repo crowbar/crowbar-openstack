@@ -8,34 +8,21 @@ Api:
   #
   # Monitoring API URL: URL for the monitoring API, if undefined it will be pulled from the keystone service catalog
   # Example: https://region-a.geo-1.monitoring.hpcloudsvc.com:8080/v2.0
-  url: <%= @monasca_url %>
+  url: "<%= @monasca_api_url %>"
   # Keystone Username
-  username: <%= @username %>
+  username: "<%= @agent_settings["keystone"]["service_user"] %>"
   # Keystone Password
-  password: "<%= @password %>"
+  password: "<%= @agent_settings["keystone"]["service_password"] %>"
   # Keystone API URL: URL for the Keystone server to use
   # Example: https://region-a.geo-1.identity.hpcloudsvc.com:35357/v3/
-  keystone_url: <%= @keystone_url %>
-  # Domain id to be used to resolve username
-  user_domain_id: <%= @user_domain_id %>
-  # Domain name to be used to resolve username
-  user_domain_name: <%= @user_domain_name %>
+  keystone_url: "<%= @keystone_settings["admin_auth_url"] %>/v<%= @keystone_settings["api_version"] %>"
   # Project name to be used by this agent
-  project_name: <%= @project_name %>
-  # Project domain id to be used by this agent
-  project_domain_id: <%= @project_domain_id %>
-  # Project domain id to be used by this agent
-  project_domain_name: <%= @project_domain_name %>
-  # Project id to be used by this agent
-  project_id: <%= @project_id %>
+  project_name: "<%= @agent_settings["keystone"]["service_tenant"] %>"
   # Set whether certificates are used for Keystone
-  # *******************************************************************************************
-  # **** CAUTION ****: The insecure flag should NOT be set to True in a production environment!
-  # *******************************************************************************************
   # If insecure is set to False, a ca_file name must be set to authenticate with Keystone
-  insecure: <%= @insecure %>
+  insecure: <%= @keystone_settings['insecure'] %>
   # Name of the ca certs file
-  ca_file: <%= @ca_file %>
+  # ca_file: <%= @ca_file %>
 
   # The following 3 options are for handling buffering and reconnection to the monasca-api
   # If the agent forwarder is consuming too much memory, you may want to set
@@ -46,20 +33,20 @@ Api:
   # DEPRECATED - please use max_measurement_buffer_size instead
   # Maximum number of messages (batches of measurements) to buffer when unable to communicate
   # with the monasca-api (-1 means no limit)
-  max_buffer_size: <%= @max_buffer_size %>
+  max_buffer_size: <%= @agent_settings["max_buffer_size"].to_i %>
   # Maximum number of measurements to buffer when unable to communicate with the monasca-api
   # (-1 means no limit)
-  max_measurement_buffer_size: <%= @max_measurement_buffer_size %>
+  max_measurement_buffer_size: <%= @agent_settings["max_measurement_buffer_size"].to_i %>
   # Maximum number of messages to send at one time when communication with the monasca-api is restored
-  backlog_send_rate: <%= @backlog_send_rate %>
+  backlog_send_rate: <%= @agent_settings["backlog_send_rate"].to_i %>
 
   # Publish extra metrics to the API by adding this number of 'amplifier' dimensions.
   # For load testing purposes only; set to 0 for production use.
-  amplifier: <%= @amplifier %>
+  amplifier: <%= @agent_settings["amplifier"].to_i %>
 
 Main:
   # Force the hostname to whatever you want.
-  hostname: <%= @hostname %>
+  hostname: "<%= @hostname %>"
 
   # Optional dimensions to be sent with every metric from this node
   # They should be in the format name: value
@@ -69,7 +56,7 @@ Main:
   #   group: group_a
   #   environment: production
   <%- unless @dimensions.nil? or @dimension.empty? then -%>
-  dimensions: <%= @dimensions %>
+  dimensions:
   <%- @dimensions.each_pair do |key, val| -%>
     <%= key %>: <%= val %>
   <%- end -%>
@@ -81,17 +68,17 @@ Main:
   #recent_point_threshold: 30
 
   # time to wait between collection runs
-  check_freq: <%= @check_frequency %>
+  check_freq: <%= @agent_settings["check_frequency"].to_i %>
 
   # Number of Collector Threads to run
-  num_collector_threads: <%= @num_collector_threads %>
+  num_collector_threads: <%= @agent_settings["num_collector_threads"].to_i %>
 
   # Maximum number of collection cycles where all of the threads in the pool are
   # still running plugins before the collector will exit
-  pool_full_max_retries: <%= @pool_full_max_retries %>
+  pool_full_max_retries: <%= @agent_settings["pool_full_max_retries"].to_i %>
 
   # Threshold value for warning on collection time of each check (in seconds)
-  sub_collection_warn: <%= @plugin_collect_time_warn %>
+  sub_collection_warn: <%= @agent_settings["plugin_collect_time_warn"].to_i %>
 
   # Collector restart interval (in hours)
   collector_restart_interval: 24
@@ -129,10 +116,10 @@ Logging:
   # ========================================================================== #
   # Logging
   # ========================================================================== #
-  log_level: <%= @log_level %>
-  collector_log_file: /var/log/monasca/agent/collector.log
-  forwarder_log_file: /var/log/monasca/agent/forwarder.log
-  statsd_log_file: /var/log/monasca/agent/statsd.log
+  log_level: "<%= @log_level %>"
+  collector_log_file: <%= @log_dir %>/collector.log
+  forwarder_log_file: <%= @log_dir %>/forwarder.log
+  statsd_log_file: <%= @log_dir %>/statsd.log
 
   # if syslog is enabled but a host and port are not set, a local domain socket
   # connection will be attempted
