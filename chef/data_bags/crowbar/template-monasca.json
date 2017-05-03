@@ -78,7 +78,7 @@
       "service_password": "none",
       "service_user": "monasca",
       "service_tenant": "monasca",
-      "service_roles": ["monasca-agent"]
+      "service_roles": ["monasca-agent", "monasca-user"]
     }
   },
   "deployment": {

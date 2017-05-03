@@ -136,6 +136,19 @@ keystone_register "give admin user admin role in monasca tenant" do
   action :add_access
 end
 
+# Required for Grafana access
+keystone_register "give admin user monasca-user role in monasca tenant" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["admin_user"]
+  tenant_name monasca_project
+  role_name "monasca-user"
+  action :add_access
+end
+
 agents_settings = []
 
 agents_settings.push(node[:monasca][:agent][:keystone])
