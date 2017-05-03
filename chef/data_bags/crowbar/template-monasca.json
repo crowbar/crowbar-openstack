@@ -11,8 +11,6 @@
           "service_role": "monasca-agent"
         },
         "insecure": true,
-        "system_only": false,
-        "overwrite_config": false,
         "ca_file": "",
         "log_dir": "/var/log/monasca-agent/",
         "log_level": "INFO",
@@ -42,6 +40,9 @@
       },
       "log_api": {
         "log_level": "INFO"
+      },
+      "setup": {
+        "extra_params": ""
       },
       "master": {
         "influxdb_mon_api_password": "",

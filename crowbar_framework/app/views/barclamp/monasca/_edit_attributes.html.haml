@@ -8,7 +8,6 @@
       %legend
         = t(".agent_header")
 
-      = boolean_field %w(agent system_only)
       = select_field %w(agent log_level), :collection => :agent_log_levels
       = integer_field %w(agent statsd_port)
       = integer_field %w(agent check_frequency)
