@@ -19,7 +19,7 @@ class TempestService < ServiceObject
   class ServiceError < StandardError
   end
 
-  def initialize(thelogger)
+  def initialize(thelogger = nil)
     @bc_name = "tempest"
     @logger = thelogger
   end

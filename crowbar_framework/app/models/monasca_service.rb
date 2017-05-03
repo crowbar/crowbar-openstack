@@ -16,7 +16,7 @@
 #
 
 class MonascaService < PacemakerServiceObject
-  def initialize(thelogger)
+  def initialize(thelogger = nil)
     @bc_name = "monasca"
     @logger = thelogger
   end

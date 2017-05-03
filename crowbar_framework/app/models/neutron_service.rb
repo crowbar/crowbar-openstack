@@ -18,7 +18,7 @@
 require "ipaddr"
 
 class NeutronService < PacemakerServiceObject
-  def initialize(thelogger)
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "neutron"
   end

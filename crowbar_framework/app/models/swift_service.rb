@@ -21,7 +21,7 @@ class SwiftService < PacemakerServiceObject
   class ServiceError < StandardError
   end
 
-  def initialize(thelogger)
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "swift"
   end
