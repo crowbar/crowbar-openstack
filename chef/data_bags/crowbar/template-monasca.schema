@@ -27,8 +27,6 @@
                   }
                 },
                 "insecure": { "type": "bool", "required": true },
-                "system_only": { "type": "bool", "required": true },
-                "overwrite_config": { "type": "bool", "required": true },
                 "ca_file": { "type": "str", "required": true },
                 "log_dir": { "type": "str", "required": true },
                 "log_level": { "type": "str", "required": true },
@@ -74,6 +72,13 @@
               "type": "map",
               "mapping": {
                 "log_level": { "type": "str", "required": true }
+              }
+            },
+            "setup": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "extra_params": { "required": true, "type": "str" }
               }
             },
             "master": {

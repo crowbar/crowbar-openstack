@@ -21,8 +21,6 @@ then
         --user '<%= @agent_settings["user"] %>' \
         --dimensions '<%= @agent_dimensions.map{|k,v| "#{k}:#{v}"}.join(',') %>' \
         --insecure '<%= @agent_settings["insecure"] %>' \
-        <% if @agent_settings["system_only"] -%> --system_only <% end -%> \
-        <% if @agent_settings["overwrite_config"] -%> --overwrite <% end -%> \
         <% if @agent_settings["ca_file"].length > 0 -%> --ca_file '<%= @agent_settings["ca_file"] %>' <% end -%> \
         --log_dir '<%= @agent_settings["log_dir"] %>' \
         --log_level '<%= @agent_settings["log_level"] %>' \
@@ -36,6 +34,6 @@ then
         --backlog_send_rate '<%= @agent_settings["backlog_send_rate"].to_i %>' \
         --amplifier '<%= @agent_settings["amplifier"] %>' \
         --skip_enable \
-        <% if @install_plugins_only -%> --install_plugins_only <% end -%> \
-        --agent_service_name '<%= @agent_settings["agent_service_name"] %>'
+        --agent_service_name '<%= @agent_settings["agent_service_name"] %>' \
+        <%= @setup["extra_params"] %>
 fi

@@ -45,7 +45,7 @@ template "/usr/sbin/monasca-reconfigure" do
     agent_keystone: agent_keystone,
     keystone_settings: keystone_settings,
     agent_dimensions: agent_dimensions,
-    install_plugins_only: false
+    setup: node[:monasca][:setup]
   )
 end
 
