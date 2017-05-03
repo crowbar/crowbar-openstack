@@ -67,11 +67,6 @@ keystone-node                    ansible_ssh_host=<%= @keystone_host %> ansible_
 <%= "monasca-notification-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
 <% end %>
 
-# Monasca-persister nodes
-<% @monasca_hosts.each_with_index do |host, index| %>
-<%= "monasca-persister-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
-<% end %>
-
 # Monasca-log-metrics nodes for cluster
 <% @monasca_hosts.each_with_index do |host, index| %>
 <%= "monasca-log-metrics-node-#{index} ansible_ssh_host=#{host}" %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -133,9 +128,6 @@ keystone-node
 balancer-node
 
 [monasca_persister_group]
-<% @monasca_hosts.length.times do |index| %>
-<%= "monasca-persister-node-#{index} influxdb_node_for_persister=keepalived-virtual-node" %>
-<% end %>
 
 [monasca_api_group]
 <% @monasca_hosts.length.times do |index| %>

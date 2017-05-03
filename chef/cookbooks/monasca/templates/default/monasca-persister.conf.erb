@@ -1,0 +1,56 @@
+[DEFAULT]
+log_dir=<%= @log_dir %>
+log_file=<%= @log_dir %>/persister.log
+debug = <%= @debug ? "True" : "False" %>
+
+[repositories]
+metrics_driver = monasca_persister.repositories.influxdb.metrics_repository:MetricInfluxdbRepository
+alarm_state_history_driver = monasca_persister.repositories.influxdb.alarm_state_history_repository:AlarmStateHistInfluxdbRepository
+
+[zookeeper]
+# Comma separated list of host:port
+uri=<%= @zookeeper_hosts %>
+partition_interval_recheck_seconds = 15
+
+[kafka_alarm_history]
+# Comma separated list of Kafka broker host:port.
+uri=<%= @kafka_hosts %>
+group_id = 1_alarm-state-transitions
+topic = alarm-state-transitions
+consumer_id = 1
+client_id = 1
+database_batch_size = 1000
+max_wait_time_seconds = 30
+# The following 3 values are set to the kakfa-python defaults
+fetch_size_bytes = 4096
+buffer_size = 4096
+# 8 times buffer size
+max_buffer_size = 32768
+# Path in zookeeper for kafka consumer group partitioning algo
+zookeeper_path = /persister_partitions/alarm-state-transitions
+num_processors = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+
+[kafka_metrics]
+# Comma separated list of Kafka broker host:port
+uri=<%= @kafka_hosts %>
+group_id = 1_metrics
+topic = metrics
+consumer_id = 1
+client_id = 1
+database_batch_size = 1000
+max_wait_time_seconds = 30
+# The following 3 values are set to the kakfa-python defaults
+fetch_size_bytes = 4096
+buffer_size = 4096
+# 8 times buffer size
+max_buffer_size = 32768
+# Path in zookeeper for kafka consumer group partitioning algo
+zookeeper_path = /persister_partitions/metrics
+num_processors = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+
+[influxdb]
+ip_address=<%= @influxdb_host %>
+port=<%= @influxdb_port %>
+database_name=<%= @influxdb_database_name %>
+user=<%= @influxdb_username %>
+password=<%= @influxdb_mon_persister_password %>
