@@ -19,10 +19,10 @@ module Barclamp
     def agent_log_levels(selected)
       options_for_select(
         [
-          ["ERROR", "ERROR"],
-          ["WARNING", "WARNING"],
-          ["INFO", "INFO"],
-          ["DEBUG", "DEBUG"]
+          ["Error", "ERROR"],
+          ["Warning", "WARNING"],
+          ["Info", "INFO"],
+          ["Debug", "DEBUG"]
         ],
         selected.to_s
       )
@@ -31,12 +31,12 @@ module Barclamp
     def api_log_levels(selected)
       options_for_select(
         [
-          ["CRITICAL", "CRITICAL"],
-          ["ERROR", "ERROR"],
-          ["WARNING", "WARNING"],
-          ["INFO", "INFO"],
-          ["DEBUG", "DEBUG"],
-          ["TRACE", "TRACE"]
+          ["Critical", "CRITICAL"],
+          ["Error", "ERROR"],
+          ["Warning", "WARNING"],
+          ["Info", "INFO"],
+          ["Debug", "DEBUG"],
+          ["Trace", "TRACE"]
         ],
         selected.to_s
       )
