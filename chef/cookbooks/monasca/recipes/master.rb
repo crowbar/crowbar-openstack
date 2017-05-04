@@ -45,7 +45,7 @@ template "/opt/monasca-installer/monasca-hosts" do
   variables(
     monasca_hosts: monasca_hosts,
     ansible_ssh_user: "root",
-    keystone_host: keystone_settings["public_url_host"]
+    keystone_host: keystone_settings["internal_url_host"]
   )
   notifies :run, "execute[run ansible]", :delayed
 end
