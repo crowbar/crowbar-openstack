@@ -89,6 +89,10 @@ class IronicService < ServiceObject
       validation_error I18n.t("barclamp.#{@bc_name}.validation.ironic_network")
     end
 
+    if proposal["attributes"][@bc_name]["enabled_drivers"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.no_drivers")
+    end
+
     # additional soft dependencies for agent_* drivers
     if proposal["attributes"][@bc_name]["enabled_drivers"].any? { |d| d.start_with?("agent_") }
       swift_svc = SwiftService.new @logger

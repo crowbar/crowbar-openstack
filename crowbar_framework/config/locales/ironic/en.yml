@@ -34,3 +34,4 @@ en:
         swift_proposal: 'To use agent_* drivers, Swift needs to be enabled.'
         swift_tempurl_enabled: 'To use agent_* drivers, Swift TempURL middleware needs to be enabled.'
         glance_swift_default_store: 'To use agent_* drivers, Glance needs to have Swift set as Default Storage Store.'
+        no_drivers: 'No drivers enabled. Select at least one driver.'
