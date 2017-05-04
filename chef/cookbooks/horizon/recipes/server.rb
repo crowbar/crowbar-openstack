@@ -126,7 +126,26 @@ unless magnum_ui_pkgname.nil?
       action :install
       notifies :reload, "service[horizon]"
     end
+end
+
+# install horizon trove plugin if needed
+trove_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-trove-ui"
+  when "rhel"
+    "openstack-trove-ui"
   end
+
+unless trove_ui_pkgname.nil?
+  trove_servers = search(:node, "roles:trove-server") || []
+  unless trove_servers.empty?
+    package trove_ui_pkgname do
+      action :install
+      notifies :reload, resources(service: "apache2")
+    end
+  end
+end
 end
 
 # install horizon trove plugin if needed
