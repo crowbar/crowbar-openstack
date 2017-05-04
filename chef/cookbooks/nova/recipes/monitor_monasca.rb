@@ -17,7 +17,7 @@
 return unless node["roles"].include?("monasca-agent")
 
 if node[:nova][:ha][:enabled]
-  bind_host = admin_address
+  bind_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
   bind_port = node[:nova][:ha][:ports][:api]
 else
   bind_host = "0.0.0.0"
