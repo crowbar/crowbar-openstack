@@ -94,7 +94,7 @@ class MonascaService < PacemakerServiceObject
 
     monasca_server = select_nodes_for_role(nodes, "monasca-server", "monitoring") || []
     log_agent_nodes = select_nodes_for_role(nodes, "monasca-log-agent", "compute") || []
-    agent_nodes = select_nodes_for_role(nodes, "monasca-agent", "compute") || []
+    agent_nodes = select_nodes_for_role(nodes, "monasca-agent") || []
 
     master_nodes = nodes.select { |n| n.intended_role == "admin" || n.name.start_with?("crowbar.") }
     master_node = master_nodes.empty? ? nodes.first : master_nodes.first
@@ -133,8 +133,13 @@ class MonascaService < PacemakerServiceObject
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "monasca-master"
     validate_one_for_role proposal, "monasca-server"
+    nodes = proposal["deployment"][@bc_name]["elements"]
+    nodes["monasca-server"].each do |node|
+      unless nodes["monasca-agent"].include? node
+         validation_error("All monasca-server node(s) need monasca-agent role too.")
+      end
+    end
     # TODO: uncomment for cluster support
-    # nodes = proposal["deployment"][@bc_name]["elements"]
     # if !nodes.key?("monasca-server") ||
     #     (nodes["monasca-server"].length != 1 && nodes["monasca-server"].length != 3)
     #   validation_error("Need either one or three monasca-server node(s).")
