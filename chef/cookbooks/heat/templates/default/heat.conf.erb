@@ -23,88 +23,60 @@ control_exchange = heat
 
 [clients]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_barbican]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_ceilometer]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_cinder]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_glance]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_heat]
 endpoint_type = publicURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_keystone]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
 
 [clients_magnum]
 endpoint_type = publicURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_manila]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_neutron]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_nova]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_sahara]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_swift]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [clients_trove]
 endpoint_type = internalURL
-<% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 
 [database]
 connection = <%= @database_connection %>
@@ -144,15 +116,16 @@ max_header_line = <%= node[:heat][:max_header_line] %>
 
 [keystone_authtoken]
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
-<% if @keystone_settings['insecure'] -%>
+project_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
 insecure = <%= @keystone_settings['insecure'] %>
-<% end -%>
 region_name = <%= @keystone_settings['endpoint_region'] %>
-identity_uri = <%= @keystone_settings['admin_auth_url'] %>
-admin_user = <%= @keystone_settings['service_user'] %>
-admin_password = <%= @keystone_settings['service_password'] %>
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings['admin_domain']%>
+user_domain_name = <%= @keystone_settings['admin_domain'] %>
+auth_type = password
 
 <% if node[:heat][:api][:protocol] == "https" %>
 [ssl]
