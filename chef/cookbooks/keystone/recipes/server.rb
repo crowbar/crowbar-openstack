@@ -121,6 +121,8 @@ elsif node[:keystone][:frontend] == "apache"
     script_alias "/usr/bin/keystone-wsgi-public"
     pass_authorization true
     limit_request_body 114688
+    processes node[:keystone][:api][:processes]
+    threads node[:keystone][:api][:threads]
     ssl_enable node[:keystone][:api][:protocol] == "https"
     ssl_certfile node[:keystone][:ssl][:certfile]
     ssl_keyfile node[:keystone][:ssl][:keyfile]
@@ -140,6 +142,8 @@ elsif node[:keystone][:frontend] == "apache"
     script_alias "/usr/bin/keystone-wsgi-admin"
     pass_authorization true
     limit_request_body 114688
+    processes node[:keystone][:api][:processes]
+    threads node[:keystone][:api][:threads]
     ssl_enable node[:keystone][:api][:protocol] == "https"
     ssl_certfile node[:keystone][:ssl][:certfile]
     ssl_keyfile node[:keystone][:ssl][:keyfile]

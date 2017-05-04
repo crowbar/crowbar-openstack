@@ -38,7 +38,9 @@
                       "api_host": { "type" : "str", "required" : true },
                       "admin_host": { "type" : "str", "required" : true },
                       "version": { "type" : "str", "required" : true },
-                      "region": { "type" : "str", "required" : true }
+                      "region": { "type" : "str", "required" : true },
+                      "processes": { "required": true, "type": "int" },
+                      "threads": { "required": true, "type": "int" }
                     }},
                     "admin": { "type": "map", "required": true, "mapping": {
                       "tenant": { "type" : "str", "required" : true },
