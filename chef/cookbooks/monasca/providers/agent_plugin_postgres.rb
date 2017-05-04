@@ -34,14 +34,9 @@ action :create do
 
   postgres_instances = node[:monasca][:agent_plugin_config][:postgres_instances]
 
-  # create config directory (needed if openstack-monasca-agent package is
-  # not yet installed)
-  directory "/etc/monasca/agent/conf.d/" do
-    owner node[:monasca][:agent][:user]
-    group node[:monasca][:agent][:group]
-    mode "0755"
-    recursive true
-  end
+  # be sure the package is installed. that way "/etc/monasca/agent/conf.d/" is available
+  # and also the user and group are there
+  package "openstack-monasca-agent"
 
   # NOTE(toabctl): convert/parse first to/from json. Otherwise we have unwanted markers
   # like "- !ruby/hash:Mash" in the yaml output
