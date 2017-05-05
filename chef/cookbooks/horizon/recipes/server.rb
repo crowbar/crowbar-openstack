@@ -38,6 +38,7 @@ service "horizon" do
     reload_command 'sleep 1 && pkill --signal SIGUSR1 -f "^\(wsgi:horizon\)" && sleep 1'
   end
   supports reload: true, restart: true, status: true
+  ignore_failure true
 end
 
 case node[:platform_family]
