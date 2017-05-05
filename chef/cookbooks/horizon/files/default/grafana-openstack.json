@@ -33,7 +33,7 @@
               "series": "http_status",
               "condition_filter": true,
               "condition_key": "service",
-              "condition_value": "compute"
+              "condition_value": "compute-api"
             }
           ],
           "cacheTimeout": null,
@@ -91,7 +91,7 @@
               "series": "http_status",
               "condition_filter": true,
               "condition_key": "service",
-              "condition_value": "networking"
+              "condition_value": "network-api"
             }
           ],
           "cacheTimeout": null,
@@ -149,7 +149,7 @@
               "series": "http_status",
               "condition_filter": true,
               "condition_key": "service",
-              "condition_value": "image-service"
+              "condition_value": "image-api"
             }
           ],
           "cacheTimeout": null,
@@ -207,7 +207,7 @@
               "series": "http_status",
               "condition_filter": true,
               "condition_key": "service",
-              "condition_value": "block-storage"
+              "condition_value": "volume-api"
             }
           ],
           "cacheTimeout": null,
@@ -265,7 +265,7 @@
               "series": "http_status",
               "condition_filter": true,
               "condition_key": "service",
-              "condition_value": "object-storage"
+              "condition_value": "object-store-api"
             }
           ],
           "cacheTimeout": null,
@@ -323,7 +323,7 @@
               "series": "http_status",
               "condition_filter": true,
               "condition_key": "service",
-              "condition_value": "identity-service"
+              "condition_value": "identity-api"
             }
           ],
           "cacheTimeout": null,
