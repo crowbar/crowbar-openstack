@@ -97,6 +97,16 @@ ansible_vars = {
   memcached_listen_ip: monasca_net_ip,
   kafka_host: monasca_net_ip,
   kibana_host: pub_net_ip,
+  kibana_plugins: {
+    "monasca-kibana-plugin" => {
+      "url" => "file:///usr/share/monasca-kibana-plugin/monasca-kibana-plugin.tar.gz",
+      "configuration" => {
+        "monasca-kibana-plugin.enabled" => true,
+        "monasca-kibana-plugin.auth_uri" => keystone_settings["public_auth_url"],
+        "monasca-kibana-plugin.cookie.isSecure" => false
+      }
+    }
+  },
   log_api_bind_host: "*",
   influxdb_bind_address: monasca_net_ip,
   influxdb_host: monasca_net_ip,
