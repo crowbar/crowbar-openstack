@@ -62,6 +62,10 @@
         "smtp_password": "",
         "smtp_from_address": "monasca@localhost"
       },
+      "influxdb": {
+        "influxdb_period": 60,
+        "influxdb_duration": "d"
+      },
       "db": {
         "database": "monasca",
         "password": "",

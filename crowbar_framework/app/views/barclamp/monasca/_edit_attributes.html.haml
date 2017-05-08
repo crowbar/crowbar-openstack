@@ -33,6 +33,13 @@
 
     %fieldset
       %legend
+        = t(".influxdb_header")
+
+      = integer_field %w(influxdb influxdb_period)
+      = select_field  %w(influxdb influxdb_duration), :collection => :influxdb_durations
+
+    %fieldset
+      %legend
         = t(".master_notification_header")
 
       = boolean_field %w(master notification_enable_email)

@@ -52,6 +52,10 @@ en:
           smtp_user: 'SMTP user'
           smtp_password: 'SMTP password'
           smtp_from_address: 'SMTP sender (FROM) address'
+        influxdb_header: 'InfluxDB Retention Policy Settings'
+        influxdb:
+          influxdb_period: 'Period'
+          influxdb_duration: 'Duration'
         db_header: 'Database settings'
         db:
           database: 'Database'

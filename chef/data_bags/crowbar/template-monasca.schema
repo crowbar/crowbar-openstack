@@ -103,6 +103,14 @@
                 "smtp_from_address": { "required": true, "type": "str" }
               }
             },
+            "influxdb": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "influxdb_period": { "required": true, "type": "int"},
+                "influxdb_duration": { "required": true, "type": "str"}
+              }
+            },
             "db": {
               "required": true,
               "type": "map",

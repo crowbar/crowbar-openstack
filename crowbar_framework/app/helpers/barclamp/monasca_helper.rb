@@ -41,5 +41,17 @@ module Barclamp
         selected.to_s
       )
     end
+
+    def influxdb_durations(selected)
+      options_for_select(
+        [
+          ["Minutes", "m"],
+          ["Hours", "h"],
+          ["Days", "d"],
+          ["Weeks", "w"]
+        ],
+        selected.to_s
+      )
+    end
   end
 end
