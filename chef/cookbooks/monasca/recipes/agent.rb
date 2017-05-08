@@ -60,7 +60,7 @@ template "/etc/monasca/agent/agent.yaml" do
     monasca_api_url: monasca_api_url,
     agent_dimensions: agent_dimensions,
     log_dir: agent_settings["log_dir"],
-    log_level: agent_settings[:debug] ? "DEBUG": "INFO",
+    log_level: agent_settings[:log_level],
     keystone_settings: keystone_settings,
     agent_settings: agent_settings
   )

@@ -29,7 +29,6 @@ default[:monasca][:log_api][:bind_port] = 5607
 # agent default service settings
 default[:monasca][:agent]["user"] = "monasca-agent"
 default[:monasca][:agent][:group] = "monasca"
-default[:monasca][:agent][:debug] = false
 default[:monasca][:agent]["log_dir"] = "/var/log/monasca-agent"
 default[:monasca][:agent]["agent_service_name"] = "openstack-monasca-agent"
 
