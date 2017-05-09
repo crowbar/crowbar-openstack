@@ -1,0 +1,49 @@
+influxdb_mon_api_password: <%= @master_settings['influxdb_mon_api_password'] %>
+influxdb_mon_persister_password: <%= @master_settings['influxdb_mon_persister_password'] %>
+database_notification_password: <%= @master_settings['database_notification_password'] %>
+database_monapi_password: <%= @master_settings['database_monapi_password'] %>
+database_thresh_password: <%= @master_settings['database_thresh_password'] %>
+database_logapi_password: <%= @master_settings['database_logapi_password'] %>
+keystone_monasca_operator_password: <%= @master_settings['keystone_monasca_operator_password'] %>
+keystone_monasca_agent_password: <%= @master_settings['keystone_monasca_agent_password'] %>
+keystone_admin_agent_password: <%= @master_settings['keystone_admin_agent_password'] %>
+keystone_admin_password: <%= @keystone_settings['admin_password'] %>
+api_region: <%= @keystone_settings['endpoint_region'] %>
+database_grafana_password: <%= @master_settings['database_grafana_password'] %>
+
+notification_enable_email: <%= @master_settings['notification_enable_email'] %>
+smtp_host: <%= @master_settings['smtp_host'] %>
+smtp_port: <%= @master_settings['smtp_port'] %>
+smtp_user: <%= @master_settings['smtp_user'] %>
+smtp_password: <%= @master_settings['smtp_password'] %>
+smtp_from_address: <%= @master_settings['smtp_from_address'] %>
+
+memcached_listen_ip: <%= @monasca_net_ip %>
+kafka_host: <%= @monasca_net_ip %>
+kibana_host: <%= @pub_net_ip %>
+kibana_plugins:
+  monasca-kibana-plugin:
+    url: "file:///usr/share/monasca-kibana-plugin/monasca-kibana-plugin.tar.gz"
+    configuration:
+      monasca-kibana-plugin.enabled: true
+      monasca-kibana-plugin.auth_uri: <%= @keystone_settings['public_auth_url'] %>
+      monasca-kibana-plugin.cookie.isSecure: false
+
+log_api_bind_host: "*"
+influxdb_bind_address: <%= @monasca_net_ip %>
+influxdb_host: <%= @monasca_net_ip %>
+monasca_api_bind_host: "*"
+elasticsearch_host: <%= @monasca_net_ip %>
+nimbus_host: <%= @monasca_net_ip %>
+zookeeper_hosts: <%= @monasca_net_ip %>
+kafka_hosts: "<%= @monasca_net_ip %>:9092"
+mariadb_bind_address: <%= @monasca_net_ip %>
+database_host: <%= @monasca_net_ip %>
+monasca_api_url: "http://<%= @pub_net_ip %>:<%= @api_settings['bind_port'] %>/v2.0"
+monasca_log_api_url: "http://<%= @pub_net_ip %>:<%= @log_api_settings['bind_port'] %>/v2.0"
+memcached_nodes: ["<%= @monasca_net_ip %>:11211"]
+influxdb_url: "http://<%= @monasca_net_ip %>:8086"
+elasticsearch_nodes: "[<%= @monasca_net_ip %>]"
+elasticsearch_hosts: <%= @monasca_net_ip %>
+monasca_api_log_level: <%= @api_settings['log_level'] %>
+log_api_log_level: <%= @log_api_settings['log_level'] %>
