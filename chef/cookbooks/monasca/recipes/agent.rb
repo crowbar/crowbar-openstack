@@ -27,8 +27,9 @@ if monasca_server.nil?
   return
 end
 
-monasca_api_url = MonascaHelper.api_public_url(monasca_server)
 agent_dimensions = { service: "monitoring" }
+
+monasca_api_url = MonascaHelper.api_network_url(monasca_server)
 
 # the monasca-reconfigure script. if you use that script, the chef settings
 # will be overwritten and after the next chef-client run, the settings

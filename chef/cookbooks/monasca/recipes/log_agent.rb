@@ -63,20 +63,22 @@ ruby_block "find log files" do
   end
 end
 
+monasca_log_api_url = MonascaHelper.log_api_network_url(monasca_server)
+
 template "/etc/monasca-log-agent/agent.conf" do
   source "log-agent.conf.erb"
   owner "root"
   group "root"
   mode 0o640
   variables(
+    monasca_log_api_url: monasca_log_api_url,
     log_agent_keystone: log_agent_keystone,
     log_agent_settings: log_agent_settings,
     log_agent_dimensions: log_agent_dimensions,
     log_filters_components: log_filters_components,
     log_filters: log_filters,
     keystone_settings: keystone_settings,
-    log_files: log_files,
-    monasca_log_api_url: MonascaHelper.log_api_public_url(monasca_server)
+    log_files: log_files
   )
   notifies :reload, "service[openstack-monasca-log-agent]"
 end

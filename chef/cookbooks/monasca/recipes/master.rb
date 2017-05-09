@@ -39,13 +39,20 @@ hosts_template =
     "monasca-hosts-cluster.erb"
   end
 
+my_ip_net = node[:monasca][:network]
+
+monasca_monitoring_host =
+  Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, my_ip_net).address
+
 template "/opt/monasca-installer/monasca-hosts" do
   source hosts_template
   owner "root"
   group "root"
   mode "0644"
   variables(
-    monasca_hosts: monasca_hosts,
+    monasca_public_host: MonascaHelper.monasca_public_host(monasca_servers[0]),
+    monasca_admin_host: monasca_hosts[0],
+    monasca_monitoring_host: monasca_monitoring_host,
     ansible_ssh_user: "root",
     keystone_host: keystone_settings["internal_url_host"]
   )

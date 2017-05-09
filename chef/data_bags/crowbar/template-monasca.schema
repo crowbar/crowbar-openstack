@@ -64,6 +64,7 @@
               "required": true,
               "type": "map",
               "mapping": {
+                "url": { "type": "str", "required": true },
                 "bind_host": { "required": true, "type": "str" },
                 "processes": { "required": true, "type": "int" },
                 "threads": { "required": true, "type": "int" },
@@ -105,6 +106,7 @@
               "required": true,
               "type": "map",
               "mapping": {
+                "url": { "type": "str", "required": true },
                 "log_level": { "type": "str", "required": true }
               }
             },
@@ -160,14 +162,15 @@
               }
             },
             "debug": { "type": "bool" },
+            "group": { "required": true, "type": "str" },
+            "user": { "required": true, "type": "str" },
+            "network": { "required": true, "type": "str" },
             "database_instance": { "type": "str", "required": true },
             "keystone_instance": { "type": "str", "required": true },
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str", "required": true },
             "service_tenant": { "type": "str", "required": true },
-            "service_roles": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
-            "group": { "required": true, "type": "str" },
-            "user": { "required": true, "type": "str" }
+            "service_roles": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] }
           }
         }
       }

@@ -52,6 +52,18 @@ module MonascaHelper
     "#{protocol}://#{host}:#{port}/v2.0"
   end
 
+  # api_network_url returns url to monasca-api based on check if custom
+  # network for api is set, if not it will returns public url for api.
+  def self.api_network_url(node)
+    monasca_api_url = if node[:monasca][:api][:url].nil? ||
+        node[:monasca][:api][:url].empty?
+      api_public_url(node)
+    else
+      node[:monasca][:api][:url]
+    end
+    return monasca_api_url
+  end
+
   def self.log_api_public_url(node)
     host = monasca_public_host(node)
     # SSL is not supported at this moment
@@ -59,6 +71,18 @@ module MonascaHelper
     protocol = "http"
     port = node[:monasca][:log_api][:bind_port]
     "#{protocol}://#{host}:#{port}/v3.0"
+  end
+
+  # log_api_network_url returns url to monasca-log-api based on check if custom
+  # network for log-api is set, if not it will returns public url for log-api.
+  def self.log_api_network_url(node)
+    monasca_log_api_url = if node[:monasca][:log_api][:url].nil? ||
+        node[:monasca][:log_api][:url].empty?
+      log_api_public_url(node)
+    else
+      node[:monasca][:log_api][:url]
+    end
+    return monasca_log_api_url
   end
 
   def self.monasca_hosts(nodes)

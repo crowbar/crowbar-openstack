@@ -58,3 +58,5 @@ en:
           user: 'Username'
         group: 'Group for Monasca services'
         user: 'User for Monasca services'
+      validation:
+        invalid_network: 'Network "%{network}" configured for Monasca is not defined in the configuration of the network barclamp.'
