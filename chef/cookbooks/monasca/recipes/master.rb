@@ -124,7 +124,10 @@ ansible_vars = {
   elasticsearch_nodes: "[#{monasca_net_ip}]",
   elasticsearch_hosts: monasca_net_ip,
   monasca_api_log_level: node[:monasca][:api][:log_level],
-  log_api_log_level: node[:monasca][:log_api][:log_level]
+  log_api_log_level: node[:monasca][:log_api][:log_level],
+  # set an invalid run mode to really ignore monasca-persister. Otherwise monasca-persister
+  # will be stopped via ansible
+  monasca_persister_run_mode: "Ignore"
 }.to_json
 
 execute "run ansible" do
