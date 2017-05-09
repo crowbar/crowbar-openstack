@@ -100,13 +100,7 @@
                 "smtp_port": { "required": true, "type": "int" },
                 "smtp_user": { "required": true, "type": "str" },
                 "smtp_password": { "required": true, "type": "str" },
-                "smtp_from_address": { "required": true, "type": "str" }
-              }
-            },
-            "influxdb": {
-              "required": true,
-              "type": "map",
-              "mapping": {
+                "smtp_from_address": { "required": true, "type": "str" },
                 "influxdb_period": { "required": true, "type": "int"},
                 "influxdb_duration": { "required": true, "type": "str"}
               }

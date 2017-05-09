@@ -33,10 +33,10 @@
 
     %fieldset
       %legend
-        = t(".influxdb_header")
+        = t(".master_influxdb_header")
 
-      = integer_field %w(influxdb influxdb_period)
-      = select_field  %w(influxdb influxdb_duration), :collection => :influxdb_durations
+      = integer_field %w(master influxdb_period)
+      = select_field  %w(master influxdb_duration), :collection => :influxdb_durations
 
     %fieldset
       %legend
