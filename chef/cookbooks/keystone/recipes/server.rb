@@ -444,6 +444,12 @@ if node[:keystone][:signing][:token_format] == "fernet"
     )
   end
 
+  unless ha_enabled
+    link "/etc/cron.hourly/openstack-keystone-fernet" do
+      to "/var/lib/keystone/keystone-fernet-rotate"
+    end
+  end
+
   crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate" if ha_enabled
 
   unless File.exist?("/etc/keystone/fernet-keys/0")
