@@ -23,4 +23,6 @@ vni_ranges = <%= @vxlan_start %>:<%= @vxlan_end %>
 <% if @ml2_type_drivers.include?("vxlan") && @ml2_mechanism_drivers.include?("linuxbridge") && !@vxlan_mcast_group.empty? -%>
 vxlan_group = <%= @vxlan_mcast_group %>
 <% end -%>
+[l2pop]
+agent_boot_time = <%= @l2pop_agent_boot_time %>
 [securitygroup]

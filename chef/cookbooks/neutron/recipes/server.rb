@@ -186,7 +186,8 @@ when "ml2"
       vxlan_end: vni_end,
       vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group],
       external_networks: physnets,
-      mtu_value: mtu_value
+      mtu_value: mtu_value,
+      l2pop_agent_boot_time: node[:neutron][:l2pop][:agent_boot_time]
     )
     notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end
