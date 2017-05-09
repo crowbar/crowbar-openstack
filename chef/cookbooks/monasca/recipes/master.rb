@@ -124,7 +124,8 @@ ansible_vars = {
   elasticsearch_nodes: "[#{monasca_net_ip}]",
   elasticsearch_hosts: monasca_net_ip,
   monasca_api_log_level: node[:monasca][:api][:log_level],
-  log_api_log_level: node[:monasca][:log_api][:log_level]
+  log_api_log_level: node[:monasca][:log_api][:log_level],
+  influxdb_retention_policy: "#{node[:monasca][:master][:influxdb_period]}#{node[:monasca][:master][:influxdb_duration]}"
 }.to_json
 
 execute "run ansible" do

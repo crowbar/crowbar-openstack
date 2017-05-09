@@ -60,7 +60,9 @@
         "smtp_port": 25,
         "smtp_user": "",
         "smtp_password": "",
-        "smtp_from_address": "monasca@localhost"
+        "smtp_from_address": "monasca@localhost",
+        "influxdb_period": 60,
+        "influxdb_duration": "d"
       },
       "db": {
         "database": "monasca",
