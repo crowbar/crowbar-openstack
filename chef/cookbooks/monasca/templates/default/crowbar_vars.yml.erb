@@ -26,7 +26,7 @@ kibana_plugins:
     url: "file:///usr/share/monasca-kibana-plugin/monasca-kibana-plugin.tar.gz"
     configuration:
       monasca-kibana-plugin.enabled: true
-      monasca-kibana-plugin.auth_uri: <%= @keystone_settings['public_auth_url'] %>
+      monasca-kibana-plugin.auth_uri: <%= @keystone_settings['unversioned_internal_auth_url'] %>
       monasca-kibana-plugin.cookie.isSecure: false
 
 log_api_bind_host: "*"
