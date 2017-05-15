@@ -20,7 +20,7 @@ source "https://rubygems.org"
 group :development do
   gem "rake", "< 12.0.0"
   gem "uglifier", "~> 2.7.2"
-  gem "sass", "~> 3.2.19"
+  gem "sass", "~> 3.4.13"
   gem "sprockets-standalone", "~> 1.2.1"
   gem "sprockets", "~> 2.11.0"
   gem "rspec", "~> 3.1.0"
