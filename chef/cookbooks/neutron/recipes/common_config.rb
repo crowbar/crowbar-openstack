@@ -110,6 +110,16 @@ if neutron[:neutron][:use_infoblox]
   infoblox_settings = neutron[:neutron][:infoblox]
 end
 
+# set core plugin for VMware NSX
+case neutron[:neutron][:networking_plugin]
+when "ml2"
+  core_plugin = "ml2"
+when "vmware_dvs"
+  core_plugin = "vmware_nsx.plugin.NsxDvsPlugin"
+when "vmware_nsx"
+  core_plugin = "vmware_nsx.plugin.NsxPlugin"
+end
+
 template neutron[:neutron][:config_file] do
     cookbook "neutron"
     source "neutron.conf.erb"
@@ -136,7 +146,7 @@ template neutron[:neutron][:config_file] do
       ssl_cert_required: neutron[:neutron][:ssl][:cert_required],
       ssl_ca_file: neutron[:neutron][:ssl][:ca_certs],
       nova_insecure: nova_insecure,
-      core_plugin: neutron[:neutron][:networking_plugin],
+      core_plugin: core_plugin,
       service_plugins: service_plugins,
       allow_overlapping_ips: neutron[:neutron][:allow_overlapping_ips],
       dvr_enabled: neutron[:neutron][:use_dvr],

@@ -91,7 +91,7 @@ when "ml2"
   when ml2_mech_drivers.include?("linuxbridge")
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
   end
-when "vmware"
+when "vmware_nsx", "vmware_dvs"
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
 end
 
@@ -114,6 +114,16 @@ end
 
 dns_list = node[:dns][:forwarders].join(",")
 
+core_plugin = node[:neutron][:networking_plugin]
+case core_plugin
+when "ml2", "vmware_nsx"
+  dhcp_driver = "neutron.agent.linux.dhcp.Dnsmasq"
+  enable_metadata_network = false
+when "vmware_dvs"
+  dhcp_driver = "vmware_nsx.plugins.dvs.dhcp.Dnsmasq"
+  enable_metadata_network = true
+end
+
 template "/etc/neutron/dhcp_agent.ini" do
   source "dhcp_agent.ini.erb"
   owner "root"
@@ -123,11 +133,12 @@ template "/etc/neutron/dhcp_agent.ini" do
     debug: node[:neutron][:debug],
     interface_driver: interface_driver,
     resync_interval: 5,
-    dhcp_driver: "neutron.agent.linux.dhcp.Dnsmasq",
+    dhcp_driver: dhcp_driver,
     dhcp_domain: node[:neutron][:dhcp_domain],
     enable_isolated_metadata: "True",
-    enable_metadata_network: "False",
-    nameservers: dns_list
+    enable_metadata_network: enable_metadata_network,
+    nameservers: dns_list,
+    core_plugin: core_plugin
   )
 end
 

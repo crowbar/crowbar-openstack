@@ -2,8 +2,12 @@
 interface_driver = <%= @interface_driver %>
 resync_interval = <%= @resync_interval %>
 dhcp_driver = <%= @dhcp_driver %>
+<% if @core_plugin == "vmware_dvs" -%>
+ovs_integration_bridge = br-int
+dvs_integration_bridge = br-int
+<% end -%>
 enable_isolated_metadata = <%= @enable_isolated_metadata %>
-enable_metadata_network = <%= @enable_metadata_network %>
+enable_metadata_network = <%= @enable_metadata_network ? "True" : "False" %>
 dhcp_domain = <%= @dhcp_domain %>
 <% if @nameservers -%>
 dnsmasq_dns_servers = <%= @nameservers %>

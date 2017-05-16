@@ -100,11 +100,15 @@ when "ml2"
     Chef::Log.error("default provider network ml2 type driver " \
         "'#{ml2_type_drivers_default_provider_network}' invalid for creating provider networks")
   end
-when "vmware"
+when "vmware_nsx"
   fixed_network_type = ""
   # We would like to be sure that floating network will be created
   # without any additional options, NSX will take care about everything.
   floating_network_type = ""
+when "vmware_dvs"
+  fixed_network_type = "--provider:network_type vlan " \
+    "--provider:segmentation_id #{fixed_net["vlan"]} " \
+    "--provider:physical_network dvs"
 else
   Chef::Log.error("networking plugin '#{networking_plugin}' invalid for creating provider networks")
 end
@@ -119,6 +123,7 @@ end
 
 execute "create_floating_network" do
   command "#{neutron_cmd} net-create floating --router:external #{floating_network_type}"
+  not_if { networking_plugin == "vmware_dvs" }
   not_if "out=$(#{neutron_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
   retries 5
   retry_delay 10
@@ -135,6 +140,7 @@ end
 
 execute "create_floating_subnet" do
   command "#{neutron_cmd} subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} --gateway #{floating_router} floating #{floating_range} --enable_dhcp False"
+  not_if { networking_plugin == "vmware_dvs" }
   not_if "out=$(#{neutron_cmd} subnet-list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
   retries 5
   retry_delay 10
@@ -143,6 +149,7 @@ end
 
 execute "create_router" do
   command "#{neutron_cmd} router-create router-floating"
+  not_if { networking_plugin == "vmware_dvs" }
   not_if "out=$(#{neutron_cmd} router-list); [ $? != 0 ] || echo ${out} | grep -q router-floating"
   retries 5
   retry_delay 10
@@ -151,6 +158,7 @@ end
 
 execute "set_router_gateway" do
   command "#{neutron_cmd} router-gateway-set router-floating floating"
+  not_if { networking_plugin == "vmware_dvs" }
   not_if "out=$(#{neutron_cmd} router-show router-floating -f shell) ; [ $? != 0 ] || eval $out && [ \"${external_gateway_info}\" != \"\" ]"
   retries 5
   retry_delay 10
@@ -159,6 +167,7 @@ end
 
 execute "add_fixed_network_to_router" do
   command "#{neutron_cmd} router-interface-add router-floating fixed"
+  not_if { networking_plugin == "vmware_dvs" }
   not_if "out1=$(#{neutron_cmd} subnet-show -f shell fixed) ; rc1=$?; eval $out1 ; out2=$(#{neutron_cmd} router-port-list router-floating); [ $? != 0 ] || [ $rc1 != 0 ] || echo $out2 | grep -q $id"
   retries 5
   retry_delay 10

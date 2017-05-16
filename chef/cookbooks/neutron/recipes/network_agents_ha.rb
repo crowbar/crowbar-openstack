@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
+use_l3_agent = (node[:neutron][:networking_plugin] == "ml2")
 use_lbaas_agent = node[:neutron][:use_lbaas]
 
 if use_l3_agent
@@ -73,7 +73,7 @@ if use_l3_agent
       neutron_agent = node[:neutron][:platform][:lb_agent_name]
       neutron_agent_ra = node[:neutron][:ha][:network]["linuxbridge_ra"]
     end
-  when "vmware"
+  when "vmware_nsx", "vmware_dvs"
     neutron_agent = ""
     neutron_agent_ra = ""
   end

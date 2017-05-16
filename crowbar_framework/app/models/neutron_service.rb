@@ -29,7 +29,7 @@ class NeutronService < PacemakerServiceObject
   end
 
   def self.networking_plugins_valid
-    ["ml2", "vmware"]
+    ["ml2", "vmware_dvs", "vmware_nsx"]
   end
 
   def self.networking_ml2_type_drivers_valid
@@ -275,7 +275,7 @@ class NeutronService < PacemakerServiceObject
         validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_requires_l2")
       end
 
-      if plugin == "vmware"
+      if plugin == "vmware_dvs" || plugin == "vmware_nsx"
         validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_vmware")
       end
 
@@ -419,7 +419,8 @@ class NeutronService < PacemakerServiceObject
           node.save
         end
       end
-    elsif attributes["networking_plugin"] == "vmware"
+    elsif attributes["networking_plugin"] == "vmware_dvs" ||
+        attributes["networking_plugin"] == "vmware_nsx"
       net_svc.allocate_ip "default", "os_sdn", "host", node
     end
     node = NodeObject.find_node_by_name nodename
