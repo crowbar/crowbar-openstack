@@ -51,6 +51,7 @@
       "master": {
         "influxdb_mon_api_password": "",
         "influxdb_mon_persister_password": "",
+        "influxdb_retention_policy": "60d",
         "database_notification_password": "",
         "database_monapi_password": "",
         "database_thresh_password": "",

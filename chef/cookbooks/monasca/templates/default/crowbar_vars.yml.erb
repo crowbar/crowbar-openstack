@@ -1,5 +1,9 @@
 influxdb_mon_api_password: <%= @master_settings['influxdb_mon_api_password'] %>
 influxdb_mon_persister_password: <%= @master_settings['influxdb_mon_persister_password'] %>
+influxdb_bind_address: <%= @monasca_net_ip %>
+influxdb_host: <%= @monasca_net_ip %>
+influxdb_url: "http://<%= @monasca_net_ip %>:8086"
+influxdb_retention_policy: <%= @master_settings['influxdb_retention_policy'] %>
 database_notification_password: <%= @master_settings['database_notification_password'] %>
 database_monapi_password: <%= @master_settings['database_monapi_password'] %>
 database_thresh_password: <%= @master_settings['database_thresh_password'] %>
@@ -33,8 +37,6 @@ kibana_plugins:
       monasca-kibana-plugin.cookie.isSecure: false
 
 log_api_bind_host: "*"
-influxdb_bind_address: <%= @monasca_net_ip %>
-influxdb_host: <%= @monasca_net_ip %>
 monasca_api_bind_host: "*"
 elasticsearch_host: <%= @monasca_net_ip %>
 nimbus_host: <%= @monasca_net_ip %>
@@ -44,7 +46,6 @@ database_host: <%= @monasca_net_ip %>
 monasca_api_url: "http://<%= @pub_net_ip %>:<%= @api_settings['bind_port'] %>/v2.0"
 monasca_log_api_url: "http://<%= @pub_net_ip %>:<%= @log_api_settings['bind_port'] %>/v2.0"
 memcached_nodes: ["<%= @monasca_net_ip %>:11211"]
-influxdb_url: "http://<%= @monasca_net_ip %>:8086"
 elasticsearch_nodes: "[<%= @monasca_net_ip %>]"
 elasticsearch_hosts: <%= @monasca_net_ip %>
 monasca_api_log_level: <%= @api_settings['log_level'] %>
