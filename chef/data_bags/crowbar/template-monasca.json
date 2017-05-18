@@ -25,6 +25,10 @@
         "amplifier": 0
       },
       "log_agent": {
+        "delay": 10,
+        "elapsed_time_sec": 30,
+        "max_data_size_kb": 5120,
+        "num_of_logs": 125,
         "keystone": {
           "service_user": "monasca-log-agent",
           "service_password": "",

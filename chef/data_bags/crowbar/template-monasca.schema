@@ -45,6 +45,10 @@
               "required": true,
               "type": "map",
               "mapping": {
+                "delay": { "type": "int", "required": true },
+                "elapsed_time_sec": { "type": "int", "required": true },
+                "max_data_size_kb": { "type": "int", "required": true },
+                "num_of_logs": { "type": "int", "required": true },
                 "keystone": {
                   "required": true,
                   "type": "map",
