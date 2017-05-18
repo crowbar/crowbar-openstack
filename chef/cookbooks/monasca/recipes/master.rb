@@ -64,6 +64,7 @@ template "/opt/monasca-installer/crowbar_vars.yml" do
   variables(
     master_settings: node[:monasca][:master],
     keystone_settings: keystone_settings,
+    kafka_settings: node[:monasca][:kafka],
     monasca_net_ip: monasca_net_ip,
     pub_net_ip: pub_net_ip,
     api_settings: node[:monasca][:api],

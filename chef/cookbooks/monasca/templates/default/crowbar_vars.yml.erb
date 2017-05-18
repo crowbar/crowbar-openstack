@@ -20,6 +20,9 @@ smtp_from_address: <%= @master_settings['smtp_from_address'] %>
 
 memcached_listen_ip: <%= @monasca_net_ip %>
 kafka_host: <%= @monasca_net_ip %>
+kafka_hosts: "<%= @monasca_net_ip %>:9092"
+kafka_log_retention_hours: <%= @kafka_settings['log_retention_hours'] %>
+kafka_log_retention_bytes: <%= @kafka_settings['log_retention_bytes'] %>
 kibana_host: <%= @pub_net_ip %>
 kibana_plugins:
   monasca-kibana-plugin:
@@ -36,7 +39,6 @@ monasca_api_bind_host: "*"
 elasticsearch_host: <%= @monasca_net_ip %>
 nimbus_host: <%= @monasca_net_ip %>
 zookeeper_hosts: <%= @monasca_net_ip %>
-kafka_hosts: "<%= @monasca_net_ip %>:9092"
 mariadb_bind_address: <%= @monasca_net_ip %>
 database_host: <%= @monasca_net_ip %>
 monasca_api_url: "http://<%= @pub_net_ip %>:<%= @api_settings['bind_port'] %>/v2.0"

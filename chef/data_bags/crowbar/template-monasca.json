@@ -41,6 +41,10 @@
       "log_api": {
         "log_level": "INFO"
       },
+      "kafka": {
+        "log_retention_hours": 24,
+        "log_retention_bytes": 21474836480
+      },
       "setup": {
         "extra_params": ""
       },

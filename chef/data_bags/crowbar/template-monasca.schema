@@ -74,6 +74,14 @@
                 "log_level": { "type": "str", "required": true }
               }
             },
+            "kafka": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "log_retention_bytes": { "required": true, "type": "int" },
+                "log_retention_hours": { "required": true, "type": "int" }
+              }
+            },
             "setup": {
               "required": true,
               "type": "map",
