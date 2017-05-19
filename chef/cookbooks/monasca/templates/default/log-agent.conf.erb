@@ -19,6 +19,10 @@ output {
     project_domain_name => "<%= @keystone_settings['admin_domain'] %>"
     ### monasca specific settings
     monasca_log_api_url => "<%= @monasca_log_api_url %>"
+    num_of_logs => <%= @log_agent_settings[:num_of_logs] %>
+    elapsed_time_sec => <%= @log_agent_settings[:elapsed_time_sec] %>
+    delay => <%= @log_agent_settings[:delay] %>
+    max_data_size_kb => <%= @log_agent_settings[:max_data_size_kb] %>
 <%- unless @log_agent_dimensions.nil? then -%>
     dimensions => [<%= @log_agent_dimensions.map{|k,v| "\"#{k}:#{v}\""}.join(',') %>]
 <%- else -%>

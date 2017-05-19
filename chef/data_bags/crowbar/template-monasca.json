@@ -25,6 +25,10 @@
         "amplifier": 0
       },
       "log_agent": {
+        "delay": 10,
+        "elapsed_time_sec": 30,
+        "max_data_size_kb": 5120,
+        "num_of_logs": 125,
         "keystone": {
           "service_user": "monasca-log-agent",
           "service_password": "",
@@ -41,12 +45,17 @@
       "log_api": {
         "log_level": "INFO"
       },
+      "kafka": {
+        "log_retention_hours": 24,
+        "log_retention_bytes": 21474836480
+      },
       "setup": {
         "extra_params": ""
       },
       "master": {
         "influxdb_mon_api_password": "",
         "influxdb_mon_persister_password": "",
+        "influxdb_retention_policy": "60d",
         "database_notification_password": "",
         "database_monapi_password": "",
         "database_thresh_password": "",

@@ -45,6 +45,10 @@
               "required": true,
               "type": "map",
               "mapping": {
+                "delay": { "type": "int", "required": true },
+                "elapsed_time_sec": { "type": "int", "required": true },
+                "max_data_size_kb": { "type": "int", "required": true },
+                "num_of_logs": { "type": "int", "required": true },
                 "keystone": {
                   "required": true,
                   "type": "map",
@@ -74,6 +78,14 @@
                 "log_level": { "type": "str", "required": true }
               }
             },
+            "kafka": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "log_retention_bytes": { "required": true, "type": "int" },
+                "log_retention_hours": { "required": true, "type": "int" }
+              }
+            },
             "setup": {
               "required": true,
               "type": "map",
@@ -87,6 +99,11 @@
               "mapping": {
                 "influxdb_mon_api_password": { "required": true, "type": "str" },
                 "influxdb_mon_persister_password": { "required": true, "type": "str" },
+                "influxdb_retention_policy": {
+                   "required": true,
+                   "type": "str",
+                   "pattern": "/^\d+[mhdw]|INF$/"
+                 },
                 "database_notification_password": { "required": true, "type": "str" },
                 "database_monapi_password": { "required": true, "type": "str" },
                 "database_thresh_password": { "required": true, "type": "str" },
