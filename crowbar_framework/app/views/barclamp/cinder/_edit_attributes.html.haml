@@ -140,7 +140,7 @@
               %span.help-block
                 = t(".volumes.nfs.nfs_shares_config_hint")
 
-              = string_field %w(volumes {{@index}} nfs nfs_mount_options)
+              = string_field %w(volumes {{@index}} nfs)
 
           {{/if_eq}}
           {{#if_eq backend_driver 'rbd'}}
