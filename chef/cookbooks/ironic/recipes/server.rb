@@ -191,6 +191,7 @@ template node[:ironic][:config_file] do
     ironic_net_id: ironic_net_id,
     ironic_ip: ironic_net_ip,
     tftp_ip: ironic_net_ip,
+    tftproot: node[:ironic][:tftproot],
     public_endpoint: public_endpoint,
     api_port: api_port,
     auth_version: auth_version

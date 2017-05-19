@@ -16,7 +16,7 @@
 
 ironic_ip = Barclamp::Inventory.get_network_by_type(node, "ironic").address
 
-tftproot = "/tftpboot"
+tftproot = node[:ironic][:tftproot]
 map_file = "#{tftproot}/map-file"
 
 case node[:platform_family]
