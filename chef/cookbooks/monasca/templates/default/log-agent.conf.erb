@@ -1,10 +1,28 @@
 input {
 <% @log_files.each_pair do |path, service| %>
-  <%= "file {
-    add_field => { \"dimensions\" => { \"service\" => \"#{service}\" }}
+  <%= "file { "%>
+  <% @log_filters_components.each_pair do |type, components|%>
+    <% if components.include?("#{service}") %>
+      <%= "tags => [\"#{type}\"]" %>
+    <% end %>
+  <% end %>
+  <%= "add_field => { \"dimensions\" => { \"service\" => \"#{service}\" }}
     path => \"#{path}\"
   }"
  %>
+<% end %>
+}
+
+filter {
+<% @log_filters.each do |filter| %>
+  <%= "if \"#{filter[:type]}\" in [tags]{
+        multiline {
+          negate => \"#{filter[:configuration][:negate]}\"
+          pattern => \"#{filter[:configuration][:pattern]}\"
+          what => \"#{filter[:configuration][:what]}\"
+        }
+      }"
+  %>
 <% end %>
 }
 
