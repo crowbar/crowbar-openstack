@@ -18,6 +18,12 @@ package "openstack-monasca-log-agent"
 log_agent_settings = node[:monasca][:log_agent]
 log_agent_keystone = log_agent_settings[:keystone]
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+log_filters_components = {
+  openstack: ["aodh", "barbican", "ceilometer", "cinder", "glance", "heat",
+              "keystone", "magnum", "manila", "neutron", "nova", "openvswitch",
+              "sahara", "swift", "trove"
+             ]
+}
 
 monasca_server = node_search_with_cache("roles:monasca-server").first
 if monasca_server.nil?
@@ -35,6 +41,18 @@ log_files = {
   "/var/log/zypper.log" => "system"
 }
 
+log_filters = [
+  {
+    name: "multiline",
+    type: "openstack",
+    configuration: {
+      pattern: "^%{TIMESTAMP_ISO8601}%{SPACE}%{NUMBER}%{SPACE}\
+      (CRITICAL|ERROR|WARNING|INFO|DEBUG|EXCEPTION|NOTSET)",
+      what: "previous",
+      negate: "true"
+    }
+  }
+]
 ruby_block "find log files" do
   block do
     log_dirs =
@@ -54,6 +72,8 @@ template "/etc/monasca-log-agent/agent.conf" do
     log_agent_keystone: log_agent_keystone,
     log_agent_settings: log_agent_settings,
     log_agent_dimensions: log_agent_dimensions,
+    log_filters_components: log_filters_components,
+    log_filters: log_filters,
     keystone_settings: keystone_settings,
     log_files: log_files,
     monasca_log_api_url: MonascaHelper.log_api_public_url(monasca_server)
