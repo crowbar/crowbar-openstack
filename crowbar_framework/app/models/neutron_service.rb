@@ -218,7 +218,7 @@ class NeutronService < PacemakerServiceObject
         !ml2_type_drivers.include?("vlan")
       validation_error I18n.t("barclamp.#{@bc_name}.validation.vmware_dvs_vlan")
     end
-    
+ 
     # Checks for Cisco ACI ml2 driver
     if ml2_mechanism_drivers.include?("cisco_apic_ml2") &&
         ml2_mechanism_drivers.include?("apic_gbp")

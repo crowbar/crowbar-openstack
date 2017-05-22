@@ -355,52 +355,11 @@ end
 
 # Metadata agent
 if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
-  package node[:neutron][:platform][:metadata_agent_pkg]
-
-  #TODO: nova should depend on neutron, but neutron also depends on nova
-  # so we have to do something like this
-  novas = search(:node, "roles:nova-controller") || []
-  if novas.length > 0
-    nova = novas[0]
-    nova = node if nova.name == node.name
-  else
-    nova = node
-  end
-  metadata_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
-  metadata_port = nova[:nova][:ports][:metadata] rescue 8775
-  metadata_protocol = (nova[:nova][:ssl][:enabled] ? "https" : "http") rescue "http"
-  metadata_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
-  metadata_proxy_shared_secret = (nova[:nova][:neutron_metadata_proxy_shared_secret] rescue "")
-
-  keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
-
-  template "/etc/neutron/metadata_agent.ini" do
-    source "metadata_agent.ini.erb"
-    owner "root"
-    group node[:neutron][:platform][:group]
-    mode "0640"
-    variables(
-      debug: neutron[:neutron][:debug],
-      nova_metadata_host: metadata_host,
-      nova_metadata_port: metadata_port,
-      nova_metadata_protocol: metadata_protocol,
-      nova_metadata_insecure: metadata_insecure,
-      metadata_proxy_shared_secret: metadata_proxy_shared_secret
-    )
-  end
-
-  service node[:neutron][:platform][:metadata_agent_name] do
-    action [:enable, :start]
-    subscribes :restart, resources(template: node[:neutron][:config_file])
-    subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
-    if neutron_network_ha || nova_compute_ha_enabled
-      provider Chef::Provider::CrowbarPacemakerService
-    end
-    if nova_compute_ha_enabled
-      supports no_crm_maintenance_mode: true
-    else
-      supports status: true, restart: true
-    end
+  neutron_metadata do
+    use_cisco_apic_ml2_driver false
+    neutron_node_object neutron
+    neutron_network_ha neutron_network_ha
+    nova_compute_ha_enabled nova_compute_ha_enabled
   end
 end
 
