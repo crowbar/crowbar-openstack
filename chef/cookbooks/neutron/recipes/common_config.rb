@@ -92,7 +92,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     service_plugins = ["group_policy", "servicechain", "apic_gbp_l3"]
   end
 end
-service_plugins = service_plugins.join(",")
+service_plugins = service_plugins.join(", ")
 
 network_nodes_count = neutron[:neutron][:elements]["neutron-network"].count
 if neutron[:neutron][:elements_expanded]
