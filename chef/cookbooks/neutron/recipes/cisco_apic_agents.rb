@@ -110,6 +110,11 @@ if node.roles.include?("nova-compute-kvm")
     )
   end
 
+  neutron_metadata do
+    use_cisco_apic_ml2_driver true
+    neutron_node_object neutron
+  end
+
   service "neutron-opflex-agent" do
     action [:enable, :start]
     subscribes :restart, resources("template[#{agent_config_path}]")
