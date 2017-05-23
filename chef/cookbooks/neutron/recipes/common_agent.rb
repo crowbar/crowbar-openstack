@@ -51,6 +51,23 @@ bash "reload disable-rp_filter-sysctl" do
 end
 
 if neutron[:neutron][:networking_plugin] == "ml2" &&
+    neutron[:neutron][:ml2_mechanism_drivers].include?("vmware_dvs") &&
+    node.roles.include?("nova-compute-vmware")
+
+  include_recipe "neutron::vmware_dvs_agents"
+
+  # No L2/L3 agents need to be installed on DVS integrated
+  # VMware compute nodes aside from the neutron-dvs agent
+  # This check is sufficient, because a node cannot be assigned
+  # the nova-compute-vmware and nova-compute-<something-else> roles
+  # at the same time. The only exception is if DVR is enabled,
+  # when L2/L3 agents are required.
+  unless neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
+    return # skip everything else in this recipe
+  end
+end
+
+if neutron[:neutron][:networking_plugin] == "ml2" &&
     (neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
     neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
   include_recipe "neutron::cisco_apic_agents"

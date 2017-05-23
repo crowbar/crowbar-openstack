@@ -141,3 +141,5 @@ en:
         dvr_requires_l2: 'DVR with GRE or VXLAN requires L2 population'
         dvr_vmware: 'DVR is not compatible with VMware NSX plugin'
         dvr_linuxbridge: 'DVR is not compatible with Linux Bridge ML2 driver'
+        vmware_dvs_vlan: 'The "vmware_dvs" mechanism driver needs the type driver "vlan"'
+        vmware_dvs_ovs_lbr: 'The "vmware_dvs" mechanism driver also needs either the "openvswitch" or the "linuxbridge" mechanism driver'

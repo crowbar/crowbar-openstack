@@ -17,6 +17,8 @@ hyperv_compute_node = search(:node, "roles:nova-compute-hyperv") || []
 use_hyperv = node[:neutron][:networking_plugin] == "ml2" && !hyperv_compute_node.empty?
 zvm_compute_node = search(:node, "roles:nova-compute-zvm") || []
 use_zvm = node[:neutron][:networking_plugin] == "ml2" && !zvm_compute_node.empty?
+use_vmware_dvs = node[:neutron][:networking_plugin] == "ml2" &&
+  node[:neutron][:ml2_mechanism_drivers].include?("vmware_dvs")
 
 pkgs = node[:neutron][:platform][:pkgs] + node[:neutron][:platform][:pkgs_fwaas]
 pkgs += node[:neutron][:platform][:pkgs_lbaas] if node[:neutron][:use_lbaas]
@@ -28,6 +30,8 @@ end
 if use_zvm
   pkgs << node[:neutron][:platform][:zvm_agent_pkg]
 end
+use_vmware_dvs && pkgs << node[:neutron][:platform][:vmware_vsphere_pkg]
+
 pkgs.each { |p| package p }
 
 include_recipe "neutron::database"
@@ -165,6 +169,11 @@ when "ml2"
       (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"))
     ml2_mechanism_drivers.push("l2population")
   end
+  if use_vmware_dvs
+    # If enabled, vmware_dvs needs to come before all others, otherwise the wrong
+    # type of VIF will be used when launching server instances
+    ml2_mechanism_drivers.unshift(ml2_mechanism_drivers.delete("vmware_dvs"))
+  end
 
   ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
   if ml2_mech_drivers.include?("linuxbridge")
@@ -190,7 +199,8 @@ when "ml2"
       vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group],
       external_networks: physnets,
       mtu_value: mtu_value,
-      l2pop_agent_boot_time: node[:neutron][:l2pop][:agent_boot_time]
+      l2pop_agent_boot_time: node[:neutron][:l2pop][:agent_boot_time],
+      vmware_dvs_config: node[:neutron][:vmware_dvs]
     )
     notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end
