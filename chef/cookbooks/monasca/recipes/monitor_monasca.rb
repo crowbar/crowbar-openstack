@@ -26,6 +26,15 @@ monasca_agent_plugin_http_check "http_check for monasca-api" do
   dimensions "service" => "monitoring-api"
 end
 
+# influxdb
+influxdb_monitor_url = "http://#{monasca_net_ip}:8086/ping"
+monasca_agent_plugin_http_check "http_check for influxdb" do
+  built_by "influxdb"
+  name "influxdb"
+  url influxdb_monitor_url
+  dimensions "service" => "influxdb"
+end
+
 # kafka
 # FIXME: keep disabled until https://storyboard.openstack.org/#!/story/2001036
 # is done
