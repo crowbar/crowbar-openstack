@@ -37,3 +37,10 @@ end
 #   kafka_connect_str monasca_net_ip
 #   consumer_groups consumer_groups
 # end
+
+# zookeeper
+monasca_agent_plugin_zookeeper "zookeeper monitoring" do
+  built_by "monasca-server"
+  name "zookeeper"
+  host monasca_net_ip
+end
