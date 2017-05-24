@@ -17,6 +17,7 @@
 return unless node["roles"].include?("monasca-agent")
 
 monitor_url = MonascaHelper.api_admin_url(node)
+monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(node)
 
 monasca_agent_plugin_http_check "http_check for monasca-api" do
   built_by "monasca-server"
@@ -24,3 +25,15 @@ monasca_agent_plugin_http_check "http_check for monasca-api" do
   url monitor_url
   dimensions "service" => "monitoring-api"
 end
+
+# kafka
+# FIXME: keep disabled until https://storyboard.openstack.org/#!/story/2001036
+# is done
+# consumer_groups = { "thresh-event" => { "events" => [] },
+#                     "thresh-metric" => { "metrics" => [] } }
+# monasca_agent_plugin_kafka "kafka monitoring" do
+#   built_by "monasca-server"
+#   name "kafka"
+#   kafka_connect_str monasca_net_ip
+#   consumer_groups consumer_groups
+# end
