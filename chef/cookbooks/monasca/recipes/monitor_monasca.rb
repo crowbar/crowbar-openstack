@@ -53,3 +53,11 @@ monasca_agent_plugin_zookeeper "zookeeper monitoring" do
   name "zookeeper"
   host monasca_net_ip
 end
+
+# postfix
+monasca_agent_plugin_postfix "postfix monitoring" do
+  built_by "monasca-server"
+  name "postfix"
+  directory "/var/spool/postfix"
+  queues [ "incoming", "active", "deferred" ]
+end
