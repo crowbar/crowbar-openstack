@@ -26,6 +26,7 @@ en:
         keystone_instance: 'Keystone'
         rabbitmq_instance: 'RabbitMQ'
         debug: 'Debug'
+        automated_clean: 'Enable automated node cleaning'
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'
