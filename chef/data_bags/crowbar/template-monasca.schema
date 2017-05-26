@@ -35,7 +35,6 @@
                 "num_collector_threads": { "type": "int", "required": true },
                 "pool_full_max_retries": { "type": "int", "required": true },
                 "plugin_collect_time_warn": { "type": "int", "required": true },
-                "max_buffer_size": { "type": "int", "required": true },
                 "max_measurement_buffer_size": { "type": "int", "required": true },
                 "backlog_send_rate": { "type": "int", "required": true },
                 "amplifier": { "type": "int", "required": true }
@@ -70,6 +69,37 @@
                 "threads": { "required": true, "type": "int" },
                 "log_level": { "type": "str", "required": true }
               }
+            },
+            "elasticsearch": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "repo_dir": {
+                  "required": true,
+                  "type": "seq",
+                  "sequence": [ { "type": "str" } ]
+                  }
+                }
+            },
+            "elasticsearch_curator": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                  "delete_after_days": { "required": false, "type": "int" },
+                  "delete_after_size": { "required": false, "type": "int" },
+                  "delete_exclude_index": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
+                  "cron_config": {
+                    "required": true,
+                    "type": "map",
+                    "mapping": {
+                      "day": { "required": true, "type": "str" },
+                      "hour": { "required": true, "type": "str" },
+                      "minute": { "required": true, "type": "str" },
+                      "month": { "required": true, "type": "str" },
+                      "weekday": { "required": true, "type": "str" }
+                    }
+                    }
+                }
             },
             "log_api": {
               "required": true,

@@ -50,3 +50,31 @@ elasticsearch_nodes: "[<%= @monasca_net_ip %>]"
 elasticsearch_hosts: <%= @monasca_net_ip %>
 monasca_api_log_level: <%= @api_settings['log_level'] %>
 log_api_log_level: <%= @log_api_settings['log_level'] %>
+
+<%- unless @elasticsearch_repo_dir.empty? %>
+elasticsearch_repo_dir:
+<%- @elasticsearch_repo_dir.each do |line| %>
+  <%= line %>
+<%- end %>
+<%- end %>
+
+<%- unless @curator_cron_config.empty? %>
+curator_cron_config:
+<%- @curator_cron_config.each do |line| %>
+  <%= line %>
+<%- end %>
+<%- end %>
+
+<%- unless @curator_actions.empty? %>
+curator_actions:
+<%- @curator_actions.each do |line| %>
+  <%= line %>
+<%- end %>
+<%- end %>
+
+<%- unless @curator_excluded_index.empty? %>
+curator_excluded_index:
+<%- @curator_excluded_index.each do |line| %>
+  <%= line %>
+<%- end %>
+<%- end %>

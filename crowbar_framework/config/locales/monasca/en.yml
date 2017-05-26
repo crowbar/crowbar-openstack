@@ -40,7 +40,6 @@ en:
           num_collector_threads: 'Number of Collector Threads to run (num_collector_threads)'
           pool_full_max_retries: 'Maximum number of collection cycles where all of the threads in the pool are still running plugins before the collector will exit (pool_full_max_retries)'
           plugin_collect_time_warn: 'Threshold value for warning on collection time of each check (in seconds, plugin_collect_time_warn)'
-          max_buffer_size: 'Maximum number of batches of measurements to buffer while unable to communicate with monasca-api (max_buffer_size)'
           max_measurement_buffer_size: 'Maximum number of measurements to buffer when unable to communicate with the monasca-api (-1 means no limit, max_measurement_buffer_size)'
           backlog_send_rate: 'Maximum number of messages to send at one time when communication with the monasca-api is restored (backlog_send_rate)'
           amplifier: 'Publish extra metrics to the API by adding this number of "amplifier" dimensions. For load testing purposes only; set to 0 for production use (amplifier)'
