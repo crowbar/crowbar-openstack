@@ -21,9 +21,9 @@ verbose = <%= node[:glance][:verbose] ? "True" : "False" %>
 log_file = <%= node[:glance][:api][:log_file] %>
 use_syslog = <%= node[:glance][:use_syslog] ? "True" : "False" %>
 use_stderr = false
-enable_v1_api = <%= node[:glance][:enable_v1] ? "True" : "False" %>
+enable_v1_api = <%= @enable_v1 %>
 enable_v2_api = true
-enable_v1_registry = <%= node[:glance][:enable_v1] ? "True" : "False" %>
+enable_v1_registry = <%= @enable_v1 %>
 enable_v2_registry = true
 
 [database]

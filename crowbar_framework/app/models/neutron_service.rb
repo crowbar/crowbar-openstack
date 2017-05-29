@@ -290,7 +290,7 @@ class NeutronService < PacemakerServiceObject
     net_svc = NetworkService.new @logger
     network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
     blacklist = ["bmc", "bmc_admin", "admin", "nova_fixed", "nova_floating",
-                 "os_sdn", "public", "storage"]
+                 "os_sdn", "public", "storage", "ironic"]
 
     external_networks.each do |ext_net|
       # Exclude a few default networks from network.json from being used as
@@ -358,7 +358,7 @@ class NeutronService < PacemakerServiceObject
         # the requirement to have the bridge setup is really node-specifc. (E.g.
         # a tempest node that might get an IP allocated in "nova_floating" won't
         # need the bridges)
-        ovs_bridge_networks = ["nova_floating"]
+        ovs_bridge_networks = ["nova_floating", "ironic"]
         ovs_bridge_networks.concat attributes["additional_external_networks"]
         if ml2_type_drivers.include?("vlan")
           ovs_bridge_networks << "nova_fixed"

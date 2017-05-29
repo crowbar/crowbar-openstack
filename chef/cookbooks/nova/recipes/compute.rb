@@ -35,6 +35,9 @@ if %w(rhel suse).include?(node[:platform_family])
 end
 
 case node[:nova][:libvirt_type]
+  when "ironic"
+    package "python-ironicclient"
+
   when "zvm"
     package "openstack-nova-virt-zvm"
 

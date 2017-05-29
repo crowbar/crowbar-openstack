@@ -1,6 +1,5 @@
-#
-# Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# frozen_string_literal: true
+# Copyright 2016, SUSE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,23 +14,8 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'neutron'
-  display: 'Neutron'
-  description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management'
-  version: 0
-  user_managed: true
-  requires:
-    - 'pacemaker'
-    - 'database'
-    - 'rabbitmq'
-    - 'keystone'
-  member:
-    - 'openstack'
-
-crowbar:
-  layout: 1
-  order: 93
-  run_order: 93
-  chef_order: 93
-  proposal_schema_version: 3
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "ironic", "ironic-server")
+  include_recipe "ironic::server"
+  include_recipe "ironic::monitor"
+  include_recipe "ironic::tftp"
+end

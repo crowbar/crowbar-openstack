@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 neutron = nil
 if node.attribute?(:cookbook) and node[:cookbook] == "nova"
   neutrons = node_search_with_cache("roles:neutron-server", node[:nova][:neutron_instance])
@@ -151,6 +150,10 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     if ml2_type_drivers.include?("vlan")
       bridge_mappings += ", " unless bridge_mappings.empty?
       bridge_mappings += "physnet1:br-fixed"
+    end
+    if (node.roles & ["ironic-server", "nova-compute-ironic"]).any?
+      bridge_mappings += "," unless bridge_mappings.empty?
+      bridge_mappings += "ironic:br-ironic"
     end
   when ml2_mech_drivers.include?("linuxbridge")
     package node[:neutron][:platform][:lb_agent_pkg]

@@ -1,6 +1,6 @@
+# frozen_string_literal: true
 #
-# Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2016, SUSE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,23 +15,15 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'neutron'
-  display: 'Neutron'
-  description: 'OpenStack Networking: Pluggable, scalable, API-driven network and IP management'
-  version: 0
-  user_managed: true
-  requires:
-    - 'pacemaker'
-    - 'database'
-    - 'rabbitmq'
-    - 'keystone'
-  member:
-    - 'openstack'
-
-crowbar:
-  layout: 1
-  order: 93
-  run_order: 93
-  chef_order: 93
-  proposal_schema_version: 3
+module Barclamp
+  module IronicHelper
+    def api_protocols_for_ironic(selected)
+      options_for_select(
+        [
+          ["HTTP", "http"],
+        ],
+        selected.to_s
+      )
+    end
+  end
+end
