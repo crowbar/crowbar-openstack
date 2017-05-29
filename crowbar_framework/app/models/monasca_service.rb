@@ -139,6 +139,14 @@ class MonascaService < PacemakerServiceObject
          validation_error("All monasca-server node(s) need monasca-agent role too.")
       end
     end
+
+    unless network_present? proposal["attributes"][@bc_name]["network"]
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.invalid_network",
+        network: proposal["attributes"][@bc_name]["network"]
+      )
+    end
+
     # TODO: uncomment for cluster support
     # if !nodes.key?("monasca-server") ||
     #     (nodes["monasca-server"].length != 1 && nodes["monasca-server"].length != 3)
@@ -176,5 +184,11 @@ class MonascaService < PacemakerServiceObject
     end
 
     @logger.debug("Monasca apply_role_pre_chef_call: leaving")
+  end
+
+  def network_present?(network_name)
+    net_svc = NetworkService.new @logger
+    network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
+    !network_proposal["attributes"]["network"]["networks"][network_name].nil?
   end
 end
