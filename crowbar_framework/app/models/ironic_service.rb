@@ -89,6 +89,29 @@ class IronicService < ServiceObject
       validation_error I18n.t("barclamp.#{@bc_name}.validation.ironic_network")
     end
 
+    if proposal["attributes"][@bc_name]["enabled_drivers"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.no_drivers")
+    end
+
+    # additional soft dependencies for agent_* drivers
+    if proposal["attributes"][@bc_name]["enabled_drivers"].any? { |d| d.start_with?("agent_") }
+      swift_svc = SwiftService.new @logger
+      swift_proposal = Proposal.find_by(barclamp: swift_svc.bc_name, name: "default")
+      if swift_proposal
+        unless swift_proposal["attributes"][swift_svc.bc_name]["middlewares"]["tempurl"]["enabled"]
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.swift_tempurl_enabled")
+        end
+      else
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.swift_proposal")
+      end
+
+      glance_svc = GlanceService.new @logger
+      glance_proposal = Proposal.find_by(barclamp: glance_svc.bc_name, name: "default")
+      unless glance_proposal["attributes"][glance_svc.bc_name]["default_store"] == "swift"
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.glance_swift_default_store")
+      end
+    end
+
     super
   end
 
