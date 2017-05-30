@@ -14,7 +14,13 @@
 # limitation.
 #
 
+# Note: this recipe is applied to the Crowbar node, but it runs
+# monasca-installer which will use Ansible over SSH to deploy the Monasca
+# backend services to the node with the monasca-server role. Please bear this
+# in mind when editing or reviewing this recipe.
+
 monasca_servers = search(:node, "roles:monasca-server")
+monasca_node = monasca_servers[0]
 monasca_hosts = MonascaHelper.monasca_hosts(monasca_servers)
 raise "no nodes with monasca-server role found" if monasca_hosts.nil? || monasca_hosts.empty?
 
@@ -41,8 +47,12 @@ hosts_template =
 
 my_ip_net = node[:monasca][:network]
 
+# Look up the listening address for monasca backend services on the node with
+# the monasca-server role (this information is a parameter for
+# monasca-installer which deploys monasca to the node with the monasca-server
+# role).
 monasca_monitoring_host =
-  Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, my_ip_net).address
+  Chef::Recipe::Barclamp::Inventory.get_network_by_type(monasca_node, my_ip_net).address
 
 template "/opt/monasca-installer/monasca-hosts" do
   source hosts_template
@@ -59,7 +69,6 @@ template "/opt/monasca-installer/monasca-hosts" do
   notifies :run, "execute[run ansible]", :delayed
 end
 
-monasca_node = monasca_servers[0]
 monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_node)
 pub_net_ip = CrowbarHelper.get_host_for_public_url(monasca_node, false, false)
 
