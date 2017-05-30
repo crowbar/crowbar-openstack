@@ -168,6 +168,25 @@ unless sahara_ui_pkgname.nil?
   end
 end
 
+# install horizon ironic plugin if needed
+ironic_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-ironic-ui"
+  when "rhel"
+    "openstack-ironic-ui"
+  end
+
+unless ironic_ui_pkgname.nil?
+  ironic_servers = search(:node, "roles:ironic-server") || []
+  unless ironic_servers.empty?
+    package ironic_ui_pkgname do
+      action :install
+      notifies :reload, "service[horizon]"
+    end
+  end
+end
+
 monasca_ui_pkgname =
   case node[:platform_family]
   when "suse"
