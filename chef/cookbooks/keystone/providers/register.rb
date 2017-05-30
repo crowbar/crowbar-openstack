@@ -204,6 +204,37 @@ action :add_access do
   end
 end
 
+# :add_domain_access specific attributes
+# attribute :domain_name, :kind_of => String
+# attribute :user_name, :kind_of => String
+# attribute :role_name, :kind_of => String
+action :add_domain_access do
+  http, headers = _build_connection(new_resource)
+
+  # Lets verify that the item does not exist yet
+  domain = new_resource.domain_name
+  user = new_resource.user_name
+  role = new_resource.role_name
+  user_id, uerror = _find_id(http, headers, user, "/v3/users", "users")
+  domain_id, terror = _find_id(http, headers, domain, "/v3/domains", "domains")
+  role_id, rerror = _find_id(http, headers, role, "/v3/roles", "roles")
+
+  path = "/v3/domains/#{domain_id}/users/#{user_id}/roles"
+  t_role_id, aerror = _find_id(http, headers, role, path, "roles")
+
+  error = (aerror || rerror || uerror || terror)
+  if role_id == t_role_id || error
+    raise "Failed to talk to keystone in add_access" if error
+    Chef::Log.info("Domain access '#{domain}:#{user} -> #{role}}' " \
+		   "already exists. Not creating.")
+    new_resource.updated_by_last_action(false)
+  else
+    # Service does not exist yet
+    ret = _update_item(http, headers, "#{path}/#{role_id}", nil, new_resource.role_name)
+    new_resource.updated_by_last_action(ret)
+  end
+end
+
 # :add_ec2 specific attributes
 # attribute :user_name, :kind_of => String
 # attribute :tenant_name, :kind_of => String
@@ -346,6 +377,9 @@ def _update_item(http, headers, path, body, name)
     return true
   elsif resp.is_a?(Net::HTTPCreated)
     Chef::Log.info("Created keystone item '#{name}'")
+    return true
+  elsif resp.is_a?(Net::HTTPNoContent)
+    Chef::Log.info("Updates keystone item '#{name}'")
     return true
   else
     Chef::Log.error("Unable to updated item '#{name}'")

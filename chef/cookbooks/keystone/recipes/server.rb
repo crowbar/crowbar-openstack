@@ -639,6 +639,7 @@ end
 # Create Access info
 user_roles = [
   [node[:keystone][:admin][:username], "admin", node[:keystone][:admin][:tenant]],
+  [node[:keystone][:admin][:username], "Member", node[:keystone][:admin][:tenant]],
   [node[:keystone][:admin][:username], "admin", node[:keystone][:default][:tenant]]
 ]
 if node[:keystone][:default][:create_user]
@@ -655,6 +656,25 @@ user_roles.each do |args|
     role_name args[1]
     tenant_name args[2]
     action :add_access
+  end
+end
+
+# Add roles on Default domain
+user_roles = [
+  [node[:keystone][:admin][:username], "admin", "Default"],
+  [node[:keystone][:admin][:username], "Member", "Default"]
+]
+user_roles.each do |args|
+  keystone_register "add 'Default' domain role" do
+    protocol node[:keystone][:api][:protocol]
+    insecure keystone_insecure
+    host my_admin_host
+    port node[:keystone][:api][:admin_port]
+    auth register_auth_hash
+    user_name args[0]
+    role_name args[1]
+    domain_name args[2]
+    action :add_domain_access
   end
 end
 

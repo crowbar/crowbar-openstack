@@ -18,7 +18,7 @@
 #
 
 actions :add_service, :add_endpoint_template, :add_tenant, :add_domain, :add_user, :add_role,
-        :add_access, :add_ec2, :wakeup
+        :add_access, :add_domain_access, :add_ec2, :wakeup
 
 attribute :protocol, kind_of: String
 attribute :insecure, kind_of: [TrueClass, FalseClass], default: false
@@ -60,6 +60,11 @@ attribute :role_name, kind_of: String
 attribute :user_name, kind_of: String
 attribute :role_name, kind_of: String
 attribute :tenant_name, kind_of: String
+
+# :add_domain_access specific attributes
+attribute :user_name, kind_of: String
+attribute :role_name, kind_of: String
+attribute :domain_name, kind_of: String
 
 # :add_ec2 specific attributes
 attribute :user_name, kind_of: String
