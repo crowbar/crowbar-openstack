@@ -139,22 +139,32 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     neutron_agent = node[:neutron][:platform][:ovs_agent_name]
     agent_config_path = "/etc/neutron/plugins/ml2/openvswitch_agent.ini"
     interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
-    bridge_mappings = ""
+    bridge_mappings = []
+
+    if ml2_type_drivers.include?("vlan")
+      bridge = node[:crowbar_wall][:network][:nets][:nova_fixed].last
+      bridge_mappings.push("physnet1:" + bridge)
+    end
+
     if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
-      bridge_mappings = "floating:br-public"
-      if multiple_external_networks
-        bridge_mappings += ", "
-        bridge_mappings += neutron[:neutron][:additional_external_networks].collect { |n| n + ":" + "br-" + n }.join ","
+      external_networks = ["nova_floating"]
+      external_networks.concat(node[:neutron][:additional_external_networks])
+      ext_physnet_map = NeutronHelper.get_neutron_physnets(node, external_networks)
+      external_networks.each do |net|
+        ext_iface = node[:crowbar_wall][:network][:nets][net].last
+        # we can't do "floating:br-public, physnet1:br-public"; this also means
+        # that all relevant nodes here must have a similar bridge_mappings
+        # setting
+        next if ext_physnet_map[net] == "physnet1"
+        bridge_mappings.push(ext_physnet_map[net] + ":" + ext_iface)
       end
     end
-    if ml2_type_drivers.include?("vlan")
-      bridge_mappings += ", " unless bridge_mappings.empty?
-      bridge_mappings += "physnet1:br-fixed"
-    end
+
     if (node.roles & ["ironic-server", "nova-compute-ironic"]).any?
-      bridge_mappings += "," unless bridge_mappings.empty?
-      bridge_mappings += "ironic:br-ironic"
+      bridge_mappings.push("ironic:br-ironic")
     end
+
+    bridge_mappings = bridge_mappings.join(", ")
   when ml2_mech_drivers.include?("linuxbridge")
     package node[:neutron][:platform][:lb_agent_pkg]
 
