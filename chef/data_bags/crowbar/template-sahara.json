@@ -16,7 +16,7 @@
       "cinder_instance": "none",
       "service_user": "sahara",
       "service_password": "",
-      "plugins": "vanilla,spark,cdh,ambari",
+      "plugins": "vanilla,spark,storm,cdh,ambari,mapr",
       "api": {
         "protocol": "http",
         "bind_open_address": true,
