@@ -610,6 +610,19 @@ if node[:keystone][:domain_specific_drivers]
   end
 end
 
+# Create default role admin for admin user in default domain
+keystone_register "add default admin role for domain default" do
+  protocol node[:keystone][:api][:protocol]
+  insecure keystone_insecure
+  host my_admin_host
+  port node[:keystone][:api][:admin_port]
+  auth register_auth_hash
+  user_name node[:keystone][:admin][:username]
+  role_name "admin"
+  domain_name "Default"
+  action :add_domain_role
+end
+
 # Create default user
 if node[:keystone][:default][:create_user]
   keystone_register "add default #{node[:keystone][:default][:username]} user" do

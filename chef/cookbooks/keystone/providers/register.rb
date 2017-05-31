@@ -107,6 +107,38 @@ action :add_domain do
   end
 end
 
+# :add_domain_role specific attributes
+# attribute :domain_name, :kind_of => String
+# attribute :user_name, :kind_of => String
+# attribute :role_name, :kind_of => String
+action :add_domain_role do
+  http, headers = _build_connection(new_resource)
+
+  # get user_id
+  path = "/v3/users"
+  dir = "users"
+  user_id, uerror = _find_id(http, headers, new_resource.user_name, path, dir)
+  # get role_id
+  path = "/v3/roles"
+  dir = "roles"
+  role_id, rerror = _find_id(http, headers, new_resource.role_name, path, dir)
+  # get domain_id
+  path = "/v3/domains"
+  dir = "domains"
+  domain_id, derror = _find_id(http, headers, new_resource.domain_name, path, dir)
+
+  if uerror || rerror || derror
+    Chef::Log.info "Could not obtain the proper ids from keystone"
+    raise "Failed to talk to keystone in add_domain_role"
+  end
+
+  # Construct the path
+  path = "/v3/domains/#{domain_id}/users/#{user_id}/roles/#{role_id}"
+
+  ret = _update_item(http, headers, path, nil, new_resource.domain_name)
+  new_resource.updated_by_last_action(ret)
+end
+
 # :add_user specific attributes
 # attribute :user_name, :kind_of => String
 # attribute :user_password, :kind_of => String
@@ -346,6 +378,10 @@ def _update_item(http, headers, path, body, name)
     return true
   elsif resp.is_a?(Net::HTTPCreated)
     Chef::Log.info("Created keystone item '#{name}'")
+    return true
+  # several APIs use 204 on v3 as success response
+  elsif resp.is_a?(Net::HTTPNoContent)
+    Chef::Log.info("Created/Updated keystone item #{name}")
     return true
   else
     Chef::Log.error("Unable to updated item '#{name}'")
