@@ -23,6 +23,7 @@
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str", "required": true },
             "enabled_drivers": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
+            "automated_clean": { "type": "bool", "required": true },
             "api": {
               "type": "map",
               "required": true,

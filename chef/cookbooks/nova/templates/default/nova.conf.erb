@@ -145,11 +145,13 @@ protocol = <%= @glance_server_protocol %>
 
 <% unless @ironic_settings.nil? -%>
 [ironic]
-api_endpoint = <%= @ironic_settings[:api_protocol] %>://<%= @ironic_settings[:public_host] %>:<%= @ironic_settings[:api_port] %>
-admin_username = <%= @ironic_settings[:service_user] %>
-admin_password = <%= @ironic_settings[:service_password] %>
-admin_url = <%= @keystone_settings['protocol'] %>://<%= @keystone_settings['internal_url_host'] %>:<%= @keystone_settings['admin_port'] %>/<%= @ironic_settings[:keystone_version] %>/
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+auth_type = password
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
+username = <%= @ironic_settings[:service_user] %>
+password = <%= @ironic_settings[:service_password] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings['admin_domain']%>
+user_domain_name = <%= @keystone_settings['admin_domain'] %>
 <% end -%>
 
 [key_manager]

@@ -206,6 +206,7 @@ template node[:ironic][:config_file] do
   group node[:ironic][:group]
   mode "0640"
   variables(
+    automated_clean: node[:ironic][:automated_clean],
     drivers: node[:ironic][:enabled_drivers],
     debug: node[:ironic][:debug],
     rabbit_settings: fetch_rabbitmq_settings,
