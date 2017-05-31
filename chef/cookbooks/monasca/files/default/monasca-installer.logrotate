@@ -1,0 +1,10 @@
+/var/log/monasca-installer.log {
+        weekly
+        rotate 10
+        size 1M
+        copytruncate
+        delaycompress
+        compress
+        notifempty
+        missingok
+}
