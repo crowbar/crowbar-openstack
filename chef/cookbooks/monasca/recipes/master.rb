@@ -26,7 +26,7 @@ raise "no nodes with monasca-server role found" if monasca_hosts.nil? || monasca
 
 package "ansible"
 package "monasca-installer" do
-  notifies :run, "execute[force running ansible]", :delayed
+  notifies :run, "execute[run ansible]", :delayed
 end
 
 cookbook_file "/etc/ansible/ansible.cfg" do
@@ -125,7 +125,7 @@ template "/opt/monasca-installer/crowbar_vars.yml" do
     curator_excluded_index: curator_excluded_index.to_yaml.split("\n")[1..-1],
     elasticsearch_repo_dir: node[:monasca][:elasticsearch][:repo_dir].to_yaml.split("\n")[1..-1]
   )
-  notifies :run, "execute[force running ansible]", :delayed
+  notifies :run, "execute[run ansible]", :delayed
 end
 
 # This file is used to mark that ansible installer run successfully.
@@ -162,11 +162,5 @@ ansible_cmd =
 execute "run ansible" do
   command ansible_cmd
   cwd "/opt/monasca-installer"
-  only_if { actual_versions != previous_versions }
-end
-
-execute "force running ansible" do
-  command ansible_cmd
-  cwd "/opt/monasca-installer"
-  action :nothing
+  action :nothing unless actual_versions != previous_versions
 end
