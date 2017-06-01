@@ -360,9 +360,38 @@ class NeutronService < PacemakerServiceObject
         # need the bridges)
         ovs_bridge_networks = ["nova_floating", "ironic"]
         ovs_bridge_networks.concat attributes["additional_external_networks"]
-        if ml2_type_drivers.include?("vlan")
-          ovs_bridge_networks << "nova_fixed"
+        ovs_bridge_networks.push("nova_fixed") if ml2_type_drivers.include?("vlan")
+
+        # next block doesn't apply for non-DVR compute nodes, hence the check
+        # on nova_floating
+        floating_net_def = node.get_network_by_type("nova_floating")
+        if ml2_type_drivers.include?("vlan") && !floating_net_def.nil?
+          # If fixed & floating are on the same interface, and floating is not
+          # using a vlan, then br-fixed and br-floating will fight for the
+          # underlying network interface; in that case, we actually only need
+          # one bridge; we'll pick br-public
+          # Note that we assume that all relevant nodes will have a similar
+          # bridge mapping in the end (and not something like one node with an
+          # entry for both floating and physnet1, and some other node with only
+          # physnet1 -- that kind of setups simply won't work).
+          fixed_net_def = node.get_network_by_type("nova_fixed")
+
+          # we use the list of interface slaves, in case the bond doesn't exist
+          # yet (ifname won't be valid, then)
+          _ifname, fixed_ifs, _team = node.conduit_details(fixed_net_def["conduit"])
+          _ifname, floating_ifs, _team = node.conduit_details(floating_net_def["conduit"])
+
+          same_bridge = !floating_net_def["use_vlan"] && fixed_ifs.sort == floating_ifs.sort
+          bridge_name = same_bridge ? "br-public" : "br-fixed"
+
+          if fixed_net_def["bridge_name"] != bridge_name
+            @logger.info("Forcing bridge_name to #{bridge_name} for the nova_fixed network " \
+              "on node #{node.name}")
+            node.set_network_attribute("nova_fixed", "bridge_name", bridge_name)
+            needs_save = true
+          end
         end
+
         ovs_bridge_networks.each do |net|
           net_def = node.get_network_by_type(net)
           next if net_def.nil?
