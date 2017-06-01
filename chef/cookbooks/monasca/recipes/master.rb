@@ -144,11 +144,19 @@ previous_versions = if Pathname.new(lock_file).file?
 get_versions = "rpm -qa | grep -e crowbar-openstack -e monasca-installer | sort"
 actual_versions = IO.popen(get_versions, &:read).gsub(/^$\n/, "")
 
+cookbook_file "/etc/logrotate.d/monasca-installer" do
+  owner "root"
+  group "root"
+  mode "0644"
+  action :create
+  source "monasca-installer.logrotate"
+end
+
 ansible_cmd =
   "rm -f #{lock_file} " \
   "&& ansible-playbook " \
     "-i monasca-hosts -e '@/opt/monasca-installer/crowbar_vars.yml' " \
-    "monasca.yml " \
+    "monasca.yml -vvv >> /var/log/monasca-installer.log 2>&1 " \
   "&& echo '#{actual_versions}' > #{lock_file}"
 
 execute "run ansible" do
