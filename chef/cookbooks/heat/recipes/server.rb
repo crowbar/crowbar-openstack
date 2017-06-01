@@ -341,17 +341,23 @@ end
 
 crowbar_pacemaker_sync_mark "create-heat_register" if ha_enabled
 
-shell_get_stack_user_domain = <<-EOF
-  export OS_URL="#{keystone_settings["protocol"]}://#{keystone_settings["internal_url_host"]}:#{keystone_settings["service_port"]}/v3"
-  eval $(openstack \
-    --os-username #{keystone_settings["admin_user"]} \
-    --os-password #{keystone_settings["admin_password"]} \
-    --os-tenant-name #{keystone_settings["admin_tenant"]} \
-    --os-auth-url=$OS_URL \
-    --os-region-name='#{keystone_settings["endpoint_region"]}' \
-    --os-identity-api-version=3 #{insecure} domain show -f shell --variable id #{stack_user_domain_name});
-  echo $id
-EOF
+ruby_block "get stack user domain" do
+  block do
+    url = "#{keystone_settings["protocol"]}://#{keystone_settings["internal_url_host"]}"
+    url << ":#{keystone_settings["service_port"]}/v3"
+    stack_user_domain_id = `openstack \
+--os-username #{keystone_settings["admin_user"]} \
+--os-password #{keystone_settings["admin_password"]} \
+--os-tenant-name #{keystone_settings["admin_tenant"]} \
+--os-auth-url=#{url} \
+--os-region-name='#{keystone_settings["endpoint_region"]}' \
+--os-identity-api-version=3 \
+#{insecure} \
+domain show -f value -c id #{stack_user_domain_name}`
+    raise "Could not obtain the stack user domain id" if stack_user_domain_id.empty?
+    node[:heat][:stack_user_domain_id] = stack_user_domain_id.strip
+  end
+end
 
 rabbit_settings = fetch_rabbitmq_settings
 
@@ -361,25 +367,29 @@ template "/etc/heat/heat.conf.d/100-heat.conf" do
   group node[:heat][:group]
   mode "0640"
   variables(
-    debug: node[:heat][:debug],
-    verbose: node[:heat][:verbose],
-    rabbit_settings: rabbit_settings,
-    keystone_settings: keystone_settings,
-    database_connection: db_connection,
-    bind_host: bind_host,
-    api_port: api_port,
-    cloud_watch_port: cloud_watch_port,
-    cfn_port: cfn_port,
-    auth_encryption_key: node[:heat][:auth_encryption_key][0, 32],
-    heat_metadata_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
-    heat_waitcondition_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
-    heat_watch_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}",
-    stack_user_domain: %x[ #{shell_get_stack_user_domain} ].chomp,
-    stack_domain_admin: node[:heat]["stack_domain_admin"],
-    stack_domain_admin_password: node[:heat]["stack_domain_admin_password"],
-    trusts_delegated_roles: node[:heat][:trusts_delegated_roles],
-    insecure: keystone_settings["insecure"],
-    heat_ssl: node[:heat][:ssl]
+    lazy {
+      {
+        debug: node[:heat][:debug],
+        verbose: node[:heat][:verbose],
+        rabbit_settings: rabbit_settings,
+        keystone_settings: keystone_settings,
+        database_connection: db_connection,
+        bind_host: bind_host,
+        api_port: api_port,
+        cloud_watch_port: cloud_watch_port,
+        cfn_port: cfn_port,
+        auth_encryption_key: node[:heat][:auth_encryption_key][0, 32],
+        heat_metadata_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
+        heat_waitcondition_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
+        heat_watch_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}",
+        stack_user_domain: node[:heat][:stack_user_domain_id],
+        stack_domain_admin: node[:heat]["stack_domain_admin"],
+        stack_domain_admin_password: node[:heat]["stack_domain_admin_password"],
+        trusts_delegated_roles: node[:heat][:trusts_delegated_roles],
+        insecure: keystone_settings["insecure"],
+        heat_ssl: node[:heat][:ssl]
+      }
+    }
   )
 end
 
