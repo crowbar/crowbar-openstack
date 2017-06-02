@@ -217,6 +217,48 @@ memcached_servers.sort!
 # node[:keystone][:token_expiration] is in seconds and has to be encoded to hours
 max_active_keys = (node[:keystone][:token_expiration].to_f / 3600).ceil + 2
 
+register_auth_hash = { user: node[:keystone][:admin][:username],
+                       password: node[:keystone][:admin][:password],
+                       tenant: node[:keystone][:admin][:tenant] }
+
+if node[:keystone].key?(:endpoint)
+  endpoint_protocol = node[:keystone][:endpoint][:protocol]
+  endpoint_insecure = node[:keystone][:endpoint][:insecure]
+  # In order to update keystone's endpoints we need the old internal endpoint.
+  endpoint_port = node[:keystone][:endpoint][:port]
+else
+  endpoint_protocol = node[:keystone][:api][:protocol]
+  endpoint_insecure = node[:keystone][:ssl][:insecure]
+  endpoint_port = node[:keystone][:api][:admin_port]
+end
+
+endpoint_host = my_admin_host
+
+Chef::Log.info("current endpoint: #{endpoint_protocol}://" \
+                "#{endpoint_host}:" \
+                "#{endpoint_port}")
+
+# Update keystone endpoints (in case we switch http/https this will update the
+# endpoints to the correct ones). This needs to be done _before_ we switch
+# protocols on the keystone api.
+keystone_register "update keystone endpoint" do
+  protocol endpoint_protocol
+  insecure endpoint_insecure
+  host endpoint_host
+  port endpoint_port
+  auth register_auth_hash
+  endpoint_service "keystone"
+  endpoint_region node[:keystone][:api][:region]
+  endpoint_adminURL KeystoneHelper.admin_auth_url(node, my_admin_host)
+  endpoint_publicURL KeystoneHelper.public_auth_url(node, my_public_host)
+  endpoint_internalURL KeystoneHelper.internal_auth_url(node, my_admin_host)
+  action :update_endpoint
+  only_if do
+    node[:keystone][:bootstrap] &&
+      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
 template node[:keystone][:config_file] do
     source "keystone.conf.erb"
     owner "root"
@@ -698,12 +740,20 @@ node.set[:keystone][:monitor] = {} if node[:keystone][:monitor].nil?
 node.set[:keystone][:monitor][:svcs] = ["keystone"] if node[:keystone][:monitor][:svcs] != ["keystone"]
 node.save
 
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
 template "/root/.openrc" do
   source "openrc.erb"
   owner "root"
   group "root"
   mode 0600
   variables(
-    keystone_settings: KeystoneHelper.keystone_settings(node, @cookbook_name)
+    keystone_settings: keystone_settings
     )
 end
+
+# Set new endpoint URL.
+node.set[:keystone][:api][:internal_url_host] = keystone_settings["internal_url_host"]
+node.save
+Chef::Log.debug("setting new endpoint host to " \
+                "#{node[:keystone][:api][:internal_url_host]}")
