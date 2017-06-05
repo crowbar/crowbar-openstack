@@ -6,7 +6,7 @@ key = <%= @vncproxy_key_file %>
 instance_name_template=zvm%05x
 <% end %>
 my_ip = <%= node[:nova][:my_ip] %>
-<% if @libvirt_type.eql?('ironic') %>scheduler_host_manager = ironic_host_manager<% end %>
+<% unless @ironic_settings.nil? %>scheduler_host_manager = ironic_host_manager<% end %>
 notify_on_state_change = vm_and_task_state
 state_path = /var/lib/nova
 enabled_ssl_apis = <%= @ssl_enabled ? "osapi_compute,metadata" : "" %>

@@ -68,8 +68,6 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 neutron_insecure = node[:neutron][:api][:protocol] == "https" && node[:neutron][:ssl][:insecure]
 ssl_insecure = keystone_settings["insecure"] || neutron_insecure
 
-has_ironic = ironic_net && node.roles.include?("ironic-server")
-
 neutron_args = "--os-username '#{keystone_settings['service_user']}'"
 neutron_args = "#{neutron_args} --os-password '#{keystone_settings['service_password']}'"
 neutron_args = "#{neutron_args} --os-tenant-name '#{keystone_settings['service_tenant']}'"
@@ -139,7 +137,7 @@ end
 
 execute "create_ironic_network" do
   command "#{neutron_cmd} net-create ironic --shared #{ironic_network_type}"
-  only_if { has_ironic }
+  only_if { ironic_net }
   not_if "out=$(#{neutron_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' ironic '"
   retries 5
   retry_delay 10
@@ -166,7 +164,7 @@ execute "create_ironic_subnet" do
   command "#{neutron_cmd} subnet-create --name ironic --ip-version=4 " \
       "--allocation-pool start=#{ironic_pool_start},end=#{ironic_pool_end} " \
       "--gateway #{ironic_router} ironic #{ironic_range} --enable_dhcp"
-  only_if { has_ironic }
+  only_if { ironic_net }
   not_if "out=$(#{neutron_cmd} subnet-list); [ $? != 0 ] || echo ${out} | grep -q ' ironic '"
   retries 5
   retry_delay 10
@@ -199,7 +197,7 @@ end
 
 execute "add_ironic_network_to_router" do
   command "#{neutron_cmd} router-interface-add router-floating ironic"
-  only_if { has_ironic }
+  only_if { ironic_net }
   not_if "out1=$(#{neutron_cmd} subnet-show -f shell ironic) ; rc1=$?; eval $out1 ; " \
       "out2=$(#{neutron_cmd} router-port-list router-floating); " \
       "[ $? != 0 ] || [ $rc1 != 0 ] || echo $out2 | grep -q $id"
