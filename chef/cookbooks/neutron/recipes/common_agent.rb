@@ -23,6 +23,8 @@ else
   nova_compute_ha_enabled = false
 end
 
+ironic_net = Barclamp::Inventory.get_network_definition(node, "ironic")
+
 # Disable rp_filter
 ruby_block "edit /etc/sysctl.conf for rp_filter" do
   block do
@@ -189,7 +191,8 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       end
     end
 
-    if (node.roles & ["ironic-server", "nova-compute-ironic"]).any?
+    if (node.roles & ["ironic-server", "nova-compute-ironic"]).any? ||
+        (ironic_net && node.roles.include?("neutron-network"))
       bridge_mappings.push("ironic:br-ironic")
     end
 

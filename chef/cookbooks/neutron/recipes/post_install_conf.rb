@@ -67,8 +67,6 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 ssl_insecure = Barclamp::Config.load("openstack", "neutron")["insecure"] || false
 
-has_ironic = ironic_net && node.roles.include?("ironic-server")
-
 openstack_args = "--os-username '#{keystone_settings['service_user']}'"
 openstack_args = "#{openstack_args} --os-password '#{keystone_settings['service_password']}'"
 openstack_args = "#{openstack_args} --os-tenant-name '#{keystone_settings['service_tenant']}'"
@@ -139,7 +137,7 @@ end
 
 execute "create_ironic_network" do
   command "#{openstack_cmd} network create --share #{ironic_network_type} ironic"
-  only_if { has_ironic }
+  only_if { ironic_net }
   not_if "out=$(#{openstack_cmd} network list); [ $? != 0 ] || echo ${out} | grep -q ' ironic '"
   retries 5
   retry_delay 10
@@ -170,7 +168,7 @@ execute "create_ironic_subnet" do
   command "#{openstack_cmd} subnet create --network ironic --ip-version=4 " \
       "--allocation-pool start=#{ironic_pool_start},end=#{ironic_pool_end} " \
       "--gateway #{ironic_router} --subnet-range #{ironic_range} --dhcp ironic"
-  only_if { has_ironic }
+  only_if { ironic_net }
   not_if "out=$(#{openstack_cmd} subnet list); [ $? != 0 ] || echo ${out} | grep -q ' ironic '"
   retries 5
   retry_delay 10
@@ -207,7 +205,7 @@ end
 
 execute "add_ironic_network_to_router" do
   command "#{openstack_cmd} router add subnet router-floating ironic"
-  only_if { has_ironic }
+  only_if { ironic_net }
   not_if "out=$(#{openstack_cmd} port list --router router-floating --network ironic | wc -l); " \
       "[ $? != 0 ] || (( ${out} > 1 ))"
   retries 5
