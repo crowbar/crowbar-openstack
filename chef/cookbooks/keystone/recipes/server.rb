@@ -234,10 +234,6 @@ end
 
 endpoint_host = my_admin_host
 
-Chef::Log.info("current endpoint: #{endpoint_protocol}://" \
-                "#{endpoint_host}:" \
-                "#{endpoint_port}")
-
 # Update keystone endpoints (in case we switch http/https this will update the
 # endpoints to the correct ones). This needs to be done _before_ we switch
 # protocols on the keystone api.
@@ -255,7 +251,10 @@ keystone_register "update keystone endpoint" do
   action :update_endpoint
   only_if do
     node[:keystone][:bootstrap] &&
-      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
+      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
+      (node[:keystone][:endpoint][:protocol] != node[:keystone][:api][:protocol] ||
+      node[:keystone][:endpoint][:insecure] != node[:keystone][:ssl][:insecure] ||
+      node[:keystone][:endpoint][:port] != node[:keystone][:api][:admin_port])
   end
 end
 
