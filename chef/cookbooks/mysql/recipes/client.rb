@@ -17,15 +17,6 @@
 # limitations under the License.
 #
 
-package "mysql-devel" do
-  package_name value_for_platform_family(
-    ["rhel", "suse", "fedora"] => { "default" => "mysql-devel" },
-    ["debian"] => { "default" => "libmysqlclient-dev" },
-    "default" => "libmysqlclient-dev"
-  )
-  action :install
-end
-
 package "mysql-client" do
   package_name value_for_platform_family(
     ["rhel", "suse", "fedora"] => "mysql",
@@ -38,7 +29,8 @@ if platform_family?(%w{debian rhel fedora suse})
 
   package "mysql-ruby" do
     package_name value_for_platform_family(
-      ["rhel", "suse", "fedora"] => "ruby-mysql",
+      ["rhel", "fedora"] => "ruby-mysql",
+      "suse" => "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-mysql",
       "debian" => "libmysql-ruby",
       "default" => "libmysql-ruby"
     )
