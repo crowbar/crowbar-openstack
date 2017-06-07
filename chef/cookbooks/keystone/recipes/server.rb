@@ -252,6 +252,7 @@ keystone_register "update keystone endpoint" do
   only_if do
     node[:keystone][:bootstrap] &&
       (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
+      node[:keystone].key?(:endpoint) &&
       (node[:keystone][:endpoint][:protocol] != node[:keystone][:api][:protocol] ||
       node[:keystone][:endpoint][:insecure] != node[:keystone][:ssl][:insecure] ||
       node[:keystone][:endpoint][:port] != node[:keystone][:api][:admin_port])
