@@ -28,7 +28,7 @@ end
 
 package "mysql-client" do
   package_name value_for_platform_family(
-    ["rhel", "suse", "fedora"] => { "default" => "mysql" },
+    ["rhel", "suse", "fedora"] => "mysql",
     "default" => "mysql-client"
   )
   action :install
@@ -38,8 +38,8 @@ if platform_family?(%w{debian rhel fedora suse})
 
   package "mysql-ruby" do
     package_name value_for_platform_family(
-      ["rhel", "suse", "fedora"] => { "default" => "ruby-mysql" },
-      ["debian"] => { "default" => "libmysql-ruby" },
+      ["rhel", "suse", "fedora"] => "ruby-mysql",
+      "debian" => "libmysql-ruby",
       "default" => "libmysql-ruby"
     )
     action :install

@@ -80,7 +80,9 @@ service "mysql" do
   action :enable
 end
 
-link value_for_platform_family(["rhel", "suse", "fedora"] => { "default" => "/etc/my.cnf" }, "default" => "/etc/mysql/my.cnf") do
+link value_for_platform_family(
+       ["rhel", "suse", "fedora"] => "/etc/my.cnf",
+       "default" => "/etc/mysql/my.cnf") do
   to "#{node[:mysql][:datadir]}/my.cnf"
 end
 
@@ -179,20 +181,16 @@ script "fix_perms_hack" do
   EOH
   not_if "/usr/bin/mysql -u root #{node['mysql']['server_root_password'].empty? ? '' : '-p' }#{node['mysql']['server_root_password']} -e 'show databases;'"
 end
-
+end
 # End hackness
 
 grants_path = value_for_platform_family(
-  ["rhel", "suse", "fedora"] => {
-    "default" => "/etc/mysql_grants.sql"
-  },
+  ["rhel", "suse", "fedora"] => "/etc/mysql_grants.sql",
   "default" => "/etc/mysql/grants.sql"
 )
 
 grants_key = value_for_platform_family(
-  ["rhel", "suse", "fedora"] => {
-    "default" => "/etc/applied_grants"
-  },
+  ["rhel", "suse", "fedora"] => "/etc/applied_grants",
   "default" => "/etc/mysql/applied_grants"
 )
 
