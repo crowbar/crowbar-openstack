@@ -17,10 +17,12 @@ hyperv_compute_node = search(:node, "roles:nova-compute-hyperv") || []
 use_hyperv = node[:neutron][:networking_plugin] == "ml2" && !hyperv_compute_node.empty?
 zvm_compute_node = search(:node, "roles:nova-compute-zvm") || []
 use_zvm = node[:neutron][:networking_plugin] == "ml2" && !zvm_compute_node.empty?
+use_nsx = ["vmware_nsx", "vmware_dvs"].include?(node[:neutron][:networking_plugin])
 
 pkgs = node[:neutron][:platform][:pkgs] + node[:neutron][:platform][:pkgs_fwaas]
 pkgs += node[:neutron][:platform][:pkgs_lbaas] if node[:neutron][:use_lbaas]
 pkgs += node[:neutron][:platform][:infoblox_pkgs] if node[:neutron][:use_infoblox]
+pkgs += node[:neutron][:platform][:nsx_pkgs] if use_nsx
 
 if use_hyperv
   pkgs << node[:neutron][:platform][:hyperv_pkg]
@@ -47,7 +49,8 @@ end
 include_recipe "neutron::common_config"
 
 # set core plugin for neutron-server
-if node[:neutron][:networking_plugin] == "vmware"
+case node[:neutron][:networking_plugin]
+when "vmware_nsx", "vmware_dvs"
   core_link = "/etc/neutron/plugins/vmware/nsx.ini"
 else
   core_link = "/etc/neutron/plugins/ml2/ml2_conf.ini"
@@ -194,7 +197,7 @@ when "ml2"
     )
     notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end
-when "vmware"
+when "vmware_nsx", "vmware_dvs"
   directory "/etc/neutron/plugins/vmware/" do
      mode 00755
      owner "root"
@@ -211,7 +214,8 @@ when "vmware"
     group node[:neutron][:platform][:group]
     mode "0640"
     variables(
-      vmware_config: node[:neutron][:vmware]
+      vmware_config: node[:neutron][node[:neutron][:networking_plugin]],
+      vmware_plugin: node[:neutron][:networking_plugin]
     )
     notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end

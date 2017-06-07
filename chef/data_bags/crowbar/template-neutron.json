@@ -65,7 +65,16 @@
         "max_namespaces_per_tenant": 1,
         "route_domain_strictness": false
       },
-      "vmware": {
+      "vmware_dvs": {
+        "host": "",
+        "port": 443,
+        "user": "",
+        "password": "",
+        "ca_file": "",
+        "insecure": false,
+        "dvs_name": "br-int"
+      },
+      "vmware_nsx": {
         "user": "",
         "password": "",
         "port": "443",

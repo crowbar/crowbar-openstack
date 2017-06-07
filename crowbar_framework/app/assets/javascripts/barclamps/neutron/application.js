@@ -247,9 +247,9 @@ function lbaasv2DriverCheck() {
 }
 
 function networking_plugin_check() {
-  switch ($('#networking_plugin').val()) {
-  case 'ml2':
-    $('#vmware_container').hide();
+  if ($('#networking_plugin').val() == 'ml2') {
+    $('#vmware_dvs_container').hide();
+    $('#vmware_nsx_container').hide();
     $('#ml2_mechanism_drivers_container').show();
     $('#ml2_type_drivers_container').show();
     $('#ml2_type_drivers_default_provider_network_container').show();
@@ -259,9 +259,7 @@ function networking_plugin_check() {
     ml2_type_drivers_check();
     ml2_mechanism_drivers_check();
     lbaasCheck();
-    break;
-  case 'vmware':
-    $('#vmware_container').show();
+  } else {
     $('#ml2_mechanism_drivers_container').hide();
     $('#ml2_type_drivers_container').hide();
     $('#ml2_type_drivers_default_provider_network_container').hide();
@@ -274,7 +272,13 @@ function networking_plugin_check() {
     $('#vxlan_container').hide();
     $('#cisco_switches').hide();
     $('#cisco_ports').hide();
-    break;
+    if ($('#networking_plugin').val() == 'vmware_dvs') {
+      $('#vmware_nsx_container').hide();
+      $('#vmware_dvs_container').show();
+    } else {
+      $('#vmware_dvs_container').hide();
+      $('#vmware_nsx_container').show();
+    }
   }
 }
 

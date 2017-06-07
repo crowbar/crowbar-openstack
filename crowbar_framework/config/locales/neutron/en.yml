@@ -79,7 +79,14 @@ en:
           vtep_selfip_name: 'Vtep Self IP Name'
           max_namespaces_per_tenant: 'Max Namespaces per Tenant'
           route_domain_strictness: 'Route Domain Strictness'
-        vmware:
+        vmware_dvs:
+          host: 'vCenter Host/IP Address'
+          user: 'vCenter Username'
+          password: 'vCenter Password'
+          ca_file: 'CA file for verifying the vCenter certificate'
+          insecure: 'vCenter SSL Certificate is insecure (for instance, self-signed)'
+          dvs_name: 'Name of the preconfigured DVS'
+        vmware_nsx:
           user: 'VMware NSX Username'
           password: 'VMware NSX Password'
           controllers: 'VMware NSX Controllers'

@@ -1,9 +1,11 @@
 [DEFAULT]
+<% if @vmware_plugin == "vmware_nsx" -%>
 nsx_user = <%= @vmware_config[:user] %>
 nsx_password = <%= @vmware_config[:password] %>
 nsx_controllers = <%= @vmware_config[:controllers] %>
 default_tz_uuid = <%= @vmware_config[:tz_uuid] %>
 default_l3_gw_service_uuid = <%= @vmware_config[:l3_gw_uuid] %>
+<% end -%>
 [quotas]
 [vcns]
 [nsx]
@@ -11,3 +13,13 @@ default_l3_gw_service_uuid = <%= @vmware_config[:l3_gw_uuid] %>
 [nsx_lsn]
 [nsx_dhcp]
 [nsx_metadata]
+[dvs]
+<% if @vmware_plugin == "vmware_dvs" -%>
+host_ip = <%= @vmware_config[:host] %>
+host_port = <%= @vmware_config[:port] %>
+host_username = <%= @vmware_config[:user] %>
+host_password = <%= @vmware_config[:password] %>
+insecure = <%= @vmware_config[:insecure] ? "true" : "false" %>
+ca_file = <%= @vmware_config[:ca_file] %>
+dvs_name = <%= @vmware_config[:dvs_name] %>
+<% end -%>

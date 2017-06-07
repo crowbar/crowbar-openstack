@@ -36,12 +36,20 @@
       #dvr_container
         = boolean_field :use_dvr
 
-      #vmware_container
-        = string_field %w(vmware user)
-        = password_field %w(vmware password)
-        = string_field %w(vmware controllers)
-        = string_field %w(vmware tz_uuid)
-        = string_field %w(vmware l3_gw_uuid)
+      #vmware_dvs_container
+        = string_field %w(vmware_dvs host)
+        = string_field %w(vmware_dvs user)
+        = password_field %w(vmware_dvs password)
+        = string_field %w(vmware_dvs ca_file)
+        = boolean_field %w(vmware_dvs insecure)
+        = string_field %w(vmware_dvs dvs_name)
+
+      #vmware_nsx_container
+        = string_field %w(vmware_nsx user)
+        = password_field %w(vmware_nsx password)
+        = string_field %w(vmware_nsx controllers)
+        = string_field %w(vmware_nsx tz_uuid)
+        = string_field %w(vmware_nsx l3_gw_uuid)
 
       #num_vlans_container
         %fieldset

@@ -376,9 +376,6 @@ if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
 end
 
 # VMware specific code
-if neutron[:neutron][:networking_plugin] == "vmware"
+if ["vmware_nsx", "vmware_dvs"].include?(neutron[:neutron][:networking_plugin])
   include_recipe "neutron::vmware_support"
-  # We don't need anything more installed or configured on
-  # compute nodes except openvswitch packages with stt.
-  # For NSX plugin no neutron packages are needed.
 end

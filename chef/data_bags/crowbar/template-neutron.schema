@@ -99,7 +99,16 @@
                       "max_namespaces_per_tenant": { "type" : "int", "required" : true },
                       "route_domain_strictness": { "type" : "bool", "required" : true }
                     }},
-                    "vmware": { "type": "map", "required": true, "mapping": {
+                    "vmware_dvs": { "type": "map", "required": true, "mapping": {
+                      "host": { "type": "str", "required": true },
+                      "port": { "type": "int", "required": true },
+                      "user": { "type": "str", "required": true },
+                      "password": { "type": "str", "required": true },
+                      "ca_file": { "type": "str", "required": true },
+                      "insecure": { "type": "bool", "required": true },
+                      "dvs_name": { "type": "str", "required": true }
+                    }},
+                    "vmware_nsx": { "type": "map", "required": true, "mapping": {
                       "user": { "type" : "str", "required" : true },
                       "password": { "type" : "str", "required" : true },
                       "port": { "type" : "str", "required" : true },
