@@ -249,9 +249,13 @@ keystone_register "update keystone endpoint" do
   endpoint_publicURL KeystoneHelper.public_auth_url(node, my_public_host)
   endpoint_internalURL KeystoneHelper.internal_auth_url(node, my_admin_host)
   action :update_endpoint
+  # Do not try to update keystone endpoint during upgrade, when keystone is not running yet
+  # ("done_os_upgrade" is present when first chef-client run is executed at the end of upgrade)
+  not_if { node["crowbar_upgrade_step"] == "done_os_upgrade" }
   only_if do
     node[:keystone][:bootstrap] &&
       (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
+      node[:keystone].key?(:endpoint) &&
       (node[:keystone][:endpoint][:protocol] != node[:keystone][:api][:protocol] ||
       node[:keystone][:endpoint][:insecure] != node[:keystone][:ssl][:insecure] ||
       node[:keystone][:endpoint][:port] != node[:keystone][:api][:admin_port])
