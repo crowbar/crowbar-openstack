@@ -15,14 +15,12 @@
 
 module MonascaHelper
   def self.monasca_public_host(node)
-    ha_enabled = node[:monasca][:ha][:enabled]
     ssl_enabled = node[:monasca][:api][:ssl]
-    CrowbarHelper.get_host_for_public_url(node, ssl_enabled, ha_enabled)
+    CrowbarHelper.get_host_for_public_url(node, ssl_enabled)
   end
 
   def self.monasca_admin_host(node)
-    ha_enabled = node[:monasca][:ha][:enabled]
-    CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
+    CrowbarHelper.get_host_for_admin_url(node)
   end
 
   def self.api_public_url(node)

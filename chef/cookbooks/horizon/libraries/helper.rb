@@ -14,9 +14,8 @@
 
 module MonascaUiHelper
   def self.monasca_public_host(node)
-    ha_enabled = node[:monasca][:ha][:enabled]
     ssl_enabled = node[:monasca][:api][:ssl]
-    CrowbarHelper.get_host_for_public_url(node, ssl_enabled, ha_enabled)
+    CrowbarHelper.get_host_for_public_url(node, ssl_enabled)
   end
 
   def self.api_public_url(node)
