@@ -134,50 +134,6 @@ unless platform_family?("debian")
 
 end
 
-# Super duper hackfest-o-rama 2011.
-# Under crowbar, for some reason, defaults aren't being set properly
-# for the mysql passwords. This is a nasty, nasty hack to
-# fix this until I understand the problem better:
-directory "/etc/mysql/" do
-  owner "root"
-  group "root"
-  mode "0755"
-  action :create
-end
-
-directory "/etc/mysql/conf.d/" do
-  owner "root"
-  group "root"
-  mode "0755"
-  action :create
-end
-
-template "/etc/mysql/conf.d/emergency_init_file" do
-  source "emergency_init_file.erb"
-  owner "root"
-  group "root"
-  mode "0600"
-  action :create
-end
-
-script "fix_perms_hack" do
-  interpreter "bash"
-  user "root"
-  cwd "/tmp"
-  code <<-EOH
-  /etc/init.d/#{mysql_service_name} stop
-  chmod 644 /etc/mysql/conf.d/emergency_init_file
-  /usr/bin/mysqld_safe --init-file=/etc/mysql/conf.d/emergency_init_file &
-  sleep 10
-  killall mysqld
-  chmod 600 /etc/mysql/conf.d/emergency_init_file
-  /etc/init.d/#{mysql_service_name} start
-  EOH
-  not_if "/usr/bin/mysql -u root #{node['mysql']['server_root_password'].empty? ? '' : '-p' }#{node['mysql']['server_root_password']} -e 'show databases;'"
-end
-end
-# End hackness
-
 grants_path = value_for_platform_family(
   ["rhel", "suse", "fedora"] => "/etc/mysql_grants.sql",
   "default" => "/etc/mysql/grants.sql"
