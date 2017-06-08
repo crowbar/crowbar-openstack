@@ -80,12 +80,6 @@ service "mysql" do
   action :enable
 end
 
-link value_for_platform_family(
-       ["rhel", "suse", "fedora"] => "/etc/my.cnf",
-       "default" => "/etc/mysql/my.cnf") do
-  to "#{node[:mysql][:datadir]}/my.cnf"
-end
-
 directory node[:mysql][:tmpdir] do
   owner "mysql"
   group "mysql"
@@ -110,11 +104,11 @@ service mysql start
 EOC
 end
 
-template "#{node[:mysql][:datadir]}/my.cnf" do
+template "/etc/my.cnf" do
   source "my.cnf.erb"
   owner "root"
-  group "root"
-  mode "0644"
+  group "mysql"
+  mode "0640"
   notifies :run, resources(script: "handle mysql restart"), :immediately if platform_family?("debian")
   notifies :restart, "service[mysql]", :immediately if platform_family?(%w{rhel suse fedora})
 end
