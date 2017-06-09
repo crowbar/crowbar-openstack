@@ -176,6 +176,11 @@
             "auth_pool_connection_lifetime": 60
           }
         }
+      },
+      "resource_limits": {
+        "apache2": {
+          "LimitNOFILE": null
+        }
       }
     }
   },
@@ -183,7 +188,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 112,
+      "schema-revision": 113,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },
