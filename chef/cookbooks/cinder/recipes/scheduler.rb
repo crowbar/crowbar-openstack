@@ -25,3 +25,14 @@ use_crowbar_pacemaker_service = node[:cinder][:ha][:enabled] &&
 cinder_service "scheduler" do
   use_pacemaker_provider use_crowbar_pacemaker_service
 end
+
+service = "openstack-cinder-scheduler"
+if node[:cinder][:resource_limits] && node[:cinder][:resource_limits][service]
+  limits = node[:cinder][:resource_limits][service]
+  action = limits.values.any? ? :create : :delete
+  utils_systemd_override_limits "Resource limits for #{service}" do
+    service_name service
+    limits limits
+    action action
+  end
+end
