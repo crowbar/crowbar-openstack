@@ -327,3 +327,14 @@ else
     notifies :restart, "service[cinder-volume]"
   end
 end
+
+service = "openstack-cinder-volume"
+if node[:cinder][:resource_limits] && node[:cinder][:resource_limits][service]
+  limits = node[:cinder][:resource_limits][service]
+  action = limits.values.any? ? :create : :delete
+  crowbar_openstack_systemd_override "Resource limits for #{service}" do
+    service_name service
+    limits limits
+    action action
+  end
+end
