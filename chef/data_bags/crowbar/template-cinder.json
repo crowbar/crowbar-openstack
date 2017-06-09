@@ -75,8 +75,7 @@
           "iscsi_ip": ""
         },
         "nfs": {
-          "nfs_shares": "",
-          "nfs_mount_options": ""
+          "nfs_shares": ""
         },
         "rbd": {
           "use_crowbar": true,
@@ -162,7 +161,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 106,
+      "schema-revision": 107,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

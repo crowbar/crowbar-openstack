@@ -191,7 +191,6 @@ nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
 
   <% if volume['backend_driver'] == 'nfs' -%>
 nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
-nfs_mount_options = <%= volume['nfs']['nfs_mount_options'] %>
 volume_driver = cinder.volume.drivers.nfs.NfsDriver
   <% end -%>
 
