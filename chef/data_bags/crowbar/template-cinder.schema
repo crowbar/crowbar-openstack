@@ -110,7 +110,8 @@
                     "admin_keyring": { "type": "str", "required": true },
                     "pool": { "type": "str", "required": true },
                     "user": { "type": "str", "required": true },
-                    "secret_uuid": { "type": "str", "required": true }
+                    "secret_uuid": { "type": "str", "required": true },
+                    "flatten_volume_from_snapshot": { "type": "bool", "required": true }
                     }
                 },
                 "vmware": {
@@ -247,7 +248,8 @@
                       "admin_keyring": { "type": "str", "required": true },
                       "pool": { "type": "str", "required": true },
                       "user": { "type": "str", "required": true },
-                      "secret_uuid" : { "type": "str", "required": true }
+                      "secret_uuid" : { "type": "str", "required": true },
+                      "flatten_volume_from_snapshot": { "type": "bool", "required": true }
                     }
                   },
                   "vmware": {
