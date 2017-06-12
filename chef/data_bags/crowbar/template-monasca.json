@@ -99,7 +99,7 @@
       "service_password": "none",
       "service_user": "monasca",
       "service_tenant": "monasca",
-      "service_roles": ["monasca-agent", "monasca-user"]
+      "service_roles": ["monasca-agent", "monasca-user", "monasca-read-only-user"]
     }
   },
   "deployment": {
