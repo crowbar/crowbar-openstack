@@ -344,6 +344,19 @@ function ml2_mechanism_drivers_check() {
     $('#cisco_switches').hide();
   }
 
+  // auto-select openvswitch & vlan if vmware_dvs is selected
+  if (values.indexOf("vmware_dvs") >= 0) {
+    if (values.indexOf("openvswitch") < 0 && values.indexOf("linuxbridge") < 0) {
+      values.push("openvswitch");
+      $("#ml2_mechanism_drivers").val(values).trigger('change');
+    }
+    var type_drivers = $('#ml2_type_drivers').val() || [];
+    if (type_drivers.indexOf('vlan') == -1) {
+        type_drivers.push('vlan');
+        $('#ml2_type_drivers').val(type_drivers).trigger('change');
+    }
+  }
+
   // show/hide l2pop depending on openvswitch/linuxbridge
   if (values.indexOf("openvswitch") >= 0 || values.indexOf("linuxbridge") >= 0) {
     $('#l2pop_container').show();

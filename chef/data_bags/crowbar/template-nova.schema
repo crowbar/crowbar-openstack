@@ -130,7 +130,9 @@
                 "datastore": { "type": "str", "required": true },
                 "interface": { "type": "str", "required": true },
                 "ca_file": { "type": "str", "required": true },
-                "insecure": { "type": "bool", "required": true }
+                "insecure": { "type": "bool", "required": true },
+                "dvs_name": { "type": "str", "required": true },
+                "dvs_security_groups": { "type": "bool", "required": true }
               }
             },
             "zvm": {

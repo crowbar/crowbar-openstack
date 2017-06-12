@@ -73,6 +73,7 @@ default[:nova][:vcenter][:user] = ""
 default[:nova][:vcenter][:password] = ""
 default[:nova][:vcenter][:clusters] = []
 default[:nova][:vcenter][:interface] = ""
+default[:nova][:vcenter][:dvs_name] = "dvSwitch0"
 
 #
 # Scheduler Settings

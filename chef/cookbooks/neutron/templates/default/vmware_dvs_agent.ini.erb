@@ -1,0 +1,14 @@
+[DEFAULT]
+[securitygroup]
+enable_security_group = <%= @vcenter_config[:dvs_security_groups] ? 'True' : 'False' %>
+#firewall_driver = networking_vsphere.agent.firewalls.vcenter_firewall.DVSFirewallDriver
+[ml2_vmware]
+vsphere_login = <%= @vcenter_config[:user] %>
+vsphere_hostname = <%= @vcenter_config[:host] %>
+vsphere_password = <%= @vcenter_config[:password] %>
+<% @vcenter_config[:clusters].each do |cluster| -%>
+cluster_name = <%= cluster %>
+<% end -%>
+ca_file = <%= @vcenter_config[:ca_file] %>
+insecure = <%= @vcenter_config[:insecure] %>
+network_maps = physnet1:<%= @vcenter_config[:dvs_name] %>

@@ -26,3 +26,8 @@ vxlan_group = <%= @vxlan_mcast_group %>
 [l2pop]
 agent_boot_time = <%= @l2pop_agent_boot_time %>
 [securitygroup]
+<% if @ml2_mechanism_drivers.include?("vmware_dvs") -%>
+[dvs]
+clean_on_restart = <%= @vmware_dvs_config[:clean_on_restart] ? 'True' : 'False' %>
+precreate_networks = <%= @vmware_dvs_config[:precreate_networks] ? 'True' : 'False' %>
+<% end -%>

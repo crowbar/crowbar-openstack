@@ -117,6 +117,8 @@ when "suse"
     infoblox_pkgs: ["python-infoblox-client",
                     "openstack-neutron-infoblox",
                     "openstack-neutron-infoblox-ipam-agent"],
+    vmware_vsphere_pkg: "openstack-neutron-vsphere",
+    vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
     user: "neutron",
     group: "neutron",
   }
@@ -158,6 +160,8 @@ when "rhel"
                         "lldpd",
                         "neutron-opflex-agent"],
     infoblox_pkgs: [],
+    vmware_vsphere_pkg: "",
+    vmware_vsphere_dvs_agent_pkg: "",
     user: "neutron",
     group: "neutron",
   }
@@ -198,6 +202,8 @@ else
     cisco_apic_gbp_pkgs: [""],
     cisco_opflex_pkgs: [""],
     infoblox_pkgs: [],
+    vmware_vsphere_pkg: "openstack-neutron-vsphere",
+    vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
     user: "neutron",
     group: "neutron",
   }
