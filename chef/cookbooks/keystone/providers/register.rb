@@ -527,32 +527,52 @@ def _build_user_object(user_name, password, tenant_id)
   return ret
 end
 
-private
-def _build_auth(user_name, password, tenant = "")
-  password_obj = Hash.new
-  password_obj.store("username", user_name)
-  password_obj.store("password", password)
-  auth_obj = Hash.new
-  if tenant
-    auth_obj.store("tenantName", tenant)
+def _build_auth(user_name,
+                password,
+                project = "",
+                user_domain = "Default",
+                project_domain = "Default")
+  body = {
+    auth: {
+      identity: {
+        methods: ["password"],
+        password: {
+          user: {
+            name: user_name,
+            password: password,
+            domain: {
+              name: user_domain
+            }
+          }
+        }
+      }
+    }
+  }
+  unless project.empty? || project.nil?
+    scope = {
+      project: {
+        name: project,
+        domain: {
+          name: project_domain
+        }
+      }
+    }
+    body[:auth][:scope] = scope
   end
-  auth_obj.store("passwordCredentials", password_obj)
-  ret = Hash.new
-  ret.store("auth", auth_obj)
-  return ret
+  body
 end
 
-private
-def _get_token(http, user_name, password, tenant = "")
-  path = "/v2.0/tokens"
+def _get_token(http, user_name, password, project = "")
+  path = "/v3/auth/tokens"
   headers = _build_headers
-  body = _build_auth(user_name, password, tenant)
+  body = _build_auth(user_name, password, project)
   resp = http.send_request("POST", path, JSON.generate(body), headers)
   if resp.is_a?(Net::HTTPCreated) || resp.is_a?(Net::HTTPOK)
-    data = JSON.parse(resp.read_body)
-    data["access"]["token"]["id"]
+    resp["X-Subject-Token"]
   else
-    Chef::Log.info "Failed to get token for User '#{user_name}' Tenant '#{tenant}'"
+    msg = "Failed to get token for User '#{user_name}'"
+    msg += " Project '#{project}'" unless project.empty?
+    Chef::Log.info msg
     Chef::Log.info "Response Code: #{resp.code}"
     Chef::Log.info "Response Message: #{resp.message}"
     nil
