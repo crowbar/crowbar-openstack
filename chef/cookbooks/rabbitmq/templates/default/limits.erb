@@ -1,0 +1,6 @@
+# Resource limits for the rabbitmq user
+
+<% @limits.each do |name, value| -%>
+rabbitmq    hard    <%= name %>    <%= value %>
+rabbitmq    soft    <%= name %>    <%= value %>
+<% end -%>
