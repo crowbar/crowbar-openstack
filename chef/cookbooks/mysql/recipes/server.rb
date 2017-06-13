@@ -17,6 +17,9 @@
 # limitations under the License.
 #
 
+
+ha_enabled = node[:database][:ha][:enabled]
+
 include_recipe "mysql::client"
 
 if platform_family?("debian")
@@ -78,6 +81,7 @@ service "mysql" do
   end
   supports status: true, restart: true, reload: true
   action :enable
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 directory node[:mysql][:tmpdir] do
@@ -120,6 +124,13 @@ unless Chef::Config[:solo]
     end
     action :create
   end
+end
+
+if ha_enabled
+  log "HA support for mysql is enabled"
+  include_recipe "mysql::ha_galera"
+else
+  log "HA support for mysql is disabled"
 end
 
 # set the root password on platforms
