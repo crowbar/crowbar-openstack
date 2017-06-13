@@ -126,6 +126,9 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 project_domain_name = <%= @keystone_settings['admin_domain']%>
 user_domain_name = <%= @keystone_settings['admin_domain'] %>
 auth_type = password
+admin_user = <%= @keystone_settings['service_user'] %>
+admin_password = <%= @keystone_settings['service_password'] %>
+user_domain_id = <%= @keystone_settings['admin_domain'] %>
 
 <% if node[:heat][:api][:protocol] == "https" %>
 [ssl]
