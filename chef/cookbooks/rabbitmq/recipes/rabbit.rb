@@ -123,5 +123,39 @@ else
   end
 end
 
+service = "rabbitmq-server"
+if node[:rabbitmq][:resource_limits] && node[:rabbitmq][:resource_limits][service]
+  limits = node[:rabbitmq][:resource_limits][service]
+  limit_action = limits.values.any? ? :create : :delete
+  # If using HA, we manage pam_limits for rabbitmq with limits.conf, otherwise
+  # we manage it through systemd
+  if ha_enabled
+    limits = Hash[limits.map { |k, v| [k.gsub(/^Limit/, "").downcase, v] }]
+    directory "/etc/security/limits.d" do
+      action :create
+      owner "root"
+      group "root"
+      mode "0755"
+    end
+    template "/etc/security/limits.d/rabbitmq.conf" do
+      action limit_action
+      source "limits.erb"
+      owner "root"
+      group "root"
+      mode "0644"
+      variables(
+        limits: limits
+      )
+      notifies :restart, resources(service: service)
+    end
+  else
+    utils_systemd_override_limits "Resource limits for #{service}" do
+      service_name service
+      limits limits
+      action limit_action
+    end
+  end
+end
+
 # save data so it can be found by search
 node.save

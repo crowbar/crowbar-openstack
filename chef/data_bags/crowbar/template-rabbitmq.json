@@ -26,6 +26,11 @@
         "password": "",
         "user": "trove",
         "vhost": "/trove"
+      },
+      "resource_limits": {
+        "rabbitmq-server": {
+          "LimitNOFILE": null
+        }
       }
     }
   },
@@ -33,7 +38,7 @@
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 11,
+      "schema-revision": 12,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },
