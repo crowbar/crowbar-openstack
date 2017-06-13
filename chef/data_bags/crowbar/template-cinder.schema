@@ -237,8 +237,7 @@
                   },
                   "nfs": {
                     "type": "map", "mapping": {
-                      "nfs_shares": { "type": "str", "required": true },
-                      "nfs_mount_options": { "type": "str", "required": true }
+                      "nfs_shares": { "type": "str", "required": true }
                     }
                   },
                   "rbd": {
