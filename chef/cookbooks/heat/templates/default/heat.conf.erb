@@ -116,18 +116,15 @@ max_header_line = <%= node[:heat][:max_header_line] %>
 
 [keystone_authtoken]
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
-auth_url = <%= @keystone_settings['internal_auth_url'] %>
+identity_uri = <%= @keystone_settings['admin_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
-project_name = <%= @keystone_settings['service_tenant'] %>
 username = <%= @keystone_settings['service_user'] %>
 password = <%= @keystone_settings['service_password'] %>
 insecure = <%= @keystone_settings['insecure'] %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
-project_domain_name = <%= @keystone_settings['admin_domain']%>
-user_domain_name = <%= @keystone_settings['admin_domain'] %>
-auth_type = password
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
+admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 user_domain_id = <%= @keystone_settings['admin_domain'] %>
 
 <% if node[:heat][:api][:protocol] == "https" %>
