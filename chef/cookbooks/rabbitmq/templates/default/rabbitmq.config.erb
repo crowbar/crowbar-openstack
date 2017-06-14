@@ -24,7 +24,7 @@
  ]},
  {rabbitmq_management,
   [
-   {listener, [{ip, "<%= node[:rabbitmq][:management_address] %>"}, {port, <%= node[:rabbitmq][:management_port] %>}]}
+   {listener, [{ip, "127.0.0.1"}, {port, <%= node[:rabbitmq][:management_port] %>}]}
   ]
  }
 ].
