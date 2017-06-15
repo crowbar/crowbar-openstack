@@ -91,6 +91,8 @@ users = [
           {"name" => tempest_adm_user, "pass" => tempest_adm_pass, "role" => "admin" }
         ]
 
+roles = [ 'anotherrole' ]
+
 heat_server = search(:node, "roles:heat-server").first
 if enabled_services.include?("orchestration") && !heat_server.nil?
   heat_trusts_delegated_roles = heat_server[:heat][:trusts_delegated_roles]
@@ -111,6 +113,18 @@ users.each do |user|
     tenant_name tempest_comp_tenant
     action :add_user
   end
+
+roles.each do |role|
+  keystone_register "tempest create role #{role}" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    auth register_auth_hash
+    role_name role
+    action :add_role
+  end
+end
 
   keystone_register "add #{user["name"]}:#{tempest_comp_tenant} user #{user["role"]} role" do
     protocol keystone_settings["protocol"]
