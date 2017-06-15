@@ -543,7 +543,7 @@
               "series": "process.pid_count",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.transformer"
+              "condition_value": "monasca-log-transformer"
             }
           ],
           "cacheTimeout": null,
@@ -600,7 +600,7 @@
               "series": "process.pid_count",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.metrics"
+              "condition_value": "monasca-log-metrics"
             }
           ],
           "cacheTimeout": null,
@@ -657,7 +657,7 @@
               "series": "process.pid_count",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.persister"
+              "condition_value": "monasca-log-persister"
             }
           ],
           "cacheTimeout": null,
@@ -2787,7 +2787,7 @@
               "series": "process.cpu_perc",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.api"
+              "condition_value": "monasca-log-api"
             }
           ],
           "aliasColors": {},
@@ -2850,7 +2850,7 @@
               "series": "process.mem.rss_mbytes",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.api"
+              "condition_value": "monasca-log-api"
             }
           ],
           "aliasColors": {},
@@ -2914,7 +2914,7 @@
               "series": "process.pid_count",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.api"
+              "condition_value": "monasca-log-api"
             }
           ],
           "aliasColors": {},
@@ -3106,7 +3106,7 @@
               "series": "process.cpu_perc",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.transformer"
+              "condition_value": "monasca-log-transformer"
             }
           ],
           "aliasColors": {},
@@ -3169,7 +3169,7 @@
               "series": "process.mem.rss_mbytes",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.transformer"
+              "condition_value": "monasca-log-transformer"
             }
           ],
           "aliasColors": {},
@@ -3233,7 +3233,7 @@
               "series": "process.pid_count",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.transformer"
+              "condition_value": "monasca-log-transformer"
             }
           ],
           "aliasColors": {},
@@ -3305,7 +3305,7 @@
               "series": "process.cpu_perc",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.metrics"
+              "condition_value": "monasca-log-metrics"
             }
           ],
           "aliasColors": {},
@@ -3368,7 +3368,7 @@
               "series": "process.mem.rss_mbytes",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.metrics"
+              "condition_value": "monasca-log-metrics"
             }
           ],
           "aliasColors": {},
@@ -3432,7 +3432,7 @@
               "series": "process.pid_count",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.metrics"
+              "condition_value": "monasca-log-metrics"
             }
           ],
           "aliasColors": {},
@@ -3504,7 +3504,7 @@
               "series": "process.cpu_perc",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.persister"
+              "condition_value": "monasca-log-persister"
             }
           ],
           "aliasColors": {},
@@ -3567,7 +3567,7 @@
               "series": "process.mem.rss_mbytes",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.persister"
+              "condition_value": "monasca-log-persister"
             }
           ],
           "aliasColors": {},
@@ -3631,7 +3631,7 @@
               "series": "process.pid_count",
               "condition_filter": true,
               "condition_key": "process_name",
-              "condition_value": "monasca.log.persister"
+              "condition_value": "monasca-log-persister"
             }
           ],
           "aliasColors": {},
