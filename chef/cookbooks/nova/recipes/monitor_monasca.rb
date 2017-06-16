@@ -16,12 +16,12 @@
 
 return unless node["roles"].include?("monasca-agent")
 
+bind_port = node[:nova][:ports][:api]
+
 if node[:nova][:ha][:enabled]
-  bind_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  bind_port = node[:nova][:ha][:ports][:api]
+  bind_host = CrowbarPacemakerHelper.cluster_vip(node, "admin")
 else
   bind_host = "0.0.0.0"
-  bind_port = node[:nova][:ports][:api]
 end
 api_protocol = node[:nova][:ssl][:enabled] ? "https" : "http"
 

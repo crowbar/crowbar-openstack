@@ -16,7 +16,13 @@
 
 return unless node["roles"].include?("monasca-agent")
 
-bind_host, bind_port = NeutronHelper.get_bind_host_port(node)
+bind_port = node[:neutron][:api][:service_port]
+
+if node[:neutron][:ha][:server][:enabled]
+  bind_host = CrowbarPacemakerHelper.cluster_vip(node, "admin")
+else
+  bind_host = NeutronHelper.get_bind_host_port(node)[0]
+end
 
 monitor_url = "#{node[:neutron][:api][:protocol]}://#{bind_host}:#{bind_port}/"
 

@@ -16,7 +16,13 @@
 
 return unless node["roles"].include?("monasca-agent")
 
-bind_host, bind_port = ManilaHelper.get_bind_host_port(node)
+bind_port = node[:manila][:api][:bind_port]
+
+if node[:manila][:ha][:enabled]
+  bind_host = CrowbarPacemakerHelper.cluster_vip(node, "admin")
+else
+  bind_host = ManilaHelper.get_bind_host_port(node)[0]
+end
 
 monitor_url = "#{node[:manila][:api][:protocol]}://#{bind_host}:#{bind_port}/"
 
