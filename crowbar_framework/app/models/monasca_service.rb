@@ -34,7 +34,7 @@ class MonascaService < PacemakerServiceObject
           "admin" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         },
@@ -43,7 +43,7 @@ class MonascaService < PacemakerServiceObject
           "admin" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         },
@@ -56,7 +56,7 @@ class MonascaService < PacemakerServiceObject
           "cluster" => false,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         },
@@ -66,7 +66,7 @@ class MonascaService < PacemakerServiceObject
           "cluster" => false,
           "admin" => true,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }
