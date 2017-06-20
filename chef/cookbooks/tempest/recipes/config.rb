@@ -387,9 +387,12 @@ cinders = search(:node, "roles:cinder-controller") || []
 storage_protocol = "iSCSI"
 vendor_name = "Open Source"
 cinder_snapshot = true
+use_attach_encrypted_volume = true
 cinders[0][:cinder][:volumes].each do |volume|
   if volume[:backend_driver] == "rbd"
     storage_protocol = "ceph"
+    # no encryption support for rbd-backed volumes
+    use_attach_encrypted_volume = false
     break
   elsif volume[:backend_driver] == "emc"
     vendor_name = "EMC"
@@ -514,6 +517,7 @@ template "/etc/tempest/tempest.conf" do
         use_livemigration: use_livemigration,
         # compute-feature-enabled settings
         use_config_drive: use_config_drive,
+        use_attach_encrypted_volume: use_attach_encrypted_volume,
         # dashboard settings
         horizon_host: horizon_host,
         horizon_protocol: horizon_protocol,
