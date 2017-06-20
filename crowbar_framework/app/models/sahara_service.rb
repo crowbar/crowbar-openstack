@@ -45,7 +45,7 @@ class SaharaService < PacemakerServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.1",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }

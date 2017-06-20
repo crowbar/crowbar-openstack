@@ -34,7 +34,7 @@ class ManilaService < PacemakerServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         },
@@ -43,7 +43,7 @@ class ManilaService < PacemakerServiceObject
           "count" => -1,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }
