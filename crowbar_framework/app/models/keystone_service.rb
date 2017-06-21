@@ -110,20 +110,6 @@ class KeystoneService < PacemakerServiceObject
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "keystone-server")
 
-    unless old_role.nil?
-      old_elements = old_role.override_attributes["keystone"]
-      attributes = role.override_attributes["keystone"]
-
-      # Copy old keystone endpoints to new role.
-      @logger.debug("old_elements: #{old_elements.pretty_inspect}")
-      if old_elements.key?("endpoint")
-        @logger.debug("copying old endpoint")
-        attributes["endpoint"] = old_elements["endpoint"].deep_dup
-      else
-        @logger.debug("old role did not have endpoints; taking current endpoint settings")
-      end
-    end
-
     reset_sync_marks_on_clusters_founders(server_elements)
     Openstack::HA.set_controller_role(server_nodes) if ha_enabled
 
@@ -170,17 +156,17 @@ class KeystoneService < PacemakerServiceObject
   def apply_role_post_chef_call(old_role, role, all_nodes)
     @logger.debug("Keystone apply_role_post_chef_call: entering #{all_nodes.inspect}")
 
-    # Save current keystone endpoints to role.
-    node = Node.find_nodes_by_name(all_nodes.first).first.node
-    attributes = role.override_attributes["keystone"]
-    attributes["endpoint"] = {
-      insecure: node[:keystone][:ssl][:insecure],
-      protocol: node[:keystone][:api][:protocol],
-      internal_url_host: node[:keystone][:api][:internal_url_host],
-      port: node[:keystone][:api][:admin_port]
-    }
-    @logger.debug("attributes: #{attributes.pretty_inspect}")
-    role.save
+    # Save current keystone endpoints to all keystone-server nodes.
+    all_nodes.each do |n|
+      node = NodeObject.find_by_name(n)
+      node[:keystone][:endpoint] = {
+        insecure: node[:keystone][:ssl][:insecure],
+        protocol: node[:keystone][:api][:protocol],
+        internal_url_host: node[:keystone][:api][:internal_url_host],
+        port: node[:keystone][:api][:admin_port]
+      }
+      node.save
+    end
 
     @logger.debug("Keystone apply_role_post_chef_call: leaving")
   end
