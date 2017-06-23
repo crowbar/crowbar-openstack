@@ -85,6 +85,8 @@ en:
           controllers: 'VMware NSX Controllers'
           tz_uuid: 'UUID of the NSX Transport Zone'
           l3_gw_uuid: 'UUID of the NSX Gateway Service'
+        midonet:
+          zone_protocol: 'MidoNet tunnel-zone protocol'
         zvm_header: 'z/VM Configuration'
         zvm:
           zvm_xcat_server: 'xCAT Host/IP Address'

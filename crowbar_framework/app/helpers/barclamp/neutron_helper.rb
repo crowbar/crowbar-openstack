@@ -63,6 +63,16 @@ module Barclamp
                          selected.to_s)
     end
 
+    def networking_midonet_zone_protocols(selected)
+      options_for_select(
+        [
+          ["VXLAN", "vxlan"],
+          ["GRE", "gre"]
+        ],
+        selected.to_s
+      )
+    end
+
     def networking_lbaasv2_drivers(selected)
       options_for_select(
         [
