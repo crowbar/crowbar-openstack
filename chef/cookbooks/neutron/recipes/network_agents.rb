@@ -15,6 +15,7 @@
 #
 
 if node[:neutron][:networking_plugin] == "midonet"
+  include_recipe "neutron::midonet_network"
   return
 end
 
