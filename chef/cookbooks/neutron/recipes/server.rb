@@ -250,13 +250,16 @@ when "vmware"
   end
 end
 
-if node[:neutron][:networking_plugin] == "ml2"
+case node[:neutron][:networking_plugin]
+when "ml2"
   if node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
     include_recipe "neutron::cisco_support"
   elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
       node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
     include_recipe "neutron::cisco_apic_support"
   end
+when "midonet"
+  include_recipe "neutron::midonet_nsdb"
 end
 
 if node[:neutron][:use_lbaas]

@@ -124,6 +124,8 @@ when "suse"
                     "openstack-neutron-infoblox-ipam-agent"],
     vmware_vsphere_pkg: "openstack-neutron-vsphere",
     vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
+    midonet_nsdb_pkgs: ["zookeeper-server",
+                        "cassandra"],
     user: "neutron",
     group: "neutron",
   }
@@ -167,6 +169,8 @@ when "rhel"
     infoblox_pkgs: [],
     vmware_vsphere_pkg: "",
     vmware_vsphere_dvs_agent_pkg: "",
+    midonet_nsdb_pkgs: ["zookeeper",
+                        "dsc22"],
     user: "neutron",
     group: "neutron",
   }
@@ -209,6 +213,8 @@ else
     infoblox_pkgs: [],
     vmware_vsphere_pkg: "openstack-neutron-vsphere",
     vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
+    midonet_nsdb_pkgs: ["zookeeper-server",
+                        "cassandra"],
     user: "neutron",
     group: "neutron",
   }
