@@ -29,7 +29,7 @@ class NeutronService < OpenstackServiceObject
   end
 
   def self.networking_plugins_valid
-    ["ml2", "vmware"]
+    ["midonet", "ml2", "vmware"]
   end
 
   def self.networking_ml2_type_drivers_valid
@@ -324,6 +324,10 @@ class NeutronService < OpenstackServiceObject
 
       if plugin == "vmware"
         validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_vmware")
+      end
+
+      if plugin == "midonet"
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_midonet")
       end
 
       if ml2_mechanism_drivers.include? "linuxbridge"
