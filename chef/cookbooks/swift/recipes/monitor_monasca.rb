@@ -16,7 +16,15 @@
 
 return unless node["roles"].include?("monasca-agent")
 
-bind_host, bind_port = SwiftHelper.get_bind_host_port(node)
+bind_port = node[:swift][:ports][:proxy]
+
+if node[:swift][:ha][:enabled]
+  bind_host = Swift::Evaluator.get_ip_by_type(node, :admin_ip_expr)
+else
+  bind_host = SwiftHelper.get_bind_host_port(node)[0]
+end
+
+
 swift_protocol = node[:swift][:ssl][:enabled] ? "https" : "http"
 
 monitor_url = "#{swift_protocol}://#{bind_host}:#{bind_port}/"

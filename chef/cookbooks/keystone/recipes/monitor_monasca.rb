@@ -18,13 +18,12 @@ return unless node["roles"].include?("monasca-agent")
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
+bind_admin_port = node[:keystone][:api][:admin_port]
+
 if node[:keystone][:ha][:enabled]
-  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  bind_admin_host = admin_address
-  bind_admin_port = node[:keystone][:ha][:ports][:admin_port]
+  bind_admin_host = CrowbarPacemakerHelper.cluster_vip(node, "admin")
 else
   bind_admin_host = node[:keystone][:api][:admin_host]
-  bind_admin_port = node[:keystone][:api][:admin_port]
 end
 
 # we want to monitor the service that is locally available (*not* the port bind to haproxy)

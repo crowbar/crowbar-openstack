@@ -16,7 +16,13 @@
 
 return unless node["roles"].include?("monasca-agent")
 
-bind_host, api_port, cfn_port, cloud_watch_port = HeatHelper.get_bind_host_port(node)
+api_port = node[:heat][:api][:port]
+
+if node[:heat][:ha][:enabled]
+  bind_host = CrowbarPacemakerHelper.cluster_vip(node, "admin")
+else
+  bind_host = HeatHelper.get_bind_host_port(node)[0]
+end
 
 monitor_url = "#{node[:heat][:api][:protocol]}://#{bind_host}:#{api_port}/"
 

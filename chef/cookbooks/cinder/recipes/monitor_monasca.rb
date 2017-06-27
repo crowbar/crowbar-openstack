@@ -16,7 +16,13 @@
 
 return unless node["roles"].include?("monasca-agent")
 
-bind_host, bind_port = CinderHelper.get_bind_host_port(node)
+bind_port = node[:cinder][:api][:bind_port]
+
+if node[:cinder][:ha][:enabled]
+  bind_host = CrowbarPacemakerHelper.cluster_vip(node, "admin")
+else
+  bind_host = CinderHelper.get_bind_host_port(node)[0]
+end
 
 monitor_url = "#{node[:cinder][:api][:protocol]}://#{bind_host}:#{bind_port}/"
 

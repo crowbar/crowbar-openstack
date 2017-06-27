@@ -17,9 +17,16 @@
 return unless node["roles"].include?("monasca-agent")
 
 network_settings = SaharaHelper.network_settings(node)
+bind_port = node[:sahara][:api][:bind_port]
 
-monitor_url = "#{node[:sahara][:api][:protocol]}://#{network_settings[:api][:bind_host]}:" \
-              "#{network_settings[:api][:bind_port]}/"
+if node[:sahara][:ha][:enabled]
+  bind_host = CrowbarPacemakerHelper.cluster_vip(node, "admin")
+else
+  bind_host = network_settings[:api][:bind_host]
+end
+
+monitor_url = "#{node[:sahara][:api][:protocol]}://#{bind_host}:" \
+              "#{bind_port}/"
 
 monasca_agent_plugin_http_check "http_check for sahara-api" do
   built_by "sahara-server"

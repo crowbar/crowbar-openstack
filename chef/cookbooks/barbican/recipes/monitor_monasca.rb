@@ -17,8 +17,14 @@
 return unless node["roles"].include?("monasca-agent")
 
 network_settings = BarbicanHelper.network_settings(node)
-bind_host = network_settings[:api][:ha_bind_host]
-bind_port = network_settings[:api][:bind_port]
+
+bind_port = node[:barbican][:api][:bind_port]
+
+if node[:barbican][:ha][:enabled]
+  bind_host = CrowbarPacemakerHelper.cluster_vip(node, "admin")
+else
+  bind_host = network_settings[:api][:bind_host]
+end
 
 monitor_url = "#{node[:barbican][:api][:protocol]}://#{bind_host}:#{bind_port}/"
 

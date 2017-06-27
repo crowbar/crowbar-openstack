@@ -17,8 +17,15 @@
 return unless node["roles"].include?("monasca-agent")
 
 network_settings = MagnumHelper.network_settings(node)
+
 bind_port = network_settings[:api][:bind_port]
-bind_host = network_settings[:api][:bind_host]
+
+if node[:magnum][:ha][:enabled]
+  bind_host = CrowbarPacemakerHelper.cluster_vip(node, "admin")
+else
+  bind_host = network_settings[:api][:bind_host]
+end
+
 api_protocol = node[:magnum][:api][:protocol]
 
 monitor_url = "#{api_protocol}://#{bind_host}:#{bind_port}/"

@@ -18,8 +18,16 @@ return unless node["roles"].include?("monasca-agent")
 
 network_settings = GlanceHelper.network_settings(node)
 
-monitor_url = "#{node[:glance][:api][:protocol]}://#{network_settings[:api][:bind_host]}:" \
-              "#{network_settings[:api][:bind_port]}/"
+bind_port = node[:glance][:api][:bind_port]
+
+if node[:glance][:ha][:enabled]
+  bind_host = CrowbarPacemakerHelper.cluster_vip(node, "admin")
+else
+  bind_host = network_settings[:api][:bind_host]
+end
+
+monitor_url = "#{node[:glance][:api][:protocol]}://#{bind_host}:" \
+              "#{bind_port}/"
 
 monasca_agent_plugin_http_check "http_check for glance-api" do
   built_by "glance-server"
