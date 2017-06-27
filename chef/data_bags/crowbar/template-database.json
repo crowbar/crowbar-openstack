@@ -26,6 +26,11 @@
             "options": ""
           }
         }
+      },
+      "resource_limits": {
+        "postgresql": {
+          "LimitNOFILE": null
+        }
       }
     }
   },
@@ -33,7 +38,7 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 4,
+      "schema-revision": 5,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },

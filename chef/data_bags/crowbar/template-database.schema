@@ -67,6 +67,17 @@
                   }
                 }
               }
+            },
+            "resource_limits": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                "postgresql": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
+                }
+              }
             }
           }
         }
