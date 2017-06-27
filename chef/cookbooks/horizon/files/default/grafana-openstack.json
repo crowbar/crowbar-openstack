@@ -28,7 +28,8 @@
           "interval": null,
           "targets": [
             {
-              "function": "none",
+              "function": "max",
+              "merge": true,
               "column": "value",
               "series": "http_status",
               "condition_filter": true,
@@ -86,7 +87,8 @@
           "interval": null,
           "targets": [
             {
-              "function": "none",
+              "function": "max",
+              "merge": true,
               "column": "value",
               "series": "http_status",
               "condition_filter": true,
@@ -144,7 +146,8 @@
           "interval": null,
           "targets": [
             {
-              "function": "none",
+              "function": "max",
+              "merge": true,
               "column": "value",
               "series": "http_status",
               "condition_filter": true,
@@ -202,7 +205,8 @@
           "interval": null,
           "targets": [
             {
-              "function": "none",
+              "function": "max",
+              "merge": true,
               "column": "value",
               "series": "http_status",
               "condition_filter": true,
@@ -260,7 +264,8 @@
           "interval": null,
           "targets": [
             {
-              "function": "none",
+              "function": "max",
+              "merge": true,
               "column": "value",
               "series": "http_status",
               "condition_filter": true,
@@ -318,7 +323,8 @@
           "interval": null,
           "targets": [
             {
-              "function": "none",
+              "function": "max",
+              "merge": true,
               "column": "value",
               "series": "http_status",
               "condition_filter": true,
