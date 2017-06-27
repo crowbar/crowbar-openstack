@@ -1,0 +1,6 @@
+# Resource limits for the postgres user
+
+<% @limits.each do |name, value| -%>
+postgres    hard    <%= name %>    <%= value %>
+postgres    soft    <%= name %>    <%= value %>
+<% end -%>
