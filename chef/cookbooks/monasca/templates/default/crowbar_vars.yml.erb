@@ -46,7 +46,7 @@ database_host: <%= @monasca_net_ip %>
 monasca_api_url: "http://<%= @pub_net_ip %>:<%= @api_settings['bind_port'] %>/v2.0"
 monasca_log_api_url: "http://<%= @pub_net_ip %>:<%= @log_api_settings['bind_port'] %>/v2.0"
 memcached_nodes: ["<%= @monasca_net_ip %>:11211"]
-elasticsearch_nodes: "[<%= @monasca_net_ip %>]"
+elasticsearch_nodes: ["<%= @monasca_net_ip %>"]
 elasticsearch_hosts: <%= @monasca_net_ip %>
 monasca_api_log_level: <%= @api_settings['log_level'] %>
 log_api_log_level: <%= @log_api_settings['log_level'] %>
