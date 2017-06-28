@@ -75,6 +75,12 @@ default[:neutron][:apic][:opflex][:vxlan][:remote_ip] = ""
 default[:neutron][:apic][:opflex][:vxlan][:remote_port] = 8472
 default[:neutron][:apic][:opflex][:vlan][:encap_iface] = ""
 
+default[:neutron][:contrail][:api_server_ip] = ""
+default[:neutron][:contrail][:api_server_port] = "8082"
+default[:neutron][:contrail][:multi_tenancy] = false
+default[:neutron][:contrail][:analytics_api_ip] = ""
+default[:neutron][:contrail][:analytics_api_port] = "8081"
+
 case node[:platform_family]
 when "suse"
   default[:neutron][:platform] = {
@@ -117,6 +123,9 @@ when "suse"
     infoblox_pkgs: ["python-infoblox-client",
                     "openstack-neutron-infoblox",
                     "openstack-neutron-infoblox-ipam-agent"],
+    contrail_pkgs: ["contrail-lib",
+                    "neutron-plugin-contrail",
+                    "python-contrail"],
     vmware_vsphere_pkg: "openstack-neutron-vsphere",
     vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
     user: "neutron",
@@ -160,6 +169,9 @@ when "rhel"
                         "lldpd",
                         "neutron-opflex-agent"],
     infoblox_pkgs: [],
+    contrail_pkgs: ["contrail-lib",
+                    "neutron-plugin-contrail",
+                    "python-contrail"],
     vmware_vsphere_pkg: "",
     vmware_vsphere_dvs_agent_pkg: "",
     user: "neutron",
@@ -202,6 +214,7 @@ else
     cisco_apic_gbp_pkgs: [""],
     cisco_opflex_pkgs: [""],
     infoblox_pkgs: [],
+    contrail_pkgs: [],
     vmware_vsphere_pkg: "openstack-neutron-vsphere",
     vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
     user: "neutron",

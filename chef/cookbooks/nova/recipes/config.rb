@@ -335,6 +335,11 @@ if need_shared_lock_path
   include_recipe "crowbar-openstack::common"
 end
 
+libvirt_vif_driver = ""
+if neutron_server[:neutron][:networking_plugin] == "contrail"
+  libvirt_vif_driver = "nova_contrail_vif.contrailvif.VRouterVIFDriver"
+end
+
 template node[:nova][:config_file] do
   source "nova.conf.erb"
   user "root"
@@ -386,6 +391,7 @@ template node[:nova][:config_file] do
     neutron_has_tunnel: neutron_has_tunnel,
     keystone_settings: keystone_settings,
     cinder_insecure: cinder_insecure || keystone_settings["insecure"],
+    nova_libvirt_vif_driver: libvirt_vif_driver,
     use_multipath: use_multipath,
     keymgr_fixed_key: keymgr_fixed_key,
     ceph_user: ceph_user,

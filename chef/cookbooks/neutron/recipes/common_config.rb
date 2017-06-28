@@ -78,13 +78,15 @@ else
     nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure])
 end
 
+neutron_core_plugin = neutron[:neutron][:networking_plugin]
+neutron_quota_driver = "neutron.db.quota.driver.DbQuotaDriver"
 service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
                    "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
 if neutron[:neutron][:use_lbaas]
   service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2")
 end
 
-if neutron[:neutron][:networking_plugin] == "ml2"
+if neutron_core_plugin == "ml2"
   service_plugins.unshift("neutron.services.l3_router.l3_router_plugin.L3RouterPlugin")
   if neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
     service_plugins = ["cisco_apic_l3"]
@@ -93,6 +95,16 @@ if neutron[:neutron][:networking_plugin] == "ml2"
   end
 end
 service_plugins = service_plugins.join(", ")
+if neutron[:neutron][:networking_plugin] == "contrail"
+  py_version = node[:languages][:python][:version].split(/\.([^.]*)$/)[0]
+  plugin_path = "/usr/lib/python#{py_version}/site-packages/neutron_plugin_contrail"
+  lbaas_path = "/usr/lib/python#{py_version}/site-packages/neutron_lbaas"
+  service_plugins = "neutron_plugin_contrail.plugins.opencontrail.loadbalancer.v2.plugin.LoadBalancerPluginV2"
+  neutron_core_plugin = "neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2"
+  lb_service_provider = "LOADBALANCER:Opencontrail:neutron_plugin_contrail.plugins.opencontrail.loadbalancer.driver.OpencontrailLoadbalancerDriver:default"
+  api_extensions_path = "extensions:#{plugin_path}/extensions:#{lbaas_path}/extensions"
+  neutron_quota_driver = "neutron_plugin_contrail.plugins.opencontrail.quota.driver.QuotaDriver"
+end
 
 network_nodes_count = neutron[:neutron][:elements]["neutron-network"].count
 if neutron[:neutron][:elements_expanded]
@@ -136,7 +148,9 @@ template neutron[:neutron][:config_file] do
       ssl_cert_required: neutron[:neutron][:ssl][:cert_required],
       ssl_ca_file: neutron[:neutron][:ssl][:ca_certs],
       nova_insecure: nova_insecure,
-      core_plugin: neutron[:neutron][:networking_plugin],
+      core_plugin: neutron_core_plugin,
+      api_extensions_path: api_extensions_path,
+      quota_driver: neutron_quota_driver,
       service_plugins: service_plugins,
       allow_overlapping_ips: neutron[:neutron][:allow_overlapping_ips],
       dvr_enabled: neutron[:neutron][:use_dvr],
@@ -165,7 +179,8 @@ if neutron[:neutron][:use_lbaas]
       interface_driver: interface_driver,
       use_lbaas: neutron[:neutron][:use_lbaas],
       lbaasv2_driver: neutron[:neutron][:lbaasv2_driver],
-      keystone_settings: keystone_settings
+      keystone_settings: keystone_settings,
+      service_provider: lb_service_provider
     )
   end
 end

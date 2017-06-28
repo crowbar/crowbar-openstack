@@ -16,6 +16,8 @@
 
 include_recipe "neutron::common_agent"
 
+return if node[:neutron][:networking_plugin] == "contrail"
+
 package node[:neutron][:platform][:dhcp_agent_pkg]
 package node[:neutron][:platform][:metering_agent_pkg]
 

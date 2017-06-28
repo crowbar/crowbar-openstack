@@ -1,0 +1,90 @@
+[APISERVER]
+# (StrOpt) IP address of the API server
+#
+api_server_ip = <%= @contrail_api_server_ip %>
+# Example: api_server_ip = 10.0.0.1
+
+# (IntOpt) API server port
+#
+api_server_port = <%= @contrail_api_server_port %>
+multi_tenancy = <%= @multi_tenancy %>
+# Example: api_server_port = 8082
+
+# (BoolOpt) Enable multi tenancy
+#
+#multi_tenancy = true
+# Example: multi_tenancy = True
+
+# auth_token_url =
+#auth_token_url = http://192.168.124.81:35357/v2.0/tokens
+
+# (ListOpt) list of OpenContrail extensions to be supported.
+# OpenContrail extensions are - ipam, policy and route-table.
+# By default ipam, policy and route-table extensions are supported 
+# by the OpenContrail neutron plugin. Set this flag if you want to enable  
+# only a subset of these extensions or to disable all these extensions.
+# If this flag is not set, then all the OpenContrail extensions 
+# are enabled.
+#
+# Example : Enable ipam and policy extensions 
+# contrail_extensions = ipam,policy
+# Example : Enable only route-table extension
+# contrail_extensions = route-table
+# Example : disable all the extensions
+# contrail_extensions = 
+# Example : enable all the extensions
+# contrail_extensions = ipam,policy,route-table
+# Example : enable all the extensions
+# Do not defined this flag
+
+contrail_extensions = ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None
+
+
+[COLLECTOR]
+analytics_api_ip = <%= @contrail_analytics_api_ip %>
+analytics_api_port = <%= @contrail_analytics_api_port %>
+
+[KEYSTONE]
+auth_url = <%= @keystone_settings['public_auth_url'] %>
+admin_user=<%= @keystone_settings['admin_user'] %>
+admin_password=<%= @keystone_settings['admin_password'] %>
+insecure = <%= @keystone_settings['insecure'] %>
+admin_tenant_name=<%= @keystone_settings['admin_tenant'] %>
+auth_host = <%= @keystone_settings['internal_url_host'] %>
+auth_port = <%= @keystone_settings['service_port'] %>
+<% if @nova_insecure -%>
+insecure = <%= @nova_insecure %>
+<% end -%>
+auth_protocol = <%= @keystone_settings['protocol'] %>
+auth_plugin = password
+
+#user_domain_name = Default
+
+#[ssl]
+#cert_file = /etc/neutron/ssl/certs/signing_cert.pem
+#key_file = /etc/neutron/ssl/private/signing_key.pem
+
+#username = neutron
+#password = jQNpeo3ZpIid
+
+# Example : auth_url = http://keystone-server:5000/v2.0
+
+# (StrOpt) admin user name 
+#
+#admin_user = admin
+# Example : admin_user = admin
+
+# (StrOpt) admin tenant name
+#
+#admin_tenant_name = crowbar
+# Example : admin_tenant_name = admin
+
+# (StrOpt) admin password
+# 
+#admin_password = crowbar
+# Example : admin_password = admin
+
+# (StrOpt) admin token 
+#
+#admin_token = crowbar
+# Example : admin_token = token1

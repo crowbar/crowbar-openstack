@@ -3,6 +3,7 @@ bind_host = <%= @bind_host %>
 bind_port = <%= @bind_port %>
 auth_strategy = keystone
 core_plugin = <%= @core_plugin %>
+api_extensions_path = <%= @api_extensions_path %>
 service_plugins = <%= @service_plugins %>
 dns_domain = <%= @dns_domain %>
 allow_overlapping_ips = <%= @allow_overlapping_ips ? "True" : "False" %>
@@ -104,3 +105,6 @@ http_pool_maxsize = <%= @infoblox[:grids][grid][:http_pool_maxsize] %>
 http_request_timeout = <%= @infoblox[:grids][grid][:http_request_timeout] %>
 <% end -%>
 <% end -%>
+
+[quotas]
+quota_driver = <%= @quota_driver %>

@@ -235,6 +235,9 @@ if node[:neutron][:networking_plugin] == "ml2"
     include_recipe "neutron::cisco_apic_support"
   end
 end
+if node[:neutron][:networking_plugin] == "contrail"
+  include_recipe "neutron::contrail_control"
+end
 
 if node[:neutron][:use_lbaas]
   template node[:neutron][:lbaas_service_file] do
