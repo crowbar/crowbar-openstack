@@ -29,7 +29,7 @@ barclamp:
   display: 'Monasca'
   description: 'OpenStack Monasca: Logging and Monitoring service for OpenStack'
   version: 0
-  user_managed: false
+  user_managed: true
   requires:
     - '@crowbar'
     - 'database'
