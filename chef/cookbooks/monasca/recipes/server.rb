@@ -80,6 +80,84 @@ keystone_register "register monasca api endpoint" do
   action :add_endpoint_template
 end
 
+keystone_register "register logs service" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  service_name "logs"
+  service_type "logs"
+  service_description "Monasca logs service"
+  action :add_service
+end
+
+keystone_register "register logs endpoint" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  endpoint_service "logs"
+  endpoint_region keystone_settings["endpoint_region"]
+  endpoint_publicURL MonascaHelper.log_api_public_url(node, "v3.0")
+  endpoint_adminURL MonascaHelper.log_api_admin_url(node, "v3.0")
+  endpoint_internalURL MonascaHelper.log_api_internal_url(node, "v3.0")
+  action :add_endpoint_template
+end
+
+keystone_register "register logs_v2 service" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  service_name "logs_v2"
+  service_type "logs_v2"
+  service_description "Monasca logs_v2 service"
+  action :add_service
+end
+
+keystone_register "register logs_v2 endpoint" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  endpoint_service "logs_v2"
+  endpoint_region keystone_settings["endpoint_region"]
+  endpoint_publicURL MonascaHelper.log_api_public_url(node, "v2.0")
+  endpoint_adminURL MonascaHelper.log_api_admin_url(node, "v2.0")
+  endpoint_internalURL MonascaHelper.log_api_internal_url(node, "v2.0")
+  action :add_endpoint_template
+end
+
+keystone_register "register logs-search service" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  service_name "logs-search"
+  service_type "logs-search"
+  service_description "Monasca logs-search service"
+  action :add_service
+end
+
+keystone_register "register logs-search endpoint" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  endpoint_service "logs-search"
+  endpoint_region keystone_settings["endpoint_region"]
+  endpoint_publicURL MonascaHelper.logs_search_public_url(node)
+  endpoint_adminURL MonascaHelper.logs_search_admin_url(node)
+  endpoint_internalURL MonascaHelper.logs_search_internal_url(node)
+  action :add_endpoint_template
+end
+
 monasca_project = node[:monasca][:service_tenant]
 monasca_roles = node[:monasca][:service_roles]
 

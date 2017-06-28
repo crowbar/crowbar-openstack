@@ -64,13 +64,55 @@ module MonascaHelper
     return monasca_api_url
   end
 
-  def self.log_api_public_url(node)
+  def self.log_api_public_url(node, version = "v3.0")
     host = monasca_public_host(node)
     # SSL is not supported at this moment
     # protocol = node[:monasca][:log_api][:ssl] ? "https" : "http"
     protocol = "http"
     port = node[:monasca][:log_api][:bind_port]
-    "#{protocol}://#{host}:#{port}/v3.0"
+    "#{protocol}://#{host}:#{port}/#{version}"
+  end
+
+  def self.log_api_admin_url(node, version = "v3.0")
+    host = monasca_admin_host(node)
+    # SSL is not supported at this moment
+    # protocol = node[:monasca][:log_api][:ssl] ? "https" : "http"
+    protocol = "http"
+    port = node[:monasca][:log_api][:bind_port]
+    "#{protocol}://#{host}:#{port}/#{version}"
+  end
+
+  def self.log_api_internal_url(node, version = "v3.0")
+    host = get_host_for_monitoring_url(node)
+    # SSL is not supported at this moment
+    # protocol = node[:monasca][:log_api][:ssl] ? "https" : "http"
+    protocol = "http"
+    port = node[:monasca][:log_api][:bind_port]
+    "#{protocol}://#{host}:#{port}/#{version}"
+  end
+
+  def self.logs_search_public_url(node)
+    host = monasca_public_host(node)
+    # SSL is not supported at this moment
+    protocol = "http"
+    port = node[:monasca][:kibana][:bind_port]
+    "#{protocol}://#{host}:#{port}/"
+  end
+
+  def self.logs_search_admin_url(node)
+    host = monasca_admin_host(node)
+    # SSL is not supported at this moment
+    protocol = "http"
+    port = node[:monasca][:kibana][:bind_port]
+    "#{protocol}://#{host}:#{port}/"
+  end
+
+  def self.logs_search_internal_url(node)
+    host = get_host_for_monitoring_url(node)
+    # SSL is not supported at this moment
+    protocol = "http"
+    port = node[:monasca][:kibana][:bind_port]
+    "#{protocol}://#{host}:#{port}/"
   end
 
   # log_api_network_url returns url to monasca-log-api based on check if custom
