@@ -51,6 +51,18 @@ bash "reload disable-rp_filter-sysctl" do
   subscribes :run, resources(cookbook_file: disable_rp_filter_file), :delayed
 end
 
+neighbour_table_overflow_file = "/etc/sysctl.d/50-neutron-neighbour-table-overflow.conf"
+cookbook_file neighbour_table_overflow_file do
+  source "sysctl-neighbour-table-overflow.conf"
+  mode "0644"
+end
+
+bash "reload neighbour-table-overflow.conf" do
+  code "/sbin/sysctl -e -q -p #{neighbour_table_overflow_file}"
+  action :nothing
+  subscribes :run, resources(cookbook_file: neighbour_table_overflow_file), :delayed
+end
+
 if neutron[:neutron][:networking_plugin] == "ml2" &&
     (neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
     neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
