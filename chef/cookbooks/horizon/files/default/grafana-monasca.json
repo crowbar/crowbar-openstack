@@ -4,7 +4,7 @@
   "originalTitle": "Monasca Service",
   "tags": [],
   "style": "light",
-  "timezone": "browser",
+  "timezone": "utc",
   "editable": true,
   "hideControls": false,
   "sharedCrosshair": false,
