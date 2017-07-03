@@ -1,11 +1,11 @@
 #
-# Copyright 2016, SUSE LINUX GmbH
+# Copyright 2017 SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#   http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,11 @@
 # limitations under the License.
 #
 
-if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-server")
-  include_recipe "#{@cookbook_name}::common"
-  include_recipe "#{@cookbook_name}::server"
-end
+actions :create
+default_action :create
+
+attribute :built_by, kind_of: String, regex: /\A[-\w.]*\z/, required: true
+attribute :name, kind_of: String, regex: /\A[-\w.]*\z/, required: true
+attribute :url, kind_of: String, required: true
+
+attr_accessor :exists
