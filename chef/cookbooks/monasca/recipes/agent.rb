@@ -44,10 +44,7 @@ if node["roles"].include?("monasca-server")
     mode "0750"
     variables(
       monasca_api_url: monasca_api_url,
-      # Use monasca_api_url for the log API as well since both are just
-      # different vhosts on the same web server and the monasca-agent Keystone
-      # user is not allowed to access monasca-log-api:
-      monasca_log_api_url: monasca_api_url,
+      monasca_log_api_url: monasca_log_api_url,
       kibana_url: kibana_url,
       service: "monitoring",
       agent_settings: agent_settings,
