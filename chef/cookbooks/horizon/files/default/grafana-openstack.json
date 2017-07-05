@@ -4,7 +4,7 @@
   "originalTitle": "SUSE OpenStack Cloud Monitoring",
   "tags": [],
   "style": "dark",
-  "timezone": "browser",
+  "timezone": "utc",
   "editable": true,
   "hideControls": false,
   "sharedCrosshair": false,
