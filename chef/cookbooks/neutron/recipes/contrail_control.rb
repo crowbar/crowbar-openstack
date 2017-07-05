@@ -30,10 +30,13 @@
 
 # Install contrail-lib, neutron-plugin-contrail, python-contrail
 
-node[:neutron][:platform][:contrail_pkgs].each { |p| package p }
+node[:neutron][:platform][:contrail_control_pkgs].each { |p| package p }
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
+# TODO(mmnelemane): metadata_proxy_shared_secret from nova servers needs to be 
+# copied onto contrail-api server to ensure the contrail service can provide 
+# metadata access to nova servers.
 template "/etc/neutron/plugins/opencontrail/ContrailPlugin.ini" do
   cookbook "neutron"
   source "ContrailPlugin.ini.erb"

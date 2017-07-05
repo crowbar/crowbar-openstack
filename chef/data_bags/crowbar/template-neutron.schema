@@ -208,7 +208,8 @@
                         "api_server_port": { "type": "str", "required": true },
                         "multi_tenancy": { "type": "bool", "required": true },
                         "analytics_api_ip": { "type": "str", "required": true },
-                        "analytics_api_port": { "type": "str", "required": true }
+                        "analytics_api_port": { "type": "str", "required": true },
+                        "gateway_server_ip": { "type": "str", "required": true }
                       } 
                     }
               }}
