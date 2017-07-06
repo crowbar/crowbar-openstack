@@ -32,6 +32,15 @@
 
 node[:neutron][:platform][:contrail_control_pkgs].each { |p| package p }
 
+neutron = nil
+if node.attribute?(:cookbook) && node[:cookbook] == "nova"                                                          
+  neutrons = node_search_with_cache("roles:neutron-server", node[:nova][:neutron_instance])
+  neutron = neutrons.first || raise("Neutron instance '#{node[:nova][:neutron_instance]}' \
+                                     for nova not found")
+else
+  neutron = node
+end
+
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 # TODO(mmnelemane): metadata_proxy_shared_secret from nova servers needs to be 
@@ -44,12 +53,11 @@ template "/etc/neutron/plugins/opencontrail/ContrailPlugin.ini" do
   owner "root"
   group node[:neutron][:platform][:group]
   variables(
-    contrail_api_server_ip: node[:neutron][:contrail][:api_server_ip],
-    contrail_api_server_port: node[:neutron][:contrail][:api_server_port],
-    multi_tenancy: node[:neutron][:contrail][:multi_tenancy],
-    contrail_analytics_api_ip: node[:neutron][:contrail][:analytics_api_ip],
-    contrail_analytics_api_port: node[:neutron][:contrail][:analytics_api_port],
+    contrail_api_server_ip: neutron[:neutron][:contrail][:api_server_ip],
+    contrail_api_server_port: neutron[:neutron][:contrail][:api_server_port],
+    multi_tenancy: neutron[:neutron][:contrail][:multi_tenancy],
+    contrail_analytics_api_ip: neutron[:neutron][:contrail][:analytics_api_ip],
+    contrail_analytics_api_port: neutron[:neutron][:contrail][:analytics_api_port],
     keystone_settings: keystone_settings
   )
-  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
 end
