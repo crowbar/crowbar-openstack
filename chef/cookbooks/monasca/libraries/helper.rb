@@ -127,6 +127,17 @@ module MonascaHelper
     return monasca_log_api_url
   end
 
+  # Returns a log API health check URL for use by a Monasca agent's http_check
+  # plugin
+  def self.log_api_healthcheck_url(node)
+    my_net = node[:monasca][:network]
+    port = node[:monasca][:log_api][:bind_port]
+    listen_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
+      node, my_net).address
+
+    "http://#{listen_ip}:#{port}/healthcheck"
+  end
+
   def self.monasca_hosts(nodes)
     hosts = []
     nodes.each do |n|
