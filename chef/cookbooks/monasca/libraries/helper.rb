@@ -25,6 +25,11 @@ module MonascaHelper
     CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
   end
 
+  def self.monasca_network_host(node)
+    monasca_net = node[:monasca][:network][:clients]
+    Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, monasca_net).address
+  end
+
   def self.api_public_url(node)
     host = monasca_public_host(node)
     # SSL is not supported at this moment
@@ -54,10 +59,12 @@ module MonascaHelper
 
   # api_network_url returns url to monasca-api based on check if custom
   # network for api is set, if not it will returns public url for api.
-  def self.api_network_url(node)
+  def self.api_network_url(node, version = "v2.0")
+    protocol = "http"
+    port = node[:monasca][:api][:bind_port]
     monasca_api_url = if node[:monasca][:api][:url].nil? ||
         node[:monasca][:api][:url].empty?
-      api_public_url(node)
+      "#{protocol}://#{monasca_network_host(node)}:#{port}/#{version}"
     else
       node[:monasca][:api][:url]
     end
@@ -117,10 +124,12 @@ module MonascaHelper
 
   # log_api_network_url returns url to monasca-log-api based on check if custom
   # network for log-api is set, if not it will returns public url for log-api.
-  def self.log_api_network_url(node)
+  def self.log_api_network_url(node, version = "v3.0")
+    protocol = "http"
+    port = node[:monasca][:log_api][:bind_port]
     monasca_log_api_url = if node[:monasca][:log_api][:url].nil? ||
         node[:monasca][:log_api][:url].empty?
-      log_api_public_url(node)
+      "#{protocol}://#{monasca_network_host(node)}:#{port}/#{version}"
     else
       node[:monasca][:log_api][:url]
     end
@@ -130,7 +139,7 @@ module MonascaHelper
   # Returns a log API health check URL for use by a Monasca agent's http_check
   # plugin
   def self.log_api_healthcheck_url(node)
-    my_net = node[:monasca][:network]
+    my_net = node[:monasca][:network][:clients]
     port = node[:monasca][:log_api][:bind_port]
     listen_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
       node, my_net).address

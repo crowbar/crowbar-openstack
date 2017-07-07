@@ -93,7 +93,10 @@
       "debug": false,
       "group": "monasca",
       "user": "monasca",
-      "network": "admin",
+      "network": {
+        "internal": "admin",
+        "clients": "admin"
+      },
       "database_instance": "none",
       "keystone_instance": "none",
       "service_password": "none",
@@ -106,7 +109,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 200,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],
