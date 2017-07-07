@@ -30,7 +30,7 @@ end
 agent_dimensions = { service: "monitoring" }
 
 monasca_api_url = MonascaHelper.api_network_url(monasca_server)
-monasca_log_api_url = MonascaHelper.log_api_network_url(monasca_server) + '/healthcheck'
+monasca_log_api_url = MonascaHelper.log_api_healthcheck_url(monasca_server)
 kibana_url = "http://" + MonascaHelper.monasca_public_host(monasca_server) + ":5601"
 monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_server)
 
