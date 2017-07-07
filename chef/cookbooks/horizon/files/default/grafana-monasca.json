@@ -1609,18 +1609,6 @@
               "column": "value",
               "series": "load.avg_1_min",
               "period": ""
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "load.avg_5_min"
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "load.avg_15_min"
             }
           ],
           "aliasColors": {},
