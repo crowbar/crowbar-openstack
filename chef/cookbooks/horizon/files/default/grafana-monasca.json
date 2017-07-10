@@ -1372,25 +1372,37 @@
             {
               "function": "none",
               "column": "value",
-              "series": "cpu.percent"
+              "series": "cpu.percent",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             },
             {
               "target": "",
               "function": "none",
               "column": "value",
-              "series": "cpu.user_perc"
+              "series": "cpu.user_perc",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             },
             {
               "target": "",
               "function": "none",
               "column": "value",
-              "series": "cpu.system_perc"
+              "series": "cpu.system_perc",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             },
             {
               "target": "",
               "function": "none",
               "column": "value",
-              "series": "cpu.wait_perc"
+              "series": "cpu.wait_perc",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             }
           ],
           "aliasColors": {},
@@ -1450,31 +1462,47 @@
             {
               "function": "none",
               "column": "value",
-              "series": "mem.total_mb"
+              "series": "mem.total_mb",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             },
             {
               "target": "",
               "function": "none",
               "column": "value",
-              "series": "mem.used_mb"
+              "series": "mem.used_mb",
+              "period": "",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             },
             {
               "target": "",
               "function": "none",
               "column": "value",
-              "series": "mem.swap_total_mb"
+              "series": "mem.swap_total_mb",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             },
             {
               "target": "",
               "function": "none",
               "column": "value",
-              "series": "mem.swap_used_mb"
+              "series": "mem.swap_used_mb",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             },
             {
               "target": "",
               "function": "none",
               "column": "value",
-              "series": "mem.used_cache"
+              "series": "mem.used_cache",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             }
           ],
           "aliasColors": {},
@@ -1537,17 +1565,8 @@
               "column": "value",
               "series": "disk.space_used_perc",
               "condition_filter": true,
-              "condition_key": "mount_point",
-              "condition_value": "/boot"
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "disk.space_used_perc",
-              "condition_filter": true,
-              "condition_key": "device",
-              "condition_value": "rootfs"
+              "condition_key": "service",
+              "condition_value": "monitoring"
             }
           ],
           "aliasColors": {},
@@ -1608,7 +1627,10 @@
               "function": "none",
               "column": "value",
               "series": "load.avg_1_min",
-              "period": ""
+              "period": "",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             }
           ],
           "aliasColors": {},
@@ -1680,7 +1702,10 @@
               "series": "net.in_bytes_sec",
               "merge": true,
               "dimensions": "",
-              "period": ""
+              "period": "",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             },
             {
               "target": "",
@@ -1689,7 +1714,10 @@
               "series": "net.out_bytes_sec",
               "merge": true,
               "dimensions": "",
-              "period": ""
+              "period": "",
+              "condition_filter": true,
+              "condition_key": "service",
+              "condition_value": "monitoring"
             }
           ],
           "aliasColors": {},
