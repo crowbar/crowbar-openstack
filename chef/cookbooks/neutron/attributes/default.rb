@@ -75,6 +75,19 @@ default[:neutron][:apic][:opflex][:vxlan][:remote_ip] = ""
 default[:neutron][:apic][:opflex][:vxlan][:remote_port] = 8472
 default[:neutron][:apic][:opflex][:vlan][:encap_iface] = ""
 
+default[:neutron][:contrail][:api_server_ip] = ""
+default[:neutron][:contrail][:api_server_port] = "8082"
+default[:neutron][:contrail][:multi_tenancy] = false
+default[:neutron][:contrail][:analytics_api_ip] = ""
+default[:neutron][:contrail][:analytics_api_port] = "8081"
+
+default[:neutron][:contrail][:api_server_ip] = ""
+default[:neutron][:contrail][:api_server_port] = "8082"
+default[:neutron][:contrail][:multi_tenancy] = false
+default[:neutron][:contrail][:analytics_api_ip] = ""
+default[:neutron][:contrail][:analytics_api_port] = "8081"
+default[:neutron][:contrail][:gateway_server_ip] = ""
+
 case node[:platform_family]
 when "suse"
   default[:neutron][:platform] = {
@@ -117,6 +130,24 @@ when "suse"
     infoblox_pkgs: ["python-infoblox-client",
                     "openstack-neutron-infoblox",
                     "openstack-neutron-infoblox-ipam-agent"],
+    contrail_control_pkgs: ["contrail-lib",
+                            "neutron-plugin-contrail",
+                            "python-contrail"],
+    contrail_compute_pkgs: ["contrail-lib",
+                            "contrail-nodemgr",
+                            "contrail-nova-vif",
+                            "contrail-openstack-vrouter",
+                            "contrail-setup",
+                            "contrail-utils",
+                            "contrail-vrouter",
+                            "contrail-vrouter-agent",
+                            "contrail-vrouter-common",
+                            "contrail-vrouter-init",
+                            "contrail-vrouter-utils",
+                            "python-contrail",
+                            "python-contrail-vrouter-api",
+                            "python-opencontrail-vrouter-netns",
+                            "yum"],
     vmware_vsphere_pkg: "openstack-neutron-vsphere",
     vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
     user: "neutron",
@@ -160,6 +191,24 @@ when "rhel"
                         "lldpd",
                         "neutron-opflex-agent"],
     infoblox_pkgs: [],
+    contrail_control_pkgs: ["contrail-lib",
+                            "neutron-plugin-contrail",
+                            "python-contrail"],
+    contrail_compute_pkgs: ["contrail-lib",
+                            "contrail-nodemgr",
+                            "contrail-nova-vif",
+                            "contrail-openstack-vrouter",
+                            "contrail-setup",
+                            "contrail-utils",
+                            "contrail-vrouter",
+                            "contrail-vrouter-agent",
+                            "contrail-vrouter-common",
+                            "contrail-vrouter-init",
+                            "contrail-vrouter-utils",
+                            "python-contrail",
+                            "python-contrail-vrouter-api",
+                            "python-opencontrail-vrouter-netns",
+                            "yum"],
     vmware_vsphere_pkg: "",
     vmware_vsphere_dvs_agent_pkg: "",
     user: "neutron",
@@ -202,6 +251,8 @@ else
     cisco_apic_gbp_pkgs: [""],
     cisco_opflex_pkgs: [""],
     infoblox_pkgs: [],
+    contrail_control_pkgs: [],
+    contrail_compute_pkgs: [],
     vmware_vsphere_pkg: "openstack-neutron-vsphere",
     vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
     user: "neutron",

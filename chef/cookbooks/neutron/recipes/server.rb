@@ -236,6 +236,13 @@ if node[:neutron][:networking_plugin] == "ml2"
   end
 end
 
+if node[:neutron][:networking_plugin] == "contrail"
+  include_recipe "neutron::contrail_control"
+  if node.roles.include?("nova-compute-kvm")
+    include_recipe "neutron::contrail_compute"
+  end
+end
+
 if node[:neutron][:use_lbaas]
   template node[:neutron][:lbaas_service_file] do
     source "services_lbaas.conf.erb"

@@ -29,7 +29,7 @@ class NeutronService < PacemakerServiceObject
   end
 
   def self.networking_plugins_valid
-    ["ml2", "vmware"]
+    ["ml2", "vmware", "contrail"]
   end
 
   def self.networking_ml2_type_drivers_valid
