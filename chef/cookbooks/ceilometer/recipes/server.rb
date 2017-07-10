@@ -137,10 +137,12 @@ my_public_host = CrowbarHelper.get_host_for_public_url(node,
                                                        ceilometer_protocol == "https",
                                                        ha_enabled)
 
-crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync" if ha_enabled
+crowbar_pacemaker_sync_mark "wait-ceilometer_upgrade" if ha_enabled
 
-execute "ceilometer-dbsync" do
-  command "ceilometer-dbsync"
+execute "ceilometer-upgrade" do
+  # --skip-gnocchi-resource-types is needed because gnocchi is not deployed.
+  # if the flag is not given, ceilometer-upgrade returns with 1 and chef-client fails
+  command "ceilometer-upgrade --skip-gnocchi-resource-types"
   action :run
   user node[:ceilometer][:user]
   group node[:ceilometer][:group]
@@ -159,10 +161,10 @@ ruby_block "mark node for ceilometer db_sync" do
     node.save
   end
   action :nothing
-  subscribes :create, "execute[ceilometer-dbsync]", :immediately
+  subscribes :create, "execute[ceilometer-upgrade]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-ceilometer_db_sync" if ha_enabled
+crowbar_pacemaker_sync_mark "create-ceilometer_upgrade" if ha_enabled
 
 service "ceilometer-collector" do
   service_name node[:ceilometer][:collector][:service_name]
