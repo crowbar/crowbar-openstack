@@ -45,7 +45,7 @@
                       "ovsdb_interface": { "type": "str", "required": true },
                       "of_interface": { "type": "str", "required": true }
                     }},
-                    "apic": { "type": "map", "required": true, "mapping": {
+                    "apic": { "type": "map", "required": false, "mapping": {
                       "hosts": { "type" : "str", "required" : true },
                       "system_id": { "type" : "str", "required" : true },
                       "username": { "type" : "str", "required": true },
