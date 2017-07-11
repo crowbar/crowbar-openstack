@@ -139,7 +139,8 @@ class CrowbarOpenStackHelper
 
             "#{rabbit[:rabbitmq][:user]}:" \
             "#{rabbit[:rabbitmq][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{port}"
+            "#{rabbit[:rabbitmq][:address]}:#{port}/" \
+            "#{rabbit[:rabbitmq][:vhost]}"
           end
 
           trove_rabbit_hosts = rabbits.map do |rabbit|
@@ -151,7 +152,8 @@ class CrowbarOpenStackHelper
 
             "#{rabbit[:rabbitmq][:trove][:user]}:" \
             "#{rabbit[:rabbitmq][:trove][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{port}"
+            "#{rabbit[:rabbitmq][:address]}:#{port}/" \
+            "#{rabbit[:rabbitmq][:trove][:vhost]}"
           end
 
           @rabbitmq_settings[instance] = {
@@ -159,10 +161,8 @@ class CrowbarOpenStackHelper
             durable_queues: true,
             use_ssl: one_rabbit[:rabbitmq][:ssl][:enabled],
             client_ca_certs: client_ca_certs,
-            url: "rabbit://#{rabbit_hosts.sort.join(",")}/" \
-              "#{rabbits.first[:rabbitmq][:vhost]}",
-            trove_url: "rabbit://#{trove_rabbit_hosts.sort.join(",")}/" \
-              "#{rabbits.first[:rabbitmq][:trove][:vhost]}",
+            url: "rabbit://#{rabbit_hosts.sort.join(", ")}",
+            trove_url: "rabbit://#{trove_rabbit_hosts.sort.join(", ")}",
             pacemaker_resource: "ms-rabbitmq"
           }
           Chef::Log.info("RabbitMQ cluster found")

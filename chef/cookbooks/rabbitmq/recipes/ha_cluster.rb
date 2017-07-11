@@ -20,6 +20,13 @@ rabbitmq_op = {}
 rabbitmq_op["monitor"] = {}
 rabbitmq_op["monitor"]["interval"] = "10s"
 
+# set the shared rabbitmq cookie
+file node[:rabbitmq][:erlang_cookie_path] do
+  content node[:rabbitmq][:erlang_cookie]
+  owner node[:rabbitmq][:rabbitmq_user]
+  group node[:rabbitmq][:rabbitmq_group]
+end
+
 crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources"
 
 transaction_objects = []
@@ -78,7 +85,7 @@ ruby_block "wait for #{ms_name} to be started" do
       # 30s (our usual timeout) is a bit short with this OCF RA which
       # stops/starts the rabbit app multiple times due to the master-slave
       # config
-      Timeout.timeout(60) do
+      Timeout.timeout(80) do
         ::Kernel.system("crm_resource --wait --resource #{ms_name}")
         ::Kernel.system("rabbitmqctl wait #{pid_file}")
       end
