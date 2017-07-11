@@ -103,6 +103,26 @@ template "/etc/glance/glance-swift.conf" do
   notifies :restart, "service[#{node[:glance][:api][:service_name]}]"
 end
 
+# If `show_multiple_locations` is enabled we need to update
+# policy.json in a more restrictive way.  Only admin (or image owner)
+# can now update the `image_location` metadate field.
+#
+# For more information check bsc#1023507, and upstream bug:
+# https://bugs.launchpad.net/ossn/+bug/1549483
+#
+# NOTE(aplanas) -- policy.json needs to be synchronized to current
+# version of OpenStack.
+template "/etc/glance/policy.json" do
+  source "policy.json.erb"
+  owner "root"
+  group "root"
+  mode 0o644
+  variables(
+    show_multiple_locations: node[:glance][:show_storage_location]
+  )
+  notifies :restart, "service[#{node[:glance][:api][:service_name]}]"
+end
+
 # ensure swift tempurl key only if some agent_* drivers are enabled in ironic
 if swifts.any? && node[:glance][:default_store] == "swift" && \
     ironics.any? && ironics.first[:ironic][:enabled_drivers].any? { |d| d.start_with?("agent_") }
