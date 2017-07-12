@@ -37,15 +37,13 @@ service_name = "rabbitmq"
 pacemaker_primitive service_name do
   agent agent_name
   # nodename is empty so that we explicitly depend on the config files
-  params (
-           {
-             "erlang_cookie" => node[:rabbitmq][:erlang_cookie],
-             "pid_file" => pid_file,
-             "rmq_feature_health_check" => false,
-             "rmq_feature_local_list_queues" => false,
-             "default_vhost" => node[:rabbitmq][:vhost]
-           }
-         )
+  params ({
+    "erlang_cookie" => node[:rabbitmq][:erlang_cookie],
+    "pid_file" => pid_file,
+    "rmq_feature_health_check" => false,
+    "rmq_feature_local_list_queues" => false,
+    "default_vhost" => node[:rabbitmq][:vhost]
+  })
   op rabbitmq_op
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -57,15 +55,13 @@ transaction_objects.push("pacemaker_primitive[#{service_name}]")
 ms_name = "ms-#{service_name}"
 pacemaker_ms ms_name do
   rsc service_name
-  meta (
-         {
-           "master-max" => "1",
-           "master-node-max" => "1",
-           "ordered" => "false",
-           "interleave" => "false",
-           "notify" => "true"
-         }
-       )
+  meta ({
+    "master-max" => "1",
+    "master-node-max" => "1",
+    "ordered" => "false",
+    "interleave" => "false",
+    "notify" => "true"
+  })
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
@@ -91,7 +87,7 @@ ruby_block "wait for #{ms_name} to be started" do
       # 30s (our usual timeout) is a bit short with this OCF RA which
       # stops/starts the rabbit app multiple times due to the master-slave
       # config
-      Timeout.timeout(80) do
+      Timeout.timeout(120) do
         ::Kernel.system("crm_resource --wait --resource #{ms_name}")
         ::Kernel.system("rabbitmqctl wait #{pid_file}")
       end
