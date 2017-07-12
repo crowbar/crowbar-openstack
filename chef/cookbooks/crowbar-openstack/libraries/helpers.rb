@@ -203,8 +203,6 @@ class CrowbarOpenStackHelper
     @rabbitmq_settings[instance]
   end
 
-  private
-
   def self.get_node(node, role, barclamp, instance)
     result = nil
 
@@ -214,7 +212,8 @@ class CrowbarOpenStackHelper
         node[barclamp]["config"]["environment"] == "#{barclamp}-config-#{instance}"
       result = node
     else
-      nodes, _, _ = Chef::Search::Query.new.search(:node, "roles:#{role} AND #{barclamp}_config_environment:#{barclamp}-config-#{instance}")
+      nodes, = Chef::Search::Query.new.search(:node, "roles:#{role} AND " \
+      "#{barclamp}_config_environment:#{barclamp}-config-#{instance}")
       result = nodes.first unless nodes.empty?
     end
 
@@ -222,7 +221,11 @@ class CrowbarOpenStackHelper
   end
 
   def self.get_nodes(node, role, barclamp, instance)
-    nodes, _, _ = Chef::Search::Query.new.search(:node, "roles:#{role} AND #{barclamp}_config_environment:#{barclamp}-config-#{instance}")
+    nodes, = Chef::Search::Query.new.search(:node, "roles:#{role} AND " \
+    "#{barclamp}_config_environment:#{barclamp}-config-#{instance}")
     nodes
   end
+
+  private_class_method :get_node
+  private_class_method :get_nodes
 end

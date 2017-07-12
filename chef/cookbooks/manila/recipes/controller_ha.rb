@@ -54,8 +54,8 @@ services.each do |service|
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent node[:manila][:ha]["#{service}_ra"]
     op node[:manila][:ha][:op]
-    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone cl-glance-api cl-cinder-api " \
-        "cl-neutron-server cl-nova-api )"
+    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone " \
+        "cl-glance-api cl-cinder-api cl-neutron-server cl-nova-api )"
   end
   transaction_objects.push(objects)
 end
