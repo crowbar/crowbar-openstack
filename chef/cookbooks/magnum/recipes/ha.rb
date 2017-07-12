@@ -48,11 +48,12 @@ transaction_objects = []
 
 services.each do |service|
   primitive_name = "magnum-#{service}"
+  ordering = "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone cl-heat-api )"
 
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent node[:magnum][:ha][service.to_sym][:agent]
     op node[:magnum][:ha][service.to_sym][:op]
-    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone cl-heat-api )"
+    order_only_existing ordering
   end
   transaction_objects.push(objects)
 end

@@ -35,13 +35,15 @@ service_name = "rabbitmq"
 pacemaker_primitive service_name do
   agent agent_name
   # nodename is empty so that we explicitly depend on the config files
-  params ({
-    "erlang_cookie" => node[:rabbitmq][:erlang_cookie],
-    "pid_file" => pid_file,
-    "rmq_feature_health_check" => false,
-    "rmq_feature_local_list_queues" => false,
-    "default_vhost" => node[:rabbitmq][:vhost]
-  })
+  params (
+           {
+             "erlang_cookie" => node[:rabbitmq][:erlang_cookie],
+             "pid_file" => pid_file,
+             "rmq_feature_health_check" => false,
+             "rmq_feature_local_list_queues" => false,
+             "default_vhost" => node[:rabbitmq][:vhost]
+           }
+         )
   op rabbitmq_op
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -53,13 +55,15 @@ transaction_objects.push("pacemaker_primitive[#{service_name}]")
 ms_name = "ms-#{service_name}"
 pacemaker_ms ms_name do
   rsc service_name
-  meta ({
-    "master-max" => "1",
-    "master-node-max" => "1",
-    "ordered" => "false",
-    "interleave" => "false",
-    "notify" => "true"
-  })
+  meta (
+         {
+           "master-max" => "1",
+           "master-node-max" => "1",
+           "ordered" => "false",
+           "interleave" => "false",
+           "notify" => "true"
+         }
+       )
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end

@@ -102,7 +102,7 @@ class RabbitmqService < PacemakerServiceObject
 
     if role.default_attributes["rabbitmq"]["cluster"]
       role.default_attributes["rabbitmq"]["erlang_cookie"] = \
-          (old_role && old_role.default_attributes["rabbitmq"]["erlang_cookie"]) || random_password
+(old_role && old_role.default_attributes["rabbitmq"]["erlang_cookie"]) || random_password
     end
 
     unless rabbitmq_ha_enabled
