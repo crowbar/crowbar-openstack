@@ -21,6 +21,8 @@ rabbitmq_op["monitor"] = {}
 rabbitmq_op["monitor"]["interval"] = "10s"
 
 # set the shared rabbitmq cookie
+# cookie is automatically set during barclamp apply
+# on the apply_role_pre_chef_call method
 file node[:rabbitmq][:erlang_cookie_path] do
   content node[:rabbitmq][:erlang_cookie]
   owner node[:rabbitmq][:rabbitmq_user]
