@@ -162,6 +162,7 @@ class CrowbarOpenStackHelper
           end
 
           @rabbitmq_settings[instance] = {
+            cluster: true,
             ha_queues: true,
             durable_queues: true,
             use_ssl: one_rabbit[:rabbitmq][:ssl][:enabled],
@@ -180,6 +181,13 @@ class CrowbarOpenStackHelper
           end
 
           @rabbitmq_settings[instance] = {
+            # backwards compatible attributes, remove in cloud8?
+            address: rabbit[:rabbitmq][:address],
+            port: port,
+            user: rabbit[:rabbitmq][:user],
+            password: rabbit[:rabbitmq][:password],
+            vhost: rabbit[:rabbitmq][:vhost], # end backwards comatible attrs
+            cluster: false,
             ha_queues: false,
             durable_queues: false,
             use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
