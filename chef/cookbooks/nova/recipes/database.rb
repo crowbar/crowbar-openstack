@@ -103,8 +103,8 @@ execute "nova-manage db online_data_migrations" do
   end
 end
 
-# Update Nova DB to revision 334 (most recent Newton migration)
-execute "nova-manage db sync (continue)" do
+# Update Nova DB to latest revision
+execute "nova-manage db sync" do
   user node[:nova][:user]
   group node[:nova][:group]
   command "nova-manage db sync"
