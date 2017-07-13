@@ -25,8 +25,8 @@ default["mysql"]["logdir"]                    = "/var/lib/mysqllogs"
 
 case node[:platform_family]
 when "rhel", "fedora", "suse"
-  set["mysql"]["socket"]                      = "/var/lib/mysql/mysql.sock"
-  set["mysql"]["pid_file"]                    = "/var/run/mysqld/mysqld.pid"
+  set["mysql"]["socket"]                      = "/var/run/mysql/mysql.sock"
+  set["mysql"]["pid_file"]                    = "/var/run/mysql/mysqld.pid"
   set["mysql"]["old_passwords"]               = 1
 else
   set["mysql"]["socket"]                      = "/var/run/mysqld/mysqld.sock"

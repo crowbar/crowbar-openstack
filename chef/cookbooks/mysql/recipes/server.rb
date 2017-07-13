@@ -80,10 +80,6 @@ service "mysql" do
   action :enable
 end
 
-link value_for_platform_family(["rhel", "suse", "fedora"] => { "default" => "/etc/my.cnf" }, "default" => "/etc/mysql/my.cnf") do
-  to "#{node[:mysql][:datadir]}/my.cnf"
-end
-
 directory node[:mysql][:tmpdir] do
   owner "mysql"
   group "mysql"
@@ -108,11 +104,11 @@ service mysql start
 EOC
 end
 
-template "#{node[:mysql][:datadir]}/my.cnf" do
+template "/etc/my.cnf" do
   source "my.cnf.erb"
   owner "root"
-  group "root"
-  mode "0644"
+  group "mysql"
+  mode "0640"
   notifies :run, resources(script: "handle mysql restart"), :immediately if platform_family?("debian")
   notifies :restart, "service[mysql]", :immediately if platform_family?(%w{rhel suse fedora})
 end
@@ -138,61 +134,13 @@ unless platform_family?("debian")
 
 end
 
-# Super duper hackfest-o-rama 2011.
-# Under crowbar, for some reason, defaults aren't being set properly
-# for the mysql passwords. This is a nasty, nasty hack to
-# fix this until I understand the problem better:
-directory "/etc/mysql/" do
-  owner "root"
-  group "root"
-  mode "0755"
-  action :create
-end
-
-directory "/etc/mysql/conf.d/" do
-  owner "root"
-  group "root"
-  mode "0755"
-  action :create
-end
-
-template "/etc/mysql/conf.d/emergency_init_file" do
-  source "emergency_init_file.erb"
-  owner "root"
-  group "root"
-  mode "0600"
-  action :create
-end
-
-script "fix_perms_hack" do
-  interpreter "bash"
-  user "root"
-  cwd "/tmp"
-  code <<-EOH
-  /etc/init.d/#{mysql_service_name} stop
-  chmod 644 /etc/mysql/conf.d/emergency_init_file
-  /usr/bin/mysqld_safe --init-file=/etc/mysql/conf.d/emergency_init_file &
-  sleep 10
-  killall mysqld
-  chmod 600 /etc/mysql/conf.d/emergency_init_file
-  /etc/init.d/#{mysql_service_name} start
-  EOH
-  not_if "/usr/bin/mysql -u root #{node['mysql']['server_root_password'].empty? ? '' : '-p' }#{node['mysql']['server_root_password']} -e 'show databases;'"
-end
-
-# End hackness
-
 grants_path = value_for_platform_family(
-  ["rhel", "suse", "fedora"] => {
-    "default" => "/etc/mysql_grants.sql"
-  },
+  ["rhel", "suse", "fedora"] => "/etc/mysql_grants.sql",
   "default" => "/etc/mysql/grants.sql"
 )
 
 grants_key = value_for_platform_family(
-  ["rhel", "suse", "fedora"] => {
-    "default" => "/etc/applied_grants"
-  },
+  ["rhel", "suse", "fedora"] => "/etc/applied_grants",
   "default" => "/etc/mysql/applied_grants"
 )
 
