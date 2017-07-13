@@ -279,3 +279,6 @@ max_header_line = <%= node[:nova][:max_header_line] %>
 ssl_cert_file = <%= @ssl_cert_file %>
 ssl_key_file = <%= @ssl_key_file %>
 keep_alive = false
+
+[scheduler]
+discover_hosts_in_cells_interval = <%= node[:nova][:scheduler][:discover_hosts_in_cells_interval] %>

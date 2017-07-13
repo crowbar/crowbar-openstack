@@ -52,7 +52,8 @@
                 "ram_allocation_ratio": { "type": "number" },
                 "cpu_allocation_ratio": { "type": "number" },
                 "disk_allocation_ratio": { "type": "number" },
-                "reserved_host_memory_mb": { "type": "number" }
+                "reserved_host_memory_mb": { "type": "number" },
+                "discover_hosts_in_cells_interval": { "type": "int", "required": true }
               }
             },
             "ec2-api": {
