@@ -132,20 +132,18 @@ compute_transaction_objects << "pacemaker_primitive[#{libvirtd_primitive}]"
 
 case neutron[:neutron][:networking_plugin]
 when "ml2"
-  neutron_agent_primitive = "#{neutron_agent.sub(/^openstack-/, "")}-compute"
-  # neutron_agent_ra is empty for plugins cisco_apic_ml2 and apic_gbp
-  unless neutron_agent_ra.empty?
+  # neutron_agent & neutron_agent_ra are empty for plugins like cisco_apic_ml2 and apic_gbp
+  unless neutron_agent.empty? || neutron_agent_ra.empty?
+    neutron_agent_primitive = "#{neutron_agent.sub(/^openstack-/, "")}-compute"
     pacemaker_primitive neutron_agent_primitive do
       agent neutron_agent_ra
       op neutron[:neutron][:ha][:network][:op]
       action :update
       only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
-    compute_primitives << neutron_agent_primitive
+    compute_primitives_to_clone << neutron_agent_primitive
     compute_transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
   end
-  compute_primitives_to_clone << neutron_agent_primitive
-  compute_transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
 end
 
 if neutron[:neutron][:use_dvr]
