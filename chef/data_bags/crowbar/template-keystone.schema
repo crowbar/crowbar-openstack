@@ -7,7 +7,6 @@
       "mapping": {
         "keystone": { "type": "map", "required": true,
              "mapping": {
-                    "verbose": { "type": "bool", "required": true },
                     "debug": { "type": "bool", "required": true },
                     "frontend": { "type": "str", "required": true },
                     "policy_file": { "type": "str", "required": true },
@@ -76,7 +75,6 @@
                       "user": { "type": "str" },
                       "password": { "type": "str" },
                       "suffix": { "type": "str" },
-                      "allow_subtree_delete": { "type": "bool" },
                       "page_size": { "type": "int" },
                       "alias_dereferencing": { "type": "str" },
                       "query_scope": { "type": "str" },
@@ -93,9 +91,6 @@
                       "user_enabled_default": { "type": "str" },
                       "user_attribute_ignore": { "type": "str" },
                       "user_default_project_id_attribute": { "type": "str" },
-                      "user_allow_create": { "type": "bool" },
-                      "user_allow_update": { "type": "bool" },
-                      "user_allow_delete": { "type": "bool" },
                       "user_enabled_invert": { "type": "bool" },
                       "user_enabled_emulation": { "type": "bool" },
                       "user_enabled_emulation_dn": { "type": "str" },

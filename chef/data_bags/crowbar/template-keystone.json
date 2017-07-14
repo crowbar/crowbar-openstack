@@ -5,7 +5,6 @@
     "keystone": {
       "debug": false,
       "frontend": "apache",
-      "verbose": true,
       "policy_file": "policy.json",
       "database_instance": "none",
       "rabbitmq_instance": "none",
@@ -71,7 +70,6 @@
         "user": "dc=Manager,dc=example,dc=com",
         "password": "",
         "suffix": "cn=example,cn=com",
-        "allow_subtree_delete": false,
         "page_size": 0,
         "alias_dereferencing": "default",
         "query_scope": "one",
@@ -88,9 +86,6 @@
         "user_enabled_default": "True",
         "user_attribute_ignore": "default_project_id",
         "user_default_project_id_attribute": "",
-        "user_allow_create": true,
-        "user_allow_update": true,
-        "user_allow_delete": true,
         "user_enabled_invert": false,
         "user_enabled_emulation": false,
         "user_enabled_emulation_dn": "",
@@ -183,7 +178,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 112,
+      "schema-revision": 200,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },
