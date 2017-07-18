@@ -17,7 +17,6 @@
 # limitations under the License.
 #
 
-
 ha_enabled = node[:database][:ha][:enabled]
 
 include_recipe "mysql::client"
@@ -49,7 +48,6 @@ if platform_family?("debian")
     command "debconf-set-selections /var/cache/local/preseeding/mysql-server.seed"
     only_if "test -f /var/cache/local/preseeding/mysql-server.seed"
   end
-
 end
 
 # For Crowbar, we need to set the address to bind - default to admin node.

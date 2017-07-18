@@ -30,8 +30,8 @@ end
 
 unless node[:database][:galera_bootstrapped]
   mysql_service_name = "mariadb"
-  
-  bash "reload systemd after mariadb.service  update" do
+
+  bash "reload systemd after mariadb.service update" do
     code "systemctl daemon-reload"
     action :nothing
     subscribes :run,
@@ -66,14 +66,14 @@ unless node[:database][:galera_bootstrapped]
 
   # Initialize cluster on the founder node, this will start mariadb
   # via systemctl. We stop it again after the bootstrap.
-  execute  "boostrapping first mariadb galera cluster node" do
+  execute "boostrapping first mariadb galera cluster node" do
     command "galera_new_cluster"
     action :run
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
   execute "assign-root-password-galera" do
-    command "/usr/bin/mysqladmin -u root password \"#{node['mysql']['server_root_password']}\""
+    command "/usr/bin/mysqladmin -u root password \"#{node[:mysql][:server_root_password]}\""
     action :run
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
     only_if "/usr/bin/mysql -u root -e 'show databases;'"
@@ -89,7 +89,7 @@ unless node[:database][:galera_bootstrapped]
     action :start
     not_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  
+
   crowbar_pacemaker_sync_mark "sync-database_after_bootstrap_rest" do
     revision node[:database]["crowbar-revision"]
   end
@@ -113,7 +113,6 @@ unless node[:database][:galera_bootstrapped]
   file "delete mariadb.service" do
     path "/etc/systemd/system/mariadb.service"
     action :delete
-    only_if
   end
 end
 
@@ -128,15 +127,13 @@ service_name = "galera"
 
 pacemaker_primitive service_name do
   agent resource_agent
-  params (
-    {
-      "enable_creation" => true,
-      "wsrep_cluster_address" => "gcomm://d52-54-00-01-00-01,d52-54-00-01-00-02,d52-54-00-01-00-03",
-      "check_user" => "root",
-      "check_passwd" => node[:database][:mysql][:server_root_password],
-      "socket" => "/var/run/mysql/mysql.sock"
-    }
-  )
+  params ({
+    "enable_creation" => true,
+    "wsrep_cluster_address" => "gcomm://d52-54-00-01-00-01,d52-54-00-01-00-02,d52-54-00-01-00-03",
+    "check_user" => "root",
+    "check_passwd" => node[:database][:mysql][:server_root_password],
+    "socket" => "/var/run/mysql/mysql.sock"
+  })
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
@@ -147,12 +144,10 @@ ms_name = "ms-#{service_name}"
 pacemaker_ms ms_name do
   rsc service_name
   meta(
-    {
-      "master-max" => 3,
-      "ordered" => "false",
-      "interleave" => "false",
-      "notify" => "true"
-    }
+    "master-max" => 3,
+    "ordered" => "false",
+    "interleave" => "false",
+    "notify" => "true"
   )
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
