@@ -5,7 +5,7 @@
     "tempest": {
       "tempest_test_images": {
           "aarch64": "http://<ADMINWEB>/files/tempest/cirros-d160722-aarch64-uec.tar.gz",
-          "x86_64": "http://<ADMINWEB>/files/tempest/cirros-0.3.4-x86_64-uec.tar.gz",
+          "x86_64": "http://<ADMINWEB>/files/tempest/cirros-0.3.5-x86_64-uec.tar.gz",
           "ppc64le": "http://<ADMINWEB>/files/tempest/FIXME",
           "s390x": "http://<ADMINWEB>/files/tempest/FIXME"
       },
