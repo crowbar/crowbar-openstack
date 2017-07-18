@@ -73,9 +73,6 @@ class DatabaseService < PacemakerServiceObject
     # HA validation
     servers = proposal["deployment"][@bc_name]["elements"]["database-server"]
     unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
-#      validation_error I18n.t(
-#        "barclamp.#{@bc_name}.validation.ha_postgresql"
-#      ) unless db_engine == "postgresql"
 
       unless db_engine == "mysql"
         storage_mode = attributes["ha"]["storage"]["mode"]
