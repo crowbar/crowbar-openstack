@@ -54,7 +54,7 @@ unless node[:database][:galera_bootstrapped]
   # will be delete again further down.
   file "mariadb.service" do
     path "/etc/systemd/system/mariadb.service"
-    content ::File.open("/usr/share/mysql/systemd/mariadb.service").read
+    content lazy { ::File.open("/usr/share/mysql/systemd/mariadb.service").read }
     mode "0644"
   end
 
@@ -99,9 +99,9 @@ unless node[:database][:galera_bootstrapped]
     action :stop
   end
 
-  block "mark node for galera bootstrap" do
+  ruby_block "mark node for galera bootstrap" do
     block do
-      node.set[:database][:galera_bootstraped] = true
+      node.set[:database][:galera_bootstrapped] = true
       node.save
     end
     subscribes :create,
