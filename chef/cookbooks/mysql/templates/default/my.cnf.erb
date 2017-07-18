@@ -52,16 +52,17 @@ datadir                = <%= node['mysql']['datadir'] %>
 tmpdir                 = <%= node['mysql']['tmpdir'] %>
 skip-external-locking
 
+<% if node[:database][:ha][:enabled] %>
 # GALERA
 
 wsrep_provider=/usr/lib64/galera-3/libgalera_smm.so
-wsrep_cluster_address="gcomm://d52-54-00-01-00-01,d52-54-00-01-00-02,d52-54-00-01-00-03"
+wsrep_cluster_address="gcomm://<%= @nodes_names.join(",") %>"
 innodb_autoinc_lock_mode=2
 innodb_doublewrite=1
 query_cache_size=0
 wsrep_on=ON
 binlog_format=ROW
-
+<% end %>
 #
 # * Storage Engines
 #

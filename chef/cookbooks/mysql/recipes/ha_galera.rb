@@ -125,11 +125,14 @@ end
 
 service_name = "galera"
 
+cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "database-server")
+nodes_names = cluster_nodes.map { |n| n[:hostname] }
+
 pacemaker_primitive service_name do
   agent resource_agent
   params ({
     "enable_creation" => true,
-    "wsrep_cluster_address" => "gcomm://d52-54-00-01-00-01,d52-54-00-01-00-02,d52-54-00-01-00-03",
+    "wsrep_cluster_address" => "gcomm://" + nodes_names.join(","),
     "check_user" => "root",
     "check_passwd" => node[:database][:mysql][:server_root_password],
     "socket" => "/var/run/mysql/mysql.sock"
@@ -144,7 +147,7 @@ ms_name = "ms-#{service_name}"
 pacemaker_ms ms_name do
   rsc service_name
   meta(
-    "master-max" => 3,
+    "master-max" => nodes_names.size,
     "ordered" => "false",
     "interleave" => "false",
     "notify" => "true"
