@@ -18,7 +18,7 @@ include_recipe "crowbar-pacemaker::haproxy"
 haproxy_loadbalancer "ceilometer-api" do
   address "0.0.0.0"
   port node[:ceilometer][:api][:port]
-  use_ssl false
+  use_ssl (node[:ceilometer][:api][:protocol] == "https")
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "ceilometer", "ceilometer-server", "api")
   action :nothing
 end.run_action(:create)
