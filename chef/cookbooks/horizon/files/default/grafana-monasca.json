@@ -1,9 +1,9 @@
 {
   "id": "sid-14393838984416185642089112666",
-  "title": "Monasca Service",
-  "originalTitle": "Monasca Service",
+  "title": "SUSE OpenStack Cloud Monitoring",
+  "originalTitle": "SUSE OpenStack Cloud Monitoring",
   "tags": [],
-  "style": "light",
+  "style": "dark",
   "timezone": "utc",
   "editable": true,
   "hideControls": false,
