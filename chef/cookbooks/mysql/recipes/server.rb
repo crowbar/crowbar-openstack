@@ -137,12 +137,14 @@ else
   log "HA support for mysql is disabled"
 end
 
+server_root_password = node[:mysql][:server_root_password]
+
 # set the root password on platforms
 # that don't support pre-seeding
 unless platform_family?("debian")
 
   execute "assign-root-password" do
-    command "/usr/bin/mysqladmin -u root password \"#{node['mysql']['server_root_password']}\""
+    command "/usr/bin/mysqladmin -u root password \"#{server_root_password}\""
     action :run
     only_if "/usr/bin/mysql -u root -e 'show databases;'"
   end
@@ -183,9 +185,10 @@ directory "/var/run/mysqld/" do
 end
 
 execute "mysql-install-privileges" do
-  command "/usr/bin/mysql -u root #{node['mysql']['server_root_password'].empty? ? '' : '-p' }#{node['mysql']['server_root_password']} < #{grants_path}"
+  command "/usr/bin/mysql -u root -p\"#{server_root_password}\" < #{grants_path}"
   action :nothing
   subscribes :run, resources("template[#{grants_path}]"), :immediately
+  only_if "/usr/bin/mysql -u root -p\"#{server_root_password}\" -e 'show databases;'"
 end
 
 file grants_path do
