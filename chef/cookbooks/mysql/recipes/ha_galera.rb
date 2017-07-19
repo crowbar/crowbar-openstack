@@ -61,7 +61,6 @@ unless node[:database][:galera_bootstrapped]
   execute "mysql_install_db" do
     command "mysql_install_db"
     action :run
-    # only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
   # Initialize cluster on the founder node, this will start mariadb
@@ -88,6 +87,13 @@ unless node[:database][:galera_bootstrapped]
     service_name mysql_service_name
     action :start
     not_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  execute "assign-root-password-galera" do
+    command "/usr/bin/mysqladmin -u root password \"#{node[:mysql][:server_root_password]}\""
+    action :run
+    not_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    only_if "/usr/bin/mysql -u root -e 'show databases;'"
   end
 
   crowbar_pacemaker_sync_mark "sync-database_after_bootstrap_rest" do
