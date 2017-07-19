@@ -411,32 +411,11 @@ else
 end
 
 # We're going to use memcached as a cache backend for Django
-
-# make sure our memcache only listens on the admin IP address
-node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-node.set[:memcached][:listen] = node_admin_ip
-node.save
-
-if ha_enabled
-  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "horizon-server")
-  memcached_locations = memcached_nodes.map do |n|
-    node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-    "#{node_admin_ip}:#{n[:memcached][:port] rescue node[:memcached][:port]}"
-  end
-else
-  memcached_locations = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
-end
-memcached_locations.sort!
+memcached_locations = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "horizon-server") : [node]
+)
 
 memcached_instance "openstack-dashboard"
-case node[:platform_family]
-when "suse"
-  package "python-python-memcached"
-when "debian"
-  package "python-memcache"
-when "rhel"
-  package "python-memcached"
-end
 
 crowbar_pacemaker_sync_mark "wait-horizon_config" if ha_enabled
 

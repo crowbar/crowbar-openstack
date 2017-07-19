@@ -101,17 +101,11 @@ end
 Chef::Log.info("Glance server at #{glance_server_host}")
 
 # use memcached as a cache backend for nova-novncproxy
-if api_ha_enabled
-  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller")
-  memcached_servers = memcached_nodes.map do |n|
-    node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-    "#{node_admin_ip}:#{n[:memcached][:port] rescue node[:memcached][:port]}"
-  end
-else
-  node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  memcached_servers = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
-end
-memcached_servers.sort!
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  api_ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller") : [node]
+)
+
+memcached_instance "nova" if is_controller
 
 directory "/etc/nova" do
    mode 0755

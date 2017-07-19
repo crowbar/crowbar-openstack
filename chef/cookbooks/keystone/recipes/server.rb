@@ -57,6 +57,12 @@ node.normal[:apache][:listen_ports_crowbar][:keystone] = { admin: [bind_admin_po
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:keystone][:api][:protocol] == "https", ha_enabled)
 
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server") : [node]
+)
+
+memcached_instance "keystone"
+
 # Other barclamps need to know the hostname to reach keystone
 node.set[:keystone][:api][:internal_URL_host] = my_admin_host
 
@@ -196,18 +202,6 @@ end
 crowbar_pacemaker_sync_mark "create-keystone_database" if ha_enabled
 
 sql_connection = "#{db_settings[:url_scheme]}://#{node[:keystone][:db][:user]}:#{node[:keystone][:db][:password]}@#{db_settings[:address]}/#{node[:keystone][:db][:database]}"
-
-if ha_enabled
-  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server")
-  memcached_servers = memcached_nodes.map do |n|
-    node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-    "#{node_admin_ip}:#{n[:memcached][:port]}"
-  end
-else
-  node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  memcached_servers = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
-end
-memcached_servers.sort!
 
 # we have to calculate max_active_keys for fernet token provider
 # http://docs.openstack.org/admin-guide/identity-fernet-token-faq.html# \

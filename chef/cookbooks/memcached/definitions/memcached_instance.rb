@@ -22,6 +22,18 @@ define :memcached_instance do
 
   opts = params
 
+  node.set[:memcached][:listen] = 
+    Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+
+  case node[:platform_family]
+  when "suse"
+    package "python-python-memcached"
+  when "debian"
+    package "python-memcache"
+  when "rhel"
+    package "python-memcached"
+  end
+
   case node[:platform_family]
   when "suse", "rhel"
     service "memcached" do

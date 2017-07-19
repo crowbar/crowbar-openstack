@@ -46,9 +46,6 @@ if node.roles.include?("swift-storage") && !node["swift"]["storage_init_done"]
   return
 end
 
-local_ip = Swift::Evaluator.get_ip_by_type(node, :admin_ip_expr)
-public_ip = Swift::Evaluator.get_ip_by_type(node, :public_ip_expr)
-
 ha_enabled = node[:swift][:ha][:enabled]
 
 bind_host, bind_port = SwiftHelper.get_bind_host_port(node)
@@ -101,9 +98,9 @@ end
 proxy_config[:cross_domain_policy] = cross_domain_policy_l.join("\n")
 
 if node[:platform_family] == "rhel"
-  pkg_list = %w{curl memcached python-dns}
+  pkg_list = ["curl", "python-dns"]
 else
-  pkg_list = %w{curl memcached python-dnspython}
+  pkg_list = ["curl", "python-dnspython"]
 end
 
 pkg_list.each do |pkg|
@@ -255,11 +252,12 @@ if node[:swift][:ssl][:enabled]
   end
 end
 
-## Find other nodes that are swift-auth nodes, and make sure
-## we use their memcached!
-proxy_config[:memcached_ips] = node_search_with_cache("roles:swift-proxy").map do |x|
-  "#{Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)}:11211"
-end.sort
+## install a default memcached instance.
+## default configuration is taken from: node[:memcached] / [:memory], [:port] and [:user]
+memcached_instance "swift-proxy"
+
+proxy_config[:memcached_ips] =
+  MemcachedHelper.get_memcached_servers(node_search_with_cache("roles:swift-proxy"))
 
 ## Create the proxy server configuraiton file
 template node[:swift][:proxy_config_file] do
@@ -270,12 +268,6 @@ template node[:swift][:proxy_config_file] do
   variables proxy_config
 end
 
-## install a default memcached instsance.
-## default configuration is take from: node[:memcached] / [:memory], [:port] and [:user]
-node.set[:memcached][:listen] = local_ip
-node.set[:memcached][:name] = "swift-proxy"
-memcached_instance "swift-proxy" do
-end
 
 ## make sure to fetch ring files from the ring compute node
 compute_nodes = node_search_with_cache("roles:swift-ring-compute")
@@ -388,7 +380,6 @@ if node[:platform_family] == "debian"
 EOH
     action :nothing
     subscribes :run, resources(template: node[:swift][:proxy_config_file])
-    notifies :restart, resources(service: "memcached-swift-proxy")
     if node[:swift][:frontend]=="native"
       notifies :restart, resources(service: "swift-proxy")
     end
