@@ -58,6 +58,10 @@ if is_controller
   database_connection = \
     "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
 
+  db = node[:nova][:placement_db]
+  placement_database_connection = \
+    "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
+
   db = node[:nova][:api_db]
   api_database_connection = \
     "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
@@ -334,6 +338,20 @@ if need_shared_lock_path
   end
   include_recipe "crowbar-openstack::common"
 end
+
+template node[:nova][:placement_config_file] do
+  source "nova-placement.conf.erb"
+  user "root"
+  group node[:nova][:group]
+  mode 0640
+  variables(
+  keystone_settings: keystone_settings,
+  placement_database_connection: placement_database_connection,
+  placement_service_user: node["nova"]["placement_service_user"],
+  placement_service_password: node["nova"]["placement_service_password"]
+  )
+end
+
 
 template node[:nova][:config_file] do
   source "nova.conf.erb"

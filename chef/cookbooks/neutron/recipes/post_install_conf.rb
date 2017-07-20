@@ -183,7 +183,8 @@ end
 
 execute "set_router_gateway" do
   command "#{neutron_cmd} router-gateway-set router-floating floating"
-  not_if "out=$(#{neutron_cmd} router-show router-floating -f shell) ; [ $? != 0 ] || eval $out && [ \"${external_gateway_info}\" != \"\" ]"
+  # on Newton, the output for external_gateway_info was an empty string, on Ocata, the output is None
+  not_if "out=$(#{neutron_cmd} router-show router-floating -f shell) ; [ $? != 0 ] || eval $out && [ \"${external_gateway_info}\" != \"None\" ] && [ \"${external_gateway_info}\" != \"\" ]"
   retries 5
   retry_delay 10
   action :nothing
