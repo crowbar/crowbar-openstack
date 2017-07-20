@@ -289,3 +289,4 @@ default[:neutron][:ha][:neutron_l3_ha_service][:log_file] = "/var/log/neutron/ne
 default[:neutron][:midonet][:username] = "midonet"
 default[:neutron][:midonet][:port] = 8181
 default[:neutron][:midonet][:config_file] = "/etc/neutron/plugins/midonet/midonet.ini"
+default[:neutron][:midonet][:tunnel_zone] = "tz"

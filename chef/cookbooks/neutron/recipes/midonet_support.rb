@@ -75,21 +75,16 @@ template "/root/.midonetrc" do
   )
 end
 
+# Map NSDB nodes to neutron-server nodes. Eventually we could create a new
+# role (nsdb-server).
 zookeeper_hosts = node_search_with_cache("roles:neutron-server") || []
-zookeeper_hosts = zookeeper_hosts.map do |h|
-  h.name
-end
+zookeeper_hosts = zookeeper_hosts.map(&:name)
+Chef::Log.debug("zookeeper_hosts = #{zookeeper_hosts}")
 zookeeper_host_list = zookeeper_hosts.join(",")
 zookeeper_host_list_with_ports = zookeeper_hosts.map do |h|
   h + ":2181"
 end
 zookeeper_host_list_with_ports = zookeeper_host_list_with_ports.join(",")
-
-if zookeeper_hosts.length < 3
-  Chef::Log.warn("MidoNet: Please configure at least 3 zookeeper nodes for " \
-                 "failover redundancy and an odd number for best " \
-                 "performance.")
-end
 
 ruby_block "configure-midonet" do
   block do
@@ -134,4 +129,85 @@ EOF`
     File.exist?("/etc/midonet/midonet-configured")
   end
   notifies :restart, "service[midonet-cluster]"
+end
+
+template "/etc/midonet/midonet.conf" do
+  source "midonet.conf.erb"
+  owner "root"
+  group "root"
+  mode 0o640
+  variables(
+    zookeeper_hosts: "#{zookeeper_host_list_with_ports}"
+  )
+  notifies :restart, "service[midonet-cluster]"
+end
+
+service "midonet-cluster" do
+  supports status: true, restart: true
+  action [:enable, :start]
+  notifies :run, "bash[create tunnel-zone #{node[:neutron][:midonet][:tunnel_zone]}]"
+end
+
+midonet_nodes = node[:neutron][:elements][:"neutron-network"] || []
+if node.key?("nova")
+  midonet_nodes += node[:nova][:elements][:"nova-compute-#{node[:nova][:libvirt_type]}"]
+end
+
+midonet_nodes = midonet_nodes.map { |n|
+  Chef::Recipe::Barclamp::Inventory.get_network_by_type(Chef::Node.load(n), "admin").address
+}.join(" ")
+
+Chef::Log.debug("midonet_nodes = #{midonet_nodes}")
+
+bash "create tunnel-zone #{node[:neutron][:midonet][:tunnel_zone]}" do
+  code <<-EOS
+#!/bin/bash
+
+set -x
+set -e
+set -u
+
+get_tz_id() {
+  midonet-cli -e "tunnel-zone list" | \
+    grep "#{node[:neutron][:midonet][:tunnel_zone]}" | \
+    awk '{print $2}'
+}
+
+# Wait for midonet-cli to become available
+cli_available=0
+for i in $(seq 20); do
+  if ( midonet-cli -e 'list host' > /dev/null ); then
+    cli_available=1
+    break
+  fi
+  sleep 5
+done
+if (( ${cli_available} != 1 )); then
+  echo "MidoNet CLI is not available"
+  exit 1
+fi
+
+declare -a nodes=( #{midonet_nodes} )
+
+tz_id=$(get_tz_id)
+if [[ -n ${tz_id} ]]; then
+  midonet-cli -e "delete tunnel-zone ${tz_id}"
+fi
+
+midonet-cli -e "tunnel-zone create " \
+  "name #{node[:neutron][:midonet][:tunnel_zone]} " \
+  "type #{node[:neutron][:midonet][:zone_protocol]}"
+tz_id=$(get_tz_id)
+
+for h in ${nodes[@]}; do
+  host_id=$(midonet-cli -e "host list" | grep ${h} | awk '{print $2}')
+  if [[ -n ${host_id} ]]; then
+    midonet-cli -e "tunnel-zone ${tz_id} " \
+      "add member " \
+      "host ${host_id} " \
+      "address ${h}"
+  fi
+done
+    EOS
+  not_if { midonet_nodes.empty? }
 end

@@ -162,11 +162,12 @@ template neutron[:neutron][:config_file] do
 end
 
 if neutron[:neutron][:use_lbaas] || neutron[:neutron][:networking_plugin] == "midonet"
-  if neutron[:neutron][:networking_plugin] == "midonet"
-    interface_driver = "midonet"
+  interface_driver = if neutron[:neutron][:networking_plugin] == "midonet"
+    "midonet"
   else
-    interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+    "neutron.agent.linux.interface.OVSInterfaceDriver"
   end
+
   if neutron[:neutron][:networking_plugin] == "ml2" &&
       neutron[:neutron][:ml2_mechanism_drivers].include?("linuxbridge")
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"

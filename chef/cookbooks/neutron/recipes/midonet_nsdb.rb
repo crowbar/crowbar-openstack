@@ -19,6 +19,8 @@
 
 node[:neutron][:platform][:midonet_nsdb_pkgs].each { |p| package p }
 
+# Map NSDB nodes to neutron-server nodes. Eventually we could create a new
+# role (nsdb-server).
 zookeeper_hosts = node_search_with_cache("roles:neutron-server") || []
 zookeeper_hosts = zookeeper_hosts.map do |h|
   Barclamp::Inventory.get_network_by_type(h, "admin").address
@@ -32,6 +34,18 @@ if zookeeper_hosts.length < 3
   Chef::Log.warn("MidoNet: Please configure at least 3 zookeeper nodes for " \
                  "failover redundancy and an odd number for best " \
                  "performance.")
+end
+
+template "/etc/zookeeper/zoo.cfg" do
+  source "zoo.cfg.erb"
+  owner "zookeeper"
+  group "zookeeper"
+  mode 0o640
+  variables(
+    zookeeper_hosts: zookeeper_hosts,
+    snapRetainCount: node[:neutron][:midonet][:zookeeper][:snapRetainCount],
+    purgeInterval: 12
+  )
 end
 
 service "zookeeper" do
@@ -50,22 +64,9 @@ template "/etc/cassandra/conf/cassandra.yaml" do
   owner "cassandra"
   group "cassandra"
   mode 0o640
-  notifies :restart, "service[cassandra]"
-end
-
-service "midonet-cluster" do
-  supports status: true, restart: true
-  action [:enable, :start]
-end
-
-template "/etc/midonet/midonet.conf" do
-  source "midonet.conf.erb"
-  owner "root"
-  group "root"
-  mode 0o640
   variables(
     zookeeper_hosts: zookeeper_hosts,
     ip_address: Barclamp::Inventory.get_network_by_type(node, "admin").address
   )
-  notifies :restart, "service[midonet-cluster]"
+  notifies :restart, "service[cassandra]"
 end

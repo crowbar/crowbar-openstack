@@ -378,3 +378,8 @@ if neutron[:neutron][:networking_plugin] == "vmware"
   # compute nodes except openvswitch packages with stt.
   # For NSX plugin no neutron packages are needed.
 end
+
+if neutron[:neutron][:networking_plugin] == "midonet"
+  Chef::Log.info("Loading midonet_network recipe")
+  include_recipe "neutron::midonet_network"
+end
