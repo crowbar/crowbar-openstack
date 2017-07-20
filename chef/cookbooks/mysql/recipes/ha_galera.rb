@@ -122,14 +122,32 @@ unless node[:database][:galera_bootstrapped]
   end
 end
 
-transaction_objects = []
-
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
 
+transaction_objects = []
 service_name = "galera"
+
+vip_primitive = "vip-admin-#{CrowbarDatabaseHelper.get_ha_vhostname(node)}"
+ip_addr = CrowbarDatabaseHelper.get_listen_address(node)
+
+mysql_op = {}
+mysql_op["monitor"] = {}
+mysql_op["monitor"]["interval"] = "10s"
+
+pacemaker_primitive vip_primitive do
+  agent "ocf:heartbeat:IPaddr2"
+    params ({
+      "ip" => ip_addr
+    })
+  op mysql_op
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+transaction_objects << "pacemaker_primitive[#{vip_primitive}]"
 
 cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "database-server")
 nodes_names = cluster_nodes.map { |n| n[:hostname] }
