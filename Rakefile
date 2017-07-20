@@ -100,11 +100,32 @@ end
 
 unless ENV["PACKAGING"] && ENV["PACKAGING"] == "yes"
   require "rspec/core/rake_task"
+  require "foodcritic"
   RSpec::Core::RakeTask.new(:spec)
 
   task :syntaxcheck do
     system("for f in `find -not -path './vendor*' -name \*.rb`; do echo -n \"Syntaxcheck $f: \"; ruby -wc $f || exit $? ; done")
     exit $?.exitstatus
+  end
+
+  desc "Runs foodcritic against all the cookbooks."
+  task :foodcritic do
+    # we use -t ~VALUE to remove rules that are useless to us
+    # FC037 -> Invalid notification action. This rule does not seem to work if you
+    # use a var as the action as we do to create/delete resources in some cookbooks
+    # FC001 -> Use strings in preference to symbols to access node attributes
+    # totally a rule that depends on choice, should not be enforced unless we agree to use
+    # a standard choice for attributes across all cookbooks, so disable it for the moment
+    # Also disable all chef>10 as doesnt affect us and the metadata rules as we ignore
+    # updating the metadata.rb files everywhere
+    FoodCritic::Rake::LintTask.new do |t|
+      t.options = {
+        cookbook_paths: "chef/cookbooks",
+        epic_fail: true,
+        progress: true,
+        tags: %w(~FC001 ~FC037 ~chef11 ~chef12 ~chef13 ~metadata )
+      }
+    end
   end
 
   task default: [
