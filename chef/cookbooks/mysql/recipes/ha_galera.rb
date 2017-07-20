@@ -122,20 +122,44 @@ unless node[:database][:galera_bootstrapped]
   end
 end
 
-transaction_objects = []
-
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
 
+transaction_objects = []
 service_name = "galera"
+
+vip_primitive = "vip-admin-#{CrowbarDatabaseHelper.get_ha_vhostname(node)}"
+ip_addr = CrowbarDatabaseHelper.get_listen_address(node)
+
+vip_op = {}
+vip_op["monitor"] = {}
+vip_op["monitor"]["interval"] = "10s"
+
+pacemaker_primitive vip_primitive do
+  agent "ocf:heartbeat:IPaddr2"
+    params ({
+      "ip" => ip_addr
+    })
+  op vip_op
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+transaction_objects << "pacemaker_primitive[#{vip_primitive}]"
 
 cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "database-server")
 nodes_names = cluster_nodes.map { |n| n[:hostname] }
 
+mysql_op = {}
+mysql_op["monitor"] = {}
+mysql_op["monitor"]["interval"] = "10s"
+mysql_op["monitor"]["role"] = "Master"
+
 pacemaker_primitive service_name do
   agent resource_agent
+  op mysql_op
   params ({
     "enable_creation" => true,
     "wsrep_cluster_address" => "gcomm://" + nodes_names.join(","),
@@ -166,6 +190,26 @@ transaction_objects.push("pacemaker_ms[#{ms_name}]")
 
 ms_location_name = openstack_pacemaker_controller_only_location_for ms_name
 transaction_objects.push("pacemaker_location[#{ms_location_name}]")
+
+# Make sure VIP is running on a node where MySQL is in a good shape
+# (= node is successfully promoted to Master)
+colocation_constraint = "col-vip-with-#{service_name}"
+pacemaker_colocation colocation_constraint do
+  score "inf"
+  resources "#{vip_primitive} #{ms_name}:Master"
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+transaction_objects << "pacemaker_colocation[#{colocation_constraint}]"
+
+order_constraint = "o-#{service_name}-vip"
+pacemaker_order order_constraint do
+  score "Mandatory"
+  ordering "#{ms_name}:promote #{vip_primitive}:start"
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+transaction_objects << "pacemaker_order[#{order_constraint}]"
 
 pacemaker_transaction "galera service" do
   cib_objects transaction_objects
