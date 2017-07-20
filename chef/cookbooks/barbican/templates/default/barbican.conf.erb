@@ -19,7 +19,7 @@ kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 
 [queue]
 
-asynchronous_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+asynchronous_workers = 1
 
 [keystone_notifications]
 
