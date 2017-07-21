@@ -29,33 +29,13 @@ crowbar_pacemaker_sync_mark "sync-database_before_ha" do
 end
 
 unless node[:database][:galera_bootstrapped]
-  mysql_service_name = "mariadb"
-
-  bash "reload systemd after mariadb.service update" do
-    code "systemctl daemon-reload"
-    action :nothing
-    subscribes :run,
-      "file[mariadb.service]",
-      :immediately
-    subscribes :run,
-      "file[delete mariadb.service]",
-      :immediately
-  end
+  mysql_service_name = "mysql"
 
   directory "/var/run/mysql/" do
     owner "mysql"
     group "root"
     mode "0755"
     action :create
-  end
-
-  # Temporary install mariadb unit as the "galera_new_cluster" bootstrap
-  # script doesn't work with installed "mysql.service" unit. This unit file
-  # will be delete again further down.
-  file "mariadb.service" do
-    path "/etc/systemd/system/mariadb.service"
-    content lazy { ::File.open("/usr/share/mysql/systemd/mariadb.service").read }
-    mode "0644"
   end
 
   execute "mysql_install_db" do
@@ -66,7 +46,7 @@ unless node[:database][:galera_bootstrapped]
   # Initialize cluster on the founder node, this will start mariadb
   # via systemctl. We stop it again after the bootstrap.
   execute "boostrapping first mariadb galera cluster node" do
-    command "galera_new_cluster"
+    command "galera_new_cluster mysql"
     action :run
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
@@ -110,15 +90,6 @@ unless node[:database][:galera_bootstrapped]
       node.set[:database][:galera_bootstrapped] = true
       node.save
     end
-    subscribes :create,
-      "file[delete mariadb.service]",
-      :immediately
-    action :nothing
-  end
-
-  file "delete mariadb.service" do
-    path "/etc/systemd/system/mariadb.service"
-    action :delete
   end
 end
 
