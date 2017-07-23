@@ -108,6 +108,10 @@ end
 
 cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "database-server")
 nodes_names = cluster_nodes.map { |n| n[:hostname] }
+cluster_addresses = "gcomm://"
+if node[:database][:galera_bootstrapped]
+  cluster_addresses << nodes_names.join(",")
+end
 
 template "/etc/my.cnf" do
   source "my.cnf.erb"
@@ -115,7 +119,7 @@ template "/etc/my.cnf" do
   group "mysql"
   mode "0640"
   variables(
-    nodes_names: nodes_names
+    cluster_addresses: cluster_addresses
   )
   notifies :run, resources(script: "handle mysql restart"), :immediately if platform_family?("debian")
   notifies :restart, "service[mysql]", :immediately if platform_family?(%w{rhel suse fedora})

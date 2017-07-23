@@ -90,6 +90,7 @@ unless node[:database][:galera_bootstrapped]
       node.set[:database][:galera_bootstrapped] = true
       node.save
     end
+    notifies :create, "template[/etc/my.cnf]"
   end
 end
 

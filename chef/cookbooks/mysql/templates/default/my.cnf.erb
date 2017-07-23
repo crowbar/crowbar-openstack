@@ -56,7 +56,7 @@ skip-external-locking
 # GALERA
 
 wsrep_provider=/usr/lib64/galera-3/libgalera_smm.so
-wsrep_cluster_address="gcomm://<%= @nodes_names.join(",") %>"
+wsrep_cluster_address="<%= @cluster_addresses %>"
 innodb_autoinc_lock_mode=2
 innodb_doublewrite=1
 query_cache_size=0
