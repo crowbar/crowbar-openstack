@@ -33,11 +33,11 @@ class NeutronService < PacemakerServiceObject
   end
 
   def self.networking_ml2_type_drivers_valid
-    ["vlan", "gre", "vxlan"]
+    ["vlan", "gre", "vxlan", "opflex"]
   end
 
   def self.networking_ml2_mechanism_drivers_valid
-    ["linuxbridge", "openvswitch", "cisco_nexus"]
+    ["linuxbridge", "openvswitch", "cisco_nexus", "cisco_apic_ml2", "apic_gbp"]
   end
 
   class << self
@@ -204,6 +204,40 @@ class NeutronService < PacemakerServiceObject
     if ml2_mechanism_drivers.include?("cisco_nexus") &&
         !ml2_type_drivers.include?("vlan")
       validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_nexus_vlan")
+    end
+
+    # Checks for Cisco ACI ml2 driver
+    if ml2_mechanism_drivers.include?("cisco_apic_ml2") &&
+        ml2_mechanism_drivers.include?("apic_gbp")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_ml2_gbp")
+    end
+
+    if ml2_mechanism_drivers.include?("cisco_apic_ml2") ||
+        ml2_mechanism_drivers.include?("apic_gbp")
+      # openvswitch should not be used when cisco_apic_ml2 mechanism driver is used
+      if ml2_mechanism_drivers.include?("openvswitch")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_ml2")
+      end
+
+      if ml2_mechanism_drivers.include?("linuxbridge")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_linuxbridge")
+      end
+
+      # cisco_apic_ml2 mechanism driver needs opflex as the type_driver
+      unless ml2_type_drivers.include?("opflex")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_type")
+      end
+
+      # Validate if ACI configurations are provided
+      if proposal["attributes"]["neutron"]["apic"].nil? ||
+          proposal["attributes"]["neutron"]["apic"].empty?
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_no_config")
+      end
+
+      # Cisco APIC already distributes neutron services not needing DVR
+      if proposal["attributes"]["neutron"]["use_dvr"]
+        validation_error I18n.t("barcalmp.#{@bc_name}.validation.cisco_apic_dvr")
+      end
     end
 
     # for now, openvswitch and linuxbrige can't be used in parallel

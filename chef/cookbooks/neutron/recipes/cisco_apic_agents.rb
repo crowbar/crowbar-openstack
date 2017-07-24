@@ -97,17 +97,22 @@ if node.roles.include?("nova-compute-kvm")
       opflex_apic_domain_name: neutron[:neutron][:apic][:system_id],
       hostname: node[:hostname],
       socketgroup: neutron[:neutron][:platform][:group],
-      opflex_peer_ip: neutron[:neutron][:opflex][:peer_ip],
-      opflex_peer_port: neutron[:neutron][:opflex][:peer_port],
-      opflex_vxlan_encap_iface: neutron[:neutron][:opflex][:vxlan][:encap_iface],
-      opflex_vxlan_uplink_iface: neutron[:neutron][:opflex][:vxlan][:uplink_iface],
-      opflex_vxlan_uplink_vlan: neutron[:neutron][:opflex][:vxlan][:uplink_vlan],
-      opflex_vxlan_remote_ip: neutron[:neutron][:opflex][:vxlan][:remote_ip],
-      opflex_vxlan_remote_port: neutron[:neutron][:opflex][:vxlan][:remote_port],
+      opflex_peer_ip: neutron[:neutron][:apic][:opflex][:peer_ip],
+      opflex_peer_port: neutron[:neutron][:apic][:opflex][:peer_port],
+      opflex_vxlan_encap_iface: neutron[:neutron][:apic][:opflex][:vxlan][:encap_iface],
+      opflex_vxlan_uplink_iface: neutron[:neutron][:apic][:opflex][:vxlan][:uplink_iface],
+      opflex_vxlan_uplink_vlan: neutron[:neutron][:apic][:opflex][:vxlan][:uplink_vlan],
+      opflex_vxlan_remote_ip: neutron[:neutron][:apic][:opflex][:vxlan][:remote_ip],
+      opflex_vxlan_remote_port: neutron[:neutron][:apic][:opflex][:vxlan][:remote_port],
       # TODO(mmnelemane) : update VLAN encapsulation config when it works.
       # Currently set to VXLAN by default but can be modified from proposal.
       ml2_type_drivers: neutron[:neutron][:ml2_type_drivers]
     )
+  end
+
+  neutron_metadata do
+    use_cisco_apic_ml2_driver true
+    neutron_node_object neutron
   end
 
   service "neutron-opflex-agent" do

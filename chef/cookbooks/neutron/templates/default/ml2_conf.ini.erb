@@ -83,7 +83,13 @@ flat_networks = <%= @external_networks.join(",") %>
 # network_vlan_ranges =
 # Example: network_vlan_ranges = physnet1:1000:2999,physnet2
 <% if @ml2_type_drivers.include?("vlan") -%>
+  <%# Using the order of ml2_type_drivers to determine encapsulation for Cisco ACI drivers -%>
+  <%# Cisco ACI opflex must be first followed by the type of ecapsulation used within ACI fabric -%>
+  <% unless @ml2_type_drivers[0] == "opflex" && @ml2_type_drivers[1] == "vxlan" -%>
+      <%# The Cisco ACI driver will force configure opflex for vlan encapsulation when network_vlan_ranges is given. -%>
+      <%# Hence network_vlan_ranges is not added for vxlan configuration -%>
 network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
+  <% end -%>
 <% end -%>
 
 [ml2_type_gre]
