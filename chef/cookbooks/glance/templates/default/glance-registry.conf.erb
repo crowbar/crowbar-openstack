@@ -5,7 +5,6 @@ workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 http_keepalive = false
 transport_url = <%= @rabbit_settings[:url] %>
 debug = <%= node[:glance][:debug] ? "True" : "False" %>
-verbose = <%= node[:glance][:verbose] ? "True" : "False" %>
 log_file = <%= node[:glance][:registry][:log_file] %>
 use_syslog = <%= node[:glance][:use_syslog] ? "True" : "False" %>
 use_stderr = false
@@ -32,6 +31,8 @@ project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
 auth_url = <%= @keystone_settings['admin_auth_url'] %>
 auth_type = password
+service_token_roles_required = true
+service_token_roles = admin
 
 [oslo_messaging_notifications]
 driver = messaging

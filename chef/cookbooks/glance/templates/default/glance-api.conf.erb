@@ -17,7 +17,6 @@ registry_port = <%= @registry_bind_port %>
 transport_url = <%= @rabbit_settings[:url] %>
 registry_client_insecure = <%= @keystone_settings["insecure"] %>
 debug = <%= node[:glance][:debug] ? "True" : "False" %>
-verbose = <%= node[:glance][:verbose] ? "True" : "False" %>
 log_file = <%= node[:glance][:api][:log_file] %>
 use_syslog = <%= node[:glance][:use_syslog] ? "True" : "False" %>
 use_stderr = false
@@ -43,7 +42,7 @@ vmware_server_password = <%= node[:glance][:vsphere][:password] %>
 <% node[:glance][:vsphere][:datastores].each do |datastore| -%>
 vmware_datastores ="<%= datastore %>"
 <% end -%>
-vmware_api_insecure = <%= node[:glance][:vsphere][:insecure] ? "True" : "False" %>
+vmware_insecure = <%= node[:glance][:vsphere][:insecure] ? "True" : "False" %>
 cinder_catalog_info = volumev2:cinderv2:internalURL
 cinder_os_region_name = <%= @keystone_settings['endpoint_region'] %>
 cinder_api_insecure = <%= @cinder_api_insecure ? 'True' : 'False' %>
@@ -77,6 +76,8 @@ project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
 auth_url = <%= @keystone_settings['admin_auth_url'] %>
 auth_type = password
+service_token_roles_required = true
+service_token_roles = admin
 
 [oslo_concurrency]
 lock_path = /var/run/glance
