@@ -265,11 +265,6 @@ template node[:keystone][:config_file] do
       sql_connection: sql_connection,
       sql_idle_timeout: node[:keystone][:sql][:idle_timeout],
       debug: node[:keystone][:debug],
-      verbose: node[:keystone][:verbose],
-      bind_admin_host: bind_admin_host,
-      bind_service_host: bind_service_host,
-      bind_admin_port: bind_admin_port,
-      bind_service_port: bind_service_port,
       admin_endpoint: KeystoneHelper.service_URL(
         node[:keystone][:api][:protocol],
         my_admin_host, node[:keystone][:api][:admin_port]
