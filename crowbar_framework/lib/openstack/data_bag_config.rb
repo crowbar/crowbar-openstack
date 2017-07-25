@@ -50,7 +50,15 @@ module Openstack
             role.default_attributes[barclamp]["keystone_instance"],
             "keystone"
         )
-        keystone_config["insecure"]
+        # If we have not run the keystone barclamp, this could be empty
+        if keystone_config["insecure"].blank?
+          keystone_proposal = Proposal.where(barclamp: "keystone", name: "default").first
+          unless keystone_proposal.nil?
+            keystone_proposal["attributes"]["keystone"]["ssl"]["insecure"]
+          end
+        else
+          keystone_config["insecure"]
+        end
       end
     end
   end
