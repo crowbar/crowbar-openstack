@@ -42,6 +42,7 @@ use_cow_images = false
 <% end -%>
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 <%= "ssl_ca_file = #{@ssl_ca_file}" if @ssl_cert_required %>
+
 default_floating_pool = floating
 dhcpbridge = <%= @dhcpbridge %>
 linuxnet_interface_driver = ""
