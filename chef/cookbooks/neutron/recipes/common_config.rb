@@ -68,6 +68,13 @@ end
 
 keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
+ha_enabled = node[:neutron][:ha][:server][:enabled]
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "neutron-server") : [node]
+)
+
+memcached_instance("neutron-server") if is_neutron_server
+
 bind_host, bind_port = NeutronHelper.get_bind_host_port(node)
 
 # Get Nova's insecure setting
@@ -130,6 +137,7 @@ template neutron[:neutron][:config_file] do
       # query on the "neutron" node, not on "node"
       rabbit_settings: CrowbarOpenStackHelper.rabbitmq_settings(neutron, "neutron"),
       keystone_settings: keystone_settings,
+      memcached_servers: memcached_servers,
       ssl_enabled: neutron[:neutron][:api][:protocol] == "https",
       ssl_cert_file: neutron[:neutron][:ssl][:certfile],
       ssl_key_file: neutron[:neutron][:ssl][:keyfile],
