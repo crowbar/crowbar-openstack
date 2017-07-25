@@ -20,18 +20,18 @@ module Openstack
       def insecure(barclamp, role)
         attributes = role.default_attributes[barclamp]
 
-        if attributes.key?("api") && attributes["api"].key?("protocol")
+        use_ssl = if attributes.key?("api") && attributes["api"].key?("protocol")
           # aodh, cinder, glance, heat, keystone, manila, neutron
-          use_ssl = attributes["api"]["protocol"] == "https"
+          attributes["api"]["protocol"] == "https"
         elsif attributes.key?("api") && attributes["api"].key?("ssl")
           # barbican
-          use_ssl = attributes["api"]["ssl"]
+          attributes["api"]["ssl"]
         elsif attributes.key?("ssl") && attributes["ssl"].key?("enabled")
           # nova
-          use_ssl = attributes["ssl"]["enabled"]
+          attributes["ssl"]["enabled"]
         else
           # magnum, sahara, trove
-          use_ssl = false
+          false
         end
 
         insecure = use_ssl && attributes["ssl"]["insecure"]
@@ -46,9 +46,9 @@ module Openstack
 
       def keystone_insecure(barclamp, role)
         keystone_config = Crowbar::DataBagConfig.load(
-            "openstack",
-            role.default_attributes[barclamp]["keystone_instance"],
-            "keystone"
+          "openstack",
+          role.default_attributes[barclamp]["keystone_instance"],
+          "keystone"
         )
         # If we have not run the keystone barclamp, this could be empty
         if keystone_config["insecure"].blank?
