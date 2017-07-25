@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class GlanceService < PacemakerServiceObject
+class GlanceService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "glance"

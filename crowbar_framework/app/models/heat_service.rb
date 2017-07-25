@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class HeatService < PacemakerServiceObject
+class HeatService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "heat"

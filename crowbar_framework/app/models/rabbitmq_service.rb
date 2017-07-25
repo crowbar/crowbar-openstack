@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class RabbitmqService < PacemakerServiceObject
+class RabbitmqService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "rabbitmq"

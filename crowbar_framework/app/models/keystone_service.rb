@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class KeystoneService < PacemakerServiceObject
+class KeystoneService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "keystone"
