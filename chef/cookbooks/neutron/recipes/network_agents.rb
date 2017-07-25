@@ -124,7 +124,7 @@ template "/etc/neutron/dhcp_agent.ini" do
     interface_driver: interface_driver,
     resync_interval: 5,
     dhcp_driver: "neutron.agent.linux.dhcp.Dnsmasq",
-    dhcp_domain: node[:neutron][:dhcp_domain],
+    dns_domain: node[:neutron][:dns_domain],
     enable_isolated_metadata: "True",
     enable_metadata_network: "False",
     nameservers: dns_list

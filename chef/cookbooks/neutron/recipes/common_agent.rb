@@ -329,7 +329,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         interface_driver: interface_driver,
         handle_internal_only_routers: "True",
         metadata_port: 9697,
-        send_arp_for_ha: 3,
         periodic_interval: 40,
         periodic_fuzzy_delay: 5,
         dvr_enabled: neutron[:neutron][:use_dvr],
