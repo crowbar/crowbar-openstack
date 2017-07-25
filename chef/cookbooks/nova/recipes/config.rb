@@ -156,7 +156,6 @@ if neutron_servers.length > 0
   neutron_insecure = neutron_protocol == "https" && neutron_server[:neutron][:ssl][:insecure]
   neutron_service_user = neutron_server[:neutron][:service_user]
   neutron_service_password = neutron_server[:neutron][:service_password]
-  neutron_dhcp_domain = neutron_server[:neutron][:dns_domain]
   neutron_ml2_drivers = neutron_server[:neutron][:ml2_type_drivers]
   neutron_has_tunnel = neutron_ml2_drivers.include?("gre") || neutron_ml2_drivers.include?("vxlan")
 else
@@ -164,7 +163,6 @@ else
   neutron_server_port = nil
   neutron_service_user = nil
   neutron_service_password = nil
-  neutron_dhcp_domain = "novalocal"
   neutron_has_tunnel = false
 end
 Chef::Log.info("Neutron server at #{neutron_server_host}")
@@ -394,7 +392,6 @@ template node[:nova][:config_file] do
     neutron_insecure: neutron_insecure || keystone_settings["insecure"],
     neutron_service_user: neutron_service_user,
     neutron_service_password: neutron_service_password,
-    neutron_dhcp_domain: neutron_dhcp_domain,
     neutron_has_tunnel: neutron_has_tunnel,
     keystone_settings: keystone_settings,
     cinder_insecure: cinder_insecure || keystone_settings["insecure"],

@@ -6,8 +6,6 @@ key = <%= @vncproxy_key_file %>
 instance_name_template=zvm%05x
 <% end %>
 my_ip = <%= node[:nova][:my_ip] %>
-<% if @libvirt_type.eql?('ironic') %>scheduler_host_manager = ironic_host_manager<% end %>
-notify_on_state_change = vm_and_task_state
 state_path = /var/lib/nova
 enabled_ssl_apis = <%= @ssl_enabled ? "osapi_compute,metadata" : "" %>
 osapi_compute_listen = <%= @bind_host %>
@@ -21,10 +19,6 @@ image_cache_manager_interval = -1
 <% if @libvirt_type.eql?('kvm') -%>
 use_rootwrap_daemon = <%= @use_rootwrap_daemon %>
 <% end -%>
-<% if @vendordata_jsonfile %>
-vendordata_jsonfile_path = <%= @vendordata_jsonfile %>
-<% end -%>
-auth_strategy = keystone
 memcached_servers = <%= @memcached_servers.join(',') %>
 instances_path = <%= node[:nova][:instances_path] %>
 instance_usage_audit = True
@@ -34,10 +28,6 @@ reserved_host_memory_mb = <%= @reserved_host_memory %>
 cpu_allocation_ratio = <%= node[:nova][:scheduler][:cpu_allocation_ratio] %>
 ram_allocation_ratio = <%= node[:nova][:scheduler][:ram_allocation_ratio] %>
 disk_allocation_ratio = <%= node[:nova][:scheduler][:disk_allocation_ratio] %>
-<% if @use_baremetal_filters %>scheduler_use_baremetal_filters = true<% end -%>
-<% if @has_itxt -%>scheduler_available_filters = nova.scheduler.filters.standard_filters<% end %>
-<% if @has_itxt %>scheduler_default_filters = RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,TrustedFilter<% end %>
-<% unless @track_instance_changes %>scheduler_tracks_instance_changes = false<% end %>
 <% if @libvirt_type.eql?('vmware') -%>
 compute_driver = vmwareapi.VMwareVCDriver
 <% elsif @libvirt_type.eql?('zvm') -%>
@@ -52,14 +42,12 @@ use_cow_images = false
 <% end -%>
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
 <%= "ssl_ca_file = #{@ssl_ca_file}" if @ssl_cert_required %>
-use_neutron = true
 default_floating_pool = floating
 dhcpbridge = <%= @dhcpbridge %>
 linuxnet_interface_driver = ""
 <% if @force_config_drive || @libvirt_type.eql?('zvm') %>
 flat_injected = true
 <% end -%>
-dhcp_domain = <%= @neutron_dhcp_domain %>
 security_group_api = neutron
 <% if @force_config_drive and !@libvirt_type.eql?('zvm') %>
 config_drive_format = vfat
@@ -68,11 +56,9 @@ config_drive_format = vfat
 force_config_drive = True
 <% end -%>
 debug = <%= node[:nova][:debug] %>
-verbose = <%= node[:nova][:verbose] ? 'True' : 'False' %>
 log_dir = /var/log/nova
 use_syslog = <%= node[:nova][:use_syslog] ? 'True' : 'False' %>
 use_stderr = false
-rpc_conn_pool_size = 64
 executor_thread_pool_size = 256
 transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = nova
@@ -90,6 +76,12 @@ control_exchange = nova
 <%= "zvm_user_profile=#{node[:nova][:zvm][:zvm_user_profile]}" if @libvirt_type.eql?('zvm') %>
 <%= "zvm_user_default_password=#{node[:nova][:zvm][:zvm_user_default_password]}" if @libvirt_type.eql?('zvm') %>
 <%= "zvm_user_default_privilege=#{node[:nova][:zvm][:zvm_user_default_privilege]}" if @libvirt_type.eql?('zvm') %>
+
+[api]
+auth_strategy = keystone
+<% if @vendordata_jsonfile %>
+vendordata_jsonfile_path = <%= @vendordata_jsonfile %>
+<% end -%>
 
 [api_database]
 <% if @api_database_connection -%>
@@ -172,6 +164,8 @@ project_name = <%= @keystone_settings['service_tenant'] %>
 project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
 memcached_servers = <%= @memcached_servers.join(',') %>
+service_token_roles_required = true
+service_token_roles = admin
 
 [libvirt]
 <% if %w(kvm lxc qemu uml xen parallels).include? @libvirt_type -%>
@@ -232,6 +226,7 @@ rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:client_ca_certs] -%>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
+rpc_conn_pool_size = 64
 
 [serial_console]
 enabled = <%= @serial_enabled ? "True" : "False" %>
@@ -283,3 +278,13 @@ keep_alive = false
 
 [scheduler]
 discover_hosts_in_cells_interval = <%= node[:nova][:scheduler][:discover_hosts_in_cells_interval] %>
+<% if @libvirt_type.eql?('ironic') %>host_manager = ironic_host_manager<% end %>
+
+[filter_scheduler]
+<% if @use_baremetal_filters %>use_baremetal_filters = true<% end -%>
+<% if @has_itxt -%>available_filters = nova.scheduler.filters.standard_filters<% end %>
+<% if @has_itxt %>enabled_filters = RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,TrustedFilter<% end %>
+<% unless @track_instance_changes %>track_instance_changes = false<% end %>
+
+[notifications]
+notify_on_state_change = vm_and_task_state
