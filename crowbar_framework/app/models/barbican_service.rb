@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-class BarbicanService < PacemakerServiceObject
+class BarbicanService < OpenstackServiceObject
   def initialize(thelogger = nil)
     @bc_name = "barbican"
     @logger = thelogger

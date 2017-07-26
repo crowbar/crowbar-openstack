@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-class ManilaService < PacemakerServiceObject
+class ManilaService < OpenstackServiceObject
   def initialize(thelogger = nil)
     @bc_name = "manila"
     @logger = thelogger

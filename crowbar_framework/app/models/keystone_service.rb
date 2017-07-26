@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class KeystoneService < PacemakerServiceObject
+class KeystoneService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "keystone"
@@ -167,6 +167,10 @@ class KeystoneService < PacemakerServiceObject
       }
       node.save
     end
+
+    # as we are overriding the apply_role_post_chef_call we have to call save_config_to_databag
+    # manually. We could also call super here.
+    save_config_to_databag(old_role, role)
 
     @logger.debug("Keystone apply_role_post_chef_call: leaving")
   end

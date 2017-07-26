@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-class AodhService < PacemakerServiceObject
+class AodhService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "aodh"
