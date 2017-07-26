@@ -18,6 +18,6 @@ end
 
 def downgrade(ta, td, a, d)
   # There is no current way of removing the databag
-  # not even sure if we should do it as it wont affect anything
+  # not even sure if we should do it as it won't affect anything
   return a, d
 end

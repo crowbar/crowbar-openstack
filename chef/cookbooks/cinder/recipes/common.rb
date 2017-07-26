@@ -42,9 +42,9 @@ end
 Chef::Log.info("Glance server at #{glance_server_host}")
 
 glance_config = BarclampLibrary::Barclamp::Config.load(
-    "openstack",
-    "glance",
-    node[:cinder][:glance_instance]
+  "openstack",
+  "glance",
+  node[:cinder][:glance_instance]
 )
 glance_insecure = glance_config["insecure"] || false
 
