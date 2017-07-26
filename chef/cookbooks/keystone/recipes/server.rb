@@ -58,7 +58,10 @@ my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:keystone][:api][:protocol] == "https", ha_enabled)
 
 # Other barclamps need to know the hostname to reach keystone
-node.set[:keystone][:api][:internal_URL_host] = my_admin_host
+if node[:keystone][:api][:internal_URL_host] != my_admin_host
+  node.set[:keystone][:api][:internal_URL_host] = my_admin_host
+  node.save
+end
 
 if node[:keystone][:frontend] == "uwsgi"
 
@@ -739,10 +742,6 @@ end
 
 crowbar_pacemaker_sync_mark "create-keystone_register" if ha_enabled
 
-node.set[:keystone][:monitor] = {} if node[:keystone][:monitor].nil?
-node.set[:keystone][:monitor][:svcs] = ["keystone"] if node[:keystone][:monitor][:svcs] != ["keystone"]
-node.save
-
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 template "/root/.openrc" do
@@ -756,7 +755,10 @@ template "/root/.openrc" do
 end
 
 # Set new endpoint URL.
-node.set[:keystone][:api][:internal_url_host] = keystone_settings["internal_url_host"]
-node.save
+internal_url_host = keystone_settings["internal_url_host"]
+if node[:keystone][:api][:internal_url_host] != internal_url_host
+  node.set[:keystone][:api][:internal_url_host] = internal_url_host
+  node.save
+end
 Chef::Log.debug("setting new endpoint host to " \
                 "#{node[:keystone][:api][:internal_url_host]}")
