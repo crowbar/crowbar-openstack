@@ -17,7 +17,7 @@
 
 require "ipaddr"
 
-class NeutronService < PacemakerServiceObject
+class NeutronService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "neutron"
