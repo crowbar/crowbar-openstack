@@ -30,9 +30,11 @@ sql_connection = "#{db_settings[:url_scheme]}://#{node[:magnum][:db][:user]}:"\
                  "#{node[:magnum][:db][:database]}"
 
 # address/port binding
-my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
-  node, "admin").address
-node.set[:magnum][:api][:bind_host] = my_ipaddress
+my_ipaddress = Barclamp::Inventory.get_network_by_type(node, "admin").address
+if node[:magnum][:api][:bind_host] != my_ipaddress
+  node.set[:magnum][:api][:bind_host] = my_ipaddress
+  node.save
+end
 
 bind_port = network_settings[:api][:bind_port]
 bind_host = network_settings[:api][:bind_host]
@@ -51,5 +53,3 @@ template node[:magnum][:config_file] do
     keystone_settings: KeystoneHelper.keystone_settings(node, :magnum),
   )
 end
-
-node.save
