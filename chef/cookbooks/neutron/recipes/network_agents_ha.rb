@@ -13,8 +13,12 @@
 # limitations under the License.
 #
 
-use_l3_agent = (node[:neutron][:networking_plugin] != "vmware")
+use_l3_agent = (node[:neutron][:networking_plugin] != "vmware" &&
+                !node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") &&
+                !node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
 use_lbaas_agent = node[:neutron][:use_lbaas]
+use_metadata_agent = (!node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") &&
+                      !node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
 
 if use_l3_agent
   # do the setup required for neutron-ha-tool
@@ -115,12 +119,14 @@ if use_l3_agent
   l3_agent_clone = "cl-#{l3_agent_primitive}"
 end
 
-metadata_agent_primitive = "neutron-metadata-agent"
-objects = openstack_pacemaker_controller_clone_for_transaction metadata_agent_primitive do
-  agent node[:neutron][:ha][:network][:metadata_ra]
-  op node[:neutron][:ha][:network][:op]
+if use_metadata_agent
+  metadata_agent_primitive = "neutron-metadata-agent"
+  objects = openstack_pacemaker_controller_clone_for_transaction metadata_agent_primitive do
+    agent node[:neutron][:ha][:network][:metadata_ra]
+    op node[:neutron][:ha][:network][:op]
+  end
+  transaction_objects.push(objects)
 end
-transaction_objects.push(objects)
 
 metering_agent_primitive = "neutron-metering-agent"
 objects = openstack_pacemaker_controller_clone_for_transaction metering_agent_primitive do
