@@ -43,11 +43,10 @@ unless node[:database][:galera_bootstrapped]
     action :run
   end
 
-  # Initialize cluster on the founder node, this will start mariadb
-  # via systemctl. We stop it again after the bootstrap.
-  execute "boostrapping first mariadb galera cluster node" do
-    command "galera_new_cluster mysql"
-    action :run
+  # Start mariadb on the founder. We stop it again after bootstrapping.
+  service "starting mysql on cluster founder" do
+    service_name mysql_service_name
+    action :start
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
