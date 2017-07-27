@@ -210,8 +210,6 @@ template node[:nova]["ec2-api"][:config_file] do
   )
 end
 
-node.save
-
 service "openstack-ec2-api-api" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:nova]["ec2-api"][:config_file])
