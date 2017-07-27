@@ -206,34 +206,50 @@ function findfirst() {
 echo "Downloading image ... "
 wget --no-verbose $IMAGE_URL --directory-prefix=$TEMP 2>&1 || exit $?
 
-echo "Unpacking image ... "
-mkdir $IMG_DIR
-tar -xvzf $TEMP/$IMG_FILE -C $IMG_DIR || exit $?
+if [[ "$IMG_FILE" == *.tar.gz ]] || [[ "$IMG_FILE" == *.tgz ]]; then
+  echo "Unpacking image ... "
+  mkdir $IMG_DIR
+  tar -xvzf $TEMP/$IMG_FILE -C $IMG_DIR || exit $?
+else
+  IMG_DIR=$TEMP
+fi
 rm -rf #{node[:tempest][:tempest_path]}/etc/cirros/*
-cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
+cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') \
+  #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
 
-echo -n "Adding kernel ... "
-KERNEL_ID=$(glance #{insecure} image-create \
-    --name "$IMG_NAME-tempest-kernel" \
-    --visibility public --container-format aki \
-    --disk-format aki < $(findfirst '*-vmlinuz') | extract_id)
-echo "done."
-[ -n "$KERNEL_ID" ] || exit 1
+if [[ -n "$(findfirst '*-vmlinuz')" && -n "$(findfirst '*-initrd')" ]]; then
+    IMG_EXTRA_ARGS=
+    echo -n "Adding kernel ... "
+    KERNEL_ID=$(glance #{insecure} image-create \
+        --name "$IMG_NAME-tempest-kernel" \
+        --visibility public --container-format aki \
+        --disk-format aki < $(findfirst '*-vmlinuz') | extract_id)
+    echo "done."
+    [ -n "$KERNEL_ID" ] || exit 1
 
-echo -n "Adding ramdisk ... "
-RAMDISK_ID=$(glance #{insecure} image-create \
-    --name="$IMG_NAME-tempest-ramdisk" \
-    --visibility public --container-format ari \
-    --disk-format ari < $(findfirst '*-initrd') | extract_id)
-echo "done."
-[ -n "$RAMDISK_ID" ] || exit 1
+    echo -n "Adding ramdisk ... "
+    RAMDISK_ID=$(glance #{insecure} image-create \
+        --name="$IMG_NAME-tempest-ramdisk" \
+        --visibility public --container-format ari \
+        --disk-format ari < $(findfirst '*-initrd') | extract_id)
+    echo "done."
+    [ -n "$RAMDISK_ID" ] || exit 1
+
+    IMG_EXTRA_ARGS="--container-format ami \
+                    --disk-format ami \
+                    --property kernel_id=$KERNEL_ID \
+                    --property ramdisk_id=$RAMDISK_ID"
+else
+    IMG_EXTRA_ARGS="--container-format bare \
+                    --disk-format qcow2"
+fi
 
 echo -n "Adding alt image ... "
 ALT_MACHINE_ID=$(glance #{insecure} image-create \
     --name="$IMG_NAME-tempest-machine-alt" \
-    --visibility public --container-format ami --disk-format ami \
-    --property kernel_id=$KERNEL_ID \
-    --property ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
+    $IMG_EXTRA_ARGS \
+    --visibility public \
+    --file $(findfirst '*.img') | extract_id)
 echo "done."
 [ -n "$ALT_MACHINE_ID" ] || exit 1
 
@@ -243,14 +259,15 @@ echo $ALT_MACHINE_ID > #{alt_machine_id_file}
 echo -n "Adding image ... "
 MACHINE_ID=$(glance #{insecure} image-create \
     --name="$IMG_NAME-tempest-machine" \
-    --visibility public --container-format ami --disk-format ami \
-    --property kernel_id=$KERNEL_ID \
-    --property ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
+    $IMG_EXTRA_ARGS \
+    --visibility public \
+    --file $(findfirst '*.img') | extract_id)
 echo "done."
 [ -n "$MACHINE_ID" ] || exit 1
 
 echo -n "Saving machine id ..."
 echo $MACHINE_ID > #{machine_id_file}
+
 echo "done."
 
 rm -rf $TEMP
