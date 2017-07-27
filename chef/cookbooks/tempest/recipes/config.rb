@@ -175,6 +175,11 @@ alt_machine_id_file = node[:tempest][:tempest_path] + "/alt_machine.id"
 
 insecure = "--insecure"
 
+kvm_compute_nodes = search(:node, "roles:nova-compute-kvm") || []
+vmware_compute_nodes = search(:node, "roles:nova-compute-vmware") || []
+vmware_enabled = vmware_compute_nodes.any?
+vmware_only = vmware_enabled && kvm_compute_nodes.empty?
+
 tempest_test_image = node[:tempest][:tempest_test_images][node[:kernel][:machine]]
 
 cirros_version = File.basename(tempest_test_image).split("-")[1]
@@ -213,35 +218,55 @@ if [[ "$IMG_FILE" == *.tar.gz ]] || [[ "$IMG_FILE" == *.tgz ]]; then
 else
   IMG_DIR=$TEMP
 fi
+if [[ "$VMWARE_ENABLED" = true && -z "$(findfirst '*.vmdk')" && -z "$(findfirst '*-vmlinuz')" ]]; then
+    echo -n "Converting vmware image ... "
+    qemu-img convert -O vmdk $(findfirst '*.img') $IMG_DIR/${IMG_FILE%.img}.vmdk || exit $?
+fi
+
 rm -rf #{node[:tempest][:tempest_path]}/etc/cirros/*
-cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') \
-  #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
+cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') $(findfirst '*.vmdk') \
+    #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
 
-if [[ -n "$(findfirst '*-vmlinuz')" && -n "$(findfirst '*-initrd')" ]]; then
-    IMG_EXTRA_ARGS=
-    echo -n "Adding kernel ... "
-    KERNEL_ID=$(glance #{insecure} image-create \
-        --name "$IMG_NAME-tempest-kernel" \
-        --visibility public --container-format aki \
-        --disk-format aki < $(findfirst '*-vmlinuz') | extract_id)
-    echo "done."
-    [ -n "$KERNEL_ID" ] || exit 1
+if [[ "$VMWARE_ENABLED" == true && -n "$(findfirst '*.vmdk')" ]]; then
+    echo -n "Creating cinder volume type ... "  
+    cinder type-create vmware || exit 1
+    cinder type-key vmware set volume_backend_name=vmware || exit 1
 
-    echo -n "Adding ramdisk ... "
-    RAMDISK_ID=$(glance #{insecure} image-create \
-        --name="$IMG_NAME-tempest-ramdisk" \
-        --visibility public --container-format ari \
-        --disk-format ari < $(findfirst '*-initrd') | extract_id)
-    echo "done."
-    [ -n "$RAMDISK_ID" ] || exit 1
-
-    IMG_EXTRA_ARGS="--container-format ami \
-                    --disk-format ami \
-                    --property kernel_id=$KERNEL_ID \
-                    --property ramdisk_id=$RAMDISK_ID"
+    IMG_EXTRA_ARGS="--container-format bare --disk-format vmdk \
+                    --property vmware_disktype='sparse' \
+                    --property hypervisor_type='vmware' \
+                    --property vmware_adaptertype='ide' \
+                    --property hw_vif_model='e1000' \
+                    --property cinder_img_volume_type='vmware'"
+    IMG_SOURCE=$(findfirst '*.vmdk')
 else
-    IMG_EXTRA_ARGS="--container-format bare \
-                    --disk-format qcow2"
+    if [[ -n "$(findfirst '*-vmlinuz')" && -n "$(findfirst '*-initrd')" ]]; then
+        echo -n "Adding kernel ... "
+        KERNEL_ID=$(glance #{insecure} image-create \
+            --name "$IMG_NAME-tempest-kernel" \
+            --visibility public --container-format aki \
+            --disk-format aki < $(findfirst '*-vmlinuz') | extract_id)
+        echo "done."
+        [ -n "$KERNEL_ID" ] || exit 1
+
+        echo -n "Adding ramdisk ... "
+        RAMDISK_ID=$(glance #{insecure} image-create \
+            --name="$IMG_NAME-tempest-ramdisk" \
+            --visibility public --container-format ari \
+            --disk-format ari < $(findfirst '*-initrd') | extract_id)
+        echo "done."
+        [ -n "$RAMDISK_ID" ] || exit 1
+
+        IMG_EXTRA_ARGS="--container-format ami \
+                        --disk-format ami \
+                        --property kernel_id=$KERNEL_ID \
+                        --property ramdisk_id=$RAMDISK_ID"
+    else
+        IMG_EXTRA_ARGS="--container-format bare \
+                        --disk-format qcow2"
+    fi
+    [ "$VMWARE_ENABLED" == true ] && IMG_EXTRA_ARGS="$IMG_EXTRA_ARGS --property hypervisor_type='qemu'"
+    IMG_SOURCE=$(findfirst '*.img')
 fi
 
 echo -n "Adding alt image ... "
@@ -249,7 +274,7 @@ ALT_MACHINE_ID=$(glance #{insecure} image-create \
     --name="$IMG_NAME-tempest-machine-alt" \
     $IMG_EXTRA_ARGS \
     --visibility public \
-    --file $(findfirst '*.img') | extract_id)
+    --file $IMG_SOURCE | extract_id)
 echo "done."
 [ -n "$ALT_MACHINE_ID" ] || exit 1
 
@@ -261,7 +286,7 @@ MACHINE_ID=$(glance #{insecure} image-create \
     --name="$IMG_NAME-tempest-machine" \
     $IMG_EXTRA_ARGS \
     --visibility public \
-    --file $(findfirst '*.img') | extract_id)
+    --file $IMG_SOURCE | extract_id)
 echo "done."
 [ -n "$MACHINE_ID" ] || exit 1
 
@@ -276,6 +301,7 @@ glance #{insecure} image-list
 EOH
   environment ({
     "IMAGE_URL" => tempest_test_image,
+    "VMWARE_ENABLED" => vmware_enabled ? "true" : "false",
     "OS_USERNAME" => tempest_adm_user,
     "OS_PASSWORD" => tempest_adm_pass,
     "OS_TENANT_NAME" => tempest_comp_tenant,
@@ -443,7 +469,6 @@ if backend_names.length > 1
   cinder_backend2_name = backend_names[1]
 end
 
-kvm_compute_nodes = search(:node, "roles:nova-compute-kvm") || []
 xen_compute_nodes = search(:node, "roles:nova-compute-xen") || []
 
 use_resize = kvm_compute_nodes.length > 1
@@ -472,7 +497,7 @@ if xen_only
   use_config_drive = false
 end
 
-unless kvm_compute_nodes.empty?
+unless kvm_compute_nodes.empty? && vmware_compute_nodes.empty?
   use_interface_attach = true
   use_rescue = true
   use_suspend = true
@@ -505,6 +530,7 @@ template "/etc/tempest/tempest.conf" do
         keystone_settings: keystone_settings,
         machine_id_file: machine_id_file,
         alt_machine_id_file: alt_machine_id_file,
+        vmware_image: vmware_only,
         tempest_path: node[:tempest][:tempest_path],
         use_swift: use_swift,
         use_horizon: use_horizon,

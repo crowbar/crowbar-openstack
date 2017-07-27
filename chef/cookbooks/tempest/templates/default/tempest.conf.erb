@@ -139,7 +139,13 @@ instance_type = <%= @heat_flavor_ref %>
 lock_path = /var/run/tempest
 
 [scenario]
+<% if @vmware_image -%>
+img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-disk.vmdk
+img_container_format = bare
+img_disk_format = vmdk
+<% else -%>
 img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-disk.img
+<% end -%>
 
 [service_available]
 neutron = true
