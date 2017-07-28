@@ -27,5 +27,15 @@ module Barclamp
         selected.to_s
       )
     end
+
+    def api_protocols_for_magnum(selected)
+      options_for_select(
+        [
+          ["HTTP", "http"],
+          ["HTTPS", "https"]
+        ],
+        selected.to_s
+      )
+    end
   end
 end

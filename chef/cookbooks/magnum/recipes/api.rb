@@ -16,6 +16,10 @@
 # Cookbook Name:: magnum
 # Recipe:: api
 #
+include_recipe "apache2"
+include_recipe "apache2::mod_wsgi"
+
+package "openstack-magnum-api"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, :magnum)
 network_settings = MagnumHelper.network_settings(node)
@@ -23,11 +27,26 @@ network_settings = MagnumHelper.network_settings(node)
 magnum_port = node[:magnum][:api][:bind_port]
 magnum_protocol = node[:magnum][:api][:protocol]
 
+bind_port = network_settings[:api][:bind_port]
+bind_host = network_settings[:api][:bind_host]
+
 ha_enabled = node[:magnum][:ha][:enabled]
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(
   node, node[:magnum][:api][:protocol] == "https", ha_enabled)
+
+if node[:magnum][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for magnum" do
+    generate_certs node[:magnum][:ssl][:generate_certs]
+    certfile node[:magnum][:ssl][:certfile]
+    keyfile node[:magnum][:ssl][:keyfile]
+    group node[:magnum][:group]
+    fqdn node[:fqdn]
+    cert_required node[:magnum][:ssl][:cert_required]
+    ca_certs node[:magnum][:ssl][:ca_certs]
+  end
+end
 
 crowbar_pacemaker_sync_mark "wait-magnum_register" if ha_enabled
 
@@ -99,6 +118,42 @@ end
 
 crowbar_pacemaker_sync_mark "create-magnum_register" if ha_enabled
 
-magnum_service "api" do
-  use_pacemaker_provider ha_enabled
+service "magnum-api" do
+  service_name node[:magnum][:api][:service_name]
+  supports status: true, restart: true, start: true, stop: true
+  action [:disable, :stop]
+  ignore_failure true
+end
+
+magnum_api_primitive_name = "magnum-api"
+
+pacemaker_primitive magnum_api_primitive_name do
+  agent node[:magnum][:ha][:api][:agent]
+  action [:stop, :delete]
+  only_if "crm configure show #{magnum_api_primitive_name}"
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  ignore_failure true
+end
+
+node.normal[:apache][:listen_ports_crowbar] ||= {}
+node.normal[:apache][:listen_ports_crowbar][:magnum] = { plain: [bind_port] }
+
+crowbar_openstack_wsgi "WSGI entry for magnum-api" do
+  bind_host bind_host
+  bind_port bind_port
+  daemon_process "magnum-api"
+  user node[:magnum][:user]
+  group node[:magnum][:group]
+  pass_authorization true
+  limit_request_body 114688
+  ssl_enable node[:magnum][:api][:protocol] == "https"
+  ssl_certfile node[:magnum][:ssl][:certfile]
+  ssl_keyfile node[:magnum][:ssl][:keyfile]
+  if node[:magnum][:ssl][:cert_required]
+    ssl_cacert node[:magnum][:ssl][:ca_certs]
+  end
+end
+
+apache_site "magnum-api.conf" do
+  enable true
 end
