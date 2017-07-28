@@ -17,7 +17,7 @@
 require "rexml/document"
 include ERB::Util # for html_escape
 
-class SwiftService < PacemakerServiceObject
+class SwiftService < OpenstackServiceObject
   class ServiceError < StandardError
   end
 

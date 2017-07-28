@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class CinderService < PacemakerServiceObject
+class CinderService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "cinder"

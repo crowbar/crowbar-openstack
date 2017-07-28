@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class NovaService < PacemakerServiceObject
+class NovaService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "nova"

@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-class TroveService < PacemakerServiceObject
+class TroveService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "trove"

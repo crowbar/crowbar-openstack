@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class MonascaService < PacemakerServiceObject
+class MonascaService < OpenstackServiceObject
   def initialize(thelogger = nil)
     @bc_name = "monasca"
     @logger = thelogger

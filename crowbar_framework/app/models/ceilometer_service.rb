@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class CeilometerService < PacemakerServiceObject
+class CeilometerService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "ceilometer"

@@ -13,7 +13,7 @@
 # limitations under the License.
 #
 
-class SaharaService < PacemakerServiceObject
+class SaharaService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "sahara"

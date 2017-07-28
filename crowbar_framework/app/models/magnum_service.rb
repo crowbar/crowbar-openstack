@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 
-class MagnumService < PacemakerServiceObject
+class MagnumService < OpenstackServiceObject
   def initialize(thelogger = nil)
     @bc_name = "magnum"
     @logger = thelogger
