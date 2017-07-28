@@ -54,6 +54,7 @@ en:
           netapp_volume_driver: 'NetApp'
           netapp:
             nfs_shares_config_hint: 'Format one entry per line in the form hostname:/vol/path -o optional-nfs-mount-options'
+            storage_family_hint: 'Only the clustered Data ONTAP storage family is supported for NetApp'
             vfiler_hint: 'Only Use this option when utilizing the MultiStore feature on the NetApp storage with iSCSI'
             vserver_hint: 'If using the NFS storage protocol, this parameter is mandatory for storage service catalog support'
             volume_list_hint: 'Optional comma separated list of NetApp controller volume names'

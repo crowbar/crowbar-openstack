@@ -42,7 +42,7 @@
           "eqlx_pool": "default"
         },
         "netapp": {
-          "storage_family": "ontap_7mode",
+          "storage_family": "ontap_cluster",
           "storage_protocol": "iscsi",
           "nfs_shares": "",
           "vserver": "",
@@ -162,7 +162,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 200,
+      "schema-revision": 201,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
