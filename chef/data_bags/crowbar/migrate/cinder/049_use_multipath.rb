@@ -7,7 +7,7 @@ end
 
 def downgrade(ta, td, a, d)
   unless ta.key? "use_multipath"
-    del a["use_multipath"]
+    a.delete("use_multipath")
   end
   return a, d
 end
