@@ -171,6 +171,7 @@ password = <%= @keystone_settings['service_password'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
 project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
+memcached_servers = <%= @memcached_servers.join(',') %>
 
 [libvirt]
 <% if %w(kvm lxc qemu uml xen parallels).include? @libvirt_type -%>
