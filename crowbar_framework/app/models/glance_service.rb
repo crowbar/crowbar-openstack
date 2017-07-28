@@ -68,6 +68,7 @@ class GlanceService < OpenstackServiceObject
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
 
     base["attributes"]["glance"]["service_password"] = random_password
+    base["attributes"]["glance"]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
     @logger.debug("Glance create_proposal: exiting")
