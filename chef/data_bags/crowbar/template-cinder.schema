@@ -55,7 +55,7 @@
                     "use_chap_auth": { "type": "bool", "required": true },
                     "chap_username": { "type": "str", "required": true },
                     "chap_password": { "type": "str", "required": true },
-                    "eqlx_cli_timeout": { "type": "int", "required": true },
+                    "ssh_conn_timeout": { "type": "int", "required": true },
                     "eqlx_pool": { "type": "str", "required": true }
                 }
                 },
@@ -189,10 +189,10 @@
                       "san_password": { "type": "str", "required": true },
                       "san_thin_provision": { "type": "bool", "required": true },
                       "eqlx_group_name": { "type": "str", "required": true },
-                      "eqlx_use_chap": { "type": "bool", "required": true },
-                      "eqlx_chap_login": { "type": "str", "required": true },
-                      "eqlx_chap_password": { "type": "str", "required": true },
-                      "eqlx_cli_timeout": { "type": "int", "required": true },
+                      "use_chap_auth": { "type": "bool", "required": true },
+                      "chap_username": { "type": "str", "required": true },
+                      "chap_password": { "type": "str", "required": true },
+                      "ssh_conn_timeout": { "type": "int", "required": true },
                       "eqlx_pool": { "type": "str", "required": true }
                     }
                   },

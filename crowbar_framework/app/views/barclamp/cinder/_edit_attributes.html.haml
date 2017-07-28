@@ -109,10 +109,10 @@
               = string_field %w(volumes {{@index}} eqlx eqlx_group_name)
               = string_field %w(volumes {{@index}} eqlx eqlx_pool)
               = boolean_field %w(volumes {{@index}} eqlx san_thin_provision)
-              = boolean_field %w(volumes {{@index}} eqlx eqlx_use_chap)
-              = string_field %w(volumes {{@index}} eqlx eqlx_chap_login)
-              = password_field %w(volumes {{@index}} eqlx eqlx_chap_password)
-              = integer_field %w(volumes {{@index}} eqlx eqlx_cli_timeout)
+              = boolean_field %w(volumes {{@index}} eqlx use_chap_auth)
+              = string_field %w(volumes {{@index}} eqlx chap_username)
+              = password_field %w(volumes {{@index}} eqlx chap_password)
+              = integer_field %w(volumes {{@index}} eqlx ssh_conn_timeout)
 
           {{/if_eq}}
           {{#if_eq backend_driver 'eternus'}}

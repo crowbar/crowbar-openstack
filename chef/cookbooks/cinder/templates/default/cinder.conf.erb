@@ -87,7 +87,7 @@ volume_driver = cinder.volume.drivers.emc.emc_vmax_iscsi.EMCVMAXISCSIDriver
 
   <% if volume['backend_driver'] == 'eqlx' -%>
 eqlx_group_name = <%= volume['eqlx']["eqlx_group_name"] %>
-eqlx_cli_timeout=<%= volume['eqlx']["eqlx_cli_timeout"] %>
+ssh_conn_timeout=<%= volume['eqlx']["ssh_conn_timeout"] %>
 use_chap_auth = <%= volume['eqlx']["use_chap_auth"] %>
 chap_username = <%= volume['eqlx']["chap_username"] %>
 chap_password = <%= volume['eqlx']["chap_password"] %>
