@@ -354,5 +354,3 @@ else
 end
 
 crowbar_pacemaker_sync_mark "create-ceilometer_register" if ha_enabled
-
-node.save

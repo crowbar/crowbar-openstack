@@ -37,10 +37,18 @@ sql_connection = "#{db_settings[:url_scheme]}://#{node[:manila][:db][:user]}:"\
                  "#{node[:manila][:db][:database]}"
 
 # address/port binding
-my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
-  node, "admin").address
-node.set[:manila][:my_ip] = my_ipaddress
-node.set[:manila][:api][:bind_host] = my_ipaddress
+my_ipaddress = Barclamp::Inventory.get_network_by_type(node, "admin").address
+
+dirty = false
+if node[:manila][:my_ip] != my_ipaddress
+  node.set[:manila][:my_ip] = my_ipaddress
+  dirty = true
+end
+if node[:manila][:api][:bind_host] != my_ipaddress
+  node.set[:manila][:api][:bind_host] = my_ipaddress
+  dirty = true
+end
+node.save if dirty
 
 bind_host, bind_port = ManilaHelper.get_bind_host_port(node)
 
@@ -148,5 +156,3 @@ if node[:manila][:api][:protocol] == "https"
     ca_certs node[:manila][:ssl][:ca_certs]
   end
 end
-
-node.save

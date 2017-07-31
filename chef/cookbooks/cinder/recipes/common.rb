@@ -70,10 +70,19 @@ end
 
 sql_connection = "#{db_settings[:url_scheme]}://#{node[:cinder][:db][:user]}:#{db_password}@#{db_settings[:address]}/#{node[:cinder][:db][:database]}"
 
-my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-node.set[:cinder][:api][:bind_host] = my_ipaddress
+dirty = false
 
-node.set[:cinder][:my_ip] = my_ipaddress
+my_ipaddress = Barclamp::Inventory.get_network_by_type(node, "admin").address
+if node[:cinder][:api][:bind_host] != my_ipaddress
+  node.set[:cinder][:api][:bind_host] = my_ipaddress
+  dirty = true
+end
+if node[:cinder][:my_ip] != my_ipaddress
+  node.set[:cinder][:my_ip] = my_ipaddress
+  dirty = true
+end
+
+node.save if dirty
 
 if node[:cinder][:api][:protocol] == "https"
   ssl_setup "setting up ssl for cinder" do
@@ -135,5 +144,3 @@ template node[:cinder][:config_file] do
     default_volume_type: node[:cinder][:default_volume_type]
     )
 end
-
-node.save
