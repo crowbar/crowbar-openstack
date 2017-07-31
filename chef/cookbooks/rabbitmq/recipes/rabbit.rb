@@ -49,12 +49,11 @@ if cluster_enabled
     node.set[:rabbitmq][:nodename] = "rabbit@#{node[:hostname]}"
     dirty = true
   end
-  
   if node[:rabbitmq][:clustername] != nodename
     node.set[:rabbitmq][:clustername] = nodename
     dirty = true
   end
-elsif ha_enabled 
+elsif ha_enabled
   if node[:rabbitmq][:nodename] != nodename
     node.set[:rabbitmq][:nodename] = nodename
     dirty = true
