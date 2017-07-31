@@ -3,10 +3,18 @@
 debug=<%= node[:barbican][:debug] %>
 host_href = <%= @host_href %>
 sql_connection = <%= @database_connection %>
+<% if @rabbit_settings[:cluster] -%>
+transport_url = <%= @rabbit_settings[:url] %>
+<% end -%>
 
 [oslo_messaging_rabbit]
 
+<% if @rabbit_settings[:cluster] -%>
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+<% else -%>
 amqp_durable_queues = False
+<% end -%>
 rabbit_userid = <%= @rabbit_settings[:user] %>
 rabbit_password =  <%= @rabbit_settings[:password] %>
 rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>

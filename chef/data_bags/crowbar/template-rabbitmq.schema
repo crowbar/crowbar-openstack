@@ -30,6 +30,7 @@
                 "client_ca_certs": { "type" : "str", "required" : true }
               }
             },
+            "cluster": { "type": "bool", "required": true },
             "ha" : {
               "type": "map",
               "required": true,

@@ -44,6 +44,7 @@ crowbar_pacemaker_sync_mark "sync-manila_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-manila_ha_resources"
 
+rabbit_settings = fetch_rabbitmq_settings
 services = ["api", "scheduler"]
 transaction_objects = []
 
@@ -53,8 +54,8 @@ services.each do |service|
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent node[:manila][:ha]["#{service}_ra"]
     op node[:manila][:ha][:op]
-    order_only_existing "( postgresql rabbitmq cl-keystone cl-glance-api cl-cinder-api " \
-        "cl-neutron-server cl-nova-api )"
+    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone " \
+        "cl-glance-api cl-cinder-api cl-neutron-server cl-nova-api )"
   end
   transaction_objects.push(objects)
 end
