@@ -186,3 +186,19 @@ end
 crowbar_pacemaker_sync_mark "create-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
+
+include_recipe "crowbar-pacemaker::haproxy"
+
+ha_servers = CrowbarPacemakerHelper.haproxy_servers(node, "database-server")
+ha_servers = ha_servers[0].each do |n|
+  n["port"] = 3306
+end
+
+# Check?
+# Add haproxy user?
+haproxy_loadbalancer "galera" do
+  address ip_addr
+  port 3306
+  servers ha_servers
+  action :nothing
+end.run_action(:create)
