@@ -1,7 +1,6 @@
 [DEFAULT]
 admin_endpoint = <%= @admin_endpoint %>
 debug = <%= @debug ? "True" : "False" %>
-verbose = <%= @verbose ? "True" : "False" %>
 log_file = keystone.log
 log_dir = /var/log/keystone
 <% if @rabbit_settings[:cluster] -%>
@@ -20,12 +19,6 @@ memcache_servers = <%= @memcached_servers.join(',') %>
 connection = <%= @sql_connection %>
 idle_timeout = <%= @sql_idle_timeout %>
 
-[eventlet_server]
-public_bind_host = <%= @bind_service_host %>
-public_port = <%= @bind_service_port %>
-admin_bind_host = <%= @bind_admin_host %>
-admin_port = <%= @bind_admin_port %>
-
 [fernet_tokens]
 max_active_keys = <%= @max_active_keys %>
 
@@ -37,7 +30,6 @@ domain_config_dir = <%= node[:keystone][:domain_config_dir] %>
 <% end -%>
 driver = <%= node[:keystone][:identity][:driver] %>
 
-[kvs]
 <% if node[:keystone][:assignment][:driver] == 'hybrid' -%>
 [ldap_hybrid]
 default_roles = Member
@@ -49,7 +41,6 @@ url = <%= node[:keystone][:ldap][:url] %>
 user = <%= node[:keystone][:ldap][:user] %>
 password = <%= node[:keystone][:ldap][:password] %>
 suffix = <%= node[:keystone][:ldap][:suffix] %>
-allow_subtree_delete = <%= node[:keystone][:ldap][:allow_subtree_delete] %>
 query_scope = <%= node[:keystone][:ldap][:query_scope] %>
 page_size = <%= node[:keystone][:ldap][:page_size] %>
 alias_dereferencing = <%= node[:keystone][:ldap][:alias_dereferencing] %>
@@ -67,9 +58,6 @@ user_enabled_mask = <%= node[:keystone][:ldap][:user_enabled_mask] %>
 user_enabled_default = <%= node[:keystone][:ldap][:user_enabled_default] %>
 user_attribute_ignore = <%= node[:keystone][:ldap][:user_attribute_ignore] %>
 user_default_project_id_attribute = <%= node[:keystone][:ldap][:user_default_project_id_attribute] %>
-user_allow_create = <%= node[:keystone][:ldap][:user_allow_create] %>
-user_allow_update = <%= node[:keystone][:ldap][:user_allow_update] %>
-user_allow_delete = <%= node[:keystone][:ldap][:user_allow_delete] %>
 user_enabled_emulation = <%= node[:keystone][:ldap][:user_enabled_emulation] %>
 user_enabled_emulation_dn = <%= node[:keystone][:ldap][:user_enabled_emulation_dn] %>
 user_enabled_emulation_use_group_config = <%= node[:keystone][:ldap][:user_enabled_emulation_use_group_config] %>

@@ -100,6 +100,8 @@ if wait_for_format
   ::Process.waitall
 end
 
+dirty = false
+
 # If we have freshly-claimed disks, add them and save them.
 found_disks.each do |disk|
   # Disk was freshly created.  Grab its UUID and create a mount point.
@@ -114,6 +116,7 @@ found_disks.each do |disk|
     disk[:name] = disk[:uuid].delete("-")
     Chef::Log.info("Adding new disk #{disk[:device]} with UUID #{disk[:uuid]} to the Swift config")
     node.set[:swift][:devs][disk[:uuid]] = disk.dup
+    dirty = true
   end
 end
 
@@ -129,12 +132,13 @@ node[:swift][:devs].each do |uuid,disk|
       Chef::Log.info("Setting disk #{disk[:device]} to Stale")
       disk[:state] = "UUID_Stale"
       node.set[:swift][:devs][disk[:uuid]] = disk.dup
+      dirty = true
     end
   end
 end
 
 # Save that data
-node.save
+node.save if dirty
 
 # Take appropriate action for each disk.
 node[:swift][:devs].each do |uuid,disk|

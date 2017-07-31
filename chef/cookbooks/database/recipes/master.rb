@@ -21,7 +21,7 @@
 # we iterate over all the app databags. If this database server provides
 # databases for multiple applications, the last app found in the databags
 # will win out, so make sure the databags have the same passwords set for
-# the root, repl, and debian-sys-maint users.
+# the root and repl users.
 #
 
 db_info = {}
@@ -29,7 +29,7 @@ root_pw = ""
 
 search(:apps) do |app|
   (app["database_master_role"] & node.run_list.roles).each do |dbm_role|
-    %w(root repl debian).each do |user|
+    %w(root repl).each do |user|
       user_pw = app["mysql_#{user}_password"]
       if !user_pw.nil? && user_pw[node.chef_environment]
         Chef::Log.debug("Saving password for #{user} as node attribute node['mysql']['server_#{user}_password'")

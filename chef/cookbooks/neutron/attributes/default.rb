@@ -240,7 +240,7 @@ default[:neutron][:ha][:server][:server_ra] = "systemd:#{node[:neutron][:platfor
 default[:neutron][:ha][:server][:op][:monitor][:interval] = "10s"
 default[:neutron][:ha][:infoblox][:enabled] = false
 default[:neutron][:ha][:infoblox][:infoblox_ra] =
-  "lsb:#{node[:neutron][:platform][:infoblox_agent_name]}"
+  "systemd:#{node[:neutron][:platform][:infoblox_agent_name]}"
 default[:neutron][:ha][:infoblox][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:neutron][:ha][:ports][:server] = 5530

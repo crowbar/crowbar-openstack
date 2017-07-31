@@ -8,6 +8,7 @@ version "1.0"
 
 depends "database"
 depends "keystone"
+depends "memcached"
 depends "nagios"
 depends "crowbar-openstack"
 depends "crowbar-pacemaker"

@@ -22,7 +22,6 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "nova", "nova-controller")
   include_recipe "nova::cert"
   include_recipe "nova::instances"
   include_recipe "nova::scheduler"
-  include_recipe "nova::memcached"
   include_recipe "nova::vncproxy"
   include_recipe "nova::controller_ha"
   include_recipe "nova::availability_zones"

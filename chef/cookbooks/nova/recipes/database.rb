@@ -204,6 +204,3 @@ ruby_block "mark node for nova api_db_sync" do
 end
 
 crowbar_pacemaker_sync_mark "create-nova_database" if ha_enabled
-
-# save data so it can be found by search
-node.save

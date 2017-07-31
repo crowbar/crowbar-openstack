@@ -17,4 +17,7 @@
 # limitations under the License.
 #
 
-node.set[:nova][:libvirt_type] = "vmware"
+if node[:nova][:libvirt_type] != "vmware"
+  node.set[:nova][:libvirt_type] = "vmware"
+  node.save
+end

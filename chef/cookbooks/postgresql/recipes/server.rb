@@ -25,11 +25,13 @@
 
 include_recipe "postgresql::client"
 
+dirty = false
+
 # For Crowbar, we need to set the address to bind - default to admin node.
 newaddr = CrowbarDatabaseHelper.get_listen_address(node)
 if node["postgresql"]["config"]["listen_addresses"] != newaddr
   node.set["postgresql"]["config"]["listen_addresses"] = newaddr
-  node.save
+  dirty = true
 end
 
 # We also need to add the network + mask to give access to other nodes
@@ -46,7 +48,10 @@ else
     method: "md5"
   }
   netaddr, netmask = "", ""
-  node.set["postgresql"]["pg_hba"] = pg_hba
+  if node["postgresql"]["pg_hba"] != pg_hba
+    node.set["postgresql"]["pg_hba"] = pg_hba
+    dirty = true
+  end
 end
 
 newnetaddr = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").subnet
@@ -54,7 +59,7 @@ newnetmask = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin"
 
 if netaddr != newnetaddr or netmask != newnetmask
   node.set["postgresql"]["pg_hba"][4][:addr] = [newnetaddr, newnetmask].join("    ")
-  node.save
+  dirty = true
 end
 
 # randomly generate postgres password, unless using solo - see README
@@ -71,16 +76,18 @@ if Chef::Config[:solo]
         "For more information, see https://github.com/opscode-cookbooks/postgresql#chef-solo-note"
       ].join(" "))
   end
-else
+elsif node["postgresql"]["password"]["postgres"].nil?
   # TODO: The "secure_password" is randomly generated plain text, so it
   # should be converted to a PostgreSQL specific "encrypted password" if
   # it should actually install a password (as opposed to disable password
   # login for user 'postgres'). However, a random password wouldn't be
   # useful if it weren't saved as clear text in Chef Server for later
   # retrieval.
-  node.set_unless["postgresql"]["password"]["postgres"] = secure_password
-  node.save
+  node.set["postgresql"]["password"]["postgres"] = secure_password
+  dirty = true
 end
+
+node.save if dirty
 
 # While we would like to include the "postgresql::ha_storage" recipe from here,
 # it's not possible: we need to have the packages installed first, and we need

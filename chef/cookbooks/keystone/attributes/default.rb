@@ -26,7 +26,6 @@ default[:keystone][:group] = "keystone"
 
 default[:keystone][:debug] = false
 default[:keystone][:frontend] = "apache"
-default[:keystone][:verbose] = true
 default[:keystone][:domain_specific_drivers] = false
 default[:keystone][:domain_config_dir] = "/etc/keystone/domains"
 default[:keystone][:config_file] = "/etc/keystone/keystone.conf.d/100-keystone.conf"
@@ -65,7 +64,6 @@ default[:keystone][:ldap][:url] = "ldap://localhost"
 default[:keystone][:ldap][:user] = "dc=Manager,dc=example,dc=com"
 default[:keystone][:ldap][:password] = ""
 default[:keystone][:ldap][:suffix] = "cn=example,cn=com"
-default[:keystone][:ldap][:allow_subtree_delete] = false
 default[:keystone][:ldap][:page_size] = 0
 default[:keystone][:ldap][:alias_dereferencing] = "default"
 default[:keystone][:ldap][:query_scope] = "one"
@@ -84,9 +82,6 @@ default[:keystone][:ldap][:user_enabled_mask] = 0
 default[:keystone][:ldap][:user_enabled_default] = "True"
 default[:keystone][:ldap][:user_attribute_ignore] = "default_project_id"
 default[:keystone][:ldap][:user_default_project_id_attribute] = ""
-default[:keystone][:ldap][:user_allow_create] = true
-default[:keystone][:ldap][:user_allow_update] = true
-default[:keystone][:ldap][:user_allow_delete] = true
 default[:keystone][:ldap][:user_enabled_emulation] = false
 default[:keystone][:ldap][:user_enabled_emulation_dn] = ""
 default[:keystone][:ldap][:user_enabled_emulation_use_group_config] = false

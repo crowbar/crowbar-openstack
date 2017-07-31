@@ -492,5 +492,3 @@ if ha_enabled
 else
   log "HA support for heat is disabled"
 end
-
-node.save

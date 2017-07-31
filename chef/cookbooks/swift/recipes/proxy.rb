@@ -22,6 +22,8 @@ include_recipe "swift::auth"
 # will allow the ring-compute node to push the rings.
 include_recipe "swift::rsync"
 
+dirty = false
+
 if node.roles.include?("swift-storage") && node[:swift][:devs].nil?
   # If we're a storage node and have no device yet, then it simply means that we
   # haven't looked for devices yet, which also means that we won't have rings at
@@ -45,9 +47,6 @@ if node.roles.include?("swift-storage") && !node["swift"]["storage_init_done"]
   Chef::Log.info("Not setting up swift-proxy daemon; this chef run is only used to setup swift-{account,container,object}.")
   return
 end
-
-local_ip = Swift::Evaluator.get_ip_by_type(node, :admin_ip_expr)
-public_ip = Swift::Evaluator.get_ip_by_type(node, :public_ip_expr)
 
 ha_enabled = node[:swift][:ha][:enabled]
 
@@ -101,9 +100,9 @@ end
 proxy_config[:cross_domain_policy] = cross_domain_policy_l.join("\n")
 
 if node[:platform_family] == "rhel"
-  pkg_list = %w{curl memcached python-dns}
+  pkg_list = ["curl", "python-dns"]
 else
-  pkg_list = %w{curl memcached python-dnspython}
+  pkg_list = ["curl", "python-dnspython"]
 end
 
 pkg_list.each do |pkg|
@@ -132,9 +131,15 @@ if ceilometermiddleware_enabled && rabbitmq_ssl_enabled
   Chef::Log.warn("Disabling ceilometer swift-proxy middleware because it cannot connect"\
                  " to rabbitmq over SSL")
 end
-node.set[:swift][:middlewares]["ceilometer"] = {
+ceilometer_swift_enabled = {
   "enabled" => ceilometermiddleware_enabled && !rabbitmq_ssl_enabled
 }
+node.set[:swift] ||= {}
+node.set[:swift][:middlewares] ||= {}
+if node[:swift][:middlewares]["ceilometer"] != ceilometer_swift_enabled
+  node.set[:swift][:middlewares]["ceilometer"] = ceilometer_swift_enabled
+  dirty = true
+end
 
 if node[:swift][:middlewares]["ceilometer"]["enabled"]
   package "python-ceilometermiddleware"
@@ -255,11 +260,12 @@ if node[:swift][:ssl][:enabled]
   end
 end
 
-## Find other nodes that are swift-auth nodes, and make sure
-## we use their memcached!
-proxy_config[:memcached_ips] = node_search_with_cache("roles:swift-proxy").map do |x|
-  "#{Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)}:11211"
-end.sort
+## install a default memcached instance.
+## default configuration is taken from: node[:memcached] / [:memory], [:port] and [:user]
+memcached_instance "swift-proxy"
+
+proxy_config[:memcached_ips] =
+  MemcachedHelper.get_memcached_servers(node_search_with_cache("roles:swift-proxy"))
 
 ## Create the proxy server configuraiton file
 template node[:swift][:proxy_config_file] do
@@ -270,12 +276,6 @@ template node[:swift][:proxy_config_file] do
   variables proxy_config
 end
 
-## install a default memcached instsance.
-## default configuration is take from: node[:memcached] / [:memory], [:port] and [:user]
-node.set[:memcached][:listen] = local_ip
-node.set[:memcached][:name] = "swift-proxy"
-memcached_instance "swift-proxy" do
-end
 
 ## make sure to fetch ring files from the ring compute node
 compute_nodes = node_search_with_cache("roles:swift-ring-compute")
@@ -388,7 +388,6 @@ if node[:platform_family] == "debian"
 EOH
     action :nothing
     subscribes :run, resources(template: node[:swift][:proxy_config_file])
-    notifies :restart, resources(service: "memcached-swift-proxy")
     if node[:swift][:frontend]=="native"
       notifies :restart, resources(service: "swift-proxy")
     end
@@ -402,11 +401,9 @@ else
   log "HA support for swift is disabled"
 end
 
-###
-# let the monitoring tools know what services should be running on this node.
-node.set[:swift][:monitor] = {}
-node.set[:swift][:monitor][:svcs] = ["swift-proxy", "memcached"]
-node.set[:swift][:monitor][:ports] = { proxy: node[:swift][:ports][:proxy] }
-node.save
+unless node["swift"]["proxy_init_done"]
+  node.set["swift"]["proxy_init_done"] = true
+  dirty = true
+end
 
-node.set["swift"]["proxy_init_done"] = true
+node.save if dirty

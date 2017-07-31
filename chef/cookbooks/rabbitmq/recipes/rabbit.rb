@@ -22,20 +22,46 @@ ha_enabled = node[:rabbitmq][:ha][:enabled]
 # we only do cluster if we do HA
 cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
 
-node.set[:rabbitmq][:address] = CrowbarRabbitmqHelper.get_listen_address(node)
-node.set[:rabbitmq][:management_address] = node[:rabbitmq][:address]
+dirty = false
+
+listen_address = CrowbarRabbitmqHelper.get_listen_address(node)
+if node[:rabbitmq][:address] != listen_address
+  node.set[:rabbitmq][:address] = listen_address
+  dirty = true
+end
+if node[:rabbitmq][:management_address] != listen_address
+  node.set[:rabbitmq][:management_address] = listen_address
+  dirty = true
+end
+
 addresses = [node[:rabbitmq][:address]]
 if node[:rabbitmq][:listen_public]
   addresses << CrowbarRabbitmqHelper.get_public_listen_address(node)
 end
-node.set[:rabbitmq][:addresses] = addresses
-
-if cluster_enabled
-  node.set[:rabbitmq][:nodename] = "rabbit@#{node[:hostname]}"
-  node.set[:rabbitmq][:clustername] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
-elsif ha_enabled
-  node.set[:rabbitmq][:nodename] = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
+if node[:rabbitmq][:addresses] != addresses
+  node.set[:rabbitmq][:addresses] = addresses
+  dirty = true
 end
+
+nodename = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
+if cluster_enabled
+  if node[:rabbitmq][:nodename] != "rabbit@#{node[:hostname]}"
+    node.set[:rabbitmq][:nodename] = "rabbit@#{node[:hostname]}"
+    dirty = true
+  end
+  
+  if node[:rabbitmq][:clustername] != nodename
+    node.set[:rabbitmq][:clustername] = nodename
+    dirty = true
+  end
+elsif ha_enabled 
+  if node[:rabbitmq][:nodename] != nodename
+    node.set[:rabbitmq][:nodename] = nodename
+    dirty = true
+  end
+end
+
+node.save if dirty
 
 include_recipe "rabbitmq::default"
 
@@ -167,6 +193,3 @@ else
     only_if only_if_command if ha_enabled
   end
 end
-
-# save data so it can be found by search
-node.save

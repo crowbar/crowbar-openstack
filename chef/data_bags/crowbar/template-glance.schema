@@ -12,7 +12,6 @@
           "type": "map",
           "required": true,
           "mapping": {
-            "verbose": { "type": "bool", "required": true },
             "debug": { "type": "bool", "required": true },
             "max_header_line": { "type": "int", "required": true },
             "enable_v1": { "type": "bool", "required": true },

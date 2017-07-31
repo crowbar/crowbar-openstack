@@ -135,9 +135,6 @@ else
   bind_port = node[:barbican][:api][:bind_port]
 end
 
-node.normal[:apache][:listen_ports_crowbar] ||= {}
-node.normal[:apache][:listen_ports_crowbar][:barbican] = { plain: [bind_port] }
-
 crowbar_openstack_wsgi "WSGI entry for barbican-api" do
   bind_host bind_host
   bind_port bind_port

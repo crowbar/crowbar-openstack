@@ -24,9 +24,9 @@ return unless node["roles"].include?("nagios-client")
 # Node addresses are dynamic and can't be set from attributes only.
 my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 
-node.set[:keystone][:monitor] = {} if node[:keystone][:monitor].nil?
-node.set[:keystone][:monitor][:svcs] = [] if node[:keystone][:monitor][:svcs].nil?
-node.set[:keystone][:monitor][:ports] = {} if node[:keystone][:monitor][:ports].nil?
+node.set[:keystone][:monitor] ||= {}
+node.set[:keystone][:monitor][:svcs] = ["keystone"]
+node.set[:keystone][:monitor][:ports] ||= {}
 node.set[:keystone][:monitor][:ports]["keystone-service"] = [my_ipaddress, node[:keystone][:api][:service_port]]
 node.set[:keystone][:monitor][:ports]["keystone-admin"] = [my_ipaddress, node[:keystone][:api][:admin_port]]
 

@@ -57,8 +57,17 @@ node.normal[:apache][:listen_ports_crowbar][:keystone] = { admin: [bind_admin_po
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:keystone][:api][:protocol] == "https", ha_enabled)
 
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server") : [node]
+)
+
+memcached_instance "keystone"
+
 # Other barclamps need to know the hostname to reach keystone
-node.set[:keystone][:api][:internal_URL_host] = my_admin_host
+if node[:keystone][:api][:internal_URL_host] != my_admin_host
+  node.set[:keystone][:api][:internal_URL_host] = my_admin_host
+  node.save
+end
 
 if node[:keystone][:frontend] == "uwsgi"
 
@@ -197,18 +206,6 @@ crowbar_pacemaker_sync_mark "create-keystone_database" if ha_enabled
 
 sql_connection = "#{db_settings[:url_scheme]}://#{node[:keystone][:db][:user]}:#{node[:keystone][:db][:password]}@#{db_settings[:address]}/#{node[:keystone][:db][:database]}"
 
-if ha_enabled
-  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server")
-  memcached_servers = memcached_nodes.map do |n|
-    node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-    "#{node_admin_ip}:#{n[:memcached][:port]}"
-  end
-else
-  node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  memcached_servers = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
-end
-memcached_servers.sort!
-
 # we have to calculate max_active_keys for fernet token provider
 # http://docs.openstack.org/admin-guide/identity-fernet-token-faq.html# \
 #       i-rotated-keys-and-now-tokens-are-invalidating-early-what-did-i-do
@@ -271,11 +268,6 @@ template node[:keystone][:config_file] do
       sql_connection: sql_connection,
       sql_idle_timeout: node[:keystone][:sql][:idle_timeout],
       debug: node[:keystone][:debug],
-      verbose: node[:keystone][:verbose],
-      bind_admin_host: bind_admin_host,
-      bind_service_host: bind_service_host,
-      bind_admin_port: bind_admin_port,
-      bind_service_port: bind_service_port,
       admin_endpoint: KeystoneHelper.service_URL(
         node[:keystone][:api][:protocol],
         my_admin_host, node[:keystone][:api][:admin_port]
@@ -739,10 +731,6 @@ end
 
 crowbar_pacemaker_sync_mark "create-keystone_register" if ha_enabled
 
-node.set[:keystone][:monitor] = {} if node[:keystone][:monitor].nil?
-node.set[:keystone][:monitor][:svcs] = ["keystone"] if node[:keystone][:monitor][:svcs] != ["keystone"]
-node.save
-
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 template "/root/.openrc" do
@@ -756,7 +744,10 @@ template "/root/.openrc" do
 end
 
 # Set new endpoint URL.
-node.set[:keystone][:api][:internal_url_host] = keystone_settings["internal_url_host"]
-node.save
+internal_url_host = keystone_settings["internal_url_host"]
+if node[:keystone][:api][:internal_url_host] != internal_url_host
+  node.set[:keystone][:api][:internal_url_host] = internal_url_host
+  node.save
+end
 Chef::Log.debug("setting new endpoint host to " \
                 "#{node[:keystone][:api][:internal_url_host]}")

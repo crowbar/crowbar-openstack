@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class HorizonService < PacemakerServiceObject
+class HorizonService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "horizon"

@@ -17,7 +17,7 @@
 
 require "ipaddr"
 
-class NeutronService < PacemakerServiceObject
+class NeutronService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "neutron"
@@ -358,7 +358,7 @@ class NeutronService < PacemakerServiceObject
 
     dc_id = proposal["attributes"]["neutron"]["infoblox"]["cloud_data_center_id"]
     grids_length = proposal["attributes"]["neutron"]["infoblox"]["grids"].length
-    if dc_id.to_i >= grids_length
+    if dc_id.to_i > grids_length || dc_id.to_i < 1
       validation_error I18n.t("barclamp.#{@bc_name}.validation.infoblox_dc_id",
                               dc_id: dc_id, grids_len: grids_length)
     end

@@ -15,3 +15,4 @@
 #
 
 require "openstack/ha"
+require "openstack/data_bag_config"

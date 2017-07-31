@@ -125,7 +125,7 @@ en:
         no_valid_multicast_ip: 'Multicast group for VXLAN broadcast emulation %{mcast_group} is not a valid multicast IP address.'
         network: 'Network "%{ext_net}" cannot be used as an additional external network'
         infoblox_grids: "No grid configurations in infoblox[:grids]. Please specify at least one grid configuration in infoblox[:grids]."
-        infoblox_dc_id: "Invalid cloud_data_center_id: `%{dc_id}` is not a valid index into infoblox[:grids]. cloud_data_center_id needs to be an integer in the range [0,%{grids_length}]."
+        infoblox_dc_id: "Invalid cloud_data_center_id: `%{dc_id}` is not a valid index into infoblox[:grids]. cloud_data_center_id needs to be an integer in the range [1,%{grids_length}]."
         external_network: 'External Network "%{ext_net}" is not defined in the configuration of the network barclamp'
         ml2_type_driver: 'At least one ml2 type driver must be selected.'
         ml2_mechanism: 'At least one ml2 mechanism driver must be selected.'
