@@ -156,6 +156,26 @@ transaction_objects.push("pacemaker_ms[#{ms_name}]")
 ms_location_name = openstack_pacemaker_controller_only_location_for ms_name
 transaction_objects.push("pacemaker_location[#{ms_location_name}]")
 
+# Make sure VIP is running on a node where MySQL is in a good shape
+# (= node is successfully promoted to Master)
+colocation_constraint = "col-vip-with-#{service_name}"
+pacemaker_colocation colocation_constraint do
+  score "inf"
+  resources "#{vip_primitive} #{ms_name}:Master"
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+transaction_objects << "pacemaker_colocation[#{colocation_constraint}]"
+
+order_constraint = "o-#{service_name}-vip"
+pacemaker_order order_constraint do
+  score "Mandatory"
+  ordering "#{ms_name}:promote #{vip_primitive}:start"
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+transaction_objects << "pacemaker_order[#{order_constraint}]"
+
 pacemaker_transaction "galera service" do
   cib_objects transaction_objects
   # note that this will also automatically start the resources
