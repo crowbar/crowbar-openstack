@@ -84,15 +84,26 @@ ruby_block "wait for #{ms_name} to be started" do
   block do
     require "timeout"
     begin
-      # 30s (our usual timeout) is a bit short with this OCF RA which
-      # stops/starts the rabbit app multiple times due to the master-slave
-      # config
-      Timeout.timeout(120) do
-        ::Kernel.system("crm_resource --wait --resource #{ms_name}")
-        ::Kernel.system("rabbitmqctl wait #{pid_file}")
+      Timeout.timeout(240) do
+        # Check that the service is running
+        cmd = "crm resource show #{ms_name} 2> /dev/null "
+        cmd << "| grep -q \"is running on\""
+        until ::Kernel.system(cmd)
+          Chef::Log.debug("#{ms_name} still not started")
+          sleep(2)
+        end
+        # The sed command grabs everything between '{running_applications'
+        # and ']}', and what we want is that the rabbit application is
+        # running
+        cmd = "rabbitmqctl -q status 2> /dev/null "
+        cmd << "| sed -n '/{running_applications/,/\]}/p' | grep -q '{rabbit,'"
+        until ::Kernel.system(cmd)
+          Chef::Log.debug("#{ms_name} still not answering")
+          sleep(2)
+        end
       end
     rescue Timeout::Error
-      message = "RabbitMQ is not started. Please manually check for an error."
+      message = "The #{ms_name} pacemaker resource is not started. Please manually check for an error."
       Chef::Log.fatal(message)
       raise message
     end
