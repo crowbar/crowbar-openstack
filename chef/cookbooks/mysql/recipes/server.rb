@@ -122,16 +122,10 @@ unless Chef::Config[:solo]
   end
 end
 
-# set the root password on platforms
-# that don't support pre-seeding
-unless platform_family?("debian")
-
-  execute "assign-root-password" do
-    command "/usr/bin/mysqladmin -u root password \"#{node['mysql']['server_root_password']}\""
-    action :run
-    only_if "/usr/bin/mysql -u root -e 'show databases;'"
-  end
-
+execute "assign-root-password" do
+  command "/usr/bin/mysqladmin -u root password \"#{node["mysql"]["server_root_password"]}\""
+  action :run
+  only_if "/usr/bin/mysql -u root -e 'show databases;'"
 end
 
 grants_path = value_for_platform_family(
