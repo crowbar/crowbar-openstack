@@ -324,6 +324,27 @@
                 "user": { "type": "str", "required": true },
                 "database": { "type": "str", "required": true }
               }
+            },
+            "resource_limits": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                "openstack-cinder-api": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
+                },
+                "openstack-cinder-scheduler": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
+                },
+                "openstack-cinder-volume": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
+                }
+              }
             }
           }
         }
