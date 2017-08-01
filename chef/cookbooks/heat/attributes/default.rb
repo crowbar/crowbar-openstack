@@ -67,7 +67,6 @@ if node[:platform_family] == "suse"
 end
 
 default[:heat][:debug] = false
-default[:heat][:verbose] = false
 default[:heat][:max_header_line] = 16384
 
 default[:heat][:user] = "heat"

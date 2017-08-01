@@ -381,7 +381,6 @@ template "/etc/heat/heat.conf.d/100-heat.conf" do
     lazy {
       {
         debug: node[:heat][:debug],
-        verbose: node[:heat][:verbose],
         rabbit_settings: rabbit_settings,
         keystone_settings: keystone_settings,
         database_connection: db_connection,
