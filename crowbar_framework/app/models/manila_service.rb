@@ -100,6 +100,7 @@ class ManilaService < OpenstackServiceObject
       find_dep_proposal("neutron")
 
     base["attributes"][@bc_name]["service_password"] = random_password
+    base["attributes"][@bc_name]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
     @logger.debug("Manila create_proposal: exiting")

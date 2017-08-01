@@ -115,6 +115,16 @@ end
 enabled_share_protocols = ["NFS", "CIFS"]
 enabled_share_protocols << ["CEPHFS"] if ManilaHelper.has_cephfs_share? node
 
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  if node[:manila][:ha][:enabled]
+    CrowbarPacemakerHelper.cluster_nodes(node, "manila-server")
+  else
+    [node]
+  end
+)
+
+memcached_instance("manila") if node["roles"].include?("manila-server")
+
 template node[:manila][:config_file] do
   source "manila.conf.erb"
   owner "root"
@@ -140,7 +150,8 @@ template node[:manila][:config_file] do
     nova_admin_password: nova_admin_password,
     cinder_insecure: cinder_insecure,
     cinder_admin_username: cinder_admin_username,
-    cinder_admin_password: cinder_admin_password
+    cinder_admin_password: cinder_admin_password,
+    memcached_servers: memcached_servers
   )
 end
 
