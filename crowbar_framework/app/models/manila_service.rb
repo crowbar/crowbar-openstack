@@ -208,6 +208,8 @@ keyring = /etc/ceph/ceph.client.manila.keyring
 
     all_nodes.each do |n|
       node = NodeObject.find_node_by_name n
+      node["ceph"] ||= {}
+      node["ceph"]["config_sections"] ||= {}
       node["ceph"]["config_sections"]["client.manila"] = ceph_conf_extra_section
       node.save
     end
