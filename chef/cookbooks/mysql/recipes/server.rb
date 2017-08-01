@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+ha_enabled = node[:database][:ha][:enabled]
+
 include_recipe "mysql::client"
 
 if platform_family?("debian")
@@ -46,7 +48,6 @@ if platform_family?("debian")
     command "debconf-set-selections /var/cache/local/preseeding/mysql-server.seed"
     only_if "test -f /var/cache/local/preseeding/mysql-server.seed"
   end
-
 end
 
 # For Crowbar, we need to set the address to bind - default to admin node.
@@ -78,6 +79,7 @@ service "mysql" do
   end
   supports status: true, restart: true, reload: true
   action :enable
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 directory node[:mysql][:tmpdir] do
@@ -104,11 +106,17 @@ service mysql start
 EOC
 end
 
+cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "database-server")
+nodes_names = cluster_nodes.map { |n| n[:hostname] }
+
 template "/etc/my.cnf" do
   source "my.cnf.erb"
   owner "root"
   group "mysql"
   mode "0640"
+  variables(
+    nodes_names: nodes_names
+  )
   notifies :run, resources(script: "handle mysql restart"), :immediately if platform_family?("debian")
   notifies :restart, "service[mysql]", :immediately if platform_family?(%w{rhel suse fedora})
 end
@@ -122,12 +130,21 @@ unless Chef::Config[:solo]
   end
 end
 
+if ha_enabled
+  log "HA support for mysql is enabled"
+  include_recipe "mysql::ha_galera"
+else
+  log "HA support for mysql is disabled"
+end
+
+server_root_password = node[:mysql][:server_root_password]
+
 # set the root password on platforms
 # that don't support pre-seeding
 unless platform_family?("debian")
 
   execute "assign-root-password" do
-    command "/usr/bin/mysqladmin -u root password \"#{node['mysql']['server_root_password']}\""
+    command "/usr/bin/mysqladmin -u root password \"#{server_root_password}\""
     action :run
     only_if "/usr/bin/mysql -u root -e 'show databases;'"
   end
@@ -168,9 +185,10 @@ directory "/var/run/mysqld/" do
 end
 
 execute "mysql-install-privileges" do
-  command "/usr/bin/mysql -u root #{node['mysql']['server_root_password'].empty? ? '' : '-p' }#{node['mysql']['server_root_password']} < #{grants_path}"
+  command "/usr/bin/mysql -u root -p\"#{server_root_password}\" < #{grants_path}"
   action :nothing
   subscribes :run, resources("template[#{grants_path}]"), :immediately
+  only_if "/usr/bin/mysql -u root -p\"#{server_root_password}\" -e 'show databases;'"
 end
 
 file grants_path do

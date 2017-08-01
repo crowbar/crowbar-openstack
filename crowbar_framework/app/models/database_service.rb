@@ -60,6 +60,56 @@ class DatabaseService < PacemakerServiceObject
     base
   end
 
+  def validate_ha_attributes(attributes, cluster)
+    storage_mode = attributes["ha"]["storage"]["mode"]
+    role = available_clusters[cluster]
+
+    case attributes["sql_engine"]
+    when "postgresql"
+      unless ["shared", "drbd"].include?(storage_mode)
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.unknown_mode_ha",
+          storage_mode: storage_mode
+        )
+      end
+      if storage_mode == "shared"
+        if attributes["ha"]["storage"]["shared"]["device"].blank?
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.no_device"
+          )
+        end
+        if attributes["ha"]["storage"]["shared"]["fstype"].blank?
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.no_filesystem"
+          )
+        end
+      elsif storage_mode == "drbd"
+        unless role.default_attributes["pacemaker"]["drbd"]["enabled"]
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.drbd_not_enabled",
+            cluster_name: cluster_name(cluster)
+          )
+        end
+        if attributes["ha"]["storage"]["drbd"]["size"] <= 0
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.invalid_size_drbd"
+          )
+        end
+      end
+    when "mysql"
+      nodes = PacemakerServiceObject.expand_nodes(cluster) || []
+      if nodes.size == 1
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.cluster_size_one"
+        )
+      elsif nodes.size.even?
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.cluster_size_even"
+        )
+      end
+    end
+  end
+
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "database-server"
 
@@ -73,34 +123,8 @@ class DatabaseService < PacemakerServiceObject
     # HA validation
     servers = proposal["deployment"][@bc_name]["elements"]["database-server"]
     unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
-      validation_error I18n.t(
-        "barclamp.#{@bc_name}.validation.ha_postgresql"
-      ) unless db_engine == "postgresql"
-
-      storage_mode = attributes["ha"]["storage"]["mode"]
-      validation_error I18n.t(
-        "barclamp.#{@bc_name}.validation.unknown_mode_ha",
-        storage_mode: storage_mode
-      ) unless %w(shared drbd).include?(storage_mode)
-
-      if storage_mode == "shared"
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.no_device"
-        ) if attributes["ha"]["storage"]["shared"]["device"].blank?
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.no_filesystem"
-        ) if attributes["ha"]["storage"]["shared"]["fstype"].blank?
-      elsif storage_mode == "drbd"
-        cluster = servers.first
-        role = available_clusters[cluster]
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.drbd_not_enabled",
-          cluster_name: cluster_name(cluster)
-        ) unless role.default_attributes["pacemaker"]["drbd"]["enabled"]
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.invalid_size_drbd"
-        ) if attributes["ha"]["storage"]["drbd"]["size"] <= 0
-      end
+      cluster = servers.first
+      validate_ha_attributes(attributes, cluster)
     end
 
     super
