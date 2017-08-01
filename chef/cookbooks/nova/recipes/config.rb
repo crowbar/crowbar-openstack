@@ -269,12 +269,12 @@ if ironic_servers.any? && (node["roles"] & ["nova-compute-ironic", "nova-control
   ironic_settings[:keystone_version] = "v2.0"
   ironic_settings[:api_protocol] = ironic_node[:ironic][:api][:protocol]
   ironic_settings[:api_port] = ironic_node[:ironic][:api][:port]
-  ironic_settings[:service_user] = ironic_node[:ironic][:service_user]
-  ironic_settings[:service_password] = ironic_node[:ironic][:service_password]
-  ironic_settings[:public_host] = CrowbarHelper.get_host_for_public_url(
+  ironic_settings[:api_host] = CrowbarHelper.get_host_for_admin_url(
     ironic_node,
     ironic_settings[:api_protocol] == "https"
   )
+  ironic_settings[:service_user] = ironic_node[:ironic][:service_user]
+  ironic_settings[:service_password] = ironic_node[:ironic][:service_password]
   reserved_host_memory = 0
 else
   use_baremetal_filters = false
