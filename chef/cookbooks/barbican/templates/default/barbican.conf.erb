@@ -42,3 +42,8 @@ project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
 region_name = <%= @keystone_settings["endpoint_region"] %>
 insecure = <%= @keystone_settings["insecure"] %>
+service_token_roles_required = true
+service_token_roles = admin
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:barbican][:memcache_secret_key] %>

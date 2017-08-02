@@ -75,6 +75,7 @@ class BarbicanService < OpenstackServiceObject
     base["attributes"][@bc_name]["service_password"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name][:kek] = SecureRandom.base64(32)
+    base["attributes"][@bc_name]["memcache_secret_key"] = random_password
 
     @logger.debug("Barbican create_proposal: exiting")
     base

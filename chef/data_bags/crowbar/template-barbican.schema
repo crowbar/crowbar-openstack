@@ -52,7 +52,8 @@
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str", "required": true },
             "group": { "required": true, "type": "str" },
-            "user": { "required": true, "type": "str" }
+            "user": { "required": true, "type": "str" },
+            "memcache_secret_key": { "type": "str", "required": true }
            }
          }
        }
