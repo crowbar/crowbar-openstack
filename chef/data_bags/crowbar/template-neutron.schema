@@ -7,7 +7,6 @@
       "mapping": {
         "neutron": { "type": "map", "required": true,
              "mapping": {
-                    "verbose": { "type": "bool", "required": true },
                     "debug": { "type": "bool", "required": true },
                     "max_header_line": { "type": "int", "required": true },
                     "service_user": { "type": "str", "required": true },
@@ -15,7 +14,7 @@
                     "rabbitmq_instance": { "type": "str", "required": true },
                     "keystone_instance": { "type": "str", "required": true },
                     "create_default_networks": { "type": "bool", "required": true },
-                    "dhcp_domain": { "type": "str", "required": true },
+                    "dns_domain": { "type": "str", "required": true },
                     "rpc_workers": { "type": "int", "required": true },
                     "use_lbaas": { "type": "bool", "required": true },
                     "lbaasv2_driver": { "type": "str", "required": true },

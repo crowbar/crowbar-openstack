@@ -156,7 +156,7 @@ if neutron_servers.length > 0
   neutron_insecure = neutron_protocol == "https" && neutron_server[:neutron][:ssl][:insecure]
   neutron_service_user = neutron_server[:neutron][:service_user]
   neutron_service_password = neutron_server[:neutron][:service_password]
-  neutron_dhcp_domain = neutron_server[:neutron][:dhcp_domain]
+  neutron_dhcp_domain = neutron_server[:neutron][:dns_domain]
   neutron_ml2_drivers = neutron_server[:neutron][:ml2_type_drivers]
   neutron_has_tunnel = neutron_ml2_drivers.include?("gre") || neutron_ml2_drivers.include?("vxlan")
 else

@@ -18,7 +18,6 @@ dhcp_agents_per_network = <%= @network_nodes_count %>
 router_distributed = True
 <% end -%>
 debug = <%= @debug ? "True" : "False" %>
-verbose = <%= @verbose ? "True" : "False" %>
 log_dir = /var/log/neutron
 use_syslog = <%= @use_syslog ? "True" : "False" %>
 use_stderr = false
@@ -53,6 +52,9 @@ project_name = <%= @keystone_settings['service_tenant'] %>
 project_domain_name = <%= @keystone_settings['admin_domain'] %>
 user_domain_name = <%= @keystone_settings['admin_domain'] %>
 memcached_servers = <%= @memcached_servers.join(',') %>
+service_token_roles_required = true
+service_token_roles = admin
+
 
 [nova]
 region_name = <%= @keystone_settings['endpoint_region'] %>
