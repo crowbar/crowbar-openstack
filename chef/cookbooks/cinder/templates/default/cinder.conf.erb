@@ -62,6 +62,11 @@ strict_ssh_host_key_policy = <%= @strict_ssh_host_key_policy ? 'true' : 'false' 
   <% if @use_multi_backend -%>
 [<%= backend_id %>]
 volume_backend_name = <%= volume['backend_name'] %>
+
+<% if @backend_host -%>
+backend_host = <%= @backend_host %>
+<% end -%>
+
   <% end -%>
 
   <% if volume['backend_driver'] == 'blockbridge' -%><% end -%>
