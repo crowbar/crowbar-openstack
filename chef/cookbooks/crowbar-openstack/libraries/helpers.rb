@@ -126,57 +126,12 @@ class CrowbarOpenStackHelper
 
   def self.rabbitmq_settings(node, barclamp)
     instance = node[barclamp][:rabbitmq_instance] || "default"
+    config = BarclampLibrary::Barclamp::Config.load("openstack", "rabbitmq", instance)
 
-    # Cache the result for each cookbook in an instance variable hash. This
-    # cache needs to be invalidated for each chef-client run from chef-client
-    # daemon (which are all in the same process); so use the ohai time as a
-    # marker for that.
-    if @rabbitmq_settings_cache_time != node[:ohai_time]
-      if @rabbitmq_settings
-        Chef::Log.info("Invalidating rabbitmq settings cache " \
-                       "on behalf of #{barclamp}")
-      end
-      @rabbitmq_settings = nil
-      @rabbitmq_settings_cache_time = node[:ohai_time]
-    end
+    Chef::Log.warn("No RabbitMQ server found!") if config.empty?
+    Chef::Log.info("RabbitMQ server found at #{config[:address]}") unless config.empty?
 
-    if @rabbitmq_settings && @rabbitmq_settings.include?(instance)
-      Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]} [cached]")
-    else
-      @rabbitmq_settings ||= Hash.new
-      rabbit = get_node(node, "rabbitmq-server", "rabbitmq", instance)
-
-      if rabbit.nil?
-        Chef::Log.warn("No RabbitMQ server found!")
-      else
-        if rabbit[:rabbitmq][:ssl][:enabled]
-          port = rabbit[:rabbitmq][:ssl][:port]
-        else
-          port = rabbit[:rabbitmq][:port]
-        end
-        client_ca_certs = if rabbit[:rabbitmq][:ssl][:enabled] && \
-            !rabbit[:rabbitmq][:ssl][:insecure]
-          rabbit[:rabbitmq][:ssl][:client_ca_certs]
-        end
-        @rabbitmq_settings[instance] = {
-          address: rabbit[:rabbitmq][:address],
-          port: port,
-          user: rabbit[:rabbitmq][:user],
-          password: rabbit[:rabbitmq][:password],
-          vhost: rabbit[:rabbitmq][:vhost],
-          use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
-          client_ca_certs: client_ca_certs,
-          url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
-            "#{rabbit[:rabbitmq][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{port}/" \
-            "#{rabbit[:rabbitmq][:vhost]}"
-        }
-
-        Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]}")
-      end
-    end
-
-    @rabbitmq_settings[instance]
+    config
   end
 
   private

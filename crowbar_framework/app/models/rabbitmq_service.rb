@@ -146,10 +146,19 @@ class RabbitmqService < OpenstackServiceObject
       _elements, nodes, _ha_enabled = role_expand_elements(role, "rabbitmq-server")
       node = NodeObject.find_node_by_name(nodes.first)
       address = node[:rabbitmq][:address]
-      port = role.default_attributes["rabbitmq"]["port"]
       user = role.default_attributes["rabbitmq"]["user"]
       password = role.default_attributes["rabbitmq"]["password"]
       vhost = role.default_attributes["rabbitmq"]["vhost"]
+      use_ssl = role.default_attributes["rabbitmq"]["ssl"]["enabled"]
+      client_ca_certs = if use_ssl && !role.default_attributes["rabbitmq"]["ssl"]["insecure"]
+        role.default_attributes["rabbitmq"]["ssl"]["client_ca_certs"]
+      end
+
+      port = if use_ssl
+        role.default_attributes["rabbitmq"]["ssl"]["port"]
+      else
+        role.default_attributes["rabbitmq"]["port"]
+      end
 
       config = {
         address: address,
@@ -157,6 +166,8 @@ class RabbitmqService < OpenstackServiceObject
         user: user,
         password: password,
         vhost: "/#{vhost}",
+        use_ssl: use_ssl,
+        client_ca_certs: client_ca_certs,
         url: "rabbit://#{user}:#{password}@#{address}:#{port}/#{vhost}"
       }
     end
