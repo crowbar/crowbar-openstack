@@ -4,6 +4,10 @@
 #
 #
 
+swift_config = Barclamp::Config.load("openstack", "swift")
+swift_insecure = swift_config["insecure"] || false
+cinder_insecure = Barclamp::Config.load("openstack", "cinder")["insecure"] || false
+
 include_recipe "#{@cookbook_name}::common"
 
 package "glance-api" do
@@ -30,23 +34,6 @@ if node[:glance][:api][:protocol] == "https"
     cert_required node[:glance][:ssl][:cert_required]
     ca_certs node[:glance][:ssl][:ca_certs]
   end
-end
-
-# TODO: there's no dependency in terms of proposal on swift
-swift_api_insecure = false
-swifts = search(:node, "roles:swift-proxy") || []
-if swifts.length > 0
-  swift = swifts[0]
-  swift_api_insecure = swift[:swift][:ssl][:enabled] && swift[:swift][:ssl][:insecure]
-end
-
-#TODO: glance should depend on cinder, but cinder already depends on glance :/
-# so we have to do something like this
-cinder_api_insecure = false
-cinders = search(:node, "roles:cinder-controller") || []
-if cinders.length > 0
-  cinder = cinders[0]
-  cinder_api_insecure = cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
 end
 
 ironics = node_search_with_cache("roles:ironic-server") || []
@@ -86,8 +73,8 @@ template node[:glance][:api][:config_file] do
       keystone_settings: keystone_settings,
       memcached_servers: memcached_servers,
       rabbit_settings: fetch_rabbitmq_settings,
-      swift_api_insecure: swift_api_insecure,
-      cinder_api_insecure: cinder_api_insecure,
+      swift_api_insecure: swift_insecure,
+      cinder_api_insecure: cinder_insecure,
       # v1 api is (temporarily) enforced by ironic
       # Newton version of Ironic supports only v1
       # Ocata and Pike have option to set glance_api_version
@@ -110,14 +97,14 @@ template "/etc/glance/glance-swift.conf" do
 end
 
 # ensure swift tempurl key only if some agent_* drivers are enabled in ironic
-if swifts.any? && node[:glance][:default_store] == "swift" && \
+if !swift_config.empty? && node[:glance][:default_store] == "swift" && \
     ironics.any? && ironics.first[:ironic][:enabled_drivers].any? { |d| d.start_with?("agent_") }
   swift_command = "swift --os-username #{keystone_settings["service_user"]}"
   swift_command << " --os-password #{keystone_settings["service_password"]}"
   swift_command << " --os-tenant-name #{keystone_settings["service_tenant"]}"
   swift_command << " --os-auth-url #{keystone_settings["public_auth_url"]}"
   swift_command << " --os-identity-api-version 3"
-  swift_command << (swift_api_insecure ? " --insecure" : "")
+  swift_command << (swift_insecure ? " --insecure" : "")
 
   get_tempurl_key = "#{swift_command} stat | grep -m1 'Meta Temp-Url-Key:' | awk '{print $3}'"
   tempurl_key = Mixlib::ShellOut.new(get_tempurl_key).run_command.stdout.chomp
