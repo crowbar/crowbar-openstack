@@ -18,7 +18,6 @@
               "type": "map",
               "required": false,
               "mapping" : {
-                "server_repl_password": { "type": "str" },
                 "server_root_password": { "type": "str" },
                 "datadir": { "type": "str", "required": true }
               }
