@@ -20,11 +20,8 @@ neutron = nil
 if node.attribute?(:cookbook) and node[:cookbook] == "nova"
   neutrons = node_search_with_cache("roles:neutron-server", node[:nova][:neutron_instance])
   neutron = neutrons.first || raise("Neutron instance '#{node[:nova][:neutron_instance]}' for nova not found")
-  nova = node
 else
   neutron = node
-  nova = node_search_with_cache("roles:nova-controller").first
-  Chef::Log.warn("nova-controller not found") if nova.nil?
 end
 
 # RDO package magic (non-standard packages)
@@ -70,13 +67,7 @@ keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
 bind_host, bind_port = NeutronHelper.get_bind_host_port(node)
 
-# Get Nova's insecure setting
-if nova.nil?
-  nova_insecure = keystone_settings["insecure"]
-else
-  nova_insecure = keystone_settings["insecure"] || (
-    nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure])
-end
+nova_insecure = Barclamp::Config.load("openstack", "nova")["insecure"] || false
 
 service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
                    "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
