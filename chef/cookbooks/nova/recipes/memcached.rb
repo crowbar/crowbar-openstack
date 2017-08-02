@@ -26,6 +26,9 @@ case node[:platform_family]
     package "python-python-memcached"
 end
 
-node.set[:memcached][:listen] = node[:nova][:my_ip]
+if node[:memcached][:listen] != node[:nova][:my_ip]
+  node.set[:memcached][:listen] = node[:nova][:my_ip]
+  node.save
+end
 
 memcached_instance "nova"

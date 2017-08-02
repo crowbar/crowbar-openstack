@@ -280,9 +280,13 @@ end
 
 ## install a default memcached instsance.
 ## default configuration is take from: node[:memcached] / [:memory], [:port] and [:user]
-node.set[:memcached][:listen] = local_ip
-node.set[:memcached][:name] = "swift-proxy"
-memcached_instance "swift-proxy" do
+if node[:memcached][:listen] != local_ip
+  node.set[:memcached][:listen] = local_ip
+  dirty = true
+end
+if node[:memcached][:name] != "swift-proxy"
+  node.set[:memcached][:name] = "swift-proxy"
+  dirty = true
 end
 
 ## make sure to fetch ring files from the ring compute node
