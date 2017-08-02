@@ -66,5 +66,3 @@ template node[:sahara][:config_file] do
     use_ceilometer: use_ceilometer
   )
 end
-
-node.save
