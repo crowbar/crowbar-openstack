@@ -22,63 +22,108 @@ class Chef
   class Provider
     class Database
       class MysqlUser < Chef::Provider::Database::Mysql
-        include Chef::Mixin::ShellOut
 
         def load_current_resource
           Gem.clear_paths
-          require "mysql"
+          require "mysql2"
           @current_resource = Chef::Resource::DatabaseUser.new(@new_resource.name)
           @current_resource.username(@new_resource.name)
           @current_resource
         end
 
         def action_create
-          unless exists?
-            begin
-              statement = "CREATE USER `#{@new_resource.username}`@`#{@new_resource.host}`"
-              statement += " IDENTIFIED BY '#{@new_resource.password}'" if @new_resource.password
-              db.query(statement)
-              @new_resource.updated_by_last_action(true)
-            ensure
-              close
-            end
+          return if user_present?(new_resource.username, new_resource.host)
+          Chef::Log.info("Creating user '#{new_resource.username}@#{new_resource.host}'")
+          username = client.escape(new_resource.username)
+          host = client.escape(new_resource.host)
+          create_sql = "CREATE USER '#{username}'@'#{host}'"
+          if new_resource.password
+            password = client.escape(new_resource.password)
+            create_sql += " IDENTIFIED BY '#{password}'"
           end
+          client.query(create_sql)
+        ensure
+          close_client
         end
 
         def action_drop
-          if exists?
-            begin
-              db.query("DROP USER `#{@new_resource.username}`@`#{@new_resource.host}`")
-              @new_resource.updated_by_last_action(true)
-            ensure
-              close
-            end
-          end
+          # drop
+          return unless user_present?(new_resource.username, new_resource.host)
+          Chef::Log.info("Dropping user '#{new_resource.username}@#{new_resource.host}'")
+
+          username = client.escape(new_resource.username)
+          host = client.escape(new_resource.host)
+          drop_sql = "DROP USER '#{username}'@'#{host}'"
+          client.query(drop_sql)
+        ensure
+          close_client
         end
 
         def action_grant
-          begin
-            # does password look like MySQL hex digest?
-            # (begins with *, followed by 40 hexadecimal characters)
-            if (/(\A\*[0-9A-F]{40}\z)/i).match(@new_resource.password) then
-              password = filtered = "PASSWORD '#{Regexp.last_match[1]}'"
-            else
-              password = "'#{@new_resource.password}'"
-              filtered = "[FILTERED]"
+          db_name = new_resource.database_name || "*"
+          tbl_name = new_resource.table || "*"
+
+          # test
+          incorrect_privileges = false
+          test_sql = client.prepare("SELECT * from mysql.db WHERE User = ? AND Host = ? AND Db = ?")
+          results = test_sql.execute(
+            new_resource.username,
+            new_resource.host,
+            db_name
+          )
+          incorrect_privileges = true if results.size.zero?
+          # These should all by 'Y'
+          results.each do |result|
+            new_resource.privileges.each do |privileges|
+              key = "#{privileges.capitalize}_priv"
+              incorrect_privileges = true if privileges[key] != "Y"
             end
-            grant_statement = "GRANT #{@new_resource.privileges.join(', ')} ON #{@new_resource.database_name && @new_resource.database_name != '*' ? "`#{@new_resource.database_name}`" : '*'}.#{@new_resource.table && @new_resource.table != '*' ? "`#{@new_resource.table}`" : '*'} TO `#{@new_resource.username}`@`#{@new_resource.host}` IDENTIFIED BY "
-            with_grant_option = @new_resource.grant_option == true ? " WITH GRANT OPTION " : ""
-            Chef::Log.info("#{@new_resource}: granting access with statement [#{grant_statement}#{filtered}]")
-            db.query(grant_statement + password + with_grant_option)
-            @new_resource.updated_by_last_action(true)
-          ensure
-            close
           end
+
+          # grant
+          return unless incorrect_privileges
+          Chef::Log.info("Granting privileges for '#{new_resource.username}@#{new_resource.host}'")
+
+          username = client.escape(new_resource.username)
+          host = client.escape(new_resource.host)
+          password = client.escape(new_resource.password)
+
+          grant_sql = "GRANT #{new_resource.privileges.join(",")}"
+          grant_sql += " ON #{db_name}.#{tbl_name}"
+          grant_sql += " TO '#{username}'@'#{host}'"
+          grant_sql += " IDENTIFIED BY '#{password}'"
+          client.query(grant_sql)
+          client.query("FLUSH PRIVILEGES")
+        ensure
+          close_client
         end
 
         private
-        def exists?
-          db.query("SELECT User,host from mysql.user WHERE User = '#{@new_resource.username}' AND host = '#{@new_resource.host}'").num_rows != 0
+
+        def user_present?(username, host)
+          user_present = false
+          test_sql = client.prepare("SELECT User, Host from mysql.user WHERE User = ? AND Host = ?")
+          results = test_sql.execute(username, host)
+          results.each do |result|
+            user_present = true if result["User"] == username
+          end
+          user_present
+        end
+
+        def client
+          @client ||= Mysql2::Client.new(
+            host: new_resource.connection[:host],
+            socket: new_resource.connection[:socket],
+            username: new_resource.connection[:username],
+            password: new_resource.connection[:password],
+            port: new_resource.connection[:port]
+          )
+        end
+
+        def close_client
+          @client.close
+        rescue
+          @client = nil
         end
       end
     end
