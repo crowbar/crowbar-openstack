@@ -61,13 +61,10 @@ if neutron_servers.length > 0
     neutron_server,
     (neutron_server[:neutron][:ha][:server][:enabled] || false))
   neutron_server_port = neutron_server[:neutron][:api][:service_port]
-  neutron_insecure = neutron_protocol == "https" &&
-                     neutron_server[:neutron][:ssl][:insecure]
   neutron_service_user = neutron_server[:neutron][:service_user]
   neutron_service_password = neutron_server[:neutron][:service_password]
   Chef::Log.info("Neutron server at #{neutron_server_host}")
 else
-  neutron_insecure = false
   neutron_protocol = nil
   neutron_server_host = nil
   neutron_server_port = nil
@@ -76,38 +73,38 @@ else
   Chef::Log.warn("Neutron server not found")
 end
 
+neutron_config = Barclamp::Config.load("openstack", "neutron", node[:manila][:neutron_instance])
+neutron_insecure = CrowbarOpenStackHelper.insecure(neutron_config)
+
 # get Nova data
 nova = node_search_with_cache("roles:nova-controller")
 if nova.length > 0
   nova = nova[0]
-  nova_insecure = (
-      nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]
-  )
   nova_admin_username = nova[:nova][:service_user]
   nova_admin_password = nova[:nova][:service_password]
 else
-  nova_insecure = false
   nova_admin_username = nil
   nova_admin_password = nil
   Chef::Log.warn("nova-controller not found")
 end
 
+nova_config = Barclamp::Config.load("openstack", "nova", node[:manila][:nova_instance])
+nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
+
 # get Cinder data
 cinder = node_search_with_cache("roles:cinder-controller")
 if cinder.length > 0
   cinder = cinder[0]
-  cinder_insecure = (
-    cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
-  )
-
   cinder_admin_username = cinder[:cinder][:service_user]
   cinder_admin_password = cinder[:cinder][:service_password]
 else
-  cinder_insecure = false
   cinder_admin_username = nil
   cinder_admin_password = nil
   Chef::Log.warn("cinder-controller not found")
 end
+
+cinder_config = Barclamp::Config.load("openstack", "cinder", node[:manila][:cinder_instance])
+cinder_insecure = CrowbarOpenStackHelper.insecure(cinder_config)
 
 enabled_share_protocols = ["NFS", "CIFS"]
 enabled_share_protocols << ["CEPHFS"] if ManilaHelper.has_cephfs_share? node
