@@ -35,7 +35,7 @@
     "aodh": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 200,
       "element_states": {
         "aodh-server": [ "readying", "ready", "applying" ]
       },
