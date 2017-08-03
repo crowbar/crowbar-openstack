@@ -23,15 +23,15 @@
 
 class OpenstackServiceObject < PacemakerServiceObject
   def apply_role_post_chef_call(old_role, role, all_nodes)
-    @logger.debug("#{@bc_name} apply_role_post_chef_call: entering")
+    Rails.logger.debug("#{@bc_name} apply_role_post_chef_call: entering")
     # do this in post, because we depend on values that are computed in the
     # cookbook
     save_config_to_databag(old_role, role)
-    @logger.debug("#{@bc_name} apply_role_post_chef_call: leaving")
+    Rails.logger.debug("#{@bc_name} apply_role_post_chef_call: leaving")
   end
 
   def save_config_to_databag(old_role, role)
-    @logger.debug("#{@bc_name} save_config_to_databag: entering")
+    Rails.logger.debug("#{@bc_name} save_config_to_databag: entering")
     if role.nil?
       config = nil
     else
@@ -44,6 +44,6 @@ class OpenstackServiceObject < PacemakerServiceObject
 
     instance = Crowbar::DataBagConfig.instance_from_role(old_role, role)
     Crowbar::DataBagConfig.save("openstack", instance, @bc_name, config)
-    @logger.debug("#{@bc_name} save_config_to_databag: leaving")
+    Rails.logger.debug("#{@bc_name} save_config_to_databag: leaving")
   end
 end
