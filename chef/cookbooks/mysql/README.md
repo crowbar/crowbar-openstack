@@ -35,8 +35,6 @@ Attributes
 ==========
 
 * `mysql[:server_root_password]` - Set the server's root password with this, default is a randomly generated password with `OpenSSL::Random.random_bytes`.
-* `mysql[:server_repl_password]` - Set the replication user 'repl' password with this, default is a randomly generated password with `OpenSSL::Random.random_bytes`.
-* `mysql[:server_debian_password]` - Set the debian-sys-maint user password with this, default is a randomly generated password with `OpenSSL::Random.random_bytes`.
 * `mysql[:bind_address]` - Listen address for MySQLd, default is node's ipaddress.
 * `mysql[:datadir]` - Location for mysql data directory, default is "/var/lib/mysql"
 * `mysql[:ec2_path]` - location of mysql datadir on EC2 nodes, default "/mnt/mysql"
@@ -77,7 +75,7 @@ On server nodes,
 
     include_recipe "mysql::server"
 
-On Debian and Ubuntu, this will preseed the mysql-server package with the randomly generated root password from the attributes file. On other platforms, it simply installs the required packages. It will also create an SQL file, /etc/mysql/grants.sql, that will be used to set up grants for the root, repl and debian-sys-maint users.
+On Debian and Ubuntu, this will preseed the mysql-server package with the randomly generated root password from the attributes file. On other platforms, it simply installs the required packages. It will also create an SQL file, /etc/mysql/grants.sql, that will be used to set up grants for the root user.
 
 On EC2 nodes,
 
