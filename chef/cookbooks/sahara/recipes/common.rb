@@ -25,25 +25,28 @@ include_recipe "#{db_settings[:backend_name]}::python-client"
 # get Database data
 sql_connection = fetch_database_connection_string(node[:sahara][:db])
 
-# cinder insecure?
-cinder = node_search_with_cache("roles:cinder-controller").first
-cinder_insecure = cinder[:cinder][:ssl][:insecure]
+cinder_instance = node[:sahara][:cinder_instance]
+heat_instance = node[:sahara][:heat_instance]
+neutron_instance = node[:sahara][:neutron_instance]
+nova_instance = node[:sahara][:nova_instance]
 
-# heat insecure?
-heat = node_search_with_cache("roles:heat-server").first
-heat_insecure = heat[:heat][:ssl][:insecure]
+cinder_insecure = Barclamp::Config.load(
+  "openstack", "cinder", cinder_instance
+)["insecure"] || false
 
-# neutron insecure?
-neutron = node_search_with_cache("roles:neutron-server").first
-neutron_insecure = neutron[:neutron][:ssl][:insecure]
+heat_insecure = Barclamp::Config.load(
+  "openstack", "heat", heat_instance
+)["insecure"] || false
 
-# nova insecure?
-nova = node_search_with_cache("roles:nova-controller").first
-nova_insecure = nova[:nova][:ssl][:insecure]
+neutron_insecure = Barclamp::Config.load(
+  "openstack", "neutron", neutron_instance
+)["insecure"] || false
 
-# use ceilometer?
-ceilometers = search_env_filtered(:node, "roles:ceilometer-server")
-use_ceilometer = !ceilometers.empty?
+nova_insecure = Barclamp::Config.load(
+  "openstack", "nova", nova_instance
+)["insecure"] || false
+
+use_ceilometer = !Barclamp::Config.load("openstack", "ceilometer").empty?
 
 template node[:sahara][:config_file] do
   source "sahara.conf.erb"
