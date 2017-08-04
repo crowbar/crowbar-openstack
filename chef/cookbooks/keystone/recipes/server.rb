@@ -536,6 +536,11 @@ if node[:keystone][:signing][:token_format] == "fernet"
   crowbar_pacemaker_sync_mark "create-keystone_fernet_rotate" if ha_enabled
 end
 
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required services correctly configured and running before we create
+# the keystone resources
+crowbar_pacemaker_sync_mark "sync-keystone_before_register" if ha_enabled
+
 crowbar_pacemaker_sync_mark "wait-keystone_register" if ha_enabled
 
 keystone_insecure = node["keystone"]["api"]["protocol"] == "https" && node[:keystone][:ssl][:insecure]
@@ -630,6 +635,7 @@ end
     auth register_auth_hash
     tenant_name tenant
     action :add_tenant
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 
@@ -643,6 +649,7 @@ if node[:keystone][:domain_specific_drivers]
       auth register_auth_hash
       domain_name domain
       action :add_domain
+      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
   end
 end
@@ -658,6 +665,7 @@ keystone_register "add default admin role for domain default" do
   role_name "admin"
   domain_name "Default"
   action :add_domain_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 # Create default user
@@ -672,6 +680,7 @@ if node[:keystone][:default][:create_user]
     user_password node[:keystone][:default][:password]
     tenant_name node[:keystone][:default][:tenant]
     action :add_user
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 
@@ -684,6 +693,7 @@ keystone_register "add default Member role" do
   auth register_auth_hash
   role_name "Member"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 # Create Access info
@@ -705,6 +715,7 @@ user_roles.each do |args|
     role_name args[1]
     tenant_name args[2]
     action :add_access
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 
@@ -726,6 +737,7 @@ ec2_creds.each do |args|
     user_name args[0]
     tenant_name args[1]
     action :add_ec2
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 
