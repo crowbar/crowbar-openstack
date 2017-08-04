@@ -119,5 +119,14 @@
 
     %fieldset
       %legend
+        = t(".serial_console_header")
+
+      .alert.alert-warning
+        = t(".serial_console_hint")
+
+      = boolean_field :use_serial
+
+    %fieldset
+      %legend
         = t(".logging_header")
       = boolean_field :verbose
