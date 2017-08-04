@@ -93,6 +93,26 @@ unless node[:database][:galera_bootstrapped]
     end
     notifies :create, "template[/etc/my.cnf]"
   end
+
+  # Make sure temporary MariaDB instance is realy down before it is started by pacemaker
+  ruby_block "wait for mysql to be really stopped" do
+    block do
+      require "timeout"
+      timeout = 60
+      begin
+        Timeout.timeout(timeout) do
+          while ::Kernel.system("systemctl status #{mysql_service_name} > /dev/null")
+            Chef::Log.debug("mysql is still running")
+            sleep(2)
+          end
+        end
+      rescue Timeout::Error
+        message = "mysql service does not want to stop after #{timeout} seconds..."
+        Chef::Log.fatal(message)
+        raise message
+      end
+    end
+  end
 end
 
 transaction_objects = []
