@@ -79,7 +79,7 @@ crowbar_pacemaker_sync_mark "wait-nova_ha_resources"
 
 transaction_objects = []
 
-services = %w(api cert conductor consoleauth scheduler)
+services = %w(api conductor consoleauth scheduler)
 if node[:nova][:use_novnc]
   services << "novncproxy"
 end
