@@ -10,7 +10,8 @@ module CrowbarDatabaseHelper
   end
 
   def self.get_listen_address(node)
-    if node[:database][:ha][:enabled]
+    # FIXME: temporarily do not expect there's any VIP for mysql database
+    if node[:database][:ha][:enabled] && node[:database][:sql_engine] != "mysql"
       vhostname = get_ha_vhostname(node)
       CrowbarPacemakerHelper.cluster_vip(node, "admin", vhostname)
     else
