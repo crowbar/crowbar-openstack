@@ -80,8 +80,6 @@ en:
             enabled: 'NoVNC Protocol'
             certfile: 'SSL Certificate File'
             keyfile: 'SSL (Private) Key File'
-        logging_header: 'Logging'
-        verbose: 'Verbose Logging'
         ec2-api_header: 'EC2API Configuration'
         ec2-api:
           ssl_header: 'SSL Support'
