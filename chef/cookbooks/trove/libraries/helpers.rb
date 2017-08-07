@@ -23,21 +23,6 @@ module TroveHelper
     "#{node[:trove][:db][:database]}"
   end
 
-  def self.get_rabbitmq_trove_url(node, rabbitmq_servers)
-    # get rabbitmq-server information
-    # NOTE: Trove uses it's own user/pass/vhost instead of the default one
-    return nil if rabbitmq_servers.empty?
-
-    default_rabbit_settings = CrowbarOpenStackHelper.rabbitmq_settings(node, "trove")
-    trove_rabbit_settings = rabbitmq_servers[0][:rabbitmq][:trove]
-
-    "rabbit://#{trove_rabbit_settings[:user]}:" \
-    "#{trove_rabbit_settings[:password]}@" \
-    "#{default_rabbit_settings[:address]}:" \
-    "#{default_rabbit_settings[:port]}/" \
-    "#{trove_rabbit_settings[:vhost]}"
-  end
-
   def self.get_nova_details(nova_controllers, keystone_settings)
     # get nova information
     if nova_controllers.empty?
