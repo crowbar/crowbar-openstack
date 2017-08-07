@@ -83,8 +83,7 @@ neutron_lbaas_ui_pkgname =
   end
 
 unless neutron_lbaas_ui_pkgname.nil?
-  neutron_servers = search(:node, "roles:neutron-server") || []
-  unless neutron_servers.empty?
+  unless Barclamp::Config.load("openstack", "neutron").empty?
     package neutron_lbaas_ui_pkgname do
       action :install
       notifies :reload, "service[horizon]"
@@ -102,8 +101,7 @@ manila_ui_pkgname =
   end
 
 unless manila_ui_pkgname.nil?
-  manila_servers = search(:node, "roles:manila-server") || []
-  unless manila_servers.empty?
+  unless Barclamp::Config.load("openstack", "manila").empty?
     package manila_ui_pkgname do
       action :install
       notifies :reload, "service[horizon]"
@@ -121,8 +119,7 @@ magnum_ui_pkgname =
   end
 
 unless magnum_ui_pkgname.nil?
-  magnum_servers = search(:node, "roles:magnum-server") || []
-  unless magnum_servers.empty?
+  unless Barclamp::Config.load("openstack", "magnum").empty?
     package magnum_ui_pkgname do
       action :install
       notifies :reload, "service[horizon]"
@@ -140,8 +137,7 @@ trove_ui_pkgname =
   end
 
 unless trove_ui_pkgname.nil?
-  trove_servers = search(:node, "roles:trove-server") || []
-  unless trove_servers.empty?
+  unless Barclamp::Config.load("openstack", "trove").empty?
     package trove_ui_pkgname do
       action :install
       notifies :reload, "service[horizon]"
@@ -159,8 +155,7 @@ sahara_ui_pkgname =
   end
 
 unless sahara_ui_pkgname.nil?
-  sahara_servers = search(:node, "roles:sahara-server") || []
-  unless sahara_servers.empty?
+  unless Barclamp::Config.load("openstack", "sahara").empty?
     package sahara_ui_pkgname do
       action :install
       notifies :reload, "service[horizon]"
@@ -178,8 +173,7 @@ ironic_ui_pkgname =
   end
 
 unless ironic_ui_pkgname.nil?
-  ironic_servers = search(:node, "roles:ironic-server") || []
-  unless ironic_servers.empty?
+  unless Barclamp::Config.load("openstack", "ironic").empty?
     package ironic_ui_pkgname do
       action :install
       notifies :reload, "service[horizon]"
@@ -196,8 +190,7 @@ monasca_ui_pkgname =
   end
 
 unless monasca_ui_pkgname.nil?
-  monasca_servers = node_search_with_cache("roles:monasca-server")
-  unless monasca_servers.empty?
+  unless Barclamp::Config.load("openstack", "monasca").empty?
     include_recipe "#{@cookbook_name}::monasca_ui"
     package monasca_ui_pkgname do
       action :install
@@ -344,26 +337,22 @@ db_settings = {
   "default-character-set" => "'utf8'"
 }
 
-glances = search(:node, "roles:glance-server") || []
-if glances.length > 0
-  glance = glances[0]
-  glance_insecure = glance[:glance][:api][:protocol] == "https" && glance[:glance][:ssl][:insecure]
-else
-  glance_insecure = false
-end
-
-cinders = search(:node, "roles:cinder-controller") || []
-if cinders.length > 0
-  cinder = cinders[0]
-  cinder_insecure = cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
-else
-  cinder_insecure = false
-end
+glance_insecure = Barclamp::Config.load("openstack", "glance")["insecure"] || false
+cinder_insecure = Barclamp::Config.load("openstack", "cinder")["insecure"] || false
+neutron_insecure = Barclamp::Config.load("openstack", "neutron")["insecure"] || false
+nova_insecure = Barclamp::Config.load("openstack", "nova")["insecure"] || false
+aodh_insecure = Barclamp::Config.load("openstack", "aodh")["insecure"] || false
+barbican_insecure = Barclamp::Config.load("openstack", "barbican")["insecure"] || false
+ceilometer_insecure = Barclamp::Config.load("openstack", "ceilometer")["insecure"] || false
+heat_insecure = Barclamp::Config.load("openstack", "heat")["insecure"] || false
+manila_insecure = Barclamp::Config.load("openstack", "manila")["insecure"] || false
+magnum_insecure = Barclamp::Config.load("openstack", "magnum")["insecure"] || false
+trove_insecure = Barclamp::Config.load("openstack", "trove")["insecure"] || false
+sahara_insecure = Barclamp::Config.load("openstack", "sahara")["insecure"] || false
 
 neutrons = search(:node, "roles:neutron-server") || []
 if neutrons.length > 0
   neutron = neutrons[0]
-  neutron_insecure = neutron[:neutron][:api][:protocol] == "https" && neutron[:neutron][:ssl][:insecure]
   if neutron[:neutron][:networking_plugin] == "ml2"
     neutron_ml2_type_drivers = neutron[:neutron][:ml2_type_drivers]
   else
@@ -372,42 +361,9 @@ if neutrons.length > 0
   neutron_use_lbaas = neutron[:neutron][:use_lbaas]
   neutron_use_vpnaas = neutron[:neutron][:use_vpnaas]
 else
-  neutron_insecure = false
   neutron_ml2_type_drivers = "'*'"
   neutron_use_lbaas = false
   neutron_use_vpnaas = false
-end
-
-novas = search(:node, "roles:nova-controller") || []
-if !novas.empty?
-  nova = novas[0]
-  nova_insecure = nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]
-else
-  nova_insecure = false
-end
-
-heats = search(:node, "roles:heat-server") || []
-if !heats.empty?
-  heat = heats[0]
-  heat_insecure = heat[:heat][:api][:protocol] == "https" && heat[:heat][:ssl][:insecure]
-else
-  heat_insecure = false
-end
-
-manilas = search(:node, "roles:manila-server")
-if !manilas.empty?
-  manila = manilas[0]
-  manila_insecure = manila[:manila][:api][:protocol] == "https" && manila[:manila][:ssl][:insecure]
-else
-  manila_insecure = false
-end
-
-ceilometers = search(:node, "roles:ceilometer-server") || []
-if !ceilometers.empty?
-  ceilometer = ceilometers[0][:ceilometer]
-  ceilometer_insecure = ceilometer[:api][:protocol] == "https" && ceilometer[:ssl][:insecure]
-else
-  ceilometer_insecure = false
 end
 
 # We're going to use memcached as a cache backend for Django
@@ -465,7 +421,13 @@ template local_settings do
     || cinder_insecure \
     || neutron_insecure \
     || nova_insecure \
+    || aodh_insecure \
+    || barbican_insecure \
+    || ceilometer_insecure \
     || heat_insecure \
+    || magnum_insecure \
+    || trove_insecure \
+    || sahara_insecure \
     || manila_insecure \
     || ceilometer_insecure,
     db_settings: db_settings,
