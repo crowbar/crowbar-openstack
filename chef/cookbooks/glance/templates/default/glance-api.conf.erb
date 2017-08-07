@@ -46,7 +46,7 @@ vmware_insecure = <%= node[:glance][:vsphere][:insecure] ? "True" : "False" %>
 cinder_catalog_info = volumev2:cinderv2:internalURL
 cinder_os_region_name = <%= @keystone_settings['endpoint_region'] %>
 cinder_api_insecure = <%= @cinder_api_insecure ? 'True' : 'False' %>
-swift_store_auth_insecure = <%= @swift_api_insecure || @keystone_settings['insecure'] ? 'True' : 'False' %>
+swift_store_auth_insecure = <%= @swift_api_insecure ? 'True' : 'False' %>
 swift_store_region = <%= @keystone_settings['endpoint_region'] %>
 swift_store_endpoint_type = internalURL
 swift_store_container = <%= node[:glance][:swift][:store_container] %>
