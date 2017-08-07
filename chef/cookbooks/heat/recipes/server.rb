@@ -404,9 +404,7 @@ template "/etc/heat/heat.conf.d/100-heat.conf" do
   )
 end
 
-magnum_env_filter = "magnum-server AND magnum_config_environment:magnum-config-default"
-magnum_servers = search(:node, "roles:#{magnum_env_filter}") || []
-unless magnum_servers.empty?
+unless Barclamp::Config.load("openstack", "magnum").empty?
 
   # https://bugs.launchpad.net/magnum/+bug/1589955
   # enable stacks global_index search so that magnum can use
