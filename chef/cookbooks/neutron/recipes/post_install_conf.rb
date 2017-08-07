@@ -65,8 +65,7 @@ vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-neutron_insecure = node[:neutron][:api][:protocol] == "https" && node[:neutron][:ssl][:insecure]
-ssl_insecure = keystone_settings["insecure"] || neutron_insecure
+ssl_insecure = Barclamp::Config.load("openstack", "neutron")["insecure"] || false
 
 has_ironic = ironic_net && node.roles.include?("ironic-server")
 
