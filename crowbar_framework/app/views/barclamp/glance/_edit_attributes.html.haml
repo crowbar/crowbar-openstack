@@ -76,8 +76,3 @@
         %span.help-block
           = t('.crossdomain.cross_domain_hosts_hint')
         = array_string_field %w(crossdomain cross_domain_hosts),  :only_comma => true
-
-    %fieldset
-      %legend
-        = t(".logging_header")
-      = boolean_field :verbose

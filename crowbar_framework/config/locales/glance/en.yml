@@ -58,8 +58,6 @@ en:
         cache_header: 'Caching'
         enable_caching: 'Enable Caching'
         use_cachemanagement: 'Turn On Cache Management'
-        logging_header: 'Logging'
-        verbose: 'Verbose Logging'
         crossdomain:
           header: 'Cross-domain'
           enabled: 'Enabled'
