@@ -91,13 +91,14 @@ if glance_servers.length > 0
   glance_server_host = CrowbarHelper.get_host_for_admin_url(glance_server, (glance_server[:glance][:ha][:enabled] rescue false))
   glance_server_port = glance_server[:glance][:api][:bind_port]
   glance_server_protocol = glance_server[:glance][:api][:protocol]
-  glance_server_insecure = glance_server_protocol == "https" && glance_server[:glance][:ssl][:insecure]
 else
   glance_server_host = nil
   glance_server_port = nil
   glance_server_protocol = nil
-  glance_server_insecure = nil
 end
+
+glance_config = Barclamp::Config.load("openstack", "glance", node[:nova][:glance_instance])
+glance_insecure = glance_config["insecure"] || false
 Chef::Log.info("Glance server at #{glance_server_host}")
 
 # use memcached as a cache backend for nova-novncproxy
@@ -116,12 +117,9 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 rbd_enabled = false
 
-use_multipath = false
-
 cinder_servers = node_search_with_cache("roles:cinder-controller")
 if cinder_servers.length > 0
   cinder_server = cinder_servers[0]
-  cinder_insecure = cinder_server[:cinder][:api][:protocol] == "https" && cinder_server[:cinder][:ssl][:insecure]
   use_multipath = cinder_server[:cinder][:use_multipath]
   keymgr_fixed_key = cinder_server[:cinder][:keymgr_fixed_key]
 
@@ -131,9 +129,12 @@ if cinder_servers.length > 0
     end
   end
 else
-  cinder_insecure = false
+  use_multipath = false
   keymgr_fixed_key = ""
 end
+
+cinder_config = Barclamp::Config.load("openstack", "cinder", node[:nova][:cinder_instance])
+cinder_insecure = cinder_config["insecure"] || false
 
 if rbd_enabled
   include_recipe "nova::ceph"
@@ -153,7 +154,6 @@ if neutron_servers.length > 0
   neutron_protocol = neutron_server[:neutron][:api][:protocol]
   neutron_server_host = CrowbarHelper.get_host_for_admin_url(neutron_server, (neutron_server[:neutron][:ha][:server][:enabled] rescue false))
   neutron_server_port = neutron_server[:neutron][:api][:service_port]
-  neutron_insecure = neutron_protocol == "https" && neutron_server[:neutron][:ssl][:insecure]
   neutron_service_user = neutron_server[:neutron][:service_user]
   neutron_service_password = neutron_server[:neutron][:service_password]
   neutron_ml2_drivers = neutron_server[:neutron][:ml2_type_drivers]
@@ -165,6 +165,9 @@ else
   neutron_service_password = nil
   neutron_has_tunnel = false
 end
+
+neutron_config = Barclamp::Config.load("openstack", "neutron", node[:nova][:neutron_instance])
+neutron_insecure = neutron_config["insecure"] || false
 Chef::Log.info("Neutron server at #{neutron_server_host}")
 
 has_itxt = false
@@ -374,7 +377,7 @@ template node[:nova][:config_file] do
     glance_server_protocol: glance_server_protocol,
     glance_server_host: glance_server_host,
     glance_server_port: glance_server_port,
-    glance_server_insecure: glance_server_insecure || keystone_settings["insecure"],
+    glance_server_insecure: glance_insecure,
     need_shared_lock_path: need_shared_lock_path,
     metadata_bind_address: metadata_bind_address,
     vnc_enabled: node[:nova][:use_novnc],
@@ -389,12 +392,12 @@ template node[:nova][:config_file] do
     neutron_protocol: neutron_protocol,
     neutron_server_host: neutron_server_host,
     neutron_server_port: neutron_server_port,
-    neutron_insecure: neutron_insecure || keystone_settings["insecure"],
+    neutron_insecure: neutron_insecure,
     neutron_service_user: neutron_service_user,
     neutron_service_password: neutron_service_password,
     neutron_has_tunnel: neutron_has_tunnel,
     keystone_settings: keystone_settings,
-    cinder_insecure: cinder_insecure || keystone_settings["insecure"],
+    cinder_insecure: cinder_insecure,
     use_multipath: use_multipath,
     keymgr_fixed_key: keymgr_fixed_key,
     ceph_user: ceph_user,
