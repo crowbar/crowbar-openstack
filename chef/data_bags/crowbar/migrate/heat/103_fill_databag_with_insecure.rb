@@ -8,7 +8,7 @@ def upgrade(ta, td, a, d)
   # Find the role, get all the values and save the databag
   role = RoleObject.find_role_by_name("heat-config-default")
   config = {
-    insecure: a[:ssl][:insecure]
+    insecure: a["ssl"]["insecure"]
   }
   # as we dont have an old_role here, we just pass the role twice, wont affect anything
   # as the instance_from_role method has an || to use any of those (old_role or role)
