@@ -4,7 +4,6 @@
   "attributes": {
     "sahara": {
       "debug": false,
-      "verbose": true,
       "use_syslog": true,
       "keystone_instance": "none",
       "database_instance": "none",
@@ -16,6 +15,7 @@
       "cinder_instance": "none",
       "service_user": "sahara",
       "service_password": "",
+      "memcache_secret_key": "",
       "plugins": "vanilla,spark,storm,cdh,ambari,mapr",
       "api": {
         "protocol": "http",
@@ -34,7 +34,7 @@
     "sahara": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 201,
+      "schema-revision": 203,
       "element_states": {
         "sahara-server": [ "readying", "ready", "applying" ]
       },

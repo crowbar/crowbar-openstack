@@ -23,6 +23,7 @@ version "0.1"
 
 depends "database"
 depends "keystone"
+depends "memcached"
 depends "crowbar-openstack"
 depends "crowbar-pacemaker"
 depends "utils"

@@ -26,8 +26,6 @@ en:
         neutron_instance: 'Neutron'
         glance_instance: 'Glance'
         cinder_instance: 'Cinder'
-        logging_header: 'Logging'
-        verbose: 'Verbose Logging'
         use_barbican_key_manager: 'Use Barbican Key manager'
       validation:
         barbican_deployed: 'The Barbican barclamp needs to be deployed correctly to use it as Key Manager for Sahara.'

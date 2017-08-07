@@ -14,7 +14,6 @@
 #
 
 default[:sahara][:debug] = false
-default[:sahara][:verbose] = false
 override[:sahara][:user] = "sahara"
 override[:sahara][:group] = "sahara"
 default[:sahara][:max_header_line] = 16384
