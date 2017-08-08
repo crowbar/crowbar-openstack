@@ -102,6 +102,16 @@ end
 
 crowbar_pacemaker_sync_mark "create-barbican_database" if ha_enabled
 
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  if node[:barbican][:ha][:enabled]
+    CrowbarPacemakerHelper.cluster_nodes(node, "barbican-controller")
+  else
+    [node]
+  end
+)
+
+memcached_instance("barbican") if node["roles"].include?("barbican-controller")
+
 template node[:barbican][:config_file] do
   source "barbican.conf.erb"
   owner "root"
@@ -114,6 +124,7 @@ template node[:barbican][:config_file] do
     host_href: "#{barbican_protocol}://#{public_host}:#{node[:barbican][:api][:bind_port]}",
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: KeystoneHelper.keystone_settings(node, @cookbook_name),
+    memcached_servers: memcached_servers
   )
   notifies :reload, resources(service: "apache2")
 end
