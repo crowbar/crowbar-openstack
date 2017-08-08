@@ -34,7 +34,7 @@
     "sahara": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 200,
+      "schema-revision": 201,
       "element_states": {
         "sahara-server": [ "readying", "ready", "applying" ]
       },
