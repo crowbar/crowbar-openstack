@@ -15,7 +15,6 @@ auth_encryption_key = <%= @auth_encryption_key %>
 loadbalancer_template = /etc/heat/loadbalancer.template
 <% end -%>
 debug = <%= node[:heat][:debug] ? 'true' : 'false' %>
-verbose = <%= node[:heat][:verbose] ? 'true' : 'false' %>
 log_dir = /var/log/heat
 use_stderr = false
 transport_url = <%= @rabbit_settings[:url] %>
@@ -115,17 +114,22 @@ workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 max_header_line = <%= node[:heat][:max_header_line] %>
 
 [keystone_authtoken]
+auth_type = password
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
-identity_uri = <%= @keystone_settings['admin_auth_url'] %>
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
-username = <%= @keystone_settings['service_user'] %>
-password = <%= @keystone_settings['service_password'] %>
 insecure = <%= @keystone_settings['insecure'] %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
-admin_user = <%= @keystone_settings['service_user'] %>
-admin_password = <%= @keystone_settings['service_password'] %>
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
-user_domain_id = <%= @keystone_settings['admin_domain'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings['admin_domain'] %>
+user_domain_name = <%= @keystone_settings['admin_domain'] %>
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:heat][:memcache_secret_key] %>
+service_token_roles_required = true
+service_token_roles = admin
 
 <% if node[:heat][:api][:protocol] == "https" %>
 [ssl]
