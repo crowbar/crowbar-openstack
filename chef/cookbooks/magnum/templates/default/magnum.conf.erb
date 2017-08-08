@@ -49,11 +49,15 @@ auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
 username = <%= @keystone_settings['service_user'] %>
 password = <%= @keystone_settings['service_password'] %>
-insecure = <%= @keystone_settings['insecure'] %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
 project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
 auth_type = password
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:magnum][:memcache_secret_key] %>
+service_token_roles_required = true
+service_token_roles = admin
 
 [magnum_client]
 region_name = <%= @keystone_settings['endpoint_region'] %>
@@ -87,4 +91,5 @@ cluster_user_trust = <%= @trustee["cluster_user_trust"] %>
 trustee_domain_id = <%= @trustee["domain_id"] %>
 trustee_domain_admin_id = <%= @trustee["domain_admin_id"] %>
 trustee_domain_admin_password = <%= @trustee["domain_admin_password"] %>
+trustee_keystone_interface = <%= @trustee["keystone_interface"] %>
 insecure = <%= @keystone_settings['insecure'] %>
