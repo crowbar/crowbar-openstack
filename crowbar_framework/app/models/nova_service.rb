@@ -97,7 +97,7 @@ class NovaService < OpenstackServiceObject
         },
         "ec2-api" => {
           "unique" => false,
-          "count" => -1,
+          "count" => 1,
           "exclude_platform" => {
             "suse" => "< 12.3",
             "windows" => "/.*/"
