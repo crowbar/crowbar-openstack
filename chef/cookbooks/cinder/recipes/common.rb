@@ -32,24 +32,23 @@ if glance_servers.length > 0
   glance_server_host = CrowbarHelper.get_host_for_admin_url(glance_server, (glance_server[:glance][:ha][:enabled] rescue false))
   glance_server_protocol = glance_server[:glance][:api][:protocol]
   glance_server_port = glance_server[:glance][:api][:bind_port]
-  glance_server_insecure = glance_server_protocol == "https" && glance_server[:glance][:ssl][:insecure]
   glance_show_storage_location = glance_server[:glance][:show_storage_location]
 else
   glance_server_host = nil
   glance_server_port = nil
   glance_server_protocol = nil
-  glance_server_insecure = nil
   glance_show_storage_location = false
 end
 Chef::Log.info("Glance server at #{glance_server_host}")
 
-nova_apis = search(:node, "roles:nova-controller") || []
-if nova_apis.length > 0
-  nova_api = nova_apis[0]
-  nova_api_insecure = nova_api[:nova][:ssl][:enabled] && nova_api[:nova][:ssl][:insecure]
-else
-  nova_api_insecure = false
-end
+glance_config = BarclampLibrary::Barclamp::Config.load(
+  "openstack",
+  "glance",
+  node[:cinder][:glance_instance]
+)
+glance_insecure = glance_config["insecure"] || false
+
+nova_insecure = BarclampLibrary::Barclamp::Config.load("openstack", "nova")["insecure"] || false
 
 db_settings = fetch_database_settings
 
@@ -143,10 +142,10 @@ template node[:cinder][:config_file] do
     glance_server_protocol: glance_server_protocol,
     glance_server_host: glance_server_host,
     glance_server_port: glance_server_port,
-    glance_server_insecure: glance_server_insecure,
+    glance_server_insecure: glance_insecure,
     need_shared_lock_path: need_shared_lock_path,
     show_storage_location: glance_show_storage_location,
-    nova_api_insecure: nova_api_insecure,
+    nova_api_insecure: nova_insecure,
     availability_zone: availability_zone,
     keystone_settings: KeystoneHelper.keystone_settings(node, :cinder),
     strict_ssh_host_key_policy: node[:cinder][:strict_ssh_host_key_policy],
