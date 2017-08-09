@@ -32,19 +32,19 @@ nova_instance = node[:sahara][:nova_instance]
 
 cinder_insecure = Barclamp::Config.load(
   "openstack", "cinder", cinder_instance
-)["insecure"] || false
+)["ssl"]["insecure"] || false
 
 heat_insecure = Barclamp::Config.load(
   "openstack", "heat", heat_instance
-)["insecure"] || false
+)["ssl"]["insecure"] || false
 
 neutron_insecure = Barclamp::Config.load(
   "openstack", "neutron", neutron_instance
-)["insecure"] || false
+)["ssl"]["insecure"] || false
 
 nova_insecure = Barclamp::Config.load(
   "openstack", "nova", nova_instance
-)["insecure"] || false
+)["ssl"]["insecure"] || false
 
 use_ceilometer = !Barclamp::Config.load("openstack", "ceilometer").empty?
 

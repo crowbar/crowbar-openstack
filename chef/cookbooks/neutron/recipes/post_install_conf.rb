@@ -65,7 +65,7 @@ vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-ssl_insecure = Barclamp::Config.load("openstack", "neutron")["insecure"] || false
+ssl_insecure = Barclamp::Config.load("openstack", "neutron")["ssl"]["insecure"] || false
 
 neutron_args = "--os-username '#{keystone_settings['service_user']}'"
 neutron_args = "#{neutron_args} --os-password '#{keystone_settings['service_password']}'"

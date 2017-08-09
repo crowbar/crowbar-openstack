@@ -5,8 +5,8 @@
 #
 
 swift_config = Barclamp::Config.load("openstack", "swift")
-swift_insecure = swift_config["insecure"] || false
-cinder_insecure = Barclamp::Config.load("openstack", "cinder")["insecure"] || false
+swift_insecure = swift_config["ssl"]["insecure"] || false
+cinder_insecure = Barclamp::Config.load("openstack", "cinder")["ssl"]["insecure"] || false
 
 include_recipe "#{@cookbook_name}::common"
 

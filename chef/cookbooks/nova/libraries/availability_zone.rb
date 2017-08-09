@@ -18,7 +18,9 @@ module NovaAvailabilityZone
   def self.fetch_set_az_command_no_arg(node, cookbook_name)
     keystone_settings = KeystoneHelper.keystone_settings(node, cookbook_name)
 
-    ssl_insecure = BarclampLibrary::Barclamp::Config.load("openstack", "nova")["insecure"] || false
+    ssl_insecure = BarclampLibrary::Barclamp::Config.load(
+        "openstack", "nova"
+    )["ssl"]["insecure"] || false
 
     command = ["/usr/bin/crowbar-nova-set-availability-zone"]
     command << "--os-username"

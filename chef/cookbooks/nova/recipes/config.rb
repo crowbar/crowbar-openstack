@@ -81,7 +81,7 @@ else
 end
 
 glance_config = Barclamp::Config.load("openstack", "glance", node[:nova][:glance_instance])
-glance_insecure = glance_config["insecure"] || false
+glance_insecure = glance_config["ssl"]["insecure"] || false
 Chef::Log.info("Glance server at #{glance_server_host}")
 
 # use memcached as a cache backend for nova-novncproxy
@@ -123,7 +123,7 @@ else
 end
 
 cinder_config = Barclamp::Config.load("openstack", "cinder", node[:nova][:cinder_instance])
-cinder_insecure = cinder_config["insecure"] || false
+cinder_insecure = cinder_config["ssl"]["insecure"] || false
 
 if rbd_enabled
   include_recipe "nova::ceph"
@@ -158,7 +158,7 @@ else
 end
 
 neutron_config = Barclamp::Config.load("openstack", "neutron", node[:nova][:neutron_instance])
-neutron_insecure = neutron_config["insecure"] || false
+neutron_insecure = neutron_config["ssl"]["insecure"] || false
 Chef::Log.info("Neutron server at #{neutron_server_host}")
 
 has_itxt = false
