@@ -186,6 +186,7 @@ class NovaService < OpenstackServiceObject
     base["attributes"][@bc_name]["neutron_instance"] = find_dep_proposal("neutron")
 
     base["attributes"]["nova"]["service_password"] = random_password
+    base["attributes"]["nova"]["memcache_secret_key"] = random_password
     base["attributes"]["nova"]["api_db"]["password"] = random_password
     base["attributes"]["nova"]["placement_db"]["password"] = random_password
     base["attributes"]["nova"]["db"]["password"] = random_password

@@ -10,6 +10,7 @@
       "glance_instance": "none",
       "cinder_instance": "none",
       "neutron_instance": "none",
+      "memcache_secret_key": "",
       "itxt_instance": "none",
       "trusted_flavors": false,
       "libvirt_type": "kvm",
@@ -163,7 +164,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 203,
+      "schema-revision": 204,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],

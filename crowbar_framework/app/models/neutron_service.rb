@@ -113,6 +113,7 @@ class NeutronService < OpenstackServiceObject
     } unless nodes.nil? or nodes.length ==0
 
     base["attributes"]["neutron"]["service_password"] = random_password
+    base["attributes"]["neutron"]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
     base

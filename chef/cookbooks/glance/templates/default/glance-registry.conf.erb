@@ -32,6 +32,8 @@ user_domain_name = <%= @keystone_settings["admin_domain"] %>
 auth_url = <%= @keystone_settings['admin_auth_url'] %>
 auth_type = password
 memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:glance][:memcache_secret_key] %>
 service_token_roles_required = true
 service_token_roles = admin
 

@@ -64,14 +64,15 @@
       "keystone_instance": "none",
       "service_user": "glance",
       "database_instance": "none",
-      "rabbitmq_instance": "none"
+      "rabbitmq_instance": "none",
+      "memcache_secret_key": ""
     }
   },
   "deployment": {
     "glance": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 201,
+      "schema-revision": 202,
       "element_states": {
         "glance-server": [ "readying", "ready", "applying" ]
       },
