@@ -46,11 +46,12 @@ glance_config = BarclampLibrary::Barclamp::Config.load(
   "glance",
   node[:cinder][:glance_instance]
 )
-glance_insecure = glance_config["ssl"]["insecure"] || false
+glance_insecure = CrowbarOpenStackHelper.insecure(glance_config)
 
-nova_insecure = BarclampLibrary::Barclamp::Config.load(
-    "openstack", "nova"
-)["ssl"]["insecure"] || false
+nova_config = BarclampLibrary::Barclamp::Config.load(
+  "openstack", "nova"
+)
+nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
 
 db_settings = fetch_database_settings
 
