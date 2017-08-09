@@ -137,7 +137,7 @@ class CrowbarOpenStackHelper
       config[:rabbitmq][:ssl][:client_ca_certs]
     end
 
-    # we still need to do a search to get th current address of the node, so we do not save any
+    # we still need to do a search to get the current address of the node, so we do not save any
     # time here by using the databag
     rabbit = get_node(node, "rabbitmq-server", "rabbitmq", instance)
 
@@ -157,6 +157,24 @@ class CrowbarOpenStackHelper
         "#{config["rabbitmq"]["address"]}:#{port}/" \
         "#{config["rabbitmq"]["vhost"]}"
     }
+  end
+
+  def self.insecure(attributes)
+    use_ssl = if attributes.key?("api") && attributes["api"].key?("protocol")
+      # aodh, cinder, glance, heat, keystone, manila, neutron
+      attributes["api"]["protocol"] == "https"
+    elsif attributes.key?("api") && attributes["api"].key?("ssl")
+      # barbican
+      attributes["api"]["ssl"]
+    elsif attributes.key?("ssl") && attributes["ssl"].key?("enabled")
+      # nova
+      attributes["ssl"]["enabled"]
+    else
+      # magnum, sahara, trove
+      false
+    end
+
+    use_ssl && attributes["ssl"]["insecure"]
   end
 
   private
