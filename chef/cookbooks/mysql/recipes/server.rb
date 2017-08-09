@@ -199,6 +199,24 @@ database_user "grant db_maker access" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
+unless node[:database][:database_bootstrapped]
+  database "drop test database" do
+    connection db_connection
+    database_name "test"
+    provider db_settings[:provider]
+    action :drop
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+end
+
+ruby_block "mark node for database bootstrap" do
+  block do
+    node.set[:database][:database_bootstrapped] = true
+    node.save
+  end
+  not_if { node[:database][:database_bootstrapped] }
+end
+
 directory "/var/log/mysql/" do
   owner "mysql"
   group "root"
