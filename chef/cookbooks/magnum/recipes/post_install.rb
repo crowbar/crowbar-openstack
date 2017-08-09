@@ -33,12 +33,12 @@ provisioner_address = Barclamp::Inventory.get_network_by_type(provisioner_server
 
 # the image is uploaded via the glance API
 glance_config = Barclamp::Config.load("openstack", "glance", node[:magnum][:glance_instance])
-glance_insecure = glance_config["insecure"] || false
+glance_insecure = glance_config["ssl"]["insecure"] || false
 openstack_args_glance = glance_insecure ? "--insecure" : ""
 
 # the flavor is created via the nova API
 nova_config = Barclamp::Config.load("openstack", "nova", node[:magnum][:nova_instance])
-nova_insecure = nova_config["insecure"] || false
+nova_insecure = nova_config["ssl"]["insecure"] || false
 openstack_args_nova = nova_insecure ? "--insecure" : ""
 
 # create basic arguments for openstack client

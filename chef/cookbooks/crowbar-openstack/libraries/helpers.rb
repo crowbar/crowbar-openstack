@@ -126,11 +126,36 @@ class CrowbarOpenStackHelper
   def self.rabbitmq_settings(node, barclamp)
     instance = node[barclamp][:rabbitmq_instance] || "default"
     config = BarclampLibrary::Barclamp::Config.load("openstack", "rabbitmq", instance)
+    port = if config[:rabbitmq][:ssl][:enabled]
+      config[:rabbitmq][:ssl][:port]
+    else
+      config[:rabbitmq][:port]
+    end
 
-    Chef::Log.warn("No RabbitMQ server found!") if config.empty?
-    Chef::Log.info("RabbitMQ server found at #{config[:address]}") unless config.empty?
+    client_ca_certs = if config[:rabbitmq][:ssl][:enabled] && !config[:rabbitmq][:ssl][:insecure]
+      config[:rabbitmq][:ssl][:client_ca_certs]
+    end
 
-    config
+    # we still need to do a search to get th current address of the node, so we do not save any
+    # time here by using the databag
+    rabbit = get_node(node, "rabbitmq-server", "rabbitmq", instance)
+
+    Chef::Log.warn("No RabbitMQ server found!") if rabbit.nil?
+    Chef::Log.info("RabbitMQ server found at #{rabbit[:address]}") unless rabbit.nil?
+
+    {
+      address: rabbit["rabbitmq"]["address"],
+      port: port,
+      user: config["rabbitmq"]["user"],
+      password: config["rabbitmq"]["password"],
+      vhost: config["rabbitmq"]["vhost"],
+      use_ssl: config["rabbitmq"]["ssl"]["enabled"],
+      client_ca_certs: client_ca_certs,
+      url: "rabbit://#{config["rabbitmq"]["user"]}:" \
+        "#{config["rabbitmq"]["password"]}@" \
+        "#{config["rabbitmq"]["address"]}:#{port}/" \
+        "#{config["rabbitmq"]["vhost"]}"
+    }
   end
 
   private
