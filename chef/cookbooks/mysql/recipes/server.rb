@@ -17,9 +17,10 @@
 # limitations under the License.
 #
 
-ha_enabled = node[:database][:ha][:enabled]
-
 include_recipe "mysql::client"
+include_recipe "database::client"
+
+ha_enabled = node[:database][:ha][:enabled]
 
 if platform_family?("debian")
 
@@ -147,23 +148,45 @@ execute "assign-root-password" do
   only_if "/usr/bin/mysql -u root -e 'show databases;'"
 end
 
-grants_path = value_for_platform_family(
-  ["rhel", "suse", "fedora"] => "/etc/mysql_grants.sql",
-  "default" => "/etc/mysql/grants.sql"
-)
 
-grants_key = value_for_platform_family(
-  ["rhel", "suse", "fedora"] => "/etc/applied_grants",
-  "default" => "/etc/mysql/applied_grants"
-)
+db_settings = fetch_database_settings
+db_connection = db_settings[:connection].dup
+db_connection[:host] = "localhost"
+db_connection[:username] = "root"
+db_connection[:password] = node[:database][:mysql][:server_root_password]
 
-template grants_path do
-  source "grants.sql.erb"
-  owner "root"
-  group "root"
-  mode "0600"
+database_user "create db_maker database user" do
+  connection db_connection
+  username "db_maker"
+  password node[:database][:db_maker_password]
+  host "%"
+  provider db_settings[:user_provider]
   action :create
-  not_if { File.exist?("#{grants_key}") }
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+database_user "grant db_maker access" do
+  connection db_connection
+  username "db_maker"
+  password node[:database][:db_maker_password]
+  host "%"
+  privileges db_settings[:privs] + [
+    "ALTER ROUTINE",
+    "CREATE ROUTINE",
+    "CREATE TEMPORARY TABLES",
+    "CREATE USER",
+    "CREATE VIEW",
+    "EXECUTE",
+    "GRANT OPTION",
+    "LOCK TABLES",
+    "RELOAD",
+    "SHOW DATABASES",
+    "SHOW VIEW",
+    "TRIGGER"
+  ]
+  provider db_settings[:user_provider]
+  action :grant
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 directory "/var/log/mysql/" do
@@ -178,23 +201,4 @@ directory "/var/run/mysqld/" do
   group "root"
   mode "0755"
   action :create
-end
-
-execute "mysql-install-privileges" do
-  command "/usr/bin/mysql -u root -p\"#{server_root_password}\" < #{grants_path}"
-  action :nothing
-  subscribes :run, resources("template[#{grants_path}]"), :immediately
-  only_if "/usr/bin/mysql -u root -p\"#{server_root_password}\" -e 'show databases;'"
-end
-
-file grants_path do
-  backup false
-  action :delete
-end
-
-file grants_key do
-  owner "root"
-  group "root"
-  mode "0600"
-  action :create_if_missing
 end
