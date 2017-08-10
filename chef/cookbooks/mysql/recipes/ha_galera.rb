@@ -160,7 +160,7 @@ haproxy_loadbalancer "galera" do
   address CrowbarDatabaseHelper.get_listen_address(node)
   port 3306
   mode "tcp"
-  options ["mysql-check"]
+  options ["mysql-check user haproxy"]
   stick ({ "on" => "dst" })
   servers ha_servers
   action :nothing
