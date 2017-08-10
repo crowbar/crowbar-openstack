@@ -22,35 +22,6 @@ include_recipe "database::client"
 
 ha_enabled = node[:database][:ha][:enabled]
 
-if platform_family?("debian")
-
-  directory "/var/cache/local/preseeding" do
-    owner "root"
-    group "root"
-    mode 0755
-    recursive true
-  end
-
-  template "/var/cache/local/preseeding/mysql-server.seed" do
-    source "mysql-server.seed.erb"
-    owner "root"
-    group "root"
-    mode "0600"
-  end
-
-  template "/etc/mysql/debian.cnf" do
-    source "debian.cnf.erb"
-    owner "root"
-    group "root"
-    mode "0600"
-  end
-
-  execute "preseed mysql-server" do
-    command "debconf-set-selections /var/cache/local/preseeding/mysql-server.seed"
-    only_if "test -f /var/cache/local/preseeding/mysql-server.seed"
-  end
-end
-
 # For Crowbar, we need to set the address to bind - default to admin node.
 addr = node["mysql"]["bind_address"] || ""
 newaddr = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
@@ -73,11 +44,6 @@ end
 
 service "mysql" do
   service_name mysql_service_name
-  if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
-    restart_command "restart mysql"
-    stop_command "stop mysql"
-    start_command "start mysql"
-  end
   supports status: true, restart: true, reload: true
   action :enable
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
