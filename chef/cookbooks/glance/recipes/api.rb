@@ -77,11 +77,7 @@ template node[:glance][:api][:config_file] do
       rabbit_settings: fetch_rabbitmq_settings,
       swift_api_insecure: swift_insecure,
       cinder_api_insecure: cinder_insecure,
-      # v1 api is (temporarily) enforced by ironic
-      # Newton version of Ironic supports only v1
-      # Ocata and Pike have option to set glance_api_version
-      # Queens will only support v2
-      enable_v1: !ironics.empty? || node[:glance][:enable_v1],
+      enable_v1: node[:glance][:enable_v1],
       glance_stores: glance_stores.join(",")
   )
   notifies :restart, "service[#{node[:glance][:api][:service_name]}]"

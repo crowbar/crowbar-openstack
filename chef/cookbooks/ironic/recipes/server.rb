@@ -63,7 +63,7 @@ ironic_net_ip = Barclamp::Inventory.get_network_by_type(node, "ironic").address
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-auth_version = "v2.0"
+auth_version = "v3"
 
 glance = node_search_with_cache("roles:glance-server").first
 raise "No glance-server found. Can not configure ironic." if glance.nil?
@@ -71,7 +71,9 @@ glance_settings = { protocol: glance[:glance][:api][:protocol],
                     host: CrowbarHelper.get_host_for_admin_url(
                       glance, glance[:glance][:ha][:enabled]
                     ),
-                    port: glance[:glance][:api][:bind_port] }
+                    port: glance[:glance][:api][:bind_port],
+                    service_user: glance[:glance][:service_user],
+                    service_password: glance[:glance][:service_password] }
 
 neutron = node_search_with_cache("roles:neutron-server").first
 raise "No neutron-server found. Can not configure ironic." if neutron.nil?
@@ -79,7 +81,9 @@ neutron_settings = { protocol: neutron[:neutron][:api][:protocol],
                      host: CrowbarHelper.get_host_for_admin_url(
                        neutron, neutron[:neutron][:ha][:server][:enabled]
                      ),
-                     port: neutron[:neutron][:api][:service_port] }
+                     port: neutron[:neutron][:api][:service_port],
+                     service_user: neutron[:neutron][:service_user],
+                     service_password: neutron[:neutron][:service_password] }
 
 api_port = node[:ironic][:api][:port]
 api_protocol = node[:ironic][:api][:protocol]
@@ -156,6 +160,12 @@ keystone_register "give ironic user admin role in service tenant" do
   action :add_access
 end
 
+ironic_net_name = "ironic"
+
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
+
+memcached_instance("ironic")
+
 template node[:ironic][:config_file] do
   source "ironic.conf.erb"
   owner "root"
@@ -173,13 +183,14 @@ template node[:ironic][:config_file] do
         swift_settings: IronicHelper.swift_settings(node, glance),
         neutron_settings: neutron_settings,
         database_connection: db_connection,
-        ironic_net_id: IronicHelper.ironic_net_id(keystone_settings),
+        ironic_net_name: ironic_net_name,
         ironic_ip: ironic_net_ip,
         tftp_ip: ironic_net_ip,
         tftproot: node[:ironic][:tftproot],
         public_endpoint: public_endpoint,
         api_port: api_port,
-        auth_version: auth_version
+        auth_version: auth_version,
+        memcached_servers: memcached_servers
       }
     }
   )

@@ -4,7 +4,6 @@
   "attributes": {
     "ironic": {
       "debug": false,
-      "verbose": true,
       "max_header_line": 16384,
       "rabbitmq_instance": "none",
       "database_instance": "none",
@@ -13,6 +12,7 @@
       "neutron_instance": "none",
       "service_user": "ironic",
       "service_password": "",
+      "memcache_secret_key": "",
       "enabled_drivers": [],
       "automated_clean": true,
       "api": {
@@ -29,7 +29,7 @@
   "deployment": {
     "ironic": {
       "crowbar-revision": 0,
-      "schema-revision": 102,
+      "schema-revision": 201,
       "crowbar-applied": false,
       "element_states": {
         "ironic-server": [ "readying", "ready", "applying" ]
