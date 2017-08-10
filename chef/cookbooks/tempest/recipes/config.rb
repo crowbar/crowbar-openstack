@@ -493,11 +493,11 @@ template "/etc/tempest/tempest.conf" do
         use_horizon: use_horizon,
         enabled_services: enabled_services,
         # boto settings
-        ec2_protocol: nova[:nova][:ssl][:enabled] ? "https" : "http",
-        ec2_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
-        ec2_port: nova[:nova][:ports][:api_ec2],
-        s3_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
-        s3_port: nova[:nova][:ports][:objectstore],
+        ec2_protocol: nova[:nova]["ec2-api"][:ssl][:enabled] ? "https" : "http",
+        ec2_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova]["ec2-api"][:ha][:enabled]),
+        ec2_port: nova[:nova]["ec2-api"][:ports][:ec2_api],
+        s3_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova]["ec2-api"][:ha][:enabled]),
+        s3_port: nova[:nova]["ec2-api"][:ports][:ec2_s3],
         ec2_access: node[:tempest][:ec2_access],
         ec2_secret: node[:tempest][:ec2_secret],
         # cli settings
