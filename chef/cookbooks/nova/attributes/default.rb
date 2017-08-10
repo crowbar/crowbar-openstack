@@ -141,16 +141,6 @@ default[:nova][:ports][:serialproxy] = 6083
 default[:nova][:ha][:enabled] = false
 default[:nova][:ha][:op][:monitor][:interval] = "10s"
 
-# EC2 Role Attributes
-default[:nova][:ports][:ec2_api] = 8788
-default[:nova][:ports][:ec2_metadata] = 8789
-default[:nova][:ports][:ec2_s3] = 3334
-
-# EC2 Role HA Ports
-default[:nova][:ha][:ports][:ec2_api] = 5557
-default[:nova][:ha][:ports][:ec2_metadata] = 5558
-default[:nova][:ha][:ports][:ec2_s3] = 5559
-
 # Ports to bind to when haproxy is used for the real ports
 default[:nova][:ha][:ports][:api_ec2] = 5550
 default[:nova][:ha][:ports][:api] = 5551
