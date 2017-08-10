@@ -17,10 +17,10 @@
 # limitations under the License.
 #
 
-package "mysql-client" do
+package "mariadb-client" do
   package_name value_for_platform_family(
-    ["rhel", "suse", "fedora"] => "mysql",
-    "default" => "mysql-client"
+    ["rhel", "fedora"] => "mysql",
+    "default" => "mariadb-client"
   )
   action :install
 end
