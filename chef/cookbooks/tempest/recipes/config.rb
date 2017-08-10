@@ -294,6 +294,11 @@ EOH
   })
 end
 
+ec2_apis = search(:node, "roles:ec2-api") || []
+use_ec2_api = ec2_apis.any?
+
+package "aws-cli" if use_ec2_api
+
 ruby_block "fetch ec2 credentials" do
   block do
     ec2_access = `#{openstackcli} ec2 credentials list -f value -c Access`.strip
@@ -302,6 +307,7 @@ ruby_block "fetch ec2 credentials" do
     node[:tempest][:ec2_access] = ec2_access
     node[:tempest][:ec2_secret] = ec2_secret
   end
+  only_if { use_ec2_api }
 end
 
 # FIXME: should avoid search with no environment in query
@@ -364,6 +370,107 @@ ruby_block "get public network id" do
     raise("Cannot fetch ID of floating network") if public_network_id.empty?
     node[:tempest][:public_network_id] = public_network_id
   end
+end
+
+bash "create ec2 test network objects" do
+  code <<-EOH
+  #{openstackcli} network show ec2-network &> /dev/null || \
+      #{openstackcli} network create ec2-network
+  #{openstackcli} subnet show ec2-subnet &> /dev/null || \
+      #{openstackcli} subnet create --ip-version 4 --gateway 10.0.0.1 \
+                      --subnet-range 10.0.0.0/24 --network ec2-network ec2-subnet
+  #{openstackcli} router show ec2-router &> /dev/null || \
+     (#{openstackcli} router create ec2-router && \
+      #{openstackcli} router add subnet ec2-router ec2-subnet && \
+      #{openstackcli} router set --external-gateway floating ec2-router)
+EOH
+  only_if { use_ec2_api }
+end
+
+nova = get_instance("roles:nova-controller")
+
+image_name = File.basename(tempest_test_image).match(/.*-/)
+
+ec2_url = ""
+s3_url = ""
+if use_ec2_api
+  ec2_api = ec2_apis.first
+  ec2_protocol = ec2_api[:nova]["ec2-api"][:ssl][:enabled] ? "https" : "http"
+  ec2_host = CrowbarHelper.get_host_for_admin_url(ec2_api, ec2_api[:nova]["ec2-api"][:ha][:enabled])
+  ec2_port = ec2_api[:nova][:ports][:ec2_api]
+  s3_port = ec2_api[:nova][:ports][:ec2_s3]
+  ec2_url = "#{ec2_protocol}://#{ec2_host}:#{ec2_port}/"
+  s3_url = "#{ec2_protocol}://#{ec2_host}:#{s3_port}/"
+end
+ebs_image_id_file = node[:tempest][:tempest_path] + "/ebs_image.id"
+
+bash "create ec2 EBS image" do
+  code <<-EOH
+echo -n "Setting up AWS CLI credentials ... "
+aws configure set aws_access_key_id $EC2_ACCESS --profile user || exit 1
+aws configure set aws_secret_access_key $EC2_SECRET --profile user || exit 2
+echo "done."
+
+echo -n "Creating volume ... "
+#{openstackcli} volume create --image #{image_name}tempest-machine --size 1 ebs-volume
+VOLUME_ID=$(#{openstackcli} volume show -f value -c id ebs-volume)
+echo "done."
+[ -n "$VOLUME_ID" ] || exit 3
+
+echo -n "Booting server ... "
+nova boot --poll --flavor tempest-stuff --nic net-name=ec2-network \
+          --block-device "device=/dev/vda,id=$VOLUME_ID,shutdown=remove,source=volume,dest=volume,bootindex=0" ebs-server
+SERVER_ID=$(#{openstackcli} server show -f value -c id ebs-server)
+echo "done."
+[ -n "$SERVER_ID" ] || exit 4
+
+echo -n "Creating EBS image ... "
+#{openstackcli} server image create --wait --name ebs-image ebs-server
+IMAGE_ID=$(#{openstackcli} image show -f value -c id ebs-image)
+echo "done."
+[ -n "$IMAGE_ID" ] || exit 5
+
+echo -n "Removing server ... "
+#{openstackcli} server delete --wait ebs-server
+SERVER_ID=$(#{openstackcli} server show -f value -c id ebs-server)
+echo "done."
+[ -z "$SERVER_ID" ] || exit 6
+
+echo -n "Saving machine id ..."
+echo $IMAGE_ID > #{ebs_image_id_file}
+echo "done."
+EOH
+  environment ( lazy { {
+    "OS_USERNAME" => tempest_comp_user,
+    "OS_PASSWORD" => tempest_comp_pass,
+    "OS_TENANT_NAME" => tempest_comp_tenant,
+    "NOVACLIENT_INSECURE" => "true",
+    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
+    "OS_USER_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
+    "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
+    "EC2_ACCESS" => node[:tempest][:ec2_access],
+    "EC2_SECRET" => node[:tempest][:ec2_secret]
+  } })
+  only_if { use_ec2_api && !File.exist?(ebs_image_id_file) }
+end
+
+ruby_block "fetch ec2 image ids" do
+  block do
+    ec2_image_id = `aws --region #{keystone_settings["endpoint_region"]} \
+        --endpoint-url #{ec2_url} --profile user \
+        ec2 describe-images --filters Name=image-type,Values=machine \
+        Name=name,Values=#{image_name}tempest-machine --query 'Images[0].ImageId' \
+        --output text`.strip
+    ebs_image_id = `aws --region #{keystone_settings["endpoint_region"]} \
+        --endpoint-url #{ec2_url} --profile user \
+        ec2 describe-images --filters Name=image-type,Values=machine \
+        Name=name,Values=ebs-image --query 'Images[0].ImageId' --output text`.strip
+    raise("Cannot fetch EC2 image ids ") if ec2_image_id.empty? || ebs_image_id.empty?
+    node[:tempest][:ec2_image_id] = ec2_image_id
+    node[:tempest][:ebs_image_id] = ebs_image_id
+  end
+  only_if { use_ec2_api }
 end
 
 # FIXME: the command above should be good enough, but radosgw is broken with
@@ -495,11 +602,8 @@ template "/etc/tempest/tempest.conf" do
         use_horizon: use_horizon,
         enabled_services: enabled_services,
         # boto settings
-        ec2_protocol: nova[:nova]["ec2-api"][:ssl][:enabled] ? "https" : "http",
-        ec2_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova]["ec2-api"][:ha][:enabled]),
-        ec2_port: nova[:nova][:ports][:ec2_api],
-        s3_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova]["ec2-api"][:ha][:enabled]),
-        s3_port: nova[:nova][:ports][:ec2_s3],
+        ec2_url: ec2_url,
+        s3_url: s3_url,
         ec2_access: node[:tempest][:ec2_access],
         ec2_secret: node[:tempest][:ec2_secret],
         # cli settings
