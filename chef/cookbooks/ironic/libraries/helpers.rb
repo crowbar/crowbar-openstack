@@ -51,7 +51,12 @@ module IronicHelper
       tempurl_key = Mixlib::ShellOut.new(get_tempurl_key).run_command.stdout.chomp
 
       # use IP as this will be used by agent which can have no DNS configured
-      swift_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(swift, "public").address
+      if swift[:swift][:ha][:enabled]
+        cluster_vhostname = CrowbarPacemakerHelper.cluster_vhostname(swift)
+        swift_address = CrowbarPacemakerHelper.cluster_vip(swift, "admin", cluster_vhostname)
+      else
+        swift_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(swift, "admin").address
+      end
 
       {
         tempurl_key: tempurl_key,
