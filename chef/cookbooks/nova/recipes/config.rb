@@ -227,17 +227,13 @@ metadata_bind_address = admin_address
 if node[:nova][:ha][:enabled]
   bind_host = admin_address
   bind_port_api = node[:nova][:ha][:ports][:api]
-  bind_port_api_ec2 = node[:nova][:ha][:ports][:api_ec2]
   bind_port_metadata = node[:nova][:ha][:ports][:metadata]
-  bind_port_objectstore = node[:nova][:ha][:ports][:objectstore]
   bind_port_novncproxy = node[:nova][:ha][:ports][:novncproxy]
   bind_port_serialproxy = node[:nova][:ha][:ports][:serialproxy]
 else
   bind_host = "0.0.0.0"
   bind_port_api = node[:nova][:ports][:api]
-  bind_port_api_ec2 = node[:nova][:ports][:api_ec2]
   bind_port_metadata = node[:nova][:ports][:metadata]
-  bind_port_objectstore = node[:nova][:ports][:objectstore]
   bind_port_novncproxy = node[:nova][:ports][:novncproxy]
   bind_port_serialproxy = node[:nova][:ports][:serialproxy]
 end
@@ -341,17 +337,13 @@ template node[:nova][:config_file] do
     cpu_model: cpu_model,
     bind_host: bind_host,
     bind_port_api: bind_port_api,
-    bind_port_api_ec2: bind_port_api_ec2,
     bind_port_metadata: bind_port_metadata,
-    bind_port_objectstore: bind_port_objectstore,
     bind_port_novncproxy: bind_port_novncproxy,
     bind_port_serialproxy: bind_port_serialproxy,
     database_connection: database_connection,
     api_database_connection: api_database_connection,
     rabbit_settings: fetch_rabbitmq_settings,
     libvirt_type: node[:nova][:libvirt_type],
-    ec2_host: admin_api_host,
-    ec2_dmz_host: public_api_host,
     libvirt_migration: node[:nova]["use_migration"],
     live_migration_inbound_fqdn: live_migration_inbound_fqdn,
     shared_instances: node[:nova]["use_shared_instance_storage"],
