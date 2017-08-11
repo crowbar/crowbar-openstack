@@ -64,7 +64,7 @@ end
 end
 
 # create the nova_cell0 database (similar to nova_api) and give the
-# nova_api DB user the correct privileges
+# nova DB user the correct privileges
 database "create nova_cell0 database" do
   connection db_settings[:connection]
   database_name "nova_cell0"
@@ -73,11 +73,11 @@ database "create nova_cell0 database" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-database_user "grant privileges to the #{node[:nova][:api_db][:user]} database user" do
+database_user "grant privileges to the #{node[:nova][:db][:user]} database user" do
   connection db_settings[:connection]
   database_name "nova_cell0"
-  username node[:nova][:api_db][:user]
-  password node[:nova][:api_db][:password]
+  username node[:nova][:db][:user]
+  password node[:nova][:db][:password]
   host "%"
   privileges db_settings[:privs]
   provider db_settings[:user_provider]
