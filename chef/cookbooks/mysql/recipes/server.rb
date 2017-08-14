@@ -56,13 +56,6 @@ directory node[:mysql][:tmpdir] do
   action :create
 end
 
-directory node[:mysql][:logdir] do
-  owner "mysql"
-  group "mysql"
-  mode "0700"
-  action :create
-end
-
 script "handle mysql restart" do
   interpreter "bash"
   action :nothing
