@@ -131,6 +131,16 @@ database_user "create db_maker database user" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
+database_user "create haproxy monitoring user" do
+  connection db_connection
+  username "haproxy"
+  password ""
+  host "%"
+  provider db_settings[:user_provider]
+  action :create
+  only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
 database_user "grant db_maker access" do
   connection db_connection
   username "db_maker"

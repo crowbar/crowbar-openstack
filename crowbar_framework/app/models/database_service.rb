@@ -137,22 +137,38 @@ class DatabaseService < PacemakerServiceObject
     database_elements, database_nodes, database_ha_enabled = role_expand_elements(role, "database-server")
     Openstack::HA.set_controller_role(database_nodes) if database_ha_enabled
 
-    prepare_role_for_ha(role, ["database", "ha", "enabled"], database_ha_enabled)
+    vip_networks = ["admin"]
+    dirty = prepare_role_for_ha_with_haproxy(role, ["database", "ha", "enabled"],
+      database_ha_enabled,
+      database_elements,
+      vip_networks)
+    role.save if dirty
+
     reset_sync_marks_on_clusters_founders(database_elements)
+
+    sql_engine = role.default_attributes["database"]["sql_engine"]
 
     if database_ha_enabled
       net_svc = NetworkService.new @logger
-      unless database_elements.length == 1 && PacemakerServiceObject.is_cluster?(database_elements[0])
-        raise "Internal error: HA enabled, but element is not a cluster"
+      case sql_engine
+      when "postgresql"
+        unless database_elements.length == 1 && PacemakerServiceObject.is_cluster?(database_elements[0])
+          raise "Internal error: HA enabled, but element is not a cluster"
+        end
+        cluster = database_elements[0]
+        cluster_name = PacemakerServiceObject.cluster_name(cluster)
+        # Any change in the generation of the vhostname here must be reflected in
+        # CrowbarDatabaseHelper.get_ha_vhostname
+        database_vhostname = "#{role.name.gsub("-config", "")}-#{cluster_name}.#{Crowbar::Settings.domain}".tr("_", "-")
+        net_svc.allocate_virtual_ip "default", "admin", "host", database_vhostname
+      when "mysql"
+        database_nodes.each do |n|
+          net_svc.allocate_ip "default", "admin", "host", n
+        end
+        allocate_virtual_ips_for_any_cluster_in_networks(database_elements, vip_networks)
       end
-      cluster = database_elements[0]
-      # Any change in the generation of the vhostname here must be reflected in
-      # CrowbarDatabaseHelper.get_ha_vhostname
-      database_vhostname = "#{role.name.gsub("-config", "")}-#{PacemakerServiceObject.cluster_name(cluster)}.#{Crowbar::Settings.domain}".tr("_", "-")
-      net_svc.allocate_virtual_ip "default", "admin", "host", database_vhostname
     end
 
-    sql_engine = role.default_attributes["database"]["sql_engine"]
     role.default_attributes["database"][sql_engine] = {} if role.default_attributes["database"][sql_engine].nil?
     role.default_attributes["database"]["db_maker_password"] = (old_role && old_role.default_attributes["database"]["db_maker_password"]) || random_password
 
