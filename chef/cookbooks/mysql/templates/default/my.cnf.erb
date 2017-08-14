@@ -32,7 +32,10 @@ bind-address            = <%= node['mysql']['bind_address'] %>
 #
 # * Fine Tuning
 #
+
+# FIXME: Remove after MariaDB 10.2.X switch (new default is 16777216)
 max_allowed_packet      = <%= node['mysql']['tunable']['max_allowed_packet'] %>
+# FIXME: Remove after MariaDB 10.2.X switch (new default is auto)
 thread_cache_size       = <%= node['mysql']['tunable']['thread_cache_size'] %>
 max_connections         = <%= node['mysql']['tunable']['max_connections'] %>
 max_heap_table_size     = <%= node['mysql']['tunable']['max_heap_table_size'] %>
@@ -46,4 +49,5 @@ innodb_buffer_pool_size = <%= node['mysql']['tunable']['innodb_buffer_pool_size'
 innodb_log_file_size    = <%= node['mysql']['tunable']['innodb_log_file_size'] %>
 
 [mysqldump]
+# FIXME: Remove after MariaDB 10.2.X switch (new default is 16777216)
 max_allowed_packet      = <%= node['mysql']['tunable']['max_allowed_packet'] %>
