@@ -77,7 +77,7 @@ cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
 nodes_names = cluster_nodes.map { |n| n[:hostname] }
 cluster_addresses = "gcomm://" + nodes_names.join(",")
 
-template "/etc/my.cnf" do
+template "/etc/my.cnf.d/openstack.cnf" do
   source "my.cnf.erb"
   owner "root"
   group "mysql"
