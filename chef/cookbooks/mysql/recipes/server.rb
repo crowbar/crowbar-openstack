@@ -75,11 +75,20 @@ template "/etc/my.cnf.d/openstack.cnf" do
   owner "root"
   group "mysql"
   mode "0640"
-  variables(
-    cluster_addresses: cluster_addresses
-  )
-  notifies :run, resources(script: "handle mysql restart"), :immediately if platform_family?("debian")
-  notifies :restart, "service[mysql]", :immediately if platform_family?(%w{rhel suse fedora})
+  notifies :restart, "service[mysql]", :immediately
+end
+
+if node[:database][:ha][:enabled]
+  template "/etc/my.cnf.d/galera.cnf" do
+    source "galera.cnf.erb"
+    owner "root"
+    group "mysql"
+    mode "0640"
+    variables(
+      cluster_addresses: cluster_addresses
+    )
+    notifies :restart, "service[mysql]", :immediately
+  end
 end
 
 unless Chef::Config[:solo]
