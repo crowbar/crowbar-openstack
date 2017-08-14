@@ -11,6 +11,7 @@
       "site_branding_link": "",
       "help_url": "http://docs.openstack.org/",
       "session_timeout": 240,
+      "secret_key": "",
       "db": {
         "database": "horizon",
         "user": "horizon",
@@ -48,7 +49,7 @@
     "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 101,
+      "schema-revision": 200,
       "element_states": {
         "horizon-server": [ "readying", "ready", "applying" ]
       },
