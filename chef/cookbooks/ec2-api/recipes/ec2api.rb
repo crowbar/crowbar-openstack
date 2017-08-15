@@ -40,19 +40,9 @@ else
   bind_port_s3 = node[:nova][:ports][:ec2_s3]
 end
 
-db_conn_scheme = db_settings[:url_scheme]
-
-if db_settings[:backend_name] == "mysql"
-  db_conn_scheme = "mysql+pymysql"
-end
-
 crowbar_pacemaker_sync_mark "wait-ec2_api_database" if ha_enabled
 
-database_connection = "#{db_conn_scheme}://" \
-  "#{node[:nova]["ec2-api"][:db][:user]}" \
-  ":#{node[:nova]["ec2-api"][:db][:password]}" \
-  "@#{db_settings[:address]}" \
-  "/#{node[:nova]["ec2-api"][:db][:database]}"
+database_connection = fetch_database_connection_string(node[:nova]["ec2-api"][:db], "nova")
 
 # Create the ec2 Database
 database "create #{node[:nova]["ec2-api"][:db][:database]} database" do

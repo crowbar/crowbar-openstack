@@ -53,7 +53,7 @@ else
   bind_port = node[:trove][:api][:bind_port]
 end
 
-sql_connection = TroveHelper.get_sql_connection node
+sql_connection = fetch_database_connection_string(node[:trove][:db])
 
 rabbitmq_servers = node_search_with_cache("roles:rabbitmq-server")
 rabbitmq_trove_settings = TroveHelper.get_rabbitmq_trove_url(node, rabbitmq_servers)
