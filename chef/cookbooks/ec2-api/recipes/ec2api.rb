@@ -170,6 +170,19 @@ end
 
 crowbar_pacemaker_sync_mark "create-ec2_api_register" if ha_enabled
 
+nova_metadata_settings = {}
+nova = node_search_with_cache("roles:nova-controller").first
+unless nova.nil?
+  nova_ha_enabled = nova[:nova][:ha][:enabled]
+  nova_metadata_settings[:host] = CrowbarHelper.get_host_for_admin_url(nova, nova_ha_enabled)
+  nova_metadata_settings[:port] = nova[:nova][:ports][:metadata]
+  ssl_enabled = nova[:nova][:ssl][:enabled]
+  nova_metadata_settings[:protocol] = ssl_enabled ? "https" : "http"
+  ssl_insecure = nova[:nova][:ssl][:insecure]
+  nova_metadata_settings[:insecure] = ssl_enabled && ssl_insecure
+  nova_metadata_settings[:shared_secret] = nova[:nova][:neutron_metadata_proxy_shared_secret]
+end
+
 # ec2-api ssl
 if node[:nova]["ec2-api"][:ssl][:enabled]
   ssl_setup "setting up ssl for ec2-api" do
@@ -197,6 +210,7 @@ template node[:nova]["ec2-api"][:config_file] do
     bind_port_ec2api: bind_port_ec2api,
     bind_port_metadata: bind_port_metadata,
     bind_port_s3: bind_port_s3,
+    nova_metadata_settings: nova_metadata_settings
   )
 end
 

@@ -24,6 +24,15 @@ ssl_ca_file = <%= node[:nova]["ec2-api"][:ssl][:ca_certs] %>
 s3_use_ssl = true
 <% end %>
 
+<% unless @nova_metadata_settings.empty? %>
+[metadata]
+nova_metadata_ip = <%= @nova_metadata_settings[:host] %>
+nova_metadata_port = <%= @nova_metadata_settings[:port] %>
+metadata_proxy_shared_secret = <%= @nova_metadata_settings[:shared_secret] %>
+nova_metadata_protocol = <%= @nova_metadata_settings[:protocol] %>
+nova_metadata_insecure = <%= @nova_metadata_settings[:insecure] %>
+<% end %>
+
 [database]
 connection = <%= @database_connection %>
 [oslo_concurrency]
