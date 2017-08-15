@@ -20,6 +20,7 @@
             "site_branding_link": { "type": "str", "required": true },
             "help_url": { "type": "str", "required": true },
             "session_timeout": { "type": "int", "required": true },
+            "secret_key": { "type": "str", "required": true },
             "db" : {
               "type" : "map",
               "required" : true,

@@ -442,6 +442,7 @@ template local_settings do
     neutron_ml2_type_drivers: neutron_ml2_type_drivers,
     help_url: node[:horizon][:help_url],
     session_timeout: node[:horizon][:session_timeout],
+    secret_key: node["horizon"]["secret_key"],
     memcached_locations: memcached_locations,
     can_set_mount_point: node["horizon"]["can_set_mount_point"],
     can_set_password: node["horizon"]["can_set_password"],
@@ -451,6 +452,7 @@ template local_settings do
     token_hash_enabled: node["horizon"]["token_hash_enabled"]
   )
   action :create
+  notifies :reload, "service[horizon]"
 end
 
 crowbar_pacemaker_sync_mark "create-horizon_config" if ha_enabled
