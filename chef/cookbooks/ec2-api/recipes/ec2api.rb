@@ -26,18 +26,18 @@ ha_enabled  = node[:nova]["ec2-api"][:ha][:enabled]
 ssl_enabled = node[:nova]["ec2-api"][:ssl][:enabled]
 api_protocol = ssl_enabled ? "https" : "http"
 db_settings = fetch_database_settings "nova"
-ec2_api_port = node[:nova][:ports][:ec2_api]
-ec2_metadata_port = node[:nova][:ports][:ec2_metadata]
+ec2_api_port = node[:nova]["ec2-api"][:ports][:ec2_api]
+ec2_metadata_port = node[:nova]["ec2-api"][:ports][:ec2_metadata]
 if ha_enabled
   bind_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  bind_port_ec2api = node[:nova][:ha][:ports][:ec2_api]
-  bind_port_metadata = node[:nova][:ha][:ports][:ec2_metadata]
-  bind_port_s3 = node[:nova][:ha][:ports][:ec2_s3]
+  bind_port_ec2api = node[:nova]["ec2-api"][:ha][:ports][:ec2_api]
+  bind_port_metadata = node[:nova]["ec2-api"][:ha][:ports][:ec2_metadata]
+  bind_port_s3 = node[:nova]["ec2-api"][:ha][:ports][:ec2_s3]
 else
   bind_host = "0.0.0.0"
-  bind_port_ec2api = node[:nova][:ports][:ec2_api]
-  bind_port_metadata = node[:nova][:ports][:ec2_metadata]
-  bind_port_s3 = node[:nova][:ports][:ec2_s3]
+  bind_port_ec2api = node[:nova]["ec2-api"][:ports][:ec2_api]
+  bind_port_metadata = node[:nova]["ec2-api"][:ports][:ec2_metadata]
+  bind_port_s3 = node[:nova]["ec2-api"][:ports][:ec2_s3]
 end
 
 db_conn_scheme = db_settings[:url_scheme]

@@ -130,32 +130,18 @@ default[:nova][:novnc][:ssl][:enabled] = false
 default[:nova][:novnc][:ssl][:certfile] = ""
 default[:nova][:novnc][:ssl][:keyfile] = ""
 
-default[:nova][:ports][:api_ec2] = 8788
 default[:nova][:ports][:api] = 8774
 default[:nova][:ports][:placement_api] = 8780
 default[:nova][:ports][:metadata] = 8775
-default[:nova][:ports][:objectstore] = 3333
 default[:nova][:ports][:novncproxy] = 6080
 default[:nova][:ports][:serialproxy] = 6083
 
 default[:nova][:ha][:enabled] = false
 default[:nova][:ha][:op][:monitor][:interval] = "10s"
 
-# EC2 Role Attributes
-default[:nova][:ports][:ec2_api] = 8788
-default[:nova][:ports][:ec2_metadata] = 8789
-default[:nova][:ports][:ec2_s3] = 3334
-
-# EC2 Role HA Ports
-default[:nova][:ha][:ports][:ec2_api] = 5557
-default[:nova][:ha][:ports][:ec2_metadata] = 5558
-default[:nova][:ha][:ports][:ec2_s3] = 5559
-
 # Ports to bind to when haproxy is used for the real ports
-default[:nova][:ha][:ports][:api_ec2] = 5550
 default[:nova][:ha][:ports][:api] = 5551
 default[:nova][:ha][:ports][:metadata] = 5552
-default[:nova][:ha][:ports][:objectstore] = 5553
 default[:nova][:ha][:ports][:novncproxy] = 5554
 default[:nova][:ha][:ports][:serialproxy] = 5556
 default[:nova][:ha][:ports][:placement_api] = 5560

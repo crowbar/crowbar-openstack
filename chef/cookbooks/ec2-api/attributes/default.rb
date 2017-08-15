@@ -31,3 +31,11 @@ default[:nova]["ec2-api"][:ssl][:generate_certs] = false
 default[:nova]["ec2-api"][:ssl][:insecure] = false
 default[:nova]["ec2-api"][:ssl][:cert_required] = false
 default[:nova]["ec2-api"][:ssl][:ca_certs] = "/etc/ec2api/ssl/certs/ca.pem"
+
+default[:nova]["ec2-api"][:ports][:ec2_api] = 8788
+default[:nova]["ec2-api"][:ports][:ec2_metadata] = 8789
+default[:nova]["ec2-api"][:ports][:ec2_s3] = 3334
+
+default[:nova]["ec2-api"][:ha][:ports][:ec2_api] = 5557
+default[:nova]["ec2-api"][:ha][:ports][:ec2_metadata] = 5558
+default[:nova]["ec2-api"][:ha][:ports][:ec2_s3] = 5559
