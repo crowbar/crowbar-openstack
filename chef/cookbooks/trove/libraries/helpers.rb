@@ -15,14 +15,6 @@
 #
 
 module TroveHelper
-  def self.get_sql_connection(node)
-    # get Database data
-    db_settings = CrowbarOpenStackHelper.database_settings(node, "trove")
-    "#{db_settings[:url_scheme]}://#{node[:trove][:db][:user]}:"\
-    "#{node[:trove][:db][:password]}@#{db_settings[:address]}/"\
-    "#{node[:trove][:db][:database]}"
-  end
-
   def self.get_rabbitmq_trove_url(node, rabbitmq_servers)
     # get rabbitmq-server information
     # NOTE: Trove uses it's own user/pass/vhost instead of the default one

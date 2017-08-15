@@ -56,18 +56,16 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-db_password = ""
-if node.roles.include? "cinder-controller"
-  db_password = node[:cinder][:db][:password]
-else
+db_auth = node[:cinder][:db].dup
+unless node.roles.include? "cinder-controller"
   # pickup password to database from cinder-controller node
   node_controllers = node_search_with_cache("roles:cinder-controller")
   if node_controllers.length > 0
-    db_password = node_controllers[0][:cinder][:db][:password]
+    db_auth[:password] = node_controllers[0][:cinder][:db][:password]
   end
 end
 
-sql_connection = "#{db_settings[:url_scheme]}://#{node[:cinder][:db][:user]}:#{db_password}@#{db_settings[:address]}/#{node[:cinder][:db][:database]}"
+sql_connection = fetch_database_connection_string(db_auth)
 
 dirty = false
 
