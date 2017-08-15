@@ -4,7 +4,6 @@
   "attributes": {
     "trove": {
       "debug": false,
-      "verbose": true,
       "keystone_instance": "none",
       "nova_instance": "none",
       "swift_instance": "none",
@@ -12,6 +11,7 @@
       "rabbitmq_instance": "none",
       "volume_support": false,
       "service_user": "trove",
+      "memcache_secret_key": "",
       "db": {
         "password": "",
         "user": "trove",
@@ -28,7 +28,7 @@
     "trove": {
       "crowbar-revision": 1,
       "crowbar-applied": false,
-      "schema-revision": 101,
+      "schema-revision": 201,
       "element_states": {
         "trove-server": [ "readying", "ready", "applying" ]
       },

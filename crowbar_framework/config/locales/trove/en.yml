@@ -18,8 +18,6 @@ en:
   barclamp:
     trove:
       edit_attributes:
-        logging_header: 'Logging'
-        verbose: 'Verbose Logging'
         rabbitmq_instance: 'RabbitMQ'
         keystone_instance: 'Keystone Instance'
         cinder_instance: 'Cinder Instance'

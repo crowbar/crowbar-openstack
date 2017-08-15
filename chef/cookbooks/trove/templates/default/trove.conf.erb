@@ -1,5 +1,4 @@
 [DEFAULT]
-verbose = <%= node[:trove][:verbose] %>
 debug = <%= node[:trove][:debug] %>
 bind_host = <%= @bind_host %>
 bind_port = <%= @bind_port %>
@@ -68,6 +67,11 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 project_domain_name = <%= @keystone_settings['admin_domain']%>
 user_domain_name = <%= @keystone_settings['admin_domain'] %>
 auth_type = password
+service_token_roles_required = true
+service_token_roles = admin
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:trove][:memcache_secret_key] %>
 
 [oslo_messaging_rabbit]
 rabbit_use_ssl = <%= @rabbit_default_settings[:use_ssl] %>

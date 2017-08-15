@@ -20,6 +20,7 @@
 dirty = false
 
 keystone_settings = KeystoneHelper.keystone_settings(node, :trove)
+is_controller = node["roles"].include?("trove-server")
 ha_enabled = false
 trove_protocol = node[:trove][:api][:protocol]
 trove_port = node[:trove][:api][:bind_port]
@@ -143,6 +144,9 @@ end
 
 crowbar_pacemaker_sync_mark "create-trove_register" if ha_enabled
 
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
+
+memcached_instance "trove" if is_controller
 
 template node[:trove][:api][:config_file] do
   source "trove.conf.erb"
@@ -161,7 +165,8 @@ template node[:trove][:api][:config_file] do
     object_store_url: object_store_url,
     object_store_insecure: object_store_insecure,
     bind_host: bind_host,
-    bind_port: bind_port
+    bind_port: bind_port,
+    memcached_servers: memcached_servers
   )
   notifies :restart, "service[trove-api]"
 end
