@@ -151,6 +151,12 @@ end
 node.normal[:apache][:listen_ports_crowbar] ||= {}
 node.normal[:apache][:listen_ports_crowbar][:aodh] = { plain: [bind_port] }
 
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "aodh-server") : [node]
+)
+
+memcached_instance("aodh-server")
+
 template node[:aodh][:config_file] do
   source "aodh.conf.erb"
   owner "root"
@@ -161,6 +167,7 @@ template node[:aodh][:config_file] do
     verbose: node[:aodh][:verbose],
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: keystone_settings,
+    memcached_servers: memcached_servers,
     bind_host: bind_host,
     bind_port: bind_port,
     database_connection: db_connection,
