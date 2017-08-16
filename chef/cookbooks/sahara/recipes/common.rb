@@ -51,6 +51,16 @@ nova_insecure = Barclamp::Config.load(
 
 use_ceilometer = !Barclamp::Config.load("openstack", "ceilometer").empty?
 
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  if node[:sahara][:ha][:enabled]
+    CrowbarPacemakerHelper.cluster_nodes(node, "sahara-server")
+  else
+    [node]
+  end
+)
+
+memcached_instance("sahara") if node["roles"].include?("sahara-server")
+
 template node[:sahara][:config_file] do
   source "sahara.conf.erb"
   owner "root"
@@ -64,6 +74,7 @@ template node[:sahara][:config_file] do
     keystone_settings: KeystoneHelper.keystone_settings(node, :sahara),
     cinder_insecure: cinder_insecure,
     heat_insecure: heat_insecure,
+    memcached_servers: memcached_servers,
     neutron_insecure: neutron_insecure,
     nova_insecure: nova_insecure,
     use_ceilometer: use_ceilometer

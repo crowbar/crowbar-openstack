@@ -1,6 +1,5 @@
 [DEFAULT]
 debug = <%= node[:sahara][:debug] %>
-verbose = <%= node[:sahara][:verbose] %>
 log_dir = /var/log/sahara
 transport_url = <%= @rabbit_settings[:url] %>
 use_syslog=<%= node[:sahara][:use_syslog] ? "True" : "False" %>
@@ -41,6 +40,11 @@ auth_url = <%= @keystone_settings['admin_auth_url'] %>
 auth_type = password
 insecure = <%= @keystone_settings["insecure"] %>
 region_name = <%= @keystone_settings["endpoint_region"] %>
+service_token_roles_required = true
+service_token_roles = admin
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:sahara][:memcache_secret_key] %>
 
 [neutron]
 api_insecure = <%= @neutron_insecure %>
