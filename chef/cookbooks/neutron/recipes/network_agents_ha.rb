@@ -53,6 +53,67 @@ if use_l3_agent
       keystone_settings: keystone_settings
     )
   end
+
+  # skip neutron-ha-tool resource creation during upgrade
+  unless CrowbarPacemakerHelper.being_upgraded?(node)
+
+    # FIXME: neutron-ha-tool can't do keystone v3 currently
+    os_auth_url_v2 = KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
+                                                          keystone_settings["internal_url_host"],
+                                                          keystone_settings["service_port"],
+                                                          "2.0")
+
+    # Add configuration file
+    insecure_flag = keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
+    default_settings = node[:neutron][:ha][:neutron_l3_ha_service].to_hash
+    config_file_contents = NeutronHelper.make_l3_ha_service_config default_settings,
+                                                                   insecure_flag do |env|
+      env["OS_AUTH_URL"] = os_auth_url_v2
+      env["OS_REGION_NAME"] = keystone_settings["endpoint_region"]
+      env["OS_TENANT_NAME"] = keystone_settings["admin_tenant"]
+      env["OS_USERNAME"] = keystone_settings["admin_user"]
+    end
+
+    file "/etc/neutron/neutron-l3-ha-service.yaml" do
+      owner "root"
+      group "root"
+      mode "0600"
+      content config_file_contents
+      action :create
+    end
+
+    # Install service script
+    cookbook_file "neutron-l3-ha-service.rb" do
+      source "neutron-l3-ha-service.rb"
+      path "/usr/bin/neutron-l3-ha-service"
+      mode "0755"
+      owner "root"
+      group "root"
+    end
+
+    # install systemd unit configuration
+    systemd_kill_timeout = NeutronHelper.max_kill_timeout(
+      node[:neutron][:ha][:neutron_l3_ha_service][:timeouts]
+    ) + 5
+
+    template "/etc/systemd/system/neutron-l3-ha-service.service" do
+      source "neutron-l3-ha-service.service.erb"
+      mode "0644"
+      owner "root"
+      group "root"
+      variables(
+        timeout_in_seconds: systemd_kill_timeout
+      )
+    end
+
+    # Reload systemd when unit file changed
+    bash "reload systemd after neutron-l3-ha-service update" do
+      code "systemctl daemon-reload"
+      action :nothing
+      subscribes :run, resources("template[/etc/systemd/system/neutron-l3-ha-service.service]"),
+        :immediately
+    end
+  end
 end
 
 # Wait for all "neutron-network" nodes to reach this point so we know that they will
@@ -167,12 +228,6 @@ if CrowbarPacemakerHelper.being_upgraded?(node)
 end
 
 if use_l3_agent
-  # FIXME: neutron-ha-tool can't do keystone v3 currently
-  os_auth_url_v2 = KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
-                                                         keystone_settings["internal_url_host"],
-                                                         keystone_settings["service_port"],
-                                                         "2.0")
-
   # Remove old resource
   ha_tool_primitive_name = "neutron-ha-tool"
   pacemaker_primitive ha_tool_primitive_name do
@@ -198,12 +253,33 @@ if use_l3_agent
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
+  # Add pacemaker resource for neutron-l3-ha-service
+  ha_service_transaction_objects = []
+  ha_service_primitive_name = "neutron-l3-ha-service"
 
+  pacemaker_primitive ha_service_primitive_name do
+    agent "systemd:neutron-l3-ha-service"
+    op node[:neutron][:ha][:neutron_l3_ha_resource][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  ha_service_transaction_objects << "pacemaker_primitive[#{ha_service_primitive_name}]"
+
+  ha_service_location_name = openstack_pacemaker_controller_only_location_for(
+    ha_service_primitive_name
+  )
+
+  ha_service_transaction_objects << "pacemaker_location[#{ha_service_location_name}]"
+
+  pacemaker_transaction "neutron ha service" do
+    cib_objects ha_service_transaction_objects
     # note that this will also automatically start the resources
     action :commit_new
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
+  # Define dependencies for this resource
+  crowbar_pacemaker_order_only_existing "o-#{ha_service_primitive_name}" do
     # While neutron-ha-tool technically doesn't directly depend on postgresql or
     # rabbitmq, if these bits are not running, then neutron-server can run but
     # can't do what it's being asked. Note that neutron-server does have a
@@ -211,7 +287,7 @@ if use_l3_agent
     # doesn't need to be restarted when postgresql or rabbitmq are restarted).
     # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
     ordering "( postgresql rabbitmq g-haproxy cl-neutron-server #{l3_agent_clone} ) " \
-        "#{ha_tool_primitive_name}"
+             "#{ha_service_primitive_name}"
     score "Mandatory"
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
