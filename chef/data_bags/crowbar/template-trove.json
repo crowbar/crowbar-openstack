@@ -28,7 +28,7 @@
     "trove": {
       "crowbar-revision": 1,
       "crowbar-applied": false,
-      "schema-revision": 101,
+      "schema-revision": 201,
       "element_states": {
         "trove-server": [ "readying", "ready", "applying" ]
       },
