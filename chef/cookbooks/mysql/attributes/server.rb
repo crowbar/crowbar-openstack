@@ -75,3 +75,6 @@ default["mysql"]["tunable"]["expire_logs_days"]         = 10
 default["mysql"]["tunable"]["max_binlog_size"]          = "100M"
 default["mysql"]["tunable"]["auto_increment_increment"] = 10
 default["mysql"]["tunable"]["auto_increment_offset"]    = 1
+
+# Ports to bind to when haproxy is used
+default[:mysql][:ha][:ports][:admin_port] = 3306

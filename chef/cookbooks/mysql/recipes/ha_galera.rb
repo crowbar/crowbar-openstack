@@ -142,3 +142,26 @@ end
 crowbar_pacemaker_sync_mark "sync-database_root_password" do
   revision node[:database]["crowbar-revision"]
 end
+
+include_recipe "crowbar-pacemaker::haproxy"
+
+ha_servers = CrowbarPacemakerHelper.haproxy_servers_for_service(
+  node, "mysql", "database-server", "admin_port"
+).sort_by { |s| s["name"] }
+
+# Let all nodes but one act as backup (standby) servers.
+# Backup server is only used when non-backup one is down. Thus we prevent possible deadlocks
+# from OpenStack services writing to the database on different nodes at once.
+ha_servers = ha_servers.each_with_index do |n, i|
+  n["backup"] = i > 0
+end
+
+haproxy_loadbalancer "galera" do
+  address CrowbarDatabaseHelper.get_listen_address(node)
+  port 3306
+  mode "tcp"
+  options ["mysql-check user haproxy"]
+  stick ({ "on" => "dst" })
+  servers ha_servers
+  action :nothing
+end.run_action(:create)
