@@ -4,7 +4,6 @@
   "attributes": {
     "aodh": {
       "debug": false,
-      "verbose": true,
       "evaluation_interval": 600,
       "rabbitmq_instance": "none",
       "database_instance": "none",
@@ -36,7 +35,7 @@
     "aodh": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 200,
+      "schema-revision": 201,
       "element_states": {
         "aodh-server": [ "readying", "ready", "applying" ]
       },

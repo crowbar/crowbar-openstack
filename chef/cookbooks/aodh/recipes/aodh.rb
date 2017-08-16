@@ -164,7 +164,6 @@ template node[:aodh][:config_file] do
   mode "0640"
   variables(
     debug: node[:aodh][:debug],
-    verbose: node[:aodh][:verbose],
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: keystone_settings,
     memcached_servers: memcached_servers,

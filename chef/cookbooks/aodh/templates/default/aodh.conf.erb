@@ -1,7 +1,6 @@
 [DEFAULT]
 evaluation_interval = <%= @evaluation_interval %>
 debug = <%= @debug ? "true" : "false" %>
-verbose = <%= @verbose ? "true" : "false" %>
 log_dir = /var/log/aodh
 transport_url = <%= @rabbit_settings[:url] %>
 
@@ -28,6 +27,8 @@ auth_type = password
 memcached_servers = <%= @memcached_servers.join(',') %>
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = <%= node[:aodh][:memcache_secret_key] %>
+service_token_roles_required = true
+service_token_roles = admin
 
 [service_credentials]
 region_name = <%= @keystone_settings['endpoint_region'] %>

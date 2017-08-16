@@ -13,7 +13,6 @@
           "required": true,
           "mapping": {
             "debug": { "type": "bool", "required": true },
-            "verbose": { "type": "bool", "required": true },
             "evaluation_interval": { "type": "int", "required": true },
             "database_instance": { "type": "str", "required": true },
             "rabbitmq_instance": { "type": "str", "required": true },
