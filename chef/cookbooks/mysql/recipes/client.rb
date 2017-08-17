@@ -17,10 +17,10 @@
 # limitations under the License.
 #
 
-package "mysql-client" do
+package "mariadb-client" do
   package_name value_for_platform_family(
-    ["rhel", "suse", "fedora"] => "mysql",
-    "default" => "mysql-client"
+    ["rhel", "fedora"] => "mysql",
+    "default" => "mariadb-client"
   )
   action :install
 end
@@ -31,7 +31,6 @@ if platform_family?(%w{debian rhel fedora suse})
     package_name value_for_platform_family(
       ["rhel", "fedora"] => "ruby-mysql",
       "suse" => "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-mysql2",
-      "debian" => "libmysql-ruby",
       "default" => "libmysql-ruby"
     )
     action :install
