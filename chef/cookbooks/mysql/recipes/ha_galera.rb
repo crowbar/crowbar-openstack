@@ -63,7 +63,7 @@ pacemaker_primitive service_name do
   params({
     "enable_creation" => true,
     "wsrep_cluster_address" => "gcomm://" + nodes_names.join(","),
-    "check_user" => "''",
+    "check_user" => "monitoring",
     "socket" => "/var/run/mysql/mysql.sock"
   })
   op({
@@ -160,7 +160,7 @@ haproxy_loadbalancer "galera" do
   address CrowbarDatabaseHelper.get_listen_address(node)
   port 3306
   mode "tcp"
-  options ["mysql-check user haproxy"]
+  options ["mysql-check user monitoring"]
   stick ({ "on" => "dst" })
   servers ha_servers
   action :nothing
