@@ -494,6 +494,12 @@ class NeutronService < OpenstackServiceObject
           node.save
         end
       end
+
+      # enable ironic interface as preparation for ironic deployment
+      network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
+      unless network_proposal["attributes"]["network"]["networks"]["ironic"].nil?
+        net_svc.enable_interface "default", "ironic", nodename
+      end
     elsif attributes["networking_plugin"] == "vmware"
       net_svc.allocate_ip "default", "os_sdn", "host", node
     end

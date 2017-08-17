@@ -21,7 +21,8 @@ when "rhel", "suse"
       "openstack-ironic-api",
       "openstack-ironic-conductor",
       "python-ironicclient",
-      "python-openstackclient"
+      "python-openstackclient",
+      "qemu-tools"
     ],
     services: [
       "openstack-ironic-api",
@@ -41,7 +42,8 @@ when "debian"
       "ironic-api",
       "ironic-conductor",
       "python-ironicclient",
-      "python-openstackclient"
+      "python-openstackclient",
+      "qemu-utils"
     ],
     services: [
       "ironic-api",
