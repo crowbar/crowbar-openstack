@@ -66,7 +66,6 @@ template node[:ceilometer][:config_file] do
     mode "0640"
     variables(
       debug: node[:ceilometer][:debug],
-      verbose: node[:ceilometer][:verbose],
       rabbit_settings: fetch_rabbitmq_settings,
       keystone_settings: keystone_settings,
       bind_host: bind_host,

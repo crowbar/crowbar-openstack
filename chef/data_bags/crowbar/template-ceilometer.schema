@@ -13,7 +13,6 @@
           "required": true,
           "mapping": {
             "debug": { "type": "bool", "required": true },
-            "verbose": { "type": "bool", "required": true },
             "use_mongodb": { "type": "bool", "required": true },
             "cpu_interval": { "type": "int", "required": true },
             "disk_interval": { "type": "int", "required": true },
