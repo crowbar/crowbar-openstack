@@ -204,7 +204,7 @@ end
 
 crowbar_pacemaker_sync_mark "create-keystone_database" if ha_enabled
 
-sql_connection = "#{db_settings[:url_scheme]}://#{node[:keystone][:db][:user]}:#{node[:keystone][:db][:password]}@#{db_settings[:address]}/#{node[:keystone][:db][:database]}"
+sql_connection = fetch_database_connection_string(node[:keystone][:db])
 
 # we have to calculate max_active_keys for fernet token provider
 # http://docs.openstack.org/admin-guide/identity-fernet-token-faq.html# \

@@ -46,25 +46,9 @@ if is_controller
   include_recipe "#{db_settings[:backend_name]}::client"
   include_recipe "#{db_settings[:backend_name]}::python-client"
 
-  db_conn_scheme = db_settings[:url_scheme]
-  if node[:platform_family] == "suse" && db_settings[:backend_name] == "mysql"
-    # The C-extensions (python-mysql) can't be monkey-patched by eventlet. Therefore,
-    # when only one nova-conductor is present, all DB queries are serialized.
-    # By using the pure-Python driver by default, eventlet can do it's job:
-    db_conn_scheme = "mysql+pymysql"
-  end
-
-  db = node[:nova][:db]
-  database_connection = \
-    "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
-
-  db = node[:nova][:placement_db]
-  placement_database_connection = \
-    "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
-
-  db = node[:nova][:api_db]
-  api_database_connection = \
-    "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
+  database_connection = fetch_database_connection_string(node[:nova][:db])
+  placement_database_connection = fetch_database_connection_string(node[:nova][:placement_db])
+  api_database_connection = fetch_database_connection_string(node[:nova][:api_db])
 else
   database_connection = nil
   api_database_connection = nil

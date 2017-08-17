@@ -87,9 +87,7 @@ api_protocol = node[:ironic][:api][:protocol]
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, false)
 
-db_connection = "#{db_settings[:url_scheme]}://"\
-                "#{node[:ironic][:db][:user]}:#{node[:ironic][:db][:password]}@"\
-                "#{db_settings[:address]}/#{node[:ironic][:db][:database]}"
+db_connection = fetch_database_connection_string(node[:ironic][:db])
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],

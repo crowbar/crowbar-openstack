@@ -133,11 +133,7 @@ end
 
 crowbar_pacemaker_sync_mark "create-aodh_keystone_register" if ha_enabled
 
-db_name = node[:aodh][:db][:database]
-db_user = node[:aodh][:db][:user]
-db_password = node[:aodh][:db][:password]
-db_connection =
-    "#{db_settings[:url_scheme]}://#{db_user}:#{db_password}@#{db_settings[:address]}/#{db_name}"
+db_connection = fetch_database_connection_string(node[:aodh][:db])
 
 if node[:aodh][:ha][:server][:enabled]
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address

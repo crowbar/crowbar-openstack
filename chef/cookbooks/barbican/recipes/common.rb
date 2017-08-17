@@ -23,7 +23,6 @@ package "openstack-barbican"
 ha_enabled = node[:barbican][:ha][:enabled]
 
 db_settings = fetch_database_settings
-db_conn_scheme = db_settings[:url_scheme]
 
 barbican_protocol = node[:barbican][:api][:protocol]
 
@@ -31,15 +30,7 @@ public_host = CrowbarHelper.get_host_for_public_url(node,
                                                     barbican_protocol == "https",
                                                     node[:barbican][:ha][:enabled])
 
-if db_settings[:backend_name] == "mysql"
-  db_conn_scheme = "mysql+pymysql"
-end
-
-database_connection = "#{db_conn_scheme}://" \
-  "#{node[:barbican][:db][:user]}" \
-  ":#{node[:barbican][:db][:password]}" \
-  "@#{db_settings[:address]}" \
-  "/#{node[:barbican][:db][:database]}"
+database_connection = fetch_database_connection_string(node[:barbican][:db])
 
 crowbar_pacemaker_sync_mark "wait-barbican_database" if ha_enabled
 

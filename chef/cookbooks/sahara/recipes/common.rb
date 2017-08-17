@@ -23,10 +23,7 @@ include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 # get Database data
-db_password = node[:sahara][:db][:password]
-sql_connection = "#{db_settings[:url_scheme]}://#{node[:sahara][:db][:user]}:"\
-                 "#{db_password}@#{db_settings[:address]}/"\
-                 "#{node[:sahara][:db][:database]}"
+sql_connection = fetch_database_connection_string(node[:sahara][:db])
 
 cinder_instance = node[:sahara][:cinder_instance]
 heat_instance = node[:sahara][:heat_instance]

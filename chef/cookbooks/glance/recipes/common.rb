@@ -64,10 +64,7 @@ end
 
 crowbar_pacemaker_sync_mark "create-glance_database" if ha_enabled
 
-glance_db = node[:glance][:db]
-sql_connection =
-  "#{db_settings[:url_scheme]}://#{glance_db[:user]}:#{glance_db[:password]}@"\
-  "#{db_settings[:address]}/#{glance_db[:database]}"
+sql_connection = fetch_database_connection_string(node[:glance][:db])
 if node[:glance][:sql_connection] != sql_connection
   node.set[:glance][:sql_connection] = sql_connection
   node.save
