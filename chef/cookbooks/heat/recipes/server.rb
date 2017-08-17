@@ -108,7 +108,7 @@ bind_host, api_port, cfn_port, cloud_watch_port = HeatHelper.get_bind_host_port(
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:protocol] == "https", ha_enabled)
 
-db_connection = "#{db_settings[:url_scheme]}://#{node[:heat][:db][:user]}:#{node[:heat][:db][:password]}@#{db_settings[:address]}/#{node[:heat][:db][:database]}"
+db_connection = fetch_database_connection_string(node[:heat][:db])
 
 crowbar_pacemaker_sync_mark "wait-heat_register" if ha_enabled
 

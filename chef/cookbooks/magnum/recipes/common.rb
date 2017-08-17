@@ -24,10 +24,7 @@ include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 # get Database data
-db_password = node[:magnum][:db][:password]
-sql_connection = "#{db_settings[:url_scheme]}://#{node[:magnum][:db][:user]}:"\
-                 "#{db_password}@#{db_settings[:address]}/"\
-                 "#{node[:magnum][:db][:database]}"
+sql_connection = fetch_database_connection_string(node[:magnum][:db])
 
 # address/port binding
 my_ipaddress = Barclamp::Inventory.get_network_by_type(node, "admin").address

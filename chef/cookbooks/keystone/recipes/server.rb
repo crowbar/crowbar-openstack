@@ -198,7 +198,7 @@ end
 
 crowbar_pacemaker_sync_mark "create-keystone_database" if ha_enabled
 
-sql_connection = "#{db_settings[:url_scheme]}://#{node[:keystone][:db][:user]}:#{node[:keystone][:db][:password]}@#{db_settings[:address]}/#{node[:keystone][:db][:database]}"
+sql_connection = fetch_database_connection_string(node[:keystone][:db])
 
 if ha_enabled
   memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server")

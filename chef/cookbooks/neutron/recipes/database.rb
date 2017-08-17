@@ -67,8 +67,7 @@ props.each do |prop|
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
-  db_address =
-    "#{db_settings[:url_scheme]}://#{db_user}:#{db_pass}@#{db_settings[:address]}/#{db_name}"
+  db_address = fetch_database_connection_string(node[:neutron][:db])
   if node[@cookbook_name][:db][db_conn_name] != db_address
     node.set[@cookbook_name][:db][db_conn_name] = db_address
     dirty = true

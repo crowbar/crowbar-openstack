@@ -24,6 +24,11 @@ class Chef
       CrowbarOpenStackHelper.database_settings(node, barclamp)
     end
 
+    def fetch_database_connection_string(db_auth, barclamp = @cookbook_name)
+      db_settings = CrowbarOpenStackHelper.database_settings(node, barclamp)
+      CrowbarOpenStackHelper.database_connection_string(db_settings, db_auth)
+    end
+
     def fetch_rabbitmq_settings(barclamp=@cookbook_name)
       CrowbarOpenStackHelper.rabbitmq_settings(node, barclamp)
     end
@@ -39,6 +44,11 @@ class Chef
     class Template
       def fetch_database_settings(barclamp=@cookbook_name)
         CrowbarOpenStackHelper.database_settings(node, barclamp)
+      end
+
+      def fetch_database_connection_string(db_auth, barclamp = @cookbook_name)
+        db_settings = CrowbarOpenStackHelper.database_settings(node, barclamp)
+        CrowbarOpenStackHelper.database_connection_string(db_settings, db_auth)
       end
 
       def fetch_rabbitmq_settings(barclamp=@cookbook_name)
@@ -96,6 +106,21 @@ class CrowbarOpenStackHelper
     end
 
     @database_settings[instance]
+  end
+
+  def self.database_connection_string(db_settings, db_auth)
+    db_conn_scheme = db_settings[:url_scheme]
+    db_charset = ""
+
+    if db_conn_scheme == "mysql"
+      db_conn_scheme = "mysql+pymysql"
+      db_charset = "?charset=utf8"
+    end
+
+    "#{db_conn_scheme}://" \
+    "#{db_auth[:user]}:#{db_auth[:password]}@#{db_settings[:address]}/" \
+    "#{db_auth[:database]}" \
+    "#{db_charset}"
   end
 
   def self.rabbitmq_settings(node, barclamp)

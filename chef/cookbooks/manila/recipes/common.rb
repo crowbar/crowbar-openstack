@@ -22,19 +22,16 @@ include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 # get Database data
-db_password = ""
-if node.roles.include? "manila-server"
-  db_password = node[:manila][:db][:password]
-else
+db_auth = node[:manila][:db].dup
+unless node.roles.include? "manila-server"
   # pickup password to database from manila-server node
   node_servers = node_search_with_cache("roles:manila-server")
   if node_servers.length > 0
-    db_password = node_servers[0][:manila][:db][:password]
+    db_auth[:password] = node_servers[0][:manila][:db][:password]
   end
 end
-sql_connection = "#{db_settings[:url_scheme]}://#{node[:manila][:db][:user]}:"\
-                 "#{db_password}@#{db_settings[:address]}/"\
-                 "#{node[:manila][:db][:database]}"
+
+sql_connection = fetch_database_connection_string(db_auth)
 
 # address/port binding
 my_ipaddress = Barclamp::Inventory.get_network_by_type(node, "admin").address

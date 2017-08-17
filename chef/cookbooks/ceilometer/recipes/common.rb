@@ -11,20 +11,16 @@ else
   include_recipe "#{db_settings[:backend_name]}::client"
   include_recipe "#{db_settings[:backend_name]}::python-client"
 
-  db_password = ""
-  if node.roles.include? "ceilometer-server"
-    # password is already created because common recipe comes
-    # after the server recipe
-    db_password = node[:ceilometer][:db][:password]
-  else
+  db_auth = node[:ceilometer][:db].dup
+  unless node.roles.include? "ceilometer-server"
     # pickup password to database from ceilometer-server node
     node_controllers = node_search_with_cache("roles:ceilometer-server")
     if node_controllers.length > 0
-      db_password = node_controllers[0][:ceilometer][:db][:password]
+      db_auth[:password] = node_controllers[0][:ceilometer][:db][:password]
     end
   end
 
-  db_connection = "#{db_settings[:url_scheme]}://#{node[:ceilometer][:db][:user]}:#{db_password}@#{db_settings[:address]}/#{node[:ceilometer][:db][:database]}"
+  db_connection = fetch_database_connection_string(db_auth)
 end
 
 is_compute_agent = node.roles.include?("ceilometer-agent") && node.roles.any? { |role| /^nova-compute-/ =~ role }

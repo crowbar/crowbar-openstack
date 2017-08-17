@@ -19,7 +19,7 @@
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-sql_connection = TroveHelper.get_sql_connection node
+sql_connection = fetch_database_connection_string(node[:trove][:db])
 
 rabbitmq_servers = node_search_with_cache("roles:rabbitmq-server")
 rabbit_trove_url = TroveHelper.get_rabbitmq_trove_url(node, rabbitmq_servers)
