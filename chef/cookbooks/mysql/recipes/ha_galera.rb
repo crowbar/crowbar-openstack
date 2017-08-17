@@ -154,6 +154,10 @@ ha_servers = CrowbarPacemakerHelper.haproxy_servers_for_service(
 # from OpenStack services writing to the database on different nodes at once.
 ha_servers = ha_servers.each_with_index do |n, i|
   n["backup"] = i > 0
+  # lower the number of unsuccessful checks needed for declaring server DOWN
+  n["fall"] = 2
+  # lower the interval checking after first failure is found
+  n["fastinter"] = 1000
 end
 
 haproxy_loadbalancer "galera" do
