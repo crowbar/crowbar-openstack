@@ -114,55 +114,72 @@ execute "assign-root-password" do
   only_if "/usr/bin/mysql -u root -e 'show databases;'"
 end
 
-
 db_settings = fetch_database_settings
 db_connection = db_settings[:connection].dup
 db_connection[:host] = "localhost"
 db_connection[:username] = "root"
 db_connection[:password] = node[:database][:mysql][:server_root_password]
 
-database_user "create db_maker database user" do
-  connection db_connection
-  username "db_maker"
-  password node[:database][:db_maker_password]
-  host "%"
-  provider db_settings[:user_provider]
-  action :create
-  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+unless node[:database][:database_bootstrapped]
+  database_user "create db_maker database user" do
+    connection db_connection
+    username "db_maker"
+    password node[:database][:db_maker_password]
+    host "%"
+    provider db_settings[:user_provider]
+    action :create
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  database_user "create haproxy monitoring user" do
+    connection db_connection
+    username "haproxy"
+    password ""
+    host "%"
+    provider db_settings[:user_provider]
+    action :create
+    only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  database_user "grant db_maker access" do
+    connection db_connection
+    username "db_maker"
+    password node[:database][:db_maker_password]
+    host "%"
+    privileges db_settings[:privs] + [
+      "ALTER ROUTINE",
+      "CREATE ROUTINE",
+      "CREATE TEMPORARY TABLES",
+      "CREATE USER",
+      "CREATE VIEW",
+      "EXECUTE",
+      "GRANT OPTION",
+      "LOCK TABLES",
+      "RELOAD",
+      "SHOW DATABASES",
+      "SHOW VIEW",
+      "TRIGGER"
+    ]
+    provider db_settings[:user_provider]
+    action :grant
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  database "drop test database" do
+    connection db_connection
+    database_name "test"
+    provider db_settings[:provider]
+    action :drop
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 end
 
-database_user "create haproxy monitoring user" do
-  connection db_connection
-  username "haproxy"
-  password ""
-  host "%"
-  provider db_settings[:user_provider]
-  action :create
-  only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-
-database_user "grant db_maker access" do
-  connection db_connection
-  username "db_maker"
-  password node[:database][:db_maker_password]
-  host "%"
-  privileges db_settings[:privs] + [
-    "ALTER ROUTINE",
-    "CREATE ROUTINE",
-    "CREATE TEMPORARY TABLES",
-    "CREATE USER",
-    "CREATE VIEW",
-    "EXECUTE",
-    "GRANT OPTION",
-    "LOCK TABLES",
-    "RELOAD",
-    "SHOW DATABASES",
-    "SHOW VIEW",
-    "TRIGGER"
-  ]
-  provider db_settings[:user_provider]
-  action :grant
-  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+ruby_block "mark node for database bootstrap" do
+  block do
+    node.set[:database][:database_bootstrapped] = true
+    node.save
+  end
+  not_if { node[:database][:database_bootstrapped] }
 end
 
 directory "/var/log/mysql/" do
