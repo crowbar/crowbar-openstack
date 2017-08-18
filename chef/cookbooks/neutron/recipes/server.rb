@@ -158,7 +158,7 @@ when "ml2"
   os_sdn_net = Barclamp::Inventory.get_network_definition(node, "os_sdn")
   mtu_value = os_sdn_net.nil? ? 1500 : os_sdn_net["mtu"].to_i
 
-  ml2_extension_drivers = ["port_security"]
+  ml2_extension_drivers = ["dns", "port_security"]
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
   ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
   if use_hyperv
