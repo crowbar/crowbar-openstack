@@ -66,10 +66,6 @@ service mysql start
 EOC
 end
 
-cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
-nodes_names = cluster_nodes.map { |n| n[:hostname] }
-cluster_addresses = "gcomm://" + nodes_names.join(",")
-
 template "/etc/my.cnf.d/openstack.cnf" do
   source "my.cnf.erb"
   owner "root"
@@ -101,19 +97,6 @@ template "/etc/my.cnf.d/tuning.cnf" do
     max_heap_table_size: node[:database][:mysql][:max_heap_table_size]
   )
   notifies :restart, "service[mysql]", :immediately
-end
-
-if node[:database][:ha][:enabled]
-  template "/etc/my.cnf.d/galera.cnf" do
-    source "galera.cnf.erb"
-    owner "root"
-    group "mysql"
-    mode "0640"
-    variables(
-      cluster_addresses: cluster_addresses
-    )
-    notifies :restart, "service[mysql]", :immediately
-  end
 end
 
 unless Chef::Config[:solo]
