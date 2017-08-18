@@ -34,7 +34,7 @@ end.run_action(:create)
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required packages installed before we create the pacemaker
 # resources
-crowbar_pacemaker_sync_mark "sync-sahara before_ha"
+crowbar_pacemaker_sync_mark "sync-sahara_before_ha"
 
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-sahara_ha_resources"
