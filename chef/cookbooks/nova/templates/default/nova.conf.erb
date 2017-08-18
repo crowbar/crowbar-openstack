@@ -6,6 +6,7 @@ key = <%= @vncproxy_key_file %>
 instance_name_template=zvm%05x
 <% end %>
 my_ip = <%= node[:nova][:my_ip] %>
+<% unless @ironic_settings.nil? %>scheduler_host_manager = ironic_host_manager<% end %>
 state_path = /var/lib/nova
 enabled_ssl_apis = <%= @ssl_enabled ? "osapi_compute,metadata" : "" %>
 osapi_compute_listen = <%= @bind_host %>
@@ -138,6 +139,8 @@ protocol = <%= @glance_server_protocol %>
 
 <% unless @ironic_settings.nil? -%>
 [ironic]
+# temporary workaround for nova using public ironic endpoint (this will be deprecated in Queens)
+api_endpoint = <%= @ironic_settings[:api_protocol] %>://<%= @ironic_settings[:api_host] %>:<%= @ironic_settings[:api_port] %>
 auth_type = password
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 username = <%= @ironic_settings[:service_user] %>

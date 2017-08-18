@@ -134,6 +134,8 @@ tenant_network_types = [[node[:neutron][:ml2_type_drivers_default_tenant_network
 
 interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
 
+ironic_net = Barclamp::Inventory.get_network_definition(node, "ironic")
+
 case node[:neutron][:networking_plugin]
 when "ml2"
   # Find out which physical interfaces we need to define in the config (depends
@@ -141,8 +143,8 @@ when "ml2"
   # with "nova_fixed".
   external_networks = ["nova_floating"]
 
-  # add ironic to external_networks if ironic-server role is on current node
-  external_networks << "ironic" if node.roles.include?("ironic-server")
+  # add ironic to external_networks if ironic network is configured
+  external_networks << "ironic" if ironic_net
 
   external_networks.concat(node[:neutron][:additional_external_networks])
   network_node = NeutronHelper.get_network_node_from_neutron_attributes(node)
