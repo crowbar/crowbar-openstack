@@ -55,7 +55,7 @@ end
 
 service_name = "galera"
 
-cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "database-server")
+cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
 nodes_names = cluster_nodes.map { |n| n[:hostname] }
 
 pacemaker_primitive service_name do
