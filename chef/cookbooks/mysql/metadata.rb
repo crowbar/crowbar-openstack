@@ -49,28 +49,8 @@ attribute "mysql/tunable/max_connections",
           display_name: "MySQL Tunable Max Connections",
           default: "800"
 
-attribute "mysql/tunable/wait_timeout",
-          display_name: "MySQL Tunable Wait Timeout",
-          default: "180"
-
-attribute "mysql/tunable/net_read_timeout",
-          display_name: "MySQL Tunable Net Read Timeout",
-          default: "30"
-
-attribute "mysql/tunable/net_write_timeout",
-          display_name: "MySQL Tunable Net Write Timeout",
-          default: "30"
-
 attribute "mysql/tunable/back_log",
           display_name: "MySQL Tunable Back Log",
-          default: "128"
-
-attribute "mysql/tunable/table_cache",
-          display_name: "MySQL Tunable Table Cache for MySQL < 5.1.3",
-          default: "128"
-
-attribute "mysql/tunable/table_open_cache",
-          display_name: "MySQL Tunable Table Cache for MySQL >= 5.1.3",
           default: "128"
 
 attribute "mysql/tunable/max_heap_table_size",
