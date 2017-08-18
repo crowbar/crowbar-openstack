@@ -5,7 +5,6 @@ libvirt_type = <%= @libvirt_type %>
 nova_http_log_debug = <%= @debug ? "true" : "false" %>
 host = <%= @node_hostname %>
 debug = <%= @debug ? "true" : "false" %>
-verbose = <%= @verbose ? "true" : "false" %>
 log_dir = /var/log/ceilometer
 use_stderr = false
 transport_url = <%= @rabbit_settings[:url] %>

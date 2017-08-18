@@ -35,7 +35,6 @@ default[:ceilometer][:agent_notification][:service_name] = agent_notification_se
 default[:ceilometer][:central][:service_name] = central_service_name
 
 default[:ceilometer][:debug] = false
-default[:ceilometer][:verbose] = false
 
 default[:ceilometer][:use_mongodb] = false
 
