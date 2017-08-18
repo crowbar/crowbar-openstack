@@ -133,9 +133,9 @@ unless node[:database][:database_bootstrapped]
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
-  database_user "create haproxy monitoring user" do
+  database_user "create haproxy and galera monitoring user" do
     connection db_connection
-    username "haproxy"
+    username "monitoring"
     password ""
     host "%"
     provider db_settings[:user_provider]
