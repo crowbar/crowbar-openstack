@@ -133,6 +133,50 @@ class CrowbarOpenStackHelper
     config
   end
 
+  # Verify uid for user.
+  def self.check_user(node, expected_username, expected_uid)
+    node["etc"]["passwd"].each do |username, attrs|
+      if username == expected_username
+        if attrs["uid"] != expected_uid
+          message = "user #{username} has uid #{attrs["uid"]} but " \
+            "expected #{expected_uid}"
+          Chef::Log.fatal(message)
+          raise message
+        else
+          break
+        end
+      end
+
+      next unless attrs["uid"] == expected_uid
+
+      message = "#{expected_uid} already in use by user #{username}"
+      Chef::Log.fatal(message)
+      raise message
+    end
+  end
+
+  # Verify gid for group.
+  def self.check_group(node, expected_groupname, expected_gid)
+    node["etc"]["group"].each do |groupname, attrs|
+      if groupname == expected_groupname
+        if attrs["gid"] != expected_gid
+          message = "group #{username} has gid #{attrs["gid"]} but " \
+            "expected #{expected_gid}"
+          Chef::Log.fatal(message)
+          raise message
+        else
+          break
+        end
+      end
+
+      next unless attrs["gid"] == expected_gid
+
+      message = "#{expected_gid} already in use by group #{groupname}"
+      Chef::Log.fatal(message)
+      raise message
+    end
+  end
+
   private
 
   def self.get_node(node, role, barclamp, instance)

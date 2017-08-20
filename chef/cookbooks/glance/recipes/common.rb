@@ -22,6 +22,29 @@ package "glance" do
   package_name "openstack-glance" if %w(rhel suse).include?(node[:platform_family])
 end
 
+ruby_block "Adjust glance uid/gid" do
+  block do
+    Chef::Log.info("Verifying uid/gid for glance")
+
+    cmdline = "groupmod -g #{node[:glance][:gid]} #{node[:glance][:group]}"
+    Chef::Log.info("running #{cmdline}")
+    cmd = Chef::ShellOut.new(cmdline).run_command
+    if cmd.exitstatus.nonzero?
+      Chef::Log.error("Failed to update glance uid/gid")
+    end
+
+    cmdline = "usermod -u #{node[:glance][:uid]} -g #{node[:glance][:gid]} #{node[:glance][:user]}"
+    Chef::Log.info("running #{cmdline}")
+    cmd = Chef::ShellOut.new(cmdline).run_command
+    if cmd.exitstatus.nonzero?
+      Chef::Log.error("Failed to update glance uid/gid")
+    end
+
+  end
+  notifies :stop, "service[#{node[:glance][:api][:service_name]}]", :before
+  notifies :start, "service[#{node[:glance][:api][:service_name]}]"
+end
+
 ha_enabled = node[:glance][:ha][:enabled]
 
 db_settings = fetch_database_settings

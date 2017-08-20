@@ -19,8 +19,10 @@
 # limitations under the License.
 #
 
-override[:glance][:user]="glance"
-override[:glance][:group]="glance"
+override[:glance][:user] = "glance"
+override[:glance][:group] = "glance"
+override[:glance][:uid] = 200
+override[:glance][:gid] = 200
 
 default[:glance][:debug] = "False"
 

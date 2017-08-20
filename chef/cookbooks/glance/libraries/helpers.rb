@@ -27,4 +27,10 @@ module GlanceHelper
       }
     end
   end
+
+  def self.verify_user_and_group_ids(node)
+    Chef::Log.info("Verifying user and group ids")
+    CrowbarOpenStackHelper.check_user(node, node[:glance][:user], node[:glance][:uid])
+    CrowbarOpenStackHelper.check_group(node, node[:glance][:group], node[:glance][:gid])
+  end
 end
