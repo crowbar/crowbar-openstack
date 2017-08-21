@@ -35,11 +35,7 @@ class OpenstackServiceObject < PacemakerServiceObject
     if role.nil?
       config = nil
     else
-      insecure = Openstack::DataBagConfig.insecure(@bc_name, role)
-
-      config = {
-        insecure: insecure
-      }
+      config = role.default_attributes[@bc_name]
     end
 
     instance = Crowbar::DataBagConfig.instance_from_role(old_role, role)

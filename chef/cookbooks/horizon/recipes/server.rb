@@ -337,18 +337,18 @@ db_settings = {
   "default-character-set" => "'utf8'"
 }
 
-glance_insecure = Barclamp::Config.load("openstack", "glance")["insecure"] || false
-cinder_insecure = Barclamp::Config.load("openstack", "cinder")["insecure"] || false
-neutron_insecure = Barclamp::Config.load("openstack", "neutron")["insecure"] || false
-nova_insecure = Barclamp::Config.load("openstack", "nova")["insecure"] || false
-aodh_insecure = Barclamp::Config.load("openstack", "aodh")["insecure"] || false
-barbican_insecure = Barclamp::Config.load("openstack", "barbican")["insecure"] || false
-ceilometer_insecure = Barclamp::Config.load("openstack", "ceilometer")["insecure"] || false
-heat_insecure = Barclamp::Config.load("openstack", "heat")["insecure"] || false
-manila_insecure = Barclamp::Config.load("openstack", "manila")["insecure"] || false
-magnum_insecure = Barclamp::Config.load("openstack", "magnum")["insecure"] || false
-trove_insecure = Barclamp::Config.load("openstack", "trove")["insecure"] || false
-sahara_insecure = Barclamp::Config.load("openstack", "sahara")["insecure"] || false
+glance_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "glance"))
+cinder_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "cinder"))
+neutron_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "neutron"))
+nova_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "nova"))
+aodh_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "aodh"))
+barbican_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "barbican"))
+ceilometer_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "ceilometer"))
+heat_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "heat"))
+manila_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "manila"))
+magnum_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "magnum"))
+trove_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "trove"))
+sahara_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "sahara"))
 
 neutrons = search(:node, "roles:neutron-server") || []
 if neutrons.length > 0

@@ -30,21 +30,15 @@ heat_instance = node[:sahara][:heat_instance]
 neutron_instance = node[:sahara][:neutron_instance]
 nova_instance = node[:sahara][:nova_instance]
 
-cinder_insecure = Barclamp::Config.load(
-  "openstack", "cinder", cinder_instance
-)["insecure"] || false
+cinder_config = Barclamp::Config.load("openstack", "cinder", cinder_instance)
+heat_config = Barclamp::Config.load("openstack", "heat", heat_instance)
+neutron_config = Barclamp::Config.load("openstack", "neutron", neutron_instance)
+nova_config = Barclamp::Config.load("openstack", "nova", nova_instance)
 
-heat_insecure = Barclamp::Config.load(
-  "openstack", "heat", heat_instance
-)["insecure"] || false
-
-neutron_insecure = Barclamp::Config.load(
-  "openstack", "neutron", neutron_instance
-)["insecure"] || false
-
-nova_insecure = Barclamp::Config.load(
-  "openstack", "nova", nova_instance
-)["insecure"] || false
+cinder_insecure = CrowbarOpenStackHelper.insecure(cinder_config)
+heat_insecure = CrowbarOpenStackHelper.insecure(heat_config)
+neutron_insecure = CrowbarOpenStackHelper.insecure(neutron_config)
+nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
 
 use_ceilometer = !Barclamp::Config.load("openstack", "ceilometer").empty?
 

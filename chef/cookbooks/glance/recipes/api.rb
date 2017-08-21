@@ -4,9 +4,11 @@
 #
 #
 
+keystone_settings = KeystoneHelper.keystone_settings(node, :glance)
 swift_config = Barclamp::Config.load("openstack", "swift")
-swift_insecure = swift_config["insecure"] || false
-cinder_insecure = Barclamp::Config.load("openstack", "cinder")["insecure"] || false
+swift_insecure = CrowbarOpenStackHelper.insecure(swift_config) || keystone_settings["insecure"]
+cinder_config = Barclamp::Config.load("openstack", "cinder")
+cinder_insecure = CrowbarOpenStackHelper.insecure(cinder_config)
 
 include_recipe "#{@cookbook_name}::common"
 

@@ -74,7 +74,8 @@ memcached_instance("neutron-server") if is_neutron_server
 
 bind_host, bind_port = NeutronHelper.get_bind_host_port(node)
 
-nova_insecure = Barclamp::Config.load("openstack", "nova")["insecure"] || false
+nova_config = Barclamp::Config.load("openstack", "nova")
+nova_insecure = CrowbarOpenStackHelper.insecure(nova_config) || keystone_settings["insecure"]
 
 service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
                    "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
