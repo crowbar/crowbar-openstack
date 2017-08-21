@@ -25,6 +25,10 @@ ha_enabled = node[:nova][:ha][:enabled]
 
 db_settings = fetch_database_settings
 
+# Wait for all nodes to reach this point so we avoid any timeouts due to the
+# non-founders being faster than the founder and not syncing properly with it
+crowbar_pacemaker_sync_mark "sync-nova_before_database" if ha_enabled
+
 crowbar_pacemaker_sync_mark "wait-nova_database" do
   # the db sync is very slow for nova
   timeout 120
