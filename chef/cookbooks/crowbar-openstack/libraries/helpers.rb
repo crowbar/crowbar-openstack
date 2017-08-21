@@ -108,7 +108,8 @@ class CrowbarOpenStackHelper
     @database_settings[instance]
   end
 
-  def self.database_connection_string(db_settings, db_auth)
+  def self.database_connection_string(db_settings, db_auth_attr)
+    db_auth = db_auth_attr.to_hash
     db_conn_scheme = db_settings[:url_scheme]
     db_charset = ""
 
@@ -118,8 +119,8 @@ class CrowbarOpenStackHelper
     end
 
     "#{db_conn_scheme}://" \
-    "#{db_auth[:user]}:#{db_auth[:password]}@#{db_settings[:address]}/" \
-    "#{db_auth[:database]}" \
+    "#{db_auth['user']}:#{db_auth['password']}@#{db_settings[:address]}/" \
+    "#{db_auth['database']}" \
     "#{db_charset}"
   end
 
