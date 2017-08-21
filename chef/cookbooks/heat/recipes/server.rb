@@ -21,6 +21,11 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
+
+# Wait for all nodes to reach this point so we avoid any timeouts due to the
+# non-founders being faster than the founder and not syncing properly with it
+crowbar_pacemaker_sync_mark "sync-heat_before_database"
+
 crowbar_pacemaker_sync_mark "wait-heat_database" if ha_enabled
 
 # Create the Heat Database
