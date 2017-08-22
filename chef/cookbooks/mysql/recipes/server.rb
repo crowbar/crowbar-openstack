@@ -78,6 +78,17 @@ template "/etc/my.cnf.d/openstack.cnf" do
   notifies :restart, "service[mysql]", :immediately
 end
 
+template "/etc/my.cnf.d/logging.cnf" do
+  source "logging.cnf.erb"
+  owner "root"
+  group "mysql"
+  mode "0640"
+  variables(
+    slow_query_logging_enabled: node[:database][:mysql][:slow_query]
+  )
+  notifies :restart, "service[mysql]", :immediately
+end
+
 if node[:database][:ha][:enabled]
   template "/etc/my.cnf.d/galera.cnf" do
     source "galera.cnf.erb"
