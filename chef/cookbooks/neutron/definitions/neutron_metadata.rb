@@ -24,44 +24,36 @@ define :neutron_metadata,
   neutron = params[:neutron_node_object] || node
 
   package node[:neutron][:platform][:metadata_agent_pkg]
+
+  nova_metadata_settings = {}
   # TODO: nova should depend on neutron, but neutron also depends on nova
   # so we have to do something like this
-  nova = node
-  novas = Chef::Search::Query.new.search(:node, "roles:nova-controller")
-  unless novas.empty? || novas[0].empty?
-    # check for novas[0].empty? because the Query.new.search() returns [[], 0, 0]
-    # instead of [] returned by the regular search helper.
-    nova = novas[0][0]
-    nova = node if nova.name == node.name
+  nova = node_search_with_cache("roles:nova-controller").first
+  unless nova.nil?
+    # If ec2-api is also enabled, the ec2 api metadata service needs to be targetted
+    # instead of the nova metadata service
+    ec2api = node_search_with_cache("roles:ec2-api").first
+    # These if branches should be easy to merge when ec2-api is a
+    # full fledged barclamp
+    if ec2api.nil?
+      ha_enabled = nova[:nova][:ha][:enabled]
+      nova_metadata_settings[:host] = CrowbarHelper.get_host_for_admin_url(nova, ha_enabled)
+      nova_metadata_settings[:port] = nova[:nova][:ports][:metadata]
+      ssl_enabled = nova[:nova][:ssl][:enabled]
+      ssl_insecure = nova[:nova][:ssl][:insecure]
+    else
+      ha_enabled = ec2api[:nova]["ec2-api"][:ha][:enabled]
+      nova_metadata_settings[:host] = CrowbarHelper.get_host_for_admin_url(ec2api, ha_enabled)
+      nova_metadata_settings[:port] = ec2api[:nova][:ports][:ec2_metadata]
+      ssl_enabled = ec2api[:nova]["ec2-api"][:ssl][:enabled]
+      ssl_insecure = ec2api[:nova]["ec2-api"][:ssl][:insecure]
+    end
+
+    # The same nova metadata proxy shared secret is used regardless of ec2-api presence
+    nova_metadata_settings[:shared_secret] = nova[:nova][:neutron_metadata_proxy_shared_secret]
+    nova_metadata_settings[:protocol] = ssl_enabled ? "https" : "http"
+    nova_metadata_settings[:insecure] = ssl_enabled && ssl_insecure
   end
-
-  ha_enabled =
-    if nova.fetch("nova", {}).fetch("ha", {})["enabled"].nil?
-      false
-    else
-      nova[:nova][:ha][:enabled]
-    end
-  metadata_host = CrowbarHelper.get_host_for_admin_url(nova, ha_enabled)
-
-  metadata_port = nova.fetch("nova", {}).fetch("ports", {})["metadata"] || 8775
-
-  ssl_enabled =
-    if nova.fetch("nova", {}).fetch("ssl", {})["enabled"].nil?
-      false
-    else
-      nova[:nova][:ssl][:enabled]
-    end
-  metadata_protocol = ssl_enabled ? "https" : "http"
-
-  ssl_insecure =
-    if nova.fetch("nova", {}).fetch("ssl", {})["insecure"].nil?
-      false
-    else
-      nova[:nova][:ssl][:insecure]
-    end
-  metadata_insecure = ssl_enabled && ssl_insecure
-
-  metadata_proxy_shared_secret = nova.fetch("nova", {})["neutron_metadata_proxy_shared_secret"] || ""
 
   keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
@@ -75,11 +67,7 @@ define :neutron_metadata,
       keystone_settings: keystone_settings,
       auth_region: keystone_settings["endpoint_region"],
       neutron_insecure: neutron[:neutron][:ssl][:insecure],
-      nova_metadata_host: metadata_host,
-      nova_metadata_port: metadata_port,
-      nova_metadata_protocol: metadata_protocol,
-      nova_metadata_insecure: metadata_insecure,
-      metadata_proxy_shared_secret: metadata_proxy_shared_secret
+      nova_metadata_settings: nova_metadata_settings
     )
   end
 

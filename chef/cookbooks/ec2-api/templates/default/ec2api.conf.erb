@@ -12,7 +12,7 @@ metadata_listen_port = <%= @bind_port_metadata %>
 s3_listen = <%= @bind_host %>
 s3_listen_port = <%= @bind_port_s3 %>
 transport_url = <%= @rabbit_settings[:url] %>
-full_vpc_support = false
+full_vpc_support = true
 <% if node[:nova]["ec2-api"][:ssl][:enabled] %>
 ec2api_use_ssl = true
 metadata_use_ssl = true
@@ -22,6 +22,16 @@ ssl_key_file = <%= node[:nova]["ec2-api"][:ssl][:keyfile] %>
 ssl_ca_file = <%= node[:nova]["ec2-api"][:ssl][:ca_certs] %>
 <% end %>
 s3_use_ssl = true
+<% end %>
+external_network = 
+
+<% unless @nova_metadata_settings.empty? %>
+[metadata]
+nova_metadata_ip = <%= @nova_metadata_settings[:host] %>
+nova_metadata_port = <%= @nova_metadata_settings[:port] %>
+metadata_proxy_shared_secret = <%= @nova_metadata_settings[:shared_secret] %>
+nova_metadata_protocol = <%= @nova_metadata_settings[:protocol] %>
+nova_metadata_insecure = <%= @nova_metadata_settings[:insecure] %>
 <% end %>
 
 [database]
