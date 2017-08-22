@@ -2,11 +2,13 @@
 ssl_only = <%= @vncproxy_ssl_enabled ? "True" : "False" %>
 cert = <%= @vncproxy_cert_file %>
 key = <%= @vncproxy_key_file %>
-<% if @libvirt_type.eql?('zvm') -%>
+<% if @libvirt_type.eql?('zvm') %>
 instance_name_template=zvm%05x
 <% end %>
 my_ip = <%= node[:nova][:my_ip] %>
-<% unless @ironic_settings.nil? %>scheduler_host_manager = ironic_host_manager<% end %>
+<% unless @ironic_settings.nil? %>
+scheduler_host_manager = ironic_host_manager
+<% end %>
 state_path = /var/lib/nova
 enabled_ssl_apis = <%= @ssl_enabled ? "osapi_compute,metadata" : "" %>
 osapi_compute_listen = <%= @bind_host %>
@@ -17,9 +19,9 @@ metadata_listen_port = <%= @bind_port_metadata %>
 metadata_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 instance_usage_audit_period = hour
 image_cache_manager_interval = -1
-<% if @libvirt_type.eql?('kvm') -%>
+<% if @libvirt_type.eql?('kvm') %>
 use_rootwrap_daemon = <%= @use_rootwrap_daemon %>
-<% end -%>
+<% end %>
 memcached_servers = <%= @memcached_servers.join(',') %>
 instances_path = <%= node[:nova][:instances_path] %>
 instance_usage_audit = True
@@ -29,34 +31,35 @@ reserved_host_memory_mb = <%= @reserved_host_memory %>
 cpu_allocation_ratio = <%= node[:nova][:scheduler][:cpu_allocation_ratio] %>
 ram_allocation_ratio = <%= node[:nova][:scheduler][:ram_allocation_ratio] %>
 disk_allocation_ratio = <%= node[:nova][:scheduler][:disk_allocation_ratio] %>
-<% if @libvirt_type.eql?('vmware') -%>
+<% if @libvirt_type.eql?('vmware') %>
 compute_driver = vmwareapi.VMwareVCDriver
-<% elsif @libvirt_type.eql?('zvm') -%>
+<% elsif @libvirt_type.eql?('zvm') %>
 compute_driver = nova.virt.zvm.ZVMDriver
-<% elsif @libvirt_type.eql?('ironic') -%>
+<% elsif @libvirt_type.eql?('ironic') %>
 compute_driver = ironic.IronicDriver
-<% else -%>
+<% else %>
 compute_driver = libvirt.LibvirtDriver
-<% end -%>
-<% if @libvirt_type.eql?('xen') -%>
+<% end %>
+<% if @libvirt_type.eql?('xen') %>
 use_cow_images = false
-<% end -%>
+<% end %>
 firewall_driver = nova.virt.firewall.NoopFirewallDriver
-<%= "ssl_ca_file = #{@ssl_ca_file}" if @ssl_cert_required %>
-
+<% if @ssl_cert_required %>
+ssl_ca_file = <%= @ssl_ca_file %>
+<% end %>
 default_floating_pool = floating
 dhcpbridge = <%= @dhcpbridge %>
 linuxnet_interface_driver = ""
 <% if @force_config_drive || @libvirt_type.eql?('zvm') %>
 flat_injected = true
-<% end -%>
+<% end %>
 security_group_api = neutron
 <% if @force_config_drive and !@libvirt_type.eql?('zvm') %>
 config_drive_format = vfat
-<% end -%>
+<% end %>
 <% if @force_config_drive || @libvirt_type.eql?('zvm') %>
 force_config_drive = True
-<% end -%>
+<% end %>
 debug = <%= node[:nova][:debug] %>
 log_dir = /var/log/nova
 use_syslog = <%= node[:nova][:use_syslog] ? 'True' : 'False' %>
@@ -64,40 +67,42 @@ use_stderr = false
 executor_thread_pool_size = 256
 transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = nova
-<%= "zvm_image_default_password = #{node[:nova][:zvm][:zvm_image_default_password]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_xcat_server=#{node[:nova][:zvm][:zvm_xcat_server]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_xcat_username=#{node[:nova][:zvm][:zvm_xcat_username]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_xcat_password=#{node[:nova][:zvm][:zvm_xcat_password]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_xcat_master=#{node[:nova][:zvm][:zvm_xcat_master]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_diskpool=#{node[:nova][:zvm][:zvm_diskpool]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_diskpool_type=#{node[:nova][:zvm][:zvm_diskpool_type]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_host=#{node[:nova][:zvm][:zvm_host]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_scsi_pool=#{node[:nova][:zvm][:zvm_scsi_pool]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_config_drive_inject_password=#{node[:nova][:zvm][:zvm_config_drive_inject_password]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_reachable_timeout=#{node[:nova][:zvm][:zvm_reachable_timeout]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_user_profile=#{node[:nova][:zvm][:zvm_user_profile]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_user_default_password=#{node[:nova][:zvm][:zvm_user_default_password]}" if @libvirt_type.eql?('zvm') %>
-<%= "zvm_user_default_privilege=#{node[:nova][:zvm][:zvm_user_default_privilege]}" if @libvirt_type.eql?('zvm') %>
+<% if @libvirt_type.eql?('zvm') %>
+zvm_image_default_password = <%= node[:nova][:zvm][:zvm_image_default_password] %>
+zvm_xcat_server = <%= node[:nova][:zvm][:zvm_xcat_server] %>
+zvm_xcat_username = <%= node[:nova][:zvm][:zvm_xcat_username] %>
+zvm_xcat_password = <%= node[:nova][:zvm][:zvm_xcat_password] %>
+zvm_xcat_master = <%= node[:nova][:zvm][:zvm_xcat_master] %>
+zvm_diskpool = <%= node[:nova][:zvm][:zvm_diskpool] %>
+zvm_diskpool_type = <%= node[:nova][:zvm][:zvm_diskpool_type] %>
+zvm_host = <%= node[:nova][:zvm][:zvm_host] %>
+zvm_scsi_pool = <%= node[:nova][:zvm][:zvm_scsi_pool] %>
+zvm_config_drive_inject_password = <%= node[:nova][:zvm][:zvm_config_drive_inject_password] %>
+zvm_reachable_timeout = <%= node[:nova][:zvm][:zvm_reachable_timeout] %>
+zvm_user_profile = <%= node[:nova][:zvm][:zvm_user_profile] %>
+zvm_user_default_password = <%= node[:nova][:zvm][:zvm_user_default_password] %>
+zvm_user_default_privilege = <%= node[:nova][:zvm][:zvm_user_default_privilege] %>
+<% end %>
 
 [api]
 auth_strategy = keystone
 <% if @vendordata_jsonfile %>
 vendordata_jsonfile_path = <%= @vendordata_jsonfile %>
-<% end -%>
+<% end %>
 
 [api_database]
-<% if @api_database_connection -%>
+<% if @api_database_connection %>
 connection = <%= @api_database_connection %>
-<% end -%>
-<% unless node[:nova][:api_db][:max_pool_size].nil? -%>
+<% end %>
+<% unless node[:nova][:api_db][:max_pool_size].nil? %>
 max_pool_size = <%= node[:nova][:api_db][:max_pool_size] %>
-<% end -%>
-<% unless node[:nova][:api_db][:max_overflow].nil? -%>
+<% end %>
+<% unless node[:nova][:api_db][:max_overflow].nil? %>
 max_overflow = <%= node[:nova][:api_db][:max_overflow] %>
-<% end -%>
-<% unless node[:nova][:api_db][:pool_timeout].nil? -%>
+<% end %>
+<% unless node[:nova][:api_db][:pool_timeout].nil? %>
 pool_timeout = <%= node[:nova][:api_db][:pool_timeout] %>
-<% end -%>
+<% end %>
 
 [cache]
 backend = dogpile.cache.memcached
@@ -114,30 +119,32 @@ cross_az_attach = <%= node[:nova][:cross_az_attach] %>
 workers=<%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
 [database]
-<% if @database_connection -%>
+<% if @database_connection %>
 connection = <%= @database_connection %>
-<% end -%>
-<% unless node[:nova][:db][:min_pool_size].nil? -%>
-min_pool_size = <%= node[:nova][:db][:min_pool_size] -%>
-<% end -%>
-<% unless node[:nova][:db][:max_pool_size].nil? -%>
+<% end %>
+<% unless node[:nova][:db][:min_pool_size].nil? %>
+min_pool_size = <%= node[:nova][:db][:min_pool_size] %>
+<% end %>
+<% unless node[:nova][:db][:max_pool_size].nil? %>
 max_pool_size = <%= node[:nova][:db][:max_pool_size] %>
-<% end -%>
-<% unless node[:nova][:db][:max_overflow].nil? -%>
+<% end %>
+<% unless node[:nova][:db][:max_overflow].nil? %>
 max_overflow = <%= node[:nova][:db][:max_overflow] %>
-<% end -%>
-<% unless node[:nova][:db][:pool_timeout].nil? -%>
+<% end %>
+<% unless node[:nova][:db][:pool_timeout].nil? %>
 pool_timeout = <%= node[:nova][:db][:pool_timeout] %>
-<% end -%>
+<% end %>
 
 [glance]
-<%= "host = #{@glance_server_host}" unless @glance_server_host.nil? %>
-<%= "port = #{@glance_server_port}" unless @glance_server_host.nil? %>
+<% unless @glance_server_host.nil? %>
+host = <%= @glance_server_host %>
+port = <%= @glance_server_port %>
+api_servers = <%= "#{@glance_server_protocol}://#{@glance_server_host}:#{@glance_server_port}" %>
+api_insecure = <%= @glance_server_insecure ? 'True' : 'False' %>
+<% end %>
 protocol = <%= @glance_server_protocol %>
-<%= "api_servers = #{@glance_server_protocol}://#{@glance_server_host}:#{@glance_server_port}" unless @glance_server_host.nil? %>
-<%= "api_insecure = #{@glance_server_insecure ? 'True' : 'False'}" unless @glance_server_host.nil? %>
 
-<% unless @ironic_settings.nil? -%>
+<% unless @ironic_settings.nil? %>
 [ironic]
 # temporary workaround for nova using public ironic endpoint (this will be deprecated in Queens)
 api_endpoint = <%= @ironic_settings[:api_protocol] %>://<%= @ironic_settings[:api_host] %>:<%= @ironic_settings[:api_port] %>
@@ -148,12 +155,12 @@ password = <%= @ironic_settings[:service_password] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
 project_domain_name = <%= @keystone_settings['admin_domain']%>
 user_domain_name = <%= @keystone_settings['admin_domain'] %>
-<% end -%>
+<% end %>
 
 [key_manager]
-<% unless @keymgr_fixed_key.empty? -%>
+<% unless @keymgr_fixed_key.empty? %>
 fixed_key = <%= @keymgr_fixed_key.each_byte.map { |b| b.to_s(16) }.join %>
-<% end -%>
+<% end %>
 
 [keystone_authtoken]
 auth_type = password
@@ -174,31 +181,43 @@ service_token_roles_required = true
 service_token_roles = admin
 
 [libvirt]
-<% if %w(kvm lxc qemu uml xen parallels).include? @libvirt_type -%>
+<% if %w(kvm lxc qemu uml xen parallels).include? @libvirt_type %>
 virt_type = <%= @libvirt_type %>
-<% end -%>
-<% if (@libvirt_type.eql?('xen') and @libvirt_migration and @shared_instances) or @libvirt_type.eql?('kvm') -%>
+<% end %>
+<% if (@libvirt_type.eql?('xen') and @libvirt_migration and @shared_instances) or @libvirt_type.eql?('kvm') %>
 live_migration_inbound_addr = <%= @live_migration_inbound_fqdn %>
-<% end -%>
-<% if @libvirt_type.eql?('xen') -%>
-  <% if @libvirt_migration and @shared_instances -%>
+<% end %>
+<% if @libvirt_type.eql?('xen') %>
+  <% if @libvirt_migration and @shared_instances %>
 live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_LIVE
   <% end %>
-<% elsif @libvirt_type.eql?('kvm') -%>
-  <% if @libvirt_migration -%>
-    <% if @shared_instances -%>
+<% elsif @libvirt_type.eql?('kvm') %>
+  <% if @libvirt_migration %>
+    <% if @shared_instances %>
 live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MIGRATE_LIVE
-    <% else -%>
+    <% else %>
 block_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MIGRATE_NON_SHARED_INC, VIR_MIGRATE_LIVE
-    <% end -%>
-  <% end -%>
-<% end -%>
-<%= "disk_prefix = xvd" if @libvirt_type.eql?('xen') %>
-<%= "cpu_mode = #{@cpu_mode}" unless @cpu_mode.empty? %>
-<%= "cpu_model = #{@cpu_model}" unless @cpu_model.empty? %>
-<% if @libvirt_type.eql?('kvm') %>use_virtio_for_bridges = true<% end %>
-<%= "volume_use_multipath = true" if @use_multipath %>
-<%= "iser_use_multipath = true" if @use_multipath %>
+    <% end %>
+  <% end %>
+<% end %>
+<% if @libvirt_type.eql?('xen') %>
+disk_prefix = xvd
+<% end %>
+<% unless @cpu_mode.empty? %>
+cpu_mode = <%= @cpu_mode %>
+<% end %>
+<% unless @cpu_model.empty? %>
+cpu_model = <%= @cpu_model %>
+<% end %>
+<% if @libvirt_type.eql?('kvm') %>
+use_virtio_for_bridges = true
+<% end %>
+<% if @use_multipath %>
+volume_use_multipath = true
+<% end %>
+<% if @use_multipath %>
+iser_use_multipath = true
+<% end %>
 
 [neutron]
 service_metadata_proxy = true
@@ -218,20 +237,20 @@ timeout = <%= node[:nova][:neutron_url_timeout] %>
 username = <%= @neutron_service_user %>
 
 [oslo_concurrency]
-<% if @need_shared_lock_path -%>
+<% if @need_shared_lock_path %>
 lock_path = /var/run/openstack
-<% else -%>
+<% else %>
 lock_path = /var/run/nova
-<% end -%>
+<% end %>
 
 [oslo_messaging_notifications]
 driver = messagingv2
 
 [oslo_messaging_rabbit]
 rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
-<% if @rabbit_settings[:client_ca_certs] -%>
+<% if @rabbit_settings[:client_ca_certs] %>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
-<% end -%>
+<% end %>
 rpc_conn_pool_size = 64
 
 [serial_console]
@@ -242,29 +261,43 @@ serialproxy_host = 0.0.0.0
 serialproxy_port = 6083
 
 [ssl]
-<%= "ca_file = #{@ssl_ca_file}" if @ssl_cert_required %>
+<% if @ssl_cert_required %>
+ca_file = <%= @ssl_ca_file %>
+<% end %>
 cert_file = <%= @ssl_cert_file %>
 key_file = <%= @ssl_key_file %>
 
 [trusted_computing]
-<% if @has_itxt %>attestation_server=<%= @oat_appraiser_host %><% end %>
-<% if @has_itxt %>attestation_server_ca_file=/etc/nova/oat_certfile.cer<% end %>
-<% if @has_itxt %>attestation_port=<%= @oat_appraiser_port %><% end %>
-<% if @has_itxt %>attestation_api_url=/AttestationService/resources<% end %>
+<% if @has_itxt %>
+attestation_server= <%= @oat_appraiser_host %>
+<% end %>
+<% if @has_itxt %>
+attestation_server_ca_file=/etc/nova/oat_certfile.cer
+<% end %>
+<% if @has_itxt %>
+attestation_port=<%= @oat_appraiser_port %>
+<% end %>
+<% if @has_itxt %>
+attestation_api_url=/AttestationService/resources
+<% end %>
 
 [vmware]
-<%= "host_ip = #{node[:nova][:vcenter][:host]}" if @libvirt_type.eql?('vmware') %>
-<%= "host_username = #{node[:nova][:vcenter][:user]}" if @libvirt_type.eql?('vmware') %>
-<%= "host_password = #{node[:nova][:vcenter][:password]}" if @libvirt_type.eql?('vmware') %>
-<%= "ca_file=#{node[:nova][:vcenter][:ca_file]}" if @libvirt_type.eql?('vmware') && ! node[:nova][:vcenter][:ca_file].empty? %>
-<%= "insecure=#{node[:nova][:vcenter][:insecure]}" if @libvirt_type.eql?('vmware') && node[:nova][:vcenter][:insecure] %>
-<% if @libvirt_type.eql?('vmware') -%>
- <% node[:nova][:vcenter][:clusters].each do |cluster| -%>
+<% if @libvirt_type.eql?('vmware') %>
+host_ip = <%= node[:nova][:vcenter][:host] %>
+host_username = <%= node[:nova][:vcenter][:user] %>
+host_password = <%= node[:nova][:vcenter][:password] %>
+  <% if ! node[:nova][:vcenter][:ca_file].empty? %>
+ca_file = <%= node[:nova][:vcenter][:ca_file] %>
+  <% end %>
+  <% if node[:nova][:vcenter][:insecure] %>
+insecure= <%= node[:nova][:vcenter][:insecure] %>
+  <% end %>
+  <% node[:nova][:vcenter][:clusters].each do |cluster| %>
 cluster_name = "<%= cluster %>"
- <% end -%>
-<% end -%>
-<%= "datastore_regex = #{node[:nova][:vcenter][:datastore]}" if @libvirt_type.eql?('vmware') %>
-<%= "vlan_interface = #{node[:nova][:vcenter][:interface]}" if @libvirt_type.eql?('vmware') %>
+  <% end %>
+datastore_regex = <%= node[:nova][:vcenter][:datastore] %>
+vlan_interface = <%= node[:nova][:vcenter][:interface] %>
+<% end %>
 
 [vnc]
 enabled = <%= @vnc_enabled ? "True" : "False" %>
@@ -284,13 +317,21 @@ keep_alive = false
 
 [scheduler]
 discover_hosts_in_cells_interval = <%= node[:nova][:scheduler][:discover_hosts_in_cells_interval] %>
-<% if @libvirt_type.eql?('ironic') %>host_manager = ironic_host_manager<% end %>
+<% if @libvirt_type.eql?('ironic') %>
+host_manager = ironic_host_manager
+<% end %>
 
 [filter_scheduler]
-<% if @use_baremetal_filters %>use_baremetal_filters = true<% end -%>
-<% if @has_itxt -%>available_filters = nova.scheduler.filters.standard_filters<% end %>
-<% if @has_itxt %>enabled_filters = RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,TrustedFilter<% end %>
-<% unless @track_instance_changes %>track_instance_changes = false<% end %>
+<% if @use_baremetal_filters %>
+use_baremetal_filters = true
+<% end %>
+<% if @has_itxt %>
+available_filters = nova.scheduler.filters.standard_filters
+enabled_filters = RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,TrustedFilter
+<% end %>
+<% unless @track_instance_changes %>
+track_instance_changes = false
+<% end %>
 
 [notifications]
 notify_on_state_change = vm_and_task_state
