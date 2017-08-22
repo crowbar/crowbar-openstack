@@ -68,8 +68,7 @@ pacemaker_primitive service_name do
   })
   op({
     "monitor" => {
-      "interval" => "20s",
-      "role" => "Master"
+      "interval" => "20s"
     }
   })
   action :update
