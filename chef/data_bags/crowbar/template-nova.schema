@@ -18,6 +18,7 @@
             "keystone_instance": { "type": "str", "required": true },
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str" },
+            "placement_service_password": { "type": "str" },
             "glance_instance": { "type": "str", "required": true },
             "cinder_instance": { "type": "str", "required": true },
             "neutron_instance": { "type": "str", "required": true },
