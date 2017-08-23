@@ -55,6 +55,12 @@
               "mapping": {
                 "image_ref": { "type": "str", "required": true }
               }
+            },
+            "ec2_api": {
+              "type": "map",
+              "mapping": {
+                "enable_ebs_image": { "type": "bool", "required": true }
+              }
             }
           }
         }

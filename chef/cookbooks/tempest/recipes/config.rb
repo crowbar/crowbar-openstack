@@ -393,6 +393,7 @@ image_name = File.basename(tempest_test_image).match(/.*-/)
 
 ec2_url = ""
 s3_url = ""
+enable_ebs_image = node[:tempest][:ec2_api][:enable_ebs_image]
 if use_ec2_api
   ec2_api = ec2_apis.first
   ec2_protocol = ec2_api[:nova]["ec2-api"][:ssl][:enabled] ? "https" : "http"
@@ -406,11 +407,6 @@ ebs_image_id_file = node[:tempest][:tempest_path] + "/ebs_image.id"
 
 bash "create ec2 EBS image" do
   code <<-EOH
-echo -n "Setting up AWS CLI credentials ... "
-aws configure set aws_access_key_id $EC2_ACCESS --profile user || exit 1
-aws configure set aws_secret_access_key $EC2_SECRET --profile user || exit 2
-echo "done."
-
 echo -n "Creating volume ... "
 #{openstackcli} volume create --image #{image_name}tempest-machine --size 1 ebs-volume
 VOLUME_ID=$(#{openstackcli} volume show -f value -c id ebs-volume)
@@ -440,7 +436,7 @@ echo -n "Saving machine id ..."
 echo $IMAGE_ID > #{ebs_image_id_file}
 echo "done."
 EOH
-  environment ( lazy { {
+  environment ({
     "OS_USERNAME" => tempest_comp_user,
     "OS_PASSWORD" => tempest_comp_pass,
     "OS_TENANT_NAME" => tempest_comp_tenant,
@@ -448,25 +444,42 @@ EOH
     "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
     "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
     "OS_USER_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
-    "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
+    "OS_PROJECT_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : ""
+  })
+  only_if { use_ec2_api && enable_ebs_image && !File.exist?(ebs_image_id_file) }
+end
+
+execute "set up AWS CLI credentials" do
+  command "aws configure set aws_access_key_id $EC2_ACCESS --profile user && \
+           aws configure set aws_secret_access_key $EC2_SECRET --profile user"
+  environment ( lazy { {
     "EC2_ACCESS" => node[:tempest][:ec2_access],
     "EC2_SECRET" => node[:tempest][:ec2_secret]
   } })
-  only_if { use_ec2_api && !File.exist?(ebs_image_id_file) }
+  action :nothing
+  only_if { use_ec2_api }
 end
 
 ruby_block "fetch ec2 image ids" do
   block do
+    raise("Cannot set up AWS CLI credentials") unless
+      ::Kernel.system("aws configure set aws_access_key_id #{node[:tempest][:ec2_access]} --profile user") &&
+      ::Kernel.system("aws configure set aws_secret_access_key #{node[:tempest][:ec2_secret]} --profile user")
     ec2_image_id = `aws --region #{keystone_settings["endpoint_region"]} \
         --endpoint-url #{ec2_url} --profile user \
         ec2 describe-images --filters Name=image-type,Values=machine \
         Name=name,Values=#{image_name}tempest-machine --query 'Images[0].ImageId' \
         --output text`.strip
-    ebs_image_id = `aws --region #{keystone_settings["endpoint_region"]} \
-        --endpoint-url #{ec2_url} --profile user \
-        ec2 describe-images --filters Name=image-type,Values=machine \
-        Name=name,Values=ebs-image --query 'Images[0].ImageId' --output text`.strip
-    raise("Cannot fetch EC2 image ids ") if ec2_image_id.empty? || ebs_image_id.empty?
+    raise("Cannot fetch EC2 image id ") if ec2_image_id.empty?
+    if enable_ebs_image
+      ebs_image_id = `aws --region #{keystone_settings["endpoint_region"]} \
+          --endpoint-url #{ec2_url} --profile user \
+          ec2 describe-images --filters Name=image-type,Values=machine \
+          Name=name,Values=ebs-image --query 'Images[0].ImageId' --output text`.strip
+      raise("Cannot fetch EBS image id ") if ebs_image_id.empty?
+    else
+      ebs_image_id = ""
+    end
     node[:tempest][:ec2_image_id] = ec2_image_id
     node[:tempest][:ebs_image_id] = ebs_image_id
   end

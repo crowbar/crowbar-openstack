@@ -34,6 +34,9 @@
       },
       "heat": {
         "image_ref": "heat-cfntools-image"
+      },
+      "ec2_api": {
+        "enable_ebs_image": false
       }
     }
   },
@@ -41,7 +44,7 @@
     "tempest": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 200,
+      "schema-revision": 201,
       "element_states": {
         "tempest": [ "ready", "applying" ]
       },
