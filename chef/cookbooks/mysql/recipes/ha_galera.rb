@@ -35,10 +35,6 @@ unless node[:database][:galera_bootstrapped]
     command "mysql_install_db"
     action :run
   end
-
-  crowbar_pacemaker_sync_mark "sync-database_after_install_db" do
-    revision node[:database]["crowbar-revision"]
-  end
 end
 
 unless node[:database][:galera_bootstrapped]
