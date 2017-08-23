@@ -1,5 +1,14 @@
 include_recipe "apache2"
 
+is_controller = node["roles"].include?("ceilometer-server")
+ha_enabled = node[:ceilometer][:ha][:server][:enabled]
+
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "ceilometer-server") : [node]
+)
+
+memcached_instance("ceilometer-server") if is_controller
+
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 if node[:ceilometer][:use_mongodb]
@@ -68,6 +77,7 @@ template node[:ceilometer][:config_file] do
       debug: node[:ceilometer][:debug],
       rabbit_settings: fetch_rabbitmq_settings,
       keystone_settings: keystone_settings,
+      memcached_servers: memcached_servers,
       bind_host: bind_host,
       bind_port: bind_port,
       metering_secret: node[:ceilometer][:metering_secret],
