@@ -7,6 +7,7 @@ user_domain_name = <%= @keystone_settings['admin_domain'] %>
 auth_type = password
 username = <%= @placement_service_user %>
 password = <%= @placement_service_password %>
+os_interface = internal
 
 <% if @placement_database_connection -%>
 [placement_database]
