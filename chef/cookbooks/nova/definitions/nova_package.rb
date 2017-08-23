@@ -55,7 +55,8 @@ define :nova_package, enable: true, use_pacemaker_provider: false, restart_crm_r
       end
     end
 
-    subscribes :restart, resources(template: node[:nova][:config_file])
+    subscribes :restart, [resources(template: node[:nova][:config_file]),
+                          resources(template: node[:nova][:placement_config_file])]
 
     provider Chef::Provider::CrowbarPacemakerService if params[:use_pacemaker_provider]
   end
