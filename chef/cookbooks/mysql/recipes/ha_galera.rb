@@ -19,7 +19,7 @@
 
 resource_agent = "ocf:heartbeat:galera"
 
-package "galera-3"
+package "galera-3-wsrep-provider"
 
 unless node[:database][:galera_bootstrapped]
   directory "/var/run/mysql/" do
