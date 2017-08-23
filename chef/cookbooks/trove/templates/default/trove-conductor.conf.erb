@@ -1,5 +1,4 @@
 [DEFAULT]
-verbose = <%= node[:trove][:verbose] %>
 debug = <%= node[:trove][:debug] %>
 control_exchange = trove
 trove_auth_url = <%= KeystoneHelper.versioned_service_URL(
