@@ -26,6 +26,16 @@
             "fstype": "",
             "options": ""
           }
+        },
+        "monitor": {
+          "interval": 10,
+          "timeout": 30
+        },
+        "start": {
+          "timeout": 120
+        },
+        "stop": {
+          "timeout": 120
         }
       }
     }
@@ -34,7 +44,7 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },

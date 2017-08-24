@@ -64,6 +64,28 @@
                       }
                     }
                   }
+                },
+                "monitor": {
+                  "type": "map",
+                  "required": true,
+                  "mapping" : {
+                    "interval": { "type": "int", "required": true },
+                    "timeout": { "type": "int", "required": true }
+                  }
+                },
+                "start": {
+                  "type": "map",
+                  "required": true,
+                  "mapping" : {
+                    "timeout": { "type": "int", "required": true }
+                  }
+                },
+                "stop": {
+                  "type": "map",
+                  "required": true,
+                  "mapping" : {
+                    "timeout": { "type": "int", "required": true }
+                  }
                 }
               }
             }

@@ -35,6 +35,17 @@ postgres_op = {}
 postgres_op["monitor"] = {}
 postgres_op["monitor"]["interval"] = "10s"
 
+postgres_daemon_op = {}
+postgres_daemon_op["monitor"] = {}
+postgres_daemon_op["monitor"]["interval"] = "#{node["database"]["ha"]["monitor"]["interval"]}s"
+postgres_daemon_op["monitor"]["timeout"] = "#{node["database"]["ha"]["monitor"]["timeout"]}s"
+
+postgres_daemon_op["start"] = {}
+postgres_daemon_op["start"]["timeout"] = "#{node["database"]["ha"]["start"]["timeout"]}s"
+
+postgres_daemon_op["stop"] = {}
+postgres_daemon_op["stop"]["timeout"] = "#{node["database"]["ha"]["start"]["timeout"]}s"
+
 # Wait for all "database" nodes to reach this point so we know that
 # they will have all the required packages installed and configuration
 # files updated before we create the pacemaker resources.
@@ -79,7 +90,7 @@ transaction_objects << "pacemaker_primitive[#{vip_primitive}]"
 # fact that the database is listening on the IP address.
 pacemaker_primitive service_name do
   agent agent_name
-  op postgres_op
+  op postgres_daemon_op
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
