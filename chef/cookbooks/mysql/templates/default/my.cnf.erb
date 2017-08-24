@@ -34,7 +34,6 @@ max_heap_table_size     = <%= node['mysql']['tunable']['max_heap_table_size'] %>
 # InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/.
 # Read the manual for more InnoDB related options. There are many!
 innodb_buffer_pool_size = <%= node['mysql']['tunable']['innodb_buffer_pool_size'] %>
-innodb_log_file_size    = <%= node['mysql']['tunable']['innodb_log_file_size'] %>
 
 [mysqldump]
 # FIXME: Remove after MariaDB 10.2.X switch (new default is 16777216)
