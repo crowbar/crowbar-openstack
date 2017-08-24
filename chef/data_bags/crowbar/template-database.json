@@ -6,7 +6,11 @@
       "sql_engine": "postgresql",
       "mysql": {
         "datadir": "/var/lib/mysql",
-        "slow_query_logging": true
+        "slow_query_logging": true,
+        "innodb_buffer_pool_size": 256,
+        "max_connections": 800,
+        "tmp_table_size": 64,
+        "max_heap_table_size": 64
       },
       "postgresql": {
         "config": {
@@ -35,7 +39,7 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 101,
+      "schema-revision": 102,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },
