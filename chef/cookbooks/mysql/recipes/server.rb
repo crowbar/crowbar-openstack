@@ -89,6 +89,20 @@ template "/etc/my.cnf.d/logging.cnf" do
   notifies :restart, "service[mysql]", :immediately
 end
 
+template "/etc/my.cnf.d/tuning.cnf" do
+  source "tuning.cnf.erb"
+  owner "root"
+  group "mysql"
+  mode "0640"
+  variables(
+    innodb_buffer_pool_size: node[:database][:mysql][:innodb_buffer_pool_size],
+    max_connections: node[:database][:mysql][:max_connections],
+    tmp_table_size: node[:database][:mysql][:tmp_table_size],
+    max_heap_table_size: node[:database][:mysql][:max_heap_table_size]
+  )
+  notifies :restart, "service[mysql]", :immediately
+end
+
 if node[:database][:ha][:enabled]
   template "/etc/my.cnf.d/galera.cnf" do
     source "galera.cnf.erb"

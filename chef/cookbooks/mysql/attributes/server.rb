@@ -28,12 +28,7 @@ if attribute?("ec2")
 end
 
 default["mysql"]["tunable"]["max_allowed_packet"]       = "16M"
-default["mysql"]["tunable"]["max_connections"]          = "800"
-default["mysql"]["tunable"]["max_heap_table_size"]      = "32M"
 default["mysql"]["tunable"]["thread_cache_size"]        = 8
-
-# InnoDB Settings
-default["mysql"]["tunable"]["innodb_buffer_pool_size"]  = "256M"
 
 # Ports to bind to when haproxy is used
 default[:mysql][:ha][:ports][:admin_port] = 3306

@@ -5,35 +5,14 @@
 #
 # The MySQL database server configuration file.
 
-# Here is entries for some specific programs
-# The following values assume you have at least 32M ram
-
 [mysqld]
 user                   = mysql
 datadir                = <%= node['mysql']['datadir'] %>
 tmpdir                 = <%= node['mysql']['tmpdir'] %>
 
-#
 # Instead of skip-networking the default is now to listen only on
 # localhost which is more compatible and is not less secure.
 bind-address            = <%= node['mysql']['bind_address'] %>
-#
-# * Fine Tuning
-#
-
-# FIXME: Remove after MariaDB 10.2.X switch (new default is 16777216)
-max_allowed_packet      = <%= node['mysql']['tunable']['max_allowed_packet'] %>
-# FIXME: Remove after MariaDB 10.2.X switch (new default is auto)
-thread_cache_size       = <%= node['mysql']['tunable']['thread_cache_size'] %>
-max_connections         = <%= node['mysql']['tunable']['max_connections'] %>
-max_heap_table_size     = <%= node['mysql']['tunable']['max_heap_table_size'] %>
-
-#
-# * InnoDB
-#
-# InnoDB is enabled by default with a 10MB datafile in /var/lib/mysql/.
-# Read the manual for more InnoDB related options. There are many!
-innodb_buffer_pool_size = <%= node['mysql']['tunable']['innodb_buffer_pool_size'] %>
 
 [mysqldump]
 # FIXME: Remove after MariaDB 10.2.X switch (new default is 16777216)
