@@ -5,7 +5,8 @@
     "database": {
       "sql_engine": "postgresql",
       "mysql": {
-        "datadir": "/var/lib/mysql"
+        "datadir": "/var/lib/mysql",
+        "slow_query": true
       },
       "postgresql": {
         "config": {
@@ -34,7 +35,7 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 200,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },
@@ -54,4 +55,3 @@
     }
   }
 }
-
