@@ -30,6 +30,11 @@ project_name = <%= @keystone_settings['service_tenant'] %>
 project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
 auth_type = password
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:ceilometer][:memcache_secret_key] %>
+service_token_roles_required = true
+service_token_roles = admin
 
 [notification]
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
