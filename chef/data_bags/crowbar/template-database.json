@@ -6,7 +6,7 @@
       "sql_engine": "postgresql",
       "mysql": {
         "datadir": "/var/lib/mysql",
-        "slow_query": true
+        "slow_query_logging": true
       },
       "postgresql": {
         "config": {

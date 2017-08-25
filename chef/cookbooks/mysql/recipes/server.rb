@@ -84,7 +84,7 @@ template "/etc/my.cnf.d/logging.cnf" do
   group "mysql"
   mode "0640"
   variables(
-    slow_query_logging_enabled: node[:database][:mysql][:slow_query]
+    slow_query_logging_enabled: node[:database][:mysql][:slow_query_logging]
   )
   notifies :restart, "service[mysql]", :immediately
 end
