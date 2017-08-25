@@ -14,11 +14,13 @@
       "rabbitmq_instance": "none",
       "service_user": "magnum",
       "service_password": "",
+      "memcache_secret_key": "",
       "trustee": {
           "cluster_user_trust": false,
           "domain_name": "magnum",
           "domain_admin_name": "magnum_domain_admin",
-          "domain_admin_password": ""
+          "domain_admin_password": "",
+          "keystone_interface": "public"
       },
       "api": {
         "protocol": "http",
@@ -39,7 +41,7 @@
     "magnum": {
       "crowbar-revision": 1,
       "crowbar-applied": false,
-      "schema-revision": 101,
+      "schema-revision": 201,
       "element_states": {
         "magnum-server": [ "readying", "ready", "applying" ]
       },

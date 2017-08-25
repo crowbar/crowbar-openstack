@@ -84,6 +84,7 @@ class MagnumService < OpenstackServiceObject
       find_dep_proposal("heat")
 
     base["attributes"][@bc_name]["service_password"] = random_password
+    base["attributes"][@bc_name]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name][:trustee][:domain_admin_password] = random_password
 
