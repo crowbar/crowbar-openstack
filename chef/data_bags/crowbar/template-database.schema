@@ -20,7 +20,7 @@
               "mapping" : {
                 "server_root_password": { "type": "str" },
                 "datadir": { "type": "str", "required": true },
-                "slow_query": { "type": "bool", "required": true }
+                "slow_query_logging": { "type": "bool", "required": true }
               }
             },
             "postgresql" : {
