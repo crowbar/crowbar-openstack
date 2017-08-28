@@ -19,7 +19,9 @@
 
 resource_agent = "ocf:heartbeat:galera"
 
-package "galera-3-wsrep-provider"
+["galera-3-wsrep-provider", "mariadb-tools", "xtrabackup"].each do |p|
+  package p
+end
 
 unless node[:database][:galera_bootstrapped]
   directory "/var/run/mysql/" do
