@@ -31,7 +31,6 @@ default[:horizon][:policy_file][:volume] = "cinder_policy.json"
 default[:horizon][:policy_file][:image] = "glance_policy.json"
 default[:horizon][:policy_file][:orchestration] = "heat_policy.json"
 default[:horizon][:policy_file][:network] = "neutron_policy.json"
-default[:horizon][:policy_file][:telemetry] = "ceilometer_policy.json"
 
 default[:horizon][:apache][:ssl] = false
 default[:horizon][:apache][:ssl_crt_file] = "/etc/apache2/ssl.crt/openstack-dashboard-server.crt"
