@@ -648,7 +648,7 @@ ec2_creds.each do |args|
     auth register_auth_hash
     port node[:keystone][:api][:admin_port]
     user_name args[0]
-    tenant_name args[1]
+    project_name args[1]
     action :add_ec2
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end

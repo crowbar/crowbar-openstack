@@ -145,7 +145,7 @@ end
     port keystone_settings["admin_port"]
     auth register_auth_hash
     user_name user["name"]
-    tenant_name tempest_comp_tenant
+    project_name tempest_comp_tenant
     action :add_ec2
   end
 end

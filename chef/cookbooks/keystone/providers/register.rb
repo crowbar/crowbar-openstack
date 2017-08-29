@@ -227,29 +227,35 @@ end
 
 # :add_ec2 specific attributes
 # attribute :user_name, :kind_of => String
-# attribute :tenant_name, :kind_of => String
+# attribute :project_name, :kind_of => String
 action :add_ec2 do
   http, headers = _build_connection(new_resource)
 
   # Lets verify that the item does not exist yet
-  project = new_resource.tenant_name
+  project = new_resource.project_name
   user = new_resource.user_name
-  user_id, uerror = _find_id(http, headers, user, "/v2.0/users", "users")
+  user_id, uerror = _find_id(http, headers, user, "/v3/users", "users")
   project_id, project_error = _get_project_id(http, headers, project)
 
-  path = "/v2.0/users/#{user_id}/credentials/OS-EC2"
-  t_tenant_id, aerror = _find_id(http, headers, tenant_id, path, "credentials", "tenant_id", "tenant_id")
+  path = "/v3/users/#{user_id}/credentials/OS-EC2"
+  matching_project_id, aerror = _find_id(http,
+                                         headers,
+                                         project_id,
+                                         path,
+                                         "credentials",
+                                         "tenant_id",
+                                         "tenant_id")
 
-  error = (aerror or uerror or project_error)
-  unless tenant_id == t_tenant_id or error
-    # Service does not exist yet
-    body = _build_ec2_object(tenant_id)
-    ret = _create_item(http, headers, path, body, tenant)
-    new_resource.updated_by_last_action(ret)
-  else
+  error = (aerror || uerror || project_error)
+  if project_id == matching_project_id || error
     raise "Failed to talk to keystone in add_ec2_creds" if error
-    Chef::Log.info "EC2 '#{tenant}:#{user}' already exists. Not creating." unless error
+    Chef::Log.info "EC2 '#{project}:#{user}' already exists. Not creating." unless error
     new_resource.updated_by_last_action(false)
+  else
+    # Service does not exist yet
+    body = _build_ec2_object(project_id)
+    ret = _create_item(http, headers, path, body, project)
+    new_resource.updated_by_last_action(ret)
   end
 end
 
@@ -614,11 +620,11 @@ def _build_access_object(role_id, role_name)
   return ret
 end
 
-private
-def _build_ec2_object(tenant_id)
-  ret = Hash.new
-  ret.store("tenant_id", tenant_id)
-  return ret
+def _build_ec2_object(project_id)
+  body = {
+    tenant_id: project_id
+  }
+  body
 end
 
 private
