@@ -343,10 +343,11 @@ class NeutronService < OpenstackServiceObject
       # Exclude a few default networks from network.json from being used as
       # additional external networks in neutron
       if blacklist.include? ext_net
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.network", ext_net: extnet)
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.network", ext_net: ext_net)
       end
       if network_proposal["attributes"]["network"]["networks"][ext_net].nil?
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.external_network", ext_net: extnet)
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.external_network",
+                                ext_net: ext_net)
       end
     end
   end
