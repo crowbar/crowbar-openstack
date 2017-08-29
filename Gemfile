@@ -29,6 +29,7 @@ end
 unless ENV["PACKAGING"] && ENV["PACKAGING"] == "yes"
   group :test do
     gem "simplecov", require: false
+    gem "foodcritic", "7.1.0"
 
     if ENV["CODECLIMATE_REPO_TOKEN"]
       gem "coveralls", require: false
