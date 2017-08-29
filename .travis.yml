@@ -4,3 +4,10 @@ cache: bundler
 dist: trusty
 
 rvm: 2.1.9
+
+matrix:
+  include:
+    - script:
+      - bundle exec rake
+    - script:
+      - bundle exec knife cookbook test -c .knife-test.rb -a
