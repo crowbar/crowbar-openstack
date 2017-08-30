@@ -66,7 +66,8 @@ pacemaker_primitive service_name do
     "enable_creation" => true,
     "wsrep_cluster_address" => "gcomm://" + nodes_names.join(","),
     "check_user" => "monitoring",
-    "socket" => "/var/run/mysql/mysql.sock"
+    "socket" => "/var/run/mysql/mysql.sock",
+    "datadir" => node[:database][:mysql][:datadir]
   })
   op({
     "monitor" => {
