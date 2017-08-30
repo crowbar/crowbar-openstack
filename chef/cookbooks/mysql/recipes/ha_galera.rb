@@ -19,7 +19,7 @@
 
 resource_agent = "ocf:heartbeat:galera"
 
-["galera-3-wsrep-provider", "mariadb-tools", "xtrabackup"].each do |p|
+["galera-3-wsrep-provider", "mariadb-tools", "xtrabackup", "socat"].each do |p|
   package p
 end
 
