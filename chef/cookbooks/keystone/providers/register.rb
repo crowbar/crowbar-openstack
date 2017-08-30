@@ -20,16 +20,12 @@
 action :wakeup do
   http, headers = _build_connection(new_resource)
 
-  # Construct the path
-  path = "/v2.0/OS-KSADM/services"
-  dir = "OS-KSADM:services"
-
   # Lets verify that the service does not exist yet
   count = 0
   error = true
   while error and count < 50 do
     count = count + 1
-    item_id, error = _find_id(http, headers, "fred", path, dir)
+    _, error = _get_service_id(http, headers, "fred")
     sleep 1 if error
   end
 
@@ -41,17 +37,14 @@ end
 action :add_service do
   http, headers = _build_connection(new_resource)
 
-  # Construct the path
-  path = "/v2.0/OS-KSADM/services"
-  dir = "OS-KSADM:services"
-
   # Lets verify that the service does not exist yet
-  item_id, error = _find_id(http, headers, new_resource.service_name, path, dir)
+  item_id, error = _get_service_id(http, headers, new_resource.service_name)
   unless item_id or error
     # Service does not exist yet
     body = _build_service_object(new_resource.service_name,
                                  new_resource.service_type,
                                  new_resource.service_description)
+    path = "/v3/services"
     ret = _create_item(http, headers, path, body, new_resource.service_name)
     new_resource.updated_by_last_action(ret)
   else
@@ -267,11 +260,7 @@ end
 action :add_endpoint_template do
   http, headers = _build_connection(new_resource)
 
-  # Look up my service id
-  # Construct the path
-  path = "/v2.0/OS-KSADM/services"
-  dir = "OS-KSADM:services"
-  my_service_id, error = _find_id(http, headers, new_resource.endpoint_service, path, dir)
+  my_service_id, _error = _get_service_id(http, headers, new_resource.endpoint_service)
   unless my_service_id
       Chef::Log.error "Couldn't find service #{new_resource.endpoint_service} in keystone"
       new_resource.updated_by_last_action(false)
@@ -350,9 +339,7 @@ end
 action :update_endpoint do
   http, headers = _build_connection(new_resource)
 
-  path = "/v2.0/OS-KSADM/services"
-  dir = "OS-KSADM:services"
-  my_service_id, error = _find_id(http, headers, new_resource.endpoint_service, path, dir)
+  my_service_id, _error = _get_service_id(http, headers, new_resource.endpoint_service)
   unless my_service_id
     Chef::Log.error "Couldn't find service #{new_resource.endpoint_service} in keystone"
     new_resource.updated_by_last_action(false)
@@ -503,15 +490,15 @@ def _find_id(http, headers, svc_name, spath, dir, key = "name", ret = "id")
   [my_service_id, error]
 end
 
-private
 def _build_service_object(svc_name, svc_type, svc_desc)
-  svc_obj = Hash.new
-  svc_obj.store("name", svc_name)
-  svc_obj.store("type", svc_type)
-  svc_obj.store("description", svc_desc)
-  ret = Hash.new
-  ret.store("OS-KSADM:service", svc_obj)
-  return ret
+  body = {
+    service: {
+      name: svc_name,
+      type: svc_type,
+      description: svc_desc
+    }
+  }
+  body
 end
 
 private
@@ -677,4 +664,8 @@ def endpoint_needs_update(endpoint, new_resource)
   else
     return true
   end
+end
+
+def _get_service_id(http, headers, svc_name)
+  _find_id(http, headers, svc_name, "/v3/services", "services")
 end
