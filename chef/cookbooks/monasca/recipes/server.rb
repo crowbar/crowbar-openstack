@@ -49,7 +49,7 @@ keystone_register "give monasca api user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -208,7 +208,7 @@ keystone_register "give admin user admin role in monasca tenant" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["admin_user"]
-  tenant_name monasca_project
+  project_name monasca_project
   role_name "admin"
   action :add_access
 end
@@ -221,7 +221,7 @@ keystone_register "give admin user monasca-user role in monasca tenant" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["admin_user"]
-  tenant_name monasca_project
+  project_name monasca_project
   role_name "monasca-user"
   action :add_access
 end
@@ -254,7 +254,7 @@ unless agents_settings.empty?
       port keystone_settings["admin_port"]
       auth register_auth_hash
       user_name as["service_user"]
-      tenant_name as["service_tenant"]
+      project_name as["service_tenant"]
       role_name as["service_role"]
       action :add_access
     end

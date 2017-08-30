@@ -134,7 +134,7 @@ end
     auth register_auth_hash
     user_name user["name"]
     role_name user["role"]
-    tenant_name tempest_comp_tenant
+    project_name tempest_comp_tenant
     action :add_access
   end
 
@@ -159,7 +159,7 @@ keystone_register "add #{keystone_settings['admin_user']}:#{tempest_comp_tenant}
   auth register_auth_hash
   user_name keystone_settings["admin_user"]
   role_name "admin"
-  tenant_name tempest_comp_tenant
+  project_name tempest_comp_tenant
   action :add_access
 end
 

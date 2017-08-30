@@ -59,7 +59,7 @@ keystone_register "give placement user '#{node["nova"]["placement_service_user"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name node["nova"]["placement_service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end

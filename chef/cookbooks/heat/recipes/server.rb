@@ -149,7 +149,7 @@ keystone_register "give heat user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -182,7 +182,7 @@ node[:heat][:trusts_delegated_roles].each do |role|
     port keystone_settings["admin_port"]
     auth register_auth_hash
     user_name keystone_settings["admin_user"]
-    tenant_name keystone_settings["default_tenant"]
+    project_name keystone_settings["default_tenant"]
     role_name role
     action :add_access
   end

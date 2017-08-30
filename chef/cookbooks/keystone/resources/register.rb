@@ -60,7 +60,7 @@ attribute :role_name, kind_of: String
 # :add_access specific attributes
 attribute :user_name, kind_of: String
 attribute :role_name, kind_of: String
-attribute :tenant_name, kind_of: String
+attribute :project_name, kind_of: String
 
 # :add_ec2 specific attributes
 attribute :user_name, kind_of: String

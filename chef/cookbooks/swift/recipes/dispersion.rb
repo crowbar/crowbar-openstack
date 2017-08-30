@@ -82,7 +82,7 @@ keystone_register "add #{service_user}:#{service_tenant} user admin role" do
   auth register_auth_hash
   user_name service_user
   role_name "admin"
-  tenant_name service_tenant
+  project_name service_tenant
   action :add_access
 end
 

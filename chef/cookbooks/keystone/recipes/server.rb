@@ -626,7 +626,7 @@ user_roles.each do |args|
     auth register_auth_hash
     user_name args[0]
     role_name args[1]
-    tenant_name args[2]
+    project_name args[2]
     action :add_access
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end

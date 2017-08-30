@@ -189,32 +189,34 @@ action :add_role do
 end
 
 # :add_access specific attributes
-# attribute :tenant_name, :kind_of => String
+# attribute :project_name, :kind_of => String
 # attribute :user_name, :kind_of => String
 # attribute :role_name, :kind_of => String
 action :add_access do
   http, headers = _build_connection(new_resource)
 
   # Lets verify that the item does not exist yet
-  project = new_resource.tenant_name
+  project = new_resource.project_name
   user = new_resource.user_name
   role = new_resource.role_name
   user_id, user_error = _get_user_id(http, headers, user)
   project_id, project_error = _get_project_id(http, headers, project)
   role_id, role_error = _get_role_id(http, headers, role)
 
-  path = "/v2.0/tenants/#{tenant_id}/users/#{user_id}/roles"
-  t_role_id, aerror = _find_id(http, headers, role, path, "roles")
+  path = "/v3/projects/#{project_id}/users/#{user_id}/roles"
+  assigned_role_id, assignment_error = _find_id(http, headers, role, path, "roles")
+  Chef::Log.info("found role id: #{assigned_role_id}, error: #{assignment_error}")
 
-  error = (aerror or role_error or user_error or project_error)
-  unless role_id == t_role_id or error
-    # Service does not exist yet
-    ret = _update_item(http, headers, "#{path}/OS-KSADM/#{role_id}", nil, new_resource.role_name)
-    new_resource.updated_by_last_action(ret)
-  else
+  error = (assignment_error || role_error || user_error || project_error)
+  if role_id == assigned_role_id || error
     raise "Failed to talk to keystone in add_access" if error
-    Chef::Log.info "Access '#{tenant}:#{user} -> #{role}}' already exists. Not creating." unless error
+    msg = "Access '#{project}:#{user} -> #{role}' already exists. Not creating."
+    Chef::Log.info msg unless error
     new_resource.updated_by_last_action(false)
+  else
+    # Role is not assigned yet
+    ret = _update_item(http, headers, "#{path}/#{role_id}", nil, new_resource.role_name)
+    new_resource.updated_by_last_action(ret)
   end
 end
 
@@ -590,8 +592,6 @@ def _build_domain_object(domain_name)
   }
   body
 end
-
-private
 
 def _build_access_object(role_id, role_name)
   svc_obj = Hash.new
