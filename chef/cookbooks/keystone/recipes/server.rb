@@ -538,16 +538,16 @@ ruby_block "mark node for keystone bootstrap" do
 end
 
 [:service, :default].each do |tenant_type|
-  tenant = node[:keystone][tenant_type][:tenant]
+  project = node[:keystone][tenant_type][:tenant]
 
-  keystone_register "add default #{tenant} tenant" do
+  keystone_register "add default #{project} project" do
     protocol node[:keystone][:api][:protocol]
     insecure keystone_insecure
     host my_admin_host
     port node[:keystone][:api][:admin_port]
     auth register_auth_hash
-    tenant_name tenant
-    action :add_tenant
+    project_name project
+    action :add_project
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end

@@ -17,7 +17,7 @@
 # limitations under the License.
 #
 
-actions :add_service, :add_endpoint_template, :add_tenant, :add_domain, :add_domain_role, :add_user,
+actions :add_service, :add_endpoint_template, :add_project, :add_domain, :add_domain_role, :add_user,
         :add_role, :add_access, :add_ec2, :wakeup, :update_endpoint
 
 attribute :protocol, kind_of: String
@@ -43,8 +43,8 @@ attribute :endpoint_publicURL, kind_of: String
 attribute :endpoint_global, default: true
 attribute :endpoint_enabled, default: true
 
-# :add_tenant specific attributes
-attribute :tenant_name, kind_of: String
+# :add_project specific attributes
+attribute :project_name, kind_of: String
 
 # :add_domain specific attributes
 attribute :domain_name, kind_of: String

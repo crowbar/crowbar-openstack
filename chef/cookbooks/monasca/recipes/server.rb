@@ -178,14 +178,14 @@ keystone_register "monasca:common wakeup keystone" do
   action :wakeup
 end
 
-keystone_register "monasca:common create tenant #{monasca_project} for monasca" do
+keystone_register "monasca:common create project #{monasca_project} for monasca" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
-  tenant_name monasca_project
-  action :add_tenant
+  project_name monasca_project
+  action :add_project
 end
 
 monasca_roles.each do |role|

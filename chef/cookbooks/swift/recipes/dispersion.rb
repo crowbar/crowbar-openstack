@@ -58,8 +58,8 @@ keystone_register "create tenant #{service_tenant} for dispersion" do
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
-  tenant_name service_tenant
-  action :add_tenant
+  project_name service_tenant
+  action :add_project
 end
 
 keystone_register "add #{service_user}:#{service_tenant} user" do

@@ -63,8 +63,8 @@ keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
-  tenant_name tempest_comp_tenant
-  action :add_tenant
+  project_name tempest_comp_tenant
+  action :add_project
 end
 
 auth_url = KeystoneHelper.service_URL(

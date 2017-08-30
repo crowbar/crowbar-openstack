@@ -54,25 +54,21 @@ action :add_service do
   end
 end
 
-# :add_tenant specific attributes
-# attribute :tenant_name, :kind_of => String
-action :add_tenant do
+# :add_project specific attributes
+# attribute :project_name, :kind_of => String
+action :add_project do
   http, headers = _build_connection(new_resource)
-
-  # Construct the path
-  path = "/v2.0/tenants"
-  dir = "tenants"
-
   # Lets verify that the service does not exist yet
-  item_id, error = _find_id(http, headers, new_resource.tenant_name, path, dir)
+  item_id, error = _get_project_id(http, headers, new_resource.project_name)
   unless item_id or error
     # Service does not exist yet
-    body = _build_tenant_object(new_resource.tenant_name)
-    ret = _create_item(http, headers, path, body, new_resource.tenant_name)
+    body = _build_project_object(new_resource.project_name)
+    ret = _create_item(http, headers, "/v3/projects", body, new_resource.project_name)
     new_resource.updated_by_last_action(ret)
   else
-    raise "Failed to talk to keystone in add_tenant" if error
-    Chef::Log.info "Tenant '#{new_resource.tenant_name}' already exists. Not creating." unless error
+    raise "Failed to talk to keystone in add_project" if error
+    msg = "Project '#{new_resource.project_name}' already exists. Not creating."
+    Chef::Log.info msg unless error
     new_resource.updated_by_last_action(false)
   end
 end
@@ -140,8 +136,8 @@ action :add_user do
   http, headers = _build_connection(new_resource)
 
   # Lets verify that the item does not exist yet
-  tenant = new_resource.tenant_name
-  tenant_id, terror = _find_id(http, headers, tenant, "/v2.0/tenants", "tenants")
+  project = new_resource.tenant_name
+  project_id, project_error = _get_project_id(http, headers, project)
 
   # Construct the path
   path = "/v2.0/users"
@@ -150,7 +146,7 @@ action :add_user do
   # Lets verify that the service does not exist yet
   item_id, uerror = _find_id(http, headers, new_resource.user_name, path, dir)
 
-  if uerror or terror
+  if uerror or project_error
     raise "Failed to talk to keystone in add_user"
   end
 
@@ -207,17 +203,17 @@ action :add_access do
   http, headers = _build_connection(new_resource)
 
   # Lets verify that the item does not exist yet
-  tenant = new_resource.tenant_name
+  project = new_resource.tenant_name
   user = new_resource.user_name
   role = new_resource.role_name
   user_id, uerror = _find_id(http, headers, user, "/v2.0/users", "users")
-  tenant_id, terror = _find_id(http, headers, tenant, "/v2.0/tenants", "tenants")
+  project_id, project_error = _get_project_id(http, headers, project)
   role_id, rerror = _find_id(http, headers, role, "/v2.0/OS-KSADM/roles", "roles")
 
   path = "/v2.0/tenants/#{tenant_id}/users/#{user_id}/roles"
   t_role_id, aerror = _find_id(http, headers, role, path, "roles")
 
-  error = (aerror or rerror or uerror or terror)
+  error = (aerror or rerror or uerror or project_error)
   unless role_id == t_role_id or error
     # Service does not exist yet
     ret = _update_item(http, headers, "#{path}/OS-KSADM/#{role_id}", nil, new_resource.role_name)
@@ -236,15 +232,15 @@ action :add_ec2 do
   http, headers = _build_connection(new_resource)
 
   # Lets verify that the item does not exist yet
-  tenant = new_resource.tenant_name
+  project = new_resource.tenant_name
   user = new_resource.user_name
   user_id, uerror = _find_id(http, headers, user, "/v2.0/users", "users")
-  tenant_id, terror = _find_id(http, headers, tenant, "/v2.0/tenants", "tenants")
+  project_id, project_error = _get_project_id(http, headers, project)
 
   path = "/v2.0/users/#{user_id}/credentials/OS-EC2"
   t_tenant_id, aerror = _find_id(http, headers, tenant_id, path, "credentials", "tenant_id", "tenant_id")
 
-  error = (aerror or uerror or terror)
+  error = (aerror or uerror or project_error)
   unless tenant_id == t_tenant_id or error
     # Service does not exist yet
     body = _build_ec2_object(tenant_id)
@@ -585,14 +581,15 @@ def _build_role_object(role_name)
   return ret
 end
 
-private
-def _build_tenant_object(tenant_name)
-  svc_obj = Hash.new
-  svc_obj.store("name", tenant_name)
-  svc_obj.store("enabled", true)
-  ret = Hash.new
-  ret.store("tenant", svc_obj)
-  return ret
+def _build_project_object(project_name, domain_id = "default")
+  body = {
+    project: {
+      name: project_name,
+      enabled: true,
+      domain_id: domain_id
+    }
+  }
+  body
 end
 
 private
@@ -668,4 +665,8 @@ end
 
 def _get_service_id(http, headers, svc_name)
   _find_id(http, headers, svc_name, "/v3/services", "services")
+end
+
+def _get_project_id(http, headers, project_name)
+  _find_id(http, headers, project_name, "/v3/projects", "projects")
 end
