@@ -63,12 +63,6 @@ memcached_servers = MemcachedHelper.get_memcached_servers(
 
 memcached_instance "keystone"
 
-# Other barclamps need to know the hostname to reach keystone
-if node[:keystone][:api][:internal_URL_host] != my_admin_host
-  node.set[:keystone][:api][:internal_URL_host] = my_admin_host
-  node.save
-end
-
 if node[:keystone][:frontend] == "uwsgi"
 
   service "keystone" do
