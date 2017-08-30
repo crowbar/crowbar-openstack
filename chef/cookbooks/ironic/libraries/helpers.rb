@@ -62,10 +62,5 @@ module IronicHelper
         port: swift[:swift][:ports][:proxy]
       }
     end
-
-    def ironic_net_id(keystone_settings)
-      cmd = "#{openstack_command(keystone_settings)} network show ironic -f value -c id"
-      Mixlib::ShellOut.new(cmd).run_command.stdout.chomp
-    end
   end
 end
