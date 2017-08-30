@@ -110,7 +110,7 @@ users.each do |user|
     auth register_auth_hash
     user_name user["name"]
     user_password user["pass"]
-    tenant_name tempest_comp_tenant
+    project_name tempest_comp_tenant
     action :add_user
   end
 

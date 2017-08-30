@@ -48,7 +48,7 @@ keystone_register "register placement user '#{node["nova"]["placement_service_us
   auth register_auth_hash
   user_name node["nova"]["placement_service_user"]
   user_password node["nova"]["placement_service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 

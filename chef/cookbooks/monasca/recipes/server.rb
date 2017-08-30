@@ -38,7 +38,7 @@ keystone_register "register monasca api user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -243,7 +243,7 @@ unless agents_settings.empty?
       auth register_auth_hash
       user_name as["service_user"]
       user_password as["service_password"]
-      tenant_name as["service_tenant"]
+      project_name as["service_tenant"]
       action :add_user
     end
 

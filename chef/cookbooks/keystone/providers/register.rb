@@ -103,10 +103,7 @@ end
 action :add_domain_role do
   http, headers = _build_connection(new_resource)
 
-  # get user_id
-  path = "/v3/users"
-  dir = "users"
-  user_id, uerror = _find_id(http, headers, new_resource.user_name, path, dir)
+  user_id, user_error = _get_user_id(http, headers, new_resource.user_name)
   # get role_id
   path = "/v3/roles"
   dir = "roles"
@@ -116,7 +113,7 @@ action :add_domain_role do
   dir = "domains"
   domain_id, derror = _find_id(http, headers, new_resource.domain_name, path, dir)
 
-  if uerror || rerror || derror
+  if user_error || rerror || derror
     Chef::Log.info "Could not obtain the proper ids from keystone"
     raise "Failed to talk to keystone in add_domain_role"
   end
@@ -131,29 +128,24 @@ end
 # :add_user specific attributes
 # attribute :user_name, :kind_of => String
 # attribute :user_password, :kind_of => String
-# attribute :tenant_name, :kind_of => String
+# attribute :project_name, :kind_of => String
 action :add_user do
   http, headers = _build_connection(new_resource)
 
   # Lets verify that the item does not exist yet
-  project = new_resource.tenant_name
+  project = new_resource.project_name
   project_id, project_error = _get_project_id(http, headers, project)
 
-  # Construct the path
-  path = "/v2.0/users"
-  dir = "users"
-
   # Lets verify that the service does not exist yet
-  item_id, uerror = _find_id(http, headers, new_resource.user_name, path, dir)
+  item_id, user_error = _get_user_id(http, headers, new_resource.user_name)
 
-  if uerror or project_error
-    raise "Failed to talk to keystone in add_user"
-  end
+  raise "Failed to talk to keystone in add_user" if user_error || project_error
 
   ret = false
+  body = _build_user_object(new_resource.user_name, new_resource.user_password, project_id)
   unless item_id
     # User does not exist yet
-    body = _build_user_object(new_resource.user_name, new_resource.user_password, tenant_id)
+    path = "/v3/users"
     ret = _create_item(http, headers, path, body, new_resource.user_name)
   else
     auth_token = _get_token(http,
@@ -161,12 +153,20 @@ action :add_user do
                             new_resource.user_password)
     if auth_token
       Chef::Log.debug "User '#{new_resource.user_name}' already exists and password still works."
-      http.delete("/v2.0/tokens/#{auth_token}", headers)
+      headers["X-Subject-Token"] = auth_token
+      http.delete("/v3/auth/tokens", headers)
     else
       Chef::Log.debug "User '#{new_resource.user_name}' already exists. Updating Password."
-      path = "/v2.0/users/#{item_id}/OS-KSADM/password"
-      body = _build_user_password_object(item_id, new_resource.user_password)
-      ret = _update_item(http, headers, path, body, new_resource.user_name)
+      path = "/v3/users/#{item_id}"
+      resp = http.send_request("PATCH", path, JSON.generate(body), headers)
+      if resp.is_a?(Net::HTTPOK)
+        Chef::Log.info("Updated keystone item '#{name}'")
+      else
+        Chef::Log.error("Unable to update item '#{name}'")
+        Chef::Log.error("Response Code: #{resp.code}")
+        Chef::Log.error("Response Message: #{resp.message}")
+        raise "Failed to talk to keystone in add_user"
+      end
     end
   end
   new_resource.updated_by_last_action(ret)
@@ -206,14 +206,14 @@ action :add_access do
   project = new_resource.tenant_name
   user = new_resource.user_name
   role = new_resource.role_name
-  user_id, uerror = _find_id(http, headers, user, "/v2.0/users", "users")
+  user_id, user_error = _get_user_id(http, headers, user)
   project_id, project_error = _get_project_id(http, headers, project)
   role_id, rerror = _find_id(http, headers, role, "/v2.0/OS-KSADM/roles", "roles")
 
   path = "/v2.0/tenants/#{tenant_id}/users/#{user_id}/roles"
   t_role_id, aerror = _find_id(http, headers, role, path, "roles")
 
-  error = (aerror or rerror or uerror or project_error)
+  error = (aerror or rerror or user_error or project_error)
   unless role_id == t_role_id or error
     # Service does not exist yet
     ret = _update_item(http, headers, "#{path}/OS-KSADM/#{role_id}", nil, new_resource.role_name)
@@ -234,7 +234,7 @@ action :add_ec2 do
   # Lets verify that the item does not exist yet
   project = new_resource.project_name
   user = new_resource.user_name
-  user_id, uerror = _find_id(http, headers, user, "/v3/users", "users")
+  user_id, user_error = _get_user_id(http, headers, user)
   project_id, project_error = _get_project_id(http, headers, project)
 
   path = "/v3/users/#{user_id}/credentials/OS-EC2"
@@ -246,7 +246,7 @@ action :add_ec2 do
                                          "tenant_id",
                                          "tenant_id")
 
-  error = (aerror || uerror || project_error)
+  error = (aerror || user_error || project_error)
   if project_id == matching_project_id || error
     raise "Failed to talk to keystone in add_ec2_creds" if error
     Chef::Log.info "EC2 '#{project}:#{user}' already exists. Not creating." unless error
@@ -503,17 +503,17 @@ def _build_service_object(svc_name, svc_type, svc_desc)
   body
 end
 
-private
-def _build_user_object(user_name, password, tenant_id)
-  svc_obj = Hash.new
-  svc_obj.store("name", user_name)
-  svc_obj.store("password", password)
-  svc_obj.store("tenantId", tenant_id)
-  svc_obj.store("email", nil)
-  svc_obj.store("enabled", true)
-  ret = Hash.new
-  ret.store("user", svc_obj)
-  return ret
+def _build_user_object(user_name, password, project_id, domain_id = "default")
+  body = {
+    user: {
+      name: user_name,
+      password: password,
+      default_project_id: project_id,
+      domain_id: domain_id,
+      enabled: true
+    }
+  }
+  body
 end
 
 def _build_auth(user_name,
@@ -566,16 +566,6 @@ def _get_token(http, user_name, password, project = "")
     Chef::Log.info "Response Message: #{resp.message}"
     nil
   end
-end
-
-private
-def _build_user_password_object(user_id, password)
-  user_obj = Hash.new
-  user_obj.store("id", user_id)
-  user_obj.store("password", password)
-  ret = Hash.new
-  ret.store("user", user_obj)
-  return ret
 end
 
 private
@@ -674,4 +664,8 @@ end
 
 def _get_project_id(http, headers, project_name)
   _find_id(http, headers, project_name, "/v3/projects", "projects")
+end
+
+def _get_user_id(http, headers, user_name)
+  _find_id(http, headers, user_name, "/v3/users", "users")
 end

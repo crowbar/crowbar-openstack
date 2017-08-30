@@ -70,7 +70,7 @@ keystone_register "add #{service_user}:#{service_tenant} user" do
   auth register_auth_hash
   user_name service_user
   user_password service_password
-  tenant_name service_tenant
+  project_name service_tenant
   action :add_user
 end
 

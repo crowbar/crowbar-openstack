@@ -496,7 +496,7 @@ unless updated_password.empty? ||
       auth register_auth_hash
       user_name node[:keystone][:admin][:username]
       user_password updated_password
-      tenant_name node[:keystone][:admin][:tenant]
+      project_name node[:keystone][:admin][:tenant]
       action :nothing
     end.run_action(:add_user)
   end
@@ -591,7 +591,7 @@ if node[:keystone][:default][:create_user]
     auth register_auth_hash
     user_name node[:keystone][:default][:username]
     user_password node[:keystone][:default][:password]
-    tenant_name node[:keystone][:default][:tenant]
+    project_name node[:keystone][:default][:tenant]
     action :add_user
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end

@@ -52,6 +52,7 @@ attribute :domain_name, kind_of: String
 # :add_user specific attributes
 attribute :user_name, kind_of: String
 attribute :user_password, kind_of: String
+attribute :project_name, kind_of: String
 
 # :add_role specific attributes
 attribute :role_name, kind_of: String
