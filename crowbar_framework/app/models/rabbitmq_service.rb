@@ -137,33 +137,5 @@ class RabbitmqService < OpenstackServiceObject
 
     super
   end
-
-  def save_config_to_databag(old_role, role)
-    @logger.debug("#{@bc_name} save_config_to_databag: entering")
-    if role.nil?
-      config = nil
-    else
-      _elements, nodes, _ha_enabled = role_expand_elements(role, "rabbitmq-server")
-      node = NodeObject.find_node_by_name(nodes.first)
-      address = node[:rabbitmq][:address]
-      port = role.default_attributes["rabbitmq"]["port"]
-      user = role.default_attributes["rabbitmq"]["user"]
-      password = role.default_attributes["rabbitmq"]["password"]
-      vhost = role.default_attributes["rabbitmq"]["vhost"]
-
-      config = {
-        address: address,
-        port: port,
-        user: user,
-        password: password,
-        vhost: "/#{vhost}",
-        url: "rabbit://#{user}:#{password}@#{address}:#{port}/#{vhost}"
-      }
-    end
-
-    instance = Crowbar::DataBagConfig.instance_from_role(old_role, role)
-    Crowbar::DataBagConfig.save("openstack", instance, @bc_name, config)
-    @logger.debug("#{@bc_name} save_config_to_databag: leaving")
-  end
 end
 

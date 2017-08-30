@@ -133,8 +133,7 @@ class CrowbarOpenStackHelper
     # marker for that.
     if @rabbitmq_settings_cache_time != node[:ohai_time]
       if @rabbitmq_settings
-        Chef::Log.info("Invalidating rabbitmq settings cache " \
-                       "on behalf of #{barclamp}")
+        Chef::Log.info("Invalidating rabbitmq settings cache on behalf of #{barclamp}")
       end
       @rabbitmq_settings = nil
       @rabbitmq_settings_cache_time = node[:ohai_time]
@@ -149,15 +148,17 @@ class CrowbarOpenStackHelper
       if rabbit.nil?
         Chef::Log.warn("No RabbitMQ server found!")
       else
-        if rabbit[:rabbitmq][:ssl][:enabled]
-          port = rabbit[:rabbitmq][:ssl][:port]
+        port = if rabbit[:rabbitmq][:ssl][:enabled]
+          rabbit[:rabbitmq][:ssl][:port]
         else
-          port = rabbit[:rabbitmq][:port]
+          rabbit[:rabbitmq][:port]
         end
+
         client_ca_certs = if rabbit[:rabbitmq][:ssl][:enabled] && \
             !rabbit[:rabbitmq][:ssl][:insecure]
           rabbit[:rabbitmq][:ssl][:client_ca_certs]
         end
+
         @rabbitmq_settings[instance] = {
           address: rabbit[:rabbitmq][:address],
           port: port,
@@ -177,6 +178,24 @@ class CrowbarOpenStackHelper
     end
 
     @rabbitmq_settings[instance]
+  end
+
+  def self.insecure(attributes)
+    use_ssl = if attributes.key?("api") && attributes["api"].key?("protocol")
+      # aodh, cinder, glance, heat, keystone, manila, neutron
+      attributes["api"]["protocol"] == "https"
+    elsif attributes.key?("api") && attributes["api"].key?("ssl")
+      # barbican
+      attributes["api"]["ssl"]
+    elsif attributes.key?("ssl") && attributes["ssl"].key?("enabled")
+      # nova
+      attributes["ssl"]["enabled"]
+    else
+      # magnum, sahara, trove
+      false
+    end
+
+    use_ssl && attributes["ssl"]["insecure"]
   end
 
   private

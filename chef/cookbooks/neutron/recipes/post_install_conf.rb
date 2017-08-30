@@ -65,8 +65,8 @@ vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-neutron_insecure = node[:neutron][:api][:protocol] == "https" && node[:neutron][:ssl][:insecure]
-ssl_insecure = keystone_settings["insecure"] || neutron_insecure
+neutron_config = Barclamp::Config.load("openstack", "neutron")
+ssl_insecure = CrowbarOpenStackHelper.insecure(neutron_config) || keystone_settings["insecure"]
 
 neutron_args = "--os-username '#{keystone_settings['service_user']}'"
 neutron_args = "#{neutron_args} --os-password '#{keystone_settings['service_password']}'"
