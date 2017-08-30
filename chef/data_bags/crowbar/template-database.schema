@@ -19,7 +19,12 @@
               "required": false,
               "mapping" : {
                 "server_root_password": { "type": "str" },
-                "datadir": { "type": "str", "required": true }
+                "datadir": { "type": "str", "required": true },
+                "slow_query_logging": { "type": "bool", "required": true },
+                "innodb_buffer_pool_size": { "type": "int", "required": true },
+                "max_connections": { "type": "int", "required": true },
+                "tmp_table_size": { "type": "int", "required": true },
+                "max_heap_table_size": { "type": "int", "required": true }
               }
             },
             "postgresql" : {
