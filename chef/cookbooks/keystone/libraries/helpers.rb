@@ -46,6 +46,7 @@ module KeystoneHelper
       end
       @keystone_settings = nil
       @keystone_node = nil
+      cache_reset
       @keystone_settings_cache_time = current_node[:ohai_time]
     end
 
@@ -122,5 +123,17 @@ module KeystoneHelper
 
     Chef::Log.info("Keystone server found at #{@keystone_node[instance].name}")
     return @keystone_node[instance]
+  end
+
+  def self.cache
+    @cache
+  end
+
+  def self.cache_update(update)
+    @cache = @cache.merge(update)
+  end
+
+  def self.cache_reset
+    @cache = {}
   end
 end
