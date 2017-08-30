@@ -598,15 +598,14 @@ def _build_project_object(project_name, domain_id = "default")
   body
 end
 
-private
-
 def _build_domain_object(domain_name)
-  svc_obj = {}
-  svc_obj.store("name", domain_name)
-  svc_obj.store("enabled", true)
-  ret = {}
-  ret.store("domain", svc_obj)
-  ret
+  body = {
+    domain: {
+      name: domain_name,
+      enabled: true
+    }
+  }
+  body
 end
 
 private
