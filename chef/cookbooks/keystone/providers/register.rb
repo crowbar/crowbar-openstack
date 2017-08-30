@@ -104,16 +104,13 @@ action :add_domain_role do
   http, headers = _build_connection(new_resource)
 
   user_id, user_error = _get_user_id(http, headers, new_resource.user_name)
-  # get role_id
-  path = "/v3/roles"
-  dir = "roles"
-  role_id, rerror = _find_id(http, headers, new_resource.role_name, path, dir)
+  role_id, role_error = _get_role_id(http, headers, new_resource.role_name)
   # get domain_id
   path = "/v3/domains"
   dir = "domains"
   domain_id, derror = _find_id(http, headers, new_resource.domain_name, path, dir)
 
-  if user_error || rerror || derror
+  if user_error || role_error || derror
     Chef::Log.info "Could not obtain the proper ids from keystone"
     raise "Failed to talk to keystone in add_domain_role"
   end
@@ -177,16 +174,12 @@ end
 action :add_role do
   http, headers = _build_connection(new_resource)
 
-  # Construct the path
-  path = "/v2.0/OS-KSADM/roles"
-  dir = "roles"
-
   # Lets verify that the service does not exist yet
-  item_id, error = _find_id(http, headers, new_resource.role_name, path, dir)
+  item_id, error = _get_role_id(http, headers, new_resource.role_name)
   unless item_id or error
     # Service does not exist yet
     body = _build_role_object(new_resource.role_name)
-    ret = _create_item(http, headers, path, body, new_resource.role_name)
+    ret = _create_item(http, headers, "/v3/roles", body, new_resource.role_name)
     new_resource.updated_by_last_action(ret)
   else
     raise "Failed to talk to keystone in add_role" if error
@@ -208,12 +201,12 @@ action :add_access do
   role = new_resource.role_name
   user_id, user_error = _get_user_id(http, headers, user)
   project_id, project_error = _get_project_id(http, headers, project)
-  role_id, rerror = _find_id(http, headers, role, "/v2.0/OS-KSADM/roles", "roles")
+  role_id, role_error = _get_role_id(http, headers, role)
 
   path = "/v2.0/tenants/#{tenant_id}/users/#{user_id}/roles"
   t_role_id, aerror = _find_id(http, headers, role, path, "roles")
 
-  error = (aerror or rerror or user_error or project_error)
+  error = (aerror or role_error or user_error or project_error)
   unless role_id == t_role_id or error
     # Service does not exist yet
     ret = _update_item(http, headers, "#{path}/OS-KSADM/#{role_id}", nil, new_resource.role_name)
@@ -568,13 +561,13 @@ def _get_token(http, user_name, password, project = "")
   end
 end
 
-private
 def _build_role_object(role_name)
-  svc_obj = Hash.new
-  svc_obj.store("name", role_name)
-  ret = Hash.new
-  ret.store("role", svc_obj)
-  return ret
+  body = {
+    role: {
+      name: role_name
+    }
+  }
+  body
 end
 
 def _build_project_object(project_name, domain_id = "default")
@@ -668,4 +661,8 @@ end
 
 def _get_user_id(http, headers, user_name)
   _find_id(http, headers, user_name, "/v3/users", "users")
+end
+
+def _get_role_id(http, headers, role_name)
+  _find_id(http, headers, role_name, "/v3/roles", "roles")
 end

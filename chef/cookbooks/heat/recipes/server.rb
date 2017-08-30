@@ -160,8 +160,6 @@ keystone_register "add heat stack user role" do
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
-  user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
   role_name "heat_stack_user"
   action :add_role
 end
@@ -173,8 +171,6 @@ node[:heat][:trusts_delegated_roles].each do |role|
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
     auth register_auth_hash
-    user_name keystone_settings["service_user"]
-    tenant_name keystone_settings["service_tenant"]
     role_name role
     action :add_role
   end
