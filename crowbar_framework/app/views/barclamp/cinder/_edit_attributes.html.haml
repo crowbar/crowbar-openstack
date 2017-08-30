@@ -140,8 +140,6 @@
               %span.help-block
                 = t(".volumes.nfs.nfs_shares_config_hint")
 
-              = string_field %w(volumes {{@index}} nfs)
-
           {{/if_eq}}
           {{#if_eq backend_driver 'rbd'}}
           %li.list-group-item
