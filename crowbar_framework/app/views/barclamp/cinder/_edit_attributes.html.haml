@@ -140,6 +140,11 @@
               %span.help-block
                 = t(".volumes.nfs.nfs_shares_config_hint")
 
+              = boolean_field %w(volumes {{@index}} nfs nfs_snapshot)
+
+              %span.help-block
+                = t(".volumes.nfs.nfs_snapshot_hint")
+
           {{/if_eq}}
           {{#if_eq backend_driver 'rbd'}}
           %li.list-group-item

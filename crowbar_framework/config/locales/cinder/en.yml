@@ -61,6 +61,7 @@ en:
           nfs_volume_driver: 'NFS'
           nfs:
             nfs_shares_config_hint: 'Format one entry per line in the form hostname:/vol/path -o optional-nfs-mount-options'
+            nfs_snapshot_hint: 'Security caution. This feature is not recommended because of its significant security implications.'
           raw_parameters: 'Raw Devices Parameters'
           raw_volume_driver: 'Raw Devices'
           rbd_parameters: 'RADOS Parameters'
@@ -115,6 +116,7 @@ en:
               vserver: 'Name of the Virtual Storage Server (netapp_vserver)'
             nfs:
               nfs_shares: 'List of NFS Exports'
+              nfs_snapshot: 'Enable volume snapshots'
             raw:
               cinder_raw_method: 'Disk selection method'
               volume_name: 'Name of Volume'
