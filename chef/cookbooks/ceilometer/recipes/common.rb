@@ -38,7 +38,11 @@ is_swift_proxy = node.roles.include?("ceilometer-swift-proxy-middleware") && nod
 # Find hypervisor inspector
 hypervisor_inspector = nil
 libvirt_type = nil
+discovery_method = nil
 if is_compute_agent
+  if ["xen"].include?(node[:nova][:libvirt_type])
+    discovery_method = "workload_partitioning"
+  end
   if node.roles.include?("nova-compute-vmware")
     hypervisor_inspector = "vmware"
   else
@@ -87,6 +91,7 @@ template node[:ceilometer][:config_file] do
       libvirt_type: libvirt_type,
       metering_time_to_live: metering_time_to_live,
       event_time_to_live: event_time_to_live,
+      discovery_method: discovery_method
     )
     if is_compute_agent
       notifies :restart, "service[nova-compute]"
