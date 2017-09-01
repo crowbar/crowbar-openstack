@@ -93,6 +93,9 @@ alt_tenant_name = <%= @alt_comp_tenant %>
 alt_password = <%= @alt_comp_pass %>
 alt_domain_name = Default
 
+[identity-feature-enabled]
+domain_specific_drivers = <%= node[:keystone][:domain_specific_drivers] ? "True" : "False" %>
+
 [image]
 region = <%= @keystone_settings['endpoint_region'] %>
 endpoint_type = internalURL
