@@ -224,24 +224,22 @@ case proxy_config[:auth_method]
      end
 
      keystone_register "register swift-proxy endpoint" do
-         protocol keystone_settings["protocol"]
-         insecure keystone_settings["insecure"]
-         host keystone_settings["internal_url_host"]
-         auth register_auth_hash
-         port keystone_settings["admin_port"]
-         endpoint_service "swift"
-         endpoint_region keystone_settings["endpoint_region"]
-         endpoint_publicURL "#{swift_protocol}://#{public_host}:"\
+       protocol keystone_settings["protocol"]
+       insecure keystone_settings["insecure"]
+       host keystone_settings["internal_url_host"]
+       auth register_auth_hash
+       port keystone_settings["admin_port"]
+       endpoint_service "swift"
+       endpoint_region keystone_settings["endpoint_region"]
+       endpoint_publicURL "#{swift_protocol}://#{public_host}:"\
+                          "#{node[:swift][:ports][:proxy]}/v1/"\
+                          "#{node[:swift][:reseller_prefix]}$(project_id)s"
+       endpoint_adminURL "#{swift_protocol}://#{admin_host}:"\
+                         "#{node[:swift][:ports][:proxy]}/v1/"
+       endpoint_internalURL "#{swift_protocol}://#{admin_host}:"\
                             "#{node[:swift][:ports][:proxy]}/v1/"\
                             "#{node[:swift][:reseller_prefix]}$(project_id)s"
-         endpoint_adminURL "#{swift_protocol}://#{admin_host}:"\
-                           "#{node[:swift][:ports][:proxy]}/v1/"
-         endpoint_internalURL "#{swift_protocol}://#{admin_host}:"\
-                              "#{node[:swift][:ports][:proxy]}/v1/"\
-                              "#{node[:swift][:reseller_prefix]}$(project_id)s"
-         #  endpoint_global true
-         #  endpoint_enabled true
-        action :add_endpoint_template
+       action :add_endpoint
      end
 
      crowbar_pacemaker_sync_mark "create-swift_register" if ha_enabled

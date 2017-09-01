@@ -109,9 +109,7 @@ keystone_register "register nova endpoint" do
                     "#{admin_api_host}:#{api_port}/v2.1/$(project_id)s"
   endpoint_internalURL "#{api_protocol}://"\
                        "#{admin_api_host}:#{api_port}/v2.1/$(project_id)s"
-#  endpoint_global true
-#  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register nova_legacy endpoint" do
@@ -128,7 +126,7 @@ keystone_register "register nova_legacy endpoint" do
                     "#{admin_api_host}:#{api_port}/v2/$(project_id)s"
   endpoint_internalURL "#{api_protocol}://"\
                        "#{admin_api_host}:#{api_port}/v2/$(project_id)s"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-nova_register" if api_ha_enabled

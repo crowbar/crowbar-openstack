@@ -77,7 +77,7 @@ keystone_register "register monasca api endpoint" do
   endpoint_publicURL MonascaHelper.api_public_url(node)
   endpoint_adminURL MonascaHelper.api_admin_url(node)
   endpoint_internalURL MonascaHelper.api_internal_url(node)
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register logs service" do
@@ -103,7 +103,7 @@ keystone_register "register logs endpoint" do
   endpoint_publicURL MonascaHelper.log_api_public_url(node, "v3.0")
   endpoint_adminURL MonascaHelper.log_api_admin_url(node, "v3.0")
   endpoint_internalURL MonascaHelper.log_api_internal_url(node, "v3.0")
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register logs_v2 service" do
@@ -129,7 +129,7 @@ keystone_register "register logs_v2 endpoint" do
   endpoint_publicURL MonascaHelper.log_api_public_url(node, "v2.0")
   endpoint_adminURL MonascaHelper.log_api_admin_url(node, "v2.0")
   endpoint_internalURL MonascaHelper.log_api_internal_url(node, "v2.0")
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register logs-search service" do
@@ -155,7 +155,7 @@ keystone_register "register logs-search endpoint" do
   endpoint_publicURL MonascaHelper.logs_search_public_url(node)
   endpoint_adminURL MonascaHelper.logs_search_admin_url(node)
   endpoint_internalURL MonascaHelper.logs_search_internal_url(node)
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 monasca_project = node[:monasca][:service_tenant]

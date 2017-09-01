@@ -318,9 +318,7 @@ keystone_register "register ceilometer endpoint" do
   endpoint_publicURL "#{ceilometer_protocol}://#{my_public_host}:#{node[:ceilometer][:api][:port]}"
   endpoint_adminURL "#{ceilometer_protocol}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
   endpoint_internalURL "#{ceilometer_protocol}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
-#  endpoint_global true
-#  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 # In stoney/icehouse we have the cronjob crowbar-ceilometer-expirer in

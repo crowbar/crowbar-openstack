@@ -96,9 +96,7 @@ keystone_register "register cinder endpoint" do
                     "#{my_admin_host}:#{cinder_port}/v1/$(project_id)s"
   endpoint_internalURL "#{cinder_protocol}://"\
                        "#{my_admin_host}:#{cinder_port}/v1/$(project_id)s"
-#  endpoint_global true
-#  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register cinder service v2" do
@@ -127,7 +125,7 @@ keystone_register "register cinder endpoint v2" do
                     "#{my_admin_host}:#{cinder_port}/v2/$(project_id)s"
   endpoint_internalURL "#{cinder_protocol}://"\
                        "#{my_admin_host}:#{cinder_port}/v2/$(project_id)s"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register cinder service v3" do
@@ -156,7 +154,7 @@ keystone_register "register cinder endpoint v3" do
                     "#{my_admin_host}:#{cinder_port}/v3/$(project_id)s"
   endpoint_internalURL "#{cinder_protocol}://"\
                        "#{my_admin_host}:#{cinder_port}/v3/$(project_id)s"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-cinder_register"

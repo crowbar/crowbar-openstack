@@ -85,9 +85,7 @@ keystone_register "register neutron endpoint" do
   endpoint_publicURL "#{neutron_protocol}://#{my_public_host}:#{api_port}/"
   endpoint_adminURL "#{neutron_protocol}://#{my_admin_host}:#{api_port}/"
   endpoint_internalURL "#{neutron_protocol}://#{my_admin_host}:#{api_port}/"
-#  endpoint_global true
-#  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-neutron_register" if ha_enabled

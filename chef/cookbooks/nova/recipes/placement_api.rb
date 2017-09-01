@@ -87,7 +87,7 @@ keystone_register "register placement endpoint" do
   endpoint_publicURL "#{api_protocol}://#{public_api_host}:#{api_port}"
   endpoint_adminURL "#{api_protocol}://#{admin_api_host}:#{api_port}"
   endpoint_internalURL "#{api_protocol}://#{admin_api_host}:#{api_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 if node[:nova][:ha][:enabled]

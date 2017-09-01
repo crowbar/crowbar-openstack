@@ -94,7 +94,7 @@ keystone_register "register magnum endpoint" do
                     "#{my_admin_host}:#{magnum_port}/v1"
   endpoint_internalURL "#{magnum_protocol}://"\
                        "#{my_admin_host}:#{magnum_port}/v1"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-magnum_register" if ha_enabled

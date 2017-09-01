@@ -138,7 +138,7 @@ keystone_register "register ec2-api endpoint" do
   endpoint_publicURL "#{api_protocol}://#{my_public_host}:#{ec2_api_port}"
   endpoint_adminURL "#{api_protocol}://#{my_admin_host}:#{ec2_api_port}"
   endpoint_internalURL "#{api_protocol}://#{my_admin_host}:#{ec2_api_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 # Create ec2-metadata service
@@ -165,7 +165,7 @@ keystone_register "register ec2-metadata endpoint" do
   endpoint_publicURL "#{api_protocol}://#{my_public_host}:#{ec2_metadata_port}"
   endpoint_adminURL "#{api_protocol}://#{my_admin_host}:#{ec2_metadata_port}"
   endpoint_internalURL "#{api_protocol}://#{my_admin_host}:#{ec2_metadata_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-ec2_api_register" if ha_enabled

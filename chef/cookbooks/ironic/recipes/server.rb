@@ -133,7 +133,7 @@ keystone_register "register ironic endpoint" do
   endpoint_publicURL public_endpoint
   endpoint_adminURL admin_endpoint
   endpoint_internalURL internal_endpoint
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register ironic user" do

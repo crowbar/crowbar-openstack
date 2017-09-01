@@ -96,9 +96,7 @@ keystone_register "register manila endpoint" do
                     "#{my_admin_host}:#{manila_port}/v1/$(project_id)s"
   endpoint_internalURL "#{manila_protocol}://"\
                        "#{my_admin_host}:#{manila_port}/v1/$(project_id)s"
-  #  endpoint_global true
-  #  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 # v2 API is new since Liberty
@@ -128,7 +126,7 @@ keystone_register "register manila endpoint v2" do
                     "#{my_admin_host}:#{manila_port}/v2/$(project_id)s"
   endpoint_internalURL "#{manila_protocol}://"\
                        "#{my_admin_host}:#{manila_port}/v2/$(project_id)s"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-manila_register"

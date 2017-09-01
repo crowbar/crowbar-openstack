@@ -128,7 +128,7 @@ keystone_register "register aodh endpoint" do
   endpoint_publicURL "#{aodh_protocol}://#{my_public_host}:#{aodh_port}"
   endpoint_adminURL "#{aodh_protocol}://#{my_admin_host}:#{aodh_port}"
   endpoint_internalURL "#{aodh_protocol}://#{my_admin_host}:#{aodh_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-aodh_keystone_register" if ha_enabled

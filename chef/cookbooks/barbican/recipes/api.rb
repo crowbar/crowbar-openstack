@@ -97,7 +97,7 @@ keystone_register "register barbican endpoint" do
   endpoint_publicURL "#{barbican_protocol}://#{public_host}:#{barbican_port}"
   endpoint_adminURL "#{barbican_protocol}://#{admin_host}:#{barbican_port}"
   endpoint_internalURL "#{barbican_protocol}://#{admin_host}:#{barbican_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register barbican user" do

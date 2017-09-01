@@ -90,7 +90,7 @@ keystone_register "register sahara endpoint" do
   endpoint_publicURL "#{sahara_protocol}://#{my_public_host}:#{sahara_port}/v1.1/%(tenant_id)s"
   endpoint_adminURL "#{sahara_protocol}://#{my_admin_host}:#{sahara_port}/v1.1/%(tenant_id)s"
   endpoint_internalURL "#{sahara_protocol}://#{my_admin_host}:#{sahara_port}/v1.1/%(tenant_id)s"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-sahara_register" if ha_enabled

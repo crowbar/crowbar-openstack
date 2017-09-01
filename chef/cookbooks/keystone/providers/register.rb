@@ -254,82 +254,69 @@ action :add_ec2 do
   end
 end
 
-action :add_endpoint_template do
+action :add_endpoint do
   http, headers = _build_connection(new_resource)
 
   my_service_id, _error = _get_service_id(http, headers, new_resource.endpoint_service)
   unless my_service_id
       Chef::Log.error "Couldn't find service #{new_resource.endpoint_service} in keystone"
       new_resource.updated_by_last_action(false)
-      raise "Failed to talk to keystone in add_endpoint_template" if error
+      raise "Failed to talk to keystone in add_endpoint" if error
   end
 
   # Construct the path
-  path = "/v2.0/endpoints"
+  path = "/v3/endpoints"
 
   # Lets verify that the endpoint does not exist yet
   resp = http.request_get(path, headers)
-  if resp.is_a?(Net::HTTPOK)
-      matched_endpoint = false
-      replace_old = false
-      old_endpoint_id = ""
-      data = JSON.parse(resp.read_body)
-      data["endpoints"].each do |endpoint|
-          if endpoint["service_id"].to_s == my_service_id.to_s
-              if endpoint_needs_update endpoint, new_resource
-                  replace_old = true
-                  old_endpoint_id = endpoint["id"]
-                  break
-              else
-                  matched_endpoint = true
-                  break
-              end
-          end
-      end
-      if matched_endpoint
-          Chef::Log.info("Already existing keystone endpointTemplate for '#{new_resource.endpoint_service}' - not creating")
-          new_resource.updated_by_last_action(false)
+  unless resp.is_a?(Net::HTTPOK)
+    log_message = "Unknown response from keystone server"
+    Chef::Log.error log_message
+    Chef::Log.error("Response Code: #{resp.code}")
+    Chef::Log.error("Response Message: #{resp.message}")
+    new_resource.updated_by_last_action(false)
+    raise log_message + " in add_endpoint"
+  end
+
+  data = JSON.parse(resp.read_body)
+  endpoints = {}
+  data["endpoints"].each do |endpoint|
+    if endpoint["service_id"].to_s == my_service_id.to_s
+      endpoints[endpoint["interface"]] = endpoint
+    end
+  end
+  endpoint_updated = false
+  ["public", "internal", "admin"].each do |interface|
+    body = _build_endpoint_object(interface, my_service_id, new_resource)
+    name = "#{interface} endpoint for '#{new_resource.endpoint_service}'"
+    path = "/v3/endpoints"
+    if endpoints.empty?
+      _create_item(http, headers, path, body, name)
+      endpoint_updated = true
+    elsif endpoint_needs_update interface, endpoints, new_resource
+      resp = http.send_request("PATCH",
+                               "#{path}/#{endpoints[interface]["id"]}",
+                               JSON.generate(body), headers)
+      if resp.is_a?(Net::HTTPOK)
+        msg = "Updated #{interface} keystone endpoint for '#{new_resource.endpoint_service}'"
+        Chef::Log.info(msg)
+        endpoint_updated = true
       else
-          # Delete the old existing endpoint first if required
-          if replace_old
-              Chef::Log.info("Deleting old endpoint #{old_endpoint_id}")
-              resp = http.delete("#{path}/#{old_endpoint_id}", headers)
-              if !resp.is_a?(Net::HTTPNoContent) and !resp.is_a?(Net::HTTPOK)
-                  Chef::Log.warn("Failed to delete old endpoint")
-                  Chef::Log.warn("Response Code: #{resp.code}")
-                  Chef::Log.warn("Response Message: #{resp.message}")
-              end
-          end
-          # endpointTemplate does not exist yet
-          body = _build_endpoint_template_object(
-                 my_service_id,
-                 new_resource.endpoint_region,
-                 new_resource.endpoint_adminURL,
-                 new_resource.endpoint_internalURL,
-                 new_resource.endpoint_publicURL,
-                 new_resource.endpoint_global,
-                 new_resource.endpoint_enabled)
-          resp = http.send_request("POST", path, JSON.generate(body), headers)
-          if resp.is_a?(Net::HTTPCreated)
-              Chef::Log.info("Created keystone endpointTemplate for '#{new_resource.endpoint_service}'")
-              new_resource.updated_by_last_action(true)
-          elsif resp.is_a?(Net::HTTPOK)
-              Chef::Log.info("Updated keystone endpointTemplate for '#{new_resource.endpoint_service}'")
-              new_resource.updated_by_last_action(true)
-          else
-              Chef::Log.error("Unable to create endpointTemplate for '#{new_resource.endpoint_service}'")
-              Chef::Log.error("Response Code: #{resp.code}")
-              Chef::Log.error("Response Message: #{resp.message}")
-              new_resource.updated_by_last_action(false)
-              raise "Failed to talk to keystone in add_endpoint_template (2)" if error
-          end
+        msg = "Unable to update #{interface} endpoint for '#{new_resource.endpoint_service}'"
+        Chef::Log.error msg
+        Chef::Log.error("Response Code: #{resp.code}")
+        Chef::Log.error("Response Message: #{resp.message}")
+        new_resource.updated_by_last_action(false)
+        raise log_message + " in add_endpoint"
       end
+    end
+  end
+  if endpoint_updated
+    new_resource.updated_by_last_action(true)
   else
-      Chef::Log.error "Unknown response from Keystone Server"
-      Chef::Log.error("Response Code: #{resp.code}")
-      Chef::Log.error("Response Message: #{resp.message}")
-      new_resource.updated_by_last_action(false)
-      raise "Failed to talk to keystone in add_endpoint_template (3)" if error
+    msg = "Keystone endpoints for '#{new_resource.endpoint_service}' already exist - not creating"
+    Chef::Log.info(msg)
+    new_resource.updated_by_last_action(false)
   end
 end
 
@@ -340,7 +327,7 @@ action :update_endpoint do
   unless my_service_id
     Chef::Log.error "Couldn't find service #{new_resource.endpoint_service} in keystone"
     new_resource.updated_by_last_action(false)
-    raise "Failed to talk to keystone in add_endpoint_template"
+    raise "Failed to talk to keystone in add_endpoint"
   end
 
   path = "/v3/endpoints"
@@ -384,7 +371,7 @@ action :update_endpoint do
     Chef::Log.error("Response Code: #{resp.code}")
     Chef::Log.error("Response Message: #{resp.message}")
     new_resource.updated_by_last_action(false)
-    raise "Failed to talk to keystone in add_endpoint_template (3)" if error
+    raise "Failed to talk to keystone in add_endpoint (3)" if error
   end
 end
 
@@ -609,27 +596,18 @@ def _build_ec2_object(project_id)
   body
 end
 
-private
-def _build_endpoint_template_object(service, region, adminURL, internalURL, publicURL, global=true, enabled=true)
-  template_obj = Hash.new
-  template_obj.store("service_id", service)
-  template_obj.store("region", region)
-  template_obj.store("adminurl", adminURL)
-  template_obj.store("internalurl", internalURL)
-  template_obj.store("publicurl", publicURL)
-  if global
-    template_obj.store("global", "True")
-  else
-    template_obj.store("global", "False")
-  end
-  if enabled
-    template_obj.store("enabled", true)
-  else
-    template_obj.store("enabled", false)
-  end
-  ret = Hash.new
-  ret.store("endpoint", template_obj)
-  return ret
+def _build_endpoint_object(interface, service, new_resource)
+  new_url = new_resource.send("endpoint_#{interface}URL".to_sym)
+  body = {
+    endpoint: {
+      service_id: service,
+      region: new_resource.endpoint_region,
+      url: new_url,
+      interface: interface,
+      enabled: new_resource.endpoint_enabled
+    }
+  }
+  body
 end
 
 private
@@ -640,15 +618,9 @@ def _build_headers(token = nil)
   return ret
 end
 
-def endpoint_needs_update(endpoint, new_resource)
-  if endpoint["publicurl"] == new_resource.endpoint_publicURL and
-        endpoint["adminurl"] == new_resource.endpoint_adminURL and
-        endpoint["internalurl"] == new_resource.endpoint_internalURL and
-        endpoint["region"] == new_resource.endpoint_region
-    return false
-  else
-    return true
-  end
+def endpoint_needs_update(interface, endpoints, new_resource)
+  !(endpoints[interface]["url"] == new_resource.send("endpoint_#{interface}URL") &&
+      endpoints[interface]["region_id"] == new_resource.endpoint_region)
 end
 
 def _get_service_id(http, headers, svc_name)

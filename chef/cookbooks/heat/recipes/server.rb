@@ -311,9 +311,7 @@ keystone_register "register heat Cfn endpoint" do
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1"
   endpoint_adminURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:cfn_port]}/v1"
   endpoint_internalURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:cfn_port]}/v1"
-  #  endpoint_global true
-  #  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 # Create Heat service
@@ -346,9 +344,7 @@ keystone_register "register heat endpoint" do
   endpoint_internalURL "#{node[:heat][:api][:protocol]}://"\
                        "#{my_admin_host}:"\
                        "#{node[:heat][:api][:port]}/v1/$(project_id)s"
-  #  endpoint_global true
-  #  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-heat_register" if ha_enabled
