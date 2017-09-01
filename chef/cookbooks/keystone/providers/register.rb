@@ -74,7 +74,7 @@ action :add_project do
 end
 
 # :add_domain specific attributes
-# attribute :tenant_name, :kind_of => String
+# attribute :domain_name, :kind_of => String
 action :add_domain do
   http, headers = _build_connection(new_resource)
 
