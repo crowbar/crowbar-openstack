@@ -159,10 +159,7 @@ action :add_user do
       if resp.is_a?(Net::HTTPOK)
         Chef::Log.info("Updated keystone item '#{name}'")
       else
-        Chef::Log.error("Unable to update item '#{name}'")
-        Chef::Log.error("Response Code: #{resp.code}")
-        Chef::Log.error("Response Message: #{resp.message}")
-        raise "Failed to talk to keystone in add_user"
+        _raise_error(respo, "Unable to update item '#{name}'", "add_user")
       end
     end
   end
@@ -259,9 +256,8 @@ action :add_endpoint do
 
   my_service_id, _error = _get_service_id(http, headers, new_resource.endpoint_service)
   unless my_service_id
-      Chef::Log.error "Couldn't find service #{new_resource.endpoint_service} in keystone"
-      new_resource.updated_by_last_action(false)
-      raise "Failed to talk to keystone in add_endpoint" if error
+    log_message = "Couldn't find service #{new_resource.endpoint_service} in keystone"
+    _raise_error(nil, log_message, "add_endpoint")
   end
 
   # Construct the path
@@ -271,11 +267,7 @@ action :add_endpoint do
   resp = http.request_get(path, headers)
   unless resp.is_a?(Net::HTTPOK)
     log_message = "Unknown response from keystone server"
-    Chef::Log.error log_message
-    Chef::Log.error("Response Code: #{resp.code}")
-    Chef::Log.error("Response Message: #{resp.message}")
-    new_resource.updated_by_last_action(false)
-    raise log_message + " in add_endpoint"
+    _raise_error(resp, log_message, "add_endpoint")
   end
 
   data = JSON.parse(resp.read_body)
@@ -303,11 +295,7 @@ action :add_endpoint do
         endpoint_updated = true
       else
         msg = "Unable to update #{interface} endpoint for '#{new_resource.endpoint_service}'"
-        Chef::Log.error msg
-        Chef::Log.error("Response Code: #{resp.code}")
-        Chef::Log.error("Response Message: #{resp.message}")
-        new_resource.updated_by_last_action(false)
-        raise log_message + " in add_endpoint"
+        _raise_error(resp, msg, "add_endpoint")
       end
     end
   end
@@ -325,9 +313,8 @@ action :update_endpoint do
 
   my_service_id, _error = _get_service_id(http, headers, new_resource.endpoint_service)
   unless my_service_id
-    Chef::Log.error "Couldn't find service #{new_resource.endpoint_service} in keystone"
-    new_resource.updated_by_last_action(false)
-    raise "Failed to talk to keystone in add_endpoint"
+    msg = "Couldn't find service #{new_resource.endpoint_service} in keystone"
+    _raise_error(nil, msg, "update_endpoint")
   end
 
   path = "/v3/endpoints"
@@ -361,22 +348,17 @@ action :update_endpoint do
       if resp.is_a?(Net::HTTPOK)
         Chef::Log.info("Successfully updated endpoint URL #{interface} #{new_url}")
       else
-        Chef::Log.error("Unknown response code: #{resp.code}")
-        new_resource.updated_by_last_action(false)
-        raise "Failed to talk to keystone in update_endpoint"
+        log_message = "Unknown response from keystone server"
+        _raise_error(resp, log_message, "update_endpoint")
       end
     end
   else
-    Chef::Log.error "Unknown response from Keystone Server"
-    Chef::Log.error("Response Code: #{resp.code}")
-    Chef::Log.error("Response Message: #{resp.message}")
-    new_resource.updated_by_last_action(false)
-    raise "Failed to talk to keystone in add_endpoint (3)" if error
+    log_message = "Unknown response from keystone server"
+    _raise_error(resp, log_message, "add_endpoint")
   end
 end
 
 # Return true on success
-private
 def _create_item(http, headers, path, body, name)
   resp = http.send_request("POST", path, JSON.generate(body), headers)
   if resp.is_a?(Net::HTTPCreated)
@@ -386,15 +368,12 @@ def _create_item(http, headers, path, body, name)
     Chef::Log.info("Updated keystone item '#{name}'")
     return true
   else
-    Chef::Log.error("Unable to create item '#{name}'")
-    Chef::Log.error("Response Code: #{resp.code}")
-    Chef::Log.error("Response Message: #{resp.message}")
-    raise "Failed to talk to keystone in _create_item"
+    log_message = "Unable to create item '#{name}'"
+    _raise_error(resp, log_message, "_create_item")
   end
 end
 
 # Return true on success
-private
 def _update_item(http, headers, path, body, name)
   unless body.nil?
     resp = http.send_request("PUT", path, JSON.generate(body), headers)
@@ -412,10 +391,8 @@ def _update_item(http, headers, path, body, name)
     Chef::Log.info("Created/Updated keystone item #{name}")
     return true
   else
-    Chef::Log.error("Unable to updated item '#{name}'")
-    Chef::Log.error("Response Code: #{resp.code}")
-    Chef::Log.error("Response Message: #{resp.message}")
-    raise "Failed to talk to keystone in _update_item"
+    log_message = "Unable to update item '#{name}'"
+    _raise_error(resp, log_message, "_update_item")
   end
 end
 
@@ -466,9 +443,8 @@ def _find_id(http, headers, svc_name, spath, dir, key = "name", ret = "id")
       break if my_service_id
     end
   else
-    Chef::Log.error "Find #{spath}: #{svc_name}: Unknown response from Keystone Server"
-    Chef::Log.error("Response Code: #{resp.code}")
-    Chef::Log.error("Response Message: #{resp.message}")
+    log_message = "Find #{spath}: #{svc_name}: Unknown response from Keystone Server"
+    _log_error(resp, log_message)
     error = true
   end
   [my_service_id, error]
@@ -637,4 +613,16 @@ end
 
 def _get_role_id(http, headers, role_name)
   _find_id(http, headers, role_name, "/v3/roles", "roles")
+end
+
+def _log_error(resp, msg)
+  Chef::Log.error(msg)
+  Chef::Log.error("Response Code: #{resp.code}") if resp
+  Chef::Log.error("Response Message: #{resp.message}") if resp
+end
+
+def _raise_error(resp, msg, calling_action)
+  _log_error(resp, msg)
+  new_resource.updated_by_last_action(false)
+  raise "#{msg} in #{calling_action}"
 end
