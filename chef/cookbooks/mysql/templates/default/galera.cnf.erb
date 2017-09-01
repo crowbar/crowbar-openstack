@@ -6,3 +6,7 @@ innodb_doublewrite=1
 query_cache_size=0
 wsrep_on=ON
 binlog_format=ROW
+
+# SST method
+wsrep_sst_method = xtrabackup-v2
+wsrep_sst_auth = <%= @sstuser %>:<%= @sstuser_password %>

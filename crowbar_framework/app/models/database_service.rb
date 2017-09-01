@@ -174,6 +174,9 @@ class DatabaseService < PacemakerServiceObject
 
     if ( sql_engine == "mysql" )
       role.default_attributes["database"]["mysql"]["server_root_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_root_password"]) || random_password
+      if database_ha_enabled
+        role.default_attributes["database"]["mysql"]["sstuser_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["sstuser_password"]) || random_password
+      end
       @logger.debug("setting mysql specific attributes")
     elsif ( sql_engine == "postgresql" )
       # Attribute is not living in "database" namespace, but that's because
