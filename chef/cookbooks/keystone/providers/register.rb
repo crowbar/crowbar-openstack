@@ -428,26 +428,25 @@ def _build_connection(new_resource)
   [http, headers]
 end
 
-private
-def _find_id(http, headers, svc_name, spath, dir, key = "name", ret = "id")
+def _find_id(http, headers, item_name, path, dir, key = "name", ret = "id")
   # Construct the path
-  my_service_id = nil
+  my_item_id = nil
   error = false
-  resp = http.request_get(spath, headers)
+  resp = http.request_get(path, headers)
   if resp.is_a?(Net::HTTPOK)
     data = JSON.parse(resp.read_body)
     data = data[dir]
 
-    data.each do |svc|
-      my_service_id = svc[ret] if svc[key] == svc_name
-      break if my_service_id
+    data.each do |item|
+      my_item_id = item[ret] if item[key] == item_name
+      break if my_item_id
     end
   else
-    log_message = "Find #{spath}: #{svc_name}: Unknown response from Keystone Server"
+    log_message = "Find #{path}: #{item_name}: Unknown response from Keystone Server"
     _log_error(resp, log_message)
     error = true
   end
-  [my_service_id, error]
+  [my_item_id, error]
 end
 
 def _build_service_object(svc_name, svc_type, svc_desc)
