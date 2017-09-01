@@ -87,10 +87,16 @@ keystone_register "add #{service_user}:#{service_tenant} user admin role" do
 end
 
 dispersion_cmd="swift-dispersion-populate"
+
+env = "OS_USERNAME='#{service_user}' "
+env << "OS_PASSWORD='#{service_password}' "
+env << "OS_PROJECT_NAME='#{service_tenant}' "
+env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
+env << "OS_ENDPOINT_TYPE=internalURL"
 if keystone_settings["insecure"]
-  swift_cmd="swift --insecure"
+  swift_cmd = "#{env} swift --insecure"
 else
-  swift_cmd="swift"
+  swift_cmd = "#{env} swift"
 end
 
 template node[:swift][:dispersion_config_file] do
@@ -117,10 +123,5 @@ execute "populate-dispersion" do
   ignore_failure true
   only_if "#{swift_cmd} \
                -V #{keystone_settings["api_version"]} \
-               --os-tenant-name #{service_tenant} \
-               --os-username #{service_user} \
-               --os-password '#{service_password}' \
-               --os-auth-url #{keystone_settings["internal_auth_url"]} \
-               --os-endpoint-type internalURL \
                stat dispersion_objects 2>&1 | grep 'Container.*not found'"
 end
