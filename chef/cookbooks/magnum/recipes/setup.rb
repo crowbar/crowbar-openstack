@@ -31,11 +31,14 @@ auth_url = "#{keystone_settings["protocol"]}://"\
            "#{keystone_settings["internal_url_host"]}:"\
            "#{keystone_settings["service_port"]}/v3"
 
-openstack_command = "openstack --os-username #{keystone_settings["admin_user"]}"
-openstack_command << " --os-auth-type password --os-identity-api-version 3"
-openstack_command << " --os-password #{keystone_settings["admin_password"]}"
-openstack_command << " --os-tenant-name #{keystone_settings["admin_tenant"]}"
-openstack_command << " --os-auth-url #{auth_url} #{insecure}"
+env = {
+  "OS_USERNAME" => keystone_settings["admin_user"],
+  "OS_PASSWORD" => keystone_settings["admin_password"],
+  "OS_PROJECT_NAME" => keystone_settings["admin_tenant"],
+  "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+  "OS_IDENTITY_API_VERSION" => "3"
+}
+openstack_command = "openstack #{insecure}"
 
 ha_enabled = node[:magnum][:ha][:enabled]
 
@@ -47,7 +50,8 @@ create_magnum_domain << " --or-show"
 create_magnum_domain << " #{magnum_domain_name}"
 
 unless node["magnum"]["trustee"]["domain_id"] && node["magnum"]["trustee"]["domain_admin_id"]
-  magnum_domain_id = Mixlib::ShellOut.new(create_magnum_domain).run_command.stdout.chomp
+  magnum_domain_id = Mixlib::ShellOut.new(create_magnum_domain,
+                                          environment: env).run_command.stdout.chomp
 
   if magnum_domain_id && !magnum_domain_id.empty?
     create_magnum_domain_admin = "#{openstack_command} user create --domain #{magnum_domain_name}"
@@ -55,13 +59,15 @@ unless node["magnum"]["trustee"]["domain_id"] && node["magnum"]["trustee"]["doma
     create_magnum_domain_admin << " --password #{magnum_domain_admin_pass}"
     create_magnum_domain_admin << " --or-show -f value -c id #{magnum_domain_admin}"
 
-    magnum_domain_admin_id = Mixlib::ShellOut.new(create_magnum_domain_admin).run_command.stdout.chomp
+    magnum_domain_admin_id = Mixlib::ShellOut.new(create_magnum_domain_admin,
+                                                  environment: env).run_command.stdout.chomp
 
     if magnum_domain_admin_id && !magnum_domain_admin_id.empty?
       check_magnum_domain_role = "#{openstack_command} role assignment list -f csv --column Role"
       check_magnum_domain_role << " --domain #{magnum_domain_id} --user #{magnum_domain_admin_id} --names"
 
-      magnum_domain_role = Mixlib::ShellOut.new(check_magnum_domain_role).run_command.stdout
+      magnum_domain_role = Mixlib::ShellOut.new(check_magnum_domain_role,
+                                                environment: env).run_command.stdout
 
       unless magnum_domain_role.include?('"admin"')
         create_magnum_domain_role = "#{openstack_command} role add --user #{magnum_domain_admin_id}"

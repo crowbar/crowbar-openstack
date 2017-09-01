@@ -11,12 +11,15 @@ end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-glance_args = "--os-username '#{keystone_settings["admin_user"]}'"
-glance_args = "#{glance_args} --os-password '#{keystone_settings["admin_password"]}'"
-glance_args = "#{glance_args} --os-tenant-name '#{keystone_settings["admin_tenant"]}'"
-glance_args = "#{glance_args} --os-auth-url '#{keystone_settings["internal_auth_url"]}'"
-glance_args = "#{glance_args} --os-endpoint-type internalURL"
-glance_args = "#{glance_args} --os-region-name '#{keystone_settings["endpoint_region"]}'"
+env = {
+  "OS_USERNAME" => keystone_settings["admin_user"],
+  "OS_PASSWORD" => keystone_settings["admin_password"],
+  "OS_PROJECT_NAME" => keystone_settings["admin_tenant"],
+  "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+  "OS_ENDPOINT_TYPE" => "internalURL",
+  "OS_REGION_NAME" => keystone_settings["endpoint_region"]
+}
+env_to_s = env.to_s[1..-2].delete(',', '').gsub('=>', '=').gsub('"', "'")
 
 #
 # Download and install AMIs
@@ -54,7 +57,7 @@ ruby_block "load glance images" do
       Chef::Log.info("Extracting #{name} into #{tmpdir}")
       ::Kernel.system("tar -zxf \"#{rawdir}/#{name}\" -C \"#{tmpdir}/\"")
       if wait
-        ::Kernel.system("glance #{glance_args} image-list")
+        ::Kernel.system(env, "glance image-list")
         sleep 15
         wait = false
       end
@@ -65,7 +68,7 @@ ruby_block "load glance images" do
         ["initrd", "loader"],
         ["image", ".img"]].each do |part|
         next unless image_part = Dir.glob("#{tmpdir}/*#{part[1]}").first
-        cmd = "glance #{glance_args} image-create --name #{basename}-#{part[0]} --public"
+        cmd = "#{env_to_s} glance image-create --name #{basename}-#{part[0]} --public"
         case part[0]
         when "kernel" then cmd << " --disk-format aki --container-format aki"
         when "initrd" then cmd << " --disk-format ari --container-format ari"
@@ -74,7 +77,7 @@ ruby_block "load glance images" do
           cmd << " --property kernel_id=#{ids["kernel"]}" if ids["kernel"]
           cmd << " --property ramdisk_id=#{ids["initrd"]}" if ids["initrd"]
         end
-        res = `glance #{glance_args} image-list| grep #{basename}-#{part[0]} 2>&1`
+        res = `#{env_to_s} glance image-list| grep #{basename}-#{part[0]} 2>&1`
         if res.nil? || res.empty?
           Chef::Log.info("Loading #{image_part} for #{basename}-#{part[0]}")
           res = `#{cmd} < "#{image_part}"`

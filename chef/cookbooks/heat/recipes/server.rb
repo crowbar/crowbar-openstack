@@ -361,14 +361,13 @@ ruby_block "get stack user domain" do
   block do
     url = "#{keystone_settings["protocol"]}://#{keystone_settings["internal_url_host"]}"
     url << ":#{keystone_settings["service_port"]}/v3"
-    stack_user_domain_id = `openstack \
---os-username #{keystone_settings["admin_user"]} \
---os-password #{keystone_settings["admin_password"]} \
---os-tenant-name #{keystone_settings["admin_tenant"]} \
---os-auth-url=#{url} \
---os-region-name='#{keystone_settings["endpoint_region"]}' \
---os-identity-api-version=3 \
-#{insecure} \
+    env = "OS_USERNAME='#{keystone_settings["admin_user"]}' "
+    env << "OS_PASSWORD='#{keystone_settings["admin_password"]}' "
+    env << "OS_PROJECT_NAME='#{keystone_settings["admin_tenant"]}' "
+    env << "OS_AUTH_URL='#{url}' "
+    env << "OS_REGION_NAME='#{keystone_settings["endpoint_region"]}' "
+    env << "OS_IDENTITY_API_VERSION=3"
+    stack_user_domain_id = `#{env} openstack #{insecure} \
 domain show -f value -c id #{stack_user_domain_name}`
     raise "Could not obtain the stack user domain id" if stack_user_domain_id.empty?
     node[:heat][:stack_user_domain_id] = stack_user_domain_id.strip
