@@ -86,7 +86,7 @@ username=<%= @nova_admin_username %>
 lock_path = /var/run/manila
 
 [oslo_messaging_rabbit]
-rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:client_ca_certs] -%>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
@@ -163,7 +163,7 @@ hitachi_hnas_user = <%= share['hitachi']['hitachi_hnas_user'] %>
 
 <% if share['backend_driver'] == 'cephfs' -%>
 share_backend_name=<%= share['backend_name'] %>
-share_driver = manila.share.drivers.cephfs.cephfs_native.CephFSNativeDriver
+share_driver = manila.share.drivers.cephfs.driver.CephFSDriver
 driver_handles_share_servers = False
 <% if share['use_crowbar'] -%>
 cephfs_conf_path = /etc/ceph/ceph.conf
