@@ -38,18 +38,18 @@
         "threads" : 8
       },
       "admin": {
-        "tenant": "admin",
+        "project": "admin",
         "username": "admin",
         "password": "crowbar",
         "updated_password": ""
       },
       "service": {
-        "tenant": "service",
+        "project": "service",
         "token": "999888777666"
       },
       "default": {
         "create_user": true,
-        "tenant": "openstack",
+        "project": "openstack",
         "username": "crowbar",
         "password": "crowbar"
       },
@@ -178,7 +178,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 200,
+      "schema-revision": 201,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },

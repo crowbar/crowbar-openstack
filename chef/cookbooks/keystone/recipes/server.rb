@@ -210,7 +210,7 @@ max_active_keys = (node[:keystone][:token_expiration].to_f / 3600).ceil + 2
 
 register_auth_hash = { user: node[:keystone][:admin][:username],
                        password: node[:keystone][:admin][:password],
-                       tenant: node[:keystone][:admin][:tenant] }
+                       tenant: node[:keystone][:admin][:project] }
 
 if node[:keystone].key?(:endpoint)
   endpoint_protocol = node[:keystone][:endpoint][:protocol]
@@ -463,7 +463,7 @@ execute "keystone-manage bootstrap" do
   command "keystone-manage bootstrap \
   --bootstrap-password #{node[:keystone][:admin][:password]} \
   --bootstrap-username #{node[:keystone][:admin][:username]} \
-  --bootstrap-project-name #{node[:keystone][:admin][:tenant]} \
+  --bootstrap-project-name #{node[:keystone][:admin][:project]} \
   --bootstrap-role-name admin \
   --bootstrap-service-name keystone \
   --bootstrap-region-id #{node[:keystone][:api][:region]} \
@@ -479,7 +479,7 @@ end
 
 register_auth_hash = { user: node[:keystone][:admin][:username],
                        password: node[:keystone][:admin][:password],
-                       tenant: node[:keystone][:admin][:tenant] }
+                       tenant: node[:keystone][:admin][:project] }
 
 updated_password = node[:keystone][:admin][:updated_password]
 
@@ -496,7 +496,7 @@ unless updated_password.empty? ||
       auth register_auth_hash
       user_name node[:keystone][:admin][:username]
       user_password updated_password
-      project_name node[:keystone][:admin][:tenant]
+      project_name node[:keystone][:admin][:project]
       action :nothing
     end.run_action(:add_user)
   end
@@ -537,8 +537,8 @@ ruby_block "mark node for keystone bootstrap" do
   subscribes :create, "execute[keystone-manage bootstrap]", :immediately
 end
 
-[:service, :default].each do |tenant_type|
-  project = node[:keystone][tenant_type][:tenant]
+[:service, :default].each do |project_type|
+  project = node[:keystone][project_type][:project]
 
   keystone_register "add default #{project} project" do
     protocol node[:keystone][:api][:protocol]
@@ -591,7 +591,7 @@ if node[:keystone][:default][:create_user]
     auth register_auth_hash
     user_name node[:keystone][:default][:username]
     user_password node[:keystone][:default][:password]
-    project_name node[:keystone][:default][:tenant]
+    project_name node[:keystone][:default][:project]
     action :add_user
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
@@ -611,11 +611,13 @@ end
 
 # Create Access info
 user_roles = [
-  [node[:keystone][:admin][:username], "admin", node[:keystone][:admin][:tenant]],
-  [node[:keystone][:admin][:username], "admin", node[:keystone][:default][:tenant]]
+  [node[:keystone][:admin][:username], "admin", node[:keystone][:admin][:project]],
+  [node[:keystone][:admin][:username], "admin", node[:keystone][:default][:project]]
 ]
 if node[:keystone][:default][:create_user]
-  user_roles << [node[:keystone][:default][:username], "Member", node[:keystone][:default][:tenant]]
+  user_roles << [node[:keystone][:default][:username],
+                 "Member",
+                 node[:keystone][:default][:project]]
 end
 user_roles.each do |args|
   keystone_register "add default #{args[2]}:#{args[0]} -> #{args[1]} role" do
@@ -634,11 +636,11 @@ end
 
 # Create EC2 creds for our users
 ec2_creds = [
-  [node[:keystone][:admin][:username], node[:keystone][:admin][:tenant]],
-  [node[:keystone][:admin][:username], node[:keystone][:default][:tenant]]
+  [node[:keystone][:admin][:username], node[:keystone][:admin][:project]],
+  [node[:keystone][:admin][:username], node[:keystone][:default][:project]]
 ]
 if node[:keystone][:default][:create_user]
-  ec2_creds << [node[:keystone][:default][:username], node[:keystone][:default][:tenant]]
+  ec2_creds << [node[:keystone][:default][:username], node[:keystone][:default][:project]]
 end
 ec2_creds.each do |args|
   keystone_register "add default ec2 creds for #{args[1]}:#{args[0]}" do

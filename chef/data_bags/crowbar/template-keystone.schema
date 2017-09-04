@@ -43,18 +43,18 @@
                       "threads": { "required": true, "type": "int" }
                     }},
                     "admin": { "type": "map", "required": true, "mapping": {
-                      "tenant": { "type" : "str", "required" : true },
+                      "project": { "type" : "str", "required" : true },
                       "username": { "type" : "str", "required" : true },
                       "password": { "type" : "str", "required" : true },
                       "updated_password": { "type" : "str", "required" : false }
                     }},
                     "service": { "type": "map", "required": true, "mapping": {
-                      "tenant": { "type" : "str", "required" : true },
+                      "project": { "type" : "str", "required" : true },
                       "token": { "type": "str", "required" : true }
                     }},
                     "default" : { "type" : "map", "required" : true, "mapping": {
                       "create_user": { "type" : "bool", "required" : true },
-                      "tenant": { "type" : "str", "required" : true },
+                      "project": { "type" : "str", "required" : true },
                       "username": { "type" : "str", "required" : true },
                       "password": { "type" : "str", "required" : true }
                     }},
