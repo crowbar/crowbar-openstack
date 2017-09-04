@@ -144,7 +144,8 @@ pacemaker_primitive service_name do
     "wsrep_cluster_address" => cluster_addresses,
     "check_user" => "monitoring",
     "socket" => "/var/run/mysql/mysql.sock",
-    "datadir" => node[:database][:mysql][:datadir]
+    "datadir" => node[:database][:mysql][:datadir],
+    "log" => "/var/log/mysql/mysql_error.log"
   })
   op({
     "monitor" => {
