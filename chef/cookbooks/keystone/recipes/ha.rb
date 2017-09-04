@@ -42,13 +42,14 @@ if node[:keystone][:frontend] == "apache"
   # Avoid races when creating pacemaker resources
   crowbar_pacemaker_sync_mark "wait-keystone_ha_resources"
 
+  rabbit_settings = fetch_rabbitmq_settings
   transaction_objects = []
 
   # let's create a dummy resource for keystone, that can be used for ordering
   # constraints (as the apache2 resource is too vague)
   objects = openstack_pacemaker_controller_clone_for_transaction "keystone" do
     agent "ocf:pacemaker:Dummy"
-    order_only_existing "( postgresql rabbitmq )"
+    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} )"
   end
   transaction_objects.push(objects)
 

@@ -127,16 +127,23 @@ if node[:swift][:middlewares][:s3][:enabled]
 end
 
 # enable ceilometer middleware if ceilometer is configured
-# and rabbitmq is unsecured - lp#1673738
+# and rabbitmq is unsecured lp#1673738 and if rabbitmq is not using durable queues
 ceilometermiddleware_enabled = node.roles.include? "ceilometer-swift-proxy-middleware"
 rabbitmq_ssl_enabled = proxy_config[:rabbit_settings][:use_ssl]
-if ceilometermiddleware_enabled && rabbitmq_ssl_enabled
-  Chef::Log.warn("Disabling ceilometer swift-proxy middleware because it cannot connect"\
-                 " to rabbitmq over SSL")
+
+# Durable queues also cannot be configured with swift-proxy
+rabbitmq_durable_queues = proxy_config[:rabbit_settings][:durable_queues]
+
+ceilometermiddleware_should_be_disabled = rabbitmq_ssl_enabled || rabbitmq_durable_queues
+
+if ceilometermiddleware_enabled && ceilometermiddleware_should_be_disabled
+  Chef::Log.warn("Disabling ceilometer swift-proxy middleware")
 end
+
 ceilometer_swift_enabled = {
-  "enabled" => ceilometermiddleware_enabled && !rabbitmq_ssl_enabled
+  "enabled" => ceilometermiddleware_enabled && !ceilometermiddleware_should_be_disabled
 }
+
 node.set[:swift] ||= {}
 node.set[:swift][:middlewares] ||= {}
 if node[:swift][:middlewares]["ceilometer"] != ceilometer_swift_enabled
