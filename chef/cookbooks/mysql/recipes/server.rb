@@ -44,7 +44,19 @@ end
 
 service "mysql" do
   service_name mysql_service_name
-  supports status: true, restart: true, reload: true
+  if ha_enabled
+    supports status: true,
+             restart: true,
+             reload: true,
+             restart_crm_resource: true,
+             pacemaker_resource: "galera",
+             crm_resource_stop_cmd: "force-demote",
+             crm_resource_start_cmd: "force-promote"
+  else
+    supports status: true,
+             restart: true,
+             reload: true
+  end
   action :enable
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
@@ -65,10 +77,6 @@ rm /var/lib/mysql/ib_logfile?
 service mysql start
 EOC
 end
-
-cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
-nodes_names = cluster_nodes.map { |n| n[:hostname] }
-cluster_addresses = "gcomm://" + nodes_names.join(",")
 
 template "/etc/my.cnf.d/openstack.cnf" do
   source "my.cnf.erb"
@@ -101,19 +109,6 @@ template "/etc/my.cnf.d/tuning.cnf" do
     max_heap_table_size: node[:database][:mysql][:max_heap_table_size]
   )
   notifies :restart, "service[mysql]", :immediately
-end
-
-if node[:database][:ha][:enabled]
-  template "/etc/my.cnf.d/galera.cnf" do
-    source "galera.cnf.erb"
-    owner "root"
-    group "mysql"
-    mode "0640"
-    variables(
-      cluster_addresses: cluster_addresses
-    )
-    notifies :restart, "service[mysql]", :immediately
-  end
 end
 
 unless Chef::Config[:solo]

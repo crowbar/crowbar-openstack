@@ -19,6 +19,7 @@
               "required": false,
               "mapping" : {
                 "server_root_password": { "type": "str" },
+                "sstuser_password": { "type": "str" },
                 "datadir": { "type": "str", "required": true },
                 "slow_query_logging": { "type": "bool", "required": true },
                 "innodb_buffer_pool_size": { "type": "int", "required": true },

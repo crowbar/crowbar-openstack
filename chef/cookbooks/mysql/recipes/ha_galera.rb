@@ -19,7 +19,7 @@
 
 resource_agent = "ocf:heartbeat:galera"
 
-["galera-3-wsrep-provider", "mariadb-tools", "xtrabackup"].each do |p|
+["galera-3-wsrep-provider", "mariadb-tools", "xtrabackup", "socat"].each do |p|
   package p
 end
 
@@ -35,15 +35,97 @@ unless node[:database][:galera_bootstrapped]
     command "mysql_install_db"
     action :run
   end
+end
 
-  crowbar_pacemaker_sync_mark "sync-database_after_install_db" do
-    revision node[:database]["crowbar-revision"]
+unless node[:database][:galera_bootstrapped]
+  if CrowbarPacemakerHelper.is_cluster_founder?(node)
+    # To bootstrap for the first time, start galera on one node
+    # to set up the seed sst user.
+
+    template "temporary bootstrap /etc/my.cnf.d/galera.cnf" do
+      path "/etc/my.cnf.d/galera.cnf"
+      source "galera.cnf.erb"
+      owner "root"
+      group "mysql"
+      mode "0640"
+      variables(
+        cluster_addresses: "gcomm://",
+        sstuser: "root",
+        sstuser_password: ""
+      )
+    end
+
+    case node[:platform_family]
+    when "rhel", "fedora"
+      mysql_service_name = "mysqld"
+    else
+      mysql_service_name = "mysql"
+    end
+
+    # use the initial root:'' credentials to set up the new user. The
+    # unauthenticated root user is later removed in server.rb after the
+    # bootstraping. Once the cluster has started other nodes will pick up on
+    # the sstuser and we are able to use these credentails.
+    db_settings = fetch_database_settings
+    db_connection = db_settings[:connection].dup
+    db_connection[:host] = "localhost"
+    db_connection[:username] = "root"
+    db_connection[:password] = ""
+
+    service "mysql-temp start" do
+      service_name mysql_service_name
+      supports status: true, restart: true, reload: true
+      action :start
+    end
+
+    database_user "create state snapshot transfer user" do
+      connection db_connection
+      username "sstuser"
+      password node[:database][:mysql][:sstuser_password]
+      host "localhost"
+      provider db_settings[:user_provider]
+      action :create
+    end
+
+    database_user "grant sstuser root privileges" do
+      connection db_connection
+      username "sstuser"
+      password node[:database][:mysql][:sstuser_password]
+      host "localhost"
+      provider db_settings[:user_provider]
+      action :grant
+    end
+
+    service "mysql-temp stop" do
+      service_name mysql_service_name
+      supports status: true, restart: true, reload: true
+      action :stop
+    end
   end
 end
 
+service_name = "galera"
+
+cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
+nodes_names = cluster_nodes.map { |n| n[:hostname] }
+
+cluster_addresses = "gcomm://" + nodes_names.join(",")
+
+template "/etc/my.cnf.d/galera.cnf" do
+  source "galera.cnf.erb"
+  owner "root"
+  group "mysql"
+  mode "0640"
+  variables(
+    cluster_addresses: cluster_addresses,
+    sstuser: "sstuser",
+    sstuser_password: node[:database][:mysql][:sstuser_password]
+  )
+end
+
 # Wait for all nodes to reach this point so we know that all nodes will have
-# all the required packages installed before we create the pacemaker
-# resources
+# all the required packages and configurations installed before we create the
+# pacemaker resources
 crowbar_pacemaker_sync_mark "sync-database_before_ha" do
   revision node[:database]["crowbar-revision"]
 end
@@ -55,16 +137,11 @@ crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
 
-service_name = "galera"
-
-cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
-nodes_names = cluster_nodes.map { |n| n[:hostname] }
-
 pacemaker_primitive service_name do
   agent resource_agent
   params({
     "enable_creation" => true,
-    "wsrep_cluster_address" => "gcomm://" + nodes_names.join(","),
+    "wsrep_cluster_address" => cluster_addresses,
     "check_user" => "monitoring",
     "socket" => "/var/run/mysql/mysql.sock",
     "datadir" => node[:database][:mysql][:datadir]
