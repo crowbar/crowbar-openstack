@@ -136,7 +136,6 @@ template node[:cinder][:config_file] do
   variables(
     bind_host: bind_host,
     bind_port: bind_port,
-    use_multi_backend: node[:cinder][:use_multi_backend],
     volumes: node[:cinder][:volumes],
     sql_connection: sql_connection,
     rabbit_settings: fetch_rabbitmq_settings,
