@@ -272,7 +272,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
             (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")),
         dvr_enabled: neutron[:neutron][:use_dvr],
         tunnel_csum: neutron[:neutron][:ovs][:tunnel_csum],
-        of_interface: neutron[:neutron][:ovs][:of_interface],
         ovsdb_interface: neutron[:neutron][:ovs][:ovsdb_interface],
         bridge_mappings: bridge_mappings
       )

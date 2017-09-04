@@ -77,7 +77,7 @@ lock_path = /var/run/neutron
 driver = neutron.openstack.common.notifier.rpc_notifier
 
 [oslo_messaging_rabbit]
-rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:client_ca_certs] -%>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
