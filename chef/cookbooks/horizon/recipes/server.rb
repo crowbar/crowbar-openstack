@@ -389,7 +389,7 @@ execute "python manage.py migrate" do
   group node[:apache][:group]
   action :nothing
   subscribes :run, "template[#{local_settings}]", :immediately
-  notifies :restart, resources(service: "apache2"), :immediately
+  notifies :reload, resources(service: "horizon"), :immediately
 end
 
 # Force-disable multidomain support when the default keystoneapi version is too
