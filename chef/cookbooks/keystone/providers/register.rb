@@ -118,7 +118,7 @@ action :add_domain_role do
   # Construct the path
   path = "/v3/domains/#{domain_id}/users/#{user_id}/roles/#{role_id}"
 
-  ret = _update_item(http, headers, path, nil, new_resource.domain_name)
+  ret = _add_item(http, headers, path, nil, new_resource.domain_name)
   new_resource.updated_by_last_action(ret)
 end
 
@@ -155,12 +155,7 @@ action :add_user do
     else
       Chef::Log.debug "User '#{new_resource.user_name}' already exists. Updating Password."
       path = "/v3/users/#{item_id}"
-      resp = http.send_request("PATCH", path, JSON.generate(body), headers)
-      if resp.is_a?(Net::HTTPOK)
-        Chef::Log.info("Updated keystone item '#{name}'")
-      else
-        _raise_error(respo, "Unable to update item '#{name}'", "add_user")
-      end
+      ret = _update_item(http, headers, path, body, new_resource.user_name)
     end
   end
   new_resource.updated_by_last_action(ret)
@@ -212,7 +207,7 @@ action :add_access do
     new_resource.updated_by_last_action(false)
   else
     # Role is not assigned yet
-    ret = _update_item(http, headers, "#{path}/#{role_id}", nil, new_resource.role_name)
+    ret = _add_item(http, headers, "#{path}/#{role_id}", nil, new_resource.role_name)
     new_resource.updated_by_last_action(ret)
   end
 end
@@ -286,22 +281,12 @@ action :add_endpoint do
       _create_item(http, headers, path, body, name)
       endpoint_updated = true
     elsif endpoint_needs_update interface, endpoints, new_resource
-      resp = http.send_request("PATCH",
-                               "#{path}/#{endpoints[interface]["id"]}",
-                               JSON.generate(body), headers)
-      if resp.is_a?(Net::HTTPOK)
-        msg = "Updated #{interface} keystone endpoint for '#{new_resource.endpoint_service}'"
-        Chef::Log.info(msg)
-        endpoint_updated = true
-      else
-        msg = "Unable to update #{interface} endpoint for '#{new_resource.endpoint_service}'"
-        _raise_error(resp, msg, "add_endpoint")
-      end
+      path = "#{path}/#{endpoints[interface]["id"]}"
+      endpoint_updated = _update_item(http, headers, path, body, name)
     end
   end
-  if endpoint_updated
-    new_resource.updated_by_last_action(true)
-  else
+  new_resource.updated_by_last_action(endpoint_updated)
+  unless endpoint_updated
     msg = "Keystone endpoints for '#{new_resource.endpoint_service}' already exist - not creating"
     Chef::Log.info(msg)
     new_resource.updated_by_last_action(false)
@@ -342,15 +327,8 @@ action :update_endpoint do
       endpoint_template["endpoint"]["url"] = new_url
       endpoint_template["endpoint"]["endpoint_id"] = endpoints[interface]["id"]
       endpoint_template["endpoint"]["service_id"] = endpoints[interface]["service_id"]
-      resp = http.send_request("PATCH",
-                               "#{path}/#{endpoints[interface]["id"]}",
-                               JSON.generate(endpoint_template), headers)
-      if resp.is_a?(Net::HTTPOK)
-        Chef::Log.info("Successfully updated endpoint URL #{interface} #{new_url}")
-      else
-        log_message = "Unknown response from keystone server"
-        _raise_error(resp, log_message, "update_endpoint")
-      end
+      path = "#{path}/#{endpoints[interface]["id"]}"
+      _update_item(http, headers, path, endpoint_template, "endpoint URL #{interface} #{new_url}")
     end
   else
     log_message = "Unknown response from keystone server"
@@ -358,7 +336,7 @@ action :update_endpoint do
   end
 end
 
-# Return true on success
+# Make a POST request to create a new object
 def _create_item(http, headers, path, body, name)
   resp = http.send_request("POST", path, JSON.generate(body), headers)
   if resp.is_a?(Net::HTTPCreated)
@@ -373,8 +351,9 @@ def _create_item(http, headers, path, body, name)
   end
 end
 
-# Return true on success
-def _update_item(http, headers, path, body, name)
+# Make a PUT request to upload an object or create relationships between
+# objects (such as role assignments)
+def _add_item(http, headers, path, body, name)
   unless body.nil?
     resp = http.send_request("PUT", path, JSON.generate(body), headers)
   else
@@ -391,8 +370,18 @@ def _update_item(http, headers, path, body, name)
     Chef::Log.info("Created/Updated keystone item #{name}")
     return true
   else
-    log_message = "Unable to update item '#{name}'"
-    _raise_error(resp, log_message, "_update_item")
+    log_message = "Unable to add item '#{name}'"
+    _raise_error(resp, log_message, "_add_item")
+  end
+end
+
+# Make a PATCH request to update an existing item
+def _update_item(http, headers, path, body, name)
+  resp = http.send_request("PATCH", path, JSON.generate(body), headers)
+  if resp.is_a?(Net::HTTPOK)
+    Chef::Log.info("Updated keystone item '#{name}'")
+  else
+    _raise_error(resp, "Unable to update item '#{name}'", "_update_item")
   end
 end
 
