@@ -227,14 +227,15 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol"],
                @keystone_settings["internal_url_host"],
                @keystone_settings["service_port"],
-               "2.0") %>
+               "3") %>
 auth_type = password
 insecure = <%= @neutron_insecure ? 'True' : 'False' %>
 password = <%= @neutron_service_password %>
 project_name = <%= @keystone_settings['service_tenant'] %>
-tenant_name = <%= @keystone_settings['service_tenant'] %>
 timeout = <%= node[:nova][:neutron_url_timeout] %>
 username = <%= @neutron_service_user %>
+user_domain_name = <%= @keystone_settings['admin_domain'] %>
+project_domain_name = <%= @keystone_settings['admin_domain'] %>
 
 [oslo_concurrency]
 <% if @need_shared_lock_path %>

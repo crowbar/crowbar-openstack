@@ -249,7 +249,7 @@ if ironic_servers.any? && (node["roles"] & ["nova-compute-ironic", "nova-control
   override_force_config_drive = true
   ironic_node = ironic_servers.first
   ironic_settings = {}
-  ironic_settings[:keystone_version] = "v2.0"
+  ironic_settings[:keystone_version] = "v3"
   ironic_settings[:api_protocol] = ironic_node[:ironic][:api][:protocol]
   ironic_settings[:api_port] = ironic_node[:ironic][:api][:port]
   ironic_settings[:api_host] = CrowbarHelper.get_host_for_admin_url(
