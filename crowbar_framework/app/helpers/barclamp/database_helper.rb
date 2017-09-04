@@ -20,7 +20,7 @@ module Barclamp
     def engines_for_database(selected)
       options_for_select(
         [
-          ["MySQL", "mysql"],
+          ["MariaDB", "mysql"],
           ["PostgreSQL", "postgresql"]
         ],
         selected.to_s
