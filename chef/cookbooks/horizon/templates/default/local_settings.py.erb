@@ -37,9 +37,7 @@ CACHES = {
           '<%= memcached_location %>',
 <% end -%>
         ],
-        'OPTIONS': {
-          'KEY_PREFIX': '<%= node[:horizon][:config][:environment] %>'
-        }
+        'KEY_PREFIX': '<%= node[:horizon][:config][:environment] %>'
     }
 }
 
