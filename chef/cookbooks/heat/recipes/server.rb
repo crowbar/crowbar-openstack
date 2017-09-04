@@ -119,7 +119,7 @@ crowbar_pacemaker_sync_mark "wait-heat_register" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "heat wakeup keystone" do
   protocol keystone_settings["protocol"]

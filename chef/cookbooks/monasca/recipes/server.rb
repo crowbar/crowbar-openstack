@@ -18,7 +18,7 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 register_auth_hash = {
   user: keystone_settings["admin_user"],
   password: keystone_settings["admin_password"],
-  tenant: keystone_settings["admin_tenant"]
+  project: keystone_settings["admin_project"]
 }
 
 keystone_register "monasca api wakeup keystone" do
@@ -166,7 +166,7 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 register_auth_hash = {
   user: keystone_settings["admin_user"],
   password: keystone_settings["admin_password"],
-  tenant: keystone_settings["admin_tenant"]
+  project: keystone_settings["admin_project"]
 }
 
 keystone_register "monasca:common wakeup keystone" do

@@ -59,7 +59,7 @@ public_host = CrowbarHelper.get_host_for_public_url(node,
                                                     node[:barbican][:ha][:enabled])
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 crowbar_pacemaker_sync_mark "wait-barbican_register" if ha_enabled
 

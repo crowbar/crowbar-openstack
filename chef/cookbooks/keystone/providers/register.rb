@@ -414,7 +414,7 @@ def _build_connection(new_resource)
     auth_token = _get_token(http,
                             new_resource.auth[:user],
                             new_resource.auth[:password],
-                            new_resource.auth[:tenant])
+                            new_resource.auth[:project])
     unless auth_token
       raise "Authentication failed for user #{new_resource.auth[:user]}"
     end

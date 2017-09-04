@@ -41,7 +41,7 @@ service_password = node[:swift][:dispersion][:service_password]
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "swift dispersion wakeup keystone" do
   protocol keystone_settings["protocol"]

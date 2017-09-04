@@ -35,7 +35,7 @@ crowbar_pacemaker_sync_mark "wait-cinder_register"
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "cinder api wakeup keystone" do
   protocol keystone_settings["protocol"]

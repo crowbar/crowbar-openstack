@@ -210,7 +210,7 @@ max_active_keys = (node[:keystone][:token_expiration].to_f / 3600).ceil + 2
 
 register_auth_hash = { user: node[:keystone][:admin][:username],
                        password: node[:keystone][:admin][:password],
-                       tenant: node[:keystone][:admin][:project] }
+                       project: node[:keystone][:admin][:project] }
 
 if node[:keystone].key?(:endpoint)
   endpoint_protocol = node[:keystone][:endpoint][:protocol]
@@ -479,7 +479,7 @@ end
 
 register_auth_hash = { user: node[:keystone][:admin][:username],
                        password: node[:keystone][:admin][:password],
-                       tenant: node[:keystone][:admin][:project] }
+                       project: node[:keystone][:admin][:project] }
 
 updated_password = node[:keystone][:admin][:updated_password]
 

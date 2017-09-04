@@ -95,7 +95,7 @@ db_connection = fetch_database_connection_string(node[:ironic][:db])
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "ironic wakeup keystone" do
   protocol keystone_settings["protocol"]

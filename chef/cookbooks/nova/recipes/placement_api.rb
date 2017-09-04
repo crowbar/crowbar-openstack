@@ -38,7 +38,7 @@ crowbar_pacemaker_sync_mark "wait-nova-placement_register" if api_ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "register placement user '#{node["nova"]["placement_service_user"]}'" do
   protocol keystone_settings["protocol"]
