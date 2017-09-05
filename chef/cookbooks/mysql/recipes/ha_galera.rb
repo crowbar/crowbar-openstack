@@ -188,15 +188,28 @@ end
 # Which might take a while. Wait for that to complete by watching the
 # "wsrep_local_state_comment" status variable on all cluster nodes to reach
 # the "Synced" state, before continuing with the rest of the recipe.
-script "wait galera bootstrap" do
-  interpreter "bash"
-  code <<-EOH
-    sync_state=""
-    while [[ $sync_state != "Synced" ]]; do
-      sleep 1
-      sync_state=$(mysql -u "''" -N -B -e "SHOW STATUS WHERE Variable_name='wsrep_local_state_comment';" | cut -f 2)
-    done
-  EOH
+ruby_block "wait galera bootstrap" do
+  seconds = 300
+  block do
+    require "timeout"
+    begin
+      cmd = "mysql -u '' -N -B " \
+        "-e \"SHOW STATUS WHERE Variable_name='wsrep_local_state_comment';\" | cut -f 2"
+      sync_state = ""
+      Timeout.timeout(seconds) do
+        while sync_state != "Synced"
+          sleep(1)
+          get_state = Mixlib::ShellOut.new(cmd).run_command
+          sync_state = get_state.stdout.chop
+        end
+      end
+    rescue Timeout::Error
+      message = "Galera cluster did not start after #{seconds} seconds. " \
+        "Check pacemaker and mysql log files manually for possible errors."
+      Chef::Log.fatal(message)
+      raise message
+    end
+  end
   not_if { node[:database][:galera_bootstrapped] }
 end
 
