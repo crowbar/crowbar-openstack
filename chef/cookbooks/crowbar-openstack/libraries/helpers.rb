@@ -170,7 +170,8 @@ class CrowbarOpenStackHelper
           url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
             "#{rabbit[:rabbitmq][:password]}@" \
             "#{rabbit[:rabbitmq][:address]}:#{port}/" \
-            "#{rabbit[:rabbitmq][:vhost]}"
+            "#{rabbit[:rabbitmq][:vhost]}",
+          pacemaker_resource: "rabbitmq"
         }
 
         Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]}")

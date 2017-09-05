@@ -375,8 +375,6 @@ domain show -f value -c id #{stack_user_domain_name}`
   end
 end
 
-rabbit_settings = fetch_rabbitmq_settings
-
 template "/etc/heat/heat.conf.d/100-heat.conf" do
   source "heat.conf.erb"
   owner "root"
@@ -386,7 +384,7 @@ template "/etc/heat/heat.conf.d/100-heat.conf" do
     lazy {
       {
         debug: node[:heat][:debug],
-        rabbit_settings: rabbit_settings,
+        rabbit_settings: fetch_rabbitmq_settings,
         keystone_settings: keystone_settings,
         memcached_servers: memcached_servers,
         database_connection: db_connection,
