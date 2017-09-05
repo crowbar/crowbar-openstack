@@ -77,6 +77,8 @@ lock_path = /var/run/neutron
 driver = neutron.openstack.common.notifier.rpc_notifier
 
 [oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
 ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:client_ca_certs] -%>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
