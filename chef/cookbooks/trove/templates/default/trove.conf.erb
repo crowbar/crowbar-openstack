@@ -3,7 +3,7 @@ verbose = <%= node[:trove][:verbose] %>
 debug = <%= node[:trove][:debug] %>
 bind_host = <%= @bind_host %>
 bind_port = <%= @bind_port %>
-transport_url = <%= @rabbit_trove_url %>
+transport_url = <%= @rabbit_settings[:trove_url] %>
 
 
 api_extensions_path = $pybasedir/extensions/routes
