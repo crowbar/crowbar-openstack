@@ -31,6 +31,7 @@ crowbar_pacemaker_sync_mark "sync-ceilometer_server_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources"
 
+rabbit_settings = fetch_rabbitmq_settings
 services = ["collector", "agent_notification"]
 transaction_objects = []
 
@@ -38,12 +39,12 @@ services.each do |service|
   primitive_name = "ceilometer-#{service}"
 
   if node[:ceilometer][:use_mongodb]
-    order_only_existing = "( rabbitmq cl-keystone )"
+    order_only_existing = "( #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
   else
     # we don't make the db mandatory if not mongodb; this is debatable, but
     # oslo.db is supposed to deal well with reconnections; it's less clear about
     # mongodb
-    order_only_existing = "( postgresql rabbitmq cl-keystone )"
+    order_only_existing = "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
   end
 
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
