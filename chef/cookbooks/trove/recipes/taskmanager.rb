@@ -44,7 +44,7 @@ template node[:trove][:taskmanager][:config_file] do
     keystone_settings: keystone_settings,
     sql_connection: sql_connection,
     rabbit_trove_url: rabbit_trove_url,
-    rabbit_default_settings: fetch_rabbitmq_settings,
+    rabbit_settings: fetch_rabbitmq_settings,
     nova_url: nova_url,
     nova_insecure: nova_insecure,
     cinder_url: cinder_url,

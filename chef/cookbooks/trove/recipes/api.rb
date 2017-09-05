@@ -152,7 +152,7 @@ template node[:trove][:api][:config_file] do
   variables(
     keystone_settings: keystone_settings,
     sql_connection: sql_connection,
-    rabbit_default_settings: fetch_rabbitmq_settings,
+    rabbit_settings: fetch_rabbitmq_settings,
     rabbit_trove_settings: rabbitmq_trove_settings,
     nova_url: nova_url,
     nova_insecure: nova_insecure,
