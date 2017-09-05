@@ -74,7 +74,7 @@ memcache_security_strategy = ENCRYPT
 memcache_secret_key = <%= node[:trove][:memcache_secret_key] %>
 
 [oslo_messaging_rabbit]
-rabbit_use_ssl = <%= @rabbit_default_settings[:use_ssl] %>
-<% if @rabbit_default_settings[:client_ca_certs] -%>
-kombu_ssl_ca_certs = <%= @rabbit_default_settings[:client_ca_certs] %>
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
