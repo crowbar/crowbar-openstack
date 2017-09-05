@@ -171,6 +171,8 @@ class CrowbarOpenStackHelper
             "#{rabbit[:rabbitmq][:password]}@" \
             "#{rabbit[:rabbitmq][:address]}:#{port}/" \
             "#{rabbit[:rabbitmq][:vhost]}",
+          durable_queues: false,
+          ha_queues: false,
           pacemaker_resource: "rabbitmq"
         }
 
