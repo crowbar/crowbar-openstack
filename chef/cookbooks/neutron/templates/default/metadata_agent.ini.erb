@@ -1,6 +1,6 @@
 [DEFAULT]
 <% unless @nova_metadata_settings.empty? %>
-nova_metadata_ip = <%= @nova_metadata_settings[:host] %>
+nova_metadata_host = <%= @nova_metadata_settings[:host] %>
 metadata_proxy_shared_secret = <%= @nova_metadata_settings[:shared_secret] %>
 nova_metadata_protocol = <%= @nova_metadata_settings[:protocol] %>
 nova_metadata_insecure = <%= @nova_metadata_settings[:insecure] %>
