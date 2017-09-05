@@ -10,7 +10,7 @@ os_region_name= <%= @keystone_settings['endpoint_region'] %>
 nova_proxy_admin_user = <%= @keystone_settings["admin_user"] %>
 nova_proxy_admin_pass = <%= @keystone_settings["admin_password"] %>
 nova_proxy_admin_tenant_name = <%= @keystone_settings["admin_tenant"] %>
-transport_url = <%= @rabbit_trove_url %>
+transport_url = <%= @rabbit_settings[:trove_url] %>
 log_dir = /var/log/trove
 
 [database]
