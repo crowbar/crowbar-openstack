@@ -157,6 +157,13 @@
         "vendordata": {
           "json": "{}"
         }
+      },
+      "ha_rate_limit": {
+        "nova-api": 0,
+        "nova-placement-api": 0,
+        "nova-metadata": 0,
+        "nova-novncproxy": 0,
+        "nova-serialproxy": 0
       }
     }
   },
@@ -164,7 +171,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 204,
+      "schema-revision": 205,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],

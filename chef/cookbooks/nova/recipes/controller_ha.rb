@@ -29,6 +29,7 @@ haproxy_loadbalancer "nova-api" do
   port node[:nova][:ports][:api]
   use_ssl node[:nova][:ssl][:enabled]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "api")
+  rate_limit node[:nova][:ha_rate_limit]["nova-api"]
   action :nothing
 end.run_action(:create)
 
@@ -37,6 +38,7 @@ haproxy_loadbalancer "nova-placement-api" do
   port node[:nova][:ports][:placement_api]
   use_ssl node[:nova][:ssl][:enabled]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "placement_api")
+  rate_limit node[:nova][:ha_rate_limit]["nova-placement-api"]
   action :nothing
 end.run_action(:create)
 
@@ -45,6 +47,7 @@ haproxy_loadbalancer "nova-metadata" do
   port node[:nova][:ports][:metadata]
   use_ssl node[:nova][:ssl][:enabled]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "metadata")
+  rate_limit node[:nova][:ha_rate_limit]["nova-metadata"]
   action :nothing
 end.run_action(:create)
 
@@ -54,6 +57,7 @@ if node[:nova][:use_novnc]
     port node[:nova][:ports][:novncproxy]
     use_ssl node[:nova][:novnc][:ssl][:enabled]
     servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "novncproxy")
+    rate_limit node[:nova][:ha_rate_limit]["nova-novncproxy"]
     action :nothing
   end.run_action(:create)
 end
@@ -66,6 +70,7 @@ if node[:nova][:use_serial]
       "nova",
       "nova-controller",
       "serialproxy")
+    rate_limit node[:nova][:ha_rate_limit]["nova-serialproxy"]
     action :nothing
   end.run_action(:create)
 end
