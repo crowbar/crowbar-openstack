@@ -5,8 +5,8 @@ host_href = <%= @host_href %>
 sql_connection = <%= @database_connection %>
 
 [oslo_messaging_rabbit]
-
-amqp_durable_queues = False
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
 rabbit_userid = <%= @rabbit_settings[:user] %>
 rabbit_password =  <%= @rabbit_settings[:password] %>
 rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>

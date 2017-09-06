@@ -2,7 +2,7 @@
 debug = <%= node[:trove][:debug] %>
 bind_host = <%= @bind_host %>
 bind_port = <%= @bind_port %>
-transport_url = <%= @rabbit_trove_url %>
+transport_url = <%= @rabbit_settings[:trove_url] %>
 
 
 api_extensions_path = $pybasedir/extensions/routes
@@ -74,7 +74,9 @@ memcache_security_strategy = ENCRYPT
 memcache_secret_key = <%= node[:trove][:memcache_secret_key] %>
 
 [oslo_messaging_rabbit]
-rabbit_use_ssl = <%= @rabbit_default_settings[:use_ssl] %>
-<% if @rabbit_default_settings[:client_ca_certs] -%>
-kombu_ssl_ca_certs = <%= @rabbit_default_settings[:client_ca_certs] %>
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
