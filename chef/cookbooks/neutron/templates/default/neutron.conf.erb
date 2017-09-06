@@ -73,8 +73,10 @@ driver = neutron.openstack.common.notifier.rpc_notifier
 
 [oslo_messaging_rabbit]
 rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:cluster] -%>
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
 rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+<% end -%>
 <% if @rabbit_settings[:client_ca_certs] -%>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
