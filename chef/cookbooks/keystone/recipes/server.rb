@@ -267,10 +267,7 @@ template node[:keystone][:config_file] do
         my_admin_host, node[:keystone][:api][:admin_port]
       ),
       memcached_servers: memcached_servers,
-      signing_token_format: node[:keystone][:signing][:token_format],
-      signing_certfile: node[:keystone][:signing][:certfile],
-      signing_keyfile: node[:keystone][:signing][:keyfile],
-      signing_ca_certs: node[:keystone][:signing][:ca_certs],
+      token_format: node[:keystone][:token_format],
       token_expiration: node[:keystone][:token_expiration],
       max_active_keys: max_active_keys,
       protocol: node[:keystone][:api][:protocol],
@@ -366,7 +363,7 @@ if ha_enabled
 end
 
 # Configure Keystone token fernet backend provider
-if node[:keystone][:signing][:token_format] == "fernet"
+if node[:keystone][:token_format] == "fernet"
   # To be sure that rsync package is installed
   package "rsync"
   crowbar_pacemaker_sync_mark "sync-keystone_install_rsync" if ha_enabled

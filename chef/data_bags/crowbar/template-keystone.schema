@@ -64,12 +64,7 @@
                     "assignment" : { "type" : "map", "required" : true, "mapping": {
                       "driver": { "type": "str", "required": true }
                     }},
-                    "signing" : { "type" : "map", "required" : true, "mapping": {
-                      "token_format": { "type": "str", "required": true, "pattern": "/^(fernet|uuid)$/" },
-                      "certfile": { "type": "str" },
-                      "keyfile": { "type": "str" },
-                      "ca_certs": { "type": "str" }
-                    }},
+                    "token_format": { "type": "str", "required": true, "pattern": "/^(fernet|uuid)$/" },
                     "ldap" : { "type" : "map", "mapping": {
                       "url": { "type": "str" },
                       "user": { "type": "str" },

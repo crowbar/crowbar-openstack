@@ -49,10 +49,7 @@ default[:keystone][:assignment][:driver] = "sql"
 
 default[:keystone][:sql][:idle_timeout] = 30
 
-default[:keystone][:signing][:token_format] = "UUID"
-default[:keystone][:signing][:certfile] = "/etc/keystone/ssl/certs/signing_cert.pem"
-default[:keystone][:signing][:keyfile] = "/etc/keystone/ssl/private/signing_key.pem"
-default[:keystone][:signing][:ca_certs] = "/etc/keystone/ssl/certs/ca.pem"
+default[:keystone][:token_format] = "fernet"
 
 default[:keystone][:ssl][:certfile] = "/etc/keystone/ssl/certs/signing_cert.pem"
 default[:keystone][:ssl][:keyfile] = "/etc/keystone/ssl/private/signing_key.pem"
