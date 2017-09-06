@@ -27,9 +27,6 @@ $(document).ready(function($) {
       return opts.inverse(this);
   });
 
-  var use_multi_backend = $('#proposal_attributes').readJsonAttribute(
-                            'use_multi_backend', false);
-
   function cb_cinder_volume_delete()
   {
     //FIXME: right now, there's no good way to localize strings in js :/
@@ -76,7 +73,6 @@ $(document).ready(function($) {
     $('#cinder_backends').replaceWith(
       cinder_backend_template({
         "entries": volumes,
-        "use_multi_backend": use_multi_backend,
         "is_only_backend": volumes.length == 1
       })
     );
@@ -91,21 +87,6 @@ $(document).ready(function($) {
     // refresh data-change handlers
     detach_events();
     attach_events();
-  }
-
-  if (!use_multi_backend) {
-    $('#volumes_0_backend_driver').on('change', function() {
-      var volumes = $('#proposal_attributes').readJsonAttribute('volumes', {});
-      var new_backend = $(this).val();
-      var old_backend = volumes[0]["backend_driver"];
-      delete volumes[0][old_backend];
-
-      volumes[0]["backend_driver"] = new_backend;
-      volumes[0][new_backend] = $('#proposal_attributes').readJsonAttribute('volume_defaults/' + new_backend);
-      $('#proposal_attributes').writeJsonAttribute('volumes', volumes);
-
-      redisplay_backends();
-    });
   }
 
   if ($.queryString['attr_raw'] != "true") {

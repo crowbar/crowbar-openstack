@@ -17,7 +17,6 @@
       "max_overflow": 10,
       "pool_timeout": 30,
       "rpc_response_timeout": 60,
-      "use_multi_backend": true,
       "use_multipath": false,
       "keymgr_fixed_key": "",
       "volume_defaults": {
@@ -163,7 +162,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 202,
+      "schema-revision": 203,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

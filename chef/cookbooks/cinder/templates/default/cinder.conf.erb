@@ -33,11 +33,9 @@ default_volume_type = <%= @default_volume_type %>
 
 auth_strategy = keystone
 
-<% if @use_multi_backend -%>
 enabled_backends=<%= @volumes.each_with_index.collect { |backend,idx|
     "backend-#{backend['backend_driver']}-#{idx}"
 }.join(',') %>
-<% end -%>
 
 nova_catalog_info = compute:nova:internalURL
 nova_catalog_admin_info = compute:nova:adminURL
@@ -59,10 +57,8 @@ strict_ssh_host_key_policy = <%= @strict_ssh_host_key_policy ? 'true' : 'false' 
     backend_id = "backend-#{volume['backend_driver']}-#{volid}"
 -%>
 
-  <% if @use_multi_backend -%>
 [<%= backend_id %>]
 volume_backend_name = <%= volume['backend_name'] %>
-  <% end -%>
 
   <% if volume['backend_driver'] == 'blockbridge' -%><% end -%>
   <% if volume['backend_driver'] == 'coho' -%><% end -%>
@@ -264,7 +260,6 @@ image_upload_use_cinder_backend = true
 max_over_subscription_ratio = <%= volume[volume['backend_driver']]['max_over_subscription_ratio'] %>
   <% end -%>
 
-  <% break unless @use_multi_backend -%>
 <% end -%>
 
 [key_manager]
@@ -304,7 +299,7 @@ lock_path = /var/run/cinder
 <% end -%>
 
 [oslo_messaging_rabbit]
-rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:client_ca_certs] -%>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
