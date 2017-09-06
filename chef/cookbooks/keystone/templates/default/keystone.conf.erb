@@ -99,9 +99,6 @@ kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 [oslo_policy]
 policy_file = <%= node[:keystone][:policy_file] %>
 
-[resource]
-driver = sql
-
 [role]
 driver = sql
 
