@@ -43,13 +43,9 @@ compute_driver = libvirt.LibvirtDriver
 <% if @libvirt_type.eql?('xen') %>
 use_cow_images = false
 <% end %>
-firewall_driver = nova.virt.firewall.NoopFirewallDriver
 <% if @ssl_cert_required %>
 ssl_ca_file = <%= @ssl_ca_file %>
 <% end %>
-default_floating_pool = floating
-dhcpbridge = <%= @dhcpbridge %>
-linuxnet_interface_driver = ""
 <% if @force_config_drive || @libvirt_type.eql?('zvm') %>
 flat_injected = true
 <% end %>
@@ -110,7 +106,7 @@ enabled = true
 memcache_servers = <%= @memcached_servers.join(',') %>
 
 [cinder]
-catalog_info = volumev2:cinderv2:internalURL
+catalog_info = volumev3:cinderv3:internalURL
 os_region_name = <%= @keystone_settings['endpoint_region'] %>
 insecure = <%= @cinder_insecure ? 'True' : 'False' %>
 cross_az_attach = <%= node[:nova][:cross_az_attach] %>
@@ -140,9 +136,14 @@ pool_timeout = <%= node[:nova][:db][:pool_timeout] %>
 host = <%= @glance_server_host %>
 port = <%= @glance_server_port %>
 api_servers = <%= "#{@glance_server_protocol}://#{@glance_server_host}:#{@glance_server_port}" %>
-api_insecure = <%= @glance_server_insecure ? 'True' : 'False' %>
+insecure = <%= @glance_server_insecure ? 'True' : 'False' %>
 <% end %>
 protocol = <%= @glance_server_protocol %>
+<% if @ssl_cert_required %>
+cafile = <%= @ssl_ca_file %>
+<% end %>
+certfile = <%= @ssl_cert_file %>
+keyfile = <%= @ssl_key_file %>
 
 <% unless @ironic_settings.nil? %>
 [ironic]
@@ -236,6 +237,7 @@ timeout = <%= node[:nova][:neutron_url_timeout] %>
 username = <%= @neutron_service_user %>
 user_domain_name = <%= @keystone_settings['admin_domain'] %>
 project_domain_name = <%= @keystone_settings['admin_domain'] %>
+default_floating_pool = floating
 
 [oslo_concurrency]
 <% if @need_shared_lock_path %>
@@ -250,7 +252,7 @@ driver = messagingv2
 [oslo_messaging_rabbit]
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
 rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
-rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:client_ca_certs] %>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end %>
@@ -262,13 +264,6 @@ base_url = ws://<%= @serialproxy_public_host %>:<%= node[:nova][:ports][:serialp
 proxyclient_address = <%= node[:nova][:my_ip] %>
 serialproxy_host = 0.0.0.0
 serialproxy_port = 6083
-
-[ssl]
-<% if @ssl_cert_required %>
-ca_file = <%= @ssl_ca_file %>
-<% end %>
-cert_file = <%= @ssl_cert_file %>
-key_file = <%= @ssl_key_file %>
 
 [trusted_computing]
 <% if @has_itxt %>
@@ -330,7 +325,7 @@ use_baremetal_filters = true
 <% end %>
 <% if @has_itxt %>
 available_filters = nova.scheduler.filters.standard_filters
-enabled_filters = RetryFilter,AvailabilityZoneFilter,RamFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,TrustedFilter
+enabled_filters = RetryFilter,AvailabilityZoneFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,TrustedFilter
 <% end %>
 <% unless @track_instance_changes %>
 track_instance_changes = false

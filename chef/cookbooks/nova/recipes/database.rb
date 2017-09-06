@@ -129,7 +129,7 @@ end
 execute "nova-manage db sync up to revision 329" do
   user node[:nova][:user]
   group node[:nova][:group]
-  command "nova-manage db sync --version 329"
+  command "nova-manage db sync 329"
   action :run
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
