@@ -62,7 +62,6 @@ OPENSTACK_NEUTRON_NETWORK = {
     'enable_distributed_router': False,
     'enable_ha_router': False,
     'enable_lb': <%= @enable_lb ? 'True' : 'False' %>,
-    'enable_firewall': True,
     'enable_vpn': <%= @enable_vpn ? 'True' : 'False' %>,
     'enable_fip_topology_check': True,
 
@@ -113,6 +112,7 @@ POLICY_FILES = {
     'image': '<%= @policy_file[:image] %>',
     'orchestration': '<%= @policy_file[:orchestration] %>',
     'network': '<%= @policy_file[:network] %>',
+    'neutron-fwaas': '<%= @policy_file[:neutron_fwaas] %>',
 }
 
 LOGGING = {

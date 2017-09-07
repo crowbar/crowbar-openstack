@@ -73,6 +73,25 @@ else
   end
 end
 
+
+# install horizon neutron fwaas plugin if needed
+neutron_fwaas_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-neutron-fwaas-ui"
+  when "rhel"
+    "openstack-neutron-fwaas-ui"
+  end
+
+unless neutron_fwaas_ui_pkgname.nil?
+  unless Barclamp::Config.load("openstack", "neutron").empty?
+    package neutron_fwaas_ui_pkgname do
+      action :install
+      notifies :reload, "service[horizon]"
+    end
+  end
+end
+
 # install horizon neutron lbaas plugin if needed
 neutron_lbaas_ui_pkgname =
   case node[:platform_family]

@@ -28,7 +28,8 @@
         "volume": "cinder_policy.json",
         "image": "glance_policy.json",
         "orchestration": "heat_policy.json",
-        "network": "neutron_policy.json"
+        "network": "neutron_policy.json",
+        "neutron_fwaas": "neutron-fwaas-policy.json"
       },
       "can_set_mount_point": false,
       "can_set_password": false,
@@ -48,7 +49,7 @@
     "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 201,
+      "schema-revision": 202,
       "element_states": {
         "horizon-server": [ "readying", "ready", "applying" ]
       },
