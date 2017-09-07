@@ -377,12 +377,8 @@ if neutrons.length > 0
   else
     neutron_ml2_type_drivers = "'*'"
   end
-  neutron_use_lbaas = neutron[:neutron][:use_lbaas]
-  neutron_use_vpnaas = neutron[:neutron][:use_vpnaas]
 else
   neutron_ml2_type_drivers = "'*'"
-  neutron_use_lbaas = false
-  neutron_use_vpnaas = false
 end
 
 # We're going to use memcached as a cache backend for Django
@@ -450,8 +446,6 @@ template local_settings do
     || manila_insecure \
     || ceilometer_insecure,
     db_settings: db_settings,
-    enable_lb: neutron_use_lbaas,
-    enable_vpn: neutron_use_vpnaas,
     timezone: (node[:provisioner][:timezone] rescue "UTC") || "UTC",
     use_ssl: node[:horizon][:apache][:ssl],
     password_validator_regex: node[:horizon][:password_validator][:regex],
