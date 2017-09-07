@@ -63,6 +63,15 @@ if node[:keystone][:api][:internal_URL_host] != my_admin_host
   node.save
 end
 
+# resource to set a flag when apache2 is restarted so we now which cookbook was the
+# one that triggered the restart, in order to know if the restart is allowed
+ruby_block "set origin for apache2 restart" do
+  block do
+    node.run_state["apache2_restart_origin"] = @cookbook_name
+  end
+  action :nothing
+end
+
 if node[:keystone][:frontend] == "uwsgi"
 
   service "keystone" do
@@ -295,6 +304,7 @@ template node[:keystone][:config_file] do
       rabbit_settings: fetch_rabbitmq_settings
     )
     if node[:keystone][:frontend] == "apache"
+      notifies :create, resources(ruby_block: "set origin for apache2 restart"), :immediately
       notifies :restart, resources(service: "apache2"), :immediately
     elsif node[:keystone][:frontend] == "uwsgi"
       notifies :restart, resources(service: "keystone-uwsgi"), :immediately
@@ -330,6 +340,7 @@ if node[:keystone][:domain_specific_drivers]
         domain: domain
       )
       if node[:keystone][:frontend] == "apache"
+        notifies :create, resources(ruby_block: "set origin for apache2 restart"), :immediately
         notifies :restart, resources(service: "apache2"), :immediately
       elsif node[:keystone][:frontend] == "uwsgi"
         notifies :restart, resources(service: "keystone-uwsgi"), :immediately
