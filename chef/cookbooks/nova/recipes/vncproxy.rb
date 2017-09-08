@@ -20,6 +20,9 @@
 
 include_recipe "nova::config"
 
+use_crowbar_pacemaker_service = node[:nova][:ha][:enabled] &&
+  node[:pacemaker][:clone_stateless_services]
+
 unless %w(rhel suse).include?(node[:platform_family])
   pkgs=%w[python-numpy nova-console nova-consoleauth]
   pkgs.each do |pkg|
@@ -42,7 +45,7 @@ if node[:nova][:use_novnc]
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources(template: node[:nova][:config_file]), :delayed
-    provider Chef::Provider::CrowbarPacemakerService if node[:nova][:ha][:enabled]
+    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
 end
 
@@ -55,7 +58,7 @@ if node[:nova][:use_serial]
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources(template: node[:nova][:config_file]), :delayed
-    provider Chef::Provider::CrowbarPacemakerService if node[:nova][:ha][:enabled]
+    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
 end
 
@@ -64,5 +67,5 @@ service "nova-consoleauth" do
   supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources(template: node[:nova][:config_file]), :delayed
-  provider Chef::Provider::CrowbarPacemakerService if node[:nova][:ha][:enabled]
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end

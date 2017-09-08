@@ -23,7 +23,11 @@ if node[:barbican][:enable_keystone_listener]
   package "openstack-barbican-keystone-listener"
 end
 
+use_crowbar_pacemaker_service = node[:barbican][:ha][:enabled] &&
+  node[:pacemaker][:clone_stateless_services]
+
 service "openstack-barbican-keystone-listener" do
   action [:enable, :start] if node[:barbican][:enable_keystone_listener]
   action [:disable, :stop] unless node[:barbican][:enable_keystone_listener]
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end

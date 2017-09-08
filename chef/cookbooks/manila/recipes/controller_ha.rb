@@ -36,35 +36,37 @@ haproxy_loadbalancer "manila-api" do
   action :nothing
 end.run_action(:create)
 
-# Wait for all nodes to reach this point so we know that all nodes will have
-# all the required packages installed before we create the pacemaker
-# resources
-crowbar_pacemaker_sync_mark "sync-manila_before_ha"
+if node[:pacemaker][:clone_stateless_services]
+  # Wait for all nodes to reach this point so we know that all nodes will have
+  # all the required packages installed before we create the pacemaker
+  # resources
+  crowbar_pacemaker_sync_mark "sync-manila_before_ha"
 
-# Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-manila_ha_resources"
+  # Avoid races when creating pacemaker resources
+  crowbar_pacemaker_sync_mark "wait-manila_ha_resources"
 
-rabbit_settings = fetch_rabbitmq_settings
-services = ["api", "scheduler"]
-transaction_objects = []
+  rabbit_settings = fetch_rabbitmq_settings
+  services = ["api", "scheduler"]
+  transaction_objects = []
 
-services.each do |service|
-  primitive_name = "manila-#{service}"
+  services.each do |service|
+    primitive_name = "manila-#{service}"
 
-  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
-    agent node[:manila][:ha]["#{service}_ra"]
-    op node[:manila][:ha][:op]
-    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone " \
-        "cl-glance-api cl-cinder-api cl-neutron-server cl-nova-api )"
+    objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
+      agent node[:manila][:ha]["#{service}_ra"]
+      op node[:manila][:ha][:op]
+      order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone " \
+          "cl-glance-api cl-cinder-api cl-neutron-server cl-nova-api )"
+    end
+    transaction_objects.push(objects)
   end
-  transaction_objects.push(objects)
-end
 
-pacemaker_transaction "manila controller" do
-  cib_objects transaction_objects.flatten
-  # note that this will also automatically start the resources
-  action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
+  pacemaker_transaction "manila controller" do
+    cib_objects transaction_objects.flatten
+    # note that this will also automatically start the resources
+    action :commit_new
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 
-crowbar_pacemaker_sync_mark "create-manila_ha_resources"
+  crowbar_pacemaker_sync_mark "create-manila_ha_resources"
+end
