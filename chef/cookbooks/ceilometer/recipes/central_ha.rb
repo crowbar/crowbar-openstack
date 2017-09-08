@@ -21,6 +21,7 @@ crowbar_pacemaker_sync_mark "sync-ceilometer_central_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-ceilometer_central_ha_resources"
 
+rabbit_settings = fetch_rabbitmq_settings
 transaction_objects = []
 
 service_name = "ceilometer-central"
@@ -43,7 +44,7 @@ pacemaker_transaction "ceilometer central" do
 end
 
 crowbar_pacemaker_order_only_existing "o-#{service_name}" do
-  ordering "( rabbitmq cl-keystone ) #{service_name}"
+  ordering "( #{rabbit_settings[:pacemaker_resource]} cl-keystone ) #{service_name}"
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

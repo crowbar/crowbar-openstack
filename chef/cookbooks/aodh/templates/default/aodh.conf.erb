@@ -38,6 +38,10 @@ user_domain_name = <%= @keystone_settings["admin_domain"] %>
 auth_type = password
 
 [oslo_messaging_rabbit]
+<% if @rabbit_settings[:cluster] -%>
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+<% end -%>
 rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:client_ca_certs] -%>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>

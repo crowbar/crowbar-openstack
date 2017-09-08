@@ -44,6 +44,7 @@ crowbar_pacemaker_sync_mark "sync-barbican_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-barbican_ha_resources"
 
+rabbit_settings = fetch_rabbitmq_settings
 transaction_objects = []
 
 services =
@@ -59,7 +60,7 @@ services.each do |service|
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent node[:barbican][:ha][service.to_sym][:agent]
     op node[:barbican][:ha][service.to_sym][:op]
-    order_only_existing "( postgresql rabbitmq cl-keystone )"
+    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
   end
   transaction_objects.push(objects)
 end
