@@ -97,15 +97,18 @@ end
 # ensure swift tempurl key only if some agent_* drivers are enabled in ironic
 if !swift_config.empty? && node[:glance][:default_store] == "swift" && \
     ironics.any? && ironics.first[:ironic][:enabled_drivers].any? { |d| d.start_with?("agent_") }
-  swift_command = "swift --os-username #{keystone_settings["service_user"]}"
-  swift_command << " --os-password #{keystone_settings["service_password"]}"
-  swift_command << " --os-tenant-name #{keystone_settings["service_tenant"]}"
-  swift_command << " --os-auth-url #{keystone_settings["public_auth_url"]}"
-  swift_command << " --os-identity-api-version 3"
+  swift_command = "swift "
   swift_command << (swift_insecure ? " --insecure" : "")
+  env = {
+    "OS_USERNAME" => keystone_settings["service_user"],
+    "OS_PASSWORD" => keystone_settings["service_password"],
+    "OS_PROJECT_NAME" => keystone_settings["service_tenant"],
+    "OS_AUTH_URL" => keystone_settings["public_auth_url"],
+    "OS_IDENTITY_API_VERSION" => 3
+  }
 
   get_tempurl_key = "#{swift_command} stat | grep -m1 'Meta Temp-Url-Key:' | awk '{print $3}'"
-  tempurl_key = Mixlib::ShellOut.new(get_tempurl_key).run_command.stdout.chomp
+  tempurl_key = Mixlib::ShellOut.new(get_tempurl_key, environment: env).run_command.stdout.chomp
   # no tempurl key set, set a random one
   if tempurl_key.empty?
     tempurl_key = secure_password

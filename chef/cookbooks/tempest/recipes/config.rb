@@ -71,18 +71,20 @@ auth_url = KeystoneHelper.service_URL(
     keystone_settings["protocol"], keystone_settings["internal_url_host"],
     keystone_settings["service_port"])
 # for non-admin usage
-openstackcli = "openstack --insecure --os-username #{tempest_comp_user}"
-openstackcli << " --os-identity-api-version #{keystone_settings["api_version"]}"
-openstackcli << " --os-password #{tempest_comp_pass}"
-openstackcli << " --os-project-name #{tempest_comp_tenant}"
-openstackcli << " --os-auth-url #{auth_url}"
+comp_environment = "OS_USERNAME='#{tempest_comp_user}' "
+comp_environment << "OS_PASSWORD='#{tempest_comp_pass}' "
+comp_environment << "OS_PROJECT_NAME='#{tempest_comp_tenant}' "
+comp_environment << "OS_AUTH_URL='#{auth_url}' "
+comp_environment << "OS_IDENTITY_API_VERSION='#{keystone_settings["api_version"]}'"
+openstackcli = "#{comp_environment} openstack --insecure"
 
 # for admin usage (listing the available services)
-openstackcli_adm = "openstack --insecure --os-username #{tempest_adm_user}"
-openstackcli_adm << " --os-identity-api-version #{keystone_settings["api_version"]}"
-openstackcli_adm << " --os-password #{tempest_adm_pass}"
-openstackcli_adm << " --os-project-name #{tempest_comp_tenant}"
-openstackcli_adm << " --os-auth-url #{auth_url}"
+adm_environment = "OS_USERNAME='#{tempest_adm_user}' "
+adm_environment << "OS_PASSWORD='#{tempest_adm_pass}' "
+adm_environment << "OS_PROJECT_NAME='#{tempest_comp_tenant}' "
+adm_environment << "OS_AUTH_URL='#{auth_url}' "
+adm_environment << "OS_IDENTITY_API_VERSION='#{keystone_settings["api_version"]}'"
+openstackcli_adm = "#{adm_environment} openstack --insecure"
 
 enabled_services = `#{openstackcli_adm} service list -f value -c Type`.split
 
