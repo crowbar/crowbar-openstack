@@ -20,6 +20,10 @@ idle_timeout = <%= @sql_idle_timeout %>
 max_active_keys = <%= @max_active_keys %>
 
 [identity]
+password_hash_algorithm = <%= node[:keystone][:identity][:password_hash_algorithm] %>
+<% if node[:keystone][:identity].key?("password_hash_rounds") -%>
+password_hash_rounds = <%= node[:keystone][:identity][:password_hash_rounds] %>
+<% end -%>
 domain_specific_drivers_enabled = <%= node[:keystone][:domain_specific_drivers] ? "True" : "False" %>
 
 <% if node[:keystone][:domain_specific_drivers] -%>

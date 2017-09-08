@@ -87,6 +87,25 @@ class KeystoneService < OpenstackServiceObject
       validation_error I18n.t("barclamp.#{@bc_name}.validation.enable_keystone_api")
     end
 
+    # validate the password hash configuration
+    if proposal["attributes"][@bc_name]["identity"]["password_hash_rounds"]
+      password_hash_rounds = proposal["attributes"][@bc_name]["identity"]["password_hash_rounds"]
+      case proposal["attributes"][@bc_name]["identity"]["password_hash_algorithm"]
+      when "bcrypt"
+        if password_hash_rounds < 4 || password_hash_rounds > 31
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.bcrypt_password_hash_rounds")
+        end
+      when "scrypt"
+        if password_hash_rounds < 1 || password_hash_rounds > 31
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.scrypt_password_hash_rounds")
+        end
+      when "pbkdf_sha512"
+        if password_hash_rounds < 1 || password_hash_rounds > (1 << 32) - 1
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.pbkdf_sha512_password_hash_rounds")
+        end
+      end
+    end
+
     keystone_timeout = proposal["attributes"]["keystone"]["token_expiration"]
     horizon_proposal = Proposal.find_by(barclamp: "horizon", name: "default")
     unless horizon_proposal.nil?

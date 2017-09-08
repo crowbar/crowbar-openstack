@@ -54,7 +54,8 @@
         "password": "crowbar"
       },
       "identity": {
-        "driver": "sql"
+        "driver": "sql",
+        "password_hash_algorithm": "bcrypt"
       },
       "assignment": {
         "driver": "sql"
@@ -173,7 +174,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 202,
+      "schema-revision": 203,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },
