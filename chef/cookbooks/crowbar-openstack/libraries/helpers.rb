@@ -163,7 +163,6 @@ class CrowbarOpenStackHelper
 
         single_rabbit_settings = {
           # backwards compatible attributes, remove in cloud8?
-          password: rabbit[:rabbitmq][:password],
           vhost: rabbit[:rabbitmq][:vhost],
           # end backwards comatible attrs
           use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
