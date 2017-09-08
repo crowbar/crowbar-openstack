@@ -108,5 +108,4 @@ ruby_block "wait for #{ms_name} to be started" do
       raise message
     end
   end # block
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end # ruby_block
