@@ -227,6 +227,7 @@ class CrowbarOpenStackHelper
             client_ca_certs: client_ca_certs,
             url: rabbit_hosts.join(","),
             trove_url: trove_rabbit_hosts.join(","),
+            cluster: true,
             durable_queues: true,
             ha_queues: true,
             pacemaker_resource: "ms-rabbitmq"
