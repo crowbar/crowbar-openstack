@@ -147,12 +147,7 @@ pacemaker_primitive service_name do
     "datadir" => node[:database][:mysql][:datadir],
     "log" => "/var/log/mysql/mysql_error.log"
   })
-  op({
-    "monitor" => {
-      "interval" => "20s",
-      "role" => "Master"
-    }
-  })
+  op node[:mysql][:ha][:op]
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
