@@ -11,7 +11,6 @@ rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
 rabbit_userid = <%= @rabbit_settings[:user] %>
 rabbit_password =  <%= @rabbit_settings[:password] %>
 rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
-rabbit_port = <%= @rabbit_settings[:port] %>
 rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:client_ca_certs] -%>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
