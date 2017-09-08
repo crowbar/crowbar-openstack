@@ -99,17 +99,9 @@ kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 [oslo_policy]
 policy_file = <%= node[:keystone][:policy_file] %>
 
-[resource]
-driver = sql
-
 [role]
 driver = sql
 
-[signing]
-certfile = <%= @signing_certfile %>
-keyfile = <%= @signing_keyfile %>
-ca_certs = <%= @signing_ca_certs %>
-
 [token]
 expiration = <%= @token_expiration %>
-provider = <%= node[:keystone][:signing][:token_format] %>
+provider = <%= node[:keystone][:token_format] %>

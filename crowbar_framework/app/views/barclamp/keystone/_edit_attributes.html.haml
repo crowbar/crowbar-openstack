@@ -5,7 +5,7 @@
   .panel-body
     = instance_field :database
     = instance_field :rabbitmq
-    = select_field %w(signing token_format), :collection => :token_formats_for_keystone
+    = select_field %w(token_format), :collection => :token_formats_for_keystone
     = string_field %w(api region)
 
     %fieldset

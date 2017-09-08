@@ -59,12 +59,7 @@
       "assignment": {
         "driver": "sql"
       },
-      "signing": {
-        "token_format": "fernet",
-        "certfile": "/etc/keystone/ssl/certs/signing_cert.pem",
-        "keyfile": "/etc/keystone/ssl/private/signing_key.pem",
-        "ca_certs": "/etc/keystone/ssl/certs/ca.pem"
-      },
+      "token_format": "fernet",
       "ldap" : {
         "url": "ldap://localhost",
         "user": "dc=Manager,dc=example,dc=com",
@@ -178,7 +173,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 201,
+      "schema-revision": 202,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },
