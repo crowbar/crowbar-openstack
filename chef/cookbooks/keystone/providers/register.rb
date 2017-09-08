@@ -386,6 +386,7 @@ def _update_item(http, headers, path, body, name)
 end
 
 private
+
 def _build_connection(new_resource)
   # Need to require net/https so that Net::HTTP gets monkey-patched
   # to actually support SSL:
@@ -574,7 +575,6 @@ def _build_endpoint_object(interface, service, new_resource)
   body
 end
 
-private
 def _build_headers(token = nil)
   ret = Hash.new
   ret.store("X-Auth-Token", token) if token
