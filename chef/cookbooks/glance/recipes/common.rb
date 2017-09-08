@@ -78,7 +78,7 @@ crowbar_pacemaker_sync_mark "wait-glance_register_user" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant:  keystone_settings["admin_tenant"] }
+                       project:  keystone_settings["admin_project"] }
 
 keystone_register "glance wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -97,7 +97,7 @@ keystone_register "register glance user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -108,7 +108,7 @@ keystone_register "give glance user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end

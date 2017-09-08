@@ -164,7 +164,7 @@ case proxy_config[:auth_method]
 
      register_auth_hash = { user: keystone_settings["admin_user"],
                             password: keystone_settings["admin_password"],
-                            tenant: keystone_settings["admin_tenant"] }
+                            project: keystone_settings["admin_project"] }
 
      keystone_register "swift proxy wakeup keystone" do
        protocol keystone_settings["protocol"]
@@ -195,7 +195,7 @@ case proxy_config[:auth_method]
        auth register_auth_hash
        user_name keystone_settings["service_user"]
        user_password keystone_settings["service_password"]
-       tenant_name keystone_settings["service_tenant"]
+       project_name keystone_settings["service_tenant"]
        action :add_user
      end
 
@@ -206,7 +206,7 @@ case proxy_config[:auth_method]
        port keystone_settings["admin_port"]
        auth register_auth_hash
        user_name keystone_settings["service_user"]
-       tenant_name keystone_settings["service_tenant"]
+       project_name keystone_settings["service_tenant"]
        role_name "admin"
        action :add_access
      end
@@ -224,24 +224,22 @@ case proxy_config[:auth_method]
      end
 
      keystone_register "register swift-proxy endpoint" do
-         protocol keystone_settings["protocol"]
-         insecure keystone_settings["insecure"]
-         host keystone_settings["internal_url_host"]
-         auth register_auth_hash
-         port keystone_settings["admin_port"]
-         endpoint_service "swift"
-         endpoint_region keystone_settings["endpoint_region"]
-         endpoint_publicURL "#{swift_protocol}://#{public_host}:"\
+       protocol keystone_settings["protocol"]
+       insecure keystone_settings["insecure"]
+       host keystone_settings["internal_url_host"]
+       auth register_auth_hash
+       port keystone_settings["admin_port"]
+       endpoint_service "swift"
+       endpoint_region keystone_settings["endpoint_region"]
+       endpoint_publicURL "#{swift_protocol}://#{public_host}:"\
+                          "#{node[:swift][:ports][:proxy]}/v1/"\
+                          "#{node[:swift][:reseller_prefix]}$(project_id)s"
+       endpoint_adminURL "#{swift_protocol}://#{admin_host}:"\
+                         "#{node[:swift][:ports][:proxy]}/v1/"
+       endpoint_internalURL "#{swift_protocol}://#{admin_host}:"\
                             "#{node[:swift][:ports][:proxy]}/v1/"\
                             "#{node[:swift][:reseller_prefix]}$(project_id)s"
-         endpoint_adminURL "#{swift_protocol}://#{admin_host}:"\
-                           "#{node[:swift][:ports][:proxy]}/v1/"
-         endpoint_internalURL "#{swift_protocol}://#{admin_host}:"\
-                              "#{node[:swift][:ports][:proxy]}/v1/"\
-                              "#{node[:swift][:reseller_prefix]}$(project_id)s"
-         #  endpoint_global true
-         #  endpoint_enabled true
-        action :add_endpoint_template
+       action :add_endpoint
      end
 
      crowbar_pacemaker_sync_mark "create-swift_register" if ha_enabled

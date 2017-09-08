@@ -25,7 +25,7 @@ en:
           token_format: 'Algorithm for Token Generation'
         default_credentials: 'Default Credentials'
         default:
-          tenant: 'Default Tenant'
+          project: 'Default Project'
           create_user: 'Create Regular User'
           username: 'Regular User Username'
           password: 'Regular User Password'

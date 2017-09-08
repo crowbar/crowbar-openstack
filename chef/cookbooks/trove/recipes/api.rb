@@ -75,7 +75,7 @@ crowbar_pacemaker_sync_mark "wait-trove_register" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "trove api wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -94,7 +94,7 @@ keystone_register "register trove user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -105,7 +105,7 @@ keystone_register "give trove user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -136,9 +136,7 @@ keystone_register "register trove endpoint" do
                     "#{my_admin_host}:#{trove_port}/v1.0/$(project_id)s"
   endpoint_internalURL "#{trove_protocol}://"\
                        "#{my_admin_host}:#{trove_port}/v1.0/$(project_id)s"
-  #  endpoint_global true
-  #  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-trove_register" if ha_enabled

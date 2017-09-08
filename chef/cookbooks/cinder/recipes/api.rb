@@ -35,7 +35,7 @@ crowbar_pacemaker_sync_mark "wait-cinder_register"
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "cinder api wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -54,7 +54,7 @@ keystone_register "register cinder user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -65,7 +65,7 @@ keystone_register "give cinder user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -96,9 +96,7 @@ keystone_register "register cinder endpoint" do
                     "#{my_admin_host}:#{cinder_port}/v1/$(project_id)s"
   endpoint_internalURL "#{cinder_protocol}://"\
                        "#{my_admin_host}:#{cinder_port}/v1/$(project_id)s"
-#  endpoint_global true
-#  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register cinder service v2" do
@@ -127,7 +125,7 @@ keystone_register "register cinder endpoint v2" do
                     "#{my_admin_host}:#{cinder_port}/v2/$(project_id)s"
   endpoint_internalURL "#{cinder_protocol}://"\
                        "#{my_admin_host}:#{cinder_port}/v2/$(project_id)s"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register cinder service v3" do
@@ -156,7 +154,7 @@ keystone_register "register cinder endpoint v3" do
                     "#{my_admin_host}:#{cinder_port}/v3/$(project_id)s"
   endpoint_internalURL "#{cinder_protocol}://"\
                        "#{my_admin_host}:#{cinder_port}/v3/$(project_id)s"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-cinder_register"

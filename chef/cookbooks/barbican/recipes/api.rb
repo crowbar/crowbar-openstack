@@ -59,7 +59,7 @@ public_host = CrowbarHelper.get_host_for_public_url(node,
                                                     node[:barbican][:ha][:enabled])
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 crowbar_pacemaker_sync_mark "wait-barbican_register" if ha_enabled
 
@@ -97,7 +97,7 @@ keystone_register "register barbican endpoint" do
   endpoint_publicURL "#{barbican_protocol}://#{public_host}:#{barbican_port}"
   endpoint_adminURL "#{barbican_protocol}://#{admin_host}:#{barbican_port}"
   endpoint_internalURL "#{barbican_protocol}://#{admin_host}:#{barbican_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register barbican user" do
@@ -108,7 +108,7 @@ keystone_register "register barbican user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -119,7 +119,7 @@ keystone_register "give barbican user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end

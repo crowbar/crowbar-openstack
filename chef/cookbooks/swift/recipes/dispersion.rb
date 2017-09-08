@@ -41,7 +41,7 @@ service_password = node[:swift][:dispersion][:service_password]
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "swift dispersion wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -58,8 +58,8 @@ keystone_register "create tenant #{service_tenant} for dispersion" do
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
-  tenant_name service_tenant
-  action :add_tenant
+  project_name service_tenant
+  action :add_project
 end
 
 keystone_register "add #{service_user}:#{service_tenant} user" do
@@ -70,7 +70,7 @@ keystone_register "add #{service_user}:#{service_tenant} user" do
   auth register_auth_hash
   user_name service_user
   user_password service_password
-  tenant_name service_tenant
+  project_name service_tenant
   action :add_user
 end
 
@@ -82,7 +82,7 @@ keystone_register "add #{service_user}:#{service_tenant} user admin role" do
   auth register_auth_hash
   user_name service_user
   role_name "admin"
-  tenant_name service_tenant
+  project_name service_tenant
   action :add_access
 end
 

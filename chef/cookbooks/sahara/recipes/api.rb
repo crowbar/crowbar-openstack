@@ -30,7 +30,7 @@ my_public_host = CrowbarHelper.get_host_for_public_url(
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 crowbar_pacemaker_sync_mark "wait-sahara_register" if ha_enabled
 
@@ -51,7 +51,7 @@ keystone_register "register sahara user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -62,7 +62,7 @@ keystone_register "give sahara user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -90,7 +90,7 @@ keystone_register "register sahara endpoint" do
   endpoint_publicURL "#{sahara_protocol}://#{my_public_host}:#{sahara_port}/v1.1/%(tenant_id)s"
   endpoint_adminURL "#{sahara_protocol}://#{my_admin_host}:#{sahara_port}/v1.1/%(tenant_id)s"
   endpoint_internalURL "#{sahara_protocol}://#{my_admin_host}:#{sahara_port}/v1.1/%(tenant_id)s"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-sahara_register" if ha_enabled

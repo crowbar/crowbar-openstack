@@ -41,7 +41,7 @@ default[:keystone][:api][:service_port] = 5000
 default[:keystone][:api][:admin_port] = 35357
 default[:keystone][:api][:admin_host] = "0.0.0.0"
 default[:keystone][:api][:api_host] = "0.0.0.0"
-default[:keystone][:api][:version] = "2.0"
+default[:keystone][:api][:version] = "3"
 default[:keystone][:api][:region] = "RegionOne"
 
 default[:keystone][:identity][:driver] = "sql"

@@ -95,7 +95,7 @@ db_connection = fetch_database_connection_string(node[:ironic][:db])
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "ironic wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -133,7 +133,7 @@ keystone_register "register ironic endpoint" do
   endpoint_publicURL public_endpoint
   endpoint_adminURL admin_endpoint
   endpoint_internalURL internal_endpoint
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register ironic user" do
@@ -144,7 +144,7 @@ keystone_register "register ironic user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -155,7 +155,7 @@ keystone_register "give ironic user admin role in service tenant" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end

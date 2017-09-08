@@ -83,7 +83,7 @@ keystone_settings = KeystoneHelper.keystone_settings(node, "nova")
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, ssl_enabled, ha_enabled)
@@ -98,7 +98,7 @@ keystone_register "register ec2 user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -109,7 +109,7 @@ keystone_register "give ec2 user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -138,7 +138,7 @@ keystone_register "register ec2-api endpoint" do
   endpoint_publicURL "#{api_protocol}://#{my_public_host}:#{ec2_api_port}"
   endpoint_adminURL "#{api_protocol}://#{my_admin_host}:#{ec2_api_port}"
   endpoint_internalURL "#{api_protocol}://#{my_admin_host}:#{ec2_api_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 # Create ec2-metadata service
@@ -165,7 +165,7 @@ keystone_register "register ec2-metadata endpoint" do
   endpoint_publicURL "#{api_protocol}://#{my_public_host}:#{ec2_metadata_port}"
   endpoint_adminURL "#{api_protocol}://#{my_admin_host}:#{ec2_metadata_port}"
   endpoint_internalURL "#{api_protocol}://#{my_admin_host}:#{ec2_metadata_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-ec2_api_register" if ha_enabled

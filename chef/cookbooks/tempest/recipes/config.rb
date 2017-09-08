@@ -46,7 +46,7 @@ tempest_heat_settings = node[:tempest][:heat]
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "tempest tempest wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -63,8 +63,8 @@ keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
-  tenant_name tempest_comp_tenant
-  action :add_tenant
+  project_name tempest_comp_tenant
+  action :add_project
 end
 
 auth_url = KeystoneHelper.service_URL(
@@ -112,7 +112,7 @@ users.each do |user|
     auth register_auth_hash
     user_name user["name"]
     user_password user["pass"]
-    tenant_name tempest_comp_tenant
+    project_name tempest_comp_tenant
     action :add_user
   end
 
@@ -136,7 +136,7 @@ end
     auth register_auth_hash
     user_name user["name"]
     role_name user["role"]
-    tenant_name tempest_comp_tenant
+    project_name tempest_comp_tenant
     action :add_access
   end
 
@@ -147,7 +147,7 @@ end
     port keystone_settings["admin_port"]
     auth register_auth_hash
     user_name user["name"]
-    tenant_name tempest_comp_tenant
+    project_name tempest_comp_tenant
     action :add_ec2
   end
 end
@@ -161,7 +161,7 @@ keystone_register "add #{keystone_settings['admin_user']}:#{tempest_comp_tenant}
   auth register_auth_hash
   user_name keystone_settings["admin_user"]
   role_name "admin"
-  tenant_name tempest_comp_tenant
+  project_name tempest_comp_tenant
   action :add_access
 end
 

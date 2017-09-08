@@ -69,7 +69,7 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(
@@ -85,7 +85,7 @@ keystone_register "register aodh user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -96,7 +96,7 @@ keystone_register "give aodh user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -128,7 +128,7 @@ keystone_register "register aodh endpoint" do
   endpoint_publicURL "#{aodh_protocol}://#{my_public_host}:#{aodh_port}"
   endpoint_adminURL "#{aodh_protocol}://#{my_admin_host}:#{aodh_port}"
   endpoint_internalURL "#{aodh_protocol}://#{my_admin_host}:#{aodh_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-aodh_keystone_register" if ha_enabled

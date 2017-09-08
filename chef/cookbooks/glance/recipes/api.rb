@@ -141,7 +141,7 @@ crowbar_pacemaker_sync_mark "wait-glance_register_service" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "register glance service" do
   protocol keystone_settings["protocol"]
@@ -166,9 +166,7 @@ keystone_register "register glance endpoint" do
   endpoint_publicURL "#{glance_protocol}://#{endpoint_public_ip}:#{api_port}"
   endpoint_adminURL "#{glance_protocol}://#{endpoint_admin_ip}:#{api_port}"
   endpoint_internalURL "#{glance_protocol}://#{endpoint_admin_ip}:#{api_port}"
-#  endpoint_global true
-#  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 crowbar_pacemaker_sync_mark "create-glance_register_service" if ha_enabled

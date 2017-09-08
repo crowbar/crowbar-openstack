@@ -38,7 +38,7 @@ crowbar_pacemaker_sync_mark "wait-nova-placement_register" if api_ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "register placement user '#{node["nova"]["placement_service_user"]}'" do
   protocol keystone_settings["protocol"]
@@ -48,7 +48,7 @@ keystone_register "register placement user '#{node["nova"]["placement_service_us
   auth register_auth_hash
   user_name node["nova"]["placement_service_user"]
   user_password node["nova"]["placement_service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -59,7 +59,7 @@ keystone_register "give placement user '#{node["nova"]["placement_service_user"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name node["nova"]["placement_service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -87,7 +87,7 @@ keystone_register "register placement endpoint" do
   endpoint_publicURL "#{api_protocol}://#{public_api_host}:#{api_port}"
   endpoint_adminURL "#{api_protocol}://#{admin_api_host}:#{api_port}"
   endpoint_internalURL "#{api_protocol}://#{admin_api_host}:#{api_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 if node[:nova][:ha][:enabled]
