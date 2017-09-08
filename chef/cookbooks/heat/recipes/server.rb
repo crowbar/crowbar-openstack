@@ -14,6 +14,7 @@
 #
 
 ha_enabled = node[:heat][:ha][:enabled]
+use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
 
 db_settings = fetch_database_settings
 
@@ -449,7 +450,7 @@ service "heat-engine" do
   supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 template "/etc/heat/loadbalancer.template" do
@@ -466,7 +467,7 @@ service "heat-api" do
   supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 service "heat-api-cfn" do
@@ -474,7 +475,7 @@ service "heat-api-cfn" do
   supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 service "heat-api-cloudwatch" do
@@ -482,7 +483,7 @@ service "heat-api-cloudwatch" do
   supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 if ha_enabled

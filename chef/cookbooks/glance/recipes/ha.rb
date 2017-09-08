@@ -40,34 +40,36 @@ haproxy_loadbalancer "glance-registry" do
   action :nothing
 end.run_action(:create)
 
-# Wait for all nodes to reach this point so we know that all nodes will have
-# all the required packages installed before we create the pacemaker
-# resources
-crowbar_pacemaker_sync_mark "sync-glance_before_ha"
+if node[:pacemaker][:clone_stateless_services]
+  # Wait for all nodes to reach this point so we know that all nodes will have
+  # all the required packages installed before we create the pacemaker
+  # resources
+  crowbar_pacemaker_sync_mark "sync-glance_before_ha"
 
-# Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-glance_ha_resources"
+  # Avoid races when creating pacemaker resources
+  crowbar_pacemaker_sync_mark "wait-glance_ha_resources"
 
-rabbit_settings = fetch_rabbitmq_settings
-services = ["registry", "api"]
-transaction_objects = []
+  rabbit_settings = fetch_rabbitmq_settings
+  services = ["registry", "api"]
+  transaction_objects = []
 
-services.each do |service|
-  primitive_name = "glance-#{service}"
+  services.each do |service|
+    primitive_name = "glance-#{service}"
 
-  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
-    agent node[:glance][:ha][service.to_sym][:agent]
-    op node[:glance][:ha][service.to_sym][:op]
-    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
+    objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
+      agent node[:glance][:ha][service.to_sym][:agent]
+      op node[:glance][:ha][service.to_sym][:op]
+      order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
+    end
+    transaction_objects.push(objects)
   end
-  transaction_objects.push(objects)
-end
 
-pacemaker_transaction "glance server" do
-  cib_objects transaction_objects.flatten
-  # note that this will also automatically start the resources
-  action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
+  pacemaker_transaction "glance server" do
+    cib_objects transaction_objects.flatten
+    # note that this will also automatically start the resources
+    action :commit_new
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 
-crowbar_pacemaker_sync_mark "create-glance_ha_resources"
+  crowbar_pacemaker_sync_mark "create-glance_ha_resources"
+end

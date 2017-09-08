@@ -19,6 +19,9 @@
 
 include_recipe "nova::config"
 
+use_crowbar_pacemaker_service = node[:nova][:ha][:enabled] &&
+  node[:pacemaker][:clone_stateless_services]
+
 nova_package "cert" do
-  use_pacemaker_provider node[:nova][:ha][:enabled]
+  use_pacemaker_provider use_crowbar_pacemaker_service
 end

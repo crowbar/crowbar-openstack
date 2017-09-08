@@ -222,12 +222,14 @@ apache_site "aodh-api.conf" do
   enable true
 end
 
+use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
+
 service "aodh-evaluator" do
   service_name node[:aodh][:evaluator][:service_name]
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
   subscribes :restart, resources(template: node[:aodh][:config_file])
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 service "aodh-notifier" do
@@ -235,7 +237,7 @@ service "aodh-notifier" do
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
   subscribes :restart, resources(template: node[:aodh][:config_file])
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 service "aodh-listener" do
@@ -243,7 +245,7 @@ service "aodh-listener" do
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
   subscribes :restart, resources(template: node[:aodh][:config_file])
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 if ha_enabled

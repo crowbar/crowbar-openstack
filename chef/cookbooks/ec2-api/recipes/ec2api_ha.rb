@@ -45,40 +45,42 @@ haproxy_loadbalancer "ec2-s3" do
   action :nothing
 end.run_action(:create)
 
-# Wait for all nodes to reach this point so we know that they will have
-# all the required packages installed and configuration files updated
-# before we create the pacemaker resources.
-crowbar_pacemaker_sync_mark "sync-ec2_api_before_ha"
+if node[:pacemaker][:clone_stateless_services]
+  # Wait for all nodes to reach this point so we know that they will have
+  # all the required packages installed and configuration files updated
+  # before we create the pacemaker resources.
+  crowbar_pacemaker_sync_mark "sync-ec2_api_before_ha"
 
-# Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-ec2_api_ha_resources"
+  # Avoid races when creating pacemaker resources
+  crowbar_pacemaker_sync_mark "wait-ec2_api_ha_resources"
 
-rabbit_settings = fetch_rabbitmq_settings "nova"
-services = ["api", "metadata", "s3"]
-transaction_objects = []
+  rabbit_settings = fetch_rabbitmq_settings "nova"
+  services = ["api", "metadata", "s3"]
+  transaction_objects = []
 
-services.each do |service|
-  primitive_ra = if ["rhel", "suse"].include?(node[:platform_family])
-    "systemd:openstack-ec2-api-#{service}"
-  else
-    "systemd:ec2-api-#{service}"
+  services.each do |service|
+    primitive_ra = if ["rhel", "suse"].include?(node[:platform_family])
+      "systemd:openstack-ec2-api-#{service}"
+    else
+      "systemd:ec2-api-#{service}"
+    end
+
+    primitive_name = "ec2-api-#{service}"
+
+    objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
+      agent primitive_ra
+      op node[:nova][:ha][:op]
+      order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
+    end
+    transaction_objects.push(objects)
   end
 
-  primitive_name = "ec2-api-#{service}"
-
-  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
-    agent primitive_ra
-    op node[:nova][:ha][:op]
-    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
+  pacemaker_transaction "ec2-api" do
+    cib_objects transaction_objects.flatten
+    # note that this will also automatically start the resources
+    action :commit_new
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  transaction_objects.push(objects)
-end
 
-pacemaker_transaction "ec2-api" do
-  cib_objects transaction_objects.flatten
-  # note that this will also automatically start the resources
-  action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  crowbar_pacemaker_sync_mark "create-ec2_api_ha_resources"
 end
-
-crowbar_pacemaker_sync_mark "create-ec2_api_ha_resources"

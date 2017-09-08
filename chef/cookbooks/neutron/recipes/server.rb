@@ -388,6 +388,8 @@ end
 
 crowbar_pacemaker_sync_mark "create-neutron_db_sync" if ha_enabled
 
+use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
+
 service node[:neutron][:platform][:service_name] do
   supports status: true, restart: true
   action [:enable, :start]
@@ -395,7 +397,7 @@ service node[:neutron][:platform][:service_name] do
   if node[:neutron][:use_lbaas]
     subscribes :restart, resources(template: node[:neutron][:lbaas_config_file])
   end
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 if node[:neutron][:use_infoblox]
@@ -403,7 +405,7 @@ if node[:neutron][:use_infoblox]
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources(template: node[:neutron][:config_file])
-    provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
 end
 

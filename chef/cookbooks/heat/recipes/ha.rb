@@ -39,35 +39,37 @@ haproxy_loadbalancer "heat-api-cloudwatch" do
   action :nothing
 end.run_action(:create)
 
-# Wait for all nodes to reach this point so we know that all nodes will have
-# all the required packages installed before we create the pacemaker
-# resources
-crowbar_pacemaker_sync_mark "sync-heat_before_ha"
+if node[:pacemaker][:clone_stateless_services]
+  # Wait for all nodes to reach this point so we know that all nodes will have
+  # all the required packages installed before we create the pacemaker
+  # resources
+  crowbar_pacemaker_sync_mark "sync-heat_before_ha"
 
-# Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-heat_ha_resources"
+  # Avoid races when creating pacemaker resources
+  crowbar_pacemaker_sync_mark "wait-heat_ha_resources"
 
-rabbit_settings = fetch_rabbitmq_settings
-services = ["engine", "api", "api_cfn", "api_cloudwatch"]
-transaction_objects = []
+  rabbit_settings = fetch_rabbitmq_settings
+  services = ["engine", "api", "api_cfn", "api_cloudwatch"]
+  transaction_objects = []
 
-services.each do |service|
-  primitive_name = "heat-#{service}".gsub("_","-")
-  ordering = "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone cl-nova-api )"
+  services.each do |service|
+    primitive_name = "heat-#{service}".gsub("_","-")
+    ordering = "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone cl-nova-api )"
 
-  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
-    agent node[:heat][:ha][service.to_sym][:agent]
-    op node[:heat][:ha][service.to_sym][:op]
-    order_only_existing ordering
+    objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
+      agent node[:heat][:ha][service.to_sym][:agent]
+      op node[:heat][:ha][service.to_sym][:op]
+      order_only_existing ordering
+    end
+    transaction_objects.push(objects)
   end
-  transaction_objects.push(objects)
-end
 
-pacemaker_transaction "heat server" do
-  cib_objects transaction_objects.flatten
-  # note that this will also automatically start the resources
-  action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
+  pacemaker_transaction "heat server" do
+    cib_objects transaction_objects.flatten
+    # note that this will also automatically start the resources
+    action :commit_new
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 
-crowbar_pacemaker_sync_mark "create-heat_ha_resources"
+  crowbar_pacemaker_sync_mark "create-heat_ha_resources"
+end
