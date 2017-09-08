@@ -87,7 +87,6 @@ auth_pool_connection_lifetime = <%= node[:keystone][:ldap][:auth_pool_connection
 [oslo_messaging_rabbit]
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
 rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
-rabbit_userid = <%= @rabbit_settings[:user] %>
 rabbit_password = <%= @rabbit_settings[:password] %>
 rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
 rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
