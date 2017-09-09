@@ -451,7 +451,11 @@ end
 # the keystone resources
 crowbar_pacemaker_sync_mark "sync-keystone_before_register" if ha_enabled
 
-crowbar_pacemaker_sync_mark "wait-keystone_register" if ha_enabled
+crowbar_pacemaker_sync_mark "wait-keystone_register" do
+  # keystone_register might be slow
+  timeout 90
+  only_if { ha_enabled }
+end
 
 keystone_insecure = node["keystone"]["api"]["protocol"] == "https" && node[:keystone][:ssl][:insecure]
 
