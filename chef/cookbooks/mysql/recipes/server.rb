@@ -78,8 +78,26 @@ service mysql start
 EOC
 end
 
+if node[:mysql][:ssl][:enabled]
+  # This only checks for the presence of given files
+  ssl_setup "setting up ssl for mysql" do
+    generate_certs false
+    certfile node[:mysql][:ssl][:certfile]
+    ca_certs node[:mysql][:ssl][:ca_certs]
+    cert_required true
+  end
+end
+
 template "/etc/my.cnf.d/openstack.cnf" do
   source "my.cnf.erb"
+  owner "root"
+  group "mysql"
+  mode "0640"
+  notifies :restart, "service[mysql]", :immediately
+end
+
+template "/etc/my.cnf.d/ssl.cnf" do
+  source "ssl.cnf.erb"
   owner "root"
   group "mysql"
   mode "0640"
