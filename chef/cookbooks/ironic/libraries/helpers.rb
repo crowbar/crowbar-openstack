@@ -23,11 +23,11 @@ module IronicHelper
 
     def openstack_command(keystone_settings)
       insecure = keystone_settings["insecure"] ? "--insecure" : ""
-      "openstack --os-username #{keystone_settings["admin_user"]}"\
-      " --os-auth-type password --os-identity-api-version 3"\
-      " --os-password #{keystone_settings["admin_password"]}"\
-      " --os-tenant-name #{keystone_settings["admin_tenant"]}"\
-      " --os-auth-url #{auth_url(keystone_settings)} #{insecure}"
+      env = "OS_USERNAME='#{keystone_settings["admin_user"]}' "
+      env << "OS_PASSWORD='#{keystone_settings["admin_password"]}' "
+      env << "OS_PROJECT_NAME='#{keystone_settings["admin_tenant"]}' "
+      env << "OS_AUTH_URL='#{auth_url(keystone_settings)}'"
+      "#{env} openstack #{insecure}"
     end
 
     def swift_settings(node, glance)
@@ -37,18 +37,22 @@ module IronicHelper
 
       glance_keystone_settings = KeystoneHelper.keystone_settings(glance, "glance")
 
-      swift_command = "swift --os-username #{glance_keystone_settings["service_user"]}"
-      swift_command << " --os-password #{glance_keystone_settings["service_password"]}"
-      swift_command << " --os-tenant-name #{glance_keystone_settings["service_tenant"]}"
-      swift_command << " --os-identity-api-version 3"
-      swift_command << " --os-auth-url #{auth_url(glance_keystone_settings)}"
-      swift_command << (swift[:swift][:ssl][:insecure] ? " --insecure" : "")
+      env = {
+        "OS_USERNAME" => glance_keystone_settings["service_user"],
+        "OS_PASSWORD" => keystone_settings["service_password"],
+        "OS_PROJECT_NAME" => keystone_settings["service_tenant"],
+        "OS_AUTH_URL" => auth_url(keystone_settings),
+        "OS_IDENTITY_API_VERSION" => "3"
+      }
+      insecure = swift[:swift][:ssl][:insecure] ? " --insecure" : ""
+      swift_command = "swift #{insecure}"
 
       get_glance_account = "#{swift_command} stat | grep -m1 Account: | awk '{print $2}'"
-      glance_account = Mixlib::ShellOut.new(get_glance_account).run_command.stdout.chomp
+      glance_account = Mixlib::ShellOut.new(get_glance_account,
+                                            environment: env).run_command.stdout.chomp
 
       get_tempurl_key = "#{swift_command} stat | grep -m1 'Meta Temp-Url-Key:' | awk '{print $3}'"
-      tempurl_key = Mixlib::ShellOut.new(get_tempurl_key).run_command.stdout.chomp
+      tempurl_key = Mixlib::ShellOut.new(get_tempurl_key, environment: env).run_command.stdout.chomp
 
       # use IP as this will be used by agent which can have no DNS configured
       if swift[:swift][:ha][:enabled]

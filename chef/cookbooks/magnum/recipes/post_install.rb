@@ -41,15 +41,14 @@ nova_config = Barclamp::Config.load("openstack", "nova", node[:magnum][:nova_ins
 nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
 openstack_args_nova = nova_insecure || keystone_settings["insecure"] ? "--insecure" : ""
 
-# create basic arguments for openstack client
-openstack_args = "--os-username #{keystone_settings["service_user"]}"
-openstack_args += " --os-auth-type password --os-identity-api-version 3"
-openstack_args += " --os-password #{keystone_settings["service_password"]}"
-openstack_args += " --os-tenant-name #{keystone_settings["service_tenant"]}"
-openstack_args += " --os-auth-url #{keystone_settings["internal_auth_url"]}"
-openstack_args += " --os-endpoint internalURL"
+env = "OS_USERNAME='#{keystone_settings["service_user"]}' "
+env << "OS_PASSWORD='#{keystone_settings["service_password"]}' "
+env << "OS_PROJECT_NAME='#{keystone_settings["service_tenant"]}' "
+env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
+env << "OS_INTERFACE=internal "
+env << "OS_IDENTITY_API_VERSION=3"
 
-openstack_cmd = "openstack #{openstack_args}"
+openstack_cmd = "#{env} openstack"
 
 image_url = "http://#{provisioner_address}:8091/files/" \
   "#{service_sles_image_name}/" \

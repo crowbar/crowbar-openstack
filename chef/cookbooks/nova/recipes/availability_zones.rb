@@ -22,7 +22,7 @@
 elements = node[:nova][:elements_expanded] || node[:nova][:elements]
 return if elements["nova-compute-hyperv"].nil? || elements["nova-compute-hyperv"].empty?
 
-command_no_arg = NovaAvailabilityZone.fetch_set_az_command_no_arg(node, @cookbook_name)
+env, command_no_arg = NovaAvailabilityZone.fetch_set_az_command_no_arg(node, @cookbook_name)
 
 hyperv_nodes = node_search_with_cache("roles:nova-compute-hyperv")
 hyperv_nodes.each do |n|
@@ -30,6 +30,7 @@ hyperv_nodes.each do |n|
 
   execute "Set availability zone for #{n.hostname}" do
     command command
+    environment env
     timeout 60
     # Any exit code in the range 60-69 is a tempfail
     returns [0] + (60..69).to_a

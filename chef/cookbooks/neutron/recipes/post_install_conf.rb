@@ -68,18 +68,18 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 neutron_config = Barclamp::Config.load("openstack", "neutron")
 ssl_insecure = CrowbarOpenStackHelper.insecure(neutron_config) || keystone_settings["insecure"]
 
-neutron_args = "--os-username '#{keystone_settings['service_user']}'"
-neutron_args = "#{neutron_args} --os-password '#{keystone_settings['service_password']}'"
-neutron_args = "#{neutron_args} --os-tenant-name '#{keystone_settings['service_tenant']}'"
-neutron_args = "#{neutron_args} --os-auth-url '#{keystone_settings['internal_auth_url']}'"
-neutron_args = "#{neutron_args} --os-region-name '#{keystone_settings['endpoint_region']}'"
-if keystone_settings["api_version"] != "2.0"
-  neutron_args = "#{neutron_args} --os-user-domain-name Default"
-  neutron_args = "#{neutron_args} --os-project-domain-name Default"
-end
-neutron_args = "#{neutron_args} --endpoint-type internalURL"
+env = "OS_USERNAME='#{keystone_settings["service_user"]}' "
+env << "OS_PASSWORD='#{keystone_settings["service_password"]}' "
+env << "OS_PROJECT_NAME='#{keystone_settings["service_tenant"]}' "
+env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
+env << "OS_REGION_NAME='#{keystone_settings["endpoint_region"]}' "
+env << "OS_INTERFACE=internal "
+env << "OS_USER_DOMAIN_NAME=Default "
+env << "OS_PROJECT_DOMAIN_NAME=Default "
+env << "OS_IDENTITY_API_VERSION=3"
+neutron_args = "--endpoint-type internalURL"
 neutron_args = "#{neutron_args} --insecure" if ssl_insecure
-neutron_cmd = "neutron #{neutron_args}"
+neutron_cmd = "#{env} neutron #{neutron_args}"
 
 fixed_network_type = ""
 floating_network_type = ""
