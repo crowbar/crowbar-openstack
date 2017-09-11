@@ -346,7 +346,6 @@ template node[:nova][:config_file] do
     bind_port_objectstore: bind_port_objectstore,
     bind_port_novncproxy: bind_port_novncproxy,
     bind_port_serialproxy: bind_port_serialproxy,
-    dhcpbridge: "/usr/bin/nova-dhcpbridge",
     database_connection: database_connection,
     api_database_connection: api_database_connection,
     rabbit_settings: fetch_rabbitmq_settings,
