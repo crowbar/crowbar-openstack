@@ -145,7 +145,7 @@
       },
       "use_infoblox": false,
       "infoblox": {
-        "cloud_data_center_id": 0,
+        "cloud_data_center_id": 1,
         "ipam_agent_workers": 1,
         "grids": [
             {
@@ -172,7 +172,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 111,
+      "schema-revision": 112,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]
