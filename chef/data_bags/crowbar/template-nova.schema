@@ -134,6 +134,7 @@
             },
             "kvm": {
               "type": "map", "required": true, "mapping": {
+                "nested_virt": { "type": "bool", "required": false },
                 "ksm_enabled": { "type": "bool", "required": true },
                 "disk_cachemodes": { "type": "str", "required": true }
               }
