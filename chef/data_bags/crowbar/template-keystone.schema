@@ -59,7 +59,9 @@
                       "password": { "type" : "str", "required" : true }
                     }},
                     "identity" : { "type" : "map", "required" : true, "mapping": {
-                      "driver": { "type": "str", "required": true }
+                      "driver": { "type": "str", "required": true },
+                      "password_hash_algorithm": { "type": "str", "required": true, "pattern": "/^bcrypt$|^scrypt$|^pbkdf2_sha512$/" },
+                      "password_hash_rounds": { "type": "int", "required": false }
                     }},
                     "assignment" : { "type" : "map", "required" : true, "mapping": {
                       "driver": { "type": "str", "required": true }
