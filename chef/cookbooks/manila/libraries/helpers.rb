@@ -17,6 +17,7 @@
 module ManilaHelper
   def self.get_bind_host_port(node)
     if node[:manila][:ha][:enabled]
+      bind_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
       bind_port = node[:manila][:ha][:ports][:api]
     else
       if node[:manila][:api][:bind_open_address]
