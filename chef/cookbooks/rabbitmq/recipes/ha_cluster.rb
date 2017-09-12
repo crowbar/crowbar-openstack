@@ -29,6 +29,11 @@ file node[:rabbitmq][:erlang_cookie_path] do
   group node[:rabbitmq][:rabbitmq_group]
 end
 
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required packages installed before we create the pacemaker
+# resources
+crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha"
+
 crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources"
 
 transaction_objects = []
