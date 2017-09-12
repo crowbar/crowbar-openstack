@@ -98,8 +98,15 @@ class CrowbarOpenStackHelper
             host: address,
             username: "db_maker",
             password: database["database"][:db_maker_password]
-          }
+          },
+          ssl: {}
         }
+        if backend_name == "mysql"
+          @database_settings[instance][:ssl] = {
+            enabled: database["database"]["mysql"]["ssl"]["enabled"],
+            ca_certs: database["database"]["mysql"]["ssl"]["ca_certs"]
+          }
+        end
 
         Chef::Log.info("Database server found at #{@database_settings[instance][:address]}")
       end
@@ -112,16 +119,19 @@ class CrowbarOpenStackHelper
     db_auth = db_auth_attr.to_hash
     db_conn_scheme = db_settings[:url_scheme]
     db_charset = ""
+    ssl_ca = ""
 
     if db_conn_scheme == "mysql"
       db_conn_scheme = "mysql+pymysql"
       db_charset = "?charset=utf8"
+      ssl_ca = "&ssl_ca=#{db_settings[:ssl][:ca_certs]}" if db_settings[:ssl][:enabled]
     end
 
     "#{db_conn_scheme}://" \
     "#{db_auth['user']}:#{db_auth['password']}@#{db_settings[:address]}/" \
     "#{db_auth['database']}" \
-    "#{db_charset}"
+    "#{db_charset}" \
+    "#{ssl_ca}"
   end
 
   def self.rabbitmq_settings(node, barclamp)
