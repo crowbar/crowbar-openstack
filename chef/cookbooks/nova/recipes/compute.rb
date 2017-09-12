@@ -111,7 +111,12 @@ case node[:nova][:libvirt_type]
             # load modules only when appropriate kernel is present
             execute "loading kvm modules" do
               command <<-EOF
-                  grep -qw vmx /proc/cpuinfo && /sbin/modprobe kvm-intel
+                  if grep -qw vmx /proc/cpuinfo ; then
+                    ! grep -q nested /etc/modprobe.d/80-kvm-intel.conf &&
+                      echo "options kvm_intel nested=1" > /etc/modprobe.d/80-kvm-intel.conf &&
+                      /sbin/modprobe -r kvm-intel
+                    /sbin/modprobe kvm-intel
+                  fi
                   grep -qw svm /proc/cpuinfo && /sbin/modprobe kvm-amd
                   grep -q POWER /proc/cpuinfo && /sbin/modprobe kvm
                   /sbin/modprobe vhost-net
