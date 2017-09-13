@@ -21,8 +21,6 @@
 ha_enabled = node[:rabbitmq][:ha][:enabled]
 # we only do cluster if we do HA
 cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
-# dont let the changes to the templates restart the rabbitmq in cluster mode
-service_action = cluster_enabled ? :nothing : :restart
 quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
 
 cluster_partition_handling = if cluster_enabled
@@ -94,7 +92,7 @@ template "/etc/rabbitmq/rabbitmq-env.conf" do
   owner "root"
   group "root"
   mode 0644
-  notifies service_action, "service[rabbitmq-server]"
+  notifies :restart, "service[rabbitmq-server]"
 end
 
 `systemd-detect-virt -v -q`
@@ -111,7 +109,7 @@ template "/etc/rabbitmq/rabbitmq.config" do
     cluster_partition_handling: cluster_partition_handling,
     hipe_compile: hipe_compile
   )
-  notifies service_action, "service[rabbitmq-server]"
+  notifies :restart, "service[rabbitmq-server]"
 end
 
 # create a file with definitions to load on start, to be 100% sure we always
@@ -154,7 +152,7 @@ bash "enabling rabbit management" do
   environment "HOME" => "/root/"
   code "#{rabbitmq_plugins} #{rabbitmq_plugins_param} enable rabbitmq_management > /dev/null"
   not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q", environment: {"HOME" => "/root/"}
-  notifies service_action, "service[rabbitmq-server]"
+  notifies :restart, "service[rabbitmq-server]"
 end
 
 service "rabbitmq-server" do
