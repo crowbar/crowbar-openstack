@@ -140,14 +140,16 @@ class CrowbarOpenStackHelper
     end
 
     if @rabbitmq_settings && @rabbitmq_settings.include?(instance)
-      Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]} [cached]")
+      Chef::Log.info("RabbitMQ settings found [cached]")
     else
       @rabbitmq_settings ||= Hash.new
-      rabbit = get_node(node, "rabbitmq-server", "rabbitmq", instance)
+      rabbits = get_nodes(node, "rabbitmq-server", "rabbitmq", instance)
 
-      if rabbit.nil?
+      if rabbits.empty?
         Chef::Log.warn("No RabbitMQ server found!")
       else
+        rabbit = rabbits.first
+
         port = if rabbit[:rabbitmq][:ssl][:enabled]
           rabbit[:rabbitmq][:ssl][:port]
         else
@@ -159,12 +161,7 @@ class CrowbarOpenStackHelper
           rabbit[:rabbitmq][:ssl][:client_ca_certs]
         end
 
-        @rabbitmq_settings[instance] = {
-          address: rabbit[:rabbitmq][:address],
-          port: port,
-          user: rabbit[:rabbitmq][:user],
-          password: rabbit[:rabbitmq][:password],
-          vhost: rabbit[:rabbitmq][:vhost],
+        single_rabbit_settings = {
           use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
           client_ca_certs: client_ca_certs,
           url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
@@ -180,7 +177,54 @@ class CrowbarOpenStackHelper
           pacemaker_resource: "rabbitmq"
         }
 
-        Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]}")
+        if !rabbit[:rabbitmq][:cluster]
+          @rabbitmq_settings[instance] = single_rabbit_settings
+          Chef::Log.info("RabbitMQ server found")
+        else
+          # transport_url format:
+          # https://docs.openstack.org/oslo.messaging/latest/reference/transport.html#oslo_messaging.TransportURL
+          rabbit_hosts = rabbits.map do |rabbit|
+            port = if rabbit[:rabbitmq][:ssl][:enabled]
+              rabbit[:rabbitmq][:ssl][:port]
+            else
+              rabbit[:rabbitmq][:port]
+            end
+            url = "#{rabbit[:rabbitmq][:user]}:"
+            url << "#{rabbit[:rabbitmq][:password]}@"
+            url << "#{rabbit[:rabbitmq][:address]}:#{port}"
+            url << "/#{rabbit[:rabbitmq][:vhost]}" if rabbit.equal? rabbits.last
+            url.prepend("rabbit://") if rabbit.equal? rabbits.first
+
+            url
+          end
+
+          trove_rabbit_hosts = rabbits.map do |rabbit|
+            port = if rabbit[:rabbitmq][:ssl][:enabled]
+              rabbit[:rabbitmq][:ssl][:port]
+            else
+              rabbit[:rabbitmq][:port]
+            end
+
+            url = "#{rabbit[:rabbitmq][:trove][:user]}:"
+            url << "#{rabbit[:rabbitmq][:trove][:password]}@"
+            url << "#{rabbit[:rabbitmq][:address]}:#{port}"
+            url << "/#{rabbit[:rabbitmq][:trove][:vhost]}" unless rabbit.equal? rabbits.first
+            url.prepend("rabbit://") if rabbit.equal? rabbits.first
+
+            url
+          end
+
+          @rabbitmq_settings[instance] = {
+            use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
+            client_ca_certs: client_ca_certs,
+            url: rabbit_hosts.join(","),
+            trove_url: trove_rabbit_hosts.join(","),
+            durable_queues: true,
+            ha_queues: true,
+            pacemaker_resource: "ms-rabbitmq"
+          }
+          Chef::Log.info("RabbitMQ cluster found")
+        end
       end
     end
 
@@ -216,10 +260,20 @@ class CrowbarOpenStackHelper
         node[barclamp]["config"]["environment"] == "#{barclamp}-config-#{instance}"
       result = node
     else
-      nodes, _, _ = Chef::Search::Query.new.search(:node, "roles:#{role} AND #{barclamp}_config_environment:#{barclamp}-config-#{instance}")
+      nodes, = Chef::Search::Query.new.search(:node, "roles:#{role} AND " \
+      "#{barclamp}_config_environment:#{barclamp}-config-#{instance}")
       result = nodes.first unless nodes.empty?
     end
 
     result
   end
+
+  def self.get_nodes(node, role, barclamp, instance)
+    nodes, = Chef::Search::Query.new.search(:node, "roles:#{role} AND " \
+    "#{barclamp}_config_environment:#{barclamp}-config-#{instance}")
+    nodes
+  end
+
+  private_class_method :get_node
+  private_class_method :get_nodes
 end
