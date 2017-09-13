@@ -34,6 +34,11 @@ nova_metadata_protocol = <%= @nova_metadata_settings[:protocol] %>
 nova_metadata_insecure = <%= @nova_metadata_settings[:insecure] %>
 <% end %>
 
+[cache]
+backend = dogpile.cache.memcached
+enabled = true
+memcache_servers = <%= @memcached_servers.join(',') %>
+
 [database]
 connection = <%= @database_connection %>
 [oslo_concurrency]

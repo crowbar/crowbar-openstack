@@ -40,6 +40,13 @@ else
   bind_port_s3 = node[:nova][:ports][:ec2_s3]
 end
 
+# use memcached as a cache backend for ec2-api-metadata
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "ec2-api") : [node]
+)
+
+memcached_instance "ec2-api"
+
 crowbar_pacemaker_sync_mark "wait-ec2_api_database" if ha_enabled
 
 database_connection = fetch_database_connection_string(node[:nova]["ec2-api"][:db], "nova")
@@ -210,7 +217,8 @@ template node[:nova]["ec2-api"][:config_file] do
     bind_port_ec2api: bind_port_ec2api,
     bind_port_metadata: bind_port_metadata,
     bind_port_s3: bind_port_s3,
-    nova_metadata_settings: nova_metadata_settings
+    nova_metadata_settings: nova_metadata_settings,
+    memcached_servers: memcached_servers
   )
 end
 
