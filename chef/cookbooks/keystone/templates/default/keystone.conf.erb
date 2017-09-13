@@ -12,7 +12,7 @@ transport_url = <%= @rabbit_settings[:url] %>
 driver = <%= node[:keystone][:assignment][:driver] %>
 
 [cache]
-backend = dogpile.cache.memcached
+backend = oslo_cache.memcache_pool
 enabled = True
 memcache_servers = <%= @memcached_servers.join(',') %>
 
