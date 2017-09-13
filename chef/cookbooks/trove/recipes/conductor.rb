@@ -19,8 +19,6 @@
 
 sql_connection = fetch_database_connection_string(node[:trove][:db])
 
-rabbitmq_servers = node_search_with_cache("roles:rabbitmq-server")
-
 template node[:trove][:conductor][:config_file] do
   source "trove-conductor.conf.erb"
   owner "root"
