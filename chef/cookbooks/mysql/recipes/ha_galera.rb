@@ -159,6 +159,7 @@ pacemaker_ms ms_name do
   rsc service_name
   meta(
     "master-max" => nodes_names.size,
+    "clone-max" => nodes_names.size,
     "ordered" => "false",
     "interleave" => "false",
     "notify" => "true"
@@ -168,6 +169,9 @@ pacemaker_ms ms_name do
 end
 
 transaction_objects.push("pacemaker_ms[#{ms_name}]")
+
+ms_location_name = openstack_pacemaker_controller_only_location_for ms_name
+transaction_objects << "pacemaker_location[#{ms_location_name}]"
 
 pacemaker_transaction "galera service" do
   cib_objects transaction_objects
