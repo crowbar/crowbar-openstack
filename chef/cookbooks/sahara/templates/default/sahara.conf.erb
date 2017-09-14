@@ -6,7 +6,6 @@ use_syslog=<%= node[:sahara][:use_syslog] ? "True" : "False" %>
 wsgi_keep_alive = false
 host = <%= @bind_host %>
 port = <%= @bind_port %>
-use_neutron = true
 use_namespaces = true
 use_rootwrap = true
 plugins = <%= node[:sahara][:plugins] %>
@@ -58,7 +57,7 @@ lock_path = "/var/run/sahara"
 [oslo_messaging_rabbit]
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
 rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
-rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:client_ca_certs] -%>
-kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+ssl_ca_file = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
