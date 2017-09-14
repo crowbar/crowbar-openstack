@@ -11,11 +11,46 @@ class Chef
         @current_resource.group(@new_resource.group)
         @current_resource.fqdn(@new_resource.fqdn)
         @current_resource.cert_required(@new_resource.cert_required)
+        @current_resource.generate_ca(@new_resource.generate_ca)
         @current_resource.ca_certs(@new_resource.ca_certs)
         @current_resource
       end
 
       def action_setup
+        if @current_resource.generate_certs
+          require "fileutils"
+
+          if @current_resource.generate_ca && !
+            ::File.exist?(@current_resource.ca_certs)
+
+            Chef::Log.info("Generating CA certificate...")
+
+            package "openssl"
+
+            dir = ::File.dirname(@current_resource.ca_certs)
+            ::FileUtils.mkdir_p(dir) unless ::File.exist?(dir)
+
+            # Generate CA key
+            ca_key_file = "#{dir}/ca_key.pem"
+            `openssl genrsa -out #{ca_key_file} 4096`
+            if $?.exitstatus != 0
+              message = "CA key generation failed"
+              Chef::Log.fatal(message)
+              raise message
+            end
+
+            ssl_subject = "\"/C=US/ST=Unset/L=Unset/O=Unset/CN=CA\""
+            # generate CA certificate
+            `openssl req -new -x509 -nodes -days 3650 -key #{ca_key_file} \
+            -subj #{ssl_subject} -out #{@current_resource.ca_certs}`
+            if $?.exitstatus != 0
+              message = "CA certificate generation failed"
+              Chef::Log.fatal(message)
+              raise message
+            end
+          end
+        end
+
         if @current_resource.generate_certs
           unless ::File.exist?(@current_resource.certfile) \
             && ::File.exist?(@current_resource.keyfile)
@@ -53,15 +88,23 @@ class Chef
               raise message
             end
 
+            sign_by = "-signkey #{@current_resource.keyfile}"
+            ca_dir = ::File.dirname(@current_resource.ca_certs)
+            ca_key_file = "#{ca_dir}/ca_key.pem"
+            if @current_resource.generate_ca
+              sign_by = "-CA #{@current_resource.ca_certs} -CAkey #{ca_key_file} -set_serial 01"
+            end
+
             # Generate self-signed certificate with above CSR
-            `openssl x509 -req -days 3650 -in #{ssl_csr_file} \
-              -signkey #{@current_resource.keyfile} -out #{@current_resource.certfile}`
+            `openssl x509 -req -days 3650 -in #{ssl_csr_file} #{sign_by} \
+              -out #{@current_resource.certfile}`
             if $?.exitstatus != 0
               message = "SSL self-signed certificate generation failed"
               Chef::Log.fatal(message)
               raise message
             end
 
+            ::File.delete ca_key_file if ::File.exist?(ca_key_file)
             ::File.delete ssl_csr_file # Nobody should even try to use this
           end # unless files exist
         else # if generate_certs
