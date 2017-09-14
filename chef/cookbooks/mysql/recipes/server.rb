@@ -79,12 +79,15 @@ EOC
 end
 
 if node[:mysql][:ssl][:enabled]
-  # This only checks for the presence of given files
   ssl_setup "setting up ssl for mysql" do
-    generate_certs false
+    generate_certs node[:mysql][:ssl][:generate_certs]
+    generate_ca node[:mysql][:ssl][:generate_certs]
+    keyfile node[:mysql][:ssl][:keyfile]
     certfile node[:mysql][:ssl][:certfile]
     ca_certs node[:mysql][:ssl][:ca_certs]
     cert_required true
+    group "mysql"
+    fqdn CrowbarDatabaseHelper.get_listen_address(node)
   end
 end
 
