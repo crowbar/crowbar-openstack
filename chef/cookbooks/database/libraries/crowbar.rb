@@ -15,11 +15,13 @@ module CrowbarDatabaseHelper
   end
 
   def self.get_listen_address(node)
+    # For SSL we prefer a cluster hostname (for certificate validation)
+    use_ssl = node[:database][:sql_engine] == "mysql" && node[:database][:mysql][:ssl][:enabled]
     if node[:database][:ha][:enabled]
       vhostname = get_ha_vhostname(node)
-      CrowbarPacemakerHelper.cluster_vip(node, "admin", vhostname)
+      use_ssl ? vhostname : CrowbarPacemakerHelper.cluster_vip(node, "admin", vhostname)
     else
-      Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+      use_ssl ? node[:hostname] : Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
     end
   end
 end
