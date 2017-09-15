@@ -137,6 +137,29 @@ crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
 
+# Sync generated ssl certificates from the founder
+if node[:mysql][:ssl][:enabled] &&
+    CrowbarPacemakerHelper.is_cluster_founder?(node) &&
+    node[:mysql][:ssl][:generate_certs]
+
+  package "rsync"
+
+  rsync_command = ""
+  cluster_nodes.each do |n|
+    next if n.name == node.name
+    node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
+    [:keyfile, :certile, :ca_certs].each do |sym_file|
+      file = node[:mysql][:ssl][sym_file]
+      rsync_command += "rsync -a --ignore-times --timeout=300 #{file} #{node_address}:#{file}; "
+    end
+  end
+
+  execute "sync SSL keys to all nodes in the cluster" do
+    command rsync_command
+    action :run
+  end
+end
+
 pacemaker_primitive service_name do
   agent resource_agent
   params({
