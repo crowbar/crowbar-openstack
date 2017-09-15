@@ -23,7 +23,7 @@
       "use_migration": false,
       "cross_az_attach": true,
       "create_default_flavors": true,
-      "image_cache_manager_interval": -1,
+      "image_cache_manager_interval": 0,
       "migration": {
         "network": "admin"
       },
