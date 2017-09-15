@@ -74,6 +74,20 @@ bash "reload enable-ip_forward-sysctl" do
   subscribes :run, resources(cookbook_file: enable_ip_forward_file), :delayed
 end
 
+# Increase inotify max user instances
+# one instance needed per dnsmasq instance / network
+inotify_instances_file = "/etc/sysctl.d/60-neutron-inotify-max-user-instances.conf"
+cookbook_file inotify_instances_file do
+  source "sysctl-inotify-max-instances.conf"
+  mode "0644"
+end
+
+bash "reload inotify-max-user-instances.conf" do
+  code "/sbin/sysctl -e -q -p #{inotify_instances_file}"
+  action :nothing
+  subscribes :run, resources(cookbook_file: inotify_instances_file), :delayed
+end
+
 # Kill all the libvirt default networks.
 execute "Destroy the libvirt default network" do
   command "virsh net-destroy default"
