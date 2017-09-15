@@ -20,15 +20,6 @@ rabbitmq_op = {}
 rabbitmq_op["monitor"] = {}
 rabbitmq_op["monitor"]["interval"] = "10s"
 
-# set the shared rabbitmq cookie
-# cookie is automatically set during barclamp apply
-# on the apply_role_pre_chef_call method
-file node[:rabbitmq][:erlang_cookie_path] do
-  content node[:rabbitmq][:erlang_cookie]
-  owner node[:rabbitmq][:rabbitmq_user]
-  group node[:rabbitmq][:rabbitmq_group]
-end
-
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required packages installed before we create the pacemaker
 # resources
