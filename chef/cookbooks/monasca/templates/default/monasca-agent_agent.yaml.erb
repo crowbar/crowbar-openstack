@@ -23,6 +23,8 @@ Api:
   insecure: <%= @keystone_settings['insecure'] %>
   # Name of the ca certs file
   # ca_file: <%= @ca_file %>
+  user_domain_name: Default
+  project_domain_name: Default
 
   # The following 3 options are for handling buffering and reconnection to the monasca-api
   # If the agent forwarder is consuming too much memory, you may want to set

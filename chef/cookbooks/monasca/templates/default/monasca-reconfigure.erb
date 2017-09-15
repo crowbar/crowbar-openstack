@@ -17,6 +17,8 @@ then
         --project_name '<%= @agent_keystone["service_tenant"] %>' \
         <% if defined?(@service) -%> --service '<%= @service %>' <% end -%> \
         --keystone_url '<%= @keystone_settings["admin_auth_url"] %>/v3' \
+        --user_domain_name Default \
+        --project_domain_name Default \
         --monasca_url '<%= @monasca_api_url %>' \
         --user '<%= @agent_settings["user"] %>' \
         --dimensions '<%= @agent_dimensions.map{|k,v| "#{k}:#{v}"}.join(',') %>' \
