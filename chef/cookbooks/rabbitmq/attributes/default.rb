@@ -40,7 +40,6 @@ default[:rabbitmq][:mnesiadir] = nil
 
 default[:rabbitmq][:cluster] = false
 default[:rabbitmq][:clustername] = "rabbit@#{node[:hostname]}"
-default[:rabbitmq][:erlang_cookie_path] = "/var/lib/rabbitmq/.erlang.cookie"
 
 # ha
 default[:rabbitmq][:ha][:enabled] = false
