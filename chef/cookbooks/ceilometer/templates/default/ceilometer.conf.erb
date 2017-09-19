@@ -61,7 +61,7 @@ password = <%= @keystone_settings['service_password'] %>
 [service_types]
 neutron_lbaas_version = v2
 
-<% if @hypervisor_inspector == "vmware" -%>
+<% if @hypervisor_inspector == "vsphere" -%>
 [vmware]
 host_ip = <%= node[:nova][:vcenter][:host] rescue "" %>
 host_port = <%= node[:nova][:vcenter][:port] rescue "443" %>

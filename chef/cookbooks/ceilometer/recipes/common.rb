@@ -47,7 +47,7 @@ if is_compute_agent
   end
   if ["vmware"].include?(node[:nova][:libvirt_type])
     instance_discovery_method = "workload_partitioning"
-    hypervisor_inspector = "vmware"
+    hypervisor_inspector = "vsphere"
   else
     hypervisor_inspector = "libvirt"
     libvirt_type = node[:nova][:libvirt_type]
