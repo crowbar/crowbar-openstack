@@ -17,8 +17,8 @@
 
 require "ipaddr"
 
-class NeutronService < PacemakerServiceObject
-  def initialize(thelogger)
+class NeutronService < OpenstackServiceObject
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "neutron"
   end
@@ -33,11 +33,11 @@ class NeutronService < PacemakerServiceObject
   end
 
   def self.networking_ml2_type_drivers_valid
-    ["vlan", "gre", "vxlan"]
+    ["vlan", "gre", "vxlan", "opflex"]
   end
 
   def self.networking_ml2_mechanism_drivers_valid
-    ["linuxbridge", "openvswitch", "cisco_nexus"]
+    ["linuxbridge", "openvswitch", "cisco_nexus", "vmware_dvs", "cisco_apic_ml2", "apic_gbp"]
   end
 
   class << self
@@ -47,7 +47,7 @@ class NeutronService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -57,7 +57,7 @@ class NeutronService < PacemakerServiceObject
           "count" => 1,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -113,6 +113,7 @@ class NeutronService < PacemakerServiceObject
     } unless nodes.nil? or nodes.length ==0
 
     base["attributes"]["neutron"]["service_password"] = random_password
+    base["attributes"]["neutron"]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
     base
@@ -206,6 +207,53 @@ class NeutronService < PacemakerServiceObject
       validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_nexus_vlan")
     end
 
+    # vmware_dvs mech driver needs also openvswitch or linuxbridge mech driver
+    # and vlan type driver
+    if ml2_mechanism_drivers.include?("vmware_dvs") &&
+        !ml2_mechanism_drivers.include?("openvswitch") &&
+        !ml2_mechanism_drivers.include?("linuxbridge")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.vmware_dvs_ovs_lbr")
+    end
+
+    if ml2_mechanism_drivers.include?("vmware_dvs") &&
+        !ml2_type_drivers.include?("vlan")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.vmware_dvs_vlan")
+    end
+ 
+    # Checks for Cisco ACI ml2 driver
+    if ml2_mechanism_drivers.include?("cisco_apic_ml2") &&
+        ml2_mechanism_drivers.include?("apic_gbp")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_ml2_gbp")
+    end
+
+    if ml2_mechanism_drivers.include?("cisco_apic_ml2") ||
+        ml2_mechanism_drivers.include?("apic_gbp")
+      # openvswitch should not be used when cisco_apic_ml2 mechanism driver is used
+      if ml2_mechanism_drivers.include?("openvswitch")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_ml2")
+      end
+
+      if ml2_mechanism_drivers.include?("linuxbridge")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_linuxbridge")
+      end
+
+      # cisco_apic_ml2 mechanism driver needs opflex as the type_driver
+      unless ml2_type_drivers.include?("opflex")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_type")
+      end
+
+      # Validate if ACI configurations are provided
+      if proposal["attributes"]["neutron"]["apic"].nil? ||
+          proposal["attributes"]["neutron"]["apic"].empty?
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_no_config")
+      end
+
+      # Cisco APIC already distributes neutron services not needing DVR
+      if proposal["attributes"]["neutron"]["use_dvr"]
+        validation_error I18n.t("barcalmp.#{@bc_name}.validation.cisco_apic_dvr")
+      end
+    end
+
     # for now, openvswitch and linuxbrige can't be used in parallel
     if ml2_mechanism_drivers.include?("openvswitch") &&
         ml2_mechanism_drivers.include?("linuxbridge")
@@ -282,7 +330,6 @@ class NeutronService < PacemakerServiceObject
       if ml2_mechanism_drivers.include? "linuxbridge"
         validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_linuxbridge")
       end
-
     end
   end
 
@@ -290,16 +337,17 @@ class NeutronService < PacemakerServiceObject
     net_svc = NetworkService.new @logger
     network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
     blacklist = ["bmc", "bmc_admin", "admin", "nova_fixed", "nova_floating",
-                 "os_sdn", "public", "storage"]
+                 "os_sdn", "public", "storage", "ironic"]
 
     external_networks.each do |ext_net|
       # Exclude a few default networks from network.json from being used as
       # additional external networks in neutron
       if blacklist.include? ext_net
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.network", ext_net: extnet)
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.network", ext_net: ext_net)
       end
       if network_proposal["attributes"]["network"]["networks"][ext_net].nil?
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.external_network", ext_net: extnet)
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.external_network",
+                                ext_net: ext_net)
       end
     end
   end
@@ -312,7 +360,7 @@ class NeutronService < PacemakerServiceObject
 
     dc_id = proposal["attributes"]["neutron"]["infoblox"]["cloud_data_center_id"]
     grids_length = proposal["attributes"]["neutron"]["infoblox"]["grids"].length
-    if dc_id.to_i >= grids_length
+    if dc_id.to_i > grids_length || dc_id.to_i < 1
       validation_error I18n.t("barclamp.#{@bc_name}.validation.infoblox_dc_id",
                               dc_id: dc_id, grids_len: grids_length)
     end
@@ -358,11 +406,40 @@ class NeutronService < PacemakerServiceObject
         # the requirement to have the bridge setup is really node-specifc. (E.g.
         # a tempest node that might get an IP allocated in "nova_floating" won't
         # need the bridges)
-        ovs_bridge_networks = ["nova_floating"]
+        ovs_bridge_networks = ["nova_floating", "ironic"]
         ovs_bridge_networks.concat attributes["additional_external_networks"]
-        if ml2_type_drivers.include?("vlan")
-          ovs_bridge_networks << "nova_fixed"
+        ovs_bridge_networks.push("nova_fixed") if ml2_type_drivers.include?("vlan")
+
+        # next block doesn't apply for non-DVR compute nodes, hence the check
+        # on nova_floating
+        floating_net_def = node.get_network_by_type("nova_floating")
+        if ml2_type_drivers.include?("vlan") && !floating_net_def.nil?
+          # If fixed & floating are on the same interface, and floating is not
+          # using a vlan, then br-fixed and br-floating will fight for the
+          # underlying network interface; in that case, we actually only need
+          # one bridge; we'll pick br-public
+          # Note that we assume that all relevant nodes will have a similar
+          # bridge mapping in the end (and not something like one node with an
+          # entry for both floating and physnet1, and some other node with only
+          # physnet1 -- that kind of setups simply won't work).
+          fixed_net_def = node.get_network_by_type("nova_fixed")
+
+          # we use the list of interface slaves, in case the bond doesn't exist
+          # yet (ifname won't be valid, then)
+          _ifname, fixed_ifs, _team = node.conduit_details(fixed_net_def["conduit"])
+          _ifname, floating_ifs, _team = node.conduit_details(floating_net_def["conduit"])
+
+          same_bridge = !floating_net_def["use_vlan"] && fixed_ifs.sort == floating_ifs.sort
+          bridge_name = same_bridge ? "br-public" : "br-fixed"
+
+          if fixed_net_def["bridge_name"] != bridge_name
+            @logger.info("Forcing bridge_name to #{bridge_name} for the nova_fixed network " \
+              "on node #{node.name}")
+            node.set_network_attribute("nova_fixed", "bridge_name", bridge_name)
+            needs_save = true
+          end
         end
+
         ovs_bridge_networks.each do |net|
           net_def = node.get_network_by_type(net)
           next if net_def.nil?
@@ -418,6 +495,12 @@ class NeutronService < PacemakerServiceObject
           node.set_network_attribute("nova_fixed", "use_vlan", false)
           node.save
         end
+      end
+
+      # enable ironic interface as preparation for ironic deployment
+      network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
+      unless network_proposal["attributes"]["network"]["networks"]["ironic"].nil?
+        net_svc.enable_interface "default", "ironic", nodename
       end
     elsif attributes["networking_plugin"] == "vmware"
       net_svc.allocate_ip "default", "os_sdn", "host", node

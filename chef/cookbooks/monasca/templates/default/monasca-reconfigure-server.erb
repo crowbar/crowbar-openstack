@@ -1,0 +1,84 @@
+#!/bin/sh
+
+# This script is a monasca-setup wrapper that configures monasca-agent on the
+# monasca-server node. On the monasca-server node chef will _not_ touch the
+# agent configuration directly. Instead, it will run this script.
+
+run_setup()
+  {
+  /usr/bin/monasca-setup \
+      -u '<%= @agent_keystone["service_user"] %>' \
+      -p '<%= @agent_keystone["service_password"] %>' \
+      --project_name '<%= @agent_keystone["service_tenant"] %>' \
+      <% if defined?(@service) -%> --service '<%= @service %>' <% end -%> \
+      --keystone_url '<%= @keystone_settings["admin_auth_url"] %>/v3' \
+      --monasca_url '<%= @monasca_api_url %>' \
+      --user '<%= @agent_settings["user"] %>' \
+      --dimensions '<%= @agent_dimensions.map{|k,v| "#{k}:#{v}"}.join(',') %>' \
+      --insecure '<%= @agent_settings["insecure"] %>' \
+      <% if @agent_settings["ca_file"].length > 0 -%> --ca_file '<%= @agent_settings["ca_file"] %>' <% end -%> \
+      --log_dir '<%= @agent_settings["log_dir"] %>' \
+      --log_level '<%= @agent_settings["log_level"] %>' \
+      --monasca_statsd_port '<%= @agent_settings["statsd_port"].to_i %>' \
+      --check_frequency '<%= @agent_settings["check_frequency"].to_i %>' \
+      --num_collector_threads '<%= @agent_settings["num_collector_threads"].to_i %>' \
+      --pool_full_max_retries '<%= @agent_settings["pool_full_max_retries"].to_i %>' \
+      --plugin_collect_time_warn '<%= @agent_settings["plugin_collect_time_warn"].to_i %>' \
+      --max_measurement_buffer_size '<%= @agent_settings["max_measurement_buffer_size"].to_i %>' \
+      --backlog_send_rate '<%= @agent_settings["backlog_send_rate"].to_i %>' \
+      --amplifier '<%= @agent_settings["amplifier"] %>' \
+      --skip_enable \
+      --agent_service_name '<%= @agent_settings["agent_service_name"] %>' \
+      "$@"
+    }
+
+
+# Run full detection first
+
+run_setup
+
+# Add process checks not covered by full detection
+
+run_setup \
+    -d ProcessCheck \
+    -json \
+      '{"process_config": [
+         {
+           "process_names":["monasca-log-api"],
+           "dimensions":{"service":"monitoring", "component":"monasca-log-api"}
+           },
+         {
+            "process_names":["monasca-log-metrics"],
+            "dimensions": {"service":"monitoring", "component":"monasca-log-metrics"},
+            "search_string": "logstash/runner.rb agent -f /etc/monasca-log-transformer/monasca-log-metrics.conf"
+            },
+         {
+            "process_names":["monasca-log-persister"],
+            "dimensions": {"service":"monitoring", "component":"monasca-log-persister"},
+            "search_string": "logstash/runner.rb agent -f /etc/monasca-log-persister/monasca-log-persister.conf"
+           },
+         {
+           "process_names":["monasca-log-transformer"],
+           "dimensions": {"service":"monitoring", "component":"monasca-log-transformer"},
+           "search_string": "logstash/runner.rb agent -f /etc/monasca-log-transformer/monasca-log-transformer.conf"
+           }
+         ]
+       }'
+
+# Add HTTP checks not covered by full detection
+
+run_setup \
+  -d HttpCheck \
+  -a 'url='<%= @monasca_log_api_url %>'
+      dimensions=service:monitoring,component:monasca-log-api
+      timeout=10
+      name=monasca-log-api
+      use_keystone=true'
+
+run_setup \
+  -d HttpCheck \
+  -a 'url='<%= @kibana_url %>'
+     dimensions=service:monitoring,component:kibana
+     timeout=10
+     name=kibana
+     use_keystone=false'

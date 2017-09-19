@@ -31,43 +31,34 @@ if provisioner_server.nil?
 end
 provisioner_address = Barclamp::Inventory.get_network_by_type(provisioner_server, "admin").address
 
-# the image is uploaded via the glance API so we need a glance-server
-glance_server = node_search_with_cache("roles:glance-server").first
-if glance_server.nil?
-  Chef::Log.warn("No glance-server found. Can not upload #{service_sles_image_name}")
-  return
-end
-# extra argument if the --insecure is needed when talking to glance-api
-openstack_args_glance = (glance_server[:glance][:api][:protocol] == "https" &&
-  glance_server[:glance][:ssl][:insecure]) || keystone_settings["insecure"] ? "--insecure" : ""
+# the image is uploaded via the glance API
+glance_config = Barclamp::Config.load("openstack", "glance", node[:magnum][:glance_instance])
+glance_insecure = CrowbarOpenStackHelper.insecure(glance_config)
+openstack_args_glance = glance_insecure || keystone_settings["insecure"] ? "--insecure" : ""
 
-# the flavor is created via the nova API so we need a nova-controller
-nova_controller = node_search_with_cache("roles:nova-controller").first
-if nova_controller.nil?
-  Chef::Log.warn("No nova-controller found. Can not create magnum flavors")
-  return
-end
-# extra argument if the --insecure is needed when talking to nova-api
-openstack_args_nova = (nova_controller[:nova][:ssl][:enabled] &&
-  nova_controller[:nova][:ssl][:insecure]) || keystone_settings["insecure"] ? "--insecure" : ""
+# the flavor is created via the nova API
+nova_config = Barclamp::Config.load("openstack", "nova", node[:magnum][:nova_instance])
+nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
+openstack_args_nova = nova_insecure || keystone_settings["insecure"] ? "--insecure" : ""
 
+env = "OS_USERNAME='#{keystone_settings["service_user"]}' "
+env << "OS_PASSWORD='#{keystone_settings["service_password"]}' "
+env << "OS_PROJECT_NAME='#{keystone_settings["service_tenant"]}' "
+env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
+env << "OS_INTERFACE=internal "
+env << "OS_IDENTITY_API_VERSION=3"
 
-# create basic arguments for openstack client
-openstack_args = "--os-username #{keystone_settings["service_user"]}"
-openstack_args += " --os-auth-type password --os-identity-api-version 3"
-openstack_args += " --os-password #{keystone_settings["service_password"]}"
-openstack_args += " --os-tenant-name #{keystone_settings["service_tenant"]}"
-openstack_args += " --os-auth-url #{keystone_settings["internal_auth_url"]}"
-openstack_args += " --os-endpoint internalURL"
+openstack_cmd = "#{env} openstack"
 
-openstack_cmd = "openstack #{openstack_args}"
-
+image_url = "http://#{provisioner_address}:8091/files/" \
+  "#{service_sles_image_name}/" \
+  "#{service_sles_image_name}.#{node[:kernel][:machine]}.qcow2"
 
 execute "create_magnum_image" do
-  command "curl http://#{provisioner_address}:8091/files/#{service_sles_image_name}/\
-  #{service_sles_image_name}.#{node[:kernel][:machine]}.qcow2 | \
+  command "curl #{image_url} | \
   #{openstack_cmd} #{openstack_args_glance} image create --disk-format qcow2 \
-  --container-format bare --public --property os_distro=opensuse #{service_sles_image_name}"
+  --container-format bare --public --property os_distro=opensuse \
+  #{service_sles_image_name}"
   not_if "#{openstack_cmd} #{openstack_args_glance} image list -f value -c Name | grep -q #{service_sles_image_name}"
   action :nothing
 end

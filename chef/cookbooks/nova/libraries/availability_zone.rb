@@ -18,28 +18,27 @@ module NovaAvailabilityZone
   def self.fetch_set_az_command_no_arg(node, cookbook_name)
     keystone_settings = KeystoneHelper.keystone_settings(node, cookbook_name)
 
-    nova_insecure = node[:nova][:ssl][:enabled] && node[:nova][:ssl][:insecure]
+    nova_config = BarclampLibrary::Barclamp::Config.load("openstack", "nova")
+    ssl_insecure = CrowbarOpenStackHelper.insecure(nova_config) || keystone_settings["insecure"]
 
-    command = ["/usr/bin/crowbar-nova-set-availability-zone"]
-    command << "--os-username"
-    command << keystone_settings["admin_user"]
-    command << "--os-password"
-    command << keystone_settings["admin_password"]
-    command << "--os-tenant-name"
-    command << keystone_settings["default_tenant"]
-    command << "--os-auth-url"
-    command << KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
+    auth_url = KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
                                                     keystone_settings["internal_url_host"],
                                                     keystone_settings["service_port"],
                                                     "2.0")
-    command << "--os-region-name"
-    command << keystone_settings["endpoint_region"]
+    env = {
+      "OS_USERNAME" => keystone_settings["admin_user"],
+      "OS_PASSWORD" => keystone_settings["admin_password"],
+      "OS_TENANT_NAME" => keystone_settings["default_tenant"],
+      "OS_AUTH_URL" => auth_url,
+      "OS_REGION_NAME" => keystone_settings["endpoint_region"]
+    }
 
-    if keystone_settings["insecure"] || nova_insecure
+    command = ["/usr/bin/crowbar-nova-set-availability-zone"]
+    if ssl_insecure
       command << "--insecure"
     end
 
-    command
+    [env, command]
   end
 
   def self.add_arg_to_set_az_command(command_no_arg, compute_node)

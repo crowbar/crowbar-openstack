@@ -1,0 +1,125 @@
+Api:
+  # To configure Keystone correctly, a project-scoped token must be acquired.
+  # To accomplish this, the configuration must be set up with one of the
+  # following scenarios:
+  #   Set username and password and you have a default project set in keystone.
+  #   Set username, password and project id.
+  #   Set username, password, project name and (domain id or domain name).
+  #
+  # Monitoring API URL: URL for the monitoring API, if undefined it will be pulled from the keystone service catalog
+  # Example: https://region-a.geo-1.monitoring.hpcloudsvc.com:8080/v2.0
+  url: "<%= @monasca_api_url %>"
+  # Keystone Username
+  username: "<%= @agent_settings["keystone"]["service_user"] %>"
+  # Keystone Password
+  password: "<%= @agent_settings["keystone"]["service_password"] %>"
+  # Keystone API URL: URL for the Keystone server to use
+  # Example: https://region-a.geo-1.identity.hpcloudsvc.com:35357/v3/
+  keystone_url: "<%= @keystone_settings["admin_auth_url"] %>/v<%= @keystone_settings["api_version"] %>"
+  # Project name to be used by this agent
+  project_name: "<%= @agent_settings["keystone"]["service_tenant"] %>"
+  # Set whether certificates are used for Keystone
+  # If insecure is set to False, a ca_file name must be set to authenticate with Keystone
+  insecure: <%= @keystone_settings['insecure'] %>
+  # Name of the ca certs file
+  # ca_file: <%= @ca_file %>
+
+  # The following 3 options are for handling buffering and reconnection to the monasca-api
+  # If the agent forwarder is consuming too much memory, you may want to set
+  # max_measurement_buffer_size to a lower value. If you have a larger system with many agents,
+  # you may want to throttle the number of messages sent to the API by setting the
+  # backlog_send_rate to a lower number.
+
+  # Maximum number of measurements to buffer when unable to communicate with the monasca-api
+  # (-1 means no limit)
+  max_measurement_buffer_size: <%= @agent_settings["max_measurement_buffer_size"].to_i %>
+  # Maximum number of messages to send at one time when communication with the monasca-api is restored
+  backlog_send_rate: <%= @agent_settings["backlog_send_rate"].to_i %>
+
+  # Publish extra metrics to the API by adding this number of 'amplifier' dimensions.
+  # For load testing purposes only; set to 0 for production use.
+  amplifier: <%= @agent_settings["amplifier"].to_i %>
+
+Main:
+  # Force the hostname to whatever you want.
+  hostname: "<%= @hostname %>"
+
+  # Optional dimensions to be sent with every metric from this node
+  # They should be in the format name: value
+  # Example of dimensions below
+  # dimensions:
+  #   service: nova
+  #   group: group_a
+  #   environment: production
+  <%- unless @dimensions.nil? or @dimension.empty? then -%>
+  dimensions:
+  <%- @dimensions.each_pair do |key, val| -%>
+    <%= key %>: <%= val %>
+  <%- end -%>
+  <%- end -%>
+
+  # Set the threshold for accepting points to allow anything
+  # with recent_point_threshold seconds
+  # Defaults to 30 seconds if no value is provided
+  #recent_point_threshold: 30
+
+  # time to wait between collection runs
+  check_freq: <%= @agent_settings["check_frequency"].to_i %>
+
+  # Number of Collector Threads to run
+  num_collector_threads: <%= @agent_settings["num_collector_threads"].to_i %>
+
+  # Maximum number of collection cycles where all of the threads in the pool are
+  # still running plugins before the collector will exit
+  pool_full_max_retries: <%= @agent_settings["pool_full_max_retries"].to_i %>
+
+  # Threshold value for warning on collection time of each check (in seconds)
+  sub_collection_warn: <%= @agent_settings["plugin_collect_time_warn"].to_i %>
+
+  # Collector restart interval (in hours)
+  collector_restart_interval: 24
+
+  # Change port the Agent is listening to
+  # listen_port: 17123
+
+  # Allow non-local traffic to this Agent
+  # This is required when using this Agent as a proxy for other Agents
+  # that might not have an internet connection
+  # For more information, please see
+  # https://github.com/DataDog/dd-agent/wiki/Network-Traffic-and-Proxy-Configuration
+  # non_local_traffic: no
+
+Statsd:
+  # ========================================================================== #
+  # Monasca Statsd configuration                                                    #
+  # ========================================================================== #
+  # Monasca Statsd is a small server that aggregates your custom app metrics.
+
+  #  Make sure your client is sending to the same port.
+  monasca_statsd_port : 8125
+
+  ## The monasca_statsd flush period.
+  # monasca_statsd_interval : 20
+
+  # If you want to forward every packet received by the monasca_statsd server
+  # to another statsd server, uncomment these lines.
+  # WARNING: Make sure that forwarded packets are regular statsd packets and not "monasca_statsd" packets,
+  # as your other statsd server might not be able to handle them.
+  # monasca_statsd_forward_host: address_of_own_statsd_server
+  # monasca_statsd_statsd_forward_port: 8125
+
+Logging:
+  # ========================================================================== #
+  # Logging
+  # ========================================================================== #
+  log_level: "<%= @log_level %>"
+  collector_log_file: <%= @log_dir %>/collector.log
+  forwarder_log_file: <%= @log_dir %>/forwarder.log
+  statsd_log_file: <%= @log_dir %>/statsd.log
+
+  # if syslog is enabled but a host and port are not set, a local domain socket
+  # connection will be attempted
+  #
+  # log_to_syslog: yes
+  # syslog_host:
+  # syslog_port:

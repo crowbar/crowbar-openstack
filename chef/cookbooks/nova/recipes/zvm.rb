@@ -17,4 +17,7 @@
 ## limitations under the License.
 ##
 
-node.set[:nova][:libvirt_type] = "zvm"
+if node[:nova][:libvirt_type] != "zvm"
+  node.set[:nova][:libvirt_type] = "zvm"
+  node.save
+end

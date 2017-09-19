@@ -18,4 +18,7 @@
 # limitations under the License.
 #
 
-node.set[:nova][:libvirt_type] = "xen"
+if node[:nova][:libvirt_type] != "xen"
+  node.set[:nova][:libvirt_type] = "xen"
+  node.save
+end

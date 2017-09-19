@@ -15,8 +15,8 @@
 # limitations under the License.
 #
 
-class GlanceService < PacemakerServiceObject
-  def initialize(thelogger)
+class GlanceService < OpenstackServiceObject
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "glance"
   end
@@ -34,7 +34,7 @@ class GlanceService < PacemakerServiceObject
           "cluster" => true,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }
@@ -68,6 +68,7 @@ class GlanceService < PacemakerServiceObject
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
 
     base["attributes"]["glance"]["service_password"] = random_password
+    base["attributes"]["glance"]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
     @logger.debug("Glance create_proposal: exiting")

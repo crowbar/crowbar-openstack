@@ -12,7 +12,6 @@ auth_region = <%= @keystone_settings['endpoint_region'] %>
 registry_host = <%= @registry_bind_host %>
 registry_port = <%= @registry_bind_port %>
 debug = <%= node[:glance][:debug] ? "True" : "False" %>
-verbose = <%= node[:glance][:verbose] ? "True" : "False" %>
 log_file = <%= node[:glance][:scrubber][:log_file] %>
 use_syslog = <%= node[:glance][:use_syslog] ? "True" : "False" %>
 use_stderr = false

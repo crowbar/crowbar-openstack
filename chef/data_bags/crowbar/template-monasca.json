@@ -1,0 +1,137 @@
+{
+  "id": "template-monasca",
+  "description": "Logging and Monitoring Service for OpenStack",
+  "attributes": {
+    "monasca": {
+      "agent": {
+        "keystone": {
+          "service_user": "monasca-agent",
+          "service_password": "",
+          "service_tenant": "monasca",
+          "service_role": "monasca-agent"
+        },
+        "insecure": true,
+        "ca_file": "",
+        "log_dir": "/var/log/monasca-agent/",
+        "log_level": "INFO",
+        "statsd_port": 8125,
+        "check_frequency": 15,
+        "num_collector_threads": 1,
+        "pool_full_max_retries": 5,
+        "plugin_collect_time_warn": 6,
+        "max_measurement_buffer_size": -1,
+        "backlog_send_rate": 1000,
+        "amplifier": 0
+      },
+      "log_agent": {
+        "delay": 10,
+        "elapsed_time_sec": 30,
+        "max_data_size_kb": 5120,
+        "num_of_logs": 125,
+        "keystone": {
+          "service_user": "monasca-log-agent",
+          "service_password": "",
+          "service_tenant": "monasca",
+          "service_role": "monasca-agent"
+        }
+      },
+      "api": {
+        "url": "",
+        "bind_host": "*",
+        "processes": 3,
+        "threads": 10,
+        "log_level": "INFO"
+      },
+      "elasticsearch": {
+        "repo_dir": []
+      },
+      "elasticsearch_curator": {
+        "delete_exclude_index": [ ".kibana" ],
+        "cron_config": {
+          "minute": "0",
+          "hour": "0",
+          "day": "*",
+          "weekday": "*",
+          "month": "*"
+        }
+      },
+      "log_api": {
+        "url": "",
+        "log_level": "INFO"
+      },
+      "kafka": {
+        "log_retention_hours": 24,
+        "log_retention_bytes": 21474836480
+      },
+      "setup": {
+        "extra_params": ""
+      },
+      "master": {
+        "influxdb_mon_api_password": "",
+        "influxdb_mon_persister_password": "",
+        "influxdb_retention_policy": "60d",
+        "database_notification_password": "",
+        "database_monapi_password": "",
+        "database_thresh_password": "",
+        "database_logapi_password": "",
+        "keystone_monasca_operator_password": "",
+        "keystone_monasca_agent_password": "",
+        "keystone_admin_agent_password": "",
+        "database_grafana_password": "",
+        "notification_enable_email": true,
+        "smtp_host": "localhost",
+        "smtp_port": 25,
+        "smtp_user": "",
+        "smtp_password": "",
+        "smtp_from_address": "monasca@localhost"
+      },
+      "db": {
+        "database": "monasca",
+        "password": "",
+        "user": "monasca"
+      },
+      "debug": false,
+      "group": "monasca",
+      "user": "monasca",
+      "network": "admin",
+      "database_instance": "none",
+      "keystone_instance": "none",
+      "service_password": "none",
+      "service_user": "monasca",
+      "service_tenant": "monasca",
+      "service_roles": ["monasca-agent", "monasca-user", "monasca-read-only-user"]
+    }
+  },
+  "deployment": {
+    "monasca": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 100,
+      "element_states": {
+        "monasca-server": [ "readying", "ready", "applying" ],
+        "monasca-master": [ "readying", "ready", "applying" ],
+        "monasca-agent": [ "readying", "ready", "applying" ],
+        "monasca-log-agent": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "monasca-server" ],
+        [ "monasca-master" ],
+        [ "monasca-agent" ],
+        [ "monasca-log-agent" ]
+      ],
+      "element_run_list_order": {
+        "monasca-server": 110,
+        "monasca-master": 115,
+        "monasca-agent": 120,
+        "monasca-log-agent": 130
+      },
+      "config": {
+        "environment": "monasca-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": []
+      }
+    }
+  }
+}

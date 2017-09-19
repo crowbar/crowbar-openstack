@@ -17,13 +17,12 @@ registry_port = <%= @registry_bind_port %>
 transport_url = <%= @rabbit_settings[:url] %>
 registry_client_insecure = <%= @keystone_settings["insecure"] %>
 debug = <%= node[:glance][:debug] ? "True" : "False" %>
-verbose = <%= node[:glance][:verbose] ? "True" : "False" %>
 log_file = <%= node[:glance][:api][:log_file] %>
 use_syslog = <%= node[:glance][:use_syslog] ? "True" : "False" %>
 use_stderr = false
-enable_v1_api = <%= node[:glance][:enable_v1] ? "True" : "False" %>
+enable_v1_api = <%= @enable_v1 %>
 enable_v2_api = true
-enable_v1_registry = <%= node[:glance][:enable_v1] ? "True" : "False" %>
+enable_v1_registry = <%= @enable_v1 %>
 enable_v2_registry = true
 
 [database]
@@ -43,10 +42,11 @@ vmware_server_password = <%= node[:glance][:vsphere][:password] %>
 <% node[:glance][:vsphere][:datastores].each do |datastore| -%>
 vmware_datastores ="<%= datastore %>"
 <% end -%>
+vmware_insecure = <%= node[:glance][:vsphere][:insecure] ? "True" : "False" %>
 cinder_catalog_info = volumev2:cinderv2:internalURL
 cinder_os_region_name = <%= @keystone_settings['endpoint_region'] %>
 cinder_api_insecure = <%= @cinder_api_insecure ? 'True' : 'False' %>
-swift_store_auth_insecure = <%= @swift_api_insecure || @keystone_settings['insecure'] ? 'True' : 'False' %>
+swift_store_auth_insecure = <%= @swift_api_insecure ? 'True' : 'False' %>
 swift_store_region = <%= @keystone_settings['endpoint_region'] %>
 swift_store_endpoint_type = internalURL
 swift_store_container = <%= node[:glance][:swift][:store_container] %>
@@ -76,12 +76,25 @@ project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
 auth_url = <%= @keystone_settings['admin_auth_url'] %>
 auth_type = password
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:glance][:memcache_secret_key] %>
+service_token_roles_required = true
+service_token_roles = admin
 
 [oslo_concurrency]
 lock_path = /var/run/glance
 
 [oslo_messaging_notifications]
 driver = messaging
+
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+ssl_ca_file = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
 
 [paste_deploy]
 <% if node[:glance][:enable_caching] and node[:glance][:use_cachemanagement] -%>

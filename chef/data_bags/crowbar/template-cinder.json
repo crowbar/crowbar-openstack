@@ -12,11 +12,11 @@
       "database_instance": "none",
       "service_user": "cinder",
       "service_password": "",
+      "memcache_secret_key": "",
       "max_pool_size": 30,
       "max_overflow": 10,
       "pool_timeout": 30,
       "rpc_response_timeout": 60,
-      "use_multi_backend": true,
       "use_multipath": false,
       "keymgr_fixed_key": "",
       "volume_defaults": {
@@ -38,11 +38,11 @@
           "use_chap_auth": false,
           "chap_username": "chapadmin",
           "chap_password": "12345",
-          "eqlx_cli_timeout": 30,
+          "ssh_conn_timeout": 30,
           "eqlx_pool": "default"
         },
         "netapp": {
-          "storage_family": "ontap_7mode",
+          "storage_family": "ontap_cluster",
           "storage_protocol": "iscsi",
           "nfs_shares": "",
           "vserver": "",
@@ -52,7 +52,8 @@
           "netapp_password": "",
           "netapp_vfiler": "",
           "netapp_transport_type": "https",
-          "netapp_volume_list": ""
+          "netapp_volume_list": "",
+          "max_over_subscription_ratio": 20
         },
         "emc": {
           "ecom_server_ip": "192.168.124.11",
@@ -74,8 +75,7 @@
           "iscsi_ip": ""
         },
         "nfs": {
-          "nfs_shares": "",
-          "nfs_mount_options": ""
+          "nfs_shares": ""
         },
         "rbd": {
           "use_crowbar": true,
@@ -83,7 +83,8 @@
           "admin_keyring": "/etc/ceph/ceph.client.admin.keyring",
           "pool": "volumes",
           "user": "cinder",
-          "secret_uuid": ""
+          "secret_uuid": "",
+          "flatten_volume_from_snapshot": false
         },
         "vmware": {
           "host": "",
@@ -161,7 +162,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 105,
+      "schema-revision": 203,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

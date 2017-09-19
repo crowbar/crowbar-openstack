@@ -18,4 +18,7 @@
 # limitations under the License.
 #
 
-node.set[:nova][:libvirt_type] = "qemu"
+if node[:nova][:libvirt_type] != "qemu"
+  node.set[:nova][:libvirt_type] = "qemu"
+  node.save
+end

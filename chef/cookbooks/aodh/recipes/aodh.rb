@@ -11,7 +11,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-aodh_database"
+crowbar_pacemaker_sync_mark "wait-aodh_database" if ha_enabled
 
 # Create the Aodh Database
 database "create #{node[:aodh][:db][:database]} database" do
@@ -44,7 +44,7 @@ database_user "grant database access for aodh database user" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-aodh_database"
+crowbar_pacemaker_sync_mark "create-aodh_database" if ha_enabled
 
 directory "/var/cache/aodh" do
   owner node[:aodh][:user]
@@ -69,11 +69,13 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(
   node, node[:aodh][:api][:protocol] == "https", ha_enabled)
+
+crowbar_pacemaker_sync_mark "wait-aodh_keystone_register" if ha_enabled
 
 keystone_register "register aodh user" do
   protocol keystone_settings["protocol"]
@@ -83,7 +85,7 @@ keystone_register "register aodh user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -94,7 +96,7 @@ keystone_register "give aodh user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -126,14 +128,12 @@ keystone_register "register aodh endpoint" do
   endpoint_publicURL "#{aodh_protocol}://#{my_public_host}:#{aodh_port}"
   endpoint_adminURL "#{aodh_protocol}://#{my_admin_host}:#{aodh_port}"
   endpoint_internalURL "#{aodh_protocol}://#{my_admin_host}:#{aodh_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
-db_name = node[:aodh][:db][:database]
-db_user = node[:aodh][:db][:user]
-db_password = node[:aodh][:db][:password]
-db_connection =
-    "#{db_settings[:url_scheme]}://#{db_user}:#{db_password}@#{db_settings[:address]}/#{db_name}"
+crowbar_pacemaker_sync_mark "create-aodh_keystone_register" if ha_enabled
+
+db_connection = fetch_database_connection_string(node[:aodh][:db])
 
 if node[:aodh][:ha][:server][:enabled]
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
@@ -147,6 +147,12 @@ end
 node.normal[:apache][:listen_ports_crowbar] ||= {}
 node.normal[:apache][:listen_ports_crowbar][:aodh] = { plain: [bind_port] }
 
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "aodh-server") : [node]
+)
+
+memcached_instance("aodh-server")
+
 template node[:aodh][:config_file] do
   source "aodh.conf.erb"
   owner "root"
@@ -154,9 +160,9 @@ template node[:aodh][:config_file] do
   mode "0640"
   variables(
     debug: node[:aodh][:debug],
-    verbose: node[:aodh][:verbose],
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: keystone_settings,
+    memcached_servers: memcached_servers,
     bind_host: bind_host,
     bind_port: bind_port,
     database_connection: db_connection,
@@ -167,7 +173,7 @@ template node[:aodh][:config_file] do
   notifies :reload, resources(service: "apache2")
 end
 
-crowbar_pacemaker_sync_mark "wait-aodh_db_sync"
+crowbar_pacemaker_sync_mark "wait-aodh_db_sync" if ha_enabled
 
 execute "aodh-dbsync" do
   command "aodh-dbsync"
@@ -192,7 +198,7 @@ ruby_block "mark node for aodh db_sync" do
   subscribes :create, "execute[aodh-dbsync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-aodh_db_sync"
+crowbar_pacemaker_sync_mark "create-aodh_db_sync" if ha_enabled
 
 service "aodh-api" do
   service_name node[:aodh][:api][:service_name]

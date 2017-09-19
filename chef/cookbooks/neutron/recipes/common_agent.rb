@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 neutron = nil
 if node.attribute?(:cookbook) and node[:cookbook] == "nova"
   neutrons = node_search_with_cache("roles:neutron-server", node[:nova][:neutron_instance])
@@ -23,6 +22,8 @@ else
   neutron = node
   nova_compute_ha_enabled = false
 end
+
+ironic_net = Barclamp::Inventory.get_network_definition(node, "ironic")
 
 # Disable rp_filter
 ruby_block "edit /etc/sysctl.conf for rp_filter" do
@@ -49,6 +50,35 @@ bash "reload disable-rp_filter-sysctl" do
   code "/sbin/sysctl -e -q -p #{disable_rp_filter_file}"
   action :nothing
   subscribes :run, resources(cookbook_file: disable_rp_filter_file), :delayed
+end
+
+neighbour_table_overflow_file = "/etc/sysctl.d/50-neutron-neighbour-table-overflow.conf"
+cookbook_file neighbour_table_overflow_file do
+  source "sysctl-neighbour-table-overflow.conf"
+  mode "0644"
+end
+
+bash "reload neighbour-table-overflow.conf" do
+  code "/sbin/sysctl -e -q -p #{neighbour_table_overflow_file}"
+  action :nothing
+  subscribes :run, resources(cookbook_file: neighbour_table_overflow_file), :delayed
+end
+
+if neutron[:neutron][:networking_plugin] == "ml2" &&
+    neutron[:neutron][:ml2_mechanism_drivers].include?("vmware_dvs") &&
+    node.roles.include?("nova-compute-vmware")
+
+  include_recipe "neutron::vmware_dvs_agents"
+
+  # No L2/L3 agents need to be installed on DVS integrated
+  # VMware compute nodes aside from the neutron-dvs agent
+  # This check is sufficient, because a node cannot be assigned
+  # the nova-compute-vmware and nova-compute-<something-else> roles
+  # at the same time. The only exception is if DVR is enabled,
+  # when L2/L3 agents are required.
+  unless neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
+    return # skip everything else in this recipe
+  end
 end
 
 if neutron[:neutron][:networking_plugin] == "ml2" &&
@@ -140,18 +170,33 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     neutron_agent = node[:neutron][:platform][:ovs_agent_name]
     agent_config_path = "/etc/neutron/plugins/ml2/openvswitch_agent.ini"
     interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
-    bridge_mappings = ""
+    bridge_mappings = []
+
+    if ml2_type_drivers.include?("vlan")
+      bridge = node[:crowbar_wall][:network][:nets][:nova_fixed].last
+      bridge_mappings.push("physnet1:" + bridge)
+    end
+
     if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
-      bridge_mappings = "floating:br-public"
-      if multiple_external_networks
-        bridge_mappings += ", "
-        bridge_mappings += neutron[:neutron][:additional_external_networks].collect { |n| n + ":" + "br-" + n }.join ","
+      external_networks = ["nova_floating"]
+      external_networks.concat(node[:neutron][:additional_external_networks])
+      ext_physnet_map = NeutronHelper.get_neutron_physnets(node, external_networks)
+      external_networks.each do |net|
+        ext_iface = node[:crowbar_wall][:network][:nets][net].last
+        # we can't do "floating:br-public, physnet1:br-public"; this also means
+        # that all relevant nodes here must have a similar bridge_mappings
+        # setting
+        next if ext_physnet_map[net] == "physnet1"
+        bridge_mappings.push(ext_physnet_map[net] + ":" + ext_iface)
       end
     end
-    if ml2_type_drivers.include?("vlan")
-      bridge_mappings += ", " unless bridge_mappings.empty?
-      bridge_mappings += "physnet1:br-fixed"
+
+    if (node.roles & ["ironic-server", "nova-compute-ironic"]).any? ||
+        (ironic_net && node.roles.include?("neutron-network"))
+      bridge_mappings.push("ironic:br-ironic")
     end
+
+    bridge_mappings = bridge_mappings.join(", ")
   when ml2_mech_drivers.include?("linuxbridge")
     package node[:neutron][:platform][:lb_agent_pkg]
 
@@ -227,7 +272,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
             (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")),
         dvr_enabled: neutron[:neutron][:use_dvr],
         tunnel_csum: neutron[:neutron][:ovs][:tunnel_csum],
-        of_interface: neutron[:neutron][:ovs][:of_interface],
         ovsdb_interface: neutron[:neutron][:ovs][:ovsdb_interface],
         bridge_mappings: bridge_mappings
       )
@@ -287,7 +331,6 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         interface_driver: interface_driver,
         handle_internal_only_routers: "True",
         metadata_port: 9697,
-        send_arp_for_ha: 3,
         periodic_interval: 40,
         periodic_fuzzy_delay: 5,
         dvr_enabled: neutron[:neutron][:use_dvr],
@@ -313,52 +356,11 @@ end
 
 # Metadata agent
 if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
-  package node[:neutron][:platform][:metadata_agent_pkg]
-
-  #TODO: nova should depend on neutron, but neutron also depends on nova
-  # so we have to do something like this
-  novas = search(:node, "roles:nova-controller") || []
-  if novas.length > 0
-    nova = novas[0]
-    nova = node if nova.name == node.name
-  else
-    nova = node
-  end
-  metadata_host = CrowbarHelper.get_host_for_admin_url(nova, (nova[:nova][:ha][:enabled] rescue false))
-  metadata_port = nova[:nova][:ports][:metadata] rescue 8775
-  metadata_protocol = (nova[:nova][:ssl][:enabled] ? "https" : "http") rescue "http"
-  metadata_insecure = (nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]) rescue false
-  metadata_proxy_shared_secret = (nova[:nova][:neutron_metadata_proxy_shared_secret] rescue "")
-
-  keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
-
-  template "/etc/neutron/metadata_agent.ini" do
-    source "metadata_agent.ini.erb"
-    owner "root"
-    group node[:neutron][:platform][:group]
-    mode "0640"
-    variables(
-      debug: neutron[:neutron][:debug],
-      nova_metadata_host: metadata_host,
-      nova_metadata_port: metadata_port,
-      nova_metadata_protocol: metadata_protocol,
-      nova_metadata_insecure: metadata_insecure,
-      metadata_proxy_shared_secret: metadata_proxy_shared_secret
-    )
-  end
-
-  service node[:neutron][:platform][:metadata_agent_name] do
-    action [:enable, :start]
-    subscribes :restart, resources(template: node[:neutron][:config_file])
-    subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
-    if neutron_network_ha || nova_compute_ha_enabled
-      provider Chef::Provider::CrowbarPacemakerService
-    end
-    if nova_compute_ha_enabled
-      supports no_crm_maintenance_mode: true
-    else
-      supports status: true, restart: true
-    end
+  neutron_metadata do
+    use_cisco_apic_ml2_driver false
+    neutron_node_object neutron
+    neutron_network_ha neutron_network_ha
+    nova_compute_ha_enabled nova_compute_ha_enabled
   end
 end
 

@@ -1,8 +1,7 @@
 [DEFAULT]
-verbose = <%= node[:trove][:verbose] %>
 debug = <%= node[:trove][:debug] %>
 update_status_on_fail = True
-transport_url = <%= @rabbit_trove_url %>
+transport_url = <%= @rabbit_settings[:trove_url] %>
 db_api_implementation = trove.db.sqlalchemy.api
 api_insecure = <%= @keystone_settings['insecure'] %>
 trove_auth_url = <%= KeystoneHelper.versioned_service_URL(
@@ -67,3 +66,11 @@ log_dir = /var/log/trove
 
 [database]
 connection = <%= @sql_connection %>
+
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>

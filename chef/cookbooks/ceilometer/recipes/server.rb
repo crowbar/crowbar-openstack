@@ -66,7 +66,7 @@ else
   include_recipe "#{db_settings[:backend_name]}::client"
   include_recipe "#{db_settings[:backend_name]}::python-client"
 
-  crowbar_pacemaker_sync_mark "wait-ceilometer_database"
+  crowbar_pacemaker_sync_mark "wait-ceilometer_database" if ha_enabled
 
   # Create the Ceilometer Database
   database "create #{node[:ceilometer][:db][:database]} database" do
@@ -99,7 +99,7 @@ else
       only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
-  crowbar_pacemaker_sync_mark "create-ceilometer_database"
+  crowbar_pacemaker_sync_mark "create-ceilometer_database" if ha_enabled
 end
 
 case node[:platform_family]
@@ -131,14 +131,18 @@ directory "/var/cache/ceilometer" do
 end unless node[:platform_family] == "suse"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
+ceilometer_protocol = node[:ceilometer][:api][:protocol]
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
-my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:ceilometer][:api][:protocol] == "https", ha_enabled)
+my_public_host = CrowbarHelper.get_host_for_public_url(node,
+                                                       ceilometer_protocol == "https",
+                                                       ha_enabled)
 
-crowbar_pacemaker_sync_mark "wait-ceilometer_db_sync"
+crowbar_pacemaker_sync_mark "wait-ceilometer_upgrade" if ha_enabled
 
-execute "ceilometer-dbsync" do
-  command "ceilometer-dbsync"
+execute "ceilometer-upgrade" do
+  # --skip-gnocchi-resource-types is needed because gnocchi is not deployed.
+  # if the flag is not given, ceilometer-upgrade returns with 1 and chef-client fails
+  command "ceilometer-upgrade --skip-gnocchi-resource-types"
   action :run
   user node[:ceilometer][:user]
   group node[:ceilometer][:group]
@@ -157,10 +161,10 @@ ruby_block "mark node for ceilometer db_sync" do
     node.save
   end
   action :nothing
-  subscribes :create, "execute[ceilometer-dbsync]", :immediately
+  subscribes :create, "execute[ceilometer-upgrade]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-ceilometer_db_sync"
+crowbar_pacemaker_sync_mark "create-ceilometer_upgrade" if ha_enabled
 
 service "ceilometer-collector" do
   service_name node[:ceilometer][:collector][:service_name]
@@ -199,12 +203,30 @@ end
 node.normal[:apache][:listen_ports_crowbar] ||= {}
 node.normal[:apache][:listen_ports_crowbar][:ceilometer] = { plain: [bind_port] }
 
+if ceilometer_protocol == "https"
+  ssl_setup "setting up ssl for ceilometer" do
+    generate_certs node[:ceilometer][:ssl][:generate_certs]
+    certfile node[:ceilometer][:ssl][:certfile]
+    keyfile node[:ceilometer][:ssl][:keyfile]
+    group node[:ceilometer][:group]
+    fqdn node[:fqdn]
+    cert_required node[:ceilometer][:ssl][:cert_required]
+    ca_certs node[:ceilometer][:ssl][:ca_certs]
+  end
+end
+
 crowbar_openstack_wsgi "WSGI entry for ceilometer-api" do
   bind_host bind_host
   bind_port bind_port
   daemon_process "ceilometer-api"
   user node[:ceilometer][:user]
   group node[:ceilometer][:group]
+  ssl_enable node[:ceilometer][:api][:protocol] == "https"
+  ssl_certfile node[:ceilometer][:ssl][:certfile]
+  ssl_keyfile node[:ceilometer][:ssl][:keyfile]
+  if node[:ceilometer][:ssl][:cert_required]
+    ssl_cacert node[:ceilometer][:ssl][:ca_certs]
+  end
 end
 
 apache_site "ceilometer-api.conf" do
@@ -218,11 +240,11 @@ else
   log "HA support for ceilometer is disabled"
 end
 
-crowbar_pacemaker_sync_mark "wait-ceilometer_register"
+crowbar_pacemaker_sync_mark "wait-ceilometer_register" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "ceilometer wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -241,7 +263,7 @@ keystone_register "register ceilometer user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -252,7 +274,7 @@ keystone_register "give ceilometer user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -266,7 +288,7 @@ unless swift_middlewares.empty?
     port keystone_settings["admin_port"]
     auth register_auth_hash
     user_name keystone_settings["service_user"]
-    tenant_name keystone_settings["service_tenant"]
+    project_name keystone_settings["service_tenant"]
     role_name "ResellerAdmin"
     action :add_access
   end
@@ -293,12 +315,10 @@ keystone_register "register ceilometer endpoint" do
   auth register_auth_hash
   endpoint_service "ceilometer"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{node[:ceilometer][:api][:protocol]}://#{my_public_host}:#{node[:ceilometer][:api][:port]}"
-  endpoint_adminURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
-  endpoint_internalURL "#{node[:ceilometer][:api][:protocol]}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
-#  endpoint_global true
-#  endpoint_enabled true
-  action :add_endpoint_template
+  endpoint_publicURL "#{ceilometer_protocol}://#{my_public_host}:#{node[:ceilometer][:api][:port]}"
+  endpoint_adminURL "#{ceilometer_protocol}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
+  endpoint_internalURL "#{ceilometer_protocol}://#{my_admin_host}:#{node[:ceilometer][:api][:port]}"
+  action :add_endpoint
 end
 
 # In stoney/icehouse we have the cronjob crowbar-ceilometer-expirer in
@@ -331,6 +351,4 @@ else
   end
 end
 
-crowbar_pacemaker_sync_mark "create-ceilometer_register"
-
-node.save
+crowbar_pacemaker_sync_mark "create-ceilometer_register" if ha_enabled

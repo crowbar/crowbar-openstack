@@ -21,11 +21,11 @@
             "glance_instance": { "type": "str", "required": true },
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str", "required": true },
+            "memcache_secret_key": { "type": "str", "required": true },
             "max_pool_size": { "type": "int", "required": true },
             "max_overflow": { "type": "int", "required": true },
             "pool_timeout": { "type": "int", "required": true },
             "rpc_response_timeout": { "type": "int", "required": true },
-            "use_multi_backend": { "type": "bool", "required": true },
             "use_multipath": { "type": "bool", "required": true },
             "keymgr_fixed_key": { "type": "str", "required": true },
             "volume_defaults": {
@@ -55,7 +55,7 @@
                     "use_chap_auth": { "type": "bool", "required": true },
                     "chap_username": { "type": "str", "required": true },
                     "chap_password": { "type": "str", "required": true },
-                    "eqlx_cli_timeout": { "type": "int", "required": true },
+                    "ssh_conn_timeout": { "type": "int", "required": true },
                     "eqlx_pool": { "type": "str", "required": true }
                 }
                 },
@@ -71,7 +71,8 @@
                     "netapp_password": { "type": "str", "required": true },
                     "netapp_vfiler": { "type": "str", "required": true },
                     "netapp_transport_type": { "type": "str", "required": true },
-                    "netapp_volume_list": { "type": "str", "required": true }
+                    "netapp_volume_list": { "type": "str", "required": true },
+                    "max_over_subscription_ratio": { "type": "int", "required": true }
                 }
                 },
                 "emc": {
@@ -99,8 +100,7 @@
                 },
                 "nfs": {
                 "type": "map", "mapping": {
-                    "nfs_shares": { "type": "str", "required": true },
-                    "nfs_mount_options": { "type": "str", "required": true }
+                    "nfs_shares": { "type": "str", "required": true }
                 }
                 },
                 "rbd": {
@@ -110,7 +110,8 @@
                     "admin_keyring": { "type": "str", "required": true },
                     "pool": { "type": "str", "required": true },
                     "user": { "type": "str", "required": true },
-                    "secret_uuid": { "type": "str", "required": true }
+                    "secret_uuid": { "type": "str", "required": true },
+                    "flatten_volume_from_snapshot": { "type": "bool", "required": true }
                     }
                 },
                 "vmware": {
@@ -188,10 +189,10 @@
                       "san_password": { "type": "str", "required": true },
                       "san_thin_provision": { "type": "bool", "required": true },
                       "eqlx_group_name": { "type": "str", "required": true },
-                      "eqlx_use_chap": { "type": "bool", "required": true },
-                      "eqlx_chap_login": { "type": "str", "required": true },
-                      "eqlx_chap_password": { "type": "str", "required": true },
-                      "eqlx_cli_timeout": { "type": "int", "required": true },
+                      "use_chap_auth": { "type": "bool", "required": true },
+                      "chap_username": { "type": "str", "required": true },
+                      "chap_password": { "type": "str", "required": true },
+                      "ssh_conn_timeout": { "type": "int", "required": true },
                       "eqlx_pool": { "type": "str", "required": true }
                     }
                   },
@@ -207,7 +208,8 @@
                       "netapp_password": { "type": "str", "required": true },
                       "netapp_vfiler": { "type": "str", "required": true },
                       "netapp_transport_type": { "type": "str", "required": true },
-                      "netapp_volume_list": { "type": "str", "required": true }
+                      "netapp_volume_list": { "type": "str", "required": true },
+                      "max_over_subscription_ratio": { "type": "int", "required": true }
                     }
                   },
                   "emc": {
@@ -235,8 +237,7 @@
                   },
                   "nfs": {
                     "type": "map", "mapping": {
-                      "nfs_shares": { "type": "str", "required": true },
-                      "nfs_mount_options": { "type": "str", "required": true }
+                      "nfs_shares": { "type": "str", "required": true }
                     }
                   },
                   "rbd": {
@@ -246,7 +247,8 @@
                       "admin_keyring": { "type": "str", "required": true },
                       "pool": { "type": "str", "required": true },
                       "user": { "type": "str", "required": true },
-                      "secret_uuid" : { "type": "str", "required": true }
+                      "secret_uuid" : { "type": "str", "required": true },
+                      "flatten_volume_from_snapshot": { "type": "bool", "required": true }
                     }
                   },
                   "vmware": {

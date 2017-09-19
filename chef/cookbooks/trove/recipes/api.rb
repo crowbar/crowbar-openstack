@@ -17,7 +17,10 @@
 # Recipe:: api
 #
 
+dirty = false
+
 keystone_settings = KeystoneHelper.keystone_settings(node, :trove)
+is_controller = node["roles"].include?("trove-server")
 ha_enabled = false
 trove_protocol = node[:trove][:api][:protocol]
 trove_port = node[:trove][:api][:bind_port]
@@ -30,8 +33,16 @@ my_public_host = CrowbarHelper.get_host_for_public_url(
 
 # address/port binding
 my_ipaddress = Barclamp::Inventory.get_network_by_type(node, "admin").address
-node.set[:trove][:my_ip] = my_ipaddress
-node.set[:trove][:api][:bind_host] = my_ipaddress
+if node[:trove][:my_ip] != my_ipaddress
+  node.set[:trove][:my_ip] = my_ipaddress
+  dirty = true
+end
+if node[:trove][:api][:bind_host] != my_ipaddress
+  node.set[:trove][:api][:bind_host] = my_ipaddress
+  dirty = true
+end
+
+node.save if dirty
 
 bind_host = node[:trove][:api][:bind_host]
 if ha_enabled
@@ -43,10 +54,7 @@ else
   bind_port = node[:trove][:api][:bind_port]
 end
 
-sql_connection = TroveHelper.get_sql_connection node
-
-rabbitmq_servers = node_search_with_cache("roles:rabbitmq-server")
-rabbitmq_trove_settings = TroveHelper.get_rabbitmq_trove_url(node, rabbitmq_servers)
+sql_connection = fetch_database_connection_string(node[:trove][:db])
 
 nova_controllers = node_search_with_cache("roles:nova-controller")
 nova_url, nova_insecure = TroveHelper.get_nova_details nova_controllers, keystone_settings
@@ -61,11 +69,11 @@ object_store_url, object_store_insecure =
   TroveHelper.get_objectstore_details swift_proxies, ceph_radosgws
 
 
-crowbar_pacemaker_sync_mark "wait-trove_register"
+crowbar_pacemaker_sync_mark "wait-trove_register" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "trove api wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -84,7 +92,7 @@ keystone_register "register trove user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -95,7 +103,7 @@ keystone_register "give trove user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -126,13 +134,14 @@ keystone_register "register trove endpoint" do
                     "#{my_admin_host}:#{trove_port}/v1.0/$(project_id)s"
   endpoint_internalURL "#{trove_protocol}://"\
                        "#{my_admin_host}:#{trove_port}/v1.0/$(project_id)s"
-  #  endpoint_global true
-  #  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
-crowbar_pacemaker_sync_mark "create-trove_register"
+crowbar_pacemaker_sync_mark "create-trove_register" if ha_enabled
 
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
+
+memcached_instance "trove" if is_controller
 
 template node[:trove][:api][:config_file] do
   source "trove.conf.erb"
@@ -142,8 +151,7 @@ template node[:trove][:api][:config_file] do
   variables(
     keystone_settings: keystone_settings,
     sql_connection: sql_connection,
-    rabbit_default_settings: fetch_rabbitmq_settings,
-    rabbit_trove_settings: rabbitmq_trove_settings,
+    rabbit_settings: fetch_rabbitmq_settings,
     nova_url: nova_url,
     nova_insecure: nova_insecure,
     cinder_url: cinder_url,
@@ -151,7 +159,8 @@ template node[:trove][:api][:config_file] do
     object_store_url: object_store_url,
     object_store_insecure: object_store_insecure,
     bind_host: bind_host,
-    bind_port: bind_port
+    bind_port: bind_port,
+    memcached_servers: memcached_servers
   )
   notifies :restart, "service[trove-api]"
 end

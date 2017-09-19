@@ -18,7 +18,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
+keystone_settings = KeystoneHelper.keystone_settings(node, :nova)
 is_controller = node["roles"].include?("nova-controller")
 
 my_ip_net = "admin"
@@ -47,21 +47,9 @@ if is_controller
   include_recipe "#{db_settings[:backend_name]}::client"
   include_recipe "#{db_settings[:backend_name]}::python-client"
 
-  db_conn_scheme = db_settings[:url_scheme]
-  if node[:platform_family] == "suse" && db_settings[:backend_name] == "mysql"
-    # The C-extensions (python-mysql) can't be monkey-patched by eventlet. Therefore,
-    # when only one nova-conductor is present, all DB queries are serialized.
-    # By using the pure-Python driver by default, eventlet can do it's job:
-    db_conn_scheme = "mysql+pymysql"
-  end
-
-  db = node[:nova][:db]
-  database_connection = \
-    "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
-
-  db = node[:nova][:api_db]
-  api_database_connection = \
-    "#{db_conn_scheme}://#{db[:user]}:#{db[:password]}@#{db_settings[:address]}/#{db[:database]}"
+  database_connection = fetch_database_connection_string(node[:nova][:db])
+  placement_database_connection = fetch_database_connection_string(node[:nova][:placement_db])
+  api_database_connection = fetch_database_connection_string(node[:nova][:api_db])
 else
   database_connection = nil
   api_database_connection = nil
@@ -88,43 +76,33 @@ if glance_servers.length > 0
   glance_server_host = CrowbarHelper.get_host_for_admin_url(glance_server, (glance_server[:glance][:ha][:enabled] rescue false))
   glance_server_port = glance_server[:glance][:api][:bind_port]
   glance_server_protocol = glance_server[:glance][:api][:protocol]
-  glance_server_insecure = glance_server_protocol == "https" && glance_server[:glance][:ssl][:insecure]
 else
   glance_server_host = nil
   glance_server_port = nil
   glance_server_protocol = nil
-  glance_server_insecure = nil
 end
+
+glance_config = Barclamp::Config.load("openstack", "glance", node[:nova][:glance_instance])
+glance_insecure = CrowbarOpenStackHelper.insecure(glance_config) || keystone_settings["insecure"]
 Chef::Log.info("Glance server at #{glance_server_host}")
 
 # use memcached as a cache backend for nova-novncproxy
-if api_ha_enabled
-  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller")
-  memcached_servers = memcached_nodes.map do |n|
-    node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-    "#{node_admin_ip}:#{n[:memcached][:port] rescue node[:memcached][:port]}"
-  end
-else
-  node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  memcached_servers = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
-end
-memcached_servers.sort!
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  api_ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller") : [node]
+)
+
+memcached_instance "nova" if is_controller
 
 directory "/etc/nova" do
    mode 0755
    action :create
 end
 
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
 rbd_enabled = false
-
-use_multipath = false
 
 cinder_servers = node_search_with_cache("roles:cinder-controller")
 if cinder_servers.length > 0
   cinder_server = cinder_servers[0]
-  cinder_insecure = cinder_server[:cinder][:api][:protocol] == "https" && cinder_server[:cinder][:ssl][:insecure]
   use_multipath = cinder_server[:cinder][:use_multipath]
   keymgr_fixed_key = cinder_server[:cinder][:keymgr_fixed_key]
 
@@ -134,9 +112,12 @@ if cinder_servers.length > 0
     end
   end
 else
-  cinder_insecure = false
+  use_multipath = false
   keymgr_fixed_key = ""
 end
+
+cinder_config = Barclamp::Config.load("openstack", "cinder", node[:nova][:cinder_instance])
+cinder_insecure = CrowbarOpenStackHelper.insecure(cinder_config) || keystone_settings["insecure"]
 
 if rbd_enabled
   include_recipe "nova::ceph"
@@ -156,10 +137,8 @@ if neutron_servers.length > 0
   neutron_protocol = neutron_server[:neutron][:api][:protocol]
   neutron_server_host = CrowbarHelper.get_host_for_admin_url(neutron_server, (neutron_server[:neutron][:ha][:server][:enabled] rescue false))
   neutron_server_port = neutron_server[:neutron][:api][:service_port]
-  neutron_insecure = neutron_protocol == "https" && neutron_server[:neutron][:ssl][:insecure]
   neutron_service_user = neutron_server[:neutron][:service_user]
   neutron_service_password = neutron_server[:neutron][:service_password]
-  neutron_dhcp_domain = neutron_server[:neutron][:dhcp_domain]
   neutron_ml2_drivers = neutron_server[:neutron][:ml2_type_drivers]
   neutron_has_tunnel = neutron_ml2_drivers.include?("gre") || neutron_ml2_drivers.include?("vxlan")
 else
@@ -167,9 +146,11 @@ else
   neutron_server_port = nil
   neutron_service_user = nil
   neutron_service_password = nil
-  neutron_dhcp_domain = "novalocal"
   neutron_has_tunnel = false
 end
+
+neutron_config = Barclamp::Config.load("openstack", "neutron", node[:nova][:neutron_instance])
+neutron_insecure = CrowbarOpenStackHelper.insecure(neutron_config) || keystone_settings["insecure"]
 Chef::Log.info("Neutron server at #{neutron_server_host}")
 
 has_itxt = false
@@ -261,6 +242,31 @@ else
   bind_port_serialproxy = node[:nova][:ports][:serialproxy]
 end
 
+ironic_servers = node_search_with_cache("roles:ironic-server") || []
+if ironic_servers.any? && (node["roles"] & ["nova-compute-ironic", "nova-controller"]).any?
+  use_baremetal_filters = true
+  track_instance_changes = false
+  override_force_config_drive = true
+  ironic_node = ironic_servers.first
+  ironic_settings = {}
+  ironic_settings[:keystone_version] = "v3"
+  ironic_settings[:api_protocol] = ironic_node[:ironic][:api][:protocol]
+  ironic_settings[:api_port] = ironic_node[:ironic][:api][:port]
+  ironic_settings[:api_host] = CrowbarHelper.get_host_for_admin_url(
+    ironic_node,
+    ironic_settings[:api_protocol] == "https"
+  )
+  ironic_settings[:service_user] = ironic_node[:ironic][:service_user]
+  ironic_settings[:service_password] = ironic_node[:ironic][:service_password]
+  reserved_host_memory = 0
+else
+  use_baremetal_filters = false
+  track_instance_changes = true
+  override_force_config_drive = false
+  ironic_settings = nil
+  reserved_host_memory = node[:nova][:scheduler][:reserved_host_memory_mb]
+end
+
 vendordata_jsonfile = "/etc/nova/suse-vendor-data.json"
 
 template vendordata_jsonfile do
@@ -311,6 +317,20 @@ if need_shared_lock_path
   include_recipe "crowbar-openstack::common"
 end
 
+template node[:nova][:placement_config_file] do
+  source "nova-placement.conf.erb"
+  user "root"
+  group node[:nova][:group]
+  mode 0640
+  variables(
+  keystone_settings: keystone_settings,
+  placement_database_connection: placement_database_connection,
+  placement_service_user: node["nova"]["placement_service_user"],
+  placement_service_password: node["nova"]["placement_service_password"]
+  )
+end
+
+
 template node[:nova][:config_file] do
   source "nova.conf.erb"
   user "root"
@@ -326,7 +346,6 @@ template node[:nova][:config_file] do
     bind_port_objectstore: bind_port_objectstore,
     bind_port_novncproxy: bind_port_novncproxy,
     bind_port_serialproxy: bind_port_serialproxy,
-    dhcpbridge: "/usr/bin/nova-dhcpbridge",
     database_connection: database_connection,
     api_database_connection: api_database_connection,
     rabbit_settings: fetch_rabbitmq_settings,
@@ -336,11 +355,11 @@ template node[:nova][:config_file] do
     libvirt_migration: node[:nova]["use_migration"],
     live_migration_inbound_fqdn: live_migration_inbound_fqdn,
     shared_instances: node[:nova]["use_shared_instance_storage"],
-    force_config_drive: node[:nova]["force_config_drive"],
+    force_config_drive: override_force_config_drive || node[:nova]["force_config_drive"],
     glance_server_protocol: glance_server_protocol,
     glance_server_host: glance_server_host,
     glance_server_port: glance_server_port,
-    glance_server_insecure: glance_server_insecure || keystone_settings["insecure"],
+    glance_server_insecure: glance_insecure,
     need_shared_lock_path: need_shared_lock_path,
     metadata_bind_address: metadata_bind_address,
     vnc_enabled: node[:nova][:use_novnc],
@@ -355,13 +374,12 @@ template node[:nova][:config_file] do
     neutron_protocol: neutron_protocol,
     neutron_server_host: neutron_server_host,
     neutron_server_port: neutron_server_port,
-    neutron_insecure: neutron_insecure || keystone_settings["insecure"],
+    neutron_insecure: neutron_insecure,
     neutron_service_user: neutron_service_user,
     neutron_service_password: neutron_service_password,
-    neutron_dhcp_domain: neutron_dhcp_domain,
     neutron_has_tunnel: neutron_has_tunnel,
     keystone_settings: keystone_settings,
-    cinder_insecure: cinder_insecure || keystone_settings["insecure"],
+    cinder_insecure: cinder_insecure,
     use_multipath: use_multipath,
     keymgr_fixed_key: keymgr_fixed_key,
     ceph_user: ceph_user,
@@ -374,7 +392,11 @@ template node[:nova][:config_file] do
     use_rootwrap_daemon: use_rootwrap_daemon,
     oat_appraiser_host: oat_server[:hostname],
     oat_appraiser_port: "8443",
-    has_itxt: has_itxt
+    has_itxt: has_itxt,
+    reserved_host_memory: reserved_host_memory,
+    use_baremetal_filters: use_baremetal_filters,
+    track_instance_changes: track_instance_changes,
+    ironic_settings: ironic_settings
   )
 end
 

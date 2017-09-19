@@ -12,7 +12,6 @@
           "type": "map",
           "required": true,
           "mapping": {
-            "verbose": { "type": "bool", "required": true },
             "debug": { "type": "bool", "required": true },
             "max_header_line": { "type": "int", "required": true },
             "enable_v1": { "type": "bool", "required": true },
@@ -82,7 +81,8 @@
                 "user": { "type": "str", "required": true },
                 "password": { "type": "str", "required": true },
                 "datastores": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
-                "store_image_dir": { "type": "str", "required": true }
+                "store_image_dir": { "type": "str", "required": true },
+                "insecure": { "type" : "bool", "required" : true }
               }
             },
             "crossdomain": {
@@ -95,6 +95,7 @@
             "keystone_instance": { "type": "str", "required": true },
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str" },
+            "memcache_secret_key": { "type": "str", "required": true },
             "database_instance": { "type": "str", "required": true }
           }
         }

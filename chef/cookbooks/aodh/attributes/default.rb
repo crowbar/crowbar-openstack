@@ -57,7 +57,6 @@ default[:aodh][:listener][:service_name]  = listener_service_name
 default[:aodh][:evaluation_interval] = 600
 
 default[:aodh][:debug] = false
-default[:aodh][:verbose] = false
 
 default[:aodh][:user] = "aodh"
 default[:aodh][:group] = "aodh"

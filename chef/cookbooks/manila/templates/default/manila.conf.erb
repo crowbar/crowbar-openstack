@@ -42,13 +42,21 @@ connection=<%= @sql_connection %>
 
 [keystone_authtoken]
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
 insecure = <%= @keystone_settings['insecure'] %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
-identity_uri = <%= @keystone_settings['admin_auth_url'] %>
-admin_user = <%= @keystone_settings['service_user'] %>
-admin_password = <%= @keystone_settings['service_password'] %>
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings['admin_domain']%>
+user_domain_name = <%= @keystone_settings['admin_domain'] %>
+auth_type = password
+service_token_roles_required = true
+service_token_roles = admin
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:manila][:memcache_secret_key] %>
 
 [neutron]
 url=<%= @neutron_protocol%>://<%= @neutron_server_host%>:<%= @neutron_server_port%>
@@ -76,6 +84,14 @@ username=<%= @nova_admin_username %>
 
 [oslo_concurrency]
 lock_path = /var/run/manila
+
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
 
 #############################################################################
 #############################################################################
@@ -149,7 +165,7 @@ hitachi_hnas_user = <%= share['hitachi']['hitachi_hnas_user'] %>
 
 <% if share['backend_driver'] == 'cephfs' -%>
 share_backend_name=<%= share['backend_name'] %>
-share_driver = manila.share.drivers.cephfs.cephfs_native.CephFSNativeDriver
+share_driver = manila.share.drivers.cephfs.driver.CephFSDriver
 driver_handles_share_servers = False
 <% if share['use_crowbar'] -%>
 cephfs_conf_path = /etc/ceph/ceph.conf

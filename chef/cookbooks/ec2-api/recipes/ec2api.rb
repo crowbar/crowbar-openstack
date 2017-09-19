@@ -23,10 +23,9 @@ package "openstack-ec2-api-s3"
 
 # NOTE: ec2 is deployed via the nova barclamp
 ha_enabled  = node[:nova]["ec2-api"][:ha][:enabled]
-# SSL support is for the entire barclamp
-ssl_enabled = node[:nova][:ssl][:enabled]
+ssl_enabled = node[:nova]["ec2-api"][:ssl][:enabled]
+api_protocol = ssl_enabled ? "https" : "http"
 db_settings = fetch_database_settings "nova"
-api_protocol = node[:nova][:ssl][:enabled] ? "https" : "http"
 ec2_api_port = node[:nova][:ports][:ec2_api]
 ec2_metadata_port = node[:nova][:ports][:ec2_metadata]
 if ha_enabled
@@ -41,19 +40,16 @@ else
   bind_port_s3 = node[:nova][:ports][:ec2_s3]
 end
 
-db_conn_scheme = db_settings[:url_scheme]
+# use memcached as a cache backend for ec2-api-metadata
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "ec2-api") : [node]
+)
 
-if db_settings[:backend_name] == "mysql"
-  db_conn_scheme = "mysql+pymysql"
-end
+memcached_instance "ec2-api"
 
-crowbar_pacemaker_sync_mark "wait-ec2_api_database"
+crowbar_pacemaker_sync_mark "wait-ec2_api_database" if ha_enabled
 
-database_connection = "#{db_conn_scheme}://" \
-  "#{node[:nova]["ec2-api"][:db][:user]}" \
-  ":#{node[:nova]["ec2-api"][:db][:password]}" \
-  "@#{db_settings[:address]}" \
-  "/#{node[:nova]["ec2-api"][:db][:database]}"
+database_connection = fetch_database_connection_string(node[:nova]["ec2-api"][:db], "nova")
 
 # Create the ec2 Database
 database "create #{node[:nova]["ec2-api"][:db][:database]} database" do
@@ -87,19 +83,19 @@ database_user "grant database access for #{@cookbook_name} database user" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-ec2_api_database"
+crowbar_pacemaker_sync_mark "create-ec2_api_database" if ha_enabled
 
 rabbit_settings = fetch_rabbitmq_settings "nova"
 keystone_settings = KeystoneHelper.keystone_settings(node, "nova")
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, ssl_enabled, ha_enabled)
 
-crowbar_pacemaker_sync_mark "wait-ec2_api_register"
+crowbar_pacemaker_sync_mark "wait-ec2_api_register" if ha_enabled
 
 keystone_register "register ec2 user" do
   protocol keystone_settings["protocol"]
@@ -109,7 +105,7 @@ keystone_register "register ec2 user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -120,7 +116,7 @@ keystone_register "give ec2 user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -149,7 +145,7 @@ keystone_register "register ec2-api endpoint" do
   endpoint_publicURL "#{api_protocol}://#{my_public_host}:#{ec2_api_port}"
   endpoint_adminURL "#{api_protocol}://#{my_admin_host}:#{ec2_api_port}"
   endpoint_internalURL "#{api_protocol}://#{my_admin_host}:#{ec2_api_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 # Create ec2-metadata service
@@ -176,10 +172,36 @@ keystone_register "register ec2-metadata endpoint" do
   endpoint_publicURL "#{api_protocol}://#{my_public_host}:#{ec2_metadata_port}"
   endpoint_adminURL "#{api_protocol}://#{my_admin_host}:#{ec2_metadata_port}"
   endpoint_internalURL "#{api_protocol}://#{my_admin_host}:#{ec2_metadata_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
-crowbar_pacemaker_sync_mark "create-ec2_api_register"
+crowbar_pacemaker_sync_mark "create-ec2_api_register" if ha_enabled
+
+nova_metadata_settings = {}
+nova = node_search_with_cache("roles:nova-controller").first
+unless nova.nil?
+  nova_ha_enabled = nova[:nova][:ha][:enabled]
+  nova_metadata_settings[:host] = CrowbarHelper.get_host_for_admin_url(nova, nova_ha_enabled)
+  nova_metadata_settings[:port] = nova[:nova][:ports][:metadata]
+  ssl_enabled = nova[:nova][:ssl][:enabled]
+  nova_metadata_settings[:protocol] = ssl_enabled ? "https" : "http"
+  ssl_insecure = nova[:nova][:ssl][:insecure]
+  nova_metadata_settings[:insecure] = ssl_enabled && ssl_insecure
+  nova_metadata_settings[:shared_secret] = nova[:nova][:neutron_metadata_proxy_shared_secret]
+end
+
+# ec2-api ssl
+if node[:nova]["ec2-api"][:ssl][:enabled]
+  ssl_setup "setting up ssl for ec2-api" do
+    generate_certs node[:nova]["ec2-api"][:ssl][:generate_certs]
+    certfile node[:nova]["ec2-api"][:ssl][:certfile]
+    keyfile node[:nova]["ec2-api"][:ssl][:keyfile]
+    group node[:nova]["ec2-api"][:group]
+    fqdn node[:fqdn]
+    cert_required node[:nova]["ec2-api"][:ssl][:cert_required]
+    ca_certs node[:nova]["ec2-api"][:ssl][:ca_cert]
+  end
+end
 
 template node[:nova]["ec2-api"][:config_file] do
   source "ec2api.conf.erb"
@@ -195,10 +217,10 @@ template node[:nova]["ec2-api"][:config_file] do
     bind_port_ec2api: bind_port_ec2api,
     bind_port_metadata: bind_port_metadata,
     bind_port_s3: bind_port_s3,
+    nova_metadata_settings: nova_metadata_settings,
+    memcached_servers: memcached_servers
   )
 end
-
-node.save
 
 service "openstack-ec2-api-api" do
   action [:enable, :start]

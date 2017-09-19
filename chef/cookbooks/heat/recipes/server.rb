@@ -21,7 +21,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-heat_database"
+crowbar_pacemaker_sync_mark "wait-heat_database" if ha_enabled
 
 # Create the Heat Database
 database "create #{node[:heat][:db][:database]} database" do
@@ -54,7 +54,7 @@ database_user "grant database access for heat database user" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-heat_database"
+crowbar_pacemaker_sync_mark "create-heat_database" if ha_enabled
 
 node[:heat][:platform][:packages].each do |p|
   package p
@@ -62,6 +62,17 @@ end
 
 node[:heat][:platform][:plugin_packages].each do |p|
   package p
+end
+
+# install Cisco GBP plugin if needed
+neutron_server = search(:node, "roles:neutron-server").first || []
+unless neutron_server.empty?
+  if neutron_server[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+    # Install GBP plugin if Cisco APIC driver is set to apic_gbp
+    node[:heat][:platform][:gbp_plugin_packages].each do |p|
+      package p
+    end
+  end
 end
 
 directory "/var/cache/heat" do
@@ -90,31 +101,25 @@ if node[:heat][:api][:protocol] == "https"
   end
 end
 
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "heat-server") : [node]
+)
+memcached_instance("heat-server")
+
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-if ha_enabled
-  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  bind_host = admin_address
-  api_port = node[:heat][:ha][:ports][:api_port]
-  cfn_port = node[:heat][:ha][:ports][:cfn_port]
-  cloud_watch_port = node[:heat][:ha][:ports][:cloud_watch_port]
-else
-  bind_host = "0.0.0.0"
-  api_port = node[:heat][:api][:port]
-  cfn_port = node[:heat][:api][:cfn_port]
-  cloud_watch_port = node[:heat][:api][:cloud_watch_port]
-end
+bind_host, api_port, cfn_port, cloud_watch_port = HeatHelper.get_bind_host_port(node)
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:protocol] == "https", ha_enabled)
 
-db_connection = "#{db_settings[:url_scheme]}://#{node[:heat][:db][:user]}:#{node[:heat][:db][:password]}@#{db_settings[:address]}/#{node[:heat][:db][:database]}"
+db_connection = fetch_database_connection_string(node[:heat][:db])
 
-crowbar_pacemaker_sync_mark "wait-heat_register"
+crowbar_pacemaker_sync_mark "wait-heat_register" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "heat wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -133,7 +138,7 @@ keystone_register "register heat user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -144,7 +149,7 @@ keystone_register "give heat user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -155,8 +160,6 @@ keystone_register "add heat stack user role" do
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
-  user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
   role_name "heat_stack_user"
   action :add_role
 end
@@ -168,8 +171,6 @@ node[:heat][:trusts_delegated_roles].each do |role|
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
     auth register_auth_hash
-    user_name keystone_settings["service_user"]
-    tenant_name keystone_settings["service_tenant"]
     role_name role
     action :add_role
   end
@@ -181,7 +182,7 @@ node[:heat][:trusts_delegated_roles].each do |role|
     port keystone_settings["admin_port"]
     auth register_auth_hash
     user_name keystone_settings["admin_user"]
-    tenant_name keystone_settings["default_tenant"]
+    project_name keystone_settings["default_tenant"]
     role_name role
     action :add_access
   end
@@ -310,9 +311,7 @@ keystone_register "register heat Cfn endpoint" do
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1"
   endpoint_adminURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:cfn_port]}/v1"
   endpoint_internalURL "#{node[:heat][:api][:protocol]}://#{my_admin_host}:#{node[:heat][:api][:cfn_port]}/v1"
-  #  endpoint_global true
-  #  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 # Create Heat service
@@ -345,26 +344,27 @@ keystone_register "register heat endpoint" do
   endpoint_internalURL "#{node[:heat][:api][:protocol]}://"\
                        "#{my_admin_host}:"\
                        "#{node[:heat][:api][:port]}/v1/$(project_id)s"
-  #  endpoint_global true
-  #  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
-crowbar_pacemaker_sync_mark "create-heat_register"
+crowbar_pacemaker_sync_mark "create-heat_register" if ha_enabled
 
-shell_get_stack_user_domain = <<-EOF
-  export OS_URL="#{keystone_settings["protocol"]}://#{keystone_settings["internal_url_host"]}:#{keystone_settings["service_port"]}/v3"
-  eval $(openstack \
-    --os-username #{keystone_settings["admin_user"]} \
-    --os-password #{keystone_settings["admin_password"]} \
-    --os-tenant-name #{keystone_settings["admin_tenant"]} \
-    --os-auth-url=$OS_URL \
-    --os-region-name='#{keystone_settings["endpoint_region"]}' \
-    --os-identity-api-version=3 #{insecure} domain show -f shell --variable id #{stack_user_domain_name});
-  echo $id
-EOF
-
-rabbit_settings = fetch_rabbitmq_settings
+ruby_block "get stack user domain" do
+  block do
+    url = "#{keystone_settings["protocol"]}://#{keystone_settings["internal_url_host"]}"
+    url << ":#{keystone_settings["service_port"]}/v3"
+    env = "OS_USERNAME='#{keystone_settings["admin_user"]}' "
+    env << "OS_PASSWORD='#{keystone_settings["admin_password"]}' "
+    env << "OS_PROJECT_NAME='#{keystone_settings["admin_tenant"]}' "
+    env << "OS_AUTH_URL='#{url}' "
+    env << "OS_REGION_NAME='#{keystone_settings["endpoint_region"]}' "
+    env << "OS_IDENTITY_API_VERSION=3"
+    stack_user_domain_id = `#{env} openstack #{insecure} \
+domain show -f value -c id #{stack_user_domain_name}`
+    raise "Could not obtain the stack user domain id" if stack_user_domain_id.empty?
+    node[:heat][:stack_user_domain_id] = stack_user_domain_id.strip
+  end
+end
 
 template "/etc/heat/heat.conf.d/100-heat.conf" do
   source "heat.conf.erb"
@@ -372,35 +372,33 @@ template "/etc/heat/heat.conf.d/100-heat.conf" do
   group node[:heat][:group]
   mode "0640"
   variables(
-    debug: node[:heat][:debug],
-    verbose: node[:heat][:verbose],
-    transport_url: "rabbit://#{rabbit_settings[:user]}:"\
-                            "#{rabbit_settings[:password]}@"\
-                            "#{rabbit_settings[:address]}:"\
-                            "#{rabbit_settings[:port]}/"\
-                            "#{rabbit_settings[:vhost]}",
-    keystone_settings: keystone_settings,
-    database_connection: db_connection,
-    bind_host: bind_host,
-    api_port: api_port,
-    cloud_watch_port: cloud_watch_port,
-    cfn_port: cfn_port,
-    auth_encryption_key: node[:heat][:auth_encryption_key][0, 32],
-    heat_metadata_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
-    heat_waitcondition_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
-    heat_watch_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}",
-    stack_user_domain: %x[ #{shell_get_stack_user_domain} ].chomp,
-    stack_domain_admin: node[:heat]["stack_domain_admin"],
-    stack_domain_admin_password: node[:heat]["stack_domain_admin_password"],
-    trusts_delegated_roles: node[:heat][:trusts_delegated_roles],
-    insecure: keystone_settings["insecure"],
-    heat_ssl: node[:heat][:ssl]
+    lazy {
+      {
+        debug: node[:heat][:debug],
+        rabbit_settings: fetch_rabbitmq_settings,
+        keystone_settings: keystone_settings,
+        memcached_servers: memcached_servers,
+        database_connection: db_connection,
+        bind_host: bind_host,
+        api_port: api_port,
+        cloud_watch_port: cloud_watch_port,
+        cfn_port: cfn_port,
+        auth_encryption_key: node[:heat][:auth_encryption_key][0, 32],
+        heat_metadata_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
+        heat_waitcondition_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
+        heat_watch_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}",
+        stack_user_domain: node[:heat][:stack_user_domain_id],
+        stack_domain_admin: node[:heat]["stack_domain_admin"],
+        stack_domain_admin_password: node[:heat]["stack_domain_admin_password"],
+        trusts_delegated_roles: node[:heat][:trusts_delegated_roles],
+        insecure: keystone_settings["insecure"],
+        heat_ssl: node[:heat][:ssl]
+      }
+    }
   )
 end
 
-magnum_env_filter = "magnum-server AND magnum_config_environment:magnum-config-default"
-magnum_servers = search(:node, "roles:#{magnum_env_filter}") || []
-unless magnum_servers.empty?
+unless Barclamp::Config.load("openstack", "magnum").empty?
 
   # https://bugs.launchpad.net/magnum/+bug/1589955
   # enable stacks global_index search so that magnum can use
@@ -456,7 +454,7 @@ service "heat-api-cloudwatch" do
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
-crowbar_pacemaker_sync_mark "wait-heat_db_sync"
+crowbar_pacemaker_sync_mark "wait-heat_db_sync" if ha_enabled
 
 execute "heat-manage db_sync" do
   user node[:heat][:user]
@@ -480,7 +478,7 @@ ruby_block "mark node for heat db_sync" do
   subscribes :create, "execute[heat-manage db_sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-heat_db_sync"
+crowbar_pacemaker_sync_mark "create-heat_db_sync" if ha_enabled
 
 if ha_enabled
   log "HA support for heat is enabled"
@@ -488,5 +486,3 @@ if ha_enabled
 else
   log "HA support for heat is disabled"
 end
-
-node.save

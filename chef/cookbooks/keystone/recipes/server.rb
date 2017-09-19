@@ -57,8 +57,20 @@ node.normal[:apache][:listen_ports_crowbar][:keystone] = { admin: [bind_admin_po
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:keystone][:api][:protocol] == "https", ha_enabled)
 
-# Other barclamps need to know the hostname to reach keystone
-node.set[:keystone][:api][:internal_URL_host] = my_admin_host
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server") : [node]
+)
+
+memcached_instance "keystone"
+
+# resource to set a flag when apache2 is restarted so we now which cookbook was the
+# one that triggered the restart, in order to know if the restart is allowed
+ruby_block "set origin for apache2 restart" do
+  block do
+    node.run_state["apache2_restart_origin"] = @cookbook_name
+  end
+  action :nothing
+end
 
 if node[:keystone][:frontend] == "uwsgi"
 
@@ -121,6 +133,8 @@ elsif node[:keystone][:frontend] == "apache"
     script_alias "/usr/bin/keystone-wsgi-public"
     pass_authorization true
     limit_request_body 114688
+    processes node[:keystone][:api][:processes]
+    threads node[:keystone][:api][:threads]
     ssl_enable node[:keystone][:api][:protocol] == "https"
     ssl_certfile node[:keystone][:ssl][:certfile]
     ssl_keyfile node[:keystone][:ssl][:keyfile]
@@ -140,6 +154,8 @@ elsif node[:keystone][:frontend] == "apache"
     script_alias "/usr/bin/keystone-wsgi-admin"
     pass_authorization true
     limit_request_body 114688
+    processes node[:keystone][:api][:processes]
+    threads node[:keystone][:api][:threads]
     ssl_enable node[:keystone][:api][:protocol] == "https"
     ssl_certfile node[:keystone][:ssl][:certfile]
     ssl_keyfile node[:keystone][:ssl][:keyfile]
@@ -156,7 +172,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-keystone_database"
+crowbar_pacemaker_sync_mark "wait-keystone_database" if ha_enabled
 
 # Create the Keystone Database
 database "create #{node[:keystone][:db][:database]} database" do
@@ -189,21 +205,9 @@ database_user "grant database access for keystone database user" do
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-keystone_database"
+crowbar_pacemaker_sync_mark "create-keystone_database" if ha_enabled
 
-sql_connection = "#{db_settings[:url_scheme]}://#{node[:keystone][:db][:user]}:#{node[:keystone][:db][:password]}@#{db_settings[:address]}/#{node[:keystone][:db][:database]}"
-
-if ha_enabled
-  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server")
-  memcached_servers = memcached_nodes.map do |n|
-    node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-    "#{node_admin_ip}:#{n[:memcached][:port]}"
-  end
-else
-  node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  memcached_servers = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
-end
-memcached_servers.sort!
+sql_connection = fetch_database_connection_string(node[:keystone][:db])
 
 # we have to calculate max_active_keys for fernet token provider
 # http://docs.openstack.org/admin-guide/identity-fernet-token-faq.html# \
@@ -212,6 +216,51 @@ memcached_servers.sort!
 # keystone fernet_rotate job runs hourly, it means that rotation_frequency = 1
 # node[:keystone][:token_expiration] is in seconds and has to be encoded to hours
 max_active_keys = (node[:keystone][:token_expiration].to_f / 3600).ceil + 2
+
+register_auth_hash = { user: node[:keystone][:admin][:username],
+                       password: node[:keystone][:admin][:password],
+                       project: node[:keystone][:admin][:project] }
+
+if node[:keystone].key?(:endpoint)
+  endpoint_protocol = node[:keystone][:endpoint][:protocol]
+  endpoint_insecure = node[:keystone][:endpoint][:insecure]
+  # In order to update keystone's endpoints we need the old internal endpoint.
+  endpoint_port = node[:keystone][:endpoint][:port]
+else
+  endpoint_protocol = node[:keystone][:api][:protocol]
+  endpoint_insecure = node[:keystone][:ssl][:insecure]
+  endpoint_port = node[:keystone][:api][:admin_port]
+end
+
+endpoint_host = my_admin_host
+
+# Update keystone endpoints (in case we switch http/https this will update the
+# endpoints to the correct ones). This needs to be done _before_ we switch
+# protocols on the keystone api.
+keystone_register "update keystone endpoint" do
+  protocol endpoint_protocol
+  insecure endpoint_insecure
+  host endpoint_host
+  port endpoint_port
+  auth register_auth_hash
+  endpoint_service "keystone"
+  endpoint_region node[:keystone][:api][:region]
+  endpoint_adminURL KeystoneHelper.admin_auth_url(node, my_admin_host)
+  endpoint_publicURL KeystoneHelper.public_auth_url(node, my_public_host)
+  endpoint_internalURL KeystoneHelper.internal_auth_url(node, my_admin_host)
+  action :update_endpoint
+  # Do not try to update keystone endpoint during upgrade, when keystone is not running yet
+  # ("done_os_upgrade" is present when first chef-client run is executed at the end of upgrade)
+  not_if { node["crowbar_upgrade_step"] == "done_os_upgrade" }
+  only_if do
+    node[:keystone][:bootstrap] &&
+      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
+      node[:keystone].key?(:endpoint) &&
+      (node[:keystone][:endpoint][:protocol] != node[:keystone][:api][:protocol] ||
+      node[:keystone][:endpoint][:insecure] != node[:keystone][:ssl][:insecure] ||
+      node[:keystone][:endpoint][:port] != node[:keystone][:api][:admin_port])
+  end
+end
 
 template node[:keystone][:config_file] do
     source "keystone.conf.erb"
@@ -222,20 +271,12 @@ template node[:keystone][:config_file] do
       sql_connection: sql_connection,
       sql_idle_timeout: node[:keystone][:sql][:idle_timeout],
       debug: node[:keystone][:debug],
-      verbose: node[:keystone][:verbose],
-      bind_admin_host: bind_admin_host,
-      bind_service_host: bind_service_host,
-      bind_admin_port: bind_admin_port,
-      bind_service_port: bind_service_port,
       admin_endpoint: KeystoneHelper.service_URL(
         node[:keystone][:api][:protocol],
         my_admin_host, node[:keystone][:api][:admin_port]
       ),
       memcached_servers: memcached_servers,
-      signing_token_format: node[:keystone][:signing][:token_format],
-      signing_certfile: node[:keystone][:signing][:certfile],
-      signing_keyfile: node[:keystone][:signing][:keyfile],
-      signing_ca_certs: node[:keystone][:signing][:ca_certs],
+      token_format: node[:keystone][:token_format],
       token_expiration: node[:keystone][:token_expiration],
       max_active_keys: max_active_keys,
       protocol: node[:keystone][:api][:protocol],
@@ -243,6 +284,7 @@ template node[:keystone][:config_file] do
       rabbit_settings: fetch_rabbitmq_settings
     )
     if node[:keystone][:frontend] == "apache"
+      notifies :create, resources(ruby_block: "set origin for apache2 restart"), :immediately
       notifies :restart, resources(service: "apache2"), :immediately
     elsif node[:keystone][:frontend] == "uwsgi"
       notifies :restart, resources(service: "keystone-uwsgi"), :immediately
@@ -278,6 +320,7 @@ if node[:keystone][:domain_specific_drivers]
         domain: domain
       )
       if node[:keystone][:frontend] == "apache"
+        notifies :create, resources(ruby_block: "set origin for apache2 restart"), :immediately
         notifies :restart, resources(service: "apache2"), :immediately
       elsif node[:keystone][:frontend] == "uwsgi"
         notifies :restart, resources(service: "keystone-uwsgi"), :immediately
@@ -286,7 +329,7 @@ if node[:keystone][:domain_specific_drivers]
   end
 end
 
-crowbar_pacemaker_sync_mark "wait-keystone_db_sync"
+crowbar_pacemaker_sync_mark "wait-keystone_db_sync" if ha_enabled
 
 execute "keystone-manage db_sync" do
   command "keystone-manage db_sync"
@@ -311,88 +354,9 @@ ruby_block "mark node for keystone db_sync" do
   subscribes :create, "execute[keystone-manage db_sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-keystone_db_sync"
-
-# Make sure the certificates code is run on the founder first
-crowbar_pacemaker_sync_mark "wait-keystone_certificates" do
-  fatal true
+if ha_enabled
+  crowbar_pacemaker_sync_mark "create-keystone_db_sync"
 end
-
-ruby_block "synchronize signing keys for founder and remember them for non-HA case" do
-  only_if { (!ha_enabled || (ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node))) }
-  block do
-    ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb", &:read)
-    signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb", &:read)
-    signing_key = File.open("/etc/keystone/ssl/private/signing_key.pem", "rb", &:read)
-
-    node[:keystone][:certificates] ||= {}
-    node[:keystone][:certificates][:content] ||= {}
-
-    dirty = false
-
-    if node[:keystone][:certificates][:content][:ca] != ca
-      node.set[:keystone][:certificates][:content][:ca] = ca
-      dirty = true
-    end
-    if node[:keystone][:certificates][:content][:signing_cert] != signing_cert
-      node.set[:keystone][:certificates][:content][:signing_cert] = signing_cert
-      dirty = true
-    end
-    if node[:keystone][:certificates][:content][:signing_key] != signing_key
-      node.set[:keystone][:certificates][:content][:signing_key] = signing_key
-      dirty = true
-    end
-
-    node.save if dirty
-  end
-end
-
-ruby_block "synchronize signing keys for non-founder" do
-  only_if { ha_enabled && !CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  block do
-    ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb", &:read)
-    signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb", &:read)
-    signing_key = File.open("/etc/keystone/ssl/private/signing_key.pem", "rb", &:read)
-
-    founder = CrowbarPacemakerHelper.cluster_founder(node)
-
-    cluster_ca = founder[:keystone][:certificates][:content][:ca]
-    cluster_signing_cert = founder[:keystone][:certificates][:content][:signing_cert]
-    cluster_signing_key = founder[:keystone][:certificates][:content][:signing_key]
-
-    # The files exist; we will keep ownership / permissions with
-    # the code below
-    dirty = false
-    if ca != cluster_ca
-      File.open("/etc/keystone/ssl/certs/ca.pem", "w") { |f|
-        f.write(cluster_ca)
-      }
-      dirty = true
-    end
-    if signing_cert != cluster_signing_cert
-      File.open("/etc/keystone/ssl/certs/signing_cert.pem", "w") { |f|
-        f.write(cluster_signing_cert)
-      }
-      dirty = true
-    end
-    if signing_key != cluster_signing_key
-      File.open("/etc/keystone/ssl/private/signing_key.pem", "w") { |f|
-        f.write(cluster_signing_key)
-      }
-      dirty = true
-    end
-
-    if dirty
-      if node[:keystone][:frontend] == "apache"
-        resources(service: "apache2").run_action(:restart)
-      elsif node[:keystone][:frontend] == "uwsgi"
-        resources(service: "keystone-uwsgi").run_action(:restart)
-      end
-    end
-  end # block
-end
-
-crowbar_pacemaker_sync_mark "create-keystone_certificates"
 
 if node[:keystone][:api][:protocol] == "https"
   ssl_setup "setting up ssl for keystone" do
@@ -410,19 +374,41 @@ if ha_enabled
 end
 
 # Configure Keystone token fernet backend provider
-if node[:keystone][:signing][:token_format] == "fernet"
+if node[:keystone][:token_format] == "fernet"
   # To be sure that rsync package is installed
   package "rsync"
+  crowbar_pacemaker_sync_mark "sync-keystone_install_rsync" if ha_enabled
   rsync_command = ""
   if ha_enabled
-    cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server")
+    cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
     cluster_nodes.map do |n|
       next if node.name == n.name
       node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-      rsync_command += "rsync -a --delete-after /etc/keystone/fernet-keys " \
-                                "#{node_address}:/etc/keystone/;"
+      rsync_command += \
+        "rsync -a --timeout=300 --delete-after /etc/keystone/fernet-keys " \
+        "#{node_address}:/etc/keystone/; "
+    end
+    raise "No other cluster members found" if rsync_command.empty?
+  end
+
+  # Rotate primary key, which is used for new tokens
+  template "/var/lib/keystone/keystone-fernet-rotate" do
+    source "keystone-fernet-rotate.erb"
+    owner "root"
+    group node[:keystone][:group]
+    mode "0750"
+    variables(
+      rsync_command: rsync_command
+    )
+  end
+
+  unless ha_enabled
+    link "/etc/cron.hourly/openstack-keystone-fernet" do
+      to "/var/lib/keystone/keystone-fernet-rotate"
     end
   end
+
+  crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate" if ha_enabled
 
   unless File.exist?("/etc/keystone/fernet-keys/0")
     # Setup a key repository for fernet tokens
@@ -442,23 +428,9 @@ if node[:keystone][:signing][:token_format] == "fernet"
     end
   end
 
-  # Rotate primary key, which is used for new tokens
-  template "/var/lib/keystone/keystone-fernet-rotate" do
-    source "keystone-fernet-rotate.erb"
-    owner "root"
-    group node[:keystone][:group]
-    mode "0750"
-    variables(
-      rsync_command: rsync_command
-    )
-  end
-
-  crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate"
-
   service_transaction_objects = []
 
   keystone_fernet_primitive = "keystone-fernet-rotate"
-
   pacemaker_primitive keystone_fernet_primitive do
     agent node[:keystone][:ha][:fernet][:agent]
     params({
@@ -482,10 +454,19 @@ if node[:keystone][:signing][:token_format] == "fernet"
     only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
-  crowbar_pacemaker_sync_mark "create-keystone_fernet_rotate"
+  crowbar_pacemaker_sync_mark "create-keystone_fernet_rotate" if ha_enabled
 end
 
-crowbar_pacemaker_sync_mark "wait-keystone_register"
+# Wait for all nodes to reach this point so we know that all nodes will have
+# all the required services correctly configured and running before we create
+# the keystone resources
+crowbar_pacemaker_sync_mark "sync-keystone_before_register" if ha_enabled
+
+crowbar_pacemaker_sync_mark "wait-keystone_register" do
+  # keystone_register might be slow
+  timeout 90
+  only_if { ha_enabled }
+end
 
 keystone_insecure = node["keystone"]["api"]["protocol"] == "https" && node[:keystone][:ssl][:insecure]
 
@@ -494,7 +475,7 @@ execute "keystone-manage bootstrap" do
   command "keystone-manage bootstrap \
   --bootstrap-password #{node[:keystone][:admin][:password]} \
   --bootstrap-username #{node[:keystone][:admin][:username]} \
-  --bootstrap-project-name #{node[:keystone][:admin][:tenant]} \
+  --bootstrap-project-name #{node[:keystone][:admin][:project]} \
   --bootstrap-role-name admin \
   --bootstrap-service-name keystone \
   --bootstrap-region-id #{node[:keystone][:api][:region]} \
@@ -510,7 +491,37 @@ end
 
 register_auth_hash = { user: node[:keystone][:admin][:username],
                        password: node[:keystone][:admin][:password],
-                       tenant: node[:keystone][:admin][:tenant] }
+                       project: node[:keystone][:admin][:project] }
+
+updated_password = node[:keystone][:admin][:updated_password]
+
+unless updated_password.empty? ||
+    updated_password.nil? ||
+    updated_password == node[:keystone][:admin][:password]
+
+  if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
+    keystone_register "update admin password" do
+      protocol node[:keystone][:api][:protocol]
+      insecure keystone_insecure
+      host my_admin_host
+      port node[:keystone][:api][:admin_port]
+      auth register_auth_hash
+      user_name node[:keystone][:admin][:username]
+      user_password updated_password
+      project_name node[:keystone][:admin][:project]
+      action :nothing
+    end.run_action(:add_user)
+  end
+
+  ruby_block "update admin password on node attributes" do
+    block do
+      node.set[:keystone][:admin][:password] = updated_password
+      node.save
+      register_auth_hash[:password] = updated_password
+    end
+    action :nothing
+  end.run_action(:create)
+end
 
 # Silly wake-up call - this is a hack; we use retries because the server was
 # just (re)started, and might not answer on the first try
@@ -538,17 +549,18 @@ ruby_block "mark node for keystone bootstrap" do
   subscribes :create, "execute[keystone-manage bootstrap]", :immediately
 end
 
-[:service, :default].each do |tenant_type|
-  tenant = node[:keystone][tenant_type][:tenant]
+[:service, :default].each do |project_type|
+  project = node[:keystone][project_type][:project]
 
-  keystone_register "add default #{tenant} tenant" do
+  keystone_register "add default #{project} project" do
     protocol node[:keystone][:api][:protocol]
     insecure keystone_insecure
     host my_admin_host
     port node[:keystone][:api][:admin_port]
     auth register_auth_hash
-    tenant_name tenant
-    action :add_tenant
+    project_name project
+    action :add_project
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 
@@ -562,8 +574,23 @@ if node[:keystone][:domain_specific_drivers]
       auth register_auth_hash
       domain_name domain
       action :add_domain
+      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
   end
+end
+
+# Create default role admin for admin user in default domain
+keystone_register "add default admin role for domain default" do
+  protocol node[:keystone][:api][:protocol]
+  insecure keystone_insecure
+  host my_admin_host
+  port node[:keystone][:api][:admin_port]
+  auth register_auth_hash
+  user_name node[:keystone][:admin][:username]
+  role_name "admin"
+  domain_name "Default"
+  action :add_domain_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 # Create default user
@@ -576,8 +603,9 @@ if node[:keystone][:default][:create_user]
     auth register_auth_hash
     user_name node[:keystone][:default][:username]
     user_password node[:keystone][:default][:password]
-    tenant_name node[:keystone][:default][:tenant]
+    project_name node[:keystone][:default][:project]
     action :add_user
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 
@@ -590,15 +618,18 @@ keystone_register "add default Member role" do
   auth register_auth_hash
   role_name "Member"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 # Create Access info
 user_roles = [
-  [node[:keystone][:admin][:username], "admin", node[:keystone][:admin][:tenant]],
-  [node[:keystone][:admin][:username], "admin", node[:keystone][:default][:tenant]]
+  [node[:keystone][:admin][:username], "admin", node[:keystone][:admin][:project]],
+  [node[:keystone][:admin][:username], "admin", node[:keystone][:default][:project]]
 ]
 if node[:keystone][:default][:create_user]
-  user_roles << [node[:keystone][:default][:username], "Member", node[:keystone][:default][:tenant]]
+  user_roles << [node[:keystone][:default][:username],
+                 "Member",
+                 node[:keystone][:default][:project]]
 end
 user_roles.each do |args|
   keystone_register "add default #{args[2]}:#{args[0]} -> #{args[1]} role" do
@@ -609,18 +640,19 @@ user_roles.each do |args|
     auth register_auth_hash
     user_name args[0]
     role_name args[1]
-    tenant_name args[2]
+    project_name args[2]
     action :add_access
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 
 # Create EC2 creds for our users
 ec2_creds = [
-  [node[:keystone][:admin][:username], node[:keystone][:admin][:tenant]],
-  [node[:keystone][:admin][:username], node[:keystone][:default][:tenant]]
+  [node[:keystone][:admin][:username], node[:keystone][:admin][:project]],
+  [node[:keystone][:admin][:username], node[:keystone][:default][:project]]
 ]
 if node[:keystone][:default][:create_user]
-  ec2_creds << [node[:keystone][:default][:username], node[:keystone][:default][:tenant]]
+  ec2_creds << [node[:keystone][:default][:username], node[:keystone][:default][:project]]
 end
 ec2_creds.each do |args|
   keystone_register "add default ec2 creds for #{args[1]}:#{args[0]}" do
@@ -630,16 +662,15 @@ ec2_creds.each do |args|
     auth register_auth_hash
     port node[:keystone][:api][:admin_port]
     user_name args[0]
-    tenant_name args[1]
+    project_name args[1]
     action :add_ec2
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 
-crowbar_pacemaker_sync_mark "create-keystone_register"
+crowbar_pacemaker_sync_mark "create-keystone_register" if ha_enabled
 
-node.set[:keystone][:monitor] = {} if node[:keystone][:monitor].nil?
-node.set[:keystone][:monitor][:svcs] = ["keystone"] if node[:keystone][:monitor][:svcs] != ["keystone"]
-node.save
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 template "/root/.openrc" do
   source "openrc.erb"
@@ -647,6 +678,15 @@ template "/root/.openrc" do
   group "root"
   mode 0600
   variables(
-    keystone_settings: KeystoneHelper.keystone_settings(node, @cookbook_name)
+    keystone_settings: keystone_settings
     )
 end
+
+# Set new endpoint URL.
+internal_url_host = keystone_settings["internal_url_host"]
+if node[:keystone][:api][:internal_url_host] != internal_url_host
+  node.set[:keystone][:api][:internal_url_host] = internal_url_host
+  node.save
+end
+Chef::Log.debug("setting new endpoint host to " \
+                "#{node[:keystone][:api][:internal_url_host]}")

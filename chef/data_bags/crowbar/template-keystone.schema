@@ -7,7 +7,6 @@
       "mapping": {
         "keystone": { "type": "map", "required": true,
              "mapping": {
-                    "verbose": { "type": "bool", "required": true },
                     "debug": { "type": "bool", "required": true },
                     "frontend": { "type": "str", "required": true },
                     "policy_file": { "type": "str", "required": true },
@@ -37,42 +36,42 @@
                       "admin_port": { "type" : "int", "required" : true },
                       "api_host": { "type" : "str", "required" : true },
                       "admin_host": { "type" : "str", "required" : true },
+                      "internal_url_host": { "type" : "str", "required" : true },
                       "version": { "type" : "str", "required" : true },
-                      "region": { "type" : "str", "required" : true }
+                      "region": { "type" : "str", "required" : true },
+                      "processes": { "required": true, "type": "int" },
+                      "threads": { "required": true, "type": "int" }
                     }},
                     "admin": { "type": "map", "required": true, "mapping": {
-                      "tenant": { "type" : "str", "required" : true },
+                      "project": { "type" : "str", "required" : true },
                       "username": { "type" : "str", "required" : true },
-                      "password": { "type" : "str", "required" : true }
+                      "password": { "type" : "str", "required" : true },
+                      "updated_password": { "type" : "str", "required" : false }
                     }},
                     "service": { "type": "map", "required": true, "mapping": {
-                      "tenant": { "type" : "str", "required" : true },
+                      "project": { "type" : "str", "required" : true },
                       "token": { "type": "str", "required" : true }
                     }},
                     "default" : { "type" : "map", "required" : true, "mapping": {
                       "create_user": { "type" : "bool", "required" : true },
-                      "tenant": { "type" : "str", "required" : true },
+                      "project": { "type" : "str", "required" : true },
                       "username": { "type" : "str", "required" : true },
                       "password": { "type" : "str", "required" : true }
                     }},
                     "identity" : { "type" : "map", "required" : true, "mapping": {
-                      "driver": { "type": "str", "required": true }
+                      "driver": { "type": "str", "required": true },
+                      "password_hash_algorithm": { "type": "str", "required": true, "pattern": "/^bcrypt$|^scrypt$|^pbkdf2_sha512$/" },
+                      "password_hash_rounds": { "type": "int", "required": false }
                     }},
                     "assignment" : { "type" : "map", "required" : true, "mapping": {
                       "driver": { "type": "str", "required": true }
                     }},
-                    "signing" : { "type" : "map", "required" : true, "mapping": {
-                      "token_format": { "type": "str", "required": true, "pattern": "/^(fernet|uuid)$/" },
-                      "certfile": { "type": "str" },
-                      "keyfile": { "type": "str" },
-                      "ca_certs": { "type": "str" }
-                    }},
+                    "token_format": { "type": "str", "required": true, "pattern": "/^(fernet|uuid)$/" },
                     "ldap" : { "type" : "map", "mapping": {
                       "url": { "type": "str" },
                       "user": { "type": "str" },
                       "password": { "type": "str" },
                       "suffix": { "type": "str" },
-                      "allow_subtree_delete": { "type": "bool" },
                       "page_size": { "type": "int" },
                       "alias_dereferencing": { "type": "str" },
                       "query_scope": { "type": "str" },
@@ -89,9 +88,6 @@
                       "user_enabled_default": { "type": "str" },
                       "user_attribute_ignore": { "type": "str" },
                       "user_default_project_id_attribute": { "type": "str" },
-                      "user_allow_create": { "type": "bool" },
-                      "user_allow_update": { "type": "bool" },
-                      "user_allow_delete": { "type": "bool" },
                       "user_enabled_invert": { "type": "bool" },
                       "user_enabled_emulation": { "type": "bool" },
                       "user_enabled_emulation_dn": { "type": "str" },

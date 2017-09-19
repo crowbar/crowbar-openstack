@@ -35,7 +35,6 @@ default[:ceilometer][:agent_notification][:service_name] = agent_notification_se
 default[:ceilometer][:central][:service_name] = central_service_name
 
 default[:ceilometer][:debug] = false
-default[:ceilometer][:verbose] = false
 
 default[:ceilometer][:use_mongodb] = false
 
@@ -61,6 +60,13 @@ default[:ceilometer][:database][:metering_time_to_live] = -1
 default[:ceilometer][:database][:event_time_to_live] = -1
 
 default[:ceilometer][:mongodb][:port] = 27017
+
+default[:ceilometer][:ssl][:certfile] = "/etc/ceilometer/ssl/certs/signing_cert.pem"
+default[:ceilometer][:ssl][:keyfile] = "/etc/ceilometer/ssl/private/signing_key.pem"
+default[:ceilometer][:ssl][:generate_certs] = false
+default[:ceilometer][:ssl][:insecure] = false
+default[:ceilometer][:ssl][:cert_required] = false
+default[:ceilometer][:ssl][:ca_certs] = "/etc/ceilometer/ssl/certs/ca.pem"
 
 default[:ceilometer][:ha][:server][:enabled] = false
 

@@ -13,7 +13,6 @@
           "required": true,
           "mapping": {
             "debug": { "type": "bool", "required": true },
-            "verbose": { "type": "bool", "required": true },
             "use_syslog": { "type": "bool", "required": true },
             "database_instance": { "type": "str", "required": true },
             "keystone_instance": { "type": "str", "required": true },
@@ -25,6 +24,7 @@
             "cinder_instance": { "type": "str", "required": true },
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str", "required": true },
+            "memcache_secret_key": { "type": "str", "required": true },
             "plugins": { "type": "str", "required": true },
             "api": {
               "type": "map", "required": true, "mapping": {
@@ -41,7 +41,8 @@
                 "user": { "type": "str", "required": true },
                 "database": { "type": "str", "required": true }
               }
-            }
+            },
+            "use_barbican_key_manager": { "type": "bool", "required": true }
           }
         }
       }

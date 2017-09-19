@@ -1,5 +1,15 @@
 language: ruby
 sudo: false
+cache: bundler
+dist: trusty
 
-rvm:
-  - 2.1.0
+rvm: 2.1.9
+
+matrix:
+  include:
+    - env: SYNTAXCHECK
+      script:
+      - bundle exec rake syntaxcheck
+    - env: SPEC_TESTS
+      script:
+      - bundle exec rake spec

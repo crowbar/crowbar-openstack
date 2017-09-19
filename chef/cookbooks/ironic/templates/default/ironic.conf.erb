@@ -1,0 +1,119 @@
+[DEFAULT]
+enabled_drivers=<%= @drivers.join(',') %>
+my_ip=<%= @ironic_ip %>
+debug=<%= @debug ? 'true' : 'false' %>
+transport_url=<%= @rabbit_settings[:url] %>
+control_exchange=ironic
+
+[api]
+host_ip=0.0.0.0
+port=<%= @api_port %>
+public_endpoint=<%= @public_endpoint %>
+
+[conductor]
+api_url=<%= @public_endpoint %>
+automated_clean=<%= @automated_clean %>
+
+[database]
+connection=<%= @database_connection %>
+max_pool_size=30
+max_overflow=10
+pool_timeout=30
+
+[glance]
+glance_host=<%= @glance_settings[:host] %>
+glance_port=<%= @glance_settings[:port] %>
+glance_protocol=<%= @glance_settings[:protocol] %>
+glance_api_servers=<%= @glance_settings[:protocol] %>://<%= @glance_settings[:host] %>:<%= @glance_settings[:port] %>
+auth_strategy=keystone
+auth_type=password
+auth_url=<%= @keystone_settings['internal_auth_url'] %>
+region_name=<%= @keystone_settings['endpoint_region'] %>
+username=<%= @glance_settings[:service_user] %>
+password=<%= @glance_settings[:service_password] %>
+project_name=<%= @keystone_settings['service_tenant'] %>
+project_domain_name=<%= @keystone_settings["admin_domain"]%>
+user_domain_name=<%= @keystone_settings["admin_domain"] %>
+<% if @swift_settings %>
+swift_temp_url_key=<%= @swift_settings[:tempurl_key] %>
+swift_endpoint_url=<%= @swift_settings[:protocol] %>://<%= @swift_settings[:host] %>:<%= @swift_settings[:port] %>
+swift_container=<%= @swift_settings[:glance_container] %>
+swift_account=<%= @swift_settings[:glance_account] %>
+<% end %>
+
+[swift]
+auth_type=password
+auth_url=<%= @keystone_settings['internal_auth_url'] %>
+region_name=<%= @keystone_settings['endpoint_region'] %>
+username=<%= if @swift_settings then @swift_settings[:service_user] else '' end %>
+password=<%= if @swift_settings then @swift_settings[:service_password] else '' end %>
+project_name=<%= @keystone_settings['service_tenant'] %>
+project_domain_name=<%= @keystone_settings["admin_domain"]%>
+user_domain_name=<%= @keystone_settings["admin_domain"] %>
+
+[keystone]
+region_name=<%= @keystone_settings['endpoint_region'] %>
+
+[keystone_authtoken]
+auth_type=password
+auth_uri=<%= @keystone_settings['protocol'] %>://<%= @keystone_settings['public_url_host'] %>:<%= @keystone_settings['service_port'] %>/<%= @auth_version %>/
+auth_url=<%= @keystone_settings['admin_auth_url'] %>
+auth_version=<%= @auth_version %>
+region_name=<%= @keystone_settings['endpoint_region'] %>
+username=<%= @keystone_settings['service_user'] %>
+password=<%= @keystone_settings['service_password'] %>
+project_name=<%= @keystone_settings['service_tenant'] %>
+project_domain_name=<%= @keystone_settings['admin_domain']%>
+user_domain_name=<%= @keystone_settings['admin_domain'] %>
+service_token_roles_required = true
+service_token_roles = admin
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:ironic][:memcache_secret_key] %>
+
+[neutron]
+auth_type=password
+url=<%= @neutron_settings[:protocol] %>://<%= @neutron_settings[:host] %>:<%= @neutron_settings[:port] %>
+auth_strategy=keystone
+auth_url=<%= @keystone_settings['internal_auth_url'] %>
+region_name=<%= @keystone_settings['endpoint_region'] %>
+username=<%= @neutron_settings[:service_user] %>
+password=<%= @neutron_settings[:service_password] %>
+project_name=<%= @keystone_settings['service_tenant'] %>
+project_domain_name=<%= @keystone_settings['admin_domain']%>
+user_domain_name=<%= @keystone_settings['admin_domain'] %>
+port_setup_delay=15
+cleaning_network=<%= @ironic_net_name %>
+
+[inspector]
+auth_type=password
+auth_url=<%= @keystone_settings['admin_auth_url'] %>
+auth_version=<%= @auth_version %>
+region_name=<%= @keystone_settings['endpoint_region'] %>
+username=<%= @keystone_settings['service_user'] %>
+password=<%= @keystone_settings['service_password'] %>
+project_name=<%= @keystone_settings['service_tenant'] %>
+project_domain_name=<%= @keystone_settings['admin_domain']%>
+user_domain_name=<%= @keystone_settings['admin_domain'] %>
+
+[service_catalog]
+auth_type=password
+auth_url=<%= @keystone_settings['admin_auth_url'] %>
+auth_version=<%= @auth_version %>
+region_name=<%= @keystone_settings['endpoint_region'] %>
+username=<%= @keystone_settings['service_user'] %>
+password=<%= @keystone_settings['service_password'] %>
+project_name=<%= @keystone_settings['service_tenant'] %>
+project_domain_name=<%= @keystone_settings['admin_domain']%>
+user_domain_name=<%= @keystone_settings['admin_domain'] %>
+
+[oslo_concurrency]
+lock_path=/var/run/ironic
+
+[pxe]
+tftp_server=<%= @tftp_ip %>
+tftp_root=<%= @tftproot %>
+tftp_master_path=<%= @tftproot %>/master_images
+
+[deploy]
+default_boot_option=netboot

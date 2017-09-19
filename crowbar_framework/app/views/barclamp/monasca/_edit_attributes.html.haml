@@ -1,0 +1,42 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header show_raw_deployment?, true
+
+  .panel-body
+
+    %fieldset
+      %legend
+        = t(".agent_header")
+
+      = select_field %w(agent log_level), :collection => :agent_log_levels
+      = integer_field %w(agent statsd_port)
+      = integer_field %w(agent check_frequency)
+      = integer_field %w(agent num_collector_threads)
+      = integer_field %w(agent pool_full_max_retries)
+      = integer_field %w(agent plugin_collect_time_warn)
+      = integer_field %w(agent max_measurement_buffer_size)
+      = integer_field %w(agent backlog_send_rate)
+      = integer_field %w(agent amplifier)
+
+    %fieldset
+      %legend
+        = t(".api_header")
+
+      = select_field %w(api log_level), :collection => :api_log_levels
+
+    %fieldset
+      %legend
+        = t(".log_api_header")
+
+      = select_field %w(log_api log_level), :collection => :api_log_levels
+
+    %fieldset
+      %legend
+        = t(".master_notification_header")
+
+      = boolean_field %w(master notification_enable_email)
+      = string_field %w(master smtp_host)
+      = integer_field %w(master smtp_port)
+      = string_field %w(master smtp_user)
+      = password_field %w(master smtp_password)
+      = string_field %w(master smtp_from_address)

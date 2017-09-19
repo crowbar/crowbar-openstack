@@ -13,6 +13,13 @@ end
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 network_settings = GlanceHelper.network_settings(node)
 
+ha_enabled = node[:glance][:ha][:enabled]
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "glance-server") : [node]
+)
+
+memcached_instance("glance")
+
 template node[:glance][:manage][:config_file] do
   source "glance-manage.conf.erb"
   owner "root"
@@ -29,11 +36,14 @@ template node[:glance][:registry][:config_file] do
       bind_host: network_settings[:registry][:bind_host],
       bind_port: network_settings[:registry][:bind_port],
       keystone_settings: keystone_settings,
+      memcached_servers: memcached_servers,
       rabbit_settings: fetch_rabbitmq_settings
   )
 end
 
-crowbar_pacemaker_sync_mark "wait-glance_db_sync"
+ha_enabled = node[:glance][:ha][:enabled]
+
+crowbar_pacemaker_sync_mark "wait-glance_db_sync" if ha_enabled
 
 execute "glance-manage db sync" do
   user node[:glance][:user]
@@ -58,6 +68,6 @@ ruby_block "mark node for glance db_sync" do
   subscribes :create, "execute[glance-manage db sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-glance_db_sync"
+crowbar_pacemaker_sync_mark "create-glance_db_sync" if ha_enabled
 
 glance_service "registry"

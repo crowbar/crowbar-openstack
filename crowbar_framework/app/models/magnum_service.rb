@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 
-class MagnumService < PacemakerServiceObject
-  def initialize(thelogger)
+class MagnumService < OpenstackServiceObject
+  def initialize(thelogger = nil)
     @bc_name = "magnum"
     @logger = thelogger
   end
@@ -48,7 +48,7 @@ class MagnumService < PacemakerServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }
@@ -84,6 +84,7 @@ class MagnumService < PacemakerServiceObject
       find_dep_proposal("heat")
 
     base["attributes"][@bc_name]["service_password"] = random_password
+    base["attributes"][@bc_name]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name][:trustee][:domain_admin_password] = random_password
 

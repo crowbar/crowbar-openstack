@@ -10,7 +10,7 @@ endpoint_type = internalURL
 
 [auth]
 admin_username = <%= @keystone_settings['admin_user'] %>
-admin_tenant_name = <%= @keystone_settings['default_tenant'] %>
+admin_project_name = <%= @keystone_settings['default_tenant'] %>
 admin_password = <%= @keystone_settings['admin_password'] %>
 admin_domain_name = Default
 
@@ -43,6 +43,7 @@ rescue = <%= @use_rescue %>
 interface_attach = <%= @use_interface_attach %>
 personality = false
 config_drive = <%= @use_config_drive %>
+attach_encrypted_volume = <%= @use_attach_encrypted_volume %>
 
 [dashboard]
 dashboard_url = <%= @horizon_protocol %>://<%= @horizon_host %>/
@@ -92,19 +93,16 @@ alt_tenant_name = <%= @alt_comp_tenant %>
 alt_password = <%= @alt_comp_pass %>
 alt_domain_name = Default
 
+[identity-feature-enabled]
+domain_specific_drivers = <%= node[:keystone][:domain_specific_drivers] ? "True" : "False" %>
+
 [image]
 region = <%= @keystone_settings['endpoint_region'] %>
 endpoint_type = internalURL
 http_image = <%= @http_image %>
 
 [image-feature-enabled]
-deactivate_image = true
 api_v1 = false
-
-[input-scenario]
-image_regex = <%= @image_regex %>
-flavor_regex = ^tempest-stuff$
-ssh_user_regex = [["^.*[Cc]irros.*$", "cirros"]]
 
 [magnum]
 image_id = <%= @magnum_settings['image_id'] %>
@@ -144,11 +142,7 @@ instance_type = <%= @heat_flavor_ref %>
 lock_path = /var/run/tempest
 
 [scenario]
-img_dir = <%= @tempest_path %>/etc/cirros/
 img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-disk.img
-ami_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-blank.img
-ari_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-initrd
-aki_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-vmlinuz
 
 [service_available]
 neutron = true
@@ -169,12 +163,12 @@ region = <%= @keystone_settings['endpoint_region'] %>
 endpoint_type = internalURL
 multitenancy_enabled = False
 enable_protocols = <%= @manila_settings['enable_protocols'] %>
-storage_protocol = <%= @manila_settings['storage_protocol'] %>
+capability_storage_protocol = <%= @manila_settings['capability_storage_protocol'] %>
 enable_ip_rules_for_protocols = <%= @manila_settings['enable_ip_rules_for_protocols'] %>
 enable_cert_rules_for_protocols = <%= @manila_settings['enable_cert_rules_for_protocols'] %>
 suppress_errors_in_cleanup = true
 run_snapshot_tests =<%= @manila_settings['run_snapshot_tests'] %>
-run_consistency_group_tests =<%= @manila_settings['run_consistency_group_tests'] %>
+run_share_group_tests =<%= @manila_settings['run_share_group_tests'] %>
 image_with_share_tools = <%= @manila_settings['image_with_share_tools'] %>
 image_username = <%= @manila_settings['image_username'] %>
 image_password = <%= @manila_settings['image_password'] %>

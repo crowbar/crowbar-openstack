@@ -70,6 +70,20 @@ bash "reload enable-ip_forward-sysctl" do
   subscribes :run, resources(cookbook_file: enable_ip_forward_file), :delayed
 end
 
+# Increase inotify max user instances
+# one instance needed per dnsmasq instance / network
+inotify_instances_file = "/etc/sysctl.d/60-neutron-inotify-max-user-instances.conf"
+cookbook_file inotify_instances_file do
+  source "sysctl-inotify-max-instances.conf"
+  mode "0644"
+end
+
+bash "reload inotify-max-user-instances.conf" do
+  code "/sbin/sysctl -e -q -p #{inotify_instances_file}"
+  action :nothing
+  subscribes :run, resources(cookbook_file: inotify_instances_file), :delayed
+end
+
 # Kill all the libvirt default networks.
 execute "Destroy the libvirt default network" do
   command "virsh net-destroy default"
@@ -124,7 +138,7 @@ template "/etc/neutron/dhcp_agent.ini" do
     interface_driver: interface_driver,
     resync_interval: 5,
     dhcp_driver: "neutron.agent.linux.dhcp.Dnsmasq",
-    dhcp_domain: node[:neutron][:dhcp_domain],
+    dns_domain: node[:neutron][:dns_domain],
     enable_isolated_metadata: "True",
     enable_metadata_network: "False",
     nameservers: dns_list

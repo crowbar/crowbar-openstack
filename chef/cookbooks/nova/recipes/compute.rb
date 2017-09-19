@@ -35,6 +35,9 @@ if %w(rhel suse).include?(node[:platform_family])
 end
 
 case node[:nova][:libvirt_type]
+  when "ironic"
+    package "python-ironicclient"
+
   when "zvm"
     package "openstack-nova-virt-zvm"
 
@@ -50,7 +53,7 @@ case node[:nova][:libvirt_type]
 
       # Generate a UUID, as DMI's system uuid is unreliable
       if node[:nova][:host_uuid].nil?
-        node.normal[:nova][:host_uuid] = `uuidgen`.strip
+        node.set[:nova][:host_uuid] = `uuidgen`.strip
         node.save
       end
 
@@ -380,11 +383,12 @@ unless cinder_servers.empty?
 end
 
 # Set our availability zone
-command_no_arg = NovaAvailabilityZone.fetch_set_az_command_no_arg(node, @cookbook_name)
+env, command_no_arg = NovaAvailabilityZone.fetch_set_az_command_no_arg(node, @cookbook_name)
 command = NovaAvailabilityZone.add_arg_to_set_az_command(command_no_arg, node)
 
 execute "Set availability zone for #{node.hostname}" do
   command command
+  environment env
   timeout 60
   # Any exit code in the range 60-69 is a tempfail
   returns [0] + (60..69).to_a
@@ -405,7 +409,7 @@ if node[:nova][:ha][:compute][:enabled]
 
   # Mark the node as ready for HA compute setup
   unless node[:nova][:ha][:compute][:setup]
-    node[:nova][:ha][:compute][:setup] = true
+    node.set[:nova][:ha][:compute][:setup] = true
     node.save
   end
 end

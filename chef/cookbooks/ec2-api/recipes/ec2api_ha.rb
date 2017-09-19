@@ -18,7 +18,7 @@ include_recipe "crowbar-pacemaker::haproxy"
 haproxy_loadbalancer "ec2-api" do
   address "0.0.0.0"
   port node[:nova][:ports][:ec2_api]
-  use_ssl false
+  use_ssl node[:nova]["ec2-api"][:ssl][:enabled]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(
     node, "nova", "ec2-api", "ec2_api"
   )
@@ -28,7 +28,7 @@ end.run_action(:create)
 haproxy_loadbalancer "ec2-metadata" do
   address "0.0.0.0"
   port node[:nova][:ports][:ec2_metadata]
-  use_ssl false
+  use_ssl node[:nova]["ec2-api"][:ssl][:enabled]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(
     node, "nova", "ec2-api", "ec2_metadata"
   )
@@ -38,7 +38,7 @@ end.run_action(:create)
 haproxy_loadbalancer "ec2-s3" do
   address "0.0.0.0"
   port node[:nova][:ports][:ec2_s3]
-  use_ssl false
+  use_ssl node[:nova]["ec2-api"][:ssl][:enabled]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(
     node, "nova", "ec2-api", "ec2_s3"
   )
@@ -53,6 +53,7 @@ crowbar_pacemaker_sync_mark "sync-ec2_api_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-ec2_api_ha_resources"
 
+rabbit_settings = fetch_rabbitmq_settings "nova"
 services = ["api", "metadata", "s3"]
 transaction_objects = []
 
@@ -68,7 +69,7 @@ services.each do |service|
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent primitive_ra
     op node[:nova][:ha][:op]
-    order_only_existing "( postgresql rabbitmq cl-keystone )"
+    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
   end
   transaction_objects.push(objects)
 end

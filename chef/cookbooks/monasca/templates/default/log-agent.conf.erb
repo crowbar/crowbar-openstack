@@ -1,0 +1,51 @@
+input {
+<% @log_files.each_pair do |path, service| %>
+  <%= "file { "%>
+  <% @log_filters_components.each_pair do |type, components|%>
+    <% if components.include?("#{service}") %>
+      <%= "tags => [\"#{type}\"]" %>
+    <% end %>
+  <% end %>
+  <%= "add_field => { \"dimensions\" => { \"service\" => \"#{service}\" }}
+    path => \"#{path}\"
+  }"
+ %>
+<% end %>
+}
+
+filter {
+<% @log_filters.each do |filter| %>
+  <%= "if \"#{filter[:type]}\" in [tags]{
+        multiline {
+          negate => \"#{filter[:configuration][:negate]}\"
+          pattern => \"#{filter[:configuration][:pattern]}\"
+          what => \"#{filter[:configuration][:what]}\"
+        }
+      }"
+  %>
+<% end %>
+}
+
+output {
+  monasca_log_api {
+    ### keystone based settings
+    keystone_api_url => "<%= @keystone_settings['admin_auth_url'] %>/v3"
+    keystone_api_insecure => <%= @keystone_settings['insecure'] %>
+    project_name => "<%= @log_agent_keystone['service_tenant'] %>"
+    username => "<%= @log_agent_keystone['service_user'] %>"
+    password => "<%= @log_agent_keystone['service_password'] %>"
+    user_domain_name => "<%= @keystone_settings['admin_domain'] %>"
+    project_domain_name => "<%= @keystone_settings['admin_domain'] %>"
+    ### monasca specific settings
+    monasca_log_api_url => "<%= @monasca_log_api_url %>"
+    num_of_logs => <%= @log_agent_settings[:num_of_logs] %>
+    elapsed_time_sec => <%= @log_agent_settings[:elapsed_time_sec] %>
+    delay => <%= @log_agent_settings[:delay] %>
+    max_data_size_kb => <%= @log_agent_settings[:max_data_size_kb] %>
+<%- unless @log_agent_dimensions.nil? then -%>
+    dimensions => [<%= @log_agent_dimensions.map{|k,v| "\"#{k}:#{v}\""}.join(',') %>]
+<%- else -%>
+    dimensions => []
+<%- end -%>
+  }
+}

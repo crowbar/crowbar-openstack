@@ -22,4 +22,5 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "glance", "glance-server")
   include_recipe "glance::ha"
   include_recipe "glance::setup"
   include_recipe "glance::monitor"
+  include_recipe "glance::monitor_monasca"
 end

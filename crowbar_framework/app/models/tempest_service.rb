@@ -19,7 +19,7 @@ class TempestService < ServiceObject
   class ServiceError < StandardError
   end
 
-  def initialize(thelogger)
+  def initialize(thelogger = nil)
     @bc_name = "tempest"
     @logger = thelogger
   end
@@ -31,7 +31,7 @@ class TempestService < ServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }

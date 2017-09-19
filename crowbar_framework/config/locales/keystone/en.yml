@@ -21,17 +21,18 @@ en:
       edit_attributes:
         database_instance: 'Database Instance'
         rabbitmq_instance: 'RabbitMQ'
-        signing:
-          token_format: 'Algorithm for Token Generation'
+        token_format: 'Algorithm for Token Generation'
         default_credentials: 'Default Credentials'
         default:
-          tenant: 'Default Tenant'
+          project: 'Default Project'
           create_user: 'Create Regular User'
           username: 'Regular User Username'
           password: 'Regular User Password'
         admin:
           username: 'Administrator Username'
           password: 'Administrator Password'
+          updated_password: 'Update Administrator Password'
+          updated_password_hint: 'Changing the admin password directly in OpenStack its not supported. You can change the admin password directly using this field.'
         ssl_header: 'SSL Support'
         api:
           protocol: 'Protocol'
@@ -46,3 +47,6 @@ en:
         api_version: 'API version %{api_version} not recognized.'
         enable_keystone_api: 'Keystone API version 3 needs to be enabled in order to use domain specific drivers.'
         timeout: 'Setting the Horizon timeout (%{horizon_timeout} minutes) longer than the Keystone token expiration timeout (%{keystone_timeout} minutes) is not supported.'
+        bcrypt_password_hash_rounds: "Password hash rounds for bcrypt must be between 4 and 31"
+        scrypt_password_hash_rounds: "Password hash rounds for scrypt must be between 1 and 31"
+        pbkdf_sha512_password_hash_rounds: "Password hash rounds for pbkdfsha512 must be between 1 and 4294967295"

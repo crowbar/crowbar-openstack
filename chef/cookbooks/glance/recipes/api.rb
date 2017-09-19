@@ -4,6 +4,12 @@
 #
 #
 
+keystone_settings = KeystoneHelper.keystone_settings(node, :glance)
+swift_config = Barclamp::Config.load("openstack", "swift")
+swift_insecure = CrowbarOpenStackHelper.insecure(swift_config) || keystone_settings["insecure"]
+cinder_config = Barclamp::Config.load("openstack", "cinder")
+cinder_insecure = CrowbarOpenStackHelper.insecure(cinder_config)
+
 include_recipe "#{@cookbook_name}::common"
 
 package "glance-api" do
@@ -32,24 +38,14 @@ if node[:glance][:api][:protocol] == "https"
   end
 end
 
-# TODO: there's no dependency in terms of proposal on swift
-swift_api_insecure = false
-swifts = search(:node, "roles:swift-proxy") || []
-if swifts.length > 0
-  swift = swifts[0]
-  swift_api_insecure = swift[:swift][:ssl][:enabled] && swift[:swift][:ssl][:insecure]
-end
-
-#TODO: glance should depend on cinder, but cinder already depends on glance :/
-# so we have to do something like this
-cinder_api_insecure = false
-cinders = search(:node, "roles:cinder-controller") || []
-if cinders.length > 0
-  cinder = cinders[0]
-  cinder_api_insecure = cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
-end
+ironics = node_search_with_cache("roles:ironic-server") || []
 
 network_settings = GlanceHelper.network_settings(node)
+
+ha_enabled = node[:glance][:ha][:enabled]
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "glance-server") : [node]
+)
 
 glance_stores = node.default[:glance][:glance_stores].dup
 glance_stores += ["vmware"] unless node[:glance][:vsphere][:host].empty?
@@ -77,11 +73,14 @@ template node[:glance][:api][:config_file] do
       registry_bind_host: network_settings[:registry][:bind_host],
       registry_bind_port: network_settings[:registry][:bind_port],
       keystone_settings: keystone_settings,
+      memcached_servers: memcached_servers,
       rabbit_settings: fetch_rabbitmq_settings,
-      swift_api_insecure: swift_api_insecure,
-      cinder_api_insecure: cinder_api_insecure,
+      swift_api_insecure: swift_insecure,
+      cinder_api_insecure: cinder_insecure,
+      enable_v1: node[:glance][:enable_v1],
       glance_stores: glance_stores.join(",")
   )
+  notifies :restart, "service[#{node[:glance][:api][:service_name]}]"
 end
 
 template "/etc/glance/glance-swift.conf" do
@@ -93,6 +92,32 @@ template "/etc/glance/glance-swift.conf" do
     keystone_settings: keystone_settings
   )
   notifies :restart, "service[#{node[:glance][:api][:service_name]}]"
+end
+
+# ensure swift tempurl key only if some agent_* drivers are enabled in ironic
+if !swift_config.empty? && node[:glance][:default_store] == "swift" && \
+    ironics.any? && ironics.first[:ironic][:enabled_drivers].any? { |d| d.start_with?("agent_") }
+  swift_command = "swift "
+  swift_command << (swift_insecure ? " --insecure" : "")
+  env = {
+    "OS_USERNAME" => keystone_settings["service_user"],
+    "OS_PASSWORD" => keystone_settings["service_password"],
+    "OS_PROJECT_NAME" => keystone_settings["service_tenant"],
+    "OS_AUTH_URL" => keystone_settings["public_auth_url"],
+    "OS_IDENTITY_API_VERSION" => 3
+  }
+
+  get_tempurl_key = "#{swift_command} stat | grep -m1 'Meta Temp-Url-Key:' | awk '{print $3}'"
+  tempurl_key = Mixlib::ShellOut.new(get_tempurl_key, environment: env).run_command.stdout.chomp
+  # no tempurl key set, set a random one
+  if tempurl_key.empty?
+    tempurl_key = secure_password
+    execute "set-glance-tempurl-key" do
+      command "#{swift_command} post -m 'Temp-Url-Key:#{tempurl_key}'"
+      user node[:glance][:user]
+      group node[:glance][:group]
+    end
+  end
 end
 
 ha_enabled = node[:glance][:ha][:enabled]
@@ -112,11 +137,11 @@ end
 api_port = node["glance"]["api"]["bind_port"]
 glance_protocol = node[:glance][:api][:protocol]
 
-crowbar_pacemaker_sync_mark "wait-glance_register_service"
+crowbar_pacemaker_sync_mark "wait-glance_register_service" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "register glance service" do
   protocol keystone_settings["protocol"]
@@ -141,11 +166,9 @@ keystone_register "register glance endpoint" do
   endpoint_publicURL "#{glance_protocol}://#{endpoint_public_ip}:#{api_port}"
   endpoint_adminURL "#{glance_protocol}://#{endpoint_admin_ip}:#{api_port}"
   endpoint_internalURL "#{glance_protocol}://#{endpoint_admin_ip}:#{api_port}"
-#  endpoint_global true
-#  endpoint_enabled true
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
-crowbar_pacemaker_sync_mark "create-glance_register_service"
+crowbar_pacemaker_sync_mark "create-glance_register_service" if ha_enabled
 
 glance_service "api"

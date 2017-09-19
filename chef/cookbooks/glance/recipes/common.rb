@@ -29,7 +29,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-glance_database"
+crowbar_pacemaker_sync_mark "wait-glance_database" if ha_enabled
 
 # Create the Glance Database
 database "create #{node[:glance][:db][:database]} database" do
@@ -62,21 +62,23 @@ database_user "grant database access for glance database user" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-glance_database"
+crowbar_pacemaker_sync_mark "create-glance_database" if ha_enabled
 
-node.set[:glance][:sql_connection] = "#{db_settings[:url_scheme]}://#{node[:glance][:db][:user]}:#{node[:glance][:db][:password]}@#{db_settings[:address]}/#{node[:glance][:db][:database]}"
-
-node.save
+sql_connection = fetch_database_connection_string(node[:glance][:db])
+if node[:glance][:sql_connection] != sql_connection
+  node.set[:glance][:sql_connection] = sql_connection
+  node.save
+end
 
 # Register glance service user
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-crowbar_pacemaker_sync_mark "wait-glance_register_user"
+crowbar_pacemaker_sync_mark "wait-glance_register_user" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant:  keystone_settings["admin_tenant"] }
+                       project:  keystone_settings["admin_project"] }
 
 keystone_register "glance wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -95,7 +97,7 @@ keystone_register "register glance user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -106,11 +108,11 @@ keystone_register "give glance user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
 
-crowbar_pacemaker_sync_mark "create-glance_register_user"
+crowbar_pacemaker_sync_mark "create-glance_register_user" if ha_enabled
 
 include_recipe "glance::ceph"

@@ -3,15 +3,15 @@
 debug=<%= node[:barbican][:debug] %>
 host_href = <%= @host_href %>
 sql_connection = <%= @database_connection %>
+transport_url = <%= @rabbit_settings[:url] %>
 
 [oslo_messaging_rabbit]
-
-amqp_durable_queues = False
-rabbit_userid = <%= @rabbit_settings[:user] %>
-rabbit_password =  <%= @rabbit_settings[:password] %>
-rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
-rabbit_port = <%= @rabbit_settings[:port] %>
-rabbit_hosts = <%= @rabbit_settings[:address] %>
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+ssl_ca_file = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
 
 [queue]
 
@@ -38,3 +38,8 @@ project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
 region_name = <%= @keystone_settings["endpoint_region"] %>
 insecure = <%= @keystone_settings["insecure"] %>
+service_token_roles_required = true
+service_token_roles = admin
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:barbican][:memcache_secret_key] %>

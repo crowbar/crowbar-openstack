@@ -23,30 +23,34 @@ include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 # get Database data
-db_password = node[:sahara][:db][:password]
-sql_connection = "#{db_settings[:url_scheme]}://#{node[:sahara][:db][:user]}:"\
-                 "#{db_password}@#{db_settings[:address]}/"\
-                 "#{node[:sahara][:db][:database]}"
+sql_connection = fetch_database_connection_string(node[:sahara][:db])
 
-# cinder insecure?
-cinder = node_search_with_cache("roles:cinder-controller").first
-cinder_insecure = cinder[:cinder][:ssl][:insecure]
+cinder_instance = node[:sahara][:cinder_instance]
+heat_instance = node[:sahara][:heat_instance]
+neutron_instance = node[:sahara][:neutron_instance]
+nova_instance = node[:sahara][:nova_instance]
 
-# heat insecure?
-heat = node_search_with_cache("roles:heat-server").first
-heat_insecure = heat[:heat][:ssl][:insecure]
+cinder_config = Barclamp::Config.load("openstack", "cinder", cinder_instance)
+heat_config = Barclamp::Config.load("openstack", "heat", heat_instance)
+neutron_config = Barclamp::Config.load("openstack", "neutron", neutron_instance)
+nova_config = Barclamp::Config.load("openstack", "nova", nova_instance)
 
-# neutron insecure?
-neutron = node_search_with_cache("roles:neutron-server").first
-neutron_insecure = neutron[:neutron][:ssl][:insecure]
+cinder_insecure = CrowbarOpenStackHelper.insecure(cinder_config)
+heat_insecure = CrowbarOpenStackHelper.insecure(heat_config)
+neutron_insecure = CrowbarOpenStackHelper.insecure(neutron_config)
+nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
 
-# nova insecure?
-nova = node_search_with_cache("roles:nova-controller").first
-nova_insecure = nova[:nova][:ssl][:insecure]
+use_ceilometer = !Barclamp::Config.load("openstack", "ceilometer").empty?
 
-# use ceilometer?
-ceilometers = search_env_filtered(:node, "roles:ceilometer-server")
-use_ceilometer = !ceilometers.empty?
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  if node[:sahara][:ha][:enabled]
+    CrowbarPacemakerHelper.cluster_nodes(node, "sahara-server")
+  else
+    [node]
+  end
+)
+
+memcached_instance("sahara") if node["roles"].include?("sahara-server")
 
 template node[:sahara][:config_file] do
   source "sahara.conf.erb"
@@ -61,10 +65,9 @@ template node[:sahara][:config_file] do
     keystone_settings: KeystoneHelper.keystone_settings(node, :sahara),
     cinder_insecure: cinder_insecure,
     heat_insecure: heat_insecure,
+    memcached_servers: memcached_servers,
     neutron_insecure: neutron_insecure,
     nova_insecure: nova_insecure,
     use_ceilometer: use_ceilometer
   )
 end
-
-node.save

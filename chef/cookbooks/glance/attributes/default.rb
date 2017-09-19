@@ -22,7 +22,6 @@
 override[:glance][:user]="glance"
 override[:glance][:group]="glance"
 
-default[:glance][:verbose] = "False"
 default[:glance][:debug] = "False"
 
 default[:glance][:enable_v3_api] = false

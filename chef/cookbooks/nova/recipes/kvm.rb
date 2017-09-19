@@ -18,4 +18,7 @@
 # limitations under the License.
 #
 
-node.set[:nova][:libvirt_type] = "kvm"
+if node[:nova][:libvirt_type] != "kvm"
+  node.set[:nova][:libvirt_type] = "kvm"
+  node.save
+end

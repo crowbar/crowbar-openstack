@@ -2,10 +2,8 @@
 shuffle_time_before_polling_task = 15
 hypervisor_inspector = <%= @hypervisor_inspector %>
 libvirt_type = <%= @libvirt_type %>
-nova_http_log_debug = <%= @debug ? "true" : "false" %>
 host = <%= @node_hostname %>
 debug = <%= @debug ? "true" : "false" %>
-verbose = <%= @verbose ? "true" : "false" %>
 log_dir = /var/log/ceilometer
 use_stderr = false
 transport_url = <%= @rabbit_settings[:url] %>
@@ -32,6 +30,11 @@ project_name = <%= @keystone_settings['service_tenant'] %>
 project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
 auth_type = password
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:ceilometer][:memcache_secret_key] %>
+service_token_roles_required = true
+service_token_roles = admin
 
 [notification]
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
@@ -66,4 +69,17 @@ ca_file = <%= node[:nova][:vcenter][:ca_file] -%>
 <% end -%>
 <% if @hypervisor_inspector == "vmware" && node[:nova][:vcenter][:insecure] -%>
 insecure = <%= node[:nova][:vcenter][:insecure] %>
+<% end -%>
+
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+
+<% if @discovery_method -%>
+[compute]
+instance_discovery_method = <%= @discovery_method %>
 <% end -%>

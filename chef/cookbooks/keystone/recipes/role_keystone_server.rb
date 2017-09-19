@@ -15,7 +15,7 @@
 #
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "keystone", "keystone-server")
-  include_recipe "keystone::memcached"
   include_recipe "keystone::server"
   include_recipe "keystone::monitor"
+  include_recipe "keystone::monitor_monasca"
 end

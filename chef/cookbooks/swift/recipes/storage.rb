@@ -16,6 +16,8 @@
 # Author: andi abes
 #
 
+dirty = false
+
 skip_setup = node[:swift][:devs].nil?
 
 include_recipe "swift::disks"
@@ -44,9 +46,7 @@ end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
-memcached_ips = node_search_with_cache("roles:swift-proxy").map do |x|
-  "#{Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)}:11211"
-end.sort
+memcached_ips = MemcachedHelper.get_memcached_servers(node_search_with_cache("roles:swift-proxy"))
 
 %w{account-server object-expirer object-server container-server}.each do |service|
   template "/etc/swift/#{service}.conf" do
@@ -64,6 +64,7 @@ end.sort
   end
 end
 
+# keep in sync with definition in monitor.rb
 svcs = %w{swift-object swift-object-auditor swift-object-expirer swift-object-replicator swift-object-updater}
 svcs += %w{swift-container swift-container-auditor swift-container-replicator swift-container-sync swift-container-updater}
 svcs += %w{swift-account swift-account-reaper swift-account-auditor swift-account-replicator}
@@ -114,11 +115,9 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
   end
 end
 
-node.set["swift"]["storage_init_done"] = true
+unless node["swift"]["storage_init_done"]
+  node.set["swift"]["storage_init_done"] = true
+  dirty = true
+end
 
-###
-# let the monitoring tools know what services should be running on this node.
-node.set[:swift][:monitor] = {}
-node.set[:swift][:monitor][:svcs] = svcs
-node.set[:swift][:monitor][:ports] = { object: 6200, container: 6201, account: 6202 }
-node.save
+node.save if dirty

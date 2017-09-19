@@ -27,7 +27,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-cinder_database"
+crowbar_pacemaker_sync_mark "wait-cinder_database" if ha_enabled
 
 # Create the Cinder Database
 database "create #{node[:cinder][:db][:database]} database" do
@@ -82,8 +82,4 @@ ruby_block "mark node for cinder db_sync" do
   subscribes :create, "execute[cinder-manage db sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-cinder_database"
-
-# save data so it can be found by search
-node.save
-
+crowbar_pacemaker_sync_mark "create-cinder_database" if ha_enabled

@@ -49,7 +49,6 @@ module Barclamp
     def netapp_storage_family(selected)
       options_for_select(
         [
-          ["Data ONTAP in 7-Mode", "ontap_7mode"],
           ["Clustered Data ONTAP", "ontap_cluster"]
         ],
         selected.to_s

@@ -37,9 +37,7 @@ CACHES = {
           '<%= memcached_location %>',
 <% end -%>
         ],
-        'OPTIONS': {
-          'KEY_PREFIX': '<%= node[:horizon][:config][:environment] %>'
-        }
+        'KEY_PREFIX': '<%= node[:horizon][:config][:environment] %>'
     }
 }
 
@@ -115,7 +113,6 @@ POLICY_FILES = {
     'image': '<%= @policy_file[:image] %>',
     'orchestration': '<%= @policy_file[:orchestration] %>',
     'network': '<%= @policy_file[:network] %>',
-    'telemetry': '<%= @policy_file[:telemetry] %>',
 }
 
 LOGGING = {
@@ -128,7 +125,7 @@ LOGGING = {
     'handlers': {
         'null': {
             'level': '<%= @debug ? 'DEBUG' : 'INFO' %>',
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
         },
         'console': {
             # Set the level to "DEBUG" for verbose output logging.
@@ -255,3 +252,4 @@ EXTERNAL_MONITORING = [
 <% end -%>
 
 SESSION_TIMEOUT = <%= @session_timeout * 60 %>
+SECRET_KEY = "<%= @secret_key %>"

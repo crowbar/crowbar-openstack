@@ -15,8 +15,8 @@
 # limitations under the License.
 #
 
-class HorizonService < PacemakerServiceObject
-  def initialize(thelogger)
+class HorizonService < OpenstackServiceObject
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "horizon"
   end
@@ -33,7 +33,7 @@ class HorizonService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -66,6 +66,7 @@ class HorizonService < PacemakerServiceObject
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
 
     base["attributes"][@bc_name][:db][:password] = random_password
+    base["attributes"][@bc_name]["secret_key"] = random_password
 
     @logger.debug("Horizon create_proposal: exiting")
     base

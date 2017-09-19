@@ -7,18 +7,22 @@
       "mapping": {
         "neutron": { "type": "map", "required": true,
              "mapping": {
-                    "verbose": { "type": "bool", "required": true },
                     "debug": { "type": "bool", "required": true },
                     "max_header_line": { "type": "int", "required": true },
                     "service_user": { "type": "str", "required": true },
                     "service_password": { "type": "str" },
+                    "memcache_secret_key": { "type": "str", "required": true },
                     "rabbitmq_instance": { "type": "str", "required": true },
                     "keystone_instance": { "type": "str", "required": true },
                     "create_default_networks": { "type": "bool", "required": true },
-                    "dhcp_domain": { "type": "str", "required": true },
+                    "dns_domain": { "type": "str", "required": true },
+                    "rpc_workers": { "type": "int", "required": true },
                     "use_lbaas": { "type": "bool", "required": true },
                     "lbaasv2_driver": { "type": "str", "required": true },
                     "use_l2pop": { "type": "bool", "required": true },
+                    "l2pop": { "type": "map", "required": true, "mapping": {
+                      "agent_boot_time": { "type" : "int", "required" : true }
+                    }},
                     "use_dvr": { "type": "bool", "required": true },
                     "additional_external_networks": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
                     "networking_plugin": { "type": "str", "required": true },
@@ -38,8 +42,37 @@
                     }},
                     "ovs": { "type": "map", "required": true, "mapping": {
                       "tunnel_csum": { "type": "bool", "required": true },
-                      "ovsdb_interface": { "type": "str", "required": true },
-                      "of_interface": { "type": "str", "required": true }
+                      "ovsdb_interface": { "type": "str", "required": true }
+                    }},
+                    "apic": { "type": "map", "required": true, "mapping": {
+                      "hosts": { "type" : "str", "required" : true },
+                      "system_id": { "type" : "str", "required" : true },
+                      "username": { "type" : "str", "required": true },
+                      "password": { "type" : "str", "required": true },
+                      "opflex": { "type": "map", "required": true, "mapping": {
+                        "peer_ip": { "type": "str", "required" : true },
+                        "peer_port": { "type": "int", "required" : true },
+                        "encap": { "type": "str", "required": true },
+                        "vxlan": { "type": "map", "required": true, "mapping" : {
+                          "encap_iface": {"type": "str", "required": true },
+                          "uplink_iface": { "type": "str", "required": true },
+                          "uplink_vlan": { "type": "int", "required": true },
+                          "remote_ip": { "type": "str", "required": true },
+                          "remote_port": { "type": "int", "required": true }
+                        }},
+                        "vlan": { "type": "map", "required": true, "mapping": {
+                          "encap_iface": { "type": "str", "required": true }
+                        }}
+                      }},
+                      "apic_switches": { "type" : "map", "required" : true, "mapping" : {
+                        = : { "type" : "map", "required" : true, "mapping" : {
+                          "switch_ports": { "type" : "map", "required" : true, "mapping" : {
+                            = : { "type" : "map", "required" : true, "mapping" : {
+                              "switch_port": { "type": "str", "required": true }}
+                            }}
+                          }}
+                        }}
+                      }
                     }},
                     "allow_overlapping_ips": { "type": "bool", "required": true },
                     "cisco_switches": {
@@ -102,6 +135,10 @@
                       "controllers": { "type" : "str", "required" : true },
                       "tz_uuid": { "type" : "str", "required" : true },
                       "l3_gw_uuid": { "type" : "str", "required" : true }
+                    }},
+                    "vmware_dvs": { "type": "map", "required": true, "mapping": {
+                      "clean_on_restart": { "type" : "bool", "required" : true },
+                      "precreate_networks": { "type" : "bool", "required" : true }
                     }},
                     "zvm": { "type": "map", "required": true, "mapping": {
                       "zvm_xcat_server": { "type": "str", "required": true },

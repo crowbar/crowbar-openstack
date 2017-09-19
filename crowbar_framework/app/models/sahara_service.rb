@@ -13,8 +13,8 @@
 # limitations under the License.
 #
 
-class SaharaService < PacemakerServiceObject
-  def initialize(thelogger)
+class SaharaService < OpenstackServiceObject
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "sahara"
   end
@@ -45,7 +45,7 @@ class SaharaService < PacemakerServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.1",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }
@@ -76,6 +76,7 @@ class SaharaService < PacemakerServiceObject
     base["attributes"][@bc_name]["cinder_instance"] = find_dep_proposal("cinder")
 
     base["attributes"][@bc_name]["service_password"] = random_password
+    base["attributes"][@bc_name]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
     @logger.debug("sahara create_proposal: exiting")
@@ -84,6 +85,14 @@ class SaharaService < PacemakerServiceObject
 
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "sahara-server"
+
+    # check if barbican is deployed in case we are using use_barbican_key_manager
+    if proposal["attributes"][@bc_name]["use_barbican_key_manager"]
+      if NodeObject.find("roles:barbican-controller").empty?
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.barbican_deployed")
+      end
+    end
+
     super
   end
 

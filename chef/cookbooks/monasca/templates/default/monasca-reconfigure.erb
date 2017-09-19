@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# if you use that script, the chef settings
+# will be overwritten and after the next chef-client run, the settings
+# from monasca-reconfigure will be overwritten. So DO NOT USE IT!
+
+echo "Running this script will override the monasca-agent settings and " \
+     "plugin settings which are written via chef. And the next chef-client " \
+     "run will override the settings again."
+
+read -p "Are you sure you want to execute the script? Press Y or N: " -n 1 -r
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    /usr/bin/monasca-setup \
+        -u '<%= @agent_keystone["service_user"] %>' \
+        -p '<%= @agent_keystone["service_password"] %>' \
+        --project_name '<%= @agent_keystone["service_tenant"] %>' \
+        <% if defined?(@service) -%> --service '<%= @service %>' <% end -%> \
+        --keystone_url '<%= @keystone_settings["admin_auth_url"] %>/v3' \
+        --monasca_url '<%= @monasca_api_url %>' \
+        --user '<%= @agent_settings["user"] %>' \
+        --dimensions '<%= @agent_dimensions.map{|k,v| "#{k}:#{v}"}.join(',') %>' \
+        --insecure '<%= @agent_settings["insecure"] %>' \
+        <% if @agent_settings["ca_file"].length > 0 -%> --ca_file '<%= @agent_settings["ca_file"] %>' <% end -%> \
+        --log_dir '<%= @agent_settings["log_dir"] %>' \
+        --log_level '<%= @agent_settings["log_level"] %>' \
+        --monasca_statsd_port '<%= @agent_settings["statsd_port"].to_i %>' \
+        --check_frequency '<%= @agent_settings["check_frequency"].to_i %>' \
+        --num_collector_threads '<%= @agent_settings["num_collector_threads"].to_i %>' \
+        --pool_full_max_retries '<%= @agent_settings["pool_full_max_retries"].to_i %>' \
+        --plugin_collect_time_warn '<%= @agent_settings["plugin_collect_time_warn"].to_i %>' \
+        --max_measurement_buffer_size '<%= @agent_settings["max_measurement_buffer_size"].to_i %>' \
+        --backlog_send_rate '<%= @agent_settings["backlog_send_rate"].to_i %>' \
+        --amplifier '<%= @agent_settings["amplifier"] %>' \
+        --skip_enable \
+        --agent_service_name '<%= @agent_settings["agent_service_name"] %>' \
+        <%= @setup["extra_params"] %>
+fi

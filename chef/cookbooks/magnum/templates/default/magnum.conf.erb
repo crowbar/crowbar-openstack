@@ -46,12 +46,18 @@ insecure = <%= @keystone_settings['insecure'] %>
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
-insecure = <%= @keystone_settings['insecure'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
-identity_uri = <%= @keystone_settings['admin_auth_url'] %>
-admin_user = <%= @keystone_settings['service_user'] %>
-admin_password = <%= @keystone_settings['service_password'] %>
-admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
+auth_type = password
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:magnum][:memcache_secret_key] %>
+service_token_roles_required = true
+service_token_roles = admin
 
 [magnum_client]
 region_name = <%= @keystone_settings['endpoint_region'] %>
@@ -71,6 +77,14 @@ lock_path = /var/run/magnum
 [oslo_messaging_notifications]
 driver = messaging
 
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+
 [oslo_policy]
 policy_file = /etc/magnum/policy.json
 
@@ -79,4 +93,5 @@ cluster_user_trust = <%= @trustee["cluster_user_trust"] %>
 trustee_domain_id = <%= @trustee["domain_id"] %>
 trustee_domain_admin_id = <%= @trustee["domain_admin_id"] %>
 trustee_domain_admin_password = <%= @trustee["domain_admin_password"] %>
+trustee_keystone_interface = <%= @trustee["keystone_interface"] %>
 insecure = <%= @keystone_settings['insecure'] %>

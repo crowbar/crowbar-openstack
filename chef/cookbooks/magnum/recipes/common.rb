@@ -19,20 +19,26 @@ package "openstack-magnum"
 db_settings = fetch_database_settings
 network_settings = MagnumHelper.network_settings(node)
 
+ha_enabled = node[:magnum][:ha][:enabled]
+
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "magnum-server") : [node]
+)
+memcached_instance("magnum-server")
+
 include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 # get Database data
-db_password = node[:magnum][:db][:password]
-sql_connection = "#{db_settings[:url_scheme]}://#{node[:magnum][:db][:user]}:"\
-                 "#{db_password}@#{db_settings[:address]}/"\
-                 "#{node[:magnum][:db][:database]}"
+sql_connection = fetch_database_connection_string(node[:magnum][:db])
 
 # address/port binding
-my_ipaddress = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
-  node, "admin").address
-node.set[:magnum][:api][:bind_host] = my_ipaddress
+my_ipaddress = Barclamp::Inventory.get_network_by_type(node, "admin").address
+if node[:magnum][:api][:bind_host] != my_ipaddress
+  node.set[:magnum][:api][:bind_host] = my_ipaddress
+  node.save
+end
 
 bind_port = network_settings[:api][:bind_port]
 bind_host = network_settings[:api][:bind_host]
@@ -49,7 +55,6 @@ template node[:magnum][:config_file] do
     sql_connection: sql_connection,
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: KeystoneHelper.keystone_settings(node, :magnum),
+    memcached_servers: memcached_servers
   )
 end
-
-node.save

@@ -1,4 +1,16 @@
 module NeutronHelper
+  def self.get_bind_host_port(node)
+    if node[:neutron][:ha][:server][:enabled]
+      admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+      bind_host = admin_address
+      bind_port = node[:neutron][:ha][:ports][:server]
+    else
+      bind_host = node[:neutron][:api][:service_host]
+      bind_port = node[:neutron][:api][:service_port]
+    end
+    return bind_host, bind_port
+  end
+
   # Find out how many (and which) physnets we need to define in neutron.
   # Input is the list of external_networks that we'll have. Returns a hash where
   # external_network -> physnet pairs
@@ -61,5 +73,34 @@ module NeutronHelper
       end
       Chef::Node.load(network_node_name)
     end
+  end
+
+  def self.stringify_keys_values(value)
+    if value.is_a? Hash
+      Hash[value.map { |key, val| [stringify_keys_values(key), stringify_keys_values(val)] }]
+    else
+      value.to_s
+    end
+  end
+
+  def self.serialize_to_yaml(hash)
+    stringify_keys_values(hash).to_yaml
+  end
+
+  def self.make_l3_ha_service_config(default_values, insecure)
+    settings = Marshal.load(Marshal.dump(default_values))  # non-elegant deep copy
+    yield settings["hatool"]["env"]
+    settings["hatool"]["insecure"] = insecure
+    serialize_to_yaml(settings)
+  end
+
+  def self.max_kill_timeout(timeout_records)
+    timeouts = []
+    timeout_records.each do |component, timeout_record|
+      timeout_record.each do |operation, timeout|
+        timeouts << timeout if operation.to_s == "kill"
+      end
+    end
+    timeouts.max
   end
 end

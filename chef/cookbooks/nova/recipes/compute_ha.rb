@@ -70,9 +70,13 @@ when "ml2"
     neutron_agent = neutron[:neutron][:platform][:lb_agent_name]
     neutron_agent_pkg = neutron[:neutron][:platform][:lb_agent_pkg]
     neutron_agent_ra = neutron[:neutron][:ha][:network]["linuxbridge_ra"]
+  when ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
+    neutron_agent = ""
+    neutron_agent_pkg = ""
+    neutron_agent_ra = ""
   end
 
-  package neutron_agent_pkg
+  package neutron_agent_pkg unless neutron_agent_ra.empty?
 end
 
 if neutron[:neutron][:use_dvr]
@@ -98,7 +102,13 @@ compute_primitives_for_group = []
 compute_primitives_to_clone = []
 compute_transaction_objects = []
 
-if node[:platform_family] == "suse" && node[:platform_version].to_f > 12.1
+# virtlogd service exists since 12.2, make sure nodes have been upgraded already
+# check the version of remote's :platform_version
+old_remote_nodes = remote_nodes.select do |remote_node|
+  remote_node[:platform_version].to_f == 12.1
+end
+
+if node[:platform_family] == "suse" && old_remote_nodes.empty?
   virtlogd_primitive = "virtlogd-compute"
   pacemaker_primitive virtlogd_primitive do
     agent "systemd:virtlogd"
@@ -122,15 +132,18 @@ compute_transaction_objects << "pacemaker_primitive[#{libvirtd_primitive}]"
 
 case neutron[:neutron][:networking_plugin]
 when "ml2"
-  neutron_agent_primitive = "#{neutron_agent.sub(/^openstack-/, "")}-compute"
-  pacemaker_primitive neutron_agent_primitive do
-    agent neutron_agent_ra
-    op neutron[:neutron][:ha][:network][:op]
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  # neutron_agent & neutron_agent_ra are empty for plugins like cisco_apic_ml2 and apic_gbp
+  unless neutron_agent.empty? || neutron_agent_ra.empty?
+    neutron_agent_primitive = "#{neutron_agent.sub(/^openstack-/, "")}-compute"
+    pacemaker_primitive neutron_agent_primitive do
+      agent neutron_agent_ra
+      op neutron[:neutron][:ha][:network][:op]
+      action :update
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
+    compute_primitives_to_clone << neutron_agent_primitive
+    compute_transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
   end
-  compute_primitives_to_clone << neutron_agent_primitive
-  compute_transaction_objects << "pacemaker_primitive[#{neutron_agent_primitive}]"
 end
 
 if neutron[:neutron][:use_dvr]
@@ -312,6 +325,8 @@ unless %w(disabled manual).include? node[:pacemaker][:stonith][:mode]
   end
 end
 
+rabbit_settings = fetch_rabbitmq_settings
+
 crowbar_pacemaker_order_only_existing "o-#{evacuate_primitive}" do
   # We need services required to boot an instance; most of these services are
   # obviously required. Some additional notes:
@@ -319,11 +334,9 @@ crowbar_pacemaker_order_only_existing "o-#{evacuate_primitive}" do
   #  - cinder is used in case of boot from volume
   #  - neutron agents are used even with DVR, if only to have a DHCP server for
   #    the instance to get an IP address
-  ordering "( " \
-      "postgresql rabbitmq cl-keystone cl-swift-proxy cl-glance-api cl-cinder-api " \
-      "cl-neutron-server cl-neutron-dhcp-agent cl-neutron-l3-agent cl-neutron-metadata-agent " \
-      "cl-nova-api " \
-      ") #{evacuate_primitive}"
+  ordering "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone cl-swift-proxy " \
+      "cl-glance-api cl-cinder-api cl-neutron-server cl-neutron-dhcp-agent cl-neutron-l3-agent " \
+      "cl-neutron-metadata-agent cl-nova-api ) #{evacuate_primitive}"
   score "Mandatory"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

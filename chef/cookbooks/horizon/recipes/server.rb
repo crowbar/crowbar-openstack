@@ -17,6 +17,8 @@ include_recipe "apache2"
 include_recipe "apache2::mod_wsgi"
 include_recipe "apache2::mod_rewrite"
 
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
 if %w(suse).include? node[:platform_family]
   dashboard_path = "/srv/www/openstack-dashboard"
 else
@@ -25,6 +27,18 @@ end
 
 if node[:horizon][:apache][:ssl]
   include_recipe "apache2::mod_ssl"
+end
+
+# Fake service to take control of the WSGI process from apache that
+# runs Horizon.  We replace the `reload` action, sending manually the
+# signal SIGUSR1 to all the process that are part of `wsgi:horizon`
+service "horizon" do
+  service_name "apache2"
+  if node[:platform_family] == "suse"
+    reload_command 'sleep 1 && pkill --signal SIGUSR1 -f "^\(wsgi:horizon\)" && sleep 1'
+  end
+  supports reload: true, restart: true, status: true
+  ignore_failure true
 end
 
 case node[:platform_family]
@@ -54,7 +68,7 @@ else
   unless node[:horizon][:site_theme].empty?
     package "openstack-dashboard-theme-#{node[:horizon][:site_theme]}" do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
     end
   end
 end
@@ -69,11 +83,10 @@ neutron_lbaas_ui_pkgname =
   end
 
 unless neutron_lbaas_ui_pkgname.nil?
-  neutron_servers = search(:node, "roles:neutron-server") || []
-  unless neutron_servers.empty?
+  unless Barclamp::Config.load("openstack", "neutron").empty?
     package neutron_lbaas_ui_pkgname do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
     end
   end
 end
@@ -88,11 +101,10 @@ manila_ui_pkgname =
   end
 
 unless manila_ui_pkgname.nil?
-  manila_servers = search(:node, "roles:manila-server") || []
-  unless manila_servers.empty?
+  unless Barclamp::Config.load("openstack", "manila").empty?
     package manila_ui_pkgname do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
     end
   end
 end
@@ -107,11 +119,10 @@ magnum_ui_pkgname =
   end
 
 unless magnum_ui_pkgname.nil?
-  magnum_servers = search(:node, "roles:magnum-server") || []
-  unless magnum_servers.empty?
+  unless Barclamp::Config.load("openstack", "magnum").empty?
     package magnum_ui_pkgname do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
     end
   end
 end
@@ -126,11 +137,10 @@ trove_ui_pkgname =
   end
 
 unless trove_ui_pkgname.nil?
-  trove_servers = search(:node, "roles:trove-server") || []
-  unless trove_servers.empty?
+  unless Barclamp::Config.load("openstack", "trove").empty?
     package trove_ui_pkgname do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
     end
   end
 end
@@ -145,11 +155,76 @@ sahara_ui_pkgname =
   end
 
 unless sahara_ui_pkgname.nil?
-  sahara_servers = search(:node, "roles:sahara-server") || []
-  unless sahara_servers.empty?
+  unless Barclamp::Config.load("openstack", "sahara").empty?
     package sahara_ui_pkgname do
       action :install
-      notifies :reload, resources(service: "apache2")
+      notifies :reload, "service[horizon]"
+    end
+  end
+end
+
+# install horizon ironic plugin if needed
+ironic_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-ironic-ui"
+  when "rhel"
+    "openstack-ironic-ui"
+  end
+
+unless ironic_ui_pkgname.nil?
+  unless Barclamp::Config.load("openstack", "ironic").empty?
+    package ironic_ui_pkgname do
+      action :install
+      notifies :reload, "service[horizon]"
+    end
+  end
+end
+
+monasca_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-monasca-ui"
+  when "rhel"
+    "openstack-monasca-ui"
+  end
+
+unless monasca_ui_pkgname.nil?
+  unless Barclamp::Config.load("openstack", "monasca").empty?
+    include_recipe "#{@cookbook_name}::monasca_ui"
+    package monasca_ui_pkgname do
+      action :install
+      notifies :reload, "service[horizon]"
+    end
+    grafana_available = true
+  end
+end
+
+# install Cisco GBP plugin if needed
+apic_gbp_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-gbp-ui"
+  when "rhel"
+    "openstack-dashboard-gbp"
+  end
+
+unless apic_gbp_ui_pkgname.nil?
+  neutron_server = search(:node, "roles:neutron-server").first || []
+  unless neutron_server.empty?
+    if neutron_server[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+      # Install GBP plugin if Cisco APIC driver is set to apic_gbp
+      package apic_gbp_ui_pkgname do
+        action :install
+        notifies :reload, resources(service: "apache2")
+      end
+    elsif neutron_server[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
+      # Remove GBP plugin if Cisco APIC driver is set to cisco_apic_ml2
+      package apic_gbp_ui_pkgname do
+        ignore_failure true
+        action :remove
+        notifies :reload, resources(service: "apache2")
+      end
     end
   end
 end
@@ -217,7 +292,7 @@ when "postgresql"
     django_db_backend = "'django.db.backends.postgresql_psycopg2'"
 end
 
-crowbar_pacemaker_sync_mark "wait-horizon_database"
+crowbar_pacemaker_sync_mark "wait-horizon_database" if ha_enabled
 
 # Create the Dashboard Database
 database "create #{node[:horizon][:db][:database]} database" do
@@ -251,7 +326,7 @@ database_user "grant database access for dashboard database user" do
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-crowbar_pacemaker_sync_mark "create-horizon_database"
+crowbar_pacemaker_sync_mark "create-horizon_database" if ha_enabled
 
 db_settings = {
   "ENGINE" => django_db_backend,
@@ -262,28 +337,22 @@ db_settings = {
   "default-character-set" => "'utf8'"
 }
 
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-
-glances = search(:node, "roles:glance-server") || []
-if glances.length > 0
-  glance = glances[0]
-  glance_insecure = glance[:glance][:api][:protocol] == "https" && glance[:glance][:ssl][:insecure]
-else
-  glance_insecure = false
-end
-
-cinders = search(:node, "roles:cinder-controller") || []
-if cinders.length > 0
-  cinder = cinders[0]
-  cinder_insecure = cinder[:cinder][:api][:protocol] == "https" && cinder[:cinder][:ssl][:insecure]
-else
-  cinder_insecure = false
-end
+glance_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "glance"))
+cinder_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "cinder"))
+neutron_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "neutron"))
+nova_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "nova"))
+aodh_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "aodh"))
+barbican_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "barbican"))
+ceilometer_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "ceilometer"))
+heat_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "heat"))
+manila_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "manila"))
+magnum_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "magnum"))
+trove_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "trove"))
+sahara_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "sahara"))
 
 neutrons = search(:node, "roles:neutron-server") || []
 if neutrons.length > 0
   neutron = neutrons[0]
-  neutron_insecure = neutron[:neutron][:api][:protocol] == "https" && neutron[:neutron][:ssl][:insecure]
   if neutron[:neutron][:networking_plugin] == "ml2"
     neutron_ml2_type_drivers = neutron[:neutron][:ml2_type_drivers]
   else
@@ -292,65 +361,19 @@ if neutrons.length > 0
   neutron_use_lbaas = neutron[:neutron][:use_lbaas]
   neutron_use_vpnaas = neutron[:neutron][:use_vpnaas]
 else
-  neutron_insecure = false
   neutron_ml2_type_drivers = "'*'"
   neutron_use_lbaas = false
   neutron_use_vpnaas = false
 end
 
-novas = search(:node, "roles:nova-controller") || []
-if !novas.empty?
-  nova = novas[0]
-  nova_insecure = nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure]
-else
-  nova_insecure = false
-end
-
-heats = search(:node, "roles:heat-server") || []
-if !heats.empty?
-  heat = heats[0]
-  heat_insecure = heat[:heat][:api][:protocol] == "https" && heat[:heat][:ssl][:insecure]
-else
-  heat_insecure = false
-end
-
-manilas = search(:node, "roles:manila-server")
-if !manilas.empty?
-  manila = manilas[0]
-  manila_insecure = manila[:manila][:api][:protocol] == "https" && manila[:manila][:ssl][:insecure]
-else
-  manila_insecure = false
-end
-
 # We're going to use memcached as a cache backend for Django
-
-# make sure our memcache only listens on the admin IP address
-node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-node.set[:memcached][:listen] = node_admin_ip
-node.save
-
-if ha_enabled
-  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "horizon-server")
-  memcached_locations = memcached_nodes.map do |n|
-    node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-    "#{node_admin_ip}:#{n[:memcached][:port] rescue node[:memcached][:port]}"
-  end
-else
-  memcached_locations = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
-end
-memcached_locations.sort!
+memcached_locations = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "horizon-server") : [node]
+)
 
 memcached_instance "openstack-dashboard"
-case node[:platform_family]
-when "suse"
-  package "python-python-memcached"
-when "debian"
-  package "python-memcache"
-when "rhel"
-  package "python-memcached"
-end
 
-crowbar_pacemaker_sync_mark "wait-horizon_config"
+crowbar_pacemaker_sync_mark "wait-horizon_config" if ha_enabled
 
 local_settings = "#{dashboard_path}/openstack_dashboard/local/" \
                  "local_settings.d/_100_local_settings.py"
@@ -366,7 +389,7 @@ execute "python manage.py migrate" do
   group node[:apache][:group]
   action :nothing
   subscribes :run, "template[#{local_settings}]", :immediately
-  notifies :restart, resources(service: "apache2"), :immediately
+  notifies :reload, resources(service: "horizon"), :immediately
 end
 
 # Force-disable multidomain support when the default keystoneapi version is too
@@ -398,8 +421,15 @@ template local_settings do
     || cinder_insecure \
     || neutron_insecure \
     || nova_insecure \
+    || aodh_insecure \
+    || barbican_insecure \
+    || ceilometer_insecure \
     || heat_insecure \
-    || manila_insecure,
+    || magnum_insecure \
+    || trove_insecure \
+    || sahara_insecure \
+    || manila_insecure \
+    || ceilometer_insecure,
     db_settings: db_settings,
     enable_lb: neutron_use_lbaas,
     enable_vpn: neutron_use_vpnaas,
@@ -412,6 +442,7 @@ template local_settings do
     neutron_ml2_type_drivers: neutron_ml2_type_drivers,
     help_url: node[:horizon][:help_url],
     session_timeout: node[:horizon][:session_timeout],
+    secret_key: node["horizon"]["secret_key"],
     memcached_locations: memcached_locations,
     can_set_mount_point: node["horizon"]["can_set_mount_point"],
     can_set_password: node["horizon"]["can_set_password"],
@@ -421,9 +452,10 @@ template local_settings do
     token_hash_enabled: node["horizon"]["token_hash_enabled"]
   )
   action :create
+  notifies :reload, "service[horizon]"
 end
 
-crowbar_pacemaker_sync_mark "create-horizon_config"
+crowbar_pacemaker_sync_mark "create-horizon_config" if ha_enabled
 
 if ha_enabled
   log "HA support for horizon is enabled"
@@ -481,7 +513,8 @@ template "#{node[:apache][:dir]}/sites-available/openstack-dashboard.conf" do
     use_ssl: node[:horizon][:apache][:ssl],
     ssl_crt_file: node[:horizon][:apache][:ssl_crt_file],
     ssl_key_file: node[:horizon][:apache][:ssl_key_file],
-    ssl_crt_chain_file: node[:horizon][:apache][:ssl_crt_chain_file]
+    ssl_crt_chain_file: node[:horizon][:apache][:ssl_crt_chain_file],
+    grafana_available: defined?(grafana_available) ? grafana_available : false
   )
   if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/openstack-dashboard.conf") || node[:platform_family] == "suse"
     notifies :reload, resources(service: "apache2")

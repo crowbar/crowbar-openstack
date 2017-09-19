@@ -1,15 +1,15 @@
 [DEFAULT]
 admin_endpoint = <%= @admin_endpoint %>
 debug = <%= @debug ? "True" : "False" %>
-verbose = <%= @verbose ? "True" : "False" %>
 log_file = keystone.log
 log_dir = /var/log/keystone
+transport_url = <%= @rabbit_settings[:url] %>
 
 [assignment]
 driver = <%= node[:keystone][:assignment][:driver] %>
 
 [cache]
-backend = dogpile.cache.memcached
+backend = oslo_cache.memcache_pool
 enabled = True
 memcache_servers = <%= @memcached_servers.join(',') %>
 
@@ -17,16 +17,14 @@ memcache_servers = <%= @memcached_servers.join(',') %>
 connection = <%= @sql_connection %>
 idle_timeout = <%= @sql_idle_timeout %>
 
-[eventlet_server]
-public_bind_host = <%= @bind_service_host %>
-public_port = <%= @bind_service_port %>
-admin_bind_host = <%= @bind_admin_host %>
-admin_port = <%= @bind_admin_port %>
-
 [fernet_tokens]
 max_active_keys = <%= @max_active_keys %>
 
 [identity]
+password_hash_algorithm = <%= node[:keystone][:identity][:password_hash_algorithm] %>
+<% if node[:keystone][:identity].key?("password_hash_rounds") -%>
+password_hash_rounds = <%= node[:keystone][:identity][:password_hash_rounds] %>
+<% end -%>
 domain_specific_drivers_enabled = <%= node[:keystone][:domain_specific_drivers] ? "True" : "False" %>
 
 <% if node[:keystone][:domain_specific_drivers] -%>
@@ -34,7 +32,6 @@ domain_config_dir = <%= node[:keystone][:domain_config_dir] %>
 <% end -%>
 driver = <%= node[:keystone][:identity][:driver] %>
 
-[kvs]
 <% if node[:keystone][:assignment][:driver] == 'hybrid' -%>
 [ldap_hybrid]
 default_roles = Member
@@ -46,7 +43,6 @@ url = <%= node[:keystone][:ldap][:url] %>
 user = <%= node[:keystone][:ldap][:user] %>
 password = <%= node[:keystone][:ldap][:password] %>
 suffix = <%= node[:keystone][:ldap][:suffix] %>
-allow_subtree_delete = <%= node[:keystone][:ldap][:allow_subtree_delete] %>
 query_scope = <%= node[:keystone][:ldap][:query_scope] %>
 page_size = <%= node[:keystone][:ldap][:page_size] %>
 alias_dereferencing = <%= node[:keystone][:ldap][:alias_dereferencing] %>
@@ -64,9 +60,6 @@ user_enabled_mask = <%= node[:keystone][:ldap][:user_enabled_mask] %>
 user_enabled_default = <%= node[:keystone][:ldap][:user_enabled_default] %>
 user_attribute_ignore = <%= node[:keystone][:ldap][:user_attribute_ignore] %>
 user_default_project_id_attribute = <%= node[:keystone][:ldap][:user_default_project_id_attribute] %>
-user_allow_create = <%= node[:keystone][:ldap][:user_allow_create] %>
-user_allow_update = <%= node[:keystone][:ldap][:user_allow_update] %>
-user_allow_delete = <%= node[:keystone][:ldap][:user_allow_delete] %>
 user_enabled_emulation = <%= node[:keystone][:ldap][:user_enabled_emulation] %>
 user_enabled_emulation_dn = <%= node[:keystone][:ldap][:user_enabled_emulation_dn] %>
 user_enabled_emulation_use_group_config = <%= node[:keystone][:ldap][:user_enabled_emulation_use_group_config] %>
@@ -96,26 +89,19 @@ auth_pool_size = <%= node[:keystone][:ldap][:auth_pool_size] %>
 auth_pool_connection_lifetime = <%= node[:keystone][:ldap][:auth_pool_connection_lifetime] %>
 
 [oslo_messaging_rabbit]
-rabbit_host = <%= @rabbit_settings[:address] %>
-<%= "rabbit_port = #{@rabbit_settings[:port]}" unless @rabbit_settings[:port].nil? %>
-rabbit_userid = <%= @rabbit_settings[:user] %>
-rabbit_password = <%= @rabbit_settings[:password] %>
-rabbit_virtual_host = <%= @rabbit_settings[:vhost] %>
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
 
 [oslo_policy]
 policy_file = <%= node[:keystone][:policy_file] %>
 
-[resource]
-driver = sql
-
 [role]
 driver = sql
 
-[signing]
-certfile = <%= @signing_certfile %>
-keyfile = <%= @signing_keyfile %>
-ca_certs = <%= @signing_ca_certs %>
-
 [token]
 expiration = <%= @token_expiration %>
-provider = <%= node[:keystone][:signing][:token_format] %>
+provider = <%= node[:keystone][:token_format] %>

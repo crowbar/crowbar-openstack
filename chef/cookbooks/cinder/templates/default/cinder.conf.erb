@@ -33,11 +33,9 @@ default_volume_type = <%= @default_volume_type %>
 
 auth_strategy = keystone
 
-<% if @use_multi_backend -%>
 enabled_backends=<%= @volumes.each_with_index.collect { |backend,idx|
     "backend-#{backend['backend_driver']}-#{idx}"
 }.join(',') %>
-<% end -%>
 
 nova_catalog_info = compute:nova:internalURL
 nova_catalog_admin_info = compute:nova:adminURL
@@ -59,22 +57,18 @@ strict_ssh_host_key_policy = <%= @strict_ssh_host_key_policy ? 'true' : 'false' 
     backend_id = "backend-#{volume['backend_driver']}-#{volid}"
 -%>
 
-  <% if @use_multi_backend -%>
 [<%= backend_id %>]
 volume_backend_name = <%= volume['backend_name'] %>
-  <% end -%>
 
   <% if volume['backend_driver'] == 'blockbridge' -%><% end -%>
-  <% if volume['backend_driver'] == 'cloudbyte' -%><% end -%>
   <% if volume['backend_driver'] == 'coho' -%><% end -%>
 
   <% if volume['backend_driver'] == 'datera' -%>
-    volume_driver = cinder.volume.drivers.datera.DateraDriver
+    volume_driver = cinder.volume.drivers.datera.datera_iscsi.DateraDriver
   <% end -%>
 
   <% if volume['backend_driver'] == 'dell' -%><% end -%>
   <% if volume['backend_driver'] == 'disco' -%><% end -%>
-  <% if volume['backend_driver'] == 'dothill' -%><% end -%>
   <% if volume['backend_driver'] == 'drbdmanage' -%><% end -%>
 
   <% if volume['backend_driver'] == 'emc' -%>
@@ -82,12 +76,12 @@ iscsi_target_prefix = iqn.1992-04.com.em
 iscsi_ip_address = <%= volume["emc"]["emc_ecom_server_ip"] %>
 cinder_emc_config_file=/etc/cinder/cinder_emc_config-<%= backend_id %>.xml
 initiator_auto_registration = true
-volume_driver = cinder.volume.drivers.emc.emc_vmax_iscsi.EMCVMAXISCSIDriver
+volume_driver = cinder.volume.drivers.dell_emc.vmax.iscsi.VMAXISCSIDriver
   <% end -%>
 
   <% if volume['backend_driver'] == 'eqlx' -%>
 eqlx_group_name = <%= volume['eqlx']["eqlx_group_name"] %>
-eqlx_cli_timeout=<%= volume['eqlx']["eqlx_cli_timeout"] %>
+ssh_conn_timeout=<%= volume['eqlx']["ssh_conn_timeout"] %>
 use_chap_auth = <%= volume['eqlx']["use_chap_auth"] %>
 chap_username = <%= volume['eqlx']["chap_username"] %>
 chap_password = <%= volume['eqlx']["chap_password"] %>
@@ -113,10 +107,6 @@ volume_driver = cinder.volume.drivers.fujitsu.eternus_dx_fc.FJDXFCDriver
   <% end -%>
 
   <% if volume['backend_driver'] == 'flashsystem' -%><% end -%>
-
-  <% if volume['backend_driver'] == 'glusterfs' -%>
-volume_driver = cinder.volume.drivers.glusterfs.GlusterfsDriver
-  <% end -%>
 
   <% if volume['backend_driver'] == 'gpfs' -%><% end -%>
   <% if volume['backend_driver'] == 'hgst' -%><% end -%>
@@ -187,11 +177,8 @@ nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
     <% end -%>
   <% end -%>
 
-  <% if volume['backend_driver'] == 'nexenta' -%><% end -%>
-
   <% if volume['backend_driver'] == 'nfs' -%>
 nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
-nfs_mount_options = <%= volume['nfs']['nfs_mount_options'] %>
 volume_driver = cinder.volume.drivers.nfs.NfsDriver
   <% end -%>
 
@@ -207,6 +194,7 @@ volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
   <% end -%>
 
   <% if volume['backend_driver'] == 'rbd' -%>
+rbd_flatten_volume_from_snapshot = <%= volume['rbd']['flatten_volume_from_snapshot'] %>
 rbd_pool = <%= volume['rbd']['pool'] %>
     <% unless volume['rbd']['user'].empty? -%>
 rbd_user = <%= volume['rbd']['user'] %>
@@ -223,7 +211,6 @@ volume_driver = cinder.volume.drivers.rbd.RBDDriver
 
   <% if volume['backend_driver'] == 'remotefs' -%><% end -%>
   <% if volume['backend_driver'] == 'scaleio' -%><% end -%>
-  <% if volume['backend_driver'] == 'scality' -%><% end -%>
   <% if volume['backend_driver'] == 'sheepdog' -%><% end -%>
   <% if volume['backend_driver'] == 'smbfs' -%><% end -%>
   <% if volume['backend_driver'] == 'solidfire' -%><% end -%>
@@ -269,7 +256,10 @@ iscsi_write_cache = off
 image_upload_use_cinder_backend = true
   <% end -%>
 
-  <% break unless @use_multi_backend -%>
+  <% if volume[volume['backend_driver']] && volume[volume['backend_driver']]['max_over_subscription_ratio'] -%>
+max_over_subscription_ratio = <%= volume[volume['backend_driver']]['max_over_subscription_ratio'] %>
+  <% end -%>
+
 <% end -%>
 
 [key_manager]
@@ -295,6 +285,11 @@ password = <%= @keystone_settings['service_password'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
 project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
+service_token_roles_required = true
+service_token_roles = admin
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:cinder][:memcache_secret_key] %>
 
 [oslo_concurrency]
 <% if @need_shared_lock_path -%>
@@ -303,7 +298,18 @@ lock_path = /var/run/openstack
 lock_path = /var/run/cinder
 <% end -%>
 
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+
 [ssl]
 ca_file = <%= node[:cinder][:ssl][:ca_certs] if node[:cinder][:api][:protocol] == 'https' && node[:cinder][:ssl][:cert_required] %>
 cert_file = <%= node[:cinder][:ssl][:certfile] if node[:cinder][:api][:protocol] == 'https' %>
 key_file = <%= node[:cinder][:ssl][:keyfile] if node[:cinder][:api][:protocol] == 'https' %>
+
+[volumes]
+backups_enabled = false

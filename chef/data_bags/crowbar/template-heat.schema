@@ -13,7 +13,6 @@
           "required": true,
           "mapping": {
             "debug": { "type": "bool", "required": true },
-            "verbose": { "type": "bool", "required": true },
             "max_header_line": { "type": "int", "required": true },
             "database_instance": { "type": "str", "required": true },
             "rabbitmq_instance": { "type": "str", "required": true },
@@ -23,6 +22,7 @@
             "stack_domain_admin": { "type": "str", "required": true },
             "stack_domain_admin_password": { "type": "str", "required": true },
             "auth_encryption_key": { "type": "str", "required": true },
+            "memcache_secret_key": { "type": "str", "required": true },
             "trusts_delegated_roles": {
               "type": "seq",
               "required": true,

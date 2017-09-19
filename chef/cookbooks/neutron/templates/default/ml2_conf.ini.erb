@@ -8,14 +8,29 @@ path_mtu = <%= @mtu_value %>
 [ml2_type_flat]
 flat_networks = <%= @external_networks.join(",") %>
 [ml2_type_geneve]
+
 [ml2_type_gre]
 <% if @ml2_type_drivers.include?("gre") -%>
 tunnel_id_ranges = <%= @gre_start %>:<%= @gre_end %>
 <% end -%>
 [ml2_type_vlan]
+# (ListOpt) List of <physical_network>[:<vlan_min>:<vlan_max>] tuples
+# specifying physical_network names usable for VLAN provider and
+# tenant networks, as well as ranges of VLAN tags on each
+# physical_network available for allocation as tenant networks.
+#
+# network_vlan_ranges =
+# Example: network_vlan_ranges = physnet1:1000:2999,physnet2
 <% if @ml2_type_drivers.include?("vlan") -%>
+  <%# Using the order of ml2_type_drivers to determine encapsulation for Cisco ACI drivers -%>
+  <%# Cisco ACI opflex must be first followed by the type of ecapsulation used within ACI fabric -%>
+  <% unless @ml2_type_drivers[0] == "opflex" && @ml2_type_drivers[1] == "vxlan" -%>
+      <%# The Cisco ACI driver will force configure opflex for vlan encapsulation when network_vlan_ranges is given. -%>
+      <%# Hence network_vlan_ranges is not added for vxlan configuration -%>
 network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
+  <% end -%>
 <% end -%>
+
 [ml2_type_vxlan]
 <% if @ml2_type_drivers.include?("vxlan") -%>
 vni_ranges = <%= @vxlan_start %>:<%= @vxlan_end %>
@@ -23,4 +38,11 @@ vni_ranges = <%= @vxlan_start %>:<%= @vxlan_end %>
 <% if @ml2_type_drivers.include?("vxlan") && @ml2_mechanism_drivers.include?("linuxbridge") && !@vxlan_mcast_group.empty? -%>
 vxlan_group = <%= @vxlan_mcast_group %>
 <% end -%>
+[l2pop]
+agent_boot_time = <%= @l2pop_agent_boot_time %>
 [securitygroup]
+<% if @ml2_mechanism_drivers.include?("vmware_dvs") -%>
+[dvs]
+clean_on_restart = <%= @vmware_dvs_config[:clean_on_restart] ? 'True' : 'False' %>
+precreate_networks = <%= @vmware_dvs_config[:precreate_networks] ? 'True' : 'False' %>
+<% end -%>

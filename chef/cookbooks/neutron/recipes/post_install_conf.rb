@@ -53,25 +53,31 @@ end
 floating_pool_start = floating_net_ranges[:host][:start]
 floating_pool_end = floating_net_ranges[:host][:end]
 
+ironic_net = node[:network][:networks]["ironic"]
+if ironic_net
+  ironic_range = "#{ironic_net["subnet"]}/#{mask_to_bits(ironic_net["netmask"])}"
+  ironic_pool_start = ironic_net[:ranges][:dhcp][:start]
+  ironic_pool_end = ironic_net[:ranges][:dhcp][:end]
+  ironic_router = ironic_net["router"]
+end
+
 vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-neutron_insecure = node[:neutron][:api][:protocol] == "https" && node[:neutron][:ssl][:insecure]
-ssl_insecure = keystone_settings["insecure"] || neutron_insecure
+neutron_config = Barclamp::Config.load("openstack", "neutron")
+ssl_insecure = CrowbarOpenStackHelper.insecure(neutron_config) || keystone_settings["insecure"]
 
-neutron_args = "--os-username '#{keystone_settings['service_user']}'"
-neutron_args = "#{neutron_args} --os-password '#{keystone_settings['service_password']}'"
-neutron_args = "#{neutron_args} --os-tenant-name '#{keystone_settings['service_tenant']}'"
-neutron_args = "#{neutron_args} --os-auth-url '#{keystone_settings['internal_auth_url']}'"
-neutron_args = "#{neutron_args} --os-region-name '#{keystone_settings['endpoint_region']}'"
-if keystone_settings["api_version"] != "2.0"
-  neutron_args = "#{neutron_args} --os-user-domain-name Default"
-  neutron_args = "#{neutron_args} --os-project-domain-name Default"
-end
-neutron_args = "#{neutron_args} --endpoint-type internalURL"
-neutron_args = "#{neutron_args} --insecure" if ssl_insecure
-neutron_cmd = "neutron #{neutron_args}"
+env = "OS_USERNAME='#{keystone_settings["service_user"]}' "
+env << "OS_PASSWORD='#{keystone_settings["service_password"]}' "
+env << "OS_PROJECT_NAME='#{keystone_settings["service_tenant"]}' "
+env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
+env << "OS_REGION_NAME='#{keystone_settings["endpoint_region"]}' "
+env << "OS_INTERFACE=internal "
+env << "OS_USER_DOMAIN_NAME=Default "
+env << "OS_PROJECT_DOMAIN_NAME=Default "
+env << "OS_IDENTITY_API_VERSION=3"
+openstack_cmd = "#{env} openstack #{ssl_insecure ? "--insecure" : ""}"
 
 fixed_network_type = ""
 floating_network_type = ""
@@ -83,19 +89,21 @@ when "ml2"
   # For ml2 always create the floating network as a flat provider network
   # find the network node, to figure out the right "physnet" parameter
   network_node = NeutronHelper.get_network_node_from_neutron_attributes(node)
-  ext_physnet_map = NeutronHelper.get_neutron_physnets(network_node, ["nova_floating"])
-  floating_network_type = "--provider:network_type flat " \
-      "--provider:physical_network #{ext_physnet_map["nova_floating"]}"
+  physnet_map = NeutronHelper.get_neutron_physnets(network_node, ["nova_floating", "ironic"])
+  floating_network_type = "--provider-network-type flat " \
+      "--provider-physical-network #{physnet_map["nova_floating"]}"
+  ironic_network_type = "--provider-network-type flat " \
+      "--provider-physical-network #{physnet_map["ironic"]}"
   case ml2_type_drivers_default_provider_network
   when "vlan"
-    fixed_network_type = "--provider:network_type vlan " \
-        "--provider:segmentation_id #{fixed_net["vlan"]} " \
-        "--provider:physical_network physnet1"
+    fixed_network_type = "--provider-network-type vlan " \
+        "--provider-segment #{fixed_net["vlan"]} " \
+        "--provider-physical-network physnet1"
   when "gre"
-    fixed_network_type = "--provider:network_type gre --provider:segmentation_id 1"
+    fixed_network_type = "--provider-network-type gre --provider-segment 1"
   when "vxlan"
-    fixed_network_type = "--provider:network_type vxlan " \
-        "--provider:segmentation_id #{vni_start}"
+    fixed_network_type = "--provider-network-type vxlan " \
+        "--provider-segment #{vni_start}"
   else
     Chef::Log.error("default provider network ml2 type driver " \
         "'#{ml2_type_drivers_default_provider_network}' invalid for creating provider networks")
@@ -110,73 +118,114 @@ else
 end
 
 execute "create_fixed_network" do
-  command "#{neutron_cmd} net-create fixed --shared #{fixed_network_type}"
-  not_if "out=$(#{neutron_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
+  command "#{openstack_cmd} network create --share #{fixed_network_type} fixed"
+  not_if "out=$(#{openstack_cmd} network list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
   retries 5
   retry_delay 10
   action :nothing
 end
 
 execute "create_floating_network" do
-  command "#{neutron_cmd} net-create floating --router:external #{floating_network_type}"
-  not_if "out=$(#{neutron_cmd} net-list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
+  command "#{openstack_cmd} network create --external #{floating_network_type} floating"
+  not_if "out=$(#{openstack_cmd} network list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
+  retries 5
+  retry_delay 10
+  action :nothing
+end
+
+execute "create_ironic_network" do
+  command "#{openstack_cmd} network create --share #{ironic_network_type} ironic"
+  only_if { ironic_net }
+  not_if "out=$(#{openstack_cmd} network list); [ $? != 0 ] || echo ${out} | grep -q ' ironic '"
   retries 5
   retry_delay 10
   action :nothing
 end
 
 execute "create_fixed_subnet" do
-  command "#{neutron_cmd} subnet-create --name fixed --allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} fixed #{fixed_range}"
-  not_if "out=$(#{neutron_cmd} subnet-list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
+  command "#{openstack_cmd} subnet create --network fixed " \
+      "--allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} " \
+      "--subnet-range #{fixed_range} fixed"
+  not_if "out=$(#{openstack_cmd} subnet list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
   retries 5
   retry_delay 10
   action :nothing
 end
 
 execute "create_floating_subnet" do
-  command "#{neutron_cmd} subnet-create --name floating --allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} --gateway #{floating_router} floating #{floating_range} --enable_dhcp False"
-  not_if "out=$(#{neutron_cmd} subnet-list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
+  command "#{openstack_cmd} subnet create --network floating " \
+      "--allocation-pool start=#{floating_pool_start},end=#{floating_pool_end} " \
+      "--gateway #{floating_router} --subnet-range #{floating_range} --no-dhcp floating"
+  not_if "out=$(#{openstack_cmd} subnet list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
+  retries 5
+  retry_delay 10
+  action :nothing
+end
+
+execute "create_ironic_subnet" do
+  command "#{openstack_cmd} subnet create --network ironic --ip-version=4 " \
+      "--allocation-pool start=#{ironic_pool_start},end=#{ironic_pool_end} " \
+      "--gateway #{ironic_router} --subnet-range #{ironic_range} --dhcp ironic"
+  only_if { ironic_net }
+  not_if "out=$(#{openstack_cmd} subnet list); [ $? != 0 ] || echo ${out} | grep -q ' ironic '"
   retries 5
   retry_delay 10
   action :nothing
 end
 
 execute "create_router" do
-  command "#{neutron_cmd} router-create router-floating"
-  not_if "out=$(#{neutron_cmd} router-list); [ $? != 0 ] || echo ${out} | grep -q router-floating"
+  command "#{openstack_cmd} router create router-floating"
+  not_if "out=$(#{openstack_cmd} router list); [ $? != 0 ] || echo ${out} | grep -q router-floating"
   retries 5
   retry_delay 10
   action :nothing
 end
 
 execute "set_router_gateway" do
-  command "#{neutron_cmd} router-gateway-set router-floating floating"
-  not_if "out=$(#{neutron_cmd} router-show router-floating -f shell) ; [ $? != 0 ] || eval $out && [ \"${external_gateway_info}\" != \"\" ]"
+  command "#{openstack_cmd} router set --external-gateway floating router-floating"
+  # on Newton, the output for external_gateway_info was an empty string, on Ocata, the output is None
+  not_if "out=$(#{openstack_cmd} router show router-floating -f shell) ; " \
+      "[ $? != 0 ] || eval $out && [ \"${external_gateway_info}\" != \"None\" ] && " \
+      "[ \"${external_gateway_info}\" != \"\" ]"
   retries 5
   retry_delay 10
   action :nothing
 end
 
 execute "add_fixed_network_to_router" do
-  command "#{neutron_cmd} router-interface-add router-floating fixed"
-  not_if "out1=$(#{neutron_cmd} subnet-show -f shell fixed) ; rc1=$?; eval $out1 ; out2=$(#{neutron_cmd} router-port-list router-floating); [ $? != 0 ] || [ $rc1 != 0 ] || echo $out2 | grep -q $id"
+  command "#{openstack_cmd} router add subnet router-floating fixed"
+  not_if "out=$(#{openstack_cmd} port list --router router-floating --network fixed | wc -l); " \
+      "[ $? != 0 ] || (( ${out} > 1 ))"
+  retries 5
+  retry_delay 10
+  action :nothing
+end
+
+execute "add_ironic_network_to_router" do
+  command "#{openstack_cmd} router add subnet router-floating ironic"
+  only_if { ironic_net }
+  not_if "out=$(#{openstack_cmd} port list --router router-floating --network ironic | wc -l); " \
+      "[ $? != 0 ] || (( ${out} > 1 ))"
   retries 5
   retry_delay 10
   action :nothing
 end
 
 execute "Neutron network configuration" do
-  command "#{neutron_cmd} net-list &>/dev/null"
+  command "#{openstack_cmd} network list &>/dev/null"
   retries 5
   retry_delay 10
   action :nothing
   notifies :run, "execute[create_fixed_network]", :delayed
   notifies :run, "execute[create_floating_network]", :delayed
+  notifies :run, "execute[create_ironic_network]", :delayed
   notifies :run, "execute[create_fixed_subnet]", :delayed
   notifies :run, "execute[create_floating_subnet]", :delayed
+  notifies :run, "execute[create_ironic_subnet]", :delayed
   notifies :run, "execute[create_router]", :delayed
   notifies :run, "execute[set_router_gateway]", :delayed
   notifies :run, "execute[add_fixed_network_to_router]", :delayed
+  notifies :run, "execute[add_ironic_network_to_router]", :delayed
 end
 
 # This is to trigger all the above "execute" resources to run :delayed, so that

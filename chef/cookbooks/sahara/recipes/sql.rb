@@ -23,7 +23,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-sahara_database"
+crowbar_pacemaker_sync_mark "wait-sahara_database" if ha_enabled
 
 # Create the sahara Database
 database "create #{node[:sahara][:db][:database]} database" do
@@ -80,4 +80,4 @@ ruby_block "mark node for sahara db_sync" do
   subscribes :create, "execute[sahara-manage db sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-sahara_database"
+crowbar_pacemaker_sync_mark "create-sahara_database" if ha_enabled

@@ -1,9 +1,18 @@
 include_recipe "apache2"
 
+is_controller = node["roles"].include?("ceilometer-server")
+ha_enabled = node[:ceilometer][:ha][:server][:enabled]
+
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "ceilometer-server") : [node]
+)
+
+memcached_instance("ceilometer-server") if is_controller
+
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 if node[:ceilometer][:use_mongodb]
-  db_connection = CeilometerHelper.mongodb_connection_string(node, cookbook_name)
+  db_connection = CeilometerHelper.mongodb_connection_string(node)
 else
   db_settings = fetch_database_settings
 
@@ -11,20 +20,16 @@ else
   include_recipe "#{db_settings[:backend_name]}::client"
   include_recipe "#{db_settings[:backend_name]}::python-client"
 
-  db_password = ""
-  if node.roles.include? "ceilometer-server"
-    # password is already created because common recipe comes
-    # after the server recipe
-    db_password = node[:ceilometer][:db][:password]
-  else
+  db_auth = node[:ceilometer][:db].dup
+  unless node.roles.include? "ceilometer-server"
     # pickup password to database from ceilometer-server node
     node_controllers = node_search_with_cache("roles:ceilometer-server")
     if node_controllers.length > 0
-      db_password = node_controllers[0][:ceilometer][:db][:password]
+      db_auth[:password] = node_controllers[0][:ceilometer][:db][:password]
     end
   end
 
-  db_connection = "#{db_settings[:url_scheme]}://#{node[:ceilometer][:db][:user]}:#{db_password}@#{db_settings[:address]}/#{node[:ceilometer][:db][:database]}"
+  db_connection = fetch_database_connection_string(db_auth)
 end
 
 is_compute_agent = node.roles.include?("ceilometer-agent") && node.roles.any? { |role| /^nova-compute-/ =~ role }
@@ -33,7 +38,11 @@ is_swift_proxy = node.roles.include?("ceilometer-swift-proxy-middleware") && nod
 # Find hypervisor inspector
 hypervisor_inspector = nil
 libvirt_type = nil
+discovery_method = nil
 if is_compute_agent
+  if ["xen"].include?(node[:nova][:libvirt_type])
+    discovery_method = "workload_partitioning"
+  end
   if node.roles.include?("nova-compute-vmware")
     hypervisor_inspector = "vmware"
   else
@@ -70,9 +79,9 @@ template node[:ceilometer][:config_file] do
     mode "0640"
     variables(
       debug: node[:ceilometer][:debug],
-      verbose: node[:ceilometer][:verbose],
       rabbit_settings: fetch_rabbitmq_settings,
       keystone_settings: keystone_settings,
+      memcached_servers: memcached_servers,
       bind_host: bind_host,
       bind_port: bind_port,
       metering_secret: node[:ceilometer][:metering_secret],
@@ -82,6 +91,7 @@ template node[:ceilometer][:config_file] do
       libvirt_type: libvirt_type,
       metering_time_to_live: metering_time_to_live,
       event_time_to_live: event_time_to_live,
+      discovery_method: discovery_method
     )
     if is_compute_agent
       notifies :restart, "service[nova-compute]"

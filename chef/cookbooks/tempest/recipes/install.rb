@@ -35,3 +35,10 @@ package "openstack-tempest-test"
  "heat", "ceilometer", "sahara"].each do |component|
   package "python-#{component}client"
 end
+
+if node[:kernel][:machine] == "x86_64" &&
+    !node_search_with_cache("roles:monasca-server").empty?
+  ["api", "log-api"].each do |component|
+    package "python-monasca-#{component}"
+  end
+end

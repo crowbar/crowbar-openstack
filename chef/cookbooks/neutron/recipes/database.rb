@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+dirty = false
+
 ha_enabled = node[:neutron][:ha][:server][:enabled]
 
 db_settings = fetch_database_settings
@@ -26,7 +28,7 @@ props = [{"db_name" => node[:neutron][:db][:database],
           "db_conn_name" => "sql_connection"  }
         ]
 
-crowbar_pacemaker_sync_mark "wait-neutron_database"
+crowbar_pacemaker_sync_mark "wait-neutron_database" if ha_enabled
 
 # Create the Neutron Databases
 props.each do |prop|
@@ -34,7 +36,6 @@ props.each do |prop|
   db_user = prop["db_user"]
   db_pass = prop["db_pass"]
   db_conn_name = prop["db_conn_name"]
-  sql_address_name = prop["sql_address_name"]
 
   database "create #{db_name} neutron database" do
     connection db_settings[:connection]
@@ -66,12 +67,13 @@ props.each do |prop|
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
-  node.set[@cookbook_name][:db][db_conn_name] = "#{db_settings[:url_scheme]}://#{db_user}:#{db_pass}@#{db_settings[:address]}/#{db_name}"
-  unless sql_address_name.nil?
-    node.set[@cookbook_name][:db][sql_address_name] = sql_address
+  db_address = fetch_database_connection_string(node[:neutron][:db])
+  if node[@cookbook_name][:db][db_conn_name] != db_address
+    node.set[@cookbook_name][:db][db_conn_name] = db_address
+    dirty = true
   end
 end
 
-crowbar_pacemaker_sync_mark "create-neutron_database"
+crowbar_pacemaker_sync_mark "create-neutron_database" if ha_enabled
 
-node.save
+node.save if dirty

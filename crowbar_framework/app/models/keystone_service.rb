@@ -15,8 +15,8 @@
 # limitations under the License.
 #
 
-class KeystoneService < PacemakerServiceObject
-  def initialize(thelogger)
+class KeystoneService < OpenstackServiceObject
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "keystone"
   end
@@ -32,7 +32,7 @@ class KeystoneService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -87,6 +87,25 @@ class KeystoneService < PacemakerServiceObject
       validation_error I18n.t("barclamp.#{@bc_name}.validation.enable_keystone_api")
     end
 
+    # validate the password hash configuration
+    if proposal["attributes"][@bc_name]["identity"]["password_hash_rounds"]
+      password_hash_rounds = proposal["attributes"][@bc_name]["identity"]["password_hash_rounds"]
+      case proposal["attributes"][@bc_name]["identity"]["password_hash_algorithm"]
+      when "bcrypt"
+        if password_hash_rounds < 4 || password_hash_rounds > 31
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.bcrypt_password_hash_rounds")
+        end
+      when "scrypt"
+        if password_hash_rounds < 1 || password_hash_rounds > 31
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.scrypt_password_hash_rounds")
+        end
+      when "pbkdf_sha512"
+        if password_hash_rounds < 1 || password_hash_rounds > (1 << 32) - 1
+          validation_error I18n.t("barclamp.#{@bc_name}.validation.pbkdf_sha512_password_hash_rounds")
+        end
+      end
+    end
+
     keystone_timeout = proposal["attributes"]["keystone"]["token_expiration"]
     horizon_proposal = Proposal.find_by(barclamp: "horizon", name: "default")
     unless horizon_proposal.nil?
@@ -109,6 +128,7 @@ class KeystoneService < PacemakerServiceObject
     @logger.debug("Keystone apply_role_pre_chef_call: entering #{all_nodes.inspect}")
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "keystone-server")
+
     reset_sync_marks_on_clusters_founders(server_elements)
     Openstack::HA.set_controller_role(server_nodes) if ha_enabled
 
@@ -130,6 +150,48 @@ class KeystoneService < PacemakerServiceObject
     end
 
     @logger.debug("Keystone apply_role_pre_chef_call: leaving")
+  end
+
+  def update_proposal_status(inst, status, message, bc = @bc_name)
+    @logger.debug("update_proposal_status: enter #{inst} #{bc} #{status} #{message}")
+
+    prop = Proposal.where(barclamp: bc, name: inst).first
+    unless prop.nil?
+      prop["deployment"][bc]["crowbar-status"] = status
+      prop["deployment"][bc]["crowbar-failed"] = message
+      # save the updated_password into the password field to update the raw_view
+      if status == "success" && !prop["attributes"][bc]["admin"]["updated_password"].blank?
+        prop["attributes"][bc]["admin"]["password"] = prop["attributes"][bc]["admin"]["updated_password"]
+      end
+      res = prop.save
+    else
+      res = true
+    end
+
+    @logger.debug("update_proposal_status: exit #{inst} #{bc} #{status} #{message}")
+    res
+  end
+
+  def apply_role_post_chef_call(old_role, role, all_nodes)
+    @logger.debug("Keystone apply_role_post_chef_call: entering #{all_nodes.inspect}")
+
+    # Save current keystone endpoints to all keystone-server nodes.
+    all_nodes.each do |n|
+      node = NodeObject.find_by_name(n)
+      node[:keystone][:endpoint] = {
+        insecure: node[:keystone][:ssl][:insecure],
+        protocol: node[:keystone][:api][:protocol],
+        internal_url_host: node[:keystone][:api][:internal_url_host],
+        port: node[:keystone][:api][:admin_port]
+      }
+      node.save
+    end
+
+    # as we are overriding the apply_role_post_chef_call we have to call save_config_to_databag
+    # manually. We could also call super here.
+    save_config_to_databag(old_role, role)
+
+    @logger.debug("Keystone apply_role_post_chef_call: leaving")
   end
 end
 

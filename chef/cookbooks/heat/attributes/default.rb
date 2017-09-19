@@ -63,10 +63,10 @@ end
 
 if node[:platform_family] == "suse"
   default[:heat][:platform][:plugin_packages] = ["openstack-heat-plugin-heat_docker"]
+  default[:heat][:platform][:gbp_plugin_packages] = ["openstack-heat-gbp"]
 end
 
 default[:heat][:debug] = false
-default[:heat][:verbose] = false
 default[:heat][:max_header_line] = 16384
 
 default[:heat][:user] = "heat"

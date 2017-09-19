@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-class ManilaService < PacemakerServiceObject
-  def initialize(thelogger)
+class ManilaService < OpenstackServiceObject
+  def initialize(thelogger = nil)
     @bc_name = "manila"
     @logger = thelogger
   end
@@ -34,7 +34,7 @@ class ManilaService < PacemakerServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         },
@@ -43,7 +43,7 @@ class ManilaService < PacemakerServiceObject
           "count" => -1,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }
@@ -100,6 +100,7 @@ class ManilaService < PacemakerServiceObject
       find_dep_proposal("neutron")
 
     base["attributes"][@bc_name]["service_password"] = random_password
+    base["attributes"][@bc_name]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
     @logger.debug("Manila create_proposal: exiting")
@@ -208,6 +209,8 @@ keyring = /etc/ceph/ceph.client.manila.keyring
 
     all_nodes.each do |n|
       node = NodeObject.find_node_by_name n
+      node["ceph"] ||= {}
+      node["ceph"]["config_sections"] ||= {}
       node["ceph"]["config_sections"]["client.manila"] = ceph_conf_extra_section
       node.save
     end

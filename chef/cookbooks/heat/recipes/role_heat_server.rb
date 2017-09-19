@@ -17,4 +17,5 @@
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "heat", "heat-server")
   include_recipe "heat::server"
   include_recipe "heat::monitor"
+  include_recipe "heat::monitor_monasca"
 end

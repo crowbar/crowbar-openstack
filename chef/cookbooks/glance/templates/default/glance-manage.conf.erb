@@ -1,7 +1,6 @@
 [DEFAULT]
 
 debug = <%= node[:glance][:debug] ? "True" : "False" %>
-verbose = <%= node[:glance][:verbose] ? "True" : "False" %>
 log_file = <%= node[:glance][:manage][:log_file] %>
 use_syslog = <%= node[:glance][:use_syslog] ? "True" : "False" %>
 use_stderr = false

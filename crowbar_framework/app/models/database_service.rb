@@ -16,7 +16,7 @@
 #
 
 class DatabaseService < PacemakerServiceObject
-  def initialize(thelogger)
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "database"
   end
@@ -35,7 +35,7 @@ class DatabaseService < PacemakerServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }
@@ -60,6 +60,56 @@ class DatabaseService < PacemakerServiceObject
     base
   end
 
+  def validate_ha_attributes(attributes, cluster)
+    storage_mode = attributes["ha"]["storage"]["mode"]
+    role = available_clusters[cluster]
+
+    case attributes["sql_engine"]
+    when "postgresql"
+      unless ["shared", "drbd"].include?(storage_mode)
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.unknown_mode_ha",
+          storage_mode: storage_mode
+        )
+      end
+      if storage_mode == "shared"
+        if attributes["ha"]["storage"]["shared"]["device"].blank?
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.no_device"
+          )
+        end
+        if attributes["ha"]["storage"]["shared"]["fstype"].blank?
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.no_filesystem"
+          )
+        end
+      elsif storage_mode == "drbd"
+        unless role.default_attributes["pacemaker"]["drbd"]["enabled"]
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.drbd_not_enabled",
+            cluster_name: cluster_name(cluster)
+          )
+        end
+        if attributes["ha"]["storage"]["drbd"]["size"] <= 0
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.invalid_size_drbd"
+          )
+        end
+      end
+    when "mysql"
+      nodes = PacemakerServiceObject.expand_nodes(cluster) || []
+      if nodes.size == 1
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.cluster_size_one"
+        )
+      elsif nodes.size.even?
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.cluster_size_even"
+        )
+      end
+    end
+  end
+
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "database-server"
 
@@ -73,34 +123,8 @@ class DatabaseService < PacemakerServiceObject
     # HA validation
     servers = proposal["deployment"][@bc_name]["elements"]["database-server"]
     unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
-      validation_error I18n.t(
-        "barclamp.#{@bc_name}.validation.ha_postgresql"
-      ) unless db_engine == "postgresql"
-
-      storage_mode = attributes["ha"]["storage"]["mode"]
-      validation_error I18n.t(
-        "barclamp.#{@bc_name}.validation.unknown_mode_ha",
-        storage_mode: storage_mode
-      ) unless %w(shared drbd).include?(storage_mode)
-
-      if storage_mode == "shared"
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.no_device"
-        ) if attributes["ha"]["storage"]["shared"]["device"].blank?
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.no_filesystem"
-        ) if attributes["ha"]["storage"]["shared"]["fstype"].blank?
-      elsif storage_mode == "drbd"
-        cluster = servers.first
-        role = available_clusters[cluster]
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.drbd_not_enabled",
-          cluster_name: cluster_name(cluster)
-        ) unless role.default_attributes["pacemaker"]["drbd"]["enabled"]
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.invalid_size_drbd"
-        ) if attributes["ha"]["storage"]["drbd"]["size"] <= 0
-      end
+      cluster = servers.first
+      validate_ha_attributes(attributes, cluster)
     end
 
     super
@@ -113,29 +137,46 @@ class DatabaseService < PacemakerServiceObject
     database_elements, database_nodes, database_ha_enabled = role_expand_elements(role, "database-server")
     Openstack::HA.set_controller_role(database_nodes) if database_ha_enabled
 
-    prepare_role_for_ha(role, ["database", "ha", "enabled"], database_ha_enabled)
+    vip_networks = ["admin"]
+    dirty = prepare_role_for_ha_with_haproxy(role, ["database", "ha", "enabled"],
+      database_ha_enabled,
+      database_elements,
+      vip_networks)
+    role.save if dirty
+
     reset_sync_marks_on_clusters_founders(database_elements)
+
+    sql_engine = role.default_attributes["database"]["sql_engine"]
 
     if database_ha_enabled
       net_svc = NetworkService.new @logger
-      unless database_elements.length == 1 && PacemakerServiceObject.is_cluster?(database_elements[0])
-        raise "Internal error: HA enabled, but element is not a cluster"
+      case sql_engine
+      when "postgresql"
+        unless database_elements.length == 1 && PacemakerServiceObject.is_cluster?(database_elements[0])
+          raise "Internal error: HA enabled, but element is not a cluster"
+        end
+        cluster = database_elements[0]
+        cluster_name = PacemakerServiceObject.cluster_name(cluster)
+        # Any change in the generation of the vhostname here must be reflected in
+        # CrowbarDatabaseHelper.get_ha_vhostname
+        database_vhostname = "#{role.name.gsub("-config", "")}-#{cluster_name}.#{Crowbar::Settings.domain}".tr("_", "-")
+        net_svc.allocate_virtual_ip "default", "admin", "host", database_vhostname
+      when "mysql"
+        database_nodes.each do |n|
+          net_svc.allocate_ip "default", "admin", "host", n
+        end
+        allocate_virtual_ips_for_any_cluster_in_networks(database_elements, vip_networks)
       end
-      cluster = database_elements[0]
-      # Any change in the generation of the vhostname here must be reflected in
-      # CrowbarDatabaseHelper.get_ha_vhostname
-      database_vhostname = "#{role.name.gsub("-config", "")}-#{PacemakerServiceObject.cluster_name(cluster)}.#{Crowbar::Settings.domain}".tr("_", "-")
-      net_svc.allocate_virtual_ip "default", "admin", "host", database_vhostname
     end
 
-    sql_engine = role.default_attributes["database"]["sql_engine"]
     role.default_attributes["database"][sql_engine] = {} if role.default_attributes["database"][sql_engine].nil?
     role.default_attributes["database"]["db_maker_password"] = (old_role && old_role.default_attributes["database"]["db_maker_password"]) || random_password
 
     if ( sql_engine == "mysql" )
-      role.default_attributes["database"]["mysql"]["server_debian_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_debian_password"]) || random_password
       role.default_attributes["database"]["mysql"]["server_root_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_root_password"]) || random_password
-      role.default_attributes["database"]["mysql"]["server_repl_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_repl_password"]) || random_password
+      if database_ha_enabled
+        role.default_attributes["database"]["mysql"]["sstuser_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["sstuser_password"]) || random_password
+      end
       @logger.debug("setting mysql specific attributes")
     elsif ( sql_engine == "postgresql" )
       # Attribute is not living in "database" namespace, but that's because
@@ -158,4 +199,3 @@ class DatabaseService < PacemakerServiceObject
     @logger.debug("Database apply_role_pre_chef_call: leaving")
   end
 end
-

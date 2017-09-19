@@ -18,15 +18,15 @@ override[:neutron][:user]="neutron"
 override[:neutron][:group]="neutron"
 
 default[:neutron][:debug] = false
-default[:neutron][:verbose] = false
 default[:neutron][:max_header_line] = 16384
-default[:neutron][:dhcp_domain] = "openstack.local"
+default[:neutron][:dns_domain] = "openstack.local"
 default[:neutron][:networking_plugin] = "ml2"
 default[:neutron][:additional_external_networks] = []
 default[:neutron][:config_file] = "/etc/neutron/neutron.conf.d/100-neutron.conf"
 default[:neutron][:lbaas_service_file] = "/etc/neutron/neutron-server.conf.d/100-neutron_service_lbaas.conf"
 default[:neutron][:lbaas_config_file] = "/etc/neutron/neutron.conf.d/110-neutron_lbaas.conf"
 default[:neutron][:l3_agent_config_file] = "/etc/neutron/neutron-l3-agent.conf.d/100-agent.conf"
+default[:neutron][:rpc_workers] = 1
 
 default[:neutron][:db][:database] = "neutron"
 default[:neutron][:db][:user] = "neutron"
@@ -59,20 +59,20 @@ default[:neutron][:ssl][:insecure] = false
 default[:neutron][:ssl][:cert_required] = false
 default[:neutron][:ssl][:ca_certs] = "/etc/neutron/ssl/certs/ca.pem"
 
-default[:neutron][:apic][:system_id] = "SOC"
-default[:neutron][:apic][:hosts] = "10.105.1.10"
+default[:neutron][:apic][:system_id] = "soc"
+default[:neutron][:apic][:hosts] = ""
 default[:neutron][:apic][:username] = "admin"
-default[:neutron][:apic][:password] = "cisco123"
+default[:neutron][:apic][:password] = ""
 
-default[:neutron][:opflex][:peer_ip] = "10.0.0.30"
-default[:neutron][:opflex][:peer_port] = 8009
-default[:neutron][:opflex][:encap] = "vxlan"
-default[:neutron][:opflex][:vxlan][:uplink_iface] = "vlan.4093"
-default[:neutron][:opflex][:vxlan][:uplink_vlan] = 4093
-default[:neutron][:opflex][:vxlan][:encap_iface] = "br-int_vxlan0"
-default[:neutron][:opflex][:vxlan][:remote_ip] = "10.0.0.32"
-default[:neutron][:opflex][:vxlan][:remote_port] = 8472
-default[:neutron][:opflex][:vlan][:encap_iface] = ""
+default[:neutron][:apic][:opflex][:peer_ip] = ""
+default[:neutron][:apic][:opflex][:peer_port] = 8009
+default[:neutron][:apic][:opflex][:encap] = "vxlan"
+default[:neutron][:apic][:opflex][:vxlan][:uplink_iface] = "vlan.4093"
+default[:neutron][:apic][:opflex][:vxlan][:uplink_vlan] = 4093
+default[:neutron][:apic][:opflex][:vxlan][:encap_iface] = "br-int_vxlan0"
+default[:neutron][:apic][:opflex][:vxlan][:remote_ip] = ""
+default[:neutron][:apic][:opflex][:vxlan][:remote_port] = 8472
+default[:neutron][:apic][:opflex][:vlan][:encap_iface] = ""
 
 case node[:platform_family]
 when "suse"
@@ -116,6 +116,8 @@ when "suse"
     infoblox_pkgs: ["python-infoblox-client",
                     "openstack-neutron-infoblox",
                     "openstack-neutron-infoblox-ipam-agent"],
+    vmware_vsphere_pkg: "openstack-neutron-vsphere",
+    vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
     user: "neutron",
     group: "neutron",
   }
@@ -157,6 +159,8 @@ when "rhel"
                         "lldpd",
                         "neutron-opflex-agent"],
     infoblox_pkgs: [],
+    vmware_vsphere_pkg: "",
+    vmware_vsphere_dvs_agent_pkg: "",
     user: "neutron",
     group: "neutron",
   }
@@ -197,6 +201,8 @@ else
     cisco_apic_gbp_pkgs: [""],
     cisco_opflex_pkgs: [""],
     infoblox_pkgs: [],
+    vmware_vsphere_pkg: "openstack-neutron-vsphere",
+    vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
     user: "neutron",
     group: "neutron",
   }
@@ -233,7 +239,18 @@ default[:neutron][:ha][:server][:server_ra] = "systemd:#{node[:neutron][:platfor
 default[:neutron][:ha][:server][:op][:monitor][:interval] = "10s"
 default[:neutron][:ha][:infoblox][:enabled] = false
 default[:neutron][:ha][:infoblox][:infoblox_ra] =
-  "lsb:#{node[:neutron][:platform][:infoblox_agent_name]}"
+  "systemd:#{node[:neutron][:platform][:infoblox_agent_name]}"
 default[:neutron][:ha][:infoblox][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:neutron][:ha][:ports][:server] = 5530
+
+default[:neutron][:ha][:neutron_l3_ha_resource][:op][:monitor][:interval] = "10s"
+
+default[:neutron][:ha][:neutron_l3_ha_service][:timeouts][:status][:terminate] = 300
+default[:neutron][:ha][:neutron_l3_ha_service][:timeouts][:status][:kill] = 120
+default[:neutron][:ha][:neutron_l3_ha_service][:timeouts][:router_migration][:terminate] = 1800
+default[:neutron][:ha][:neutron_l3_ha_service][:timeouts][:router_migration][:kill] = 120
+default[:neutron][:ha][:neutron_l3_ha_service][:hatool][:program] = "/usr/bin/neutron-ha-tool"
+default[:neutron][:ha][:neutron_l3_ha_service][:hatool][:env] = {}
+default[:neutron][:ha][:neutron_l3_ha_service][:seconds_to_sleep_between_checks] = 10
+default[:neutron][:ha][:neutron_l3_ha_service][:max_errors_tolerated] = 10

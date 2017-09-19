@@ -26,7 +26,6 @@ default[:keystone][:group] = "keystone"
 
 default[:keystone][:debug] = false
 default[:keystone][:frontend] = "apache"
-default[:keystone][:verbose] = true
 default[:keystone][:domain_specific_drivers] = false
 default[:keystone][:domain_config_dir] = "/etc/keystone/domains"
 default[:keystone][:config_file] = "/etc/keystone/keystone.conf.d/100-keystone.conf"
@@ -42,7 +41,7 @@ default[:keystone][:api][:service_port] = 5000
 default[:keystone][:api][:admin_port] = 35357
 default[:keystone][:api][:admin_host] = "0.0.0.0"
 default[:keystone][:api][:api_host] = "0.0.0.0"
-default[:keystone][:api][:version] = "2.0"
+default[:keystone][:api][:version] = "3"
 default[:keystone][:api][:region] = "RegionOne"
 
 default[:keystone][:identity][:driver] = "sql"
@@ -50,10 +49,7 @@ default[:keystone][:assignment][:driver] = "sql"
 
 default[:keystone][:sql][:idle_timeout] = 30
 
-default[:keystone][:signing][:token_format] = "UUID"
-default[:keystone][:signing][:certfile] = "/etc/keystone/ssl/certs/signing_cert.pem"
-default[:keystone][:signing][:keyfile] = "/etc/keystone/ssl/private/signing_key.pem"
-default[:keystone][:signing][:ca_certs] = "/etc/keystone/ssl/certs/ca.pem"
+default[:keystone][:token_format] = "fernet"
 
 default[:keystone][:ssl][:certfile] = "/etc/keystone/ssl/certs/signing_cert.pem"
 default[:keystone][:ssl][:keyfile] = "/etc/keystone/ssl/private/signing_key.pem"
@@ -65,7 +61,6 @@ default[:keystone][:ldap][:url] = "ldap://localhost"
 default[:keystone][:ldap][:user] = "dc=Manager,dc=example,dc=com"
 default[:keystone][:ldap][:password] = ""
 default[:keystone][:ldap][:suffix] = "cn=example,cn=com"
-default[:keystone][:ldap][:allow_subtree_delete] = false
 default[:keystone][:ldap][:page_size] = 0
 default[:keystone][:ldap][:alias_dereferencing] = "default"
 default[:keystone][:ldap][:query_scope] = "one"
@@ -84,9 +79,6 @@ default[:keystone][:ldap][:user_enabled_mask] = 0
 default[:keystone][:ldap][:user_enabled_default] = "True"
 default[:keystone][:ldap][:user_attribute_ignore] = "default_project_id"
 default[:keystone][:ldap][:user_default_project_id_attribute] = ""
-default[:keystone][:ldap][:user_allow_create] = true
-default[:keystone][:ldap][:user_allow_update] = true
-default[:keystone][:ldap][:user_allow_delete] = true
 default[:keystone][:ldap][:user_enabled_emulation] = false
 default[:keystone][:ldap][:user_enabled_emulation_dn] = ""
 default[:keystone][:ldap][:user_enabled_emulation_use_group_config] = false

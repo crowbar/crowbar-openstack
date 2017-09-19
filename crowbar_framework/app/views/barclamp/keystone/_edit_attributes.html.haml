@@ -5,16 +5,21 @@
   .panel-body
     = instance_field :database
     = instance_field :rabbitmq
-    = select_field %w(signing token_format), :collection => :token_formats_for_keystone
+    = select_field %w(token_format), :collection => :token_formats_for_keystone
     = string_field %w(api region)
 
     %fieldset
       %legend
         = t(".default_credentials")
 
-      = string_field %w(default tenant)
+      = string_field %w(default project)
       = string_field %w(admin username)
-      = password_field %w(admin password)
+      - if @proposal.active?
+        = password_field %w(admin updated_password)
+        .alert.alert-info
+          = t('.admin.updated_password_hint')
+      - else
+        = password_field %w(admin password)
 
       = boolean_field %w(default create_user),
         "data-showit" => "true",

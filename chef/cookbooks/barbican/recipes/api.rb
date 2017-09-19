@@ -22,6 +22,8 @@ include_recipe "#{@cookbook_name}::common"
 application_path = "/srv/www/barbican-api"
 application_exec_path = "#{application_path}/app.wsgi"
 
+ha_enabled = node[:barbican][:ha][:enabled]
+
 package "openstack-barbican-api"
 
 apache_module "deflate" do
@@ -57,9 +59,9 @@ public_host = CrowbarHelper.get_host_for_public_url(node,
                                                     node[:barbican][:ha][:enabled])
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
-crowbar_pacemaker_sync_mark "wait-barbican_register"
+crowbar_pacemaker_sync_mark "wait-barbican_register" if ha_enabled
 
 keystone_register "barbican api wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -95,7 +97,7 @@ keystone_register "register barbican endpoint" do
   endpoint_publicURL "#{barbican_protocol}://#{public_host}:#{barbican_port}"
   endpoint_adminURL "#{barbican_protocol}://#{admin_host}:#{barbican_port}"
   endpoint_internalURL "#{barbican_protocol}://#{admin_host}:#{barbican_port}"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
 keystone_register "register barbican user" do
@@ -106,7 +108,7 @@ keystone_register "register barbican user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -117,12 +119,12 @@ keystone_register "give barbican user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
 
-crowbar_pacemaker_sync_mark "create-barbican_register"
+crowbar_pacemaker_sync_mark "create-barbican_register" if ha_enabled
 
 if node[:barbican][:ha][:enabled]
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
@@ -132,9 +134,6 @@ else
   bind_host = node[:barbican][:api][:bind_host]
   bind_port = node[:barbican][:api][:bind_port]
 end
-
-node.normal[:apache][:listen_ports_crowbar] ||= {}
-node.normal[:apache][:listen_ports_crowbar][:barbican] = { plain: [bind_port] }
 
 crowbar_openstack_wsgi "WSGI entry for barbican-api" do
   bind_host bind_host

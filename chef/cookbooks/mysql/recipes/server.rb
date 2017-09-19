@@ -18,36 +18,9 @@
 #
 
 include_recipe "mysql::client"
+include_recipe "database::client"
 
-if platform_family?("debian")
-
-  directory "/var/cache/local/preseeding" do
-    owner "root"
-    group "root"
-    mode 0755
-    recursive true
-  end
-
-  template "/var/cache/local/preseeding/mysql-server.seed" do
-    source "mysql-server.seed.erb"
-    owner "root"
-    group "root"
-    mode "0600"
-  end
-
-  template "/etc/mysql/debian.cnf" do
-    source "debian.cnf.erb"
-    owner "root"
-    group "root"
-    mode "0600"
-  end
-
-  execute "preseed mysql-server" do
-    command "debconf-set-selections /var/cache/local/preseeding/mysql-server.seed"
-    only_if "test -f /var/cache/local/preseeding/mysql-server.seed"
-  end
-
-end
+ha_enabled = node[:database][:ha][:enabled]
 
 # For Crowbar, we need to set the address to bind - default to admin node.
 addr = node["mysql"]["bind_address"] || ""
@@ -71,27 +44,24 @@ end
 
 service "mysql" do
   service_name mysql_service_name
-  if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
-    restart_command "restart mysql"
-    stop_command "stop mysql"
-    start_command "start mysql"
+  if ha_enabled
+    supports status: true,
+             restart: true,
+             reload: true,
+             restart_crm_resource: true,
+             pacemaker_resource: "galera",
+             crm_resource_stop_cmd: "force-demote",
+             crm_resource_start_cmd: "force-promote"
+  else
+    supports status: true,
+             restart: true,
+             reload: true
   end
-  supports status: true, restart: true, reload: true
   action :enable
-end
-
-link value_for_platform_family(["rhel", "suse", "fedora"] => { "default" => "/etc/my.cnf" }, "default" => "/etc/mysql/my.cnf") do
-  to "#{node[:mysql][:datadir]}/my.cnf"
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 
 directory node[:mysql][:tmpdir] do
-  owner "mysql"
-  group "mysql"
-  mode "0700"
-  action :create
-end
-
-directory node[:mysql][:logdir] do
   owner "mysql"
   group "mysql"
   mode "0700"
@@ -108,13 +78,37 @@ service mysql start
 EOC
 end
 
-template "#{node[:mysql][:datadir]}/my.cnf" do
+template "/etc/my.cnf.d/openstack.cnf" do
   source "my.cnf.erb"
   owner "root"
-  group "root"
-  mode "0644"
-  notifies :run, resources(script: "handle mysql restart"), :immediately if platform_family?("debian")
-  notifies :restart, "service[mysql]", :immediately if platform_family?(%w{rhel suse fedora})
+  group "mysql"
+  mode "0640"
+  notifies :restart, "service[mysql]", :immediately
+end
+
+template "/etc/my.cnf.d/logging.cnf" do
+  source "logging.cnf.erb"
+  owner "root"
+  group "mysql"
+  mode "0640"
+  variables(
+    slow_query_logging_enabled: node[:database][:mysql][:slow_query_logging]
+  )
+  notifies :restart, "service[mysql]", :immediately
+end
+
+template "/etc/my.cnf.d/tuning.cnf" do
+  source "tuning.cnf.erb"
+  owner "root"
+  group "mysql"
+  mode "0640"
+  variables(
+    innodb_buffer_pool_size: node[:database][:mysql][:innodb_buffer_pool_size],
+    max_connections: node[:database][:mysql][:max_connections],
+    tmp_table_size: node[:database][:mysql][:tmp_table_size],
+    max_heap_table_size: node[:database][:mysql][:max_heap_table_size]
+  )
+  notifies :restart, "service[mysql]", :immediately
 end
 
 unless Chef::Config[:solo]
@@ -126,83 +120,97 @@ unless Chef::Config[:solo]
   end
 end
 
-# set the root password on platforms
-# that don't support pre-seeding
-unless platform_family?("debian")
+if ha_enabled
+  log "HA support for mysql is enabled"
+  include_recipe "mysql::ha_galera"
+else
+  log "HA support for mysql is disabled"
+end
 
-  execute "assign-root-password" do
-    command "/usr/bin/mysqladmin -u root password \"#{node['mysql']['server_root_password']}\""
-    action :run
-    only_if "/usr/bin/mysql -u root -e 'show databases;'"
+server_root_password = node[:mysql][:server_root_password]
+
+execute "assign-root-password" do
+  command "/usr/bin/mysqladmin -u root password \"#{server_root_password}\""
+  action :run
+  not_if { ha_enabled } # password already set as part of the ha bootstrap
+  only_if "/usr/bin/mysql -u root -e 'show databases;'"
+end
+
+db_settings = fetch_database_settings
+db_connection = db_settings[:connection].dup
+db_connection[:host] = "localhost"
+db_connection[:username] = "root"
+db_connection[:password] = node[:database][:mysql][:server_root_password]
+
+unless node[:database][:database_bootstrapped]
+  database_user "create db_maker database user" do
+    connection db_connection
+    username "db_maker"
+    password node[:database][:db_maker_password]
+    host "%"
+    provider db_settings[:user_provider]
+    action :create
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
+  database_user "create haproxy and galera monitoring user" do
+    connection db_connection
+    username "monitoring"
+    password ""
+    host "%"
+    provider db_settings[:user_provider]
+    action :create
+    only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  database_user "grant db_maker access" do
+    connection db_connection
+    username "db_maker"
+    password node[:database][:db_maker_password]
+    host "%"
+    privileges db_settings[:privs] + [
+      "ALTER ROUTINE",
+      "CREATE ROUTINE",
+      "CREATE TEMPORARY TABLES",
+      "CREATE USER",
+      "CREATE VIEW",
+      "EXECUTE",
+      "GRANT OPTION",
+      "LOCK TABLES",
+      "RELOAD",
+      "SHOW DATABASES",
+      "SHOW VIEW",
+      "TRIGGER"
+    ]
+    provider db_settings[:user_provider]
+    action :grant
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  database "drop test database" do
+    connection db_connection
+    database_name "test"
+    provider db_settings[:provider]
+    action :drop
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  database_user "drop anonymous database user" do
+    connection db_connection
+    username ""
+    host "*"
+    provider db_settings[:user_provider]
+    action :drop
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 end
 
-# Super duper hackfest-o-rama 2011.
-# Under crowbar, for some reason, defaults aren't being set properly
-# for the mysql passwords. This is a nasty, nasty hack to
-# fix this until I understand the problem better:
-directory "/etc/mysql/" do
-  owner "root"
-  group "root"
-  mode "0755"
-  action :create
-end
-
-directory "/etc/mysql/conf.d/" do
-  owner "root"
-  group "root"
-  mode "0755"
-  action :create
-end
-
-template "/etc/mysql/conf.d/emergency_init_file" do
-  source "emergency_init_file.erb"
-  owner "root"
-  group "root"
-  mode "0600"
-  action :create
-end
-
-script "fix_perms_hack" do
-  interpreter "bash"
-  user "root"
-  cwd "/tmp"
-  code <<-EOH
-  /etc/init.d/#{mysql_service_name} stop
-  chmod 644 /etc/mysql/conf.d/emergency_init_file
-  /usr/bin/mysqld_safe --init-file=/etc/mysql/conf.d/emergency_init_file &
-  sleep 10
-  killall mysqld
-  chmod 600 /etc/mysql/conf.d/emergency_init_file
-  /etc/init.d/#{mysql_service_name} start
-  EOH
-  not_if "/usr/bin/mysql -u root #{node['mysql']['server_root_password'].empty? ? '' : '-p' }#{node['mysql']['server_root_password']} -e 'show databases;'"
-end
-
-# End hackness
-
-grants_path = value_for_platform_family(
-  ["rhel", "suse", "fedora"] => {
-    "default" => "/etc/mysql_grants.sql"
-  },
-  "default" => "/etc/mysql/grants.sql"
-)
-
-grants_key = value_for_platform_family(
-  ["rhel", "suse", "fedora"] => {
-    "default" => "/etc/applied_grants"
-  },
-  "default" => "/etc/mysql/applied_grants"
-)
-
-template grants_path do
-  source "grants.sql.erb"
-  owner "root"
-  group "root"
-  mode "0600"
-  action :create
-  not_if { File.exist?("#{grants_key}") }
+ruby_block "mark node for database bootstrap" do
+  block do
+    node.set[:database][:database_bootstrapped] = true
+    node.save
+  end
+  not_if { node[:database][:database_bootstrapped] }
 end
 
 directory "/var/log/mysql/" do
@@ -217,22 +225,4 @@ directory "/var/run/mysqld/" do
   group "root"
   mode "0755"
   action :create
-end
-
-execute "mysql-install-privileges" do
-  command "/usr/bin/mysql -u root #{node['mysql']['server_root_password'].empty? ? '' : '-p' }#{node['mysql']['server_root_password']} < #{grants_path}"
-  action :nothing
-  subscribes :run, resources("template[#{grants_path}]"), :immediately
-end
-
-file grants_path do
-  backup false
-  action :delete
-end
-
-file grants_key do
-  owner "root"
-  group "root"
-  mode "0600"
-  action :create_if_missing
 end

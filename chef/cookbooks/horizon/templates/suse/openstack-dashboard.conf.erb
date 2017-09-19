@@ -26,7 +26,7 @@
 
 <VirtualHost <%= @bind_host %>:<%= @bind_port_ssl %>>
     SSLEngine On
-    SSLCipherSuite ALL:!aNULL:!eNULL:!SSLv2:!LOW:!EXP:!MD5:@STRENGTH
+    SSLCipherSuite DEFAULT_SUSE
     SSLProtocol all -SSLv2 -SSLv3
     SSLCertificateFile <%= @ssl_crt_file %>
     SSLCertificateKeyFile <%= @ssl_key_file %>
@@ -38,7 +38,7 @@
 <VirtualHost <%= @bind_host %>:<%= @bind_port %>>
 <% end %>
     WSGIScriptAlias / <%= @horizon_dir %>/openstack_dashboard/wsgi/django.wsgi
-    WSGIDaemonProcess horizon user=<%= @user %> group=<%= @group %> processes=3 threads=10
+    WSGIDaemonProcess horizon user=<%= @user %> group=<%= @group %> processes=3 threads=10 display-name=%{GROUP}
     SetEnv APACHE_RUN_USER  <%= @user %>
     SetEnv APACHE_RUN_GROUP <%= @group %>
     WSGIProcessGroup horizon
@@ -46,6 +46,9 @@
     DocumentRoot <%= @horizon_dir %>
     Alias /media <%= @horizon_dir %>/media
     Alias /static <%= @horizon_dir %>/static
+    <% if @grafana_available %>
+    Alias /grafana /srv/www/grafana
+    <% end %>
 
     Timeout 120
 
@@ -54,6 +57,11 @@
         ExpiresActive on
         ExpiresDefault "access plus 1 month"
     </Location>
+    <% if @grafana_available %>
+    <Location /grafana>
+        Require all granted
+    </Location>
+    <% end %>
 
     <Directory />
         Options None

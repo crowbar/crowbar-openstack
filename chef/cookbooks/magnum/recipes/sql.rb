@@ -24,7 +24,7 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-magnum_database"
+crowbar_pacemaker_sync_mark "wait-magnum_database" if ha_enabled
 
 is_cluster_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
 # Create the Magnum Database
@@ -83,4 +83,4 @@ ruby_block "mark node for magnum db_sync" do
   subscribes :create, "execute[magnum-manage db sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-magnum_database"
+crowbar_pacemaker_sync_mark "create-magnum_database" if ha_enabled

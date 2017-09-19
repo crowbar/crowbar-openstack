@@ -3,7 +3,6 @@ from django.utils.translation import ugettext_lazy as _
 from openstack_dashboard import exceptions
 
 DEBUG = <%= @debug ? 'True' : 'False' %>
-TEMPLATE_DEBUG = DEBUG
 <%= @use_ssl ? '' : '# ' %>SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTOCOL', 'https')
 ALLOWED_HOSTS = ['*']
 LOGIN_URL = '/auth/login/'
@@ -91,7 +90,7 @@ LOGGING = {
     'handlers': {
         'null': {
             'level': 'DEBUG',
-            'class': 'django.utils.log.NullHandler',
+            'class': 'logging.NullHandler',
         },
         'console': {
             # Set the level to "DEBUG" for verbose output logging.

@@ -10,13 +10,13 @@
       "glance_instance": "none",
       "cinder_instance": "none",
       "neutron_instance": "none",
+      "memcache_secret_key": "",
       "itxt_instance": "none",
       "trusted_flavors": false,
       "libvirt_type": "kvm",
       "use_novnc": true,
       "use_serial": false,
       "debug": false,
-      "verbose": true,
       "max_header_line": 16384,
       "setup_shared_instance_storage": false,
       "use_shared_instance_storage": false,
@@ -35,13 +35,23 @@
         "ram_allocation_ratio": 1.0,
         "cpu_allocation_ratio": 16.0,
         "disk_allocation_ratio": 1.0,
-        "reserved_host_memory_mb": 512
+        "reserved_host_memory_mb": 512,
+        "discover_hosts_in_cells_interval": 600
       },
       "ec2-api": {
         "db": {
           "password": "",
           "user": "ec2",
           "database": "ec2"
+        },
+        "ssl": {
+          "enabled": false,
+          "certfile": "/etc/ec2api/ssl/certs/signing_cert.pem",
+          "keyfile": "/etc/ec2api/ssl/certs/signing_key.pem",
+          "generate_certs": false,
+          "insecure": false,
+          "cert_required": false,
+          "ca_certs": "/etc/ec2api/ssl/certs/ca.pem"
         }
       },
       "db": {
@@ -54,7 +64,11 @@
         "user": "nova_api",
         "database": "nova_api"
       },
-
+      "placement_db": {
+        "password": "",
+        "user": "placement",
+        "database": "placement"
+      },
       "rbd": {
         "user": "",
         "secret_uuid": ""
@@ -71,7 +85,9 @@
         "datastore": "",
         "interface": "vmnic0",
         "ca_file": "",
-        "insecure": false
+        "insecure": false,
+        "dvs_name": "dvSwitch0",
+        "dvs_security_groups": false
       },
       "zvm": {
         "zvm_xcat_server": "",
@@ -141,6 +157,13 @@
         "vendordata": {
           "json": "{}"
         }
+      },
+      "ha_rate_limit": {
+        "nova-api": 0,
+        "nova-placement-api": 0,
+        "nova-metadata": 0,
+        "nova-novncproxy": 0,
+        "nova-serialproxy": 0
       }
     }
   },
@@ -148,9 +171,10 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 115,
+      "schema-revision": 205,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
+        "nova-compute-ironic": [ "readying", "ready", "applying" ],
         "nova-compute-kvm": [ "readying", "ready", "applying" ],
         "nova-compute-qemu": [ "readying", "ready", "applying" ],
         "nova-compute-vmware": [ "readying", "ready", "applying" ],
@@ -166,6 +190,7 @@
           "ec2-api"
         ],
         [
+          "nova-compute-ironic",
           "nova-compute-kvm",
           "nova-compute-qemu",
           "nova-compute-vmware",
@@ -176,6 +201,7 @@
       "element_run_list_order": {
         "nova-controller": 95,
         "ec2-api": 96,
+        "nova-compute-ironic": 97,
         "nova-compute-kvm": 97,
         "nova-compute-qemu": 97,
         "nova-compute-vmware": 97,

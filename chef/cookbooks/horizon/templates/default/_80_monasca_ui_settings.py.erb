@@ -1,0 +1,71 @@
+# Copyright 2016 SUSE Linux GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
+
+# Services being monitored
+MONITORING_SERVICES = getattr(
+    settings,
+    'MONITORING_SERVICES',
+    [
+        {'name': _('OpenStack Services'),
+         'groupBy': 'service'},
+        {'name': _('Servers'),
+         'groupBy': 'hostname'},
+        {'name': _('Log Paths'),
+          'groupBy': 'path'}
+    ]
+)
+
+MONITORING_SERVICE_TYPE = getattr(
+    settings, 'MONITORING_SERVICE_TYPE', 'monitoring'
+)
+
+
+# Grafana button titles/file names (global across all projects):
+GRAFANA_LINKS = [
+    {'title': 'Dashboard', 'fileName': 'openstack.json'},
+    {'title': 'Monasca Health', 'fileName': 'monasca.json'}
+]
+
+DEFAULT_LINKS = GRAFANA_LINKS
+DASHBOARDS = getattr(settings, 'GRAFANA_LINKS', GRAFANA_LINKS)
+
+#
+# Per project grafana button titles/file names.  If in this form,
+# '*' will be applied to all projects not explicitly listed.
+#
+# Note the above form (flat) is supported for backward compatibility.
+#
+#GRAFANA_LINKS = [
+#    {'admin': [
+#        {'title': 'Dashboard', 'fileName': 'openstack.json'},
+#        {'title': 'RabbitMQ', 'fileName': 'rabbit.json'},
+#        {'title': 'Project Utilization', 'fileName': 'libvirt.json'}]},
+#    {'*': [
+#        {'title': 'OpenStack Dashboard', 'fileName': 'project.json'},
+#        {'title': 'Add New Dashboard', 'fileName': 'empty.json'}]}
+#]
+
+ENABLE_KIBANA_BUTTON = getattr(settings, 'ENABLE_KIBANA_BUTTON', <%= @kibana_enabled ? "True" : "False" %>)
+# TODO: this needs to be fixed for clustered deployment
+KIBANA_HOST = getattr(settings, 'KIBANA_HOST', 'http://<%= @kibana_host %>:5601/')
+
+KIBANA_POLICY_SCOPE = 'monitoring'
+KIBANA_POLICY_RULE = 'monitoring:kibana_access'
+
+OPENSTACK_SSL_NO_VERIFY = getattr(settings, 'OPENSTACK_SSL_NO_VERIFY', False)
+OPENSTACK_SSL_CACERT = getattr(settings, 'OPENSTACK_SSL_CACERT', None)
+OPENSTACK_ENDPOINT_TYPE="publicURL"

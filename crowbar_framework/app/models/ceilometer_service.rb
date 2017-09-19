@@ -15,8 +15,8 @@
 # limitations under the License.
 #
 
-class CeilometerService < PacemakerServiceObject
-  def initialize(thelogger)
+class CeilometerService < OpenstackServiceObject
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "ceilometer"
   end
@@ -33,7 +33,7 @@ class CeilometerService < PacemakerServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         },
@@ -48,7 +48,7 @@ class CeilometerService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -57,7 +57,7 @@ class CeilometerService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -66,7 +66,7 @@ class CeilometerService < PacemakerServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }
@@ -117,6 +117,7 @@ class CeilometerService < PacemakerServiceObject
     } unless agent_nodes.nil? or server_nodes.nil?
 
     base["attributes"]["ceilometer"]["service_password"] = random_password
+    base["attributes"][@bc_name]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name][:metering_secret] = random_password
 

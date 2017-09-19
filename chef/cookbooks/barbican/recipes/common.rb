@@ -23,7 +23,6 @@ package "openstack-barbican"
 ha_enabled = node[:barbican][:ha][:enabled]
 
 db_settings = fetch_database_settings
-db_conn_scheme = db_settings[:url_scheme]
 
 barbican_protocol = node[:barbican][:api][:protocol]
 
@@ -31,17 +30,9 @@ public_host = CrowbarHelper.get_host_for_public_url(node,
                                                     barbican_protocol == "https",
                                                     node[:barbican][:ha][:enabled])
 
-if db_settings[:backend_name] == "mysql"
-  db_conn_scheme = "mysql+pymysql"
-end
+database_connection = fetch_database_connection_string(node[:barbican][:db])
 
-database_connection = "#{db_conn_scheme}://" \
-  "#{node[:barbican][:db][:user]}" \
-  ":#{node[:barbican][:db][:password]}" \
-  "@#{db_settings[:address]}" \
-  "/#{node[:barbican][:db][:database]}"
-
-crowbar_pacemaker_sync_mark "wait-barbican_database"
+crowbar_pacemaker_sync_mark "wait-barbican_database" if ha_enabled
 
 # Create the Barbican Database
 database "create #{node[:barbican][:db][:database]} database" do
@@ -100,7 +91,17 @@ ruby_block "mark node for barbican db_sync" do
   subscribes :create, "execute[barbican-manage db upgrade]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-barbican_database"
+crowbar_pacemaker_sync_mark "create-barbican_database" if ha_enabled
+
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  if node[:barbican][:ha][:enabled]
+    CrowbarPacemakerHelper.cluster_nodes(node, "barbican-controller")
+  else
+    [node]
+  end
+)
+
+memcached_instance("barbican") if node["roles"].include?("barbican-controller")
 
 template node[:barbican][:config_file] do
   source "barbican.conf.erb"
@@ -114,8 +115,7 @@ template node[:barbican][:config_file] do
     host_href: "#{barbican_protocol}://#{public_host}:#{node[:barbican][:api][:bind_port]}",
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: KeystoneHelper.keystone_settings(node, @cookbook_name),
+    memcached_servers: memcached_servers
   )
   notifies :reload, resources(service: "apache2")
 end
-
-node.save

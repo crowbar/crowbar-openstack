@@ -46,7 +46,7 @@ tempest_heat_settings = node[:tempest][:heat]
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "tempest tempest wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -55,7 +55,7 @@ keystone_register "tempest tempest wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
-end.run_action(:wakeup)
+end
 
 keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   protocol keystone_settings["protocol"]
@@ -63,26 +63,28 @@ keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
-  tenant_name tempest_comp_tenant
-  action :add_tenant
-end.run_action(:add_tenant)
+  project_name tempest_comp_tenant
+  action :add_project
+end
 
 auth_url = KeystoneHelper.service_URL(
     keystone_settings["protocol"], keystone_settings["internal_url_host"],
     keystone_settings["service_port"])
 # for non-admin usage
-openstackcli = "openstack --insecure --os-username #{tempest_comp_user}"
-openstackcli << " --os-identity-api-version #{keystone_settings["api_version"]}"
-openstackcli << " --os-password #{tempest_comp_pass}"
-openstackcli << " --os-project-name #{tempest_comp_tenant}"
-openstackcli << " --os-auth-url #{auth_url}"
+comp_environment = "OS_USERNAME='#{tempest_comp_user}' "
+comp_environment << "OS_PASSWORD='#{tempest_comp_pass}' "
+comp_environment << "OS_PROJECT_NAME='#{tempest_comp_tenant}' "
+comp_environment << "OS_AUTH_URL='#{auth_url}' "
+comp_environment << "OS_IDENTITY_API_VERSION='#{keystone_settings["api_version"]}'"
+openstackcli = "#{comp_environment} openstack --insecure"
 
 # for admin usage (listing the available services)
-openstackcli_adm = "openstack --insecure --os-username #{tempest_adm_user}"
-openstackcli_adm << " --os-identity-api-version #{keystone_settings["api_version"]}"
-openstackcli_adm << " --os-password #{tempest_adm_pass}"
-openstackcli_adm << " --os-project-name #{tempest_comp_tenant}"
-openstackcli_adm << " --os-auth-url #{auth_url}"
+adm_environment = "OS_USERNAME='#{tempest_adm_user}' "
+adm_environment << "OS_PASSWORD='#{tempest_adm_pass}' "
+adm_environment << "OS_PROJECT_NAME='#{tempest_comp_tenant}' "
+adm_environment << "OS_AUTH_URL='#{auth_url}' "
+adm_environment << "OS_IDENTITY_API_VERSION='#{keystone_settings["api_version"]}'"
+openstackcli_adm = "#{adm_environment} openstack --insecure"
 
 enabled_services = `#{openstackcli_adm} service list -f value -c Type`.split
 
@@ -90,6 +92,8 @@ users = [
           {"name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "Member"},
           {"name" => tempest_adm_user, "pass" => tempest_adm_pass, "role" => "admin" }
         ]
+
+roles = [ 'anotherrole' ]
 
 heat_server = search(:node, "roles:heat-server").first
 if enabled_services.include?("orchestration") && !heat_server.nil?
@@ -108,9 +112,21 @@ users.each do |user|
     auth register_auth_hash
     user_name user["name"]
     user_password user["pass"]
-    tenant_name tempest_comp_tenant
-    action :nothing
-  end.run_action(:add_user)
+    project_name tempest_comp_tenant
+    action :add_user
+  end
+
+roles.each do |role|
+  keystone_register "tempest create role #{role}" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    auth register_auth_hash
+    role_name role
+    action :add_role
+  end
+end
 
   keystone_register "add #{user["name"]}:#{tempest_comp_tenant} user #{user["role"]} role" do
     protocol keystone_settings["protocol"]
@@ -120,9 +136,9 @@ users.each do |user|
     auth register_auth_hash
     user_name user["name"]
     role_name user["role"]
-    tenant_name tempest_comp_tenant
-    action :nothing
-  end.run_action(:add_access)
+    project_name tempest_comp_tenant
+    action :add_access
+  end
 
   keystone_register "add default ec2 creds for #{user["name"]}:#{tempest_comp_tenant}" do
     protocol keystone_settings["protocol"]
@@ -131,9 +147,9 @@ users.each do |user|
     port keystone_settings["admin_port"]
     auth register_auth_hash
     user_name user["name"]
-    tenant_name tempest_comp_tenant
-    action :nothing
-  end.run_action(:add_ec2)
+    project_name tempest_comp_tenant
+    action :add_ec2
+  end
 end
 
 # Give admin user access to tempest tenant
@@ -145,9 +161,9 @@ keystone_register "add #{keystone_settings['admin_user']}:#{tempest_comp_tenant}
   auth register_auth_hash
   user_name keystone_settings["admin_user"]
   role_name "admin"
-  tenant_name tempest_comp_tenant
-  action :nothing
-end.run_action(:add_access)
+  project_name tempest_comp_tenant
+  action :add_access
+end
 
 # Create directories that we need
 ["", "bin", "etc", "etc/certs", "etc/cirros"].each do |subdir|
@@ -278,9 +294,15 @@ EOH
   })
 end
 
-ec2_access = `#{openstackcli} ec2 credentials list -f value -c Access`.strip
-ec2_secret = `#{openstackcli} ec2 credentials list -f value -c Secret`.strip
-raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
+ruby_block "fetch ec2 credentials" do
+  block do
+    ec2_access = `#{openstackcli} ec2 credentials list -f value -c Access`.strip
+    ec2_secret = `#{openstackcli} ec2 credentials list -f value -c Secret`.strip
+    raise("Cannot fetch EC2 credentials ") if ec2_access.empty? || ec2_secret.empty?
+    node[:tempest][:ec2_access] = ec2_access
+    node[:tempest][:ec2_secret] = ec2_secret
+  end
+end
 
 # FIXME: should avoid search with no environment in query
 neutrons = search(:node, "roles:neutron-server") || []
@@ -334,8 +356,15 @@ unless neutrons[0].nil?
   end
 end
 
-public_network_id = `neutron --insecure --os-user-domain-name Default --os-project-domain-name Default --os-username #{tempest_comp_user} --os-password #{tempest_comp_pass} --os-tenant-name #{tempest_comp_tenant} --os-auth-url #{keystone_settings["internal_auth_url"]} net-list -f csv -c id -- --name floating | tail -n 1 | cut -d'"' -f2`.strip
-raise("Cannot fetch ID of floating network") if public_network_id.empty?
+ruby_block "get public network id" do
+  block do
+    cmd = "#{openstackcli} --os-user-domain-name Default --os-project-domain-name Default"
+    cmd << " network show -f value -c id floating"
+    public_network_id =  `#{cmd}`.strip
+    raise("Cannot fetch ID of floating network") if public_network_id.empty?
+    node[:tempest][:public_network_id] = public_network_id
+  end
+end
 
 # FIXME: the command above should be good enough, but radosgw is broken with
 # tempest; also should avoid search with no environment in query
@@ -357,9 +386,12 @@ cinders = search(:node, "roles:cinder-controller") || []
 storage_protocol = "iSCSI"
 vendor_name = "Open Source"
 cinder_snapshot = true
+use_attach_encrypted_volume = true
 cinders[0][:cinder][:volumes].each do |volume|
   if volume[:backend_driver] == "rbd"
     storage_protocol = "ceph"
+    # no encryption support for rbd-backed volumes
+    use_attach_encrypted_volume = false
     break
   elsif volume[:backend_driver] == "emc"
     vendor_name = "EMC"
@@ -452,85 +484,90 @@ template "/etc/tempest/tempest.conf" do
   source "tempest.conf.erb"
   mode 0644
   variables(
-    # general settings
-    keystone_settings: keystone_settings,
-    machine_id_file: machine_id_file,
-    alt_machine_id_file: alt_machine_id_file,
-    tempest_path: node[:tempest][:tempest_path],
-    use_swift: use_swift,
-    use_horizon: use_horizon,
-    enabled_services: enabled_services,
-    # boto settings
-    ec2_protocol: nova[:nova][:ssl][:enabled] ? "https" : "http",
-    ec2_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
-    ec2_port: nova[:nova][:ports][:api_ec2],
-    s3_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
-    s3_port: nova[:nova][:ports][:objectstore],
-    ec2_access: ec2_access,
-    ec2_secret: ec2_secret,
-    # cli settings
-    bin_path: "/usr/bin",
-    # compute settings
-    flavor_ref: flavor_ref,
-    alt_flavor_ref: alt_flavor_ref,
-    nova_api_v3: nova[:nova][:enable_v3_api],
-    use_interface_attach: use_interface_attach,
-    use_rescue: use_rescue,
-    use_resize: use_resize,
-    use_suspend: use_suspend,
-    use_vnc: use_vnc,
-    use_livemigration: use_livemigration,
-    # compute-feature-enabled settings
-    use_config_drive: use_config_drive,
-    # dashboard settings
-    horizon_host: horizon_host,
-    horizon_protocol: horizon_protocol,
-    # identity settings
-    # FIXME: it's a bit unclear, but looking at the tempest code, we should set
-    # this if any of the services is insecure, not just keystone
-    ssl_insecure: keystone_settings["insecure"],
-    comp_user: tempest_comp_user,
-    comp_tenant: tempest_comp_tenant,
-    comp_pass: tempest_comp_pass,
-    alt_comp_user: alt_comp_user,
-    alt_comp_tenant: alt_comp_tenant,
-    alt_comp_pass: alt_comp_pass,
-    # image settings
-    http_image: tempest_test_image,
-    # network settings
-    public_network_id: public_network_id,
-    neutron_api_extensions: neutron_api_extensions,
-    # object storage settings
-    swift_cluster_name: swift_cluster_name,
-    object_versioning: swift_allow_versions,
-    # orchestration settings
-    heat_flavor_ref: heat_flavor_ref,
-    # FIXME: until https://bugs.launchpad.net/tempest/+bug/1559078 only the
-    # first element of this list will be used in the template (this works fine
-    # for all of our default settings for stack_delegated_roles (single values)
-    # but breaks in the (unlikely) case of anybody configuring multiple roles).
-    heat_trusts_delegated_roles: heat_trusts_delegated_roles,
-    # scenario settings
-    cirros_arch: cirros_arch,
-    cirros_version: cirros_version,
-    image_regex: image_regex,
-    # validation settings
-    use_run_validation: use_run_validation,
-    validation_connect_timeout: validation_connect_timeout,
-    validation_ssh_timeout: validation_ssh_timeout,
-    # volume settings
-    cinder_multi_backend: cinder_multi_backend,
-    cinder_backend1_name: cinder_backend1_name,
-    cinder_backend2_name: cinder_backend2_name,
-    cinder_snapshot: cinder_snapshot,
-    storage_protocol: storage_protocol,
-    vendor_name: vendor_name,
-    # manila (share) settings
-    manila_settings: tempest_manila_settings,
-    # magnum (container) settings
-    magnum_settings: tempest_magnum_settings,
-    # heat (orchestration) settings
-    heat_settings: tempest_heat_settings
+    lazy {
+      {
+        # general settings
+        keystone_settings: keystone_settings,
+        machine_id_file: machine_id_file,
+        alt_machine_id_file: alt_machine_id_file,
+        tempest_path: node[:tempest][:tempest_path],
+        use_swift: use_swift,
+        use_horizon: use_horizon,
+        enabled_services: enabled_services,
+        # boto settings
+        ec2_protocol: nova[:nova][:ssl][:enabled] ? "https" : "http",
+        ec2_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
+        ec2_port: nova[:nova][:ports][:api_ec2],
+        s3_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
+        s3_port: nova[:nova][:ports][:objectstore],
+        ec2_access: node[:tempest][:ec2_access],
+        ec2_secret: node[:tempest][:ec2_secret],
+        # cli settings
+        bin_path: "/usr/bin",
+        # compute settings
+        flavor_ref: flavor_ref,
+        alt_flavor_ref: alt_flavor_ref,
+        nova_api_v3: nova[:nova][:enable_v3_api],
+        use_interface_attach: use_interface_attach,
+        use_rescue: use_rescue,
+        use_resize: use_resize,
+        use_suspend: use_suspend,
+        use_vnc: use_vnc,
+        use_livemigration: use_livemigration,
+        # compute-feature-enabled settings
+        use_config_drive: use_config_drive,
+        use_attach_encrypted_volume: use_attach_encrypted_volume,
+        # dashboard settings
+        horizon_host: horizon_host,
+        horizon_protocol: horizon_protocol,
+        # identity settings
+        # FIXME: it's a bit unclear, but looking at the tempest code, we should set
+        # this if any of the services is insecure, not just keystone
+        ssl_insecure: keystone_settings["insecure"],
+        comp_user: tempest_comp_user,
+        comp_tenant: tempest_comp_tenant,
+        comp_pass: tempest_comp_pass,
+        alt_comp_user: alt_comp_user,
+        alt_comp_tenant: alt_comp_tenant,
+        alt_comp_pass: alt_comp_pass,
+        # image settings
+        http_image: tempest_test_image,
+        # network settings
+        public_network_id: node[:tempest][:public_network_id],
+        neutron_api_extensions: neutron_api_extensions,
+        # object storage settings
+        swift_cluster_name: swift_cluster_name,
+        object_versioning: swift_allow_versions,
+        # orchestration settings
+        heat_flavor_ref: heat_flavor_ref,
+        # FIXME: until https://bugs.launchpad.net/tempest/+bug/1559078 only the
+        # first element of this list will be used in the template (this works fine
+        # for all of our default settings for stack_delegated_roles (single values)
+        # but breaks in the (unlikely) case of anybody configuring multiple roles).
+        heat_trusts_delegated_roles: heat_trusts_delegated_roles,
+        # scenario settings
+        cirros_arch: cirros_arch,
+        cirros_version: cirros_version,
+        image_regex: image_regex,
+        # validation settings
+        use_run_validation: use_run_validation,
+        validation_connect_timeout: validation_connect_timeout,
+        validation_ssh_timeout: validation_ssh_timeout,
+        # volume settings
+        cinder_multi_backend: cinder_multi_backend,
+        cinder_backend1_name: cinder_backend1_name,
+        cinder_backend2_name: cinder_backend2_name,
+        cinder_snapshot: cinder_snapshot,
+        storage_protocol: storage_protocol,
+        vendor_name: vendor_name,
+        # manila (share) settings
+        manila_settings: tempest_manila_settings,
+        # magnum (container) settings
+        magnum_settings: tempest_magnum_settings,
+        # heat (orchestration) settings
+        heat_settings: tempest_heat_settings
+      }
+    }
   )
 end
 

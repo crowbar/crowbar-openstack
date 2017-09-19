@@ -18,4 +18,5 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "swift", "swift-proxy")
   include_recipe "swift::default"
   include_recipe "swift::proxy"
   include_recipe "swift::monitor"
+  include_recipe "swift::monitor_monasca"
 end

@@ -18,13 +18,14 @@
             "keystone_instance": { "type": "str", "required": true },
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str" },
+            "placement_service_password": { "type": "str" },
+            "memcache_secret_key": { "type": "str", "required": true },
             "glance_instance": { "type": "str", "required": true },
             "cinder_instance": { "type": "str", "required": true },
             "neutron_instance": { "type": "str", "required": true },
             "libvirt_type": { "type": "str", "required": true },
             "use_novnc": { "type": "bool", "required": true },
             "use_serial": { "type": "bool", "required": true },
-            "verbose": { "type": "bool", "required": true },
             "max_header_line": { "type": "int", "required": true },
             "trusted_flavors": { "type": "bool", "required": true },
             "use_migration": { "type": "bool", "required": true },
@@ -52,7 +53,8 @@
                 "ram_allocation_ratio": { "type": "number" },
                 "cpu_allocation_ratio": { "type": "number" },
                 "disk_allocation_ratio": { "type": "number" },
-                "reserved_host_memory_mb": { "type": "number" }
+                "reserved_host_memory_mb": { "type": "number" },
+                "discover_hosts_in_cells_interval": { "type": "int", "required": true }
               }
             },
             "ec2-api": {
@@ -66,6 +68,19 @@
                     "password": { "type": "str", "required": true },
                     "user": { "type": "str", "required": true },
                     "database": { "type": "str", "required": true }
+                  }
+                },
+                "ssl": {
+                  "type": "map",
+                  "required": true,
+                  "mapping": {
+                    "enabled": { "type" : "bool", "required" : true },
+                    "certfile": { "type" : "str", "required" : true },
+                    "keyfile": { "type" : "str", "required" : true },
+                    "generate_certs": { "type" : "bool", "required" : true },
+                    "insecure": { "type" : "bool", "required" : true },
+                    "cert_required": { "type" : "bool", "required" : true },
+                    "ca_certs": { "type" : "str", "required" : true }
                   }
                 }
               }
@@ -84,6 +99,19 @@
               }
             },
             "api_db": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "password": { "type": "str", "required": true },
+                "user": { "type": "str", "required": true },
+                "database": { "type": "str", "required": true },
+                "max_pool_size": { "type": "int", "required": false },
+                "max_overflow": { "type": "int", "required": false },
+                "pool_timeout": { "type": "int", "required": false },
+                "min_pool_size": { "type": "int", "required": false }
+              }
+            },
+            "placement_db": {
               "type": "map",
               "required": true,
               "mapping": {
@@ -117,7 +145,9 @@
                 "datastore": { "type": "str", "required": true },
                 "interface": { "type": "str", "required": true },
                 "ca_file": { "type": "str", "required": true },
-                "insecure": { "type": "bool", "required": true }
+                "insecure": { "type": "bool", "required": true },
+                "dvs_name": { "type": "str", "required": true },
+                "dvs_security_groups": { "type": "bool", "required": true }
               }
             },
             "zvm": {
@@ -215,6 +245,15 @@
                     "json": { "type": "str", "required" : true }
                   }
                 }
+              }
+            },
+            "ha_rate_limit": {
+              "type": "map", "required": true, "mapping": {
+                "nova-api": { "type": "int", "required": true },
+                "nova-placement-api": { "type": "int", "required": true },
+                "nova-metadata": { "type": "int", "required": true },
+                "nova-novncproxy": { "type": "int", "required": true },
+                "nova-serialproxy": { "type": "int", "required": true }
               }
             }
           }

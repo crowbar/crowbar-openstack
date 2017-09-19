@@ -12,7 +12,6 @@
       %div#cinder_backends
         {{#each entries}}
         %ul.list-group(id="volume-entry-{{@index}}")
-          {{#if ../use_multi_backend }}
           %li.list-group-item.active
             %h3.list-group-item-heading
               Backend: {{ backend_name }}
@@ -20,7 +19,6 @@
               {{else}}
               = link_to icon_tag("trash"), "#", :class => "volume-backend-delete pull-right delete", "data-volumeid" => "{{@index}}"
               {{/if}}
-          {{/if}}
 
           {{#if_eq backend_driver 'raw'}}
           %li.list-group-item
@@ -49,22 +47,22 @@
               %legend
                 = t('.volumes.netapp_parameters')
 
-              = select_field %w(volumes {{@index}} netapp storage_family), :collection => :netapp_storage_family, "data-showit" => "ontap_7mode;ontap_cluster", "data-showit-target" => "#netapp_7mode_container_{{@index}};#netapp_cmode_container_{{@index}}", "data-showit-direct" => "true"
+              %div{ :id => "netapp_storage_family_{{@index}}" }
+                = select_field %w(volumes {{@index}} netapp storage_family), :collection => :netapp_storage_family,
+                                                                             "data-showit" => "ontap_cluster",
+                                                                             "data-showit-target" => "#netapp_cmode_container_{{@index}}",
+                                                                             "data-showit-direct" => "true",
+                                                                             :disabled => "disabled"
+                %span.help-block
+                  = t(".volumes.netapp.storage_family_hint")
+
               = select_field %w(volumes {{@index}} netapp storage_protocol), :collection => :netapp_storage_protocol, "data-showit" => "nfs", "data-showit-target" => "#netapp_nfs_container_{{@index}}", "data-showit-direct" => "true"
               = string_field %w(volumes {{@index}} netapp netapp_server_hostname)
               = select_field %w(volumes {{@index}} netapp netapp_transport_type), :collection => :netapp_transports_for_cinder
               = integer_field %w(volumes {{@index}} netapp netapp_server_port)
               = string_field %w(volumes {{@index}} netapp netapp_login)
               = password_field %w(volumes {{@index}} netapp netapp_password)
-
-              %div{ :id => "netapp_7mode_container_{{@index}}" }
-                = string_field %w(volumes {{@index}} netapp netapp_vfiler)
-                %span.help-block
-                  = t(".volumes.netapp.vfiler_hint")
-
-                = string_field %w(volumes {{@index}} netapp netapp_volume_list)
-                %span.help-block
-                  = t(".volumes.netapp.volume_list_hint")
+              = integer_field %w(volumes {{@index}} netapp max_over_subscription_ratio)
 
               %div{ :id => "netapp_cmode_container_{{@index}}" }
                 = string_field %w(volumes {{@index}} netapp vserver)
@@ -108,10 +106,10 @@
               = string_field %w(volumes {{@index}} eqlx eqlx_group_name)
               = string_field %w(volumes {{@index}} eqlx eqlx_pool)
               = boolean_field %w(volumes {{@index}} eqlx san_thin_provision)
-              = boolean_field %w(volumes {{@index}} eqlx eqlx_use_chap)
-              = string_field %w(volumes {{@index}} eqlx eqlx_chap_login)
-              = password_field %w(volumes {{@index}} eqlx eqlx_chap_password)
-              = integer_field %w(volumes {{@index}} eqlx eqlx_cli_timeout)
+              = boolean_field %w(volumes {{@index}} eqlx use_chap_auth)
+              = string_field %w(volumes {{@index}} eqlx chap_username)
+              = password_field %w(volumes {{@index}} eqlx chap_password)
+              = integer_field %w(volumes {{@index}} eqlx ssh_conn_timeout)
 
           {{/if_eq}}
           {{#if_eq backend_driver 'eternus'}}
@@ -139,7 +137,7 @@
               %span.help-block
                 = t(".volumes.nfs.nfs_shares_config_hint")
 
-              = string_field %w(volumes {{@index}} nfs nfs_mount_options)
+              = string_field %w(volumes {{@index}} nfs)
 
           {{/if_eq}}
           {{#if_eq backend_driver 'rbd'}}
@@ -220,13 +218,9 @@
       %legend
         = t(".volumes.listheader")
 
-      - if !@proposal.pretty_attributes.use_multi_backend
-        = select_field ["volumes", 0, "backend_driver"], :collection => :volume_driver_for_cinder
-
       %div#cinder_backends
         = t(".volumes.loading_text")
 
-    - if @proposal.pretty_attributes.use_multi_backend
       %fieldset
         %legend
           = t(".volumes.addheader")

@@ -29,11 +29,11 @@ my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(
   node, node[:magnum][:api][:protocol] == "https", ha_enabled)
 
-crowbar_pacemaker_sync_mark "wait-magnum_register"
+crowbar_pacemaker_sync_mark "wait-magnum_register" if ha_enabled
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "magnum api wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -52,7 +52,7 @@ keystone_register "register magnum user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   action :add_user
 end
 
@@ -63,7 +63,7 @@ keystone_register "give magnum user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  tenant_name keystone_settings["service_tenant"]
+  project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
 end
@@ -94,10 +94,10 @@ keystone_register "register magnum endpoint" do
                     "#{my_admin_host}:#{magnum_port}/v1"
   endpoint_internalURL "#{magnum_protocol}://"\
                        "#{my_admin_host}:#{magnum_port}/v1"
-  action :add_endpoint_template
+  action :add_endpoint
 end
 
-crowbar_pacemaker_sync_mark "create-magnum_register"
+crowbar_pacemaker_sync_mark "create-magnum_register" if ha_enabled
 
 magnum_service "api" do
   use_pacemaker_provider ha_enabled

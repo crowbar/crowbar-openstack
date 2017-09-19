@@ -1,0 +1,6 @@
+[Unit]
+Description=Tftp Server
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/in.tftpd -u tftp -s <%= @tftproot %> -m <%= @map_file %> -L -a <%= @ironic_ip %>

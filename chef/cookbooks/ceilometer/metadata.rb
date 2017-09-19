@@ -7,6 +7,7 @@ version "0.1"
 
 depends "nagios"
 depends "keystone"
+depends "memcached"
 depends "database"
 depends "crowbar-openstack"
 depends "crowbar-pacemaker"

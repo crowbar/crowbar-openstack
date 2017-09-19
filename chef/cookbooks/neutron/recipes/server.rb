@@ -17,6 +17,8 @@ hyperv_compute_node = search(:node, "roles:nova-compute-hyperv") || []
 use_hyperv = node[:neutron][:networking_plugin] == "ml2" && !hyperv_compute_node.empty?
 zvm_compute_node = search(:node, "roles:nova-compute-zvm") || []
 use_zvm = node[:neutron][:networking_plugin] == "ml2" && !zvm_compute_node.empty?
+use_vmware_dvs = node[:neutron][:networking_plugin] == "ml2" &&
+  node[:neutron][:ml2_mechanism_drivers].include?("vmware_dvs")
 
 pkgs = node[:neutron][:platform][:pkgs] + node[:neutron][:platform][:pkgs_fwaas]
 pkgs += node[:neutron][:platform][:pkgs_lbaas] if node[:neutron][:use_lbaas]
@@ -28,6 +30,8 @@ end
 if use_zvm
   pkgs << node[:neutron][:platform][:zvm_agent_pkg]
 end
+use_vmware_dvs && pkgs << node[:neutron][:platform][:vmware_vsphere_pkg]
+
 pkgs.each { |p| package p }
 
 include_recipe "neutron::database"
@@ -130,12 +134,17 @@ tenant_network_types = [[node[:neutron][:ml2_type_drivers_default_tenant_network
 
 interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
 
+ironic_net = Barclamp::Inventory.get_network_definition(node, "ironic")
+
 case node[:neutron][:networking_plugin]
 when "ml2"
   # Find out which physical interfaces we need to define in the config (depends
   # on whether one of the external networks will share the physical interface
   # with "nova_fixed".
   external_networks = ["nova_floating"]
+
+  # add ironic to external_networks if ironic network is configured
+  external_networks << "ironic" if ironic_net
 
   external_networks.concat(node[:neutron][:additional_external_networks])
   network_node = NeutronHelper.get_network_node_from_neutron_attributes(node)
@@ -149,7 +158,7 @@ when "ml2"
   os_sdn_net = Barclamp::Inventory.get_network_definition(node, "os_sdn")
   mtu_value = os_sdn_net.nil? ? 1500 : os_sdn_net["mtu"].to_i
 
-  ml2_extension_drivers = ["port_security"]
+  ml2_extension_drivers = ["dns", "port_security"]
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
   ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
   if use_hyperv
@@ -161,6 +170,11 @@ when "ml2"
   if node[:neutron][:use_l2pop] &&
       (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan"))
     ml2_mechanism_drivers.push("l2population")
+  end
+  if use_vmware_dvs
+    # If enabled, vmware_dvs needs to come before all others, otherwise the wrong
+    # type of VIF will be used when launching server instances
+    ml2_mechanism_drivers.unshift(ml2_mechanism_drivers.delete("vmware_dvs"))
   end
 
   ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
@@ -186,7 +200,9 @@ when "ml2"
       vxlan_end: vni_end,
       vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group],
       external_networks: physnets,
-      mtu_value: mtu_value
+      mtu_value: mtu_value,
+      l2pop_agent_boot_time: node[:neutron][:l2pop][:agent_boot_time],
+      vmware_dvs_config: node[:neutron][:vmware_dvs]
     )
     notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end
@@ -243,6 +259,7 @@ crowbar_pacemaker_sync_mark "wait sync mark for neutron db sync" do
   mark "neutron_db_sync"
   action :wait
   timeout 120
+  only_if { ha_enabled }
 end
 
 execute "neutron-db-manage migrate" do
@@ -369,7 +386,7 @@ if node[:neutron][:networking_plugin] == "ml2"
   end
 end
 
-crowbar_pacemaker_sync_mark "create-neutron_db_sync"
+crowbar_pacemaker_sync_mark "create-neutron_db_sync" if ha_enabled
 
 service node[:neutron][:platform][:service_name] do
   supports status: true, restart: true
@@ -417,8 +434,3 @@ if node[:neutron][:create_default_networks] && \
     (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
   include_recipe "neutron::post_install_conf"
 end
-
-node.set[:neutron][:monitor] = {} if node[:neutron][:monitor].nil?
-node.set[:neutron][:monitor][:svcs] = [] if node[:neutron][:monitor][:svcs].nil?
-node.set[:neutron][:monitor][:svcs] << ["neutron"] if node[:neutron][:monitor][:svcs].empty?
-node.save

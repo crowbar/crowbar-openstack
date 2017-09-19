@@ -29,6 +29,16 @@ haproxy_loadbalancer "nova-api" do
   port node[:nova][:ports][:api]
   use_ssl node[:nova][:ssl][:enabled]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "api")
+  rate_limit node[:nova][:ha_rate_limit]["nova-api"]
+  action :nothing
+end.run_action(:create)
+
+haproxy_loadbalancer "nova-placement-api" do
+  address "0.0.0.0"
+  port node[:nova][:ports][:placement_api]
+  use_ssl node[:nova][:ssl][:enabled]
+  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "placement_api")
+  rate_limit node[:nova][:ha_rate_limit]["nova-placement-api"]
   action :nothing
 end.run_action(:create)
 
@@ -37,6 +47,7 @@ haproxy_loadbalancer "nova-metadata" do
   port node[:nova][:ports][:metadata]
   use_ssl node[:nova][:ssl][:enabled]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "metadata")
+  rate_limit node[:nova][:ha_rate_limit]["nova-metadata"]
   action :nothing
 end.run_action(:create)
 
@@ -46,6 +57,7 @@ if node[:nova][:use_novnc]
     port node[:nova][:ports][:novncproxy]
     use_ssl node[:nova][:novnc][:ssl][:enabled]
     servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "novncproxy")
+    rate_limit node[:nova][:ha_rate_limit]["nova-novncproxy"]
     action :nothing
   end.run_action(:create)
 end
@@ -58,6 +70,7 @@ if node[:nova][:use_serial]
       "nova",
       "nova-controller",
       "serialproxy")
+    rate_limit node[:nova][:ha_rate_limit]["nova-serialproxy"]
     action :nothing
   end.run_action(:create)
 end
@@ -69,9 +82,10 @@ crowbar_pacemaker_sync_mark "sync-nova_before_ha"
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-nova_ha_resources"
 
+rabbit_settings = fetch_rabbitmq_settings
 transaction_objects = []
 
-services = %w(api cert conductor consoleauth scheduler)
+services = %w(api conductor consoleauth scheduler)
 if node[:nova][:use_novnc]
   services << "novncproxy"
 end
@@ -91,7 +105,7 @@ services.each do |service|
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
     agent primitive_ra
     op node[:nova][:ha][:op]
-    order_only_existing "( postgresql rabbitmq cl-keystone )"
+    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
   end
   transaction_objects.push(objects)
 end

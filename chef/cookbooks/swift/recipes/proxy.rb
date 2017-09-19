@@ -22,6 +22,8 @@ include_recipe "swift::auth"
 # will allow the ring-compute node to push the rings.
 include_recipe "swift::rsync"
 
+dirty = false
+
 if node.roles.include?("swift-storage") && node[:swift][:devs].nil?
   # If we're a storage node and have no device yet, then it simply means that we
   # haven't looked for devices yet, which also means that we won't have rings at
@@ -46,18 +48,9 @@ if node.roles.include?("swift-storage") && !node["swift"]["storage_init_done"]
   return
 end
 
-local_ip = Swift::Evaluator.get_ip_by_type(node, :admin_ip_expr)
-public_ip = Swift::Evaluator.get_ip_by_type(node, :public_ip_expr)
-
 ha_enabled = node[:swift][:ha][:enabled]
 
-if node[:swift][:ha][:enabled]
-  bind_host = local_ip
-  bind_port = node[:swift][:ha][:ports][:proxy]
-else
-  bind_host = "0.0.0.0"
-  bind_port = node[:swift][:ports][:proxy]
-end
+bind_host, bind_port = SwiftHelper.get_bind_host_port(node)
 
 admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 public_host = CrowbarHelper.get_host_for_public_url(node, node[:swift][:ssl][:enabled], ha_enabled)
@@ -107,9 +100,9 @@ end
 proxy_config[:cross_domain_policy] = cross_domain_policy_l.join("\n")
 
 if node[:platform_family] == "rhel"
-  pkg_list = %w{curl memcached python-dns}
+  pkg_list = ["curl", "python-dns"]
 else
-  pkg_list = %w{curl memcached python-dnspython}
+  pkg_list = ["curl", "python-dnspython"]
 end
 
 pkg_list.each do |pkg|
@@ -131,9 +124,25 @@ if node[:swift][:middlewares][:s3][:enabled]
 end
 
 # enable ceilometer middleware if ceilometer is configured
-node.set[:swift][:middlewares]["ceilometer"] = {
-  "enabled" => (node.roles.include? "ceilometer-swift-proxy-middleware")
+ceilometermiddleware_enabled = node.roles.include? "ceilometer-swift-proxy-middleware"
+# unless rabbitmq is secured (see lp#1673738) or is using durable queues
+ceilometermiddleware_should_be_disabled = proxy_config[:rabbit_settings][:use_ssl] ||
+  proxy_config[:rabbit_settings][:durable_queues]
+
+if ceilometermiddleware_enabled && ceilometermiddleware_should_be_disabled
+  Chef::Log.warn("Disabling ceilometer swift-proxy middleware")
+end
+
+ceilometer_swift_enabled = {
+  "enabled" => ceilometermiddleware_enabled && !ceilometermiddleware_should_be_disabled
 }
+
+node.set[:swift] ||= {}
+node.set[:swift][:middlewares] ||= {}
+if node[:swift][:middlewares]["ceilometer"] != ceilometer_swift_enabled
+  node.set[:swift][:middlewares]["ceilometer"] = ceilometer_swift_enabled
+  dirty = true
+end
 
 if node[:swift][:middlewares]["ceilometer"]["enabled"]
   package "python-ceilometermiddleware"
@@ -154,11 +163,11 @@ case proxy_config[:auth_method]
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
      proxy_config[:keystone_delay_auth_decision] = node["swift"]["keystone_delay_auth_decision"]
 
-     crowbar_pacemaker_sync_mark "wait-swift_register"
+     crowbar_pacemaker_sync_mark "wait-swift_register" if ha_enabled
 
      register_auth_hash = { user: keystone_settings["admin_user"],
                             password: keystone_settings["admin_password"],
-                            tenant: keystone_settings["admin_tenant"] }
+                            project: keystone_settings["admin_project"] }
 
      keystone_register "swift proxy wakeup keystone" do
        protocol keystone_settings["protocol"]
@@ -189,7 +198,7 @@ case proxy_config[:auth_method]
        auth register_auth_hash
        user_name keystone_settings["service_user"]
        user_password keystone_settings["service_password"]
-       tenant_name keystone_settings["service_tenant"]
+       project_name keystone_settings["service_tenant"]
        action :add_user
      end
 
@@ -200,7 +209,7 @@ case proxy_config[:auth_method]
        port keystone_settings["admin_port"]
        auth register_auth_hash
        user_name keystone_settings["service_user"]
-       tenant_name keystone_settings["service_tenant"]
+       project_name keystone_settings["service_tenant"]
        role_name "admin"
        action :add_access
      end
@@ -218,27 +227,25 @@ case proxy_config[:auth_method]
      end
 
      keystone_register "register swift-proxy endpoint" do
-         protocol keystone_settings["protocol"]
-         insecure keystone_settings["insecure"]
-         host keystone_settings["internal_url_host"]
-         auth register_auth_hash
-         port keystone_settings["admin_port"]
-         endpoint_service "swift"
-         endpoint_region keystone_settings["endpoint_region"]
-         endpoint_publicURL "#{swift_protocol}://#{public_host}:"\
+       protocol keystone_settings["protocol"]
+       insecure keystone_settings["insecure"]
+       host keystone_settings["internal_url_host"]
+       auth register_auth_hash
+       port keystone_settings["admin_port"]
+       endpoint_service "swift"
+       endpoint_region keystone_settings["endpoint_region"]
+       endpoint_publicURL "#{swift_protocol}://#{public_host}:"\
+                          "#{node[:swift][:ports][:proxy]}/v1/"\
+                          "#{node[:swift][:reseller_prefix]}$(project_id)s"
+       endpoint_adminURL "#{swift_protocol}://#{admin_host}:"\
+                         "#{node[:swift][:ports][:proxy]}/v1/"
+       endpoint_internalURL "#{swift_protocol}://#{admin_host}:"\
                             "#{node[:swift][:ports][:proxy]}/v1/"\
                             "#{node[:swift][:reseller_prefix]}$(project_id)s"
-         endpoint_adminURL "#{swift_protocol}://#{admin_host}:"\
-                           "#{node[:swift][:ports][:proxy]}/v1/"
-         endpoint_internalURL "#{swift_protocol}://#{admin_host}:"\
-                              "#{node[:swift][:ports][:proxy]}/v1/"\
-                              "#{node[:swift][:reseller_prefix]}$(project_id)s"
-         #  endpoint_global true
-         #  endpoint_enabled true
-        action :add_endpoint_template
+       action :add_endpoint
      end
 
-     crowbar_pacemaker_sync_mark "create-swift_register"
+     crowbar_pacemaker_sync_mark "create-swift_register" if ha_enabled
 
    when "tempauth"
      ## uses defaults...
@@ -254,11 +261,12 @@ if node[:swift][:ssl][:enabled]
   end
 end
 
-## Find other nodes that are swift-auth nodes, and make sure
-## we use their memcached!
-proxy_config[:memcached_ips] = node_search_with_cache("roles:swift-proxy").map do |x|
-  "#{Swift::Evaluator.get_ip_by_type(x, :admin_ip_expr)}:11211"
-end.sort
+## install a default memcached instance.
+## default configuration is taken from: node[:memcached] / [:memory], [:port] and [:user]
+memcached_instance "swift-proxy"
+
+proxy_config[:memcached_ips] =
+  MemcachedHelper.get_memcached_servers(node_search_with_cache("roles:swift-proxy"))
 
 ## Create the proxy server configuraiton file
 template node[:swift][:proxy_config_file] do
@@ -269,12 +277,6 @@ template node[:swift][:proxy_config_file] do
   variables proxy_config
 end
 
-## install a default memcached instsance.
-## default configuration is take from: node[:memcached] / [:memory], [:port] and [:user]
-node.set[:memcached][:listen] = local_ip
-node.set[:memcached][:name] = "swift-proxy"
-memcached_instance "swift-proxy" do
-end
 
 ## make sure to fetch ring files from the ring compute node
 compute_nodes = node_search_with_cache("roles:swift-ring-compute")
@@ -387,7 +389,6 @@ if node[:platform_family] == "debian"
 EOH
     action :nothing
     subscribes :run, resources(template: node[:swift][:proxy_config_file])
-    notifies :restart, resources(service: "memcached-swift-proxy")
     if node[:swift][:frontend]=="native"
       notifies :restart, resources(service: "swift-proxy")
     end
@@ -401,11 +402,9 @@ else
   log "HA support for swift is disabled"
 end
 
-###
-# let the monitoring tools know what services should be running on this node.
-node.set[:swift][:monitor] = {}
-node.set[:swift][:monitor][:svcs] = ["swift-proxy", "memcached"]
-node.set[:swift][:monitor][:ports] = { proxy: node[:swift][:ports][:proxy] }
-node.save
+unless node["swift"]["proxy_init_done"]
+  node.set["swift"]["proxy_init_done"] = true
+  dirty = true
+end
 
-node.set["swift"]["proxy_init_done"] = true
+node.save if dirty

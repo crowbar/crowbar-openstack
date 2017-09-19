@@ -6,14 +6,18 @@
       "service_user": "neutron",
       "rabbitmq_instance": "none",
       "keystone_instance": "none",
+      "memcache_secret_key": "",
       "max_header_line": 16384,
       "debug": false,
-      "verbose": true,
       "create_default_networks": true,
-      "dhcp_domain": "openstack.local",
+      "dns_domain": "openstack.local",
+      "rpc_workers": 1,
       "use_lbaas": true,
       "lbaasv2_driver": "haproxy",
       "use_l2pop": false,
+      "l2pop": {
+        "agent_boot_time": 180
+      },
       "use_dvr": false,
       "additional_external_networks": [],
       "networking_plugin": "ml2",
@@ -33,8 +37,50 @@
       },
       "ovs": {
         "tunnel_csum": false,
-        "of_interface": "native",
         "ovsdb_interface": "native"
+      },
+      "apic": {
+        "hosts": "",
+        "system_id": "soc",
+        "username": "admin",
+        "password": "",
+        "opflex": {
+          "peer_ip": "",
+          "peer_port": 8009,
+          "encap": "vxlan",
+          "vxlan": {
+              "encap_iface": "br-int_vxlan0",
+              "uplink_iface": "vlan.4093",
+              "uplink_vlan": 4093,
+              "remote_ip": "",
+              "remote_port": 8472
+          },
+          "vlan": {
+              "encap_iface": ""
+          }
+        },
+        "apic_switches": {
+          "101": {
+            "switch_ports": {
+              "58-00-00-00-00-00" : {
+                "switch_port": "1/2"
+              },
+              "58-00-00-00-00-01" : {
+                "switch_port": "1/33"
+              }
+            }
+          },
+          "102": {
+            "switch_ports": {
+              "58-00-00-00-00-02" : {
+                "switch_port": "1/3"
+              },
+              "58-00-00-00-00-03" : {
+                "switch_port": "1/34"
+              }
+            }
+          }
+        }
       },
       "allow_overlapping_ips": true,
       "use_syslog": false,
@@ -69,6 +115,10 @@
         "tz_uuid": "",
         "l3_gw_uuid": ""
       },
+      "vmware_dvs": {
+        "clean_on_restart": true,
+        "precreate_networks": false
+      },
       "zvm": {
         "zvm_xcat_server": "",
         "zvm_xcat_username": "",
@@ -94,7 +144,7 @@
       },
       "use_infoblox": false,
       "infoblox": {
-        "cloud_data_center_id": 0,
+        "cloud_data_center_id": 1,
         "ipam_agent_workers": 1,
         "grids": [
             {
@@ -121,7 +171,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 107,
+      "schema-revision": 204,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

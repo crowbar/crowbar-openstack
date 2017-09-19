@@ -11,6 +11,7 @@
       "site_branding_link": "",
       "help_url": "http://docs.openstack.org/",
       "session_timeout": 240,
+      "secret_key": "",
       "db": {
         "database": "horizon",
         "user": "horizon",
@@ -27,8 +28,7 @@
         "volume": "cinder_policy.json",
         "image": "glance_policy.json",
         "orchestration": "heat_policy.json",
-        "network": "neutron_policy.json",
-        "telemetry": "ceilometer_policy.json"
+        "network": "neutron_policy.json"
       },
       "can_set_mount_point": false,
       "can_set_password": false,
@@ -48,7 +48,7 @@
     "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 101,
+      "schema-revision": 201,
       "element_states": {
         "horizon-server": [ "readying", "ready", "applying" ]
       },

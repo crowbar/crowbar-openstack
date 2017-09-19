@@ -1,0 +1,251 @@
+{
+  "required": true,
+  "type": "map",
+  "mapping": {
+    "id": { "type": "str", "required": true, "pattern": "/^monasca-|^template-monasca$/" },
+    "description": { "required": true, "type": "str" },
+    "attributes": {
+      "required": true,
+      "type": "map",
+      "mapping": {
+        "monasca": {
+          "required": true,
+          "type": "map",
+          "mapping": {
+            "agent": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "keystone": {
+                  "required": true,
+                  "type": "map",
+                  "mapping": {
+                    "service_user": { "type": "str", "required": true },
+                    "service_password": { "type": "str", "required": true },
+                    "service_tenant": { "type": "str", "required": false },
+                    "service_role": { "type": "str", "required": false }
+                  }
+                },
+                "insecure": { "type": "bool", "required": true },
+                "ca_file": { "type": "str", "required": true },
+                "log_dir": { "type": "str", "required": true },
+                "log_level": { "type": "str", "required": true },
+                "statsd_port": { "type": "int", "required": true },
+                "check_frequency": { "type": "int", "required": true },
+                "num_collector_threads": { "type": "int", "required": true },
+                "pool_full_max_retries": { "type": "int", "required": true },
+                "plugin_collect_time_warn": { "type": "int", "required": true },
+                "max_measurement_buffer_size": { "type": "int", "required": true },
+                "backlog_send_rate": { "type": "int", "required": true },
+                "amplifier": { "type": "int", "required": true }
+              }
+            },
+            "log_agent": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "delay": { "type": "int", "required": true },
+                "elapsed_time_sec": { "type": "int", "required": true },
+                "max_data_size_kb": { "type": "int", "required": true },
+                "num_of_logs": { "type": "int", "required": true },
+                "keystone": {
+                  "required": true,
+                  "type": "map",
+                  "mapping": {
+                    "service_user": { "type": "str", "required": true },
+                    "service_password": { "type": "str", "required": true },
+                    "service_tenant": { "type": "str", "required": false },
+                    "service_role": { "type": "str", "required": false }
+                  }
+                }
+              }
+            },
+            "api": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "url": { "type": "str", "required": true },
+                "bind_host": { "required": true, "type": "str" },
+                "processes": { "required": true, "type": "int" },
+                "threads": { "required": true, "type": "int" },
+                "log_level": { "type": "str", "required": true }
+              }
+            },
+            "elasticsearch": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "repo_dir": {
+                  "required": true,
+                  "type": "seq",
+                  "sequence": [ { "type": "str" } ]
+                  }
+                }
+            },
+            "elasticsearch_curator": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                  "delete_after_days": { "required": false, "type": "int" },
+                  "delete_after_size": { "required": false, "type": "int" },
+                  "delete_exclude_index": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
+                  "cron_config": {
+                    "required": true,
+                    "type": "map",
+                    "mapping": {
+                      "day": { "required": true, "type": "str" },
+                      "hour": { "required": true, "type": "str" },
+                      "minute": { "required": true, "type": "str" },
+                      "month": { "required": true, "type": "str" },
+                      "weekday": { "required": true, "type": "str" }
+                    }
+                    }
+                }
+            },
+            "log_api": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "url": { "type": "str", "required": true },
+                "log_level": { "type": "str", "required": true }
+              }
+            },
+            "kafka": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "log_retention_bytes": { "required": true, "type": "int" },
+                "log_retention_hours": { "required": true, "type": "int" }
+              }
+            },
+            "setup": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "extra_params": { "required": true, "type": "str" }
+              }
+            },
+            "master": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "influxdb_mon_api_password": { "required": true, "type": "str" },
+                "influxdb_mon_persister_password": { "required": true, "type": "str" },
+                "influxdb_retention_policy": {
+                   "required": true,
+                   "type": "str",
+                   "pattern": "/^\d+[mhdw]|INF$/"
+                 },
+                "database_notification_password": { "required": true, "type": "str" },
+                "database_monapi_password": { "required": true, "type": "str" },
+                "database_thresh_password": { "required": true, "type": "str" },
+                "database_logapi_password": { "required": true, "type": "str" },
+                "keystone_monasca_operator_password": { "required": true, "type": "str" },
+                "keystone_monasca_agent_password": { "required": true, "type": "str" },
+                "keystone_admin_agent_password": { "required": true, "type": "str" },
+                "database_grafana_password": { "required": true, "type": "str" },
+                "notification_enable_email": { "required": true, "type": "bool" },
+                "smtp_host": { "required": true, "type": "str" },
+                "smtp_port": { "required": true, "type": "int" },
+                "smtp_user": { "required": true, "type": "str" },
+                "smtp_password": { "required": true, "type": "str" },
+                "smtp_from_address": { "required": true, "type": "str" }
+              }
+            },
+            "db": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "database": { "required": true, "type": "str" },
+                "password": { "required": true, "type": "str" },
+                "user": { "required": true, "type": "str" }
+              }
+            },
+            "debug": { "type": "bool" },
+            "group": { "required": true, "type": "str" },
+            "user": { "required": true, "type": "str" },
+            "network": { "required": true, "type": "str" },
+            "database_instance": { "type": "str", "required": true },
+            "keystone_instance": { "type": "str", "required": true },
+            "service_user": { "type": "str", "required": true },
+            "service_password": { "type": "str", "required": true },
+            "service_tenant": { "type": "str", "required": true },
+            "service_roles": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] }
+          }
+        }
+      }
+    },
+    "deployment": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "monasca": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "crowbar-revision": { "type": "int", "required": true },
+            "crowbar-committing": { "type": "bool" },
+            "crowbar-applied": { "type": "bool" },
+            "crowbar-status": { "type": "str" },
+            "crowbar-failed": { "type": "str" },
+            "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
+            "element_states": {
+              "type": "map",
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "elements": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "element_order": {
+              "type": "seq",
+              "required": true,
+              "sequence": [ {
+                "type": "seq",
+                "sequence": [ { "type": "str" } ]
+              } ]
+            },
+            "element_run_list_order": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                = : {
+                  "type": "int",
+                  "required": true
+                }
+              }
+            },
+            "config": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "environment": { "type": "str", "required": true },
+                "mode": { "type": "str", "required": true },
+                "transitions": { "type": "bool", "required": true },
+                "transition_list": {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

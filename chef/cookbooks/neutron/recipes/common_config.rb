@@ -20,11 +20,8 @@ neutron = nil
 if node.attribute?(:cookbook) and node[:cookbook] == "nova"
   neutrons = node_search_with_cache("roles:neutron-server", node[:nova][:neutron_instance])
   neutron = neutrons.first || raise("Neutron instance '#{node[:nova][:neutron_instance]}' for nova not found")
-  nova = node
 else
   neutron = node
-  nova = node_search_with_cache("roles:nova-controller").first
-  Chef::Log.warn("nova-controller not found") if nova.nil?
 end
 
 # RDO package magic (non-standard packages)
@@ -68,22 +65,17 @@ end
 
 keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
-if neutron[:neutron][:ha][:server][:enabled]
-  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(neutron, "admin").address
-  bind_host = admin_address
-  bind_port = neutron[:neutron][:ha][:ports][:server]
-else
-  bind_host = neutron[:neutron][:api][:service_host]
-  bind_port = neutron[:neutron][:api][:service_port]
-end
+ha_enabled = node[:neutron][:ha][:server][:enabled]
+memcached_servers = MemcachedHelper.get_memcached_servers(
+  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "neutron-server") : [node]
+)
 
-# Get Nova's insecure setting
-if nova.nil?
-  nova_insecure = keystone_settings["insecure"]
-else
-  nova_insecure = keystone_settings["insecure"] || (
-    nova[:nova][:ssl][:enabled] && nova[:nova][:ssl][:insecure])
-end
+memcached_instance("neutron-server") if is_neutron_server
+
+bind_host, bind_port = NeutronHelper.get_bind_host_port(node)
+
+nova_config = Barclamp::Config.load("openstack", "nova")
+nova_insecure = CrowbarOpenStackHelper.insecure(nova_config) || keystone_settings["insecure"]
 
 service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
                    "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
@@ -129,7 +121,6 @@ template neutron[:neutron][:config_file] do
       sql_max_pool_overflow: neutron[:neutron][:sql][:max_pool_overflow],
       sql_pool_timeout: neutron[:neutron][:sql][:pool_timeout],
       debug: neutron[:neutron][:debug],
-      verbose: neutron[:neutron][:verbose],
       bind_host: bind_host,
       bind_port: bind_port,
       use_syslog: neutron[:neutron][:use_syslog],
@@ -137,6 +128,7 @@ template neutron[:neutron][:config_file] do
       # query on the "neutron" node, not on "node"
       rabbit_settings: CrowbarOpenStackHelper.rabbitmq_settings(neutron, "neutron"),
       keystone_settings: keystone_settings,
+      memcached_servers: memcached_servers,
       ssl_enabled: neutron[:neutron][:api][:protocol] == "https",
       ssl_cert_file: neutron[:neutron][:ssl][:certfile],
       ssl_key_file: neutron[:neutron][:ssl][:keyfile],
@@ -148,10 +140,11 @@ template neutron[:neutron][:config_file] do
       allow_overlapping_ips: neutron[:neutron][:allow_overlapping_ips],
       dvr_enabled: neutron[:neutron][:use_dvr],
       network_nodes_count: network_nodes_count,
-      dns_domain: neutron[:neutron][:dhcp_domain],
+      dns_domain: neutron[:neutron][:dns_domain],
       mtu_value: mtu_value,
       infoblox: infoblox_settings,
-      ipam_driver: ipam_driver
+      ipam_driver: ipam_driver,
+      rpc_workers: neutron[:neutron][:rpc_workers]
     )
 end
 

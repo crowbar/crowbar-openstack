@@ -41,7 +41,7 @@ service_password = node[:swift][:dispersion][:service_password]
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
-                       tenant: keystone_settings["admin_tenant"] }
+                       project: keystone_settings["admin_project"] }
 
 keystone_register "swift dispersion wakeup keystone" do
   protocol keystone_settings["protocol"]
@@ -58,8 +58,8 @@ keystone_register "create tenant #{service_tenant} for dispersion" do
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
-  tenant_name service_tenant
-  action :add_tenant
+  project_name service_tenant
+  action :add_project
 end
 
 keystone_register "add #{service_user}:#{service_tenant} user" do
@@ -70,7 +70,7 @@ keystone_register "add #{service_user}:#{service_tenant} user" do
   auth register_auth_hash
   user_name service_user
   user_password service_password
-  tenant_name service_tenant
+  project_name service_tenant
   action :add_user
 end
 
@@ -82,15 +82,21 @@ keystone_register "add #{service_user}:#{service_tenant} user admin role" do
   auth register_auth_hash
   user_name service_user
   role_name "admin"
-  tenant_name service_tenant
+  project_name service_tenant
   action :add_access
 end
 
 dispersion_cmd="swift-dispersion-populate"
+
+env = "OS_USERNAME='#{service_user}' "
+env << "OS_PASSWORD='#{service_password}' "
+env << "OS_PROJECT_NAME='#{service_tenant}' "
+env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
+env << "OS_ENDPOINT_TYPE=internalURL"
 if keystone_settings["insecure"]
-  swift_cmd="swift --insecure"
+  swift_cmd = "#{env} swift --insecure"
 else
-  swift_cmd="swift"
+  swift_cmd = "#{env} swift"
 end
 
 template node[:swift][:dispersion_config_file] do
@@ -117,10 +123,5 @@ execute "populate-dispersion" do
   ignore_failure true
   only_if "#{swift_cmd} \
                -V #{keystone_settings["api_version"]} \
-               --os-tenant-name #{service_tenant} \
-               --os-username #{service_user} \
-               --os-password '#{service_password}' \
-               --os-auth-url #{keystone_settings["internal_auth_url"]} \
-               --os-endpoint-type internalURL \
                stat dispersion_objects 2>&1 | grep 'Container.*not found'"
 end

@@ -1,0 +1,170 @@
+# Copyright 2017 FUJITSU LIMITED
+
+################################################################################
+# Host definitions. Replace monasca_hosts, openstack_host,
+# ansible_ssh_user, ssh_user_openstack with valid informations.
+################################################################################
+
+localhost                        ansible_connection=local
+
+# networks
+internal-node-1                  ansible_ssh_host=<%= @monasca_monitoring_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+public-node-1                    ansible_ssh_host=<%= @monasca_public_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Monasca host
+monasca-node                     ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Openstack hosts
+keystone-node                    ansible_ssh_host=<%= @keystone_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Monasca-log-transformer
+log-transformer-node             ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Monasca-log-persister
+log-persister-node               ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Kibana
+kibana-node                      ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Elasticsearch
+elasticsearch-node               ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Memcached
+memcached-node                   ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Kafka
+kafka-node                       ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Zookeeper
+zookeeper-node                   ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Monasca-api
+monasca-api-node                 ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Monasca-log-api
+monasca-log-api-node             ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Monasca-notification
+monasca-notification-node        ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Monasca-persister node
+monasca-persister-node           ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Monasca-log-metric node
+monasca-log-metrics-node         ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Storm Nimbus node
+storm-nimbus-node                ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Storm Supervisor node
+storm-supervisor-node            ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Monasca-thresh host
+monasca-thresh-node              ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# MariaDB node
+mariadb-node                     ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# Elasticsearch Curator
+elasticsearch-curator-node       ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+# InfluxDB node
+influxdb-node                    ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+
+################################################################################
+# Other group definition
+################################################################################
+
+[openstack_group]
+keystone-node
+
+[memcached_group]
+memcached-node memcached_listen_node_ip=internal-node-1
+
+[kafka_group]
+kafka-node kafka_listen_ip=internal-node-1
+
+[zookeeper_group]
+zookeeper-node zookeeper_listen_ip=internal-node-1
+
+[monasca_group]
+monasca-node
+
+[monasca_api_group]
+monasca-api-node database_node_for_api=internal-node-1 influxdb_node_for_api=internal-node-1 monasca_api_listen_ip=public-node-1
+
+[monasca_notification_group]
+monasca-notification-node database_node_for_notification=internal-node-1
+
+[monasca_persister_group]
+monasca-persister-node influxdb_node_for_persister=internal-node-1
+
+[monasca_log_api_group]
+monasca-log-api-node log_api_listen_ip=public-node-1
+
+[monasca_log_metrics_group]
+monasca-log-metrics-node
+
+[monasca_log_persister_group]
+log-persister-node
+
+[monasca_log_transformer_group]
+log-transformer-node
+
+[elasticsearch_group]
+elasticsearch-node elastic_listen_ip=internal-node-1
+
+[kibana_group]
+kibana-node es_node_for_kibana=elasticsearch-node kibana_listen_ip=internal-node-1
+
+[storm_nimbus_group]
+storm-nimbus-node storm_listen_ip=internal-node-1
+
+[storm_supervisor_group]
+storm-supervisor-node storm_listen_ip=internal-node-1
+
+[monasca_thresh_group]
+monasca-thresh-node database_node_for_thresh=monasca-node monasca_thresh_listen_ip=internal-node-1
+
+[mariadb_group]
+mariadb-node mariadb_listen_ip=internal-node-1
+
+[elasticsearch_curator_group]
+elasticsearch-curator-node
+
+[influxdb_group]
+influxdb-node influxdb_listen_ip=internal-node-1
+
+################################################################################
+# Group inheritance
+################################################################################
+
+[elkstack_group:children]
+elasticsearch_group
+kibana_group
+monasca_log_persister_group
+monasca_log_transformer_group
+monasca_log_metrics_group
+elasticsearch_curator_group
+
+[storm_group:children]
+storm_nimbus_group
+storm_supervisor_group
+
+[all_group:children]
+openstack_group
+monasca_group
+
+[monasca_group:children]
+elkstack_group
+memcached_group
+kafka_group
+zookeeper_group
+monasca_log_api_group
+monasca_api_group
+monasca_notification_group
+monasca_persister_group
+storm_group
+monasca_thresh_group
+mariadb_group
+influxdb_group

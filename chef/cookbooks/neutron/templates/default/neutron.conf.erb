@@ -12,13 +12,12 @@ ipam_driver = <%= @ipam_driver %>
 global_physnet_mtu = <%= @mtu_value %>
 use_ssl = <%= @ssl_enabled ? "True" : "False" %>
 api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
-rpc_workers = 0
+rpc_workers = <%= @rpc_workers %>
 dhcp_agents_per_network = <%= @network_nodes_count %>
 <% if @dvr_enabled -%>
 router_distributed = True
 <% end -%>
 debug = <%= @debug ? "True" : "False" %>
-verbose = <%= @verbose ? "True" : "False" %>
 log_dir = /var/log/neutron
 use_syslog = <%= @use_syslog ? "True" : "False" %>
 use_stderr = false
@@ -52,6 +51,12 @@ password = <%= @keystone_settings['service_password'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
 project_domain_name = <%= @keystone_settings['admin_domain'] %>
 user_domain_name = <%= @keystone_settings['admin_domain'] %>
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:neutron][:memcache_secret_key] %>
+service_token_roles_required = true
+service_token_roles = admin
+
 
 [nova]
 region_name = <%= @keystone_settings['endpoint_region'] %>
@@ -71,6 +76,14 @@ lock_path = /var/run/neutron
 [oslo_messaging_notifications]
 driver = neutron.openstack.common.notifier.rpc_notifier
 
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+
 [ssl]
 <% if @ssl_cert_required -%>
 ca_file = <%= @ssl_ca_file %>
@@ -84,7 +97,7 @@ cloud_data_center_id = <%= @infoblox[:cloud_data_center_id] %>
 ipam_agent_workers = <%= @infoblox[:ipam_agent_workers] %>
 <% @infoblox[:grids].each_index do |grid| -%>
 # Per-grid configuration for infoblox grid <%= grid %>
-[infoblox-dc:<%= grid %>]
+[infoblox-dc:<%= grid + 1 %>]
 admin_user_name = <%= @infoblox[:grids][grid][:admin_user_name] %>
 admin_password = <%= @infoblox[:grids][grid][:admin_password] %>
 grid_master_name = <%= @infoblox[:grids][grid][:grid_master_name] %>

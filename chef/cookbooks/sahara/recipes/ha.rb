@@ -34,11 +34,12 @@ end.run_action(:create)
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required packages installed before we create the pacemaker
 # resources
-crowbar_pacemaker_sync_mark "sync-sahara before_ha"
+crowbar_pacemaker_sync_mark "sync-sahara_before_ha"
 
 # Avoid races when creating pacemaker resources
 crowbar_pacemaker_sync_mark "wait-sahara_ha_resources"
 
+rabbit_settings = fetch_rabbitmq_settings
 transaction_objects = []
 
 ["api", "engine"].each do |service|
@@ -47,7 +48,7 @@ transaction_objects = []
   objects = openstack_pacemaker_controller_clone_for_transaction primitive do
     agent node[:sahara][:ha][service.to_sym][:ra]
     op node[:sahara][:ha][:op]
-    order_only_existing "( postgresql rabbitmq cl-keystone )"
+    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
   end
   transaction_objects.push(objects)
 end

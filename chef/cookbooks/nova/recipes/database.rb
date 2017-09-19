@@ -28,9 +28,10 @@ db_settings = fetch_database_settings
 crowbar_pacemaker_sync_mark "wait-nova_database" do
   # the db sync is very slow for nova
   timeout 120
+  only_if { ha_enabled }
 end
 
-[node[:nova][:db], node[:nova][:api_db]].each do |d|
+[node[:nova][:db], node[:nova][:api_db], node[:nova][:placement_db]].each do |d|
   # Creates empty nova database
   database "create #{d[:database]} database" do
     connection db_settings[:connection]
@@ -62,6 +63,29 @@ end
   end
 end
 
+# create the nova_cell0 database (similar to nova_api) and give the
+# nova DB user the correct privileges
+database "create nova_cell0 database" do
+  connection db_settings[:connection]
+  database_name "nova_cell0"
+  provider db_settings[:provider]
+  action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+database_user "grant privileges to the #{node[:nova][:db][:user]} database user" do
+  connection db_settings[:connection]
+  database_name "nova_cell0"
+  username node[:nova][:db][:user]
+  password node[:nova][:db][:password]
+  host "%"
+  privileges db_settings[:privs]
+  provider db_settings[:user_provider]
+  action :grant
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+
 execute "nova-manage api_db sync" do
   user node[:nova][:user]
   group node[:nova][:group]
@@ -75,10 +99,37 @@ execute "nova-manage api_db sync" do
   end
 end
 
+# handle cell0 and cell1 before doing the db sync
+execute "nova-manage create cell0" do
+  user node[:nova][:user]
+  group node[:nova][:group]
+  command "nova-manage cell_v2 map_cell0"
+  action :run
+  # TODO: Does not work on Newton (14.x.x). Remove when switched to Ocata
+  not_if 'rpm -qa --qf "%{VERSION}\n" openstack-nova|grep ^14\.'
+  only_if do
+    !node[:nova][:db_synced] &&
+      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
+execute "nova-manage create cell1" do
+  user node[:nova][:user]
+  group node[:nova][:group]
+  command "nova-manage cell_v2 create_cell --name cell1 --verbose"
+  action :run
+  # TODO: Does not work on Newton (14.x.x). Remove when switched to Ocata
+  not_if 'rpm -qa --qf "%{VERSION}\n" openstack-nova|grep ^14\.'
+  only_if do
+    !node[:nova][:db_synced] &&
+      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
 execute "nova-manage db sync up to revision 329" do
   user node[:nova][:user]
   group node[:nova][:group]
-  command "nova-manage db sync --version 329"
+  command "nova-manage db sync 329"
   action :run
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
@@ -102,8 +153,8 @@ execute "nova-manage db online_data_migrations" do
   end
 end
 
-# Update Nova DB to revision 334 (most recent Newton migration)
-execute "nova-manage db sync (continue)" do
+# Update Nova DB to latest revision
+execute "nova-manage db sync" do
   user node[:nova][:user]
   group node[:nova][:group]
   command "nova-manage db sync"
@@ -152,7 +203,4 @@ ruby_block "mark node for nova api_db_sync" do
   subscribes :create, "execute[nova-manage api_db sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-nova_database"
-
-# save data so it can be found by search
-node.save
+crowbar_pacemaker_sync_mark "create-nova_database" if ha_enabled

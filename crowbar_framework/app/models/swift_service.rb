@@ -17,11 +17,11 @@
 require "rexml/document"
 include ERB::Util # for html_escape
 
-class SwiftService < PacemakerServiceObject
+class SwiftService < OpenstackServiceObject
   class ServiceError < StandardError
   end
 
-  def initialize(thelogger)
+  def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "swift"
   end
@@ -38,7 +38,7 @@ class SwiftService < PacemakerServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         },
@@ -46,7 +46,7 @@ class SwiftService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -55,7 +55,7 @@ class SwiftService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         },
@@ -63,7 +63,7 @@ class SwiftService < PacemakerServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.2",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }

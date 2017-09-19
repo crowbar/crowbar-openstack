@@ -20,4 +20,5 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "sahara", "sahara-server")
   include_recipe "sahara::api"
   include_recipe "sahara::engine"
   include_recipe "sahara::ha"
+  include_recipe "sahara::monitor_monasca"
 end

@@ -1,7 +1,6 @@
 [DEFAULT]
 evaluation_interval = <%= @evaluation_interval %>
 debug = <%= @debug ? "true" : "false" %>
-verbose = <%= @verbose ? "true" : "false" %>
 log_dir = /var/log/aodh
 transport_url = <%= @rabbit_settings[:url] %>
 
@@ -25,6 +24,11 @@ project_name = <%= @keystone_settings['service_tenant'] %>
 project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
 auth_type = password
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:aodh][:memcache_secret_key] %>
+service_token_roles_required = true
+service_token_roles = admin
 
 [service_credentials]
 region_name = <%= @keystone_settings['endpoint_region'] %>
@@ -36,3 +40,11 @@ password = <%= @keystone_settings['service_password'] %>
 project_domain_name = <%= @keystone_settings["admin_domain"]%>
 user_domain_name = <%= @keystone_settings["admin_domain"] %>
 auth_type = password
+
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>

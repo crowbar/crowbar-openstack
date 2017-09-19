@@ -7,7 +7,6 @@ registry_host = <%= @registry_bind_host %>
 registry_port = <%= @registry_bind_port %>
 registry_client_insecure = <%= @keystone_settings["insecure"] %>
 debug = <%= node[:glance][:debug] ? 'True' : 'False' %>
-verbose = <%= node[:glance][:verbose] ? 'True' : 'False' %>
 log_file = <%= node[:glance][:cache][:log_file] %>
 use_syslog = <%= node[:glance][:use_syslog] ? 'True' : 'False' %>
 use_stderr = false

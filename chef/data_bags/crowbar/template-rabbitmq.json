@@ -8,6 +8,18 @@
       "password": "",
       "user": "nova",
       "vhost": "/nova",
+      "ssl": {
+        "enabled": false,
+        "port": 5671,
+        "certfile": "/etc/rabbitmq/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/rabbitmq/ssl/private/signing_key.pem",
+        "insecure": false,
+        "generate_certs": false,
+        "cert_required": false,
+        "ca_certs": "/etc/rabbitmq/ssl/certs/ca.pem",
+        "client_ca_certs": "/etc/ssl/certs/rabbitca.pem"
+      },
+      "cluster": true,
       "ha": {
         "storage": {
           "mode": "shared",
@@ -33,7 +45,7 @@
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 11,
+      "schema-revision": 101,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },

@@ -20,6 +20,7 @@
             "site_branding_link": { "type": "str", "required": true },
             "help_url": { "type": "str", "required": true },
             "session_timeout": { "type": "int", "required": true },
+            "secret_key": { "type": "str", "required": true },
             "db" : {
               "type" : "map",
               "required" : true,
@@ -47,8 +48,7 @@
                 "volume" : { "type": "str", "required": true },
                 "image" : { "type": "str", "required": true },
                 "orchestration" : { "type": "str", "required": true },
-                "network" : { "type": "str", "required": true },
-                "telemetry" : { "type": "str", "required": true }
+                "network" : { "type": "str", "required": true }
               }
             },
             "can_set_mount_point": { "type": "bool", "required": false },

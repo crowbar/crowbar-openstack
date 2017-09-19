@@ -124,6 +124,13 @@ when "redhat", "centos", "scientific", "oracle"
 
 when "suse"
 
+  default["postgresql"]["client"]["packages"] = [
+    "postgresql",
+    "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-pg"
+  ]
+  default["postgresql"]["server"]["packages"] = ["postgresql-server"]
+  default["postgresql"]["contrib"]["packages"] = ["postgresql-contrib"]
+
   case
   when node["platform_version"].to_f <= 11.2
     default["postgresql"]["version"] = "8.3"
@@ -142,12 +149,10 @@ when "suse"
       "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-pg"]
     default["postgresql"]["server"]["packages"] = ["postgresql93-server"]
     default["postgresql"]["contrib"]["packages"] = ["postgresql93-contrib"]
-  else
+  when node["platform_version"].to_f < 12.3
     default["postgresql"]["version"] = "9.4"
-    default["postgresql"]["client"]["packages"] = ["postgresql94",
-      "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-pg"]
-    default["postgresql"]["server"]["packages"] = ["postgresql94-server"]
-    default["postgresql"]["contrib"]["packages"] = ["postgresql94-contrib"]
+  else
+    default["postgresql"]["version"] = "9.6"
   end
 
   default["postgresql"]["dir"] = "/var/lib/pgsql/data"
@@ -155,16 +160,18 @@ when "suse"
 
 when "opensuse"
 
-  # This is valid as of openSUSE Leap 42.1
+  default["postgresql"]["version"] = if node["platform_version"].to_f < 42.3
+    "9.4"
+  else
+    "9.6"
+  end
 
-  default["postgresql"]["version"] = "9.4"
   default["postgresql"]["client"]["packages"] = [
-    "postgresql94",
+    "postgresql",
     "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-pg"
   ]
-  default["postgresql"]["server"]["packages"] = ["postgresql94-server"]
-  default["postgresql"]["contrib"]["packages"] = ["postgresql94-contrib"]
-
+  default["postgresql"]["server"]["packages"] = ["postgresql-server"]
+  default["postgresql"]["contrib"]["packages"] = ["postgresql-contrib"]
   default["postgresql"]["dir"] = "/var/lib/pgsql/data"
   default["postgresql"]["sysconfig"] = "/etc/sysconfig/postgresql"
 

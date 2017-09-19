@@ -24,6 +24,11 @@ class Chef
       CrowbarOpenStackHelper.database_settings(node, barclamp)
     end
 
+    def fetch_database_connection_string(db_auth, barclamp = @cookbook_name)
+      db_settings = CrowbarOpenStackHelper.database_settings(node, barclamp)
+      CrowbarOpenStackHelper.database_connection_string(db_settings, db_auth)
+    end
+
     def fetch_rabbitmq_settings(barclamp=@cookbook_name)
       CrowbarOpenStackHelper.rabbitmq_settings(node, barclamp)
     end
@@ -39,6 +44,11 @@ class Chef
     class Template
       def fetch_database_settings(barclamp=@cookbook_name)
         CrowbarOpenStackHelper.database_settings(node, barclamp)
+      end
+
+      def fetch_database_connection_string(db_auth, barclamp = @cookbook_name)
+        db_settings = CrowbarOpenStackHelper.database_settings(node, barclamp)
+        CrowbarOpenStackHelper.database_connection_string(db_settings, db_auth)
       end
 
       def fetch_rabbitmq_settings(barclamp=@cookbook_name)
@@ -98,6 +108,22 @@ class CrowbarOpenStackHelper
     @database_settings[instance]
   end
 
+  def self.database_connection_string(db_settings, db_auth_attr)
+    db_auth = db_auth_attr.to_hash
+    db_conn_scheme = db_settings[:url_scheme]
+    db_charset = ""
+
+    if db_conn_scheme == "mysql"
+      db_conn_scheme = "mysql+pymysql"
+      db_charset = "?charset=utf8"
+    end
+
+    "#{db_conn_scheme}://" \
+    "#{db_auth['user']}:#{db_auth['password']}@#{db_settings[:address]}/" \
+    "#{db_auth['database']}" \
+    "#{db_charset}"
+  end
+
   def self.rabbitmq_settings(node, barclamp)
     instance = node[barclamp][:rabbitmq_instance] || "default"
 
@@ -107,39 +133,120 @@ class CrowbarOpenStackHelper
     # marker for that.
     if @rabbitmq_settings_cache_time != node[:ohai_time]
       if @rabbitmq_settings
-        Chef::Log.info("Invalidating rabbitmq settings cache " \
-                       "on behalf of #{barclamp}")
+        Chef::Log.info("Invalidating rabbitmq settings cache on behalf of #{barclamp}")
       end
       @rabbitmq_settings = nil
       @rabbitmq_settings_cache_time = node[:ohai_time]
     end
 
     if @rabbitmq_settings && @rabbitmq_settings.include?(instance)
-      Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]} [cached]")
+      Chef::Log.info("RabbitMQ settings found [cached]")
     else
       @rabbitmq_settings ||= Hash.new
-      rabbit = get_node(node, "rabbitmq-server", "rabbitmq", instance)
+      rabbits = get_nodes(node, "rabbitmq-server", "rabbitmq", instance)
 
-      if rabbit.nil?
+      if rabbits.empty?
         Chef::Log.warn("No RabbitMQ server found!")
       else
-        @rabbitmq_settings[instance] = {
-          address: rabbit[:rabbitmq][:address],
-          port: rabbit[:rabbitmq][:port],
-          user: rabbit[:rabbitmq][:user],
-          password: rabbit[:rabbitmq][:password],
-          vhost: rabbit[:rabbitmq][:vhost],
+        rabbit = rabbits.first
+
+        port = if rabbit[:rabbitmq][:ssl][:enabled]
+          rabbit[:rabbitmq][:ssl][:port]
+        else
+          rabbit[:rabbitmq][:port]
+        end
+
+        client_ca_certs = if rabbit[:rabbitmq][:ssl][:enabled] && \
+            !rabbit[:rabbitmq][:ssl][:insecure]
+          rabbit[:rabbitmq][:ssl][:client_ca_certs]
+        end
+
+        single_rabbit_settings = {
+          use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
+          client_ca_certs: client_ca_certs,
           url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
             "#{rabbit[:rabbitmq][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{rabbit[:rabbitmq][:port]}/" \
-            "#{rabbit[:rabbitmq][:vhost]}"
+            "#{rabbit[:rabbitmq][:address]}:#{port}/" \
+            "#{rabbit[:rabbitmq][:vhost]}",
+          trove_url: "rabbit://#{rabbit[:rabbitmq][:trove][:user]}:" \
+            "#{rabbit[:rabbitmq][:trove][:password]}@" \
+            "#{rabbit[:rabbitmq][:address]}:#{port}/" \
+            "#{rabbit[:rabbitmq][:trove][:vhost]}",
+          durable_queues: false,
+          ha_queues: false,
+          pacemaker_resource: "rabbitmq"
         }
 
-        Chef::Log.info("RabbitMQ server found at #{@rabbitmq_settings[instance][:address]}")
+        if !rabbit[:rabbitmq][:cluster]
+          @rabbitmq_settings[instance] = single_rabbit_settings
+          Chef::Log.info("RabbitMQ server found")
+        else
+          # transport_url format:
+          # https://docs.openstack.org/oslo.messaging/latest/reference/transport.html#oslo_messaging.TransportURL
+          rabbit_hosts = rabbits.map do |rabbit|
+            port = if rabbit[:rabbitmq][:ssl][:enabled]
+              rabbit[:rabbitmq][:ssl][:port]
+            else
+              rabbit[:rabbitmq][:port]
+            end
+            url = "#{rabbit[:rabbitmq][:user]}:"
+            url << "#{rabbit[:rabbitmq][:password]}@"
+            url << "#{rabbit[:rabbitmq][:address]}:#{port}"
+            url << "/#{rabbit[:rabbitmq][:vhost]}" if rabbit.equal? rabbits.last
+            url.prepend("rabbit://") if rabbit.equal? rabbits.first
+
+            url
+          end
+
+          trove_rabbit_hosts = rabbits.map do |rabbit|
+            port = if rabbit[:rabbitmq][:ssl][:enabled]
+              rabbit[:rabbitmq][:ssl][:port]
+            else
+              rabbit[:rabbitmq][:port]
+            end
+
+            url = "#{rabbit[:rabbitmq][:trove][:user]}:"
+            url << "#{rabbit[:rabbitmq][:trove][:password]}@"
+            url << "#{rabbit[:rabbitmq][:address]}:#{port}"
+            url << "/#{rabbit[:rabbitmq][:trove][:vhost]}" unless rabbit.equal? rabbits.first
+            url.prepend("rabbit://") if rabbit.equal? rabbits.first
+
+            url
+          end
+
+          @rabbitmq_settings[instance] = {
+            use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
+            client_ca_certs: client_ca_certs,
+            url: rabbit_hosts.join(","),
+            trove_url: trove_rabbit_hosts.join(","),
+            durable_queues: true,
+            ha_queues: true,
+            pacemaker_resource: "ms-rabbitmq"
+          }
+          Chef::Log.info("RabbitMQ cluster found")
+        end
       end
     end
 
     @rabbitmq_settings[instance]
+  end
+
+  def self.insecure(attributes)
+    use_ssl = if attributes.key?("api") && attributes["api"].key?("protocol")
+      # aodh, cinder, glance, heat, keystone, manila, neutron
+      attributes["api"]["protocol"] == "https"
+    elsif attributes.key?("api") && attributes["api"].key?("ssl")
+      # barbican
+      attributes["api"]["ssl"]
+    elsif attributes.key?("ssl") && attributes["ssl"].key?("enabled")
+      # nova
+      attributes["ssl"]["enabled"]
+    else
+      # magnum, sahara, trove
+      false
+    end
+
+    use_ssl && attributes["ssl"]["insecure"]
   end
 
   private
@@ -153,10 +260,20 @@ class CrowbarOpenStackHelper
         node[barclamp]["config"]["environment"] == "#{barclamp}-config-#{instance}"
       result = node
     else
-      nodes, _, _ = Chef::Search::Query.new.search(:node, "roles:#{role} AND #{barclamp}_config_environment:#{barclamp}-config-#{instance}")
+      nodes, = Chef::Search::Query.new.search(:node, "roles:#{role} AND " \
+      "#{barclamp}_config_environment:#{barclamp}-config-#{instance}")
       result = nodes.first unless nodes.empty?
     end
 
     result
   end
+
+  def self.get_nodes(node, role, barclamp, instance)
+    nodes, = Chef::Search::Query.new.search(:node, "roles:#{role} AND " \
+    "#{barclamp}_config_environment:#{barclamp}-config-#{instance}")
+    nodes
+  end
+
+  private_class_method :get_node
+  private_class_method :get_nodes
 end
