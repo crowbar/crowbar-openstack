@@ -231,6 +231,14 @@
                   }
                 }
               }
+            },
+            "ha_rate_limit": {
+              "type": "map", "required": true, "mapping": {
+                "nova-api": { "type": "int", "required": true },
+                "nova-metadata": { "type": "int", "required": true },
+                "nova-novncproxy": { "type": "int", "required": true },
+                "nova-serialproxy": { "type": "int", "required": true }
+              }
             }
           }
         }
