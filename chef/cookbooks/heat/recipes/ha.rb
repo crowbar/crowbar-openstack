@@ -53,7 +53,7 @@ if node[:pacemaker][:clone_stateless_services]
   transaction_objects = []
 
   services.each do |service|
-    primitive_name = "heat-#{service}".gsub("_","-")
+    primitive_name = "heat-#{service}".tr("_","-")
     ordering = "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone cl-nova-api )"
 
     objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do

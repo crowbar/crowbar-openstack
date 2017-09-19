@@ -131,11 +131,10 @@ if node[:pacemaker][:clone_stateless_services]
     case node[:neutron][:networking_plugin]
     when "ml2"
       ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
-      case
-      when ml2_mech_drivers.include?("openvswitch")
+      if ml2_mech_drivers.include?("openvswitch")
         neutron_agent = node[:neutron][:platform][:ovs_agent_name]
         neutron_agent_ra = node[:neutron][:ha][:network]["openvswitch_ra"]
-      when ml2_mech_drivers.include?("linuxbridge")
+      elsif ml2_mech_drivers.include?("linuxbridge")
         neutron_agent = node[:neutron][:platform][:lb_agent_name]
         neutron_agent_ra = node[:neutron][:ha][:network]["linuxbridge_ra"]
       end
