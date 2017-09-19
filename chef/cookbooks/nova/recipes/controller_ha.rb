@@ -78,19 +78,15 @@ if node[:pacemaker][:clone_stateless_services]
   rabbit_settings = fetch_rabbitmq_settings
   transaction_objects = []
 
-  services = %w(api cert conductor consoleauth scheduler)
-  if node[:nova][:use_novnc]
-    services << "novncproxy"
-  end
-  if node[:nova][:use_serial]
-    services << "serialproxy"
-  end
+  services = ["api", "cert", "conductor", "consoleauth", "scheduler"]
+  services.push("novncproxy") if node[:nova][:use_novnc]
+  services.push("serialproxy") if node[:nova][:use_serial]
 
   services.each do |service|
-    if %w(rhel suse).include?(node[:platform_family])
-      primitive_ra = "systemd:openstack-nova-#{service}"
+    primitive_ra = if ["rhel", "suse"].include?(node[:platform_family])
+      "systemd:openstack-nova-#{service}"
     else
-      primitive_ra = "systemd:nova-#{service}"
+      "systemd:nova-#{service}"
     end
 
     primitive_name = "nova-#{service}"
