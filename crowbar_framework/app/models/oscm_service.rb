@@ -42,7 +42,6 @@ class OscmService < PacemakerServiceObject
     end
   end
 
-  
   def proposal_dependencies(role)
     answer = []
     ["heat"].each do |dep|
@@ -62,7 +61,7 @@ class OscmService < PacemakerServiceObject
     base["deployment"][@bc_name]["elements"] = {
       "oscm-server" => [server_nodes.first.name]
     } unless server_nodes.nil?
-    
+
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
     base["attributes"][@bc_name]["heat_instance"] = find_dep_proposal("heat")
 
@@ -75,5 +74,4 @@ class OscmService < PacemakerServiceObject
 
     super
   end
-
 end
