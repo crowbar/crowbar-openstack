@@ -87,5 +87,6 @@ service "openstack-monasca-log-agent" do
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
 end
+utils_systemd_service_restart "openstack-monasca-log-agent"
 
 node.save

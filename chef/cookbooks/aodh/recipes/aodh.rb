@@ -231,6 +231,9 @@ service "aodh-evaluator" do
   subscribes :restart, resources(template: node[:aodh][:config_file])
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
+utils_systemd_service_restart "aodh-evaluator" do
+  action use_crowbar_pacemaker_service ? :disable : :enable
+end
 
 service "aodh-notifier" do
   service_name node[:aodh][:notifier][:service_name]
@@ -239,6 +242,9 @@ service "aodh-notifier" do
   subscribes :restart, resources(template: node[:aodh][:config_file])
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
+utils_systemd_service_restart "aodh-notifier" do
+  action use_crowbar_pacemaker_service ? :disable : :enable
+end
 
 service "aodh-listener" do
   service_name node[:aodh][:listener][:service_name]
@@ -246,6 +252,9 @@ service "aodh-listener" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:aodh][:config_file])
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
+end
+utils_systemd_service_restart "aodh-listener" do
+  action use_crowbar_pacemaker_service ? :disable : :enable
 end
 
 if ha_enabled

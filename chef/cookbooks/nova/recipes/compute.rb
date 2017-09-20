@@ -32,6 +32,7 @@ if %w(rhel suse).include?(node[:platform_family])
       service_name "iscsid"
     end
   end
+  utils_systemd_service_restart "open-iscsi"
 end
 
 case node[:nova][:libvirt_type]
@@ -216,6 +217,10 @@ case node[:nova][:libvirt_type]
         end
         only_if { node[:platform_family] == "suse" && node[:platform_version].to_f > 12.1 }
       end
+      utils_systemd_service_restart "virtlogd" do
+        action node[:nova][:ha][:compute][:enabled] ? :disable : :enable
+        only_if { node[:platform_family] == "suse" && node[:platform_version].to_f > 12.1 }
+      end
 
       service "libvirtd" do
         action [:enable, :start]
@@ -224,11 +229,15 @@ case node[:nova][:libvirt_type]
           supports no_crm_maintenance_mode: true
         end
       end
+      utils_systemd_service_restart "libvirtd" do
+        action node[:nova][:ha][:compute][:enabled] ? :disable : :enable
+      end
     else
       service "libvirt-bin" do
         action :nothing
         supports status: true, start: true, stop: true, restart: true
       end
+      utils_systemd_service_restart "libvirt-bin"
 
       cookbook_file "/etc/libvirt/qemu.conf" do
         owner "root"
@@ -379,6 +388,7 @@ unless cinder_servers.empty?
     service "multipathd" do
       action [:enable, :start]
     end
+    utils_systemd_service_restart "multipathd"
   end
 end
 

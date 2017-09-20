@@ -31,3 +31,7 @@ service "openstack-barbican-keystone-listener" do
   action [:disable, :stop] unless node[:barbican][:enable_keystone_listener]
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
+utils_systemd_service_restart "openstack-barbican-keystone-listener" do
+  action use_crowbar_pacemaker_service ? :disable : :enable
+  only_if { node[:barbican][:enable_keystone_listener] }
+end

@@ -100,5 +100,8 @@ define :neutron_metadata,
         supports status: true, restart: true
       end
     end
+    utils_systemd_service_restart node[:neutron][:platform][:metadata_agent_name] do
+      action use_crowbar_pacemaker_service ? :disable : :enable
+    end
   end
 end

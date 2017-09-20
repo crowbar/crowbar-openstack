@@ -41,3 +41,7 @@ service "ceilometer-agent-compute" do
     action [:disable, :stop]
   end
 end
+utils_systemd_service_restart "ceilometer-agent-compute" do
+  action :enable
+  only_if { is_compute }
+end

@@ -287,6 +287,7 @@ service "tgt" do
     restart_command "stop tgt; start tgt"
   end
 end
+utils_systemd_service_restart "tgt"
 
 volume_elements = node[:cinder][:elements]["cinder-volume"]
 ha_enabled = CrowbarPacemakerHelper.cluster_enabled?(node) &&

@@ -34,6 +34,7 @@ service "memcached" do
   action :nothing
   supports status: true, start: true, stop: true, restart: true
 end
+utils_systemd_service_restart "memcached"
 
 template "/etc/memcached.conf" do
   case node[:platform_family]
