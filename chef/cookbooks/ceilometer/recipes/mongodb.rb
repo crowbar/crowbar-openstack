@@ -42,6 +42,9 @@ service mongo_service do
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
+utils_systemd_service_restart mongo_service do
+  action ha_enabled ? :disable : :enable
+end
 
 if ha_enabled
   crowbar_pacemaker_sync_mark "wait-mongodb_service"

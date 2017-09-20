@@ -61,6 +61,10 @@ if node["roles"].include?("monasca-server")
     action [:enable, :start]
     # provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   end
+  utils_systemd_service_restart agent_settings[:agent_service_name] do
+    # action ha_enabled ? :disable : :enable
+    action :enable
+  end
 
   monasca_agent_plugin_elastic "elasticsearch checks" do
     built_by "agent.rb"
@@ -129,6 +133,10 @@ service agent_settings[:agent_service_name] do
   # provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   subscribes :restart, resources(template: "/etc/monasca/agent/agent.yaml")
   subscribes :restart, resources(template: "/etc/monasca/agent/supervisor.conf")
+end
+utils_systemd_service_restart agent_settings[:agent_service_name] do
+  # action ha_enabled ? :disable : :enable
+  action :enable
 end
 
 ##########################################################

@@ -47,6 +47,9 @@ if node[:nova][:use_novnc]
     subscribes :restart, resources(template: node[:nova][:config_file]), :delayed
     provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
+  utils_systemd_service_restart "nova-novncproxy" do
+    action use_crowbar_pacemaker_service ? :disable : :enable
+  end
 end
 
 if node[:nova][:use_serial]
@@ -60,6 +63,9 @@ if node[:nova][:use_serial]
     subscribes :restart, resources(template: node[:nova][:config_file]), :delayed
     provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
+  utils_systemd_service_restart "nova-serialproxy" do
+    action use_crowbar_pacemaker_service ? :disable : :enable
+  end
 end
 
 service "nova-consoleauth" do
@@ -68,4 +74,7 @@ service "nova-consoleauth" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:nova][:config_file]), :delayed
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
+end
+utils_systemd_service_restart "nova-consoleauth" do
+  action use_crowbar_pacemaker_service ? :disable : :enable
 end

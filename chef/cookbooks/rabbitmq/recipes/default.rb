@@ -75,3 +75,6 @@ service "rabbitmq-server" do
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if node[:rabbitmq][:ha][:enabled]
 end
+utils_systemd_service_restart "rabbitmq-server" do
+  action node[:rabbitmq][:ha][:enabled] ? :disable : :enable
+end

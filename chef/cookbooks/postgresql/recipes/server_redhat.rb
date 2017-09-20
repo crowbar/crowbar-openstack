@@ -90,6 +90,9 @@ service "postgresql" do
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if node[:database][:ha][:enabled]
 end
+utils_systemd_service_restart "postgresql" do
+  action node[:database][:ha][:enabled] ? :disable : :enable
+end
 
 template "/etc/cron.daily/postgresql-logs" do
   source "cron-postgresql-logs.erb"

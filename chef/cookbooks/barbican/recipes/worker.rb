@@ -28,3 +28,6 @@ service "openstack-barbican-worker" do
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
+utils_systemd_service_restart "openstack-barbican-worker" do
+  action use_crowbar_pacemaker_service ? :disable : :enable
+end

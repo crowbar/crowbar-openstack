@@ -60,4 +60,7 @@ define :nova_package, enable: true, use_pacemaker_provider: false, restart_crm_r
 
     provider Chef::Provider::CrowbarPacemakerService if params[:use_pacemaker_provider]
   end
+  utils_systemd_service_restart nova_name do
+    action params[:use_pacemaker_provider] ? :disable : :enable
+  end
 end

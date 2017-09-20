@@ -32,6 +32,9 @@ service "ceilometer-agent-central" do
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
+utils_systemd_service_restart "ceilometer-agent-central" do
+  action ha_enabled ? :disable : :enable
+end
 
 if ha_enabled
   log "HA support for ceilometer-central is enabled"

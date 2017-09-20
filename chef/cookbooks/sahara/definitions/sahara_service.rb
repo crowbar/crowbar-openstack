@@ -27,4 +27,7 @@ define :sahara_service do
     subscribes :restart, resources(template: node[:sahara][:config_file])
     provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
+  utils_systemd_service_restart sahara_service_name do
+    action use_crowbar_pacemaker_service ? :disable : :enable
+  end
 end

@@ -318,6 +318,10 @@ if node[:swift][:frontend]=="native"
     # Do not even try to start the daemon if we don't have the ring yet
     only_if { ::File.exist? "/etc/swift/object.ring.gz" }
   end
+  utils_systemd_service_restart "swift-proxy" do
+    action use_crowbar_pacemaker_service ? :disable : :enable
+    only_if { ::File.exist? "/etc/swift/object.ring.gz" }
+  end
 elsif node[:swift][:frontend]=="uwsgi"
 
   service "swift-proxy" do

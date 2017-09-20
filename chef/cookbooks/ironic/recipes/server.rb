@@ -202,12 +202,18 @@ service "ironic-api" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:ironic][:config_file])
 end
+utils_systemd_service_restart "ironic-api" do
+  action :enable
+end
 
 service "ironic-conductor" do
   service_name node[:ironic][:conductor][:service_name]
   supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources(template: node[:ironic][:config_file])
+end
+utils_systemd_service_restart "ironic-conductor" do
+  action :enable
 end
 
 execute "ironic-dbsync" do

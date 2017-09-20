@@ -79,6 +79,7 @@ if node[:platform_family] == "suse"
       action ["disable", "stop"]
     end
   end
+  # No need for utils_systemd_service_restart: it's handled in the template already
 
   bash "reload systemd after tftp.service update" do
     code "systemctl daemon-reload"

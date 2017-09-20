@@ -229,17 +229,26 @@ service "openstack-ec2-api-api" do
   subscribes :restart, resources(template: node[:nova]["ec2-api"][:config_file])
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
+utils_systemd_service_restart "openstack-ec2-api-api" do
+  action use_crowbar_pacemaker_service ? :disable : :enable
+end
 
 service "openstack-ec2-api-metadata" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:nova]["ec2-api"][:config_file])
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
+utils_systemd_service_restart "openstack-ec2-api-metadata" do
+  action use_crowbar_pacemaker_service ? :disable : :enable
+end
 
 service "openstack-ec2-api-s3" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:nova]["ec2-api"][:config_file])
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
+end
+utils_systemd_service_restart "openstack-ec2-api-s3" do
+  action use_crowbar_pacemaker_service ? :disable : :enable
 end
 
 if ha_enabled
