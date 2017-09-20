@@ -74,13 +74,22 @@ class Chef
         end
 
         def client
-          @client ||= Mysql2::Client.new(
+          client_options = {
             host: new_resource.connection[:host],
             socket: new_resource.connection[:socket],
             username: new_resource.connection[:username],
             password: new_resource.connection[:password],
             port: new_resource.connection[:port]
-          )
+          }
+          if new_resource.connection[:ssl][:enabled]
+            if new_resource.connection[:ssl][:insecure]
+              client_options[:sslverify] = false
+            else
+              client_options[:sslverify] = true
+              client_options[:sslca] = new_resource.connection[:ssl][:ca_certs]
+            end
+          end
+          @client ||= Mysql2::Client.new(client_options)
         end
 
         def close_client
