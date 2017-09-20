@@ -39,6 +39,7 @@
         "auth": true,
         "host": "",
         "port": 25,
+        "tls": false,
         "user": "",
         "password": "",
         "from": ""

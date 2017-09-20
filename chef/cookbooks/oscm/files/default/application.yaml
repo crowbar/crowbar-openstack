@@ -85,6 +85,9 @@ parameters:
   mail_auth:
     default: false
     type: string
+  mail_tls:
+    default: false
+    type: string
   keystone_user_pwd:
     default: oscm
     type: string
@@ -276,6 +279,7 @@ resources:
             $MAIL_USER: { get_param: mail_user }
             $MAIL_PORT: { get_param: mail_port }
             $MAIL_AUTH: { get_param: mail_auth }
+            $MAIL_TLS: { get_param: mail_tls }
             $KEYSTONE_USER_PWD: { get_param: keystone_user_pwd }
             $KEYSTONE_USER_NAME: { get_param: keystone_user_name }
             $KEYSTONE_URL: { get_param: keystone_url }

@@ -75,6 +75,7 @@
                 "auth": { "type": "bool", "required": true },
                 "host": { "type": "str", "required": true },
                 "port": { "type": "int", "required": true },
+                "tls":  { "type": "bool", "required": true },
                 "user": { "type": "str", "required": true },
                 "password": { "type": "str", "required": true },
                 "from": { "type": "str", "required": true }

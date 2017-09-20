@@ -25,6 +25,7 @@ en:
           auth: 'Authentication Required'
           host: 'Mail Host'
           port: 'SMTP Port'
+          tls:  'Enable TLS'
           user: 'User'
           password: 'Password'
           from: 'Oscm Email Address'

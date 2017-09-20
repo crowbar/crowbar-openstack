@@ -42,8 +42,9 @@ oscm_proxy_httphost = node[:oscm][:proxy][:http_host]
 oscm_proxy_httpport = node[:oscm][:proxy][:http_port]
 oscm_proxy_httpshost = node[:oscm][:proxy][:https_host]
 oscm_proxy_httpsport = node[:oscm][:proxy][:https_port]
-oscm_mail_host = node[:oscm][:mail][:host] 
-oscm_mail_port = node[:oscm][:mail][:port] 
+oscm_mail_host = node[:oscm][:mail][:host]
+oscm_mail_port = node[:oscm][:mail][:port]
+oscm_mail_tls = node[:oscm][:mail][:tls]
 oscm_mail_from = node[:oscm][:mail][:from]
 oscm_mail_auth = node[:oscm][:mail][:auth]
 oscm_mail_user = node[:oscm][:mail][:user]
@@ -236,7 +237,8 @@ bash "create oscm stacks" do
       ssh-keygen -t rsa -f #{oscm_keypair_crowbar_sshkey}
     fi
     openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}" --parameter "key_name=#{oscm_keypair_name}" --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
-    --parameter "mail_host=#{oscm_mail_host}" --parameter "mail_port=#{oscm_mail_port}" --parameter "mail_address=#{oscm_mail_from}" --parameter "mail_auth=#{oscm_mail_auth}" --parameter "mail_user=#{oscm_mail_user}" --parameter "mail_password=#{oscm_mail_pwd}"\
+    --parameter "mail_host=#{oscm_mail_host}" --parameter "mail_port=#{oscm_mail_port}" --parameter "mail_tls=#{oscm_mail_tls}" --parameter "mail_address=#{oscm_mail_from}"\
+    --parameter "mail_auth=#{oscm_mail_auth}" --parameter "mail_user=#{oscm_mail_user}" --parameter "mail_password=#{oscm_mail_pwd}"\
     --parameter "http_proxy=#{oscm_proxy_httphost}:#{oscm_proxy_httpport}" --parameter "https_proxy=#{oscm_proxy_httpshost}:#{oscm_proxy_httpsport}"\
     --parameter "registry_host=#{oscm_docker_host}" --parameter "registry_port=#{oscm_docker_port}"  --parameter "registry_user=#{oscm_docker_user}" --parameter "registry_port=#{oscm_docker_pwd}"\
     --parameter "ssl_path=#{oscm_ssl_scp_path}"\
