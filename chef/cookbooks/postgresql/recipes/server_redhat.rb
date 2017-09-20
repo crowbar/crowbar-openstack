@@ -88,10 +88,10 @@ service "postgresql" do
   service_name node["postgresql"]["server"]["service_name"]
   supports restart: true, status: true, reload: true, restart_crm_resource: true
   action [:enable, :start]
-  provider Chef::Provider::CrowbarPacemakerService if node[:database][:ha][:enabled]
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
 utils_systemd_service_restart "postgresql" do
-  action node[:database][:ha][:enabled] ? :disable : :enable
+  action ha_enabled ? :disable : :enable
 end
 
 template "/etc/cron.daily/postgresql-logs" do
