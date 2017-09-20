@@ -25,7 +25,16 @@
                 "innodb_buffer_pool_size": { "type": "int", "required": true },
                 "max_connections": { "type": "int", "required": true },
                 "tmp_table_size": { "type": "int", "required": true },
-                "max_heap_table_size": { "type": "int", "required": true }
+                "max_heap_table_size": { "type": "int", "required": true },
+                "ssl": {
+                  "type": "map", "required": true, "mapping": {
+                    "enabled": { "type": "bool", "required": true },
+                    "generate_certs": { "type": "bool", "required": true },
+                    "certfile": { "type" : "str", "required" : true },
+                    "keyfile": { "type" : "str", "required" : true },
+                    "ca_certs": { "type" : "str", "required" : true }
+                  }
+                }
               }
             },
             "postgresql" : {

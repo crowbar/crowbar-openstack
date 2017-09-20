@@ -18,6 +18,7 @@ class Chef
         @group = ""
         @fqdn = ""
         @cert_required = false
+        @generate_ca = false
         @ca_certs = ""
       end
 
@@ -43,6 +44,10 @@ class Chef
 
       def cert_required(arg = nil)
         set_or_return(:cert_required, arg, kind_of: [TrueClass, FalseClass])
+      end
+
+      def generate_ca(arg = nil)
+        set_or_return(:generate_ca, arg, kind_of: [TrueClass, FalseClass])
       end
 
       def ca_certs(arg = nil)
