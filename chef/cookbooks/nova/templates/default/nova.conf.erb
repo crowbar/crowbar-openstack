@@ -242,8 +242,8 @@ kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 enabled = <%= @serial_enabled ? "True" : "False" %>
 base_url = ws://<%= @serialproxy_public_host %>:<%= node[:nova][:ports][:serialproxy] %>/
 proxyclient_address = <%= node[:nova][:my_ip] %>
-serialproxy_host = 0.0.0.0
-serialproxy_port = 6083
+serialproxy_host = <%= @bind_host %>
+serialproxy_port = <%= @bind_port_serialproxy %>
 
 [ssl]
 <%= "ca_file = #{@ssl_ca_file}" if @ssl_cert_required %>
