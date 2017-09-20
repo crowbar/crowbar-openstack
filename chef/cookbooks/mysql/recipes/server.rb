@@ -206,6 +206,7 @@ unless node[:database][:database_bootstrapped]
       "TRIGGER"
     ]
     provider db_settings[:user_provider]
+    require_ssl db_connection[:ssl][:enabled]
     action :grant
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
