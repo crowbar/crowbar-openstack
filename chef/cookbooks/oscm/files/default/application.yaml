@@ -50,10 +50,23 @@ parameters:
     default: ""
     type: string
     description: Https proxy
-  registry:
-    default: localhost:5000
+  registry_host:
+    default: ""
     type: string
-    description: Docker registry
+    description: Docker registry host
+  registry_port:
+    default: ""
+    type: string
+    description: Docker registry port
+  registry_user:
+    default: ""
+    type: string
+    description: Docker registry user
+  registry_pwd:
+    default: ""
+    type: string
+    hidden: true
+    description: Docker registry password
   mail_address:
     default: ""
     type: string
@@ -79,7 +92,7 @@ parameters:
     default: oscm
     type: string
   keystone_url:
-    default: http://192.168.53.2:5000/v3/
+    default: ""
     type: string
   keystone_tenant_id:
     default: oscm
@@ -184,13 +197,13 @@ resources:
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
-          port_range_min: 5000
-          port_range_max: 5000
+          port_range_min: { get_param: registry_port }
+          port_range_max: { get_param: registry_port }
         - direction: egress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
-          port_range_min: 5000
-          port_range_max: 5000
+          port_range_min: { get_param: registry_port }
+          port_range_max: { get_param: registry_port }
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
@@ -211,21 +224,6 @@ resources:
           protocol: tcp
           port_range_min: 8881
           port_range_max: 8881
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 8048
-          port_range_max: 8048
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 8848
-          port_range_max: 8848
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 8448
-          port_range_max: 8448
         - direction: egress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
@@ -268,7 +266,10 @@ resources:
             $APP_NAME: { get_param: app_name }
             $HTTP_PROXY: { get_param: http_proxy }
             $HTTPS_PROXY: { get_param: https_proxy }
-            $REGISTRY: { get_param: registry }
+            $REGISTRY_HOST: { get_param: registry_host }
+            $REGISTRY_PORT: { get_param: registry_port }
+            $REGISTRY_USER: { get_param: registry_user }
+            $REGISTRY_PWD: { get_param: registry_pwd }
             $MAIL_ADDRESS: { get_param: mail_address }
             $MAIL_HOST: { get_param: mail_host }
             $MAIL_PASSWORD: { get_param: mail_password }

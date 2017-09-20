@@ -36,6 +36,8 @@ oscm_app_volume_size = node[:oscm][:openstack][:volume_stack][:app_volume_size]
 oscm_image = node[:oscm][:openstack][:image]
 oscm_docker_host = node[:oscm][:docker][:host]
 oscm_docker_port = node[:oscm][:docker][:port]
+oscm_docker_user = node[:oscm][:docker][:user]
+oscm_docker_pwd = node[:oscm][:docker][:password]
 oscm_proxy_httphost = node[:oscm][:proxy][:http_host]
 oscm_proxy_httpport = node[:oscm][:proxy][:http_port]
 oscm_proxy_httpshost = node[:oscm][:proxy][:https_host]
@@ -236,7 +238,7 @@ bash "create oscm stacks" do
     openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}" --parameter "key_name=#{oscm_keypair_name}" --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
     --parameter "mail_host=#{oscm_mail_host}" --parameter "mail_port=#{oscm_mail_port}" --parameter "mail_address=#{oscm_mail_from}" --parameter "mail_auth=#{oscm_mail_auth}" --parameter "mail_user=#{oscm_mail_user}" --parameter "mail_password=#{oscm_mail_pwd}"\
     --parameter "http_proxy=#{oscm_proxy_httphost}:#{oscm_proxy_httpport}" --parameter "https_proxy=#{oscm_proxy_httpshost}:#{oscm_proxy_httpsport}"\
-    --parameter "registry=#{oscm_docker_host}:#{oscm_docker_port}"\
+    --parameter "registry_host=#{oscm_docker_host}" --parameter "registry_port=#{oscm_docker_port}"  --parameter "registry_user=#{oscm_docker_user}" --parameter "registry_port=#{oscm_docker_pwd}"\
     --parameter "ssl_path=#{oscm_ssl_scp_path}"\
     --parameter "heat_host_cidr=#{heat_public_host}/32" --parameter "heat_port=#{heat_port}"\
     --parameter-file "ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub"\

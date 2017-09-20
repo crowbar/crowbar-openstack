@@ -17,14 +17,17 @@ FTP_PROXY=""
 GOPHER_PROXY=""
 SOCKS_PROXY=""
 SOCKS5_SERVER=""
-NO_PROXY="localhost, 127.0.0.1, $REGISTRY"
+NO_PROXY="localhost, 127.0.0.1, $REGISTRY_HOST"
 EOF
 
+# TODO:
+# If $REGISTRY_HOST empty, docker hub is default.
+# Remove insecure
 sudo cat > /etc/sysconfig/docker <<EOF
-DOCKER_OPTS="--insecure-registry=$REGISTRY"
+DOCKER_OPTS="--insecure-registry=$REGISTRY_HOST:$REGISTRY_PORT"
 HTTP_PROXY="http://$HTTP_PROXY"
 HTTPS_PROXY="https://$HTTPS_PROXY"
-NO_PROXY="localhost, 127.0.0.1, $REGISTRY"
+NO_PROXY="localhost, 127.0.0.1, $REGISTRY_HOST"
 EOF
 
 export http_proxy="http://$HTTP_PROXY"
@@ -42,7 +45,7 @@ if [ ${SSL_PATH} ]; then
     sleep 5
   done
   echo "scp for ssl certificate is finished."
-  #TODO: add certificate to a local docker volume folder.
+  # TODO: add certificate to a local docker volume folder.
   # echo $SSL_PATH/somekey.pem > /var/web_cert
 fi
 
@@ -81,7 +84,6 @@ DB_IMAGE=$REGISTRY/$DB_IMAGE_NAME
 DB=/db/database
 APP_PATH=/oscm/app/
 BES_PATH=/oscm/bes/
-MI_PATH=/oscm/master-indexer
 CLIENT_CRT_PATH=/oscm/client-crt/
 
 DB_VOLUME=dbvolume
@@ -91,7 +93,6 @@ APP_VOLUME=appvolume
 mkdir -p $DB
 mkdir -p $APP_PATH
 mkdir -p $BES_PATH
-mkdir -p $MI_PATH
 
 # Start docker service
 systemctl start docker.service
@@ -102,10 +103,9 @@ docker rm -f $APP_VOLUME $BES_VOLUME $DB_VOLUME db web app >/dev/null 2>&1 || tr
 # Create volume container for database
 docker create -v $DB:/var/lib/pgsql/database --name $DB_VOLUME $DB_IMAGE /bin/true
 
-# create volume container for bes and master-indexer
+# create volume container for bes and app
 docker create \
   -v $BES_PATH:/opt/glassfish3/glassfish/domains/bes-domain/ \
-  -v $MI_PATH:/opt/glassfish3/glassfish/domains/master-indexer-domain/ \
   -v $APP_PATH:/opt/glassfish3/glassfish/domains/app-domain/ \
   -v $CLIENT_CRT_PATH:/tmp/client-crt \
   --name $BES_VOLUME $OSCM_IMAGE /bin/true
@@ -135,8 +135,6 @@ services:
     ports:
       - "8080:8080"
       - "8081:8081"
-      - "8048:8048"
-      - "8448:8448"
     volumes_from:
       - container:$BES_VOLUME:rw
   $APP_HOSTNAME:
@@ -150,7 +148,6 @@ services:
     ports:
       - "8880:8880"
       - "8881:8881"
-      - "8848:8848"
     volumes_from:
       - container:$APP_VOLUME:rw
   $DB_HOSTNAME:
@@ -164,7 +161,8 @@ EOF
 echo "# updated at $(date)" >> $OSCM_DIR/docker-compose.yml
 fi
 
-# OSCM start script
+# OSCM start script 
+# TODO: Add docker login -u="$REGISTRY_USER" -p="REGISTRY_PWD" if $REGISTRY_USER not empty.
 if [ ! -x $OSCM_DIR/start-oscm.sh ]; then
 cat > $OSCM_DIR/start-oscm.sh <<EOF
 #/bin/sh

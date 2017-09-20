@@ -84,7 +84,6 @@
               "type" : "map",
               "required" : true,
               "mapping": {
-                "use_registry": { "type": "bool", "required": true },
                 "host": { "type": "str", "required": true },
                 "port": { "type": "int", "required": true },
                 "auth": { "type": "bool", "required": true },
