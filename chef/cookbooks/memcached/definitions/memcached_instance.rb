@@ -39,6 +39,7 @@ define :memcached_instance do
     service "memcached" do
       action [:enable, :start]
     end
+    utils_systemd_service_restart "memcached"
   else
     runit_service "memcached-#{params[:name]}" do
       template_name "memcached"

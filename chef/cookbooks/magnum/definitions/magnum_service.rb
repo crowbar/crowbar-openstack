@@ -14,4 +14,7 @@ define :magnum_service, use_pacemaker_provider: false do
     provider Chef::Provider::CrowbarPacemakerService \
                if params[:use_pacemaker_provider]
   end
+  utils_systemd_service_restart magnum_service_name do
+    action params[:use_pacemaker_provider] ? :disable : :enable
+  end
 end

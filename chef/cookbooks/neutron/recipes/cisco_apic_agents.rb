@@ -43,6 +43,7 @@ service node[:network][:ovs_service] do
   supports status: true, restart: true
   action [:start, :enable]
 end
+utils_systemd_service_restart node[:network][:ovs_service]
 
 if node.roles.include?("neutron-network")
   # Explicitly stop and disable l3 and metadata agents if APIC is
@@ -63,6 +64,7 @@ if node.roles.include?("nova-compute-kvm")
   service "lldpd" do
     action [:enable, :start]
   end
+  utils_systemd_service_restart "lldpd"
 
   # include neutron::common_config only now, after we've installed packages
   include_recipe "neutron::common_config"
@@ -118,9 +120,11 @@ if node.roles.include?("nova-compute-kvm")
     action [:enable, :start]
     subscribes :restart, resources("template[#{agent_config_path}]")
   end
+  utils_systemd_service_restart "neutron-opflex-agent"
 
   service "agent-ovs" do
     action [:enable, :start]
     subscribes :restart, resources("template[#{opflex_agent_conf}]")
   end
+  utils_systemd_service_restart "agent-ovs"
 end

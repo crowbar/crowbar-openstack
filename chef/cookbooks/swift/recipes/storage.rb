@@ -112,6 +112,9 @@ if (!compute_nodes.nil? and compute_nodes.length > 0 )
       end
       only_if { ::File.exist? "/etc/swift/#{ring}.ring.gz" }
     end
+    utils_systemd_service_restart svc do
+      only_if { ::File.exist? "/etc/swift/#{ring}.ring.gz" }
+    end
   end
 end
 

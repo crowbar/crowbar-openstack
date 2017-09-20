@@ -73,5 +73,8 @@ service "rabbitmq-server" do
   supports restart: true, start: true, stop: true, status: true, \
            restart_crm_resource: true, pacemaker_resource_name: "rabbitmq"
   action [:enable, :start]
-  provider Chef::Provider::CrowbarPacemakerService if node[:rabbitmq][:ha][:enabled]
+  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+end
+utils_systemd_service_restart "rabbitmq-server" do
+  action ha_enabled ? :disable : :enable
 end

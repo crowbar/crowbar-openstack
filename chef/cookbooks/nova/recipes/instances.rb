@@ -29,6 +29,7 @@ if node[:nova]["setup_shared_instance_storage"]
     enabled true
     action [:enable, :start]
   end
+  utils_systemd_service_restart "nfs-kernel-server"
 
   admin_net = Barclamp::Inventory.get_network_by_type(node, "admin")
 
