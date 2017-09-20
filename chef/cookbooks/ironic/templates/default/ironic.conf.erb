@@ -21,9 +21,6 @@ max_overflow=10
 pool_timeout=30
 
 [glance]
-glance_host=<%= @glance_settings[:host] %>
-glance_port=<%= @glance_settings[:port] %>
-glance_protocol=<%= @glance_settings[:protocol] %>
 glance_api_servers=<%= @glance_settings[:protocol] %>://<%= @glance_settings[:host] %>:<%= @glance_settings[:port] %>
 auth_strategy=keystone
 auth_type=password
