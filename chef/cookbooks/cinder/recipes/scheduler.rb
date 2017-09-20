@@ -19,6 +19,9 @@
 
 include_recipe "#{@cookbook_name}::common"
 
+use_crowbar_pacemaker_service = node[:cinder][:ha][:enabled] &&
+  node[:pacemaker][:clone_stateless_services]
+
 cinder_service "scheduler" do
-  use_pacemaker_provider node[:cinder][:ha][:enabled]
+  use_pacemaker_provider use_crowbar_pacemaker_service
 end

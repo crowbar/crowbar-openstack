@@ -2,6 +2,7 @@ define :glance_service do
   short_name    = "#{params[:name]}"
   glance_name   = node[:glance][short_name][:service_name]
   ha_enabled    = node[:glance][:ha][:enabled]
+  use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
 
   service glance_name do
     if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
@@ -13,6 +14,6 @@ define :glance_service do
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources(template: node[:glance][short_name][:config_file])
-    provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
 end

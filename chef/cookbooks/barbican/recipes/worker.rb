@@ -21,6 +21,10 @@ include_recipe "#{@cookbook_name}::common"
 
 package "openstack-barbican-worker"
 
+use_crowbar_pacemaker_service = node[:barbican][:ha][:enabled] &&
+  node[:pacemaker][:clone_stateless_services]
+
 service "openstack-barbican-worker" do
   action [:enable, :start]
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end

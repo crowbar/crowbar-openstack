@@ -222,19 +222,24 @@ template node[:nova]["ec2-api"][:config_file] do
   )
 end
 
+use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
+
 service "openstack-ec2-api-api" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:nova]["ec2-api"][:config_file])
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 service "openstack-ec2-api-metadata" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:nova]["ec2-api"][:config_file])
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 service "openstack-ec2-api-s3" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:nova]["ec2-api"][:config_file])
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 if ha_enabled

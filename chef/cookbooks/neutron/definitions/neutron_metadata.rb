@@ -72,15 +72,16 @@ define :neutron_metadata,
   end
 
   unless use_cisco_apic_ml2_driver
+    use_crowbar_pacemaker_service = \
+      (neutron_network_ha && node[:pacemaker][:clone_stateless_services]) || nova_compute_ha_enabled
+
     # In case of Cisco ACI driver, supervisord takes care of starting up
     # the metadata agent.
     service node[:neutron][:platform][:metadata_agent_name] do
       action [:enable, :start]
       subscribes :restart, resources(template: node[:neutron][:config_file])
       subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
-      if neutron_network_ha || nova_compute_ha_enabled
-        provider Chef::Provider::CrowbarPacemakerService
-      end
+      provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
       if nova_compute_ha_enabled
         supports no_crm_maintenance_mode: true
       else

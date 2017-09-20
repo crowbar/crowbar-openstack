@@ -99,6 +99,8 @@ end
 
 crowbar_pacemaker_sync_mark "create-magnum_register" if ha_enabled
 
+use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
+
 magnum_service "api" do
-  use_pacemaker_provider ha_enabled
+  use_pacemaker_provider use_crowbar_pacemaker_service
 end

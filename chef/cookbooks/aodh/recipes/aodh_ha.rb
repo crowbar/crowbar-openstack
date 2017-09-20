@@ -23,35 +23,37 @@ haproxy_loadbalancer "aodh-api" do
   action :nothing
 end.run_action(:create)
 
-# Wait for all nodes to reach this point so we know that they will have
-# all the required packages installed and configuration files updated
-# before we create the pacemaker resources.
-crowbar_pacemaker_sync_mark "sync-aodh_before_ha"
+if node[:pacemaker][:clone_stateless_services]
+  # Wait for all nodes to reach this point so we know that they will have
+  # all the required packages installed and configuration files updated
+  # before we create the pacemaker resources.
+  crowbar_pacemaker_sync_mark "sync-aodh_before_ha"
 
-# Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-aodh_ha_resources"
+  # Avoid races when creating pacemaker resources
+  crowbar_pacemaker_sync_mark "wait-aodh_ha_resources"
 
-rabbit_settings = fetch_rabbitmq_settings
-transaction_objects = []
+  rabbit_settings = fetch_rabbitmq_settings
+  transaction_objects = []
 
-node[:aodh][:platform][:services].each do |service|
-  primitive_name = "aodh-#{service}"
+  node[:aodh][:platform][:services].each do |service|
+    primitive_name = "aodh-#{service}"
 
-  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
-    agent node[:aodh][:ha][service.to_sym][:agent]
-    op node[:aodh][:ha][service.to_sym][:op]
-    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
+    objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
+      agent node[:aodh][:ha][service.to_sym][:agent]
+      op node[:aodh][:ha][service.to_sym][:op]
+      order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
+    end
+    transaction_objects.push(objects)
   end
-  transaction_objects.push(objects)
+
+  pacemaker_transaction "aodh" do
+    cib_objects transaction_objects.flatten
+    # note that this will also automatically start the resources
+    action :commit_new
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  crowbar_pacemaker_sync_mark "create-aodh_ha_resources"
+
+  include_recipe "crowbar-pacemaker::apache"
 end
-
-pacemaker_transaction "aodh" do
-  cib_objects transaction_objects.flatten
-  # note that this will also automatically start the resources
-  action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-
-crowbar_pacemaker_sync_mark "create-aodh_ha_resources"
-
-include_recipe "crowbar-pacemaker::apache"

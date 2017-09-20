@@ -74,47 +74,46 @@ if node[:nova][:use_serial]
     action :nothing
   end.run_action(:create)
 end
-# Wait for all nodes to reach this point so we know that all nodes will have
-# all the required packages installed before we create the pacemaker
-# resources
-crowbar_pacemaker_sync_mark "sync-nova_before_ha"
 
-# Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-nova_ha_resources"
+if node[:pacemaker][:clone_stateless_services]
+  # Wait for all nodes to reach this point so we know that all nodes will have
+  # all the required packages installed before we create the pacemaker
+  # resources
+  crowbar_pacemaker_sync_mark "sync-nova_before_ha"
 
-rabbit_settings = fetch_rabbitmq_settings
-transaction_objects = []
+  # Avoid races when creating pacemaker resources
+  crowbar_pacemaker_sync_mark "wait-nova_ha_resources"
 
-services = %w(api conductor consoleauth scheduler)
-if node[:nova][:use_novnc]
-  services << "novncproxy"
-end
-if node[:nova][:use_serial]
-  services << "serialproxy"
-end
+  rabbit_settings = fetch_rabbitmq_settings
+  transaction_objects = []
 
-services.each do |service|
-  if %w(rhel suse).include?(node[:platform_family])
-    primitive_ra = "systemd:openstack-nova-#{service}"
-  else
-    primitive_ra = "systemd:nova-#{service}"
+  services = ["api", "conductor", "consoleauth", "scheduler"]
+  services.push("novncproxy") if node[:nova][:use_novnc]
+  services.push("serialproxy") if node[:nova][:use_serial]
+
+  services.each do |service|
+    primitive_ra = if ["rhel", "suse"].include?(node[:platform_family])
+      "systemd:openstack-nova-#{service}"
+    else
+      "systemd:nova-#{service}"
+    end
+
+    primitive_name = "nova-#{service}"
+
+    objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
+      agent primitive_ra
+      op node[:nova][:ha][:op]
+      order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
+    end
+    transaction_objects.push(objects)
   end
 
-  primitive_name = "nova-#{service}"
-
-  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
-    agent primitive_ra
-    op node[:nova][:ha][:op]
-    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
+  pacemaker_transaction "nova controller" do
+    cib_objects transaction_objects.flatten
+    # note that this will also automatically start the resources
+    action :commit_new
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
-  transaction_objects.push(objects)
-end
 
-pacemaker_transaction "nova controller" do
-  cib_objects transaction_objects.flatten
-  # note that this will also automatically start the resources
-  action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  crowbar_pacemaker_sync_mark "create-nova_ha_resources"
 end
-
-crowbar_pacemaker_sync_mark "create-nova_ha_resources"

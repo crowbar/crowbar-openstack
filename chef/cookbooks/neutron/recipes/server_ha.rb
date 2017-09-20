@@ -23,42 +23,44 @@ haproxy_loadbalancer "neutron-server" do
   action :nothing
 end.run_action(:create)
 
-# Wait for all "neutron-server" nodes to reach this point so we know that they
-# will have all the required packages installed and configuration files updated
-# before we create the pacemaker resources.
-crowbar_pacemaker_sync_mark "sync-neutron_before_ha"
+if node[:pacemaker][:clone_stateless_services]
+  # Wait for all "neutron-server" nodes to reach this point so we know that they
+  # will have all the required packages installed and configuration files updated
+  # before we create the pacemaker resources.
+  crowbar_pacemaker_sync_mark "sync-neutron_before_ha"
 
-# Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-neutron_ha_resources"
+  # Avoid races when creating pacemaker resources
+  crowbar_pacemaker_sync_mark "wait-neutron_ha_resources"
 
-rabbit_settings = fetch_rabbitmq_settings
-transaction_objects = []
+  rabbit_settings = fetch_rabbitmq_settings
+  transaction_objects = []
 
-server_primitive_name = "neutron-server"
+  server_primitive_name = "neutron-server"
 
-objects = openstack_pacemaker_controller_clone_for_transaction server_primitive_name do
-  agent node[:neutron][:ha][:server][:server_ra]
-  op node[:neutron][:ha][:server][:op]
-  order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
-end
-transaction_objects.push(objects)
-
-if node[:neutron][:use_infoblox]
-  infoblox_primitive_name = "infoblox-agent"
-
-  objects = openstack_pacemaker_controller_clone_for_transaction infoblox_primitive_name do
-    agent node[:neutron][:ha][:infoblox][:infoblox_ra]
-    op node[:neutron][:ha][:infoblox][:op]
+  objects = openstack_pacemaker_controller_clone_for_transaction server_primitive_name do
+    agent node[:neutron][:ha][:server][:server_ra]
+    op node[:neutron][:ha][:server][:op]
     order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
   end
   transaction_objects.push(objects)
-end
 
-pacemaker_transaction "neutron server" do
-  cib_objects transaction_objects.flatten
-  # note that this will also automatically start the resources
-  action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
+  if node[:neutron][:use_infoblox]
+    infoblox_primitive_name = "infoblox-agent"
 
-crowbar_pacemaker_sync_mark "create-neutron_ha_resources"
+    objects = openstack_pacemaker_controller_clone_for_transaction infoblox_primitive_name do
+      agent node[:neutron][:ha][:infoblox][:infoblox_ra]
+      op node[:neutron][:ha][:infoblox][:op]
+      order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
+    end
+    transaction_objects.push(objects)
+  end
+
+  pacemaker_transaction "neutron server" do
+    cib_objects transaction_objects.flatten
+    # note that this will also automatically start the resources
+    action :commit_new
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  crowbar_pacemaker_sync_mark "create-neutron_ha_resources"
+end
