@@ -8,9 +8,6 @@ log_dir = /var/log/ceilometer
 use_stderr = false
 transport_url = <%= @rabbit_settings[:url] %>
 
-[collector]
-workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
-
 [database]
 metering_time_to_live = <%= @metering_time_to_live %>
 event_time_to_live = <%= @event_time_to_live %>

@@ -19,18 +19,15 @@ default[:ceilometer][:config_file] = "/etc/ceilometer/ceilometer.conf.d/100-ceil
 
 central_service_name = "ceilometer-agent-central"
 api_service_name = "ceilometer-api"
-collector_service_name = "ceilometer-collector"
 agent_notification_service_name = "ceilometer-agent-notification"
 
 if %w(rhel suse).include?(node[:platform_family])
   central_service_name = "openstack-ceilometer-agent-central"
   api_service_name = "openstack-ceilometer-api"
-  collector_service_name = "openstack-ceilometer-collector"
   agent_notification_service_name = "openstack-ceilometer-agent-notification"
 end
 
 default[:ceilometer][:api][:service_name] = api_service_name
-default[:ceilometer][:collector][:service_name] = collector_service_name
 default[:ceilometer][:agent_notification][:service_name] = agent_notification_service_name
 default[:ceilometer][:central][:service_name] = central_service_name
 
@@ -72,8 +69,6 @@ default[:ceilometer][:ha][:server][:enabled] = false
 
 # increase default timeout: ceilometer has to wait until mongodb is ready
 default[:ceilometer][:ha][:api][:op][:start][:timeout] = "60s"
-default[:ceilometer][:ha][:collector][:agent] = "systemd:#{collector_service_name}"
-default[:ceilometer][:ha][:collector][:op][:monitor][:interval] = "10s"
 default[:ceilometer][:ha][:agent_notification][:agent] = "systemd:#{agent_notification_service_name}"
 default[:ceilometer][:ha][:agent_notification][:op][:monitor][:interval] = "10s"
 

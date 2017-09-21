@@ -33,7 +33,7 @@ if node[:pacemaker][:clone_stateless_services]
   crowbar_pacemaker_sync_mark "wait-ceilometer_server_ha_resources"
 
   rabbit_settings = fetch_rabbitmq_settings
-  services = ["collector", "agent_notification"]
+  services = ["agent_notification"]
   transaction_objects = []
 
   services.each do |service|

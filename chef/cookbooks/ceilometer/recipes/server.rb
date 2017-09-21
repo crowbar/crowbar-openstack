@@ -104,19 +104,16 @@ end
 
 case node[:platform_family]
 when "suse"
-  package "openstack-ceilometer-collector"
   package "openstack-ceilometer-agent-notification"
   package "openstack-ceilometer-api"
 when "rhel"
   package "openstack-ceilometer-common"
-  package "openstack-ceilometer-collector"
   package "openstack-ceilometer-agent-notification"
   package "openstack-ceilometer-api"
   package "python-ceilometerclient"
 else
   package "python-ceilometerclient"
   package "ceilometer-common"
-  package "ceilometer-collector"
   package "ceilometer-agent-notification"
   package "ceilometer-api"
 end
@@ -167,18 +164,6 @@ end
 crowbar_pacemaker_sync_mark "create-ceilometer_upgrade" if ha_enabled
 
 use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
-
-service "ceilometer-collector" do
-  service_name node[:ceilometer][:collector][:service_name]
-  supports status: true, restart: true, start: true, stop: true
-  action [:enable, :start]
-  subscribes :restart, resources(template: node[:ceilometer][:config_file])
-  subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
-  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
-end
-utils_systemd_service_restart "ceilometer-collector" do
-  action use_crowbar_pacemaker_service ? :disable : :enable
-end
 
 service "ceilometer-agent-notification" do
   service_name node[:ceilometer][:agent_notification][:service_name]
