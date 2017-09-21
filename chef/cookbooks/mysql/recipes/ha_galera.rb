@@ -240,13 +240,15 @@ include_recipe "crowbar-pacemaker::haproxy"
 
 ha_servers = CrowbarPacemakerHelper.haproxy_servers_for_service(
   node, "mysql", "database-server", "admin_port"
-).sort_by { |s| s["name"] }
+)
 
 # Let all nodes but one act as backup (standby) servers.
 # Backup server is only used when non-backup one is down. Thus we prevent possible deadlocks
 # from OpenStack services writing to the database on different nodes at once.
-ha_servers = ha_servers.each_with_index do |n, i|
-  n["backup"] = i > 0
+ha_servers = ha_servers.each do |n|
+  # Let the current node be non-backup one, so haproxy running on this node does
+  # not direct traffic elsewhere by default
+  n["backup"] = n["name"] != node["hostname"]
   # lower the number of unsuccessful checks needed for declaring server DOWN
   n["fall"] = 2
   # lower the interval checking after first failure is found
