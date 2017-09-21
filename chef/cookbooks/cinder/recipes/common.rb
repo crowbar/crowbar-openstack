@@ -53,6 +53,18 @@ nova_config = BarclampLibrary::Barclamp::Config.load(
 )
 nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
 
+barbican_settings = {}
+barbican = node_search_with_cache("roles:barbican-controller").first
+unless barbican.nil?
+  barbican_ha_enabled = barbican[:barbican][:ha][:enabled]
+  barbican_settings[:host] = CrowbarHelper.get_host_for_admin_url(barbican, barbican_ha_enabled)
+  barbican_settings[:port] = barbican[:barbican][:api][:bind_port]
+  barbican_settings[:protocol] = barbican[:barbican][:api][:protocol]
+  Chef::Log.info("Barbican controller at #{barbican_settings[:host]}")
+  barbican_config = Barclamp::Config.load("openstack", "barbican")
+  barbican_settings[:insecure] = CrowbarOpenStackHelper.insecure(barbican_config)
+end
+
 db_settings = fetch_database_settings
 
 include_recipe "database::client"
@@ -151,6 +163,7 @@ template node[:cinder][:config_file] do
     strict_ssh_host_key_policy: node[:cinder][:strict_ssh_host_key_policy],
     default_availability_zone: node[:cinder][:default_availability_zone],
     default_volume_type: node[:cinder][:default_volume_type],
-    memcached_servers: memcached_servers
+    memcached_servers: memcached_servers,
+    barbican_settings: barbican_settings
     )
 end

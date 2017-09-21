@@ -86,6 +86,18 @@ glance_config = Barclamp::Config.load("openstack", "glance", node[:nova][:glance
 glance_insecure = CrowbarOpenStackHelper.insecure(glance_config) || keystone_settings["insecure"]
 Chef::Log.info("Glance server at #{glance_server_host}")
 
+barbican_settings = {}
+barbican = node_search_with_cache("roles:barbican-controller").first
+unless barbican.nil?
+  barbican_ha_enabled = barbican[:barbican][:ha][:enabled]
+  barbican_settings[:host] = CrowbarHelper.get_host_for_admin_url(barbican, barbican_ha_enabled)
+  barbican_settings[:port] = barbican[:barbican][:api][:bind_port]
+  barbican_settings[:protocol] = barbican[:barbican][:api][:protocol]
+  Chef::Log.info("Barbican controller at #{barbican_settings[:host]}")
+  barbican_config = Barclamp::Config.load("openstack", "barbican")
+  barbican_settings[:insecure] = CrowbarOpenStackHelper.insecure(barbican_config)
+end
+
 # use memcached as a cache backend for nova-novncproxy
 memcached_servers = MemcachedHelper.get_memcached_servers(
   api_ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller") : [node]
@@ -396,7 +408,8 @@ template node[:nova][:config_file] do
     reserved_host_memory: reserved_host_memory,
     use_baremetal_filters: use_baremetal_filters,
     track_instance_changes: track_instance_changes,
-    ironic_settings: ironic_settings
+    ironic_settings: ironic_settings,
+    barbican_settings: barbican_settings
   )
 end
 

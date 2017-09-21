@@ -159,9 +159,15 @@ user_domain_name = <%= @keystone_settings['admin_domain'] %>
 <% end %>
 
 [key_manager]
+<% if @barbican_settings.any? -%>
+api_class = castellan.key_manager.barbican_key_manager.BarbicanKeyManager
+<% else -%>
+api_class = nova.keymgr.conf_key_mgr.ConfKeyManager
 <% unless @keymgr_fixed_key.empty? %>
 fixed_key = <%= @keymgr_fixed_key.each_byte.map { |b| b.to_s(16) }.join %>
 <% end %>
+<% end -%>
+
 
 [keystone_authtoken]
 auth_type = password
@@ -333,3 +339,13 @@ track_instance_changes = false
 
 [notifications]
 notify_on_state_change = vm_and_task_state
+
+<% unless @barbican_settings.empty? %>
+[barbican]
+barbican_endpoint = <%= @barbican_settings[:protocol] %>://<%= @barbican_settings[:host] %>:<%= @barbican_settings[:port] %>
+barbican_api_version = v1
+auth_endpoint = <%= @keystone_settings['internal_auth_url'] %>
+<% unless @barbican_settings[:protocol].nil? -%>
+verify_ssl = <%= @barbican_settings[:insecure] %>
+<% end -%>
+<% end %>
