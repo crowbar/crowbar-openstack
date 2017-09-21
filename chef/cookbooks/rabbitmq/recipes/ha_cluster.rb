@@ -62,6 +62,7 @@ pacemaker_ms ms_name do
   rsc service_name
   meta ({
     "master-max" => "1",
+    "clone-max" => CrowbarPacemakerHelper.cluster_nodes(node).size,
     "master-node-max" => "1",
     "ordered" => "false",
     "interleave" => "false",
