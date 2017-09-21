@@ -72,6 +72,7 @@ unless node[:database][:galera_bootstrapped]
     db_connection[:host] = "localhost"
     db_connection[:username] = "root"
     db_connection[:password] = ""
+    db_connection[:ssl] = {}
 
     service "mysql-temp start" do
       service_name mysql_service_name
