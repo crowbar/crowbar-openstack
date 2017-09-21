@@ -165,6 +165,11 @@ keystone_register "add #{keystone_settings['admin_user']}:#{tempest_comp_tenant}
   action :add_access
 end
 
+# Add the creator role to all tempest users to enable them to
+# create encrypted volumes
+barbican = search(:node, "roles:barbican-controller").first
+tempest_roles = barbican.nil? ? "" : "creator"
+
 # Create directories that we need
 ["", "bin", "etc", "etc/certs", "etc/cirros"].each do |subdir|
   directory "#{node[:tempest][:tempest_path]}/#{subdir}" do
@@ -565,7 +570,8 @@ template "/etc/tempest/tempest.conf" do
         # magnum (container) settings
         magnum_settings: tempest_magnum_settings,
         # heat (orchestration) settings
-        heat_settings: tempest_heat_settings
+        heat_settings: tempest_heat_settings,
+        tempest_roles: tempest_roles
       }
     }
   )

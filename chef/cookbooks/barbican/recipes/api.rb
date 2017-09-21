@@ -124,6 +124,16 @@ keystone_register "give barbican user access" do
   action :add_access
 end
 
+keystone_register "add barbican creator user role" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  role_name "creator"
+  action :add_role
+end
+
 crowbar_pacemaker_sync_mark "create-barbican_register" if ha_enabled
 
 if node[:barbican][:ha][:enabled]
