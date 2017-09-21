@@ -10,7 +10,15 @@
         "innodb_buffer_pool_size": 256,
         "max_connections": 800,
         "tmp_table_size": 64,
-        "max_heap_table_size": 64
+        "max_heap_table_size": 64,
+        "ssl": {
+          "enabled": false,
+          "generate_certs": false,
+          "insecure": false,
+          "certfile": "/etc/mysql/ssl/certs/signing_cert.pem",
+          "keyfile": "/etc/mysql/ssl/private/signing_key.pem",
+          "ca_certs": "/etc/mysql/ssl/certs/ca.pem"
+        }
       },
       "postgresql": {
         "config": {
@@ -39,7 +47,7 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 201,
+      "schema-revision": 202,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },

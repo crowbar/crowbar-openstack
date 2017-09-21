@@ -256,7 +256,7 @@ ha_servers = ha_servers.each do |n|
 end
 
 haproxy_loadbalancer "galera" do
-  address CrowbarDatabaseHelper.get_listen_address(node)
+  address CrowbarPacemakerHelper.cluster_vip(node, "admin")
   port 3306
   mode "tcp"
   options ["mysql-check user monitoring"]

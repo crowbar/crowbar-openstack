@@ -92,6 +92,7 @@ class Chef
           grant_sql += " ON #{db_name}.#{tbl_name}"
           grant_sql += " TO '#{username}'@'#{host}'"
           grant_sql += " IDENTIFIED BY '#{password}'"
+          grant_sql += " REQUIRE SSL" if new_resource.require_ssl
           client.query(grant_sql)
           client.query("FLUSH PRIVILEGES")
         ensure

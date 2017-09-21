@@ -25,6 +25,14 @@ en:
         mysql_attributes: 'MariaDB Options'
         mysql:
           datadir: 'Datadir'
+          ssl_header: 'SSL Support'
+          ssl:
+            enabled: 'Enable SSL'
+            generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+            certfile: 'SSL Certificate File'
+            keyfile: 'SSL (Private) Key File'
+            ca_certs: 'SSL CA Certificates File'
+            insecure: 'SSL Certificate is insecure (for instance, self-signed)'
         postgresql_attributes: 'PostgreSQL Options'
         postgresql:
           config:

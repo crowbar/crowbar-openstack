@@ -12,6 +12,19 @@
 
         = string_field %w(mysql datadir)
 
+      %fieldset
+        %legend
+          = t(".mysql.ssl_header")
+
+        = boolean_field %w(mysql ssl enabled),
+          "data-sslprefix" => "ssl"
+
+        #ssl_container
+          = boolean_field %w(mysql ssl generate_certs)
+          = string_field %w(mysql ssl certfile)
+          = string_field %w(mysql ssl keyfile)
+          = string_field %w(mysql ssl ca_certs)
+
     #postgresql_container
       %fieldset
         %legend

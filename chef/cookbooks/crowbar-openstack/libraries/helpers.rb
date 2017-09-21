@@ -87,6 +87,15 @@ class CrowbarOpenStackHelper
         address = CrowbarDatabaseHelper.get_listen_address(database)
         backend_name = DatabaseLibrary::Database::Util.get_backend_name(database)
 
+        ssl_opts = {}
+        if backend_name == "mysql"
+          ssl_opts = {
+            enabled: database["database"]["mysql"]["ssl"]["enabled"],
+            ca_certs: database["database"]["mysql"]["ssl"]["ca_certs"],
+            insecure: database["database"]["mysql"]["ssl"]["generate_certs"] ||
+              database["database"]["mysql"]["ssl"]["insecure"]
+          }
+        end
         @database_settings[instance] = {
           address: address,
           url_scheme: backend_name,
@@ -97,7 +106,8 @@ class CrowbarOpenStackHelper
           connection: {
             host: address,
             username: "db_maker",
-            password: database["database"][:db_maker_password]
+            password: database["database"][:db_maker_password],
+            ssl: ssl_opts
           }
         }
 
@@ -112,16 +122,26 @@ class CrowbarOpenStackHelper
     db_auth = db_auth_attr.to_hash
     db_conn_scheme = db_settings[:url_scheme]
     db_charset = ""
+    ssl_suffix = ""
 
     if db_conn_scheme == "mysql"
       db_conn_scheme = "mysql+pymysql"
       db_charset = "?charset=utf8"
+      ssl = db_settings[:connection][:ssl]
+      if ssl[:enabled]
+        # For insecure (e.g. generated) configuration, we want to start SSL connection without
+        # certificate verification.
+        # This is relying on a part of sqlalchemy/pymysql code that starts SSL when just any ssl_key
+        # value is present, not checking for its content.
+        ssl_suffix = ssl[:insecure] ? "&ssl_key=generated" : "&ssl_ca=#{ssl[:ca_certs]}"
+      end
     end
 
     "#{db_conn_scheme}://" \
     "#{db_auth['user']}:#{db_auth['password']}@#{db_settings[:address]}/" \
     "#{db_auth['database']}" \
-    "#{db_charset}"
+    "#{db_charset}" \
+    "#{ssl_suffix}"
   end
 
   def self.rabbitmq_settings(node, barclamp)
