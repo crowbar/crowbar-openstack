@@ -1,7 +1,9 @@
 [DEFAULT]
 shuffle_time_before_polling_task = 15
+<% if @is_compute_agent -%>
 hypervisor_inspector = <%= @hypervisor_inspector %>
 libvirt_type = <%= @libvirt_type %>
+<% end -%>
 host = <%= @node_hostname %>
 debug = <%= @debug ? "true" : "false" %>
 log_dir = /var/log/ceilometer
@@ -59,16 +61,18 @@ password = <%= @keystone_settings['service_password'] %>
 [service_types]
 neutron_lbaas_version = v2
 
+<% if @hypervisor_inspector == "vsphere" -%>
 [vmware]
 host_ip = <%= node[:nova][:vcenter][:host] rescue "" %>
 host_port = <%= node[:nova][:vcenter][:port] rescue "443" %>
 host_username = <%= node[:nova][:vcenter][:user] rescue "" %>
 host_password = <%= node[:nova][:vcenter][:password] rescue "" %>
-<% if @hypervisor_inspector == "vmware" && !node[:nova][:vcenter][:ca_file].empty? -%>
+<% if !node[:nova][:vcenter][:ca_file].empty? -%>
 ca_file = <%= node[:nova][:vcenter][:ca_file] -%>
 <% end -%>
-<% if @hypervisor_inspector == "vmware" && node[:nova][:vcenter][:insecure] -%>
+<% if node[:nova][:vcenter][:insecure] -%>
 insecure = <%= node[:nova][:vcenter][:insecure] %>
+<% end -%>
 <% end -%>
 
 [oslo_messaging_rabbit]
@@ -79,7 +83,7 @@ ssl = <%= @rabbit_settings[:use_ssl] %>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
 
-<% if @discovery_method -%>
+<% if @is_compute_agent -%>
 [compute]
-instance_discovery_method = <%= @discovery_method %>
+instance_discovery_method = <%= @instance_discovery_method %>
 <% end -%>
