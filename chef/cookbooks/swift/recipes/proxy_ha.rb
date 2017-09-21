@@ -23,35 +23,39 @@ haproxy_loadbalancer "swift-proxy" do
   action :nothing
 end.run_action(:create)
 
-# Wait for all nodes to reach this point so we know that all nodes will have
-# all the required packages installed before we create the pacemaker
-# resources
-crowbar_pacemaker_sync_mark "sync-swift_before_ha"
+if node[:pacemaker][:clone_stateless_services]
+  # Wait for all nodes to reach this point so we know that all nodes will have
+  # all the required packages installed before we create the pacemaker
+  # resources
+  crowbar_pacemaker_sync_mark "sync-swift_before_ha"
 
-# Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-swift_ha_resources" do
-  only_if { ::File.exist? "/etc/swift/object.ring.gz" }
-end
+  # Avoid races when creating pacemaker resources
+  crowbar_pacemaker_sync_mark "wait-swift_ha_resources" do
+    only_if { ::File.exist? "/etc/swift/object.ring.gz" }
+  end
 
-transaction_objects = []
+  transaction_objects = []
 
-service_name = "swift-proxy"
+  service_name = "swift-proxy"
 
-objects = openstack_pacemaker_controller_clone_for_transaction service_name do
-  agent node[:swift][:ha]["proxy"][:agent]
-  op node[:swift][:ha]["proxy"][:op]
-  order_only_existing "cl-keystone"
-end
-transaction_objects.push(objects)
+  objects = openstack_pacemaker_controller_clone_for_transaction service_name do
+    agent node[:swift][:ha]["proxy"][:agent]
+    op node[:swift][:ha]["proxy"][:op]
+    order_only_existing "cl-keystone"
+  end
+  transaction_objects.push(objects)
 
-pacemaker_transaction "swift proxy" do
-  cib_objects transaction_objects.flatten
-  # note that this will also automatically start the resources
-  action :commit_new
-  # Do not even try to start the daemon if we don't have the ring yet
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exist?("/etc/swift/object.ring.gz") }
-end
+  pacemaker_transaction "swift proxy" do
+    cib_objects transaction_objects.flatten
+    # note that this will also automatically start the resources
+    action :commit_new
+    # Do not even try to start the daemon if we don't have the ring yet
+    only_if {
+      CrowbarPacemakerHelper.is_cluster_founder?(node) && ::File.exist?("/etc/swift/object.ring.gz")
+    }
+  end
 
-crowbar_pacemaker_sync_mark "create-swift_ha_resources" do
-  only_if { ::File.exist? "/etc/swift/object.ring.gz" }
+  crowbar_pacemaker_sync_mark "create-swift_ha_resources" do
+    only_if { ::File.exist? "/etc/swift/object.ring.gz" }
+  end
 end

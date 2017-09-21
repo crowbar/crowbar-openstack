@@ -164,13 +164,15 @@ end
 
 crowbar_pacemaker_sync_mark "create-ceilometer_db_sync" if ha_enabled
 
+use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
+
 service "ceilometer-collector" do
   service_name node[:ceilometer][:collector][:service_name]
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
   subscribes :restart, resources(template: node[:ceilometer][:config_file])
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 service "ceilometer-agent-notification" do
@@ -179,7 +181,7 @@ service "ceilometer-agent-notification" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:ceilometer][:config_file])
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 
 service "ceilometer-api" do

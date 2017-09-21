@@ -14,6 +14,7 @@
 #
 
 ha_enabled = node[:heat][:ha][:enabled]
+use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
 
 db_settings = fetch_database_settings
 
@@ -416,47 +417,6 @@ unless Barclamp::Config.load("openstack", "magnum").empty?
   end
 end
 
-service "heat-engine" do
-  service_name node[:heat][:engine][:service_name]
-  supports status: true, restart: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-end
-
-template "/etc/heat/loadbalancer.template" do
-  source "loadbalancer.template.erb"
-  owner "root"
-  group node[:heat][:group]
-  mode "0640"
-  notifies :restart, "service[heat-engine]", :delayed
-  only_if { node[:platform_family] == "suse" }
-end
-
-service "heat-api" do
-  service_name node[:heat][:api][:service_name]
-  supports status: true, restart: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-end
-
-service "heat-api-cfn" do
-  service_name node[:heat][:api_cfn][:service_name]
-  supports status: true, restart: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-end
-
-service "heat-api-cloudwatch" do
-  service_name node[:heat][:api_cloudwatch][:service_name]
-  supports status: true, restart: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-end
-
 crowbar_pacemaker_sync_mark "wait-heat_db_sync" if ha_enabled
 
 execute "heat-manage db_sync" do
@@ -465,7 +425,9 @@ execute "heat-manage db_sync" do
   command "heat-manage db_sync"
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
-  only_if { !node[:heat][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+  only_if {
+    !node[:heat][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  }
 end
 
 # We want to keep a note that we've done db_sync, so we don't do it again.
@@ -482,6 +444,47 @@ ruby_block "mark node for heat db_sync" do
 end
 
 crowbar_pacemaker_sync_mark "create-heat_db_sync" if ha_enabled
+
+service "heat-engine" do
+  service_name node[:heat][:engine][:service_name]
+  supports status: true, restart: true
+  action [:enable, :start]
+  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
+end
+
+template "/etc/heat/loadbalancer.template" do
+  source "loadbalancer.template.erb"
+  owner "root"
+  group node[:heat][:group]
+  mode "0640"
+  notifies :restart, "service[heat-engine]", :delayed
+  only_if { node[:platform_family] == "suse" }
+end
+
+service "heat-api" do
+  service_name node[:heat][:api][:service_name]
+  supports status: true, restart: true
+  action [:enable, :start]
+  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
+end
+
+service "heat-api-cfn" do
+  service_name node[:heat][:api_cfn][:service_name]
+  supports status: true, restart: true
+  action [:enable, :start]
+  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
+end
+
+service "heat-api-cloudwatch" do
+  service_name node[:heat][:api_cloudwatch][:service_name]
+  supports status: true, restart: true
+  action [:enable, :start]
+  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
+  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
+end
 
 if ha_enabled
   log "HA support for heat is enabled"

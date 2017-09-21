@@ -20,7 +20,8 @@
 include_recipe "#{@cookbook_name}::common"
 
 ha_enabled = node[:manila][:ha][:enabled]
+use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
 
 manila_service "scheduler" do
-  use_pacemaker_provider ha_enabled
+  use_pacemaker_provider use_crowbar_pacemaker_service
 end

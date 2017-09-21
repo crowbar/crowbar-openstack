@@ -31,7 +31,7 @@ haproxy_loadbalancer "keystone-admin" do
   action :nothing
 end.run_action(:create)
 
-if node[:keystone][:frontend] == "apache"
+if node[:keystone][:frontend] == "apache" && node[:pacemaker][:clone_stateless_services]
   include_recipe "crowbar-pacemaker::apache"
 
   # Wait for all nodes to reach this point so we know that all nodes will have
