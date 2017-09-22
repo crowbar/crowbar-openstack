@@ -87,12 +87,13 @@ class Chef
           username = client.escape(new_resource.username)
           host = client.escape(new_resource.host)
           password = client.escape(new_resource.password)
+          requires = new_resource.require_ssl ? "SSL" : "NONE"
 
           grant_sql = "GRANT #{new_resource.privileges.join(",")}"
           grant_sql += " ON #{db_name}.#{tbl_name}"
           grant_sql += " TO '#{username}'@'#{host}'"
           grant_sql += " IDENTIFIED BY '#{password}'"
-          grant_sql += " REQUIRE SSL" if new_resource.require_ssl
+          grant_sql += " REQUIRE #{requires}"
           client.query(grant_sql)
           client.query("FLUSH PRIVILEGES")
         ensure
