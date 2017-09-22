@@ -20,7 +20,6 @@ oscm_password = node[:oscm][:keystone][:password]
 oscm_ssl_certfile = node[:oscm][:ssl][:certfile]
 oscm_ssl_keyfile = node[:oscm][:ssl][:keyfile]
 oscm_ssl_cacerts = node[:oscm][:ssl][:ca_certs]
-oscm_ssl_scp_path = node[:oscm][:ssl][:scp_path]
 oscm_flavor_name = node[:oscm][:openstack][:flavor][:name]
 oscm_flavor_ram = node[:oscm][:openstack][:flavor][:ram]
 oscm_flavor_vcpus = node[:oscm][:openstack][:flavor][:vcpus]
@@ -28,7 +27,8 @@ oscm_flavor_disk = node[:oscm][:openstack][:flavor][:disk]
 oscm_keypair_name = node[:oscm][:openstack][:keypair][:name]
 oscm_keypair_publickey = node[:oscm][:openstack][:keypair][:publickey]
 oscm_keypair_publickeyfile = node[:oscm][:openstack][:keypair][:publickeyfile]
-oscm_heattemplate_path = node[:oscm][:openstack][:heattemplate_path]
+oscm_install_path = "/etc/oscm/install/"
+oscm_config_path = "/etc/oscm/config/"
 oscm_volumestack_name = node[:oscm][:openstack][:volume_stack][:stack_name]
 oscm_instancestack_name = node[:oscm][:openstack][:instance_stack][:stack_name]
 oscm_db_volume_size = node[:oscm][:openstack][:volume_stack][:db_volume_size]
@@ -38,10 +38,13 @@ oscm_docker_host = node[:oscm][:docker][:host]
 oscm_docker_port = node[:oscm][:docker][:port]
 oscm_docker_user = node[:oscm][:docker][:user]
 oscm_docker_pwd = node[:oscm][:docker][:password]
+oscm_docker_tag = node[:oscm][:docker][:tag]
 oscm_proxy_httphost = node[:oscm][:proxy][:http_host]
 oscm_proxy_httpport = node[:oscm][:proxy][:http_port]
 oscm_proxy_httpshost = node[:oscm][:proxy][:https_host]
 oscm_proxy_httpsport = node[:oscm][:proxy][:https_port]
+oscm_proxy_user = node[:oscm][:proxy][:user]
+oscm_proxy_pwd = node[:oscm][:proxy][:password]
 oscm_mail_host = node[:oscm][:mail][:host]
 oscm_mail_port = node[:oscm][:mail][:port]
 oscm_mail_tls = node[:oscm][:mail][:tls]
@@ -180,14 +183,14 @@ EOH
   })
 end
 
-directory "#{oscm_heattemplate_path}" do
+directory "#{oscm_install_path}" do
   owner oscm_group
   group oscm_group
   mode 0755
   recursive true
 end
 
-cookbook_file "#{oscm_heattemplate_path}/volumes.yaml" do
+cookbook_file "#{oscm_install_path}/volumes.yaml" do
   source "volumes.yaml"
   owner oscm_group
   group oscm_group
@@ -195,7 +198,7 @@ cookbook_file "#{oscm_heattemplate_path}/volumes.yaml" do
   action :create
 end
 
-cookbook_file "#{oscm_heattemplate_path}/application.yaml" do
+cookbook_file "#{oscm_install_path}/application.yaml" do
   source "application.yaml"
   owner oscm_group
   group oscm_group
@@ -203,22 +206,30 @@ cookbook_file "#{oscm_heattemplate_path}/application.yaml" do
   action :create
 end
 
-directory "#{oscm_heattemplate_path}/user-data" do
+directory "#{oscm_install_path}/user-data" do
   owner oscm_group
   group oscm_group
   mode 0755
   recursive true
 end
 
-cookbook_file "#{oscm_heattemplate_path}/user-data/write-config" do
-  source "user-data/write-config"
+cookbook_file "#{oscm_install_path}/user-data/heat-config" do
+  source "user-data/heat-config"
   owner oscm_group
   group oscm_group
   mode 0755
   action :create
 end
 
-cookbook_file "#{oscm_heattemplate_path}/user-data/deploy-oscmserver" do
+cookbook_file "#{oscm_install_path}/user-data/oscm-config" do
+  source "user-data/oscm-config"
+  owner oscm_group
+  group oscm_group
+  mode 0755
+  action :create
+end
+
+cookbook_file "#{oscm_install_path}/user-data/deploy-oscmserver" do
   source "user-data/deploy-oscmserver"
   owner oscm_group
   group oscm_group
@@ -226,9 +237,38 @@ cookbook_file "#{oscm_heattemplate_path}/user-data/deploy-oscmserver" do
   action :create
 end
 
+oscm_mail_host = node[:oscm][:mail][:host]
+oscm_mail_port = node[:oscm][:mail][:port]
+oscm_mail_tls = node[:oscm][:mail][:tls]
+oscm_mail_from = node[:oscm][:mail][:from]
+oscm_mail_auth = node[:oscm][:mail][:auth]
+oscm_mail_user = node[:oscm][:mail][:user]
+oscm_mail_pwd = node[:oscm][:mail][:password]
+
 bash "create oscm stacks" do
   code <<-EOH
-    openstack stack create --parameter "db_size=#{oscm_db_volume_size}" --parameter "app_size=#{oscm_app_volume_size}" -t #{oscm_heattemplate_path}/volumes.yaml --wait #{oscm_volumestack_name} &> /dev/null || true
+    sed -i 'g/$HTTP_PROXY/#{oscm_proxy_httphost}:#{oscm_proxy_httpport}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$HTTPS_PROXY/#{oscm_proxy_httpshost}:#{oscm_proxy_httpsport}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$PROXY_USER/#{oscm_proxy_user}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$PROXY_PWD/#{oscm_proxy_pwd}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$MAIL_HOST/#{oscm_mail_host}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$MAIL_PORT/#{oscm_mail_port}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$MAIL_TLS/#{oscm_mail_tls}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$MAIL_USER/#{oscm_mail_user}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$MAIL_PWD/#{oscm_mail_pwd}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$REGISTRY_HOST/#{oscm_docker_host}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$REGISTRY_PORT/#{oscm_docker_port}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$REGISTRY_USER/#{oscm_docker_user}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$REGISTRY_PWD/#{oscm_docker_pwd}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 'g/$OSCM_IMAGES_TAG/#{oscm_docker_tag}/g' #{oscm_install_path}/user-data/oscm-config
+  EOH
+  environment ({
+  })
+end
+
+bash "create oscm stacks" do
+  code <<-EOH
+    openstack stack create --parameter "db_size=#{oscm_db_volume_size}" --parameter "app_size=#{oscm_app_volume_size}" -t #{oscm_install_path}/volumes.yaml --wait #{oscm_volumestack_name} &> /dev/null || true
     app_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
     db_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} db_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
     mkdir -p "$(dirname "#{oscm_keypair_crowbar_sshkey}")"
@@ -236,22 +276,26 @@ bash "create oscm stacks" do
     then
       ssh-keygen -t rsa -f #{oscm_keypair_crowbar_sshkey}
     fi
-    openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}" --parameter "key_name=#{oscm_keypair_name}" --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
-    --parameter "mail_host=#{oscm_mail_host}" --parameter "mail_port=#{oscm_mail_port}" --parameter "mail_tls=#{oscm_mail_tls}" --parameter "mail_address=#{oscm_mail_from}"\
-    --parameter "mail_auth=#{oscm_mail_auth}" --parameter "mail_user=#{oscm_mail_user}" --parameter "mail_password=#{oscm_mail_pwd}"\
-    --parameter "http_proxy=#{oscm_proxy_httphost}:#{oscm_proxy_httpport}" --parameter "https_proxy=#{oscm_proxy_httpshost}:#{oscm_proxy_httpsport}"\
-    --parameter "registry_host=#{oscm_docker_host}" --parameter "registry_port=#{oscm_docker_port}"  --parameter "registry_user=#{oscm_docker_user}" --parameter "registry_port=#{oscm_docker_pwd}"\
-    --parameter "ssl_path=#{oscm_ssl_scp_path}"\
+    openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}"\
+    --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
+    --parameter "mail_port=#{oscm_mail_port}" --parameter "registry_port=#{oscm_docker_port}"\
     --parameter "heat_host_cidr=#{heat_public_host}/32" --parameter "heat_port=#{heat_port}"\
     --parameter-file "ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub"\
-    -t #{oscm_heattemplate_path}/application.yaml --wait #{oscm_instancestack_name} &> /dev/null || true
+    -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name} &> /dev/null || true
     ip_appserver=$(openstack stack output show -f shell --variable output_value #{oscm_instancestack_name} ip_appserver | grep -Po '(?<=^output_value=\")[^\"]*')
     ssh-keygen -R ${ip_appserver} -f /root/.ssh/known_hosts
-    ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_ssl_scp_path}" || true
-    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_certfile} ${ip_appserver}:#{oscm_ssl_scp_path} || true
-    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_keyfile} ${ip_appserver}:#{oscm_ssl_scp_path} || true
-    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_cacerts} ${ip_appserver}:#{oscm_ssl_scp_path} || true
-    ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_ssl_scp_path}/scp_finished"
+    ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_config_path}" || true
+    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/oscm-config ${ip_appserver}:#{oscm_config_path} || true
+    ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/finished"
+    if [ -f #{oscm_ssl_certfile} ]; then
+      ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_config_path}/ssl/" || true
+      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_certfile} ${ip_appserver}:#{oscm_config_path}/ssl || true
+      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_certfile} ${ip_appserver}:#{oscm_config_path}/ssl || true
+      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_keyfile} ${ip_appserver}:#{oscm_config_path}/ssl || true
+      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_cacerts} ${ip_appserver}:#{oscm_config_path}/ssl || true
+      ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/ssl/finished"
+    fi
+ 
   EOH
   environment ({
     "OS_USERNAME" => oscm_user,

@@ -5,50 +5,37 @@ set -e
 
 exec &> /var/log/setup-machine.log
 
-source /etc/oscm-variables
+CONFIG_PATH=/etc/oscm/config
+SSL_CONFIG_PATH=${CONFIG_PATH}/ssl
+OSCM_CONFIG=${CONFIG_PATH}/oscmconfig
 
-WEB_CERT_PATH=/var/web_cert
+source ${CONFIG_PATH}/heatconfig
 
-sudo cat /etc/sysconfig/proxy <<EOF
-PROXY_ENABLED="yes"
-HTTP_PROXY="http://$HTTP_PROXY"
-HTTPS_PROXY="https://$HTTPS_PROXY"
-FTP_PROXY=""
-GOPHER_PROXY=""
-SOCKS_PROXY=""
-SOCKS5_SERVER=""
-NO_PROXY="localhost, 127.0.0.1, $REGISTRY_HOST"
-EOF
 
-# TODO:
-# If $REGISTRY_HOST empty, docker hub is default.
-# Remove insecure
-sudo cat > /etc/sysconfig/docker <<EOF
-DOCKER_OPTS="--insecure-registry=$REGISTRY_HOST:$REGISTRY_PORT"
-HTTP_PROXY="http://$HTTP_PROXY"
-HTTPS_PROXY="https://$HTTPS_PROXY"
-NO_PROXY="localhost, 127.0.0.1, $REGISTRY_HOST"
-EOF
+if [ ${CONFIG_PATH} ]; then
+  until [ -f $CONFIG_PATH/finished ]
+  do
+    echo "scp for oscm configuration file is not finished yet sleeping 5sec."
+    sleep 5
+  done
+  echo "scp for oscm configuration file is finished."
+fi
 
-export http_proxy="http://$HTTP_PROXY"
-export https_proxy="https://$HTTPS_PROXY"
-export no_proxy="localhost, 127.0.0.1, $REGISTRY"
-
-systemctl restart docker
+if [ ${SSL_CONFIG_PATH} ]; then
+  until [ -f $SSL_CONFIG_PATH/finished ]
+  do
+    echo "scp for oscm ssl certificate is not finished yet sleeping 5sec."
+    sleep 5
+  done
+  echo "scp for oscm ssl certificate is finished."
+  # TODO: add certificate to a local docker volume folder.
+  # echo $SSL_CONFIG_PATH/somekey.pem > /var/web_cert
+fi
 
 WAIT_CURL="$WAIT_CURL --data-binary '{\"status\": \"SUCCESS\"}' --noproxy '*'"
 eval $WAIT_CURL
-if [ ${SSL_PATH} ]; then
-  until [ -f $SSL_PATH/scp_finished ]
-  do
-    echo "scp for ssl certificate is not finished yet sleeping 5sec."
-    sleep 5
-  done
-  echo "scp for ssl certificate is finished."
-  # TODO: add certificate to a local docker volume folder.
-  # echo $SSL_PATH/somekey.pem > /var/web_cert
-fi
 
+source ${OSCM_CONFIG}
 
 # For some reason the volume id is shortened to 27 characters when the device
 # link in /dev/disk/by-id/ is created. Account for this by truncating the
@@ -82,136 +69,20 @@ OSCM_IMAGE=$REGISTRY/$OSCM_IMAGE_NAME
 APP_IMAGE=$REGISTRY/$APP_IMAGE_NAME
 DB_IMAGE=$REGISTRY/$DB_IMAGE_NAME
 DB=/db/database
-APP_PATH=/oscm/app/
-BES_PATH=/oscm/bes/
+APP_PATH=/oscm/oscm-app/
+OSCM_PATH=/oscm/oscm-core/
 CLIENT_CRT_PATH=/oscm/client-crt/
 
-DB_VOLUME=dbvolume
-BES_VOLUME=besvolume
-APP_VOLUME=appvolume
+DB_VOLUME=oscm-db-volume
+OSCM_VOLUME=oscm-core-volume
+APP_VOLUME=oscm-app-volume
 
 mkdir -p $DB
 mkdir -p $APP_PATH
-mkdir -p $BES_PATH
-
-# Start docker service
-systemctl start docker.service
-
-# Delete all containers before creating if they are already created before
-docker rm -f $APP_VOLUME $BES_VOLUME $DB_VOLUME db web app >/dev/null 2>&1 || true
-
-# Create volume container for database
-docker create -v $DB:/var/lib/pgsql/database --name $DB_VOLUME $DB_IMAGE /bin/true
-
-# create volume container for bes and app
-docker create \
-  -v $BES_PATH:/opt/glassfish3/glassfish/domains/bes-domain/ \
-  -v $APP_PATH:/opt/glassfish3/glassfish/domains/app-domain/ \
-  -v $CLIENT_CRT_PATH:/tmp/client-crt \
-  --name $BES_VOLUME $OSCM_IMAGE /bin/true
-
-# create volume container for app
-docker create \
-  -v $APP_PATH:/opt/glassfish3/glassfish/domains/app-domain/ \
-  -v $BES_PATH:/opt/glassfish3/glassfish/domains/bes-domain/ \
-  -v $CLIENT_CRT_PATH:/tmp/client-crt \
-  --name $APP_VOLUME $APP_IMAGE /bin/true
+mkdir -p $OSCM_PATH
 
 OSCM_DIR=/opt/oscm
 mkdir -p $OSCM_DIR
-
-# Docker compose file for the application deployment
-if [ ! -x $OSCM_DIR/docker-compose.yml ]; then
-cat > $OSCM_DIR/docker-compose.yml <<EOF
-version: "2"
-services:
-  $OSCM_HOSTNAME:
-    depends_on:
-      - $DB_HOSTNAME
-    image: $OSCM_IMAGE
-    env_file:
-      - /etc/oscm-variables
-    container_name: $OSCM_HOSTNAME
-    ports:
-      - "8080:8080"
-      - "8081:8081"
-    volumes_from:
-      - container:$BES_VOLUME:rw
-  $APP_HOSTNAME:
-    depends_on:
-      - $DB_HOSTNAME
-      - $OSCM_HOSTNAME
-    image: $APP_IMAGE
-    env_file:
-      - /etc/oscm-variables
-    container_name: $APP_HOSTNAME
-    ports:
-      - "8880:8880"
-      - "8881:8881"
-    volumes_from:
-      - container:$APP_VOLUME:rw
-  $DB_HOSTNAME:
-    image: $DB_IMAGE
-    container_name: $DB_HOSTNAME
-    volumes_from:
-      - container:$DB_VOLUME:rw
-    env_file:
-      - /etc/oscm-variables
-EOF
-echo "# updated at $(date)" >> $OSCM_DIR/docker-compose.yml
-fi
-
-# OSCM start script 
-# TODO: Add docker login -u="$REGISTRY_USER" -p="REGISTRY_PWD" if $REGISTRY_USER not empty.
-if [ ! -x $OSCM_DIR/start-oscm.sh ]; then
-cat > $OSCM_DIR/start-oscm.sh <<EOF
-#/bin/sh
-# check if docker is running
-if ! docker ps &>/dev/null; then
-  echo "starting docker service"
-  systemctl start docker.service
-fi
-if ! grep -qs '/db' /proc/mounts; then
-    mount -t ext4 $volume_dev_db /db
-fi
-if ! grep -qs '/oscm' /proc/mounts; then
-    mount -t ext4 $volume_dev_db /oscm
-fi
-echo "oscm is being started"
-docker-compose -f $OSCM_DIR/docker-compose.yml up --force-recreate
-EOF
-echo "# updated at $(date)" >> $OSCM_DIR/start-oscm.sh
-fi
-chmod +x $OSCM_DIR/start-oscm.sh
-
-# OSCM Stop script
-if [ ! -x $OSCM_DIR/stop-oscm.sh ]; then
-cat > $OSCM_DIR/stop-oscm.sh <<EOF
-#/bin/sh
-echo "oscm is being stopped"
-docker-compose -f $OSCM_DIR/docker-compose.yml kill
-EOF
-echo "# updated at $(date)" >> $OSCM_DIR/stop-oscm.sh
-fi
-chmod +x $OSCM_DIR/stop-oscm.sh
-
-# OSCM systemd service
-cat > /etc/systemd/system/oscm.service <<EOF
-[Unit]
-Description=OSCM conainerized
-Requires=docker.service
-After=docker.service
-[Service]
-ExecStart=/usr/bin/sh $OSCM_DIR/start-oscm.sh
-ExecStop=/usr/bin/sh $OSCM_DIR/stop-oscm.sh
-[Install]
-WantedBy=default.target
-EOF
-
-echo "# updated at $(date)" >> /etc/systemd/system/oscm.service
-
-systemctl enable oscm.service
-systemctl start oscm.service
 
 cat > /etc/motd <<EOF
 This node has been set up as the mock server for oscm.

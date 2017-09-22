@@ -49,7 +49,6 @@
                     "publickeyfile": { "type": "str", "required": true }
                   }
                 },
-                "heattemplate_path": { "type": "str", "required": true },
                 "volume_stack" : {
                   "type" : "map",
                   "required" : true,
@@ -89,7 +88,8 @@
                 "port": { "type": "int", "required": true },
                 "auth": { "type": "bool", "required": true },
                 "user": { "type": "str", "required": true },
-                "password": { "type": "str", "required": true }
+                "password": { "type": "str", "required": true },
+                "tag": { "type": "str", "required": true }
               }
             },
             "proxy" : {

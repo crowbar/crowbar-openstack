@@ -28,92 +28,18 @@ parameters:
     type: string
     default: oscm.medium
     description: Nova flavor to use for servers
-  key_name:
-    type: string
-    default: oscm
-    description: SSH key to add to servers' /root/.ssh/authorized_keys
   app_volume_id:
     type: string
     description: The Cinder volume to attach to the application server
   db_volume_id:
     type: string
     description: The Cinder volume to attach to the database server
-  app_name:
-    default: oscm
-    description: The application name
-    type: string
-  http_proxy:
-    default: ""
-    type: string
-    description: Http proxy
-  https_proxy:
-    default: ""
-    type: string
-    description: Https proxy
-  registry_host:
-    default: ""
-    type: string
-    description: Docker registry host
   registry_port:
     default: ""
     type: string
     description: Docker registry port
-  registry_user:
-    default: ""
-    type: string
-    description: Docker registry user
-  registry_pwd:
-    default: ""
-    type: string
-    hidden: true
-    description: Docker registry password
-  mail_address:
-    default: ""
-    type: string
-  mail_host:
-    default: ""
-    type: string
-  mail_password:
-    default: ""
-    type: string
-  mail_user:
-    default: oscm
-    type: string
   mail_port:
     default: 25
-    type: string
-  mail_auth:
-    default: false
-    type: string
-  mail_tls:
-    default: false
-    type: string
-  keystone_user_pwd:
-    default: oscm
-    type: string
-  keystone_user_name:
-    default: oscm
-    type: string
-  keystone_url:
-    default: ""
-    type: string
-  keystone_tenant_id:
-    default: oscm
-    type: string
-  keystone_domain:
-    default: default
-    type: string
-  oscm_image_name:
-    default: oscm
-    type: string
-  app_image_name:
-    default: app
-    type: string
-  db_image_name:
-    default: db
-    type: string
-  ssl_path:
-    default: ""
     type: string
   wait_condition_timeout:
     default: 1800
@@ -121,6 +47,7 @@ parameters:
   ssh_cert:
     default: ""
     type: string
+    description: SSH key to add to servers' /root/.ssh/authorized_keys
   heat_host_cidr:
     default: ""
     type: string
@@ -130,23 +57,17 @@ parameters:
 
 resources:
 
-  ssl_wait_handle:
+  inject_wait_handle:
     type: OS::Heat::WaitConditionHandle
 
-  ssl_wait_condition:
+  inject_wait_condition:
     type: OS::Heat::WaitCondition
     depends_on: appserver
     properties:
-      handle: { get_resource: ssl_wait_handle }
+      handle: { get_resource: inject_wait_handle }
       timeout: { get_param: wait_condition_timeout }
 
   db_password:
-    type: OS::Heat::RandomString
-
-  keystore_password:
-    type: OS::Heat::RandomString
-
-  as_admin_password:
     type: OS::Heat::RandomString
 
   ### Network infrastructure ###
@@ -155,7 +76,6 @@ resources:
     type: OS::Neutron::Net
     properties:
       name: oscm
-
 
   oscm_subnet:
     type: OS::Neutron::Subnet
@@ -200,16 +120,6 @@ resources:
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
-          port_range_min: { get_param: registry_port }
-          port_range_max: { get_param: registry_port }
-        - direction: egress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: { get_param: registry_port }
-          port_range_max: { get_param: registry_port }
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
           port_range_min: 8080
           port_range_max: 8080
         - direction: ingress
@@ -227,6 +137,11 @@ resources:
           protocol: tcp
           port_range_min: 8881
           port_range_max: 8881
+        - direction: ergress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: { get_param: registry_port }
+          port_range_max: { get_param: registry_port }
         - direction: egress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
@@ -251,7 +166,7 @@ resources:
       group: ungrouped
       config:
         str_replace:
-          template: {get_file: user-data/write-config}
+          template: {get_file: user-data/heat-config}
           params:
             $APP_VOLUME_DEV:
               list_join:
@@ -264,31 +179,6 @@ resources:
                 - - "/dev/disk/by-id/virtio-"
                   - { get_param: db_volume_id }
             $DB_PASSWORD: { get_attr: [ db_password, value ] }
-            $KEYSTORE_PASSWORD: { get_attr: [ keystore_password, value ] }
-            $AS_ADMIN_PASSWORD: { get_attr: [ as_admin_password, value ] }
-            $APP_NAME: { get_param: app_name }
-            $HTTP_PROXY: { get_param: http_proxy }
-            $HTTPS_PROXY: { get_param: https_proxy }
-            $REGISTRY_HOST: { get_param: registry_host }
-            $REGISTRY_PORT: { get_param: registry_port }
-            $REGISTRY_USER: { get_param: registry_user }
-            $REGISTRY_PWD: { get_param: registry_pwd }
-            $MAIL_ADDRESS: { get_param: mail_address }
-            $MAIL_HOST: { get_param: mail_host }
-            $MAIL_PASSWORD: { get_param: mail_password }
-            $MAIL_USER: { get_param: mail_user }
-            $MAIL_PORT: { get_param: mail_port }
-            $MAIL_AUTH: { get_param: mail_auth }
-            $MAIL_TLS: { get_param: mail_tls }
-            $KEYSTONE_USER_PWD: { get_param: keystone_user_pwd }
-            $KEYSTONE_USER_NAME: { get_param: keystone_user_name }
-            $KEYSTONE_URL: { get_param: keystone_url }
-            $KEYSTONE_TENANT_ID: { get_param: keystone_tenant_id }
-            $KEYSTONE_DOMAIN: { get_param: keystone_domain }
-            $OSCM_IMAGE_NAME: { get_param: oscm_image_name }
-            $APP_IMAGE_NAME: { get_param: app_image_name }
-            $DB_IMAGE_NAME: { get_param: db_image_name }
-            $SSL_PATH: { get_param: ssl_path }
             $WAIT_CURL: { get_attr: [ ssl_wait_handle, curl_cli ] }
             $SSH_CERT: { get_param: ssh_cert }
 

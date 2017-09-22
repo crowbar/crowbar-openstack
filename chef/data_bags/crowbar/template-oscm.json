@@ -25,7 +25,6 @@
           "publickey": "",
           "publickeyfile": "/etc/oscm/ssl/openstack/keypair_publickey.pem"
         },
-        "heattemplate_path": "/etc/oscm/heat/",
         "volume_stack": {
           "stack_name": "oscm-volumes",
           "db_volume_size": 1,
@@ -49,7 +48,8 @@
         "port": 0,
         "auth": false,
         "user": "",
-        "password": ""
+        "password": "",
+        "tag": "17.5"
       },
       "proxy": {
         "use_proxy": false,
