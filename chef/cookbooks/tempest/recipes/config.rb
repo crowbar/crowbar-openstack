@@ -348,6 +348,7 @@ neutron_api_extensions = [
   "subnet_allocation",
   "subnet-service-types",
   "tag",
+  "subnet_allocation",
 ].join(",")
 
 unless neutrons[0].nil?
