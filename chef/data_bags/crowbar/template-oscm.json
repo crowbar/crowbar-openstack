@@ -63,7 +63,6 @@
         "password": ""
       },
       "ssl": {
-        "scp_path": "/etc/oscm/ssl/",
         "certfile": "/etc/oscm/ssl/certs/signing_cert.pem",
         "keyfile": "/etc/oscm/ssl/private/signing_key.pem",
         "generate_certs": false,

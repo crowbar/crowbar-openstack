@@ -245,22 +245,22 @@ oscm_mail_auth = node[:oscm][:mail][:auth]
 oscm_mail_user = node[:oscm][:mail][:user]
 oscm_mail_pwd = node[:oscm][:mail][:password]
 
-bash "create oscm stacks" do
+bash "create oscm configuration" do
   code <<-EOH
-    sed -i 'g/$HTTP_PROXY/#{oscm_proxy_httphost}:#{oscm_proxy_httpport}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$HTTPS_PROXY/#{oscm_proxy_httpshost}:#{oscm_proxy_httpsport}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$PROXY_USER/#{oscm_proxy_user}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$PROXY_PWD/#{oscm_proxy_pwd}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$MAIL_HOST/#{oscm_mail_host}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$MAIL_PORT/#{oscm_mail_port}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$MAIL_TLS/#{oscm_mail_tls}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$MAIL_USER/#{oscm_mail_user}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$MAIL_PWD/#{oscm_mail_pwd}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$REGISTRY_HOST/#{oscm_docker_host}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$REGISTRY_PORT/#{oscm_docker_port}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$REGISTRY_USER/#{oscm_docker_user}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$REGISTRY_PWD/#{oscm_docker_pwd}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 'g/$OSCM_IMAGES_TAG/#{oscm_docker_tag}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$HTTP_PROXY/#{oscm_proxy_httphost}:#{oscm_proxy_httpport}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$HTTPS_PROXY/#{oscm_proxy_httpshost}:#{oscm_proxy_httpsport}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$PROXY_USER/#{oscm_proxy_user}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$PROXY_PWD/#{oscm_proxy_pwd}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$MAIL_HOST/#{oscm_mail_host}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$MAIL_PORT/#{oscm_mail_port}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$MAIL_TLS/#{oscm_mail_tls}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$MAIL_USER/#{oscm_mail_user}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$MAIL_PWD/#{oscm_mail_pwd}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$REGISTRY_HOST/#{oscm_docker_host}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$REGISTRY_PORT/#{oscm_docker_port}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$REGISTRY_USER/#{oscm_docker_user}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$REGISTRY_PWD/#{oscm_docker_pwd}/g' #{oscm_install_path}/user-data/oscm-config
+    sed -i 's/$OSCM_IMAGES_TAG/#{oscm_docker_tag}/g' #{oscm_install_path}/user-data/oscm-config
   EOH
   environment ({
   })
@@ -295,7 +295,7 @@ bash "create oscm stacks" do
       scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_cacerts} ${ip_appserver}:#{oscm_config_path}/ssl || true
       ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/ssl/finished"
     fi
- 
+
   EOH
   environment ({
     "OS_USERNAME" => oscm_user,

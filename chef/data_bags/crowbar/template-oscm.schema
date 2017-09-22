@@ -111,7 +111,6 @@
               "type": "map",
               "required": true,
               "mapping": {
-                "scp_path": { "type" : "str", "required" : true },
                 "certfile": { "type" : "str", "required" : true },
                 "keyfile": { "type" : "str", "required" : true },
                 "generate_certs": { "type" : "bool", "required" : true },
