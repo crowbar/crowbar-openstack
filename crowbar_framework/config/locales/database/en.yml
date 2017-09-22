@@ -25,6 +25,8 @@ en:
         mysql_attributes: 'MariaDB Options'
         mysql:
           datadir: 'Datadir'
+          max_connections: 'Maximum Number of simultaneous Connections'
+          slow_query_logging: 'Slow Query Logging'
           ssl_header: 'SSL Support'
           ssl:
             enabled: 'Enable SSL'
