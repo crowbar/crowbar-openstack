@@ -18,8 +18,8 @@
 #
 
 default["mysql"]["bind_address"]              = node["ipaddress"]
-default["mysql"]["tmpdir"]                    = "/var/lib/mysqltmp"
-default["mysql"]["datadir"]                   = "/var/lib/mysql"
+default["mysql"]["tmpdir"]                    = "/var/lib/mariadbtmp"
+default["mysql"]["datadir"]                   = "/var/lib/mariadb"
 
 if attribute?("ec2")
   default["mysql"]["ec2_path"]                = "/mnt/mysql"
