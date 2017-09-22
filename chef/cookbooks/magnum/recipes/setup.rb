@@ -72,7 +72,8 @@ unless node["magnum"]["trustee"]["domain_id"] && node["magnum"]["trustee"]["doma
       unless magnum_domain_role.include?('"admin"')
         create_magnum_domain_role = "#{openstack_command} role add --user #{magnum_domain_admin_id}"
         create_magnum_domain_role << " --domain #{magnum_domain_id} admin"
-        Mixlib::ShellOut.new(create_magnum_domain_role).run_command
+        Mixlib::ShellOut.new(create_magnum_domain_role,
+                             environment: env).run_command
       end
 
       dirty = false
