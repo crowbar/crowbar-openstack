@@ -70,8 +70,7 @@ bash "enabling rabbit management" do
 end
 
 service "rabbitmq-server" do
-  supports restart: true, start: true, stop: true, status: true, \
-           restart_crm_resource: true, pacemaker_resource_name: "rabbitmq"
+  supports restart: true, start: true, stop: true, status: true
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
