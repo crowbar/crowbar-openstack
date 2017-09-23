@@ -46,6 +46,8 @@ if node[:platform_family] == "rhel"
   service "xinetd" do
     action [:start, :enable]
   end
+  utils_systemd_service_restart "xinetd"
+
   cookbook_file "/etc/xinetd.d/rsync" do
     source "rsync_xinetd"
     notifies :restart, resources(service: "xinetd")
@@ -55,5 +57,6 @@ else
     action [:enable, :start]
     service_name "rsyncd" if node[:platform_family] == "suse"
   end
+  utils_systemd_service_restart "rsync"
 end
 

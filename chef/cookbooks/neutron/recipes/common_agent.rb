@@ -315,6 +315,9 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       supports status: true, restart: true
     end
   end
+  utils_systemd_service_restart neutron_agent do
+    action use_crowbar_pacemaker_service ? :disable : :enable
+  end
 
   # L3 agent
   if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
@@ -350,6 +353,9 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       else
         supports status: true, restart: true
       end
+    end
+    utils_systemd_service_restart node[:neutron][:platform][:l3_agent_name] do
+      action use_crowbar_pacemaker_service ? :disable : :enable
     end
   end
 end

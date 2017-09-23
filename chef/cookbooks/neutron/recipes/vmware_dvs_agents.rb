@@ -37,3 +37,4 @@ service agent_service_name do
   subscribes :restart, resources(template: node[:neutron][:config_file])
   subscribes :restart, resources(template: agent_config_path)
 end
+utils_systemd_service_restart agent_service_name

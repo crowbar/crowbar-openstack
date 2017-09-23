@@ -399,6 +399,9 @@ service node[:neutron][:platform][:service_name] do
   end
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
+utils_systemd_service_restart node[:neutron][:platform][:service_name] do
+  action use_crowbar_pacemaker_service ? :disable : :enable
+end
 
 if node[:neutron][:use_infoblox]
   service node[:neutron][:platform][:infoblox_agent_name] do
@@ -406,6 +409,9 @@ if node[:neutron][:use_infoblox]
     action [:enable, :start]
     subscribes :restart, resources(template: node[:neutron][:config_file])
     provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
+  end
+  utils_systemd_service_restart node[:neutron][:platform][:infoblox_agent_name] do
+    action use_crowbar_pacemaker_service ? :disable : :enable
   end
 end
 

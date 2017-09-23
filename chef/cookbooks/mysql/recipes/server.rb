@@ -60,6 +60,9 @@ service "mysql" do
   action :enable
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
+utils_systemd_service_restart "mysql" do
+  action ha_enabled ? :disable : :enable
+end
 
 directory node[:mysql][:tmpdir] do
   owner "mysql"
