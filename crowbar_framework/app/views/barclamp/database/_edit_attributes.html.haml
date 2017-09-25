@@ -11,6 +11,8 @@
           = t('.mysql_attributes')
 
         = string_field %w(mysql datadir)
+        = integer_field %w(mysql max_connections)
+        = boolean_field %w(mysql slow_query_logging)
 
       %fieldset
         %legend
