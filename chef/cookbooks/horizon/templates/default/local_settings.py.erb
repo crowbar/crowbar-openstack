@@ -61,9 +61,6 @@ OPENSTACK_NEUTRON_NETWORK = {
     'enable_ipv6': False,
     'enable_distributed_router': False,
     'enable_ha_router': False,
-    'enable_lb': <%= @enable_lb ? 'True' : 'False' %>,
-    'enable_firewall': True,
-    'enable_vpn': <%= @enable_vpn ? 'True' : 'False' %>,
     'enable_fip_topology_check': True,
 
     # Neutron can be configured with a default Subnet Pool to be used for IPv4
@@ -77,12 +74,6 @@ OPENSTACK_NEUTRON_NETWORK = {
     # You must set this to enable IPv6 Prefix Delegation in a PD-capable
     # environment.
     'default_ipv6_subnet_pool_label': None,
-
-    # The profile_support option is used to detect if an external router can be
-    # configured via the dashboard. When using specific plugins the
-    # profile_support can be turned on if needed.
-    'profile_support': None,
-    #'profile_support': 'cisco',
 
     # Set which provider network types are supported. Only the network types
     # in this list will be available to choose from when creating a network.
@@ -113,6 +104,7 @@ POLICY_FILES = {
     'image': '<%= @policy_file[:image] %>',
     'orchestration': '<%= @policy_file[:orchestration] %>',
     'network': '<%= @policy_file[:network] %>',
+    'neutron-fwaas': '<%= @policy_file[:neutron_fwaas] %>',
 }
 
 LOGGING = {
