@@ -81,8 +81,28 @@ service mysql start
 EOC
 end
 
+if node[:mysql][:ssl][:enabled]
+  ssl_setup "setting up ssl for mysql" do
+    generate_certs node[:mysql][:ssl][:generate_certs]
+    keyfile node[:mysql][:ssl][:keyfile]
+    certfile node[:mysql][:ssl][:certfile]
+    ca_certs node[:mysql][:ssl][:ca_certs]
+    cert_required !(node[:mysql][:ssl][:generate_certs] || node[:mysql][:ssl][:insecure])
+    group "mysql"
+    fqdn CrowbarDatabaseHelper.get_listen_address(node)
+  end
+end
+
 template "/etc/my.cnf.d/openstack.cnf" do
   source "my.cnf.erb"
+  owner "root"
+  group "mysql"
+  mode "0640"
+  notifies :restart, "service[mysql]", :immediately
+end
+
+template "/etc/my.cnf.d/ssl.cnf" do
+  source "ssl.cnf.erb"
   owner "root"
   group "mysql"
   mode "0640"
