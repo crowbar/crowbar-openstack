@@ -137,7 +137,7 @@ resources:
           protocol: tcp
           port_range_min: 8881
           port_range_max: 8881
-        - direction: ergress
+        - direction: egress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
           port_range_min: { get_param: registry_port }
