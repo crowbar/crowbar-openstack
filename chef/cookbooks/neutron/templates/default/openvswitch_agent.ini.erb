@@ -3,10 +3,11 @@
 <% unless @tunnel_types.empty? -%>
 tunnel_types = <%= @tunnel_types.join(",") %>
 <% end -%>
-<% if @use_l2pop -%>
-l2_population = True
+<% if @ml2_type_drivers.include?("cisco_apic_ml2") || @ml2_type_drivers.include?("apic_gbp") -%>
+enable_tunneling = <%= @enable_tunneling %>
 <% end -%>
 <% if @use_l2pop -%>
+l2_population = True
 arp_responder = True
 <% end -%>
 <% if @dvr_enabled -%>
@@ -16,7 +17,7 @@ enable_distributed_routing = True
 tunnel_csum = True
 <% end -%>
 [ovs]
-<% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") -%>
+<% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") && !@ml2_type_drivers.include?("opflex") -%>
 tunnel_bridge = br-tunnel
 <% end -%>
 ovsdb_interface = <%= @ovsdb_interface %>
