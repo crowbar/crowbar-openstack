@@ -13,12 +13,12 @@
         "password": "oscm"
       },
       "openstack": {
-        "image": "sles12-docker",
+        "image": "sles12-sp1",
         "flavor": {
           "name": "oscm.small",
-          "ram": 1024,
+          "ram": 2048,
           "vcpus": 1,
-          "disk": 1
+          "disk": 20
         },
         "keypair": {
           "name": "oscm",

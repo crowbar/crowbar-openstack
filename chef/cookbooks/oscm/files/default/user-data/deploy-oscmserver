@@ -7,9 +7,9 @@ exec &> /var/log/setup-machine.log
 
 CONFIG_PATH=/etc/oscm/config
 SSL_CONFIG_PATH=${CONFIG_PATH}/ssl
-OSCM_CONFIG=${CONFIG_PATH}/oscmconfig
+OSCM_CONFIG=${CONFIG_PATH}/oscm-config
 
-source ${CONFIG_PATH}/heatconfig
+source ${CONFIG_PATH}/heat-config
 
 
 if [ ${CONFIG_PATH} ]; then

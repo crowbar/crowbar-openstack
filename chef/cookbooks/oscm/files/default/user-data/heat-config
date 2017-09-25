@@ -2,18 +2,13 @@
 
 # Writes the configuration parameters passed in by Heat/cloud-init to /etc/heatconfig.
 
-touch /etc/oscm/config/heatconfig
-chmod 400 /etc/oscm/config/heatconfig
+touch /etc/oscm/config/heat-config
+chmod 400 /etc/oscm/config/heat-config
 
 cat > /etc/oscm/config/heatconfig <<EOF
-DB_HOSTNAME=oscm-db
-OSCM_HOSTNAME=oscm-core
-APP_HOSTNAME=oscm-app
-BIRT_HOSTNAME=oscm-birt
 APP_VOLUME_DEV=$APP_VOLUME_DEV
 DB_VOLUME_DEV=$DB_VOLUME_DEV
 DB_PASSWORD=$DB_PASSWORD
-WAIT_CURL="$WAIT_CURL"
 EOF
 
 CERT_STR="$SSH_CERT"

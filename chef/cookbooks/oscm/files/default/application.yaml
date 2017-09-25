@@ -45,9 +45,6 @@ parameters:
   mail_port:
     default: 25
     type: string
-  wait_condition_timeout:
-    default: 1800
-    type: number
   ssh_cert:
     default: ""
     type: string
@@ -60,16 +57,6 @@ parameters:
     type: number
 
 resources:
-
-  inject_wait_handle:
-    type: OS::Heat::WaitConditionHandle
-
-  inject_wait_condition:
-    type: OS::Heat::WaitCondition
-    depends_on: appserver
-    properties:
-      handle: { get_resource: inject_wait_handle }
-      timeout: { get_param: wait_condition_timeout }
 
   db_password:
     type: OS::Heat::RandomString
@@ -183,17 +170,7 @@ resources:
                 - - "/dev/disk/by-id/virtio-"
                   - { get_param: db_volume_id }
             $DB_PASSWORD: { get_attr: [ db_password, value ] }
-            $WAIT_CURL: { get_attr: [ inject_wait_handle, curl_cli ] }
             $SSH_CERT: { get_param: ssh_cert }
-
-  # User data payload for appserver
-  userdata_appserver:
-    type: OS::Heat::MultipartMime
-    properties:
-      parts:
-        - config: {get_resource: user_data_params}
-        - config: {get_file: user-data/deploy-oscmserver}
-
 
   ### Servers ###
 
@@ -207,8 +184,6 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - port: { get_resource: port_appserver }
-      user_data_format: RAW
-      user_data: { get_resource: userdata_appserver }
 
   port_appserver:
     type: OS::Neutron::Port
