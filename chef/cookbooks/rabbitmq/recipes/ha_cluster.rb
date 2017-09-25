@@ -16,9 +16,6 @@
 pid_file = "/var/run/rabbitmq/pid"
 
 agent_name = "ocf:rabbitmq:rabbitmq-server-ha"
-rabbitmq_op = {}
-rabbitmq_op["monitor"] = {}
-rabbitmq_op["monitor"]["interval"] = "10s"
 
 # set the shared rabbitmq cookie
 # cookie is automatically set during barclamp apply
@@ -49,7 +46,7 @@ pacemaker_primitive service_name do
     "rmq_feature_local_list_queues" => false,
     "default_vhost" => node[:rabbitmq][:vhost]
   })
-  op rabbitmq_op
+  op node[:rabbitmq][:ha][:op]
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
