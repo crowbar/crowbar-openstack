@@ -22,12 +22,16 @@ parameters:
     description: Network to draw Floating IPs from
   image:
     type: string
-    default: sles12-docker
+    default: sles12-sp1
     description: Glance image to use for servers
   flavor:
     type: string
     default: oscm.medium
     description: Nova flavor to use for servers
+  key_name:
+    type: string
+    default: oscm
+    description: Keypair name
   app_volume_id:
     type: string
     description: The Cinder volume to attach to the application server
