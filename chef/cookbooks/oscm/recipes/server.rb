@@ -237,14 +237,6 @@ cookbook_file "#{oscm_install_path}/user-data/deploy-oscmserver" do
   action :create
 end
 
-oscm_mail_host = node[:oscm][:mail][:host]
-oscm_mail_port = node[:oscm][:mail][:port]
-oscm_mail_tls = node[:oscm][:mail][:tls]
-oscm_mail_from = node[:oscm][:mail][:from]
-oscm_mail_auth = node[:oscm][:mail][:auth]
-oscm_mail_user = node[:oscm][:mail][:user]
-oscm_mail_pwd = node[:oscm][:mail][:password]
-
 bash "create oscm configuration" do
   code <<-EOH
     sed -i 's/$HTTP_PROXY/#{oscm_proxy_httphost}:#{oscm_proxy_httpport}/g' #{oscm_install_path}/user-data/oscm-config
@@ -266,22 +258,51 @@ bash "create oscm configuration" do
   })
 end
 
-bash "create oscm stacks" do
+bash "create oscm volume stack" do
   code <<-EOH
     openstack stack create --parameter "db_size=#{oscm_db_volume_size}" --parameter "app_size=#{oscm_app_volume_size}" -t #{oscm_install_path}/volumes.yaml --wait #{oscm_volumestack_name} &> /dev/null || true
+  EOH
+  environment ({
+    "OS_USERNAME" => oscm_user,
+    "OS_PASSWORD" => oscm_password,
+    "OS_TENANT_NAME" => oscm_tenant,
+    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
+    "OS_USER_DOMAIN_NAME" => "Default",
+    "OS_PROJECT_DOMAIN_NAME" => "Default"
+  })
+end
+
+bash "create oscm instance stack" do
+  code <<-EOH
     app_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
     db_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} db_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
-    mkdir -p "$(dirname "#{oscm_keypair_crowbar_sshkey}")"
-    if [ ! -f #{oscm_keypair_crowbar_sshkey} ];
-    then
-      ssh-keygen -t rsa -f #{oscm_keypair_crowbar_sshkey}
-    fi
     openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}"\
     --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
     --parameter "mail_port=#{oscm_mail_port}" --parameter "registry_port=#{oscm_docker_port}"\
     --parameter "heat_host_cidr=#{heat_public_host}/32" --parameter "heat_port=#{heat_port}"\
     --parameter-file "ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub"\
     -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name} &> /dev/null || true
+  EOH
+  environment ({
+    "OS_USERNAME" => oscm_user,
+    "OS_PASSWORD" => oscm_password,
+    "OS_TENANT_NAME" => oscm_tenant,
+    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
+    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
+    "OS_USER_DOMAIN_NAME" => "Default",
+    "OS_PROJECT_DOMAIN_NAME" => "Default"
+  })
+end
+
+
+bash "inject oscm certificates" do
+  code <<-EOH
+    mkdir -p "$(dirname "#{oscm_keypair_crowbar_sshkey}")"
+    if [ ! -f #{oscm_keypair_crowbar_sshkey} ];
+    then
+      ssh-keygen -t rsa -f #{oscm_keypair_crowbar_sshkey}
+    fi
     ip_appserver=$(openstack stack output show -f shell --variable output_value #{oscm_instancestack_name} ip_appserver | grep -Po '(?<=^output_value=\")[^\"]*')
     ssh-keygen -R ${ip_appserver} -f /root/.ssh/known_hosts
     ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_config_path}" || true
@@ -295,7 +316,6 @@ bash "create oscm stacks" do
       scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_cacerts} ${ip_appserver}:#{oscm_config_path}/ssl || true
       ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/ssl/finished"
     fi
-
   EOH
   environment ({
     "OS_USERNAME" => oscm_user,
@@ -307,4 +327,3 @@ bash "create oscm stacks" do
     "OS_PROJECT_DOMAIN_NAME" => "Default"
   })
 end
-
