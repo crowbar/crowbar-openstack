@@ -179,7 +179,7 @@ resources:
                 - - "/dev/disk/by-id/virtio-"
                   - { get_param: db_volume_id }
             $DB_PASSWORD: { get_attr: [ db_password, value ] }
-            $WAIT_CURL: { get_attr: [ ssl_wait_handle, curl_cli ] }
+            $WAIT_CURL: { get_attr: [ inject_wait_handle, curl_cli ] }
             $SSH_CERT: { get_param: ssh_cert }
 
   # User data payload for appserver
