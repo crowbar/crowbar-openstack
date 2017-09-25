@@ -22,8 +22,7 @@
         },
         "keypair": {
           "name": "oscm",
-          "publickey": "",
-          "publickeyfile": "/etc/oscm/ssl/openstack/keypair_publickey.pem"
+          "publickey": ""
         },
         "volume_stack": {
           "stack_name": "oscm-volumes",

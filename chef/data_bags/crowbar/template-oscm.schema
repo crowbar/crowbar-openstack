@@ -45,8 +45,7 @@
                   "required" : true,
                   "mapping": {
                     "name": { "type": "str", "required": true },
-                    "publickey": { "type": "str", "required": true },
-                    "publickeyfile": { "type": "str", "required": true }
+                    "publickey": { "type": "str", "required": true }
                   }
                 },
                 "volume_stack" : {

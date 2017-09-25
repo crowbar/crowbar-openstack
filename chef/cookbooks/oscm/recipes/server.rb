@@ -26,7 +26,7 @@ oscm_flavor_vcpus = node[:oscm][:openstack][:flavor][:vcpus]
 oscm_flavor_disk = node[:oscm][:openstack][:flavor][:disk]
 oscm_keypair_name = node[:oscm][:openstack][:keypair][:name]
 oscm_keypair_publickey = node[:oscm][:openstack][:keypair][:publickey]
-oscm_keypair_publickeyfile = node[:oscm][:openstack][:keypair][:publickeyfile]
+oscm_keypair_publickeyfile = "/etc/oscm/install/openstack_keypair_public.pem"
 oscm_install_path = "/etc/oscm/install/"
 oscm_config_path = "/etc/oscm/config/"
 oscm_volumestack_name = node[:oscm][:openstack][:volume_stack][:stack_name]
@@ -52,7 +52,7 @@ oscm_mail_from = node[:oscm][:mail][:from]
 oscm_mail_auth = node[:oscm][:mail][:auth]
 oscm_mail_user = node[:oscm][:mail][:user]
 oscm_mail_pwd = node[:oscm][:mail][:password]
-oscm_keypair_crowbar_sshkey = "/etc/oscm/ssh/oscm_ssh.key"
+oscm_keypair_crowbar_sshkey = "/etc/oscm/install/oscm_ssh.key"
 oscm_group = "root"
 
 heat_node = node_search_with_cache("roles:heat-server").first
@@ -277,12 +277,21 @@ bash "create oscm instance stack" do
   code <<-EOH
     app_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
     db_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} db_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
-    openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}"\
-    --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
-    --parameter "mail_port=#{oscm_mail_port}" --parameter "registry_port=#{oscm_docker_port}"\
-    --parameter "heat_host_cidr=#{heat_public_host}/32" --parameter "heat_port=#{heat_port}"\
-    --parameter-file "ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub"\
-    -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name} &> /dev/null || true
+    if [ -f #{oscm_keypair_crowbar_sshkey}.pub ];
+    then
+      openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}"\
+      --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
+      --parameter "mail_port=#{oscm_mail_port}" --parameter "registry_port=#{oscm_docker_port}"\
+      --parameter "heat_host_cidr=#{heat_public_host}/32" --parameter "heat_port=#{heat_port}"\
+      --parameter-file "ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub"\
+      -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name} &> /dev/null || true
+    else
+      openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}"\
+      --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
+      --parameter "mail_port=#{oscm_mail_port}" --parameter "registry_port=#{oscm_docker_port}"\
+      --parameter "heat_host_cidr=#{heat_public_host}/32" --parameter "heat_port=#{heat_port}"\
+      -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name} &> /dev/null || true
+    fi
   EOH
   environment ({
     "OS_USERNAME" => oscm_user,
