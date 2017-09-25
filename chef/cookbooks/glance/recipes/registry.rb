@@ -42,17 +42,26 @@ template node[:glance][:registry][:config_file] do
 end
 
 ha_enabled = node[:glance][:ha][:enabled]
+is_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
 
-crowbar_pacemaker_sync_mark "wait-glance_db_sync" if ha_enabled
+crowbar_pacemaker_sync_mark "wait-glance_database" if ha_enabled
 
 execute "glance-manage db sync" do
   user node[:glance][:user]
   group node[:glance][:group]
-  # We know the glance-api.conf file is not updated yet, so forcefully ignore it
-  command "glance-manage --config-file \"#{node[:glance][:registry][:config_file]}\" db sync"
+  command "glance-manage db sync"
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
-  only_if { !node[:glance][:db_synced] && (!node[:glance][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
+  only_if { !node[:glance][:db_synced] && (!ha_enabled || is_founder) }
+end
+
+execute "glance-manage db_load_metadefs" do
+  user node[:glance][:user]
+  group node[:glance][:group]
+  command "glance-manage db_load_metadefs"
+  # We only load the metadefs the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if { !node[:glance][:db_synced] && (!ha_enabled || is_founder) }
 end
 
 # We want to keep a note that we've done db_sync, so we don't do it again.
@@ -68,6 +77,6 @@ ruby_block "mark node for glance db_sync" do
   subscribes :create, "execute[glance-manage db sync]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-glance_db_sync" if ha_enabled
+crowbar_pacemaker_sync_mark "create-glance_database" if ha_enabled
 
 glance_service "registry"
