@@ -21,7 +21,7 @@ if node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
 end
 
 aciswitches = node[:neutron][:apic][:apic_switches].to_hash
-template "/etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini" do
+template "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" do
   cookbook "neutron"
   source "ml2_conf_cisco_apic.ini.erb"
   mode "0640"
