@@ -46,6 +46,7 @@ end
     username d[:user]
     password d[:password]
     provider db_settings[:user_provider]
+    host "%"
     action :create
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
