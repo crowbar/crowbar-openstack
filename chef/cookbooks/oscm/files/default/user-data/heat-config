@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Writes the configuration parameters passed in by Heat/cloud-init to /etc/heatconfig.
-
+mkdir -p /etc/oscm/config
 touch /etc/oscm/config/heat-config
 chmod 400 /etc/oscm/config/heat-config
 
