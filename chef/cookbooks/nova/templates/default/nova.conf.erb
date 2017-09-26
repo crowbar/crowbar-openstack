@@ -160,6 +160,7 @@ user_domain_name = <%= @keystone_settings['admin_domain'] %>
 
 [key_manager]
 <% unless @keymgr_fixed_key.empty? %>
+api_class = nova.keymgr.conf_key_mgr.ConfKeyManager
 fixed_key = <%= @keymgr_fixed_key.each_byte.map { |b| b.to_s(16) }.join %>
 <% end %>
 
