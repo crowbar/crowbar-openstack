@@ -8,6 +8,7 @@ auth_type = password
 username = <%= @placement_service_user %>
 password = <%= @placement_service_password %>
 os_interface = internal
+insecure = <%= @placement_service_insecure %>
 
 <% if @placement_database_connection -%>
 [placement_database]

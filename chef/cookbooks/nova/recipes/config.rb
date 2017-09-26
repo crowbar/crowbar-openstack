@@ -335,7 +335,8 @@ template node[:nova][:placement_config_file] do
   keystone_settings: keystone_settings,
   placement_database_connection: placement_database_connection,
   placement_service_user: node["nova"]["placement_service_user"],
-  placement_service_password: node["nova"]["placement_service_password"]
+  placement_service_password: node["nova"]["placement_service_password"],
+  placement_service_insecure: node[:nova][:ssl][:insecure]
   )
 end
 

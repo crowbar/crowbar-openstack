@@ -108,6 +108,12 @@ crowbar_openstack_wsgi "WSGI entry for nova-placement-api" do
   daemon_process "nova-placement-api"
   user node[:nova][:user]
   group node[:nova][:group]
+  ssl_enable node[:nova][:ssl][:enabled]
+  ssl_certfile node[:nova][:ssl][:certfile]
+  ssl_keyfile node[:nova][:ssl][:keyfile]
+  if node[:nova][:ssl][:cert_required]
+    ssl_cacert node[:nova][:ssl][:ca_certs]
+  end
 end
 
 apache_site "nova-placement-api.conf" do
