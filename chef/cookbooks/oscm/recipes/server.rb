@@ -310,6 +310,7 @@ bash "inject oscm certificates" do
     ssh-keygen -R ${ip_appserver} -f /root/.ssh/known_hosts
     ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_config_path}" || true
     scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/oscm-config ${ip_appserver}:#{oscm_config_path} || true
+    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/deploy-oscmserver ${ip_appserver}:#{oscm_config_path} || true
     ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/finished"
     if [ -f #{oscm_ssl_certfile} ]; then
       ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_config_path}/ssl/" || true
