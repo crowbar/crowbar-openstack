@@ -61,10 +61,10 @@ host_ip = <%= node[:nova][:vcenter][:host] rescue "" %>
 host_port = <%= node[:nova][:vcenter][:port] rescue "443" %>
 host_username = <%= node[:nova][:vcenter][:user] rescue "" %>
 host_password = <%= node[:nova][:vcenter][:password] rescue "" %>
-<% if @hypervisor_inspector == "vmware" && !node[:nova][:vcenter][:ca_file].empty? -%>
+<% if @hypervisor_inspector == "vsphere" && !node[:nova][:vcenter][:ca_file].empty? -%>
 ca_file = <%= node[:nova][:vcenter][:ca_file] -%>
 <% end -%>
-<% if @hypervisor_inspector == "vmware" && node[:nova][:vcenter][:insecure] -%>
+<% if @hypervisor_inspector == "vsphere" && node[:nova][:vcenter][:insecure] -%>
 insecure = <%= node[:nova][:vcenter][:insecure] %>
 <% end -%>
 
