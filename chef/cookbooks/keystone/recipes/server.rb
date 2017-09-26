@@ -72,6 +72,18 @@ ruby_block "set origin for apache2 restart" do
   action :nothing
 end
 
+if node[:keystone][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for keystone" do
+    generate_certs node[:keystone][:ssl][:generate_certs]
+    certfile node[:keystone][:ssl][:certfile]
+    keyfile node[:keystone][:ssl][:keyfile]
+    group node[:keystone][:group]
+    fqdn node[:fqdn]
+    cert_required node[:keystone][:ssl][:cert_required]
+    ca_certs node[:keystone][:ssl][:ca_certs]
+  end
+end
+
 if node[:keystone][:frontend] == "uwsgi"
 
   service "keystone" do
@@ -138,7 +150,9 @@ elsif node[:keystone][:frontend] == "apache"
     ssl_enable node[:keystone][:api][:protocol] == "https"
     ssl_certfile node[:keystone][:ssl][:certfile]
     ssl_keyfile node[:keystone][:ssl][:keyfile]
-    ssl_cacert node[:keystone][:ssl][:ca_certs]
+    if node[:keystone][:ssl][:cert_required]
+      ssl_cacert node[:keystone][:ssl][:ca_certs]
+    end
   end
 
   apache_site "keystone-public.conf" do
@@ -159,7 +173,9 @@ elsif node[:keystone][:frontend] == "apache"
     ssl_enable node[:keystone][:api][:protocol] == "https"
     ssl_certfile node[:keystone][:ssl][:certfile]
     ssl_keyfile node[:keystone][:ssl][:keyfile]
-    ssl_cacert node[:keystone][:ssl][:ca_certs]
+    if node[:keystone][:ssl][:cert_required]
+      ssl_cacert node[:keystone][:ssl][:ca_certs]
+    end
   end
 
   apache_site "keystone-admin.conf" do
@@ -356,17 +372,6 @@ end
 
 if ha_enabled
   crowbar_pacemaker_sync_mark "create-keystone_db_sync"
-end
-
-if node[:keystone][:api][:protocol] == "https"
-  ssl_setup "setting up ssl for keystone" do
-    generate_certs node[:keystone][:ssl][:generate_certs]
-    certfile node[:keystone][:ssl][:certfile]
-    keyfile node[:keystone][:ssl][:keyfile]
-    group node[:keystone][:group]
-    fqdn node[:fqdn]
-    ca_certs node[:keystone][:ssl][:ca_certs]
-  end
 end
 
 if ha_enabled
