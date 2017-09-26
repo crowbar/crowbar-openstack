@@ -114,6 +114,7 @@ class SwiftService < OpenstackServiceObject
         "swift-ring-compute"    => [controller[:fqdn]],
         "swift-storage"         => storage_nodes.map { |x| x[:fqdn] }
       }
+      base["attributes"]["swift"]["replicas"] = [[storage_nodes.length, 3].min, 1].max
     end
 
     @logger.fatal("swift create_proposal: exiting")
