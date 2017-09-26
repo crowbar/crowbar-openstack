@@ -55,10 +55,6 @@ oscm_mail_pwd = node[:oscm][:mail][:password]
 oscm_keypair_crowbar_sshkey = "/etc/oscm/install/oscm_ssh.key"
 oscm_group = "root"
 
-heat_node = node_search_with_cache("roles:heat-server").first
-heat_public_host =  CrowbarHelper.get_host_for_public_url(heat_node, false)
-heat_port = heat_node[:heat][:api][:port]
-
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 register_auth_hash = {
@@ -282,14 +278,12 @@ bash "create oscm instance stack" do
       openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}"\
       --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
       --parameter "mail_port=#{oscm_mail_port}" --parameter "registry_port=#{oscm_docker_port}"\
-      --parameter "heat_host_cidr=#{heat_public_host}/32" --parameter "heat_port=#{heat_port}"\
       --parameter-file "ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub"\
       -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name} &> /dev/null || true
     else
       openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}"\
       --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
       --parameter "mail_port=#{oscm_mail_port}" --parameter "registry_port=#{oscm_docker_port}"\
-      --parameter "heat_host_cidr=#{heat_public_host}/32" --parameter "heat_port=#{heat_port}"\
       -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name} &> /dev/null || true
     fi
   EOH
