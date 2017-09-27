@@ -1,0 +1,27 @@
+#proxy
+USE_PROXY=<%= @proxy["use_proxy"] %>
+HTTP_PROXY_HOST=<%= @proxy["http_host"] %>
+HTTP_PROXY_PORT=<%= @proxy["http_port"] %>
+HTTPS_PROXY_HOST=<%= @proxy["https_host"] %>
+HTTPS_PROXY_PORT=<%= @proxy["https_port"] %>
+NO_PROXY=<%= @proxy["no_proxy"] %>
+PROXY_AUTH=<%= @proxy["auth"] %>
+PROXY_USER=<%= @proxy["user"] %>
+PROXY_PWD=<%= @proxy["password"] %>
+
+#mail
+MAIL_HOST=<%= @mail["host"] %>
+MAIL_PORT=<%= @mail["port"] %>
+MAIL_TLS=<%= @mail["tls"] %>
+MAIL_USER=<%= @mail["user"] %>
+MAIL_PWD=<%= @mail["password"] %>
+MAIL_ADDRESS=<%= @mail["from"] %>
+MAIL_AUTH=<%= @mail["auth"] %>
+
+#docker
+DOCKER_HUB=<%= @docker["dockerhub"] %>
+REGISTRY_HOST=<%= @docker["host"] %>
+REGISTRY_PORT=<%= @docker["port"] %>
+REGISTRY_USER=<%= @docker["user"] %>
+REGISTRY_PWD=<%= @docker["password"] %>
+OSCM_IMAGES_TAG=<%= @docker["tag"] %>
