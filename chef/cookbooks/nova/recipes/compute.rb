@@ -292,10 +292,6 @@ elsif !node[:nova]["use_shared_instance_storage"]
   end
 end
 
-unless node[:nova][:user].empty? or node["etc"]["passwd"][node[:nova][:user]].nil?
-  nova_home_dir = node["etc"]["passwd"][node[:nova][:user]]["dir"]
-end
-
 # Create and distribute ssh keys for nova user on all compute nodes
 
 # if for some reason, we only have one of the two keys, we recreate the keys
