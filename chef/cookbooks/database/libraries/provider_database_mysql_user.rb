@@ -32,11 +32,10 @@ class Chef
         end
 
         def action_create
-          return if user_present?(new_resource.username, new_resource.host)
           Chef::Log.info("Creating user '#{new_resource.username}@#{new_resource.host}'")
           username = client.escape(new_resource.username)
           host = client.escape(new_resource.host)
-          create_sql = "CREATE USER '#{username}'@'#{host}'"
+          create_sql = "CREATE USER IF NOT EXISTS '#{username}'@'#{host}'"
           if new_resource.password
             password = client.escape(new_resource.password)
             create_sql += " IDENTIFIED BY '#{password}'"
@@ -48,12 +47,11 @@ class Chef
 
         def action_drop
           # drop
-          return unless user_present?(new_resource.username, new_resource.host)
           Chef::Log.info("Dropping user '#{new_resource.username}@#{new_resource.host}'")
 
           username = client.escape(new_resource.username)
           host = client.escape(new_resource.host)
-          drop_sql = "DROP USER '#{username}'@'#{host}'"
+          drop_sql = "DROP USER IF EXISTS '#{username}'@'#{host}'"
           client.query(drop_sql)
         ensure
           close_client
@@ -100,16 +98,6 @@ class Chef
         end
 
         private
-
-        def user_present?(username, host)
-          user_present = false
-          test_sql = client.prepare("SELECT User, Host from mysql.user WHERE User = ? AND Host = ?")
-          results = test_sql.execute(username, host)
-          results.each do |result|
-            user_present = true if result["User"] == username
-          end
-          user_present
-        end
 
         def client
           @client ||= Mysql2::Client.new(
