@@ -27,8 +27,8 @@ oscm_flavor_disk = node[:oscm][:openstack][:flavor][:disk]
 oscm_keypair_name = node[:oscm][:openstack][:keypair][:name]
 oscm_keypair_publickey = node[:oscm][:openstack][:keypair][:publickey]
 oscm_keypair_publickeyfile = "/etc/oscm/install/openstack_keypair_public.pem"
-oscm_install_path = "/etc/oscm/install/"
-oscm_config_path = "/etc/oscm/config/"
+oscm_install_path = "/etc/oscm/install"
+oscm_config_path = "/etc/oscm/config"
 oscm_volumestack_name = node[:oscm][:openstack][:volume_stack][:stack_name]
 oscm_instancestack_name = node[:oscm][:openstack][:instance_stack][:stack_name]
 oscm_db_volume_size = node[:oscm][:openstack][:volume_stack][:db_volume_size]
@@ -56,6 +56,22 @@ oscm_keypair_crowbar_sshkey = "/etc/oscm/install/oscm_ssh.key"
 oscm_group = "root"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
+env = "OS_USERNAME='#{oscm_user}' "
+env << "OS_PASSWORD='#{oscm_password}' "
+env << "OS_PROJECT_NAME='#{oscm_tenant}' "
+env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
+env << "OS_INTERFACE=internal "
+env << "OS_IDENTITY_API_VERSION='#{keystone_settings["api_version"]}' "
+env << "OS_USER_DOMAIN_NAME='Default' "
+env << "OS_PROJECT_DOMAIN_NAME='Default'"
+
+openstack_cmd = "#{env} openstack"
+
+# the flavor is created via the nova API
+nova_config = Barclamp::Config.load("openstack", "nova", node[:oscm][:nova_instance])
+nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
+openstack_args_nova = nova_insecure || keystone_settings["insecure"] ? "--insecure" : ""
 
 register_auth_hash = {
   user: keystone_settings["admin_user"],
@@ -141,9 +157,14 @@ if node[:oscm][:api][:protocol] == "https"
   end
 end
 
-bash "add oscm flavor and flavor access" do
+execute "create_oscm_flavor" do
+  command "#{openstack_cmd} #{openstack_args_nova} flavor create --ram #{oscm_flavor_ram} --disk #{oscm_flavor_disk} \
+  --vcpus #{oscm_flavor_vcpus} --private #{oscm_flavor_name}"
+  not_if "#{openstack_cmd} #{openstack_args_nova} flavor list --all | grep -q #{oscm_flavor_name}"
+end
+
+bash "create_oscm_flavor_access" do
   code <<-EOH
-  nova flavor-create #{oscm_flavor_name} auto #{oscm_flavor_ram} #{oscm_flavor_disk} #{oscm_flavor_vcpus} --is-public false &> /dev/null || true
   tenant_id=$(openstack project show -f shell #{oscm_tenant} | grep -Po '(?<=^id=\")[^\"]*')
   nova flavor-access-add #{oscm_flavor_name} $tenant_id &> /dev/null || true
 EOH
@@ -158,25 +179,22 @@ EOH
   })
 end
 
-bash "add oscm keypair" do
+bash "create_oscm_keypair_file" do
   code <<-EOH
   publickey="#{oscm_keypair_publickey}"
-  if !  -z  "${publickey// }"
-  then
-    mkdir -p "$(dirname "#{oscm_keypair_publickeyfile}")" &> /dev/null
-    echo "${publickey}" > "#{oscm_keypair_publickeyfile}"
-    nova keypair-add #{oscm_keypair_name} --pub-key #{oscm_keypair_publickeyfile} &> /dev/null || exit 0
-  fi
+  mkdir -p "$(dirname "#{oscm_keypair_publickeyfile}")" &> /dev/null
+  echo "${publickey}" > "#{oscm_keypair_publickeyfile}"
 EOH
-  environment ({
-    "OS_USERNAME" => oscm_user,
-    "OS_PASSWORD" => oscm_password,
-    "OS_TENANT_NAME" => oscm_tenant,
-    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
-    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
-    "OS_USER_DOMAIN_NAME" => "Default",
-    "OS_PROJECT_DOMAIN_NAME" => "Default"
-  })
+end
+
+execute "delete_oscm_keypair" do
+  command "#{openstack_cmd} #{openstack_args_nova} keypair delete #{oscm_keypair_name}"
+  only_if "#{openstack_cmd} #{openstack_args_nova} keypair list | grep -q #{oscm_keypair_name}"
+end
+
+execute "create_oscm_keypair" do
+  command "#{openstack_cmd} #{openstack_args_nova} keypair create #{oscm_keypair_name} --public-key #{oscm_keypair_publickeyfile}"
+  not_if "#{openstack_cmd} #{openstack_args_nova} keypair list | grep -q #{oscm_keypair_name}"
 end
 
 directory "#{oscm_install_path}" do
@@ -217,14 +235,6 @@ cookbook_file "#{oscm_install_path}/user-data/heat-config" do
   action :create
 end
 
-cookbook_file "#{oscm_install_path}/user-data/oscm-config" do
-  source "user-data/oscm-config"
-  owner oscm_group
-  group oscm_group
-  mode 0755
-  action :create
-end
-
 cookbook_file "#{oscm_install_path}/user-data/deploy-oscmserver" do
   source "user-data/deploy-oscmserver"
   owner oscm_group
@@ -233,25 +243,16 @@ cookbook_file "#{oscm_install_path}/user-data/deploy-oscmserver" do
   action :create
 end
 
-bash "create oscm configuration" do
-  code <<-EOH
-    sed -i 's/$HTTP_PROXY/#{oscm_proxy_httphost}:#{oscm_proxy_httpport}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$HTTPS_PROXY/#{oscm_proxy_httpshost}:#{oscm_proxy_httpsport}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$PROXY_USER/#{oscm_proxy_user}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$PROXY_PWD/#{oscm_proxy_pwd}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$MAIL_HOST/#{oscm_mail_host}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$MAIL_PORT/#{oscm_mail_port}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$MAIL_TLS/#{oscm_mail_tls}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$MAIL_USER/#{oscm_mail_user}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$MAIL_PWD/#{oscm_mail_pwd}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$REGISTRY_HOST/#{oscm_docker_host}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$REGISTRY_PORT/#{oscm_docker_port}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$REGISTRY_USER/#{oscm_docker_user}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$REGISTRY_PWD/#{oscm_docker_pwd}/g' #{oscm_install_path}/user-data/oscm-config
-    sed -i 's/$OSCM_IMAGES_TAG/#{oscm_docker_tag}/g' #{oscm_install_path}/user-data/oscm-config
-  EOH
-  environment ({
-  })
+template "#{oscm_install_path}/user-data/oscm-config" do
+  source "oscm.conf.erb"
+  owner oscm_group
+  group oscm_group
+  mode 0640
+  variables(
+    mail: node[:oscm][:mail],
+    docker: node[:oscm][:docker],
+    proxy: node[:oscm][:proxy]
+  )
 end
 
 bash "create oscm volume stack" do
@@ -299,7 +300,7 @@ bash "create oscm instance stack" do
 end
 
 
-bash "inject oscm certificates" do
+bash "inject oscm configuration and certificates" do
   code <<-EOH
     mkdir -p "$(dirname "#{oscm_keypair_crowbar_sshkey}")"
     if [ ! -f #{oscm_keypair_crowbar_sshkey} ];
@@ -312,7 +313,8 @@ bash "inject oscm certificates" do
     scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/user-data/oscm-config ${ip_appserver}:#{oscm_config_path} || true
     scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/user-data/deploy-oscmserver ${ip_appserver}:#{oscm_config_path} || true
     ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/finished"
-    if [ -f #{oscm_ssl_certfile} ]; then
+    if [ -f #{oscm_ssl_certfile} ]; 
+    then
       ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_config_path}/ssl/" || true
       scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_certfile} ${ip_appserver}:#{oscm_config_path}/ssl || true
       scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_certfile} ${ip_appserver}:#{oscm_config_path}/ssl || true
@@ -321,13 +323,4 @@ bash "inject oscm certificates" do
       ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/ssl/finished"
     fi
   EOH
-  environment ({
-    "OS_USERNAME" => oscm_user,
-    "OS_PASSWORD" => oscm_password,
-    "OS_TENANT_NAME" => oscm_tenant,
-    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
-    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
-    "OS_USER_DOMAIN_NAME" => "Default",
-    "OS_PROJECT_DOMAIN_NAME" => "Default"
-  })
 end

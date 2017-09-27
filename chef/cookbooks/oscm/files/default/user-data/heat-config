@@ -5,7 +5,7 @@ mkdir -p /etc/oscm/config
 touch /etc/oscm/config/heat-config
 chmod 400 /etc/oscm/config/heat-config
 
-cat > /etc/oscm/config/heatconfig <<EOF
+cat > /etc/oscm/config/heat-config <<EOF
 APP_VOLUME_DEV=$APP_VOLUME_DEV
 DB_VOLUME_DEV=$DB_VOLUME_DEV
 DB_PASSWORD=$DB_PASSWORD

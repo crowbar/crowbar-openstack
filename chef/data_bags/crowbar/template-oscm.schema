@@ -15,6 +15,7 @@
             "timeout": { "type": "int", "required": true },
             "debug": { "type": "bool", "required": true },
             "keystone_instance": { "type": "str", "required": true },
+            "nova_instance": { "type": "str", "required": true },
             "heat_instance": { "type": "str", "required": true },
             "keystone" : {
               "type" : "map",
@@ -83,6 +84,7 @@
               "type" : "map",
               "required" : true,
               "mapping": {
+                "dockerhub": { "type": "bool", "required": true },
                 "host": { "type": "str", "required": true },
                 "port": { "type": "int", "required": true },
                 "auth": { "type": "bool", "required": true },

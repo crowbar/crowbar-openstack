@@ -24,10 +24,15 @@
     %fieldset
       %legend
         = t(".docker_settings")
-      %span.help-block
-        = t('.docker_hint')
-      = string_field %w(docker host)
-      = integer_field %w(docker port)
+      = boolean_field %w(docker dockerhub),
+        "data-showit" => "false",
+        "data-showit-target" => "#dockerhub_container",
+        "data-showit-direct" => "true"
+
+      #dockerhub_container
+        = string_field %w(docker host)
+        = integer_field %w(docker port)
+
       = boolean_field %w(docker auth),
         "data-showit" => "true",
         "data-showit-target" => "#dockerauth_container",

@@ -6,6 +6,7 @@
       "timeout": 300,
       "debug": false,
       "keystone_instance": "none",
+      "nova_instance": "none",
       "heat_instance": "none",
       "keystone": {
         "tenant": "oscm",
@@ -43,6 +44,7 @@
         "from": ""
       },
       "docker": {
+        "dockerhub": true,
         "host": "",
         "port": 0,
         "auth": false,

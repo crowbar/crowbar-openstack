@@ -31,12 +31,12 @@ en:
           from: 'Oscm Email Address'
         docker_settings: 'Docker Registry'
         docker:
+          dockerhub: 'Use Docker Hub'
           auth: 'Authentication Required'
           host: 'Registry Host' 
           port: 'Registry Port' 
           user: 'User'
           password: 'Password'
-        docker_hint: 'The registry host and port can be leaved empty for docker hub'
         proxy_settings: 'Proxy Settings'
         proxy:
           auth: 'Authentication Required'
