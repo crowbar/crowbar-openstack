@@ -531,12 +531,10 @@ describe "neutron-l3-ha-service" do
       subprocess = Subprocess.new @ruby, @service_path, @settings_path
       subprocess.start
       sleep_workaround_for_subprocess
-      sleep 1 # Let it run for a while
-      subprocess.send_signal "TERM"
       result = subprocess.wait 0.1
 
-      expect(result.error).to include "HATOOL-CALL --l3-agent-check --quiet"
-      expect(result.error).to include "HATOOL-CALL --l3-agent-migrate --now --retry"
+      expect(result.output).to include "HATOOL-CALL --l3-agent-check --quiet"
+      expect(result.output).to include "HATOOL-CALL --l3-agent-migrate --now --retry"
 
       expect(result.exit_status).to eq 0
     end

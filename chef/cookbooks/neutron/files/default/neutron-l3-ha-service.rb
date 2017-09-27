@@ -30,8 +30,6 @@ class HAToolLog
 end
 
 def main
-  terminator = Terminator.new
-  terminator.register_term_signal_handler
   service_options = ServiceOptions.load ARGV[0]
   ha_functions = HAFunctions.new(service_options)
   error_counter = ErrorCounter.new service_options.max_errors_tolerated
@@ -43,9 +41,7 @@ def main
 
       register_errors_to(
         error_counter,
-        terminator.dont_exit_until_block_finished do
-          ha_functions.migrate_routers_away_from_dead_agents
-        end
+        ha_functions.migrate_routers_away_from_dead_agents
       )
     elsif status.exit_status == 0
       error_counter.reset!
@@ -64,32 +60,6 @@ def register_errors_to error_counter, result
     error_counter.reset!
   else
     error_counter.bump!
-  end
-end
-
-
-class Terminator
-  def initialize
-    @immediate_exit_enabled = true
-    @exit_requested = false
-  end
-
-  def register_term_signal_handler
-    Signal.trap "TERM" do
-      exit 0 if @immediate_exit_enabled
-      @exit_requested = true
-    end
-  end
-
-  def dont_exit_until_block_finished
-    @immediate_exit_enabled = false
-    result = yield
-    @immediate_exit_enabled = true
-    if @exit_requested
-      HAToolLog.log.info("TERM signal received while waiting for block to finish, exiting now")
-      exit 0
-    end
-    result
   end
 end
 
