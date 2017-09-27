@@ -56,6 +56,7 @@
               = integer_field %w(volumes {{@index}} netapp netapp_server_port)
               = string_field %w(volumes {{@index}} netapp netapp_login)
               = password_field %w(volumes {{@index}} netapp netapp_password)
+              = integer_field %w(volumes {{@index}} netapp max_over_subscription_ratio)
 
               %div{ :id => "netapp_7mode_container_{{@index}}" }
                 = string_field %w(volumes {{@index}} netapp netapp_vfiler)
