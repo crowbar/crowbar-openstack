@@ -1,0 +1,88 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header show_raw_deployment?, true
+
+  .panel-body
+    %fieldset
+      %legend
+        = t(".mail_settings")
+
+      = string_field %w(mail host)
+      = integer_field %w(mail port)
+      = boolean_field %w(mail tls)
+      = string_field %w(mail from)
+
+      = boolean_field %w(mail auth),
+        "data-showit" => "true",
+        "data-showit-target" => "#mail_container",
+        "data-showit-direct" => "true"
+
+      #mail_container
+        = string_field %w(mail user)
+        = password_field %w(mail password)
+
+    %fieldset
+      %legend
+        = t(".docker_settings")
+      %span.help-block
+        = t('.docker_hint')
+      = string_field %w(docker host)
+      = integer_field %w(docker port)
+      = boolean_field %w(docker auth),
+        "data-showit" => "true",
+        "data-showit-target" => "#dockerauth_container",
+        "data-showit-direct" => "true"
+
+      #dockerauth_container
+        = string_field %w(docker user)
+        = password_field %w(docker password)
+
+    %fieldset
+      %legend
+        = t(".proxy_settings")
+
+      = boolean_field %w(proxy use_proxy),
+        "data-showit" => "true",
+        "data-showit-target" => "#proxy_container",
+        "data-showit-direct" => "true"
+
+      #proxy_container
+        = string_field %w(proxy http_host)
+        = integer_field %w(proxy http_port)
+        = string_field %w(proxy https_host)
+        = integer_field %w(proxy https_port)
+        %span.help-block
+          = t('.proxy_hint')
+        = string_field %w(proxy no_proxy)
+        = boolean_field %w(proxy auth),
+          "data-showit" => "true",
+          "data-showit-target" => "#proxyauth_container",
+          "data-showit-direct" => "true"
+        #proxyauth_container
+          = string_field %w(proxy user)
+          = password_field %w(proxy password)
+
+    %fieldset
+      %legend
+        = t(".openstack_settings")
+
+      %span.help-block
+        = t('.keypair_hint')
+      = text_field %w(openstack keypair publickey)
+
+    %fieldset
+      %legend
+        = t(".ssl_header")
+
+      = select_field %w(api protocol),
+        :collection => :api_protocols_for_oscm,
+        "data-sslprefix" => "ssl",
+        "data-sslcert" => "/etc/oscm/ssl/certs/signing_cert.pem",
+        "data-sslkey" => "/etc/oscm/ssl/private/signing_key.pem"
+
+      #ssl_container
+        = string_field %w(ssl certfile)
+        = string_field %w(ssl keyfile)
+        = boolean_field %w(ssl insecure)
+        = string_field %w(ssl ca_certs)
+    
