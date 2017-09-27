@@ -13,6 +13,8 @@ run_setup()
       <% if defined?(@service) -%> --service '<%= @service %>' <% end -%> \
       --keystone_url '<%= @keystone_settings["admin_auth_url"] %>/v3' \
       --monasca_url '<%= @monasca_api_url %>' \
+      --user_domain_name Default \
+      --project_domain_name Default \
       --user '<%= @agent_settings["user"] %>' \
       --dimensions '<%= @agent_dimensions.map{|k,v| "#{k}:#{v}"}.join(',') %>' \
       --insecure '<%= @agent_settings["insecure"] %>' \
