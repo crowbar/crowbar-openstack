@@ -19,9 +19,9 @@ module CrowbarDatabaseHelper
     use_ssl = node[:database][:sql_engine] == "mysql" && node[:database][:mysql][:ssl][:enabled]
     if node[:database][:ha][:enabled]
       vhostname = get_ha_vhostname(node)
-      use_ssl ? vhostname : CrowbarPacemakerHelper.cluster_vip(node, "admin", vhostname)
+      use_ssl ? "#{vhostname}.#{node[:domain]}" : CrowbarPacemakerHelper.cluster_vip(node, "admin", vhostname)
     else
-      use_ssl ? node[:hostname] : Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+      use_ssl ? node[:fqdn] : Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
     end
   end
 end
