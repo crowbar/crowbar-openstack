@@ -46,10 +46,11 @@
       "docker": {
         "dockerhub": true,
         "host": "",
-        "port": 0,
+        "port": 5000,
         "auth": false,
         "user": "",
         "password": "",
+        "organization": "servicecatalog"
         "tag": "17.5"
       },
       "proxy": {

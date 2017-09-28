@@ -90,6 +90,7 @@
                 "auth": { "type": "bool", "required": true },
                 "user": { "type": "str", "required": true },
                 "password": { "type": "str", "required": true },
+                "organization": { "type": "str", "required": true },
                 "tag": { "type": "str", "required": true }
               }
             },
