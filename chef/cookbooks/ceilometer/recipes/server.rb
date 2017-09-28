@@ -186,6 +186,7 @@ service "ceilometer-agent-notification" do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:ceilometer][:config_file])
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
+  subscribes :restart, resources("template[/etc/ceilometer/event_pipeline.yaml]")
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 utils_systemd_service_restart "ceilometer-agent-notification" do
