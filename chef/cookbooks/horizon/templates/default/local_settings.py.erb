@@ -57,6 +57,13 @@ OPENSTACK_HYPERVISOR_FEATURES = {
     'requires_keypair': False,
 }
 
+# explicitly set this (bsc#1046616)
+# SOC6 wrote to local_settings.py which means the file gets not updated
+# via an rpm package update.
+REST_API_REQUIRED_SETTINGS = ['OPENSTACK_HYPERVISOR_FEATURES',
+                              'LAUNCH_INSTANCE_DEFAULTS',
+                              'OPENSTACK_IMAGE_FORMATS']
+
 OPENSTACK_NEUTRON_NETWORK = {
     'enable_router': True,
     'enable_quotas': True,
