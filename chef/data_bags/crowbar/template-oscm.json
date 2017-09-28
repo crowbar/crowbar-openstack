@@ -50,7 +50,7 @@
         "auth": false,
         "user": "",
         "password": "",
-        "organization": "servicecatalog"
+        "organization": "servicecatalog",
         "tag": "17.5"
       },
       "proxy": {
