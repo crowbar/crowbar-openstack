@@ -22,7 +22,7 @@ require 'logger'
 class HAToolLog
   def self.log
     if @logger.nil?
-      @logger = Logger.new(STDERR)
+      @logger = Logger.new('/var/log/neutron/neutron-l3-ha-service.log', 'daily')
       @logger.level = Logger::DEBUG
     end
     @logger
