@@ -68,7 +68,8 @@ env << "OS_PROJECT_DOMAIN_NAME='Default'"
 
 openstack_cmd = "#{env} openstack"
 
-# the flavor is created via the nova API
+openstack_args_keystone = keystone_settings["insecure"] ? "--insecure" : ""
+
 nova_config = Barclamp::Config.load("openstack", "nova", node[:oscm][:nova_instance])
 nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
 openstack_args_nova = nova_insecure || keystone_settings["insecure"] ? "--insecure" : ""
@@ -167,20 +168,19 @@ execute "create_oscm_flavor" do
   not_if "#{openstack_cmd} #{openstack_args_nova} flavor list --all | grep -q #{oscm_flavor_name}"
 end
 
-bash "create_oscm_flavor_access" do
-  code <<-EOH
-  tenant_id=$(openstack project show -f shell #{oscm_tenant} | grep -Po '(?<=^id=\")[^\"]*')
-  nova flavor-access-add #{oscm_flavor_name} $tenant_id &> /dev/null || true
-EOH
-  environment ({
-    "OS_USERNAME" => oscm_user,
-    "OS_PASSWORD" => oscm_password,
-    "OS_TENANT_NAME" => oscm_tenant,
-    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
-    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
-    "OS_USER_DOMAIN_NAME" => "Default",
-    "OS_PROJECT_DOMAIN_NAME" => "Default"
-  })
+ruby_block "get_oscm_tenant_id" do
+    block do
+      Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
+      command = "#{openstack_cmd} #{openstack_args_keystone} project show -f shell #{oscm_tenant} | grep -Po '(?<=^id=\")[^\"]*'"
+      command_out = shell_out(command)
+      node[:oscm][:keystone][:tenant_id] = command_out.stdout.strip
+    end
+    action :create
+end
+
+execute "create_oscm_flavor_access" do
+  command = lazy { "#{openstack_cmd} #{openstack_args_nova} flavor-access-add #{oscm_flavor_name} #{node[:oscm][:keystone][:tenant_id]}" }
+  not_if "#{openstack_cmd} #{openstack_args_nova} flavor-access-list --flavor #{oscm_flavor_name} | grep -q #{node[:oscm][:keystone][:tenant_id]}"
 end
 
 bash "create_oscm_keypair_file" do
