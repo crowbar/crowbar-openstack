@@ -18,6 +18,12 @@
 # limitations under the License.
 #
 
+ha_enabled = node[:rabbitmq][:ha][:enabled]
+# we only do cluster if we do HA
+cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
+crm_resource_stop_cmd = cluster_enabled ? "force-demote" : "force-stop"
+crm_resource_start_cmd = cluster_enabled ? "force-promote" : "force-start"
+
 package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node[:platform_family] == "suse"
 
@@ -64,7 +70,12 @@ bash "enabling rabbit management" do
 end
 
 service "rabbitmq-server" do
-  supports restart: true, start: true, stop: true, status: true
+  supports restart: true,
+           start: true,
+           stop: true,
+           status: true,
+           crm_resource_stop_cmd: crm_resource_stop_cmd,
+           crm_resource_start_cmd: crm_resource_start_cmd
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
