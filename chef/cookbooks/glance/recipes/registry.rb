@@ -74,7 +74,7 @@ ruby_block "mark node for glance db_sync" do
     node.save
   end
   action :nothing
-  subscribes :create, "execute[glance-manage db sync]", :immediately
+  subscribes :create, "execute[glance-manage db_load_metadefs]", :immediately
 end
 
 crowbar_pacemaker_sync_mark "create-glance_database" if ha_enabled
