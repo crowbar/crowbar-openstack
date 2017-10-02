@@ -209,17 +209,8 @@ crowbar_pacemaker_sync_mark "create-keystone_database" if ha_enabled
 
 sql_connection = fetch_database_connection_string(node[:keystone][:db])
 
-if ha_enabled
-  memcached_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server")
-  memcached_servers = memcached_nodes.map do |n|
-    node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-    "#{node_admin_ip}:#{n[:memcached][:port]}"
-  end
-else
-  node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  memcached_servers = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
-end
-memcached_servers.sort!
+node_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+memcached_servers = ["#{node_admin_ip}:#{node[:memcached][:port]}"]
 
 # we have to calculate max_active_keys for fernet token provider
 # http://docs.openstack.org/admin-guide/identity-fernet-token-faq.html# \
