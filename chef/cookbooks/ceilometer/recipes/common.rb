@@ -3,9 +3,7 @@ include_recipe "apache2"
 is_controller = node["roles"].include?("ceilometer-server")
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "ceilometer-server") : [node]
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance("ceilometer-server") if is_controller
 

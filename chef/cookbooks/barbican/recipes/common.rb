@@ -93,13 +93,7 @@ end
 
 crowbar_pacemaker_sync_mark "create-barbican_database" if ha_enabled
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  if node[:barbican][:ha][:enabled]
-    CrowbarPacemakerHelper.cluster_nodes(node, "barbican-controller")
-  else
-    [node]
-  end
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance("barbican") if node["roles"].include?("barbican-controller")
 

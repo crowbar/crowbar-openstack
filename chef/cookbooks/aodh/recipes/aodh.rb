@@ -147,9 +147,7 @@ end
 node.normal[:apache][:listen_ports_crowbar] ||= {}
 node.normal[:apache][:listen_ports_crowbar][:aodh] = { plain: [bind_port] }
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "aodh-server") : [node]
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance("aodh-server")
 

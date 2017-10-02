@@ -57,9 +57,7 @@ node.normal[:apache][:listen_ports_crowbar][:keystone] = { admin: [bind_admin_po
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:keystone][:api][:protocol] == "https", ha_enabled)
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server") : [node]
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance "keystone"
 

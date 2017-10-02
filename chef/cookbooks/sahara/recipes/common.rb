@@ -42,13 +42,7 @@ nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
 
 use_ceilometer = !Barclamp::Config.load("openstack", "ceilometer").empty?
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  if node[:sahara][:ha][:enabled]
-    CrowbarPacemakerHelper.cluster_nodes(node, "sahara-server")
-  else
-    [node]
-  end
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance("sahara") if node["roles"].include?("sahara-server")
 

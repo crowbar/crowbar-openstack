@@ -21,9 +21,7 @@ network_settings = MagnumHelper.network_settings(node)
 
 ha_enabled = node[:magnum][:ha][:enabled]
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "magnum-server") : [node]
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 memcached_instance("magnum-server")
 
 include_recipe "database::client"

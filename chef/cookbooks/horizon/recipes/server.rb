@@ -382,9 +382,7 @@ else
 end
 
 # We're going to use memcached as a cache backend for Django
-memcached_locations = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "horizon-server") : [node]
-)
+memcached_locations = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance "openstack-dashboard"
 
