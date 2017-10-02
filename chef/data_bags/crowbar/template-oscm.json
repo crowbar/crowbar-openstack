@@ -9,7 +9,7 @@
       "nova_instance": "none",
       "heat_instance": "none",
       "keystone": {
-        "tenant": "oscm",
+        "project": "oscm",
         "user": "oscm",
         "password": "oscm"
       },

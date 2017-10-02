@@ -21,7 +21,7 @@
               "type" : "map",
               "required" : true,
               "mapping": {
-                "tenant": { "type": "str", "required": true },
+                "project": { "type": "str", "required": true },
                 "user": { "type": "str", "required": true },
                 "password": { "type": "str", "required": true }
               }

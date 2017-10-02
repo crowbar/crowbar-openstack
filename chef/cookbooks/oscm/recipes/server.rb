@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-oscm_tenant = node[:oscm][:keystone][:tenant]
+oscm_project = node[:oscm][:keystone][:project]
 oscm_user = node[:oscm][:keystone][:user]
 oscm_password = node[:oscm][:keystone][:password]
 oscm_ssl_certfile = node[:oscm][:ssl][:certfile]
@@ -59,7 +59,7 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 env = "OS_USERNAME='#{oscm_user}' "
 env << "OS_PASSWORD='#{oscm_password}' "
-env << "OS_PROJECT_NAME='#{oscm_tenant}' "
+env << "OS_PROJECT_NAME='#{oscm_project}' "
 env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
 env << "OS_INTERFACE=internal "
 env << "OS_IDENTITY_API_VERSION='#{keystone_settings["api_version"]}' "
@@ -81,7 +81,7 @@ openstack_args_heat = heat_insecure || keystone_settings["insecure"] ? "--insecu
 register_auth_hash = {
   user: keystone_settings["admin_user"],
   password: keystone_settings["admin_password"],
-  tenant: keystone_settings["admin_tenant"]
+  project: keystone_settings["admin_project"]
 }
 
 keystone_register "oscm wakeup keystone" do
@@ -93,14 +93,14 @@ keystone_register "oscm wakeup keystone" do
   action :wakeup
 end
 
-keystone_register "oscm create tenant" do
+keystone_register "oscm create project" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
-  tenant_name oscm_tenant
-  action :add_tenant
+  project_name oscm_project
+  action :add_project
 end
 
 keystone_register "oscm register user" do
@@ -111,7 +111,7 @@ keystone_register "oscm register user" do
   auth register_auth_hash
   user_name oscm_user
   user_password oscm_password
-  tenant_name oscm_tenant
+  project_name oscm_project
   action :add_user
 end
 
@@ -122,7 +122,7 @@ keystone_register "oscm give user admin role" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name oscm_user
-  tenant_name oscm_tenant
+  project_name oscm_project
   role_name "admin"
   action :add_access
 end
@@ -134,7 +134,7 @@ keystone_register "oscm give user member role" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name oscm_user
-  tenant_name oscm_tenant
+  project_name oscm_project
   role_name "Member"
   action :add_access
 end
@@ -146,7 +146,7 @@ keystone_register "oscm give user _member_ role" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name oscm_user
-  tenant_name oscm_tenant
+  project_name oscm_project
   role_name "_member_"
   action :add_access
 end
@@ -168,19 +168,9 @@ execute "create_oscm_flavor" do
   not_if "#{openstack_cmd} #{openstack_args_nova} flavor list --all | grep -q #{oscm_flavor_name}"
 end
 
-ruby_block "get_oscm_tenant_id" do
-    block do
-      Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
-      command = "#{openstack_cmd} #{openstack_args_keystone} project show -f shell #{oscm_tenant} | grep -Po '(?<=^id=\")[^\"]*'"
-      command_out = shell_out(command)
-      node[:oscm][:keystone][:tenant_id] = command_out.stdout.strip
-    end
-    action :create
-end
-
 execute "create_oscm_flavor_access" do
-  command = lazy { "#{openstack_cmd} #{openstack_args_nova} flavor-access-add #{oscm_flavor_name} #{node[:oscm][:keystone][:tenant_id]}" }
-  not_if "#{openstack_cmd} #{openstack_args_nova} flavor-access-list --flavor #{oscm_flavor_name} | grep -q #{node[:oscm][:keystone][:tenant_id]}"
+  command "#{openstack_cmd} #{openstack_args_nova} flavor set --project #{oscm_project} #{oscm_flavor_name}"
+  ignore_failure true
 end
 
 bash "create_oscm_keypair_file" do
@@ -262,13 +252,17 @@ ruby_block "get_oscm_volume_ids" do
       command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po '(?<=^output_value=\")[^\"]*'"
       command_out = shell_out(command)
       node[:oscm][:openstack][:volume_stack][:app_volume_id] = command_out.stdout.strip
+    end
+    action :create
+end
+
+ruby_block "generate_oscm_crowbar_ssh_keys" do
+    block do
+      Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
       command = "mkdir -p '$(dirname #{oscm_keypair_crowbar_sshkey})'"
       command_out = shell_out(command)
       command = "yes y | ssh-keygen -t rsa -f #{oscm_keypair_crowbar_sshkey} -N ''"
       command_out = shell_out(command)
-      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell --variable output_value #{oscm_instancestack_name} ip_appserver | grep -Po '(?<=^output_value=\")[^\"]*'"
-      command_out = shell_out(command)
-      node[:oscm][:openstack][:instance_stack][:ip_appserver] = command_out.stdout.strip
     end
     action :create
 end
@@ -281,6 +275,16 @@ execute "create_oscm_instance_stack" do
   --parameter-file ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub \
   -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name}" }
   not_if "#{openstack_cmd} #{openstack_args_heat} stack list | grep -q #{oscm_instancestack_name}"
+end
+
+ruby_block "get_oscm_floating_ip" do
+    block do
+      Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
+      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell --variable output_value #{oscm_instancestack_name} ip_appserver | grep -Po '(?<=^output_value=\")[^\"]*'"
+      command_out = shell_out(command)
+      node[:oscm][:openstack][:instance_stack][:ip_appserver] = command_out.stdout.strip
+    end
+    action :create
 end
 
 template "#{oscm_install_path}/user-data/oscm-config" do
