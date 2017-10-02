@@ -57,6 +57,7 @@ en:
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'
+        host_fqdn: 'OSCM Host FQDN (if left empty, the floating IP will be used)'
         ssl:
           generate_certs: 'Generate (self-signed) certificates (implies insecure)'
           certfile: 'SSL Certificate File'

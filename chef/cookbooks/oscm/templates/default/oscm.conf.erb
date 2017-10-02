@@ -26,3 +26,11 @@ DOCKER_REGISTRY_ORGANIZATION=<%= @docker["organization"] %>
 DOCKER_REGISTRY_USER=<%= @docker["user"] %>
 DOCKER_REGISTRY_PWD=<%= @docker["password"] %>
 DOCKER_OSCM_TAG=<%= @docker["tag"] %>
+
+#host
+<% if @host_fqdn.empty? -%>
+   HOST_FQDN=<%= @host_fqdn %>
+<% else %>
+   HOST_FQDN=<%= @floating_ip %>
+<% end %>
+   

@@ -55,6 +55,15 @@ resources:
   db_password:
     type: OS::Heat::RandomString
 
+  key_secret:
+    type: OS::Heat::RandomString
+  
+  db_core_password:
+    type: OS::Heat::RandomString
+
+  db_app_password:
+    type: OS::Heat::RandomString
+
   ### Network infrastructure ###
 
   oscm_network:
@@ -152,7 +161,10 @@ resources:
                 - ""
                 - - "/dev/disk/by-id/virtio-"
                   - { get_param: db_volume_id }
-            $DB_PASSWORD: { get_attr: [ db_password, value ] }
+            $PGPASSWORD: { get_attr: [ db_password, value ] }
+            $DB_PWD_CORE: { get_attr: [ db_core_password, value ] }
+            $DB_PWD_APP: { get_attr: [ db_app_password, value ] }
+            $KEY_SECRET: { get_attr: [ key_secret, value ] }
             $SSH_CERT: { get_param: ssh_cert }
 
   # User data payload for appserver

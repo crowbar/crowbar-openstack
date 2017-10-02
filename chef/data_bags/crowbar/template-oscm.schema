@@ -109,6 +109,7 @@
                 "password": { "type": "str", "required": true }
               }
             },
+            "host_fqdn": { "type" : "str", "required" : true },
             "ssl": {
               "type": "map",
               "required": true,

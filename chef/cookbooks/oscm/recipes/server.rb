@@ -73,6 +73,10 @@ nova_config = Barclamp::Config.load("openstack", "nova", node[:oscm][:nova_insta
 nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
 openstack_args_nova = nova_insecure || keystone_settings["insecure"] ? "--insecure" : ""
 
+heat_config = Barclamp::Config.load("openstack", "heat", node[:oscm][:heat_instance])
+heat_insecure = CrowbarOpenStackHelper.insecure(heat_config)
+openstack_args_heat = heat_insecure || keystone_settings["insecure"] ? "--insecure" : ""
+
 register_auth_hash = {
   user: keystone_settings["admin_user"],
   password: keystone_settings["admin_password"],
@@ -243,6 +247,42 @@ cookbook_file "#{oscm_install_path}/user-data/deploy-oscmserver" do
   action :create
 end
 
+execute "create_oscm_volume_stack" do
+  command "#{openstack_cmd} #{openstack_args_heat} stack create --parameter db_size=#{oscm_db_volume_size} --parameter app_size=#{oscm_app_volume_size} \
+  -t #{oscm_install_path}/volumes.yaml --wait #{oscm_volumestack_name}"
+  not_if "#{openstack_cmd} #{openstack_args_heat} stack list | grep -q #{oscm_volumestack_name}"
+end
+
+ruby_block "get_oscm_volume_ids" do
+    block do
+      Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
+      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell #{oscm_volumestack_name} db_volume_id | grep -Po '(?<=^output_value=\")[^\"]*'"
+      command_out = shell_out(command)
+      node[:oscm][:openstack][:volume_stack][:db_volume_id] = command_out.stdout.strip
+      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po '(?<=^output_value=\")[^\"]*'"
+      command_out = shell_out(command)
+      node[:oscm][:openstack][:volume_stack][:app_volume_id] = command_out.stdout.strip
+      command = "mkdir -p '$(dirname #{oscm_keypair_crowbar_sshkey})'"
+      command_out = shell_out(command)
+      command = "yes y | ssh-keygen -t rsa -f #{oscm_keypair_crowbar_sshkey} -N ''"
+      command_out = shell_out(command)
+      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell --variable output_value #{oscm_instancestack_name} ip_appserver | grep -Po '(?<=^output_value=\")[^\"]*'"
+      command_out = shell_out(command)
+      node[:oscm][:openstack][:instance_stack][:ip_appserver] = command_out.stdout.strip
+    end
+    action :create
+end
+
+execute "create_oscm_instance_stack" do
+  command lazy { "#{openstack_cmd} #{openstack_args_heat} stack create --parameter app_volume_id=#{node[:oscm][:openstack][:volume_stack][:app_volume_id]} \
+  --parameter db_volume_id=#{node[:oscm][:openstack][:volume_stack][:db_volume_id]} \
+  --parameter image=#{oscm_image} --parameter flavor=#{oscm_flavor_name} \
+  --parameter mail_port=#{oscm_mail_port} --parameter registry_port=#{oscm_docker_port} \
+  --parameter-file ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub \
+  -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name}" }
+  not_if "#{openstack_cmd} #{openstack_args_heat} stack list | grep -q #{oscm_instancestack_name}"
+end
+
 template "#{oscm_install_path}/user-data/oscm-config" do
   source "oscm.conf.erb"
   owner oscm_group
@@ -251,64 +291,14 @@ template "#{oscm_install_path}/user-data/oscm-config" do
   variables(
     mail: node[:oscm][:mail],
     docker: node[:oscm][:docker],
-    proxy: node[:oscm][:proxy]
+    proxy: node[:oscm][:proxy],
+    host_fqdn: node[:oscm][:host_fqdn],
+    floating_ip: node[:oscm][:openstack][:instance_stack][:ip_appserver]
   )
 end
 
-bash "create oscm volume stack" do
-  code <<-EOH
-    openstack stack create --parameter "db_size=#{oscm_db_volume_size}" --parameter "app_size=#{oscm_app_volume_size}" -t #{oscm_install_path}/volumes.yaml --wait #{oscm_volumestack_name} &> /dev/null || true
-  EOH
-  environment ({
-    "OS_USERNAME" => oscm_user,
-    "OS_PASSWORD" => oscm_password,
-    "OS_TENANT_NAME" => oscm_tenant,
-    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
-    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
-    "OS_USER_DOMAIN_NAME" => "Default",
-    "OS_PROJECT_DOMAIN_NAME" => "Default"
-  })
-end
-
-bash "create oscm instance stack" do
-  code <<-EOH
-    app_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
-    db_volume_id=$(openstack stack output show -f shell #{oscm_volumestack_name} db_volume_id | grep -Po '(?<=^output_value=\")[^\"]*')
-    if [ -f #{oscm_keypair_crowbar_sshkey}.pub ];
-    then
-      openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}"\
-      --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
-      --parameter "mail_port=#{oscm_mail_port}" --parameter "registry_port=#{oscm_docker_port}"\
-      --parameter-file "ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub"\
-      -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name} &> /dev/null || true
-    else
-      openstack stack create --parameter "app_volume_id=${app_volume_id}" --parameter "db_volume_id=${db_volume_id}"\
-      --parameter "image=#{oscm_image}" --parameter "flavor=#{oscm_flavor_name}"\
-      --parameter "mail_port=#{oscm_mail_port}" --parameter "registry_port=#{oscm_docker_port}"\
-      -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name} &> /dev/null || true
-    fi
-  EOH
-  environment ({
-    "OS_USERNAME" => oscm_user,
-    "OS_PASSWORD" => oscm_password,
-    "OS_TENANT_NAME" => oscm_tenant,
-    "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
-    "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
-    "OS_USER_DOMAIN_NAME" => "Default",
-    "OS_PROJECT_DOMAIN_NAME" => "Default"
-  })
-end
-
-
 bash "inject oscm configuration and certificates" do
   code <<-EOH
-    mkdir -p "$(dirname "#{oscm_keypair_crowbar_sshkey}")"
-    if [ ! -f #{oscm_keypair_crowbar_sshkey} ];
-    then
-      ssh-keygen -t rsa -f #{oscm_keypair_crowbar_sshkey}
-    fi
-    ip_appserver=$(openstack stack output show -f shell --variable output_value #{oscm_instancestack_name} ip_appserver | grep -Po '(?<=^output_value=\")[^\"]*')
-    ssh-keygen -R ${ip_appserver} -f /root/.ssh/known_hosts
     ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_config_path}" || true
     scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/user-data/oscm-config ${ip_appserver}:#{oscm_config_path} || true
     scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/user-data/deploy-oscmserver ${ip_appserver}:#{oscm_config_path} || true

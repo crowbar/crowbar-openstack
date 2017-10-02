@@ -64,6 +64,7 @@
         "user": "",
         "password": ""
       },
+      "host_fqdn": "",
       "ssl": {
         "certfile": "/etc/oscm/ssl/certs/signing_cert.pem",
         "keyfile": "/etc/oscm/ssl/private/signing_key.pem",

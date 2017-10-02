@@ -79,6 +79,8 @@
       %legend
         = t(".ssl_header")
 
+      = string_field %w(host_fqdn)
+
       = select_field %w(api protocol),
         :collection => :api_protocols_for_oscm,
         "data-sslprefix" => "ssl",
