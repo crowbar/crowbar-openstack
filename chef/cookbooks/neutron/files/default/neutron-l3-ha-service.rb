@@ -235,13 +235,15 @@ class ServiceOptions
   attr_reader :hatool
   attr_reader :seconds_to_sleep_between_checks
   attr_reader :max_errors_tolerated
+  attr_reader :log_file
 
-  def initialize(status_timeout, router_migration_timeout, hatool_options, sleep_time, max_errors_tolerated)
+  def initialize(status_timeout, router_migration_timeout, hatool_options, sleep_time, max_errors_tolerated, log_file)
     @status_timeout = status_timeout
     @router_migration_timeout = router_migration_timeout
     @hatool = hatool_options
     @seconds_to_sleep_between_checks = sleep_time
     @max_errors_tolerated = max_errors_tolerated
+    @log_file = log_file
   end
 
   def self.load(path)
@@ -252,7 +254,8 @@ class ServiceOptions
         TimeoutOptions.from_hash(data["timeouts"]["router_migration"]),
         HAToolOptions.from_hash(data["hatool"]),
         data["seconds_to_sleep_between_checks"].to_i,
-        data["max_errors_tolerated"].to_i
+        data["max_errors_tolerated"].to_i,
+        data["log_file"]
       )
     end
   end
