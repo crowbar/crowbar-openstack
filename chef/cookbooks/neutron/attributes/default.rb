@@ -247,9 +247,9 @@ default[:neutron][:ha][:ports][:server] = 5530
 default[:neutron][:ha][:neutron_l3_ha_resource][:op][:monitor][:interval] = "10s"
 
 default[:neutron][:ha][:neutron_l3_ha_service][:timeouts][:status][:terminate] = 300
-default[:neutron][:ha][:neutron_l3_ha_service][:timeouts][:status][:kill] = 120
+default[:neutron][:ha][:neutron_l3_ha_service][:timeouts][:status][:kill] = 50
 default[:neutron][:ha][:neutron_l3_ha_service][:timeouts][:router_migration][:terminate] = 1800
-default[:neutron][:ha][:neutron_l3_ha_service][:timeouts][:router_migration][:kill] = 120
+default[:neutron][:ha][:neutron_l3_ha_service][:timeouts][:router_migration][:kill] = 50
 default[:neutron][:ha][:neutron_l3_ha_service][:hatool][:program] = "/usr/bin/neutron-ha-tool"
 default[:neutron][:ha][:neutron_l3_ha_service][:hatool][:env] = {}
 default[:neutron][:ha][:neutron_l3_ha_service][:seconds_to_sleep_between_checks] = 10
