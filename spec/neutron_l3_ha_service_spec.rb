@@ -524,7 +524,7 @@ describe ErrorCounter do
   end
 end
 
-def make_config(tmpdir, log_file=nil)
+def make_config(tmpdir, log_file = nil)
   config = {
     "timeouts" => {
       "status" => {
@@ -546,7 +546,7 @@ def make_config(tmpdir, log_file=nil)
     "max_errors_tolerated" => "10"
   }
 
-  config.update({"log_file" => log_file}) unless log_file.nil?
+  config.update("log_file" => log_file) unless log_file.nil?
 
   tmpdir.write_file "settings.yml", config.to_yaml
 end
