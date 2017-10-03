@@ -27,6 +27,10 @@ class HAToolLog
     end
     @logger
   end
+
+  def self.set_file(file_path)
+    @logger = Logger.new(file_path, "daily") unless file_path.nil?
+  end
 end
 
 def main
@@ -35,6 +39,7 @@ def main
   service_options = ServiceOptions.load ARGV[0]
   ha_functions = HAFunctions.new(service_options)
   error_counter = ErrorCounter.new service_options.max_errors_tolerated
+  HAToolLog.set_file(service_options.log_file)
 
   while true
     status = ha_functions.check_l3_agents
