@@ -22,7 +22,7 @@ require 'logger'
 class HAToolLog
   def self.log
     if @logger.nil?
-      @logger = Logger.new(STDERR)
+      @logger = Logger.new('/var/log/neutron/neutron-l3-ha-service.log', 'daily')
       @logger.level = Logger::DEBUG
     end
     @logger
@@ -53,7 +53,7 @@ def main
       error_counter.bump!
     end
 
-    HAToolLog.log.info("Sleeping until next run")
+    HAToolLog.log.debug("Sleeping until next run")
     sleep service_options.seconds_to_sleep_between_checks
   end
 end
@@ -103,7 +103,7 @@ class HAFunctions
   end
 
   def check_l3_agents
-    HAToolLog.log.info("checking for dead agents")
+    HAToolLog.log.debug("checking for dead agents")
     run_supervised(
       @hatool.status_command,
       @service_options.status_timeout
@@ -268,7 +268,7 @@ class ErrorCounter
   end
 
   def reset!
-    HAToolLog.log.info("error counter: re-set to 0")
+    HAToolLog.log.debug("error counter: re-set to 0")
     @errors = 0
   end
 
@@ -290,9 +290,9 @@ class Supervisor
   end
 
   def run_subprocess
-    HAToolLog.log.info("supervisor: starting #{@subprocess}")
+    HAToolLog.log.debug("supervisor: starting #{@subprocess}")
     @subprocess.start
-    HAToolLog.log.info("supervisor: monitoring #{@subprocess}")
+    HAToolLog.log.debug("supervisor: monitoring #{@subprocess}")
 
     result = begin
       @subprocess.wait @timeout_options.terminate
@@ -308,7 +308,7 @@ class Supervisor
       end
     end
 
-    HAToolLog.log.info("supervisor: done running #{@subprocess} exited with: #{result.exit_status}")
+    HAToolLog.log.debug("supervisor: done running #{@subprocess} exited with: #{result.exit_status}")
     result
   end
 end
