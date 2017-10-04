@@ -161,6 +161,10 @@ end
 monasca_project = node[:monasca][:service_tenant]
 monasca_roles = node[:monasca][:service_roles]
 
+if node[:monasca][:agent][:monitor_libvirt]
+  monasca_roles.push node[:monasca][:delegate_role]
+end
+
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 register_auth_hash = {

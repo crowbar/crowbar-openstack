@@ -10,6 +10,7 @@
 
       = select_field %w(agent log_level), :collection => :agent_log_levels
       = integer_field %w(agent statsd_port)
+      = boolean_field %w(agent monitor_libvirt)
       = integer_field %w(agent check_frequency)
       = integer_field %w(agent num_collector_threads)
       = integer_field %w(agent pool_full_max_retries)

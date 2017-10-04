@@ -10,10 +10,35 @@
           "service_tenant": "monasca",
           "service_role": "monasca-agent"
         },
+        "plugins" : {
+          "libvirt" : {
+            "cache_dir": "/dev/shm",
+            "customer_metadata": [
+              "scale_group",
+              "tenant_name"
+              ],
+            "disk_collection_period": 0,
+            "max_ping_concurrency": 8,
+            "metadata": [
+              "scale_group",
+              "tenant_name"
+              ],
+            "nova_refresh": 14400,
+            "ping_check": false,
+            "vm_cpu_check_enable": true,
+            "vm_disks_check_enable": true,
+            "vm_extended_disks_check_enable": false,
+            "vm_network_check_enable": true,
+            "vm_ping_check_enable": true,
+            "vm_probation": 300,
+            "vnic_collection_period": 0
+          }
+        },
         "insecure": true,
         "ca_file": "",
         "log_dir": "/var/log/monasca-agent/",
         "log_level": "INFO",
+        "monitor_libvirt": true,
         "statsd_port": 8125,
         "check_frequency": 15,
         "num_collector_threads": 1,
@@ -106,7 +131,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 100,
+      "schema-revision": 101,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],

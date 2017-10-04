@@ -27,6 +27,7 @@ default[:monasca][:api][:bind_port] = 8070
 default[:monasca][:log_api][:bind_port] = 5607
 
 default[:monasca][:kibana][:bind_port] = 5601
+default[:monasca][:delegate_role] = "monasca-delegate"
 
 # agent default service settings
 default[:monasca][:agent]["user"] = "monasca-agent"
