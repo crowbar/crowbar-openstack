@@ -272,9 +272,10 @@ EOH
   not_if { File.exist?(machine_id_file) }
 end
 
-flavor_ref = "6"
-alt_flavor_ref = "7"
-heat_flavor_ref = "8"
+# pre-generated guid, to avoid conflicts
+flavor_ref = "2ace2042-a736-4114-af67-61fef1b80d5a"
+alt_flavor_ref = "bf9d7697-a348-4e1a-b983-753698e33596"
+heat_flavor_ref = "a9d20c85-9ef6-41f2-a833-0367f973bca2"
 
 bash "create_yet_another_tiny_flavor" do
   code <<-EOH
