@@ -31,6 +31,7 @@
             "cross_az_attach": { "type": "bool", "required": true },
             "create_default_flavors": { "type": "bool", "required": true },
             "image_cache_manager_interval": { "type": "int", "required": true },
+            "compute_remotefs_sshkey": { "type": "str", "required": true },
             "migration": {
               "type": "map",
               "required": true,

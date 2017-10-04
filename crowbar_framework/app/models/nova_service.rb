@@ -191,6 +191,13 @@ class NovaService < OpenstackServiceObject
     base["attributes"]["nova"]["neutron_metadata_proxy_shared_secret"] = random_password
 
     base["attributes"]["nova"]["ec2-api"]["db"]["password"] = random_password
+    base["attributes"]["nova"]["compute_remotefs_sshkey"] = %x[
+      t=$(mktemp)
+      rm -f $t
+      ssh-keygen -q -t ed25519 -N "" -f $t
+      cat $t
+      rm -f $t ${t}.pub
+    ]
 
     @logger.debug("Nova create_proposal: exiting")
     base

@@ -24,6 +24,7 @@
       "cross_az_attach": true,
       "create_default_flavors": true,
       "image_cache_manager_interval": -1,
+      "compute_remotefs_sshkey": "",
       "migration": {
         "network": "admin"
       },
@@ -165,7 +166,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 119,
+      "schema-revision": 120,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],
