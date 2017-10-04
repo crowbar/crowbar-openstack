@@ -16,6 +16,34 @@
 
 return unless node["roles"].include?("monasca-agent")
 
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
+is_compute = false
+
+if node[:monasca][:agent][:monitor_libvirt]
+  node["roles"].each do |role|
+    re_match = role.match "^nova-compute"
+    is_compute = true unless re_match.nil?
+
+    unless is_compute && (["kvm", "lxc", "qemu", "xen"].include? node[:nova][:libvirt_type])
+      next
+    end
+
+    monasca_agent_plugin_libvirt "libvirt check for nova-compute" do
+      user_domain_name "Default"
+      project_domain_name "Default"
+      region_name keystone_settings["endpoint_region"]
+      username keystone_settings["service_user"]
+      password keystone_settings["service_password"]
+      project_name keystone_settings["service_tenant"]
+      auth_url keystone_settings["internal_auth_url"]
+    end
+  end
+end
+
+# No need to proceed beyond this point on a compute node
+return unless node["roles"].include?("nova-controller")
+
 if node[:nova][:ha][:enabled]
   bind_host = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
   bind_port = node[:nova][:ha][:ports][:api]

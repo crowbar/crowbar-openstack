@@ -28,6 +28,10 @@ smtp_user: <%= @master_settings['smtp_user'] %>
 smtp_password: <%= @master_settings['smtp_password'] %>
 smtp_from_address: <%= @master_settings['smtp_from_address'] %>
 
+<%- if @monitor_libvirt %>
+delegated_authorized_roles: <%= @delegate_role %>
+<%- end %>
+
 memcached_listen_ip: <%= @monasca_net_ip %>
 kafka_host: <%= @monasca_net_ip %>
 kafka_hosts: "<%= @monasca_net_ip %>:9092"

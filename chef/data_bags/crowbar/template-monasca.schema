@@ -26,10 +26,37 @@
                     "service_role": { "type": "str", "required": false }
                   }
                 },
+                "plugins": {
+                  "required": true,
+                  "type": "map",
+                  "mapping": {
+                    "libvirt": {
+                      "required": true,
+                      "type": "map",
+                      "mapping": {
+                        "cache_dir": { "type": "str", "required": true },
+                        "customer_metadata": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
+                        "disk_collection_period": { "type": "int", "required": true },
+                        "max_ping_concurrency": { "type": "int", "required": true },
+                        "metadata": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
+                        "nova_refresh": { "type": "int", "required": true },
+                        "ping_check": { "type": "bool", "required": true },
+                        "vm_cpu_check_enable": { "type": "bool", "required": true },
+                        "vm_disks_check_enable": { "type": "bool", "required": true },
+                        "vm_extended_disks_check_enable": { "type": "bool", "required": true },
+                        "vm_network_check_enable": { "type": "bool", "required": true },
+                        "vm_ping_check_enable": { "type": "bool", "required": true },
+                        "vm_probation": { "type": "int", "required": true },
+                        "vnic_collection_period": { "type": "int", "required": true }
+                      }
+                    }
+                  }
+                },
                 "insecure": { "type": "bool", "required": true },
                 "ca_file": { "type": "str", "required": true },
                 "log_dir": { "type": "str", "required": true },
                 "log_level": { "type": "str", "required": true },
+                "monitor_libvirt": { "type": "bool", "required": true },
                 "statsd_port": { "type": "int", "required": true },
                 "check_frequency": { "type": "int", "required": true },
                 "num_collector_threads": { "type": "int", "required": true },
