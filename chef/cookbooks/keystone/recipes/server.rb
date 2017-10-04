@@ -592,8 +592,8 @@ register_auth_hash = { user: node[:keystone][:admin][:username],
 
 updated_password = node[:keystone][:admin][:updated_password]
 
-unless updated_password.empty? ||
-    updated_password.nil? ||
+unless updated_password.nil? ||
+    updated_password.empty? ||
     updated_password == node[:keystone][:admin][:password]
 
   if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
