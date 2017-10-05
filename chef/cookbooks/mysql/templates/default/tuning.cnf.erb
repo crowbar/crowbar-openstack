@@ -1,5 +1,7 @@
 [mysqld]
 innodb_buffer_pool_size = <%= @innodb_buffer_pool_size %>M
+innodb_log_file_size = <%= [8, @innodb_buffer_pool_size / 4].max %>M
+innodb_flush_method = O_DIRECT
 
 max_connections = <%= @max_connections %>
 tmp_table_size = <%= @tmp_table_size %>M
