@@ -95,20 +95,45 @@ def make_volume(node, backend_id, volume)
     end
   end
 
-  claimed_disks.each do |disk|
-    bash "Create physical volume on #{disk.name}" do
-      code <<-EOH
-      dd if=/dev/zero of=#{disk.name} bs=1024 count=10
-      blockdev --rereadpt  #{disk.name}
-      pvcreate -f #{disk.name}
-      EOH
-      not_if "pvs #{disk.name}"
+  disks_or_partitions = []
+  if node["kernel"]["machine"] =~ /s390x/
+    # In s390x we need to partition the device and create the LVM
+    # volume from the first and single partition. We also need to
+    # recreate the claimed_disk array, to store the first partition
+    # only.
+    claimed_disks.each do |disk|
+      device_name = disk.name.split("/").last
+      partition = "#{disk.name}1"
+      disks_or_partitions << partition
+      bash "Create physical volume on #{partition}" do
+        code <<-EOH
+        bus_id=$(lsdasd | grep #{device_name} | awk '{ print $1 }')
+        lsdasd $bus_id -l | grep -q "status:.*active" || {
+          echo "yes" | dasdfmt -b 4096 -f #{disk.name}
+        }
+        fdasd -a #{disk.name}
+        pvcreate -f #{partition}
+        EOH
+        not_if "pvs #{partition}"
+      end
+    end
+  else
+    claimed_disks.each do |disk|
+      disks_or_partitions << disk
+      bash "Create physical volume on #{disk.name}" do
+        code <<-EOH
+        dd if=/dev/zero of=#{disk.name} bs=1024 count=10
+        blockdev --rereadpt  #{disk.name}
+        pvcreate -f #{disk.name}
+        EOH
+        not_if "pvs #{disk.name}"
+      end
     end
   end
 
   # Make our volume group.
   bash "Create volume group #{volname}" do
-    code "vgcreate #{volname} #{claimed_disks.map{ |d|d.name }.join(' ')}"
+    code "vgcreate #{volname} #{disks_or_partitions.join(" ")}"
     not_if "vgs #{volname}"
   end
 end
