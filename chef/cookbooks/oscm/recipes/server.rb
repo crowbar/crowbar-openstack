@@ -81,7 +81,7 @@ openstack_args_heat = heat_insecure || keystone_settings["insecure"] ? "--insecu
 register_auth_hash = {
   user: keystone_settings["admin_user"],
   password: keystone_settings["admin_password"],
-  project: keystone_settings["admin_project"]
+  tenant: keystone_settings["admin_tenant"]
 }
 
 keystone_register "oscm wakeup keystone" do
@@ -99,8 +99,8 @@ keystone_register "oscm create project" do
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
   auth register_auth_hash
-  project_name oscm_project
-  action :add_project
+  tenant_name oscm_project
+  action :add_tenant
 end
 
 keystone_register "oscm register user" do
@@ -111,7 +111,7 @@ keystone_register "oscm register user" do
   auth register_auth_hash
   user_name oscm_user
   user_password oscm_password
-  project_name oscm_project
+  tenant_name oscm_project
   action :add_user
 end
 
@@ -122,7 +122,7 @@ keystone_register "oscm give user admin role" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name oscm_user
-  project_name oscm_project
+  tenant_name oscm_project
   role_name "admin"
   action :add_access
 end
@@ -134,7 +134,7 @@ keystone_register "oscm give user member role" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name oscm_user
-  project_name oscm_project
+  tenant_name oscm_project
   role_name "Member"
   action :add_access
 end
@@ -146,7 +146,7 @@ keystone_register "oscm give user _member_ role" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name oscm_user
-  project_name oscm_project
+  tenant_name oscm_project
   role_name "_member_"
   action :add_access
 end
