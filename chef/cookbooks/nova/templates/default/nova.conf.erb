@@ -668,6 +668,9 @@ keystone_ec2_insecure = <%= @keystone_settings['insecure'] %>
 
 # Availability zone to use when user doesn't specify one (string value)
 #default_schedule_zone = <None>
+<% unless node[:nova][:default_schedule_zone].empty? -%>
+default_schedule_zone = <%= node[:nova][:default_schedule_zone] %>
+<% end -%>
 
 # These are image properties which a snapshot should not inherit from an
 # instance (list value)

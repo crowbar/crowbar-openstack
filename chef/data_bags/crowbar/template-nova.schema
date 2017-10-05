@@ -36,6 +36,7 @@
               }
             },
             "cross_az_attach": { "type": "bool", "required": true },
+            "default_schedule_zone": { "type": "str", "required": true },
             "setup_shared_instance_storage": { "type": "bool", "required": true },
             "use_shared_instance_storage": { "type": "bool", "required": true },
             "use_syslog": { "type": "bool", "required": true },

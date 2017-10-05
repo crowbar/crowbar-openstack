@@ -25,6 +25,7 @@
         "network": "admin"
       },
       "cross_az_attach": true,
+      "default_schedule_zone": "",
       "use_syslog": false,
       "neutron_url_timeout": 30,
       "force_config_drive": false,
