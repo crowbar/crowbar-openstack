@@ -61,36 +61,49 @@ class Chef
           db_name = new_resource.database_name || "*"
           tbl_name = new_resource.table || "*"
 
-          # test
-          incorrect_privileges = false
-          test_sql = client.prepare("SELECT * from mysql.db WHERE User = ? AND Host = ? AND Db = ?")
-          results = test_sql.execute(
-            new_resource.username,
-            new_resource.host,
-            db_name
-          )
-          incorrect_privileges = true if results.size.zero?
-          # These should all by 'Y'
-          results.each do |result|
-            new_resource.privileges.each do |privileges|
-              key = "#{privileges.capitalize}_priv"
-              incorrect_privileges = true if privileges[key] != "Y"
+          username = client.escape(new_resource.username)
+          host = client.escape(new_resource.host)
+
+          # test the presence of privileges
+          privs = {}
+          if new_resource.privileges == [:all]
+            privs = { "ALL" => false }
+          else
+            new_resource.privileges.each { |p| privs[p] = false }
+          end
+
+          ssl_set = false
+
+          client.query("SHOW GRANTS FOR '#{username}'@'#{host}'").each do |row|
+            row.each do |grant, val|
+              # example of vals:
+              # GRANT USAGE ON *.* TO 'nova'@'%' IDENTIFIED BY PASSWORD '..' REQUIRE SSL
+              # GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, INDEX, ALTER ON `nova`.* TO 'nova'@'%'
+              ssl_set = true if val.include?("REQUIRE SSL")
+              # make sure to check privileges for selected database
+              next unless db_name == "*" || val.include?("\`#{db_name}\`")
+              privs.keys.each do |priv|
+                privs[priv] = true if val.include? priv
+              end
             end
           end
 
+          correct_privileges = privs.reject { |priv, present| present }.empty? &&
+            (ssl_set == new_resource.require_ssl)
+
+          return if correct_privileges
+
           # grant
-          return unless incorrect_privileges
           Chef::Log.info("Granting privileges for '#{new_resource.username}@#{new_resource.host}'")
 
-          username = client.escape(new_resource.username)
-          host = client.escape(new_resource.host)
           password = client.escape(new_resource.password)
+          requires = new_resource.require_ssl ? "SSL" : "NONE"
 
           grant_sql = "GRANT #{new_resource.privileges.join(",")}"
           grant_sql += " ON #{db_name}.#{tbl_name}"
           grant_sql += " TO '#{username}'@'#{host}'"
           grant_sql += " IDENTIFIED BY '#{password}'"
-          grant_sql += " REQUIRE SSL" if new_resource.require_ssl
+          grant_sql += " REQUIRE #{requires}"
           client.query(grant_sql)
           client.query("FLUSH PRIVILEGES")
         ensure
