@@ -17,10 +17,15 @@
 # limitations under the License.
 #
 
+# non-hyperv nodes set their AZ themselves, so only look for hyperv nodes
+
+elements = node[:nova][:elements_expanded] || node[:nova][:elements]
+return if elements["nova-compute-hyperv"].nil? || elements["nova-compute-hyperv"].empty?
+
 command_no_arg = NovaAvailabilityZone.fetch_set_az_command_no_arg(node, @cookbook_name)
 
-# non-hyperv nodes set their AZ themselves, so only look for hyperv nodes
-search_env_filtered(:node, "roles:nova-compute-hyperv") do |n|
+hyperv_nodes = node_search_with_cache("roles:nova-compute-hyperv")
+hyperv_nodes.each do |n|
   command = NovaAvailabilityZone.add_arg_to_set_az_command(command_no_arg, n)
 
   execute "Set availability zone for #{n.hostname}" do

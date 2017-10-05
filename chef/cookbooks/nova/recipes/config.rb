@@ -64,7 +64,7 @@ end
 api = if is_controller
   node
 else
-  search_env_filtered(:node, "roles:nova-controller").first
+  node_search_with_cache("roles:nova-controller").first
 end
 
 api_ha_enabled = api[:nova][:ha][:enabled]
@@ -72,7 +72,7 @@ admin_api_host = CrowbarHelper.get_host_for_admin_url(api, api_ha_enabled)
 public_api_host = CrowbarHelper.get_host_for_public_url(api, api[:nova][:ssl][:enabled], api_ha_enabled)
 Chef::Log.info("Api server found at #{admin_api_host} #{public_api_host}")
 
-glance_servers = search_env_filtered(:node, "roles:glance-server")
+glance_servers = node_search_with_cache("roles:glance-server")
 if glance_servers.length > 0
   glance_server = glance_servers[0]
   glance_server = node if glance_server.name == node.name
@@ -112,7 +112,7 @@ rbd_enabled = false
 
 use_multipath = false
 
-cinder_servers = search_env_filtered(:node, "roles:cinder-controller") || []
+cinder_servers = node_search_with_cache("roles:cinder-controller")
 if cinder_servers.length > 0
   cinder_server = cinder_servers[0]
   cinder_insecure = cinder_server[:cinder][:api][:protocol] == "https" && cinder_server[:cinder][:ssl][:insecure]
@@ -138,7 +138,7 @@ end
 ceph_user = node[:nova][:rbd][:user]
 ceph_uuid = node[:nova][:rbd][:secret_uuid]
 
-neutron_servers = search_env_filtered(:node, "roles:neutron-server")
+neutron_servers = node_search_with_cache("roles:neutron-server")
 if neutron_servers.length > 0
   neutron_server = neutron_servers[0]
   neutron_server = node if neutron_server.name == node.name

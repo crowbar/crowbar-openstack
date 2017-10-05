@@ -23,50 +23,14 @@ return unless node["roles"].include?("nagios-client")
 
 include_recipe "nagios::common"
 
-# Nova scale data holder
-nova_scale = {
-  computes: [],
-  schedulers: [],
-  apis: []
-}
+elements = node[:nova][:elements_expanded] || node[:nova][:elements]
 
-search_env_filtered(:node, "roles:nova-single-machine") do |n|
-  nova_scale[:computes] << n
-  nova_scale[:schedulers] << n
-  nova_scale[:apis] << n
-end
+nova_controllers_n = elements["nova-controller"].length
+nova_computes_n = 0
 
-search_env_filtered(:node, "roles:nova-controller") do |n|
-  nova_scale[:schedulers] << n
-  nova_scale[:apis] << n
-end
-
-search_env_filtered(:node, "roles:nova-compute-docker") do |n|
-  nova_scale[:computes] << n
-end
-
-search_env_filtered(:node, "roles:nova-compute-hyperv") do |n|
-  nova_scale[:computes] << n
-end
-
-search_env_filtered(:node, "roles:nova-compute-kvm") do |n|
-  nova_scale[:computes] << n
-end
-
-search_env_filtered(:node, "roles:nova-compute-qemu") do |n|
-  nova_scale[:computes] << n
-end
-
-search_env_filtered(:node, "roles:nova-compute-vmware") do |n|
-  nova_scale[:computes] << n
-end
-
-search_env_filtered(:node, "roles:nova-compute-xen") do |n|
-  nova_scale[:computes] << n
-end
-
-search_env_filtered(:node, "roles:nova-compute-zvm") do |n|
-  nova_scale[:computes] << n
+compute_roles = elements.keys.select { |r| r =~ /^nova-compute-/ }
+compute_roles.each do |role|
+  nova_computes_n += elements[role].length
 end
 
 nova_admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
@@ -76,7 +40,8 @@ template "/etc/nagios/nrpe.d/nova_nrpe.cfg" do
   group node[:nagios][:group]
   owner node[:nagios][:user]
   variables(
-    nova_scale: nova_scale,
+    nova_controllers_n: nova_controllers_n,
+    nova_computes_n: nova_computes_n,
     nova_admin_ip: nova_admin_ip
   )
   notifies :restart, "service[nagios-nrpe-server]"

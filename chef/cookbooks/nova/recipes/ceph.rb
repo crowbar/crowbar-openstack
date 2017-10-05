@@ -20,7 +20,7 @@
 has_internal = false
 has_external = false
 
-cinder_controller = search_env_filtered(:node, "roles:cinder-controller").first
+cinder_controller = node_search_with_cache("roles:cinder-controller").first
 return if cinder_controller.nil?
 
 # First loop to find if we have internal/external cluster

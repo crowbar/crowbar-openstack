@@ -27,6 +27,48 @@ include Chef::Mixin::ShellOut
 
 module CeilometerHelper
   class << self
+    def replica_set_members(node)
+      CrowbarUtilsSearch.node_search_with_cache(node,
+                                                "roles:ceilometer-server",
+                                                "ceilometer").select do |n|
+        n[:ceilometer][:ha][:mongodb][:replica_set][:member] rescue false
+      end
+    end
+
+    def mongodb_connection_string(node)
+      connection_string = nil
+
+      if node[:ceilometer][:ha][:server][:enabled]
+        db_hosts = replica_set_members(node)
+        unless db_hosts.empty?
+          mongodb_servers = db_hosts.map do |s|
+            address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(s, "admin").address
+            port = s[:ceilometer][:mongodb][:port]
+            "#{address}:#{port}"
+          end
+          mongodb_servers_list = mongodb_servers.sort.join(",")
+          replica_set_name = node[:ceilometer][:ha][:mongodb][:replica_set][:name]
+
+          connection_string = \
+            "mongodb://#{mongodb_servers_list}/ceilometer?replicaSet=#{replica_set_name}"
+        end
+      end
+
+      # if this is a cluster, but the replica set member attribute hasn't
+      # been set on any node (yet), we just fallback to using the first
+      # ceilometer-server node
+      if db_connection.nil?
+        db_hosts = CrowbarUtilsSearch.node_search_with_cache("roles:ceilometer-server",
+                                                             "ceilometer")
+        db_host = db_hosts.first || node
+        address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(db_host, "admin").address
+        port = db_host[:ceilometer][:mongodb][:port]
+        connection_string = "mongodb://#{address}:#{port}/ceilometer"
+      end
+
+      connection_string
+    end
+
     def configure_replicaset(node, name, members)
       # lazy require, to move loading this modules to runtime of the cookbook
       require "rubygems"

@@ -266,7 +266,7 @@ cookbook_file "/etc/nova/nova-compute.conf" do
   notifies :restart, "service[nova-compute]"
 end unless node[:platform_family] == "suse"
 
-nova_controllers = search_env_filtered(:node, "roles:nova-controller")
+nova_controllers = node_search_with_cache("roles:nova-controller")
 
 nova_controller_ips = nova_controllers.map do |nova_controller_node|
   Chef::Recipe::Barclamp::Inventory.get_network_by_type(nova_controller_node, "admin").address
@@ -321,7 +321,8 @@ ruby_block "nova_read_ssh_public_key" do
 end
 
 ssh_auth_keys = ""
-search_env_filtered(:node, "roles:nova-compute-#{node[:nova][:libvirt_type]}") do |n|
+compute_nodes = node_search_with_cache("roles:nova-compute-#{node[:nova][:libvirt_type]}")
+compute_nodes.each do |n|
   ssh_auth_keys += n[:nova][:service_ssh_key]
 end
 
@@ -366,7 +367,7 @@ execute "set vhost_net module" do
   command "grep -q 'vhost_net' /etc/modules || echo 'vhost_net' >> /etc/modules"
 end
 
-cinder_servers = search_env_filtered(:node, "roles:cinder-controller") || []
+cinder_servers = node_search_with_cache("roles:cinder-controller")
 unless cinder_servers.empty?
   cinder_server = cinder_servers[0]
   if cinder_server[:cinder][:use_multipath]

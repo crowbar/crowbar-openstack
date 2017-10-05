@@ -23,10 +23,7 @@ if node[:ceilometer][:use_mongodb]
   mongodb_nodes = nil
 
   if ha_enabled
-    mongodb_nodes = search(:node,
-                           "ceilometer_ha_mongodb_replica_set_member:true AND "\
-                           "ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
-      )
+    mongodb_nodes = CeilometerHelper.replica_set_members(node)
   end
 
   # if we don't have HA enabled, then mongodb should be on the current host; if
@@ -257,8 +254,7 @@ keystone_register "give ceilometer user access" do
   action :add_access
 end
 
-env_filter = " AND ceilometer_config_environment:#{node[:ceilometer][:config][:environment]}"
-swift_middlewares = search(:node, "roles:ceilometer-swift-proxy-middleware#{env_filter}") || []
+swift_middlewares = node[:ceilometer][:elements]["ceilometer-swift-proxy-middleware"] || []
 unless swift_middlewares.empty?
   keystone_register "give ceilometer user ResellerAdmin role" do
     protocol keystone_settings["protocol"]
