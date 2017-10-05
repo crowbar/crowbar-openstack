@@ -226,7 +226,7 @@ crowbar_pacemaker_sync_mark "sync-database_boostrapped" do
 end
 
 execute "assign-root-password-galera" do
-  command "/usr/bin/mysqladmin -u root password \"#{node[:mysql][:server_root_password]}\""
+  command "/usr/bin/mysqladmin -u root password \"#{node[:database][:mysql][:server_root_password]}\""
   action :run
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   only_if "/usr/bin/mysql -u root -e 'show databases;'"
