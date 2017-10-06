@@ -17,7 +17,7 @@ metadata_listen = <%= @metadata_bind_address %>
 metadata_listen_port = <%= @bind_port_metadata %>
 metadata_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 instance_usage_audit_period = hour
-image_cache_manager_interval = -1
+image_cache_manager_interval = <%= node[:nova][:image_cache_manager_interval] %>
 <% if @libvirt_type.eql?('kvm') -%>
 use_rootwrap_daemon = <%= @use_rootwrap_daemon %>
 <% end -%>
