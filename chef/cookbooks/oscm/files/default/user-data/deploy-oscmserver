@@ -111,14 +111,12 @@ if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml ps -q | wc -l) !
     docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml rm -f
 fi
 
-# Create Docker directories #TODO: If they do not exist yet
-mkdir -p ${DOCKER_PATH}/data/oscm-db/data
-mkdir -p ${DOCKER_PATH}/config/brandings
-mkdir -p ${DOCKER_PATH}/config/certs
-mkdir -p ${DOCKER_PATH}/config/privkey/oscm-core
-mkdir -p ${DOCKER_PATH}/config/privkey/oscm-app
-mkdir -p ${DOCKER_PATH}/config/privkey/oscm-birt
-mkdir -p ${DOCKER_PATH}/config/privkey/oscm-branding
+# Create Docker directories if they do not exist yet
+for docker_directory in ${DOCKER_PATH}/data/oscm-db/data ${DOCKER_PATH}/config/brandings ${DOCKER_PATH}/config/certs ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding; do
+    if [ ! -d $docker_directory ]; then
+        mkdir -p $docker_directory
+    fi
+done
 
 # Copy certificate files
 if [ ${GENERATE_CERTIFICATES} == "false" ] && [ -f ${SSL_CONFIG_PATH}/oscm.crt ] && [ -f ${SSL_CONFIG_PATH}/oscm.key ]; then
@@ -145,9 +143,11 @@ else
     fi
 fi
 
-# Set Docker proxy
+# If http proxy is enabled, create Docker config file
 if [ ${PROXY_ENABLED} == "true" ]; then
-    mkdir -p /etc/systemd/system/docker.service.d
+    if [ ! -d /etc/systemd/system/docker.service.d]; then
+        mkdir -p /etc/systemd/system/docker.service.d
+    fi
     if [ ${PROXY_AUTH} == "true" ]; then
         cat <<EOF > /etc/systemd/system/docker.service.d/http-proxy.conf
 [Service]
@@ -161,12 +161,17 @@ EOF
     fi
     systemctl daemon-reload
     systemctl restart docker
-    #TODO: If disabled, disable proxy
+# Otherwise remove Docker config file with proxy config
+else
+    if [ -f /etc/systemd/system/docker.service.d/http-proxy.conf ]; then
+        rm -f /etc/systemd/system/docker.service.d/http-proxy.conf
+        systemctl daemon-reload
+        systemctl restart docker
+    fi
 fi
 
-# Create Docker registry authentication info
-#TODO: Change check to variable DOCKER_REGISTRY_AUTH
-if [ ! -z ${DOCKER_REGISTRY_USER} ] && [ ! -z ${DOCKER_REGISTRY_PWD} ]; then
+# If Docker registry authentication is enabled, create auth info file
+if [ ${DOCKER_REGISTRY_AUTH} == "true" ]; then
     #Create auth file for Docker registry
     REGISTRY_USER_PASS_BASE64=$(printf "${DOCKER_REGISTRY_USER}:${DOCKER_REGISTRY_PWD}" | base64)
     mkdir -p /root/.docker
@@ -179,15 +184,22 @@ if [ ! -z ${DOCKER_REGISTRY_USER} ] && [ ! -z ${DOCKER_REGISTRY_PWD} ]; then
         }
 }
 EOF
-#TODO: If false, remove auth file
+# Otherwise remove auth info file
+else
+    if [ -f /root/.docker/config.json ]; then
+        rm -f /root/.docker/config.json
+    fi
 fi
 
-# Prepare Docker image registry variable
+# If default Docker registry (Dockerhub) is used, remove insecure registry config
 if [ ${DOCKER_REGISTRY_DOCKERHUB} = "true" ]; then
     DOCKER_IMAGES_SOURCE="${DOCKER_REGISTRY_ORGANIZATION}/"
-    #TODO: Remove daemon.json
+    if [ -f /etc/docker/daemon.json ]; then
+        rm -f /etc/docker/daemon.json
+        systemctl restart docker
+    fi
+# Otherwise, custom registry is used, so create insecure registry config
 else
-    DOCKER_IMAGES_SOURCE="${DOCKER_REGISTRY_HOST}:${DOCKER_REGISTRY_PORT}/${DOCKER_REGISTRY_ORGANIZATION}/"
     cat <<EOF > /etc/docker/daemon.json
 {
   "insecure-registries" : ["${DOCKER_REGISTRY_HOST}:${DOCKER_REGISTRY_PORT}"]
