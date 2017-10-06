@@ -1,6 +1,9 @@
 #!/bin/sh
+# Enable command traces
 set -x
+# Exit on error
 set -e
+# Redirect all output to log file
 exec &> /var/log/setup-machine.log
 
 # Variables for this script
@@ -9,30 +12,6 @@ CONFIG_PATH=${CONFIG_BASE}/config
 SSL_CONFIG_PATH=${CONFIG_BASE}/ssl
 COMPOSE_CONFIG_PATH=${CONFIG_BASE}/docker-compose
 DOCKER_PATH=/docker
-
-# Fixed values; neither from oscm-config nor heat-config
-export DB_PORT=5432                         # Fixed by deployment script: 5432
-export DB_PWD_JMS=jmsuser                   # Fixed by deployment script: jmsuser
-export CONTROLLER_ORG_ID=PLATFORM_OPERATOR  # Fixed by deployment script: PLATFORM_OPERATOR
-export CONTROLLER_USER_KEY=1000             # Fixed by deployment script: 1000
-export CONTROLLER_USER_NAME=administrator   # Fixed by deployment script: administrator
-export CONTROLLER_USER_PASS=admin123        # Fixed by deployment script: admin123
-export DB_VOLUME_DATA_SRC=${DOCKER_PATH}/data/oscm-db/data
-export BRANDING_VOLUME_BRANDINGS_SRC=${DOCKER_PATH}/config/brandings
-export TOMEE_DEBUG=false
-
-# To be removed from this script
-export IMAGE_DB=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-db:soc
-export IMAGE_CORE=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-core:soc
-export IMAGE_APP=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-app:soc
-export IMAGE_BIRT=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-birt:soc
-export IMAGE_BRANDING=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-branding:soc
-export IMAGE_INITDB=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-initdb:soc
-export KEY_SECRET=secret                    # Generate with Barclamp (heat-config)
-export HOST_FQDN=estshimizusles.intern.est.fujitsu.com  # Operator set or generated in Barclamp (oscm-config)
-export DB_PWD_CORE=bssuser                  # Generate with Barclamp (heat-config)
-export DB_PWD_APP=bssappuser                # Generate with Barclamp (heat-config)
-export DB_SUPERPWD=postgres                  # Generate with Barclamp (heat-config)
 
 # Wait for remote copying to finish
 if [ ${CONFIG_PATH} ] && [ ${SSL_CONFIG_PATH} ] && [ ${COMPOSE_CONFIG_PATH} ]; then
