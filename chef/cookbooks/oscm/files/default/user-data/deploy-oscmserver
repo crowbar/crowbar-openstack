@@ -105,7 +105,11 @@ set +a
 
 # ------------------------------------------------------------------------------
 
-#TODO: If containers are running, stop them
+# If containers are running, stop them
+if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml ps -q | wc -l) != "0"]; then
+    docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml stop
+    docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml rm -f
+fi
 
 # Create Docker directories #TODO: If they do not exist yet
 mkdir -p ${DOCKER_PATH}/data/oscm-db/data
