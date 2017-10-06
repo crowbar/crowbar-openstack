@@ -316,7 +316,7 @@ template "#{oscm_install_path}/user-data/oscm-config" do
     docker: node[:oscm][:docker],
     proxy: node[:oscm][:proxy],
     host_fqdn: node[:oscm][:host_fqdn],
-    floating_ip: node[:oscm][:openstack][:instance_stack][:ip_appserver]
+    instance: node[:oscm][:openstack][:instance_stack]
   )
 end
 
