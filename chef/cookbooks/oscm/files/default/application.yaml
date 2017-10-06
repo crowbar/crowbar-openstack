@@ -161,10 +161,6 @@ resources:
                 - ""
                 - - "/dev/disk/by-id/virtio-"
                   - { get_param: db_volume_id }
-            $PGPASSWORD: { get_attr: [ db_password, value ] }
-            $DB_PWD_CORE: { get_attr: [ db_core_password, value ] }
-            $DB_PWD_APP: { get_attr: [ db_app_password, value ] }
-            $KEY_SECRET: { get_attr: [ key_secret, value ] }
             $SSH_CERT: { get_param: ssh_cert }
 
   # User data payload for appserver
