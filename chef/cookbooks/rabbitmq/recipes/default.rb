@@ -21,8 +21,8 @@
 ha_enabled = node[:rabbitmq][:ha][:enabled]
 # we only do cluster if we do HA
 cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
-# dont let the changes to the templates restart the rabbitmq in cluster mode
-service_action = cluster_enabled ? :nothing : :restart
+crm_resource_stop_cmd = cluster_enabled ? "force-demote" : "force-stop"
+crm_resource_start_cmd = cluster_enabled ? "force-promote" : "force-start"
 
 package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node[:platform_family] == "suse"
@@ -39,7 +39,7 @@ template "/etc/rabbitmq/rabbitmq-env.conf" do
   owner "root"
   group "root"
   mode 0644
-  notifies service_action, "service[rabbitmq-server]"
+  notifies :restart, "service[rabbitmq-server]"
 end
 
 template "/etc/rabbitmq/rabbitmq.config" do
@@ -47,7 +47,7 @@ template "/etc/rabbitmq/rabbitmq.config" do
   owner "root"
   group "root"
   mode 0644
-  notifies service_action, "service[rabbitmq-server]"
+  notifies :restart, "service[rabbitmq-server]"
 end
 
 case node[:platform_family]
@@ -66,11 +66,16 @@ bash "enabling rabbit management" do
   environment "HOME" => "/root/"
   code "#{rabbitmq_plugins} #{rabbitmq_plugins_param} enable rabbitmq_management > /dev/null"
   not_if "#{rabbitmq_plugins} list -E | grep rabbitmq_management -q", environment: {"HOME" => "/root/"}
-  notifies service_action, "service[rabbitmq-server]"
+  notifies :restart, "service[rabbitmq-server]"
 end
 
 service "rabbitmq-server" do
-  supports restart: true, start: true, stop: true, status: true
+  supports restart: true,
+           start: true,
+           stop: true,
+           status: true,
+           crm_resource_stop_cmd: crm_resource_stop_cmd,
+           crm_resource_start_cmd: crm_resource_start_cmd
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
