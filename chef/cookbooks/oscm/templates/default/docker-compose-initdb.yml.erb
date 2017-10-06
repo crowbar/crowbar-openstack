@@ -1,20 +1,20 @@
 version: "3"
 services:
   oscm-db:
-<% if @docker["dockerhub"] == true %>  
-    image: <%= @docker["organization"]/oscm-db:@docker["tag"] %>
+<% if @docker["dockerhub"] == true %>
+    image: <%= @docker["organization"]+"/oscm-db:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-db:@docker["tag"]%>
+    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-db:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-db
     volumes:
       - /docker/data/oscm-db/data:/var/lib/postgresql/data
 
   oscm-initdb-core:
-<% if @docker["dockerhub"] == true %>  
-    image: <%= @docker["organization"]/oscm-initdb-core:@docker["tag"] %>
+<% if @docker["dockerhub"] == true %>
+    image: <%= @docker["organization"]+"/oscm-initdb-core:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-initdb-core:@docker["tag"]%>
+    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-initdb-core:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-initdb-core
     env_file: var.env
@@ -26,10 +26,10 @@ services:
       - oscm-db:oscm-db
       
   oscm-initdb-jms:
-<% if @docker["dockerhub"] == true %>  
-    image: <%= @docker["organization"]/oscm-initdb-jms:@docker["tag"] %>
+<% if @docker["dockerhub"] == true %>
+    image: <%= @docker["organization"]+"/oscm-initdb-jms:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-initdb-jms:@docker["tag"]%>
+    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-initdb-jms:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-initdb-jms
     env_file: var.env
@@ -41,10 +41,10 @@ services:
       - oscm-db:oscm-db
       
   oscm-initdb-app:
-<% if @docker["dockerhub"] == true %>  
-    image: <%= @docker["organization"]/oscm-initdb-app:@docker["tag"] %>
+<% if @docker["dockerhub"] == true %>
+    image: <%= @docker["organization"]+"/oscm-initdb-app:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-initdb-app:@docker["tag"]%>
+    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-initdb-app:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-initdb-app
     env_file: var.env
@@ -56,10 +56,10 @@ services:
       - oscm-db:oscm-db
       
   oscm-initdb-controller-openstack:
-<% if @docker["dockerhub"] == true %>  
-    image: <%= @docker["organization"]/oscm-initdb-controller-openstack:@docker["tag"] %>
+<% if @docker["dockerhub"] == true %>
+    image: <%= @docker["organization"]+"/oscm-initdb-controller-openstack:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-initdb-controller-openstack:@docker["tag"]%>
+    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-initdb-controller-openstack:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-initdb-controller-openstack
     env_file: var.env

@@ -1,10 +1,10 @@
 version: "3"
 services:
   oscm-db:
-<% if @docker["dockerhub"] == true %>  
-    image: <%= @docker["organization"]/oscm-db:@docker["tag"] %>
+<% if @docker["dockerhub"] == true %>
+    image: <%= @docker["organization"]+"/oscm-db:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-db:@docker["tag"]%>
+    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-db:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-db
     volumes:
@@ -13,11 +13,11 @@ services:
       - 5432:5432
 
   oscm-core:
-<% if @docker["dockerhub"] == true %>  
-    image: <%= @docker["organization"]/oscm-core:@docker["tag"] %>
+<% if @docker["dockerhub"] == true %>
+    image: <%= @docker["organization"]+"/oscm-core:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-core:@docker["tag"]%>
-<% end %>  
+    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-core:"+@docker["tag"] %>
+<% end %>
     container_name: oscm-core
     env_file: var.env
     environment:
@@ -33,10 +33,10 @@ services:
       - 10081:8081
 
   oscm-app:
-<% if @docker["dockerhub"] == true %>  
-    image: <%= @docker["organization"]/oscm-app:@docker["tag"] %>
+<% if @docker["dockerhub"] == true %>
+    image: <%= @docker["organization"]+"/oscm-app:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-app:@docker["tag"]%>
+    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-app:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-app
     env_file: var.env
@@ -53,10 +53,10 @@ services:
       - 8881:8881
 
   oscm-birt:
-<% if @docker["dockerhub"] == true %>  
-    image: <%= @docker["organization"]/oscm-birt:@docker["tag"] %>
+<% if @docker["dockerhub"] == true %>
+    image: <%= @docker["organization"]+"/oscm-birt:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-birt:@docker["tag"]%>
+    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-birt:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-birt
     env_file: var.env
@@ -67,10 +67,10 @@ services:
       - 8181:8181
 
   oscm-branding:
-<% if @docker["dockerhub"] == true %>  
-    image: <%= @docker["organization"]/oscm-branding:@docker["tag"] %>
+<% if @docker["dockerhub"] == true %>
+    image: <%= @docker["organization"]+"/oscm-branding:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-branding:@docker["tag"]%>
+    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-branding:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-branding
     env_file: var.env
