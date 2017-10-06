@@ -111,28 +111,34 @@ set +a
 mkdir -p ${DOCKER_PATH}/data/oscm-db/data
 mkdir -p ${DOCKER_PATH}/config/brandings
 mkdir -p ${DOCKER_PATH}/config/certs
+mkdir -p ${DOCKER_PATH}/config/privkey/oscm-core
+mkdir -p ${DOCKER_PATH}/config/privkey/oscm-app
+mkdir -p ${DOCKER_PATH}/config/privkey/oscm-birt
+mkdir -p ${DOCKER_PATH}/config/privkey/oscm-branding
 
 # Copy certificate files
 if [ ${GENERATE_CERTIFICATES} == "false" ] && [ -f ${SSL_CONFIG_PATH}/oscm.crt ] && [ -f ${SSL_CONFIG_PATH}/oscm.key ]; then
-    cp -f ${SSL_CONFIG_PATH}/oscm.crt ${DOCKER_PATH}/config/certs
-    cp -f ${SSL_CONFIG_PATH}/oscm.key ${DOCKER_PATH}/config/certs
+    echo ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.key
+    echo ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.crt
     if [ -f ${SSL_CONFIG_PATH}/oscm.chain ]; then
-        cp -f ${SSL_CONFIG_PATH}/oscm.chain ${DOCKER_PATH}/config/certs
+        echo ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.chain
     fi
 else
-    # TODO: Only if there are no certificate and key files yet
-    mkdir ${SSL_CONFIG_PATH}/generate
-    openssl rand -base64 48 > ${SSL_CONFIG_PATH}/generate/passphrase.txt
-    openssl genrsa -aes128 -passout file:${SSL_CONFIG_PATH}/generate/passphrase.txt -out ${SSL_CONFIG_PATH}/generate/oscm.key 2048
-    openssl req -new -passin file:${SSL_CONFIG_PATH}/generate/passphrase.txt -key ${SSL_CONFIG_PATH}/generate/oscm.key -out ${SSL_CONFIG_PATH}/generate/oscm.csr -subj "/CN=${HOST_FQDN}"
-    cp ${SSL_CONFIG_PATH}/generate/oscm.key ${SSL_CONFIG_PATH}/generate/oscm.key.pass
-    openssl rsa -in ${SSL_CONFIG_PATH}/generate/oscm.key.pass -passin file:${SSL_CONFIG_PATH}/generate/passphrase.txt -out ${SSL_CONFIG_PATH}/generate/oscm.key
-    openssl x509 -req -days 3650 -in ${SSL_CONFIG_PATH}/generate/oscm.csr -signkey ${SSL_CONFIG_PATH}/generate/oscm.key -out ${SSL_CONFIG_PATH}/generate/oscm.crt
-    rm -f ${SSL_CONFIG_PATH}/generate/passphrase.txt ${SSL_CONFIG_PATH}/generate/oscm.key.pass ${SSL_CONFIG_PATH}/generate/oscm.csr
-    cp -f ${SSL_CONFIG_PATH}/generate/oscm.key ${DOCKER_PATH}/config/certs
-    cp -f ${SSL_CONFIG_PATH}/generate/oscm.crt ${DOCKER_PATH}/config/certs
-    rm -f ${SSL_CONFIG_PATH}/generate/oscm.key ${SSL_CONFIG_PATH}/generate/oscm.crt
-    rmdir ${SSL_CONFIG_PATH}/generate
+    # Generate self signed certificate if none exist yet
+    if [ ! -f ${DOCKER_PATH}/config/privkey/oscm-core/oscm.key ] && [ ! -f ${DOCKER_PATH}/config/privkey/oscm-core/oscm.crt ]; then
+        mkdir ${SSL_CONFIG_PATH}/generate
+        openssl rand -base64 48 > ${SSL_CONFIG_PATH}/generate/passphrase.txt
+        openssl genrsa -aes128 -passout file:${SSL_CONFIG_PATH}/generate/passphrase.txt -out ${SSL_CONFIG_PATH}/generate/oscm.key 2048
+        openssl req -new -passin file:${SSL_CONFIG_PATH}/generate/passphrase.txt -key ${SSL_CONFIG_PATH}/generate/oscm.key -out ${SSL_CONFIG_PATH}/generate/oscm.csr -subj "/CN=${HOST_FQDN}"
+        cp ${SSL_CONFIG_PATH}/generate/oscm.key ${SSL_CONFIG_PATH}/generate/oscm.key.pass
+        openssl rsa -in ${SSL_CONFIG_PATH}/generate/oscm.key.pass -passin file:${SSL_CONFIG_PATH}/generate/passphrase.txt -out ${SSL_CONFIG_PATH}/generate/oscm.key
+        openssl x509 -req -days 3650 -in ${SSL_CONFIG_PATH}/generate/oscm.csr -signkey ${SSL_CONFIG_PATH}/generate/oscm.key -out ${SSL_CONFIG_PATH}/generate/oscm.crt
+        rm -f ${SSL_CONFIG_PATH}/generate/passphrase.txt ${SSL_CONFIG_PATH}/generate/oscm.key.pass ${SSL_CONFIG_PATH}/generate/oscm.csr
+        echo ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/generate/oscm.key
+        echo ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/generate/oscm.crt
+        rm -f ${SSL_CONFIG_PATH}/generate/oscm.key ${SSL_CONFIG_PATH}/generate/oscm.crt
+        rmdir ${SSL_CONFIG_PATH}/generate
+    fi
 fi
 
 # Set Docker proxy
