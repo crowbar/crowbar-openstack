@@ -208,18 +208,6 @@ EOF
     systemctl restart docker
 fi
 
-# Create docker-compose files from templates
-#TODO: Will be provided by Barclamp
-envsubst '$IMAGE_DB $DB_VOLUME_DATA_SRC $IMAGE_INITDB' \
-    < ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml.template \
-    > ${DOCKER_PATH}/docker-compose-initdb.yml
-envsubst '$IMAGE_DB $DB_VOLUME_DATA_SRC $DB_PORT $IMAGE_CORE $IMAGE_APP $IMAGE_BIRT $IMAGE_BRANDING $BRANDING_VOLUME_BRANDINGS_SRC' \
-    < ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml.template \
-    > ${DOCKER_PATH}/docker-compose-oscm.yml
-envsubst '$SMTP_HOST $SMTP_PORT $SMTP_FROM $SMTP_USER $SMTP_PWD $SMTP_AUTH $SMTP_TLS $KEY_SECRET $HOST_FQDN $DB_PORT $DB_PWD_CORE $DB_PWD_JMS $DB_PWD_APP $DB_SUPERPWD $APP_ADMIN_MAIL_ADDRESS $CONTROLLER_ID $CONTROLLER_ORG_ID $CONTROLLER_USER_KEY $CONTROLLER_USER_NAME $CONTROLLER_USER_PASS $TOMEE_DEBUG' \
-    < ${COMPOSE_CONFIG_PATH}/var.env.template \
-    > ${DOCKER_PATH}/var.env
-
 # Pull images
 egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-initdb.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
 egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-oscm.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
