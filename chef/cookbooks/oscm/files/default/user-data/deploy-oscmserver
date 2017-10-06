@@ -1,96 +1,215 @@
 #!/bin/sh
-
 set -x
 set -e
-
 exec &> /var/log/setup-machine.log
 
-CONFIG_PATH=/etc/oscm/config
-SSL_CONFIG_PATH=${CONFIG_PATH}/ssl
-OSCM_CONFIG=${CONFIG_PATH}/oscm-config
+# Variables for this script
+CONFIG_BASE=/etc/oscm
+CONFIG_PATH=${CONFIG_BASE}/config
+SSL_CONFIG_PATH=${CONFIG_BASE}/ssl
+COMPOSE_CONFIG_PATH=${CONFIG_BASE}/docker-compose
+DOCKER_PATH=/docker
 
+# Fixed values; neither from oscm-config nor heat-config
+export DB_PORT=5432                         # Fixed by deployment script: 5432
+export DB_PWD_JMS=jmsuser                   # Fixed by deployment script: jmsuser
+export CONTROLLER_ORG_ID=PLATFORM_OPERATOR  # Fixed by deployment script: PLATFORM_OPERATOR
+export CONTROLLER_USER_KEY=1000             # Fixed by deployment script: 1000
+export CONTROLLER_USER_NAME=administrator   # Fixed by deployment script: administrator
+export CONTROLLER_USER_PASS=admin123        # Fixed by deployment script: admin123
+export DB_VOLUME_DATA_SRC=${DOCKER_PATH}/data/oscm-db/data
+export BRANDING_VOLUME_BRANDINGS_SRC=${DOCKER_PATH}/config/brandings
+export TOMEE_DEBUG=false
+
+# To be removed from this script
+export IMAGE_DB=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-db:soc
+export IMAGE_CORE=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-core:soc
+export IMAGE_APP=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-app:soc
+export IMAGE_BIRT=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-birt:soc
+export IMAGE_BRANDING=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-branding:soc
+export IMAGE_INITDB=artifactory.intern.est.fujitsu.com:5002/oscmdocker/oscm-initdb:soc
+export KEY_SECRET=secret                    # Generate with Barclamp (heat-config)
+export HOST_FQDN=estshimizusles.intern.est.fujitsu.com  # Operator set or generated in Barclamp (oscm-config)
+export DB_PWD_CORE=bssuser                  # Generate with Barclamp (heat-config)
+export DB_PWD_APP=bssappuser                # Generate with Barclamp (heat-config)
+export DB_SUPERPWD=postgres                  # Generate with Barclamp (heat-config)
+
+# Wait for remote copying to finish
+if [ ${CONFIG_PATH} ] && [ ${SSL_CONFIG_PATH} ] && [ ${COMPOSE_CONFIG_PATH} ]; then
+  until [ -f ${CONFIG_PATH}/finished ] && [ -f ${SSL_CONFIG_PATH}/finished ] && [ -f ${COMPOSE_CONFIG_PATH}/finished ]
+  do
+    echo "scp for oscm configuration files is not finished yet - sleeping 5s"
+    sleep 5
+  done
+  echo "scp for oscm configuration files is finished."
+fi
+
+# Enable automatic exporting of variables
+set -a
+# Read configuration files
 source ${CONFIG_PATH}/heat-config
+source ${CONFIG_PATH}/oscm-config
+# Disable automatic exporting of variables
+set +a
 
 
-if [ ${CONFIG_PATH} ]; then
-  until [ -f $CONFIG_PATH/finished ]
-  do
-    echo "scp for oscm configuration file is not finished yet sleeping 5sec."
-    sleep 5
-  done
-  echo "scp for oscm configuration file is finished."
-fi
+# TODO: add certificate to a local docker volume folder.
+# echo $SSL_CONFIG_PATH/somekey.pem > /var/web_cert
 
-if [ ${SSL_CONFIG_PATH} ]; then
-  until [ -f $SSL_CONFIG_PATH/finished ]
-  do
-    echo "scp for oscm ssl certificate is not finished yet sleeping 5sec."
-    sleep 5
-  done
-  echo "scp for oscm ssl certificate is finished."
-  # TODO: add certificate to a local docker volume folder.
-  # echo $SSL_CONFIG_PATH/somekey.pem > /var/web_cert
-fi
-
-WAIT_CURL="$WAIT_CURL --data-binary '{\"status\": \"SUCCESS\"}' --noproxy '*'"
-eval $WAIT_CURL
-
-source ${OSCM_CONFIG}
+# WAIT_CURL="$WAIT_CURL --data-binary '{\"status\": \"SUCCESS\"}' --noproxy '*'"
+# eval $WAIT_CURL
 
 # For some reason the volume id is shortened to 27 characters when the device
 # link in /dev/disk/by-id/ is created. Account for this by truncating the
 # device name accordingly.
 
-volume_dev_db=$(printf '%.43s\n' $DB_VOLUME_DEV)
-volume_dev_app=$(printf '%.43s\n' $APP_VOLUME_DEV)
+# volume_dev_db=$(printf '%.43s\n' $DB_VOLUME_DEV)
+# volume_dev_app=$(printf '%.43s\n' $APP_VOLUME_DEV)
 
 # Only format volume if it hasn't already been formatted.
 
-if ! file -Ls $volume_dev_db | grep -q "filesystem data" ; then
-    mkfs.ext4 "$volume_dev_db"
+# if ! file -Ls $volume_dev_db | grep -q "filesystem data" ; then
+#     mkfs.ext4 "$volume_dev_db"
+# fi
+# 
+# if ! file -Ls $volume_dev_app | grep -q "filesystem data" ; then
+#     mkfs.ext4 "$volume_dev_app"
+# fi
+# 
+# mkdir -p /db
+# if ! grep -qs '/db' /proc/mounts; then
+#     mount -t ext4 $volume_dev_db /db
+# fi
+# 
+# mkdir -p /oscm
+# if ! grep -qs '/oscm' /proc/mounts; then
+#     mount -t ext4 $volume_dev_app /oscm
+# fi
+
+
+# DB=/db/database
+# APP_PATH=/oscm/oscm-app/
+# OSCM_PATH=/oscm/oscm-core/
+# CLIENT_CRT_PATH=/oscm/client-crt/
+# 
+# DB_VOLUME=oscm-db-volume
+# OSCM_VOLUME=oscm-core-volume
+# APP_VOLUME=oscm-app-volume
+# 
+# mkdir -p $DB
+# mkdir -p $APP_PATH
+# mkdir -p $OSCM_PATH
+# 
+# OSCM_DIR=/opt/oscm
+# mkdir -p $OSCM_DIR
+
+# ------------------------------------------------------------------------------
+
+#TODO: If containers are running, stop them
+
+# Create Docker directories #TODO: If they do not exist yet
+mkdir -p ${DOCKER_PATH}/data/oscm-db/data
+mkdir -p ${DOCKER_PATH}/config/brandings
+mkdir -p ${DOCKER_PATH}/config/certs
+
+# Copy certificate files
+if [ ${GENERATE_CERTIFICATES} == "false" ] && [ -f ${SSL_CONFIG_PATH}/oscm.crt ] && [ -f ${SSL_CONFIG_PATH}/oscm.key ]; then
+    cp -f ${SSL_CONFIG_PATH}/oscm.crt ${DOCKER_PATH}/config/certs
+    cp -f ${SSL_CONFIG_PATH}/oscm.key ${DOCKER_PATH}/config/certs
+    if [ -f ${SSL_CONFIG_PATH}/oscm.chain ]; then
+        cp -f ${SSL_CONFIG_PATH}/oscm.chain ${DOCKER_PATH}/config/certs
+    fi
+else
+    # TODO: Only if there are no certificate and key files yet
+    mkdir ${SSL_CONFIG_PATH}/generate
+    openssl rand -base64 48 > ${SSL_CONFIG_PATH}/generate/passphrase.txt
+    openssl genrsa -aes128 -passout file:${SSL_CONFIG_PATH}/generate/passphrase.txt -out ${SSL_CONFIG_PATH}/generate/oscm.key 2048
+    openssl req -new -passin file:${SSL_CONFIG_PATH}/generate/passphrase.txt -key ${SSL_CONFIG_PATH}/generate/oscm.key -out ${SSL_CONFIG_PATH}/generate/oscm.csr -subj "/CN=${HOST_FQDN}"
+    cp ${SSL_CONFIG_PATH}/generate/oscm.key ${SSL_CONFIG_PATH}/generate/oscm.key.pass
+    openssl rsa -in ${SSL_CONFIG_PATH}/generate/oscm.key.pass -passin file:${SSL_CONFIG_PATH}/generate/passphrase.txt -out ${SSL_CONFIG_PATH}/generate/oscm.key
+    openssl x509 -req -days 3650 -in ${SSL_CONFIG_PATH}/generate/oscm.csr -signkey ${SSL_CONFIG_PATH}/generate/oscm.key -out ${SSL_CONFIG_PATH}/generate/oscm.crt
+    rm -f ${SSL_CONFIG_PATH}/generate/passphrase.txt ${SSL_CONFIG_PATH}/generate/oscm.key.pass ${SSL_CONFIG_PATH}/generate/oscm.csr
+    cp -f ${SSL_CONFIG_PATH}/generate/oscm.key ${DOCKER_PATH}/config/certs
+    cp -f ${SSL_CONFIG_PATH}/generate/oscm.crt ${DOCKER_PATH}/config/certs
+    rm -f ${SSL_CONFIG_PATH}/generate/oscm.key ${SSL_CONFIG_PATH}/generate/oscm.crt
+    rmdir ${SSL_CONFIG_PATH}/generate
 fi
 
-if ! file -Ls $volume_dev_app | grep -q "filesystem data" ; then
-    mkfs.ext4 "$volume_dev_app"
-fi
-
-mkdir -p /db
-if ! grep -qs '/db' /proc/mounts; then
-    mount -t ext4 $volume_dev_db /db
-fi
-
-mkdir -p /oscm
-if ! grep -qs '/oscm' /proc/mounts; then
-    mount -t ext4 $volume_dev_app /oscm
-fi
-
-
-OSCM_IMAGE=$REGISTRY/$OSCM_IMAGE_NAME
-APP_IMAGE=$REGISTRY/$APP_IMAGE_NAME
-DB_IMAGE=$REGISTRY/$DB_IMAGE_NAME
-DB=/db/database
-APP_PATH=/oscm/oscm-app/
-OSCM_PATH=/oscm/oscm-core/
-CLIENT_CRT_PATH=/oscm/client-crt/
-
-DB_VOLUME=oscm-db-volume
-OSCM_VOLUME=oscm-core-volume
-APP_VOLUME=oscm-app-volume
-
-mkdir -p $DB
-mkdir -p $APP_PATH
-mkdir -p $OSCM_PATH
-
-OSCM_DIR=/opt/oscm
-mkdir -p $OSCM_DIR
-
-cat > /etc/motd <<EOF
-This node has been set up as the mock server for oscm.
-You will find
-* The application config file in /oscm with a
-  timestamp appended to include redeployment every time the application.yaml
-  template is re-instantiated.
-* A persistent application data volume mounted at /oscm
-* Data directory in /db/database
-* This message in /etc/motd
+# Set Docker proxy
+if [ ${PROXY_ENABLED} == "true" ]; then
+    mkdir -p /etc/systemd/system/docker.service.d
+    if [ ${PROXY_AUTH} == "true" ]; then
+        cat <<EOF > /etc/systemd/system/docker.service.d/http-proxy.conf
+[Service]
+Environment="HTTP_PROXY=http://${PROXY_USER}:${PROXY_PWD}@${PROXY_HTTP_HOST}:${PROXY_HTTP_PORT}/" "HTTPS_PROXY=http://${PROXY_USER}:${PROXY_PWD}@${PROXY_HTTPS_HOST}:${PROXY_HTTPS_PORT}/" "NO_PROXY=${PROXY_NOPROXY}"
 EOF
+    else
+        cat <<EOF > /etc/systemd/system/docker.service.d/http-proxy.conf
+[Service]
+Environment="HTTP_PROXY=http://${PROXY_HTTP_HOST}:${PROXY_HTTP_PORT}/" "HTTPS_PROXY=http://${PROXY_HTTPS_HOST}:${PROXY_HTTPS_PORT}/" "NO_PROXY=${PROXY_NOPROXY}"
+EOF
+    fi
+    systemctl daemon-reload
+    systemctl restart docker
+    #TODO: If disabled, disable proxy
+fi
+
+# Create Docker registry authentication info
+#TODO: Change check to variable DOCKER_REGISTRY_AUTH
+if [ ! -z ${DOCKER_REGISTRY_USER} ] && [ ! -z ${DOCKER_REGISTRY_PWD} ]; then
+    #Create auth file for Docker registry
+    REGISTRY_USER_PASS_BASE64=$(printf "${DOCKER_REGISTRY_USER}:${DOCKER_REGISTRY_PWD}" | base64)
+    mkdir -p /root/.docker
+    cat <<EOF > /root/.docker/config.json
+{
+        "auths": {
+                "${DOCKER_REGISTRY_HOST}:${DOCKER_REGISTRY_PORT}": {
+                        "auth": "${REGISTRY_USER_PASS_BASE64}"
+                }
+        }
+}
+EOF
+#TODO: If false, remove auth file
+fi
+
+# Prepare Docker image registry variable
+if [ ${DOCKER_REGISTRY_DOCKERHUB} = "true" ]; then
+    DOCKER_IMAGES_SOURCE="${DOCKER_REGISTRY_ORGANIZATION}/"
+    #TODO: Remove daemon.json
+else
+    DOCKER_IMAGES_SOURCE="${DOCKER_REGISTRY_HOST}:${DOCKER_REGISTRY_PORT}/${DOCKER_REGISTRY_ORGANIZATION}/"
+    cat <<EOF > /etc/docker/daemon.json
+{
+  "insecure-registries" : ["${DOCKER_REGISTRY_HOST}:${DOCKER_REGISTRY_PORT}"]
+}
+EOF
+    systemctl restart docker
+fi
+
+# Create docker-compose files from templates
+#TODO: Will be provided by Barclamp
+envsubst '$IMAGE_DB $DB_VOLUME_DATA_SRC $IMAGE_INITDB' \
+    < ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml.template \
+    > ${DOCKER_PATH}/docker-compose-initdb.yml
+envsubst '$IMAGE_DB $DB_VOLUME_DATA_SRC $DB_PORT $IMAGE_CORE $IMAGE_APP $IMAGE_BIRT $IMAGE_BRANDING $BRANDING_VOLUME_BRANDINGS_SRC' \
+    < ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml.template \
+    > ${DOCKER_PATH}/docker-compose-oscm.yml
+envsubst '$SMTP_HOST $SMTP_PORT $SMTP_FROM $SMTP_USER $SMTP_PWD $SMTP_AUTH $SMTP_TLS $KEY_SECRET $HOST_FQDN $DB_PORT $DB_PWD_CORE $DB_PWD_JMS $DB_PWD_APP $DB_SUPERPWD $APP_ADMIN_MAIL_ADDRESS $CONTROLLER_ID $CONTROLLER_ORG_ID $CONTROLLER_USER_KEY $CONTROLLER_USER_NAME $CONTROLLER_USER_PASS $TOMEE_DEBUG' \
+    < ${COMPOSE_CONFIG_PATH}/var.env.template \
+    > ${DOCKER_PATH}/var.env
+
+# Pull images
+egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-initdb.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
+egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-oscm.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
+
+# Initialize databases
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up -d oscm-db
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-core
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-jms
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-app
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-controller-openstack
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml stop
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml rm -f
+
+# Start application containers
+docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml up -d
