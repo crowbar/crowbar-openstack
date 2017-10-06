@@ -287,6 +287,25 @@ ruby_block "get_oscm_floating_ip" do
     action :create
 end
 
+ruby_block "get_oscm_secrets" do
+    block do
+      Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
+      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell --variable output_value #{oscm_instancestack_name} db_password | grep -Po '(?<=^output_value=\")[^\"]*'"
+      command_out = shell_out(command)
+      node[:oscm][:openstack][:instance_stack][:db_password] = command_out.stdout.strip
+      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell --variable output_value #{oscm_instancestack_name} db_core_password | grep -Po '(?<=^output_value=\")[^\"]*'"
+      command_out = shell_out(command)
+      node[:oscm][:openstack][:instance_stack][:db_core_password] = command_out.stdout.strip
+      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell --variable output_value #{oscm_instancestack_name} db_app_password | grep -Po '(?<=^output_value=\")[^\"]*'"
+      command_out = shell_out(command)
+      node[:oscm][:openstack][:instance_stack][:db_app_password] = command_out.stdout.strip
+      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell --variable output_value #{oscm_instancestack_name} key_secret | grep -Po '(?<=^output_value=\")[^\"]*'"
+      command_out = shell_out(command)
+      node[:oscm][:openstack][:instance_stack][:key_secret] = command_out.stdout.strip
+    end
+    action :create
+end
+
 template "#{oscm_install_path}/user-data/oscm-config" do
   source "oscm.conf.erb"
   owner oscm_group
@@ -301,19 +320,55 @@ template "#{oscm_install_path}/user-data/oscm-config" do
   )
 end
 
+template "#{oscm_install_path}/docker-compose-initdb.yml" do
+  source "docker-compose-initdb.yml.erb"
+  owner oscm_group
+  group oscm_group
+  mode 0640
+  variables(
+    docker: node[:oscm][:docker]
+  )
+end
+
+template "#{oscm_install_path}/docker-compose-oscm.yml" do
+  source "docker-compose-oscm.yml.erb"
+  owner oscm_group
+  group oscm_group
+  mode 0640
+  variables(
+    docker: node[:oscm][:docker]
+  )
+end
+
+template "#{oscm_install_path}/var.env" do
+  source "var.env.erb"
+  owner oscm_group
+  group oscm_group
+  mode 0640
+  variables(
+    mail: node[:oscm][:mail],
+    docker: node[:oscm][:docker],
+    proxy: node[:oscm][:proxy],
+    host_fqdn: node[:oscm][:host_fqdn],
+    instance: node[:oscm][:openstack][:instance_stack]
+  )
+end
+
 bash "inject oscm configuration and certificates" do
   code <<-EOH
     ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_config_path}" || true
     scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/user-data/oscm-config ${ip_appserver}:#{oscm_config_path} || true
     scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/user-data/deploy-oscmserver ${ip_appserver}:#{oscm_config_path} || true
     ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/finished"
+    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/docker-compose-initdb.yml ${ip_appserver}:#{oscm_config_path}/docker-compose || true
+    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/docker-compose-oscm.yml ${ip_appserver}:#{oscm_config_path}/docker-compose || true
+    ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/docker-compose/finished"    
     if [ -f #{oscm_ssl_certfile} ]; 
     then
       ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_config_path}/ssl/" || true
-      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_certfile} ${ip_appserver}:#{oscm_config_path}/ssl || true
-      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_certfile} ${ip_appserver}:#{oscm_config_path}/ssl || true
-      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_keyfile} ${ip_appserver}:#{oscm_config_path}/ssl || true
-      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_cacerts} ${ip_appserver}:#{oscm_config_path}/ssl || true
+      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_certfile} ${ip_appserver}:#{oscm_config_path}/ssl/oscm.crt || true
+      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_keyfile} ${ip_appserver}:#{oscm_config_path}/ssl/oscm.key || true
+      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_cacerts} ${ip_appserver}:#{oscm_config_path}/ssl/oscm.chain || true
       ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/ssl/finished"
     fi
   EOH

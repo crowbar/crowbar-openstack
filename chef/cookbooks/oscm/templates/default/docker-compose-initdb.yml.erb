@@ -1,0 +1,71 @@
+version: "3"
+services:
+  oscm-db:
+<% if @docker["dockerhub"] == true %>  
+    image: <%= @docker["organization"]/oscm-db:@docker["tag"] %>
+<% else %>
+    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-db:@docker["tag"]%>
+<% end %>
+    container_name: oscm-db
+    volumes:
+      - /docker/data/oscm-db/data:/var/lib/postgresql/data
+
+  oscm-initdb-core:
+<% if @docker["dockerhub"] == true %>  
+    image: <%= @docker["organization"]/oscm-initdb-core:@docker["tag"] %>
+<% else %>
+    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-initdb-core:@docker["tag"]%>
+<% end %>
+    container_name: oscm-initdb-core
+    env_file: var.env
+    environment:
+      - TARGET=CORE
+      - SOURCE=INIT
+      - OVERWRITE=true
+    links:
+      - oscm-db:oscm-db
+      
+  oscm-initdb-jms:
+<% if @docker["dockerhub"] == true %>  
+    image: <%= @docker["organization"]/oscm-initdb-jms:@docker["tag"] %>
+<% else %>
+    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-initdb-jms:@docker["tag"]%>
+<% end %>
+    container_name: oscm-initdb-jms
+    env_file: var.env
+    environment:
+      - TARGET=JMS
+      - SOURCE=INIT
+      - OVERWRITE=true
+    links:
+      - oscm-db:oscm-db
+      
+  oscm-initdb-app:
+<% if @docker["dockerhub"] == true %>  
+    image: <%= @docker["organization"]/oscm-initdb-app:@docker["tag"] %>
+<% else %>
+    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-initdb-app:@docker["tag"]%>
+<% end %>
+    container_name: oscm-initdb-app
+    env_file: var.env
+    environment:
+      - TARGET=APP
+      - SOURCE=INIT
+      - OVERWRITE=true
+    links:
+      - oscm-db:oscm-db
+      
+  oscm-initdb-controller-openstack:
+<% if @docker["dockerhub"] == true %>  
+    image: <%= @docker["organization"]/oscm-initdb-controller-openstack:@docker["tag"] %>
+<% else %>
+    image: <%= @docker["host"]:@docker["port"]/@docker["organization"]/oscm-initdb-controller-openstack:@docker["tag"]%>
+<% end %>
+    container_name: oscm-initdb-controller-openstack
+    env_file: var.env
+    environment:
+      - TARGET=CONTROLLER
+      - SOURCE=NONE
+      - OVERWRITE=true
+    links:
+      - oscm-db:oscm-db

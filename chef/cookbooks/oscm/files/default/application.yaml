@@ -224,3 +224,23 @@ outputs:
       get_attr:
         - ip_appserver
         - floating_ip_address
+  db_password:
+     value:
+       get_attr:
+          - db_password
+          - value
+  db_core_password:
+     value:
+       get_attr:
+          - db_core_password
+          - value
+  db_app_password:
+     value:
+       get_attr:
+          - db_app_password
+          - value
+  key_secret:
+     value:
+       get_attr:
+          - key_secret
+          - value
