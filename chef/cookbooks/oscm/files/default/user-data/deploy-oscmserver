@@ -13,16 +13,6 @@ SSL_CONFIG_PATH=${CONFIG_BASE}/ssl
 COMPOSE_CONFIG_PATH=${CONFIG_BASE}/docker-compose
 DOCKER_PATH=/docker
 
-# Wait for remote copying to finish
-if [ ${CONFIG_PATH} ] && [ ${SSL_CONFIG_PATH} ] && [ ${COMPOSE_CONFIG_PATH} ]; then
-  until [ -f ${CONFIG_PATH}/finished ] && [ -f ${SSL_CONFIG_PATH}/finished ] && [ -f ${COMPOSE_CONFIG_PATH}/finished ]
-  do
-    echo "scp for oscm configuration files is not finished yet - sleeping 5s"
-    sleep 5
-  done
-  echo "scp for oscm configuration files is finished."
-fi
-
 # Enable automatic exporting of variables
 set -a
 # Read configuration files
