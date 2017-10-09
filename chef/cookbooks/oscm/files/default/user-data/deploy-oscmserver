@@ -87,6 +87,14 @@ for docker_directory in ${DOCKER_PATH}/data/oscm-db/data ${DOCKER_PATH}/config/b
     fi
 done
 
+# Copy Docker Compose files
+if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml ]; then
+    cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml ${DOCKER_PATH}/docker-compose-initdb.yml
+fi
+if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml ]; then
+    cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml ${DOCKER_PATH}/docker-compose-oscm.yml
+fi
+
 # Copy certificate files
 if [ ${GENERATE_CERTIFICATES} == "false" ] && [ -f ${SSL_CONFIG_PATH}/oscm.crt ] && [ -f ${SSL_CONFIG_PATH}/oscm.key ]; then
     echo ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.key
