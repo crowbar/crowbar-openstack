@@ -448,9 +448,9 @@ if node[:neutron][:create_default_networks]
   # take a long time. Otherwise, the founder node will be delayed and
   # might produce pacemaker sync timeouts in other recipes where such
   # a big delay isn't expected (e.g. the network_agents recipe).
-  crowbar_pacemaker_sync_mark "wait sync mark for neutron default networks" do
+  crowbar_pacemaker_sync_mark "sync mark for neutron default networks" do
     mark "neutron_default_networks"
-    action :wait
+    action :sync
     timeout 180
     only_if { ha_enabled }
   end
