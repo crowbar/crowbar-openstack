@@ -48,7 +48,6 @@ service node[:network][:ovs_service] do
   supports status: true, restart: true
   action [:start, :enable]
 end
-utils_systemd_service_restart node[:network][:ovs_service]
 
 node[:neutron][:platform][:nsx_pkgs].each { |p| package p }
 
