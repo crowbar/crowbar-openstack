@@ -33,16 +33,12 @@ my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:cinder][:api]
 
 crowbar_pacemaker_sync_mark "wait-cinder_register"
 
-register_auth_hash = { user: keystone_settings["admin_user"],
-                       password: keystone_settings["admin_password"],
-                       project: keystone_settings["admin_project"] }
-
 keystone_register "cinder api wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   action :wakeup
 end
 
@@ -51,7 +47,7 @@ keystone_register "register cinder user" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
   project_name keystone_settings["service_tenant"]
@@ -63,7 +59,7 @@ keystone_register "give cinder user access" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name keystone_settings["service_user"]
   project_name keystone_settings["service_tenant"]
   role_name "admin"
@@ -75,7 +71,7 @@ keystone_register "register cinder service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   service_name "cinder"
   service_type "volume"
   service_description "Openstack Cinder Service"
@@ -87,7 +83,7 @@ keystone_register "register cinder endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   endpoint_service "cinder"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{cinder_protocol}://"\
@@ -104,7 +100,7 @@ keystone_register "register cinder service v2" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   service_name "cinderv2"
   service_type "volumev2"
   service_description "Openstack Cinder Service V2"
@@ -116,7 +112,7 @@ keystone_register "register cinder endpoint v2" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   endpoint_service "cinderv2"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{cinder_protocol}://"\
@@ -133,7 +129,7 @@ keystone_register "register cinder service v3" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   service_name "cinderv3"
   service_type "volumev3"
   service_description "Openstack Cinder Service V3"
@@ -145,7 +141,7 @@ keystone_register "register cinder endpoint v3" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   endpoint_service "cinderv3"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{cinder_protocol}://"\

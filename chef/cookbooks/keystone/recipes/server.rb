@@ -233,10 +233,6 @@ sql_connection = fetch_database_connection_string(node[:keystone][:db])
 # node[:keystone][:token_expiration] is in seconds and has to be encoded to hours
 max_active_keys = (node[:keystone][:token_expiration].to_f / 3600).ceil + 2
 
-register_auth_hash = { user: node[:keystone][:admin][:username],
-                       password: node[:keystone][:admin][:password],
-                       project: node[:keystone][:admin][:project] }
-
 if node[:keystone].key?(:endpoint)
   endpoint_protocol = node[:keystone][:endpoint][:protocol]
   endpoint_insecure = node[:keystone][:endpoint][:insecure]
@@ -250,6 +246,12 @@ end
 
 endpoint_host = my_admin_host
 
+register_auth_hash = { user: node[:keystone][:admin][:username],
+                       password: node[:keystone][:admin][:password],
+                       project: node[:keystone][:admin][:project] }
+node[:keystone][:admin][:credentials] = register_auth_hash
+node.save
+
 # Update keystone endpoints (in case we switch http/https this will update the
 # endpoints to the correct ones). This needs to be done _before_ we switch
 # protocols on the keystone api.
@@ -258,7 +260,7 @@ keystone_register "update keystone endpoint" do
   insecure endpoint_insecure
   host endpoint_host
   port endpoint_port
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   endpoint_service "keystone"
   endpoint_region node[:keystone][:api][:region]
   endpoint_adminURL KeystoneHelper.admin_auth_url(node, my_admin_host)
@@ -494,10 +496,6 @@ execute "keystone-manage bootstrap" do
   end
 end
 
-register_auth_hash = { user: node[:keystone][:admin][:username],
-                       password: node[:keystone][:admin][:password],
-                       project: node[:keystone][:admin][:project] }
-
 updated_password = node[:keystone][:admin][:updated_password]
 
 unless updated_password.nil? ||
@@ -510,7 +508,7 @@ unless updated_password.nil? ||
       insecure keystone_insecure
       host my_admin_host
       port node[:keystone][:api][:admin_port]
-      auth register_auth_hash
+      auth lazy { node[:keystone][:admin][:credentials] }
       user_name node[:keystone][:admin][:username]
       user_password updated_password
       project_name node[:keystone][:admin][:project]
@@ -520,9 +518,10 @@ unless updated_password.nil? ||
 
   ruby_block "update admin password on node attributes" do
     block do
-      node.set[:keystone][:admin][:password] = updated_password
-      node.save
       register_auth_hash[:password] = updated_password
+      node.set[:keystone][:admin][:password] = updated_password
+      node.set[:keystone][:admin][:credentials] = register_auth_hash
+      node.save
     end
     action :nothing
   end.run_action(:create)
@@ -535,7 +534,7 @@ keystone_register "wakeup keystone" do
   insecure keystone_insecure
   host my_admin_host
   port node[:keystone][:api][:admin_port]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   retries 5
   retry_delay 10
   action :wakeup
@@ -562,7 +561,7 @@ end
     insecure keystone_insecure
     host my_admin_host
     port node[:keystone][:api][:admin_port]
-    auth register_auth_hash
+    auth lazy { node[:keystone][:admin][:credentials] }
     project_name project
     action :add_project
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -576,7 +575,7 @@ if node[:keystone][:domain_specific_drivers]
       insecure keystone_insecure
       host my_admin_host
       port node[:keystone][:api][:admin_port]
-      auth register_auth_hash
+      auth lazy { node[:keystone][:admin][:credentials] }
       domain_name domain
       action :add_domain
       only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -590,7 +589,7 @@ keystone_register "add default admin role for domain default" do
   insecure keystone_insecure
   host my_admin_host
   port node[:keystone][:api][:admin_port]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name node[:keystone][:admin][:username]
   role_name "admin"
   domain_name "Default"
@@ -605,7 +604,7 @@ if node[:keystone][:default][:create_user]
     insecure keystone_insecure
     host my_admin_host
     port node[:keystone][:api][:admin_port]
-    auth register_auth_hash
+    auth lazy { node[:keystone][:admin][:credentials] }
     user_name node[:keystone][:default][:username]
     user_password node[:keystone][:default][:password]
     project_name node[:keystone][:default][:project]
@@ -620,7 +619,7 @@ keystone_register "add default Member role" do
   insecure keystone_insecure
   host my_admin_host
   port node[:keystone][:api][:admin_port]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   role_name "Member"
   action :add_role
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
@@ -642,7 +641,7 @@ user_roles.each do |args|
     insecure keystone_insecure
     host my_admin_host
     port node[:keystone][:api][:admin_port]
-    auth register_auth_hash
+    auth lazy { node[:keystone][:admin][:credentials] }
     user_name args[0]
     role_name args[1]
     project_name args[2]
@@ -664,7 +663,7 @@ ec2_creds.each do |args|
     protocol node[:keystone][:api][:protocol]
     insecure keystone_insecure
     host my_admin_host
-    auth register_auth_hash
+    auth lazy { node[:keystone][:admin][:credentials] }
     port node[:keystone][:api][:admin_port]
     user_name args[0]
     project_name args[1]

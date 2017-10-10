@@ -88,10 +88,6 @@ crowbar_pacemaker_sync_mark "create-ec2_api_database" if ha_enabled
 rabbit_settings = fetch_rabbitmq_settings "nova"
 keystone_settings = KeystoneHelper.keystone_settings(node, "nova")
 
-register_auth_hash = { user: keystone_settings["admin_user"],
-                       password: keystone_settings["admin_password"],
-                       project: keystone_settings["admin_project"] }
-
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, ssl_enabled, ha_enabled)
 
@@ -102,7 +98,7 @@ keystone_register "register ec2 user" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
   project_name keystone_settings["service_tenant"]
@@ -114,7 +110,7 @@ keystone_register "give ec2 user access" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name keystone_settings["service_user"]
   project_name keystone_settings["service_tenant"]
   role_name "admin"
@@ -127,7 +123,7 @@ keystone_register "register ec2-api service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   service_name "ec2-api"
   service_type "ec2"
   service_description "EC2 Compatibility Layer"
@@ -139,7 +135,7 @@ keystone_register "register ec2-api endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   endpoint_service "ec2-api"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{api_protocol}://#{my_public_host}:#{ec2_api_port}"
@@ -154,7 +150,7 @@ keystone_register "register ec2-metadata service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   service_name "ec2-metadata"
   service_type "ec2"
   service_description "EC2 Compatibility Layer"
@@ -166,7 +162,7 @@ keystone_register "register ec2-metadata endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   endpoint_service "ec2-metadata"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{api_protocol}://#{my_public_host}:#{ec2_metadata_port}"

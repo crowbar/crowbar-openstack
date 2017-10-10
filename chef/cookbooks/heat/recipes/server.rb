@@ -118,16 +118,12 @@ db_connection = fetch_database_connection_string(node[:heat][:db])
 
 crowbar_pacemaker_sync_mark "wait-heat_register" if ha_enabled
 
-register_auth_hash = { user: keystone_settings["admin_user"],
-                       password: keystone_settings["admin_password"],
-                       project: keystone_settings["admin_project"] }
-
 keystone_register "heat wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   action :wakeup
 end
 
@@ -136,7 +132,7 @@ keystone_register "register heat user" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
   project_name keystone_settings["service_tenant"]
@@ -148,7 +144,7 @@ keystone_register "give heat user access" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name keystone_settings["service_user"]
   project_name keystone_settings["service_tenant"]
   role_name "admin"
@@ -160,7 +156,7 @@ keystone_register "add heat stack user role" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   role_name "heat_stack_user"
   action :add_role
 end
@@ -171,7 +167,7 @@ node[:heat][:trusts_delegated_roles].each do |role|
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    auth register_auth_hash
+    auth lazy { node[:keystone][:admin][:credentials] }
     role_name role
     action :add_role
   end
@@ -181,7 +177,7 @@ node[:heat][:trusts_delegated_roles].each do |role|
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    auth register_auth_hash
+    auth lazy { node[:keystone][:admin][:credentials] }
     user_name keystone_settings["admin_user"]
     project_name keystone_settings["default_tenant"]
     role_name role
@@ -280,7 +276,7 @@ bash "register heat domain" do
   EOF
   environment ({
     "OS_USERNAME" => keystone_settings["admin_user"],
-    "OS_PASSWORD" => keystone_settings["admin_password"],
+    "OS_PASSWORD" => node[:keystone][:admin][:password],
     "OS_TENANT_NAME" => keystone_settings["admin_tenant"],
     "OS_AUTH_URL" => "#{keystone_settings['protocol']}://#{keystone_settings['internal_url_host']}:#{keystone_settings['service_port']}/v3",
     "OS_REGION_NAME" => keystone_settings["endpoint_region"],
@@ -294,7 +290,7 @@ keystone_register "register Heat CloudFormation Service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   service_name "heat-cfn"
   service_type "cloudformation"
   service_description "Heat CloudFormation Service"
@@ -306,7 +302,7 @@ keystone_register "register heat Cfn endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   endpoint_service "heat-cfn"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1"
@@ -321,7 +317,7 @@ keystone_register "register Heat Service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   service_name "heat"
   service_type "orchestration"
   service_description "Heat Service"
@@ -333,7 +329,7 @@ keystone_register "register heat endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   endpoint_service "heat"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{node[:heat][:api][:protocol]}://"\
@@ -355,7 +351,7 @@ ruby_block "get stack user domain" do
     url = "#{keystone_settings["protocol"]}://#{keystone_settings["internal_url_host"]}"
     url << ":#{keystone_settings["service_port"]}/v3"
     env = "OS_USERNAME='#{keystone_settings["admin_user"]}' "
-    env << "OS_PASSWORD='#{keystone_settings["admin_password"]}' "
+    env << "OS_PASSWORD='#{node[:keystone][:admin][:password]}' "
     env << "OS_PROJECT_NAME='#{keystone_settings["admin_tenant"]}' "
     env << "OS_AUTH_URL='#{url}' "
     env << "OS_REGION_NAME='#{keystone_settings["endpoint_region"]}' "

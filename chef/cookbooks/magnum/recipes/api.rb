@@ -31,16 +31,12 @@ my_public_host = CrowbarHelper.get_host_for_public_url(
 
 crowbar_pacemaker_sync_mark "wait-magnum_register" if ha_enabled
 
-register_auth_hash = { user: keystone_settings["admin_user"],
-                       password: keystone_settings["admin_password"],
-                       project: keystone_settings["admin_project"] }
-
 keystone_register "magnum api wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   action :wakeup
 end
 
@@ -49,7 +45,7 @@ keystone_register "register magnum user" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
   project_name keystone_settings["service_tenant"]
@@ -61,7 +57,7 @@ keystone_register "give magnum user access" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name keystone_settings["service_user"]
   project_name keystone_settings["service_tenant"]
   role_name "admin"
@@ -73,7 +69,7 @@ keystone_register "register magnum service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   service_name "magnum"
   service_type "container-infra"
   service_description "Container Infrastructure Management Service"
@@ -85,7 +81,7 @@ keystone_register "register magnum endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   endpoint_service "magnum"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{magnum_protocol}://"\

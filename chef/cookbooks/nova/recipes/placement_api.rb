@@ -36,16 +36,12 @@ api_protocol = node[:nova][:ssl][:enabled] ? "https" : "http"
 
 crowbar_pacemaker_sync_mark "wait-nova-placement_register" if api_ha_enabled
 
-register_auth_hash = { user: keystone_settings["admin_user"],
-                       password: keystone_settings["admin_password"],
-                       project: keystone_settings["admin_project"] }
-
 keystone_register "register placement user '#{node["nova"]["placement_service_user"]}'" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name node["nova"]["placement_service_user"]
   user_password node["nova"]["placement_service_password"]
   project_name keystone_settings["service_tenant"]
@@ -57,7 +53,7 @@ keystone_register "give placement user '#{node["nova"]["placement_service_user"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name node["nova"]["placement_service_user"]
   project_name keystone_settings["service_tenant"]
   role_name "admin"
@@ -69,7 +65,7 @@ keystone_register "register placement service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   service_name "placement"
   service_type "placement"
   service_description "Openstack Placement Service"
@@ -81,7 +77,7 @@ keystone_register "register placement endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   endpoint_service "placement"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL "#{api_protocol}://#{public_api_host}:#{api_port}"
