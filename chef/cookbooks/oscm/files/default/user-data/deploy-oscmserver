@@ -75,17 +75,57 @@ set +a
 # ------------------------------------------------------------------------------
 
 # If containers are running, stop them
-if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml ps -q | wc -l) != "0"]; then
-    docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml stop
-    docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml rm -f
+if [ -f ${DOCKER_PATH}/docker-compose-oscm.yml]; then
+    if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml ps -q | wc -l) != "0"]; then
+        docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml stop
+        docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml rm -f
+    fi
 fi
 
 # Create Docker directories if they do not exist yet
-for docker_directory in ${DOCKER_PATH}/data/oscm-db/data ${DOCKER_PATH}/config/brandings ${DOCKER_PATH}/config/certs ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding; do
-    if [ ! -d $docker_directory ]; then
-        mkdir -p $docker_directory
+for docker_directory in \
+    ${DOCKER_PATH}/data/oscm-db/data \
+    ${DOCKER_PATH}/config/brandings\
+    ${DOCKER_PATH}/config/certs \
+    ${DOCKER_PATH}/config/privkey/oscm-core \
+    ${DOCKER_PATH}/config/privkey/oscm-app \
+    ${DOCKER_PATH}/config/privkey/oscm-birt \
+    ${DOCKER_PATH}/config/privkey/oscm-branding \
+    ${DOCKER_PATH}/logs/oscm-app \
+    ${DOCKER_PATH}/logs/oscm-birt \
+    ${DOCKER_PATH}/logs/oscm-branding \
+    ${DOCKER_PATH}/logs/oscm-core \
+    ${DOCKER_PATH}/logs/oscm-db; do
+    if [ ! -d ${docker_directory} ]; then
+        mkdir -p ${docker_directory}
     fi
 done
+
+# Create Docker log files if they do not exist yet
+for docker_log_file in \
+    ${DOCKER_PATH}/logs/oscm-app/oscm-app.out.log \
+    ${DOCKER_PATH}/logs/oscm-birt/oscm-birt.out.log \
+    ${DOCKER_PATH}/logs/oscm-branding/oscm-branding.out.log \
+    ${DOCKER_PATH}/logs/oscm-core/oscm-core.out.log \
+    ${DOCKER_PATH}/logs/oscm-db/oscm-db.out.log; do
+    if [ ! -f {docker_log_file} ]; then
+        touch ${docker_log_file}
+        chmod 640 ${docker_log_file}
+    fi
+done
+
+# Create rsyslog configuration for Docker log files
+if [ ! -f /etc/rsyslog.d/oscm.conf ]; then
+    cat <<EOF > /etc/rsyslog.d/oscm.conf
+local0.*        /docker/logs/oscm-db/oscm-db.out.log
+local1.*        /docker/logs/oscm-core/oscm-core.out.log
+local2.*        /docker/logs/oscm-app/oscm-app.out.log
+local3.*        /docker/logs/oscm-birt/oscm-birt.out.log
+local4.*        /docker/logs/oscm-branding/oscm-branding.out.log
+EOF
+    sed -i '/^local/d' /etc/rsyslog.conf
+    systemctl restart rsyslog
+fi
 
 # Copy Docker Compose files
 if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml ]; then
@@ -122,7 +162,7 @@ fi
 
 # If http proxy is enabled, create Docker config file
 if [ ${PROXY_ENABLED} == "true" ]; then
-    if [ ! -d /etc/systemd/system/docker.service.d]; then
+    if [ ! -d /etc/systemd/system/docker.service.d ]; then
         mkdir -p /etc/systemd/system/docker.service.d
     fi
     if [ ${PROXY_AUTH} == "true" ]; then
@@ -140,6 +180,7 @@ EOF
     systemctl restart docker
 # Otherwise remove Docker config file with proxy config
 else
+    echo NOPE
     if [ -f /etc/systemd/system/docker.service.d/http-proxy.conf ]; then
         rm -f /etc/systemd/system/docker.service.d/http-proxy.conf
         systemctl daemon-reload
