@@ -6,8 +6,8 @@ touch /etc/oscm/config/heat-config
 chmod 400 /etc/oscm/config/heat-config
 
 cat > /etc/oscm/config/heat-config <<EOF
-APP_VOLUME_DEV=$APP_VOLUME_DEV
-DB_VOLUME_DEV=$DB_VOLUME_DEV
+LOGS_VOLUME_DEV=$LOGS_VOLUME_DEV
+DATA_VOLUME_DEV=$DATA_VOLUME_DEV
 EOF
 
 CERT_STR="$SSH_CERT"

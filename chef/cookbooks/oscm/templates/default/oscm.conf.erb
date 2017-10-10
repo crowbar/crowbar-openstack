@@ -20,9 +20,6 @@ DOCKER_REGISTRY_PWD=<%= @docker["password"] %>
 DOCKER_OSCM_TAG=<%= @docker["tag"] %>
 
 #host
-<% if @host_fqdn.strip.empty? -%>
-HOST_FQDN=<%= @instance["ip_appserver"] %>
-<% else %>
 HOST_FQDN=<%= @host_fqdn %>
-<% end %>
+
    

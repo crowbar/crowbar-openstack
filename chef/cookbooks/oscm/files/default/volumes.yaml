@@ -3,45 +3,45 @@ heat_template_version: 2015-10-15
 
 
 parameters:
-  app_size:
+  logs_size:
     type: number
     default: 1
-    description: Size of the application volume in gigabytes
-  db_size:
+    description: Size of the logs volume in gigabytes
+  data_size:
     type: number
     default: 1
-    description: Size of the database volume in gigabytes
+    description: Size of the data volume in gigabytes
 
 
 resources:
 
-  app_volume:
+  logs_volume:
     type: OS::Cinder::Volume
     properties:
       name:
         list_join:
           - "_"
           - - { get_param: 'OS::stack_name' }
-            - app_volume
-      size: { get_param: app_size }
+            - logs_volume
+      size: { get_param: logs_size }
 
-  db_volume:
+  data_volume:
     type: OS::Cinder::Volume
     properties:
       name:
         list_join:
           - "_"
           - - { get_param: 'OS::stack_name' }
-            - db_volume
-      size: { get_param: db_size }
+            - data_volume
+      size: { get_param: data_size }
 
 outputs:
   # Retrieval after stack creation (presuming stack is named `oscm`): 
-  # heat output-show oscm app_volume_id
-  app_volume_id:
-    value: { get_resource: app_volume }
+  # heat output-show oscm logs_volume_id
+  logs_volume_id:
+    value: { get_resource: logs_volume }
 
   # Retrieval after stack creation (presuming stack is named `oscm`): 
-  # heat output-show oscm db_volume_id
-  db_volume_id:
-    value: { get_resource: db_volume }
+  # heat output-show oscm data_volume_id
+  data_volume_id:
+    value: { get_resource: data_volume }

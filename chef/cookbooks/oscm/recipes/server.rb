@@ -31,8 +31,8 @@ oscm_install_path = "/etc/oscm/install"
 oscm_config_path = "/etc/oscm/config"
 oscm_volumestack_name = node[:oscm][:openstack][:volume_stack][:stack_name]
 oscm_instancestack_name = node[:oscm][:openstack][:instance_stack][:stack_name]
-oscm_db_volume_size = node[:oscm][:openstack][:volume_stack][:db_volume_size]
-oscm_app_volume_size = node[:oscm][:openstack][:volume_stack][:app_volume_size]
+oscm_data_volume_size = node[:oscm][:openstack][:volume_stack][:data_volume_size]
+oscm_logs_volume_size = node[:oscm][:openstack][:volume_stack][:logs_volume_size]
 oscm_image = node[:oscm][:openstack][:image]
 oscm_docker_host = node[:oscm][:docker][:host]
 oscm_docker_port = node[:oscm][:docker][:port]
@@ -236,7 +236,7 @@ cookbook_file "#{oscm_install_path}/user-data/deploy-oscmserver" do
 end
 
 execute "create_oscm_volume_stack" do
-  command "#{openstack_cmd} #{openstack_args_heat} stack create --parameter db_size=#{oscm_db_volume_size} --parameter app_size=#{oscm_app_volume_size} \
+  command "#{openstack_cmd} #{openstack_args_heat} stack create --parameter data_size=#{oscm_data_volume_size} --parameter logs_size=#{oscm_logs_volume_size} \
   -t #{oscm_install_path}/volumes.yaml --wait #{oscm_volumestack_name}"
   not_if "#{openstack_cmd} #{openstack_args_heat} stack list -c 'Stack Name' -f value | egrep -q '^#{oscm_volumestack_name}$'"
 end
@@ -244,12 +244,12 @@ end
 ruby_block "get_oscm_volume_ids" do
     block do
       Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
-      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell #{oscm_volumestack_name} db_volume_id | grep -Po '(?<=^output_value=\")[^\"]*'"
+      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell #{oscm_volumestack_name} data_volume_id | grep -Po '(?<=^output_value=\")[^\"]*'"
       command_out = shell_out(command)
-      node[:oscm][:openstack][:volume_stack][:db_volume_id] = command_out.stdout.strip
-      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell #{oscm_volumestack_name} app_volume_id | grep -Po '(?<=^output_value=\")[^\"]*'"
+      node[:oscm][:openstack][:volume_stack][:data_volume_id] = command_out.stdout.strip
+      command = "#{openstack_cmd} #{openstack_args_heat} stack output show -f shell #{oscm_volumestack_name} logs_volume_id | grep -Po '(?<=^output_value=\")[^\"]*'"
       command_out = shell_out(command)
-      node[:oscm][:openstack][:volume_stack][:app_volume_id] = command_out.stdout.strip
+      node[:oscm][:openstack][:volume_stack][:logs_volume_id] = command_out.stdout.strip
     end
     action :create
 end
@@ -266,8 +266,8 @@ ruby_block "generate_oscm_crowbar_ssh_keys" do
 end
 
 execute "create_oscm_instance_stack" do
-  command lazy { "#{openstack_cmd} #{openstack_args_heat} stack create --parameter app_volume_id=#{node[:oscm][:openstack][:volume_stack][:app_volume_id]} \
-  --parameter db_volume_id=#{node[:oscm][:openstack][:volume_stack][:db_volume_id]} \
+  command lazy { "#{openstack_cmd} #{openstack_args_heat} stack create --parameter logs_volume_id=#{node[:oscm][:openstack][:volume_stack][:logs_volume_id]} \
+  --parameter data_volume_id=#{node[:oscm][:openstack][:volume_stack][:data_volume_id]} \
   --parameter image=#{oscm_image} --parameter flavor=#{oscm_flavor_name} \
   --parameter mail_port=#{oscm_mail_port} --parameter registry_port=#{oscm_docker_port} \
   --parameter-file ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub \

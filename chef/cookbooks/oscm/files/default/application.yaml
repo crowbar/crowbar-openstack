@@ -1,4 +1,4 @@
-# heat stack-create --poll -f application.yaml -P app_volume_id=$app_volume_id -P db_volume_id=$db_volume_id -P key_name=default -P flavor=d1.tiny oscm
+# heat stack-create --poll -f application.yaml -P logs_volume_id=$logs_volume_id -P data_volume_id=$data_volume_id -P key_name=default -P flavor=d1.tiny oscm
 heat_template_version: 2015-10-15
 
 description: |
@@ -7,11 +7,11 @@ description: |
   heat stack-create --poll -f volumes.yaml oscm
 
   # 2) Retrieve outputs from oscm:
-  app_volume_id=$(heat output-show oscm app_volume_id | sed 's/"//g')
-  db_volume_id=$(heat output-show oscm db_volume_id | sed 's/"//g')
+  logs_volume_id=$(heat output-show oscm logs_volume_id | sed 's/"//g')
+  data_volume_id=$(heat output-show oscm data_volume_id | sed 's/"//g')
 
   # 3) Create application stack:
-  heat stack-create --poll -f application.yaml -P app_volume_id=$app_volume_id -P db_volume_id=$db_volume_id -P key_name=<your nova keypair's name> oscm
+  heat stack-create --poll -f application.yaml -P logs_volume_id=$logs_volume_id -P data_volume_id=$data_volume_id -P key_name=<your nova keypair's name> oscm
 
 
 
@@ -32,10 +32,10 @@ parameters:
     type: string
     default: oscm
     description: Keypair name
-  app_volume_id:
+  logs_volume_id:
     type: string
     description: The Cinder volume to attach to the application server
-  db_volume_id:
+  data_volume_id:
     type: string
     description: The Cinder volume to attach to the database server
   registry_port:
@@ -151,16 +151,16 @@ resources:
         str_replace:
           template: {get_file: user-data/heat-config}
           params:
-            $APP_VOLUME_DEV:
+            $LOGS_VOLUME_DEV:
               list_join:
                 - ""
                 - - "/dev/disk/by-id/virtio-"
-                  - { get_param: app_volume_id }
-            $DB_VOLUME_DEV:
+                  - { get_param: logs_volume_id }
+            $DATA_VOLUME_DEV:
               list_join:
                 - ""
                 - - "/dev/disk/by-id/virtio-"
-                  - { get_param: db_volume_id }
+                  - { get_param: data_volume_id }
             $SSH_CERT: { get_param: ssh_cert }
 
   # User data payload for appserver
@@ -200,17 +200,17 @@ resources:
       floating_network:
         get_param: floating_network
 
-  app_volume_attachment:
+  logs_volume_attachment:
     type: OS::Cinder::VolumeAttachment
     properties:
       instance_uuid: { get_resource: appserver }
-      volume_id: { get_param: app_volume_id }
+      volume_id: { get_param: logs_volume_id }
 
-  db_volume_attachment:
+  data_volume_attachment:
     type: OS::Cinder::VolumeAttachment
     properties:
       instance_uuid: { get_resource: appserver }
-      volume_id: { get_param: db_volume_id }
+      volume_id: { get_param: data_volume_id }
 
 outputs:
   # Retrieval after stack creation (presuming stack is named `mystack`):

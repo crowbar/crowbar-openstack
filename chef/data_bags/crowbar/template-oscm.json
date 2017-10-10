@@ -27,8 +27,8 @@
         },
         "volume_stack": {
           "stack_name": "oscm-volumes",
-          "db_volume_size": 1,
-          "app_volume_size": 1
+          "data_volume_size": 1,
+          "logs_volume_size": 1
         },
        "instance_stack": {
           "stack_name": "oscm-instances"
