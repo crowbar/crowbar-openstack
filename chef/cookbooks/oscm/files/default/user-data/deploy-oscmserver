@@ -1,96 +1,243 @@
 #!/bin/sh
-
+# Enable command traces
 set -x
+# Exit on error
 set -e
-
+# Redirect all output to log file
 exec &> /var/log/setup-machine.log
 
-CONFIG_PATH=/etc/oscm/config
-SSL_CONFIG_PATH=${CONFIG_PATH}/ssl
-OSCM_CONFIG=${CONFIG_PATH}/oscm-config
+# Variables for this script
+CONFIG_BASE=/etc/oscm
+CONFIG_PATH=${CONFIG_BASE}/config
+SSL_CONFIG_PATH=${CONFIG_BASE}/ssl
+COMPOSE_CONFIG_PATH=${CONFIG_BASE}/docker-compose
+DOCKER_PATH=/docker
 
+# Enable automatic exporting of variables
+set -a
+# Read configuration files
 source ${CONFIG_PATH}/heat-config
+source ${CONFIG_PATH}/oscm-config
+# Disable automatic exporting of variables
+set +a
 
 
-if [ ${CONFIG_PATH} ]; then
-  until [ -f $CONFIG_PATH/finished ]
-  do
-    echo "scp for oscm configuration file is not finished yet sleeping 5sec."
-    sleep 5
-  done
-  echo "scp for oscm configuration file is finished."
-fi
+# TODO: add certificate to a local docker volume folder.
+# echo $SSL_CONFIG_PATH/somekey.pem > /var/web_cert
 
-if [ ${SSL_CONFIG_PATH} ]; then
-  until [ -f $SSL_CONFIG_PATH/finished ]
-  do
-    echo "scp for oscm ssl certificate is not finished yet sleeping 5sec."
-    sleep 5
-  done
-  echo "scp for oscm ssl certificate is finished."
-  # TODO: add certificate to a local docker volume folder.
-  # echo $SSL_CONFIG_PATH/somekey.pem > /var/web_cert
-fi
-
-WAIT_CURL="$WAIT_CURL --data-binary '{\"status\": \"SUCCESS\"}' --noproxy '*'"
-eval $WAIT_CURL
-
-source ${OSCM_CONFIG}
+# WAIT_CURL="$WAIT_CURL --data-binary '{\"status\": \"SUCCESS\"}' --noproxy '*'"
+# eval $WAIT_CURL
 
 # For some reason the volume id is shortened to 27 characters when the device
 # link in /dev/disk/by-id/ is created. Account for this by truncating the
 # device name accordingly.
 
-volume_dev_db=$(printf '%.43s\n' $DB_VOLUME_DEV)
-volume_dev_app=$(printf '%.43s\n' $APP_VOLUME_DEV)
+# volume_dev_db=$(printf '%.43s\n' $DB_VOLUME_DEV)
+# volume_dev_app=$(printf '%.43s\n' $APP_VOLUME_DEV)
 
 # Only format volume if it hasn't already been formatted.
 
-if ! file -Ls $volume_dev_db | grep -q "filesystem data" ; then
-    mkfs.ext4 "$volume_dev_db"
+# if ! file -Ls $volume_dev_db | grep -q "filesystem data" ; then
+#     mkfs.ext4 "$volume_dev_db"
+# fi
+# 
+# if ! file -Ls $volume_dev_app | grep -q "filesystem data" ; then
+#     mkfs.ext4 "$volume_dev_app"
+# fi
+# 
+# mkdir -p /db
+# if ! grep -qs '/db' /proc/mounts; then
+#     mount -t ext4 $volume_dev_db /db
+# fi
+# 
+# mkdir -p /oscm
+# if ! grep -qs '/oscm' /proc/mounts; then
+#     mount -t ext4 $volume_dev_app /oscm
+# fi
+
+
+# DB=/db/database
+# APP_PATH=/oscm/oscm-app/
+# OSCM_PATH=/oscm/oscm-core/
+# CLIENT_CRT_PATH=/oscm/client-crt/
+# 
+# DB_VOLUME=oscm-db-volume
+# OSCM_VOLUME=oscm-core-volume
+# APP_VOLUME=oscm-app-volume
+# 
+# mkdir -p $DB
+# mkdir -p $APP_PATH
+# mkdir -p $OSCM_PATH
+# 
+# OSCM_DIR=/opt/oscm
+# mkdir -p $OSCM_DIR
+
+# ------------------------------------------------------------------------------
+
+# If containers are running, stop them
+if [ -f ${DOCKER_PATH}/docker-compose-oscm.yml]; then
+    if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml ps -q | wc -l) != "0"]; then
+        docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml stop
+        docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml rm -f
+    fi
 fi
 
-if ! file -Ls $volume_dev_app | grep -q "filesystem data" ; then
-    mkfs.ext4 "$volume_dev_app"
-fi
+# Create Docker directories if they do not exist yet
+for docker_directory in \
+    ${DOCKER_PATH}/data/oscm-db/data \
+    ${DOCKER_PATH}/config/brandings\
+    ${DOCKER_PATH}/config/certs \
+    ${DOCKER_PATH}/config/privkey/oscm-core \
+    ${DOCKER_PATH}/config/privkey/oscm-app \
+    ${DOCKER_PATH}/config/privkey/oscm-birt \
+    ${DOCKER_PATH}/config/privkey/oscm-branding \
+    ${DOCKER_PATH}/logs/oscm-app \
+    ${DOCKER_PATH}/logs/oscm-birt \
+    ${DOCKER_PATH}/logs/oscm-branding \
+    ${DOCKER_PATH}/logs/oscm-core \
+    ${DOCKER_PATH}/logs/oscm-db; do
+    if [ ! -d ${docker_directory} ]; then
+        mkdir -p ${docker_directory}
+    fi
+done
 
-mkdir -p /db
-if ! grep -qs '/db' /proc/mounts; then
-    mount -t ext4 $volume_dev_db /db
-fi
+# Create Docker log files if they do not exist yet
+for docker_log_file in \
+    ${DOCKER_PATH}/logs/oscm-app/oscm-app.out.log \
+    ${DOCKER_PATH}/logs/oscm-birt/oscm-birt.out.log \
+    ${DOCKER_PATH}/logs/oscm-branding/oscm-branding.out.log \
+    ${DOCKER_PATH}/logs/oscm-core/oscm-core.out.log \
+    ${DOCKER_PATH}/logs/oscm-db/oscm-db.out.log; do
+    if [ ! -f {docker_log_file} ]; then
+        touch ${docker_log_file}
+        chmod 640 ${docker_log_file}
+    fi
+done
 
-mkdir -p /oscm
-if ! grep -qs '/oscm' /proc/mounts; then
-    mount -t ext4 $volume_dev_app /oscm
-fi
-
-
-OSCM_IMAGE=$REGISTRY/$OSCM_IMAGE_NAME
-APP_IMAGE=$REGISTRY/$APP_IMAGE_NAME
-DB_IMAGE=$REGISTRY/$DB_IMAGE_NAME
-DB=/db/database
-APP_PATH=/oscm/oscm-app/
-OSCM_PATH=/oscm/oscm-core/
-CLIENT_CRT_PATH=/oscm/client-crt/
-
-DB_VOLUME=oscm-db-volume
-OSCM_VOLUME=oscm-core-volume
-APP_VOLUME=oscm-app-volume
-
-mkdir -p $DB
-mkdir -p $APP_PATH
-mkdir -p $OSCM_PATH
-
-OSCM_DIR=/opt/oscm
-mkdir -p $OSCM_DIR
-
-cat > /etc/motd <<EOF
-This node has been set up as the mock server for oscm.
-You will find
-* The application config file in /oscm with a
-  timestamp appended to include redeployment every time the application.yaml
-  template is re-instantiated.
-* A persistent application data volume mounted at /oscm
-* Data directory in /db/database
-* This message in /etc/motd
+# Create rsyslog configuration for Docker log files
+if [ ! -f /etc/rsyslog.d/oscm.conf ]; then
+    cat <<EOF > /etc/rsyslog.d/oscm.conf
+local0.*        /docker/logs/oscm-db/oscm-db.out.log
+local1.*        /docker/logs/oscm-core/oscm-core.out.log
+local2.*        /docker/logs/oscm-app/oscm-app.out.log
+local3.*        /docker/logs/oscm-birt/oscm-birt.out.log
+local4.*        /docker/logs/oscm-branding/oscm-branding.out.log
 EOF
+    sed -i '/^local/d' /etc/rsyslog.conf
+    systemctl restart rsyslog
+fi
+
+# Copy Docker Compose files
+if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml ]; then
+    cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml ${DOCKER_PATH}/docker-compose-initdb.yml
+fi
+if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml ]; then
+    cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml ${DOCKER_PATH}/docker-compose-oscm.yml
+fi
+
+# Copy certificate files
+if [ ${GENERATE_CERTIFICATES} == "false" ] && [ -f ${SSL_CONFIG_PATH}/oscm.crt ] && [ -f ${SSL_CONFIG_PATH}/oscm.key ]; then
+    echo ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.key
+    echo ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.crt
+    if [ -f ${SSL_CONFIG_PATH}/oscm.chain ]; then
+        echo ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.chain
+    fi
+else
+    # Generate self signed certificate if none exist yet
+    if [ ! -f ${DOCKER_PATH}/config/privkey/oscm-core/oscm.key ] && [ ! -f ${DOCKER_PATH}/config/privkey/oscm-core/oscm.crt ]; then
+        mkdir ${SSL_CONFIG_PATH}/generate
+        openssl rand -base64 48 > ${SSL_CONFIG_PATH}/generate/passphrase.txt
+        openssl genrsa -aes128 -passout file:${SSL_CONFIG_PATH}/generate/passphrase.txt -out ${SSL_CONFIG_PATH}/generate/oscm.key 2048
+        openssl req -new -passin file:${SSL_CONFIG_PATH}/generate/passphrase.txt -key ${SSL_CONFIG_PATH}/generate/oscm.key -out ${SSL_CONFIG_PATH}/generate/oscm.csr -subj "/CN=${HOST_FQDN}"
+        cp ${SSL_CONFIG_PATH}/generate/oscm.key ${SSL_CONFIG_PATH}/generate/oscm.key.pass
+        openssl rsa -in ${SSL_CONFIG_PATH}/generate/oscm.key.pass -passin file:${SSL_CONFIG_PATH}/generate/passphrase.txt -out ${SSL_CONFIG_PATH}/generate/oscm.key
+        openssl x509 -req -days 3650 -in ${SSL_CONFIG_PATH}/generate/oscm.csr -signkey ${SSL_CONFIG_PATH}/generate/oscm.key -out ${SSL_CONFIG_PATH}/generate/oscm.crt
+        rm -f ${SSL_CONFIG_PATH}/generate/passphrase.txt ${SSL_CONFIG_PATH}/generate/oscm.key.pass ${SSL_CONFIG_PATH}/generate/oscm.csr
+        echo ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/generate/oscm.key
+        echo ${DOCKER_PATH}/config/privkey/oscm-core ${DOCKER_PATH}/config/privkey/oscm-app ${DOCKER_PATH}/config/privkey/oscm-birt ${DOCKER_PATH}/config/privkey/oscm-branding ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/generate/oscm.crt
+        rm -f ${SSL_CONFIG_PATH}/generate/oscm.key ${SSL_CONFIG_PATH}/generate/oscm.crt
+        rmdir ${SSL_CONFIG_PATH}/generate
+    fi
+fi
+
+# If http proxy is enabled, create Docker config file
+if [ ${PROXY_ENABLED} == "true" ]; then
+    if [ ! -d /etc/systemd/system/docker.service.d ]; then
+        mkdir -p /etc/systemd/system/docker.service.d
+    fi
+    if [ ${PROXY_AUTH} == "true" ]; then
+        cat <<EOF > /etc/systemd/system/docker.service.d/http-proxy.conf
+[Service]
+Environment="HTTP_PROXY=http://${PROXY_USER}:${PROXY_PWD}@${PROXY_HTTP_HOST}:${PROXY_HTTP_PORT}/" "HTTPS_PROXY=http://${PROXY_USER}:${PROXY_PWD}@${PROXY_HTTPS_HOST}:${PROXY_HTTPS_PORT}/" "NO_PROXY=${PROXY_NOPROXY}"
+EOF
+    else
+        cat <<EOF > /etc/systemd/system/docker.service.d/http-proxy.conf
+[Service]
+Environment="HTTP_PROXY=http://${PROXY_HTTP_HOST}:${PROXY_HTTP_PORT}/" "HTTPS_PROXY=http://${PROXY_HTTPS_HOST}:${PROXY_HTTPS_PORT}/" "NO_PROXY=${PROXY_NOPROXY}"
+EOF
+    fi
+    systemctl daemon-reload
+    systemctl restart docker
+# Otherwise remove Docker config file with proxy config
+else
+    echo NOPE
+    if [ -f /etc/systemd/system/docker.service.d/http-proxy.conf ]; then
+        rm -f /etc/systemd/system/docker.service.d/http-proxy.conf
+        systemctl daemon-reload
+        systemctl restart docker
+    fi
+fi
+
+# If Docker registry authentication is enabled, create auth info file
+if [ ${DOCKER_REGISTRY_AUTH} == "true" ]; then
+    #Create auth file for Docker registry
+    REGISTRY_USER_PASS_BASE64=$(printf "${DOCKER_REGISTRY_USER}:${DOCKER_REGISTRY_PWD}" | base64)
+    mkdir -p /root/.docker
+    cat <<EOF > /root/.docker/config.json
+{
+        "auths": {
+                "${DOCKER_REGISTRY_HOST}:${DOCKER_REGISTRY_PORT}": {
+                        "auth": "${REGISTRY_USER_PASS_BASE64}"
+                }
+        }
+}
+EOF
+# Otherwise remove auth info file
+else
+    if [ -f /root/.docker/config.json ]; then
+        rm -f /root/.docker/config.json
+    fi
+fi
+
+# If default Docker registry (Dockerhub) is used, remove insecure registry config
+if [ ${DOCKER_REGISTRY_DOCKERHUB} = "true" ]; then
+    DOCKER_IMAGES_SOURCE="${DOCKER_REGISTRY_ORGANIZATION}/"
+    if [ -f /etc/docker/daemon.json ]; then
+        rm -f /etc/docker/daemon.json
+        systemctl restart docker
+    fi
+# Otherwise, custom registry is used, so create insecure registry config
+else
+    cat <<EOF > /etc/docker/daemon.json
+{
+  "insecure-registries" : ["${DOCKER_REGISTRY_HOST}:${DOCKER_REGISTRY_PORT}"]
+}
+EOF
+    systemctl restart docker
+fi
+
+# Pull images
+egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-initdb.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
+egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-oscm.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
+
+# Initialize databases
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up -d oscm-db
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-core
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-jms
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-app
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-controller-openstack
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml stop
+docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml rm -f
+
+# Start application containers
+docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml up -d
