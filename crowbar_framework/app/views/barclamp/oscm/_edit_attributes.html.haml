@@ -79,8 +79,6 @@
       %legend
         = t(".ssl_header")
 
-      = string_field %w(host_fqdn)
-
       = select_field %w(api protocol),
         :collection => :api_protocols_for_oscm,
         "data-sslprefix" => "ssl",
@@ -88,8 +86,12 @@
         "data-sslkey" => "/etc/oscm/ssl/private/signing_key.pem"
 
       #ssl_container
+        %span.help-block
+          = t('.ssl_hint')
+        = boolean_field %w(ssl generate_certs)
+        = string_field %w(ssl fqdn)
         = string_field %w(ssl certfile)
         = string_field %w(ssl keyfile)
         = boolean_field %w(ssl insecure)
         = string_field %w(ssl ca_certs)
-    
+

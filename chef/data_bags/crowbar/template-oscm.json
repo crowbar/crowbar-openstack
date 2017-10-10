@@ -69,11 +69,12 @@
         "certfile": "/etc/oscm/ssl/certs/signing_cert.pem",
         "keyfile": "/etc/oscm/ssl/private/signing_key.pem",
         "generate_certs": false,
+        "fqdn": "",
         "insecure": false,
         "ca_certs": "/etc/oscm/ssl/certs/ca.pem"
       },
       "api": {
-        "protocol": "http"
+        "protocol": "https"
       }
     }
   },

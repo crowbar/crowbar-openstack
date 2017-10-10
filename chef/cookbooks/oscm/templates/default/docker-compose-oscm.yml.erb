@@ -4,9 +4,13 @@ services:
 <% if @docker["dockerhub"] == true %>
     image: <%= @docker["organization"]+"/oscm-db:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-db:"+@docker["tag"] %>
+    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-db:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-db
+    logging:
+      driver: syslog
+      options:
+        syslog-facility: "local0"
     volumes:
       - /docker/data/oscm-db/data:/var/lib/postgresql/data
     ports:
@@ -16,9 +20,13 @@ services:
 <% if @docker["dockerhub"] == true %>
     image: <%= @docker["organization"]+"/oscm-core:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-core:"+@docker["tag"] %>
+    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-core:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-core
+    logging:
+      driver: syslog
+      options:
+        syslog-facility: "local1"
     env_file: var.env
     environment:
       - JPDA_ADDRESS=8000
@@ -36,9 +44,13 @@ services:
 <% if @docker["dockerhub"] == true %>
     image: <%= @docker["organization"]+"/oscm-app:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-app:"+@docker["tag"] %>
+    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-app:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-app
+    logging:
+      driver: syslog
+      options:
+        syslog-facility: "local2"
     env_file: var.env
     environment:
       - JPDA_ADDRESS=8000
@@ -56,9 +68,13 @@ services:
 <% if @docker["dockerhub"] == true %>
     image: <%= @docker["organization"]+"/oscm-birt:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-birt:"+@docker["tag"] %>
+    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-birt:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-birt
+    logging:
+      driver: syslog
+      options:
+        syslog-facility: "local3"
     env_file: var.env
     volumes:
       - /docker/config/oscm-birt/privkey:/privkey
@@ -70,9 +86,13 @@ services:
 <% if @docker["dockerhub"] == true %>
     image: <%= @docker["organization"]+"/oscm-branding:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]+":"+@docker["port"]+"/"+@docker["organization"]+"/oscm-branding:"+@docker["tag"] %>
+    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-branding:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-branding
+    logging:
+      driver: syslog
+      options:
+        syslog-facility: "local4"
     env_file: var.env
     volumes:
       - /docker/config/brandings:/brandings:ro

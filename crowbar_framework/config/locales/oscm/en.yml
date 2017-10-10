@@ -53,15 +53,16 @@ en:
         openstack:
           keypair:
             publickey: "Public Key"
-        keypair_hint: 'SSH public key for the openstack instance where the OSCM will be deployed'
+        keypair_hint: 'SSH public key of the keypair for openstack instance which hosts OSCM. It cannot be updated.'
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'
-        host_fqdn: 'OSCM Host FQDN (if left empty, the floating IP will be used)'
         ssl:
           generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          fqdn: 'Host FQDN (if left empty, the floating IP will be used)'
           certfile: 'SSL Certificate File'
           keyfile: 'SSL (Private) Key File'
           insecure: 'SSL Certificate is insecure (for instance, self-signed)'
           ca_certs: 'SSL CA Certificates File'
+        ssl_hint: 'Delete the SSL key pair on the given locations, in order to generate new one.'
         

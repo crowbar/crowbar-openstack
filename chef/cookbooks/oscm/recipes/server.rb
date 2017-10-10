@@ -78,6 +78,20 @@ heat_config = Barclamp::Config.load("openstack", "heat", node[:oscm][:heat_insta
 heat_insecure = CrowbarOpenStackHelper.insecure(heat_config)
 openstack_args_heat = heat_insecure || keystone_settings["insecure"] ? "--insecure" : ""
 
+ruby_block "check_oscm_glance_image" do
+    block do
+      Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
+      command = "#{openstack_cmd} #{openstack_args_heat} image list -c Name -f value | egrep '^#{oscm_image}$'"
+      command_out = shell_out(command)
+      if command_out.stdout.strip != oscm_image
+        message = "The image with name '#{oscm_image}' is not found in glance! Please check your oscm proposal attributes or glance image registry."
+        raise message         
+      end
+    end
+    action :create
+end
+
+
 register_auth_hash = {
   user: keystone_settings["admin_user"],
   password: keystone_settings["admin_password"],
@@ -151,21 +165,10 @@ keystone_register "oscm give user _member_ role" do
   action :add_access
 end
 
-if node[:oscm][:api][:protocol] == "https"
-  ssl_setup "setting up ssl for oscm" do
-    generate_certs node[:oscm][:ssl][:generate_certs]
-    certfile node[:oscm][:ssl][:certfile]
-    keyfile node[:oscm][:ssl][:keyfile]
-    group oscm_group
-    fqdn node[:fqdn]
-    ca_certs node[:oscm][:ssl][:ca_certs]
-  end
-end
-
 execute "create_oscm_flavor" do
   command "#{openstack_cmd} #{openstack_args_nova} flavor create --ram #{oscm_flavor_ram} --disk #{oscm_flavor_disk} \
   --vcpus #{oscm_flavor_vcpus} --private #{oscm_flavor_name}"
-  not_if "#{openstack_cmd} #{openstack_args_nova} flavor list --all | grep -q #{oscm_flavor_name}"
+  not_if "#{openstack_cmd} #{openstack_args_nova} flavor list --all -c Name -f value | egrep -q '^#{oscm_flavor_name}$'"
 end
 
 execute "create_oscm_flavor_access" do
@@ -181,20 +184,15 @@ bash "create_oscm_keypair_file" do
 EOH
 end
 
-execute "delete_oscm_keypair" do
-  command "#{openstack_cmd} #{openstack_args_nova} keypair delete #{oscm_keypair_name}"
-  only_if "#{openstack_cmd} #{openstack_args_nova} keypair list | grep -q #{oscm_keypair_name}"
-end
-
 execute "create_oscm_keypair" do
   command "#{openstack_cmd} #{openstack_args_nova} keypair create #{oscm_keypair_name} --public-key #{oscm_keypair_publickeyfile}"
-  not_if "#{openstack_cmd} #{openstack_args_nova} keypair list | grep -q #{oscm_keypair_name}"
+  not_if "#{openstack_cmd} #{openstack_args_nova} keypair list -c Name -f value | egrep -q '^#{oscm_keypair_name}$'"
 end
 
 directory "#{oscm_install_path}" do
   owner oscm_group
   group oscm_group
-  mode 0755
+  mode 0640
   recursive true
 end
 
@@ -202,7 +200,7 @@ cookbook_file "#{oscm_install_path}/volumes.yaml" do
   source "volumes.yaml"
   owner oscm_group
   group oscm_group
-  mode 0755
+  mode 0640
   action :create
 end
 
@@ -210,14 +208,14 @@ cookbook_file "#{oscm_install_path}/application.yaml" do
   source "application.yaml"
   owner oscm_group
   group oscm_group
-  mode 0755
+  mode 0640
   action :create
 end
 
 directory "#{oscm_install_path}/user-data" do
   owner oscm_group
   group oscm_group
-  mode 0755
+  mode 0640
   recursive true
 end
 
@@ -225,7 +223,7 @@ cookbook_file "#{oscm_install_path}/user-data/heat-config" do
   source "user-data/heat-config"
   owner oscm_group
   group oscm_group
-  mode 0755
+  mode 0640
   action :create
 end
 
@@ -233,14 +231,14 @@ cookbook_file "#{oscm_install_path}/user-data/deploy-oscmserver" do
   source "user-data/deploy-oscmserver"
   owner oscm_group
   group oscm_group
-  mode 0755
+  mode 0640
   action :create
 end
 
 execute "create_oscm_volume_stack" do
   command "#{openstack_cmd} #{openstack_args_heat} stack create --parameter db_size=#{oscm_db_volume_size} --parameter app_size=#{oscm_app_volume_size} \
   -t #{oscm_install_path}/volumes.yaml --wait #{oscm_volumestack_name}"
-  not_if "#{openstack_cmd} #{openstack_args_heat} stack list | grep -q #{oscm_volumestack_name}"
+  not_if "#{openstack_cmd} #{openstack_args_heat} stack list -c 'Stack Name' -f value | egrep -q '^#{oscm_volumestack_name}$'"
 end
 
 ruby_block "get_oscm_volume_ids" do
@@ -261,7 +259,7 @@ ruby_block "generate_oscm_crowbar_ssh_keys" do
       Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
       command = "mkdir -p '$(dirname #{oscm_keypair_crowbar_sshkey})'"
       command_out = shell_out(command)
-      command = "yes y | ssh-keygen -t rsa -f #{oscm_keypair_crowbar_sshkey} -N ''"
+      command = "[ ! -f #{oscm_keypair_crowbar_sshkey}] && yes y | ssh-keygen -t rsa -f #{oscm_keypair_crowbar_sshkey} -N ''"
       command_out = shell_out(command)
     end
     action :create
@@ -274,7 +272,7 @@ execute "create_oscm_instance_stack" do
   --parameter mail_port=#{oscm_mail_port} --parameter registry_port=#{oscm_docker_port} \
   --parameter-file ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub \
   -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name}" }
-  not_if "#{openstack_cmd} #{openstack_args_heat} stack list | grep -q #{oscm_instancestack_name}"
+  not_if "#{openstack_cmd} #{openstack_args_heat} stack list -c 'Stack Name' -f value | egrep -q '^#{oscm_instancestack_name}$'"
 end
 
 ruby_block "get_oscm_floating_ip" do
@@ -285,6 +283,17 @@ ruby_block "get_oscm_floating_ip" do
       node[:oscm][:openstack][:instance_stack][:ip_appserver] = command_out.stdout.strip
     end
     action :create
+end
+
+if node[:oscm][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for oscm" do
+    generate_certs node[:oscm][:ssl][:generate_certs]
+    certfile node[:oscm][:ssl][:certfile]
+    keyfile node[:oscm][:ssl][:keyfile]
+    group oscm_group
+    fqdn node[:oscm][:ssl][:fqdn].empty? ? node[:oscm][:openstack][:instance_stack][:ip_appserver] : node[:oscm][:ssl][:fqdn]
+    ca_certs node[:oscm][:ssl][:ca_certs]
+  end
 end
 
 ruby_block "get_oscm_secrets" do
@@ -315,7 +324,7 @@ template "#{oscm_install_path}/user-data/oscm-config" do
     mail: node[:oscm][:mail],
     docker: node[:oscm][:docker],
     proxy: node[:oscm][:proxy],
-    host_fqdn: node[:oscm][:host_fqdn],
+    host_fqdn: node[:oscm][:ssl][:fqdn].empty? ? node[:oscm][:openstack][:instance_stack][:ip_appserver] : node[:oscm][:ssl][:fqdn],
     instance: node[:oscm][:openstack][:instance_stack]
   )
 end
@@ -349,27 +358,38 @@ template "#{oscm_install_path}/var.env" do
     mail: node[:oscm][:mail],
     docker: node[:oscm][:docker],
     proxy: node[:oscm][:proxy],
-    host_fqdn: node[:oscm][:host_fqdn],
+    host_fqdn: node[:oscm][:ssl][:fqdn].empty? ? node[:oscm][:openstack][:instance_stack][:ip_appserver] : node[:oscm][:ssl][:fqdn],
     instance: node[:oscm][:openstack][:instance_stack]
   )
 end
 
-bash "inject oscm configuration and certificates" do
-  code <<-EOH
-    ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_config_path}" || true
-    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/user-data/oscm-config ${ip_appserver}:#{oscm_config_path} || true
-    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/user-data/deploy-oscmserver ${ip_appserver}:#{oscm_config_path} || true
-    ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/finished"
-    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/docker-compose-initdb.yml ${ip_appserver}:#{oscm_config_path}/docker-compose || true
-    scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_install_path}/docker-compose-oscm.yml ${ip_appserver}:#{oscm_config_path}/docker-compose || true
-    ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/docker-compose/finished"    
-    if [ -f #{oscm_ssl_certfile} ]; 
-    then
-      ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "mkdir -p #{oscm_config_path}/ssl/" || true
-      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_certfile} ${ip_appserver}:#{oscm_config_path}/ssl/oscm.crt || true
-      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_keyfile} ${ip_appserver}:#{oscm_config_path}/ssl/oscm.key || true
-      scp -i #{oscm_keypair_crowbar_sshkey} #{oscm_ssl_cacerts} ${ip_appserver}:#{oscm_config_path}/ssl/oscm.chain || true
-      ssh -i #{oscm_keypair_crowbar_sshkey} ${ip_appserver} "touch #{oscm_config_path}/ssl/finished"
-    fi
-  EOH
+ruby_block "inject_oscm_scripts" do
+    block do
+      args = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i #{oscm_keypair_crowbar_sshkey}"
+      ip_appserver = node[:oscm][:openstack][:instance_stack][:ip_appserver]
+      Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
+      command = "ssh #{args} #{ip_appserver} 'mkdir -p #{oscm_config_path}/docker-compose'"
+      command_out = shell_out(command)
+      command = "scp #{args} #{oscm_install_path}/user-data/oscm-config #{ip_appserver}:#{oscm_config_path}"
+      command_out = shell_out(command)
+      command = "scp #{args} #{oscm_install_path}/docker-compose-*.yml #{ip_appserver}:#{oscm_config_path}/docker-compose"
+      command_out = shell_out(command)
+      if node[:oscm][:api][:protocol] == "https"
+        command = "ssh #{args} #{ip_appserver} 'mkdir -p #{oscm_config_path}/ssl'"
+        command_out = shell_out(command)
+        command = "scp #{args} #{oscm_ssl_certfile} #{ip_appserver}:#{oscm_config_path}/ssl/oscm.crt"
+        command_out = shell_out(command)
+        command = "scp #{args} #{oscm_ssl_keyfile} #{ip_appserver}:#{oscm_config_path}/ssl/oscm.key"
+        command_out = shell_out(command)
+        command = "scp #{args} #{oscm_ssl_cacerts} #{ip_appserver}:#{oscm_config_path}/ssl/oscm.chain"
+      end
+      command = "scp #{args} #{oscm_install_path}/user-data/deploy-oscmserver #{ip_appserver}:#{oscm_config_path}"
+      command_out = shell_out(command)
+      command = "ssh #{args} #{ip_appserver} 'chmod 755 #{oscm_config_path}/deploy-oscmserver'"
+      command_out = shell_out(command)
+      command = "ssh #{args} #{ip_appserver} '#{oscm_config_path}/deploy-oscmserver'"
+      command_out = shell_out(command)
+    end
+    action :create
 end
+
