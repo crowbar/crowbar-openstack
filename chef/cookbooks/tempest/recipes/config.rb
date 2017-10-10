@@ -482,7 +482,7 @@ end
 
 template "/etc/tempest/tempest.conf" do
   source "tempest.conf.erb"
-  mode 0644
+  mode 0o640
   variables(
     lazy {
       {
