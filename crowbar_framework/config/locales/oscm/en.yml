@@ -32,6 +32,7 @@ en:
         docker_settings: 'Docker Registry'
         docker:
           dockerhub: 'Use Docker Hub'
+          organization: 'Organization'
           auth: 'Authentication Required'
           host: 'Registry Host' 
           port: 'Registry Port' 

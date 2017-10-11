@@ -34,24 +34,7 @@ oscm_instancestack_name = node[:oscm][:openstack][:instance_stack][:stack_name]
 oscm_data_volume_size = node[:oscm][:openstack][:volume_stack][:data_volume_size]
 oscm_logs_volume_size = node[:oscm][:openstack][:volume_stack][:logs_volume_size]
 oscm_image = node[:oscm][:openstack][:image]
-oscm_docker_host = node[:oscm][:docker][:host]
-oscm_docker_port = node[:oscm][:docker][:port]
-oscm_docker_user = node[:oscm][:docker][:user]
-oscm_docker_pwd = node[:oscm][:docker][:password]
-oscm_docker_tag = node[:oscm][:docker][:tag]
-oscm_proxy_httphost = node[:oscm][:proxy][:http_host]
-oscm_proxy_httpport = node[:oscm][:proxy][:http_port]
-oscm_proxy_httpshost = node[:oscm][:proxy][:https_host]
-oscm_proxy_httpsport = node[:oscm][:proxy][:https_port]
-oscm_proxy_user = node[:oscm][:proxy][:user]
-oscm_proxy_pwd = node[:oscm][:proxy][:password]
-oscm_mail_host = node[:oscm][:mail][:host]
-oscm_mail_port = node[:oscm][:mail][:port]
-oscm_mail_tls = node[:oscm][:mail][:tls]
-oscm_mail_from = node[:oscm][:mail][:from]
-oscm_mail_auth = node[:oscm][:mail][:auth]
-oscm_mail_user = node[:oscm][:mail][:user]
-oscm_mail_pwd = node[:oscm][:mail][:password]
+oscm_floating_network = node[:oscm][:openstack][:floating_network]
 oscm_keypair_crowbar_sshkey = "/etc/oscm/install/oscm_ssh.key"
 oscm_group = "root"
 
@@ -269,7 +252,8 @@ execute "create_oscm_instance_stack" do
   command lazy { "#{openstack_cmd} #{openstack_args_heat} stack create --parameter logs_volume_id=#{node[:oscm][:openstack][:volume_stack][:logs_volume_id]} \
   --parameter data_volume_id=#{node[:oscm][:openstack][:volume_stack][:data_volume_id]} \
   --parameter image=#{oscm_image} --parameter flavor=#{oscm_flavor_name} \
-  --parameter mail_port=#{oscm_mail_port} --parameter registry_port=#{oscm_docker_port} \
+  --parameter key_name=#{oscm_keypair_name} --parameter floating_network=#{oscm_floating_network} \
+  --parameter mail_port=#{node[:oscm][:mail][:port]} --parameter registry_port=#{node[:oscm][:docker][:port]} \
   --parameter-file ssh_cert=#{oscm_keypair_crowbar_sshkey}.pub \
   -t #{oscm_install_path}/application.yaml --wait #{oscm_instancestack_name}" }
   not_if "#{openstack_cmd} #{openstack_args_heat} stack list -c 'Stack Name' -f value | egrep -q '^#{oscm_instancestack_name}$'"

@@ -32,7 +32,8 @@
         },
        "instance_stack": {
           "stack_name": "oscm-instances"
-        }
+        },
+       "floating_network": "floating"
       },
       "mail": {
         "auth": true,
