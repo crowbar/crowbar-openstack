@@ -255,3 +255,4 @@ default[:neutron][:ha][:neutron_l3_ha_service][:hatool][:program] = "/usr/bin/ne
 default[:neutron][:ha][:neutron_l3_ha_service][:hatool][:env] = {}
 default[:neutron][:ha][:neutron_l3_ha_service][:seconds_to_sleep_between_checks] = 10
 default[:neutron][:ha][:neutron_l3_ha_service][:max_errors_tolerated] = 10
+default[:neutron][:ha][:neutron_l3_ha_service][:log_file] = "/var/log/neutron/neutron-l3-ha-service.log"

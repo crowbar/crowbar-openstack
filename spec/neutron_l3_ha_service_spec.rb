@@ -120,7 +120,49 @@ describe ServiceOptions do
       service_options = ServiceOptions.load(@tmpdir.path_for("settings.yml"))
       expect(service_options.hatool.insecure).to eq false
     end
+
+    it "log_file is nil by default" do
+      service_options = ServiceOptions.load(@tmpdir.path_for("settings.yml"))
+      expect(service_options.log_file).to eq nil
+    end
   end
+
+  context "valid settings file" do
+    around do |example|
+      with_tmpdir do |tmpdir|
+        @tmpdir = tmpdir
+        tmpdir.write_file "settings.yml", {
+          "timeouts" => {
+            "status" => {
+              "terminate" => 1,
+              "kill" => 2
+            },
+            "router_migration" => {
+              "terminate" => 5,
+              "kill" => 6
+            }
+          },
+          "hatool" => {
+            "program" => "path-to-hatool",
+            "env" => {
+              "some-key" => "some-value"
+            },
+            "insecure" => "false"
+          },
+          "seconds_to_sleep_between_checks" => "10",
+          "max_errors_tolerated" => "13",
+          "log_file" => "something"
+        }.to_yaml
+        example.run
+      end
+    end
+
+    it "log_file is loaded" do
+      service_options = ServiceOptions.load(@tmpdir.path_for("settings.yml"))
+      expect(service_options.log_file).to eq "something"
+    end
+  end
+
 end
 
 describe TimeoutOptions do
@@ -482,8 +524,8 @@ describe ErrorCounter do
   end
 end
 
-def make_config(tmpdir)
-  tmpdir.write_file "settings.yml", {
+def make_config(tmpdir, log_file = nil)
+  config = {
     "timeouts" => {
       "status" => {
         "terminate" => 1,
@@ -502,10 +544,55 @@ def make_config(tmpdir)
     },
     "seconds_to_sleep_between_checks" => "10",
     "max_errors_tolerated" => "10"
-  }.to_yaml
+  }
+
+  config.update("log_file" => log_file) unless log_file.nil?
+
+  tmpdir.write_file "settings.yml", config.to_yaml
 end
 
 describe "neutron-l3-ha-service" do
+  context "explicit log file specified" do
+    around do |example|
+      with_tmpdir do |tmpdir|
+        @hatool_path = tmpdir.write_script "fake-hatool", <<-EOF.gsub(/^\s+/, "")
+        #!#{ruby_bin}
+        puts (["HATOOL-CALL"] + ARGV).join(" ")
+        if ARGV.include? "--help"
+          puts "--retry"
+          exit 0
+        end
+        exit 2 if ARGV.include? "--l3-agent-check"
+        EOF
+
+        @log_path = tmpdir.path_for("somelogfile")
+        @settings_path = make_config tmpdir, @log_path
+        @tmpdir = tmpdir
+        @ruby = File.join(RbConfig::CONFIG["bindir"], RbConfig::CONFIG["ruby_install_name"])
+        @service_path = "chef/cookbooks/neutron/files/default/neutron-l3-ha-service.rb"
+        example.run
+      end
+    end
+
+    it "logs to specified file" do
+      subprocess = Subprocess.new @ruby, @service_path, @settings_path
+      subprocess.start
+      sleep_workaround_for_subprocess
+      sleep 1 # Let it run for a while
+      subprocess.send_signal "TERM"
+      result = subprocess.wait 0.1
+
+      log_file_content = File.read(@log_path)
+      expect(log_file_content).to include "HATOOL-CALL --l3-agent-check --quiet"
+      expect(log_file_content).to include "HATOOL-CALL --l3-agent-migrate --now --retry"
+
+      expect(result.error).to eq ""
+      expect(result.output).to eq ""
+
+      expect(result.exit_status).to eq 0
+    end
+  end
+
   context "hatool reports dead agents" do
     around do |example|
       with_tmpdir do |tmpdir|
