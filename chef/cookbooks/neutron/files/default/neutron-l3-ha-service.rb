@@ -27,6 +27,10 @@ class HAToolLog
     end
     @logger
   end
+
+  def self.file=(file_path)
+    @logger = Logger.new(file_path, "daily") unless file_path.nil?
+  end
 end
 
 def main
@@ -35,6 +39,7 @@ def main
   service_options = ServiceOptions.load ARGV[0]
   ha_functions = HAFunctions.new(service_options)
   error_counter = ErrorCounter.new service_options.max_errors_tolerated
+  HAToolLog.file = service_options.log_file
 
   while true
     status = ha_functions.check_l3_agents
@@ -235,24 +240,27 @@ class ServiceOptions
   attr_reader :hatool
   attr_reader :seconds_to_sleep_between_checks
   attr_reader :max_errors_tolerated
+  attr_reader :log_file
 
-  def initialize(status_timeout, router_migration_timeout, hatool_options, sleep_time, max_errors_tolerated)
-    @status_timeout = status_timeout
-    @router_migration_timeout = router_migration_timeout
-    @hatool = hatool_options
-    @seconds_to_sleep_between_checks = sleep_time
-    @max_errors_tolerated = max_errors_tolerated
+  def initialize(params = {})
+    @status_timeout = params.fetch(:status_timeout)
+    @router_migration_timeout = params.fetch(:router_migration_timeout)
+    @hatool = params.fetch(:hatool_options)
+    @seconds_to_sleep_between_checks = params.fetch(:sleep_time)
+    @max_errors_tolerated = params.fetch(:max_errors_tolerated)
+    @log_file = params.fetch(:log_file)
   end
 
   def self.load(path)
     File.open path do |file|
       data = YAML.load file.read
       ServiceOptions.new(
-        TimeoutOptions.from_hash(data["timeouts"]["status"]),
-        TimeoutOptions.from_hash(data["timeouts"]["router_migration"]),
-        HAToolOptions.from_hash(data["hatool"]),
-        data["seconds_to_sleep_between_checks"].to_i,
-        data["max_errors_tolerated"].to_i
+        status_timeout: TimeoutOptions.from_hash(data["timeouts"]["status"]),
+        router_migration_timeout: TimeoutOptions.from_hash(data["timeouts"]["router_migration"]),
+        hatool_options: HAToolOptions.from_hash(data["hatool"]),
+        sleep_time: data["seconds_to_sleep_between_checks"].to_i,
+        max_errors_tolerated: data["max_errors_tolerated"].to_i,
+        log_file: data["log_file"]
       )
     end
   end
