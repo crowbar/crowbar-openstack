@@ -32,8 +32,6 @@ en:
         admin:
           username: 'Administrator Username'
           password: 'Administrator Password'
-          updated_password: 'Update Administrator Password'
-          updated_password_hint: 'Changing the admin password directly in OpenStack its not supported. You can change the admin password directly using this field.'
         ssl_header: 'SSL Support'
         api:
           protocol: 'Protocol'
