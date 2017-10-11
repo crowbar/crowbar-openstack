@@ -75,7 +75,7 @@ set +a
 # ------------------------------------------------------------------------------
 
 # If containers are running, stop them
-if [ -f ${DOCKER_PATH}/docker-compose-oscm.yml]; then
+if [ -f ${DOCKER_PATH}/docker-compose-oscm.yml ]; then
     if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml ps -q | wc -l) != "0"]; then
         docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml stop
         docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml rm -f
