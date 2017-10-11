@@ -124,3 +124,12 @@ template "/etc/ceilometer/pipeline.yaml" do
     notifies :restart, "service[swift-proxy]"
   end
 end
+
+template "/etc/ceilometer/event_pipeline.yaml" do
+  source "event_pipeline.yaml.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  notifies :restart, "service[nova-compute]" if is_compute_agent
+  notifies :restart, "service[swift-proxy]" if is_swift_proxy
+end
