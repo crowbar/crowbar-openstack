@@ -26,6 +26,9 @@ define :openstack_pacemaker_controller_clone_for_transaction,
   raise "No agent specified for #{primitive_name}!" if agent.nil?
 
   fake_params = {}
+  unless op["monitor"].nil?
+    op["monitor"] = op["monitor"].merge("on-fail" => "restart")
+  end
 
   pacemaker_primitive primitive_name do
     agent agent
