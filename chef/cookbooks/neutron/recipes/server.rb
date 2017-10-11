@@ -258,7 +258,7 @@ ha_enabled = node[:neutron][:ha][:server][:enabled]
 crowbar_pacemaker_sync_mark "wait sync mark for neutron db sync" do
   mark "neutron_db_sync"
   action :wait
-  timeout 120
+  timeout 300
   only_if { ha_enabled }
 end
 
