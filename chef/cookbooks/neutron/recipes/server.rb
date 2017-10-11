@@ -432,13 +432,26 @@ end
 #   action :nothing
 # end
 #
-# If this runs simulatiously on multiple nodes (e.g. in a HA setup). It might
-# be that one node creates the router after the other did the "not_if" check.
-# In that case the router will be created twice (as it is perfectly fine to
-# have multiple routers with the same name). To avoid this race-condition we
-# make sure that the post_install_conf recipe is only executed on a single node
-# of the cluster.
-if node[:neutron][:create_default_networks] && \
-    (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
-  include_recipe "neutron::post_install_conf"
+if node[:neutron][:create_default_networks]
+  # If this runs simulatiously on multiple nodes (e.g. in a HA setup). It might
+  # be that one node creates the router after the other did the "not_if" check.
+  # In that case the router will be created twice (as it is perfectly fine to
+  # have multiple routers with the same name). To avoid this race-condition we
+  # make sure that the post_install_conf recipe is only executed on a single node
+  # of the cluster.
+  if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
+    include_recipe "neutron::post_install_conf"
+  end
+
+  # All non-founder nodes should wait until the founder node is done
+  # evaluating if the default networks need to be created, as this can
+  # take a long time. Otherwise, the founder node will be delayed and
+  # might produce pacemaker sync timeouts in other recipes where such
+  # a big delay isn't expected (e.g. the network_agents recipe).
+  crowbar_pacemaker_sync_mark "sync mark for neutron default networks" do
+    mark "neutron_default_networks"
+    action :sync
+    timeout 180
+    only_if { ha_enabled }
+  end
 end
