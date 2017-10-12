@@ -21,65 +21,42 @@ source ${CONFIG_PATH}/oscm-config
 # Disable automatic exporting of variables
 set +a
 
-
-# TODO: add certificate to a local docker volume folder.
-# echo $SSL_CONFIG_PATH/somekey.pem > /var/web_cert
-
-# WAIT_CURL="$WAIT_CURL --data-binary '{\"status\": \"SUCCESS\"}' --noproxy '*'"
-# eval $WAIT_CURL
-
-# For some reason the volume id is shortened to 27 characters when the device
-# link in /dev/disk/by-id/ is created. Account for this by truncating the
-# device name accordingly.
-
-# volume_dev_db=$(printf '%.43s\n' $DB_VOLUME_DEV)
-# volume_dev_app=$(printf '%.43s\n' $APP_VOLUME_DEV)
-
-# Only format volume if it hasn't already been formatted.
-
-# if ! file -Ls $volume_dev_db | grep -q "filesystem data" ; then
-#     mkfs.ext4 "$volume_dev_db"
-# fi
-# 
-# if ! file -Ls $volume_dev_app | grep -q "filesystem data" ; then
-#     mkfs.ext4 "$volume_dev_app"
-# fi
-# 
-# mkdir -p /db
-# if ! grep -qs '/db' /proc/mounts; then
-#     mount -t ext4 $volume_dev_db /db
-# fi
-# 
-# mkdir -p /oscm
-# if ! grep -qs '/oscm' /proc/mounts; then
-#     mount -t ext4 $volume_dev_app /oscm
-# fi
-
-
-# DB=/db/database
-# APP_PATH=/oscm/oscm-app/
-# OSCM_PATH=/oscm/oscm-core/
-# CLIENT_CRT_PATH=/oscm/client-crt/
-# 
-# DB_VOLUME=oscm-db-volume
-# OSCM_VOLUME=oscm-core-volume
-# APP_VOLUME=oscm-app-volume
-# 
-# mkdir -p $DB
-# mkdir -p $APP_PATH
-# mkdir -p $OSCM_PATH
-# 
-# OSCM_DIR=/opt/oscm
-# mkdir -p $OSCM_DIR
-
-# ------------------------------------------------------------------------------
-
 # If containers are running, stop them
 if [ -f ${DOCKER_PATH}/docker-compose-oscm.yml ]; then
     if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml ps -q | wc -l) != "0" ]; then
         docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml stop
         docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml rm -f
     fi
+fi
+
+# The Cinder volume ids are truncated to 27 characters when the device
+# link in /dev/disk/by-id/ is created. Account for this by truncating the
+# device name accordingly.
+volume_dev_logs=$(printf '%.43s\n' ${LOGS_VOLUME_DEV})
+volume_dev_data=$(printf '%.43s\n' ${DATA_VOLUME_DEV})
+
+# Create a file system on the Cinder volumes
+if ! file -Ls ${volume_dev_logs} | grep -q "filesystem data" ; then
+    mkfs.ext4 "${volume_dev_logs}"
+fi
+
+if ! file -Ls ${volume_dev_data} | grep -q "filesystem data" ; then
+    mkfs.ext4 "${volume_dev_data}"
+fi
+
+# Mount the Cinder volumes if they are not mounted yet
+if ! grep -qs "${DOCKER_PATH}/logs" /proc/mounts; then
+    if [ ! -d ${DOCKER_PATH}/logs ]; then
+        mkdir -p ${DOCKER_PATH}/logs
+    fi
+    mount -t ext4 ${volume_dev_logs} ${DOCKER_PATH}/logs
+fi
+
+if ! grep -qs "${DOCKER_PATH}/data" /proc/mounts; then
+    if [ ! -d ${DOCKER_PATH}/data ]; then
+        mkdir -p ${DOCKER_PATH}/data
+    fi
+    mount -t ext4 ${volume_dev_data} ${DOCKER_PATH}/data
 fi
 
 # Create Docker directories if they do not exist yet
