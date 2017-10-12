@@ -76,7 +76,7 @@ set +a
 
 # If containers are running, stop them
 if [ -f ${DOCKER_PATH}/docker-compose-oscm.yml ]; then
-    if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml ps -q | wc -l) != "0"]; then
+    if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml ps -q | wc -l) != "0" ]; then
         docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml stop
         docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml rm -f
     fi
@@ -134,6 +134,9 @@ fi
 if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml ]; then
     cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml ${DOCKER_PATH}/docker-compose-oscm.yml
 fi
+if [ -f ${COMPOSE_CONFIG_PATH}/var.env ]; then
+    cp -f ${COMPOSE_CONFIG_PATH}/var.env ${DOCKER_PATH}/var.env
+fi
 
 # Copy certificate files
 if [ -f ${SSL_CONFIG_PATH}/oscm.key ]; then
@@ -166,7 +169,6 @@ EOF
     systemctl restart docker
 # Otherwise remove Docker config file with proxy config
 else
-    echo NOPE
     if [ -f /etc/systemd/system/docker.service.d/http-proxy.conf ]; then
         rm -f /etc/systemd/system/docker.service.d/http-proxy.conf
         systemctl daemon-reload
