@@ -13,10 +13,7 @@ end
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 network_settings = GlanceHelper.network_settings(node)
 
-ha_enabled = node[:glance][:ha][:enabled]
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "glance-server") : [node]
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance("glance")
 

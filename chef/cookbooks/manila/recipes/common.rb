@@ -109,13 +109,7 @@ cinder_insecure = CrowbarOpenStackHelper.insecure(cinder_config)
 enabled_share_protocols = ["NFS", "CIFS"]
 enabled_share_protocols << ["CEPHFS"] if ManilaHelper.has_cephfs_share? node
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  if node[:manila][:ha][:enabled]
-    CrowbarPacemakerHelper.cluster_nodes(node, "manila-server")
-  else
-    [node]
-  end
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance("manila") if node["roles"].include?("manila-server")
 

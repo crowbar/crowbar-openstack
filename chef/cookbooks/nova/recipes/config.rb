@@ -87,9 +87,7 @@ glance_insecure = CrowbarOpenStackHelper.insecure(glance_config) || keystone_set
 Chef::Log.info("Glance server at #{glance_server_host}")
 
 # use memcached as a cache backend for nova-novncproxy
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  api_ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller") : [node]
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance "nova" if is_controller
 

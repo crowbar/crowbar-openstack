@@ -66,9 +66,7 @@ end
 keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
 ha_enabled = node[:neutron][:ha][:server][:enabled]
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "neutron-server") : [node]
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance("neutron-server") if is_neutron_server
 

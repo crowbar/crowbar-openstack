@@ -41,9 +41,7 @@ else
 end
 
 # use memcached as a cache backend for ec2-api-metadata
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "ec2-api") : [node]
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance "ec2-api"
 

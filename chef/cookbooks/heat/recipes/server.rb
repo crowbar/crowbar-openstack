@@ -102,9 +102,7 @@ if node[:heat][:api][:protocol] == "https"
   end
 end
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "heat-server") : [node]
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 memcached_instance("heat-server")
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)

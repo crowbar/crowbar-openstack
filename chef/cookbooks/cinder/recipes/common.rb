@@ -118,13 +118,7 @@ if need_shared_lock_path
   include_recipe "crowbar-openstack::common"
 end
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  if node[:cinder][:ha][:enabled]
-    CrowbarPacemakerHelper.cluster_nodes(node, "cinder-controller")
-  else
-    [node]
-  end
-)
+memcached_servers = MemcachedHelper.get_memcached_servers([node])
 
 memcached_instance("cinder") if node["roles"].include?("cinder-controller")
 
