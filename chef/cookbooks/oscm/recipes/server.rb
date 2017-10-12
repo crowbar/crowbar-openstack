@@ -358,6 +358,8 @@ ruby_block "inject_oscm_scripts" do
       command_out = shell_out(command)
       command = "scp #{args} #{oscm_install_path}/docker-compose-*.yml #{ip_appserver}:#{oscm_path}/docker-compose"
       command_out = shell_out(command)
+      command = "scp #{args} #{oscm_install_path}/var.env #{ip_appserver}:#{oscm_path}/docker-compose"
+      command_out = shell_out(command)
       if node[:oscm][:api][:protocol] == "https"
         command = "ssh #{args} #{ip_appserver} 'mkdir -p #{oscm_path}/ssl'"
         command_out = shell_out(command)
