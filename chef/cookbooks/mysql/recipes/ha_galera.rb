@@ -51,7 +51,8 @@ unless node[:database][:galera_bootstrapped]
       variables(
         cluster_addresses: "gcomm://",
         sstuser: "root",
-        sstuser_password: ""
+        sstuser_password: "",
+        expire_logs_days: node[:database][:mysql][:expire_logs_days]
       )
     end
 
@@ -119,7 +120,8 @@ template "/etc/my.cnf.d/galera.cnf" do
   variables(
     cluster_addresses: cluster_addresses,
     sstuser: "sstuser",
-    sstuser_password: node[:database][:mysql][:sstuser_password]
+    sstuser_password: node[:database][:mysql][:sstuser_password],
+    expire_logs_days: node[:database][:mysql][:expire_logs_days]
   )
 end
 
