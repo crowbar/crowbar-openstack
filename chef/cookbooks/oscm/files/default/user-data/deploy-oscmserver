@@ -134,6 +134,9 @@ fi
 if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml ]; then
     cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml ${DOCKER_PATH}/docker-compose-oscm.yml
 fi
+if [ -f ${COMPOSE_CONFIG_PATH}/var.env ]; then
+    cp -f ${COMPOSE_CONFIG_PATH}/var.env ${DOCKER_PATH}/var.env
+fi
 
 # Copy certificate files
 if [ -f ${SSL_CONFIG_PATH}/oscm.key ]; then
