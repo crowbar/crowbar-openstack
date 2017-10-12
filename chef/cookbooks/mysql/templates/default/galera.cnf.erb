@@ -6,6 +6,7 @@ innodb_doublewrite=1
 query_cache_size=0
 wsrep_on=ON
 binlog_format=ROW
+expire_logs_days = <%= @expire_logs_days %>
 
 # SST method
 wsrep_sst_method = xtrabackup-v2
