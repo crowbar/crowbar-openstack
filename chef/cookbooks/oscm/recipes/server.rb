@@ -373,7 +373,7 @@ ruby_block "inject_oscm_scripts" do
       command_out = shell_out(command)
       command = "ssh #{args} #{ip_appserver} 'chmod 755 #{oscm_path}/config/deploy-oscmserver'"
       command_out = shell_out(command)
-      command = "ssh #{args} #{ip_appserver} '#{oscm_path}/config/deploy-oscmserver'"
+      command = "ssh #{args} #{ip_appserver} '#{oscm_path}/config/deploy-oscmserver &'"
       command_out = shell_out(command)
     end
     action :create
