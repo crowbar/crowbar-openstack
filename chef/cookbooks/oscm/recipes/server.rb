@@ -28,7 +28,7 @@ oscm_keypair_name = node[:oscm][:openstack][:keypair][:name]
 oscm_keypair_publickey = node[:oscm][:openstack][:keypair][:publickey]
 oscm_keypair_publickeyfile = "/etc/oscm/install/openstack_keypair_public.pem"
 oscm_install_path = "/etc/oscm/install"
-oscm_config_path = "/etc/oscm/config"
+oscm_path = "/etc/oscm"
 oscm_volumestack_name = node[:oscm][:openstack][:volume_stack][:stack_name]
 oscm_instancestack_name = node[:oscm][:openstack][:instance_stack][:stack_name]
 oscm_data_volume_size = node[:oscm][:openstack][:volume_stack][:data_volume_size]
@@ -352,26 +352,26 @@ ruby_block "inject_oscm_scripts" do
       args = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i #{oscm_keypair_crowbar_sshkey}"
       ip_appserver = node[:oscm][:openstack][:instance_stack][:ip_appserver]
       Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
-      command = "ssh #{args} #{ip_appserver} 'mkdir -p #{oscm_config_path}/docker-compose'"
+      command = "ssh #{args} #{ip_appserver} 'mkdir -p #{oscm_path}/docker-compose'"
       command_out = shell_out(command)
-      command = "scp #{args} #{oscm_install_path}/user-data/oscm-config #{ip_appserver}:#{oscm_config_path}"
+      command = "scp #{args} #{oscm_install_path}/user-data/oscm-config #{ip_appserver}:#{oscm_path}/config"
       command_out = shell_out(command)
-      command = "scp #{args} #{oscm_install_path}/docker-compose-*.yml #{ip_appserver}:#{oscm_config_path}/docker-compose"
+      command = "scp #{args} #{oscm_install_path}/docker-compose-*.yml #{ip_appserver}:#{oscm_path}/docker-compose"
       command_out = shell_out(command)
       if node[:oscm][:api][:protocol] == "https"
-        command = "ssh #{args} #{ip_appserver} 'mkdir -p #{oscm_config_path}/ssl'"
+        command = "ssh #{args} #{ip_appserver} 'mkdir -p #{oscm_path}/ssl'"
         command_out = shell_out(command)
-        command = "scp #{args} #{oscm_ssl_certfile} #{ip_appserver}:#{oscm_config_path}/ssl/oscm.crt"
+        command = "scp #{args} #{oscm_ssl_certfile} #{ip_appserver}:#{oscm_path}/ssl/oscm.crt"
         command_out = shell_out(command)
-        command = "scp #{args} #{oscm_ssl_keyfile} #{ip_appserver}:#{oscm_config_path}/ssl/oscm.key"
+        command = "scp #{args} #{oscm_ssl_keyfile} #{ip_appserver}:#{oscm_path}/ssl/oscm.key"
         command_out = shell_out(command)
-        command = "scp #{args} #{oscm_ssl_cacerts} #{ip_appserver}:#{oscm_config_path}/ssl/oscm.chain"
+        command = "scp #{args} #{oscm_ssl_cacerts} #{ip_appserver}:#{oscm_path}/ssl/oscm.chain"
       end
-      command = "scp #{args} #{oscm_install_path}/user-data/deploy-oscmserver #{ip_appserver}:#{oscm_config_path}"
+      command = "scp #{args} #{oscm_install_path}/user-data/deploy-oscmserver #{ip_appserver}:#{oscm_path}/config"
       command_out = shell_out(command)
-      command = "ssh #{args} #{ip_appserver} 'chmod 755 #{oscm_config_path}/deploy-oscmserver'"
+      command = "ssh #{args} #{ip_appserver} 'chmod 755 #{oscm_path}/config/deploy-oscmserver'"
       command_out = shell_out(command)
-      command = "ssh #{args} #{ip_appserver} '#{oscm_config_path}/deploy-oscmserver'"
+      command = "ssh #{args} #{ip_appserver} '#{oscm_path}/config/deploy-oscmserver'"
       command_out = shell_out(command)
     end
     action :create
