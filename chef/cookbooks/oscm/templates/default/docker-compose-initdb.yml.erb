@@ -14,7 +14,7 @@ services:
 <% if @docker["dockerhub"] == true %>
     image: <%= @docker["organization"]+"/oscm-initdb-core:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-initdb-core:"+@docker["tag"] %>
+    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-initdb:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-initdb-core
     env_file: var.env
@@ -29,7 +29,7 @@ services:
 <% if @docker["dockerhub"] == true %>
     image: <%= @docker["organization"]+"/oscm-initdb-jms:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-initdb-jms:"+@docker["tag"] %>
+    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-initdb:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-initdb-jms
     env_file: var.env
@@ -44,7 +44,7 @@ services:
 <% if @docker["dockerhub"] == true %>
     image: <%= @docker["organization"]+"/oscm-initdb-app:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-initdb-app:"+@docker["tag"] %>
+    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-initdb:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-initdb-app
     env_file: var.env
@@ -59,7 +59,7 @@ services:
 <% if @docker["dockerhub"] == true %>
     image: <%= @docker["organization"]+"/oscm-initdb-controller-openstack:"+@docker["tag"] %>
 <% else %>
-    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-initdb-controller-openstack:"+@docker["tag"] %>
+    image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-initdb:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-initdb-controller-openstack
     env_file: var.env
