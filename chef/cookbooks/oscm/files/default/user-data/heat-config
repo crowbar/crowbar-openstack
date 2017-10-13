@@ -1,14 +1,47 @@
 #!/bin/sh
 
-# Writes the configuration parameters passed in by Heat/cloud-init to /etc/heatconfig.
-mkdir -p /etc/oscm/config
-touch /etc/oscm/config/heat-config
-chmod 400 /etc/oscm/config/heat-config
+DOCKER_PATH=/docker
 
-cat > /etc/oscm/config/heat-config <<EOF
-LOGS_VOLUME_DEV=$LOGS_VOLUME_DEV
-DATA_VOLUME_DEV=$DATA_VOLUME_DEV
-EOF
-
+# Write the SSH public key to root's trusted keys file
 CERT_STR="$SSH_CERT"
 echo $CERT_STR >> /root/.ssh/authorized_keys
+
+# Set up Cinder storage
+# The Cinder volume ids are truncated to 27 characters when the device
+# link in /dev/disk/by-id/ is created. Account for this by truncating the
+# device name accordingly.
+volume_dev_logs=$(printf '%.43s\n' ${LOGS_VOLUME_DEV})
+volume_dev_data=$(printf '%.43s\n' ${DATA_VOLUME_DEV})
+
+# Create a file system on the Cinder volumes
+if ! file -Ls ${volume_dev_logs} | grep -q "filesystem data" ; then
+    mkfs.ext4 "${volume_dev_logs}"
+fi
+
+if ! file -Ls ${volume_dev_data} | grep -q "filesystem data" ; then
+    mkfs.ext4 "${volume_dev_data}"
+fi
+
+# Create fstab entries
+if ! grep -qs "${volume_dev_logs}" /etc/fstab; then
+    echo "${volume_dev_logs} ${DOCKER_PATH}/logs ext4 defaults 1 1" >> /etc/fstab
+fi
+
+if ! grep -qs "${volume_dev_data}" /etc/fstab; then
+    echo "${volume_dev_data} ${DOCKER_PATH}/logs ext4 defaults 1 1" >> /etc/fstab
+fi
+
+# Mount the Cinder volumes if they are not mounted yet
+if ! grep -qs "${DOCKER_PATH}/logs" /proc/mounts; then
+    if [ ! -d ${DOCKER_PATH}/logs ]; then
+        mkdir -p ${DOCKER_PATH}/logs
+    fi
+    mount ${volume_dev_logs}
+fi
+
+if ! grep -qs "${DOCKER_PATH}/data" /proc/mounts; then
+    if [ ! -d ${DOCKER_PATH}/data ]; then
+        mkdir -p ${DOCKER_PATH}/data
+    fi
+    mount ${volume_dev_data}
+fi
