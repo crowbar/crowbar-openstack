@@ -4,7 +4,11 @@ PROXY_HTTP_HOST=<%= @proxy["http_host"] %>
 PROXY_HTTP_PORT=<%= @proxy["http_port"] %>
 PROXY_HTTPS_HOST=<%= @proxy["https_host"] %>
 PROXY_HTTPS_PORT=<%= @proxy["https_port"] %>
-PROXY_NOPROXY=<%= @proxy["no_proxy"] %>
+<% if @proxy["no_proxy"].empty? %>
+PROXY_NOPROXY=<%= @proxy["no_proxy_default"]+","+@instance["ip_appserver"] %>
+<% else %>
+PROXY_NOPROXY=<%= @proxy["no_proxy_default"]+","+@instance["ip_appserver"]+","+@proxy["no_proxy"] %>
+<% end%>
 PROXY_AUTH=<%= @proxy["auth"] %>
 PROXY_USER=<%= @proxy["user"] %>
 PROXY_PWD=<%= @proxy["password"] %>
