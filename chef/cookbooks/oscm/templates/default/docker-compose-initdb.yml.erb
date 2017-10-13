@@ -7,6 +7,7 @@ services:
     image: <%= @docker["host"]+":"+@docker["port"].to_s+"/"+@docker["organization"]+"/oscm-db:"+@docker["tag"] %>
 <% end %>
     container_name: oscm-db
+    env_file: var.env
     volumes:
       - /docker/data/oscm-db/data:/var/lib/postgresql/data
 
