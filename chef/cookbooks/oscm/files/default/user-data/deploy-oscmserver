@@ -16,7 +16,6 @@ DOCKER_PATH=/docker
 # Enable automatic exporting of variables
 set -a
 # Read configuration files
-source ${CONFIG_PATH}/heat-config
 source ${CONFIG_PATH}/oscm-config
 # Disable automatic exporting of variables
 set +a
@@ -27,36 +26,6 @@ if [ -f ${DOCKER_PATH}/docker-compose-oscm.yml ]; then
         docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml stop
         docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml rm -f
     fi
-fi
-
-# The Cinder volume ids are truncated to 27 characters when the device
-# link in /dev/disk/by-id/ is created. Account for this by truncating the
-# device name accordingly.
-volume_dev_logs=$(printf '%.43s\n' ${LOGS_VOLUME_DEV})
-volume_dev_data=$(printf '%.43s\n' ${DATA_VOLUME_DEV})
-
-# Create a file system on the Cinder volumes
-if ! file -Ls ${volume_dev_logs} | grep -q "filesystem data" ; then
-    mkfs.ext4 "${volume_dev_logs}"
-fi
-
-if ! file -Ls ${volume_dev_data} | grep -q "filesystem data" ; then
-    mkfs.ext4 "${volume_dev_data}"
-fi
-
-# Mount the Cinder volumes if they are not mounted yet
-if ! grep -qs "${DOCKER_PATH}/logs" /proc/mounts; then
-    if [ ! -d ${DOCKER_PATH}/logs ]; then
-        mkdir -p ${DOCKER_PATH}/logs
-    fi
-    mount -t ext4 ${volume_dev_logs} ${DOCKER_PATH}/logs
-fi
-
-if ! grep -qs "${DOCKER_PATH}/data" /proc/mounts; then
-    if [ ! -d ${DOCKER_PATH}/data ]; then
-        mkdir -p ${DOCKER_PATH}/data
-    fi
-    mount -t ext4 ${volume_dev_data} ${DOCKER_PATH}/data
 fi
 
 # Create Docker directories if they do not exist yet
