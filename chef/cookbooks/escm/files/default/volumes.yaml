@@ -1,4 +1,4 @@
-# Example invocation: heat stack-create --poll -f volumes.yaml oscm
+# Example invocation: heat stack-create --poll -f volumes.yaml escm
 heat_template_version: 2015-10-15
 
 
@@ -36,12 +36,12 @@ resources:
       size: { get_param: data_size }
 
 outputs:
-  # Retrieval after stack creation (presuming stack is named `oscm`): 
-  # heat output-show oscm logs_volume_id
+  # Retrieval after stack creation (presuming stack is named `escm`): 
+  # heat output-show escm logs_volume_id
   logs_volume_id:
     value: { get_resource: logs_volume }
 
-  # Retrieval after stack creation (presuming stack is named `oscm`): 
-  # heat output-show oscm data_volume_id
+  # Retrieval after stack creation (presuming stack is named `escm`): 
+  # heat output-show escm data_volume_id
   data_volume_id:
     value: { get_resource: data_volume }

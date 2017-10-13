@@ -16,7 +16,7 @@
 
 en:
   barclamp:
-    oscm:
+    escm:
       edit_attributes:
         keystone_instance: 'Keystone'
         heat_instance: 'Heat'
@@ -28,7 +28,7 @@ en:
           tls:  'Enable TLS'
           user: 'User'
           password: 'Password'
-          from: 'Oscm Email Address'
+          from: 'ESCM Email Address'
         docker_settings: 'Docker Registry'
         docker:
           dockerhub: 'Use Docker Hub'
@@ -54,7 +54,7 @@ en:
         openstack:
           keypair:
             publickey: "Public Key"
-        keypair_hint: 'SSH public key of the keypair for openstack instance which hosts OSCM. It cannot be updated.'
+        keypair_hint: 'SSH public key of the keypair for openstack instance which hosts ESCM. It cannot be updated.'
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'

@@ -1,17 +1,17 @@
-# heat stack-create --poll -f application.yaml -P logs_volume_id=$logs_volume_id -P data_volume_id=$data_volume_id -P key_name=default -P flavor=d1.tiny oscm
+# heat stack-create --poll -f application.yaml -P logs_volume_id=$logs_volume_id -P data_volume_id=$data_volume_id -P key_name=default -P flavor=d1.tiny escm
 heat_template_version: 2015-10-15
 
 description: |
   # This is how you deploy the whole thing:
   # 1) Instantiate volumes.yaml as follows
-  heat stack-create --poll -f volumes.yaml oscm
+  heat stack-create --poll -f volumes.yaml escm
 
-  # 2) Retrieve outputs from oscm:
-  logs_volume_id=$(heat output-show oscm logs_volume_id | sed 's/"//g')
-  data_volume_id=$(heat output-show oscm data_volume_id | sed 's/"//g')
+  # 2) Retrieve outputs from escm:
+  logs_volume_id=$(heat output-show escm logs_volume_id | sed 's/"//g')
+  data_volume_id=$(heat output-show escm data_volume_id | sed 's/"//g')
 
   # 3) Create application stack:
-  heat stack-create --poll -f application.yaml -P logs_volume_id=$logs_volume_id -P data_volume_id=$data_volume_id -P key_name=<your nova keypair's name> oscm
+  heat stack-create --poll -f application.yaml -P logs_volume_id=$logs_volume_id -P data_volume_id=$data_volume_id -P key_name=<your nova keypair's name> escm
 
 
 
@@ -23,21 +23,21 @@ parameters:
   image:
     type: string
     default: sles12-sp1
-    description: Glance image to use for servers
+    description: Glance image to use for server
   flavor:
     type: string
-    default: oscm.medium
-    description: Nova flavor to use for servers
+    default: escm.medium
+    description: Nova flavor to use for server
   key_name:
     type: string
-    default: oscm
+    default: escm
     description: Keypair name
   logs_volume_id:
     type: string
-    description: The Cinder volume to attach to the application server
+    description: The Cinder volume for logs
   data_volume_id:
     type: string
-    description: The Cinder volume to attach to the database server
+    description: The Cinder volume for data
   registry_port:
     default: ""
     type: string
@@ -66,18 +66,18 @@ resources:
 
   ### Network infrastructure ###
 
-  oscm_network:
+  escm_network:
     type: OS::Neutron::Net
     properties:
-      name: oscm
+      name: escm
 
-  oscm_subnet:
+  escm_subnet:
     type: OS::Neutron::Subnet
     properties:
       cidr: 10.0.0.1/24
-      name: oscm
+      name: escm
       network:
-        get_resource: oscm_network
+        get_resource: escm_network
 
   router:
     type: OS::Neutron::Router
@@ -91,13 +91,13 @@ resources:
     type: OS::Neutron::RouterInterface
     properties:
       router: { get_resource: router }
-      subnet: { get_resource: oscm_subnet }
+      subnet: { get_resource: escm_subnet }
 
   allow_inbound:
     type: OS::Neutron::SecurityGroup
     properties:
       description: "Allow inbound SSH and HTTP traffic"
-      name: oscm
+      name: escm
       rules:
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
@@ -189,7 +189,7 @@ resources:
     type: OS::Neutron::Port
     properties:
       network:
-        get_resource: oscm_network
+        get_resource: escm_network
       security_groups:
         - get_resource: allow_inbound
 

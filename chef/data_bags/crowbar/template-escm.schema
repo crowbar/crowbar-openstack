@@ -8,7 +8,7 @@
       "type": "map",
       "required": true,
       "mapping": {
-        "oscm": {
+        "escm": {
           "type": "map",
           "required": true,
           "mapping": {
@@ -139,7 +139,7 @@
       "type": "map",
       "required": true,
       "mapping": {
-        "oscm": {
+        "escm": {
           "type": "map",
           "required": true,
           "mapping": {

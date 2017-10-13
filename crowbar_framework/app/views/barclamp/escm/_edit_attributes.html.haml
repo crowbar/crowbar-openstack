@@ -81,10 +81,10 @@
         = t(".ssl_header")
 
       = select_field %w(api protocol),
-        :collection => :api_protocols_for_oscm,
+        :collection => :api_protocols_for_escm,
         "data-sslprefix" => "ssl",
-        "data-sslcert" => "/etc/oscm/ssl/certs/signing_cert.pem",
-        "data-sslkey" => "/etc/oscm/ssl/private/signing_key.pem"
+        "data-sslcert" => "/etc/escm/ssl/certs/signing_cert.pem",
+        "data-sslkey" => "/etc/escm/ssl/private/signing_key.pem"
 
       #ssl_container
         %span.help-block

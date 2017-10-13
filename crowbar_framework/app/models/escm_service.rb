@@ -14,9 +14,9 @@
 # limitations under the License.
 #
 
-class OscmService < PacemakerServiceObject
+class EscmService < PacemakerServiceObject
   def initialize(thelogger)
-    @bc_name = "oscm"
+    @bc_name = "escm"
     @logger = thelogger
   end
 
@@ -28,7 +28,7 @@ class OscmService < PacemakerServiceObject
 
     def role_constraints
       {
-        "oscm-server" => {
+        "escm-server" => {
           "unique" => false,
           "count" => 1,
           "admin" => false,
@@ -51,7 +51,7 @@ class OscmService < PacemakerServiceObject
   end
 
   def create_proposal
-    @logger.debug("Oscm create_proposal: entering")
+    @logger.debug("Escm create_proposal: entering")
     base = super
 
     nodes = NodeObject.all
@@ -59,18 +59,18 @@ class OscmService < PacemakerServiceObject
     server_nodes = [nodes.first] if server_nodes.empty?
 
     base["deployment"][@bc_name]["elements"] = {
-      "oscm-server" => [server_nodes.first.name]
+      "escm-server" => [server_nodes.first.name]
     } unless server_nodes.nil?
 
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
     base["attributes"][@bc_name]["heat_instance"] = find_dep_proposal("heat")
 
-    @logger.debug("Oscm create_proposal: exiting")
+    @logger.debug("Escm create_proposal: exiting")
     base
   end
 
   def validate_proposal_after_save(proposal)
-    validate_one_for_role proposal, "oscm-server"
+    validate_one_for_role proposal, "escm-server"
 
     super
   end

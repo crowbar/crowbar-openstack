@@ -14,8 +14,16 @@
 # limitations under the License.
 #
 
-default[:oscm][:ssl][:certfile] = "/etc/oscm/ssl/certs/signing_cert.pem"
-default[:oscm][:ssl][:keyfile] = "/etc/oscm/ssl/private/signing_key.pem"
-default[:oscm][:ssl][:generate_certs] = false
-default[:oscm][:ssl][:insecure] = false
-default[:oscm][:ssl][:ca_certs] = "/etc/oscm/ssl/certs/ca.pem"
+module Barclamp
+  module EscmHelper
+    def api_protocols_for_escm(selected)
+      options_for_select(
+        [
+          ["HTTP", "http"],
+          ["HTTPS", "https"]
+        ],
+        selected.to_s
+      )
+    end
+  end
+end

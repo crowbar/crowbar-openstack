@@ -15,9 +15,9 @@
 #
 
 barclamp:
-  name: 'oscm'
-  display: 'OSCM'
-  description: 'Open Service Catalog Manager'
+  name: 'escm'
+  display: 'ESCM'
+  description: 'Enterprise Service Catalog Manager'
   version: 1
   member:
     - 'openstack'

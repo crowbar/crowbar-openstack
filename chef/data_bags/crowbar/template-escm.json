@@ -1,37 +1,37 @@
 {
-  "id": "template-oscm",
-  "description": "OSCM",
+  "id": "template-escm",
+  "description": "ESCM",
   "attributes": {
-    "oscm": {
+    "escm": {
       "timeout": 300,
       "debug": false,
       "keystone_instance": "none",
       "nova_instance": "none",
       "heat_instance": "none",
       "keystone": {
-        "project": "oscm",
-        "user": "oscm",
-        "password": "oscm"
+        "project": "escm",
+        "user": "escm",
+        "password": "escm"
       },
       "openstack": {
-        "image": "sles12-sp1",
+        "image": "sles12-sp3",
         "flavor": {
-          "name": "oscm.small",
-          "ram": 2048,
+          "name": "escm.small",
+          "ram": 8192,
           "vcpus": 1,
           "disk": 20
         },
         "keypair": {
-          "name": "oscm",
+          "name": "escm",
           "publickey": ""
         },
         "volume_stack": {
-          "stack_name": "oscm-volumes",
+          "stack_name": "escm-volumes",
           "data_volume_size": 1,
           "logs_volume_size": 1
         },
        "instance_stack": {
-          "stack_name": "oscm-instances"
+          "stack_name": "escm-instances"
         },
        "floating_network": "floating"
       },
@@ -67,12 +67,12 @@
       },
       "host_fqdn": "",
       "ssl": {
-        "certfile": "/etc/oscm/ssl/certs/signing_cert.pem",
-        "keyfile": "/etc/oscm/ssl/private/signing_key.pem",
+        "certfile": "/etc/escm/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/escm/ssl/private/signing_key.pem",
         "generate_certs": false,
         "fqdn": "",
         "insecure": false,
-        "ca_certs": "/etc/oscm/ssl/certs/ca.pem"
+        "ca_certs": "/etc/escm/ssl/certs/ca.pem"
       },
       "api": {
         "protocol": "https"
@@ -80,19 +80,19 @@
     }
   },
   "deployment": {
-    "oscm": {
+    "escm": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
       "schema-revision": 100,
       "element_states": {
-        "oscm-server": [ "readying", "ready", "applying" ]
+        "escm-server": [ "readying", "ready", "applying" ]
       },
       "element_order": [
-        [ "oscm-server" ]
+        [ "escm-server" ]
       ],
       "elements": {},
       "element_run_list_order": {
-        "oscm-server": 110
+        "escm-server": 110
       },      
       "config": {
         "mode": "full",

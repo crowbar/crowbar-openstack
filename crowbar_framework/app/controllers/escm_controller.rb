@@ -14,12 +14,12 @@
 # limitations under the License.
 #
 
-class OscmController < BarclampController
-  # Controller for Oscm barclamp
+class EscmController < BarclampController
+  # Controller for ESCM barclamp
 
   protected
 
   def initialize_service
-    @service_object = OscmService.new logger
+    @service_object = EscmService.new logger
   end
 end

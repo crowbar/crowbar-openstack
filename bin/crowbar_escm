@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 #
 # Copyright 2017, SUSE LINUX GmbH
 #
@@ -14,16 +15,9 @@
 # limitations under the License.
 #
 
-module Barclamp
-  module OscmHelper
-    def api_protocols_for_oscm(selected)
-      options_for_select(
-        [
-          ["HTTP", "http"],
-          ["HTTPS", "https"]
-        ],
-        selected.to_s
-      )
-    end
-  end
-end
+require File.join(File.expand_path(File.dirname(__FILE__)), "barclamp_lib")
+@barclamp = "escm"
+@timeout = 3600
+
+main
+

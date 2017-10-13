@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 #
 # Copyright 2017, SUSE LINUX GmbH
 #
@@ -15,9 +14,8 @@
 # limitations under the License.
 #
 
-require File.join(File.expand_path(File.dirname(__FILE__)), "barclamp_lib")
-@barclamp = "oscm"
-@timeout = 3600
-
-main
-
+default[:escm][:ssl][:certfile] = "/etc/escm/ssl/certs/signing_cert.pem"
+default[:escm][:ssl][:keyfile] = "/etc/escm/ssl/private/signing_key.pem"
+default[:escm][:ssl][:generate_certs] = false
+default[:escm][:ssl][:insecure] = false
+default[:escm][:ssl][:ca_certs] = "/etc/escm/ssl/certs/ca.pem"
