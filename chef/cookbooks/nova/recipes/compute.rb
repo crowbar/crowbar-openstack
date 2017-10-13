@@ -80,6 +80,24 @@ case node[:nova][:libvirt_type]
         notifies :create, "ruby_block[restart_libvirtd]", :immediately
       end
 
+      logr_virttype = {
+        "kvm" =>"qemu",
+        "qemu"=>"qemu",
+        "lxc" =>"lxc",
+        "xen" =>"libxl",
+      }
+
+      logr_confname = logr_virttype[node[:nova][:libvirt_type]]
+      template "/etc/logrotate.d/libvirtd.#{logr_confname}" do
+        source "libvirtd.logrotate.erb"
+        group "root"
+        owner "root"
+        mode "0644"
+        variables(
+          logdir: logr_confname
+        )
+      end
+
       case node[:nova][:libvirt_type]
         when "kvm", "qemu"
           package "qemu"
