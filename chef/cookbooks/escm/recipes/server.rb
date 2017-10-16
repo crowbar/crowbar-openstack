@@ -61,20 +61,6 @@ heat_config = Barclamp::Config.load("openstack", "heat", node[:escm][:heat_insta
 heat_insecure = CrowbarOpenStackHelper.insecure(heat_config)
 openstack_args_heat = heat_insecure || keystone_settings["insecure"] ? "--insecure" : ""
 
-ruby_block "check_escm_glance_image" do
-    block do
-      Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
-      command = "#{openstack_cmd} #{openstack_args_heat} image list -c Name -f value | egrep '^#{escm_image}$'"
-      command_out = shell_out(command)
-      if command_out.stdout.strip != escm_image
-        message = "The image with name '#{escm_image}' is not found in glance! Please check your escm proposal attributes or glance image registry."
-        raise message         
-      end
-    end
-    action :create
-end
-
-
 register_auth_hash = {
   user: keystone_settings["admin_user"],
   password: keystone_settings["admin_password"],
@@ -146,6 +132,19 @@ keystone_register "escm give user _member_ role" do
   tenant_name escm_project
   role_name "_member_"
   action :add_access
+end
+
+ruby_block "check_escm_glance_image" do
+    block do
+      Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
+      command = "#{openstack_cmd} #{openstack_args_heat} image list -c Name -f value | egrep '^#{escm_image}$'"
+      command_out = shell_out(command)
+      if command_out.stdout.strip != escm_image
+        message = "The image with name '#{escm_image}' is not found in glance! Please check your escm proposal attributes or glance image registry."
+        raise message         
+      end
+    end
+    action :create
 end
 
 execute "create_escm_flavor" do
