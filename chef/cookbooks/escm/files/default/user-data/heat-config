@@ -1,5 +1,12 @@
 #!/bin/sh
+# Enable command traces
+set -x
+# Exit on error
+set -e
+# Redirect all output to log file
+exec &> /var/log/setup-cloud.log
 
+# Variables for this script
 DOCKER_PATH=/docker
 
 # Create the config directory if it does not exist yet
