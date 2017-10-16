@@ -3,8 +3,8 @@
 DOCKER_PATH=/docker
 
 # Create the config directory if it does not exist yet
-if [ ! -d /etc/oscm/config ]; then
-    mkdir -p /etc/oscm/config
+if [ ! -d /etc/escm/config ]; then
+    mkdir -p /etc/escm/config
 fi
 
 # Write the SSH public key to root's trusted keys file
