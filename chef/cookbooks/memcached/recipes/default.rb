@@ -17,6 +17,8 @@
 # limitations under the License.
 #
 
+service_name = "memcached"
+
 case node[:platform_family]
 when "suse", "rhel"
   package "memcached" do
@@ -30,11 +32,11 @@ when "debian"
   end
 end
 
-service "memcached" do
+service service_name do
   action :nothing
   supports status: true, start: true, stop: true, restart: true
 end
-utils_systemd_service_restart "memcached"
+utils_systemd_service_restart service_name
 
 template "/etc/memcached.conf" do
   case node[:platform_family]
@@ -52,7 +54,8 @@ template "/etc/memcached.conf" do
     listen: node[:memcached][:listen],
     user: node[:memcached][:user],
     port: node[:memcached][:port],
-    memory: node[:memcached][:memory]
+    memory: node[:memcached][:memory],
+    max_connections: node[:memcached][:max_connections]
   )
   notifies :restart, resources(service: "memcached"), :immediately
 end
