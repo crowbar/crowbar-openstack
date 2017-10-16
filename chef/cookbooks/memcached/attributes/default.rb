@@ -2,6 +2,7 @@ default[:memcached][:memory] = 64
 default[:memcached][:port] = 11211
 default[:memcached][:listen] = "0.0.0.0"
 default[:memcached][:daemonize] = true
+default[:memcached][:max_connections] = 4096
 
 case node[:platform_family]
 when "suse"
