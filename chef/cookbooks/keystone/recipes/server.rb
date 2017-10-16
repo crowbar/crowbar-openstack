@@ -469,7 +469,7 @@ crowbar_pacemaker_sync_mark "sync-keystone_before_register" if ha_enabled
 
 crowbar_pacemaker_sync_mark "wait-keystone_register" do
   # keystone_register might be slow
-  timeout 90
+  timeout 150
   only_if { ha_enabled }
 end
 
