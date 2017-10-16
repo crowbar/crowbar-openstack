@@ -32,3 +32,9 @@ default["mysql"]["tunable"]["thread_cache_size"]        = 8
 
 # Ports to bind to when haproxy is used
 default[:mysql][:ha][:ports][:admin_port] = 3306
+
+# Default operation setting for the galera resource
+# in pacemamker
+default[:mysql][:ha][:op][:monitor][:interval] = "20s"
+default[:mysql][:ha][:op][:monitor][:role]     = "Master"
+default[:mysql][:ha][:op][:promote][:timeout]  = "300s"
