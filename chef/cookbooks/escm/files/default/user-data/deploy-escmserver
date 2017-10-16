@@ -7,7 +7,7 @@ set -e
 exec &> /var/log/setup-machine.log
 
 # Variables for this script
-CONFIG_BASE=/etc/oscm
+CONFIG_BASE=/etc/escm
 CONFIG_PATH=${CONFIG_BASE}/config
 SSL_CONFIG_PATH=${CONFIG_BASE}/ssl
 COMPOSE_CONFIG_PATH=${CONFIG_BASE}/docker-compose
@@ -16,15 +16,15 @@ DOCKER_PATH=/docker
 # Enable automatic exporting of variables
 set -a
 # Read configuration files
-source ${CONFIG_PATH}/oscm-config
+source ${CONFIG_PATH}/escm-config
 # Disable automatic exporting of variables
 set +a
 
 # If containers are running, stop them
-if [ -f ${DOCKER_PATH}/docker-compose-oscm.yml ]; then
-    if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml ps -q | wc -l) != "0" ]; then
-        docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml stop
-        docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml rm -f
+if [ -f ${DOCKER_PATH}/docker-compose-escm.yml ]; then
+    if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml ps -q | wc -l) != "0" ]; then
+        docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml stop
+        docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml rm -f
     fi
 fi
 
@@ -77,8 +77,8 @@ fi
 if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml ]; then
     cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml ${DOCKER_PATH}/docker-compose-initdb.yml
 fi
-if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml ]; then
-    cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-oscm.yml ${DOCKER_PATH}/docker-compose-oscm.yml
+if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-escm.yml ]; then
+    cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-escm.yml ${DOCKER_PATH}/docker-compose-escm.yml
 fi
 if [ -f ${COMPOSE_CONFIG_PATH}/var.env ]; then
     cp -f ${COMPOSE_CONFIG_PATH}/var.env ${DOCKER_PATH}/var.env
@@ -162,7 +162,7 @@ fi
 
 # Pull images
 egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-initdb.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
-egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-oscm.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
+egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-escm.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
 
 # Initialize databases
 docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up -d oscm-db
@@ -174,4 +174,4 @@ docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml stop
 docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml rm -f
 
 # Start application containers
-docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml up -d
+docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml up -d
