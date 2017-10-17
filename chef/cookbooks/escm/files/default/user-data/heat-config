@@ -40,7 +40,7 @@ if ! grep -qs "${volume_dev_logs}" /etc/fstab; then
 fi
 
 if ! grep -qs "${volume_dev_data}" /etc/fstab; then
-    echo "${volume_dev_data} ${DOCKER_PATH}/logs ext4 defaults 1 1" >> /etc/fstab
+    echo "${volume_dev_data} ${DOCKER_PATH}/data ext4 defaults 1 1" >> /etc/fstab
 fi
 
 # Mount the Cinder volumes if they are not mounted yet
