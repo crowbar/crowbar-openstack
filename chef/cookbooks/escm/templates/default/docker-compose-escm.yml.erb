@@ -34,8 +34,8 @@ services:
     links:
       - oscm-db:oscm-db
     volumes:
-      - /docker/config/oscm-core/privkey:/privkey
-      - /docker/config/certs:/certs
+      - /docker/config/oscm-core/privkey:/import/privkey
+      - /docker/config/certs:/import/certs
     ports:
       - 8080:8080
       - 8081:8081
@@ -58,8 +58,8 @@ services:
     links:
       - oscm-db:oscm-db
     volumes:
-      - /docker/config/oscm-app/privkey:/privkey
-      - /docker/config/certs:/certs
+      - /docker/config/oscm-app/privkey:/import/privkey
+      - /docker/config/certs:/import/certs
     ports:
       - 8880:8880
       - 8881:8881
@@ -77,8 +77,8 @@ services:
         syslog-facility: "local3"
     env_file: var.env
     volumes:
-      - /docker/config/oscm-birt/privkey:/privkey
-      - /docker/config/certs:/certs
+      - /docker/config/oscm-birt/privkey:/import/privkey
+      - /docker/config/certs:/import/certs
     ports:
       - 8181:8181
 
@@ -95,8 +95,8 @@ services:
         syslog-facility: "local4"
     env_file: var.env
     volumes:
-      - /docker/config/brandings:/brandings:ro
-      - /docker/config/oscm-branding/privkey:/privkey
-      - /docker/config/certs:/certs
+      - /docker/config/brandings:/import:ro
+      - /docker/config/oscm-branding/privkey:/import/privkey
+      - /docker/config/certs:/import/certs
     ports:
       - 4443:443
