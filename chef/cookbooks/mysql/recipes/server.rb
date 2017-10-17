@@ -228,6 +228,18 @@ unless node[:database][:database_bootstrapped]
       only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
   end
+
+  # Drop unneeded root users, we only use root access via unix domain socket
+  ["127.0.0.1", "::1", node[:hostname]].each do |hostname|
+    database_user "drop unneeded root database user at #{hostname}" do
+      connection db_connection
+      username "root"
+      host hostname
+      provider db_settings[:user_provider]
+      action :drop
+      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
+  end
 end
 
 ruby_block "mark node for database bootstrap" do
