@@ -11,6 +11,7 @@
         "max_connections": 800,
         "tmp_table_size": 64,
         "max_heap_table_size": 64,
+        "expire_logs_days": 10,
         "ssl": {
           "enabled": false,
           "generate_certs": false,
@@ -47,7 +48,7 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 202,
+      "schema-revision": 203,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },
