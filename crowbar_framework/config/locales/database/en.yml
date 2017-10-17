@@ -26,6 +26,7 @@ en:
         mysql:
           datadir: 'Datadir'
           max_connections: 'Maximum Number of simultaneous Connections'
+          expire_logs_days: 'Number of days after the binary logs can be automatically removed'
           slow_query_logging: 'Slow Query Logging'
           ssl_header: 'SSL Support'
           ssl:
