@@ -161,7 +161,7 @@ end
 bash "create_escm_keypair_file" do
   code <<-EOH
   publickey="#{escm_keypair_publickey}"
-  mkdir -p "$(dirname "#{escm_keypair_publickeyfile}")" &> /dev/null
+  mkdir -p $(dirname #{escm_keypair_publickeyfile})
   echo "${publickey}" > "#{escm_keypair_publickeyfile}"
 EOH
 end
@@ -241,7 +241,7 @@ ruby_block "generate_escm_crowbar_ssh_keys" do
       Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
       command = "mkdir -p '$(dirname #{escm_keypair_crowbar_sshkey})'"
       command_out = shell_out(command)
-      command = "[ ! -f #{escm_keypair_crowbar_sshkey}] && yes y | ssh-keygen -t rsa -f #{escm_keypair_crowbar_sshkey} -N ''"
+      command = "[ ! -f #{escm_keypair_crowbar_sshkey} ] && yes y | ssh-keygen -t rsa -f #{escm_keypair_crowbar_sshkey} -N ''"
       command_out = shell_out(command)
     end
     action :create
@@ -351,6 +351,8 @@ ruby_block "inject_escm_scripts" do
       args = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i #{escm_keypair_crowbar_sshkey}"
       ip_appserver = node[:escm][:openstack][:instance_stack][:ip_appserver]
       Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
+      command = "ssh #{args} #{ip_appserver} 'mkdir -p #{escm_path}/config'"
+      command_out = shell_out(command)
       command = "ssh #{args} #{ip_appserver} 'mkdir -p #{escm_path}/docker-compose'"
       command_out = shell_out(command)
       command = "scp #{args} #{escm_install_path}/user-data/escm-config #{ip_appserver}:#{escm_path}/config"
@@ -368,7 +370,7 @@ ruby_block "inject_escm_scripts" do
         command_out = shell_out(command)
         command = "scp #{args} #{escm_ssl_cacerts} #{ip_appserver}:#{escm_path}/ssl/escm.chain"
       end
-      command = "scp #{args} #{escm_install_path}/user-data/deploy-escmserver #{ip_appserver}:#{escm_path}/config"
+      command = "scp #{args} #{escm_install_path}/user-data/deploy-escmserver #{ip_appserver}:#{escm_path}/config/"
       command_out = shell_out(command)
       command = "ssh #{args} #{ip_appserver} 'chmod 755 #{escm_path}/config/deploy-escmserver'"
       command_out = shell_out(command)
