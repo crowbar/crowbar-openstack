@@ -252,7 +252,6 @@ execute "create_escm_instance_stack" do
   --parameter data_volume_id=#{node[:escm][:openstack][:volume_stack][:data_volume_id]} \
   --parameter image=#{escm_image} --parameter flavor=#{escm_flavor_name} \
   --parameter key_name=#{escm_keypair_name} --parameter floating_network=#{escm_floating_network} \
-  --parameter mail_port=#{node[:escm][:mail][:port]} --parameter registry_port=#{node[:escm][:docker][:port]} \
   --parameter-file ssh_cert=#{escm_keypair_crowbar_sshkey}.pub \
   -t #{escm_install_path}/application.yaml --wait #{escm_instancestack_name}" }
   not_if "#{openstack_cmd} #{openstack_args_heat} stack list -c 'Stack Name' -f value | egrep -q '^#{escm_instancestack_name}$'"
