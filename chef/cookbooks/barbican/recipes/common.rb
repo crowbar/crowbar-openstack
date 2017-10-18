@@ -32,6 +32,22 @@ public_host = CrowbarHelper.get_host_for_public_url(node,
 
 database_connection = fetch_database_connection_string(node[:barbican][:db])
 
+template node[:barbican][:config_file] do
+  source "barbican.conf.erb"
+  owner "root"
+  group node[:barbican][:group]
+  mode 0o640
+  variables(
+    database_connection: database_connection,
+    kek: node[:barbican][:kek],
+    keystone_listener: node[:barbican][:enable_keystone_listener],
+    host_href: "#{barbican_protocol}://#{public_host}:#{node[:barbican][:api][:bind_port]}",
+    rabbit_settings: fetch_rabbitmq_settings,
+    keystone_settings: KeystoneHelper.keystone_settings(node, @cookbook_name)
+  )
+  notifies :reload, resources(service: "apache2")
+end
+
 crowbar_pacemaker_sync_mark "wait-barbican_database" if ha_enabled
 
 # Create the Barbican Database
@@ -69,7 +85,7 @@ end
 execute "barbican-manage db upgrade" do
   user node[:barbican][:user]
   group node[:barbican][:group]
-  command "barbican-manage db upgrade -d #{database_connection} -v head "
+  command "barbican-manage db upgrade -v head"
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
   only_if do
@@ -92,19 +108,3 @@ ruby_block "mark node for barbican db_sync" do
 end
 
 crowbar_pacemaker_sync_mark "create-barbican_database" if ha_enabled
-
-template node[:barbican][:config_file] do
-  source "barbican.conf.erb"
-  owner "root"
-  group node[:barbican][:group]
-  mode 0640
-  variables(
-    database_connection: database_connection,
-    kek: node[:barbican][:kek],
-    keystone_listener: node[:barbican][:enable_keystone_listener],
-    host_href: "#{barbican_protocol}://#{public_host}:#{node[:barbican][:api][:bind_port]}",
-    rabbit_settings: fetch_rabbitmq_settings,
-    keystone_settings: KeystoneHelper.keystone_settings(node, @cookbook_name),
-  )
-  notifies :reload, resources(service: "apache2")
-end
