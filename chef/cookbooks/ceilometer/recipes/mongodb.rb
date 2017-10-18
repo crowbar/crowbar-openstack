@@ -47,6 +47,11 @@ utils_systemd_service_restart mongo_service do
 end
 
 if ha_enabled
+  # Wait for all nodes to reach this point so we know that all nodes
+  # will have all the required packages installed and configured before
+  # we create the pacemaker resources.
+  crowbar_pacemaker_sync_mark "sync-mongodb_before_ha"
+
   crowbar_pacemaker_sync_mark "wait-mongodb_service"
 
   transaction_objects = []
