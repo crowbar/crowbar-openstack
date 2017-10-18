@@ -202,6 +202,11 @@
                           }]
                         }
                       }
+                    },
+                    "ha_rate_limit": {
+                      "type": "map", "required": true, "mapping": {
+                        "neutron-server": { "type": "int", "required": true }
+                      }
                     }
               }}
      }},
