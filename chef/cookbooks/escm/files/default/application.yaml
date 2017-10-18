@@ -123,12 +123,13 @@ resources:
           template:
             direction: ingress
             protocol: tcp
+            ethertype: IPv4
             port_range_min: <%port%>
             port_range_max: <%port%>
         repeat:
           for_each:
             <%protocol%>: { get_param: protocols }
-            <%ethertype%>: { get_param: ethertype }
+            <%ethertype%>: { get_param: ethertypes }
           template:
             direction: egress
             protocol: <%protocol%>
