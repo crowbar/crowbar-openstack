@@ -38,20 +38,38 @@ parameters:
   data_volume_id:
     type: string
     description: The Cinder volume for data
-  registry_port:
-    default: ""
-    type: string
-    description: Docker registry port
-  mail_port:
-    default: 25
-    type: string
   ssh_cert:
     default: ""
     type: string
     description: SSH key to add to servers' /root/.ssh/authorized_keys
+  ports:
+    type: comma_delimited_list
+    label: ports
+    default: "22,80,8080,8081,8880,8881,8680,8681"
+  protocols:
+    type: comma_delimited_list
+    label: protocols
+    default: "tcp,udp,icmp"
+  ethertypes:
+    type: comma_delimited_list
+    label: ethertypes
+    default: "IPv4,IPv6"
+  wait_condition_timeout:
+    default: 1800
+    type: number
 
 resources:
 
+  wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
+  wait_condition:
+    type: OS::Heat::WaitCondition
+    depends_on: appserver
+    properties:
+      handle: { get_resource: wait_handle }
+      timeout: { get_param: wait_condition_timeout }
+      
   db_password:
     type: OS::Heat::RandomString
 
@@ -99,58 +117,22 @@ resources:
       description: "Allow inbound SSH and HTTP traffic"
       name: escm
       rules:
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 22
-          port_range_max: 22
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 80
-          port_range_max: 80
-        - remote_ip_prefix: 0.0.0.0/0
-          protocol: icmp
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 8080
-          port_range_max: 8080
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 8880
-          port_range_max: 8880
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 8081
-          port_range_max: 8081
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 8881
-          port_range_max: 8881
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 8680
-          port_range_max: 8680
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: 8681
-          port_range_max: 8681
-        - direction: egress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: { get_param: registry_port }
-          port_range_max: { get_param: registry_port }
-        - direction: egress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          port_range_min: { get_param: mail_port }
-          port_range_max: { get_param: mail_port }
+        repeat:
+          for_each:
+            <%port%>: { get_param: ports }
+          template:
+            direction: ingress
+            protocol: tcp
+            port_range_min: <%port%>
+            port_range_max: <%port%>
+        repeat:
+          for_each:
+            <%protocol%>: { get_param: protocols }
+            <%ethertype%>: { get_param: ethertype }
+          template:
+            direction: egress
+            protocol: <%protocol%>
+            ethertype: <%ethertype%>
 
   # Parameters that will be available to both user data scripts
   user_data_params:
@@ -172,6 +154,7 @@ resources:
                 - - "/dev/disk/by-id/virtio-"
                   - { get_param: data_volume_id }
             $SSH_CERT: { get_param: ssh_cert }
+            $WAIT_CURL: { get_attr: [ wait_handle, curl_cli ] }
 
   # User data payload for appserver
   userdata_appserver:
