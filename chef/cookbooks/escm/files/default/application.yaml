@@ -131,6 +131,16 @@ resources:
           protocol: tcp
           port_range_min: 8881
           port_range_max: 8881
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 8680
+          port_range_max: 8680
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          port_range_min: 8681
+          port_range_max: 8681
         - direction: egress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp

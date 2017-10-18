@@ -80,7 +80,8 @@ services:
       - /docker/config/oscm-birt/privkey:/import/privkey
       - /docker/config/certs:/import/certs
     ports:
-      - 8181:8181
+      - 8680:8680
+      - 8681:8681
 
   oscm-branding:
 <% if @docker["dockerhub"] == true %>
