@@ -29,6 +29,7 @@ haproxy_loadbalancer "cinder-api" do
   port node[:cinder][:api][:bind_port]
   use_ssl (node[:cinder][:api][:protocol] == "https")
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "cinder", "cinder-controller", "api")
+  rate_limit node[:cinder][:ha_rate_limit]["cinder-api"]
   action :nothing
 end.run_action(:create)
 
