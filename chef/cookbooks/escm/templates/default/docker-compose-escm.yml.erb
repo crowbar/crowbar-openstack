@@ -96,7 +96,7 @@ services:
         syslog-facility: "local4"
     env_file: var.env
     volumes:
-      - /docker/config/brandings:/import:ro
+      - /docker/config/brandings:/import/brandings:ro
       - /docker/config/oscm-branding/privkey:/import/privkey
       - /docker/config/certs:/import/certs
     ports:
