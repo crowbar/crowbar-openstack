@@ -57,3 +57,7 @@ if ! grep -qs "${DOCKER_PATH}/data" /proc/mounts; then
     fi
     mount ${volume_dev_data}
 fi
+
+# Signal to OpenStack that we're finished and ready
+WAIT_CURL="$WAIT_CURL --data-binary '{\"status\": \"SUCCESS\"}' --noproxy '*'"
+eval $WAIT_CURL
