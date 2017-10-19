@@ -32,10 +32,18 @@ for docker_directory in \
     ${DOCKER_PATH}/data/oscm-db/data \
     ${DOCKER_PATH}/config/certs \
     ${DOCKER_PATH}/config/oscm-branding/brandings \
-    ${DOCKER_PATH}/config/oscm-core/privkey \
-    ${DOCKER_PATH}/config/oscm-app/privkey \
-    ${DOCKER_PATH}/config/oscm-birt/privkey \
-    ${DOCKER_PATH}/config/oscm-branding/privkey \
+    ${DOCKER_PATH}/config/oscm-core/ssl/privkey \
+    ${DOCKER_PATH}/config/oscm-core/ssl/cert \
+    ${DOCKER_PATH}/config/oscm-core/ssl/chain \
+    ${DOCKER_PATH}/config/oscm-app/ssl/privkey \
+    ${DOCKER_PATH}/config/oscm-app/ssl/cert \
+    ${DOCKER_PATH}/config/oscm-app/ssl/chain \
+    ${DOCKER_PATH}/config/oscm-birt/ssl/privkey \
+    ${DOCKER_PATH}/config/oscm-birt/ssl/cert \
+    ${DOCKER_PATH}/config/oscm-birt/ssl/chain \
+    ${DOCKER_PATH}/config/oscm-branding/ssl/privkey \
+    ${DOCKER_PATH}/config/oscm-branding/ssl/cert \
+    ${DOCKER_PATH}/config/oscm-branding/ssl/chain \
     ${DOCKER_PATH}/logs/oscm-app \
     ${DOCKER_PATH}/logs/oscm-birt \
     ${DOCKER_PATH}/logs/oscm-branding \
@@ -85,13 +93,13 @@ fi
 
 # Copy certificate files
 if [ -f ${SSL_CONFIG_PATH}/oscm.key ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/privkey ${DOCKER_PATH}/config/oscm-app/privkey ${DOCKER_PATH}/config/oscm-birt/privkey ${DOCKER_PATH}/config/oscm-branding/privkey | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.key
+    echo ${DOCKER_PATH}/config/oscm-core/ssl/privkey ${DOCKER_PATH}/config/oscm-app/ssl/privkey ${DOCKER_PATH}/config/oscm-birt/ssl/privkey ${DOCKER_PATH}/config/oscm-branding/ssl/privkey | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.key
 fi
 if [ -f ${SSL_CONFIG_PATH}/oscm.crt ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/privkey ${DOCKER_PATH}/config/oscm-app/privkey ${DOCKER_PATH}/config/oscm-birt/privkey ${DOCKER_PATH}/config/oscm-branding/privkey ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.crt
+    echo ${DOCKER_PATH}/config/oscm-core/ssl/cert ${DOCKER_PATH}/config/oscm-app/ssl/cert ${DOCKER_PATH}/config/oscm-birt/ssl/cert ${DOCKER_PATH}/config/oscm-branding/ssl/cert ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.crt
 fi
 if [ -f ${SSL_CONFIG_PATH}/oscm.chain ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/privkey ${DOCKER_PATH}/config/oscm-app/privkey ${DOCKER_PATH}/config/oscm-birt/privkey ${DOCKER_PATH}/config/oscm-branding/privkey | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.chain
+    echo ${DOCKER_PATH}/config/oscm-core/ssl/chain ${DOCKER_PATH}/config/oscm-app/ssl/chain ${DOCKER_PATH}/config/oscm-birt/ssl/chain ${DOCKER_PATH}/config/oscm-branding/ssl/chain | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.chain
 fi
 
 # If http proxy is enabled, create Docker config file
