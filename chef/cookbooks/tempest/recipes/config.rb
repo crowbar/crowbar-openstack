@@ -44,16 +44,12 @@ tempest_magnum_settings = node[:tempest][:magnum]
 # heat (orchestration)
 tempest_heat_settings = node[:tempest][:heat]
 
-register_auth_hash = { user: keystone_settings["admin_user"],
-                       password: keystone_settings["admin_password"],
-                       project: keystone_settings["admin_project"] }
-
 keystone_register "tempest tempest wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   action :wakeup
 end
 
@@ -62,7 +58,7 @@ keystone_register "create tenant #{tempest_comp_tenant} for tempest" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   project_name tempest_comp_tenant
   action :add_project
 end
@@ -109,7 +105,7 @@ users.each do |user|
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    auth register_auth_hash
+    auth lazy { node[:keystone][:admin][:credentials] }
     user_name user["name"]
     user_password user["pass"]
     project_name tempest_comp_tenant
@@ -122,7 +118,7 @@ roles.each do |role|
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    auth register_auth_hash
+    auth lazy { node[:keystone][:admin][:credentials] }
     role_name role
     action :add_role
   end
@@ -133,7 +129,7 @@ end
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    auth register_auth_hash
+    auth lazy { node[:keystone][:admin][:credentials] }
     user_name user["name"]
     role_name user["role"]
     project_name tempest_comp_tenant
@@ -145,7 +141,7 @@ end
     insecure keystone_settings["insecure"]
     host keystone_settings["internal_url_host"]
     port keystone_settings["admin_port"]
-    auth register_auth_hash
+    auth lazy { node[:keystone][:admin][:credentials] }
     user_name user["name"]
     project_name tempest_comp_tenant
     action :add_ec2
@@ -158,7 +154,7 @@ keystone_register "add #{keystone_settings['admin_user']}:#{tempest_comp_tenant}
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name keystone_settings["admin_user"]
   role_name "admin"
   project_name tempest_comp_tenant

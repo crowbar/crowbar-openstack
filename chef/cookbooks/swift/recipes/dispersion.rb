@@ -39,16 +39,12 @@ service_tenant = node[:swift][:dispersion][:service_tenant]
 service_user = node[:swift][:dispersion][:service_user]
 service_password = node[:swift][:dispersion][:service_password]
 
-register_auth_hash = { user: keystone_settings["admin_user"],
-                       password: keystone_settings["admin_password"],
-                       project: keystone_settings["admin_project"] }
-
 keystone_register "swift dispersion wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   action :wakeup
 end
 
@@ -57,7 +53,7 @@ keystone_register "create tenant #{service_tenant} for dispersion" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   project_name service_tenant
   action :add_project
 end
@@ -67,7 +63,7 @@ keystone_register "add #{service_user}:#{service_tenant} user" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name service_user
   user_password service_password
   project_name service_tenant
@@ -79,7 +75,7 @@ keystone_register "add #{service_user}:#{service_tenant} user admin role" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name service_user
   role_name "admin"
   project_name service_tenant

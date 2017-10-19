@@ -165,16 +165,12 @@ case proxy_config[:auth_method]
 
      crowbar_pacemaker_sync_mark "wait-swift_register" if ha_enabled
 
-     register_auth_hash = { user: keystone_settings["admin_user"],
-                            password: keystone_settings["admin_password"],
-                            project: keystone_settings["admin_project"] }
-
      keystone_register "swift proxy wakeup keystone" do
        protocol keystone_settings["protocol"]
        insecure keystone_settings["insecure"]
        host keystone_settings["internal_url_host"]
        port keystone_settings["admin_port"]
-       auth register_auth_hash
+       auth lazy { node[:keystone][:admin][:credentials] }
        action :wakeup
      end
 
@@ -185,7 +181,7 @@ case proxy_config[:auth_method]
        insecure keystone_settings["insecure"]
        host keystone_settings["internal_url_host"]
        port keystone_settings["admin_port"]
-       auth register_auth_hash
+       auth lazy { node[:keystone][:admin][:credentials] }
        role_name role
        action :add_role
      end
@@ -195,7 +191,7 @@ case proxy_config[:auth_method]
        insecure keystone_settings["insecure"]
        host keystone_settings["internal_url_host"]
        port keystone_settings["admin_port"]
-       auth register_auth_hash
+       auth lazy { node[:keystone][:admin][:credentials] }
        user_name keystone_settings["service_user"]
        user_password keystone_settings["service_password"]
        project_name keystone_settings["service_tenant"]
@@ -207,7 +203,7 @@ case proxy_config[:auth_method]
        insecure keystone_settings["insecure"]
        host keystone_settings["internal_url_host"]
        port keystone_settings["admin_port"]
-       auth register_auth_hash
+       auth lazy { node[:keystone][:admin][:credentials] }
        user_name keystone_settings["service_user"]
        project_name keystone_settings["service_tenant"]
        role_name "admin"
@@ -218,7 +214,7 @@ case proxy_config[:auth_method]
        protocol keystone_settings["protocol"]
        insecure keystone_settings["insecure"]
        host keystone_settings["internal_url_host"]
-       auth register_auth_hash
+       auth lazy { node[:keystone][:admin][:credentials] }
        port keystone_settings["admin_port"]
        service_name "swift"
        service_type "object-store"
@@ -230,7 +226,7 @@ case proxy_config[:auth_method]
        protocol keystone_settings["protocol"]
        insecure keystone_settings["insecure"]
        host keystone_settings["internal_url_host"]
-       auth register_auth_hash
+       auth lazy { node[:keystone][:admin][:credentials] }
        port keystone_settings["admin_port"]
        endpoint_service "swift"
        endpoint_region keystone_settings["endpoint_region"]

@@ -93,16 +93,12 @@ my_public_host = CrowbarHelper.get_host_for_public_url(node, false)
 
 db_connection = fetch_database_connection_string(node[:ironic][:db])
 
-register_auth_hash = { user: keystone_settings["admin_user"],
-                       password: keystone_settings["admin_password"],
-                       project: keystone_settings["admin_project"] }
-
 keystone_register "ironic wakeup keystone" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   action :wakeup
 end
 
@@ -111,7 +107,7 @@ keystone_register "register ironic service" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   service_name "ironic"
   service_type "baremetal"
   service_description "Ironic baremetal provisioning service"
@@ -127,7 +123,7 @@ keystone_register "register ironic endpoint" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   endpoint_service "ironic"
   endpoint_region keystone_settings["endpoint_region"]
   endpoint_publicURL public_endpoint
@@ -141,7 +137,7 @@ keystone_register "register ironic user" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
   project_name keystone_settings["service_tenant"]
@@ -153,7 +149,7 @@ keystone_register "give ironic user admin role in service tenant" do
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
   port keystone_settings["admin_port"]
-  auth register_auth_hash
+  auth lazy { node[:keystone][:admin][:credentials] }
   user_name keystone_settings["service_user"]
   project_name keystone_settings["service_tenant"]
   role_name "admin"
