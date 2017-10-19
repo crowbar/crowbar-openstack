@@ -297,20 +297,6 @@ ruby_block "get_escm_secrets" do
     action :create
 end
 
-template "#{escm_install_path}/user-data/escm-config" do
-  source "escm.conf.erb"
-  owner escm_group
-  group escm_group
-  mode 0640
-  variables(
-    mail: node[:escm][:mail],
-    docker: node[:escm][:docker],
-    proxy: node[:escm][:proxy],
-    host_fqdn: node[:escm][:ssl][:fqdn].empty? ? node[:escm][:openstack][:instance_stack][:ip_appserver] : node[:escm][:ssl][:fqdn],
-    instance: node[:escm][:openstack][:instance_stack]
-  )
-end
-
 template "#{escm_install_path}/docker-compose-initdb.yml" do
   source "docker-compose-initdb.yml.erb"
   owner escm_group
@@ -350,11 +336,7 @@ ruby_block "inject_escm_scripts" do
       args = "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i #{escm_keypair_crowbar_sshkey}"
       ip_appserver = node[:escm][:openstack][:instance_stack][:ip_appserver]
       Chef::Resource::RubyBlock.send(:include, Chef::Mixin::ShellOut)
-      command = "ssh #{args} #{ip_appserver} 'mkdir -p #{escm_path}/config'"
-      command_out = shell_out(command)
       command = "ssh #{args} #{ip_appserver} 'mkdir -p #{escm_path}/docker-compose'"
-      command_out = shell_out(command)
-      command = "scp #{args} #{escm_install_path}/user-data/escm-config #{ip_appserver}:#{escm_path}/config"
       command_out = shell_out(command)
       command = "scp #{args} #{escm_install_path}/docker-compose-*.yml #{ip_appserver}:#{escm_path}/docker-compose"
       command_out = shell_out(command)

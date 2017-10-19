@@ -8,7 +8,6 @@ exec &> /var/log/setup-machine.log
 
 # Variables for this script
 CONFIG_BASE=/etc/escm
-CONFIG_PATH=${CONFIG_BASE}/config
 SSL_CONFIG_PATH=${CONFIG_BASE}/ssl
 COMPOSE_CONFIG_PATH=${CONFIG_BASE}/docker-compose
 DOCKER_PATH=/docker
@@ -16,7 +15,7 @@ DOCKER_PATH=/docker
 # Enable automatic exporting of variables
 set -a
 # Read configuration files
-source ${CONFIG_PATH}/escm-config
+source ${COMPOSE_CONFIG_PATH}/var.env
 # Disable automatic exporting of variables
 set +a
 
