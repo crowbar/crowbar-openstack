@@ -138,6 +138,8 @@ class MonascaService < OpenstackServiceObject
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "monasca-master"
     validate_one_for_role proposal, "monasca-server"
+    all_nodes = NodeObject.all
+    monasca_server_node = select_nodes_for_role(all_nodes, "monasca-server", "monitoring")[0]
     nodes = proposal["deployment"][@bc_name]["elements"]
     nodes["monasca-server"].each do |node|
       n = NodeObject.find_node_by_name(node)
@@ -151,11 +153,40 @@ class MonascaService < OpenstackServiceObject
       end
     end
 
-    unless network_present? proposal["attributes"][@bc_name]["network"]
-      validation_error I18n.t(
-        "barclamp.#{@bc_name}.validation.invalid_network",
-        network: proposal["attributes"][@bc_name]["network"]
-      )
+    networks = ["internal", "clients"]
+
+    networks.each do |net_type|
+      unless network_present? proposal["attributes"][@bc_name]["network"][net_type]
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.invalid_network",
+          network: proposal["attributes"][@bc_name]["network"][net_type]
+        )
+        # no need for the remaining checks in this case.
+        next
+      end
+
+      # Check whether the monasca-server nodes have interfaces and IP
+      # addresses on both Monasca networks
+      nodes["monasca-server"].each do |node|
+        unless interface_present? node, proposal["attributes"][@bc_name]["network"][net_type]
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.missing_interface",
+            node: node,
+            network: proposal["attributes"][@bc_name]["network"][net_type]
+          )
+
+          # no need to check for an address allocation in this case
+          next
+        end
+
+        unless address_present? node, proposal["attributes"][@bc_name]["network"][net_type]
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.missing_address",
+            node: node,
+            network: proposal["attributes"][@bc_name]["network"][net_type]
+          )
+        end
+      end
     end
 
     # TODO: uncomment for cluster support
@@ -200,6 +231,21 @@ class MonascaService < OpenstackServiceObject
   def network_present?(network_name)
     net_svc = NetworkService.new @logger
     network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
-    !network_proposal["attributes"]["network"]["networks"][network_name].nil?
+    network_proposal["attributes"]["network"]["networks"].key? network_name
+  end
+
+  def interface_present?(node_name, network_name)
+    node = NodeObject.find_by_name(node_name)
+    if node.get_network_by_type(network_name).nil?
+      return false
+    end
+
+    true
+  end
+
+  def address_present?(node_name, network_name)
+    node = NodeObject.find_by_name(node_name)
+    net_info = node.get_network_by_type(network_name)
+    net_info["address"].nil? ? false : true
   end
 end

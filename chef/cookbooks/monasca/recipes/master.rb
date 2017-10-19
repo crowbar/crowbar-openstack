@@ -45,7 +45,7 @@ hosts_template =
     "monasca-hosts-cluster.erb"
   end
 
-my_ip_net = node[:monasca][:network]
+my_ip_net = node[:monasca][:network][:internal]
 
 # Look up the listening address for monasca backend services on the node with
 # the monasca-server role (this information is a parameter for

@@ -164,7 +164,14 @@
             "debug": { "type": "bool" },
             "group": { "required": true, "type": "str" },
             "user": { "required": true, "type": "str" },
-            "network": { "required": true, "type": "str" },
+            "network": {
+              "required": true,
+              "type": "map",
+              "mapping": {
+                "internal": { "required": true, "type": "str" },
+                "clients": { "required": true, "type": "str" }
+              }
+            },
             "database_instance": { "type": "str", "required": true },
             "keystone_instance": { "type": "str", "required": true },
             "service_user": { "type": "str", "required": true },

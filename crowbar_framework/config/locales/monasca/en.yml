@@ -60,3 +60,5 @@ en:
         user: 'User for Monasca services'
       validation:
         invalid_network: 'Network "%{network}" configured for Monasca is not defined in the configuration of the network barclamp.'
+        missing_interface: 'Node %{node} does not have an interface on network %{network}.'
+        missing_address: 'Node %{node} does not have an IP address allocated for its interface on network %{network}.'
