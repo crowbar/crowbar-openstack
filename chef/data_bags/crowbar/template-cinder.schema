@@ -324,6 +324,11 @@
                 "user": { "type": "str", "required": true },
                 "database": { "type": "str", "required": true }
               }
+            },
+            "ha_rate_limit": {
+              "type": "map", "required": true, "mapping": {
+                "cinder-api": { "type": "int", "required": true }
+              }
             }
           }
         }
