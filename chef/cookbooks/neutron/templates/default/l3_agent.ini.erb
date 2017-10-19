@@ -11,3 +11,9 @@ periodic_interval = <%= @periodic_interval %>
 periodic_fuzzy_delay = <%= @periodic_fuzzy_delay %>
 debug = <%= @debug ? "True" : "False" %>
 [AGENT]
+extensions = fwaas
+
+[fwaas]
+agent_version = v1
+driver = iptables
+enabled = True
