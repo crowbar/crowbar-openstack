@@ -20,6 +20,7 @@ haproxy_loadbalancer "neutron-server" do
   port node[:neutron][:api][:service_port]
   use_ssl (node[:neutron][:api][:protocol] == "https")
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "neutron", "neutron-server", "server")
+  rate_limit node[:neutron][:ha_rate_limit]["neutron-server"]
   action :nothing
 end.run_action(:create)
 

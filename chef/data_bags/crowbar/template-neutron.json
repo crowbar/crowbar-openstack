@@ -165,6 +165,9 @@
           "wapi_version": "2.2.2",
           "wapi_max_results": -1000
           }
+      },
+      "ha_rate_limit": {
+        "neutron-server": 0
       }
     }
   },
@@ -172,7 +175,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 112,
+      "schema-revision": 113,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]
