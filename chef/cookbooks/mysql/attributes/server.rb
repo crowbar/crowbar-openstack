@@ -37,4 +37,3 @@ default[:mysql][:ha][:ports][:admin_port] = 3306
 # in pacemamker
 default[:mysql][:ha][:op][:monitor][:interval] = "20s"
 default[:mysql][:ha][:op][:monitor][:role]     = "Master"
-default[:mysql][:ha][:op][:promote][:timeout]  = "300s"
