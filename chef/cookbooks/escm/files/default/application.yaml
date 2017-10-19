@@ -42,18 +42,6 @@ parameters:
     default: ""
     type: string
     description: SSH key to add to servers' /root/.ssh/authorized_keys
-  ports:
-    type: comma_delimited_list
-    label: ports
-    default: "22,80,8080,8081,8880,8881,8680,8681"
-  protocols:
-    type: comma_delimited_list
-    label: protocols
-    default: "tcp,udp,icmp"
-  ethertypes:
-    type: comma_delimited_list
-    label: ethertypes
-    default: "IPv4,IPv6"
   wait_condition_timeout:
     default: 1800
     type: number
@@ -117,23 +105,72 @@ resources:
       description: "Allow inbound SSH and HTTP traffic"
       name: escm
       rules:
-        repeat:
-          for_each:
-            <%port%>: { get_param: ports }
-          template:
-            direction: ingress
-            protocol: tcp
-            ethertype: IPv4
-            port_range_min: <%port%>
-            port_range_max: <%port%>
-        repeat:
-          for_each:
-            <%protocol%>: { get_param: protocols }
-            <%ethertype%>: { get_param: ethertypes }
-          template:
-            direction: egress
-            protocol: <%protocol%>
-            ethertype: <%ethertype%>
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          ethertype: IPv4
+          port_range_min: 22
+          port_range_max: 22
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          ethertype: IPv4
+          port_range_min: 80
+          port_range_max: 80
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          ethertype: IPv4
+          port_range_min: 8080
+          port_range_max: 8080
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          ethertype: IPv4
+          port_range_min: 8880
+          port_range_max: 8880
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          ethertype: IPv4
+          port_range_min: 8081
+          port_range_max: 8081
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          ethertype: IPv4
+          port_range_min: 8881
+          port_range_max: 8881
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          ethertype: IPv4
+          port_range_min: 8680
+          port_range_max: 8680
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          ethertype: IPv4
+          port_range_min: 8681
+          port_range_max: 8681
+        - direction: egress
+          protocol: tcp
+          ethertype: IPv4
+        - direction: egress
+          protocol: tcp
+          ethertype: IPv6
+        - direction: egress
+          protocol: udp
+          ethertype: IPv4
+        - direction: egress
+          protocol: udp
+          ethertype: IPv6
+        - direction: egress
+          protocol: icmp
+          ethertype: IPv4
+        - direction: egress
+          protocol: icmp
+          ethertype: IPv6
 
   # Parameters that will be available to both user data scripts
   user_data_params:
