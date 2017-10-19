@@ -518,14 +518,9 @@ unless updated_password.nil? ||
     end.run_action(:add_user)
   end
 
-  ruby_block "update admin password on node attributes" do
-    block do
-      node.set[:keystone][:admin][:password] = updated_password
-      node.save
-      register_auth_hash[:password] = updated_password
-    end
-    action :nothing
-  end.run_action(:create)
+  node.set[:keystone][:admin][:password] = updated_password
+  node.save
+  register_auth_hash[:password] = updated_password
 end
 
 # Silly wake-up call - this is a hack; we use retries because the server was
