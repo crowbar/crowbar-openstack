@@ -198,4 +198,11 @@ class DatabaseService < PacemakerServiceObject
 
     @logger.debug("Database apply_role_pre_chef_call: leaving")
   end
+
+  def post_schema_migration_callback(proposal, role)
+    return if role.nil?
+    sql_engine = role.default_attributes["database"]["sql_engine"]
+    role.default_attributes[sql_engine] = role.default_attributes["database"][sql_engine]
+    role.save
+  end
 end
