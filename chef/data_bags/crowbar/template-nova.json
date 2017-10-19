@@ -22,6 +22,7 @@
       "use_shared_instance_storage": false,
       "use_migration": false,
       "cross_az_attach": true,
+      "default_schedule_zone": "",
       "create_default_flavors": true,
       "image_cache_manager_interval": 0,
       "compute_remotefs_sshkey": "",

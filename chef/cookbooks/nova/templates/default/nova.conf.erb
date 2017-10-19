@@ -56,6 +56,9 @@ config_drive_format = vfat
 <% if @force_config_drive || @libvirt_type.eql?('zvm') %>
 force_config_drive = True
 <% end %>
+<% unless node[:nova][:default_schedule_zone].empty? -%>
+default_schedule_zone = <%= node[:nova][:default_schedule_zone] %>
+<% end %>
 debug = <%= node[:nova][:debug] %>
 log_dir = /var/log/nova
 use_syslog = <%= node[:nova][:use_syslog] ? 'True' : 'False' %>
