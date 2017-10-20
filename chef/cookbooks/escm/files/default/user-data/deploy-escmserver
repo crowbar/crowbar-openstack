@@ -12,6 +12,13 @@ SSL_CONFIG_PATH=${CONFIG_BASE}/ssl
 COMPOSE_CONFIG_PATH=${CONFIG_BASE}/docker-compose
 DOCKER_PATH=/docker
 
+# Check if update is necessary
+if [ -f ${DOCKER_PATH}/var.env.current ]; then
+  if [ $(diff ${DOCKER_PATH}/var.env.current ${COMPOSE_CONFIG_PATH}/var.env | wc -l) == "0" ]; then
+    exit
+  fi
+fi
+
 # Enable automatic exporting of variables
 set -a
 # Read configuration files
@@ -182,3 +189,7 @@ docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml rm -f
 
 # Start application containers
 docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml up -d
+
+# Backup the current configuration for update check by the next run
+cp ${DOCKER_PATH}/var.env ${DOCKER_PATH}/var.env.current
+
