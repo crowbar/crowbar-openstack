@@ -234,7 +234,7 @@ end
 if use_l3_agent
   # Remove old resource
   ha_tool_primitive_name = "neutron-ha-tool"
-  pacemaker_primitive ha_tool_primitive_name do
+  openstack_pacemaker_primitive ha_tool_primitive_name do
     agent node[:neutron][:ha][:network][:ha_tool_ra]
     action [:stop, :delete]
     only_if "crm configure show #{ha_tool_primitive_name}"
@@ -261,7 +261,7 @@ if use_l3_agent
   ha_service_transaction_objects = []
   ha_service_primitive_name = "neutron-l3-ha-service"
 
-  pacemaker_primitive ha_service_primitive_name do
+  openstack_pacemaker_primitive ha_service_primitive_name do
     agent "systemd:neutron-l3-ha-service"
     op node[:neutron][:ha][:neutron_l3_ha_resource][:op]
     action :update

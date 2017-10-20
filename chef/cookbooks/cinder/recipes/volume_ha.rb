@@ -24,7 +24,7 @@ crowbar_pacemaker_sync_mark "wait-cinder_volume_ha_resources"
 transaction_objects = []
 
 service_name = "cinder-volume"
-pacemaker_primitive service_name do
+openstack_pacemaker_primitive service_name do
   agent node[:cinder][:ha][:volume_ra]
   op node[:cinder][:ha][:op]
   action :update

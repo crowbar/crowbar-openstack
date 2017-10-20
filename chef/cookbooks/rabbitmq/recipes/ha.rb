@@ -103,7 +103,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   drbd_params = {}
   drbd_params["drbd_resource"] = drbd_resource
 
-  pacemaker_primitive drbd_primitive do
+  openstack_pacemaker_primitive drbd_primitive do
     agent "ocf:linbit:drbd"
     params drbd_params
     op rabbitmq_op
@@ -130,7 +130,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   storage_transaction_objects << "pacemaker_location[#{ms_location_name}]"
 end
 
-pacemaker_primitive fs_primitive do
+openstack_pacemaker_primitive fs_primitive do
   agent "ocf:heartbeat:Filesystem"
   params fs_params
   op rabbitmq_op
@@ -239,7 +239,7 @@ end # ruby_block
 
 service_transaction_objects = []
 
-pacemaker_primitive admin_vip_primitive do
+openstack_pacemaker_primitive admin_vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
   params ({
     "ip" => admin_ip_addr
@@ -251,7 +251,7 @@ end
 service_transaction_objects << "pacemaker_primitive[#{admin_vip_primitive}]"
 
 if node[:rabbitmq][:listen_public]
-  pacemaker_primitive public_vip_primitive do
+  openstack_pacemaker_primitive public_vip_primitive do
     agent "ocf:heartbeat:IPaddr2"
     params ({
       "ip" => public_ip_addr
@@ -266,7 +266,7 @@ if node[:rabbitmq][:listen_public]
   #       constraints before we can stop and delete the primitive.
 end
 
-pacemaker_primitive service_name do
+openstack_pacemaker_primitive service_name do
   agent agent_name
   params ({
     "nodename" => node[:rabbitmq][:nodename]
@@ -341,7 +341,7 @@ end
 
 # When listen_public is disabled remove the VIP primitive for rabbitmq
 unless node[:rabbitmq][:listen_public]
-  pacemaker_primitive public_vip_primitive do
+  openstack_pacemaker_primitive public_vip_primitive do
     agent "ocf:heartbeat:IPaddr2"
     action [:stop, :delete]
     only_if "crm configure show #{public_vip_primitive}"

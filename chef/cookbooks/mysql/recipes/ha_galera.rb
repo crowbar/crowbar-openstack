@@ -139,7 +139,7 @@ crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
 
-pacemaker_primitive service_name do
+openstack_pacemaker_primitive service_name do
   agent resource_agent
   params({
     "enable_creation" => true,

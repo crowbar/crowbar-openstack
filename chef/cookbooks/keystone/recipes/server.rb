@@ -436,7 +436,7 @@ if node[:keystone][:token_format] == "fernet"
   service_transaction_objects = []
 
   keystone_fernet_primitive = "keystone-fernet-rotate"
-  pacemaker_primitive keystone_fernet_primitive do
+  openstack_pacemaker_primitive keystone_fernet_primitive do
     agent node[:keystone][:ha][:fernet][:agent]
     params({
       "target" => "/var/lib/keystone/keystone-fernet-rotate",

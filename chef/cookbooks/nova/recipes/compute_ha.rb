@@ -110,7 +110,7 @@ end
 
 if node[:platform_family] == "suse" && old_remote_nodes.empty?
   virtlogd_primitive = "virtlogd-compute"
-  pacemaker_primitive virtlogd_primitive do
+  openstack_pacemaker_primitive virtlogd_primitive do
     agent "systemd:virtlogd"
     op nova[:nova][:ha][:op]
     action :update
@@ -121,7 +121,7 @@ if node[:platform_family] == "suse" && old_remote_nodes.empty?
 end
 
 libvirtd_primitive = "libvirtd-compute"
-pacemaker_primitive libvirtd_primitive do
+openstack_pacemaker_primitive libvirtd_primitive do
   agent "systemd:libvirtd"
   op nova[:nova][:ha][:op]
   action :update
@@ -135,7 +135,7 @@ when "ml2"
   # neutron_agent & neutron_agent_ra are empty for plugins like cisco_apic_ml2 and apic_gbp
   unless neutron_agent.empty? || neutron_agent_ra.empty?
     neutron_agent_primitive = "#{neutron_agent.sub(/^openstack-/, "")}-compute"
-    pacemaker_primitive neutron_agent_primitive do
+    openstack_pacemaker_primitive neutron_agent_primitive do
       agent neutron_agent_ra
       op neutron[:neutron][:ha][:network][:op]
       action :update
@@ -148,7 +148,7 @@ end
 
 if neutron[:neutron][:use_dvr]
   l3_agent_primitive = "neutron-l3-agent-compute"
-  pacemaker_primitive l3_agent_primitive do
+  openstack_pacemaker_primitive l3_agent_primitive do
     agent neutron[:neutron][:ha][:network][:l3_ra]
     op neutron[:neutron][:ha][:network][:op]
     action :update
@@ -158,7 +158,7 @@ if neutron[:neutron][:use_dvr]
   compute_transaction_objects << "pacemaker_primitive[#{l3_agent_primitive}]"
 
   metadata_agent_primitive = "neutron-metadata-agent-compute"
-  pacemaker_primitive metadata_agent_primitive do
+  openstack_pacemaker_primitive metadata_agent_primitive do
     agent neutron[:neutron][:ha][:network][:metadata_ra]
     op neutron[:neutron][:ha][:network][:op]
     action :update
@@ -169,7 +169,7 @@ if neutron[:neutron][:use_dvr]
 end
 
 nova_primitive = "nova-compute"
-pacemaker_primitive nova_primitive do
+openstack_pacemaker_primitive nova_primitive do
   agent "ocf:openstack:NovaCompute"
   params ({
     "auth_url"       => internal_auth_url_v2,
@@ -229,7 +229,7 @@ end
 controller_transaction_objects = []
 
 evacuate_primitive = "nova-evacuate"
-pacemaker_primitive evacuate_primitive do
+openstack_pacemaker_primitive evacuate_primitive do
   agent "ocf:openstack:NovaEvacuate"
   params ({
     "auth_url"       => internal_auth_url_v2,
@@ -270,7 +270,7 @@ hostmap = remote_nodes.map do |remote_node|
 end.sort.join(";")
 
 fence_primitive = "fence-nova"
-pacemaker_primitive fence_primitive do
+openstack_pacemaker_primitive fence_primitive do
   agent "stonith:fence_compute"
   params ({
     "pcmk_host_map"  => hostmap,

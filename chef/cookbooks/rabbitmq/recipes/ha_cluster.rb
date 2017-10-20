@@ -36,7 +36,7 @@ crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources"
 transaction_objects = []
 
 service_name = "rabbitmq"
-pacemaker_primitive service_name do
+openstack_pacemaker_primitive service_name do
   agent agent_name
   # nodename is empty so that we explicitly depend on the config files
   params ({
