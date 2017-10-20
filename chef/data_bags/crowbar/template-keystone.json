@@ -40,8 +40,7 @@
       "admin": {
         "project": "admin",
         "username": "admin",
-        "password": "crowbar",
-        "updated_password": ""
+        "password": "crowbar"
       },
       "service": {
         "project": "service",
@@ -174,7 +173,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 203,
+      "schema-revision": 204,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },
