@@ -3,14 +3,17 @@
 set -x
 # Exit on error
 set -e
-# Redirect all output to log file
-exec &> /var/log/setup-machine.log
 
 # Variables for this script
 CONFIG_BASE=/etc/escm
 SSL_CONFIG_PATH=${CONFIG_BASE}/ssl
 COMPOSE_CONFIG_PATH=${CONFIG_BASE}/docker-compose
 DOCKER_PATH=/docker
+
+# Redirect all output to log file
+exec &>> ${DOCKER_PATH}/setup-machine-$(date '+%Y-%m-%d').log
+
+echo "$(date '+%Y-%m-%d %H:%M:%S') starting setup..."
 
 # Check if update is necessary
 if [ -f ${DOCKER_PATH}/var.env.current ]; then
@@ -193,3 +196,4 @@ docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml up -d
 # Backup the current configuration for update check by the next run
 cp ${DOCKER_PATH}/var.env ${DOCKER_PATH}/var.env.current
 
+echo "$(date '+%Y-%m-%d %H:%M:%S') setup finished."
