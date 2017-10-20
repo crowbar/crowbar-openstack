@@ -34,9 +34,9 @@ services:
     links:
       - oscm-db:oscm-db
     volumes:
-      - /docker/config/oscm-core/ssl/privkey:/import/privkey
-      - /docker/config/oscm-core/ssl/cert:/import/privkey
-      - /docker/config/oscm-core/ssl/chain:/import/privkey
+      - /docker/config/oscm-core/ssl/privkey:/import/ssl/privkey
+      - /docker/config/oscm-core/ssl/cert:/import/ssl/cert
+      - /docker/config/oscm-core/ssl/chain:/import/ssl/chain
       - /docker/config/certs:/import/certs
     ports:
       - 8080:8080
@@ -60,9 +60,9 @@ services:
     links:
       - oscm-db:oscm-db
     volumes:
-      - /docker/config/oscm-app/ssl/privkey:/import/privkey
-      - /docker/config/oscm-app/ssl/cert:/import/privkey
-      - /docker/config/oscm-app/ssl/chain:/import/privkey
+      - /docker/config/oscm-app/ssl/privkey:/import/ssl/privkey
+      - /docker/config/oscm-app/ssl/cert:/import/ssl/cert
+      - /docker/config/oscm-app/ssl/chain:/import/ssl/chain
       - /docker/config/certs:/import/certs
     ports:
       - 8880:8880
@@ -81,9 +81,9 @@ services:
         syslog-facility: "local3"
     env_file: var.env
     volumes:
-      - /docker/config/oscm-birt/ssl/privkey:/import/privkey
-      - /docker/config/oscm-birt/ssl/cert:/import/privkey
-      - /docker/config/oscm-birt/ssl/chain:/import/privkey
+      - /docker/config/oscm-birt/ssl/privkey:/import/ssl/privkey
+      - /docker/config/oscm-birt/ssl/cert:/import/ssl/cert
+      - /docker/config/oscm-birt/ssl/chain:/import/ssl/chain
       - /docker/config/certs:/import/certs
     ports:
       - 8680:8680
@@ -103,9 +103,9 @@ services:
     env_file: var.env
     volumes:
       - /docker/config/brandings:/import/brandings:ro
-      - /docker/config/oscm-branding/ssl/privkey:/import/privkey
-      - /docker/config/oscm-branding/ssl/cert:/import/privkey
-      - /docker/config/oscm-branding/ssl/chain:/import/privkey
+      - /docker/config/oscm-branding/ssl/privkey:/import/ssl/privkey
+      - /docker/config/oscm-branding/ssl/cert:/import/ssl/cert
+      - /docker/config/oscm-branding/ssl/chain:/import/ssl/chain
       - /docker/config/certs:/import/certs
     ports:
       - 4443:443
