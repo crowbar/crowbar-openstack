@@ -320,10 +320,7 @@ unless node[:nova][:compute_remotefs_sshkey].empty?
     content "#{node[:nova][:compute_remotefs_sshkey]}\n"
   end
 
-  ssh_auth_keys += %x[cat <<EOF | ssh-keygen -y -f /dev/stdin
-  #{node[:nova][:compute_remotefs_sshkey]}
-  EOF
-  ].chomp
+  ssh_auth_keys += %x[ssh-keygen -y -f "#{node[:nova][:home_dir]}/.ssh/id_ed25519"].chomp
 end
 
 file "#{node[:nova][:home_dir]}/.ssh/authorized_keys" do
