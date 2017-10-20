@@ -99,14 +99,14 @@ if [ -f ${COMPOSE_CONFIG_PATH}/var.env ]; then
 fi
 
 # Copy certificate files
-if [ -f ${SSL_CONFIG_PATH}/oscm.key ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/ssl/privkey ${DOCKER_PATH}/config/oscm-app/ssl/privkey ${DOCKER_PATH}/config/oscm-birt/ssl/privkey ${DOCKER_PATH}/config/oscm-branding/ssl/privkey | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.key
+if [ -f ${SSL_CONFIG_PATH}/escm.key ]; then
+    echo ${DOCKER_PATH}/config/oscm-core/ssl/privkey ${DOCKER_PATH}/config/oscm-app/ssl/privkey ${DOCKER_PATH}/config/oscm-birt/ssl/privkey ${DOCKER_PATH}/config/oscm-branding/ssl/privkey | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.key
 fi
-if [ -f ${SSL_CONFIG_PATH}/oscm.crt ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/ssl/cert ${DOCKER_PATH}/config/oscm-app/ssl/cert ${DOCKER_PATH}/config/oscm-birt/ssl/cert ${DOCKER_PATH}/config/oscm-branding/ssl/cert ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.crt
+if [ -f ${SSL_CONFIG_PATH}/escm.crt ]; then
+    echo ${DOCKER_PATH}/config/oscm-core/ssl/cert ${DOCKER_PATH}/config/oscm-app/ssl/cert ${DOCKER_PATH}/config/oscm-birt/ssl/cert ${DOCKER_PATH}/config/oscm-branding/ssl/cert ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.crt
 fi
-if [ -f ${SSL_CONFIG_PATH}/oscm.chain ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/ssl/chain ${DOCKER_PATH}/config/oscm-app/ssl/chain ${DOCKER_PATH}/config/oscm-birt/ssl/chain ${DOCKER_PATH}/config/oscm-branding/ssl/chain | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/oscm.chain
+if [ -f ${SSL_CONFIG_PATH}/escm.chain ]; then
+    echo ${DOCKER_PATH}/config/oscm-core/ssl/chain ${DOCKER_PATH}/config/oscm-app/ssl/chain ${DOCKER_PATH}/config/oscm-birt/ssl/chain ${DOCKER_PATH}/config/oscm-branding/ssl/chain | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.chain
 fi
 
 # If http proxy is enabled, create Docker config file
