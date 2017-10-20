@@ -33,12 +33,15 @@ MONITORING_SERVICE_TYPE = getattr(
     settings, 'MONITORING_SERVICE_TYPE', 'monitoring'
 )
 
+GRAFANA_URL = { '<%= @endpoint_region %>': "/grafana" }
 
 # Grafana button titles/file names (global across all projects):
 GRAFANA_LINKS = [
-    {'title': 'Dashboard', 'fileName': 'openstack.json'},
-    {'title': 'Monasca Health', 'fileName': 'monasca.json'}
+        {'title': 'Dashboard', 'path': '/grafana/dashboard/file/openstack.json?orgId=1', 'raw': True},
+        {'title': 'Monasca Health', 'path': '/grafana/dashboard/file/monasca.json?orgId=1', 'raw': True}
 ]
+
+SHOW_GRAFANA_HOME = False
 
 DEFAULT_LINKS = GRAFANA_LINKS
 DASHBOARDS = getattr(settings, 'GRAFANA_LINKS', GRAFANA_LINKS)
