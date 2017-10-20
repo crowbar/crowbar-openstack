@@ -35,7 +35,7 @@ if use_l3_agent
     owner "root"
     group "root"
     mode "0600"
-    content keystone_settings["admin_password"]
+    content keystone_settings["service_password"]
     # Our Chef is apparently too old for this :-/
     #sensitive true
     action :create
@@ -70,8 +70,8 @@ if use_l3_agent
                                                                    insecure_flag do |env|
       env["OS_AUTH_URL"] = os_auth_url_v2
       env["OS_REGION_NAME"] = keystone_settings["endpoint_region"]
-      env["OS_TENANT_NAME"] = keystone_settings["admin_tenant"]
-      env["OS_USERNAME"] = keystone_settings["admin_user"]
+      env["OS_TENANT_NAME"] = keystone_settings["service_tenant"]
+      env["OS_USERNAME"] = keystone_settings["service_user"]
     end
 
     file "/etc/neutron/neutron-l3-ha-service.yaml" do
