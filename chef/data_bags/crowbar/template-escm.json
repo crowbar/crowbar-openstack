@@ -57,9 +57,9 @@
       "proxy": {
         "use_proxy": false,
         "http_host": "",
-        "http_port": 0,
+        "http_port": 80,
         "https_host": "",
-        "https_port": 0,
+        "https_port": 80,
         "no_proxy": "",
         "auth": false,
         "user": "",
