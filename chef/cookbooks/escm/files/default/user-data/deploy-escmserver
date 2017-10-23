@@ -37,80 +37,45 @@ if [ -f ${DOCKER_PATH}/docker-compose-escm.yml ]; then
     fi
 fi
 
-# Create Docker directories if they do not exist yet
-for docker_directory in \
-    ${DOCKER_PATH}/data/oscm-db/data \
-    ${DOCKER_PATH}/config/certs \
-    ${DOCKER_PATH}/config/oscm-branding/brandings \
-    ${DOCKER_PATH}/config/oscm-core/ssl/privkey \
-    ${DOCKER_PATH}/config/oscm-core/ssl/cert \
-    ${DOCKER_PATH}/config/oscm-core/ssl/chain \
-    ${DOCKER_PATH}/config/oscm-app/ssl/privkey \
-    ${DOCKER_PATH}/config/oscm-app/ssl/cert \
-    ${DOCKER_PATH}/config/oscm-app/ssl/chain \
-    ${DOCKER_PATH}/config/oscm-birt/ssl/privkey \
-    ${DOCKER_PATH}/config/oscm-birt/ssl/cert \
-    ${DOCKER_PATH}/config/oscm-birt/ssl/chain \
-    ${DOCKER_PATH}/config/oscm-branding/ssl/privkey \
-    ${DOCKER_PATH}/config/oscm-branding/ssl/cert \
-    ${DOCKER_PATH}/config/oscm-branding/ssl/chain \
-    ${DOCKER_PATH}/logs/oscm-app \
-    ${DOCKER_PATH}/logs/oscm-birt \
-    ${DOCKER_PATH}/logs/oscm-branding \
-    ${DOCKER_PATH}/logs/oscm-core \
-    ${DOCKER_PATH}/logs/oscm-db; do
-    if [ ! -d ${docker_directory} ]; then
-        mkdir -p ${docker_directory}
-    fi
-done
+# # Create Docker directories if they do not exist yet
+# for docker_directory in \
+#     ${DOCKER_PATH}/data/oscm-db/data \
+#     ${DOCKER_PATH}/config/certs \
+#     ${DOCKER_PATH}/config/oscm-branding/brandings \
+#     ${DOCKER_PATH}/config/oscm-core/ssl/privkey \
+#     ${DOCKER_PATH}/config/oscm-core/ssl/cert \
+#     ${DOCKER_PATH}/config/oscm-core/ssl/chain \
+#     ${DOCKER_PATH}/config/oscm-app/ssl/privkey \
+#     ${DOCKER_PATH}/config/oscm-app/ssl/cert \
+#     ${DOCKER_PATH}/config/oscm-app/ssl/chain \
+#     ${DOCKER_PATH}/config/oscm-birt/ssl/privkey \
+#     ${DOCKER_PATH}/config/oscm-birt/ssl/cert \
+#     ${DOCKER_PATH}/config/oscm-birt/ssl/chain \
+#     ${DOCKER_PATH}/config/oscm-branding/ssl/privkey \
+#     ${DOCKER_PATH}/config/oscm-branding/ssl/cert \
+#     ${DOCKER_PATH}/config/oscm-branding/ssl/chain \
+#     ${DOCKER_PATH}/logs/oscm-app \
+#     ${DOCKER_PATH}/logs/oscm-birt \
+#     ${DOCKER_PATH}/logs/oscm-branding \
+#     ${DOCKER_PATH}/logs/oscm-core \
+#     ${DOCKER_PATH}/logs/oscm-db; do
+#     if [ ! -d ${docker_directory} ]; then
+#         mkdir -p ${docker_directory}
+#     fi
+# done
 
-# Create Docker log files if they do not exist yet
-for docker_log_file in \
-    ${DOCKER_PATH}/logs/oscm-app/oscm-app.out.log \
-    ${DOCKER_PATH}/logs/oscm-birt/oscm-birt.out.log \
-    ${DOCKER_PATH}/logs/oscm-branding/oscm-branding.out.log \
-    ${DOCKER_PATH}/logs/oscm-core/oscm-core.out.log \
-    ${DOCKER_PATH}/logs/oscm-db/oscm-db.out.log; do
-    if [ ! -f {docker_log_file} ]; then
-        touch ${docker_log_file}
-        chmod 640 ${docker_log_file}
-    fi
-done
-
-# Create rsyslog configuration for Docker log files
-if [ ! -f /etc/rsyslog.d/oscm.conf ]; then
-    cat <<EOF > /etc/rsyslog.d/oscm.conf
-local0.*        /docker/logs/oscm-db/oscm-db.out.log
-local1.*        /docker/logs/oscm-core/oscm-core.out.log
-local2.*        /docker/logs/oscm-app/oscm-app.out.log
-local3.*        /docker/logs/oscm-birt/oscm-birt.out.log
-local4.*        /docker/logs/oscm-branding/oscm-branding.out.log
-EOF
-    sed -i '/^local/d' /etc/rsyslog.conf
-    systemctl restart rsyslog
-fi
-
-# Copy Docker Compose files
-if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml ]; then
-    cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml ${DOCKER_PATH}/docker-compose-initdb.yml
-fi
-if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-escm.yml ]; then
-    cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-escm.yml ${DOCKER_PATH}/docker-compose-escm.yml
-fi
-if [ -f ${COMPOSE_CONFIG_PATH}/var.env ]; then
-    cp -f ${COMPOSE_CONFIG_PATH}/var.env ${DOCKER_PATH}/var.env
-fi
-
-# Copy certificate files
-if [ -f ${SSL_CONFIG_PATH}/escm.key ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/ssl/privkey ${DOCKER_PATH}/config/oscm-app/ssl/privkey ${DOCKER_PATH}/config/oscm-birt/ssl/privkey ${DOCKER_PATH}/config/oscm-branding/ssl/privkey | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.key
-fi
-if [ -f ${SSL_CONFIG_PATH}/escm.crt ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/ssl/cert ${DOCKER_PATH}/config/oscm-app/ssl/cert ${DOCKER_PATH}/config/oscm-birt/ssl/cert ${DOCKER_PATH}/config/oscm-branding/ssl/cert ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.crt
-fi
-if [ -f ${SSL_CONFIG_PATH}/escm.chain ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/ssl/chain ${DOCKER_PATH}/config/oscm-app/ssl/chain ${DOCKER_PATH}/config/oscm-birt/ssl/chain ${DOCKER_PATH}/config/oscm-branding/ssl/chain | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.chain
-fi
+# # Create Docker log files if they do not exist yet
+# for docker_log_file in \
+#     ${DOCKER_PATH}/logs/oscm-app/oscm-app.out.log \
+#     ${DOCKER_PATH}/logs/oscm-birt/oscm-birt.out.log \
+#     ${DOCKER_PATH}/logs/oscm-branding/oscm-branding.out.log \
+#     ${DOCKER_PATH}/logs/oscm-core/oscm-core.out.log \
+#     ${DOCKER_PATH}/logs/oscm-db/oscm-db.out.log; do
+#     if [ ! -f {docker_log_file} ]; then
+#         touch ${docker_log_file}
+#         chmod 640 ${docker_log_file}
+#     fi
+# done
 
 # If http proxy is enabled, create Docker config file
 if [ ${PROXY_ENABLED} == "true" ]; then
@@ -177,21 +142,64 @@ EOF
     systemctl restart docker
 fi
 
-# Pull images
-egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-initdb.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
-egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-escm.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
+# Create rsyslog configuration for Docker log files
+if [ ! -f /etc/rsyslog.d/oscm.conf ]; then
+    cat <<EOF > /etc/rsyslog.d/oscm.conf
+local0.*        /docker/logs/oscm-db/oscm-db.out.log
+local1.*        /docker/logs/oscm-core/oscm-core.out.log
+local2.*        /docker/logs/oscm-app/oscm-app.out.log
+local3.*        /docker/logs/oscm-birt/oscm-birt.out.log
+local4.*        /docker/logs/oscm-branding/oscm-branding.out.log
+EOF
+    sed -i '/^local/d' /etc/rsyslog.conf
+    systemctl restart rsyslog
+fi
 
-# Initialize databases
-docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up -d oscm-db
-docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-core
-docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-jms
-docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-app
-docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-controller-openstack
-docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml stop
-docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml rm -f
+# # Copy Docker Compose files
+# if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml ]; then
+#     cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-initdb.yml ${DOCKER_PATH}/docker-compose-initdb.yml
+# fi
+# if [ -f ${COMPOSE_CONFIG_PATH}/docker-compose-escm.yml ]; then
+#     cp -f ${COMPOSE_CONFIG_PATH}/docker-compose-escm.yml ${DOCKER_PATH}/docker-compose-escm.yml
+# fi
+# if [ -f ${COMPOSE_CONFIG_PATH}/var.env ]; then
+#     cp -f ${COMPOSE_CONFIG_PATH}/var.env ${DOCKER_PATH}/var.env
+# fi
 
-# Start application containers
-docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml up -d
+#TODO: Where does the deployer image come from?
+# Create Docker directory structure and Docker Compose files
+docker run --name deployer-directories-compose --rm -v ${DOCKER_PATH}:/target oscm-deployer
+
+# Copy certificate files
+if [ -f ${SSL_CONFIG_PATH}/escm.key ]; then
+    echo ${DOCKER_PATH}/config/oscm-core/ssl/privkey ${DOCKER_PATH}/config/oscm-app/ssl/privkey ${DOCKER_PATH}/config/oscm-birt/ssl/privkey ${DOCKER_PATH}/config/oscm-branding/ssl/privkey | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.key
+fi
+if [ -f ${SSL_CONFIG_PATH}/escm.crt ]; then
+    echo ${DOCKER_PATH}/config/oscm-core/ssl/cert ${DOCKER_PATH}/config/oscm-app/ssl/cert ${DOCKER_PATH}/config/oscm-birt/ssl/cert ${DOCKER_PATH}/config/oscm-branding/ssl/cert ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.crt
+fi
+if [ -f ${SSL_CONFIG_PATH}/escm.chain ]; then
+    echo ${DOCKER_PATH}/config/oscm-core/ssl/chain ${DOCKER_PATH}/config/oscm-app/ssl/chain ${DOCKER_PATH}/config/oscm-birt/ssl/chain ${DOCKER_PATH}/config/oscm-branding/ssl/chain | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.chain
+fi
+
+#TODO: Where does the deployer image come from?
+# Initialize the databases and start the application containers
+docker run --name deployer-init-start --rm -v ${DOCKER_PATH}:/target -v /var/run/docker.sock:/var/run/docker.sock -e INITDB=true -e STARTUP=true oscm-deployer
+
+# # Pull images
+# egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-initdb.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
+# egrep '^\s*image:' ${DOCKER_PATH}/docker-compose-escm.yml | sed 's|\s*image: \(.*\)|\1|g' | xargs -L 1 docker pull
+
+# # Initialize databases
+# docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up -d oscm-db
+# docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-core
+# docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-jms
+# docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-app
+# docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml up oscm-initdb-controller-openstack
+# docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml stop
+# docker-compose -f ${DOCKER_PATH}/docker-compose-initdb.yml rm -f
+
+# # Start application containers
+# docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml up -d
 
 # Backup the current configuration for update check by the next run
 cp ${DOCKER_PATH}/var.env ${DOCKER_PATH}/var.env.current
