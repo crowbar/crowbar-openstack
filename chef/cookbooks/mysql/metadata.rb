@@ -29,7 +29,7 @@ attribute "mysql/bind_address",
 attribute "mysql/datadir",
           display_name: "MySQL Data Directory",
           description: "Location of mysql databases",
-          default: "/var/lib/mysql"
+          default: "/var/lib/mariadb"
 
 attribute "mysql/ec2_path",
           display_name: "MySQL EC2 Path",

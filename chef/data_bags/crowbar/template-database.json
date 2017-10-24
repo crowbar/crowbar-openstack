@@ -5,7 +5,7 @@
     "database": {
       "sql_engine": "mysql",
       "mysql": {
-        "datadir": "/var/lib/mysql",
+        "datadir": "/var/lib/mariadb",
         "slow_query_logging": true,
         "innodb_buffer_pool_size": 256,
         "max_connections": 800,
