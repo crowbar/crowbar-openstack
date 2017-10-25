@@ -336,13 +336,9 @@ template "#{escm_install_path}/.env" do
   owner escm_group
   group escm_group
   mode 0640
-  variables(
-    mail: node[:escm][:mail],
-    docker: node[:escm][:docker],
-    proxy: node[:escm][:proxy],
-    host_fqdn: node[:escm][:ssl][:fqdn].empty? ? node[:escm][:openstack][:instance_stack][:ip_appserver] : node[:escm][:ssl][:fqdn],
-    instance: node[:escm][:openstack][:instance_stack]
-  )
+    variables(
+      docker: node[:escm][:docker]
+    )
 end
 
 ruby_block "inject_escm_scripts" do
