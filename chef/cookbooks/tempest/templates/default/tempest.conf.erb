@@ -53,6 +53,7 @@ login_url = <%= @horizon_protocol %>://<%= @horizon_host %>/auth/login/
 endpoint_type = internalURL
 
 [heat_plugin]
+disable_ssl_certificate_validation = <%= @ssl_insecure ? 'true' : 'false' %>
 username = <%= @comp_user %>
 password = <%= @comp_pass %>
 admin_username = <%= @keystone_settings['admin_user'] %>
