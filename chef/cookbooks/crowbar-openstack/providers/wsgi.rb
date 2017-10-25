@@ -66,6 +66,7 @@ action :create do
         ssl_certfile: current_resource.ssl_certfile,
         ssl_keyfile: current_resource.ssl_keyfile,
         ssl_cacert: current_resource.ssl_cacert,
+        timeout: current_resource.timeout,
         access_log: current_resource.access_log,
         error_log: current_resource.error_log,
         apache_log_dir: node[:apache][:log_dir],
@@ -112,6 +113,8 @@ def load_current_resource
   @current_resource.ssl_certfile(@new_resource.ssl_certfile)
   @current_resource.ssl_keyfile(@new_resource.ssl_keyfile)
   @current_resource.ssl_cacert(@new_resource.ssl_cacert)
+
+  @current_resource.timeout(@new_resource.timeout)
 
   @current_resource.access_log(_get_access_log)
   @current_resource.error_log(_get_error_log)
