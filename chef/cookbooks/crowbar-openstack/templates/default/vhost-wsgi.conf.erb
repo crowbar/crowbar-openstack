@@ -12,6 +12,10 @@ Listen <%= @bind_host %>:<%= @bind_port %>
     LimitRequestBody <%= @limit_request_body %>
 <% end %>
 
+<% if @timeout %>
+    Timeout <%= @timeout %>
+<% end %>
+
 <% if @ssl_enable %>
     SSLEngine on
     SSLCertificateFile <%= @ssl_certfile %>
