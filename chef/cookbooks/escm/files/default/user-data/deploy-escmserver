@@ -166,6 +166,14 @@ fi
 #     cp -f ${COMPOSE_CONFIG_PATH}/var.env ${DOCKER_PATH}/var.env
 # fi
 
+# Copy environment and configuration files to Docker directory
+if [ -f ${COMPOSE_CONFIG_PATH}/var.env ]; then
+    cp ${COMPOSE_CONFIG_PATH}/var.env ${DOCKER_PATH}
+fi
+if [ -f ${COMPOSE_CONFIG_PATH}/var.env ]; then
+    cp ${COMPOSE_CONFIG_PATH}/var.env ${DOCKER_PATH}
+fi
+
 #TODO: Where does the deployer image come from?
 # Create Docker directory structure and Docker Compose files
 docker run --name deployer-directories-compose --rm -v ${DOCKER_PATH}:/target oscm-deployer
