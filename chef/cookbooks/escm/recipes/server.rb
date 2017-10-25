@@ -267,20 +267,15 @@ ruby_block "get_escm_floating_ip" do
     action :create
 end
 
-ruby_block "set_up_ssl_for_escm" do
-    block do
-        if node[:escm][:api][:protocol] == "https"
-          ssl_setup "setting up ssl for escm" do
-            generate_certs node[:escm][:ssl][:generate_certs]
-            certfile node[:escm][:ssl][:certfile]
-            keyfile node[:escm][:ssl][:keyfile]
-            group escm_group
-            fqdn node[:escm][:ssl][:fqdn].empty? ? node[:escm][:openstack][:instance_stack][:ip_appserver] : node[:escm][:ssl][:fqdn]
-            ca_certs node[:escm][:ssl][:ca_certs]
-          end
-        end
-    end
-    action :create
+if node[:escm][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for escm" do
+    generate_certs node[:escm][:ssl][:generate_certs]
+    certfile node[:escm][:ssl][:certfile]
+    keyfile node[:escm][:ssl][:keyfile]
+    group escm_group
+    fqdn node[:escm][:ssl][:fqdn].empty? ? node[:escm][:openstack][:instance_stack][:ip_appserver] : node[:escm][:ssl][:fqdn]
+    ca_certs node[:escm][:ssl][:ca_certs]
+  end
 end
 
 ruby_block "get_escm_secrets" do
