@@ -81,6 +81,7 @@ env << "OS_PROJECT_NAME='#{keystone_settings["service_tenant"]}' "
 env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
 env << "OS_REGION_NAME='#{keystone_settings["endpoint_region"]}' "
 env << "OS_IDENTITY_API_VERSION=#{keystone_settings["api_version"]}"
+env << "OS_ENDPOINT_TYPE=internalURL"
 novacmd = "#{env} nova"
 openstack = "#{env} openstack"
 
