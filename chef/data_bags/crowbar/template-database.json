@@ -57,6 +57,11 @@
             "options": ""
           }
         }
+      },
+      "resource_limits": {
+        "postgresql": {
+          "LimitNOFILE": null
+        }
       }
     }
   },
