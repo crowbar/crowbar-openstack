@@ -233,6 +233,7 @@ crowbar_openstack_wsgi "WSGI entry for ceilometer-api" do
   if node[:ceilometer][:ssl][:cert_required]
     ssl_cacert node[:ceilometer][:ssl][:ca_certs]
   end
+  timeout node[:ceilometer][:api][:timeout]
 end
 
 apache_site "ceilometer-api.conf" do
