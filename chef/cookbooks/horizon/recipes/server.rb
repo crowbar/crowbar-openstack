@@ -545,3 +545,46 @@ end
 apache_site "openstack-dashboard.conf" do
   enable true
 end
+
+if node[:horizon][:resource_limits] && \
+    node[:horizon][:resource_limits].include?("apache2") && \
+    node[:horizon][:resource_limits]["apache2"].values.any?
+  ruby_block "set global apache limits" do
+    block do
+      # Get the limits set in the proposal
+      horizon_apache_limits = node[:horizon][:resource_limits]["apache2"]
+
+      # If this value hasn't been set in this chef run, make it a hash
+      node.default[:resource_limits] = {} unless node[:resource_limits]
+
+      # If apache limits have already been set in this chef run, get those
+      global_apache_limits = node[:resource_limits]["apache2"] || {}
+      global_apache_limits = global_apache_limits.to_hash
+
+      # For each limit setting, get the maximum across all barclamps seen so far
+      horizon_apache_limits.each do |name, value|
+        global_apache_limits[name] = [global_apache_limits[name].to_i, value].max
+      end
+
+      # Set the new limits in the node so it can be re-used in this chef run.
+      # node.default is cleared before every chef run so this will not pollute the node.
+      node.default[:resource_limits]["apache2"] = global_apache_limits
+
+      # Now that the limits variable is set, override the lwrp parameter at compile time
+      rsc_name = "Resource limits for apache2"
+      override_rsc = Chef::Resource::UtilsSystemdOverrideLimits.new(rsc_name, run_context)
+      override_rsc.service_name "apache2"
+      override_rsc.limits node[:resource_limits]["apache2"]
+      override_rsc.run_action :create
+    end
+  end
+# If we've deleted limits across the board, delete leftover override files (and don't create them)
+# Note that other recipes may come along later in the chef run and set these node values
+# and then the resource will be created again.
+elsif !node[:resource_limits] || !node[:resource_limits]["apache2"] || \
+    (node[:resource_limits]["apache2"] || {}).to_hash.values.none?
+  utils_systemd_override_limits "Resource limits for apache2" do
+    service_name "apache2"
+    action :delete
+  end
+end

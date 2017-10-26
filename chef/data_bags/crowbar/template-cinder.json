@@ -158,6 +158,17 @@
       },
       "ha_rate_limit": {
         "cinder-api": 0
+      },
+      "resource_limits": {
+        "openstack-cinder-api": {
+          "LimitNOFILE": null
+        },
+        "openstack-cinder-scheduler": {
+          "LimitNOFILE": null
+        },
+        "openstack-cinder-volume": {
+          "LimitNOFILE": null
+        }
       }
     }
   },
@@ -165,7 +176,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 109,
+      "schema-revision": 110,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]

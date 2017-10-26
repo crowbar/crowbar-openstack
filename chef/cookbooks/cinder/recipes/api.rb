@@ -166,3 +166,14 @@ use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_
 cinder_service "api" do
   use_pacemaker_provider use_crowbar_pacemaker_service
 end
+
+service = "openstack-cinder-api"
+if node[:cinder][:resource_limits] && node[:cinder][:resource_limits][service]
+  limits = node[:cinder][:resource_limits][service]
+  action = limits.values.any? ? :create : :delete
+  utils_systemd_override_limits "Resource limits for #{service}" do
+    service_name service
+    limits limits
+    action action
+  end
+end
