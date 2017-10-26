@@ -20,6 +20,8 @@ attribute :ssl_certfile, kind_of: String, default: nil
 attribute :ssl_keyfile, kind_of: String, default: nil
 attribute :ssl_cacert, kind_of: String, default: nil
 
+attribute :timeout, kind_of: Integer, default: nil
+
 attribute :access_log, kind_of: String, default: nil
 attribute :error_log, kind_of: String, default: nil
 
