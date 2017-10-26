@@ -26,7 +26,7 @@
 
 <VirtualHost <%= @bind_host %>:<%= @bind_port_ssl %>>
     SSLEngine On
-    SSLCipherSuite DEFAULT_SUSE
+    SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
     SSLProtocol all -SSLv2 -SSLv3
     SSLCertificateFile <%= @ssl_crt_file %>
     SSLCertificateKeyFile <%= @ssl_key_file %>
