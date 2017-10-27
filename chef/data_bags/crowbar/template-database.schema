@@ -36,6 +36,34 @@
                     "keyfile": { "type" : "str", "required" : true },
                     "ca_certs": { "type" : "str", "required" : true }
                   }
+                },
+                "ha": {
+                  "type": "map", "required": true, "mapping": {
+                    "op": {
+                      "type": "map", "required": true, "mapping": {
+                        "start": {
+                          "type": "map", "required": true, "mapping": {
+                            "timeout": { "type" : "str", "required" : true }
+                          }
+                        },
+                        "stop": {
+                          "type": "map", "required": true, "mapping": {
+                            "timeout": { "type" : "str", "required" : true }
+                          }
+                        },
+                        "promote": {
+                          "type": "map", "required": true, "mapping": {
+                            "timeout": { "type" : "str", "required" : true }
+                          }
+                        },
+                        "demote": {
+                          "type": "map", "required": true, "mapping": {
+                            "timeout": { "type" : "str", "required" : true }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             },

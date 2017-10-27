@@ -19,6 +19,22 @@
           "certfile": "/etc/mysql/ssl/certs/signing_cert.pem",
           "keyfile": "/etc/mysql/ssl/private/signing_key.pem",
           "ca_certs": "/etc/mysql/ssl/certs/ca.pem"
+        },
+        "ha": {
+          "op": {
+            "start": {
+              "timeout": "60s"
+            },
+            "stop": {
+              "timeout": "60s"
+            },
+            "promote": {
+              "timeout": "300s"
+            },
+            "demote": {
+              "timeout": "60s"
+            }
+          }
         }
       },
       "postgresql": {
