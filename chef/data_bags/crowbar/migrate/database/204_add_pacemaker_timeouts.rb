@@ -1,5 +1,5 @@
 def upgrade(ta, td, a, d)
-  a["mysql"]["ha"] = ta["mysql"]["ha"]
+  a["mysql"].key?("ha") || a["mysql"]["ha"] = ta["mysql"]["ha"]
   return a, d
 end
 
