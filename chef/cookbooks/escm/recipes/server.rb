@@ -273,7 +273,7 @@ if node[:escm][:api][:protocol] == "https"
     certfile node[:escm][:ssl][:certfile]
     keyfile node[:escm][:ssl][:keyfile]
     group escm_group
-    fqdn lazy { "node[:escm][:ssl][:fqdn].empty? ? node[:escm][:openstack][:instance_stack][:ip_appserver] : node[:escm][:ssl][:fqdn]" }
+    fqdn lazy { node[:escm][:ssl][:fqdn].empty? ? node[:escm][:openstack][:instance_stack][:ip_appserver] : node[:escm][:ssl][:fqdn] }
     ca_certs node[:escm][:ssl][:ca_certs]
   end
 end
@@ -326,7 +326,7 @@ template "#{escm_install_path}/var.env" do
     mail: node[:escm][:mail],
     docker: node[:escm][:docker],
     proxy: node[:escm][:proxy],
-    host_fqdn: node[:escm][:ssl][:fqdn].empty? ? node[:escm][:openstack][:instance_stack][:ip_appserver] : node[:escm][:ssl][:fqdn],
+    host_fqdn: lazy { node[:escm][:ssl][:fqdn].empty? ? node[:escm][:openstack][:instance_stack][:ip_appserver] : node[:escm][:ssl][:fqdn] },
     instance: node[:escm][:openstack][:instance_stack]
   )
 end
