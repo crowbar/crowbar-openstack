@@ -1,3 +1,4 @@
+name "tempest"
 maintainer "Dell Inc."
 maintainer_email "agordeev@mirantis.com"
 license "All rights reserved"

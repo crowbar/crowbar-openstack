@@ -1,3 +1,4 @@
+name "aodh"
 maintainer "Crowbar project"
 maintainer_email "crowbar@googlegroups.com"
 license "Apache 2.0"

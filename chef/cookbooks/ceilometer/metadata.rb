@@ -1,3 +1,4 @@
+name "ceilometer"
 maintainer "User Unknown"
 maintainer_email "Unknown@Sample.com"
 license "Apache 2.0"
@@ -12,5 +13,3 @@ depends "database"
 depends "crowbar-openstack"
 depends "crowbar-pacemaker"
 depends "utils"
-
-recommends "hyperv"

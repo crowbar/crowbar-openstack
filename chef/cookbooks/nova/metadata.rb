@@ -16,5 +16,3 @@ depends "memcached"
 depends "nagios"
 depends "neutron"
 depends "utils"
-
-recommends "hyperv"
