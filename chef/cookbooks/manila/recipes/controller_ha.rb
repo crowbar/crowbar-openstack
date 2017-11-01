@@ -37,6 +37,8 @@ haproxy_loadbalancer "manila-api" do
 end.run_action(:create)
 
 if node[:pacemaker][:clone_stateless_services]
+  include_recipe "crowbar-pacemaker::apache"
+
   # Wait for all nodes to reach this point so we know that all nodes will have
   # all the required packages installed before we create the pacemaker
   # resources
@@ -46,20 +48,26 @@ if node[:pacemaker][:clone_stateless_services]
   crowbar_pacemaker_sync_mark "wait-manila_ha_resources"
 
   rabbit_settings = fetch_rabbitmq_settings
-  services = ["api", "scheduler"]
   transaction_objects = []
 
-  services.each do |service|
-    primitive_name = "manila-#{service}"
-
-    objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
-      agent node[:manila][:ha]["#{service}_ra"]
-      op node[:manila][:ha][:op]
-      order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone " \
-          "cl-glance-api cl-cinder-api cl-neutron-server cl-nova-api )"
-    end
-    transaction_objects.push(objects)
+  order_name = "o-cl-apache2-manila-api"
+  pacemaker_order order_name do
+    ordering "cl-apache2 cl-manila-api"
+    score "Mandatory"
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
+  transaction_objects << "pacemaker_order[#{order_name}]"
+
+  primitive_name = "manila-scheduler"
+
+  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
+    agent node[:manila][:ha][:scheduler_ra]
+    op node[:manila][:ha][:op]
+    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone " \
+        "cl-glance-api cl-cinder-api cl-neutron-server cl-nova-api )"
+  end
+  transaction_objects.push(objects)
 
   pacemaker_transaction "manila controller" do
     cib_objects transaction_objects.flatten
