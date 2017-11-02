@@ -69,7 +69,7 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 204,
+      "schema-revision": 205,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },
