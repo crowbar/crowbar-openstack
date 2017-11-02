@@ -1,3 +1,4 @@
+name "horizon"
 maintainer "User Unknown"
 maintainer_email "Unknown@Sample.com"
 license "Apache 2.0"

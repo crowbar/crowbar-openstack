@@ -1,3 +1,4 @@
+name "heat"
 maintainer "User Unknown"
 maintainer_email "crowbar@dell.com"
 license "Apache 2.0"
