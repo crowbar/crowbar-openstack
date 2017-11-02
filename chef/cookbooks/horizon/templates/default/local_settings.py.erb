@@ -245,6 +245,13 @@ DATABASES = {
         <% @db_settings.sort_by { |key, value| key }.each do |key,value| -%>
         '<%= key %>': <%= value %>,
         <% end -%>
+        <% unless @db_ca_certs.empty? %>
+        'OPTIONS': {
+            'ssl': {
+                'ca': '<%= @db_ca_certs %>'
+            }
+        }
+        <% end %>
     },
 }
 
