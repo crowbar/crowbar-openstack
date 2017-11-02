@@ -69,6 +69,9 @@ if node.roles.include?("nova-compute-kvm")
   include_recipe "neutron::common_config"
 
   # Agent configurations for Cisco APIC driver
+  # The ACI setup for OpenStack releases before Pike use "of_interface" options
+  # set to "ovs-ofctl". This option has been deprecated in Pike and removed
+  # from this config file for Pike. It is still included in Newton (Cloud7)
   agent_config_path = "/etc/neutron/plugins/ml2/openvswitch_agent.ini"
   template agent_config_path do
     cookbook "neutron"
@@ -79,8 +82,11 @@ if node.roles.include?("nova-compute-kvm")
     variables(
       ml2_type_drivers: ml2_type_drivers,
       tunnel_types: "",
+      enable_tunneling: false,
       use_l2pop: false,
       dvr_enabled: false,
+      of_interface: "ovs-ofctl",
+      ovsdb_interface: neutron[:neutron][:ovs][:ovsdb_interface],
       bridge_mappings: ""
     )
   end
