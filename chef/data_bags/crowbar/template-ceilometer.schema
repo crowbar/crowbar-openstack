@@ -31,7 +31,8 @@
               "mapping": {
                 "protocol": { "type": "str", "required": true },
                 "port": { "type": "int", "required": true },
-                "timeout": { "type": "int", "required": true }
+                "timeout": { "type": "int", "required": true },
+                "default_return_limit": { "type": "int", "required": true }
               }
             },
             "db": {
