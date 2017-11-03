@@ -78,6 +78,7 @@ template node[:ceilometer][:config_file] do
       libvirt_type: libvirt_type,
       metering_time_to_live: metering_time_to_live,
       event_time_to_live: event_time_to_live,
+      default_api_return_limit: node[:ceilometer][:api][:default_return_limit]
     )
     if is_compute_agent
       notifies :restart, "service[nova-compute]"

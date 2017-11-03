@@ -13,6 +13,9 @@ transport_url = <%= @rabbit_settings[:url] %>
 [collector]
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
+[api]
+default_api_return_limit = <%= @default_api_return_limit %>
+
 [database]
 metering_time_to_live = <%= @metering_time_to_live %>
 event_time_to_live = <%= @event_time_to_live %>

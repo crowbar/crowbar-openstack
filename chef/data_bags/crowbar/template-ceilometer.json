@@ -19,7 +19,8 @@
       "api": {
         "protocol": "http",
         "port": 8777,
-        "timeout": 120
+        "timeout": 120,
+        "default_return_limit": 1000
       },
       "db": {
         "password": "",
@@ -44,7 +45,7 @@
     "ceilometer": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 105,
+      "schema-revision": 106,
       "element_states": {
         "ceilometer-server": [ "readying", "ready", "applying" ],
         "ceilometer-central": [ "readying", "ready", "applying" ],
