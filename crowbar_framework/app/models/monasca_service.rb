@@ -101,11 +101,10 @@ class MonascaService < OpenstackServiceObject
     log_agent_nodes = select_nodes_for_role(nodes, "monasca-log-agent", "compute") || []
     agent_nodes = select_nodes_for_role(nodes, "monasca-agent") || []
 
-    master_nodes = nodes.select { |n| n.intended_role == "admin" || n.name.start_with?("crowbar.") }
-    master_node = master_nodes.empty? ? nodes.first : master_nodes.first
+    master_nodes = select_nodes_for_role(nodes, "monasca-master", "admin") || nodes
 
     base["deployment"][@bc_name]["elements"] = {
-      "monasca-master" => [master_node.name],
+      "monasca-master" => [master_nodes.first.name],
       "monasca-server" => monasca_server.empty? ? [] : [monasca_server.first.name],
       "monasca-agent" => agent_nodes.map { |x| x.name },
       "monasca-log-agent" => log_agent_nodes.map { |x| x.name }
