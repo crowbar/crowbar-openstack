@@ -10,6 +10,9 @@ log_dir = /var/log/ceilometer
 use_stderr = false
 transport_url = <%= @rabbit_settings[:url] %>
 
+[api]
+default_api_return_limit = <%= @default_api_return_limit %>
+
 [database]
 metering_time_to_live = <%= @metering_time_to_live %>
 event_time_to_live = <%= @event_time_to_live %>

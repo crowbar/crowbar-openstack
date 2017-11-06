@@ -95,7 +95,8 @@ template node[:ceilometer][:config_file] do
       metering_time_to_live: metering_time_to_live,
       event_time_to_live: event_time_to_live,
       instance_discovery_method: instance_discovery_method,
-      is_compute_agent: is_compute_agent
+      is_compute_agent: is_compute_agent,
+      default_api_return_limit: node[:ceilometer][:api][:default_return_limit]
     )
     if is_compute_agent
       notifies :restart, "service[nova-compute]"
