@@ -8,11 +8,14 @@
         "datadir": "/var/lib/mysql",
         "slow_query_logging": true,
         "innodb_buffer_pool_size": 256,
+        "innodb_flush_log_at_trx_commit": 1,
+        "innodb_buffer_pool_instances": 1,
         "max_connections": 800,
         "tmp_table_size": 64,
         "max_heap_table_size": 64,
         "expire_logs_days": 10,
         "bootstrap_timeout": 600,
+        "wsrep_slave_threads" : 1,
         "ssl": {
           "enabled": false,
           "generate_certs": false,
@@ -70,7 +73,7 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 106,
+      "schema-revision": 107,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },
