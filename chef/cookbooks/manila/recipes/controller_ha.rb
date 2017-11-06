@@ -50,15 +50,6 @@ if node[:pacemaker][:clone_stateless_services]
   rabbit_settings = fetch_rabbitmq_settings
   transaction_objects = []
 
-  order_name = "o-cl-apache2-manila-api"
-  pacemaker_order order_name do
-    ordering "cl-apache2 cl-manila-api"
-    score "Mandatory"
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-  transaction_objects << "pacemaker_order[#{order_name}]"
-
   primitive_name = "manila-scheduler"
 
   objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
