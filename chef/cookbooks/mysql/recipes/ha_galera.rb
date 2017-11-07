@@ -19,7 +19,7 @@
 
 resource_agent = "ocf:heartbeat:galera"
 
-["galera-3-wsrep-provider", "mariadb-tools", "xtrabackup", "socat"].each do |p|
+["galera-3-wsrep-provider", "mariadb-tools", "xtrabackup", "socat", "galera-python-clustercheck"].each do |p|
   package p
 end
 
@@ -40,7 +40,7 @@ end
 unless node[:database][:galera_bootstrapped]
   if CrowbarPacemakerHelper.is_cluster_founder?(node)
     # To bootstrap for the first time, start galera on one node
-    # to set up the seed sst user.
+    # to set up the seed sst and monitoring users.
 
     template "temporary bootstrap /etc/my.cnf.d/galera.cnf" do
       path "/etc/my.cnf.d/galera.cnf"
@@ -96,6 +96,15 @@ unless node[:database][:galera_bootstrapped]
       host "localhost"
       provider db_settings[:user_provider]
       action :grant
+    end
+
+    database_user "create haproxy and galera monitoring user" do
+      connection db_connection
+      username "monitoring"
+      password ""
+      host "%"
+      provider db_settings[:user_provider]
+      action :create
     end
 
     service "mysql-temp stop" do
@@ -242,6 +251,59 @@ crowbar_pacemaker_sync_mark "sync-database_root_password" do
   revision node[:database]["crowbar-revision"]
 end
 
+# Configuration files for galera-python-clustercheck
+template "/etc/galera-python-clustercheck/galera-python-clustercheck.conf" do
+  source "galera-python-clustercheck.conf.erb"
+  owner "galera-python-clustercheck"
+  group "mysql"
+  mode "0640"
+  variables(
+    node_address: Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  )
+end
+
+template "/etc/galera-python-clustercheck/my.cnf" do
+  source "galera-python-clustercheck-my.cnf.erb"
+  owner "galera-python-clustercheck"
+  group "mysql"
+  mode "0640"
+  variables(
+    node_address: Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  )
+end
+
+# Start galera-clustercheck which serves the cluster state as http return codes
+# on port 5555
+transaction_objects = []
+service_name = "galera-python-clustercheck"
+
+pacemaker_primitive service_name do
+  agent "systemd:#{service_name}"
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+transaction_objects.push("pacemaker_primitive[#{service_name}]")
+
+clone_name = "cl-#{service_name}"
+pacemaker_clone clone_name do
+  rsc service_name
+  meta CrowbarPacemakerHelper.clone_meta(node, remote: false)
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+transaction_objects.push("pacemaker_clone[#{clone_name}]")
+
+clone_location_name = openstack_pacemaker_controller_only_location_for clone_name
+transaction_objects << "pacemaker_location[#{clone_location_name}]"
+
+pacemaker_transaction "clustercheck" do
+  cib_objects transaction_objects
+  action :commit_new
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
 include_recipe "crowbar-pacemaker::haproxy"
 
 ha_servers = CrowbarPacemakerHelper.haproxy_servers_for_service(
@@ -265,7 +327,8 @@ haproxy_loadbalancer "galera" do
   address CrowbarPacemakerHelper.cluster_vip(node, "admin")
   port 3306
   mode "tcp"
-  options ["mysql-check user monitoring"]
+  options ["httpchk"]
+  default_server "port 5555"
   stick ({ "on" => "dst" })
   servers ha_servers
   action :nothing
