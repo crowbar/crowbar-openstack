@@ -164,6 +164,7 @@ db_connection = db_settings[:connection].dup
 db_connection[:host] = "localhost"
 db_connection[:username] = "root"
 db_connection[:password] = node[:database][:mysql][:server_root_password]
+db_connection[:ssl] = {}
 
 unless node[:database][:database_bootstrapped]
   database_user "create db_maker database user" do
@@ -206,6 +207,7 @@ unless node[:database][:database_bootstrapped]
       "TRIGGER"
     ]
     provider db_settings[:user_provider]
+    require_ssl node[:mysql][:ssl][:enabled]
     action :grant
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end

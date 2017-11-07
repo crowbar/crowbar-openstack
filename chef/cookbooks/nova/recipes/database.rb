@@ -59,6 +59,7 @@ end
     host "%"
     privileges db_settings[:privs]
     provider db_settings[:user_provider]
+    require_ssl db_settings[:connection][:ssl][:enabled]
     action :grant
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
@@ -82,6 +83,7 @@ database_user "grant privileges to the #{node[:nova][:db][:user]} database user"
   host "%"
   privileges db_settings[:privs]
   provider db_settings[:user_provider]
+  require_ssl db_settings[:connection][:ssl][:enabled]
   action :grant
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
