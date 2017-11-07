@@ -191,7 +191,7 @@ end
 # "wsrep_local_state_comment" status variable on all cluster nodes to reach
 # the "Synced" state, before continuing with the rest of the recipe.
 ruby_block "wait galera bootstrap" do
-  seconds = 300
+  seconds = node[:database][:mysql][:bootstrap_timeout]
   block do
     require "timeout"
     begin
@@ -224,6 +224,9 @@ ruby_block "mark node for galera bootstrap" do
 end
 
 crowbar_pacemaker_sync_mark "sync-database_boostrapped" do
+  # to be on the safe side we need to wait at least as long as the other nodes might
+  # need for bootstrapping (see the 'ruby_block "wait galera bootstrap"' above)
+  timeout node[:database][:mysql][:bootstrap_timeout] + 10
   revision node[:database]["crowbar-revision"]
 end
 
