@@ -57,7 +57,7 @@ define :neutron_metadata,
 
   keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
-  template "/etc/neutron/metadata_agent.ini" do
+  template node[:neutron][:metadata_agent_config_file] do
     source "metadata_agent.ini.erb"
     owner "root"
     group node[:neutron][:platform][:group]
@@ -80,7 +80,7 @@ define :neutron_metadata,
     service node[:neutron][:platform][:metadata_agent_name] do
       action [:enable, :start]
       subscribes :restart, resources(template: node[:neutron][:config_file])
-      subscribes :restart, resources("template[/etc/neutron/metadata_agent.ini]")
+      subscribes :restart, resources(template: node[:neutron][:metadata_agent_config_file])
       provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
       if nova_compute_ha_enabled
         supports no_crm_maintenance_mode: true
