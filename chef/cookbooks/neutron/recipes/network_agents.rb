@@ -128,7 +128,7 @@ end
 
 dns_list = node[:dns][:forwarders].join(",")
 
-template "/etc/neutron/dhcp_agent.ini" do
+template node[:neutron][:dhcp_agent_config_file] do
   source "dhcp_agent.ini.erb"
   owner "root"
   group node[:neutron][:platform][:group]
