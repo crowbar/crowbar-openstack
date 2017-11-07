@@ -27,6 +27,7 @@
                 "tmp_table_size": { "type": "int", "required": true },
                 "max_heap_table_size": { "type": "int", "required": true },
                 "expire_logs_days": { "type": "int", "required": true },
+                "bootstrap_timeout": { "type": "int", "required": true },
                 "ssl": {
                   "type": "map", "required": true, "mapping": {
                     "enabled": { "type": "bool", "required": true },
