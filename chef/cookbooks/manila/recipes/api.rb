@@ -17,8 +17,12 @@
 # Recipe:: api
 #
 
+include_recipe "apache2"
+include_recipe "apache2::mod_wsgi"
 include_recipe "#{@cookbook_name}::common"
 include_recipe "#{@cookbook_name}::sql"
+
+package "openstack-manila-api"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, :manila)
 
@@ -131,8 +135,40 @@ end
 
 crowbar_pacemaker_sync_mark "create-manila_register"
 
-use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
+service "manila-api" do
+  service_name "openstack-manila-#{params[:name]}" if %w(rhel suse).include? node[:platform_family]
+  supports status: true, restart: true
+  action [:disable, :stop]
+  # allow to fail here because there may not be a service
+  ignore_failure true
+end
 
-manila_service "api" do
-  use_pacemaker_provider use_crowbar_pacemaker_service
+ssl_enabled = node[:manila][:api][:protocol] == "https"
+
+if node[:manila][:ha][:enabled]
+  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  manila_bind_host = admin_address
+  manila_port = node[:manila][:ha][:ports][:api]
+else
+  manila_bind_host = "0.0.0.0"
+  manila_port = manila_port
+end
+
+crowbar_openstack_wsgi "WSGI entry for manila-api" do
+  bind_host manila_bind_host
+  bind_port manila_port
+  daemon_process "manila-api"
+  script_alias "/usr/bin/manila-wsgi"
+  user node[:manila][:user]
+  group node[:manila][:group]
+  ssl_enable ssl_enabled
+  ssl_certfile node[:manila][:ssl][:certfile]
+  ssl_keyfile node[:manila][:ssl][:keyfile]
+  if node[:manila][:ssl][:cert_required]
+    ssl_cacert node[:manila][:ssl][:ca_certs]
+  end
+end
+
+apache_site "manila-api.conf" do
+  enable true
 end
