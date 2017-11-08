@@ -57,6 +57,18 @@ define :neutron_metadata,
 
   keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
 
+  # Empty the config file that is explicitly passed to the metadata agent, as
+  # its content will prevail compared to config snippets (because the file is
+  # explicitly passed as a config file, not loaded as part of the default files
+  # to load).
+  file "/etc/neutron/metadata_agent.ini" do
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    content "# Please use config file snippets in /etc/neutron/neutron-metadata-agent.conf.d/.\n" \
+            "# See /etc/neutron/README.config for more details.\n"
+  end
+
   template node[:neutron][:metadata_agent_config_file] do
     source "metadata_agent.ini.erb"
     owner "root"
@@ -81,6 +93,7 @@ define :neutron_metadata,
       action [:enable, :start]
       subscribes :restart, resources(template: node[:neutron][:config_file])
       subscribes :restart, resources(template: node[:neutron][:metadata_agent_config_file])
+      subscribes :restart, resources(file: "/etc/neutron/metadata_agent.ini")
       provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
       if nova_compute_ha_enabled
         supports no_crm_maintenance_mode: true

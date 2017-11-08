@@ -128,6 +128,18 @@ end
 
 dns_list = node[:dns][:forwarders].join(",")
 
+# Empty the config file that is explicitly passed to the metadata agent, as
+# its content will prevail compared to config snippets (because the file is
+# explicitly passed as a config file, not loaded as part of the default files
+# to load).
+file "/etc/neutron/dhcp_agent.ini" do
+  owner "root"
+  group node[:neutron][:platform][:group]
+  mode "0640"
+  content "# Please use config file snippets in /etc/neutron/neutron-dhcp-agent.conf.d/.\n" \
+          "# See /etc/neutron/README.config for more details.\n"
+end
+
 template node[:neutron][:dhcp_agent_config_file] do
   source "dhcp_agent.ini.erb"
   owner "root"
@@ -147,6 +159,18 @@ end
 
 if node[:neutron][:use_lbaas] &&
     [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver])
+  # Empty the config file that is explicitly passed to the metadata agent, as
+  # its content will prevail compared to config snippets (because the file is
+  # explicitly passed as a config file, not loaded as part of the default files
+  # to load).
+  file "/etc/neutron/lbaas_agent.ini" do
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    content "# Please use config file snippets in /etc/neutron/neutron-lbaasv2-agent.conf.d/.\n" \
+            "# See /etc/neutron/README.config for more details.\n"
+  end
+
   template node[:neutron][:lbaas_agent_config_file] do
     source "lbaas_agent.ini.erb"
     owner "root"
@@ -211,6 +235,7 @@ if node[:neutron][:use_lbaas] &&
     subscribes :restart, resources(template: node[:neutron][:config_file])
     subscribes :restart, resources(template: node[:neutron][:lbaas_config_file])
     subscribes :restart, resources(template: node[:neutron][:lbaas_agent_config_file])
+    subscribes :restart, resources(file: "/etc/neutron/lbaas_agent.ini")
     provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
   utils_systemd_service_restart lbaas_agent do
@@ -235,6 +260,7 @@ service node[:neutron][:platform][:dhcp_agent_name] do
   action [:enable, :start]
   subscribes :restart, resources(template: node[:neutron][:config_file])
   subscribes :restart, resources(template: node[:neutron][:dhcp_agent_config_file])
+  subscribes :restart, resources(file: "/etc/neutron/dhcp_agent.ini")
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 utils_systemd_service_restart node[:neutron][:platform][:dhcp_agent_name] do
