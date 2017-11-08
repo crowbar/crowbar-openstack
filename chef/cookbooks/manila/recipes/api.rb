@@ -146,12 +146,11 @@ end
 ssl_enabled = node[:manila][:api][:protocol] == "https"
 
 if node[:manila][:ha][:enabled]
-  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+  admin_address = Barclamp::Inventory.get_network_by_type(node, "admin").address
   manila_bind_host = admin_address
   manila_port = node[:manila][:ha][:ports][:api]
 else
   manila_bind_host = "0.0.0.0"
-  manila_port = manila_port
 end
 
 crowbar_openstack_wsgi "WSGI entry for manila-api" do
