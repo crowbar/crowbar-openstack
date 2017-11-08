@@ -314,6 +314,11 @@ database_user "create dashboard database user" do
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
+# We do not require SSL connectopn for horizon user in case of insecure DB setup,
+# because horizon's django uses a library (MySQLdb) that does not support insecure connection.
+database_ssl = db_settings[:connection][:ssl][:enabled] &&
+  !db_settings[:connection][:ssl][:insecure]
+
 database_user "grant database access for dashboard database user" do
     connection db_settings[:connection]
     database_name node[:horizon][:db][:database]
@@ -322,13 +327,14 @@ database_user "grant database access for dashboard database user" do
     host "%"
     privileges db_settings[:privs]
     provider db_settings[:user_provider]
+    require_ssl database_ssl
     action :grant
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-horizon_database" if ha_enabled
 
-db_settings = {
+django_db_settings = {
   "ENGINE" => django_db_backend,
   "NAME" => "'#{node[:horizon][:db][:database]}'",
   "USER" => "'#{node[:horizon][:db][:user]}'",
@@ -336,6 +342,8 @@ db_settings = {
   "HOST" => "'#{db_settings[:address]}'",
   "default-character-set" => "'utf8'"
 }
+
+db_ca_certs = database_ssl ? db_settings[:connection][:ssl][:ca_certs] : ""
 
 glance_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "glance"))
 cinder_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "cinder"))
@@ -453,7 +461,8 @@ template local_settings do
     || sahara_insecure \
     || manila_insecure \
     || ceilometer_insecure,
-    db_settings: db_settings,
+    db_settings: django_db_settings,
+    db_ca_certs: db_ca_certs,
     enable_lb: neutron_use_lbaas,
     enable_vpn: neutron_use_vpnaas,
     timezone: (node[:provisioner][:timezone] rescue "UTC") || "UTC",
