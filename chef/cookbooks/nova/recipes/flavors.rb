@@ -79,22 +79,29 @@ env = "OS_USERNAME='#{keystone_settings["service_user"]}' "
 env << "OS_PASSWORD='#{keystone_settings["service_password"]}' "
 env << "OS_PROJECT_NAME='#{keystone_settings["service_tenant"]}' "
 env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
-env << "OS_REGION_NAME='#{keystone_settings["endpoint_region"]}'"
+env << "OS_REGION_NAME='#{keystone_settings["endpoint_region"]}' "
+env << "OS_IDENTITY_API_VERSION=#{keystone_settings["api_version"]}"
+env << "OS_ENDPOINT_TYPE=internalURL"
 novacmd = "#{env} nova"
+openstack = "#{env} openstack"
 
 if ssl_insecure
   novacmd = "#{novacmd} --insecure"
+  openstack = "#{openstack} --insecure"
 end
 if keystone_settings["api_version"] != "2.0"
   novacmd = "#{novacmd} --os-user-domain-name Default --os-project-domain-name Default"
+  openstack = "#{openstack} --os-user-domain-name Default --os-project-domain-name Default"
 end
 
 trusted_flavors = flavors.select{ |key, value| value["name"].match(/\.trusted\./) }
 default_flavors = flavors.select{ |key, value| !value["name"].match(/\.trusted\./) }
+flavorlist = `#{openstack} flavor list -f value -c Name`.split("\n")
 
 # create the trusted flavors
 if node[:nova][:trusted_flavors]
   trusted_flavors.keys.each do |id|
+    next if flavorlist.include?(flavors[id]["name"])
     execute "register_#{flavors[id]["name"]}_flavor" do
       retries 5
       command <<-EOF
@@ -102,7 +109,6 @@ if node[:nova][:trusted_flavors]
   #{flavors[id]["disk"]} #{flavors[id]["vcpu"]}
   #{novacmd} flavor-key #{flavors[id]["name"]} set trust:trusted_host=trusted
   EOF
-      not_if "#{novacmd} flavor-list | grep -q #{flavors[id]["name"]}"
       action :nothing
       subscribes :run, "execute[trigger-flavor-creation]", :delayed
     end
@@ -112,13 +118,13 @@ end
 # create the default flavors
 if node[:nova][:create_default_flavors]
   default_flavors.keys.each do |id|
+    next if flavorlist.include?(flavors[id]["name"])
     execute "register_#{flavors[id]["name"]}_flavor" do
       retries 5
       command <<-EOF
   #{novacmd} flavor-create #{flavors[id]["name"]} #{id} #{flavors[id]["mem"]} \
   #{flavors[id]["disk"]} #{flavors[id]["vcpu"]}
   EOF
-      not_if "#{novacmd} flavor-list | grep -q #{flavors[id]["name"]}"
       action :nothing
       subscribes :run, "execute[trigger-flavor-creation]", :delayed
     end
