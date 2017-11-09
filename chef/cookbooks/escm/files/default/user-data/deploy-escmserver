@@ -11,7 +11,7 @@ COMPOSE_CONFIG_PATH=${CONFIG_BASE}/docker-compose
 DOCKER_PATH=/docker
 
 # Redirect all output to log file
-exec &>> ${DOCKER_PATH}/setup-machine-$(date '+%Y-%m-%d').log
+exec &>> ${DOCKER_PATH}/logs/setup-machine-$(date '+%Y-%m-%d').log
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') starting setup..."
 
