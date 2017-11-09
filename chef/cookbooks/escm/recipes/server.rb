@@ -327,7 +327,8 @@ template "#{escm_install_path}/var.env" do
     docker: node[:escm][:docker],
     proxy: node[:escm][:proxy],
     host_fqdn: lazy { node[:escm][:ssl][:fqdn].empty? ? node[:escm][:openstack][:instance_stack][:ip_appserver] : node[:escm][:ssl][:fqdn] },
-    instance: lazy { node[:escm][:openstack][:instance_stack] }
+    instance: lazy { node[:escm][:openstack][:instance_stack] },
+    no_proxy: lazy { node[:escm][:proxy][:no_proxy].empty? ? "#{node[:escm][:proxy][:no_proxy_default]},#{node[:escm][:openstack][:instance_stack][:ip_appserver]}" : "#{node[:escm][:proxy][:no_proxy_default]},#{node[:escm][:openstack][:instance_stack][:ip_appserver]},#{node[:escm][:proxy][:no_proxy]}" }
   )
 end
 
