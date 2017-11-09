@@ -317,6 +317,13 @@ end
 #   )
 # end
 
+var_no_proxy = node[:escm][:proxy][:no_proxy].empty? ? "#{node[:escm][:proxy][:no_proxy_default]},#{node[:escm][:openstack][:instance_stack][:ip_appserver]}" : "#{node[:escm][:proxy][:no_proxy_default]},#{node[:escm][:openstack][:instance_stack][:ip_appserver]},#{node[:escm][:proxy][:no_proxy]}"
+var_key_secret = "#{node[:escm][:openstack][:instance_stack][:key_secret]}"
+var_host_fqdn = node[:escm][:ssl][:fqdn].empty? ? "#{node[:escm][:openstack][:instance_stack][:ip_appserver]}" : "#{node[:escm][:ssl][:fqdn]}"
+var_db_pwd_core = "#{node[:escm][:openstack][:instance_stack][:db_core_password]}"
+var_db_pwd_app = "#{node[:escm][:openstack][:instance_stack][:db_app_password]}"
+var_db_superpwd = "#{node[:escm][:openstack][:instance_stack][:db_password]}"
+
 template "#{escm_install_path}/var.env" do
   source "var.env.erb"
   owner escm_group
@@ -326,9 +333,12 @@ template "#{escm_install_path}/var.env" do
     mail: node[:escm][:mail],
     docker: node[:escm][:docker],
     proxy: node[:escm][:proxy],
-    host_fqdn: lazy { node[:escm][:ssl][:fqdn].empty? ? node[:escm][:openstack][:instance_stack][:ip_appserver] : node[:escm][:ssl][:fqdn] },
-    instance: lazy { node[:escm][:openstack][:instance_stack] },
-    no_proxy: lazy { node[:escm][:proxy][:no_proxy].empty? ? "#{node[:escm][:proxy][:no_proxy_default]},#{node[:escm][:openstack][:instance_stack][:ip_appserver]}" : "#{node[:escm][:proxy][:no_proxy_default]},#{node[:escm][:openstack][:instance_stack][:ip_appserver]},#{node[:escm][:proxy][:no_proxy]}" }
+    no_proxy: var_no_proxy,
+    key_secret: var_key_secret,
+    host_fqdn: var_host_fqdn,
+    db_pwd_core: var_db_pwd_core,
+    db_pwd_app: var_db_pwd_app,
+    db_superpwd: var_db_superpwd
   )
 end
 
