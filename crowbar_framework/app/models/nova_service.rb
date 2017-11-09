@@ -504,7 +504,82 @@ class NovaService < OpenstackServiceObject
     super
   end
 
+  # try to know if we can skip a node from running chef-client
+  def skip_unchanged_node?(node, old_role, new_role)
+    # if old_role is nil, then we are applying the barclamp for the first time, so no skip
+    return false if old_role.nil?
+
+    # if the node changed roles, then we need to apply, so no skip
+    return false if node_changed_roles?(node, old_role, new_role)
+
+    # if attributes have changed, we need to apply, so no skip
+    return false if node_changed_attributes?(node, old_role, new_role)
+
+    # if we use remote HA, let's be safe, so no skip
+    return false if node_is_remote_ha?(node, new_role)
+
+    # if the node is a controller, then we only need to apply if we move from
+    # non-HA to HA (or vice-versa), since the config didn't change
+    if node_is_nova_controller?(node, new_role)
+      return false if node_changed_ha?(node, old_role, new_role)
+    end
+
+    # by this point its safe to assume that we can skip the node as nothing has changed on it
+    # same attributes, same roles so skip it
+    @logger.info("#{@bc_name} skip_batch_for_node? skipping: #{node_name}")
+    true
+  end
+
   private
+
+  def node_changed_attributes?(node, old_role, new_role)
+    old_role_attributes = old_role.default_attributes[@bc_name].deep_dup
+    # we need to remove the HA keys from the old_role for nova/ec2-api,
+    # as they get added afterwards to the new role during apply_role_pre_chef_call
+    # so if we dont remove them, the comparision is always gonna fail
+    old_role_attributes.delete("ha")
+    old_role_attributes["ec2-api"].delete("ha")
+    if old_role_attributes != new_role.default_attributes[@bc_name]
+      logger.debug("Nova skip_batch_for_node?: not skipping #{node} (attribute change)")
+      return true
+    end
+
+    false
+  end
+
+  def node_is_remote_ha?(node, new_role)
+    new_role.override_attributes[@bc_name]["elements"].each do |role_name, elements|
+      next unless role_name =~ /^nova-compute-/
+      elements.each do |element|
+        if is_remotes?(element)
+          @logger.debug("Nova skip_batch_for_node?: not skipping #{node} (compute HA)")
+          return true
+        end
+      end
+    end
+
+    false
+  end
+
+  def node_changed_ha?(node, old_role, new_role)
+    old_elements = old_role.override_attributes[@bc_name]["elements"]
+    new_elements = new_role.override_attributes[@bc_name]["elements"]
+
+    if old_elements["nova-controller"] == new_elements["nova-controller"]
+      @logger.debug("Nova skip_batch_for_node?: skipping #{node} (no controller change)")
+      return false
+    end
+
+    true
+  end
+
+  # find out if this node is a controller
+  def node_is_nova_controller?(node, role)
+    return false if role.nil?
+
+    _, controller_nodes, = role_expand_elements(role, "nova-controller")
+    controller_nodes.include?(node)
+  end
 
   def hyperv_available?
     return File.exist?("/opt/dell/chef/cookbooks/hyperv")
