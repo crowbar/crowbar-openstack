@@ -52,7 +52,7 @@
         "user": "",
         "password": "",
         "organization": "servicecatalog",
-        "tag": "17.5"
+        "tag": "v17.5.0"
       },
       "proxy": {
         "use_proxy": false,
