@@ -181,7 +181,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
     if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
       external_networks = ["nova_floating"]
-      external_networks.concat(node[:neutron][:additional_external_networks])
+      external_networks.concat(neutron[:neutron][:additional_external_networks])
       ext_physnet_map = NeutronHelper.get_neutron_physnets(node, external_networks)
       external_networks.each do |net|
         ext_iface = node[:crowbar_wall][:network][:nets][net].last
@@ -214,7 +214,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
     if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
       external_networks = ["nova_floating"]
-      external_networks.concat(node[:neutron][:additional_external_networks])
+      external_networks.concat(neutron[:neutron][:additional_external_networks])
       ext_physnet_map = NeutronHelper.get_neutron_physnets(node, external_networks)
       external_networks.each do |net|
         ext_iface = node[:crowbar_wall][:network][:nets][net].last
