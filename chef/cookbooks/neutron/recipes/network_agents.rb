@@ -109,7 +109,19 @@ when "vmware"
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
 end
 
-template "/etc/neutron/metering_agent.ini" do
+# Empty the config file that is explicitly passed to the metadata agent, as
+# its content will prevail compared to config snippets (because the file is
+# explicitly passed as a config file, not loaded as part of the default files
+# to load).
+file "/etc/neutron/metering_agent.ini" do
+  owner "root"
+  group node[:neutron][:platform][:group]
+  mode "0640"
+  content "# Please use config file snippets in /etc/neutron/neutron-metering-agent.conf.d/.\n" \
+          "# See /etc/neutron/README.config for more details.\n"
+end
+
+template node[:neutron][:metering_agent_config_file] do
   cookbook "neutron"
   source "metering_agent.ini.erb"
   owner "root"
@@ -219,7 +231,8 @@ service node[:neutron][:platform][:metering_agent_name] do
   supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources(template: node[:neutron][:config_file])
-  subscribes :restart, resources("template[/etc/neutron/metering_agent.ini]")
+  subscribes :restart, resources(template: node[:neutron][:metering_agent_config_file])
+  subscribes :restart, resources(file: "/etc/neutron/metering_agent.ini")
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 utils_systemd_service_restart node[:neutron][:platform][:metering_agent_name] do
