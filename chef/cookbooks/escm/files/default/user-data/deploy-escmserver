@@ -125,6 +125,7 @@ fi
 
 #TODO: Where does the deployer image come from?
 # Create Docker directory structure and Docker Compose files
+pushd ${DOCKER_PATH}
 docker run --name deployer-directories-compose --rm -v ${DOCKER_PATH}:/target oscm-deployer
 
 # Copy certificate files
