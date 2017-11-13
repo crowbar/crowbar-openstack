@@ -137,18 +137,18 @@ docker run --name deployer-directories-compose --rm -v ${DOCKER_PATH}:/target ${
 
 # Copy certificate files
 if [ -f ${SSL_CONFIG_PATH}/escm.key ]; then
-    for dir_privkey in ${DOCKER_PATH}/config/*; do
+    for dir_privkey in ${DOCKER_PATH}/config/oscm-*; do
         cp -f ${SSL_CONFIG_PATH}/escm.key ${dir_privkey}/ssl/privkey
     done
 fi
 if [ -f ${SSL_CONFIG_PATH}/escm.crt ]; then
-    for dir_privkey in ${DOCKER_PATH}/config/*; do
+    for dir_privkey in ${DOCKER_PATH}/config/oscm-*; do
         cp -f ${SSL_CONFIG_PATH}/escm.crt ${dir_privkey}/ssl/cert
     done
     cp -f ${SSL_CONFIG_PATH}/escm.crt ${DOCKER_PATH}/config/certs
 fi
 if [ -f ${SSL_CONFIG_PATH}/escm.chain ]; then
-    for dir_privkey in ${DOCKER_PATH}/config/*; do
+    for dir_privkey in ${DOCKER_PATH}/config/oscm-*; do
         cp -f ${SSL_CONFIG_PATH}/escm.chain ${dir_privkey}/ssl/chain
     done
 fi
