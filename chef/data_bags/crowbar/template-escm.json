@@ -71,7 +71,6 @@
         "keyfile": "/etc/escm/ssl/private/signing_key.pem",
         "generate_certs": false,
         "fqdn": "",
-        "insecure": false,
         "ca_certs": "/etc/escm/ssl/certs/ca.pem"
       },
       "api": {

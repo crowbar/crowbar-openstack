@@ -19,6 +19,4 @@ default[:escm][:proxy][:no_proxy_default] = "localhost,127.0.0.1"
 default[:escm][:ssl][:certfile] = "/etc/escm/ssl/certs/signing_cert.pem"
 default[:escm][:ssl][:keyfile] = "/etc/escm/ssl/private/signing_key.pem"
 default[:escm][:ssl][:generate_certs] = false
-default[:escm][:ssl][:insecure] = false
 default[:escm][:ssl][:ca_certs] = "/etc/escm/ssl/certs/ca.pem"
-
