@@ -18,7 +18,7 @@
         "flavor": {
           "name": "escm.small",
           "ram": 8192,
-          "vcpus": 1,
+          "vcpus": 4,
           "disk": 20
         },
         "keypair": {
@@ -52,7 +52,7 @@
         "user": "",
         "password": "",
         "organization": "servicecatalog",
-        "tag": "17.5"
+        "tag": "v17.5.0"
       },
       "proxy": {
         "use_proxy": false,

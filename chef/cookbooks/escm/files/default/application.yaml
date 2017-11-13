@@ -115,44 +115,32 @@ resources:
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
           ethertype: IPv4
-          port_range_min: 80
-          port_range_max: 80
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          ethertype: IPv4
-          port_range_min: 8080
-          port_range_max: 8080
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          ethertype: IPv4
-          port_range_min: 8880
-          port_range_max: 8880
-        - direction: ingress
-          remote_ip_prefix: 0.0.0.0/0
-          protocol: tcp
-          ethertype: IPv4
           port_range_min: 8081
           port_range_max: 8081
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
           ethertype: IPv4
-          port_range_min: 8881
-          port_range_max: 8881
+          port_range_min: 8443
+          port_range_max: 8443
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
           ethertype: IPv4
-          port_range_min: 8680
-          port_range_max: 8680
+          port_range_min: 8543
+          port_range_max: 8543
         - direction: ingress
           remote_ip_prefix: 0.0.0.0/0
           protocol: tcp
           ethertype: IPv4
           port_range_min: 8681
           port_range_max: 8681
+        - direction: ingress
+          remote_ip_prefix: 0.0.0.0/0
+          protocol: tcp
+          ethertype: IPv4
+          port_range_min: 8881
+          port_range_max: 8881
         - direction: egress
           protocol: tcp
           ethertype: IPv4
