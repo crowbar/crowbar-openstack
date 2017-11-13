@@ -80,8 +80,7 @@
       %legend
         = t(".ssl_header")
 
-      = select_field %w(api protocol),
-        :collection => :api_protocols_for_escm,
+      = :collection => :api_protocols_for_escm,
         "data-sslprefix" => "ssl",
         "data-sslcert" => "/etc/escm/ssl/certs/signing_cert.pem",
         "data-sslkey" => "/etc/escm/ssl/private/signing_key.pem"
@@ -93,6 +92,4 @@
         = string_field %w(ssl fqdn)
         = string_field %w(ssl certfile)
         = string_field %w(ssl keyfile)
-        = boolean_field %w(ssl insecure)
         = string_field %w(ssl ca_certs)
-
