@@ -30,7 +30,8 @@ source ${COMPOSE_CONFIG_PATH}/var.env
 set +a
 
 # If mandatory variables are unset, abort
-if [ -z ${DB_PWD_CORE} ] || [ -z ${DB_PWD_APP} ] || [ -z ${KEY_SECRET} ] || [ -z ${HOST_FQDN} ]; then
+if [ -z ${DB_PWD_CORE} ] || [ -z ${DB_PWD_APP} ] || [ -z ${KEY_SECRET} ] || [ -z ${HOST_FQDN} ] || [ -z ${DB_SUPERPWD} ]; then
+    echo "Mandatory variables unset - aborting."
     exit 0
 fi
 
