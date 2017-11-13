@@ -291,6 +291,7 @@ service_token_roles = admin
 memcached_servers = <%= @memcached_servers.join(',') %>
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = <%= node[:cinder][:memcache_secret_key] %>
+memcache_pool_socket_timeout = 1
 
 [oslo_concurrency]
 <% if @need_shared_lock_path -%>
