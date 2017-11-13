@@ -116,6 +116,7 @@ local1.*        /docker/logs/oscm-core/oscm-core.out.log
 local2.*        /docker/logs/oscm-app/oscm-app.out.log
 local3.*        /docker/logs/oscm-birt/oscm-birt.out.log
 local4.*        /docker/logs/oscm-branding/oscm-branding.out.log
+local5.*        /docker/logs/oscm-help/oscm-help.out.log
 EOF
     sed -i '/^local/d' /etc/rsyslog.conf
     systemctl restart rsyslog
@@ -136,18 +137,25 @@ docker run --name deployer-directories-compose --rm -v ${DOCKER_PATH}:/target os
 
 # Copy certificate files
 if [ -f ${SSL_CONFIG_PATH}/escm.key ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/ssl/privkey ${DOCKER_PATH}/config/oscm-app/ssl/privkey ${DOCKER_PATH}/config/oscm-birt/ssl/privkey ${DOCKER_PATH}/config/oscm-branding/ssl/privkey | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.key
+    for dir_privkey in ${DOCKER_PATH}/config/*; do
+        cp -f ${SSL_CONFIG_PATH}/escm.key ${dir_privkey}/ssl/privkey
+    done
 fi
 if [ -f ${SSL_CONFIG_PATH}/escm.crt ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/ssl/cert ${DOCKER_PATH}/config/oscm-app/ssl/cert ${DOCKER_PATH}/config/oscm-birt/ssl/cert ${DOCKER_PATH}/config/oscm-branding/ssl/cert ${DOCKER_PATH}/config/certs | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.crt
+    for dir_privkey in ${DOCKER_PATH}/config/*; do
+        cp -f ${SSL_CONFIG_PATH}/escm.crt ${dir_privkey}/ssl/cert
+    done
+    cp -f ${SSL_CONFIG_PATH}/escm.crt ${DOCKER_PATH}/config/certs
 fi
 if [ -f ${SSL_CONFIG_PATH}/escm.chain ]; then
-    echo ${DOCKER_PATH}/config/oscm-core/ssl/chain ${DOCKER_PATH}/config/oscm-app/ssl/chain ${DOCKER_PATH}/config/oscm-birt/ssl/chain ${DOCKER_PATH}/config/oscm-branding/ssl/chain | xargs -n 1 cp -f ${SSL_CONFIG_PATH}/escm.chain
+    for dir_privkey in ${DOCKER_PATH}/config/*; do
+        cp -f ${SSL_CONFIG_PATH}/escm.chain ${dir_privkey}/ssl/chain
+    done
 fi
 
 #TODO: Where does the deployer image come from?
 # Initialize the databases and start the application containers
-docker run --name deployer-init-start --rm -v ${DOCKER_PATH}:/target -v /var/run/docker.sock:/var/run/docker.sock -e INITDB=true -e STARTUP=true oscm-deployer
+docker run --name deployer-init-start --rm -v ${DOCKER_PATH}:/target -v /var/run/docker.sock:/var/run/docker.sock -e SYSLOG=true -e INITDB=true -e STARTUP=true oscm-deployer
 
 # Backup the current configuration for update check by the next run
 cp ${DOCKER_PATH}/var.env ${DOCKER_PATH}/var.env.current
