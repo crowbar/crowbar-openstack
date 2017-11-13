@@ -111,14 +111,16 @@ EOF
 fi
 
 # Create rsyslog configuration for Docker log files
-if [ ! -f /etc/rsyslog.d/oscm.conf ]; then
-    cat <<EOF > /etc/rsyslog.d/oscm.conf
+if [ ! -f /etc/rsyslog.d/escm.conf ]; then
+    sed -i '/\/var\/log\/messages$/d' /etc/rsyslog.conf
+    cat <<EOF > /etc/rsyslog.d/escm.conf
 local0.*        /docker/logs/oscm-db/oscm-db.out.log
 local1.*        /docker/logs/oscm-core/oscm-core.out.log
 local2.*        /docker/logs/oscm-app/oscm-app.out.log
 local3.*        /docker/logs/oscm-birt/oscm-birt.out.log
 local4.*        /docker/logs/oscm-branding/oscm-branding.out.log
 local5.*        /docker/logs/oscm-help/oscm-help.out.log
+*.*;mail.none;news.none;local0.none;local1.none;local2.none;local3.none;local4.none;local5.none;local6.none;local7.none     -/var/log/messages
 EOF
     sed -i '/^local/d' /etc/rsyslog.conf
     systemctl restart rsyslog
