@@ -18,7 +18,8 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') starting setup..."
 # Check if update is necessary
 if [ -f ${DOCKER_PATH}/var.env.current ]; then
   if [ $(diff ${DOCKER_PATH}/var.env.current ${COMPOSE_CONFIG_PATH}/var.env | wc -l) == "0" ]; then
-    exit
+    echo "$(date '+%Y-%m-%d %H:%M:%S') configuration not changed - aborting..."
+    exit 0
   fi
 fi
 
@@ -32,15 +33,15 @@ set +a
 
 # If mandatory variables are unset, abort
 if [ -z ${DB_PWD_CORE} ] || [ -z ${DB_PWD_APP} ] || [ -z ${KEY_SECRET} ] || [ -z ${HOST_FQDN} ] || [ -z ${DB_SUPERPWD} ]; then
-    echo "Mandatory variables unset - aborting."
+    echo "$(date '+%Y-%m-%d %H:%M:%S') Mandatory variables unset - aborting."
     exit 0
 fi
 
 # If containers are running, stop them
-if [ -f ${DOCKER_PATH}/docker-compose-escm.yml ]; then
-    if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml ps -q | wc -l) != "0" ]; then
-        docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml stop
-        docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml rm -f
+if [ -f ${DOCKER_PATH}/docker-compose-oscm.yml ]; then
+    if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml ps -q | wc -l) != "0" ]; then
+        docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml stop
+        docker-compose -f ${DOCKER_PATH}/docker-compose-oscm.yml rm -f
     fi
 fi
 
