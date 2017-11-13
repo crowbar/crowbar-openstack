@@ -57,12 +57,13 @@ en:
         keypair_hint: 'SSH public key of the keypair for openstack instance which hosts ESCM. It cannot be updated.'
         api:
           protocol: 'Protocol'
-        ssl_header: 'SSL Settings'
+        ssl_header: 'SSL Support'
         ssl:
-          generate_certs: 'Generate self-signed certificates'
-          fqdn: 'Host FQDN/IP address (if left empty, the floating IP will be used)'
+          generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          fqdn: 'Host FQDN (if left empty, the floating IP will be used)'
           certfile: 'SSL Certificate File'
-          keyfile: 'SSL Private Key File'
-          ca_certs: 'SSL CA Certificates File (optional)'
+          keyfile: 'SSL (Private) Key File'
+          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          ca_certs: 'SSL CA Certificates File'
         ssl_hint: 'Delete the SSL key pair on the given locations, in order to generate new one.'
         
