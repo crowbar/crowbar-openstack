@@ -29,6 +29,11 @@ source ${COMPOSE_CONFIG_PATH}/var.env
 # Disable automatic exporting of variables
 set +a
 
+# If mandatory variables are unset, abort
+if [ -z ${DB_PWD_CORE} ] || [ -z ${DB_PWD_APP} ] || [ -z ${KEY_SECRET} ] || [ -z ${HOST_FQDN} ]; then
+    exit 0
+fi
+
 # If containers are running, stop them
 if [ -f ${DOCKER_PATH}/docker-compose-escm.yml ]; then
     if [ $(docker-compose -f ${DOCKER_PATH}/docker-compose-escm.yml ps -q | wc -l) != "0" ]; then
