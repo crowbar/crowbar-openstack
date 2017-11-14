@@ -1,0 +1,68 @@
+#
+# Copyright 2017, SUSE LINUX GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+en:
+  barclamp:
+    escm:
+      edit_attributes:
+        keystone_instance: 'Keystone'
+        heat_instance: 'Heat'
+        mail_settings: 'Mail Settings'
+        mail:
+          auth: 'Authentication Required'
+          host: 'Mail Host'
+          port: 'SMTP Port'
+          tls:  'Enable TLS'
+          user: 'User'
+          password: 'Password'
+          from: 'ESCM Email Address'
+        docker_settings: 'Docker Registry'
+        docker:
+          dockerhub: 'Use Docker Hub'
+          organization: 'Organization'
+          auth: 'Authentication Required'
+          host: 'Registry Host' 
+          port: 'Registry Port' 
+          user: 'User'
+          password: 'Password'
+        proxy_settings: 'Proxy Settings'
+        proxy:
+          auth: 'Authentication Required'
+          use_proxy: 'Use Proxy'
+          http_host: 'HTTP Host'
+          http_port: 'HTTP Port'
+          https_host: 'HTTPS Host'
+          https_port: 'HTTPS Port'
+          no_proxy: 'No Proxy'
+          user: 'User'
+          password: 'Password'
+        proxy_hint: 'A comma-separated list of hosts which can bypass the proxy'
+        openstack_settings: "OpenStack Settings"
+        openstack:
+          keypair:
+            publickey: "Public Key"
+        keypair_hint: 'SSH public key of the keypair for openstack instance which hosts ESCM. It cannot be updated.'
+        api:
+          protocol: 'Protocol'
+        ssl_header: 'SSL Settings'
+        ssl:
+          generate_certs: 'Generate self-signed certificates'
+          fqdn: 'Host FQDN/IP address (if left empty, the floating IP will be used)'
+          certfile: 'SSL Certificate File'
+          keyfile: 'SSL Private Key File'
+          ca_certs: 'SSL CA Certificates File (optional)'
+        ssl_hint: 'Delete the SSL key pair on the given locations, in order to generate new one.'
+        

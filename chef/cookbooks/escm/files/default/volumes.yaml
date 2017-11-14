@@ -1,0 +1,47 @@
+# Example invocation: heat stack-create --poll -f volumes.yaml escm
+heat_template_version: 2015-10-15
+
+
+parameters:
+  logs_size:
+    type: number
+    default: 2
+    description: Size of the logs volume in gigabytes
+  data_size:
+    type: number
+    default: 2
+    description: Size of the data volume in gigabytes
+
+
+resources:
+
+  logs_volume:
+    type: OS::Cinder::Volume
+    properties:
+      name:
+        list_join:
+          - "_"
+          - - { get_param: 'OS::stack_name' }
+            - logs_volume
+      size: { get_param: logs_size }
+
+  data_volume:
+    type: OS::Cinder::Volume
+    properties:
+      name:
+        list_join:
+          - "_"
+          - - { get_param: 'OS::stack_name' }
+            - data_volume
+      size: { get_param: data_size }
+
+outputs:
+  # Retrieval after stack creation (presuming stack is named `escm`): 
+  # heat output-show escm logs_volume_id
+  logs_volume_id:
+    value: { get_resource: logs_volume }
+
+  # Retrieval after stack creation (presuming stack is named `escm`): 
+  # heat output-show escm data_volume_id
+  data_volume_id:
+    value: { get_resource: data_volume }

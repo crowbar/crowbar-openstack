@@ -1,0 +1,210 @@
+{
+  "type": "map",
+  "required": true,
+  "mapping": {
+    "id": { "type": "str", "required": true},
+    "description": { "type": "str", "required": true },
+    "attributes": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "escm": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "timeout": { "type": "int", "required": true },
+            "debug": { "type": "bool", "required": true },
+            "keystone_instance": { "type": "str", "required": true },
+            "nova_instance": { "type": "str", "required": true },
+            "heat_instance": { "type": "str", "required": true },
+            "keystone" : {
+              "type" : "map",
+              "required" : true,
+              "mapping": {
+                "project": { "type": "str", "required": true },
+                "user": { "type": "str", "required": true },
+                "password": { "type": "str", "required": true }
+              }
+            },
+            "openstack" : {
+              "type" : "map",
+              "required" : true,
+              "mapping": {
+                "image": { "type": "str", "required": true },
+                "flavor": {
+                  "type" : "map",
+                  "required" : true,
+                  "mapping": {
+                    "name": { "type": "str", "required": true },
+                    "ram": { "type": "int", "required": true },
+                    "vcpus": { "type": "int", "required": true },
+                    "disk": { "type": "int", "required": true }
+                  }
+                },
+                "keypair": {
+                  "type" : "map",
+                  "required" : true,
+                  "mapping": {
+                    "name": { "type": "str", "required": true },
+                    "publickey": { "type": "str", "required": true }
+                  }
+                },
+                "volume_stack" : {
+                  "type" : "map",
+                  "required" : true,
+                  "mapping": {
+                    "stack_name": { "type": "str", "required": true },
+                    "data_volume_size": { "type": "int", "required": true },
+                    "logs_volume_size": { "type": "int", "required": true }
+                  }
+                },
+                "instance_stack" : {
+                  "type" : "map",
+                  "required" : true,
+                  "mapping": {
+                    "stack_name": { "type": "str", "required": true }
+                  }
+                },
+                "floating_network" : { "type": "str", "required": true }
+              }
+            },
+            "mail" : {
+              "type" : "map",
+              "required" : true,
+              "mapping": {
+                "auth": { "type": "bool", "required": true },
+                "host": { "type": "str", "required": true },
+                "port": { "type": "int", "required": true },
+                "tls":  { "type": "bool", "required": true },
+                "user": { "type": "str", "required": true },
+                "password": { "type": "str", "required": true },
+                "from": { "type": "str", "required": true }
+              }
+            },
+            "docker" : {
+              "type" : "map",
+              "required" : true,
+              "mapping": {
+                "dockerhub": { "type": "bool", "required": true },
+                "host": { "type": "str", "required": true },
+                "port": { "type": "int", "required": true },
+                "auth": { "type": "bool", "required": true },
+                "user": { "type": "str", "required": true },
+                "password": { "type": "str", "required": true },
+                "organization": { "type": "str", "required": true },
+                "tag": { "type": "str", "required": true }
+              }
+            },
+            "proxy" : {
+              "type" : "map",
+              "required" : true,
+              "mapping": {
+                "use_proxy": { "type": "bool", "required": true },
+                "http_host": { "type": "str", "required": true },
+                "http_port": { "type": "int", "required": true },
+                "https_host": { "type": "str", "required": true },
+                "https_port": { "type": "int", "required": true },
+                "no_proxy": { "type": "str", "required": true },
+                "auth": { "type": "bool", "required": true },
+                "user": { "type": "str", "required": true },
+                "password": { "type": "str", "required": true }
+              }
+            },
+            "host_fqdn": { "type" : "str", "required" : true },
+            "ssl": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "certfile": { "type" : "str", "required" : true },
+                "keyfile": { "type" : "str", "required" : true },
+                "generate_certs": { "type" : "bool", "required" : true },
+                "fqdn": { "type" : "str", "required" : true },
+                "ca_certs": { "type" : "str", "required" : true }
+              }
+            },
+            "api": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "protocol": { "type" : "str", "required" : true }
+              }
+            }
+          }
+        }
+      }
+    },
+    
+    "deployment": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "escm": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "crowbar-revision": { "type": "int", "required": true },
+            "crowbar-committing": { "type": "bool" },
+            "crowbar-applied": { "type": "bool" },
+            "crowbar-status": { "type": "str" },
+            "crowbar-failed": { "type": "str" },
+            "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
+            "element_states": {
+              "type": "map",
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "elements": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "element_order": {
+              "type": "seq",
+              "required": true,
+              "sequence": [ {
+                "type": "seq",
+                "sequence": [ { "type": "str" } ]
+              } ]
+            },
+            "element_run_list_order": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                = : {
+                  "type": "int",
+                  "required": true
+                }
+              }
+            },
+            "config": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "environment": { "type": "str", "required": true },
+                "mode": { "type": "str", "required": true },
+                "transitions": { "type": "bool", "required": true },
+                "transition_list": {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
