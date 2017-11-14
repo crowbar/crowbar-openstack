@@ -24,8 +24,10 @@ if [ -f ${DOCKER_PATH}/var.env.old ]; then
   fi
 fi
 
-if ! (sha512sum --status --ignore-missing -c ${DOCKER_PATH}/escm.key.old.sha512sum && sha512sum --status --ignore-missing -c ${DOCKER_PATH}/escm.crt.old.sha512sum); then
-    UPDATE_NECESSARY_CERTS=false
+if [ -f ${DOCKER_PATH}/escm.key.old.sha512sum ] && [ -f ${DOCKER_PATH}/escm.crt.old.sha512sum ]; then
+    if sha512sum --status --ignore-missing -c ${DOCKER_PATH}/escm.key.old.sha512sum && sha512sum --status --ignore-missing -c ${DOCKER_PATH}/escm.crt.old.sha512sum; then
+        UPDATE_NECESSARY_CERTS=false
+    fi
 fi
 
 if [ ${UPDATE_NECESSARY_CONFIG} == "false" ] && [ ${UPDATE_NECESSARY_CERTS} == "false" ]; then
