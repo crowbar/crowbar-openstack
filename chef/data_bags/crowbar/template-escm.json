@@ -27,8 +27,8 @@
         },
         "volume_stack": {
           "stack_name": "escm-volumes",
-          "data_volume_size": 1,
-          "logs_volume_size": 1
+          "data_volume_size": 2,
+          "logs_volume_size": 2
         },
        "instance_stack": {
           "stack_name": "escm-instances"

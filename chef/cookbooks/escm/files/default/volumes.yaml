@@ -5,11 +5,11 @@ heat_template_version: 2015-10-15
 parameters:
   logs_size:
     type: number
-    default: 1
+    default: 2
     description: Size of the logs volume in gigabytes
   data_size:
     type: number
-    default: 1
+    default: 2
     description: Size of the data volume in gigabytes
 
 
