@@ -16,8 +16,8 @@ exec &>> ${DOCKER_PATH}/logs/setup-machine-$(date '+%Y-%m-%d').log
 echo "$(date '+%Y-%m-%d %H:%M:%S') starting setup..."
 
 # Check if update is necessary
-if [ -f ${DOCKER_PATH}/var.env.current ]; then
-  if [ $(diff ${DOCKER_PATH}/var.env.current ${COMPOSE_CONFIG_PATH}/var.env | wc -l) == "0" ]; then
+if [ -f ${DOCKER_PATH}/var.env.old ]; then
+  if [ $(diff ${DOCKER_PATH}/var.env.old ${COMPOSE_CONFIG_PATH}/var.env | wc -l) == "0" ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') configuration not changed - aborting..."
     exit 0
   fi
@@ -160,6 +160,6 @@ fi
 docker run --name deployer-init-start --rm -v ${DOCKER_PATH}:/target -v /var/run/docker.sock:/var/run/docker.sock -e SYSLOG=true -e INITDB=true -e STARTUP=true ${IMAGE_DEPLOYER}
 
 # Backup the current configuration for update check by the next run
-cp ${DOCKER_PATH}/var.env ${DOCKER_PATH}/var.env.current
+cp ${DOCKER_PATH}/var.env ${DOCKER_PATH}/var.env.old
 
 echo "$(date '+%Y-%m-%d %H:%M:%S') setup finished."
