@@ -85,8 +85,9 @@ execute "nova-manage db sync up to revision 329" do
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
   only_if do
-    !node[:nova][:db_synced] && (`nova-manage db version`.to_i < 329) &&
-      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
+    !node[:nova][:db_synced] &&
+      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
+      (`nova-manage db version`.to_i < 329)
   end
 end
 
@@ -99,8 +100,9 @@ execute "nova-manage db online_data_migrations" do
   ignore_failure true
   action :run
   only_if do
-    !node[:nova][:db_synced] && (`nova-manage db version`.to_i == 329) &&
-      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
+    !node[:nova][:db_synced] &&
+      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
+      (`nova-manage db version`.to_i == 329)
   end
 end
 
