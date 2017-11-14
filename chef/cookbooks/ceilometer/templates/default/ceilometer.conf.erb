@@ -80,3 +80,4 @@ rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:client_ca_certs] -%>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
+heartbeat_timeout_threshold = <%= @rabbit_settings[:heartbeat_timeout] %>
