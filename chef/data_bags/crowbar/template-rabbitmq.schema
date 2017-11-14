@@ -30,6 +30,13 @@
                 "client_ca_certs": { "type" : "str", "required" : true }
               }
             },
+            "client" : {
+              "type": "map",
+              "required": true,
+              "mapping" : {
+                "heartbeat_timeout": { "type": "int", "required": true }
+              }
+            },
             "cluster": { "type": "bool", "required": true },
             "ha" : {
               "type": "map",
