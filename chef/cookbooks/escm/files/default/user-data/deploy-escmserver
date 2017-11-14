@@ -9,6 +9,8 @@ CONFIG_BASE=/etc/escm
 SSL_CONFIG_PATH=${CONFIG_BASE}/ssl
 COMPOSE_CONFIG_PATH=${CONFIG_BASE}/docker-compose
 DOCKER_PATH=/docker
+UPDATE_NECESSARY_CONFIG=true
+UPDATE_NECESSARY_CERTS=true
 
 # Redirect all output to log file
 exec &>> ${DOCKER_PATH}/logs/setup-machine-$(date '+%Y-%m-%d').log
@@ -18,9 +20,17 @@ echo "$(date '+%Y-%m-%d %H:%M:%S') starting setup..."
 # Check if update is necessary
 if [ -f ${DOCKER_PATH}/var.env.old ]; then
   if [ $(diff ${DOCKER_PATH}/var.env.old ${COMPOSE_CONFIG_PATH}/var.env | wc -l) == "0" ]; then
+    UPDATE_NECESSARY_CONFIG=false
+  fi
+fi
+
+if ! (sha512sum --status --ignore-missing -c ${DOCKER_PATH}/escm.key.old.sha512sum && sha512sum --status --ignore-missing -c ${DOCKER_PATH}/escm.crt.old.sha512sum); then
+    UPDATE_NECESSARY_CERTS=false
+fi
+
+if [ ${UPDATE_NECESSARY_CONFIG} == "false" ] && [ ${UPDATE_NECESSARY_CERTS} == "false" ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') configuration not changed - aborting..."
     exit 0
-  fi
 fi
 
 # Enable automatic exporting of variables
@@ -139,20 +149,24 @@ pushd ${DOCKER_PATH}
 docker run --name deployer-directories-compose --rm -v ${DOCKER_PATH}:/target ${IMAGE_DEPLOYER}
 
 # Copy certificate files
+# and save the hashes of the current certificate files for update check by the next run
 if [ -f ${SSL_CONFIG_PATH}/escm.key ]; then
     for dir_privkey in ${DOCKER_PATH}/config/oscm-*; do
         cp -f ${SSL_CONFIG_PATH}/escm.key ${dir_privkey}/ssl/privkey
     done
+    sha512sum ${SSL_CONFIG_PATH}/escm.key > ${DOCKER_PATH}/escm.key.old.sha512sum
 fi
 if [ -f ${SSL_CONFIG_PATH}/escm.crt ]; then
     for dir_privkey in ${DOCKER_PATH}/config/oscm-*; do
         cp -f ${SSL_CONFIG_PATH}/escm.crt ${dir_privkey}/ssl/cert
     done
     cp -f ${SSL_CONFIG_PATH}/escm.crt ${DOCKER_PATH}/config/certs
+    sha512sum ${SSL_CONFIG_PATH}/escm.crt > ${DOCKER_PATH}/escm.crt.old.sha512sum
 fi
 if [ -f ${SSL_CONFIG_PATH}/escm.chain ]; then
     for dir_privkey in ${DOCKER_PATH}/config/oscm-*; do
         cp -f ${SSL_CONFIG_PATH}/escm.chain ${dir_privkey}/ssl/chain
+        sha512sum ${SSL_CONFIG_PATH}/escm.chain > ${DOCKER_PATH}/escm.chain.old.sha512sum
     done
 fi
 
