@@ -60,6 +60,7 @@ fi
 
 if [ $(grep SwapTotal /proc/meminfo | awk '{ print $2 }') -eq 0 ]; then
     dd if=/dev/zero of=${DOCKER_PATH}/data/swapfile bs=1G count=1
+    mkswap -f ${DOCKER_PATH}/data/swapfile
     echo "${DOCKER_PATH}/data/swapfile swap swap defaults 0 0"
     swapon ${DOCKER_PATH}/data/swapfile
 fi
