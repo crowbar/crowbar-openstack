@@ -19,7 +19,6 @@ module Barclamp
     def api_protocols_for_escm(selected)
       options_for_select(
         [
-          ["HTTP", "http"],
           ["HTTPS", "https"]
         ],
         selected.to_s

@@ -119,7 +119,6 @@
                 "keyfile": { "type" : "str", "required" : true },
                 "generate_certs": { "type" : "bool", "required" : true },
                 "fqdn": { "type" : "str", "required" : true },
-                "insecure": { "type" : "bool", "required" : true },
                 "ca_certs": { "type" : "str", "required" : true }
               }
             },
