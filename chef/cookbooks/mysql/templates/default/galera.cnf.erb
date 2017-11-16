@@ -8,6 +8,8 @@ wsrep_on=ON
 binlog_format=ROW
 expire_logs_days = <%= @expire_logs_days %>
 
+wsrep_provider_options = "gmcast.listen_addr=tcp://<%= @node_address %>:4567"
+
 # SST method
 wsrep_sst_method = xtrabackup-v2
 wsrep_sst_auth = <%= @sstuser %>:<%= @sstuser_password %>
