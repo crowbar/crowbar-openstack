@@ -26,7 +26,7 @@ en:
         keystone_instance: 'Keystone'
         glance_instance: 'Glance'
         shares:
-          addheader: 'Add new Manila Backend'
+          addheader: 'New Backend'
           listheader: 'Share backends'
           backend_name: 'Name for Backend'
           backend_driver: 'Type of Share'
