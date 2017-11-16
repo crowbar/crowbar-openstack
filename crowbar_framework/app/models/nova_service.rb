@@ -131,6 +131,10 @@ class NovaService < OpenstackServiceObject
     node[:cpu]["0"][:flags].include?("vmx") or node[:cpu]["0"][:flags].include?("svm")
   end
 
+  def node_supports_zvm(node)
+    return true if node["kernel"]["machine"] =~ /s390x/
+  end
+
   #
   # Lots of enhancements here.  Like:
   #    * Don't reuse machines
@@ -164,17 +168,19 @@ class NovaService < OpenstackServiceObject
     kvm = non_hyperv.select { |n| n if node_supports_kvm(n) }
     non_kvm = non_hyperv - kvm
     xen = non_kvm.select { |n| n if node_supports_xen(n) }
-    qemu = non_kvm - xen
+    # NOTE(aplanas) For SOC7 we autoselect nova-compute-zvm the nodes
+    # that are on S390X.  Is SOC8 we need to change it to KVM.
+    zvm = non_kvm.select { |n| n if node_supports_zvm(n) }
+    qemu = non_kvm - xen - zvm
 
-    # do not use zvm by default
-    #   TODO add it here once a compute node can run inside z/VM
     # (2017-01-30) Hyper-V is hidden for now
     # "nova-compute-hyperv" => hyperv.map(&:name),
     base["deployment"]["nova"]["elements"] = {
       "nova-controller" => [controller.name],
       "nova-compute-kvm" => kvm.map(&:name),
       "nova-compute-qemu" => qemu.map(&:name),
-      "nova-compute-xen" => xen.map(&:name)
+      "nova-compute-xen" => xen.map(&:name),
+      "nova-compute-zvm" => zvm.map(&:name)
     }
 
     base["attributes"][@bc_name]["itxt_instance"] = find_dep_proposal("itxt", true)
