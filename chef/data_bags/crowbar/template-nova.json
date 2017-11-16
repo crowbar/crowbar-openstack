@@ -97,7 +97,7 @@
         "zvm_xcat_username": "admin",
         "zvm_xcat_password": "admin",
         "zvm_diskpool": "",
-        "zvm_diskpool_type": "",
+        "zvm_diskpool_type": "ECKD",
         "zvm_host": "",
         "zvm_scsi_pool": "",
         "zvm_user_profile": "OSDFLT",
