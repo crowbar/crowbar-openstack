@@ -72,6 +72,7 @@ service_token_roles = admin
 memcached_servers = <%= @memcached_servers.join(',') %>
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = <%= node[:trove][:memcache_secret_key] %>
+memcache_pool_socket_timeout = 1
 
 [oslo_messaging_rabbit]
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>

@@ -56,6 +56,7 @@ auth_type = password
 memcached_servers = <%= @memcached_servers.join(',') %>
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = <%= node[:magnum][:memcache_secret_key] %>
+memcache_pool_socket_timeout = 1
 service_token_roles_required = true
 service_token_roles = admin
 
