@@ -37,6 +37,8 @@ unless node[:database][:galera_bootstrapped]
   end
 end
 
+node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+
 unless node[:database][:galera_bootstrapped]
   if CrowbarPacemakerHelper.is_cluster_founder?(node)
     # To bootstrap for the first time, start galera on one node
@@ -52,7 +54,8 @@ unless node[:database][:galera_bootstrapped]
         cluster_addresses: "gcomm://",
         sstuser: "root",
         sstuser_password: "",
-        expire_logs_days: node[:database][:mysql][:expire_logs_days]
+        expire_logs_days: node[:database][:mysql][:expire_logs_days],
+        node_address: node_address
       )
     end
 
@@ -131,7 +134,8 @@ template "/etc/my.cnf.d/galera.cnf" do
     cluster_addresses: cluster_addresses,
     sstuser: "sstuser",
     sstuser_password: node[:database][:mysql][:sstuser_password],
-    expire_logs_days: node[:database][:mysql][:expire_logs_days]
+    expire_logs_days: node[:database][:mysql][:expire_logs_days],
+    node_address: node_address
   )
 end
 
@@ -258,7 +262,7 @@ template "/etc/galera-python-clustercheck/galera-python-clustercheck.conf" do
   group "mysql"
   mode "0640"
   variables(
-    node_address: Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+    node_address: node_address
   )
 end
 
@@ -268,7 +272,7 @@ template "/etc/galera-python-clustercheck/my.cnf" do
   group "mysql"
   mode "0640"
   variables(
-    node_address: Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+    node_address: node_address
   )
 end
 
