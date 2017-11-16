@@ -30,7 +30,7 @@ en:
         database_instance: 'Database Instance'
         rabbitmq_instance: 'RabbitMQ Instance'
         keystone_instance: 'Keystone Instance'
-        dhcp_domain: 'DHCP Domain'
+        dns_domain: 'DNS Domain'
         plugin_header: 'Networking Plugin'
         networking_plugin: 'Plugin'
         ml2_type_drivers: 'Modular Layer 2 type drivers'
