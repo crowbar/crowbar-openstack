@@ -476,6 +476,11 @@ class NovaService < OpenstackServiceObject
       end
     end
 
+    # Validate some zVM / xCAT configuration
+    unless elements["nova-compute-zvm"].nil?
+      validate_zvm_xcat(proposal)
+    end
+
     # vendordata must be valid json
     begin
       JSON.parse(proposal["attributes"][@bc_name]["metadata"]["vendordata"]["json"])
@@ -484,6 +489,32 @@ class NovaService < OpenstackServiceObject
     end
 
     super
+  end
+
+  def validate_zvm_xcat(proposal)
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_server"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_server")
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_username"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_username")
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_password"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_password")
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_diskpool"].empty?
+      if proposal["attributes"][@bc_name]["zvm"]["zvm_diskpool_type"] == "ECKD"
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_diskpool")
+      end
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_host"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_host")
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_master"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_master")
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_ssh_key"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_ssh_key")
+    end
   end
 
   # try to know if we can skip a node from running chef-client
