@@ -28,7 +28,7 @@ en:
         volumes:
           "0":
             backend_driver: 'Type of Volume'
-          addheader: 'Add new Cinder Backend'
+          addheader: 'New Backend'
           backend_name: 'Name for Backend'
           backend_driver: 'Type of Volume'
           loading_text: 'Loading Backends...'
