@@ -346,6 +346,41 @@ class NeutronService < OpenstackServiceObject
     end
   end
 
+  def validate_additional_net(net)
+    elements = net.split(":")
+    # Trivial validation, based on the length of the array. Valid arrays are:
+    #  ['name']
+    #  ['name', 'vlan_start', 'vlan_end']
+    #  ['name', '', '', 'rdev_list']
+    #  ['name', 'vlan_start', 'vlan_end', 'rdev_list']
+    if elements.length == 2 or elements.length > 4
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.additional_zvm_networks")
+    end
+  end
+
+  def validate_zvm(proposql)
+    if proposal["attributes"]["neutron"]["zvm"]["zvm_xcat_server"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_server")
+    end
+    if proposal["attributes"]["neutron"]["zvm"]["zvm_xcat_username"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_username")
+    end
+    if proposal["attributes"]["neutron"]["zvm"]["zvm_xcat_password"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_password")
+    end
+
+    # The format for the `additional_zvm_networks` is
+    # netname[:[vlan_start]:[vlan_end][:rdev_list]].
+    #
+    # Example of valid items:
+    #   datanet1, datanet2:100:600, datanet3:::1600
+    #
+    extra_networks = proposal["attributes"]["neutron"]["zvm"]["additional_zvm_networks"]
+    extra_networks.each do |net|
+      validate_additional_net(net)
+    end
+  end
+    
   def validate_external_networks(external_networks)
     net_svc = NetworkService.new @logger
     network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
@@ -390,6 +425,13 @@ class NeutronService < OpenstackServiceObject
     validate_dvr(proposal)
     if proposal[:attributes][:neutron][:use_infoblox]
       validate_infoblox(proposal)
+    end
+
+    # if some of the nodes is a zVM (s390x arch), validate the zvm
+    # sub-attributes
+    nodes = NodeObject.all
+    if nodes.any? { |n| node_supports_zvm(n) }
+      validate_zvm(proposal)
     end
 
     unless proposal["attributes"]["neutron"]["additional_external_networks"].empty?

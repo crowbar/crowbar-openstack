@@ -9,14 +9,23 @@ xcat_mgt_ip = <%= @zvm[:xcat_mgt_ip] %>
 <% unless @zvm[:xcat_mgt_mask].empty? -%>
 xcat_mgt_mask = <%= @zvm[:xcat_mgt_mask] %>
 <%end -%>
-[ml2_type_vlan]
-network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
-<% unless @zvm[:xcat_mgt_ip].empty? -%>
+
+# NOTE(aplanas) some error avoid in export of those parameters from
+# ml2_conf.ini
 [ml2_type_flat]
-flat_networks = <%= @zvm[:zvm_xcat_mgt_vswitch] %>
-<%end -%>
+flat_networks = <%= @flat_nets.join(",") %>
+[ml2_type_vlan]
+network_vlan_ranges = <%= @vlan_nets.join(",") %>
+
 [<%= @zvm[:zvm_xcat_mgt_vswitch] %>]
 [physnet1]
 <% unless @zvm[:zvm_physnet_rdev].empty? -%>
 rdev_list = <%= @zvm[:zvm_physnet_rdev] -%>
 <%end -%>
+
+<% @extra_nets.each do |name, rdev| -%>
+[<%= name %>]
+  <% if !rdev.nil? -%>
+rdev_list = <%= rdev %>
+  <% end -%>
+<% end -%>
