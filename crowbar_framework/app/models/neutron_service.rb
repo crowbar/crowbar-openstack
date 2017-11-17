@@ -166,6 +166,10 @@ class NeutronService < OpenstackServiceObject
     end
   end
 
+  def node_supports_zvm(node)
+    return true if node["kernel"]["machine"] =~ /s390x/
+  end
+
   def validate_ml2(proposal)
     ml2_mechanism_drivers = proposal["attributes"]["neutron"]["ml2_mechanism_drivers"]
     ml2_type_drivers = proposal["attributes"]["neutron"]["ml2_type_drivers"]
@@ -174,6 +178,15 @@ class NeutronService < OpenstackServiceObject
 
     ml2_type_drivers_valid = NeutronService.networking_ml2_type_drivers_valid
     ml2_mechanism_drivers_valid = NeutronService.networking_ml2_mechanism_drivers_valid
+
+    # if some of the nodes is a zVM (s390x arch), we need vlan
+    # included in the ml2_type_drivers
+    nodes = NodeObject.all
+    if nodes.any? { |n| node_supports_zvm(n) }
+      unless ml2_type_drivers.include?("vlan")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.ml2_zvm_vlan")
+      end
+    end
 
     # at least one ml2 mech driver must be selected for ml2 as core plugin
     if ml2_mechanism_drivers.empty?
