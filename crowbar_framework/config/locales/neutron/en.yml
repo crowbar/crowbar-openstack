@@ -150,3 +150,7 @@ en:
         dvr_linuxbridge: 'DVR is not compatible with Linux Bridge ML2 driver'
         vmware_dvs_vlan: 'The "vmware_dvs" mechanism driver needs the type driver "vlan"'
         vmware_dvs_ovs_lbr: 'The "vmware_dvs" mechanism driver also needs either the "openvswitch" or the "linuxbridge" mechanism driver'
+        zvm_xcat_server: 'The xCAT MN IP address is not optional'
+        zvm_xcat_username: 'Provide the username for the xCAT server'
+        zvm_xcat_password: 'Provide the password for the xCAT server'
+        additional_zvm_networks: 'The format for the `additional_zvm_networks` is netname[:[vlan_start]:[vlan_end][:rdev_list]]'
