@@ -1,0 +1,16 @@
+# Options:
+#   -h, --help            show this help message and exit
+#   -a AWD, --available-when-donor=AWD
+#                         Available when donor [default: 0]
+#   -r, --disable-when-readonly
+#                         Disable when read_only flag is set (desirable when
+#                         wanting to take a node out of the cluster wihtout
+#                         desync) [default: False]
+#   -c CACHE, --cache-time=CACHE
+#                         Cache the last response for N seconds [default: 1]
+#   -f CNF, --conf=CNF    MySQL Config file to use [default: ~/.my.cnf]
+#   -p PORT, --port=PORT  Port to listen on [default: 8000]
+#   -6, --ipv6            Listen to ipv6 only (disabled ipv4) [default: False]
+#   -4 IPV4, --ipv4=IPV4  Listen to ipv4 on this address [default: 0.0.0.0]
+
+GALERA_PYTHON_CLUSTERCHECK_OPTIONS="--conf=/etc/galera-python-clustercheck/my.cnf -p 5555 -4 <%= @node_address %>"
