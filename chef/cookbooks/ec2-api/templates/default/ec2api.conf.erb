@@ -26,8 +26,10 @@ s3_use_ssl = true
 
 [database]
 connection = <%= @database_connection %>
+
 [oslo_concurrency]
 lock_path = /var/run/ec2-api
+
 [oslo_messaging_rabbit]
 <% if @rabbit_settings[:cluster] -%>
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
@@ -37,6 +39,8 @@ rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:client_ca_certs] -%>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end -%>
+heartbeat_timeout_threshold = <%= @rabbit_settings[:heartbeat_timeout] %>
+
 [keystone_authtoken]
 auth_type = password
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
