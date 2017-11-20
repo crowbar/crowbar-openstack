@@ -137,9 +137,10 @@
         "zvm_xcat_password": "",
         "zvm_physnet_rdev": "",
         "zvm_xcat_zhcp_nodename": "zhcp",
-        "xcat_mgt_ip": "10.1.0.1",
-        "xcat_mgt_mask": "255.255.0.0",
-        "zvm_xcat_mgt_vswitch": "xcatvsw2"
+        "xcat_mgt_ip": "",
+        "xcat_mgt_mask": "",
+        "zvm_xcat_mgt_vswitch": "xcatvsw2",
+        "additional_flat_networks": []
       },
       "ssl": {
         "certfile": "/etc/neutron/ssl/certs/signing_cert.pem",
