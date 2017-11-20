@@ -194,6 +194,7 @@ class CrowbarOpenStackHelper
             "#{rabbit[:rabbitmq][:trove][:vhost]}",
           durable_queues: false,
           ha_queues: false,
+          heartbeat_timeout: rabbit[:rabbitmq][:client][:heartbeat_timeout],
           pacemaker_resource: "rabbitmq"
         }
 
@@ -241,6 +242,7 @@ class CrowbarOpenStackHelper
             trove_url: trove_rabbit_hosts.join(","),
             durable_queues: true,
             ha_queues: true,
+            heartbeat_timeout: rabbit[:rabbitmq][:client][:heartbeat_timeout],
             pacemaker_resource: "ms-rabbitmq"
           }
           Chef::Log.info("RabbitMQ cluster found")
