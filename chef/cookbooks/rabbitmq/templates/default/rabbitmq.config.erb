@@ -24,7 +24,8 @@
  ]},
  {rabbitmq_management,
   [
-   {listener, [{ip, "<%= node[:rabbitmq][:management_address] %>"}, {port, <%= node[:rabbitmq][:management_port] %>}]}
+   {listener, [{ip, "<%= node[:rabbitmq][:management_address] %>"}, {port, <%= node[:rabbitmq][:management_port] %>}]},
+   {load_definitions, "/etc/rabbitmq/definitions.json"}
   ]
  }
 ].
