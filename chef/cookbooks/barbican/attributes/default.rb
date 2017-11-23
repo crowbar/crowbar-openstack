@@ -41,7 +41,6 @@ default[:barbican][:ha][:enabled] = false
 default[:barbican][:ha][:ports][:api] = 5621
 
 # pacemaker definitions
-default[:barbican][:ha][:api][:op][:monitor][:interval] = "10s"
 default[:barbican][:ha][:worker][:op][:monitor][:interval] = "10s"
 default[:barbican][:ha][:keystone_listener][:op][:monitor][:interval] = "10s"
 default[:barbican][:ha][:worker][:agent] = "systemd:openstack-barbican-worker"
