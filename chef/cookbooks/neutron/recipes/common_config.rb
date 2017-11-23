@@ -139,6 +139,7 @@ template neutron[:neutron][:config_file] do
       service_plugins: service_plugins,
       allow_overlapping_ips: neutron[:neutron][:allow_overlapping_ips],
       dvr_enabled: neutron[:neutron][:use_dvr],
+      l3_ha: neutron[:neutron][:use_l3_ha],
       network_nodes_count: network_nodes_count,
       dns_domain: neutron[:neutron][:dns_domain],
       mtu_value: mtu_value,

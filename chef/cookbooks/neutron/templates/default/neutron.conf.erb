@@ -17,6 +17,9 @@ dhcp_agents_per_network = <%= @network_nodes_count %>
 <% if @dvr_enabled -%>
 router_distributed = True
 <% end -%>
+<% if @l3_ha -%>
+l3_ha = True
+<% end -%>
 debug = <%= @debug ? "True" : "False" %>
 log_dir = /var/log/neutron
 use_syslog = <%= @use_syslog ? "True" : "False" %>
