@@ -55,6 +55,17 @@
                 "user": { "type": "str", "required": true },
                 "vhost": { "type": "str", "required": true }
               }
+            },
+            "resource_limits": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                "rabbitmq-server": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
+                }
+              }
             }
           }
         }

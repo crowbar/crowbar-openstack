@@ -137,7 +137,18 @@
                       "use_tls": { "type": "bool" },
                       "use_pool": { "type": "bool" },
                       "tls_req_cert": { "type": "str" }
-                    }}
+                    }},
+                    "resource_limits": {
+                      "type": "map",
+                      "required": false,
+                      "mapping": {
+                        "apache2": {
+                          "type": "map",
+                          "required": false,
+                          "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
+                        }
+                      }
+                    }
               }}
      }},
     "deployment": { "type": "map", "required": true,

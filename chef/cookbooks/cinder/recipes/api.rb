@@ -125,3 +125,14 @@ crowbar_pacemaker_sync_mark "create-cinder_register"
 cinder_service "api" do
   use_pacemaker_provider ha_enabled
 end
+
+service = "openstack-cinder-api"
+if node[:cinder][:resource_limits] && node[:cinder][:resource_limits][service]
+  limits = node[:cinder][:resource_limits][service]
+  action = limits.values.any? ? :create : :delete
+  utils_systemd_override_limits "Resource limits for #{service}" do
+    service_name service
+    limits limits
+    action action
+  end
+end

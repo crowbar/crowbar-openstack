@@ -43,14 +43,19 @@
         "ssl_crt_chain_file": ""
       },
       "external_monitoring": {},
-      "token_hash_enabled": true
+      "token_hash_enabled": true,
+      "resource_limits": {
+        "apache2": {
+          "LimitNOFILE": null
+        }
+      }
     }
   },
   "deployment": {
     "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 38,
+      "schema-revision": 39,
       "element_states": {
         "horizon-server": [ "readying", "ready", "applying" ]
       },

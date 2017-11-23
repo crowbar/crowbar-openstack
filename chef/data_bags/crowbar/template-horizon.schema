@@ -72,7 +72,18 @@
                 =: { "type": "str",  "required": false }
               }
             },
-	    "token_hash_enabled": { "type": "bool", "required": true }
+	    "token_hash_enabled": { "type": "bool", "required": true },
+            "resource_limits": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                "apache2": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
+                }
+              }
+            }
           }
         }
       }
