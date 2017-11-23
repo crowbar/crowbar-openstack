@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # This script is a monasca-setup wrapper that configures monasca-agent on the
 # monasca-server node. On the monasca-server node chef will _not_ touch the
 # agent configuration directly. Instead, it will run this script.
