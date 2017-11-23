@@ -7,7 +7,6 @@
       "mysql": {
         "datadir": "/var/lib/mysql",
         "slow_query_logging": true,
-        "innodb_buffer_pool_size": 256,
         "innodb_flush_log_at_trx_commit": 1,
         "innodb_buffer_pool_instances": 1,
         "max_connections": 800,
@@ -16,6 +15,17 @@
         "expire_logs_days": 10,
         "bootstrap_timeout": 600,
         "wsrep_slave_threads" : 1,
+        "innodb_buffer_pool_size": 256,
+        "innodb_tunings": [
+            "# log_file_size should be ~ 25% of buffer_pool_size",
+            "# Larger values mean long crash recovery time but fewer syncs during normal runtime",
+            "# Crash recovery is ~ 1-2GB/minute, so value should be 2048M or less to complete",
+            "# within start timeout",
+            "innodb_log_file_size = 64M",
+            "# https://mariadb.com/kb/en/library/xtradbinnodb-server-system-variables/#innodb_flush_method_",
+            "innodb_flush_method = O_DIRECT",
+            ""
+        ],
         "ssl": {
           "enabled": false,
           "generate_certs": false,
@@ -73,7 +83,7 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 107,
+      "schema-revision": 108,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },

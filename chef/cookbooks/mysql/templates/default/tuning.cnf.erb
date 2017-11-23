@@ -3,7 +3,9 @@ innodb_buffer_pool_size = <%= @innodb_buffer_pool_size %>M
 innodb_log_file_size = <%= [8, @innodb_buffer_pool_size / 4].max %>M
 innodb_buffer_pool_instances = <%= @innodb_buffer_pool_instances %>
 
-innodb_flush_method = O_DIRECT
+<% node['database']['mysql']['innodb_tunings'].each do |line| %>
+<%= line %>
+<% end %>
 
 # 0 should bring better performance but has slight risk of losing some logs
 innodb_flush_log_at_trx_commit = <%= @innodb_flush_log_at_trx_commit %>
