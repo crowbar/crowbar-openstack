@@ -1,0 +1,61 @@
+{
+    "vhosts": [
+        {
+            "name": "/"
+        },
+<% if @trove_enabled -%>
+        {
+            "name": <%= @json_trove_vhost %>
+        },
+<% end -%>
+        {
+            "name": <%= @json_vhost %>
+        }
+    ],
+<% if @ha_all_policy -%>
+    "policies": [
+        {
+            "apply-to": "all",
+            "definition": {
+                "ha-mode": "all"
+            },
+            "name": "ha-all",
+            "pattern": "^(?!amq.).*",
+            "priority": 0,
+            "vhost": <%= @json_vhost %>
+        }
+    ],
+<% end -%>
+    "users": [
+<% if @trove_enabled -%>
+        {
+            "name": <%= @json_trove_user %>,
+            "password": <%= @json_trove_password %>,
+            "tags": ""
+        },
+<% end -%>
+        {
+            "name": <%= @json_user %>,
+            "password": <%= @json_password %>,
+            "tags": "management"
+        }
+    ],
+    "permissions": [
+<% if @trove_enabled -%>
+        {
+            "user": <%= @json_trove_user %>,
+            "vhost": <%= @json_trove_vhost %>,
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*"
+        },
+<% end -%>
+        {
+            "user": <%= @json_user %>,
+            "vhost": <%= @json_vhost %>,
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*"
+        }
+    ]
+}

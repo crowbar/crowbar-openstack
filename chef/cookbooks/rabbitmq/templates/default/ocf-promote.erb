@@ -1,0 +1,4 @@
+# What should be done on promote, and that could not be done through definitions.json
+
+# Ensure the cluster name is correctly set (as it cannot be set in rabbitmq.config)
+${OCF_RESKEY_ctl} set_cluster_name <%= @clustername %>

@@ -50,6 +50,29 @@ template "/etc/rabbitmq/rabbitmq.config" do
   notifies service_action, "service[rabbitmq-server]"
 end
 
+# create a file with definitions to load on start, to be 100% sure we always
+# start with a usable state
+template "/etc/rabbitmq/definitions.json" do
+  source "definitions.json.erb"
+  owner "root"
+  group node[:rabbitmq][:rabbitmq_group]
+  mode 0o640
+  variables(
+    json_user: node[:rabbitmq][:user].to_json,
+    # ideally we'd put a hash in the file, but the hash would change on each
+    # chef run and we don't want to rewrite the file all the time
+    json_password: node[:rabbitmq][:password].to_json,
+    json_vhost: node[:rabbitmq][:vhost].to_json,
+    trove_enabled: node[:rabbitmq][:trove][:enabled],
+    json_trove_user: node[:rabbitmq][:trove][:user].to_json,
+    json_trove_password: node[:rabbitmq][:trove][:password].to_json,
+    json_trove_vhost: node[:rabbitmq][:trove][:vhost].to_json,
+    ha_all_policy: cluster_enabled
+  )
+  # no notification to restart rabbitmq, as we still do changes with
+  # rabbitmqctl in the rabbit.rb recipe (this is less disruptive)
+end
+
 case node[:platform_family]
 when "suse"
   rabbitmq_plugins = "/usr/sbin/rabbitmq-plugins"
