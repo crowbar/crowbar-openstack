@@ -127,6 +127,8 @@ template "/etc/my.cnf.d/tuning.cnf" do
   mode "0640"
   variables(
     innodb_buffer_pool_size: node[:database][:mysql][:innodb_buffer_pool_size],
+    innodb_flush_log_at_trx_commit: node[:database][:mysql][:innodb_flush_log_at_trx_commit],
+    innodb_buffer_pool_instances: node[:database][:mysql][:innodb_buffer_pool_instances],
     max_connections: node[:database][:mysql][:max_connections],
     tmp_table_size: node[:database][:mysql][:tmp_table_size],
     max_heap_table_size: node[:database][:mysql][:max_heap_table_size]
