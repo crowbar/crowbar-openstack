@@ -75,7 +75,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
   drbd_params = {}
   drbd_params["drbd_resource"] = drbd_resource
 
-  pacemaker_primitive drbd_primitive do
+  openstack_pacemaker_primitive drbd_primitive do
     agent "ocf:linbit:drbd"
     params drbd_params
     op postgres_op
@@ -102,7 +102,7 @@ if node[:database][:ha][:storage][:mode] == "drbd"
   transaction_objects << "pacemaker_location[#{location_name}]"
 end
 
-pacemaker_primitive fs_primitive do
+openstack_pacemaker_primitive fs_primitive do
   agent "ocf:heartbeat:Filesystem"
   params fs_params
   op postgres_op

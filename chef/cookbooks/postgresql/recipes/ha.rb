@@ -49,7 +49,7 @@ end
 
 transaction_objects = []
 
-pacemaker_primitive vip_primitive do
+openstack_pacemaker_primitive vip_primitive do
   agent "ocf:heartbeat:IPaddr2"
   params ({
     "ip" => ip_addr
@@ -77,7 +77,7 @@ transaction_objects << "pacemaker_primitive[#{vip_primitive}]"
 # of through the IP address). So we're still monitoring what we want, although
 # in two different steps -- and strictly speaking, we're not monitoring the
 # fact that the database is listening on the IP address.
-pacemaker_primitive service_name do
+openstack_pacemaker_primitive service_name do
   agent agent_name
   op postgres_op
   action :update

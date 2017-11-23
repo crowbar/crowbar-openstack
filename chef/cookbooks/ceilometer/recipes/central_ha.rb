@@ -25,7 +25,7 @@ rabbit_settings = fetch_rabbitmq_settings
 transaction_objects = []
 
 service_name = "ceilometer-central"
-pacemaker_primitive service_name do
+openstack_pacemaker_primitive service_name do
   agent node[:ceilometer][:ha][:central][:agent]
   op node[:ceilometer][:ha][:central][:op]
   action :update

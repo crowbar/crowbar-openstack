@@ -27,7 +27,7 @@ define :openstack_pacemaker_controller_clone_for_transaction,
 
   fake_params = {}
 
-  pacemaker_primitive primitive_name do
+  openstack_pacemaker_primitive primitive_name do
     agent agent
     op op
     # do not inherit params from the definition; yes, they get inherited if not
