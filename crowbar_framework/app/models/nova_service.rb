@@ -526,7 +526,7 @@ class NovaService < OpenstackServiceObject
 
     # by this point its safe to assume that we can skip the node as nothing has changed on it
     # same attributes, same roles so skip it
-    @logger.info("#{@bc_name} skip_batch_for_node? skipping: #{node_name}")
+    @logger.info("#{@bc_name} skip_batch_for_node? skipping: #{node}")
     true
   end
 
