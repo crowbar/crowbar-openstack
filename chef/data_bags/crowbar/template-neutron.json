@@ -20,6 +20,8 @@
         "agent_boot_time": 180
       },
       "use_dvr": false,
+      "use_l3_ha": false,
+      "l3_ha_password": "",
       "additional_external_networks": [],
       "networking_plugin": "ml2",
       "ml2_mechanism_drivers": ["openvswitch"],
