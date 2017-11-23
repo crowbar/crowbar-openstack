@@ -207,7 +207,8 @@
                       "type": "map", "required": true, "mapping": {
                         "neutron-server": { "type": "int", "required": true }
                       }
-                    }
+                    },
+                    "force_metadata": { "type": "bool", "required": true }
               }}
      }},
     "deployment": { "type": "map", "required": true,
