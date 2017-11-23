@@ -152,6 +152,7 @@ template node[:neutron][:dhcp_agent_config_file] do
     dhcp_driver: "neutron.agent.linux.dhcp.Dnsmasq",
     dhcp_domain: node[:neutron][:dhcp_domain],
     enable_isolated_metadata: "True",
+    force_metadata: node[:neutron][:force_metadata],
     enable_metadata_network: "False",
     nameservers: dns_list
   )
