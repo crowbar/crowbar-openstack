@@ -50,7 +50,7 @@ if node[:pacemaker][:clone_stateless_services]
 
   services =
     if node[:barbican][:enable_keystone_listener]
-      ["worker", "keystone-listner"]
+      ["worker", "keystone-listener"]
     else
       ["worker"]
     end
