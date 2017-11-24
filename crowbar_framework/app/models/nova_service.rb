@@ -266,7 +266,6 @@ class NovaService < OpenstackServiceObject
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Nova apply_role_pre_chef_call: entering #{all_nodes.inspect}")
-    return if all_nodes.empty?
 
     unless hyperv_available?
       role.override_attributes["nova"]["elements"]["nova-compute-hyperv"] = []
