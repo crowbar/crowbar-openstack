@@ -58,7 +58,7 @@ pacemaker_primitive service_name do
     "rmq_feature_local_list_queues" => false,
     "default_vhost" => node[:rabbitmq][:vhost]
   })
-  op node[:rabbitmq][:ha][:op]
+  op node[:rabbitmq][:ha][:clustered_op]
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
