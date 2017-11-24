@@ -75,10 +75,16 @@ if node[:database][:ha][:storage][:mode] == "drbd"
   drbd_params = {}
   drbd_params["drbd_resource"] = drbd_resource
 
+  drbd_op = {}
+  drbd_op["monitor"] = [
+    { "interval" => "15s" },
+    { "interval" => "10s", "role" => "Master" }
+  ]
+
   pacemaker_primitive drbd_primitive do
     agent "ocf:linbit:drbd"
     params drbd_params
-    op postgres_op
+    op drbd_op
     action :update
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
