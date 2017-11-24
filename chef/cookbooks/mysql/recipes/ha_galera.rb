@@ -56,7 +56,8 @@ unless node[:database][:galera_bootstrapped]
         sstuser: "root",
         sstuser_password: "",
         expire_logs_days: node[:database][:mysql][:expire_logs_days],
-        node_address: node_address
+        node_address: node_address,
+        wsrep_slave_threads: node[:database][:mysql][:wsrep_slave_threads]
       )
     end
 
@@ -136,7 +137,8 @@ template "/etc/my.cnf.d/galera.cnf" do
     sstuser: "sstuser",
     sstuser_password: node[:database][:mysql][:sstuser_password],
     expire_logs_days: node[:database][:mysql][:expire_logs_days],
-    node_address: node_address
+    node_address: node_address,
+    wsrep_slave_threads: node[:database][:mysql][:wsrep_slave_threads]
   )
 end
 
