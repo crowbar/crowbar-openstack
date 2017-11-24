@@ -48,3 +48,8 @@ default[:rabbitmq][:ha][:storage][:mode] = nil
 default[:rabbitmq][:ha][:op][:start][:timeout] = "300s"
 default[:rabbitmq][:ha][:op][:promote][:timeout] = "180s"
 default[:rabbitmq][:ha][:op][:monitor][:interval] = "10s"
+default[:rabbitmq][:ha][:clustered_op][:start][:timeout] = "300s"
+default[:rabbitmq][:ha][:clustered_op][:promote][:timeout] = "180s"
+default[:rabbitmq][:ha][:clustered_op][:monitor] = [
+  { interval: "10s" }, { interval: "11s", role: "Master" }
+]
