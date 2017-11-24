@@ -59,6 +59,11 @@ pacemaker_primitive service_name do
     "default_vhost" => node[:rabbitmq][:vhost]
   })
   op node[:rabbitmq][:ha][:clustered_op]
+  meta ({
+    "migration-threshold" => "10",
+    "failure-timeout" => "30s",
+    "resource-stickiness" => "100"
+  })
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
