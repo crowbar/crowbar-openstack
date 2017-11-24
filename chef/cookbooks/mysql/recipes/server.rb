@@ -23,10 +23,10 @@ include_recipe "database::client"
 ha_enabled = node[:database][:ha][:enabled]
 
 # For Crowbar, we need to set the address to bind - default to admin node.
-addr = node["mysql"]["bind_address"] || ""
+addr = node[:database][:mysql][:bind_address] || ""
 newaddr = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 if addr != newaddr
-  node["mysql"]["bind_address"] = newaddr
+  node[:database][:mysql][:bind_address] = newaddr
   node.save
 end
 
@@ -64,7 +64,7 @@ utils_systemd_service_restart "mysql" do
   action ha_enabled ? :disable : :enable
 end
 
-directory node[:mysql][:tmpdir] do
+directory node[:database][:mysql][:tmpdir] do
   owner "mysql"
   group "mysql"
   mode "0700"
@@ -81,13 +81,15 @@ service mysql start
 EOC
 end
 
-if node[:mysql][:ssl][:enabled]
+if node[:database][:mysql][:ssl][:enabled]
   ssl_setup "setting up ssl for mysql" do
-    generate_certs node[:mysql][:ssl][:generate_certs]
-    keyfile node[:mysql][:ssl][:keyfile]
-    certfile node[:mysql][:ssl][:certfile]
-    ca_certs node[:mysql][:ssl][:ca_certs]
-    cert_required !(node[:mysql][:ssl][:generate_certs] || node[:mysql][:ssl][:insecure])
+    generate_certs node[:database][:mysql][:ssl][:generate_certs]
+    keyfile node[:database][:mysql][:ssl][:keyfile]
+    certfile node[:database][:mysql][:ssl][:certfile]
+    ca_certs node[:database][:mysql][:ssl][:ca_certs]
+    cert_required !(
+      node[:database][:mysql][:ssl][:generate_certs] ||
+      node[:database][:mysql][:ssl][:insecure])
     group "mysql"
     fqdn CrowbarDatabaseHelper.get_listen_address(node)
   end
@@ -152,7 +154,7 @@ else
   log "HA support for mysql is disabled"
 end
 
-server_root_password = node[:mysql][:server_root_password]
+server_root_password = node[:database][:mysql][:server_root_password]
 
 execute "assign-root-password" do
   command "/usr/bin/mysqladmin -u root password \"#{server_root_password}\""
@@ -199,7 +201,7 @@ unless node[:database][:database_bootstrapped]
       "TRIGGER"
     ]
     provider db_settings[:user_provider]
-    require_ssl node[:mysql][:ssl][:enabled]
+    require_ssl node[:database][:mysql][:ssl][:enabled]
     action :grant
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end

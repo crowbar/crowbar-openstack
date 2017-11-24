@@ -15,6 +15,6 @@ max_heap_table_size = <%= @max_heap_table_size %>M
 skip_name_resolve = 1
 
 # FIXME: Remove after MariaDB 10.2.X switch (new default is auto)
-thread_cache_size = <%= node['mysql']['tunable']['thread_cache_size'] %>
+thread_cache_size = <%= node[:database][:mysql][:tunable][:thread_cache_size] %>
 # FIXME: Remove after MariaDB 10.2.X switch (new default is 16777216)
-max_allowed_packet = <%= node['mysql']['tunable']['max_allowed_packet'] %>
+max_allowed_packet = <%= node[:database][:mysql][:tunable][:max_allowed_packet] %>

@@ -17,18 +17,17 @@
 # limitations under the License.
 #
 
-default["mysql"]["bind_address"]              = node["ipaddress"]
-default["mysql"]["tmpdir"]                    = "/var/lib/mysqltmp"
-default["mysql"]["datadir"]                   = "/var/lib/mysql"
+default[:database][:mysql][:bind_address]              = node[:ipaddress]
+default[:database][:mysql][:tmpdir]                    = "/var/lib/mysqltmp"
 
-if attribute?("ec2")
-  default["mysql"]["ec2_path"]                = "/mnt/mysql"
-  default["mysql"]["ebs_vol_dev"]             = "/dev/sdi"
-  default["mysql"]["ebs_vol_size"]            = 50
+if node[:database].key? "ec2"
+  default[:database][:mysql][:ec2_path]                = "/mnt/mysql"
+  default[:database][:mysql][:ebs_vol_dev]             = "/dev/sdi"
+  default[:database][:mysql][:ebs_vol_size]            = 50
 end
 
-default["mysql"]["tunable"]["max_allowed_packet"]       = "16M"
-default["mysql"]["tunable"]["thread_cache_size"]        = 8
+default[:database][:mysql][:tunable][:max_allowed_packet]       = "16M"
+default[:database][:mysql][:tunable][:thread_cache_size]        = 8
 
 # Ports to bind to when haproxy is used
 default[:mysql][:ha][:ports][:admin_port] = 3306
