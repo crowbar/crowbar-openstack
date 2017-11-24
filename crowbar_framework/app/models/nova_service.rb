@@ -272,7 +272,12 @@ class NovaService < OpenstackServiceObject
     end
 
     controller_elements, controller_nodes, ha_enabled = role_expand_elements(role, "nova-controller")
-    reset_sync_marks_on_clusters_founders(controller_elements)
+    # Only reset sync marks if we are really applying on all controller nodes;
+    # if we are not, then we clearly do not intend to have some sync between
+    # them during the chef run
+    if Set.new(controller_nodes & all_nodes) == Set.new(controller_nodes)
+      reset_sync_marks_on_clusters_founders(controller_elements)
+    end
     Openstack::HA.set_controller_role(controller_nodes) if ha_enabled
 
     vip_networks = ["admin", "public"]
