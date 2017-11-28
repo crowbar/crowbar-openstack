@@ -95,8 +95,8 @@ template "/etc/default/neutron-server" do
   owner "root"
   group node[:neutron][:platform][:group]
   variables(
-      neutron_plugin_config: "/etc/neutron/plugins/ml2/ml2_conf.ini"
-    )
+    neutron_plugin_config: node[:neutron][:ml2_config_file]
+  )
   only_if { node[:platform_family] == "debian" }
 end
 
@@ -182,7 +182,17 @@ when "ml2"
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
   end
 
-  template "/etc/neutron/plugins/ml2/ml2_conf.ini" do
+  # Empty the config file that is explicitly passed to neutron-server (via plugin.ini
+  # symlink). This allows overriding of ml2_conf.ini settings using config snippets.
+  file "/etc/neutron/plugins/ml2/ml2_conf.ini" do
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    content "# Please use config file snippets in /etc/neutron/neutron.conf.d/.\n" \
+            "# See /etc/neutron/README.config for more details.\n"
+  end
+
+  template node[:neutron][:ml2_config_file] do
     source "ml2_conf.ini.erb"
     owner "root"
     group node[:neutron][:platform][:group]
@@ -347,7 +357,7 @@ if node[:neutron][:networking_plugin] == "ml2"
       user node[:neutron][:user]
       group node[:neutron][:group]
       command "apic-ml2-db-manage --config-dir /etc/neutron/neutron.conf.d \
-                                  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
+                                  --config-file #{node[:neutron][:ml2_config_file]} \
                                   --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
                                   upgrade head"
       only_if { !db_synced && (!ha_enabled || is_founder) }
@@ -369,7 +379,7 @@ if node[:neutron][:networking_plugin] == "ml2"
       user node[:neutron][:user]
       group node[:neutron][:group]
       command "gbp-db-manage --config-dir /etc/neutron/neutron.conf.d \
-                             --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
+                             --config-file #{node[:neutron][:ml2_config_file]} \
                              --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
                              upgrade head"
       only_if { !db_synced && (!ha_enabled || is_founder) }
