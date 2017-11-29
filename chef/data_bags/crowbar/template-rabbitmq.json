@@ -46,7 +46,8 @@
         "rabbitmq-server": {
           "LimitNOFILE": null
         }
-      }
+      },
+      "extra_users": [ ]
     }
   },
   "deployment": {

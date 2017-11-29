@@ -71,8 +71,31 @@ class RabbitmqService < OpenstackServiceObject
     @logger.debug("Rabbitmq apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
+    # create random passwords for the extra users requested for rabbit
+    save_role = false
+    old_attrs = old_role.nil? ? nil : old_role.default_attributes[@bc_name]
+    role.default_attributes[@bc_name]["users"] ||= {}
+    role.default_attributes[@bc_name]["extra_users"].each do |user|
+      save_role = true
+      if !old_attrs.nil? && old_attrs.include?("users") && old_attrs["users"].include?(user)
+        # reuse the existing pass
+        role.default_attributes[@bc_name]["users"][user] = old_attrs["users"][user]
+      else
+        # new user, so create a random pass
+        role.default_attributes[@bc_name]["users"][user] = random_password
+      end
+    end
+
+    role.save if save_role
+
     rabbitmq_elements, rabbitmq_nodes, rabbitmq_ha_enabled = role_expand_elements(role, "rabbitmq-server")
     Openstack::HA.set_controller_role(rabbitmq_nodes) if rabbitmq_ha_enabled
+
+    rabbitmq_nodes.each do |node|
+      role.default_attributes[@bc_name]["extra_users"].each do |user|
+        next if node[@bc_name]["users"].include?
+      end
+    end
 
     role.save if prepare_role_for_ha(role, ["rabbitmq", "ha", "enabled"], rabbitmq_ha_enabled)
     reset_sync_marks_on_clusters_founders(rabbitmq_elements)

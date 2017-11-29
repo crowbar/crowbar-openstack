@@ -134,6 +134,34 @@ execute "rabbitmqctl set_user_tags #{node[:rabbitmq][:user]} management" do
   only_if only_if_command if ha_enabled
 end
 
+node[:rabbitmq][:users].each do |user, pass|
+  # create extra users
+  rabbitmq_user "adding user #{user}" do
+    user user
+    password pass
+    address node[:rabbitmq][:management_address]
+    port node[:rabbitmq][:management_port]
+    action :add
+    only_if only_if_command if ha_enabled
+  end
+
+  # add permisions to those extra users into the default vhost
+  rabbitmq_user "setting permissions for #{user}" do
+    user user
+    vhost node[:rabbitmq][:vhost]
+    permissions "\".*\" \".*\" \".*\""
+    action :set_permissions
+    only_if only_if_command if ha_enabled
+  end
+
+  # tag those users as management
+  execute "rabbitmqctl set_user_tags #{user} management" do
+    not_if "rabbitmqctl list_users | grep #{user} | grep -q management"
+    action :run
+    only_if only_if_command if ha_enabled
+  end
+end
+
 if cluster_enabled
   set_policy_command = "rabbitmqctl set_policy -p #{node[:rabbitmq][:vhost]} " \
       " ha-all '^(?!amq\.).*' '{\"ha-mode\": \"all\"}'"
