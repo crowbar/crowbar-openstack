@@ -266,14 +266,18 @@ class NovaService < OpenstackServiceObject
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Nova apply_role_pre_chef_call: entering #{all_nodes.inspect}")
-    return if all_nodes.empty?
 
     unless hyperv_available?
       role.override_attributes["nova"]["elements"]["nova-compute-hyperv"] = []
     end
 
     controller_elements, controller_nodes, ha_enabled = role_expand_elements(role, "nova-controller")
-    reset_sync_marks_on_clusters_founders(controller_elements)
+    # Only reset sync marks if we are really applying on all controller nodes;
+    # if we are not, then we clearly do not intend to have some sync between
+    # them during the chef run
+    if Set.new(controller_nodes & all_nodes) == Set.new(controller_nodes)
+      reset_sync_marks_on_clusters_founders(controller_elements)
+    end
     Openstack::HA.set_controller_role(controller_nodes) if ha_enabled
 
     vip_networks = ["admin", "public"]
