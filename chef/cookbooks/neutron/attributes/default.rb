@@ -30,6 +30,7 @@ default[:neutron][:lbaas_config_file] = "/etc/neutron/neutron.conf.d/110-neutron
 default[:neutron][:l3_agent_config_file] = "/etc/neutron/neutron-l3-agent.conf.d/100-agent.conf"
 default[:neutron][:metadata_agent_config_file] = "/etc/neutron/neutron-metadata-agent.conf.d/100-metadata_agent.conf"
 default[:neutron][:ml2_config_file] = "/etc/neutron/neutron.conf.d/110-ml2.conf"
+default[:neutron][:nsx_config_file] = "/etc/neutron/neutron.conf.d/110-nsx.conf"
 default[:neutron][:rpc_workers] = 1
 
 default[:neutron][:db][:database] = "neutron"
