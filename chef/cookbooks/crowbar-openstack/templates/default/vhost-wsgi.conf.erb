@@ -5,6 +5,7 @@ Listen <%= @bind_host %>:<%= @bind_port %>
     WSGIProcessGroup <%= @process_group %>
     WSGIScriptAlias / <%= @script_alias %>
     WSGIApplicationGroup %{GLOBAL}
+    WSGIScriptReloading Off
 <% if @pass_authorization %>
     WSGIPassAuthorization On
 <% end %>
