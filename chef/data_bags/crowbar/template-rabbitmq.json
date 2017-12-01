@@ -7,7 +7,7 @@
       "port": 5672,
       "password": "",
       "user": "nova",
-      "vhost": "/nova",
+      "vhost": "nova",
       "ssl": {
         "enabled": false,
         "port": 5671,
@@ -40,7 +40,7 @@
         "enabled": false,
         "password": "",
         "user": "trove",
-        "vhost": "/trove"
+        "vhost": "trove"
       },
       "resource_limits": {
         "rabbitmq-server": {
