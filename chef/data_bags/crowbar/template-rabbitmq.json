@@ -22,7 +22,7 @@
       "client": {
         "heartbeat_timeout": 10
       },
-      "cluster": true,
+      "cluster": false,
       "ha": {
         "storage": {
           "mode": "shared",
