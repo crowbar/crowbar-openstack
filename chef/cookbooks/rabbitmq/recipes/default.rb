@@ -24,6 +24,16 @@ cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
 crm_resource_stop_cmd = cluster_enabled ? "force-demote" : "force-stop"
 crm_resource_start_cmd = cluster_enabled ? "force-promote" : "force-start"
 
+cluster_partition_handling = if cluster_enabled
+  if CrowbarPacemakerHelper.num_corosync_nodes(node) > 2
+    "pause_minority"
+  else
+    "ignore"
+  end
+else
+  "unused"
+end
+
 package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node[:platform_family] == "suse"
 
@@ -47,6 +57,10 @@ template "/etc/rabbitmq/rabbitmq.config" do
   owner "root"
   group "root"
   mode 0644
+  variables(
+    cluster_enabled: cluster_enabled,
+    cluster_partition_handling: cluster_partition_handling
+  )
   notifies :restart, "service[rabbitmq-server]"
 end
 
