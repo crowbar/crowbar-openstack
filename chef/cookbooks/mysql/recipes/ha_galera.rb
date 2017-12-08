@@ -19,7 +19,7 @@
 
 resource_agent = "ocf:heartbeat:galera"
 
-["galera-3-wsrep-provider", "mariadb-tools", "xtrabackup", "socat", "galera-python-clustercheck"].each do |p|
+node[:mysql][:galera_packages].each do |p|
   package p
 end
 
