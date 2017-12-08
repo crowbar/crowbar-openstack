@@ -20,8 +20,29 @@ if node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
   node[:neutron][:platform][:cisco_apic_gbp_pkgs].each { |p| package p }
 end
 
+# Empty the config file to avoid confusion (it may be a symlink, due to some
+# old code we had)
+old_config = "/etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini"
+link old_config do
+  action :delete
+  only_if "test -L #{old_config}"
+end
+file old_config do
+  owner "root"
+  group node[:neutron][:platform][:group]
+  mode "0640"
+  content "# Please use config file snippets in /etc/neutron/neutron.conf.d/.\n" \
+          "# See /etc/neutron/README.config for more details.\n"
+end
+
+# remove old snippet that was created previously
+file "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" do
+  action :delete
+end
+
 aciswitches = node[:neutron][:apic][:apic_switches].to_hash
-template "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" do
+
+template node[:neutron][:ml2_cisco_apic_config_file] do
   cookbook "neutron"
   source "ml2_conf_cisco_apic.ini.erb"
   mode "0640"
