@@ -1,4 +1,10 @@
 [
+ {mnesia,
+  [
+   {dump_log_write_threshold, <%= node[:rabbitmq][:mnesia][:dump_log_write_threshold] %>},
+   {dump_log_time_threshold, <%= node[:rabbitmq][:mnesia][:dump_log_time_threshold] %>}
+  ]
+ },
  {rabbit,
   [
    {tcp_listeners, [
