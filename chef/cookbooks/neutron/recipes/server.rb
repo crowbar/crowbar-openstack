@@ -50,17 +50,32 @@ end
 
 include_recipe "neutron::common_config"
 
-# set core plugin for neutron-server
+# remove unused plugin config snippets
+all_plugin_snippets = [node[:neutron][:ml2_config_file], node[:neutron][:nsx_config_file]]
+used_plugin_snippets = []
 if node[:neutron][:networking_plugin] == "vmware"
-  core_link = "/etc/neutron/plugins/vmware/nsx.ini"
+  used_plugin_snippets << node[:neutron][:nsx_config_file]
 else
-  core_link = "/etc/neutron/plugins/ml2/ml2_conf.ini"
+  used_plugin_snippets << node[:neutron][:ml2_config_file]
 end
 
-link "/etc/neutron/plugin.ini" do
-  to core_link
-  action :create
-  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+(all_plugin_snippets - used_plugin_snippets).each do |config_file|
+  file config_file do
+    action :delete
+    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+  end
+end
+
+# Empty the config file that is explicitly passed to neutron-server.
+# This allows overriding of plugin settings using config snippets.
+# NOTE: if plugin.ini is a symlink it will not replace it with regular file
+#       but this is OK since all possible target files will be empty too.
+file "/etc/neutron/plugin.ini" do
+  owner "root"
+  group node[:neutron][:platform][:group]
+  mode "0640"
+  content "# Please use config file snippets in /etc/neutron/neutron.conf.d/.\n" \
+          "# See /etc/neutron/README.config for more details.\n"
 end
 
 # enable/disable ml2_conf_cisco for neutron-server
@@ -88,16 +103,6 @@ link "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" do
   to "/etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini"
   action cisco_apic_link_action
   notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-end
-
-template "/etc/default/neutron-server" do
-  source "neutron-server.erb"
-  owner "root"
-  group node[:neutron][:platform][:group]
-  variables(
-      neutron_plugin_config: "/etc/neutron/plugins/ml2/ml2_conf.ini"
-    )
-  only_if { node[:platform_family] == "debian" }
 end
 
 directory "/var/cache/neutron" do
@@ -182,7 +187,17 @@ when "ml2"
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
   end
 
-  template "/etc/neutron/plugins/ml2/ml2_conf.ini" do
+  # Empty the config file that is explicitly passed to neutron-server (via plugin.ini
+  # symlink). This allows overriding of ml2_conf.ini settings using config snippets.
+  file "/etc/neutron/plugins/ml2/ml2_conf.ini" do
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    content "# Please use config file snippets in /etc/neutron/neutron.conf.d/.\n" \
+            "# See /etc/neutron/README.config for more details.\n"
+  end
+
+  template node[:neutron][:ml2_config_file] do
     source "ml2_conf.ini.erb"
     owner "root"
     group node[:neutron][:platform][:group]
@@ -216,7 +231,17 @@ when "vmware"
      not_if { node[:platform_family] == "suse" }
   end
 
-  template "/etc/neutron/plugins/vmware/nsx.ini" do
+  # Empty the config file that is explicitly passed to neutron-server (via plugin.ini
+  # symlink). This allows overriding of nsx.ini settings using config snippets.
+  file "/etc/neutron/plugins/vmware/nsx.ini" do
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode "0640"
+    content "# Please use config file snippets in /etc/neutron/neutron.conf.d/.\n" \
+            "# See /etc/neutron/README.config for more details.\n"
+  end
+
+  template node[:neutron][:nsx_config_file] do
     cookbook "neutron"
     source "nsx.ini.erb"
     owner "root"
@@ -265,13 +290,7 @@ end
 execute "neutron-db-manage migrate" do
   user node[:neutron][:user]
   group node[:neutron][:group]
-  case node[:platform_family]
-  when "debian"
-    command 'source /etc/default/neutron-server; \
-             neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file $NEUTRON_PLUGIN_CONFIG upgrade head'
-  else
-    command "neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugin.ini upgrade head"
-  end
+  command "neutron-db-manage --config-file /etc/neutron/neutron.conf upgrade head"
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
   only_if { !node[:neutron][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) }
@@ -347,7 +366,6 @@ if node[:neutron][:networking_plugin] == "ml2"
       user node[:neutron][:user]
       group node[:neutron][:group]
       command "apic-ml2-db-manage --config-dir /etc/neutron/neutron.conf.d \
-                                  --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
                                   --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
                                   upgrade head"
       only_if { !db_synced && (!ha_enabled || is_founder) }
@@ -369,7 +387,6 @@ if node[:neutron][:networking_plugin] == "ml2"
       user node[:neutron][:user]
       group node[:neutron][:group]
       command "gbp-db-manage --config-dir /etc/neutron/neutron.conf.d \
-                             --config-file /etc/neutron/plugins/ml2/ml2_conf.ini \
                              --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
                              upgrade head"
       only_if { !db_synced && (!ha_enabled || is_founder) }
