@@ -88,7 +88,6 @@ database_user "grant privileges to the #{node[:nova][:db][:user]} database user"
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-
 execute "nova-manage api_db sync" do
   user node[:nova][:user]
   group node[:nova][:group]
@@ -98,6 +97,7 @@ execute "nova-manage api_db sync" do
   # are the founder of the HA cluster (so that it's really only done once).
   only_if do
     !node[:nova][:api_db_synced] &&
+      !CrowbarPacemakerHelper.being_upgraded?(node) &&
       (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
   end
 end
@@ -125,6 +125,20 @@ execute "nova-manage create cell1" do
   not_if 'rpm -qa --qf "%{VERSION}\n" openstack-nova|grep ^14\.'
   only_if do
     !node[:nova][:db_synced] &&
+      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
+# During upgrade to Pike, execute api_db sync after 'cell_v2 map_cell0' and 'cell_v2 create_cell'
+execute "nova-manage api_db sync" do
+  user node[:nova][:user]
+  group node[:nova][:group]
+  command "nova-manage api_db sync"
+  action :run
+  # We only do the sync the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if do
+    !node[:nova][:api_db_synced] &&
       (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
   end
 end
