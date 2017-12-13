@@ -139,7 +139,7 @@ execute "nova-manage db sync up to revision 329" do
   only_if do
     !node[:nova][:db_synced] &&
       (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
-      (`nova-manage db version`.to_i < 329)
+      (`nova-manage --log-file /dev/null db version`.to_i < 329)
   end
 end
 
@@ -154,7 +154,7 @@ execute "nova-manage db online_data_migrations" do
   only_if do
     !node[:nova][:db_synced] &&
       (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
-      (`nova-manage db version`.to_i == 329)
+      (`nova-manage --log-file /dev/null db version`.to_i == 329)
   end
 end
 
