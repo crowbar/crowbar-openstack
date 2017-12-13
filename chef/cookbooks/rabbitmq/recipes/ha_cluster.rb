@@ -95,12 +95,26 @@ ruby_block "wait for #{ms_name} to be started" do
   block do
     require "timeout"
     begin
-      Timeout.timeout(240) do
-        # Check that the service is running
+      Timeout.timeout(300) do
+        # Check that the service has a master
         cmd = "crm resource show #{ms_name} 2> /dev/null "
-        cmd << "| grep -q \"is running on\""
+        cmd << "| grep \"is running on\" | grep -q \"Master\""
         until ::Kernel.system(cmd)
-          Chef::Log.debug("#{ms_name} still not started")
+          Chef::Log.info("#{ms_name} still without master")
+          sleep(2)
+        end
+        # Check that the service is running on this node
+        cmd = "crm resource show #{ms_name} 2> /dev/null "
+        cmd << "| grep -q \"is running on: #{node.hostname}\""
+        until ::Kernel.system(cmd)
+          Chef::Log.info("#{ms_name} still not running locally")
+          sleep(2)
+        end
+        # Check that we dont have any pending resource operations
+        cmd = "crm resource operations #{ms_name} 2> /dev/null "
+        cmd << "| grep -q \"pending\""
+        while ::Kernel.system(cmd)
+          Chef::Log.info("resource #{ms_name} still has pending operations")
           sleep(2)
         end
         # The sed command grabs everything between '{running_applications'
@@ -109,12 +123,13 @@ ruby_block "wait for #{ms_name} to be started" do
         cmd = "rabbitmqctl -q status 2> /dev/null "
         cmd << "| sed -n '/{running_applications/,/\]}/p' | grep -q '{rabbit,'"
         until ::Kernel.system(cmd)
-          Chef::Log.debug("#{ms_name} still not answering")
+          Chef::Log.info("#{ms_name} still not answering")
           sleep(2)
         end
       end
     rescue Timeout::Error
-      message = "The #{ms_name} pacemaker resource is not started. Please manually check for an error."
+      message = "The #{ms_name} pacemaker resource is not started or doesn't have a master yet."
+      message << " Please manually check for an error."
       Chef::Log.fatal(message)
       raise message
     end
