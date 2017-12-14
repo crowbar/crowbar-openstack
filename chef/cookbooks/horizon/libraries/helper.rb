@@ -19,6 +19,10 @@ module MonascaUiHelper
     CrowbarHelper.get_host_for_public_url(node, ssl_enabled, ha_enabled)
   end
 
+  def self.monasca_admin_host(node)
+    CrowbarHelper.get_host_for_admin_url(node, node[:monasca][:ha][:enabled])
+  end
+
   def self.api_public_url(node)
     host = monasca_public_host(node)
     # SSL is not supported at this moment
@@ -26,5 +30,45 @@ module MonascaUiHelper
     protocol = "http"
     port = node[:monasca][:api][:bind_port]
     "#{protocol}://#{host}:#{port}/v2.0"
+  end
+
+  def self.dashboard_ip(node)
+    ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
+
+    if node[:horizon][:ha][:enabled] && !@cluster_admin_ip
+      ip = CrowbarPacemakerHelper.cluster_vip(node, "public")
+    end
+
+    ip
+  end
+
+  def self.dashboard_local_url(node)
+    public_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
+    admin_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+
+    ha_enabled = node[:horizon][:ha][:enabled]
+    ssl_enabled = node[:horizon][:apache][:ssl]
+
+    protocol = "http"
+    protocol = "https" if ssl_enabled
+
+    if ha_enabled
+      port = node[:horizon][:ha][:ports][:plain]
+      port = node[:horizon][:ha][:ports][:ssl] if ssl_enabled
+      return "#{protocol}://#{admin_ip}:#{port}"
+    end
+
+    "#{protocol}://#{public_ip}"
+  end
+
+  def self.dashboard_public_url(node)
+    protocol = "http"
+    protocol = "https" if node[:horizon][:apache][:ssl]
+
+    "#{protocol}://#{dashboard_ip(node)}"
+  end
+
+  def self.grafana_service_url(node)
+    "http://#{monasca_public_host(node)}:3000"
   end
 end
