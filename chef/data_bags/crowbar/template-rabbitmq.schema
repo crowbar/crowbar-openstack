@@ -87,6 +87,14 @@
                   "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
                 }
               }
+            },
+            "mnesia": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "dump_log_write_threshold": { "type": "int", "required": true},
+                "dump_log_time_threshold": { "type": "int", "required": true}
+              }
             }
           }
         }

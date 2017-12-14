@@ -46,6 +46,10 @@
         "rabbitmq-server": {
           "LimitNOFILE": null
         }
+      },
+      "mnesia": {
+        "dump_log_write_threshold": 100,
+        "dump_log_time_threshold": 180000
       }
     }
   },
@@ -53,7 +57,7 @@
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 103,
+      "schema-revision": 104,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },
