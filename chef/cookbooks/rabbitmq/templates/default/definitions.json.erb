@@ -34,6 +34,13 @@
             "tags": ""
         },
 <% end -%>
+<% @extra_users.each do |user, pass| -%>
+        {
+            "name": "<%= user %>",
+            "password": "<%= pass %>",
+            "tags": ""
+        },
+<% end -%>
         {
             "name": <%= @json_user %>,
             "password": <%= @json_password %>,
@@ -49,6 +56,15 @@
             "read": ".*",
             "write": ".*"
         },
+<% end -%>
+<% @extra_users.each do |user, pass| -%>
+        {
+          "user": <%= user %>,
+          "vhost": <%= @json_vhost %>,
+          "configure": ".*",
+          "read": ".*",
+          "write": ".*"
+        }
 <% end -%>
         {
             "user": <%= @json_user %>,

@@ -87,6 +87,11 @@
                   "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
                 }
               }
+            },
+            "extra_users": {
+              "type": "seq",
+              "required": false,
+              "sequence": [ { "type": "str" } ]
             }
           }
         }

@@ -6,6 +6,9 @@
     = string_field :vhost
     = integer_field :port
     = string_field :user
+    = array_string_field :extra_users, :only_comma => true
+    %span.help-block
+      = t('.extra_users_hint')
 
     %fieldset
       %legend

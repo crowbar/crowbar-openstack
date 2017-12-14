@@ -48,6 +48,8 @@ en:
               device: 'Name of Block Device or NFS Mount Specification'
               fstype: 'Filesystem Type'
               options: 'Mount Options'
+        extra_users: 'Extra users to create.'
+        extra_users_hint: 'A comma-separated list of extra users to create. This users will have all privileges for the default vhost and will be tagged as management.'
       validation:
         unknown_mode: 'Unknown mode for HA storage: %{storage_mode}.'
         no_device: 'No device specified for shared storage.'
