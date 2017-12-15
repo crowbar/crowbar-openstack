@@ -103,42 +103,43 @@ if neutron[:neutron][:use_infoblox]
 end
 
 template neutron[:neutron][:config_file] do
-    cookbook "neutron"
-    source "neutron.conf.erb"
-    mode "0640"
-    owner "root"
-    group neutron[:neutron][:platform][:group]
-    variables(
-      sql_connection: is_neutron_server ? neutron[:neutron][:db][:sql_connection] : nil,
-      sql_min_pool_size: neutron[:neutron][:sql][:min_pool_size],
-      sql_max_pool_overflow: neutron[:neutron][:sql][:max_pool_overflow],
-      sql_pool_timeout: neutron[:neutron][:sql][:pool_timeout],
-      debug: neutron[:neutron][:debug],
-      verbose: neutron[:neutron][:verbose],
-      bind_host: bind_host,
-      bind_port: bind_port,
-      use_syslog: neutron[:neutron][:use_syslog],
-      # Note that we don't uset fetch_rabbitmq_settings, as we want to run the
-      # query on the "neutron" node, not on "node"
-      rabbit_settings: CrowbarOpenStackHelper.rabbitmq_settings(neutron, "neutron"),
-      keystone_settings: keystone_settings,
-      ssl_enabled: neutron[:neutron][:api][:protocol] == "https",
-      ssl_cert_file: neutron[:neutron][:ssl][:certfile],
-      ssl_key_file: neutron[:neutron][:ssl][:keyfile],
-      ssl_cert_required: neutron[:neutron][:ssl][:cert_required],
-      ssl_ca_file: neutron[:neutron][:ssl][:ca_certs],
-      nova_insecure: nova_insecure,
-      core_plugin: neutron[:neutron][:networking_plugin],
-      service_plugins: service_plugins,
-      allow_overlapping_ips: neutron[:neutron][:allow_overlapping_ips],
-      dvr_enabled: neutron[:neutron][:use_dvr],
-      network_nodes_count: network_nodes_count,
-      dns_domain: neutron[:neutron][:dhcp_domain],
-      mtu_value: mtu_value,
-      infoblox: infoblox_settings,
-      ipam_driver: ipam_driver,
-      rpc_workers: neutron[:neutron][:rpc_workers]
-    )
+  cookbook "neutron"
+  source "neutron.conf.erb"
+  mode "0640"
+  owner "root"
+  group neutron[:neutron][:platform][:group]
+  variables(
+    sql_connection: is_neutron_server ? neutron[:neutron][:db][:sql_connection] : nil,
+    sql_min_pool_size: neutron[:neutron][:sql][:min_pool_size],
+    sql_max_pool_overflow: neutron[:neutron][:sql][:max_pool_overflow],
+    sql_pool_timeout: neutron[:neutron][:sql][:pool_timeout],
+    debug: neutron[:neutron][:debug],
+    verbose: neutron[:neutron][:verbose],
+    bind_host: bind_host,
+    bind_port: bind_port,
+    use_syslog: neutron[:neutron][:use_syslog],
+    # Note that we don't uset fetch_rabbitmq_settings, as we want to run the
+    # query on the "neutron" node, not on "node"
+    rabbit_settings: CrowbarOpenStackHelper.rabbitmq_settings(neutron, "neutron"),
+    keystone_settings: keystone_settings,
+    ssl_enabled: neutron[:neutron][:api][:protocol] == "https",
+    ssl_cert_file: neutron[:neutron][:ssl][:certfile],
+    ssl_key_file: neutron[:neutron][:ssl][:keyfile],
+    ssl_cert_required: neutron[:neutron][:ssl][:cert_required],
+    ssl_ca_file: neutron[:neutron][:ssl][:ca_certs],
+    nova_insecure: nova_insecure,
+    core_plugin: core_plugin,
+    service_plugins: service_plugins,
+    allow_overlapping_ips: allow_overlapping_ips,
+    dvr_enabled: neutron[:neutron][:use_dvr],
+    network_nodes_count: network_nodes_count,
+    dns_domain: neutron[:neutron][:dhcp_domain],
+    mtu_value: mtu_value,
+    infoblox: infoblox_settings,
+    ipam_driver: ipam_driver,
+    rpc_workers: neutron[:neutron][:rpc_workers],
+    api_extensions_path: api_extensions_path
+  )
 end
 
 if neutron[:neutron][:use_lbaas]
