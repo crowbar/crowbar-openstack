@@ -21,11 +21,15 @@ debug = <%= @debug ? "True" : "False" %>
 verbose = <%= @verbose ? "True" : "False" %>
 log_dir = /var/log/neutron
 use_syslog = <%= @use_syslog ? "True" : "False" %>
-use_stderr = false
+use_stderr = False
 transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = neutron
 max_header_line = <%= node[:neutron][:max_header_line] %>
-wsgi_keep_alive = false
+wsgi_keep_alive = False
+<% if @core_plugin =~ /^midonet/ -%>
+dhcp_agent_notification = False
+api_extensions_path = <%= @api_extensions_path %>
+<% end -%>
 
 [agent]
 root_helper = sudo neutron-rootwrap /etc/neutron/rootwrap.conf
@@ -108,4 +112,8 @@ http_pool_connections = <%= @infoblox[:grids][grid][:http_pool_connections] %>
 http_pool_maxsize = <%= @infoblox[:grids][grid][:http_pool_maxsize] %>
 http_request_timeout = <%= @infoblox[:grids][grid][:http_request_timeout] %>
 <% end -%>
+<% end -%>
+<% if @core_plugin =~ /^midonet/ -%>
+[qos]
+notification_drivers = midonet
 <% end -%>

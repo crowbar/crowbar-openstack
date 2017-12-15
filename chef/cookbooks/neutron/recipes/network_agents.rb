@@ -14,6 +14,10 @@
 # limitations under the License.
 #
 
+if node[:neutron][:networking_plugin] == "midonet"
+  return
+end
+
 include_recipe "neutron::common_agent"
 
 package node[:neutron][:platform][:dhcp_agent_pkg]

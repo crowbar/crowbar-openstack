@@ -124,6 +124,11 @@ when "suse"
                     "openstack-neutron-infoblox-ipam-agent"],
     vmware_vsphere_pkg: "openstack-neutron-vsphere",
     vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
+    midonet_controller_pkgs: ["python-midonetclient",
+                              "python-networking-midonet-ext",
+                              "python-neutron-lbaas",
+                              "python-neutron-fwaas",
+                              "midonet-cluster"],
     midonet_nsdb_pkgs: ["zookeeper-server",
                         "cassandra"],
     user: "neutron",
@@ -169,6 +174,11 @@ when "rhel"
     infoblox_pkgs: [],
     vmware_vsphere_pkg: "",
     vmware_vsphere_dvs_agent_pkg: "",
+    midonet_controller_pkgs: ["python-midonetclient",
+                              "python-networking-midonet-ext",
+                              "python-neutron-lbaas",
+                              "python-neutron-fwaas",
+                              "midonet-cluster"],
     midonet_nsdb_pkgs: ["zookeeper",
                         "dsc22"],
     user: "neutron",
@@ -213,6 +223,11 @@ else
     infoblox_pkgs: [],
     vmware_vsphere_pkg: "openstack-neutron-vsphere",
     vmware_vsphere_dvs_agent_pkg: "openstack-neutron-vsphere-dvs-agent",
+    midonet_controller_pkgs: ["python-midonetclient",
+                              "python-networking-midonet-ext",
+                              "python-neutron-lbaas",
+                              "python-neutron-fwaas",
+                              "midonet-cluster"],
     midonet_nsdb_pkgs: ["zookeeper-server",
                         "cassandra"],
     user: "neutron",
@@ -267,3 +282,7 @@ default[:neutron][:ha][:neutron_l3_ha_service][:hatool][:env] = {}
 default[:neutron][:ha][:neutron_l3_ha_service][:seconds_to_sleep_between_checks] = 10
 default[:neutron][:ha][:neutron_l3_ha_service][:max_errors_tolerated] = 10
 default[:neutron][:ha][:neutron_l3_ha_service][:log_file] = "/var/log/neutron/neutron-l3-ha-service.log"
+
+default[:neutron][:midonet][:username] = "midonet"
+default[:neutron][:midonet][:port] = 8181
+default[:neutron][:midonet][:config_file] = "/etc/neutron/plugins/midonet/midonet.ini"
