@@ -49,6 +49,8 @@
                       "system_id": { "type" : "str", "required" : true },
                       "username": { "type" : "str", "required": true },
                       "password": { "type" : "str", "required": true },
+                      "optimized_metadata": { "type" : "bool", "required": true },
+                      "optimized_dhcp": { "type" : "bool", "required": true }, 
                       "opflex": { "type": "map", "required": true, "mapping": {
                         "peer_ip": { "type": "str", "required" : true },
                         "peer_port": { "type": "int", "required" : true },
