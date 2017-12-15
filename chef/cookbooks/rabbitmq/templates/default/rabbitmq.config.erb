@@ -26,6 +26,9 @@
                  {certfile, "<%= node[:rabbitmq][:ssl][:certfile] %>"},
                  {keyfile, "<%= node[:rabbitmq][:ssl][:keyfile] %>"}]},
 <% end -%>
+<% if @cluster_enabled -%>
+   {cluster_partition_handling, <%= @cluster_partition_handling %>},
+<% end -%>
    {disk_free_limit, 50000000}
  ]},
  {rabbitmq_management,
