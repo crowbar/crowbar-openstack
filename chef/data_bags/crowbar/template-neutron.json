@@ -45,6 +45,8 @@
         "system_id": "soc",
         "username": "admin",
         "password": "",
+        "optimized_metadata": true,
+        "optimized_dhcp": true,
         "opflex": [{
           "pod": "",
           "nodes" : [],
@@ -177,7 +179,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 114,
+      "schema-revision": 115,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]
