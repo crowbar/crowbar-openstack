@@ -82,6 +82,7 @@ usermod -u #{static_uid} -g #{static_gid} rabbitmq;
 chown -R rabbitmq:rabbitmq /var/lib/rabbitmq;
 chown rabbitmq:rabbitmq /var/run/rabbitmq /var/log/rabbitmq;
 chown rabbitmq:rabbitmq /var/run/rabbitmq/pid /var/log/rabbitmq/*.log* || :;
+chgrp rabbitmq /etc/rabbitmq/definitions.json;
 EOC
   # Make any error in the commands fatal
   flags "-e"
