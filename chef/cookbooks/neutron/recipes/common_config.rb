@@ -24,6 +24,9 @@ else
   neutron = node
 end
 
+use_apic_gbp = neutron[:neutron][:networking_plugin] == "ml2" &&
+  neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+
 # RDO package magic (non-standard packages)
 if node[:platform_family] == "rhel"
   net_core_pkgs=%w(kernel-*openstack* iproute-*el6ost.netns* iputils)
@@ -137,7 +140,8 @@ template neutron[:neutron][:config_file] do
       mtu_value: mtu_value,
       infoblox: infoblox_settings,
       ipam_driver: ipam_driver,
-      rpc_workers: neutron[:neutron][:rpc_workers]
+      rpc_workers: neutron[:neutron][:rpc_workers],
+      use_apic_gbp: use_apic_gbp
     )
 end
 
