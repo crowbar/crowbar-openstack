@@ -181,6 +181,13 @@ elsif node[:keystone][:frontend] == "apache"
   apache_site "keystone-admin.conf" do
     enable true
   end
+
+  template "/etc/logrotate.d/apache2-all" do
+    source "apache.logrotate.erb"
+    mode 0o644
+    owner "root"
+    group "root"
+  end
 end
 
 db_settings = fetch_database_settings
