@@ -56,9 +56,10 @@ node.normal[:apache][:listen_ports_crowbar][:keystone] = { admin: [bind_admin_po
 # service bind address.
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:keystone][:api][:protocol] == "https", ha_enabled)
+cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server")
 
 memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "keystone-server") : [node]
+  ha_enabled ? cluster_nodes : [node]
 )
 
 memcached_instance "keystone"
@@ -234,6 +235,11 @@ sql_connection = fetch_database_connection_string(node[:keystone][:db])
 # node[:keystone][:token_expiration] is in seconds and has to be encoded to hours
 max_active_keys = (node[:keystone][:token_expiration].to_f / 3600).ceil + 2
 
+# cron.hourly runs at a different time offset on every node in the cluster,
+# so in the worst case we have #nodes rotates (if we're unlucky and
+# the keystone-fernet-token provider is moving around quickly
+max_active_keys += cluster_nodes.length if ha_enabled
+
 register_auth_hash = { user: node[:keystone][:admin][:username],
                        password: node[:keystone][:admin][:password],
                        project: node[:keystone][:admin][:project] }
@@ -386,7 +392,6 @@ if node[:keystone][:token_format] == "fernet"
   crowbar_pacemaker_sync_mark "sync-keystone_install_rsync" if ha_enabled
   rsync_command = ""
   if ha_enabled
-    cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
     cluster_nodes.map do |n|
       next if node.name == n.name
       node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
