@@ -337,6 +337,8 @@ haproxy_loadbalancer "galera" do
   address CrowbarPacemakerHelper.cluster_vip(node, "admin")
   port 3306
   mode "tcp"
+  # leave some room for pacemaker health checks
+  max_connections node[:database][:mysql][:max_connections] - 10
   if node[:mysql][:ha][:clustercheck]
     options ["httpchk"]
     default_server "port 5555"
