@@ -86,43 +86,23 @@ zookeeper_host_list_with_ports = zookeeper_hosts.map do |h|
 end
 zookeeper_host_list_with_ports = zookeeper_host_list_with_ports.join(",")
 
+template "/etc/midonet/midonet-mn.conf" do
+  source "midonet-mn.conf.erb"
+  owner "root"
+  group "root"
+  mode 0o640
+  variables(
+    zookeeper_host_list_with_ports: zookeeper_host_list_with_ports,
+    zookeeper_host_list: zookeeper_host_list,
+    replication_factor: zookeeper_hosts.length,
+    keystone_settings: keystone_settings
+  )
+  notifies :start, "ruby_block[configure-midonet]"
+end
+
 ruby_block "configure-midonet" do
   block do
-    `cat <<EOF | mn-conf set -t default
-zookeeper {
-    zookeeper_hosts = "#{zookeeper_host_list_with_ports}"
-}
-
-cassandra {
-    servers = "#{zookeeper_host_list}"
-    replication_factor = #{zookeeper_hosts.length}
-}
-
-cluster.auth {
-   admin_role = "admin"
-   provider_class = "org.midonet.cluster.auth.keystone.KeystoneService"
-   keystone {
-      admin_token = ""
-      protocol = "#{keystone_settings["protocol"]}"
-      host = "#{keystone_settings["internal_url_host"]}"
-      port = #{keystone_settings["admin_port"]}
-      domain_name = "Default"
-      domain_id = "default"
-      tenant_name = "#{keystone_settings["service_tenant"]}"
-      user_name = "#{node[:neutron][:midonet][:username]}"
-      user_password = "#{keystone_settings["service_password"]}"
-      version = 3
-   }
-}
-
-agent.openstack {
-    metadata {
-        nova_metadata_url : "http://#{keystone_settings["internal_url_host"]}:#{keystone_settings["service_port"]}"
-        shared_secret : #{keystone_settings["service_password"]}
-        enabled : true
-    }
-}
-EOF`
+    `cat /etc/midonet/midonet-mn.conf | mn-conf set -t default`
     `touch /etc/midonet/midonet-configured`
   end
   not_if do

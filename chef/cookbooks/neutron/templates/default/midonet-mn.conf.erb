@@ -1,0 +1,33 @@
+zookeeper {
+    zookeeper_hosts = "<%= @zookeeper_host_list_with_ports %>"
+}
+
+cassandra {
+    servers = "<%= @zookeeper_host_list %>"
+    replication_factor = <%= @replication_factor %>
+}
+
+cluster.auth {
+    admin_role = "admin"
+    provider_class = "org.midonet.cluster.auth.keystone.KeystoneService"
+    keystone {
+        admin_token = ""
+        protocol = "<%= @keystone_settings["protocol"] %>"
+        host = "<%= @keystone_settings["internal_url_host"] %>"
+        port = <%= @keystone_settings["admin_port"] %>
+        domain_name = "Default"
+        domain_id = "default"
+        tenant_name = "<%= @keystone_settings["service_tenant"] %>"
+        user_name = "<%= @node[:neutron][:midonet][:username] %>"
+        user_password = "<%= @keystone_settings["service_password"] %>"
+        version = 3
+    }
+}
+
+agent.openstack {
+    metadata {
+        nova_metadata_url : "http://<%= @keystone_settings["internal_url_host"] %>:<%= @keystone_settings["service_port"] %>"
+        shared_secret : <%= @keystone_settings["service_password"] %>
+        enabled : true
+    }
+}
