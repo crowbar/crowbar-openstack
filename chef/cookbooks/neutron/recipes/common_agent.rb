@@ -362,7 +362,8 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 end
 
 # Metadata agent
-if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
+if ! neutron[:neutron][:networking_plugin] &&
+   (neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network"))
   neutron_metadata do
     use_cisco_apic_ml2_driver false
     neutron_node_object neutron
