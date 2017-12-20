@@ -116,6 +116,11 @@ if node.roles.include?("nova-compute-kvm")
     )
   end
 
+  # Explicitly link the opflex-agent-ovs.conf
+  link "/etc/opflex-agent-ovs/opflex-agent-ovs.conf" do
+    to "/etc/opflex-agent-ovs/conf.d/10-opflex-agent-ovs.conf"
+  end
+
   neutron_metadata do
     use_cisco_apic_ml2_driver true
     neutron_node_object neutron
