@@ -35,7 +35,7 @@ nova_metadata_insecure = <%= @nova_metadata_settings[:insecure] %>
 <% end %>
 
 [cache]
-backend = dogpile.cache.memcached
+backend = oslo_cache.memcache_pool
 enabled = true
 memcache_servers = <%= @memcached_servers.join(',') %>
 

@@ -101,7 +101,7 @@ pool_timeout = <%= node[:nova][:api_db][:pool_timeout] %>
 <% end %>
 
 [cache]
-backend = dogpile.cache.memcached
+backend = oslo_cache.memcache_pool
 enabled = true
 memcache_servers = <%= @memcached_servers.join(',') %>
 
