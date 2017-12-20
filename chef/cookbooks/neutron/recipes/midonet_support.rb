@@ -122,6 +122,11 @@ template "/etc/midonet/midonet.conf" do
   notifies :restart, "service[midonet-cluster]"
 end
 
+utils_systemd_environment "midonet-cluster" do
+  service_name "midonet-cluster"
+  environment node[:neutron][:midonet][:environment]
+end
+
 service "midonet-cluster" do
   supports status: true, restart: true
   action [:enable, :start]

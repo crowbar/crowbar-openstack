@@ -290,3 +290,7 @@ default[:neutron][:midonet][:username] = "midonet"
 default[:neutron][:midonet][:port] = 8181
 default[:neutron][:midonet][:config_file] = "/etc/neutron/plugins/midonet/midonet.ini"
 default[:neutron][:midonet][:tunnel_zone] = "tz"
+
+default[:neutron][:midonet][:environment] = { "JVM_OPTS" => "-Djava.net.preferIPv4Stack=true" }
+default[:neutron][:midonet][:zookeeper][:environment] = { "SERVER_JVMFLAGS" => "-Djava.net.preferIPv4Stack=true" }
+default[:neutron][:midonet][:cassandra][:environment] = { "JVM_OPTS" => "-Djava.net.preferIPv4Stack=true" }

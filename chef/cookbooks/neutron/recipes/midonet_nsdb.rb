@@ -48,10 +48,20 @@ template "/etc/zookeeper/zoo.cfg" do
   )
 end
 
+utils_systemd_environment "zookeeper" do
+  service_name "zookeeper"
+  environment node[:neutron][:midonet][:zookeeper][:environment]
+end
+
 service "zookeeper" do
   supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, "template[/etc/zookeeper/zoo.cfg]", :delayed
+end
+
+utils_systemd_environment "cassandra" do
+  service_name "cassandra"
+  environment node[:neutron][:midonet][:cassandra][:environment]
 end
 
 service "cassandra" do
