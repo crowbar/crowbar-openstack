@@ -72,8 +72,8 @@ verbose = <%= node[:nova][:verbose] ? 'True' : 'False' %>
 log_dir = /var/log/nova
 use_syslog = <%= node[:nova][:use_syslog] ? 'True' : 'False' %>
 use_stderr = false
-rpc_conn_pool_size = 64
-executor_thread_pool_size = 256
+# consider making configurable or even lower it
+rpc_conn_pool_size = 32
 transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = nova
 <%= "zvm_image_default_password = #{node[:nova][:zvm][:zvm_image_default_password]}" if @libvirt_type.eql?('zvm') %>
