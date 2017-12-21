@@ -148,6 +148,12 @@ template neutron[:neutron][:config_file] do
     )
 end
 
+if node[:platform_family] == "suse"
+  link "/etc/neutron/neutron.conf" do
+    to node[:neutron][:config_file]
+  end
+end
+
 if neutron[:neutron][:use_lbaas]
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
   if neutron[:neutron][:networking_plugin] == "ml2" &&
