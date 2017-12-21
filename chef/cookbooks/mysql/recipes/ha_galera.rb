@@ -336,7 +336,7 @@ haproxy_loadbalancer "galera" do
   mode "tcp"
   # leave some room for pacemaker health checks
   max_connections node[:database][:mysql][:max_connections] - 10
-  options ["httpchk"]
+  options ["httpchk", "clitcpka"]
   default_server "port 5555"
   stick ({ "on" => "dst" })
   servers ha_servers

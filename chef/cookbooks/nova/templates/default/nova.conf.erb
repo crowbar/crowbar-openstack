@@ -60,7 +60,6 @@ debug = <%= node[:nova][:debug] %>
 log_dir = /var/log/nova
 use_syslog = <%= node[:nova][:use_syslog] ? 'True' : 'False' %>
 use_stderr = false
-executor_thread_pool_size = 256
 transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = nova
 <% if @libvirt_type.eql?('zvm') %>
@@ -259,7 +258,8 @@ ssl = <%= @rabbit_settings[:use_ssl] %>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end %>
 heartbeat_timeout_threshold = <%= @rabbit_settings[:heartbeat_timeout] %>
-rpc_conn_pool_size = 64
+# consider making configurable or even lower it
+rpc_conn_pool_size = 32
 
 [serial_console]
 enabled = <%= @serial_enabled ? "True" : "False" %>
