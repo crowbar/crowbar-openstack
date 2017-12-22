@@ -1,16 +1,25 @@
 [mysqld]
-wsrep_provider=/usr/lib64/galera-3/libgalera_smm.so
-wsrep_cluster_address="<%= @cluster_addresses %>"
-innodb_autoinc_lock_mode=2
-innodb_doublewrite=1
-query_cache_size=0
-wsrep_on=ON
-binlog_format=ROW
-expire_logs_days = <%= @expire_logs_days %>
-
-wsrep_slave_threads = <%= @wsrep_slave_threads %>
+wsrep_on = ON
+wsrep_provider = /usr/lib64/galera-3/libgalera_smm.so
+wsrep_cluster_address = "<%= @cluster_addresses %>"
 # values recommended by mysqltuner.pl
 wsrep_provider_options = "gmcast.listen_addr=tcp://<%= @node_address %>:4567;gcs.fc_limit = <%= @wsrep_slave_threads * 5 %>;gcs.fc_factor = 0.8"
+wsrep_slave_threads = <%= @wsrep_slave_threads %>
+
+# to enable debug level logging, set this to 1
+wsrep_debug = 0
+
+binlog_format=ROW
+default_storage_engine = InnoDB
+
+innodb_autoinc_lock_mode = 2
+innodb_doublewrite = 1
+
+# Disable Query Cache completely
+query_cache_size = 0
+query_cache_type = 0
+
+expire_logs_days = <%= @expire_logs_days %>
 
 # SST method
 wsrep_sst_method = xtrabackup-v2

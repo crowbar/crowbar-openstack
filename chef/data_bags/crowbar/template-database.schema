@@ -25,6 +25,7 @@
                 "innodb_buffer_pool_size": { "type": "int", "required": true },
                 "innodb_flush_log_at_trx_commit": { "type": "int", "required": true },
                 "innodb_buffer_pool_instances": { "type": "int", "required": true },
+                "innodb_tunings": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
                 "max_connections": { "type": "int", "required": true },
                 "tmp_table_size": { "type": "int", "required": true },
                 "max_heap_table_size": { "type": "int", "required": true },
