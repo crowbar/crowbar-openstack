@@ -273,6 +273,11 @@ when "midonet"
       keystone_settings: keystone_settings
     )
   end
+
+  link "/etc/neutron/plugin.ini" do
+    to node[:neutron][:midonet][:config_file]
+    action :create
+  end
 end
 
 case node[:neutron][:networking_plugin]
