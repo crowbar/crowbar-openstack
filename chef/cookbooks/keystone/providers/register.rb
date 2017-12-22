@@ -231,7 +231,7 @@ action :add_access do
     new_resource.updated_by_last_action(ret)
   else
     raise "Failed to talk to keystone in add_access" if error
-    Chef::Log.info "Access '#{tenant}:#{user} -> #{role}}' already exists. Not creating." unless error
+    Chef::Log.info "Access '#{tenant}:#{user} -> #{role}' already exists. Not creating." unless error
     new_resource.updated_by_last_action(false)
   end
 end
