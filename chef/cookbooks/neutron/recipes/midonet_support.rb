@@ -125,7 +125,7 @@ end
 service "midonet-cluster" do
   supports status: true, restart: true
   action [:enable, :start]
-  notifies :run, "bash[create tunnel-zone #{node[:neutron][:midonet][:tunnel_zone]}]"
+  notifies :run, "execute[create tunnel-zone #{node[:neutron][:midonet][:tunnel_zone]}]"
 end
 
 midonet_nodes = node[:neutron][:elements][:"neutron-network"] || []
@@ -139,55 +139,19 @@ midonet_nodes = midonet_nodes.map { |n|
 
 Chef::Log.debug("midonet_nodes = #{midonet_nodes}")
 
-bash "create tunnel-zone #{node[:neutron][:midonet][:tunnel_zone]}" do
-  code <<-EOS
-#!/bin/bash
+template "/etc/midonet/create-tunnel-zone.sh" do
+  source "midonet-create-tunnel-zone.sh.erb"
+  owner "root"
+  group "root"
+  mode 0o750
+  variables(
+    node: node,
+    midonet_nodes: midonet_nodes
+  )
+  notifies :run, "execute[create tunnel-zone #{node[:neutron][:midonet][:tunnel_zone]}]"
+end
 
-set -x
-set -e
-set -u
-
-get_tz_id() {
-  midonet-cli -e "tunnel-zone list" | \
-    grep "#{node[:neutron][:midonet][:tunnel_zone]}" | \
-    awk '{print $2}'
-}
-
-# Wait for midonet-cli to become available
-cli_available=0
-for i in $(seq 20); do
-  if ( midonet-cli -e 'list host' > /dev/null ); then
-    cli_available=1
-    break
-  fi
-  sleep 5
-done
-if (( ${cli_available} != 1 )); then
-  echo "MidoNet CLI is not available"
-  exit 1
-fi
-
-declare -a nodes=( #{midonet_nodes} )
-
-tz_id=$(get_tz_id)
-if [[ -n ${tz_id} ]]; then
-  midonet-cli -e "delete tunnel-zone ${tz_id}"
-fi
-
-midonet-cli -e "tunnel-zone create " \
-  "name #{node[:neutron][:midonet][:tunnel_zone]} " \
-  "type #{node[:neutron][:midonet][:zone_protocol]}"
-tz_id=$(get_tz_id)
-
-for h in ${nodes[@]}; do
-  host_id=$(midonet-cli -e "host list" | grep ${h} | awk '{print $2}')
-  if [[ -n ${host_id} ]]; then
-    midonet-cli -e "tunnel-zone ${tz_id} " \
-      "add member " \
-      "host ${host_id} " \
-      "address ${h}"
-  fi
-done
-    EOS
+execute "create tunnel-zone #{node[:neutron][:midonet][:tunnel_zone]}" do
+  command "/bin/bash /etc/midonet/create-tunnel-zone.sh"
   not_if { midonet_nodes.empty? }
 end
