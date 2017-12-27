@@ -4,6 +4,11 @@ set -x
 set -e
 set -u
 
+log_file=/var/log/midonet-cluster/create-tunnel-zone.log
+
+exec 1> >(exec tee --ignore-interrupts --append "${log_file}")
+exec 2> >(exec tee --ignore-interrupts --append "${log_file}" >&2)
+
 get_tz_id() {
   midonet-cli -e "tunnel-zone list" | \
     grep "<%= @node[:neutron][:midonet][:tunnel_zone] %>" | \
