@@ -269,6 +269,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       mode "0640"
       variables(
         ml2_type_drivers: ml2_type_drivers,
+        ml2_mech_drivers: ml2_mech_drivers,
         tunnel_types: ml2_type_drivers.select { |t| ["vxlan", "gre"].include?(t) },
         use_l2pop: neutron[:neutron][:use_l2pop] &&
             (ml2_type_drivers.include?("gre") || ml2_type_drivers.include?("vxlan")),
