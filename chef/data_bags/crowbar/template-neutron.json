@@ -46,7 +46,9 @@
         "password": "",
         "optimized_metadata": true,
         "optimized_dhcp": true,
-        "opflex": {
+        "opflex": [{
+          "pod": "",
+          "nodes" : [],
           "peer_ip": "",
           "peer_port": 8009,
           "encap": "vxlan",
@@ -60,7 +62,7 @@
           "vlan": {
               "encap_iface": ""
           }
-        },
+        }],
         "apic_switches": {
           "101": {
             "switch_ports": {
@@ -176,7 +178,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 206,
+      "schema-revision": 207,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

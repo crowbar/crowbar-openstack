@@ -71,15 +71,24 @@ default[:neutron][:apic][:password] = ""
 default[:neutron][:apic][:optimized_metadata] = true
 default[:neutron][:apic][:optimized_dhcp] = true
 
-default[:neutron][:apic][:opflex][:peer_ip] = ""
-default[:neutron][:apic][:opflex][:peer_port] = 8009
-default[:neutron][:apic][:opflex][:encap] = "vxlan"
-default[:neutron][:apic][:opflex][:vxlan][:uplink_iface] = "vlan.4093"
-default[:neutron][:apic][:opflex][:vxlan][:uplink_vlan] = 4093
-default[:neutron][:apic][:opflex][:vxlan][:encap_iface] = "br-int_vxlan0"
-default[:neutron][:apic][:opflex][:vxlan][:remote_ip] = ""
-default[:neutron][:apic][:opflex][:vxlan][:remote_port] = 8472
-default[:neutron][:apic][:opflex][:vlan][:encap_iface] = ""
+default[:neutron][:apic][:opflex] = [{
+  pod: "",
+  nodes: [],
+  peer_ip: "",
+  peer_port: "",
+  encap: "vxlan",
+  vxlan: {
+    uplink_iface: "vlan.4093",
+    uplink_vlan: 4093,
+    encap_iface: "br-int_vxlan0",
+    remote_ip: "",
+    remote_port: 8472
+  },
+  vlan: {
+    encap_iface: ""
+  }
+}]
+
 
 case node[:platform_family]
 when "suse"
