@@ -45,7 +45,9 @@
         "system_id": "soc",
         "username": "admin",
         "password": "",
-        "opflex": {
+        "opflex": [{
+          "pod": "",
+          "nodes" : [],
           "peer_ip": "",
           "peer_port": 8009,
           "encap": "vxlan",
@@ -59,7 +61,7 @@
           "vlan": {
               "encap_iface": ""
           }
-        },
+        }],
         "apic_switches": {
           "101": {
             "switch_ports": {
@@ -175,7 +177,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 113,
+      "schema-revision": 114,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]
