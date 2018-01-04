@@ -21,7 +21,6 @@ dirty = false
 skip_setup = node[:swift][:devs].nil?
 
 include_recipe "swift::disks"
-#include_recipe 'swift::auth'
 # Note: we always want to setup rsync, even if we do not do anything else; this
 # will allow the ring-compute node to push the rings.
 include_recipe "swift::rsync"
