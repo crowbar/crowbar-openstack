@@ -9,6 +9,36 @@
 
     %fieldset
       %legend
+        = t(".extra_users.title")
+
+      %table.table.table-middle{ "data-dynamic" => "#extrauser-entries", "data-namespace" => "extra_users", "data-optional" => "tags",
+      "data-invalid" => t(".extra_users.error_invalid"), "data-duplicate" => t(".extra_users.error_duplicate") }
+        %thead
+          %tr
+            %th.col-sm-2
+              = t(".extra_users.username")
+            %th.col-sm-3
+              = t(".extra_users.permissions")
+            %th.col-sm-3
+              = t(".extra_users.tags")
+            %th.col-sm-1
+        %tbody
+        %tfoot
+          %tr
+            %td
+              = text_field_tag "extrauser[name]", "", :placeholder => t(".extra_users.username"),
+              :class => "form-control", "data-name" => "name", "data-type" => "string"
+            %td
+              = text_field_tag "extrauser[permissions]", "", :placeholder => t(".extra_users.permissions"),
+              :class => "form-control", "data-name" => "permissions", "data-type" => "array-string"
+            %td
+              = text_field_tag "extrauser[tags]", "", :placeholder => t(".extra_users.tags"),
+              :class => "form-control", "data-name" => "tags", "data-type" => "array-string"
+            %td
+              = link_to t(".extra_users.add"), "#", :class => "btn btn-default btn-block", "data-add" => true
+
+    %fieldset
+      %legend
         = t(".ssl_header")
 
       = boolean_field %w(ssl enabled),
@@ -48,3 +78,26 @@
           = string_field %w(ha storage shared device)
           = string_field %w(ha storage shared fstype)
           = string_field %w(ha storage shared options)
+
+
+%script#extrauser-entries{ :type => "text/x-handlebars-template" }
+  {{#each entries}}
+  %tr.edit
+    %td
+      = text_field_tag "extrauser[name]", "{{name}}", :placeholder => t(".extra_users.username"),
+      :class => "form-control", :disabled => "disabled"
+    %td
+      = text_field_tag "extrauser[permissions]", "{{permissions}}", :placeholder => t(".extra_users.permissions"),
+      :class => "form-control", "data-update" => "extra_users/{{name}}/permissions", "data-name" => "permissions",
+      "data-type" => "array-string"
+    %td
+      = text_field_tag "extrauser[tags]", "{{tags}}", :placeholder => t(".extra_users.tags"), :class => "form-control",
+      "data-update" => "extra_users/{{name}}/tags", "data-name" => "tags", "data-type" => "array-string"
+    %td
+      = link_to t(".extra_users.record_remove"), "#", :class => "btn btn-default btn-block", "data-remove" => "{{name}}"
+  {{else}}
+  %tr
+    %td{ :colspan => 4 }
+      .empty.alert.alert-info.text-center
+        = t(".extra_users.no_records")
+  {{/each}}
