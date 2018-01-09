@@ -340,7 +340,7 @@ haproxy_loadbalancer "galera" do
   # leave some room for pacemaker health checks
   max_connections node[:database][:mysql][:max_connections] - 10
   if node[:mysql][:ha][:clustercheck]
-    options ["httpchk"]
+    options ["httpchk", "clitcpka"]
     default_server "port 5555"
   else
     options ["mysql-check user monitoring"]
