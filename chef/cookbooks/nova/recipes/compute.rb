@@ -436,3 +436,14 @@ nova_controller_ips.each do |nova_controller_ip|
     not_if "iptables -nL VNCBLOCK | grep -q #{nova_controller_ip}"
   end
 end
+
+service = "openstack-nova-compute"
+if node[:nova][:resource_limits] && node[:nova][:resource_limits][service]
+  limits = node[:nova][:resource_limits][service]
+  action = limits.values.any? ? :create : :delete
+  utils_systemd_override_limits "Resource limits for #{service}" do
+    service_name service
+    limits limits
+    action action
+  end
+end
