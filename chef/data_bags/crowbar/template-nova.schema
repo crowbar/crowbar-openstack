@@ -240,6 +240,22 @@
                 "nova-novncproxy": { "type": "int", "required": true },
                 "nova-serialproxy": { "type": "int", "required": true }
               }
+            },
+            "resource_limits": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                "openstack-nova-api": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
+                },
+                "openstack-nova-compute": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
+                }
+              }
             }
           }
         }
