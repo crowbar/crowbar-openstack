@@ -100,7 +100,8 @@
                 },
                 "nfs": {
                 "type": "map", "mapping": {
-                    "nfs_shares": { "type": "str", "required": true }
+                    "nfs_shares": { "type": "str", "required": true },
+                    "nfs_snapshot": { "type": "bool", "required": true }
                 }
                 },
                 "rbd": {
@@ -237,7 +238,8 @@
                   },
                   "nfs": {
                     "type": "map", "mapping": {
-                      "nfs_shares": { "type": "str", "required": true }
+                      "nfs_shares": { "type": "str", "required": true },
+                      "nfs_snapshot": { "type": "bool", "required": true }
                     }
                   },
                   "rbd": {

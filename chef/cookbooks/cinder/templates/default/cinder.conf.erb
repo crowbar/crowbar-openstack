@@ -180,6 +180,10 @@ nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
   <% if volume['backend_driver'] == 'nfs' -%>
 nfs_shares_config=/etc/cinder/nfs_shares-<%= backend_id %>
 volume_driver = cinder.volume.drivers.nfs.NfsDriver
+    <% if volume['nfs']['nfs_snapshot'] -%>
+nfs_snapshot_support = true
+nas_secure_file_operations = false
+    <% end -%>
   <% end -%>
 
   <% if volume['backend_driver'] == 'nimble' -%><% end -%>
