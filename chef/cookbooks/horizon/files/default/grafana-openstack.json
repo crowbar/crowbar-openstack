@@ -1,822 +1,4231 @@
 {
-  "id": "sid-14394701277644387945359960469",
-  "title": "SUSE OpenStack Cloud Monitoring",
-  "originalTitle": "SUSE OpenStack Cloud Monitoring",
-  "tags": [],
-  "style": "dark",
-  "timezone": "utc",
-  "editable": true,
-  "hideControls": false,
-  "sharedCrosshair": false,
-  "rows": [
+  "__requires": [
     {
-      "title": "OpenStack Health",
-      "height": "100px",
-      "editable": true,
-      "collapse": false,
-      "collapsable": true,
-      "panels": [
-        {
-          "title": "compute (Nova)",
-          "error": false,
-          "span": 2,
-          "editable": true,
-          "type": "singlestat",
-          "id": 1,
-          "links": [],
-          "maxDataPoints": 100,
-          "interval": null,
-          "targets": [
-            {
-              "function": "max",
-              "merge": true,
-              "column": "value",
-              "series": "http_status",
-              "condition_filter": true,
-              "condition_key": "service",
-              "condition_value": "compute-api"
-            }
-          ],
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
-          "valueMaps": [
-            {
-              "value": "0",
-              "op": "=",
-              "text": "UP"
-            },
-            {
-              "value": "1",
-              "op": "=",
-              "text": "DOWN"
-            }
-          ],
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
-          "thresholds": "-1.0,0.2,0.8",
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "rgba(71, 212, 59, 0.4)",
-            "rgba(245, 150, 40, 0.73)",
-            "rgba(225, 40, 40, 0.59)"
-          ],
-          "sparkline": {
-            "show": false,
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
-          },
-          "height": "100"
-        },
-        {
-          "title": "networking (Neutron)",
-          "error": false,
-          "span": 2,
-          "editable": true,
-          "type": "singlestat",
-          "id": 4,
-          "links": [],
-          "maxDataPoints": 100,
-          "interval": null,
-          "targets": [
-            {
-              "function": "max",
-              "merge": true,
-              "column": "value",
-              "series": "http_status",
-              "condition_filter": true,
-              "condition_key": "service",
-              "condition_value": "network-api"
-            }
-          ],
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
-          "valueMaps": [
-            {
-              "value": "0",
-              "op": "=",
-              "text": "UP"
-            },
-            {
-              "value": "1",
-              "op": "=",
-              "text": "DOWN"
-            }
-          ],
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
-          "thresholds": "-1.0,0.2,0.8",
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "rgba(71, 212, 59, 0.4)",
-            "rgba(245, 150, 40, 0.73)",
-            "rgba(225, 40, 40, 0.59)"
-          ],
-          "sparkline": {
-            "show": false,
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
-          },
-          "height": "100"
-        },
-        {
-          "title": "image-service (Glance)",
-          "error": false,
-          "span": 2,
-          "editable": true,
-          "type": "singlestat",
-          "id": 5,
-          "links": [],
-          "maxDataPoints": 100,
-          "interval": null,
-          "targets": [
-            {
-              "function": "max",
-              "merge": true,
-              "column": "value",
-              "series": "http_status",
-              "condition_filter": true,
-              "condition_key": "service",
-              "condition_value": "image-api"
-            }
-          ],
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
-          "valueMaps": [
-            {
-              "value": "0",
-              "op": "=",
-              "text": "UP"
-            },
-            {
-              "value": "1",
-              "op": "=",
-              "text": "DOWN"
-            }
-          ],
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
-          "thresholds": "-1.0,0.2,0.8",
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "rgba(71, 212, 59, 0.4)",
-            "rgba(245, 150, 40, 0.73)",
-            "rgba(225, 40, 40, 0.59)"
-          ],
-          "sparkline": {
-            "show": false,
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
-          },
-          "height": "100"
-        },
-        {
-          "title": "block-storage (Cinder)",
-          "error": false,
-          "span": 2,
-          "editable": true,
-          "type": "singlestat",
-          "id": 7,
-          "links": [],
-          "maxDataPoints": 100,
-          "interval": null,
-          "targets": [
-            {
-              "function": "max",
-              "merge": true,
-              "column": "value",
-              "series": "http_status",
-              "condition_filter": true,
-              "condition_key": "service",
-              "condition_value": "volume-api"
-            }
-          ],
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
-          "valueMaps": [
-            {
-              "value": "0",
-              "op": "=",
-              "text": "UP"
-            },
-            {
-              "value": "1",
-              "op": "=",
-              "text": "DOWN"
-            }
-          ],
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
-          "thresholds": "-1.0,0.2,0.8",
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "rgba(71, 212, 59, 0.4)",
-            "rgba(245, 150, 40, 0.73)",
-            "rgba(225, 40, 40, 0.59)"
-          ],
-          "sparkline": {
-            "show": false,
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
-          },
-          "height": "100"
-        },
-        {
-          "title": "object-storage (Swift)",
-          "error": false,
-          "span": 2,
-          "editable": true,
-          "type": "singlestat",
-          "id": 8,
-          "links": [],
-          "maxDataPoints": 100,
-          "interval": null,
-          "targets": [
-            {
-              "function": "max",
-              "merge": true,
-              "column": "value",
-              "series": "http_status",
-              "condition_filter": true,
-              "condition_key": "service",
-              "condition_value": "object-store-api"
-            }
-          ],
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
-          "valueMaps": [
-            {
-              "value": "0",
-              "op": "=",
-              "text": "UP"
-            },
-            {
-              "value": "1",
-              "op": "=",
-              "text": "DOWN"
-            }
-          ],
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
-          "thresholds": "-1.0,0.2,0.8",
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "rgba(71, 212, 59, 0.4)",
-            "rgba(245, 150, 40, 0.73)",
-            "rgba(225, 40, 40, 0.59)"
-          ],
-          "sparkline": {
-            "show": false,
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
-          },
-          "height": "100"
-        },
-        {
-          "title": "identity-service (Keystone)",
-          "error": false,
-          "span": 2,
-          "editable": true,
-          "type": "singlestat",
-          "id": 12,
-          "links": [],
-          "maxDataPoints": 100,
-          "interval": null,
-          "targets": [
-            {
-              "function": "max",
-              "merge": true,
-              "column": "value",
-              "series": "http_status",
-              "condition_filter": true,
-              "condition_key": "service",
-              "condition_value": "identity-api"
-            }
-          ],
-          "cacheTimeout": null,
-          "format": "none",
-          "prefix": "",
-          "postfix": "",
-          "nullText": null,
-          "valueMaps": [
-            {
-              "value": "0",
-              "op": "=",
-              "text": "UP"
-            },
-            {
-              "value": "1",
-              "op": "=",
-              "text": "DOWN"
-            }
-          ],
-          "nullPointMode": "connected",
-          "valueName": "current",
-          "prefixFontSize": "50%",
-          "valueFontSize": "80%",
-          "postfixFontSize": "50%",
-          "thresholds": "-1.0,0.2,0.8",
-          "colorBackground": true,
-          "colorValue": false,
-          "colors": [
-            "rgba(71, 212, 59, 0.4)",
-            "rgba(245, 150, 40, 0.73)",
-            "rgba(225, 40, 40, 0.59)"
-          ],
-          "sparkline": {
-            "show": false,
-            "full": false,
-            "lineColor": "rgb(31, 120, 193)",
-            "fillColor": "rgba(31, 118, 189, 0.18)"
-          },
-          "height": "100"
-        }
-      ],
-      "notice": false,
-      "showTitle": true
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "4.1.0"
     },
     {
-      "title": "System Resources",
-      "height": "250px",
-      "editable": true,
-      "collapse": false,
-      "collapsable": true,
-      "panels": [
-        {
-          "span": 6,
-          "editable": true,
-          "type": "graph",
-          "loadingEditor": false,
-          "datasource": null,
-          "renderer": "flot",
-          "x-axis": true,
-          "y-axis": true,
-          "scale": 1,
-          "y_formats": [
-            "percent",
-            "none"
-          ],
-          "grid": {
-            "max": null,
-            "min": null,
-            "threshold1": null,
-            "threshold2": null,
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2Color": "rgba(234, 112, 112, 0.22)",
-            "leftMax": 100,
-            "rightMax": null,
-            "leftMin": 0,
-            "rightMin": null
-          },
-          "annotate": {
-            "enable": false
-          },
-          "resolution": 100,
-          "lines": true,
-          "fill": 0,
-          "linewidth": 1,
-          "points": false,
-          "pointradius": 5,
-          "bars": false,
-          "stack": false,
-          "legend": {
-            "show": true,
-            "values": false,
-            "min": false,
-            "max": false,
-            "current": false,
-            "total": false,
-            "avg": false,
-            "alignAsTable": true,
-            "rightSide": false
-          },
-          "percentage": false,
-          "zerofill": true,
-          "nullPointMode": "null",
-          "steppedLine": false,
-          "tooltip": {
-            "value_type": "cumulative",
-            "query_as_alias": true,
-            "shared": true
-          },
-          "targets": [
-            {
-              "function": "none",
-              "column": "value",
-              "series": "cpu.percent",
-              "condition_filter": false,
-              "alias": ""
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "cpu.wait_perc"
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "cpu.system_perc"
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "cpu.user_perc"
-            }
-          ],
-          "aliasColors": {},
-          "title": "CPU usage",
-          "id": 2,
-          "seriesOverrides": [],
-          "links": [],
-          "leftYAxisLabel": ""
-        },
-        {
-          "title": "Memory usage",
-          "error": false,
-          "span": 6,
-          "editable": true,
-          "type": "graph",
-          "id": 13,
-          "datasource": null,
-          "renderer": "flot",
-          "x-axis": true,
-          "y-axis": true,
-          "y_formats": [
-            "none",
-            "none"
-          ],
-          "grid": {
-            "leftMax": null,
-            "rightMax": null,
-            "leftMin": 0,
-            "rightMin": null,
-            "threshold1": null,
-            "threshold2": null,
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2Color": "rgba(234, 112, 112, 0.22)",
-            "thresholdLine": false
-          },
-          "lines": true,
-          "fill": 0,
-          "linewidth": 1,
-          "points": false,
-          "pointradius": 5,
-          "bars": false,
-          "stack": false,
-          "percentage": false,
-          "legend": {
-            "show": true,
-            "values": false,
-            "min": false,
-            "max": false,
-            "current": false,
-            "total": false,
-            "avg": false,
-            "alignAsTable": true,
-            "rightSide": false
-          },
-          "nullPointMode": "null",
-          "steppedLine": false,
-          "tooltip": {
-            "value_type": "cumulative",
-            "shared": true
-          },
-          "targets": [
-            {
-              "function": "none",
-              "column": "value",
-              "series": "mem.total_mb",
-              "merge": false,
-              "dimensions": ""
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "mem.swap_used_mb"
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "mem.used_mb"
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "mem.swap_total_mb"
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "mem.used_cache"
-            }
-          ],
-          "aliasColors": {},
-          "seriesOverrides": [],
-          "links": [],
-          "leftYAxisLabel": "MB"
-        },
-        {
-          "title": "Disk usage",
-          "error": false,
-          "span": 6,
-          "editable": true,
-          "type": "graph",
-          "id": 14,
-          "datasource": null,
-          "renderer": "flot",
-          "x-axis": true,
-          "y-axis": true,
-          "y_formats": [
-            "percent",
-            "short"
-          ],
-          "grid": {
-            "leftMax": 100,
-            "rightMax": null,
-            "leftMin": 0,
-            "rightMin": null,
-            "threshold1": null,
-            "threshold2": null,
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2Color": "rgba(234, 112, 112, 0.22)"
-          },
-          "lines": true,
-          "fill": 0,
-          "linewidth": 1,
-          "points": false,
-          "pointradius": 5,
-          "bars": false,
-          "stack": false,
-          "percentage": false,
-          "legend": {
-            "show": true,
-            "values": false,
-            "min": false,
-            "max": false,
-            "current": false,
-            "total": false,
-            "avg": false,
-            "alignAsTable": true,
-            "rightSide": false,
-            "sortDesc": null,
-            "sort": null
-          },
-          "nullPointMode": "null",
-          "steppedLine": false,
-          "tooltip": {
-            "value_type": "cumulative",
-            "shared": true
-          },
-          "targets": [
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "series": "disk.space_used_perc",
-              "condition_filter": true,
-              "condition_key": "mount_point",
-              "condition_value": "/"
-           }
-          ],
-          "aliasColors": {},
-          "seriesOverrides": [],
-          "links": []
-        },
-        {
-          "title": "System load",
-          "error": false,
-          "span": 6,
-          "editable": true,
-          "type": "graph",
-          "id": 15,
-          "datasource": null,
-          "renderer": "flot",
-          "x-axis": true,
-          "y-axis": true,
-          "y_formats": [
-            "none",
-            "short"
-          ],
-          "grid": {
-            "leftMax": null,
-            "rightMax": null,
-            "leftMin": 0,
-            "rightMin": null,
-            "threshold1": null,
-            "threshold2": null,
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2Color": "rgba(234, 112, 112, 0.22)"
-          },
-          "lines": true,
-          "fill": 0,
-          "linewidth": 1,
-          "points": false,
-          "pointradius": 5,
-          "bars": false,
-          "stack": false,
-          "percentage": false,
-          "legend": {
-            "show": true,
-            "values": false,
-            "min": false,
-            "max": false,
-            "current": false,
-            "total": false,
-            "avg": false,
-            "alignAsTable": true
-          },
-          "nullPointMode": "null",
-          "steppedLine": false,
-          "tooltip": {
-            "value_type": "cumulative",
-            "shared": true
-          },
-          "targets": [
-            {
-              "function": "none",
-              "column": "value",
-              "series": "load.avg_1_min"
-            }
-          ],
-          "aliasColors": {},
-          "seriesOverrides": [],
-          "links": []
-        }
-      ],
-      "notice": false,
-      "showTitle": true
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": ""
     },
     {
-      "title": "Network monitoring",
-      "height": "250px",
-      "editable": true,
-      "collapse": false,
-      "panels": [
-        {
-          "title": "Network usage",
-          "error": false,
-          "span": 6,
-          "editable": true,
-          "type": "graph",
-          "id": 16,
-          "datasource": null,
-          "renderer": "flot",
-          "x-axis": true,
-          "y-axis": true,
-          "y_formats": [
-            "bps",
-            "short"
-          ],
-          "grid": {
-            "leftMax": null,
-            "rightMax": null,
-            "leftMin": 0,
-            "rightMin": null,
-            "threshold1": null,
-            "threshold2": null,
-            "threshold1Color": "rgba(216, 200, 27, 0.27)",
-            "threshold2Color": "rgba(234, 112, 112, 0.22)"
-          },
-          "lines": true,
-          "fill": 0,
-          "linewidth": 1,
-          "points": false,
-          "pointradius": 5,
-          "bars": false,
-          "stack": false,
-          "percentage": false,
-          "legend": {
-            "show": true,
-            "values": false,
-            "min": false,
-            "max": false,
-            "current": false,
-            "total": false,
-            "avg": false,
-            "alignAsTable": true
-          },
-          "nullPointMode": "connected",
-          "steppedLine": false,
-          "tooltip": {
-            "value_type": "cumulative",
-            "shared": true
-          },
-          "targets": [
-            {
-              "function": "none",
-              "column": "value",
-              "series": "net.in_bytes_sec",
-              "merge": true,
-              "dimensions": ""
-            },
-            {
-              "target": "",
-              "function": "none",
-              "column": "value",
-              "merge": true,
-              "dimensions": "",
-              "series": "net.out_bytes_sec"
-            }
-          ],
-          "aliasColors": {},
-          "seriesOverrides": [],
-          "links": []
-        }
-      ],
-      "showTitle": true
-    }
-  ],
-  "nav": [
+      "type": "datasource",
+      "id": "monasca-datasource",
+      "name": "Monasca",
+      "version": "1.0.0"
+    },
     {
-      "type": "timepicker",
-      "collapse": false,
-      "notice": false,
-      "enable": true,
-      "status": "Stable",
-      "time_options": [
-        "15m",
-        "1h",
-        "6h",
-        "12h",
-        "24h",
-        "2d",
-        "7d",
-        "30d"
-      ],
-      "refresh_intervals": [
-        "5s",
-        "10s",
-        "30s",
-        "1m",
-        "5m",
-        "15m",
-        "30m",
-        "1h",
-        "2h",
-        "1d"
-      ],
-      "now": true
+      "type": "panel",
+      "id": "natel-discrete-panel",
+      "name": "Discrete",
+      "version": "0.0.6"
     }
   ],
-  "time": {
-    "from": "now-1h",
-    "to": "now"
-  },
-  "templating": {
-    "list": [],
-    "enable": false
-  },
   "annotations": {
     "enable": false,
     "list": []
   },
-  "refresh": "30s",
-  "version": 6,
-  "hideAllLegends": false
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "hideControls": false,
+  "id": null,
+  "links": [],
+  "refresh": false,
+  "rows": [
+    {
+      "collapse": false,
+      "height": 60,
+      "panels": [
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 17,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "compute-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Compute (Nova)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 18,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "network-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Networking (Neutron)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 19,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "image-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Image (Glance)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 20,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "volume-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Volume (Cinder)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 21,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "volume-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Block Storage (Cinder)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 22,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "object-store-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Object Storage (Swift)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 23,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "identity-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Identity (Keystone)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 24,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "orchestration-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Orchestration (Heat)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 25,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "data-processing-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Data Processing (Sahara)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 26,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "key-manager-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Key Manager (Barbican)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 27,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "share-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Share (Manila)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 28,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "service",
+                  "value": "container-infra-api"
+                },
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "http_status",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Containers (Magnum)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "OpenStack Health",
+      "titleSize": "h6"
+    },
+    {
+      "collapse": true,
+      "height": 250,
+      "panels": [
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 34,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "mem.total_mb",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "mem.total_mb",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Memory (Total)",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "decmbytes",
+              "label": "",
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        },
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 37,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "mem.used_mb",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "mem.used_mb",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Memory (Used)",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "decmbytes",
+              "label": "",
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        },
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 35,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "mem.swap_total_mb",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "mem.swap_total_mb",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Swap (Total)",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "decmbytes",
+              "label": "",
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        },
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 36,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "mem.swap_used_mb",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "mem.swap_used_mb",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Swap (Used)",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "decmbytes",
+              "label": "",
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        },
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 38,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "mem.used_cache",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "mem.used_cache",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Cache",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "decmbytes",
+              "label": "",
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "Memory Usage",
+      "titleSize": "h6"
+    },
+    {
+      "collapse": true,
+      "height": 260,
+      "panels": [
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 2,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "cpu.percent",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "cpu.percent",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Percentage",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "percent",
+              "label": "",
+              "max": 100,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        },
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 29,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "cpu.wait_perc",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "cpu.wait_perc",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Wait",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "percent",
+              "label": "",
+              "max": 100,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        },
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 30,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "cpu.system_perc",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "cpu.system_perc",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "System",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "percent",
+              "label": "",
+              "max": 100,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        },
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 32,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "load.avg_1_min",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "load.avg_1_min",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "System Load",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "percent",
+              "label": "",
+              "max": 100,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        },
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 31,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 3,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "cpu.user_perc",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "cpu.user_perc",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "User",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "percent",
+              "label": "",
+              "max": 100,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "CPU Usage",
+      "titleSize": "h6"
+    },
+    {
+      "collapse": true,
+      "height": 16,
+      "panels": [
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "height": "400px",
+          "id": 33,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "disk.space_used_perc",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "disk.space_used_perc",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Root File System",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "percent",
+              "label": "",
+              "max": 100,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "Disk Usage",
+      "titleSize": "h6"
+    },
+    {
+      "collapse": true,
+      "height": "250px",
+      "panels": [
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 39,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "net.in_bytes_sec",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "net.in_bytes_sec",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Bytes/s (inbound)",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "Bps",
+              "label": "",
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        },
+        {
+          "aliasColors": {},
+          "annotate": {
+            "enable": false
+          },
+          "bars": false,
+          "datasource": "default",
+          "editable": true,
+          "fill": 0,
+          "grid": {
+            "max": null,
+            "min": null
+          },
+          "id": 40,
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "loadingEditor": false,
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "resolution": 100,
+          "scale": 1,
+          "seriesOverrides": [],
+          "span": 6,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "column": "value",
+              "condition_filter": false,
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "function": "none",
+              "metric": "net.out_bytes_sec",
+              "period": "300",
+              "refId": "A",
+              "series": "cpu.percent"
+            },
+            {
+              "aggregator": "avg",
+              "alias": "Average (all hosts)",
+              "dimensions": [],
+              "error": "",
+              "group": false,
+              "metric": "net.out_bytes_sec",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Bytes/s (outbound)",
+          "tooltip": {
+            "query_as_alias": true,
+            "shared": true,
+            "sort": 0,
+            "value_type": "cumulative"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "Bps",
+              "label": "",
+              "max": null,
+              "min": 0,
+              "show": true
+            },
+            {
+              "format": "none",
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ],
+          "zerofill": true
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "Network monitoring",
+      "titleSize": "h6"
+    },
+    {
+      "collapse": true,
+      "height": 250,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "decimals": null,
+          "fill": 1,
+          "id": 59,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [],
+              "error": "",
+              "group": true,
+              "metric": "nova.vm.total_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Total VMs",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "decimals": null,
+          "fill": 1,
+          "id": 60,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [],
+              "error": "",
+              "group": true,
+              "metric": "nova.vm.blocked_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Blocked",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "decimals": null,
+          "fill": 1,
+          "id": 61,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [],
+              "error": "",
+              "group": true,
+              "metric": "nova.vm.crashed_count",
+              "period": "300",
+              "refId": "B"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Crashed",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "decimals": null,
+          "fill": 1,
+          "id": 62,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [],
+              "error": "",
+              "group": true,
+              "metric": "nova.vm.nostate_count",
+              "period": "300",
+              "refId": "C"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "No State",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "decimals": null,
+          "fill": 1,
+          "id": 63,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [],
+              "error": "",
+              "group": true,
+              "metric": "nova.vm.paused_count",
+              "period": "300",
+              "refId": "D"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Paused",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "decimals": null,
+          "fill": 1,
+          "id": 64,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [],
+              "error": "",
+              "group": true,
+              "metric": "nova.vm.running_count",
+              "period": "300",
+              "refId": "F"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Running",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "decimals": null,
+          "fill": 1,
+          "id": 65,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [],
+              "error": "",
+              "group": true,
+              "metric": "nova.vm.suspended_count",
+              "period": "300",
+              "refId": "E"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Suspended",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "decimals": null,
+          "fill": 1,
+          "id": 66,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "hideEmpty": false,
+            "max": false,
+            "min": false,
+            "rightSide": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [],
+              "error": "",
+              "group": true,
+              "metric": "nova.vm.shutoff_count",
+              "period": "300",
+              "refId": "H"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Shut off/Nova suspend",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": "0",
+              "show": true
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "VM Graphs",
+      "titleSize": "h6"
+    },
+    {
+      "collapse": true,
+      "height": 250,
+      "panels": [
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 58,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 25,
+          "showLegend": true,
+          "showLegendNames": true,
+          "showLegendPercent": false,
+          "showLegendValues": true,
+          "span": 4,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "nova.vm.total_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 22,
+          "title": "Total VMs",
+          "type": "natel-discrete-panel",
+          "valueMaps": [],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(202, 31, 31, 0)",
+          "colorMaps": [],
+          "display": "timeline",
+          "extendLastValue": true,
+          "height": "",
+          "highlightOnMouseover": true,
+          "id": 51,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [
+            {
+              "type": "dashboard"
+            }
+          ],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 25,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": false,
+          "showLegendValues": true,
+          "span": 4,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "metric": "nova.vm.running_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 22,
+          "title": "Running",
+          "type": "natel-discrete-panel",
+          "valueMaps": [],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 52,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 25,
+          "showLegend": true,
+          "showLegendNames": true,
+          "showLegendPercent": false,
+          "showLegendValues": true,
+          "span": 4,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "metric": "nova.vm.blocked_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 22,
+          "title": "Blocked",
+          "type": "natel-discrete-panel",
+          "valueMaps": [],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 53,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 25,
+          "showLegend": true,
+          "showLegendNames": true,
+          "showLegendPercent": false,
+          "showLegendValues": true,
+          "span": 4,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "metric": "nova.vm.nostate_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 22,
+          "title": "No State",
+          "type": "natel-discrete-panel",
+          "valueMaps": [],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 54,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 25,
+          "showLegend": true,
+          "showLegendNames": true,
+          "showLegendPercent": false,
+          "showLegendValues": true,
+          "span": 4,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "metric": "nova.vm.crashed_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 22,
+          "title": "Crashed",
+          "type": "natel-discrete-panel",
+          "valueMaps": [],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 55,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 25,
+          "showLegend": true,
+          "showLegendNames": true,
+          "showLegendPercent": false,
+          "showLegendValues": true,
+          "span": 4,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "metric": "nova.vm.paused_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 22,
+          "title": "Paused",
+          "type": "natel-discrete-panel",
+          "valueMaps": [],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 56,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 25,
+          "showLegend": true,
+          "showLegendNames": true,
+          "showLegendPercent": false,
+          "showLegendValues": true,
+          "span": 4,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "metric": "nova.vm.shuttingdown_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 22,
+          "title": "Shutting down",
+          "type": "natel-discrete-panel",
+          "valueMaps": [],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 57,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 25,
+          "showLegend": true,
+          "showLegendNames": true,
+          "showLegendPercent": false,
+          "showLegendValues": true,
+          "span": 4,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "metric": "nova.vm.shutoff_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 22,
+          "title": "Shut off / Nova suspended",
+          "type": "natel-discrete-panel",
+          "valueMaps": [],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "VM Counts",
+      "titleSize": "h6"
+    },
+    {
+      "collapse": true,
+      "height": 250,
+      "panels": [
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 41,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "ceph.cluster.osds.total_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "OSDs (total)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "UP",
+              "value": "0"
+            },
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "1"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 42,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "ceph.cluster.osds.up_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "OSDs (up)",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "DOWN",
+              "value": "0"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "ALL UP"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "OSD(s) DOWN"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 43,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [
+            {
+              "from": "1",
+              "text": "OSD(s) DOWN",
+              "to": "1000"
+            }
+          ],
+          "rowHeight": 50,
+          "showDistinctCount": false,
+          "showLegend": true,
+          "showLegendCounts": false,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendTime": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "ceph.cluster.osds.down_count",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "OSD Health",
+          "type": "natel-discrete-panel",
+          "valueMaps": [
+            {
+              "op": "=",
+              "text": "ALL UP",
+              "value": "0"
+            }
+          ],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        },
+        {
+          "backgroundColor": "rgba(128, 128, 128, 0.1)",
+          "colorMaps": [
+            {
+              "color": "rgb(0, 255, 0)",
+              "text": "OK"
+            },
+            {
+              "color": "rgb(255, 255, 0)",
+              "text": "WARN"
+            },
+            {
+              "color": "rgb(255, 0, 0)",
+              "text": "ERROR"
+            }
+          ],
+          "display": "timeline",
+          "extendLastValue": true,
+          "highlightOnMouseover": true,
+          "id": 44,
+          "legendSortBy": "-ms",
+          "lineColor": "rgba(128, 128, 128, 1.0)",
+          "links": [],
+          "mappingTypes": [
+            {
+              "name": "value to text",
+              "value": 1
+            },
+            {
+              "name": "range to text",
+              "value": 2
+            }
+          ],
+          "metricNameColor": "#000000",
+          "rangeMaps": [],
+          "rowHeight": 50,
+          "showLegend": true,
+          "showLegendNames": true,
+          "showLegendPercent": true,
+          "showLegendValues": true,
+          "span": 3,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "group": false,
+              "metric": "ceph.cluster.quorum_size",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "textSize": 24,
+          "title": "Quorum Size",
+          "type": "natel-discrete-panel",
+          "valueMaps": [],
+          "valueTextColor": "#000000",
+          "writeAllValues": false,
+          "writeLastValue": true,
+          "writeMetricNames": false
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "Ceph Health",
+      "titleSize": "h6"
+    },
+    {
+      "collapse": true,
+      "height": 250,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "fill": 1,
+          "id": 46,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "dimensions": [],
+              "error": "",
+              "metric": "ceph.cluster.total_used_bytes",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Used Storage",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "bytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "fill": 1,
+          "id": 48,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "dimensions": [],
+              "error": "",
+              "metric": "ceph.cluster.total_avail_bytes",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Available Storage",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "bytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "fill": 1,
+          "id": 47,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "dimensions": [],
+              "error": "",
+              "metric": "ceph.cluster.utilization_perc",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "Storage Utilization (%)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": "100",
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "fill": 1,
+          "id": 49,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "metric": "ceph.osd.utilization_perc",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "OSD Utilization (%)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "none",
+              "label": null,
+              "logBase": 1,
+              "max": "100",
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "datasource": "default",
+          "fill": 1,
+          "id": 50,
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "links": [],
+          "nullPointMode": "null",
+          "percentage": false,
+          "pointradius": 5,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "span": 4,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "aggregator": "none",
+              "alias": "@hostname",
+              "dimensions": [
+                {
+                  "key": "hostname",
+                  "value": "$all"
+                }
+              ],
+              "error": "",
+              "metric": "ceph.osd.used_bytes",
+              "period": "300",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "OSD Utilization (bytes)",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "bytes",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": true,
+      "title": "Ceph Storage",
+      "titleSize": "h6"
+    }
+  ],
+  "schemaVersion": 14,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "enable": false,
+    "list": []
+  },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "timepicker": {
+    "collapse": false,
+    "enable": true,
+    "notice": false,
+    "now": true,
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ],
+    "status": "Stable",
+    "time_options": [
+      "15m",
+      "1h",
+      "6h",
+      "12h",
+      "24h",
+      "2d",
+      "7d",
+      "30d"
+    ],
+    "type": "timepicker"
+  },
+  "timezone": "utc",
+  "title": "SUSE OpenStack Cloud Monitoring: OpenStack",
+  "version": 0
 }

@@ -17,6 +17,17 @@ include_recipe "apache2"
 include_recipe "apache2::mod_wsgi"
 include_recipe "apache2::mod_rewrite"
 
+monasca_server = node_search_with_cache("roles:monasca-server").first
+
+grafana_url = ""
+
+unless monasca_server.nil?
+  include_recipe "apache2::mod_proxy"
+  include_recipe "apache2::mod_proxy_http"
+
+  grafana_url = MonascaUiHelper.grafana_service_url(node)
+end
+
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 if %w(suse).include? node[:platform_family]
@@ -178,25 +189,6 @@ unless ironic_ui_pkgname.nil?
       action :install
       notifies :reload, "service[horizon]"
     end
-  end
-end
-
-monasca_ui_pkgname =
-  case node[:platform_family]
-  when "suse"
-    "openstack-horizon-plugin-monasca-ui"
-  when "rhel"
-    "openstack-monasca-ui"
-  end
-
-unless monasca_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "monasca").empty?
-    include_recipe "#{@cookbook_name}::monasca_ui"
-    package monasca_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
-    grafana_available = true
   end
 end
 
@@ -544,10 +536,10 @@ template "#{node[:apache][:dir]}/sites-available/openstack-dashboard.conf" do
     ssl_crt_file: node[:horizon][:apache][:ssl_crt_file],
     ssl_key_file: node[:horizon][:apache][:ssl_key_file],
     ssl_crt_chain_file: node[:horizon][:apache][:ssl_crt_chain_file],
-    grafana_available: defined?(grafana_available) ? grafana_available : false
+    grafana_url: grafana_url
   )
   if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/openstack-dashboard.conf") || node[:platform_family] == "suse"
-    notifies :reload, resources(service: "apache2")
+    notifies :reload, resources(service: "apache2"), :immediately
   end
 end
 
@@ -595,5 +587,23 @@ elsif !node[:resource_limits] || !node[:resource_limits]["apache2"] || \
   utils_systemd_override_limits "Resource limits for apache2" do
     service_name "apache2"
     action :delete
+  end
+end
+
+monasca_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-monasca-ui"
+  when "rhel"
+    "openstack-monasca-ui"
+  end
+
+unless monasca_ui_pkgname.nil?
+  unless Barclamp::Config.load("openstack", "monasca").empty?
+    include_recipe "#{@cookbook_name}::monasca_ui"
+    package monasca_ui_pkgname do
+      action :install
+      notifies :reload, "service[horizon]"
+    end
   end
 end
