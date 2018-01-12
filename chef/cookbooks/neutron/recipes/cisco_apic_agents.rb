@@ -81,6 +81,7 @@ if node.roles.include?("nova-compute-kvm")
     mode "0640"
     variables(
       ml2_type_drivers: ml2_type_drivers,
+      ml2_mech_drivers: ml2_mech_drivers,
       tunnel_types: "",
       enable_tunneling: false,
       use_l2pop: false,
@@ -112,7 +113,7 @@ if node.roles.include?("nova-compute-kvm")
       opflex_vxlan_remote_port: neutron[:neutron][:apic][:opflex][:vxlan][:remote_port],
       # TODO(mmnelemane) : update VLAN encapsulation config when it works.
       # Currently set to VXLAN by default but can be modified from proposal.
-      ml2_type_drivers: neutron[:neutron][:ml2_type_drivers]
+      ml2_type_drivers: ml2_type_drivers
     )
   end
 
