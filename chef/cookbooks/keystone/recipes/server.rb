@@ -391,13 +391,6 @@ if node[:keystone][:token_format] == "fernet"
   package "rsync"
   crowbar_pacemaker_sync_mark "sync-keystone_install_rsync" if ha_enabled
 
-  template "/usr/bin/keystone-fernet-keys-push.sh" do
-    source "keystone-fernet-keys-push.sh"
-    owner "root"
-    group "root"
-    mode "0755"
-  end
-
   rsync_command = ""
   if ha_enabled
     cluster_nodes.map do |n|
