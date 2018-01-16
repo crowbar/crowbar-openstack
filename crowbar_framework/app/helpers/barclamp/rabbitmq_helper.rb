@@ -26,5 +26,19 @@ module Barclamp
         selected.to_s
       )
     end
+
+    def log_levels_for_rabbitmq(selected)
+      options_for_select(
+        [
+          ["debug", "debug"],
+          ["info", "info"],
+          ["warning", "warning"],
+          ["error", "error"],
+          ["critical", "critical"],
+          ["none", "none"]
+        ],
+        selected.to_s
+      )
+    end
   end
 end

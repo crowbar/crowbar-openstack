@@ -6,6 +6,7 @@
     = string_field :vhost
     = integer_field :port
     = string_field :user
+    = select_field :log_level, :collection => :log_levels_for_rabbitmq
 
     %fieldset
       %legend

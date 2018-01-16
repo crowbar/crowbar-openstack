@@ -22,6 +22,7 @@ en:
         vhost: 'Virtual host'
         user: 'User'
         port: 'Port'
+        log_level: 'Log level'
         ssl_header: 'SSL Support'
         ssl:
           enabled: 'Enable SSL'

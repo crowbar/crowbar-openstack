@@ -7,6 +7,13 @@
  },
  {rabbit,
   [
+   {log_levels, [
+                 {connection, <%= node[:rabbitmq][:log_level] %>},
+                 {channel, <%= node[:rabbitmq][:log_level] %>},
+                 {federation, <%= node[:rabbitmq][:log_level] %>},
+                 {mirroring, <%= node[:rabbitmq][:log_level] %>}
+                ]
+   },
    {tcp_listeners, [
                     <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{node[:rabbitmq][:port]}}" }.join(", ") %>
                    ]},
