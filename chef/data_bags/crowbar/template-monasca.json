@@ -38,6 +38,7 @@
         "ca_file": "",
         "log_dir": "/var/log/monasca-agent/",
         "log_level": "INFO",
+        "monitor_ceph": true,
         "monitor_libvirt": true,
         "statsd_port": 8125,
         "check_frequency": 15,
@@ -131,7 +132,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 200,
+      "schema-revision": 201,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],
