@@ -287,7 +287,7 @@ pacemaker_primitive fence_primitive do
     "no-shared-storage" => no_shared_storage,
     "record-only"    => "1",
     "verbose"        => "1",
-    "debug"          => "/var/log/nova/fence_compute.log"
+    "debug-file"     => "/var/log/nova/fence_compute.log"
   })
   op nova[:nova][:ha][:compute][:fence][:op]
   action :update
