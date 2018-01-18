@@ -98,7 +98,8 @@ template "/etc/rabbitmq/rabbitmq.config" do
   mode 0644
   variables(
     cluster_enabled: cluster_enabled,
-    cluster_partition_handling: cluster_partition_handling
+    cluster_partition_handling: cluster_partition_handling,
+    hipe_compile: node[:rabbitmq][:hipe_compile]
   )
   notifies :restart, "service[rabbitmq-server]"
 end
