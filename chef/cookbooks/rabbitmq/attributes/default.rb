@@ -56,3 +56,11 @@ default[:rabbitmq][:ha][:clustered_op][:notify][:timeout] = "180s"
 default[:rabbitmq][:ha][:clustered_op][:monitor] = [
   { interval: "30s" }, { interval: "27s", role: "Master" }
 ]
+
+default[:rabbitmq][:ha][:clustered_rmq_features] = false
+case node[:platform_family]
+when "suse"
+  if node[:platform] != "suse" || node[:platform_version].to_f > 12.2
+    default[:rabbitmq][:ha][:clustered_rmq_features] = true
+  end
+end

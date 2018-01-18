@@ -54,8 +54,8 @@ pacemaker_primitive service_name do
     "erlang_cookie" => node[:rabbitmq][:erlang_cookie],
     "pid_file" => pid_file,
     "policy_file" => "/etc/rabbitmq/ocf-promote",
-    "rmq_feature_health_check" => false,
-    "rmq_feature_local_list_queues" => false,
+    "rmq_feature_health_check" => node[:rabbitmq][:ha][:clustered_rmq_features],
+    "rmq_feature_local_list_queues" => node[:rabbitmq][:ha][:clustered_rmq_features],
     "default_vhost" => node[:rabbitmq][:vhost]
   })
   op node[:rabbitmq][:ha][:clustered_op]
