@@ -21,6 +21,7 @@
 ha_enabled = node[:rabbitmq][:ha][:enabled]
 # we only do cluster if we do HA
 cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
+quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
 crm_resource_stop_cmd = cluster_enabled ? "force-demote" : "force-stop"
 crm_resource_start_cmd = cluster_enabled ? "force-promote" : "force-start"
 
@@ -81,7 +82,8 @@ template "/etc/rabbitmq/definitions.json" do
     json_trove_user: node[:rabbitmq][:trove][:user].to_json,
     json_trove_password: node[:rabbitmq][:trove][:password].to_json,
     json_trove_vhost: node[:rabbitmq][:trove][:vhost].to_json,
-    ha_all_policy: cluster_enabled
+    ha_all_policy: cluster_enabled,
+    quorum: quorum
   )
   # no notification to restart rabbitmq, as we still do changes with
   # rabbitmqctl in the rabbit.rb recipe (this is less disruptive)
