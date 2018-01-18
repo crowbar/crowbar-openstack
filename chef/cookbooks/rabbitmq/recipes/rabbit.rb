@@ -135,10 +135,12 @@ execute "rabbitmqctl set_user_tags #{node[:rabbitmq][:user]} management" do
 end
 
 if cluster_enabled
-  set_policy_command = "rabbitmqctl set_policy -p #{node[:rabbitmq][:vhost]} " \
-      " ha-all '^(?!amq\.).*' '{\"ha-mode\": \"all\"}'"
+  quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
+
+  set_policy_command = "rabbitmqctl set_policy -p #{node[:rabbitmq][:vhost]} --apply-to queues " \
+      " ha-queues '^(?!amq\.).*' '{\"ha-mode\": \"exactly\", \"ha-params\": #{quorum}}'"
   check_policy_command = "rabbitmqctl list_policies -p #{node[:rabbitmq][:vhost]} | " \
-      " grep -q '^#{node[:rabbitmq][:vhost]}\\s*ha-all\\s'"
+      " grep -q '^#{node[:rabbitmq][:vhost]}\\s*ha-queues\\s'"
 
   execute set_policy_command do
     not_if check_policy_command
