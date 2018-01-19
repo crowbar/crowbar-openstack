@@ -159,6 +159,14 @@
         "nova-metadata": 0,
         "nova-novncproxy": 0,
         "nova-serialproxy": 0
+      },
+      "resource_limits": {
+        "openstack-nova-api": {
+          "LimitNOFILE": null
+        },
+        "openstack-nova-compute": {
+          "LimitNOFILE": null
+        }
       }
     }
   },
@@ -166,7 +174,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 120,
+      "schema-revision": 121,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],
