@@ -37,6 +37,45 @@ end
 package "rabbitmq-server"
 package "rabbitmq-server-plugins" if node[:platform_family] == "suse"
 
+if node[:platform_family] == "suse"
+  # With new erlang packages, we move to a system-wide epmd service, with a
+  # epmd.socket unit. This is enabled by default but only listens on 127.0.0.1,
+  # while we need it to listen on the admin network too.
+
+  directory "/etc/systemd/system/epmd.socket.d" do
+    owner "root"
+    group "root"
+    mode 0o755
+    action :create
+    only_if "grep -q Requires=epmd.service /usr/lib/systemd/system/rabbitmq-server.service"
+  end
+
+  template "/etc/systemd/system/epmd.socket.d/port.conf" do
+    source "epmd.socket-port.conf.erb"
+    owner "root"
+    group "root"
+    mode 0o644
+    variables(
+      listen_address: node[:rabbitmq][:address]
+    )
+    only_if "grep -q Requires=epmd.service /usr/lib/systemd/system/rabbitmq-server.service"
+  end
+
+  bash "reload systemd for epmd.socket extension" do
+    code "systemctl daemon-reload"
+    action :nothing
+    subscribes :run, "template[/etc/systemd/system/epmd.socket.d/port.conf]", :immediate
+  end
+
+  # Enable epmd.socket so that even when we don't use the rabbitmq systemd
+  # service (in HA, for instance), we use the system-wide epmd.
+  # (not a typo, we want the socket, not the service here)
+  service "epmd.socket" do
+    action :enable
+    only_if "grep -q Requires=epmd.service /usr/lib/systemd/system/rabbitmq-server.service"
+  end
+end
+
 directory "/etc/rabbitmq/" do
   owner "root"
   group "root"
@@ -59,7 +98,8 @@ template "/etc/rabbitmq/rabbitmq.config" do
   mode 0644
   variables(
     cluster_enabled: cluster_enabled,
-    cluster_partition_handling: cluster_partition_handling
+    cluster_partition_handling: cluster_partition_handling,
+    hipe_compile: node[:rabbitmq][:hipe_compile]
   )
   notifies :restart, "service[rabbitmq-server]"
 end
