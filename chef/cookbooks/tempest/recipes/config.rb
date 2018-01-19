@@ -409,7 +409,7 @@ cinders[0][:cinder][:volumes].each do |volume|
     break
   elsif volume[:backend_driver] == "nfs"
     storage_protocol = "nfs"
-    cinder_snapshot = false
+    cinder_snapshot = volume[:nfs][:nfs_snapshot]
     break
   elsif volume[:backend_driver] == "vmware"
     vendor_name = "VMware"
