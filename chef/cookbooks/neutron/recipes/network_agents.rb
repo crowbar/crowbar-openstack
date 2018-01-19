@@ -29,6 +29,10 @@ if node[:neutron][:use_lbaas]
   end
 end
 
+if node[:neutron][:ha][:network][:enabled]
+  package node[:neutron][:platform][:l3_ha_pkg]
+end
+
 # Enable ip forwarding on network node for SLE11
 ruby_block "edit /etc/sysconfig/sysctl for IP_FORWARD" do
   block do
