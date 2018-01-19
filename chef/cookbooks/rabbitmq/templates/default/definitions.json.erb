@@ -15,11 +15,12 @@
 <% if @ha_all_policy -%>
     "policies": [
         {
-            "apply-to": "all",
+            "apply-to": "queues",
             "definition": {
-                "ha-mode": "all"
+                "ha-mode": "exactly",
+               "ha-params": <%= @quorum %>
             },
-            "name": "ha-all",
+            "name": "ha-queues",
             "pattern": "^(?!amq.).*",
             "priority": 0,
             "vhost": <%= @json_vhost %>
