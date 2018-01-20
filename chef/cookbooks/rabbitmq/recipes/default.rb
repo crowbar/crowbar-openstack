@@ -96,6 +96,16 @@ template "/etc/rabbitmq/rabbitmq-env.conf" do
   notifies :restart, "service[rabbitmq-server]"
 end
 
+virtualized = [
+  "KVM", "QEMU", "Bochs",
+  "VMWare Virtual Platform", "VMware Virtual Platform",
+  "VirtualBox"
+]
+hipe_compile = node[:rabbitmq][:hipe_compile] &&
+  node[:dmi][:system] &&
+  !virtualized.include?(node[:dmi][:system][:product_name]) &&
+  !virtualized.include?(node[:dmi][:system][:manufacturer])
+
 template "/etc/rabbitmq/rabbitmq.config" do
   source "rabbitmq.config.erb"
   owner "root"
@@ -104,7 +114,7 @@ template "/etc/rabbitmq/rabbitmq.config" do
   variables(
     cluster_enabled: cluster_enabled,
     cluster_partition_handling: cluster_partition_handling,
-    hipe_compile: node[:rabbitmq][:hipe_compile]
+    hipe_compile: hipe_compile
   )
   notifies :restart, "service[rabbitmq-server]"
 end
