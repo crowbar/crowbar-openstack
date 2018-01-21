@@ -68,11 +68,16 @@ if node[:platform_family] == "suse"
     subscribes :run, "template[/etc/systemd/system/epmd.socket.d/port.conf]", :immediate
   end
 
-  # Enable epmd.socket so that even when we don't use the rabbitmq systemd
-  # service (in HA, for instance), we use the system-wide epmd.
+  # Enable epmd.socket for two reasons:
+  # 1. when we don't use the rabbitmq systemd service (in HA, for instance),
+  #    this will enable the use of the system-wide epmd
+  # 2. the call to rabbitmq-plugins before we start the rabbitmq-server service
+  #    will cause epmd to be started, but not by systemd; this will make the
+  #    rabbitmq-server service fail to start due to dependencies. By
+  #    proactively starting epmd.socket, we avoid this.
   # (not a typo, we want the socket, not the service here)
   service "epmd.socket" do
-    action :enable
+    action [:enable, :start]
     only_if "grep -q Requires=epmd.service /usr/lib/systemd/system/rabbitmq-server.service"
   end
 end
@@ -92,6 +97,16 @@ template "/etc/rabbitmq/rabbitmq-env.conf" do
   notifies :restart, "service[rabbitmq-server]"
 end
 
+virtualized = [
+  "KVM", "QEMU", "Bochs",
+  "VMWare Virtual Platform", "VMware Virtual Platform",
+  "VirtualBox"
+]
+hipe_compile = node[:rabbitmq][:hipe_compile] &&
+  node[:dmi][:system] &&
+  !virtualized.include?(node[:dmi][:system][:product_name]) &&
+  !virtualized.include?(node[:dmi][:system][:manufacturer])
+
 template "/etc/rabbitmq/rabbitmq.config" do
   source "rabbitmq.config.erb"
   owner "root"
@@ -100,7 +115,7 @@ template "/etc/rabbitmq/rabbitmq.config" do
   variables(
     cluster_enabled: cluster_enabled,
     cluster_partition_handling: cluster_partition_handling,
-    hipe_compile: node[:rabbitmq][:hipe_compile]
+    hipe_compile: hipe_compile
   )
   notifies :restart, "service[rabbitmq-server]"
 end
