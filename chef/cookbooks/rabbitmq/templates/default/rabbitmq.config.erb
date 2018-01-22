@@ -7,6 +7,13 @@
  },
  {rabbit,
   [
+   <% if node[:rabbitmq][:collect_statistics_interval] -%>
+   {collect_statistics_interval, <%= node[:rabbitmq][:collect_statistics_interval] %>},
+   <% end -%>
+   {tcp_listen_options, [
+                         <%= node[:rabbitmq][:tcp_listen_options].reject { |k,v| v.nil? }.map { |k,v| "{#{k}, #{v}}" }.join(",") %>
+                        ]
+   },
    {tcp_listeners, [
                     <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{node[:rabbitmq][:port]}}" }.join(", ") %>
                    ]},
