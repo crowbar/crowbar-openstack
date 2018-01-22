@@ -30,6 +30,9 @@
    {cluster_partition_handling, <%= @cluster_partition_handling %>},
    {queue_master_locator, "min-masters"},
 <% end -%>
+<% if @hipe_compile -%>
+   {hipe_compile, true},
+<% end -%>
    {disk_free_limit, 50000000}
  ]},
  {rabbitmq_management,
