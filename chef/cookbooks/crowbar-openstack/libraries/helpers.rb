@@ -137,6 +137,8 @@ class CrowbarOpenStackHelper
       end
     end
 
+    db_conn_scheme = "postgresql+psycopg2" if db_conn_scheme == "postgresql"
+
     "#{db_conn_scheme}://" \
     "#{db_auth['user']}:#{db_auth['password']}@#{db_settings[:address]}/" \
     "#{db_auth['database']}" \
