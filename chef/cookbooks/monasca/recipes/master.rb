@@ -166,3 +166,22 @@ execute "run ansible" do
   cwd "/opt/monasca-installer"
   action :nothing unless actual_versions != previous_versions
 end
+
+# Record that monasca-installer has concluded successfully at least once. We
+# use this to signal that it is ok to run monasca-reconfigure-server on the
+# monasca-server node. Without this, some of the explicitely enabled detection
+# plugins for Monasca components might not find anything because they run
+# before these components have finished deploying, thus causing
+# monasca-reconfigure-server to fail.
+# If we were doing that outside a ruby_block, we would process this code in the
+# compile phase, before monasca-installer is actually executed. In this case it
+# would never be reached, since monasca-installer won't be run anymore once it
+# has suceeded.
+ruby_block "mark successful monasca-installer run" do
+  block do
+    node.set[:monasca][:installed] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[run ansible]", :immediately
+end
