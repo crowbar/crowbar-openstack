@@ -24,7 +24,7 @@
               "tenant_name"
               ],
             "nova_refresh": 14400,
-            "ping_check": false,
+            "ping_check": "/bin/ip netns exec NAMESPACE /usr/bin/ping",
             "vm_cpu_check_enable": true,
             "vm_disks_check_enable": true,
             "vm_extended_disks_check_enable": false,
@@ -132,7 +132,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 102,
+      "schema-revision": 103,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],
