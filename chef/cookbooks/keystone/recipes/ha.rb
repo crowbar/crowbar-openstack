@@ -71,3 +71,26 @@ if node[:keystone][:frontend] == "apache" && node[:pacemaker][:clone_stateless_s
 
   crowbar_pacemaker_sync_mark "create-keystone_ha_resources"
 end
+
+template "/usr/bin/keystone-fernet-keys-sync.sh" do
+  source "keystone-fernet-keys-sync.sh"
+  owner "root"
+  group "root"
+  mode "0755"
+end
+
+# handler scripts are run by hacluster user so sudo configuration is needed
+# if the handler needs to rsync to other nodes using root's keys
+template "/etc/sudoers.d/keystone-fernet-keys-sync" do
+  source "hacluster_sudoers.erb"
+  owner "root"
+  group "root"
+  mode "0440"
+end
+
+# on founder: create/delete pacemaker alert
+pacemaker_alert "keystone-fernet-keys-sync" do
+  handler "/usr/bin/keystone-fernet-keys-sync.sh"
+  action node[:keystone][:signing][:token_format] == "fernet" ? :create : :delete
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end

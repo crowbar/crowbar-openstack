@@ -480,15 +480,21 @@ if node[:keystone][:signing][:token_format] == "fernet"
   # To be sure that rsync package is installed
   package "rsync"
   crowbar_pacemaker_sync_mark "sync-keystone_install_rsync" if ha_enabled
+
+  template "/usr/bin/keystone-fernet-keys-push.sh" do
+    source "keystone-fernet-keys-push.sh"
+    owner "root"
+    group "root"
+    mode "0755"
+  end
+
   rsync_command = ""
   if ha_enabled
     cluster_nodes = CrowbarPacemakerHelper.cluster_nodes(node)
     cluster_nodes.map do |n|
       next if node.name == n.name
       node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-      rsync_command += \
-        "rsync -a --timeout=300 --delete-after /etc/keystone/fernet-keys " \
-        "#{node_address}:/etc/keystone/; "
+      rsync_command += "/usr/bin/keystone-fernet-keys-push.sh #{node_address}; "
     end
     raise "No other cluster members found" if rsync_command.empty?
   end
