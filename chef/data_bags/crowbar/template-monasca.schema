@@ -40,7 +40,7 @@
                         "max_ping_concurrency": { "type": "int", "required": true },
                         "metadata": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
                         "nova_refresh": { "type": "int", "required": true },
-                        "ping_check": { "type": "bool", "required": true },
+                        "ping_check": { "type": "str", "required": true },
                         "vm_cpu_check_enable": { "type": "bool", "required": true },
                         "vm_disks_check_enable": { "type": "bool", "required": true },
                         "vm_extended_disks_check_enable": { "type": "bool", "required": true },
