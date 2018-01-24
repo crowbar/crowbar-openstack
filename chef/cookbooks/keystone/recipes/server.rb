@@ -48,9 +48,6 @@ else
   bind_service_port = node[:keystone][:api][:service_port]
 end
 
-node.normal[:apache][:listen_ports_crowbar] ||= {}
-node.normal[:apache][:listen_ports_crowbar][:keystone] = { admin: [bind_admin_port], service: [bind_service_port] }
-
 # Ideally this would be called admin_host, but that's already being
 # misleadingly used to store a value which actually represents the
 # service bind address.

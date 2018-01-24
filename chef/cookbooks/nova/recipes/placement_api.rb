@@ -99,9 +99,6 @@ else
   bind_port = node[:nova][:ports][:placement_api]
 end
 
-node.normal[:apache][:listen_ports_crowbar] ||= {}
-node.normal[:apache][:listen_ports_crowbar][:nova] = { plain: [bind_port] }
-
 crowbar_openstack_wsgi "WSGI entry for nova-placement-api" do
   bind_host bind_host
   bind_port bind_port
