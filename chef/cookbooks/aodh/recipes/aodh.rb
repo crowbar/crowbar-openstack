@@ -145,9 +145,6 @@ else
   bind_port = node[:aodh][:api][:port]
 end
 
-node.normal[:apache][:listen_ports_crowbar] ||= {}
-node.normal[:apache][:listen_ports_crowbar][:aodh] = { plain: [bind_port] }
-
 template node[:aodh][:config_file] do
   source "aodh.conf.erb"
   owner "root"

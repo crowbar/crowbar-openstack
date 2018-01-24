@@ -207,9 +207,6 @@ else
   bind_port = node[:ceilometer][:api][:port]
 end
 
-node.normal[:apache][:listen_ports_crowbar] ||= {}
-node.normal[:apache][:listen_ports_crowbar][:ceilometer] = { plain: [bind_port] }
-
 if ceilometer_protocol == "https"
   ssl_setup "setting up ssl for ceilometer" do
     generate_certs node[:ceilometer][:ssl][:generate_certs]
