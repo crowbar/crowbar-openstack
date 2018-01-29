@@ -38,7 +38,10 @@ class Rack_awareness
             #get storage iface
             iface=""
             n[:crowbar_wall][:network][:interfaces].keys.each do |ifn|
-              if n[:crowbar_wall][:network][:interfaces][ifn.to_s][:addresses].include?(storage_ip)
+              ifaddrs = n[:crowbar_wall][:network][:interfaces][ifn.to_s][:addresses]
+              # strip netmasks from CIDR addresses
+              ifaddrs.map! { |addr| addr[%r{^[^/]+}] }
+              if ifaddrs.include?(storage_ip)
                 iface=ifn
                 break
               end
@@ -52,7 +55,7 @@ class Rack_awareness
                #fallback to something default
                iface=n[:crowbar_ohai][:switch_config].keys[0]
             end
-            sw_name=n[:crowbar_ohai][:switch_config][iface][:switch_name]
+            return n[:crowbar_ohai][:switch_config].fetch(iface, switch_name: -1)[:switch_name]
     end
 
     def switch_to_zone()
