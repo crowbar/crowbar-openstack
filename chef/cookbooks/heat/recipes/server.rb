@@ -400,21 +400,6 @@ template "/etc/heat/heat.conf.d/100-heat.conf" do
   )
 end
 
-unless Barclamp::Config.load("openstack", "magnum").empty?
-
-  # https://bugs.launchpad.net/magnum/+bug/1589955
-  # enable stacks global_index search so that magnum can use
-  # list(global_tenant=True)
-  ruby_block "update_heat_policy" do
-    block do
-      file = Chef::Util::FileEdit.new("/etc/heat/policy.json")
-      file.search_file_replace_line("stacks:global_index",
-                                    '    "stacks:global_index": "role:admin",')
-      file.write_file
-    end
-  end
-end
-
 crowbar_pacemaker_sync_mark "wait-heat_db_sync" if ha_enabled
 
 execute "heat-manage db_sync" do
