@@ -15,6 +15,7 @@
       "memcache_secret_key": "",
       "enabled_drivers": [],
       "automated_clean": true,
+      "pxe_append_params": "nofb nomodeset vga=normal",
       "api": {
         "protocol": "http",
         "port": 6385
@@ -29,7 +30,7 @@
   "deployment": {
     "ironic": {
       "crowbar-revision": 0,
-      "schema-revision": 201,
+      "schema-revision": 202,
       "crowbar-applied": false,
       "element_states": {
         "ironic-server": [ "readying", "ready", "applying" ]

@@ -24,6 +24,7 @@
             "memcache_secret_key": { "type": "str", "required": true },
             "enabled_drivers": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
             "automated_clean": { "type": "bool", "required": true },
+            "pxe_append_params": { "type": "str", "required": true },
             "api": {
               "type": "map",
               "required": true,
