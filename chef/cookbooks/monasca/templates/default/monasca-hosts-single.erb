@@ -68,8 +68,15 @@ mariadb-node                     ansible_ssh_host=<%= @monasca_admin_host %> ans
 # Elasticsearch Curator
 elasticsearch-curator-node       ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
+<%- if @tsdb == 'influxdb' %>
 # InfluxDB node
 influxdb-node                    ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<%- end %>
+
+<%- if @tsdb == 'cassandra' %>
+# Cassandra node
+cassandra-node                    ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+<%- end %>
 
 ################################################################################
 # Other group definition
@@ -91,13 +98,23 @@ zookeeper-node zookeeper_listen_ip=internal-node-1
 monasca-node
 
 [monasca_api_group]
+<%- if @tsdb == 'influxdb' %>
 monasca-api-node database_node_for_api=internal-node-1 influxdb_node_for_api=internal-node-1 monasca_api_listen_ip=public-node-1
+<%- end %>
+<%- if @tsdb == 'cassandra' %>
+monasca-api-node database_node_for_api=internal-node-1 cassandra_node_for_api=internal-node-1 monasca_api_listen_ip=public-node-1
+<%- end %>
 
 [monasca_notification_group]
 monasca-notification-node database_node_for_notification=internal-node-1
 
 [monasca_persister_group]
+<%- if @tsdb == 'influxdb' %>
 monasca-persister-node influxdb_node_for_persister=internal-node-1
+<%- end %>
+<%- if @tsdb == 'cassandra' %>
+monasca-persister-node cassandra_node_for_persister=internal-node-1
+<%- end %>
 
 [monasca_log_api_group]
 monasca-log-api-node log_api_listen_ip=public-node-1
@@ -132,8 +149,14 @@ mariadb-node mariadb_listen_ip=internal-node-1
 [elasticsearch_curator_group]
 elasticsearch-curator-node
 
+<%- if @tsdb == 'influxdb' %>
 [influxdb_group]
 influxdb-node influxdb_listen_ip=internal-node-1
+<%- end %>
+<%- if @tsdb == 'cassandra' %>
+[cassandra_group]
+cassandra-node cassandra_listen_ip=internal-node-1
+<%- end %>
 
 ################################################################################
 # Group inheritance
@@ -167,4 +190,9 @@ monasca_persister_group
 storm_group
 monasca_thresh_group
 mariadb_group
+<%- if @tsdb == 'cassandra' %>
+cassandra_group
+<%- end %>
+<%- if @tsdb == 'influxdb' %>
 influxdb_group
+<%- end %>

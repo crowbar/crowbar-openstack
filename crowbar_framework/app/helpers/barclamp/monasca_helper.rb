@@ -41,5 +41,15 @@ module Barclamp
         selected.to_s
       )
     end
+
+    def tsdbs(selected)
+      options_for_select(
+        [
+          ["InfluxDB", "influxdb"],
+          ["Cassandra", "cassandra"]
+        ],
+        selected.to_s
+      )
+    end
   end
 end
