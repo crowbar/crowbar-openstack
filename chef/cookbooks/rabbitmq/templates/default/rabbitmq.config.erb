@@ -28,7 +28,7 @@
 <% end -%>
 <% if @cluster_enabled -%>
    {cluster_partition_handling, <%= @cluster_partition_handling %>},
-   {queue_master_locator, "min-masters"},
+   {queue_master_locator, <<"min-masters">>},
 <% end -%>
 <% if @hipe_compile -%>
    {hipe_compile, true},
