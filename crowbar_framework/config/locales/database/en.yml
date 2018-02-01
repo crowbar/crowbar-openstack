@@ -56,6 +56,7 @@ en:
               options: 'Mount Options'
       validation:
         invalid_db_engine: 'Invalid database engine: %{db_engine}.'
+        no_new_postgresql: 'PostgreSQL is not allowed for new deployments.'
         unknown_mode_ha: 'Unknown mode for HA storage: %{storage_mode}.'
         no_device: 'No device specified for shared storage.'
         no_filesystem: 'No filesystem type specified for shared storage.'
