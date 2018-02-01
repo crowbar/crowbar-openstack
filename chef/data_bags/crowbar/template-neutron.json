@@ -64,6 +64,7 @@
           "nodes" : [],
           "peer_ip": "",
           "peer_port": 8009,
+          "ssl_mode": "encrypted",
           "encap": "vxlan",
           "integration_bridge": "br-int",
           "access_bridge": "br-fabric",
@@ -99,7 +100,17 @@
               }
             }
           }
-        }
+        },
+        "apic_vmms": [{
+          "vmm_name": "soc_kvm_domain",
+          "vmm_type": "openstack",
+          "vlan_ranges": ""
+        },
+        {
+          "vmm_name": "soc_vm_domain",
+          "vmm_type": "vmware",
+          "vlan_ranges": ""
+        }]
       },
       "allow_overlapping_ips": true,
       "use_syslog": false,
