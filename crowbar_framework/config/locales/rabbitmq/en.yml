@@ -59,6 +59,7 @@ en:
               fstype: 'Filesystem Type'
               options: 'Mount Options'
       validation:
+        no_new_unclustered: 'HA without RabbitMQ clustering is not allowed for new deployments.'
         unknown_mode: 'Unknown mode for HA storage: %{storage_mode}.'
         no_device: 'No device specified for shared storage.'
         no_filesystem: 'No filesystem type specified for shared storage.'

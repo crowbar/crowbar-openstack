@@ -167,6 +167,15 @@ class RabbitmqService < OpenstackServiceObject
 
     # Shared storage validation for HA
     if ha_enabled && !attributes["cluster"]
+      # disallow non-cluster HA for new deployments
+      proposal_id = proposal["id"].gsub("#{@bc_name}-", "")
+      proposal_object = Proposal.where(barclamp: @bc_name, name: proposal_id).first
+      if proposal_object.nil? || !proposal_object.active_status?
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.no_new_unclustered"
+        )
+      end
+
       storage_mode = attributes["ha"]["storage"]["mode"]
       validation_error I18n.t(
         "barclamp.#{@bc_name}.validation.unknown_mode", storage_mode: storage_mode
