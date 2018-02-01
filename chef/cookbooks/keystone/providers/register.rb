@@ -419,24 +419,35 @@ def _build_connection(new_resource)
 end
 
 def _find_id(http, headers, item_name, path, dir, key = "name", ret = "id")
-  # Construct the path
-  my_item_id = nil
+  # this can break your code, if you are asking for name (ret),
+  # find_id will have to be modified to not search the cache.
+  # the cache stores only the "ret" that it was first querried with
+  my_item_id = _find_id_in_cache(item_name, path)
   error = false
-  resp = http.request_get(path, headers)
-  if resp.is_a?(Net::HTTPOK)
-    data = JSON.parse(resp.read_body)
-    data = data[dir]
+  unless my_item_id
+    resp = http.request_get(path, headers)
+    if resp.is_a?(Net::HTTPOK)
+      data = JSON.parse(resp.read_body)
+      data = data[dir]
+      data2hash = {}
 
-    data.each do |item|
-      my_item_id = item[ret] if item[key] == item_name
-      break if my_item_id
+      data.each do |item|
+        my_item_id = item[ret] if item[key] == item_name
+        data2hash[[path, item[key]]] = item[ret]
+      end
+      KeystoneHelper.cache_update(data2hash) if my_item_id
+    else
+      log_message = "Find #{path}: #{item_name}: Unknown response from Keystone Server"
+      _log_error(resp, log_message)
+      error = true
     end
-  else
-    log_message = "Find #{path}: #{item_name}: Unknown response from Keystone Server"
-    _log_error(resp, log_message)
-    error = true
   end
   [my_item_id, error]
+end
+
+def _find_id_in_cache(rsc_name, rpath)
+  cache = KeystoneHelper.cache
+  cache[[rpath, rsc_name]]
 end
 
 def _build_service_object(svc_name, svc_type, svc_desc)
