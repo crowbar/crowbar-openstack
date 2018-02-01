@@ -246,7 +246,6 @@ ironic_servers = node_search_with_cache("roles:ironic-server") || []
 if ironic_servers.any? && (node["roles"] & ["nova-compute-ironic", "nova-controller"]).any?
   use_baremetal_filters = true
   track_instance_changes = false
-  override_force_config_drive = true
   ironic_node = ironic_servers.first
   ironic_settings = {}
   ironic_settings[:keystone_version] = "v3"
@@ -262,7 +261,6 @@ if ironic_servers.any? && (node["roles"] & ["nova-compute-ironic", "nova-control
 else
   use_baremetal_filters = false
   track_instance_changes = true
-  override_force_config_drive = false
   ironic_settings = nil
   reserved_host_memory = node[:nova][:scheduler][:reserved_host_memory_mb]
 end
@@ -356,7 +354,7 @@ template node[:nova][:config_file] do
     libvirt_migration: node[:nova]["use_migration"],
     live_migration_inbound_fqdn: live_migration_inbound_fqdn,
     shared_instances: node[:nova]["use_shared_instance_storage"],
-    force_config_drive: override_force_config_drive || node[:nova]["force_config_drive"],
+    force_config_drive: node[:nova]["force_config_drive"],
     glance_server_protocol: glance_server_protocol,
     glance_server_host: glance_server_host,
     glance_server_port: glance_server_port,
