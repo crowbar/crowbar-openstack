@@ -88,6 +88,12 @@ if neutron[:neutron][:networking_plugin] == "ml2" &&
   return # skip anything else in this recipe
 end
 
+if neutron[:neutron][:networking_plugin] == "ml2" &&
+    neutron[:neutron][:ml2_mechanism_drivers].include?("nuage")
+  include_recipe "neutron::nuage_vrs"
+  return # skip anything else in this recipe
+end
+
 multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty?
 
 # openvswitch configuration specific to ML2

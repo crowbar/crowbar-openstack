@@ -90,6 +90,9 @@ control_exchange = nova
 <%= "zvm_user_profile=#{node[:nova][:zvm][:zvm_user_profile]}" if @libvirt_type.eql?('zvm') %>
 <%= "zvm_user_default_password=#{node[:nova][:zvm][:zvm_user_default_password]}" if @libvirt_type.eql?('zvm') %>
 <%= "zvm_user_default_privilege=#{node[:nova][:zvm][:zvm_user_default_privilege]}" if @libvirt_type.eql?('zvm') %>
+<% if @ml2_mechanism_drivers.include?("nuage") %>
+use_forwarded_for = True
+<% end %>
 
 [api_database]
 <% if @api_database_connection -%>
@@ -200,10 +203,17 @@ block_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_M
 <% if @libvirt_type.eql?('kvm') %>use_virtio_for_bridges = true<% end %>
 <%= "volume_use_multipath = true" if @use_multipath %>
 <%= "iser_use_multipath = true" if @use_multipath %>
+<% if @ml2_mechanism_drivers.include?("nuage") %>
+vif_driver = nova.virt.libvirt.vif.LibvirtGenericVIFDriver
+<% end %>
 
 [neutron]
 service_metadata_proxy = true
+<% if @ml2_mechanism_drivers.include?("nuage") %>
+metadata_proxy_shared_secret = NuageNetworksSharedSecret
+<% else %>
 metadata_proxy_shared_secret = <%= node[:nova][:neutron_metadata_proxy_shared_secret] %>
+<% end %>
 url = <%= @neutron_protocol %>://<%= @neutron_server_host %>:<%= @neutron_server_port %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
 auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol"],
@@ -217,6 +227,9 @@ project_name = <%= @keystone_settings['service_tenant'] %>
 tenant_name = <%= @keystone_settings['service_tenant'] %>
 timeout = <%= node[:nova][:neutron_url_timeout] %>
 username = <%= @neutron_service_user %>
+<% if @ml2_mechanism_drivers.include?("nuage") %>
+ovs_bridge = alubr0
+<% end %>
 
 [oslo_concurrency]
 <% if @need_shared_lock_path -%>

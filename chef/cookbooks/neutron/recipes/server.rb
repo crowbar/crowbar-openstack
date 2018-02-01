@@ -163,7 +163,12 @@ when "ml2"
   os_sdn_net = Barclamp::Inventory.get_network_definition(node, "os_sdn")
   mtu_value = os_sdn_net.nil? ? 1500 : os_sdn_net["mtu"].to_i
 
-  ml2_extension_drivers = ["dns", "port_security"]
+  if node[:neutron][:ml2_mechanism_drivers].include?("nuage")
+    ml2_extension_drivers =["nuage_subnet", "nuage_port", "port_security"]
+  else
+    ml2_extension_drivers = ["dns", "port_security"]
+  end
+
   ml2_type_drivers = node[:neutron][:ml2_type_drivers]
   ml2_mechanism_drivers = node[:neutron][:ml2_mechanism_drivers].dup
   if use_hyperv
@@ -260,6 +265,12 @@ if node[:neutron][:networking_plugin] == "ml2"
   elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
       node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
     include_recipe "neutron::cisco_apic_support"
+  end
+end
+
+if node[:neutron][:networking_plugin] == "ml2"
+  if node[:neutron][:ml2_mechanism_drivers].include?("nuage")
+    include_recipe "neutron::nuage_vsp_agents"
   end
 end
 

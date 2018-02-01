@@ -32,6 +32,7 @@ default[:neutron][:l3_agent_config_file] = "/etc/neutron/neutron-l3-agent.conf.d
 default[:neutron][:metadata_agent_config_file] = "/etc/neutron/neutron-metadata-agent.conf.d/100-metadata_agent.conf"
 default[:neutron][:ml2_config_file] = "/etc/neutron/neutron.conf.d/110-ml2.conf"
 default[:neutron][:nsx_config_file] = "/etc/neutron/neutron.conf.d/110-nsx.conf"
+default[:neutron][:nuage_config_file] = "/etc/neutron/neutron.conf.d/110-nuage.conf"
 default[:neutron][:rpc_workers] = 1
 
 default[:neutron][:db][:database] = "neutron"
@@ -112,6 +113,10 @@ when "suse"
     nsx_pkgs: ["openvswitch-pki",
                    "ruby2.1-rubygem-faraday"],
     cisco_pkgs: ["python-networking-cisco"],
+    nuage_vrs_pkgs: ["nuage-openvswitch"],
+    nuage_vrs_metadata_pkgs: ["nuage-metadata-agent"],
+    nuage_vsp_pkgs: ["nuage-openstack-neutron",
+                     "nuage-openstack-neutronclient"],
     cisco_apic_pkgs: ["python-apicapi",
                       "python-neutron-ml2-driver-apic"],
     cisco_apic_gbp_pkgs: ["openstack-neutron-gbp",

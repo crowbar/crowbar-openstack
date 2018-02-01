@@ -145,6 +145,7 @@ if neutron_servers.length > 0
   neutron_service_user = neutron_server[:neutron][:service_user]
   neutron_service_password = neutron_server[:neutron][:service_password]
   neutron_dhcp_domain = neutron_server[:neutron][:dhcp_domain]
+  ml2_mechanism_drivers = neutron_server[:neutron][:ml2_mechanism_drivers]
   neutron_ml2_drivers = neutron_server[:neutron][:ml2_type_drivers]
   neutron_has_tunnel = neutron_ml2_drivers.include?("gre") || neutron_ml2_drivers.include?("vxlan")
 else
@@ -373,6 +374,7 @@ template node[:nova][:config_file] do
     neutron_service_password: neutron_service_password,
     neutron_dhcp_domain: neutron_dhcp_domain,
     neutron_has_tunnel: neutron_has_tunnel,
+    ml2_mechanism_drivers: ml2_mechanism_drivers,
     keystone_settings: keystone_settings,
     cinder_insecure: cinder_insecure,
     use_multipath: use_multipath,

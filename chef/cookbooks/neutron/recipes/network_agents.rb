@@ -109,6 +109,12 @@ when "vmware"
   interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
 end
 
+
+if node[:neutron][:networking_plugin] == "ml2" &&
+    (node[:neutron][:ml2_mechanism_drivers].include?("nuage"))
+  return # skip anything else in this recipe
+end
+
 template "/etc/neutron/metering_agent.ini" do
   cookbook "neutron"
   source "metering_agent.ini.erb"

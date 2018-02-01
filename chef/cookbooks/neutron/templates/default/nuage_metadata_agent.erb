@@ -1,0 +1,78 @@
+# Copyright (C) 2017, Nuage Networks
+#
+# METADATA_PORT: This is the location to get the values from when migrating
+# from Neutron metadata agent to Nuage metadata agent and these values need
+# not be populated in neutron.conf while using Nuage Metadata agent.
+# (metadata_port in neutron.conf)
+METADATA_PORT=<%= @metadata_port %>
+
+#
+# NOVA_METADATA_IP: IP address used by Nova metadata server. This is the
+# location to get the values from when migrating from Neutron metadata
+# agent to Nuage metadata agent. These values need not be populated in
+# neutron.conf while using Nuage Metadata agent.
+# (nova_metadata_ip in neutron.conf)
+NOVA_METADATA_IP=<%= @metadata_bind_address %>
+
+#
+# NOVA_METADATA_PORT: TCP Port used by Nova metadata server
+# (metadata_listen_port in nova.conf or nova_metadata_port in neutron.conf)
+NOVA_METADATA_PORT=<%= @nova_metadata_port %>
+
+#
+# METADATA_PROXY_SHARED_SECRET: Shared secret to sign the instance-id
+# request. Must match metadata_proxy_shared_secret in nova.conf
+METADATA_PROXY_SHARED_SECRET="NuageNetworksSharedSecret"
+
+#
+# NOVA_CLIENT_VERSION:
+NOVA_CLIENT_VERSION=2
+
+#
+# NOVA_OS_USERNAME:
+NOVA_OS_USERNAME=<%= @keystone_settings['service_user'] %>
+
+#
+# NOVA_OS_PASSWORD:
+NOVA_OS_PASSWORD=<%= @keystone_settings['service_password'] %>
+
+#
+# NOVA_OS_TENANT_NAME:
+NOVA_OS_TENANT_NAME=<%= @keystone_settings['service_tenant'] %>
+
+#
+# NOVA_OS_AUTH_URL:
+OVA_OS_AUTH_URL=<%= @keystone_settings['internal_auth_url'] %>
+
+#
+# NOVA_REGION_NAME:
+NOVA_REGION_NAME=<%= @keystone_settings['endpoint_region'] %>
+
+#
+# NUAGE_METADATA_AGENT_START_WITH_OVS: if nuage-metadata-agent needs to be
+# started with nuage-openvswitch-switch
+NUAGE_METADATA_AGENT_START_WITH_OVS=true
+
+#
+# NOVA_API_ENDPOINT_TYPE: one of publicURL, internalURL, adminURL
+NOVA_API_ENDPOINT_TYPE=internalURL
+
+#
+# NOVA_PROJECT_NAME:
+NOVA_PROJECT_NAME=<%= @keystone_settings['service_tenant'] %>
+
+#
+# NOVA_USER_DOMAIN_NAME
+NOVA_USER_DOMAIN_NAME=<%= @keystone_settings['admin_domain'] %>
+
+#
+# NOVA_PROJECT_DOMAIN_NAME
+NOVA_PROJECT_DOMAIN_NAME=<%= @keystone_settings['admin_domain']%>
+
+#
+# IDENTITY_URL_VERSION
+IDENTITY_URL_VERSION=<%= @keystone_settings['api_version_for_middleware'] %>
+
+#
+# NOVA_OS_KEYSTONE_USERNAME
+NOVA_OS_KEYSTONE_USERNAME=<%= @keystone_settings['service_user'] %>
