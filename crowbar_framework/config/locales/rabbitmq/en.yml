@@ -43,21 +43,6 @@ en:
           cert_required: 'Require Client Certificate'
           ca_certs: 'SSL CA Certificates File'
           client_ca_certs: 'SSL client CA file (used to validate rabbitmq server certificate)'
-        ha_header: 'High Availability'
-        cluster: 'Use RabbitMQ Clustering'
-        ha:
-          storage:
-            mode: 'Storage Mode'
-            modes:
-              drbd: 'DRBD'
-              shared: 'Shared Storage'
-            drbd_info: 'The cluster must have been setup for DRBD.'
-            drbd:
-              size: 'Size to Allocate for DRBD Device (in Gigabytes)'
-            shared:
-              device: 'Name of Block Device or NFS Mount Specification'
-              fstype: 'Filesystem Type'
-              options: 'Mount Options'
       validation:
         no_new_unclustered: 'HA without RabbitMQ clustering is not allowed for new deployments.'
         unknown_mode: 'Unknown mode for HA storage: %{storage_mode}.'
