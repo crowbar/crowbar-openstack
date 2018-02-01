@@ -108,6 +108,7 @@ template node[:neutron][:opflex_config_file] do
     socketgroup: neutron[:neutron][:platform][:group],
     opflex_peer_ip: opflex[:peer_ip],
     opflex_peer_port: opflex[:peer_port],
+    opflex_ssl_mode: opflex[:ssl_mode],
     opflex_int_bridge: opflex[:integration_bridge],
     opflex_access_bridge: opflex[:access_bridge],
     opflex_vxlan_encap_iface: opflex[:vxlan][:encap_iface],
@@ -132,8 +133,8 @@ service "neutron-opflex-agent" do
 end
 utils_systemd_service_restart "neutron-opflex-agent"
 
-service "agent-ovs" do
+service "opflex-agent" do
   action [:enable, :start]
-  subscribes :restart, resources("template[#{opflex_agent_conf}]")
+  subscribes :restart, resources("template[#{node[:neutron][:opflex_config_file]}]")
 end
-utils_systemd_service_restart "agent-ovs"
+utils_systemd_service_restart "opflex-agent"
