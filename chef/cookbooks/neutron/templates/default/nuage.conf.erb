@@ -1,0 +1,19 @@
+[RESTPROXY]
+# Desired Name of VSD Organization/Enterprise to use when net-partition
+# is not specified
+default_net_partition_name = <%= @nuage_config[:vsd_default_net_partition_name] %>
+
+# Hostname or IP address and port for connection
+server = <%= @nuage_config[:vsd_server] %>
+
+# VSD Username and password for OpenStack plugin
+# User must belong to CSP Root group and CSP CMS
+serverauth = <%= @nuage_config[:vsd_user] %>:<%= @nuage_config[:vsd_password] %>
+
+cms_id=<%= @nuage_config[:vsd_cms_id] %>
+
+### Do not change the below options for standard installs
+organization = csp
+auth_resource = /me
+serverssl = True
+base_uri = /nuage/api/v5_0

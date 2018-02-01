@@ -74,6 +74,10 @@ when "ml2"
     neutron_agent = ""
     neutron_agent_pkg = ""
     neutron_agent_ra = ""
+  when ml2_mech_drivers.include?("nuage")
+    neutron_agent = ""
+    neutron_agent_pkg = ""
+    neutron_agent_ra = ""
   end
 
   package neutron_agent_pkg unless neutron_agent_ra.empty?

@@ -141,6 +141,16 @@
                       "clean_on_restart": { "type" : "bool", "required" : true },
                       "precreate_networks": { "type" : "bool", "required" : true }
                     }},
+                    "nuage": { "type": "map", "required": true, "mapping": {
+                      "vrs_personality": { "type" : "str", "required" : true },
+                      "vrs_active_controller": { "type" : "str", "required" : true },
+                      "vrs_standby_controller": { "type" : "str", "required" : false },
+                      "vsd_user": { "type" : "str", "required" : true },
+                      "vsd_password": { "type" : "str", "required" : true },
+                      "vsd_server": { "type" : "str", "required" : true },
+                      "vsd_default_net_partition_name": { "type" : "str", "required" : true },
+                      "vsd_cms_id": { "type" : "str", "required" : true }
+                    }},
                     "zvm": { "type": "map", "required": true, "mapping": {
                       "zvm_xcat_server": { "type": "str", "required": true },
                       "zvm_xcat_username": { "type": "str", "required": true },
