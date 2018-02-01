@@ -94,7 +94,14 @@
                             }}
                           }}
                         }}
-                      }
+                      },
+                      "apic_vmms": { "type" : "seq", "required" : true, "sequence" : [ {
+                        "type" : "map", "required" : true, "mapping" : {
+                          "vmm_name": { "type": "str", "required": true },
+                          "vmm_type": { "type": "str", "required": true },
+                          "vlan_ranges": { "type": "str", "required": true }
+                        }
+                      } ] }
                     }},
                     "allow_overlapping_ips": { "type": "bool", "required": true },
                     "cisco_switches": {
