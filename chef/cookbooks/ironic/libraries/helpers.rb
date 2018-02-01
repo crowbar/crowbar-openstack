@@ -39,9 +39,9 @@ module IronicHelper
 
       env = {
         "OS_USERNAME" => glance_keystone_settings["service_user"],
-        "OS_PASSWORD" => keystone_settings["service_password"],
-        "OS_PROJECT_NAME" => keystone_settings["service_tenant"],
-        "OS_AUTH_URL" => auth_url(keystone_settings),
+        "OS_PASSWORD" => glance_keystone_settings["service_password"],
+        "OS_PROJECT_NAME" => glance_keystone_settings["service_tenant"],
+        "OS_AUTH_URL" => auth_url(glance_keystone_settings),
         "OS_IDENTITY_API_VERSION" => "3"
       }
       insecure = swift[:swift][:ssl][:insecure] ? " --insecure" : ""
