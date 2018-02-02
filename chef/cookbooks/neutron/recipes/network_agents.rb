@@ -29,7 +29,7 @@ if node[:neutron][:use_lbaas]
   end
 end
 
-if node[:neutron][:ha][:network][:enabled]
+if node[:neutron][:l3_ha][:enabled]
   package node[:neutron][:platform][:l3_ha_pkg]
 end
 

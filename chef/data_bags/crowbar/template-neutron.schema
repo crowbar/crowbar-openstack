@@ -25,8 +25,11 @@
                       "agent_boot_time": { "type" : "int", "required" : true }
                     }},
                     "use_dvr": { "type": "bool", "required": true },
-                    "use_l3_ha": { "type": "bool", "required": true },
-                    "l3_ha_password": { "type": "str", "required": true },
+                    "l3_ha": { "type": "map", "required": true, "mapping": {
+                      "enabled": { "type": "bool", "required": true },
+                      "password": { "type": "str", "required": true },
+                      "max_l3_agents_per_router": { "type": "int", "required": true }
+                    }},
                     "additional_external_networks": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
                     "networking_plugin": { "type": "str", "required": true },
                     "ml2_mechanism_drivers": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },

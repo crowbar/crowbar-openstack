@@ -137,7 +137,7 @@ if use_l3_agent
   # Add pacemaker resource for neutron-l3-ha-service
   # only if l3_ha is not enabled
   ha_service_primitive_name = "neutron-l3-ha-service"
-  unless node[:neutron][:use_l3_ha]
+  if !node[:neutron][:use_l3_ha]
     ha_service_transaction_objects = []
 
     pacemaker_primitive ha_service_primitive_name do
@@ -160,6 +160,23 @@ if use_l3_agent
       action :commit_new
       only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
+
+    rabbit_settings = fetch_rabbitmq_settings
+
+    crowbar_pacemaker_order_only_existing "o-#{ha_service_primitive_name}" do
+      # While neutron-ha-tool technically doesn't directly depend on postgresql or
+      # rabbitmq, if these bits are not running, then neutron-server can run but
+      # can't do what it's being asked. Note that neutron-server does have a
+      # constraint on these services, but it's optional, not mandatory (because it
+      # doesn't need to be restarted when postgresql or rabbitmq are restarted).
+      # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
+      ordering "( postgresql #{rabbit_settings[:pacemaker_resource]} g-haproxy "\
+               "cl-neutron-server ) #{ha_service_primitive_name}"
+      score "Mandatory"
+      action :create
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
+
   else
     pacemaker_primitive ha_service_primitive_name do
       agent "systemd:neutron-l3-ha-service"
