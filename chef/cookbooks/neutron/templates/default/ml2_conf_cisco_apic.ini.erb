@@ -2,7 +2,7 @@
 apic_system_id=<%= node[:neutron][:apic][:system_id] %>
 [opflex]
 networks = *
-[ml2_cisco_apic]
+[apic]
 apic_hosts=<%= node[:neutron][:apic][:hosts] %>
 apic_username=<%= node[:neutron][:apic][:username] %>
 apic_password=<%= node[:neutron][:apic][:password] %>
@@ -27,4 +27,10 @@ apic_provision_hostlinks = True
 policy_drivers = <%= @policy_drivers %>
 [group_policy_implicit_policy]
 default_ip_pool = <%= @default_ip_pool %>
+<% end -%>
+<% @apic_vmms.keys.each do |ip| -%>
+[apic_vmdom:<%=ip%>]
+<%    @apic_vmms[ip].each do |key, value|  -%>
+<%=     key %> = <%= value %>
+<%    end -%>
 <% end -%>

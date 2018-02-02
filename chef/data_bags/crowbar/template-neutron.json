@@ -81,6 +81,19 @@
               }
             }
           }
+        },
+        "apic_vmms": {
+          "soc_kvm_domain": {
+            "apic_vmm_type": "openstack",
+            "enable_optimized_dhcp": "true",
+            "enable_optimized_metadata": "true",
+            "hosts" : ""
+          },
+          "soc_vm_domain": {
+            "apic_vmm_type": "vmware",
+            "enable_optimized_dhcp": "false",
+            "enable_optimized_metadata": "false"
+          }
         }
       },
       "allow_overlapping_ips": true,
