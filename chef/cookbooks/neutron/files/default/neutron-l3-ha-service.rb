@@ -334,7 +334,7 @@ class HATool
   end
 
   def status_command
-    [@options.program, "--l3-agent-check", "--quiet"]
+    [@options.program, "--l3-agent-check", "--quiet"] + insecure_flag
   end
 
   def migration_command
