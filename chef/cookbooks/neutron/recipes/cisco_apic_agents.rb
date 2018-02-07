@@ -94,6 +94,11 @@ if node.roles.include?("nova-compute-kvm")
 
   # Update config file from template
   opflex_agent_conf = "/etc/opflex-agent-ovs/conf.d/10-opflex-agent-ovs.conf"
+  apic = neutron[:neutron][:apic]
+  opflex_list = apic[:opflex].select { |i| i[:nodes].include? node[:hostname] }
+  opflex_list.any? || raise("Opflex instance not found for node '#{node[:hostname]}'")
+  opflex_list.one? || raise("Multiple opflex instances found for node '#{node[:hostname]}'")
+  opflex = opflex_list.first
   template opflex_agent_conf do
     cookbook "neutron"
     source "10-opflex-agent-ovs.conf.erb"
@@ -104,13 +109,13 @@ if node.roles.include?("nova-compute-kvm")
       opflex_apic_domain_name: neutron[:neutron][:apic][:system_id],
       hostname: node[:hostname],
       socketgroup: neutron[:neutron][:platform][:group],
-      opflex_peer_ip: neutron[:neutron][:apic][:opflex][:peer_ip],
-      opflex_peer_port: neutron[:neutron][:apic][:opflex][:peer_port],
-      opflex_vxlan_encap_iface: neutron[:neutron][:apic][:opflex][:vxlan][:encap_iface],
-      opflex_vxlan_uplink_iface: neutron[:neutron][:apic][:opflex][:vxlan][:uplink_iface],
-      opflex_vxlan_uplink_vlan: neutron[:neutron][:apic][:opflex][:vxlan][:uplink_vlan],
-      opflex_vxlan_remote_ip: neutron[:neutron][:apic][:opflex][:vxlan][:remote_ip],
-      opflex_vxlan_remote_port: neutron[:neutron][:apic][:opflex][:vxlan][:remote_port],
+      opflex_peer_ip: opflex[:peer_ip],
+      opflex_peer_port: opflex[:peer_port],
+      opflex_vxlan_encap_iface: opflex[:vxlan][:encap_iface],
+      opflex_vxlan_uplink_iface: opflex[:vxlan][:uplink_iface],
+      opflex_vxlan_uplink_vlan: opflex[:vxlan][:uplink_vlan],
+      opflex_vxlan_remote_ip: opflex[:vxlan][:remote_ip],
+      opflex_vxlan_remote_port: opflex[:vxlan][:remote_port],
       # TODO(mmnelemane) : update VLAN encapsulation config when it works.
       # Currently set to VXLAN by default but can be modified from proposal.
       ml2_type_drivers: ml2_type_drivers
