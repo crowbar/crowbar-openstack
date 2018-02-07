@@ -70,20 +70,39 @@ bind_host, bind_port = NeutronHelper.get_bind_host_port(node)
 nova_config = Barclamp::Config.load("openstack", "nova")
 nova_insecure = CrowbarOpenStackHelper.insecure(nova_config) || keystone_settings["insecure"]
 
-service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
-                   "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
-if neutron[:neutron][:use_lbaas]
+case neutron[:neutron][:networking_plugin]
+when "midonet"
+  core_plugin = "midonet_v2_ext"
+  service_plugins = ["midonet_l3_ext"]
+  allow_overlapping_ips = true
+  # In order to enable 'fip64' extension feature, the API extension path must
+  # be specified.  The path depends on the directory location in which
+  # python-networking-midonet-ext is installed.
+  api_extensions_path = "/usr/lib/python2.7/site-packages/midonet_ext/neutron/extensions"
+  service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2")
+  service_plugins.push("midonet.neutron.services.firewall.plugin.MidonetFirewallPlugin")
+  service_plugins.push("qos")
+else
+  core_plugin = neutron[:neutron][:networking_plugin]
+  service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
+                     "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
+  allow_overlapping_ips = neutron[:neutron][:allow_overlapping_ips]
+  api_extensions_path = ""
+
+  if neutron[:neutron][:networking_plugin] == "ml2"
+    service_plugins.unshift("neutron.services.l3_router.l3_router_plugin.L3RouterPlugin")
+    if neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
+      service_plugins = ["cisco_apic_l3"]
+    elsif neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+      service_plugins = ["group_policy", "servicechain", "apic_gbp_l3"]
+    end
+  end
+end
+
+if neutron[:neutron][:use_lbaas] && neutron[:neutron][:networking_plugin] != "midonet"
   service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2")
 end
 
-if neutron[:neutron][:networking_plugin] == "ml2"
-  service_plugins.unshift("neutron.services.l3_router.l3_router_plugin.L3RouterPlugin")
-  if neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
-    service_plugins = ["cisco_apic_l3"]
-  elsif neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
-    service_plugins = ["group_policy", "servicechain", "apic_gbp_l3"]
-  end
-end
 service_plugins = service_plugins.join(", ")
 
 network_nodes_count = neutron[:neutron][:elements]["neutron-network"].count
@@ -103,46 +122,52 @@ if neutron[:neutron][:use_infoblox]
 end
 
 template neutron[:neutron][:config_file] do
-    cookbook "neutron"
-    source "neutron.conf.erb"
-    mode "0640"
-    owner "root"
-    group neutron[:neutron][:platform][:group]
-    variables(
-      sql_connection: is_neutron_server ? neutron[:neutron][:db][:sql_connection] : nil,
-      sql_min_pool_size: neutron[:neutron][:sql][:min_pool_size],
-      sql_max_pool_overflow: neutron[:neutron][:sql][:max_pool_overflow],
-      sql_pool_timeout: neutron[:neutron][:sql][:pool_timeout],
-      debug: neutron[:neutron][:debug],
-      verbose: neutron[:neutron][:verbose],
-      bind_host: bind_host,
-      bind_port: bind_port,
-      use_syslog: neutron[:neutron][:use_syslog],
-      # Note that we don't uset fetch_rabbitmq_settings, as we want to run the
-      # query on the "neutron" node, not on "node"
-      rabbit_settings: CrowbarOpenStackHelper.rabbitmq_settings(neutron, "neutron"),
-      keystone_settings: keystone_settings,
-      ssl_enabled: neutron[:neutron][:api][:protocol] == "https",
-      ssl_cert_file: neutron[:neutron][:ssl][:certfile],
-      ssl_key_file: neutron[:neutron][:ssl][:keyfile],
-      ssl_cert_required: neutron[:neutron][:ssl][:cert_required],
-      ssl_ca_file: neutron[:neutron][:ssl][:ca_certs],
-      nova_insecure: nova_insecure,
-      core_plugin: neutron[:neutron][:networking_plugin],
-      service_plugins: service_plugins,
-      allow_overlapping_ips: neutron[:neutron][:allow_overlapping_ips],
-      dvr_enabled: neutron[:neutron][:use_dvr],
-      network_nodes_count: network_nodes_count,
-      dns_domain: neutron[:neutron][:dhcp_domain],
-      mtu_value: mtu_value,
-      infoblox: infoblox_settings,
-      ipam_driver: ipam_driver,
-      rpc_workers: neutron[:neutron][:rpc_workers]
-    )
+  cookbook "neutron"
+  source "neutron.conf.erb"
+  mode "0640"
+  owner "root"
+  group neutron[:neutron][:platform][:group]
+  variables(
+    sql_connection: is_neutron_server ? neutron[:neutron][:db][:sql_connection] : nil,
+    sql_min_pool_size: neutron[:neutron][:sql][:min_pool_size],
+    sql_max_pool_overflow: neutron[:neutron][:sql][:max_pool_overflow],
+    sql_pool_timeout: neutron[:neutron][:sql][:pool_timeout],
+    debug: neutron[:neutron][:debug],
+    verbose: neutron[:neutron][:verbose],
+    bind_host: bind_host,
+    bind_port: bind_port,
+    use_syslog: neutron[:neutron][:use_syslog],
+    # Note that we don't uset fetch_rabbitmq_settings, as we want to run the
+    # query on the "neutron" node, not on "node"
+    rabbit_settings: CrowbarOpenStackHelper.rabbitmq_settings(neutron, "neutron"),
+    keystone_settings: keystone_settings,
+    ssl_enabled: neutron[:neutron][:api][:protocol] == "https",
+    ssl_cert_file: neutron[:neutron][:ssl][:certfile],
+    ssl_key_file: neutron[:neutron][:ssl][:keyfile],
+    ssl_cert_required: neutron[:neutron][:ssl][:cert_required],
+    ssl_ca_file: neutron[:neutron][:ssl][:ca_certs],
+    nova_insecure: nova_insecure,
+    core_plugin: core_plugin,
+    service_plugins: service_plugins,
+    allow_overlapping_ips: allow_overlapping_ips,
+    dvr_enabled: neutron[:neutron][:use_dvr],
+    network_nodes_count: network_nodes_count,
+    dns_domain: neutron[:neutron][:dhcp_domain],
+    mtu_value: mtu_value,
+    infoblox: infoblox_settings,
+    ipam_driver: ipam_driver,
+    rpc_workers: neutron[:neutron][:rpc_workers],
+    api_extensions_path: api_extensions_path
+  )
 end
 
-if neutron[:neutron][:use_lbaas]
-  interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+if neutron[:neutron][:use_lbaas] || neutron[:neutron][:networking_plugin] == "midonet"
+  interface_driver = if neutron[:neutron][:networking_plugin] == "midonet"
+    "midonet"
+  else
+    "neutron.agent.linux.interface.OVSInterfaceDriver"
+  end
+
   if neutron[:neutron][:networking_plugin] == "ml2" &&
       neutron[:neutron][:ml2_mechanism_drivers].include?("linuxbridge")
     interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
@@ -157,6 +182,7 @@ if neutron[:neutron][:use_lbaas]
       interface_driver: interface_driver,
       use_lbaas: neutron[:neutron][:use_lbaas],
       lbaasv2_driver: neutron[:neutron][:lbaasv2_driver],
+      networking_plugin: neutron[:neutron][:networking_plugin],
       keystone_settings: keystone_settings
     )
   end
@@ -167,4 +193,3 @@ if node[:platform_family] == "rhel"
     to node[:neutron][:config_file]
   end
 end
-

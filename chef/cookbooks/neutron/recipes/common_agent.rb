@@ -362,7 +362,8 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 end
 
 # Metadata agent
-if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
+if ! neutron[:neutron][:networking_plugin] &&
+   (neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network"))
   neutron_metadata do
     use_cisco_apic_ml2_driver false
     neutron_node_object neutron
@@ -377,4 +378,9 @@ if neutron[:neutron][:networking_plugin] == "vmware"
   # We don't need anything more installed or configured on
   # compute nodes except openvswitch packages with stt.
   # For NSX plugin no neutron packages are needed.
+end
+
+if neutron[:neutron][:networking_plugin] == "midonet"
+  Chef::Log.info("Loading midonet_network recipe")
+  include_recipe "neutron::midonet_network"
 end

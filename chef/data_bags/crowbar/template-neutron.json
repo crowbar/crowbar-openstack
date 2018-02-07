@@ -122,6 +122,12 @@
         "clean_on_restart": true,
         "precreate_networks": false
       },
+      "midonet": {
+        "zone_protocol": "vxlan",
+        "zookeeper": {
+          "snapRetainCount": 10
+        }
+      },
       "zvm": {
         "zvm_xcat_server": "",
         "zvm_xcat_username": "",
@@ -180,7 +186,8 @@
       "schema-revision": 114,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
-        "neutron-network": [ "readying", "ready", "applying" ]
+        "neutron-network": [ "readying", "ready", "applying" ],
+        "neutron-midonet": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [

@@ -43,6 +43,11 @@
         = string_field %w(vmware tz_uuid)
         = string_field %w(vmware l3_gw_uuid)
 
+      #midonet_container
+        = select_field %w(midonet zone_protocol),
+          :collection => :networking_midonet_zone_protocols,
+          :multiple => false
+
       #num_vlans_container
         %fieldset
           %legend

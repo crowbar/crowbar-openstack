@@ -11,15 +11,20 @@ admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
 [service_providers]
-<% if @use_lbaas -%>
-<%
+<% service_provider = nil
+if @use_lbaas
   service_provider = case @lbaasv2_driver
     when "f5"
       "LOADBALANCERV2:F5Networks:neutron_lbaas.drivers.f5.driver_v2.F5LBaaSV2Driver:default"
     when nil, "", "haproxy"
       "LOADBALANCERV2:Haproxy:neutron_lbaas.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default"
   end
-%>
-service_provider=<%= service_provider %>
+end
+if @networking_plugin.eql?("midonet")
+  service_provider = "LOADBALANCERV2:Midonet:midonet_ext.neutron.services.loadbalancer.v2_driver.MidonetLoadBalancerDriver:default"
+end
+if service_provider
+-%>
+service_provider = <%= service_provider %>
 <% end -%>
 [certificates]

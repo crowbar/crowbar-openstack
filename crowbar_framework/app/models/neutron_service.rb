@@ -29,7 +29,7 @@ class NeutronService < OpenstackServiceObject
   end
 
   def self.networking_plugins_valid
-    ["ml2", "vmware"]
+    ["midonet", "ml2", "vmware"]
   end
 
   def self.networking_ml2_type_drivers_valid
@@ -116,6 +116,34 @@ class NeutronService < OpenstackServiceObject
     base["attributes"][@bc_name][:db][:password] = random_password
 
     base
+  end
+
+  def active_update(proposal, inst, in_queue, bootstrap = false)
+    deployment = proposal["deployment"]["neutron"]
+    elements = deployment["elements"]
+
+    unless elements.fetch("neutron-midonet", []).empty?
+      @logger.warn("neutron: discarding neutron-midonet elements from proposal; " \
+        "this role is automatically filled")
+    end
+    elements["neutron-midonet"] = []
+    unless deployment["element_order"].flatten.include?("neutron-midonet")
+      deployment["element_order"].push(["neutron-midonet"])
+    end
+
+    # Find list of roles which accept clusters.
+    roles_with_midonet = role_constraints.select do |role, constraints|
+      constraints["cluster"]
+    end.keys
+
+    roles_with_midonet.each do |role|
+      next unless elements.key? role
+      elements[role].each do |element|
+        elements["neutron-midonet"].push(element)
+      end
+    end
+
+    super
   end
 
   def validate_gre(gre_settings)
@@ -218,7 +246,7 @@ class NeutronService < OpenstackServiceObject
         !ml2_type_drivers.include?("vlan")
       validation_error I18n.t("barclamp.#{@bc_name}.validation.vmware_dvs_vlan")
     end
- 
+
     # Checks for Cisco ACI ml2 driver
     if ml2_mechanism_drivers.include?("cisco_apic_ml2") &&
         ml2_mechanism_drivers.include?("apic_gbp")
@@ -324,6 +352,10 @@ class NeutronService < OpenstackServiceObject
 
       if plugin == "vmware"
         validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_vmware")
+      end
+
+      if plugin == "midonet"
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.dvr_midonet")
       end
 
       if ml2_mechanism_drivers.include? "linuxbridge"

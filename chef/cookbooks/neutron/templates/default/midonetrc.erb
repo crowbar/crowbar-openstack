@@ -1,0 +1,5 @@
+[cli]
+api_url = http://localhost:<%= @midonet[:port] %>/midonet-api
+username = <%= @midonet["username"] %>
+password = <%= @keystone_settings["service_password"] %>
+project_id = <%= @keystone_settings["service_tenant"] %>

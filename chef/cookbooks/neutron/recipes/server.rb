@@ -24,13 +24,9 @@ pkgs = node[:neutron][:platform][:pkgs] + node[:neutron][:platform][:pkgs_fwaas]
 pkgs += node[:neutron][:platform][:pkgs_lbaas] if node[:neutron][:use_lbaas]
 pkgs += node[:neutron][:platform][:infoblox_pkgs] if node[:neutron][:use_infoblox]
 
-if use_hyperv
-  pkgs << node[:neutron][:platform][:hyperv_pkg]
-end
-if use_zvm
-  pkgs << node[:neutron][:platform][:zvm_agent_pkg]
-end
-use_vmware_dvs && pkgs << node[:neutron][:platform][:vmware_vsphere_pkg]
+pkgs << node[:neutron][:platform][:hyperv_pkg] if use_hyperv
+pkgs << node[:neutron][:platform][:zvm_agent_pkg] if use_zvm
+pkgs << node[:neutron][:platform][:vmware_vsphere_pkg] if use_vmware_dvs
 
 pkgs.each { |p| package p }
 
@@ -55,6 +51,8 @@ all_plugin_snippets = [node[:neutron][:ml2_config_file], node[:neutron][:nsx_con
 used_plugin_snippets = []
 if node[:neutron][:networking_plugin] == "vmware"
   used_plugin_snippets << node[:neutron][:nsx_config_file]
+elsif node[:neutron][:networking_plugin] == "midonet"
+  used_plugin_snippets << node[:neutron][:midonet][:config_file]
 else
   used_plugin_snippets << node[:neutron][:ml2_config_file]
 end
@@ -108,7 +106,7 @@ end
 directory "/var/cache/neutron" do
   owner node[:neutron][:user]
   group node[:neutron][:group]
-  mode 0755
+  mode 0o755
   action :create
   only_if { node[:platform_family] == "debian" }
 end
@@ -127,7 +125,7 @@ vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 vni_end = [node[:neutron][:vxlan][:vni_end], 16777215].min
 
 directory "/etc/neutron/plugins/ml2" do
-  mode 0755
+  mode 0o755
   action :create
   only_if { node[:platform_family] == "debian" }
 end
@@ -201,7 +199,7 @@ when "ml2"
     source "ml2_conf.ini.erb"
     owner "root"
     group node[:neutron][:platform][:group]
-    mode "0640"
+    mode 0o640
     variables(
       ml2_mechanism_drivers: ml2_mechanism_drivers,
       ml2_extension_drivers: ml2_extension_drivers,
@@ -223,12 +221,12 @@ when "ml2"
   end
 when "vmware"
   directory "/etc/neutron/plugins/vmware/" do
-     mode 00755
-     owner "root"
-     group node[:neutron][:platform][:group]
-     action :create
-     recursive true
-     not_if { node[:platform_family] == "suse" }
+    mode 0o755
+    owner "root"
+    group node[:neutron][:platform][:group]
+    action :create
+    recursive true
+    not_if { node[:platform_family] == "suse" }
   end
 
   # Empty the config file that is explicitly passed to neutron-server (via plugin.ini
@@ -246,29 +244,61 @@ when "vmware"
     source "nsx.ini.erb"
     owner "root"
     group node[:neutron][:platform][:group]
-    mode "0640"
+    mode 0o640
     variables(
       vmware_config: node[:neutron][:vmware]
     )
     notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end
+when "midonet"
+  directory "/etc/neutron/plugins/midonet/" do
+    mode 0o755
+    owner "root"
+    group node[:neutron][:platform][:group]
+    action :create
+  end
+
+  bind_host, = NeutronHelper.get_bind_host_port(node)
+  interface_driver = "midonet"
+  keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
+  template "/etc/neutron/plugins/midonet/midonet.ini" do
+    source "midonet.ini.erb"
+    owner "root"
+    group node[:neutron][:platform][:group]
+    mode 0o640
+    variables(
+      midonet_config: node[:neutron][:midonet],
+      bind_host: bind_host,
+      keystone_settings: keystone_settings
+    )
+  end
+
+  link "/etc/neutron/plugin.ini" do
+    to node[:neutron][:midonet][:config_file]
+    action :create
+  end
 end
 
-if node[:neutron][:networking_plugin] == "ml2"
+case node[:neutron][:networking_plugin]
+when "ml2"
   if node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
     include_recipe "neutron::cisco_support"
   elsif node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
       node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
     include_recipe "neutron::cisco_apic_support"
   end
+when "midonet"
+  include_recipe "neutron::midonet_nsdb"
+  include_recipe "neutron::midonet_support"
 end
 
-if node[:neutron][:use_lbaas]
+if node[:neutron][:use_lbaas] || node[:neutron][:networking_plugin] == "midonet"
   template node[:neutron][:lbaas_service_file] do
     source "services_lbaas.conf.erb"
     owner "root"
     group node[:neutron][:platform][:group]
-    mode "0640"
+    mode 0o640
     variables(
       interface_driver: interface_driver
     )
@@ -338,7 +368,7 @@ ruby_block "mark node for neutron db_sync fwaas" do
   subscribes :create, "execute[neutron-db-manage migrate fwaas]", :immediately
 end
 
-if node[:neutron][:use_lbaas]
+if node[:neutron][:use_lbaas] || node[:neutron][:networking_plugin] == "midonet"
   # See comments for "neutron-db-manage migrate" above
   execute "neutron-db-manage migrate lbaas" do
     user node[:neutron][:user]
@@ -357,11 +387,12 @@ if node[:neutron][:use_lbaas]
   end
 end
 
+is_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
+
 if node[:neutron][:networking_plugin] == "ml2"
   if node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
     # See comments for "neutron-db-manage migrate" above
     db_synced = node[:neutron][:db_synced_apic_ml2]
-    is_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
     execute "apic-ml2-db-manage upgrade head" do
       user node[:neutron][:user]
       group node[:neutron][:group]
@@ -382,7 +413,6 @@ if node[:neutron][:networking_plugin] == "ml2"
   elsif node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
     # See comments for "neutron-db-manage migrate" above
     db_synced = node[:neutron][:db_synced_apic_gbp]
-    is_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
     execute "gbp-db-manage upgrade head" do
       user node[:neutron][:user]
       group node[:neutron][:group]
@@ -401,6 +431,30 @@ if node[:neutron][:networking_plugin] == "ml2"
       subscribes :create, "execute[gbp-db-manage upgrade head]", :immediately
     end
   end
+elsif node[:neutron][:networking_plugin] == "midonet"
+  # See comments for "neutron-db-manage migrate" above
+
+  bash "neutron-db-manage migrate" do
+    user node[:neutron][:user]
+    group node[:neutron][:group]
+    code <<-EOS
+neutron-db-manage \
+  --config-file /etc/neutron/neutron.conf \
+  --config-file /etc/neutron/plugins/midonet/midonet.ini \
+  upgrade head
+neutron-db-manage --subproject networking-midonet upgrade head
+    EOS
+    only_if { !node[:neutron][:db_synced_midonet] && (!ha_enabled || is_founder) }
+  end
+
+  ruby_block "mark node for neutron db_sync midonet" do
+    block do
+      node.set[:neutron][:db_synced_midonet] = true
+      node.save
+    end
+    action :nothing
+    subscribes :create, "execute[neutron-db-manage migrate]", :immediately
+  end
 end
 
 crowbar_pacemaker_sync_mark "create-neutron_db_sync" if ha_enabled
@@ -411,7 +465,7 @@ service node[:neutron][:platform][:service_name] do
   supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources(template: node[:neutron][:config_file])
-  if node[:neutron][:use_lbaas]
+  if node[:neutron][:use_lbaas] || node[:neutron][:networking_plugin] == "midonet"
     subscribes :restart, resources(template: node[:neutron][:lbaas_config_file])
   end
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
