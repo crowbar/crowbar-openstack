@@ -26,10 +26,16 @@ when "debian"
     code "service tftpd-hpa stop; killall in.tftpd; rm /etc/init/tftpd-hpa.conf"
     only_if "test -f /etc/init/tftpd-hpa.conf"
   end
+  package "grub-efi-amd64-signed"
+  package "shim-signed"
 when "rhel"
   package "tftp-server"
+  package "grub2-efi"
+  package "shim"
 when "suse"
   package "tftp"
+  package "grub2-efi"
+  package "shim"
 end
 
 directory tftproot do
@@ -51,6 +57,25 @@ package "syslinux"
     end
     break
   end
+end
+
+# TODO: adjust locations for other distros
+bash "Install shim.efi" do
+  code "cp /usr/lib64/efi/shim.efi #{tftproot}/bootx64.efi"
+  not_if "cmp /usr/lib64/efi/shim.efi #{tftproot}/bootx64.efi"
+end
+
+bash "Install grub.efi" do
+  code "cp /usr/lib/grub2/x86_64-efi/grub.efi #{tftproot}/grub.efi"
+  not_if "cmp /usr/lib/grub2/x86_64-efi/grub.efi #{tftproot}/grub.efi"
+end
+
+template "#{tftproot}/grub.cfg" do
+  source "grub.cfg.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(tftproot: tftproot)
 end
 
 template map_file do
