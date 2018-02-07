@@ -25,6 +25,7 @@ default[:rabbitmq][:user] = "nova"
 default[:rabbitmq][:vhost] = "/nova"
 default[:rabbitmq][:rabbitmq_user] = "rabbitmq"
 default[:rabbitmq][:rabbitmq_group] = "rabbitmq"
+default[:rabbitmq][:bootstrapped] = false
 
 default[:rabbitmq][:nodename]  = "rabbit@#{node[:hostname]}"
 # This is the address for internal usage

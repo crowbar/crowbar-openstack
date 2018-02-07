@@ -24,6 +24,11 @@ cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
 quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
 crm_resource_stop_cmd = cluster_enabled ? "force-demote" : "force-stop"
 crm_resource_start_cmd = cluster_enabled ? "force-promote" : "force-start"
+cluster_nodes = if cluster_enabled
+  CrowbarPacemakerHelper.cluster_nodes_names(node)
+else
+  []
+end
 
 cluster_partition_handling = if cluster_enabled
   if CrowbarPacemakerHelper.num_corosync_nodes(node) > 2
@@ -109,6 +114,7 @@ template "/etc/rabbitmq/rabbitmq.config" do
   variables(
     cluster_enabled: cluster_enabled,
     cluster_partition_handling: cluster_partition_handling,
+    cluster_nodes: cluster_nodes,
     hipe_compile: hipe_compile
   )
   notifies :restart, "service[rabbitmq-server]"
