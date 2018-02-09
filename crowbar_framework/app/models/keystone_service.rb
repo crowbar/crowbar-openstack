@@ -149,6 +149,20 @@ class KeystoneService < OpenstackServiceObject
       allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
     end
 
+    # Save current keystone endpoints to all keystone-server nodes.
+    all_nodes.each do |n|
+      node = NodeObject.find_by_name(n)
+      unless node[:keystone].nil?
+        node[:keystone][:endpoint] = {
+          insecure: node[:keystone][:ssl][:insecure],
+          protocol: node[:keystone][:api][:protocol],
+          internal_url_host: node[:keystone][:api][:internal_url_host],
+          port: node[:keystone][:api][:admin_port]
+        }
+        node.save
+      end
+    end
+
     @logger.debug("Keystone apply_role_pre_chef_call: leaving")
   end
 
