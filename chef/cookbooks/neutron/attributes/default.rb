@@ -69,7 +69,8 @@ default[:neutron][:apic][:system_id] = "soc"
 default[:neutron][:apic][:hosts] = ""
 default[:neutron][:apic][:username] = "admin"
 default[:neutron][:apic][:password] = ""
-
+default[:neutron][:apic][:optimized_metadata] = true
+default[:neutron][:apic][:optimized_dhcp] = true
 default[:neutron][:apic][:opflex] = [{
   pod: "",
   nodes: [],
