@@ -44,6 +44,8 @@
         "system_id": "soc",
         "username": "admin",
         "password": "",
+        "optimized_metadata": true,
+        "optimized_dhcp": true,
         "opflex": {
           "peer_ip": "",
           "peer_port": 8009,
@@ -174,7 +176,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 205,
+      "schema-revision": 206,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

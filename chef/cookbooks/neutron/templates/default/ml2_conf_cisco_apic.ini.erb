@@ -11,7 +11,8 @@ apic_name_mapping = use_name
 apic_clear_node_profiles = True
 enable_aci_routing = True
 apic_arp_flooding = True
-enable_optimized_metadata = True
+enable_optimized_metadata = <%= node[:neutron][:apic][:optimized_metadata] %>
+enable_optimized_dhcp = <%= node[:neutron][:apic][:optimized_dhcp] %>
 apic_provision_infra = True
 apic_provision_hostlinks = True
 <% @apic_switches.keys.each do |ip| -%>
