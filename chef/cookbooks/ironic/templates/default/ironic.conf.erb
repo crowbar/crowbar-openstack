@@ -121,6 +121,7 @@ heartbeat_timeout_threshold = <%= @rabbit_settings[:heartbeat_timeout] %>
 tftp_server=<%= @tftp_ip %>
 tftp_root=<%= @tftproot %>
 tftp_master_path=<%= @tftproot %>/master_images
+pxe_append_params=<%= @pxe_append_params %>
 
 [deploy]
 default_boot_option=netboot
