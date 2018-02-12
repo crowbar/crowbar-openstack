@@ -40,7 +40,7 @@ default[:mysql][:ha][:op][:monitor][:role]     = "Master"
 # If needed we can enhance this to set the mariadb version
 # depeding on "platform" and "platform_version". But currently
 # this should be enough
-default[:mysql][:mariadb][:version] = "10.1"
+default[:mysql][:mariadb][:version] = "10.2"
 default[:mysql][:galera_packages] = [
   "galera-3-wsrep-provider",
   "mariadb-tools",
