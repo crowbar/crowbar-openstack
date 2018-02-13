@@ -41,6 +41,8 @@ project_name = <%= @keystone_settings['service_tenant'] %>
 username = <%= @keystone_settings['service_user'] %>
 password = <%= @keystone_settings['service_password'] %>
 insecure = <%= @keystone_settings['insecure'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
 
 [keystone_authtoken]
 auth_uri = <%= @keystone_settings['public_auth_url'] %>
