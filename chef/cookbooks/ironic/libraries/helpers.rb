@@ -62,6 +62,8 @@ module IronicHelper
         glance_container: glance[:glance][:swift][:store_container],
         glance_account: glance_account,
         protocol: swift[:swift][:ssl][:enabled] ? "https" : "http",
+        service_user: swift[:swift][:service_user],
+        service_password: swift[:swift][:service_password],
         host: swift_address,
         port: swift[:swift][:ports][:proxy]
       }
