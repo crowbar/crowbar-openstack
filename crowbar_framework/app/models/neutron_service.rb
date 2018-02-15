@@ -115,6 +115,7 @@ class NeutronService < OpenstackServiceObject
     base["attributes"]["neutron"]["service_password"] = random_password
     base["attributes"]["neutron"]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
+    base["attributes"][@bc_name][:l3_ha_password] = random_password
 
     base
   end
