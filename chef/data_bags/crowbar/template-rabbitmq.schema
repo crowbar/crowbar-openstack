@@ -17,6 +17,7 @@
             "password": { "type": "str", "required": true },
             "user": { "type": "str", "required": true },
             "vhost": { "type": "str", "required": true },
+            "log_level": { "type": "str", "required": true },
             "ssl": {
               "type": "map", "required": true, "mapping": {
                 "enabled": { "type": "bool", "required": true },
