@@ -95,7 +95,7 @@ if node[:database][:mysql][:ssl][:enabled]
   end
 end
 
-template "/etc/my.cnf.d/openstack.cnf" do
+template "/etc/my.cnf.d/72-openstack.cnf" do
   source "my.cnf.erb"
   owner "root"
   group "mysql"
@@ -103,7 +103,12 @@ template "/etc/my.cnf.d/openstack.cnf" do
   notifies :restart, "service[mysql]", :immediately
 end
 
-template "/etc/my.cnf.d/ssl.cnf" do
+file "/etc/my.cnf.d/openstack.cnf" do
+  action :delete
+  notifies :restart, "service[mysql]"
+end
+
+template "/etc/my.cnf.d/73-ssl.cnf" do
   source "ssl.cnf.erb"
   owner "root"
   group "mysql"
@@ -111,7 +116,12 @@ template "/etc/my.cnf.d/ssl.cnf" do
   notifies :restart, "service[mysql]", :immediately
 end
 
-template "/etc/my.cnf.d/logging.cnf" do
+file "/etc/my.cnf.d/ssl.cnf" do
+  action :delete
+  notifies :restart, "service[mysql]"
+end
+
+template "/etc/my.cnf.d/71-logging.cnf" do
   source "logging.cnf.erb"
   owner "root"
   group "mysql"
@@ -122,7 +132,12 @@ template "/etc/my.cnf.d/logging.cnf" do
   notifies :restart, "service[mysql]", :immediately
 end
 
-template "/etc/my.cnf.d/tuning.cnf" do
+file "/etc/my.cnf.d/logging.cnf" do
+  action :delete
+  notifies :restart, "service[mysql]"
+end
+
+template "/etc/my.cnf.d/74-tuning.cnf" do
   source "tuning.cnf.erb"
   owner "root"
   group "mysql"
@@ -136,6 +151,11 @@ template "/etc/my.cnf.d/tuning.cnf" do
     max_heap_table_size: node[:database][:mysql][:max_heap_table_size]
   )
   notifies :restart, "service[mysql]", :immediately
+end
+
+file "/etc/my.cnf.d/tuning.cnf" do
+  action :delete
+  notifies :restart, "service[mysql]"
 end
 
 unless Chef::Config[:solo]
