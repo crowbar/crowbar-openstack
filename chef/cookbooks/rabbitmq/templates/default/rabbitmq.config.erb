@@ -36,6 +36,7 @@
 <% if @cluster_enabled -%>
    {cluster_partition_handling, <%= @cluster_partition_handling %>},
    {queue_master_locator, <<"min-masters">>},
+   {cluster_nodes, {[<%= @cluster_nodes.map { |node| "'rabbit@#{node}'" }.join(",") %>], disc}},
 <% end -%>
 <% if @hipe_compile -%>
    {hipe_compile, true},
