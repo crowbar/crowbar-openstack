@@ -26,9 +26,6 @@ if node[:database].key? "ec2"
   default[:database][:mysql][:ebs_vol_size]            = 50
 end
 
-default[:database][:mysql][:tunable][:max_allowed_packet]       = "16M"
-default[:database][:mysql][:tunable][:thread_cache_size]        = 8
-
 # Ports to bind to when haproxy is used
 default[:mysql][:ha][:ports][:admin_port] = 3306
 
