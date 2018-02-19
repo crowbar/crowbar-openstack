@@ -45,13 +45,13 @@ default[:glance][:registry][:config_file] = \
 default[:glance][:registry][:service_name] = "glance-registry"
 
 default[:glance][:cache][:log_file] = "/var/log/glance/cache.log"
-default[:glance][:cache][:config_file] = "/etc/glance/glance.conf.d/100-glance-cache.conf"
+default[:glance][:cache][:config_file] = "/etc/glance/glance-cache.conf.d/100-glance-cache.conf"
 
 default[:glance][:manage][:log_file] = "/var/log/glance/manage.log"
-default[:glance][:manage][:config_file] = "/etc/glance/glance.conf.d/100-glance-manage.conf"
+default[:glance][:manage][:config_file] = "/etc/glance/glance-manage.conf.d/100-glance-manage.conf"
 
 default[:glance][:scrubber][:log_file] = "/var/log/glance/scrubber.log"
-default[:glance][:scrubber][:config_file] = "/etc/glance/glance.conf.d/100-glance-scrubber.conf"
+default[:glance][:scrubber][:config_file] = "/etc/glance/glance-scrubber.conf.d/100-glance-scrubber.conf"
 
 default[:glance][:working_directory]="/var/lib/glance"
 default[:glance][:image_cache_datadir] = "/var/lib/glance/image-cache/"
