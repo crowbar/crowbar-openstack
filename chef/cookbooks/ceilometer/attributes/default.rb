@@ -33,8 +33,6 @@ default[:ceilometer][:central][:service_name] = central_service_name
 
 default[:ceilometer][:debug] = false
 
-default[:ceilometer][:use_mongodb] = false
-
 default[:ceilometer][:meters_interval] = 600
 default[:ceilometer][:cpu_interval] = 600
 default[:ceilometer][:disk_interval] = 600
@@ -56,8 +54,6 @@ default[:ceilometer][:metering_secret] = "" # Set by wrapper
 default[:ceilometer][:database][:metering_time_to_live] = -1
 default[:ceilometer][:database][:event_time_to_live] = -1
 
-default[:ceilometer][:mongodb][:port] = 27017
-
 default[:ceilometer][:ssl][:certfile] = "/etc/ceilometer/ssl/certs/signing_cert.pem"
 default[:ceilometer][:ssl][:keyfile] = "/etc/ceilometer/ssl/private/signing_key.pem"
 default[:ceilometer][:ssl][:generate_certs] = false
@@ -67,7 +63,6 @@ default[:ceilometer][:ssl][:ca_certs] = "/etc/ceilometer/ssl/certs/ca.pem"
 
 default[:ceilometer][:ha][:server][:enabled] = false
 
-# increase default timeout: ceilometer has to wait until mongodb is ready
 default[:ceilometer][:ha][:api][:op][:start][:timeout] = "60s"
 default[:ceilometer][:ha][:agent_notification][:agent] = "systemd:#{agent_notification_service_name}"
 default[:ceilometer][:ha][:agent_notification][:op][:monitor][:interval] = "10s"
@@ -77,10 +72,3 @@ default[:ceilometer][:ha][:central][:agent] = "systemd:#{central_service_name}"
 default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:ceilometer][:ha][:ports][:api] = 5561
-default[:ceilometer][:ha][:mongodb][:agent] = "systemd:mongodb"
-default[:ceilometer][:ha][:mongodb][:op][:monitor][:interval] = "10s"
-default[:ceilometer][:ha][:mongodb][:replica_set][:name] = "crowbar-ceilometer"
-default[:ceilometer][:ha][:mongodb][:replica_set][:member] = false
-# this establishes which node is used for mongo client connections that
-# we use to initialize the replica set
-default[:ceilometer][:ha][:mongodb][:replica_set][:controller] = false
