@@ -328,10 +328,18 @@ use_baremetal_filters = true
 <% end %>
 <% if @has_itxt %>
 available_filters = nova.scheduler.filters.standard_filters
+<% if @enabled_filters.empty? %>
 enabled_filters = RetryFilter,AvailabilityZoneFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,TrustedFilter
 <% else %>
+enabled_filters = <%= @enabled_filters %>
+<% end %>
+<% else %>
 available_filters = nova.scheduler.filters.all_filters
+<% if @enabled_filters.empty? %>
 enabled_filters = RetryFilter,AvailabilityZoneFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,SameHostFilter,DifferentHostFilter
+<% else %>
+enabled_filters = <%= @enabled_filters %>
+<% end %>
 <% end %>
 <% unless @track_instance_changes %>
 track_instance_changes = false
