@@ -79,7 +79,8 @@
                       }
                     }
                   }
-                }
+                },
+                "haproxy_enabled": { "type": "bool", "required": true }
               }
             },
             "trove": {

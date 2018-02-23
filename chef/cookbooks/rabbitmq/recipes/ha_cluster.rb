@@ -99,6 +99,13 @@ end
 
 transaction_objects = []
 
+rabbitmq_port = if node[:rabbitmq][:ha][:haproxy_enabled]
+  node[:rabbitmq][:ha][:ports][:api]
+else
+  node[:rabbitmq][:port]
+end
+
+service_name = "rabbitmq"
 pacemaker_primitive service_name do
   agent agent_name
   # nodename is empty so that we explicitly depend on the config files
@@ -108,7 +115,8 @@ pacemaker_primitive service_name do
     "policy_file" => "/etc/rabbitmq/ocf-promote",
     "rmq_feature_health_check" => node[:rabbitmq][:ha][:clustered_rmq_features],
     "rmq_feature_local_list_queues" => node[:rabbitmq][:ha][:clustered_rmq_features],
-    "default_vhost" => node[:rabbitmq][:vhost]
+    "default_vhost" => node[:rabbitmq][:vhost],
+    "node_port" => rabbitmq_port
   })
   op node[:rabbitmq][:ha][:clustered_op]
   meta ({
@@ -118,6 +126,7 @@ pacemaker_primitive service_name do
   })
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  notifies :restart, "service[rabbitmq-server]", :immediately
 end
 transaction_objects.push("pacemaker_primitive[#{service_name}]")
 
@@ -150,3 +159,57 @@ pacemaker_transaction "rabbitmq service" do
 end
 
 crowbar_pacemaker_sync_mark "create-rabbitmq_ha_resources"
+
+# wait for all nodes the first time haproxy is enabled to be sure to have the ports in the ha
+# information of the node used by CrowbarPacemakerHelper.haproxy_servers_for_service
+crowbar_pacemaker_sync_mark "sync-rabbitmq_haproxy_enabled"
+
+if node[:rabbitmq][:ha][:haproxy_enabled]
+  include_recipe "crowbar-pacemaker::haproxy"
+
+  cluster_admin_ip = CrowbarPacemakerHelper.cluster_vip(node, "admin")
+
+  haproxy_loadbalancer "rabbitmq" do
+    address node[:rabbitmq][:listen_public] ? "0.0.0.0" : cluster_admin_ip
+    port node[:rabbitmq][:port]
+    mode "tcp"
+    servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "rabbitmq",
+      "rabbitmq-server", "api")
+    action :nothing
+  end.run_action(:create)
+
+  if node[:rabbitmq][:ssl][:enabled]
+    haproxy_loadbalancer "rabbitmq-ssl" do
+      address node[:rabbitmq][:listen_public] ? "0.0.0.0" : cluster_admin_ip
+      port node[:rabbitmq][:ssl][:port]
+      use_ssl true
+      mode "tcp"
+      servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "rabbitmq",
+        "rabbitmq-server", "api_ssl")
+      action :nothing
+    end.run_action(:create)
+  end
+
+  unless node[:rabbitmq][:listen_public]
+    haproxy_loadbalancer "rabbitmq-local" do
+      address node[:rabbitmq][:address]
+      port node[:rabbitmq][:port]
+      mode "tcp"
+      servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "rabbitmq",
+        "rabbitmq-server", "api")
+      action :nothing
+    end.run_action(:create)
+
+    if node[:rabbitmq][:ssl][:enabled]
+      haproxy_loadbalancer "rabbitmq-local-ssl" do
+        address node[:rabbitmq][:address]
+        port node[:rabbitmq][:ssl][:port]
+        use_ssl true
+        mode "tcp"
+        servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "rabbitmq",
+          "rabbitmq-server", "api_ssl")
+        action :nothing
+      end.run_action(:create)
+    end
+  end
+end
