@@ -19,6 +19,9 @@
 
 action :add do
   unless Kernel::system("rabbitmqctl list_vhosts | grep -q #{new_resource.vhost}")
+    # wait for service to have a master, and to be active
+    CrowbarPacemakerHelper.wait_until_rabbitmq_ready
+
     Chef::Log.info "Adding RabbitMQ vhost '#{new_resource.vhost}'."
     execute "rabbitmqctl add_vhost #{new_resource.vhost}"
     new_resource.updated_by_last_action(true)
