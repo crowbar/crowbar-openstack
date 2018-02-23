@@ -15,11 +15,11 @@
                         ]
    },
    {tcp_listeners, [
-                    <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{node[:rabbitmq][:port]}}" }.join(", ") %>
+                    <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{@rabbitmq_port}}" }.join(", ") %>
                    ]},
 <% if node[:rabbitmq][:ssl][:enabled] -%>
    {ssl_listeners, [
-                    <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{node[:rabbitmq][:ssl][:port]}}" }.join(", ") %>
+                    <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{@rabbitmq_ssl_port}}" }.join(", ") %>
                    ]},
    {ssl_options, [
    <% if node[:rabbitmq][:ssl][:cert_required] -%>
