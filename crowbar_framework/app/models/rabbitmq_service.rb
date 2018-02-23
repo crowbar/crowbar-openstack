@@ -100,6 +100,17 @@ class RabbitmqService < OpenstackServiceObject
 
     role.save if save_role
 
+    # if no previous configuration of haproxy_enable, active if the proposal is not already applied
+    if old_role.nil?
+      haproxy_enabled = role.default_attributes[@bc_name]["ha"]["haproxy_enabled"]
+    else
+      haproxy_enabled = old_role.default_attributes[@bc_name]["ha"]["haproxy_enabled"]
+      haproxy_enabled = false if haproxy_enabled.nil?
+    end
+
+    role.default_attributes[@bc_name]["ha"]["haproxy_enabled"] = haproxy_enabled
+    role.save
+
     rabbitmq_elements, rabbitmq_nodes, rabbitmq_ha_enabled = role_expand_elements(role, "rabbitmq-server")
     Openstack::HA.set_controller_role(rabbitmq_nodes) if rabbitmq_ha_enabled
 
@@ -134,7 +145,21 @@ class RabbitmqService < OpenstackServiceObject
         (old_role && old_role.default_attributes["rabbitmq"]["erlang_cookie"]) || random_password
     end
 
-    unless rabbitmq_ha_enabled
+    if rabbitmq_ha_enabled
+      if role.default_attributes["rabbitmq"]["cluster"] &&
+          role.default_attributes["rabbitmq"]["ha"]["haproxy_enabled"]
+        vip_networks = ["admin"]
+        vip_networks << "public" if role.default_attributes["rabbitmq"]["listen_public"]
+
+        allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(rabbitmq_elements,
+          vip_networks)
+
+        dirty = prepare_role_for_ha_with_haproxy(role, ["rabbitmq", "ha", "haproxy"],
+          rabbitmq_ha_enabled, rabbitmq_elements, vip_networks)
+
+        role.save if dirty
+      end
+    else
       # cluster mode requires HA (for now); don't do a validation check as we
       # still want to have the setting default to true in case people want to
       # turn HA on, and in this case, result in clustering by default

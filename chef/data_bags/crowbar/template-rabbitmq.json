@@ -35,7 +35,8 @@
             "fstype": "",
             "options": ""
           }
-        }
+        },
+        "haproxy_enabled": false
       },
       "trove": {
         "enabled": false,
@@ -64,7 +65,7 @@
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 204,
+      "schema-revision": 205,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },
