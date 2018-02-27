@@ -39,14 +39,10 @@ if node[:pacemaker][:clone_stateless_services]
   services.each do |service|
     primitive_name = "ceilometer-#{service}"
 
-    if node[:ceilometer][:use_mongodb]
-      order_only_existing = "( #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
-    else
-      # we don't make the db mandatory if not mongodb; this is debatable, but
-      # oslo.db is supposed to deal well with reconnections; it's less clear about
-      # mongodb
-      order_only_existing = "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
-    end
+    # we don't make the db mandatory if not mongodb; this is debatable, but
+    # oslo.db is supposed to deal well with reconnections; it's less clear about
+    # mongodb
+    order_only_existing = "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
 
     objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
       agent node[:ceilometer][:ha][service.to_sym][:agent]
@@ -54,18 +50,6 @@ if node[:pacemaker][:clone_stateless_services]
       order_only_existing order_only_existing
     end
     transaction_objects.push(objects)
-
-    if node[:ceilometer][:use_mongodb]
-      clone_name = "cl-#{primitive_name}"
-      order_name = "o-#{clone_name}-mongo"
-      pacemaker_order order_name do
-        score "Mandatory"
-        ordering "cl-mongodb #{clone_name}"
-        action :update
-        only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-      end
-      transaction_objects << "pacemaker_order[#{order_name}]"
-    end
   end
 
   pacemaker_transaction "ceilometer server" do

@@ -78,9 +78,7 @@ class CeilometerService < OpenstackServiceObject
     answer = []
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["ceilometer"]["rabbitmq_instance"] }
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes["ceilometer"]["keystone_instance"] }
-    unless role.default_attributes["ceilometer"]["use_mongodb"]
-      answer << { "barclamp" => "database", "inst" => role.default_attributes["ceilometer"]["database_instance"] }
-    end
+    answer << { "barclamp" => "database", "inst" => role.default_attributes["ceilometer"]["database_instance"] }
     answer
   end
 
@@ -129,8 +127,6 @@ class CeilometerService < OpenstackServiceObject
     validate_one_for_role proposal, "ceilometer-central"
     validate_one_for_role proposal, "ceilometer-server"
 
-    validate_minimum_three_nodes_in_cluster(proposal)
-
     # unless (proposal["deployment"]["ceilometer"]["elements"]["ceilometer-agent-hyperv"] || []).empty? || hyperv_available?
     #   validation_error I18n.t("barclamp.#{@bc_name}.validation.hyper_v_support")
     # end
@@ -171,9 +167,6 @@ class CeilometerService < OpenstackServiceObject
       net_svc.allocate_ip "default", "public", "host", n
     end
 
-    use_mongodb = role.default_attributes[@bc_name]["use_mongodb"]
-    mongodb_ha(server_nodes, role) if ha_enabled && use_mongodb
-
     # No specific need to call sync dns here, as the cookbook doesn't require
     # the VIP of the cluster to be setup
     allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
@@ -190,74 +183,7 @@ class CeilometerService < OpenstackServiceObject
     @logger.debug("Ceilometer apply_role_pre_chef_call: leaving")
   end
 
-  def mongodb_ha(new_members, role)
-    # enforce that mongodb is only installed on an odd number of nodes
-    # so we don't get problems when they try to vote for a replica set
-    # primary node
-    new_members.pop if new_members.length % 2 == 0
-
-    # this is just the node we use to communicate to mongodb and
-    # configure the replica set
-    controller = new_members.sort.first
-
-    logger.debug("Configuring a MongoDB Replica Set with "\
-      "the following nodes: #{new_members.join(", ")}")
-
-    # make sure only the current replica set new_members have the replica
-    # set attributes enabled
-    old_members = NodeObject.find("ceilometer_ha_mongodb_replica_set_member:true AND ceilometer_config_environment:#{role.name}")
-    old_members.each do |old_member|
-      next if new_members.include?(old_member.name)
-      old_member[:ceilometer][:ha][:mongodb][:replica_set][:member] = false
-      old_member[:ceilometer][:ha][:mongodb][:replica_set][:controller] = false
-      old_member.save
-    end
-
-    new_members.each do |new_member|
-      dirty = false
-
-      node = NodeObject.find_node_by_name(new_member)
-      node[:ceilometer] ||= {ha: {mongodb: {replica_set: {}}}}
-
-      # explicit check for true; otherwise it doesn't work
-      unless node[:ceilometer][:ha][:mongodb][:replica_set][:member] == true
-        node[:ceilometer][:ha][:mongodb][:replica_set][:member] = true
-        dirty = true
-      end
-
-      is_controller = (new_member == controller)
-      unless node[:ceilometer][:ha][:mongodb][:replica_set][:controller] == is_controller
-        node[:ceilometer][:ha][:mongodb][:replica_set][:controller] = is_controller
-        dirty = true
-      end
-
-      node.save if dirty
-    end
-  end
-
   private
-
-  # If the ceilometer-server role has a cluster assigned, we want to
-  # make sure that the cluster contains at least three nodes. MongoDB HA
-  # requires it; otherwise the Replica Set wouldn't be able to elect a
-  # primary.
-  def validate_minimum_three_nodes_in_cluster(proposal)
-    servers = proposal["deployment"][@bc_name]["elements"]["ceilometer-server"]
-    use_mongodb = proposal["attributes"][@bc_name]["use_mongodb"]
-
-    if use_mongodb && servers.length == 1 && is_cluster?(servers[0])
-      nodes, failures = expand_nodes_for_all servers
-
-      @logger.debug("validate_minimum_three_nodes_in_cluster: skipping "\
-        "items that we failed to expand: #{failures.join(", ")}"
-        ) unless failures.nil? || failures.empty?
-
-      validation_error I18n.t(
-        "barclamp.#{@bc_name}.validation.nodes_count",
-        nodes_count: nodes.count
-      ) if nodes.length < 3
-    end
-  end
 
   def hyperv_available?
     return File.exist?("/opt/dell/chef/cookbooks/hyperv")

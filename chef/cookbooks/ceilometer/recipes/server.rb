@@ -15,51 +15,6 @@
 
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
-if node[:ceilometer][:use_mongodb]
-  include_recipe "ceilometer::mongodb" if !ha_enabled || node[:ceilometer][:ha][:mongodb][:replica_set][:member]
-
-  # need to wait for mongodb to start even if it's on a different host
-  # (ceilometer services need it running)
-  mongodb_nodes = nil
-
-  if ha_enabled
-    mongodb_nodes = CeilometerHelper.replica_set_members(node)
-  end
-
-  # if we don't have HA enabled, then mongodb should be on the current host; if
-  # we have HA enabled and the node is part of the replica set, then we're fine
-  # too
-  mongodb_nodes ||= [node]
-
-  mongodb_addresses = mongodb_nodes.map{ |n| Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address }
-
-  ruby_block "wait for mongodb start" do
-    block do
-      require "timeout"
-      begin
-        Timeout.timeout(120) do
-          master_available = false
-          while true
-            mongodb_addresses.each do |mongodb_address|
-              cmd = shell_out("mongo --quiet #{mongodb_address} --eval \"db.isMaster()['ismaster']\" 2> /dev/null")
-              if cmd.exitstatus == 0 and cmd.stdout.strip == "true"
-                master_available = true
-                break
-              end
-            end
-
-            break if master_available
-
-            Chef::Log.debug("mongodb still not reachable")
-            sleep(2)
-          end
-        end
-      rescue Timeout::Error
-        Chef::Log.warn("No master for mongodb on #{mongodb_addresses.join(',')} after trying for 2 minutes")
-      end
-    end
-  end
-else
   db_settings = fetch_database_settings
 
   include_recipe "database::client"
@@ -101,7 +56,6 @@ else
   end
 
   crowbar_pacemaker_sync_mark "create-ceilometer_database" if ha_enabled
-end
 
 case node[:platform_family]
 when "suse"
@@ -322,26 +276,8 @@ file "/etc/cron.daily/crowbar-ceilometer-expirer" do
   action :delete
 end
 
-# Cronjob to repair the database and free space for mongodb.  This
-# only makes sense when the metering_time_to_live or
-# event_time_to_leave > 0
-time_to_live_set = node[:ceilometer][:database][:metering_time_to_live] > 0 \
-                   || node[:ceilometer][:database][:event_time_to_live] > 0
-if node[:ceilometer][:use_mongodb] && time_to_live_set
-  template "/etc/cron.weekly/crowbar-repairdatabase-mongodb" do
-    source "cronjob-repairdatabase-mongodb.erb"
-    owner "root"
-    group "root"
-    mode 0755
-    backup false
-    variables(
-      listen_addr: Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-    )
-  end
-else
-  file "/etc/cron.weekly/crowbar-repairdatabase-mongodb" do
-    action :delete
-  end
+file "/etc/cron.weekly/crowbar-repairdatabase-mongodb" do
+  action :delete
 end
 
 crowbar_pacemaker_sync_mark "create-ceilometer_register" if ha_enabled
