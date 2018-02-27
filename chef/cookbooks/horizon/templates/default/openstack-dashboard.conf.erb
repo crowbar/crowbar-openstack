@@ -6,6 +6,9 @@ RewriteEngine On
 RewriteCond %{SERVER_PORT} ^<%= @bind_port %>$
 RewriteRule / https://%{HTTP_HOST}%{REQUEST_URI} [L,R]
 
+Listen <%= @bind_host %>:<%= @bind_port %>>
+Listen <%= @bind_host %>:<%= @bind_port_ssl %>
+
 <VirtualHost <%= @bind_host %>:<%= @bind_port_ssl %>>
     SSLEngine On
     SSLCipherSuite EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH
@@ -17,6 +20,8 @@ RewriteRule / https://%{HTTP_HOST}%{REQUEST_URI} [L,R]
     <% end %>
 
 <% else %>
+Listen <%= @bind_host %>:<%= @bind_port %>>
+
 <VirtualHost <%= @bind_host %>:<%= @bind_port %>>
 <% end %>
     WSGIDaemonProcess horizon user=<%= @user %> group=<%= @group %> processes=3 threads=10 home=<%= @horizon_dir %>  display-name=%{GROUP}

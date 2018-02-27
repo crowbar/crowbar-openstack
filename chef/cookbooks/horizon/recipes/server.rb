@@ -492,20 +492,7 @@ else
   bind_port_ssl = 443
 end
 
-node.normal[:apache][:listen_ports_crowbar] ||= {}
-
-if node[:horizon][:apache][:ssl]
-  node.normal[:apache][:listen_ports_crowbar][:horizon] = { plain: [bind_port], ssl: [bind_port_ssl] }
-else
-  node.normal[:apache][:listen_ports_crowbar][:horizon] = { plain: [bind_port] }
-end
-
-# we can only include the recipe after having defined the listen_ports_crowbar attribute
 include_recipe "horizon::ha" if ha_enabled
-
-# Override what the apache2 cookbook does since it enforces the ports
-resource = resources(template: "#{node[:apache][:dir]}/ports.conf")
-resource.variables({apache_listen_ports: node.normal[:apache][:listen_ports_crowbar].values.map{ |p| p.values }.flatten.uniq.sort})
 
 if node[:horizon][:apache][:ssl] && node[:horizon][:apache][:generate_certs]
   package "apache2-utils"
