@@ -94,6 +94,14 @@
       "block_device": {
         "allocate_retries": 60,
         "allocate_retries_interval": 3
+      },
+      "resource_limits": {
+        "openstack-nova-api": {
+          "LimitNOFILE": null
+        },
+        "openstack-nova-compute": {
+          "LimitNOFILE": null
+        }
       }
     }
   },
@@ -101,7 +109,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 48,
+      "schema-revision": 49,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-docker": [ "readying", "ready", "applying" ],

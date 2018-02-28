@@ -136,6 +136,22 @@
                 "allocate_retries": { "type": "number", "required" : true },
                 "allocate_retries_interval": { "type": "number", "required" : true }
               }
+            },
+            "resource_limits": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                "openstack-nova-api": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
+                },
+                "openstack-nova-compute": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
+                }
+              }
             }
           }
         }
