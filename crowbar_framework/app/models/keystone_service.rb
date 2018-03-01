@@ -133,26 +133,6 @@ class KeystoneService < OpenstackServiceObject
     @logger.debug("Keystone apply_role_pre_chef_call: leaving")
   end
 
-  def update_proposal_status(inst, status, message, bc = @bc_name)
-    @logger.debug("update_proposal_status: enter #{inst} #{bc} #{status} #{message}")
-
-    prop = Proposal.where(barclamp: bc, name: inst).first
-    unless prop.nil?
-      prop["deployment"][bc]["crowbar-status"] = status
-      prop["deployment"][bc]["crowbar-failed"] = message
-      # save the updated_password into the password field to update the raw_view
-      if status == "success" && !prop["attributes"][bc]["admin"]["updated_password"].blank?
-        prop["attributes"][bc]["admin"]["password"] = prop["attributes"][bc]["admin"]["updated_password"]
-      end
-      res = prop.save
-    else
-      res = true
-    end
-
-    @logger.debug("update_proposal_status: exit #{inst} #{bc} #{status} #{message}")
-    res
-  end
-
   def apply_role_post_chef_call(old_role, role, all_nodes)
     @logger.debug("Keystone apply_role_post_chef_call: entering #{all_nodes.inspect}")
 

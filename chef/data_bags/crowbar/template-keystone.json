@@ -41,8 +41,7 @@
       "admin": {
         "tenant": "admin",
         "username": "admin",
-        "password": "crowbar",
-        "updated_password": ""
+        "password": "crowbar"
       },
       "service": {
         "tenant": "service",

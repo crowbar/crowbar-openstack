@@ -46,8 +46,7 @@
                     "admin": { "type": "map", "required": true, "mapping": {
                       "tenant": { "type" : "str", "required" : true },
                       "username": { "type" : "str", "required" : true },
-                      "password": { "type" : "str", "required" : true },
-                      "updated_password": { "type" : "str", "required" : false }
+                      "password": { "type" : "str", "required" : true }
                     }},
                     "service": { "type": "map", "required": true, "mapping": {
                       "tenant": { "type" : "str", "required" : true },

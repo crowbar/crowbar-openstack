@@ -571,6 +571,39 @@ crowbar_pacemaker_sync_mark "wait-keystone_register" if ha_enabled
 
 keystone_insecure = node["keystone"]["api"]["protocol"] == "https" && node[:keystone][:ssl][:insecure]
 
+register_auth_hash = { user: node[:keystone][:admin][:username],
+                       password: node[:keystone][:admin][:password],
+                       tenant: node[:keystone][:admin][:tenant] }
+
+old_password = node[:keystone][:admin][:old_password]
+old_register_auth_hash = register_auth_hash.clone
+old_register_auth_hash[:password] = old_password
+
+keystone_register "update admin password" do
+  protocol node[:keystone][:api][:protocol]
+  insecure keystone_insecure
+  host my_admin_host
+  port node[:keystone][:api][:admin_port]
+  auth old_register_auth_hash
+  user_name node[:keystone][:admin][:username]
+  user_password node[:keystone][:admin][:password]
+  tenant_name node[:keystone][:admin][:tenant]
+  action :add_user
+  only_if do
+    node[:keystone][:bootstrap] &&
+      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
+      old_password && !old_password.empty? &&
+      old_password != node[:keystone][:admin][:password]
+  end
+end
+
+ruby_block "backup current admin password on node attributes" do
+  block do
+    node.set[:keystone][:admin][:old_password] = node[:keystone][:admin][:password]
+    node.save
+  end
+end
+
 # Creates admin user, admin role and admin project
 execute "keystone-manage bootstrap" do
   command "keystone-manage bootstrap \
@@ -590,39 +623,6 @@ execute "keystone-manage bootstrap" do
   end
 end
 
-register_auth_hash = { user: node[:keystone][:admin][:username],
-                       password: node[:keystone][:admin][:password],
-                       tenant: node[:keystone][:admin][:tenant] }
-
-updated_password = node[:keystone][:admin][:updated_password]
-
-unless updated_password.nil? ||
-    updated_password.empty? ||
-    updated_password == node[:keystone][:admin][:password]
-
-  if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
-    keystone_register "update admin password" do
-      protocol node[:keystone][:api][:protocol]
-      insecure keystone_insecure
-      host my_admin_host
-      port node[:keystone][:api][:admin_port]
-      auth register_auth_hash
-      user_name node[:keystone][:admin][:username]
-      user_password updated_password
-      tenant_name node[:keystone][:admin][:tenant]
-      action :nothing
-    end.run_action(:add_user)
-  end
-
-  ruby_block "update admin password on node attributes" do
-    block do
-      node.set[:keystone][:admin][:password] = updated_password
-      node.save
-      register_auth_hash[:password] = updated_password
-    end
-    action :nothing
-  end.run_action(:create)
-end
 
 # Silly wake-up call - this is a hack; we use retries because the server was
 # just (re)started, and might not answer on the first try
