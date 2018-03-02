@@ -154,3 +154,14 @@ keystone_register "register nova_legacy endpoint" do
 end
 
 crowbar_pacemaker_sync_mark "create-nova_register"
+
+service = "openstack-nova-api"
+if node[:nova][:resource_limits] && node[:nova][:resource_limits][service]
+  limits = node[:nova][:resource_limits][service]
+  action = limits.values.any? ? :create : :delete
+  utils_systemd_override_limits "Resource limits for #{service}" do
+    service_name service
+    limits limits
+    action action
+  end
+end
