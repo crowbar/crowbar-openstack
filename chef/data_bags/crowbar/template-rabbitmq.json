@@ -7,6 +7,7 @@
       "port": 5672,
       "password": "",
       "user": "nova",
+      "extra_users": {},
       "vhost": "/nova",
       "ssl": {
         "enabled": false,
@@ -57,7 +58,7 @@
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 104,
+      "schema-revision": 105,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },
@@ -74,4 +75,3 @@
     }
   }
 }
-
