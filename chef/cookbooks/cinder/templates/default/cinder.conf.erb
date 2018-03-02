@@ -12,6 +12,12 @@ wsgi_keep_alive = false
 state_path = /var/lib/cinder
 my_ip = <%= node[:cinder][:my_ip] %>
 
+# os_privileged_* values are required for migrations of attached volumes
+# See bsc#1079763
+os_privileged_user_name = <%= @keystone_settings['service_user'] %>
+os_privileged_user_password = <%= @keystone_settings['service_password'] %>
+os_privileged_user_tenant = <%= @keystone_settings['service_tenant'] %>
+
 glance_api_servers = <%= @glance_server_protocol %>://<%= @glance_server_host %>:<%= @glance_server_port %>
 glance_api_version = 2
 <% unless @glance_server_insecure.nil? -%>
