@@ -1,0 +1,38 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header show_raw_deployment?, true
+
+  .panel-body
+    = instance_field :rabbitmq
+    = instance_field :keystone
+    = instance_field :nova
+    = instance_field :heat
+    = instance_field :glance
+    = instance_field :neutron
+
+    %fieldset
+      %legend
+        = t(".logging_header")
+      = boolean_field :verbose
+      = boolean_field :debug
+      = boolean_field :use_syslog
+
+    %fieldset
+      %legend
+        = t('.ssl_header')
+
+      = select_field %w(api protocol),
+        :collection => :api_protocols_for_murano,
+        'data-sslprefix' => 'ssl',
+        'data-sslcert' => '/etc/murano/ssl/certs/signing_cert.pem',
+        'data-sslkey' => '/etc/murano/ssl/private/signing_key.pem'
+
+      #ssl_container
+        = boolean_field %w(ssl generate_certs)
+        = string_field %w(ssl certfile)
+        = string_field %w(ssl keyfile)
+        = boolean_field %w(ssl insecure)
+        = boolean_field %w(ssl cert_required),
+          'data-enabler' => 'true',
+          'data-enabler-target' => '#ssl_ca_certs'
+        = string_field %w(ssl ca_certs)
