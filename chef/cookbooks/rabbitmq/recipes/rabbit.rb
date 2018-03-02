@@ -134,6 +134,35 @@ execute "rabbitmqctl set_user_tags #{node[:rabbitmq][:user]} management" do
   only_if only_if_command if ha_enabled
 end
 
+node[:rabbitmq][:users].each do |user|
+  # create extra users
+  rabbitmq_user "adding user #{user[:username]}" do
+    user user[:username]
+    password user[:password]
+    address node[:rabbitmq][:management_address]
+    port node[:rabbitmq][:management_port]
+    action :add
+    only_if only_if_command if ha_enabled
+  end
+
+  # add permisions to those extra users into the default vhost
+  rabbitmq_user "setting permissions for #{user[:username]}" do
+    user user[:username]
+    vhost node[:rabbitmq][:vhost]
+    # permissions is a list but the resource needs an escaped string
+    permissions user[:permissions].map { |x| "'#{x}'" }.join(" ")
+    action :set_permissions
+    only_if only_if_command if ha_enabled
+  end
+
+  # tag those users as management
+  execute "rabbitmqctl set_user_tags #{user[:username]} #{user[:tags]}" do
+    not_if "rabbitmqctl list_users | grep #{user[:username]} | grep -q #{user[:tags].join(",")}"
+    action :run
+    only_if only_if_command if ha_enabled
+  end
+end
+
 if cluster_enabled
   quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
 

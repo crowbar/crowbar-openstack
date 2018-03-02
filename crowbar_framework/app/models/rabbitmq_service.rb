@@ -71,6 +71,35 @@ class RabbitmqService < OpenstackServiceObject
     @logger.debug("Rabbitmq apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
+    # prepare extra users
+    save_role = false
+    old_attrs = old_role.nil? ? nil : old_role.default_attributes[@bc_name]
+    role.default_attributes[@bc_name]["users"] ||= []
+    role.default_attributes[@bc_name]["extra_users"].each do |username, user|
+      save_role = true
+      updated_user = {
+        username: username,
+        tags: user["tags"],
+        permissions: user["permissions"]
+      }
+      if !old_attrs.nil? && old_attrs.include?("users") && !old_attrs["users"].each.select do |u|
+        u["username"] == user["username"]
+      end.empty?
+        # reuse the existing pass
+        pass = old_attrs["users"].each.select do |u|
+          u["username"] == user["username"]
+        end.first["password"]
+
+        updated_user.update(password: pass)
+      else
+        # new user, so create a random pass
+        updated_user.update(password: random_password)
+      end
+      role.default_attributes[@bc_name]["users"].push(updated_user)
+    end
+
+    role.save if save_role
+
     rabbitmq_elements, rabbitmq_nodes, rabbitmq_ha_enabled = role_expand_elements(role, "rabbitmq-server")
     Openstack::HA.set_controller_role(rabbitmq_nodes) if rabbitmq_ha_enabled
 
@@ -125,6 +154,17 @@ class RabbitmqService < OpenstackServiceObject
     servers = proposal["deployment"][@bc_name]["elements"]["rabbitmq-server"]
     ha_enabled = !(servers.nil? || servers.first.nil? || !is_cluster?(servers.first))
 
+    # extra users validation for permissions
+    unless attributes["extra_users"].empty?
+      attributes["extra_users"].each do |username, user|
+        if user["permissions"].length != 3
+          validation_error I18n.t(
+            "barclamp.#{bc_name}.validation.wrong_permissions", user: username
+          )
+        end
+      end
+    end
+
     # Shared storage validation for HA
     if ha_enabled && !attributes["cluster"]
       storage_mode = attributes["ha"]["storage"]["mode"]
@@ -154,4 +194,3 @@ class RabbitmqService < OpenstackServiceObject
     super
   end
 end
-

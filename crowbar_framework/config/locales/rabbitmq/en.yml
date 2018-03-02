@@ -21,6 +21,16 @@ en:
       edit_attributes:
         vhost: 'Virtual host'
         user: 'User'
+        extra_users:
+          username: 'Username'
+          permissions: 'Permissions (3 comma separated items for configure, write, read; e.g. ".*,.*,.*")'
+          tags: 'Tags (comma separated)'
+          error_invalid: 'Username and Permissions cannot be empty'
+          error_duplicate: 'There is a user with this username'
+          title: 'Extra users'
+          add: 'Add'
+          record_remove: 'Delete'
+          no_records: 'No records'
         port: 'Port'
         ssl_header: 'SSL Support'
         ssl:
@@ -54,3 +64,4 @@ en:
         no_filesystem: 'No filesystem type specified for shared storage.'
         drbd: 'DRBD is not enabled for cluster %{cluster_name}.'
         invalid_size: 'Invalid size for DRBD device.'
+        wrong_permissions: 'Wrong permissions for user %{user}. Permissions need to be 3 comma separated items (configure, write, read)'

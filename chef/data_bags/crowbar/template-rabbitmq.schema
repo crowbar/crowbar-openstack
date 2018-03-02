@@ -16,6 +16,20 @@
             "port": { "type": "int", "required": true },
             "password": { "type": "str", "required": true },
             "user": { "type": "str", "required": true },
+            "extra_users": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                = : {
+                  "type": "map",
+                  "required": false,
+                  "mapping": {
+                    "permissions": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
+                    "tags": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] }
+                  }
+                }
+              }
+            },
             "vhost": { "type": "str", "required": true },
             "ssl": {
               "type": "map", "required": true, "mapping": {
