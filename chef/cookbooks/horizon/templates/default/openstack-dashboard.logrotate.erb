@@ -1,27 +1,21 @@
 /var/log/apache2/openstack-dashboard-access_log {
     compress
+    copytruncate
     dateext
     maxage 365
     rotate 99
     size=+4096k
     notifempty
     missingok
-    create 644 root root
-    postrotate
-     systemctl reload apache2.service
-    endscript
 }
 
 /var/log/apache2/openstack-dashboard-error_log {
     compress
+    copytruncate
     dateext
     maxage 365
     rotate 99
     size=+1024k
     notifempty
     missingok
-    create 644 root root
-    postrotate
-     systemctl reload apache2.service
-    endscript
 }
