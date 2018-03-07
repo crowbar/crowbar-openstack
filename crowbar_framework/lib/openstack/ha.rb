@@ -21,6 +21,8 @@ module Openstack
         save_it = false
         node = NodeObject.find_node_by_name nodename
 
+        node[:pacemaker] ||= {}
+
         node[:pacemaker][:attributes] ||= {}
         if node[:pacemaker][:attributes]["OpenStack-role"] != role
           node[:pacemaker][:attributes]["OpenStack-role"] = role
