@@ -19,6 +19,7 @@
                     "rpc_workers": { "type": "int", "required": true },
                     "use_lbaas": { "type": "bool", "required": true },
                     "lbaasv2_driver": { "type": "str", "required": true },
+                    "allow_automatic_lbaas_agent_failover": { "type": "bool", "required": true },
                     "use_l2pop": { "type": "bool", "required": true },
                     "l2pop": { "type": "map", "required": true, "mapping": {
                       "agent_boot_time": { "type" : "int", "required" : true }

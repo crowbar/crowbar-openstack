@@ -180,6 +180,7 @@ if node[:neutron][:use_lbaas] &&
       debug: node[:neutron][:debug],
       interface_driver: interface_driver,
       user_group: node[:neutron][:platform][:lbaas_haproxy_group],
+      allow_automatic_lbaas_agent_failover: node[:neutron][:allow_automatic_lbaas_agent_failover],
       device_driver: "neutron_lbaas.drivers.haproxy.namespace_driver.HaproxyNSDriver"
     )
   end
