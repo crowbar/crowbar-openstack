@@ -37,5 +37,19 @@ default[:mysql][:ha][:ports][:admin_port] = 3306
 default[:mysql][:ha][:op][:monitor][:interval] = "20s"
 default[:mysql][:ha][:op][:monitor][:role]     = "Master"
 
-# Let users override this if galera-python-clustercheck is available to them
-default[:mysql][:ha][:clustercheck] = false
+# If needed we can enhance this to set the mariadb version
+# depeding on "platform" and "platform_version". But currently
+# this should be enough
+default[:mysql][:mariadb][:version] = "10.2"
+default[:mysql][:galera_packages] = [
+  "galera-3-wsrep-provider",
+  "mariadb-tools",
+  "xtrabackup",
+  "socat",
+  "galera-python-clustercheck"
+]
+
+# newer version need an additional package on SLES
+unless node[:mysql][:mariadb][:version] == "10.1"
+  default[:mysql][:galera_packages] << "mariadb-galera"
+end
