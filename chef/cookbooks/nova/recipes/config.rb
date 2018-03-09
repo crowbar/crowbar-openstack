@@ -392,6 +392,7 @@ template node[:nova][:config_file] do
     oat_appraiser_host: oat_server[:hostname],
     oat_appraiser_port: "8443",
     has_itxt: has_itxt,
+    enabled_filters: node[:nova][:scheduler][:enabled_filters],
     reserved_host_memory: reserved_host_memory,
     use_baremetal_filters: use_baremetal_filters,
     track_instance_changes: track_instance_changes,

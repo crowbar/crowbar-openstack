@@ -37,7 +37,8 @@
         "cpu_allocation_ratio": 16.0,
         "disk_allocation_ratio": 1.0,
         "reserved_host_memory_mb": 512,
-        "discover_hosts_in_cells_interval": 600
+        "discover_hosts_in_cells_interval": 600,
+        "enabled_filters": ""
       },
       "ec2-api": {
         "db": {
@@ -180,7 +181,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 207,
+      "schema-revision": 208,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],
