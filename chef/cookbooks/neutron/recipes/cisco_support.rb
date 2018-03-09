@@ -13,7 +13,27 @@ if vlan_mode
   switches = neutron[:neutron][:cisco_switches].to_hash
 end
 
-template "/etc/neutron/plugins/ml2/ml2_conf_cisco.ini" do
+# Empty the config file to avoid confusion (it may be a symlink, due to some
+# old code we had)
+old_config = "/etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
+link old_config do
+  action :delete
+  only_if "test -L #{old_config}"
+end
+file old_config do
+  owner "root"
+  group node[:neutron][:platform][:group]
+  mode "0640"
+  content "# Please use config file snippets in /etc/neutron/neutron.conf.d/.\n" \
+          "# See /etc/neutron/README.config for more details.\n"
+end
+
+# remove old snippet that was created previously
+file "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco.ini.conf" do
+  action :delete
+end
+
+template node[:neutron][:ml2_cisco_config_file] do
   cookbook "neutron"
   source "ml2_conf_cisco.ini.erb"
   mode "0640"

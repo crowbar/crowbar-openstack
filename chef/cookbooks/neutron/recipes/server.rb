@@ -78,33 +78,6 @@ file "/etc/neutron/plugin.ini" do
           "# See /etc/neutron/README.config for more details.\n"
 end
 
-# enable/disable ml2_conf_cisco for neutron-server
-if node[:neutron][:networking_plugin] == "ml2" and
-  node[:neutron][:ml2_mechanism_drivers].include?("cisco_nexus")
-  cisco_nexus_link_action = "create"
-else
-  cisco_nexus_link_action = "delete"
-end
-link "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco.ini.conf" do
-  to "/etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
-  action cisco_nexus_link_action
-  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-end
-
-# enable/disable ml2_conf_cisco_apic for neutron-server
-if node[:neutron][:networking_plugin] == "ml2" &&
-  (node[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
-   node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
-  cisco_apic_link_action = "create"
-else
-  cisco_apic_link_action = "delete"
-end
-link "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" do
-  to "/etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini"
-  action cisco_apic_link_action
-  notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-end
-
 directory "/var/cache/neutron" do
   owner node[:neutron][:user]
   group node[:neutron][:group]
@@ -365,9 +338,7 @@ if node[:neutron][:networking_plugin] == "ml2"
     execute "apic-ml2-db-manage upgrade head" do
       user node[:neutron][:user]
       group node[:neutron][:group]
-      command "apic-ml2-db-manage --config-dir /etc/neutron/neutron.conf.d \
-                                  --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
-                                  upgrade head"
+      command "apic-ml2-db-manage --config-dir /etc/neutron/neutron.conf.d upgrade head"
       only_if { !db_synced && (!ha_enabled || is_founder) }
     end
 
@@ -386,9 +357,7 @@ if node[:neutron][:networking_plugin] == "ml2"
     execute "gbp-db-manage upgrade head" do
       user node[:neutron][:user]
       group node[:neutron][:group]
-      command "gbp-db-manage --config-dir /etc/neutron/neutron.conf.d \
-                             --config-file /etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini \
-                             upgrade head"
+      command "gbp-db-manage --config-dir /etc/neutron/neutron.conf.d upgrade head"
       only_if { !db_synced && (!ha_enabled || is_founder) }
     end
 
