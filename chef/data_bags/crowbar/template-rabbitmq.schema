@@ -109,7 +109,17 @@
                 "dump_log_write_threshold": { "type": "int", "required": true},
                 "dump_log_time_threshold": { "type": "int", "required": true}
               }
-            }
+            },
+            "tcp_listen_options": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "backlog": { "type": "int", "required": true },
+                "sndbuf": { "type": "int", "required": false },
+                "recbuf": { "type": "int", "required": false }
+              }
+            },
+            "collect_statistics_interval": { "type": "int", "required": true}
           }
         }
       }
