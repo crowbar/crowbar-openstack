@@ -1,4 +1,0 @@
-
-<% unless node[:rabbitmq].nil? -%>
-command[check_rabbit]=/usr/lib/nagios/plugins/check_rabbitmq_aliveness -H <%= node[:rabbitmq][:address] %> -u <%= node[:rabbitmq][:user] %> -p <%= node[:rabbitmq][:password] %> --vhost <%= node[:rabbitmq][:vhost] %>
-<% end -%>

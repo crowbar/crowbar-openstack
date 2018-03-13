@@ -25,6 +25,5 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "nova", "nova-controller")
   include_recipe "nova::controller_ha"
   include_recipe "nova::availability_zones"
   include_recipe "nova::flavors"
-  include_recipe "nova::monitor"
   include_recipe "nova::monitor_monasca"
 end

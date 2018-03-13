@@ -16,5 +16,4 @@
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "rabbitmq", "rabbitmq-server")
   include_recipe "rabbitmq::rabbit"
-  include_recipe "rabbitmq::monitor"
 end

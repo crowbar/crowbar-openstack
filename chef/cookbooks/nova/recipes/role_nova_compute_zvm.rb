@@ -17,5 +17,4 @@
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "nova", "nova-compute-zvm")
   include_recipe "nova::zvm"
   include_recipe "nova::compute"
-  include_recipe "nova::monitor"
 end
