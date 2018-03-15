@@ -242,14 +242,13 @@ class CinderService < OpenstackServiceObject
     # Generate secrets uuid for libvirt rbd backend
     dirty = false
     proposal = Proposal.find_by(barclamp: "cinder", name: role.inst)
-    role.default_attributes[:cinder][:volumes].each_with_index do |volume, volid|
-      next unless volume[:backend_driver] == "rbd"
-      if volume[:rbd][:secret_uuid].empty?
-        secret_uuid = `uuidgen`.strip
-        volume[:rbd][:secret_uuid] = secret_uuid
-        proposal[:attributes][:cinder][:volumes][volid][:rbd][:secret_uuid] = secret_uuid
-        dirty = true
-      end
+    role.default_attributes["cinder"]["volumes"].each_with_index do |volume, volid|
+      next unless volume["backend_driver"] == "rbd"
+      next unless volume["rbd"]["secret_uuid"].empty?
+      secret_uuid = `uuidgen`.strip
+      volume["rbd"]["secret_uuid"] = secret_uuid
+      proposal["attributes"]["cinder"]["volumes"][volid]["rbd"]["secret_uuid"] = secret_uuid
+      dirty = true
     end
     if dirty
       # This makes the proposal in the UI looked as 'applied', even if you make changes to it
