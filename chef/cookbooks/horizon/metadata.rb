@@ -8,7 +8,6 @@ version "0.0"
 
 depends "apache2"
 depends "database"
-depends "nagios"
 depends "memcached"
 depends "keystone"
 depends "crowbar-openstack"

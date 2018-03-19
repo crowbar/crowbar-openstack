@@ -16,6 +16,5 @@
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "ironic", "ironic-server")
   include_recipe "ironic::server"
-  include_recipe "ironic::monitor"
   include_recipe "ironic::tftp"
 end

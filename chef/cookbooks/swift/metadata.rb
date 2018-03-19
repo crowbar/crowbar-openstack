@@ -25,7 +25,6 @@ version "0.1"
 
 depends "memcached"
 depends "keystone"
-depends "nagios"
 depends "uwsgi"
 depends "crowbar-openstack"
 depends "crowbar-pacemaker"

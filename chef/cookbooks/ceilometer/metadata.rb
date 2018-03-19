@@ -6,7 +6,6 @@ description "Installs/Configures Ceilometer"
 long_description IO.read(File.join(File.dirname(__FILE__), "README.md"))
 version "0.1"
 
-depends "nagios"
 depends "keystone"
 depends "memcached"
 depends "database"

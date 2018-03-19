@@ -18,6 +18,5 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "cinder", "cinder-controll
   include_recipe "cinder::api"
   include_recipe "cinder::scheduler"
   include_recipe "cinder::controller_ha"
-  include_recipe "cinder::monitor"
   include_recipe "cinder::monitor_monasca"
 end

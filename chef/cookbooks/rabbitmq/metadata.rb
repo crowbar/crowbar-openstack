@@ -9,7 +9,6 @@ recipe "rabbitmq", "Install and configure RabbitMQ"
 depends "crowbar-openstack"
 depends "crowbar-pacemaker"
 depends "utils"
-depends "nagios"
 # depends           "apt"
 
 %w{ubuntu debian}.each do |os|

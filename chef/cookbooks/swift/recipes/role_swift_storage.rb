@@ -17,5 +17,4 @@
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "swift", "swift-storage")
   include_recipe "swift::default"
   include_recipe "swift::storage"
-  include_recipe "swift::monitor"
 end
