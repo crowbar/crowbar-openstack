@@ -163,6 +163,17 @@ node[:rabbitmq][:users].each do |user|
   end
 end
 
+expire_policy_command = "rabbitmqctl set_policy -p #{node[:rabbitmq][:vhost]} --apply-to queues " \
+  " expire-queues '^(?!amq\.).*' '{\"expires\": 3600000}'"
+check_expire_policy_command = "rabbitmqctl list_policies -p #{node[:rabbitmq][:vhost]} | "\
+  " grep -q '^#{node[:rabbitmq][:vhost]}\\s*expire-queues\\s'"
+
+execute expire_policy_command do
+  not_if check_expire_policy_command
+  action :run
+  only_if only_if_command if ha_enabled
+end
+
 if cluster_enabled
   quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
 
