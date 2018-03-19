@@ -164,6 +164,8 @@ class CrowbarOpenStackHelper
     else
       @rabbitmq_settings ||= Hash.new
       rabbits = get_nodes(node, "rabbitmq-server", "rabbitmq", instance)
+      # Patent pending (tm)
+      rabbits = rabbits.rotate(barclamp.length).rotate(-node.name.hash % 6)
 
       if rabbits.empty?
         Chef::Log.warn("No RabbitMQ server found!")
