@@ -28,6 +28,7 @@ template "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" d
   owner "root"
   group node[:neutron][:platform][:group]
   variables(
+    vpc_pairs: node[:neutron][:apic][:vpc_pairs],
     apic_switches: aciswitches,
     ml2_mechanism_drivers: node[:neutron][:ml2_mechanism_drivers],
     policy_drivers: "implicit_policy,apic",
