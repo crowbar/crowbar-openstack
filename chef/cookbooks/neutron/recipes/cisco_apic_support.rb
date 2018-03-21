@@ -49,6 +49,7 @@ template node[:neutron][:ml2_cisco_apic_config_file] do
   owner "root"
   group node[:neutron][:platform][:group]
   variables(
+    vpc_pairs: node[:neutron][:apic][:vpc_pairs],
     apic_switches: aciswitches,
     ml2_mechanism_drivers: node[:neutron][:ml2_mechanism_drivers],
     policy_drivers: "implicit_policy,apic",
