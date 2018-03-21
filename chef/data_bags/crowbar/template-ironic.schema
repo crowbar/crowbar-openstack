@@ -25,6 +25,7 @@
             "enabled_drivers": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
             "automated_clean": { "type": "bool", "required": true },
             "pxe_append_params": { "type": "str", "required": true },
+            "configdrive_use_object_store": { "type": "bool", "required": true },
             "api": {
               "type": "map",
               "required": true,

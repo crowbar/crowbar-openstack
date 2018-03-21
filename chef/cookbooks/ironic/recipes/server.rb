@@ -182,6 +182,7 @@ template node[:ironic][:config_file] do
         keystone_settings: keystone_settings,
         glance_settings: glance_settings,
         swift_settings: IronicHelper.swift_settings(node, glance),
+        configdrive_use_object_store: node[:ironic][:configdrive_use_object_store],
         neutron_settings: neutron_settings,
         database_connection: db_connection,
         ironic_net_name: ironic_net_name,

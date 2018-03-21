@@ -125,3 +125,7 @@ pxe_append_params=<%= @pxe_append_params %>
 
 [deploy]
 default_boot_option=netboot
+<% if @swift_settings -%>
+configdrive_use_object_store=<%= @configdrive_use_object_store %>
+object_store_endpoint_type=swift
+<% end -%>

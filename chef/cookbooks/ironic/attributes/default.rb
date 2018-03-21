@@ -81,3 +81,5 @@ default[:ironic][:tftproot] = "/var/lib/ironic/tftpboot"
 default[:ironic][:pxe_append_params] = "nofb nomodeset vga=normal"
 
 default[:ironic][:enabled_drivers] = []
+
+default[:ironic][:configdrive_use_object_store] = true
