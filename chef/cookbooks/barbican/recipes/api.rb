@@ -112,7 +112,7 @@ keystone_register "register barbican user" do
   action :add_user
 end
 
-keystone_register "give barbican user access" do
+keystone_register "give barbican user access as admin" do
   protocol keystone_settings["protocol"]
   insecure keystone_settings["insecure"]
   host keystone_settings["internal_url_host"]
@@ -121,6 +121,94 @@ keystone_register "give barbican user access" do
   user_name keystone_settings["service_user"]
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"
+  action :add_access
+end
+
+keystone_register "add key-manager:service-admin role for barbican" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  role_name "key-manager:service-admin"
+  action :add_role
+end
+
+keystone_register "give barbican user access as key-manager:service-admin" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
+  role_name "key-manager:service-admin"
+  action :add_access
+end
+
+keystone_register "add creator role for barbican" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  role_name "creator"
+  action :add_role
+end
+
+keystone_register "give barbican user access as creator" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
+  role_name "creator"
+  action :add_access
+end
+
+keystone_register "add observer role for barbican" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  role_name "observer"
+  action :add_role
+end
+
+keystone_register "give barbican user access as observer" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
+  role_name "observer"
+  action :add_access
+end
+
+keystone_register "add audit role for barbican" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  role_name "audit"
+  action :add_role
+end
+
+keystone_register "give barbican user access as audit" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  tenant_name keystone_settings["service_tenant"]
+  role_name "audit"
   action :add_access
 end
 
