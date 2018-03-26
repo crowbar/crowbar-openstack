@@ -15,6 +15,10 @@ enable_optimized_metadata = <%= node[:neutron][:apic][:optimized_metadata] %>
 enable_optimized_dhcp = <%= node[:neutron][:apic][:optimized_dhcp] %>
 apic_provision_infra = True
 apic_provision_hostlinks = True
+<%  unless @vpc_pairs.nil? -%>
+apic_vpc_pairs = <%= @vpc_pairs %>
+<% end -%>
+
 <% @apic_switches.keys.each do |ip| -%>
 [apic_switch:<%=ip%>]
 <%    if @apic_switches[ip].key?(:switch_ports) -%>

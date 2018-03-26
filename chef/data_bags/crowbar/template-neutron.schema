@@ -51,8 +51,9 @@
                       "system_id": { "type" : "str", "required" : true },
                       "username": { "type" : "str", "required": true },
                       "password": { "type" : "str", "required": true },
-                      "optimized_metadata": { "type" : "bool", "required" : true },
-                      "optimized_dhcp": { "type" : "bool", "required" : true },
+                      "optimized_metadata": { "type" : "bool", "required": true },
+                      "optimized_dhcp": { "type" : "bool", "required": true }, 
+                      "vpc_pairs": { "type": "str", "required": false },
                       "opflex": { "type": "seq", "required": true, "sequence": [ {
                         "type": "map", "required": true, "mapping": {
                           "pod": { "type" : "str", "required" : false },
