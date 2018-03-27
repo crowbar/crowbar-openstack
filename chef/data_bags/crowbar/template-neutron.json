@@ -48,6 +48,12 @@
         "password": "",
         "optimized_metadata": true,
         "optimized_dhcp": true,
+        "ext_net": {
+          "name": "l3out",
+          "preexisting": true,
+          "ext_epg": "l3out-epg",
+          "host_pool_cidr": ""
+        },
         "opflex": [{
           "pod": "",
           "nodes" : [],
@@ -180,7 +186,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 116,
+      "schema-revision": 117,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ]

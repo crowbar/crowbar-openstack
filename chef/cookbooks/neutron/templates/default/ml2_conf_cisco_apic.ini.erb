@@ -21,11 +21,11 @@ apic_vpc_pairs = <%= @vpc_pairs %>
 
 <% @apic_switches.keys.each do |ip| -%>
 [apic_switch:<%=ip%>]
-<%    if @apic_switches[ip].key?(:switch_ports) -%>
-<%      @apic_switches[ip][:switch_ports].each do |name, values| -%>
-<%=       name %> = <%= values[:switch_port] %>
-<%      end -%>
-<%    end -%>
+  <% if @apic_switches[ip].key?(:switch_ports) -%>
+    <% @apic_switches[ip][:switch_ports].each do |name, values| -%>
+<%= name %> = <%= values[:switch_port] %>
+    <% end -%>
+  <% end -%>
 <% end -%>
 <% if @ml2_mechanism_drivers.include?("apic_gbp") -%>
 [group_policy]
@@ -33,3 +33,11 @@ policy_drivers = <%= @policy_drivers %>
 [group_policy_implicit_policy]
 default_ip_pool = <%= @default_ip_pool %>
 <% end -%>
+
+[apic_external_network:<%=node[:neutron][:apic][:ext_net][:name]%>]
+preexisting = <%= node[:neutron][:apic][:ext_net][:preexisting] %>
+<% unless node[:neutron][:apic][:ext_net][:nat_enabled].nil? -%>
+enable_nat = <%= node[:neutron][:apic][:ext_net][:nat_enabled] %>
+<% end -%>
+external_epg = <%= node[:neutron][:apic][:ext_net][:ext_epg] %>
+host_pool_cidr = <%= node[:neutron][:apic][:ext_net][:host_pool_cidr] %>
