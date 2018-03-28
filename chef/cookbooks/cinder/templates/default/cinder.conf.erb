@@ -13,7 +13,6 @@ state_path = /var/lib/cinder
 my_ip = <%= node[:cinder][:my_ip] %>
 
 glance_api_servers = <%= @glance_server_protocol %>://<%= @glance_server_host %>:<%= @glance_server_port %>
-glance_api_version = 2
 <% unless @glance_server_insecure.nil? -%>
 glance_api_insecure = <%= @glance_server_insecure %>
 <% end -%>
