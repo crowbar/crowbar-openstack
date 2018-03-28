@@ -120,6 +120,20 @@ class DatabaseService < PacemakerServiceObject
       db_engine: db_engine
     ) unless %w(mysql postgresql).include?(db_engine)
 
+    # for new deployments, only allow mysql
+    case attributes["sql_engine"]
+    when "postgresql"
+      proposal_id = proposal["id"].gsub("#{@bc_name}-", "")
+      proposal_object = Proposal.where(barclamp: @bc_name, name: proposal_id).first
+      if proposal_object.nil? || !proposal_object.active_status?
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.no_new_postgresql"
+        )
+      end
+    when "mysql"
+      # we're good
+    end
+
     # HA validation
     servers = proposal["deployment"][@bc_name]["elements"]["database-server"]
     unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
