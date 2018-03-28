@@ -164,9 +164,7 @@ service "rabbitmq-server" do
            stop: true,
            status: true,
            crm_resource_stop_cmd: crm_resource_stop_cmd,
-           crm_resource_start_cmd: crm_resource_start_cmd,
-           restart_crm_resource: true,
-           pacemaker_resource_name: "rabbitmq"
+           crm_resource_start_cmd: crm_resource_start_cmd
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
