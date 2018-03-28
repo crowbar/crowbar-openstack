@@ -22,8 +22,6 @@ ha_enabled = node[:rabbitmq][:ha][:enabled]
 # we only do cluster if we do HA
 cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
 quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
-crm_resource_stop_cmd = cluster_enabled ? "force-demote" : "force-stop"
-crm_resource_start_cmd = cluster_enabled ? "force-promote" : "force-start"
 
 cluster_partition_handling = if cluster_enabled
   if CrowbarPacemakerHelper.num_corosync_nodes(node) > 2
@@ -159,14 +157,7 @@ bash "enabling rabbit management" do
 end
 
 service "rabbitmq-server" do
-  supports restart: true,
-           start: true,
-           stop: true,
-           status: true,
-           crm_resource_stop_cmd: crm_resource_stop_cmd,
-           crm_resource_start_cmd: crm_resource_start_cmd,
-           restart_crm_resource: true,
-           pacemaker_resource_name: "rabbitmq"
+  supports restart: true, start: true, stop: true, status: true
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
