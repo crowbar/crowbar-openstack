@@ -1,0 +1,16 @@
+[placement]
+os_region_name = <%= @keystone_settings['endpoint_region'] %>
+auth_url = <%= @keystone_settings['admin_auth_url'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"] %>
+user_domain_name = <%= @keystone_settings['admin_domain'] %>
+auth_type = password
+username = <%= @placement_service_user %>
+password = <%= @placement_service_password %>
+os_interface = internal
+insecure = <%= @placement_service_insecure %>
+
+<% if @placement_database_connection -%>
+[placement_database]
+connection = <%= @placement_database_connection %>
+<% end -%>
