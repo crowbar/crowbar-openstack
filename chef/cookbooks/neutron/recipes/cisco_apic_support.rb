@@ -53,7 +53,7 @@ template node[:neutron][:ml2_cisco_apic_config_file] do
     apic_switches: aciswitches,
     ml2_mechanism_drivers: node[:neutron][:ml2_mechanism_drivers],
     policy_drivers: "implicit_policy,apic",
-    default_ip_pool: "192.168.0.0/16",
+    default_ip_pool: "192.168.0.0/16"
   )
   notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
 end
