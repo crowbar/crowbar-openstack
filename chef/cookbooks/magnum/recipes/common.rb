@@ -58,3 +58,16 @@ template node[:magnum][:config_file] do
     memcached_servers: memcached_servers
   )
 end
+
+# ssl
+if node[:magnum][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for magnum" do
+    generate_certs node[:magnum][:ssl][:generate_certs]
+    certfile node[:magnum][:ssl][:certfile]
+    keyfile node[:magnum][:ssl][:keyfile]
+    group node[:magnum][:group]
+    fqdn node[:fqdn]
+    cert_required node[:magnum][:ssl][:cert_required]
+    ca_certs node[:magnum][:ssl][:ca_certs]
+  end
+end

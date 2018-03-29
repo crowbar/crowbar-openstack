@@ -32,6 +32,16 @@ en:
         cert_header: 'Certificate Manager'
         cert:
           cert_manager_type: 'Plugin'
+        ssl_header: 'SSL Support'
+        ssl:
+          generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          certfile: 'SSL Certificate File'
+          keyfile: 'SSL (Private) Key File'
+          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          cert_required: 'Require Client Certificate'
+          ca_certs: 'SSL CA Certificates File'
+        api:
+          protocol: 'Protocol'
       validation:
         barbican:
           barbican_not_deployed: 'The "barbican-controller" role is not deployed. Please check the Barbican barclamp'
