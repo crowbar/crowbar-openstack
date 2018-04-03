@@ -31,7 +31,7 @@ package "euca2ools"
 
 package "openstack-tempest-test"
 
-["cinder", "designate", "ironic", "keystone", "magnum",
+["barbican", "cinder", "designate", "heat", "ironic", "keystone", "magnum",
  "manila", "neutron"].each do |service|
   package "python-#{service}-tempest-plugin"
 end
