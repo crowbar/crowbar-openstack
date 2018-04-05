@@ -389,6 +389,9 @@ class NovaService < OpenstackServiceObject
       end
     end
 
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Nova apply_role_pre_chef_call: leaving")
   end
 

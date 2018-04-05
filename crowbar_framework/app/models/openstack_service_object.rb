@@ -22,6 +22,13 @@
 #
 
 class OpenstackServiceObject < PacemakerServiceObject
+  def apply_role_pre_chef_call(old_role, role, all_nodes)
+    Rails.logger.debug("#{@bc_name} apply_role_pre_chef_call: entering #{all_nodes.inspect}")
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+    Rails.logger.debug("#{@bc_name} apply_role_pre_chef_call: leaving")
+  end
+
   def apply_role_post_chef_call(old_role, role, all_nodes)
     Rails.logger.debug("#{@bc_name} apply_role_post_chef_call: entering")
     # do this in post, because we depend on values that are computed in the

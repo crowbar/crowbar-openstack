@@ -222,6 +222,9 @@ keyring = /etc/ceph/ceph.client.manila.keyring
       node.save
     end
 
+    # save attributes into the databag
+    save_config_to_databag(_old_role, role)
+
     @logger.debug("Manila apply_role_pre_chef_call: leaving")
   end
 end

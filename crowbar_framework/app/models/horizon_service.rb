@@ -173,6 +173,9 @@ class HorizonService < OpenstackServiceObject
       node.save
     end
 
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Horizon apply_role_pre_chef_call: leaving")
   end
 end

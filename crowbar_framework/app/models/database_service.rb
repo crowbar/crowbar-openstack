@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-class DatabaseService < PacemakerServiceObject
+class DatabaseService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
     @bc_name = "database"
@@ -209,6 +209,9 @@ class DatabaseService < PacemakerServiceObject
     # (FIXME: is there a better way to achieve this?)
     role.default_attributes[sql_engine] = role.default_attributes["database"][sql_engine]
     role.save
+
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
 
     @logger.debug("Database apply_role_pre_chef_call: leaving")
   end

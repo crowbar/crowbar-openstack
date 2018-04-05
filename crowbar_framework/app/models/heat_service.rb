@@ -109,6 +109,9 @@ class HeatService < OpenstackServiceObject
 
     allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
 
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Heat apply_role_pre_chef_call: leaving")
   end
 end

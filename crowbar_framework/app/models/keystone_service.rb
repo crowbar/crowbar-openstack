@@ -163,6 +163,9 @@ class KeystoneService < OpenstackServiceObject
       end
     end
 
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Keystone apply_role_pre_chef_call: leaving")
   end
 

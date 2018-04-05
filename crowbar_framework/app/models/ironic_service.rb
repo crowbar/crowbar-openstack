@@ -137,6 +137,9 @@ class IronicService < ServiceObject
       neutron_service.update_ovs_bridge_attributes(neutron["attributes"]["neutron"], node)
     end
 
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Ironic apply_role_pre_chef_call: leaving")
   end
 end

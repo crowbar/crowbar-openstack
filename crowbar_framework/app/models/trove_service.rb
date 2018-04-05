@@ -113,6 +113,9 @@ class TroveService < OpenstackServiceObject
 
     # allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
 
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Trove apply_role_pre_chef_call: leaving")
   end
 end

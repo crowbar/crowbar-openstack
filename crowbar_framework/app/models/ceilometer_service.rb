@@ -180,6 +180,9 @@ class CeilometerService < OpenstackServiceObject
                                      ["ceilometer", "ha", "central", "enabled"],\
                                      central_ha_enabled)
 
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Ceilometer apply_role_pre_chef_call: leaving")
   end
 

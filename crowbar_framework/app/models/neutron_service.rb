@@ -564,6 +564,10 @@ class NeutronService < OpenstackServiceObject
     network_nodes.each do |n|
       enable_neutron_networks(role.default_attributes["neutron"], n, net_svc)
     end
+
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Neutron apply_role_pre_chef_call: leaving")
   end
 end

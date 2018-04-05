@@ -155,6 +155,9 @@ class GlanceService < OpenstackServiceObject
     # Setup virtual IPs for the clusters
     allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
 
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Glance apply_role_pre_chef_call: leaving")
   end
 end

@@ -195,6 +195,9 @@ class MonascaService < OpenstackServiceObject
       allocate_virtual_ips_for_any_cluster_in_networks_and_sync_dns(server_elements, vip_networks)
     end
 
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Monasca apply_role_pre_chef_call: leaving")
   end
 

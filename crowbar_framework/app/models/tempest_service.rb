@@ -108,6 +108,9 @@ class TempestService < ServiceObject
       net_svc.allocate_ip "default", "public", "host", n
     end
 
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Tempest apply_role_pre_chef_call: leaving")
   end
 

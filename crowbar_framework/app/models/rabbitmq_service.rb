@@ -143,6 +143,9 @@ class RabbitmqService < OpenstackServiceObject
 
     role.save
 
+    # save attributes into the databag
+    save_config_to_databag(old_role, role)
+
     @logger.debug("Rabbitmq apply_role_pre_chef_call: leaving")
   end
 
