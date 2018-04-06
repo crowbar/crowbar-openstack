@@ -71,7 +71,7 @@ image_ref = <%= @heat_settings['image_ref'] %>
 minimal_image_ref = <%= `cat #{@machine_id_file}`.strip %>
 build_timeout = 2000
 fixed_network_name = fixed
-floating_network_name = floating
+floating_network_name = <%= @public_network_name %>
 # TODO
 skip_scenario_tests = True
 skip_functional_tests = True
@@ -112,7 +112,7 @@ ssh_user_regex = [["^.*[Cc]irros.*$", "cirros"]]
 
 [magnum]
 image_id = <%= @magnum_settings['image_id'] %>
-nic_id = floating
+nic_id = <%= @public_network_name %>
 flavor_id = <%= @magnum_settings['flavor_id'] %>
 master_flavor_id = <%= @magnum_settings['master_flavor_id'] %>
 
@@ -120,7 +120,7 @@ master_flavor_id = <%= @magnum_settings['master_flavor_id'] %>
 region = <%= @keystone_settings['endpoint_region'] %>
 endpoint_type = internalURL
 public_network_id = <%= @public_network_id %>
-floating_network_name = floating
+floating_network_name = <%= @public_network_name %>
 
 [network-feature-enabled]
 api_extensions = <%= @neutron_api_extensions %>
@@ -193,7 +193,7 @@ events = true
 
 [validation]
 run_validation = <%= @use_run_validation %>
-connect_method = floating
+connect_method = <% @public_network_name %>
 ip_version_for_ssh = 4
 <% if @validation_connect_timeout -%>
 connect_timeout = <%= @validation_connect_timeout %>

@@ -27,6 +27,7 @@
                 "s390x": { "type": "str", "required": true }
               }
             },
+            "public_network_name": { "type": "str", "required": true },
             "manila": {
               "type": "map",
               "mapping": {

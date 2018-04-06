@@ -362,7 +362,7 @@ ruby_block "get public network id" do
     cmd << " --os-username #{tempest_comp_user} --os-password #{tempest_comp_pass}"
     cmd << " --os-tenant-name #{tempest_comp_tenant}"
     cmd << " --os-auth-url #{keystone_settings["internal_auth_url"]}"
-    cmd << " net-list -f value -c id --name floating"
+    cmd << " net-list -f value -c id --name #{node[:tempest][:public_network_name]}"
     public_network_id =  `#{cmd}`.strip
     raise("Cannot fetch ID of floating network") if public_network_id.empty?
     node[:tempest][:public_network_id] = public_network_id
@@ -537,6 +537,7 @@ template "/etc/tempest/tempest.conf" do
         http_image: tempest_test_image,
         # network settings
         public_network_id: node[:tempest][:public_network_id],
+        public_network_name: node[:tempest][:public_network_name],
         neutron_api_extensions: neutron_api_extensions,
         # object storage settings
         swift_cluster_name: swift_cluster_name,
