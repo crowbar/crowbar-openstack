@@ -359,7 +359,7 @@ end
 ruby_block "get public network id" do
   block do
     cmd = "#{openstackcli} --os-user-domain-name Default --os-project-domain-name Default"
-    cmd << " network show -f value -c id floating"
+    cmd << " network show -f value -c id #{node[:tempest][:public_network_name]}"
     public_network_id =  `#{cmd}`.strip
     raise("Cannot fetch ID of floating network") if public_network_id.empty?
     node[:tempest][:public_network_id] = public_network_id
@@ -534,6 +534,7 @@ template "/etc/tempest/tempest.conf" do
         http_image: tempest_test_image,
         # network settings
         public_network_id: node[:tempest][:public_network_id],
+        public_network_name: node[:tempest][:public_network_name],
         neutron_api_extensions: neutron_api_extensions,
         # object storage settings
         swift_cluster_name: swift_cluster_name,
