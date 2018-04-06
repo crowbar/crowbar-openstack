@@ -163,7 +163,7 @@ class ManilaService < OpenstackServiceObject
     super
   end
 
-  def apply_role_pre_chef_call(_old_role, role, all_nodes)
+  def apply_role_pre_chef_call(old_role, role, all_nodes)
     @logger.debug("Manila apply_role_pre_chef_call: "\
                   "entering #{all_nodes.inspect}")
 
@@ -223,7 +223,7 @@ keyring = /etc/ceph/ceph.client.manila.keyring
     end
 
     # save attributes into the databag
-    save_config_to_databag(_old_role, role)
+    save_config_to_databag(old_role, role)
 
     @logger.debug("Manila apply_role_pre_chef_call: leaving")
   end
