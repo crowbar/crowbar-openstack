@@ -121,6 +121,11 @@
           "hitachi_unit_name": "None",
           "hitachi_zoning_request": false
         },
+        "pure": {
+          "san_ip": "10.10.10.10",
+          "pure_api_token": "960e185a-255f-4bdb-3b03-3b9eb1e5cf1f",
+          "use_chap_auth": false
+        },
         "manual": {
           "driver": "",
           "config": ""
@@ -177,7 +182,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 206,
+      "schema-revision": 207,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
