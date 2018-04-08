@@ -27,6 +27,7 @@ module Barclamp
           [t(".volumes.hitachi_volume_driver"), "hitachi"],
           [t(".volumes.netapp_volume_driver"), "netapp"],
           [t(".volumes.nfs_volume_driver"), "nfs"],
+          [t(".volumes.pure_volume_driver"), "pure"],
           [t(".volumes.rbd_volume_driver"), "rbd"],
           [t(".volumes.vmware_volume_driver"), "vmware"],
           [t(".volumes.local_volume_driver"), "local"],
