@@ -200,6 +200,9 @@ live_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MI
     <% else %>
 block_migration_flag = VIR_MIGRATE_UNDEFINE_SOURCE, VIR_MIGRATE_PEER2PEER, VIR_MIGRATE_NON_SHARED_INC, VIR_MIGRATE_LIVE
     <% end %>
+# Timeout migration if less than 1MB/s RAM can be copied
+live_migration_progress_timeout=0
+live_migration_completion_timeout=1000
   <% end %>
 <% end %>
 <% if @libvirt_type.eql?('xen') %>
@@ -258,8 +261,6 @@ ssl = <%= @rabbit_settings[:use_ssl] %>
 kombu_ssl_ca_certs = <%= @rabbit_settings[:client_ca_certs] %>
 <% end %>
 heartbeat_timeout_threshold = <%= @rabbit_settings[:heartbeat_timeout] %>
-# consider making configurable or even lower it
-rpc_conn_pool_size = 32
 
 [serial_console]
 enabled = <%= @serial_enabled ? "True" : "False" %>
