@@ -151,6 +151,8 @@ elsif node[:keystone][:frontend] == "apache"
     if node[:keystone][:ssl][:cert_required]
       ssl_cacert node[:keystone][:ssl][:ca_certs]
     end
+    # LDAP backend can be slow..
+    timeout 600
   end
 
   apache_site "keystone-public.conf" do
@@ -174,6 +176,8 @@ elsif node[:keystone][:frontend] == "apache"
     if node[:keystone][:ssl][:cert_required]
       ssl_cacert node[:keystone][:ssl][:ca_certs]
     end
+    # LDAP backend can be slow..
+    timeout 600
   end
 
   apache_site "keystone-admin.conf" do
