@@ -284,8 +284,13 @@ end
 transaction_objects = []
 service_name = "galera-python-clustercheck"
 
+clustercheck_op = {}
+clustercheck_op["monitor"] = {}
+clustercheck_op["monitor"]["interval"] = "10s"
+
 pacemaker_primitive service_name do
   agent "systemd:#{service_name}"
+  op clustercheck_op
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
