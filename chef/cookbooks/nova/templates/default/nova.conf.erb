@@ -323,6 +323,9 @@ keep_alive = false
 
 [scheduler]
 discover_hosts_in_cells_interval = <%= node[:nova][:scheduler][:discover_hosts_in_cells_interval] %>
+max_attempts = 9
+# Avoid scheduler conflicts when using HA
+host_subset_size = 4
 <% if @libvirt_type.eql?('ironic') %>
 host_manager = ironic_host_manager
 <% end %>
