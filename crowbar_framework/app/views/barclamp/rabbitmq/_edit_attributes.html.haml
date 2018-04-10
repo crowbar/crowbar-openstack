@@ -60,25 +60,6 @@
           "data-disabler-target" => "#ssl_client_ca_certs"
         = string_field %w(ssl client_ca_certs)
 
-    %fieldset#ha-setup{ "data-show-for-clusters-only" => "true", "data-elements-path" => "rabbitmq-server" }
-      %legend
-        = t('.ha_header')
-
-      = boolean_field %w(cluster), "data-hideit" => "true", "data-hideit-target" => "#ha_storage_container", "data-hideit-direct" => "true"
-
-      #ha_storage_container
-        = select_field %w(ha storage mode), :collection => :ha_storage_mode_for_rabbitmq, "data-showit" => ["drbd", "shared"].join(";"), "data-showit-target" => "#drbd_storage_container;#shared_storage_container", "data-showit-direct" => "true"
-
-        #drbd_storage_container
-          .alert.alert-info
-            = t('.ha.storage.drbd_info')
-          = integer_field %w(ha storage drbd size)
-
-        #shared_storage_container
-          = string_field %w(ha storage shared device)
-          = string_field %w(ha storage shared fstype)
-          = string_field %w(ha storage shared options)
-
 
 %script#extrauser-entries{ :type => "text/x-handlebars-template" }
   {{#each entries}}
