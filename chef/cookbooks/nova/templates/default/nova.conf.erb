@@ -48,6 +48,9 @@ scheduler_default_filters = <%= @default_filters %>
 scheduler_available_filters = nova.scheduler.filters.all_filters
 scheduler_default_filters = <%= @default_filters %>
 <% end %>
+# Avoid scheduler conflicts when using HA
+scheduler_max_attempts = 9
+scheduler_host_subset_size = 4
 <% unless @track_instance_changes %>scheduler_tracks_instance_changes = false<% end %>
 <% if @libvirt_type.eql?('vmware') -%>
 compute_driver = vmwareapi.VMwareVCDriver
