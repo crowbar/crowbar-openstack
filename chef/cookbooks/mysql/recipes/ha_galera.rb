@@ -176,6 +176,12 @@ crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
 
+# some of the op attributes are now in the proposal, so we need to merge the
+# default attributes and the proposal attributes (that actually completely
+# override the default attributes, even the ones not defined in the proposal)
+primitive_op = node.default_attrs[:mysql][:ha][:op].to_hash
+primitive_op.merge!(node[:database][:mysql][:ha][:op].to_hash)
+
 pacemaker_primitive service_name do
   agent resource_agent
   params({
@@ -186,7 +192,7 @@ pacemaker_primitive service_name do
     "datadir" => node[:database][:mysql][:datadir],
     "log" => "/var/log/mysql/mysql_error.log"
   })
-  op node[:database][:mysql][:ha][:op]
+  op primitive_op
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
