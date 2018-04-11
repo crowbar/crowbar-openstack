@@ -42,3 +42,4 @@
       = string_field %w(master smtp_user)
       = password_field %w(master smtp_password)
       = string_field %w(master smtp_from_address)
+      = select_field %w(master tsdb), :collection => :tsdbs

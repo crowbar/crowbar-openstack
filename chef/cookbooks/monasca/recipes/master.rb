@@ -60,6 +60,7 @@ template "/opt/monasca-installer/monasca-hosts" do
   group "root"
   mode "0644"
   variables(
+    tsdb: node[:monasca][:master][:tsdb],
     monasca_public_host: MonascaHelper.monasca_public_host(monasca_servers[0]),
     monasca_admin_host: monasca_hosts[0],
     monasca_monitoring_host: monasca_monitoring_host,

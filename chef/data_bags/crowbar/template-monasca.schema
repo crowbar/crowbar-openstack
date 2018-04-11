@@ -157,13 +157,12 @@
               "required": true,
               "type": "map",
               "mapping": {
-                "influxdb_mon_api_password": { "required": true, "type": "str" },
-                "influxdb_mon_persister_password": { "required": true, "type": "str" },
                 "influxdb_retention_policy": {
                    "required": true,
                    "type": "str",
                    "pattern": "/^\d+[mhdw]|INF$/"
                  },
+                "cassandra_admin_password": { "required": true, "type": "str" },
                 "database_notification_password": { "required": true, "type": "str" },
                 "database_monapi_password": { "required": true, "type": "str" },
                 "database_thresh_password": { "required": true, "type": "str" },
@@ -177,7 +176,10 @@
                 "smtp_port": { "required": true, "type": "int" },
                 "smtp_user": { "required": true, "type": "str" },
                 "smtp_password": { "required": true, "type": "str" },
-                "smtp_from_address": { "required": true, "type": "str" }
+                "smtp_from_address": { "required": true, "type": "str" },
+                "tsdb": { "required": true, "type": "str" },
+                "tsdb_mon_api_password": { "required": true, "type": "str" },
+                "tsdb_mon_persister_password": { "required": true, "type": "str" }
               }
             },
             "db": {

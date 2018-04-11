@@ -53,6 +53,7 @@ en:
           smtp_user: 'SMTP user'
           smtp_password: 'SMTP password'
           smtp_from_address: 'SMTP sender (FROM) address'
+          tsdb: 'Time series database to use'
         db_header: 'Database settings'
         db:
           database: 'Database'

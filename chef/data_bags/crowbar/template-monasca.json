@@ -93,9 +93,8 @@
         "extra_params": ""
       },
       "master": {
-        "influxdb_mon_api_password": "",
-        "influxdb_mon_persister_password": "",
         "influxdb_retention_policy": "60d",
+        "cassandra_admin_password": "",
         "database_notification_password": "",
         "database_monapi_password": "",
         "database_thresh_password": "",
@@ -109,7 +108,10 @@
         "smtp_port": 25,
         "smtp_user": "",
         "smtp_password": "",
-        "smtp_from_address": "monasca@localhost"
+        "smtp_from_address": "monasca@localhost",
+        "tsdb": "influxdb",
+        "tsdb_mon_api_password": "",
+        "tsdb_mon_persister_password": ""
       },
       "db": {
         "database": "monasca",
@@ -132,7 +134,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 202,
+      "schema-revision": 203,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],

@@ -1,9 +1,15 @@
-influxdb_mon_api_password: <%= @master_settings['influxdb_mon_api_password'] %>
-influxdb_mon_persister_password: <%= @master_settings['influxdb_mon_persister_password'] %>
+influxdb_mon_api_password: <%= @master_settings['tsdb_mon_api_password'] %>
+influxdb_mon_persister_password: <%= @master_settings['tsdb_mon_persister_password'] %>
 influxdb_bind_address: <%= @monasca_net_ip %>
 influxdb_host: <%= @monasca_net_ip %>
 influxdb_url: "http://<%= @monasca_net_ip %>:8086"
 influxdb_retention_policy: <%= @master_settings['influxdb_retention_policy'] %>
+cassandra_mon_api_password: <%= @master_settings['tsdb_mon_api_password'] %>
+cassandra_mon_persister_password: <%= @master_settings['tsdb_mon_persister_password'] %>
+cassandra_rpc_address: <%= @monasca_net_ip %>
+cassandra_admin_password: <%= @master_settings['tsdb_mon_api_password'] %>
+database_type: <%= @master_settings['tsdb'] %>
+
 database_notification_password: <%= @master_settings['database_notification_password'] %>
 database_monapi_password: <%= @master_settings['database_monapi_password'] %>
 database_thresh_password: <%= @master_settings['database_thresh_password'] %>
