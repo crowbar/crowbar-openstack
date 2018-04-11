@@ -146,6 +146,27 @@ file "/etc/my.cnf.d/galera.cnf" do
   notifies :restart, "service[mysql]"
 end
 
+# Configuration files for galera-python-clustercheck
+template "/etc/galera-python-clustercheck/galera-python-clustercheck.conf" do
+  source "galera-python-clustercheck.conf.erb"
+  owner "galera-python-clustercheck"
+  group "mysql"
+  mode "0640"
+  variables(
+    node_address: node_address
+  )
+end
+
+template "/etc/galera-python-clustercheck/my.cnf" do
+  source "galera-python-clustercheck-my.cnf.erb"
+  owner "galera-python-clustercheck"
+  group "mysql"
+  mode "0640"
+  variables(
+    node_address: node_address
+  )
+end
+
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required packages and configurations installed before we create the
 # pacemaker resources
@@ -261,27 +282,6 @@ end
 
 crowbar_pacemaker_sync_mark "sync-database_root_password" do
   revision node[:database]["crowbar-revision"]
-end
-
-# Configuration files for galera-python-clustercheck
-template "/etc/galera-python-clustercheck/galera-python-clustercheck.conf" do
-  source "galera-python-clustercheck.conf.erb"
-  owner "galera-python-clustercheck"
-  group "mysql"
-  mode "0640"
-  variables(
-    node_address: node_address
-  )
-end
-
-template "/etc/galera-python-clustercheck/my.cnf" do
-  source "galera-python-clustercheck-my.cnf.erb"
-  owner "galera-python-clustercheck"
-  group "mysql"
-  mode "0640"
-  variables(
-    node_address: node_address
-  )
 end
 
 # Start galera-clustercheck which serves the cluster state as http return codes
