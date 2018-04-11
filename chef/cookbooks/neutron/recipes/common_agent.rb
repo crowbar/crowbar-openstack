@@ -184,6 +184,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       external_networks.concat(neutron[:neutron][:additional_external_networks])
       ext_physnet_map = NeutronHelper.get_neutron_physnets(node, external_networks)
       external_networks.each do |net|
+        next if node[:crowbar_wall][:network][:nets][net].nil?
         ext_iface = node[:crowbar_wall][:network][:nets][net].last
         # we can't do "floating:br-public, physnet1:br-public"; this also means
         # that all relevant nodes here must have a similar bridge_mappings
