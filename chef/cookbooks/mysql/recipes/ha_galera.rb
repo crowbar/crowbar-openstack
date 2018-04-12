@@ -141,6 +141,27 @@ template "/etc/my.cnf.d/galera.cnf" do
   )
 end
 
+# Configuration files for galera-python-clustercheck
+template "/etc/galera-python-clustercheck/galera-python-clustercheck.conf" do
+  source "galera-python-clustercheck.conf.erb"
+  owner "galera-python-clustercheck"
+  group "mysql"
+  mode "0640"
+  variables(
+    node_address: node_address
+  )
+end
+
+template "/etc/galera-python-clustercheck/my.cnf" do
+  source "galera-python-clustercheck-my.cnf.erb"
+  owner "galera-python-clustercheck"
+  group "mysql"
+  mode "0640"
+  variables(
+    node_address: node_address
+  )
+end
+
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required packages and configurations installed before we create the
 # pacemaker resources
@@ -155,6 +176,12 @@ crowbar_pacemaker_sync_mark "wait-database_ha_resources" do
   revision node[:database]["crowbar-revision"]
 end
 
+# some of the op attributes are now in the proposal, so we need to merge the
+# default attributes and the proposal attributes (that actually completely
+# override the default attributes, even the ones not defined in the proposal)
+primitive_op = node.default_attrs[:mysql][:ha][:op].to_hash
+primitive_op.merge!(node[:database][:mysql][:ha][:op].to_hash)
+
 pacemaker_primitive service_name do
   agent resource_agent
   params({
@@ -165,7 +192,7 @@ pacemaker_primitive service_name do
     "datadir" => node[:database][:mysql][:datadir],
     "log" => "/var/log/mysql/mysql_error.log"
   })
-  op node[:database][:mysql][:ha][:op]
+  op primitive_op
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
@@ -257,27 +284,6 @@ end
 crowbar_pacemaker_sync_mark "sync-database_root_password" do
   revision node[:database]["crowbar-revision"]
 end
-
-  # Configuration files for galera-python-clustercheck
-  template "/etc/galera-python-clustercheck/galera-python-clustercheck.conf" do
-    source "galera-python-clustercheck.conf.erb"
-    owner "galera-python-clustercheck"
-    group "mysql"
-    mode "0640"
-    variables(
-      node_address: node_address
-    )
-  end
-
-  template "/etc/galera-python-clustercheck/my.cnf" do
-    source "galera-python-clustercheck-my.cnf.erb"
-    owner "galera-python-clustercheck"
-    group "mysql"
-    mode "0640"
-    variables(
-      node_address: node_address
-    )
-  end
 
 # Start galera-clustercheck which serves the cluster state as http return codes
 # on port 5555
