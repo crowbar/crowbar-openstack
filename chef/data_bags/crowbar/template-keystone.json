@@ -35,7 +35,7 @@
         "version": "3",
         "region": "RegionOne",
         "processes" : 8,
-        "threads" : 8
+        "threads" : 1
       },
       "admin": {
         "project": "admin",
