@@ -220,6 +220,7 @@ live_migration_completion_timeout=1000
 <% if @rng_device %>
 rng_dev_path = <%= @rng_device %>
 <% end %>
+disk_cachemodes = <%= node[:nova][:kvm][:disk_cachemodes] %>
 
 [neutron]
 service_metadata_proxy = true

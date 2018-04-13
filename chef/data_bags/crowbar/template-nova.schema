@@ -133,7 +133,8 @@
             },
             "kvm": {
               "type": "map", "required": true, "mapping": {
-                "ksm_enabled": { "type": "bool", "required": true }
+                "ksm_enabled": { "type": "bool", "required": true },
+                "disk_cachemodes": { "type": "str", "required": true }
               }
             },
             "vcenter": {
