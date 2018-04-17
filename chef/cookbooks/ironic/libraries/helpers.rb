@@ -54,9 +54,6 @@ module IronicHelper
       get_tempurl_key = "#{swift_command} stat | grep -m1 'Meta Temp-Url-Key:' | awk '{print $3}'"
       tempurl_key = Mixlib::ShellOut.new(get_tempurl_key, environment: env).run_command.stdout.chomp
 
-      # use IP as this will be used by agent which can have no DNS configured
-      swift_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(swift, "public").address
-
       {
         tempurl_key: tempurl_key,
         glance_container: glance[:glance][:swift][:store_container],
@@ -64,7 +61,7 @@ module IronicHelper
         protocol: swift[:swift][:ssl][:enabled] ? "https" : "http",
         service_user: swift[:swift][:service_user],
         service_password: swift[:swift][:service_password],
-        host: swift_address,
+        host: CrowbarHelper.get_host_for_admin_url(swift, swift[:swift][:ha][:enabled]),
         port: swift[:swift][:ports][:proxy]
       }
     end
