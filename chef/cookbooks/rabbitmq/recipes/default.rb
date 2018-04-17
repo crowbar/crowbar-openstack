@@ -79,6 +79,7 @@ if node[:platform_family] == "suse"
   service "epmd.socket" do
     action [:enable, :start]
     only_if "grep -q Requires=epmd.service /usr/lib/systemd/system/rabbitmq-server.service"
+    subscribes :restart, "template[/etc/systemd/system/epmd.socket.d/port.conf]", :immediate
   end
 end
 
