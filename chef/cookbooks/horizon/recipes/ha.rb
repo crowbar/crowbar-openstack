@@ -20,6 +20,8 @@ haproxy_loadbalancer "horizon" do
   port 80
   use_ssl false
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "horizon", "horizon-server", "plain")
+  options ["defaults", "httpchk"]
+  check ({ inter: 1000, downinter: 3000, rise: 3, fall: 1 })
   action :nothing
 end.run_action(:create)
 
@@ -29,6 +31,7 @@ if node[:horizon][:apache][:ssl]
     port 443
     use_ssl true
     servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "horizon", "horizon-server", "ssl")
+    check ({ inter: 1000, downinter: 3000, rise: 3, fall: 1 })
     action :nothing
   end.run_action(:create)
 end
