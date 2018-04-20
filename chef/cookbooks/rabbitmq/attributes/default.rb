@@ -65,3 +65,7 @@ when "suse"
     default[:rabbitmq][:ha][:clustered_rmq_features] = true
   end
 end
+
+# Ports to bind to when haproxy is used for the real ports
+default[:rabbitmq][:ha][:ports][:api] = 5630
+default[:rabbitmq][:ha][:ports][:api_ssl] = 5631

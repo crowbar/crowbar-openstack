@@ -22,6 +22,16 @@ ha_enabled = node[:rabbitmq][:ha][:enabled]
 # we only do cluster if we do HA
 cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
 quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
+crm_resource_stop_cmd = "force-stop"
+crm_resource_start_cmd = "force-start"
+
+if node[:rabbitmq][:ha][:haproxy_enabled] && cluster_enabled
+  rabbitmq_port = node[:rabbitmq][:ha][:ports][:api]
+  rabbitmq_ssl_port = node[:rabbitmq][:ha][:ports][:api_ssl]
+else
+  rabbitmq_port = node[:rabbitmq][:port]
+  rabbitmq_ssl_port = node[:rabbitmq][:ssl][:port]
+end
 
 cluster_partition_handling = if cluster_enabled
   if CrowbarPacemakerHelper.num_corosync_nodes(node) > 2
@@ -107,7 +117,9 @@ template "/etc/rabbitmq/rabbitmq.config" do
   variables(
     cluster_enabled: cluster_enabled,
     cluster_partition_handling: cluster_partition_handling,
-    hipe_compile: hipe_compile
+    hipe_compile: hipe_compile,
+    rabbitmq_port: rabbitmq_port,
+    rabbitmq_ssl_port: rabbitmq_ssl_port
   )
   notifies :restart, "service[rabbitmq-server]"
 end
@@ -157,7 +169,12 @@ bash "enabling rabbit management" do
 end
 
 service "rabbitmq-server" do
-  supports restart: true, start: true, stop: true, status: true
+  supports restart: true,
+           start: true,
+           stop: true,
+           status: true,
+           crm_resource_stop_cmd: crm_resource_stop_cmd,
+           crm_resource_start_cmd: crm_resource_start_cmd
   action [:enable, :start]
   provider Chef::Provider::CrowbarPacemakerService if ha_enabled
 end
