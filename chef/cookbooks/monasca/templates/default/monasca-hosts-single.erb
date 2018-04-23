@@ -68,15 +68,11 @@ mariadb-node                     ansible_ssh_host=<%= @monasca_admin_host %> ans
 # Elasticsearch Curator
 elasticsearch-curator-node       ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
-<%- if @tsdb == 'influxdb' %>
 # InfluxDB node
 influxdb-node                    ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
-<%- end %>
 
-<%- if @tsdb == 'cassandra' %>
 # Cassandra node
 cassandra-node                    ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
-<%- end %>
 
 ################################################################################
 # Other group definition
@@ -149,14 +145,11 @@ mariadb-node mariadb_listen_ip=internal-node-1
 [elasticsearch_curator_group]
 elasticsearch-curator-node
 
-<%- if @tsdb == 'influxdb' %>
 [influxdb_group]
 influxdb-node influxdb_listen_ip=internal-node-1
-<%- end %>
-<%- if @tsdb == 'cassandra' %>
+
 [cassandra_group]
 cassandra-node cassandra_listen_ip=internal-node-1
-<%- end %>
 
 ################################################################################
 # Group inheritance
@@ -190,9 +183,5 @@ monasca_persister_group
 storm_group
 monasca_thresh_group
 mariadb_group
-<%- if @tsdb == 'cassandra' %>
 cassandra_group
-<%- end %>
-<%- if @tsdb == 'influxdb' %>
 influxdb_group
-<%- end %>
