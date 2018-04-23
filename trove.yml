@@ -19,7 +19,7 @@ barclamp:
   display: 'Trove'
   description: 'OpenStack Database: Scalable and reliable Database-as-a-Service provisioning'
   version: 0
-  user_managed: true
+  user_managed: false
   requires:
     - 'cinder'
     - 'keystone'
