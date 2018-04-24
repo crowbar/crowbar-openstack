@@ -220,7 +220,7 @@ end
 
 transaction_objects.push("pacemaker_ms[#{ms_name}]")
 
-ms_location_name = openstack_pacemaker_controller_only_location_for ms_name
+ms_location_name = openstack_pacemaker_controller_location_ignoring_upgrade_for ms_name
 transaction_objects << "pacemaker_location[#{ms_location_name}]"
 
 pacemaker_transaction "galera service" do
@@ -318,7 +318,7 @@ end
 
 transaction_objects.push("pacemaker_clone[#{clone_name}]")
 
-clone_location_name = openstack_pacemaker_controller_only_location_for clone_name
+clone_location_name = openstack_pacemaker_controller_location_ignoring_upgrade_for clone_name
 transaction_objects << "pacemaker_location[#{clone_location_name}]"
 
 pacemaker_transaction "clustercheck" do
