@@ -134,7 +134,7 @@ execute "rabbitmqctl set_user_tags #{node[:rabbitmq][:user]} management" do
   only_if only_if_command if ha_enabled
 end
 
-node[:rabbitmq][:users].each do |user|
+node[:rabbitmq][:extra_users].each do |user|
   # create extra users
   rabbitmq_user "adding user #{user[:username]}" do
     user user[:username]
