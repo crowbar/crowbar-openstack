@@ -96,44 +96,72 @@ end
 
 trusted_flavors = flavors.select{ |key, value| value["name"].match(/\.trusted\./) }
 default_flavors = flavors.select{ |key, value| !value["name"].match(/\.trusted\./) }
-flavorlist = `#{openstack} flavor list -f value -c Name`.split("\n")
 
-# create the trusted flavors
-if node[:nova][:trusted_flavors]
-  trusted_flavors.keys.each do |id|
-    next if flavorlist.include?(flavors[id]["name"])
-    execute "register_#{flavors[id]["name"]}_flavor" do
-      retries 5
-      command <<-EOF
-  #{novacmd} flavor-create #{flavors[id]["name"]} #{id} #{flavors[id]["mem"]} \
-  #{flavors[id]["disk"]} #{flavors[id]["vcpu"]}
-  #{novacmd} flavor-key #{flavors[id]["name"]} set trust:trusted_host=trusted
-  EOF
-      action :nothing
-      subscribes :run, "execute[trigger-flavor-creation]", :delayed
-    end
-  end
-end
-
-# create the default flavors
-if node[:nova][:create_default_flavors]
-  default_flavors.keys.each do |id|
-    next if flavorlist.include?(flavors[id]["name"])
-    execute "register_#{flavors[id]["name"]}_flavor" do
-      retries 5
-      command <<-EOF
-  #{novacmd} flavor-create #{flavors[id]["name"]} #{id} #{flavors[id]["mem"]} \
-  #{flavors[id]["disk"]} #{flavors[id]["vcpu"]}
-  EOF
-      action :nothing
-      subscribes :run, "execute[trigger-flavor-creation]", :delayed
-    end
-  end
-end
-
-# This is to trigger all the above "execute" resources to run :delayed, so that
-# they run at the end of the chef-client run, after the nova service has been
-# restarted (in case of a config change)
-execute "trigger-flavor-creation" do
+execute "delay-flavor-creation" do
   command "true"
+  action :nothing
+end
+
+ruby_block "Get current flavors" do
+  block do
+    cmd = Mixlib::ShellOut.new("#{openstack} flavor list -f value -c Name").run_command
+    raise "Flavor list not obtained, is the nova-api down?" unless cmd.exitstatus.zero?
+    node.run_state["flavorlist"] = cmd.stdout.split("\n")
+  end
+  retries 5
+end
+
+ruby_block "Flavor creation" do
+  block do
+    flavorlist = node.run_state["flavorlist"]
+
+    if node[:nova][:create_default_flavors]
+      default_flavors.each do |id, flavor|
+        next if flavorlist.include?(flavor["name"])
+        command = "#{novacmd} flavor-create #{flavor["name"]} #{id} #{flavor["mem"]} "
+        command << "#{flavor["disk"]} #{flavor["vcpu"]}"
+        run_context.resource_collection << flavor_create = Chef::Resource::Execute.new(
+          "Create flavor #{flavor["name"]}", run_context
+        )
+        flavor_create.command command
+        flavor_create.retries 5
+
+        # delay the run of this resource until the end of the run
+        run_context.notifies_delayed(
+          Chef::Resource::Notification.new(flavor_create, :run, "delay-flavor-creation")
+        )
+      end
+    end
+
+    if node[:nova][:trusted_flavors]
+      trusted_flavors.each do |id, flavor|
+        next if flavorlist.include?(flavor["name"])
+        command = "#{novacmd} flavor-create #{flavor["name"]} "
+        command << "#{id} #{flavor["mem"]} #{flavor["disk"]} #{flavor["vcpu"]} "
+        run_context.resource_collection << flavor_create = Chef::Resource::Execute.new(
+          "Create trusted flavor #{flavor["name"]}", run_context
+        )
+        flavor_create.command command
+        flavor_create.retries 5
+
+        # delay the run of this resource until the end of the run
+        run_context.notifies_delayed(
+          Chef::Resource::Notification.new(flavor_create, :run, "delay-flavor-creation")
+        )
+
+        # set flavors to trusted
+        command = "#{novacmd} flavor-key #{flavor["name"]} set trust:trusted_host=trusted"
+        run_context.resource_collection << flavor_trusted = Chef::Resource::Execute.new(
+          "Set flavor #{flavor["name"]} to trusted", run_context
+        )
+        flavor_trusted.command command
+        flavor_trusted.retries 5
+
+        # delay the run of this resource until the end of the run
+        run_context.notifies_delayed(
+          Chef::Resource::Notification.new(flavor_trusted, :run, "delay-flavor-creation")
+        )
+      end
+    end
+  end
 end
