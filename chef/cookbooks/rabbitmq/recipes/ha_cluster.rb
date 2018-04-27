@@ -103,6 +103,16 @@ ruby_block "wait for #{ms_name} to be started" do
           Chef::Log.debug("#{ms_name} still not started")
           sleep(2)
         end
+
+        # Do not check if rabbitmq is running when it is not supposed to run.
+        # pre-upgrade attribute is set to true to indicate the case that the upgrade of the node has
+        # not been finished yet. In such case, services cannot start on the node
+        # (there's a location constraint that prevents that).
+        # See disable_pre_upgrade_attribute_for method in models/api/node.rb for more info
+        cmd = "crm_attribute --node #{node[:hostname]} --name pre-upgrade --query --quiet"
+        cmd << "| grep -q true"
+        break if ::Kernel.system(cmd)
+
         # The sed command grabs everything between '{running_applications'
         # and ']}', and what we want is that the rabbit application is
         # running
