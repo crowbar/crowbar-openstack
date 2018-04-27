@@ -172,6 +172,20 @@ execute "nova-manage db online_data_migrations" do
   end
 end
 
+# Right after controller is upgraded to Pike, explicitely map the instances to cell1
+execute "nova-manage cell_v2 map_instances" do
+  user node[:nova][:user]
+  group node[:nova][:group]
+  command "nova-manage cell_v2 map_instances --cell_uuid \ " \
+    "$(nova-manage cell_v2 list_cells 2>&1 | grep cell1 | tr -d '\n' | awk '{print $4}')"
+  action :run
+  only_if do
+    !node[:nova][:db_synced] &&
+      CrowbarPacemakerHelper.being_upgraded?(node) &&
+      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
 # Update Nova DB to latest revision
 execute "nova-manage db sync" do
   user node[:nova][:user]
