@@ -55,6 +55,7 @@ default[:aodh][:evaluator][:service_name] = evaluator_service_name
 default[:aodh][:notifier][:service_name]  = notifier_service_name
 default[:aodh][:listener][:service_name]  = listener_service_name
 default[:aodh][:evaluation_interval] = 600
+default[:aodh][:alarm_history_ttl] = -1
 
 default[:aodh][:debug] = false
 
