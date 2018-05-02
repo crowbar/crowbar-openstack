@@ -265,3 +265,25 @@ unless agents_settings.empty?
 
   end
 end
+
+tuning_file = "/etc/sysctl.d/60-sysctl-server.conf"
+
+# Tune server.
+# Ensure directory is present
+directory "/etc/sysctl.d" do
+  mode "0755"
+end
+
+# Tuning server
+template "sysctl-server" do
+  path tuning_file
+  source "sysctl-server.conf.erb"
+  mode "0644"
+end
+
+# Reload sysctl
+bash "reload sysctl" do
+  code "/bin/sysctl -e -p #{tuning_file}"
+  action :nothing
+  subscribes :run, resources(template: "sysctl-server"), :delayed
+end
