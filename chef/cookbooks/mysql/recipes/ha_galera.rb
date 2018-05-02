@@ -347,7 +347,7 @@ ha_servers = ha_servers.each do |n|
 end
 
 haproxy_loadbalancer "galera" do
-  address CrowbarPacemakerHelper.cluster_vip(node, "admin")
+  address "0.0.0.0"
   port 3306
   mode "tcp"
   # leave some room for pacemaker health checks

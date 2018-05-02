@@ -27,7 +27,7 @@ if node[:database].key? "ec2"
 end
 
 # Ports to bind to when haproxy is used
-default[:mysql][:ha][:ports][:admin_port] = 3306
+default[:mysql][:ha][:ports][:admin_port] = 5512
 
 # Default operation setting for the galera resource
 # in pacemamker
