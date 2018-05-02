@@ -43,7 +43,7 @@ haproxy_loadbalancer "nova-placement-api" do
 end.run_action(:create)
 
 haproxy_loadbalancer "nova-metadata" do
-  address cluster_admin_ip
+  address "0.0.0.0"
   port node[:nova][:ports][:metadata]
   use_ssl node[:nova][:ssl][:enabled]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "metadata")
