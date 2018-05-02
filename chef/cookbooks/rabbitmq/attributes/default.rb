@@ -65,3 +65,6 @@ when "suse"
     default[:rabbitmq][:ha][:clustered_rmq_features] = true
   end
 end
+
+# create empty users list as it is expected by some recipes
+default[:rabbitmq][:users] = []
