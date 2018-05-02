@@ -134,7 +134,7 @@ template "/etc/rabbitmq/definitions.json" do
     json_trove_vhost: node[:rabbitmq][:trove][:vhost].to_json,
     ha_all_policy: cluster_enabled,
     quorum: quorum,
-    extra_users: node[:rabbitmq][:users]
+    extra_users: node[:rabbitmq][:extra_users]
   )
   # no notification to restart rabbitmq, as we still do changes with
   # rabbitmqctl in the rabbit.rb recipe (this is less disruptive)
