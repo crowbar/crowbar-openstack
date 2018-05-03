@@ -1,0 +1,31 @@
+#!/bin/sh
+
+# calcules the blocking level applying the formula
+total_nodes=<%= @total_nodes %>
+blocking_level=$(expr $total_nodes / 2)
+comment_text="rabbitmq port blocker (no quorum)"
+
+# get the number of running nodes of rabbitmq in the current cluster
+function running_nodes()
+{
+  rabbitmqctl cluster_status 2>/dev/null | tr -d "\n" | sed -e 's/running_nodes,/\nrunning_nodes/g'| grep running_nodes | cut -d "[" -f2 | cut -d "]" -f1 | tr "," "\n" | wc -l
+}
+
+# check if exists the blocking rule for rabbitmq clients
+function check_rule()
+{
+  iptables -L -n | grep -F "tcp dpt:5672 /* $comment_text */" | grep DROP | wc -l
+}
+
+# if the running nodes is les that the blocking level, then...
+if [ $(running_nodes) -le $blocking_level ]; then
+  # if rule not exists the rule will be added to block the clients port
+  if [ $(check_rule) -eq 0 ]; then
+    iptables -A INPUT -p tcp --destination-port 5672 -m comment --comment "$comment_text" -j DROP
+  fi
+else
+  # finally if the rule exists it will be deleted. If there are more than one, will remove all
+  if [[ $(check_rule) -gt 0 ]]; then
+    iptables -D INPUT -p tcp --destination-port 5672 -m comment --comment "$comment_text" -j DROP
+  fi
+fi
