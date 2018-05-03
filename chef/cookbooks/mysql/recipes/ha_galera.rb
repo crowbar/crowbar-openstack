@@ -19,6 +19,14 @@
 
 resource_agent = "ocf:heartbeat:galera"
 
+# this was in attributes/server.rb where it did not work, because it
+# was evaluated too early for overrides to be useful
+#
+# newer version need an additional package on SLES
+unless node[:mysql][:mariadb][:version] == "10.1"
+  node[:mysql][:galera_packages] << "mariadb-galera"
+end
+
 node[:mysql][:galera_packages].each do |p|
   package p
 end
