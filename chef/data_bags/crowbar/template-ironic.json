@@ -31,7 +31,7 @@
   "deployment": {
     "ironic": {
       "crowbar-revision": 0,
-      "schema-revision": 203,
+      "schema-revision": 204,
       "crowbar-applied": false,
       "element_states": {
         "ironic-server": [ "readying", "ready", "applying" ]

@@ -29,8 +29,6 @@ when "rhel", "suse"
       "openstack-ironic-conductor"
     ],
     driver_dependencies: {
-      pxe_ssh: ["python-paramiko"],
-      agent_ssh: ["python-paramiko"]
     }
   }
   default[:ironic][:api][:service_name] = "openstack-ironic-api"
@@ -50,8 +48,6 @@ when "debian"
       "ironic-api-conductor"
     ],
     driver_dependencies: {
-      pxe_ssh: ["python-paramiko"],
-      agent_ssh: ["python-paramiko"]
     }
   }
   default[:ironic][:api][:service_name] = "ironic-api"
