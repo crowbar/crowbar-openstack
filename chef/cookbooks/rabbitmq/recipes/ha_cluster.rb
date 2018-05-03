@@ -130,3 +130,71 @@ ruby_block "wait for #{ms_name} to be started" do
     end
   end # block
 end # ruby_block
+
+if CrowbarPacemakerHelper.cluster_nodes(node).size > 2
+  # create the directory to lock rabbitmq-port-blocker
+  cookbook_file "/etc/tmpfiles.d/rabbitmq.conf" do
+    owner "root"
+    group "root"
+    mode "0644"
+    action :create
+    source "rabbitmq.tmpfiles"
+  end
+
+  bash "create tmpfiles.d files for rabbitmq" do
+    code "systemd-tmpfiles --create /etc/tmpfiles.d/rabbitmq.conf"
+    action :nothing
+    subscribes :run, resources("cookbook_file[/etc/tmpfiles.d/rabbitmq.conf]"), :immediately
+  end
+
+  # create the scripts to block the client port on startup
+  template "/usr/bin/rabbitmq-alert-handler.sh" do
+    source "rabbitmq-alert-handler.erb"
+    owner "root"
+    group "root"
+    mode "0755"
+    variables(node: node, nodes: CrowbarPacemakerHelper.cluster_nodes(node))
+  end
+
+  template "/usr/bin/rabbitmq-port-blocker.sh" do
+    source "rabbitmq-port-blocker.erb"
+    owner "root"
+    group "root"
+    mode "0755"
+    variables(total_nodes: CrowbarPacemakerHelper.cluster_nodes(node).size)
+  end
+
+  template "/etc/sudoers.d/rabbitmq-port-blocker" do
+    source "hacluster_sudoers.erb"
+    owner "root"
+    group "root"
+    mode "0440"
+  end
+
+  # create the alert
+  pacemaker_alert "rabbitmq-alert-handler" do
+    handler "/usr/bin/rabbitmq-alert-handler.sh"
+    action :create
+  end
+else
+  pacemaker_alert "rabbitmq-alert-handler" do
+    handler "/usr/bin/rabbitmq-alert-handler.sh"
+    action :delete
+  end
+
+  cookbook_file "/etc/tmpfiles.d/rabbitmq.conf" do
+    action :delete
+  end
+
+  file "/usr/bin/rabbitmq-alert-handler.sh" do
+    action :delete
+  end
+
+  file "/usr/bin/rabbitmq-port-blocker.sh" do
+    action :delete
+  end
+
+  file "/etc/sudoers.d/rabbitmq-port-blocker" do
+    action :delete
+  end
+end
