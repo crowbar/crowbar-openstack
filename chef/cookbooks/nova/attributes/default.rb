@@ -186,3 +186,9 @@ default[:nova][:serial][:ssl][:enabled] = false
 # metadata/vendordata
 #
 default[:nova][:metadata][:vendordata][:json] = "{}"
+
+#
+# Initialize nova scheduler default_filters 
+#
+default[:nova][:scheduler][:default_filters] = ""
+
