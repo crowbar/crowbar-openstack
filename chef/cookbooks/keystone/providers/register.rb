@@ -547,15 +547,26 @@ def _get_token(http, user_name, password, tenant = "")
   path = "/v2.0/tokens"
   headers = _build_headers
   body = _build_auth(user_name, password, tenant)
-  resp = http.send_request("POST", path, JSON.generate(body), headers)
-  if resp.is_a?(Net::HTTPCreated) || resp.is_a?(Net::HTTPOK)
-    data = JSON.parse(resp.read_body)
-    data["access"]["token"]["id"]
-  else
+
+  resp = nil
+  count = 0
+  error = true
+  while error && count < 10
+    count += 1
+    Chef::Log.debug "Trying to get keystone token for user '#{user_name}' (try #{count})"
+    resp = http.send_request("POST", path, JSON.generate(body), headers)
+    error = !(resp.is_a?(Net::HTTPCreated) || resp.is_a?(Net::HTTPOK))
+    sleep 5 if error
+  end
+
+  if error
     Chef::Log.info "Failed to get token for User '#{user_name}' Tenant '#{tenant}'"
     Chef::Log.info "Response Code: #{resp.code}"
     Chef::Log.info "Response Message: #{resp.message}"
     nil
+  else
+    data = JSON.parse(resp.read_body)
+    data["access"]["token"]["id"]
   end
 end
 
