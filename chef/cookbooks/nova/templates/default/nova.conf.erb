@@ -220,6 +220,7 @@ volume_use_multipath = true
 <% if @use_multipath %>
 iser_use_multipath = true
 <% end %>
+disk_cachemodes = <%= node[:nova][:kvm][:disk_cachemodes] %>
 
 [neutron]
 service_metadata_proxy = true

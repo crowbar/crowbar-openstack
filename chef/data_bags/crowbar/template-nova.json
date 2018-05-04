@@ -76,7 +76,8 @@
         "secret_uuid": ""
       },
       "kvm": {
-        "ksm_enabled": false
+        "ksm_enabled": false,
+        "disk_cachemodes": "network=writeback"
       },
       "vcenter": {
         "host": "",
@@ -181,7 +182,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 208,
+      "schema-revision": 209,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],
