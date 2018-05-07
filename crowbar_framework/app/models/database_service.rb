@@ -23,7 +23,7 @@ class DatabaseService < PacemakerServiceObject
 
 # turn off nulti proposal support till it really works and people ask for it.
   def self.allow_multiple_proposals?
-    false
+    true
   end
 
   class << self
