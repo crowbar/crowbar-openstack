@@ -60,7 +60,13 @@ end
 
 class CrowbarOpenStackHelper
   def self.database_settings(node, barclamp)
-    instance = node[barclamp][:database_instance] || "default"
+    if barclamp == "mysql" or barclamp == "postgresql"
+      # We're called from one of the database cookbooks, which doesn't reference
+      # another database instance.
+      instance = node[:database][:config][:environment].gsub(/^database-config-/, "")
+    else
+      instance = node[barclamp][:database_instance] || "default"
+    end
 
     # Cache the result for each cookbook in an instance variable hash. This
     # cache needs to be invalidated for each chef-client run from chef-client
