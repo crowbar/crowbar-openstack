@@ -121,7 +121,7 @@ ruby_block "wait for #{ms_name} to be started" do
   end # block
 end # ruby_block
 
-if CrowbarPacemakerHelper.cluster_nodes(node).size > 2
+if CrowbarPacemakerHelper.cluster_nodes(node).size > 2 && !CrowbarPacemakerHelper.being_upgraded?(node)
   # create the directory to lock rabbitmq-port-blocker
   cookbook_file "/etc/tmpfiles.d/rabbitmq.conf" do
     owner "root"
