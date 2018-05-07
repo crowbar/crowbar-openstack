@@ -121,7 +121,7 @@ ruby_block "wait for #{ms_name} to be started" do
   end # block
 end # ruby_block
 
-if CrowbarPacemakerHelper.cluster_nodes(node).size > 2
+if CrowbarPacemakerHelper.cluster_nodes(node).size > 2 && !CrowbarPacemakerHelper.being_upgraded?(node)
   # create the directory to lock rabbitmq-port-blocker
   cookbook_file "/etc/tmpfiles.d/rabbitmq.conf" do
     owner "root"
@@ -186,5 +186,17 @@ else
 
   file "/etc/sudoers.d/rabbitmq-port-blocker" do
     action :delete
+  end
+
+  # in case that the script was already deployed and the rule is already stored we need to clean it
+  # up as to not left anything around
+  bash "Remove existent rabbitmq blocking rules" do
+    code "iptables -D INPUT -p tcp --destination-port 5672 "\
+         "-m comment --comment \"rabbitmq port blocker (no quorum)\" -j DROP"
+    only_if do
+      # check for the rule
+      cmd = "iptables -L -n | grep -F \"tcp dpt:5672 /* rabbitmq port blocker (no quorum) */\""
+      system(cmd)
+    end
   end
 end
