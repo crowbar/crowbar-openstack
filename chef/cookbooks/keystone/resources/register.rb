@@ -64,3 +64,6 @@ attribute :project_name, kind_of: String
 # :add_ec2 specific attributes
 attribute :user_name, kind_of: String
 attribute :project_name, kind_of: String
+
+# :wakeup specific attributes
+attribute :reissue_token_on_error, kind_of: [TrueClass, FalseClass], default: false
