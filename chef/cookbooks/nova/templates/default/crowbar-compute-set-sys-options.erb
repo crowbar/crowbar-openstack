@@ -8,11 +8,11 @@ if test -w /sys/kernel/mm/ksm/run; then
 fi
 
 if test -w /sys/kernel/mm/transparent_hugepage/enabled; then
-    echo <%= @tranparent_hugepage_enabled %> > /sys/kernel/mm/transparent_hugepage/enabled
+    echo <%= @transparent_hugepage_enabled %> > /sys/kernel/mm/transparent_hugepage/enabled
 fi
 
 if test -w /sys/kernel/mm/transparent_hugepage/defrag; then
-    echo <%= @tranparent_hugepage_defrag %> > /sys/kernel/mm/transparent_hugepage/defrag
+    echo <%= @transparent_hugepage_defrag %> > /sys/kernel/mm/transparent_hugepage/defrag
 fi
 
 find /sys/block -type l -name 'sd*' -exec sh -c 'echo deadline > {}/queue/scheduler' \;
