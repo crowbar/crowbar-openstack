@@ -1,0 +1,5 @@
+<% @db_conf_sections.keys.each do |section| -%>
+[<%= section -%>]
+connection = <%= @db_conf_sections[section] -%>
+
+<% end %>
