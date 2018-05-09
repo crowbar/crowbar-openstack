@@ -193,6 +193,17 @@
                 = boolean_field %w(volumes {{@index}} hitachi hitachi_group_request)
 
           {{/if_eq}}
+          {{#if_eq backend_driver 'pure'}}
+          %li.list-group-item
+            %fieldset
+              %legend
+                = t('.volumes.pure_parameters')
+
+              = string_field %w(volumes {{@index}} pure san_ip)
+              = string_field %w(volumes {{@index}} pure pure_api_token)
+              = boolean_field %w(volumes {{@index}} pure use_chap_auth)
+
+          {{/if_eq}}
           {{#if_eq backend_driver 'manual'}}
           %li.list-group-item
             %fieldset

@@ -153,6 +153,13 @@
                   "hitachi_zoning_request": { "type" : "bool", "required" : true }
                  }
                 },
+                "pure": {
+                "type": "map", "mapping": {
+                    "san_ip": { "type": "str", "required": true },
+                    "pure_api_token": { "type": "str", "required": true },
+                    "use_chap_auth": { "type": "bool", "required": true }
+                 }
+                },
                 "manual": {
                 "type": "map", "mapping": {
                     "driver": { "type": "str", "required": true },
@@ -290,7 +297,14 @@
                       "hitachi_unit_name": { "type": "str", "required": true },
                       "hitachi_zoning_request": { "type" : "bool", "required" : true }
                       }
-                    },
+                  },
+                  "pure": {
+                  "type": "map", "mapping": {
+                    "san_ip": { "type": "str", "required": true },
+                    "pure_api_token": { "type": "str", "required": true },
+                    "use_chap_auth": { "type": "bool", "required": true }
+                    }
+                  },
                   "manual": {
                     "type": "map", "mapping": {
                       "driver": { "type": "str", "required": true },

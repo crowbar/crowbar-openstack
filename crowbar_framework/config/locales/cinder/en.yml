@@ -62,6 +62,8 @@ en:
           nfs_volume_driver: 'NFS'
           nfs:
             nfs_shares_config_hint: 'Format one entry per line in the form hostname:/vol/path -o optional-nfs-mount-options'
+          pure_parameters: 'Pure Storage FlashArray Parameters'
+          pure_volume_driver: 'Pure Storage FlashArray'
           raw_parameters: 'Raw Devices Parameters'
           raw_volume_driver: 'Raw Devices'
           rbd_parameters: 'RADOS Parameters'
@@ -116,6 +118,10 @@ en:
               vserver: 'Name of the Virtual Storage Server (netapp_vserver)'
             nfs:
               nfs_shares: 'List of NFS Exports'
+            pure:
+              use_chap_auth: 'Use chap auth for targets'
+              san_ip: 'Pure Storage Flasharray Management VIP'
+              pure_api_token: 'Pure Storage FlashArray API token'
             raw:
               cinder_raw_method: 'Disk selection method'
               volume_name: 'Name of Volume'

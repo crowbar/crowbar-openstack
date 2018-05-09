@@ -187,7 +187,12 @@ nas_secure_file_operations = false
 
   <% if volume['backend_driver'] == 'nimble' -%><% end -%>
   <% if volume['backend_driver'] == 'peophetstor' -%><% end -%>
-  <% if volume['backend_driver'] == 'pure' -%><% end -%>
+  <% if volume['backend_driver'] == 'pure' -%>
+volume_driver = cinder.volume.drivers.pure.PureISCSIDriver
+use_chap_auth = <%= volume['pure']["use_chap_auth"] %>
+san_ip = <%= volume['pure']["san_ip"] %>
+pure_api_token = <%= volume['pure']["pure_api_token"] %>
+  <% end -%>
   <% if volume['backend_driver'] == 'quobyte' -%><% end -%>
 
   <% if volume['backend_driver'] == 'raw' -%>
