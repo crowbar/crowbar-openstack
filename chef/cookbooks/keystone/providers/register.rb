@@ -23,10 +23,13 @@ action :wakeup do
   # Lets verify that the service does not exist yet
   count = 0
   error = true
-  while error and count < 50 do
+  loop do
     count = count + 1
     _, error = _get_service_id(http, headers, "fred")
-    sleep 1 if error
+    break unless error && count < 50
+    sleep 1
+    next unless new_resource.reissue_token_on_error
+    http, headers = _build_connection(new_resource)
   end
 
   raise "Failed to validate keystone is wake" if error

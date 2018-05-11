@@ -488,6 +488,10 @@ register_auth_hash = { user: node[:keystone][:admin][:username],
 old_password = node[:keystone][:admin][:old_password]
 old_register_auth_hash = register_auth_hash.clone
 old_register_auth_hash[:password] = old_password
+update_admin_password = node[:keystone][:bootstrap] &&
+  (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
+  old_password && !old_password.empty? &&
+  old_password != node[:keystone][:admin][:password]
 
 keystone_register "update admin password" do
   protocol node[:keystone][:api][:protocol]
@@ -499,12 +503,7 @@ keystone_register "update admin password" do
   user_password node[:keystone][:admin][:password]
   project_name node[:keystone][:admin][:project]
   action :add_user
-  only_if do
-    node[:keystone][:bootstrap] &&
-      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
-      old_password && !old_password.empty? &&
-      old_password != node[:keystone][:admin][:password]
-  end
+  only_if { update_admin_password }
 end
 
 ruby_block "backup current admin password on node attributes" do
@@ -533,7 +532,6 @@ execute "keystone-manage bootstrap" do
   end
 end
 
-
 # Silly wake-up call - this is a hack; we use retries because the server was
 # just (re)started, and might not answer on the first try
 keystone_register "wakeup keystone" do
@@ -544,6 +542,7 @@ keystone_register "wakeup keystone" do
   auth register_auth_hash
   retries 5
   retry_delay 10
+  reissue_token_on_error update_admin_password
   action :wakeup
 end
 
