@@ -108,8 +108,6 @@ execute "nova-manage create cell0" do
   group node[:nova][:group]
   command "nova-manage cell_v2 map_cell0"
   action :run
-  # TODO: Does not work on Newton (14.x.x). Remove when switched to Ocata
-  not_if 'rpm -qa --qf "%{VERSION}\n" openstack-nova|grep ^14\.'
   only_if do
     !node[:nova][:db_synced] &&
       (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
@@ -121,8 +119,6 @@ execute "nova-manage create cell1" do
   group node[:nova][:group]
   command "nova-manage cell_v2 create_cell --name cell1 --verbose"
   action :run
-  # TODO: Does not work on Newton (14.x.x). Remove when switched to Ocata
-  not_if 'rpm -qa --qf "%{VERSION}\n" openstack-nova|grep ^14\.'
   only_if do
     !node[:nova][:db_synced] &&
       (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
