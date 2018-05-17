@@ -290,6 +290,7 @@ end
 
 cpu_mode = ""
 cpu_model = ""
+rng_device = nil
 
 if node.roles.include? "nova-compute-kvm"
   compute_flags = node[:nova][:compute]["kvm-#{node[:kernel][:machine]}"]
@@ -300,6 +301,14 @@ end
 if compute_flags
   cpu_model = compute_flags["cpu_model"]
   cpu_mode = compute_flags["cpu_mode"]
+end
+
+if File.exist?("/sys/devices/virtual/misc/hw_random/rng_current") &&
+    !File.read("/sys/devices/virtual/misc/hw_random/rng_current").include?("none")
+  # Unfortunately that file isn't readable by non-root so we can not set it
+  # rng_device = "/dev/hwrng"
+else
+  rng_device = "/dev/random"
 end
 
 # lock path prevents race conditions for cinder-volume and nova-compute on same
@@ -339,6 +348,7 @@ template node[:nova][:config_file] do
     cpu_mode: cpu_mode,
     cpu_model: cpu_model,
     bind_host: bind_host,
+    rng_device: rng_device,
     bind_port_api: bind_port_api,
     bind_port_api_ec2: bind_port_api_ec2,
     bind_port_metadata: bind_port_metadata,

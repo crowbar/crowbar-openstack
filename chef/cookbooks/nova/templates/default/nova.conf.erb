@@ -224,6 +224,9 @@ volume_use_multipath = true
 iser_use_multipath = true
 <% end %>
 disk_cachemodes = <%= node[:nova][:kvm][:disk_cachemodes] %>
+<% if @rng_device %>
+rng_dev_path = <%= @rng_device %>
+<% end %>
 
 [neutron]
 service_metadata_proxy = true
