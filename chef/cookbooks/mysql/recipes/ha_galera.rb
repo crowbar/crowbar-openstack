@@ -290,6 +290,43 @@ crowbar_pacemaker_sync_mark "sync-database_root_password" do
   revision node[:database]["crowbar-revision"]
 end
 
+include_recipe "crowbar-pacemaker::haproxy"
+
+ha_servers = CrowbarPacemakerHelper.haproxy_servers_for_service(
+  node, "mysql", "database-server", "admin_port"
+)
+
+# Let all nodes but one act as backup (standby) servers.
+# Backup server is only used when non-backup one is down. Thus we prevent possible deadlocks
+# from OpenStack services writing to the database on different nodes at once.
+ha_servers = ha_servers.each do |n|
+  # Let the current node be non-backup one, so haproxy running on this node does
+  # not direct traffic elsewhere by default
+  n["backup"] = n["name"] != node["hostname"]
+  # lower the number of unsuccessful checks needed for declaring server DOWN
+  n["fall"] = 2
+  # lower the interval checking after first failure is found
+  n["fastinter"] = 1000
+end
+
+haproxy_loadbalancer "galera" do
+  address CrowbarPacemakerHelper.cluster_vip(node, "admin")
+  port 3306
+  mode "tcp"
+  # leave some room for pacemaker health checks
+  max_connections node[:database][:mysql][:max_connections] - 10
+  options ["httpchk", "clitcpka"]
+  default_server "port 5555"
+  stick ({ "on" => "dst" })
+  servers ha_servers
+  action :nothing
+end.run_action(:create)
+
+# wait for all nodes to have haproxy configured before clustercheck
+crowbar_pacemaker_sync_mark "sync-database_before_clustercheck" do
+  revision node[:database]["crowbar-revision"]
+end
+
 # Start galera-clustercheck which serves the cluster state as http return codes
 # on port 5555
 transaction_objects = []
@@ -327,34 +364,3 @@ pacemaker_transaction "clustercheck" do
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
-include_recipe "crowbar-pacemaker::haproxy"
-
-ha_servers = CrowbarPacemakerHelper.haproxy_servers_for_service(
-  node, "mysql", "database-server", "admin_port"
-)
-
-# Let all nodes but one act as backup (standby) servers.
-# Backup server is only used when non-backup one is down. Thus we prevent possible deadlocks
-# from OpenStack services writing to the database on different nodes at once.
-ha_servers = ha_servers.each do |n|
-  # Let the current node be non-backup one, so haproxy running on this node does
-  # not direct traffic elsewhere by default
-  n["backup"] = n["name"] != node["hostname"]
-  # lower the number of unsuccessful checks needed for declaring server DOWN
-  n["fall"] = 2
-  # lower the interval checking after first failure is found
-  n["fastinter"] = 1000
-end
-
-haproxy_loadbalancer "galera" do
-  address CrowbarPacemakerHelper.cluster_vip(node, "admin")
-  port 3306
-  mode "tcp"
-  # leave some room for pacemaker health checks
-  max_connections node[:database][:mysql][:max_connections] - 10
-  options ["httpchk", "clitcpka"]
-  default_server "port 5555"
-  stick ({ "on" => "dst" })
-  servers ha_servers
-  action :nothing
-end.run_action(:create)
