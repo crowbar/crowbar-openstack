@@ -45,7 +45,7 @@
         {
             "name": <%= @json_user %>,
             "password": <%= @json_password %>,
-            "tags": "management"
+            "tags": "management<% if node[:rabbitmq][:yarb][:enabled] -%>, administrator<% end -%>"
         }
     ],
     "permissions": [

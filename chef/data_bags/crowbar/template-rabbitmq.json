@@ -61,14 +61,20 @@
         "recbuf": null
       },
       "collect_statistics_interval": 5000,
-      "enable_queue_mirroring": true
+      "enable_queue_mirroring": true,
+      "yarb": {
+        "enabled": false,
+        "log_level": "info",
+        "threads": 50,
+        "wait_time": 1
+      }
     }
   },
   "deployment": {
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 301,
+      "schema-revision": 302,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },

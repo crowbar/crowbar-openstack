@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# check that we are getting a rabbitmq monitor OK alert
+[ "${CRM_notify_rsc}" = "rabbitmq" -a "${CRM_notify_task}" = "monitor" -a "${CRM_notify_desc}" = "OK" ] || exit 0
+
+# if the return code was 8 we know it was a master
+if [ "${CRM_notify_rc}" = 8 ]; then
+  node_type="master"
+else
+  node_type="slave"
+fi
+
+logger -t "yarb-alert-pacemaker" "A rabbit ${node_type} node is back: ${CRM_notify_node}. Launching yarb..."
+
+# lock in case there is 2 node recoveries really close
+# we dont care on launching yarb multiple times, because everytime we get that alert it
+# means there is a new node up so the queues should be rebalanced
+flock /var/lock/yarb /usr/bin/yarb

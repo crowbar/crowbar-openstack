@@ -111,9 +111,15 @@ rabbitmq_user "setting permissions for #{node[:rabbitmq][:user]}" do
 end
 
 execute "rabbitmqctl set_user_tags #{node[:rabbitmq][:user]} management" do
-  not_if "rabbitmqctl list_users | grep #{node[:rabbitmq][:user]} | grep -q management"
   action :run
+  not_if "rabbitmqctl list_users | grep #{node[:rabbitmq][:user]} | grep -q management"
   only_if only_if_command if ha_enabled
+end
+
+execute "rabbitmqctl set_user_tags #{node[:rabbitmq][:user]} administrator" do
+  action :run
+  not_if "rabbitmqctl list_users | grep #{node[:rabbitmq][:user]} | grep -q administrator"
+  only_if only_if_command if ha_enabled && node[:rabbitmq][:yarb][:enabled]
 end
 
 node[:rabbitmq][:users].each do |user|

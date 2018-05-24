@@ -123,7 +123,17 @@
               }
             },
             "collect_statistics_interval": { "type": "int", "required": true},
-            "enable_queue_mirroring": { "type": "bool", "required": true}
+            "enable_queue_mirroring": { "type": "bool", "required": true},
+            "yarb": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "enabled": { "type": "bool", "required": true },
+                "log_level": { "type": "str", "required": true },
+                "threads": { "type": "int", "required": true },
+                "wait_time": { "type": "int", "required": true }
+              }
+            }
           }
         }
       }

@@ -1,0 +1,17 @@
+[default]
+# user with the administrator tag
+username = <%= @username %>
+# password for the user
+password = <%= @password %>
+# vhost
+vhost = <%= @vhost %>
+# hostname
+hostname = <%= @hostname %>
+# port, usually 15672
+port = <%= @port %>
+# log level, valid options are error, info, debug
+log_level = <%= @log_level %>
+# how many threads to use to delete the queues, careful as this has a performance hit on the cluster
+threads = <%= @threads %>
+# how mmuch time to wait between launching a new queue after one has finished
+wait_time = <%= @wait_time %>
