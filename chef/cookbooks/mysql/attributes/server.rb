@@ -48,8 +48,4 @@ default[:mysql][:galera_packages] = [
   "socat",
   "galera-python-clustercheck"
 ]
-
-# newer version need an additional package on SLES
-unless node[:mysql][:mariadb][:version] == "10.1"
-  default[:mysql][:galera_packages] << "mariadb-galera"
-end
+# for versions != 10.1, mariadb-galera is added in the ha_galera.rb recipe
