@@ -107,6 +107,19 @@
                   "required": true,
                   "type": "seq",
                   "sequence": [ { "type": "str" } ]
+                  },
+                  "tunables": {
+                    "required": true,
+                    "type": "map",
+                    "mapping": {
+                      "heap_size": { "type": "str", "required": true },
+                      "max_locked_memory": { "type": "str", "required": true },
+                      "max_open_files_hard_limit": { "type": "int", "required": true },
+                      "max_open_files_soft_limit": { "type": "int", "required": true },
+                      "max_procs": { "type": "int", "required": true },
+                      "memory_lock": { "type": "bool", "required": true },
+                      "vm_max_map_count": { "type": "int", "required": true }
+                    }
                   }
                 }
             },
