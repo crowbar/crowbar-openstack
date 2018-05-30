@@ -1,0 +1,23 @@
+#!/bin/sh
+
+set -e
+
+actual_versions=$(LC_ALL=C rpm -qa crowbar-openstack openstack-monasca-installer | sort)
+previous_versions=$(cat <%= @lock_file %> 2> /dev/null || echo)
+
+# No need to run if versions match (Crowbar will ensure a mismatch by deleting
+# <%= @lock_file %> if any parameters change.
+if [ "$actual_versions" = "$previous_versions" ]; then
+  echo "No package version changes, skipping monasca-installer run"
+  exit 0
+fi
+
+cd "/opt/monasca-installer"
+rm -f <%= @lock_file %>
+  /usr/bin/ansible-playbook \
+    -i monasca-hosts \
+    -e '@/opt/monasca-installer/crowbar_vars.yml' \
+    monasca.yml -vvv
+
+# Record version information to indicate a successful run.
+LC_ALL=C rpm -qa crowbar-openstack openstack-monasca-installer | sort > <%= @lock_file %>
