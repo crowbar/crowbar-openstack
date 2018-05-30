@@ -125,6 +125,7 @@ template "/opt/monasca-installer/crowbar_vars.yml" do
     curator_cron_config: [curator_cron_config].to_yaml.split("\n")[1..-1],
     curator_excluded_index: curator_excluded_index.to_yaml.split("\n")[1..-1],
     elasticsearch_repo_dir: node[:monasca][:elasticsearch][:repo_dir].to_yaml.split("\n")[1..-1],
+    elasticsearch_tunables: node[:monasca][:elasticsearch][:tunables],
     monitor_libvirt: node[:monasca][:agent][:monitor_libvirt],
     delegate_role: node[:monasca][:delegate_role]
   )

@@ -69,7 +69,16 @@
         "log_level": "INFO"
       },
       "elasticsearch": {
-        "repo_dir": []
+        "repo_dir": [],
+        "tunables": {
+          "heap_size": "4g",
+          "max_locked_memory": "infinity",
+          "max_open_files_hard_limit": 65536,
+          "max_open_files_soft_limit": 16384,
+          "max_procs": 65536,
+          "memory_lock": true,
+          "vm_max_map_count": 262144
+        }
       },
       "elasticsearch_curator": {
         "delete_exclude_index": [ ".kibana" ],
@@ -134,7 +143,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 203,
+      "schema-revision": 204,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],

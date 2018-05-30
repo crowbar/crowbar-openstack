@@ -64,6 +64,9 @@ monasca_log_api_url: "http://<%= @pub_net_ip %>:<%= @log_api_settings['bind_port
 memcached_nodes: ["<%= @monasca_net_ip %>:11211"]
 elasticsearch_nodes: ["<%= @monasca_net_ip %>"]
 elasticsearch_hosts: <%= @monasca_net_ip %>
+<%- @elasticsearch_tunables.each_key do |t| %>
+elasticsearch_<%= t %>: <%= @elasticsearch_tunables[t] %>
+<%- end %>
 monasca_api_log_level: <%= @api_settings['log_level'] %>
 log_api_log_level: <%= @log_api_settings['log_level'] %>
 
