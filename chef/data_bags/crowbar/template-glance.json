@@ -65,14 +65,17 @@
       "keystone_instance": "none",
       "service_user": "glance",
       "database_instance": "none",
-      "rabbitmq_instance": "none"
+      "rabbitmq_instance": "none",
+      "ha_rate_limit": {
+        "glance-api": 0
+      }
     }
   },
   "deployment": {
     "glance": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 104,
+      "schema-revision": 105,
       "element_states": {
         "glance-server": [ "readying", "ready", "applying" ]
       },
