@@ -119,7 +119,18 @@
                 "recbuf": { "type": "int", "required": false }
               }
             },
-            "collect_statistics_interval": { "type": "int", "required": true}
+            "collect_statistics_interval": { "type": "int", "required": true},
+            "optimize_max_conn": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "enabled": { "type": "bool", "required": true },
+                "ip_local_port_range": { "type": "seq", "required": true, "sequence": [ { "type": "int" } ] },
+                "tcp_fin_timeout": { "type": "int", "required": true },
+                "somaxconn": { "type": "int", "required": true },
+                "tcp_max_syn_backlog": { "type": "int", "required": true }
+              }
+            }
           }
         }
       }

@@ -57,14 +57,21 @@
         "sndbuf": null,
         "recbuf": null
       },
-      "collect_statistics_interval": 5000
+      "collect_statistics_interval": 5000,
+      "optimize_max_conn": {
+        "enabled": false,
+        "ip_local_port_range": [10000, 65000],
+        "tcp_fin_timeout": 10,
+        "somaxconn": 4096,
+        "tcp_max_syn_backlog": 4096
+      }
     }
   },
   "deployment": {
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 204,
+      "schema-revision": 205,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },
