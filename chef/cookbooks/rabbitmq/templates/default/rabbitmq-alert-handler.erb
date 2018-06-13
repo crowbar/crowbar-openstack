@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# exit if isn't a rabbitmq alert or is not a monitor task
+[ "${CRM_notify_rsc}" = "rabbitmq" -a "${CRM_notify_task}" = "monitor" ] || exit 0
+
+# launch the blocker in exclusive mode
+flock /var/lock/rabbit /usr/bin/rabbitmq-port-blocker.sh
