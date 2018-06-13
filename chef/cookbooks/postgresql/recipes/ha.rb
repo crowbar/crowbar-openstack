@@ -29,7 +29,7 @@ group_name = "g-#{service_name}"
 
 agent_name = "ocf:heartbeat:pgsql"
 
-ip_addr = CrowbarDatabaseHelper.get_listen_address(node)
+ip_addr = CrowbarDatabaseHelper.get_listen_address(node, "postgresql")
 
 postgres_op = {}
 postgres_op["monitor"] = {}
@@ -63,7 +63,7 @@ transaction_objects << "pacemaker_primitive[#{vip_primitive}]"
 # We run the resource agent "ocf:heartbeat:pgsql" without params, instead of
 # something like:
 #  params ({
-#    "pghost" => CrowbarDatabaseHelper.get_listen_address(node),
+#    "pghost" => CrowbarDatabaseHelper.get_listen_address(node, "postgresql"),
 #    "monitor_user" => "postgres",
 #    "monitor_password" => node['postgresql']['password']['postgres']
 #  })

@@ -170,7 +170,14 @@ class DatabaseService < PacemakerServiceObject
     end
 
     role.default_attributes["database"][sql_engine] = {} if role.default_attributes["database"][sql_engine].nil?
-    role.default_attributes["database"]["db_maker_password"] = (old_role && old_role.default_attributes["database"]["db_maker_password"]) || random_password
+    role.default_attributes["database"][sql_engine]["db_maker_password"] = random_password
+    if old_role
+      if old_role.default_attributes["database"][sql_engine]["db_maker_password"]
+        role.default_attributes["database"][sql_engine]["db_maker_password"] = old_role.default_attributes["database"][sql_engine]["db_maker_password"]
+      elsif old_role.default_attributes["database"]["db_maker_password"]
+        role.default_attributes["database"][sql_engine]["db_maker_password"] = old_role.default_attributes["database"]["db_maker_password"]
+      end
+    end
 
     if ( sql_engine == "mysql" )
       role.default_attributes["database"]["mysql"]["server_root_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_root_password"]) || random_password
