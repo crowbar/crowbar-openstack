@@ -25,7 +25,7 @@ monasca_hosts = MonascaHelper.monasca_hosts(monasca_servers)
 raise "no nodes with monasca-server role found" if monasca_hosts.nil? || monasca_hosts.empty?
 
 package "ansible"
-package "monasca-installer" do
+package "openstack-monasca-installer" do
   notifies :run, "execute[run ansible]", :delayed
 end
 
