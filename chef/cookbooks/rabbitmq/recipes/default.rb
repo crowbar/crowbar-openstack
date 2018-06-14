@@ -48,7 +48,7 @@ if node[:platform_family] == "suse"
     group "root"
     mode 0o755
     action :create
-    only_if "grep -q Requires=epmd.service /usr/lib/systemd/system/rabbitmq-server.service"
+    only_if "systemctl list-dependencies --plain rabbitmq-server.service | grep -q epmd.service"
   end
 
   template "/etc/systemd/system/epmd.socket.d/port.conf" do
@@ -59,7 +59,7 @@ if node[:platform_family] == "suse"
     variables(
       listen_address: node[:rabbitmq][:address]
     )
-    only_if "grep -q Requires=epmd.service /usr/lib/systemd/system/rabbitmq-server.service"
+    only_if "systemctl list-dependencies --plain rabbitmq-server.service | grep -q epmd.service"
   end
 
   bash "reload systemd for epmd.socket extension" do
@@ -78,7 +78,7 @@ if node[:platform_family] == "suse"
   # (not a typo, we want the socket, not the service here)
   service "epmd.socket" do
     action [:enable, :start]
-    only_if "grep -q Requires=epmd.service /usr/lib/systemd/system/rabbitmq-server.service"
+    only_if "systemctl list-dependencies --plain rabbitmq-server.service | grep -q epmd.service"
     subscribes :restart, "template[/etc/systemd/system/epmd.socket.d/port.conf]", :immediate
   end
 end
