@@ -68,6 +68,19 @@ if node[:platform_family] == "suse"
     subscribes :run, "template[/etc/systemd/system/epmd.socket.d/port.conf]", :immediate
   end
 
+  # Before we pass epmd socket management to systemd, we need to make sure that no
+  # "standalone" epmd is running to avoid "Address already in use" errors. Epmd can
+  # be implicitly started by any erlang command e.g. rabbitmqctl (also used by OCF
+  # monitoring agents in HA setup).
+  # Note that epmd stopped here can still be started by some command during the
+  # short window before systemd socket is started.
+  bash "stop any running epmd before systemd socket start" do
+    code "epmd -kill"
+    action :run
+    only_if "! systemctl is-active --quiet epmd.socket && " \
+      "grep -q Requires=epmd.service /usr/lib/systemd/system/rabbitmq-server.service"
+  end
+
   # Enable epmd.socket for two reasons:
   # 1. when we don't use the rabbitmq systemd service (in HA, for instance),
   #    this will enable the use of the system-wide epmd
