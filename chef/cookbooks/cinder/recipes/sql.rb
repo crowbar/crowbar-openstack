@@ -61,6 +61,37 @@ database_user "grant database access for cinder database user" do
     only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
+# Some live migrations need to happen before revision 97, so we first need to
+# sync all revisions up to 96
+execute "cinder-manage db sync up to revision 96" do
+  command "cinder-manage db sync 96"
+  user node[:cinder][:user]
+  group node[:cinder][:group]
+  ignore_failure true
+  # We only do the sync the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if do
+    !node[:cinder][:db_synced] &&
+      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
+      (`cinder-manage --log-file /dev/null db version`.to_i < 97)
+  end
+end
+
+# Now we can run the live migrations
+execute "cinder-manage db online_data_migrations" do
+  user node[:cinder][:user]
+  group node[:cinder][:group]
+  command "cinder-manage db online_data_migrations"
+  ignore_failure true
+  action :run
+  only_if do
+    !node[:cinder][:db_synced] &&
+      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
+      (`cinder-manage --log-file /dev/null db version`.to_i == 96)
+  end
+end
+
+# update to the last cinder db revision
 execute "cinder-manage db sync" do
   command "cinder-manage db sync"
   user node[:cinder][:user]
