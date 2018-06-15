@@ -187,8 +187,7 @@ ruby_block "mark node for nova db_sync" do
     node.set[:nova][:db_synced] = true
     node.save
   end
-  action :nothing
-  subscribes :create, "execute[nova-manage db sync]", :immediately
+  not_if { node[:nova][:db_synced] }
 end
 
 # We want to keep a note that we've done db_sync, so we don't do it again.
