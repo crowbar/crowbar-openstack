@@ -29,6 +29,7 @@ haproxy_loadbalancer "glance-api" do
   port network_settings[:api][:ha_bind_port]
   use_ssl (node[:glance][:api][:protocol] == "https")
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "glance", "glance-server", "api")
+  rate_limit node[:glance][:ha_rate_limit]["glance-api"]
   action :nothing
 end.run_action(:create)
 

@@ -96,7 +96,12 @@
             "service_user": { "type": "str", "required": true },
             "service_password": { "type": "str" },
             "memcache_secret_key": { "type": "str", "required": true },
-            "database_instance": { "type": "str", "required": true }
+            "database_instance": { "type": "str", "required": true },
+            "ha_rate_limit": {
+              "type": "map", "required": true, "mapping": {
+                "glance-api": { "type": "int", "required": true }
+              }
+            }
           }
         }
       }

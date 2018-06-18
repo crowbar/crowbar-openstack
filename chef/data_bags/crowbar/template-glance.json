@@ -65,14 +65,17 @@
       "service_user": "glance",
       "database_instance": "none",
       "rabbitmq_instance": "none",
-      "memcache_secret_key": ""
+      "memcache_secret_key": "",
+      "ha_rate_limit": {
+        "glance-api": 0
+      }
     }
   },
   "deployment": {
     "glance": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 201,
+      "schema-revision": 202,
       "element_states": {
         "glance-server": [ "readying", "ready", "applying" ]
       },
