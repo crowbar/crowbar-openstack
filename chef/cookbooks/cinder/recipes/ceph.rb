@@ -122,7 +122,7 @@ unless ceph_clients.empty?
     ceph_pools.each_pair do |cinder_user, cinder_pools|
 
       allow_pools = cinder_pools.map{ |p| "allow rwx pool=#{p}" }.join(", ")
-      allow_pools += ", allow rx pool=#{glance_pool}" if glance_pool
+      allow_pools += ", allow rwx pool=#{glance_pool}" if glance_pool
       ceph_caps = { "mon" => "allow r", "osd" => "allow class-read object_prefix rbd_children, #{allow_pools}" }
 
       ceph_client cinder_user do
