@@ -25,6 +25,8 @@ en:
         rabbitmq_instance: 'RabbitMQ'
         ceilometer_instance: 'Ceilometer'
         evaluation_interval: 'Evaluation interval for threshold alarms (in seconds).'
+        alarm_history_ttl: 'Number of seconds that alarm histories are kept in the database for (<= 0 means forever).'
+
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'

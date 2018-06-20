@@ -8,6 +8,7 @@ transport_url = <%= @rabbit_settings[:url] %>
 workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
 [database]
+alarm_history_time_to_live = <%= @alarm_history_ttl %>
 connection = <%= @database_connection %>
 
 [keystone_authtoken]

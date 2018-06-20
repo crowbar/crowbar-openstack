@@ -5,6 +5,7 @@
     "aodh": {
       "debug": false,
       "evaluation_interval": 600,
+      "alarm_history_ttl": -1,
       "rabbitmq_instance": "none",
       "database_instance": "none",
       "keystone_instance": "none",
@@ -35,7 +36,7 @@
     "aodh": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 201,
+      "schema-revision": 202,
       "element_states": {
         "aodh-server": [ "readying", "ready", "applying" ]
       },
