@@ -91,7 +91,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
 
   end
 
-  ruby_block "save nova key as libvirt secret" do
+  ruby_block "Ceph: save key for #{rbd_uuid} as libvirt secret" do
     block do
       # Check if libvirt is installed and started
       if system("virsh hostname &> /dev/null")
