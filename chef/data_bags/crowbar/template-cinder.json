@@ -82,6 +82,7 @@
           "use_crowbar": true,
           "config_file": "/etc/ceph/ceph.conf",
           "admin_keyring": "/etc/ceph/ceph.client.admin.keyring",
+          "cluster_name": "ceph",
           "pool": "volumes",
           "user": "cinder",
           "secret_uuid": "",
@@ -182,7 +183,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 207,
+      "schema-revision": 208,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
