@@ -68,6 +68,12 @@ if node[:platform_family] == "suse"
     subscribes :run, "template[/etc/systemd/system/epmd.socket.d/port.conf]", :immediate
   end
 
+  # skz: TODO: remove
+  bash "wait for some epmd to come up to trigger epmd.socket bug" do
+    code "echo 'waiting for 60sec...'; sleep 60"
+    action :run
+  end
+
   # Enable epmd.socket for two reasons:
   # 1. when we don't use the rabbitmq systemd service (in HA, for instance),
   #    this will enable the use of the system-wide epmd
