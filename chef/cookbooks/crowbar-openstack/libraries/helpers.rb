@@ -75,7 +75,7 @@ class CrowbarOpenStackHelper
       @database_settings_cache_time = node[:ohai_time]
     end
 
-    if @database_settings && @database_settings.include?(instance)
+    if @database_settings && @database_settings.include?(instance) && false
       Chef::Log.info("Database server found at #{@database_settings[instance][:address]} [cached]")
     else
       @database_settings ||= Hash.new
@@ -85,6 +85,9 @@ class CrowbarOpenStackHelper
                         )
       db_proposal_role = db_roles.first unless db_roles.empty?
       sql_engine = db_proposal_role.default_attributes["database"]["sql_engine"]
+      if barclamp == "mysql" || barclamp == "postgresql"
+        sql_engine = barclamp
+      end
       db_role = if sql_engine == "postgresql"
                   "database-server"
                 else
@@ -97,7 +100,7 @@ class CrowbarOpenStackHelper
         Chef::Log.warn("No database server found!")
       else
         address = CrowbarDatabaseHelper.get_listen_address(database)
-        backend_name = DatabaseLibrary::Database::Util.get_backend_name(database)
+        backend_name = sql_engine
 
         ssl_opts = {}
         if backend_name == "mysql"
@@ -112,9 +115,9 @@ class CrowbarOpenStackHelper
           address: address,
           url_scheme: backend_name,
           backend_name: backend_name,
-          provider: DatabaseLibrary::Database::Util.get_database_provider(database),
-          user_provider: DatabaseLibrary::Database::Util.get_user_provider(database),
-          privs: DatabaseLibrary::Database::Util.get_default_priviledges(database),
+          provider: DatabaseLibrary::Database::Util.get_database_provider(database, backend_name),
+          user_provider: DatabaseLibrary::Database::Util.get_user_provider(database, backend_name),
+          privs: DatabaseLibrary::Database::Util.get_default_priviledges(database, backend_name),
           connection: {
             host: address,
             username: "db_maker",

@@ -183,7 +183,7 @@ execute "assign-root-password" do
   only_if "/usr/bin/mysql -u root -e 'show databases;'"
 end
 
-db_settings = fetch_database_settings
+db_settings = fetch_database_settings(@cookbook_name)
 db_connection = db_settings[:connection].dup
 db_connection[:host] = "localhost"
 db_connection[:username] = "root"
