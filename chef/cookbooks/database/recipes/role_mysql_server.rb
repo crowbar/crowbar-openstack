@@ -1,14 +1,11 @@
 #
-# Cookbook Name:: database
-# Recipe:: server
-#
-# Copyright 2012, SUSE Linux Products GmbH
+# Copyright 2018, SUSE LINUX GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+#   http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,9 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-backend = node[:database][:sql_engine]
-
-Chef::Log.info("Running database::server for #{backend}")
-
-include_recipe "#{backend}::server"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "database", "mysql-server")
+  include_recipe "mysql::server"
+end

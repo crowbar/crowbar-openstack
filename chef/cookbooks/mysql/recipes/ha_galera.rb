@@ -330,7 +330,7 @@ end
 include_recipe "crowbar-pacemaker::haproxy"
 
 ha_servers = CrowbarPacemakerHelper.haproxy_servers_for_service(
-  node, "mysql", "database-server", "admin_port"
+  node, "mysql", "mysql-server", "admin_port"
 )
 
 # Let all nodes but one act as backup (standby) servers.
