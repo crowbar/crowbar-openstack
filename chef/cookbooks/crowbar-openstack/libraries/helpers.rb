@@ -79,7 +79,19 @@ class CrowbarOpenStackHelper
       Chef::Log.info("Database server found at #{@database_settings[instance][:address]} [cached]")
     else
       @database_settings ||= Hash.new
-      database = get_node(node, "database-server", "database", instance)
+      db_roles, = Chef::Search::Query.new.search(
+                          :role,
+                          "name:database-config-#{instance}"
+                        )
+      db_proposal_role = db_roles.first unless db_roles.empty?
+      sql_engine = db_proposal_role.default_attributes["database"]["sql_engine"]
+      db_role = if sql_engine == "postgresql"
+                  "database-server"
+                else
+                  "mysql-server"
+                end
+
+      database = get_node(node, db_role, "database", instance)
 
       if database.nil?
         Chef::Log.warn("No database server found!")

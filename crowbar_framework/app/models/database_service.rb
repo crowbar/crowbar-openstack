@@ -38,6 +38,16 @@ class DatabaseService < PacemakerServiceObject
             "suse" => "< 12.2",
             "windows" => "/.*/"
           }
+        },
+        "mysql-server" => {
+          "unique" => false,
+          "count" => 1,
+          "cluster" => true,
+          "admin" => false,
+          "exclude_platform" => {
+            "suse" => "< 12.2",
+            "windows" => "/.*/"
+          }
         }
       }
     end
@@ -111,17 +121,22 @@ class DatabaseService < PacemakerServiceObject
   end
 
   def validate_proposal_after_save(proposal)
-    validate_one_for_role proposal, "database-server"
-
     attributes = proposal["attributes"][@bc_name]
-    db_engine = attributes["sql_engine"]
+    sql_engine = attributes["sql_engine"]
+    db_role = if sql_engine == "postgresql"
+                "database-server"
+              else
+                "mysql-server"
+              end
+    validate_one_for_role proposal, db_role
+
     validation_error I18n.t(
       "barclamp.#{@bc_name}.validation.invalid_db_engine",
-      db_engine: db_engine
-    ) unless %w(mysql postgresql).include?(db_engine)
+      db_engine: sql_engine
+    ) unless %w(mysql postgresql).include?(sql_engine)
 
     # HA validation
-    servers = proposal["deployment"][@bc_name]["elements"]["database-server"]
+    servers = proposal["deployment"][@bc_name]["elements"][db_role]
     unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
       cluster = servers.first
       validate_ha_attributes(attributes, cluster)
@@ -134,10 +149,18 @@ class DatabaseService < PacemakerServiceObject
     @logger.debug("Database apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
-    database_elements, database_nodes, database_ha_enabled = role_expand_elements(role, "database-server")
+    sql_engine = role.default_attributes["database"]["sql_engine"]
+    db_role = if engine == "postgresql"
+                "database-server"
+              else
+                "mysql-server"
+              end
+
+    database_elements, database_nodes, database_ha_enabled = role_expand_elements(role, db_role)
     Openstack::HA.set_controller_role(database_nodes) if database_ha_enabled
 
     vip_networks = ["admin"]
+
     dirty = prepare_role_for_ha_with_haproxy(role, ["database", "ha", "enabled"],
       database_ha_enabled,
       database_elements,
@@ -145,8 +168,6 @@ class DatabaseService < PacemakerServiceObject
     role.save if dirty
 
     reset_sync_marks_on_clusters_founders(database_elements)
-
-    sql_engine = role.default_attributes["database"]["sql_engine"]
 
     if database_ha_enabled
       net_svc = NetworkService.new @logger
