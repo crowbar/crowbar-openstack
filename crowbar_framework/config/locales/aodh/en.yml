@@ -27,6 +27,8 @@ en:
         evaluation_interval: 'Evaluation interval for threshold alarms (in seconds).'
         logging_header: 'Logging'
         verbose: 'Verbose Logging'
+        alarm_history_ttl: 'Number of seconds that alarm histories are kept in the database for (<= 0 means forever).'
+
         api:
           protocol: 'Protocol'
         ssl_header: 'SSL Support'
