@@ -24,25 +24,6 @@ class Chef
       CrowbarOpenStackHelper.database_settings(node, barclamp)
     end
 
-    # The following are special cases of fetch_database_settings.
-    # To allow users to migrate from postgresql to mariadb it is possible to
-    # have multiple databases deployed. Most barclamps will use the above
-    # `fetch_database_settings` to get the currently active connection details.
-    # However, for the database barclamps themselves, they may need access to
-    # one set of settings or the other regardless of which one is active.
-    # These helper functions return the appropriate settings for the database
-    # recipes.
-    # NOTE: These are probably redundant as the barclamp parameter is actually
-    # the cookbook name, not the barclamp, so we can likely use that. Leaving
-    # them for now while this patch is WIP
-    def fetch_database_mysql_settings(barclamp=@cookbook_name)
-      CrowbarOpenStackHelper.database_settings(node, barclamp, 'mysql')
-    end
-
-    def fetch_database_postgresql_settings(barclamp=@cookbook_name)
-      CrowbarOpenStackHelper.database_settings(node, barclamp, 'postgresql')
-    end
-
     def fetch_database_connection_string(db_auth, barclamp = @cookbook_name)
       db_settings = CrowbarOpenStackHelper.database_settings(node, barclamp)
       CrowbarOpenStackHelper.database_connection_string(db_settings, db_auth)
@@ -78,13 +59,32 @@ class Chef
 end
 
 class CrowbarOpenStackHelper
-  def self.database_settings(node, barclamp, engine=nil)
-    if barclamp == "mysql" or barclamp == "postgresql"
-      # We're called from one of the database cookbooks, which doesn't reference
-      # another database instance.
+  def self.database_settings(node, barclamp)
+    if ["mysql", "postgresql"].include? barclamp
+      # We're called from one of the database cookbooks, find the settings for that type
+      backend_name = barclamp
+      db_config = nil
+      Chef::Search::Query.new.search(:role,"name:database-config-*") do |db_role|
+        if db_role.default_attributes["database"]["sql_engine"] == barclamp
+          db_config = db_role
+          break
+        end
+      end
+      if db_config == nil
+        Chef::Log.error("No role for #{barclamp} found")
+      end
+
+      # TODO: Check that this instance is correct. I think we should be finding an
+      # instance of db_role
       instance = node[:database][:config][:environment].gsub(/^database-config-/, "")
     else
       instance = node[barclamp][:database_instance] || "default"
+      db_config_results, = Chef::Search::Query.new.search(:role,"name:database-config-#{instance}")
+      if db_config_results.empty?
+        Chef::Log.error("Unable to find role name:database-config-#{instance}")
+      end
+      db_config = db_config_results.first
+      backend_name = db_config.default_attributes["database"]["sql_engine"]
     end
 
     # Cache the result for each cookbook in an instance variable hash. This
@@ -100,87 +100,39 @@ class CrowbarOpenStackHelper
       @database_settings_cache_time = node[:ohai_time]
     end
 
-    if @database_settings && @database_settings.include?(instance) && false
-      # FIXME: Skip the cache for now
+    if @database_settings && @database_settings.include?(instance)
       Chef::Log.info("Database server found at #{@database_settings[instance][:address]} [cached]")
     else
       @database_settings ||= Hash.new
-      database_nodes, = Chef::Search::Query.new.search(:node, "roles:database-server")
+      database = get_node(node, "database-server", "database", instance)
+      address = CrowbarDatabaseHelper.get_listen_address(database, backend_name)
 
-      if database_nodes.empty?
-        # Should this be an error?
-        Chef::Log.warn("No database server found!")
-        # TODO
-      elsif false
-        # Check if anything other than 1 or 2 databases were returned
-        # Raise an error if so
-        Chef::Log.warn("Somehow there are more than 2 databases deployed.")
-        # TODO
-      elsif false
-        # If we have 2 separate database nodes handle selecting one
-        # Check that there is one postgres and one mariadb. Raise an error if not
-        # Use postgres first
-        Chef::Log.info("We have 2 different database nodes")
-
-        # Inspect both the nodes and figure out which engine is deployed to which
-        # Prefer postgres over mariadb unless `engine` is given
-        # TODO
-      else
-        # We only have one database node, but we need to check if it has multiple
-        # proposals
-        database = database_nodes.first
-
-        database_roles = database["roles"].select{|roles| roles.match(/^database-config-/)}
-        if database_roles.count == 1
-          Chef::Log.info("Only one role found, so we can continue")
-          backend_name = DatabaseLibrary::Database::Util.get_backend_name(database)
-        elsif database_roles.count != 2
-          Chef::Log.warn("More than two database roles applied to node was unexpected")
-          # TODO: Raise error
-        else
-          Chef::Log.info("We have exactly 2 roles applied, figure out which one to use")
-          Chef::Log.info(database_roles)
-
-          if engine
-            backend_name = engine
-          else
-            # For now, just use postgres. After the data migration the old role
-            # should be deleted and then the logic will switch us to mariadb
-            backend_name = "postgresql"
-          end
-          Chef::Log.info("Backend_name: ")
-          Chef::Log.info(backend_name)
-        end
-
-        address = CrowbarDatabaseHelper.get_listen_address(database, backend_name)
-
-        ssl_opts = {}
-        if backend_name == "mysql"
-          ssl_opts = {
-            enabled: database["database"]["mysql"]["ssl"]["enabled"],
-            ca_certs: database["database"]["mysql"]["ssl"]["ca_certs"],
-            insecure: database["database"]["mysql"]["ssl"]["generate_certs"] ||
-              database["database"]["mysql"]["ssl"]["insecure"]
-          }
-        end
-        db_maker_password = database["database"][backend_name][:db_maker_password] || database["database"][:db_maker_password]
-        @database_settings[instance] = {
-          address: address,
-          url_scheme: backend_name,
-          backend_name: backend_name,
-          provider: DatabaseLibrary::Database::Util.get_database_provider(database, backend_name),
-          user_provider: DatabaseLibrary::Database::Util.get_user_provider(database, backend_name),
-          privs: DatabaseLibrary::Database::Util.get_default_priviledges(database, backend_name),
-          connection: {
-            host: address,
-            username: "db_maker",
-            password: db_maker_password,
-            ssl: ssl_opts
-          }
+      ssl_opts = {}
+      if backend_name == "mysql"
+        ssl_opts = {
+          enabled: db_config.default_attributes["database"]["mysql"]["ssl"]["enabled"],
+          ca_certs: db_config.default_attributes["database"]["mysql"]["ssl"]["ca_certs"],
+          insecure: db_config.default_attributes["database"]["mysql"]["ssl"]["generate_certs"] ||
+            db_config.default_attributes["database"]["mysql"]["ssl"]["insecure"]
         }
-
-        Chef::Log.info("Database server found at #{@database_settings[instance][:address]}")
       end
+      db_maker_password = db_config.default_attributes["database"][backend_name][:db_maker_password] || db_config.default_attributes["database"][:db_maker_password]
+      @database_settings[instance] = {
+        address: address,
+        url_scheme: backend_name,
+        backend_name: backend_name,
+        provider: DatabaseLibrary::Database::Util.get_database_provider(backend_name),
+        user_provider: DatabaseLibrary::Database::Util.get_user_provider(backend_name),
+        privs: DatabaseLibrary::Database::Util.get_default_priviledges(backend_name),
+        connection: {
+          host: address,
+          username: "db_maker",
+          password: db_maker_password,
+          ssl: ssl_opts
+        }
+      }
+
+      Chef::Log.info("Database server found at #{@database_settings[instance][:address]}")
     end
 
     @database_settings[instance]
