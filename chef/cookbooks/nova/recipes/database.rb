@@ -139,22 +139,19 @@ execute "nova-manage api_db sync" do
   end
 end
 
-execute "nova-manage db sync up to revision 329" do
+execute "nova-manage db sync" do
   user node[:nova][:user]
   group node[:nova][:group]
-  command "nova-manage db sync 329"
+  command "nova-manage db sync"
   action :run
   # We only do the sync the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
   only_if do
     !node[:nova][:db_synced] &&
-      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
-      (`nova-manage --log-file /dev/null db version`.to_i < 329)
+      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
   end
 end
 
-# Perform online migrations up to revision 329 (the ones for later revisions
-# will fail. These errors can probably be ignored (hence the ignore_failure usage)
 execute "nova-manage db online_data_migrations" do
   user node[:nova][:user]
   group node[:nova][:group]
@@ -163,8 +160,7 @@ execute "nova-manage db online_data_migrations" do
   action :run
   only_if do
     !node[:nova][:db_synced] &&
-      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
-      (`nova-manage --log-file /dev/null db version`.to_i == 329)
+      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
   end
 end
 
@@ -182,30 +178,6 @@ execute "nova-manage cell_v2 map_instances" do
   end
 end
 
-# Update Nova DB to latest revision
-execute "nova-manage db sync" do
-  user node[:nova][:user]
-  group node[:nova][:group]
-  command "nova-manage db sync"
-  action :run
-  only_if do
-    !node[:nova][:db_synced] &&
-      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
-  end
-end
-
-# Run online migration again to cover the ones that failed in the first pass.
-execute "nova-manage db online_data_migrations (continue)" do
-  user node[:nova][:user]
-  group node[:nova][:group]
-  command "nova-manage db online_data_migrations"
-  action :run
-  only_if do
-    !node[:nova][:db_synced] &&
-      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
-  end
-end
-
 # We want to keep a note that we've done db_sync, so we don't do it again.
 # If we were doing that outside a ruby_block, we would add the note in the
 # compile phase, before the actual db_sync is done (which is wrong, since it
@@ -215,8 +187,7 @@ ruby_block "mark node for nova db_sync" do
     node.set[:nova][:db_synced] = true
     node.save
   end
-  action :nothing
-  subscribes :create, "execute[nova-manage db sync]", :immediately
+  not_if { node[:nova][:db_synced] }
 end
 
 # We want to keep a note that we've done db_sync, so we don't do it again.
