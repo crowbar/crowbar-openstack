@@ -71,7 +71,7 @@ unless node[:database][:galera_bootstrapped]
     # unauthenticated root user is later removed in server.rb after the
     # bootstraping. Once the cluster has started other nodes will pick up on
     # the sstuser and we are able to use these credentails.
-    db_settings = fetch_database_settings
+    db_settings = fetch_database_settings(@cookbook_name)
     db_connection = db_settings[:connection].dup
     db_connection[:host] = "localhost"
     db_connection[:username] = "root"

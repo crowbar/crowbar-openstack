@@ -28,7 +28,7 @@ include_recipe "postgresql::client"
 dirty = false
 
 # For Crowbar, we need to set the address to bind - default to admin node.
-newaddr = CrowbarDatabaseHelper.get_listen_address(node)
+newaddr = CrowbarDatabaseHelper.get_listen_address(node, "postgresql")
 if node["postgresql"]["config"]["listen_addresses"] != newaddr
   node.set["postgresql"]["config"]["listen_addresses"] = newaddr
   dirty = true
@@ -121,7 +121,7 @@ template "#{node['postgresql']['dir']}/pg_hba.conf" do
   notifies change_notify, "service[postgresql]", :immediately
 end
 
-ha_enabled = node[:database][:ha][:enabled]
+ha_enabled = node[:database][:postgresql][:ha][:enabled]
 
 if ha_enabled
   log "HA support for postgresql is enabled"

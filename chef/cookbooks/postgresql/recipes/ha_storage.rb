@@ -37,21 +37,21 @@ postgres_op["monitor"]["interval"] = "10s"
 fs_params = {}
 fs_params["directory"] = "/var/lib/pgsql"
 
-if node[:database][:ha][:storage][:mode] == "drbd"
+if node[:database][:postgresql][:ha][:storage][:mode] == "drbd"
   include_recipe "crowbar-pacemaker::drbd"
 
   crowbar_pacemaker_drbd drbd_resource do
-    size "#{node[:database][:ha][:storage][:drbd][:size]}G"
+    size "#{node[:database][:postgresql][:ha][:storage][:drbd][:size]}G"
     action :nothing
   end.run_action(:create)
 
   fs_params["device"] = node["drbd"]["rsc"][drbd_resource]["device"]
   fs_params["fstype"] = "xfs"
-elsif node[:database][:ha][:storage][:mode] == "shared"
-  fs_params["device"] = node[:database][:ha][:storage][:shared][:device]
-  fs_params["fstype"] = node[:database][:ha][:storage][:shared][:fstype]
-  unless node[:database][:ha][:storage][:shared][:options].empty?
-    fs_params["options"] = node[:database][:ha][:storage][:shared][:options]
+elsif node[:database][:postgresql][:ha][:storage][:mode] == "shared"
+  fs_params["device"] = node[:database][:postgresql][:ha][:storage][:shared][:device]
+  fs_params["fstype"] = node[:database][:postgresql][:ha][:storage][:shared][:fstype]
+  unless node[:database][:postgresql][:ha][:storage][:shared][:options].empty?
+    fs_params["options"] = node[:database][:postgresql][:ha][:storage][:shared][:options]
   end
 else
   raise "Invalid mode for HA storage!"
@@ -71,7 +71,7 @@ end
 
 transaction_objects = []
 
-if node[:database][:ha][:storage][:mode] == "drbd"
+if node[:database][:postgresql][:ha][:storage][:mode] == "drbd"
   drbd_params = {}
   drbd_params["drbd_resource"] = drbd_resource
 
@@ -120,7 +120,7 @@ transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
 location_name = openstack_pacemaker_controller_only_location_for fs_primitive
 transaction_objects << "pacemaker_location[#{location_name}]"
 
-if node[:database][:ha][:storage][:mode] == "drbd"
+if node[:database][:postgresql][:ha][:storage][:mode] == "drbd"
   colocation_constraint = "col-#{fs_primitive}"
   pacemaker_colocation colocation_constraint do
     score "inf"
