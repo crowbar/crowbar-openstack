@@ -1,4 +1,12 @@
 def upgrade(ta, td, a, d)
+  db_engine = a["sql_engine"]
+  a[db_engine]["ha"] = a["ha"]
+  a.delete("ha")
+  if db_engine == "postgresql"
+    a["mysql"]["ha"] = ta["mysql"]["ha"]
+  else
+    a["postgresql"]["ha"] = ta["postgresql"]["ha"]
+  end
   d["element_states"] = td["element_states"]
   d["element_order"] = td["element_order"]
 
