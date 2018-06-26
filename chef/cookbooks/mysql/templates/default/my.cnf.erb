@@ -13,7 +13,3 @@ tmpdir                 = <%= node[:database][:mysql][:tmpdir] %>
 # Instead of skip-networking the default is now to listen only on
 # localhost which is more compatible and is not less secure.
 bind-address            = <%= node[:database][:mysql][:bind_address] %>
-
-[mysqldump]
-# FIXME: Remove after MariaDB 10.2.X switch (new default is 16777216)
-max_allowed_packet      = <%= node[:database][:mysql][:tunable][:max_allowed_packet] %>
