@@ -1,0 +1,19 @@
+# Secure Zookeeper configuration.
+
+- name: Prepare/Configure hosts
+  hosts: zookeeper_group
+  become: yes
+  vars_files:
+    - credentials.yml
+  tasks:
+    - name: Insert/update security configuration for zookeeper
+      blockinfile:
+        dest: /etc/zookeeper/zoo.cfg
+        marker: "# {mark} Security settings managed by Ansible"
+        block: |
+          quorum.auth.enableSasl=true
+          quorum.auth.learnerRequireSasl=true
+          quorum.auth.serverRequireSasl=true
+          quorum.auth.learner.loginContext=QuorumLearner
+          quorum.auth.server.loginContext=QuorumServer
+          quorum.cnxn.threads.size=20

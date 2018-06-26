@@ -166,3 +166,20 @@ execute "run ansible" do
   cwd "/opt/monasca-installer"
   action :nothing unless actual_versions != previous_versions
 end
+
+template "/opt/monasca-installer/security.yml" do
+  source "security.yml.erb"
+  owner "root"
+  group "root"
+  mode "0o644"
+end
+
+bash "Update Zookeeper security settings" do
+  cwd "/opt/monasca-installer"
+  code <<-EOH
+    ansible-playbook -i monasca-hosts \
+      -e '@/opt/monasca-installer/crowbar_vars.yml' \
+      security.yml -vvv
+    EOH
+  subscribes :run, "execute[run ansible]", :delayed
+end
