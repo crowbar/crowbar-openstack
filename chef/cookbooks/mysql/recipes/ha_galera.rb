@@ -44,8 +44,8 @@ unless node[:database][:galera_bootstrapped]
     # To bootstrap for the first time, start galera on one node
     # to set up the seed sst and monitoring users.
 
-    template "temporary bootstrap /etc/my.cnf.d/galera.cnf" do
-      path "/etc/my.cnf.d/galera.cnf"
+    template "temporary bootstrap /etc/my.cnf.d/75-galera.cnf" do
+      path "/etc/my.cnf.d/75-galera.cnf"
       source "galera.cnf.erb"
       owner "root"
       group "mysql"
@@ -126,7 +126,7 @@ nodes_names = cluster_nodes.map { |n| n[:hostname] }
 
 cluster_addresses = "gcomm://" + nodes_names.join(",")
 
-template "/etc/my.cnf.d/galera.cnf" do
+template "/etc/my.cnf.d/75-galera.cnf" do
   source "galera.cnf.erb"
   owner "root"
   group "mysql"
@@ -160,6 +160,11 @@ template "/etc/galera-python-clustercheck/my.cnf" do
   variables(
     node_address: node_address
   )
+end
+
+file "/etc/my.cnf.d/galera.cnf" do
+  action :delete
+  notifies :restart, "service[mysql]"
 end
 
 # Wait for all nodes to reach this point so we know that all nodes will have
