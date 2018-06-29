@@ -72,7 +72,7 @@
               = boolean_field %w(shares {{@index}} cephfs use_crowbar), "data-hideit" => "true", "data-hideit-target" => "#cephfs_conf_path_{{@index}}", "data-hideit-direct" => "true"
               %div{:id => "cephfs_conf_path_{{@index}}"}
                 = string_field %w(shares {{@index}} cephfs cephfs_conf_path)
-                = string_field %w(shares {{@index}} cephfs cephfs_clustername)
+                = string_field %w(shares {{@index}} cephfs cephfs_cluster_name)
                 = string_field %w(shares {{@index}} cephfs cephfs_auth_id)
 
           {{/if_eq}}
