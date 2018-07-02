@@ -25,8 +25,8 @@ monasca_hosts = MonascaHelper.monasca_hosts(monasca_servers)
 raise "no nodes with monasca-server role found" if monasca_hosts.nil? || monasca_hosts.empty?
 
 package "ansible"
-package "monasca-installer" do
-  notifies :run, "execute[run ansible]", :delayed
+package "openstack-monasca-installer" do
+  notifies :run, "execute[remove lock file]", :immediately
 end
 
 cookbook_file "/etc/ansible/ansible.cfg" do
@@ -67,7 +67,7 @@ template "/opt/monasca-installer/monasca-hosts" do
     ansible_ssh_user: "root",
     keystone_host: keystone_settings["internal_url_host"]
   )
-  notifies :run, "execute[run ansible]", :delayed
+  notifies :run, "execute[remove lock file]", :immediately
 end
 
 monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_node)
@@ -129,7 +129,7 @@ template "/opt/monasca-installer/crowbar_vars.yml" do
     monitor_libvirt: node[:monasca][:agent][:monitor_libvirt],
     delegate_role: node[:monasca][:delegate_role]
   )
-  notifies :run, "execute[run ansible]", :delayed
+  notifies :run, "execute[remove lock file]", :immediately
 end
 
 # This file is used to mark that ansible installer run successfully.
@@ -139,15 +139,6 @@ end
 # and monasca-installer. If they change re-execute ansible installer.
 lock_file = "/opt/monasca-installer/.installed"
 
-previous_versions = if Pathname.new(lock_file).file?
-                      File.read(lock_file).gsub(/^$\n/, "")
-                    else
-                      ""
-                    end
-
-get_versions = "rpm -qa | grep -e crowbar-openstack -e monasca-installer | sort"
-actual_versions = IO.popen(get_versions, &:read).gsub(/^$\n/, "")
-
 cookbook_file "/etc/logrotate.d/monasca-installer" do
   owner "root"
   group "root"
@@ -156,17 +147,28 @@ cookbook_file "/etc/logrotate.d/monasca-installer" do
   source "monasca-installer.logrotate"
 end
 
-ansible_cmd =
-  "rm -f #{lock_file} " \
-  "&& ansible-playbook " \
-    "-i monasca-hosts -e '@/opt/monasca-installer/crowbar_vars.yml' " \
-    "monasca.yml -vvv >> /var/log/monasca-installer.log 2>&1 " \
-  "&& echo '#{actual_versions}' > #{lock_file}"
+template "/usr/sbin/run-monasca-installer" do
+  source "run-monasca-installer.erb"
+  owner "root"
+  group "root"
+  mode "0555"
+  variables(
+    lock_file: lock_file
+  )
+  notifies :run, "execute[remove lock file]", :immediately
+end
+
+# Remove lock file. This gets notified if parameters change and ensures the
+# version check in run-monasca-installer fails.
+execute "remove lock file" do
+  command "rm -f #{lock_file}"
+  action :nothing
+end
 
 execute "run ansible" do
-  command ansible_cmd
-  cwd "/opt/monasca-installer"
-  action :nothing unless actual_versions != previous_versions
+  command "/usr/sbin/run-monasca-installer 2>&1"\
+          " | awk '{ print strftime(\"[%Y-%m-%d %H:%M:%S]\"), $0 }'"\
+          "   >> /var/log/monasca-installer.log"
 end
 
 # Record that monasca-installer has concluded successfully at least once. We
