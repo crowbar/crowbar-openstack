@@ -22,7 +22,7 @@ group :development do
   gem "uglifier", "~> 2.7.2"
   gem "sass", "~> 3.2.19"
   gem "sprockets-standalone", "~> 1.2.1"
-  gem "sprockets", "~> 2.11.0"
+  gem "sprockets", "~> 2.12.5"
   gem "rspec", "~> 3.1.0"
 end
 
