@@ -74,7 +74,7 @@ en:
             cephfs:
               use_crowbar: 'Use Ceph deployed by Crowbar'
               cephfs_conf_path: 'Path to Ceph configuration file'
-              cephfs_clustername: 'Cluster name'
+              cephfs_cluster_name: 'Cluster name'
               cephfs_auth_id: 'Authentication ID'
             manual:
               config: 'Options'
