@@ -57,84 +57,83 @@ if node.roles.include?("neutron-network")
 end
 
 # apply configurations to compute node
-if node.roles.include?("nova-compute-kvm")
-  node[:neutron][:platform][:cisco_opflex_pkgs].each { |p| package p }
+node[:neutron][:platform][:cisco_opflex_pkgs].each { |p| package p }
 
-  service "lldpd" do
-    action [:enable, :start]
-  end
-  utils_systemd_service_restart "lldpd"
-
-  # include neutron::common_config only now, after we've installed packages
-  include_recipe "neutron::common_config"
-
-  # Agent configurations for Cisco APIC driver
-  # The ACI setup for OpenStack releases before Pike use "of_interface" options
-  # set to "ovs-ofctl". This option has been deprecated in Pike and removed
-  # from this config file for Pike. It is still included in Newton (Cloud7)
-  agent_config_path = "/etc/neutron/plugins/ml2/openvswitch_agent.ini"
-  template agent_config_path do
-    cookbook "neutron"
-    source "openvswitch_agent.ini.erb"
-    owner "root"
-    group node[:neutron][:platform][:group]
-    mode "0640"
-    variables(
-      ml2_type_drivers: ml2_type_drivers,
-      ml2_mech_drivers: ml2_mech_drivers,
-      tunnel_types: "",
-      enable_tunneling: false,
-      use_l2pop: false,
-      dvr_enabled: false,
-      ovsdb_interface: neutron[:neutron][:ovs][:ovsdb_interface],
-      bridge_mappings: ""
-    )
-  end
-
-  # Update config file from template
-  opflex_agent_conf = "/etc/opflex-agent-ovs/conf.d/10-opflex-agent-ovs.conf"
-  apic = neutron[:neutron][:apic]
-  opflex_list = apic[:opflex].select { |i| i[:nodes].include? node[:hostname] }
-  opflex_list.any? || raise("Opflex instance not found for node '#{node[:hostname]}'")
-  opflex_list.one? || raise("Multiple opflex instances found for node '#{node[:hostname]}'")
-  opflex = opflex_list.first
-  template opflex_agent_conf do
-    cookbook "neutron"
-    source "10-opflex-agent-ovs.conf.erb"
-    mode "0755"
-    owner "root"
-    group neutron[:neutron][:platform][:group]
-    variables(
-      opflex_apic_domain_name: neutron[:neutron][:apic][:system_id],
-      hostname: node[:hostname],
-      socketgroup: neutron[:neutron][:platform][:group],
-      opflex_peer_ip: opflex[:peer_ip],
-      opflex_peer_port: opflex[:peer_port],
-      opflex_vxlan_encap_iface: opflex[:vxlan][:encap_iface],
-      opflex_vxlan_uplink_iface: opflex[:vxlan][:uplink_iface],
-      opflex_vxlan_uplink_vlan: opflex[:vxlan][:uplink_vlan],
-      opflex_vxlan_remote_ip: opflex[:vxlan][:remote_ip],
-      opflex_vxlan_remote_port: opflex[:vxlan][:remote_port],
-      # TODO(mmnelemane) : update VLAN encapsulation config when it works.
-      # Currently set to VXLAN by default but can be modified from proposal.
-      ml2_type_drivers: ml2_type_drivers
-    )
-  end
-
-  neutron_metadata do
-    use_cisco_apic_ml2_driver true
-    neutron_node_object neutron
-  end
-
-  service "neutron-opflex-agent" do
-    action [:enable, :start]
-    subscribes :restart, resources("template[#{agent_config_path}]")
-  end
-  utils_systemd_service_restart "neutron-opflex-agent"
-
-  service "agent-ovs" do
-    action [:enable, :start]
-    subscribes :restart, resources("template[#{opflex_agent_conf}]")
-  end
-  utils_systemd_service_restart "agent-ovs"
+service "lldpd" do
+  action [:enable, :start]
 end
+utils_systemd_service_restart "lldpd"
+
+# include neutron::common_config only now, after we've installed packages
+include_recipe "neutron::common_config"
+
+# Agent configurations for Cisco APIC driver
+# The ACI setup for OpenStack releases before Pike use "of_interface" options
+# set to "ovs-ofctl". This option has been deprecated in Pike and removed
+# from this config file for Pike. It is still included in Newton (Cloud7)
+agent_config_path = "/etc/neutron/plugins/ml2/openvswitch_agent.ini"
+template agent_config_path do
+  cookbook "neutron"
+  source "openvswitch_agent.ini.erb"
+  owner "root"
+  group node[:neutron][:platform][:group]
+  mode "0640"
+  variables(
+    ml2_type_drivers: ml2_type_drivers,
+    ml2_mech_drivers: ml2_mech_drivers,
+    tunnel_types: "",
+    enable_tunneling: false,
+    use_l2pop: false,
+    dvr_enabled: false,
+    of_interface: "ovs-ofctl",
+    ovsdb_interface: neutron[:neutron][:ovs][:ovsdb_interface],
+    bridge_mappings: ""
+  )
+end
+
+# Update config file from template
+opflex_agent_conf = "/etc/opflex-agent-ovs/conf.d/10-opflex-agent-ovs.conf"
+apic = neutron[:neutron][:apic]
+opflex_list = apic[:opflex].select { |i| i[:nodes].include? node[:hostname] }
+opflex_list.any? || raise("Opflex instance not found for node '#{node[:hostname]}'")
+opflex_list.one? || raise("Multiple opflex instances found for node '#{node[:hostname]}'")
+opflex = opflex_list.first
+template opflex_agent_conf do
+  cookbook "neutron"
+  source "10-opflex-agent-ovs.conf.erb"
+  mode "0755"
+  owner "root"
+  group neutron[:neutron][:platform][:group]
+  variables(
+    opflex_apic_domain_name: neutron[:neutron][:apic][:system_id],
+    hostname: node[:hostname],
+    socketgroup: neutron[:neutron][:platform][:group],
+    opflex_peer_ip: opflex[:peer_ip],
+    opflex_peer_port: opflex[:peer_port],
+    opflex_vxlan_encap_iface: opflex[:vxlan][:encap_iface],
+    opflex_vxlan_uplink_iface: opflex[:vxlan][:uplink_iface],
+    opflex_vxlan_uplink_vlan: opflex[:vxlan][:uplink_vlan],
+    opflex_vxlan_remote_ip: opflex[:vxlan][:remote_ip],
+    opflex_vxlan_remote_port: opflex[:vxlan][:remote_port],
+    # TODO(mmnelemane) : update VLAN encapsulation config when it works.
+    # Currently set to VXLAN by default but can be modified from proposal.
+    ml2_type_drivers: ml2_type_drivers
+  )
+end
+
+neutron_metadata do
+  use_cisco_apic_ml2_driver true
+  neutron_node_object neutron
+end
+
+service "neutron-opflex-agent" do
+  action [:enable, :start]
+  subscribes :restart, resources("template[#{agent_config_path}]")
+end
+utils_systemd_service_restart "neutron-opflex-agent"
+
+service "agent-ovs" do
+  action [:enable, :start]
+  subscribes :restart, resources("template[#{opflex_agent_conf}]")
+end
+utils_systemd_service_restart "agent-ovs"

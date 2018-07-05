@@ -188,19 +188,22 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 300,
+      "schema-revision": 301,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
-        "neutron-network": [ "readying", "ready", "applying" ]
+        "neutron-network": [ "readying", "ready", "applying" ],
+        "neutron-sdn-cisco-aci-agents": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
          ["neutron-server" ],
-         ["neutron-network" ]
+         ["neutron-network" ],
+         ["neutron-sdn-cisco-aci-agents" ]
       ],
       "element_run_list_order": {
         "neutron-server": 94,
-        "neutron-network": 95
+        "neutron-network": 95,
+        "neutron-sdn-cisco-aci-agents": 96
       },
       "config": {
         "environment": "neutron-config-base",
