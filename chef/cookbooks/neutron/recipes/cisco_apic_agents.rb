@@ -57,7 +57,7 @@ if node.roles.include?("neutron-network")
 end
 
 # apply configurations to compute node
-if node.roles.include?("nova-compute-kvm")
+if node.roles.include?("neutron-sdn-cisco-aci-agents")
   node[:neutron][:platform][:cisco_opflex_pkgs].each { |p| package p }
 
   service "lldpd" do
