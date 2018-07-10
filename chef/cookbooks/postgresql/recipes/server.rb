@@ -28,7 +28,7 @@ include_recipe "postgresql::client"
 dirty = false
 
 # For Crowbar, we need to set the address to bind - default to admin node.
-newaddr = CrowbarDatabaseHelper.get_listen_address(node)
+newaddr = CrowbarDatabaseHelper.get_listen_address(node, "postgresql")
 if node["postgresql"]["config"]["listen_addresses"] != newaddr
   node.set["postgresql"]["config"]["listen_addresses"] = newaddr
   dirty = true
@@ -154,14 +154,15 @@ echo "ALTER ROLE postgres ENCRYPTED PASSWORD '#{node['postgresql']['password']['
 end
 
 # For Crowbar we also need the "db_maker" user
+db_maker_password = node[:database][:postgresql][:db_maker_password] || node[:database][:db_maker_password]
 bash "assign-db_maker-password" do
   user "postgres"
   code <<-EOH
     echo "SELECT rolname FROM pg_roles WHERE rolname='db_maker';" | psql | grep -q db_maker
     if [ $? -ne 0 ]; then
-        echo "CREATE ROLE db_maker WITH LOGIN CREATEDB CREATEROLE ENCRYPTED PASSWORD '#{node[:database][:db_maker_password]}';" | psql
+        echo "CREATE ROLE db_maker WITH LOGIN CREATEDB CREATEROLE ENCRYPTED PASSWORD '#{db_maker_password}';" | psql
     else
-        echo "ALTER ROLE db_maker ENCRYPTED PASSWORD '#{node[:database][:db_maker_password]}';" | psql
+        echo "ALTER ROLE db_maker ENCRYPTED PASSWORD '#{db_maker_password}';" | psql
     fi
   EOH
   only_if only_if_command if ha_enabled

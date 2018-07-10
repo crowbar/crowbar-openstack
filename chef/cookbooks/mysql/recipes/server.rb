@@ -91,7 +91,7 @@ if node[:database][:mysql][:ssl][:enabled]
       node[:database][:mysql][:ssl][:generate_certs] ||
       node[:database][:mysql][:ssl][:insecure])
     group "mysql"
-    fqdn CrowbarDatabaseHelper.get_listen_address(node)
+    fqdn CrowbarDatabaseHelper.get_listen_address(node, "mysql")
   end
 end
 
@@ -194,7 +194,7 @@ unless node[:database][:database_bootstrapped]
   database_user "create db_maker database user" do
     connection db_connection
     username "db_maker"
-    password node[:database][:db_maker_password]
+    password node[:database][:mysql][:db_maker_password] || node[:database][:db_maker_password]
     host "%"
     provider db_settings[:user_provider]
     action :create
@@ -204,7 +204,7 @@ unless node[:database][:database_bootstrapped]
   database_user "grant db_maker access" do
     connection db_connection
     username "db_maker"
-    password node[:database][:db_maker_password]
+    password node[:database][:mysql][:db_maker_password] || node[:database][:db_maker_password]
     host "%"
     privileges db_settings[:privs] + [
       "ALTER ROUTINE",

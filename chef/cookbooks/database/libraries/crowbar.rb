@@ -14,9 +14,9 @@ module CrowbarDatabaseHelper
     end
   end
 
-  def self.get_listen_address(node)
+  def self.get_listen_address(node, sql_engine)
     # For SSL we prefer a cluster hostname (for certificate validation)
-    use_ssl = node[:database][:sql_engine] == "mysql" && node[:database][:mysql][:ssl][:enabled]
+    use_ssl = sql_engine == "mysql" && node[:database][:mysql][:ssl][:enabled]
     if node[:database][:ha][:enabled]
       vhostname = get_ha_vhostname(node)
       use_ssl ? "#{vhostname}.#{node[:domain]}" : CrowbarPacemakerHelper.cluster_vip(node, "admin", vhostname)

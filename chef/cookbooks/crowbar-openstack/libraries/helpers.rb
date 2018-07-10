@@ -60,7 +60,32 @@ end
 
 class CrowbarOpenStackHelper
   def self.database_settings(node, barclamp)
-    instance = node[barclamp][:database_instance] || "default"
+    if ["mysql", "postgresql"].include? barclamp
+      # We're called from one of the database cookbooks, find the settings for that type
+      backend_name = barclamp
+      db_config = nil
+      Chef::Search::Query.new.search(:role,"name:database-config-*") do |db_role|
+        if db_role.default_attributes["database"]["sql_engine"] == barclamp
+          db_config = db_role
+          break
+        end
+      end
+      if db_config == nil
+        Chef::Log.error("No role for #{barclamp} found")
+      end
+
+      # TODO: Check that this instance is correct. I think we should be finding an
+      # instance of db_role
+      instance = node[:database][:config][:environment].gsub(/^database-config-/, "")
+    else
+      instance = node[barclamp][:database_instance] || "default"
+      db_config_results, = Chef::Search::Query.new.search(:role,"name:database-config-#{instance}")
+      if db_config_results.empty?
+        Chef::Log.error("Unable to find role name:database-config-#{instance}")
+      end
+      db_config = db_config_results.first
+      backend_name = db_config.default_attributes["database"]["sql_engine"]
+    end
 
     # Cache the result for each cookbook in an instance variable hash. This
     # cache needs to be invalidated for each chef-client run from chef-client
@@ -80,39 +105,34 @@ class CrowbarOpenStackHelper
     else
       @database_settings ||= Hash.new
       database = get_node(node, "database-server", "database", instance)
+      address = CrowbarDatabaseHelper.get_listen_address(database, backend_name)
 
-      if database.nil?
-        Chef::Log.warn("No database server found!")
-      else
-        address = CrowbarDatabaseHelper.get_listen_address(database)
-        backend_name = DatabaseLibrary::Database::Util.get_backend_name(database)
-
-        ssl_opts = {}
-        if backend_name == "mysql"
-          ssl_opts = {
-            enabled: database["database"]["mysql"]["ssl"]["enabled"],
-            ca_certs: database["database"]["mysql"]["ssl"]["ca_certs"],
-            insecure: database["database"]["mysql"]["ssl"]["generate_certs"] ||
-              database["database"]["mysql"]["ssl"]["insecure"]
-          }
-        end
-        @database_settings[instance] = {
-          address: address,
-          url_scheme: backend_name,
-          backend_name: backend_name,
-          provider: DatabaseLibrary::Database::Util.get_database_provider(database),
-          user_provider: DatabaseLibrary::Database::Util.get_user_provider(database),
-          privs: DatabaseLibrary::Database::Util.get_default_priviledges(database),
-          connection: {
-            host: address,
-            username: "db_maker",
-            password: database["database"][:db_maker_password],
-            ssl: ssl_opts
-          }
+      ssl_opts = {}
+      if backend_name == "mysql"
+        ssl_opts = {
+          enabled: db_config.default_attributes["database"]["mysql"]["ssl"]["enabled"],
+          ca_certs: db_config.default_attributes["database"]["mysql"]["ssl"]["ca_certs"],
+          insecure: db_config.default_attributes["database"]["mysql"]["ssl"]["generate_certs"] ||
+            db_config.default_attributes["database"]["mysql"]["ssl"]["insecure"]
         }
-
-        Chef::Log.info("Database server found at #{@database_settings[instance][:address]}")
       end
+      db_maker_password = db_config.default_attributes["database"][backend_name][:db_maker_password] || db_config.default_attributes["database"][:db_maker_password]
+      @database_settings[instance] = {
+        address: address,
+        url_scheme: backend_name,
+        backend_name: backend_name,
+        provider: DatabaseLibrary::Database::Util.get_database_provider(backend_name),
+        user_provider: DatabaseLibrary::Database::Util.get_user_provider(backend_name),
+        privs: DatabaseLibrary::Database::Util.get_default_priviledges(backend_name),
+        connection: {
+          host: address,
+          username: "db_maker",
+          password: db_maker_password,
+          ssl: ssl_opts
+        }
+      }
+
+      Chef::Log.info("Database server found at #{@database_settings[instance][:address]}")
     end
 
     @database_settings[instance]
