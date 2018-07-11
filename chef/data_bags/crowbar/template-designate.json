@@ -1,0 +1,52 @@
+{
+  "id": "template-designate",
+  "description": "Sets up Multi-Tenant DNSaaS service for OpenStack",
+  "attributes": {
+    "designate": {
+      "debug": false,
+      "use_syslog": true,
+      "keystone_instance": "none",
+      "database_instance": "none",
+      "rabbitmq_instance": "none",
+      "service_user": "designate",
+      "service_password": "",
+      "memcache_secret_key": "",
+      "api": {
+        "protocol": "http",
+        "bind_open_address": true,
+        "bind_port": 9001
+      },
+      "db": {
+        "password": "",
+        "user": "designate",
+        "database": "designate"
+      }
+    }
+  },
+  "deployment": {
+    "designate": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 300,
+      "element_states": {
+        "designate-server": [ "readying", "ready", "applying" ],
+        "designate-pool-bind": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "designate-server", "designate-worker" ]
+      ],
+      "element_run_list_order": {
+          "designate-server": 110,
+          "designate-pool-bind": 111
+      },
+      "config": {
+        "environment": "designate-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
