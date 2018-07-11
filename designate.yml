@@ -1,6 +1,5 @@
 #
-# Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2018, SUSE LINUX Products GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,23 +15,21 @@
 #
 
 barclamp:
-  name: 'cinder'
-  display: 'Cinder'
-  description: 'OpenStack Block Storage: Management of volumes (persistent block level storage)'
+  name: 'designate'
+  display: 'Designate'
+  description: 'OpenStack DNSaaS: Multi-Tenant DNSaaS service for OpenStack'
   version: 0
+  # Change to true when complete
+  user_managed: false
   requires:
-    - '@crowbar'
-    - 'pacemaker'
-    - 'database'
-    - 'rabbitmq'
     - 'keystone'
-    - 'glance'
+    - 'rabbitmq'
   member:
     - 'openstack'
 
 crowbar:
   layout: 1
-  order: 90
-  run_order: 90
-  chef_order: 90
+  order: 91
+  run_order: 91
+  chef_order: 91
   proposal_schema_version: 3
