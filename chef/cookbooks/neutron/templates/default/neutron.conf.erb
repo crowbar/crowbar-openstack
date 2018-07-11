@@ -33,6 +33,21 @@ wsgi_keep_alive = false
 default_log_levels = <%= @default_log_levels.join(", ") %>
 <% end -%>
 
+<%if @designate_enabled -%>
+external_dns_driver = designate
+
+[designate]
+url = <%= @designate_public_uri %>
+admin_auth_url = <%= @keystone_settings['internal_auth_url'] %>
+admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
+admin_username = <%= @keystone_settings['service_user'] %>
+admin_password = <%= @keystone_settings['service_password'] %>
+region_name = <%= @keystone_settings['endpoint_region'] %>
+admin_user_domain = <%= @keystone_settings['admin_domain'] %>
+admin_project_domain = <%= @keystone_settings['admin_domain'] %>
+<% end -%>
+
+
 [agent]
 root_helper = sudo neutron-rootwrap /etc/neutron/rootwrap.conf
 root_helper_daemon = sudo neutron-rootwrap-daemon /etc/neutron/rootwrap.conf
