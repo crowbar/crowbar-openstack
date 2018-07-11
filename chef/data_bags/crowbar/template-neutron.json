@@ -11,6 +11,7 @@
       "debug": false,
       "create_default_networks": true,
       "dns_domain": "openstack.local",
+      "floating_dns_domain": "floating.openstack.local",
       "rpc_workers": 1,
       "use_lbaas": false,
       "lbaasv2_driver": "haproxy",
@@ -187,7 +188,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 303,
+      "schema-revision": 304,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ],

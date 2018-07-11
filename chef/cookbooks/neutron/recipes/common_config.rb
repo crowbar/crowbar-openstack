@@ -131,6 +131,8 @@ template neutron[:neutron][:config_file] do
       sql_max_pool_overflow: neutron[:neutron][:sql][:max_pool_overflow],
       sql_pool_timeout: neutron[:neutron][:sql][:pool_timeout],
       debug: neutron[:neutron][:debug],
+      # TODO
+      designate_enabled: false,
       bind_host: bind_host,
       bind_port: bind_port,
       use_syslog: neutron[:neutron][:use_syslog],
