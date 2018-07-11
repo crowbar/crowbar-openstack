@@ -1,6 +1,6 @@
+#!/usr/bin/env ruby
 #
-# Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2018, SUSE LINUX GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,24 +15,8 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'cinder'
-  display: 'Cinder'
-  description: 'OpenStack Block Storage: Management of volumes (persistent block level storage)'
-  version: 0
-  requires:
-    - '@crowbar'
-    - 'pacemaker'
-    - 'database'
-    - 'rabbitmq'
-    - 'keystone'
-    - 'glance'
-  member:
-    - 'openstack'
+require File.join(File.expand_path(File.dirname(__FILE__)), "barclamp_lib")
+@barclamp = "designate"
+@timeout = 3600
 
-crowbar:
-  layout: 1
-  order: 90
-  run_order: 90
-  chef_order: 90
-  proposal_schema_version: 3
+main
