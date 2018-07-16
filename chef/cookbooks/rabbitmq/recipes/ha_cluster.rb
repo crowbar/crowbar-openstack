@@ -17,6 +17,9 @@ pid_file = "/var/run/rabbitmq/pid"
 
 agent_name = "ocf:rabbitmq:rabbitmq-server-ha"
 
+service_name = "rabbitmq"
+ms_name = "ms-#{service_name}"
+
 # create file that will be sourced by OCF resource agent on promote
 template "/etc/rabbitmq/ocf-promote" do
   source "ocf-promote.erb"
@@ -28,16 +31,74 @@ template "/etc/rabbitmq/ocf-promote" do
   )
 end
 
+# wait for service to have a master, and to be active
+ruby_block "wait for #{ms_name} to be started" do
+  block do
+    require "timeout"
+    begin
+      Timeout.timeout(360) do
+        # Check that the service has a master
+        cmd = "crm resource show #{ms_name} 2> /dev/null "
+        cmd << "| grep \"is running on\" | grep -q \"Master\""
+        until ::Kernel.system(cmd)
+          Chef::Log.info("#{ms_name} still without master")
+          sleep(2)
+        end
+
+        # Check that the service is running on this node
+        cmd = "crm resource show #{ms_name} 2> /dev/null "
+        cmd << "| grep -q \"is running on: #{node.hostname}\""
+        until ::Kernel.system(cmd)
+          Chef::Log.info("#{ms_name} still not running locally")
+          sleep(2)
+        end
+
+        # The sed command grabs everything between '{running_applications'
+        # and ']}', and what we want is that the rabbit application is
+        # running
+        # Checks if the actual rabbit app is running properly at least 5 times in a row
+        # as to prevent continuing when its not stable enough
+        cmd = "rabbitmqctl -q status 2> /dev/null "
+        cmd << "| sed -n '/{running_applications/,/\]}/p' | grep -q '{rabbit,'"
+        count = 0
+        until count == 5
+          if ::Kernel.system(cmd)
+            count += 1
+            sleep(2)
+          else
+            count = 0
+          end
+        end
+
+        # Check that we dont have any pending pacemaker resource operations
+        cmd = "crm resource operations #{ms_name} 2> /dev/null "
+        cmd << "| grep -q \"pending\""
+        while ::Kernel.system(cmd)
+          Chef::Log.info("resource #{ms_name} still has pending operations")
+          sleep(2)
+        end
+      end
+    rescue Timeout::Error
+      message = "The #{ms_name} pacemaker resource is not started or doesn't have a master yet."
+      message << " Please manually check for an error."
+      Chef::Log.fatal(message)
+      raise message
+    end
+  end
+  action :nothing
+end
+
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required packages installed before we create the pacemaker
 # resources
 crowbar_pacemaker_sync_mark "sync-rabbitmq_before_ha"
 
-crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources"
+crowbar_pacemaker_sync_mark "wait-rabbitmq_ha_resources" do
+  timeout 300
+end
 
 transaction_objects = []
 
-service_name = "rabbitmq"
 pacemaker_primitive service_name do
   agent agent_name
   # nodename is empty so that we explicitly depend on the config files
@@ -62,7 +123,6 @@ transaction_objects.push("pacemaker_primitive[#{service_name}]")
 
 # no location on the role here: the ms resource will have this constraint
 
-ms_name = "ms-#{service_name}"
 pacemaker_ms ms_name do
   rsc service_name
   meta ({
@@ -86,37 +146,7 @@ pacemaker_transaction "rabbitmq service" do
   # note that this will also automatically start the resources
   action :commit_new
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  notifies :create, resources(ruby_block: "wait for #{ms_name} to be started"), :immediately
 end
 
 crowbar_pacemaker_sync_mark "create-rabbitmq_ha_resources"
-
-# wait for service to have a master, and to be active
-ruby_block "wait for #{ms_name} to be started" do
-  block do
-    require "timeout"
-    begin
-      Timeout.timeout(240) do
-        # Check that the service is running
-        cmd = "crm resource show #{ms_name} 2> /dev/null "
-        cmd << "| grep -q \"is running on\""
-        until ::Kernel.system(cmd)
-          Chef::Log.debug("#{ms_name} still not started")
-          sleep(2)
-        end
-        # The sed command grabs everything between '{running_applications'
-        # and ']}', and what we want is that the rabbit application is
-        # running
-        cmd = "rabbitmqctl -q status 2> /dev/null "
-        cmd << "| sed -n '/{running_applications/,/\]}/p' | grep -q '{rabbit,'"
-        until ::Kernel.system(cmd)
-          Chef::Log.debug("#{ms_name} still not answering")
-          sleep(2)
-        end
-      end
-    rescue Timeout::Error
-      message = "The #{ms_name} pacemaker resource is not started. Please manually check for an error."
-      Chef::Log.fatal(message)
-      raise message
-    end
-  end # block
-end # ruby_block
