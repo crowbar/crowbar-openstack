@@ -10,6 +10,7 @@ class Chef
         @current_resource.keyfile(@new_resource.keyfile)
         @current_resource.group(@new_resource.group)
         @current_resource.fqdn(@new_resource.fqdn)
+        @current_resource.alt_names(@new_resource.alt_names)
         @current_resource.cert_required(@new_resource.cert_required)
         @current_resource.ca_certs(@new_resource.ca_certs)
         @current_resource
@@ -53,8 +54,22 @@ class Chef
               raise message
             end
 
+            # Generate x509v3 extensions (restricting CA usage, set alt names)
+            ssl_x509v3_ext = "#{conf_dir}/signing_key.conf"
+            cfg = ::File.new(ssl_x509v3_ext, "w")
+            cfg.write(%{
+[v3_req]
+subjectKeyIdentifier = hash
+basicConstraints     = critical,CA:false
+keyUsage             = critical,digitalSignature, nonRepudiation})
+            cfg.write(%{
+subjectAltName       = #{@current_resource.alt_names.join ', '}
+                      }) if @current_resource.alt_names.any?
+            cfg.close
+
             # Generate self-signed certificate with above CSR
             `openssl x509 -req -days 3650 -in #{ssl_csr_file} \
+              -extfile #{ssl_x509v3_ext} -extensions v3_req \
               -signkey #{@current_resource.keyfile} -out #{@current_resource.certfile}`
             if $?.exitstatus != 0
               message = "SSL self-signed certificate generation failed"
@@ -62,6 +77,7 @@ class Chef
               raise message
             end
 
+            ::File.delete ssl_x509v3_ext # No longer needed
             ::File.delete ssl_csr_file # Nobody should even try to use this
           end # unless files exist
         else # if generate_certs
