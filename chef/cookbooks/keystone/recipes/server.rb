@@ -77,6 +77,7 @@ if node[:keystone][:api][:protocol] == "https"
     keyfile node[:keystone][:ssl][:keyfile]
     group node[:keystone][:group]
     fqdn node[:fqdn]
+    alt_names ["DNS:#{my_admin_host}", "DNS:#{my_public_host}"]
     cert_required node[:keystone][:ssl][:cert_required]
     ca_certs node[:keystone][:ssl][:ca_certs]
   end
