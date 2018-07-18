@@ -78,10 +78,17 @@ class ManilaService < OpenstackServiceObject
     storage = select_nodes_for_role(
       nodes, "manila-share", "storage") || []
 
+    # Do not put manila-share roles to compute nodes
+    # (it does not work with non-disruptive upgrade)
+    shares = storage.reject { |n| n.roles.include? "nova-compute-kvm" }
+
+    # Take at least one manila-share role if it was emptied by previous filter
+    shares << controllers.first if shares.empty?
+
     base["deployment"][@bc_name]["elements"] = {
       "manila-server" => controllers.empty? ?
     [] : [controllers.first.name],
-      "manila-share" => storage.map(&:name)
+      "manila-share" => shares.map(&:name)
     }
 
     base["attributes"][@bc_name]["database_instance"] =
