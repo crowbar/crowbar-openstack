@@ -1,6 +1,6 @@
 /**
  * Copyright 2011-2013, Dell
- * Copyright 2013-2014, SUSE LINUX Products GmbH
+ * Copyright 2013-2018, SUSE LINUX Products GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,38 @@
  */
 
 $(document).ready(function($) {
-  $('#sql_engine').on('change', function() {
-    var value = $(this).val();
+  function updateDBEngines() {
+    // defer update of selected engines to make sure roles assignment
+    // is updated by event handlers from NodeList.
+    setTimeout(function() {
+      var nodes = {
+        postgresql: $('ul#database-server li').length,
+        mysql: $('ul#mysql-server li').length
+      };
 
-    var types = [
-      'mysql',
-      'postgresql'
-    ];
+      var selector = $.map(nodes, function(val, index) {
+        return '#{0}_container'.format(index);
+      }).join(', ');
 
-    var selector = $.map(types, function(val, index) {
-      return '#{0}_container'.format(val);
-    }).join(', ');
+      var current = $.map($.grep(Object.keys(nodes), function(val) {
+        return nodes[val] > 0;
+      }), function(val, index) {
+        return '#{0}_container'.format(val);
+      }).join(', ');
 
-    var current = '#{0}_container'.format(
-      value
-    );
+      $(selector).hide(100).attr('disabled', 'disabled');
+      $(current).show(100).removeAttr('disabled');
 
-    $(selector).hide(100).attr('disabled', 'disabled');
-    $(current).show(100).removeAttr('disabled');
-  }).trigger('change');
+      // make sure all items have handlers attached
+      setupEventHandlers();
+    }, 0);
+  }
+
+  function setupEventHandlers() {
+    $('[data-droppable=true]').off('drop', updateDBEngines).on('drop', updateDBEngines);
+    $('.dropzone .delete').off('click', updateDBEngines).on('click', updateDBEngines);
+    $('.dropzone .unassign').off('click', updateDBEngines).on('click', updateDBEngines);
+  }
+
+  updateDBEngines();
 });
