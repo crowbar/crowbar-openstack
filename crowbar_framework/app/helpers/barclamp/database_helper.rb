@@ -30,8 +30,8 @@ module Barclamp
     def ha_storage_mode_for_database(selected)
       options_for_select(
         [
-          [t(".ha.storage.modes.drbd"), "drbd"],
-          [t(".ha.storage.modes.shared"), "shared"]
+          [t(".postgresql.ha.storage.modes.drbd"), "drbd"],
+          [t(".postgresql.ha.storage.modes.shared"), "shared"]
         ],
         selected.to_s
       )

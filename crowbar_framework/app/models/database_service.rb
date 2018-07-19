@@ -38,6 +38,16 @@ class DatabaseService < PacemakerServiceObject
             "suse" => "< 12.2",
             "windows" => "/.*/"
           }
+        },
+        "mysql-server" => {
+          "unique" => false,
+          "count" => 1,
+          "cluster" => true,
+          "admin" => false,
+          "exclude_platform" => {
+            "suse" => "< 12.2",
+            "windows" => "/.*/"
+          }
         }
       }
     end
@@ -61,11 +71,13 @@ class DatabaseService < PacemakerServiceObject
   end
 
   def validate_ha_attributes(attributes, cluster)
-    storage_mode = attributes["ha"]["storage"]["mode"]
+    sql_engine = attributes["sql_engine"]
     role = available_clusters[cluster]
 
     case attributes["sql_engine"]
     when "postgresql"
+      ha_attr = attributes["postgresql"]["ha"]
+      storage_mode = ha_attr["storage"]["mode"]
       unless ["shared", "drbd"].include?(storage_mode)
         validation_error I18n.t(
           "barclamp.#{@bc_name}.validation.unknown_mode_ha",
@@ -73,12 +85,12 @@ class DatabaseService < PacemakerServiceObject
         )
       end
       if storage_mode == "shared"
-        if attributes["ha"]["storage"]["shared"]["device"].blank?
+        if ha_attr["storage"]["shared"]["device"].blank?
           validation_error I18n.t(
             "barclamp.#{@bc_name}.validation.no_device"
           )
         end
-        if attributes["ha"]["storage"]["shared"]["fstype"].blank?
+        if ha_attr["storage"]["shared"]["fstype"].blank?
           validation_error I18n.t(
             "barclamp.#{@bc_name}.validation.no_filesystem"
           )
@@ -90,7 +102,7 @@ class DatabaseService < PacemakerServiceObject
             cluster_name: cluster_name(cluster)
           )
         end
-        if attributes["ha"]["storage"]["drbd"]["size"] <= 0
+        if ha_attr["storage"]["drbd"]["size"] <= 0
           validation_error I18n.t(
             "barclamp.#{@bc_name}.validation.invalid_size_drbd"
           )
@@ -111,17 +123,22 @@ class DatabaseService < PacemakerServiceObject
   end
 
   def validate_proposal_after_save(proposal)
-    validate_one_for_role proposal, "database-server"
-
     attributes = proposal["attributes"][@bc_name]
-    db_engine = attributes["sql_engine"]
+    sql_engine = attributes["sql_engine"]
+    db_role = if sql_engine == "postgresql"
+                "database-server"
+              else
+                "mysql-server"
+              end
+    validate_one_for_role proposal, db_role
+
     validation_error I18n.t(
       "barclamp.#{@bc_name}.validation.invalid_db_engine",
-      db_engine: db_engine
-    ) unless %w(mysql postgresql).include?(db_engine)
+      db_engine: sql_engine
+    ) unless %w(mysql postgresql).include?(sql_engine)
 
     # HA validation
-    servers = proposal["deployment"][@bc_name]["elements"]["database-server"]
+    servers = proposal["deployment"][@bc_name]["elements"][db_role]
     unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
       cluster = servers.first
       validate_ha_attributes(attributes, cluster)
@@ -134,51 +151,72 @@ class DatabaseService < PacemakerServiceObject
     @logger.debug("Database apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
-    database_elements, database_nodes, database_ha_enabled = role_expand_elements(role, "database-server")
-    Openstack::HA.set_controller_role(database_nodes) if database_ha_enabled
-
-    vip_networks = ["admin"]
-    dirty = prepare_role_for_ha_with_haproxy(role, ["database", "ha", "enabled"],
-      database_ha_enabled,
-      database_elements,
-      vip_networks)
-    role.save if dirty
-
-    reset_sync_marks_on_clusters_founders(database_elements)
-
     sql_engine = role.default_attributes["database"]["sql_engine"]
 
-    if database_ha_enabled
-      net_svc = NetworkService.new @logger
-      case sql_engine
-      when "postgresql"
-        unless database_elements.length == 1 && PacemakerServiceObject.is_cluster?(database_elements[0])
-          raise "Internal error: HA enabled, but element is not a cluster"
+    vip_networks = ["admin"]
+    dirty = false
+    net_svc = NetworkService.new @logger
+    db_enabled = {
+      "mysql" => {
+        "enabled" => false,
+        "ha" => false
+      },
+      "postgresql" => {
+        "enabled" => false,
+        "ha" => false
+      }
+    }
+    ["postgresql", "mysql"].each do |engine|
+      db_role = if engine == "postgresql"
+                  "database-server"
+                else
+                  "mysql-server"
+                end
+      database_elements, database_nodes, database_ha_enabled = role_expand_elements(role, db_role)
+      unless database_nodes.empty?
+        db_enabled[engine]["enabled"] = true
+      end
+      db_enabled[engine]["ha"] = database_ha_enabled
+      Openstack::HA.set_controller_role(database_nodes) if database_ha_enabled
+      dirty = prepare_role_for_ha_with_haproxy(role,
+                                               ["database", engine, "ha", "enabled"],
+                                               database_ha_enabled,
+                                               database_elements,
+                                               vip_networks) || dirty
+      reset_sync_marks_on_clusters_founders(database_elements)
+      if database_ha_enabled
+        case engine
+        when "postgresql"
+          unless database_elements.length == 1 && PacemakerServiceObject.is_cluster?(database_elements[0])
+            raise "Internal error: HA enabled, but element is not a cluster"
+          end
+          cluster = database_elements[0]
+          cluster_name = PacemakerServiceObject.cluster_name(cluster)
+          # Any change in the generation of the vhostname here must be reflected in
+          # CrowbarDatabaseHelper.get_ha_vhostname
+          database_vhostname = "#{role.name.gsub("-config", "")}-#{cluster_name}.#{Crowbar::Settings.domain}".tr("_", "-")
+          net_svc.allocate_virtual_ip "default", "admin", "host", database_vhostname
+        when "mysql"
+          database_nodes.each do |n|
+            net_svc.allocate_ip "default", "admin", "host", n
+          end
+          allocate_virtual_ips_for_any_cluster_in_networks(database_elements, vip_networks)
         end
-        cluster = database_elements[0]
-        cluster_name = PacemakerServiceObject.cluster_name(cluster)
-        # Any change in the generation of the vhostname here must be reflected in
-        # CrowbarDatabaseHelper.get_ha_vhostname
-        database_vhostname = "#{role.name.gsub("-config", "")}-#{cluster_name}.#{Crowbar::Settings.domain}".tr("_", "-")
-        net_svc.allocate_virtual_ip "default", "admin", "host", database_vhostname
-      when "mysql"
-        database_nodes.each do |n|
-          net_svc.allocate_ip "default", "admin", "host", n
-        end
-        allocate_virtual_ips_for_any_cluster_in_networks(database_elements, vip_networks)
       end
     end
+    role.save if dirty
 
     role.default_attributes["database"][sql_engine] = {} if role.default_attributes["database"][sql_engine].nil?
     role.default_attributes["database"]["db_maker_password"] = (old_role && old_role.default_attributes["database"]["db_maker_password"]) || random_password
 
-    if ( sql_engine == "mysql" )
+    if db_enabled["mysql"]["enabled"]
       role.default_attributes["database"]["mysql"]["server_root_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_root_password"]) || random_password
-      if database_ha_enabled
+      if db_enabled["mysql"]["ha"]
         role.default_attributes["database"]["mysql"]["sstuser_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["sstuser_password"]) || random_password
       end
       @logger.debug("setting mysql specific attributes")
-    elsif ( sql_engine == "postgresql" )
+    end
+    if db_enabled["postgresql"]["enabled"]
       # Attribute is not living in "database" namespace, but that's because
       # it's for the postgresql cookbook. We're not using default_attributes
       # because the upstream cookbook use node.set_unless which would override

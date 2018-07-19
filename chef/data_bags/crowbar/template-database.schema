@@ -85,32 +85,32 @@
                     "log_filename": {"type": "str" },
                     "log_min_duration_statement": { "type": "int" }
                   }
-                }
-              }
-            },
-            "ha" : {
-              "type": "map",
-              "required": true,
-              "mapping" : {
-                "storage": {
+                },
+                "ha" : {
                   "type": "map",
                   "required": true,
                   "mapping" : {
-                    "mode": { "type": "str", "required": true },
-                    "drbd": {
+                    "storage": {
                       "type": "map",
                       "required": true,
                       "mapping" : {
-                        "size": { "type": "int", "required": true }
-                      }
-                    },
-                    "shared": {
-                      "type": "map",
-                      "required": true,
-                      "mapping" : {
-                        "device": { "type": "str", "required": true },
-                        "fstype": { "type": "str", "required": true },
-                        "options": { "type": "str", "required": true }
+                        "mode": { "type": "str", "required": true },
+                        "drbd": {
+                          "type": "map",
+                          "required": true,
+                          "mapping" : {
+                            "size": { "type": "int", "required": true }
+                          }
+                        },
+                        "shared": {
+                          "type": "map",
+                          "required": true,
+                          "mapping" : {
+                            "device": { "type": "str", "required": true },
+                            "fstype": { "type": "str", "required": true },
+                            "options": { "type": "str", "required": true }
+                          }
+                        }
                       }
                     }
                   }
