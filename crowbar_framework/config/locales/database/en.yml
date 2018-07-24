@@ -64,3 +64,5 @@ en:
         invalid_size_drbd: 'Invalid size for DRBD device.'
         cluster_size_one: 'The Galera cluster needs more than one cluster member.'
         cluster_size_even: 'The Galera cluster needs an odd number of cluster members and at least three of them.'
+        engine_roles_mismatch: 'Assigned roles do not match selected database engine: %{db_engine}.'
+        secondary_psql: 'PostgreSQL can only be deployed as first SQL engine. Migration from MariaDB to PostgreSQL is not supported.'

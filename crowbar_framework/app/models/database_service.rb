@@ -76,10 +76,18 @@ class DatabaseService < PacemakerServiceObject
     base
   end
 
-  def validate_ha_attributes(attributes, cluster)
+  def role_for_engine(engine)
+    if engine == "postgresql"
+      "database-server"
+    else
+      "mysql-server"
+    end
+  end
+
+  def validate_ha_attributes(attributes, cluster, sql_engine)
     role = available_clusters[cluster]
 
-    case attributes["sql_engine"]
+    case sql_engine
     when "postgresql"
       ha_attr = attributes["postgresql"]["ha"]
       storage_mode = ha_attr["storage"]["mode"]
@@ -129,26 +137,38 @@ class DatabaseService < PacemakerServiceObject
 
   def validate_proposal_after_save(proposal)
     attributes = proposal["attributes"][@bc_name]
-    sql_engine = attributes["sql_engine"]
-    db_role = if sql_engine == "postgresql"
-      "database-server"
-    else
-      "mysql-server"
-    end
-    validate_one_for_role proposal, db_role
+    active_engine = attributes["sql_engine"]
 
     validation_error I18n.t(
       "barclamp.#{@bc_name}.validation.invalid_db_engine",
-      db_engine: sql_engine
-    ) unless ["mysql", "postgresql"].include?(sql_engine)
+      db_engine: active_engine
+    ) unless ["mysql", "postgresql"].include?(active_engine)
 
-    # HA validation
-    servers = proposal["deployment"][@bc_name]["elements"][db_role]
-    unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
-      cluster = servers.first
-      validate_ha_attributes(attributes, cluster)
+    selected_engines = ["postgresql", "mysql"].select do |engine|
+      nodes = proposal["deployment"][@bc_name]["elements"][role_for_engine engine]
+      !nodes.nil? && !nodes.first.nil?
     end
 
+    validation_error I18n.t(
+      "barclamp.#{@bc_name}.validation.engine_roles_mismatch",
+      db_engine: active_engine
+    ) unless selected_engines.include?(active_engine)
+
+    validation_error I18n.t(
+      "barclamp.#{@bc_name}.validation.secondary_psql"
+    ) if selected_engines.length > 1 && active_engine == "mysql"
+
+    selected_engines.each do |engine|
+      db_role = role_for_engine engine
+      validate_one_for_role proposal, db_role
+
+      # HA validation
+      servers = proposal["deployment"][@bc_name]["elements"][db_role]
+      unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
+        cluster = servers.first
+        validate_ha_attributes(attributes, cluster, engine)
+      end
+    end
     super
   end
 
@@ -172,11 +192,7 @@ class DatabaseService < PacemakerServiceObject
       }
     }
     ["postgresql", "mysql"].each do |engine|
-      db_role = if engine == "postgresql"
-        "database-server"
-      else
-        "mysql-server"
-      end
+      db_role = role_for_engine engine
       database_elements, database_nodes, database_ha_enabled = role_expand_elements(role, db_role)
       db_enabled[engine]["enabled"] = true unless database_nodes.empty?
       db_enabled[engine]["ha"] = database_ha_enabled
