@@ -3,6 +3,9 @@
     = header show_raw_deployment?, true
 
   .panel-body
+    .alert.alert-warning
+      = t(".engine_upgrade")
+
     = string_field :sql_engine, disabled: true
 
     #mysql_container

@@ -21,6 +21,7 @@ en:
   barclamp:
     database:
       edit_attributes:
+        engine_upgrade: 'Deployment of multiple database engines at the same time is only supported before SUSE OpenStack Cloud 8 upgrade to allow the migration from PostgreSQL to MariaDB. Please refer to the SUSE OpenStack Cloud documentation for more information about the upgrade procedure.'
         sql_engine: 'Active SQL Engine'
         mysql_attributes: 'MariaDB Options'
         mysql:
