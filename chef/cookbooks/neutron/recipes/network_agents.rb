@@ -39,9 +39,9 @@ ruby_block "edit /etc/sysconfig/sysctl for IP_FORWARD" do
 end
 
 # Enable ip forwarding on network node for new SUSE platforms
-ruby_block "edit /etc/sysctl.d/99-sysctl.conf for net.ipv4.ip_forward" do
+ruby_block "edit /etc/sysctl.conf for net.ipv4.ip_forward" do
   block do
-    rc = Chef::Util::FileEdit.new("/etc/sysctl.d/99-sysctl.conf")
+    rc = Chef::Util::FileEdit.new("/etc/sysctl.conf")
     rc.search_file_replace_line(/^net.ipv4.ip_forward =/, "net.ipv4.ip_forward = 1")
     rc.write_file
   end
@@ -51,7 +51,7 @@ end
 # The rest of this logic will be compatible for all the platforms.
 # There is an overlap here, but will not cause inferference (the
 # variable `net.ipv4.ip_forward` is set to 1 in two files,
-# 99-sysctl.conf and 50-neutron-enable-ip_forward.conf)
+# sysctl.conf and 50-neutron-enable-ip_forward.conf)
 
 directory "create /etc/sysctl.d for enable-ip_forward" do
   path "/etc/sysctl.d"
