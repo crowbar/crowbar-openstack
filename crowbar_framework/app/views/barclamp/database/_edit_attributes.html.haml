@@ -5,29 +5,6 @@
   .panel-body
     = select_field :sql_engine, :collection => :engines_for_database
 
-    #mysql_container
-      %fieldset
-        %legend
-          = t('.mysql_attributes')
-
-        = integer_field %w(mysql max_connections)
-        = integer_field %w(mysql expire_logs_days)
-        = boolean_field %w(mysql slow_query_logging)
-
-      %fieldset
-        %legend
-          = t(".mysql.ssl_header")
-
-        = boolean_field %w(mysql ssl enabled),
-          "data-sslprefix" => "ssl"
-
-        #ssl_container
-          = boolean_field %w(mysql ssl generate_certs)
-          = string_field %w(mysql ssl certfile)
-          = string_field %w(mysql ssl keyfile)
-          = boolean_field %w(mysql ssl insecure)
-          = string_field %w(mysql ssl ca_certs)
-
     #postgresql_container
       %fieldset
         %legend
@@ -51,3 +28,26 @@
           = string_field %w(ha storage shared device)
           = string_field %w(ha storage shared fstype)
           = string_field %w(ha storage shared options)
+
+    #mysql_container
+      %fieldset
+        %legend
+          = t('.mysql_attributes')
+
+        = integer_field %w(mysql max_connections)
+        = integer_field %w(mysql expire_logs_days)
+        = boolean_field %w(mysql slow_query_logging)
+
+      %fieldset
+        %legend
+          = t(".mysql.ssl_header")
+
+        = boolean_field %w(mysql ssl enabled),
+          "data-sslprefix" => "ssl"
+
+        #ssl_container
+          = boolean_field %w(mysql ssl generate_certs)
+          = string_field %w(mysql ssl certfile)
+          = string_field %w(mysql ssl keyfile)
+          = boolean_field %w(mysql ssl insecure)
+          = string_field %w(mysql ssl ca_certs)
