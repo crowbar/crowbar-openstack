@@ -21,7 +21,7 @@ en:
   barclamp:
     database:
       edit_attributes:
-        sql_engine: 'SQL Engine'
+        sql_engine: 'Active SQL Engine'
         mysql_attributes: 'MariaDB Options'
         mysql:
           datadir: 'Datadir'

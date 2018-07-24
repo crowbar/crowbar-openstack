@@ -29,14 +29,24 @@ $(document).ready(function($) {
         return '#{0}_container'.format(index);
       }).join(', ');
 
-      var current = $.map($.grep(Object.keys(nodes), function(val) {
-        return nodes[val] > 0;
-      }), function(val, index) {
+      var currentEngines = $.grep(Object.keys(nodes), function(val) { return nodes[val] > 0; });
+
+      var current = $.map(currentEngines, function(val, index) {
         return '#{0}_container'.format(val);
       }).join(', ');
 
       $(selector).hide(100).attr('disabled', 'disabled');
       $(current).show(100).removeAttr('disabled');
+
+      // update sql_engine if only one engine was selected and default to mysql if no roles are assigned
+      var activeEngine = $('#sql_engine').val();
+      if (currentEngines.length === 1) {
+        activeEngine = currentEngines[0];
+      } else if (currentEngines.length === 0) {
+        activeEngine = 'mysql';
+      }
+      $('#sql_engine').val(activeEngine);
+      $('#proposal_attributes').writeJsonAttribute('sql_engine', activeEngine);
 
       // make sure all items have handlers attached
       setupEventHandlers();

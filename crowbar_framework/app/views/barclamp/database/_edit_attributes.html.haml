@@ -3,6 +3,8 @@
     = header show_raw_deployment?, true
 
   .panel-body
+    = string_field :sql_engine, disabled: true
+
     #mysql_container
       %fieldset
         %legend
