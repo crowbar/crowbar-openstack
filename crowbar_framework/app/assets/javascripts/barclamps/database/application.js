@@ -38,15 +38,20 @@ $(document).ready(function($) {
       $(selector).hide(100).attr('disabled', 'disabled');
       $(current).show(100).removeAttr('disabled');
 
-      // update sql_engine if only one engine was selected and default to mysql if no roles are assigned
-      var activeEngine = $('#sql_engine').val();
-      if (currentEngines.length === 1) {
-        activeEngine = currentEngines[0];
-      } else if (currentEngines.length === 0) {
-        activeEngine = 'mysql';
+      // automatically select active engine only for new proposals
+      // note that this check is not perfect and will trigger autoselect also for saved but not applied
+      // proposals (even old ones).
+      if ($('#proposal_deployment').readJsonAttribute('crowbar-applied') === false) {
+        // update sql_engine if only one engine was selected and default to mysql if no roles are assigned
+        var activeEngine = $('#sql_engine').val();
+        if (currentEngines.length === 1) {
+          activeEngine = currentEngines[0];
+        } else if (currentEngines.length === 0) {
+          activeEngine = 'mysql';
+        }
+        $('#sql_engine').val(activeEngine);
+        $('#proposal_attributes').writeJsonAttribute('sql_engine', activeEngine);
       }
-      $('#sql_engine').val(activeEngine);
-      $('#proposal_attributes').writeJsonAttribute('sql_engine', activeEngine);
 
       // make sure all items have handlers attached
       setupEventHandlers();
