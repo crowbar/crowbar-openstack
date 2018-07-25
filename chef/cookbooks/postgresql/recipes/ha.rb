@@ -22,14 +22,14 @@
 #
 # This is the second step.
 
-vip_primitive = "vip-admin-#{CrowbarDatabaseHelper.get_ha_vhostname(node)}"
+vip_primitive = "vip-admin-#{CrowbarDatabaseHelper.get_ha_vhostname(node, "postgresql")}"
 service_name = "postgresql"
 fs_primitive = "fs-#{service_name}"
 group_name = "g-#{service_name}"
 
 agent_name = "ocf:heartbeat:pgsql"
 
-ip_addr = CrowbarDatabaseHelper.get_listen_address(node)
+ip_addr = CrowbarDatabaseHelper.get_listen_address(node, "postgresql")
 
 postgres_op = {}
 postgres_op["monitor"] = {}
@@ -85,7 +85,7 @@ pacemaker_primitive service_name do
 end
 transaction_objects << "pacemaker_primitive[#{service_name}]"
 
-if node[:database][:ha][:storage][:mode] == "drbd"
+if node[:database][:postgresql][:ha][:storage][:mode] == "drbd"
 
   colocation_constraint = "col-#{service_name}"
   pacemaker_colocation colocation_constraint do

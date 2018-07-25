@@ -121,7 +121,7 @@ template "#{node['postgresql']['dir']}/pg_hba.conf" do
   notifies change_notify, "service[postgresql]", :immediately
 end
 
-ha_enabled = node[:database][:ha][:enabled]
+ha_enabled = node[:database][:postgresql][:ha][:enabled]
 
 if ha_enabled
   log "HA support for postgresql is enabled"
