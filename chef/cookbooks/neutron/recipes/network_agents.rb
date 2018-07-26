@@ -153,7 +153,8 @@ template node[:neutron][:dhcp_agent_config_file] do
     dhcp_domain: node[:neutron][:dhcp_domain],
     enable_isolated_metadata: "True",
     enable_metadata_network: "False",
-    nameservers: dns_list
+    nameservers: dns_list,
+    force_metadata: node[:neutron][:metadata][:force]
   )
 end
 
