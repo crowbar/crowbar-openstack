@@ -83,17 +83,15 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 109,
+      "schema-revision": 108,
       "element_states": {
-        "database-server": [ "readying", "ready", "applying" ],
-        "mysql-server": [ "readying", "ready", "applying" ]
+        "database-server": [ "readying", "ready", "applying" ]
       },
       "elements": {
-        "database-server": [],
-        "mysql-server": []
+        "database-server": []
       },
       "element_order": [
-        [ "database-server", "mysql-server" ]
+        [ "database-server" ]
       ],
       "config": {
         "environment": "database-base-config",
