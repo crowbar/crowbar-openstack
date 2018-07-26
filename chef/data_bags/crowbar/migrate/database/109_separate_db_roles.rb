@@ -1,25 +1,18 @@
 def upgrade(ta, td, a, d)
   db_engine = a["sql_engine"]
-
-  # 'ha' hash needs to be moved under 'postgresql' to keep it consistent with mysql
+  a[db_engine]["ha"] = a["ha"]
+  a.delete("ha")
   if db_engine == "postgresql"
-    a["postgresql"]["ha"] = a["ha"]
+    a["mysql"]["ha"] = ta["mysql"]["ha"]
   else
     a["postgresql"]["ha"] = ta["postgresql"]["ha"]
   end
-  a.delete("ha") if a.key? "ha"
-
   d["element_states"] = td["element_states"]
   d["element_order"] = td["element_order"]
 
-  if db_engine == "mysql"
-    # For the time of upgrade, we're adding new 'mysql-server role', while old 'database-server'
-    # is reserved for existing postgresql setup.
-    # For users that already have mysql (mariadb) deployed with 'database-server' role, we need to
-    # adapt the role assignments so the code that is looking for 'mysql-server' instances always finds
-    # correct mysql nodes.
+  if a["sql_engine"] == "mysql"
     d["elements"]["mysql-server"] = d["elements"]["database-server"]
-    d["elements"]["database-server"] = []
+    d["elements"]["atabase-server"] = []
     if d.fetch("elements_expanded", {}).key? "database-server"
       d["elements_expanded"]["mysql-server"] = d["elements_expanded"]["database-server"]
       d["elements_expanded"].delete("database-server")
