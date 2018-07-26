@@ -72,45 +72,23 @@ class CrowbarOpenStackHelper
                        "on behalf of #{barclamp}")
       end
       @database_settings = nil
-      @sql_engine_cache = nil
       @database_settings_cache_time = node[:ohai_time]
     end
 
-    if barclamp == "mysql" || barclamp == "postgresql"
-      sql_engine = barclamp
-    elsif @sql_engine_cache && @sql_engine_cache.include?(instance)
-      sql_engine = @sql_engine_cache[instance]
-    else
-      db_roles, = Chef::Search::Query.new.search(
-        :role,
-        "name:database-config-#{instance}"
-      )
-      db_proposal_role = db_roles.first unless db_roles.empty?
-      # TODO(jhesketh): What if db_roles is empty here?
-      sql_engine = db_proposal_role.default_attributes["database"]["sql_engine"]
-
-      @sql_engine_cache ||= Hash.new
-      @sql_engine_cache[instance] = sql_engine
-    end
-
-    if @database_settings && @database_settings.include?(instance) && @database_settings[instance].include?(sql_engine)
-      Chef::Log.info("Database server found at #{@database_settings[instance][sql_engine][:address]} [cached]")
+    if @database_settings && @database_settings.include?(instance)
+      Chef::Log.info("Database server found at #{@database_settings[instance][:address]} [cached]")
     else
       @database_settings ||= Hash.new
-      db_role = if sql_engine == "postgresql"
-                  "database-server"
-                else
-                  "mysql-server"
-                end
-      database = get_node(node, db_role, "database", instance)
+      database = get_node(node, "database-server", "database", instance)
 
       if database.nil?
         Chef::Log.warn("No database server found!")
       else
         address = CrowbarDatabaseHelper.get_listen_address(database)
+        backend_name = DatabaseLibrary::Database::Util.get_backend_name(database)
 
         ssl_opts = {}
-        if sql_engine == "mysql"
+        if backend_name == "mysql"
           ssl_opts = {
             enabled: database["database"]["mysql"]["ssl"]["enabled"],
             ca_certs: database["database"]["mysql"]["ssl"]["ca_certs"],
@@ -118,14 +96,13 @@ class CrowbarOpenStackHelper
               database["database"]["mysql"]["ssl"]["insecure"]
           }
         end
-        @database_settings[instance] ||= Hash.new
-        @database_settings[instance][sql_engine] = {
+        @database_settings[instance] = {
           address: address,
-          url_scheme: sql_engine,
-          backend_name: sql_engine,
-          provider: DatabaseLibrary::Database::Util.get_database_provider(database, sql_engine),
-          user_provider: DatabaseLibrary::Database::Util.get_user_provider(database, sql_engine),
-          privs: DatabaseLibrary::Database::Util.get_default_priviledges(database, sql_engine),
+          url_scheme: backend_name,
+          backend_name: backend_name,
+          provider: DatabaseLibrary::Database::Util.get_database_provider(database),
+          user_provider: DatabaseLibrary::Database::Util.get_user_provider(database),
+          privs: DatabaseLibrary::Database::Util.get_default_priviledges(database),
           connection: {
             host: address,
             username: "db_maker",
@@ -138,7 +115,7 @@ class CrowbarOpenStackHelper
       end
     end
 
-    @database_settings[instance][sql_engine]
+    @database_settings[instance]
   end
 
   def self.database_connection_string(db_settings, db_auth_attr)

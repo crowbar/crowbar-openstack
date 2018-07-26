@@ -18,7 +18,5 @@
 #
 
 # ha
-default[:database][:postgresql][:ha][:enabled] = false
-default[:database][:postgresql][:ha][:storage][:mode] = nil
-
-default[:database][:mysql][:ha][:enabled] = false
+default[:database][:ha][:enabled] = false
+default[:database][:ha][:storage][:mode] = nil

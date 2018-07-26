@@ -93,7 +93,7 @@ class MonascaService < OpenstackServiceObject
     nodes = NodeObject.all
     non_db_nodes = nodes.reject do |n|
       # Do not deploy monasca-server to the node running database cluster (already running mariadb)
-      n.roles.include?("mysql-server")
+      n.roles.include?("database-server") && n[:database][:sql_engine] == "mysql"
     end
 
     monasca_server = select_nodes_for_role(non_db_nodes, "monasca-server", "monitoring") || []
@@ -141,7 +141,7 @@ class MonascaService < OpenstackServiceObject
     nodes = proposal["deployment"][@bc_name]["elements"]
     nodes["monasca-server"].each do |node|
       n = NodeObject.find_node_by_name(node)
-      if n.roles.include?("mysql-server")
+      if n.roles.include?("database-server") && n[:database][:sql_engine] == "mysql"
         validation_error(
           "monasca-server role cannot be deployed to the node with other MariaDB instance."
         )

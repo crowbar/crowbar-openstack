@@ -20,7 +20,7 @@
 include_recipe "mysql::client"
 include_recipe "database::client"
 
-ha_enabled = node[:database][:mysql][:ha][:enabled]
+ha_enabled = node[:database][:ha][:enabled]
 
 # For Crowbar, we need to set the address to bind - default to admin node.
 addr = node[:database][:mysql][:bind_address] || ""
@@ -91,7 +91,7 @@ if node[:database][:mysql][:ssl][:enabled]
       node[:database][:mysql][:ssl][:generate_certs] ||
       node[:database][:mysql][:ssl][:insecure])
     group "mysql"
-    fqdn CrowbarDatabaseHelper.get_listen_address(node, "mysql")
+    fqdn CrowbarDatabaseHelper.get_listen_address(node)
   end
 end
 
@@ -183,7 +183,7 @@ execute "assign-root-password" do
   only_if "/usr/bin/mysql -u root -e 'show databases;'"
 end
 
-db_settings = fetch_database_settings(@cookbook_name)
+db_settings = fetch_database_settings
 db_connection = db_settings[:connection].dup
 db_connection[:host] = "localhost"
 db_connection[:username] = "root"

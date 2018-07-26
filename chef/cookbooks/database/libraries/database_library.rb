@@ -19,7 +19,8 @@
 module DatabaseLibrary
     class Database
         class Util
-            def self.get_database_provider(node, backend = node[:database][:sql_engine])
+            def self.get_database_provider(node)
+                backend = node[:database][:sql_engine]
                 db_provider = nil
                 case backend
                 when "postgresql"
@@ -32,7 +33,8 @@ module DatabaseLibrary
                 db_provider
             end
 
-            def self.get_user_provider(node, backend = node[:database][:sql_engine])
+            def self.get_user_provider(node)
+                backend = node[:database][:sql_engine]
                 db_provider = nil
                 case backend
                 when "postgresql"
@@ -49,7 +51,8 @@ module DatabaseLibrary
                 node[:database][:sql_engine]
             end
 
-            def self.get_default_priviledges(node, backend = node[:database][:sql_engine])
+            def self.get_default_priviledges(node)
+                backend = node[:database][:sql_engine]
                 privs = nil
                 case backend
                 when "postgresql"
