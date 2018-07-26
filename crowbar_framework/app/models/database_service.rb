@@ -150,6 +150,10 @@ class DatabaseService < PacemakerServiceObject
     end
 
     validation_error I18n.t(
+      "barclamp.#{@bc_name}.validation.new_proposal_multi_engine"
+    ) if selected_engines.length > 1 && !proposal["deployment"]["crowbar-applied"]
+
+    validation_error I18n.t(
       "barclamp.#{@bc_name}.validation.engine_roles_mismatch",
       db_engine: active_engine
     ) unless selected_engines.include?(active_engine)

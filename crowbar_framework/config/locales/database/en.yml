@@ -66,3 +66,4 @@ en:
         cluster_size_even: 'The Galera cluster needs an odd number of cluster members and at least three of them.'
         engine_roles_mismatch: 'Assigned roles do not match selected database engine: %{db_engine}.'
         secondary_psql: 'PostgreSQL can only be deployed as first SQL engine. Migration from MariaDB to PostgreSQL is not supported.'
+        new_proposal_multi_engine: 'Second SQL engine can only be added to an existing database deployment.'
