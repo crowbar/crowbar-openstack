@@ -21,7 +21,7 @@
         "client_ca_certs": "/etc/ssl/certs/rabbitca.pem"
       },
       "client": {
-        "heartbeat_timeout": 10
+        "heartbeat_timeout": 60
       },
       "cluster": false,
       "ha": {
