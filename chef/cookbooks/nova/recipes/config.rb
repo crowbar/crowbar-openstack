@@ -39,6 +39,19 @@ package "nova-common" do
   action :install
 end
 
+# Fake service to take control of the WSGI process from apache that
+# runs Placement API.  We replace the `reload` action, sending
+# manually the signal SIGUSR1 to all the process that are part of
+# `wsgi:nova-placement-api`
+service "nova-placement-api" do
+  service_name "apache2"
+  if node[:platform_family] == "suse"
+    reload_command 'sleep 1 && pkill --signal SIGUSR1 -f "^\(wsgi:nova-placement" && sleep 1'
+  end
+  supports reload: true, restart: true, status: true
+  ignore_failure true
+end
+
 # don't expose database connection to the compute clients
 if is_controller
   db_settings = fetch_database_settings
@@ -341,12 +354,13 @@ template node[:nova][:placement_config_file] do
   group node[:nova][:group]
   mode 0640
   variables(
-  keystone_settings: keystone_settings,
-  placement_database_connection: placement_database_connection,
-  placement_service_user: node["nova"]["placement_service_user"],
-  placement_service_password: node["nova"]["placement_service_password"],
-  placement_service_insecure: node[:nova][:ssl][:insecure]
+    keystone_settings: keystone_settings,
+    placement_database_connection: placement_database_connection,
+    placement_service_user: node["nova"]["placement_service_user"],
+    placement_service_password: node["nova"]["placement_service_password"],
+    placement_service_insecure: node[:nova][:ssl][:insecure]
   )
+  notifies :reload, "service[nova-placement-api]"
 end
 
 
