@@ -174,14 +174,15 @@
         "openstack-nova-compute": {
           "LimitNOFILE": null
         }
-      }
+      },
+      "default_log_levels": []
     }
   },
   "deployment": {
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 124,
+      "schema-revision": 125,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],

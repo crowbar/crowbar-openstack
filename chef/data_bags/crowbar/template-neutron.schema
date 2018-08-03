@@ -227,6 +227,11 @@
                       "type": "map", "required": true, "mapping": {
                         "force": { "type": "bool", "required": true }
                       }
+                    },
+                    "default_log_levels": {
+                      "type": "seq",
+                      "required": false,
+                      "sequence": [ { "type": "str" } ]
                     }
               }}
      }},

@@ -148,7 +148,8 @@ template neutron[:neutron][:config_file] do
       infoblox: infoblox_settings,
       ipam_driver: ipam_driver,
       rpc_workers: neutron[:neutron][:rpc_workers],
-      use_apic_gbp: use_apic_gbp
+      use_apic_gbp: use_apic_gbp,
+      default_log_levels: neutron[:neutron][:default_log_levels]
     )
 end
 

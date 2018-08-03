@@ -433,7 +433,8 @@ template node[:nova][:config_file] do
     reserved_host_memory: reserved_host_memory,
     use_baremetal_filters: use_baremetal_filters,
     track_instance_changes: track_instance_changes,
-    ironic_settings: ironic_settings
+    ironic_settings: ironic_settings,
+    default_log_levels: node[:nova][:default_log_levels]
   )
 end
 
