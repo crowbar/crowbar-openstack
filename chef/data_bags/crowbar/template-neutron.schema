@@ -52,7 +52,7 @@
                       "username": { "type" : "str", "required": true },
                       "password": { "type" : "str", "required": true },
                       "optimized_metadata": { "type" : "bool", "required": true },
-                      "optimized_dhcp": { "type" : "bool", "required": true }, 
+                      "optimized_dhcp": { "type" : "bool", "required": true },
                       "vpc_pairs": { "type": "str", "required": false },
                       "ext_net": { "type" : "map", "required" : true, "mapping" : {
                           "name": { "type" : "str", "required" : true },
@@ -221,6 +221,11 @@
                     "ha_rate_limit": {
                       "type": "map", "required": true, "mapping": {
                         "neutron-server": { "type": "int", "required": true }
+                      }
+                    },
+                    "metadata": {
+                      "type": "map", "required": true, "mapping": {
+                        "force": { "type": "bool", "required": true }
                       }
                     }
               }}
