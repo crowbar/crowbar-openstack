@@ -275,6 +275,11 @@
                   "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
                 }
               }
+            },
+            "default_log_levels": {
+              "type": "seq",
+              "required": false,
+              "sequence": [ { "type": "str" } ]
             }
           }
         }
