@@ -280,7 +280,7 @@ action :add_endpoint do
     body = _build_endpoint_object(interface, my_service_id, new_resource)
     name = "#{interface} endpoint for '#{new_resource.endpoint_service}'"
     path = "/v3/endpoints"
-    if endpoints.empty?
+    if !endpoints.key? interface
       _create_item(http, headers, path, body, name)
       endpoint_updated = true
     elsif endpoint_needs_update interface, endpoints, new_resource
