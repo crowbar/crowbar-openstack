@@ -2,7 +2,9 @@ def upgrade(ta, td, a, d)
   a["admin"].delete("updated_password")
   nodes = NodeObject.find("roles:keystone-server")
   nodes.each do |node|
-    node[:keystone][:admin][:old_password] = node[:keystone][:admin][:password]
+    unless node[:keystone][:admin].key?("old_password")
+      node[:keystone][:admin][:old_password] = node[:keystone][:admin][:password]
+    end
     node.save
   end
   return a, d
