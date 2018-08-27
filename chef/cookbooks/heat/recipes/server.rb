@@ -125,6 +125,7 @@ keystone_register "heat wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register heat user" do
@@ -137,6 +138,7 @@ keystone_register "register heat user" do
   user_password keystone_settings["service_password"]
   tenant_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give heat user access" do
@@ -149,6 +151,7 @@ keystone_register "give heat user access" do
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "add heat stack user role" do
@@ -161,6 +164,7 @@ keystone_register "add heat stack user role" do
   tenant_name keystone_settings["service_tenant"]
   role_name "heat_stack_user"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 node[:heat][:trusts_delegated_roles].each do |role|
@@ -174,6 +178,7 @@ node[:heat][:trusts_delegated_roles].each do |role|
     tenant_name keystone_settings["service_tenant"]
     role_name role
     action :add_role
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
   keystone_register "give admin access to stack owner role #{role}" do
@@ -186,6 +191,7 @@ node[:heat][:trusts_delegated_roles].each do |role|
     tenant_name keystone_settings["default_tenant"]
     role_name role
     action :add_access
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 
@@ -286,6 +292,7 @@ bash "register heat domain" do
     "OS_REGION_NAME" => keystone_settings["endpoint_region"],
     "OS_IDENTITY_API_VERSION" => "3"
   })
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 # Create Heat CloudFormation service
@@ -299,6 +306,7 @@ keystone_register "register Heat CloudFormation Service" do
   service_type "cloudformation"
   service_description "Heat CloudFormation Service"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register heat Cfn endpoint" do
@@ -315,6 +323,7 @@ keystone_register "register heat Cfn endpoint" do
   #  endpoint_global true
   #  endpoint_enabled true
   action :add_endpoint_template
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 # Create Heat service
@@ -328,6 +337,7 @@ keystone_register "register Heat Service" do
   service_type "orchestration"
   service_description "Heat Service"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register heat endpoint" do
@@ -350,6 +360,7 @@ keystone_register "register heat endpoint" do
   #  endpoint_global true
   #  endpoint_enabled true
   action :add_endpoint_template
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-heat_register" if ha_enabled
