@@ -95,25 +95,29 @@ end
 # ensure swift tempurl key only if some agent_* drivers are enabled in ironic
 if !swift_config.empty? && node[:glance][:default_store] == "swift" && \
     ironics.any? && ironics.first[:ironic][:enabled_drivers].any? { |d| d.start_with?("agent_") }
-  swift_command = "swift "
+  swift_command = "swift"
   swift_command << (swift_insecure ? " --insecure" : "")
   env = {
     "OS_USERNAME" => keystone_settings["service_user"],
     "OS_PASSWORD" => keystone_settings["service_password"],
     "OS_PROJECT_NAME" => keystone_settings["service_tenant"],
     "OS_AUTH_URL" => keystone_settings["public_auth_url"],
-    "OS_IDENTITY_API_VERSION" => 3
+    "OS_IDENTITY_API_VERSION" => "3"
   }
 
   get_tempurl_key = "#{swift_command} stat | grep -m1 'Meta Temp-Url-Key:' | awk '{print $3}'"
   tempurl_key = Mixlib::ShellOut.new(get_tempurl_key, environment: env).run_command.stdout.chomp
   # no tempurl key set, set a random one
   if tempurl_key.empty?
+    # include the secure_password code
+    ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
+
     tempurl_key = secure_password
     execute "set-glance-tempurl-key" do
       command "#{swift_command} post -m 'Temp-Url-Key:#{tempurl_key}'"
       user node[:glance][:user]
       group node[:glance][:group]
+      environment env
     end
   end
 end
