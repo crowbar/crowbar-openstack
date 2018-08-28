@@ -57,12 +57,18 @@ class DatabaseService < PacemakerServiceObject
     @logger.debug("Database create_proposal: entering")
     base = super
 
+    db_role = if base["attributes"]["sql_engine"] == "postgresql"
+      "database-server"
+    else
+      "mysql-server"
+    end
+
     nodes = NodeObject.all
     nodes.delete_if { |n| n.nil? or n.admin? }
     if nodes.size >= 1
       controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
       base["deployment"]["database"]["elements"] = {
-        "database-server" => [controller[:fqdn]]
+        db_role => [controller[:fqdn]]
       }
     end
 
