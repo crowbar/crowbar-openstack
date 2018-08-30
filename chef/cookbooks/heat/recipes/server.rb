@@ -68,8 +68,8 @@ end
 # install Cisco GBP plugin if needed
 neutron_server = search(:node, "roles:neutron-server").first || []
 unless neutron_server.empty?
-  if neutron_server[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
-    # Install GBP plugin if Cisco APIC driver is set to apic_gbp
+  if neutron_server[:neutron][:ml2_mechanism_drivers].include?("apic_aim")
+    # Install GBP plugin if Cisco APIC driver is set to apic_aim
     node[:heat][:platform][:gbp_plugin_packages].each do |p|
       package p
     end

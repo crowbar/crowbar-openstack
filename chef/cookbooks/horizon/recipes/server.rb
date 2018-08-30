@@ -168,17 +168,10 @@ apic_gbp_ui_pkgname =
 unless apic_gbp_ui_pkgname.nil?
   neutron_server = search(:node, "roles:neutron-server").first || []
   unless neutron_server.empty?
-    if neutron_server[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+    if neutron_server[:neutron][:ml2_mechanism_drivers].include?("apic_aim")
       # Install GBP plugin if Cisco APIC driver is set to apic_gbp
       package apic_gbp_ui_pkgname do
         action :install
-        notifies :reload, resources(service: "apache2")
-      end
-    elsif neutron_server[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
-      # Remove GBP plugin if Cisco APIC driver is set to cisco_apic_ml2
-      package apic_gbp_ui_pkgname do
-        ignore_failure true
-        action :remove
         notifies :reload, resources(service: "apache2")
       end
     end

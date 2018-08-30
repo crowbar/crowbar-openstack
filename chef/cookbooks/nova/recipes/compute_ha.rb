@@ -70,7 +70,7 @@ when "ml2"
     neutron_agent = neutron[:neutron][:platform][:lb_agent_name]
     neutron_agent_pkg = neutron[:neutron][:platform][:lb_agent_pkg]
     neutron_agent_ra = neutron[:neutron][:ha][:network]["linuxbridge_ra"]
-  when ml2_mech_drivers.include?("cisco_apic_ml2") || ml2_mech_drivers.include?("apic_gbp")
+  when ml2_mech_drivers.include?("apic_aim")
     neutron_agent = ""
     neutron_agent_pkg = ""
     neutron_agent_ra = ""
@@ -132,7 +132,7 @@ compute_transaction_objects << "pacemaker_primitive[#{libvirtd_primitive}]"
 
 case neutron[:neutron][:networking_plugin]
 when "ml2"
-  # neutron_agent & neutron_agent_ra are empty for plugins like cisco_apic_ml2 and apic_gbp
+  # neutron_agent & neutron_agent_ra are empty for Cisco ACI backend
   unless neutron_agent.empty? || neutron_agent_ra.empty?
     neutron_agent_primitive = "#{neutron_agent.sub(/^openstack-/, "")}-compute"
     pacemaker_primitive neutron_agent_primitive do

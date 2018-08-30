@@ -59,19 +59,33 @@
                           "ext_epg": { "type" : "str", "required" : true },
                           "host_pool_cidr": { "type" : "str", "required" : true }
                       }},
+                      "phys_domain": {"type": "str", "required": false },
+                      "vm_domains": {"type": "seq", "required": false, "sequence": [ {
+                        "type": "map", "required": true, "mapping": {
+                          "domain_name": { "type": "str", "required": true },
+                          "vlan_ranges": { "type": "str", "required": true },
+                          "vmm_type": { "type": "str", "required": true }
+                        }
+                      }]},
                       "opflex": { "type": "seq", "required": true, "sequence": [ {
                         "type": "map", "required": true, "mapping": {
                           "pod": { "type" : "str", "required" : false },
                           "nodes": { "type" : "seq", "required" : true, "sequence": [ { "type": "str" } ] },
-                          "peer_ip": { "type": "str", "required" : true },
-                          "peer_port": { "type": "int", "required" : true },
-                          "encap": { "type": "str", "required": true },
-                          "vxlan": { "type": "map", "required": true, "mapping" : {
-                            "encap_iface": {"type": "str", "required": true },
-                            "uplink_iface": { "type": "str", "required": true },
-                            "uplink_vlan": { "type": "int", "required": true },
-                            "remote_ip": { "type": "str", "required": true },
-                            "remote_port": { "type": "int", "required": true }
+                          "integration_bridge" : { "type" : "str", "required" : true },
+                          "access_bridge" : { "type" : "str", "required" : true },
+                          "peers" : { "type" : "seq", "required" : true, "sequence" : [ {
+                            "type" : "map", "required" : true, "mapping": {
+                              "ip" : { "type" : "str", "required" : true },
+                              "port" : { "type" : "int", "required" : true }
+                            }
+                          }]},
+                          "encap": { "type" : "str", "required" : true },
+                          "vxlan": { "type" : "map", "required" : true, "mapping" : {
+                            "encap_iface": { "type" : "str", "required" : true },
+                            "uplink_iface": { "type" : "str", "required" : true },
+                            "uplink_vlan": { "type" : "int", "required" : true },
+                            "remote_ip": { "type" : "str", "required" : true },
+                            "remote_port": { "type" : "int", "required" : true }
                           }},
                           "vlan": { "type": "map", "required": true, "mapping": {
                             "encap_iface": { "type": "str", "required": true }

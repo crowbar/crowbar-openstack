@@ -3,7 +3,7 @@
 <% unless @tunnel_types.empty? -%>
 tunnel_types = <%= @tunnel_types.join(",") %>
 <% end -%>
-<% if @ml2_mech_drivers.include?("cisco_apic_ml2") || @ml2_mech_drivers.include?("apic_gbp") -%>
+<% if @ml2_mech_drivers.include?("apic_aim") -%>
 enable_tunneling = <%= @enable_tunneling %>
 <% end -%>
 <% if @use_l2pop -%>

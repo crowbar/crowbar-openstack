@@ -13,12 +13,12 @@
 # limitations under the License.
 #
 define :neutron_metadata,
-  use_cisco_apic_ml2_driver: false,
+  use_cisco_apic_aim: false,
   neutron_network_ha: false,
   nova_compute_ha_enabled: false,
   neutron_node_object: nil do
 
-  use_cisco_apic_ml2_driver = params[:use_cisco_apic_ml2_driver]
+  use_cisco_apic_aim = params[:use_cisco_apic_aim]
   neutron_network_ha = params[:neutron_network_ha]
   nova_compute_ha_enabled = params[:nova_compute_ha_enabled]
   neutron = params[:neutron_node_object] || node
@@ -83,7 +83,7 @@ define :neutron_metadata,
     )
   end
 
-  unless use_cisco_apic_ml2_driver
+  unless use_cisco_apic_aim
     enable_metadata = node.roles.include?("neutron-network") || !neutron[:neutron][:metadata][:force]
 
     utils_systemd_service_restart node[:neutron][:platform][:metadata_agent_name] do

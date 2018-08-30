@@ -24,9 +24,6 @@ else
   neutron = node
 end
 
-use_apic_gbp = neutron[:neutron][:networking_plugin] == "ml2" &&
-  neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
-
 # RDO package magic (non-standard packages)
 if node[:platform_family] == "rhel"
   net_core_pkgs=%w(kernel-*openstack* iproute-*el6ost.netns* iputils)
@@ -86,20 +83,24 @@ if neutron[:neutron][:use_lbaas]
   service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2")
 end
 
-if neutron[:neutron][:networking_plugin] == "ml2"
-  service_plugins.unshift("neutron.services.l3_router.l3_router_plugin.L3RouterPlugin")
+use_apic = neutron[:neutron][:networking_plugin] == "ml2" && \
+  neutron[:neutron][:ml2_mechanism_drivers].include?("apic_aim")
 
+if neutron[:neutron][:networking_plugin] == "ml2"
   if neutron[:neutron][:ml2_mechanism_drivers].include?("linuxbridge") ||
       neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch")
     service_plugins.push("neutron.services.trunk.plugin.TrunkPlugin")
   end
 
-  if neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
-    service_plugins = ["cisco_apic_l3"]
-  elsif neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
-    service_plugins = ["group_policy", "servicechain", "apic_gbp_l3"]
+  if neutron[:neutron][:ml2_mechanism_drivers].include?("apic_aim")
+    service_plugins.unshift("apic_aim_l3", "group_policy", "ncp")
+  else
+    service_plugins.unshift("neutron.services.l3_router.l3_router_plugin.L3RouterPlugin")
   end
 end
+
+core_plugins = use_apic ? "ml2plus" : neutron[:neutron][:networking_plugin]
+
 service_plugins = service_plugins.join(", ")
 
 network_nodes_count = neutron[:neutron][:elements]["neutron-network"].count
@@ -145,7 +146,7 @@ template neutron[:neutron][:config_file] do
       ssl_cert_required: neutron[:neutron][:ssl][:cert_required],
       ssl_ca_file: neutron[:neutron][:ssl][:ca_certs],
       nova_insecure: nova_insecure,
-      core_plugin: neutron[:neutron][:networking_plugin],
+      core_plugin: core_plugins,
       service_plugins: service_plugins,
       allow_overlapping_ips: neutron[:neutron][:allow_overlapping_ips],
       dvr_enabled: neutron[:neutron][:use_dvr],
@@ -154,8 +155,6 @@ template neutron[:neutron][:config_file] do
       mtu_value: mtu_value,
       infoblox: infoblox_settings,
       ipam_driver: ipam_driver,
-      rpc_workers: neutron[:neutron][:rpc_workers],
-      use_apic_gbp: use_apic_gbp,
       default_log_levels: neutron[:neutron][:default_log_levels]
     )
 end

@@ -60,18 +60,6 @@ memcache_pool_socket_timeout = 1
 service_token_roles_required = true
 service_token_roles = admin
 
-
-<% if @use_apic_gbp -%>
-[apic_aim_auth]
-auth_plugin = v3password
-auth_url = <%= @keystone_settings['internal_auth_url'] %>
-user_domain_name = <%= @keystone_settings['admin_domain'] %>
-project_name = <%= @keystone_settings['service_tenant'] %>
-project_domain_name = <%= @keystone_settings['admin_domain'] %>
-username = <%= @keystone_settings['service_user'] %>
-password = <%= @keystone_settings['service_password'] %>
-
-<% end -%>
 [nova]
 region_name = <%= @keystone_settings['endpoint_region'] %>
 endpoint_type = internal

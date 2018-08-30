@@ -7,10 +7,15 @@
     "domain": "comp/prov-OpenStack/ctrlr-[<%= @opflex_apic_domain_name %>]-<%= @opflex_apic_domain_name %>/sw-InsiemeLSOid",
     "name": "<%= @hostname %>",
     "peers": [
-      {"hostname": "<%= @opflex_peer_ip %>", "port": "<%= @opflex_peer_port %>"}
+<% @opflex_peers.each do |peer| -%>
+      {
+        "hostname": <%= @peer[:ip] %>,
+        "port": <%= @peer[:port] %>
+      },
+<% end -%>
     ],
     "ssl": {
-      "mode": "enabled",
+      "mode": "encrypted",
       "ca-store": "/etc/ssl/certs/"
     },
     "inspector": {
@@ -36,7 +41,8 @@
 
   "renderers": {
     "stitched-mode": {
-      "ovs-bridge-name": "br-int",
+      "int-bridge-name": "<%= @opflex_int_bridge %>",
+      "access-bridge-name": "<%= @opflex_access_bridge %>",
       "encap": {
         "vxlan" : {
           "encap-iface": "<%= @opflex_vxlan_encap_iface %>",
