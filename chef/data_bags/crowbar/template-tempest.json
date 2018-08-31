@@ -15,6 +15,7 @@
       "tempest_user_username": "tempest",
       "tempest_user_tenant": "tempest",
       "nova_instance": "none",
+      "public_network_name": "floating",
       "manila": {
         "image_with_share_tools": "manila-service-image",
         "image_username": "root",
@@ -41,7 +42,7 @@
     "tempest": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 200,
+      "schema-revision": 201,
       "element_states": {
         "tempest": [ "ready", "applying" ]
       },
