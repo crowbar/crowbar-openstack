@@ -240,6 +240,22 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     num_vlans = neutron[:neutron][:num_vlans]
     vlan_end = [vlan_start + num_vlans - 1, 4094].min
 
+    flat_nets = []
+    vlan_nets = []
+    extra_nets = []
+
+    flat_nets << neutron[:neutron][:zvm][:zvm_xcat_mgt_vswitch]
+    vlan_nets << "physnet1:#{vlan_start}:#{vlan_end}"
+    neutron[:neutron][:zvm][:additional_zvm_networks].each do |net|
+      name, vlan_min, vlan_max, rdev = net.split(":")
+      extra_nets << [name, rdev]
+      if vlan_min.to_s.empty?
+        flat_nets << name
+      else
+        vlan_nets << "#{name}:#{vlan_min}:#{vlan_max}"
+      end
+    end
+
     template agent_config_path do
       cookbook "neutron"
       source "neutron_zvm_plugin.ini.erb"
@@ -250,6 +266,9 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         zvm: neutron[:neutron][:zvm],
         vlan_start: vlan_start,
         vlan_end: vlan_end,
+        flat_nets: flat_nets,
+        vlan_nets: vlan_nets,
+        extra_nets: extra_nets
       )
     end
   when ml2_mech_drivers.include?("openvswitch")

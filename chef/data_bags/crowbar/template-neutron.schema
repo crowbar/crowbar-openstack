@@ -163,7 +163,8 @@
                       "zvm_physnet_rdev": { "type": "str", "required": true },
                       "xcat_mgt_ip": { "type": "str", "required": true },
                       "zvm_xcat_mgt_vswitch": { "type": "str", "required": true },
-                      "xcat_mgt_mask": { "type": "str", "required": true }
+                      "xcat_mgt_mask": { "type": "str", "required": true },
+                      "additional_zvm_networks": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] }
                     }},
                     "ssl": { "type": "map", "required": true, "mapping": {
                       "certfile": { "type" : "str", "required" : true },

@@ -129,8 +129,17 @@ when "ml2"
   physnet_map = NeutronHelper.get_neutron_physnets(network_node, external_networks)
   physnets = physnet_map.values
 
+  extra_vlan_nets = []
   if use_zvm
     physnets.push(node[:neutron][:zvm][:zvm_xcat_mgt_vswitch])
+    node[:neutron][:zvm][:additional_zvm_networks].each do |net|
+      name, vlan_min, vlan_max, rdev = net.split(":")
+      if vlan_min.to_s.empty?
+        physnets.push(name)
+      else
+        extra_vlan_nets.push("#{name}:#{vlan_min}:#{vlan_max}")
+      end
+    end
   end
 
   os_sdn_net = Barclamp::Inventory.get_network_definition(node, "os_sdn")
@@ -190,7 +199,8 @@ when "ml2"
       external_networks: physnets,
       mtu_value: mtu_value,
       l2pop_agent_boot_time: node[:neutron][:l2pop][:agent_boot_time],
-      vmware_dvs_config: node[:neutron][:vmware_dvs]
+      vmware_dvs_config: node[:neutron][:vmware_dvs],
+      extra_vlan_nets: extra_vlan_nets,
     )
     notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
   end

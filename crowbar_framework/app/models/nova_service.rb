@@ -131,6 +131,10 @@ class NovaService < OpenstackServiceObject
     node[:cpu]["0"][:flags].include?("vmx") or node[:cpu]["0"][:flags].include?("svm")
   end
 
+  def node_supports_zvm(node)
+    return true if node["kernel"]["machine"] =~ /s390x/
+  end
+
   #
   # Lots of enhancements here.  Like:
   #    * Don't reuse machines
@@ -164,17 +168,19 @@ class NovaService < OpenstackServiceObject
     kvm = non_hyperv.select { |n| n if node_supports_kvm(n) }
     non_kvm = non_hyperv - kvm
     xen = non_kvm.select { |n| n if node_supports_xen(n) }
-    qemu = non_kvm - xen
+    # NOTE(aplanas) For SOC7 we autoselect nova-compute-zvm the nodes
+    # that are on S390X.  Is SOC8 we need to change it to KVM.
+    zvm = non_kvm.select { |n| n if node_supports_zvm(n) }
+    qemu = non_kvm - xen - zvm
 
-    # do not use zvm by default
-    #   TODO add it here once a compute node can run inside z/VM
     # (2017-01-30) Hyper-V is hidden for now
     # "nova-compute-hyperv" => hyperv.map(&:name),
     base["deployment"]["nova"]["elements"] = {
       "nova-controller" => [controller.name],
       "nova-compute-kvm" => kvm.map(&:name),
       "nova-compute-qemu" => qemu.map(&:name),
-      "nova-compute-xen" => xen.map(&:name)
+      "nova-compute-xen" => xen.map(&:name),
+      "nova-compute-zvm" => zvm.map(&:name)
     }
 
     base["attributes"][@bc_name]["itxt_instance"] = find_dep_proposal("itxt", true)
@@ -377,18 +383,6 @@ class NovaService < OpenstackServiceObject
       end
     end unless all_nodes.nil?
 
-    # Allocate IP for xcat_management network for z/VM nodes, if we're
-    # configured to use something else than the "admin" network for it.
-    zvm_compute_nodes = role.override_attributes["nova"]["elements"]["nova-compute-zvm"]
-    unless zvm_compute_nodes.nil? || zvm_compute_nodes.empty?
-      zvm_xcat_network = role.default_attributes["nova"]["zvm"]["zvm_xcat_network"]
-      unless zvm_xcat_network == "admin"
-        zvm_compute_nodes.each do |n|
-          net_svc.allocate_ip("default", zvm_xcat_network, "host", n)
-        end
-      end
-    end
-
     @logger.debug("Nova apply_role_pre_chef_call: leaving")
   end
 
@@ -413,24 +407,6 @@ class NovaService < OpenstackServiceObject
     # unless elements["nova-compute-hyperv"].empty? || hyperv_available?
     #   validation_error I18n.t("barclamp.#{@bc_name}.validation.hyperv_support")
     # end
-
-    unless elements["nova-compute-zvm"].nil? || elements["nova-compute-zvm"].empty?
-      unless network_present? proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_network"]
-        validation_error I18n.t(
-          "barclamp.#{@bc_name}.validation.invalid_zvm_xcat_network",
-          network: proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_network"]
-        )
-      end
-    end
-
-    unless elements["nova-compute-ironic"].nil? || elements["nova-compute-ironic"].empty?
-      unless network_present?("ironic")
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.ironic_network")
-      end
-      if Proposal.where(barclamp: "ironic").empty?
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.ironic_server")
-      end
-    end
 
     elements["nova-compute-kvm"].each do |n|
       nodes[n] += 1
@@ -501,6 +477,11 @@ class NovaService < OpenstackServiceObject
       end
     end
 
+    # Validate some zVM / xCAT configuration
+    unless elements["nova-compute-zvm"].nil?
+      validate_zvm_xcat(proposal)
+    end
+
     # vendordata must be valid json
     begin
       JSON.parse(proposal["attributes"][@bc_name]["metadata"]["vendordata"]["json"])
@@ -509,6 +490,32 @@ class NovaService < OpenstackServiceObject
     end
 
     super
+  end
+
+  def validate_zvm_xcat(proposal)
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_server"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_server")
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_username"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_username")
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_password"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_password")
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_diskpool"].empty?
+      if proposal["attributes"][@bc_name]["zvm"]["zvm_diskpool_type"] == "ECKD"
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_diskpool")
+      end
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_host"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_host")
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_master"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_master")
+    end
+    if proposal["attributes"][@bc_name]["zvm"]["zvm_xcat_ssh_key"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.zvm_xcat_ssh_key")
+    end
   end
 
   # try to know if we can skip a node from running chef-client

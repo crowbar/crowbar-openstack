@@ -34,7 +34,7 @@ disk_allocation_ratio = <%= node[:nova][:scheduler][:disk_allocation_ratio] %>
 <% if @libvirt_type.eql?('vmware') %>
 compute_driver = vmwareapi.VMwareVCDriver
 <% elsif @libvirt_type.eql?('zvm') %>
-compute_driver = nova.virt.zvm.ZVMDriver
+compute_driver = zvm.ZVMDriver
 <% elsif @libvirt_type.eql?('ironic') %>
 compute_driver = ironic.IronicDriver
 <% else %>
