@@ -122,7 +122,9 @@ end
 crowbar_pacemaker_sync_mark "sync-neutron-agents_before_ha"
 
 # Avoid races when creating pacemaker resources
-crowbar_pacemaker_sync_mark "wait-neutron-agents_ha_resources"
+crowbar_pacemaker_sync_mark "wait-neutron-agents_ha_resources" do
+  timeout 90
+end
 
 if node[:pacemaker][:clone_stateless_services]
   transaction_objects = []
