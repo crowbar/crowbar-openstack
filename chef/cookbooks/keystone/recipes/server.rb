@@ -528,13 +528,6 @@ if node[:keystone][:signing][:token_format] == "fernet"
       action :run
       only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
-
-    # We would like to propagate fernet keys to all nodes in the cluster
-    execute "propagate fernet keys to all nodes in the cluster" do
-      command rsync_command
-      action :run
-      only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
-    end
   end
 
   service_transaction_objects = []
@@ -564,6 +557,13 @@ if node[:keystone][:signing][:token_format] == "fernet"
   end
 
   crowbar_pacemaker_sync_mark "create-keystone_fernet_rotate" if ha_enabled
+
+  # We would like to propagate fernet keys to all nodes in the cluster
+  execute "propagate fernet keys to all nodes in the cluster" do
+    command rsync_command
+    action :run
+    only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
 end
 
 # Wait for all nodes to reach this point so we know that all nodes will have
