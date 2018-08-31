@@ -128,6 +128,7 @@ en:
         infoblox_dc_id: "Invalid cloud_data_center_id: `%{dc_id}` is not a valid index into infoblox[:grids]. cloud_data_center_id needs to be an integer in the range [1,%{grids_length}]."
         external_network: 'External Network "%{ext_net}" is not defined in the configuration of the network barclamp'
         ml2_type_driver: 'At least one ml2 type driver must be selected.'
+        ml2_zvm_vlan: 'To deploy Neutron in a Cloud with a zVM node, VLAN needs to be included a as ML2 agent driver type.'
         ml2_mechanism: 'At least one ml2 mechanism driver must be selected.'
         no_valid_ml2_type_driver: 'Selected ml2 type driver "%{drv}" is not a valid option. Valid drivers are %{ml2_type_drivers_valid}'
         no_valid_ml2_mechanism: 'Selected ml2 mechansim driver "%{drv}" is not a valid option. Valid drivers are %{ml2_mechanism_drivers_valid}'
@@ -149,3 +150,7 @@ en:
         dvr_linuxbridge: 'DVR is not compatible with Linux Bridge ML2 driver'
         vmware_dvs_vlan: 'The "vmware_dvs" mechanism driver needs the type driver "vlan"'
         vmware_dvs_ovs_lbr: 'The "vmware_dvs" mechanism driver also needs either the "openvswitch" or the "linuxbridge" mechanism driver'
+        zvm_xcat_server: 'The xCAT MN IP address is not optional'
+        zvm_xcat_username: 'Provide the username for the xCAT server'
+        zvm_xcat_password: 'Provide the password for the xCAT server'
+        additional_zvm_networks: 'The format for the `additional_zvm_networks` is netname[:[vlan_start]:[vlan_end][:rdev_list]]'

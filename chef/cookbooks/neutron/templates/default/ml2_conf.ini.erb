@@ -27,7 +27,11 @@ tunnel_id_ranges = <%= @gre_start %>:<%= @gre_end %>
   <% unless @ml2_type_drivers[0] == "opflex" && @ml2_type_drivers[1] == "vxlan" -%>
       <%# The Cisco ACI driver will force configure opflex for vlan encapsulation when network_vlan_ranges is given. -%>
       <%# Hence network_vlan_ranges is not added for vxlan configuration -%>
+      <% if @extra_vlan_nets.empty? -%>
 network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>
+      <% else -%>
+network_vlan_ranges = physnet1:<%= @vlan_start %>:<%= @vlan_end %>,<%= @extra_vlan_nets.join(",") %>
+      <% end -%>
   <% end -%>
 <% end -%>
 

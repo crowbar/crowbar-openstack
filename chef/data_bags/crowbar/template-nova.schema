@@ -158,7 +158,6 @@
                 "zvm_xcat_server": { "type": "str", "required": true },
                 "zvm_xcat_username": { "type": "str", "required": true },
                 "zvm_xcat_password": { "type": "str", "required": true },
-                "zvm_xcat_network": { "type": "str", "required": true },
                 "zvm_diskpool": { "type": "str", "required": true },
                 "zvm_diskpool_type": { "type": "str", "required": true },
                 "zvm_host": { "type": "str", "required": true },
