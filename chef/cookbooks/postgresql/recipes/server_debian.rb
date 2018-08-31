@@ -28,7 +28,7 @@ end
 # We need to include the HA recipe early, before the config files are
 # generated, but after the postgresql packages are installed since they live in
 # the directory that will be mounted for HA
-if node[:database][:ha][:enabled]
+if node[:database][:postgresql][:ha][:enabled]
   include_recipe "postgresql::ha_storage"
 end
 

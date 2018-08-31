@@ -40,20 +40,20 @@ en:
         postgresql:
           config:
             max_connections: 'Global Connection Limit (max_connections)'
+          ha:
+            storage:
+              mode: 'Storage Mode'
+              modes:
+                drbd: 'DRBD'
+                shared: 'Shared Storage'
+              drbd_info: 'The cluster must have been setup for DRBD.'
+              drbd:
+                size: 'Size to Allocate for DRBD Device (in Gigabytes)'
+              shared:
+                device: 'Name of Block Device or NFS Mount Specification'
+                fstype: 'Filesystem Type'
+                options: 'Mount Options'
         ha_header: 'High Availability'
-        ha:
-          storage:
-            mode: 'Storage Mode'
-            modes:
-              drbd: 'DRBD'
-              shared: 'Shared Storage'
-            drbd_info: 'The cluster must have been setup for DRBD.'
-            drbd:
-              size: 'Size to Allocate for DRBD Device (in Gigabytes)'
-            shared:
-              device: 'Name of Block Device or NFS Mount Specification'
-              fstype: 'Filesystem Type'
-              options: 'Mount Options'
       validation:
         invalid_db_engine: 'Invalid database engine: %{db_engine}.'
         unknown_mode_ha: 'Unknown mode for HA storage: %{storage_mode}.'

@@ -1,5 +1,5 @@
 #
-# Copyright 2016, SUSE LINUX GmbH
+# Copyright 2018, SUSE LINUX GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "database", "database-server")
   include_recipe "database::crowbar"
-  include_recipe "database::server"
+  Chef::Log.info("Running database::server for PostgreSQL")
+  include_recipe "postgresql::server"
 end
