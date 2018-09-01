@@ -138,7 +138,7 @@ en:
               cluster_name: 'vCenter Cluster Names for Volumes'
               volume_folder: 'Folder for Volumes'
               ca_file: 'CA file for verifying the vCenter certificate'
-              insecure: 'vCenter SSL Certificate is insecure (for instance, self-signed)'
+              insecure: 'vCenter Skip Certificate Validation (self-signed/insecure) (for instance, self-signed)'
             local:
               file_name: 'Volume File Name'
               file_size: 'Maximum File Size (GB)'
@@ -158,13 +158,13 @@ en:
         api:
           protocol: 'Protocol'
         ssl:
-          header: 'SSL Support'
-          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
-          certfile: 'SSL Certificate File'
-          keyfile: 'SSL (Private) Key File'
+          header: 'TLS (SSL) Support'
+          insecure: 'Skip Certificate Validation (self-signed/insecure) (for instance, self-signed)'
+          certfile: 'Server X.509 Certificate (Public) File'
+          keyfile: 'Server X.509 Key (Private) File'
           generate_certs: 'Generate (self-signed) certificates (implies insecure)'
-          cert_required: 'Require Client Certificate'
-          ca_certs: 'SSL CA Certificates File'
+          cert_required: 'Certificate Authority (CA) Bundle File Required'
+          ca_certs: 'Server CA Certificate Bundle File'
       validation:
         invalid_proposal: 'Invalid proposal: backend with driver %{backend_driver} is missing the backend-specific attributes.'
         volume_name: '%{count} backends are using \"%{volume_name}\" as LVM volume name.'

@@ -115,12 +115,12 @@ en:
             account_blacklist: 'Account blacklist'
             container_ratelimit_size: 'Container ratelimit size'
         ssl:
-          header: 'SSL Support'
+          header: 'TLS (SSL) Support'
           enabled: 'Protocol'
-          certfile: 'SSL Certificate File'
-          keyfile: 'SSL (Private) Key File'
+          certfile: 'Server X.509 Certificate (Public) File'
+          keyfile: 'Server X.509 Key (Private) File'
           generate_certs: 'Generate (self-signed) certificates (implies insecure)'
-          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          insecure: 'Skip Certificate Validation (self-signed/insecure) (for instance, self-signed)'
       validation:
         radosgw: 'Ceph with RadosGW support is already deployed. Only one of Ceph with RadosGW and Swift can be deployed at any time.'
         replica: 'Need at least 1 replica.'

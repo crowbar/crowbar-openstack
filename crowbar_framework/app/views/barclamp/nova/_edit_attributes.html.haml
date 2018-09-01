@@ -71,7 +71,7 @@
 
     %fieldset
       %legend
-        = t(".ssl_header")
+        = t(".tls_header")
 
       = boolean_field %w(ssl enabled), :collection => :ssl_protocols_for_nova, "data-sslprefix" => "ssl", "data-sslcert" => "/etc/nova/ssl/certs/signing_cert.pem", "data-sslkey" => "/etc/nova/ssl/private/signing_key.pem"
 

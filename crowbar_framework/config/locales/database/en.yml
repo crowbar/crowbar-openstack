@@ -28,14 +28,14 @@ en:
           max_connections: 'Maximum Number of simultaneous Connections'
           expire_logs_days: 'Number of days after the binary logs can be automatically removed'
           slow_query_logging: 'Slow Query Logging'
-          ssl_header: 'SSL Support'
+          tls_header: 'TLS (SSL) Support'
           ssl:
             enabled: 'Enable SSL'
             generate_certs: 'Generate (self-signed) certificates (implies insecure)'
-            certfile: 'SSL Certificate File'
-            keyfile: 'SSL (Private) Key File'
-            ca_certs: 'SSL CA Certificates File'
-            insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+            certfile: 'Server X.509 Certificate (Public) File'
+            keyfile: 'Server X.509 Key (Private) File'
+            ca_certs: 'Server CA Certificate Bundle File'
+            insecure: 'Skip Certificate Validation (self-signed/insecure) (for instance, self-signed)'
         postgresql_attributes: 'PostgreSQL Options'
         postgresql:
           config:

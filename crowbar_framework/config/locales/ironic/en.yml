@@ -29,7 +29,7 @@ en:
         automated_clean: 'Enable automated node cleaning'
         api:
           protocol: 'Protocol'
-        ssl_header: 'SSL Support'
+        tls_header: 'TLS (SSL) Support'
       validation:
         ironic_network: 'Ironic network is not configured.'
         swift_proposal: 'To use agent_* drivers, Swift needs to be enabled.'
