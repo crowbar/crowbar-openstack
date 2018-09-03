@@ -38,7 +38,10 @@ fs_params = {}
 fs_params["directory"] = "/var/lib/pgsql"
 
 if node[:database][:postgresql][:ha][:storage][:mode] == "drbd"
-  include_recipe "crowbar-pacemaker::drbd"
+
+  if CrowbarPacemakerHelper.drbd_node?(node)
+    include_recipe "crowbar-pacemaker::drbd"
+  end
 
   crowbar_pacemaker_drbd drbd_resource do
     size "#{node[:database][:postgresql][:ha][:storage][:drbd][:size]}G"
@@ -104,7 +107,7 @@ if node[:database][:postgresql][:ha][:storage][:mode] == "drbd"
   end
   transaction_objects << "pacemaker_ms[#{ms_name}]"
 
-  location_name = openstack_pacemaker_controller_location_ignoring_upgrade_for ms_name
+  location_name = openstack_pacemaker_drbd_controller_only_location_for ms_name
   transaction_objects << "pacemaker_location[#{location_name}]"
 end
 
@@ -117,7 +120,11 @@ pacemaker_primitive fs_primitive do
 end
 transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
 
-location_name = openstack_pacemaker_controller_only_location_for fs_primitive
+location_name = if node[:database][:postgresql][:ha][:storage][:mode] == "drbd"
+  openstack_pacemaker_drbd_controller_only_location_for fs_primitive
+else
+  openstack_pacemaker_controller_only_location_for fs_primitive
+end
 transaction_objects << "pacemaker_location[#{location_name}]"
 
 if node[:database][:postgresql][:ha][:storage][:mode] == "drbd"
