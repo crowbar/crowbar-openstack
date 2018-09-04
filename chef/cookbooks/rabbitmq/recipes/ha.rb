@@ -33,7 +33,10 @@ end
 fs_params = {}
 fs_params["directory"] = "/var/lib/rabbitmq"
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
-  include_recipe "crowbar-pacemaker::drbd"
+
+  if CrowbarPacemakerHelper.drbd_node?(node)
+    include_recipe "crowbar-pacemaker::drbd"
+  end
 
   crowbar_pacemaker_drbd drbd_resource do
     size "#{node[:rabbitmq][:ha][:storage][:drbd][:size]}G"
@@ -133,7 +136,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
   end
   storage_transaction_objects << "pacemaker_ms[#{ms_name}]"
 
-  ms_location_name = openstack_pacemaker_controller_location_ignoring_upgrade_for ms_name
+  ms_location_name = openstack_pacemaker_drbd_controller_only_location_for ms_name
   storage_transaction_objects << "pacemaker_location[#{ms_location_name}]"
 end
 
@@ -146,7 +149,12 @@ pacemaker_primitive fs_primitive do
 end
 storage_transaction_objects << "pacemaker_primitive[#{fs_primitive}]"
 
-fs_location_name = openstack_pacemaker_controller_only_location_for fs_primitive
+fs_location_name = if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
+  openstack_pacemaker_drbd_controller_only_location_for fs_primitive
+else
+  openstack_pacemaker_controller_only_location_for fs_primitive
+end
+
 storage_transaction_objects << "pacemaker_location[#{fs_location_name}]"
 
 if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
@@ -318,7 +326,7 @@ if node[:rabbitmq][:ha][:storage][:mode] == "drbd"
     service_transaction_objects << "pacemaker_location[#{public_vip_location_name}]"
   end
 
-  location_name = openstack_pacemaker_controller_only_location_for service_name
+  location_name = openstack_pacemaker_drbd_controller_only_location_for service_name
   service_transaction_objects << "pacemaker_location[#{location_name}]"
 
 else
