@@ -162,10 +162,6 @@ class DatabaseService < PacemakerServiceObject
       db_engine: active_engine
     ) unless selected_engines.include?(active_engine)
 
-    validation_error I18n.t(
-      "barclamp.#{@bc_name}.validation.secondary_psql"
-    ) if selected_engines.length > 1 && active_engine == "mysql"
-
     selected_engines.each do |engine|
       db_role = role_for_engine engine
       validate_one_for_role proposal, db_role
@@ -177,6 +173,25 @@ class DatabaseService < PacemakerServiceObject
         validate_ha_attributes(attributes, cluster, engine)
       end
     end
+    super
+  end
+
+  def validate_proposal_elements(proposal_elements)
+    old_proposal = proposals_raw.first
+
+    return super if old_proposal.nil?
+
+    # disallow adding psql when mysql is already deployed
+    old_psql_nodes = old_proposal.elements["database-server"] || []
+    old_mysql_nodes = old_proposal.elements["mysql-server"] || []
+    new_psql_nodes = proposal_elements["database-server"] || []
+    raise I18n.t(
+      "barclamp.#{@bc_name}.validation.secondary_psql"
+    ) if already_applied? &&
+        !old_mysql_nodes.empty? &&
+        old_psql_nodes.empty? &&
+        !new_psql_nodes.empty?
+
     super
   end
 
