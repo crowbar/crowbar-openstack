@@ -84,6 +84,10 @@ class DatabaseService < PacemakerServiceObject
     end
   end
 
+  def already_applied?(proposal_name="default")
+    !RoleObject.find_role_by_name("#{@bc_name}-config-#{proposal_name}").nil?
+  end
+
   def validate_ha_attributes(attributes, cluster, sql_engine)
     role = available_clusters[cluster]
 
@@ -151,7 +155,7 @@ class DatabaseService < PacemakerServiceObject
 
     validation_error I18n.t(
       "barclamp.#{@bc_name}.validation.new_proposal_multi_engine"
-    ) if selected_engines.length > 1 && !proposal["deployment"]["crowbar-applied"]
+    ) if selected_engines.length > 1 && !already_applied?
 
     validation_error I18n.t(
       "barclamp.#{@bc_name}.validation.engine_roles_mismatch",
