@@ -56,6 +56,11 @@ class DatabaseService < PacemakerServiceObject
       }
     end
 
+    base["attributes"]["database"]["db_maker_password"] = random_password
+    base["attributes"]["mysql"]["server_root_password"] = random_password
+    base["attributes"]["mysql"]["sstuser_password"] = random_password
+    base["attributes"]["postgresql"]["password"]["postgres"] = random_password
+
     @logger.debug("Database create_proposal: exiting")
     base
   end
@@ -183,16 +188,7 @@ class DatabaseService < PacemakerServiceObject
       end
     end
 
-    role.default_attributes["database"][sql_engine] = {} if role.default_attributes["database"][sql_engine].nil?
-    role.default_attributes["database"]["db_maker_password"] = (old_role && old_role.default_attributes["database"]["db_maker_password"]) || random_password
-
-    if ( sql_engine == "mysql" )
-      role.default_attributes["database"]["mysql"]["server_root_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_root_password"]) || random_password
-      if database_ha_enabled
-        role.default_attributes["database"]["mysql"]["sstuser_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["sstuser_password"]) || random_password
-      end
-      @logger.debug("setting mysql specific attributes")
-    elsif ( sql_engine == "postgresql" )
+    if ( sql_engine == "postgresql" )
       # Attribute is not living in "database" namespace, but that's because
       # it's for the postgresql cookbook. We're not using default_attributes
       # because the upstream cookbook use node.set_unless which would override
