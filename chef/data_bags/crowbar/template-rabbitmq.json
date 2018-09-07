@@ -66,7 +66,7 @@
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 204,
+      "schema-revision": 300,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },
