@@ -115,6 +115,8 @@
               "required": true,
               "mapping": {
                 "backlog": { "type": "int", "required": true },
+                "nodelay": { "type": "bool", "required": false },
+                "keepalive": { "type": "bool", "required": false },
                 "sndbuf": { "type": "int", "required": false },
                 "recbuf": { "type": "int", "required": false }
               }

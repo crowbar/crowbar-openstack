@@ -54,6 +54,8 @@
       },
       "tcp_listen_options": {
         "backlog": 128,
+        "nodelay": true,
+        "keepalive": false,
         "sndbuf": null,
         "recbuf": null
       },
