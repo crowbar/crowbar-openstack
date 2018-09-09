@@ -44,7 +44,7 @@ CACHES = {
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 OPENSTACK_HOST = "<%= @keystone_settings['internal_url_host'] %>"
 OPENSTACK_KEYSTONE_URL = "<%= @keystone_settings['unversioned_internal_auth_url'] %>"
-OPENSTACK_KEYSTONE_DEFAULT_ROLE = "Member"
+OPENSTACK_KEYSTONE_DEFAULT_ROLE = "member"
 OPENSTACK_SSL_NO_VERIFY = <%= @insecure ? "True" : "False" %>
 
 OPENSTACK_ENABLE_PASSWORD_RETRIEVE = True

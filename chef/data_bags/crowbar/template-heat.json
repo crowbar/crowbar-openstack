@@ -14,7 +14,7 @@
       "service_password": "",
       "auth_encryption_key": "",
       "memcache_secret_key": "",
-      "trusts_delegated_roles": [ "Member" ],
+      "trusts_delegated_roles": [ "member" ],
       "api": {
         "protocol": "http",
         "cfn_port": 8000,

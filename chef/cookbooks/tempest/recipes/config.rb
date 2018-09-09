@@ -89,7 +89,7 @@ openstackcli_adm = "#{adm_environment} openstack --insecure"
 enabled_services = `#{openstackcli_adm} service list -f value -c Type`.split
 
 users = [
-          {"name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "Member"},
+          {"name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "member"},
           {"name" => tempest_adm_user, "pass" => tempest_adm_pass, "role" => "admin" }
         ]
 

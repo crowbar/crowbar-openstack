@@ -71,7 +71,7 @@ service_token_roles_required = true
 service_token_roles = admin
 [filter:keystoneauth]
 use = egg:swift#keystoneauth
-operator_roles = Member, admin
+operator_roles = member, admin
 reseller_prefix=<%= @reseller_prefix %>
 log_facility = LOG_LOCAL0
 log_level = <%= @debug? "DEBUG": "INFO" %>

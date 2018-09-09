@@ -1,9 +1,9 @@
 def upgrade(ta, td, a, d)
   # Keep heat_stack_owner as a default for existing installations: operators
   # of existing clouds may have created user accounts that do not have the
-  # "Member" role in the proposal's default, but do have the "heat_stack_owner"
+  # "member" role in the proposal's default, but do have the "heat_stack_owner"
   # role (required for Heat to work). Switching trusts_delegated_roles to
-  # "Member" would break heat for such users.
+  # "member" would break heat for such users.
   unless a.key? "trusts_delegated_roles"
     a["trusts_delegated_roles"] = ["heat_stack_owner"]
   end
