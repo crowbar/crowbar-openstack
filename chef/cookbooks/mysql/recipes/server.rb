@@ -30,10 +30,7 @@ if addr != newaddr
   node.save
 end
 
-package "mysql-server" do
-  package_name "mysql" if node[:platform_family] == "suse"
-  action :install
-end
+package node[:mysql][:mysql_server]
 
 case node[:platform_family]
 when "rhel", "fedora"
