@@ -95,15 +95,6 @@ class NovaService < OpenstackServiceObject
           },
           "remotes" => false
         },
-        "ec2-api" => {
-          "unique" => false,
-          "count" => 1,
-          "exclude_platform" => {
-            "suse" => "< 12.4",
-            "windows" => "/.*/"
-          },
-          "cluster" => true
-        }
       }
     end
   end
@@ -193,7 +184,6 @@ class NovaService < OpenstackServiceObject
     base["attributes"]["nova"]["db"]["password"] = random_password
     base["attributes"]["nova"]["neutron_metadata_proxy_shared_secret"] = random_password
 
-    base["attributes"]["nova"]["ec2-api"]["db"]["password"] = random_password
     base["attributes"]["nova"]["compute_remotefs_sshkey"] = %x[
       t=$(mktemp)
       rm -f $t
@@ -285,21 +275,8 @@ class NovaService < OpenstackServiceObject
 
     vip_networks = ["admin", "public"]
 
-    #required for sync-mark mechanism
-    role.default_attributes["ec2-api"] ||= {}
-    role.default_attributes["ec2-api"]["crowbar-revision"] =
-      role.override_attributes["nova"]["crowbar-revision"]
-
     dirty = false
     dirty = prepare_role_for_ha_with_haproxy(role, ["nova", "ha", "enabled"], ha_enabled, controller_elements, vip_networks)
-    role.save if dirty
-
-    ec2_controller_elements, ec2_controller_nodes, ec2_ha_enabled = role_expand_elements(role, "ec2-api")
-    reset_sync_marks_on_clusters_founders(ec2_controller_elements)
-    Openstack::HA.set_controller_role(ec2_controller_nodes) if ec2_ha_enabled
-
-    dirty = false
-    dirty = prepare_role_for_ha_with_haproxy(role, ["nova", "ec2-api", "ha", "enabled"], ec2_ha_enabled,  ec2_controller_elements, vip_networks)
     role.save if dirty
 
     net_svc = NetworkService.new @logger
@@ -541,11 +518,7 @@ class NovaService < OpenstackServiceObject
 
   def node_changed_attributes?(node, old_role, new_role)
     old_role_attributes = old_role.default_attributes[@bc_name].deep_dup
-    # we need to remove the HA keys from the old_role for nova/ec2-api,
-    # as they get added afterwards to the new role during apply_role_pre_chef_call
-    # so if we dont remove them, the comparision is always gonna fail
     old_role_attributes.delete("ha")
-    old_role_attributes["ec2-api"].delete("ha")
     if old_role_attributes != new_role.default_attributes[@bc_name]
       logger.debug("Nova skip_batch_for_node?: not skipping #{node} (attribute change)")
       return true

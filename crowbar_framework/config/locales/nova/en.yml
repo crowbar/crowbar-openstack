@@ -80,17 +80,6 @@ en:
             enabled: 'NoVNC Protocol'
             certfile: 'SSL Certificate File'
             keyfile: 'SSL (Private) Key File'
-        ec2-api_header: 'EC2API Configuration'
-        ec2-api:
-          ssl_header: 'SSL Support'
-          ssl:
-            enabled: 'Protocol'
-            insecure: 'SSL Certificate is insecure (for instance, self-signed)'
-            certfile: 'SSL Certificate File'
-            keyfile: 'SSL (Private) Key File'
-            generate_certs: 'Generate (self-signed) certificates (implies insecure)'
-            cert_required: 'Require Client Certificate'
-            ca_certs: 'SSL CA Certificates File'
       validation:
         no_shared_storage_cluster: 'Shared storage cannot be automatically setup when a cluster has the nova-controller role. Please consider using the NFS Client barclamp instead.'
         setup_use_shared_storage: 'When automatically setting up shared storage, it must also be used.'
