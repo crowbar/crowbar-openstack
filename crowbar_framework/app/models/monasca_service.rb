@@ -34,7 +34,7 @@ class MonascaService < OpenstackServiceObject
           "admin" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           }
         },
@@ -43,7 +43,7 @@ class MonascaService < OpenstackServiceObject
           "admin" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           }
         },
@@ -56,7 +56,7 @@ class MonascaService < OpenstackServiceObject
           "cluster" => false,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           }
         },
@@ -66,7 +66,7 @@ class MonascaService < OpenstackServiceObject
           "cluster" => false,
           "admin" => true,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           }
         }

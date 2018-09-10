@@ -35,7 +35,7 @@ class DatabaseService < PacemakerServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           }
         }

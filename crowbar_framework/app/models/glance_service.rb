@@ -34,7 +34,7 @@ class GlanceService < OpenstackServiceObject
           "cluster" => true,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           }
         }
