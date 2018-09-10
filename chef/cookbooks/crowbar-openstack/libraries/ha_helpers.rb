@@ -40,6 +40,11 @@ module OpenStackHAHelper
       "rule 0: OpenStack-role eq controller"
   end
 
+  def self.drbd_controller_only_location(location, service)
+    "location #{location} #{service} resource-discovery=exclusive " \
+      "rule 0: OpenStack-role eq controller and drbd-controller eq true"
+  end
+
   def self.no_compute_location(location, service)
     "location #{location} #{service} resource-discovery=exclusive " \
       "rule 0: OpenStack-role ne compute"

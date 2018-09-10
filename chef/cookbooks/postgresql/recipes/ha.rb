@@ -108,7 +108,7 @@ if node[:database][:postgresql][:ha][:storage][:mode] == "drbd"
   vip_location_name = openstack_pacemaker_controller_only_location_for vip_primitive
   transaction_objects << "pacemaker_location[#{vip_location_name}]"
 
-  location_name = openstack_pacemaker_controller_only_location_for service_name
+  location_name = openstack_pacemaker_drbd_controller_only_location_for service_name
   transaction_objects << "pacemaker_location[#{location_name}]"
 
 else
