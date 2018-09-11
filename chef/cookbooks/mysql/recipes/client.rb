@@ -17,13 +17,7 @@
 # limitations under the License.
 #
 
-package "mariadb-client" do
-  package_name value_for_platform_family(
-    ["rhel", "fedora"] => "mysql",
-    "default" => "mariadb-client"
-  )
-  action :install
-end
+package node[:mysql][:mysql_client]
 
 if platform_family?(%w{debian rhel fedora suse})
 

@@ -40,13 +40,13 @@ default[:mysql][:ha][:op][:monitor][:role]     = "Master"
 default[:mysql][:mariadb][:version] = "10.2"
 default[:mysql][:galera_packages] = [
   "galera-3-wsrep-provider",
-  "mariadb-tools",
+  "mariadb-102-tools",
   "xtrabackup",
   "socat",
   "galera-python-clustercheck"
 ]
 
-# newer version need an additional package on SLES
-unless node[:mysql][:mariadb][:version] == "10.1"
-  default[:mysql][:galera_packages] << "mariadb-galera"
-end
+default[:mysql][:galera_packages] << "mariadb-102-galera"
+
+default[:mysql][:mysql_client] = "mariadb-102-client"
+default[:mysql][:mysql_server] = "mariadb-102"
