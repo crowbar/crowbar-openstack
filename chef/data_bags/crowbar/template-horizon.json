@@ -54,7 +54,7 @@
     "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 203,
+      "schema-revision": 300,
       "element_states": {
         "horizon-server": [ "readying", "ready", "applying" ]
       },
