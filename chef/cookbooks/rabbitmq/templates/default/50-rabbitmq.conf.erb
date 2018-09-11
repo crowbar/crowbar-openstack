@@ -1,0 +1,14 @@
+# Local IP port range, define as a pair of values. The range must provide enough entries for the peak number of concurrent connections.
+net.ipv4.ip_local_port_range = <%= @ip_local_port_range %>
+
+# Lowering this value to 5-10 reduces the amount of time closed connections will stay in the TIME_WAIT state.
+# Recommended for cases when a large number of concurrent connections is expected.
+net.ipv4.tcp_fin_timeout = <%= @tcp_fin_timeout %>
+
+# Size of the listen queue (how many connections are in the process of being established at the same time).
+# Default is 128. Increase to 4096 or higher to support inbound connection bursts, e.g. when clients reconnect en masse.
+net.core.somaxconn = <%= @somaxconn %>
+
+# Maximum number of remembered connection requests which did not receive an acknowledgment yet from connecting client.
+# Default is 128, max value is 65535. 4096 and 8192 are recommended starting values when optimising for throughput.
+net.ipv4.tcp_max_syn_backlog = <%= @tcp_max_syn_backlog %>

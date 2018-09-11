@@ -18,6 +18,42 @@
 # limitations under the License.
 #
 
+if node[:rabbitmq][:optimize_max_conn][:enabled]
+
+  # if we have the optimize for max connections here, we need to manually increase the
+  # value for the rabbitmq backlog
+  # NOTE: this ignores and overwrites any user provided value, so it should probably be dropped
+  # from the config if we are just gonna ignore it
+  if node[:rabbitmq][:tcp_listen_options][:backlog].to_i < 4096
+    node.set[:rabbitmq][:tcp_listen_options][:backlog] = 4096
+    node.save
+  end
+
+  directory "/etc/sysctl.d/" do
+    mode 0o755
+  end
+
+  template "/etc/sysctl.d/50-rabbitmq.conf" do
+    source "50-rabbitmq.conf.erb"
+    variables(
+      ip_local_port_range: node[:rabbitmq][:optimize_max_conn][:ip_local_port_range],
+      tcp_fin_timeout: node[:rabbitmq][:optimize_max_conn][:tcp_fin_timeout],
+      somaxconn: node[:rabbitmq][:optimize_max_conn][:somaxconn],
+      tcp_max_syn_backlog: node[:rabbitmq][:optimize_max_conn][:tcp_max_syn_backlog]
+    )
+  end
+
+  bash "reload sysctl" do
+    code "/sbin/sysctl -e -p /etc/sysctl.d/50-rabbitmq.conf"
+    action :nothing
+    subscribes :run, "template[/etc/sysctl.d/50-rabbitmq.conf]", :immediate
+  end
+else
+  file "/etc/sysctl.d/50-rabbitmq.conf.erb" do
+    action :delete
+  end
+end
+
 ha_enabled = node[:rabbitmq][:ha][:enabled]
 # we only do cluster if we do HA
 cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled

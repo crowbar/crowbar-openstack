@@ -12,3 +12,11 @@ LOG_BASE=<%= node[:rabbitmq][:logdir] %>
 <% if node[:rabbitmq][:mnesiadir] -%>
 MNESIA_BASE=<%= node[:rabbitmq][:mnesiadir] %>
 <% end -%>
+<% if node[:rabbitmq][:optimize_max_conn][:enabled] -%>
+# optimization for erlang to server more connections in exchange for more resources
+# +A: Sets the number of threads in async thread pool.
+# Valid range is 0-1024. Defaults to 128. Set to double of that.
+# +P: Sets the maximum number of simultaneously existing processes for this system
+# Valid range for is [1024-134217727]. Set to half of maximum value.
+SERVER_ADDITIONAL_ERL_ARGS="+A 256 +P 67108862"
+<% end -%>
