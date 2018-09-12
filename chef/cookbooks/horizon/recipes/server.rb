@@ -335,6 +335,19 @@ django_db_settings = {
   "default-character-set" => "'utf8'"
 }
 
+mysql_settings = fetch_database_settings "mysql"
+if mysql_settings
+  package "python-mysql"
+  django_mysql_settings = {
+    "ENGINE" => "'django.db.backends.mysql'",
+    "NAME" => "'#{node[:horizon][:db][:database]}'",
+    "USER" => "'#{node[:horizon][:db][:user]}'",
+    "PASSWORD" => "'#{node[:horizon][:db][:password]}'",
+    "HOST" => "'#{mysql_settings[:address]}'",
+    "default-character-set" => "'utf8'"
+  }
+end
+
 db_ca_certs = database_ssl ? db_settings[:connection][:ssl][:ca_certs] : ""
 
 glance_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "glance"))
@@ -454,6 +467,7 @@ template local_settings do
     || manila_insecure \
     || ceilometer_insecure,
     db_settings: django_db_settings,
+    mysql_settings: django_mysql_settings,
     db_ca_certs: db_ca_certs,
     enable_lb: neutron_use_lbaas,
     enable_vpn: neutron_use_vpnaas,
