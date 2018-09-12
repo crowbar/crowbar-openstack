@@ -619,14 +619,15 @@ if node[:keystone][:default][:create_user]
   end
 end
 
-# Create Member role used by horizon (see OPENSTACK_KEYSTONE_DEFAULT_ROLE option)
-keystone_register "add default Member role" do
+# Create member role used by horizon (see OPENSTACK_KEYSTONE_DEFAULT_ROLE option)
+### Remove after Rocky is required (keystone-bootstrap creates it for us)
+keystone_register "add default member role" do
   protocol node[:keystone][:api][:protocol]
   insecure keystone_insecure
   host my_admin_host
   port node[:keystone][:api][:admin_port]
   auth register_auth_hash
-  role_name "Member"
+  role_name "member"
   action :add_role
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
@@ -638,7 +639,7 @@ user_roles = [
 ]
 if node[:keystone][:default][:create_user]
   user_roles << [node[:keystone][:default][:username],
-                 "Member",
+                 "member",
                  node[:keystone][:default][:project]]
 end
 user_roles.each do |args|

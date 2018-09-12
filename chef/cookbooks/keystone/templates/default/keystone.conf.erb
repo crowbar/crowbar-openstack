@@ -35,7 +35,7 @@ driver = <%= node[:keystone][:identity][:driver] %>
 
 <% if node[:keystone][:assignment][:driver] == 'hybrid' -%>
 [ldap_hybrid]
-default_roles = Member
+default_roles = member
 default_project = <%= node[:keystone][:default][:tenant] %>
 <% end -%>
 
