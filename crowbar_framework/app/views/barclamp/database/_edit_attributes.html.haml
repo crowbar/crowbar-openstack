@@ -3,51 +3,59 @@
     = header show_raw_deployment?, true
 
   .panel-body
-    = select_field :sql_engine, :collection => :engines_for_database
+    .alert.alert-warning
+      = t(".engine_upgrade")
 
-    #mysql_container
-      %fieldset
-        %legend
+    = string_field :sql_engine, disabled: true
+
+    %ul.list-group#mysql_container
+      %li.list-group-item.active
+        %h3.list-group-item-heading
           = t('.mysql_attributes')
 
-        = integer_field %w(mysql max_connections)
-        = integer_field %w(mysql expire_logs_days)
-        = boolean_field %w(mysql slow_query_logging)
+      %li.list-group-item
+        %fieldset
+          = integer_field %w(mysql max_connections)
+          = integer_field %w(mysql expire_logs_days)
+          = boolean_field %w(mysql slow_query_logging)
 
-      %fieldset{ "style" => "display:none" }
-        %legend
-          = t(".mysql.ssl_header")
+        %fieldset{ "style" => "display:none" }
+          %legend
+            = t(".mysql.ssl_header")
 
-        = boolean_field %w(mysql ssl enabled),
-          "data-sslprefix" => "ssl"
+          = boolean_field %w(mysql ssl enabled),
+            "data-sslprefix" => "ssl"
 
-        #ssl_container
-          = boolean_field %w(mysql ssl generate_certs)
-          = string_field %w(mysql ssl certfile)
-          = string_field %w(mysql ssl keyfile)
-          = boolean_field %w(mysql ssl insecure)
-          = string_field %w(mysql ssl ca_certs)
+          #ssl_container
+            = boolean_field %w(mysql ssl generate_certs)
+            = string_field %w(mysql ssl certfile)
+            = string_field %w(mysql ssl keyfile)
+            = boolean_field %w(mysql ssl insecure)
+            = string_field %w(mysql ssl ca_certs)
 
-    #postgresql_container
-      %fieldset
-        %legend
+    %ul.list-group#postgresql_container
+      %li.list-group-item.active
+        %h3.list-group-item-heading
           = t('.postgresql_attributes')
 
-        = integer_field %w(postgresql config max_connections)
+      %li.list-group-item
+        %fieldset
+          = integer_field %w(postgresql config max_connections)
 
-      -# As HA is only supported for postgresql, we put this section in #postgresql_container
-      %fieldset#ha-setup{ "data-show-for-clusters-only" => "true", "data-elements-path" => "database-server" }
-        %legend
-          = t('.ha_header')
+        -# As HA is only supported for postgresql, we put this section in #postgresql_container
+        %fieldset#ha-setup{ "data-show-for-clusters-only" => "true", "data-elements-path" => "database-server" }
+          %legend
+            = t('.ha_header')
 
-        = select_field %w(postgresql ha storage mode), :collection => :ha_storage_mode_for_database, "data-showit" => ["drbd", "shared"].join(";"), "data-showit-target" => "#drbd_storage_container;#shared_storage_container", "data-showit-direct" => "true"
+          = select_field %w(postgresql ha storage mode), :collection => :ha_storage_mode_for_database, "data-showit" => ["drbd", "shared"].join(";"), "data-showit-target" => "#drbd_storage_container;#shared_storage_container", "data-showit-direct" => "true"
 
-        #drbd_storage_container
-          .alert.alert-info
-            = t('.postgresql.ha.storage.drbd_info')
-          = integer_field %w(postgresql ha storage drbd size)
+          #drbd_storage_container
+            .alert.alert-info
+              = t('.postgresql.ha.storage.drbd_info')
+            = integer_field %w(postgresql ha storage drbd size)
 
-        #shared_storage_container
-          = string_field %w(postgresql ha storage shared device)
-          = string_field %w(postgresql ha storage shared fstype)
-          = string_field %w(postgresql ha storage shared options)
+          #shared_storage_container
+            = string_field %w(postgresql ha storage shared device)
+            = string_field %w(postgresql ha storage shared fstype)
+            = string_field %w(postgresql ha storage shared options)
+

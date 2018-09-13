@@ -21,7 +21,8 @@ en:
   barclamp:
     database:
       edit_attributes:
-        sql_engine: 'SQL Engine'
+        engine_upgrade: 'Deployment of multiple database engines at the same time is only supported before SUSE OpenStack Cloud 8 upgrade to allow the migration from PostgreSQL to MariaDB. Please refer to the SUSE OpenStack Cloud documentation for more information about the upgrade procedure.'
+        sql_engine: 'Active SQL Engine'
         mysql_attributes: 'MariaDB Options'
         mysql:
           datadir: 'Datadir'
@@ -63,3 +64,6 @@ en:
         invalid_size_drbd: 'Invalid size for DRBD device.'
         cluster_size_one: 'The Galera cluster needs more than one cluster member.'
         cluster_size_even: 'The Galera cluster needs an odd number of cluster members and at least three of them.'
+        engine_roles_mismatch: 'Assigned roles do not match selected database engine: %{db_engine}.'
+        secondary_psql: 'PostgreSQL can only be deployed as first SQL engine. Migration from MariaDB to PostgreSQL is not supported.'
+        new_proposal_multi_engine: 'Second SQL engine can only be added to an existing database deployment.'
