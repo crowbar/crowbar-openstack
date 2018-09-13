@@ -61,6 +61,16 @@ class NeutronService < OpenstackServiceObject
             "windows" => "/.*/"
           },
           "cluster" => true
+        },
+        "neutron-sdn-cisco-aci-agents" => {
+          "unique" => false,
+          "count" => -1,
+          "admin" => false,
+          "exclude_platform" => {
+            "suse" => "< 12.3",
+            "windows" => "/.*/"
+          },
+          "cluster" => true
         }
       }
     end
@@ -109,8 +119,9 @@ class NeutronService < OpenstackServiceObject
 
     base["deployment"]["neutron"]["elements"] = {
         "neutron-server" => [controller_node[:fqdn]],
-        "neutron-network" => network_nodes.map { |x| x[:fqdn] }
-    } unless nodes.nil? or nodes.length ==0
+        "neutron-network" => network_nodes.map { |x| x[:fqdn] },
+        "neutron-sdn-cisco-aci-agents" => nodes.map { |x| x[:fqdn] }
+    } unless nodes.nil? || nodes.length.zero?
 
     base["attributes"]["neutron"]["service_password"] = random_password
     base["attributes"]["neutron"]["memcache_secret_key"] = random_password
@@ -220,39 +231,6 @@ class NeutronService < OpenstackServiceObject
       validation_error I18n.t("barclamp.#{@bc_name}.validation.vmware_dvs_vlan")
     end
  
-    # Checks for Cisco ACI ml2 driver
-    if ml2_mechanism_drivers.include?("cisco_apic_ml2") &&
-        ml2_mechanism_drivers.include?("apic_gbp")
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_ml2_gbp")
-    end
-
-    if ml2_mechanism_drivers.include?("cisco_apic_ml2") ||
-        ml2_mechanism_drivers.include?("apic_gbp")
-      # openvswitch should not be used when cisco_apic_ml2 mechanism driver is used
-      if ml2_mechanism_drivers.include?("openvswitch")
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_ml2")
-      end
-
-      if ml2_mechanism_drivers.include?("linuxbridge")
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_linuxbridge")
-      end
-
-      # cisco_apic_ml2 mechanism driver needs opflex as the type_driver
-      unless ml2_type_drivers.include?("opflex")
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_type")
-      end
-
-      # Validate if ACI configurations are provided
-      if proposal["attributes"]["neutron"]["apic"].nil? ||
-          proposal["attributes"]["neutron"]["apic"].empty?
-        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_no_config")
-      end
-
-      # Cisco APIC already distributes neutron services not needing DVR
-      if proposal["attributes"]["neutron"]["use_dvr"]
-        validation_error I18n.t("barcalmp.#{@bc_name}.validation.cisco_apic_dvr")
-      end
-    end
 
     # for now, openvswitch and linuxbrige can't be used in parallel
     if ml2_mechanism_drivers.include?("openvswitch") &&
@@ -333,6 +311,48 @@ class NeutronService < OpenstackServiceObject
     end
   end
 
+  def validate_cisco_aci(proposal)
+    # Checks for Cisco ACI ml2 driver
+    ml2_mechanism_drivers = proposal["attributes"]["neutron"]["ml2_mechanism_drivers"]
+    ml2_type_drivers = proposal["attributes"]["neutron"]["ml2_type_drivers"]
+
+    if ml2_mechanism_drivers.include?("cisco_apic_ml2") &&
+        ml2_mechanism_drivers.include?("apic_gbp")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_ml2_gbp")
+    end
+
+    if ml2_mechanism_drivers.include?("cisco_apic_ml2") ||
+        ml2_mechanism_drivers.include?("apic_gbp")
+
+      validate_at_least_n_for_role proposal, "neutron-sdn-cisco-aci-agents", 1
+
+      # openvswitch should not be used when cisco_apic_ml2 mechanism driver is used
+      if ml2_mechanism_drivers.include?("openvswitch")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_ml2")
+      end
+
+      if ml2_mechanism_drivers.include?("linuxbridge")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_linuxbridge")
+      end
+
+      # cisco_apic_ml2 mechanism driver needs opflex as the type_driver
+      unless ml2_type_drivers.include?("opflex")
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_type")
+      end
+
+      # Validate if ACI configurations are provided
+      if proposal["attributes"]["neutron"]["apic"].nil? ||
+          proposal["attributes"]["neutron"]["apic"].empty?
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.cisco_apic_no_config")
+      end
+
+      # Cisco APIC already distributes neutron services not needing DVR
+      if proposal["attributes"]["neutron"]["use_dvr"]
+        validation_error I18n.t("barcalmp.#{@bc_name}.validation.cisco_apic_dvr")
+      end
+    end
+  end
+
   def validate_external_networks(external_networks)
     net_svc = NetworkService.new @logger
     network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
@@ -375,6 +395,7 @@ class NeutronService < OpenstackServiceObject
     validate_ml2(proposal) if plugin == "ml2"
     validate_l2pop(proposal)
     validate_dvr(proposal)
+    validate_cisco_aci(proposal)
     if proposal[:attributes][:neutron][:use_infoblox]
       validate_infoblox(proposal)
     end
