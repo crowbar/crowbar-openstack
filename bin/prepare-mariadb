@@ -78,13 +78,15 @@ def remove_recipe(node)
 end
 
 # based on code from crowbar_framework/app/models/node.rb
-def run_ssh_cmd(node, cmd, timeout = "15s", kill_after = "5s")
+def run_ssh_cmd(node, cmd, log_suffix, timeout = "15s", kill_after = "5s")
+  log_file = "/var/log/crowbar/db-prepare.#{log_suffix}.log" if log_suffix
   start_time = Time.now
   args = ["sudo", "-i", "-u", "root", "--", "timeout", "-k", kill_after, timeout,
           "ssh", "-o", "ConnectTimeout=10",
           "root@#{node.name}",
-          %("#{cmd.gsub('"', '\\"')}")
+          %("#{cmd.gsub('"', '\\"')} > #{log_file} 2>&1")
   ].join(" ")
+  log "Log: #{log_file} on #{node.name}"
   Open3.popen2e(args) do |stdin, stdout_and_stderr, wait_thr|
     {
       stdout_and_stderr: stdout_and_stderr.gets(nil),
@@ -98,19 +100,12 @@ def log(msg)
   print "#{msg}\n"
 end
 
-def write_log(part, stdout_and_stderr)
-  outfile = File.join(LOGDIR, "db-prepare.#{part}.log")
-  open(outfile, "w") { |f| f << stdout_and_stderr }
-  log "Stdout/Stderr written to: #{outfile}"
-end
-
 def prepare_node(node, roles)
     log "Preparing node #{node.name}"
     log "Adding #{RECIPE} to run_list"
     add_recipe node
     log "Running chef-client on #{node.name}..."
-    res = run_ssh_cmd(node, "chef-client", "40m")
-    write_log("chef-client", res[:stdout_and_stderr])
+    res = run_ssh_cmd(node, "chef-client", "chef-client", "30m")
     log "Run time: #{res[:run_time]}s"
     log "Removing #{RECIPE} from run_list"
     remove_recipe node
@@ -122,9 +117,8 @@ def prepare_node(node, roles)
     roles.each do |role|
       cmd = "/etc/pg2mysql/scripts/#{role}-db_sync.sh"
       log "Running db_sync script #{cmd} for role #{role}"
-      res = run_ssh_cmd(node, cmd, "5m")
+      res = run_ssh_cmd(node, cmd, role, "5m")
       log "ERROR: Failed with code: #{res[:exit_code]}" unless res[:exit_code].zero?
-      write_log("role-#{role}", res[:stdout_and_stderr])
       log "Run time: #{res[:run_time]}s"
     end
     log "Prepare completed for #{node.name}"
