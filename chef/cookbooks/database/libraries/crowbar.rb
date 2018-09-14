@@ -103,6 +103,16 @@ module CrowbarDatabaseHelper
         #   "--config-dir <%=@db_override_conf%> db upgrade"
         "db_sync_cmd" => "barbican-manage db upgrade --db-url <%=@db_conf_sections['DEFAULT']%>"
       },
+      "magnum-server" => {
+        "barclamp" => "magnum",
+        "db_sync_cmd" => "magnum-db-manage --config-dir /etc/magnum/magnum.conf.d/ " \
+          "--config-dir <%=@db_override_conf%> upgrade"
+      },
+      "sahara-server" => {
+        "barclamp" => "sahara",
+        "db_sync_cmd" => "sahara-db-manage --config-dir /etc/sahara/sahara.conf.d/ " \
+          "--config-dir <%=@db_override_conf%> upgrade head"
+      },
       "trove-server" => {
         "barclamp" => "trove",
         "db_sync_cmd" => "trove-manage --config-dir /etc/trove/trove.conf.d/ " \
