@@ -107,7 +107,7 @@ class CrowbarOpenStackHelper
       if database.nil?
         Chef::Log.warn("No database server found!")
       else
-        address = CrowbarDatabaseHelper.get_listen_address(database)
+        address = CrowbarDatabaseHelper.get_listen_address(database, sql_engine)
 
         ssl_opts = {}
         if sql_engine == "mysql"
