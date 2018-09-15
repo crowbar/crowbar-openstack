@@ -2,6 +2,7 @@ databases = []
 # The "barclamp" parameter doesn't really matter here, we want to use the same
 # instance for all databases.
 db_settings = CrowbarOpenStackHelper.database_settings(node, "mysql")
+psql_settings = CrowbarOpenStackHelper.database_settings(node, "postgresql")
 CrowbarDatabaseHelper.roles_using_database.each do |role|
   next unless node.roles.include? role
 
@@ -13,23 +14,23 @@ CrowbarDatabaseHelper.roles_using_database.each do |role|
   else
     node[barclamp]["db"]
   end
-  databases << db
   db_conf_sections = {}
   db_connection_key = "connection"
   connection = CrowbarOpenStackHelper.database_connection_string(db_settings, db)
+  databases << { db: db, url: connection }
   Chef::Log.info("connection string: #{connection}")
   db_conf_sections["database"] = connection
 
   # The nova-controller role creates more than one database
   if role == "nova-controller"
-    databases << node[barclamp]["api_db"]
     connection = CrowbarOpenStackHelper.database_connection_string(db_settings,
       node[barclamp]["api_db"])
+    databases << { db: node[barclamp]["api_db"], url: connection }
     Chef::Log.info("connection string: #{connection}")
     db_conf_sections["api_database"] = connection
-    databases << node[barclamp]["placement_db"]
     connection = CrowbarOpenStackHelper.database_connection_string(db_settings,
       node[barclamp]["placement_db"])
+    databases << { db: node[barclamp]["placement_db"], url: connection }
     Chef::Log.info("connection string: #{connection}")
     db_conf_sections["placement_database"] = connection
   end
@@ -89,7 +90,10 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-databases.each do |db|
+databases.each do |dbdata|
+  db = dbdata[:db]
+  # fill psql url for databases.txt
+  dbdata[:psql_url] = CrowbarOpenStackHelper.database_connection_string(psql_settings, db)
   Chef::Log.info("creating database #{db["database"]}")
   Chef::Log.info("creating database user #{db["user"]} with password #{db["password"]}")
   Chef::Log.info("db settings: #{db_settings.inspect}")
@@ -122,4 +126,14 @@ databases.each do |db|
     action :grant
   end
 
+end
+
+template "/etc/pg2mysql/databases.txt" do
+  source "mariadb-databases.txt.erb"
+  mode 0640
+  owner "root"
+  group "root"
+  variables(
+    databases: databases
+  )
 end

@@ -78,13 +78,14 @@ def remove_recipe(node)
 end
 
 # based on code from crowbar_framework/app/models/node.rb
-def run_ssh_cmd(node, cmd, log_suffix, timeout = "15s", kill_after = "5s")
+def run_ssh_cmd(node, cmd, log_suffix = nil, timeout = "15s", kill_after = "5s")
   log_file = "/var/log/crowbar/db-prepare.#{log_suffix}.log" if log_suffix
+  log_redirect = "> #{log_file} 2>&1" if log_file
   start_time = Time.now
   args = ["sudo", "-i", "-u", "root", "--", "timeout", "-k", kill_after, timeout,
           "ssh", "-o", "ConnectTimeout=10",
           "root@#{node.name}",
-          %("#{cmd.gsub('"', '\\"')} > #{log_file} 2>&1")
+          %("#{cmd.gsub('"', '\\"')} #{log_redirect}")
   ].join(" ")
   log "Log: #{log_file} on #{node.name}"
   Open3.popen2e(args) do |stdin, stdout_and_stderr, wait_thr|
@@ -111,7 +112,7 @@ def prepare_node(node, roles)
     remove_recipe node
     unless res[:exit_code].zero?
       log "ERROR: Chef-client failed with code: #{res[:exit_code]}"
-      return
+      return []
     end
     log "Processing db_sync commands on #{node.name}"
     roles.each do |role|
@@ -121,7 +122,9 @@ def prepare_node(node, roles)
       log "ERROR: Failed with code: #{res[:exit_code]}" unless res[:exit_code].zero?
       log "Run time: #{res[:run_time]}s"
     end
+    summary = run_ssh_cmd(node, "cat /etc/pg2mysql/databases.txt")[:stdout_and_stderr].lines
     log "Prepare completed for #{node.name}"
+    summary
 end
 
 def main
@@ -131,9 +134,13 @@ def main
       "to some node or cluster and re-apply database proposal."
     return
   end
+  summary = Set.new
   selected_nodes.values.each do |node_data|
-    prepare_node(node_data[:node], node_data[:roles])
+    summary |= prepare_node(node_data[:node], node_data[:roles])
   end
+  Dir.mkdir "/etc/pg2mysql" unless File.exists? "/etc/pg2mysql"
+  open("/etc/pg2mysql/databases.txt", "w") { |f| f << summary.to_a.join }
+  log "Summary of used databases: /etc/pg2mysql/databases.txt"
 end
 
 main
