@@ -36,7 +36,9 @@ end
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required packages installed before we create the pacemaker
 # resources
-crowbar_pacemaker_sync_mark "sync-horizon_before_ha"
+crowbar_pacemaker_sync_mark "sync-horizon_before_ha" do
+  timeout 150
+end
 
 # no wait/create sync mark as it's done in crowbar-pacemaker itself
 
