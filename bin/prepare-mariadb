@@ -112,7 +112,7 @@ def prepare_node(node, roles)
     remove_recipe node
     unless res[:exit_code].zero?
       log "ERROR: Chef-client failed with code: #{res[:exit_code]}"
-      return []
+      return
     end
     log "Processing db_sync commands on #{node.name}"
     roles.each do |role|
@@ -128,19 +128,26 @@ def prepare_node(node, roles)
 end
 
 def main
+  ret = 0
   chef_init
   if mysql_node.nil?
     log "ERROR: MySQL server not found. Please assign mysql-server role "
       "to some node or cluster and re-apply database proposal."
-    return
+    return -1
   end
   summary = Set.new
   selected_nodes.values.each do |node_data|
-    summary |= prepare_node(node_data[:node], node_data[:roles])
+    node_summary = prepare_node(node_data[:node], node_data[:roles])
+    if node_summary.nil?
+      ret = -2
+    else
+      summary |= node_summary
+    end
   end
   Dir.mkdir "/etc/pg2mysql" unless File.exists? "/etc/pg2mysql"
   open("/etc/pg2mysql/databases.txt", "w") { |f| f << summary.to_a.join }
   log "Summary of used databases: /etc/pg2mysql/databases.txt"
+  return ret
 end
 
-main
+exit(main)
