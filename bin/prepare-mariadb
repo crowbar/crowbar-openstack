@@ -47,8 +47,12 @@ end
 # Select nodes which represent all services which use database
 # they might be standalone nodes or cluster members. In most simple
 # case there will be only one node used for all services.
-def selected_nodes
-  nodes_and_roles = {}
+def selected_nodes(first_mysql_node)
+  nodes_and_roles = {
+    first_mysql_node.name => {
+      node: first_mysql_node, roles: ["mysql-server"]
+    }
+  }
   CrowbarDatabaseHelper.roles_using_database.each do |role|
     node = node_for_role(role)
     next if node.nil?
@@ -112,41 +116,27 @@ def prepare_node(node, roles)
     remove_recipe node
     unless res[:exit_code].zero?
       log "ERROR: Chef-client failed with code: #{res[:exit_code]}"
-      return
+      return -2
     end
-    log "Processing db_sync commands on #{node.name}"
-    roles.each do |role|
-      cmd = "/etc/pg2mysql/scripts/#{role}-db_sync.sh"
-      log "Running db_sync script #{cmd} for role #{role}"
-      res = run_ssh_cmd(node, cmd, role, "5m")
-      log "ERROR: Failed with code: #{res[:exit_code]}" unless res[:exit_code].zero?
-      log "Run time: #{res[:run_time]}s"
-    end
-    summary = run_ssh_cmd(node, "cat /etc/pg2mysql/databases.txt")[:stdout_and_stderr].lines
     log "Prepare completed for #{node.name}"
-    summary
+    0
 end
 
 def main
   ret = 0
   chef_init
-  if mysql_node.nil?
-    log "ERROR: MySQL server not found. Please assign mysql-server role "
+  first_mysql_node = mysql_node
+  if first_mysql_node.nil?
+    log "ERROR: MySQL server not found. Please assign mysql-server role " \
       "to some node or cluster and re-apply database proposal."
     return -1
   end
-  summary = Set.new
-  selected_nodes.values.each do |node_data|
-    node_summary = prepare_node(node_data[:node], node_data[:roles])
-    if node_summary.nil?
-      ret = -2
-    else
-      summary |= node_summary
-    end
+  selected_nodes(first_mysql_node).values.each do |node_data|
+    node_ret = prepare_node(node_data[:node], node_data[:roles])
+    ret = node_ret if ret.zero? && !node_ret.zero?
+    log "Summary of used databases: /etc/pg2mysql/databases.yaml on " \
+      "#{first_mysql_node.name}" if node_data[:node] == first_mysql_node && ret.zero?
   end
-  Dir.mkdir "/etc/pg2mysql" unless File.exists? "/etc/pg2mysql"
-  open("/etc/pg2mysql/databases.txt", "w") { |f| f << summary.to_a.join }
-  log "Summary of used databases: /etc/pg2mysql/databases.txt"
   return ret
 end
 

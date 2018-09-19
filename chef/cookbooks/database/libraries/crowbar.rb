@@ -38,42 +38,42 @@ module CrowbarDatabaseHelper
       "keystone-server" => {
         "barclamp" => "keystone",
         "db_sync_cmd" => "keystone-manage --config-dir /etc/keystone/keystone.conf.d/ " \
-          "--config-dir <%=@db_override_conf%> db_sync"
+          "--config-dir <%=db_override_conf%> db_sync"
       },
       "glance-server" => {
         "barclamp" => "glance",
         "db_sync_cmd" => "glance-manage --config-dir /etc/glance/glance.conf.d/ " \
-          "--config-dir <%=@db_override_conf%> db_sync"
+          "--config-dir <%=db_override_conf%> db_sync"
       },
       "cinder-controller" => {
         "barclamp" => "cinder",
         "db_sync_cmd" => "cinder-manage --config-dir /etc/cinder/cinder.conf.d/ " \
-          "--config-dir <%=@db_override_conf%> db sync"
+          "--config-dir <%=db_override_conf%> db sync"
       },
       "manila-server" => {
         "barclamp" => "manila",
         "db_sync_cmd" => "manila-manage --config-dir /etc/manila/manila.conf.d/ " \
-          "--config-dir <%=@db_override_conf%> db sync"
+          "--config-dir <%=db_override_conf%> db sync"
       },
       "neutron-server" => {
         "barclamp" => "neutron",
         "db_sync_cmd" => "neutron-db-manage --config-dir /etc/neutron/neutron.conf.d/ " \
-          "--config-dir <%=@db_override_conf%> upgrade head"
+          "--config-dir <%=db_override_conf%> upgrade head"
       },
       "nova-controller" => {
         "barclamp" => "nova",
         "db_sync_cmd" => [
           "nova-manage --config-dir /etc/nova/nova.conf.d/ " \
-            "--config-dir <%=@db_override_conf%> api_db sync",
+            "--config-dir <%=db_override_conf%> api_db sync",
           "nova-manage --config-dir /etc/nova/nova.conf.d/ " \
-            "--config-dir <%=@db_override_conf%> db sync"
+            "--config-dir <%=db_override_conf%> db sync"
         ]
       },
       # ec2 is special in that it's attributes are part of the nova barclamp
       "ec2-api" => {
         "barclamp" => "nova",
         "db_sync_cmd" => "ec2-api-manage --config-dir /etc/ec2api/ec2api.conf.d/ " \
-          "--config-dir <%=@db_override_conf%> db_sync"
+          "--config-dir <%=db_override_conf%> db_sync"
       },
       # django migration tool uses db settings from
       # /srv/www/openstack-dashboard/openstack_dashboard/local/local.settings.d/_100_local_settings.py
@@ -84,39 +84,39 @@ module CrowbarDatabaseHelper
       "ceilometer-server" => {
         "barclamp" => "ceilometer",
         "db_sync_cmd" => "ceilometer-dbsync --config-dir /etc/ceilometer/ceilometer.conf.d/ " \
-          "--config-dir <%=@db_override_conf%>"
+          "--config-dir <%=db_override_conf%>"
       },
       "heat-server" => {
         "barclamp" => "heat",
         "db_sync_cmd" => "heat-manage --config-dir /etc/heat/heat.conf.d/ " \
-                         "--config-dir <%=@db_override_conf%> db_sync"
+                         "--config-dir <%=db_override_conf%> db_sync"
       },
       "aodh-server" => {
         "barclamp" => "aodh",
         "db_sync_cmd" => "aodh-dbsync --config-dir /etc/aodh/aodh.conf.d/ " \
-          "--config-dir <%=@db_override_conf%>"
+          "--config-dir <%=db_override_conf%>"
       },
       "barbican-controller" => {
         "barclamp" => "barbican",
         # this doesn't work because of a bug in barbican-manage handling of oslo_config
         # "db_sync_cmd" => "barbican-manage --config-dir /etc/barbican/barbican.conf.d/ " \
-        #   "--config-dir <%=@db_override_conf%> db upgrade"
-        "db_sync_cmd" => "barbican-manage db upgrade --db-url <%=@db_conf_sections['DEFAULT']%>"
+        #   "--config-dir <%=db_override_conf%> db upgrade"
+        "db_sync_cmd" => "barbican-manage db upgrade --db-url <%=db_conf_sections['DEFAULT']%>"
       },
       "magnum-server" => {
         "barclamp" => "magnum",
         "db_sync_cmd" => "magnum-db-manage --config-dir /etc/magnum/magnum.conf.d/ " \
-          "--config-dir <%=@db_override_conf%> upgrade"
+          "--config-dir <%=db_override_conf%> upgrade"
       },
       "sahara-server" => {
         "barclamp" => "sahara",
         "db_sync_cmd" => "sahara-db-manage --config-dir /etc/sahara/sahara.conf.d/ " \
-          "--config-dir <%=@db_override_conf%> upgrade head"
+          "--config-dir <%=db_override_conf%> upgrade head"
       },
       "trove-server" => {
         "barclamp" => "trove",
         "db_sync_cmd" => "trove-manage --config-dir /etc/trove/trove.conf.d/ " \
-          "--config-dir <%=@db_override_conf%> db_sync"
+          "--config-dir <%=db_override_conf%> db_sync"
       }
     }
   end

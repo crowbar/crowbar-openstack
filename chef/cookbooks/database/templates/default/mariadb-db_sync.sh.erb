@@ -1,4 +1,0 @@
-#!/bin/sh
-<% @db_sync_cmds.each do |cmd| -%>
-<%= ERB.new(cmd).result(binding) %>
-<% end %>

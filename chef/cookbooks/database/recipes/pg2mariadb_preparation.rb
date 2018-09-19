@@ -1,18 +1,24 @@
 databases = []
+commands = []
 # The "barclamp" parameter doesn't really matter here, we want to use the same
 # instance for all databases.
 db_settings = CrowbarOpenStackHelper.database_settings(node, "mysql")
 psql_settings = CrowbarOpenStackHelper.database_settings(node, "postgresql")
 CrowbarDatabaseHelper.roles_using_database.each do |role|
-  next unless node.roles.include? role
-
   role_migration_data = CrowbarDatabaseHelper.role_migration_data(role)
   barclamp = role_migration_data["barclamp"]
 
+  # Find a node with this role even if the recipe was executed from another one
+  # e.g. one of the database nodes.
+  role_node = CrowbarOpenStackHelper.get_node(node, role, barclamp, "default")
+
+  # Role not found on any node? Skip it completely.
+  next if role_node.nil?
+
   db = if role == "ec2-api"
-    node[barclamp]["ec2-api"]["db"]
+    role_node[barclamp]["ec2-api"]["db"]
   else
-    node[barclamp]["db"]
+    role_node[barclamp]["db"]
   end
   db_conf_sections = {}
   db_connection_key = "connection"
@@ -24,13 +30,13 @@ CrowbarDatabaseHelper.roles_using_database.each do |role|
   # The nova-controller role creates more than one database
   if role == "nova-controller"
     connection = CrowbarOpenStackHelper.database_connection_string(db_settings,
-      node[barclamp]["api_db"])
-    databases << { db: node[barclamp]["api_db"], url: connection }
+      role_node[barclamp]["api_db"])
+    databases << { db: role_node[barclamp]["api_db"], url: connection }
     Chef::Log.info("connection string: #{connection}")
     db_conf_sections["api_database"] = connection
     connection = CrowbarOpenStackHelper.database_connection_string(db_settings,
-      node[barclamp]["placement_db"])
-    databases << { db: node[barclamp]["placement_db"], url: connection }
+      role_node[barclamp]["placement_db"])
+    databases << { db: role_node[barclamp]["placement_db"], url: connection }
     Chef::Log.info("connection string: #{connection}")
     db_conf_sections["placement_database"] = connection
   end
@@ -40,32 +46,27 @@ CrowbarDatabaseHelper.roles_using_database.each do |role|
     db_connection_key = "sql_connection"
   end
 
-  db_override_conf = "/etc/pg2mysql/#{role}.mariadb-conf.d/"
   directory "/etc/pg2mysql/" do
     mode 0750
     owner "root"
     group "root"
   end
 
-  directory "/etc/pg2mysql/scripts" do
-    mode 0750
-    owner "root"
-    group "root"
-  end
+  # Remaining part of the loop should only be executed on the controller node with this role
+  next unless node.roles.include? role
+
+  db_override_conf = "/etc/pg2mysql/#{role}.mariadb-conf.d/"
 
   cmds = role_migration_data["db_sync_cmd"]
   cmds = [cmds] unless cmds.is_a?(Array)
 
-  template "/etc/pg2mysql/scripts/#{role}-db_sync.sh" do
-    source "mariadb-db_sync.sh.erb"
-    mode 0750
-    owner "root"
-    group "root"
-    variables(
-      db_sync_cmds: cmds,
-      db_conf_sections: db_conf_sections,
-      db_override_conf: db_override_conf
-    )
+  idx = 0
+  cmds.each do |cmd|
+    suffix = idx.zero? ? "" : "-#{idx}"
+    log_file = "/var/log/crowbar/db-prepare.#{role}#{suffix}.log"
+    log_redirect = "> #{log_file} 2>&1"
+    commands << { cmd: ERB.new("#{cmd} #{log_redirect}").result(binding), role: role + suffix }
+    idx += 1
   end
 
   directory db_override_conf do
@@ -92,7 +93,7 @@ include_recipe "#{db_settings[:backend_name]}::python-client"
 
 databases.each do |dbdata|
   db = dbdata[:db]
-  # fill psql url for databases.txt
+  # fill psql url for databases.yaml
   dbdata[:psql_url] = CrowbarOpenStackHelper.database_connection_string(psql_settings, db)
   Chef::Log.info("creating database #{db["database"]}")
   Chef::Log.info("creating database user #{db["user"]} with password #{db["password"]}")
@@ -128,12 +129,20 @@ databases.each do |dbdata|
 
 end
 
-template "/etc/pg2mysql/databases.txt" do
-  source "mariadb-databases.txt.erb"
+commands.each do |command|
+  execute "dbsync-role-#{command[:role]}" do
+    command command[:cmd]
+  end
+end
+
+# Write the index only on database node
+template "/etc/pg2mysql/databases.yaml" do
+  source "mariadb-databases.yaml.erb"
   mode 0640
   owner "root"
   group "root"
   variables(
     databases: databases
   )
+  only_if { node.roles.include? "mysql-server" }
 end
