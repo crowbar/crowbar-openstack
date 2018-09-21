@@ -110,7 +110,7 @@ memcached_instance("heat-server")
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-bind_host, api_port, cfn_port, cloud_watch_port = HeatHelper.get_bind_host_port(node)
+bind_host, api_port, cfn_port = HeatHelper.get_bind_host_port(node)
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:protocol] == "https", ha_enabled)
@@ -394,12 +394,10 @@ template "/etc/heat/heat.conf.d/100-heat.conf" do
         database_connection: db_connection,
         bind_host: bind_host,
         api_port: api_port,
-        cloud_watch_port: cloud_watch_port,
         cfn_port: cfn_port,
         auth_encryption_key: node[:heat][:auth_encryption_key][0, 32],
         heat_metadata_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}",
         heat_waitcondition_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cfn_port]}/v1/waitcondition",
-        heat_watch_server_url: "#{node[:heat][:api][:protocol]}://#{my_public_host}:#{node[:heat][:api][:cloud_watch_port]}",
         stack_user_domain: node[:heat][:stack_user_domain_id],
         stack_domain_admin: node[:heat]["stack_domain_admin"],
         stack_domain_admin_password: node[:heat]["stack_domain_admin_password"],
@@ -478,17 +476,6 @@ service "heat-api-cfn" do
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 utils_systemd_service_restart "heat-api-cfn" do
-  action use_crowbar_pacemaker_service ? :disable : :enable
-end
-
-service "heat-api-cloudwatch" do
-  service_name node[:heat][:api_cloudwatch][:service_name]
-  supports status: true, restart: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
-end
-utils_systemd_service_restart "heat-api-cloudwatch" do
   action use_crowbar_pacemaker_service ? :disable : :enable
 end
 

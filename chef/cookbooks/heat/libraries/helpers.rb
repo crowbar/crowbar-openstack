@@ -21,13 +21,11 @@ module HeatHelper
       bind_host = admin_address
       api_port = node[:heat][:ha][:ports][:api_port]
       cfn_port = node[:heat][:ha][:ports][:cfn_port]
-      cloud_watch_port = node[:heat][:ha][:ports][:cloud_watch_port]
     else
       bind_host = "0.0.0.0"
       api_port = node[:heat][:api][:port]
       cfn_port = node[:heat][:api][:cfn_port]
-      cloud_watch_port = node[:heat][:api][:cloud_watch_port]
     end
-    return bind_host, api_port, cfn_port, cloud_watch_port
+    [bind_host, api_port, cfn_port]
   end
 end

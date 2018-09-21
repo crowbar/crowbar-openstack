@@ -7,19 +7,6 @@
     }
   },
   "Resources": {
-    "latency_watcher": {
-     "Type": "AWS::CloudWatch::Alarm",
-     "Properties": {
-        "MetricName": "Latency",
-        "Namespace": "AWS/ELB",
-        "Statistic": "Average",
-        "Period": "60",
-        "EvaluationPeriods": "1",
-        "Threshold": "2",
-        "AlarmActions": [],
-        "ComparisonOperator": "GreaterThanThreshold"
-      }
-    },
     "CfnLBUser" : {
       "Type" : "AWS::IAM::User"
     },
@@ -103,7 +90,7 @@
                 "\n",
                 "* * * * * /opt/aws/bin/cfn-hup -f\n",
                 "* * * * * /opt/aws/bin/cfn-push-stats ",
-                " --watch ", { "Ref" : "latency_watcher" }, " --haproxy\n"
+                " --haproxy\n"
                 ]]},
                 "mode"    : "000600",
                 "owner"   : "root",
