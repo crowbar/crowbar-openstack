@@ -119,8 +119,7 @@ class NeutronService < OpenstackServiceObject
 
     base["deployment"]["neutron"]["elements"] = {
         "neutron-server" => [controller_node[:fqdn]],
-        "neutron-network" => network_nodes.map { |x| x[:fqdn] },
-        "neutron-sdn-cisco-aci-agents" => nodes.map { |x| x[:fqdn] }
+        "neutron-network" => network_nodes.map { |x| x[:fqdn] }
     } unless nodes.nil? || nodes.length.zero?
 
     base["attributes"]["neutron"]["service_password"] = random_password
