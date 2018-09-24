@@ -16,7 +16,6 @@
 default[:heat][:engine][:service_name] = "heat-engine"
 default[:heat][:api][:service_name] = "heat-api"
 default[:heat][:api_cfn][:service_name] = "heat-api-cfn"
-default[:heat][:api_cloudwatch][:service_name] = "heat-api-cloudwatch"
 
 case node[:platform_family]
 when "debian"
@@ -25,7 +24,6 @@ when "debian"
       "heat-engine",
       "heat-api",
       "heat-api-cfn",
-      "heat-api-cloudwatch",
       "python-heat",
       "heat-common",
       "python-heatclient"
@@ -35,7 +33,6 @@ when "debian"
       "heat-engine",
       "heat-api",
       "heat-api-cfn",
-      "heat-api-cloudwatch"
     ]
   }
 when "rhel", "suse"
@@ -44,7 +41,6 @@ when "rhel", "suse"
       "openstack-heat-engine",
       "openstack-heat-api",
       "openstack-heat-api-cfn",
-      "openstack-heat-api-cloudwatch",
       "python-heatclient"
     ],
     plugin_packages: [],
@@ -52,13 +48,11 @@ when "rhel", "suse"
       "openstack-heat-engine",
       "openstack-heat-api",
       "openstack-heat-api-cfn",
-      "openstack-heat-api-cloudwatch"
     ]
   }
   default[:heat][:engine][:service_name] = "openstack-heat-engine"
   default[:heat][:api][:service_name] = "openstack-heat-api"
   default[:heat][:api_cfn][:service_name] = "openstack-heat-api-cfn"
-  default[:heat][:api_cloudwatch][:service_name] = "openstack-heat-api-cloudwatch"
 end
 
 if node[:platform_family] == "suse"
@@ -109,5 +103,3 @@ default[:heat][:ha][:api][:agent] = "systemd:#{default[:heat][:api][:service_nam
 default[:heat][:ha][:api][:op][:monitor][:interval] = "10s"
 default[:heat][:ha][:api_cfn][:agent] = "systemd:#{default[:heat][:api_cfn][:service_name]}"
 default[:heat][:ha][:api_cfn][:op][:monitor][:interval] = "10s"
-default[:heat][:ha][:api_cloudwatch][:agent] = "systemd:#{default[:heat][:api_cloudwatch][:service_name]}"
-default[:heat][:ha][:api_cloudwatch][:op][:monitor][:interval] = "10s"

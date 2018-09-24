@@ -481,17 +481,6 @@ utils_systemd_service_restart "heat-api-cfn" do
   action use_crowbar_pacemaker_service ? :disable : :enable
 end
 
-service "heat-api-cloudwatch" do
-  service_name node[:heat][:api_cloudwatch][:service_name]
-  supports status: true, restart: true
-  action [:enable, :start]
-  subscribes :restart, resources("template[/etc/heat/heat.conf.d/100-heat.conf]")
-  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
-end
-utils_systemd_service_restart "heat-api-cloudwatch" do
-  action use_crowbar_pacemaker_service ? :disable : :enable
-end
-
 if ha_enabled
   log "HA support for heat is enabled"
   include_recipe "heat::ha"
