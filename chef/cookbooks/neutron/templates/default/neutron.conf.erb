@@ -80,7 +80,7 @@ username = <%= @keystone_settings['service_user'] %>
 lock_path = /var/run/neutron
 
 [oslo_messaging_notifications]
-driver = neutron.openstack.common.notifier.rpc_notifier
+driver = messaging
 
 [oslo_messaging_rabbit]
 rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
