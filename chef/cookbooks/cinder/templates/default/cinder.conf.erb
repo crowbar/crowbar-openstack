@@ -313,6 +313,9 @@ lock_path = /var/run/openstack
 lock_path = /var/run/cinder
 <% end -%>
 
+[oslo_messaging_notifications]
+driver = messaging
+
 [oslo_messaging_rabbit]
 rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>
 <% if @rabbit_settings[:cluster] -%>
