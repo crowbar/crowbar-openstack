@@ -86,7 +86,7 @@ username = <%= @keystone_settings['service_user'] %>
 lock_path = /var/run/neutron
 
 [oslo_messaging_notifications]
-driver = neutron.openstack.common.notifier.rpc_notifier
+driver = messagingv2
 
 [oslo_messaging_rabbit]
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
