@@ -241,6 +241,7 @@ class CrowbarOpenStackHelper
             url: rabbit_hosts.join(","),
             trove_url: trove_rabbit_hosts.join(","),
             durable_queues: true,
+            enable_notifications: rabbit[:rabbitmq][:client][:enable_notifications],
             ha_queues: true,
             heartbeat_timeout: rabbit[:rabbitmq][:client][:heartbeat_timeout],
             pacemaker_resource: "ms-rabbitmq"
