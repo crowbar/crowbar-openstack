@@ -83,7 +83,7 @@ if node[:pacemaker][:clone_stateless_services]
 
   # Avoid races when creating pacemaker resources
   crowbar_pacemaker_sync_mark "wait-nova_ha_resources" do
-    timeout 120
+    timeout 160
   end
 
   rabbit_settings = fetch_rabbitmq_settings
