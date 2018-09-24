@@ -87,7 +87,7 @@ service_token_roles = admin
 lock_path = /var/run/glance
 
 [oslo_messaging_notifications]
-driver = messaging
+driver = messagingv2
 
 [oslo_messaging_rabbit]
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>

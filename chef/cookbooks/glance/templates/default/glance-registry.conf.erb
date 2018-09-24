@@ -39,7 +39,7 @@ service_token_roles_required = true
 service_token_roles = admin
 
 [oslo_messaging_notifications]
-driver = messaging
+driver = messagingv2
 
 [oslo_messaging_rabbit]
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
