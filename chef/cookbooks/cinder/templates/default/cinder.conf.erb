@@ -313,8 +313,10 @@ lock_path = /var/run/openstack
 lock_path = /var/run/cinder
 <% end -%>
 
+<% if @rabbit_settings[:enable_notifications] -%>
 [oslo_messaging_notifications]
 driver = messaging
+<% end -%>
 
 [oslo_messaging_rabbit]
 rabbit_use_ssl = <%= @rabbit_settings[:use_ssl] %>

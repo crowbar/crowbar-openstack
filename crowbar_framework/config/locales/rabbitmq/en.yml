@@ -21,6 +21,8 @@ en:
       edit_attributes:
         vhost: 'Virtual host'
         user: 'User'
+        client:
+          enable_notifications: 'Configure Clients to send notifications'
         extra_users:
           username: 'Username'
           permissions: 'Permissions (3 comma separated items for configure, write, read; e.g. ".*,.*,.*")'
