@@ -475,14 +475,8 @@ end
 # Configure Keystone token fernet backend provider (non-HA case)
 if !ha_enabled && node[:keystone][:signing][:token_format] == "fernet"
   # Rotate primary key, which is used for new tokens
-  template "/var/lib/keystone/keystone-fernet-rotate" do
-    source "keystone-fernet-rotate.erb"
-    owner "root"
-    group node[:keystone][:group]
-    mode "0750"
-    variables(
-      rsync_command: ""
-    )
+  keystone_fernet "keystone-fernet-rotate-non-ha" do
+    action :rotate_script
   end
 
   link "/etc/cron.hourly/openstack-keystone-fernet" do
@@ -491,11 +485,8 @@ if !ha_enabled && node[:keystone][:signing][:token_format] == "fernet"
 
   unless File.exist?("/etc/keystone/fernet-keys/0")
     # Setup a key repository for fernet tokens
-    execute "keystone-manage fernet_setup" do
-      command "keystone-manage fernet_setup \
-        --keystone-user #{node[:keystone][:user]} \
-        --keystone-group #{node[:keystone][:group]}"
-      action :run
+    keystone_fernet "keystone-fernet-setup-non-ha" do
+      action :setup
     end
   end
 end

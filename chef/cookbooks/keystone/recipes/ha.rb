@@ -66,14 +66,9 @@ if node[:keystone][:signing][:token_format] == "fernet"
   raise "No other cluster members found" if rsync_command.empty?
 
   # Rotate primary key, which is used for new tokens
-  template "/var/lib/keystone/keystone-fernet-rotate" do
-    source "keystone-fernet-rotate.erb"
-    owner "root"
-    group node[:keystone][:group]
-    mode "0750"
-    variables(
-      rsync_command: rsync_command
-    )
+  keystone_fernet "keystone-fernet-rotate-ha" do
+    action :rotate_script
+    rsync_command rsync_command
   end
 
   crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate"
@@ -85,12 +80,8 @@ if node[:keystone][:signing][:token_format] == "fernet"
       node.save
     end
   else
-    # Setup a key repository for fernet tokens
-    execute "keystone-manage fernet_setup" do
-      command "keystone-manage fernet_setup \
-        --keystone-user #{node[:keystone][:user]} \
-        --keystone-group #{node[:keystone][:group]}"
-      action :run
+    keystone_fernet "keystone-fernet-setup-ha" do
+      action :setup
       only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
     end
   end
