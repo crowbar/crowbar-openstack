@@ -33,7 +33,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -49,7 +49,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           },
           "remotes" => true
@@ -58,7 +58,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           },
           "remotes" => true
@@ -67,7 +67,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           }
         },
@@ -75,7 +75,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           }
         },
@@ -83,7 +83,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => -1,
           "platform" => {
-            "suse" => ">= 12.3"
+            "suse" => ">= 12.4"
           },
           "remotes" => true
         },
@@ -91,7 +91,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "platform" => {
-            "suse" => ">= 12.3"
+            "suse" => ">= 12.4"
           },
           "remotes" => false
         },
@@ -99,7 +99,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           },
           "cluster" => true

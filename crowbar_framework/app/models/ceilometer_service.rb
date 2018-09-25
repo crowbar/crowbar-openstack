@@ -33,7 +33,7 @@ class CeilometerService < OpenstackServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           }
         },
@@ -48,7 +48,7 @@ class CeilometerService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -57,7 +57,7 @@ class CeilometerService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -66,7 +66,7 @@ class CeilometerService < OpenstackServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.3",
+            "suse" => "< 12.4",
             "windows" => "/.*/"
           }
         }
