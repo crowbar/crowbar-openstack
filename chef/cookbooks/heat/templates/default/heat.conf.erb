@@ -4,7 +4,6 @@ reauthentication_auth_method = trusts
 trusts_delegated_roles = <%= @trusts_delegated_roles.join(',') %>
 heat_metadata_server_url = <%= @heat_metadata_server_url %>
 heat_waitcondition_server_url = <%= @heat_waitcondition_server_url %>
-heat_watch_server_url = <%= @heat_watch_server_url %>
 region_name_for_services = <%= @keystone_settings['endpoint_region'] %>
 stack_user_domain_id = <%= @stack_user_domain %>
 stack_domain_admin = <%= @stack_domain_admin %>
@@ -96,16 +95,6 @@ max_header_line = <%= node[:heat][:max_header_line] %>
 [heat_api_cfn]
 bind_host = <%= @bind_host %>
 bind_port = <%= @cfn_port %>
-<% if node[:heat][:api][:protocol] == "https" %>
-cert_file = <%= @heat_ssl[:certfile] %>
-key_file = <%= @heat_ssl[:keyfile] %>
-<% end %>
-workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
-max_header_line = <%= node[:heat][:max_header_line] %>
-
-[heat_api_cloudwatch]
-bind_host = <%= @bind_host %>
-bind_port = <%= @cloud_watch_port %>
 <% if node[:heat][:api][:protocol] == "https" %>
 cert_file = <%= @heat_ssl[:certfile] %>
 key_file = <%= @heat_ssl[:keyfile] %>

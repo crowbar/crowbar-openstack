@@ -16,7 +16,7 @@
 
 return unless node["roles"].include?("monasca-agent")
 
-bind_host, api_port, cfn_port, cloud_watch_port = HeatHelper.get_bind_host_port(node)
+bind_host, api_port, _cfn_port = HeatHelper.get_bind_host_port(node)
 
 monitor_url = "#{node[:heat][:api][:protocol]}://#{bind_host}:#{api_port}/"
 

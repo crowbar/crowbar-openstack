@@ -31,14 +31,6 @@ haproxy_loadbalancer "heat-api-cfn" do
   action :nothing
 end.run_action(:create)
 
-haproxy_loadbalancer "heat-api-cloudwatch" do
-  address "0.0.0.0"
-  port node[:heat][:api][:cloud_watch_port]
-  use_ssl (node[:heat][:api][:protocol] == "https")
-  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "heat", "heat-server", "cloud_watch_port")
-  action :nothing
-end.run_action(:create)
-
 if node[:pacemaker][:clone_stateless_services]
   # Wait for all nodes to reach this point so we know that all nodes will have
   # all the required packages installed before we create the pacemaker
@@ -49,7 +41,7 @@ if node[:pacemaker][:clone_stateless_services]
   crowbar_pacemaker_sync_mark "wait-heat_ha_resources"
 
   rabbit_settings = fetch_rabbitmq_settings
-  services = ["engine", "api", "api_cfn", "api_cloudwatch"]
+  services = ["engine", "api", "api_cfn"]
   transaction_objects = []
 
   services.each do |service|
