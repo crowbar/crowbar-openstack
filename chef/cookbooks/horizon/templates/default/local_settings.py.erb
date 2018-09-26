@@ -253,6 +253,13 @@ DATABASES = {
         }
         <% end %>
     },
+<% if @mysql_settings -%>
+    'mysql': {
+        <% @mysql_settings.sort_by { |key, value| key }.each do |key,value| -%>
+        '<%= key %>': <%= value %>,
+        <% end -%>
+    },
+<% end -%>
 }
 
 SITE_BRANDING = "<%= @site_branding %>"

@@ -1,0 +1,143 @@
+#!/usr/bin/env ruby
+#
+# Copyright 2018, SUSE
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+$LOAD_PATH.unshift(File.expand_path("../../crowbar_framework/lib", __FILE__))
+$LOAD_PATH.unshift(File.expand_path("../../chef/cookbooks/database/libraries", __FILE__))
+
+require "chef"
+require "erb"
+require "crowbar"
+
+RECIPE = "recipe[database::pg2mariadb_preparation]"
+LOGDIR = "/var/log/crowbar"
+
+def chef_init
+  Chef::Config.node_name "crowbar"
+  Chef::Config.client_key "/opt/dell/crowbar_framework/config/client.pem"
+  Chef::Config.chef_server_url "http://localhost:4000"
+end
+
+def node_for_role(role)
+  nodes = []
+  Chef::Search::Query.new.search "node", "roles:#{role}" do |n|
+    nodes << n
+  end
+  nodes.sort_by! { |n| n.name }
+  nodes.empty? ? nil : nodes.first
+end
+
+def mysql_node
+    node_for_role "mysql-server"
+end
+
+# Select nodes which represent all services which use database
+# they might be standalone nodes or cluster members. In most simple
+# case there will be only one node used for all services.
+def selected_nodes(first_mysql_node)
+  nodes_and_roles = {
+    first_mysql_node.name => {
+      node: first_mysql_node, roles: ["mysql-server"]
+    }
+  }
+  CrowbarDatabaseHelper.roles_using_database.each do |role|
+    node = node_for_role(role)
+    next if node.nil?
+    if nodes_and_roles.include? node.name
+      nodes_and_roles[node.name][:roles] << role
+    else
+      nodes_and_roles[node.name] = { node: node, roles: [role] }
+    end
+  end
+  nodes_and_roles
+end
+
+def node_role(node)
+    Chef::Role.load("crowbar-"+node.name.gsub(".", "_"))
+end
+
+def add_recipe(node)
+  role = node_role(node)
+  role.run_list << RECIPE
+  role.save
+end
+
+def remove_recipe(node)
+  role = node_role(node)
+  role.run_list.remove(RECIPE)
+  role.save
+end
+
+# based on code from crowbar_framework/app/models/node.rb
+def run_ssh_cmd(node, cmd, log_suffix = nil, timeout = "15s", kill_after = "5s")
+  log_file = "/var/log/crowbar/db-prepare.#{log_suffix}.log" if log_suffix
+  log_redirect = "> #{log_file} 2>&1" if log_file
+  start_time = Time.now
+  args = ["sudo", "-i", "-u", "root", "--", "timeout", "-k", kill_after, timeout,
+          "ssh", "-o", "ConnectTimeout=10",
+          "root@#{node.name}",
+          %("#{cmd.gsub('"', '\\"')} #{log_redirect}")
+  ].join(" ")
+  log "Log: #{log_file} on #{node.name}"
+  Open3.popen2e(args) do |stdin, stdout_and_stderr, wait_thr|
+    {
+      stdout_and_stderr: stdout_and_stderr.gets(nil),
+      exit_code: wait_thr.value.exitstatus,
+      run_time: Time.now - start_time
+    }
+  end
+end
+
+def log(msg)
+  print "#{msg}\n"
+end
+
+def prepare_node(node, roles)
+    log "Preparing node #{node.name}"
+    log "Adding #{RECIPE} to run_list"
+    add_recipe node
+    log "Running chef-client on #{node.name}..."
+    res = run_ssh_cmd(node, "chef-client", "chef-client", "30m")
+    log "Run time: #{res[:run_time]}s"
+    log "Removing #{RECIPE} from run_list"
+    remove_recipe node
+    unless res[:exit_code].zero?
+      log "ERROR: Chef-client failed with code: #{res[:exit_code]}"
+      return -2
+    end
+    log "Prepare completed for #{node.name}"
+    0
+end
+
+def main
+  ret = 0
+  chef_init
+  first_mysql_node = mysql_node
+  if first_mysql_node.nil?
+    log "ERROR: MySQL server not found. Please assign mysql-server role " \
+      "to some node or cluster and re-apply database proposal."
+    return -1
+  end
+  selected_nodes(first_mysql_node).values.each do |node_data|
+    node_ret = prepare_node(node_data[:node], node_data[:roles])
+    ret = node_ret if ret.zero? && !node_ret.zero?
+    log "Summary of used databases: /etc/pg2mysql/databases.yaml on " \
+      "#{first_mysql_node.name}" if node_data[:node] == first_mysql_node && ret.zero?
+  end
+  return ret
+end
+
+exit(main)

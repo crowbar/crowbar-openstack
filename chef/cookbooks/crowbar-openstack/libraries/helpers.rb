@@ -303,8 +303,6 @@ class CrowbarOpenStackHelper
     use_ssl && attributes["ssl"]["insecure"]
   end
 
-  private
-
   def self.get_node(node, role, barclamp, instance)
     result = nil
 
@@ -322,12 +320,13 @@ class CrowbarOpenStackHelper
     result
   end
 
+  private
+
   def self.get_nodes(node, role, barclamp, instance)
     nodes, = Chef::Search::Query.new.search(:node, "roles:#{role} AND " \
     "#{barclamp}_config_environment:#{barclamp}-config-#{instance}")
     nodes
   end
 
-  private_class_method :get_node
   private_class_method :get_nodes
 end

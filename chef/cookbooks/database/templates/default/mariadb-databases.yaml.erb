@@ -1,0 +1,5 @@
+<% @databases.each do |dbdata| -%>
+<%= dbdata[:db][:database] %>:
+  source: <%= dbdata[:psql_url] %>
+  target: <%= dbdata[:url] %>
+<% end %>
