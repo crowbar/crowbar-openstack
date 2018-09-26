@@ -45,6 +45,7 @@ en:
           cert_required: 'Require Client Certificate'
           ca_certs: 'SSL CA Certificates File'
       validation:
+        notifications_enabled: 'Sending notifications has to be enabled in the RabbitMQ proposal first.'
         hyper_v_support: 'Hyper-V support is not available.'
         swift_proxy: 'Nodes with the ceilometer-swift-proxy-middleware role must also have the swift-proxy role.'
         nodes_count: 'The cluster assigned to the ceilometer-server role should have at least 3 nodes, but it only has %{nodes_count}.'
