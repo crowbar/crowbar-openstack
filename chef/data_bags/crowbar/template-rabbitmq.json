@@ -21,7 +21,8 @@
         "client_ca_certs": "/etc/ssl/certs/rabbitca.pem"
       },
       "client": {
-        "heartbeat_timeout": 60
+        "heartbeat_timeout": 60,
+        "enable_notifications": false
       },
       "cluster": false,
       "ha": {
@@ -58,7 +59,7 @@
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 105,
+      "schema-revision": 106,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },

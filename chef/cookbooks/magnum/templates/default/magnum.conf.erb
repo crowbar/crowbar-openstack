@@ -72,8 +72,10 @@ insecure = <%= @keystone_settings['insecure'] %>
 [oslo_concurrency]
 lock_path = /var/run/magnum
 
+<% if @rabbit_settings[:enable_notifications] -%>
 [oslo_messaging_notifications]
 driver = messaging
+<% end -%>
 
 [oslo_messaging_rabbit]
 <% if @rabbit_settings[:cluster] -%>

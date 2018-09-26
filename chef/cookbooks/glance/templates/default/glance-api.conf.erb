@@ -81,8 +81,10 @@ auth_type = password
 [oslo_concurrency]
 lock_path = /var/run/glance
 
+<% if @rabbit_settings[:enable_notifications] -%>
 [oslo_messaging_notifications]
 driver = messaging
+<% end -%>
 
 [oslo_messaging_rabbit]
 <% if @rabbit_settings[:cluster] -%>

@@ -95,6 +95,16 @@ users = [
 
 roles = [ 'anotherrole' ]
 
+if enabled_services.include?("metering")
+  rabbitmq_settings = fetch_rabbitmq_settings
+
+  unless rabbitmq_settings[:enable_notifications]
+    # without rabbitmq notification clients configured the ceilometer
+    # tempest tests will fail so skip them
+    enabled_services = enabled_services - ["metering"]
+  end
+end
+
 heat_server = search(:node, "roles:heat-server").first
 if enabled_services.include?("orchestration") && !heat_server.nil?
   heat_trusts_delegated_roles = heat_server[:heat][:trusts_delegated_roles]

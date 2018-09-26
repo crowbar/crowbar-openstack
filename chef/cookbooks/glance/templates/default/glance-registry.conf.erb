@@ -33,8 +33,10 @@ user_domain_name = <%= @keystone_settings["admin_domain"] %>
 auth_url = <%= @keystone_settings['admin_auth_url'] %>
 auth_type = password
 
+<% if @rabbit_settings[:enable_notifications] -%>
 [oslo_messaging_notifications]
 driver = messaging
+<% end -%>
 
 [oslo_messaging_rabbit]
 <% if @rabbit_settings[:cluster] -%>
