@@ -17,6 +17,7 @@ class Chef
         @keyfile = ""
         @group = ""
         @fqdn = ""
+        @alt_names = []
         @cert_required = false
         @ca_certs = ""
       end
@@ -39,6 +40,10 @@ class Chef
 
       def fqdn(arg = nil)
         set_or_return(:fqdn, arg, kind_of: String)
+      end
+
+      def alt_names(arg = nil)
+        set_or_return(:alt_names, arg, kind_of: Array)
       end
 
       def cert_required(arg = nil)
