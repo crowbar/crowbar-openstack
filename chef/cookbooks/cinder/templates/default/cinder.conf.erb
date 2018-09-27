@@ -308,6 +308,11 @@ lock_path = /var/run/openstack
 lock_path = /var/run/cinder
 <% end -%>
 
+<% if @rabbit_settings[:enable_notifications] -%>
+[oslo_messaging_notifications]
+driver = messagingv2
+<% end -%>
+
 [oslo_messaging_rabbit]
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
 rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>

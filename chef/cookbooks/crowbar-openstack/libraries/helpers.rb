@@ -193,6 +193,7 @@ class CrowbarOpenStackHelper
             "#{rabbit[:rabbitmq][:address]}:#{port}/" \
             "#{rabbit[:rabbitmq][:trove][:vhost]}",
           durable_queues: false,
+          enable_notifications: rabbit[:rabbitmq][:client][:enable_notifications],
           ha_queues: false,
           heartbeat_timeout: rabbit[:rabbitmq][:client][:heartbeat_timeout],
           pacemaker_resource: "rabbitmq"
