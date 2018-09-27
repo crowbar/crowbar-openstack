@@ -72,11 +72,28 @@ if node[:keystone][:frontend] == "apache" && node[:pacemaker][:clone_stateless_s
   crowbar_pacemaker_sync_mark "create-keystone_ha_resources"
 end
 
+# note(jtomasiak): We don't need new syncmarks for the fernet-keys-sync part.
+# This is because the deployment and configuration of this feature will be done
+# once during keystone installation and it will not be used until some keystone
+# node is reinstalled. We assume that time between keystone installation and
+# possible node reinstallation is high enough to run this safely without
+# syncmarks.
+fernet_resources_action = node[:keystone][:signing][:token_format] == "fernet" ? :create : :delete
+
+template "/usr/bin/keystone-fernet-keys-push.sh" do
+  source "keystone-fernet-keys-push.sh"
+  owner "root"
+  group "root"
+  mode "0755"
+  action fernet_resources_action
+end
+
 template "/usr/bin/keystone-fernet-keys-sync.sh" do
   source "keystone-fernet-keys-sync.sh"
   owner "root"
   group "root"
   mode "0755"
+  action fernet_resources_action
 end
 
 # handler scripts are run by hacluster user so sudo configuration is needed
@@ -86,11 +103,12 @@ template "/etc/sudoers.d/keystone-fernet-keys-sync" do
   owner "root"
   group "root"
   mode "0440"
+  action fernet_resources_action
 end
 
 # on founder: create/delete pacemaker alert
 pacemaker_alert "keystone-fernet-keys-sync" do
   handler "/usr/bin/keystone-fernet-keys-sync.sh"
-  action node[:keystone][:signing][:token_format] == "fernet" ? :create : :delete
+  action fernet_resources_action
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
