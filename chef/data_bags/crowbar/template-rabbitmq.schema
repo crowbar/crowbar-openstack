@@ -48,7 +48,8 @@
               "type": "map",
               "required": true,
               "mapping" : {
-                "heartbeat_timeout": { "type": "int", "required": true }
+                "heartbeat_timeout": { "type": "int", "required": true },
+                "enable_notifications": { "type": "bool", "required": true }
               }
             },
             "cluster": { "type": "bool", "required": true },

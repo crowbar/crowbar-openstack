@@ -78,8 +78,10 @@ insecure = <%= @keystone_settings['insecure'] %>
 [oslo_concurrency]
 lock_path = /var/run/magnum
 
+<% if @rabbit_settings[:enable_notifications] -%>
 [oslo_messaging_notifications]
-driver = messaging
+driver = messagingv2
+<% end -%>
 
 [oslo_messaging_rabbit]
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
