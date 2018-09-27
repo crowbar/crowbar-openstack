@@ -30,7 +30,7 @@ module Openstack
           # nova
           attributes["ssl"]["enabled"]
         else
-          # magnum, sahara, trove
+          # magnum, sahara
           false
         end
 

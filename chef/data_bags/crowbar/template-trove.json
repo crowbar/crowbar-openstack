@@ -28,13 +28,12 @@
     "trove": {
       "crowbar-revision": 1,
       "crowbar-applied": false,
-      "schema-revision": 300,
+      "schema-revision": 301,
       "element_states": {
         "trove-server": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-        [ "trove-server" ]
       ],
       "config": {
         "environment": "trove-base-config",
