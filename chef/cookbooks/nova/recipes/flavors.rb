@@ -108,7 +108,7 @@ ruby_block "Get current flavors" do
     raise "Flavor list not obtained, is the nova-api down?" unless cmd.exitstatus.zero?
     node.run_state["flavorlist"] = cmd.stdout.split("\n")
   end
-  retries 5
+  retries 10
 end
 
 ruby_block "Flavor creation" do
