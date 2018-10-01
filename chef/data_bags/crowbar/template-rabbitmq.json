@@ -52,14 +52,15 @@
       "mnesia": {
         "dump_log_write_threshold": 100,
         "dump_log_time_threshold": 180000
-      }
+      },
+      "enable_queue_mirroring": true
     }
   },
   "deployment": {
     "rabbitmq": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 106,
+      "schema-revision": 107,
       "element_states": {
         "rabbitmq-server": [ "readying", "ready", "applying" ]
       },
