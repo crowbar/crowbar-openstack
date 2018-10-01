@@ -60,7 +60,8 @@
         "sndbuf": null,
         "recbuf": null
       },
-      "collect_statistics_interval": 5000
+      "collect_statistics_interval": 5000,
+      "enable_queue_mirroring": true
     }
   },
   "deployment": {
