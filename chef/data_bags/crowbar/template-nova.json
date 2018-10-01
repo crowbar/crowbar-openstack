@@ -40,22 +40,6 @@
         "discover_hosts_in_cells_interval": 600,
         "enabled_filters": ""
       },
-      "ec2-api": {
-        "db": {
-          "password": "",
-          "user": "ec2",
-          "database": "ec2"
-        },
-        "ssl": {
-          "enabled": false,
-          "certfile": "/etc/ec2api/ssl/certs/signing_cert.pem",
-          "keyfile": "/etc/ec2api/ssl/certs/signing_key.pem",
-          "generate_certs": false,
-          "insecure": false,
-          "cert_required": false,
-          "ca_certs": "/etc/ec2api/ssl/certs/ca.pem"
-        }
-      },
       "db": {
         "password": "",
         "user": "nova",
@@ -183,7 +167,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 300,
+      "schema-revision": 301,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],
@@ -192,14 +176,12 @@
         "nova-compute-vmware": [ "readying", "ready", "applying" ],
         "nova-compute-xen": [ "readying", "ready", "applying" ],
         "nova-compute-zvm": [ "readying", "ready", "applying" ],
-        "nova-ha-compute": [ "readying", "ready", "applying" ],
-        "ec2-api": [ "readying", "ready", "applying" ]
+        "nova-ha-compute": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
         [
-          "nova-controller",
-          "ec2-api"
+          "nova-controller"
         ],
         [
           "nova-compute-ironic",
@@ -212,7 +194,6 @@
       ],
       "element_run_list_order": {
         "nova-controller": 95,
-        "ec2-api": 96,
         "nova-compute-ironic": 97,
         "nova-compute-kvm": 97,
         "nova-compute-qemu": 97,

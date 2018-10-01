@@ -59,34 +59,6 @@
                 "enabled_filters": { "type": "str", "required": true }
               }
             },
-            "ec2-api": {
-              "type": "map",
-              "required": true,
-              "mapping": {
-                "db": {
-                  "type": "map",
-                  "required": true,
-                  "mapping": {
-                    "password": { "type": "str", "required": true },
-                    "user": { "type": "str", "required": true },
-                    "database": { "type": "str", "required": true }
-                  }
-                },
-                "ssl": {
-                  "type": "map",
-                  "required": true,
-                  "mapping": {
-                    "enabled": { "type" : "bool", "required" : true },
-                    "certfile": { "type" : "str", "required" : true },
-                    "keyfile": { "type" : "str", "required" : true },
-                    "generate_certs": { "type" : "bool", "required" : true },
-                    "insecure": { "type" : "bool", "required" : true },
-                    "cert_required": { "type" : "bool", "required" : true },
-                    "ca_certs": { "type" : "str", "required" : true }
-                  }
-                }
-              }
-            },
             "db": {
               "type": "map",
               "required": true,
