@@ -101,9 +101,9 @@
         "user": "neutron"
       },
       "sql": {
-        "min_pool_size": 30,
-        "max_pool_size": 60,
-        "max_pool_overflow": 10,
+        "min_pool_size": 1,
+        "max_pool_size": 50,
+        "max_pool_overflow": 50,
         "pool_timeout": 30
       },
       "f5": {
