@@ -57,21 +57,23 @@ if use_l3_agent
   # skip neutron-ha-tool resource creation during upgrade
   unless CrowbarPacemakerHelper.being_upgraded?(node)
 
-    # FIXME: neutron-ha-tool can't do keystone v3 currently
-    os_auth_url_v2 = KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
-                                                          keystone_settings["internal_url_host"],
-                                                          keystone_settings["service_port"],
-                                                          "2.0")
+    os_auth_url = KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
+                                                       keystone_settings["internal_url_host"],
+                                                       keystone_settings["service_port"],
+                                                       keystone_settings["api_version"])
 
     # Add configuration file
     insecure_flag = keystone_settings["insecure"] || node[:neutron][:ssl][:insecure]
     default_settings = node[:neutron][:ha][:neutron_l3_ha_service].to_hash
     config_file_contents = NeutronHelper.make_l3_ha_service_config default_settings,
                                                                    insecure_flag do |env|
-      env["OS_AUTH_URL"] = os_auth_url_v2
+      env["OS_AUTH_URL"] = os_auth_url
+      env["OS_IDENTITY_API_VERSION"] = keystone_settings["api_version"]
       env["OS_REGION_NAME"] = keystone_settings["endpoint_region"]
-      env["OS_TENANT_NAME"] = keystone_settings["service_project"]
+      env["OS_PROJECT_NAME"] = keystone_settings["service_project"]
       env["OS_USERNAME"] = keystone_settings["service_user"]
+      env["OS_PROJECT_DOMAIN_NAME"] = keystone_settings["admin_domain"]
+      env["OS_USER_DOMAIN_NAME"] = keystone_settings["admin_domain"]
     end
 
     file "/etc/neutron/neutron-l3-ha-service.yaml" do
