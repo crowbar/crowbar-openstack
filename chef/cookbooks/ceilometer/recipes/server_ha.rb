@@ -15,14 +15,6 @@
 
 include_recipe "crowbar-pacemaker::haproxy"
 
-haproxy_loadbalancer "ceilometer-api" do
-  address "0.0.0.0"
-  port node[:ceilometer][:api][:port]
-  use_ssl (node[:ceilometer][:api][:protocol] == "https")
-  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "ceilometer", "ceilometer-server", "api")
-  action :nothing
-end.run_action(:create)
-
 if node[:pacemaker][:clone_stateless_services]
   # Wait for all nodes to reach this point so we know that they will have
   # all the required packages installed and configuration files updated
