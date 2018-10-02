@@ -110,7 +110,7 @@ end
 #                so the order is important
 tenant_network_types = [[node[:neutron][:ml2_type_drivers_default_tenant_network]] + node[:neutron][:ml2_type_drivers]].flatten.uniq
 
-interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+interface_driver = "openvswitch"
 
 ironic_net = Barclamp::Inventory.get_network_definition(node, "ironic")
 
@@ -157,7 +157,7 @@ when "ml2"
 
   ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
   if ml2_mech_drivers.include?("linuxbridge")
-    interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
+    interface_driver = "linuxbridge"
   end
 
   # Empty the config file that is explicitly passed to neutron-server (via plugin.ini

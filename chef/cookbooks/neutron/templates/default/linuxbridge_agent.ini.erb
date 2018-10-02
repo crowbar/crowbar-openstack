@@ -3,7 +3,7 @@
 [linux_bridge]
 physical_interface_mappings = <%= @interface_mappings %>
 [securitygroup]
-firewall_driver = neutron.agent.linux.iptables_firewall.IptablesFirewallDriver
+firewall_driver = iptables
 [vxlan]
 <% unless @ml2_type_drivers.include?("vxlan") -%>
 enable_vxlan = False
