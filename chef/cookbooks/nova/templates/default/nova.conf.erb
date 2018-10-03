@@ -78,6 +78,9 @@ zvm_user_profile = <%= node[:nova][:zvm][:zvm_user_profile] %>
 zvm_user_default_password = <%= node[:nova][:zvm][:zvm_user_default_password] %>
 zvm_user_default_privilege = <%= node[:nova][:zvm][:zvm_user_default_privilege] %>
 <% end %>
+<% unless @default_log_levels.length.zero? -%>
+default_log_levels = <%= @default_log_levels.join(", ") %>
+<% end -%>
 
 [api]
 auth_strategy = keystone
