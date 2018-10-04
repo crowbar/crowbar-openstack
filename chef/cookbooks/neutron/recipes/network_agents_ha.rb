@@ -182,13 +182,21 @@ if node[:pacemaker][:clone_stateless_services]
     l3_agent_clone = "cl-#{l3_agent_primitive}"
   end
 
-  if use_metadata_agent
-    metadata_agent_primitive = "neutron-metadata-agent"
+  enable_metadata = node.roles.include?("neutron-network") || !node[:neutron][:metadata][:force]
+
+  metadata_agent_primitive = "neutron-metadata-agent"
+  if use_metadata_agent && enable_metadata
     objects = openstack_pacemaker_controller_clone_for_transaction metadata_agent_primitive do
       agent node[:neutron][:ha][:network][:metadata_ra]
       op node[:neutron][:ha][:network][:op]
     end
     transaction_objects.push(objects)
+  else
+    pacemaker_primitive metadata_agent_primitive do
+      agent node[:neutron][:ha][:network][:metadata_ra]
+      action [:stop, :delete]
+      only_if "crm configure show #{metadata_agent_primitive}"
+    end
   end
 
   metering_agent_primitive = "neutron-metering-agent"
