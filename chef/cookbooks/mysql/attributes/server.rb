@@ -41,13 +41,13 @@ default[:mysql][:ha][:op][:monitor] = [
 default[:mysql][:mariadb][:version] = "10.2"
 default[:mysql][:galera_packages] = [
   "galera-3-wsrep-provider",
-  "mariadb-102-tools",
+  "mariadb-tools",
   "xtrabackup",
   "socat",
   "galera-python-clustercheck"
 ]
 
-default[:mysql][:galera_packages] << "mariadb-102-galera"
+default[:mysql][:galera_packages] << "mariadb-galera"
 
-default[:mysql][:mysql_client] = "mariadb-102-client"
-default[:mysql][:mysql_server] = "mariadb-102"
+default[:mysql][:mysql_client] = "mariadb-client"
+default[:mysql][:mysql_server] = "mariadb"
