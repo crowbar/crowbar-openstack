@@ -102,6 +102,8 @@ execute "delay-flavor-creation" do
   action :nothing
 end
 
+package "python-openstackclient"
+
 ruby_block "Get current flavors" do
   block do
     cmd = Mixlib::ShellOut.new("#{openstack} flavor list -f value -c Name").run_command
