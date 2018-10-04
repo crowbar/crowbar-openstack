@@ -104,6 +104,16 @@ end
 
 ruby_block "Get current flavors" do
   block do
+    cmd = if node[:nova][:ha][:enabled]
+      "crm resource show nova-api 2> /dev/null | grep is\ running"
+    else
+      "systemctl status openstack-nova-api"
+    end
+    unless ::Kernel.system(cmd)
+      Chef::Log.info("nova-api does not seem to be running, skipping flavor list")
+      return
+    end
+
     cmd = Mixlib::ShellOut.new("#{openstack} flavor list -f value -c Name").run_command
     raise "Flavor list not obtained, is the nova-api down?" unless cmd.exitstatus.zero?
     node.run_state["flavorlist"] = cmd.stdout.split("\n")
