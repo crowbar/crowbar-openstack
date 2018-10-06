@@ -2,8 +2,13 @@
 interface_driver = <%= @interface_driver %>
 resync_interval = <%= @resync_interval %>
 dhcp_driver = <%= @dhcp_driver %>
+<% if @force_metadata -%>
+enable_isolated_metadata = False
+enable_metadata_network = False
+<% else -%>
 enable_isolated_metadata = <%= @enable_isolated_metadata %>
 enable_metadata_network = <%= @enable_metadata_network %>
+<% end -%>
 force_metadata = <%= @force_metadata %>
 dns_domain = <%= @dns_domain %>
 <% if @nameservers -%>
