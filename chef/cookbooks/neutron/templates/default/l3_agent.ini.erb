@@ -3,6 +3,9 @@ interface_driver = <%= @interface_driver %>
 <% if @dvr_enabled -%>
 agent_mode = <%= @dvr_mode %>
 <% end -%>
+<% if node[:neutron][:metadata][:force] -%>
+enable_metadata_proxy = False
+<% end -%>
 metadata_port = <%= @metadata_port %>
 send_arp_for_ha = <%= @send_arp_for_ha %>
 handle_internal_only_routers = <%= @handle_internal_only_routers %>
