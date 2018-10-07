@@ -81,6 +81,8 @@ insecure = <%= @nova_insecure %>
 password = <%= @keystone_settings['service_password'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
 username = <%= @keystone_settings['service_user'] %>
+project_domain_name = <%= @keystone_settings['default_user_domain'] %>
+user_domain_name = <%= @keystone_settings['default_user_domain'] %>
 
 [oslo_concurrency]
 lock_path = /var/run/neutron
