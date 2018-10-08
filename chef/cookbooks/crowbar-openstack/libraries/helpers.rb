@@ -134,7 +134,7 @@ class CrowbarOpenStackHelper
           }
         }
 
-        Chef::Log.info("Database server found at #{@database_settings[instance][:address]}")
+        Chef::Log.info("Database server found at #{@database_settings[instance][sql_engine][:address]}")
       end
     end
 
