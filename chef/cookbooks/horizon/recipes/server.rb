@@ -157,24 +157,6 @@ unless magnum_ui_pkgname.nil?
   end
 end
 
-# install horizon trove plugin if needed
-trove_ui_pkgname =
-  case node[:platform_family]
-  when "suse"
-    "openstack-horizon-plugin-trove-ui"
-  when "rhel"
-    "openstack-trove-ui"
-  end
-
-unless trove_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "trove").empty?
-    package trove_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
-  end
-end
-
 # install horizon sahara plugin if needed
 sahara_ui_pkgname =
   case node[:platform_family]
