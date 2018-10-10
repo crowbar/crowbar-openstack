@@ -24,13 +24,11 @@ cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
 
 dirty = false
 
+management_address = CrowbarRabbitmqHelper.get_management_address(node)
+
 listen_address = CrowbarRabbitmqHelper.get_listen_address(node)
 if node[:rabbitmq][:address] != listen_address
   node.set[:rabbitmq][:address] = listen_address
-  dirty = true
-end
-if node[:rabbitmq][:management_address] != listen_address
-  node.set[:rabbitmq][:management_address] = listen_address
   dirty = true
 end
 
@@ -103,7 +101,7 @@ end
 rabbitmq_user "adding user #{node[:rabbitmq][:user]}" do
   user node[:rabbitmq][:user]
   password node[:rabbitmq][:password]
-  address node[:rabbitmq][:management_address]
+  address management_address
   port node[:rabbitmq][:management_port]
   action :add
   only_if only_if_command if ha_enabled
@@ -130,7 +128,7 @@ node[:rabbitmq][:users].each do |user|
   rabbitmq_user "adding user #{user[:username]}" do
     user user[:username]
     password user[:password]
-    address node[:rabbitmq][:management_address]
+    address management_address
     port node[:rabbitmq][:management_port]
     action :add
     only_if only_if_command if ha_enabled
@@ -186,7 +184,7 @@ if node[:rabbitmq][:trove][:enabled]
   rabbitmq_user "adding user #{node[:rabbitmq][:trove][:user]}" do
     user node[:rabbitmq][:trove][:user]
     password node[:rabbitmq][:trove][:password]
-    address node[:rabbitmq][:management_address]
+    address management_address
     port node[:rabbitmq][:management_port]
     action :add
     only_if only_if_command if ha_enabled
@@ -204,7 +202,7 @@ if node[:rabbitmq][:trove][:enabled]
 else
   rabbitmq_user "deleting user #{node[:rabbitmq][:trove][:user]}" do
     user node[:rabbitmq][:trove][:user]
-    address node[:rabbitmq][:management_address]
+    address management_address
     port node[:rabbitmq][:management_port]
     action :delete
     only_if only_if_command if ha_enabled

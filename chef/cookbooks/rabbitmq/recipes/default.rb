@@ -116,6 +116,7 @@ template "/etc/rabbitmq/rabbitmq.config" do
     cluster_enabled: cluster_enabled,
     cluster_partition_handling: cluster_partition_handling,
     addresses: addresses,
+    management_address: CrowbarRabbitmqHelper.get_management_address(node),
     hipe_compile: hipe_compile
   )
   notifies :restart, "service[rabbitmq-server]"
