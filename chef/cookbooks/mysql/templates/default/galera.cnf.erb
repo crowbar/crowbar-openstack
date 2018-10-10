@@ -6,6 +6,16 @@ wsrep_cluster_address = "<%= @cluster_addresses %>"
 wsrep_provider_options = "gmcast.listen_addr=tcp://<%= @node_address %>:4567;gcs.fc_limit = <%= @wsrep_slave_threads * 5 %>;gcs.fc_factor = 0.8"
 wsrep_slave_threads = <%= @wsrep_slave_threads %>
 
+# Maximum number of rows in write set
+# "0" (unlimited) is the upstream default, but the default configuration in the
+# rpm package overwrites that
+wsrep_max_ws_rows=0
+
+# Maximum size of write set
+# "2147483647" (2GB) is the upstream default, but the default configuration in
+# the rpm package overwrites that
+wsrep_max_ws_size=2147483647
+
 # to enable debug level logging, set this to 1
 wsrep_debug = 0
 
