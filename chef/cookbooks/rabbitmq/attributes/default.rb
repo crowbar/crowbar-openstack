@@ -29,8 +29,6 @@ default[:rabbitmq][:rabbitmq_group] = "rabbitmq"
 default[:rabbitmq][:nodename]  = "rabbit@#{node[:hostname]}"
 # This is the address for internal usage
 default[:rabbitmq][:address] = nil
-# These are all the addresses, possibly including public one
-default[:rabbitmq][:addresses] = []
 default[:rabbitmq][:port]  = 5672
 default[:rabbitmq][:management_port] = 15672
 default[:rabbitmq][:management_address] = nil
