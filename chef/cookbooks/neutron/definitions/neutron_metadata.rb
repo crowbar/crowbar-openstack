@@ -99,7 +99,7 @@ define :neutron_metadata,
     use_crowbar_pacemaker_service = \
       (neutron_network_ha && node[:pacemaker][:clone_stateless_services]) || nova_compute_ha_enabled
 
-    enable_metadata = node.roles.include?("neutron-network") || !node[:neutron][:metadata][:force]
+    enable_metadata = node.roles.include?("neutron-network") || !neutron[:neutron][:metadata][:force]
 
     # In case of Cisco ACI driver, supervisord takes care of starting up
     # the metadata agent.
