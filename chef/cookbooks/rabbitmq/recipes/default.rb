@@ -18,6 +18,11 @@
 # limitations under the License.
 #
 
+addresses = [CrowbarRabbitmqHelper.get_listen_address(node)]
+if node[:rabbitmq][:listen_public]
+  addresses << CrowbarRabbitmqHelper.get_public_listen_address(node)
+end
+
 ha_enabled = node[:rabbitmq][:ha][:enabled]
 # we only do cluster if we do HA
 cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
@@ -107,6 +112,7 @@ template "/etc/rabbitmq/rabbitmq.config" do
   variables(
     cluster_enabled: cluster_enabled,
     cluster_partition_handling: cluster_partition_handling,
+    addresses: addresses,
     hipe_compile: hipe_compile
   )
   notifies :restart, "service[rabbitmq-server]"
