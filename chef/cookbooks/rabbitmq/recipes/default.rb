@@ -18,7 +18,8 @@
 # limitations under the License.
 #
 
-addresses = [CrowbarRabbitmqHelper.get_listen_address(node)]
+listen_address = CrowbarRabbitmqHelper.get_listen_address(node)
+addresses = [listen_address]
 if node[:rabbitmq][:listen_public]
   addresses << CrowbarRabbitmqHelper.get_public_listen_address(node)
 end
@@ -62,7 +63,7 @@ if node[:platform_family] == "suse"
     group "root"
     mode 0o644
     variables(
-      listen_address: node[:rabbitmq][:address]
+      listen_address: listen_address
     )
     only_if "systemctl list-dependencies --plain rabbitmq-server.service | grep -q epmd.service"
   end

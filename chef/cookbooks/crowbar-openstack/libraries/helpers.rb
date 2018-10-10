@@ -170,6 +170,8 @@ class CrowbarOpenStackHelper
       else
         rabbit = rabbits.first
 
+        address = CrowbarRabbitmqHelper.get_listen_address(rabbit)
+
         port = if rabbit[:rabbitmq][:ssl][:enabled]
           rabbit[:rabbitmq][:ssl][:port]
         else
@@ -188,22 +190,21 @@ class CrowbarOpenStackHelper
           heartbeat_timeout: rabbit[:rabbitmq][:client][:heartbeat_timeout]
         }
 
-        single_rabbit_settings = {
-          url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
-            "#{rabbit[:rabbitmq][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{port}/" \
-            "#{rabbit[:rabbitmq][:vhost]}",
-          trove_url: "rabbit://#{rabbit[:rabbitmq][:trove][:user]}:" \
-            "#{rabbit[:rabbitmq][:trove][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{port}/" \
-            "#{rabbit[:rabbitmq][:trove][:vhost]}",
-          durable_queues: false,
-          ha_queues: false,
-          pacemaker_resource: "rabbitmq"
-        }.merge(common_rabbit_settings)
-
         if !rabbit[:rabbitmq][:cluster]
-          @rabbitmq_settings[instance] = single_rabbit_settings
+          @rabbitmq_settings[instance] = {
+            url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
+              "#{rabbit[:rabbitmq][:password]}@" \
+              "#{address}:#{port}/" \
+              "#{rabbit[:rabbitmq][:vhost]}",
+            trove_url: "rabbit://#{rabbit[:rabbitmq][:trove][:user]}:" \
+              "#{rabbit[:rabbitmq][:trove][:password]}@" \
+              "#{address}:#{port}/" \
+              "#{rabbit[:rabbitmq][:trove][:vhost]}",
+            durable_queues: false,
+            ha_queues: false,
+            pacemaker_resource: "rabbitmq"
+          }.merge(common_rabbit_settings)
+
           Chef::Log.info("RabbitMQ server found")
         else
           # transport_url format:
@@ -216,7 +217,7 @@ class CrowbarOpenStackHelper
             end
             url = "#{rabbit[:rabbitmq][:user]}:"
             url << "#{rabbit[:rabbitmq][:password]}@"
-            url << "#{rabbit[:rabbitmq][:address]}:#{port}"
+            url << "#{CrowbarRabbitmqHelper.get_listen_address(rabbit)}:#{port}"
             url << "/#{rabbit[:rabbitmq][:vhost]}" if rabbit.equal? rabbits.last
             url.prepend("rabbit://") if rabbit.equal? rabbits.first
 
@@ -232,7 +233,7 @@ class CrowbarOpenStackHelper
 
             url = "#{rabbit[:rabbitmq][:trove][:user]}:"
             url << "#{rabbit[:rabbitmq][:trove][:password]}@"
-            url << "#{rabbit[:rabbitmq][:address]}:#{port}"
+            url << "#{CrowbarRabbitmqHelper.get_listen_address(rabbit)}:#{port}"
             url << "/#{rabbit[:rabbitmq][:trove][:vhost]}" unless rabbit.equal? rabbits.first
             url.prepend("rabbit://") if rabbit.equal? rabbits.first
 
