@@ -24,4 +24,8 @@ module CrowbarRabbitmqHelper
       Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
     end
   end
+
+  def self.get_management_address(node)
+    get_listen_address(node)
+  end
 end
