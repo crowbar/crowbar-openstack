@@ -31,7 +31,6 @@ default[:rabbitmq][:nodename]  = "rabbit@#{node[:hostname]}"
 default[:rabbitmq][:address] = nil
 default[:rabbitmq][:port]  = 5672
 default[:rabbitmq][:management_port] = 15672
-default[:rabbitmq][:management_address] = nil
 default[:rabbitmq][:configfile] = nil
 default[:rabbitmq][:logdir] = nil
 default[:rabbitmq][:mnesiadir] = nil
