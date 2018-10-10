@@ -193,6 +193,8 @@ class CrowbarOpenStackHelper
       else
         rabbit = rabbits.first
 
+        address = CrowbarRabbitmqHelper.get_listen_address(rabbit)
+
         port = if rabbit[:rabbitmq][:ssl][:enabled]
           rabbit[:rabbitmq][:ssl][:port]
         else
@@ -204,34 +206,33 @@ class CrowbarOpenStackHelper
           rabbit[:rabbitmq][:ssl][:client_ca_certs]
         end
 
-        single_rabbit_settings = {
-          # backwards compatible attributes, remove in cloud8?
-          address: rabbit[:rabbitmq][:address],
-          port: port,
-          user: rabbit[:rabbitmq][:user],
-          password: rabbit[:rabbitmq][:password],
-          vhost: rabbit[:rabbitmq][:vhost],
-          # end backwards comatible attrs
-          use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
-          client_ca_certs: client_ca_certs,
-          url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
-            "#{rabbit[:rabbitmq][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{port}/" \
-            "#{rabbit[:rabbitmq][:vhost]}",
-          trove_url: "rabbit://#{rabbit[:rabbitmq][:trove][:user]}:" \
-            "#{rabbit[:rabbitmq][:trove][:password]}@" \
-            "#{rabbit[:rabbitmq][:address]}:#{port}/" \
-            "#{rabbit[:rabbitmq][:trove][:vhost]}",
-          cluster: false,
-          durable_queues: false,
-          enable_notifications: rabbit[:rabbitmq][:client][:enable_notifications],
-          ha_queues: false,
-          heartbeat_timeout: rabbit[:rabbitmq][:client][:heartbeat_timeout],
-          pacemaker_resource: "rabbitmq"
-        }
-
         if !rabbit[:rabbitmq][:cluster]
-          @rabbitmq_settings[instance] = single_rabbit_settings
+          @rabbitmq_settings[instance] = {
+            # backwards compatible attributes, remove in cloud8?
+            address: address,
+            port: port,
+            user: rabbit[:rabbitmq][:user],
+            password: rabbit[:rabbitmq][:password],
+            vhost: rabbit[:rabbitmq][:vhost],
+            # end backwards comatible attrs
+            use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
+            client_ca_certs: client_ca_certs,
+            url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
+              "#{rabbit[:rabbitmq][:password]}@" \
+              "#{address}:#{port}/" \
+              "#{rabbit[:rabbitmq][:vhost]}",
+            trove_url: "rabbit://#{rabbit[:rabbitmq][:trove][:user]}:" \
+              "#{rabbit[:rabbitmq][:trove][:password]}@" \
+              "#{address}:#{port}/" \
+              "#{rabbit[:rabbitmq][:trove][:vhost]}",
+            cluster: false,
+            durable_queues: false,
+            enable_notifications: rabbit[:rabbitmq][:client][:enable_notifications],
+            ha_queues: false,
+            heartbeat_timeout: rabbit[:rabbitmq][:client][:heartbeat_timeout],
+            pacemaker_resource: "rabbitmq"
+          }
+
           Chef::Log.info("RabbitMQ server found")
         else
           # transport_url format:
@@ -244,7 +245,7 @@ class CrowbarOpenStackHelper
             end
             url = "#{rabbit[:rabbitmq][:user]}:"
             url << "#{rabbit[:rabbitmq][:password]}@"
-            url << "#{rabbit[:rabbitmq][:address]}:#{port}"
+            url << "#{CrowbarRabbitmqHelper.get_listen_address(rabbit)}:#{port}"
             url << "/#{rabbit[:rabbitmq][:vhost]}" if rabbit.equal? rabbits.last
             url.prepend("rabbit://") if rabbit.equal? rabbits.first
 
@@ -260,7 +261,7 @@ class CrowbarOpenStackHelper
 
             url = "#{rabbit[:rabbitmq][:trove][:user]}:"
             url << "#{rabbit[:rabbitmq][:trove][:password]}@"
-            url << "#{rabbit[:rabbitmq][:address]}:#{port}"
+            url << "#{CrowbarRabbitmqHelper.get_listen_address(rabbit)}:#{port}"
             url << "/#{rabbit[:rabbitmq][:trove][:vhost]}" unless rabbit.equal? rabbits.first
             url.prepend("rabbit://") if rabbit.equal? rabbits.first
 

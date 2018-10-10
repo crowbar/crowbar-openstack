@@ -28,5 +28,8 @@ template "/etc/nagios/nrpe.d/rabbitmq_nrpe.cfg" do
   mode "0644"
   group node[:nagios][:group]
   owner node[:nagios][:user]
+  variables(
+    listen_address: CrowbarRabbitmqHelper.get_listen_address(node)
+  )
   notifies :restart, "service[nagios-nrpe-server]"
 end

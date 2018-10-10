@@ -8,3 +8,4 @@ version "0.1"
 
 depends "crowbar-pacemaker"
 depends "database"
+depends "rabbitmq"

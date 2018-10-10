@@ -25,13 +25,6 @@ cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
 dirty = false
 
 management_address = CrowbarRabbitmqHelper.get_management_address(node)
-
-listen_address = CrowbarRabbitmqHelper.get_listen_address(node)
-if node[:rabbitmq][:address] != listen_address
-  node.set[:rabbitmq][:address] = listen_address
-  dirty = true
-end
-
 nodename = "rabbit@#{CrowbarRabbitmqHelper.get_ha_vhostname(node)}"
 
 if cluster_enabled
