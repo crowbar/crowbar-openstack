@@ -272,7 +272,7 @@ max_over_subscription_ratio = <%= volume[volume['backend_driver']]['max_over_sub
 
 [key_manager]
 <% unless node[:cinder][:keymgr_fixed_key].empty? -%>
-api_class = cinder.keymgr.conf_key_mgr.ConfKeyManager
+backend = cinder.keymgr.conf_key_mgr.ConfKeyManager
 fixed_key = <%= node[:cinder][:keymgr_fixed_key].each_byte.map { |b| b.to_s(16) }.join %>
 <% end -%>
 
@@ -284,7 +284,7 @@ pool_timeout = <%= node[:cinder][:pool_timeout] %>
 
 [keystone_authtoken]
 auth_type = password
-auth_uri = <%= @keystone_settings['public_auth_url'] %>
+www_authenticate_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
 insecure = <%= @keystone_settings['insecure'] %>

@@ -162,13 +162,13 @@ user_domain_name = <%= @keystone_settings['admin_domain'] %>
 
 [key_manager]
 <% unless @keymgr_fixed_key.empty? %>
-api_class = nova.keymgr.conf_key_mgr.ConfKeyManager
+backend = nova.keymgr.conf_key_mgr.ConfKeyManager
 fixed_key = <%= @keymgr_fixed_key.each_byte.map { |b| b.to_s(16) }.join %>
 <% end %>
 
 [keystone_authtoken]
 auth_type = password
-auth_uri = <%= @keystone_settings['public_auth_url'] %>
+www_authenticate_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
 insecure = <%= @keystone_settings['insecure'] %>
@@ -317,8 +317,8 @@ vlan_interface = <%= node[:nova][:vcenter][:interface] %>
 [vnc]
 enabled = <%= @vnc_enabled ? "True" : "False" %>
 keymap = <%= node[:nova][:vnc_keymap] %>
-vncserver_listen = "0.0.0.0"
-vncserver_proxyclient_address = <%= node[:nova][:my_ip] %>
+server_listen = "0.0.0.0"
+server_proxyclient_address = <%= node[:nova][:my_ip] %>
 novncproxy_host = <%= @bind_host %>
 novncproxy_port = <%= @bind_port_novncproxy %>
 novncproxy_base_url = <%= @vncproxy_ssl_enabled ? "https" : "http" %>://<%= @vncproxy_public_host %>:<%= node[:nova][:ports][:novncproxy] %>/vnc_auto.html

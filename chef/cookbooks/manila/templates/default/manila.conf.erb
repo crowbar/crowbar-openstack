@@ -41,7 +41,7 @@ username=<%= @cinder_admin_username %>
 connection=<%= @sql_connection %>
 
 [keystone_authtoken]
-auth_uri = <%= @keystone_settings['public_auth_url'] %>
+www_authenticate_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>

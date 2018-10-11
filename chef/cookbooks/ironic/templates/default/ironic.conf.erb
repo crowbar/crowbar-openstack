@@ -53,7 +53,7 @@ region_name=<%= @keystone_settings['endpoint_region'] %>
 
 [keystone_authtoken]
 auth_type=password
-auth_uri=<%= @keystone_settings['protocol'] %>://<%= @keystone_settings['public_url_host'] %>:<%= @keystone_settings['service_port'] %>/<%= @auth_version %>/
+www_authenticate_uri=<%= @keystone_settings['protocol'] %>://<%= @keystone_settings['public_url_host'] %>:<%= @keystone_settings['service_port'] %>/<%= @auth_version %>/
 auth_url=<%= @keystone_settings['admin_auth_url'] %>
 auth_version=<%= @auth_version %>
 region_name=<%= @keystone_settings['endpoint_region'] %>

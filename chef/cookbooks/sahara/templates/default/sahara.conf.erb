@@ -29,7 +29,7 @@ api_insecure = <%= @heat_insecure %>
 api_insecure = <%= @keystone_settings["insecure"] %>
 
 [keystone_authtoken]
-auth_uri = <%= @keystone_settings["public_auth_url"] %>
+www_authenticate_uri = <%= @keystone_settings["public_auth_url"] %>
 username = <%= @keystone_settings['service_user'] %>
 password = <%= @keystone_settings['service_password'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
