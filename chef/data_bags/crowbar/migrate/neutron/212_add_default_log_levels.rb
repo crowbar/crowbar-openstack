@@ -7,5 +7,5 @@ end
 def downgrade(template_attributes, template_deployment, attributes, deployment)
   key = "default_log_levels"
   attributes.delete(key) unless template_attributes.key? key
-  return attributes, deploment
+  return attributes, deployment
 end
