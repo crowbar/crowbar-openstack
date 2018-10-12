@@ -20,7 +20,8 @@ begin
 
   Sprockets::Standalone::RakeTask.new(:assets) do |task, sprockets|
     task.assets = [
-      "**/application.js"
+      "**/application.js",
+      "**/yaml.min.js"
     ]
 
     task.sources = [

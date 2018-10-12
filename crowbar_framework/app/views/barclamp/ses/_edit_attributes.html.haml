@@ -1,0 +1,65 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header show_raw_deployment?, true
+
+  .panel-body
+    = instance_field :cinder
+    = instance_field :glance
+    = instance_field :nova
+    = instance_field :keystone
+
+    %script#yaml{ :type => "text/javascript", :src => "/assets/barclamps/ses/yaml.min.js" }
+
+    %fieldset
+      %legend
+        = t(".yaml_header")
+
+      = text_field %w(yaml_file)
+
+      %div.form-group.pull-left
+        %input(id='parse_yaml' class="form-control" type="button" value="Parse Yaml")
+        %div#yaml_success{ :style => "display: none" }
+          = t(".yaml_success")
+
+        %div#yaml_fail{ :style => "display: none" }
+          = t(".yaml_failure")
+
+    %fieldset
+      %legend
+        = t(".parameters.ceph_conf_info")
+      = string_field %w(ceph_conf cluster_network)
+      = string_field %w(ceph_conf fsid)
+      = string_field %w(ceph_conf mon_host)
+      = string_field %w(ceph_conf mon_initial_members)
+      = string_field %w(ceph_conf public_network)
+
+    %fieldset
+      %legend
+        = t(".parameters.cinder_info")
+      = string_field %w(cinder key)
+      = string_field %w(cinder rbd_store_pool)
+      = string_field %w(cinder rbd_store_user)
+
+    %fieldset
+      %legend
+        = t(".parameters.cinder_backup_info")
+      = string_field %w(cinder_backup key)
+      = string_field %w(cinder_backup rbd_store_pool)
+      = string_field %w(cinder_backup rbd_store_user)
+
+    %fieldset
+      %legend
+        = t(".parameters.glance_info")
+      = string_field %w(glance key)
+      = string_field %w(glance rbd_store_pool)
+      = string_field %w(glance rbd_store_user)
+
+    %fieldset
+      %legend
+        = t(".parameters.nova_info")
+      = string_field %w(nova rbd_store_pool)
+
+    %fieldset
+      %legend
+        = t(".parameters.radosgw_info")
+      = array_string_field %w(radosgw_urls), :only_comma => true
