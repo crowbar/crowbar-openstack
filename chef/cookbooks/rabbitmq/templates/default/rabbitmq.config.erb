@@ -8,11 +8,11 @@
  {rabbit,
   [
    {tcp_listeners, [
-                    <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{node[:rabbitmq][:port]}}" }.join(", ") %>
+                    <%= @addresses.map { |address| "{\"#{address}\", #{node[:rabbitmq][:port]}}" }.join(", ") %>
                    ]},
 <% if node[:rabbitmq][:ssl][:enabled] -%>
    {ssl_listeners, [
-                    <%= node[:rabbitmq][:addresses].map { |address| "{\"#{address}\", #{node[:rabbitmq][:ssl][:port]}}" }.join(", ") %>
+                    <%= @addresses.map { |address| "{\"#{address}\", #{node[:rabbitmq][:ssl][:port]}}" }.join(", ") %>
                    ]},
    {ssl_options, [
    <% if node[:rabbitmq][:ssl][:cert_required] -%>
@@ -37,7 +37,7 @@
  ]},
  {rabbitmq_management,
   [
-   {listener, [{ip, "<%= node[:rabbitmq][:management_address] %>"}, {port, <%= node[:rabbitmq][:management_port] %>}]},
+   {listener, [{ip, "<%= @management_address %>"}, {port, <%= node[:rabbitmq][:management_port] %>}]},
    {load_definitions, "/etc/rabbitmq/definitions.json"}
   ]
  }

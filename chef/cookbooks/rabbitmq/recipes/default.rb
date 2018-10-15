@@ -18,6 +18,12 @@
 # limitations under the License.
 #
 
+listen_address = CrowbarRabbitmqHelper.get_listen_address(node)
+addresses = [listen_address]
+if node[:rabbitmq][:listen_public]
+  addresses << CrowbarRabbitmqHelper.get_public_listen_address(node)
+end
+
 ha_enabled = node[:rabbitmq][:ha][:enabled]
 # we only do cluster if we do HA
 cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
@@ -55,7 +61,7 @@ if node[:platform_family] == "suse"
     group "root"
     mode 0o644
     variables(
-      listen_address: node[:rabbitmq][:address]
+      listen_address: listen_address
     )
     only_if "grep -q Requires=epmd.service /usr/lib/systemd/system/rabbitmq-server.service"
   end
@@ -107,6 +113,8 @@ template "/etc/rabbitmq/rabbitmq.config" do
   variables(
     cluster_enabled: cluster_enabled,
     cluster_partition_handling: cluster_partition_handling,
+    addresses: addresses,
+    management_address: CrowbarRabbitmqHelper.get_management_address(node),
     hipe_compile: hipe_compile
   )
   notifies :restart, "service[rabbitmq-server]"
