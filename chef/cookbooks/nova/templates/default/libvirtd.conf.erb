@@ -78,7 +78,7 @@ listen_addr = "<%= @libvirtd_listen_addr %>"
 # without becoming root.
 #
 # This is restricted to 'root' by default.
-#unix_sock_group = "libvirt"
+unix_sock_group = "libvirt"
 
 # Set the UNIX socket permissions for the R/O socket. This is used
 # for monitoring VM status only
@@ -95,7 +95,7 @@ listen_addr = "<%= @libvirtd_listen_addr %>"
 #
 # If not using PolicyKit and setting group ownership for access
 # control then you may want to relax this to:
-#unix_sock_rw_perms = "0770"
+unix_sock_rw_perms = "0770"
 
 # Set the name of the directory in which sockets will be found/created.
 #unix_sock_dir = "/var/run/libvirt"
@@ -135,7 +135,7 @@ listen_addr = "<%= @libvirtd_listen_addr %>"
 #
 # If the unix_sock_rw_perms are changed you may wish to enable
 # an authentication mechanism here
-#auth_unix_rw = "none"
+auth_unix_rw = "none"
 
 # Change the authentication scheme for TCP sockets.
 #
