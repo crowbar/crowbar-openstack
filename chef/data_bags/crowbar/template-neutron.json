@@ -181,14 +181,15 @@
       },
       "metadata": {
         "force": false
-      }
+      },
+      "default_log_levels": []
     }
   },
   "deployment": {
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 301,
+      "schema-revision": 302,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ],
