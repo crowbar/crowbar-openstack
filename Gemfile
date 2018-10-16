@@ -18,6 +18,7 @@
 source "https://rubygems.org"
 
 group :development do
+  gem "crowbar-validate-databags", "~> 0.1"
   gem "rake", "< 12.0.0"
   gem "uglifier", "~> 2.7.2"
   gem "sass", "~> 3.2.19"
