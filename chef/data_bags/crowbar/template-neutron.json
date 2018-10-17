@@ -23,9 +23,9 @@
       "additional_external_networks": [],
       "networking_plugin": "ml2",
       "ml2_mechanism_drivers": ["openvswitch"],
-      "ml2_type_drivers": ["gre"],
-      "ml2_type_drivers_default_provider_network": "gre",
-      "ml2_type_drivers_default_tenant_network": "gre",
+      "ml2_type_drivers": ["vxlan"],
+      "ml2_type_drivers_default_provider_network": "vxlan",
+      "ml2_type_drivers_default_tenant_network": "vxlan",
       "num_vlans": 2000,
       "gre": {
         "tunnel_id_start": 1,
