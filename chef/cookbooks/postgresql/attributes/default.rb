@@ -219,6 +219,7 @@ when "rhel", "fedora", "suse"
   default["postgresql"]["config"]["log_truncate_on_rotation"] = true
   default["postgresql"]["config"]["log_rotation_age"] = "1d"
   default["postgresql"]["config"]["log_rotation_size"] = 0
+  default["postgresql"]["config"]["log_line_prefix"] = "%t "
   default["postgresql"]["config"]["datestyle"] = "iso, mdy"
   default["postgresql"]["config"]["lc_messages"] = "en_US.UTF-8"
   default["postgresql"]["config"]["lc_monetary"] = "en_US.UTF-8"
