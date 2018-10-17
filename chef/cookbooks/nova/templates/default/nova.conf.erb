@@ -8,6 +8,7 @@ instance_name_template=zvm%05x
 my_ip = <%= node[:nova][:my_ip] %>
 <% unless @ironic_settings.nil? %>scheduler_host_manager = ironic_host_manager<% end %>
 notify_on_state_change = vm_and_task_state
+notification_format = unversioned
 state_path = /var/lib/nova
 enabled_ssl_apis = <%= @ssl_enabled ? "osapi_compute,metadata" : "" %>
 osapi_compute_listen = <%= @bind_host %>
