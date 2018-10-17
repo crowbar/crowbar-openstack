@@ -144,6 +144,8 @@ service agent_settings[:agent_service_name] do
   # provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   subscribes :restart, resources(template: "/etc/monasca/agent/agent.yaml")
   subscribes :restart, resources(template: "/etc/monasca/agent/supervisor.conf")
+  subscribes :start, resources(template: "/etc/monasca/agent/agent.yaml")
+  subscribes :start, resources(template: "/etc/monasca/agent/supervisor.conf")
 end
 utils_systemd_service_restart agent_settings[:agent_service_name] do
   # action ha_enabled ? :disable : :enable
