@@ -181,9 +181,14 @@ class CrowbarOpenStackHelper
           rabbit[:rabbitmq][:ssl][:client_ca_certs]
         end
 
-        single_rabbit_settings = {
+        common_rabbit_settings = {
           use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
           client_ca_certs: client_ca_certs,
+          enable_notifications: rabbit[:rabbitmq][:client][:enable_notifications],
+          heartbeat_timeout: rabbit[:rabbitmq][:client][:heartbeat_timeout]
+        }
+
+        single_rabbit_settings = {
           url: "rabbit://#{rabbit[:rabbitmq][:user]}:" \
             "#{rabbit[:rabbitmq][:password]}@" \
             "#{rabbit[:rabbitmq][:address]}:#{port}/" \
@@ -195,9 +200,8 @@ class CrowbarOpenStackHelper
           durable_queues: false,
           enable_notifications: rabbit[:rabbitmq][:client][:enable_notifications],
           ha_queues: false,
-          heartbeat_timeout: rabbit[:rabbitmq][:client][:heartbeat_timeout],
           pacemaker_resource: "rabbitmq"
-        }
+        }.merge(common_rabbit_settings)
 
         if !rabbit[:rabbitmq][:cluster]
           @rabbitmq_settings[instance] = single_rabbit_settings
@@ -237,15 +241,12 @@ class CrowbarOpenStackHelper
           end
 
           @rabbitmq_settings[instance] = {
-            use_ssl: rabbit[:rabbitmq][:ssl][:enabled],
-            client_ca_certs: client_ca_certs,
             url: rabbit_hosts.join(","),
             trove_url: trove_rabbit_hosts.join(","),
             durable_queues: true,
             ha_queues: true,
-            heartbeat_timeout: rabbit[:rabbitmq][:client][:heartbeat_timeout],
             pacemaker_resource: "ms-rabbitmq"
-          }
+          }.merge(common_rabbit_settings)
           Chef::Log.info("RabbitMQ cluster found")
         end
       end
