@@ -6,9 +6,9 @@
       "listen_public": false,
       "port": 5672,
       "password": "",
-      "user": "nova",
+      "user": "openstack",
       "extra_users": {},
-      "vhost": "nova",
+      "vhost": "openstack",
       "ssl": {
         "enabled": false,
         "port": 5671,
