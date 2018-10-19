@@ -260,6 +260,10 @@ lock_path = /var/run/nova
 <% if @rabbit_settings[:enable_notifications] -%>
 [oslo_messaging_notifications]
 driver = messagingv2
+
+[notifications]
+notify_on_state_change = vm_and_task_state
+notification_format = unversioned
 <% end -%>
 
 [oslo_messaging_rabbit]
@@ -358,6 +362,3 @@ enabled_filters = <%= @enabled_filters %>
 track_instance_changes = false
 <% end %>
 
-[notifications]
-notify_on_state_change = vm_and_task_state
-notification_format = unversioned
