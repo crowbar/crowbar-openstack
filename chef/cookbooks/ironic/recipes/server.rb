@@ -122,6 +122,7 @@ end
 public_endpoint = "#{api_protocol}://#{my_public_host}:#{api_port}"
 admin_endpoint = "#{api_protocol}://#{my_admin_host}:#{api_port}"
 internal_endpoint = admin_endpoint
+api_url = "#{api_protocol}://#{ironic_net_ip}:#{api_port}"
 
 keystone_register "register ironic endpoint" do
   protocol keystone_settings["protocol"]
@@ -192,6 +193,7 @@ template node[:ironic][:config_file] do
         pxe_append_params: node[:ironic][:pxe_append_params],
         public_endpoint: public_endpoint,
         api_port: api_port,
+        api_url: api_url,
         auth_version: auth_version,
         memcached_servers: memcached_servers
       }
