@@ -139,6 +139,19 @@ class CeilometerService < OpenstackServiceObject
         end
       end
     end
+
+    rabbitmq_proposal = Proposal.find_by(
+      barclamp: "rabbitmq",
+      name: proposal["attributes"][@bc_name]["rabbitmq_instance"]
+    )
+
+    unless rabbitmq_proposal &&
+        rabbitmq_proposal["attributes"]["rabbitmq"]["client"]["enable_notifications"]
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.notifications_enabled"
+      )
+    end
+
     super
   end
 
