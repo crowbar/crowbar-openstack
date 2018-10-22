@@ -174,7 +174,7 @@ if cluster_enabled
   queue_regex = "^(?!(amqp.)|(.*_fanout_)|(reply_)).*"
   # policy doesnt need spaces between elements as they will be removed when listing them
   # making it more difficult to check for them
-  policy = "{\"ha-mode\":\"exactly\",\"ha-params\":#{quorum}}"
+  policy = "{\"ha-mode\":\"exactly\",\"ha-params\":#{quorum},\"ha-sync-mode\":\"automatic\"}"
   vhost = node[:rabbitmq][:vhost]
   # we need to scape the regex properly so we can use it on the grep command
   queue_regex_escaped = ""
