@@ -82,11 +82,11 @@ def remove_recipe(node)
 end
 
 # based on code from crowbar_framework/app/models/node.rb
-def run_ssh_cmd(node, cmd, log_suffix = nil, timeout = "15s", kill_after = "5s")
+def run_ssh_cmd(node, cmd, log_suffix = nil)
   log_file = "/var/log/crowbar/db-prepare.#{log_suffix}.log" if log_suffix
   log_redirect = "> #{log_file} 2>&1" if log_file
   start_time = Time.now
-  args = ["sudo", "-i", "-u", "root", "--", "timeout", "-k", kill_after, timeout,
+  args = ["sudo", "-i", "-u", "root", "--",
           "ssh", "-o", "ConnectTimeout=10",
           "root@#{node.name}",
           %("#{cmd.gsub('"', '\\"')} #{log_redirect}")
@@ -110,7 +110,7 @@ def prepare_node(node, roles)
     log "Adding #{RECIPE} to run_list"
     add_recipe node
     log "Running chef-client on #{node.name}..."
-    res = run_ssh_cmd(node, "chef-client", "chef-client", "30m")
+    res = run_ssh_cmd(node, "chef-client", "chef-client")
     log "Run time: #{res[:run_time]}s"
     log "Removing #{RECIPE} from run_list"
     remove_recipe node
