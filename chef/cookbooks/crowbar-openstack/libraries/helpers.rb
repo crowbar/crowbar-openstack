@@ -198,7 +198,6 @@ class CrowbarOpenStackHelper
             "#{rabbit[:rabbitmq][:address]}:#{port}/" \
             "#{rabbit[:rabbitmq][:trove][:vhost]}",
           durable_queues: false,
-          enable_notifications: rabbit[:rabbitmq][:client][:enable_notifications],
           ha_queues: false,
           pacemaker_resource: "rabbitmq"
         }.merge(common_rabbit_settings)
