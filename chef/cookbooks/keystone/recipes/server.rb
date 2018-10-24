@@ -386,106 +386,27 @@ if ha_enabled
   crowbar_pacemaker_sync_mark "create-keystone_db_sync"
 end
 
-if ha_enabled
-  include_recipe "keystone::ha"
-end
-
-# Configure Keystone token fernet backend provider
-if node[:keystone][:token_format] == "fernet"
-  # To be sure that rsync package is installed
-  package "rsync"
-  crowbar_pacemaker_sync_mark "sync-keystone_install_rsync" if ha_enabled
-
-  rsync_command = ""
-  initial_rsync_command = ""
-  if ha_enabled
-    cluster_nodes.each do |n|
-      next if node.name == n.name
-      node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
-      node_rsync_command = "/usr/bin/keystone-fernet-keys-push.sh #{node_address}; "
-      rsync_command += node_rsync_command
-      # initial rsync only for (new) nodes which didn't get the keys yet
-      next if n.include?(:keystone) &&
-          n[:keystone][:initial_keys_sync]
-      initial_rsync_command += node_rsync_command
-    end
-    raise "No other cluster members found" if rsync_command.empty?
-  end
-
+# Configure Keystone token fernet backend provider (non-HA case)
+if !ha_enabled && node[:keystone][:token_format] == "fernet"
   # Rotate primary key, which is used for new tokens
-  template "/var/lib/keystone/keystone-fernet-rotate" do
-    source "keystone-fernet-rotate.erb"
-    owner "root"
-    group node[:keystone][:group]
-    mode "0750"
-    variables(
-      rsync_command: rsync_command
-    )
+  keystone_fernet "keystone-fernet-rotate-non-ha" do
+    action :rotate_script
   end
 
-  unless ha_enabled
-    link "/etc/cron.hourly/openstack-keystone-fernet" do
-      to "/var/lib/keystone/keystone-fernet-rotate"
-    end
+  link "/etc/cron.hourly/openstack-keystone-fernet" do
+    to "/var/lib/keystone/keystone-fernet-rotate"
   end
 
-  crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate" if ha_enabled
-
-  if File.exist?("/etc/keystone/fernet-keys/0")
-    # Mark node to avoid unneeded future rsyncs
-    unless node[:keystone][:initial_keys_sync]
-      node[:keystone][:initial_keys_sync] = true
-      node.save
-    end
-  else
+  unless File.exist?("/etc/keystone/fernet-keys/0")
     # Setup a key repository for fernet tokens
-    execute "keystone-manage fernet_setup" do
-      command "keystone-manage fernet_setup \
-        --keystone-user #{node[:keystone][:user]} \
-        --keystone-group #{node[:keystone][:group]}"
-      action :run
-      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    keystone_fernet "keystone-fernet-setup-non-ha" do
+      action :setup
     end
   end
-
-  # We would like to propagate fernet keys to all (new) nodes in the cluster
-  execute "propagate fernet keys to all nodes in the cluster" do
-    command initial_rsync_command
-    action :run
-    only_if do
-      ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) &&
-        !initial_rsync_command.empty?
-    end
-  end
-
-  service_transaction_objects = []
-
-  keystone_fernet_primitive = "keystone-fernet-rotate"
-  pacemaker_primitive keystone_fernet_primitive do
-    agent node[:keystone][:ha][:fernet][:agent]
-    params({
-      "target" => "/var/lib/keystone/keystone-fernet-rotate",
-      "link" => "/etc/cron.hourly/openstack-keystone-fernet",
-      "backup_suffix" => ".orig"
-    })
-    op node[:keystone][:ha][:fernet][:op]
-    action :update
-    only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-  service_transaction_objects << "pacemaker_primitive[#{keystone_fernet_primitive}]"
-
-  fernet_rotate_loc = openstack_pacemaker_controller_only_location_for keystone_fernet_primitive
-  service_transaction_objects << "pacemaker_location[#{fernet_rotate_loc}]"
-
-  pacemaker_transaction "keystone-fernet-rotate cron" do
-    cib_objects service_transaction_objects
-    # note that this will also automatically start the resources
-    action :commit_new
-    only_if { ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  crowbar_pacemaker_sync_mark "create-keystone_fernet_rotate" if ha_enabled
 end
+
+# This also includes fernet setup for HA case
+include_recipe "keystone::ha" if ha_enabled
 
 # Wait for all nodes to reach this point so we know that all nodes will have
 # all the required services correctly configured and running before we create

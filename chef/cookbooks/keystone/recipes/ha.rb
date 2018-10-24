@@ -31,6 +31,133 @@ haproxy_loadbalancer "keystone-admin" do
   action :nothing
 end.run_action(:create)
 
+# Configure Keystone token fernet backend provider
+if node[:keystone][:token_format] == "fernet"
+  template "/usr/bin/keystone-fernet-keys-push.sh" do
+    source "keystone-fernet-keys-push.sh"
+    owner "root"
+    group "root"
+    mode "0755"
+  end
+
+  # To be sure that rsync package is installed
+  package "rsync"
+  crowbar_pacemaker_sync_mark "sync-keystone_install_rsync"
+
+  rsync_command = ""
+  initial_rsync_command = ""
+
+  # can't use CrowbarPacemakerHelper.cluster_nodes() here as it will sometimes not return
+  # nodes which will be added to the cluster in current chef-client run.
+  cluster_nodes = node[:pacemaker][:elements]["pacemaker-cluster-member"]
+  cluster_nodes = cluster_nodes.map { |n| Chef::Node.load(n) }
+  cluster_nodes.sort_by! { |n| n[:hostname] }
+  cluster_nodes.each do |n|
+    next if node.name == n.name
+    node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
+    node_rsync_command = "/usr/bin/keystone-fernet-keys-push.sh #{node_address}; "
+    rsync_command += node_rsync_command
+    # initial rsync only for (new) nodes which didn't get the keys yet
+    next if n.include?(:keystone) &&
+        n[:keystone][:initial_keys_sync]
+    initial_rsync_command += node_rsync_command
+  end
+  raise "No other cluster members found" if rsync_command.empty?
+
+  # Rotate primary key, which is used for new tokens
+  keystone_fernet "keystone-fernet-rotate-ha" do
+    action :rotate_script
+    rsync_command rsync_command
+  end
+
+  crowbar_pacemaker_sync_mark "wait-keystone_fernet_rotate"
+
+  if File.exist?("/etc/keystone/fernet-keys/0")
+    # Mark node to avoid unneeded future rsyncs
+    unless node[:keystone][:initial_keys_sync]
+      node[:keystone][:initial_keys_sync] = true
+      node.save
+    end
+  else
+    keystone_fernet "keystone-fernet-setup-ha" do
+      action :setup
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
+  end
+
+  # We would like to propagate fernet keys to all (new) nodes in the cluster
+  execute "propagate fernet keys to all nodes in the cluster" do
+    command initial_rsync_command
+    action :run
+    only_if do
+      CrowbarPacemakerHelper.is_cluster_founder?(node) &&
+        !initial_rsync_command.empty?
+    end
+  end
+
+  service_transaction_objects = []
+
+  keystone_fernet_primitive = "keystone-fernet-rotate"
+  pacemaker_primitive keystone_fernet_primitive do
+    agent node[:keystone][:ha][:fernet][:agent]
+    params(
+      "target" => "/var/lib/keystone/keystone-fernet-rotate",
+      "link" => "/etc/cron.hourly/openstack-keystone-fernet",
+      "backup_suffix" => ".orig"
+    )
+    op node[:keystone][:ha][:fernet][:op]
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+  service_transaction_objects << "pacemaker_primitive[#{keystone_fernet_primitive}]"
+
+  fernet_rotate_loc = openstack_pacemaker_controller_only_location_for keystone_fernet_primitive
+  service_transaction_objects << "pacemaker_location[#{fernet_rotate_loc}]"
+
+  pacemaker_transaction "keystone-fernet-rotate cron" do
+    cib_objects service_transaction_objects
+    # note that this will also automatically start the resources
+    action :commit_new
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  crowbar_pacemaker_sync_mark "create-keystone_fernet_rotate"
+end
+
+# note(jtomasiak): We don't need new syncmarks for the fernet-keys-sync part.
+# This is because the deployment and configuration of this feature will be done
+# once during keystone installation and it will not be used until some keystone
+# node is reinstalled. We assume that time between keystone installation and
+# possible node reinstallation is high enough to run this safely without
+# syncmarks.
+fernet_resources_action = node[:keystone][:token_format] == "fernet" ? :create : :delete
+
+template "/usr/bin/keystone-fernet-keys-sync.sh" do
+  source "keystone-fernet-keys-sync.sh"
+  owner "root"
+  group "root"
+  mode "0755"
+  action fernet_resources_action
+end
+
+# handler scripts are run by hacluster user so sudo configuration is needed
+# if the handler needs to rsync to other nodes using root's keys
+template "/etc/sudoers.d/keystone-fernet-keys-sync" do
+  source "hacluster_sudoers.erb"
+  owner "root"
+  group "root"
+  mode "0440"
+  action fernet_resources_action
+end
+
+# on founder: create/delete pacemaker alert
+pacemaker_alert "keystone-fernet-keys-sync" do
+  handler "/usr/bin/keystone-fernet-keys-sync.sh"
+  action fernet_resources_action
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+# Create/update apache resources after fernet keys setup to make sure everything is ready.
 if node[:keystone][:frontend] == "apache" && node[:pacemaker][:clone_stateless_services]
   include_recipe "crowbar-pacemaker::apache"
 
@@ -70,45 +197,4 @@ if node[:keystone][:frontend] == "apache" && node[:pacemaker][:clone_stateless_s
   end
 
   crowbar_pacemaker_sync_mark "create-keystone_ha_resources"
-end
-
-# note(jtomasiak): We don't need new syncmarks for the fernet-keys-sync part.
-# This is because the deployment and configuration of this feature will be done
-# once during keystone installation and it will not be used until some keystone
-# node is reinstalled. We assume that time between keystone installation and
-# possible node reinstallation is high enough to run this safely without
-# syncmarks.
-fernet_resources_action = node[:keystone][:token_format] == "fernet" ? :create : :delete
-
-template "/usr/bin/keystone-fernet-keys-push.sh" do
-  source "keystone-fernet-keys-push.sh"
-  owner "root"
-  group "root"
-  mode "0755"
-  action fernet_resources_action
-end
-
-template "/usr/bin/keystone-fernet-keys-sync.sh" do
-  source "keystone-fernet-keys-sync.sh"
-  owner "root"
-  group "root"
-  mode "0755"
-  action fernet_resources_action
-end
-
-# handler scripts are run by hacluster user so sudo configuration is needed
-# if the handler needs to rsync to other nodes using root's keys
-template "/etc/sudoers.d/keystone-fernet-keys-sync" do
-  source "hacluster_sudoers.erb"
-  owner "root"
-  group "root"
-  mode "0440"
-  action fernet_resources_action
-end
-
-# on founder: create/delete pacemaker alert
-pacemaker_alert "keystone-fernet-keys-sync" do
-  handler "/usr/bin/keystone-fernet-keys-sync.sh"
-  action fernet_resources_action
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
