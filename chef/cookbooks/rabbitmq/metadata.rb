@@ -25,10 +25,6 @@ attribute "rabbitmq/nodename",
           description: "The Erlang node name for this server.",
           default: "node[:hostname]"
 
-attribute "rabbitmq/address",
-          display_name: "RabbitMQ server IP address",
-          description: "IP address to bind."
-
 attribute "rabbitmq/port",
           display_name: "RabbitMQ server port",
           description: "TCP port to bind."
