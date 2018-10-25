@@ -122,7 +122,8 @@
                 "recbuf": { "type": "int", "required": false }
               }
             },
-            "collect_statistics_interval": { "type": "int", "required": true}
+            "collect_statistics_interval": { "type": "int", "required": true},
+            "enable_queue_mirroring": { "type": "bool", "required": true}
           }
         }
       }
