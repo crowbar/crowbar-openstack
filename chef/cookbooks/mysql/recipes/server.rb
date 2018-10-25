@@ -155,6 +155,20 @@ file "/etc/my.cnf.d/tuning.cnf" do
   notifies :restart, "service[mysql]"
 end
 
+template "/etc/my.cnf.d/76-mysqladmin.cnf" do
+  source "mysqladmin-credentials"
+  owner "root"
+  group "mysql"
+  mode "0640"
+end
+
+template "/etc/logrotate.d/mariadb-soc" do
+  source "mysqladmin-logrotate"
+  owner "root"
+  group "root"
+  mode "0644"
+end
+
 unless Chef::Config[:solo]
   ruby_block "save node data" do
     block do
