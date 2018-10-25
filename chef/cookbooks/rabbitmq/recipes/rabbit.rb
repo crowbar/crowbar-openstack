@@ -138,7 +138,7 @@ node[:rabbitmq][:users].each do |user|
   end
 
   # tag those users as management
-  execute "rabbitmqctl set_user_tags #{user[:username]} #{user[:tags]}" do
+  execute "rabbitmqctl set_user_tags #{user[:username]} #{user[:tags].join(",")}" do
     not_if "rabbitmqctl list_users | grep #{user[:username]} | grep -q #{user[:tags].join(",")}"
     action :run
     only_if only_if_command if ha_enabled
