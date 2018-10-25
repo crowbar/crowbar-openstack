@@ -201,12 +201,14 @@ if node[:pacemaker][:clone_stateless_services]
     end
   end
 
-  metering_agent_primitive = "neutron-metering-agent"
-  objects = openstack_pacemaker_controller_clone_for_transaction metering_agent_primitive do
-    agent node[:neutron][:ha][:network][:metering_ra]
-    op node[:neutron][:ha][:network][:op]
+  if node.roles.include? "ceilometer-agent"
+    metering_agent_primitive = "neutron-metering-agent"
+    objects = openstack_pacemaker_controller_clone_for_transaction metering_agent_primitive do
+      agent node[:neutron][:ha][:network][:metering_ra]
+      op node[:neutron][:ha][:network][:op]
+    end
+    transaction_objects.push(objects)
   end
-  transaction_objects.push(objects)
 
   if use_lbaas_agent &&
       [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver])
