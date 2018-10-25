@@ -15,9 +15,10 @@
 #
 
 include_recipe "neutron::common_agent"
+ceilometer_agent_enabled = node.roles.include? "ceilometer-agent"
 
 package node[:neutron][:platform][:dhcp_agent_pkg]
-package node[:neutron][:platform][:metering_agent_pkg]
+package node[:neutron][:platform][:metering_agent_pkg] if ceilometer_agent_enabled
 
 if node[:neutron][:use_lbaas]
   if node[:neutron][:lbaasv2_driver] == "f5" &&
@@ -119,6 +120,7 @@ template "/etc/neutron/metering_agent.ini" do
     debug: node[:neutron][:debug],
     interface_driver: interface_driver,
   )
+  only_if { ceilometer_agent_enabled }
 end
 
 # Delete pre-existing configuration file.
@@ -223,9 +225,11 @@ service node[:neutron][:platform][:metering_agent_name] do
   subscribes :restart, resources(template: node[:neutron][:config_file])
   subscribes :restart, resources("template[/etc/neutron/metering_agent.ini]")
   provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
+  only_if { ceilometer_agent_enabled }
 end
 utils_systemd_service_restart node[:neutron][:platform][:metering_agent_name] do
   action use_crowbar_pacemaker_service ? :disable : :enable
+  only_if { ceilometer_agent_enabled }
 end
 
 if node[:neutron][:use_lbaas] &&
