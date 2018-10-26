@@ -12,7 +12,7 @@ ipam_driver = <%= @ipam_driver %>
 global_physnet_mtu = <%= @mtu_value %>
 use_ssl = <%= @ssl_enabled ? "True" : "False" %>
 api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
-rpc_workers = <%= @rpc_workers %>
+rpc_workers = <%= node["cpu"]["total"] %>
 dhcp_agents_per_network = <%= @network_nodes_count %>
 <% if @dvr_enabled -%>
 router_distributed = True

@@ -33,7 +33,6 @@ default[:neutron][:ml2_config_file] = "/etc/neutron/neutron.conf.d/110-ml2.conf"
 default[:neutron][:nsx_config_file] = "/etc/neutron/neutron.conf.d/110-nsx.conf"
 default[:neutron][:ml2_cisco_config_file] = "/etc/neutron/neutron.conf.d/115-ml2_cisco.conf"
 default[:neutron][:ml2_cisco_apic_config_file] = "/etc/neutron/neutron.conf.d/115-ml2_cisco_apic.conf"
-default[:neutron][:rpc_workers] = 1
 
 default[:neutron][:db][:database] = "neutron"
 default[:neutron][:db][:user] = "neutron"
