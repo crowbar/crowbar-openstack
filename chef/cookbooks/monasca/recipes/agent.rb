@@ -128,14 +128,6 @@ template "/etc/monasca/agent/agent.yaml" do
   )
 end
 
-# monasca-agent uses supervisord to start multiple processes (forwarder, statsd, collector)
-template "/etc/monasca/agent/supervisor.conf" do
-  source "monasca-agent_supervisor.conf.erb"
-  owner agent_settings[:user]
-  group agent_settings[:group]
-  mode "0640"
-end
-
 # enable and start the monasca-agent
 service agent_settings[:agent_service_name] do
   service_name agent_settings[:agent_service_name]
@@ -143,7 +135,6 @@ service agent_settings[:agent_service_name] do
   action [:enable, :start]
   # provider Chef::Provider::CrowbarPacemakerService if ha_enabled
   subscribes :restart, resources(template: "/etc/monasca/agent/agent.yaml")
-  subscribes :restart, resources(template: "/etc/monasca/agent/supervisor.conf")
 end
 utils_systemd_service_restart agent_settings[:agent_service_name] do
   # action ha_enabled ? :disable : :enable
