@@ -150,3 +150,141 @@ pacemaker_transaction "rabbitmq service" do
 end
 
 crowbar_pacemaker_sync_mark "create-rabbitmq_ha_resources"
+
+clustermon_op = { "monitor" => [{ "interval" => "10s" }] }
+clustermon_params = { "extra_options" => "-E /usr/bin/rabbitmq-alert-handler.sh --watch-fencing" }
+name = "rabbitmq-port-blocker"
+clone_name = "cl-#{name}"
+location_name = "l-#{name}-controller"
+node_upgrading = CrowbarPacemakerHelper.being_upgraded?(node)
+clone_running = "crm resource show #{clone_name}"
+primitive_running = "crm resource show #{name}"
+port = node[:rabbitmq][:port]
+ssl_port = node[:rabbitmq][:ssl][:port]
+
+crowbar_pacemaker_sync_mark "wait-rabbitmq_alert_resources"
+
+if CrowbarPacemakerHelper.cluster_nodes(node).size > 2 && !node_upgrading
+  template "/usr/bin/rabbitmq-alert-handler.sh" do
+    source "rabbitmq-alert-handler.erb"
+    owner "root"
+    group "root"
+    mode "0755"
+    variables(node: node, nodes: CrowbarPacemakerHelper.cluster_nodes(node))
+  end
+
+  template "/usr/bin/#{name}.sh" do
+    source "#{name}.erb"
+    owner "root"
+    group "root"
+    mode "0755"
+    variables(total_nodes: CrowbarPacemakerHelper.cluster_nodes(node).size,
+              port: port, ssl_port: ssl_port)
+  end
+
+  pacemaker_primitive name do
+    agent "ocf:pacemaker:ClusterMon"
+    op clustermon_op
+    params clustermon_params
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  pacemaker_clone clone_name do
+    rsc name
+    meta CrowbarPacemakerHelper.clone_meta(node)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  pacemaker_location location_name do
+    definition OpenStackHAHelper.controller_only_location(location_name, clone_name)
+    action :update
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  pacemaker_transaction name do
+    cib_objects [
+      "pacemaker_primitive[#{name}]",
+      "pacemaker_clone[#{clone_name}]",
+      "pacemaker_location[#{location_name}]"
+    ]
+    # note that this will also automatically start the resources
+    action :commit_new
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+else
+  pacemaker_location location_name do
+    definition OpenStackHAHelper.controller_only_location(location_name, clone_name)
+    action :delete
+    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  end
+
+  pacemaker_clone "#{clone_name}_stop" do
+    name clone_name
+    rsc name
+    meta CrowbarPacemakerHelper.clone_meta(node)
+    action :stop
+    only_if do
+      running = system(clone_running, err: File::NULL)
+      CrowbarPacemakerHelper.is_cluster_founder?(node) && running
+    end
+  end
+
+  pacemaker_clone "#{clone_name}_delete" do
+    name clone_name
+    rsc name
+    meta CrowbarPacemakerHelper.clone_meta(node)
+    action :delete
+    only_if do
+      running = system(clone_running, err: File::NULL)
+      CrowbarPacemakerHelper.is_cluster_founder?(node) && running
+    end
+  end
+
+  pacemaker_primitive "#{name}_stop" do
+    agent "ocf:pacemaker:ClusterMon"
+    name name
+    op clustermon_op
+    params clustermon_params
+    action :stop
+    only_if do
+      running = system(primitive_running, err: File::NULL)
+      CrowbarPacemakerHelper.is_cluster_founder?(node) && running
+    end
+  end
+
+  pacemaker_primitive "#{name}_delete" do
+    agent "ocf:pacemaker:ClusterMon"
+    name name
+    op clustermon_op
+    params clustermon_params
+    action :delete
+    only_if do
+      running = system(primitive_running, err: File::NULL)
+      CrowbarPacemakerHelper.is_cluster_founder?(node) && running
+    end
+  end
+
+  file "/usr/bin/rabbitmq-alert-handler.sh" do
+    action :delete
+  end
+
+  file "/usr/bin/#{name}.sh" do
+    action :delete
+  end
+
+  # in case that the script was already deployed and the rule is already stored we need to clean it
+  # up as to not left anything around
+  bash "Remove existent rabbitmq blocking rules" do
+    code "iptables -D INPUT -p tcp --destination-port 5672 "\
+         "-m comment --comment \"rabbitmq port blocker (no quorum)\" -j DROP"
+    only_if do
+      # check for the rule
+      cmd = "iptables -L -n | grep -F \"tcp dpt:5672 /* rabbitmq port blocker (no quorum) */\""
+      system(cmd)
+    end
+  end
+end
+
+crowbar_pacemaker_sync_mark "create-rabbitmq_alert_resources"
