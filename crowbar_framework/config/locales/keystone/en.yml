@@ -21,7 +21,6 @@ en:
       edit_attributes:
         database_instance: 'Database Instance'
         rabbitmq_instance: 'RabbitMQ'
-        token_format: 'Algorithm for Token Generation'
         default_credentials: 'Default Credentials'
         default:
           project: 'Default Project'

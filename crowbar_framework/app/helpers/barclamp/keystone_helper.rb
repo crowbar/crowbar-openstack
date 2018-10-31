@@ -17,16 +17,6 @@
 
 module Barclamp
   module KeystoneHelper
-    def token_formats_for_keystone(selected)
-      options_for_select(
-        [
-          ["UUID", "uuid"],
-          ["Fernet", "fernet"]
-        ],
-        selected.to_s
-      )
-    end
-
     def api_protocols_for_keystone(selected)
       options_for_select(
         [
