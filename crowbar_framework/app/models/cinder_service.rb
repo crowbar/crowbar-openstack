@@ -105,7 +105,7 @@ class CinderService < OpenstackServiceObject
                          "user" => cinder_ses["rbd_store_user"],
                          "config_file" => "/etc/ceph/ceph.conf",
                          "admin_keyring" => "/etc/ceph/ceph.client.cinder.keyring",
-                         "secret_uuid" => "",
+                         "secret_uuid" => cinder_ses["secret_uuid"],
                          "flatten_volume_from_snapshot" => false
                        }
                       }

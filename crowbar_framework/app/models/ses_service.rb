@@ -20,64 +20,67 @@ class SesService < OpenstackServiceObject
     @bc_name = "ses"
     @logger = thelogger
   end
-end
 
-class << self
-  # turn off multi proposal support till it really works and people ask for
-  # it.
-  def self.allow_multiple_proposals?
-    false
-  end
+  class << self
+    # turn off multi proposal support till it really works and people ask for
+    # it.
+    def self.allow_multiple_proposals?
+      false
+    end
 
-  def role_constraints
-    {
-      "ses-controller" => {
-        "unique" => false,
-        "count" => 1,
-        "cluster" => true,
-        "admin" => false,
-        "exclude_platform" => {
-          "suse" => "< 12.3",
-          "windows" => "/.*/"
+    def role_constraints
+      {
+        "ses-controller" => {
+          "unique" => true,
+          "count" => 1,
+          "cluster" => false,
+          "admin" => false,
+          "exclude_platform" => {
+            "suse" => "< 12.3",
+            "windows" => "/.*/"
+          }
         }
       }
-    }
+    end
   end
-end
 
-def proposal_dependencies(role)
-  answer = []
-  deps = ["cinder", "keystone", "glance", "nova"]
-  deps.each do |dep|
-    answer << {
-      "barclamp" => dep,
-      "inst" => role.default_attributes[@bc_name]["#{dep}_instance"]
-    }
+  def proposal_dependencies(role)
+    answer = []
+    deps = ["keystone"]
+    deps.each do |dep|
+      answer << {
+        "barclamp" => dep,
+        "inst" => role.default_attributes[@bc_name]["#{dep}_instance"]
+      }
+    end
+    answer
   end
-  answer
-end
 
-def create_proposal
-  @logger.debug("SES create_proposal: entering")
-  base = super
+  def create_proposal
+    @logger.debug("SES create_proposal: entering")
+    base = super
 
-  base["attributes"][@bc_name]["cinder_instance"] = find_dep_proposal("cinder")
-  base["attributes"][@bc_name]["nova_instance"] = find_dep_proposal("nova")
-  base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
-  base["attributes"][@bc_name]["glance_instance"] = find_dep_proposal("glance")
+    #base["attributes"][@bc_name]["cinder_instance"] = Proposal.find_by(barclamp: "cinder")
+    #base["attributes"][@bc_name]["nova_instance"] = Proposal.find_by(barclamp: "nova")
+    #base["attributes"][@bc_name]["keystone_instance"] = Proposal.find_by(barclamp: "keystone")
+    #base["attributes"][@bc_name]["glance_instance"] = Proposal.find_by(barclamp: "glance")
+    secret_uuid = `uuidgen`.strip
+    base["attributes"][@bc_name]["secret_uuid"] = secret_uuid
+    @logger.debug("SES create_proposal: #{secret_uuid}")
 
-  @logger.debug("SES create_proposal: exiting")
-  base
-end
+    @logger.debug("SES create_proposal: exiting")
+    base
+  end
 
-def validate_proposal_after_save(proposal)
-  validate_one_for_role proposal, "ses-controller"
+  def validate_proposal_after_save(proposal)
+    validate_one_for_role proposal, "ses-controller"
 
-  super
-end
+    super
+  end
 
-def apply_role_pre_chef_call(old_role, role, all_nodes)
-  @logger.debug("Cinder apply_role_pre_chef_call: entering #{all_nodes.inspect}")
+  def apply_role_pre_chef_call(old_role, role, all_nodes)
+    @logger.debug("Cinder apply_role_pre_chef_call: entering #{all_nodes.inspect}")
 
-  @logger.debug("Cinder apply_role_pre_chef_call: leaving")
+    @logger.debug("Cinder apply_role_pre_chef_call: leaving")
+  end
 end

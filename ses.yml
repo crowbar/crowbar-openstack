@@ -22,9 +22,6 @@ barclamp:
   requires:
     - '@crowbar'
     - 'keystone'
-    - 'cinder'
-    - 'glance'
-    - 'nova'
   member:
     - 'openstack'
     - 'suse_enterprise_storage'

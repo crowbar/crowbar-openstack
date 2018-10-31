@@ -8,7 +8,8 @@
      "nova_instance": "none",
      "keystone_instance": "none",
      "glance_instance": "none",
-     "yaml_file": "none",
+     "yaml_file": "",
+     "secret_uuid": "",
      "ceph_conf": {
        "cluster_network": "",
        "fsid": "",
