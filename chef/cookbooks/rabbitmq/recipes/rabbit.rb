@@ -146,12 +146,26 @@ node[:rabbitmq][:users].each do |user|
 end
 
 if cluster_enabled
-  quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
+  if node[:rabbitmq][:enable_queue_mirroring]
+    quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
+  else
+    quorum = 1
+  end
 
-  set_policy_command = "rabbitmqctl set_policy -p #{node[:rabbitmq][:vhost]} --apply-to queues " \
-      " ha-queues '^(?!amq\.).*' '{\"ha-mode\": \"exactly\", \"ha-params\": #{quorum}}'"
-  check_policy_command = "rabbitmqctl list_policies -p #{node[:rabbitmq][:vhost]} | " \
-      " grep -q '^#{node[:rabbitmq][:vhost]}\\s*ha-queues\\s'"
+  # don't mirror queues that are 'amqp.*' or '*_fanout_*' or `reply_*` in their names
+  queue_regex = "^(?!(amqp.)|(.*_fanout_)|(reply_)).*"
+  # policy doesnt need spaces between elements as they will be removed when listing them
+  # making it more difficult to check for them
+  policy = "{\"ha-mode\":\"exactly\",\"ha-params\":#{quorum},\"ha-sync-mode\":\"automatic\"}"
+  vhost = node[:rabbitmq][:vhost]
+  # we need to scape the regex properly so we can use it on the grep command
+  queue_regex_escaped = ""
+  queue_regex.split("").each { |c| queue_regex_escaped << "\\" + c }
+
+  set_policy_command = "rabbitmqctl set_policy -p #{vhost} --apply-to queues " \
+      " ha-queues '#{queue_regex}' '#{policy}'"
+  check_policy_command = "rabbitmqctl list_policies -p #{vhost} | " \
+      " grep -Eq '^#{vhost}\\s*ha-queues\\s*queues\\s*#{queue_regex_escaped}\\s*#{policy}\\s*0$'"
 
   execute set_policy_command do
     not_if check_policy_command
