@@ -110,7 +110,8 @@
                 "dump_log_write_threshold": { "type": "int", "required": true},
                 "dump_log_time_threshold": { "type": "int", "required": true}
               }
-            }
+            },
+            "enable_queue_mirroring": { "type": "bool", "required": true}
           }
         }
       }
