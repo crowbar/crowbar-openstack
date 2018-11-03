@@ -38,14 +38,3 @@ monasca_agent_plugin_http_check "http_check for keystone" do
   dimensions "service" => "identity-api"
   match_pattern ".*v#{keystone_settings["api_version"]}.*"
 end
-
-# monasca-agent "postgres" plugin
-db_settings = fetch_database_settings
-
-monasca_agent_plugin_postgres "postgres check for keystone DB" do
-  built_by "keystone-server"
-  host db_settings[:address]
-  username node[:keystone][:db][:user]
-  password node[:keystone][:db][:password]
-  dbname node[:keystone][:db][:database]
-end
