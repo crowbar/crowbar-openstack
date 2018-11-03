@@ -27,14 +27,3 @@ monasca_agent_plugin_http_check "http_check for sahara-api" do
   url monitor_url
   dimensions "service" => "data-processing-api"
 end
-
-# monasca-agent "postgres" plugin
-db_settings = fetch_database_settings
-
-monasca_agent_plugin_postgres "postgres check for sahara DB" do
-  built_by "sahara-server"
-  host db_settings[:address]
-  username node[:sahara][:db][:user]
-  password node[:sahara][:db][:password]
-  dbname node[:sahara][:db][:database]
-end

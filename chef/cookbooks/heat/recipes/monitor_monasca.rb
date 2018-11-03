@@ -27,14 +27,3 @@ monasca_agent_plugin_http_check "http_check for heat-api" do
   dimensions "service" => "orchestration-api"
   match_pattern ".*v1.0*"
 end
-
-# monasca-agent "postgres" plugin
-db_settings = fetch_database_settings
-
-monasca_agent_plugin_postgres "postgres check for heat DB" do
-  built_by "heat-server"
-  host db_settings[:address]
-  username node[:heat][:db][:user]
-  password node[:heat][:db][:password]
-  dbname node[:heat][:db][:database]
-end

@@ -29,13 +29,3 @@ monasca_agent_plugin_http_check "http_check for barbican-api" do
   dimensions "service" => "key-manager-api"
 end
 
-# monasca-agent "postgres" plugin
-db_settings = fetch_database_settings
-
-monasca_agent_plugin_postgres "postgres check for barbican DB" do
-  built_by "barbican-controller"
-  host db_settings[:address]
-  username node[:barbican][:db][:user]
-  password node[:barbican][:db][:password]
-  dbname node[:barbican][:db][:database]
-end

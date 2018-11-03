@@ -27,14 +27,3 @@ monasca_agent_plugin_http_check "http_check for manila-api" do
   dimensions "service" => "share-api"
   match_pattern ".*v2*"
 end
-
-# monasca-agent "postgres" plugin
-db_settings = fetch_database_settings
-
-monasca_agent_plugin_postgres "postgres check for manila DB" do
-  built_by "manila-server"
-  host db_settings[:address]
-  username node[:manila][:db][:user]
-  password node[:manila][:db][:password]
-  dbname node[:manila][:db][:database]
-end
