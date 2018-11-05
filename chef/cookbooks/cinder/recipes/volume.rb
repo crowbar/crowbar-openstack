@@ -57,8 +57,13 @@ def make_loopback_volume(backend_id, volume)
 
   return if volume_exists(volname)
 
+  # Make our volume group. Wait for it to be created to prevent race conditions
+  # upon cinder-volume startup.
   bash "Create volume group #{volname}" do
-    code "vgcreate #{volname} `losetup -j #{fname} | cut -f1 -d:`"
+    code <<-EOH
+    vgcreate #{volname} `losetup -j #{fname} | cut -f1 -d:`
+    while true; do vgs #{volname} && break; done
+    EOH
     not_if "vgs #{volname}"
   end
 end
@@ -106,9 +111,14 @@ def make_volume(node, backend_id, volume)
     end
   end
 
-  # Make our volume group.
+  # Make our volume group. Wait for it to be created to prevent race conditions
+  # upon cinder-volume startup.
   bash "Create volume group #{volname}" do
-    code "vgcreate #{volname} #{claimed_disks.map{ |d|d.name }.join(' ')}"
+    code <<-EOH
+    vgcreate #{volname} #{claimed_disks.map{ |d|d.name }.join(' ')}
+    while true; do vgs #{volname} && break; done
+    EOH
+    timeout 60
     not_if "vgs #{volname}"
   end
 end
