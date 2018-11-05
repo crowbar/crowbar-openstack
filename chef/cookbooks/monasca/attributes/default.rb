@@ -33,7 +33,7 @@ default[:monasca][:delegate_role] = "monasca-delegate"
 default[:monasca][:agent]["user"] = "monasca-agent"
 default[:monasca][:agent][:group] = "monasca"
 default[:monasca][:agent]["log_dir"] = "/var/log/monasca-agent"
-default[:monasca][:agent]["agent_service_name"] = "openstack-monasca-agent"
+default[:monasca][:agent]["agent_service_name"] = "openstack-monasca-agent.target"
 
 # log-agent default service settings
 default[:monasca][:log_agent][:service_name] = "openstack-monasca-log-agent"
