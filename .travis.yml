@@ -13,3 +13,5 @@ matrix:
     - env: SPEC_TESTS
       script:
       - bundle exec rake spec
+    - name: "Databag testing"
+      script: bundle exec crowbar-validate-databags chef/data_bags/crowbar
