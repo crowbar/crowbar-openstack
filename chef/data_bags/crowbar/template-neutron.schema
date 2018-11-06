@@ -42,8 +42,7 @@
                       "multicast_group": { "type" : "str", "required": true }
                     }},
                     "ovs": { "type": "map", "required": true, "mapping": {
-                      "tunnel_csum": { "type": "bool", "required": true },
-                      "ovsdb_interface": { "type": "str", "required": true }
+                      "tunnel_csum": { "type": "bool", "required": true }
                     }},
                     "apic": { "type": "map", "required": true, "mapping": {
                       "hosts": { "type" : "str", "required" : true },
