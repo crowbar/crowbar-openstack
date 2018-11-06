@@ -8,6 +8,10 @@ define :cinder_service, use_pacemaker_provider: false do
   # even if it be asked about that by 'confnew' option
   package cinder_name unless node[:platform_family] == "rhel"
 
+  utils_systemd_service_restart cinder_service_name do
+    action params[:use_pacemaker_provider] ? :disable : :enable
+  end
+
   service cinder_service_name do
     if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
       restart_command "stop #{cinder_name} ; start #{cinder_name}"
@@ -20,8 +24,5 @@ define :cinder_service, use_pacemaker_provider: false do
     action [:enable, :start]
     subscribes :restart, resources(template: node[:cinder][:config_file])
     provider Chef::Provider::CrowbarPacemakerService if params[:use_pacemaker_provider]
-  end
-  utils_systemd_service_restart cinder_service_name do
-    action params[:use_pacemaker_provider] ? :disable : :enable
   end
 end

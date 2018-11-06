@@ -1,4 +1,4 @@
-# Copyright 2017, SUSE Linux Products GmBH
+# Copyright 2017-2018 SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -89,6 +89,14 @@ define :neutron_metadata,
 
     enable_metadata = node.roles.include?("neutron-network") || !neutron[:neutron][:metadata][:force]
 
+    utils_systemd_service_restart node[:neutron][:platform][:metadata_agent_name] do
+      if enable_metadata
+        action use_crowbar_pacemaker_service ? :disable : :enable
+      else
+        action :disable
+      end
+    end
+
     # In case of Cisco ACI driver, supervisord takes care of starting up
     # the metadata agent.
     service node[:neutron][:platform][:metadata_agent_name] do
@@ -105,13 +113,6 @@ define :neutron_metadata,
         supports no_crm_maintenance_mode: true
       else
         supports status: true, restart: true
-      end
-    end
-    utils_systemd_service_restart node[:neutron][:platform][:metadata_agent_name] do
-      if enable_metadata
-        action use_crowbar_pacemaker_service ? :disable : :enable
-      else
-        action :disable
       end
     end
   end

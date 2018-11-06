@@ -4,6 +4,10 @@ define :glance_service do
   ha_enabled    = node[:glance][:ha][:enabled]
   use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
 
+  utils_systemd_service_restart glance_name do
+    action use_crowbar_pacemaker_service ? :disable : :enable
+  end
+
   service glance_name do
     if (platform?("ubuntu") && node.platform_version.to_f >= 10.04)
       restart_command "stop #{glance_name} ; start #{glance_name}"
@@ -15,8 +19,5 @@ define :glance_service do
     action [:enable, :start]
     subscribes :restart, resources(template: node[:glance][short_name][:config_file])
     provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
-  end
-  utils_systemd_service_restart glance_name do
-    action use_crowbar_pacemaker_service ? :disable : :enable
   end
 end
