@@ -161,10 +161,10 @@ template neutron[:neutron][:config_file] do
 end
 
 if neutron[:neutron][:use_lbaas]
-  interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+  interface_driver = "openvswitch"
   if neutron[:neutron][:networking_plugin] == "ml2" &&
       neutron[:neutron][:ml2_mechanism_drivers].include?("linuxbridge")
-    interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
+    interface_driver = "linuxbridge"
   end
 
   template neutron[:neutron][:lbaas_config_file] do

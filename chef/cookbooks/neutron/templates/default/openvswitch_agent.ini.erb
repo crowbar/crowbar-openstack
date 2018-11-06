@@ -26,4 +26,4 @@ local_ip = <%= node.address("os_sdn").addr %>
 <% end -%>
 bridge_mappings = <%= @bridge_mappings %>
 [securitygroup]
-firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver
+firewall_driver = iptables_hybrid

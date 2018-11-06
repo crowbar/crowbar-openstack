@@ -101,12 +101,12 @@ when "ml2"
   when ml2_mech_drivers.include?("openvswitch") ||
     ml2_mech_drivers.include?("cisco_apic_ml2") ||
     ml2_mech_drivers.include?("apic_gbp")
-    interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+    interface_driver = "openvswitch"
   when ml2_mech_drivers.include?("linuxbridge")
-    interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
+    interface_driver = "linuxbridge"
   end
 when "vmware"
-  interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+  interface_driver = "openvswitch"
 end
 
 template "/etc/neutron/metering_agent.ini" do

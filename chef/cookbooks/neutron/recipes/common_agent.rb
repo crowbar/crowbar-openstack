@@ -169,7 +169,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     # package is already installed
     neutron_agent = node[:neutron][:platform][:ovs_agent_name]
     agent_config_path = "/etc/neutron/plugins/ml2/openvswitch_agent.ini"
-    interface_driver = "neutron.agent.linux.interface.OVSInterfaceDriver"
+    interface_driver = "openvswitch"
     bridge_mappings = []
 
     if ml2_type_drivers.include?("vlan")
@@ -203,7 +203,7 @@ if neutron[:neutron][:networking_plugin] == "ml2"
 
     neutron_agent = node[:neutron][:platform][:lb_agent_name]
     agent_config_path = "/etc/neutron/plugins/ml2/linuxbridge_agent.ini"
-    interface_driver = "neutron.agent.linux.interface.BridgeInterfaceDriver"
+    interface_driver = "linuxbridge"
     interface_mappings = []
 
     if ml2_type_drivers.include?("vlan")
