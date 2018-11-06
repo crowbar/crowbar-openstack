@@ -56,7 +56,7 @@ heartbeat_timeout_threshold = <%= @rabbit_settings[:heartbeat_timeout] %>
 
 [keystone_authtoken]
 auth_type = password
-auth_uri = <%= @keystone_settings['public_auth_url'] %>
+www_authenticate_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
 insecure = <%= @keystone_settings['insecure'] %>

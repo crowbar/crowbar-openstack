@@ -19,7 +19,7 @@ event_time_to_live = <%= @event_time_to_live %>
 connection = <%= @database_connection %>
 
 [keystone_authtoken]
-auth_uri = <%= @keystone_settings['public_auth_url'] %>
+www_authenticate_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_url = <%= @keystone_settings['admin_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 <% if @keystone_settings['insecure'] -%>

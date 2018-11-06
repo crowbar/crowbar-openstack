@@ -27,7 +27,7 @@ enable_v2_registry = true
 
 [database]
 connection = <%= node[:glance][:sql_connection] %>
-idle_timeout = <%= node[:glance][:sql_idle_timeout] %>
+connection_recycle_time = <%= node[:glance][:sql_idle_timeout] %>
 
 [glance_store]
 stores = <%= @glance_stores %>
@@ -63,7 +63,7 @@ allowed_origin = <%= node[:glance][:crossdomain][:cross_domain_hosts].join(",") 
 <% end -%>
 
 [keystone_authtoken]
-auth_uri = <%= @keystone_settings['public_auth_url'] %>
+www_authenticate_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
 <% if @keystone_settings['insecure'] -%>
 insecure = <%= @keystone_settings['insecure'] %>

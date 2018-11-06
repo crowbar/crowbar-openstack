@@ -16,7 +16,7 @@ memcache_socket_timeout = 1
 
 [database]
 connection = <%= @sql_connection %>
-idle_timeout = <%= @sql_idle_timeout %>
+connection_recycle_time = <%= @sql_idle_timeout %>
 
 [fernet_tokens]
 max_active_keys = <%= @max_active_keys %>

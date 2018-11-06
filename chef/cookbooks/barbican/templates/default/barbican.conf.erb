@@ -30,7 +30,7 @@ kek = <%= @kek %>
 [keystone_authtoken]
 auth_type = password
 auth_url = <%= @keystone_settings["internal_auth_url"] %>
-auth_uri = <%= @keystone_settings["public_auth_url"] %>
+www_authenticate_uri = <%= @keystone_settings["public_auth_url"] %>
 auth_version = <%= @keystone_settings["api_version_for_middleware"] %>
 username = <%= @keystone_settings["service_user"] %>
 password = <%= @keystone_settings["service_password"] %>
