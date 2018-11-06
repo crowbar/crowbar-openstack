@@ -101,7 +101,6 @@
         "user": "neutron"
       },
       "sql": {
-        "min_pool_size": 1,
         "max_pool_size": 50,
         "max_pool_overflow": 50,
         "pool_timeout": 30
@@ -189,7 +188,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 302,
+      "schema-revision": 303,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ],
