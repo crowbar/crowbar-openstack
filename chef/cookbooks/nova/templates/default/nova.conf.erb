@@ -105,6 +105,9 @@ control_exchange = nova
 <%= "zvm_user_profile=#{node[:nova][:zvm][:zvm_user_profile]}" if @libvirt_type.eql?('zvm') %>
 <%= "zvm_user_default_password=#{node[:nova][:zvm][:zvm_user_default_password]}" if @libvirt_type.eql?('zvm') %>
 <%= "zvm_user_default_privilege=#{node[:nova][:zvm][:zvm_user_default_privilege]}" if @libvirt_type.eql?('zvm') %>
+<% unless @default_log_levels.length.zero? -%>
+default_log_levels = <%= @default_log_levels.join(", ") %>
+<% end -%>
 
 [api_database]
 <% if @api_database_connection -%>
