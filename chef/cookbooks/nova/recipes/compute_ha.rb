@@ -274,16 +274,16 @@ pacemaker_primitive fence_primitive do
   agent "stonith:fence_compute"
   params ({
     "pcmk_host_map"  => hostmap,
-    "auth-url"       => internal_auth_url_v2,
+    "auth_url"       => internal_auth_url_v2,
     # "region-name"    => keystone_settings["endpoint_region"],
-    "endpoint-type"  => "internalURL",
+    "endpoint_type"  => "internalURL",
     "login"          => keystone_settings["admin_user"],
     "passwd"         => keystone_settings["admin_password"],
-    "tenant-name"    => keystone_settings["admin_tenant"],
+    "tenant_name"    => keystone_settings["admin_tenant"],
     # "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure],
     "domain"         => node[:domain],
-    "no-shared-storage" => no_shared_storage,
-    "record-only"    => "1",
+    "no_shared_storage" => no_shared_storage,
+    "record_only"    => "1",
     "verbose"        => "1",
     "debug"          => "/var/log/nova/fence_compute.log"
   })
