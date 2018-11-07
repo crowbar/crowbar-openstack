@@ -54,7 +54,6 @@ default[:neutron][:api][:protocol] = "http"
 default[:neutron][:api][:service_port] = "9696"
 default[:neutron][:api][:service_host] = "0.0.0.0"
 
-default[:neutron][:sql][:min_pool_size] = 30
 default[:neutron][:sql][:max_pool_size] = 60
 default[:neutron][:sql][:max_pool_overflow] = 10
 default[:neutron][:sql][:pool_timeout] = 30

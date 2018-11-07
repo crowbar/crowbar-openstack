@@ -403,6 +403,16 @@ class NeutronService < OpenstackServiceObject
       validate_external_networks proposal["attributes"]["neutron"]["additional_external_networks"]
     end
 
+    validation_error I18n.t("barclamp.#{@bc_name}.validation.agent_down_time_min") if
+      proposal["attributes"]["neutron"]["agent_down_time"] <
+          2 * proposal["attributes"]["neutron"]["report_interval"]
+
+    validation_error I18n.t("barclamp.#{@bc_name}.validation.network_log_rate_limit_min") if
+      proposal[:attributes][:neutron][:network_log][:rate_limit] < 100
+
+    validation_error I18n.t("barclamp.#{@bc_name}.validation.network_log_burst_limit_min") if
+      proposal[:attributes][:neutron][:network_log][:burst_limit] < 25
+
     super
   end
 

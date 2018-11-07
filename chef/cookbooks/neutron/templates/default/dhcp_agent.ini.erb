@@ -13,4 +13,10 @@ dnsmasq_dns_servers = <%= @nameservers %>
 dnsmasq_base_log_dir = /var/log/neutron
 <% end -%>
 debug = <%= @debug ? "True" : "False" %>
+dhcp_renewal_time = <%= @dhcp_renewal_time %>
+dhcp_rebinding_time = <%= @dhcp_rebinding_time %>
 [AGENT]
+[OVS]
+ovsdb_debug = <%= @ovsdb_debug ? "True" : "False" %>
+ovsdb_timeout = <%= @ovsdb_timeout %>
+bridge_mac_table_size = <%= @bridge_mac_table_size %>

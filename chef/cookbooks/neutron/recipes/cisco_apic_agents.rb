@@ -86,7 +86,6 @@ template agent_config_path do
     use_l2pop: false,
     dvr_enabled: false,
     of_interface: "ovs-ofctl",
-    ovsdb_interface: neutron[:neutron][:ovs][:ovsdb_interface],
     bridge_mappings: ""
   )
 end

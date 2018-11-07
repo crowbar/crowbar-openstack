@@ -20,10 +20,13 @@ tunnel_csum = True
 <% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") && !@ml2_type_drivers.include?("opflex") -%>
 tunnel_bridge = br-tunnel
 <% end -%>
-ovsdb_interface = <%= @ovsdb_interface %>
 <% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") -%>
 local_ip = <%= node.address("os_sdn").addr %>
 <% end -%>
 bridge_mappings = <%= @bridge_mappings %>
 [securitygroup]
 firewall_driver = iptables_hybrid
+[network_log]
+rate_limit = <%= @network_log_rate_limit %>
+burst_limit = <%= @network_log_burst_limit %>
+local_output_log_base = <%= @network_log_local_output_log_base %>

@@ -149,3 +149,6 @@ en:
         dvr_linuxbridge: 'DVR is not compatible with Linux Bridge ML2 driver'
         vmware_dvs_vlan: 'The "vmware_dvs" mechanism driver needs the type driver "vlan"'
         vmware_dvs_ovs_lbr: 'The "vmware_dvs" mechanism driver also needs either the "openvswitch" or the "linuxbridge" mechanism driver'
+        agent_down_time_min: 'agent_down_time should be at least twice report_interval, to be sure the agent is down for good.'
+        network_log_rate_limit_min: 'Network_log.rate_limit_min value must be higher than 100'
+        network_log_burst_limit_min: 'Network_log.burst_limit value must be higher than 25'

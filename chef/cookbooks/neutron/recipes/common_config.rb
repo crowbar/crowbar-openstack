@@ -126,10 +126,11 @@ template neutron[:neutron][:config_file] do
     group neutron[:neutron][:platform][:group]
     variables(
       sql_connection: is_neutron_server ? neutron[:neutron][:db][:sql_connection] : nil,
-      sql_min_pool_size: neutron[:neutron][:sql][:min_pool_size],
       sql_max_pool_size: neutron[:neutron][:sql][:max_pool_size],
       sql_max_pool_overflow: neutron[:neutron][:sql][:max_pool_overflow],
       sql_pool_timeout: neutron[:neutron][:sql][:pool_timeout],
+      connection_recycle_time: neutron[:neutron][:sql][:connection_recycle_time],
+      connection_parameters: neutron[:neutron][:sql][:connection_parameters],
       debug: neutron[:neutron][:debug],
       bind_host: bind_host,
       bind_port: bind_port,
@@ -156,7 +157,9 @@ template neutron[:neutron][:config_file] do
       ipam_driver: ipam_driver,
       rpc_workers: neutron[:neutron][:rpc_workers],
       use_apic_gbp: use_apic_gbp,
-      default_log_levels: neutron[:neutron][:default_log_levels]
+      default_log_levels: neutron[:neutron][:default_log_levels],
+      report_interval: neutron[:neutron][:report_interval],
+      agent_down_time: neutron[:neutron][:agent_down_time]
     )
 end
 
@@ -186,4 +189,3 @@ if node[:platform_family] == "rhel"
     to node[:neutron][:config_file]
   end
 end
-

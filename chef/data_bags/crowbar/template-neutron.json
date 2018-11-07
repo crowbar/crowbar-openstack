@@ -27,6 +27,8 @@
       "ml2_type_drivers_default_provider_network": "vxlan",
       "ml2_type_drivers_default_tenant_network": "vxlan",
       "num_vlans": 2000,
+      "agent_down_time": 75,
+      "report_interval": 30,
       "gre": {
         "tunnel_id_start": 1,
         "tunnel_id_end": 1000
@@ -36,9 +38,12 @@
         "vni_end": 99999,
         "multicast_group": "239.1.1.1"
       },
+      "network_log": {
+        "rate_limit": 100,
+        "burst_limit": 25
+      },
       "ovs": {
-        "tunnel_csum": false,
-        "ovsdb_interface": "native"
+        "tunnel_csum": false
       },
       "apic": {
         "hosts": "",
@@ -101,10 +106,11 @@
         "user": "neutron"
       },
       "sql": {
-        "min_pool_size": 1,
         "max_pool_size": 50,
         "max_pool_overflow": 50,
-        "pool_timeout": 30
+        "pool_timeout": 30,
+        "connection_recycle_time": 3600,
+        "connection_parameters": ""
       },
       "f5": {
         "ha_type": "standalone",
@@ -182,14 +188,23 @@
       "metadata": {
         "force": false
       },
-      "default_log_levels": []
+      "default_log_levels": [],
+      "dhcp": {
+        "dhcp_renewal_time": 0,
+        "dhcp_rebinding_time": 0,
+        "ovs": {
+          "ovsdb_debug": false,
+          "ovsdb_timeout": 10,
+          "bridge_mac_table_size": 50000
+        }
+      }
     }
   },
   "deployment": {
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 302,
+      "schema-revision": 303,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ],

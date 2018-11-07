@@ -32,6 +32,8 @@
                     "ml2_type_drivers_default_provider_network": { "type": "str", "required": true },
                     "ml2_type_drivers_default_tenant_network": { "type": "str", "required": true },
                     "num_vlans": { "type": "int", "required": true },
+                    "agent_down_time": {"type": "int", "required": true},
+                    "report_interval": {"type": "int", "required": true},
                     "gre": { "type": "map", "required": true, "mapping": {
                       "tunnel_id_start": { "type" : "int", "required" : true },
                       "tunnel_id_end": { "type" : "int", "required" : true }
@@ -41,9 +43,12 @@
                       "vni_end": { "type" : "int", "required" : true },
                       "multicast_group": { "type" : "str", "required": true }
                     }},
+                    "network_log": { "type": "map", "required": true, "mapping": {
+                      "rate_limit": { "type": "int", "required": true },
+                      "burst_limit": { "type": "int", "required": true }
+                    }},
                     "ovs": { "type": "map", "required": true, "mapping": {
-                      "tunnel_csum": { "type": "bool", "required": true },
-                      "ovsdb_interface": { "type": "str", "required": true }
+                      "tunnel_csum": { "type": "bool", "required": true }
                     }},
                     "apic": { "type": "map", "required": true, "mapping": {
                       "hosts": { "type" : "str", "required" : true },
@@ -126,10 +131,11 @@
                       "password": { "type" : "str" }
                     }},
                     "sql": { "type": "map", "required": true, "mapping": {
-                      "min_pool_size": { "type" : "int", "required" : true },
                       "max_pool_size": { "type" : "int", "required" : true },
                       "max_pool_overflow": { "type" : "int", "required" : true },
-                      "pool_timeout": { "type" : "int", "required" : true }
+                      "pool_timeout": { "type" : "int", "required" : true },
+                      "connection_recycle_time": { "type" : "int", "required" : true },
+                      "connection_parameters": { "type" : "str", "required" : true }
                     }},
                     "f5": { "type": "map", "required": true, "mapping": {
                       "ha_type": { "type" : "str", "required" : true },
@@ -231,6 +237,19 @@
                       "type": "seq",
                       "required": false,
                       "sequence": [ { "type": "str" } ]
+                    },
+                    "dhcp": {
+                      "type": "map", "required": true, "mapping": {
+                        "dhcp_renewal_time": { "type": "int", "required": true },
+                        "dhcp_rebinding_time": { "type": "int", "required": true },
+                        "ovs": {
+                          "type": "map", "required": true, "mapping": {
+                            "ovsdb_debug": { "type": "bool", "required": true },
+                            "ovsdb_timeout": { "type": "int", "required": true },
+                            "bridge_mac_table_size": { "type": "int", "required": true }
+                          }
+                        }
+                      }
                     }
               }}
      }},

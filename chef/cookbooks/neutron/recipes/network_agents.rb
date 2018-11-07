@@ -154,7 +154,12 @@ template node[:neutron][:dhcp_agent_config_file] do
     enable_isolated_metadata: "True",
     enable_metadata_network: "False",
     nameservers: dns_list,
-    force_metadata: node[:neutron][:metadata][:force]
+    force_metadata: node[:neutron][:metadata][:force],
+    dhcp_renewal_time: node[:neutron][:dhcp][:dhcp_renewal_time],
+    dhcp_rebinding_time: node[:neutron][:dhcp][:dhcp_rebinding_time],
+    ovsdb_debug: node[:neutron][:dhcp][:ovs][:ovsdb_debug],
+    ovsdb_timeout: node[:neutron][:dhcp][:ovs][:ovsdb_timeout],
+    bridge_mac_table_size: node[:neutron][:dhcp][:ovs][:bridge_mac_table_size]
   )
 end
 
