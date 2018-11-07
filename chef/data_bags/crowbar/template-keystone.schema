@@ -65,7 +65,7 @@
                     "assignment" : { "type" : "map", "required" : true, "mapping": {
                       "driver": { "type": "str", "required": true }
                     }},
-                    "token_format": { "type": "str", "required": true, "pattern": "/^(fernet|uuid)$/" },
+                    "token_format": { "type": "str", "required": true, "pattern": "/^(fernet)$/" },
                     "ldap" : { "type" : "map", "mapping": {
                       "url": { "type": "str" },
                       "user": { "type": "str" },
