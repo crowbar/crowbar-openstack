@@ -59,6 +59,10 @@ if has_external
       action :nothing
     end.run_action(:install)
   end
+
+  # call the SES recipe to create the ceph.conf and keyrings
+  Chef::Log.info("Calling SES to create configs")
+  include_recipe "ses::create_configs"
 end
 
 # Second loop to do our setup

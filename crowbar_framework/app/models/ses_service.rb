@@ -28,32 +28,6 @@ class SesService < OpenstackServiceObject
       false
     end
 
-    def role_constraints
-      {
-        "ses-controller" => {
-          "unique" => true,
-          "count" => 1,
-          "cluster" => false,
-          "admin" => false,
-          "exclude_platform" => {
-            "suse" => "< 12.3",
-            "windows" => "/.*/"
-          }
-        }
-      }
-    end
-  end
-
-  def proposal_dependencies(role)
-    answer = []
-    deps = ["keystone"]
-    deps.each do |dep|
-      answer << {
-        "barclamp" => dep,
-        "inst" => role.default_attributes[@bc_name]["#{dep}_instance"]
-      }
-    end
-    answer
   end
 
   def create_proposal
@@ -73,7 +47,6 @@ class SesService < OpenstackServiceObject
   end
 
   def validate_proposal_after_save(proposal)
-    validate_one_for_role proposal, "ses-controller"
 
     super
   end

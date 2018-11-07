@@ -44,14 +44,11 @@
      "crowbar-applied": false,
      "schema-revision": 300,
      "element_states": {
-       "ses-controller": [ "readying", "ready", "applying" ]
      },
      "elements": {},
      "element_order": [
-       [ "ses-controller" ]
      ],
      "element_run_list_order": {
-       "ses-controller": 100
      },
      "config": {
        "environment": "ses-base-config",

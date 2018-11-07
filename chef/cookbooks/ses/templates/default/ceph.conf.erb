@@ -1,0 +1,25 @@
+[global]
+fsid = <%= @fsid %>
+mon_initial_members = <%= @mon_initial_members %>
+mon_host = <%= @mon_host %>
+auth_cluster_required = cephx
+auth_service_required = cephx
+auth_client_required = cephx
+filestore_xattr_use_omap = true
+public_network = <%= @public_network %>
+cluster_network = <%= @cluster_network %>
+
+# enable old ceph health format in the json output. This fixes the
+# ceph_exporter. This option will only stay until the prometheus plugin takes
+# over
+mon_health_preluminous_compat = true
+mon health preluminous compat warning = false
+
+rbd default features = 3
+
+[client.<%= @cinder_user %>]
+keyring=client.ceph.<%= @cinder_user %>.keyring
+[client.<%= @cinder_backup_user %>]
+keyring=client.ceph.<%= @cinder_backup_user %>.keyring
+[client.<%= @glance_user %>]
+keyring=client.ceph.<%= @glance_user %>.keyring

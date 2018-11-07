@@ -96,6 +96,7 @@ class CinderService < OpenstackServiceObject
         @logger.debug("Cinder create_proposal: FOUND ses barclamp")
         ceph_fsid = ses_proposal["attributes"]["ses"]["ceph_conf"]["fsid"]
         cinder_ses = ses_proposal["attributes"]["ses"]["cinder"]
+        secret_uuid = ses_proposal["attributes"]["ses"]["secret_uuid"]
         @logger.debug("ceph_fsid = #{ceph_fsid}")
         ses_backend = {"backend_driver" => "rbd",
                        "backend_name" => "ses_ceph",
@@ -105,7 +106,7 @@ class CinderService < OpenstackServiceObject
                          "user" => cinder_ses["rbd_store_user"],
                          "config_file" => "/etc/ceph/ceph.conf",
                          "admin_keyring" => "/etc/ceph/ceph.client.cinder.keyring",
-                         "secret_uuid" => cinder_ses["secret_uuid"],
+                         "secret_uuid" => secret_uuid,
                          "flatten_volume_from_snapshot" => false
                        }
                       }

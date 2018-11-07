@@ -21,10 +21,8 @@ barclamp:
   version: 0
   requires:
     - '@crowbar'
-    - 'keystone'
   member:
     - 'openstack'
-    - 'suse_enterprise_storage'
 
 crowbar:
   layout: 1
