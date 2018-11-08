@@ -11,6 +11,7 @@ max_header_line = <%= node[:cinder][:max_header_line] %>
 wsgi_keep_alive = false
 state_path = /var/lib/cinder
 my_ip = <%= node[:cinder][:my_ip] %>
+volume_service_inithost_offload = True
 
 glance_api_servers = <%= @glance_server_protocol %>://<%= @glance_server_host %>:<%= @glance_server_port %>
 <% unless @glance_server_insecure.nil? -%>
