@@ -28,6 +28,10 @@ if ceph_servers.length > 0
   # file is the right one
   node.default[:glance][:rbd][:store_ceph_conf] = ceph_conf
 else
+
+  Chef::Log.info("Calling SES to create configs")
+  include_recipe "ses::create_configs"
+
   ceph_conf = node[:glance][:rbd][:store_ceph_conf]
   admin_keyring = node[:glance][:rbd][:store_admin_keyring]
 
@@ -51,7 +55,7 @@ else
 
   # If ceph.conf and admin keyring will be available
   # we have to check ceph cluster status
-  cmd = ["ceph", "-k", admin_keyring, "-c", ceph_conf, "-s"]
+  cmd = ["ceph", "--id", node[:glance][:rbd][:store_user], "-c", ceph_conf, "-s"]
   check_ceph = Mixlib::ShellOut.new(cmd)
 
   unless check_ceph.run_command.stdout.match("(HEALTH_OK|HEALTH_WARN)")
