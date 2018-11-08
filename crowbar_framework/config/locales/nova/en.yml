@@ -28,7 +28,6 @@ en:
         itxt_instance: 'Intel TXT'
         trusted_flavors: 'Create Trusted Flavors'
         scheduler_header: 'Scheduler Options'
-        vnc_keymap: 'Keymap'
         scheduler:
           ram_allocation_ratio: 'Virtual RAM to Physical RAM allocation ratio'
           cpu_allocation_ratio: 'Virtual CPU to Physical CPU allocation ratio'
@@ -51,6 +50,7 @@ en:
           interface: 'VLAN Interface'
           ca_file: 'CA file for verifying the vCenter certificate'
           insecure: 'vCenter SSL Certificate is insecure (for instance, self-signed)'
+          vnc_keymap: 'Keymap'
         vmware_cluster_hint: 'A comma-separated list of cluster names'
         zvm_header: 'z/VM Configuration'
         zvm:

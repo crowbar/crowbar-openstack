@@ -31,7 +31,6 @@
       "use_syslog": false,
       "neutron_url_timeout": 30,
       "force_config_drive": false,
-      "vnc_keymap": "en-us",
       "scheduler": {
         "ram_allocation_ratio": 1.0,
         "cpu_allocation_ratio": 16.0,
@@ -91,7 +90,8 @@
         "ca_file": "",
         "insecure": false,
         "dvs_name": "dvSwitch0",
-        "dvs_security_groups": false
+        "dvs_security_groups": false,
+        "vnc_keymap": "en-us"
       },
       "zvm": {
         "zvm_xcat_server": "",
@@ -184,7 +184,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 302,
+      "schema-revision": 303,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],
