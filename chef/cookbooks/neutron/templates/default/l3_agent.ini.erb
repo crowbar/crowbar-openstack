@@ -3,7 +3,7 @@ interface_driver = <%= @interface_driver %>
 <% if @dvr_enabled -%>
 agent_mode = <%= @dvr_mode %>
 <% end -%>
-<% if node[:neutron][:metadata][:force] -%>
+<% if @force_metadata -%>
 enable_metadata_proxy = False
 <% end -%>
 metadata_port = <%= @metadata_port %>
