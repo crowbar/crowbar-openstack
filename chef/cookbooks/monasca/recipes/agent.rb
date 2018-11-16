@@ -44,71 +44,70 @@ if node["roles"].include?("monasca-server")
   unless monasca_master[:monasca] && monasca_master[:monasca][:installed]
     Chef::Log.warn("monasca-installer has not finished successfully, yet. Skipping" \
                    " monasca-agent setup.")
+  else
+    # Special monasca-reconfigure script for monasca-server: on this machine
+    # monasca-reconfigure will configure the agent.
+    template "/usr/sbin/monasca-reconfigure" do
+      source "monasca-reconfigure-server.erb"
+      owner "root"
+      group "root"
+      mode "0750"
+      variables(
+        monasca_api_url: monasca_api_url,
+        monasca_log_api_url: monasca_log_api_url,
+        kibana_url: kibana_url,
+        service: "monitoring",
+        agent_settings: agent_settings,
+        agent_keystone: agent_keystone,
+        keystone_settings: keystone_settings,
+        agent_dimensions: agent_dimensions,
+        setup: node[:monasca][:setup]
+      )
+    end
+
+    service agent_settings[:agent_service_name] do
+      service_name agent_settings[:agent_service_name]
+      supports status: true, restart: true, start: true, stop: true
+      action [:enable, :start]
+      # provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+    end
+    utils_systemd_service_restart agent_settings[:agent_service_name] do
+      # action ha_enabled ? :disable : :enable
+      action :enable
+    end
+
+    monasca_agent_plugin_elastic "elasticsearch checks" do
+      built_by "agent.rb"
+      name "elasticsearch"
+      url "http://#{monasca_net_ip}:9200"
+    end
+
+    execute "run monasca-reconfigure" do
+      command "/usr/sbin/monasca-reconfigure"
+    end
+
+    # Nothing left to do, monasca-reconfigure has configured everything we need.
     return
   end
-  # Special monasca-reconfigure script for monasca-server: on this machine
-  # monasca-reconfigure will configure the agent.
-  template "/usr/sbin/monasca-reconfigure" do
-    source "monasca-reconfigure-server.erb"
-    owner "root"
-    group "root"
-    mode "0750"
-    variables(
-      monasca_api_url: monasca_api_url,
-      monasca_log_api_url: monasca_log_api_url,
-      kibana_url: kibana_url,
-      service: "monitoring",
-      agent_settings: agent_settings,
-      agent_keystone: agent_keystone,
-      keystone_settings: keystone_settings,
-      agent_dimensions: agent_dimensions,
-      setup: node[:monasca][:setup]
-    )
-  end
+end
 
-  service agent_settings[:agent_service_name] do
-    service_name agent_settings[:agent_service_name]
-    supports status: true, restart: true, start: true, stop: true
-    action [:enable, :start]
-    # provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-  end
-  utils_systemd_service_restart agent_settings[:agent_service_name] do
-    # action ha_enabled ? :disable : :enable
-    action :enable
-  end
-
-  monasca_agent_plugin_elastic "elasticsearch checks" do
-    built_by "agent.rb"
-    name "elasticsearch"
-    url "http://#{monasca_net_ip}:9200"
-  end
-
-  execute "run monasca-reconfigure" do
-    command "/usr/sbin/monasca-reconfigure"
-  end
-
-  # Nothing left to do, monasca-reconfigure has configured everything we need.
-  return
-else
-  # Regular monasca-reconfigure script. if you use that script, the chef settings
-  # will be overwritten and after the next chef-client run, the settings
-  # from monasca-reconfigure will be overwritten. So DO NOT USE IT!
-  template "/usr/sbin/monasca-reconfigure" do
-    source "monasca-reconfigure.erb"
-    owner "root"
-    group "root"
-    mode "0750"
-    variables(
-      monasca_api_url: monasca_api_url,
-      service: "monitoring",
-      agent_settings: agent_settings,
-      agent_keystone: agent_keystone,
-      keystone_settings: keystone_settings,
-      agent_dimensions: agent_dimensions,
-      setup: node[:monasca][:setup]
-    )
-  end
-
+# Regular monasca-reconfigure script. if you use that script, the chef settings
+# will be overwritten and after the next chef-client run, the settings
+# from monasca-reconfigure will be overwritten. So DO NOT USE IT!
+template "/usr/sbin/monasca-reconfigure" do
+  source "monasca-reconfigure.erb"
+  owner "root"
+  group "root"
+  mode "0750"
+  variables(
+    monasca_api_url: monasca_api_url,
+    service: "monitoring",
+    agent_settings: agent_settings,
+    agent_keystone: agent_keystone,
+    keystone_settings: keystone_settings,
+    agent_dimensions: agent_dimensions,
+    setup: node[:monasca][:setup]
+  )
 end
 
 # the monasca-agent configuration
