@@ -33,7 +33,7 @@ module Openstack
       # this point the nodes maybe don't have roles assigned anymore
       components = [
         :ceilometer, :cinder, :glance, :heat,
-        :keystone, :manila, :neutron, :nova
+        :manila, :neutron, :nova
       ]
       NodeObject.all.each do |node|
         save_it = false
