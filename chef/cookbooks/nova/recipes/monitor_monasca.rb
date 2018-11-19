@@ -62,22 +62,3 @@ monasca_agent_plugin_http_check "http_check for nova-api" do
   dimensions "service" => "compute-api"
   match_pattern ".*v2.1*"
 end
-
-# monasca-agent "postgres" plugin
-db_settings = fetch_database_settings
-
-monasca_agent_plugin_postgres "postgres check for nova DB" do
-  built_by "nova-controller-nova"
-  host db_settings[:address]
-  username node[:nova][:db][:user]
-  password node[:nova][:db][:password]
-  dbname node[:nova][:db][:database]
-end
-
-monasca_agent_plugin_postgres "postgres check for nova_api DB" do
-  built_by "nova-controller-nova_api"
-  host db_settings[:address]
-  username node[:nova][:api_db][:user]
-  password node[:nova][:api_db][:password]
-  dbname node[:nova][:api_db][:database]
-end

@@ -27,14 +27,3 @@ monasca_agent_plugin_http_check "http_check for neutron-api" do
   dimensions "service" => "network-api"
   match_pattern ".*v2.0*"
 end
-
-# monasca-agent "postgres" plugin
-db_settings = fetch_database_settings
-
-monasca_agent_plugin_postgres "postgres check for neutron DB" do
-  built_by "neutron-server"
-  host db_settings[:address]
-  username node[:neutron][:db][:user]
-  password node[:neutron][:db][:password]
-  dbname node[:neutron][:db][:database]
-end
