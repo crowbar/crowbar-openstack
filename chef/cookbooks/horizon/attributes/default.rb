@@ -29,7 +29,6 @@ default[:horizon][:policy_file][:identity] = "keystone_policy.json"
 default[:horizon][:policy_file][:compute] = "nova_policy.json"
 default[:horizon][:policy_file][:volume] = "cinder_policy.json"
 default[:horizon][:policy_file][:image] = "glance_policy.json"
-default[:horizon][:policy_file][:orchestration] = "heat_policy.json"
 default[:horizon][:policy_file][:network] = "neutron_policy.json"
 default[:horizon][:policy_file][:neutron_fwaas] = "neutron-fwaas-policy.json"
 
