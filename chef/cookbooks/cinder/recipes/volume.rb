@@ -293,13 +293,18 @@ volume_elements = node[:cinder][:elements]["cinder-volume"]
 ha_enabled = CrowbarPacemakerHelper.cluster_enabled?(node) &&
   volume_elements.include?("cluster:#{CrowbarPacemakerHelper.cluster_name(node)}")
 
-cinder_service "volume" do
-  use_pacemaker_provider ha_enabled
+cinder_volume_name = "openstack-cinder-volume"
+if node[:cinder][:resource_limits] && node[:cinder][:resource_limits][cinder_volume_name]
+  resource_limits = node[:cinder][:resource_limits][cinder_volume_name]
+  utils_systemd_override_limits "Resource limits for #{cinder_volume_name}" do
+    service_name cinder_volume_name
+    limits resource_limits
+    action resource_limits.values.any? ? :create : :delete
+  end
 end
 
-# remove file used for HA in 3.0 branch
-file "/etc/cinder/cinder-volume.conf" do
-  action :delete
+cinder_service "volume" do
+  use_pacemaker_provider ha_enabled
 end
 
 if ha_enabled
@@ -326,16 +331,5 @@ else
   file node[:cinder][:config_file_cinder_volume] do
     action :delete
     notifies :restart, "service[cinder-volume]"
-  end
-end
-
-service = "openstack-cinder-volume"
-if node[:cinder][:resource_limits] && node[:cinder][:resource_limits][service]
-  limits = node[:cinder][:resource_limits][service]
-  action = limits.values.any? ? :create : :delete
-  utils_systemd_override_limits "Resource limits for #{service}" do
-    service_name service
-    limits limits
-    action action
   end
 end
