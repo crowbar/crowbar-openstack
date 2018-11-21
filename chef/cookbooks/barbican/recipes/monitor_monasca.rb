@@ -15,6 +15,7 @@
 #
 
 return unless node["roles"].include?("monasca-agent")
+return if no_monasca_server_or_master
 
 network_settings = BarbicanHelper.network_settings(node)
 bind_host = network_settings[:api][:ha_bind_host]
