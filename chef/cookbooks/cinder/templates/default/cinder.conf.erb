@@ -2,7 +2,6 @@
 tcp_keepalive_interval = 30
 debug = <%= node[:cinder][:debug] %>
 log_dir = /var/log/cinder
-use_syslog = <%= node[:cinder][:use_syslog] ? "true" : "false" %>
 use_stderr = false
 transport_url = <%= @rabbit_settings[:url] %>
 rpc_response_timeout = <%= node[:cinder][:rpc_response_timeout] %>
