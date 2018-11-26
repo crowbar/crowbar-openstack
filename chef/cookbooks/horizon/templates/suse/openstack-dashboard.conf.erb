@@ -43,7 +43,7 @@ Listen <%= @bind_host %>:<%= @bind_port %>
 
 <VirtualHost <%= @bind_host %>:<%= @bind_port %>>
 <% end %>
-    WSGIScriptAlias / <%= @horizon_dir %>/openstack_dashboard/wsgi/django.wsgi
+    WSGIScriptAlias / <%= @horizon_dir %>/openstack_dashboard/wsgi.py
     WSGIDaemonProcess horizon user=<%= @user %> group=<%= @group %> processes=3 threads=10 display-name=%{GROUP}
     SetEnv APACHE_RUN_USER  <%= @user %>
     SetEnv APACHE_RUN_GROUP <%= @group %>
