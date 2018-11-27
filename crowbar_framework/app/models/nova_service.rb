@@ -33,7 +33,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.4",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -49,7 +49,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.4",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "remotes" => true
@@ -58,7 +58,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => -1,
           "exclude_platform" => {
-            "suse" => "< 12.4",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "remotes" => true
@@ -67,7 +67,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.4",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         },
@@ -75,7 +75,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.4",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         },
@@ -83,7 +83,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => -1,
           "platform" => {
-            "suse" => ">= 12.4"
+            "suse" => ">= 12.3"
           },
           "remotes" => true
         },
@@ -91,7 +91,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "platform" => {
-            "suse" => ">= 12.4"
+            "suse" => ">= 12.3"
           },
           "remotes" => false
         },
@@ -99,7 +99,7 @@ class NovaService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.4",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "cluster" => true
@@ -201,6 +201,18 @@ class NovaService < OpenstackServiceObject
       cat $t
       rm -f $t ${t}.pub
     ]
+
+    @logger.debug("Nova create_proposal: Find SES barclamp?")
+    ses_proposal = Proposal.find_by(barclamp: "ses")
+    if ses_proposal.nil?
+      @logger.debug("Nova create_proposal: did NOT find SES barclamp")
+    else
+      @logger.debug("Nova create_proposal: FOUND ses barclamp")
+      cinder_ses = ses_proposal["attributes"]["ses"]["cinder"]
+      secret_uuid = ses_proposal["attributes"]["ses"]["secret_uuid"]
+      base["attributes"]["nova"]["rbd"]["user"] = cinder_ses["rbd_store_user"]
+      base["attributes"]["nova"]["rbd"]["secret_uuid"] = secret_uuid
+    end
 
     @logger.debug("Nova create_proposal: exiting")
     base

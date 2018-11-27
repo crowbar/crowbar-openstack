@@ -33,7 +33,7 @@ class HorizonService < OpenstackServiceObject
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
-            "suse" => "< 12.4",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           },
           "cluster" => true

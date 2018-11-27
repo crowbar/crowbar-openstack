@@ -35,7 +35,7 @@ class CinderService < OpenstackServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.4",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         },
@@ -45,7 +45,7 @@ class CinderService < OpenstackServiceObject
           "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
-            "suse" => "< 12.4",
+            "suse" => "< 12.3",
             "windows" => "/.*/"
           }
         }
@@ -83,6 +83,33 @@ class CinderService < OpenstackServiceObject
     base["attributes"][@bc_name]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name]["keymgr_fixed_key"] = random_password
+
+    volumes = base["attributes"][@bc_name]["volumes"]
+
+    ses_proposal = Proposal.find_by(barclamp: "ses")
+    if ses_proposal.nil?
+      @logger.debug("Cinder create_proposal: did NOT find ses barclamp")
+    else
+      @logger.debug("Cinder create_proposal: FOUND ses barclamp")
+      ceph_fsid = ses_proposal["attributes"]["ses"]["ceph_conf"]["fsid"]
+      cinder_ses = ses_proposal["attributes"]["ses"]["cinder"]
+      secret_uuid = ses_proposal["attributes"]["ses"]["secret_uuid"]
+      rbd_store_user = cinder_ses["rbd_store_user"]
+      keyring_file = "/etc/ceph/ceph.client.#{rbd_store_user}.keyring"
+      ses_backend = {"backend_driver" => "rbd",
+                     "backend_name" => "ses_ceph",
+                     "rbd" => {
+                       "use_crowbar" => false,
+                       "pool" => cinder_ses["rbd_store_pool"],
+                       "user" => cinder_ses["rbd_store_user"],
+                       "config_file" => "/etc/ceph/ceph.conf",
+                       "admin_keyring" => keyring_file,
+                       "secret_uuid" => secret_uuid,
+                       "flatten_volume_from_snapshot" => false
+                      }
+                    }
+      base["attributes"][@bc_name]["volumes"].push(ses_backend)
+    end
 
     @logger.debug("Cinder create_proposal: exiting")
     base
