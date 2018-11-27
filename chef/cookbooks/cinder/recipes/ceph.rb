@@ -42,7 +42,8 @@ if has_internal
     # So check if the ceph setup was done once already, to decide whether
     # to fail or just to emit a warning.
     if File.exist?("/etc/ceph/ceph.client.admin.keyring")
-      Chef::Log.warn("Ceph nodes seem to not be running; RBD backends might not work.")
+      Chef::Log.warn("Ceph nodes seem to not be running; RBD backends " \
+                     "might not work.")
     else
       message = "Ceph was not deployed with Crowbar yet!"
       Chef::Log.fatal(message)
@@ -59,6 +60,12 @@ if has_external
       action :nothing
     end.run_action(:install)
   end
+
+  # call the SES recipe to create the ceph.conf and keyrings
+  Chef::Log.info("Calling SES to create configs")
+  ses_create_configs "cinder" do
+    action :create
+  end
 end
 
 # Second loop to do our setup
@@ -73,14 +80,19 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
     admin_keyring = volume[:rbd][:admin_keyring]
 
     if ceph_conf.empty? || !File.exist?(ceph_conf)
-      Chef::Log.info("Ceph configuration file is missing; skipping the ceph setup for backend #{volume[:backend_name]}")
+      Chef::Log.info("Ceph configuration file is missing; skipping the " \
+                     "ceph setup for backend #{volume[:backend_name]}")
       next
     end
 
     if !admin_keyring.empty? && File.exist?(admin_keyring)
-      Chef::Log.info("Using external ceph cluster for cinder #{volume[:backend_name]} backend, with automatic setup.")
+      Chef::Log.info("Using external ceph cluster for cinder " \
+                     "#{volume[:backend_name]} backend, with automatic " \
+                     "setup.")
     else
-      Chef::Log.info("Using external ceph cluster for cinder #{volume[:backend_name]} backend, with no automatic setup.")
+      Chef::Log.info("Using external ceph cluster for cinder " \
+                     "#{volume[:backend_name]} backend, with no automatic " \
+                     "setup.")
       next
     end
 
@@ -88,7 +100,8 @@ node[:cinder][:volumes].each_with_index do |volume, volid|
     check_ceph = Mixlib::ShellOut.new(cmd)
 
     unless check_ceph.run_command.stdout.match("(HEALTH_OK|HEALTH_WARN)")
-      Chef::Log.info("Ceph cluster is not healthy; skipping the ceph setup for backend #{volume[:backend_name]}")
+      Chef::Log.info("Ceph cluster is not healthy; Cinder skipping the " \
+                     "ceph setup for backend #{volume[:backend_name]}")
       next
     end
   end
@@ -123,7 +136,9 @@ unless ceph_clients.empty?
 
       allow_pools = cinder_pools.map{ |p| "allow rwx pool=#{p}" }.join(", ")
       allow_pools += ", allow rx pool=#{glance_pool}" if glance_pool
-      ceph_caps = { "mon" => "allow r", "osd" => "allow class-read object_prefix rbd_children, #{allow_pools}" }
+      ceph_caps = { "mon" => "allow r",
+                    "osd" => "allow class-read object_prefix rbd_children, " \
+                             "#{allow_pools}" }
 
       ceph_client cinder_user do
         ceph_conf ceph_conf

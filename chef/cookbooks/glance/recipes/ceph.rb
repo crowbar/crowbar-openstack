@@ -28,19 +28,24 @@ if ceph_servers.length > 0
   # file is the right one
   node.default[:glance][:rbd][:store_ceph_conf] = ceph_conf
 else
-  ceph_conf = node[:glance][:rbd][:store_ceph_conf]
-  admin_keyring = node[:glance][:rbd][:store_admin_keyring]
-
-  # If Ceph configuration file is present, external Ceph cluster will be used,
-  # we have to install ceph client packages
-  return if ceph_conf.empty? || !File.exist?(ceph_conf)
-
   if node[:platform_family] == "suse"
     # install package in compile phase because we will run "ceph -s"
     package "ceph-common" do
       action :nothing
     end.run_action(:install)
   end
+
+  Chef::Log.info("Calling SES to create configs")
+  ses_create_configs "glance" do
+    action :create
+  end
+
+  ceph_conf = node[:glance][:rbd][:store_ceph_conf]
+  admin_keyring = node[:glance][:rbd][:store_admin_keyring]
+
+  # If Ceph configuration file is present, external Ceph cluster will be used,
+  # we have to install ceph client packages
+  return if ceph_conf.empty? || !File.exist?(ceph_conf)
 
   if !admin_keyring.empty? && File.exist?(admin_keyring)
     Chef::Log.info("Using external ceph cluster for glance, with automatic setup.")
@@ -49,9 +54,9 @@ else
     return
   end
 
-  # If ceph.conf and admin keyring will be available
+  # If ceph.conf and user keyring will be available
   # we have to check ceph cluster status
-  cmd = ["ceph", "-k", admin_keyring, "-c", ceph_conf, "-s"]
+  cmd = ["ceph", "--id", node[:glance][:rbd][:store_user], "-c", ceph_conf, "-s"]
   check_ceph = Mixlib::ShellOut.new(cmd)
 
   unless check_ceph.run_command.stdout.match("(HEALTH_OK|HEALTH_WARN)")
@@ -63,20 +68,30 @@ end
 ceph_user = node[:glance][:rbd][:store_user]
 ceph_pool = node[:glance][:rbd][:store_pool]
 
-ceph_caps = { "mon" => "allow r", "osd" => "allow class-read object_prefix rbd_children, allow rwx pool=#{ceph_pool}" }
+# If this is an external SES cluster, it could have been setup already
+# So test to see if we have access to the pool first.
+# If we don't, then try and create it
+cmd = ["rbd", "--id", ceph_user, "ls", ceph_pool]
+check_pool = Mixlib::ShellOut.new(cmd)
+check_pool.run_command
+if check_pool.exitstatus != 0
+  # we failed to auth, so lets try to create it.
+  ceph_caps = { "mon" => "profile rbd",
+                "osd" => "profile rbd pool=#{ceph_pool}" }
 
-ceph_client ceph_user do
-  ceph_conf ceph_conf
-  admin_keyring admin_keyring
-  caps ceph_caps
-  keyname "client.#{ceph_user}"
-  filename "/etc/ceph/ceph.client.#{ceph_user}.keyring"
-  owner "root"
-  group node[:glance][:group]
-  mode 0640
-end
+  ceph_client ceph_user do
+    ceph_conf ceph_conf
+    admin_keyring admin_keyring
+    caps ceph_caps
+    keyname "client.#{ceph_user}"
+    filename "/etc/ceph/ceph.client.#{ceph_user}.keyring"
+    owner "root"
+    group node[:glance][:group]
+    mode "0640"
+  end
 
-ceph_pool ceph_pool do
-  ceph_conf ceph_conf
-  admin_keyring admin_keyring
+  ceph_pool ceph_pool do
+    ceph_conf ceph_conf
+    admin_keyring admin_keyring
+  end
 end

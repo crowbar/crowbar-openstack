@@ -230,6 +230,10 @@ disk_cachemodes = <%= node[:nova][:kvm][:disk_cachemodes] %>
 <% if @rng_device %>
 rng_dev_path = <%= @rng_device %>
 <% end %>
+<% if @ceph_user %>
+rbd_user = <%= @ceph_user %>
+rbd_secret_uuid = <%= @ceph_uuid %>
+<% end %>
 
 [neutron]
 service_metadata_proxy = true

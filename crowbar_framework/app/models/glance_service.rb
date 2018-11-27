@@ -71,6 +71,23 @@ class GlanceService < OpenstackServiceObject
     base["attributes"]["glance"]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
+    @logger.debug("Glance create_proposal: Find ses barclamp?")
+    ses_proposal = Proposal.find_by(barclamp: "ses")
+    if ses_proposal.nil?
+      @logger.debug("Glance create_proposal: did NOT find ses barclamp")
+    else
+      @logger.debug("Glance create_proposal: FOUND ses barclamp")
+      ses_ceph = ses_proposal["attributes"]["ses"]
+      rbd_store_user = ses_ceph["glance"]["rbd_store_user"]
+      rbd_store_pool = ses_ceph["glance"]["rbd_store_pool"]
+
+      base["attributes"]["glance"]["rbd"]["store_ceph_conf"] = "/etc/ceph/ceph.conf"
+      keyring_file = "/etc/ceph/ceph.client.#{rbd_store_user}.keyring"
+      base["attributes"]["glance"]["rbd"]["store_admin_keyring"] = keyring_file
+      base["attributes"]["glance"]["rbd"]["store_user"] = rbd_store_user
+      base["attributes"]["glance"]["rbd"]["store_pool"] = rbd_store_pool
+    end
+
     @logger.debug("Glance create_proposal: exiting")
     base
   end
