@@ -40,9 +40,6 @@ ses_service = node.run_state["ses_service"]
 Chef::Log.info("SES: create_configs for service #{ses_service}")
 
 ceph_conf  = search(:node, "ses:ceph_conf") || []
-Chef::Log.info("SES: ceph_conf = #{ceph_conf}")
-
-Chef::Log.info("SES config Try and load it!")
 ses_config = BarclampLibrary::Barclamp::Config.load(
   "openstack",
   "ses"
@@ -57,7 +54,7 @@ if !ses_config.nil? && !ses_config.empty?
   template "/etc/ceph/ceph.conf" do
     source "ceph.conf.erb"
     owner "root"
-    group "#{ses_service}"
+    group ses_service.to_s
     mode "0644"
     variables(fsid: ses_config["ceph_conf"]["fsid"],
               mon_initial_members: ses_config["ceph_conf"]["mon_initial_members"],
