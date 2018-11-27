@@ -27,6 +27,7 @@ barclamp:
     - 'rabbitmq'
     - 'keystone'
     - 'glance'
+    - 'ses'
   member:
     - 'openstack'
 

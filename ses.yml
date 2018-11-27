@@ -1,5 +1,5 @@
 #
-# Copyright 2016, SUSE LINUX GmbH
+# Copyright 2018, SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,19 @@
 # limitations under the License.
 #
 
-if CrowbarRoleRecipe.node_state_valid_for_role?(node, "nova", "nova-compute-qemu")
-  include_recipe "nova::qemu"
-  include_recipe "nova::compute"
-  include_recipe "nova::ceph_post_libvirt"
-  include_recipe "nova::monitor_monasca"
-end
+barclamp:
+  name: 'ses'
+  display: 'SES'
+  description: 'SUSE Enterprise Storage (ceph) Integration'
+  version: 0
+  requires:
+    - '@crowbar'
+  member:
+    - 'openstack'
+
+crowbar:
+  layout: 1
+  order: 80
+  run_order: 80
+  chef_order: 80
+  proposal_schema_version: 3
