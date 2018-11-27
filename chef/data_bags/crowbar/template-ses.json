@@ -1,0 +1,61 @@
+{
+ "id": "template-ses",
+ "description": "Installation for SES",
+ "attributes": {
+   "ses": {
+     "debug": false,
+     "cinder_instance": "none",
+     "nova_instance": "none",
+     "keystone_instance": "none",
+     "glance_instance": "none",
+     "yaml_file": "",
+     "secret_uuid": "",
+     "ceph_conf": {
+       "cluster_network": "",
+       "fsid": "",
+       "mon_host": "",
+       "mon_initial_members": "",
+       "public_network": ""
+     },
+     "radosgw_urls": [],
+     "cinder": {
+       "key": "",
+       "rbd_store_pool": "",
+       "rbd_store_user": ""
+     },
+     "cinder_backup": {
+       "key": "",
+       "rbd_store_pool": "",
+       "rbd_store_user": ""
+     },
+     "glance": {
+       "key": "",
+       "rbd_store_pool": "",
+       "rbd_store_user": ""
+     },
+     "nova": {
+       "rbd_store_pool": ""
+     }
+   }
+ },
+ "deployment": {
+   "ses": {
+     "crowbar-revision": 0,
+     "crowbar-applied": false,
+     "schema-revision": 300,
+     "element_states": {
+     },
+     "elements": {},
+     "element_order": [
+     ],
+     "element_run_list_order": {
+     },
+     "config": {
+       "environment": "ses-base-config",
+       "mode": "full",
+       "transitions": false,
+       "transition_list": []
+     }
+   }
+ }
+}
