@@ -127,13 +127,12 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
         if File.exist?(client_keyring)
           f = File.open(client_keyring)
           f.each do |line|
-            if match = line.match("key\s*=\s*(.+)")
+            if (match = line.match("key\s*=\s*(.+)"))
               client_key = match[1]
               break
             end
           end
-        else
-          if !admin_keyring.empty? && File.exist?(admin_keyring)
+        elsif !admin_keyring.empty? && File.exist?(admin_keyring)
             # Now add our secret and its value
             cmd = [
               "ceph",
