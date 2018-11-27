@@ -27,7 +27,6 @@ memcached_servers = MemcachedHelper.get_memcached_servers(
 memcached_instance("magnum-server")
 
 include_recipe "database::client"
-include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 # get Database data

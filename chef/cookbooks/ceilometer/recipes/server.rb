@@ -18,7 +18,6 @@ ha_enabled = node[:ceilometer][:ha][:server][:enabled]
   db_settings = fetch_database_settings
 
   include_recipe "database::client"
-  include_recipe "#{db_settings[:backend_name]}::client"
   include_recipe "#{db_settings[:backend_name]}::python-client"
 
   crowbar_pacemaker_sync_mark "wait-ceilometer_database" if ha_enabled

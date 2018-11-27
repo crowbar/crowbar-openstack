@@ -19,7 +19,6 @@ ha_enabled = node[:neutron][:ha][:server][:enabled]
 
 db_settings = fetch_database_settings
 include_recipe "database::client"
-include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 props = [{"db_name" => node[:neutron][:db][:database],

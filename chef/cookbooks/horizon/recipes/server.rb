@@ -238,14 +238,15 @@ ha_enabled = node[:horizon][:ha][:enabled]
 
 db_settings = fetch_database_settings
 include_recipe "database::client"
-include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 case db_settings[:backend_name]
 when "mysql"
     django_db_backend = "'django.db.backends.mysql'"
+    package "python-mysql"
 when "postgresql"
     django_db_backend = "'django.db.backends.postgresql_psycopg2'"
+    package "python-psycopg2"
 end
 
 crowbar_pacemaker_sync_mark "wait-horizon_database" if ha_enabled

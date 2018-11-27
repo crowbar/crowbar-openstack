@@ -57,7 +57,6 @@ if is_controller
   db_settings = fetch_database_settings
 
   include_recipe "database::client"
-  include_recipe "#{db_settings[:backend_name]}::client"
   include_recipe "#{db_settings[:backend_name]}::python-client"
 
   database_connection = fetch_database_connection_string(node[:nova][:db])

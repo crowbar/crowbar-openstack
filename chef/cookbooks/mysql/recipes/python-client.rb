@@ -19,8 +19,7 @@
 
 case node[:platform_family]
 when "suse"
-  package "python-mysql"     # C-extensions MySQL driver
-  package "python-PyMySQL"   # pure-Python MySQL driver
+  package "python-PyMySQL"
 when "rhel"
   package "MySQL-python"
 else

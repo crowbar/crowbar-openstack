@@ -4,7 +4,6 @@ ha_enabled = node[:manila][:ha][:enabled]
 
 db_settings = fetch_database_settings
 include_recipe "database::client"
-include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 crowbar_pacemaker_sync_mark "wait-manila_database" if ha_enabled

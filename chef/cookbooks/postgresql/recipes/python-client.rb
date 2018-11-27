@@ -17,6 +17,4 @@
 # limitations under the License.
 #
 
-package "python-psycopg2" do
-    action :install
-end
+package "python-psycopg2"

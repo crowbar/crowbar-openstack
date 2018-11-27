@@ -56,7 +56,6 @@ nova_insecure = CrowbarOpenStackHelper.insecure(nova_config)
 db_settings = fetch_database_settings
 
 include_recipe "database::client"
-include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
 db_auth = node[:cinder][:db].dup
