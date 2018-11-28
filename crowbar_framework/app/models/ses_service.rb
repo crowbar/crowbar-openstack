@@ -32,10 +32,6 @@ class SesService < OpenstackServiceObject
   def create_proposal
     base = super
 
-    #base["attributes"][@bc_name]["cinder_instance"] = Proposal.find_by(barclamp: "cinder")
-    #base["attributes"][@bc_name]["nova_instance"] = Proposal.find_by(barclamp: "nova")
-    #base["attributes"][@bc_name]["keystone_instance"] = Proposal.find_by(barclamp: "keystone")
-    #base["attributes"][@bc_name]["glance_instance"] = Proposal.find_by(barclamp: "glance")
     secret_uuid = `uuidgen`.strip
     base["attributes"][@bc_name]["secret_uuid"] = secret_uuid
     base
@@ -45,6 +41,5 @@ class SesService < OpenstackServiceObject
     super
   end
 
-  def apply_role_pre_chef_call(old_role, role, all_nodes)
-  end
+  def apply_role_pre_chef_call(old_role, role, all_nodes); end
 end

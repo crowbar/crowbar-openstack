@@ -39,7 +39,6 @@ end
 ses_service = node.run_state["ses_service"]
 Chef::Log.info("SES: create_configs for service #{ses_service}")
 
-ceph_conf  = search(:node, "ses:ceph_conf") || []
 ses_config = BarclampLibrary::Barclamp::Config.load(
   "openstack",
   "ses"
