@@ -461,3 +461,5 @@ if node[:nova][:resource_limits] && node[:nova][:resource_limits][service]
     action action
   end
 end
+
+include_recipe "nova::compute_register_cell"
