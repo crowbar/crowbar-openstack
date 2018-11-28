@@ -16,7 +16,7 @@
 
       = text_field %w(yaml_file)
 
-      %div.form-group.pull-left
+      .form-group.pull-left
         %input(id='parse_yaml' class="form-control" type="button" value="Parse Yaml")
         #yaml_success{ :style => "display: none" }
           = t(".yaml_success")
