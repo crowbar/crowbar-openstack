@@ -146,7 +146,6 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
             ceph_get_key = Mixlib::ShellOut.new(cmd)
             client_key = ceph_get_key.run_command.stdout.strip
             ceph_get_key.error!
-          end
         end
 
         cmd = ["virsh", "secret-get-value", rbd_uuid]
