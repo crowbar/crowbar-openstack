@@ -106,8 +106,7 @@ class CinderService < OpenstackServiceObject
                        "admin_keyring" => keyring_file,
                        "secret_uuid" => secret_uuid,
                        "flatten_volume_from_snapshot" => false
-                      }
-                    }
+                     }}
       base["attributes"][@bc_name]["volumes"].push(ses_backend)
     end
 
