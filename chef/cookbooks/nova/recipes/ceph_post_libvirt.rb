@@ -51,24 +51,27 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
     admin_keyring = volume[:rbd][:admin_keyring]
 
     if ceph_conf.empty? || !File.exist?(ceph_conf)
-      Chef::Log.info("Ceph configuration file is missing; skipping the ceph setup for backend #{volume[:backend_name]}")
+      Chef::Log.info("Ceph configuration file is missing; skipping the ceph" +
+                     " setup for backend #{volume[:backend_name]}")
       next
     end
 
     if !admin_keyring.empty? && File.exist?(admin_keyring)
       cmd = ["ceph", "--id", rbd_user, "-c", ceph_conf, "-s"]
-      Log::info("Check ceph -s with #{cmd}")
+      Chef::Log.info("Check ceph -s with #{cmd}")
       check_ceph = Mixlib::ShellOut.new(cmd)
 
       unless check_ceph.run_command.stdout.match("(HEALTH_OK|HEALTH_WARN)")
-        Chef::Log.info("Ceph cluster is not healthy; Nova skipping the ceph setup for backend #{volume[:backend_name]}")
+        Chef::Log.info("Ceph cluster is not healthy; Nova skipping the ceph" +
+                       " setup for backend #{volume[:backend_name]}")
         next
       end
     else
       # Check if rbd keyring was uploaded manually by user
       client_keyring = "/etc/ceph/ceph.client.#{rbd_user}.keyring"
       unless File.exist?(client_keyring)
-        Chef::Log.info("Ceph user keyring wasn't provided for backend #{volume[:backend_name]}")
+        Chef::Log.info("Ceph user keyring wasn't provided for backend " +
+                       "#{volume[:backend_name]}")
         next
       end
     end
@@ -100,7 +103,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
           next if secret_xml.index("<usage type='ceph'>").nil?
 
           # lazy xml parsing
-          re_match = %r[<usage type='ceph'>.*<name>(.*)</name>]m.match(secret_xml)
+          re_match = %r{<usage type='ceph'>.*<name>(.*)</name>}m.match(secret_xml)
           next if re_match.nil?
           secret_usage = re_match[1]
           undefine = false
@@ -123,7 +126,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
         # Check if rbd keyring was created by SES barclamp
         client_keyring = "/etc/ceph/ceph.client.#{rbd_user}.keyring"
         Chef::Log.info("Check to see if we have a #{client_keyring} file.")
-        client_key = ''
+        client_key = ""
         if File.exist?(client_keyring)
           f = File.open(client_keyring)
           f.each do |line|
@@ -133,19 +136,19 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
             end
           end
         elsif !admin_keyring.empty? && File.exist?(admin_keyring)
-            # Now add our secret and its value
-            cmd = [
-              "ceph",
-              "-k", admin_keyring,
-              "-c", ceph_conf,
-              "auth",
-              "get-or-create-key",
-              "client.#{rbd_user}"
-            ]
+          # Now add our secret and its value
+          cmd = [
+            "ceph",
+            "-k", admin_keyring,
+            "-c", ceph_conf,
+            "auth",
+            "get-or-create-key",
+            "client.#{rbd_user}"
+          ]
 
-            ceph_get_key = Mixlib::ShellOut.new(cmd)
-            client_key = ceph_get_key.run_command.stdout.strip
-            ceph_get_key.error!
+          ceph_get_key = Mixlib::ShellOut.new(cmd)
+          client_key = ceph_get_key.run_command.stdout.strip
+          ceph_get_key.error!
         end
 
         cmd = ["virsh", "secret-get-value", rbd_uuid]
