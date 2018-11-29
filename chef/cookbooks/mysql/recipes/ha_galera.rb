@@ -243,7 +243,7 @@ ruby_block "wait galera bootstrap" do
   block do
     require "timeout"
     begin
-      cmd = "mysql -u '' -N -B " \
+      cmd = "mysql -u 'monitoring' -N -B " \
         "-e \"SHOW STATUS WHERE Variable_name='wsrep_local_state_comment';\" | cut -f 2"
       sync_state = ""
       Timeout.timeout(seconds) do
