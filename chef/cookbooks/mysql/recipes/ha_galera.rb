@@ -23,24 +23,30 @@ node[:mysql][:galera_packages].each do |p|
   package p
 end
 
-unless node[:database][:galera_bootstrapped]
-  directory "/var/run/mysql/" do
-    owner "mysql"
-    group "root"
-    mode "0755"
-    action :create
-  end
+directory "/var/run/mysql/" do
+  owner "mysql"
+  group "root"
+  mode "0755"
+  action :create
+end
 
-  execute "mysql_install_db" do
-    command "mysql_install_db"
-    action :run
-  end
+directory "/var/lib/mysql/" do
+  owner "mysql"
+  group "root"
+  mode "0700"
+  action :create
 end
 
 node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 
 unless node[:database][:galera_bootstrapped]
   if CrowbarPacemakerHelper.is_cluster_founder?(node)
+
+    execute "mysql_install_db" do
+      command "mysql_install_db"
+      action :run
+    end
+
     # To bootstrap for the first time, start galera on one node
     # to set up the seed sst and monitoring users.
 
