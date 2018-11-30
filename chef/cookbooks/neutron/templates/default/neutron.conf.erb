@@ -37,7 +37,6 @@ root_helper_daemon = sudo neutron-rootwrap-daemon /etc/neutron/rootwrap.conf
 <% unless @sql_connection.nil? || @sql_connection.empty? -%>
 connection = <%= @sql_connection %>
 <% end -%>
-min_pool_size = <%= @sql_min_pool_size %>
 max_pool_size = <%= @sql_max_pool_size %>
 max_overflow = <%= @sql_max_pool_overflow %>
 pool_timeout = <%= @sql_pool_timeout %>
