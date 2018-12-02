@@ -36,10 +36,7 @@ enabled_backends=<%= @volumes.each_with_index.collect { |backend,idx|
     "backend-#{backend['backend_driver']}-#{idx}"
 }.join(',') %>
 
-nova_catalog_info = compute:nova:internalURL
-nova_catalog_admin_info = compute:nova:adminURL
-os_region_name = <%= @keystone_settings['endpoint_region'] %>
-nova_api_insecure = <%= @nova_api_insecure %>
+
 <% if @show_storage_location -%>
 allowed_direct_url_schemes = cinder
 <% end -%>
@@ -300,6 +297,10 @@ memcached_servers = <%= @memcached_servers.join(',') %>
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = <%= node[:cinder][:memcache_secret_key] %>
 memcache_pool_socket_timeout = 1
+
+[nova]
+region_name = <%= @keystone_settings['endpoint_region'] %>
+insecure = <%= @nova_api_insecure %>
 
 [oslo_concurrency]
 <% if @need_shared_lock_path -%>
