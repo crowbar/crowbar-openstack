@@ -16,14 +16,8 @@ module GlanceHelper
           bind_port: node[:glance][:ha][:enabled] ? node[:glance][:ha][:ports][:api].to_i : node[:glance][:api][:bind_port].to_i,
           ha_bind_host: node[:glance][:api][:bind_open_address] ? "0.0.0.0" : @cluster_admin_ip,
           ha_bind_port: node[:glance][:api][:bind_port].to_i
-        },
-
-        registry: {
-          bind_host: @ip,
-          bind_port: node[:glance][:ha][:enabled] ? node[:glance][:ha][:ports][:registry].to_i : node[:glance][:registry][:bind_port].to_i,
-          ha_bind_host: @cluster_admin_ip,
-          ha_bind_port: node[:glance][:registry][:bind_port].to_i
         }
+
       }
     end
   end

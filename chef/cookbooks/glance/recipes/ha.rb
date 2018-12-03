@@ -33,14 +33,6 @@ haproxy_loadbalancer "glance-api" do
   action :nothing
 end.run_action(:create)
 
-haproxy_loadbalancer "glance-registry" do
-  address network_settings[:registry][:ha_bind_host]
-  port network_settings[:registry][:ha_bind_port]
-  use_ssl false
-  servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "glance", "glance-server", "registry")
-  action :nothing
-end.run_action(:create)
-
 if node[:pacemaker][:clone_stateless_services]
   # Wait for all nodes to reach this point so we know that all nodes will have
   # all the required packages installed before we create the pacemaker
@@ -51,7 +43,7 @@ if node[:pacemaker][:clone_stateless_services]
   crowbar_pacemaker_sync_mark "wait-glance_ha_resources"
 
   rabbit_settings = fetch_rabbitmq_settings
-  services = ["registry", "api"]
+  services = ["api"]
   transaction_objects = []
 
   services.each do |service|

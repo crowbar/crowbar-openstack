@@ -70,8 +70,6 @@ template node[:glance][:api][:config_file] do
   variables(
       bind_host: network_settings[:api][:bind_host],
       bind_port: network_settings[:api][:bind_port],
-      registry_bind_host: network_settings[:registry][:bind_host],
-      registry_bind_port: network_settings[:registry][:bind_port],
       keystone_settings: keystone_settings,
       memcached_servers: memcached_servers,
       rabbit_settings: fetch_rabbitmq_settings,

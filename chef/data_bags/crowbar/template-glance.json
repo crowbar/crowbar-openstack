@@ -1,6 +1,6 @@
 {
   "id": "template-glance",
-  "description": "Glance service (image registry and delivery service) for the cloud",
+  "description": "Glance service (image delivery service) for the cloud",
   "attributes": {
     "glance": {
       "debug": false,
@@ -17,9 +17,6 @@
         "protocol": "http",
         "bind_open_address": true,
         "bind_port": 9292
-      },
-      "registry": {
-        "bind_port": 9191
       },
       "ssl": {
         "certfile": "/etc/glance/ssl/certs/signing_cert.pem",
@@ -75,7 +72,7 @@
     "glance": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 300,
+      "schema-revision": 301,
       "element_states": {
         "glance-server": [ "readying", "ready", "applying" ]
       },

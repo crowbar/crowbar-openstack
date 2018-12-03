@@ -1,6 +1,6 @@
 DESCRIPTION
 ===========
-Chef Cookbook to install and configure Glance API and Registry.
+Chef Cookbook to install and configure Glance API.
 
 REQUIREMENTS
 ============
@@ -15,10 +15,6 @@ common and service
 common
 ------
 package, directories, template
-
-registry
---------
-common and service
 
 setup
 -----

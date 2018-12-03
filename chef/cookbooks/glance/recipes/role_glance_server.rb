@@ -15,7 +15,6 @@
 #
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "glance", "glance-server")
-  include_recipe "glance::registry"
   include_recipe "glance::api"
   include_recipe "glance::cache"
   include_recipe "glance::scrubber"
