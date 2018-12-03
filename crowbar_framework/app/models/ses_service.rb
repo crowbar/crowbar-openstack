@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+require 'securerandom'
 
 class SesService < OpenstackServiceObject
   def initialize(thelogger = nil)
@@ -32,8 +33,7 @@ class SesService < OpenstackServiceObject
   def create_proposal
     base = super
 
-    secret_uuid = `uuidgen`.strip
-    base["attributes"][@bc_name]["secret_uuid"] = secret_uuid
+    base["attributes"][@bc_name]["secret_uuid"] = SecureRandom.uuid
     base
   end
 
