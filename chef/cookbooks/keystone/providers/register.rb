@@ -306,7 +306,6 @@ action :update_endpoint do
   end
 
   path = "/v3/endpoints"
-
   resp = http.request_get(path, headers)
   if resp.is_a?(Net::HTTPOK)
     data = JSON.parse(resp.read_body)
@@ -330,8 +329,9 @@ action :update_endpoint do
       endpoint_template["endpoint"]["url"] = new_url
       endpoint_template["endpoint"]["endpoint_id"] = endpoints[interface]["id"]
       endpoint_template["endpoint"]["service_id"] = endpoints[interface]["service_id"]
-      path = "#{path}/#{endpoints[interface]["id"]}"
-      _update_item(http, headers, path, endpoint_template, "endpoint URL #{interface} #{new_url}")
+      fullpath = "#{path}/#{endpoints[interface]["id"]}"
+      name = "endpoint URL #{interface} #{new_url}"
+      _update_item(http, headers, fullpath, endpoint_template, name)
     end
   else
     log_message = "Unknown response from keystone server"
