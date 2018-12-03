@@ -246,47 +246,6 @@ register_auth_hash = { user: node[:keystone][:admin][:username],
                        password: node[:keystone][:admin][:password],
                        project: node[:keystone][:admin][:project] }
 
-if node[:keystone].key?(:endpoint)
-  endpoint_protocol = node[:keystone][:endpoint][:protocol]
-  endpoint_insecure = node[:keystone][:endpoint][:insecure]
-  # In order to update keystone's endpoints we need the old internal endpoint.
-  endpoint_port = node[:keystone][:endpoint][:port]
-else
-  endpoint_protocol = node[:keystone][:api][:protocol]
-  endpoint_insecure = node[:keystone][:ssl][:insecure]
-  endpoint_port = node[:keystone][:api][:admin_port]
-end
-
-endpoint_host = my_admin_host
-
-# Update keystone endpoints (in case we switch http/https this will update the
-# endpoints to the correct ones). This needs to be done _before_ we switch
-# protocols on the keystone api.
-keystone_register "update keystone endpoint" do
-  protocol endpoint_protocol
-  insecure endpoint_insecure
-  host endpoint_host
-  port endpoint_port
-  auth register_auth_hash
-  endpoint_service "keystone"
-  endpoint_region node[:keystone][:api][:region]
-  endpoint_adminURL KeystoneHelper.admin_auth_url(node, my_admin_host)
-  endpoint_publicURL KeystoneHelper.public_auth_url(node, my_public_host)
-  endpoint_internalURL KeystoneHelper.internal_auth_url(node, my_admin_host)
-  action :update_endpoint
-  # Do not try to update keystone endpoint during upgrade, when keystone is not running yet
-  # ("done_os_upgrade" is present when first chef-client run is executed at the end of upgrade)
-  not_if { node["crowbar_upgrade_step"] == "done_os_upgrade" }
-  only_if do
-    node[:keystone][:bootstrap] &&
-      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)) &&
-      node[:keystone].key?(:endpoint) &&
-      (node[:keystone][:endpoint][:protocol] != node[:keystone][:api][:protocol] ||
-      node[:keystone][:endpoint][:insecure] != node[:keystone][:ssl][:insecure] ||
-      node[:keystone][:endpoint][:port] != node[:keystone][:api][:admin_port])
-  end
-end
-
 template node[:keystone][:config_file] do
     source "keystone.conf.erb"
     owner "root"
@@ -402,7 +361,7 @@ if !ha_enabled && node[:keystone][:token_format] == "fernet"
   end
 end
 
-# This also includes fernet setup for HA case
+# This also includes fernet setup for HA case.
 include_recipe "keystone::ha" if ha_enabled
 
 # Wait for all nodes to reach this point so we know that all nodes will have
@@ -617,6 +576,8 @@ ec2_creds.each do |args|
 end
 
 crowbar_pacemaker_sync_mark "create-keystone_register" if ha_enabled
+
+include_recipe "keystone::update_endpoint"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 

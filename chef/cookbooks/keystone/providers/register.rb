@@ -339,6 +339,43 @@ action :update_endpoint do
   end
 end
 
+action :update_one_endpoint do
+  KeystoneHelper.cache_reset
+  http, headers = _build_connection(new_resource)
+
+  my_service_id, _error = _get_service_id(http, headers, new_resource.endpoint_service)
+  unless my_service_id
+    msg = "Couldn't find service #{new_resource.endpoint_service} in keystone"
+    _raise_error(nil, msg, "update_endpoint")
+  end
+
+  path = "/v3/endpoints"
+
+  resp = http.request_get(path, headers)
+  if resp.is_a?(Net::HTTPOK)
+    data = JSON.parse(resp.read_body)
+    endpoints = {}
+    data["endpoints"].each do |endpoint|
+      if endpoint["service_id"].to_s == my_service_id.to_s
+        endpoints[endpoint["interface"]] = endpoint
+      end
+    end
+    interface = new_resource.endpoint_interface
+    new_url = new_resource.endpoint_url
+    endpoint_template = {}
+    endpoint_template["endpoint"] = {}
+    endpoint_template["endpoint"]["interface"] = interface
+    endpoint_template["endpoint"]["url"] = new_url
+    endpoint_template["endpoint"]["endpoint_id"] = endpoints[interface]["id"]
+    endpoint_template["endpoint"]["service_id"] = endpoints[interface]["service_id"]
+    path = "#{path}/#{endpoints[interface]["id"]}"
+    _update_item(http, headers, path, endpoint_template, "endpoint URL #{interface} #{new_url}")
+  else
+    log_message = "Unknown response from keystone server"
+    _raise_error(resp, log_message, "add_endpoint")
+  end
+end
+
 # Make a POST request to create a new object
 def _create_item(http, headers, path, body, name)
   resp = http.send_request("POST", path, JSON.generate(body), headers)
@@ -380,7 +417,7 @@ end
 
 # Make a PATCH request to update an existing item
 def _update_item(http, headers, path, body, name)
-  resp = http.send_request("PATCH", path, JSON.generate(body), headers)
+  resp = retry_request(http, "PATCH", path, body, headers)
   if resp.is_a?(Net::HTTPOK)
     Chef::Log.info("Updated keystone item '#{name}'")
   else
