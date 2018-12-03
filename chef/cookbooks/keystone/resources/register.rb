@@ -18,7 +18,7 @@
 #
 
 actions :add_service, :add_endpoint_template, :add_tenant, :add_domain, :add_domain_role, :add_user,
-        :add_role, :add_access, :add_ec2, :wakeup, :update_endpoint
+        :add_role, :add_access, :add_ec2, :wakeup, :update_endpoint, :update_one_endpoint
 
 attribute :protocol, kind_of: String
 attribute :insecure, kind_of: [TrueClass, FalseClass], default: false
@@ -42,6 +42,10 @@ attribute :endpoint_internalURL, kind_of: String
 attribute :endpoint_publicURL, kind_of: String
 attribute :endpoint_global, default: true
 attribute :endpoint_enabled, default: true
+
+# :update_one_endpoint specific attributes
+attribute :endpoint_interface, kind_of: String
+attribute :endpoint_url, kind_of: String
 
 # :add_tenant specific attributes
 attribute :tenant_name, kind_of: String
