@@ -165,6 +165,9 @@ sahara = <%= @enabled_services.include? "data-processing" %>
 trove = <%= @enabled_services.include? "database" %>
 manila = <%= @enabled_services.include? "sharev2" %>
 magnum = <%= @enabled_services.include? "container-infra" %>
+ironic = <%= @enabled_services.include? "baremetal" %>
+ironic_inspector = <%= @enabled_services.include? "baremetal" %>
+designate = <%= @enabled_services.include? "dns" %>
 
 [share]
 region = <%= @keystone_settings['endpoint_region'] %>
