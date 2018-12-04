@@ -517,17 +517,8 @@ def _get_token(http, user_name, password, project = "")
   headers = _build_headers
   body = _build_auth(user_name, password, project)
 
-  resp = nil
-  count = 0
-  error = true
-  while error && count < 10
-    count += 1
-    Chef::Log.debug "Trying to get keystone token for user '#{user_name}' (try #{count})"
-    resp = http.send_request("POST", path, JSON.generate(body), headers)
-    error = !resp.is_a?(Net::HTTPSuccess)
-    # retry on any 5XX (server error) error code but not on 4XX (client error)
-    sleep 5 if resp.is_a?(Net::HTTPServerError)
-  end
+  resp = retry_request(http, "POST", path, body, headers)
+  error = !resp.is_a?(Net::HTTPSuccess)
 
   if error
     msg = "Failed to get token for User '#{user_name}'"
@@ -639,4 +630,15 @@ def _raise_error(resp, msg, calling_action)
   _log_error(resp, msg)
   new_resource.updated_by_last_action(false)
   raise "#{msg} in #{calling_action}"
+end
+
+def retry_request(http, method, path, body, headers)
+  resp = nil
+  10.times do |count|
+    resp = http.send_request(method, path, JSON.generate(body), headers)
+    break unless resp.is_a?(Net::HTTPServerError)
+    Chef::Log.debug("Retrying request #{method} #{path} : #{count}")
+    sleep 5
+  end
+  resp
 end
