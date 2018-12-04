@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-require 'securerandom'
+require "securerandom"
 
 class SesService < OpenstackServiceObject
   def initialize(thelogger = nil)
