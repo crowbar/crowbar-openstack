@@ -408,7 +408,6 @@ template local_settings do
     multi_domain_support: multi_domain_support,
     policy_file_path: node["horizon"]["policy_file_path"],
     policy_file: node["horizon"]["policy_file"],
-    token_hash_enabled: node["horizon"]["token_hash_enabled"]
   )
   action :create
   notifies :reload, "service[horizon]"

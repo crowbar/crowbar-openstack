@@ -55,6 +55,3 @@ default["horizon"]["can_set_password"] = false
 
 # Display "Domain" text field on login page
 default[:horizon][:multi_domain_support] = false
-
-# Set as false when using PKI tokens (401 errors)
-default[:horizon][:token_hash_enabled] = true
