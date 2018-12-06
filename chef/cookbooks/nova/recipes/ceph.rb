@@ -78,7 +78,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
     admin_keyring = volume[:rbd][:admin_keyring]
 
     if ceph_conf.empty? || !File.exist?(ceph_conf)
-      Chef::Log.info("Ceph configuration file is missing; skipping the ceph" +
+      Chef::Log.info("Ceph configuration file is missing; skipping the ceph" \
                      " setup for backend #{volume[:backend_name]}")
       next
     end
@@ -89,7 +89,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
       check_ceph = Mixlib::ShellOut.new(cmd)
 
       unless check_ceph.run_command.stdout.match("(HEALTH_OK|HEALTH_WARN)")
-        Chef::Log.info("Ceph cluster is not healthy; Nova skipping the ceph" +
+        Chef::Log.info("Ceph cluster is not healthy; Nova skipping the ceph" \
                        " setup for backend #{volume[:backend_name]}")
         next
       end
@@ -97,7 +97,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
       # Check if rbd keyring was uploaded manually by user
       client_keyring = "/etc/ceph/ceph.client.#{rbd_user}.keyring"
       unless File.exist?(client_keyring)
-        Chef::Log.info("Ceph user keyring wasn't provided for backend" +
+        Chef::Log.info("Ceph user keyring wasn't provided for backend" \
                        " #{volume[:backend_name]}")
         next
       end
