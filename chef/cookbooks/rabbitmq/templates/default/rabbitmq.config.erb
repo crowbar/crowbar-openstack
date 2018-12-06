@@ -36,6 +36,11 @@
 <% if @cluster_enabled -%>
    {cluster_partition_handling, <%= @cluster_partition_handling %>},
    {queue_master_locator, <<"min-masters">>},
+   # We need to be able to sync that many messages per 60s (net_ticktime) period, otherwise
+   # cluster will be considered partitioned. default is 4096. As we assume low latency high bandwidth
+   # raising this should be safe.
+   # Typical size of openstack messages is < 8kb
+   {mirroring_sync_batch_size, 16384},
 <% end -%>
 <% if @hipe_compile -%>
    {hipe_compile, true},
