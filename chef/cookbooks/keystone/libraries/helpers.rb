@@ -136,4 +136,116 @@ module KeystoneHelper
   def self.cache_reset
     @cache = {}
   end
+
+  class KeystoneSession
+    def initialize(auth, host, port, protocol, insecure)
+      # Need to require net/https so that Net::HTTP gets monkey-patched
+      # to actually support SSL:
+      use_ssl = protocol == "https"
+      require "net/https" if use_ssl
+      @http = Net::HTTP.new(host, port)
+      @http.use_ssl = use_ssl
+      @http.verify_mode = OpenSSL::SSL::VERIFY_NONE if insecure
+      @headers = { "Content-Type" => "application/json" }
+      @headers["X-Auth-Token"] = get_token(auth)
+    end
+
+    def get(path)
+      retry_request("GET", path, nil)
+    end
+
+    def post(path, body)
+      retry_request("POST", path, body)
+    end
+
+    def put(path, body)
+      retry_request("PUT", path, body)
+    end
+
+    def patch(path, body)
+      retry_request("PATCH", path, body)
+    end
+
+    def delete(path, headers = {})
+      retry_request("DELETE", path, nil, headers)
+    end
+
+    def authenticated?
+      @headers["X-Auth-Token"] != nil
+    end
+
+    def revoke_token
+      headers = { "X-Subject-Token" => @headers["X-Auth-Token"] }
+      delete("/v3/auth/tokens", headers)
+    end
+
+    private
+
+    def get_token(auth)
+      path = "/v3/auth/tokens"
+      resp = post(path, auth_body(auth))
+      if resp.is_a?(Net::HTTPSuccess)
+        resp["X-Subject-Token"]
+      else
+        msg = "Failed to get token for User '#{auth[:user]}'"
+        msg += " Project '#{auth[:project]}'" if auth[:project]
+        Chef::Log.info msg
+        Chef::Log.info "Response Code: #{resp.code}"
+        Chef::Log.info "Response Message: #{resp.message}"
+        nil
+      end
+    end
+
+    def auth_body(auth)
+      body = {
+        auth: {
+          identity: {
+            methods: ["password"],
+            password: {
+              user: {
+                name: auth[:user],
+                password: auth[:password],
+                domain: {
+                  name: auth[:user_domain] || "Default"
+                }
+              }
+            }
+          }
+        }
+      }
+      if auth[:project]
+        scope = {
+          project: {
+            name: auth[:project],
+            domain: {
+              name: auth[:project_domain] || "Default"
+            }
+          }
+        }
+        body[:auth][:scope] = scope
+      end
+      body
+    end
+
+    def retry_request(method, path, body, headers = {}, times = nil)
+      headers = @headers.merge(headers)
+      resp = nil
+      (times || 10).times do |count|
+        resp = @http.send_request(method, path, body ? JSON.generate(body) : nil, headers)
+        break unless resp.is_a?(Net::HTTPServerError)
+        Chef::Log.debug("Retrying request #{method} #{path} : #{count}")
+        sleep 5
+      end
+      resp
+    end
+  end
+
+  def self.session(auth, host, port, protocol, insecure)
+    @session ||= KeystoneSession.new(auth, host, port, protocol, insecure)
+  end
+
+  def self.reset_session
+    @session.revoke_token
+    @session = nil
+  end
 end
