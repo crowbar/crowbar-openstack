@@ -19,13 +19,5 @@
 
 include_recipe "nova::config"
 
-use_crowbar_pacemaker_service = node[:nova][:ha][:enabled] &&
-  node[:pacemaker][:clone_stateless_services]
-
-nova_package "conductor" do
-  use_pacemaker_provider use_crowbar_pacemaker_service
-end
-
-nova_package "scheduler" do
-  use_pacemaker_provider use_crowbar_pacemaker_service
-end
+nova_package "conductor"
+nova_package "scheduler"

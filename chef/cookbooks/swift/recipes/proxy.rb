@@ -301,7 +301,6 @@ ruby_block "Check if ring is present" do
 end
 
 if node[:swift][:frontend]=="native"
-  use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
 
   service "swift-proxy" do
     service_name node[:swift][:proxy][:service_name]
@@ -313,12 +312,11 @@ if node[:swift][:frontend]=="native"
     action [:enable, :start]
     subscribes :restart, resources(template: node[:swift][:config_file]), :immediately
     subscribes :restart, resources(template: node[:swift][:proxy_config_file]), :immediately
-    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
     # Do not even try to start the daemon if we don't have the ring yet
     only_if { ::File.exist? "/etc/swift/object.ring.gz" }
   end
   utils_systemd_service_restart "swift-proxy" do
-    action use_crowbar_pacemaker_service ? :disable : :enable
+    action :enable
     only_if { ::File.exist? "/etc/swift/object.ring.gz" }
   end
 elsif node[:swift][:frontend]=="uwsgi"

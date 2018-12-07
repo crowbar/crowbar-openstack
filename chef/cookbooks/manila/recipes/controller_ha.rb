@@ -35,37 +35,3 @@ haproxy_loadbalancer "manila-api" do
                                                              "api")
   action :nothing
 end.run_action(:create)
-
-if node[:pacemaker][:clone_stateless_services]
-  include_recipe "crowbar-pacemaker::apache"
-
-  # Wait for all nodes to reach this point so we know that all nodes will have
-  # all the required packages installed before we create the pacemaker
-  # resources
-  crowbar_pacemaker_sync_mark "sync-manila_before_ha"
-
-  # Avoid races when creating pacemaker resources
-  crowbar_pacemaker_sync_mark "wait-manila_ha_resources"
-
-  rabbit_settings = fetch_rabbitmq_settings
-  transaction_objects = []
-
-  primitive_name = "manila-scheduler"
-
-  objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
-    agent node[:manila][:ha][:scheduler_ra]
-    op node[:manila][:ha][:op]
-    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone " \
-        "cl-glance-api cl-cinder-api cl-neutron-server cl-nova-api )"
-  end
-  transaction_objects.push(objects)
-
-  pacemaker_transaction "manila controller" do
-    cib_objects transaction_objects.flatten
-    # note that this will also automatically start the resources
-    action :commit_new
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  crowbar_pacemaker_sync_mark "create-manila_ha_resources"
-end

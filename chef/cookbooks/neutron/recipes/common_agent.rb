@@ -145,8 +145,6 @@ unless (node[:platform] == "suse" && node[:platform_version].to_f < 12.0)
 end
 
 neutron_network_ha = node.roles.include?("neutron-network") && neutron[:neutron][:ha][:network][:enabled]
-use_crowbar_pacemaker_service = \
-  (neutron_network_ha && node[:pacemaker][:clone_stateless_services]) || nova_compute_ha_enabled
 
 # ML2 configuration: L2 agent and L3 agent
 if neutron[:neutron][:networking_plugin] == "ml2"
@@ -306,15 +304,15 @@ if neutron[:neutron][:networking_plugin] == "ml2"
     action [:enable, :start]
     subscribes :restart, resources("template[#{agent_config_path}]")
     subscribes :restart, resources(template: node[:neutron][:config_file])
-    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
     if nova_compute_ha_enabled
+      provider Chef::Provider::CrowbarPacemakerService
       supports no_crm_maintenance_mode: true
     else
       supports status: true, restart: true
     end
   end
   utils_systemd_service_restart neutron_agent do
-    action use_crowbar_pacemaker_service ? :disable : :enable
+    action nova_compute_ha_enabled ? :disable : :enable
   end
 
   # L3 agent
@@ -345,15 +343,15 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       action [:enable, :start]
       subscribes :restart, resources(template: node[:neutron][:config_file])
       subscribes :restart, resources(template: node[:neutron][:l3_agent_config_file])
-      provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
       if nova_compute_ha_enabled
+        provider Chef::Provider::CrowbarPacemakerService
         supports no_crm_maintenance_mode: true
       else
         supports status: true, restart: true
       end
     end
     utils_systemd_service_restart node[:neutron][:platform][:l3_agent_name] do
-      action use_crowbar_pacemaker_service ? :disable : :enable
+      action nova_compute_ha_enabled ? :disable : :enable
     end
   end
 end

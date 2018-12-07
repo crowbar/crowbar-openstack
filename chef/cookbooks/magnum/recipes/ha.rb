@@ -33,38 +33,3 @@ haproxy_loadbalancer "magnum-api" do
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "magnum", "magnum-server", "api")
   action :nothing
 end.run_action(:create)
-
-if node[:pacemaker][:clone_stateless_services]
-  # Wait for all nodes to reach this point so we know that all nodes will have
-  # all the required packages installed before we create the pacemaker
-  # resources
-  crowbar_pacemaker_sync_mark "sync-magnum_before_ha"
-
-  # Avoid races when creating pacemaker resources
-  crowbar_pacemaker_sync_mark "wait-magnum_ha_resources"
-
-  rabbit_settings = fetch_rabbitmq_settings
-  services = ["conductor", "api"]
-  transaction_objects = []
-
-  services.each do |service|
-    primitive_name = "magnum-#{service}"
-    ordering = "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone cl-heat-api )"
-
-    objects = openstack_pacemaker_controller_clone_for_transaction primitive_name do
-      agent node[:magnum][:ha][service.to_sym][:agent]
-      op node[:magnum][:ha][service.to_sym][:op]
-      order_only_existing ordering
-    end
-    transaction_objects.push(objects)
-  end
-
-  pacemaker_transaction "magnum server" do
-    cib_objects transaction_objects.flatten
-    # note that this will also automatically start the resources
-    action :commit_new
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  crowbar_pacemaker_sync_mark "create-magnum_ha_resources"
-end

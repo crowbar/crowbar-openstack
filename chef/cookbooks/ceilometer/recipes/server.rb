@@ -108,8 +108,6 @@ end
 
 crowbar_pacemaker_sync_mark "create-ceilometer_upgrade" if ha_enabled
 
-use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
-
 service "ceilometer-agent-notification" do
   service_name node[:ceilometer][:agent_notification][:service_name]
   supports status: true, restart: true, start: true, stop: true
@@ -117,10 +115,9 @@ service "ceilometer-agent-notification" do
   subscribes :restart, resources(template: node[:ceilometer][:config_file])
   subscribes :restart, resources("template[/etc/ceilometer/pipeline.yaml]")
   subscribes :restart, resources("template[/etc/ceilometer/event_pipeline.yaml]")
-  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 utils_systemd_service_restart "ceilometer-agent-notification" do
-  action use_crowbar_pacemaker_service ? :disable : :enable
+  action :enable
 end
 
 # In stoney/icehouse we have the cronjob crowbar-ceilometer-expirer in

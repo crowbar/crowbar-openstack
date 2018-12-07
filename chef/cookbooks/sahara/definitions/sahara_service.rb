@@ -16,12 +16,11 @@
 define :sahara_service do
   sahara_service_name = "sahara-#{params[:name]}"
   ha_enabled = node[:sahara][:ha][:enabled]
-  use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
 
   package "openstack-sahara-#{params[:name]}" if ["rhel", "suse"].include? node[:platform_family]
 
   utils_systemd_service_restart sahara_service_name do
-    action use_crowbar_pacemaker_service ? :disable : :enable
+    action :enable
   end
 
   service sahara_service_name do
@@ -29,6 +28,5 @@ define :sahara_service do
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources(template: node[:sahara][:config_file])
-    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
 end

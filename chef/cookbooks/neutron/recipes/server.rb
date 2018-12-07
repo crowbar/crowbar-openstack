@@ -374,7 +374,6 @@ end
 
 crowbar_pacemaker_sync_mark "create-neutron_db_sync" if ha_enabled
 
-use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
 
 service node[:neutron][:platform][:service_name] do
   supports status: true, restart: true
@@ -383,10 +382,9 @@ service node[:neutron][:platform][:service_name] do
   if node[:neutron][:use_lbaas]
     subscribes :restart, resources(template: node[:neutron][:lbaas_config_file])
   end
-  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 utils_systemd_service_restart node[:neutron][:platform][:service_name] do
-  action use_crowbar_pacemaker_service ? :disable : :enable
+  action :enable
 end
 # neutron-server must be restarted immediately if keystone settings have changed,
 # otherwise neutron requests in recipes will fail
@@ -401,10 +399,9 @@ if node[:neutron][:use_infoblox]
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources(template: node[:neutron][:config_file])
-    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
   utils_systemd_service_restart node[:neutron][:platform][:infoblox_agent_name] do
-    action use_crowbar_pacemaker_service ? :disable : :enable
+    action :enable
   end
 end
 
