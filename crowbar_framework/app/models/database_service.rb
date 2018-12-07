@@ -141,6 +141,7 @@ class DatabaseService < PacemakerServiceObject
 
   def validate_proposal_after_save(proposal)
     attributes = proposal["attributes"][@bc_name]
+    deployment = proposal["deployment"][@bc_name]
     active_engine = attributes["sql_engine"]
 
     validation_error I18n.t(
@@ -149,8 +150,16 @@ class DatabaseService < PacemakerServiceObject
     ) unless ["mysql", "postgresql"].include?(active_engine)
 
     selected_engines = ["postgresql", "mysql"].select do |engine|
-      nodes = proposal["deployment"][@bc_name]["elements"][role_for_engine engine]
+      nodes = deployment["elements"][role_for_engine engine]
       !nodes.nil? && !nodes.first.nil?
+    end
+
+    expand_nodes_for_all(deployment["elements"]["mysql-server"] || []).flatten.each do |n|
+      node = Node.find_by_name(n)
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.monasca_deployed",
+        node_name: n
+      ) if node.roles.include?("monasca-server")
     end
 
     validation_error I18n.t(
@@ -167,7 +176,7 @@ class DatabaseService < PacemakerServiceObject
       validate_one_for_role proposal, db_role
 
       # HA validation
-      servers = proposal["deployment"][@bc_name]["elements"][db_role]
+      servers = deployment["elements"][db_role]
       unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
         cluster = servers.first
         validate_ha_attributes(attributes, cluster, engine)
