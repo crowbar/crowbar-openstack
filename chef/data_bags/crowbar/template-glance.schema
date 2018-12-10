@@ -45,13 +45,6 @@
               "cert_required": { "type" : "bool", "required" : true },
               "ca_certs": { "type" : "str", "required" : true }
             }},
-            "registry": {
-              "type": "map",
-              "required": true,
-              "mapping": {
-                "bind_port": { "type": "int", "required": true }
-              }
-            },
             "enable_caching": { "type": "bool", "required": true },
             "use_cachemanagement": { "type": "bool", "required": true },
             "show_storage_location": { "type": "bool", "required": true },

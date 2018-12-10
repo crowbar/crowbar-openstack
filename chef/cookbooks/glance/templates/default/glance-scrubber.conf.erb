@@ -1,6 +1,5 @@
 [DEFAULT]
 
-registry_client_insecure = <%= @keystone_settings["insecure"] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
 admin_tenant_name =  <%= @keystone_settings['service_tenant'] %>
@@ -9,8 +8,6 @@ auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol
                                                     @keystone_settings["service_port"],
                                                     "2.0") %>
 auth_region = <%= @keystone_settings['endpoint_region'] %>
-registry_host = <%= @registry_bind_host %>
-registry_port = <%= @registry_bind_port %>
 debug = <%= node[:glance][:debug] ? "True" : "False" %>
 log_file = <%= node[:glance][:scrubber][:log_file] %>
 use_syslog = <%= node[:glance][:use_syslog] ? "True" : "False" %>

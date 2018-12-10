@@ -36,8 +36,6 @@ template node[:glance][:cache][:config_file] do
   group node[:glance][:group]
   mode 0640
   variables(
-    registry_bind_host: network_settings[:registry][:bind_host],
-    registry_bind_port: network_settings[:registry][:bind_port],
     keystone_settings: keystone_settings
   )
 end

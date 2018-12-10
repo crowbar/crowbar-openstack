@@ -12,18 +12,13 @@ image_cache_max_size = <%= node[:glance][:image_cache_max_size] %>
 image_cache_stall_time = <%= node[:glance][:image_cache_stall_timeout] %>
 image_cache_dir = <%= node[:glance][:image_cache_datadir] %>
 default_publisher_id = <%= @node_hostname %>
-registry_host = <%= @registry_bind_host %>
-registry_port = <%= @registry_bind_port %>
 transport_url = <%= @rabbit_settings[:url] %>
-registry_client_insecure = <%= @keystone_settings["insecure"] %>
 debug = <%= node[:glance][:debug] ? "True" : "False" %>
 log_file = <%= node[:glance][:api][:log_file] %>
 use_syslog = <%= node[:glance][:use_syslog] ? "True" : "False" %>
 use_stderr = false
 enable_v1_api = <%= @enable_v1 %>
 enable_v2_api = true
-enable_v1_registry = <%= @enable_v1 %>
-enable_v2_registry = true
 
 [database]
 connection = <%= node[:glance][:sql_connection] %>
