@@ -28,6 +28,14 @@ nova_package "api" do
   use_pacemaker_provider use_crowbar_pacemaker_service
 end
 
+# nova-api must be restarted immediately if keystone settings have changed,
+# otherwise nova requests in recipes will fail
+if node[:keystone][:endpoint_changed]
+  service "nova-api" do
+    subscribes :restart, resources(template: node[:nova][:config_file]), :immediately
+  end
+end
+
 api_ha_enabled = node[:nova][:ha][:enabled]
 admin_api_host = CrowbarHelper.get_host_for_admin_url(node, api_ha_enabled)
 public_api_host = CrowbarHelper.get_host_for_public_url(node, node[:nova][:ssl][:enabled], api_ha_enabled)
