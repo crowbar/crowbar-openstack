@@ -25,6 +25,7 @@ aws_access = <%= @ec2_access %>
 
 [baremetal]
 endpoint_type = internalURL
+max_microversion = latest
 
 [compute]
 image_ref = <%= img_id %>
@@ -35,6 +36,7 @@ fixed_network_name = fixed
 region = <%= @keystone_settings['endpoint_region'] %>
 endpoint_type = internalURL
 min_compute_nodes = <%= @use_livemigration ? 2 : 1 %>
+max_microversion = latest
 
 [compute-feature-enabled]
 resize = <%= @use_resize %>
@@ -184,6 +186,7 @@ image_with_share_tools = <%= @manila_settings['image_with_share_tools'] %>
 image_username = <%= @manila_settings['image_username'] %>
 image_password = <%= @manila_settings['image_password'] %>
 default_share_type_name = <%= @manila_settings['default_share_type_name'] %>
+max_microversion = latest
 
 [telemetry]
 endpoint_type = internalURL
@@ -217,6 +220,7 @@ backend2_name = <%= @cinder_backend2_name %>
 <% end -%>
 storage_protocol = <%= @storage_protocol %>
 vendor_name = <%= @vendor_name %>
+max_microversion = latest
 
 [volume-feature-enabled]
 multi_backend = <%= @cinder_multi_backend ? 'true' : 'false' %>
