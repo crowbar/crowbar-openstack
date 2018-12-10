@@ -24,6 +24,9 @@ if node[:keystone].key?(:endpoint)
     endpoint_insecure != node[:keystone][:ssl][:insecure] ||
     endpoint_port != node[:keystone][:api][:admin_port]
 
+  # Will be reset on next chef run
+  node.default[:keystone][:endpoint_changed] = endpoint_changed
+
   endpoint_needs_update = endpoint_changed &&
     node[:keystone][:bootstrap] &&
     # Do not try to update keystone endpoint during upgrade, when keystone is not
