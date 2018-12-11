@@ -311,11 +311,11 @@ cluster_name = "<%= cluster %>"
   <% end %>
 datastore_regex = <%= node[:nova][:vcenter][:datastore] %>
 vlan_interface = <%= node[:nova][:vcenter][:interface] %>
+vnc_keymap = <%= node[:nova][:vcenter][:vnc_keymap] %>
 <% end %>
 
 [vnc]
 enabled = <%= @vnc_enabled ? "True" : "False" %>
-keymap = <%= node[:nova][:vnc_keymap] %>
 server_listen = "0.0.0.0"
 server_proxyclient_address = <%= node[:nova][:my_ip] %>
 novncproxy_host = <%= @bind_host %>

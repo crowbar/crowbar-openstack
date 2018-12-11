@@ -47,7 +47,6 @@
             "neutron_metadata_proxy_shared_secret": { "type": "str" },
             "neutron_url_timeout": {"type": "int"},
             "force_config_drive": { "type": "bool", "required": true },
-            "vnc_keymap": { "type": "str" , "required": true },
             "scheduler": {
               "type": "map",
               "mapping": {
@@ -151,7 +150,8 @@
                 "ca_file": { "type": "str", "required": true },
                 "insecure": { "type": "bool", "required": true },
                 "dvs_name": { "type": "str", "required": true },
-                "dvs_security_groups": { "type": "bool", "required": true }
+                "dvs_security_groups": { "type": "bool", "required": true },
+                "vnc_keymap": { "type": "str" , "required": true }
               }
             },
             "zvm": {

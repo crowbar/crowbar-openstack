@@ -83,6 +83,7 @@ default[:nova][:vcenter][:password] = ""
 default[:nova][:vcenter][:clusters] = []
 default[:nova][:vcenter][:interface] = ""
 default[:nova][:vcenter][:dvs_name] = "dvSwitch0"
+default[:nova][:vcenter][:vnc_keymap] = "en-us"
 
 #
 # Scheduler Settings
@@ -106,7 +107,6 @@ default[:nova][:user] = "nova"
 default[:nova][:group] = "nova"
 default[:nova][:home_dir] = "/var/lib/nova"
 default[:nova][:instances_path] = "/var/lib/nova/instances"
-default[:nova][:vnc_keymap] = "en-us"
 
 default[:nova][:neutron_metadata_proxy_shared_secret] = ""
 default[:nova][:neutron_url_timeout] = 30

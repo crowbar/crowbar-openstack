@@ -52,6 +52,7 @@
       = string_field %w(vcenter interface)
       = string_field %w(vcenter ca_file)
       = boolean_field %w(vcenter insecure)
+      = string_field %w(vcenter vnc_keymap)
 
     %fieldset
       %legend
@@ -106,7 +107,6 @@
       %legend
         = t(".vnc_header")
 
-      = string_field :vnc_keymap
 
       = boolean_field %w(novnc ssl enabled), :collection => :ssl_protocols_for_nova, "data-sslprefix" => "novnc_ssl", "data-sslcert" => "", "data-sslkey" => ""
 
