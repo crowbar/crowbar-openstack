@@ -96,7 +96,12 @@ class MonascaService < OpenstackServiceObject
       n.roles.include?("database-server") && n[:database][:sql_engine] == "mysql"
     end
 
-    monasca_server = select_nodes_for_role(non_db_nodes, "monasca-server", "monitoring") || []
+    # Do not deploy monasca-server to the node in pacemaker cluster
+    server_nodes = non_db_nodes.reject do |n|
+      n.roles.include?("pacemaker-cluster-member")
+    end
+
+    monasca_server = select_nodes_for_role(server_nodes, "monasca-server", "monitoring") || []
 
     log_agent_nodes = select_nodes_for_role(nodes, "monasca-log-agent", "compute") || []
     agent_nodes = select_nodes_for_role(nodes, "monasca-agent") || []
@@ -160,6 +165,11 @@ class MonascaService < OpenstackServiceObject
       if n.roles.include?("database-server") && n[:database][:sql_engine] == "mysql"
         validation_error(
           "monasca-server role cannot be deployed to the node with other MariaDB instance."
+        )
+      end
+      if n.roles.include?("pacemaker-cluster-member")
+        validation_error(
+          "monasca-server role cannot be deployed to the node that is part of the Pacemaker cluster."
         )
       end
       unless nodes["monasca-agent"].include? node
