@@ -14,9 +14,12 @@
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 monasca_server = node_search_with_cache("roles:monasca-server").first
-monasca_master = node_search_with_cache("roles:monasca-master").first
-monasca_host = MonascaUiHelper.monasca_admin_host(monasca_server)
-grafana_password = monasca_master[:monasca][:master][:database_grafana_password]
+if monasca_server.nil?
+  Chef::Log.warn("No monasca-server found.")
+  return
+end
+monasca_cfg = Barclamp::Config.load("openstack", "monasca")
+grafana_password = monasca_cfg["master"]["database_grafana_password"]
 
 # Used for creating data source
 grafana_base_url = ::File.join(MonascaUiHelper.dashboard_local_url(node), "/grafana")
@@ -25,16 +28,6 @@ grafana_base_url = ::File.join(MonascaUiHelper.dashboard_local_url(node), "/graf
 grafana_service_url = MonascaUiHelper.grafana_service_url(node)
 
 ha_enabled = node[:horizon][:ha][:enabled]
-
-if monasca_server.nil?
-  Chef::Log.warn("No monasca-server found.")
-  return
-end
-
-if monasca_master.nil?
-  Chef::Log.warn("No monasca-master found.")
-  return
-end
 
 template "/srv/www/openstack-dashboard/openstack_dashboard/"\
          "local/local_settings.d/_80_monasca_ui_settings.py" do
@@ -57,7 +50,9 @@ end
 template "/etc/grafana/grafana.ini" do
   source "grafana.ini.erb"
   variables(
-    database_host: monasca_host,
+    database_host: CrowbarHelper.get_host_for_admin_url(
+      monasca_server, monasca_cfg["ha"]["enabled"]
+    ),
     grafana_password: grafana_password
   )
   owner "root"
