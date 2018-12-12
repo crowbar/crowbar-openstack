@@ -84,18 +84,6 @@ end
 
 node.save if dirty
 
-if node[:cinder][:api][:protocol] == "https"
-  ssl_setup "setting up ssl for cinder" do
-    generate_certs node[:cinder][:ssl][:generate_certs]
-    certfile node[:cinder][:ssl][:certfile]
-    keyfile node[:cinder][:ssl][:keyfile]
-    group node[:cinder][:group]
-    fqdn node[:fqdn]
-    cert_required node[:cinder][:ssl][:cert_required]
-    ca_certs node[:cinder][:ssl][:ca_certs]
-  end
-end
-
 availability_zone = nil
 unless node[:crowbar_wall].nil? or node[:crowbar_wall][:openstack].nil?
   if node[:crowbar_wall][:openstack][:availability_zone] != ""
