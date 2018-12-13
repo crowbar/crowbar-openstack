@@ -35,7 +35,7 @@ Listen <%= @bind_host %>:<%= @bind_port_ssl %>
     SSLCertificateFile <%= @ssl_crt_file %>
     SSLCertificateKeyFile <%= @ssl_key_file %>
     <% unless @ssl_crt_chain_file.nil? or @ssl_crt_chain_file.empty? %>
-    SSLCertificateChainFile <%= @ssl_crt_chain_file %>
+    SSLCACertificateFile <%= @ssl_crt_chain_file %>
     <% end %>
 
 <% else %>
