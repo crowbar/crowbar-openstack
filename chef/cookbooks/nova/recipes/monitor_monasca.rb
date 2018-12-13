@@ -15,6 +15,7 @@
 #
 
 return unless node["roles"].include?("monasca-agent")
+return if no_monasca_server_or_master
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 

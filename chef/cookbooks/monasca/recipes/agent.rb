@@ -87,6 +87,8 @@ if node["roles"].include?("monasca-server")
     command "/usr/sbin/monasca-reconfigure"
   end
 
+  include_recipe "monasca::monitors"
+
   # Nothing left to do, monasca-reconfigure has configured everything we need.
   return
 else
@@ -140,6 +142,8 @@ utils_systemd_service_restart agent_settings[:agent_service_name] do
   # action ha_enabled ? :disable : :enable
   action :enable
 end
+
+include_recipe "monasca::monitors"
 
 ##########################################################
 # plugin config
