@@ -81,16 +81,13 @@ env << "OS_PROJECT_NAME='#{keystone_settings["service_tenant"]}' "
 env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
 env << "OS_REGION_NAME='#{keystone_settings["endpoint_region"]}' "
 env << "OS_IDENTITY_API_VERSION=#{keystone_settings["api_version"]} "
-env << "OS_ENDPOINT_TYPE=internalURL"
-novacmd = "#{env} nova"
+env << "OS_INTERFACE=internal "
 openstack = "#{env} openstack"
 
 if ssl_insecure
-  novacmd = "#{novacmd} --insecure"
   openstack = "#{openstack} --insecure"
 end
 if keystone_settings["api_version"] != "2.0"
-  novacmd = "#{novacmd} --os-user-domain-name Default --os-project-domain-name Default"
   openstack = "#{openstack} --os-user-domain-name Default --os-project-domain-name Default"
 end
 
@@ -120,8 +117,8 @@ ruby_block "Flavor creation" do
     if node[:nova][:create_default_flavors]
       default_flavors.each do |id, flavor|
         next if flavorlist.include?(flavor["name"])
-        command = "#{novacmd} flavor-create #{flavor["name"]} #{id} #{flavor["mem"]} "
-        command << "#{flavor["disk"]} #{flavor["vcpu"]}"
+        command = "#{openstack} flavor create #{flavor["name"]} --id=#{id} "
+        command << "--ram=#{flavor["mem"]} --disk=#{flavor["disk"]} --vcpus=#{flavor["vcpu"]}"
         run_context.resource_collection << flavor_create = Chef::Resource::Execute.new(
           "Create flavor #{flavor["name"]}", run_context
         )
@@ -138,8 +135,8 @@ ruby_block "Flavor creation" do
     if node[:nova][:trusted_flavors]
       trusted_flavors.each do |id, flavor|
         next if flavorlist.include?(flavor["name"])
-        command = "#{novacmd} flavor-create #{flavor["name"]} "
-        command << "#{id} #{flavor["mem"]} #{flavor["disk"]} #{flavor["vcpu"]} "
+        command = "#{openstack} flavor create #{flavor["name"]} --id=#{id} "
+        command << "--ram=#{flavor["mem"]} --disk=#{flavor["disk"]} --vcpus=#{flavor["vcpu"]} "
         run_context.resource_collection << flavor_create = Chef::Resource::Execute.new(
           "Create trusted flavor #{flavor["name"]}", run_context
         )
@@ -152,7 +149,7 @@ ruby_block "Flavor creation" do
         )
 
         # set flavors to trusted
-        command = "#{novacmd} flavor-key #{flavor["name"]} set trust:trusted_host=trusted"
+        command = "#{openstack} flavor set #{flavor["name"]} --property trust:trusted_host=trusted"
         run_context.resource_collection << flavor_trusted = Chef::Resource::Execute.new(
           "Set flavor #{flavor["name"]} to trusted", run_context
         )
