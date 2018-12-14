@@ -55,15 +55,11 @@ strict_ssh_host_key_policy = <%= @strict_ssh_host_key_policy ? 'true' : 'false' 
 [<%= backend_id %>]
 volume_backend_name = <%= volume['backend_name'] %>
 
-  <% if volume['backend_driver'] == 'blockbridge' -%><% end -%>
-  <% if volume['backend_driver'] == 'coho' -%><% end -%>
-
   <% if volume['backend_driver'] == 'datera' -%>
     volume_driver = cinder.volume.drivers.datera.datera_iscsi.DateraDriver
   <% end -%>
 
   <% if volume['backend_driver'] == 'dell' -%><% end -%>
-  <% if volume['backend_driver'] == 'disco' -%><% end -%>
   <% if volume['backend_driver'] == 'drbdmanage' -%><% end -%>
 
   <% if volume['backend_driver'] == 'emc' -%>
@@ -102,9 +98,7 @@ volume_driver = cinder.volume.drivers.fujitsu.eternus_dx_fc.FJDXFCDriver
   <% end -%>
 
   <% if volume['backend_driver'] == 'flashsystem' -%><% end -%>
-
   <% if volume['backend_driver'] == 'gpfs' -%><% end -%>
-  <% if volume['backend_driver'] == 'hgst' -%><% end -%>
 
   <% if volume['backend_driver'] == 'hitachi' -%>
 hitachi_serial_number = <%= volume['hitachi']['hitachi_serial_number'] %>
@@ -129,9 +123,7 @@ hitachi_add_chap_user = <%= volume['hitachi']['hitachi_add_chap_user'] %>
 hitachi_auth_method = <%= volume['hitachi']['hitachi_auth_method'] %>
 hitachi_auth_user = <%= volume['hitachi']['hitachi_auth_user'] %>
 hitachi_auth_password = <%= volume['hitachi']['hitachi_auth_password'] %>
-    <% if volume['hitachi']['hitachi_storage_protocol'] == 'iscsi' -%>
-volume_driver = cinder.volume.drivers.hitachi.hbsd_iscsi.HBSDISCSIDriver
-    <% elsif volume['hitachi']['hitachi_storage_protocol'] == 'fc' -%>
+    <% if volume['hitachi']['hitachi_storage_protocol'] == 'fc' -%>
 volume_driver = cinder.volume.drivers.hitachi.hbsd_fc.HBSDFCDriver
     <% end -%>
   <% end -%>
@@ -141,7 +133,6 @@ volume_driver = cinder.volume.drivers.hitachi.hbsd_fc.HBSDFCDriver
   <% if volume['backend_driver'] == 'hp_msa' -%><% end -%>
   <% if volume['backend_driver'] == 'hp_xp' -%><% end -%>
   <% if volume['backend_driver'] == 'huawei' -%><% end -%>
-  <% if volume['backend_driver'] == 'infortrend' -%><% end -%>
   <% if volume['backend_driver'] == 'lenovo' -%><% end -%>
 
   <% if volume['backend_driver'] == 'local' -%>
@@ -219,7 +210,6 @@ volume_driver = cinder.volume.drivers.rbd.RBDDriver
   <% if volume['backend_driver'] == 'smbfs' -%><% end -%>
   <% if volume['backend_driver'] == 'solidfire' -%><% end -%>
   <% if volume['backend_driver'] == 'storewize' -%><% end -%>
-  <% if volume['backend_driver'] == 'tegile' -%><% end -%>
   <% if volume['backend_driver'] == 'tintri' -%><% end -%>
   <% if volume['backend_driver'] == 'violin' -%><% end -%>
 
@@ -242,7 +232,6 @@ volume_driver = cinder.volume.drivers.vmware.vmdk.VMwareVcVmdkDriver
 
   <% if volume['backend_driver'] == 'vzstorage' -%><% end -%>
   <% if volume['backend_driver'] == 'windows' -%><% end -%>
-  <% if volume['backend_driver'] == 'xio' -%><% end -%>
   <% if volume['backend_driver'] == 'xiv_ds8k' -%><% end -%>
   <% if volume['backend_driver'] == 'xtremio' -%><% end -%>
 
