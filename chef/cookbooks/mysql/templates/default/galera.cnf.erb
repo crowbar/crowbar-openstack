@@ -32,5 +32,5 @@ query_cache_type = 0
 expire_logs_days = <%= @expire_logs_days %>
 
 # SST method
-wsrep_sst_method = xtrabackup-v2
+wsrep_sst_method = mariabackup
 wsrep_sst_auth = <%= @sstuser %>:<%= @sstuser_password %>
