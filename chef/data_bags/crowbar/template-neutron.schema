@@ -42,8 +42,7 @@
                       "multicast_group": { "type" : "str", "required": true }
                     }},
                     "ovs": { "type": "map", "required": true, "mapping": {
-                      "tunnel_csum": { "type": "bool", "required": true },
-                      "ovsdb_interface": { "type": "str", "required": true }
+                      "tunnel_csum": { "type": "bool", "required": true }
                     }},
                     "apic": { "type": "map", "required": true, "mapping": {
                       "hosts": { "type" : "str", "required" : true },
@@ -126,7 +125,6 @@
                       "password": { "type" : "str" }
                     }},
                     "sql": { "type": "map", "required": true, "mapping": {
-                      "min_pool_size": { "type" : "int", "required" : true },
                       "max_pool_size": { "type" : "int", "required" : true },
                       "max_pool_overflow": { "type" : "int", "required" : true },
                       "pool_timeout": { "type" : "int", "required" : true }

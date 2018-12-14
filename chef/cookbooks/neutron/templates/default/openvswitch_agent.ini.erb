@@ -20,7 +20,6 @@ tunnel_csum = True
 <% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") && !@ml2_type_drivers.include?("opflex") -%>
 tunnel_bridge = br-tunnel
 <% end -%>
-ovsdb_interface = <%= @ovsdb_interface %>
 <% if @ml2_type_drivers.include?("gre") || @ml2_type_drivers.include?("vxlan") -%>
 local_ip = <%= node.address("os_sdn").addr %>
 <% end -%>
