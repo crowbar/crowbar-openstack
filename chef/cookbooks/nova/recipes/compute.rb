@@ -242,6 +242,7 @@ case node[:nova][:libvirt_type]
           provider Chef::Provider::CrowbarPacemakerService
           supports no_crm_maintenance_mode: true
         end
+        subscribes :restart, resources("template[/etc/ceph/ceph.conf]")
       end
       utils_systemd_service_restart "libvirtd" do
         action node[:nova][:ha][:compute][:enabled] ? :disable : :enable
