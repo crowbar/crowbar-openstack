@@ -92,19 +92,19 @@ class Chef
 
       def _fix_acl(certificate, group)
         partial = "/"
-        directory.split(File::SEPARATOR).each do |entry|
+        certificate.split(::File::SEPARATOR).each do |entry|
           next if entry.empty?
 
-          partial = File.join(partial, entry)
+          partial = ::File.join(partial, entry)
           # If the file is readable by all users, and the directory is
           # readable and executable (we can list the contents) we can
           # avoid an ACL modification
-          if File.world_readable?(partial)
-            next if File.file?(partial)
-            next if _world_executable?(partial) && File.directory?(partial)
+          if ::File.world_readable?(partial)
+            next if ::File.file?(partial)
+            next if _world_executable?(partial) && ::File.directory?(partial)
           end
 
-          mask = if File.directory?(partial)
+          mask = if ::File.directory?(partial)
             "group:#{group}:r-x"
           else
             "group:#{group}:r--"
@@ -113,8 +113,8 @@ class Chef
         end
       end
 
-      def _world_executable(path)
-        File.stat(path).mode & 1 == 1
+      def _world_executable?(path)
+        ::File.stat(path).mode & 1 == 1
       end
     end
   end

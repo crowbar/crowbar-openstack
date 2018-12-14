@@ -19,10 +19,6 @@ module MonascaUiHelper
     CrowbarHelper.get_host_for_public_url(node, ssl_enabled, ha_enabled)
   end
 
-  def self.monasca_admin_host(node)
-    CrowbarHelper.get_host_for_admin_url(node, node[:monasca][:ha][:enabled])
-  end
-
   def self.api_public_url(node)
     host = monasca_public_host(node)
     # SSL is not supported at this moment
