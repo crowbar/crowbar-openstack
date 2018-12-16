@@ -329,6 +329,11 @@ ssl_cert_file = <%= @ssl_cert_file %>
 ssl_key_file = <%= @ssl_key_file %>
 keep_alive = false
 
+[upgrade_levels]
+# Determine RPC protocol version for nova based on the minimum
+# of all services registered in nova service database.
+compute=auto
+
 [scheduler]
 discover_hosts_in_cells_interval = <%= node[:nova][:scheduler][:discover_hosts_in_cells_interval] %>
 max_attempts = 9
