@@ -72,6 +72,15 @@ class Chef
           end
           # We do not check for existence of keyfile, as the private key is
           # allowed to be in the certfile
+
+          # If we do no generate the certificate, we need to be sure
+          # that is readable for the user.  In some configurations we
+          # need to share the same certificate for multiple services,
+          # so needs to be readable for multiple different users and
+          # groups (for example, if we share the apache certificate
+          # for Nova and the Dashboard)
+          _fix_acl @current_resource.certfile, @current_resource.group
+          _fix_acl @current_resource.keyfile, @current_resource.group
         end # if generate_certs
 
         if @current_resource.cert_required && ! ::File.size?(@current_resource.ca_certs)
@@ -79,6 +88,33 @@ class Chef
           Chef::Log.fatal(message)
           raise message
         end
+      end
+
+      def _fix_acl(certificate, group)
+        partial = "/"
+        certificate.split(::File::SEPARATOR).each do |entry|
+          next if entry.empty?
+
+          partial = ::File.join(partial, entry)
+          # If the file is readable by all users, and the directory is
+          # readable and executable (we can list the contents) we can
+          # avoid an ACL modification
+          if ::File.world_readable?(partial)
+            next if ::File.file?(partial)
+            next if _world_executable?(partial) && ::File.directory?(partial)
+          end
+
+          mask = if ::File.directory?(partial)
+            "group:#{group}:r-x"
+          else
+            "group:#{group}:r--"
+          end
+          system "setfacl -m #{mask} #{partial}"
+        end
+      end
+
+      def _world_executable?(path)
+        ::File.stat(path).mode & 1 == 1
       end
     end
   end
