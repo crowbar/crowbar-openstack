@@ -17,7 +17,9 @@ database_logapi_password: <%= @master_settings['database_logapi_password'] %>
 keystone_monasca_operator_password: <%= @master_settings['keystone_monasca_operator_password'] %>
 keystone_monasca_agent_password: <%= @master_settings['keystone_monasca_agent_password'] %>
 keystone_admin_agent_password: <%= @master_settings['keystone_admin_agent_password'] %>
+keystone_admin: <%= @keystone_settings['admin_user'] %>
 keystone_admin_password: <%= @keystone_settings['admin_password'] %>
+keystone_admin_project: <%= @keystone_settings['admin_project'] %>
 keystone_use_https: <%= @keystone_settings['use_ssl'] %>
 <%- if @keystone_settings['use_ssl'] %>
 keystone_protocol: 'https'
