@@ -9,7 +9,7 @@
         "slow_query_logging": true,
         "innodb_flush_log_at_trx_commit": 1,
         "innodb_buffer_pool_instances": 1,
-        "max_connections": 800,
+        "max_connections": 1400,
         "tmp_table_size": 64,
         "max_heap_table_size": 64,
         "expire_logs_days": 10,
