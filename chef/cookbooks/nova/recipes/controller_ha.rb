@@ -89,9 +89,11 @@ if node[:pacemaker][:clone_stateless_services]
   rabbit_settings = fetch_rabbitmq_settings
   transaction_objects = []
 
-  services = ["api", "conductor", "consoleauth", "scheduler"]
+  # conductor needs to be first, api last
+  services = ["conductor", "consoleauth", "scheduler"]
   services.push("novncproxy") if node[:nova][:use_novnc]
   services.push("serialproxy") if node[:nova][:use_serial]
+  services.push("api")
 
   services.each do |service|
     primitive_ra = if ["rhel", "suse"].include?(node[:platform_family])
