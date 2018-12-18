@@ -195,15 +195,6 @@
                 "tsdb_mon_persister_password": { "required": true, "type": "str" }
               }
             },
-            "db": {
-              "required": true,
-              "type": "map",
-              "mapping": {
-                "database": { "required": true, "type": "str" },
-                "password": { "required": true, "type": "str" },
-                "user": { "required": true, "type": "str" }
-              }
-            },
             "debug": { "type": "bool" },
             "group": { "required": true, "type": "str" },
             "user": { "required": true, "type": "str" },

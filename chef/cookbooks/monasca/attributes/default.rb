@@ -14,10 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitation.
 
-default[:monasca][:db][:database] = "monasca"
-default[:monasca][:db][:user] = "monasca"
-default[:monasca][:db][:password] = nil # must be set by wrapper
-
 override[:monasca][:group] = "monasca"
 override[:monasca][:user] = "monasca"
 

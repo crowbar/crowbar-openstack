@@ -117,7 +117,6 @@ class MonascaService < OpenstackServiceObject
       find_dep_proposal("keystone")
 
     base["attributes"][@bc_name]["service_password"] = random_password
-    base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name][:agent][:keystone][:service_password] = random_password
     base["attributes"][@bc_name][:log_agent][:keystone][:service_password] = random_password
     base["attributes"][@bc_name][:master][:tsdb_mon_api_password] = random_password

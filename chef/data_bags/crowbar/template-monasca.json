@@ -122,11 +122,6 @@
         "tsdb_mon_api_password": "",
         "tsdb_mon_persister_password": ""
       },
-      "db": {
-        "database": "monasca",
-        "password": "",
-        "user": "monasca"
-      },
       "debug": false,
       "group": "monasca",
       "user": "monasca",
@@ -143,7 +138,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 300,
+      "schema-revision": 301,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],
