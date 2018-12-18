@@ -67,3 +67,4 @@ en:
         engine_roles_mismatch: 'Assigned roles do not match selected database engine: %{db_engine}.'
         secondary_psql: 'PostgreSQL can only be deployed as first SQL engine. Migration from MariaDB to PostgreSQL is not supported.'
         new_proposal_multi_engine: 'Second SQL engine can only be added to an existing database deployment.'
+        monasca_deployed: 'MariaDB cannot be deployed on a node with monasca-server role: %{node_name}.'
