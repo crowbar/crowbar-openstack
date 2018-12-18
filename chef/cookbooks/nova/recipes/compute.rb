@@ -102,8 +102,6 @@ case node[:nova][:libvirt_type]
           end
 
           if node[:nova][:libvirt_type] == "kvm"
-            package "qemu-kvm" if node[:kernel][:machine] == "x86_64"
-
             # only install on architectures that support Ceph
             if node[:kernel][:machine] =~ /aarch64|x86_64/
               package "qemu-block-rbd"
