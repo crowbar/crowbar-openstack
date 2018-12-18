@@ -195,8 +195,11 @@ rbd_pool = <%= volume['rbd']['pool'] %>
 rbd_user = <%= volume['rbd']['user'] %>
     <% end -%>
     <% if volume['rbd']['use_crowbar'] -%>
+rbd_exclusive_cinder_pool = True
 rbd_ceph_conf = /etc/ceph/ceph.conf
     <% else -%>
+# Setting it to True would be highly recommended here as well
+rbd_exclusive_cinder_pool = False
 rbd_ceph_conf = <%= volume['rbd']['config_file'] %>
     <% end -%>
 rbd_secret_uuid = <%= volume['rbd']['secret_uuid'] %>
