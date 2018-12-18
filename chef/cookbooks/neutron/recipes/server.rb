@@ -388,6 +388,13 @@ end
 utils_systemd_service_restart node[:neutron][:platform][:service_name] do
   action use_crowbar_pacemaker_service ? :disable : :enable
 end
+# neutron-server must be restarted immediately if keystone settings have changed,
+# otherwise neutron requests in recipes will fail
+if node[:keystone][:endpoint_changed]
+  service node[:neutron][:platform][:service_name] do
+    subscribes :restart, resources(template: node[:neutron][:config_file]), :immediately
+  end
+end
 
 if node[:neutron][:use_infoblox]
   service node[:neutron][:platform][:infoblox_agent_name] do
