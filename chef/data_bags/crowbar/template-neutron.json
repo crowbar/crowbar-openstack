@@ -11,7 +11,6 @@
       "debug": false,
       "create_default_networks": true,
       "dns_domain": "openstack.local",
-      "rpc_workers": 1,
       "use_lbaas": false,
       "lbaasv2_driver": "haproxy",
       "allow_automatic_lbaas_agent_failover": true,

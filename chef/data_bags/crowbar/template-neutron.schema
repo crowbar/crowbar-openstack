@@ -16,7 +16,6 @@
                     "keystone_instance": { "type": "str", "required": true },
                     "create_default_networks": { "type": "bool", "required": true },
                     "dns_domain": { "type": "str", "required": true },
-                    "rpc_workers": { "type": "int", "required": true },
                     "use_lbaas": { "type": "bool", "required": true },
                     "lbaasv2_driver": { "type": "str", "required": true },
                     "allow_automatic_lbaas_agent_failover": { "type": "bool", "required": true },
