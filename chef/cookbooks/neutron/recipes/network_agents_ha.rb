@@ -134,31 +134,6 @@ if CrowbarPacemakerHelper.being_upgraded?(node)
 end
 
 if use_l3_agent
-  # Remove old resource
-  ha_tool_primitive_name = "neutron-ha-tool"
-  pacemaker_primitive ha_tool_primitive_name do
-    agent node[:neutron][:ha][:network][:ha_tool_ra]
-    action [:stop, :delete]
-    only_if "crm configure show #{ha_tool_primitive_name}"
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  # Remove old location
-  ha_tool_location_name = "l-#{ha_tool_primitive_name}-controller"
-  pacemaker_location ha_tool_location_name do
-    action :delete
-    only_if "crm configure show #{ha_tool_location_name}"
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  # Remove old ordering
-  ha_tool_ordering_name = "o-#{ha_tool_primitive_name}"
-  pacemaker_order ha_tool_ordering_name do
-    action :delete
-    only_if "crm configure show #{ha_tool_ordering_name}"
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
   # Add pacemaker resource for neutron-l3-ha-service
   ha_service_transaction_objects = []
   ha_service_primitive_name = "neutron-l3-ha-service"
