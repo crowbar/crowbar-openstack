@@ -129,6 +129,7 @@ if node[:keystone][:frontend] == "uwsgi"
   end
 
 elsif node[:keystone][:frontend] == "apache"
+  keystone_enabled = !node[:keystone][:disable_vhost]
 
   service "keystone" do
     service_name node[:keystone][:service_name]
@@ -158,7 +159,7 @@ elsif node[:keystone][:frontend] == "apache"
   end
 
   apache_site "keystone-public.conf" do
-    enable true
+    enable keystone_enabled
   end
 
   crowbar_openstack_wsgi "WSGI entry for keystone-admin" do
@@ -181,7 +182,7 @@ elsif node[:keystone][:frontend] == "apache"
   end
 
   apache_site "keystone-admin.conf" do
-    enable true
+    enable keystone_enabled
   end
 end
 
