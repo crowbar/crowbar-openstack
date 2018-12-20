@@ -63,7 +63,7 @@ storm-supervisor-node            ansible_ssh_host=<%= @monasca_admin_host %> ans
 monasca-thresh-node              ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # MariaDB node
-mariadb-node                     ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+# mariadb-node                     ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Elasticsearch Curator
 elasticsearch-curator-node       ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -140,7 +140,7 @@ storm-supervisor-node storm_listen_ip=internal-node-1
 monasca-thresh-node database_node_for_thresh=monasca-node monasca_thresh_listen_ip=internal-node-1
 
 [mariadb_group]
-mariadb-node mariadb_listen_ip=internal-node-1
+# mariadb-node mariadb_listen_ip=internal-node-1
 
 [elasticsearch_curator_group]
 elasticsearch-curator-node

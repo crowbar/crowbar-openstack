@@ -25,6 +25,12 @@ default[:monasca][:log_api][:bind_port] = 5607
 default[:monasca][:kibana][:bind_port] = 5601
 default[:monasca][:delegate_role] = "monasca-delegate"
 
+# Database Settings
+default[:monasca][:db_monapi][:password] = nil
+default[:monasca][:db_monapi][:user] = "monapi"
+# Don't change the database name. "mon" is hardcoded in the mysql mon.sql schema file
+default[:monasca][:db_monapi][:database] = "mon"
+
 # agent default service settings
 default[:monasca][:agent]["user"] = "monasca-agent"
 default[:monasca][:agent][:group] = "monasca"

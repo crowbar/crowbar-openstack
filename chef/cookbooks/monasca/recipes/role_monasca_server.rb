@@ -16,5 +16,6 @@
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-server")
   include_recipe "#{@cookbook_name}::common"
+  include_recipe "#{@cookbook_name}::database"
   include_recipe "#{@cookbook_name}::server"
 end

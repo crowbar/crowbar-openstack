@@ -166,6 +166,15 @@
                 "extra_params": { "required": true, "type": "str" }
               }
             },
+            "db_monapi": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "password": { "type": "str", "required": true },
+                "user": { "type": "str", "required": true },
+                "database": { "type": "str", "required": true }
+              }
+            },
             "master": {
               "required": true,
               "type": "map",
@@ -177,7 +186,6 @@
                  },
                 "cassandra_admin_password": { "required": true, "type": "str" },
                 "database_notification_password": { "required": true, "type": "str" },
-                "database_monapi_password": { "required": true, "type": "str" },
                 "database_thresh_password": { "required": true, "type": "str" },
                 "database_logapi_password": { "required": true, "type": "str" },
                 "keystone_monasca_operator_password": { "required": true, "type": "str" },

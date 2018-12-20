@@ -24,6 +24,8 @@ monasca_node = monasca_servers[0]
 monasca_hosts = MonascaHelper.monasca_hosts(monasca_servers)
 raise "no nodes with monasca-server role found" if monasca_hosts.nil? || monasca_hosts.empty?
 
+db_settings = fetch_database_settings
+
 package "ansible"
 package "openstack-monasca-installer" do
   notifies :run, "execute[remove lock file]", :immediately
@@ -114,6 +116,8 @@ template "/opt/monasca-installer/crowbar_vars.yml" do
   group "root"
   mode "0400"
   variables(
+    database_host: db_settings[:address],
+    db_monapi_password: node[:monasca][:db_monapi][:password],
     master_settings: node[:monasca][:master],
     keystone_settings: keystone_settings,
     kafka_settings: node[:monasca][:kafka],

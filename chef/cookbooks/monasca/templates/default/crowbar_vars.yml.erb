@@ -11,7 +11,7 @@ cassandra_admin_password: <%= @master_settings['tsdb_mon_api_password'] %>
 database_type: <%= @master_settings['tsdb'] %>
 
 database_notification_password: <%= @master_settings['database_notification_password'] %>
-database_monapi_password: <%= @master_settings['database_monapi_password'] %>
+database_monapi_password: <%= @db_monapi_password %>
 database_thresh_password: <%= @master_settings['database_thresh_password'] %>
 database_logapi_password: <%= @master_settings['database_logapi_password'] %>
 keystone_monasca_operator_password: <%= @master_settings['keystone_monasca_operator_password'] %>
@@ -59,7 +59,7 @@ elasticsearch_host: <%= @monasca_net_ip %>
 nimbus_host: <%= @monasca_net_ip %>
 zookeeper_hosts: <%= @monasca_net_ip %>
 mariadb_bind_address: <%= @monasca_net_ip %>
-database_host: <%= @monasca_net_ip %>
+database_host: <%= @database_host %>
 monasca_api_url: "http://<%= @pub_net_ip %>:<%= @api_settings['bind_port'] %>/v2.0"
 monasca_log_api_url: "http://<%= @pub_net_ip %>:<%= @log_api_settings['bind_port'] %>/v2.0"
 memcached_nodes: ["<%= @monasca_net_ip %>:11211"]
