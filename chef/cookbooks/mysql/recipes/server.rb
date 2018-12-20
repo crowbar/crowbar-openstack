@@ -177,7 +177,7 @@ execute "assign-root-password" do
   command "/usr/bin/mysqladmin -u root password \"#{server_root_password}\""
   action :run
   not_if { ha_enabled } # password already set as part of the ha bootstrap
-  only_if "/usr/bin/mysql -u root -e 'show databases;'"
+  only_if "/usr/bin/mysql --no-defaults -u root -e 'select (1);'"
 end
 
 db_settings = fetch_database_settings
@@ -275,4 +275,14 @@ directory "/var/run/mysqld/" do
   group "root"
   mode "0755"
   action :create
+end
+
+template "/root/.my.cnf" do
+  source "root-my.cnf.erb"
+  owner "root"
+  group "root"
+  mode "0600"
+  variables(
+    password: node[:database][:mysql][:server_root_password]
+  )
 end
