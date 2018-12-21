@@ -32,7 +32,7 @@ run_setup()
       --backlog_send_rate '<%= @agent_settings["backlog_send_rate"].to_i %>' \
       --amplifier '<%= @agent_settings["amplifier"] %>' \
       --skip_enable \
-      --agent_service_name '<%= @agent_settings["agent_service_name"] %>' \
+      --agent_service_name '<%= @agent_settings["agent_service_name"].gsub(/\.target$/, '') %>' \
       "$@"
     }
 
