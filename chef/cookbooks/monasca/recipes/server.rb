@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+package "openstack-monasca-api"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 

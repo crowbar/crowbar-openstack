@@ -86,3 +86,5 @@ run_setup \
      timeout=10
      name=kibana
      use_keystone=false'
+
+/usr/bin/monasca_db stamp --from-fingerprint && /usr/bin/monasca_db upgrade
