@@ -31,12 +31,31 @@ api_database_connection = fetch_database_connection_string(node[:nova][:api_db])
 bash "nova-manage discover_hosts" do
   user node[:nova][:user]
   code <<-EOH
-    tmpfile=$(mktemp /tmp/nova-discover-hosts.XXXXXX.conf)
+    tmpdir=$(mktemp -d)
+    tmpfile=$(mktemp ${tmpdir}/nova-discover-hosts.XXXXXX.conf)
+    tmplogfile=$(mktemp ${tmpdir}/nova-manage.XXXXXX.log)
     chmod 600 $tmpfile
     echo "[api_database]" >> $tmpfile
     echo "connection = #{api_database_connection}" >> $tmpfile
-    nova-manage --config-file=$tmpfile cell_v2 discover_hosts --verbose
-    rm -f "$tmpfile"
+    for i in `seq 1 10`;
+    do
+	echo "$i try ..." >> $tmplogfile
+        nova-manage --config-file=$tmpfile --config-dir=$tmpdir cell_v2 discover_hosts --verbose >> $tmplogfile 2>&1
+	host_mapping_created=$(grep 'Creating host mapping' $tmplogfile | grep #{node[:hostname]})
+	echo "host_mapping_created=${host_mapping_created}" >> $tmplogfile
+	if [ -z "$host_mapping_created" ]; then
+	    # allow some time for the compute node to be visible to the controller
+	    sleep 10
+	else
+	    # host mapping created, we're done
+	    break
+	fi
+    done
+    if [ ! -z "$host_mapping_created" ]; then
+        # preserve the tmpdir and log files only if cell registration failed in
+    	# order to aide troubleshooting
+        rm -rf "$tmpdir"
+    fi
     EOH
 end
 
