@@ -31,6 +31,18 @@ ha_enabled = node[:cinder][:ha][:enabled]
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:cinder][:api][:protocol] == "https", ha_enabled)
 
+if node[:cinder][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for cinder" do
+    generate_certs node[:cinder][:ssl][:generate_certs]
+    certfile node[:cinder][:ssl][:certfile]
+    keyfile node[:cinder][:ssl][:keyfile]
+    group node[:cinder][:group]
+    fqdn node[:fqdn]
+    cert_required node[:cinder][:ssl][:cert_required]
+    ca_certs node[:cinder][:ssl][:ca_certs]
+  end
+end
+
 crowbar_pacemaker_sync_mark "wait-cinder_register"
 
 register_auth_hash = { user: keystone_settings["admin_user"],

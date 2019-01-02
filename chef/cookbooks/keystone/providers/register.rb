@@ -387,9 +387,8 @@ action :update_endpoint do
       endpoint_template["endpoint"]["url"] = new_url
       endpoint_template["endpoint"]["endpoint_id"] = endpoints[interface]["id"]
       endpoint_template["endpoint"]["service_id"] = endpoints[interface]["service_id"]
-      resp = http.send_request("PATCH",
-                               "#{path}/#{endpoints[interface]["id"]}",
-                               JSON.generate(endpoint_template), headers)
+      fullpath = "#{path}/#{endpoints[interface]["id"]}"
+      resp = retry_request(http, "PATCH", fullpath, endpoint_template, headers)
       if resp.is_a?(Net::HTTPOK)
         Chef::Log.info("Successfully updated endpoint URL #{interface} #{new_url}")
       else
@@ -404,6 +403,54 @@ action :update_endpoint do
     Chef::Log.error("Response Message: #{resp.message}")
     new_resource.updated_by_last_action(false)
     raise "Failed to talk to keystone in add_endpoint_template (3)" if error
+  end
+end
+
+action :update_one_endpoint do
+  http, headers = _build_connection(new_resource)
+
+  path = "/v3/services"
+  dir = "services"
+  my_service_id, error = _find_id(http, headers, new_resource.endpoint_service, path, dir)
+  unless my_service_id
+    msg = "Couldn't find service #{new_resource.endpoint_service} in keystone"
+    _raise_error(nil, msg, "update_endpoint")
+  end
+
+  path = "/v3/endpoints"
+
+  resp = http.request_get(path, headers)
+  if resp.is_a?(Net::HTTPOK)
+    data = JSON.parse(resp.read_body)
+    endpoints = {}
+    data["endpoints"].each do |endpoint|
+      if endpoint["service_id"].to_s == my_service_id.to_s
+        endpoints[endpoint["interface"]] = endpoint
+      end
+    end
+    interface = new_resource.endpoint_interface
+    new_url = new_resource.endpoint_url
+    endpoint_template = {}
+    endpoint_template["endpoint"] = {}
+    endpoint_template["endpoint"]["interface"] = interface
+    endpoint_template["endpoint"]["url"] = new_url
+    endpoint_template["endpoint"]["endpoint_id"] = endpoints[interface]["id"]
+    endpoint_template["endpoint"]["service_id"] = endpoints[interface]["service_id"]
+    fullpath = "#{path}/#{endpoints[interface]["id"]}"
+    resp = retry_request(http, "PATCH", fullpath, endpoint_template, headers)
+    if resp.is_a?(Net::HTTPOK)
+      Chef::Log.info("Successfully updated endpoint URL #{interface} #{new_url}")
+    else
+      Chef::Log.error("Unknown response code: #{resp.code}")
+      new_resource.updated_by_last_action(false)
+      raise "Failed to talk to keystone in update_endpoint"
+    end
+  else
+    Chef::Log.error "Unknown response from Keystone Server"
+    Chef::Log.error("Response Code: #{resp.code}")
+    Chef::Log.error("Response Message: #{resp.message}")
+    new_resource.updated_by_last_action(false)
+    raise "Failed to talk to keystone in update_one_endpoint" if error
   end
 end
 
@@ -551,17 +598,8 @@ def _get_token(http, user_name, password, tenant = "")
   headers = _build_headers
   body = _build_auth(user_name, password, tenant)
 
-  resp = nil
-  count = 0
-  error = true
-  while error && count < 10
-    count += 1
-    Chef::Log.debug "Trying to get keystone token for user '#{user_name}' (try #{count})"
-    resp = http.send_request("POST", path, JSON.generate(body), headers)
-    error = !resp.is_a?(Net::HTTPSuccess)
-    # retry on any 5XX (server error) error code but not on 4XX (client error)
-    sleep 5 if resp.is_a?(Net::HTTPServerError)
-  end
+  resp = retry_request(http, "POST", path, body, headers)
+  error = !resp.is_a?(Net::HTTPSuccess)
 
   if error
     Chef::Log.info "Failed to get token for User '#{user_name}' Tenant '#{tenant}'"
@@ -672,4 +710,15 @@ def endpoint_needs_update(endpoint, new_resource)
   else
     return true
   end
+end
+
+def retry_request(http, method, path, body, headers)
+  resp = nil
+  10.times do |count|
+    resp = http.send_request(method, path, JSON.generate(body), headers)
+    break unless resp.is_a?(Net::HTTPServerError)
+    Chef::Log.debug("Retrying request #{method} #{path} : #{count}")
+    sleep 5
+  end
+  resp
 end

@@ -157,6 +157,7 @@ pool_timeout = <%= node[:nova][:db][:pool_timeout] %>
 [glance]
 <%= "host = #{@glance_server_host}" unless @glance_server_host.nil? %>
 <%= "port = #{@glance_server_port}" unless @glance_server_host.nil? %>
+endpoint_type = internal
 protocol = <%= @glance_server_protocol %>
 <%= "api_servers = #{@glance_server_protocol}://#{@glance_server_host}:#{@glance_server_port}" unless @glance_server_host.nil? %>
 <%= "api_insecure = #{@glance_server_insecure ? 'True' : 'False'}" unless @glance_server_host.nil? %>
@@ -235,6 +236,7 @@ auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol
                @keystone_settings["internal_url_host"],
                @keystone_settings["service_port"],
                "2.0") %>
+endpoint_type = internal
 auth_type = password
 insecure = <%= @neutron_insecure ? 'True' : 'False' %>
 password = <%= @neutron_service_password %>
