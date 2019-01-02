@@ -114,6 +114,7 @@ class DatabaseService < PacemakerServiceObject
     validate_one_for_role proposal, "database-server"
 
     attributes = proposal["attributes"][@bc_name]
+    deployment = proposal["deployment"][@bc_name]
     db_engine = attributes["sql_engine"]
     validation_error I18n.t(
       "barclamp.#{@bc_name}.validation.invalid_db_engine",
@@ -131,11 +132,17 @@ class DatabaseService < PacemakerServiceObject
         )
       end
     when "mysql"
-      # we're good
+      expand_nodes_for_all(deployment["elements"]["database-server"] || []).flatten.each do |n|
+        node = Node.find_by_name(n)
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.validation.monasca_deployed",
+          node_name: n
+        ) if node.roles.include?("monasca-server")
+      end
     end
 
     # HA validation
-    servers = proposal["deployment"][@bc_name]["elements"]["database-server"]
+    servers = deployment["elements"]["database-server"]
     unless servers.nil? || servers.first.nil? || !is_cluster?(servers.first)
       cluster = servers.first
       validate_ha_attributes(attributes, cluster)
