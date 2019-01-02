@@ -9,7 +9,7 @@
         "slow_query_logging": true,
         "innodb_flush_log_at_trx_commit": 1,
         "innodb_buffer_pool_instances": 1,
-        "max_connections": 1400,
+        "max_connections": 2048,
         "tmp_table_size": 64,
         "max_heap_table_size": 64,
         "expire_logs_days": 10,
@@ -53,7 +53,7 @@
       },
       "postgresql": {
         "config": {
-          "max_connections": 1000,
+          "max_connections": 2048,
           "log_filename": "postgresql.log-%Y%m%d%H%M",
           "log_truncate_on_rotation": false,
           "log_min_duration_statement": -1
