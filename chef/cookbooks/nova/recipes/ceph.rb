@@ -99,7 +99,9 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
       virsh_secret.error!
 
       secret_lines = secret_list.strip.split("\n")
-      if secret_lines.length < 2 || !secret_lines[0].lstrip.start_with?("UUID") || !secret_lines[1].start_with?("----")
+      if secret_lines.length < 2 ||
+          !secret_lines[0].lstrip.start_with?("UUID") ||
+          !secret_lines[1].start_with?("----")
         raise "cannot fetch list of libvirt secret"
       end
       secret_lines.shift(2)
@@ -113,15 +115,15 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
         next if secret_xml.index("<usage type='ceph'>").nil?
 
         # lazy xml parsing
-        re_match = %r[<usage type='ceph'>.*<name>(.*)</name>]m.match(secret_xml)
+        re_match = %r{<usage type='ceph'>.*<name>(.*)</name>}m.match(secret_xml)
         next if re_match.nil?
         secret_usage = re_match[1]
         undefine = false
 
         if secret_uuid == rbd_uuid
           undefine = true if secret_usage != "crowbar-#{rbd_uuid} secret"
-        else
-          undefine = true if secret_usage == "crowbar-#{rbd_uuid} secret"
+        elsif secret_usage == "crowbar-#{rbd_uuid} secret"
+          undefine = true
         end
 
         if undefine
@@ -151,7 +153,8 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
         if File.exist?(client_keyring)
           f = File.open(client_keyring)
           f.each do |line|
-            if match = line.match("key\s*=\s*(.+)")
+            match = line.match("key\s*=\s*(.+)")
+            if match
               client_key = match[1]
               break
             end
