@@ -18,8 +18,5 @@
 #
 
 ha_enabled = node[:magnum][:ha][:enabled]
-use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
 
-magnum_service "conductor" do
-  use_pacemaker_provider use_crowbar_pacemaker_service
-end
+magnum_service "conductor"

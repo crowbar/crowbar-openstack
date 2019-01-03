@@ -21,12 +21,7 @@ include_recipe "nova::config"
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-use_crowbar_pacemaker_service = node[:nova][:ha][:enabled] &&
-  node[:pacemaker][:clone_stateless_services]
-
-nova_package "api" do
-  use_pacemaker_provider use_crowbar_pacemaker_service
-end
+nova_package "api"
 
 # nova-api must be restarted immediately if keystone settings have changed,
 # otherwise nova requests in recipes will fail

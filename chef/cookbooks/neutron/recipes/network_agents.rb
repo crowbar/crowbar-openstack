@@ -217,18 +217,16 @@ elsif node[:neutron][:use_lbaas] &&
 end
 
 ha_enabled = node[:neutron][:ha][:network][:enabled]
-use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
 
 service node[:neutron][:platform][:metering_agent_name] do
   supports status: true, restart: true
   action [:enable, :start]
   subscribes :restart, resources(template: node[:neutron][:config_file])
   subscribes :restart, resources("template[/etc/neutron/metering_agent.ini]")
-  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   only_if { ceilometer_agent_enabled }
 end
 utils_systemd_service_restart node[:neutron][:platform][:metering_agent_name] do
-  action use_crowbar_pacemaker_service ? :disable : :enable
+  action :enable
   only_if { ceilometer_agent_enabled }
 end
 
@@ -242,10 +240,9 @@ if node[:neutron][:use_lbaas] &&
     subscribes :restart, resources(template: node[:neutron][:lbaas_config_file])
     subscribes :restart, resources(template: node[:neutron][:lbaas_agent_config_file])
     subscribes :restart, resources(file: "/etc/neutron/lbaas_agent.ini")
-    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
   utils_systemd_service_restart lbaas_agent do
-    action use_crowbar_pacemaker_service ? :disable : :enable
+    action :enable
   end
 elsif node[:neutron][:use_lbaas] &&
     node[:neutron][:lbaasv2_driver] == "f5"
@@ -254,10 +251,9 @@ elsif node[:neutron][:use_lbaas] &&
     action [:enable, :start]
     subscribes :restart, resources(template: node[:neutron][:config_file])
     subscribes :restart, resources("template[/etc/neutron/services/f5/f5-openstack-agent.ini]")
-    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
   utils_systemd_service_restart node[:neutron][:platform][:f5_agent_name] do
-    action use_crowbar_pacemaker_service ? :disable : :enable
+    action :enable
   end
 end
 
@@ -267,10 +263,9 @@ service node[:neutron][:platform][:dhcp_agent_name] do
   subscribes :restart, resources(template: node[:neutron][:config_file])
   subscribes :restart, resources(template: node[:neutron][:dhcp_agent_config_file])
   subscribes :restart, resources(file: "/etc/neutron/dhcp_agent.ini")
-  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
 end
 utils_systemd_service_restart node[:neutron][:platform][:dhcp_agent_name] do
-  action use_crowbar_pacemaker_service ? :disable : :enable
+  action :enable
 end
 
 if ha_enabled

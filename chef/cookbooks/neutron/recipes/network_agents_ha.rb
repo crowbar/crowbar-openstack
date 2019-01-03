@@ -128,149 +128,12 @@ crowbar_pacemaker_sync_mark "wait-neutron-agents_ha_resources" do
   timeout 150
 end
 
-if node[:pacemaker][:clone_stateless_services]
-  transaction_objects = []
-
-  if use_l3_agent
-    case node[:neutron][:networking_plugin]
-    when "ml2"
-      ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
-      if ml2_mech_drivers.include?("openvswitch")
-        neutron_agent = node[:neutron][:platform][:ovs_agent_name]
-        neutron_agent_ra = node[:neutron][:ha][:network]["openvswitch_ra"]
-      elsif ml2_mech_drivers.include?("linuxbridge")
-        neutron_agent = node[:neutron][:platform][:lb_agent_name]
-        neutron_agent_ra = node[:neutron][:ha][:network]["linuxbridge_ra"]
-      end
-    when "vmware"
-      neutron_agent = ""
-      neutron_agent_ra = ""
-    end
-    neutron_agent_primitive = neutron_agent.sub(/^openstack-/, "")
-
-    objects = openstack_pacemaker_controller_clone_for_transaction neutron_agent_primitive do
-      agent neutron_agent_ra
-      op node[:neutron][:ha][:network][:op]
-    end
-    transaction_objects.push(objects)
-  end
-
-  dhcp_agent_primitive = "neutron-dhcp-agent"
-  objects = openstack_pacemaker_controller_clone_for_transaction dhcp_agent_primitive do
-    agent node[:neutron][:ha][:network][:dhcp_ra]
-    op node[:neutron][:ha][:network][:op]
-  end
-  transaction_objects.push(objects)
-
-  if use_l3_agent
-    # The L2 agent must start before DHCP agent as DHCP agent depends on it.
-    # Otherwise, this can result in port failing to bind.
-    l2_dhcp_order_name = "o-cl-neutron-l2-dhcp-agents"
-    pacemaker_order l2_dhcp_order_name do
-      ordering "cl-#{neutron_agent_primitive} cl-#{dhcp_agent_primitive}"
-      score "Optional"
-      action :update
-      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-    end
-    transaction_objects << "pacemaker_order[#{l2_dhcp_order_name}]"
-
-    l3_agent_primitive = "neutron-l3-agent"
-    objects = openstack_pacemaker_controller_clone_for_transaction l3_agent_primitive do
-      agent node[:neutron][:ha][:network][:l3_ra]
-      op node[:neutron][:ha][:network][:op]
-    end
-    transaction_objects.push(objects)
-
-    l3_agent_clone = "cl-#{l3_agent_primitive}"
-  end
-
-  enable_metadata = node.roles.include?("neutron-network") || !node[:neutron][:metadata][:force]
-
-  metadata_agent_primitive = "neutron-metadata-agent"
-  if use_metadata_agent && enable_metadata
-    objects = openstack_pacemaker_controller_clone_for_transaction metadata_agent_primitive do
-      agent node[:neutron][:ha][:network][:metadata_ra]
-      op node[:neutron][:ha][:network][:op]
-    end
-    transaction_objects.push(objects)
-  else
-    pacemaker_primitive metadata_agent_primitive do
-      agent node[:neutron][:ha][:network][:metadata_ra]
-      action [:stop, :delete]
-      only_if "crm configure show #{metadata_agent_primitive}"
-    end
-  end
-
-  if node.roles.include? "ceilometer-agent"
-    metering_agent_primitive = "neutron-metering-agent"
-    objects = openstack_pacemaker_controller_clone_for_transaction metering_agent_primitive do
-      agent node[:neutron][:ha][:network][:metering_ra]
-      op node[:neutron][:ha][:network][:op]
-    end
-    transaction_objects.push(objects)
-  end
-
-  if use_lbaas_agent &&
-      [nil, "", "haproxy"].include?(node[:neutron][:lbaasv2_driver])
-    lbaas_agent_primitive = "neutron-lbaasv2-agent"
-    objects = openstack_pacemaker_controller_clone_for_transaction lbaas_agent_primitive do
-      agent node[:neutron][:ha][:network][:lbaasv2_ra]
-      op node[:neutron][:ha][:network][:op]
-    end
-    transaction_objects.push(objects)
-  end
-
-  if use_lbaas_agent && node[:neutron][:lbaasv2_driver] == "f5"
-    f5_agent_primitive = "neutron-f5-agent"
-    objects = openstack_pacemaker_controller_clone_for_transaction f5_agent_primitive do
-      agent node[:neutron][:ha][:network][:f5_ra]
-      op node[:neutron][:ha][:network][:op]
-    end
-    transaction_objects.push(objects)
-  end
-
-  pacemaker_transaction "neutron agents" do
-    cib_objects transaction_objects.flatten
-    # note that this will also automatically start the resources
-    action :commit_new
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-else
-  l3_agent_primitive = "neutron-l3-agent"
-  l3_agent_clone = "cl-#{l3_agent_primitive}"
-end
-
 if CrowbarPacemakerHelper.being_upgraded?(node)
   log "Skipping neutron-ha-tool resource creation during the upgrade"
   use_l3_agent = false
 end
 
 if use_l3_agent
-  # Remove old resource
-  ha_tool_primitive_name = "neutron-ha-tool"
-  pacemaker_primitive ha_tool_primitive_name do
-    agent node[:neutron][:ha][:network][:ha_tool_ra]
-    action [:stop, :delete]
-    only_if "crm configure show #{ha_tool_primitive_name}"
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  # Remove old location
-  ha_tool_location_name = "l-#{ha_tool_primitive_name}-controller"
-  pacemaker_location ha_tool_location_name do
-    action :delete
-    only_if "crm configure show #{ha_tool_location_name}"
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  # Remove old ordering
-  ha_tool_ordering_name = "o-#{ha_tool_primitive_name}"
-  pacemaker_order ha_tool_ordering_name do
-    action :delete
-    only_if "crm configure show #{ha_tool_ordering_name}"
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
   # Add pacemaker resource for neutron-l3-ha-service
   ha_service_transaction_objects = []
   ha_service_primitive_name = "neutron-l3-ha-service"
@@ -305,8 +168,8 @@ if use_l3_agent
     # constraint on these services, but it's optional, not mandatory (because it
     # doesn't need to be restarted when postgresql or rabbitmq are restarted).
     # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
-    ordering "( postgresql #{rabbit_settings[:pacemaker_resource]} g-haproxy cl-neutron-server " \
-             "#{l3_agent_clone} ) #{ha_service_primitive_name}"
+    ordering "( postgresql #{rabbit_settings[:pacemaker_resource]} g-haproxy " \
+             "cl-neutron-server ) #{ha_service_primitive_name}"
     score "Mandatory"
     action :create
     only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }

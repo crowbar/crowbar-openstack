@@ -84,14 +84,11 @@ define :neutron_metadata,
   end
 
   unless use_cisco_apic_ml2_driver
-    use_crowbar_pacemaker_service = \
-      (neutron_network_ha && node[:pacemaker][:clone_stateless_services]) || nova_compute_ha_enabled
-
     enable_metadata = node.roles.include?("neutron-network") || !neutron[:neutron][:metadata][:force]
 
     utils_systemd_service_restart node[:neutron][:platform][:metadata_agent_name] do
       if enable_metadata
-        action use_crowbar_pacemaker_service ? :disable : :enable
+        action nova_compute_ha_enabled ? :disable : :enable
       else
         action :disable
       end
@@ -108,8 +105,8 @@ define :neutron_metadata,
       else
         action [:disable, :stop]
       end
-      provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
       if nova_compute_ha_enabled
+        provider Chef::Provider::CrowbarPacemakerService
         supports no_crm_maintenance_mode: true
       else
         supports status: true, restart: true

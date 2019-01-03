@@ -171,11 +171,7 @@ end
 
 crowbar_pacemaker_sync_mark "create-cinder_register"
 
-use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
-
-cinder_service "api" do
-  use_pacemaker_provider use_crowbar_pacemaker_service
-end
+cinder_service "api"
 
 service = "openstack-cinder-api"
 if node[:cinder][:resource_limits] && node[:cinder][:resource_limits][service]
