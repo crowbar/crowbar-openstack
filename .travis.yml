@@ -5,6 +5,9 @@ dist: trusty
 
 rvm: 2.1.9
 
+before_install:
+  - rvm @global do gem install bundler -v '< 2.0.0'
+
 matrix:
   include:
     - env: SYNTAXCHECK
