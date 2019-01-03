@@ -128,8 +128,8 @@ class MonascaService < OpenstackServiceObject
     base["attributes"][@bc_name][:master][:keystone_monasca_operator_password] = random_password
     base["attributes"][@bc_name][:master][:keystone_monasca_agent_password] = random_password
     base["attributes"][@bc_name][:master][:keystone_admin_agent_password] = random_password
-    base["attributes"][@bc_name][:master][:database_grafana_password] = random_password
     base["attributes"][@bc_name][:db_monapi][:password] = random_password
+    base["attributes"][@bc_name][:db_grafana][:password] = random_password
 
     @logger.debug("Monasca create_proposal: exiting")
     base

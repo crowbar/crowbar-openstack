@@ -118,6 +118,7 @@ template "/opt/monasca-installer/crowbar_vars.yml" do
   variables(
     database_host: db_settings[:address],
     db_monapi_password: node[:monasca][:db_monapi][:password],
+    db_grafana_password: node[:monasca][:db_grafana][:password],
     master_settings: node[:monasca][:master],
     keystone_settings: keystone_settings,
     kafka_settings: node[:monasca][:kafka],

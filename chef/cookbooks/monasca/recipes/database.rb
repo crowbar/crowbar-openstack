@@ -26,7 +26,7 @@ ha_enabled = node[:monasca][:ha][:enabled]
 
 crowbar_pacemaker_sync_mark "wait-monasca_database"
 
-[node[:monasca][:db_monapi]].each do |d|
+[node[:monasca][:db_monapi], node[:monasca][:db_grafana]].each do |d|
   database "create #{d[:database]} database" do
     connection db_settings[:connection]
     database_name d[:database]

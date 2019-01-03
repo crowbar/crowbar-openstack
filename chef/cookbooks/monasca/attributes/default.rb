@@ -31,6 +31,10 @@ default[:monasca][:db_monapi][:user] = "monapi"
 # Don't change the database name. "mon" is hardcoded in the mysql mon.sql schema file
 default[:monasca][:db_monapi][:database] = "mon"
 
+default[:monasca][:db_grafana][:password] = nil
+default[:monasca][:db_grafana][:user] = "grafana"
+default[:monasca][:db_grafana][:database] = "grafana"
+
 # agent default service settings
 default[:monasca][:agent]["user"] = "monasca-agent"
 default[:monasca][:agent][:group] = "monasca"

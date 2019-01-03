@@ -26,7 +26,7 @@ keystone_insecure: <%= @keystone_settings['insecure'] %>
 <%- end %>
 api_region: <%= @keystone_settings['endpoint_region'] %>
 keystone_region: <%= @keystone_settings['endpoint_region'] %>
-database_grafana_password: <%= @master_settings['database_grafana_password'] %>
+database_grafana_password: <%= @db_grafana_password %>
 
 notification_enable_email: <%= @master_settings['notification_enable_email'] %>
 smtp_host: <%= @master_settings['smtp_host'] %>
