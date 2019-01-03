@@ -159,11 +159,13 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
         end
       end
 
+      raise "CephX authentication for #{rbd_user} could not be determined." if client_key.nil?
+
       cmd = ["virsh", "secret-get-value", rbd_uuid]
       virsh_secret_get_value = Mixlib::ShellOut.new(cmd)
       secret = virsh_secret_get_value.run_command.stdout.chomp.strip
 
-      if secret != client_key
+      if client_key && secret != client_key
         secret_file_path = "/etc/ceph/ceph-secret-#{rbd_uuid}.xml"
         secret_file_content = "<secret ephemeral='no' private='no'>" \
                               " <uuid>#{rbd_uuid}</uuid>" \
@@ -172,7 +174,6 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
                               " </usage> " \
                               "</secret>"
         File.write(secret_file_path, secret_file_content)
-
         cmd = ["virsh", "secret-define", "--file", secret_file_path]
         virsh_secret_define = Mixlib::ShellOut.new(cmd)
         secret_uuid_out = virsh_secret_define.run_command.stdout
