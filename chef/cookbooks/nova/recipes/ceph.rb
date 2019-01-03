@@ -176,6 +176,7 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
         cmd = ["virsh", "secret-define", "--file", secret_file_path]
         virsh_secret_define = Mixlib::ShellOut.new(cmd)
         secret_uuid_out = virsh_secret_define.run_command.stdout
+        File.delete(secret_file_path)
 
         if secret_uuid_out.scan(/(\S{8}-\S{4}-\S{4}-\S{4}-\S{12})/)
           cmd = ["virsh", "secret-set-value", "--secret", rbd_uuid, "--base64", client_key]
@@ -186,7 +187,6 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
           raise "Libvirt secret for UUID #{rbd_uuid} was not created properly."
         end
 
-        File.delete(secret_file_path)
       end
     end
     only_if { system("virsh hostname &> /dev/null") }
