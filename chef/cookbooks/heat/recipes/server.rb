@@ -424,6 +424,17 @@ execute "heat-manage db_sync" do
   }
 end
 
+execute "heat-manage migrate_properties_data" do
+  user node[:heat][:user]
+  group node[:heat][:group]
+  command "heat-manage migrate_properties_data"
+  # We only do the migration for the first time during the deployment or after the upgrade
+  # (:db_synced flag is reset during the upgrade)
+  only_if do
+    !node[:heat][:db_synced] && (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
 # We want to keep a note that we've done db_sync, so we don't do it again.
 # If we were doing that outside a ruby_block, we would add the note in the
 # compile phase, before the actual db_sync is done (which is wrong, since it
