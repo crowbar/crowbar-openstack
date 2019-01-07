@@ -46,4 +46,5 @@ if node[:kernel][:machine] == "x86_64" &&
   ["api", "log-api"].each do |component|
     package "python-monasca-#{component}"
   end
+  package "python-monasca-tempest-plugin"
 end

@@ -116,6 +116,10 @@ nic_id = floating
 flavor_id = <%= @magnum_settings['flavor_id'] %>
 master_flavor_id = <%= @magnum_settings['master_flavor_id'] %>
 
+[monitoring]
+region = <%= @keystone_settings['endpoint_region'] %>
+endpoint_type = internalURL
+
 [network]
 region = <%= @keystone_settings['endpoint_region'] %>
 endpoint_type = internalURL
@@ -170,6 +174,9 @@ magnum = <%= @enabled_services.include? "container-infra" %>
 ironic = <%= @enabled_services.include? "baremetal" %>
 ironic_inspector = <%= @enabled_services.include? "baremetal" %>
 designate = <%= @enabled_services.include? "dns" %>
+logs = <%= @enabled_services.include? "logs_v2" %>
+logs-search = <%= @enabled_services.include? "logs-search" %>
+monasca = <%= @enabled_services.include? "monitoring" %>
 
 [share]
 region = <%= @keystone_settings['endpoint_region'] %>
