@@ -329,7 +329,6 @@ xvpvncproxy_host = <%= @bind_host %>
 max_header_line = <%= node[:nova][:max_header_line] %>
 ssl_cert_file = <%= @ssl_cert_file %>
 ssl_key_file = <%= @ssl_key_file %>
-keep_alive = false
 
 [upgrade_levels]
 # Determine RPC protocol version for nova based on the minimum

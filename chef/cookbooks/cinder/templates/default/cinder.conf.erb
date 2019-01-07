@@ -7,7 +7,6 @@ transport_url = <%= @rabbit_settings[:url] %>
 rpc_response_timeout = <%= node[:cinder][:rpc_response_timeout] %>
 control_exchange = cinder
 max_header_line = <%= node[:cinder][:max_header_line] %>
-wsgi_keep_alive = false
 state_path = /var/lib/cinder
 my_ip = <%= node[:cinder][:my_ip] %>
 
