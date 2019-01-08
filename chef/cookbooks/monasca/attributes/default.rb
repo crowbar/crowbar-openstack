@@ -53,3 +53,24 @@ default[:monasca][:ha][:enabled] = false
 default[:monasca][:zookeeper][:data_dir] = "/var/lib/zookeeper/data"
 default[:monasca][:zookeeper][:client_port_address] = "0.0.0.0"
 default[:monasca][:zookeeper][:client_port] = 2181
+
+# kafka
+default[:monasca][:kafka][:listen_address] = nil
+default[:monasca][:kafka][:port] = 9092
+default[:monasca][:kafka][:num_network_threads] = 2
+default[:monasca][:kafka][:num_io_threads] = 2
+default[:monasca][:kafka][:socket_send_buffer_bytes] = 1048576
+default[:monasca][:kafka][:socket_receive_buffer_bytes] = 1048576
+default[:monasca][:kafka][:socket_request_max_bytes] = 104857600
+default[:monasca][:kafka][:connections_max_idle_ms] = 86400000
+default[:monasca][:kafka][:data_dir] = "/var/kafka"
+default[:monasca][:kafka][:auto_create_topics] = "false"
+default[:monasca][:kafka][:num_partitions] = 2
+default[:monasca][:kafka][:log_flush_interval_messages] = 10000
+default[:monasca][:kafka][:log_flush_interval_ms] = 1000
+default[:monasca][:kafka][:log_retention_hours] = 24
+default[:monasca][:kafka][:log_retention_bytes] = 21474836480
+default[:monasca][:kafka][:log_segment_bytes] = 104857600
+default[:monasca][:kafka][:replica_fetch_max_bytes] = 1048576
+default[:monasca][:kafka][:message_max_bytes] = 1000012
+default[:monasca][:kafka][:zookeeper_connection_timeout_ms] = 1000000

@@ -33,7 +33,7 @@ elasticsearch-node               ansible_ssh_host=<%= @monasca_admin_host %> ans
 memcached-node                   ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Kafka
-kafka-node                       ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+# kafka-node                       ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Zookeeper
 # zookeeper-node                   ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -85,7 +85,7 @@ keystone-node
 memcached-node memcached_listen_node_ip=internal-node-1
 
 [kafka_group]
-kafka-node kafka_listen_ip=internal-node-1
+# kafka-node kafka_listen_ip=internal-node-1
 
 [zookeeper_group]
 # zookeeper-node zookeeper_listen_ip=internal-node-1
