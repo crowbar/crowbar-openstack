@@ -48,3 +48,8 @@ default[:monasca][:log_agent][:group] = "root"
 
 # HA attributes
 default[:monasca][:ha][:enabled] = false
+
+# zookeeper
+default[:monasca][:zookeeper][:data_dir] = "/var/lib/zookeeper/data"
+default[:monasca][:zookeeper][:client_port_address] = "0.0.0.0"
+default[:monasca][:zookeeper][:client_port] = 2181
