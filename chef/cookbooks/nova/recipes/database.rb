@@ -152,18 +152,6 @@ execute "nova-manage db sync" do
   end
 end
 
-execute "nova-manage db online_data_migrations" do
-  user node[:nova][:user]
-  group node[:nova][:group]
-  command "nova-manage db online_data_migrations"
-  ignore_failure true
-  action :run
-  only_if do
-    !node[:nova][:db_synced] &&
-      (!node[:nova][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
-  end
-end
-
 # Right after controller is upgraded to Pike, explicitely map the instances to cell1
 execute "nova-manage cell_v2 map_instances" do
   user node[:nova][:user]
