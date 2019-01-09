@@ -74,3 +74,12 @@ default[:monasca][:kafka][:log_segment_bytes] = 104857600
 default[:monasca][:kafka][:replica_fetch_max_bytes] = 1048576
 default[:monasca][:kafka][:message_max_bytes] = 1000012
 default[:monasca][:kafka][:zookeeper_connection_timeout_ms] = 1000000
+
+# elasticsearch
+default[:monasca][:elasticsearch][:cluster_name] = "elasticsearch"
+default[:monasca][:elasticsearch][:is_master_node] = "true"
+default[:monasca][:elasticsearch][:is_data_node] = "true"
+default[:monasca][:elasticsearch][:data_dirs] = ["/var/data/elasticsearch"]
+default[:monasca][:elasticsearch][:log_dir] = "/var/log/elasticsearch"
+default[:monasca][:elasticsearch][:repo_dirs] = []
+default[:monasca][:elasticsearch][:bootstrap_memory_lock] = "true"
