@@ -37,52 +37,6 @@ run_setup()
     }
 
 
-# Run full detection first
+# Run full detection
 
 run_setup
-
-# Add process checks not covered by full detection
-
-run_setup \
-    -d ProcessCheck \
-    -json \
-      '{"process_config": [
-         {
-           "process_names":["monasca-log-api"],
-           "dimensions":{"service":"monitoring", "component":"monasca-log-api"}
-           },
-         {
-            "process_names":["monasca-log-metrics"],
-            "dimensions": {"service":"monitoring", "component":"monasca-log-metrics"},
-            "search_string": "logstash/runner.rb agent -f /etc/monasca-log-transformer/monasca-log-metrics.conf"
-            },
-         {
-            "process_names":["monasca-log-persister"],
-            "dimensions": {"service":"monitoring", "component":"monasca-log-persister"},
-            "search_string": "logstash/runner.rb agent -f /etc/monasca-log-persister/monasca-log-persister.conf"
-           },
-         {
-           "process_names":["monasca-log-transformer"],
-           "dimensions": {"service":"monitoring", "component":"monasca-log-transformer"},
-           "search_string": "logstash/runner.rb agent -f /etc/monasca-log-transformer/monasca-log-transformer.conf"
-           }
-         ]
-       }'
-
-# Add HTTP checks not covered by full detection
-
-run_setup \
-  -d HttpCheck \
-  -a 'url='<%= @monasca_log_api_url %>'
-      dimensions=service:monitoring,component:monasca-log-api
-      timeout=10
-      name=monasca-log-api
-      use_keystone=true'
-
-run_setup \
-  -d HttpCheck \
-  -a 'url='<%= @kibana_url %>'
-     dimensions=service:monitoring,component:kibana
-     timeout=10
-     name=kibana
-     use_keystone=false'

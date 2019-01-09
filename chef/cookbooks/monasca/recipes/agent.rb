@@ -36,8 +36,6 @@ end
 agent_dimensions = { service: "monitoring" }
 
 monasca_api_url = MonascaHelper.api_network_url(monasca_server)
-monasca_log_api_url = MonascaHelper.log_api_healthcheck_url(monasca_server)
-kibana_url = "http://" + MonascaHelper.monasca_public_host(monasca_server) + ":5601"
 monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_server)
 
 if node["roles"].include?("monasca-server")
@@ -55,8 +53,6 @@ if node["roles"].include?("monasca-server")
     mode "0750"
     variables(
       monasca_api_url: monasca_api_url,
-      monasca_log_api_url: monasca_log_api_url,
-      kibana_url: kibana_url,
       service: "monitoring",
       agent_settings: agent_settings,
       agent_keystone: agent_keystone,
