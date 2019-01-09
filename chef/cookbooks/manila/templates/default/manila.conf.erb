@@ -27,7 +27,6 @@ use_stderr = false
 transport_url = <%= @rabbit_settings[:url] %>
 
 [cinder]
-api_insecure=<%= @cinder_insecure %>
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_type = password
 default_domain_id = <%= @keystone_settings["admin_domain_id"] %>
@@ -61,19 +60,17 @@ memcache_pool_socket_timeout = 1
 
 [neutron]
 url=<%= @neutron_protocol%>://<%= @neutron_server_host%>:<%= @neutron_server_port%>
-api_insecure=<%= @neutron_insecure %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_type = password
 default_domain_id = <%= @keystone_settings["admin_domain_id"] %>
 default_domain_name = <%= @keystone_settings["admin_domain"] %>
-insecure=<%= @neutron_insecure ? 'True' : 'False' %>
+insecure=<%= @neutron_insecure %>
 password=<%= @neutron_service_password %>
 project_name=<%= @keystone_settings['service_tenant'] %>
 username=<%= @neutron_service_user %>
 
 [nova]
-api_insecure=<%= @nova_insecure %>
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 auth_type = password
 default_domain_id = <%= @keystone_settings["admin_domain_id"] %>
