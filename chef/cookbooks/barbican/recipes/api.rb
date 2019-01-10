@@ -1,5 +1,5 @@
 #
-# Copyright 2016 SUSE Linux GmbH
+# Copyright 2016-2018 SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,6 @@
 # limitations under the License.
 #
 
-include_recipe "apache2"
-include_recipe "apache2::mod_wsgi"
-include_recipe "apache2::mod_rewrite"
 include_recipe "#{@cookbook_name}::common"
 
 application_path = "/srv/www/barbican-api"
