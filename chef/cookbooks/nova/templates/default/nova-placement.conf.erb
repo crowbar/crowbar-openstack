@@ -1,6 +1,6 @@
 [placement]
 auth_type = password
-auth_uri = <%= @keystone_settings['public_auth_url'] %>
+www_authenticate_uri = <%= @keystone_settings['public_auth_url'] %>
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 region_name = <%= @keystone_settings['endpoint_region'] %>
 project_name = <%= @keystone_settings['service_tenant'] %>
