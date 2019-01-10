@@ -55,7 +55,6 @@ default[:keystone][:ssl][:certfile] = "/etc/keystone/ssl/certs/signing_cert.pem"
 default[:keystone][:ssl][:keyfile] = "/etc/keystone/ssl/private/signing_key.pem"
 default[:keystone][:ssl][:generate_certs] = false
 default[:keystone][:ssl][:insecure] = false
-default[:keystone][:ssl][:ca_certs] = "/etc/keystone/ssl/certs/ca.pem"
 
 default[:keystone][:ldap][:url] = "ldap://localhost"
 default[:keystone][:ldap][:user] = "dc=Manager,dc=example,dc=com"

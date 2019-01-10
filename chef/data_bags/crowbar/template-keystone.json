@@ -22,8 +22,7 @@
         "certfile": "/etc/keystone/ssl/certs/signing_cert.pem",
         "keyfile": "/etc/keystone/ssl/private/signing_key.pem",
         "generate_certs": false,
-        "insecure": false,
-        "ca_certs": "/etc/keystone/ssl/certs/ca.pem"
+        "insecure": false
       },
       "api": {
         "protocol": "http",
@@ -184,7 +183,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 303,
+      "schema-revision": 304,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },

@@ -82,8 +82,6 @@ if node[:keystone][:api][:protocol] == "https"
     group node[:keystone][:group]
     fqdn node[:fqdn]
     alt_names ["DNS:#{my_admin_host}", "DNS:#{my_public_host}"]
-    cert_required !node[:keystone][:ssl][:insecure]
-    ca_certs node[:keystone][:ssl][:ca_certs]
   end
 end
 
@@ -154,7 +152,6 @@ elsif node[:keystone][:frontend] == "apache"
     ssl_enable node[:keystone][:api][:protocol] == "https"
     ssl_certfile node[:keystone][:ssl][:certfile]
     ssl_keyfile node[:keystone][:ssl][:keyfile]
-    ssl_cacert node[:keystone][:ssl][:ca_certs] unless node[:keystone][:ssl][:insecure]
     # LDAP backend can be slow..
     timeout 600
   end
@@ -177,7 +174,6 @@ elsif node[:keystone][:frontend] == "apache"
     ssl_enable node[:keystone][:api][:protocol] == "https"
     ssl_certfile node[:keystone][:ssl][:certfile]
     ssl_keyfile node[:keystone][:ssl][:keyfile]
-    ssl_cacert node[:keystone][:ssl][:ca_certs] unless node[:keystone][:ssl][:insecure]
     # LDAP backend can be slow..
     timeout 600
   end

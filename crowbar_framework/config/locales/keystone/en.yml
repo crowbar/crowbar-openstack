@@ -39,7 +39,6 @@ en:
           certfile: 'SSL Certificate File'
           keyfile: 'SSL (Private) Key File'
           insecure: 'SSL Certificate is insecure (for instance, self-signed)'
-          ca_certs: 'SSL CA Certificates File'
       validation:
         api_version: 'API version %{api_version} not recognized.'
         enable_keystone_api: 'Keystone API version 3 needs to be enabled in order to use domain specific drivers.'
