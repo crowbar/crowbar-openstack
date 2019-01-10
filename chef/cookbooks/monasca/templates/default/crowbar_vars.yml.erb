@@ -77,24 +77,3 @@ elasticsearch_repo_dir:
   <%= line %>
 <%- end %>
 <%- end %>
-
-<%- unless @curator_cron_config.empty? %>
-curator_cron_config:
-<%- @curator_cron_config.each do |line| %>
-  <%= line %>
-<%- end %>
-<%- end %>
-
-<%- unless @curator_actions.empty? %>
-curator_actions:
-<%- @curator_actions.each do |line| %>
-  <%= line %>
-<%- end %>
-<%- end %>
-
-<%- unless @curator_excluded_index.empty? %>
-curator_excluded_index:
-<%- @curator_excluded_index.each do |line| %>
-  <%= line %>
-<%- end %>
-<%- end %>

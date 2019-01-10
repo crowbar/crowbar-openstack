@@ -129,18 +129,7 @@
               "mapping": {
                   "delete_after_days": { "required": false, "type": "int" },
                   "delete_after_size": { "required": false, "type": "int" },
-                  "delete_exclude_index": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
-                  "cron_config": {
-                    "required": true,
-                    "type": "map",
-                    "mapping": {
-                      "day": { "required": true, "type": "str" },
-                      "hour": { "required": true, "type": "str" },
-                      "minute": { "required": true, "type": "str" },
-                      "month": { "required": true, "type": "str" },
-                      "weekday": { "required": true, "type": "str" }
-                    }
-                    }
+                  "delete_exclude_index": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] }
                 }
             },
             "log_api": {

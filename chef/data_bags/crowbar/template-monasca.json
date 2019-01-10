@@ -81,14 +81,7 @@
         }
       },
       "elasticsearch_curator": {
-        "delete_exclude_index": [ ".kibana" ],
-        "cron_config": {
-          "minute": "0",
-          "hour": "0",
-          "day": "*",
-          "weekday": "*",
-          "month": "*"
-        }
+        "delete_exclude_index": [ ".kibana" ]
       },
       "log_api": {
         "url": "",
@@ -146,7 +139,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 304,
+      "schema-revision": 305,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],

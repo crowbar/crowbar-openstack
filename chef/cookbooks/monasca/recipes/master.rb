@@ -75,41 +75,6 @@ end
 monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_node)
 pub_net_ip = CrowbarHelper.get_host_for_public_url(monasca_node, false, false)
 
-curator_actions = []
-curator_excluded_index = []
-
-if node[:monasca][:elasticsearch_curator].key?(:delete_after_days)
-  curator_actions.push(
-    "delete_by" => "age",
-    "description" => "Delete indices older than " \
-                     "#{node[:monasca][:elasticsearch_curator][:delete_after_days]} days",
-    "deleted_days" => node[:monasca][:elasticsearch_curator][:delete_after_days],
-    "disable" => false
-  )
-end
-
-if node[:monasca][:elasticsearch_curator].key?(:delete_after_size)
-  curator_actions.push(
-    "delete_by" => "size",
-    "description" => "Delete indices larger than " \
-                     "#{node[:monasca][:elasticsearch_curator][:delete_after_size]}MB",
-    "deleted_size" => node[:monasca][:elasticsearch_curator][:delete_after_size],
-    "disable" => false
-  )
-end
-
-node[:monasca][:elasticsearch_curator][:delete_exclude_index].each do |index|
-  curator_excluded_index.push(
-    "index_name" => index,
-    "exclude" => true
-  )
-end
-
-curator_cron_config = {}
-node[:monasca][:elasticsearch_curator][:cron_config].each_pair do |field, value|
-  curator_cron_config[field] = value
-end
-
 template "/opt/monasca-installer/crowbar_vars.yml" do
   source "crowbar_vars.yml.erb"
   owner "root"
@@ -126,9 +91,6 @@ template "/opt/monasca-installer/crowbar_vars.yml" do
     pub_net_ip: pub_net_ip,
     api_settings: node[:monasca][:api],
     log_api_settings: node[:monasca][:log_api],
-    curator_actions: curator_actions.to_yaml.split("\n")[1..-1],
-    curator_cron_config: [curator_cron_config].to_yaml.split("\n")[1..-1],
-    curator_excluded_index: curator_excluded_index.to_yaml.split("\n")[1..-1],
     elasticsearch_repo_dir: node[:monasca][:elasticsearch][:repo_dir].to_yaml.split("\n")[1..-1],
     elasticsearch_tunables: node[:monasca][:elasticsearch][:tunables],
     monitor_libvirt: node[:monasca][:agent][:monitor_libvirt],

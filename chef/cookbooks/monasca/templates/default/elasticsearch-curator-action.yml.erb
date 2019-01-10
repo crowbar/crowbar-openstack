@@ -1,0 +1,43 @@
+<% unless @elasticsearch_curator_actions.empty? -%>
+actions:
+  <% @elasticsearch_curator_actions.each.with_index do |action, index| -%>
+  <%= index %>:
+    action: delete_indices
+    description: >-
+      <%= action['description'] %>
+    options:
+      ignore_empty_list: True
+      timeout_override:
+      continue_if_exception: False
+      disable_action: <%= action['disable'] %>
+    filters:
+      <% @elasticsearch_curator_excluded_index.each do |it| -%>
+      - filtertype: pattern
+        kind: prefix
+        value: <%= it['index_name'] %>
+        exclude: <%= it['exclude'] %>
+      <% end %>
+      <% if action['delete_by'] == 'age' -%>
+      - filtertype: age
+        source: name
+        direction: older
+        timestring: '%Y-%m-%d'
+        unit: days
+        unit_count: <%= action['deleted_days'] %>
+        field:
+        stats_result:
+        epoch:
+        exclude: False
+      <% elsif action['delete_by'] == 'size' -%>
+      - filtertype: space
+        disk_space: <%= action['deleted_size'] %>
+        reverse: True
+        use_age: False
+        source: creation_date
+        timestring:
+        field:
+        stats_result:
+        exclude: False
+      <% end %>
+  <% end %>
+<% end %>

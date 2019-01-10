@@ -66,7 +66,7 @@ monasca-thresh-node              ansible_ssh_host=<%= @monasca_admin_host %> ans
 # mariadb-node                     ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Elasticsearch Curator
-elasticsearch-curator-node       ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+# elasticsearch-curator-node       ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # InfluxDB node
 influxdb-node                    ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -143,7 +143,7 @@ monasca-thresh-node database_node_for_thresh=monasca-node monasca_thresh_listen_
 # mariadb-node mariadb_listen_ip=internal-node-1
 
 [elasticsearch_curator_group]
-elasticsearch-curator-node
+# elasticsearch-curator-node
 
 [influxdb_group]
 influxdb-node influxdb_listen_ip=internal-node-1
