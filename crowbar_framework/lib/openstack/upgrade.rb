@@ -33,11 +33,24 @@ module Openstack
       # this point the nodes maybe don't have roles assigned anymore
       components = [
         :ceilometer, :cinder, :glance, :heat,
-        :keystone, :manila, :neutron, :nova
+        :manila, :neutron, :nova
       ]
       NodeObject.all.each do |node|
         save_it = false
-        components.each do |component|
+        # When the setup was deploying with "clone_stateless_services=false" we
+        # keep keystone running for some longer and don't what the chef-recipes
+        # to trigger the database schema migrations. So we only add keystone here
+        # if clone_stateless_services was true.
+        clone_stateless = if node["pacemaker"]
+          node["pacemaker"]["clone_stateless_services_orig"].nil? ||
+            node["pacemaker"]["clone_stateless_services_orig"]
+        else
+          true
+        end
+
+        complete_components = components.clone
+        complete_components << "keystone" if clone_stateless
+        complete_components.each do |component|
           [:db_synced, :api_db_synced].each do |flag|
             if node[component] && node[component][flag]
               node[component][flag] = false
