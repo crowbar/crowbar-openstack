@@ -16,7 +16,7 @@ use = egg:swift#healthcheck
 [filter:recon]
 use = egg:swift#recon
 [object-replicator]
-run_pause = <%= node[:swift][:replication_interval] %>
+interval = <%= node[:swift][:replication_interval] %>
 [object-updater]
 [object-auditor]
 [filter:xprofile]
