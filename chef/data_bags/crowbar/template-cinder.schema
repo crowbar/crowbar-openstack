@@ -100,7 +100,8 @@
                 "nfs": {
                 "type": "map", "mapping": {
                     "nfs_shares": { "type": "str", "required": true },
-                    "nfs_snapshot": { "type": "bool", "required": true }
+                    "nfs_snapshot": { "type": "bool", "required": true },
+                    "nfs_qcow2_volumes": { "type": "bool", "required": true }
                 }
                 },
                 "rbd": {

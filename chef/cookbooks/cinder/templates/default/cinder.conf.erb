@@ -170,6 +170,7 @@ volume_driver = cinder.volume.drivers.nfs.NfsDriver
 nfs_snapshot_support = true
 nas_secure_file_operations = false
     <% end -%>
+    nfs_qcow2_volumes = <%= volume['nfs']['nfs_qcow2_volumes'] ? 'True' : 'False' %>
   <% end -%>
 
   <% if volume['backend_driver'] == 'nimble' -%><% end -%>

@@ -210,6 +210,24 @@ class CinderService < OpenstackServiceObject
     @logger.debug("Cinder apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
+    unless old_role.nil?
+      field = "nfs_qcow2_volumes"
+      old_qcow = old_role.default_attributes[@bc_name]["volume_defaults"]["nfs"][field]
+      new_qcow = role.default_attributes[@bc_name]["volume_defaults"]["nfs"][field]
+
+      unless old_qcow == new_qcow
+        old_role.default_attributes[@bc_name]["volumes"].each do |volume|
+          next unless volume["backend_driver"] == "nfs"
+
+          role.default_attributes[@bc_name]["volumes"].each do |volume_new|
+            next unless volume_new["backend_driver"] == "nfs"
+            raise I18n.t("barclamp.#{@bc_name}.validation.nfs_qcow2_volumes")
+          end
+          break
+        end
+      end
+    end
+
     controller_elements, controller_nodes, ha_enabled = role_expand_elements(role, "cinder-controller")
     reset_sync_marks_on_clusters_founders(controller_elements)
     Openstack::HA.set_controller_role(controller_nodes) if ha_enabled
@@ -260,4 +278,3 @@ class CinderService < OpenstackServiceObject
     @logger.debug("Cinder apply_role_pre_chef_call: leaving")
   end
 end
-

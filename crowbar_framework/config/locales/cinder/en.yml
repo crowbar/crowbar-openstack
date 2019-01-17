@@ -176,3 +176,4 @@ en:
         raw_device_backend: 'There cannot be multiple raw devices backends when one raw device backend is configured to use all disks.'
         missing_unclaimed_disk: 'Nodes %{nodes_without_suitable_drives} for cinder volume role are missing at least one unclaimed disk, required when using raw devices.'
         rados_backends: 'RADOS backends not deployed with Crowbar cannot use /etc/ceph/ceph.conf as configuration files when also using the RADOS backend deployed with Crowbar.'
+        nfs_qcow2_volumes: 'Is not possible to change nfs_qcow2_volumes parameter if a nfs backend is already created'
