@@ -132,14 +132,15 @@
       "service_password": "none",
       "service_user": "monasca",
       "service_tenant": "monasca",
-      "service_roles": ["monasca-agent", "monasca-user", "monasca-read-only-user"]
+      "service_roles": ["monasca-agent", "monasca-user", "monasca-read-only-user"],
+      "memcache_secret_key": ""
     }
   },
   "deployment": {
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 305,
+      "schema-revision": 306,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],
