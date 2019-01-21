@@ -145,7 +145,20 @@
               "type": "map",
               "mapping": {
                 "log_retention_bytes": { "required": true, "type": "int" },
-                "log_retention_hours": { "required": true, "type": "int" }
+                "log_retention_hours": { "required": true, "type": "int" },
+                "topics": {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ {
+                    "type": "map",
+                    "mapping": {
+                      "name": { "required": true, "type": "str" },
+                      "replicas": { "required": true, "type": "int" },
+                      "partitions": { "required": true, "type": "int" },
+                      "config_options": { "type": "seq", "required": false, "sequence": [ { "type": "str" } ] }
+                    }
+                  } ]
+                }
               }
             },
             "setup": {

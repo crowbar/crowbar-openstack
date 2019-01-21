@@ -80,3 +80,22 @@ service "kafka" do
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
 end
+
+# create topics
+# TODO: handle the case where the replicas or partitions attributes change.
+# then the topic needs to be updated
+node["monasca"]["kafka"]["topics"].each do |t|
+  cmd = "/usr/bin/kafka-topics.sh --create --zookeeper #{monasca_hosts.join(',')}"
+  cmd << " --replication-factor #{t['replicas']}"
+  cmd << " --partitions #{t['partitions']}"
+  if t.has_key?("config_options")
+    t["config_options"].each do |co|
+      cmd << " --config #{co}"
+    end
+  end
+  cmd << " --topic #{t['name']}"
+  execute "Create kafka topic #{t['name']}" do
+    command cmd
+    not_if "/usr/bin/kafka-topics.sh --list --zookeeper #{monasca_hosts.join(',')}|grep #{t['name']}"
+  end
+end
