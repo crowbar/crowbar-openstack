@@ -48,6 +48,13 @@
             "demote": {
               "timeout": "60s"
             }
+          },
+          "haproxy": {
+            "inter": 2000,
+            "fastinter": 1000,
+            "downinter": 2000,
+            "rise": 2,
+            "fall": 2
           }
         }
       },

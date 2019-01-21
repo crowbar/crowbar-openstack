@@ -67,6 +67,15 @@
                           }
                         }
                       }
+                    },
+                    "haproxy": {
+                      "type": "map", "required": true, "mapping": {
+                        "inter": { "type" : "int", "required": true },
+                        "fastinter": { "type" : "int", "required": true },
+                        "downinter": { "type" : "int", "required": true },
+                        "rise": { "type" : "int", "required": true },
+                        "fall": { "type" : "int", "required": true }
+                      }
                     }
                   }
                 }

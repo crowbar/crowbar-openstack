@@ -346,10 +346,26 @@ ha_servers = ha_servers.each do |n|
   # Let the current node be non-backup one, so haproxy running on this node does
   # not direct traffic elsewhere by default
   n["backup"] = n["name"] != node["hostname"]
-  # lower the number of unsuccessful checks needed for declaring server DOWN
-  n["fall"] = 2
-  # lower the interval checking after first failure is found
-  n["fastinter"] = 1000
+
+  # inter parameter sets the interval between two consecutive health checks.
+  n["inter"] = node[:database][:mysql][:ha][:haproxy][:inter]
+
+  # fastinter parameter sets the interval between two consecutive health checks
+  # when the server is any of the transition state: UP - transitionally DOWN or
+  # DOWN - transitionally UP.
+  n["fastinter"] = node[:database][:mysql][:ha][:haproxy][:fastinter]
+
+  # downinter parameter sets the interval between two consecutive health checks
+  # when the server is in the DOWN state.
+  n["downinter"] = node[:database][:mysql][:ha][:haproxy][:downinter]
+
+  # rise <count> : number of consecutive valid health checks before considering
+  # the server as UP.
+  n["rise"] = node[:database][:mysql][:ha][:haproxy][:rise]
+
+  # fall : number of consecutive invalid health checks before considering the
+  # server as DOWN.
+  n["fall"] = node[:database][:mysql][:ha][:haproxy][:fall]
 end
 
 haproxy_loadbalancer "galera" do
