@@ -18,7 +18,7 @@ monasca-node                     ansible_ssh_host=<%= @monasca_admin_host %> ans
 keystone-node                    ansible_ssh_host=<%= @keystone_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Monasca-log-transformer
-log-transformer-node             ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+# log-transformer-node             ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Monasca-log-persister
 log-persister-node               ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -122,7 +122,7 @@ monasca-log-metrics-node
 log-persister-node
 
 [monasca_log_transformer_group]
-log-transformer-node
+# log-transformer-node
 
 [elasticsearch_group]
 elasticsearch-node elastic_listen_ip=internal-node-1

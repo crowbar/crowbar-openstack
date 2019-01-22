@@ -48,6 +48,10 @@ default[:monasca][:log_agent][:service_name] = "openstack-monasca-log-agent"
 default[:monasca][:log_agent][:user] = "root"
 default[:monasca][:log_agent][:group] = "root"
 
+# log-transformer
+default[:monasca][:log_transformer][:user] = "monasca-log-transformer"
+default[:monasca][:log_transformer][:group] = "logstash"
+
 # HA attributes
 default[:monasca][:ha][:enabled] = false
 
