@@ -22,6 +22,7 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-server
   include_recipe "#{@cookbook_name}::elasticsearch"
   include_recipe "#{@cookbook_name}::elasticsearch_curator"
   include_recipe "#{@cookbook_name}::kibana"
+  include_recipe "#{@cookbook_name}::monasca_log_api"
   include_recipe "#{@cookbook_name}::server"
   include_recipe "#{@cookbook_name}::monitor_monasca"
 end

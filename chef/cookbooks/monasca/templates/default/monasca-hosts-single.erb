@@ -42,7 +42,7 @@ memcached-node                   ansible_ssh_host=<%= @monasca_admin_host %> ans
 monasca-api-node                 ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Monasca-log-api
-monasca-log-api-node             ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+# monasca-log-api-node             ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Monasca-notification
 monasca-notification-node        ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -113,7 +113,7 @@ monasca-persister-node cassandra_node_for_persister=internal-node-1
 <%- end %>
 
 [monasca_log_api_group]
-monasca-log-api-node log_api_listen_ip=public-node-1
+# monasca-log-api-node log_api_listen_ip=public-node-1
 
 [monasca_log_metrics_group]
 monasca-log-metrics-node

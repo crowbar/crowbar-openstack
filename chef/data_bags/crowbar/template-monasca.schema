@@ -137,7 +137,8 @@
               "type": "map",
               "mapping": {
                 "url": { "type": "str", "required": true },
-                "log_level": { "type": "str", "required": true }
+                "log_level": { "type": "str", "required": true },
+                "protocol": { "type" : "str", "required" : true }
               }
             },
             "kafka": {

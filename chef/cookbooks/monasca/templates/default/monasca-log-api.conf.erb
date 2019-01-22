@@ -1,0 +1,42 @@
+[service]
+region = <%= @keystone_settings['endpoint_region'] %>
+max_log_size = 5242880
+
+[log_publisher]
+topics = log
+kafka_url = <%= @kafka_url %>
+max_message_size = 1048576
+
+[keystone_authtoken]
+www_authenticate_uri = <%= @keystone_settings['public_auth_url'] %>
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
+auth_version= <%= @keystone_settings['api_version_for_middleware'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+insecure = <%= @keystone_settings['insecure'] %>
+region_name = <%= @keystone_settings['endpoint_region'] %>
+project_domain_name = <%= @keystone_settings['admin_domain']%>
+user_domain_name = <%= @keystone_settings['admin_domain'] %>
+auth_type = password
+service_token_roles_required = true
+service_token_roles = admin
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:monasca][:memcache_secret_key] %>
+memcache_pool_socket_timeout = 1
+
+[kafka_healthcheck]
+kafka_url = <%= @kafka_url %>
+kafka_topics = log
+
+[roles_middleware]
+path = /v2.0/log,/v3.0/logs
+default_roles = user,domainuser,domainadmin,monasca-user
+agent_roles = monasca-agent
+
+[dispatcher]
+logs = monasca_log_api.reference.v2.logs:Logs
+logs_v3 = monasca_log_api.reference.v3.logs:Logs
+versions = monasca_log_api.reference.versions:Versions
+healthchecks = monasca_log_api.reference.healthchecks:HealthChecks

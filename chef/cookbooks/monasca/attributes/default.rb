@@ -21,6 +21,8 @@ default[:monasca][:api][:bind_host] = "*"
 default[:monasca][:api][:bind_port] = 8070
 
 default[:monasca][:log_api][:bind_port] = 5607
+default[:monasca][:log_api][:user] = "monasca-log-api"
+default[:monasca][:log_api][:group] = "monasca"
 
 default[:monasca][:kibana][:bind_port] = 5601
 default[:monasca][:delegate_role] = "monasca-delegate"

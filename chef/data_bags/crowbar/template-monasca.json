@@ -85,7 +85,8 @@
       },
       "log_api": {
         "url": "",
-        "log_level": "INFO"
+        "log_level": "INFO",
+        "protocol": "http"
       },
       "kafka": {
         "log_retention_hours": 24,
@@ -152,7 +153,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 307,
+      "schema-revision": 308,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],
