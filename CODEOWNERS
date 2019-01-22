@@ -16,8 +16,12 @@
 **/*cinder*  @toabctl
 **/*manila*  @toabctl
 
-**/*keystone*  @rhafer @cmurphy
+**/*keystone*  @rhafer
 **/*monasca*  @jgrassler
 
 ha*.rb  @aspiers
 *_ha.rb  @aspiers
+
+/chef/cookbooks/keystone/ @cmurphy
+/chef/data_bags/crowbar/template-keystone.* @cmurphy
+/chef/data_bags/crowbar/migrate/keystone/ @cmurphy
