@@ -21,7 +21,7 @@ keystone-node                    ansible_ssh_host=<%= @keystone_host %> ansible_
 # log-transformer-node             ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Monasca-log-persister
-log-persister-node               ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+# log-persister-node               ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Kibana
 # kibana-node                      ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -119,7 +119,7 @@ monasca-persister-node cassandra_node_for_persister=internal-node-1
 monasca-log-metrics-node
 
 [monasca_log_persister_group]
-log-persister-node
+# log-persister-node
 
 [monasca_log_transformer_group]
 # log-transformer-node
