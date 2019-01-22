@@ -56,6 +56,10 @@ default[:monasca][:log_transformer][:group] = "logstash"
 default[:monasca][:log_persister][:user] = "monasca-log-persister"
 default[:monasca][:log_persister][:group] = "logstash"
 
+# log-metrics
+default[:monasca][:log_metrics][:user] = "monasca-log-metrics"
+default[:monasca][:log_metrics][:group] = "logstash"
+
 # HA attributes
 default[:monasca][:ha][:enabled] = false
 

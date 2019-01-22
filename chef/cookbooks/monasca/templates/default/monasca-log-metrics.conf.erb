@@ -1,0 +1,25 @@
+# {{ ansible_managed }}
+
+input {
+  kafka {
+    zk_connect => "<%= @zookeeper_hosts %>"
+    topic_id => "log"
+    group_id => "log_group"
+    consumer_id => "<%= node['hostname'] %>_log_metrics"
+    consumer_threads => "1"
+    fetch_message_max_bytes => "1048576"
+  }
+}
+
+filter {
+  drop { periodic_flush => true }
+}
+
+output {
+  kafka {
+    bootstrap_servers => "<%= @kafka_hosts %>"
+    topic_id => "log_metrics"
+    client_id => "<%= node['hostname'] %>_log_metrics"
+    compression_type => "none"
+  }
+}
