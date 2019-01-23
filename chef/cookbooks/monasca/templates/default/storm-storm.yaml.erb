@@ -1,0 +1,45 @@
+# See https://github.com/apache/storm/blob/master/conf/defaults.yaml
+
+### base
+java.library.path: "/usr/local/lib:/opt/local/lib:/usr/lib"
+storm.local.dir: "/var/lib/storm/"
+
+### zookeeper.*
+storm.zookeeper.servers:
+<% @zookeeper_hosts.each do |host| -%>
+    - "<%= host %>"
+<% end -%>
+storm.zookeeper.port:  <%= node['monasca']['zookeeper']['client_port'] %>
+storm.zookeeper.retry.interval: 5000
+storm.zookeeper.retry.times: 60
+storm.zookeeper.root: "/storm"
+storm.zookeeper.session.timeout: 3000
+
+### supervisor.* configs are for node supervisors
+supervisor.slots.ports:
+    - 6701
+    - 6702
+supervisor.childopts: "-Xmx1024m"
+
+### nimbus.* configs are for the master
+nimbus.seeds:
+<% @storm_master_hosts.each do |host| -%>
+    - "<%= host %>"
+<% end -%>
+nimbus.thrift.port: 6627
+nimbus.childopts: -Xmx256m
+
+### worker.* configs are for task workers
+worker.childopts: "-Xmx1280m -XX:+UseConcMarkSweepGC -Dcom.sun.management.jmxremote"
+
+### transactional.* configs
+transactional.zookeeper.servers:
+<% @zookeeper_hosts.each do |host| -%>
+    - "<%= host %>"
+<% end -%>
+transactional.zookeeper.port: <%= node['monasca']['zookeeper']['client_port'] %>
+transactional.zookeeper.root: "/storm-transactional"
+
+### topology.* configs are for specific executing storms
+topology.acker.executors: 1
+topology.debug: False

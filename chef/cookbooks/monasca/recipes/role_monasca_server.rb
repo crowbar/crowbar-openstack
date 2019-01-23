@@ -26,6 +26,7 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-server
   include_recipe "#{@cookbook_name}::monasca_log_transformer"
   include_recipe "#{@cookbook_name}::monasca_log_persister"
   include_recipe "#{@cookbook_name}::monasca_log_metrics"
+  include_recipe "#{@cookbook_name}::storm"
   include_recipe "#{@cookbook_name}::server"
   include_recipe "#{@cookbook_name}::monitor_monasca"
 end

@@ -97,3 +97,8 @@ default[:monasca][:elasticsearch][:data_dirs] = ["/var/data/elasticsearch"]
 default[:monasca][:elasticsearch][:log_dir] = "/var/log/elasticsearch"
 default[:monasca][:elasticsearch][:repo_dirs] = []
 default[:monasca][:elasticsearch][:bootstrap_memory_lock] = "true"
+
+# storm
+default[:monasca][:storm][:user] = "storm"
+default[:monasca][:storm][:group] = "storm"
+default[:monasca][:storm][:nimbus_thrift_port] = 6627
