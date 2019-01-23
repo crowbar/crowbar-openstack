@@ -185,6 +185,15 @@ unless apic_gbp_ui_pkgname.nil?
   end
 end
 
+# install horizon heat plugin if needed
+heat_ui_pkgname = "openstack-horizon-plugin-heat-ui"
+unless Barclamp::Config.load("openstack", "heat").empty?
+  package heat_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+  end
+end
+
 if node[:platform_family] == "suse"
   # Get rid of unwanted vhost config files:
   ["#{node[:apache][:dir]}/vhosts.d/default-redirect.conf",
