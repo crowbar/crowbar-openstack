@@ -111,3 +111,7 @@ default[:monasca][:influxdb][:client_port] = 8086
 # monasca-thresh
 default[:monasca][:thresh][:user] = "monasca-thresh"
 default[:monasca][:thresh][:group] = "monasca"
+
+# monasca-notification
+default[:monasca][:notification][:user] = "monasca-notification"
+default[:monasca][:notification][:group] = "monasca"

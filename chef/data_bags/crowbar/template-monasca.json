@@ -117,6 +117,14 @@
         "user": "grafana",
         "database": "grafana"
       },
+      "notification": {
+        "email_enabled": false,
+        "email_smtp_host": "localhost",
+        "email_smtp_port": 25,
+        "email_smtp_user": "",
+        "email_smtp_password": "",
+        "email_smtp_from_address": "monasca@localhost"
+      },
       "master": {
         "influxdb_retention_policy": "60d",
         "cassandra_admin_password": "",
@@ -125,12 +133,6 @@
         "keystone_monasca_operator_password": "",
         "keystone_monasca_agent_password": "",
         "keystone_admin_agent_password": "",
-        "notification_enable_email": true,
-        "smtp_host": "localhost",
-        "smtp_port": 25,
-        "smtp_user": "",
-        "smtp_password": "",
-        "smtp_from_address": "monasca@localhost",
         "tsdb": "influxdb",
         "tsdb_mon_api_password": "",
         "tsdb_mon_persister_password": ""
@@ -152,7 +154,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 309,
+      "schema-revision": 310,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],

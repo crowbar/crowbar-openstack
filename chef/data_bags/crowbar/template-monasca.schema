@@ -187,6 +187,18 @@
                 "database": { "type": "str", "required": true }
               }
             },
+            "notification": {
+              "type": "map",
+              "required": true,
+                "mapping": {
+                "email_enabled": { "required": true, "type": "bool" },
+                "email_smtp_host": { "required": true, "type": "str" },
+                "email_smtp_port": { "required": true, "type": "int" },
+                "email_smtp_user": { "required": true, "type": "str" },
+                "email_smtp_password": { "required": true, "type": "str" },
+                "email_smtp_from_address": { "required": true, "type": "str" }
+              }
+            },
             "master": {
               "required": true,
               "type": "map",
@@ -202,12 +214,6 @@
                 "keystone_monasca_operator_password": { "required": true, "type": "str" },
                 "keystone_monasca_agent_password": { "required": true, "type": "str" },
                 "keystone_admin_agent_password": { "required": true, "type": "str" },
-                "notification_enable_email": { "required": true, "type": "bool" },
-                "smtp_host": { "required": true, "type": "str" },
-                "smtp_port": { "required": true, "type": "int" },
-                "smtp_user": { "required": true, "type": "str" },
-                "smtp_password": { "required": true, "type": "str" },
-                "smtp_from_address": { "required": true, "type": "str" },
                 "tsdb": { "required": true, "type": "str" },
                 "tsdb_mon_api_password": { "required": true, "type": "str" },
                 "tsdb_mon_persister_password": { "required": true, "type": "str" }
