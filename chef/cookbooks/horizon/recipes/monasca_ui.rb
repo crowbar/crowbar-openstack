@@ -90,6 +90,14 @@ cookbook_file "/var/lib/grafana/dashboards/openstack.json" do
   notifies :restart, resources(service: "grafana-server")
 end
 
+cookbook_file "/etc/grafana/provisioning/dashboards/default.yaml" do
+  source "default-dashboards-provider.yaml"
+  owner "root"
+  group "grafana"
+  mode "0640"
+  notifies :restart, resources(service: "grafana-server")
+end
+
 # Grafana takes a few seconds from startup until it's actually listening, so
 # we'll need to wait for it:
 execute "grafana listening?" do

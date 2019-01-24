@@ -25,6 +25,7 @@
       "version": "0.0.6"
     }
   ],
+  "uid": "Monasca_dashboard",
   "annotations": {
     "enable": false,
     "list": []
