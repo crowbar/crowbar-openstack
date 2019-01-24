@@ -21,13 +21,11 @@
 include_recipe "nova::config"
 
 unless %w(rhel suse).include?(node[:platform_family])
-  pkgs=%w[python-numpy nova-console nova-consoleauth]
+  pkgs = %w[python-numpy nova-console]
   pkgs.each do |pkg|
     package pkg
   end
 end
-
-package "openstack-nova-consoleauth" if %w(rhel suse).include?(node[:platform_family])
 
 # forcing novnc is deliberate on suse
 if node[:nova][:use_novnc]
@@ -61,14 +59,4 @@ if node[:nova][:use_serial]
   utils_systemd_service_restart "nova-serialproxy" do
     action :enable
   end
-end
-
-service "nova-consoleauth" do
-  service_name "openstack-nova-consoleauth" if %w(rhel suse).include?(node[:platform_family])
-  supports status: true, restart: true
-  action [:enable, :start]
-  subscribes :restart, resources(template: node[:nova][:config_file]), :delayed
-end
-utils_systemd_service_restart "nova-consoleauth" do
-  action :enable
 end
