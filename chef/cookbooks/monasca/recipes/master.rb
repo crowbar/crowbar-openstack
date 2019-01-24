@@ -166,7 +166,7 @@ execute "remove lock file" do
 end
 
 execute "run ansible" do
-  command "/usr/sbin/run-monasca-installer 2>&1"\
+  command "set -o pipefail; /usr/sbin/run-monasca-installer 2>&1"\
           " | awk '{ print strftime(\"[%Y-%m-%d %H:%M:%S]\"), $0 }'"\
           "   >> /var/log/monasca-installer.log"
 end
