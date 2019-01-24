@@ -102,3 +102,8 @@ default[:monasca][:elasticsearch][:bootstrap_memory_lock] = "true"
 default[:monasca][:storm][:user] = "storm"
 default[:monasca][:storm][:group] = "storm"
 default[:monasca][:storm][:nimbus_thrift_port] = 6627
+
+# influxdb
+default[:monasca][:influxdb][:user] = "influxdb"
+default[:monasca][:influxdb][:group] = "influxdb"
+default[:monasca][:influxdb][:client_port] = 8086

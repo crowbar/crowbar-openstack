@@ -69,7 +69,7 @@ monasca-thresh-node              ansible_ssh_host=<%= @monasca_admin_host %> ans
 # elasticsearch-curator-node       ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # InfluxDB node
-influxdb-node                    ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+# influxdb-node                    ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Cassandra node
 cassandra-node                    ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -146,7 +146,7 @@ monasca-thresh-node database_node_for_thresh=monasca-node monasca_thresh_listen_
 # elasticsearch-curator-node
 
 [influxdb_group]
-influxdb-node influxdb_listen_ip=internal-node-1
+# influxdb-node influxdb_listen_ip=internal-node-1
 
 [cassandra_group]
 cassandra-node cassandra_listen_ip=internal-node-1
