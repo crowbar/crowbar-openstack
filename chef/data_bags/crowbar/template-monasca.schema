@@ -198,7 +198,6 @@
                  },
                 "cassandra_admin_password": { "required": true, "type": "str" },
                 "database_notification_password": { "required": true, "type": "str" },
-                "database_thresh_password": { "required": true, "type": "str" },
                 "database_logapi_password": { "required": true, "type": "str" },
                 "keystone_monasca_operator_password": { "required": true, "type": "str" },
                 "keystone_monasca_agent_password": { "required": true, "type": "str" },

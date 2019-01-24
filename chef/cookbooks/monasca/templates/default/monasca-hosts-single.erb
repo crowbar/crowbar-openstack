@@ -60,7 +60,7 @@ monasca-persister-node           ansible_ssh_host=<%= @monasca_admin_host %> ans
 # storm-supervisor-node            ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # Monasca-thresh host
-monasca-thresh-node              ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
+# monasca-thresh-node              ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
 
 # MariaDB node
 # mariadb-node                     ansible_ssh_host=<%= @monasca_admin_host %> ansible_ssh_user=<%= @ansible_ssh_user %>
@@ -137,7 +137,7 @@ kibana-node es_node_for_kibana=elasticsearch-node kibana_listen_ip=internal-node
 # storm-supervisor-node storm_listen_ip=internal-node-1
 
 [monasca_thresh_group]
-monasca-thresh-node database_node_for_thresh=monasca-node monasca_thresh_listen_ip=internal-node-1
+# monasca-thresh-node database_node_for_thresh=monasca-node monasca_thresh_listen_ip=internal-node-1
 
 [mariadb_group]
 # mariadb-node mariadb_listen_ip=internal-node-1

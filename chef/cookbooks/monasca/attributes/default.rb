@@ -107,3 +107,7 @@ default[:monasca][:storm][:nimbus_thrift_port] = 6627
 default[:monasca][:influxdb][:user] = "influxdb"
 default[:monasca][:influxdb][:group] = "influxdb"
 default[:monasca][:influxdb][:client_port] = 8086
+
+# monasca-thresh
+default[:monasca][:thresh][:user] = "monasca-thresh"
+default[:monasca][:thresh][:group] = "monasca"

@@ -121,7 +121,6 @@
         "influxdb_retention_policy": "60d",
         "cassandra_admin_password": "",
         "database_notification_password": "",
-        "database_thresh_password": "",
         "database_logapi_password": "",
         "keystone_monasca_operator_password": "",
         "keystone_monasca_agent_password": "",
@@ -153,7 +152,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 308,
+      "schema-revision": 309,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],
