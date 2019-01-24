@@ -27,7 +27,6 @@
         "compute": "nova_policy.json",
         "volume": "cinder_policy.json",
         "image": "glance_policy.json",
-        "orchestration": "heat_policy.json",
         "network": "neutron_policy.json",
         "neutron_fwaas": "neutron-fwaas-policy.json"
       },
@@ -53,7 +52,7 @@
     "horizon": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 301,
+      "schema-revision": 302,
       "element_states": {
         "horizon-server": [ "readying", "ready", "applying" ]
       },

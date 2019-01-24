@@ -47,7 +47,6 @@
                 "compute" : { "type": "str", "required": true },
                 "volume" : { "type": "str", "required": true },
                 "image" : { "type": "str", "required": true },
-                "orchestration" : { "type": "str", "required": true },
                 "network" : { "type": "str", "required": true },
                 "neutron_fwaas" : { "type": "str", "required": true }
               }
