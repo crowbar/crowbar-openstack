@@ -9,6 +9,9 @@ cassandra_mon_persister_password: <%= @master_settings['tsdb_mon_persister_passw
 cassandra_rpc_address: <%= @monasca_net_ip %>
 cassandra_admin_password: <%= @master_settings['tsdb_mon_api_password'] %>
 database_type: <%= @master_settings['tsdb'] %>
+<%- if @master_settings['mon_persister_impl'] == "python" %>
+monasca_persister_java: False
+<%- end %>
 
 database_notification_password: <%= @master_settings['database_notification_password'] %>
 database_monapi_password: <%= @master_settings['database_monapi_password'] %>
@@ -57,7 +60,7 @@ log_api_bind_host: "*"
 monasca_api_bind_host: "*"
 elasticsearch_host: <%= @monasca_net_ip %>
 nimbus_host: <%= @monasca_net_ip %>
-zookeeper_hosts: <%= @monasca_net_ip %>
+zookeeper_hosts: "<%= @monasca_net_ip %>:2181"
 mariadb_bind_address: <%= @monasca_net_ip %>
 database_host: <%= @monasca_net_ip %>
 monasca_api_url: "http://<%= @pub_net_ip %>:<%= @api_settings['bind_port'] %>/v2.0"

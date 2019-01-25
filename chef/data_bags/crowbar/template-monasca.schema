@@ -192,7 +192,8 @@
                 "smtp_from_address": { "required": true, "type": "str" },
                 "tsdb": { "required": true, "type": "str" },
                 "tsdb_mon_api_password": { "required": true, "type": "str" },
-                "tsdb_mon_persister_password": { "required": true, "type": "str" }
+                "tsdb_mon_persister_password": { "required": true, "type": "str" },
+                "mon_persister_impl": { "required": true, "type": "str", "pattern": "/^python$|^java$/" }
               }
             },
             "db": {
