@@ -30,6 +30,7 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-server
   include_recipe "#{@cookbook_name}::influxdb"
   include_recipe "#{@cookbook_name}::monasca_thresh"
   include_recipe "#{@cookbook_name}::monasca_notification"
+  include_recipe "#{@cookbook_name}::monasca_persister"
   include_recipe "#{@cookbook_name}::server"
   include_recipe "#{@cookbook_name}::monitor_monasca"
 end

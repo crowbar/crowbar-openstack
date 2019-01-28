@@ -115,3 +115,8 @@ default[:monasca][:thresh][:group] = "monasca"
 # monasca-notification
 default[:monasca][:notification][:user] = "monasca-notification"
 default[:monasca][:notification][:group] = "monasca"
+
+# monasca-persister
+default[:monasca][:persister][:user] = "monasca-persister"
+default[:monasca][:persister][:group] = "monasca"
+default[:monasca][:persister][:influxdb_user] = "mon_persister"
