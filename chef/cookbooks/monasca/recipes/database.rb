@@ -22,6 +22,11 @@ db_settings = fetch_database_settings
 include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 
+monasca_servers = search(:node, "roles:monasca-server")
+monasca_monitoring_host =
+  Chef::Recipe::Barclamp::Inventory.get_network_by_type(
+    monasca_servers[0], node[:monasca][:network]).address
+
 ha_enabled = node[:monasca][:ha][:enabled]
 
 crowbar_pacemaker_sync_mark "wait-monasca_database"
@@ -80,6 +85,23 @@ ruby_block "mark node for monasca mon db schema migration" do
     node.save
   end
   not_if { node[:monasca][:db_monapi_synced] }
+end
+
+# create influx Database for monasca time series
+ruby_block "Create influx database \"#{node['monasca']['db_monapi']['database']}\"" do
+  block do
+    InfluxDBHelper.create_database(node["monasca"]["db_monapi"]["database"],
+                                   influx_host: monasca_monitoring_host)
+  end
+end
+
+# Set retention policy for auto-generated (called "autogen") policy
+ruby_block "Set retention policy for influx database \"#{node['monasca']['db_monapi']['database']}\"" do
+  block do
+    InfluxDBHelper.set_retention_policy(node["monasca"]["db_monapi"]["database"], "autogen",
+                                        node["monasca"]["master"]["influxdb_retention_policy"], 1,
+                                        influx_host: monasca_monitoring_host)
+  end
 end
 
 crowbar_pacemaker_sync_mark "create-monasca_database" if ha_enabled
