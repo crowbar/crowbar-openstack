@@ -51,3 +51,5 @@ default[:mysql][:galera_packages] << "mariadb-galera"
 
 default[:mysql][:mysql_client] = "mariadb-client"
 default[:mysql][:mysql_server] = "mariadb"
+
+default[:mysql][:sysctl][:swappiness] = 10

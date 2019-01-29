@@ -127,6 +127,13 @@
                   "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
                 }
               }
+            },
+            "sysctl": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "swappiness": {"type": "int", "required": true }
+              }
             }
           }
         }

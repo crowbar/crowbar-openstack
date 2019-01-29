@@ -76,6 +76,9 @@
         "postgresql": {
           "LimitNOFILE": null
         }
+      },
+      "sysctl": {
+        "swappiness": 10
       }
     }
   },

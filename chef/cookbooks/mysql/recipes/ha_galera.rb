@@ -364,3 +364,22 @@ haproxy_loadbalancer "galera" do
   servers ha_servers
   action :nothing
 end.run_action(:create)
+
+directory "create /etc/sysctl.d for galera values" do
+  path "/etc/sysctl.d"
+  mode "755"
+end
+
+template "galera_sysctl.conf" do
+  path "/etc/sysctl.d/90-galera_sysctl.conf"
+  mode "0644"
+  variables(
+    swappiness: node[:mysql][:sysctl][:swappiness]
+  )
+end
+
+bash "reload galera_sysctl.conf" do
+  code "/sbin/sysctl -e -q -p /etc/sysctl.d/90-galera_sysctl.conf"
+  action :nothing
+  subscribes :run, resources(template: "galera_sysctl.conf"), :delayed
+end
