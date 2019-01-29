@@ -177,7 +177,11 @@
           "LimitNOFILE": null
         }
       },
-      "default_log_levels": []
+      "default_log_levels": [],
+      "sysctl": {
+        "dirty_ratio": 40,
+        "swappiness": 10
+      }
     }
   },
   "deployment": {

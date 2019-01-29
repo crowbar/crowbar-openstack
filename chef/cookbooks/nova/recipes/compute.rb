@@ -460,4 +460,24 @@ if node[:nova][:resource_limits] && node[:nova][:resource_limits][service]
   end
 end
 
+directory "create /etc/sysctl.d for compute values" do
+  path "/etc/sysctl.d"
+  mode "755"
+end
+
+template "compute_sysctl.conf" do
+  path "/etc/sysctl.d/90-compute_sysctl.conf"
+  mode "0644"
+  variables(
+    dirty_ratio: node[:nova][:sysctl][:dirty_ratio],
+    swappiness: node[:nova][:sysctl][:swappiness]
+  )
+end
+
+bash "reload compute_sysctl.conf" do
+  code "/sbin/sysctl -e -q -p /etc/sysctl.d/90-compute_sysctl.conf"
+  action "nothing".to_sym
+  subscribes :run, resources(template: "compute_sysctl.conf"), :delayed
+end
+
 include_recipe "nova::compute_register_cell"

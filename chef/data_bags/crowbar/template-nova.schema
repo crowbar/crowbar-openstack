@@ -280,6 +280,14 @@
               "type": "seq",
               "required": false,
               "sequence": [ { "type": "str" } ]
+            },
+            "sysctl": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "dirty_ratio": { "type": "int", "required": true },
+                "swappiness": {"type": "int", "required": true }
+              }
             }
           }
         }

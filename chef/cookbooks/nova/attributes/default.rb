@@ -186,3 +186,9 @@ default[:nova][:serial][:ssl][:enabled] = false
 # metadata/vendordata
 #
 default[:nova][:metadata][:vendordata][:json] = "{}"
+
+#
+# sysctl
+#
+default[:nova][:sysctl][:dirty_ratio] = 40
+default[:nova][:sysctl][:swappiness] = 10
