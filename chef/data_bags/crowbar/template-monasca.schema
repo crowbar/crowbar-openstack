@@ -94,6 +94,7 @@
               "mapping": {
                 "url": { "type": "str", "required": true },
                 "bind_host": { "required": true, "type": "str" },
+                "protocol": { "type" : "str", "required" : true },
                 "processes": { "required": true, "type": "int" },
                 "threads": { "required": true, "type": "int" },
                 "log_level": { "type": "str", "required": true }

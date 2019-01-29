@@ -16,6 +16,7 @@
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-server")
   include_recipe "#{@cookbook_name}::common"
+  include_recipe "#{@cookbook_name}::influxdb"
   include_recipe "#{@cookbook_name}::database"
   include_recipe "#{@cookbook_name}::zookeeper"
   include_recipe "#{@cookbook_name}::kafka"
@@ -27,10 +28,10 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "monasca", "monasca-server
   include_recipe "#{@cookbook_name}::monasca_log_persister"
   include_recipe "#{@cookbook_name}::monasca_log_metrics"
   include_recipe "#{@cookbook_name}::storm"
-  include_recipe "#{@cookbook_name}::influxdb"
   include_recipe "#{@cookbook_name}::monasca_thresh"
   include_recipe "#{@cookbook_name}::monasca_notification"
   include_recipe "#{@cookbook_name}::monasca_persister"
+  include_recipe "#{@cookbook_name}::monasca_api"
   include_recipe "#{@cookbook_name}::server"
   include_recipe "#{@cookbook_name}::monitor_monasca"
 end

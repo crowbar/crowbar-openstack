@@ -66,6 +66,7 @@
         "bind_host": "*",
         "processes": 3,
         "threads": 10,
+        "protocol": "http",
         "log_level": "INFO"
       },
       "elasticsearch": {
@@ -154,7 +155,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 310,
+      "schema-revision": 311,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-master": [ "readying", "ready", "applying" ],
