@@ -59,16 +59,6 @@ class MonascaService < OpenstackServiceObject
             "suse" => "< 12.4",
             "windows" => "/.*/"
           }
-        },
-        "monasca-master" => {
-          "unique" => true,
-          "count" => 1,
-          "cluster" => false,
-          "admin" => true,
-          "exclude_platform" => {
-            "suse" => "< 12.4",
-            "windows" => "/.*/"
-          }
         }
       }
     end
@@ -101,11 +91,7 @@ class MonascaService < OpenstackServiceObject
     log_agent_nodes = select_nodes_for_role(nodes, "monasca-log-agent", "compute") || []
     agent_nodes = select_nodes_for_role(nodes, "monasca-agent") || []
 
-    master_nodes = nodes.select { |n| n.intended_role == "admin" || n.name.start_with?("crowbar.") }
-    master_node = master_nodes.empty? ? nodes.first : master_nodes.first
-
     base["deployment"][@bc_name]["elements"] = {
-      "monasca-master" => [master_node.name],
       "monasca-server" => monasca_server.empty? ? [] : [monasca_server.first.name],
       "monasca-agent" => agent_nodes.map { |x| x.name },
       "monasca-log-agent" => log_agent_nodes.map { |x| x.name }
@@ -136,7 +122,6 @@ class MonascaService < OpenstackServiceObject
   end
 
   def validate_proposal_after_save(proposal)
-    validate_one_for_role proposal, "monasca-master"
     validate_one_for_role proposal, "monasca-server"
     nodes = proposal["deployment"][@bc_name]["elements"]
     nodes["monasca-server"].each do |node|

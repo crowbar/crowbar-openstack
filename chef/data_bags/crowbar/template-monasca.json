@@ -155,23 +155,20 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 311,
+      "schema-revision": 312,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
-        "monasca-master": [ "readying", "ready", "applying" ],
         "monasca-agent": [ "readying", "ready", "applying" ],
         "monasca-log-agent": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
         [ "monasca-server" ],
-        [ "monasca-master" ],
         [ "monasca-agent" ],
         [ "monasca-log-agent" ]
       ],
       "element_run_list_order": {
         "monasca-server": 110,
-        "monasca-master": 115,
         "monasca-agent": 120,
         "monasca-log-agent": 130
       },

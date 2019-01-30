@@ -21,12 +21,6 @@ agent_keystone = agent_settings[:keystone]
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-monasca_master = node_search_with_cache("roles:monasca-master").first
-if monasca_master.nil?
-  Chef::Log.warn("No monasca-master found. Skip monasca-agent setup.")
-  return
-end
-
 monasca_server = node_search_with_cache("roles:monasca-server").first
 if monasca_server.nil?
   Chef::Log.warn("No monasca-server found. Skip monasca-agent setup.")
@@ -39,11 +33,6 @@ monasca_api_url = MonascaHelper.api_network_url(monasca_server)
 monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_server)
 
 if node["roles"].include?("monasca-server")
-  unless monasca_master[:monasca] && monasca_master[:monasca][:installed]
-    Chef::Log.warn("monasca-installer has not finished successfully, yet. Skipping" \
-                   " monasca-agent setup.")
-    return
-  end
   # Special monasca-reconfigure script for monasca-server: on this machine
   # monasca-reconfigure will configure the agent.
   template "/usr/sbin/monasca-reconfigure" do
