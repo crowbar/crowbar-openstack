@@ -14,7 +14,7 @@
         = integer_field %w(mysql expire_logs_days)
         = boolean_field %w(mysql slow_query_logging)
 
-      %fieldset
+      %fieldset{ "style" => "display:none" }
         %legend
           = t(".mysql.ssl_header")
 
