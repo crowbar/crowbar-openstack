@@ -1,0 +1,34 @@
+{
+  "id": "template-octavia",
+  "description": "API-enabled, pluggable virtual network service for OpenStack",
+  "attributes": {
+    "octavia": {
+    }
+  },
+  "deployment": {
+    "octavia": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 300,
+      "element_states": {
+        "octavia-api": [ "readying", "ready", "applying" ],
+        "octavia-health-manager": [ "readying", "ready", "applying" ],
+        "octavia-housekeeping": [ "readying", "ready", "applying" ],
+        "octavia-worker": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+         ["octavia-api", "octavia-health-manager", "octavia-housekeeping", "octavia-worker"]
+      ],
+      "element_run_list_order": {
+        "octavia-api": 101
+      },
+      "config": {
+        "environment": "octavia-config-base",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": []
+      }
+    }
+  }
+}
