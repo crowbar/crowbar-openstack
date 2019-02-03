@@ -42,6 +42,16 @@ node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admi
 unless node[:database][:galera_bootstrapped]
   if CrowbarPacemakerHelper.is_cluster_founder?(node)
 
+    # mysql_install_db is blocking when mysql is running as
+    # it wants an exclusive lock. This can happen if a
+    # previous bootstrap ran into an error before stopping again
+
+    service "mysql-stop for install " do
+      service_name mysql_service_name
+      supports status: true, restart: true, reload: true
+      action :stop
+    end
+
     execute "mysql_install_db" do
       command "mysql_install_db"
       action :run
@@ -88,6 +98,29 @@ unless node[:database][:galera_bootstrapped]
       service_name mysql_service_name
       supports status: true, restart: true, reload: true
       action :start
+    end
+
+    ruby_block "wait mysql initialisation" do
+      block do
+        require "timeout"
+        begin
+          cmd = "mysql -u 'root' -N -B " \
+            "-e \"SHOW STATUS WHERE Variable_name='wsrep_local_state_comment';\" | cut -f 2"
+          sync_state = ""
+          Timeout.timeout(30) do
+            while sync_state != "Synced"
+              sleep(1)
+              get_state = Mixlib::ShellOut.new(cmd).run_command
+              sync_state = get_state.stdout.chop
+            end
+          end
+        rescue Timeout::Error
+          message = "Galera cluster did not start after 30 seconds. " \
+            "Check pacemaker and mysql log files manually for possible errors."
+          Chef::Log.fatal(message)
+          raise message
+        end
+      end
     end
 
     database_user "create state snapshot transfer user" do
