@@ -19,7 +19,8 @@ if monasca_server.nil?
   return
 end
 monasca_cfg = Barclamp::Config.load("openstack", "monasca")
-grafana_password = monasca_cfg["master"]["database_grafana_password"]
+grafana_password = monasca_cfg["db_grafana"]["password"]
+db_settings = fetch_database_settings
 
 # Used for creating data source
 grafana_base_url = ::File.join(MonascaUiHelper.dashboard_local_url(node), "/grafana")
@@ -50,9 +51,7 @@ end
 template "/etc/grafana/grafana.ini" do
   source "grafana.ini.erb"
   variables(
-    database_host: CrowbarHelper.get_host_for_admin_url(
-      monasca_server, monasca_cfg["ha"]["enabled"]
-    ),
+    database_host: db_settings[:address],
     grafana_password: grafana_password
   )
   owner "root"

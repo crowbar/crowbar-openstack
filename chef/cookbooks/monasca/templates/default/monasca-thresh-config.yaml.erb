@@ -1,0 +1,165 @@
+metricSpoutThreads: 2
+metricSpoutTasks: 2
+
+statsdConfig:
+  host: localhost
+  port: 8125
+  prefix: monasca.storm.
+  dimensions: !!map
+    service : monitoring
+    component : storm
+  whitelist: !!seq
+    - aggregation-bolt.execute-count.filtering-bolt_alarm-creation-stream
+    - aggregation-bolt.execute-count.filtering-bolt_default
+    - aggregation-bolt.execute-count.system_tick
+    - filtering-bolt.execute-count.event-bolt_metric-alarm-events
+    - filtering-bolt.execute-count.metrics-spout_default
+    - thresholding-bolt.execute-count.aggregation-bolt_default
+    - thresholding-bolt.execute-count.event-bolt_alarm-definition-events
+    - system.memory_heap.committedBytes
+    - system.memory_nonHeap.committedBytes
+    - system.newWorkerEvent
+    - system.startTimeSecs
+    - system.GC_ConcurrentMarkSweep.timeMs
+  metricmap: !!map
+    aggregation-bolt.execute-count.filtering-bolt_alarm-creation-stream :
+      monasca_threshold.aggregation-bolt.execute-count.filtering-bolt_alarm-creation-stream
+    aggregation-bolt.execute-count.filtering-bolt_default :
+      monasca_threshold.aggregation-bolt.execute-count.filtering-bolt_default
+    aggregation-bolt.execute-count.system_tick :
+      monasca_threshold.aggregation-bolt.execute-count.system_tick
+    filtering-bolt.execute-count.event-bolt_metric-alarm-events :
+      monasca_threshold.filtering-bolt.execute-count.event-bolt_metric-alarm-events
+    filtering-bolt.execute-count.metrics-spout_default :
+      monasca_threshold.filtering-bolt.execute-count.metrics-spout_default
+    thresholding-bolt.execute-count.aggregation-bolt_default :
+      monasca_threshold.thresholding-bolt.execute-count.aggregation-bolt_default
+    thresholding-bolt.execute-count.event-bolt_alarm-definition-events :
+      monasca_threshold.thresholding-bolt.execute-count.event-bolt_alarm-definition-events
+    system.memory_heap.committedBytes :
+      monasca_threshold.system.memory_heap.committedBytes
+    system.memory_nonHeap.committedBytes :
+      monasca_threshold.system.memory_nonHeap.committedBytes
+    system.newWorkerEvent :
+      monasca_threshold.system.newWorkerEvent
+    system.startTimeSecs :
+      monasca_threshold.system.startTimeSecs
+    system.GC_ConcurrentMarkSweep.timeMs :
+      monasca_threshold.system.GC_ConcurrentMarkSweep.timeMs
+
+metricSpoutConfig:
+  kafkaConsumerConfiguration:
+  # See http://kafka.apache.org/documentation.html#api for semantics and defaults.
+    topic: metrics
+    numThreads: 1
+    groupId: thresh-metric
+    zookeeperConnect: <%= @zookeeper_hosts.join(",") %>
+    consumerId: <%= node['hostname'] %>
+    socketTimeoutMs: 30000
+    socketReceiveBufferBytes : 65536
+    fetchMessageMaxBytes: 1048576
+    autoCommitEnable: true
+    autoCommitIntervalMs: 60000
+    queuedMaxMessageChunks: 10
+    rebalanceMaxRetries: 4
+    fetchMinBytes:  1
+    fetchWaitMaxMs:  100
+    rebalanceBackoffMs: 2000
+    refreshLeaderBackoffMs: 200
+    autoOffsetReset: largest
+    consumerTimeoutMs:  -1
+    clientId : <%= node['hostname'] %>
+    zookeeperSessionTimeoutMs : 60000
+    zookeeperConnectionTimeoutMs : 60000
+    zookeeperSyncTimeMs: 2000
+
+
+eventSpoutConfig:
+  kafkaConsumerConfiguration:
+  # See http://kafka.apache.org/documentation.html#api for semantics and defaults.
+    topic: events
+    numThreads: 1
+    groupId: thresh-event
+    zookeeperConnect: <%= @zookeeper_hosts.join(",") %>
+    consumerId: <%= node['hostname'] %>
+    socketTimeoutMs: 30000
+    socketReceiveBufferBytes : 65536
+    fetchMessageMaxBytes: 1048576
+    autoCommitEnable: true
+    autoCommitIntervalMs: 60000
+    queuedMaxMessageChunks: 10
+    rebalanceMaxRetries: 4
+    fetchMinBytes:  1
+    fetchWaitMaxMs:  100
+    rebalanceBackoffMs: 2000
+    refreshLeaderBackoffMs: 200
+    autoOffsetReset: largest
+    consumerTimeoutMs:  -1
+    clientId : <%= node['hostname'] %>
+    zookeeperSessionTimeoutMs : 60000
+    zookeeperConnectionTimeoutMs : 60000
+    zookeeperSyncTimeMs: 2000
+
+
+kafkaProducerConfig:
+  # See http://kafka.apache.org/documentation.html#api for semantics and defaults.
+  topic: alarm-state-transitions
+  metadataBrokerList: <%= @kafka_host %>:<%= node[:monasca][:kafka][:port] %>
+  serializerClass: kafka.serializer.StringEncoder
+  partitionerClass:
+  requestRequiredAcks: 1
+  requestTimeoutMs: 10000
+  producerType: sync
+  keySerializerClass:
+  compressionCodec: none
+  compressedTopics:
+  messageSendMaxRetries: 3
+  retryBackoffMs: 100
+  topicMetadataRefreshIntervalMs: 600000
+  queueBufferingMaxMs: 5000
+  queueBufferingMaxMessages: 10000
+  queueEnqueueTimeoutMs: -1
+  batchNumMessages: 200
+  sendBufferBytes: 102400
+  clientId : Threshold_Engine
+
+
+sporadicMetricNamespaces:
+  - foo
+
+database:
+  driverClass: com.mysql.jdbc.jdbc2.optional.MysqlDataSource
+  url: jdbc:mysql://<%= @database_host %>/<%= node['monasca']['db_monapi']['database'] %>?useSSL=true
+  user: <%= node['monasca']['db_monapi']['user'] %>
+  password: <%= node['monasca']['db_monapi']['password'] %>
+  properties:
+      ssl: false
+  # the maximum amount of time to wait on an empty pool before throwing an exception
+  maxWaitForConnection: 1s
+
+  # the SQL query to run when validating a connection's liveness
+  validationQuery: "/* MyService Health Check */ SELECT 1"
+
+  # the minimum number of connections to keep open
+  minSize: 8
+
+  # the maximum number of connections to keep open
+  maxSize: 41
+
+  #Flag indicates if Hibernate support enabled
+  hibernateSupport: False
+
+  #Hibernate provider class
+  providerClass: com.zaxxer.hikari.hibernate.HikariConnectionProvider
+
+  #Database name
+  databaseName: <%= node['monasca']['db_monapi']['database'] %>
+
+  #Server name/address
+  serverName: <%= @database_host %>
+
+  #Server port number
+  portNumber: 3306
+
+  #Hibernate auto configuretion parameter
+  autoConfig: validate

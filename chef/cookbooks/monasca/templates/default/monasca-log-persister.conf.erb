@@ -1,0 +1,64 @@
+input {
+    kafka {
+        zk_connect => "<%= @zookeeper_hosts %>"
+        topic_id => "transformed-log"
+        group_id => "logstash-persister"
+        consumer_threads => "1"
+        fetch_message_max_bytes => "1048576"
+    }
+}
+
+filter {
+    date {
+        match => ["[log][timestamp]", "UNIX"]
+        target => "@timestamp"
+    }
+
+    date {
+        match => ["creation_time", "UNIX"]
+        target => "creation_time"
+    }
+
+    grok {
+        match => {
+            "[@timestamp]" => "^(?<index_date>\d{4}-\d{2}-\d{2})"
+        }
+    }
+
+    if "dimensions" in [log] {
+        ruby {
+            code => "
+                fieldHash = event['log']['dimensions']
+                fieldHash.each do |key, value|
+                    event[key] = value
+                end
+            "
+        }
+    }
+    if "truncated" not in [log] {
+        ruby {
+            code => "
+                event['log']['truncated'] = false
+            "
+        }
+    }
+    mutate {
+        add_field => {
+            message => "%{[log][message]}"
+            log_level => "%{[log][level]}"
+            tenant => "%{[meta][tenantId]}"
+            region => "%{[meta][region]}"
+            truncated => "%{[log][truncated]}"
+        }
+        remove_field => ["@version", "host", "type", "tags" ,"_index_date", "meta", "log"]
+    }
+}
+
+output {
+    elasticsearch {
+        index => "%{tenant}-%{index_date}"
+        document_type => "logs"
+        hosts => "<%= @elasticsearch_hosts %>"
+        flush_size => 500
+    }
+}

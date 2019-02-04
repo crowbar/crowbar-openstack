@@ -237,7 +237,13 @@
             }
           ],
           "metricNameColor": "#000000",
-          "rangeMaps": [],
+          "rangeMaps": [
+            {
+              "from": "1",
+              "text": "UP",
+              "to": "100"
+            }
+          ],
           "rowHeight": 50,
           "showDistinctCount": false,
           "showLegend": true,
@@ -253,7 +259,7 @@
               "alias": "@hostname",
               "dimensions": [
                 {
-                  "key": "component",
+                  "key": "process_name",
                   "value": "monasca-persister"
                 },
                 {
@@ -263,7 +269,7 @@
               ],
               "error": "",
               "group": false,
-              "metric": "http_status",
+              "metric": "process.pid_count",
               "period": "300",
               "refId": "A"
             }
@@ -274,13 +280,8 @@
           "valueMaps": [
             {
               "op": "=",
-              "text": "UP",
-              "value": "0"
-            },
-            {
-              "op": "=",
               "text": "DOWN",
-              "value": "1"
+              "value": "0"
             }
           ],
           "valueTextColor": "#000000",

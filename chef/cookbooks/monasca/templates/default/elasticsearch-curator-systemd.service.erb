@@ -1,0 +1,8 @@
+[Unit]
+Description=Run elasticsearch-curator
+
+[Service]
+Type=oneshot
+User=curator
+Group=curator
+ExecStart=/usr/bin/curator --config /etc/elasticsearch-curator/curator_config.yml /etc/elasticsearch-curator/curator_action.yml

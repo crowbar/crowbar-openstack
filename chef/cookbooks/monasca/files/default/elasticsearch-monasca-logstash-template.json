@@ -1,0 +1,63 @@
+  {
+    "order" : 0,
+    "template" : "*",
+    "settings" : {
+      "index.refresh_interval" : "5s",
+      "index" : {
+        "analysis": {
+          "analyzer" : {
+            "no_token" : {
+              "type" : "custom",
+              "tokenizer" : "keyword",
+              "filter" : "lowercase"
+            }
+          }
+        }
+      }
+    },
+    "mappings" : {
+      "_default_" : {
+        "dynamic_templates" : [ {
+          "message_field" : {
+            "mapping" : {
+              "index" : "analyzed",
+              "omit_norms" : true,
+              "type" : "string"
+            },
+            "match_mapping_type" : "string",
+            "match" : "message"
+          }
+        }, {
+          "string_fields" : {
+            "mapping" : {
+              "analyzer" : "no_token",
+              "omit_norms" : true,
+              "type" : "string"
+            },
+            "match_mapping_type" : "string",
+            "match" : "*"
+          }
+        } ],
+        "properties" : {
+          "geoip" : {
+            "dynamic" : true,
+            "properties" : {
+              "location" : {
+                "type" : "geo_point"
+              }
+            },
+            "type" : "object"
+          },
+          "@version" : {
+            "index" : "not_analyzed",
+            "type" : "string"
+          }
+        },
+        "_all" : {
+          "enabled" : true,
+          "omit_norms" : true
+        }
+      }
+    },
+    "aliases" : { }
+  }

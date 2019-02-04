@@ -66,66 +66,77 @@
         "bind_host": "*",
         "processes": 3,
         "threads": 10,
+        "protocol": "http",
         "log_level": "INFO"
       },
       "elasticsearch": {
         "repo_dir": [],
         "tunables": {
           "heap_size": "4g",
-          "max_locked_memory": "infinity",
-          "max_open_files_hard_limit": 65536,
+          "limit_memlock": "infinity",
+          "limit_nofile": 65536,
           "max_open_files_soft_limit": 16384,
-          "max_procs": 65536,
+          "limit_nproc": 65536,
           "memory_lock": true,
           "vm_max_map_count": 262144
         }
       },
       "elasticsearch_curator": {
-        "delete_exclude_index": [ ".kibana" ],
-        "cron_config": {
-          "minute": "0",
-          "hour": "0",
-          "day": "*",
-          "weekday": "*",
-          "month": "*"
-        }
+        "delete_exclude_index": [ ".kibana" ]
       },
       "log_api": {
         "url": "",
-        "log_level": "INFO"
+        "log_level": "INFO",
+        "protocol": "http"
       },
       "kafka": {
         "log_retention_hours": 24,
-        "log_retention_bytes": 21474836480
+        "log_retention_bytes": 21474836480,
+        "topics": [
+          { "name": "metrics", "replicas": 1, "partitions": 1 },
+          { "name": "events", "replicas": 1, "partitions": 1 },
+          { "name": "alarm-state-transitions", "replicas": 1, "partitions": 1 },
+          { "name": "alarm-notifications", "replicas": 1, "partitions": 1 },
+          { "name": "retry-notifications", "replicas": 1, "partitions": 1 },
+          { "name": "60-seconds-notifications", "replicas": 1, "partitions": 1 },
+          { "name": "log", "replicas": 1, "partitions": 1,
+            "config_options": ["retention.bytes=-1", "retention.ms=3600000", "max.message.bytes=1048576"] },
+          { "name": "transformed-log", "replicas": 1, "partitions": 1,
+            "config_options": ["retention.bytes=-1", "retention.ms=3600000", "max.message.bytes=1048576"] }
+        ]
       },
       "setup": {
         "extra_params": ""
+      },
+      "db_monapi": {
+        "password": "",
+        "user": "monapi",
+        "database": "mon"
+      },
+      "db_grafana": {
+        "password": "",
+        "user": "grafana",
+        "database": "grafana"
+      },
+      "notification": {
+        "email_enabled": false,
+        "email_smtp_host": "localhost",
+        "email_smtp_port": 25,
+        "email_smtp_user": "",
+        "email_smtp_password": "",
+        "email_smtp_from_address": "monasca@localhost"
       },
       "master": {
         "influxdb_retention_policy": "60d",
         "cassandra_admin_password": "",
         "database_notification_password": "",
-        "database_monapi_password": "",
-        "database_thresh_password": "",
         "database_logapi_password": "",
         "keystone_monasca_operator_password": "",
         "keystone_monasca_agent_password": "",
         "keystone_admin_agent_password": "",
-        "database_grafana_password": "",
-        "notification_enable_email": true,
-        "smtp_host": "localhost",
-        "smtp_port": 25,
-        "smtp_user": "",
-        "smtp_password": "",
-        "smtp_from_address": "monasca@localhost",
         "tsdb": "influxdb",
         "tsdb_mon_api_password": "",
         "tsdb_mon_persister_password": ""
-      },
-      "db": {
-        "database": "monasca",
-        "password": "",
-        "user": "monasca"
       },
       "debug": false,
       "group": "monasca",
@@ -136,30 +147,28 @@
       "service_password": "none",
       "service_user": "monasca",
       "service_tenant": "monasca",
-      "service_roles": ["monasca-agent", "monasca-user", "monasca-read-only-user"]
+      "service_roles": ["monasca-agent", "monasca-user", "monasca-read-only-user"],
+      "memcache_secret_key": ""
     }
   },
   "deployment": {
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 300,
+      "schema-revision": 312,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
-        "monasca-master": [ "readying", "ready", "applying" ],
         "monasca-agent": [ "readying", "ready", "applying" ],
         "monasca-log-agent": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
         [ "monasca-server" ],
-        [ "monasca-master" ],
         [ "monasca-agent" ],
         [ "monasca-log-agent" ]
       ],
       "element_run_list_order": {
         "monasca-server": 110,
-        "monasca-master": 115,
         "monasca-agent": 120,
         "monasca-log-agent": 130
       },
