@@ -1597,10 +1597,10 @@
               ],
               "error": "",
               "function": "none",
-              "metric": "mem.used_mb",
+              "metric": "mem.used_real_mb",
               "period": "300",
               "refId": "B",
-              "series": "mem.used_mb",
+              "series": "mem.used_real_mb",
               "target": ""
             },
             {
