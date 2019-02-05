@@ -415,6 +415,7 @@ uri=<%= @kafka_host %>:<%= node[:monasca][:kafka][:port] %>
 
 # The repository driver to use for alarm state history (string value)
 #alarm_state_history_driver = monasca_persister.repositories.influxdb.metrics_repository:MetricInfluxdbRepository
+alarm_state_history_driver = monasca_persister.repositories.influxdb.alarm_state_history_repository:AlarmStateHistInfluxdbRepository
 
 # The repository driver to use for events (string value)
 #events_driver = monasca_persister.repositories.elasticsearch.events_repository:ElasticSearchEventsRepository
