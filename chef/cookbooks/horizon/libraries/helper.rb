@@ -68,3 +68,12 @@ module MonascaUiHelper
     "http://#{monasca_public_host(node)}:3000"
   end
 end
+
+module RoleHelper
+  def self.config_for_role_exists?(name)
+    shouldbe = "#{name}-config-"
+    @cached_roles = @cached_roles || Chef::Role.list.keys
+    res = @cached_roles.find { |rname| rname.start_with? shouldbe }
+    res != nil
+  end
+end
