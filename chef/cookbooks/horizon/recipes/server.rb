@@ -205,11 +205,10 @@ end
 
 # install horizon heat plugin if needed
 heat_ui_pkgname = "openstack-horizon-plugin-heat-ui"
-unless Barclamp::Config.load("openstack", "heat").empty?
-  package heat_ui_pkgname do
-    action :install
-    notifies :reload, "service[horizon]"
-  end
+package heat_ui_pkgname do
+  action :install
+  notifies :reload, "service[horizon]"
+  only_if { RoleHelper.config_for_role_exists?("heat") }
 end
 
 if node[:platform_family] == "suse"
