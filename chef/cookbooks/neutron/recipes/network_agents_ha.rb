@@ -174,13 +174,13 @@ if use_l3_agent
     rabbit_settings = fetch_rabbitmq_settings
 
     crowbar_pacemaker_order_only_existing "o-#{ha_service_primitive_name}" do
-      # While neutron-ha-tool technically doesn't directly depend on postgresql or
+      # While neutron-ha-tool technically doesn't directly depend on galera or
       # rabbitmq, if these bits are not running, then neutron-server can run but
       # can't do what it's being asked. Note that neutron-server does have a
       # constraint on these services, but it's optional, not mandatory (because it
-      # doesn't need to be restarted when postgresql or rabbitmq are restarted).
-      # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
-      ordering "( postgresql #{rabbit_settings[:pacemaker_resource]} g-haproxy "\
+      # doesn't need to be restarted when galera or rabbitmq are restarted).
+      # So explicitly depend on galera and rabbitmq (if they are in the cluster).
+      ordering "( galera #{rabbit_settings[:pacemaker_resource]} g-haproxy "\
                "cl-neutron-server ) #{ha_service_primitive_name}"
       score "Mandatory"
       action :create
