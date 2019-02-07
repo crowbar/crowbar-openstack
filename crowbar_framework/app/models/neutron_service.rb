@@ -125,6 +125,7 @@ class NeutronService < OpenstackServiceObject
     base["attributes"]["neutron"]["service_password"] = random_password
     base["attributes"]["neutron"]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
+    base["attributes"][@bc_name][:l3_ha][:vrrp_password] = random_password
 
     base
   end
@@ -352,6 +353,12 @@ class NeutronService < OpenstackServiceObject
     end
   end
 
+  def validate_l3ha(proposal)
+    if proposal["attributes"]["neutron"]["l3_ha"]["enabled"]
+      validate_multiple_for_role_or_cluster proposal, "neutron-network"
+    end
+  end
+
   def validate_external_networks(external_networks)
     net_svc = NetworkService.new @logger
     network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
@@ -395,6 +402,7 @@ class NeutronService < OpenstackServiceObject
     validate_l2pop(proposal)
     validate_dvr(proposal)
     validate_cisco_aci(proposal)
+    validate_l3ha(proposal)
     if proposal[:attributes][:neutron][:use_infoblox]
       validate_infoblox(proposal)
     end
