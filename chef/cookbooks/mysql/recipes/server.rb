@@ -286,3 +286,10 @@ template "/root/.my.cnf" do
     password: node[:database][:mysql][:server_root_password]
   )
 end
+
+template "/etc/logrotate.d/mariadb-soc" do
+  source "mysqladmin-logrotate"
+  owner "root"
+  group "root"
+  mode "0644"
+end
