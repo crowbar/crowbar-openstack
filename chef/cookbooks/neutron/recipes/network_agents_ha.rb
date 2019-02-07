@@ -246,68 +246,82 @@ end
 if use_l3_agent
   # Remove old resource
   ha_tool_primitive_name = "neutron-ha-tool"
-  pacemaker_primitive ha_tool_primitive_name do
-    agent node[:neutron][:ha][:network][:ha_tool_ra]
-    action [:stop, :delete]
-    only_if "crm configure show #{ha_tool_primitive_name}"
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  # Remove old location
-  ha_tool_location_name = "l-#{ha_tool_primitive_name}-controller"
-  pacemaker_location ha_tool_location_name do
-    action :delete
-    only_if "crm configure show #{ha_tool_location_name}"
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  # Remove old ordering
-  ha_tool_ordering_name = "o-#{ha_tool_primitive_name}"
-  pacemaker_order ha_tool_ordering_name do
-    action :delete
-    only_if "crm configure show #{ha_tool_ordering_name}"
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-
-  # Add pacemaker resource for neutron-l3-ha-service
-  ha_service_transaction_objects = []
   ha_service_primitive_name = "neutron-l3-ha-service"
 
-  pacemaker_primitive ha_service_primitive_name do
-    agent "systemd:neutron-l3-ha-service"
-    op node[:neutron][:ha][:neutron_l3_ha_resource][:op]
-    action :update
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
-  ha_service_transaction_objects << "pacemaker_primitive[#{ha_service_primitive_name}]"
+  if node[:neutron][:l3_ha][:use_l3_ha]
+    ## Do we really need to delete it? what about routers not
+    # marked with --ha Enabled ?!
+    pacemaker_primitive ha_service_primitive_name do
+      agent "systemd:neutron-l3-ha-service"
+      op node[:neutron][:ha][:neutron_l3_ha_resource][:op]
+      action [:stop, :delete]
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+      only_if "crm configure show #{ha_service_primitive_name}"
+    end
+  else
+    pacemaker_primitive ha_tool_primitive_name do
+      agent node[:neutron][:ha][:network][:ha_tool_ra]
+      action [:stop, :delete]
+      only_if "crm configure show #{ha_tool_primitive_name}"
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
 
-  ha_service_location_name = openstack_pacemaker_controller_only_location_for(
-    ha_service_primitive_name
-  )
+    # Remove old location
+    ha_tool_location_name = "l-#{ha_tool_primitive_name}-controller"
+    pacemaker_location ha_tool_location_name do
+      action :delete
+      only_if "crm configure show #{ha_tool_location_name}"
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
 
-  ha_service_transaction_objects << "pacemaker_location[#{ha_service_location_name}]"
+    # Remove old ordering
+    ha_tool_ordering_name = "o-#{ha_tool_primitive_name}"
+    pacemaker_order ha_tool_ordering_name do
+      action :delete
+      only_if "crm configure show #{ha_tool_ordering_name}"
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
 
-  pacemaker_transaction "neutron ha service" do
-    cib_objects ha_service_transaction_objects
-    # note that this will also automatically start the resources
-    action :commit_new
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+    # Add pacemaker resource for neutron-l3-ha-service
+    # only if l3_ha is not enabled
+    ha_service_transaction_objects = []
 
-  rabbit_settings = fetch_rabbitmq_settings
+    pacemaker_primitive ha_service_primitive_name do
+      agent "systemd:neutron-l3-ha-service"
+      op node[:neutron][:ha][:neutron_l3_ha_resource][:op]
+      action :update
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
+    ha_service_transaction_objects << "pacemaker_primitive[#{ha_service_primitive_name}]"
 
-  crowbar_pacemaker_order_only_existing "o-#{ha_service_primitive_name}" do
-    # While neutron-ha-tool technically doesn't directly depend on postgresql or
-    # rabbitmq, if these bits are not running, then neutron-server can run but
-    # can't do what it's being asked. Note that neutron-server does have a
-    # constraint on these services, but it's optional, not mandatory (because it
-    # doesn't need to be restarted when postgresql or rabbitmq are restarted).
-    # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
-    ordering "( postgresql #{rabbit_settings[:pacemaker_resource]} g-haproxy cl-neutron-server " \
-        "#{l3_agent_clone} ) #{ha_service_primitive_name}"
-    score "Mandatory"
-    action :create
-    only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    ha_service_location_name = openstack_pacemaker_controller_only_location_for(
+      ha_service_primitive_name
+    )
+
+    ha_service_transaction_objects << "pacemaker_location[#{ha_service_location_name}]"
+
+    pacemaker_transaction "neutron ha service" do
+      cib_objects ha_service_transaction_objects
+      # note that this will also automatically start the resources
+      action :commit_new
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
+
+    rabbit_settings = fetch_rabbitmq_settings
+
+    crowbar_pacemaker_order_only_existing "o-#{ha_service_primitive_name}" do
+      # While neutron-ha-tool technically doesn't directly depend on postgresql or
+      # rabbitmq, if these bits are not running, then neutron-server can run but
+      # can't do what it's being asked. Note that neutron-server does have a
+      # constraint on these services, but it's optional, not mandatory (because it
+      # doesn't need to be restarted when postgresql or rabbitmq are restarted).
+      # So explicitly depend on postgresql and rabbitmq (if they are in the cluster).
+      ordering "( postgresql #{rabbit_settings[:pacemaker_resource]} g-haproxy cl-neutron-server " \
+          "#{l3_agent_clone} ) #{ha_service_primitive_name}"
+      score "Mandatory"
+      action :create
+      only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    end
   end
 end
 

@@ -25,6 +25,10 @@
                       "agent_boot_time": { "type" : "int", "required" : true }
                     }},
                     "use_dvr": { "type": "bool", "required": true },
+                    "l3_ha": { "type": "map", "required": true, "mapping": {
+                      "use_l3_ha": { "type": "bool", "required": true },
+                      "vrrp_password": { "type": "str", "required": true }
+                    }},
                     "additional_external_networks": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
                     "networking_plugin": { "type": "str", "required": true },
                     "ml2_mechanism_drivers": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },

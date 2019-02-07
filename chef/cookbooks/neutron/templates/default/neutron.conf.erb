@@ -17,6 +17,10 @@ dhcp_agents_per_network = <%= @network_nodes_count %>
 <% if @dvr_enabled -%>
 router_distributed = True
 <% end -%>
+<% if @l3_ha_enabled -%>
+l3_ha = True
+max_l3_agents_per_router = <%= (@network_nodes_count + 1) / 2 %>
+<% end -%>
 debug = <%= @debug ? "True" : "False" %>
 verbose = <%= @verbose ? "True" : "False" %>
 log_dir = /var/log/neutron

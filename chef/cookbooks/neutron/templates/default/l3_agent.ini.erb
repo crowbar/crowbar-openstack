@@ -1,5 +1,6 @@
 [DEFAULT]
 interface_driver = <%= @interface_driver %>
+ha_vrrp_auth_password = <%= @l3_ha_vrrp_password %>
 <% if @dvr_enabled -%>
 agent_mode = <%= @dvr_mode %>
 <% end -%>
