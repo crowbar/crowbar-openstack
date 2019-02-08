@@ -30,27 +30,21 @@ module MonascaHelper
 
   def self.api_public_url(node)
     host = monasca_public_host(node)
-    # SSL is not supported at this moment
-    # protocol = node[:monasca][:api][:ssl] ? "https" : "http"
-    protocol = "http"
+    protocol = node[:monasca][:api][:protocol]
     port = node[:monasca][:api][:bind_port]
     "#{protocol}://#{host}:#{port}/v2.0"
   end
 
   def self.api_admin_url(node)
     host = monasca_admin_host(node)
-    # SSL is not supported at this moment
-    # protocol = node[:monasca][:api][:ssl] ? "https" : "http"
-    protocol = "http"
+    protocol = node[:monasca][:api][:protocol]
     port = node[:monasca][:api][:bind_port]
     "#{protocol}://#{host}:#{port}/v2.0"
   end
 
   def self.api_internal_url(node)
     host = get_host_for_monitoring_url(node)
-    # SSL is not supported at this moment
-    # protocol = node[:monasca][:api][:ssl] ? "https" : "http"
-    protocol = "http"
+    protocol = node[:monasca][:api][:protocol]
     port = node[:monasca][:api][:bind_port]
     "#{protocol}://#{host}:#{port}/v2.0"
   end
@@ -69,27 +63,21 @@ module MonascaHelper
 
   def self.log_api_public_url(node, version = "v3.0")
     host = monasca_public_host(node)
-    # SSL is not supported at this moment
-    # protocol = node[:monasca][:log_api][:ssl] ? "https" : "http"
-    protocol = "http"
+    protocol = node[:monasca][:api][:protocol]
     port = node[:monasca][:log_api][:bind_port]
     "#{protocol}://#{host}:#{port}/#{version}"
   end
 
   def self.log_api_admin_url(node, version = "v3.0")
     host = monasca_admin_host(node)
-    # SSL is not supported at this moment
-    # protocol = node[:monasca][:log_api][:ssl] ? "https" : "http"
-    protocol = "http"
+    protocol = node[:monasca][:api][:protocol]
     port = node[:monasca][:log_api][:bind_port]
     "#{protocol}://#{host}:#{port}/#{version}"
   end
 
   def self.log_api_internal_url(node, version = "v3.0")
     host = get_host_for_monitoring_url(node)
-    # SSL is not supported at this moment
-    # protocol = node[:monasca][:log_api][:ssl] ? "https" : "http"
-    protocol = "http"
+    protocol = node[:monasca][:api][:protocol]
     port = node[:monasca][:log_api][:bind_port]
     "#{protocol}://#{host}:#{port}/#{version}"
   end
