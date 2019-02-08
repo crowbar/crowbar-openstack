@@ -186,6 +186,15 @@
                           "mapping": { "LimitNOFILE": { "type": "int", "required": false }}
                         }
                       }
+                    },
+                    "osprofiler": {
+                      "type": "map",
+                      "required": true,
+                      "mapping": {
+                        "enabled": { "type" : "bool", "required" : true },
+                        "hmac_keys": { "type" : "seq", "required" : true, "sequence": [ { "type": "str" } ] },
+                        "trace_sqlalchemy": { "type" : "bool", "required" : true }
+                      }
                     }
               }}
      }},

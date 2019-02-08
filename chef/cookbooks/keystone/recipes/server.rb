@@ -246,6 +246,8 @@ register_auth_hash = { user: node[:keystone][:admin][:username],
                        password: node[:keystone][:admin][:password],
                        project: node[:keystone][:admin][:project] }
 
+profiler_settings = KeystoneHelper.profiler_settings(node, @cookbook_name)
+
 template node[:keystone][:config_file] do
     source "keystone.conf.erb"
     owner "root"
@@ -265,7 +267,8 @@ template node[:keystone][:config_file] do
       max_active_keys: max_active_keys,
       protocol: node[:keystone][:api][:protocol],
       frontend: node[:keystone][:frontend],
-      rabbit_settings: fetch_rabbitmq_settings
+      rabbit_settings: fetch_rabbitmq_settings,
+      profiler_settings: profiler_settings
     )
     if node[:keystone][:frontend] == "apache"
       notifies :create, resources(ruby_block: "set origin for apache2 restart"), :immediately
