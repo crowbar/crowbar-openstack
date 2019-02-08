@@ -15,23 +15,23 @@
  */
 
 $(document).ready(function($) {
-  $('#master_notification_enable_email').on('change', function() {
+  $('#notification_email_enabled').on('change', function() {
     var value = $(this).val();
 
     if (value == 'false') {
-      $('#master_smtp_host').attr('disabled', 'disabled');
-      $('#master_smtp_port').attr('disabled', 'disabled');
-      $('#master_smtp_user').attr('disabled', 'disabled');
-      $('#master_smtp_password').attr('disabled', 'disabled');
-      $('#master_smtp_from_address').attr('disabled', 'disabled');
+      $('#notification_email_smtp_host').attr('disabled', 'disabled');
+      $('#notification_email_smtp_port').attr('disabled', 'disabled');
+      $('#notification_email_smtp_user').attr('disabled', 'disabled');
+      $('#notification_email_smtp_password').attr('disabled', 'disabled');
+      $('#notification_email_smtp_from_address').attr('disabled', 'disabled');
     }
     else
     {
-      $('#master_smtp_host').removeAttr('disabled');
-      $('#master_smtp_port').removeAttr('disabled');
-      $('#master_smtp_user').removeAttr('disabled');
-      $('#master_smtp_password').removeAttr('disabled');
-      $('#master_smtp_from_address').removeAttr('disabled');
+      $('#notification_email_smtp_host').removeAttr('disabled');
+      $('#notification_email_smtp_port').removeAttr('disabled');
+      $('#notification_email_smtp_user').removeAttr('disabled');
+      $('#notification_email_smtp_password').removeAttr('disabled');
+      $('#notification_email_smtp_from_address').removeAttr('disabled');
     }
   }).trigger('change');
 });
