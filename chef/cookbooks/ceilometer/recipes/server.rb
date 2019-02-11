@@ -15,47 +15,47 @@
 
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
-  db_settings = fetch_database_settings
+db_settings = fetch_database_settings
 
-  include_recipe "database::client"
-  include_recipe "#{db_settings[:backend_name]}::client"
-  include_recipe "#{db_settings[:backend_name]}::python-client"
+include_recipe "database::client"
+include_recipe "#{db_settings[:backend_name]}::client"
+include_recipe "#{db_settings[:backend_name]}::python-client"
 
-  crowbar_pacemaker_sync_mark "wait-ceilometer_database" if ha_enabled
+crowbar_pacemaker_sync_mark "wait-ceilometer_database" if ha_enabled
 
-  # Create the Ceilometer Database
-  database "create #{node[:ceilometer][:db][:database]} database" do
-      connection db_settings[:connection]
-      database_name node[:ceilometer][:db][:database]
-      provider db_settings[:provider]
-      action :create
-      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+# Create the Ceilometer Database
+database "create #{node[:ceilometer][:db][:database]} database" do
+  connection db_settings[:connection]
+  database_name node[:ceilometer][:db][:database]
+  provider db_settings[:provider]
+  action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
 
-  database_user "create ceilometer database user" do
-      host "%"
-      connection db_settings[:connection]
-      username node[:ceilometer][:db][:user]
-      password node[:ceilometer][:db][:password]
-      provider db_settings[:user_provider]
-      action :create
-      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+database_user "create ceilometer database user" do
+  host "%"
+  connection db_settings[:connection]
+  username node[:ceilometer][:db][:user]
+  password node[:ceilometer][:db][:password]
+  provider db_settings[:user_provider]
+  action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
 
-  database_user "grant database access for ceilometer database user" do
-      connection db_settings[:connection]
-      username node[:ceilometer][:db][:user]
-      password node[:ceilometer][:db][:password]
-      database_name node[:ceilometer][:db][:database]
-      host "%"
-      privileges db_settings[:privs]
-      provider db_settings[:user_provider]
-      require_ssl db_settings[:connection][:ssl][:enabled]
-      action :grant
-      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+database_user "grant database access for ceilometer database user" do
+  connection db_settings[:connection]
+  username node[:ceilometer][:db][:user]
+  password node[:ceilometer][:db][:password]
+  database_name node[:ceilometer][:db][:database]
+  host "%"
+  privileges db_settings[:privs]
+  provider db_settings[:user_provider]
+  require_ssl db_settings[:connection][:ssl][:enabled]
+  action :grant
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
 
-  crowbar_pacemaker_sync_mark "create-ceilometer_database" if ha_enabled
+crowbar_pacemaker_sync_mark "create-ceilometer_database" if ha_enabled
 
 case node[:platform_family]
 when "suse"
@@ -78,6 +78,64 @@ directory "/var/cache/ceilometer" do
   mode 00755
   action :create
 end unless node[:platform_family] == "suse"
+
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
+crowbar_pacemaker_sync_mark "wait-ceilometer_register" if ha_enabled
+
+register_auth_hash = { user: keystone_settings["admin_user"],
+                       password: keystone_settings["admin_password"],
+                       project: keystone_settings["admin_project"] }
+
+keystone_register "ceilometer wakeup keystone" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  action :wakeup
+end
+
+keystone_register "register ceilometer user" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  user_password keystone_settings["service_password"]
+  project_name keystone_settings["service_tenant"]
+  action :add_user
+end
+
+keystone_register "give ceilometer user access" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  project_name keystone_settings["service_tenant"]
+  role_name "admin"
+  action :add_access
+end
+
+swift_middlewares = node[:ceilometer][:elements]["ceilometer-swift-proxy-middleware"] || []
+unless swift_middlewares.empty?
+  keystone_register "give ceilometer user ResellerAdmin role" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    auth register_auth_hash
+    user_name keystone_settings["service_user"]
+    project_name keystone_settings["service_tenant"]
+    role_name "ResellerAdmin"
+    action :add_access
+  end
+end
+
+crowbar_pacemaker_sync_mark "create-ceilometer_register" if ha_enabled
 
 crowbar_pacemaker_sync_mark "wait-ceilometer_upgrade" if ha_enabled
 
