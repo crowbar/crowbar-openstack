@@ -104,6 +104,12 @@ module KeystoneHelper
       "service_password" => current_node[cookbook_name][:service_password])
   end
 
+  def self.profiler_settings(current_node, cookbook_name)
+    instance = current_node[cookbook_name][:keystone_instance] || "default"
+    node = search_for_keystone(current_node, instance)
+    node["keystone"]["osprofiler"]
+  end
+
   private_class_method def self.search_for_keystone(node, instance)
     if @keystone_node && @keystone_node.include?(instance)
       Chef::Log.info("Keystone server found at #{@keystone_node[instance].name} [cached]")
