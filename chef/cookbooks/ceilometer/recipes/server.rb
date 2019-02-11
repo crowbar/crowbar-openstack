@@ -15,47 +15,47 @@
 
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
-  db_settings = fetch_database_settings
+db_settings = fetch_database_settings
 
-  include_recipe "database::client"
-  include_recipe "#{db_settings[:backend_name]}::client"
-  include_recipe "#{db_settings[:backend_name]}::python-client"
+include_recipe "database::client"
+include_recipe "#{db_settings[:backend_name]}::client"
+include_recipe "#{db_settings[:backend_name]}::python-client"
 
-  crowbar_pacemaker_sync_mark "wait-ceilometer_database" if ha_enabled
+crowbar_pacemaker_sync_mark "wait-ceilometer_database" if ha_enabled
 
-  # Create the Ceilometer Database
-  database "create #{node[:ceilometer][:db][:database]} database" do
-      connection db_settings[:connection]
-      database_name node[:ceilometer][:db][:database]
-      provider db_settings[:provider]
-      action :create
-      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+# Create the Ceilometer Database
+database "create #{node[:ceilometer][:db][:database]} database" do
+  connection db_settings[:connection]
+  database_name node[:ceilometer][:db][:database]
+  provider db_settings[:provider]
+  action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
 
-  database_user "create ceilometer database user" do
-      host "%"
-      connection db_settings[:connection]
-      username node[:ceilometer][:db][:user]
-      password node[:ceilometer][:db][:password]
-      provider db_settings[:user_provider]
-      action :create
-      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+database_user "create ceilometer database user" do
+  host "%"
+  connection db_settings[:connection]
+  username node[:ceilometer][:db][:user]
+  password node[:ceilometer][:db][:password]
+  provider db_settings[:user_provider]
+  action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
 
-  database_user "grant database access for ceilometer database user" do
-      connection db_settings[:connection]
-      username node[:ceilometer][:db][:user]
-      password node[:ceilometer][:db][:password]
-      database_name node[:ceilometer][:db][:database]
-      host "%"
-      privileges db_settings[:privs]
-      provider db_settings[:user_provider]
-      require_ssl db_settings[:connection][:ssl][:enabled]
-      action :grant
-      only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  end
+database_user "grant database access for ceilometer database user" do
+  connection db_settings[:connection]
+  username node[:ceilometer][:db][:user]
+  password node[:ceilometer][:db][:password]
+  database_name node[:ceilometer][:db][:database]
+  host "%"
+  privileges db_settings[:privs]
+  provider db_settings[:user_provider]
+  require_ssl db_settings[:connection][:ssl][:enabled]
+  action :grant
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
 
-  crowbar_pacemaker_sync_mark "create-ceilometer_database" if ha_enabled
+crowbar_pacemaker_sync_mark "create-ceilometer_database" if ha_enabled
 
 case node[:platform_family]
 when "suse"
