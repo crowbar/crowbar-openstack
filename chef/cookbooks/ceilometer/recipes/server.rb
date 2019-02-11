@@ -79,6 +79,64 @@ directory "/var/cache/ceilometer" do
   action :create
 end unless node[:platform_family] == "suse"
 
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
+crowbar_pacemaker_sync_mark "wait-ceilometer_register" if ha_enabled
+
+register_auth_hash = { user: keystone_settings["admin_user"],
+                       password: keystone_settings["admin_password"],
+                       project: keystone_settings["admin_project"] }
+
+keystone_register "ceilometer wakeup keystone" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  action :wakeup
+end
+
+keystone_register "register ceilometer user" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  user_password keystone_settings["service_password"]
+  project_name keystone_settings["service_tenant"]
+  action :add_user
+end
+
+keystone_register "give ceilometer user access" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  project_name keystone_settings["service_tenant"]
+  role_name "admin"
+  action :add_access
+end
+
+swift_middlewares = node[:ceilometer][:elements]["ceilometer-swift-proxy-middleware"] || []
+unless swift_middlewares.empty?
+  keystone_register "give ceilometer user ResellerAdmin role" do
+    protocol keystone_settings["protocol"]
+    insecure keystone_settings["insecure"]
+    host keystone_settings["internal_url_host"]
+    port keystone_settings["admin_port"]
+    auth register_auth_hash
+    user_name keystone_settings["service_user"]
+    project_name keystone_settings["service_tenant"]
+    role_name "ResellerAdmin"
+    action :add_access
+  end
+end
+
+crowbar_pacemaker_sync_mark "create-ceilometer_register" if ha_enabled
+
 crowbar_pacemaker_sync_mark "wait-ceilometer_upgrade" if ha_enabled
 
 execute "ceilometer-upgrade" do
