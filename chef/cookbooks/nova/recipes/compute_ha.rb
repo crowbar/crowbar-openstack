@@ -36,9 +36,6 @@ include_recipe "crowbar-pacemaker::attributes"
 include_recipe "crowbar-pacemaker::remote_attributes"
 
 keystone_settings = KeystoneHelper.keystone_settings(nova, @cookbook_name)
-internal_auth_url_v2 = \
-  "#{keystone_settings["protocol"]}://" \
-  "#{keystone_settings["internal_url_host"]}:#{keystone_settings["service_port"]}/v2.0/"
 neutrons = node_search_with_cache("roles:neutron-server")
 neutron = neutrons.first || \
   raise("Neutron instance '#{nova[:nova][:neutron_instance]}' for nova not found")
@@ -172,7 +169,7 @@ nova_primitive = "nova-compute"
 pacemaker_primitive nova_primitive do
   agent "ocf:openstack:NovaCompute"
   params ({
-    "auth_url"       => internal_auth_url_v2,
+    "auth_url"       => keystone_settings["internal_auth_url"],
     # "region_name"    => keystone_settings["endpoint_region"],
     "endpoint_type"  => "internalURL",
     "username"       => keystone_settings["admin_user"],
@@ -232,7 +229,7 @@ evacuate_primitive = "nova-evacuate"
 pacemaker_primitive evacuate_primitive do
   agent "ocf:openstack:NovaEvacuate"
   params ({
-    "auth_url"       => internal_auth_url_v2,
+    "auth_url"       => keystone_settings["internal_auth_url"],
     # "region_name"    => keystone_settings["endpoint_region"],
     "endpoint_type"  => "internalURL",
     "username"       => keystone_settings["admin_user"],
@@ -274,7 +271,7 @@ pacemaker_primitive fence_primitive do
   agent "stonith:fence_compute"
   params ({
     "pcmk_host_map"  => hostmap,
-    "auth-url"       => internal_auth_url_v2,
+    "auth_url"       => keystone_settings["internal_auth_url"],
     # "region-name"    => keystone_settings["endpoint_region"],
     "endpoint-type"  => "internalURL",
     "login"          => keystone_settings["admin_user"],
