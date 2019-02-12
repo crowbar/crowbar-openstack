@@ -42,7 +42,6 @@ default[:mysql][:mariadb][:version] = "10.2"
 default[:mysql][:galera_packages] = [
   "galera-3-wsrep-provider",
   "mariadb-tools",
-  "xtrabackup",
   "socat",
   "galera-python-clustercheck"
 ]
