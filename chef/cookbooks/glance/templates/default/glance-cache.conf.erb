@@ -10,3 +10,11 @@ debug = <%= node[:glance][:debug] ? 'True' : 'False' %>
 log_file = <%= node[:glance][:cache][:log_file] %>
 use_syslog = <%= node[:glance][:use_syslog] ? 'True' : 'False' %>
 use_stderr = false
+
+<% if @profiler_settings[:enabled] -%>
+[profiler]
+enabled = true
+trace_sqlalchemy = <%= @profiler_settings[:trace_sqlalchemy] ? "true" : "false" %>
+hmac_keys = <%= @profiler_settings[:hmac_keys].join(",") %>
+connection_string = <%= @profiler_settings[:connection_string] %>
+<% end -%>

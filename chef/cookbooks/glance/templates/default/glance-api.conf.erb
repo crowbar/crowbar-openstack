@@ -111,3 +111,11 @@ flavor = keystone
 
 [task]
 work_dir = /var/lib/glance/taskflow
+
+<% if @profiler_settings[:enabled] -%>
+[profiler]
+enabled = true
+trace_sqlalchemy = <%= @profiler_settings[:trace_sqlalchemy] ? "true" : "false" %>
+hmac_keys = <%= @profiler_settings[:hmac_keys].join(",") %>
+connection_string = <%= @profiler_settings[:connection_string] %>
+<% end -%>
