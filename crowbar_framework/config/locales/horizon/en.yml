@@ -26,13 +26,13 @@ en:
         password_validator:
           regex: 'Regular expression used for password validation'
           help_text: 'Text to display if the password does not pass validation'
-        ssl_header: 'SSL Support'
+        tls_header: 'TLS (SSL) Support'
         session_timeout: 'Session Timeout (in minutes)'
         apache:
           ssl: 'Protocol'
           generate_certs: 'Generate (self-signed) certificates'
-          ssl_crt_file: 'SSL Certificate File'
-          ssl_key_file: 'SSL (Private) Key File'
+          ssl_crt_file: 'Server X.509 Certificate (Public) File'
+          ssl_key_file: 'Server X.509 Key (Private) File'
           ssl_crt_chain_file: 'SSL Certificate Chain File'
       validation:
         enable_keystone: 'Multi domain support requires enabling Keystone V3 API in the keystone proposal first.'

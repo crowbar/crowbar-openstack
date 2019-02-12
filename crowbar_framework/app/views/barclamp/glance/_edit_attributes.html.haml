@@ -46,7 +46,7 @@
 
     %fieldset
       %legend
-        = t(".ssl_header")
+        = t(".tls_header")
 
       = select_field %w(api protocol), :collection => :api_protocols_for_glance, "data-sslprefix" => "ssl", "data-sslcert" => "/etc/glance/ssl/certs/signing_cert.pem", "data-sslkey" => "/etc/glance/ssl/private/signing_key.pem"
 
