@@ -21,3 +21,11 @@ connection_recycle_time = <%= node[:glance][:sql_idle_timeout] %>
 [oslo_concurrency]
 
 lock_path = /var/run/glance
+
+<% if @profiler_settings[:enabled] -%>
+[profiler]
+enabled = true
+trace_sqlalchemy = <%= @profiler_settings[:trace_sqlalchemy] ? "true" : "false" %>
+hmac_keys = <%= @profiler_settings[:hmac_keys].join(",") %>
+connection_string = <%= @profiler_settings[:connection_string] %>
+<% end -%>

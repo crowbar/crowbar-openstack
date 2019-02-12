@@ -29,6 +29,7 @@ end
 network_settings = GlanceHelper.network_settings(node)
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+profiler_settings = KeystoneHelper.profiler_settings(node, @cookbook_name)
 
 template node[:glance][:cache][:config_file] do
   source "glance-cache.conf.erb"
@@ -36,7 +37,8 @@ template node[:glance][:cache][:config_file] do
   group node[:glance][:group]
   mode 0640
   variables(
-    keystone_settings: keystone_settings
+    keystone_settings: keystone_settings,
+    profiler_settings: profiler_settings
   )
 end
 
