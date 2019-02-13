@@ -113,5 +113,5 @@ provider = <%= node[:keystone][:token_format] %>
 enabled = true
 trace_sqlalchemy = <%= @profiler_settings[:trace_sqlalchemy] ? "true" : "false" %>
 hmac_keys = <%= @profiler_settings[:hmac_keys].join(",") %>
-connection_string = messaging://
+connection_string = <%= @profiler_settings[:connection_string] %>
 <% end -%>
