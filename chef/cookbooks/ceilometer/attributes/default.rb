@@ -72,3 +72,5 @@ default[:ceilometer][:ha][:central][:agent] = "systemd:#{central_service_name}"
 default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:ceilometer][:ha][:ports][:api] = 5561
+
+default[:ceilometer][:monasca][:field_definitions] = "/etc/ceilometer/monasca_field_definitions.yaml"

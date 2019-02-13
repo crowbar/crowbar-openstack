@@ -27,6 +27,7 @@ barclamp:
     - 'database'
     - 'rabbitmq'
     - 'keystone'
+    - 'monasca'
   member:
     - 'openstack'
 

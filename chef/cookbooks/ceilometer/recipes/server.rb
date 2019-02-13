@@ -13,6 +13,12 @@
 # limitations under the License.
 #
 
+monasca_server = node_search_with_cache("roles:monasca-server").first
+if monasca_server.nil?
+  Chef::Log.warn("No monasca-server found. Skip Ceilometer setup.")
+  return
+end
+
 ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
 db_settings = fetch_database_settings
@@ -59,7 +65,7 @@ crowbar_pacemaker_sync_mark "create-ceilometer_database" if ha_enabled
 
 case node[:platform_family]
 when "suse"
-  package "openstack-ceilometer-agent-notification"
+  package "openstack-monasca-ceilometer-agent-notification"
 when "rhel"
   package "openstack-ceilometer-common"
   package "openstack-ceilometer-agent-notification"
@@ -79,7 +85,16 @@ directory "/var/cache/ceilometer" do
   action :create
 end unless node[:platform_family] == "suse"
 
+cookbook_file node[:ceilometer][:monasca][:field_definitions] do
+  source "monasca-field-definitions.yaml"
+  owner "root"
+  group node[:ceilometer][:group]
+  mode "0640"
+  notifies :restart, resources(service: "apache2")
+end
+
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+monasca_project = monasca_server[:monasca][:service_tenant]
 
 crowbar_pacemaker_sync_mark "wait-ceilometer_register" if ha_enabled
 
@@ -104,7 +119,7 @@ keystone_register "register ceilometer user" do
   auth register_auth_hash
   user_name keystone_settings["service_user"]
   user_password keystone_settings["service_password"]
-  project_name keystone_settings["service_tenant"]
+  project_name monasca_project
   action :add_user
 end
 
@@ -115,8 +130,20 @@ keystone_register "give ceilometer user access" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   user_name keystone_settings["service_user"]
-  project_name keystone_settings["service_tenant"]
+  project_name monasca_project
   role_name "admin"
+  action :add_access
+end
+
+keystone_register "grant ceilometer user monasca-user role on monasca projec" do
+  protocol keystone_settings["protocol"]
+  insecure keystone_settings["insecure"]
+  host keystone_settings["internal_url_host"]
+  port keystone_settings["admin_port"]
+  auth register_auth_hash
+  user_name keystone_settings["service_user"]
+  project_name monasca_project
+  role_name "monasca-user"
   action :add_access
 end
 
@@ -129,7 +156,7 @@ unless swift_middlewares.empty?
     port keystone_settings["admin_port"]
     auth register_auth_hash
     user_name keystone_settings["service_user"]
-    project_name keystone_settings["service_tenant"]
+    project_name monasca_project
     role_name "ResellerAdmin"
     action :add_access
   end

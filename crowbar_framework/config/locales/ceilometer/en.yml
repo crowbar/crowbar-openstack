@@ -27,10 +27,9 @@ en:
         api_header: 'API Settings'
         api:
           protocol: 'Protocol'
-        cpu_interval: 'Interval used for CPU meter updates (in seconds)'
-        disk_interval: 'Interval used for disk meter updates (in seconds)'
-        network_interval: 'Interval used for network meter updates (in seconds)'
-        meters_interval: 'Interval used for other meter updates (in seconds)'
+        compute_interval: 'Interval used for OpenStack Compute meter updates (in seconds)'
+        image_interval: 'Interval used for OpenStack Image meter updates (in seconds)'
+        volume_interval: 'Interval used for OpenStack Block Storage meter updates (in seconds)'
         database:
           metering_time_to_live: 'How long are metering samples kept in the database (in days)'
           metering_time_to_live_hint: '-1 means that samples are kept in the database forever'

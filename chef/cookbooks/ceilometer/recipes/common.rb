@@ -1,3 +1,6 @@
+monasca_server = node_search_with_cache("roles:monasca-server").first
+monasca_api_url = MonascaHelper.api_network_url(monasca_server)
+
 include_recipe "apache2"
 
 is_controller = node["roles"].include?("ceilometer-server")
@@ -10,6 +13,7 @@ memcached_servers = MemcachedHelper.get_memcached_servers(
 memcached_instance("ceilometer-server") if is_controller
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+monasca_project = monasca_server[:monasca][:service_tenant]
 
 db_settings = fetch_database_settings
 
@@ -80,6 +84,7 @@ template node[:ceilometer][:config_file] do
       debug: node[:ceilometer][:debug],
       rabbit_settings: fetch_rabbitmq_settings,
       keystone_settings: keystone_settings,
+      monasca_project: monasca_project,
       memcached_servers: memcached_servers,
       bind_host: bind_host,
       bind_port: bind_port,
@@ -109,11 +114,13 @@ template "/etc/ceilometer/pipeline.yaml" do
   group "root"
   mode "0644"
   variables({
-      meters_interval: node[:ceilometer][:meters_interval],
-      cpu_interval: node[:ceilometer][:cpu_interval],
-      disk_interval: node[:ceilometer][:disk_interval],
-      network_interval: node[:ceilometer][:network_interval]
-  })
+              compute_interval: node[:ceilometer][:compute_interval],
+              image_interval: node[:ceilometer][:image_interval],
+              volume_interval: node[:ceilometer][:volume_interval],
+              network_interval: node[:ceilometer][:network_interval],
+              swift_interval: node[:ceilometer][:swift_interval],
+              monasca_api_url: monasca_api_url
+            })
   if is_compute_agent
     notifies :restart, "service[nova-compute]"
   end
