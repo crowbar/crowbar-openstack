@@ -94,11 +94,10 @@ neutron_fwaas_ui_pkgname =
   end
 
 unless neutron_fwaas_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "neutron").empty?
-    package neutron_fwaas_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  package neutron_fwaas_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { RoleHelper.config_for_role_exists?("neutron") }
   end
 end
 
@@ -112,11 +111,10 @@ manila_ui_pkgname =
   end
 
 unless manila_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "manila").empty?
-    package manila_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  package manila_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { RoleHelper.config_for_role_exists?("manila") }
   end
 end
 
@@ -130,11 +128,10 @@ magnum_ui_pkgname =
   end
 
 unless magnum_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "magnum").empty?
-    package magnum_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  package magnum_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { RoleHelper.config_for_role_exists?("magnum") }
   end
 end
 
@@ -148,11 +145,10 @@ sahara_ui_pkgname =
   end
 
 unless sahara_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "sahara").empty?
-    package sahara_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  package sahara_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { RoleHelper.config_for_role_exists?("sahara") }
   end
 end
 
@@ -166,11 +162,10 @@ ironic_ui_pkgname =
   end
 
 unless ironic_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "ironic").empty?
-    package ironic_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  package ironic_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { RoleHelper.config_for_role_exists?("ironic") }
   end
 end
 
@@ -579,7 +574,7 @@ monasca_ui_pkgname =
   end
 
 unless monasca_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "monasca").empty?
+  if RoleHelper.config_for_role_exists?("monasca")
     include_recipe "#{@cookbook_name}::monasca_ui"
     package monasca_ui_pkgname do
       action :install
