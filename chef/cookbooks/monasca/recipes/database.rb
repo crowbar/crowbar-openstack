@@ -64,29 +64,6 @@ crowbar_pacemaker_sync_mark "wait-monasca_database"
   end
 end
 
-# FIXME(toabctl):the package contains the mon_mysql.sql file
-# would be good if the file is in a extra package
-package "openstack-monasca-api"
-
-execute "apply mon database schema migration" do
-  command "/usr/bin/mysql --no-defaults -u #{node[:monasca][:db_monapi][:user]} -p#{node[:monasca][:db_monapi][:password]} -h #{db_settings[:connection][:host]} #{node[:monasca][:db_monapi][:database]} < /usr/share/monasca-api/schema/mon_mysql.sql"
-  action :run
-  only_if do
-    !node[:monasca][:db_monapi_synced] &&
-      (!node[:monasca][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
-  end
-end
-
-# We want to keep a note that we've done the schema apply,
-# so we don't do it again.
-ruby_block "mark node for monasca mon db schema migration" do
-  block do
-    node.set[:monasca][:db_monapi_synced] = true
-    node.save
-  end
-  not_if { node[:monasca][:db_monapi_synced] }
-end
-
 # create influx Database for monasca time series
 ruby_block "Create influx database \"#{node['monasca']['db_monapi']['database']}\"" do
   block do

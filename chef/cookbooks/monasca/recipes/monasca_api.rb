@@ -52,6 +52,25 @@ template "/etc/monasca/api.conf" do
   )
 end
 
+execute "apply mon database schema migration" do
+  command "/usr/bin/monasca_db upgrade"
+  action :run
+  only_if do
+    !node[:monasca][:db_monapi_synced] &&
+      (!node[:monasca][:ha][:enabled] || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
+# We want to keep a note that we've done the schema apply,
+# so we don't do it again.
+ruby_block "mark node for monasca mon db schema migration" do
+  block do
+    node.set[:monasca][:db_monapi_synced] = true
+    node.save
+  end
+  not_if { node[:monasca][:db_monapi_synced] }
+end
+
 # influxdb user for monasca-api
 ruby_block "Create influxdb user #{node["monasca"]["api"]["influxdb_user"]} " \
            "for database #{node['monasca']['db_monapi']['database']}" do
