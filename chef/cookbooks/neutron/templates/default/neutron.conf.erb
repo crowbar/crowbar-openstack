@@ -13,7 +13,7 @@ global_physnet_mtu = <%= @mtu_value %>
 use_ssl = <%= @ssl_enabled ? "True" : "False" %>
 api_workers = <%= [node["cpu"]["total"] / 2, 1, 16].sort[1] %>
 rpc_workers = <%= @rpc_workers %>
-dhcp_agents_per_network = <%= @network_nodes_count %>
+dhcp_agents_per_network = <%= (@network_nodes_count + 1) / 2 %>
 <% if @dvr_enabled -%>
 router_distributed = True
 <% end -%>
