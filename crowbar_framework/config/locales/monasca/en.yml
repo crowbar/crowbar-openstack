@@ -46,13 +46,14 @@ en:
           backlog_send_rate: 'Maximum number of messages to send at one time when communication with the monasca-api is restored (backlog_send_rate)'
           amplifier: 'Publish extra metrics to the API by adding this number of "amplifier" dimensions. For load testing purposes only; set to 0 for production use (amplifier)'
         master_notification_header: 'Notification configuration'
+        notification:
+          email_enabled: 'Enable email notification'
+          email_smtp_host: 'SMTP host'
+          email_smtp_port: 'SMTP port'
+          email_smtp_user: 'SMTP user'
+          email_smtp_password: 'SMTP password'
+          email_smtp_from_address: 'SMTP sender (FROM) address'
         master:
-          notification_enable_email: 'Enable email notification'
-          smtp_host: 'SMTP host'
-          smtp_port: 'SMTP port'
-          smtp_user: 'SMTP user'
-          smtp_password: 'SMTP password'
-          smtp_from_address: 'SMTP sender (FROM) address'
           tsdb: 'Time series database to use'
         db_header: 'Database settings'
         db:
