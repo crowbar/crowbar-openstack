@@ -201,7 +201,7 @@ pacemaker_primitive service_name do
     "check_user" => "monitoring",
     "socket" => "/var/run/mysql/mysql.sock",
     "datadir" => node[:database][:mysql][:datadir],
-    "log" => "/var/log/mysql/mysql_error.log"
+    "log" => "/var/log/mysql/mysqld.log"
   })
   op primitive_op
   action :update
