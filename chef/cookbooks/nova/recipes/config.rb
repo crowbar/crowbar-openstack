@@ -19,6 +19,7 @@
 # limitations under the License.
 #
 keystone_settings = KeystoneHelper.keystone_settings(node, :nova)
+profiler_settings = KeystoneHelper.profiler_settings(node, @cookbook_name)
 is_controller = node["roles"].include?("nova-controller")
 
 my_ip_net = "admin"
@@ -344,6 +345,7 @@ template node[:nova][:placement_config_file] do
   mode 0640
   variables(
     keystone_settings: keystone_settings,
+    profiler_settings: profiler_settings,
     placement_database_connection: placement_database_connection,
     placement_service_user: node["nova"]["placement_service_user"],
     placement_service_password: node["nova"]["placement_service_password"],
@@ -402,6 +404,7 @@ template node[:nova][:config_file] do
     neutron_service_password: neutron_service_password,
     neutron_has_tunnel: neutron_has_tunnel,
     keystone_settings: keystone_settings,
+    profiler_settings: profiler_settings,
     cinder_insecure: cinder_insecure,
     use_multipath: use_multipath,
     keymgr_fixed_key: keymgr_fixed_key,
