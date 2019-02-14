@@ -130,3 +130,11 @@ http_pool_maxsize = <%= @infoblox[:grids][grid][:http_pool_maxsize] %>
 http_request_timeout = <%= @infoblox[:grids][grid][:http_request_timeout] %>
 <% end -%>
 <% end -%>
+
+<% if @profiler_settings[:enabled] -%>
+[profiler]
+enabled = true
+trace_sqlalchemy = <%= @profiler_settings[:trace_sqlalchemy] ? "true" : "false" %>
+hmac_keys = <%= @profiler_settings[:hmac_keys].join(",") %>
+connection_string = <%= @profiler_settings[:connection_string] %>
+<% end -%>

@@ -67,6 +67,7 @@ if node[:platform_family] == "rhel"
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(neutron, @cookbook_name)
+profiler_settings = KeystoneHelper.profiler_settings(node, @cookbook_name)
 
 ha_enabled = node[:neutron][:ha][:server][:enabled]
 memcached_servers = MemcachedHelper.get_memcached_servers(
@@ -138,6 +139,7 @@ template neutron[:neutron][:config_file] do
       # query on the "neutron" node, not on "node"
       rabbit_settings: CrowbarOpenStackHelper.rabbitmq_settings(neutron, "neutron"),
       keystone_settings: keystone_settings,
+      profiler_settings: profiler_settings,
       memcached_servers: memcached_servers,
       ssl_enabled: neutron[:neutron][:api][:protocol] == "https",
       ssl_cert_file: neutron[:neutron][:ssl][:certfile],
