@@ -1,11 +1,11 @@
 def upgrade(template_attrs, template_deployment, attrs, deployment)
   unless attrs.key? "osprofiler"
     attrs["osprofiler"] = template_attrs["osprofiler"]
-    unless defined?(@@osprofiler_hmac_keys)
+    unless defined?(@@keystone_osprofiler_hmac_keys)
       service = ServiceObject.new "fake-logger"
-      @@osprofiler_hmac_keys = service.random_password
+      @@keystone_osprofiler_hmac_keys = service.random_password
     end
-    attrs["osprofiler"]["hmac_keys"] << @@osprofiler_hmac_keys
+    attrs["osprofiler"]["hmac_keys"] << @@keystone_osprofiler_hmac_keys
   end
   return attrs, deployment
 end
