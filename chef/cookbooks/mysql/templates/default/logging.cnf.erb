@@ -1,6 +1,4 @@
 [mysqld]
-log_error=/var/log/mysql/mysql_error.log
-
 <% if @slow_query_logging_enabled -%>
 slow_query_log = 1
 slow_query_log_file = /var/log/mysql/mysql_slow.log
