@@ -289,7 +289,7 @@ execute "assign-root-password-galera" do
     password \"#{node[:database][:mysql][:server_root_password]}\""
   action :run
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  only_if "/usr/bin/mysql -u root -e 'show databases;'"
+  only_if "/usr/bin/mysql --no-defaults -u root -e 'select (1);'"
 end
 
 crowbar_pacemaker_sync_mark "sync-database_root_password" do
