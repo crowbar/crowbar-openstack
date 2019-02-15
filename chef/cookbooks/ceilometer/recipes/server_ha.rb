@@ -23,6 +23,39 @@ haproxy_loadbalancer "ceilometer-api" do
   action :nothing
 end.run_action(:create)
 
+# setup the expirer cronjob only on a single node to not
+# run into DB deadlocks (bsc#1113107)
+crowbar_pacemaker_sync_mark "wait-ceilometer_expirer_cron"
+
+expirer_transaction_objects = []
+
+ceilometer_expirer_cron_primitive = "ceilometer-expirer-cron"
+pacemaker_primitive ceilometer_expirer_cron_primitive do
+  agent node[:ceilometer][:ha][:expirer][:cronjob][:agent]
+  params(
+    # target is from the RPM package openstack-ceilometer
+    "target" => "/usr/share/ceilometer/openstack-ceilometer-expirer.cron",
+    "link" => "/etc/cron.daily/openstack-ceilometer-expirer.cron",
+    "backup_suffix" => ".orig"
+  )
+  op node[:ceilometer][:ha][:expirer][:cronjob][:op]
+  action :update
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+expirer_transaction_objects << "pacemaker_primitive[#{ceilometer_expirer_cron_primitive}]"
+
+ceilometer_expirer_cron_loc = openstack_pacemaker_controller_only_location_for ceilometer_expirer_cron_primitive
+expirer_transaction_objects << "pacemaker_location[#{ceilometer_expirer_cron_loc}]"
+
+pacemaker_transaction "ceilometer-expirer cron" do
+  cib_objects expirer_transaction_objects
+  # note that this will also automatically start the resources
+  action :commit_new
+  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+crowbar_pacemaker_sync_mark "create-ceilometer_expirer_cron"
+
 if node[:pacemaker][:clone_stateless_services]
   # Wait for all nodes to reach this point so we know that they will have
   # all the required packages installed and configuration files updated
