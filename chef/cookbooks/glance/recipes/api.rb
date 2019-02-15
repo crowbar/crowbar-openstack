@@ -25,6 +25,7 @@ when "rhel", "fedora"
 end
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+profiler_settings = KeystoneHelper.profiler_settings(node, @cookbook_name)
 
 if node[:glance][:api][:protocol] == "https"
   ssl_setup "setting up ssl for glance" do
@@ -76,7 +77,8 @@ template node[:glance][:api][:config_file] do
       swift_api_insecure: swift_insecure,
       cinder_api_insecure: cinder_insecure,
       enable_v1: node[:glance][:enable_v1],
-      glance_stores: glance_stores.join(",")
+      glance_stores: glance_stores.join(","),
+      profiler_settings: profiler_settings
   )
   notifies :restart, "service[#{node[:glance][:api][:service_name]}]"
 end

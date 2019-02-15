@@ -116,6 +116,8 @@ memcached_servers = MemcachedHelper.get_memcached_servers(
 
 memcached_instance("cinder") if node["roles"].include?("cinder-controller")
 
+profiler_settings = KeystoneHelper.profiler_settings(node, @cookbook_name)
+
 template node[:cinder][:config_file] do
   source "cinder.conf.erb"
   owner "root"
@@ -139,6 +141,7 @@ template node[:cinder][:config_file] do
     strict_ssh_host_key_policy: node[:cinder][:strict_ssh_host_key_policy],
     default_availability_zone: node[:cinder][:default_availability_zone],
     default_volume_type: node[:cinder][:default_volume_type],
-    memcached_servers: memcached_servers
+    memcached_servers: memcached_servers,
+    profiler_settings: profiler_settings
     )
 end
