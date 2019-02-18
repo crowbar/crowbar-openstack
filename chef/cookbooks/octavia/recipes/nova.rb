@@ -1,3 +1,4 @@
+require 'chef/mixin/shell_out'
 
 Chef::Log.info "YYYY *************************************** Nova *******************************"
 octavia_keystone_settings = KeystoneHelper.keystone_settings(node, "octavia")
@@ -13,8 +14,8 @@ template "/tmp/create_security_group.sh" do
   group "root"
   mode 00700
   variables(
-    net_name: "fixed",
-    sec_group: "lb-mgmt-sec-group"
+    net_name: node[:octavia][:amphora][:manage_net],
+    sec_group: node[:octavia][:amphora][:sec_group]
   )
 end
 
@@ -24,8 +25,9 @@ template "/tmp/create_image.sh" do
   group "root"
   mode 00700
   variables(
-    flavor: "m1.lbaas.amphora",
-    project_name: octavia_keystone_settings['service_tenant']
+    flavor: node[:octavia][:amphora][:flavor],
+    project_name: octavia_keystone_settings['service_tenant'],
+    image_tag: node[:octavia][:amphora][:image_tag]
   )
 end
 

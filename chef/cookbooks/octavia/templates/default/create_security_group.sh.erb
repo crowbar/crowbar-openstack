@@ -17,7 +17,7 @@ else
 fi
 
 
-openstack security group show lb-mgmt-sec-group >$tmpf
+openstack security group show $sec_group >$tmpf
 
 if (( $? == 1 )); then
   openstack security group create $sec_group --description "Octavia Management Security Group" >$tmpf
@@ -25,4 +25,6 @@ fi
 
 sec_group_id=$(cat $tmpf | tr -d " " | grep "|id|" | cut -f 3 -d "|" )
 
-openstack security group rule create --protocol tcp --dst-port 9443:9443 $sec_group_id >$tmpf
+if (( $(openstack security group rule list $sec_group_id | grep 9443 | wc -l) == 0)); then
+  openstack security group rule create --protocol tcp --dst-port 9443:9443 $sec_group_id >$tmpf
+fi
