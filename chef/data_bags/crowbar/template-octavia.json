@@ -3,13 +3,37 @@
   "description": "API-enabled, pluggable virtual network service for OpenStack",
   "attributes": {
     "octavia": {
+      "user": "octavia",
+      "group": "octavia",
+      "octavia_log_dir":  "/var/log/octavia",
+      "octavia_bin_dir": "octavia",
+      "restart_hold": "100ms",
+      "nova_instance": "none",
+      "neutron_instance": "none",
+      "barbican_instance": "none",
+      "keystone_instance": "none",
+      "glance_instance": "none",
+      "service_user": "octavia",
+      "service_password": "octavia",
+      "api":{
+        "port": 9876
+      },
+      "health-manager":{
+        "port": 5555,
+        "heartbeat_key": "none"
+      },
+      "database":{
+        "user": "octavia",
+        "password": "none",
+        "name": "octavia"
+      }
     }
   },
   "deployment": {
     "octavia": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 300,
+      "schema-revision": 303,
       "element_states": {
         "octavia-api": [ "readying", "ready", "applying" ],
         "octavia-health-manager": [ "readying", "ready", "applying" ],
@@ -21,7 +45,10 @@
          ["octavia-api", "octavia-health-manager", "octavia-housekeeping", "octavia-worker"]
       ],
       "element_run_list_order": {
-        "octavia-api": 101
+        "octavia-api": 101,
+        "octavia-health-manager": 102,
+        "octavia-housekeeping": 103,
+        "octavia-worker": 104
       },
       "config": {
         "environment": "octavia-config-base",

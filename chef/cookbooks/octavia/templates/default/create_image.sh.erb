@@ -1,0 +1,34 @@
+#!/bin/bash -x
+
+source /root/.openrc #TODO: use environment variables
+
+flavor="<%= @flavor %>"
+project_name="<%= @project_name %>"
+
+nova flavor-show $flavor &> /dev/null ||nova flavor-create --is-public False $flavor auto 1024 2 1
+
+service_id=$(openstack project show -f value -c id $project_name)
+echo "Service id is $service_id"
+
+flavor_id=$(nova flavor-access-list --flavor $flavor | head -n -1 | tail -n +4 | tr -d " " | cut -f 3 -d "|")
+
+if (( $(echo $flavor_id | wc -l) == 0 )); then
+        nova flavor-access-add $flavor $service_id
+        flavor_id=$(nova flavor-show $flavor | grep id | tr -d ' ' | cut -f 3 -d '|')
+else
+        echo "Skipped flavor-access-add, it's already created"
+fi
+
+echo "flavor_id: $flavor_id"
+
+image_id=$(glance image-list | grep 'amphora' | tr -d " " | cut -f 2 -d "|" )
+
+if (( $(echo $image_id | wc -l) == 0 )); then
+        file=$(rpm -ql openstack-octavia-amphora-image-x86_64 | grep qcow2)
+        image_id=$(glance image-create --name "amphora" --disk-format qcow2 --container-format bare --file $file | grep id | head -n 1 | tr -d " " | cut -f 3 -d "|")
+        openstack image set --tag "amphora" $image_id
+else
+        echo "Skipped image-list already exists"
+fi
+
+echo "image_id: $image_id"

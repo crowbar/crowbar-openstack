@@ -12,33 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+Chef::Log.info "YYYY *************************************** HEALTH MANAGER *******************************"
 
-Chef::Log.info "YYYY *************************************** housekeeping *******************************"
+#package "openstack-octavia-health-manager"
 
-template "/etc/octavia/octavia-housekeeping.conf" do
-  source "octavia-housekeeping.conf.erb"
+template "/etc/octavia/octavia-health-manager.conf" do
+  source "octavia-health-manager.conf.erb"
   owner node[:octavia][:user]
   group node[:octavia][:group]
   mode 00640
   variables(
     octavia_db_connection: OctaviaHelper.db_connection(fetch_database_settings, node),
     octavia_bind_host: "0.0.0.0", #TODO: Change if change in api
+    octavia_healthmanager_bind_host: "0.0.0.0", #TODO: It is good
+    octavia_healthmanager_hosts: ["0.0.0.0"] #TODO: add all hosts
   )
 end
 
-
-file node[:octavia][:octavia_log_dir] + "/octavia-housekeeping.log" do
+file node[:octavia][:octavia_log_dir] + "/octavia-health-manager.log" do
   action :touch
   owner node[:octavia][:user]
   group node[:octavia][:group]
   mode 00640
 end
 
-file node[:octavia][:octavia_log_dir] + "/octavia-housekeeping-json.log" do
-  action :touch
-  owner node[:octavia][:user]
-  group node[:octavia][:group]
-  mode 00640
-end
 
-octavia_service "housekeeping"
+octavia_service "health-manager"

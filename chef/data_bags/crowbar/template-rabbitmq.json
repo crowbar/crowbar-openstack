@@ -1,86 +1,46 @@
 {
-  "id": "template-rabbitmq",
-  "description": "Installation for rabbitmq",
+  "id": "template-octavia",
+  "description": "API-enabled, pluggable virtual network service for OpenStack",
   "attributes": {
-    "rabbitmq": {
-      "listen_public": false,
-      "port": 5672,
-      "password": "",
-      "user": "openstack",
-      "extra_users": {},
-      "vhost": "openstack",
-      "ssl": {
-        "enabled": false,
-        "port": 5671,
-        "certfile": "/etc/rabbitmq/ssl/certs/signing_cert.pem",
-        "keyfile": "/etc/rabbitmq/ssl/private/signing_key.pem",
-        "insecure": false,
-        "generate_certs": false,
-        "cert_required": false,
-        "ca_certs": "/etc/rabbitmq/ssl/certs/ca.pem",
-        "client_ca_certs": "/etc/ssl/certs/rabbitca.pem"
-      },
-      "client": {
-        "heartbeat_timeout": 60,
-        "enable_notifications": false
-      },
-      "cluster": true,
-      "ha": {
-        "storage": {
-          "mode": "shared",
-          "drbd": {
-            "size": 50
-          },
-          "shared": {
-            "device": "",
-            "fstype": "",
-            "options": ""
-          }
-        }
-      },
-      "trove": {
-        "enabled": false,
-        "password": "",
-        "user": "trove",
-        "vhost": "trove"
-      },
-      "resource_limits": {
-        "rabbitmq-server": {
-          "LimitNOFILE": null
-        }
-      },
-      "mnesia": {
-        "dump_log_write_threshold": 100,
-        "dump_log_time_threshold": 180000
-      },
-      "tcp_listen_options": {
-        "backlog": 128,
-        "nodelay": true,
-        "keepalive": false,
-        "sndbuf": null,
-        "recbuf": null
-      },
-      "collect_statistics_interval": 5000,
-      "enable_queue_mirroring": true
+    "octavia": {
+      "user": "octavia",
+      "group": "octavia",
+      "octavia_log_dir":  "/var/log/octavia",
+      "octavia_bin_dir": "octavia",
+      "restart_hold": "100ms",
+      "nova_instance": "none",
+      "neutron_instance": "none",
+      "barbican_instance": "none",
+      "keystone_instance": "none",
+      "glance_instance": "none"
     }
   },
   "deployment": {
-    "rabbitmq": {
+    "octavia": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
       "schema-revision": 301,
       "element_states": {
-        "rabbitmq-server": [ "readying", "ready", "applying" ]
+        "octavia-api": [ "readying", "ready", "applying" ],
+        "octavia-health-manager": [ "readying", "ready", "applying" ],
+        "octavia-housekeeping": [ "readying", "ready", "applying" ],
+        "octavia-worker": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-        [ "rabbitmq-server" ]
+         ["octavia-api", "octavia-health-manager", "octavia-housekeeping", "octavia-worker"]
       ],
+      "element_run_list_order": {
+        "octavia-api": 101,
+        "octavia-health-manager": 102,
+        "octavia-housekeeping": 103,
+        "octavia-worker": 104
+      },
       "config": {
-        "environment": "rabbitmq-base-config",
+        "environment": "octavia-config-base",
         "mode": "full",
         "transitions": false,
-        "transition_list": [ ]
+        "transition_list": []
       }
     }
   }
