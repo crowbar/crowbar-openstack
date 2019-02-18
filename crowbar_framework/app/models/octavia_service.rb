@@ -29,7 +29,7 @@ class OctaviaService < OpenstackServiceObject
   class << self
     def role_constraints
       {
-        "octavia-server" => {
+        "octavia-api" => {
           "unique" => false,
           "count" => 1,
           "exclude_platform" => {
@@ -37,6 +37,31 @@ class OctaviaService < OpenstackServiceObject
             "windows" => "/.*/"
           },
           "cluster" => true
+        },
+        "octavia-health-manager" => {
+          "unique" => false,
+          "exclude_platform" => {
+            "suse" => "< 12.4",
+            "windows" => "/.*/"
+          },
+          "cluster" => true
+        },
+        "octavia-housekeeping" => {
+          "unique" => false,
+          "count" => 1,
+          "exclude_platform" => {
+            "suse" => "< 12.4",
+            "windows" => "/.*/"
+          },
+          "cluster" => true
+        },
+        "octavia-worker" => {
+          "unique" => false,
+          "exclude_platform" => {
+            "suse" => "< 12.4",
+            "windows" => "/.*/"
+          },
+          "cluster" => false
         }
       }
     end
@@ -44,14 +69,11 @@ class OctaviaService < OpenstackServiceObject
 
   def proposal_dependencies(role)
     answer = []
-    answer << { "barclamp" => "nova", "inst" => role.default_attributes["octavia"]["glance_instance"] }
-    answer << { "barclamp" => "glance", "inst" => role.default_attributes["octavia"]["glance_instance"] }
+    answer << { "barclamp" => "nova", "inst" => role.default_attributes["octavia"]["nova_instance"] }
     answer << { "barclamp" => "neutron", "inst" => role.default_attributes["octavia"]["neutron_instance"] }
-    #answer << { "barclamp" => "barbican", "inst" => role.default_attributes["octavia"]["barbican_instance"] }
+    answer << { "barclamp" => "barbican", "inst" => role.default_attributes["octavia"]["barbican_instance"] }
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes["octavia"]["keystone_instance"] }
-    answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["octavia"]["rabbitmq_instance"] }
-    answer << { "barclamp" => "database", "inst" => role.default_attributes["octavia"]["database_instance"] }
-
+    answer << { "barclamp" => "glance", "inst" => role.default_attributes["octavia"]["glance_instance"] }
     answer
   end
 
@@ -79,7 +101,7 @@ class OctaviaService < OpenstackServiceObject
 
     base["attributes"][@bc_name]["nova_instance"] = find_dep_proposal("nova")
     base["attributes"][@bc_name]["neutron_instance"] = find_dep_proposal("neutron")
-    #base["attributes"][@bc_name]["barbican_instance"] = find_dep_proposal("barbican")
+    base["attributes"][@bc_name]["barbican_instance"] = find_dep_proposal("barbican")
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
     base["attributes"][@bc_name]["glance_instance"] = find_dep_proposal("glance")
 
@@ -87,10 +109,11 @@ class OctaviaService < OpenstackServiceObject
     controller_node = controller_nodes.first
     controller_node ||= nodes.first
 
+    #TODO: network_nodes I don't know if are required
     network_nodes = nodes.select { |n| n.intended_role == "network" }
     network_nodes = [controller_node] if network_nodes.empty?
 
-      worker_nodes = nodes - [controller_node] - [network_nodes]
+    worker_nodes = nodes - [controller_node] - [network_nodes]
 
     base["deployment"]["octavia"]["elements"] = {
         "octavia-api" => [controller_node[:fqdn]],
@@ -99,8 +122,9 @@ class OctaviaService < OpenstackServiceObject
         "octavia-worker" => worker_nodes.map(&:name)
     } unless nodes.nil? || nodes.length.zero?
 
-    base["attributes"]["octavia"]["service_password"] = random_password
-    # TODO: Add more random passwords if are neceesary
+    base["attributes"][@bc_name]["database"]["password"] = random_password
+    base["attributes"][@bc_name]["health-manager"]["heartbeat_key"] = random_password
+    base["attributes"][@bc_name]["service_password"] = random_password
 
     base
   end

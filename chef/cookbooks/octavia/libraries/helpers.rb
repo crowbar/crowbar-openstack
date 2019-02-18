@@ -15,5 +15,15 @@
 #
 #
 module OctaviaHelper
-  # TODO: Octavia Helper
+  def self.db_connection(db_settings, node)
+    db_host = db_settings[:connection][:host]
+    db_user = node[:octavia][:database][:user]
+    db_pass = node[:octavia][:database][:password]
+    db_name = node[:octavia][:database][:name]
+
+    #TODO: mysqsl.ca? octavia_db_connection: "mysql+pymysql://{{ mysql.octavia_user }}:{{ mysql.octavia_password | urlencode }}@{{ mysql.host }}/octavia{% if mysql.use_tls %}{{ mysql.ca }}{% endif %}"
+
+    Chef::Log.info "YYYY db connection mysql+pymysql://#{db_user}:#{db_pass}@#{db_host}/#{db_name}?charset=utf8"
+    "mysql+pymysql://#{db_user}:#{db_pass}@#{db_host}/#{db_name}?charset=utf8"
+  end
 end

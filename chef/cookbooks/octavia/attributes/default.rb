@@ -13,13 +13,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-override[:octavia][:user]="octavia"
-override[:octavia][:group]="octavia"
+default[:octavia][:user]="octavia"
+default[:octavia][:group]="octavia"
 
-defautl[:octavia][:octavia_log_dir] = "/var/log/octavia"
-defautl[:octavia][:octavia_bin_dir] = "octavia" #TODO: Check this value!
-defautl[:octavia][:restart_hold] = "100ms"
+default[:octavia][:octavia_log_dir] = "/var/log/octavia"
+default[:octavia][:octavia_bin_dir] = "octavia" #TODO: Check this value!
+default[:octavia][:restart_hold] = "100ms"
 
+default[:octavia][:api][:port]=9876
+
+default[:octavia][:database][:user]="octavia"
+default[:octavia][:database][:password]="octavia"
+default[:octavia][:database][:name]="octavia"
+
+default[:octavia][:sudoers_file] = "/etc/sudoers.d/octavia"
+default[:octavia][:cert_path] = "/etc/octavia/certs"
+default[:octavia][:octavia_ca_certificate] = default[:octavia][:cert_path] + "/cacert.pem"
+default[:octavia][:octavia_ca_private_key] = default[:octavia][:cert_path] + "/private/cakey.pem"
+default[:octavia][:octavia_ca_private_key_passphrase] = "foobar"
+default[:octavia][:octavia_client_cert] = default[:octavia][:cert_path] + "/private/cacert_01.pem"
+default[:octavia][:octavia_client_key] = default[:octavia][:cert_path] + "/private/servercakey.pem"
+
+default[:octavia][:amphora][:flavor] = "m1.lbaas.amphora"
 #
 # default[:octavia][:debug] = false
 

@@ -12,11 +12,75 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-service_name = "octavia-api"
-octavia_service_cmd = "octavia-api"
-octavia_service_cmd_args = "--config-file={{ octavia_conf_dir }}/octavia-api.conf"
+Chef::Log.info "YYYY *************************************** API *******************************"
 
-package "openstack-octavia-api"
+Chef::Log.info "YYYY #{node[:octavia][:octavia_ca_certificate]}"
+
+cookbook_file "#{node[:octavia][:octavia_ca_certificate]}" do
+  source "cacert.pem"
+  owner "octavia"
+  group "octavia"
+  mode 0600
+  #notifies :restart, "service[openstack-octavia-api]"
+end
+
+cookbook_file "#{node[:octavia][:octavia_ca_private_key]}" do
+  source "cakey.pem"
+  owner "octavia"
+  group "octavia"
+  mode 0600
+  #notifies :restart, "service[openstack-octavia-api]"
+end
+
+cookbook_file "#{node[:octavia][:octavia_client_cert]}" do
+  source "cacert.pem"
+  owner "octavia"
+  group "octavia"
+  mode 0600
+  #notifies :restart, "service[openstack-octavia-api]"
+end
+
+cookbook_file "#{node[:octavia][:octavia_client_key]}" do
+  source "servercakey.pem"
+  owner "octavia"
+  group "octavia"
+  mode 0600
+  #notifies :restart, "service[openstack-octavia-api]"
+end
+
+neutron = node_search_with_cache("roles:neutron-server").first
+neutron_protocol = neutron[:neutron][:api][:protocol]
+neutron_server_host = CrowbarHelper.get_host_for_admin_url(neutron, neutron[:neutron][:ha][:server][:enabled])
+neutron_server_port = neutron[:neutron][:api][:service_port]
+neutron_endpoint = neutron_protocol + "://" + neutron_server_host + ":" + neutron_server_port.to_s
+
+nova = node_search_with_cache("roles:neutron-server").first
+nova_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
+nova_server_host = CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled])
+nova_server_port = nova[:nova][:ports][:api]
+nova_endpoint = nova_protocol + "://" + nova_server_host + ":" + nova_server_port.to_s
+
+Chef::Log.info "YYYY #{KeystoneHelper.keystone_settings(node, "octavia")}"
+
+template "/etc/octavia/octavia-api.conf" do
+  source "octavia-api.conf.erb"
+  owner node[:octavia][:user]
+  group node[:octavia][:group]
+  mode 00640
+  variables(
+    octavia_db_connection: OctaviaHelper.db_connection(fetch_database_settings, node),
+    octavia_bind_host: "0.0.0.0",
+    neutron_endpoint: neutron_endpoint,
+    nova_endpoint: nova_endpoint,
+    neutron_keystone_settings: KeystoneHelper.keystone_settings(node, "neutron"),
+    octavia_keystone_settings: KeystoneHelper.keystone_settings(node, "octavia"),
+    rabbit_settings: fetch_rabbitmq_settings,
+    octavia_ca_certificate: node[:octavia][:octavia_ca_certificate],
+    octavia_ca_private_key: node[:octavia][:octavia_ca_private_key],
+    octavia_ca_private_key_passphrase: node[:octavia][:octavia_ca_private_key_passphrase],
+    octavia_client_cert: node[:octavia][:octavia_client_cert],
+  )
+end
 
 file node[:octavia][:octavia_log_dir] + "/octavia-api.log" do
   action :touch
@@ -32,43 +96,4 @@ file node[:octavia][:octavia_log_dir] + "/octavia-api-json.log" do
   mode 00640
 end
 
-octavia_component_exec_start = node[:octavia]["octavia_bin_dir"] + "/" + octavia_service_cmd + " " + octavia_service_cmd_args
-
-template "/etc/systemd/system/#{service_name}.service" do
-  source "octavia-component.service.erb"
-  mode "0644"
-  owner "root"
-  group "root"
-  variables(
-    service_name: service_name,
-    octavia_component_exec_start: octavia_component_exec_start
-  )
-end
-
-bash "reload systemd after #{service_name} update" do
-  code "systemctl daemon-reload"
-  action :nothing
-  subscribes :run,
-    "template[/etc/systemd/system/#{service_name}.service]",
-    :immediately
-end
-
-service "#{service_name}" do
-  supports status: true, restart: true
-  action [:enable, :start]
-  subscribes :restart, resources(template: node[:neutron][:config_file])
-end
-
-
-
-# template node[:neutron][:nsx_config_file] do
-#   cookbook "neutron"
-#   source "nsx.ini.erb"
-#   owner "root"
-#   group node[:neutron][:platform][:group]
-#   mode "0640"
-#   variables(
-#     vmware_config: node[:neutron][:vmware]
-#   )
-#   notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
-# end
+octavia_service "api"

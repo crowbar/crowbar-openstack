@@ -1,4 +1,4 @@
-# Copyright 2019 SUSE Linux, GmbH.
+#Copyright 2016, SUSE Linux GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,4 +13,16 @@
 # limitations under the License.
 #
 
-# TODO: Server recipes
+define :octavia_service do
+ # ha_enabled = node[:octavia][:ha][:enabled]
+
+ package "openstack-octavia-#{params[:name]}" if ["rhel", "suse"].include? node[:platform_family]
+
+ service "octavia-#{params[:name]}" do
+   service_name "openstack-octavia-#{params[:name]}"
+   supports status: true, restart: true
+   action [:enable, :start]
+   subscribes :restart, resources(template: "/etc/octavia/octavia-#{params[:name]}.conf")
+  #TODO provider Chef::Provider::CrowbarPacemakerService if ha_enabled
+ end
+end

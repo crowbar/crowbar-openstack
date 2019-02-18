@@ -7,12 +7,38 @@
       "mapping": {
         "octavia": { "type": "map", "required": true,
              "mapping": {
-                  "user": { "type": "str", "required": true },
-                  "group": { "type": "str", "required": true },
-                  "octavia_log_dir": { "type": "str", "required": true },
-                  "octavia_bin_dir": { "type": "str", "required": true },
-                  "restart_hold": { "type": "str", "required": true }
-              }}
+                    "user": { "type": "str", "required": true },
+                    "group": { "type": "str", "required": true },
+                    "octavia_log_dir": { "type": "str", "required": true },
+                    "octavia_bin_dir": { "type": "str", "required": true },
+                    "restart_hold": { "type": "str", "required": true },
+                    "nova_instance": { "type": "str", "required": true },
+                    "neutron_instance": { "type": "str", "required": true },
+                    "barbican_instance": { "type": "str", "required": true },
+                    "keystone_instance": { "type": "str", "required": true },
+                    "glance_instance": { "type": "str", "required": true },
+                    "service_user": { "type": "str", "required": true },
+                    "service_password": { "type": "str", "required": true },
+                    "api": { "type": "map", "required": true,
+                      "mapping": {
+                        "port": { "type": "int", "required": true }
+                      }
+                    },
+                    "health-manager": { "type": "map", "required": true,
+                      "mapping": {
+                        "port": { "type": "int", "required": true },
+                        "heartbeat_key": { "type": "str", "required": true }
+                      }
+                    },
+                    "database": { "type": "map", "required": true,
+                      "mapping": {
+                        "user": { "type": "str", "required": true },
+                        "password": { "type": "str", "required": true },
+                        "name": { "type": "str", "required": true }
+                      }
+                    }
+              }
+        }
      }},
     "deployment": { "type": "map", "required": true,
       "mapping": {

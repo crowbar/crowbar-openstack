@@ -1,0 +1,3 @@
+octavia ALL=(root) NOPASSWD:ALL
+Defaults:octavia !requiretty
+Defaults:octavia secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"

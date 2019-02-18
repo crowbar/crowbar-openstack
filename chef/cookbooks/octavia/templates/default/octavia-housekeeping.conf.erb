@@ -1,4 +1,4 @@
-{#
+#
 #
 # (c) Copyright 2016 Hewlett Packard Enterprise Development LP
 # (c) Copyright 2017-2018 SUSE LLC
@@ -15,127 +15,26 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-#}
+#
 # This configuration file includes the default values for Ardana Openstack
 # Changes may be made to this file by customers.
 
 [DEFAULT]
 debug = True
 #os_region_name = region1
-os_endpoint_type = <%= @octavia_endpoint_type %>
-log_config_append = "<%= @octavia_conf_dir %>/octavia-hk-logging.conf"
+os_endpoint_type = "internalURL"
 
 [api_settings]
 api_handler = queue_producer
 bind_host = <%= @octavia_bind_host %>
-bind_port = <%= @octavia_bind_port %>
+bind_port = <%= @node[:octavia][:api][:port] %>
 
 [database]
 connection = <%= @octavia_db_connection %>
 
-[health_manager]
-bind_ip = <%= @octavia_healthmanager_bind_host %>
-bind_port = <%= @octavia_healthmanager_port %>
-controller_ip_port_list = <%= @octavia_healthmanager_hosts %>
-heartbeat_key = <%= @octavia_heartbeat_key %>
-event_streamer_driver = queue_event_streamer
-heartbeat_interval = 10
-heartbeat_timeout = 180
-health_check_interval = 3
-
-[keystone_authtoken]
-auth_version = 3
-auth_uri = <%= @octavia_auth_endpoint %>
-auth_url = <%= @octavia_auth_endpoint %>
-auth_type = password
-project_name = <%= @octavia_project_name %>
-project_domain_name = Default
-user_domain_name = Default
-username = <%= @octavia_admin_user %>
-password = <%= @octavia_admin_password %>
-region_name = <%= @octavia_region_name %>
-cafile = <%= @octavia_ca_file %>
-
-[certificates]
-cert_generator = local_cert_generator
-cert_manager = barbican_cert_manager
-ca_certificate = <%= @octavia_ca_certificate %>
-ca_private_key = <%= @octavia_ca_private_key %>
-ca_private_key_passphrase = <%= @octavia_ca_private_key_passphrase %>
-
-[haproxy_amphora]
-server_ca = <%= @octavia_server_ca %>
-client_cert = <%= @octavia_client_cert %>
-key_path = <%= @octavia_key_path %>
-base_path = /var/lib/octavia
-base_cert_dir = /var/lib/octavia/certs
-connection_max_retries = 10
-connection_retry_interval = 10
-
-[controller_worker]
-amp_active_retries = 40
-amp_active_wait_sec = 10
-amp_flavor_id = <%= @octavia_nova_flavor_id.stdout %>
-amp_image_id = <%= @octavia_amp_image_id %>
-amp_image_tag = <%= @octavia_amp_image_tag %>
-amp_boot_network_list = <%= @octavia_mgmt_net_id.stdout %>
-amp_secgroup_list = <%= @octavia_mgmt_sec_group_id.stdout %>
-client_ca = <%= @octavia_client_ca %>
-compute_driver = compute_nova_driver
-amphora_driver = amphora_haproxy_rest_driver
-network_driver = allowed_address_pairs_driver
-loadbalancer_topology = SINGLE
-#amp_ssh_key_name =
-
-[oslo_messaging_rabbit]
-rabbit_userid = <%= @octavia_rabbit_userid %>
-rabbit_hosts = <%= @octavia_rabbit_hosts %>
-rabbit_password = <%= @octavia_rabbit_password %>
-rabbit_use_ssl = <%= @octavia_rabbit_use_ssl %>
-
-[oslo_messaging]
-topic = octavia_prov
-rpc_thread_pool_size = 2
-
 [house_keeping]
 # Pool size for the spare pool
 # spare_amphora_pool_size = 0
-
-[service_auth]
-auth_version = 3
-auth_uri = <%= @octavia_auth_endpoint %>
-auth_url = <%= @octavia_auth_endpoint %>
-auth_type = password
-project_name = <%= @octavia_project_name %>
-project_domain_name = Default
-user_domain_name = Default
-username = <%= @octavia_admin_user %>
-password = <%= @octavia_admin_password %>
-region_name = <%= @octavia_region_name %>
-cafile = <%= @octavia_ca_file %>
-
-[networking]
-port_detach_timeout = 900
-
-[neutron]
-endpoint = <%= @neutron_endpoint %>
-endpoint_type = <%= @octavia_endpoint_type %>
-
-[nova]
-endpoint = <%= @nova_endpoint %>
-endpoint_type = <%= @octavia_endpoint_type %>
-
-[barbican]
-auth_url = <%= @octavia_auth_endpoint %>
-admin_user = <%= @neutron_admin_user %>
-admin_password = <%= @neutron_admin_password %>
-auth_version = 3
-admin_tenant_name = <%= @keystone_admin_tenant %>
-admin_user_domain = <%= @keystone_default_domain %>
-admin_project_domain = <%= @keystone_default_domain %>
-region_name = <%= @octavia_region_name %>
-#service_name =
-endpoint_type = <%= @octavia_endpoint_type %>
 
 ### End of File ###
 ## Do NOT put anything after this line ##
