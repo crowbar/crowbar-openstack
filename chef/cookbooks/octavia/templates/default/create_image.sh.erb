@@ -4,6 +4,7 @@ source /root/.openrc #TODO: use environment variables
 
 flavor="<%= @flavor %>"
 project_name="<%= @project_name %>"
+image_tag="<%= @image_tag %>"
 
 nova flavor-show $flavor &> /dev/null ||nova flavor-create --is-public False $flavor auto 1024 2 1
 
@@ -21,12 +22,12 @@ fi
 
 echo "flavor_id: $flavor_id"
 
-image_id=$(glance image-list | grep 'amphora' | tr -d " " | cut -f 2 -d "|" )
+image_id=$(glance image-list | grep $image_tag | tr -d " " | cut -f 2 -d "|" )
 
 if (( $(echo $image_id | wc -l) == 0 )); then
         file=$(rpm -ql openstack-octavia-amphora-image-x86_64 | grep qcow2)
-        image_id=$(glance image-create --name "amphora" --disk-format qcow2 --container-format bare --file $file | grep id | head -n 1 | tr -d " " | cut -f 3 -d "|")
-        openstack image set --tag "amphora" $image_id
+        image_id=$(glance image-create --name $image_tag --disk-format qcow2 --container-format bare --file $file | grep id | head -n 1 | tr -d " " | cut -f 3 -d "|")
+        openstack image set --tag $image_tag $image_id
 else
         echo "Skipped image-list already exists"
 fi

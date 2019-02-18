@@ -35,6 +35,10 @@ default[:octavia][:octavia_client_cert] = default[:octavia][:cert_path] + "/priv
 default[:octavia][:octavia_client_key] = default[:octavia][:cert_path] + "/private/servercakey.pem"
 
 default[:octavia][:amphora][:flavor] = "m1.lbaas.amphora"
+default[:octavia][:amphora][:sec_group] ="lb-mgmt-sec-group"
+default[:octavia][:amphora][:manage_net] ="fixed"
+default[:octavia][:amphora][:image_tag] = "amphora"
+
 #
 # default[:octavia][:debug] = false
 

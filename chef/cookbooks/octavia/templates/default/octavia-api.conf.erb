@@ -65,13 +65,13 @@ ca_private_key = <%= @octavia_ca_private_key %>
 ca_private_key_passphrase = <%= @octavia_ca_private_key_passphrase %>
 
 [haproxy_amphora]
-#server_ca = <%= @octavia_ca_certificate %>
-#client_cert = <%= @octavia_client_cert %>
-#key_path = {{ octavia_key_path }}
-#base_path = /var/lib/octavia
-#base_cert_dir = /var/lib/octavia/certs
-#connection_max_retries = 10
-#connection_retry_interval = 10
+server_ca = <%= @octavia_ca_certificate %>
+client_cert = <%= @node[:octavia][:octavia_client_cert] %>
+key_path = <%= @node[:octavia][:cert_path] %>/private
+base_path = /var/lib/octavia
+base_cert_dir = <%= @node[:octavia][:cert_path] %>
+connection_max_retries = 10
+connection_retry_interval = 10
 
 [oslo_messaging_rabbit]
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
