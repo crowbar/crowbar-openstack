@@ -55,12 +55,7 @@ if node[:nova][:use_novnc]
   haproxy_loadbalancer "nova-novncproxy" do
     address "0.0.0.0"
     port node[:nova][:ports][:novncproxy]
-    # novnc proxy does not like empty ssl packet followed by an RST
-    # http://git.haproxy.org/?p=haproxy.git;a=commit;h=fd29cc537b8511db6e256529ded625c8e7f856d0
-    # which is used for check-ssl
-    # use_ssl #node[:nova][:novnc][:ssl][:enabled]
-    mode "tcp"
-    options ["tcpka", "tcplog"]
+    use_ssl node[:nova][:novnc][:ssl][:enabled]
     servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "novncproxy")
     rate_limit node[:nova][:ha_rate_limit]["nova-novncproxy"]
     action :nothing
