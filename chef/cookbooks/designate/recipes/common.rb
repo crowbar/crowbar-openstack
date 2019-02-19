@@ -39,6 +39,8 @@ memcached_servers = MemcachedHelper.get_memcached_servers(
 
 memcached_instance("designate") if node["roles"].include?("designate-server")
 
+api_protocol = node[:designate][:api][:protocol]
+
 template node[:designate][:config_file] do
   source "designate.conf.erb"
   owner "root"
@@ -47,7 +49,7 @@ template node[:designate][:config_file] do
   variables(
     bind_host: network_settings[:api][:bind_host],
     bind_port: network_settings[:api][:bind_port],
-    api_base_uri: "#{node[:designate][:api][:protocol]}://#{public_host}:#{node[:designate][:api][:bind_port]}",
+    api_base_uri: "#{api_protocol}://#{public_host}:#{node[:designate][:api][:bind_port]}",
     sql_connection: sql_connection,
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: KeystoneHelper.keystone_settings(node, :designate),

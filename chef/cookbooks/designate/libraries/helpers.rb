@@ -19,7 +19,9 @@ module DesignateHelper
       @ip ||= Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
       @cluster_admin_ip ||= nil
 
-      if node[:designate][:ha][:enabled] && !@cluster_admin_ip
+      ha_enabled = node[:designate][:ha][:enabled]
+
+      if ha_enabled && !@cluster_admin_ip
         @cluster_admin_ip = CrowbarPacemakerHelper.cluster_vip(node, "admin")
       end
 
@@ -27,12 +29,12 @@ module DesignateHelper
         ip: @ip,
 
         api: {
-          bind_host: if !node[:designate][:ha][:enabled] && node[:designate][:api][:bind_open_address]
+          bind_host: if !ha_enabled && node[:designate][:api][:bind_open_address]
                        "0.0.0.0"
                      else
                        @ip
                      end,
-          bind_port: if node[:designate][:ha][:enabled]
+          bind_port: if ha_enabled
                        node[:designate][:ha][:ports][:api_port].to_i
                      else
                        node[:designate][:api][:bind_port].to_i
