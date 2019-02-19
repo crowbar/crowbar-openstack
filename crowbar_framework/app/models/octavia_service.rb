@@ -67,6 +67,7 @@ class OctaviaService < OpenstackServiceObject
     end
   end
 
+
   def proposal_dependencies(role)
     answer = []
     answer << { "barclamp" => "nova", "inst" => role.default_attributes["octavia"]["nova_instance"] }
@@ -125,6 +126,17 @@ class OctaviaService < OpenstackServiceObject
     base["attributes"][@bc_name]["database"]["password"] = random_password
     base["attributes"][@bc_name]["health-manager"]["heartbeat_key"] = random_password
     base["attributes"][@bc_name]["service_password"] = random_password
+
+    with_lock @bc_name do
+      db = Chef::DataBagItem.new
+      db.data_bag "crowbar"
+      db["id"] = "octavia"
+      db["server_ca_cert"] = ""
+      db["server_ca_key"] = ""
+      db["client_ca"] = ""
+      db["client_cert_and_key"] = ""
+      db.save
+    end
 
     base
   end

@@ -16,38 +16,6 @@ Chef::Log.info "YYYY *************************************** API ***************
 
 Chef::Log.info "YYYY #{node[:octavia][:octavia_ca_certificate]}"
 
-cookbook_file "#{node[:octavia][:octavia_ca_certificate]}" do
-  source "cacert.pem"
-  owner "octavia"
-  group "octavia"
-  mode 0600
-  #notifies :restart, "service[openstack-octavia-api]"
-end
-
-cookbook_file "#{node[:octavia][:octavia_ca_private_key]}" do
-  source "cakey.pem"
-  owner "octavia"
-  group "octavia"
-  mode 0600
-  #notifies :restart, "service[openstack-octavia-api]"
-end
-
-cookbook_file "#{node[:octavia][:octavia_client_cert]}" do
-  source "cacert.pem"
-  owner "octavia"
-  group "octavia"
-  mode 0600
-  #notifies :restart, "service[openstack-octavia-api]"
-end
-
-cookbook_file "#{node[:octavia][:octavia_client_key]}" do
-  source "servercakey.pem"
-  owner "octavia"
-  group "octavia"
-  mode 0600
-  #notifies :restart, "service[openstack-octavia-api]"
-end
-
 neutron = node_search_with_cache("roles:neutron-server").first
 neutron_protocol = neutron[:neutron][:api][:protocol]
 neutron_server_host = CrowbarHelper.get_host_for_admin_url(neutron, neutron[:neutron][:ha][:server][:enabled])
@@ -74,11 +42,7 @@ template "/etc/octavia/octavia-api.conf" do
     nova_endpoint: nova_endpoint,
     neutron_keystone_settings: KeystoneHelper.keystone_settings(node, "neutron"),
     octavia_keystone_settings: KeystoneHelper.keystone_settings(node, "octavia"),
-    rabbit_settings: fetch_rabbitmq_settings,
-    octavia_ca_certificate: node[:octavia][:octavia_ca_certificate],
-    octavia_ca_private_key: node[:octavia][:octavia_ca_private_key],
-    octavia_ca_private_key_passphrase: node[:octavia][:octavia_ca_private_key_passphrase],
-    octavia_client_cert: node[:octavia][:octavia_client_cert],
+    rabbit_settings: fetch_rabbitmq_settings
   )
 end
 

@@ -1,0 +1,61 @@
+# Requires create the directory, and copy openssl.conf inside
+#
+
+country="<%= node[:octavia][:certs][:country] %>"
+province="<%= node[:octavia][:certs][:province] %>"
+domain="<%= node[:octavia][:certs][:domain] %>"
+pass="<%= node[:octavia][:certs][:passphrase] %>"
+subj="/C=$country/ST=$province/L=Ocala/O=Home/CN=$domain"
+
+# Make directories for the two certificate authorities.
+cd <%= node[:octavia][:certs][:cert_path] %>
+mkdir client_ca
+mkdir server_ca
+
+# Starting with the server certificate authority, prepare the CA.
+cd server_ca
+mkdir certs crl newcerts private
+chmod 700 private
+touch index.txt
+echo 1000 > serial
+
+# Create the server CA key.
+openssl genrsa -aes256 -out private/ca.key.pem -passout pass:$pass 4096
+chmod 400 private/ca.key.pem
+
+# Create the server CA certificate.
+openssl req -config ../openssl.cnf -key private/ca.key.pem -new -x509 -days 7300 -sha256 \
+-subj "$subj" -passin pass:$pass -extensions v3_ca -out certs/ca.cert.pem
+
+# Moving to the client certificate authority, prepare the CA.
+cd ../client_ca
+mkdir certs crl csr newcerts private
+chmod 700 private
+touch index.txt
+echo 1000 > serial
+
+# Create the client CA key.
+openssl genrsa -aes256 -out private/ca.key.pem -passout pass:$pass 4096
+chmod 400 private/ca.key.pem
+
+# Create the client CA certificate.
+openssl req -config ../openssl.cnf -key private/ca.key.pem -new -x509 -days 7300 -sha256 \
+-subj "$subj" -passin pass:$pass -extensions v3_ca -out certs/ca.cert.pem
+
+# Create a key for the client certificate to use.
+openssl genrsa -aes256 -out private/client.key.pem -passout pass:$pass 2048
+
+#Create the certificate request for the client certificate used on the controllers.
+openssl req -config ../openssl.cnf -new -sha256 -key private/client.key.pem \
+-subj "$subj" -passin pass:$pass -extensions v3_ca -out csr/client.csr.pem
+
+# Sign the client certificate request.
+openssl ca  -batch -config ../openssl.cnf -extensions usr_cert -days 7300 -notext -md sha256 \
+-in csr/client.csr.pem -passin pass:$pass -out certs/client.cert.pem
+
+# Create a concatenated client certificate and key file.
+openssl rsa -in private/client.key.pem -passin pass:$pass -out private/client.cert-and-key.pem
+cat certs/client.cert.pem >> private/client.cert-and-key.pem
+chmod 700 private/client.cert-and-key.pem
+
+chown -R <%= node[:octavia][:user] %>:<%= node[:octavia][:group] %> *

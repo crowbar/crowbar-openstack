@@ -37,15 +37,18 @@ amp_active_retries = 40
 amp_active_wait_sec = 10
 amp_flavor_id = <%= @octavia_nova_flavor_id %>
 amp_image_id = <%= @octavia_amp_image_id %>
-amp_image_tag = <%= @octavia_amp_image_tag %>
+amp_image_tag = <%= @node[:octavia][:amphora][:image_tag] %>
 amp_boot_network_list = <%= @octavia_mgmt_net_id %>
 amp_secgroup_list = <%= @octavia_mgmt_sec_group_id %>
-client_ca = <%= @octavia_client_cert %>
+client_ca = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:client_ca_cert_path] %>
 compute_driver = compute_nova_driver
 amphora_driver = amphora_haproxy_rest_driver
 network_driver = allowed_address_pairs_driver
 loadbalancer_topology = SINGLE
 
+[haproxy_amphora]
+client_cert = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:client_cert_and_key_path] %>
+server_ca = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:server_ca_cert_path] %>
 
 ### End of File ###
 ## Do NOT put anything after this line ##
