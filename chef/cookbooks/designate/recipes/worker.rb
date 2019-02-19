@@ -16,6 +16,4 @@
 # Recipe:: pool_bind
 #
 
-ha_enabled = node[:designate][:ha][:enabled]
-
 designate_service "pool-worker"
