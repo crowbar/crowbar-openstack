@@ -44,7 +44,7 @@ pacemaker_transaction "ceilometer central" do
 end
 
 crowbar_pacemaker_order_only_existing "o-#{service_name}" do
-  ordering "( #{rabbit_settings[:pacemaker_resource]} cl-keystone ) #{service_name}"
+  ordering "( galera #{rabbit_settings[:pacemaker_resource]} ) #{service_name}"
   score "Optional"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
