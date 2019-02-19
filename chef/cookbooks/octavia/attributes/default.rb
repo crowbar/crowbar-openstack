@@ -27,12 +27,24 @@ default[:octavia][:database][:password]="octavia"
 default[:octavia][:database][:name]="octavia"
 
 default[:octavia][:sudoers_file] = "/etc/sudoers.d/octavia"
-default[:octavia][:cert_path] = "/etc/octavia/certs"
-default[:octavia][:octavia_ca_certificate] = default[:octavia][:cert_path] + "/cacert.pem"
-default[:octavia][:octavia_ca_private_key] = default[:octavia][:cert_path] + "/private/cakey.pem"
-default[:octavia][:octavia_ca_private_key_passphrase] = "foobar"
-default[:octavia][:octavia_client_cert] = default[:octavia][:cert_path] + "/private/cacert_01.pem"
-default[:octavia][:octavia_client_key] = default[:octavia][:cert_path] + "/private/servercakey.pem"
+
+default[:octavia][:certs][:country] = "US"
+default[:octavia][:certs][:province] = "Oregon"
+default[:octavia][:certs][:domain] = "example.com"
+default[:octavia][:certs][:cert_path] = "/etc/octavia/certs/"
+default[:octavia][:certs][:passphrase] = "foobar"
+
+default[:octavia][:certs][:server_ca_cert_path] = "server_ca/certs/ca.cert.pem"
+default[:octavia][:certs][:server_ca_key_path] = "server_ca/private/ca.key.pem"
+default[:octavia][:certs][:client_ca_cert_path] = "client_ca/certs/ca.cert.pem"
+default[:octavia][:certs][:client_cert_and_key_path] = "client_ca/private/client.cert-and-key.pem"
+
+# To deprecate
+# default[:octavia][:octavia_ca_certificate] = default[:octavia][:cert_path] + "/cacert.pem"
+# default[:octavia][:octavia_ca_private_key] = default[:octavia][:cert_path] + "/private/cakey.pem"
+# default[:octavia][:octavia_ca_private_key_passphrase] = "foobar"
+# default[:octavia][:octavia_client_cert] = default[:octavia][:cert_path] + "/private/cacert_01.pem"
+# default[:octavia][:octavia_client_key] = default[:octavia][:cert_path] + "/private/servercakey.pem"
 
 default[:octavia][:amphora][:flavor] = "m1.lbaas.amphora"
 default[:octavia][:amphora][:sec_group] ="lb-mgmt-sec-group"

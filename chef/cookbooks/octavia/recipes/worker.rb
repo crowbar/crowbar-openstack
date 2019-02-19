@@ -61,16 +61,10 @@ template "/etc/octavia/octavia-worker.conf" do
     neutron_keystone_settings: KeystoneHelper.keystone_settings(node, "neutron"),
     octavia_keystone_settings: KeystoneHelper.keystone_settings(node, "octavia"),
     rabbit_settings: fetch_rabbitmq_settings,
-    octavia_ca_certificate: node[:octavia][:octavia_ca_certificate],
-    octavia_ca_private_key: node[:octavia][:octavia_ca_private_key],
-    octavia_ca_private_key_passphrase: node[:octavia][:octavia_ca_private_key_passphrase],
-    octavia_client_cert: node[:octavia][:octavia_client_cert],
     octavia_nova_flavor_id: flavor_id,
     octavia_amp_image_id: image_id,
-    octavia_amp_image_tag: node[:octavia][:amphora][:image_tag],
     octavia_mgmt_net_id: net_id,
-    octavia_mgmt_sec_group_id: sec_group_id,
-    octavia_client_cert: node[:octavia][:octavia_client_cert]
+    octavia_mgmt_sec_group_id: sec_group_id
   )
 end
 
@@ -85,13 +79,12 @@ octavia_service "worker"
 
 package "openstack-octavia-amphora-agent"
 
-template "/etc/octavia/octavia-worker.conf" do
-  source "octavia-worker.conf.erb"
+template "/etc/octavia/amphora-agent.conf" do
+  source "amphora-agent.conf.erb"
   owner node[:octavia][:user]
   group node[:octavia][:group]
   mode 00640
   variables(
-    octavia_ca_certificate: node[:octavia][:octavia_ca_certificate]
   )
 end
 

@@ -1,7 +1,4 @@
 Chef::Log.info "YYYY *************************************** Common *******************************"
-include_recipe "#{@cookbook_name}::database"
-include_recipe "#{@cookbook_name}::keystone"
-include_recipe "#{@cookbook_name}::nova"
 
 cookbook_file "#{node[:octavia][:sudoers_file]}" do
   source "sudoers"
