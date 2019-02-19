@@ -78,6 +78,7 @@ default[:ceilometer][:ha][:collector][:op][:monitor][:interval] = "10s"
 default[:ceilometer][:ha][:agent_notification][:agent] = "systemd:#{agent_notification_service_name}"
 default[:ceilometer][:ha][:agent_notification][:op][:monitor][:interval] = "10s"
 
+
 default[:ceilometer][:ha][:central][:enabled] = false
 default[:ceilometer][:ha][:central][:agent] = "systemd:#{central_service_name}"
 default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"
@@ -90,3 +91,7 @@ default[:ceilometer][:ha][:mongodb][:replica_set][:member] = false
 # this establishes which node is used for mongo client connections that
 # we use to initialize the replica set
 default[:ceilometer][:ha][:mongodb][:replica_set][:controller] = false
+
+# Pacemaker ceilometer expirer cronjob link
+default[:ceilometer][:ha][:expirer][:cronjob][:agent] = "ocf:heartbeat:symlink"
+default[:ceilometer][:ha][:expirer][:cronjob][:op][:monitor][:interval] = "10s"
