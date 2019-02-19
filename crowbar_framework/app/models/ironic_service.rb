@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 #
-# Copyright 2016, SUSE
+# Copyright 2016-2019, SUSE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,16 +90,19 @@ class IronicService < ServiceObject
       validation_error I18n.t("barclamp.#{@bc_name}.validation.ironic_network")
     end
 
-    if proposal["attributes"][@bc_name]["enabled_drivers"].empty?
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.no_drivers")
+    if proposal["attributes"][@bc_name]["enabled_hardware_types"].empty?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.no_hardware_types")
     end
 
-    if proposal["attributes"][@bc_name]["enabled_drivers"].any? { |d| d.include?("ssh") }
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.wrong_drivers")
+    ["boot", "console", "deploy", "inspect", "management",
+     "network", "power", "raid", "storage", "vendor"].each do |type|
+      if proposal["attributes"][@bc_name]["enabled_#{type}_interfaces"].empty?
+        validation_error I18n.t("barclamp.#{@bc_name}.validation.no_interfaces", type: type)
+      end
     end
 
-    # additional soft dependencies for agent_* drivers
-    if proposal["attributes"][@bc_name]["enabled_drivers"].any? { |d| d.start_with?("agent_") }
+    # additional soft dependencies for agent based deployments
+    if proposal["attributes"][@bc_name]["enabled_deploy_interfaces"].include? "direct"
       swift_svc = SwiftService.new @logger
       swift_proposal = Proposal.find_by(barclamp: swift_svc.bc_name, name: "default")
       if swift_proposal

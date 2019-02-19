@@ -1,5 +1,16 @@
 [DEFAULT]
-enabled_drivers=<%= @drivers.join(',') %>
+enabled_hardware_types=<%= @enabled_hardware_types.join(',') %>
+enabled_boot_interfaces=<%= @enabled_boot_interfaces.join(',') %>
+enabled_console_interfaces=<%= @enabled_console_interfaces.join(',') %>
+enabled_deploy_interfaces=<%= @enabled_deploy_interfaces.join(',') %>
+enabled_inspect_interfaces=<%= @enabled_inspect_interfaces.join(',') %>
+enabled_management_interfaces=<%= @enabled_management_interfaces.join(',') %>
+enabled_network_interfaces=<%= @enabled_network_interfaces.join(',') %>
+enabled_power_interfaces=<%= @enabled_power_interfaces.join(',') %>
+enabled_raid_interfaces=<%= @enabled_raid_interfaces.join(',') %>
+enabled_storage_interfaces=<%= @enabled_storage_interfaces.join(',') %>
+enabled_vendor_interfaces=<%= @enabled_vendor_interfaces.join(',') %>
+
 my_ip=<%= @ironic_ip %>
 debug=<%= @debug ? 'true' : 'false' %>
 transport_url=<%= @rabbit_settings[:url] %>

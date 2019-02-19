@@ -32,8 +32,8 @@ en:
         ssl_header: 'SSL Support'
       validation:
         ironic_network: 'Ironic network is not configured.'
-        swift_proposal: 'To use agent_* drivers, Swift needs to be enabled.'
-        swift_tempurl_enabled: 'To use agent_* drivers, Swift TempURL middleware needs to be enabled.'
-        glance_swift_default_store: 'To use agent_* drivers, Glance needs to have Swift set as Default Storage Store.'
-        no_drivers: 'No drivers enabled. Select at least one driver.'
-        wrong_drivers: 'SSH-based power and management driver interfaces have been removed from ironic.'
+        swift_proposal: 'To use agent based (direct) deploy interface, Swift needs to be enabled.'
+        swift_tempurl_enabled: 'To use agent based (direct) deploy interface, Swift TempURL middleware needs to be enabled.'
+        glance_swift_default_store: 'To use agent based (direct) deploy interface, Glance needs to have Swift set as Default Storage Store.'
+        no_hardware_types: 'No hardware types enabled. Select at least one hardware type.'
+        no_interfaces: 'No %{type} interfaces enabled. Select at least one %{type} interface.'

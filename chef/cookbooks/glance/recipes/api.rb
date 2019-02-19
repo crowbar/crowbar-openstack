@@ -94,9 +94,9 @@ template "/etc/glance/glance-swift.conf" do
   notifies :restart, "service[#{node[:glance][:api][:service_name]}]"
 end
 
-# ensure swift tempurl key only if some agent_* drivers are enabled in ironic
+# ensure swift tempurl key only if "direct" deploy interface is enabled in ironic
 if !swift_config.empty? && node[:glance][:default_store] == "swift" && \
-    ironics.any? && ironics.first[:ironic][:enabled_drivers].any? { |d| d.start_with?("agent_") }
+    ironics.any? && ironics.first[:ironic][:enabled_deploy_interfaces].include?("direct")
   swift_command = "swift"
   swift_command << (swift_insecure ? " --insecure" : "")
   env = {

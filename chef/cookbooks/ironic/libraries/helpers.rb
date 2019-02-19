@@ -1,4 +1,4 @@
-# Copyright 2017 SUSE
+# Copyright 2017-2019 SUSE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@ module IronicHelper
 
     def swift_settings(node, glance)
       swift = CrowbarUtilsSearch.node_search_with_cache(node, "roles:swift-proxy").first || {}
-      # configure swift only if some agent_* drivers are enabled
-      return unless swift && node[:ironic][:enabled_drivers].any? { |d| d.start_with?("agent_") }
+      # configure swift only if direct deploy interface is enabled
+      return unless swift && node[:ironic][:enabled_deploy_interfaces].include?("direct")
 
       glance_keystone_settings = KeystoneHelper.keystone_settings(glance, "glance")
 

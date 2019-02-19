@@ -1,5 +1,6 @@
 # frozen_string_literal: true
-# Copyright 2016 SUSE
+
+# Copyright 2016-2019 SUSE
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,7 +54,7 @@ node[:ironic][:platform][:packages].each do |p|
   package p
 end
 
-node[:ironic][:enabled_drivers].each do |d|
+node[:ironic][:enabled_hardware_types].each do |d|
   driver_dependencies = node[:ironic][:platform][:driver_dependencies][d] || []
   driver_dependencies.each do |p|
     package p
@@ -177,7 +178,17 @@ template node[:ironic][:config_file] do
     lazy {
       {
         automated_clean: node[:ironic][:automated_clean],
-        drivers: node[:ironic][:enabled_drivers],
+        enabled_hardware_types: node[:ironic][:enabled_hardware_types],
+        enabled_boot_interfaces: node[:ironic][:enabled_boot_interfaces],
+        enabled_console_interfaces: node[:ironic][:enabled_console_interfaces],
+        enabled_deploy_interfaces: node[:ironic][:enabled_deploy_interfaces],
+        enabled_inspect_interfaces: node[:ironic][:enabled_inspect_interfaces],
+        enabled_management_interfaces: node[:ironic][:enabled_management_interfaces],
+        enabled_network_interfaces: node[:ironic][:enabled_network_interfaces],
+        enabled_power_interfaces: node[:ironic][:enabled_power_interfaces],
+        enabled_raid_interfaces: node[:ironic][:enabled_raid_interfaces],
+        enabled_storage_interfaces: node[:ironic][:enabled_storage_interfaces],
+        enabled_vendor_interfaces: node[:ironic][:enabled_vendor_interfaces],
         debug: node[:ironic][:debug],
         rabbit_settings: fetch_rabbitmq_settings,
         keystone_settings: keystone_settings,
