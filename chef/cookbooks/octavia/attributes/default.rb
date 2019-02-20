@@ -39,6 +39,8 @@ default[:octavia][:certs][:server_ca_key_path] = "server_ca/private/ca.key.pem"
 default[:octavia][:certs][:client_ca_cert_path] = "client_ca/certs/ca.cert.pem"
 default[:octavia][:certs][:client_cert_and_key_path] = "client_ca/private/client.cert-and-key.pem"
 
+default[:octavia][:tmp][:node_list] = nil
+
 # To deprecate
 # default[:octavia][:octavia_ca_certificate] = default[:octavia][:cert_path] + "/cacert.pem"
 # default[:octavia][:octavia_ca_private_key] = default[:octavia][:cert_path] + "/private/cakey.pem"

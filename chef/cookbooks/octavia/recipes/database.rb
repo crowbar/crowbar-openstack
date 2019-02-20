@@ -15,8 +15,6 @@
 
 dirty = false
 
-Chef::Log.info "YYYY *************************************** DATABASE *******************************"
-
 #TODO: ha_enabled = node[:neutron][:ha][:server][:enabled]
 
 db_settings = fetch_database_settings

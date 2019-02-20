@@ -6,9 +6,10 @@ province="<%= node[:octavia][:certs][:province] %>"
 domain="<%= node[:octavia][:certs][:domain] %>"
 pass="<%= node[:octavia][:certs][:passphrase] %>"
 subj="/C=$country/ST=$province/L=Ocala/O=Home/CN=$domain"
+cert_path="<%=node[:octavia][:certs][:cert_path]%>"
 
 # Make directories for the two certificate authorities.
-cd <%= node[:octavia][:certs][:cert_path] %>
+cd $cert_path
 mkdir client_ca
 mkdir server_ca
 

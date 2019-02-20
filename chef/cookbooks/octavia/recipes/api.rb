@@ -12,10 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Chef::Log.info "YYYY *************************************** API *******************************"
-
-Chef::Log.info "YYYY #{node[:octavia][:octavia_ca_certificate]}"
-
 neutron = node_search_with_cache("roles:neutron-server").first
 neutron_protocol = neutron[:neutron][:api][:protocol]
 neutron_server_host = CrowbarHelper.get_host_for_admin_url(neutron, neutron[:neutron][:ha][:server][:enabled])
@@ -28,9 +24,7 @@ nova_server_host = CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:
 nova_server_port = nova[:nova][:ports][:api]
 nova_endpoint = nova_protocol + "://" + nova_server_host + ":" + nova_server_port.to_s
 
-Chef::Log.info "YYYY #{KeystoneHelper.keystone_settings(node, "octavia")}"
-
-template "/etc/octavia/octavia-api.conf" do
+template "/etc/octavia/octavia.conf" do
   source "octavia-api.conf.erb"
   owner node[:octavia][:user]
   group node[:octavia][:group]
