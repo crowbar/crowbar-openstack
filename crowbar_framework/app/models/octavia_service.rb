@@ -134,7 +134,7 @@ class OctaviaService < OpenstackServiceObject
         "octavia-worker" => worker_nodes.map(&:name)
     } unless nodes.nil? || nodes.length.zero?
 
-    base["attributes"][@bc_name]["database"]["password"] = random_password
+    base["attributes"][@bc_name]["db"]["password"] = random_password
     base["attributes"][@bc_name]["health-manager"]["heartbeat_key"] = random_password
     base["attributes"][@bc_name]["service_password"] = random_password
 

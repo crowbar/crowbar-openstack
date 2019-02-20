@@ -30,11 +30,11 @@
                         "heartbeat_key": { "type": "str", "required": true }
                       }
                     },
-                    "database": { "type": "map", "required": true,
+                    "db": { "type": "map", "required": true,
                       "mapping": {
                         "user": { "type": "str", "required": true },
                         "password": { "type": "str", "required": true },
-                        "name": { "type": "str", "required": true }
+                        "database": { "type": "str", "required": true }
                       }
                     }
               }

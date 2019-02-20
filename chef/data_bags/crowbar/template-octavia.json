@@ -22,10 +22,10 @@
         "port": 5555,
         "heartbeat_key": "none"
       },
-      "database":{
+      "db":{
         "user": "octavia",
         "password": "none",
-        "name": "octavia"
+        "database": "octavia"
       }
     }
   },

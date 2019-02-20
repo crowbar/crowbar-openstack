@@ -13,38 +13,19 @@
 # limitations under the License.
 #
 
-dirty = false
-
-#TODO: ha_enabled = node[:neutron][:ha][:server][:enabled]
+ha_enabled = node[:octavia][:ha][:enabled]
 
 db_settings = fetch_database_settings
-include_recipe "database::client"
-include_recipe "#{db_settings[:backend_name]}::client"
-include_recipe "#{db_settings[:backend_name]}::python-client"
+crowbar_pacemaker_sync_mark "wait-octavia_database" if ha_enabled
 
-props = [{"db_name" => node[:octavia][:database][:name],
-          "db_user" => node[:octavia][:database][:user],
-          "db_pass" => node[:octavia][:database][:password],
-          "db_conn_name" => "sql_connection"  }
-        ]
-
-
-Chef::Log.info "YYYY database props #{props}"
-
-#TODO: crowbar_pacemaker_sync_mark "wait-neutron_database" if ha_enabled
-
-# Create the Neutron Databases
-props.each do |prop|
-  db_name = prop["db_name"]
-  db_user = prop["db_user"]
-  db_pass = prop["db_pass"]
+# Create the Octavia Database
 
   database "create #{db_name} octavia database" do
     connection db_settings[:connection]
     database_name "#{db_name}"
     provider db_settings[:provider]
     action :create
-    #TODO: only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
   database_user "create #{db_user} user in #{db_name} octavia database" do
@@ -54,7 +35,7 @@ props.each do |prop|
     host "%"
     provider db_settings[:user_provider]
     action :create
-    #TODO: only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
   database_user "grant database access for #{db_user} user in #{db_name} octavia database" do
@@ -67,17 +48,7 @@ props.each do |prop|
     provider db_settings[:user_provider]
     require_ssl db_settings[:connection][:ssl][:enabled]
     action :grant
-    #TODO: only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 
-  # TODO
-  # db_address = fetch_database_connection_string(node[:octavia][:db])
-  # if node[@cookbook_name][:db][db_conn_name] != db_address
-  #   node.set[@cookbook_name][:db][db_conn_name] = db_address
-  #   dirty = true
-  # end
-end
-
-# TODO: crowbar_pacemaker_sync_mark "create-neutron_database" if ha_enabled
-
-node.save if dirty
+crowbar_pacemaker_sync_mark "create-octavia_database" if ha_enabled

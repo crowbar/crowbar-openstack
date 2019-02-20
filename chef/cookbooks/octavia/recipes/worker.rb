@@ -45,7 +45,7 @@ template "/etc/octavia/octavia-worker.conf" do
   group node[:octavia][:group]
   mode 00640
   variables(
-    octavia_db_connection: OctaviaHelper.db_connection(fetch_database_settings, node),
+    octavia_db_connection: fetch_database_connection_string(node[:octavia][:db]),
     octavia_bind_host: "0.0.0.0",
     neutron_endpoint: neutron_endpoint,
     nova_endpoint: nova_endpoint,
