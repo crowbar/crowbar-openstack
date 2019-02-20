@@ -1,5 +1,3 @@
-Chef::Log.info "YYYY *************************************** Common *******************************"
-
 cookbook_file "#{node[:octavia][:sudoers_file]}" do
   source "sudoers"
   owner "root"
@@ -26,7 +24,7 @@ directory node[:octavia][:octavia_log_dir] do
   recursive true
 end
 
-directory "/etc/octavia/certs/private" do
+directory node[:octavia][:certs][:cert_path] do
   owner node[:octavia][:user]
   group node[:octavia][:group]
   recursive true

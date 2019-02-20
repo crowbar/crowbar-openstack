@@ -14,15 +14,6 @@
 #
 Chef::Log.info "YYYY *************************************** WORKER *******************************"
 
-cookbook_file "#{node[:octavia][:octavia_client_cert]}" do
-  source "serverca_01.pem"
-  owner "octavia"
-  group "octavia"
-  mode 0600
-  #notifies :restart, "service[openstack-octavia-worker]"
-  #notifies :restart, "service[openstack-octavia-amphora-agent]"
-end
-
 neutron = node_search_with_cache("roles:neutron-server").first
 neutron_protocol = neutron[:neutron][:api][:protocol]
 neutron_server_host = CrowbarHelper.get_host_for_admin_url(neutron, neutron[:neutron][:ha][:server][:enabled])

@@ -18,11 +18,17 @@ define :octavia_service do
 
  package "openstack-octavia-#{params[:name]}" if ["rhel", "suse"].include? node[:platform_family]
 
+ if params[:name] == "api"
+   conf = "/etc/octavia/octavia.conf"
+ else
+   conf = "/etc/octavia/octavia-#{params[:name]}.conf"
+ end
+ 
  service "octavia-#{params[:name]}" do
    service_name "openstack-octavia-#{params[:name]}"
    supports status: true, restart: true
    action [:enable, :start]
-   subscribes :restart, resources(template: "/etc/octavia/octavia-#{params[:name]}.conf")
+   subscribes :restart, resources(template: conf)
   #TODO provider Chef::Provider::CrowbarPacemakerService if ha_enabled
  end
 end
