@@ -67,8 +67,13 @@ default[:ceilometer][:ha][:api][:op][:start][:timeout] = "60s"
 default[:ceilometer][:ha][:agent_notification][:agent] = "systemd:#{agent_notification_service_name}"
 default[:ceilometer][:ha][:agent_notification][:op][:monitor][:interval] = "10s"
 
+
 default[:ceilometer][:ha][:central][:enabled] = false
 default[:ceilometer][:ha][:central][:agent] = "systemd:#{central_service_name}"
 default[:ceilometer][:ha][:central][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:ceilometer][:ha][:ports][:api] = 5561
+
+# Pacemaker ceilometer expirer cronjob link
+default[:ceilometer][:ha][:expirer][:cronjob][:agent] = "ocf:heartbeat:symlink"
+default[:ceilometer][:ha][:expirer][:cronjob][:op][:monitor][:interval] = "10s"
