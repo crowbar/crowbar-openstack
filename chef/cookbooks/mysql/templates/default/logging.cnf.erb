@@ -2,4 +2,5 @@
 <% if @slow_query_logging_enabled -%>
 slow_query_log = 1
 slow_query_log_file = /var/log/mysql/mysql_slow.log
+log_slow_verbosity = query_plan,explain
 <% end -%>
