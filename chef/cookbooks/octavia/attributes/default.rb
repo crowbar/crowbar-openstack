@@ -22,9 +22,9 @@ default[:octavia][:restart_hold] = "100ms"
 
 default[:octavia][:api][:port]=9876
 
-default[:octavia][:database][:user]="octavia"
-default[:octavia][:database][:password]="octavia"
-default[:octavia][:database][:name]="octavia"
+default[:octavia][:db][:user] = "octavia"
+default[:octavia][:db][:database] =" octavia"
+default[:octavia][:db][:password]= nil
 
 default[:octavia][:sudoers_file] = "/etc/sudoers.d/octavia"
 
@@ -95,8 +95,6 @@ default[:octavia][:amphora][:image_tag] = "amphora"
 # default[:octavia][:health_manager][:members: "{{ OCT_API.consumes_OCT_HMX.members.private }}"
 # default[:octavia][:health_manager][:heartbeat_key: "{{ OCT_API.consumes_OCT_HMX.vars.heartbeat_key }}"
 
-# octavia_db_connection: "mysql+pymysql://{{ mysql.octavia_user }}:{{ mysql.octavia_password | urlencode }}@{{ mysql.host }}/octavia{% if mysql.use_tls %}{{ mysql.ca }}{% endif %}"
-#
 # octavia_endpoint_type: "internalURL"
 #
 # installation_directory: "/usr/share"
