@@ -49,7 +49,7 @@ class DesignateService < OpenstackServiceObject
             "windows" => "/.*/"
           }
         },
-        "designate-pool-bind" => {
+        "designate-worker" => {
           "unique" => false,
           "count" => 1,
           "cluster" => false,
@@ -73,8 +73,7 @@ class DesignateService < OpenstackServiceObject
       controller = nodes.find { |n| n.intended_role == "controller" } || nodes.first
       base["deployment"][@bc_name]["elements"] = {
         "designate-server" => [controller[:fqdn]],
-        "designate-pool-bind" => [controller[:fqdn]]
-
+        "designate-worker" => [controller[:fqdn]]
       }
     end
 
@@ -92,7 +91,7 @@ class DesignateService < OpenstackServiceObject
 
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "designate-server"
-    validate_one_for_role proposal, "designate-pool-bind"
+    validate_one_for_role proposal, "designate-worker"
 
     super
   end

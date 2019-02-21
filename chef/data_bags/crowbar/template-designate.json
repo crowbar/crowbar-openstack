@@ -30,7 +30,7 @@
       "schema-revision": 300,
       "element_states": {
         "designate-server": [ "readying", "ready", "applying" ],
-        "designate-pool-bind": [ "readying", "ready", "applying" ]
+        "designate-worker": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
@@ -38,7 +38,7 @@
       ],
       "element_run_list_order": {
           "designate-server": 110,
-          "designate-pool-bind": 111
+          "designate-worker": 111
       },
       "config": {
         "environment": "designate-base-config",
