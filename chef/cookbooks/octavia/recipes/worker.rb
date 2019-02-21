@@ -16,9 +16,12 @@ Chef::Log.info "YYYY *************************************** WORKER ************
 
 neutron = node_search_with_cache("roles:neutron-server").first
 neutron_protocol = neutron[:neutron][:api][:protocol]
-neutron_server_host = CrowbarHelper.get_host_for_admin_url(neutron, neutron[:neutron][:ha][:server][:enabled])
+neutron_host = CrowbarHelper.get_host_for_admin_url(
+                                                     neutron, 
+                                                     neutron[:neutron][:ha][:server][:enabled]
+                                                   )
 neutron_server_port = neutron[:neutron][:api][:service_port]
-neutron_endpoint = neutron_protocol + "://" + neutron_server_host + ":" + neutron_server_port.to_s
+neutron_endpoint = neutron_protocol + "://" + neutron_host + ":" + neutron_server_port.to_s
 
 nova = node_search_with_cache("roles:neutron-server").first
 nova_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
@@ -26,16 +29,32 @@ nova_server_host = CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:
 nova_server_port = nova[:nova][:ports][:api]
 nova_endpoint = nova_protocol + "://" + nova_server_host + ":" + nova_server_port.to_s
 
-sec_group_id = shell_out("source /root/.openrc && openstack security group show #{node[:octavia][:amphora][:sec_group]} | tr -d ' ' | grep '|id|' | cut -f 3 -d '|'").stdout
+sec_group_id = shell_out
+                 (
+                   "source /root/.openrc &&"\
+                   "openstack security group show #{node[:octavia][:amphora][:sec_group]}"\
+                   "| tr -d ' ' | grep '|id|' | cut -f 3 -d '|'"\
+                 ).stdout
 Chef::Log.info "YYYY ----- sec_group_id #{sec_group_id}"
 
-flavor_id = shell_out("source /root/.openrc && nova flavor-access-list --flavor #{node[:octavia][:amphora][:flavor]} | head -n -1 | tail -n +4 | tr -d ' ' | cut -f 3 -d '|'").stdout
+flavor_id = shell_out(
+                       "source /root/.openrc &&"\
+                       "nova flavor-access-list --flavor #{node[:octavia][:amphora][:flavor]}"\
+                       "| head -n -1 | tail -n +4 | tr -d ' ' | cut -f 3 -d '|'"
+                     ).stdout
 Chef::Log.info "YYYY ----- flavor_id #{flavor_id}"
 
-image_id = shell_out("source /root/.openrc && glance image-list | grep #{node[:octavia][:amphora][:image_tag]} | tr -d ' ' | cut -f 2 -d '|'").stdout
+image_id = shell_out(
+                      "source /root/.openrc && glance image-list"\
+                      "| grep #{node[:octavia][:amphora][:image_tag]}"\
+                      "| tr -d ' ' | cut -f 2 -d '|'"
+                    ).stdout
 Chef::Log.info "YYYY ----- image_id #{image_id}"
 
-net_id = shell_out("source /root/.openrc && openstack network list | grep fixed | tr -d ' ' | cut -d '|' -f 2").stdout
+net_id = shell_out(
+                    "source /root/.openrc && openstack network list"\
+                    "| grep fixed | tr -d ' ' | cut -d '|' -f 2"
+                  ).stdout
 Chef::Log.info "YYYY ----- net_id #{net_id}"
 
 
@@ -75,8 +94,9 @@ template "/etc/octavia/amphora-agent.conf" do
   owner node[:octavia][:user]
   group node[:octavia][:group]
   mode 00640
-  variables(
-  )
+  variables
+    (
+    )
 end
 
 service "octavia-amphora-agent" do

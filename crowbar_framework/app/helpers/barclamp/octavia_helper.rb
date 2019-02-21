@@ -17,6 +17,5 @@
 
 module Barclamp
   module OctaviaHelper
-
   end
 end
