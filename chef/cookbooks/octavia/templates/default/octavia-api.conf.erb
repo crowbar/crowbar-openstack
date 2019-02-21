@@ -1,0 +1,127 @@
+#
+#
+# (c) Copyright 2016 Hewlett Packard Enterprise Development LP
+# (c) Copyright 2017-2018 SUSE LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+#
+# This configuration file includes the default values for Ardana Openstack
+# Changes may be made to this file by customers.
+
+[DEFAULT]
+debug = True
+#os_region_name = region1
+os_endpoint_type = "internalURL"
+#log_config_append = "/etc/octavia/octavia-api-logging.conf"
+transport_url = <%= @rabbit_settings[:url] %>
+
+[api_settings]
+api_handler = queue_producer
+bind_host = <%= @octavia_bind_host %>
+bind_port = <%= @node[:octavia][:api][:port] %>
+
+[database]
+connection = <%= @octavia_db_connection %>
+
+[oslo_messaging]
+topic = octavia_prov
+rpc_thread_pool_size = 2
+
+[keystone_authtoken]
+auth_version = <%= @octavia_keystone_settings['api_version'] %>
+www_authenticate_uri = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
+                                                    @octavia_keystone_settings["public_auth_url"],
+                                                    @octavia_keystone_settings["service_port"],
+                                                    @octavia_keystone_settings['api_version']) %>
+auth_url = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
+                                                    @octavia_keystone_settings["internal_url_host"],
+                                                    @octavia_keystone_settings["service_port"],
+                                                    @octavia_keystone_settings['api_version']) %>
+auth_type = password
+project_name = <%= @octavia_keystone_settings['service_tenant'] %>
+project_domain_name = Default
+user_domain_name = Default
+username = <%= @octavia_keystone_settings['service_user'] %>
+password =  <%= @octavia_keystone_settings['service_password'] %>
+region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
+#TODO cafile = <%= @octavia_ca_file %>
+
+[certificates]
+cert_generator = local_cert_generator
+cert_manager = barbican_cert_manager
+ca_certificate = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_cert_path] %>
+ca_private_key = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_key_path] %>
+ca_private_key_passphrase = <%= @node[:octavia][:certs][:passphrase] %>
+
+#[haproxy_amphora]
+#server_ca = <%= @octavia_ca_certificate %>
+#client_cert = <%= @node[:octavia][:octavia_client_cert] %>
+#key_path = <%= @node[:octavia][:cert_path] %>/private
+#base_path = /var/lib/octavia
+#base_cert_dir = <%= @node[:octavia][:cert_path] %>
+#connection_max_retries = 10
+#connection_retry_interval = 10
+
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+ssl_ca_file = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+heartbeat_timeout_threshold = <%= @rabbit_settings[:heartbeat_timeout] %>
+
+[service_auth]
+auth_version = <%= @octavia_keystone_settings['api_version'] %>
+auth_uri = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
+                                                    @octavia_keystone_settings["internal_url_host"],
+                                                    @octavia_keystone_settings["service_port"],
+                                                    @octavia_keystone_settings['api_version']) %>
+auth_type = password
+project_name = <%= @octavia_keystone_settings['service_project'] %>
+project_domain_name = Default
+user_domain_name = Default
+username = <%= @octavia_keystone_settings['service_user'] %>
+password =  <%= @octavia_keystone_settings['service_password'] %>
+region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
+#TODO cafile = <%= @octavia_ca_file %>
+
+[networking]
+port_detach_timeout = 900
+
+[neutron]
+endpoint = <%= @neutron_endpoint %>
+endpoint_type = "internalURL"
+
+[nova]
+endpoint = <%= @nova_endpoint %>/v2.1
+endpoint_type = "internalURL"
+
+[barbican]
+auth_url = <%= KeystoneHelper.versioned_service_URL(@neutron_keystone_settings["protocol"],
+                                                    @neutron_keystone_settings["internal_url_host"],
+                                                    @neutron_keystone_settings["service_port"],
+                                                    @neutron_keystone_settings['api_version']) %>
+admin_project_name = <%= @neutron_keystone_settings['service_tenant'] %>
+admin_user = <%= @neutron_keystone_settings['service_user'] %>
+admin_password = <%= @neutron_keystone_settings['service_password'] %>
+region_name = <%= @neutron_keystone_settings['endpoint_region'] %>
+admin_user_domain = <%= @neutron_keystone_settings['admin_domain'] %>
+admin_project_domain = <%= @neutron_keystone_settings['admin_domain'] %>
+auth_version = <%= @neutron_keystone_settings['api_version'] %>
+admin_tenant_name = <%= @neutron_keystone_settings['admin_tenant'] %>
+endpoint_type = "internalURL"
+
+### End of File ###
+## Do NOT put anything after this line ##

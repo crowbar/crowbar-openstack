@@ -12,14 +12,28 @@
       "neutron_instance": "none",
       "barbican_instance": "none",
       "keystone_instance": "none",
-      "glance_instance": "none"
+      "glance_instance": "none",
+      "service_user": "octavia",
+      "service_password": "octavia",
+      "api":{
+        "port": 9876
+      },
+      "health-manager":{
+        "port": 5555,
+        "heartbeat_key": "none"
+      },
+      "db":{
+        "user": "octavia",
+        "password": "none",
+        "database": "octavia"
+      }
     }
   },
   "deployment": {
     "octavia": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 301,
+      "schema-revision": 303,
       "element_states": {
         "octavia-api": [ "readying", "ready", "applying" ],
         "octavia-health-manager": [ "readying", "ready", "applying" ],

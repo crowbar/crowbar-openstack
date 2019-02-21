@@ -1,0 +1,8 @@
+# Requires create the directory, and copy openssl.conf inside
+#
+
+cert_path="<%=node[:octavia][:certs][:cert_path]%>"
+
+<% @node_list.each do |node| %>
+rsync -aro --timeout=300 $cert_path/* <%= node %>:$cert_path
+<% end %>
