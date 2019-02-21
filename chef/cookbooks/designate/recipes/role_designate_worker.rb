@@ -1,6 +1,5 @@
 #
-# Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2018, SUSE LINUX GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,24 +14,7 @@
 # limitations under the License.
 #
 
-barclamp:
-  name: 'cinder'
-  display: 'Cinder'
-  description: 'OpenStack Block Storage: Management of volumes (persistent block level storage)'
-  version: 0
-  requires:
-    - '@crowbar'
-    - 'pacemaker'
-    - 'database'
-    - 'rabbitmq'
-    - 'keystone'
-    - 'glance'
-  member:
-    - 'openstack'
-
-crowbar:
-  layout: 1
-  order: 90
-  run_order: 90
-  chef_order: 90
-  proposal_schema_version: 3
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "designate", "designate-worker")
+  include_recipe "designate::common"
+  include_recipe "designate::worker"
+end
