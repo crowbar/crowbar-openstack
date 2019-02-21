@@ -35,6 +35,7 @@ en:
         swift:
           store_container: 'Swift Container'
         rbd:
+          use_ses: 'Use SES Configuration'
           store_user: 'RADOS user for CephX authentication'
           store_pool: 'RADOS pool for Glance images'
         vsphere:
@@ -66,3 +67,4 @@ en:
       validation:
         default_store_no_cinder: 'Cannot set default store to Cinder without Cinder being active.'
         ceph_client_network_not_available: "The ceph_client network '%{ceph_client}' is not available in the network proposal"
+        no_ses_config: 'No SES configuration found. Upload SES configuration file before enabling it for RADOS Store.'
