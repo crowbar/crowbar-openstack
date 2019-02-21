@@ -21,7 +21,7 @@ class OctaviaService < OpenstackServiceObject
     @bc_name = "octavia"
   end
 
-# Turn off multi proposal support till it really works and people ask for it.
+  # Turn off multi proposal support till it really works and people ask for it.
   def self.allow_multiple_proposals?
     false
   end
@@ -67,14 +67,28 @@ class OctaviaService < OpenstackServiceObject
     end
   end
 
-
   def proposal_dependencies(role)
     answer = []
-    answer << { "barclamp" => "nova", "inst" => role.default_attributes["octavia"]["nova_instance"] }
-    answer << { "barclamp" => "neutron", "inst" => role.default_attributes["octavia"]["neutron_instance"] }
-    answer << { "barclamp" => "barbican", "inst" => role.default_attributes["octavia"]["barbican_instance"] }
-    answer << { "barclamp" => "keystone", "inst" => role.default_attributes["octavia"]["keystone_instance"] }
-    answer << { "barclamp" => "glance", "inst" => role.default_attributes["octavia"]["glance_instance"] }
+    answer << {
+                "barclamp" => "nova",
+                "inst" => role.default_attributes["octavia"]["nova_instance"]
+              }
+    answer << {
+                "barclamp" => "neutron",
+                "inst" => role.default_attributes["octavia"]["neutron_instance"]
+              }
+    answer << {
+                "barclamp" => "barbican",
+                "inst" => role.default_attributes["octavia"]["barbican_instance"]
+              }
+    answer << {
+                "barclamp" => "keystone",
+                "inst" => role.default_attributes["octavia"]["keystone_instance"]
+              }
+    answer << {
+                "barclamp" => "glance",
+                "inst" => role.default_attributes["octavia"]["glance_instance"]
+              }
     answer
   end
 
@@ -84,9 +98,7 @@ class OctaviaService < OpenstackServiceObject
       prop.raw_data[:attributes][:octavia][:infoblox][:grids].each do |grid|
         defaults = prop.raw_data["attributes"]["octavia"]["infoblox"]["grid_defaults"]
         defaults.each_key.each do |d|
-          unless grid.key?(d)
-            grid[d] = defaults[d]
-          end
+          grid[d] = defaults[d] unless grid.key?(d)
         end
       end
     end
@@ -109,7 +121,7 @@ class OctaviaService < OpenstackServiceObject
     base = super
 
     nodes = NodeObject.all
-    nodes.delete_if { |n| n.nil? or n.admin? }
+    nodes.delete_if { |n| n.nil? || n.admin? }
 
     base["attributes"][@bc_name]["nova_instance"] = find_dep_proposal("nova")
     base["attributes"][@bc_name]["neutron_instance"] = find_dep_proposal("neutron")
@@ -121,18 +133,21 @@ class OctaviaService < OpenstackServiceObject
     controller_node = controller_nodes.first
     controller_node ||= nodes.first
 
-    #TODO: network_nodes I don't know if are required
+    # TODO: network_nodes I don't know if are required
     network_nodes = nodes.select { |n| n.intended_role == "network" }
     network_nodes = [controller_node] if network_nodes.empty?
 
     worker_nodes = nodes - [controller_node] - [network_nodes]
 
-    base["deployment"]["octavia"]["elements"] = {
+    unless nodes.nil? || nodes.length.zero?
+      base["deployment"]["octavia"]["elements"] =
+      {
         "octavia-api" => [controller_node[:fqdn]],
         "octavia-health-manager" => [controller_node[:fqdn]],
         "octavia-housekeeping" => [controller_node[:fqdn]],
         "octavia-worker" => worker_nodes.map(&:name)
-    } unless nodes.nil? || nodes.length.zero?
+      }
+    end
 
     base["attributes"][@bc_name]["db"]["password"] = random_password
     base["attributes"][@bc_name]["health-manager"]["heartbeat_key"] = random_password
