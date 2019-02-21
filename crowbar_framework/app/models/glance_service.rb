@@ -71,6 +71,8 @@ class GlanceService < OpenstackServiceObject
     base["attributes"]["glance"]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
+    base["attributes"][@bc_name]["rbd"]["use_ses"] = true if SES.configured?
+
     @logger.debug("Glance create_proposal: exiting")
     base
   end
@@ -84,6 +86,10 @@ class GlanceService < OpenstackServiceObject
           "barclamp.#{@bc_name}.validation.default_store_no_cinder"
         )
       end
+    end
+
+    if proposal["attributes"]["glance"]["rbd"]["use_ses"] && !SES.configured?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.no_ses_config")
     end
 
     super
