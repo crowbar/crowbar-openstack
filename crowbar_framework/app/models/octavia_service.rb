@@ -146,10 +146,27 @@ class OctaviaService < OpenstackServiceObject
   # TODO: Validations
 
   def apply_role_pre_chef_call(old_role, role, all_nodes)
-    @logger.debug("Octavia apply_role_pre_chef_call: entering #{all_nodes.inspect}")
+    @logger.debug("octavia apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
-    # TODO: apply_role_pre_chef_call
-    @logger.debug("Octavia apply_role_pre_chef_call: leaving")
+    vip_networks = ["admin", "public"]
+
+    server_elements, server_nodes, ha_enabled = role_expand_elements(role, "octavia-api")
+    reset_sync_marks_on_clusters_founders(server_elements)
+    Openstack::HA.set_controller_role(server_nodes) if ha_enabled
+
+    role.save if prepare_role_for_ha_with_haproxy(role, ["octavia", "ha", "enabled"],
+                                                  ha_enabled, server_elements, vip_networks)
+
+    net_svc = NetworkService.new @logger
+    # All nodes must have a public IP, even if part of a cluster; otherwise
+    # the VIP can't be moved to the nodes
+    server_nodes.each do |n|
+      net_svc.allocate_ip "default", "public", "host", n
+    end
+
+    allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
+
+    @logger.debug("octavia apply_role_pre_chef_call: leaving")
   end
 end
