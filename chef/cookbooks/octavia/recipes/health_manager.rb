@@ -12,9 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Chef::Log.info "YYYY *************************************** HEALTH MANAGER *******************************"
 
-#package "openstack-octavia-health-manager"
+list = search(:node, "roles:octavia-health-manager") || []
+
+hm_port = node[:octavia]["health-manager"][:port]
+node_list = []
+list.each do |e|
+  str = e.name + ":" + hm_port.to_s
+  node_list << str unless node_list.include?(str)
+end
 
 template "/etc/octavia/octavia-health-manager.conf" do
   source "octavia-health-manager.conf.erb"
@@ -23,9 +29,9 @@ template "/etc/octavia/octavia-health-manager.conf" do
   mode 00640
   variables(
     octavia_db_connection: fetch_database_connection_string(node[:octavia][:db]),
-    octavia_bind_host: "0.0.0.0", #TODO: Change if change in api
-    octavia_healthmanager_bind_host: "0.0.0.0", #TODO: It is good
-    octavia_healthmanager_hosts: ["0.0.0.0"] #TODO: add all hosts
+    octavia_bind_host: "0.0.0.0", #HACK: It has to be configured from UI
+    octavia_healthmanager_bind_host: "0.0.0.0", #HACK: It has to be configured from UI
+    octavia_healthmanager_hosts: node_list.join(",")
   )
 end
 
@@ -35,6 +41,5 @@ file node[:octavia][:octavia_log_dir] + "/octavia-health-manager.log" do
   group node[:octavia][:group]
   mode 00640
 end
-
 
 octavia_service "health-manager"

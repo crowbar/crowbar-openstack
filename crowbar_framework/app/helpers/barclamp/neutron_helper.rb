@@ -66,6 +66,8 @@ module Barclamp
     def networking_lbaasv2_drivers(selected)
       options_for_select(
         [
+          ["Octavia", "octavia"],
+          ["HAProxy", "haproxy"],
           ["HAProxy", "haproxy"],
           ["F5", "f5"]
         ],

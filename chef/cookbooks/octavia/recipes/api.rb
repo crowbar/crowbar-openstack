@@ -18,7 +18,7 @@ neutron_server_host = CrowbarHelper.get_host_for_admin_url(neutron, neutron[:neu
 neutron_server_port = neutron[:neutron][:api][:service_port]
 neutron_endpoint = neutron_protocol + "://" + neutron_server_host + ":" + neutron_server_port.to_s
 
-nova = node_search_with_cache("roles:neutron-server").first
+nova = node_search_with_cache("roles:nova-controller").first
 nova_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
 nova_server_host = CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled])
 nova_server_port = nova[:nova][:ports][:api]

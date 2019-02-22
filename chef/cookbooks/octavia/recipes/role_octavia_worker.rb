@@ -17,4 +17,5 @@
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "octavia", "octavia-worker")
   include_recipe "#{@cookbook_name}::common"
   include_recipe "#{@cookbook_name}::worker"
+  include_recipe "#{@cookbook_name}::amphorae"
 end

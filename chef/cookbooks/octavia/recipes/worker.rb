@@ -17,7 +17,7 @@ Chef::Log.info "YYYY *************************************** WORKER ************
 neutron = node_search_with_cache("roles:neutron-server").first
 neutron_protocol = neutron[:neutron][:api][:protocol]
 neutron_host = CrowbarHelper.get_host_for_admin_url(
-                                                     neutron, 
+                                                     neutron,
                                                      neutron[:neutron][:ha][:server][:enabled]
                                                    )
 neutron_server_port = neutron[:neutron][:api][:service_port]
@@ -86,23 +86,3 @@ file node[:octavia][:octavia_log_dir] + "/octavia-worker.log" do
 end
 
 octavia_service "worker"
-
-package "openstack-octavia-amphora-agent"
-
-template "/etc/octavia/amphora-agent.conf" do
-  source "amphora-agent.conf.erb"
-  owner node[:octavia][:user]
-  group node[:octavia][:group]
-  mode 00640
-  variables
-    (
-    )
-end
-
-service "octavia-amphora-agent" do
-  service_name "openstack-octavia-amphora-agent"
-  supports status: true, restart: true
-  action [:enable, :start]
-  subscribes :restart, resources(template: "/etc/octavia/amphora-agent.conf")
- # provider Chef::Provider::CrowbarPacemakerService if ha_enabled
-end

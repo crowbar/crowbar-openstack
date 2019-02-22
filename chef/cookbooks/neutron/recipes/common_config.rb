@@ -119,6 +119,13 @@ if neutron[:neutron][:use_infoblox]
   infoblox_settings = neutron[:neutron][:infoblox]
 end
 
+octavia_api = nil
+octavia_nodes = search(:node, "roles:octavia-api") || []
+unless octavia_nodes.length == 0
+  octavia_node = octavia_nodes[0]
+  octavia_api = octavia_node.name + ":" + octavia_node[:octavia][:api][:port].to_s
+end
+
 template neutron[:neutron][:config_file] do
     cookbook "neutron"
     source "neutron.conf.erb"
@@ -161,7 +168,8 @@ template neutron[:neutron][:config_file] do
       ipam_driver: ipam_driver,
       rpc_workers: neutron[:neutron][:rpc_workers],
       use_apic_gbp: use_apic_gbp,
-      default_log_levels: neutron[:neutron][:default_log_levels]
+      default_log_levels: neutron[:neutron][:default_log_levels],
+      octavia_api: octavia_api
     )
 end
 
@@ -191,4 +199,3 @@ if node[:platform_family] == "rhel"
     to node[:neutron][:config_file]
   end
 end
-
