@@ -1,4 +1,4 @@
-# Copyright 2019 SUSE Linux, GmbH.
+# Copyright 2019 SUSE Linux GmbH.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ ha_enabled = node[:octavia][:ha][:enabled]
 db_settings = fetch_database_settings
 crowbar_pacemaker_sync_mark "wait-octavia_database" if ha_enabled
 
-# Create the Octavia Database
+  # Create the Octavia Database
 
   database "create #{db_name} octavia database" do
     connection db_settings[:connection]
