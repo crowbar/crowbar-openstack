@@ -8,7 +8,7 @@ template "/tmp/create_security_group.sh" do
   source "create_security_group.sh.erb"
   owner "root"
   group "root"
-  mode 00700
+  mode 0o700
   variables(
     net_name: node[:octavia][:amphora][:manage_net],
     sec_group: node[:octavia][:amphora][:sec_group]
@@ -19,7 +19,7 @@ template "/tmp/create_image.sh" do
   source "create_image.sh.erb"
   owner "root"
   group "root"
-  mode 00700
+  mode 0o700
   variables(
     flavor: node[:octavia][:amphora][:flavor],
     project_name: octavia_keystone_settings["service_tenant"],
@@ -46,7 +46,6 @@ bash "Create a octavia image" do
   environment ({
     "OS_USERNAME" => octavia_keystone_settings["service_user"],
     "OS_PASSWORD" => octavia_keystone_settings["service_password"],
-     #"OS_TENANT_NAME" => tempest_comp_tenant,
     "NOVACLIENT_INSECURE" => "true",
     "OS_AUTH_URL" => octavia_keystone_settings["internal_auth_url"],
     "OS_IDENTITY_API_VERSION" => octavia_keystone_settings["api_version"],

@@ -1,4 +1,4 @@
-# Copyright 2019 SUSE Linux, GmbH.
+# Copyright 2019 SUSE Linux GmbH.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 octavia_port = node[:octavia][:api][:port]
-octavia_protocol = "http" #TODO node[:octavia][:api][:protocol]
+octavia_protocol = "http" # TODO: node[:octavia][:api][:protocol]
 
-ha_enabled = false #TODO node[:octavia][:ha][:enabled]
+ha_enabled = false # TODO: node[:octavia][:ha][:enabled]
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(

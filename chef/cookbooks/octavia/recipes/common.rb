@@ -1,11 +1,11 @@
-cookbook_file "#{node[:octavia][:sudoers_file]}" do
+cookbook_file node[:octavia][:sudoers_file].to_s do
   source "sudoers"
   owner "root"
   group "root"
-  mode 0440
+  mode 0o440
 end
 
-group 'octavia' do
+group "octavia" do
   group_name node[:octavia][:group]
   system true
 end
@@ -29,7 +29,6 @@ directory node[:octavia][:certs][:cert_path] do
   group node[:octavia][:group]
   recursive true
 end
-
 
 # name: octavia-post-configure | set_octavia_quotas | Set Octavia Quotas
 #   shell: >

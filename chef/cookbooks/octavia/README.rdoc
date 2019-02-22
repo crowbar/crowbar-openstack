@@ -1,2 +1,1 @@
-This cookbook deployes the openstack neutron server and client
- 
+This cookbook deployes the openstack octavia server and client

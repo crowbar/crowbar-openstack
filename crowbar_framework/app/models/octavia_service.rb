@@ -1,6 +1,5 @@
 #
-# Copyright 2011-2013, Dell
-# Copyright 2013-2014, SUSE LINUX Products GmbH
+# Copyright 2019, SUSE LINUX Products GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -70,25 +69,25 @@ class OctaviaService < OpenstackServiceObject
   def proposal_dependencies(role)
     answer = []
     answer << {
-                "barclamp" => "nova",
-                "inst" => role.default_attributes["octavia"]["nova_instance"]
-              }
+      "barclamp" => "nova",
+      "inst" => role.default_attributes["octavia"]["nova_instance"]
+    }
     answer << {
-                "barclamp" => "neutron",
-                "inst" => role.default_attributes["octavia"]["neutron_instance"]
-              }
+      "barclamp" => "neutron",
+      "inst" => role.default_attributes["octavia"]["neutron_instance"]
+    }
     answer << {
-                "barclamp" => "barbican",
-                "inst" => role.default_attributes["octavia"]["barbican_instance"]
-              }
+      "barclamp" => "barbican",
+      "inst" => role.default_attributes["octavia"]["barbican_instance"]
+    }
     answer << {
-                "barclamp" => "keystone",
-                "inst" => role.default_attributes["octavia"]["keystone_instance"]
-              }
+      "barclamp" => "keystone",
+      "inst" => role.default_attributes["octavia"]["keystone_instance"]
+    }
     answer << {
-                "barclamp" => "glance",
-                "inst" => role.default_attributes["octavia"]["glance_instance"]
-              }
+      "barclamp" => "glance",
+      "inst" => role.default_attributes["octavia"]["glance_instance"]
+    }
     answer
   end
 
@@ -140,8 +139,7 @@ class OctaviaService < OpenstackServiceObject
     worker_nodes = nodes - [controller_node] - [network_nodes]
 
     unless nodes.nil? || nodes.length.zero?
-      base["deployment"]["octavia"]["elements"] =
-      {
+      base["deployment"]["octavia"]["elements"] = {
         "octavia-api" => [controller_node[:fqdn]],
         "octavia-health-manager" => [controller_node[:fqdn]],
         "octavia-housekeeping" => [controller_node[:fqdn]],
