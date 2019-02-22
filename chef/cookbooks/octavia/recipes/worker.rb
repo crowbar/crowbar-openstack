@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-Chef::Log.info "YYYY *************************************** WORKER *******************************"
-
 neutron = node_search_with_cache("roles:neutron-server").first
 neutron_protocol = neutron[:neutron][:api][:protocol]
 neutron_host = CrowbarHelper.get_host_for_admin_url(
@@ -35,33 +33,30 @@ sec_group_id = shell_out
                    "openstack security group show #{node[:octavia][:amphora][:sec_group]}"\
                    "| tr -d ' ' | grep '|id|' | cut -f 3 -d '|'"\
                  ).stdout
-Chef::Log.info "YYYY ----- sec_group_id #{sec_group_id}"
 
 flavor_id = shell_out(
                        "source /root/.openrc &&"\
                        "nova flavor-access-list --flavor #{node[:octavia][:amphora][:flavor]}"\
                        "| head -n -1 | tail -n +4 | tr -d ' ' | cut -f 3 -d '|'"
                      ).stdout
-Chef::Log.info "YYYY ----- flavor_id #{flavor_id}"
 
 image_id = shell_out(
                       "source /root/.openrc && glance image-list"\
                       "| grep #{node[:octavia][:amphora][:image_tag]}"\
                       "| tr -d ' ' | cut -f 2 -d '|'"
                     ).stdout
-Chef::Log.info "YYYY ----- image_id #{image_id}"
 
 net_id = shell_out(
                     "source /root/.openrc && openstack network list"\
                     "| grep fixed | tr -d ' ' | cut -d '|' -f 2"
                   ).stdout
-Chef::Log.info "YYYY ----- net_id #{net_id}"
+
 
 template "/etc/octavia/octavia-worker.conf" do
   source "octavia-worker.conf.erb"
   owner node[:octavia][:user]
   group node[:octavia][:group]
-  mode "0640"
+  mode 00640
   variables(
     octavia_db_connection: fetch_database_connection_string(node[:octavia][:db]),
     octavia_bind_host: "0.0.0.0",
@@ -81,7 +76,7 @@ file node[:octavia][:octavia_log_dir] + "/octavia-worker.log" do
   action :touch
   owner node[:octavia][:user]
   group node[:octavia][:group]
-  mode "0640"
+  mode 00640
 end
 
 octavia_service "worker"

@@ -1,10 +1,6 @@
 require "chef/mixin/shell_out"
 
-Chef::Log.info "YYYY *************************************** Nova *******************************"
 octavia_keystone_settings = KeystoneHelper.keystone_settings(node, "octavia")
-
-
-Chef::Log.info "YYYY #{octavia_keystone_settings.inspect}"
 
 package "openstack-octavia-amphora-image-x86_64"
 

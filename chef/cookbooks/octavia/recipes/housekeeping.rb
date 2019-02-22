@@ -13,8 +13,6 @@
 # limitations under the License.
 #
 
-Chef::Log.info "YYYY *************************************** housekeeping *******************************"
-
 template "/etc/octavia/octavia-housekeeping.conf" do
   source "octavia-housekeeping.conf.erb"
   owner node[:octavia][:user]
