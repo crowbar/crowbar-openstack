@@ -84,6 +84,17 @@ class CinderService < OpenstackServiceObject
     base["attributes"][@bc_name][:db][:password] = random_password
     base["attributes"][@bc_name]["keymgr_fixed_key"] = random_password
 
+    # create rbd backend with use_ses=true if SES config was detected
+    if SES.configured?
+      ses_backend = {
+        "backend_driver" => "rbd",
+        "backend_name" => "ses-ceph",
+        "rbd" => base["attributes"][@bc_name]["volume_defaults"]["rbd"]
+                    .clone.merge("use_ses" => true)
+      }
+      base["attributes"][@bc_name]["volumes"].push(ses_backend)
+    end
+
     @logger.debug("Cinder create_proposal: exiting")
     base
   end
@@ -98,7 +109,9 @@ class CinderService < OpenstackServiceObject
     raw_count = 0
     raw_want_all = false
     rbd_crowbar = false
-    rbd_ceph_conf = false
+    rbd_non_crowbar_ceph_conf = false
+    rbd_ses = false
+    rbd_non_ses_ceph_conf = false
 
     proposal["attributes"][@bc_name]["volumes"].each do |volume|
       backend_driver = volume["backend_driver"]
@@ -131,7 +144,21 @@ class CinderService < OpenstackServiceObject
 
       if backend_driver == "rbd"
         rbd_crowbar ||= volume["rbd"]["use_crowbar"]
-        rbd_ceph_conf ||= !volume["rbd"]["use_crowbar"] && (volume["rbd"]["config_file"].strip == "/etc/ceph/ceph.conf")
+        rbd_non_crowbar_ceph_conf ||= !volume["rbd"]["use_crowbar"] && \
+          !volume["rbd"]["use_ses"] && \
+          (volume["rbd"]["config_file"].strip == "/etc/ceph/ceph.conf")
+
+        rbd_ses ||= volume["rbd"]["use_ses"]
+        rbd_non_ses_ceph_conf ||= !volume["rbd"]["use_ses"] && \
+          !volume["rbd"]["use_crowbar"] && \
+          (volume["rbd"]["config_file"].strip == "/etc/ceph/ceph.conf")
+
+        if volume["rbd"]["use_crowbar"] && volume["rbd"]["use_ses"]
+          validation_error I18n.t(
+            "barclamp.#{@bc_name}.validation.ses_crowbar_conflict",
+            backend_name: volume["backend_name"]
+          )
+        end
       end
     end
 
@@ -199,8 +226,20 @@ class CinderService < OpenstackServiceObject
         end
     end
 
-    if rbd_crowbar && rbd_ceph_conf
-      validation_error I18n.t("barclamp.#{@bc_name}.validation.rados_backends")
+    if rbd_crowbar && rbd_non_crowbar_ceph_conf
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.rados_backends_crowbar")
+    end
+
+    if rbd_crowbar && rbd_ses
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.rados_backends_ses_crowbar")
+    end
+
+    if rbd_ses && rbd_non_ses_ceph_conf
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.rados_backends_ses")
+    end
+
+    if rbd_ses && !SES.configured?
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.no_ses_config")
     end
 
     super

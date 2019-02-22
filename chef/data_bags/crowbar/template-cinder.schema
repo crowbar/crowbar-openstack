@@ -107,6 +107,7 @@
                 "rbd": {
                 "type": "map", "mapping": {
                     "use_crowbar": { "type": "bool", "required": true },
+                    "use_ses": { "type": "bool", "required": true },
                     "config_file": { "type": "str", "required": true },
                     "admin_keyring": { "type": "str", "required": true },
                     "pool": { "type": "str", "required": true },
@@ -252,6 +253,7 @@
                   "rbd": {
                     "type": "map", "mapping": {
                       "use_crowbar": { "type": "bool", "required": true },
+                      "use_ses": { "type": "bool", "required": true },
                       "config_file": { "type": "str", "required": true },
                       "admin_keyring": { "type": "str", "required": true },
                       "pool": { "type": "str", "required": true },

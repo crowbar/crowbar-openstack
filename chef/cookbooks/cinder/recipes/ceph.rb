@@ -17,6 +17,15 @@
 # Recipe:: ceph
 #
 
+has_ses = SesHelper.populate_cinder_volumes_with_ses_settings(node)
+
+# Install SES based ceph configuration
+if has_ses
+  ses_config "cinder" do
+    action :create
+  end
+end
+
 ceph_clients = {}
 ceph_keyrings = {}
 
@@ -51,7 +60,7 @@ if has_internal
   end
 end
 
-if has_external
+if has_external || has_ses
   # Ensure ceph is available here
   if node[:platform_family] == "suse"
     # install package in compile phase because we will run "ceph -s"
@@ -64,6 +73,8 @@ end
 # Second loop to do our setup
 node[:cinder][:volumes].each_with_index do |volume, volid|
   next unless volume[:backend_driver] == "rbd"
+
+  next if volume[:rbd][:use_ses]
 
   if volume[:rbd][:use_crowbar]
     ceph_conf = "/etc/ceph/ceph.conf"

@@ -80,6 +80,7 @@
         },
         "rbd": {
           "use_crowbar": false,
+          "use_ses": false,
           "config_file": "/etc/ceph/ceph.conf",
           "admin_keyring": "/etc/ceph/ceph.client.admin.keyring",
           "pool": "volumes",
@@ -182,7 +183,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 208,
+      "schema-revision": 209,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
