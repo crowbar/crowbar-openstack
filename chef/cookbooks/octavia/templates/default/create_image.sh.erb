@@ -13,7 +13,7 @@ echo "Service id is $service_id"
 
 flavor_id=$(nova flavor-access-list --flavor $flavor | head -n -1 | tail -n +4 | tr -d " " | cut -f 3 -d "|")
 
-if (( $(echo $flavor_id | wc -l) == 0 )); then
+if [ $flavor_id -z ]; then
         nova flavor-access-add $flavor $service_id
         flavor_id=$(nova flavor-show $flavor | grep id | tr -d ' ' | cut -f 3 -d '|')
 else
@@ -24,7 +24,7 @@ echo "flavor_id: $flavor_id"
 
 image_id=$(glance image-list | grep $image_tag | tr -d " " | cut -f 2 -d "|" )
 
-if (( $(echo $image_id | wc -l) == 0 )); then
+if [ $image_id -z ]; then
         file=$(rpm -ql openstack-octavia-amphora-image-x86_64 | grep qcow2)
         image_id=$(glance image-create --name $image_tag --disk-format qcow2 --container-format bare --file $file | grep id | head -n 1 | tr -d " " | cut -f 3 -d "|")
         openstack image set --tag $image_tag $image_id
