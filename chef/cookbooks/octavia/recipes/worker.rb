@@ -1,4 +1,4 @@
-# Copyright 2019 SUSE Linux, GmbH.
+# Copyright 2019 SUSE Linux GmbH.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
+
 neutron = node_search_with_cache("roles:neutron-server").first
 neutron_protocol = neutron[:neutron][:api][:protocol]
 neutron_host = CrowbarHelper.get_host_for_admin_url(
@@ -51,12 +51,11 @@ net_id = shell_out(
                     "| grep fixed | tr -d ' ' | cut -d '|' -f 2"
                   ).stdout
 
-
 template "/etc/octavia/octavia-worker.conf" do
   source "octavia-worker.conf.erb"
   owner node[:octavia][:user]
   group node[:octavia][:group]
-  mode 00640
+  mode 0o640
   variables(
     octavia_db_connection: fetch_database_connection_string(node[:octavia][:db]),
     octavia_bind_host: "0.0.0.0",
@@ -76,7 +75,7 @@ file node[:octavia][:octavia_log_dir] + "/octavia-worker.log" do
   action :touch
   owner node[:octavia][:user]
   group node[:octavia][:group]
-  mode 00640
+  mode 0o640
 end
 
 octavia_service "worker"

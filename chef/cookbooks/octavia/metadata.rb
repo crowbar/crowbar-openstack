@@ -1,8 +1,8 @@
-name "neutron"
+name "octavia"
 maintainer "Crowbar project"
 maintainer_email "crowbar@googlegroups.com"
-license "Apache 2.0 License, Copyright (c) 2011 Dell Inc. - http://www.apache.org/licenses/LICENSE-2.0"
-description "Openstack Neutron server deployment recipes."
+license "Apache 2.0 License, Copyright (c) 2019 SUSE Linux GmbH. - http://www.apache.org/licenses/LICENSE-2.0"
+description "Openstack Octavia server deployment recipes."
 long_description IO.read(File.join(File.dirname(__FILE__), "README.rdoc"))
 version "1.0"
 

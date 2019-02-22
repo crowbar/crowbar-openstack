@@ -23,7 +23,7 @@ define :octavia_service do
   else
     conf = "/etc/octavia/octavia-#{params[:name]}.conf"
   end
- 
+
   service "octavia-#{params[:name]}" do
     service_name "openstack-octavia-#{params[:name]}"
     supports status: true, restart: true

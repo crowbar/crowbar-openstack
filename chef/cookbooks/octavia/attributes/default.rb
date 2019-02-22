@@ -1,5 +1,4 @@
-
-# Copyright (c) 2019 SUSE Linux, GmbH.
+# Copyright (c) 2019 SUSE Linux GmbH.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,17 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-default[:octavia][:user]="octavia"
-default[:octavia][:group]="octavia"
+default[:octavia][:user] = "octavia"
+default[:octavia][:group] = "octavia"
 
 default[:octavia][:octavia_log_dir] = "/var/log/octavia"
-default[:octavia][:octavia_bin_dir] = "octavia" #TODO: Check this value!
+default[:octavia][:octavia_bin_dir] = "octavia" # TODO: Check this value!
 default[:octavia][:restart_hold] = "100ms"
 
-default[:octavia][:api][:port]=9876
+default[:octavia][:api][:port] = 9876
 
 default[:octavia][:db][:user] = "octavia"
-default[:octavia][:db][:database] =" octavia"
+default[:octavia][:db][:database] = "octavia"
 default[:octavia][:db][:password]= nil
 
 default[:octavia][:sudoers_file] = "/etc/sudoers.d/octavia"
@@ -42,6 +41,6 @@ default[:octavia][:certs][:client_cert_and_key_path] = "client_ca/private/client
 default[:octavia][:tmp][:node_list] = nil
 
 default[:octavia][:amphora][:flavor] = "m1.lbaas.amphora"
-default[:octavia][:amphora][:sec_group] ="lb-mgmt-sec-group"
-default[:octavia][:amphora][:manage_net] ="fixed"
+default[:octavia][:amphora][:sec_group] = "lb-mgmt-sec-group"
+default[:octavia][:amphora][:manage_net] = "fixed"
 default[:octavia][:amphora][:image_tag] = "amphora"
