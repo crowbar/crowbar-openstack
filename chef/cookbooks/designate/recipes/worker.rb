@@ -16,4 +16,4 @@
 # Recipe:: pool_bind
 #
 
-designate_service "pool-worker"
+designate_service "worker"
