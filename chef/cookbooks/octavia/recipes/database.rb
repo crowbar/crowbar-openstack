@@ -18,6 +18,10 @@ ha_enabled = node[:octavia][:ha][:enabled]
 db_settings = fetch_database_settings
 crowbar_pacemaker_sync_mark "wait-octavia_database" if ha_enabled
 
+db_user = node[:octavia][:db][:user]
+db_pass = node[:octavia][:db][:password]
+db_name = node[:octavia][:db][:database]
+
 # Create the Octavia Database
 
   database "create #{db_name} octavia database" do
