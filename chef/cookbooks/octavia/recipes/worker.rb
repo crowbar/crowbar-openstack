@@ -57,12 +57,11 @@ net_id = shell_out(
                   ).stdout
 Chef::Log.info "YYYY ----- net_id #{net_id}"
 
-
 template "/etc/octavia/octavia-worker.conf" do
   source "octavia-worker.conf.erb"
   owner node[:octavia][:user]
   group node[:octavia][:group]
-  mode 00640
+  mode "0640"
   variables(
     octavia_db_connection: fetch_database_connection_string(node[:octavia][:db]),
     octavia_bind_host: "0.0.0.0",
@@ -82,7 +81,7 @@ file node[:octavia][:octavia_log_dir] + "/octavia-worker.log" do
   action :touch
   owner node[:octavia][:user]
   group node[:octavia][:group]
-  mode 00640
+  mode "0640"
 end
 
 octavia_service "worker"
