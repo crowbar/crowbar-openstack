@@ -116,9 +116,7 @@
                       "heap_size": { "type": "str", "required": true },
                       "limit_memlock": { "type": "str", "required": true },
                       "limit_nofile": { "type": "int", "required": true },
-                      "max_open_files_soft_limit": { "type": "int", "required": true },
                       "limit_nproc": { "type": "int", "required": true },
-                      "memory_lock": { "type": "bool", "required": true },
                       "vm_max_map_count": { "type": "int", "required": true }
                     }
                   }

@@ -75,9 +75,7 @@
           "heap_size": "4g",
           "limit_memlock": "infinity",
           "limit_nofile": 65536,
-          "max_open_files_soft_limit": 16384,
           "limit_nproc": 65536,
-          "memory_lock": true,
           "vm_max_map_count": 262144
         }
       },
@@ -155,7 +153,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 312,
+      "schema-revision": 313,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-agent": [ "readying", "ready", "applying" ],
