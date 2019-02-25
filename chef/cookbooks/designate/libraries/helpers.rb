@@ -27,7 +27,7 @@ module DesignateHelper
 
       @network_settings ||= {
         ip: @ip,
-
+        mdns_bind_host: ha_enabled ? @cluster_admin_ip : @ip,
         api: {
           bind_host: if !ha_enabled && node[:designate][:api][:bind_open_address]
                        "0.0.0.0"
