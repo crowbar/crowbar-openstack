@@ -70,8 +70,8 @@ keystone_register "register octavia service" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   service_name "octavia"
-  service_type "data-processing"
-  service_description "Openstack octavia - Data Processing"
+  service_type "load-balancer"
+  service_description "Openstack Octavia - Load Balancer"
   action :add_service
 end
 
