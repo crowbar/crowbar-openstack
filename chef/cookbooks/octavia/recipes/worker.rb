@@ -27,12 +27,11 @@ nova_server_host = CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:
 nova_server_port = nova[:nova][:ports][:api]
 nova_endpoint = nova_protocol + "://" + nova_server_host + ":" + nova_server_port.to_s
 
-sec_group_id = shell_out
-                 (
-                   "source /root/.openrc &&"\
-                   "openstack security group show #{node[:octavia][:amphora][:sec_group]}"\
-                   "| tr -d ' ' | grep '|id|' | cut -f 3 -d '|'"
-                 ).stdout
+sec_group_id = shell_out(
+                          "source /root/.openrc &&"\
+                          "openstack security group show #{node[:octavia][:amphora][:sec_group]}"\
+                          "| tr -d ' ' | grep '|id|' | cut -f 3 -d '|'"
+                        ).stdout
 
 flavor_id = shell_out(
                        "source /root/.openrc &&"\
