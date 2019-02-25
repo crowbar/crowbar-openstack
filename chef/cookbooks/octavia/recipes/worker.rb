@@ -31,7 +31,7 @@ sec_group_id = shell_out
                  (
                    "source /root/.openrc &&"\
                    "openstack security group show #{node[:octavia][:amphora][:sec_group]}"\
-                   "| tr -d ' ' | grep '|id|' | cut -f 3 -d '|'"\
+                   "| tr -d ' ' | grep '|id|' | cut -f 3 -d '|'"
                  ).stdout
 
 flavor_id = shell_out(
