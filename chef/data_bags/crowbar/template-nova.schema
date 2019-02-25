@@ -125,12 +125,6 @@
                 "min_pool_size": { "type": "int", "required": false }
               }
             },
-            "rbd": {
-              "type": "map", "required": false, "mapping": {
-                "user": { "type": "str", "required": true },
-                "secret_uuid": { "type": "str", "required": true }
-              }
-            },
             "kvm": {
               "type": "map", "required": true, "mapping": {
                 "nested_virt": { "type": "bool", "required": false },
