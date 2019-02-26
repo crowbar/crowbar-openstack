@@ -15,6 +15,12 @@
       "glance_instance": "none",
       "service_user": "octavia",
       "service_password": "octavia",
+      "certs":{
+        "country": "US",
+        "province": "Oregon",
+        "domain": "example.com",
+        "passphrase": "password"
+      },
       "api":{
         "port": 9876,
         "protocol": "http"
@@ -34,22 +40,24 @@
     "octavia": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 303,
+      "schema-revision": 300,
       "element_states": {
         "octavia-api": [ "readying", "ready", "applying" ],
         "octavia-health-manager": [ "readying", "ready", "applying" ],
         "octavia-housekeeping": [ "readying", "ready", "applying" ],
-        "octavia-worker": [ "readying", "ready", "applying" ]
+        "octavia-worker": [ "readying", "ready", "applying" ],
+        "octavia-certificates-sharing": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-         ["octavia-api", "octavia-health-manager", "octavia-housekeeping", "octavia-worker"]
+         ["octavia-certificates-sharing", "octavia-api", "octavia-health-manager", "octavia-housekeeping", "octavia-worker"]
       ],
       "element_run_list_order": {
-        "octavia-api": 101,
-        "octavia-health-manager": 102,
-        "octavia-housekeeping": 103,
-        "octavia-worker": 104
+        "octavia-certificates-sharing": 101,
+        "octavia-api": 102,
+        "octavia-health-manager": 103,
+        "octavia-housekeeping": 104,
+        "octavia-worker": 105
       },
       "config": {
         "environment": "octavia-config-base",

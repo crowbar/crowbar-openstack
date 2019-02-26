@@ -14,14 +14,21 @@
 # limitations under the License.
 #
 
-if CrowbarRoleRecipe.node_state_valid_for_role?(node, "octavia", "octavia-api")
-  include_recipe "#{@cookbook_name}::common"
 
-  if CrowbarPacemakerHelper.is_cluster_founder?(node)
-    include_recipe "#{@cookbook_name}::database"
-    include_recipe "#{@cookbook_name}::keystone"
-    include_recipe "#{@cookbook_name}::nova"
+if CrowbarRoleRecipe.node_state_valid_for_role?(node, "octavia", "octavia-certificates-sharing")
+  directory node[:octavia][:certs][:cert_path] do
+    owner node[:octavia][:user]
+    group node[:octavia][:group]
+    recursive true
   end
 
-  include_recipe "#{@cookbook_name}::api"
+  if CrowbarPacemakerHelper.is_cluster_founder?(node)
+    include_recipe "#{@cookbook_name}::ca_certs"
+  end
+
+  crowbar_pacemaker_sync_mark "sync-octavia-initial-setup" do
+    timeout 300
+  end
+
+  include_recipe "#{@cookbook_name}::certs"
 end

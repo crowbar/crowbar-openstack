@@ -1,5 +1,6 @@
 #
-# Copyright 2019, SUSE LINUX GmbH
+# Copyright 2011-2013, Dell
+# Copyright 2013-2014, SUSE LINUX Products GmbH
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,14 +15,29 @@
 # limitations under the License.
 #
 
-if CrowbarRoleRecipe.node_state_valid_for_role?(node, "octavia", "octavia-api")
-  include_recipe "#{@cookbook_name}::common"
+barclamp:
+  name: 'octavia'
+  display: 'Octavia'
+  description: 'Octavia: Load balancer as a Service'
+  version: 0
+  user_managed: true
+  requires:
+    - '@crowbar'
+    - 'git'
+    - 'database'
+    - 'rabbitmq'
+    - 'keystone'
+    - 'neutron'
+    - 'cinder'
+    - 'glance'
+    - 'nova'
+      'barbican'
+  member:
+    - 'openstack'
 
-  if CrowbarPacemakerHelper.is_cluster_founder?(node)
-    include_recipe "#{@cookbook_name}::database"
-    include_recipe "#{@cookbook_name}::keystone"
-    include_recipe "#{@cookbook_name}::nova"
-  end
-
-  include_recipe "#{@cookbook_name}::api"
-end
+crowbar:
+  layout: 1
+  order: 101
+  run_order: 101
+  chef_order: 101
+  proposal_schema_version: 3

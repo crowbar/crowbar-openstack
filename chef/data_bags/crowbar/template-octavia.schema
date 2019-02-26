@@ -19,6 +19,14 @@
                     "glance_instance": { "type": "str", "required": true },
                     "service_user": { "type": "str", "required": true },
                     "service_password": { "type": "str", "required": true },
+                    "certs": { "type": "map", "required": true,
+                      "mapping": {
+                        "country": { "type": "str", "required": true },
+                        "province": { "type": "str", "required": true },
+                        "domain": { "type": "str", "required": true },
+                        "passphrase": { "type": "str", "required": true }
+                      }
+                    },
                     "api": { "type": "map", "required": true,
                       "mapping": {
                         "port": { "type": "int", "required": true },
