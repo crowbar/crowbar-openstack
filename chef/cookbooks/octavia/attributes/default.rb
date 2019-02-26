@@ -20,6 +20,7 @@ default[:octavia][:octavia_bin_dir] = "octavia" # TODO: Check this value!
 default[:octavia][:restart_hold] = "100ms"
 
 default[:octavia][:api][:port] = 9876
+default[:octavia][:api][:protocol] = "http"
 
 default[:octavia][:db][:user] = "octavia"
 default[:octavia][:db][:database] = "octavia"

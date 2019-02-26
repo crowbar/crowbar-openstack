@@ -16,7 +16,8 @@
       "service_user": "octavia",
       "service_password": "octavia",
       "api":{
-        "port": 9876
+        "port": 9876,
+        "protocol": "http"
       },
       "health-manager":{
         "port": 5555,

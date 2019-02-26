@@ -123,7 +123,8 @@ octavia_api = nil
 octavia_nodes = search(:node, "roles:octavia-api") || []
 unless octavia_nodes.length == 0
   octavia_node = octavia_nodes[0]
-  octavia_api = "http://" + octavia_node.name + ":" + octavia_node[:octavia][:api][:port].to_s
+  octavia_api = neutron[:octavia][:api][:protocol] + "://" +
+                octavia_node.name + ":" + octavia_node[:octavia][:api][:port].to_s
 end
 
 template neutron[:neutron][:config_file] do

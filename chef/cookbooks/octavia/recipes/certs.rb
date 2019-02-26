@@ -38,18 +38,3 @@ execute "Execute build certs" do
   action :run
   only_if { !already_created }
 end
-
-template "/tmp/distribute_certs.sh" do
-  source "distribute_certs.sh.erb"
-  owner node[:octavia][:user]
-  group node[:octavia][:group]
-  mode 0o700
-  variables(
-    node_list: node[:octavia][:tmp][:node_list]
-  )
-end
-
-execute "Distribute certs" do
-  command "./tmp/distribute_certs.sh"
-  action :run
-end

@@ -27,28 +27,23 @@ nova_server_host = CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:
 nova_server_port = nova[:nova][:ports][:api]
 nova_endpoint = nova_protocol + "://" + nova_server_host + ":" + nova_server_port.to_s
 
-sec_group_id = shell_out
-                 (
-                   "source /root/.openrc &&"\
-                   "openstack security group show #{node[:octavia][:amphora][:sec_group]}"\
-                   "| tr -d ' ' | grep '|id|' | cut -f 3 -d '|'"\
-                 ).stdout
+sec_group_id = shell_out("source /root/.openrc &&"\
+                          "openstack security group show #{node[:octavia][:amphora][:sec_group]}"\
+                          "| tr -d ' ' | grep '|id|' | cut -f 3 -d '|'"
+                        ).stdout
 
-flavor_id = shell_out(
-                       "source /root/.openrc &&"\
-                       "nova flavor-access-list --flavor #{node[:octavia][:amphora][:flavor]}"\
-                       "| head -n -1 | tail -n +4 | tr -d ' ' | cut -f 3 -d '|'"
-                     ).stdout
+flavor_id = shell_out("source /root/.openrc &&"\
+                      "nova flavor-access-list --flavor #{node[:octavia][:amphora][:flavor]}"\
+                      "| head -n -1 | tail -n +4 | tr -d ' ' | cut -f 3 -d '|'"
+                      ).stdout
 
-image_id = shell_out(
-                      "source /root/.openrc && glance image-list"\
-                      "| grep #{node[:octavia][:amphora][:image_tag]}"\
-                      "| tr -d ' ' | cut -f 2 -d '|'"
+image_id = shell_out("source /root/.openrc && glance image-list"\
+                     "| grep #{node[:octavia][:amphora][:image_tag]}"\
+                     "| tr -d ' ' | cut -f 2 -d '|'"
                     ).stdout
 
-net_id = shell_out(
-                    "source /root/.openrc && openstack network list"\
-                    "| grep fixed | tr -d ' ' | cut -d '|' -f 2"
+net_id = shell_out("source /root/.openrc && openstack network list"\
+                   "| grep fixed | tr -d ' ' | cut -d '|' -f 2"
                   ).stdout
 
 template "/etc/octavia/octavia-worker.conf" do
