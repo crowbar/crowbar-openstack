@@ -171,6 +171,12 @@
         "apache2": {
           "LimitNOFILE": null
         }
+      },
+      "osprofiler": {
+        "enabled": false,
+        "hmac_keys": [],
+        "trace_sqlalchemy": false,
+        "connection_string": "messaging://"
       }
     }
   },
@@ -178,7 +184,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 205,
+      "schema-revision": 207,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },

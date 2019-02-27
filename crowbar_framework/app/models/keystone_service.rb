@@ -66,6 +66,7 @@ class KeystoneService < OpenstackServiceObject
 
     base["attributes"][@bc_name][:service][:token] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
+    base["attributes"][@bc_name][:osprofiler][:hmac_keys] << random_password
 
     base
   end

@@ -21,6 +21,7 @@
 network_settings = GlanceHelper.network_settings(node)
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+profiler_settings = KeystoneHelper.profiler_settings(node, @cookbook_name)
 
 template node[:glance][:scrubber][:config_file] do
   source "glance-scrubber.conf.erb"
@@ -30,7 +31,8 @@ template node[:glance][:scrubber][:config_file] do
   variables(
     registry_bind_host: network_settings[:registry][:bind_host],
     registry_bind_port: network_settings[:registry][:bind_port],
-    keystone_settings: keystone_settings
+    keystone_settings: keystone_settings,
+    profiler_settings: profiler_settings
   )
 end
 

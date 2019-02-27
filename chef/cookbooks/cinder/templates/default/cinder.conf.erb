@@ -329,3 +329,11 @@ key_file = <%= node[:cinder][:ssl][:keyfile] if node[:cinder][:api][:protocol] =
 
 [volumes]
 backups_enabled = false
+
+<% if @profiler_settings[:enabled] -%>
+[profiler]
+enabled = true
+trace_sqlalchemy = <%= @profiler_settings[:trace_sqlalchemy] ? "true" : "false" %>
+hmac_keys = <%= @profiler_settings[:hmac_keys].join(",") %>
+connection_string = <%= @profiler_settings[:connection_string] %>
+<% end -%>
