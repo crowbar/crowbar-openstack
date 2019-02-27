@@ -16,6 +16,8 @@
 
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "octavia", "octavia-certificates-sharing")
+  include_recipe "#{@cookbook_name}::common"
+  
   directory node[:octavia][:certs][:cert_path] do
     owner node[:octavia][:user]
     group node[:octavia][:group]
