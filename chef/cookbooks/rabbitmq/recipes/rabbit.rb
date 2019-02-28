@@ -152,8 +152,8 @@ if cluster_enabled
     quorum = 1
   end
 
-  # don't mirror queues that are 'amqp.*' or '*_fanout_*' or `reply_*` in their names
-  queue_regex = "^(?!(amqp.)|(.*_fanout_)|(reply_)).*"
+  # don't mirror queues that are 'amq.*' or '*_fanout_*' or `reply_*` in their names
+  queue_regex = "^(?!(amq\.)|(.*_fanout_)|(reply_)).*"
   # policy doesnt need spaces between elements as they will be removed when listing them
   # making it more difficult to check for them
   policy = "{\"ha-mode\":\"exactly\",\"ha-params\":#{quorum},\"ha-sync-mode\":\"automatic\"}"
