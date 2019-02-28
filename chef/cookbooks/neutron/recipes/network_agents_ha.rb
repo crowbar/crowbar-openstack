@@ -180,7 +180,7 @@ if use_l3_agent
       # constraint on these services, but it's optional, not mandatory (because it
       # doesn't need to be restarted when galera or rabbitmq are restarted).
       # So explicitly depend on galera and rabbitmq (if they are in the cluster).
-      ordering "( galera #{rabbit_settings[:pacemaker_resource]} g-haproxy "\
+      ordering "( ms-galera #{rabbit_settings[:pacemaker_resource]} g-haproxy "\
                "cl-neutron-server ) #{ha_service_primitive_name}"
       score "Mandatory"
       action :create

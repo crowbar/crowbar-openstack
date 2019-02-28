@@ -334,7 +334,7 @@ crowbar_pacemaker_order_only_existing "o-#{evacuate_primitive}" do
   #  - cinder is used in case of boot from volume
   #  - neutron agents are used even with DVR, if only to have a DHCP server for
   #    the instance to get an IP address
-  ordering "( galera #{rabbit_settings[:pacemaker_resource]} ) #{evacuate_primitive}"
+  ordering "( ms-galera #{rabbit_settings[:pacemaker_resource]} ) #{evacuate_primitive}"
   score "Mandatory"
   action :create
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
