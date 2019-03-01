@@ -54,7 +54,8 @@ template "/etc/systemd/system/elasticsearch.service.d/override.conf" do
   variables(
     elasticsearch_limit_nproc: node[:monasca][:elasticsearch][:tunables][:limit_nproc],
     elasticsearch_limit_nofile: node[:monasca][:elasticsearch][:tunables][:limit_nofile],
-    elasticsearch_limit_memlock: node[:monasca][:elasticsearch][:tunables][:limit_memlock]
+    elasticsearch_limit_memlock: node[:monasca][:elasticsearch][:tunables][:limit_memlock],
+    elasticsearch_heap_size: node[:monasca][:elasticsearch][:tunables][:heap_size]
   )
   notifies :run, "execute[systemctl daemon-reload]", :immediately
   notifies :restart, "service[elasticsearch]"
