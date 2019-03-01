@@ -1,4 +1,12 @@
 def upgrade(ta, td, a, d)
+  fields = ["type", "boot", "console", "deploy", "inspect", "management", "power", "raid"]
+
+  # init empty attributes with defaults
+  fields.each do |field|
+    attribute = "enabled_" + (field == "type" ? "hardware_types" : "#{field}_interfaces")
+    a[attribute] ||= ta[attribute]
+  end
+
   # migrate classic drivers to new form
   unless a["enabled_drivers"].nil? || a["enabled_drivers"].empty?
     # based on https://docs.openstack.org/ironic/pike/admin/upgrade-to-hardware-types.html
@@ -182,16 +190,16 @@ def upgrade(ta, td, a, d)
     }
     a["enabled_drivers"].each do |driver|
       next unless mapping.key? driver
-      ["type", "boot", "console", "deploy", "inspect",
-       "management", "power", "raid"].each do |field|
+      fields.each do |field|
         next if mapping[driver][field.to_sym].nil?
         attribute = "enabled_" + (field == "type" ? "hardware_types" : "#{field}_interfaces")
-        a[attribute] = [] unless a.key? attribute
         a[attribute].push(mapping[driver][field.to_sym]).uniq!
       end
     end
-    a.delete("enabled_drivers")
   end
+
+  a.delete("enabled_drivers")
+
   return a, d
 end
 
