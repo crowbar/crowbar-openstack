@@ -30,6 +30,8 @@ directory node[:octavia][:certs][:cert_path] do
   recursive true
 end
 
+package "python-octaviaclient"
+
 # name: octavia-post-configure | set_octavia_quotas | Set Octavia Quotas
 #   shell: >
 #     openstack quota set {{ octavia_project_name }} \

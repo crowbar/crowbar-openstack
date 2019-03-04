@@ -34,7 +34,7 @@ sec_group_id = shell_out("source /root/.openrc &&"\
 
 flavor_id = shell_out("source /root/.openrc &&"\
                       "nova flavor-access-list --flavor #{node[:octavia][:amphora][:flavor]}"\
-                      "| head -n -1 | tail -n +4 | tr -d ' ' | cut -f 3 -d '|'"
+                      "| head -n -1 | tail -n +4 | tr -d ' ' | cut -f 2 -d '|'"
                       ).stdout
 
 image_id = shell_out("source /root/.openrc && glance image-list"\

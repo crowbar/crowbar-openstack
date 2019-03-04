@@ -83,9 +83,9 @@ keystone_register "register octavia endpoint" do
   auth register_auth_hash
   endpoint_service "octavia"
   endpoint_region keystone_settings["endpoint_region"]
-  endpoint_publicURL "#{octavia_protocol}://#{my_public_host}:#{octavia_port}/v1.1/%(tenant_id)s"
-  endpoint_adminURL "#{octavia_protocol}://#{my_admin_host}:#{octavia_port}/v1.1/%(tenant_id)s"
-  endpoint_internalURL "#{octavia_protocol}://#{my_admin_host}:#{octavia_port}/v1.1/%(tenant_id)s"
+  endpoint_publicURL "#{octavia_protocol}://#{my_public_host}:#{octavia_port}/"
+  endpoint_adminURL "#{octavia_protocol}://#{my_admin_host}:#{octavia_port}/"
+  endpoint_internalURL "#{octavia_protocol}://#{my_admin_host}:#{octavia_port}/"
   action :add_endpoint
 end
 

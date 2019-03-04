@@ -50,5 +50,50 @@ loadbalancer_topology = SINGLE
 client_cert = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:client_cert_and_key_path] %>
 server_ca = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:server_ca_cert_path] %>
 
+[keystone_authtoken]
+auth_version = <%= @octavia_keystone_settings['api_version'] %>
+www_authenticate_uri = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
+                                                    @octavia_keystone_settings["public_auth_url"],
+                                                    @octavia_keystone_settings["service_port"],
+                                                    @octavia_keystone_settings['api_version']) %>
+auth_url = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
+                                                    @octavia_keystone_settings["internal_url_host"],
+                                                    @octavia_keystone_settings["service_port"],
+                                                    @octavia_keystone_settings['api_version']) %>
+auth_type = password
+project_name = <%= @octavia_keystone_settings['service_tenant'] %>
+project_domain_name = Default
+user_domain_name = Default
+username = <%= @octavia_keystone_settings['service_user'] %>
+password =  <%= @octavia_keystone_settings['service_password'] %>
+region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
+#TODO cafile = <%= @octavia_ca_file %>
+
+[certificates]
+cert_generator = local_cert_generator
+cert_manager = barbican_cert_manager
+ca_certificate = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_cert_path] %>
+ca_private_key = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_key_path] %>
+ca_private_key_passphrase = <%= @node[:octavia][:certs][:passphrase] %>
+
+[service_auth]
+auth_version = <%= @octavia_keystone_settings['api_version'] %>
+www_authenticate_uri = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
+                                                    @octavia_keystone_settings["public_auth_url"],
+                                                    @octavia_keystone_settings["service_port"],
+                                                    @octavia_keystone_settings['api_version']) %>
+auth_url = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
+                                                    @octavia_keystone_settings["internal_url_host"],
+                                                    @octavia_keystone_settings["service_port"],
+                                                    @octavia_keystone_settings['api_version']) %>
+auth_type = password
+project_name = <%= @octavia_keystone_settings['service_project'] %>
+project_domain_name = Default
+user_domain_name = Default
+username = <%= @octavia_keystone_settings['service_user'] %>
+password =  <%= @octavia_keystone_settings['service_password'] %>
+region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
+#TODO cafile = <%= @octavia_ca_file %>
+
 ### End of File ###
 ## Do NOT put anything after this line ##
