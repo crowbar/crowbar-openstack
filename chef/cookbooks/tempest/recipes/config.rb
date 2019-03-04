@@ -18,6 +18,8 @@
 # limitations under the License.
 #
 
+require "open3"
+
 nova = get_instance("roles:nova-controller")
 keystone_settings = KeystoneHelper.keystone_settings(nova, "nova")
 
@@ -370,9 +372,11 @@ ruby_block "get public network id" do
   block do
     cmd = "#{openstackcli} --os-user-domain-name Default --os-project-domain-name Default"
     cmd << " network show -f value -c id floating"
-    public_network_id =  `#{cmd}`.strip
-    raise("Cannot fetch ID of floating network") if public_network_id.empty?
-    node[:tempest][:public_network_id] = public_network_id
+    stdout, stderr, status = Open3.capture3(cmd)
+    unless status.success? || stdout.empty?
+      raise("Cannot fetch ID of floating network.\n#{stdout}\n#{stderr}")
+    end
+    node[:tempest][:public_network_id] = stdout.strip
   end
 end
 
