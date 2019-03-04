@@ -11,6 +11,7 @@
       "service_user": "designate",
       "service_password": "",
       "memcache_secret_key": "",
+      "rndc_secret_key": "",
       "api": {
         "protocol": "http",
         "bind_open_address": true,

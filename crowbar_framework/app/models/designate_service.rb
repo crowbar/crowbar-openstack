@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+require "openssl"
+
 class DesignateService < OpenstackServiceObject
   def initialize(thelogger = nil)
     super(thelogger)
@@ -83,6 +85,7 @@ class DesignateService < OpenstackServiceObject
 
     base["attributes"][@bc_name]["service_password"] = random_password
     base["attributes"][@bc_name]["memcache_secret_key"] = random_password
+    base["attributes"][@bc_name]["rndc_secret_key"] = OpenSSL::Digest.new("md5", random_password).hexdigest
     base["attributes"][@bc_name][:db][:password] = random_password
 
     @logger.debug("Designate create_proposal: exiting")
