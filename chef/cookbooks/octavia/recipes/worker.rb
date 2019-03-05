@@ -32,9 +32,9 @@ sec_group_id = shell_out("source /root/.openrc &&"\
                           "| tr -d ' ' | grep '|id|' | cut -f 3 -d '|'"
                         ).stdout
 
-flavor_id = shell_out("source /root/.openrc &&"\
-                      "nova flavor-access-list --flavor #{node[:octavia][:amphora][:flavor]}"\
-                      "| head -n -1 | tail -n +4 | tr -d ' ' | cut -f 2 -d '|'"
+flavor_id = shell_out("source /root/.openrc && openstack flavor list"\
+                      "| grep #{node[:octavia][:amphora][:flavor]}"\
+                      "| tr -d ' ' | cut -f 2 -d '|'"
                       ).stdout
 
 image_id = shell_out("source /root/.openrc && glance image-list"\
@@ -43,7 +43,7 @@ image_id = shell_out("source /root/.openrc && glance image-list"\
                     ).stdout
 
 net_id = shell_out("source /root/.openrc && openstack network list"\
-                   "| grep fixed | tr -d ' ' | cut -d '|' -f 2"
+                   "| grep #{node[:octavia][:amphora][:manage_net]} | tr -d ' ' | cut -d '|' -f 2"
                   ).stdout
 
 template "/etc/octavia/octavia-worker.conf" do

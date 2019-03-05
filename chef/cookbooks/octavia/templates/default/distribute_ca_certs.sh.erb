@@ -2,7 +2,8 @@
 #
 
 cert_path="<%=node[:octavia][:certs][:cert_path]%>"
+owner="<%=node[:octavia][:user]%>:<%=node[:octavia][:group]%>"
 
 <% @node_list.each do |node| %>
-rsync -aro --timeout=300 $cert_path/* <%= node %>:$cert_path
+rsync -aro --timeout=300 --chown=$owner $cert_path/* <%= node %>:$cert_path
 <% end %>

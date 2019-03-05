@@ -6,7 +6,7 @@ flavor="<%= @flavor %>"
 project_name="<%= @project_name %>"
 image_tag="<%= @image_tag %>"
 
-nova flavor-show $flavor &> /dev/null ||nova flavor-create --is-public False $flavor auto 1024 2 1
+openstack flavor create --public --ram 1024 --disk 2 --vcpus 1 m1.lbaas.amphora
 
 service_id=$(openstack project show -f value -c id $project_name)
 echo "Service id is $service_id"

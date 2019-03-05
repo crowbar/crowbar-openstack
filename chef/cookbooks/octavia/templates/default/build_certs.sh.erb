@@ -4,6 +4,7 @@ domain="<%= node[:octavia][:certs][:domain] %>"
 pass="<%= node[:octavia][:certs][:passphrase] %>"
 subj="/C=$country/ST=$province/L=Ocala/O=Home/CN=$domain"
 cert_path="<%=node[:octavia][:certs][:cert_path]%>"
+owner="<%=node[:octavia][:user]%>:<%=node[:octavia][:group]%>"
 
 cd $cert_path
 cd client_ca
@@ -22,4 +23,6 @@ openssl ca  -batch -config ../openssl.cnf -extensions usr_cert -days 7300 -notex
 # Create a concatenated client certificate and key file.
 openssl rsa -in private/client.key.pem -passin pass:$pass -out private/client.cert-and-key.pem
 cat certs/client.cert.pem >> private/client.cert-and-key.pem
+
+chown -R $owner $cert_path 
 chmod 700 private/client.cert-and-key.pem

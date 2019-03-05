@@ -11,7 +11,8 @@ template "/tmp/create_security_group.sh" do
   mode 0o700
   variables(
     net_name: node[:octavia][:amphora][:manage_net],
-    sec_group: node[:octavia][:amphora][:sec_group]
+    sec_group: node[:octavia][:amphora][:sec_group],
+    project_name: node[:octavia][:amphora][:project]
   )
 end
 
@@ -22,7 +23,7 @@ template "/tmp/create_image.sh" do
   mode 0o700
   variables(
     flavor: node[:octavia][:amphora][:flavor],
-    project_name: octavia_keystone_settings["service_tenant"],
+    project_name: node[:octavia][:amphora][:project],
     image_tag: node[:octavia][:amphora][:image_tag]
   )
 end
