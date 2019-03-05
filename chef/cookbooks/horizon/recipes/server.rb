@@ -326,7 +326,6 @@ glance_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("opensta
 cinder_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "cinder"))
 neutron_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "neutron"))
 nova_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "nova"))
-aodh_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "aodh"))
 barbican_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "barbican"))
 ceilometer_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "ceilometer"))
 heat_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "heat"))
@@ -402,7 +401,6 @@ template local_settings do
     || cinder_insecure \
     || neutron_insecure \
     || nova_insecure \
-    || aodh_insecure \
     || barbican_insecure \
     || ceilometer_insecure \
     || heat_insecure \

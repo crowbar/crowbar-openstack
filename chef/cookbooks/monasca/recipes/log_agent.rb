@@ -19,7 +19,7 @@ log_agent_settings = node[:monasca][:log_agent]
 log_agent_keystone = log_agent_settings[:keystone]
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 log_filters_components = {
-  openstack: ["aodh", "barbican", "ceilometer", "cinder", "glance", "heat",
+  openstack: ["barbican", "ceilometer", "cinder", "glance", "heat",
               "keystone", "magnum", "manila", "neutron", "nova", "openvswitch",
               "sahara", "swift", "trove"
              ]
