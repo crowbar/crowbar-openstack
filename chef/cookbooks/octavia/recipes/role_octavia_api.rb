@@ -16,12 +16,8 @@
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "octavia", "octavia-api")
   include_recipe "#{@cookbook_name}::common"
-
-  if CrowbarPacemakerHelper.is_cluster_founder?(node)
-    include_recipe "#{@cookbook_name}::database"
-    include_recipe "#{@cookbook_name}::keystone"
-    include_recipe "#{@cookbook_name}::nova"
-  end
-
+  include_recipe "#{@cookbook_name}::database"
+  include_recipe "#{@cookbook_name}::keystone"
+  include_recipe "#{@cookbook_name}::nova"
   include_recipe "#{@cookbook_name}::api"
 end

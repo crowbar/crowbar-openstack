@@ -14,6 +14,7 @@ template "/tmp/create_security_group.sh" do
     sec_group: node[:octavia][:amphora][:sec_group],
     project_name: node[:octavia][:amphora][:project]
   )
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 template "/tmp/create_image.sh" do
@@ -26,6 +27,7 @@ template "/tmp/create_image.sh" do
     project_name: node[:octavia][:amphora][:project],
     image_tag: node[:octavia][:amphora][:image_tag]
   )
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 bash "Create a octavia security_group" do
@@ -40,6 +42,7 @@ bash "Create a octavia security_group" do
                 "OS_PROJECT_DOMAIN_NAME" => "Default",
                 "OS_PROJECT_NAME" => octavia_keystone_settings["service_tenant"]
               })
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 bash "Create a octavia image" do
@@ -54,4 +57,5 @@ bash "Create a octavia image" do
     "OS_PROJECT_DOMAIN_NAME" => octavia_keystone_settings["api_version"] != "2.0" ? "Default" : "",
     "OS_PROJECT_NAME" => octavia_keystone_settings["service_tenant"]
   })
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end

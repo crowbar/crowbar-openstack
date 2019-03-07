@@ -17,7 +17,7 @@ keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 octavia_port = node[:octavia][:api][:port]
 octavia_protocol = "http" # TODO: node[:octavia][:api][:protocol]
 
-ha_enabled = false # TODO: node[:octavia][:ha][:enabled]
+ha_enabled = node[:octavia][:ha][:enabled]
 
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(
@@ -37,6 +37,7 @@ keystone_register "octavia api wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register octavia user" do
@@ -49,6 +50,7 @@ keystone_register "register octavia user" do
   user_password keystone_settings["service_password"]
   project_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give octavia user access" do
@@ -61,6 +63,7 @@ keystone_register "give octavia user access" do
   project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register octavia service" do
@@ -73,6 +76,7 @@ keystone_register "register octavia service" do
   service_type "load-balancer"
   service_description "Openstack Octavia - Load Balancer"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register octavia endpoint" do
@@ -87,6 +91,7 @@ keystone_register "register octavia endpoint" do
   endpoint_adminURL "#{octavia_protocol}://#{my_admin_host}:#{octavia_port}/"
   endpoint_internalURL "#{octavia_protocol}://#{my_admin_host}:#{octavia_port}/"
   action :add_endpoint
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-octavia_register" if ha_enabled
