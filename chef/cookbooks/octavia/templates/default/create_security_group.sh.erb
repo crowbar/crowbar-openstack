@@ -5,27 +5,24 @@ source /root/.openrc #TODO: use environment variables
 net_name="<%= @net_name %>"
 sec_group="<%= @sec_group %>"
 project_name="<%= @project_name %>"
-tmpf="/tmp/octavia-temp"
 
 net_info=$(openstack network list | grep $net_name)
 
-if (( $(echo $net_info|wc -l) == 0 )); then
-  echo "Management network cannot be founded"
+if [ $net_info -z ]; then
+  echo "Management network doesn't exist"
   exit 1
 else
   net_id=$(echo $net_info | tr -d " " | cut -f 2 -d "|")
-  subnets=$(echo $net_info | tr -d " " | cut -f 4 -d "|") #TODO: consider multiple subnets
+  subnets=$(echo $net_info | tr -d " " | cut -f 4 -d "|" | head -n 1)
 fi
 
+sec_group_id=$(openstack security group show $sec_group | tr -d " "  | grep '|id|' | cut -f 3 -d "|")
 
-openstack security group show $sec_group >$tmpf
-
-if (( $? == 1 )); then
-  openstack security group create $sec_group --description "Octavia Management Security Group" --project $project_name >$tmpf
+if [ $sec_group_id -z ]; then
+  sec_group_id=$(openstack security group create $sec_group --description "Octavia Management Security Group" --project $project_name | tr -d " "  | grep '|id|' | cut -f 3 -d "|")
 fi
-
-sec_group_id=$(cat $tmpf | tr -d " " | grep "|id|" | cut -f 3 -d "|" )
 
 if (( $(openstack security group rule list $sec_group_id | grep 9443 | wc -l) == 0)); then
-  openstack security group rule create --protocol tcp --dst-port 9443:9443 $sec_group_id >$tmpf
+  openstack security group rule create --protocol tcp --dst-port 9443:9443 $sec_group_id
+  openstack security group rule create --protocol tcp --dst-port 22:22 $sec_group_id
 fi

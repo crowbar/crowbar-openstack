@@ -3,33 +3,17 @@
 source /root/.openrc #TODO: use environment variables
 
 flavor="<%= @flavor %>"
-project_name="<%= @project_name %>"
 image_tag="<%= @image_tag %>"
+package="openstack-octavia-amphora-image-x86_64"
 
-openstack flavor create --public --ram 1024 --disk 2 --vcpus 1 m1.lbaas.amphora
+openstack flavor create --public --ram 1024 --disk 2 --vcpus 1 $flavor
 
-service_id=$(openstack project show -f value -c id $project_name)
-echo "Service id is $service_id"
-
-flavor_id=$(nova flavor-access-list --flavor $flavor | head -n -1 | tail -n +4 | tr -d " " | cut -f 3 -d "|")
-
-if [ $flavor_id -z ]; then
-        nova flavor-access-add $flavor $service_id
-        flavor_id=$(nova flavor-show $flavor | grep id | tr -d ' ' | cut -f 3 -d '|')
-else
-        echo "Skipped flavor-access-add, it's already created"
-fi
-
-echo "flavor_id: $flavor_id"
-
-image_id=$(glance image-list | grep $image_tag | tr -d " " | cut -f 2 -d "|" )
+image_id=$(openstack image list | grep $image_tag | head -n 1 | tr -d " " | cut -f 2 -d "|" )
 
 if [ $image_id -z ]; then
-        file=$(rpm -ql openstack-octavia-amphora-image-x86_64 | grep qcow2)
-        image_id=$(glance image-create --name $image_tag --disk-format qcow2 --container-format bare --file $file | grep id | head -n 1 | tr -d " " | cut -f 3 -d "|")
+        file=$(rpm -ql $package | grep qcow2 | head -n 1)
+        image_id=$(openstack image create --disk-format qcow2 --container-format bare --file  $file $image_tag  | tr -d " " | grep "|id|" | cut -f 3 -d "|")
         openstack image set --tag $image_tag $image_id
 else
         echo "Skipped image-list already exists"
 fi
-
-echo "image_id: $image_id"
