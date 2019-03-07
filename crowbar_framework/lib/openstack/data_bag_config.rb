@@ -21,7 +21,7 @@ module Openstack
         attributes = role.default_attributes[barclamp]
 
         use_ssl = if attributes.key?("api") && attributes["api"].key?("protocol")
-          # aodh, cinder, glance, heat, keystone, manila, neutron
+          # cinder, glance, heat, keystone, manila, neutron
           attributes["api"]["protocol"] == "https"
         elsif attributes.key?("api") && attributes["api"].key?("ssl")
           # barbican
