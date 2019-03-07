@@ -1,5 +1,7 @@
 require "chef/mixin/shell_out"
 
+ha_enabled = node[:octavia][:ha][:enabled]
+
 octavia_keystone_settings = KeystoneHelper.keystone_settings(node, "octavia")
 
 package "openstack-octavia-amphora-image-x86_64"
