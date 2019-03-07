@@ -20,11 +20,13 @@ return if no_monasca_server_or_master
 bind_host, bind_port = SwiftHelper.get_bind_host_port(node)
 swift_protocol = node[:swift][:ssl][:enabled] ? "https" : "http"
 
-monitor_url = "#{swift_protocol}://#{bind_host}:#{bind_port}/"
+monitor_url = "#{swift_protocol}://#{bind_host}:#{bind_port}/healthcheck"
 
 monasca_agent_plugin_http_check "http_check for swift-proxy" do
   built_by "swift-proxy"
   name "object-store-api"
   url monitor_url
   dimensions "service" => "object-store-api"
+  match_pattern "^OK$"
+  use_keystone false
 end
