@@ -43,6 +43,6 @@ default[:octavia][:tmp][:node_list] = nil
 
 default[:octavia][:amphora][:flavor] = "m1.lbaas.amphora"
 default[:octavia][:amphora][:sec_group] = "lb-mgmt-sec-group"
-default[:octavia][:amphora][:manage_net] = "floating"
+default[:octavia][:amphora][:manage_net] = "fixed"
 default[:octavia][:amphora][:image_tag] = "amphora"
 default[:octavia][:amphora][:project] = "service"
