@@ -28,6 +28,15 @@ class OctaviaService < OpenstackServiceObject
   class << self
     def role_constraints
       {
+        "octavia-certificates-sharing" => {
+          "unique" => false,
+          "count" => 1,
+          "exclude_platform" => {
+            "suse" => "< 12.4",
+            "windows" => "/.*/"
+          },
+          "cluster" => true
+        },
         "octavia-api" => {
           "unique" => false,
           "count" => 1,
@@ -60,7 +69,7 @@ class OctaviaService < OpenstackServiceObject
             "suse" => "< 12.4",
             "windows" => "/.*/"
           },
-          "cluster" => false
+          "cluster" => true
         }
       }
     end
@@ -123,6 +132,7 @@ class OctaviaService < OpenstackServiceObject
 
     unless nodes.nil? || nodes.length.zero?
       base["deployment"]["octavia"]["elements"] = {
+        "octavia-certificates-sharing" => [controller_node[:fqdn]],
         "octavia-api" => [controller_node[:fqdn]],
         "octavia-health-manager" => [controller_node[:fqdn]],
         "octavia-housekeeping" => [controller_node[:fqdn]],

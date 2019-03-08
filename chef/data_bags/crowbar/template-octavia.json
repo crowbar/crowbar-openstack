@@ -6,33 +6,46 @@
       "user": "octavia",
       "group": "octavia",
       "octavia_log_dir":  "/var/log/octavia",
-      "octavia_bin_dir": "octavia",
-      "restart_hold": "100ms",
       "nova_instance": "none",
       "neutron_instance": "none",
       "barbican_instance": "none",
       "keystone_instance": "none",
       "glance_instance": "none",
-      "service_user": "octavia",
-      "service_password": "octavia",
+      "api":{
+        "port": 9876,
+        "protocol": "http",
+        "host": "0.0.0.0"
+      },
+      "db":{
+        "user": "octavia",
+        "password": "none",
+        "database": "octavia"
+      },
+      "oslo":{
+        "rpc_thread_pool_size": 2
+      },
+      "networking":{
+        "port_detach_timeout": 900
+      },
+      "health_manager":{
+        "host": "0.0.0.0",
+        "port": 5555,
+        "heartbeat_interval": 10,
+        "heartbeat_timeout": 180,
+        "health_check_interval": 3
+      },
       "certs":{
         "country": "US",
         "province": "Oregon",
         "domain": "example.com",
         "passphrase": "password"
       },
-      "api":{
-        "port": 9876,
-        "protocol": "http"
-      },
-      "health-manager":{
-        "port": 5555,
-        "heartbeat_key": "none"
-      },
-      "db":{
-        "user": "octavia",
-        "password": "none",
-        "database": "octavia"
+      "amphora":{
+        "flavor": "m1.lbaas.amphora",
+        "sec_group": "lb-mgmt-sec-group",
+        "manage_net": "fixed",
+        "image_tag": "amphora",
+        "project": "service"
       }
     }
   },

@@ -9,16 +9,46 @@
              "mapping": {
                     "user": { "type": "str", "required": true },
                     "group": { "type": "str", "required": true },
+                    "debug": { "type": "bool", "required": true },
                     "octavia_log_dir": { "type": "str", "required": true },
-                    "octavia_bin_dir": { "type": "str", "required": true },
-                    "restart_hold": { "type": "str", "required": true },
                     "nova_instance": { "type": "str", "required": true },
                     "neutron_instance": { "type": "str", "required": true },
                     "barbican_instance": { "type": "str", "required": true },
                     "keystone_instance": { "type": "str", "required": true },
                     "glance_instance": { "type": "str", "required": true },
-                    "service_user": { "type": "str", "required": true },
-                    "service_password": { "type": "str", "required": true },
+                    "api": { "type": "map", "required": true,
+                      "mapping": {
+                        "port": { "type": "int", "required": true },
+                        "protocol": { "type": "str", "required": true },
+                        "host": { "type": "str", "required": true }
+                      }
+                    },
+                    "db": { "type": "map", "required": true,
+                      "mapping": {
+                        "user": { "type": "str", "required": true },
+                        "password": { "type": "str", "required": true },
+                        "database": { "type": "str", "required": true }
+                      }
+                    },
+                    "oslo": { "type": "map", "required": true,
+                      "mapping": {
+                        "rpc_thread_pool_size": { "type": "int", "required": true }
+                      }
+                    },
+                    "networking": { "type": "map", "required": true,
+                      "mapping": {
+                        "port_detach_timeout": { "type": "int", "required": true }
+                      }
+                    },
+                    "health_manager": { "type": "map", "required": true,
+                      "mapping": {
+                        "host": { "type": "str", "required": true },
+                        "port": { "type": "int", "required": true },
+                        "heartbeat_interval": { "type": "int", "required": true },
+                        "heartbeat_timeout": { "type": "int", "required": true },
+                        "health_check_interval": { "type": "int", "required": true }
+                      }
+                    },
                     "certs": { "type": "map", "required": true,
                       "mapping": {
                         "country": { "type": "str", "required": true },
@@ -27,23 +57,13 @@
                         "passphrase": { "type": "str", "required": true }
                       }
                     },
-                    "api": { "type": "map", "required": true,
+                    "amphora": { "type": "map", "required": true,
                       "mapping": {
-                        "port": { "type": "int", "required": true },
-                        "protocol": { "type": "str", "required": true }
-                      }
-                    },
-                    "health-manager": { "type": "map", "required": true,
-                      "mapping": {
-                        "port": { "type": "int", "required": true },
-                        "heartbeat_key": { "type": "str", "required": true }
-                      }
-                    },
-                    "db": { "type": "map", "required": true,
-                      "mapping": {
-                        "user": { "type": "str", "required": true },
-                        "password": { "type": "str", "required": true },
-                        "database": { "type": "str", "required": true }
+                        "flavor": { "type": "str", "required": true },
+                        "sec_group": { "type": "str", "required": true },
+                        "manage_net": { "type": "str", "required": true },
+                        "image_tag": { "type": "str", "required": true },
+                        "project": { "type": "str", "required": true }
                       }
                     }
               }
