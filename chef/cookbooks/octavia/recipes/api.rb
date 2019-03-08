@@ -23,7 +23,7 @@ nova = node_search_with_cache("roles:nova-controller").first
 nova_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
 nova_server_host = CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled])
 nova_server_port = nova[:nova][:ports][:api]
-nova_endpoint = nova_protocol + "://" + nova_server_host + ":" + nova_server_port.to_s
+nova_endpoint = nova_protocol + "://" + nova_server_host + ":" + nova_server_port.to_s + "/v2.1"
 
 template "/etc/octavia/octavia.conf" do
   source "octavia-api.conf.erb"

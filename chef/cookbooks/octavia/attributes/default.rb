@@ -23,10 +23,14 @@ default[:octavia][:debug] = false
 
 default[:octavia][:api][:port] = 9876
 default[:octavia][:api][:protocol] = "http"
+default[:octavia][:api][:host] = "0.0.0.0"
 
 default[:octavia][:db][:user] = "octavia"
 default[:octavia][:db][:database] = "octavia"
 default[:octavia][:db][:password]= nil
+
+default[:octavia][:oslo][:rpc_thread_pool_size] = 2
+default[:octavia][:networking][:port_detach_timeout] = 900
 
 default[:octavia][:sudoers_file] = "/etc/sudoers.d/octavia"
 

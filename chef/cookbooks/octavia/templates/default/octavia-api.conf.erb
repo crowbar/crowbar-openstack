@@ -20,15 +20,12 @@
 # Changes may be made to this file by customers.
 
 [DEFAULT]
-debug = True
-#os_region_name = region1
-os_endpoint_type = "internalURL"
-#log_config_append = "/etc/octavia/octavia-api-logging.conf"
+debug = <%= @node[:octavia][:debug] %>
 transport_url = <%= @rabbit_settings[:url] %>
 
 [api_settings]
 api_handler = queue_producer
-bind_host = <%= @octavia_bind_host %>
+bind_host = <%= @node[:octavia][:api][:host] %>
 bind_port = <%= @node[:octavia][:api][:port] %>
 
 [database]
@@ -36,7 +33,7 @@ connection = <%= @octavia_db_connection %>
 
 [oslo_messaging]
 topic = octavia_prov
-rpc_thread_pool_size = 2
+rpc_thread_pool_size = <%= @node[:octavia][:oslo][:rpc_thread_pool_size] %>
 
 [keystone_authtoken]
 auth_version = <%= @octavia_keystone_settings['api_version'] %>
@@ -55,7 +52,6 @@ user_domain_name = Default
 username = <%= @octavia_keystone_settings['service_user'] %>
 password =  <%= @octavia_keystone_settings['service_password'] %>
 region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
-#TODO cafile = <%= @octavia_ca_file %>
 
 [certificates]
 cert_generator = local_cert_generator
@@ -63,15 +59,6 @@ cert_manager = barbican_cert_manager
 ca_certificate = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_cert_path] %>
 ca_private_key = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_key_path] %>
 ca_private_key_passphrase = <%= @node[:octavia][:certs][:passphrase] %>
-
-#[haproxy_amphora]
-#server_ca = <%= @octavia_ca_certificate %>
-#client_cert = <%= @node[:octavia][:octavia_client_cert] %>
-#key_path = <%= @node[:octavia][:cert_path] %>/private
-#base_path = /var/lib/octavia
-#base_cert_dir = <%= @node[:octavia][:cert_path] %>
-#connection_max_retries = 10
-#connection_retry_interval = 10
 
 [oslo_messaging_rabbit]
 amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
@@ -95,17 +82,16 @@ user_domain_name = Default
 username = <%= @octavia_keystone_settings['service_user'] %>
 password =  <%= @octavia_keystone_settings['service_password'] %>
 region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
-#TODO cafile = <%= @octavia_ca_file %>
 
 [networking]
-port_detach_timeout = 900
+port_detach_timeout = <%= @node[:octavia][:networking][:port_detach_timeout] %>
 
 [neutron]
 endpoint = <%= @neutron_endpoint %>
 endpoint_type = "internalURL"
 
 [nova]
-endpoint = <%= @nova_endpoint %>/v2.1
+endpoint = <%= @nova_endpoint %>
 endpoint_type = "internalURL"
 
 [barbican]
