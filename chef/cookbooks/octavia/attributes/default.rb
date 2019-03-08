@@ -32,6 +32,11 @@ default[:octavia][:db][:password]= nil
 default[:octavia][:oslo][:rpc_thread_pool_size] = 2
 default[:octavia][:networking][:port_detach_timeout] = 900
 
+default[:octavia][:health_manager][:host] = "0.0.0.0"
+default[:octavia][:health_manager][:heartbeat_interval] = 10
+default[:octavia][:health_manager][:heartbeat_timeout] = 180
+default[:octavia][:health_manager][:health_check_interval] = 3
+
 default[:octavia][:sudoers_file] = "/etc/sudoers.d/octavia"
 
 default[:octavia][:certs][:country] = "US"

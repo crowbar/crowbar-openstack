@@ -121,25 +121,19 @@ class OctaviaService < OpenstackServiceObject
     controller_node = controller_nodes.first
     controller_node ||= nodes.first
 
-    # TODO: network_nodes I don't know if are required
-    network_nodes = nodes.select { |n| n.intended_role == "network" }
-    network_nodes = [controller_node] if network_nodes.empty?
-
-    worker_nodes = nodes - [controller_node] - [network_nodes]
-
     unless nodes.nil? || nodes.length.zero?
       base["deployment"]["octavia"]["elements"] = {
         "octavia-api" => [controller_node[:fqdn]],
         "octavia-health-manager" => [controller_node[:fqdn]],
         "octavia-housekeeping" => [controller_node[:fqdn]],
-        "octavia-worker" => worker_nodes.map(&:name)
+        "octavia-worker" => [controller_node[:fqdn]] #TODO: controller_nodes.map(&:name)
       }
     end
 
     base["attributes"][@bc_name]["db"]["password"] = random_password
-    base["attributes"][@bc_name]["health-manager"]["heartbeat_key"] = random_password
+    base["attributes"][@bc_name]["health_manager"]["heartbeat_key"] = random_password
     base["attributes"][@bc_name]["service_password"] = random_password
-    
+
     base
   end
 

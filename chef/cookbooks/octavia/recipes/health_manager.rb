@@ -29,8 +29,6 @@ template "/etc/octavia/octavia-health-manager.conf" do
   mode 0o640
   variables(
     octavia_db_connection: fetch_database_connection_string(node[:octavia][:db]),
-    octavia_bind_host: "0.0.0.0", #HACK: It has to be configured from UI
-    octavia_healthmanager_bind_host: "0.0.0.0", #HACK: It has to be configured from UI
     octavia_healthmanager_hosts: node_list.join(",")
   )
 end

@@ -18,29 +18,21 @@
 #
 
 [DEFAULT]
-debug = True
-#os_region_name = region1
-os_endpoint_type = "internalURL"
-#log_config_append = "/etc/octavia//octavia-hm-logging.conf"
-
-[api_settings]
-api_handler = queue_producer
-bind_host = <%= @octavia_bind_host %>
-bind_port = <%= @node[:octavia][:api][:port] %>
+debug = <%= @node[:octavia][:debug] %>
 
 [database]
 connection = <%= @octavia_db_connection %>
 
 [health_manager]
 bind_ip = <%= @octavia_healthmanager_bind_host %>
-bind_port = <%= @node[:octavia]["health-manager"]["port"] %>
+bind_port = <%= @node[:octavia][:health_manager][:port] %>
 #TODO: List of controller ip and port pairs for the heartbeat receivers. Example 127.0.0.1:5555, 192.168.0.1:5555
 controller_ip_port_list = <%= @octavia_healthmanager_hosts %>
-heartbeat_key = <%= @node[:octavia]["health-manager"]["heartbeat_key"] %>
+heartbeat_key = <%= @node[:octavia][:health_manager][:heartbeat_key] %>
 event_streamer_driver = queue_event_streamer
-heartbeat_interval = 10
-heartbeat_timeout = 180
-health_check_interval = 3
+heartbeat_interval = <%= @node[:octavia][:health_manager][:heartbeat_interval] %>
+heartbeat_timeout = <%= @node[:octavia][:health_manager][:heartbeat_timeout] %>
+health_check_interval = <%= @node[:octavia][:health_manager][:health_check_interval] %>
 
 ### End of File ###
 ## Do NOT put anything after this line ##
