@@ -19,8 +19,7 @@ template "/etc/octavia/octavia-housekeeping.conf" do
   group node[:octavia][:group]
   mode 0o640
   variables(
-    octavia_db_connection: fetch_database_connection_string(node[:octavia][:db]),
-    octavia_bind_host: "0.0.0.0", # TODO: Change if change in api
+    octavia_db_connection: fetch_database_connection_string(node[:octavia][:db])
   )
 end
 

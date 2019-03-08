@@ -20,21 +20,12 @@
 # Changes may be made to this file by customers.
 
 [DEFAULT]
-debug = True
-#os_region_name = region1
-os_endpoint_type = "internalURL"
-
-[api_settings]
-api_handler = queue_producer
-bind_host = <%= @octavia_bind_host %>
-bind_port = <%= @node[:octavia][:api][:port] %>
+debug = <%= @node[:octavia][:debug] %>
 
 [database]
 connection = <%= @octavia_db_connection %>
 
 [house_keeping]
-# Pool size for the spare pool
-# spare_amphora_pool_size = 0
 
 ### End of File ###
 ## Do NOT put anything after this line ##
