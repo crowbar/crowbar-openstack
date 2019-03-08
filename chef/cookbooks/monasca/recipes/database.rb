@@ -70,6 +70,7 @@ ruby_block "Create influx database \"#{node['monasca']['db_monapi']['database']}
     InfluxDBHelper.create_database(node["monasca"]["db_monapi"]["database"],
                                    influx_host: monasca_monitoring_host)
   end
+  retries 5
 end
 
 # Set retention policy for auto-generated (called "autogen") policy
