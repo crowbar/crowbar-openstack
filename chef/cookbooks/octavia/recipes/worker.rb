@@ -12,21 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-neutron = node_search_with_cache("roles:neutron-server").first
-neutron_protocol = neutron[:neutron][:api][:protocol]
-neutron_host = CrowbarHelper.get_host_for_admin_url(
-                                                     neutron,
-                                                     neutron[:neutron][:ha][:server][:enabled]
-                                                   )
-neutron_server_port = neutron[:neutron][:api][:service_port]
-neutron_endpoint = neutron_protocol + "://" + neutron_host + ":" + neutron_server_port.to_s
-
-nova = node_search_with_cache("roles:neutron-server").first
-nova_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
-nova_server_host = CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled])
-nova_server_port = nova[:nova][:ports][:api]
-nova_endpoint = nova_protocol + "://" + nova_server_host + ":" + nova_server_port.to_s
-
 sec_group_id = shell_out("source /root/.openrc &&"\
                           "openstack security group show #{node[:octavia][:amphora][:sec_group]}"\
                           "| tr -d ' ' | grep '|id|' | cut -f 3 -d '|'"
@@ -36,11 +21,6 @@ flavor_id = shell_out("source /root/.openrc && openstack flavor list"\
                       "| grep #{node[:octavia][:amphora][:flavor]}"\
                       "| tr -d ' ' | cut -f 2 -d '|'"
                       ).stdout
-
-image_id = shell_out("source /root/.openrc && glance image-list"\
-                     "| grep #{node[:octavia][:amphora][:image_tag]}"\
-                     "| tr -d ' ' | cut -f 2 -d '|'"
-                    ).stdout
 
 net_id = shell_out("source /root/.openrc && openstack network list"\
                    "| grep #{node[:octavia][:amphora][:manage_net]} | tr -d ' ' | cut -d '|' -f 2"
@@ -53,14 +33,9 @@ template "/etc/octavia/octavia-worker.conf" do
   mode 0o640
   variables(
     octavia_db_connection: fetch_database_connection_string(node[:octavia][:db]),
-    octavia_bind_host: "0.0.0.0",
-    neutron_endpoint: neutron_endpoint,
-    nova_endpoint: nova_endpoint,
     neutron_keystone_settings: KeystoneHelper.keystone_settings(node, "neutron"),
     octavia_keystone_settings: KeystoneHelper.keystone_settings(node, "octavia"),
-    rabbit_settings: fetch_rabbitmq_settings,
     octavia_nova_flavor_id: flavor_id,
-    octavia_amp_image_id: image_id,
     octavia_mgmt_net_id: net_id,
     octavia_mgmt_sec_group_id: sec_group_id
   )

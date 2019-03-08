@@ -19,6 +19,8 @@ default[:octavia][:octavia_log_dir] = "/var/log/octavia"
 default[:octavia][:octavia_bin_dir] = "octavia" # TODO: Check this value!
 default[:octavia][:restart_hold] = "100ms"
 
+default[:octavia][:debug] = false
+
 default[:octavia][:api][:port] = 9876
 default[:octavia][:api][:protocol] = "http"
 
