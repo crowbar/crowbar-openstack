@@ -18,8 +18,7 @@ if monasca_server.nil?
   Chef::Log.warn("No monasca-server found.")
   return
 end
-monasca_cfg = Barclamp::Config.load("openstack", "monasca")
-grafana_password = monasca_cfg["db_grafana"]["password"]
+grafana_password = monasca_server[:monasca][:db_grafana][:password]
 db_settings = fetch_database_settings
 
 # Used for creating data source
