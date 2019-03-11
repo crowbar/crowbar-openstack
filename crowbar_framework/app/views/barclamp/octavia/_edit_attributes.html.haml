@@ -3,10 +3,19 @@
     = header show_raw_deployment?, true
 
   .panel-body
-    = instance_field :database
-    = instance_field :keystone
-    = instance_field :rabbitmq
 
     %fieldset
       %legend
-        = t(".plugin_header")
+        = t(".api_header")
+
+      = integer_field %w(api port)
+      = string_field %w(api host)
+
+    %fieldset
+      %legend
+        = t(".certs_header")
+
+      = string_field %w(certs country)
+      = string_field %w(certs province)
+      = string_field %w(certs domain)
+      = string_field %w(certs passphrase)

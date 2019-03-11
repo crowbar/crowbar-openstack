@@ -102,14 +102,14 @@ class OctaviaService < OpenstackServiceObject
 
   def save_proposal!(prop, options = {})
     # Fill in missing defaults for infoblox grid configurations
-    if prop.raw_data[:attributes][:octavia][:use_infoblox]
-      prop.raw_data[:attributes][:octavia][:infoblox][:grids].each do |grid|
-        defaults = prop.raw_data["attributes"]["octavia"]["infoblox"]["grid_defaults"]
-        defaults.each_key.each do |d|
-          grid[d] = defaults[d] unless grid.key?(d)
-        end
-      end
-    end
+    # if prop.raw_data[:attributes][:octavia][:use_infoblox]
+    #   prop.raw_data[:attributes][:octavia][:infoblox][:grids].each do |grid|
+    #     defaults = prop.raw_data["attributes"]["octavia"]["infoblox"]["grid_defaults"]
+    #     defaults.each_key.each do |d|
+    #       grid[d] = defaults[d] unless grid.key?(d)
+    #     end
+    #   end
+    # end
 
     super(prop, options)
   end
@@ -142,7 +142,6 @@ class OctaviaService < OpenstackServiceObject
 
     base["attributes"][@bc_name]["db"]["password"] = random_password
     base["attributes"][@bc_name]["health_manager"]["heartbeat_key"] = random_password
-    base["attributes"][@bc_name]["service_password"] = random_password
 
     base
   end

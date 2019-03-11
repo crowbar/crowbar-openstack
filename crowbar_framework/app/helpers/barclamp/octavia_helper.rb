@@ -16,5 +16,14 @@
 
 module Barclamp
   module OctaviaHelper
+    def api_protocols_for_octavia(selected)
+      options_for_select(
+        [
+          ["HTTP", "http"],
+          ["HTTPS", "https"]
+        ],
+        selected.to_s
+      )
+    end
   end
 end

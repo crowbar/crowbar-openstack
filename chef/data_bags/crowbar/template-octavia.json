@@ -5,6 +5,7 @@
     "octavia": {
       "user": "octavia",
       "group": "octavia",
+      "debug": false,
       "octavia_log_dir":  "/var/log/octavia",
       "nova_instance": "none",
       "neutron_instance": "none",

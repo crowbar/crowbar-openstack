@@ -46,7 +46,8 @@
                         "port": { "type": "int", "required": true },
                         "heartbeat_interval": { "type": "int", "required": true },
                         "heartbeat_timeout": { "type": "int", "required": true },
-                        "health_check_interval": { "type": "int", "required": true }
+                        "health_check_interval": { "type": "int", "required": true },
+                        "heartbeat_key": { "type": "str", "required": true }
                       }
                     },
                     "certs": { "type": "map", "required": true,

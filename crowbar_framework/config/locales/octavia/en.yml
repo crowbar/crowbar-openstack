@@ -17,4 +17,15 @@
 en:
   barclamp:
     octavia:
-      # TODO
+      edit_attributes:
+        api_header: 'Api'
+        api:
+          port: 'Port'
+          host: 'Host IP'
+        certs_header: 'CA Certificate info'
+        certs:
+          country: 'Country'
+          province: 'Province'
+          domain: 'Domain'
+          passphrase: 'Passphrase'
+          

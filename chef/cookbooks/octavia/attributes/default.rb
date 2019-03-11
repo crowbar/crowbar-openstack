@@ -33,6 +33,7 @@ default[:octavia][:health_manager][:port] = 5555
 default[:octavia][:health_manager][:heartbeat_interval] = 10
 default[:octavia][:health_manager][:heartbeat_timeout] = 180
 default[:octavia][:health_manager][:health_check_interval] = 3
+default[:octavia][:health_manager][:heartbeat_key] = nil
 
 default[:octavia][:sudoers_file] = "/etc/sudoers.d/octavia"
 
