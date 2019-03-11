@@ -30,7 +30,9 @@ api_database_connection = fetch_database_connection_string(node[:nova][:api_db])
 # host and delete the creds
 bash "nova-manage discover_hosts" do
   user node[:nova][:user]
+  group node[:nova][:group]
   code <<-EOH
+    set -e
     tmpfile=$(mktemp /tmp/nova-discover-hosts.XXXXXX.conf)
     chmod 600 $tmpfile
     echo "[api_database]" >> $tmpfile
