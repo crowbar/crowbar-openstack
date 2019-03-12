@@ -1,8 +1,8 @@
 #
 # Cookbook Name:: monasca
-# Recipe:: influxdb
+# Recipe:: cassandra
 #
-# Copyright 2018, SUSE Linux GmbH.
+# Copyright 2019, SUSE Linux GmbH.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,25 +17,26 @@
 # limitations under the License.
 #
 
-package "influxdb"
+package "cassandra"
 
 monasca_node = node_search_with_cache("roles:monasca-server").first
 monasca_monitoring_host =
   Chef::Recipe::Barclamp::Inventory.get_network_by_type(
-    monasca_node, node[:monasca][:network]).address
+    monasca_node, node[:monasca][:network]
+  ).address
 
-template "/etc/influxdb/config.toml" do
-  source "influxdb-config.toml.erb"
-  owner node[:monasca][:influxdb][:user]
-  group node[:monasca][:influxdb][:group]
+template "/etc/cassandra/conf/cassandra.yaml" do
+  source "cassandra.yaml.erb"
+  owner node[:monasca][:cassandra][:user]
+  group node[:monasca][:cassandra][:group]
   mode "0640"
   variables(
-    bind_address: monasca_monitoring_host
+    broadcast_rpc_address: monasca_monitoring_host
   )
-  notifies :restart, "service[influxdb]"
+  notifies :restart, "service[cassandra]"
 end
 
-service "influxdb" do
+service "cassandra" do
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
 end

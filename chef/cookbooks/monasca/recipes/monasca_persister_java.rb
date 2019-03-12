@@ -1,6 +1,6 @@
 #
 # Cookbook Name:: monasca
-# Recipe:: monasca_persister
+# Recipe:: monasca_persister_java
 #
 # Copyright 2018, SUSE Linux GmbH.
 #
@@ -17,34 +17,21 @@
 # limitations under the License.
 #
 
-package "openstack-monasca-persister"
+package "openstack-monasca-persister-java"
 
 monasca_servers = node_search_with_cache("roles:monasca-server")
 monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_servers[0])
 
-template "/etc/monasca/persister.conf" do
-  source "monasca-persister.conf.erb"
+template "/etc/monasca-persister/monasca-persister.yaml" do
+  source "monasca-persister-java.yaml.erb"
   owner node[:monasca][:persister][:user]
   group node[:monasca][:persister][:group]
   mode "0640"
   variables(
     zookeeper_host: monasca_net_ip,
-    kafka_host: monasca_net_ip,
-    influxdb_host: monasca_net_ip
+    cassandra_hosts: monasca_net_ip
   )
   notifies :restart, "service[openstack-monasca-persister]"
-end
-
-# influxdb user for persister
-ruby_block "Create influxdb user #{node["monasca"]["persister"]["influxdb_user"]} " \
-           "for database #{node['monasca']['db_monapi']['database']}" do
-  block do
-    InfluxDBHelper.create_user(node["monasca"]["persister"]["influxdb_user"],
-                               # FIXME(toabctl): Move password away from master settings
-                               node["monasca"]["master"]["tsdb_mon_persister_password"],
-                               node["monasca"]["db_monapi"]["database"],
-                               influx_host: monasca_net_ip)
-  end
 end
 
 service "openstack-monasca-persister" do

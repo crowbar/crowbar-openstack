@@ -37,6 +37,7 @@ memcached_instance("monasca") if node["roles"].include?("monasca-server")
 # get Database data
 db_auth = node[:monasca][:db_monapi].dup
 sql_connection = fetch_database_connection_string(db_auth)
+tsdb = node["monasca"]["tsdb"]
 
 template "/etc/monasca/api.conf" do
   source "monasca-api.conf.erb"
@@ -47,8 +48,9 @@ template "/etc/monasca/api.conf" do
     keystone_settings: keystone_settings,
     memcached_servers: memcached_servers,
     kafka_host: monasca_net_ip,
-    influxdb_host: monasca_net_ip,
-    sql_connection: sql_connection
+    tsdb_host: monasca_net_ip,
+    sql_connection: sql_connection,
+    tsdb: tsdb
   )
 end
 
@@ -80,6 +82,81 @@ ruby_block "Create influxdb user #{node["monasca"]["api"]["influxdb_user"]} " \
                                node["monasca"]["master"]["tsdb_mon_api_password"],
                                node["monasca"]["db_monapi"]["database"],
                                influx_host: monasca_net_ip)
+  end
+  only_if { tsdb == "influxdb" }
+end
+
+if tsdb == "cassandra"
+  package "python-cassandra-driver"
+
+  cassandra_admin_user = node[:monasca][:cassandra][:admin_user]
+  default_password = node[:monasca][:cassandra][:admin_default_password]
+  cassandra_admin_password = node[:monasca][:cassandra][:admin_password]
+  admin_role = node[:monasca][:cassandra][:admin_role]
+  api_role = node[:monasca][:cassandra][:monasca_api_role]
+  persister_role = node[:monasca][:cassandra][:monasca_persister_role]
+
+  ruby_block "Initialize password for superuser role" do
+    condition_cmd = "/usr/bin/cqlsh -u #{cassandra_admin_user} -p '#{default_password}'"
+    condition_cmd << " -e \"LIST ROLES\" #{monasca_net_ip}"
+    block do
+      CassandraHelper.set_password(admin_role, cassandra_admin_password,
+                                   user: cassandra_admin_user,
+                                   password: default_password,
+                                   host: monasca_net_ip)
+      Chef::Log.info "Superuser password has been initialized"
+    end
+    only_if condition_cmd
+  end
+
+  # Create Monasca roles
+  roles = [api_role, persister_role]
+  roles.each do |roles_item|
+    ruby_block "Create role for #{roles_item}" do
+      block do
+        CassandraHelper.create_role_with_login(roles_item, cassandra_admin_password,
+                                               user: cassandra_admin_user,
+                                               password: cassandra_admin_password,
+                                               host: monasca_net_ip)
+      end
+      retries 5
+    end
+  end
+
+  # Apply Cassandra schema
+  cmd = "/usr/bin/cqlsh -u #{cassandra_admin_user}"
+  cmd << " -p '#{cassandra_admin_password}' #{monasca_net_ip}"
+  cmd << " < /usr/share/monasca-api/schema/monasca_schema.cql"
+  condition_cmd = "/usr/bin/cqlsh -u #{cassandra_admin_user}"
+  condition_cmd << " -p '#{cassandra_admin_password}'"
+  condition_cmd << " -e \"DESCRIBE KEYSPACES\" #{monasca_net_ip}"
+  condition_cmd << " | grep -q monasca"
+  execute "Apply Cassandra schema" do
+    command cmd
+    not_if condition_cmd
+  end
+
+  api_role = node[:monasca][:cassandra][:monasca_api_role]
+  persister_role = node[:monasca][:cassandra][:monasca_persister_role]
+  roles = [api_role, persister_role]
+  roles.each do |roles_item|
+    ruby_block "Grant read permissions for #{roles_item}" do
+      block do
+        CassandraHelper.grant_read_permissions(roles_item,
+                                               user: cassandra_admin_user,
+                                               password: cassandra_admin_password,
+                                               host: monasca_net_ip)
+      end
+    end
+  end
+
+  ruby_block "Grant write permissions for persister" do
+    block do
+      CassandraHelper.grant_write_permissions(persister_role,
+                                              user: cassandra_admin_user,
+                                              password: cassandra_admin_password,
+                                              host: monasca_net_ip)
+    end
   end
 end
 

@@ -64,6 +64,8 @@ crowbar_pacemaker_sync_mark "wait-monasca_database"
   end
 end
 
+tsdb = node["monasca"]["tsdb"]
+
 # create influx Database for monasca time series
 ruby_block "Create influx database \"#{node['monasca']['db_monapi']['database']}\"" do
   block do
@@ -71,6 +73,7 @@ ruby_block "Create influx database \"#{node['monasca']['db_monapi']['database']}
                                    influx_host: monasca_monitoring_host)
   end
   retries 5
+  only_if { tsdb == "influxdb" }
 end
 
 # Set retention policy for auto-generated (called "autogen") policy
@@ -80,6 +83,7 @@ ruby_block "Set retention policy for influx database \"#{node['monasca']['db_mon
                                         node["monasca"]["master"]["influxdb_retention_policy"], 1,
                                         influx_host: monasca_monitoring_host)
   end
+  only_if { tsdb == "influxdb" }
 end
 
 crowbar_pacemaker_sync_mark "create-monasca_database" if ha_enabled

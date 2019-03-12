@@ -53,8 +53,6 @@ en:
           email_smtp_user: 'SMTP user'
           email_smtp_password: 'SMTP password'
           email_smtp_from_address: 'SMTP sender (FROM) address'
-        master:
-          tsdb: 'Time series database to use'
         db_header: 'Database settings'
         db:
           database: 'Database'
@@ -62,5 +60,6 @@ en:
           user: 'Username'
         group: 'Group for Monasca services'
         user: 'User for Monasca services'
+        tsdb: 'Time series database to use'
       validation:
         invalid_network: 'Network "%{network}" configured for Monasca is not defined in the configuration of the network barclamp.'

@@ -152,6 +152,12 @@ module MonascaHelper
   def self.get_host_for_monitoring_url(node)
     Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "monitoring").address
   end
+
+  def self.call(cmd)
+    stdout, stderr, status = Open3.capture3(cmd)
+    raise "Can not execute '#{cmd}': #{stderr}" unless status.success?
+    stdout
+  end
 end
 
 
@@ -159,7 +165,7 @@ module InfluxDBHelper
   def self.get_databases(**options)
     cmd = base_cmd(**options)
     cmd << " -execute 'SHOW DATABASES' -format json"
-    dbs = call(cmd)
+    dbs = MonascaHelper.call(cmd)
     dbs_json = JSON.parse(dbs)
     unless dbs_json['results'][0]['series'][0].has_key?("values")
       return []
@@ -172,7 +178,7 @@ module InfluxDBHelper
     unless dbs_available.include?(db_name)
       cmd = base_cmd(**options)
       cmd << " -execute 'CREATE DATABASE #{db_name}'"
-      call(cmd)
+      MonascaHelper.call(cmd)
     end
   end
 
@@ -180,7 +186,7 @@ module InfluxDBHelper
     cmd = base_cmd(**options)
     cmd << " -database #{db_name}"
     cmd << " -execute 'SHOW USERS' -format json"
-    users = call(cmd)
+    users = MonascaHelper.call(cmd)
     users_json = JSON.parse(users)
     unless users_json['results'][0]['series'][0].has_key?("values")
       return []
@@ -198,7 +204,7 @@ module InfluxDBHelper
       cmd = base_cmd(**options)
       cmd << " -database #{db_name}"
       cmd << " -execute \"CREATE USER #{new_username} WITH PASSWORD '#{new_password}'\""
-      call(cmd)
+      MonascaHelper.call(cmd)
     end
   end
 
@@ -206,7 +212,7 @@ module InfluxDBHelper
     cmd = base_cmd(**options)
     cmd << " -database #{db_name}"
     cmd << " -execute 'SHOW RETENTION POLICIES ON #{db_name}' -format json"
-    rps_val = call(cmd)
+    rps_val = MonascaHelper.call(cmd)
     rps_json = JSON.parse(rps_val)
     unless rps_json['results'][0]['series'][0].has_key?("values")
       return []
@@ -225,28 +231,28 @@ module InfluxDBHelper
   end
 
   def self.create_retention_policy(db_name, policy_name, duration, replicas,
-                                   shard_group_duration: nil, default: nil, **options)
+    shard_group_duration: nil, default: nil, **options)
 
     cmd_create = base_cmd(**options)
     cmd_create << " -database #{db_name}"
     cmd_create << " -execute 'CREATE RETENTION POLICY #{policy_name} ON #{db_name}"
     cmd_create << " DURATION #{duration}"
     cmd_create << " REPLICATION #{replicas}"
-    unless  shard_group_duration.nil?
+    unless shard_group_duration.nil?
       cmd_create << " SHARD DURATION #{shard_group_duration}"
     end
     unless default.nil?
       cmd_create << " #{default}"
     end
     cmd_create << "'"
-    call(cmd_create)
+    MonascaHelper.call(cmd_create)
   end
 
   def self.set_retention_policy(db_name, policy_name, duration, replicas,
-                                shard_group_duration: nil, default: nil,
-                                **options)
+    shard_group_duration: nil, default: nil,
+    **options)
     rps_available = InfluxDBHelper.get_retention_policies(db_name, **options)
-    rp = rps_available.find{ |rp| rp['name'] == policy_name }
+    rp = rps_available.find { |rp| rp['name'] == policy_name }
     if rp
       # update policy
       needs_update = false
@@ -267,13 +273,13 @@ module InfluxDBHelper
       end
       cmd_update << "'"
       if needs_update
-        call(cmd_update)
+        MonascaHelper.call(cmd_update)
       end
     else
       # create policy
       InfluxDBHelper.create_retention_policy(db_name, policy_name, duration, replicas,
-                                            shard_group_duration: shard_group_duration,
-                                            default: default, **options)
+                                             shard_group_duration: shard_group_duration,
+                                             default: default, **options)
     end
   end
 
@@ -292,13 +298,5 @@ module InfluxDBHelper
       base_cmd << " -password #{options[:influx_password]}"
     end
     base_cmd
-  end
-
-  private_class_method def self.call(cmd)
-    stdout, stderr, status = Open3.capture3(cmd)
-    unless status.success?
-      raise "Can not execute '#{cmd}': #{stderr}"
     end
-    stdout
-  end
 end
