@@ -44,7 +44,7 @@
       "amphora":{
         "flavor": "m1.lbaas.amphora",
         "sec_group": "lb-mgmt-sec-group",
-        "manage_net": "fixed",
+        "manage_net": "lb-mgmt-net",
         "image_tag": "amphora",
         "project": "service"
       }

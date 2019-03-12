@@ -50,6 +50,6 @@ default[:octavia][:certs][:client_cert_and_key_path] = "client_ca/private/client
 
 default[:octavia][:amphora][:flavor] = "m1.lbaas.amphora"
 default[:octavia][:amphora][:sec_group] = "lb-mgmt-sec-group"
-default[:octavia][:amphora][:manage_net] = "fixed"
+default[:octavia][:amphora][:manage_net] = "lb-mgmt-net"
 default[:octavia][:amphora][:image_tag] = "amphora"
 default[:octavia][:amphora][:project] = "service"

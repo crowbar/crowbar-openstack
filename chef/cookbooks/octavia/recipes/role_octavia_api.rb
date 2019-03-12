@@ -18,6 +18,7 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "octavia", "octavia-api")
   include_recipe "#{@cookbook_name}::common"
   include_recipe "#{@cookbook_name}::database"
   include_recipe "#{@cookbook_name}::keystone"
+  include_recipe "#{@cookbook_name}::networking"
   include_recipe "#{@cookbook_name}::nova"
   include_recipe "#{@cookbook_name}::api"
 end

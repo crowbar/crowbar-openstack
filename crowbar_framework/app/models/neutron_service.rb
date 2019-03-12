@@ -363,7 +363,7 @@ class NeutronService < OpenstackServiceObject
     net_svc = NetworkService.new @logger
     network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
     blacklist = ["bmc", "bmc_admin", "admin", "nova_fixed", "nova_floating",
-                 "os_sdn", "public", "storage", "ironic"]
+                 "os_sdn", "public", "storage", "ironic", "lb-mgmt-net"]
 
     external_networks.each do |ext_net|
       # Exclude a few default networks from network.json from being used as
