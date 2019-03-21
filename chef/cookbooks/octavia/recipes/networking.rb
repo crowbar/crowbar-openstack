@@ -60,6 +60,16 @@ execute "create_octavia_router" do
   action :run
 end
 
+execute "add_octavia_subnet_to_router" do
+  command "#{cmd} router add subnet #{router_name} #{net_name}"
+  only_if { octavia_net }
+  not_if "out=$(#{cmd} router show #{router_name}); [ $? != 0 ] || echo ${out} | grep -q " \
+    "$(#{cmd} subnet show #{net_name} | tr -d ' ' | grep '|id|' | cut -d '|' -f 3)"
+  retries 5
+  retry_delay 10
+  action :run
+end
+
 execute "set_octavia_set_external_gateway" do
   command "#{cmd} router set --external-gateway floating #{router_name}"
   only_if { octavia_net }

@@ -77,7 +77,7 @@ image_tag = node[:octavia][:amphora][:image_tag]
 
 execute "create_amphora_flavor" do
   command "#{cmd} image create --disk-format qcow2 --container-format bare "\
-    "--file $(rpm -ql #{package} | grep qcow2 | head -n 1) #{image_tag}"
+    "--file $(rpm -ql #{package} | grep qcow2 | head -n 1) --tag #{image_tag} #{image_tag}"
   not_if "out=$(#{cmd} image list); [ $? != 0 ] || echo ${out} | grep -q ' #{image_tag} '"
   retries 5
   retry_delay 10
