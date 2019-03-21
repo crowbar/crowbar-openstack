@@ -26,6 +26,17 @@ net_id = shell_out("source /root/.openrc && openstack network list"\
                    "| grep #{node[:octavia][:amphora][:manage_net]} | tr -d ' ' | cut -d '|' -f 2"
                   ).stdout
 
+list = search(:node, "roles:octavia-health-manager") || []
+
+hm_port = node[:octavia]["health_manager"][:port]
+node_list = []
+list.each do |e|
+  Chef::Log.info "YYY #{Chef::Recipe::Barclamp::Inventory.get_network_by_type(e, "lb-mgmt-net").inspect}"
+  address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(e, "lb-mgmt-net").address
+  str = address + ":" + hm_port.to_s
+  node_list << str unless node_list.include?(str)
+end
+
 template "/etc/octavia/octavia-worker.conf" do
   source "octavia-worker.conf.erb"
   owner node[:octavia][:user]
@@ -37,7 +48,8 @@ template "/etc/octavia/octavia-worker.conf" do
     octavia_keystone_settings: KeystoneHelper.keystone_settings(node, "octavia"),
     octavia_nova_flavor_id: flavor_id,
     octavia_mgmt_net_id: net_id,
-    octavia_mgmt_sec_group_id: sec_group_id
+    octavia_mgmt_sec_group_id: sec_group_id,
+    octavia_healthmanager_hosts: node_list.join(",")
   )
 end
 

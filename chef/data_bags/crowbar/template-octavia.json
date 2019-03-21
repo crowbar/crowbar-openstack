@@ -12,6 +12,8 @@
       "barbican_instance": "none",
       "keystone_instance": "none",
       "glance_instance": "none",
+      "service_user": "octavia",
+      "service_password": "",
       "api":{
         "port": 9876,
         "protocol": "http",

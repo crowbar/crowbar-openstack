@@ -24,7 +24,7 @@ debug = <%= @node[:octavia][:debug] %>
 connection = <%= @octavia_db_connection %>
 
 [health_manager]
-bind_ip = <%= @octavia_healthmanager_bind_host %>
+bind_ip = <%= @node[:octavia][:health_manager][:host] %>
 bind_port = <%= @node[:octavia][:health_manager][:port] %>
 #TODO: List of controller ip and port pairs for the heartbeat receivers. Example 127.0.0.1:5555, 192.168.0.1:5555
 controller_ip_port_list = <%= @octavia_healthmanager_hosts %>

@@ -53,3 +53,6 @@ default[:octavia][:amphora][:sec_group] = "lb-mgmt-sec-group"
 default[:octavia][:amphora][:manage_net] = "lb-mgmt-net"
 default[:octavia][:amphora][:image_tag] = "amphora"
 default[:octavia][:amphora][:project] = "service"
+default[:octavia][:amphora][:keypair] = "lbaas-amphora"
+default[:octavia][:amphora][:keypair_private_cert] = "keypair.key"
+default[:octavia][:amphora][:ssh_access] = true

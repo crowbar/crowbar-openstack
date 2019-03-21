@@ -142,7 +142,8 @@ class OctaviaService < OpenstackServiceObject
 
     base["attributes"][@bc_name]["db"]["password"] = random_password
     base["attributes"][@bc_name]["health_manager"]["heartbeat_key"] = random_password
-
+    base["attributes"][@bc_name]["service_password"] = random_password
+    
     base
   end
 

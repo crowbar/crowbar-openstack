@@ -15,7 +15,7 @@
 
 list = search(:node, "roles:octavia-health-manager") || []
 
-hm_port = node[:octavia]["health-manager"][:port]
+hm_port = node[:octavia]["health_manager"][:port]
 node_list = []
 list.each do |e|
   str = e.name + ":" + hm_port.to_s
