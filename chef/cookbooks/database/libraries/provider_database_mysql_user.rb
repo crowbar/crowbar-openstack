@@ -32,15 +32,43 @@ class Chef
         end
 
         def action_create
-          Chef::Log.info("Creating user '#{new_resource.username}@#{new_resource.host}'")
-          username = client.escape(new_resource.username)
-          host = client.escape(new_resource.host)
-          create_sql = "CREATE USER IF NOT EXISTS '#{username}'@'#{host}'"
-          if new_resource.password
-            password = client.escape(new_resource.password)
-            create_sql += " IDENTIFIED BY '#{password}'"
+          # create
+          # new_resource can have password defined or not;
+          # search a user
+          # if found,
+          #   if password hashes match
+          #     do nothing
+          #   else
+          #     update password
+          # else
+          #   create user (with or without password)
+          nr = new_resource
+          username = "'#{client.escape(nr.username)}'"
+          host = "'#{client.escape(nr.host)}'"
+          userspec = "#{username}@#{host}"
+          createuser = "CREATE USER IF NOT EXISTS #{userspec}"
+          if nr.password
+            password = "'#{client.escape(nr.password)}'"
+            alteruser = "ALTER USER #{userspec} IDENTIFIED BY #{password}"
+            createuser = "#{createuser} IDENTIFIED BY #{password}"
           end
-          client.query(create_sql)
+
+          checkqry = "SELECT user,host FROM mysql.user WHERE user=#{username} AND host=#{host}"
+          if client.query(checkqry).count > 0
+            # PASSWORD is the mysql's internal password hashing function
+            checkqry = "#{checkqry} AND password=PASSWORD(#{password})"
+            if nr.password && client.query(checkqry).count.zero?
+              Chef::Log.info("Updating password : #{userspec}")
+              query = alteruser
+            else
+              # user found but either passowrd not defied or no change
+              query = nil
+            end
+          else
+            Chef::Log.info("Creating user #{userspec}")
+            query = createuser
+          end
+          client.query(query) if query
         ensure
           close_client
         end
