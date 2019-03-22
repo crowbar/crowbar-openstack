@@ -37,7 +37,9 @@ compute_driver = compute_nova_driver
 amphora_driver = amphora_haproxy_rest_driver
 network_driver = allowed_address_pairs_driver
 loadbalancer_topology = SINGLE
-amp_ssh_key_name = "<%= @node[:octavia][:amphora][:keypair]%>"
+<% if @node[:octavia][:amphora][:ssh_access][:enabled] -%>
+amp_ssh_key_name = "<%= @node[:octavia][:amphora][:ssh_access][:keyname]%>"
+<% end %>
 
 [haproxy_amphora]
 client_cert = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:client_cert_and_key_path] %>

@@ -66,7 +66,13 @@
                         "sec_group": { "type": "str", "required": true },
                         "manage_net": { "type": "str", "required": true },
                         "image_tag": { "type": "str", "required": true },
-                        "project": { "type": "str", "required": true }
+                        "project": { "type": "str", "required": true },
+                        "ssh_access": { "type": "map", "required": true,
+                          "mapping": {
+                            "enabled": { "type": "bool", "required": true },
+                            "keyname": { "type": "str", "required": true }
+                          }
+                        }
                       }
                     }
               }

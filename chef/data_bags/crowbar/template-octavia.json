@@ -48,7 +48,11 @@
         "sec_group": "lb-mgmt-sec-group",
         "manage_net": "lb-mgmt-net",
         "image_tag": "amphora",
-        "project": "service"
+        "project": "service",
+        "ssh_access": {
+          "enabled": false,
+          "keyname": ""
+        }
       }
     }
   },
