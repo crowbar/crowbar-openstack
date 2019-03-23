@@ -127,6 +127,7 @@ en:
               volume_name: 'Name of Volume'
             rbd:
               use_ses: 'Use SES Configuration'
+              use_crowbar: 'Use Ceph deployed by Crowbar'
               config_file: 'Path to Ceph configuration file'
               pool: 'RADOS pool for Cinder volumes'
               user: 'RADOS user (Set only if using CephX authentication)'
