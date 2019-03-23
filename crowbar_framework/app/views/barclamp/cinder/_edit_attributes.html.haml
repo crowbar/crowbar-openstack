@@ -144,7 +144,11 @@
               %legend
                 = t('.volumes.rbd_parameters')
 
+              {{#if this.rbd.use_crowbar}}
+              = boolean_field %w(volumes {{@index}} rbd use_crowbar), "data-hideit" => "true", "data-hideit-target" => "#rbd_config_{{@index}}", "data-hideit-direct" => "true"
+              {{else}}
               = boolean_field %w(volumes {{@index}} rbd use_ses), "data-hideit" => "true", "data-hideit-target" => "#rbd_config_{{@index}}", "data-hideit-direct" => "true"
+              {{/if}}
               %div{ :id => "rbd_config_{{@index}}" }
                 = string_field %w(volumes {{@index}} rbd config_file)
                 = string_field %w(volumes {{@index}} rbd pool)
