@@ -79,6 +79,7 @@ class CeilometerService < OpenstackServiceObject
     answer << { "barclamp" => "rabbitmq", "inst" => role.default_attributes["ceilometer"]["rabbitmq_instance"] }
     answer << { "barclamp" => "keystone", "inst" => role.default_attributes["ceilometer"]["keystone_instance"] }
     answer << { "barclamp" => "database", "inst" => role.default_attributes["ceilometer"]["database_instance"] }
+    answer << { "barclamp" => "monasca", "inst" => role.default_attributes["ceilometer"]["monasca_instance"] }
     answer
   end
 
@@ -89,6 +90,7 @@ class CeilometerService < OpenstackServiceObject
     base["attributes"][@bc_name]["database_instance"] = find_dep_proposal("database", true)
     base["attributes"][@bc_name]["rabbitmq_instance"] = find_dep_proposal("rabbitmq")
     base["attributes"][@bc_name]["keystone_instance"] = find_dep_proposal("keystone")
+    base["attributes"][@bc_name]["monasca_instance"] = find_dep_proposal("monasca")
 
     agent_nodes = NodeObject.find("roles:nova-compute-kvm") +
       NodeObject.find("roles:nova-compute-qemu") +

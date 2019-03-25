@@ -13,12 +13,17 @@
 # limitations under the License.
 #
 
+if node_search_with_cache("roles:monasca-server").empty?
+  Chef::Log.warn("No monasca-server found. Skip Ceilometer setup.")
+  return
+end
+
 case node[:platform_family]
 when "debian"
   package "ceilometer-common"
   package "swift-proxy"
 else
-  package "openstack-ceilometer"
+  package "openstack-monasca-ceilometer"
   package "openstack-swift-proxy" # we need it for swift user presence
 end
 

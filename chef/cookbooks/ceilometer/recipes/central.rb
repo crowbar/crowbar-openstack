@@ -13,9 +13,14 @@
 # limitations under the License.
 #
 
+if node_search_with_cache("roles:monasca-server").empty?
+  Chef::Log.warn("No monasca-server found. Skip Ceilometer setup.")
+  return
+end
+
 package "ceilometer-agent-central" do
   if %w(rhel suse).include?(node[:platform_family])
-    package_name "openstack-ceilometer-agent-central"
+    package_name "openstack-monasca-ceilometer-agent-central"
   end
   action :install
 end
