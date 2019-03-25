@@ -46,9 +46,12 @@ block_migration_for_live_migration = true
 vnc_console = <%= @use_vnc %>
 rescue = <%= @use_rescue %>
 interface_attach = <%= @use_interface_attach %>
-personality = false
+personality = True
+volume_multiattach = True
+swap_volume = True
 config_drive = <%= @use_config_drive %>
 attach_encrypted_volume = <%= @use_attach_encrypted_volume %>
+api_extensions = all
 
 [dashboard]
 dashboard_url = <%= @horizon_protocol %>://<%= @horizon_host %>/
@@ -101,6 +104,12 @@ alt_domain_name = Default
 
 [identity-feature-enabled]
 domain_specific_drivers = <%= node[:keystone][:domain_specific_drivers] ? "True" : "False" %>
+# Not enabled in keystone
+security_compliance = False
+application_credentials = True
+project_tags = True
+api_v2_admin = False
+api_v2 = False
 
 [image]
 region = <%= @keystone_settings['endpoint_region'] %>
@@ -128,6 +137,7 @@ floating_network_name = floating
 
 [network-feature-enabled]
 api_extensions = <%= @neutron_api_extensions %>
+port_security = True
 
 [object-storage]
 region = <%= @keystone_settings['endpoint_region'] %>
@@ -138,6 +148,7 @@ cluster_name = <%= @swift_cluster_name %>
 
 [object-storage-feature-enabled]
 object_versioning = <%= @object_versioning ? 'true' : 'false' %>
+discoverable_apis = all
 
 [orchestration]
 region = <%= @keystone_settings['endpoint_region'] %>
@@ -149,7 +160,7 @@ build_timeout = 2000
 instance_type = <%= @heat_flavor_ref %>
 
 [oslo_concurrency]
-lock_path = /var/run/tempest
+lock_path = /run/tempest
 
 [scenario]
 img_dir = <%= @tempest_path %>/etc/cirros/
@@ -185,8 +196,8 @@ capability_storage_protocol = <%= @manila_settings['capability_storage_protocol'
 enable_ip_rules_for_protocols = <%= @manila_settings['enable_ip_rules_for_protocols'] %>
 enable_cert_rules_for_protocols = <%= @manila_settings['enable_cert_rules_for_protocols'] %>
 suppress_errors_in_cleanup = true
-run_snapshot_tests =<%= @manila_settings['run_snapshot_tests'] %>
-run_share_group_tests =<%= @manila_settings['run_share_group_tests'] %>
+run_snapshot_tests = <%= @manila_settings['run_snapshot_tests'] %>
+run_share_group_tests = <%= @manila_settings['run_share_group_tests'] %>
 image_with_share_tools = <%= @manila_settings['image_with_share_tools'] %>
 image_username = <%= @manila_settings['image_username'] %>
 image_password = <%= @manila_settings['image_password'] %>
@@ -230,5 +241,9 @@ max_microversion = latest
 [volume-feature-enabled]
 multi_backend = <%= @cinder_multi_backend ? 'true' : 'false' %>
 backup = false
+extend_attached_volume = True
+manage_volume = True
+manage_snapshot = True
 api_v3 = True
 snapshot = <%= @cinder_snapshot %>
+api_extensions = all
