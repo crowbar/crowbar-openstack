@@ -58,7 +58,10 @@ template "/etc/grafana/grafana.ini" do
   mode "0640"
 end
 
-crowbar_pacemaker_sync_mark "wait-grafana_migrations" if ha_enabled
+crowbar_pacemaker_sync_mark "wait-grafana_migrations" do
+  timeout 120
+  only_if { ha_enabled }
+end
 
 # Start Grafana server on cluster founder first to ensure database migrations
 # happen there...
