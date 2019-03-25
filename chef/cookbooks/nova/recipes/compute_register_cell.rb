@@ -39,6 +39,7 @@ bash "nova-manage discover_hosts" do
     nova-manage --config-file=$tmpfile cell_v2 discover_hosts --verbose
     rm -f "$tmpfile"
     EOH
+  delayed true
 end
 
 # We want to keep a note that we've done discover_hosts, so we don't do it again.
