@@ -129,6 +129,7 @@ log_dir = /var/log/monasca-api/
 #fatal_deprecations = false
 
 
+<% if @tsdb == "cassandra" %>
 [cassandra]
 
 #
@@ -139,6 +140,7 @@ log_dir = /var/log/monasca-api/
 # Comma separated list of Cassandra node IP addresses
 #  (list value)
 #contact_points = 127.0.0.1
+contact_points = <%= @tsdb_host %>
 
 #
 # keyspace where metric are stored
@@ -148,12 +150,13 @@ log_dir = /var/log/monasca-api/
 #
 # Cassandra user for monasca-api service
 #  (string value)
-#user =
+user = <%= node['monasca']['cassandra']['monasca_api_role'] %>
 
 #
 # Cassandra user password for monasca-api service
 #  (string value)
-#password =
+password = <%= node['monasca']['cassandra']['admin_password'] %>
+<% end %>
 
 
 [database]
@@ -337,7 +340,7 @@ connection = <%= @sql_connection %>
 # Health checks endpoint controller (string value)
 #healthchecks = monasca_api.healthchecks:HealthChecks
 
-
+<% if @tsdb == "influxdb" %>
 [influxdb]
 
 #
@@ -346,15 +349,15 @@ connection = <%= @sql_connection %>
 
 #
 # Database name where metrics are stored
-#  (string value)
+# (string value)
 #database_name = mon
 database_name = <%= node['monasca']['db_monapi']['database'] %>
 
 #
 # IP address to Influxdb server
-#  (host address value)
+# (host address value)
 #ip_address = 127.0.0.1
-ip_address = <%= @influxdb_host %>
+ip_address = <%= @tsdb_host %>
 
 # Port to Influxdb server (port value)
 # Minimum value: 0
@@ -364,16 +367,16 @@ port = <%= node['monasca']['influxdb']['client_port'] %>
 
 #
 # Influxdb user
-#  (string value)
+# (string value)
 #user = monasca-api
 user = <%= node['monasca']['persister']['influxdb_user'] %>
 
 #
 # Influxdb password
-#  (string value)
+# (string value)
 #password = password
 password = <%= node['monasca']['master']['tsdb_mon_persister_password'] %>
-
+<% end %>
 
 [kafka]
 
@@ -552,7 +555,7 @@ driver = monasca_api.common.messaging.kafka_publisher:KafkaPublisher
 # by the majority of users, and might have a significant
 # effect on stability and/or performance.
 #metrics_driver = monasca_api.common.repositories.influxdb.metrics_repository:MetricsRepository
-metrics_driver = monasca_api.common.repositories.influxdb.metrics_repository:MetricsRepository
+metrics_driver = monasca_api.common.repositories.<%= @tsdb %>.metrics_repository:MetricsRepository
 
 #
 # The repository driver to use for alarm definitions

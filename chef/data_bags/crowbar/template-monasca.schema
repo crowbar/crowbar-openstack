@@ -198,6 +198,13 @@
                 "email_smtp_from_address": { "required": true, "type": "str" }
               }
             },
+            "cassandra": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "admin_password": { "required": true, "type": "str" }
+              }
+            },
             "master": {
               "required": true,
               "type": "map",
@@ -207,13 +214,11 @@
                    "type": "str",
                    "pattern": "/^\d+[mhdw]|INF$/"
                  },
-                "cassandra_admin_password": { "required": true, "type": "str" },
                 "database_notification_password": { "required": true, "type": "str" },
                 "database_logapi_password": { "required": true, "type": "str" },
                 "keystone_monasca_operator_password": { "required": true, "type": "str" },
                 "keystone_monasca_agent_password": { "required": true, "type": "str" },
                 "keystone_admin_agent_password": { "required": true, "type": "str" },
-                "tsdb": { "required": true, "type": "str" },
                 "tsdb_mon_api_password": { "required": true, "type": "str" },
                 "tsdb_mon_persister_password": { "required": true, "type": "str" }
               }
@@ -228,7 +233,8 @@
             "service_password": { "type": "str", "required": true },
             "service_tenant": { "type": "str", "required": true },
             "service_roles": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
-            "memcache_secret_key": { "type": "str", "required": true }
+            "memcache_secret_key": { "type": "str", "required": true },
+            "tsdb": { "required": true, "type": "str", "pattern": "/^(influxdb|cassandra)$/" }
           }
         }
       }

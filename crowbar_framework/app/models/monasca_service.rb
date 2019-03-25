@@ -113,7 +113,7 @@ class MonascaService < OpenstackServiceObject
     base["attributes"][@bc_name][:log_agent][:keystone][:service_password] = random_password
     base["attributes"][@bc_name][:master][:tsdb_mon_api_password] = random_password
     base["attributes"][@bc_name][:master][:tsdb_mon_persister_password] = random_password
-    base["attributes"][@bc_name][:master][:cassandra_admin_password] = random_password
+    base["attributes"][@bc_name][:cassandra][:admin_password] = random_password
     base["attributes"][@bc_name][:master][:database_notification_password] = random_password
     base["attributes"][@bc_name][:master][:database_logapi_password] = random_password
     base["attributes"][@bc_name][:master][:keystone_monasca_operator_password] = random_password

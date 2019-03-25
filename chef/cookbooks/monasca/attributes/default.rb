@@ -108,6 +108,18 @@ default[:monasca][:influxdb][:user] = "influxdb"
 default[:monasca][:influxdb][:group] = "influxdb"
 default[:monasca][:influxdb][:client_port] = 8086
 
+# cassandra
+default[:monasca][:cassandra][:user] = "cassandra"
+default[:monasca][:cassandra][:group] = "cassandra"
+default[:monasca][:cassandra][:client_port] = 9042
+default[:monasca][:cassandra][:batch_size_warn_threshold_in_kb] = 2000
+default[:monasca][:cassandra][:batch_size_fail_threshold_in_kb] = 2500
+default[:monasca][:cassandra][:admin_user] = "cassandra"
+default[:monasca][:cassandra][:admin_default_password] = "cassandra"
+default[:monasca][:cassandra][:admin_role] = "cassandra"
+default[:monasca][:cassandra][:monasca_api_role] = "monasca_api"
+default[:monasca][:cassandra][:monasca_persister_role] = "monasca_persister"
+
 # monasca-thresh
 default[:monasca][:thresh][:user] = "monasca-thresh"
 default[:monasca][:thresh][:group] = "monasca"
