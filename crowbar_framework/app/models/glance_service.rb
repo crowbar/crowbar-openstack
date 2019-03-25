@@ -71,7 +71,11 @@ class GlanceService < OpenstackServiceObject
     base["attributes"]["glance"]["memcache_secret_key"] = random_password
     base["attributes"][@bc_name][:db][:password] = random_password
 
-    base["attributes"][@bc_name]["rbd"]["use_ses"] = true if SES.configured?
+    # enable SES integration for new deployments (where available)
+    if SES.configured?
+      base["attributes"][@bc_name]["rbd"]["use_ses"] = true
+      base["attributes"][@bc_name]["default_store"] = "rbd"
+    end
 
     @logger.debug("Glance create_proposal: exiting")
     base
