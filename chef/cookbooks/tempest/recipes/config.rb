@@ -325,8 +325,11 @@ neutron_api_extensions = [
   "address-scope",
   "agent",
   "allowed-address-pairs",
+  "availability_zone",
+  "availability_zone_filter",
   "auto-allocated-topology",
   "binding",
+  "binding-extended",
   "default-subnetpools",
   "dhcp_agent_scheduler",
   "external-net",
@@ -339,16 +342,21 @@ neutron_api_extensions = [
   "hm_max_retries_down",
   "l3_agent_scheduler",
   "l3-flavors",
+  "l7",
   "metering",
   "multi-provider",
   "net-mtu",
+  "net-mtu-writable",
   "network_availability_zone",
   "network-ip-availability",
   "pagination",
   "port-security",
   "project-id",
   "provider",
+  "quota_details",
   "quotas",
+  "rbac-policies",
+  "revision-if-match",
   "router",
   "router_availability_zone",
   "security-group",
@@ -357,16 +365,25 @@ neutron_api_extensions = [
   "sorting",
   "standard-attr-description",
   "standard-attr-revisions",
-  "subnet_allocation",
+  "standard-attr-tag",
+  "standard-attr-timestamp",
   "subnet-service-types",
-  "tag",
-].join(",")
+  "subnet_allocation",
+  "trunk",
+  "trunk-details"
+].join(", ")
 
 unless neutrons[0].nil?
-  if neutrons[0][:neutron][:use_lbaas] then
-    neutron_api_extensions += ",lbaasv2,lbaas_agent_schedulerv2,lb-graph,lb_network_vip"
+  neutron_attr = neutrons[0][:neutron]
+  if neutron_attr[:use_lbaas]
+    neutron_api_extensions += ", lbaasv2, lbaas_agent_schedulerv2"
+    neutron_api_extensions += ", lb-graph, lb_network_vip"
   end
+  neutron_api_extensions += ", dvr" if neutron_attr[:use_dvr]
+  neutron_api_extensions += ", l3-ha" if neutron_attr[:l3_ha][:use_l3_ha]
 end
+
+neutron_api_extensions += ", dns-integration" if enabled_services.include?("dns")
 
 ruby_block "get public network id" do
   block do
