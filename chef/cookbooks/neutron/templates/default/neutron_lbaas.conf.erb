@@ -9,7 +9,7 @@ auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol
 admin_project_name = <%= @keystone_settings['service_tenant'] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
-region_name = <%= @keystone_settings['endpoint_region'] %>
+region = <%= @keystone_settings['endpoint_region'] %>
 admin_user_domain = <%= @keystone_settings['admin_domain'] %>
 admin_project_domain = <%= @keystone_settings['admin_domain'] %>
 [service_providers]
