@@ -340,8 +340,12 @@ if neutrons.length > 0
   neutron = neutrons[0]
   if neutron[:neutron][:networking_plugin] == "ml2"
     neutron_ml2_type_drivers = neutron[:neutron][:ml2_type_drivers]
+    neutron_use_dvr = neutron[:neutron][:use_dvr]
+    neutron_use_l3_ha = neutron[:neutron][:l3_ha][:use_l3_ha]
   else
     neutron_ml2_type_drivers = "'*'"
+    neutron_use_dvr = false
+    neutron_use_l3_ha = false
   end
 else
   neutron_ml2_type_drivers = "'*'"
@@ -419,6 +423,8 @@ template local_settings do
     site_branding: node[:horizon][:site_branding],
     site_branding_link: node[:horizon][:site_branding_link],
     neutron_ml2_type_drivers: neutron_ml2_type_drivers,
+    neutron_use_dvr: neutron_use_dvr,
+    neutron_use_l3_ha: neutron_use_l3_ha,
     help_url: node[:horizon][:help_url],
     session_timeout: node[:horizon][:session_timeout],
     secret_key: node["horizon"]["secret_key"],

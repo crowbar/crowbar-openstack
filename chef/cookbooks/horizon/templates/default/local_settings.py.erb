@@ -59,8 +59,8 @@ OPENSTACK_NEUTRON_NETWORK = {
     'enable_router': True,
     'enable_quotas': True,
     'enable_ipv6': False,
-    'enable_distributed_router': False,
-    'enable_ha_router': False,
+    'enable_distributed_router': <%= @neutron_use_dvr ? "True" : "False" -%>,
+    'enable_ha_router': <%= @neutron_use_l3_ha ? "True" : "False" -%>,
     'enable_fip_topology_check': True,
 
     # Neutron can be configured with a default Subnet Pool to be used for IPv4
