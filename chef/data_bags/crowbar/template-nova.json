@@ -70,10 +70,6 @@
         "user": "placement",
         "database": "placement"
       },
-      "rbd": {
-        "user": "",
-        "secret_uuid": ""
-      },
       "kvm": {
         "nested_virt": false,
         "ksm_enabled": false,
@@ -184,7 +180,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 303,
+      "schema-revision": 304,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],

@@ -62,6 +62,7 @@
             },
             "rbd": {
               "type": "map", "required": true, "mapping": {
+                "use_ses": { "type": "bool", "required": true },
                 "store_ceph_conf": { "type": "str", "required": true },
                 "store_admin_keyring": { "type": "str", "required": true },
                 "store_user": { "type": "str", "required": true },

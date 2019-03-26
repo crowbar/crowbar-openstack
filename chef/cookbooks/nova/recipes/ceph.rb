@@ -23,6 +23,16 @@ has_external = false
 cinder_controller = node_search_with_cache("roles:cinder-controller").first
 return if cinder_controller.nil?
 
+has_ses = SesHelper.populate_cinder_volumes_with_ses_settings(cinder_controller)
+ses_config = SesHelper.ses_settings
+
+# Install SES based ceph configuration
+if has_ses
+  ses_config "nova" do
+    action :create
+  end
+end
+
 # First loop to find if we have internal/external cluster
 cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
   next unless volume[:backend_driver] == "rbd"
@@ -43,7 +53,7 @@ if has_internal
   end
 end
 
-if has_external
+if has_external || has_ses
   # Ensure ceph is available here
   if node[:platform_family] == "suse"
     # install package in compile phase because we will run "ceph -s"
@@ -54,13 +64,15 @@ if has_external
 end
 
 # Second loop to do our setup
-cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
+cinder_controller[:cinder][:volumes].each do |volume|
   next unless volume[:backend_driver] == "rbd"
 
   rbd_user = volume[:rbd][:user]
   rbd_uuid = volume[:rbd][:secret_uuid]
 
-  if volume[:rbd][:use_crowbar]
+  if volume[:rbd][:use_ses]
+    ceph_conf = volume[:rbd][:config_file]
+  elsif volume[:rbd][:use_crowbar]
     ceph_conf = "/etc/ceph/ceph.conf"
     admin_keyring = "/etc/ceph/ceph.client.admin.keyring"
   else
@@ -133,7 +145,9 @@ cinder_controller[:cinder][:volumes].each_with_index do |volume, volid|
         end
       end
 
-      if !admin_keyring.empty? && File.exist?(admin_keyring)
+      if volume[:rbd][:use_ses]
+        client_key = ses_config["cinder"]["key"]
+      elsif !admin_keyring.empty? && File.exist?(admin_keyring)
         # Now add our secret and its value
         cmd = [
           "ceph",

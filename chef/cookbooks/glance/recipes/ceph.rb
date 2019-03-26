@@ -16,6 +16,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+ses_config = SesHelper.ses_settings
+
+# Ceph deployed and configured with SES
+if node[:glance][:rbd][:use_ses]
+  # Trying to use_ses but no SES config is available?
+  if ses_config.nil? || !ses_config.key?("glance")
+    message = "SES configuration was not found but use_ses was enabled!"
+    Chef::Log.fatal(message)
+    raise message
+  end
+  ceph_conf = SesHelper.ceph_conf_path
+  # Copy settings from SES config
+  node.default[:glance][:rbd][:store_ceph_conf] = ceph_conf
+  node.default[:glance][:rbd][:store_pool] = ses_config["glance"]["rbd_store_pool"]
+  node.default[:glance][:rbd][:store_user] = ses_config["glance"]["rbd_store_user"]
+
+  ses_config "glance" do
+    action :create
+  end
+
+  # If Ceph configuration file is present, Ceph cluster will be used,
+  # we have to install ceph client packages
+  if node[:platform_family] == "suse"
+    package "ceph-common" do
+      action :install
+      only_if { !ceph_conf.empty? && File.exist?(ceph_conf) }
+    end
+  end
+  # break here to not run any legacy code if SES option was used
+  return
+end
 
 ceph_env_filter = " AND ceph_config_environment:ceph-config-default"
 ceph_servers = search(:node, "roles:ceph-osd#{ceph_env_filter}") || []
