@@ -201,7 +201,7 @@ execute "glance-manage db_load_metadefs" do
   command "glance-manage db_load_metadefs"
   # We only load the metadefs the first time, and only if we're not doing HA or if we
   # are the founder of the HA cluster (so that it's really only done once).
-  only_if { !node[:glance][:db_metadefs] && (!ha_enabled || is_founder) }
+  only_if { !node[:glance][:db_synced] && (!ha_enabled || is_founder) }
 end
 
 # We want to keep a note that we've done db_sync, so we don't do it again.
