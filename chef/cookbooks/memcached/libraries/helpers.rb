@@ -6,7 +6,7 @@ module MemcachedHelper
       port = if n.key?(:memcached) && n[:memcached].key?(:port)
         n[:memcached][:port]
       else
-        node[:memcached][:port]
+        memcached_nodes.first[:memcached][:port]
       end
       "#{node_admin_ip}:#{port}"
     end
