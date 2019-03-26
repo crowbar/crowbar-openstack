@@ -45,11 +45,11 @@ live_migration = <%= @use_livemigration %>
 block_migration_for_live_migration = true
 vnc_console = <%= @use_vnc %>
 rescue = <%= @use_rescue %>
-interface_attach = <%= @use_interface_attach %>
 personality = True
-volume_multiattach = True
+# only supported by LVM driver
+# see https://docs.openstack.org/cinder/rocky/reference/support-matrix.html#operation_multi_attach
+volume_multiattach = False
 swap_volume = True
-config_drive = <%= @use_config_drive %>
 attach_encrypted_volume = <%= @use_attach_encrypted_volume %>
 api_extensions = all
 
@@ -212,7 +212,6 @@ too_slow_to_test = false
 events = true
 
 [validation]
-run_validation = <%= @use_run_validation %>
 connect_method = floating
 ip_version_for_ssh = 4
 <% if @validation_connect_timeout -%>

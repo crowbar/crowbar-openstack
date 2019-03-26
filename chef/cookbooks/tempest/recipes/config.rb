@@ -417,7 +417,8 @@ cinders = search(:node, "roles:cinder-controller") || []
 storage_protocol = "iSCSI"
 vendor_name = "Open Source"
 cinder_snapshot = true
-use_attach_encrypted_volume = true
+# Currently broken in general, even with LVM
+use_attach_encrypted_volume = false
 cinders[0][:cinder][:volumes].each do |volume|
   if volume[:backend_driver] == "rbd"
     storage_protocol = "ceph"
@@ -460,42 +461,22 @@ if backend_names.length > 1
 end
 
 kvm_compute_nodes = search(:node, "roles:nova-compute-kvm") || []
-xen_compute_nodes = search(:node, "roles:nova-compute-xen") || []
 
 use_resize = kvm_compute_nodes.length > 1
 use_livemigration = nova[:nova][:use_migration] && kvm_compute_nodes.length > 1
-
-# create a flag to disable some test for xen (lp#1443898)
-xen_only = !xen_compute_nodes.empty? && kvm_compute_nodes.empty?
-file "#{node[:tempest][:tempest_path]}/flag-xen_only" do
-  action xen_only ? :create : :delete
-end
 
 # tempest timeouts for ssh and connection can be different for XEN, a
 # `nil` value will use the tempest default value
 validation_connect_timeout = nil
 validation_ssh_timeout = nil
-if xen_only
-  # Default: 60
-  validation_connect_timeout = 90
-  # Default: 300
-  validation_ssh_timeout = 450
-  use_interface_attach = false
-  use_rescue = false
-  use_suspend = false
-  use_vnc = node[:kernel][:machine] != "aarch64"
-  use_run_validation = false
-  use_config_drive = false
-end
+use_rescue = false
+use_suspend = false
+use_vnc = false
 
 unless kvm_compute_nodes.empty?
-  use_interface_attach = true
   use_rescue = true
   use_suspend = true
   use_vnc = node[:kernel][:machine] != "aarch64"
-  use_run_validation = true
-  use_config_drive = true
-  image_regex = "^cirros-#{cirros_version}-#{cirros_arch}-tempest-machine$"
 end
 
 # FIXME: should avoid search with no environment in query
@@ -546,14 +527,11 @@ template "/etc/tempest/tempest.conf" do
         flavor_ref: flavor_ref,
         alt_flavor_ref: alt_flavor_ref,
         nova_api_v3: nova[:nova][:enable_v3_api],
-        use_interface_attach: use_interface_attach,
         use_rescue: use_rescue,
         use_resize: use_resize,
         use_suspend: use_suspend,
         use_vnc: use_vnc,
         use_livemigration: use_livemigration,
-        # compute-feature-enabled settings
-        use_config_drive: use_config_drive,
         use_attach_encrypted_volume: use_attach_encrypted_volume,
         # dashboard settings
         horizon_host: horizon_host,
@@ -586,9 +564,7 @@ template "/etc/tempest/tempest.conf" do
         # scenario settings
         cirros_arch: cirros_arch,
         cirros_version: cirros_version,
-        image_regex: image_regex,
-        # validation settings
-        use_run_validation: use_run_validation,
+        image_regex: "^cirros-#{cirros_version}-#{cirros_arch}-tempest-machine$",
         validation_connect_timeout: validation_connect_timeout,
         validation_ssh_timeout: validation_ssh_timeout,
         # volume settings
