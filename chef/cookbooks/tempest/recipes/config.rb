@@ -23,19 +23,12 @@ require "open3"
 nova = get_instance("roles:nova-controller")
 keystone_settings = KeystoneHelper.keystone_settings(nova, "nova")
 
-alt_comp_user = keystone_settings["default_user"]
-alt_comp_pass = keystone_settings["default_password"]
-alt_comp_tenant = keystone_settings["default_tenant"]
-
 # Will only be set if this cloud is actually running heat
 heat_trusts_delegated_roles = nil
 
 tempest_comp_user = node[:tempest][:tempest_user_username]
 tempest_comp_pass = node[:tempest][:tempest_user_password]
 tempest_comp_tenant = node[:tempest][:tempest_user_tenant]
-
-tempest_adm_user = node[:tempest][:tempest_adm_username]
-tempest_adm_pass = node[:tempest][:tempest_adm_password]
 
 # manila (share)
 tempest_manila_settings = node[:tempest][:manila]
@@ -81,9 +74,9 @@ comp_environment << "OS_IDENTITY_API_VERSION='#{keystone_settings["api_version"]
 openstackcli = "#{comp_environment} openstack --insecure"
 
 # for admin usage (listing the available services)
-adm_environment = "OS_USERNAME='#{tempest_adm_user}' "
-adm_environment << "OS_PASSWORD='#{tempest_adm_pass}' "
-adm_environment << "OS_PROJECT_NAME='#{tempest_comp_tenant}' "
+adm_environment = "OS_USERNAME='#{keystone_settings["admin_user"]}' "
+adm_environment << "OS_PASSWORD='#{keystone_settings["admin_password"]}' "
+adm_environment << "OS_PROJECT_NAME='#{keystone_settings["admin_project"]}' "
 adm_environment << "OS_AUTH_URL='#{auth_url}' "
 adm_environment << "OS_IDENTITY_API_VERSION='#{keystone_settings["api_version"]}'"
 openstackcli_adm = "#{adm_environment} openstack --insecure"
@@ -91,9 +84,8 @@ openstackcli_adm = "#{adm_environment} openstack --insecure"
 enabled_services = `#{openstackcli_adm} service list -f value -c Type`.split
 
 users = [
-          {"name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "member"},
-          {"name" => tempest_adm_user, "pass" => tempest_adm_pass, "role" => "admin" }
-        ]
+  { "name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "member" }
+]
 
 roles = [ 'anotherrole' ]
 
@@ -273,9 +265,9 @@ glance #{insecure} image-list
 EOH
   environment ({
     "IMAGE_URL" => tempest_test_image,
-    "OS_USERNAME" => tempest_adm_user,
-    "OS_PASSWORD" => tempest_adm_pass,
-    "OS_TENANT_NAME" => tempest_comp_tenant,
+    "OS_USERNAME" => keystone_settings["admin_user"],
+    "OS_PASSWORD" => keystone_settings["admin_password"],
+    "OS_TENANT_NAME" => keystone_settings["admin_project"],
     "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
     "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
     "OS_USER_DOMAIN_NAME" => keystone_settings["api_version"] != "2.0" ? "Default" : "",
@@ -295,9 +287,9 @@ bash "create_yet_another_tiny_flavor" do
   nova flavor-show tempest-heat &> /dev/null || nova flavor-create tempest-heat #{heat_flavor_ref} 512 0 1 || exit 0
 EOH
   environment ({
-    "OS_USERNAME" => tempest_adm_user,
-    "OS_PASSWORD" => tempest_adm_pass,
-    "OS_TENANT_NAME" => tempest_comp_tenant,
+    "OS_USERNAME" => keystone_settings["admin_user"],
+    "OS_PASSWORD" => keystone_settings["admin_password"],
+    "OS_TENANT_NAME" => keystone_settings["admin_project"],
     "NOVACLIENT_INSECURE" => "true",
     "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
     "OS_IDENTITY_API_VERSION" => keystone_settings["api_version"],
@@ -543,9 +535,6 @@ template "/etc/tempest/tempest.conf" do
         comp_user: tempest_comp_user,
         comp_tenant: tempest_comp_tenant,
         comp_pass: tempest_comp_pass,
-        alt_comp_user: alt_comp_user,
-        alt_comp_tenant: alt_comp_tenant,
-        alt_comp_pass: alt_comp_pass,
         # image settings
         http_image: tempest_test_image,
         # network settings

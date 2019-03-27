@@ -62,10 +62,8 @@ class TempestService < ServiceObject
     base["attributes"][@bc_name]["nova_instance"] = find_dep_proposal("nova")
 
     base["attributes"]["tempest"]["tempest_user_username"] = "tempest-user-" + random_password
-    base["attributes"]["tempest"]["tempest_adm_username"] = "tempest-adm-" + random_password
     base["attributes"]["tempest"]["tempest_user_tenant"] = "tempest-tenant-" + random_password
     base["attributes"]["tempest"]["tempest_user_password"] = random_password
-    base["attributes"]["tempest"]["tempest_adm_password"] = random_password
 
     @logger.debug("Tempest create_proposal: exiting")
     base
