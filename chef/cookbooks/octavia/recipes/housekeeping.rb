@@ -13,16 +13,6 @@
 # limitations under the License.
 #
 
-template "/etc/octavia/octavia-housekeeping.conf" do
-  source "octavia-housekeeping.conf.erb"
-  owner node[:octavia][:user]
-  group node[:octavia][:group]
-  mode 0o640
-  variables(
-    octavia_db_connection: fetch_database_connection_string(node[:octavia][:db])
-  )
-end
-
 file node[:octavia][:octavia_log_dir] + "/octavia-housekeeping.log" do
   action :touch
   owner node[:octavia][:user]
@@ -37,4 +27,5 @@ file node[:octavia][:octavia_log_dir] + "/octavia-housekeeping-json.log" do
   mode 0o640
 end
 
+octavia_conf "housekeeping"
 octavia_service "housekeeping"

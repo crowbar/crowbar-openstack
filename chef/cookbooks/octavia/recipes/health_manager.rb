@@ -13,26 +13,6 @@
 # limitations under the License.
 #
 
-list = search(:node, "roles:octavia-health-manager") || []
-
-hm_port = node[:octavia]["health_manager"][:port]
-node_list = []
-list.each do |e|
-  str = e.name + ":" + hm_port.to_s
-  node_list << str unless node_list.include?(str)
-end
-
-template "/etc/octavia/octavia-health-manager.conf" do
-  source "octavia-health-manager.conf.erb"
-  owner node[:octavia][:user]
-  group node[:octavia][:group]
-  mode 0o640
-  variables(
-    octavia_db_connection: fetch_database_connection_string(node[:octavia][:db]),
-    octavia_healthmanager_hosts: node_list.join(",")
-  )
-end
-
 file node[:octavia][:octavia_log_dir] + "/octavia-health-manager.log" do
   action :touch
   owner node[:octavia][:user]
@@ -40,4 +20,5 @@ file node[:octavia][:octavia_log_dir] + "/octavia-health-manager.log" do
   mode 0o640
 end
 
+octavia_conf "health-manager"
 octavia_service "health-manager"

@@ -1,6 +1,6 @@
 #
 #
-# (c) Copyright 2016-2017 Hewlett Packard Enterprise Development LP
+# (c) Copyright 2016 Hewlett Packard Enterprise Development LP
 # (c) Copyright 2017-2018 SUSE LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -21,9 +21,19 @@
 
 [DEFAULT]
 debug = <%= @node[:octavia][:debug] %>
+transport_url = <%= @rabbit_settings[:url] %>
 
-[database]
-connection = <%= @octavia_db_connection %>
+[api_settings]
+api_handler = queue_producer
+bind_host = <%= @node[:octavia][:api][:host] %>
+bind_port = <%= @node[:octavia][:api][:port] %>
+
+[certificates]
+cert_generator = local_cert_generator
+cert_manager = barbican_cert_manager
+ca_certificate = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_cert_path] %>
+ca_private_key = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_key_path] %>
+ca_private_key_passphrase = <%= @node[:octavia][:certs][:passphrase] %>
 
 [controller_worker]
 amp_active_retries = 40
@@ -41,6 +51,9 @@ loadbalancer_topology = SINGLE
 amp_ssh_key_name = "<%= @node[:octavia][:amphora][:ssh_access][:keyname]%>"
 <% end %>
 
+[database]
+connection = <%= @octavia_db_connection %>
+
 [haproxy_amphora]
 client_cert = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:client_cert_and_key_path] %>
 server_ca = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:server_ca_cert_path] %>
@@ -50,9 +63,21 @@ base_cert_dir = <%= @node[:octavia][:certs][:cert_path]%>
 connection_max_retries = 10
 connection_retry_interval = 10
 
+[health_manager]
+bind_ip = <%= @node[:octavia][:health_manager][:host] %>
+bind_port = <%= @node[:octavia][:health_manager][:port] %>
+controller_ip_port_list = <%= @octavia_healthmanager_hosts %>
+heartbeat_key = <%= @node[:octavia][:health_manager][:heartbeat_key] %>
+event_streamer_driver = queue_event_streamer
+heartbeat_interval = <%= @node[:octavia][:health_manager][:heartbeat_interval] %>
+heartbeat_timeout = <%= @node[:octavia][:health_manager][:heartbeat_timeout] %>
+health_check_interval = <%= @node[:octavia][:health_manager][:health_check_interval] %>
+
+[house_keeping]
+
 [keystone_authtoken]
 auth_version = <%= @octavia_keystone_settings['api_version'] %>
-www_authenticate_uri = <%= @octavia_keystone_settings["public_auth_url"]%>
+www_authenticate_uri = <%= @octavia_keystone_settings["public_auth_url"] %>
 auth_url = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
                                                     @octavia_keystone_settings["internal_url_host"],
                                                     @octavia_keystone_settings["service_port"],
@@ -65,12 +90,29 @@ username = <%= @octavia_keystone_settings['service_user'] %>
 password =  <%= @octavia_keystone_settings['service_password'] %>
 region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
 
-[certificates]
-cert_generator = local_cert_generator
-cert_manager = barbican_cert_manager
-ca_certificate = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_cert_path] %>
-ca_private_key = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_key_path] %>
-ca_private_key_passphrase = <%= @node[:octavia][:certs][:passphrase] %>
+[networking]
+port_detach_timeout = <%= @node[:octavia][:networking][:port_detach_timeout] %>
+
+[neutron]
+endpoint = <%= @neutron_endpoint %>
+endpoint_type = "internalURL"
+
+[nova]
+endpoint = <%= @nova_endpoint %>
+endpoint_type = "internalURL"
+
+[oslo_messaging]
+topic = octavia_prov
+rpc_thread_pool_size = <%= @node[:octavia][:oslo][:rpc_thread_pool_size] %>
+
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+ssl_ca_file = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+heartbeat_timeout_threshold = <%= @rabbit_settings[:heartbeat_timeout] %>
 
 [service_auth]
 auth_version = <%= @octavia_keystone_settings['api_version'] %>
@@ -88,47 +130,10 @@ password =  <%= @octavia_keystone_settings['service_password'] %>
 region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
 cafile = /etc/ssl/ca-bundle.pem
 
-[health_manager]
-bind_ip = <%= @node[:octavia][:health_manager][:host] %>
-bind_port = <%= @node[:octavia][:health_manager][:port] %>
-#TODO: List of controller ip and port pairs for the heartbeat receivers. Example 127.0.0.1:5555, 192.168.0.1:5555
-controller_ip_port_list = <%= @octavia_healthmanager_hosts %>
-heartbeat_key = <%= @node[:octavia][:health_manager][:heartbeat_key] %>
-event_streamer_driver = queue_event_streamer
-heartbeat_interval = <%= @node[:octavia][:health_manager][:heartbeat_interval] %>
-heartbeat_timeout = <%= @node[:octavia][:health_manager][:heartbeat_timeout] %>
-health_check_interval = <%= @node[:octavia][:health_manager][:health_check_interval] %>
-
-[barbican]
-auth_url = <%= KeystoneHelper.versioned_service_URL(@neutron_keystone_settings["protocol"],
-                                                    @neutron_keystone_settings["internal_url_host"],
-                                                    @neutron_keystone_settings["service_port"],
-                                                    @neutron_keystone_settings['api_version']) %>
-admin_project_name = <%= @neutron_keystone_settings['service_tenant'] %>
-admin_user = <%= @neutron_keystone_settings['service_user'] %>
-admin_password = <%= @neutron_keystone_settings['service_password'] %>
-region_name = <%= @neutron_keystone_settings['endpoint_region'] %>
-admin_user_domain = <%= @neutron_keystone_settings['admin_domain'] %>
-admin_project_domain = <%= @neutron_keystone_settings['admin_domain'] %>
-auth_version = <%= @neutron_keystone_settings['api_version'] %>
-admin_tenant_name = <%= @neutron_keystone_settings['admin_tenant'] %>
-endpoint_type = "internalURL"
-
 <% if @node[:octavia][:debug] -%>
 [task_flow]
 disable_revert = False
 <% end %>
-
-[networking]
-port_detach_timeout = <%= @node[:octavia][:networking][:port_detach_timeout] %>
-
-[neutron]
-endpoint = <%= @neutron_endpoint %>
-endpoint_type = "internalURL"
-
-[nova]
-endpoint = <%= @nova_endpoint %>
-endpoint_type = "internalURL"
 
 ### End of File ###
 ## Do NOT put anything after this line ##
