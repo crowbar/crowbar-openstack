@@ -52,10 +52,7 @@ connection_retry_interval = 10
 
 [keystone_authtoken]
 auth_version = <%= @octavia_keystone_settings['api_version'] %>
-www_authenticate_uri = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
-                                                    @octavia_keystone_settings["public_auth_url"],
-                                                    @octavia_keystone_settings["service_port"],
-                                                    @octavia_keystone_settings['api_version']) %>
+www_authenticate_uri = <%= @octavia_keystone_settings["public_auth_url"]%>
 auth_url = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
                                                     @octavia_keystone_settings["internal_url_host"],
                                                     @octavia_keystone_settings["service_port"],
@@ -77,10 +74,7 @@ ca_private_key_passphrase = <%= @node[:octavia][:certs][:passphrase] %>
 
 [service_auth]
 auth_version = <%= @octavia_keystone_settings['api_version'] %>
-www_authenticate_uri = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
-                                                    @octavia_keystone_settings["public_auth_url"],
-                                                    @octavia_keystone_settings["service_port"],
-                                                    @octavia_keystone_settings['api_version']) %>
+www_authenticate_uri = <%= @octavia_keystone_settings["public_auth_url"] %>
 auth_url = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
                                                     @octavia_keystone_settings["internal_url_host"],
                                                     @octavia_keystone_settings["service_port"],
@@ -120,8 +114,21 @@ auth_version = <%= @neutron_keystone_settings['api_version'] %>
 admin_tenant_name = <%= @neutron_keystone_settings['admin_tenant'] %>
 endpoint_type = "internalURL"
 
+<% if @node[:octavia][:debug] -%>
 [task_flow]
-disable_revert = True
+disable_revert = False
+<% end %>
+
+[networking]
+port_detach_timeout = <%= @node[:octavia][:networking][:port_detach_timeout] %>
+
+[neutron]
+endpoint = <%= @neutron_endpoint %>
+endpoint_type = "internalURL"
+
+[nova]
+endpoint = <%= @nova_endpoint %>
+endpoint_type = "internalURL"
 
 ### End of File ###
 ## Do NOT put anything after this line ##

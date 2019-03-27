@@ -37,10 +37,7 @@ rpc_thread_pool_size = <%= @node[:octavia][:oslo][:rpc_thread_pool_size] %>
 
 [keystone_authtoken]
 auth_version = <%= @octavia_keystone_settings['api_version'] %>
-www_authenticate_uri = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
-                                                    @octavia_keystone_settings["public_auth_url"],
-                                                    @octavia_keystone_settings["service_port"],
-                                                    @octavia_keystone_settings['api_version']) %>
+www_authenticate_uri = <%= @octavia_keystone_settings["public_auth_url"] %>
 auth_url = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
                                                     @octavia_keystone_settings["internal_url_host"],
                                                     @octavia_keystone_settings["service_port"],
@@ -71,7 +68,8 @@ heartbeat_timeout_threshold = <%= @rabbit_settings[:heartbeat_timeout] %>
 
 [service_auth]
 auth_version = <%= @octavia_keystone_settings['api_version'] %>
-auth_uri = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
+www_authenticate_uri = <%= @octavia_keystone_settings["public_auth_url"] %>
+auth_url = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
                                                     @octavia_keystone_settings["internal_url_host"],
                                                     @octavia_keystone_settings["service_port"],
                                                     @octavia_keystone_settings['api_version']) %>
@@ -82,6 +80,7 @@ user_domain_name = Default
 username = <%= @octavia_keystone_settings['service_user'] %>
 password =  <%= @octavia_keystone_settings['service_password'] %>
 region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
+cafile = /etc/ssl/ca-bundle.pem
 
 [networking]
 port_detach_timeout = <%= @node[:octavia][:networking][:port_detach_timeout] %>
@@ -108,6 +107,22 @@ admin_project_domain = <%= @neutron_keystone_settings['admin_domain'] %>
 auth_version = <%= @neutron_keystone_settings['api_version'] %>
 admin_tenant_name = <%= @neutron_keystone_settings['admin_tenant'] %>
 endpoint_type = "internalURL"
+
+[controller_worker]
+amp_active_retries = 40
+amp_active_wait_sec = 10
+amp_flavor_id = <%= @octavia_nova_flavor_id %>
+amp_image_tag = <%= @node[:octavia][:amphora][:image_tag] %>
+amp_boot_network_list = <%= @octavia_mgmt_net_id %>
+amp_secgroup_list = <%= @octavia_mgmt_sec_group_id %>
+client_ca = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:client_ca_cert_path] %>
+compute_driver = compute_nova_driver
+amphora_driver = amphora_haproxy_rest_driver
+network_driver = allowed_address_pairs_driver
+loadbalancer_topology = SINGLE
+<% if @node[:octavia][:amphora][:ssh_access][:enabled] -%>
+amp_ssh_key_name = "<%= @node[:octavia][:amphora][:ssh_access][:keyname]%>"
+<% end %>
 
 ### End of File ###
 ## Do NOT put anything after this line ##

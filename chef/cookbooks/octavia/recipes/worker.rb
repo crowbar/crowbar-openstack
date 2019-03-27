@@ -37,6 +37,20 @@ list.each do |e|
   node_list << str unless node_list.include?(str)
 end
 
+neutron = node_search_with_cache("roles:neutron-server").first
+neutron_protocol = neutron[:neutron][:api][:protocol]
+neutron_server_host = CrowbarHelper.get_host_for_admin_url(
+  neutron, neutron[:neutron][:ha][:server][:enabled])
+neutron_server_port = neutron[:neutron][:api][:service_port]
+neutron_endpoint = neutron_protocol + "://" + neutron_server_host + ":" + neutron_server_port.to_s
+
+nova = node_search_with_cache("roles:nova-controller").first
+nova_protocol = nova[:nova][:ssl][:enabled] ? "https" : "http"
+nova_server_host = CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled])
+nova_server_port = nova[:nova][:ports][:api]
+nova_endpoint = nova_protocol + "://" + nova_server_host + ":" + nova_server_port.to_s + "/v2.1"
+
+
 template "/etc/octavia/octavia-worker.conf" do
   source "octavia-worker.conf.erb"
   owner node[:octavia][:user]
@@ -49,7 +63,9 @@ template "/etc/octavia/octavia-worker.conf" do
     octavia_nova_flavor_id: flavor_id,
     octavia_mgmt_net_id: net_id,
     octavia_mgmt_sec_group_id: sec_group_id,
-    octavia_healthmanager_hosts: node_list.join(",")
+    octavia_healthmanager_hosts: node_list.join(","),
+    neutron_endpoint: neutron_endpoint,
+    nova_endpoint: nova_endpoint
   )
 end
 

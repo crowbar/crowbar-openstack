@@ -21,7 +21,7 @@ admin_project_domain = <%= @keystone_settings['admin_domain'] %>
     when "haproxy"
       "LOADBALANCERV2:Haproxy:neutron_lbaas.drivers.haproxy.plugin_driver.HaproxyOnHostPluginDriver:default"
     when nil, "", "octavia"
-      "LOADBALANCERV2:Octavia:neutron_lbaas.drivers.octavia.driver.OctaviaDriver:default"
+      "LOADBALANCERV2:Octavia:neutron_lbaas.drivers.octavia.driver.OctaviaDriver"
   end
 %>
 service_provider=<%= service_provider %>

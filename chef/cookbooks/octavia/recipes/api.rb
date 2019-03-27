@@ -12,6 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+sec_group_id = shell_out("source /root/.openrc &&"\
+                          "openstack security group show #{node[:octavia][:amphora][:sec_group]}"\
+                          "| tr -d ' ' | grep '|id|' | cut -f 3 -d '|'"
+                        ).stdout
+
+flavor_id = shell_out("source /root/.openrc && openstack flavor list"\
+                      "| grep #{node[:octavia][:amphora][:flavor]}"\
+                      "| tr -d ' ' | cut -f 2 -d '|'"
+                      ).stdout
+
+net_id = shell_out("source /root/.openrc && openstack network list"\
+                   "| grep #{node[:octavia][:amphora][:manage_net]} | tr -d ' ' | cut -d '|' -f 2"
+                  ).stdout
+
+list = search(:node, "roles:octavia-health-manager") || []
+
+hm_port = node[:octavia]["health_manager"][:port]
+node_list = []
+list.each do |e|
+  Chef::Log.info "YYY #{Chef::Recipe::Barclamp::Inventory.get_network_by_type(e, "lb-mgmt-net").inspect}"
+  address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(e, "lb-mgmt-net").address
+  str = address + ":" + hm_port.to_s
+  node_list << str unless node_list.include?(str)
+end
+
+
 neutron = node_search_with_cache("roles:neutron-server").first
 neutron_protocol = neutron[:neutron][:api][:protocol]
 neutron_server_host = CrowbarHelper.get_host_for_admin_url(
@@ -37,7 +64,11 @@ template "/etc/octavia/octavia.conf" do
     nova_endpoint: nova_endpoint,
     neutron_keystone_settings: KeystoneHelper.keystone_settings(node, "neutron"),
     octavia_keystone_settings: KeystoneHelper.keystone_settings(node, "octavia"),
-    rabbit_settings: fetch_rabbitmq_settings
+    rabbit_settings: fetch_rabbitmq_settings,
+    octavia_nova_flavor_id: flavor_id,
+    octavia_mgmt_net_id: net_id,
+    octavia_mgmt_sec_group_id: sec_group_id,
+    octavia_healthmanager_hosts: node_list.join(",")
   )
 end
 
