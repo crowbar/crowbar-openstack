@@ -26,6 +26,7 @@ aws_access = <%= @ec2_access %>
 [baremetal]
 endpoint_type = internalURL
 max_microversion = latest
+driver = fake-hardware
 
 [compute]
 image_ref = <%= img_id %>
