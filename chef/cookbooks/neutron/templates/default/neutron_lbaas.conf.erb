@@ -2,11 +2,8 @@
 interface_driver = <%= @interface_driver %>
 [quotas]
 [service_auth]
-auth_url = <%= KeystoneHelper.versioned_service_URL(@keystone_settings["protocol"],
-                                                    @keystone_settings["internal_url_host"],
-                                                    @keystone_settings["service_port"],
-                                                    "3") %>
-admin_project_name = <%= @keystone_settings['service_tenant'] %>
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
+admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
 admin_user = <%= @keystone_settings['service_user'] %>
 admin_password = <%= @keystone_settings['service_password'] %>
 region = <%= @keystone_settings['endpoint_region'] %>
