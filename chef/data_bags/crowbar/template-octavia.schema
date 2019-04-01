@@ -57,7 +57,11 @@
                         "country": { "type": "str", "required": true },
                         "province": { "type": "str", "required": true },
                         "domain": { "type": "str", "required": true },
-                        "passphrase": { "type": "str", "required": true }
+                        "passphrase": { "type": "str", "required": true },
+                        "server_ca_cert_path": { "type": "str", "required": true },
+                        "server_ca_key_path": { "type": "str", "required": true },
+                        "client_ca_cert_path": { "type": "str", "required": true },
+                        "client_cert_and_key_path": { "type": "str", "required": true }
                       }
                     },
                     "amphora": { "type": "map", "required": true,

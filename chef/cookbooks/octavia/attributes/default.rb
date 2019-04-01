@@ -42,7 +42,6 @@ default[:octavia][:certs][:province] = "Oregon"
 default[:octavia][:certs][:domain] = "example.com"
 default[:octavia][:certs][:cert_path] = "/etc/octavia/certs/"
 default[:octavia][:certs][:passphrase] = "foobar"
-
 default[:octavia][:certs][:server_ca_cert_path] = "server_ca/certs/ca.cert.pem"
 default[:octavia][:certs][:server_ca_key_path] = "server_ca/private/ca.key.pem"
 default[:octavia][:certs][:client_ca_cert_path] = "client_ca/certs/ca.cert.pem"

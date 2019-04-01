@@ -41,7 +41,11 @@
         "country": "US",
         "province": "Oregon",
         "domain": "example.com",
-        "passphrase": "password"
+        "passphrase": "",
+        "server_ca_cert_path": "",
+        "server_ca_key_path": "",
+        "client_ca_cert_path": "",
+        "client_cert_and_key_path": ""
       },
       "amphora":{
         "flavor": "m1.lbaas.amphora",
@@ -65,15 +69,13 @@
         "octavia-api": [ "readying", "ready", "applying" ],
         "octavia-health-manager": [ "readying", "ready", "applying" ],
         "octavia-housekeeping": [ "readying", "ready", "applying" ],
-        "octavia-worker": [ "readying", "ready", "applying" ],
-        "octavia-certificates-sharing": [ "readying", "ready", "applying" ]
+        "octavia-worker": [ "readying", "ready", "applying" ]
       },
       "elements": {},
       "element_order": [
-         ["octavia-certificates-sharing", "octavia-api", "octavia-health-manager", "octavia-housekeeping", "octavia-worker"]
+         ["octavia-api", "octavia-health-manager", "octavia-housekeeping", "octavia-worker"]
       ],
       "element_run_list_order": {
-        "octavia-certificates-sharing": 101,
         "octavia-api": 102,
         "octavia-health-manager": 103,
         "octavia-housekeeping": 104,
