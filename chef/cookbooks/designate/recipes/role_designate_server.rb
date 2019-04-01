@@ -19,5 +19,6 @@ if CrowbarRoleRecipe.node_state_valid_for_role?(node, "designate", "designate-se
   include_recipe "designate::sql"
   include_recipe "designate::api"
   include_recipe "designate::ha"
+  include_recipe "designate::mdns"
   include_recipe "designate::monitor_monasca"
 end
