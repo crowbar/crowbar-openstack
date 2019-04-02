@@ -39,6 +39,7 @@ default[:octavia][:sudoers_file] = "/etc/sudoers.d/octavia"
 
 default[:octavia][:certs][:country] = "US"
 default[:octavia][:certs][:province] = "Oregon"
+default[:octavia][:certs][:organization] = "Home"
 default[:octavia][:certs][:domain] = "example.com"
 default[:octavia][:certs][:cert_path] = "/etc/octavia/certs/"
 default[:octavia][:certs][:passphrase] = "foobar"

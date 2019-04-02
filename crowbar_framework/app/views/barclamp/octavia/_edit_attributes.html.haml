@@ -17,5 +17,14 @@
 
       = string_field %w(certs country)
       = string_field %w(certs province)
+      = string_field %w(certs organization)
       = string_field %w(certs domain)
       = string_field %w(certs passphrase)
+
+    %fieldset
+      %legend
+        = t(".amphora_header")
+
+      #amphora_ssh_access_container
+        = boolean_field %w(amphora ssh_access enabled)
+        = string_field %w(amphora ssh_access keyname)

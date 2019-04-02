@@ -38,14 +38,15 @@
         "health_check_interval": 3
       },
       "certs":{
-        "country": "US",
-        "province": "Oregon",
-        "domain": "example.com",
+        "country": "",
+        "province": "",
+        "organization": "",
+        "domain": "",
         "passphrase": "",
-        "server_ca_cert_path": "",
-        "server_ca_key_path": "",
-        "client_ca_cert_path": "",
-        "client_cert_and_key_path": ""
+        "server_ca_cert_path": "server_ca/certs/ca.cert.pem",
+        "server_ca_key_path": "server_ca/private/ca.key.pem",
+        "client_ca_cert_path": "client_ca/certs/ca.cert.pem",
+        "client_cert_and_key_path": "client_ca/private/client.cert-and-key.pem"
       },
       "amphora":{
         "flavor": "m1.lbaas.amphora",

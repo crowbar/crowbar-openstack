@@ -24,10 +24,13 @@ directory node[:octavia][:octavia_log_dir] do
   recursive true
 end
 
-directory node[:octavia][:certs][:cert_path] do
-  owner node[:octavia][:user]
-  group node[:octavia][:group]
-  recursive true
+execute "create_security_group" do
+  command "chown -R #{node[:octavia][:user]}:#{node[:octavia][:group]} "\
+    "#{node[:octavia][:certs][:cert_path]}"
+  not_if "[ ! -d \"#{node[:octavia][:certs][:cert_path]}\" ]"
+  retries 5
+  retry_delay 10
+  action :run
 end
 
 package "python-octaviaclient"

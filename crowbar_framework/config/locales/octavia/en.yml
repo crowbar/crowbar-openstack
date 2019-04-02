@@ -28,4 +28,13 @@ en:
           province: 'Province'
           domain: 'Domain'
           passphrase: 'Passphrase'
-          
+        amphora_header: "Amphora Virtual Machines"
+        amphora:
+          ssh_access_header: 'Access via SSH'
+          ssh_access:
+            enabled: "Allow SSH access"
+            keyname: "Keypair name"
+      validation:
+        subject_not_empty: 'Country, Province, Organization and Domain cannot be empty'
+        passphrase_not_empty: 'Passphrase cannot be empty'
+        keyname_not_empty: 'Keypair name cannot be empty if you active ssh access'

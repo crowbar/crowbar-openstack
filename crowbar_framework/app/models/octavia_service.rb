@@ -95,11 +95,14 @@ class OctaviaService < OpenstackServiceObject
 
   def create_certs(certs, nodes)
     cert_path = "/tmp/octavia"
+    subj="/C=#{certs[:country]}/ST=#{certs[:province]}/L=Octavia"\
+      "/O=#{certs[:organization]}/CN=#{certs[:domain]}"
+    pass="#{certs[:passphrase]}"
 
     `rm -rf #{cert_path} 2>/dev/null`
     `mkdir #{cert_path} 2>/dev/null`
 
-    conf=%{
+    openssl_conf=%{
     [ ca ]
     default_ca = CA_default
 
@@ -206,12 +209,8 @@ class OctaviaService < OpenstackServiceObject
     }
 
     create_ca_certificates = %{
-    subj="/C=#{certs[:country]}/ST=#{certs[:province]}/L=Octavia/O=Home/CN=#{certs[:domain]}"
-    pass="#{certs[:passphrase]}"
-    cert_path="#{cert_path}"
-
     # Make directories for the two certificate authorities.
-    cd $cert_path
+    cd #{cert_path}
     mkdir client_ca
     mkdir server_ca
 
@@ -223,12 +222,12 @@ class OctaviaService < OpenstackServiceObject
     echo 1000 > serial
 
     # Create the server CA key.
-    openssl genrsa -aes256 -out private/ca.key.pem -passout pass:$pass 4096
+    openssl genrsa -aes256 -out private/ca.key.pem -passout pass:#{pass} 4096
     chmod 400 private/ca.key.pem
 
     # Create the server CA certificate.
     openssl req -config ../openssl.cnf -key private/ca.key.pem -new -x509 -days 7300 -sha256 \
-    -subj \"$subj\" -passin pass:$pass -extensions v3_ca -out certs/ca.cert.pem
+    -subj \"#{subj}\" -passin pass:#{pass} -extensions v3_ca -out certs/ca.cert.pem
 
     # Moving to the client certificate authority, prepare the CA.
     cd ../client_ca
@@ -238,30 +237,30 @@ class OctaviaService < OpenstackServiceObject
     echo 1000 > serial
 
     # Create the client CA key.
-    openssl genrsa -aes256 -out private/ca.key.pem -passout pass:$pass 4096
+    openssl genrsa -aes256 -out private/ca.key.pem -passout pass:#{pass} 4096
     chmod 400 private/ca.key.pem
 
     # Create the client CA certificate.
     openssl req -config ../openssl.cnf -key private/ca.key.pem -new -x509 -days 7300 -sha256 \
-    -subj \"$subj\" -passin pass:$pass -extensions v3_ca -out certs/ca.cert.pem
+    -subj \"#{subj}\" -passin pass:#{pass} -extensions v3_ca -out certs/ca.cert.pem
 
     # Create a key for the client certificate to use.
-    openssl genrsa -aes256 -out private/client.key.pem -passout pass:$pass 2048
+    openssl genrsa -aes256 -out private/client.key.pem -passout pass:#{pass} 2048
 
     #Create the certificate request for the client certificate used on the controllers.
     openssl req -config ../openssl.cnf -new -sha256 -key private/client.key.pem \
-    -subj "$subj" -passin pass:$pass -extensions v3_ca -out csr/client.csr.pem
+    -subj "#{subj}" -passin pass:#{pass} -extensions v3_ca -out csr/client.csr.pem
 
     # Sign the client certificate request.
     openssl ca  -batch -config ../openssl.cnf -extensions usr_cert -days 7300 -notext -md sha256 \
-    -in csr/client.csr.pem -passin pass:$pass -out certs/client.cert.pem
+    -in csr/client.csr.pem -passin pass:#{pass} -out certs/client.cert.pem
 
     # Create a concatenated client certificate and key file.
-    openssl rsa -in private/client.key.pem -passin pass:$pass -out private/client.cert-and-key.pem
+    openssl rsa -in private/client.key.pem -passin pass:#{pass} -out private/client.cert-and-key.pem
     cat certs/client.cert.pem >> private/client.cert-and-key.pem
     }
 
-    File.write("#{cert_path}/openssl.cnf", conf)
+    File.write("#{cert_path}/openssl.cnf", openssl_conf)
     `#{create_ca_certificates}`
 
     nodes.each { |node|
@@ -278,7 +277,28 @@ class OctaviaService < OpenstackServiceObject
 
 
   def validate_proposal_after_save(proposal)
-    #TODO: Validate that the subject for CA certificates hasn't changed
+    certs = proposal["attributes"]["octavia"]["certs"]
+
+    if (certs["country"] == "" || certs["province"] == "" ||
+          certs["domain"] == "" || certs["organization"] == "")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.subject_not_empty")
+    end
+
+    if (certs["country"].length > 2)
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.country_too_long")
+    end
+
+    if (certs["passphrase"] == "")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.passphrase_not_empty")
+    end
+
+    ssh_access = proposal["attributes"]["octavia"]["amphora"]["ssh_access"]
+
+    if (ssh_access["enabled"] && ssh_access["keyname"] == "")
+      validation_error I18n.t("barclamp.#{@bc_name}.validation.keyname_not_empty")
+    end
+
+    super
   end
 
   def create_proposal
