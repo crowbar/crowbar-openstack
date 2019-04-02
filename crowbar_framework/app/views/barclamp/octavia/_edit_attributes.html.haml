@@ -1,0 +1,27 @@
+= attributes_for @proposal do
+  .panel-sub
+    = header show_raw_deployment?, true
+
+  .panel-body
+
+    %fieldset
+      %legend
+        = t(".certs_header")
+
+      = string_field %w(certs server_ca_cert_path)
+      = string_field %w(certs server_ca_key_path)
+      = string_field %w(certs client_ca_cert_path)
+      = string_field %w(certs client_cert_and_key_path)
+      = string_field %w(certs passphrase)
+
+    %fieldset
+      %legend
+        = t(".amphora_header")
+
+      = boolean_field %w(amphora ssh_access enabled),
+        "data-showit" => "true",
+        "data-showit-target" => "#ssh_access_keyname_containe",
+        "data-showit-direct" => "true"
+
+      #ssh_access_keyname_containe
+        = string_field %w(amphora ssh_access keyname)

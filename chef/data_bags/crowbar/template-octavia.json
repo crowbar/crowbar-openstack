@@ -1,0 +1,111 @@
+{
+  "id": "template-octavia",
+  "description": "API-enabled, pluggable virtual network service for OpenStack",
+  "attributes": {
+    "octavia": {
+      "user": "octavia",
+      "group": "octavia",
+      "debug": false,
+      "nova_instance": "none",
+      "neutron_instance": "none",
+      "barbican_instance": "none",
+      "keystone_instance": "none",
+      "glance_instance": "none",
+      "service_user": "octavia",
+      "service_password": "",
+      "api": {
+        "bind_open_address": true,
+        "protocol": "http"
+      },
+      "db": {
+        "user": "octavia",
+        "password": "none",
+        "database": "octavia"
+      },
+      "oslo": {
+        "rpc_thread_pool_size": 2
+      },
+      "networking": {
+        "port_detach_timeout": 900
+      },
+      "health_manager": {
+        "bind_open_address": false,
+        "heartbeat_interval": 10,
+        "heartbeat_timeout": 180,
+        "health_check_interval": 3,
+        "heartbeat_key": ""
+      },
+      "certs": {
+        "passphrase": "",
+        "server_ca_cert_path": "server_ca/certs/ca.cert.pem",
+        "server_ca_key_path": "server_ca/private/ca.key.pem",
+        "client_ca_cert_path": "client_ca/certs/ca.cert.pem",
+        "client_cert_and_key_path": "client_ca/private/client.cert-and-key.pem"
+      },
+      "amphora": {
+        "connection_max_retries": 300,
+        "connection_retry_interval": 10,
+        "flavor": "m1.lbaas.amphora",
+        "sec_group": "lb-mgmt-sec-group",
+        "manage_net": {
+          "name": "lb-mgmt-net",
+          "subnet": "192.168.127.0",
+          "netmask": "255.255.255.0",
+          "pool_start": "192.168.127.10",
+          "pool_end": "192.168.127.254"
+        },
+        "image_tag": "amphora",
+        "project": "service",
+        "ssh_access": {
+          "enabled": false,
+          "keyname": ""
+        }
+      },
+      "ssl": {
+        "certfile": "/etc/octavia/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/octavia/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
+        "cert_required": false,
+        "ca_certs": "/etc/octavia/ssl/certs/ca.pem"
+      },
+      "ha": {
+        "ports": {
+          "api": 19876
+        }
+      },
+      "ha_rate_limit": {
+        "octavia-api": 0
+      }
+    }
+  },
+  "deployment": {
+    "octavia": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 300,
+      "element_states": {
+        "octavia-api": [ "readying", "ready", "applying" ],
+        "octavia-health-manager": [ "readying", "ready", "applying" ],
+        "octavia-housekeeping": [ "readying", "ready", "applying" ],
+        "octavia-worker": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+         ["octavia-api", "octavia-health-manager", "octavia-housekeeping", "octavia-worker"]
+      ],
+      "element_run_list_order": {
+        "octavia-api": 102,
+        "octavia-health-manager": 103,
+        "octavia-housekeeping": 104,
+        "octavia-worker": 105
+      },
+      "config": {
+        "environment": "octavia-config-base",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": []
+      }
+    }
+  }
+}
