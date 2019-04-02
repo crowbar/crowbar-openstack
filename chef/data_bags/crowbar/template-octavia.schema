@@ -1,0 +1,154 @@
+{
+  "type": "map", "required": true,
+  "mapping": {
+    "id": { "type": "str", "required": true, "pattern": "/^octavia-|^template-octavia$/" },
+    "description": { "type": "str", "required": true },
+    "attributes": { "type": "map", "required": true,
+      "mapping": {
+        "octavia": { "type": "map", "required": true,
+             "mapping": {
+                    "user": { "type": "str", "required": true },
+                    "group": { "type": "str", "required": true },
+                    "debug": { "type": "bool", "required": true },
+                    "nova_instance": { "type": "str", "required": true },
+                    "neutron_instance": { "type": "str", "required": true },
+                    "barbican_instance": { "type": "str", "required": true },
+                    "keystone_instance": { "type": "str", "required": true },
+                    "glance_instance": { "type": "str", "required": true },
+                    "service_user": { "type": "str", "required": true },
+                    "service_password": { "type": "str", "required": true },
+                    "api": { "type": "map", "required": true,
+                      "mapping": {
+                        "bind_open_address": { "type": "bool", "required": true },
+                        "protocol": { "type": "str", "required": true }
+                      }
+                    },
+                    "db": { "type": "map", "required": true,
+                      "mapping": {
+                        "user": { "type": "str", "required": true },
+                        "password": { "type": "str", "required": true },
+                        "database": { "type": "str", "required": true }
+                      }
+                    },
+                    "oslo": { "type": "map", "required": true,
+                      "mapping": {
+                        "rpc_thread_pool_size": { "type": "int", "required": true }
+                      }
+                    },
+                    "networking": { "type": "map", "required": true,
+                      "mapping": {
+                        "port_detach_timeout": { "type": "int", "required": true }
+                      }
+                    },
+                    "health_manager": { "type": "map", "required": true,
+                      "mapping": {
+                        "bind_open_address": { "type": "bool", "required": true },
+                        "heartbeat_interval": { "type": "int", "required": true },
+                        "heartbeat_timeout": { "type": "int", "required": true },
+                        "health_check_interval": { "type": "int", "required": true },
+                        "heartbeat_key": { "type": "str", "required": true }
+                      }
+                    },
+                    "certs": { "type": "map", "required": true,
+                      "mapping": {
+                        "passphrase": { "type": "str", "required": true },
+                        "server_ca_cert_path": { "type": "str", "required": true },
+                        "server_ca_key_path": { "type": "str", "required": true },
+                        "client_ca_cert_path": { "type": "str", "required": true },
+                        "client_cert_and_key_path": { "type": "str", "required": true }
+                      }
+                    },
+                    "amphora": { "type": "map", "required": true,
+                      "mapping": {
+                        "connection_max_retries": { "type": "int", "required": true },
+                        "connection_retry_interval": { "type": "int", "required": true },
+                        "flavor": { "type": "str", "required": true },
+                        "sec_group": { "type": "str", "required": true },
+                        "manage_net": { "type": "str", "required": true },
+                        "image_tag": { "type": "str", "required": true },
+                        "project": { "type": "str", "required": true },
+                        "ssh_access": { "type": "map", "required": true,
+                          "mapping": {
+                            "enabled": { "type": "bool", "required": true },
+                            "keyname": { "type": "str", "required": true }
+                          }
+                        }
+                      }
+                    },
+                    "ssl": { "type": "map", "required": true, "mapping": {
+                      "certfile": { "type" : "str", "required" : true },
+                      "keyfile": { "type" : "str", "required" : true },
+                      "generate_certs": { "type" : "bool", "required" : true },
+                      "insecure": { "type" : "bool", "required" : true },
+                      "cert_required": { "type" : "bool", "required" : true },
+                      "ca_certs": { "type" : "str", "required" : true }
+                    }},
+                    "ha": { "type": "map", "required": true, "mapping": {
+                      "ports": { "type": "map", "required": true, "mapping": {
+                        "api": { "type": "int", "required": true }
+                      }}
+                    }},
+                    "ha_rate_limit": {
+                      "type": "map", "required": true, "mapping": {
+                        "octavia-api": { "type": "int", "required": true }
+                      }
+                    }
+              }
+        }
+     }},
+    "deployment": { "type": "map", "required": true,
+      "mapping": {
+        "octavia": { "type": "map", "required": true,
+          "mapping": {
+            "crowbar-revision": { "type": "int", "required": true },
+            "crowbar-committing": { "type": "bool" },
+            "crowbar-applied": { "type": "bool" },
+            "crowbar-status": { "type": "str" },
+            "crowbar-failed": { "type": "str" },
+            "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
+            "element_states": { "type": "map", "mapping": {
+                = : { "type": "seq", "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "elements": { "type": "map", "required": true,
+              "mapping": {
+                = : {"type": "seq", "required": true,
+                  "sequence": [   { "type": "str" }  ]
+                }
+              }
+            },
+            "element_order": { "type": "seq", "required": true,
+              "sequence": [ {
+                "type": "seq",
+                "sequence": [ { "type": "str" } ]
+              } ]
+            },
+            "element_run_list_order": {
+              "type": "map",
+              "required": false,
+              "mapping": {
+                = : {
+                  "type": "int",
+                  "required": true
+                }
+              }
+            },
+            "config": { "type": "map", "required": true,
+              "mapping": {
+                "environment": { "type": "str", "required": true },
+                "mode": { "type": "str", "required": true },
+                "transitions": { "type": "bool", "required": true },
+                "transition_list": { "type": "seq", "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
