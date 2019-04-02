@@ -7,7 +7,10 @@ include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-crowbar_pacemaker_sync_mark "wait-manila_database" if ha_enabled
+crowbar_pacemaker_sync_mark "wait-manila_database" do
+  timeout 120
+  only_if { ha_enabled }
+end
 
 # Create the Manila Database
 database "create #{node[:manila][:db][:database]} database" do
