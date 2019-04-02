@@ -147,6 +147,9 @@ cafile = <%= @ssl_ca_file %>
 <% end %>
 certfile = <%= @ssl_cert_file %>
 keyfile = <%= @ssl_key_file %>
+<% if @barbican_available %>
+verify_glance_signatures = true
+<% end %>
 
 <% unless @ironic_settings.nil? %>
 [ironic]

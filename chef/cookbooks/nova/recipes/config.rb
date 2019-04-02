@@ -347,6 +347,7 @@ template node[:nova][:placement_config_file] do
   notifies :reload, "service[nova-placement-api]"
 end
 
+barbican_available = node_search_with_cache("roles:barbican-controller").any?
 
 template node[:nova][:config_file] do
   source "nova.conf.erb"
@@ -415,7 +416,8 @@ template node[:nova][:config_file] do
     use_baremetal_filters: use_baremetal_filters,
     track_instance_changes: track_instance_changes,
     ironic_settings: ironic_settings,
-    default_log_levels: node[:nova][:default_log_levels]
+    default_log_levels: node[:nova][:default_log_levels],
+    barbican_available: barbican_available
   )
 end
 
