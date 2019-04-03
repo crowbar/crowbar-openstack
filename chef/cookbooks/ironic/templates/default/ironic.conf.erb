@@ -44,7 +44,7 @@ project_domain_name=<%= @keystone_settings["admin_domain"]%>
 user_domain_name=<%= @keystone_settings["admin_domain"] %>
 <% if @swift_settings %>
 swift_temp_url_key=<%= @swift_settings[:tempurl_key] %>
-swift_endpoint_url=<%= @swift_settings[:protocol] %>://<%= @swift_settings[:host] %>:<%= @swift_settings[:port] %>
+swift_endpoint_url=<%= @swift_settings[:protocol] %>://<%= @swift_settings[:ip] %>:<%= @swift_settings[:port] %>
 swift_container=<%= @swift_settings[:glance_container] %>
 swift_account=<%= @swift_settings[:glance_account] %>
 <% end %>
