@@ -20,10 +20,8 @@ require "yaml"
 
 dns = node_search_with_cache("roles:dns-server").first
 dnsmaster = dns[:dns][:master_ip]
-dnsslaves = dndns[:dns][:slave_ips]
-dnsservs = []
-dnsservs += dns[:dns][:master_ip]
-dnsservs += dns[:dns][:master_ip]
+dnsslaves = dns[:dns][:slave_ips]
+dnsservers = [dnsmaster] + dnsslaves
 
 network_settings = DesignateHelper.network_settings(node)
 
@@ -42,7 +40,7 @@ pools = [{
   "id" => "794ccc2c-d751-44fe-b57f-8894c9f5c842",
   "attributes" => {},
   "ns_records" => [{ "hostname" => "#{dns[:fqdn]}.", "priority" => 1 }],
-  "nameservers" => dnsservs.map { |ip| { "host" => ip, "port" => 53 } },
+  "nameservers" => dnsservers.map { |ip| { "host" => ip, "port" => 53 } },
   "also_notifies" => dnsslaves[1, dnsslaves.length].map { |ip| { "host" => ip, "port" => 53 } },
   "targets" => [{
     "type" => "bind9",
