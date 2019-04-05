@@ -102,8 +102,7 @@ when "ml2"
   ml2_mech_drivers = node[:neutron][:ml2_mechanism_drivers]
   case
   when ml2_mech_drivers.include?("openvswitch") ||
-    ml2_mech_drivers.include?("cisco_apic_ml2") ||
-    ml2_mech_drivers.include?("apic_gbp")
+    ml2_mech_drivers.include?("apic_aim")
     interface_driver = "openvswitch"
   when ml2_mech_drivers.include?("linuxbridge")
     interface_driver = "linuxbridge"

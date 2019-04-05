@@ -1,12 +1,10 @@
 [DEFAULT]
 apic_system_id=<%= node[:neutron][:apic][:system_id] %>
+
 [opflex]
 networks = *
-[ml2_cisco_apic]
-apic_hosts=<%= node[:neutron][:apic][:hosts] %>
-apic_username=<%= node[:neutron][:apic][:username] %>
-apic_password=<%= node[:neutron][:apic][:password] %>
-apic_use_ssl = True
+
+[ml2_apic_aim]
 apic_name_mapping = use_name
 apic_clear_node_profiles = True
 enable_aci_routing = True
@@ -19,20 +17,25 @@ apic_provision_hostlinks = True
 apic_vpc_pairs = <%= @vpc_pairs %>
 <% end -%>
 
-<% @apic_switches.keys.each do |ip| -%>
-[apic_switch:<%=ip%>]
-  <% if @apic_switches[ip].key?(:switch_ports) -%>
-    <% @apic_switches[ip][:switch_ports].each do |name, values| -%>
-<%= name %> = <%= values[:switch_port] %>
-    <% end -%>
-  <% end -%>
-<% end -%>
-<% if @ml2_mechanism_drivers.include?("apic_gbp") -%>
+[apic_aim_auth]
+auth_url = <%= @keystone_settings['internal_auth_url'] %>
+auth_plugin = v3password
+user_domain_name = <%= @keystone_settings['admin_domain'] %>
+project_domain_name = <%= @keystone_settings['admin_domain'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+
 [group_policy]
 policy_drivers = <%= @policy_drivers %>
+extension_drivers = <%= @extension_drivers %>
+
 [group_policy_implicit_policy]
+# Uncomment this if ever IPV6 needs to be used
+# Provide a suitable ip-pool for ipv6
+# default_ip_version = 46
 default_ip_pool = <%= @default_ip_pool %>
-<% end -%>
+
 
 [apic_external_network:<%=node[:neutron][:apic][:ext_net][:name]%>]
 preexisting = <%= node[:neutron][:apic][:ext_net][:preexisting] %>
@@ -41,3 +44,7 @@ enable_nat = <%= node[:neutron][:apic][:ext_net][:nat_enabled] %>
 <% end -%>
 external_epg = <%= node[:neutron][:apic][:ext_net][:ext_epg] %>
 host_pool_cidr = <%= node[:neutron][:apic][:ext_net][:host_pool_cidr] %>
+# Uncomment this if ever IPV6 needs to be used
+# [resource_mapping]
+# default_ipv6_ra_mode = slaac
+# default_ipv6_address_mode = slaac

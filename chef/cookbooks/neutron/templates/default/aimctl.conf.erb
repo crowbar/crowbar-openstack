@@ -1,0 +1,64 @@
+[DEFAULT]
+apic_system_id=<%= node[:neutron][:apic][:system_id] %>
+
+
+[apic]
+# Note: When deploying multiple clouds against one APIC,
+#       these names must be unique between the clouds.
+apic_vmm_type = OpenStack
+apic_vlan_ns_name = openstack_ns
+apic_node_profile = openstack_profile
+apic_entity_profile = openstack_entity
+apic_function_profile = openstack_function
+apic_vpc_pairs = <%= @vpc_pairs -%>
+
+# Specify your network topology.
+# This section indicates how your compute nodes are connected to the fabric's
+# switches and ports. The format is as follows:
+#
+# [apic_switch:<swich_id_from_the_apic>]
+# <compute_host>,<compute_host> = <switchport_the_host(s)_are_connected_to>
+#
+# You can have multiple sections, one for each switch in your fabric that is
+# participating in Openstack. e.g.
+#
+# [apic_switch:17]
+# ubuntu,ubuntu1 = 1/10
+# ubuntu2,ubuntu3 = 1/11
+#
+# [apic_switch:18]
+# ubuntu5,ubuntu6 = 1/1
+# ubuntu7,ubuntu8 = 1/2
+<% @apic_switches.keys.each do |ip| -%>
+[apic_switch:<%=ip%>]
+<%    if @apic_switches[ip].key?(:switch_ports) -%>
+<%      @apic_switches[ip][:switch_ports].each do |name, values| -%>
+<%=name %> = <%= values[:switch_port] %>
+<%      end -%>
+<%    end -%>
+
+<% end -%>
+
+# APIC domains are specified by the following sections:
+# [apic_physdom:<name>]
+#
+# [apic_vmdom:<name>]
+#
+# In the above sections, [apic] configurations can be overridden for more granular infrastructure sharing.
+# What is configured in the [apic] sharing will be the default used in case a more specific configuration is missing
+# for the domain.
+# An example follows:
+#
+# [apic_vmdom:openstack_domain]
+# vlan_ranges=1000:2000
+#
+# [apic_vmdom:openstack_domain_2]
+# vlan_ranges=3000:4000
+[apic_physdom:<%node[:neutron][:apic][:phys_domain]%>]
+
+<% node[:neutron][:apic][:vm_domains].each do |vm_domain| -%>
+[apic_vmdom:<%= vm_domain["domain_name"] %>]
+vlan_ranges=<%= vm_domain["vlan_ranges"] %>
+apic_vmm_type=<%= vm_domain["vmm_type"] %>
+
+<% end -%>

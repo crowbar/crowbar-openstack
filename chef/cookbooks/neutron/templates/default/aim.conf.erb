@@ -1,0 +1,48 @@
+[DEFAULT]
+debug=False
+rpc_backend=rabbit
+control_exchange=neutron
+default_log_levels=neutron.context=ERROR
+
+[oslo_messaging_rabbit]
+#rabbit_host=<rabbit-mq-host>
+#rabbit_port=<rabbit-m1-port>
+#rabbit_hosts=<rabbit-mq-host>:<rabbit-m1-port>
+rabbit_use_ssl=<%= @rabbit_settings[:use_ssl] %>
+#rabbit_userid=username
+#rabbit_password=password
+rabbit_ha_queues=<%= @rabbit_settings[:ha_queues] %>
+
+[database]
+connection=<%= @sql_connection %>
+# Example:
+# connection = mysql://root:pass@127.0.0.1:3306/aim
+# Replace 127.0.0.1 above with the IP address of the database used by the
+# main neutron server. (Leave it as is if the database runs on this host.)
+# connection = sqlite://
+# NOTE: In deployment the [database] section and its connection attribute may
+# be set in the corresponding core plugin '.ini' file. However, it is suggested
+# to put the [database] section and its connection attribute in this
+# configuration file.
+
+# Database engine for which script will be generated when using offline
+# migration
+# engine =
+
+[aim]
+# Seconds to regard the agent is down; should be at least twice report_interval.
+# agent_down_time = 75
+agent_down_time = 75
+poll_config = False
+aim_system_id = <%= node[:neutron][:apic][:system_id] %>
+max_operation_retry = 5
+
+[apic]
+# Hostname:port list of APIC controllers
+apic_hosts = <%= node[:neutron][:apic][:hosts] %>
+# Username for the APIC controller
+apic_username = <%= node[:neutron][:apic][:username] %>
+# Password for the APIC controller
+apic_password = <%= node[:neutron][:apic][:password] %>
+# Whether use SSl for connecting to the APIC controller or not
+apic_use_ssl = True

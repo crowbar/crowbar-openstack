@@ -60,8 +60,12 @@
         "opflex": [{
           "pod": "",
           "nodes" : [],
-          "peer_ip": "",
-          "peer_port": 8009,
+          "integration_bridge": "br-int",
+          "access_bridge": "br-fabric",
+          "peers": [{
+             "ip": "",
+             "port": 8009
+          }],
           "encap": "vxlan",
           "vxlan": {
               "encap_iface": "br-int_vxlan0",

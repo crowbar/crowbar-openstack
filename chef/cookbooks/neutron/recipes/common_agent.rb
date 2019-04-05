@@ -83,8 +83,7 @@ end
 
 # Skip working with regular agents if Cisco ACI is used
 return if neutron[:neutron][:networking_plugin] == "ml2" &&
-    (neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
-    neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
+    neutron[:neutron][:ml2_mechanism_drivers].include?("apic_aim")
 
 multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty?
 
@@ -361,7 +360,7 @@ end
 # Metadata agent
 if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
   neutron_metadata do
-    use_cisco_apic_ml2_driver false
+    use_cisco_apic_aim false
     neutron_node_object neutron
     neutron_network_ha neutron_network_ha
     nova_compute_ha_enabled nova_compute_ha_enabled

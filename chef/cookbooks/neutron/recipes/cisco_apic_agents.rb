@@ -26,17 +26,16 @@ end
 ml2_mech_drivers = neutron[:neutron][:ml2_mechanism_drivers]
 ml2_type_drivers = neutron[:neutron][:ml2_type_drivers]
 
-return unless ml2_mech_drivers.include?("cisco_apic_ml2") ||
-    ml2_mech_drivers.include?("apic_gbp")
+return unless ml2_mech_drivers.include?("apic_aim")
 
 node[:neutron][:platform][:cisco_apic_pkgs].each { |p| package p }
 
-# We may need to review the ovs packages once we have better
-# clarity on what packages and kernel modules will be supported
-# for APIC integration.(eg: current version of APIC requires
-# openvswitch 2.4 with upstream kmp modules instead of kernel
-# provided modules). This will install default openvswitch
-# packages until the correct set is finalized.
+# This will install the default ovs packages.
+# The agent-ovs however is built on a separate
+# static ovs library based on version supported
+# for this particular OpenStack Release. The build
+# can be found in the following OBS Project:
+# Cloud:OpenStack:<Version>:cisco-apic
 node[:network][:ovs_pkgs].each { |p| package p }
 
 service node[:network][:ovs_service] do
@@ -56,12 +55,36 @@ if node.roles.include?("neutron-network")
   end
 end
 
-# apply configurations to compute node
-node[:neutron][:platform][:cisco_opflex_pkgs].each { |p| package p }
+if node.roles.include?("neutron-sdn-cisco-aci-agents")
+  node[:neutron][:platform][:cisco_opflex_pkgs].each { |p| package p }
+end
+
+service "openvswitch" do
+  action [:enable, :start]
+end
+
+utils_systemd_service_restart "openvswitch"
+
+["br-int", "br-fabric"].each do |bridge|
+  execute "create_bridge_setup" do
+    command "ovs-vsctl --may-exist add-br #{bridge}"
+  end
+end
+
+execute "set_protocol_to fabric_bridge" do
+  command "ovs-vsctl set bridge br-fabric protocols=[]"
+end
+
+execute "add_vxlan_port_to_fabric_bridge" do
+  command "ovs-vsctl add-port br-fabric br-fab_vxlan0 -- set Interface \
+  br-fab_vxlan0 type=vxlan options:remote_ip=flow options:key=flow \
+  options:dst_port=8472"
+end
 
 service "lldpd" do
   action [:enable, :start]
 end
+
 utils_systemd_service_restart "lldpd"
 
 # include neutron::common_config only now, after we've installed packages
@@ -121,7 +144,7 @@ template opflex_agent_conf do
 end
 
 neutron_metadata do
-  use_cisco_apic_ml2_driver true
+  use_cisco_apic_aim true
   neutron_node_object neutron
 end
 
