@@ -118,7 +118,7 @@ template "/etc/monasca/agent/agent.yaml" do
   group agent_settings[:group]
   mode "0640"
   variables(
-    hostname: node[:hostname],
+    hostname: node[:fqdn],
     monasca_api_url: monasca_api_url,
     agent_dimensions: agent_dimensions,
     log_dir: agent_settings["log_dir"],
