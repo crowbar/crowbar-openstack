@@ -24,8 +24,9 @@ aws_secret = <%= @ec2_secret %>
 aws_access = <%= @ec2_access %>
 
 [baremetal]
-endpoint_type = internalURL
+endpoint_type = public
 max_microversion = latest
+driver = fake-hardware
 
 [compute]
 image_ref = <%= img_id %>
@@ -177,7 +178,7 @@ trove = <%= @enabled_services.include? "database" %>
 manila = <%= @enabled_services.include? "sharev2" %>
 magnum = <%= @enabled_services.include? "container-infra" %>
 ironic = <%= @enabled_services.include? "baremetal" %>
-ironic_inspector = <%= @enabled_services.include? "baremetal" %>
+ironic_inspector = false
 designate = <%= @enabled_services.include? "dns" %>
 logs = <%= @enabled_services.include? "logs_v2" %>
 logs-search = <%= @enabled_services.include? "logs-search" %>
