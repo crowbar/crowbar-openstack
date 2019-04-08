@@ -23,6 +23,10 @@ haproxy_loadbalancer "ceilometer-api" do
   action :nothing
 end.run_action(:create)
 
+# install openstack-ceilometer-collector - the package contains the cron file
+# /usr/share/ceilometer/openstack-ceilometer-expirer.cron
+package "openstack-ceilometer-collector"
+
 # setup the expirer cronjob only on a single node to not
 # run into DB deadlocks (bsc#1113107)
 crowbar_pacemaker_sync_mark "wait-ceilometer_expirer_cron"
