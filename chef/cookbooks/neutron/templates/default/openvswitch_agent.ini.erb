@@ -25,4 +25,4 @@ local_ip = <%= node.address("os_sdn").addr %>
 <% end -%>
 bridge_mappings = <%= @bridge_mappings %>
 [securitygroup]
-firewall_driver = iptables_hybrid
+firewall_driver = openvswitch
