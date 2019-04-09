@@ -30,6 +30,18 @@ module IronicHelper
       "#{env} openstack #{insecure}"
     end
 
+    def get_ip_for_admin_url(node, use_cluster)
+      # based on CrowbarHelper.get_host_for_admin_url()
+      if use_cluster && defined?(CrowbarPacemakerHelper)
+        # loose dependency on the pacemaker cookbook
+        cluster_vhostname = CrowbarPacemakerHelper.cluster_vhostname(node)
+
+        CrowbarPacemakerHelper.cluster_vip(node, "admin", cluster_vhostname)
+      else
+        Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+      end
+    end
+
     def swift_settings(node, glance)
       swift = CrowbarUtilsSearch.node_search_with_cache(node, "roles:swift-proxy").first || {}
       # configure swift only if direct deploy interface is enabled
@@ -62,6 +74,7 @@ module IronicHelper
         service_user: swift[:swift][:service_user],
         service_password: swift[:swift][:service_password],
         host: CrowbarHelper.get_host_for_admin_url(swift, swift[:swift][:ha][:enabled]),
+        ip: get_ip_for_admin_url(swift, swift[:swift][:ha][:enabled]),
         port: swift[:swift][:ports][:proxy]
       }
     end
