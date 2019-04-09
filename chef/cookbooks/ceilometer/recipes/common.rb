@@ -129,6 +129,18 @@ template "/etc/ceilometer/pipeline.yaml" do
   end
 end
 
+template "/etc/ceilometer/polling_pipeline.yaml" do
+  source "polling_pipeline.yaml.erb"
+  owner "root"
+  group "root"
+  mode "0644"
+  variables(
+    swift_interval: node[:ceilometer][:swift_interval],
+    monasca_api_url: monasca_api_url
+  )
+  notifies :restart, "service[swift-proxy]" if is_swift_proxy
+end
+
 template "/etc/ceilometer/event_pipeline.yaml" do
   source "event_pipeline.yaml.erb"
   owner "root"

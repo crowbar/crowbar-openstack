@@ -54,10 +54,10 @@ interface = internalURL
 auth_type = password
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 project_name = <%= @monasca_project %>
-default_domain_id = <%= @keystone_settings["admin_domain_id"] %>
-default_domain_name = <%= @keystone_settings["admin_domain"] %>
 username = <%= @keystone_settings['service_user'] %>
 password = <%= @keystone_settings['service_password'] %>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
 
 [service_types]
 neutron_lbaas_version = v2
@@ -105,3 +105,6 @@ service_region_name= <%= @keystone_settings['endpoint_region'] %>
 
 [publisher_notifier]
 metering_topic=metering
+
+[polling]
+cfg_file=/etc/ceilometer/polling_pipeline.yaml
