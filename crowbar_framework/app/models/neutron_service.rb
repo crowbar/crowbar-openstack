@@ -33,11 +33,11 @@ class NeutronService < OpenstackServiceObject
   end
 
   def self.networking_ml2_type_drivers_valid
-    ["vlan", "gre", "vxlan", "opflex"]
+    ["vlan", "gre", "vxlan"]
   end
 
   def self.networking_ml2_mechanism_drivers_valid
-    ["linuxbridge", "openvswitch", "cisco_nexus", "vmware_dvs", "cisco_apic_ml2", "apic_gbp"]
+    ["linuxbridge", "openvswitch", "cisco_nexus", "vmware_dvs"]
   end
 
   class << self
