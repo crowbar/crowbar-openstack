@@ -278,7 +278,7 @@ end
 
 flavor_ref = "6"
 alt_flavor_ref = "7"
-heat_flavor_ref = "8"
+heat_flavor_ref = "20"
 
 bash "create_yet_another_tiny_flavor" do
   code <<-EOH
