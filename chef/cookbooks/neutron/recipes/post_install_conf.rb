@@ -211,6 +211,25 @@ execute "add_ironic_network_to_router" do
   action :nothing
 end
 
+domain_float = node[:neutron][:floating_dns_domain]
+domain_fixed = node[:neutron][:dns_domain]
+
+execute "update_dns_domain_for_fixed_network" do
+  command "#{env} neutron net-update fixed --dns-domain #{domain_fixed}"
+  not_if "#{openstack_cmd} network show fixed -f value -c dns_domain | grep -q #{domain_fixed}"
+  retries 5
+  retry_delay 10
+  action :nothing
+end
+
+execute "update_dns_domain_for_floating_network" do
+  command "#{env} neutron net-update floating --dns-domain #{domain_float}"
+  not_if "#{openstack_cmd} network show floating -f value -c dns_domain | grep -q #{domain_float}"
+  retries 5
+  retry_delay 10
+  action :nothing
+end
+
 execute "Neutron network configuration" do
   command "#{openstack_cmd} network list &>/dev/null"
   retries 5
@@ -226,6 +245,8 @@ execute "Neutron network configuration" do
   notifies :run, "execute[set_router_gateway]", :delayed
   notifies :run, "execute[add_fixed_network_to_router]", :delayed
   notifies :run, "execute[add_ironic_network_to_router]", :delayed
+  notifies :run, "execute[update_dns_domain_for_fixed_network]", :delayed
+  notifies :run, "execute[update_dns_domain_for_floating_network]", :delayed
 end
 
 # This is to trigger all the above "execute" resources to run :delayed, so that
@@ -235,4 +256,3 @@ execute "Trigger Neutron network configuration" do
   command "true"
   notifies :run, "execute[Neutron network configuration]", :delayed
 end
-
