@@ -153,17 +153,6 @@
 
     %fieldset
       %legend
-        = t(".zvm_header")
-
-      = string_field %w(zvm zvm_xcat_server)
-      = string_field %w(zvm zvm_xcat_username)
-      = password_field %w(zvm zvm_xcat_password)
-      = string_field %w(zvm zvm_physnet_rdev)
-      = string_field %w(zvm xcat_mgt_ip)
-      = string_field %w(zvm xcat_mgt_mask)
-
-    %fieldset
-      %legend
         = t(".ssl_header")
 
       = select_field %w(api protocol), :collection => :api_protocols_for_neutron, "data-sslprefix" => "ssl", "data-sslcert" => "/etc/neutron/ssl/certs/signing_cert.pem", "data-sslkey" => "/etc/neutron/ssl/private/signing_key.pem"

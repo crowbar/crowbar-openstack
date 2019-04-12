@@ -85,14 +85,6 @@ en:
           controllers: 'VMware NSX Controllers'
           tz_uuid: 'UUID of the NSX Transport Zone'
           l3_gw_uuid: 'UUID of the NSX Gateway Service'
-        zvm_header: 'z/VM Configuration'
-        zvm:
-          zvm_xcat_server: 'xCAT Host/IP Address'
-          zvm_xcat_username: 'xCAT Username'
-          zvm_xcat_password: 'xCAT Password'
-          zvm_physnet_rdev: 'rdev list for physnet1 vswitch uplink (if available)'
-          xcat_mgt_ip: 'xCAT IP Address on Management Network'
-          xcat_mgt_mask: 'Net Mask of Management Network'
         ssl_header: 'SSL Support'
         api:
           protocol: 'Protocol'
