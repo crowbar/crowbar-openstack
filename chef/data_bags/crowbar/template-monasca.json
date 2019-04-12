@@ -32,6 +32,17 @@
             "vm_ping_check_enable": true,
             "vm_probation": 300,
             "vnic_collection_period": 0
+          },
+          "ovs": {
+            "cache_dir": "/dev/shm",
+            "neutron_refresh": 14400,
+            "network_use_bits": false,
+            "included_interface_re": "qg.*|vhu.*|sg.*",
+            "ovs_cmd": "sudo /usr/bin/ovs-vsctl",
+            "use_absolute_metrics": true,
+            "use_rate_metrics": true,
+            "use_health_metrics": true,
+            "collect_period": 300
           }
         },
         "insecure": true,
@@ -40,6 +51,7 @@
         "log_level": "INFO",
         "monitor_ceph": true,
         "monitor_libvirt": true,
+        "monitor_ovs": true,
         "statsd_port": 8125,
         "check_frequency": 15,
         "num_collector_threads": 1,
@@ -155,7 +167,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 314,
+      "schema-revision": 315,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-agent": [ "readying", "ready", "applying" ],

@@ -37,6 +37,7 @@ en:
           log_level: 'Log level'
           monitor_ceph: 'Monitor Ceph'
           monitor_libvirt: 'Monitor libvirt'
+          monitor_ovs: 'Monitor Open vSwitch'
           statsd_port: 'Monasca Statsd port'
           check_frequency: 'Time to wait between collection runs (check_frequency)'
           num_collector_threads: 'Number of Collector Threads to run (num_collector_threads)'
