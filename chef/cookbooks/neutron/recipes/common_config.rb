@@ -119,6 +119,17 @@ if neutron[:neutron][:use_infoblox]
   infoblox_settings = neutron[:neutron][:infoblox]
 end
 
+designate_public_uri = nil
+designate_server = node_search_with_cache("roles:designate-server").first
+unless designate_server.nil?
+  node_designate = designate_server[:designate]
+  public_host = CrowbarHelper.get_host_for_public_url(designate_server,
+                                                    node_designate[:api][:protocol] == "https",
+                                                    node_designate[:ha][:enabled])
+  api_protocol = node_designate[:api][:protocol]
+  designate_public_uri = "#{api_protocol}://#{public_host}:#{node_designate[:api][:bind_port]}/v2"
+end
+
 template neutron[:neutron][:config_file] do
     cookbook "neutron"
     source "neutron.conf.erb"
@@ -132,8 +143,8 @@ template neutron[:neutron][:config_file] do
       sql_max_pool_overflow: neutron[:neutron][:sql][:max_pool_overflow],
       sql_pool_timeout: neutron[:neutron][:sql][:pool_timeout],
       debug: neutron[:neutron][:debug],
-      # TODO
-      designate_enabled: false,
+      designate_enabled: (not designate_server.nil?),
+      designate_public_uri: designate_public_uri,
       bind_host: bind_host,
       bind_port: bind_port,
       use_syslog: neutron[:neutron][:use_syslog],
