@@ -52,7 +52,7 @@ class DesignateService < OpenstackServiceObject
         "designate-worker" => {
           "unique" => false,
           "count" => 1,
-          "cluster" => false,
+          "cluster" => true,
           "admin" => false,
           "exclude_platform" => {
             "suse" => "< 12.4",
