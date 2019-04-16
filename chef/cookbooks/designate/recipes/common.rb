@@ -49,6 +49,7 @@ template node[:designate][:config_file] do
   variables(
     bind_host: network_settings[:api][:bind_host],
     bind_port: network_settings[:api][:bind_port],
+    with_authtoken: node["roles"].include?("designate-server"),
     api_base_uri: "#{api_protocol}://#{public_host}:#{node[:designate][:api][:bind_port]}",
     sql_connection: sql_connection,
     rabbit_settings: fetch_rabbitmq_settings,
