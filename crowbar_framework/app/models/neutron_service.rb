@@ -411,6 +411,11 @@ class NeutronService < OpenstackServiceObject
       validate_external_networks proposal["attributes"]["neutron"]["additional_external_networks"]
     end
 
+    ["dns_domain", "floating_dns_domain"].each do |domain|
+      validation_error "#{domain} should end with a dot"\
+          unless proposal["attributes"]["neutron"][domain].end_with?(".")
+    end
+
     super
   end
 
