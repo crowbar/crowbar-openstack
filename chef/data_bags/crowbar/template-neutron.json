@@ -126,6 +126,12 @@
         "tz_uuid": "",
         "l3_gw_uuid": ""
       },
+      "contrail": {
+        "api_server_ip": "",
+        "api_server_port": 8082,
+        "analytics_server_ip": "",
+        "analytics_server_port": 8081
+      },
       "vmware_dvs": {
         "clean_on_restart": true,
         "precreate_networks": false
@@ -189,7 +195,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 212,
+      "schema-revision": 213,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ],

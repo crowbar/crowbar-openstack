@@ -86,6 +86,9 @@ return if neutron[:neutron][:networking_plugin] == "ml2" &&
     (neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
     neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
 
+return if neutron[:neutron][:networking_plugin] == "ml2" &&
+    neutron[:neutron][:ml2_mechanism_drivers].include?("contrail")
+
 multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty?
 
 # openvswitch configuration specific to ML2

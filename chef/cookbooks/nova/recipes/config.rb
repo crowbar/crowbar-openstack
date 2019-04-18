@@ -155,12 +155,14 @@ if neutron_servers.length > 0
   neutron_service_password = neutron_server[:neutron][:service_password]
   neutron_ml2_drivers = neutron_server[:neutron][:ml2_type_drivers]
   neutron_has_tunnel = neutron_ml2_drivers.include?("gre") || neutron_ml2_drivers.include?("vxlan")
+  neutron_contrail = neutron_server[:neutron][:ml2_mechanism_drivers].include?("contrail")
 else
   neutron_server_host = nil
   neutron_server_port = nil
   neutron_service_user = nil
   neutron_service_password = nil
   neutron_has_tunnel = false
+  neutron_contrail = false
 end
 
 neutron_config = Barclamp::Config.load("openstack", "neutron", node[:nova][:neutron_instance])
@@ -403,6 +405,7 @@ template node[:nova][:config_file] do
     neutron_service_user: neutron_service_user,
     neutron_service_password: neutron_service_password,
     neutron_has_tunnel: neutron_has_tunnel,
+    neutron_contrail: neutron_contrail,
     keystone_settings: keystone_settings,
     profiler_settings: profiler_settings,
     cinder_insecure: cinder_insecure,

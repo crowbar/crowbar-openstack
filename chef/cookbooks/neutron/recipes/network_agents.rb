@@ -261,16 +261,19 @@ elsif node[:neutron][:use_lbaas] &&
   end
 end
 
-service node[:neutron][:platform][:dhcp_agent_name] do
-  supports status: true, restart: true
-  action [:enable, :start]
-  subscribes :restart, resources(template: node[:neutron][:config_file])
-  subscribes :restart, resources(template: node[:neutron][:dhcp_agent_config_file])
-  subscribes :restart, resources(file: "/etc/neutron/dhcp_agent.ini")
-  provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
-end
-utils_systemd_service_restart node[:neutron][:platform][:dhcp_agent_name] do
-  action use_crowbar_pacemaker_service ? :disable : :enable
+
+unless node[:neutron][:ml2_mechanism_drivers].include?("contrail")
+  service node[:neutron][:platform][:dhcp_agent_name] do
+    supports status: true, restart: true
+    action [:enable, :start]
+    subscribes :restart, resources(template: node[:neutron][:config_file])
+    subscribes :restart, resources(template: node[:neutron][:dhcp_agent_config_file])
+    subscribes :restart, resources(file: "/etc/neutron/dhcp_agent.ini")
+    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
+  end
+  utils_systemd_service_restart node[:neutron][:platform][:dhcp_agent_name] do
+    action use_crowbar_pacemaker_service ? :disable : :enable
+  end
 end
 
 if ha_enabled

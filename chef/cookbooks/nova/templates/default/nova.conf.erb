@@ -81,6 +81,9 @@ zvm_user_default_privilege = <%= node[:nova][:zvm][:zvm_user_default_privilege] 
 <% unless @default_log_levels.length.zero? -%>
 default_log_levels = <%= @default_log_levels.join(", ") %>
 <% end -%>
+<% if @neutron_contrail %>
+use_forwarded_for = True
+<% end %>
 
 [api]
 auth_strategy = keystone
