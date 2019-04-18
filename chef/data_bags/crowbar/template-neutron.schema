@@ -151,6 +151,12 @@
                       "tz_uuid": { "type" : "str", "required" : true },
                       "l3_gw_uuid": { "type" : "str", "required" : true }
                     }},
+                    "contrail": { "type": "map", "required": true, "mapping": {
+                      "api_server_ip": { "type" : "str", "required" : true },
+                      "api_server_port": { "type" : "int", "required" : true },
+                      "analytics_server_ip": { "type" : "str", "required" : true },
+                      "analytics_server_port": { "type" : "int", "required" : true }
+                    }},
                     "vmware_dvs": { "type": "map", "required": true, "mapping": {
                       "clean_on_restart": { "type" : "bool", "required" : true },
                       "precreate_networks": { "type" : "bool", "required" : true }

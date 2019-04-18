@@ -81,27 +81,38 @@ bind_host, bind_port = NeutronHelper.get_bind_host_port(node)
 nova_config = Barclamp::Config.load("openstack", "nova")
 nova_insecure = CrowbarOpenStackHelper.insecure(nova_config) || keystone_settings["insecure"]
 
-service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
-                   "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
-if neutron[:neutron][:use_lbaas]
-  service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2")
+if neutron[:neutron][:networking_plugin] == "ml2" &&
+  neutron[:neutron][:ml2_mechanism_drivers].include?("contrail")
+  service_plugins = "neutron_plugin_contrail.plugins.opencontrail.loadbalancer.v2.plugin.LoadBalancerPluginV2"
+  core_plugin = "neutron_plugin_contrail.plugins.opencontrail.contrail_plugin.NeutronPluginContrailCoreV2"
+  api_extensions_path = "/usr/lib/python2.7/site-packages/neutron_plugin_contrail/extensions:/usr/lib/python2.7/site-packages/neutron_lbaas/extensions"
+else
+  service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
+                     "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
+  if neutron[:neutron][:use_lbaas]
+    service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2")
+  end
+  core_plugin = neutron[:neutron][:networking_plugin]
+  api_extensions_path = nil
 end
 
 if neutron[:neutron][:networking_plugin] == "ml2"
-  service_plugins.unshift("neutron.services.l3_router.l3_router_plugin.L3RouterPlugin")
+  unless neutron[:neutron][:ml2_mechanism_drivers].include?("contrail")
+    service_plugins.unshift("neutron.services.l3_router.l3_router_plugin.L3RouterPlugin")
 
-  if neutron[:neutron][:ml2_mechanism_drivers].include?("linuxbridge") ||
-      neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch")
-    service_plugins.push("neutron.services.trunk.plugin.TrunkPlugin")
-  end
+    if neutron[:neutron][:ml2_mechanism_drivers].include?("linuxbridge") ||
+        neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch")
+      service_plugins.push("neutron.services.trunk.plugin.TrunkPlugin")
+    end
 
-  if neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
-    service_plugins = ["cisco_apic_l3"]
-  elsif neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
-    service_plugins = ["group_policy", "servicechain", "apic_gbp_l3"]
+    if neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2")
+      service_plugins = ["cisco_apic_l3"]
+    elsif neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
+      service_plugins = ["group_policy", "servicechain", "apic_gbp_l3"]
+    end
+    service_plugins = service_plugins.join(", ")
   end
 end
-service_plugins = service_plugins.join(", ")
 
 network_nodes_count = neutron[:neutron][:elements]["neutron-network"].count
 if neutron[:neutron][:elements_expanded]
@@ -147,7 +158,7 @@ template neutron[:neutron][:config_file] do
       ssl_cert_required: neutron[:neutron][:ssl][:cert_required],
       ssl_ca_file: neutron[:neutron][:ssl][:ca_certs],
       nova_insecure: nova_insecure,
-      core_plugin: neutron[:neutron][:networking_plugin],
+      core_plugin: core_plugin,
       service_plugins: service_plugins,
       allow_overlapping_ips: neutron[:neutron][:allow_overlapping_ips],
       dvr_enabled: neutron[:neutron][:use_dvr],
@@ -158,7 +169,8 @@ template neutron[:neutron][:config_file] do
       ipam_driver: ipam_driver,
       rpc_workers: neutron[:neutron][:rpc_workers],
       use_apic_gbp: use_apic_gbp,
-      default_log_levels: neutron[:neutron][:default_log_levels]
+      default_log_levels: neutron[:neutron][:default_log_levels],
+      api_extensions_path: api_extensions_path
     )
 end
 

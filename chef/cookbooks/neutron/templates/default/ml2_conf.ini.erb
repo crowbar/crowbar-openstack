@@ -1,3 +1,15 @@
+<% if @ml2_mechanism_drivers.include?("contrail") -%>
+[APISERVER]
+api_server_ip = <%= @api_server_ip %>
+api_server_port = <%= @api_server_port %>
+multi_tenancy = True
+contrail_extensions = ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc,contrail:None,service-interface:None,vf-binding:None
+
+
+[COLLECTOR]
+analytics_api_ip = <%= @analytics_server_ip %>
+analytics_api_port = <%= @analytics_server_port %>
+<% else -%>
 [DEFAULT]
 [ml2]
 type_drivers = <%= @ml2_type_drivers.join(",") %>,flat
@@ -45,4 +57,5 @@ agent_boot_time = <%= @l2pop_agent_boot_time %>
 [dvs]
 clean_on_restart = <%= @vmware_dvs_config[:clean_on_restart] ? 'True' : 'False' %>
 precreate_networks = <%= @vmware_dvs_config[:precreate_networks] ? 'True' : 'False' %>
+<% end -%>
 <% end -%>

@@ -66,6 +66,11 @@ default[:neutron][:ssl][:insecure] = false
 default[:neutron][:ssl][:cert_required] = false
 default[:neutron][:ssl][:ca_certs] = "/etc/neutron/ssl/certs/ca.pem"
 
+default[:neutron][:contrail][:api_server_ip] = ""
+default[:neutron][:contrail][:api_server_port] = 8082
+default[:neutron][:contrail][:analytics_server_ip] = ""
+default[:neutron][:contrail][:analytics_server_port] = 8081
+
 default[:neutron][:apic][:system_id] = "soc"
 default[:neutron][:apic][:hosts] = ""
 default[:neutron][:apic][:username] = "admin"

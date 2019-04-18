@@ -85,6 +85,11 @@ en:
           controllers: 'VMware NSX Controllers'
           tz_uuid: 'UUID of the NSX Transport Zone'
           l3_gw_uuid: 'UUID of the NSX Gateway Service'
+        contrail:
+          api_server_ip: 'Contrail controller API server IP address'
+          api_server_port: 'Contrail controller API server IP port'
+          analytics_server_ip: 'Contrail controller Analytics server IP address'
+          analytics_server_ip: 'Contrail controller Analytics server port'
         zvm_header: 'z/VM Configuration'
         zvm:
           zvm_xcat_server: 'xCAT Host/IP Address'

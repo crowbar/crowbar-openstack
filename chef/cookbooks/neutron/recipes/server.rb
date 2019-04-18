@@ -170,29 +170,46 @@ when "ml2"
             "# See /etc/neutron/README.config for more details.\n"
   end
 
-  template node[:neutron][:ml2_config_file] do
-    source "ml2_conf.ini.erb"
-    owner "root"
-    group node[:neutron][:platform][:group]
-    mode "0640"
-    variables(
-      ml2_mechanism_drivers: ml2_mechanism_drivers,
-      ml2_extension_drivers: ml2_extension_drivers,
-      ml2_type_drivers: ml2_type_drivers,
-      tenant_network_types: tenant_network_types,
-      vlan_start: vlan_start,
-      vlan_end: vlan_end,
-      gre_start: gre_start,
-      gre_end: gre_end,
-      vxlan_start: vni_start,
-      vxlan_end: vni_end,
-      vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group],
-      external_networks: physnets,
-      mtu_value: mtu_value,
-      l2pop_agent_boot_time: node[:neutron][:l2pop][:agent_boot_time],
-      vmware_dvs_config: node[:neutron][:vmware_dvs]
-    )
-    notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+  if ml2_mech_drivers.include?("contrail")
+    template node[:neutron][:ml2_config_file] do
+      source "ml2_conf.ini.erb"
+      owner "root"
+      group node[:neutron][:platform][:group]
+      mode "0640"
+      variables(
+        ml2_mechanism_drivers: ml2_mechanism_drivers,
+        api_server_ip: node[:neutron][:contrail][:api_server_ip],
+        api_server_port: node[:neutron][:contrail][:api_server_port],
+        analytics_server_ip: node[:neutron][:contrail][:analytics_server_ip],
+        analytics_server_port: node[:neutron][:contrail][:analytics_server_port]
+      )
+      notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+    end
+  else
+    template node[:neutron][:ml2_config_file] do
+      source "ml2_conf.ini.erb"
+      owner "root"
+      group node[:neutron][:platform][:group]
+      mode "0640"
+      variables(
+        ml2_mechanism_drivers: ml2_mechanism_drivers,
+        ml2_extension_drivers: ml2_extension_drivers,
+        ml2_type_drivers: ml2_type_drivers,
+        tenant_network_types: tenant_network_types,
+        vlan_start: vlan_start,
+        vlan_end: vlan_end,
+        gre_start: gre_start,
+        gre_end: gre_end,
+        vxlan_start: vni_start,
+        vxlan_end: vni_end,
+        vxlan_mcast_group: node[:neutron][:vxlan][:multicast_group],
+        external_networks: physnets,
+        mtu_value: mtu_value,
+        l2pop_agent_boot_time: node[:neutron][:l2pop][:agent_boot_time],
+        vmware_dvs_config: node[:neutron][:vmware_dvs]
+      )
+      notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
+    end
   end
 when "vmware"
   directory "/etc/neutron/plugins/vmware/" do
@@ -371,6 +388,13 @@ if node[:neutron][:networking_plugin] == "ml2"
     end
   end
 end
+
+if node[:neutron][:networking_plugin] == "ml2"
+  if node[:neutron][:ml2_mechanism_drivers].include?("contrail")
+    include_recipe "neutron::contrail_agents"
+  end
+end
+
 
 crowbar_pacemaker_sync_mark "create-neutron_db_sync" if ha_enabled
 
