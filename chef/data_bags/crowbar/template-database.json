@@ -43,10 +43,10 @@
               "timeout": "60s"
             },
             "promote": {
-              "timeout": "300s"
+              "timeout": "600s"
             },
             "demote": {
-              "timeout": "60s"
+              "timeout": "600s"
             }
           }
         }
