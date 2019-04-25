@@ -279,11 +279,16 @@ end
 flavor_ref = "6"
 alt_flavor_ref = "7"
 heat_flavor_ref = "20"
+ironic_flavor_ref = "21"
 
 bash "create_yet_another_tiny_flavor" do
   code <<-EOH
   nova flavor-show tempest-stuff &> /dev/null || nova flavor-create tempest-stuff #{flavor_ref} 128 0 1 || exit 0
   nova flavor-show tempest-stuff-2 &> /dev/null || nova flavor-create tempest-stuff-2 #{alt_flavor_ref} 196 0 1 || exit 0
+  # note: this should be created based on the actual size of test ironic node
+  # note: ironic flavor disk size needs to be a bit smaller than actual physical disk to
+  #       make sure rootfs will fit if deploying with partition image
+  nova flavor-show tempest-ironic &> /dev/null || nova flavor-create tempest-ironic #{ironic_flavor_ref} 2048 19 2 || exit 0
   nova flavor-show tempest-heat &> /dev/null || nova flavor-create tempest-heat #{heat_flavor_ref} 512 0 1 || exit 0
 EOH
   environment ({
@@ -518,6 +523,7 @@ template "/etc/tempest/tempest.conf" do
         # compute settings
         flavor_ref: flavor_ref,
         alt_flavor_ref: alt_flavor_ref,
+        ironic_flavor_ref: ironic_flavor_ref,
         nova_api_v3: nova[:nova][:enable_v3_api],
         use_rescue: use_rescue,
         use_resize: use_resize,

@@ -16,6 +16,9 @@ admin_domain_name = Default
 <%- unless @tempest_roles.empty? %>
 tempest_roles = <%= @tempest_roles %>
 <%- end %>
+<%- if @enabled_services.include? "baremetal" %>
+create_isolated_networks = False
+<%- end %>
 
 [aws]
 ec2_url = <%= @ec2_protocol %>://<%= @ec2_host %>:<%= @ec2_port %>/
@@ -27,17 +30,27 @@ aws_access = <%= @ec2_access %>
 endpoint_type = public
 max_microversion = latest
 driver = fake-hardware
+unprovision_timeout = 600
 
 [compute]
 image_ref = <%= img_id %>
 image_ref_alt = <%= alt_img_id %>
+<%- if @enabled_services.include? "baremetal" %>
+flavor_ref = <%= @ironic_flavor_ref %>
+<%- else %>
 flavor_ref = <%= @flavor_ref %>
+<%- end %>
 flavor_ref_alt = <%= @alt_flavor_ref %>
+<%- if @enabled_services.include? "baremetal" %>
+fixed_network_name = ironic
+<%- else %>
 fixed_network_name = fixed
+<%- end %>
 region = <%= @keystone_settings['endpoint_region'] %>
 endpoint_type = internalURL
 min_compute_nodes = <%= @use_livemigration ? 2 : 1 %>
 max_microversion = latest
+build_timeout = 600
 
 [compute-feature-enabled]
 resize = <%= @use_resize %>
