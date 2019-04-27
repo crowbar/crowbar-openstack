@@ -107,10 +107,10 @@ if use_l3_agent
     end
 
     service "neutron-l3-ha-service" do
-      supports status: true, restart: true
-      subscribes :restart, resources(file: "/etc/neutron/neutron-l3-ha-service.yaml")
-      subscribes :restart, resources(template: "/root/.openrc")
-      subscribes :restart, resources(file: "/etc/neutron/os_password")
+      supports status: true, restart: true, restart_crm_resource: true
+      subscribes :restart, resources(file: "/etc/neutron/neutron-l3-ha-service.yaml"), :immediately
+      subscribes :restart, resources(template: "/root/.openrc"), :immediately
+      subscribes :restart, resources(file: "/etc/neutron/os_password"), :immediately
 
       provider Chef::Provider::CrowbarPacemakerService
     end
