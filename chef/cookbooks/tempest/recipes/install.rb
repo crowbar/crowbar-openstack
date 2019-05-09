@@ -60,7 +60,8 @@ end
   "magnum",
   "manila",
   "monasca",
-  "neutron"
+  "neutron",
+  "octavia"
 ].each do |component|
   package "python-#{component}-tempest-plugin" if RoleHelper.config_for_role_exists?(component)
 end
