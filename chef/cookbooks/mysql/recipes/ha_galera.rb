@@ -350,6 +350,8 @@ ha_servers = ha_servers.each do |n|
   n["fall"] = 2
   # lower the interval checking after first failure is found
   n["fastinter"] = 1000
+  # shutdown connection when backend is marked down
+  n["on_marked_down_shutdown"] = true
 end
 
 haproxy_loadbalancer "galera" do
