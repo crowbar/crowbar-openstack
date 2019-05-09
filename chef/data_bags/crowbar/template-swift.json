@@ -105,10 +105,10 @@
       },
       "elements": {},
       "element_order": [
+        [ "swift-proxy" ],
         [ "swift-storage" ],  
         [ "swift-ring-compute" ], 
         [ "swift-storage" ],
-        [ "swift-proxy" ],
         [ "swift-dispersion" ]
       ],
       "element_run_list_order": {
