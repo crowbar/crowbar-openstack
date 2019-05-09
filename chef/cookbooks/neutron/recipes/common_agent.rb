@@ -338,6 +338,8 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         periodic_interval: 40,
         periodic_fuzzy_delay: 5,
         dvr_enabled: neutron[:neutron][:use_dvr],
+        l3_ha_enabled: node.roles.include?("neutron-network") && neutron[:neutron][:l3_ha][:use_l3_ha],
+        l3_ha_vrrp_password: neutron[:neutron][:l3_ha][:vrrp_password],
         dvr_mode: node.roles.include?("neutron-network") ? "dvr_snat" : "dvr"
       )
     end
