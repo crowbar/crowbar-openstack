@@ -126,6 +126,7 @@ class SwiftService < OpenstackServiceObject
     return if all_nodes.empty?
 
     proxy_elements, proxy_nodes, ha_enabled = role_expand_elements(role, "swift-proxy")
+    reset_sync_marks_on_clusters_founders(proxy_elements)
     Openstack::HA.set_controller_role(proxy_nodes) if ha_enabled
 
     vip_networks = ["admin", "public"]
