@@ -24,5 +24,6 @@ tunnel_bridge = br-tunnel
 local_ip = <%= node.address("os_sdn").addr %>
 <% end -%>
 bridge_mappings = <%= @bridge_mappings %>
+of_inactivity_probe = <%= @of_inactivity_probe %>
 [securitygroup]
 firewall_driver = iptables_hybrid
