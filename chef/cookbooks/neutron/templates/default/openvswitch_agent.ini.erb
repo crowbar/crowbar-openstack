@@ -25,5 +25,6 @@ ovsdb_interface = <%= @ovsdb_interface %>
 local_ip = <%= node.address("os_sdn").addr %>
 <% end -%>
 bridge_mappings = <%= @bridge_mappings %>
+of_inactivity_probe = <%= @of_inactivity_probe %>
 [securitygroup]
 firewall_driver = neutron.agent.linux.iptables_firewall.OVSHybridIptablesFirewallDriver

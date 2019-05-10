@@ -43,7 +43,8 @@
       },
       "ovs": {
         "tunnel_csum": false,
-        "ovsdb_interface": "native"
+        "ovsdb_interface": "native",
+        "of_inactivity_probe": 10
       },
       "apic": {
         "hosts": "",
@@ -194,7 +195,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 215,
+      "schema-revision": 216,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ],
