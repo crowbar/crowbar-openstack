@@ -85,6 +85,13 @@
                     "log_filename": {"type": "str" },
                     "log_min_duration_statement": { "type": "int" }
                   }
+                },
+                "password": {
+                  "type": "map",
+                  "required": false,
+                  "mapping": {
+                    "postgresql": { "type": "str" }
+                  }
                 }
               }
             },

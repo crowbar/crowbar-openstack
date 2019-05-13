@@ -56,6 +56,11 @@ class DatabaseService < PacemakerServiceObject
       }
     end
 
+    base["attributes"]["database"]["db_maker_password"] = random_password
+    base["attributes"]["database"]["mysql"]["server_root_password"] = random_password
+    base["attributes"]["database"]["mysql"]["sstuser_password"] = random_password
+    base["attributes"]["database"]["postgresql"]["password"]["postgres"] = random_password
+
     @logger.debug("Database create_proposal: exiting")
     base
   end
@@ -190,23 +195,14 @@ class DatabaseService < PacemakerServiceObject
       end
     end
 
-    role.default_attributes["database"][sql_engine] = {} if role.default_attributes["database"][sql_engine].nil?
-    role.default_attributes["database"]["db_maker_password"] = (old_role && old_role.default_attributes["database"]["db_maker_password"]) || random_password
-
-    if ( sql_engine == "mysql" )
-      role.default_attributes["database"]["mysql"]["server_root_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["server_root_password"]) || random_password
-      if database_ha_enabled
-        role.default_attributes["database"]["mysql"]["sstuser_password"] = (old_role && old_role.default_attributes["database"]["mysql"]["sstuser_password"]) || random_password
-      end
-      @logger.debug("setting mysql specific attributes")
-    elsif ( sql_engine == "postgresql" )
-      # Attribute is not living in "database" namespace, but that's because
-      # it's for the postgresql cookbook. We're not using default_attributes
+    if ( sql_engine == "postgresql" )
+      # Attribute needs to move outside the "database" namespace, that's because
+      # it's for the postgresql cookbook. We need to make it an override_attribute
       # because the upstream cookbook use node.set_unless which would override
-      # a default attribute.
+      # a default_attribute.
       role.override_attributes["postgresql"] ||= {}
       role.override_attributes["postgresql"]["password"] ||= {}
-      role.override_attributes["postgresql"]["password"]["postgres"] = (old_role && (old_role.override_attributes["postgresql"]["password"]["postgres"] rescue nil)) || random_password
+      role.override_attributes["postgresql"]["password"]["postgres"] = role.default_attributes["database"]["postgresql"]["password"]["postgres"]
       @logger.debug("setting postgresql specific attributes")
     end
 
