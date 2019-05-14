@@ -49,6 +49,21 @@
                         "vm_probation": { "type": "int", "required": true },
                         "vnic_collection_period": { "type": "int", "required": true }
                       }
+                    },
+                    "ovs": {
+                      "required": true,
+                      "type": "map",
+                      "mapping": {
+                        "cache_dir": { "type": "str", "required": true },
+                        "neutron_refresh": { "type": "int", "required": true },
+                        "network_use_bits": { "type": "bool", "required": true },
+                        "included_interface_re": { "type": "str", "required": true },
+                        "ovs_cmd": { "type": "str", "required": true },
+                        "use_absolute_metrics": { "type": "bool", "required": true },
+                        "use_rate_metrics": { "type": "bool", "required": true },
+                        "use_health_metrics": { "type": "bool", "required": true },
+                        "collect_period": { "type": "int", "required": true }
+                      }
                     }
                   }
                 },
@@ -58,6 +73,7 @@
                 "log_level": { "type": "str", "required": true },
                 "monitor_ceph": { "type": "bool", "required": true },
                 "monitor_libvirt": { "type": "bool", "required": true },
+                "monitor_ovs": { "type": "bool", "required": true },
                 "statsd_port": { "type": "int", "required": true },
                 "check_frequency": { "type": "int", "required": true },
                 "num_collector_threads": { "type": "int", "required": true },

@@ -33,6 +33,7 @@ run_setup()
       --amplifier '<%= @agent_settings["amplifier"] %>' \
       --skip_enable \
       --agent_service_name '<%= @agent_settings["agent_service_name"].gsub(/\.target$/, '') %>' \
+      --skip_detection_plugins ovs \
       "$@"
     }
 

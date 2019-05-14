@@ -16,4 +16,5 @@
 
 if CrowbarRoleRecipe.node_state_valid_for_role?(node, "neutron", "neutron-network")
   include_recipe "neutron::network_agents"
+  include_recipe "neutron::monitor_monasca_ovs"
 end

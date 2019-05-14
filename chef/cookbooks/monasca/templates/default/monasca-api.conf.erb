@@ -623,7 +623,7 @@ agent_authorized_roles = monasca-agent
 # Roles that are allowed to POST metrics on
 # behalf of another tenant
 #  (list value)
-#delegate_authorized_roles = admin
+delegate_authorized_roles = monasca-agent
 
 [keystone_authtoken]
 www_authenticate_uri = <%= @keystone_settings['public_auth_url'] %>
