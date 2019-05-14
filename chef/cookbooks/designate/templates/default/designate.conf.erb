@@ -28,6 +28,7 @@ notify = False
 [storage:sqlalchemy]
 connection=<%= @sql_connection %>
 
+<%if @with_authtoken -%>
 [keystone_authtoken]
 auth_uri = <%= @keystone_settings["public_auth_url"] %>
 username = <%= @keystone_settings['service_user'] %>
@@ -45,6 +46,7 @@ memcached_servers = <%= @memcached_servers.join(',') %>
 memcache_security_strategy = ENCRYPT
 memcache_secret_key = <%= node[:designate][:memcache_secret_key] %>
 memcache_pool_socket_timeout = 1
+<% end -%>
 
 [oslo_concurrency]
 lock_path = "/var/run/designate"
