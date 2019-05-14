@@ -3,7 +3,7 @@ wsrep_on = ON
 wsrep_provider = /usr/lib64/galera-3/libgalera_smm.so
 wsrep_cluster_address = "<%= @cluster_addresses %>"
 # values recommended by mysqltuner.pl
-wsrep_provider_options = "gmcast.listen_addr=tcp://<%= @node_address %>:4567;gcs.fc_limit = <%= @wsrep_slave_threads * 5 %>;gcs.fc_factor = 0.8"
+wsrep_provider_options = "gmcast.listen_addr=tcp://<%= @node_address %>:4567;gcs.fc_limit = <%= @wsrep_slave_threads * @gcs_fc_limit_multiplier %>;gcs.fc_factor = <%= @gcs_fc_factor %>;<%= @wsrep_provider_options_custom %>"
 wsrep_slave_threads = <%= @wsrep_slave_threads %>
 
 # Maximum number of rows in write set
