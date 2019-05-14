@@ -3493,7 +3493,7 @@
       "showTitle": true,
       "title": "VM Counts",
       "titleSize": "h6"
-    },
+    }<% if @ceph_enabled %>,
     {
       "collapse": true,
       "height": 250,
@@ -4184,6 +4184,7 @@
       "title": "Ceph Storage",
       "titleSize": "h6"
     }
+<% end -%>
   ],
   "schemaVersion": 14,
   "style": "dark",

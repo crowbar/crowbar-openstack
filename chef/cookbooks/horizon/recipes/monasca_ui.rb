@@ -95,16 +95,19 @@ end
 cookbook_file "/var/lib/grafana/dashboards/monasca.json" do
   source "grafana-monasca.json"
   owner "root"
-  group "root"
-  mode "0644"
+  group "grafana"
+  mode "0640"
   notifies :restart, resources(service: "grafana-server")
 end
 
-cookbook_file "/var/lib/grafana/dashboards/openstack.json" do
-  source "grafana-openstack.json"
+template "/var/lib/grafana/dashboards/openstack.json" do
+  source "grafana-openstack.json.erb"
+  variables(
+    ceph_enabled: monasca_server[:monasca][:agent][:monitor_ceph]
+  )
   owner "root"
-  group "root"
-  mode "0644"
+  group "grafana"
+  mode "0640"
   notifies :restart, resources(service: "grafana-server")
 end
 
