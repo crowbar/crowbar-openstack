@@ -106,6 +106,15 @@ if use_l3_agent
       )
     end
 
+    service "neutron-l3-ha-service" do
+      supports status: true, restart: true, restart_crm_resource: true
+      subscribes :restart, resources(file: "/etc/neutron/neutron-l3-ha-service.yaml"), :immediately
+      subscribes :restart, resources(template: "/root/.openrc"), :immediately
+      subscribes :restart, resources(file: "/etc/neutron/os_password"), :immediately
+
+      provider Chef::Provider::CrowbarPacemakerService
+    end
+
     # Reload systemd when unit file changed
     bash "reload systemd after neutron-l3-ha-service update" do
       code "systemctl daemon-reload"
