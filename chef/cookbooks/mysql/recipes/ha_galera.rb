@@ -62,7 +62,10 @@ unless node[:database][:galera_bootstrapped]
         sstuser_password: "",
         expire_logs_days: node[:database][:mysql][:expire_logs_days],
         node_address: node_address,
-        wsrep_slave_threads: node[:database][:mysql][:wsrep_slave_threads]
+        wsrep_slave_threads: node[:database][:mysql][:wsrep_slave_threads],
+        gcs_fc_limit_multiplier: node[:database][:mysql][:gcs_fc_limit_multiplier],
+        gcs_fc_factor: node[:database][:mysql][:gcs_fc_factor],
+        wsrep_provider_options_custom: node[:database][:mysql][:wsrep_provider_options_custom].join(";")
       )
     end
 
@@ -143,7 +146,10 @@ template "/etc/my.cnf.d/75-galera.cnf" do
     sstuser_password: node[:database][:mysql][:sstuser_password],
     expire_logs_days: node[:database][:mysql][:expire_logs_days],
     node_address: node_address,
-    wsrep_slave_threads: node[:database][:mysql][:wsrep_slave_threads]
+    wsrep_slave_threads: node[:database][:mysql][:wsrep_slave_threads],
+    gcs_fc_limit_multiplier: node[:database][:mysql][:gcs_fc_limit_multiplier],
+    gcs_fc_factor: node[:database][:mysql][:gcs_fc_factor],
+    wsrep_provider_options_custom: node[:database][:mysql][:wsrep_provider_options_custom].join(";")
   )
 end
 
