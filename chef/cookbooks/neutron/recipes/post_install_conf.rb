@@ -214,8 +214,10 @@ end
 domain_float = node[:neutron][:floating_dns_domain]
 domain_fixed = node[:neutron][:dns_domain]
 
+neutron_insecure = ssl_insecure ? "--insecure" : ""
+
 execute "update_dns_domain_for_fixed_network" do
-  command "#{env} neutron net-update fixed --dns-domain #{domain_fixed}"
+  command "#{env} neutron #{neutron_insecure} net-update fixed --dns-domain #{domain_fixed}"
   not_if "#{openstack_cmd} network show fixed -f value -c dns_domain | grep -q #{domain_fixed}"
   retries 5
   retry_delay 10
@@ -223,7 +225,7 @@ execute "update_dns_domain_for_fixed_network" do
 end
 
 execute "update_dns_domain_for_floating_network" do
-  command "#{env} neutron net-update floating --dns-domain #{domain_float}"
+  command "#{env} neutron #{neutron_insecure} net-update floating --dns-domain #{domain_float}"
   not_if "#{openstack_cmd} network show floating -f value -c dns_domain | grep -q #{domain_float}"
   retries 5
   retry_delay 10
