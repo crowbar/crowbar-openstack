@@ -32,6 +32,9 @@
                 "expire_logs_days": { "type": "int", "required": true },
                 "bootstrap_timeout": { "type": "int", "required": true },
                 "wsrep_slave_threads": { "type": "int", "required": true },
+                "gcs_fc_limit_multiplier": { "type": "int", "required": true },
+                "gcs_fc_factor": { "type": "float", "required": true },
+                "wsrep_provider_options_custom": { "type": "seq", "required": true, "sequence": [ { "type": "str" } ] },
                 "ssl": {
                   "type": "map", "required": true, "mapping": {
                     "enabled": { "type": "bool", "required": true },

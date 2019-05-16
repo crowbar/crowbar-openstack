@@ -15,6 +15,9 @@
         "expire_logs_days": 10,
         "bootstrap_timeout": 600,
         "wsrep_slave_threads" : 1,
+        "gcs_fc_limit_multiplier" : 5,
+        "gcs_fc_factor" : 0.8,
+        "wsrep_provider_options_custom" : [],
         "innodb_buffer_pool_size": 256,
         "innodb_tunings": [
             "# log_file_size should be ~ 25% of buffer_pool_size",
@@ -83,7 +86,7 @@
     "database": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 209,
+      "schema-revision": 210,
       "element_states": {
         "database-server": [ "readying", "ready", "applying" ]
       },
