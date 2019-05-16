@@ -1,0 +1,53 @@
+{
+  "id": "template-watcher",
+  "description": "Sets up Resource Optimization service for Openstack",
+  "attributes": {
+    "watcher": {
+      "debug": false,
+      "use_syslog": true,
+      "keystone_instance": "none",
+      "database_instance": "none",
+      "rabbitmq_instance": "none",
+      "service_user": "watcher",
+      "service_password": "",
+      "memcache_secret_key": "",
+      "api": {
+        "protocol": "http",
+        "bind_open_address": true,
+        "bind_port": 9322
+      },
+      "db": {
+        "password": "",
+        "user": "watcher",
+        "database": "watcher"
+      }
+    }
+  },
+  "deployment": {
+    "watcher": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 300,
+      "element_states": {
+        "watcher-server": [ "readying", "ready", "applying" ],
+        "watcher-worker": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "watcher-api", "watcher-decision-engine", "watcher-applier"]
+      ],
+      "element_run_list_order": {
+          "watcher-apij": 110,
+          "watcher-decision-engine": 111,
+          "watcher-applier": 112
+      },
+      "config": {
+        "environment": "watcher-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
