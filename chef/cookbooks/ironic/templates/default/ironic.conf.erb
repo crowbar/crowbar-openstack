@@ -58,6 +58,9 @@ password=<%= if @swift_settings then @swift_settings[:service_password] else '' 
 project_name=<%= @keystone_settings['service_tenant'] %>
 project_domain_name=<%= @keystone_settings["admin_domain"]%>
 user_domain_name=<%= @keystone_settings["admin_domain"] %>
+<% if @swift_settings %>
+endpoint_override=<%= @swift_settings[:protocol] %>://<%= @swift_settings[:ip] %>:<%= @swift_settings[:port] %>/v1/<%= @swift_settings[:glance_account] %>
+<% end %>
 
 [keystone]
 region_name=<%= @keystone_settings['endpoint_region'] %>
