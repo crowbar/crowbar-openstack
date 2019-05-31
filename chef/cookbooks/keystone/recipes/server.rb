@@ -347,9 +347,9 @@ end
 ruby_block "synchronize signing keys for founder and remember them for non-HA case" do
   only_if { (!ha_enabled || (ha_enabled && CrowbarPacemakerHelper.is_cluster_founder?(node))) }
   block do
-    ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb", &:read)
-    signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb", &:read)
-    signing_key = File.open("/etc/keystone/ssl/private/signing_key.pem", "rb", &:read)
+    ca = File.open(node[:keystone][:signing][:ca_certs], "rb", &:read)
+    signing_cert = File.open(node[:keystone][:signing][:certfile], "rb", &:read)
+    signing_key = File.open(node[:keystone][:signing][:keyfile], "rb", &:read)
 
     node[:keystone][:certificates] ||= {}
     node[:keystone][:certificates][:content] ||= {}
@@ -376,9 +376,9 @@ end
 ruby_block "synchronize signing keys for non-founder" do
   only_if { ha_enabled && !CrowbarPacemakerHelper.is_cluster_founder?(node) }
   block do
-    ca = File.open("/etc/keystone/ssl/certs/ca.pem", "rb", &:read)
-    signing_cert = File.open("/etc/keystone/ssl/certs/signing_cert.pem", "rb", &:read)
-    signing_key = File.open("/etc/keystone/ssl/private/signing_key.pem", "rb", &:read)
+    ca = File.open(node[:keystone][:signing][:ca_certs], "rb", &:read)
+    signing_cert = File.open(node[:keystone][:signing][:certfile], "rb", &:read)
+    signing_key = File.open(node[:keystone][:signing][:keyfile], "rb", &:read)
 
     founder = CrowbarPacemakerHelper.cluster_founder(node)
 
@@ -390,19 +390,19 @@ ruby_block "synchronize signing keys for non-founder" do
     # the code below
     dirty = false
     if ca != cluster_ca
-      File.open("/etc/keystone/ssl/certs/ca.pem", "w") { |f|
+      File.open(node[:keystone][:signing][:ca_certs], "w") { |f|
         f.write(cluster_ca)
       }
       dirty = true
     end
     if signing_cert != cluster_signing_cert
-      File.open("/etc/keystone/ssl/certs/signing_cert.pem", "w") { |f|
+      File.open(node[:keystone][:signing][:certfile], "w") { |f|
         f.write(cluster_signing_cert)
       }
       dirty = true
     end
     if signing_key != cluster_signing_key
-      File.open("/etc/keystone/ssl/private/signing_key.pem", "w") { |f|
+      File.open(node[:keystone][:signing][:keyfile], "w") { |f|
         f.write(cluster_signing_key)
       }
       dirty = true
