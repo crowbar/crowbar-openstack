@@ -30,6 +30,9 @@ when "rhel", "suse"
       "openstack-ironic-conductor"
     ],
     driver_dependencies: {
+      redfish: [
+        "python-sushy"
+      ]
     }
   }
   default[:ironic][:api][:service_name] = "openstack-ironic-api"
@@ -49,6 +52,9 @@ when "debian"
       "ironic-api-conductor"
     ],
     driver_dependencies: {
+      redfish: [
+        "python-sushy"
+      ]
     }
   }
   default[:ironic][:api][:service_name] = "ironic-api"
