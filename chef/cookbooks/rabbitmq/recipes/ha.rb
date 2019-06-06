@@ -77,6 +77,7 @@ rabbitmq_op["monitor"]["interval"] = "10s"
 # on anyway.
 static_uid = 91
 static_gid = 91
+ssl_keyfile = node[:rabbitmq][:ssl][:keyfile]
 bash "assign static uid to rabbitmq" do
   code <<EOC
 service rabbitmq-server stop > /dev/null;
@@ -86,6 +87,7 @@ chown -R rabbitmq:rabbitmq /var/lib/rabbitmq;
 chown rabbitmq:rabbitmq /var/run/rabbitmq /var/log/rabbitmq;
 chown rabbitmq:rabbitmq /var/run/rabbitmq/pid /var/log/rabbitmq/*.log* || :;
 chgrp rabbitmq /etc/rabbitmq/definitions.json;
+test -e #{ssl_keyfile} && chgrp rabbitmq #{ssl_keyfile} || :;
 EOC
   # Make any error in the commands fatal
   flags "-e"
