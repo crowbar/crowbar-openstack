@@ -16,7 +16,6 @@
 define :designate_service do
   designate_service_name = "designate-#{params[:name]}"
   ha_enabled = node[:designate][:ha][:enabled]
-  use_crowbar_pacemaker_service = ha_enabled && node[:pacemaker][:clone_stateless_services]
 
   package "openstack-designate-#{params[:name]}"
 
@@ -25,9 +24,8 @@ define :designate_service do
     supports status: true, restart: true
     action [:enable, :start]
     subscribes :restart, resources(template: node[:designate][:config_file])
-    provider Chef::Provider::CrowbarPacemakerService if use_crowbar_pacemaker_service
   end
   utils_systemd_service_restart designate_service_name do
-    action use_crowbar_pacemaker_service ? :disable : :enable
+    :enable
   end
 end
