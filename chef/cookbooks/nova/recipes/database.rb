@@ -116,7 +116,8 @@ end
 execute "nova-manage create cell1" do
   user node[:nova][:user]
   group node[:nova][:group]
-  command "nova-manage cell_v2 create_cell --name cell1 --verbose"
+  command "nova-manage cell_v2 list_cells | grep -q ' cell1 ' "\
+          "|| nova-manage cell_v2 create_cell --name cell1 --verbose"
   action :run
   only_if do
     !node[:nova][:db_synced] &&
