@@ -47,6 +47,39 @@ package "grafana" do
   action :install
 end
 
+grafana_db = node[:monasca][:db_grafana]
+
+database "create #{grafana_db[:database]} database" do
+  connection db_settings[:connection]
+  database_name grafana_db[:database]
+  provider db_settings[:provider]
+  action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+database_user "create #{grafana_db[:user]} database user" do
+  connection db_settings[:connection]
+  username grafana_db[:user]
+  password grafana_db[:password]
+  provider db_settings[:user_provider]
+  host "%"
+  action :create
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+database_user "grant privileges to the #{grafana_db[:user]} database user" do
+  connection db_settings[:connection]
+  database_name grafana_db[:database]
+  username grafana_db[:user]
+  password grafana_db[:password]
+  host "%"
+  privileges db_settings[:privs]
+  provider db_settings[:user_provider]
+  require_ssl db_settings[:connection][:ssl][:enabled]
+  action :grant
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
 template "/etc/grafana/grafana.ini" do
   source "grafana.ini.erb"
   variables(
