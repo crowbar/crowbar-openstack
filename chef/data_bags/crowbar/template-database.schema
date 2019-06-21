@@ -31,6 +31,7 @@
                 "max_heap_table_size": { "type": "int", "required": true },
                 "expire_logs_days": { "type": "int", "required": true },
                 "bootstrap_timeout": { "type": "int", "required": true },
+                "presync_timeout": { "type": "int", "required": true },
                 "wsrep_slave_threads": { "type": "int", "required": true },
                 "gcs_fc_limit_multiplier": { "type": "int", "required": true },
                 "gcs_fc_factor": { "type": "float", "required": true },
