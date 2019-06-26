@@ -42,7 +42,8 @@
         "multicast_group": "239.1.1.1"
       },
       "ovs": {
-        "tunnel_csum": false
+        "tunnel_csum": false,
+        "of_inactivity_probe": 10
       },
       "apic": {
         "hosts": "",
@@ -192,7 +193,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 306,
+      "schema-revision": 307,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ],
