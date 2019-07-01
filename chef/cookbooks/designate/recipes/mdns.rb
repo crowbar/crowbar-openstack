@@ -25,8 +25,8 @@ dnsservers = [dnsmaster] + dnsslaves
 
 network_settings = DesignateHelper.network_settings(node)
 
-# One could have multiple pools in desginate. And
-# Desginate needs to have a default pool, this pools
+# One could have multiple pools in designate. And
+# designate needs to have a default pool, this pools
 # id is hardcoded in the designate conf. By reusing that
 # id we let designate know how crowbar's deployement of
 # dns servers looks like.
