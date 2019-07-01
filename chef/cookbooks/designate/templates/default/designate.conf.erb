@@ -1,0 +1,64 @@
+[DEFAULT]
+debug = <%= node[:designate][:debug] %>
+log_dir = /var/log/designate
+transport_url = <%= @rabbit_settings[:url] %>
+use_syslog=<%= node[:designate][:use_syslog] ? "True" : "False" %>
+wsgi_keep_alive = false
+use_namespaces = true
+use_rootwrap = true
+use_identity_api_v3 = true
+admin_user_domain_name = <%= @keystone_settings["admin_domain"] %>
+admin_project_domain_name = <%= @keystone_settings["admin_domain"]%>
+os_region_name = <%= @keystone_settings['endpoint_region'] %>
+api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+
+[service:api]
+listen = <%= @bind_host %>:<%= @bind_port %>
+auth_strategy = keystone
+enabled_extensions_v2 = quotas, reports
+enable_host_header = True
+api_base_uri = <%= @api_base_uri %>
+
+[service:worker]
+enabled = True
+notify = False
+# poll_max_retries
+# poll_retry_interval
+
+[storage:sqlalchemy]
+connection=<%= @sql_connection %>
+
+<%if @with_authtoken -%>
+[keystone_authtoken]
+auth_uri = <%= @keystone_settings["public_auth_url"] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
+auth_url = <%= @keystone_settings['admin_auth_url'] %>
+auth_type = password
+insecure = <%= @keystone_settings["insecure"] %>
+region_name = <%= @keystone_settings["endpoint_region"] %>
+service_token_roles_required = true
+service_token_roles = admin
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:designate][:memcache_secret_key] %>
+memcache_pool_socket_timeout = 1
+<% end -%>
+
+[oslo_concurrency]
+lock_path = "/var/run/designate"
+
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+ssl_ca_file = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+heartbeat_timeout_threshold = <%= @rabbit_settings[:heartbeat_timeout] %>
+
+[oslo_middleware]
+enable_proxy_headers_parsing = true
