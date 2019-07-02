@@ -125,6 +125,8 @@ ruby_block "Flavor creation" do
         )
         flavor_create.command command
         flavor_create.retries 5
+        # don't retry after "Flavor with ID ... already exists"
+        flavor_create.not_if "#{openstack} flavor show #{id}"
 
         # delay the run of this resource until the end of the run
         run_context.notifies_delayed(
@@ -143,6 +145,8 @@ ruby_block "Flavor creation" do
         )
         flavor_create.command command
         flavor_create.retries 5
+        # don't retry after "Flavor with ID ... already exists"
+        flavor_create.not_if "#{openstack} flavor show #{id}"
 
         # delay the run of this resource until the end of the run
         run_context.notifies_delayed(
