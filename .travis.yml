@@ -1,20 +1,29 @@
 language: ruby
-sudo: false
 cache: bundler
-dist: trusty
+dist: xenial
 
 rvm: 2.1.9
 
-before_install:
-  - rvm @global do gem install bundler -v '< 2.0.0'
-
 matrix:
   include:
-    - env: SYNTAXCHECK
+    - name: "Validate Commit Message"
+      language: python
+      script:
+      - pip install gitlint
+      - wget https://raw.githubusercontent.com/SUSE-Cloud/automation/master/scripts/jenkins/gitlint.ini
+      - gitlint --commits master..HEAD -C gitlint.ini
+    - name: "Syntaxcheck"
+      gemfile: Gemfile
       script:
       - bundle exec rake syntaxcheck
-    - env: SPEC_TESTS
+    - name: "Validate Framework (RSpec)"
+      gemfile: Gemfile
       script:
       - bundle exec rake spec
-    - name: "Databag testing"
-      script: bundle exec crowbar-validate-databags chef/data_bags/crowbar
+    - name: "Validate Databags"
+      gemfile: Gemfile
+      script:
+      - bundle exec crowbar-validate-databags chef/data_bags/crowbar
+
+before_install:
+  - rvm @global do gem install bundler -v '< 2.0.0'
