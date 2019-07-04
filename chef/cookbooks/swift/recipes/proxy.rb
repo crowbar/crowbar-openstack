@@ -162,6 +162,15 @@ case proxy_config[:auth_method]
      proxy_config[:reseller_prefix] = node[:swift][:reseller_prefix]
      proxy_config[:keystone_delay_auth_decision] = node["swift"]["keystone_delay_auth_decision"]
 
+     # Because syncmarks are not reset when applying Swift proposal, nodes
+     # can be out of sync beyond normal syncmark timeout. This 'sync' syncmark
+     # should line them up and correct any time offsets.
+     if ha_enabled
+       crowbar_pacemaker_sync_mark "sync-swift_before_register" do
+         timeout 300
+       end
+     end
+
      crowbar_pacemaker_sync_mark "wait-swift_register" if ha_enabled
 
      register_auth_hash = { user: keystone_settings["admin_user"],
