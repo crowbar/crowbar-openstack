@@ -412,7 +412,12 @@ def find_id(item_name, path, dir, key = "name", ret = "id")
       data2hash = {}
 
       data.each do |item|
-        my_item_id = item[ret] if item[key] == item_name
+        # NOTE: for Keystone with MySQL backend, which is the default since
+        # Cloud 8, we should be doing case-insensitive comparison when lookup
+        # ID by name. For more information, see
+        # https://docs.openstack.org/keystone/rocky/admin
+        # /identity-case-insensitive.html
+        my_item_id = item[ret] if item[key].casecmp(item_name).zero?
         data2hash[[path, item[key]]] = item[ret]
       end
       KeystoneHelper.cache_update(data2hash) if my_item_id
