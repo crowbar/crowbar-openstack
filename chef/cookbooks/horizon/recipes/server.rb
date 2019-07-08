@@ -175,6 +175,24 @@ unless trove_ui_pkgname.nil?
   end
 end
 
+# install horizon designate plugin if needed
+designate_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-designate-ui"
+  when "rhel"
+    "openstack-designate-dashboard"
+  end
+
+unless designate_ui_pkgname.nil?
+  unless Barclamp::Config.load("openstack", "designate").empty?
+    package designate_ui_pkgname do
+      action :install
+      notifies :reload, "service[horizon]"
+    end
+  end
+end
+
 # install horizon sahara plugin if needed
 sahara_ui_pkgname =
   case node[:platform_family]
