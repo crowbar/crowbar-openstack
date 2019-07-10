@@ -50,7 +50,7 @@
         }
       },
       "mnesia": {
-        "dump_log_write_threshold": 100,
+        "dump_log_write_threshold": 300,
         "dump_log_time_threshold": 180000
       },
       "tcp_listen_options": {
