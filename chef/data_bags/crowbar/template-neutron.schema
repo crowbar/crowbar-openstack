@@ -48,7 +48,8 @@
                     "ovs": { "type": "map", "required": true, "mapping": {
                       "tunnel_csum": { "type": "bool", "required": true },
                       "ovsdb_interface": { "type": "str", "required": true },
-                      "of_interface": { "type": "str", "required": true }
+                      "of_interface": { "type": "str", "required": true },
+                      "of_inactivity_probe": { "type": "int", "required": true }
                     }},
                     "apic": { "type": "map", "required": true, "mapping": {
                       "hosts": { "type" : "str", "required" : true },
