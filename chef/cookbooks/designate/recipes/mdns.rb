@@ -18,7 +18,8 @@
 
 require "yaml"
 
-dns = node_search_with_cache("roles:dns-server").first
+dns_all = node_search_with_cache("roles:dns-server")
+dns = dns_all.first
 dnsmaster = dns[:dns][:master_ip]
 dnsslaves = dns[:dns][:slave_ips].to_a
 dnsservers = [dnsmaster] + dnsslaves
@@ -39,7 +40,7 @@ pools = [{
   "description" => "Default BIND9 Pool",
   "id" => "794ccc2c-d751-44fe-b57f-8894c9f5c842",
   "attributes" => {},
-  "ns_records" => [{ "hostname" => "#{dns[:fqdn]}.", "priority" => 1 }],
+  "ns_records" => dns_all.map { |dnss| { "hostname" => "#{dnss[:fqdn]}.", "priority" => 1 } },
   "nameservers" => dnsservers.map { |ip| { "host" => ip, "port" => 53 } },
   "also_notifies" => dnsslaves.map { |ip| { "host" => ip, "port" => 53 } },
   "targets" => [{
