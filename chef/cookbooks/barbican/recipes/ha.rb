@@ -22,7 +22,7 @@ log "Setting up barbican HA support"
 
 network_settings = BarbicanHelper.network_settings(node)
 
-ssl_enabled = node[:barbican][:api][:ssl]
+ssl_enabled = node["barbican"]["api"]["protocol"] == "https"
 
 include_recipe "crowbar-pacemaker::haproxy"
 
