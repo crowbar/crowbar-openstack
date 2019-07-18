@@ -244,13 +244,16 @@ backend1_name = <%= @cinder_backend1_name %>
 backend2_name = <%= @cinder_backend2_name %>
 <% end -%>
 storage_protocol = <%= @storage_protocol %>
+<% if @storage_protocol == 'ceph' %>
+manage_snapshot_ref = source-name,snapshot-%s
+<% end %>
 vendor_name = <%= @vendor_name %>
 max_microversion = latest
 
 [volume-feature-enabled]
 multi_backend = <%= @cinder_multi_backend ? 'true' : 'false' %>
 backup = false
-extend_attached_volume = True
+extend_attached_volume = <%= @storage_protocol != 'ceph' ? 'true' : 'false' %>
 manage_volume = True
 manage_snapshot = True
 api_v3 = True
