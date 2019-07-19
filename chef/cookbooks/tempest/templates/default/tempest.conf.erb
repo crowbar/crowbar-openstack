@@ -13,9 +13,7 @@ admin_username = <%= @keystone_settings['admin_user'] %>
 admin_project_name = <%= @keystone_settings['default_tenant'] %>
 admin_password = <%= @keystone_settings['admin_password'] %>
 admin_domain_name = Default
-<%- unless @tempest_roles.empty? %>
 tempest_roles = <%= @tempest_roles %>
-<%- end %>
 <%- if @enabled_services.include? "baremetal" %>
 create_isolated_networks = False
 <%- end %>
@@ -134,6 +132,7 @@ image_id = <%= @magnum_settings['image_id'] %>
 nic_id = floating
 flavor_id = <%= @magnum_settings['flavor_id'] %>
 master_flavor_id = <%= @magnum_settings['master_flavor_id'] %>
+dns_nameserver = <%= @dns_server_node_ip %>
 
 [monitoring]
 region = <%= @keystone_settings['endpoint_region'] %>

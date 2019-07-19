@@ -27,6 +27,9 @@ region_name = <%= @keystone_settings['endpoint_region'] %>
 [database]
 connection = <%= @sql_connection %>
 
+[drivers]
+verify_ca = false
+
 [glance_client]
 region_name = <%= @keystone_settings['endpoint_region'] %>
 insecure = <%= @keystone_settings['insecure'] %>
