@@ -228,52 +228,81 @@ function findfirst() {
 echo "Downloading image ... "
 wget --no-verbose $IMAGE_URL --directory-prefix=$TEMP 2>&1 || exit $?
 
-echo "Unpacking image ... "
 mkdir $IMG_DIR
-tar -xvzf $TEMP/$IMG_FILE -C $IMG_DIR || exit $?
 rm -rf #{node[:tempest][:tempest_path]}/etc/cirros/*
-cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
 
-echo -n "Adding kernel ... "
-KERNEL_ID=$(glance #{insecure} image-create \
-    --name "$IMG_NAME-tempest-kernel" \
-    --visibility public --container-format aki \
-    --disk-format aki < $(findfirst '*-vmlinuz') | extract_id)
-echo "done."
-[ -n "$KERNEL_ID" ] || exit 1
+if [[ $IMAGE_URL == *".img" ]]; then
+  mv $TEMP/$IMG_FILE $IMG_DIR/ || exit $?
+  cp -v $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
 
-echo -n "Adding ramdisk ... "
-RAMDISK_ID=$(glance #{insecure} image-create \
-    --name="$IMG_NAME-tempest-ramdisk" \
-    --visibility public --container-format ari \
-    --disk-format ari < $(findfirst '*-initrd') | extract_id)
-echo "done."
-[ -n "$RAMDISK_ID" ] || exit 1
+  echo -n "Adding alt image ... "
+  ALT_MACHINE_ID=$(glance #{insecure} image-create \
+      --name="$IMG_NAME-tempest-alt" \
+      --visibility public --container-format bare --disk-format qcow2 \
+      < $(findfirst '*.img') | extract_id)
+  echo "done."
+  [ -n "$ALT_MACHINE_ID" ] || exit 1
 
-echo -n "Adding alt image ... "
-ALT_MACHINE_ID=$(glance #{insecure} image-create \
-    --name="$IMG_NAME-tempest-machine-alt" \
-    --visibility public --container-format ami --disk-format ami \
-    --property kernel_id=$KERNEL_ID \
-    --property ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
-echo "done."
-[ -n "$ALT_MACHINE_ID" ] || exit 1
+  echo -n "Saving alt machine id ..."
+  echo $ALT_MACHINE_ID > #{alt_machine_id_file}
 
-echo -n "Saving alt machine id ..."
-echo $ALT_MACHINE_ID > #{alt_machine_id_file}
+  echo -n "Adding image ... "
+  MACHINE_ID=$(glance #{insecure} image-create \
+      --name="$IMG_NAME-tempest" \
+      --visibility public --container-format bare --disk-format qcow2 \
+      < $(findfirst '*.img') | extract_id)
+  echo "done."
+  [ -n "$MACHINE_ID" ] || exit 1
 
-echo -n "Adding image ... "
-MACHINE_ID=$(glance #{insecure} image-create \
-    --name="$IMG_NAME-tempest-machine" \
-    --visibility public --container-format ami --disk-format ami \
-    --property kernel_id=$KERNEL_ID \
-    --property ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
-echo "done."
-[ -n "$MACHINE_ID" ] || exit 1
+  echo -n "Saving machine id ..."
+  echo $MACHINE_ID > #{machine_id_file}
+  echo "done."
+else
+  echo "Unpacking image ... "
+  tar -xvzf $TEMP/$IMG_FILE -C $IMG_DIR || exit $?
+  cp -v $(findfirst '*-vmlinuz') $(findfirst '*-initrd') $(findfirst '*.img') #{node[:tempest][:tempest_path]}/etc/cirros/ || exit $?
 
-echo -n "Saving machine id ..."
-echo $MACHINE_ID > #{machine_id_file}
-echo "done."
+  echo -n "Adding kernel ... "
+  KERNEL_ID=$(glance #{insecure} image-create \
+      --name "$IMG_NAME-tempest-kernel" \
+      --visibility public --container-format aki \
+      --disk-format aki < $(findfirst '*-vmlinuz') | extract_id)
+  echo "done."
+  [ -n "$KERNEL_ID" ] || exit 1
+
+  echo -n "Adding ramdisk ... "
+  RAMDISK_ID=$(glance #{insecure} image-create \
+      --name="$IMG_NAME-tempest-ramdisk" \
+      --visibility public --container-format ari \
+      --disk-format ari < $(findfirst '*-initrd') | extract_id)
+  echo "done."
+  [ -n "$RAMDISK_ID" ] || exit 1
+
+  echo -n "Adding alt image ... "
+  ALT_MACHINE_ID=$(glance #{insecure} image-create \
+      --name="$IMG_NAME-tempest-machine-alt" \
+      --visibility public --container-format ami --disk-format ami \
+      --property kernel_id=$KERNEL_ID \
+      --property ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
+  echo "done."
+  [ -n "$ALT_MACHINE_ID" ] || exit 1
+
+  echo -n "Saving alt machine id ..."
+  echo $ALT_MACHINE_ID > #{alt_machine_id_file}
+
+  echo -n "Adding image ... "
+  MACHINE_ID=$(glance #{insecure} image-create \
+      --name="$IMG_NAME-tempest-machine" \
+      --visibility public --container-format ami --disk-format ami \
+      --property kernel_id=$KERNEL_ID \
+      --property ramdisk_id=$RAMDISK_ID < $(findfirst '*.img') | extract_id)
+  echo "done."
+  [ -n "$MACHINE_ID" ] || exit 1
+
+  echo -n "Saving machine id ..."
+  echo $MACHINE_ID > #{machine_id_file}
+  echo "done."
+fi
 
 rm -rf $TEMP
 
