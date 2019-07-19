@@ -63,7 +63,7 @@ personality = True
 # only supported by LVM driver
 # see https://docs.openstack.org/cinder/rocky/reference/support-matrix.html#operation_multi_attach
 volume_multiattach = False
-swap_volume = True
+swap_volume = <%= @storage_protocol != 'ceph' ? 'true' : 'false' %>
 attach_encrypted_volume = <%= @use_attach_encrypted_volume %>
 api_extensions = all
 
@@ -174,7 +174,7 @@ lock_path = /run/tempest
 
 [scenario]
 img_dir = <%= @tempest_path %>/etc/cirros/
-img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-blank.img
+img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-disk.img
 ami_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-blank.img
 ari_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-initrd
 aki_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-vmlinuz
