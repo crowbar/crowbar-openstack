@@ -29,7 +29,11 @@ module Openstack
     # so the next time that Chef runs, will synchronize and update the
     # OpenStack service database
     def self.unset_db_synced
-      # we can't search by roles (like 'keystone-server') because at
+      # keystone is not included here because we keep it running for some longer
+      # during the upgrade and don't what the chef-recipes to trigger the database
+      # schema migrations.
+
+      # we can't search by roles (like 'neutron-server') because at
       # this point the nodes maybe don't have roles assigned anymore
       components = [
         :ceilometer, :cinder, :glance, :heat,
@@ -37,19 +41,10 @@ module Openstack
       ]
       NodeObject.all.each do |node|
         save_it = false
-        # When the setup was deploying with "clone_stateless_services=false" we
-        # keep keystone running for some longer and don't what the chef-recipes
-        # to trigger the database schema migrations. So we only add keystone here
-        # if clone_stateless_services was true.
-        clone_stateless = if node["pacemaker"]
-          node["pacemaker"]["clone_stateless_services_orig"].nil? ||
-            node["pacemaker"]["clone_stateless_services_orig"]
-        else
-          true
-        end
 
         complete_components = components.clone
-        complete_components << "keystone" if clone_stateless
+        # run keystone db_sync only in non-ha scenarios
+        complete_components << "keystone" unless node["pacemaker"]
         complete_components.each do |component|
           [:db_synced, :api_db_synced].each do |flag|
             if node[component] && node[component][flag]
