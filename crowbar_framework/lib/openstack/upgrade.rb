@@ -44,7 +44,7 @@ module Openstack
 
         complete_components = components.clone
         # run keystone db_sync only in non-ha scenarios
-        complete_components << "keystone" unless node["pacemaker"]
+        complete_components << "keystone" if node["keystone"] && !node["keystone"]["ha"]["enabled"]
         complete_components.each do |component|
           [:db_synced, :api_db_synced].each do |flag|
             if node[component] && node[component][flag]
