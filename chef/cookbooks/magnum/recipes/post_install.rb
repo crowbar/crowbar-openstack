@@ -67,6 +67,8 @@ execute "create_magnum_flavor" do
   command "#{openstack_cmd} #{openstack_args_nova} flavor create --ram 1024 --disk 10 \
   --vcpus 1 m1.magnum"
   not_if "#{openstack_cmd} #{openstack_args_nova} flavor list --all | grep -q m1.magnum"
+  retries 5
+  retry_delay 10
   action :nothing
 end
 
