@@ -13,9 +13,7 @@ admin_username = <%= @keystone_settings['admin_user'] %>
 admin_project_name = <%= @keystone_settings['default_tenant'] %>
 admin_password = <%= @keystone_settings['admin_password'] %>
 admin_domain_name = Default
-<%- unless @tempest_roles.empty? %>
 tempest_roles = <%= @tempest_roles %>
-<%- end %>
 <%- if @enabled_services.include? "baremetal" %>
 create_isolated_networks = False
 <%- end %>
@@ -63,7 +61,7 @@ personality = True
 # only supported by LVM driver
 # see https://docs.openstack.org/cinder/rocky/reference/support-matrix.html#operation_multi_attach
 volume_multiattach = False
-swap_volume = True
+swap_volume = <%= @storage_protocol != 'ceph' ? 'true' : 'false' %>
 attach_encrypted_volume = <%= @use_attach_encrypted_volume %>
 api_extensions = all
 
@@ -134,6 +132,7 @@ image_id = <%= @magnum_settings['image_id'] %>
 nic_id = floating
 flavor_id = <%= @magnum_settings['flavor_id'] %>
 master_flavor_id = <%= @magnum_settings['master_flavor_id'] %>
+dns_nameserver = <%= @dns_server_node_ip %>
 
 [monitoring]
 region = <%= @keystone_settings['endpoint_region'] %>
@@ -174,7 +173,7 @@ lock_path = /run/tempest
 
 [scenario]
 img_dir = <%= @tempest_path %>/etc/cirros/
-img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-blank.img
+img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-disk.img
 ami_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-blank.img
 ari_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-initrd
 aki_img_file = cirros-<%= @cirros_version %>-<%= @cirros_arch %>-vmlinuz
