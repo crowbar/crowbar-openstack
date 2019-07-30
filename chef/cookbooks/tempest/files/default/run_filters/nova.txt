@@ -1,0 +1,7 @@
++tempest.api.compute.*
++tempest.scenario.test_server.*
++tempest.scenario.test_snapshot.*
++tempest.scenario.test_minimum.*
++tempest.scenario.test_shelve.*
++tempest.scenario.test_stamp.*
++tempest.scenario.test_aggregates.*

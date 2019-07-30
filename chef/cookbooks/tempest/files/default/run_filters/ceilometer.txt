@@ -1,0 +1,4 @@
++ceilometer.*
+
+# BUG lp 1673738
+-ceilometer.tests.tempest.scenario.test_object_storage_telemetry_middleware.TestObjectStorageTelemetry.test_swift_middleware_notifies
