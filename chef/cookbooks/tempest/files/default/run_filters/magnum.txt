@@ -1,0 +1,4 @@
++magnum_tempest_plugin.*
+
+# Fails when using 2+ controllers
+-magnum_tempest_plugin.tests.api.v1.test_magnum_service.MagnumServiceTest.test_magnum_service_list
