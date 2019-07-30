@@ -137,3 +137,11 @@ default[:monasca][:persister][:influxdb_user] = "mon_persister"
 default[:monasca][:api][:user] = "monasca-api"
 default[:monasca][:api][:group] = "monasca"
 default[:monasca][:api][:influxdb_user] = "mon_api"
+
+# SSL
+default[:monasca][:ssl][:certfile] = "/etc/monasca/ssl/certs/signing_cert.pem"
+default[:monasca][:ssl][:keyfile] = "/etc/monasca/ssl/private/signing_key.pem"
+default[:monasca][:ssl][:generate_certs] = false
+default[:monasca][:ssl][:insecure] = false
+default[:monasca][:ssl][:cert_required] = false
+default[:monasca][:ssl][:ca_certs] = "/etc/monasca/ssl/certs/ca.pem"

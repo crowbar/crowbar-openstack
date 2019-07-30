@@ -38,6 +38,7 @@ output {
     project_domain_name => "<%= @keystone_settings['admin_domain'] %>"
     ### monasca specific settings
     monasca_log_api_url => "<%= @monasca_log_api_url %>"
+    monasca_log_api_insecure => "<%= @insecure %>"
     num_of_logs => <%= @log_agent_settings[:num_of_logs] %>
     elapsed_time_sec => <%= @log_agent_settings[:elapsed_time_sec] %>
     delay => <%= @log_agent_settings[:delay] %>

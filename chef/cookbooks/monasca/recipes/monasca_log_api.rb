@@ -56,13 +56,11 @@ crowbar_openstack_wsgi "WSGI entry for monasca-log-api" do
   script_alias "/usr/bin/monasca-log-api-wsgi"
   user node[:monasca][:log_api][:user]
   group node[:monasca][:log_api][:group]
-  ssl_enable node[:monasca][:log_api][:protocol] == "https"
-  # FIXME(toabctl): the attributes do not even extist so SSL is broken!
-  ssl_certfile nil # node[:monasca][:ssl][:certfile]
-  ssl_keyfile nil # node[:monasca][:ssl][:keyfile]
-  # if node[:monasca][:ssl][:cert_required]
-  #  ssl_cacert node[:monasca][:ssl][:ca_certs]
-  # end
+  ssl_enable node[:monasca][:api][:protocol] == "https"
+  ssl_certfile node[:monasca][:ssl][:certfile]
+  ssl_keyfile node[:monasca][:ssl][:keyfile]
+  ssl_cacert node[:monasca][:ssl][:ca_certs] if
+    node[:monasca][:ssl][:cert_required]
 end
 
 apache_site "monasca-log-api.conf" do

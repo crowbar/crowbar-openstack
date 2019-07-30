@@ -73,6 +73,14 @@
           "service_role": "monasca-agent"
         }
       },
+      "ssl": {
+        "certfile": "/etc/monasca/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/monasca/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
+        "cert_required": false,
+        "ca_certs": "/etc/monasca/ssl/certs/ca.pem"
+      },
       "api": {
         "url": "",
         "bind_host": "*",
@@ -167,7 +175,7 @@
     "monasca": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 315,
+      "schema-revision": 316,
       "element_states": {
         "monasca-server": [ "readying", "ready", "applying" ],
         "monasca-agent": [ "readying", "ready", "applying" ],

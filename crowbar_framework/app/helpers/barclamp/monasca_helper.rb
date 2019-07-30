@@ -51,5 +51,15 @@ module Barclamp
         selected.to_s
       )
     end
+
+    def api_protocols_for_monasca(selected)
+      options_for_select(
+        [
+          ["HTTP", "http"],
+          ["HTTPS", "https"]
+        ],
+        selected.to_s
+      )
+    end
   end
 end

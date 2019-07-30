@@ -24,6 +24,18 @@ monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_servers[0])
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
+if node[:monasca][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for monasca-api" do
+    generate_certs node[:monasca][:ssl][:generate_certs]
+    certfile node[:monasca][:ssl][:certfile]
+    keyfile node[:monasca][:ssl][:keyfile]
+    group node[:monasca][:api][:group]
+    fqdn node[:fqdn]
+    cert_required node[:monasca][:ssl][:cert_required]
+    ca_certs node[:monasca][:ssl][:ca_certs]
+  end
+end
+
 memcached_servers = MemcachedHelper.get_memcached_servers(
   if node[:monasca][:ha][:enabled]
     CrowbarPacemakerHelper.cluster_nodes(node, "monasca-server")
@@ -168,12 +180,10 @@ crowbar_openstack_wsgi "WSGI entry for monasca-api" do
   user node[:monasca][:api][:user]
   group node[:monasca][:api][:group]
   ssl_enable node[:monasca][:api][:protocol] == "https"
-  # FIXME(toabctl): the attributes do not even extist so SSL is broken!
-  ssl_certfile nil # node[:monasca][:ssl][:certfile]
-  ssl_keyfile nil # node[:monasca][:ssl][:keyfile]
-  # if node[:monasca][:ssl][:cert_required]
-  #  ssl_cacert node[:monasca][:ssl][:ca_certs]
-  # end
+  ssl_certfile node[:monasca][:ssl][:certfile]
+  ssl_keyfile node[:monasca][:ssl][:keyfile]
+  ssl_cacert node[:monasca][:ssl][:ca_certs] if
+    node[:monasca][:ssl][:cert_required]
 end
 
 apache_site "monasca-api.conf" do

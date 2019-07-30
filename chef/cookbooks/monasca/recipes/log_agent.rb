@@ -72,6 +72,7 @@ template "/etc/monasca-log-agent/agent.conf" do
   mode 0o640
   variables(
     monasca_log_api_url: monasca_log_api_url,
+    insecure: node[:monasca][:ssl][:insecure],
     log_agent_keystone: log_agent_keystone,
     log_agent_settings: log_agent_settings,
     log_agent_dimensions: log_agent_dimensions,
