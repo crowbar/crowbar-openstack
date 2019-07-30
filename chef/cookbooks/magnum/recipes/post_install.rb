@@ -60,6 +60,8 @@ execute "create_magnum_image" do
   --container-format bare --public --property os_distro=opensuse \
   #{service_sles_image_name}"
   not_if "#{openstack_cmd} #{openstack_args_glance} image list -f value -c Name | grep -q #{service_sles_image_name}"
+  retries 5
+  retry_delay 10
   action :nothing
 end
 
