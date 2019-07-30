@@ -77,7 +77,8 @@
       "kvm": {
         "nested_virt": false,
         "ksm_enabled": false,
-        "disk_cachemodes": "network=writeback"
+        "disk_cachemodes": "network=writeback",
+        "max_threads_per_process": 0
       },
       "vcenter": {
         "host": "",
@@ -182,7 +183,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 125,
+      "schema-revision": 126,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],
