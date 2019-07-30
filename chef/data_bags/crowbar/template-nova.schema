@@ -136,7 +136,8 @@
               "type": "map", "required": true, "mapping": {
                 "nested_virt": { "type": "bool", "required": false },
                 "ksm_enabled": { "type": "bool", "required": true },
-                "disk_cachemodes": { "type": "str", "required": true }
+                "disk_cachemodes": { "type": "str", "required": true },
+                "max_threads_per_process": { "type": "int", "required": true }
               }
             },
             "vcenter": {
