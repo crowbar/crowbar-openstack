@@ -1,0 +1,4 @@
++manila_tempest_tests.tests.*
+
+# bsc#1137262
+-manila_tempest_tests.tests.scenario.test_share_basic_ops.TestShareBasicOpsNFS.test_read_write_two_vms

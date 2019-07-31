@@ -1,0 +1,12 @@
++tempest.api.network.*
++tempest.scenario.test_network.*
++tempest.scenario.test_security_groups.*
++neutron_tempest_plugin.*
+
+# This test uses the hypervisor_hostname (dfa-16-3e-0a-9d-4f.crowbar.prv.suse.net) to ensure the
+# instances are created on the same compute, however nova-scheduler uses the compute hostname
+# (dfa-16-3e-0a-9d-4f) to schedule the instance on the compute.
+-neutron_tempest_plugin.scenario.admin.test_floatingip.FloatingIpTestCasesAdmin.test_two_vms_fips
+
+# Upstream bug https://bugs.launchpad.net/nova/+bug/1832028
+-tempest.scenario.test_network_advanced_server_ops.TestNetworkAdvancedServerOps.test_server_connectivity_cold_migration_revert

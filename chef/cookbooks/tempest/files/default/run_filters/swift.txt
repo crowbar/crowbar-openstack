@@ -1,0 +1,2 @@
++tempest.api.object_storage.*
++tempest.scenario.test_object_storage.*

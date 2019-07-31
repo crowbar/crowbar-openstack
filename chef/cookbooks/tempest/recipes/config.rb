@@ -627,3 +627,14 @@ template "#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh" do
     tempest_path: node[:tempest][:tempest_path]
   )
 end
+
+remote_directory "#{node[:tempest][:tempest_path]}/run_filters/" do
+  source "run_filters"
+  action :create
+  recursive true
+end
+
+cookbook_file "#{node[:tempest][:tempest_path]}/bin/tests2skip.py" do
+  source "tests2skip.py"
+  mode 0755
+end

@@ -1,0 +1,4 @@
++tempest.api.volume.*
++tempest.scenario.test_volume.*
++tempest.scenario.test_encrypted.*
++cinder_tempest_plugin.*
