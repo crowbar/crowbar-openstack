@@ -64,6 +64,9 @@ service "grafana-server" do
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
   subscribes :restart, resources(template: "/etc/grafana/grafana.ini")
+  # grafana-server runs database migrations on startup, these tend to fail sometimes but
+  # they usually self-correct when retried
+  retries 2
 end
 
 ["monasca-grafana-datasource", "grafana-natel-discrete-panel",
