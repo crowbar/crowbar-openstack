@@ -13,6 +13,15 @@
 # limitations under the License.
 #
 
+# delete obsolete ceilometer-api configs (even if monasca was not detected)
+apache_site "ceilometer-api.conf" do
+  enable false
+end
+crowbar_openstack_wsgi "delete WSGI entry for ceilometer-api" do
+  daemon_process "ceilometer-api"
+  action :delete
+end
+
 monasca_server = node_search_with_cache("roles:monasca-server").first
 if monasca_server.nil?
   Chef::Log.warn("No monasca-server found. Skip Ceilometer setup.")
