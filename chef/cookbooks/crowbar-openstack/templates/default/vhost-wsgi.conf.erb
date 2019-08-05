@@ -26,6 +26,34 @@ Listen <%= @bind_host %>:<%= @bind_port %>
     <% end -%>
 <% end %>
 
+<% if @openidc_enabled %>
+# See
+# https://github.com/zmartzone/mod_auth_openidc/blob/master/auth_openidc.conf
+    OIDCClaimPrefix "OIDC-"
+    OIDCResponseType "<%= @openidc_response_type %>"
+    OIDCScope "<%= @openidc_scope %>"
+    OIDCProviderMetadataURL "<%= @openidc_metadata_url %>"
+    OIDCClientID  "<%= @openidc_client_id %>"
+    OIDCClientSecret "<%= @openidc_client_secret %>"
+    OIDCCryptoPassphrase "<%= @openidc_passphrase %>"
+    OIDCRedirectURI "<%= @openidc_redirect_uri %>"
+
+    <Location /v3/OS-FEDERATION/identity_providers/<%= @openidc_provider %>/protocols/openid/auth>
+        Require valid-user
+        AuthType openid-connect
+    </Location>
+
+    <Location /v3/auth/OS-FEDERATION/websso/openid>
+        Require valid-user
+        AuthType openid-connect
+    </Location>
+
+    <Location /v3/auth/OS-FEDERATION/identity_providers/<%= @openidc_provider %>/protocols/openid/websso>
+        Require valid-user
+        AuthType openid-connect
+    </Location>
+<% end %>
+
     ErrorLogFormat "%{cu}t %M"
     ErrorLog <%= @apache_log_dir %>/<%= @error_log %>
     CustomLog <%= @apache_log_dir %>/<%= @access_log %> combined

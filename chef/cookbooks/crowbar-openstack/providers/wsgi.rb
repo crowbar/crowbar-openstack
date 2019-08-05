@@ -67,6 +67,15 @@ action :create do
         ssl_keyfile: current_resource.ssl_keyfile,
         ssl_cacert: current_resource.ssl_cacert,
         timeout: current_resource.timeout,
+        openidc_enabled: current_resource.openidc_enabled,
+        openidc_provider: current_resource.openidc_provider,
+        openidc_response_type: current_resource.openidc_response_type,
+        openidc_scope: current_resource.openidc_scope,
+        openidc_metadata_url: current_resource.openidc_metadata_url,
+        openidc_client_id: current_resource.openidc_client_id,
+        openidc_client_secret: current_resource.openidc_client_secret,
+        openidc_passphrase: current_resource.openidc_passphrase,
+        openidc_redirect_uri: current_resource.openidc_redirect_uri,
         access_log: current_resource.access_log,
         error_log: current_resource.error_log,
         apache_log_dir: node[:apache][:log_dir],
@@ -115,6 +124,16 @@ def load_current_resource
   @current_resource.ssl_cacert(@new_resource.ssl_cacert)
 
   @current_resource.timeout(@new_resource.timeout)
+
+  @current_resource.openidc_enabled(@new_resource.openidc_enabled)
+  @current_resource.openidc_provider(@new_resource.openidc_provider)
+  @current_resource.openidc_response_type(@new_resource.openidc_response_type)
+  @current_resource.openidc_scope(@new_resource.openidc_scope)
+  @current_resource.openidc_metadata_url(@new_resource.openidc_metadata_url)
+  @current_resource.openidc_client_id(@new_resource.openidc_client_id)
+  @current_resource.openidc_client_secret(@new_resource.openidc_client_secret)
+  @current_resource.openidc_passphrase(@new_resource.openidc_passphrase)
+  @current_resource.openidc_redirect_uri(@new_resource.openidc_redirect_uri)
 
   @current_resource.access_log(_get_access_log)
   @current_resource.error_log(_get_error_log)
