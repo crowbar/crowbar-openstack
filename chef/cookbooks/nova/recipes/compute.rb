@@ -200,7 +200,8 @@ case node[:nova][:libvirt_type]
         mode 0644
         variables(
             user: libvirt_user,
-            group: libvirt_group
+            group: libvirt_group,
+            max_threads_per_process: node[:nova][:kvm][:max_threads_per_process]
         )
         notifies :create, "ruby_block[restart_libvirtd]", :immediately
       end
