@@ -15,14 +15,15 @@
 
 package "openstack-designate"
 
-network_settings = DesignateHelper.network_settings(node)
+designate_server_node = node_search_with_cache("roles:designate-server").first
+network_settings = DesignateHelper.network_settings(designate_server_node)
 db_settings = fetch_database_settings
 
 include_recipe "database::client"
 include_recipe "#{db_settings[:backend_name]}::client"
 include_recipe "#{db_settings[:backend_name]}::python-client"
 
-public_host = CrowbarHelper.get_host_for_public_url(node,
+public_host = CrowbarHelper.get_host_for_public_url(designate_server_node,
                                                     node[:designate][:api][:protocol] == "https",
                                                     node[:designate][:ha][:enabled])
 
