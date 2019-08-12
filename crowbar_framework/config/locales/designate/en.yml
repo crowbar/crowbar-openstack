@@ -21,3 +21,7 @@ en:
         rabbitmq_instance: 'RabbitMQ'
         database_instance: 'Database Instance'
         keystone_instance: 'Keystone'
+        resource_email: 'E-mail address of hostmaster'
+        resource_project: 'Project that will own created resources'
+      validation:
+        invalid_email_address: 'E-mail address %{email} is invalid.'

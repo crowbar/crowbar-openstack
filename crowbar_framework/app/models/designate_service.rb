@@ -93,6 +93,15 @@ class DesignateService < OpenstackServiceObject
     validate_one_for_role proposal, "designate-server"
     validate_one_for_role proposal, "designate-worker"
 
+    designate_bc = proposal["attributes"][@bc_name]
+    email = designate_bc["resource_email"]
+    if email !~ /\w@[^.]+\.\w+/
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.invalid_email_address",
+        email: email
+      )
+    end
+
     super
   end
 
