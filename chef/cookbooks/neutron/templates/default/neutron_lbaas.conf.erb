@@ -1,6 +1,12 @@
 [DEFAULT]
 interface_driver = <%= @interface_driver %>
+
 [quotas]
+#quota_loadbalancer = 10
+quota_loadbalancer = -1
+#quota_pool = 10
+quota_pool = -1
+
 [service_auth]
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
