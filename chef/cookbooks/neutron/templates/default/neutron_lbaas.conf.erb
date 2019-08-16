@@ -15,6 +15,7 @@ admin_password = <%= @keystone_settings['service_password'] %>
 region = <%= @keystone_settings['endpoint_region'] %>
 admin_user_domain = <%= @keystone_settings['admin_domain'] %>
 admin_project_domain = <%= @keystone_settings['admin_domain'] %>
+
 [service_providers]
 <% if @use_lbaas -%>
 <%
@@ -29,4 +30,3 @@ admin_project_domain = <%= @keystone_settings['admin_domain'] %>
 %>
 service_provider=<%= service_provider %>
 <% end -%>
-[certificates]
