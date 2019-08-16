@@ -84,7 +84,13 @@ nova_insecure = CrowbarOpenStackHelper.insecure(nova_config) || keystone_setting
 service_plugins = ["neutron.services.metering.metering_plugin.MeteringPlugin",
                    "neutron_fwaas.services.firewall.fwaas_plugin.FirewallPlugin"]
 if neutron[:neutron][:use_lbaas]
-  service_plugins.push("neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2")
+  lbaas_plugin = if neutron[:neutron][:lbaasv2_driver] == "octavia"
+    "neutron_lbaas.services.loadbalancer.proxy_plugin.LoadBalancerProxyPluginv2"
+  else
+    "neutron_lbaas.services.loadbalancer.plugin.LoadBalancerPluginv2"
+  end
+
+  service_plugins.push(lbaas_plugin)
 end
 
 if neutron[:neutron][:networking_plugin] == "ml2"
@@ -130,6 +136,14 @@ unless designate_server.nil?
   designate_public_uri = "#{api_protocol}://#{public_host}:#{node_designate[:api][:bind_port]}/v2"
 end
 
+octavia_api = nil
+octavia_nodes = search(:node, "roles:octavia-api") || []
+unless octavia_nodes.empty?
+  octavia_node = octavia_nodes[0]
+  octavia_api = octavia_node[:octavia][:api][:protocol] + "://" +
+    octavia_node.name + ":" + octavia_node[:octavia][:api][:port].to_s
+end
+
 template neutron[:neutron][:config_file] do
     cookbook "neutron"
     source "neutron.conf.erb"
@@ -172,7 +186,8 @@ template neutron[:neutron][:config_file] do
       ipam_driver: ipam_driver,
       rpc_workers: neutron[:neutron][:rpc_workers],
       use_apic_gbp: use_apic_gbp,
-      default_log_levels: neutron[:neutron][:default_log_levels]
+      default_log_levels: neutron[:neutron][:default_log_levels],
+      octavia_api: octavia_api
     )
 end
 
@@ -202,4 +217,3 @@ if node[:platform_family] == "rhel"
     to node[:neutron][:config_file]
   end
 end
-

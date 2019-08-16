@@ -264,3 +264,12 @@ api_extensions = all
 
 [image_signature_verification]
 enforced = false
+
+<% if @neutron_lbaasv2_driver == "octavia" -%>
+[load_balancer]
+provider = amphora
+test_with_ipv6 = false
+
+[loadbalancer-feature-enabled]
+terminated_tls_enabled = false
+<% end -%>

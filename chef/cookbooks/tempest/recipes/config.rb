@@ -405,6 +405,7 @@ unless neutrons[0].nil?
   if neutron_attr[:use_lbaas]
     neutron_api_extensions += ", lbaasv2, lbaas_agent_schedulerv2"
     neutron_api_extensions += ", lb-graph, lb_network_vip"
+    neutron_lbaasv2_driver = neutron_attr[:lbaasv2_driver]
   end
   neutron_api_extensions += ", dvr" if neutron_attr[:use_dvr]
   neutron_api_extensions += ", l3-ha" if neutron_attr[:l3_ha][:use_l3_ha]
@@ -535,6 +536,12 @@ dns_server_node_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
   "admin"
 ).address
 
+unless neutron_lbaasv2_driver.nil? || neutron_lbaasv2_driver != "octavia"
+  tempest_roles += ["load-balancer_observer", "load-balancer_global_observer",
+                    "load-balancer_member", "load-balancer_quota_admin",
+                    "load-balancer_admin"]
+end
+
 template "/etc/tempest/tempest.conf" do
   source "tempest.conf.erb"
   mode 0o640
@@ -587,6 +594,7 @@ template "/etc/tempest/tempest.conf" do
         public_network_id: node[:tempest][:public_network_id],
         neutron_api_extensions: neutron_api_extensions,
         neutron_ml2_mechanism_drivers: neutron_ml2_mechanism_drivers,
+        neutron_lbaasv2_driver: neutron_lbaasv2_driver,
         # object storage settings
         swift_cluster_name: swift_cluster_name,
         object_versioning: swift_allow_versions,

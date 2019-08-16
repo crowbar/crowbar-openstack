@@ -1,0 +1,128 @@
+# Copyright 2019, SUSE LINUX Products GmbH
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+[DEFAULT]
+debug = <%= @node[:octavia][:debug] %>
+transport_url = <%= @rabbit_settings[:url] %>
+
+[api_settings]
+api_handler = queue_producer
+bind_host = <%= @bind_host %>
+bind_port = <%= @bind_port %>
+
+[certificates]
+cert_generator = local_cert_generator
+cert_manager = barbican_cert_manager
+ca_certificate = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_cert_path] %>
+ca_private_key = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_key_path] %>
+ca_private_key_passphrase = <%= @node[:octavia][:certs][:passphrase] %>
+
+[controller_worker]
+amp_active_retries = 40
+amp_active_wait_sec = 10
+amp_flavor_id = <%= @node[:octavia][:flavor_id] %>
+amp_image_tag = <%= @node[:octavia][:amphora][:image_tag] %>
+amp_boot_network_list = <%= @node[:octavia][:net_id] %>
+amp_secgroup_list = <%= @node[:octavia][:sec_group_id] %>
+client_ca = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:client_ca_cert_path] %>
+compute_driver = compute_nova_driver
+amphora_driver = amphora_haproxy_rest_driver
+network_driver = allowed_address_pairs_driver
+loadbalancer_topology = SINGLE
+<% if @node[:octavia][:amphora][:ssh_access][:enabled] -%>
+amp_ssh_key_name = "<%= @node[:octavia][:amphora][:ssh_access][:keyname]%>"
+<% end %>
+
+[database]
+connection = <%= @octavia_db_connection %>
+
+[haproxy_amphora]
+client_cert = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:client_cert_and_key_path] %>
+server_ca = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][:server_ca_cert_path] %>
+key_path = <%= @node[:octavia][:certs][:cert_path]%><%= @node[:octavia][:amphora][:keypair_private_cert]%>
+base_path = /var/lib/octavia
+base_cert_dir = <%= @node[:octavia][:certs][:cert_path]%>
+connection_max_retries = <%= @node[:octavia][:amphora][:connection_max_retries] %>
+connection_retry_interval = <%= @node[:octavia][:amphora][:connection_retry_interval] %>
+
+[health_manager]
+bind_ip = <%= @bind_host %>
+bind_port = <%= @node[:octavia][:health_manager][:port] %>
+controller_ip_port_list = <%= @octavia_healthmanager_hosts %>
+heartbeat_key = <%= @node[:octavia][:health_manager][:heartbeat_key] %>
+event_streamer_driver = queue_event_streamer
+heartbeat_interval = <%= @node[:octavia][:health_manager][:heartbeat_interval] %>
+heartbeat_timeout = <%= @node[:octavia][:health_manager][:heartbeat_timeout] %>
+health_check_interval = <%= @node[:octavia][:health_manager][:health_check_interval] %>
+
+[house_keeping]
+
+[keystone_authtoken]
+auth_version = <%= @octavia_keystone_settings['api_version'] %>
+www_authenticate_uri = <%= @octavia_keystone_settings["public_auth_url"] %>
+auth_url = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
+                                                    @octavia_keystone_settings["internal_url_host"],
+                                                    @octavia_keystone_settings["service_port"],
+                                                    @octavia_keystone_settings['api_version']) %>
+auth_type = password
+project_name = <%= @octavia_keystone_settings['service_tenant'] %>
+project_domain_name = <%= @octavia_keystone_settings['default_user_domain'] %>
+user_domain_name = <%= @octavia_keystone_settings['default_user_domain'] %>
+username = <%= @octavia_keystone_settings['service_user'] %>
+password =  <%= @octavia_keystone_settings['service_password'] %>
+region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
+
+[networking]
+port_detach_timeout = <%= @node[:octavia][:networking][:port_detach_timeout] %>
+
+[neutron]
+endpoint = <%= @neutron_endpoint %>
+endpoint_type = "internalURL"
+
+[nova]
+endpoint = <%= @nova_endpoint %>
+endpoint_type = "internalURL"
+
+[oslo_messaging]
+topic = octavia_prov
+rpc_thread_pool_size = <%= @node[:octavia][:oslo][:rpc_thread_pool_size] %>
+
+[oslo_messaging_rabbit]
+amqp_durable_queues = <%= @rabbit_settings[:durable_queues] %>
+rabbit_ha_queues = <%= @rabbit_settings[:ha_queues] %>
+ssl = <%= @rabbit_settings[:use_ssl] %>
+<% if @rabbit_settings[:client_ca_certs] -%>
+ssl_ca_file = <%= @rabbit_settings[:client_ca_certs] %>
+<% end -%>
+heartbeat_timeout_threshold = <%= @rabbit_settings[:heartbeat_timeout] %>
+
+[service_auth]
+auth_url = <%= KeystoneHelper.versioned_service_URL(@octavia_keystone_settings["protocol"],
+                                                    @octavia_keystone_settings["internal_url_host"],
+                                                    @octavia_keystone_settings["service_port"],
+                                                    @octavia_keystone_settings['api_version']) %>
+auth_type = password
+project_name = <%= @octavia_keystone_settings['service_project'] %>
+project_domain_name = <%= @octavia_keystone_settings['default_user_domain'] %>
+user_domain_name = <%= @octavia_keystone_settings['default_user_domain'] %>
+username = <%= @octavia_keystone_settings['service_user'] %>
+password =  <%= @octavia_keystone_settings['service_password'] %>
+region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
+cafile = /etc/ssl/ca-bundle.pem
+
+<% if @node[:octavia][:debug] %>
+[task_flow]
+disable_revert = False
+<% end %>

@@ -1,0 +1,41 @@
+{
+  "replacing": {
+
+  },
+  "platforms": {
+
+  },
+  "license": "Apache 2.0 License, Copyright (c) 2019 SUSE Linux GmbH. - http://www.apache.org/licenses/LICENSE-2.0",
+  "maintainer_email": "crowbar@googlegroups.com",
+  "groupings": {
+
+  },
+  "recommendations": {
+
+  },
+  "suggestions": {
+
+  },
+  "description": "Openstack Octavia server deployment recipes.",
+  "version": "1.0.0",
+  "conflicting": {
+
+  },
+  "attributes": {
+
+  },
+  "long_description": "This cookbook deployes the openstack octavia LBaaS\r\n ",
+  "name": "octavia",
+  "recipes": {
+
+  },
+  "providing": {
+
+  },
+  "dependencies": {
+    "apt": [
+
+    ]
+  },
+  "maintainer": "SUSE Linux, GmbH."
+}
