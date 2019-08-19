@@ -31,8 +31,22 @@ package "euca2ools"
 
 package "openstack-tempest-test"
 
-["keystone", "swift", "glance", "cinder", "neutron", "nova",
- "heat", "ceilometer", "sahara"].each do |component|
+[
+  "barbican",
+  "ceilometer",
+  "cinder",
+  "designate",
+  "glance",
+  "heat",
+  "ironic",
+  "keystone",
+  "magnum",
+  "manila",
+  "neutron",
+  "nova",
+  "sahara",
+  "swift"
+].each do |component|
   package "python-#{component}client"
 end
 
@@ -41,4 +55,13 @@ if node[:kernel][:machine] == "x86_64" &&
   ["api", "log-api"].each do |component|
     package "python-monasca-#{component}"
   end
+end
+
+[
+  "barbican",
+  "designate",
+  "heat",
+  "monasca"
+].each do |component|
+  package "python-#{component}-tempest-plugin" if RoleHelper.config_for_role_exists?(component)
 end
