@@ -519,7 +519,7 @@ template "#{node[:apache][:dir]}/sites-available/openstack-dashboard.conf" do
     grafana_url: grafana_url
   )
   if ::File.symlink?("#{node[:apache][:dir]}/sites-enabled/openstack-dashboard.conf") || node[:platform_family] == "suse"
-    notifies :reload, resources(service: "apache2"), :immediately
+    notifies :restart, resources(service: "apache2"), :immediately
   end
 end
 
@@ -586,4 +586,14 @@ unless monasca_ui_pkgname.nil?
       notifies :reload, "service[horizon]"
     end
   end
+end
+
+# Make a simple request to load cache right away.
+bash "build horizon cache" do
+  url = "http://localhost:#{bind_port}"
+  url = "http://#{bind_host}:#{bind_port}" if ha_enabled
+  code <<-EOH
+    curl --location --max-time 5 --silent --insecure --show-error #{url}
+    EOH
+  ignore_failure true
 end
