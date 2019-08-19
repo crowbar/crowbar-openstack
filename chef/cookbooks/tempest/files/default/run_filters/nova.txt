@@ -5,9 +5,3 @@
 +tempest.scenario.test_shelve.*
 +tempest.scenario.test_stamp.*
 +tempest.scenario.test_aggregates.*
-
-# Upstream bug https://bugs.launchpad.net/nova/+bug/1832028
--tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_resize_server_revert
--tempest.api.compute.admin.test_migrations.MigrationsAdminTest.test_resize_server_revert_deleted_flavor
--tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_resize_server_revert_with_volume_attached
--tempest.api.compute.admin.test_migrations.MigrationsAdminTest.test_revert_cold_migration
