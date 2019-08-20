@@ -59,10 +59,6 @@ cluster_nodes = ha_enabled ? node[:pacemaker][:elements]["pacemaker-cluster-memb
 cluster_nodes = cluster_nodes.map { |n| Chef::Node.load(n) }
 cluster_nodes.sort_by! { |n| n[:hostname] }
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? cluster_nodes : [node]
-)
-
 memcached_instance "keystone"
 
 # resource to set a flag when apache2 is restarted so we now which cookbook was the
@@ -262,7 +258,7 @@ template node[:keystone][:config_file] do
         node[:keystone][:api][:protocol],
         my_admin_host, node[:keystone][:api][:admin_port]
       ),
-      memcached_servers: memcached_servers,
+      memcached_servers: MemcachedHelper.get_memcached_servers(node, cluster_nodes),
       token_format: node[:keystone][:token_format],
       token_expiration: node[:keystone][:token_expiration],
       max_active_keys: max_active_keys,
