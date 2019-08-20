@@ -399,11 +399,6 @@ else
   neutron_ml2_type_drivers = "'*'"
 end
 
-# We're going to use memcached as a cache backend for Django
-memcached_locations = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "horizon-server") : [node]
-)
-
 memcached_instance "openstack-dashboard"
 
 crowbar_pacemaker_sync_mark "wait-horizon_config" if ha_enabled
@@ -475,7 +470,8 @@ template local_settings do
     help_url: node[:horizon][:help_url],
     session_timeout: node[:horizon][:session_timeout],
     secret_key: node["horizon"]["secret_key"],
-    memcached_locations: memcached_locations,
+    memcached_locations: MemcachedHelper.get_memcached_servers(node,
+      CrowbarPacemakerHelper.cluster_nodes(node, "horizon-server")),
     can_set_mount_point: node["horizon"]["can_set_mount_point"],
     can_set_password: node["horizon"]["can_set_password"],
     multi_domain_support: multi_domain_support,

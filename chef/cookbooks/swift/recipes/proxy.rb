@@ -274,7 +274,7 @@ end
 memcached_instance "swift-proxy"
 
 proxy_config[:memcached_ips] =
-  MemcachedHelper.get_memcached_servers(node_search_with_cache("roles:swift-proxy"))
+  MemcachedHelper.get_memcached_servers(node, node_search_with_cache("roles:swift-proxy"))
 
 ## Create the proxy server configuraiton file
 template node[:swift][:proxy_config_file] do

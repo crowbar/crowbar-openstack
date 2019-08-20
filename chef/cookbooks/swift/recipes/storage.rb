@@ -45,7 +45,7 @@ end
 
 storage_ip = Swift::Evaluator.get_ip_by_type(node,:storage_ip_expr)
 
-memcached_ips = MemcachedHelper.get_memcached_servers(node_search_with_cache("roles:swift-proxy"))
+memcached_ips = MemcachedHelper.get_memcached_servers(node, node_search_with_cache("roles:swift-proxy"))
 
 %w{account-server object-expirer object-server container-server}.each do |service|
   template "/etc/swift/#{service}.conf" do

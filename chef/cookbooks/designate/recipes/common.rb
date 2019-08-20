@@ -30,14 +30,6 @@ public_host = CrowbarHelper.get_host_for_public_url(designate_server_node,
 # get Database data
 sql_connection = fetch_database_connection_string(node[:designate][:db])
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  if node[:designate][:ha][:enabled]
-    CrowbarPacemakerHelper.cluster_nodes(node, "designate-server")
-  else
-    [node]
-  end
-)
-
 memcached_instance("designate") if node["roles"].include?("designate-server")
 
 api_protocol = node[:designate][:api][:protocol]
@@ -74,7 +66,8 @@ template node[:designate][:config_file] do
     sql_connection: sql_connection,
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: keystone_settings,
-    memcached_servers: memcached_servers,
+    memcached_servers: MemcachedHelper.get_memcached_servers(node,
+      CrowbarPacemakerHelper.cluster_nodes(node, "designate-server")),
     resource_project_id: resource_project_id
   )
 end

@@ -164,8 +164,6 @@ end
 
 ironic_net_name = "ironic"
 
-memcached_servers = MemcachedHelper.get_memcached_servers([node])
-
 memcached_instance("ironic")
 
 template node[:ironic][:config_file] do
@@ -195,7 +193,7 @@ template node[:ironic][:config_file] do
         api_port: api_port,
         api_url: api_url,
         auth_version: auth_version,
-        memcached_servers: memcached_servers
+        memcached_servers: MemcachedHelper.get_memcached_servers(node)
       }
     }
   )

@@ -44,9 +44,6 @@ ironics = node_search_with_cache("roles:ironic-server") || []
 network_settings = GlanceHelper.network_settings(node)
 
 ha_enabled = node[:glance][:ha][:enabled]
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "glance-server") : [node]
-)
 
 glance_stores = node.default[:glance][:glance_stores].dup
 glance_stores += ["vmware"] unless node[:glance][:vsphere][:host].empty?
@@ -74,7 +71,8 @@ template node[:glance][:api][:config_file] do
       registry_bind_host: network_settings[:registry][:bind_host],
       registry_bind_port: network_settings[:registry][:bind_port],
       keystone_settings: keystone_settings,
-      memcached_servers: memcached_servers,
+      memcached_servers: MemcachedHelper.get_memcached_servers(node,
+        CrowbarPacemakerHelper.cluster_nodes(node, "glance-server")),
       rabbit_settings: fetch_rabbitmq_settings,
       swift_api_insecure: swift_insecure,
       cinder_api_insecure: cinder_insecure,

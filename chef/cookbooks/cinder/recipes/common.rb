@@ -106,14 +106,6 @@ if need_shared_lock_path
   include_recipe "crowbar-openstack::common"
 end
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  if node[:cinder][:ha][:enabled]
-    CrowbarPacemakerHelper.cluster_nodes(node, "cinder-controller")
-  else
-    [node]
-  end
-)
-
 memcached_instance("cinder") if node["roles"].include?("cinder-controller")
 
 profiler_settings = KeystoneHelper.profiler_settings(node, @cookbook_name)
@@ -141,7 +133,8 @@ template node[:cinder][:config_file] do
     strict_ssh_host_key_policy: node[:cinder][:strict_ssh_host_key_policy],
     default_availability_zone: node[:cinder][:default_availability_zone],
     default_volume_type: node[:cinder][:default_volume_type],
-    memcached_servers: memcached_servers,
+    memcached_servers: MemcachedHelper.get_memcached_servers(node,
+      CrowbarPacemakerHelper.cluster_nodes(node, "cinder-controller")),
     profiler_settings: profiler_settings
     )
 end

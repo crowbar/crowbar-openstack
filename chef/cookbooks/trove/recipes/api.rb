@@ -139,8 +139,6 @@ end
 
 crowbar_pacemaker_sync_mark "create-trove_register" if ha_enabled
 
-memcached_servers = MemcachedHelper.get_memcached_servers([node])
-
 memcached_instance "trove" if is_controller
 
 template node[:trove][:api][:config_file] do
@@ -160,7 +158,7 @@ template node[:trove][:api][:config_file] do
     object_store_insecure: object_store_insecure,
     bind_host: bind_host,
     bind_port: bind_port,
-    memcached_servers: memcached_servers
+    memcached_servers: MemcachedHelper.get_memcached_servers(node)
   )
   notifies :restart, "service[trove-api]"
 end
