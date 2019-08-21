@@ -1,0 +1,75 @@
+[DEFAULT]
+debug = <%= node[:watcher][:debug] %>
+state_path = <%= node[:watcher][:state_path] %>
+transport_url = <%= @rabbit_settings[:url] %>
+control_exchange = <%= node[:watcher][:control_exchange] %>
+
+[api]
+host = <%= @bind_host %>
+port = <%= @bind_port %>
+workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
+<% if node[:watcher][:api][:protocol] == 'https' -%>
+enable_ssl_api = true
+
+[ssl]
+ca_file = <%= node[:watcher][:ssl][:ca_certs] if node[:watcher][:ssl][:cert_required] %>
+cert_file = <%= node[:watcher][:ssl][:certfile] %>
+key_file = <%= node[:watcher][:ssl][:keyfile] %>
+<% end -%>
+
+[database]
+connection = <%= node[:watcher][:sql_connection] %>
+connection_recycle_time = <%= node[:watcher][:sql_idle_timeout] %>
+
+[keystone_authtoken]
+www_authenticate_uri = <%= @keystone_settings['public_auth_url'] %>
+auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
+<% if @keystone_settings['insecure'] -%>
+insecure = <%= @keystone_settings['insecure'] %>
+<% end -%>
+region_name=<%= @keystone_settings['endpoint_region'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
+auth_url = <%= @keystone_settings['admin_auth_url'] %>
+auth_type = password
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:watcher][:memcache_secret_key] %>
+memcache_pool_socket_timeout = 1
+service_token_roles_required = true
+service_token_roles = admin
+
+[watcher_clients_auth]
+www_authenticate_uri = <%= @keystone_settings['public_auth_url'] %>
+auth_version = <%= @keystone_settings['api_version_for_middleware'] %>
+<% if @keystone_settings['insecure'] -%>
+insecure = <%= @keystone_settings['insecure'] %>
+<% end -%>
+region_name=<%= @keystone_settings['endpoint_region'] %>
+username = <%= @keystone_settings['service_user'] %>
+password = <%= @keystone_settings['service_password'] %>
+project_name = <%= @keystone_settings['service_tenant'] %>
+project_domain_name = <%= @keystone_settings["admin_domain"]%>
+user_domain_name = <%= @keystone_settings["admin_domain"] %>
+auth_url = <%= @keystone_settings['admin_auth_url'] %>
+auth_type = password
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:watcher][:memcache_secret_key] %>
+memcache_pool_socket_timeout = 1
+service_token_roles_required = true
+service_token_roles = admin
+
+[oslo_concurrency]
+lock_path = /var/run/watcher
+
+<% if @rabbit_settings[:enable_notifications] -%>
+[oslo_messaging_notifications]
+driver = messagingv2
+<% end -%>
+
+[watcher_messaging]
+notifier_driver = messaging

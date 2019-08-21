@@ -1,0 +1,122 @@
+{
+  "type": "map",
+  "required": true,
+  "mapping": {
+    "id": { "type": "str", "required": true, "pattern": "/^watcher-|^template-watcher$/" },
+    "description": { "type": "str", "required": true },
+    "attributes": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "watcher": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "debug": { "type": "bool", "required": true },
+            "state_path": { "type": "str", "required": true },
+            "control_exchange": { "type": "str", "required": true },
+            "rabbitmq_instance": { "type": "str", "required": true },
+            "db" : {
+              "type" : "map",
+              "required" : true,
+              "mapping": {
+                "database": { "type": "str", "required": true },
+                "user": { "type": "str", "required": true },
+                "password": { "type": "str", "required": true }
+              }
+            },
+            "api": {
+              "type": "map", "required": true, "mapping": {
+                "protocol": { "type" : "str", "required" : true },
+                "bind_open_address": { "type": "bool", "required": true },
+                "bind_port": { "type": "int", "required": true }
+              }
+            },
+            "ssl": { "type": "map", "required": true, "mapping": {
+              "certfile": { "type" : "str", "required" : true },
+              "keyfile": { "type" : "str", "required" : true },
+              "generate_certs": { "type" : "bool", "required" : true },
+              "insecure": { "type" : "bool", "required" : true },
+              "cert_required": { "type" : "bool", "required" : true },
+              "ca_certs": { "type" : "str", "required" : true }
+            }},
+            "use_syslog": { "type": "bool", "required": true },
+            "enable_caching": { "type": "bool", "required": true },
+            "keystone_instance": { "type": "str", "required": true },
+            "service_user": { "type": "str", "required": true },
+            "service_password": { "type": "str" },
+            "memcache_secret_key": { "type": "str", "required": true },
+            "database_instance": { "type": "str", "required": true },
+            "ha_rate_limit": {
+              "type": "map", "required": true, "mapping": {
+                "watcher-api": { "type": "int", "required": true }
+              }
+            }
+          }
+        }
+      }
+    },
+    "deployment": {
+      "type": "map",
+      "required": true,
+      "mapping": {
+        "watcher": {
+          "type": "map",
+          "required": true,
+          "mapping": {
+            "crowbar-revision": { "type": "int", "required": true },
+            "crowbar-committing": { "type": "bool" },
+            "crowbar-applied": { "type": "bool" },
+            "crowbar-status": { "type": "str" },
+            "crowbar-failed": { "type": "str" },
+            "crowbar-queued": { "type": "bool" },
+            "schema-revision": { "type": "int" },
+            "element_states": {
+              "type": "map",
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "elements": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                = : {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            },
+            "element_order": {
+              "type": "seq",
+              "required": true,
+              "sequence": [ {
+                "type": "seq",
+                "sequence": [ { "type": "str" } ]
+              } ]
+            },
+            "config": {
+              "type": "map",
+              "required": true,
+              "mapping": {
+                "environment": { "type": "str", "required": true },
+                "mode": { "type": "str", "required": true },
+                "transitions": { "type": "bool", "required": true },
+                "transition_list": {
+                  "type": "seq",
+                  "required": true,
+                  "sequence": [ { "type": "str" } ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
