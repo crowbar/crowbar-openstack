@@ -61,6 +61,7 @@ file "/etc/designate/pools.crowbar.yaml" do
   group node[:designate][:group]
   mode "0640"
   content pools.to_yaml
+  not_if { ::File.exist?("/etc/designate/pools.crowbar.yaml") }
 end
 
 template "/etc/designate/rndc.key" do
@@ -69,6 +70,33 @@ template "/etc/designate/rndc.key" do
   group node[:designate][:group]
   mode "0640"
   variables(rndc_key: dns[:dns][:designate_rndc_key])
+end
+
+ha_enabled = node[:designate][:ha][:enabled]
+
+execute "designate-manage pool update" do
+  command "designate-manage pool update --file /etc/designate/pools.crowbar.yaml"
+  user node[:designate][:user]
+  group node[:designate][:group]
+  # We only do the pool update the first time, and only if we're not doing HA or if we
+  # are the founder of the HA cluster (so that it's really only done once).
+  only_if do
+    !node[:designate][:pool_updated] &&
+      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
+end
+
+# We want to keep a note that we've done a pool update, so we don't do it again.
+# If we were doing that outside a ruby_block, we would add the note in the
+# compile phase, before the actual pool update is done (which is wrong, since it
+# could possibly not be reached in case of errors).
+ruby_block "mark node for designate-manage pool update" do
+  block do
+    node.set[:designate][:pool_updated] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[designate-manage pool update]", :immediately
 end
 
 designate_service "mdns"
