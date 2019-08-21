@@ -136,6 +136,23 @@ unless magnum_ui_pkgname.nil?
   end
 end
 
+# install horizon designate plugin if needed
+designate_ui_pkgname =
+  case node[:platform_family]
+  when "suse"
+    "openstack-horizon-plugin-designate-ui"
+  when "rhel"
+    "openstack-designate-dashboard"
+  end
+
+unless designate_ui_pkgname.nil?
+  package designate_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { RoleHelper.config_for_role_exists?("designate") }
+  end
+end
+
 # install horizon sahara plugin if needed
 sahara_ui_pkgname =
   case node[:platform_family]
