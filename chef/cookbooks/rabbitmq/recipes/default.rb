@@ -104,10 +104,6 @@ template "/etc/rabbitmq/rabbitmq-env.conf" do
   notifies :restart, "service[rabbitmq-server]"
 end
 
-`systemd-detect-virt -v -q`
-virtualized = $?.exitstatus.zero?
-hipe_compile = node[:rabbitmq][:hipe_compile] && !virtualized
-
 template "/etc/rabbitmq/rabbitmq.config" do
   source "rabbitmq.config.erb"
   owner "root"
@@ -118,7 +114,7 @@ template "/etc/rabbitmq/rabbitmq.config" do
     cluster_partition_handling: cluster_partition_handling,
     addresses: addresses,
     management_address: CrowbarRabbitmqHelper.get_management_address(node),
-    hipe_compile: hipe_compile
+    hipe_compile: node[:rabbitmq][:hipe_compile]
   )
   notifies :restart, "service[rabbitmq-server]"
 end
