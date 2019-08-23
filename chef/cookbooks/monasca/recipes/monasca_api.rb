@@ -24,14 +24,6 @@ monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_servers[0])
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  if node[:monasca][:ha][:enabled]
-    CrowbarPacemakerHelper.cluster_nodes(node, "monasca-server")
-  else
-    [node]
-  end
-)
-
 memcached_instance("monasca") if node["roles"].include?("monasca-server")
 
 # get Database data
@@ -46,7 +38,8 @@ template "/etc/monasca/api.conf" do
   mode "0640"
   variables(
     keystone_settings: keystone_settings,
-    memcached_servers: memcached_servers,
+    memcached_servers: MemcachedHelper.get_memcached_servers(node,
+      CrowbarPacemakerHelper.cluster_nodes(node, "monasca-server")),
     kafka_host: monasca_net_ip,
     tsdb_host: monasca_net_ip,
     sql_connection: sql_connection,

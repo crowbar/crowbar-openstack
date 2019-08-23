@@ -100,11 +100,6 @@ glance_config = Barclamp::Config.load("openstack", "glance", node[:nova][:glance
 glance_insecure = CrowbarOpenStackHelper.insecure(glance_config) || keystone_settings["insecure"]
 Chef::Log.info("Glance server at #{glance_server_host}")
 
-# use memcached as a cache backend for nova-novncproxy
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  api_ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller") : [node]
-)
-
 memcached_instance "nova" if is_controller
 
 directory "/etc/nova" do
@@ -388,7 +383,8 @@ template node[:nova][:config_file] do
     vncproxy_cert_file: api_novnc_ssl_certfile,
     vncproxy_key_file: api_novnc_ssl_keyfile,
     serialproxy_public_host: public_api_host,
-    memcached_servers: memcached_servers,
+    memcached_servers: MemcachedHelper.get_memcached_servers(node,
+      CrowbarPacemakerHelper.cluster_nodes(node, "nova-controller")),
     neutron_protocol: neutron_protocol,
     neutron_server_host: neutron_server_host,
     neutron_server_port: neutron_server_port,
