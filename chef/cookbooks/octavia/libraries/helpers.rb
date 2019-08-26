@@ -1,4 +1,4 @@
-# Copyright 2019 SUSE Linux GmbH.
+# Copyright 2020 SUSE Linux GmbH.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -104,11 +104,8 @@ module OctaviaHelper
     end
 
     def conf_file(name)
-      if name == "api"
-        "/etc/octavia/octavia.conf"
-      else
-        "/etc/octavia/octavia-#{name}.conf"
-      end
+      ["/etc/octavia/octavia.conf.d/100-octavia.conf",
+       "/etc/octavia/octavia.conf.d/110-#{name}.conf"]
     end
 
     def bind_host(node, name)

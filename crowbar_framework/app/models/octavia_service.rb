@@ -153,6 +153,14 @@ class OctaviaService < OpenstackServiceObject
     @logger.debug("octavia apply_role_pre_chef_call: entering #{all_nodes.inspect}")
     return if all_nodes.empty?
 
+    if old_role
+      all_nodes.each do |n|
+        node = ::Node.find_by_name(n)
+        node[:octavia][:old_amphora] = old_role.default_attributes["octavia"]["amphora"]
+        node.save
+      end
+    end
+
     vip_networks = ["admin", "public"]
 
     server_elements, server_nodes, ha_enabled = role_expand_elements(role, "octavia-api")

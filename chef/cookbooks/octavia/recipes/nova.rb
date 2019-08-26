@@ -15,9 +15,10 @@
 
 require "chef/mixin/shell_out"
 
-package "openstack-octavia-amphora-image-x86_64"
 
+image = "openstack-octavia-amphora-image-x86_64"
 ha_enabled = node[:octavia][:ha][:enabled]
+package image if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
 octavia_config = Barclamp::Config.load("openstack", "octavia")
 cmd = OctaviaHelper.get_openstack_command(node, octavia_config)
 
@@ -76,14 +77,34 @@ execute "create_amphora_flavor" do
   action :run
 end
 
-package = "openstack-octavia-amphora-image-x86_64"
 image_tag = node[:octavia][:amphora][:image_tag]
 
 execute "create_amphora_image" do
   command "#{cmd} image create --disk-format qcow2 --container-format bare "\
-    "--file $(rpm -ql #{package} | grep qcow2 | head -n 1) --tag #{image_tag} #{image_tag}"
+    "--file $(rpm -ql #{image} | grep qcow2 | head -n 1) --tag #{image_tag} #{image_tag}"
   not_if "out=$(#{cmd} image list); [ $? != 0 ] || echo ${out} | grep -q ' #{image_tag} '"
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  retries 5
+  retry_delay 10
+  action :run
+end
+
+manage_net = node[:octavia][:amphora][:manage_net]
+manage_cidr = node[:octavia][:amphora][:manage_cidr]
+
+execute "create_octavia_management_network" do
+  command "#{cmd} network create --project #{project_name} #{manage_net}"
+  not_if "out=$(#{cmd} network list); [ $? != 0 ] || echo ${out} | grep -q ' #{manage_net} '"
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  retries 5
+  retry_delay 10
+  action :run
+end
+
+execute "create_octavia_management_subnet" do
+  command "#{cmd} subnet create --network #{manage_net} " \
+      "--subnet-range #{manage_cidr} --project #{project_name} #{manage_net}"
+  not_if "out=$(#{cmd} subnet list); [ $? != 0 ] || echo ${out} | grep -q ' #{manage_net} '"
   retries 5
   retry_delay 10
   action :run

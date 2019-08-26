@@ -12,13 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-file node[:octavia][:octavia_log_dir] + "/octavia-worker.log" do
-  action :touch
-  owner node[:octavia][:user]
-  group node[:octavia][:group]
-  mode 0o640
-end
-
 octavia_config = Barclamp::Config.load("openstack", "octavia")
 cmd = OctaviaHelper.get_openstack_command(node, octavia_config)
 

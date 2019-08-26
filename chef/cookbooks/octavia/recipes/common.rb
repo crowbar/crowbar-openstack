@@ -13,17 +13,7 @@
 # limitations under the License.
 #
 
-group "octavia" do
-  group_name node[:octavia][:group]
-  system true
-end
-
-user "octavia" do
-  shell "/bin/bash"
-  comment "Octavia user Server"
-  gid node[:octavia][:group]
-  system true
-  supports manage_home: false
-end
-
 package "python-octaviaclient"
+package "octavia" do
+  package_name "openstack-octavia" if %w[rhel suse].include?(node[:platform_family])
+end
