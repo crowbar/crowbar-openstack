@@ -13,11 +13,6 @@ end
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 network_settings = GlanceHelper.network_settings(node)
 
-ha_enabled = node[:glance][:ha][:enabled]
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "glance-server") : [node]
-)
-
 memcached_instance("glance")
 
 template node[:glance][:manage][:config_file] do
@@ -36,7 +31,8 @@ template node[:glance][:registry][:config_file] do
       bind_host: network_settings[:registry][:bind_host],
       bind_port: network_settings[:registry][:bind_port],
       keystone_settings: keystone_settings,
-      memcached_servers: memcached_servers,
+      memcached_servers: MemcachedHelper.get_memcached_servers(node,
+        CrowbarPacemakerHelper.cluster_nodes(node, "glance-server")),
       rabbit_settings: fetch_rabbitmq_settings
   )
 end

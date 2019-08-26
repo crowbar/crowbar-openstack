@@ -103,9 +103,6 @@ if node[:heat][:api][:protocol] == "https"
   end
 end
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  ha_enabled ? CrowbarPacemakerHelper.cluster_nodes(node, "heat-server") : [node]
-)
 memcached_instance("heat-server")
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -390,7 +387,8 @@ template "/etc/heat/heat.conf.d/100-heat.conf" do
         debug: node[:heat][:debug],
         rabbit_settings: fetch_rabbitmq_settings,
         keystone_settings: keystone_settings,
-        memcached_servers: memcached_servers,
+        memcached_servers: MemcachedHelper.get_memcached_servers(node,
+          CrowbarPacemakerHelper.cluster_nodes(node, "heat-server")),
         database_connection: db_connection,
         bind_host: bind_host,
         api_port: api_port,

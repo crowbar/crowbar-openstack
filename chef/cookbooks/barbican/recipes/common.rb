@@ -32,14 +32,6 @@ public_host = CrowbarHelper.get_host_for_public_url(node,
 
 database_connection = fetch_database_connection_string(node[:barbican][:db])
 
-memcached_servers = MemcachedHelper.get_memcached_servers(
-  if node[:barbican][:ha][:enabled]
-    CrowbarPacemakerHelper.cluster_nodes(node, "barbican-controller")
-  else
-    [node]
-  end
-)
-
 memcached_instance("barbican") if node["roles"].include?("barbican-controller")
 
 template node[:barbican][:config_file] do
@@ -54,7 +46,8 @@ template node[:barbican][:config_file] do
     host_href: "#{barbican_protocol}://#{public_host}:#{node[:barbican][:api][:bind_port]}",
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: KeystoneHelper.keystone_settings(node, @cookbook_name),
-    memcached_servers: memcached_servers
+    memcached_servers: MemcachedHelper.get_memcached_servers(node,
+        CrowbarPacemakerHelper.cluster_nodes(node, "barbican-controller"))
   )
   notifies :reload, resources(service: "apache2")
 end
