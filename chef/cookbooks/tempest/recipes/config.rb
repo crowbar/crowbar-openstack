@@ -490,6 +490,18 @@ else
   horizon_protocol = horizon[:horizon][:apache][:ssl] ? "https" : "http"
 end
 
+# Extra roles to assign to the tempest user
+tempest_roles = ["member"]
+
+barbicans = search(:node, "roles:barbican-controller") || []
+tempest_roles += ["creator"] unless barbicans.empty?
+
+dns_server_node = node_search_with_cache("roles:dns-server").first
+dns_server_node_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
+  dns_server_node,
+  "admin"
+).address
+
 template "/etc/tempest/tempest.conf" do
   source "tempest.conf.erb"
   mode 0o640
@@ -504,6 +516,7 @@ template "/etc/tempest/tempest.conf" do
         use_swift: use_swift,
         use_horizon: use_horizon,
         enabled_services: enabled_services,
+        tempest_roles: tempest_roles.join(", "),
         # boto settings
         ec2_protocol: nova[:nova][:ssl][:enabled] ? "https" : "http",
         ec2_host: CrowbarHelper.get_host_for_admin_url(nova, nova[:nova][:ha][:enabled]),
@@ -575,7 +588,8 @@ template "/etc/tempest/tempest.conf" do
         # magnum (container) settings
         magnum_settings: tempest_magnum_settings,
         # heat (orchestration) settings
-        heat_settings: tempest_heat_settings
+        heat_settings: tempest_heat_settings,
+        dns_server_node_ip: dns_server_node_ip
       }
     }
   )
