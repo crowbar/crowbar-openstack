@@ -132,14 +132,18 @@ when "suse"
     default["postgresql"]["contrib"]["packages"] = ["postgresql-contrib"]
   when node["platform_version"].to_f < 12.0
     default["postgresql"]["version"] = "9.1"
-    default["postgresql"]["client"]["packages"] = ["postgresql91",
-      "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-pg"]
+    default["postgresql"]["client"]["packages"] = [
+      "postgresql91",
+      "ruby2.1-rubygem-pg"
+    ]
     default["postgresql"]["server"]["packages"] = ["postgresql91-server"]
     default["postgresql"]["contrib"]["packages"] = ["postgresql91-contrib"]
   when node["platform_version"].to_f == 12.0
     default["postgresql"]["version"] = "9.3"
-    default["postgresql"]["client"]["packages"] = ["postgresql93",
-      "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-pg"]
+    default["postgresql"]["client"]["packages"] = [
+      "postgresql93",
+      "ruby2.1-rubygem-pg"
+    ]
     default["postgresql"]["server"]["packages"] = ["postgresql93-server"]
     default["postgresql"]["contrib"]["packages"] = ["postgresql93-contrib"]
   else
@@ -160,7 +164,7 @@ when "opensuse"
   default["postgresql"]["version"] = "9.4"
   default["postgresql"]["client"]["packages"] = [
     "postgresql94",
-    "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-pg"
+    "ruby2.1-rubygem-pg"
   ]
   default["postgresql"]["server"]["packages"] = ["postgresql94-server"]
   default["postgresql"]["contrib"]["packages"] = ["postgresql94-contrib"]

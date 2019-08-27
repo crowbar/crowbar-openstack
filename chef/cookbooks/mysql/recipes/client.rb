@@ -30,7 +30,7 @@ if platform_family?(%w{debian rhel fedora suse})
   package "mysql-ruby" do
     package_name value_for_platform_family(
       ["rhel", "fedora"] => "ruby-mysql",
-      "suse" => "ruby#{node["languages"]["ruby"]["version"].to_f}-rubygem-mysql2",
+      "suse" => "ruby2.1-rubygem-mysql2",
       "default" => "libmysql-ruby"
     )
     action :install
