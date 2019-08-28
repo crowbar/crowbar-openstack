@@ -109,7 +109,7 @@ default[:nova][:instances_path] = "/var/lib/nova/instances"
 default[:nova][:vnc_keymap] = "en-us"
 
 default[:nova][:neutron_metadata_proxy_shared_secret] = ""
-default[:nova][:neutron_url_timeout] = 30
+default[:nova][:neutron_url_timeout] = 300
 
 default[:nova][:service_user] = "nova"
 default[:nova][:service_password] = "nova"
