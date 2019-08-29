@@ -42,3 +42,9 @@ if node[:kernel][:machine] == "x86_64" &&
     package "python-monasca-#{component}"
   end
 end
+
+[
+  "barbican"
+].each do |component|
+  package "python-#{component}-tempest-plugin" if config_for_role_exists?(component)
+end
