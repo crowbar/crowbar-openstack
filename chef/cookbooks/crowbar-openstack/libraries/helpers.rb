@@ -257,11 +257,8 @@ class CrowbarOpenStackHelper
 
   def self.insecure(attributes)
     use_ssl = if attributes.key?("api") && attributes["api"].key?("protocol")
-      # aodh, cinder, glance, heat, keystone, manila, neutron
+      # aodh, barbican, cinder, glance, heat, keystone, manila, neutron
       attributes["api"]["protocol"] == "https"
-    elsif attributes.key?("api") && attributes["api"].key?("ssl")
-      # barbican
-      attributes["api"]["ssl"]
     elsif attributes.key?("ssl") && attributes["ssl"].key?("enabled")
       # nova
       attributes["ssl"]["enabled"]
