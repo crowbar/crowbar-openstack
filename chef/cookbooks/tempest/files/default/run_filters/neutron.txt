@@ -1,0 +1,3 @@
++tempest.api.network.*
++tempest.scenario.test_network.*
++tempest.scenario.test_security_groups.*

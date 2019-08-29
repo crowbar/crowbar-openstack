@@ -1,0 +1,4 @@
++magnum.tests.functional.api.*
+
+# Fails when using 2+ controllers
+-magnum.tests.functional.api.v1.test_magnum_service.MagnumServiceTest.test_magnum_service_list
