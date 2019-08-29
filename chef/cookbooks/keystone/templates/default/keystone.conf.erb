@@ -115,3 +115,18 @@ trace_sqlalchemy = <%= @profiler_settings[:trace_sqlalchemy] ? "true" : "false" 
 hmac_keys = <%= @profiler_settings[:hmac_keys].join(",") %>
 connection_string = <%= @profiler_settings[:connection_string] %>
 <% end -%>
+
+<% if @websso_enabled %>
+[federation]
+<% @trusted_dashboards.each do |trusted_dashboard_url| -%>
+trusted_dashboard = <%= trusted_dashboard_url %>
+<% end -%>
+
+<% if @openidc_enabled -%>
+[openid]
+remote_id_attribute = HTTP_OIDC_ISS
+<% end -%>
+<% end -%>
+
+[auth]
+methods = <%= @auth_methods %>

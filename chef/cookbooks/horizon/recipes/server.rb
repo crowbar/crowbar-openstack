@@ -447,6 +447,7 @@ template local_settings do
     multi_domain_support: multi_domain_support,
     policy_file_path: node["horizon"]["policy_file_path"],
     policy_file: node["horizon"]["policy_file"],
+    websso_keystone_url: keystone_settings["websso_keystone_url"]
   )
   action :create
   notifies :reload, "service[horizon]"

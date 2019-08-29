@@ -22,6 +22,16 @@ attribute :ssl_cacert, kind_of: String, default: nil
 
 attribute :timeout, kind_of: Integer, default: nil
 
+attribute :openidc_enabled, kind_of: [TrueClass, FalseClass], default: false
+attribute :openidc_provider, kind_of: String, default: nil
+attribute :openidc_response_type, kind_of: String, default: nil
+attribute :openidc_scope, kind_of: String, default: nil
+attribute :openidc_metadata_url, kind_of: String, default: nil
+attribute :openidc_client_id, kind_of: String, default: nil
+attribute :openidc_client_secret, kind_of: String, default: nil
+attribute :openidc_passphrase, kind_of: String, default: nil
+attribute :openidc_redirect_uri, kind_of: String, default: nil
+
 attribute :access_log, kind_of: String, default: nil
 attribute :error_log, kind_of: String, default: nil
 

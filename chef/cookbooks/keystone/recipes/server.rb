@@ -31,7 +31,13 @@ end
 # useful with .openrc
 package "python-openstackclient"
 
+# FIXME(gyee): need a more elegant way to update the default auth methods
+# if these happened to change from one release to another.
+auth_methods = "password,token,oauth1,mapped,application_credential"
+
 ha_enabled = node[:keystone][:ha][:enabled]
+
+keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 if ha_enabled
   log "HA support for keystone is enabled"
@@ -46,6 +52,35 @@ else
   bind_admin_port = node[:keystone][:api][:admin_port]
   bind_service_host = node[:keystone][:api][:api_host]
   bind_service_port = node[:keystone][:api][:service_port]
+end
+
+# verify the OpenID Connect Federation parameters
+openidc_enabled = node[:keystone][:federation][:openidc][:enabled]
+openidc_provider = node[:keystone][:federation][:openidc][:identity_provider]
+openidc_response_type = node[:keystone][:federation][:openidc][:response_type]
+openidc_scope = node[:keystone][:federation][:openidc][:scope]
+openidc_metadata_url = node[:keystone][:federation][:openidc][:metadata_url]
+openidc_client_id = node[:keystone][:federation][:openidc][:client_id]
+openidc_client_secret = node[:keystone][:federation][:openidc][:client_secret]
+openidc_passphrase = node[:keystone][:federation][:openidc][:passphrase]
+openidc_redirect_uri = node[:keystone][:federation][:openidc][:redirect_uri]
+
+openidc_attributes = {
+  "openidc_response_type" => openidc_response_type,
+  "openidc_scope" => openidc_scope,
+  "openidc_metadata_url" => openidc_metadata_url,
+  "openidc_client_id" => openidc_client_id,
+  "openidc_client_secret" => openidc_client_secret,
+  "openidc_passphrase" => openidc_passphrase,
+  "openidc_provider" => openidc_provider
+}
+
+if openidc_enabled
+  auth_methods = "#{auth_methods},openid"
+  openidc_attributes.each do |openidc_attr_name, openidc_attr_value|
+    raise "#{openidc_attr_name} is required and cannot be an empty value" if
+        openidc_attr_value.empty?
+  end
 end
 
 # Ideally this would be called admin_host, but that's already being
@@ -136,6 +171,17 @@ elsif node[:keystone][:frontend] == "apache"
     ignore_failure true
   end
 
+  # automagically populate the redirect_uri if user does not specify one
+  if openidc_redirect_uri.empty?
+    openidc_redirect_uri = ::File.join(
+      keystone_settings["websso_keystone_url"],
+      "/OS-FEDERATION/identity_providers/#{openidc_provider}/protocols/openid/auth"
+    )
+  end
+
+  package "apache2-mod_auth_openidc" if openidc_enabled
+  apache_module "auth_openidc" if openidc_enabled
+
   crowbar_openstack_wsgi "WSGI entry for keystone-public" do
     bind_host bind_service_host
     bind_port bind_service_port
@@ -153,6 +199,16 @@ elsif node[:keystone][:frontend] == "apache"
     ssl_cacert node[:keystone][:ssl][:ca_certs] unless node[:keystone][:ssl][:insecure]
     # LDAP backend can be slow..
     timeout 600
+    # auth_openidc configuration
+    openidc_enabled openidc_enabled
+    openidc_provider openidc_provider
+    openidc_response_type openidc_response_type
+    openidc_scope openidc_scope
+    openidc_metadata_url openidc_metadata_url
+    openidc_client_id openidc_client_id
+    openidc_client_secret openidc_client_secret
+    openidc_passphrase openidc_passphrase
+    openidc_redirect_uri openidc_redirect_uri
   end
 
   apache_site "keystone-public.conf" do
@@ -176,6 +232,16 @@ elsif node[:keystone][:frontend] == "apache"
     ssl_cacert node[:keystone][:ssl][:ca_certs] unless node[:keystone][:ssl][:insecure]
     # LDAP backend can be slow..
     timeout 600
+    # auth_openidc configuration
+    openidc_enabled openidc_enabled
+    openidc_provider openidc_provider
+    openidc_response_type openidc_response_type
+    openidc_scope openidc_scope
+    openidc_metadata_url openidc_metadata_url
+    openidc_client_id openidc_client_id
+    openidc_client_secret openidc_client_secret
+    openidc_passphrase openidc_passphrase
+    openidc_redirect_uri openidc_redirect_uri
   end
 
   apache_site "keystone-admin.conf" do
@@ -265,7 +331,11 @@ template node[:keystone][:config_file] do
       protocol: node[:keystone][:api][:protocol],
       frontend: node[:keystone][:frontend],
       rabbit_settings: fetch_rabbitmq_settings,
-      profiler_settings: profiler_settings
+      profiler_settings: profiler_settings,
+      websso_enabled: keystone_settings["websso_enabled"],
+      trusted_dashboards: keystone_settings["trusted_dashboards"],
+      auth_methods: auth_methods,
+      openidc_enabled: openidc_enabled
     )
     if node[:keystone][:frontend] == "apache"
       notifies :create, resources(ruby_block: "set origin for apache2 restart"), :immediately
@@ -578,8 +648,6 @@ end
 crowbar_pacemaker_sync_mark "create-keystone_register" if ha_enabled
 
 include_recipe "keystone::update_endpoint"
-
-keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 template "/root/.openrc" do
   source "openrc.erb"

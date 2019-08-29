@@ -250,3 +250,18 @@ EXTERNAL_MONITORING = [
 
 SESSION_TIMEOUT = <%= @session_timeout * 60 %>
 SECRET_KEY = "<%= @secret_key %>"
+
+# FIXME(gyee): if we ever going to support multiple protocols or multiple
+# IDPs, we'll need to refactor this accordingly.
+<% if node[:keystone][:federation][:openidc][:enabled] %>
+WEBSSO_ENABLED = True
+
+# NOTE(gyee): this need to be versioned public Keystone URL as this is used
+# to redirect the browsers to Keystone.
+WEBSSO_KEYSTONE_URL = "<%= @websso_keystone_url %>"
+
+WEBSSO_CHOICES = (
+    ("credentials", _("Keystone Credentials")),
+    ("openid", _("OpenID Connect")),
+)
+<% end %>
