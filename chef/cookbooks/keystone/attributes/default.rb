@@ -25,6 +25,7 @@ default[:keystone][:user] = "keystone"
 default[:keystone][:group] = "keystone"
 
 default[:keystone][:debug] = false
+default[:keystone][:insecure_debug] = false
 default[:keystone][:frontend] = "apache"
 default[:keystone][:domain_specific_drivers] = false
 default[:keystone][:domain_config_dir] = "/etc/keystone/domains"
@@ -63,6 +64,7 @@ default[:keystone][:ldap][:password] = ""
 default[:keystone][:ldap][:suffix] = "cn=example,cn=com"
 default[:keystone][:ldap][:page_size] = 0
 default[:keystone][:ldap][:alias_dereferencing] = "default"
+default[:keystone][:ldap][:chase_referrals] = ""
 default[:keystone][:ldap][:query_scope] = "one"
 
 default[:keystone][:ldap][:user_tree_dn] = ""

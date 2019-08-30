@@ -4,6 +4,7 @@
   "attributes": {
     "keystone": {
       "debug": false,
+      "insecure_debug": false,
       "frontend": "apache",
       "policy_file": "policy.json",
       "database_instance": "none",
@@ -67,6 +68,7 @@
         "suffix": "cn=example,cn=com",
         "page_size": 0,
         "alias_dereferencing": "default",
+        "chase_referrals": "",
         "query_scope": "one",
         "user_tree_dn": "",
         "user_filter": "",
@@ -122,6 +124,7 @@
             "suffix": "cn=example,cn=com",
             "page_size": 0,
             "alias_dereferencing": "default",
+            "chase_referrals": "",
             "query_scope": "one",
             "user_tree_dn": "",
             "user_filter": "",
@@ -199,7 +202,7 @@
     "keystone": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 304,
+      "schema-revision": 305,
       "element_states": {
         "keystone-server": [ "readying", "ready", "applying" ]
       },

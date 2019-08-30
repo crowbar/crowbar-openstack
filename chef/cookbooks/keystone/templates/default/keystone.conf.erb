@@ -1,6 +1,7 @@
 [DEFAULT]
 admin_endpoint = <%= @admin_endpoint %>
 debug = <%= @debug ? "True" : "False" %>
+insecure_debug = <%= @insecure_debug ? "True": "False" %>
 log_file = keystone.log
 log_dir = /var/log/keystone
 transport_url = <%= @rabbit_settings[:url] %>
@@ -47,6 +48,9 @@ suffix = <%= node[:keystone][:ldap][:suffix] %>
 query_scope = <%= node[:keystone][:ldap][:query_scope] %>
 page_size = <%= node[:keystone][:ldap][:page_size] %>
 alias_dereferencing = <%= node[:keystone][:ldap][:alias_dereferencing] %>
+<%  unless node[:keystone][:ldap][:chase_referrals].nil? or node[:keystone][:ldap][:chase_referrals].empty? -%>
+chase_referrals = <%= node[:keystone][:ldap][:chase_referrals] %>
+<% end -%>
 user_tree_dn = <%= node[:keystone][:ldap][:user_tree_dn] %>
 user_filter = <%= node[:keystone][:ldap][:user_filter] %>
 user_objectclass = <%= node[:keystone][:ldap][:user_objectclass] %>
