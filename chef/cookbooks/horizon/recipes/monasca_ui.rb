@@ -60,10 +60,27 @@ template "/etc/grafana/grafana.ini" do
   mode "0640"
 end
 
+crowbar_pacemaker_sync_mark "wait-grafana_migrations" if ha_enabled
+
+# Start Grafana server on cluster founder first to ensure database migrations
+# happen there...
+
 service "grafana-server" do
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
   subscribes :restart, resources(template: "/etc/grafana/grafana.ini")
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+end
+
+crowbar_pacemaker_sync_mark "create-grafana_migrations" if ha_enabled
+
+# ...then start Grafana server on all other nodes.
+
+service "grafana-server" do
+  supports status: true, restart: true, start: true, stop: true
+  action [:enable, :start]
+  subscribes :restart, resources(template: "/etc/grafana/grafana.ini")
+  only_if { ha_enabled && !CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 ["monasca-grafana-datasource", "grafana-natel-discrete-panel",
