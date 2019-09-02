@@ -32,6 +32,9 @@ default[:neutron][:l3_agent_config_file] = "/etc/neutron/neutron-l3-agent.conf.d
 default[:neutron][:metadata_agent_config_file] = "/etc/neutron/neutron-metadata-agent.conf.d/100-metadata_agent.conf"
 default[:neutron][:ml2_config_file] = "/etc/neutron/neutron.conf.d/110-ml2.conf"
 default[:neutron][:nsx_config_file] = "/etc/neutron/neutron.conf.d/110-nsx.conf"
+default[:neutron][:ml2_cisco_config_file] = "/etc/neutron/neutron.conf.d/115-ml2_cisco.conf"
+default[:neutron][:ml2_cisco_apic_config_file] = "/etc/neutron/neutron.conf.d/115-ml2_cisco_apic.conf"
+default[:neutron][:opflex_config_file] = "/etc/opflex-agent-ovs/conf.d/10-opflex-agent-ovs.conf"
 default[:neutron][:rpc_workers] = 1
 
 default[:neutron][:db][:database] = "neutron"
@@ -126,8 +129,8 @@ when "suse"
     cisco_apic_pkgs: ["python-apicapi",
                       "python-neutron-ml2-driver-apic"],
     cisco_apic_gbp_pkgs: ["openstack-neutron-gbp",
-                          "python-gbpclient"],
-    cisco_opflex_pkgs: ["agent-ovs",
+                          "python-group-based-policy-client"],
+    cisco_opflex_pkgs: ["opflex-agent",
                         "lldpd",
                         "openstack-neutron-opflex-agent"],
     infoblox_pkgs: ["python-infoblox-client",
@@ -172,8 +175,8 @@ when "rhel"
     cisco_apic_pkgs: ["python-apicapi",
                       "python-neutron-ml2-driver-apic"],
     cisco_apic_gbp_pkgs: ["openstack-neutron-gbp",
-                          "python-gbpclient"],
-    cisco_opflex_pkgs: ["agent-ovs",
+                          "python-group-based-policy-client"],
+    cisco_opflex_pkgs: ["opflex-agent",
                         "lldpd",
                         "neutron-opflex-agent"],
     infoblox_pkgs: [],

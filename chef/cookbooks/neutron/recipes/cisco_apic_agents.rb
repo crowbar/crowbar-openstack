@@ -92,15 +92,14 @@ template agent_config_path do
 end
 
 # Update config file from template
-opflex_agent_conf = "/etc/opflex-agent-ovs/conf.d/10-opflex-agent-ovs.conf"
 apic = neutron[:neutron][:apic]
 opflex_list = apic[:opflex].select { |i| i[:nodes].include? node[:hostname] }
 opflex_list.any? || raise("Opflex instance not found for node '#{node[:hostname]}'")
 opflex_list.one? || raise("Multiple opflex instances found for node '#{node[:hostname]}'")
 opflex = opflex_list.first
-template opflex_agent_conf do
+template node[:neutron][:opflex_config_file] do
   cookbook "neutron"
-  source "10-opflex-agent-ovs.conf.erb"
+  source "opflex-agent-ovs.conf.erb"
   mode "0755"
   owner "root"
   group neutron[:neutron][:platform][:group]
@@ -110,6 +109,8 @@ template opflex_agent_conf do
     socketgroup: neutron[:neutron][:platform][:group],
     opflex_peer_ip: opflex[:peer_ip],
     opflex_peer_port: opflex[:peer_port],
+    opflex_int_bridge: opflex[:integration_bridge],
+    opflex_access_bridge: opflex[:access_bridge],
     opflex_vxlan_encap_iface: opflex[:vxlan][:encap_iface],
     opflex_vxlan_uplink_iface: opflex[:vxlan][:uplink_iface],
     opflex_vxlan_uplink_vlan: opflex[:vxlan][:uplink_vlan],
