@@ -36,7 +36,8 @@
 
   "renderers": {
     "stitched-mode": {
-      "ovs-bridge-name": "br-int",
+      "int-bridge-name": "<%= @opflex_int_bridge %>",
+      "access-bridge-name": "<%= @opflex_access_bridge %>",
       "encap": {
         "vxlan" : {
           "encap-iface": "<%= @opflex_vxlan_encap_iface %>",
