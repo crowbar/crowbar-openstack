@@ -18,7 +18,8 @@
 
 require "yaml"
 
-dns = node_search_with_cache("roles:dns-server").first
+dns_all = node_search_with_cache("roles:dns-server")
+dns = dns_all.first
 dnsmaster = dns[:dns][:master_ip]
 dnsslaves = dns[:dns][:slave_ips].to_a
 dnsservers = [dnsmaster] + dnsslaves
@@ -34,12 +35,14 @@ network_settings = DesignateHelper.network_settings(node)
 # with every delete/create cycle of proposal. This might mess
 # up the designate configuration. So the advantage of having
 # non-hardcoded is high enough
+
+ns_records = dns_all.map { |dnss| { "hostname" => "public-#{dnss[:fqdn]}.", "priority" => 1 } }
 pools = [{
   "name" => "default-bind",
   "description" => "Default BIND9 Pool",
   "id" => "794ccc2c-d751-44fe-b57f-8894c9f5c842",
   "attributes" => {},
-  "ns_records" => [{ "hostname" => "#{dns[:fqdn]}.", "priority" => 1 }],
+  "ns_records" => ns_records,
   "nameservers" => dnsservers.map { |ip| { "host" => ip, "port" => 53 } },
   "also_notifies" => dnsslaves.map { |ip| { "host" => ip, "port" => 53 } },
   "targets" => [{
