@@ -16,6 +16,8 @@
 # Recipe:: api
 #
 
+package "openstack-designate-producer"
+
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 designate_port = node[:designate][:api][:bind_port]
@@ -97,3 +99,4 @@ crowbar_pacemaker_sync_mark "create-designate_register" if ha_enabled
 
 designate_service "central"
 designate_service "api"
+designate_service "producer" unless ha_enabled
