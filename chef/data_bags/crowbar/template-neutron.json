@@ -64,8 +64,10 @@
           "peer_ip": "",
           "peer_port": 8009,
           "encap": "vxlan",
+          "integration_bridge": "br-int",
+          "access_bridge": "br-fabric",
           "vxlan": {
-              "encap_iface": "br-int_vxlan0",
+              "encap_iface": "br-fab_vxlan0",
               "uplink_iface": "vlan.4093",
               "uplink_vlan": 4093,
               "remote_ip": "",
@@ -96,7 +98,17 @@
               }
             }
           }
-        }
+        },
+        "apic_vmms": [{
+          "vmm_name": "soc_kvm_domain",
+          "vmm_type": "openstack",
+          "vlan_ranges": ""
+        },
+        {
+          "vmm_name": "soc_vm_domain",
+          "vmm_type": "vmware",
+          "vlan_ranges": ""
+        }]
       },
       "allow_overlapping_ips": true,
       "use_syslog": false,
@@ -193,7 +205,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 307,
+      "schema-revision": 309,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ],
