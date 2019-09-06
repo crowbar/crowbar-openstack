@@ -98,7 +98,17 @@
               }
             }
           }
-        }
+        },
+        "apic_vmms": [{
+          "vmm_name": "soc_kvm_domain",
+          "vmm_type": "openstack",
+          "vlan_ranges": ""
+        },
+        {
+          "vmm_name": "soc_vm_domain",
+          "vmm_type": "vmware",
+          "vlan_ranges": ""
+        }]
       },
       "allow_overlapping_ips": true,
       "use_syslog": false,
@@ -195,7 +205,7 @@
     "neutron": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 308,
+      "schema-revision": 309,
       "element_states": {
         "neutron-server": [ "readying", "ready", "applying" ],
         "neutron-network": [ "readying", "ready", "applying" ],

@@ -41,6 +41,18 @@ file "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" do
 end
 
 aciswitches = node[:neutron][:apic][:apic_switches].to_hash
+acivmms = node[:neutron][:apic][:apic_vmms]
+
+# If using VMWare vcenter as one of the compute hosts.
+# distributed dhcp and metadata cannot work since these
+# functions conflict with vcenter functionality.
+if acivmms.find { |vmm| vmm[:vmm_type].downcase == "vmware"}
+  apic_optimized_dhcp = false 
+  apic_optimized_metadata = false
+else
+  apic_optimized_dhcp = node[:neutron][:apic][:optimized_dhcp]
+  apic_optimized_metadata = node[:neutron][:apic][:optimized_metadata]
+end
 
 template node[:neutron][:ml2_cisco_apic_config_file] do
   cookbook "neutron"
@@ -51,6 +63,9 @@ template node[:neutron][:ml2_cisco_apic_config_file] do
   variables(
     vpc_pairs: node[:neutron][:apic][:vpc_pairs],
     apic_switches: aciswitches,
+    optimized_dhcp: apic_optimized_dhcp,
+    optimized_metadata: apic_optimized_metadata,
+    apic_vmms: acivmms,
     ml2_mechanism_drivers: node[:neutron][:ml2_mechanism_drivers],
     policy_drivers: "implicit_policy,apic",
     default_ip_pool: "192.168.0.0/16"
