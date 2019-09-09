@@ -33,20 +33,22 @@ haproxy_loadbalancer "designate-api" do
   action :nothing
 end.run_action(:create)
 
-op = {}
-op["monitor"] = {}
-op["monitor"]["interval"] = "10s"
+crowbar_pacemaker_sync_mark "wait-designate_producer"
 
-designate_producer_primitive = "designate-producer"
-pacemaker_primitive designate_producer_primitive do
+package "openstack-designate-producer"
+
+op = { "monitor" => { "interval" => "10s" }}
+
+producer_primitive = "designate-producer"
+pacemaker_primitive producer_primitive do
   agent "systemd:openstack-designate-producer"
   op op
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
-service_transaction_objects << "pacemaker_primitive[#{designate_producer_primitive}]"
+service_transaction_objects << "pacemaker_primitive[#{producer_primitive}]"
 
-designate_producer_loc = openstack_pacemaker_controller_only_location_for designate_producer_primitive
+designate_producer_loc = openstack_pacemaker_controller_only_location_for producer_primitive
 service_transaction_objects << "pacemaker_location[#{designate_producer_loc}]"
 
 pacemaker_transaction "designate producer service" do
