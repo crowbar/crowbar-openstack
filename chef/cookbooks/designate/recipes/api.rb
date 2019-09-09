@@ -16,8 +16,6 @@
 # Recipe:: api
 #
 
-package "openstack-designate-producer"
-
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
 designate_port = node[:designate][:api][:bind_port]
