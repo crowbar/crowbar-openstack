@@ -1,1 +1,5 @@
 +manila_tempest_tests.tests.*
+
+# BUG SOC-10395
+-manila_tempest_tests.tests.scenario.test_share_basic_ops.TestShareBasicOpsCIFS.test_mount_share_one_vm
+-manila_tempest_tests.tests.scenario.test_share_basic_ops.TestShareBasicOpsCIFS.test_read_write_two_vms
