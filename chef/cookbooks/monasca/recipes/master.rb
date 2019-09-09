@@ -24,6 +24,18 @@ monasca_node = monasca_servers[0]
 monasca_hosts = MonascaHelper.monasca_hosts(monasca_servers)
 raise "no nodes with monasca-server role found" if monasca_hosts.nil? || monasca_hosts.empty?
 
+# monasca-server nodes are in reinstall state
+unless monasca_node[:state] == "ready"
+  Chef::Log.warn("monasca-installer: monasca-server node is in reinstall state. skipping")
+  return
+end
+
+log "check for reinstallation" do
+  message "monasca-installer: explicit install is required"
+  notifies :run, "execute[remove lock file]", :immediately
+  only_if { node[:monasca] && node[:monasca][:installed] == false }
+end
+
 package "ansible"
 package "openstack-monasca-installer" do
   notifies :run, "execute[remove lock file]", :immediately
