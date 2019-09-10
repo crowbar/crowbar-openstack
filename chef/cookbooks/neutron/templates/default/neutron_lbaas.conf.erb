@@ -1,6 +1,12 @@
 [DEFAULT]
 interface_driver = <%= @interface_driver %>
+
 [quotas]
+#quota_loadbalancer = 10
+quota_loadbalancer = -1
+#quota_pool = 10
+quota_pool = -1
+
 [service_auth]
 auth_url = <%= @keystone_settings['internal_auth_url'] %>
 admin_tenant_name = <%= @keystone_settings['service_tenant'] %>
@@ -9,6 +15,7 @@ admin_password = <%= @keystone_settings['service_password'] %>
 region = <%= @keystone_settings['endpoint_region'] %>
 admin_user_domain = <%= @keystone_settings['admin_domain'] %>
 admin_project_domain = <%= @keystone_settings['admin_domain'] %>
+
 [service_providers]
 <% if @use_lbaas -%>
 <%
@@ -23,4 +30,3 @@ admin_project_domain = <%= @keystone_settings['admin_domain'] %>
 %>
 service_provider=<%= service_provider %>
 <% end -%>
-[certificates]
