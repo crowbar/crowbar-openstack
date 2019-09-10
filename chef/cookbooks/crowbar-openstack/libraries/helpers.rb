@@ -38,9 +38,9 @@ class Chef
     end
 
     def no_monasca_server_or_master
-      monasca_master = node_search_with_cache("roles:monasca-master").first
-      monasca_server = node_search_with_cache("roles:monasca-server").first
-      monasca_master.nil? || monasca_server.nil?
+      master = node_search_with_cache("roles:monasca-master").first
+      server = node_search_with_cache("roles:monasca-server").first
+      master.nil? || server.nil? || !(master[:monasca] && master[:monasca][:installed])
     end
   end
 end
