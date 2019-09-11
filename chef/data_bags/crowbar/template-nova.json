@@ -29,7 +29,7 @@
         "network": "admin"
       },
       "use_syslog": false,
-      "neutron_url_timeout": 30,
+      "neutron_url_timeout": 300,
       "force_config_drive": false,
       "vnc_keymap": "en-us",
       "scheduler": {
