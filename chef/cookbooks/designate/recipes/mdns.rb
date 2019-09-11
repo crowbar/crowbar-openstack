@@ -79,7 +79,7 @@ template "/etc/designate/rndc.key" do
   owner "root"
   group node[:designate][:group]
   mode "0640"
-  variables(rndc_key: dns[:dns][:designate_rndc_key])
+  variables(rndc_key: dns_all.first[:dns][:designate_rndc_key])
 end
 
 ha_enabled = node[:designate][:ha][:enabled]
