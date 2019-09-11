@@ -19,7 +19,8 @@ barclamp:
   display: 'Aodh'
   description: 'OpenStack Telemetry: Alarming service'
   version: 0
-  user_managed: true
+  # Change to true when complete
+  user_managed: false
   requires:
     - '@crowbar'
     - 'pacemaker'
