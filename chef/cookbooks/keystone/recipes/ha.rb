@@ -15,10 +15,24 @@
 
 include_recipe "crowbar-pacemaker::haproxy"
 
+# NOTE(gyee): for features such as OpenID Connect and SAML-based federation,
+# where client interaction with Keystone is stateful and the state information
+# is persisted in the Keystone instance's local cache, we must use source
+# load balancing so that the client is talking to the same Keystone instance
+# for the duration of the session. By default, the balancing algorithm is an
+# empty string.
+balancing_algorithm =
+  if node[:keystone][:federation][:openidc][:enabled]
+    "source"
+  else
+    ""
+  end
+
 haproxy_loadbalancer "keystone-service" do
   address node[:keystone][:api][:api_host]
   port node[:keystone][:api][:service_port]
   use_ssl (node[:keystone][:api][:protocol] == "https")
+  balance balancing_algorithm
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "keystone", "keystone-server", "service_port")
   action :nothing
 end.run_action(:create)
