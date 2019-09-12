@@ -37,6 +37,10 @@ class Chef
       monasca_server = node_search_with_cache("roles:monasca-server").first
       monasca_server.nil?
     end
+
+    def config_for_role_exists?(name)
+      CrowbarOpenStackHelper.config_for_role_exists?(name)
+    end
   end
 end
 
@@ -273,6 +277,13 @@ class CrowbarOpenStackHelper
     end
 
     use_ssl && attributes["ssl"]["insecure"]
+  end
+
+  def self.config_for_role_exists?(name)
+    shouldbe = "#{name}-config-"
+    @cached_roles ||= Chef::Role.list.keys
+    res = @cached_roles.find { |rname| rname.start_with? shouldbe }
+    res != nil
   end
 
   private
