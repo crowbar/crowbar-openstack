@@ -13,16 +13,15 @@
 # limitations under the License.
 #
 # Cookbook Name:: designate
-# Recipe:: api
+# Recipe:: mdns
 #
 
 require "yaml"
 
 dns_all = node_search_with_cache("roles:dns-server")
-dns = dns_all.first
-dnsmaster = dns[:dns][:master_ip]
-dnsslaves = dns[:dns][:slave_ips].to_a
-dnsservers = [dnsmaster] + dnsslaves
+dnsservers = dns_all.map do |n|
+  Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
+end
 
 designate_servers = node_search_with_cache("roles:designate-server")
 
