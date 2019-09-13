@@ -70,7 +70,7 @@ node[:monasca][:elasticsearch][:data_dirs].each do |d|
   end
 end
 
-node[:monasca][:elasticsearch][:repo_dirs].each do |d|
+node[:monasca][:elasticsearch][:repo_dir].each do |d|
   directory d do
     mode "0755"
     owner "elasticsearch"
@@ -98,7 +98,7 @@ template "/etc/elasticsearch/elasticsearch.yml" do
     elasticsearch_is_data_node: node[:monasca][:elasticsearch][:is_data_node],
     elasticsearch_data_dirs: node[:monasca][:elasticsearch][:data_dirs],
     elasticsearch_log_dir: node[:monasca][:elasticsearch][:log_dir],
-    elasticsearch_repo_dirs: node[:monasca][:elasticsearch][:repo_dirs],
+    elasticsearch_repo_dir: node[:monasca][:elasticsearch][:repo_dir],
     elasticsearch_bootstrap_memory_lock: node[:monasca][:elasticsearch][:bootstrap_memory_lock],
     elasticsearch_bind_host: monasca_net_ip,
     elasticsearch_public_host: monasca_net_ip

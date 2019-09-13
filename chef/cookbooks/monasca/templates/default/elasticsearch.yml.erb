@@ -162,8 +162,8 @@ path.logs: <%= @elasticsearch_log_dir %>
 #path.conf: /path/to/conf
 
 # Path to Shared File System Repository
-<% unless @elasticsearch_repo_dirs.empty? %>
-path.repo: [<%= @elasticsearch_repo_dirs.join(",") %>]
+<% unless @elasticsearch_repo_dir.empty? %>
+path.repo: [<%= @elasticsearch_repo_dir.join(",") %>]
 <% else %>
 # path.repo:
 <% end %>
