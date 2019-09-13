@@ -83,7 +83,7 @@ end
 template "/etc/grafana/grafana.ini" do
   source "grafana.ini.erb"
   variables(
-    database_host: db_settings[:address],
+    database_host: NetworkHelper.wrap_ip(db_settings[:address]),
     grafana_password: grafana_password
   )
   owner "root"

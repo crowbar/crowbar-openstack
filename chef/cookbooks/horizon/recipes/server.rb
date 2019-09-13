@@ -444,7 +444,8 @@ crowbar_pacemaker_sync_mark "create-horizon_config" if ha_enabled
 if ha_enabled
   log "HA support for horizon is enabled"
   admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  bind_host = admin_address
+  bind_host_ipv6 = NetworkHelper.ipv6(admin_address)
+  bind_host = NetworkHelper.wrap_ip(admin_address)
   bind_port = node[:horizon][:ha][:ports][:plain]
   bind_port_ssl = node[:horizon][:ha][:ports][:ssl]
 else
@@ -507,6 +508,7 @@ template "#{node[:apache][:dir]}/sites-available/openstack-dashboard.conf" do
   variables(
     behind_proxy: ha_enabled,
     bind_host: bind_host,
+    bind_host_ipv6: bind_host_ipv6,
     bind_port: bind_port,
     bind_port_ssl: bind_port_ssl,
     horizon_dir: dashboard_path,

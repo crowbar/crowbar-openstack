@@ -15,8 +15,15 @@
 
 include_recipe "crowbar-pacemaker::haproxy"
 
+admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+
 haproxy_loadbalancer "horizon" do
-  address "0.0.0.0"
+  # Support IPv4 and IPv6
+  if NetworkHelper.ipv6(admin_address)
+    address "::"
+  else
+    address "0.0.0.0"
+  end
   port 80
   use_ssl false
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "horizon", "horizon-server", "plain")
@@ -25,7 +32,12 @@ end.run_action(:create)
 
 if node[:horizon][:apache][:ssl]
   haproxy_loadbalancer "horizon-ssl" do
-    address "0.0.0.0"
+    # Support IPv4 and IPv6
+    if NetworkHelper.ipv6(admin_address)
+      address "::"
+    else
+      address "0.0.0.0"
+    end
     port 443
     use_ssl true
     servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "horizon", "horizon-server", "ssl")

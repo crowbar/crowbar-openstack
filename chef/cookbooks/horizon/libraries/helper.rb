@@ -25,7 +25,7 @@ module MonascaUiHelper
     # protocol = node[:monasca][:api][:ssl] ? "https" : "http"
     protocol = "http"
     port = node[:monasca][:api][:bind_port]
-    "#{protocol}://#{host}:#{port}/v2.0"
+    "#{protocol}://#{NetworkHelper.wrap_ip(host)}:#{port}/v2.0"
   end
 
   def self.dashboard_ip(node)
@@ -51,21 +51,21 @@ module MonascaUiHelper
     if ha_enabled
       port = node[:horizon][:ha][:ports][:plain]
       port = node[:horizon][:ha][:ports][:ssl] if ssl_enabled
-      return "#{protocol}://#{admin_ip}:#{port}"
+      return "#{protocol}://#{NetworkHelper.wrap_ip(admin_ip)}:#{port}"
     end
 
-    "#{protocol}://#{public_ip}"
+    "#{protocol}://#{NetworkHelper.wrap_ip(public_ip)}"
   end
 
   def self.dashboard_public_url(node)
     protocol = "http"
     protocol = "https" if node[:horizon][:apache][:ssl]
 
-    "#{protocol}://#{dashboard_ip(node)}"
+    "#{protocol}://#{NetworkHelper.wrap_ip(dashboard_ip(node))}"
   end
 
   def self.grafana_service_url(node)
-    "http://#{monasca_public_host(node)}:3000"
+    "http://#{NetworkHelper.wrap_ip(monasca_public_host(node))}:3000"
   end
 end
 
