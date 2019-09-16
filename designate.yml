@@ -19,8 +19,7 @@ barclamp:
   display: 'Designate'
   description: 'OpenStack DNSaaS: Multi-Tenant DNSaaS service for OpenStack'
   version: 0
-  # Change to true when complete
-  user_managed: false
+  user_managed: true
   requires:
     - 'keystone'
     - 'rabbitmq'
