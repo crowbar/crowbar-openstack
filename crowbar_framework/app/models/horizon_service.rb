@@ -165,10 +165,12 @@ class HorizonService < OpenstackServiceObject
       end
 
       node.crowbar["crowbar"]["links"].delete("Nova Dashboard (public)")
-      node.crowbar["crowbar"]["links"]["OpenStack Dashboard (public)"] = "#{protocol}://#{public_server_ip}/"
+      node.crowbar["crowbar"]["links"]["OpenStack Dashboard (public)"] =
+        "#{protocol}://#{NetworkHelper.wrap_ip(public_server_ip)}/"
 
       node.crowbar["crowbar"]["links"].delete("Nova Dashboard (admin)")
-      node.crowbar["crowbar"]["links"]["OpenStack Dashboard (admin)"] = "#{protocol}://#{admin_server_ip}/"
+      node.crowbar["crowbar"]["links"]["OpenStack Dashboard (admin)"] =
+        "#{protocol}://#{NetworkHelper.wrap_ip(admin_server_ip)}/"
 
       node.save
     end
