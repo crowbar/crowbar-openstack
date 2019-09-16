@@ -19,7 +19,8 @@ barclamp:
   display: 'Octavia'
   description: 'Operator-scale load balancing solution designed to work with OpenStack.'
   version: 0
-  user_managed: true
+  # Change to true when complete
+  user_managed: false
   requires:
     - 'nova'
     - 'glance'
