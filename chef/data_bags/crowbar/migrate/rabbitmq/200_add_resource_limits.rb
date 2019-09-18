@@ -1,5 +1,5 @@
 def upgrade(ta, td, a, d)
-  a["resource_limits"] = ta["resource_limits"] unless a["resource_limits"]
+  a["resource_limits"] = ta["resource_limits"] unless a.key?(["resource_limits"])
   return a, d
 end
 

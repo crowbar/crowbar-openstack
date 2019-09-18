@@ -1,6 +1,6 @@
 def upgrade(ta, td, a, d)
   a["client"] ||= {}
-  unless a["client"]["heartbeat_timeout"]
+  unless a["client"].key?("heartbeat_timeout")
     a["client"]["heartbeat_timeout"] = ta["client"]["heartbeat_timeout"]
   end
   return a, d

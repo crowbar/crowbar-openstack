@@ -1,6 +1,6 @@
 def upgrade(ta, td, a, d)
   ["tcp_listen_options", "collect_statistics_interval"].each do |option|
-    a[option] = ta[option] unless a[option]
+    a[option] = ta[option] unless a.key?(option)
   end
   return a, d
 end
