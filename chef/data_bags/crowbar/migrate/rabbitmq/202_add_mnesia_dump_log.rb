@@ -1,5 +1,5 @@
 def upgrade(ta, td, a, d)
-  a["mnesia"] = ta["mnesia"] unless a["mnesia"]
+  a["mnesia"] = ta["mnesia"] unless a.key?("mnesia")
   return a, d
 end
 
