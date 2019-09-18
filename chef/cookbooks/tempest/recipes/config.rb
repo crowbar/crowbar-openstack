@@ -83,6 +83,12 @@ openstackcli_adm = "#{adm_environment} openstack --insecure"
 
 enabled_services = `#{openstackcli_adm} service list -f value -c Type`.split
 
+unless $?.success?
+  message = "Failed to execute `#{openstackcli_adm} service list -f value -c Type`."
+  Chef::Log.fatal(message)
+  raise message
+end
+
 users = [
   { "name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "member" }
 ]
