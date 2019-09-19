@@ -95,7 +95,6 @@ default[:monasca][:elasticsearch][:is_master_node] = "true"
 default[:monasca][:elasticsearch][:is_data_node] = "true"
 default[:monasca][:elasticsearch][:data_dirs] = ["/var/data/elasticsearch"]
 default[:monasca][:elasticsearch][:log_dir] = "/var/log/elasticsearch"
-default[:monasca][:elasticsearch][:repo_dirs] = []
 default[:monasca][:elasticsearch][:bootstrap_memory_lock] = "true"
 
 # storm
