@@ -71,7 +71,7 @@ default[:nova][:libvirt_type] = "kvm"
 #
 
 default[:nova][:kvm][:ksm_enabled] = false
-
+default[:nova][:kvm][:max_threads_per_process] = 0
 #
 # VMware Settings
 #
