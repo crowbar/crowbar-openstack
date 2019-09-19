@@ -78,15 +78,21 @@ comp_environment << "OS_AUTH_URL='#{auth_url}' "
 comp_environment << "OS_IDENTITY_API_VERSION='#{keystone_settings["api_version"]}'"
 openstackcli = "#{comp_environment} openstack --insecure"
 
-# for admin usage (listing the available services)
-adm_environment = "OS_USERNAME='#{tempest_adm_user}' "
-adm_environment << "OS_PASSWORD='#{tempest_adm_pass}' "
-adm_environment << "OS_PROJECT_NAME='#{tempest_comp_tenant}' "
-adm_environment << "OS_AUTH_URL='#{auth_url}' "
-adm_environment << "OS_IDENTITY_API_VERSION='#{keystone_settings["api_version"]}'"
-openstackcli_adm = "#{adm_environment} openstack --insecure"
+# maps a keystone catalog service name to its corresponding barclamp role
+service_role_map = {
+  "metering" => "ceilometer-server",
+  "orchestration" => "heat-server",
+  "data-processing" => "sahara-server",
+  "database" => "trove-server",
+  "sharev2" => "manila-server",
+  "container-infra" => "magnum-server",
+  "baremetal" => "ironic-server",
+  "alarming" => "aodh-server"
+}
 
-enabled_services = `#{openstackcli_adm} service list -f value -c Type`.split
+enabled_services = service_role_map.reject do |service_name, role_name|
+  search(:node, "roles:#{role_name}").first.nil?
+end.keys
 
 users = [
           {"name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => "Member"},
@@ -105,8 +111,8 @@ if enabled_services.include?("metering")
   end
 end
 
-heat_server = search(:node, "roles:heat-server").first
-if enabled_services.include?("orchestration") && !heat_server.nil?
+if enabled_services.include?("orchestration")
+  heat_server = search(:node, "roles:heat-server").first
   heat_trusts_delegated_roles = heat_server[:heat][:trusts_delegated_roles]
   heat_trusts_delegated_roles.each do |role|
     users.push("name" => tempest_comp_user, "pass" => tempest_comp_pass, "role" => role)
