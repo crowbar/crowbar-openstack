@@ -119,12 +119,6 @@ class NovaService < OpenstackServiceObject
     answer
   end
 
-  def node_supports_xen(node)
-    return false if node[:platform_family] != "suse"
-    return false if node[:block_device].include?("vda")
-    node["kernel"]["machine"] =~ /x86_64/
-  end
-
   def node_supports_kvm(node)
     return false if node[:cpu].nil? || node[:cpu]["0"].nil? || node[:cpu]["0"][:flags].nil?
     return true if node["kernel"]["machine"] =~ /(aarch64|s390x)/
@@ -164,8 +158,7 @@ class NovaService < OpenstackServiceObject
     non_hyperv = nodes - hyperv
     kvm = non_hyperv.select { |n| n if node_supports_kvm(n) }
     non_kvm = non_hyperv - kvm
-    xen = non_kvm.select { |n| n if node_supports_xen(n) }
-    qemu = non_kvm - xen
+    qemu = non_kvm
 
     # do not use zvm by default
     #   TODO add it here once a compute node can run inside z/VM
@@ -449,7 +442,7 @@ class NovaService < OpenstackServiceObject
       nodes[n] += 1
 
       node = NodeObject.find_node_by_name(n)
-      next if node.nil? || node_supports_xen(node)
+      next if node.nil?
 
       node_platform = "#{node[:platform]}-#{node[:platform_version]}"
       validation_error I18n.t(
