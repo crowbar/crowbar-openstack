@@ -180,7 +180,7 @@ template node[:glance][:manage][:config_file] do
   mode 0o640
 end
 
-crowbar_pacemaker_sync_mark "wait-glance_database" if ha_enabled
+crowbar_pacemaker_sync_mark "wait-glance_db_sync" if ha_enabled
 
 is_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
 
@@ -215,6 +215,6 @@ ruby_block "mark node for glance db_sync" do
   subscribes :create, "execute[glance-manage db_load_metadefs]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-glance_database" if ha_enabled
+crowbar_pacemaker_sync_mark "create-glance_db_sync" if ha_enabled
 
 glance_service "api"
