@@ -37,7 +37,7 @@ module Openstack
       # this point the nodes maybe don't have roles assigned anymore
       components = [
         :ceilometer, :cinder, :glance, :heat,
-        :manila, :neutron, :nova
+        :manila, :neutron, :nova, :monasca
       ]
       NodeObject.all.each do |node|
         save_it = false
@@ -46,7 +46,7 @@ module Openstack
         # run keystone db_sync only in non-ha scenarios
         complete_components << "keystone" if node["keystone"] && !node["keystone"]["ha"]["enabled"]
         complete_components.each do |component|
-          [:db_synced, :api_db_synced].each do |flag|
+          [:db_synced, :api_db_synced, :db_monapi_synced].each do |flag|
             if node[component] && node[component][flag]
               node[component][flag] = false
               save_it = true
