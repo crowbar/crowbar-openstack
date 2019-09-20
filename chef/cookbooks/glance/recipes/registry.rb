@@ -40,7 +40,7 @@ end
 ha_enabled = node[:glance][:ha][:enabled]
 is_founder = CrowbarPacemakerHelper.is_cluster_founder?(node)
 
-crowbar_pacemaker_sync_mark "wait-glance_database" if ha_enabled
+crowbar_pacemaker_sync_mark "wait-glance_db_sync" if ha_enabled
 
 execute "glance-manage db sync" do
   user node[:glance][:user]
@@ -73,6 +73,6 @@ ruby_block "mark node for glance db_sync" do
   subscribes :create, "execute[glance-manage db_load_metadefs]", :immediately
 end
 
-crowbar_pacemaker_sync_mark "create-glance_database" if ha_enabled
+crowbar_pacemaker_sync_mark "create-glance_db_sync" if ha_enabled
 
 glance_service "registry"
