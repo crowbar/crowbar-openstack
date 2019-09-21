@@ -359,7 +359,7 @@ enabled_filters = <%= @enabled_filters %>
 <% else %>
 available_filters = nova.scheduler.filters.all_filters
 <% if @enabled_filters.empty? %>
-enabled_filters = RetryFilter,AvailabilityZoneFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,SameHostFilter,DifferentHostFilter
+enabled_filters = RetryFilter,AvailabilityZoneFilter,ComputeFilter,ComputeCapabilitiesFilter,ImagePropertiesFilter,ServerGroupAntiAffinityFilter,ServerGroupAffinityFilter,SameHostFilter,DifferentHostFilter,PciPassthroughFilter
 <% else %>
 enabled_filters = <%= @enabled_filters %>
 <% end %>
