@@ -275,7 +275,8 @@ if neutron[:neutron][:networking_plugin] == "ml2"
         dvr_enabled: neutron[:neutron][:use_dvr],
         tunnel_csum: neutron[:neutron][:ovs][:tunnel_csum],
         ovsdb_interface: neutron[:neutron][:ovs][:ovsdb_interface],
-        bridge_mappings: bridge_mappings
+        bridge_mappings: bridge_mappings,
+        of_inactivity_probe: neutron[:neutron][:ovs][:of_inactivity_probe]
       )
     end
   when ml2_mech_drivers.include?("linuxbridge")
