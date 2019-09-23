@@ -168,7 +168,7 @@ class NovaService < OpenstackServiceObject
       "nova-controller" => [controller.name],
       "nova-compute-kvm" => kvm.map(&:name),
       "nova-compute-qemu" => qemu.map(&:name),
-      "nova-compute-xen" => xen.map(&:name)
+      "nova-compute-xen" => []
     }
 
     base["attributes"][@bc_name]["itxt_instance"] = find_dep_proposal("itxt", true)
