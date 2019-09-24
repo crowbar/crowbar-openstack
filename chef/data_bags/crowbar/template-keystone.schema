@@ -8,6 +8,7 @@
         "keystone": { "type": "map", "required": true,
              "mapping": {
                     "debug": { "type": "bool", "required": true },
+                    "insecure_debug": { "type": "bool", "required": true },
                     "frontend": { "type": "str", "required": true },
                     "policy_file": { "type": "str", "required": true },
                     "database_instance": { "type": "str", "required": true },
@@ -73,6 +74,7 @@
                       "suffix": { "type": "str" },
                       "page_size": { "type": "int" },
                       "alias_dereferencing": { "type": "str" },
+                      "chase_referrals": { "type": "str" },
                       "query_scope": { "type": "str" },
                       "user_tree_dn": { "type": "str" },
                       "user_filter": { "type": "str" },
@@ -129,6 +131,7 @@
                             "suffix": { "type": "str" },
                             "page_size": { "type": "int" },
                             "alias_dereferencing": { "type": "str" },
+                            "chase_referrals": { "type": "str" },
                             "query_scope": { "type": "str" },
                             "user_tree_dn": { "type": "str" },
                             "user_filter": { "type": "str" },
