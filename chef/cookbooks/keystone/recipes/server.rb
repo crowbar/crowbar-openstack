@@ -253,6 +253,7 @@ template node[:keystone][:config_file] do
       sql_connection: sql_connection,
       sql_idle_timeout: node[:keystone][:sql][:idle_timeout],
       debug: node[:keystone][:debug],
+      insecure_debug: node[:keystone][:insecure_debug],
       admin_endpoint: KeystoneHelper.service_URL(
         node[:keystone][:api][:protocol],
         my_admin_host, node[:keystone][:api][:admin_port]

@@ -9,6 +9,9 @@ suffix = <%= node[:keystone][:domain_specific_config][@domain][:ldap][:suffix] %
 query_scope = <%= node[:keystone][:domain_specific_config][@domain][:ldap][:query_scope] %>
 page_size = <%= node[:keystone][:domain_specific_config][@domain][:ldap][:page_size] %>
 alias_dereferencing = <%= node[:keystone][:domain_specific_config][@domain][:ldap][:alias_dereferencing] %>
+<%  unless node[:keystone][:domain_specific_config][@domain][:ldap][:chase_referrals].nil? or node[:keystone][:domain_specific_config][@domain][:ldap][:chase_referrals].empty? -%>
+chase_referrals = <%= node[:keystone][:domain_specific_config][@domain][:ldap][:chase_referrals] %>
+<% end -%>
 user_tree_dn = <%= node[:keystone][:domain_specific_config][@domain][:ldap][:user_tree_dn] %>
 user_filter = <%= node[:keystone][:domain_specific_config][@domain][:ldap][:user_filter] %>
 user_objectclass = <%= node[:keystone][:domain_specific_config][@domain][:ldap][:user_objectclass] %>
