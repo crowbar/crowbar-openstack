@@ -95,10 +95,10 @@ neutron_fwaas_ui_pkgname =
   end
 
 unless neutron_fwaas_ui_pkgname.nil?
+  neutron_role_exists = config_for_role_exists?("neutron")
   package neutron_fwaas_ui_pkgname do
     action :install
-    notifies :reload, "service[horizon]"
-    only_if { RoleHelper.config_for_role_exists?("neutron") }
+    only_if { neutron_role_exists }
   end
 end
 
@@ -112,10 +112,10 @@ manila_ui_pkgname =
   end
 
 unless manila_ui_pkgname.nil?
+  manila_role_exists = config_for_role_exists?("manila")
   package manila_ui_pkgname do
     action :install
-    notifies :reload, "service[horizon]"
-    only_if { RoleHelper.config_for_role_exists?("manila") }
+    only_if { manila_role_exists }
   end
 end
 
@@ -129,10 +129,10 @@ magnum_ui_pkgname =
   end
 
 unless magnum_ui_pkgname.nil?
+  magnum_role_exists = config_for_role_exists?("magnum")
   package magnum_ui_pkgname do
     action :install
-    notifies :reload, "service[horizon]"
-    only_if { RoleHelper.config_for_role_exists?("magnum") }
+    only_if { magnum_role_exists }
   end
 end
 
@@ -146,10 +146,10 @@ designate_ui_pkgname =
   end
 
 unless designate_ui_pkgname.nil?
+  designate_role_exists = config_for_role_exists?("designate")
   package designate_ui_pkgname do
     action :install
-    notifies :reload, "service[horizon]"
-    only_if { RoleHelper.config_for_role_exists?("designate") }
+    only_if { designate_role_exists }
   end
 end
 
@@ -163,10 +163,10 @@ sahara_ui_pkgname =
   end
 
 unless sahara_ui_pkgname.nil?
+  sahara_role_exists = config_for_role_exists?("sahara")
   package sahara_ui_pkgname do
     action :install
-    notifies :reload, "service[horizon]"
-    only_if { RoleHelper.config_for_role_exists?("sahara") }
+    only_if { sahara_role_exists }
   end
 end
 
@@ -180,10 +180,10 @@ ironic_ui_pkgname =
   end
 
 unless ironic_ui_pkgname.nil?
+  ironic_role_exists = config_for_role_exists?("ironic")
   package ironic_ui_pkgname do
     action :install
-    notifies :reload, "service[horizon]"
-    only_if { RoleHelper.config_for_role_exists?("ironic") }
+    only_if { ironic_role_exists }
   end
 end
 
@@ -218,10 +218,10 @@ end
 
 # install horizon heat plugin if needed
 heat_ui_pkgname = "openstack-horizon-plugin-heat-ui"
+heat_role_exists = config_for_role_exists?("heat")
 package heat_ui_pkgname do
   action :install
-  notifies :reload, "service[horizon]"
-  only_if { RoleHelper.config_for_role_exists?("heat") }
+  only_if { heat_role_exists }
 end
 
 if node[:platform_family] == "suse"
@@ -595,11 +595,11 @@ monasca_ui_pkgname =
   end
 
 unless monasca_ui_pkgname.nil?
-  if RoleHelper.config_for_role_exists?("monasca")
+  monasca_role_exists = config_for_role_exists?("monasca")
+  if monasca_role_exists
     include_recipe "#{@cookbook_name}::monasca_ui"
     package monasca_ui_pkgname do
       action :install
-      notifies :reload, "service[horizon]"
     end
   end
 end
