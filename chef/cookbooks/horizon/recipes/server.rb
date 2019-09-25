@@ -98,6 +98,7 @@ unless neutron_fwaas_ui_pkgname.nil?
   neutron_role_exists = config_for_role_exists?("neutron")
   package neutron_fwaas_ui_pkgname do
     action :install
+    notifies :reload, "service[horizon]"
     only_if { neutron_role_exists }
   end
 end
@@ -115,6 +116,7 @@ unless manila_ui_pkgname.nil?
   manila_role_exists = config_for_role_exists?("manila")
   package manila_ui_pkgname do
     action :install
+    notifies :reload, "service[horizon]"
     only_if { manila_role_exists }
   end
 end
@@ -132,6 +134,7 @@ unless magnum_ui_pkgname.nil?
   magnum_role_exists = config_for_role_exists?("magnum")
   package magnum_ui_pkgname do
     action :install
+    notifies :reload, "service[horizon]"
     only_if { magnum_role_exists }
   end
 end
@@ -149,6 +152,7 @@ unless designate_ui_pkgname.nil?
   designate_role_exists = config_for_role_exists?("designate")
   package designate_ui_pkgname do
     action :install
+    notifies :reload, "service[horizon]"
     only_if { designate_role_exists }
   end
 end
@@ -166,6 +170,7 @@ unless sahara_ui_pkgname.nil?
   sahara_role_exists = config_for_role_exists?("sahara")
   package sahara_ui_pkgname do
     action :install
+    notifies :reload, "service[horizon]"
     only_if { sahara_role_exists }
   end
 end
@@ -183,6 +188,7 @@ unless ironic_ui_pkgname.nil?
   ironic_role_exists = config_for_role_exists?("ironic")
   package ironic_ui_pkgname do
     action :install
+    notifies :reload, "service[horizon]"
     only_if { ironic_role_exists }
   end
 end
@@ -221,6 +227,7 @@ heat_ui_pkgname = "openstack-horizon-plugin-heat-ui"
 heat_role_exists = config_for_role_exists?("heat")
 package heat_ui_pkgname do
   action :install
+  notifies :reload, "service[horizon]"
   only_if { heat_role_exists }
 end
 
@@ -600,6 +607,7 @@ unless monasca_ui_pkgname.nil?
     include_recipe "#{@cookbook_name}::monasca_ui"
     package monasca_ui_pkgname do
       action :install
+      notifies :reload, "service[horizon]"
     end
   end
 end
