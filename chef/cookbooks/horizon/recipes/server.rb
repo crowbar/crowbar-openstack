@@ -95,11 +95,11 @@ neutron_fwaas_ui_pkgname =
   end
 
 unless neutron_fwaas_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "neutron").empty?
-    package neutron_fwaas_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  neutron_fwaas_role_exists = config_for_role_exists?("neutron")
+  package neutron_fwaas_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { neutron_fwaas_role_exists }
   end
 end
 
@@ -113,11 +113,11 @@ neutron_lbaas_ui_pkgname =
   end
 
 unless neutron_lbaas_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "neutron").empty?
-    package neutron_lbaas_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  neutron_lbaas_role_exists = config_for_role_exists?("neutron")
+  package neutron_lbaas_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { neutron_lbaas_role_exists }
   end
 end
 
@@ -131,11 +131,11 @@ manila_ui_pkgname =
   end
 
 unless manila_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "manila").empty?
-    package manila_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  manila_role_exists = config_for_role_exists?("manila")
+  package manila_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { manila_role_exists }
   end
 end
 
@@ -149,11 +149,11 @@ magnum_ui_pkgname =
   end
 
 unless magnum_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "magnum").empty?
-    package magnum_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  magnum_role_exists = config_for_role_exists?("magnum")
+  package magnum_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { magnum_role_exists }
   end
 end
 
@@ -167,11 +167,11 @@ trove_ui_pkgname =
   end
 
 unless trove_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "trove").empty?
-    package trove_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  trove_role_exists = config_for_role_exists?("trove")
+  package trove_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { trove_role_exists }
   end
 end
 
@@ -185,11 +185,11 @@ designate_ui_pkgname =
   end
 
 unless designate_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "designate").empty?
-    package designate_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  designate_role_exists = config_for_role_exists?("designate")
+  package designate_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { designate_role_exists }
   end
 end
 
@@ -203,11 +203,11 @@ sahara_ui_pkgname =
   end
 
 unless sahara_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "sahara").empty?
-    package sahara_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  sahara_role_exists = config_for_role_exists?("sahara")
+  package sahara_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { sahara_role_exists }
   end
 end
 
@@ -221,11 +221,11 @@ ironic_ui_pkgname =
   end
 
 unless ironic_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "ironic").empty?
-    package ironic_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  ironic_role_exists = config_for_role_exists?("ironic")
+  package ironic_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { ironic_role_exists }
   end
 end
 
@@ -623,11 +623,11 @@ monasca_ui_pkgname =
   end
 
 unless monasca_ui_pkgname.nil?
-  unless Barclamp::Config.load("openstack", "monasca").empty?
-    include_recipe "#{@cookbook_name}::monasca_ui"
-    package monasca_ui_pkgname do
-      action :install
-      notifies :reload, "service[horizon]"
-    end
+  monasca_role_exists = config_for_role_exists?("monasca")
+  include_recipe "#{@cookbook_name}::monasca_ui"
+  package monasca_ui_pkgname do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { monasca_role_exists }
   end
 end
