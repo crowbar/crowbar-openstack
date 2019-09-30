@@ -19,6 +19,10 @@
 require "yaml"
 
 dns_all = node_search_with_cache("roles:dns-server")
+
+# filter out the crowbar node
+dns_all.select! { |node| node["crowbar"]["admin_node"].nil? }
+
 dnsservers = dns_all.map do |n|
   Chef::Recipe::Barclamp::Inventory.get_network_by_type(n, "admin").address
 end
