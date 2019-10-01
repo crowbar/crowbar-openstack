@@ -1,6 +1,6 @@
 def upgrade(template_attrs, template_deployment, attrs, deployment)
-  unless attrs["mysql"]["presync_timeout"]
-    attrs["mysql"]["presync_timeout"] = template_attrs["mysql"].key?("presync_timeout")
+  unless attrs["mysql"].key?("presync_timeout")
+    attrs["mysql"]["presync_timeout"] = template_attrs["mysql"]["presync_timeout"]
   end
   return attrs, deployment
 end
