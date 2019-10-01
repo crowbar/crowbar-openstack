@@ -64,7 +64,7 @@ if node["crowbar_upgrade_step"] == "done_os_upgrade"
              " #{mondb_database}"
     not_if "monasca_db version" # If DB is stamped with an Alembic version, this already happened.
     action :run
-    only_if File.exist?(db_backup_path)
+    only_if { File.exist?(db_backup_path) }
     notifies :run, "execute[stamp Monasca DB]", :immediately
   end
 
