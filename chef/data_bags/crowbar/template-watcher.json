@@ -1,0 +1,61 @@
+{
+  "id": "template-watcher",
+  "description": "Resource optimization service for the cloud",
+  "attributes": {
+    "watcher": {
+      "debug": false,
+      "state_path": "/var/lib/watcher/state",
+      "control_exchange": "watcher",
+      "db": {
+        "database": "watcher",
+        "user": "watcher",
+        "password": ""
+      },
+      "api": {
+        "protocol": "http",
+        "bind_open_address": true,
+        "bind_port": 9322
+      },
+      "ssl": {
+        "certfile": "/etc/watcher/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/watcher/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
+        "cert_required": false,
+        "ca_certs": "/etc/watcher/ssl/certs/ca.pem"
+      },
+      "use_syslog": false,
+      "enable_caching": false,
+      "keystone_instance": "none",
+      "service_user": "watcher",
+      "service_password": "",
+      "database_instance": "none",
+      "rabbitmq_instance": "none",
+      "memcache_secret_key": "",
+      "ha_rate_limit": {
+        "watcher-api": 0
+      }
+    }
+  },
+  "deployment": {
+    "watcher": {
+      "crowbar-revision": 0,
+      "crowbar-applied": false,
+      "schema-revision": 300,
+      "element_states": {
+        "watcher-server": [ "readying", "ready", "applying" ]
+      },
+      "elements": {},
+      "element_order": [
+        [ "watcher-server" ]
+      ],
+      "config": {
+        "environment": "watcher-base-config",
+        "mode": "full",
+        "transitions": false,
+        "transition_list": [
+        ]
+      }
+    }
+  }
+}
