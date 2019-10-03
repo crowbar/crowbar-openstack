@@ -74,12 +74,17 @@ file "/etc/designate/pools.crowbar.yaml" do
   not_if { ::File.exist?("/etc/designate/pools.crowbar.yaml") }
 end
 
-template "/etc/designate/rndc.key" do
-  source "rndc.key.erb"
-  owner "root"
-  group node[:designate][:group]
-  mode "0640"
-  variables(rndc_key: dns_all.first[:dns][:designate_rndc_key])
+if dns_all.empty?
+  Chef::Log.warn("Designate will not be integrated with external DNS server," \
+		 "as no DNS server is running on publicly accessible (non admin) node.")
+else
+  template "/etc/designate/rndc.key" do
+    source "rndc.key.erb"
+    owner "root"
+    group node[:designate][:group]
+    mode "0640"
+    variables(rndc_key: dns_all.first[:dns][:designate_rndc_key])
+  end
 end
 
 ha_enabled = node[:designate][:ha][:enabled]
