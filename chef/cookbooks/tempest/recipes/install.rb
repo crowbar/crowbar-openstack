@@ -44,6 +44,7 @@ if node[:kernel][:machine] == "x86_64" &&
 end
 
 [
+  "designate",
   "barbican"
 ].each do |component|
   package "python-#{component}-tempest-plugin" if config_for_role_exists?(component)
