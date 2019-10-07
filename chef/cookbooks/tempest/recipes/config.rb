@@ -539,11 +539,15 @@ tempest_roles = ["member"]
 barbicans = search(:node, "roles:barbican-controller") || []
 tempest_roles += ["creator"] unless barbicans.empty?
 
-dns_server_node = node_search_with_cache("roles:dns-server").first
-dns_server_node_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
-  dns_server_node,
-  "admin"
-).address
+dns_server_nodes = search(:node, "roles:dns-server") || []
+dns_server_node_ip = if dns_server_nodes.empty?
+  ""
+else
+  Chef::Recipe::Barclamp::Inventory.get_network_by_type(
+    dns_server_nodes.first,
+    "admin"
+  ).address
+end
 
 unless neutron_lbaasv2_driver.nil? || neutron_lbaasv2_driver != "octavia"
   tempest_roles += ["load-balancer_observer", "load-balancer_global_observer",
