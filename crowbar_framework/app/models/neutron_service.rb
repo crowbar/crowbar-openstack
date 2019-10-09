@@ -579,4 +579,22 @@ class NeutronService < OpenstackServiceObject
     end
     @logger.debug("Neutron apply_role_pre_chef_call: leaving")
   end
+
+  def event_hook(role, event, details)
+    case event
+    when :node_changed
+      # we only care about non-HA here, so no need to look at elements_expanded
+      server_nodes = role.override_attributes["neutron"]["elements"]["neutron-server"]
+      if details["attributes"].include?("public_name") && server_nodes.include?(details["node"])
+        # trigger chef-client asynchronously
+      end
+    when :proposal_applied
+      # FIXME: don't hardcode deps we know about; also for these ones, we need
+      # to check that the instance matches too
+      # we include nova here as some of the neutron config depends on nova
+      if ["database", "rabbitmq", "keystone", "nova"].include?(details["barclamp"])
+        # trigger chef-client asynchronously
+      end
+    end
+  end
 end
