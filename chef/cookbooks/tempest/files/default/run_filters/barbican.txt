@@ -1,1 +1,4 @@
 +barbican_tempest_plugin.*
+
+# verify_glance_signatures not enabled on nova
+-barbican_tempest_plugin.tests.scenario.test_image_signing.ImageSigningTest.test_signed_image_upload_boot_failure
