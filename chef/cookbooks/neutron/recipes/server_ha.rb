@@ -41,7 +41,7 @@ if node[:pacemaker][:clone_stateless_services]
   objects = openstack_pacemaker_controller_clone_for_transaction server_primitive_name do
     agent node[:neutron][:ha][:server][:server_ra]
     op node[:neutron][:ha][:server][:op]
-    order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
+    order_only_existing "( postgresql ms-galera #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
   end
   transaction_objects.push(objects)
 
@@ -51,7 +51,7 @@ if node[:pacemaker][:clone_stateless_services]
     objects = openstack_pacemaker_controller_clone_for_transaction infoblox_primitive_name do
       agent node[:neutron][:ha][:infoblox][:infoblox_ra]
       op node[:neutron][:ha][:infoblox][:op]
-      order_only_existing "( postgresql #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
+      order_only_existing "( postgresql ms-galera #{rabbit_settings[:pacemaker_resource]} cl-keystone )"
     end
     transaction_objects.push(objects)
   end
