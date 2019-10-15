@@ -36,6 +36,12 @@ class Chef
     def config_for_role_exists?(name)
       CrowbarOpenStackHelper.config_for_role_exists?(name)
     end
+
+    def no_monasca_server_or_master
+      master = node_search_with_cache("roles:monasca-master").first
+      server = node_search_with_cache("roles:monasca-server").first
+      master.nil? || server.nil? || !(master[:monasca] && master[:monasca][:installed])
+    end
   end
 end
 

@@ -15,6 +15,7 @@
 #
 
 return unless node["roles"].include?("monasca-agent")
+return if no_monasca_server_or_master
 
 bind_host, bind_port = SwiftHelper.get_bind_host_port(node)
 swift_protocol = node[:swift][:ssl][:enabled] ? "https" : "http"

@@ -12,12 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+return if no_monasca_server_or_master
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
+
 monasca_server = node_search_with_cache("roles:monasca-server").first
-if monasca_server.nil?
-  Chef::Log.warn("No monasca-server found.")
-  return
-end
 monasca_cfg = Barclamp::Config.load("openstack", "monasca")
 grafana_password = monasca_cfg["master"]["database_grafana_password"]
 

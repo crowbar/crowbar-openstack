@@ -136,6 +136,21 @@ class MonascaService < OpenstackServiceObject
     base
   end
 
+  def transition(inst, name, state)
+    Rails.logger.debug("Monasca transition: entering: #{name} for #{state}")
+
+    node = Node.find_by_name(name)
+    if state == "reinstall" && node.roles.include?("monasca-server")
+      monasca_master = Node.find("roles:monasca-master").first
+      if monasca_master[:monasca] && monasca_master[:monasca][:installed]
+        monasca_master[:monasca][:installed] = false
+        monasca_master.save
+      end
+    end
+    Rails.logger.debug("Monasca transition: exiting: #{name} for #{state}")
+    [200, { name: name }]
+  end
+
   def validate_proposal_after_save(proposal)
     validate_one_for_role proposal, "monasca-master"
     validate_one_for_role proposal, "monasca-server"
