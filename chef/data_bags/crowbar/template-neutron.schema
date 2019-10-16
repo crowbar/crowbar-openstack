@@ -72,6 +72,8 @@
                           "peer_ip": { "type": "str", "required" : true },
                           "peer_port": { "type": "int", "required" : true },
                           "encap": { "type": "str", "required": true },
+                          "integration_bridge": { "type": "str", "required": true },
+                          "access_bridge": { "type": "str", "required": true },
                           "vxlan": { "type": "map", "required": true, "mapping" : {
                             "encap_iface": {"type": "str", "required": true },
                             "uplink_iface": { "type": "str", "required": true },
