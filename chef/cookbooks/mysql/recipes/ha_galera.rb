@@ -183,6 +183,7 @@ end
 # all the required packages and configurations installed before we create the
 # pacemaker resources
 crowbar_pacemaker_sync_mark "sync-database_before_ha" do
+  timeout node[:database][:mysql][:presync_timeout]
   revision node[:database]["crowbar-revision"]
 end
 
