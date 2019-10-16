@@ -1,5 +1,5 @@
 def upgrade(ta, td, a, d)
-  a["extra_users"] = ta["extra_users"] unless a["extra_users"]
+  a["extra_users"] = ta["extra_users"] unless a.key?("extra_users")
   return a, d
 end
 

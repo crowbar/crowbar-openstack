@@ -1,5 +1,6 @@
 def upgrade(ta, td, a, d)
-  a["mysql"]["bootstrap_timeout"] = ta["mysql"]["bootstrap_timeout"] unless a["mysql"]["bootstap_timeout"]
+  a["mysql"]["bootstrap_timeout"] = ta["mysql"]["bootstrap_timeout"] unless
+    a["mysql"].key?("bootstap_timeout")
   return a, d
 end
 
