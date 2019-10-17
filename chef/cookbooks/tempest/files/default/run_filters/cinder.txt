@@ -1,3 +1,6 @@
 +tempest.api.volume.*
 +tempest.scenario.test_volume.*
 +tempest.scenario.test_encrypted.*
+
+# BUG: SOC-10874
+-tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern
