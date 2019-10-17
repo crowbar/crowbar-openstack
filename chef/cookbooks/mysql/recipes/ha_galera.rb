@@ -39,6 +39,12 @@ end
 
 node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 
+# This is needed because the single node bootstrap cluster will take a
+# while until it reports "Sync". If that takes too long, user creation will
+# fail.
+early_sync_retry_delay = 10
+early_sync_retries = 2
+
 unless node[:database][:galera_bootstrapped]
   if CrowbarPacemakerHelper.is_cluster_founder?(node)
     case node[:platform_family]
@@ -100,6 +106,14 @@ unless node[:database][:galera_bootstrapped]
       service_name mysql_service_name
       supports status: true, restart: true, reload: true
       action :start
+    end
+
+    execute "Test WSREP state early" do
+      retries early_sync_retries
+      retry_delay early_sync_retry_delay
+      command "mysql -u 'monitoring' -N -B " \
+        "-e \"SHOW STATUS WHERE Variable_name='wsrep_local_state_comment';\" | grep Synced"
+      action :run
     end
 
     database_user "create state snapshot transfer user" do
@@ -192,7 +206,7 @@ end
 # all the required packages and configurations installed before we create the
 # pacemaker resources
 crowbar_pacemaker_sync_mark "sync-database_before_ha" do
-  timeout node[:database][:mysql][:presync_timeout]
+  timeout node[:database][:mysql][:presync_timeout] + (early_sync_retry_delay * early_sync_retries)
   revision node[:database]["crowbar-revision"]
 end
 
