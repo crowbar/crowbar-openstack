@@ -77,7 +77,7 @@ env << "OS_INTERFACE=internal "
 env << "OS_USER_DOMAIN_NAME=Default "
 env << "OS_PROJECT_DOMAIN_NAME=Default "
 env << "OS_IDENTITY_API_VERSION=3"
-neutron_args = "--endpoint-type internalURL"
+env << "OS_ENDPOINT_TYPE=internalURL"
 neutron_args = "#{neutron_args} --insecure" if ssl_insecure
 neutron_cmd = "#{env} neutron #{neutron_args}"
 
