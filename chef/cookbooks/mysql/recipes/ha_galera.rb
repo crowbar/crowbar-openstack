@@ -41,10 +41,26 @@ node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admi
 
 unless node[:database][:galera_bootstrapped]
   if CrowbarPacemakerHelper.is_cluster_founder?(node)
+    case node[:platform_family]
+    when "rhel", "fedora"
+      mysql_service_name = "mysqld"
+    else
+      mysql_service_name = "mysql"
+    end
+
+    # This may still be running from a previous failed run. If it does, it will
+    # hold various locks on files in /var/lib/mysql, which will cause
+    # mysql_install_db to fail with a timeout.
+    service "ensure mysql-temp is stopped" do
+      service_name mysql_service_name
+      supports status: true, restart: true, reload: true
+      action :stop
+      notifies :run, "execute[mysql_install_db]", :immediately
+    end
 
     execute "mysql_install_db" do
       command "mysql_install_db"
-      action :run
+      action :nothing
     end
 
     # To bootstrap for the first time, start galera on one node
@@ -67,13 +83,6 @@ unless node[:database][:galera_bootstrapped]
         gcs_fc_factor: node[:database][:mysql][:gcs_fc_factor],
         wsrep_provider_options_custom: node[:database][:mysql][:wsrep_provider_options_custom].join(";")
       )
-    end
-
-    case node[:platform_family]
-    when "rhel", "fedora"
-      mysql_service_name = "mysqld"
-    else
-      mysql_service_name = "mysql"
     end
 
     # use the initial root:'' credentials to set up the new user. The
