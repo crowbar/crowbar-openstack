@@ -36,9 +36,15 @@ api_protocol = node[:designate][:api][:protocol]
 
 resource_project_id = ""
 keystone_settings = KeystoneHelper.keystone_settings(node, :designate)
+admin_password = keystone_settings["admin_password"]
+old_admin_password = node[:keystone][:admin][:old_password]
+if old_admin_password && !old_admin_password.empty? && old_admin_password != admin_password
+  # We are in the middle of a password update for the admin user.
+  admin_password = old_admin_password
+end
 env = {
   "OS_USERNAME" => keystone_settings["admin_user"],
-  "OS_PASSWORD" => keystone_settings["admin_password"],
+  "OS_PASSWORD" => admin_password,
   "OS_PROJECT_NAME" => keystone_settings["admin_tenant"],
   "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
   "OS_IDENTITY_API_VERSION" => "3"
