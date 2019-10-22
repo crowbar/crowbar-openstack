@@ -105,6 +105,7 @@ execute "create_octavia_management_subnet" do
   command "#{cmd} subnet create --network #{manage_net} " \
       "--subnet-range #{manage_cidr} --project #{project_name} #{manage_net}"
   not_if "out=$(#{cmd} subnet list); [ $? != 0 ] || echo ${out} | grep -q ' #{manage_net} '"
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   retries 5
   retry_delay 10
   action :run
