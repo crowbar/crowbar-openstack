@@ -1,6 +1,6 @@
 [health_manager]
 bind_ip = <%= @bind_host %>
-bind_port = <%= @node[:octavia][:health_manager][:port] %>
+bind_port = <%= @bind_port %>
 controller_ip_port_list = <%= @octavia_healthmanager_hosts %>
 heartbeat_key = <%= @node[:octavia][:health_manager][:heartbeat_key] %>
 event_streamer_driver = queue_event_streamer

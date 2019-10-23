@@ -63,42 +63,41 @@ module OctaviaHelper
       hm_node_list.join(",")
     end
 
-    def find_cluster_ips(node)
-      @cluster_admin_ip ||= nil
-
-      cluster_vhostname = CrowbarPacemakerHelper.cluster_vhostname(node)
-      @cluster_admin_ip = CrowbarPacemakerHelper.cluster_vip(node, "admin", cluster_vhostname)
-      @cluster_public_ip = CrowbarPacemakerHelper.cluster_vip(node, "public", cluster_vhostname)
-
-      [@cluster_admin_ip, @cluster_public_ip]
-    end
-
-    def find_ips(node)
-      @admin_ip ||= Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-      @public_ip ||= Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "public").address
-      [@admin_ip, @public_ip]
-    end
-
     def network_settings(node)
       ha_enabled = node[:octavia][:ha][:enabled]
+      @admin_ip ||= Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
+      @cluster_admin_ip ||= nil
 
-      if ha_enabled
-        admin_ip, public_ip = find_cluster_ips(node)
-      else
-        admin_ip, public_ip = find_ips(node)
+      if ha_enabled && !@cluster_admin_ip
+        @cluster_admin_ip = CrowbarPacemakerHelper.cluster_vip(node, "admin")
       end
-
-      api_bind_host = node[:octavia][:api][:bind_open_address] ? "0.0.0.0" : public_ip
-      hm_host = node[:octavia][:health_manager][:bind_open_address] ? "0.0.0.0" : admin_ip
 
       @network_settings ||= {
         api: {
-          bind_host: api_bind_host,
-          bind_port: ha_enabled ? node[:octavia][:ha][:ports][:api] : node[:octavia][:api][:port],
-          ha_port: node[:octavia][:api][:port]
+          bind_host: if !ha_enabled && node[:octavia][:api][:bind_open_address]
+                       "0.0.0.0"
+                     else
+                       @admin_ip
+                     end,
+          bind_port: if ha_enabled
+                       node[:octavia][:ha][:ports][:api].to_i
+                     else
+                       node[:octavia][:api][:port].to_i
+                     end,
+          ha_bind_host: if node[:octavia][:api][:bind_open_address]
+                          "0.0.0.0"
+                        else
+                          @cluster_admin_ip
+                        end,
+          ha_bind_port: node[:octavia][:api][:port].to_i
         },
         health_manager: {
-          bind_host: hm_host
+          bind_host: if node[:octavia][:health_manager][:bind_open_address]
+                       "0.0.0.0"
+                     else
+                       @admin_ip
+                     end,
+          bind_port: node[:octavia][:health_manager][:port].to_i
         },
       }
     end
