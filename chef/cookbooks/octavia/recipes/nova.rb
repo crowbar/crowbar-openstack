@@ -110,3 +110,14 @@ execute "create_octavia_management_subnet" do
   retry_delay 10
   action :run
 end
+
+# Installing the amphora image package and creating OpenStack artifacts (the
+# security group, image, network etc.) can take a lot of time, so we have to
+# account for the fact that nodes will fall out of sync in an HA setup.
+# We do an explicit sync here with an extended timeout value, to avoid having
+# timeout failures un subsequent sync marks (the octavia_database sync mark).
+if ha_enabled
+  crowbar_pacemaker_sync_mark "sync-octavia_after_long_ops" do
+    timeout 200
+  end
+end
