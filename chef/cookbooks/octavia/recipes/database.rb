@@ -1,4 +1,4 @@
-# Copyright 2019 SUSE Linux GmbH.
+# Copyright 2019 SUSE LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,10 +57,26 @@ end
 
 execute "create database initial content" do
   command "octavia-db-manage upgrade head"
-  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  only_if do
+    !node[:octavia][:db_synced] &&
+      (!ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node))
+  end
   retries 5
   retry_delay 10
   action :run
+end
+
+# We want to keep a note that we've done db_sync, so we don't do it again.
+# If we were doing that outside a ruby_block, we would add the note in the
+# compile phase, before the actual db_sync is done (which is wrong, since it
+# could possibly not be reached in case of errors).
+ruby_block "mark node for octavia db_sync" do
+  block do
+    node.set[:octavia][:db_synced] = true
+    node.save
+  end
+  action :nothing
+  subscribes :create, "execute[create database initial content]", :immediately
 end
 
 crowbar_pacemaker_sync_mark "create-octavia_database" if ha_enabled

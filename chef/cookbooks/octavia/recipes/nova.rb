@@ -1,4 +1,4 @@
-# Copyright 2019, SUSE LINUX Products GmbH
+# Copyright 2019, SUSE LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
 
 require "chef/mixin/shell_out"
 
-package "openstack-octavia-amphora-image-x86_64"
 
+image = "openstack-octavia-amphora-image-x86_64"
 ha_enabled = node[:octavia][:ha][:enabled]
+package image if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
 octavia_config = Barclamp::Config.load("openstack", "octavia")
 cmd = OctaviaHelper.get_openstack_command(node, octavia_config)
 
@@ -76,15 +77,47 @@ execute "create_amphora_flavor" do
   action :run
 end
 
-package = "openstack-octavia-amphora-image-x86_64"
 image_tag = node[:octavia][:amphora][:image_tag]
 
 execute "create_amphora_image" do
   command "#{cmd} image create --disk-format qcow2 --container-format bare "\
-    "--file $(rpm -ql #{package} | grep qcow2 | head -n 1) --tag #{image_tag} #{image_tag}"
+    "--file $(rpm -ql #{image} | grep qcow2 | head -n 1) --tag #{image_tag} #{image_tag}"
   not_if "out=$(#{cmd} image list); [ $? != 0 ] || echo ${out} | grep -q ' #{image_tag} '"
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   retries 5
   retry_delay 10
   action :run
+end
+
+manage_net = node[:octavia][:amphora][:manage_net]
+manage_cidr = node[:octavia][:amphora][:manage_cidr]
+
+execute "create_octavia_management_network" do
+  command "#{cmd} network create --project #{project_name} #{manage_net}"
+  not_if "out=$(#{cmd} network list); [ $? != 0 ] || echo ${out} | grep -q ' #{manage_net} '"
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  retries 5
+  retry_delay 10
+  action :run
+end
+
+execute "create_octavia_management_subnet" do
+  command "#{cmd} subnet create --network #{manage_net} " \
+      "--subnet-range #{manage_cidr} --project #{project_name} #{manage_net}"
+  not_if "out=$(#{cmd} subnet list); [ $? != 0 ] || echo ${out} | grep -q ' #{manage_net} '"
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+  retries 5
+  retry_delay 10
+  action :run
+end
+
+# Installing the amphora image package and creating OpenStack artifacts (the
+# security group, image, network etc.) can take a lot of time, so we have to
+# account for the fact that nodes will fall out of sync in an HA setup.
+# We do an explicit sync here with an extended timeout value, to avoid having
+# timeout failures un subsequent sync marks (the octavia_database sync mark).
+if ha_enabled
+  crowbar_pacemaker_sync_mark "sync-octavia_after_long_ops" do
+    timeout 200
+  end
 end

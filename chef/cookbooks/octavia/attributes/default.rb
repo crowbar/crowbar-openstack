@@ -1,4 +1,4 @@
-# Copyright 2019, SUSE LINUX Products GmbH
+# Copyright 2019, SUSE LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,8 +50,7 @@ default[:octavia][:amphora][:manage_net] = "lb-mgmt-net"
 default[:octavia][:amphora][:image_tag] = "amphora"
 default[:octavia][:amphora][:project] = "service"
 
-default[:octavia][:amphora][:ssh_access][:enabled] = false
-default[:octavia][:amphora][:ssh_access][:keypair] = ""
+default[:octavia][:amphora][:ssh_access][:keyname] = ""
 
 default[:octavia][:ssl][:certfile] = "/etc/octavia/ssl/certs/signing_cert.pem"
 default[:octavia][:ssl][:keyfile] = "/etc/octavia/ssl/private/signing_key.pem"
