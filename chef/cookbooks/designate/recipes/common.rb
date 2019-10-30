@@ -36,21 +36,23 @@ api_protocol = node[:designate][:api][:protocol]
 
 resource_project_id = ""
 keystone_settings = KeystoneHelper.keystone_settings(node, :designate)
-env = {
-  "OS_USERNAME" => keystone_settings["admin_user"],
-  "OS_PASSWORD" => keystone_settings["admin_password"],
-  "OS_PROJECT_NAME" => keystone_settings["admin_tenant"],
-  "OS_AUTH_URL" => keystone_settings["internal_auth_url"],
-  "OS_IDENTITY_API_VERSION" => "3"
-}
 
 if node["roles"].include?("designate-server")
-  insecure = keystone_settings["insecure"] ? "--insecure" : ""
-  project = node[:designate][:resource_project]
-  cmdline = "openstack #{insecure} project show -f value -c id '#{project}'"
-  cmd = Mixlib::ShellOut.new(cmdline, environment: env)
-  resource_project_id = cmd.run_command.stdout.chomp
-  cmd.error!
+  ruby_block "lookup resource project ID" do
+    block do
+      insecure = keystone_settings["insecure"] ? "--insecure" : ""
+      project = node[:designate][:resource_project]
+      env = "OS_USERNAME='#{keystone_settings["admin_user"]}' "
+      env << "OS_PASSWORD='#{keystone_settings["admin_password"]}' "
+      env << "OS_PROJECT_NAME='#{keystone_settings["admin_tenant"]}' "
+      env << "OS_AUTH_URL='#{keystone_settings["internal_auth_url"]}' "
+      env << "OS_REGION_NAME='#{keystone_settings["endpoint_region"]}' "
+      env << "OS_IDENTITY_API_VERSION=3"
+      cmd_out = `#{env} openstack #{insecure} project show -f value -c id #{project}`
+      raise "Unable to lookup resource project ID" if cmd_out.empty?
+      resource_project_id = cmd_out.strip
+    end
+  end
 end
 
 template node[:designate][:config_file] do
