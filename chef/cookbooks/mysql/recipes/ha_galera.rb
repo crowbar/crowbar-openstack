@@ -39,12 +39,34 @@ end
 
 node_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
 
+# This is needed because the single node bootstrap cluster will take a
+# while until it reports "Sync". If that takes too long, user creation will
+# fail.
+early_sync_retry_delay = 10
+early_sync_retries = 2
+
 unless node[:database][:galera_bootstrapped]
   if CrowbarPacemakerHelper.is_cluster_founder?(node)
+    case node[:platform_family]
+    when "rhel", "fedora"
+      mysql_service_name = "mysqld"
+    else
+      mysql_service_name = "mysql"
+    end
+
+    # This may still be running from a previous failed run. If it does, it will
+    # hold various locks on files in /var/lib/mysql, which will cause
+    # mysql_install_db to fail with a timeout.
+    service "ensure mysql-temp is stopped" do
+      service_name mysql_service_name
+      supports status: true, restart: true, reload: true
+      action :stop
+      notifies :run, "execute[mysql_install_db]", :immediately
+    end
 
     execute "mysql_install_db" do
       command "mysql_install_db"
-      action :run
+      action :nothing
     end
 
     # To bootstrap for the first time, start galera on one node
@@ -69,13 +91,6 @@ unless node[:database][:galera_bootstrapped]
       )
     end
 
-    case node[:platform_family]
-    when "rhel", "fedora"
-      mysql_service_name = "mysqld"
-    else
-      mysql_service_name = "mysql"
-    end
-
     # use the initial root:'' credentials to set up the new user. The
     # unauthenticated root user is later removed in server.rb after the
     # bootstraping. Once the cluster has started other nodes will pick up on
@@ -91,6 +106,14 @@ unless node[:database][:galera_bootstrapped]
       service_name mysql_service_name
       supports status: true, restart: true, reload: true
       action :start
+    end
+
+    execute "Test WSREP state early" do
+      retries early_sync_retries
+      retry_delay early_sync_retry_delay
+      command "mysql -u 'monitoring' -N -B " \
+        "-e \"SHOW STATUS WHERE Variable_name='wsrep_local_state_comment';\" | grep Synced"
+      action :run
     end
 
     database_user "create state snapshot transfer user" do
@@ -183,7 +206,7 @@ end
 # all the required packages and configurations installed before we create the
 # pacemaker resources
 crowbar_pacemaker_sync_mark "sync-database_before_ha" do
-  timeout node[:database][:mysql][:presync_timeout]
+  timeout node[:database][:mysql][:presync_timeout] + (early_sync_retry_delay * early_sync_retries)
   revision node[:database]["crowbar-revision"]
 end
 
