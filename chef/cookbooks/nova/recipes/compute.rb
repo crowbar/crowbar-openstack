@@ -327,19 +327,27 @@ if node["roles"].include?("nova-compute-zvm")
   ssh_auth_keys += node[:nova][:zvm][:zvm_xcat_ssh_key]
 end
 
+ssh_key_file = "#{node[:nova][:home_dir]}/.ssh/id_ed25519"
+
 unless node[:nova][:compute_remotefs_sshkey].empty?
   # Create and distribute ssh keys for nova user on all compute nodes
-  file "#{node[:nova][:home_dir]}/.ssh/id_ed25519" do
+  file ssh_key_file do
     mode 0o600
     owner node[:nova][:user]
     content "#{node[:nova][:compute_remotefs_sshkey]}\n"
   end
+end
 
-  ssh_auth_keys += %x[ssh-keygen -y -f "#{node[:nova][:home_dir]}/.ssh/id_ed25519"].chomp
+ruby_block "Add ssh keys from file" do
+  block do
+    cmd = "ssh-keygen -y -f #{ssh_key_file}"
+    ssh_auth_keys += Mixlib::ShellOut.new(cmd).run_command.stdout.chomp
+  end
+  only_if { File.exist?(ssh_key_file) }
 end
 
 file "#{node[:nova][:home_dir]}/.ssh/authorized_keys" do
-  content ssh_auth_keys
+  content lazy { ssh_auth_keys.to_s }
   owner node[:nova][:user]
 end
 
