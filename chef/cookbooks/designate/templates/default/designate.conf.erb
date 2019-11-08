@@ -12,11 +12,19 @@ admin_project_domain_name = <%= @keystone_settings["admin_domain"]%>
 os_region_name = <%= @keystone_settings['endpoint_region'] %>
 api_workers = <%= [node["cpu"]["total"], 2, 4].sort[1] %>
 
+# Quota
+quota_zones = 100
+quota_zone_recordsets = 500
+quota_zone_records = 500
+quota_recordset_records = 20
+quota_api_export_size = 1000
+
 [service:api]
 listen = <%= @bind_host %>:<%= @bind_port %>
 auth_strategy = keystone
-enabled_extensions_v2 = quotas, reports
 enable_host_header = True
+enable_api_admin = True
+enabled_extensions_admin = quotas, zones
 api_base_uri = <%= @api_base_uri %>
 
 <%if @with_authtoken -%>
