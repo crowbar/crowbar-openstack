@@ -159,7 +159,7 @@ hmac_keys = <%= @profiler_settings[:hmac_keys].join(",") %>
 connection_string = <%= @profiler_settings[:connection_string] %>
 <% end -%>
 
-<% if @octavia_api %>
+<% if @octavia_admin_uri %>
 [octavia]
-base_url = <%= @octavia_api %>
+base_url = <%= @octavia_admin_uri %>
 <% end %>
