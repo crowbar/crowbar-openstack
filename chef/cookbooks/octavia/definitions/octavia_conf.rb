@@ -61,7 +61,9 @@ define :octavia_conf do
             octavia_nova_flavor_id: node[:octavia][:flavor_id],
             octavia_mgmt_net_id: node[:octavia][:net_id],
             octavia_mgmt_sec_group_id: node[:octavia][:sec_group_id],
-            octavia_healthmanager_hosts: OctaviaHelper.get_healthmanager_nodes(node, net_name)
+            octavia_healthmanager_hosts: OctaviaHelper.get_healthmanager_nodes(node, net_name),
+            memcached_servers: MemcachedHelper.get_memcached_servers(node,
+                CrowbarPacemakerHelper.cluster_nodes(node, "octavia-api"))
           }
         end
       )
