@@ -17,3 +17,9 @@ package "python-octaviaclient"
 package "octavia" do
   package_name "openstack-octavia" if %w[rhel suse].include?(node[:platform_family])
 end
+
+execute "chown certs path" do
+  command "chown -R #{node[:octavia][:user]}:#{node[:octavia][:group]} \
+    #{node[:octavia][:certs][:cert_path]}"
+  action :run
+end

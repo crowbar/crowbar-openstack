@@ -13,6 +13,9 @@
 # limitations under the License.
 #
 
+include_recipe "apache2"
+include_recipe "apache2::mod_wsgi"
+
 octavia_config = Barclamp::Config.load("openstack", "octavia")
 cmd = OctaviaHelper.get_openstack_command(node, octavia_config)
 
@@ -24,4 +27,19 @@ package "openstack-octavia-api" if ["rhel", "suse"].include? node[:platform_fami
 
 include_recipe "#{@cookbook_name}::database"
 
-octavia_service "api"
+crowbar_openstack_wsgi "WSGI entry for octavia-api" do
+  bind_host OctaviaHelper.bind_host(node, "api")
+  bind_port OctaviaHelper.bind_port(node, "api")
+  daemon_process "octavia-api"
+  script_alias "/usr/bin/octavia-wsgi"
+  user node[:octavia][:user]
+  group node[:octavia][:group]
+  ssl_enable node[:octavia][:api][:protocol] == "https"
+  ssl_certfile node[:octavia][:ssl][:certfile]
+  ssl_keyfile node[:octavia][:ssl][:keyfile]
+  ssl_cacert node[:octavia][:ssl][:ca_certs] if node[:octavia][:ssl][:cert_required]
+end
+
+apache_site "octavia-api.conf" do
+  enable true
+end
