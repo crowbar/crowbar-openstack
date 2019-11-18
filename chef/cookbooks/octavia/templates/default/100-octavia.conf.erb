@@ -50,6 +50,10 @@ user_domain_name = <%= @octavia_keystone_settings['default_user_domain'] %>
 username = <%= @octavia_keystone_settings['service_user'] %>
 password =  <%= @octavia_keystone_settings['service_password'] %>
 region_name = <%= @octavia_keystone_settings['endpoint_region'] %>
+memcached_servers = <%= @memcached_servers.join(',') %>
+memcache_security_strategy = ENCRYPT
+memcache_secret_key = <%= node[:octavia][:memcache_secret_key] %>
+memcache_pool_socket_timeout = 1
 
 [networking]
 port_detach_timeout = <%= @node[:octavia][:networking][:port_detach_timeout] %>
