@@ -42,6 +42,16 @@ notify = False
 [storage:sqlalchemy]
 connection=<%= @sql_connection %>
 
+[ssl]
+<% if node[:designate][:api][:protocol] == 'https' %>
+<% if node[:designate][:ssl][:cert_required] %>
+ca_file = <%= node[:designate][:ssl][:ca_certs] %>
+<% end %>
+cert_file = <%= node[:designate][:ssl][:certfile] %>
+key_file = <%= node[:designate][:ssl][:keyfile] %>
+<% end %>
+
+
 <%if @with_authtoken -%>
 [keystone_authtoken]
 auth_uri = <%= @keystone_settings["public_auth_url"] %>

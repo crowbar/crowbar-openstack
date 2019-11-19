@@ -18,6 +18,14 @@
         "bind_open_address": true,
         "bind_port": 9001
       },
+      "ssl": {
+        "certfile": "/etc/designate/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/designate/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false,
+        "cert_required": false,
+        "ca_certs": "/etc/designate/ssl/certs/ca.pem"
+      },
       "db": {
         "password": "",
         "user": "designate",
@@ -29,7 +37,7 @@
     "designate": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 301,
+      "schema-revision": 302,
       "element_states": {
         "designate-server": [ "readying", "ready", "applying" ],
         "designate-worker": [ "readying", "ready", "applying" ]
