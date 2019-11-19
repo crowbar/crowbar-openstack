@@ -121,6 +121,16 @@ unless neutron_lbaas_ui_pkgname.nil?
   end
 end
 
+# install horizon neutron lbaas plugin if needed
+neutron_server = node_search_with_cache("roles:neutron-server").first
+unless neutron_server.nil?
+  package "openstack-horizon-plugin-neutron-lbaas-ui" do
+    action :install
+    notifies :reload, "service[horizon]"
+    only_if { neutron_server[:neutron][:use_lbaas] }
+  end
+end
+
 # install horizon manila plugin if needed
 manila_ui_pkgname =
   case node[:platform_family]
