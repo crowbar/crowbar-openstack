@@ -30,6 +30,17 @@ en:
           ssh_access:
             enabled: "Allow SSH Access"
             keyname: "SSH Access Keypair Name"
+        api_header: 'API Settings'
+        api:
+          protocol: 'Protocol'
+        ssl_header: 'SSL Support'
+        ssl:
+          generate_certs: 'Generate (self-signed) certificates (implies insecure)'
+          certfile: 'SSL Certificate File'
+          keyfile: 'SSL (Private) Key File'
+          insecure: 'SSL Certificate is insecure (for instance, self-signed)'
+          cert_required: 'Require Client Certificate'
+          ca_certs: 'SSL CA Certificates File'
       validation:
         certificates_not_empty: 'The certificates paths cannot be empty.'
         passphrase_not_empty: 'Passphrase cannot be empty.'

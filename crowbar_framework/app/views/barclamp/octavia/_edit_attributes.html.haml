@@ -13,3 +13,23 @@
       = string_field %w(certs client_ca_cert_path)
       = string_field %w(certs client_cert_and_key_path)
       = string_field %w(certs passphrase)
+
+    %fieldset
+      %legend
+        = t(".ssl_header")
+
+      = select_field %w(api protocol),
+        :collection => :api_protocols_for_octavia,
+        "data-sslprefix" => "ssl",
+        "data-sslcert" => "/etc/octavia/ssl/certs/signing_cert.pem",
+        "data-sslkey" => "/etc/octavia/ssl/private/signing_key.pem"
+
+      #ssl_container
+        = boolean_field %w(ssl generate_certs)
+        = string_field %w(ssl certfile)
+        = string_field %w(ssl keyfile)
+        = boolean_field %w(ssl insecure)
+        = boolean_field %w(ssl cert_required),
+          "data-enabler" => "true",
+          "data-enabler-target" => "#ssl_ca_certs"
+        = string_field %w(ssl ca_certs)
