@@ -87,7 +87,8 @@ service_role_map = {
   "sharev2" => "manila-server",
   "container-infra" => "magnum-server",
   "baremetal" => "ironic-server",
-  "alarming" => "aodh-server"
+  "alarming" => "aodh-server",
+  "monitoring" => "monasca-server"
 }
 
 enabled_services = service_role_map.reject do |service_name, role_name|
@@ -100,6 +101,18 @@ users = [
         ]
 
 roles = [ 'anotherrole' ]
+
+if enabled_services.include?("monitoring")
+  # Figure out the most recent Kibana version available in repositories. This
+  # will be used to set the Kibana version for Monasca's tempest tests.
+  kibana_version = nil
+
+  IO.popen("zypper search --detail kibana | tail -n +6 | awk '{print $6}'"\
+           " | cut -d- -f 1 | sort -r | head -n 1") do |f|
+    kibana_version = f.read.strip
+    kibana_version = nil if kibana_version == ""
+  end
+end
 
 if enabled_services.include?("metering")
   rabbitmq_settings = fetch_rabbitmq_settings
@@ -584,7 +597,8 @@ template "/etc/tempest/tempest.conf" do
         # magnum (container) settings
         magnum_settings: tempest_magnum_settings,
         # heat (orchestration) settings
-        heat_settings: tempest_heat_settings
+        heat_settings: tempest_heat_settings,
+        kibana_version: kibana_version
       }
     }
   )
