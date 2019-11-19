@@ -8,3 +8,23 @@
 
     = string_field :resource_email
     = string_field :resource_project
+
+    %fieldset
+      %legend
+        = t(".ssl_header")
+
+      = select_field %w(api protocol),
+        :collection => :api_protocols_for_designate,
+        "data-sslprefix" => "ssl",
+        "data-sslcert" => "/etc/designate/ssl/certs/signing_cert.pem",
+        "data-sslkey" => "/etc/designate/ssl/private/signing_key.pem"
+
+      #ssl_container
+        = boolean_field %w(ssl generate_certs)
+        = string_field %w(ssl certfile)
+        = string_field %w(ssl keyfile)
+        = boolean_field %w(ssl insecure)
+        = boolean_field %w(ssl cert_required),
+          "data-enabler" => "true",
+          "data-enabler-target" => "#ssl_ca_certs"
+        = string_field %w(ssl ca_certs)
