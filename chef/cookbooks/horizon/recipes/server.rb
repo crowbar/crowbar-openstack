@@ -353,6 +353,7 @@ neutron_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openst
 nova_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "nova"))
 barbican_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "barbican"))
 ceilometer_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "ceilometer"))
+designate_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "designate"))
 heat_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "heat"))
 manila_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "manila"))
 magnum_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "magnum"))
@@ -432,7 +433,7 @@ template local_settings do
     || trove_insecure \
     || sahara_insecure \
     || manila_insecure \
-    || ceilometer_insecure,
+    || designate_insecure,
     db_settings: django_db_settings,
     db_ca_certs: db_ca_certs,
     timezone: (node[:provisioner][:timezone] rescue "UTC") || "UTC",

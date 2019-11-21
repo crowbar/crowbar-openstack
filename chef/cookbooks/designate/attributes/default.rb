@@ -26,6 +26,13 @@ default[:designate][:ha][:enabled] = false
 # Ports to bind to when haproxy is used for the real ports
 default[:designate][:ha][:ports][:api_port] = 5574
 
+default[:designate][:ssl][:certfile] = "/etc/designate/ssl/certs/signing_cert.pem"
+default[:designate][:ssl][:keyfile] = "/etc/designate/ssl/private/signing_key.pem"
+default[:designate][:ssl][:generate_certs] = false
+default[:designate][:ssl][:insecure] = false
+default[:designate][:ssl][:cert_required] = false
+default[:designate][:ssl][:ca_certs] = "/etc/designate/ssl/certs/ca.pem"
+
 default[:designate][:ha][:api][:ra] = if ["rhel", "suse"].include? node[:platform_family]
   "systemd:openstack-designate-api"
 else
