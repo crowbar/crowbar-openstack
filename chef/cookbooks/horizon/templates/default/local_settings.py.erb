@@ -253,7 +253,7 @@ SECRET_KEY = "<%= @secret_key %>"
 
 # FIXME(gyee): if we ever going to support multiple protocols or multiple
 # IDPs, we'll need to refactor this accordingly.
-<% if node[:keystone][:federation][:openidc][:enabled] %>
+<% if @openidc_enabled %>
 WEBSSO_ENABLED = True
 
 # NOTE(gyee): this need to be versioned public Keystone URL as this is used
