@@ -31,13 +31,8 @@ designate_servers = node_search_with_cache("roles:designate-server")
 
 # hidden masters are designate-mdns services, in ha this service will be running on multiple
 # hosts and any host can be asked to update a zone on the pool target(s).
-# We use the vip for the cluster in case of HA.
-hiddenmasters = if node[:designate][:ha][:enabled]
-  [CrowbarPacemakerHelper.cluster_vip(node, "admin")]
-else
-  designate_servers.map do |n|
-    Barclamp::Inventory.get_network_by_type(n, "admin").address
-  end
+hiddenmasters = designate_servers.map do |n|
+  Barclamp::Inventory.get_network_by_type(n, "admin").address
 end
 
 # One could have multiple pools in designate. And
