@@ -19,6 +19,7 @@ include_recipe "apache2::mod_wsgi"
 include_recipe "apache2::mod_rewrite"
 
 monasca_server = node_search_with_cache("roles:monasca-server").first
+keystone_server = node_search_with_cache("roles:keystone-server").first
 
 grafana_url = ""
 
@@ -465,7 +466,8 @@ template local_settings do
     multi_domain_support: multi_domain_support,
     policy_file_path: node["horizon"]["policy_file_path"],
     policy_file: node["horizon"]["policy_file"],
-    websso_keystone_url: keystone_settings["websso_keystone_url"]
+    websso_keystone_url: keystone_settings["websso_keystone_url"],
+    openidc_enabled: keystone_server[:keystone][:federation][:openidc][:enabled]
   )
   action :create
   notifies :reload, "service[horizon]"
