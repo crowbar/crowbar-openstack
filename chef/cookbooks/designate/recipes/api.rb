@@ -23,6 +23,18 @@ designate_protocol = node[:designate][:api][:protocol]
 
 ha_enabled = node[:designate][:ha][:enabled]
 
+if node[:designate][:api][:protocol] == "https"
+  ssl_setup "setting up ssl for designate" do
+    generate_certs node[:designate][:ssl][:generate_certs]
+    certfile node[:designate][:ssl][:certfile]
+    keyfile node[:designate][:ssl][:keyfile]
+    group node[:designate][:group]
+    fqdn node[:fqdn]
+    cert_required node[:designate][:ssl][:cert_required]
+    ca_certs node[:designate][:ssl][:ca_certs]
+  end
+end
+
 my_admin_host = CrowbarHelper.get_host_for_admin_url(node, ha_enabled)
 my_public_host = CrowbarHelper.get_host_for_public_url(
   node, node[:designate][:api][:protocol] == "https", ha_enabled
