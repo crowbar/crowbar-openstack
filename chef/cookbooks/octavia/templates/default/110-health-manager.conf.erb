@@ -3,7 +3,7 @@ bind_ip = <%= @bind_host %>
 bind_port = <%= @bind_port %>
 controller_ip_port_list = <%= @octavia_healthmanager_hosts %>
 heartbeat_key = <%= @node[:octavia][:health_manager][:heartbeat_key] %>
-event_streamer_driver = queue_event_streamer
+event_streamer_driver = noop_event_streamer
 heartbeat_interval = <%= @node[:octavia][:health_manager][:heartbeat_interval] %>
 heartbeat_timeout = <%= @node[:octavia][:health_manager][:heartbeat_timeout] %>
 health_check_interval = <%= @node[:octavia][:health_manager][:health_check_interval] %>
