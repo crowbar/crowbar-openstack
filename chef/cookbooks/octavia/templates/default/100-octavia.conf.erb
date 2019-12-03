@@ -20,6 +20,9 @@ transport_url = <%= @rabbit_settings[:url] %>
 [certificates]
 cert_generator = local_cert_generator
 cert_manager = barbican_cert_manager
+endpoint = <%= @barbican_endpoint %>
+endpoint_type = "internalURL"
+insecure = <%= @octavia_keystone_settings['insecure'] %>
 ca_certificate = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_cert_path] %>
 ca_private_key = <%= @node[:octavia][:certs][:cert_path] %><%= @node[:octavia][:certs][:server_ca_key_path] %>
 ca_private_key_passphrase = <%= @node[:octavia][:certs][:passphrase] %>
@@ -63,10 +66,12 @@ port_detach_timeout = <%= @node[:octavia][:networking][:port_detach_timeout] %>
 [neutron]
 endpoint = <%= @neutron_endpoint %>
 endpoint_type = "internalURL"
+insecure = <%= @octavia_keystone_settings['insecure'] %>
 
 [nova]
 endpoint = <%= @nova_endpoint %>
 endpoint_type = "internalURL"
+insecure = <%= @octavia_keystone_settings['insecure'] %>
 
 [oslo_messaging]
 topic = octavia_prov
