@@ -41,6 +41,10 @@ en:
           insecure: 'SSL Certificate is insecure (for instance, self-signed)'
           cert_required: 'Require Client Certificate'
           ca_certs: 'SSL CA Certificates File'
+        mgmt_net_header: 'Octavia Management Network Settings'
+        amphora:
+          manage_net: 'Management Network Name'
+          manage_cidr: 'Management Network CIDR'
       validation:
         certificates_not_empty: 'The certificates paths cannot be empty.'
         passphrase_not_empty: 'Passphrase cannot be empty.'
