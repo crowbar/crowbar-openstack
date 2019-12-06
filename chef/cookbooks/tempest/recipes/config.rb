@@ -73,7 +73,7 @@ comp_environment << "OS_AUTH_URL='#{auth_url}' "
 comp_environment << "OS_IDENTITY_API_VERSION='#{keystone_settings["api_version"]}'"
 openstackcli = "#{comp_environment} openstack --insecure"
 
-# maps a keystone catalog service name to its corresponding barclamp role
+# maps a keystone catalog service type to its corresponding barclamp role
 service_role_map = {
   "metering" => "ceilometer-server",
   "orchestration" => "heat-server",
@@ -85,7 +85,8 @@ service_role_map = {
   "baremetal" => "ironic-server",
   "logs_v2" => "monasca-server",
   "logs-search" => "monasca-server",
-  "monitoring" => "monasca-server"
+  "monitoring" => "monasca-server",
+  "load-balancer" => "octavia-api"
 }
 
 enabled_services = service_role_map.reject do |service_name, role_name|
@@ -545,10 +546,17 @@ dns_server_node_ip = Chef::Recipe::Barclamp::Inventory.get_network_by_type(
   "admin"
 ).address
 
-unless neutron_lbaasv2_driver.nil? || neutron_lbaasv2_driver != "octavia"
-  tempest_roles += ["load-balancer_observer", "load-balancer_global_observer",
-                    "load-balancer_member", "load-balancer_quota_admin",
-                    "load-balancer_admin"]
+octavias = search(:node, "roles:octavia-api") || []
+octavia_rbac_test_type = "advanced"
+
+# Add the octavia load-balancer_member role only if Octavia is deployed and
+# the neutron lbaasv2 octavia provider is configured, because this role is
+# still required to get the legacy neutron-lbaas tempest test cases to pass.
+# Advanced RBAC testing cannot be enabled for octavia while this role is
+# added by tempest.
+if !octavias.empty? && neutron_attr[:use_lbaas] && neutron_lbaasv2_driver == "octavia"
+  tempest_roles += ["load-balancer_member"]
+  octavia_rbac_test_type = "owner_or_admin"
 end
 
 template "/etc/tempest/tempest.conf" do
@@ -633,7 +641,8 @@ template "/etc/tempest/tempest.conf" do
         magnum_settings: tempest_magnum_settings,
         # heat (orchestration) settings
         heat_settings: tempest_heat_settings,
-        dns_server_node_ip: dns_server_node_ip
+        dns_server_node_ip: dns_server_node_ip,
+        octavia_rbac_test_type: octavia_rbac_test_type
       }
     }
   )

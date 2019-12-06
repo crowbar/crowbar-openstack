@@ -198,6 +198,7 @@ designate = <%= @enabled_services.include? "dns" %>
 logs = <%= @enabled_services.include? "logs_v2" %>
 logs-search = <%= @enabled_services.include? "logs-search" %>
 monasca = <%= @enabled_services.include? "monitoring" %>
+load_balancer = <%= @enabled_services.include? "load-balancer" %>
 
 [share]
 region = <%= @keystone_settings['endpoint_region'] %>
@@ -266,13 +267,10 @@ api_extensions = all
 enforced = false
 
 <% if @neutron_lbaasv2_driver == "octavia" -%>
-[load_balancer]
-provider = amphora
-test_with_ipv6 = false
-
-[loadbalancer-feature-enabled]
-terminated_tls_enabled = false
-
 [lbaas]
 test_with_noop = true
 <% end -%>
+
+[load_balancer]
+test_with_ipv6 = false
+RBAC_test_type = <%= @octavia_rbac_test_type %>
