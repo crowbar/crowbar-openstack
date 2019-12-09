@@ -32,6 +32,18 @@ module OctaviaHelper
       nova_protocol + "://" + nova_server_host + ":" + nova_server_port.to_s + "/v2.1"
     end
 
+    def get_barbican_endpoint(node)
+      barbican = CrowbarUtilsSearch.node_search_with_cache(node, "roles:barbican-controller").first
+      if !barbican.nil?
+        barbican_protocol = barbican[:barbican][:api][:protocol]
+        barbican_server_host = CrowbarHelper.get_host_for_admin_url(barbican, barbican[:barbican][:ha][:enabled])
+        barbican_server_port = barbican[:barbican][:api][:bind_port]
+        barbican_protocol + "://" + barbican_server_host + ":" + barbican_server_port.to_s
+      else
+        ""
+      end
+    end
+
     def get_openstack_command(node, config)
       key_settings = KeystoneHelper.keystone_settings(node, "octavia")
 

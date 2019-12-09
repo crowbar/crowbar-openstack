@@ -56,6 +56,7 @@ define :octavia_conf do
             octavia_db_connection: fetch_database_connection_string(node[:octavia][:db]),
             neutron_endpoint: OctaviaHelper.get_neutron_endpoint(node),
             nova_endpoint: OctaviaHelper.get_nova_endpoint(node),
+            barbican_endpoint: OctaviaHelper.get_barbican_endpoint(node),
             octavia_keystone_settings: KeystoneHelper.keystone_settings(node, "octavia"),
             rabbit_settings: fetch_rabbitmq_settings,
             octavia_nova_flavor_id: node[:octavia][:flavor_id],
