@@ -2,6 +2,7 @@
 export OS_USERNAME='<%= @keystone_settings['admin_user'] %>'
 export OS_PASSWORD='<%= @keystone_settings['admin_password'] %>'
 export OS_ENDPOINT_TYPE='internalURL'
+export OS_INTERFACE='internal'
 <% if @keystone_settings['api_version'] != '2.0' %>
 export OS_IDENTITY_API_VERSION='<%= @keystone_settings['api_version'] %>'
 export OS_USER_DOMAIN_NAME='Default'
