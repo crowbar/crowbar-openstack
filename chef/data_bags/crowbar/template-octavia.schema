@@ -70,6 +70,8 @@
                         "image_tag": { "type": "str", "required": true },
                         "project": { "type": "str", "required": true },
                         "enable_anti_affinity": { "type": "bool", "required": true },
+                        "loadbalancer_topology": { "type": "str", "required": true },
+                        "spare_amphora_pool_size": { "type": "int", "required": true },
                         "ssh_access": { "type": "map", "required": true,
                           "mapping": {
                             "keyname": { "type": "str", "required": true }

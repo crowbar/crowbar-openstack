@@ -53,6 +53,8 @@
         "image_tag": "amphora",
         "project": "service",
         "enable_anti_affinity": false,
+        "loadbalancer_topology": "SINGLE",
+        "spare_amphora_pool_size": 0,
         "ssh_access": {
           "keyname": ""
         }
@@ -79,7 +81,7 @@
     "octavia": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 302,
+      "schema-revision": 303,
       "element_states": {
         "octavia-api": [ "readying", "ready", "applying" ],
         "octavia-backend": [ "readying", "ready", "applying" ]

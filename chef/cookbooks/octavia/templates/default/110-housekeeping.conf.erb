@@ -7,3 +7,4 @@ amp_ssh_key_name = "<%= keyname%>"
    if !anti_affinity.nil? -%>
 enable_anti_affinity = <%= anti_affinity %>
 <% end %>
+spare_amphora_pool_size = <%= @node[:octavia][:amphora][:spare_amphora_pool_size] %>
