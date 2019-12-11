@@ -41,6 +41,19 @@ if use_l3_agent
     action :create
   end
 
+  # We need .openrc present at network node so the node can use neutron-ha-tool even
+  # when located in separate cluster
+  template "/root/.openrc" do
+    source "openrc.erb"
+    cookbook "keystone"
+    owner "root"
+    group "root"
+    mode 0o600
+    variables(
+      keystone_settings: keystone_settings
+    )
+  end
+
   # skip neutron-ha-tool resource creation during upgrade
   unless CrowbarPacemakerHelper.being_upgraded?(node)
 
