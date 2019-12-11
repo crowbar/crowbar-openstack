@@ -104,14 +104,27 @@ unless neutron_fwaas_ui_pkgname.nil?
   end
 end
 
-# install horizon neutron lbaas plugin if needed
+# install the horizon neutron lbaas plugin if needed
 neutron_server = node_search_with_cache("roles:neutron-server").first
-unless neutron_server.nil?
-  package "openstack-horizon-plugin-neutron-lbaas-ui" do
-    action :install
-    notifies :reload, "service[horizon]"
-    only_if { neutron_server[:neutron][:use_lbaas] }
-  end
+# the horizon octavia plugin always takes precedence, if the service is
+# deployed
+octavia_role_exists = config_for_role_exists?("octavia")
+package_action = if !neutron_server.nil? && !octavia_role_exists && \
+    neutron_server[:neutron][:use_lbaas] && \
+    neutron_server[:neutron][:lbaasv2_driver] != "octavia"
+  :install
+else
+  :remove
+end
+package "openstack-horizon-plugin-neutron-lbaas-ui" do
+  action package_action
+  notifies :reload, "service[horizon]"
+end
+
+package "openstack-horizon-plugin-octavia-ui" do
+  action :install
+  only_if { octavia_role_exists }
+  notifies :reload, "service[horizon]"
 end
 
 # install horizon manila plugin if needed
@@ -370,6 +383,7 @@ manila_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("opensta
 magnum_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "magnum"))
 trove_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "trove"))
 sahara_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "sahara"))
+octavia_insecure = CrowbarOpenStackHelper.insecure(Barclamp::Config.load("openstack", "octavia"))
 
 neutrons = search(:node, "roles:neutron-server") || []
 if neutrons.length > 0
@@ -444,7 +458,8 @@ template local_settings do
     || trove_insecure \
     || sahara_insecure \
     || manila_insecure \
-    || designate_insecure,
+    || designate_insecure \
+    || octavia_insecure,
     db_settings: django_db_settings,
     db_ca_certs: db_ca_certs,
     timezone: (node[:provisioner][:timezone] rescue "UTC") || "UTC",
