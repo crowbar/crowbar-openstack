@@ -1,1 +1,5 @@
 [house_keeping]
+<% keyname = @node[:octavia][:amphora][:ssh_access][:keyname]
+   if !keyname.nil? and !keyname.empty? -%>
+amp_ssh_key_name = "<%= keyname%>"
+<% end %>
