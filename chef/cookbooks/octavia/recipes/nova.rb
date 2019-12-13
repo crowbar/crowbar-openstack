@@ -97,8 +97,20 @@ ruby_block "create_amphora_image" do
                 "--tag #{image_tag} #{image_packagename}")
     end
     images.each do |old_image|
-      Chef::Log.info("removing tag #{image_tag} from #{old_image}")
-      shell_out("#{cmd} image unset --tag #{image_tag} #{old_image}")
+      servers_using_image = shell_out("#{cmd} server list " \
+                                      "--image #{old_image} " \
+                                      "--format value --column ID").stdout.split
+      if servers_using_image.empty?
+        Chef::Log.info("removing old image #{old_image}")
+        shell_out("#{cmd} image delete #{old_image}")
+      else
+        # Only untag the image but do not delete it so that live
+        # migration of amphorae using this image can still work. Note
+        # that new amphorae will not use this image because it is
+        # lacking the proper tag.
+        Chef::Log.info("image #{old_image} still in use; untagging it")
+        shell_out("#{cmd} image unset --tag #{image_tag} #{old_image}")
+      end
     end
   end
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
