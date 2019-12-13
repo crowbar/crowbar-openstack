@@ -58,7 +58,7 @@ module OctaviaHelper
       env << "OS_IDENTITY_API_VERSION=3"
 
       ssl_insecure = CrowbarOpenStackHelper.insecure(config) || key_settings["insecure"]
-      "#{env} openstack #{ssl_insecure ? "--insecure" : ""}"
+      "#{env} openstack#{ssl_insecure ? " --insecure" : ""}"
     end
 
     def get_healthmanager_nodes(node, net_name)

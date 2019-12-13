@@ -79,14 +79,29 @@ end
 
 image_tag = node[:octavia][:amphora][:image_tag]
 
-execute "create_amphora_image" do
-  command "#{cmd} image create --disk-format qcow2 --container-format bare "\
-    "--file $(rpm -ql #{image} | grep qcow2 | head -n 1) --tag #{image_tag} #{image_tag}"
-  not_if "out=$(#{cmd} image list); [ $? != 0 ] || echo ${out} | grep -q ' #{image_tag} '"
+ruby_block "create_amphora_image" do
+  block do
+    image_packagename = shell_out("rpm -qa | grep #{image}").stdout.chomp
+    image_qcow = shell_out("rpm -ql #{image} | grep qcow2").stdout.chomp
+    images = shell_out("#{cmd} image list --tag #{image_tag} --sort created_at:asc " \
+                       "--format value --column ID").stdout.split
+    image_md5 = shell_out("md5sum #{image_qcow}").stdout.split[0]
+    latest_md5 = shell_out("#{cmd} image show --format value --column checksum " \
+                           "#{images[-1]}").stdout.chomp
+    if latest_md5 == image_md5
+      # Remove latest image so we don't untag it later.
+      images.pop
+    else
+      shell_out("#{cmd} image create --disk-format qcow2 " \
+                "--container-format bare --file #{image_qcow} " \
+                "--tag #{image_tag} #{image_packagename}")
+    end
+    images.each do |old_image|
+      Chef::Log.info("removing tag #{image_tag} from #{old_image}")
+      shell_out("#{cmd} image unset --tag #{image_tag} #{old_image}")
+    end
+  end
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  retries 5
-  retry_delay 10
-  action :run
 end
 
 manage_net = node[:octavia][:amphora][:manage_net]
