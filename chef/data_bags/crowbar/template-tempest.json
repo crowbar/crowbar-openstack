@@ -39,7 +39,7 @@
     "tempest": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 301,
+      "schema-revision": 302,
       "element_states": {
         "tempest": [ "ready", "applying" ]
       },
