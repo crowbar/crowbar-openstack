@@ -16,28 +16,20 @@
 define :octavia_conf do
   amphora = node[:octavia][:amphora]
   net_name = amphora[:manage_net]
-  old_amp = if node[:octavia][:old_amphora].nil?
-    {}
-  else
-    node[:octavia][:old_amphora]
-  end
 
   ruby_block "Check for amphora changes" do
     block do
-      if node[:octavia][:sec_group_id].nil? || amphora[:sec_group] != old_amp[:sec_group]
-        node.set[:octavia][:sec_group_id] = shell_out("#{params[:cmd]} security group show "\
-                                                      "#{amphora[:sec_group]} "\
-                                                      "-f value -c id").stdout.delete "\n"
-      end
-      if node[:octavia][:flavor_id].nil? || amphora[:flavor] != old_amp[:flavor]
-        node.set[:octavia][:flavor_id] =  shell_out("#{params[:cmd]} flavor show "\
-                                                    "#{amphora[:flavor]}" \
-                                                    " -f value -c id").stdout.delete "\n"
-      end
-      if node[:octavia][:net_id].nil? || net_name != old_amp[:manage_net]
-        node.set[:octavia][:net_id] = shell_out("#{params[:cmd]} network show #{net_name} "\
-                                                "-f value -c id").stdout.delete "\n"
-      end
+      sec_group_id = shell_out("#{params[:cmd]} security group show " \
+                               "#{amphora[:sec_group]} -f value -c id").stdout.chomp
+      flavor_id = shell_out("#{params[:cmd]} flavor show "\
+                            "#{amphora[:flavor]} -f value -c id").stdout.chomp
+      mgmt_net_id = shell_out("#{params[:cmd]} network list " \
+                              "--format value --column ID --column Name " \
+                              "| grep #{net_name} | cut -d ' ' -f 1").stdout.chomp
+
+      sec_group_id.empty? || node.set[:octavia][:sec_group_id] = sec_group_id
+      flavor_id.empty? || node.set[:octavia][:flavor_id] = flavor_id
+      mgmt_net_id.empty? || node.set[:octavia][:net_id] = mgmt_net_id
     end
   end
 
