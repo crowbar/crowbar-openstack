@@ -52,6 +52,7 @@
         "manage_cidr": "172.31.0.0/16",
         "image_tag": "amphora",
         "project": "service",
+        "enable_anti_affinity": false,
         "ssh_access": {
           "keyname": ""
         }
@@ -78,7 +79,7 @@
     "octavia": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 301,
+      "schema-revision": 302,
       "element_states": {
         "octavia-api": [ "readying", "ready", "applying" ],
         "octavia-backend": [ "readying", "ready", "applying" ]

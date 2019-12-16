@@ -14,3 +14,7 @@ loadbalancer_topology = SINGLE
    if !keyname.nil? and !keyname.empty? -%>
 amp_ssh_key_name = "<%= keyname%>"
 <% end %>
+<% anti_affinity = @node[:octavia][:amphora][:enable_anti_affinity]
+   if !anti_affinity.nil? -%>
+enable_anti_affinity = <%= anti_affinity %>
+<% end %>
