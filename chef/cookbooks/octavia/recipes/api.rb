@@ -16,8 +16,7 @@
 include_recipe "apache2"
 include_recipe "apache2::mod_wsgi"
 
-octavia_config = Barclamp::Config.load("openstack", "octavia")
-cmd = OctaviaHelper.get_openstack_command(node, octavia_config)
+cmd = OctaviaHelper.get_openstack_command(node, node[:octavia])
 
 octavia_conf "api" do
   cmd cmd

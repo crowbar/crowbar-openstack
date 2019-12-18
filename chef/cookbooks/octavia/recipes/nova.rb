@@ -19,8 +19,7 @@ require "chef/mixin/shell_out"
 image = "openstack-octavia-amphora-image-x86_64"
 ha_enabled = node[:octavia][:ha][:enabled]
 package image if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
-octavia_config = Barclamp::Config.load("openstack", "octavia")
-cmd = OctaviaHelper.get_openstack_command(node, octavia_config)
+cmd = OctaviaHelper.get_openstack_command(node, node[:octavia])
 
 sec_group = node[:octavia][:amphora][:sec_group]
 project_name = node[:octavia][:amphora][:project]

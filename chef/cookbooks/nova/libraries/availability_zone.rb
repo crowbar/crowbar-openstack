@@ -18,8 +18,7 @@ module NovaAvailabilityZone
   def self.fetch_set_az_command_no_arg(node, cookbook_name)
     keystone_settings = KeystoneHelper.keystone_settings(node, cookbook_name)
 
-    nova_config = BarclampLibrary::Barclamp::Config.load("openstack", "nova")
-    ssl_insecure = CrowbarOpenStackHelper.insecure(nova_config) || keystone_settings["insecure"]
+    ssl_insecure = CrowbarOpenStackHelper.insecure(node[:nova]) || keystone_settings["insecure"]
 
     auth_url = KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
                                                     keystone_settings["internal_url_host"],

@@ -13,8 +13,7 @@
 # limitations under the License.
 #
 
-octavia_config = Barclamp::Config.load("openstack", "octavia")
-cmd = OctaviaHelper.get_openstack_command(node, octavia_config)
+cmd = OctaviaHelper.get_openstack_command(node, node[:octavia])
 
 octavia_conf "health-manager" do
   cmd cmd

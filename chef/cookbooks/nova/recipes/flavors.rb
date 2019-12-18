@@ -72,8 +72,7 @@ flavors =
   }
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
-nova_config = Barclamp::Config.load("openstack", "nova")
-ssl_insecure = CrowbarOpenStackHelper.insecure(nova_config) || keystone_settings["insecure"]
+ssl_insecure = CrowbarOpenStackHelper.insecure(node[:nova]) || keystone_settings["insecure"]
 
 env = "OS_USERNAME='#{keystone_settings["service_user"]}' "
 env << "OS_PASSWORD='#{keystone_settings["service_password"]}' "
