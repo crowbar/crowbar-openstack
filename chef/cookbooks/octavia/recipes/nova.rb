@@ -85,6 +85,8 @@ ruby_block "create_amphora_image" do
     image_qcow = shell_out("rpm -ql #{image} | grep qcow2").stdout.chomp
     images = shell_out("#{cmd} image list --tag #{image_tag} --sort created_at:asc " \
                        "--format value --column ID").stdout.split
+    old_images = shell_out("#{cmd} image list --tag #{image_tag}-old --sort created_at:asc " \
+                           "--format value --column ID").stdout.split
     image_md5 = shell_out("md5sum #{image_qcow}").stdout.split[0]
     latest_md5 = shell_out("#{cmd} image show --format value --column checksum " \
                            "#{images[-1]}").stdout.chomp
@@ -96,7 +98,7 @@ ruby_block "create_amphora_image" do
                 "--container-format bare --file #{image_qcow} " \
                 "--tag #{image_tag} #{image_packagename}")
     end
-    images.each do |old_image|
+    (old_images + images).each do |old_image|
       servers_using_image = shell_out("#{cmd} server list " \
                                       "--image #{old_image} " \
                                       "--format value --column ID").stdout.split
@@ -109,6 +111,7 @@ ruby_block "create_amphora_image" do
         # that new amphorae will not use this image because it is
         # lacking the proper tag.
         Chef::Log.info("image #{old_image} still in use; untagging it")
+        shell_out("#{cmd} image set --tag #{image_tag}-old #{old_image}")
         shell_out("#{cmd} image unset --tag #{image_tag} #{old_image}")
       end
     end
