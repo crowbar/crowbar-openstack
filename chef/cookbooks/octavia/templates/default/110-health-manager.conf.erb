@@ -7,3 +7,7 @@ event_streamer_driver = noop_event_streamer
 heartbeat_interval = <%= @node[:octavia][:health_manager][:heartbeat_interval] %>
 heartbeat_timeout = <%= @node[:octavia][:health_manager][:heartbeat_timeout] %>
 health_check_interval = <%= @node[:octavia][:health_manager][:health_check_interval] %>
+<% keyname = @node[:octavia][:amphora][:ssh_access][:keyname]
+   if !keyname.nil? and !keyname.empty? -%>
+amp_ssh_key_name = "<%= keyname%>"
+<% end %>
