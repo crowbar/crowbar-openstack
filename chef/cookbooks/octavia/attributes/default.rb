@@ -49,7 +49,7 @@ default[:octavia][:amphora][:sec_group] = "lb-mgmt-sec-group"
 default[:octavia][:amphora][:manage_net] = "lb-mgmt-net"
 default[:octavia][:amphora][:image_tag] = "amphora"
 default[:octavia][:amphora][:project] = "service"
-
+default[:octavia][:amphora][:enable_anti_affinity] = false
 default[:octavia][:amphora][:ssh_access][:keyname] = ""
 
 default[:octavia][:ssl][:certfile] = "/etc/octavia/ssl/certs/signing_cert.pem"

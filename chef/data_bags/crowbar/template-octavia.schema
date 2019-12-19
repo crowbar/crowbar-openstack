@@ -69,6 +69,7 @@
                         "manage_cidr": { "type": "str", "required": true },
                         "image_tag": { "type": "str", "required": true },
                         "project": { "type": "str", "required": true },
+                        "enable_anti_affinity": { "type": "bool", "required": true },
                         "ssh_access": { "type": "map", "required": true,
                           "mapping": {
                             "keyname": { "type": "str", "required": true }
