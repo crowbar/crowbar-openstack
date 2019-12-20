@@ -23,6 +23,15 @@
 
     %fieldset
       %legend
+        = t(".amphora_header")
+
+      = string_field %w(amphora ssh_access keyname)
+      = select_field %w(amphora loadbalancer_topology),
+        :collection => :loadbalancer_topology_for_octavia
+      = integer_field %w(amphora spare_amphora_pool_size)
+
+    %fieldset
+      %legend
         = t(".ssl_header")
 
       = select_field %w(api protocol),

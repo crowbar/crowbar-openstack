@@ -9,7 +9,7 @@ client_ca = <%= @node[:octavia][:certs][:cert_path]%><%=@node[:octavia][:certs][
 compute_driver = compute_nova_driver
 amphora_driver = amphora_haproxy_rest_driver
 network_driver = allowed_address_pairs_driver
-loadbalancer_topology = SINGLE
+loadbalancer_topology = <%= @node[:octavia][:amphora][:loadbalancer_topology] %>
 <% keyname = @node[:octavia][:amphora][:ssh_access][:keyname]
    if !keyname.nil? and !keyname.empty? -%>
 amp_ssh_key_name = "<%= keyname%>"

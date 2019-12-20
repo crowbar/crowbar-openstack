@@ -38,7 +38,7 @@ default[:octavia][:health_manager][:heartbeat_key] = nil
 default[:octavia][:sudoers_file] = "/etc/sudoers.d/octavia"
 
 default[:octavia][:certs][:cert_path] = "/etc/octavia/certs/"
-default[:octavia][:certs][:passphrase] = "foobar"
+default[:octavia][:certs][:passphrase] = ""
 default[:octavia][:certs][:server_ca_cert_path] = "server_ca/certs/ca.cert.pem"
 default[:octavia][:certs][:server_ca_key_path] = "server_ca/private/ca.key.pem"
 default[:octavia][:certs][:client_ca_cert_path] = "client_ca/certs/ca.cert.pem"
@@ -50,6 +50,8 @@ default[:octavia][:amphora][:manage_net] = "lb-mgmt-net"
 default[:octavia][:amphora][:image_tag] = "amphora"
 default[:octavia][:amphora][:project] = "service"
 default[:octavia][:amphora][:enable_anti_affinity] = false
+default[:octavia][:amphora][:loadbalancer_topology] = "SINGLE"
+default[:octavia][:amphora][:spare_amphora_pool_size] = 0
 default[:octavia][:amphora][:ssh_access][:keyname] = ""
 
 default[:octavia][:ssl][:certfile] = "/etc/octavia/ssl/certs/signing_cert.pem"

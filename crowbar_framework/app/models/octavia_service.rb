@@ -27,6 +27,10 @@ class OctaviaService < OpenstackServiceObject
     false
   end
 
+  def self.valid_loadbalancer_topologies
+    ["SINGLE", "ACTIVE_STANDBY"]
+  end
+
   class << self
     def role_constraints
       {
@@ -102,12 +106,27 @@ class OctaviaService < OpenstackServiceObject
     validation_error error_text if invalid
   end
 
+  def validate_proposal_topology(proposal)
+    topology = proposal[:attributes][:octavia][:amphora][:loadbalancer_topology]
+    error_text = I18n.t("barclamp.#{@bc_name}.validation.unknown_topology")
+    validation_error error_text \
+      unless OctaviaService.valid_loadbalancer_topologies.include? topology
+  end
+
+  def validate_spare_amphora_pool_size(proposal)
+    error_text = I18n.t("barclamp.#{@bc_name}.validation.negative_pool_size")
+    validation_error error_text \
+      unless proposal[:attributes][:octavia][:amphora][:spare_amphora_pool_size] >= 0
+  end
+
   def validate_proposal_after_save(proposal)
     certs = proposal["attributes"]["octavia"]["certs"]
 
     validate_proposal_certs(certs)
     validate_proposal_passphrase(certs)
     validate_proposal_ssh(proposal)
+    validate_proposal_topology(proposal)
+    validate_spare_amphora_pool_size(proposal)
 
     super
   end

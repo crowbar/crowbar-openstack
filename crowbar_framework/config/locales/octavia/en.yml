@@ -27,9 +27,13 @@ en:
           passphrase: 'Passphrase'
         amphora_header: "Amphora Virtual Machines"
         amphora:
+          loadbalancer_topology: "Loadbalancer Topology"
+          spare_amphora_pool_size: "Spare Amphora Pool Size"
           ssh_access:
             enabled: "Allow SSH Access"
             keyname: "SSH Access Keypair Name"
+          manage_net: 'Management Network Name'
+          manage_cidr: 'Management Network CIDR'
         api_header: 'API Settings'
         api:
           protocol: 'Protocol'
@@ -42,10 +46,9 @@ en:
           cert_required: 'Require Client Certificate'
           ca_certs: 'SSL CA Certificates File'
         mgmt_net_header: 'Octavia Management Network Settings'
-        amphora:
-          manage_net: 'Management Network Name'
-          manage_cidr: 'Management Network CIDR'
       validation:
         certificates_not_empty: 'The certificates paths cannot be empty.'
         passphrase_not_empty: 'Passphrase cannot be empty.'
         keyname_not_empty: 'Keypair name cannot be empty if you enable ssh access.'
+        unknown_topology: 'The specified topology is not known.'
+        negative_pool_size: 'The spare pool size can not be negative.'

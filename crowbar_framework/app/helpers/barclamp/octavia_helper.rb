@@ -25,5 +25,9 @@ module Barclamp
         selected.to_s
       )
     end
+
+    def loadbalancer_topology_for_octavia(selected)
+      options_for_select(OctaviaService.valid_loadbalancer_topologies { |i| [i, i] }, selected.to_s)
+    end
   end
 end
