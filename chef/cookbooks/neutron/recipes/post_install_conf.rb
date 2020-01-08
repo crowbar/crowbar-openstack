@@ -116,6 +116,8 @@ else
   Chef::Log.error("networking plugin '#{networking_plugin}' invalid for creating provider networks")
 end
 
+package "python-openstackclient"
+
 execute "create_fixed_network" do
   command "#{openstack_cmd} network create --share #{fixed_network_type} fixed"
   not_if "out=$(#{openstack_cmd} network list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
