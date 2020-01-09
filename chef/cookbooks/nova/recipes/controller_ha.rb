@@ -28,6 +28,8 @@ haproxy_loadbalancer "nova-api" do
   address "0.0.0.0"
   port node[:nova][:ports][:api]
   use_ssl node[:nova][:ssl][:enabled]
+  terminate_ssl node[:nova][:ssl][:loadbalancer_terminate_ssl]
+  pemfile node[:nova][:ssl][:pemfile]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "nova", "nova-controller", "api")
   rate_limit node[:nova][:ha_rate_limit]["nova-api"]
   action :nothing
