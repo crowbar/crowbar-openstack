@@ -186,3 +186,9 @@ default[:nova][:serial][:ssl][:enabled] = false
 # metadata/vendordata
 #
 default[:nova][:metadata][:vendordata][:json] = "{}"
+
+#
+# SSL settings
+#
+default[:nova][:ssl][:loadbalancer_terminate_ssl] = false
+default[:nova][:ssl][:pemfile] = "/etc/ssl/private/nova.pem"
