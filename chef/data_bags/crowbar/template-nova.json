@@ -116,7 +116,9 @@
         "generate_certs": false,
         "insecure": false,
         "cert_required": false,
-        "ca_certs": "/etc/nova/ssl/certs/ca.pem"
+        "ca_certs": "/etc/nova/ssl/certs/ca.pem",
+        "loadbalancer_terminate_ssl": false,
+        "pemfile": "/etc/ssl/private/nova.pem"
       },
       "novnc": {
         "ssl": {
@@ -182,7 +184,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 306,
+      "schema-revision": 307,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],
