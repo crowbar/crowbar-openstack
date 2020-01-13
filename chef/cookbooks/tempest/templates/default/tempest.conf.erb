@@ -147,9 +147,7 @@ floating_network_name = floating
 [network-feature-enabled]
 api_extensions = <%= @neutron_api_extensions %>
 port_security = True
-# Skip TestNetworkBasicOps.test_update_instance_port_admin_state
-# test when neutron uses linuxbridge until SOC-10138 gets fixed
-port_admin_state_change = <%= @neutron_ml2_mechanism_drivers.include?("linuxbridge") ? 'false' : 'true' %>
+port_admin_state_change = true
 
 [object-storage]
 region = <%= @keystone_settings['endpoint_region'] %>
