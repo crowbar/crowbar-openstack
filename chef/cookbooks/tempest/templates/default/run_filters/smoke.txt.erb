@@ -1,6 +1,7 @@
 +.*smoke
 
+<% if @neutron_lbaasv2_driver == "octavia" -%>
 # When Octavia is deployed, the lbaasv2-proxy service plugin doesn't handle the `http_method` attribute correctly (SOC-10965)
 # Upstream bug: https://storyboard.openstack.org/#!/story/2006909
 -neutron_lbaas.tests.tempest.v2.api.test_health_monitors_non_admin.TestHealthMonitors.test_list_health_monitors_two
-
+<% end -%>
