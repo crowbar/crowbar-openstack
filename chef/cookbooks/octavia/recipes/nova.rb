@@ -15,7 +15,6 @@
 
 require "chef/mixin/shell_out"
 
-
 image = "openstack-octavia-amphora-image-x86_64"
 ha_enabled = node[:octavia][:ha][:enabled]
 package image if !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node)
@@ -27,7 +26,8 @@ project_name = node[:octavia][:amphora][:project]
 execute "create_security_group" do
   command "#{cmd} security group create #{sec_group} --project #{project_name} "\
     "--description \"Octavia Management Security Group\""
-  not_if "out=$(#{cmd} security group list); [ $? != 0 ] || echo ${out} | grep -q ' #{sec_group} '"
+  not_if "out=$(#{cmd} security group list); [ $? != 0 ] || echo ${out} | " \
+         "grep -q ' #{sec_group} '"
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   retries 5
   retry_delay 10
@@ -116,28 +116,6 @@ ruby_block "create_amphora_image" do
     end
   end
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-
-manage_net = node[:octavia][:amphora][:manage_net]
-manage_cidr = node[:octavia][:amphora][:manage_cidr]
-
-execute "create_octavia_management_network" do
-  command "#{cmd} network create --project #{project_name} #{manage_net}"
-  not_if "out=$(#{cmd} network list); [ $? != 0 ] || echo ${out} | grep -q ' #{manage_net} '"
-  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  retries 5
-  retry_delay 10
-  action :run
-end
-
-execute "create_octavia_management_subnet" do
-  command "#{cmd} subnet create --network #{manage_net} " \
-      "--subnet-range #{manage_cidr} --project #{project_name} #{manage_net}"
-  not_if "out=$(#{cmd} subnet list); [ $? != 0 ] || echo ${out} | grep -q ' #{manage_net} '"
-  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
-  retries 5
-  retry_delay 10
-  action :run
 end
 
 # Installing the amphora image package and creating OpenStack artifacts (the

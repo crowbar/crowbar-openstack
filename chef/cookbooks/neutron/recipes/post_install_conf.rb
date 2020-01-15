@@ -61,6 +61,20 @@ if ironic_net
   ironic_router = ironic_net["router"]
 end
 
+have_octavia = !(node[:network][:networks][:octavia].nil? || node[:octavia].nil?)
+if have_octavia
+  octavia_net = node[:network][:networks][:octavia]
+  octavia_netname = node[:octavia][:amphora][:manage_net]
+  octavia_cidr = node[:octavia][:amphora][:manage_cidr]
+  octavia_project = node[:octavia][:amphora][:project]
+  octavia_router = octavia_net[:router]
+  if octavia_net[:use_vlan]
+    octavia_vlan_id = octavia_net[:vlan]
+  else
+    Chef::Log.error("[FIXME] Add flat network")
+  end
+end
+
 vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
@@ -143,6 +157,22 @@ execute "create_ironic_network" do
   action :nothing
 end
 
+execute "create_octavia_management_network" do
+  command "#{openstack_cmd} network create " \
+          "--project #{octavia_project} " \
+          "--provider-network-type vlan " \
+          "--provider-physical-network physnet1 " \
+          "--provider-segment #{octavia_vlan_id} " \
+          "--internal " \
+          "#{octavia_netname}"
+  only_if { have_octavia }
+  not_if "out=$(#{openstack_cmd} network list); [ $? != 0 ] || echo ${out} " \
+         "| grep -q ' #{octavia_netname} '"
+  retries 5
+  retry_delay 10
+  action :nothing
+end
+
 execute "create_fixed_subnet" do
   command "#{openstack_cmd} subnet create --network fixed " \
       "--allocation-pool start=#{fixed_pool_start},end=#{fixed_pool_end} " \
@@ -169,6 +199,22 @@ execute "create_ironic_subnet" do
       "--gateway #{ironic_router} --subnet-range #{ironic_range} --dhcp ironic"
   only_if { ironic_net }
   not_if "out=$(#{openstack_cmd} subnet list); [ $? != 0 ] || echo ${out} | grep -q ' ironic '"
+  retries 5
+  retry_delay 10
+  action :nothing
+end
+
+execute "create_octavia_management_subnet" do
+  command "#{openstack_cmd} subnet create " \
+          "--project #{octavia_project} " \
+          "--network #{octavia_netname} " \
+          "--subnet-range #{octavia_cidr} " \
+          "--gateway #{octavia_router} " \
+          "--dhcp " \
+          "#{octavia_netname}"
+  only_if { have_octavia }
+  not_if "out=$(#{openstack_cmd} subnet list); [ $? != 0 ] || echo ${out} " \
+         "| grep -q ' #{octavia_netname} '"
   retries 5
   retry_delay 10
   action :nothing
@@ -241,9 +287,11 @@ execute "Neutron network configuration" do
   notifies :run, "execute[create_fixed_network]", :delayed
   notifies :run, "execute[create_floating_network]", :delayed
   notifies :run, "execute[create_ironic_network]", :delayed
+  notifies :run, "execute[create_octavia_management_network]", :delayed
   notifies :run, "execute[create_fixed_subnet]", :delayed
   notifies :run, "execute[create_floating_subnet]", :delayed
   notifies :run, "execute[create_ironic_subnet]", :delayed
+  notifies :run, "execute[create_octavia_management_subnet]", :delayed
   notifies :run, "execute[create_router]", :delayed
   notifies :run, "execute[set_router_gateway]", :delayed
   notifies :run, "execute[add_fixed_network_to_router]", :delayed

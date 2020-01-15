@@ -19,6 +19,8 @@ zvm_compute_node = search(:node, "roles:nova-compute-zvm") || []
 use_zvm = node[:neutron][:networking_plugin] == "ml2" && !zvm_compute_node.empty?
 use_vmware_dvs = node[:neutron][:networking_plugin] == "ml2" &&
   node[:neutron][:ml2_mechanism_drivers].include?("vmware_dvs")
+octavia_nodes = search(:node, "roles:octavia-api") || []
+use_octavia = !octavia_nodes.empty?
 
 pkgs = node[:neutron][:platform][:pkgs] + node[:neutron][:platform][:pkgs_fwaas]
 pkgs += node[:neutron][:platform][:pkgs_lbaas] if node[:neutron][:use_lbaas]
@@ -121,7 +123,7 @@ when "ml2"
   # with "nova_fixed".
   external_networks = ["nova_floating"]
 
-  # add ironic to external_networks if ironic network is configured
+  # Add ironic to external_networks if ironic network is configured
   external_networks << "ironic" if ironic_net
 
   external_networks.concat(node[:neutron][:additional_external_networks])
@@ -182,6 +184,7 @@ when "ml2"
       tenant_network_types: tenant_network_types,
       vlan_start: vlan_start,
       vlan_end: vlan_end,
+      use_octavia: use_octavia,
       gre_start: gre_start,
       gre_end: gre_end,
       vxlan_start: vni_start,
