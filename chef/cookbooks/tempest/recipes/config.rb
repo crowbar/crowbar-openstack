@@ -669,13 +669,39 @@ template "#{node[:tempest][:tempest_path]}/bin/tempest_smoketest.sh" do
   )
 end
 
-remote_directory "#{node[:tempest][:tempest_path]}/run_filters/" do
-  source "run_filters"
-  action :create
-  recursive true
-end
-
 cookbook_file "#{node[:tempest][:tempest_path]}/bin/tests2skip.py" do
   source "tests2skip.py"
   mode 0755
+end
+
+# This is where tempest run filter templates are generated
+directory "#{node[:tempest][:tempest_path]}/run_filters" do
+  mode 0o755
+  action :create
+end
+
+# Get the Chef::CookbookVersion for this cookbook
+cb = run_context.cookbook_collection["tempest"]
+
+# Loop over the array of run filter template files
+cb.manifest["templates"].each do |cb_template|
+  # cb_template['name'] is relative to the default
+  # templates location, e.g.
+  #   'run_filters/foo.txt.erb'
+  filter_name = cb_template["name"].split(".erb")[0]
+
+  next unless filter_name =~ %r{run_filters\/.*txt}
+
+  template "#{node[:tempest][:tempest_path]}/#{filter_name}" do
+    mode 0o640
+    source "#{filter_name}.erb"
+    variables(
+      lazy do
+        {
+          enabled_services: enabled_services,
+          neutron_lbaasv2_driver: neutron_lbaasv2_driver
+        }
+      end
+    )
+  end
 end
