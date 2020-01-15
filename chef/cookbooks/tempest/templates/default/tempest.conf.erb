@@ -58,9 +58,7 @@ block_migration_for_live_migration = true
 vnc_console = <%= @use_vnc %>
 rescue = <%= @use_rescue %>
 personality = True
-# only supported by LVM driver
-# see https://docs.openstack.org/cinder/rocky/reference/support-matrix.html#operation_multi_attach
-volume_multiattach = False
+volume_multiattach = <%= @use_multiattach %>
 swap_volume = <%= @storage_protocol != 'ceph' ? 'true' : 'false' %>
 attach_encrypted_volume = <%= @use_attach_encrypted_volume %>
 api_extensions = all

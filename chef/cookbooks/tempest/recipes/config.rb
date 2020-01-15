@@ -459,18 +459,24 @@ cinders = search(:node, "roles:cinder-controller") || []
 storage_protocol = "iSCSI"
 vendor_name = "Open Source"
 cinder_snapshot = true
+
+use_multiattach = true
+
 # Currently broken in general, even with LVM
 use_attach_encrypted_volume = false
 cinders[0][:cinder][:volumes].each do |volume|
   if volume[:backend_driver] == "rbd"
     storage_protocol = "ceph"
+    use_multiattach = false
     # no encryption support for rbd-backed volumes
     use_attach_encrypted_volume = false
     break
   elsif volume[:backend_driver] == "emc"
+    use_multiattach = false
     vendor_name = "EMC"
     break
   elsif volume[:backend_driver] == "eqlx"
+    use_multiattach = false
     vendor_name = "Dell"
     break
   elsif volume[:backend_driver] == "eternus"
@@ -483,10 +489,12 @@ cinders[0][:cinder][:volumes].each do |volume|
     break
   elsif volume[:backend_driver] == "nfs"
     storage_protocol = "nfs"
+    use_multiattach = false
     cinder_snapshot = volume[:nfs][:nfs_snapshot]
     break
   elsif volume[:backend_driver] == "vmware"
     vendor_name = "VMware"
+    use_multiattach = false
     storage_protocol = "LSI Logic SCSI"
     break
   end
@@ -592,6 +600,7 @@ template "/etc/tempest/tempest.conf" do
         use_rescue: use_rescue,
         use_resize: use_resize,
         use_suspend: use_suspend,
+        use_multiattach: use_multiattach,
         use_vnc: use_vnc,
         use_livemigration: use_livemigration,
         use_attach_encrypted_volume: use_attach_encrypted_volume,
