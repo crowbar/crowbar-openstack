@@ -22,8 +22,6 @@ network_settings = DesignateHelper.network_settings(node)
 
 include_recipe "crowbar-pacemaker::haproxy"
 
-service_transaction_objects = []
-
 haproxy_loadbalancer "designate-api" do
   address network_settings[:api][:ha_bind_host]
   port network_settings[:api][:ha_bind_port]
@@ -32,30 +30,3 @@ haproxy_loadbalancer "designate-api" do
                                                              "designate-server", "api_port")
   action :nothing
 end.run_action(:create)
-
-crowbar_pacemaker_sync_mark "wait-designate_producer"
-
-package "openstack-designate-producer"
-
-op = { "monitor" => { "interval" => "10s" }}
-
-producer_primitive = "designate-producer"
-pacemaker_primitive producer_primitive do
-  agent "systemd:openstack-designate-producer"
-  op op
-  action :update
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-service_transaction_objects << "pacemaker_primitive[#{producer_primitive}]"
-
-designate_producer_loc = openstack_pacemaker_controller_only_location_for producer_primitive
-service_transaction_objects << "pacemaker_location[#{designate_producer_loc}]"
-
-pacemaker_transaction "designate producer service" do
-  cib_objects service_transaction_objects
-  # note that this will also automatically start the resources
-  action :commit_new
-  only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
-end
-
-crowbar_pacemaker_sync_mark "create-designate_producer"

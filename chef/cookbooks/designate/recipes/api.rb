@@ -109,4 +109,4 @@ crowbar_pacemaker_sync_mark "create-designate_register" if ha_enabled
 
 designate_service "central"
 designate_service "api"
-designate_service "producer" unless ha_enabled
+designate_service "producer"
