@@ -28,6 +28,8 @@ haproxy_loadbalancer "cinder-api" do
   address node[:cinder][:api][:bind_open_address] ? "0.0.0.0" : cluster_admin_ip
   port node[:cinder][:api][:bind_port]
   use_ssl (node[:cinder][:api][:protocol] == "https")
+  terminate_ssl node[:cinder][:ssl][:loadbalancer_terminate_ssl]
+  pemfile node[:cinder][:ssl][:pemfile]
   servers CrowbarPacemakerHelper.haproxy_servers_for_service(node, "cinder", "cinder-controller", "api")
   rate_limit node[:cinder][:ha_rate_limit]["cinder-api"]
   action :nothing
