@@ -156,7 +156,9 @@
         "generate_certs": false,
         "insecure": false,
         "cert_required": false,
-        "ca_certs": "/etc/cinder/ssl/certs/ca.pem"
+        "ca_certs": "/etc/cinder/ssl/certs/ca.pem",
+        "loadbalancer_terminate_ssl": false,
+        "pemfile": "/etc/ssl/private/cinder.pem"
       },
       "db": {
         "password": "",
@@ -183,7 +185,7 @@
     "cinder": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 209,
+      "schema-revision": 210,
       "element_states": {
           "cinder-controller": [ "readying", "ready", "applying" ],
           "cinder-volume": [ "readying", "ready", "applying" ]
