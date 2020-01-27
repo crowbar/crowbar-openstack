@@ -54,3 +54,9 @@ end
 default[:cinder][:ha][:op][:monitor][:interval] = "10s"
 # Ports to bind to when haproxy is used for the real ports
 default[:cinder][:ha][:ports][:api] = 5520
+
+#
+# SSL settings
+#
+default[:cinder][:ssl][:loadbalancer_terminate_ssl] = false
+default[:cinder][:ssl][:pemfile] = "/etc/ssl/private/cinder.pem"
