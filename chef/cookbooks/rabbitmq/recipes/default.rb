@@ -27,7 +27,6 @@ end
 ha_enabled = node[:rabbitmq][:ha][:enabled]
 # we only do cluster if we do HA
 cluster_enabled = node[:rabbitmq][:cluster] && ha_enabled
-quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
 
 cluster_partition_handling = if cluster_enabled
   if CrowbarPacemakerHelper.num_corosync_nodes(node) > 2
@@ -138,7 +137,8 @@ template "/etc/rabbitmq/definitions.json" do
     json_trove_password: node[:rabbitmq][:trove][:password].to_json,
     json_trove_vhost: node[:rabbitmq][:trove][:vhost].to_json,
     ha_all_policy: cluster_enabled,
-    quorum: quorum,
+    json_policy_definition: CrowbarRabbitmqHelper.get_ha_policy_definition(node).to_json,
+    queue_regex: CrowbarRabbitmqHelper.ha_policy_regex,
     extra_users: node[:rabbitmq][:users]
   )
   # no notification to restart rabbitmq, as we still do changes with
