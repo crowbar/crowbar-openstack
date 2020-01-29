@@ -16,12 +16,9 @@
     "policies": [
         {
             "apply-to": "queues",
-            "definition": {
-                "ha-mode": "exactly",
-               "ha-params": <%= @quorum %>
-            },
+            "definition": <%= @json_policy_definition %>,
             "name": "ha-queues",
-            "pattern": "^(?!amq.).*",
+            "pattern": "<%= @queue_regex %>",
             "priority": 0,
             "vhost": <%= @json_vhost %>
         }
