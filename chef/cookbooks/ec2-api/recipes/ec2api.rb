@@ -101,6 +101,7 @@ keystone_register "register ec2 user" do
   user_password keystone_settings["service_password"]
   tenant_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give ec2 user access" do
@@ -113,6 +114,7 @@ keystone_register "give ec2 user access" do
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 # Create ec2-api service
@@ -126,6 +128,7 @@ keystone_register "register ec2-api service" do
   service_type "ec2"
   service_description "EC2 Compatibility Layer"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register ec2-api endpoint" do
@@ -140,6 +143,7 @@ keystone_register "register ec2-api endpoint" do
   endpoint_adminURL "#{api_protocol}://#{my_admin_host}:#{ec2_api_port}"
   endpoint_internalURL "#{api_protocol}://#{my_admin_host}:#{ec2_api_port}"
   action :add_endpoint_template
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 # Create ec2-metadata service
@@ -153,6 +157,7 @@ keystone_register "register ec2-metadata service" do
   service_type "ec2"
   service_description "EC2 Compatibility Layer"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register ec2-metadata endpoint" do
@@ -167,6 +172,7 @@ keystone_register "register ec2-metadata endpoint" do
   endpoint_adminURL "#{api_protocol}://#{my_admin_host}:#{ec2_metadata_port}"
   endpoint_internalURL "#{api_protocol}://#{my_admin_host}:#{ec2_metadata_port}"
   action :add_endpoint_template
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-ec2_api_register" if ha_enabled
