@@ -146,17 +146,8 @@ node[:rabbitmq][:users].each do |user|
 end
 
 if cluster_enabled
-  if node[:rabbitmq][:enable_queue_mirroring]
-    quorum = CrowbarPacemakerHelper.num_corosync_nodes(node) / 2 + 1
-  else
-    quorum = 1
-  end
-
-  # don't mirror queues that are 'amq.*' or '*_fanout_*' or `reply_*` in their names
-  queue_regex = "^(?!(amq\.)|(.*_fanout_)|(reply_)).*"
-  # policy doesnt need spaces between elements as they will be removed when listing them
-  # making it more difficult to check for them
-  policy = "{\"ha-mode\":\"exactly\",\"ha-params\":#{quorum},\"ha-sync-mode\":\"automatic\"}"
+  queue_regex = CrowbarRabbitmqHelper.ha_policy_regex
+  policy = CrowbarRabbitmqHelper.get_ha_policy_definition(node).to_json
   vhost = node[:rabbitmq][:vhost]
   # we need to scape the regex properly so we can use it on the grep command
   queue_regex_escaped = ""
