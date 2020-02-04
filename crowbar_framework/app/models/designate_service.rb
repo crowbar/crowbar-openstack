@@ -103,6 +103,26 @@ class DesignateService < OpenstackServiceObject
       )
     end
 
+    # Make sure dns-server role is applied to at least one non-admin node
+    dns_server_nodes = NodeObject.find("roles:dns-server")
+    dns_server_nodes.delete_if { |n| n.nil? || n.admin? }
+    if dns_server_nodes.empty?
+      validation_error I18n.t(
+        "barclamp.#{@bc_name}.validation.non_admin_dns_nodes_not_found"
+      )
+    end
+
+    # All designate-worker nodes should have dns-server role too. This is
+    # assuming that designate-working is deployed on all the controller nodes.
+    designate_worker_nodes = NodeObject.find("roles:designate-worker")
+    designate_worker_nodes.each do |node|
+      next if node.roles.include?("dns-server")
+      @logger.warn(
+        "Node #{node.name} does not have dns-server role. All "\
+        "designate-worker node(s) should have dns-server role too."
+      )
+    end
+
     super
   end
 

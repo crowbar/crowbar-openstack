@@ -36,3 +36,4 @@ en:
           ca_certs: 'SSL CA Certificates File'
       validation:
         invalid_email_address: 'E-mail address %{email} is invalid.'
+        non_admin_dns_nodes_not_found: 'No DNS server found on non-admin nodes. Dns-server role must be applied to at least one non-admin node prior to deploying Designate.'
