@@ -36,3 +36,9 @@ crowbar:
 
 smoketest:
   timeout: 2400
+
+nav:
+  utils:
+    tempest:
+      order: 30
+      route: 'tempest_dashboard_path'

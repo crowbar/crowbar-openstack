@@ -210,8 +210,12 @@ class TempestService < ServiceObject
     @logger.info("starting tempest on node #{node}, test run uuid #{test_run['uuid']}")
 
     pid = fork do
-      command_line = "/tmp/tempest_smoketest.sh 2>/dev/null"
-      Process.waitpid run_remote_chef_client(node, command_line, test_run["results.xml"])
+      smoketest = "tempest_smoketest.sh"
+      script_path = "/var/lib/openstack-tempest-test"
+
+      Process.waitpid run_remote_chef_client(node,
+        "#{File.join(script_path, smoketest)} 2>/dev/null",
+        test_run["results.xml"])
 
       test_run["ended"] = Time.now.utc.to_i
       test_run["status"] = $?.exitstatus.equal?(0) ? "passed" : "failed"
