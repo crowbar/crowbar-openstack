@@ -231,6 +231,15 @@ disk_cachemodes = <%= node[:nova][:kvm][:disk_cachemodes] %>
 <% if @rng_device %>
 rng_dev_path = <%= @rng_device %>
 <% end %>
+<% if @ephemeral_rbd_settings %>
+images_type = rbd
+rbd_user = <%= @ephemeral_rbd_settings[:user] %>
+rbd_secret_uuid = <%= @ephemeral_rbd_settings[:secret_uuid] %>
+images_rbd_pool = <%= @ephemeral_rbd_settings[:pool] %>
+images_rbd_ceph_conf = <%= @ephemeral_rbd_settings[:config_file] %>
+disk_cachemodes = network=writeback
+hw_disk_discard = unmap
+<% end %>
 
 [neutron]
 service_metadata_proxy = true
