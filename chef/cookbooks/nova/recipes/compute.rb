@@ -273,6 +273,11 @@ case node[:nova][:libvirt_type]
 
 end
 
+# libvirtd (if used) should already be running now.
+# we can define secrets for ceph usage.
+# this recipe is a no-op of rbd or libvirt is not used.
+include_recipe "nova::ceph_secrets"
+
 nova_package "compute" do
   use_pacemaker_provider node[:nova][:ha][:compute][:enabled]
   restart_crm_resource true
