@@ -113,7 +113,10 @@ my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:
 
 db_connection = fetch_database_connection_string(node[:heat][:db])
 
-crowbar_pacemaker_sync_mark "wait-heat_register" if ha_enabled
+crowbar_pacemaker_sync_mark "wait-heat_register" do
+  timeout 90
+  only_if { ha_enabled }
+end
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
