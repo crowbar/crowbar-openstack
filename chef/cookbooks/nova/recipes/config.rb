@@ -108,6 +108,7 @@ directory "/etc/nova" do
 end
 
 rbd_enabled = false
+ephemeral_rbd_settings = nil
 
 cinder_servers = node_search_with_cache("roles:cinder-controller")
 if cinder_servers.length > 0
@@ -117,7 +118,14 @@ if cinder_servers.length > 0
 
   if node.roles.include? "nova-compute-kvm"
     cinder_server[:cinder][:volumes].each do |volume|
-      rbd_enabled = true if volume["backend_driver"] == "rbd"
+      next unless volume["backend_driver"] == "rbd"
+      rbd_enabled = true
+      # use first rbd cinder backend for ephemeral storage settings
+      ephemeral_rbd_settings = volume[:rbd].clone
+      # override pool with nova section from settings
+      ses_config = SesHelper.ses_settings
+      ephemeral_rbd_settings[:pool] = ses_config[:nova][:rbd_store_pool]
+      break
     end
   end
 else
@@ -411,6 +419,7 @@ template node[:nova][:config_file] do
     use_baremetal_filters: use_baremetal_filters,
     track_instance_changes: track_instance_changes,
     ironic_settings: ironic_settings,
+    ephemeral_rbd_settings: ephemeral_rbd_settings,
     default_log_levels: node[:nova][:default_log_levels]
   )
 end
