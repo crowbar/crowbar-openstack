@@ -196,6 +196,9 @@ class NovaService < OpenstackServiceObject
       rm -f $t ${t}.pub
     ]
 
+    # enable SES/Ceph based ephemeral storage for new deployments
+    base["attributes"]["nova"]["use_rbd_ephemeral"] = true
+
     @logger.debug("Nova create_proposal: exiting")
     base
   end
