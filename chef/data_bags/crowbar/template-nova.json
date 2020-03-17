@@ -16,6 +16,7 @@
       "libvirt_type": "kvm",
       "use_novnc": true,
       "use_serial": false,
+      "use_rbd_ephemeral": false,
       "debug": false,
       "max_header_line": 16384,
       "setup_shared_instance_storage": false,
@@ -185,7 +186,7 @@
     "nova": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 211,
+      "schema-revision": 212,
       "element_states": {
         "nova-controller": [ "readying", "ready", "applying" ],
         "nova-compute-ironic": [ "readying", "ready", "applying" ],
