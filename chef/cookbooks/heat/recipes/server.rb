@@ -114,7 +114,10 @@ my_public_host = CrowbarHelper.get_host_for_public_url(node, node[:heat][:api][:
 
 db_connection = fetch_database_connection_string(node[:heat][:db])
 
-crowbar_pacemaker_sync_mark "wait-heat_register" if ha_enabled
+crowbar_pacemaker_sync_mark "wait-heat_register" do
+  timeout 90
+  only_if { ha_enabled }
+end
 
 register_auth_hash = { user: keystone_settings["admin_user"],
                        password: keystone_settings["admin_password"],
@@ -205,82 +208,54 @@ bash "register heat domain" do
   code <<-EOF
 
     # Find domain ID
-    id=
-    eval $(openstack #{insecure} \
+    HEAT_DOMAIN_ID=$(openstack #{insecure} \
         domain show \
-        -f shell --variable id \
+        -f value -c id \
         #{stack_user_domain_name})
 
-    HEAT_DOMAIN_ID=$id
-
     if [ -z "$HEAT_DOMAIN_ID" ]; then
-        id=
-        eval $(openstack #{insecure} \
+        HEAT_DOMAIN_ID=$(openstack #{insecure} \
             domain create \
-            -f shell --variable id \
+            -f value -c id \
             --description "Owns users and projects created by heat" \
             #{stack_user_domain_name})
-        HEAT_DOMAIN_ID=$id
     fi
 
     [ -n "$HEAT_DOMAIN_ID" ] || exit 1
 
     # Find user ID
-    STACK_DOMAIN_ADMIN_ID=
+    STACK_DOMAIN_ADMIN_ID=$(openstack #{insecure} \
+        user show \
+        -f value -c id \
+        --domain $HEAT_DOMAIN_ID \
+        #{node[:heat][:stack_domain_admin]})
 
-    # we need to loop, as there might be users with this name in different
-    # domains; unfortunately --domain doesn't allow fetching users from just
-    # one domain
-    for userid in $(openstack #{insecure} \
-                        user list \
-                        -f csv \
-                        --domain $HEAT_DOMAIN_ID \
-                        | grep \"#{node[:heat]["stack_domain_admin"]}\" | cut -d , -f 1 | sed 's/"//g'); do
-        domain_id=
-        eval $(openstack #{insecure} \
-            user show \
-            -f shell --variable domain_id \
-            $userid)
-
-        if [ x"$domain_id" = x"$HEAT_DOMAIN_ID" ]; then
-            STACK_DOMAIN_ADMIN_ID=$userid
-            openstack #{insecure} \
-                user set \
-                --domain $HEAT_DOMAIN_ID \
-                --password #{node[:heat]["stack_domain_admin_password"]} \
-                --description "Manages users and projects created by heat" \
-                $STACK_DOMAIN_ADMIN_ID
-            break
-        fi
-    done
-
-    if [ -z "$STACK_DOMAIN_ADMIN_ID" ]; then
-        id=
-        eval $(openstack #{insecure} \
-            user create \
-            -f shell --variable id \
+    # Update heat admin user if exists
+    if [ -n "$STACK_DOMAIN_ADMIN_ID" ]; then
+        openstack #{insecure} \
+            user set \
             --domain $HEAT_DOMAIN_ID \
-            --password #{node[:heat]["stack_domain_admin_password"]} \
+            --password #{node[:heat][:stack_domain_admin_password]} \
             --description "Manages users and projects created by heat" \
-            #{node[:heat]["stack_domain_admin"]})
-        STACK_DOMAIN_ADMIN_ID=$id
+            $STACK_DOMAIN_ADMIN_ID
+    else
+        STACK_DOMAIN_ADMIN_ID=$(openstack #{insecure} \
+            user create \
+            -f value -c id \
+            --domain $HEAT_DOMAIN_ID \
+            --password #{node[:heat][:stack_domain_admin_password]} \
+            --description "Manages users and projects created by heat" \
+            #{node[:heat][:stack_domain_admin]})
     fi
 
     [ -n "$STACK_DOMAIN_ADMIN_ID" ] || exit 1
 
     # Make user an admin
-    if ! openstack #{insecure} \
-            role list \
-            -f csv --column Name \
-            --domain $HEAT_DOMAIN_ID \
-            --user $STACK_DOMAIN_ADMIN_ID \
-            | grep -q \"admin\"; then
-        openstack #{insecure} \
-            role add \
-            --domain $HEAT_DOMAIN_ID \
-            --user $STACK_DOMAIN_ADMIN_ID \
-            admin
-    fi
+    openstack #{insecure} \
+        role add \
+        --domain $HEAT_DOMAIN_ID \
+        --user $STACK_DOMAIN_ADMIN_ID \
+        admin
   EOF
   environment ({
     "OS_USERNAME" => keystone_settings["admin_user"],
