@@ -132,13 +132,6 @@ if rbd_enabled
   include_recipe "nova::ceph"
 end
 
-# FIXME: These attributes will be removed or re-used
-# with ephemeral storage change. Right now they are
-# disabled in nova.conf to prevent overwritting
-# multi Ceph backends from Cinder
-ceph_user = node[:nova][:rbd][:user]
-ceph_uuid = node[:nova][:rbd][:secret_uuid]
-
 neutron_servers = node_search_with_cache("roles:neutron-server")
 if neutron_servers.length > 0
   neutron_server = neutron_servers[0]
@@ -404,8 +397,6 @@ template node[:nova][:config_file] do
     cinder_insecure: cinder_insecure,
     use_multipath: use_multipath,
     keymgr_fixed_key: keymgr_fixed_key,
-    ceph_user: ceph_user,
-    ceph_uuid: ceph_uuid,
     ssl_enabled: api[:nova][:ssl][:enabled],
     ssl_cert_file: api_ssl_certfile,
     ssl_key_file: api_ssl_keyfile,
