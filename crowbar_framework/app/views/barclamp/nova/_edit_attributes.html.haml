@@ -101,3 +101,9 @@
 
         = string_field %w(novnc ssl certfile)
         = string_field %w(novnc ssl keyfile)
+
+    %fieldset
+      %legend
+        = t(".storage_header")
+
+      = boolean_field %w(use_rbd_ephemeral)

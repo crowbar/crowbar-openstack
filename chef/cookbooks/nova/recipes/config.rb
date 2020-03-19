@@ -120,6 +120,7 @@ if cinder_servers.length > 0
     cinder_server[:cinder][:volumes].each do |volume|
       next unless volume["backend_driver"] == "rbd"
       rbd_enabled = true
+      next unless node[:nova][:use_rbd_ephemeral]
       # use first rbd cinder backend for ephemeral storage settings
       ephemeral_rbd_settings = volume[:rbd].clone
       # override pool with nova section from settings

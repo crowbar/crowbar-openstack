@@ -79,6 +79,8 @@ en:
             generate_certs: 'Generate (self-signed) certificates (implies insecure)'
             cert_required: 'Require Client Certificate'
             ca_certs: 'SSL CA Certificates File'
+        storage_header: 'Storage Settings'
+        use_rbd_ephemeral: 'Use Ceph RBD Ephemeral Backend (if available)'
       validation:
         no_shared_storage_cluster: 'Shared storage cannot be automatically setup when a cluster has the nova-controller role. Please consider using the NFS Client barclamp instead.'
         setup_use_shared_storage: 'When automatically setting up shared storage, it must also be used.'
