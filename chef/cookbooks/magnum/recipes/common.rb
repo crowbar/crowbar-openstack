@@ -40,6 +40,18 @@ end
 bind_port = network_settings[:api][:bind_port]
 bind_host = network_settings[:api][:bind_host]
 
+ssl_enabled = node[:magnum][:api][:protocol] == "https"
+
+if ssl_enabled
+  ssl_setup "setting up ssl for magnum" do
+    generate_certs node[:magnum][:ssl][:generate_certs]
+    certfile node[:magnum][:ssl][:certfile]
+    keyfile node[:magnum][:ssl][:keyfile]
+    group node[:magnum][:group]
+    fqdn node[:fqdn]
+  end
+end
+
 template node[:magnum][:config_file] do
   source "magnum.conf.erb"
   owner "root"
@@ -52,18 +64,9 @@ template node[:magnum][:config_file] do
     sql_connection: sql_connection,
     rabbit_settings: fetch_rabbitmq_settings,
     keystone_settings: KeystoneHelper.keystone_settings(node, :magnum),
+    ssl_enabled: ssl_enabled,
+    ssl_settings: node[:magnum][:ssl],
     memcached_servers: MemcachedHelper.get_memcached_servers(node,
       CrowbarPacemakerHelper.cluster_nodes(node, "magnum-server"))
   )
-end
-
-# ssl
-if node[:magnum][:api][:protocol] == "https"
-  ssl_setup "setting up ssl for magnum" do
-    generate_certs node[:magnum][:ssl][:generate_certs]
-    certfile node[:magnum][:ssl][:certfile]
-    keyfile node[:magnum][:ssl][:keyfile]
-    group node[:magnum][:group]
-    fqdn node[:fqdn]
-  end
 end
