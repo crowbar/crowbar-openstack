@@ -16,6 +16,7 @@
       "libvirt_type": "kvm",
       "use_novnc": true,
       "use_serial": false,
+      "use_rbd_ephemeral": false,
       "debug": false,
       "max_header_line": 16384,
       "setup_shared_instance_storage": false,
