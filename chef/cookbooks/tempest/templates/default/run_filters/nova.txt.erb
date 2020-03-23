@@ -11,3 +11,14 @@
 -tempest.api.compute.admin.test_migrations.MigrationsAdminTest.test_resize_server_revert_deleted_flavor
 -tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_resize_server_revert_with_volume_attached
 -tempest.api.compute.admin.test_migrations.MigrationsAdminTest.test_revert_cold_migration
+
+<% if @use_rbd_ephemeral -%>
+
+# SOC-9708 black list failing shelve tests
+-tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_shelve_shelved_server
+-tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_shelve_unshelve_server
+-tempest.api.compute.volumes.test_attach_volume.AttachVolumeShelveTestJSON.test_attach_volume_shelved_or_offload_server
+-tempest.api.compute.volumes.test_attach_volume.AttachVolumeShelveTestJSON.test_detach_volume_shelved_or_offload_server
+-tempest.scenario.test_shelve_instance.TestShelveInstance.test_shelve_instance
+
+<% end -%>
