@@ -514,6 +514,7 @@ kvm_compute_nodes = search(:node, "roles:nova-compute-kvm") || []
 
 use_resize = kvm_compute_nodes.length > 1
 use_livemigration = nova[:nova][:use_migration] && kvm_compute_nodes.length > 1
+use_rbd_ephemeral = nova[:nova][:use_rbd_ephemeral]
 
 # tempest timeouts for ssh and connection can be different for XEN, a
 # `nil` value will use the tempest default value
@@ -602,6 +603,7 @@ template "/etc/tempest/tempest.conf" do
         use_suspend: use_suspend,
         use_multiattach: use_multiattach,
         use_vnc: use_vnc,
+        use_rbd_ephemeral: use_rbd_ephemeral,
         use_livemigration: use_livemigration,
         use_attach_encrypted_volume: use_attach_encrypted_volume,
         # dashboard settings
