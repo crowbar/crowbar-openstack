@@ -117,6 +117,9 @@ if cinder_servers.length > 0
   keymgr_fixed_key = cinder_server[:cinder][:keymgr_fixed_key]
 
   if node.roles.include? "nova-compute-kvm"
+    # make sure cinder volumes are filled with settings from SES data bag
+    SesHelper.populate_cinder_volumes_with_ses_settings(cinder_server)
+
     cinder_server[:cinder][:volumes].each do |volume|
       next unless volume["backend_driver"] == "rbd"
       rbd_enabled = true
