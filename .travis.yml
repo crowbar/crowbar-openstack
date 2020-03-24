@@ -11,7 +11,7 @@ matrix:
       script:
       - pip install gitlint
       - wget https://raw.githubusercontent.com/SUSE-Cloud/automation/master/scripts/jenkins/gitlint.ini
-      - gitlint --commits master..HEAD -C gitlint.ini
+      - gitlint --commits `git rev-parse --abbrev-ref HEAD`..HEAD -C gitlint.ini
     - name: "Syntaxcheck"
       gemfile: Gemfile
       script:
