@@ -54,7 +54,7 @@ build_timeout = 600
 resize = <%= @use_resize %>
 suspend = <%= @use_suspend %>
 live_migration = <%= @use_livemigration %>
-block_migration_for_live_migration = true
+block_migration_for_live_migration = <%= not @use_rbd_ephemeral %>
 vnc_console = <%= @use_vnc %>
 rescue = <%= @use_rescue %>
 personality = True
