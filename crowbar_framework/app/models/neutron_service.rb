@@ -363,7 +363,7 @@ class NeutronService < OpenstackServiceObject
     net_svc = NetworkService.new @logger
     network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
     blacklist = ["bmc", "bmc_admin", "admin", "nova_fixed", "nova_floating",
-                 "os_sdn", "public", "storage", "ironic"]
+                 "os_sdn", "public", "storage", "ironic", "octavia"]
 
     external_networks.each do |ext_net|
       # Exclude a few default networks from network.json from being used as
@@ -439,7 +439,7 @@ class NeutronService < OpenstackServiceObject
         # the requirement to have the bridge setup is really node-specifc. (E.g.
         # a tempest node that might get an IP allocated in "nova_floating" won't
         # need the bridges)
-        ovs_bridge_networks = ["nova_floating", "ironic"]
+        ovs_bridge_networks = ["nova_floating", "ironic", "octavia"]
         ovs_bridge_networks.concat attributes["additional_external_networks"]
         ovs_bridge_networks.push("nova_fixed") if ml2_type_drivers.include?("vlan")
 
@@ -534,6 +534,11 @@ class NeutronService < OpenstackServiceObject
       network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
       unless network_proposal["attributes"]["network"]["networks"]["ironic"].nil?
         net_svc.enable_interface "default", "ironic", nodename
+      end
+
+      # Enable octavia interface as preparation for octavia deployment.
+      unless network_proposal["attributes"]["network"]["networks"]["octavia"].nil?
+        net_svc.enable_interface "default", "octavia", nodename
       end
     elsif attributes["networking_plugin"] == "vmware"
       net_svc.allocate_ip "default", "os_sdn", "host", node

@@ -197,6 +197,10 @@ class OctaviaService < OpenstackServiceObject
       net_svc.allocate_ip "default", "public", "host", n
     end
 
+    all_nodes.each do |n|
+      net_svc.allocate_ip "default", "octavia", "host", n
+    end
+
     allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)
 
     @logger.debug("octavia apply_role_pre_chef_call: leaving")

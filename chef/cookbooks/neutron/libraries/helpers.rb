@@ -15,8 +15,8 @@ module NeutronHelper
   # Input is the list of external_networks that we'll have. Returns a hash where
   # external_network -> physnet pairs
   def self.get_neutron_physnets(node, external_networks)
-    # This assumes that "nova_fixed" will always be on the phynet called
-    # "physnet1" in neutron
+    # This assumes that "nova_fixed" will always be on the physnet called
+    # "physnet1" in neutron.
     # Also we don't allow to put 2 external networks on the same neutron
     # physnet.
 
