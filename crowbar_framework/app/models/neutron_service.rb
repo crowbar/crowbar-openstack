@@ -536,7 +536,7 @@ class NeutronService < OpenstackServiceObject
         net_svc.enable_interface "default", "ironic", nodename
       end
 
-      # Enable octavia interface as preparation for octavia deployment.
+      # Enable octavia interface as preparation for octavia deployment
       unless network_proposal["attributes"]["network"]["networks"]["octavia"].nil?
         net_svc.enable_interface "default", "octavia", nodename
       end

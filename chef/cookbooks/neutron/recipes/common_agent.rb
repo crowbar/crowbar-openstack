@@ -86,8 +86,6 @@ return if neutron[:neutron][:networking_plugin] == "ml2" &&
     (neutron[:neutron][:ml2_mechanism_drivers].include?("cisco_apic_ml2") ||
     neutron[:neutron][:ml2_mechanism_drivers].include?("apic_gbp"))
 
-multiple_external_networks = !neutron[:neutron][:additional_external_networks].empty?
-
 # openvswitch configuration specific to ML2
 if neutron[:neutron][:networking_plugin] == "ml2" &&
    neutron[:neutron][:ml2_mechanism_drivers].include?("openvswitch")
@@ -154,6 +152,12 @@ if neutron[:neutron][:networking_plugin] == "ml2"
   end
   ml2_type_drivers = neutron[:neutron][:ml2_type_drivers]
 
+  external_networks = ["nova_floating"]
+  external_networks.concat(neutron[:neutron][:additional_external_networks])
+  # Add octavia to external_networks if octavia network is configured
+  octavia_net = Barclamp::Inventory.get_network_definition(node, "octavia")
+  external_networks << "octavia" if octavia_net
+
   case
   when ml2_mech_drivers.include?("zvm")
     package node[:neutron][:platform][:zvm_agent_pkg]
@@ -175,19 +179,17 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       bridge_mappings.push("physnet1:" + bridge)
     end
 
-    if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
-      external_networks = ["nova_floating"]
-      external_networks.concat(neutron[:neutron][:additional_external_networks])
-      ext_physnet_map = NeutronHelper.get_neutron_physnets(node, external_networks)
-      external_networks.each do |net|
-        next if node[:crowbar_wall][:network][:nets][net].nil?
-        ext_iface = node[:crowbar_wall][:network][:nets][net].last
-        # we can't do "floating:br-public, physnet1:br-public"; this also means
-        # that all relevant nodes here must have a similar bridge_mappings
-        # setting
-        next if ext_physnet_map[net] == "physnet1"
-        bridge_mappings.push(ext_physnet_map[net] + ":" + ext_iface)
-      end
+    ext_physnet_map = NeutronHelper.get_neutron_physnets(node, external_networks)
+    external_networks.each do |net|
+      next if node[:crowbar_wall][:network][:nets][net].nil?
+      next unless neutron[:neutron][:use_dvr] ||
+          node.roles.include?("neutron-network") || net == "octavia"
+      ext_iface = node[:crowbar_wall][:network][:nets][net].last
+      # we can't do "floating:br-public, physnet1:br-public"; this also means
+      # that all relevant nodes here must have a similar bridge_mappings
+      # setting
+      next if ext_physnet_map[net] == "physnet1"
+      bridge_mappings.push(ext_physnet_map[net] + ":" + ext_iface)
     end
 
     if (node.roles & ["ironic-server", "nova-compute-ironic"]).any? ||
@@ -209,15 +211,14 @@ if neutron[:neutron][:networking_plugin] == "ml2"
       interface_mappings.push("physnet1:" + physnet)
     end
 
-    if neutron[:neutron][:use_dvr] || node.roles.include?("neutron-network")
-      external_networks = ["nova_floating"]
-      external_networks.concat(neutron[:neutron][:additional_external_networks])
-      ext_physnet_map = NeutronHelper.get_neutron_physnets(node, external_networks)
-      external_networks.each do |net|
-        ext_iface = node[:crowbar_wall][:network][:nets][net].last
-        next if ext_physnet_map[net] == "physnet1"
-        interface_mappings.push(ext_physnet_map[net] + ":" + ext_iface)
-      end
+    ext_physnet_map = NeutronHelper.get_neutron_physnets(node, external_networks)
+    external_networks.each do |net|
+      next if node[:crowbar_wall][:network][:nets][net].nil?
+      next unless neutron[:neutron][:use_dvr] ||
+          node.roles.include?("neutron-network") || net == "octavia"
+      ext_iface = node[:crowbar_wall][:network][:nets][net].last
+      next if ext_physnet_map[net] == "physnet1"
+      interface_mappings.push(ext_physnet_map[net] + ":" + ext_iface)
     end
 
     interface_mappings = interface_mappings.join(", ")

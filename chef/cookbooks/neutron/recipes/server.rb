@@ -116,6 +116,8 @@ interface_driver = "openvswitch"
 
 ironic_net = Barclamp::Inventory.get_network_definition(node, "ironic")
 
+octavia_net = Barclamp::Inventory.get_network_definition(node, "octavia")
+
 case node[:neutron][:networking_plugin]
 when "ml2"
   # Find out which physical interfaces we need to define in the config (depends
@@ -125,6 +127,9 @@ when "ml2"
 
   # Add ironic to external_networks if ironic network is configured
   external_networks << "ironic" if ironic_net
+
+  # Add octavia to external_networks if octavia network is configured
+  external_networks << "octavia" if octavia_net
 
   external_networks.concat(node[:neutron][:additional_external_networks])
   network_node = NeutronHelper.get_network_node_from_neutron_attributes(node)

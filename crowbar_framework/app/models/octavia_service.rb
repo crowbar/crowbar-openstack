@@ -197,8 +197,14 @@ class OctaviaService < OpenstackServiceObject
       net_svc.allocate_ip "default", "public", "host", n
     end
 
-    all_nodes.each do |n|
-      net_svc.allocate_ip "default", "octavia", "host", n
+    # If the octavia network is defined in the network proposal, we also need to allocate
+    # a host IP on each Octavia controller node and enable the interface
+    network_proposal = Proposal.find_by(barclamp: net_svc.bc_name, name: "default")
+    unless network_proposal["attributes"]["network"]["networks"]["octavia"].nil?
+      all_nodes.each do |n|
+        net_svc.enable_interface "default", "octavia", n
+        net_svc.allocate_ip "default", "octavia", "host", n
+      end
     end
 
     allocate_virtual_ips_for_any_cluster_in_networks(server_elements, vip_networks)

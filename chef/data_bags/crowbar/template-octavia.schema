@@ -66,7 +66,6 @@
                         "flavor": { "type": "str", "required": true },
                         "sec_group": { "type": "str", "required": true },
                         "manage_net": { "type": "str", "required": true },
-                        "manage_cidr": { "type": "str", "required": true },
                         "image_tag": { "type": "str", "required": true },
                         "project": { "type": "str", "required": true },
                         "enable_anti_affinity": { "type": "bool", "required": true },

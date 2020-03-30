@@ -49,7 +49,6 @@
         "flavor": "m1.lbaas.amphora",
         "sec_group": "lb-mgmt-sec-group",
         "manage_net": "lb-mgmt-net",
-        "manage_cidr": "172.31.0.0/16",
         "image_tag": "amphora",
         "project": "service",
         "enable_anti_affinity": false,

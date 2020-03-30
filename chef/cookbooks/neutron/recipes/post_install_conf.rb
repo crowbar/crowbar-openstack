@@ -61,18 +61,22 @@ if ironic_net
   ironic_router = ironic_net["router"]
 end
 
-have_octavia = !(node[:network][:networks][:octavia].nil? || node[:octavia].nil?)
+octavia_net = Barclamp::Inventory.get_network_definition(node, "octavia")
+
+have_octavia = !octavia_net.nil?
 if have_octavia
-  octavia_net = node[:network][:networks][:octavia]
+  octavia_net_ranges = octavia_net["ranges"]
+  octavia_range = "#{octavia_net["subnet"]}/#{mask_to_bits(octavia_net["netmask"])}"
+  octavia_pool_start = octavia_net_ranges[:dhcp][:start]
+  octavia_pool_end = octavia_net_ranges[:dhcp][:end]
+  octavia_first_ip = IPAddr.new(octavia_range).to_range.to_a[2]
+  octavia_last_ip = IPAddr.new(octavia_range).to_range.to_a[-2]
+
+  octavia_pool_start = octavia_first_ip if octavia_first_ip > octavia_pool_start
+  octavia_pool_end = octavia_last_ip if octavia_last_ip < octavia_pool_end
+
   octavia_netname = node[:octavia][:amphora][:manage_net]
-  octavia_cidr = node[:octavia][:amphora][:manage_cidr]
   octavia_project = node[:octavia][:amphora][:project]
-  octavia_router = octavia_net[:router]
-  if octavia_net[:use_vlan]
-    octavia_vlan_id = octavia_net[:vlan]
-  else
-    Chef::Log.error("[FIXME] Add flat network")
-  end
 end
 
 vni_start = [node[:neutron][:vxlan][:vni_start], 0].max
@@ -94,6 +98,7 @@ openstack_cmd = "#{env} openstack #{ssl_insecure ? "--insecure" : ""}"
 
 fixed_network_type = ""
 floating_network_type = ""
+octavia_network_type = ""
 
 networking_plugin = node[:neutron][:networking_plugin]
 ml2_type_drivers_default_provider_network = node[:neutron][:ml2_type_drivers_default_provider_network]
@@ -102,11 +107,22 @@ when "ml2"
   # For ml2 always create the floating network as a flat provider network
   # find the network node, to figure out the right "physnet" parameter
   network_node = NeutronHelper.get_network_node_from_neutron_attributes(node)
-  physnet_map = NeutronHelper.get_neutron_physnets(network_node, ["nova_floating", "ironic"])
+
+  external_networks = ["nova_floating"]
+
+  # Add ironic to external_networks if ironic network is configured
+  external_networks << "ironic" if ironic_net
+
+  # Add octavia to external_networks if octavia network is configured
+  external_networks << "octavia" if octavia_net
+
+  physnet_map = NeutronHelper.get_neutron_physnets(network_node, external_networks)
   floating_network_type = "--provider-network-type flat " \
       "--provider-physical-network #{physnet_map["nova_floating"]}"
   ironic_network_type = "--provider-network-type flat " \
       "--provider-physical-network #{physnet_map["ironic"]}"
+  octavia_network_type = "--provider-network-type flat " \
+      "--provider-physical-network #{physnet_map["octavia"]}"
   case ml2_type_drivers_default_provider_network
   when "vlan"
     fixed_network_type = "--provider-network-type vlan " \
@@ -160,11 +176,8 @@ end
 execute "create_octavia_management_network" do
   command "#{openstack_cmd} network create " \
           "--project #{octavia_project} " \
-          "--provider-network-type vlan " \
-          "--provider-physical-network physnet1 " \
-          "--provider-segment #{octavia_vlan_id} " \
           "--internal " \
-          "#{octavia_netname}"
+          "#{octavia_network_type} #{octavia_netname}"
   only_if { have_octavia }
   not_if "out=$(#{openstack_cmd} network list); [ $? != 0 ] || echo ${out} " \
          "| grep -q ' #{octavia_netname} '"
@@ -208,8 +221,9 @@ execute "create_octavia_management_subnet" do
   command "#{openstack_cmd} subnet create " \
           "--project #{octavia_project} " \
           "--network #{octavia_netname} " \
-          "--subnet-range #{octavia_cidr} " \
-          "--gateway #{octavia_router} " \
+          "--subnet-range #{octavia_range} " \
+          "--allocation-pool start=#{octavia_pool_start},end=#{octavia_pool_end} " \
+          "--gateway none " \
           "--dhcp " \
           "#{octavia_netname}"
   only_if { have_octavia }
