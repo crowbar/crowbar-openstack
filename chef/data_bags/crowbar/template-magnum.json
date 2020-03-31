@@ -34,6 +34,12 @@
       },
       "cert": {
         "cert_manager_type": "x509keypair"
+      },
+      "ssl": {
+        "certfile": "/etc/magnum/ssl/certs/signing_cert.pem",
+        "keyfile": "/etc/magnum/ssl/private/signing_key.pem",
+        "generate_certs": false,
+        "insecure": false
       }
     }
   },
@@ -41,7 +47,7 @@
     "magnum": {
       "crowbar-revision": 1,
       "crowbar-applied": false,
-      "schema-revision": 201,
+      "schema-revision": 202,
       "element_states": {
         "magnum-server": [ "readying", "ready", "applying" ]
       },
