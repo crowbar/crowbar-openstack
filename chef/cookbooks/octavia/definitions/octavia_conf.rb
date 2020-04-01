@@ -33,6 +33,13 @@ define :octavia_conf do
     end
   end
 
+  octavia_net = \
+    if Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "octavia")
+      "octavia"
+    else
+      "admin"
+    end
+
   conf_files = OctaviaHelper.conf_file(params[:name])
   conf_files.each do |conf_file|
     template conf_file do
@@ -54,7 +61,7 @@ define :octavia_conf do
             octavia_nova_flavor_id: node[:octavia][:flavor_id],
             octavia_mgmt_net_id: node[:octavia][:net_id],
             octavia_mgmt_sec_group_id: node[:octavia][:sec_group_id],
-            octavia_healthmanager_hosts: OctaviaHelper.get_healthmanager_nodes(node, net_name),
+            octavia_healthmanager_hosts: OctaviaHelper.get_healthmanager_nodes(node, octavia_net),
             memcached_servers: MemcachedHelper.get_memcached_servers(node,
                 CrowbarPacemakerHelper.cluster_nodes(node, "octavia-api"))
           }

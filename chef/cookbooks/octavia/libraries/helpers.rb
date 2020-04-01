@@ -84,6 +84,8 @@ module OctaviaHelper
         @cluster_admin_ip = CrowbarPacemakerHelper.cluster_vip(node, "admin")
       end
 
+      octavia_net = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "octavia")
+
       @network_settings ||= {
         api: {
           bind_host: if !ha_enabled && node[:octavia][:api][:bind_open_address]
@@ -104,7 +106,9 @@ module OctaviaHelper
           ha_bind_port: node[:octavia][:api][:port].to_i
         },
         health_manager: {
-          bind_host: if node[:octavia][:health_manager][:bind_open_address]
+          bind_host: if octavia_net
+                       octavia_net.address
+                     elsif node[:octavia][:health_manager][:bind_open_address]
                        "0.0.0.0"
                      else
                        @admin_ip
