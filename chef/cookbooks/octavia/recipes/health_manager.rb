@@ -13,10 +13,5 @@
 # limitations under the License.
 #
 
-cmd = OctaviaHelper.get_openstack_command(node, node[:octavia])
-
-octavia_conf "health-manager" do
-  cmd cmd
-end
-
+octavia_conf "health-manager"
 octavia_service "health-manager"
