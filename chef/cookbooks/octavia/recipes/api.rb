@@ -16,11 +16,7 @@
 include_recipe "apache2"
 include_recipe "apache2::mod_wsgi"
 
-cmd = OctaviaHelper.get_openstack_command(node, node[:octavia])
-
-octavia_conf "api" do
-  cmd cmd
-end
+octavia_conf "api"
 
 package "openstack-octavia-api" if ["rhel", "suse"].include? node[:platform_family]
 

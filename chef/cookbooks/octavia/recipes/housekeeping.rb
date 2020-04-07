@@ -13,10 +13,5 @@
 # limitations under the License.
 #
 
-cmd = OctaviaHelper.get_openstack_command(node, node[:octavia])
-
-octavia_conf "housekeeping" do
-  cmd cmd
-end
-
+octavia_conf "housekeeping"
 octavia_service "housekeeping"

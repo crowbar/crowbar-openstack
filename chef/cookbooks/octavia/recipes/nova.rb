@@ -14,6 +14,11 @@
 #
 
 require "chef/mixin/shell_out"
+require "ipaddr"
+
+def mask_to_bits(mask)
+  IPAddr.new(mask).to_i.to_s(2).count("1")
+end
 
 image = "openstack-octavia-amphora-image-x86_64"
 ha_enabled = node[:octavia][:ha][:enabled]
@@ -118,6 +123,61 @@ ruby_block "create_amphora_image" do
   only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
+# If the octavia network is configured in the network barclamp, use it to
+# configure the management network and derive the attributes from the
+# network attributes
+octavia_net = Barclamp::Inventory.get_network_definition(node, "octavia")
+unless octavia_net.nil?
+  octavia_net_ranges = octavia_net["ranges"]
+  octavia_range = "#{octavia_net["subnet"]}/#{mask_to_bits(octavia_net["netmask"])}"
+  octavia_pool_start = octavia_net_ranges[:dhcp][:start]
+  octavia_pool_end = octavia_net_ranges[:dhcp][:end]
+  octavia_first_ip = IPAddr.new(octavia_range).to_range.to_a[2]
+  octavia_last_ip = IPAddr.new(octavia_range).to_range.to_a[-2]
+
+  octavia_pool_start = octavia_first_ip if octavia_first_ip > octavia_pool_start
+  octavia_pool_end = octavia_last_ip if octavia_last_ip < octavia_pool_end
+
+  octavia_netname = node[:octavia][:amphora][:manage_net]
+  octavia_project = node[:octavia][:amphora][:project]
+
+  # find the neutron network node, to figure out the right "physnet" parameter
+  network_node = NeutronHelper.get_network_node_from_neutron_attributes(node)
+  physnet_map = NeutronHelper.get_neutron_physnets(network_node, ["octavia"])
+  octavia_network_type = "--provider-network-type flat " \
+      "--provider-physical-network #{physnet_map["octavia"]}"
+
+  execute "create_octavia_management_network" do
+    command "#{cmd} network create " \
+            "--project #{octavia_project} " \
+            "--internal " \
+            "#{octavia_network_type} #{octavia_netname}"
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    not_if "out=$(#{cmd} network list); [ $? != 0 ] || echo ${out} " \
+           "| grep -q ' #{octavia_netname} '"
+    retries 5
+    retry_delay 10
+    action :run
+  end
+
+  execute "create_octavia_management_subnet" do
+    command "#{cmd} subnet create " \
+            "--project #{octavia_project} " \
+            "--network #{octavia_netname} " \
+            "--subnet-range #{octavia_range} " \
+            "--allocation-pool start=#{octavia_pool_start},end=#{octavia_pool_end} " \
+            "--gateway none " \
+            "--dhcp " \
+            "#{octavia_netname}"
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
+    not_if "out=$(#{cmd} subnet list); [ $? != 0 ] || echo ${out} " \
+           "| grep -q ' #{octavia_netname} '"
+    retries 5
+    retry_delay 10
+    action :run
+  end
+end
+
 # Installing the amphora image package and creating OpenStack artifacts (the
 # security group, image, network etc.) can take a lot of time, so we have to
 # account for the fact that nodes will fall out of sync in an HA setup.
@@ -125,6 +185,6 @@ end
 # timeout failures un subsequent sync marks (the octavia_database sync mark).
 if ha_enabled
   crowbar_pacemaker_sync_mark "sync-octavia_after_long_ops" do
-    timeout 200
+    timeout 300
   end
 end
