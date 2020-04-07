@@ -30,14 +30,3 @@ monasca_agent_plugin_http_check "http_check for container-infra-api" do
   url monitor_url
   dimensions "service" => "container-infra-api"
 end
-
-# monasca-agent "postgres" plugin
-db_settings = fetch_database_settings
-
-monasca_agent_plugin_postgres "postgres check for magnum DB" do
-  built_by "magnum-server"
-  host db_settings[:address]
-  username node[:magnum][:db][:user]
-  password node[:magnum][:db][:password]
-  dbname node[:magnum][:db][:database]
-end

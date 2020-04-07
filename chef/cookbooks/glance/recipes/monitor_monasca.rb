@@ -29,14 +29,3 @@ monasca_agent_plugin_http_check "http_check for glance-api" do
   dimensions "service" => "image-api"
   match_pattern ".*v2.*"
 end
-
-# monasca-agent "postgres" plugin
-db_settings = fetch_database_settings
-
-monasca_agent_plugin_postgres "postgres check for glance DB" do
-  built_by "glance-controller"
-  host db_settings[:address]
-  username node[:glance][:db][:user]
-  password node[:glance][:db][:password]
-  dbname node[:glance][:db][:database]
-end

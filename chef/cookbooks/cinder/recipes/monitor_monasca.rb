@@ -31,11 +31,3 @@ end
 
 # monasca-agent "postgres" plugin
 db_settings = fetch_database_settings
-
-monasca_agent_plugin_postgres "postgres check for cinder DB" do
-  built_by "cinder-controller"
-  host db_settings[:address]
-  username node[:cinder][:db][:user]
-  password node[:cinder][:db][:password]
-  dbname node[:cinder][:db][:database]
-end
