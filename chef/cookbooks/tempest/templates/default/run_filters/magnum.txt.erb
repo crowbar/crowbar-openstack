@@ -2,3 +2,6 @@
 
 # Fails when using 2+ controllers
 -magnum.tests.functional.api.v1.test_magnum_service.MagnumServiceTest.test_magnum_service_list
+# magnum fail work when ssl enabled for other services e.g. heat.
+# see SOC-11224
+-magnum.tests.functional.api.v1.test_cluster.ClusterTest.test_create_list_sign_delete_clusters
