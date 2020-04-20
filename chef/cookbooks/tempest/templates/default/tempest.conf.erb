@@ -38,7 +38,7 @@ min_compute_nodes = <%= @use_livemigration ? 2 : 1 %>
 resize = <%= @use_resize %>
 suspend = <%= @use_suspend %>
 live_migration = <%= @use_livemigration %>
-block_migration_for_live_migration = true
+block_migration_for_live_migration = <%= not @use_rbd_ephemeral %>
 vnc_console = <%= @use_vnc %>
 rescue = <%= @use_rescue %>
 interface_attach = <%= @use_interface_attach %>

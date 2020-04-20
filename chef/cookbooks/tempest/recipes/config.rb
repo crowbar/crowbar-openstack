@@ -482,6 +482,7 @@ xen_compute_nodes = search(:node, "roles:nova-compute-xen") || []
 
 use_resize = kvm_compute_nodes.length > 1
 use_livemigration = nova[:nova][:use_migration] && kvm_compute_nodes.length > 1
+use_rbd_ephemeral = nova[:nova][:use_rbd_ephemeral]
 
 # create a flag to disable some test for xen (lp#1443898)
 xen_only = !xen_compute_nodes.empty? && kvm_compute_nodes.empty?
@@ -575,6 +576,7 @@ template "/etc/tempest/tempest.conf" do
         use_resize: use_resize,
         use_suspend: use_suspend,
         use_vnc: use_vnc,
+        use_rbd_ephemeral: use_rbd_ephemeral,
         use_livemigration: use_livemigration,
         # compute-feature-enabled settings
         use_config_drive: use_config_drive,
