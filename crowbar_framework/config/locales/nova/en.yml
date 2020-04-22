@@ -34,7 +34,6 @@ en:
           disk_allocation_ratio: 'Virtual Disk to Physical Disk allocation ratio'
           reserved_host_memory_mb: 'Reserved Memory for Nova Compute hosts (MB)'
         live_migration_header: 'Live Migration Support'
-        setup_shared_instance_storage: 'Set up Shared Storage on nova-controller for Nova instances'
         use_shared_instance_storage: 'Shared Storage for Nova instances has been manually configured'
         use_migration: 'Enable Libvirt Migration'
         kvm_header: 'KVM Options'
