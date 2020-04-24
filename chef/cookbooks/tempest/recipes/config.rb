@@ -350,6 +350,8 @@ ruby_block "fetch ec2 credentials" do
     node[:tempest][:ec2_access] = ec2_access
     node[:tempest][:ec2_secret] = ec2_secret
   end
+  retries 5
+  retry_delay 10
 end
 
 # FIXME: should avoid search with no environment in query
@@ -437,6 +439,8 @@ ruby_block "get public network id" do
     end
     node[:tempest][:public_network_id] = stdout.strip
   end
+  retries 5
+  retry_delay 10
 end
 
 # FIXME: the command above should be good enough, but radosgw is broken with
