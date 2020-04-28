@@ -41,6 +41,7 @@ keystone_register "sahara api wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register sahara user" do
@@ -53,6 +54,7 @@ keystone_register "register sahara user" do
   user_password keystone_settings["service_password"]
   tenant_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give sahara user access" do
@@ -65,6 +67,7 @@ keystone_register "give sahara user access" do
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register sahara service" do
@@ -77,6 +80,7 @@ keystone_register "register sahara service" do
   service_type "data-processing"
   service_description "Openstack Sahara - Data Processing"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register sahara endpoint" do
@@ -91,6 +95,7 @@ keystone_register "register sahara endpoint" do
   endpoint_adminURL "#{sahara_protocol}://#{my_admin_host}:#{sahara_port}/v1.1/%(tenant_id)s"
   endpoint_internalURL "#{sahara_protocol}://#{my_admin_host}:#{sahara_port}/v1.1/%(tenant_id)s"
   action :add_endpoint_template
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-sahara_register" if ha_enabled

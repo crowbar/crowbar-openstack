@@ -36,6 +36,7 @@ keystone_register "neutron api wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register neutron user" do
@@ -48,6 +49,7 @@ keystone_register "register neutron user" do
   user_password keystone_settings["service_password"]
   tenant_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give neutron user access" do
@@ -60,6 +62,7 @@ keystone_register "give neutron user access" do
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register neutron service" do
@@ -72,6 +75,7 @@ keystone_register "register neutron service" do
   service_type "network"
   service_description "Openstack Neutron Service"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register neutron endpoint" do
@@ -88,6 +92,7 @@ keystone_register "register neutron endpoint" do
 #  endpoint_global true
 #  endpoint_enabled true
   action :add_endpoint_template
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-neutron_register" if ha_enabled

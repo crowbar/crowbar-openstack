@@ -42,6 +42,7 @@ keystone_register "magnum api wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register magnum user" do
@@ -54,6 +55,7 @@ keystone_register "register magnum user" do
   user_password keystone_settings["service_password"]
   tenant_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give magnum user access" do
@@ -66,6 +68,7 @@ keystone_register "give magnum user access" do
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register magnum service" do
@@ -78,6 +81,7 @@ keystone_register "register magnum service" do
   service_type "container-infra"
   service_description "Container Infrastructure Management Service"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register magnum endpoint" do
@@ -95,6 +99,7 @@ keystone_register "register magnum endpoint" do
   endpoint_internalURL "#{magnum_protocol}://"\
                        "#{my_admin_host}:#{magnum_port}/v1"
   action :add_endpoint_template
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-magnum_register" if ha_enabled
