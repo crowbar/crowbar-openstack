@@ -56,6 +56,7 @@ keystone_register "cinder api wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register cinder user" do
@@ -68,6 +69,7 @@ keystone_register "register cinder user" do
   user_password keystone_settings["service_password"]
   project_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give cinder user access" do
@@ -80,6 +82,7 @@ keystone_register "give cinder user access" do
   project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register cinder service" do
@@ -92,6 +95,7 @@ keystone_register "register cinder service" do
   service_type "volume"
   service_description "Openstack Cinder Service"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register cinder endpoint" do
@@ -109,6 +113,7 @@ keystone_register "register cinder endpoint" do
   endpoint_internalURL "#{cinder_protocol}://"\
                        "#{my_admin_host}:#{cinder_port}/v1/$(project_id)s"
   action :add_endpoint
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register cinder service v2" do
@@ -121,6 +126,7 @@ keystone_register "register cinder service v2" do
   service_type "volumev2"
   service_description "Openstack Cinder Service V2"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register cinder endpoint v2" do
@@ -138,6 +144,7 @@ keystone_register "register cinder endpoint v2" do
   endpoint_internalURL "#{cinder_protocol}://"\
                        "#{my_admin_host}:#{cinder_port}/v2/$(project_id)s"
   action :add_endpoint
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register cinder service v3" do
@@ -150,6 +157,7 @@ keystone_register "register cinder service v3" do
   service_type "volumev3"
   service_description "Openstack Cinder Service V3"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register cinder endpoint v3" do
@@ -167,6 +175,7 @@ keystone_register "register cinder endpoint v3" do
   endpoint_internalURL "#{cinder_protocol}://"\
                        "#{my_admin_host}:#{cinder_port}/v3/$(project_id)s"
   action :add_endpoint
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-cinder_register"

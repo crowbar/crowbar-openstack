@@ -67,6 +67,7 @@ keystone_register "barbican api wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 # Create barbican service
@@ -80,6 +81,7 @@ keystone_register "register barbican service" do
   service_type "key-manager"
   service_description "Openstack Barbican - Key and Secret Management Service"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register barbican endpoint" do
@@ -95,6 +97,7 @@ keystone_register "register barbican endpoint" do
   endpoint_adminURL "#{barbican_protocol}://#{admin_host}:#{barbican_port}"
   endpoint_internalURL "#{barbican_protocol}://#{admin_host}:#{barbican_port}"
   action :add_endpoint
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register barbican user" do
@@ -107,6 +110,7 @@ keystone_register "register barbican user" do
   user_password keystone_settings["service_password"]
   project_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give barbican user access as admin" do
@@ -119,6 +123,7 @@ keystone_register "give barbican user access as admin" do
   project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "add key-manager:service-admin role for barbican" do
@@ -129,6 +134,7 @@ keystone_register "add key-manager:service-admin role for barbican" do
   auth register_auth_hash
   role_name "key-manager:service-admin"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give barbican user access as key-manager:service-admin" do
@@ -141,6 +147,7 @@ keystone_register "give barbican user access as key-manager:service-admin" do
   project_name keystone_settings["service_tenant"]
   role_name "key-manager:service-admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "add creator role for barbican" do
@@ -151,6 +158,7 @@ keystone_register "add creator role for barbican" do
   auth register_auth_hash
   role_name "creator"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give barbican user access as creator" do
@@ -163,6 +171,7 @@ keystone_register "give barbican user access as creator" do
   project_name keystone_settings["service_tenant"]
   role_name "creator"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "add observer role for barbican" do
@@ -173,6 +182,7 @@ keystone_register "add observer role for barbican" do
   auth register_auth_hash
   role_name "observer"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give barbican user access as observer" do
@@ -185,6 +195,7 @@ keystone_register "give barbican user access as observer" do
   project_name keystone_settings["service_tenant"]
   role_name "observer"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "add audit role for barbican" do
@@ -195,6 +206,7 @@ keystone_register "add audit role for barbican" do
   auth register_auth_hash
   role_name "audit"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give barbican user access as audit" do
@@ -207,6 +219,7 @@ keystone_register "give barbican user access as audit" do
   project_name keystone_settings["service_tenant"]
   role_name "audit"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-barbican_register" if ha_enabled

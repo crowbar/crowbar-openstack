@@ -53,6 +53,7 @@ keystone_register "designate api wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register designate user" do
@@ -65,6 +66,7 @@ keystone_register "register designate user" do
   user_password keystone_settings["service_password"]
   project_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give designate user access" do
@@ -77,6 +79,7 @@ keystone_register "give designate user access" do
   project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register designate service" do
@@ -89,6 +92,7 @@ keystone_register "register designate service" do
   service_type "dns"
   service_description "Designate DNS Service"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register designate endpoint" do
@@ -103,6 +107,7 @@ keystone_register "register designate endpoint" do
   endpoint_adminURL "#{designate_protocol}://#{my_admin_host}:#{designate_port}/"
   endpoint_internalURL "#{designate_protocol}://#{my_admin_host}:#{designate_port}/"
   action :add_endpoint
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-designate_register" if ha_enabled
