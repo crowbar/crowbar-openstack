@@ -51,6 +51,7 @@ keystone_register "nova api wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
+  only_if { !api_ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register nova user" do
@@ -63,6 +64,7 @@ keystone_register "register nova user" do
   user_password keystone_settings["service_password"]
   project_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !api_ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give nova user access" do
@@ -75,6 +77,7 @@ keystone_register "give nova user access" do
   project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !api_ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register nova service" do
@@ -87,6 +90,7 @@ keystone_register "register nova service" do
   service_type "compute"
   service_description "Openstack Nova Service"
   action :add_service
+  only_if { !api_ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register nova_legacy service" do
@@ -99,6 +103,7 @@ keystone_register "register nova_legacy service" do
   service_type "compute_legacy"
   service_description "Openstack Nova Compute Service (Legacy 2.0)"
   action :add_service
+  only_if { !api_ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register nova endpoint" do
@@ -116,6 +121,7 @@ keystone_register "register nova endpoint" do
   endpoint_internalURL "#{api_protocol}://"\
                        "#{admin_api_host}:#{api_port}/v2.1/$(project_id)s"
   action :add_endpoint
+  only_if { !api_ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register nova_legacy endpoint" do
@@ -133,6 +139,7 @@ keystone_register "register nova_legacy endpoint" do
   endpoint_internalURL "#{api_protocol}://"\
                        "#{admin_api_host}:#{api_port}/v2/$(project_id)s"
   action :add_endpoint
+  only_if { !api_ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-nova_register" if api_ha_enabled
