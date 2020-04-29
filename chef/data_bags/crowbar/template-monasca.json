@@ -24,7 +24,7 @@
               "tenant_name"
               ],
             "nova_refresh": 14400,
-            "ping_check": "/bin/ip netns exec NAMESPACE /usr/bin/ping",
+            "ping_check": "sudo /bin/ip netns exec NAMESPACE /usr/bin/ping",
             "vm_cpu_check_enable": true,
             "vm_disks_check_enable": true,
             "vm_extended_disks_check_enable": false,
