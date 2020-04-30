@@ -50,6 +50,7 @@ keystone_register "register placement user '#{node["nova"]["placement_service_us
   user_password node["nova"]["placement_service_password"]
   tenant_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !api_ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give placement user '#{node["nova"]["placement_service_user"]}' access" do
@@ -62,6 +63,7 @@ keystone_register "give placement user '#{node["nova"]["placement_service_user"]
   tenant_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !api_ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register placement service" do
@@ -74,6 +76,7 @@ keystone_register "register placement service" do
   service_type "placement"
   service_description "Openstack Placement Service"
   action :add_service
+  only_if { !api_ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register placement endpoint" do
@@ -88,6 +91,7 @@ keystone_register "register placement endpoint" do
   endpoint_adminURL "#{api_protocol}://#{admin_api_host}:#{api_port}"
   endpoint_internalURL "#{api_protocol}://#{admin_api_host}:#{api_port}"
   action :add_endpoint_template
+  only_if { !api_ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 if node[:nova][:ha][:enabled]

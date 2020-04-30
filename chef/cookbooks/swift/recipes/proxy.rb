@@ -178,6 +178,7 @@ case proxy_config[:auth_method]
        port keystone_settings["admin_port"]
        auth register_auth_hash
        action :wakeup
+       only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
      end
 
      # ResellerAdmin is used by swift (see reseller_admin_role option)
@@ -190,6 +191,7 @@ case proxy_config[:auth_method]
        auth register_auth_hash
        role_name role
        action :add_role
+       only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
      end
 
      keystone_register "register swift user" do
@@ -202,6 +204,7 @@ case proxy_config[:auth_method]
        user_password keystone_settings["service_password"]
        tenant_name keystone_settings["service_tenant"]
        action :add_user
+       only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
      end
 
      keystone_register "give swift user access" do
@@ -214,6 +217,7 @@ case proxy_config[:auth_method]
        tenant_name keystone_settings["service_tenant"]
        role_name "admin"
        action :add_access
+       only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
      end
 
      keystone_register "register swift service" do
@@ -226,6 +230,7 @@ case proxy_config[:auth_method]
        service_type "object-store"
        service_description "Openstack Swift Object Store Service"
        action :add_service
+       only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
      end
 
      keystone_register "register swift-proxy endpoint" do
@@ -247,6 +252,7 @@ case proxy_config[:auth_method]
          #  endpoint_global true
          #  endpoint_enabled true
         action :add_endpoint_template
+        only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
      end
 
      crowbar_pacemaker_sync_mark "create-swift_register" if ha_enabled
