@@ -155,6 +155,7 @@ keystone_register "register glance service" do
   service_type "image"
   service_description "Openstack Glance Service"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register glance endpoint" do
@@ -169,6 +170,7 @@ keystone_register "register glance endpoint" do
   endpoint_adminURL "#{glance_protocol}://#{endpoint_admin_ip}:#{api_port}"
   endpoint_internalURL "#{glance_protocol}://#{endpoint_admin_ip}:#{api_port}"
   action :add_endpoint
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-glance_register_service" if ha_enabled

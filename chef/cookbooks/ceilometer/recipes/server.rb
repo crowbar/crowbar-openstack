@@ -118,6 +118,7 @@ keystone_register "ceilometer wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register ceilometer user" do
@@ -130,6 +131,7 @@ keystone_register "register ceilometer user" do
   user_password keystone_settings["service_password"]
   project_name monasca_project
   action :add_user
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give ceilometer user access" do
@@ -142,6 +144,7 @@ keystone_register "give ceilometer user access" do
   project_name monasca_project
   role_name "admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "grant ceilometer user monasca-user role on monasca projec" do
@@ -154,6 +157,7 @@ keystone_register "grant ceilometer user monasca-user role on monasca projec" do
   project_name monasca_project
   role_name "monasca-user"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 swift_middlewares = node[:ceilometer][:elements]["ceilometer-swift-proxy-middleware"] || []
@@ -168,6 +172,7 @@ unless swift_middlewares.empty?
     project_name monasca_project
     role_name "ResellerAdmin"
     action :add_access
+    only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
   end
 end
 

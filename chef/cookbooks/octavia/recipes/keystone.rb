@@ -102,6 +102,7 @@ keystone_register "add load-balancer_observer role for octavia" do
   auth register_auth_hash
   role_name "load-balancer_observer"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "add load-balancer_global_observer role for octavia" do
@@ -112,6 +113,7 @@ keystone_register "add load-balancer_global_observer role for octavia" do
   auth register_auth_hash
   role_name "load-balancer_global_observer"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "add load-balancer_member role for octavia" do
@@ -122,6 +124,7 @@ keystone_register "add load-balancer_member role for octavia" do
   auth register_auth_hash
   role_name "load-balancer_member"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "add load-balancer_quota_admin role for octavia" do
@@ -132,6 +135,7 @@ keystone_register "add load-balancer_quota_admin role for octavia" do
   auth register_auth_hash
   role_name "load-balancer_quota_admin"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "add load-balancer_admin role for octavia" do
@@ -142,6 +146,7 @@ keystone_register "add load-balancer_admin role for octavia" do
   auth register_auth_hash
   role_name "load-balancer_admin"
   action :add_role
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-octavia_register" if ha_enabled

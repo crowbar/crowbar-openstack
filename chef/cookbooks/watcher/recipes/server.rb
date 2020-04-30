@@ -81,6 +81,7 @@ keystone_register "register watcher service" do
   service_type "infra-optim"
   service_description "Openstack Watcher Infrastructure Optimization Service"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register watcher endpoint" do
@@ -95,6 +96,7 @@ keystone_register "register watcher endpoint" do
   endpoint_adminURL "#{watcher_protocol}://#{endpoint_admin_ip}:#{api_port}"
   endpoint_internalURL "#{watcher_protocol}://#{endpoint_admin_ip}:#{api_port}"
   action :add_endpoint
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-watcher_register_service" if ha_enabled
