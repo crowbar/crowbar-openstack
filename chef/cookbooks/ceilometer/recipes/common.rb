@@ -4,7 +4,6 @@ monasca_api_url = MonascaHelper.api_network_url(monasca_server)
 include_recipe "apache2"
 
 is_controller = node["roles"].include?("ceilometer-server")
-ha_enabled = node[:ceilometer][:ha][:server][:enabled]
 
 memcached_instance("ceilometer-server") if is_controller
 
@@ -50,15 +49,6 @@ if is_compute_agent
   end
 end
 
-if node[:ceilometer][:ha][:server][:enabled]
-  admin_address = Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, "admin").address
-  bind_host = admin_address
-  bind_port = node[:ceilometer][:ha][:ports][:api]
-else
-  bind_host = node[:ceilometer][:api][:host]
-  bind_port = node[:ceilometer][:api][:port]
-end
-
 metering_time_to_live = node[:ceilometer][:database][:metering_time_to_live]
 event_time_to_live = node[:ceilometer][:database][:event_time_to_live]
 
@@ -83,8 +73,6 @@ template node[:ceilometer][:config_file] do
       monasca_project: monasca_project,
       memcached_servers: MemcachedHelper.get_memcached_servers(node,
         CrowbarPacemakerHelper.cluster_nodes(node, "ceilometer-server")),
-      bind_host: bind_host,
-      bind_port: bind_port,
       metering_secret: node[:ceilometer][:metering_secret],
       database_connection: db_connection,
       node_hostname: node["hostname"],
@@ -93,8 +81,7 @@ template node[:ceilometer][:config_file] do
       metering_time_to_live: metering_time_to_live,
       event_time_to_live: event_time_to_live,
       instance_discovery_method: instance_discovery_method,
-      is_compute_agent: is_compute_agent,
-      default_api_return_limit: node[:ceilometer][:api][:default_return_limit]
+      is_compute_agent: is_compute_agent
     )
     if is_compute_agent
       notifies :restart, "service[nova-compute]"

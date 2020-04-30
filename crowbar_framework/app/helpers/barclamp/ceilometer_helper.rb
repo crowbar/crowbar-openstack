@@ -17,14 +17,5 @@
 
 module Barclamp
   module CeilometerHelper
-    def api_protocols_for_ceilometer(selected)
-      options_for_select(
-        [
-          ["HTTP", "http"],
-          ["HTTPS", "https"]
-        ],
-        selected.to_s
-      )
-    end
   end
 end

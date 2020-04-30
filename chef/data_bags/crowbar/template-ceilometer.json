@@ -17,12 +17,6 @@
       "service_user": "ceilometer",
       "service_password": "",
       "memcache_secret_key": "",
-      "api": {
-        "protocol": "http",
-        "port": 8777,
-        "timeout": 120,
-        "default_return_limit": 1000
-      },
       "db": {
         "password": "",
         "user": "ceilometer",
@@ -31,22 +25,14 @@
       "database": {
           "metering_time_to_live": 30,
           "event_time_to_live": 30
-      },
-      "ssl": {
-         "certfile": "/etc/ceilometer/ssl/certs/signing_cert.pem",
-         "keyfile": "/etc/ceilometer/ssl/private/signing_key.pem",
-         "generate_certs": false,
-         "insecure": false,
-         "cert_required": false,
-         "ca_certs": "/etc/ceilometer/ssl/certs/ca.pem"
-      }      
+      }
     }
   },
   "deployment": {
     "ceilometer": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 302,
+      "schema-revision": 303,
       "element_states": {
         "ceilometer-server": [ "readying", "ready", "applying" ],
         "ceilometer-central": [ "readying", "ready", "applying" ],
