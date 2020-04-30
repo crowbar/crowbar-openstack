@@ -54,21 +54,41 @@ image_url = "http://#{provisioner_address}:8091/files/" \
   "#{service_sles_image_name}/" \
   "#{service_sles_image_name}.#{node[:kernel][:machine]}.qcow2"
 
+ruby_block "Get current images" do
+  block do
+    cmd = Mixlib::ShellOut.new("#{openstack_cmd} #{openstack_args_glance} image list -f value -c Name").run_command
+    raise "Image list not obtained, is the glance-api down?" unless cmd.exitstatus.zero?
+    node.run_state["mimagelist"] = cmd.stdout.split("\n")
+  end
+  retries 5
+  retry_delay 10
+end
+
 execute "create_magnum_image" do
   command "curl #{image_url} | \
   #{openstack_cmd} #{openstack_args_glance} image create --disk-format qcow2 \
   --container-format bare --public --property os_distro=opensuse \
   #{service_sles_image_name}"
-  not_if "#{openstack_cmd} #{openstack_args_glance} image list -f value -c Name | grep -q #{service_sles_image_name}"
+  not_if { node.run_state["mimagelist"].include?(service_sles_image_name) }
   retries 5
   retry_delay 10
   action :nothing
 end
 
+ruby_block "Get current flavors" do
+  block do
+    cmd = Mixlib::ShellOut.new("#{openstack_cmd} #{openstack_args_nova} flavor list -f value -c Name").run_command
+    raise "Flavor list not obtained, is the nova-api down?" unless cmd.exitstatus.zero?
+    node.run_state["mflavorlist"] = cmd.stdout.split("\n")
+  end
+  retries 5
+  retry_delay 10
+end
+
 execute "create_magnum_flavor" do
   command "#{openstack_cmd} #{openstack_args_nova} flavor create --ram 1024 --disk 10 \
   --vcpus 1 m1.magnum"
-  not_if "#{openstack_cmd} #{openstack_args_nova} flavor list --all | grep -q m1.magnum"
+  not_if { node.run_state["mflavorlist"].include?("m1.magnum") }
   retries 5
   retry_delay 10
   action :nothing
