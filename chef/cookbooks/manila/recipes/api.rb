@@ -48,6 +48,7 @@ keystone_register "manila api wakeup keystone" do
   port keystone_settings["admin_port"]
   auth register_auth_hash
   action :wakeup
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register manila user" do
@@ -60,6 +61,7 @@ keystone_register "register manila user" do
   user_password keystone_settings["service_password"]
   project_name keystone_settings["service_tenant"]
   action :add_user
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "give manila user access" do
@@ -72,6 +74,7 @@ keystone_register "give manila user access" do
   project_name keystone_settings["service_tenant"]
   role_name "admin"
   action :add_access
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register manila service" do
@@ -84,6 +87,7 @@ keystone_register "register manila service" do
   service_type "share"
   service_description "Openstack Manila shared filesystem service"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register manila endpoint" do
@@ -101,6 +105,7 @@ keystone_register "register manila endpoint" do
   endpoint_internalURL "#{manila_protocol}://"\
                        "#{my_admin_host}:#{manila_port}/v1/$(project_id)s"
   action :add_endpoint
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 # v2 API is new since Liberty
@@ -114,6 +119,7 @@ keystone_register "register manila service v2" do
   service_type "sharev2"
   service_description "Openstack Manila shared filesystem service V2"
   action :add_service
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 keystone_register "register manila endpoint v2" do
@@ -131,6 +137,7 @@ keystone_register "register manila endpoint v2" do
   endpoint_internalURL "#{manila_protocol}://"\
                        "#{my_admin_host}:#{manila_port}/v2/$(project_id)s"
   action :add_endpoint
+  only_if { !ha_enabled || CrowbarPacemakerHelper.is_cluster_founder?(node) }
 end
 
 crowbar_pacemaker_sync_mark "create-manila_register"
