@@ -6,9 +6,6 @@ key = <%= @vncproxy_key_file %>
 instance_name_template=zvm%05x
 <% end %>
 my_ip = <%= node[:nova][:my_ip] %>
-<% unless @ironic_settings.nil? %>
-scheduler_host_manager = ironic_host_manager
-<% end %>
 state_path = /var/lib/nova
 enabled_ssl_apis = <%= @ssl_enabled ? "osapi_compute,metadata" : "" %>
 osapi_compute_listen = <%= @bind_host %>
@@ -348,9 +345,6 @@ host_manager = ironic_host_manager
 <% end %>
 
 [filter_scheduler]
-<% if @use_baremetal_filters %>
-use_baremetal_filters = true
-<% end %>
 <% if @has_itxt %>
 available_filters = nova.scheduler.filters.standard_filters
 <% if @enabled_filters.empty? %>
