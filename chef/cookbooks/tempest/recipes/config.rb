@@ -411,7 +411,6 @@ neutron_api_extensions = [
   "trunk-details"
 ].join(", ")
 
-neutron_ml2_mechanism_drivers = []
 unless neutrons[0].nil?
   neutron_attr = neutrons[0][:neutron]
   if neutron_attr[:use_lbaas]
@@ -422,9 +421,6 @@ unless neutrons[0].nil?
   neutron_api_extensions += ", dvr" if neutron_attr[:use_dvr]
   neutron_api_extensions += ", l3-ha" if neutron_attr[:l3_ha][:use_l3_ha]
 
-  if neutron_attr[:networking_plugin] == "ml2"
-    neutron_ml2_mechanism_drivers = neutron_attr[:ml2_mechanism_drivers]
-  end
 end
 
 neutron_api_extensions += ", dns-integration" if enabled_services.include?("dns")
@@ -625,7 +621,6 @@ template "/etc/tempest/tempest.conf" do
         # network settings
         public_network_id: node[:tempest][:public_network_id],
         neutron_api_extensions: neutron_api_extensions,
-        neutron_ml2_mechanism_drivers: neutron_ml2_mechanism_drivers,
         neutron_lbaasv2_driver: neutron_lbaasv2_driver,
         # object storage settings
         swift_cluster_name: swift_cluster_name,
