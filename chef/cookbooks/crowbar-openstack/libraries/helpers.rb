@@ -244,7 +244,7 @@ class CrowbarOpenStackHelper
             url = "#{rabbit[:rabbitmq][:trove][:user]}:"
             url << "#{rabbit[:rabbitmq][:trove][:password]}@"
             url << "#{CrowbarRabbitmqHelper.get_listen_address(rabbit)}:#{port}"
-            url << "/#{rabbit[:rabbitmq][:trove][:vhost]}" unless rabbit.equal? rabbits.first
+            url << "/#{rabbit[:rabbitmq][:trove][:vhost]}" if rabbit.equal? rabbits.last
             url.prepend("rabbit://") if rabbit.equal? rabbits.first
 
             url
