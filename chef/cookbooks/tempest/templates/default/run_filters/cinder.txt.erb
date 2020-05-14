@@ -2,5 +2,7 @@
 +tempest.scenario.test_volume.*
 +tempest.scenario.test_encrypted.*
 
+<% if @storage_protocol == "iSCSI" -%>
 # BUG: SOC-10874
 -tempest.scenario.test_volume_boot_pattern.TestVolumeBootPattern.test_volume_boot_pattern
+<% end -%>
