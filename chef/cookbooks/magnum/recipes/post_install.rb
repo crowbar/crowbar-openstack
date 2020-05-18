@@ -54,6 +54,11 @@ image_url = "http://#{provisioner_address}:8091/files/" \
   "#{service_sles_image_name}/" \
   "#{service_sles_image_name}.#{node[:kernel][:machine]}.qcow2"
 
+# need to define those variables here to be able to run those resources
+# delayed
+node.run_state["mimagelist"] = ""
+node.run_state["mflavorlist"] = ""
+
 ruby_block "Get current images" do
   block do
     cmd = Mixlib::ShellOut.new("#{openstack_cmd} #{openstack_args_glance} image list -f value -c Name").run_command
@@ -62,6 +67,7 @@ ruby_block "Get current images" do
   end
   retries 5
   retry_delay 10
+  action :nothing
 end
 
 execute "create_magnum_image" do
@@ -83,6 +89,7 @@ ruby_block "Get current flavors" do
   end
   retries 5
   retry_delay 10
+  action :nothing
 end
 
 execute "create_magnum_flavor" do
@@ -99,6 +106,8 @@ end
 # (in case of a config change)
 execute "trigger-magnum-post-commands" do
   command "true"
+  notifies :create, "ruby_block[Get current images]", :delayed
   notifies :run, "execute[create_magnum_image]", :delayed
+  notifies :create, "ruby_block[Get current flavors]", :delayed
   notifies :run, "execute[create_magnum_flavor]", :delayed
 end
