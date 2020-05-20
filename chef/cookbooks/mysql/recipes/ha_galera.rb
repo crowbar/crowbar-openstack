@@ -229,6 +229,7 @@ pacemaker_primitive service_name do
     "enable_creation" => true,
     "wsrep_cluster_address" => cluster_addresses,
     "check_user" => "monitoring",
+    "check_passwd_use_empty" => 1,
     "socket" => "/var/run/mysql/mysql.sock",
     "datadir" => node[:database][:mysql][:datadir],
     "log" => "/var/log/mysql/mysqld.log"
