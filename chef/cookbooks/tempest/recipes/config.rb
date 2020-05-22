@@ -681,7 +681,8 @@ cb.manifest["templates"].each do |cb_template|
     variables(
       lazy do
         {
-          enabled_services: enabled_services
+          enabled_services: enabled_services,
+          storage_protocol: storage_protocol
         }
       end
     )
