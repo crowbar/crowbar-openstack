@@ -111,7 +111,7 @@ if not args.os_auth_url:
 c = nova_client.Client("2",
                        args.os_username,
                        args.os_password,
-                       args.os_tenant_name,
+                       project_name=args.os_tenant_name,
                        auth_url=args.os_auth_url,
                        region_name=args.os_region_name,
                        endpoint_type=args.endpoint_type,
