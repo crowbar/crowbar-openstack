@@ -700,8 +700,7 @@ cb.manifest["templates"].each do |cb_template|
       lazy do
         {
           enabled_services: enabled_services,
-          neutron_lbaasv2_driver: neutron_lbaasv2_driver,
-          use_rbd_ephemeral: use_rbd_ephemeral
+          neutron_lbaasv2_driver: neutron_lbaasv2_driver
         }
       end
     )
