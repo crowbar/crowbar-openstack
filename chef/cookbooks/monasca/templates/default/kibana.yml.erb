@@ -8,6 +8,10 @@ server.host: 0.0.0.0
 # specify that path here. The basePath can't end in a slash.
 server.basePath: /monitoring/logs_proxy
 
+# Set to sameorigin as a mitigation to CVE-2020-10743
+# Header names and values to send on all responses to the client from the Kibana server.
+server.customResponseHeaders: {"x-frame-options":"sameorigin"}
+
 # The Elasticsearch instance to use for all your queries.
 elasticsearch.url: http://<%= @elasticsearch_host %>:9200
 
