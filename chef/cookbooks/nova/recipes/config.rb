@@ -153,12 +153,14 @@ if neutron_servers.length > 0
   neutron_server_port = neutron_server[:neutron][:api][:service_port]
   neutron_service_user = neutron_server[:neutron][:service_user]
   neutron_service_password = neutron_server[:neutron][:service_password]
+  neutron_dhcp_domain = neutron_server[:neutron][:dns_domain]
   neutron_ml2_drivers = neutron_server[:neutron][:ml2_type_drivers]
   neutron_has_tunnel = neutron_ml2_drivers.include?("gre") || neutron_ml2_drivers.include?("vxlan")
 else
   neutron_server_host = nil
   neutron_server_port = nil
   neutron_service_user = nil
+  neutron_dhcp_domain = "novalocal"
   neutron_service_password = nil
   neutron_has_tunnel = false
 end
@@ -403,6 +405,7 @@ template node[:nova][:config_file] do
     neutron_insecure: neutron_insecure,
     neutron_service_user: neutron_service_user,
     neutron_service_password: neutron_service_password,
+    neutron_dhcp_domain: neutron_dhcp_domain,
     neutron_has_tunnel: neutron_has_tunnel,
     keystone_settings: keystone_settings,
     profiler_settings: profiler_settings,
