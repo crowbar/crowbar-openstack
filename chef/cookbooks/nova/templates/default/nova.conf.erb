@@ -49,6 +49,7 @@ ssl_ca_file = <%= @ssl_ca_file %>
 <% if @force_config_drive || @libvirt_type.eql?('zvm') %>
 flat_injected = true
 <% end %>
+dhcp_domain = <%= @neutron_dhcp_domain %>
 security_group_api = neutron
 <% if @force_config_drive and !@libvirt_type.eql?('zvm') %>
 config_drive_format = vfat
