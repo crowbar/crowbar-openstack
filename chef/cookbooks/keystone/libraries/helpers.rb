@@ -15,17 +15,15 @@ module KeystoneHelper
   end
 
   def self.public_auth_url(node, public_host)
-    versioned_service_URL(node[:keystone][:api][:protocol],
-                          public_host,
-                          node[:keystone][:api][:service_port],
-                          node[:keystone][:api][:version])
+    service_URL(node[:keystone][:api][:protocol],
+                public_host,
+                node[:keystone][:api][:service_port])
   end
 
   def self.internal_auth_url(node, admin_host)
-    versioned_service_URL(node[:keystone][:api][:protocol],
-                          admin_host,
-                          node[:keystone][:api][:service_port],
-                          node[:keystone][:api][:version])
+    service_URL(node[:keystone][:api][:protocol],
+                admin_host,
+                node[:keystone][:api][:service_port])
   end
 
   def self.unversioned_internal_auth_url(node, admin_host)
