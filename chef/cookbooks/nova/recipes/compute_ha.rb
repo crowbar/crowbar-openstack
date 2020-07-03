@@ -237,6 +237,8 @@ pacemaker_primitive evacuate_primitive do
     "tenant_name"    => keystone_settings["admin_tenant"],
     # "insecure"       => keystone_settings["insecure"] || nova[:nova][:ssl][:insecure],
     "domain"         => node[:domain],
+    "verbose"        => "1",
+    "debug_file"     => "/var/log/nova/nova-evacuate.log",
     "no_shared_storage" => no_shared_storage
   })
   op nova[:nova][:ha][:compute][:evacuate][:op]
@@ -282,7 +284,7 @@ pacemaker_primitive fence_primitive do
     "no-shared-storage" => no_shared_storage,
     "record-only"    => "1",
     "verbose"        => "1",
-    "debug"          => "/var/log/nova/fence_compute.log"
+    "debug-file"     => "/var/log/nova/fence_compute.log"
   })
   op nova[:nova][:ha][:compute][:fence][:op]
   action :update
