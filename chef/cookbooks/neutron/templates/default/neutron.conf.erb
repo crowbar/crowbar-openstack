@@ -28,7 +28,6 @@ use_stderr = false
 transport_url = <%= @rabbit_settings[:url] %>
 control_exchange = neutron
 max_header_line = <%= node[:neutron][:max_header_line] %>
-wsgi_keep_alive = false
 <% unless @default_log_levels.length.zero? -%>
 default_log_levels = <%= @default_log_levels.join(", ") %>
 <% end -%>
