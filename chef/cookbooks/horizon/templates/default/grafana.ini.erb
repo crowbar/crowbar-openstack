@@ -22,8 +22,10 @@
 # Directory where grafana will automatically scan and look for plugins
 #
 ;plugins = /var/lib/grafana/plugins
-
 #
+# folder that contains provisioning config files that grafana will apply on startup and while running.
+;provisioning = /etc/grafana/provisioning
+
 #################################### Server ####################################
 [server]
 # Protocol (http or https)
@@ -351,11 +353,6 @@ org_role = Viewer
 ;enabled = false
 ;rabbitmq_url = amqp://localhost/
 ;exchange = grafana_events
-
-;#################################### Dashboard JSON files ##########################
-[dashboards.json]
-enabled = true
-path = /var/lib/grafana/dashboards
 
 #################################### Alerting ############################
 [alerting]
