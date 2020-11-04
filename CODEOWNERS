@@ -19,6 +19,3 @@
 **/*keystone*  @rhafer
 **/*monasca*  @jgrassler
 **/*octavia*  @ilausuch
-
-ha*.rb  @aspiers
-*_ha.rb  @aspiers
