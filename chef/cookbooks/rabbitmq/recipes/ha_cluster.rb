@@ -166,8 +166,8 @@ name = "rabbitmq-port-blocker"
 clone_name = "cl-#{name}"
 location_name = "l-#{name}-controller"
 node_upgrading = CrowbarPacemakerHelper.being_upgraded?(node)
-clone_running = "crm resource show #{clone_name}"
-primitive_running = "crm resource show #{name}"
+clone_running = "crm resource show #{clone_name} | grep -q \"is running on:\""
+primitive_running = "crm resource show #{name} | grep -q \"is running on:\""
 port = node[:rabbitmq][:port]
 ssl_port = node[:rabbitmq][:ssl][:port]
 
