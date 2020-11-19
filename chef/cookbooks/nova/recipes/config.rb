@@ -260,7 +260,6 @@ end
 
 ironic_servers = node_search_with_cache("roles:ironic-server") || []
 if ironic_servers.any? && (node["roles"] & ["nova-compute-ironic", "nova-controller"]).any?
-  use_baremetal_filters = true
   track_instance_changes = false
   ironic_node = ironic_servers.first
   ironic_settings = {}
@@ -275,7 +274,6 @@ if ironic_servers.any? && (node["roles"] & ["nova-compute-ironic", "nova-control
   ironic_settings[:service_password] = ironic_node[:ironic][:service_password]
   reserved_host_memory = 0
 else
-  use_baremetal_filters = false
   track_instance_changes = true
   ironic_settings = nil
   reserved_host_memory = node[:nova][:scheduler][:reserved_host_memory_mb]
@@ -423,7 +421,6 @@ template node[:nova][:config_file] do
     has_itxt: has_itxt,
     enabled_filters: node[:nova][:scheduler][:enabled_filters],
     reserved_host_memory: reserved_host_memory,
-    use_baremetal_filters: use_baremetal_filters,
     track_instance_changes: track_instance_changes,
     ironic_settings: ironic_settings,
     ephemeral_rbd_settings: ephemeral_rbd_settings,
