@@ -67,6 +67,7 @@ action :create do
         ssl_keyfile: current_resource.ssl_keyfile,
         ssl_cacert: current_resource.ssl_cacert,
         timeout: current_resource.timeout,
+        disable_keepalive: current_resource.disable_keepalive,
         openidc_enabled: current_resource.openidc_enabled,
         openidc_provider: current_resource.openidc_provider,
         openidc_response_type: current_resource.openidc_response_type,
@@ -124,6 +125,7 @@ def load_current_resource
   @current_resource.ssl_cacert(@new_resource.ssl_cacert)
 
   @current_resource.timeout(@new_resource.timeout)
+  @current_resource.disable_keepalive(@new_resource.disable_keepalive)
 
   @current_resource.openidc_enabled(@new_resource.openidc_enabled)
   @current_resource.openidc_provider(@new_resource.openidc_provider)

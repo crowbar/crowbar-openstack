@@ -199,6 +199,7 @@ elsif node[:keystone][:frontend] == "apache"
     ssl_cacert node[:keystone][:ssl][:ca_certs] unless node[:keystone][:ssl][:insecure]
     # LDAP backend can be slow..
     timeout 600
+    disable_keepalive true
     # auth_openidc configuration
     openidc_enabled openidc_enabled
     openidc_provider openidc_provider
@@ -232,6 +233,7 @@ elsif node[:keystone][:frontend] == "apache"
     ssl_cacert node[:keystone][:ssl][:ca_certs] unless node[:keystone][:ssl][:insecure]
     # LDAP backend can be slow..
     timeout 600
+    disable_keepalive true
     # auth_openidc configuration
     openidc_enabled openidc_enabled
     openidc_provider openidc_provider

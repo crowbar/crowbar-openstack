@@ -17,6 +17,10 @@ Listen <%= @bind_host %>:<%= @bind_port %>
     Timeout <%= @timeout %>
 <% end %>
 
+<% if @disable_keepalive %>
+    KeepAlive Off
+<% end %>
+
 <% if @ssl_enable %>
     SSLEngine on
     SSLCertificateFile <%= @ssl_certfile %>

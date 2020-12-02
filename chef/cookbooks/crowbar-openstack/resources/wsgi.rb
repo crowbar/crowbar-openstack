@@ -21,6 +21,7 @@ attribute :ssl_keyfile, kind_of: String, default: nil
 attribute :ssl_cacert, kind_of: String, default: nil
 
 attribute :timeout, kind_of: Integer, default: nil
+attribute :disable_keepalive, kind_of: [TrueClass, FalseClass], default: false
 
 attribute :openidc_enabled, kind_of: [TrueClass, FalseClass], default: false
 attribute :openidc_provider, kind_of: String, default: nil
