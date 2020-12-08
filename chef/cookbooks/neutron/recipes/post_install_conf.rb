@@ -121,7 +121,7 @@ package "python-openstackclient"
 
 execute "create_fixed_network" do
   command "#{openstack_cmd} network create --share #{fixed_network_type} fixed"
-  not_if "out=$(#{openstack_cmd} network list); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
+  not_if "out=$(#{openstack_cmd} network list --name fixed); [ $? != 0 ] || echo ${out} | grep -q ' fixed '"
   retries 5
   retry_delay 10
   action :nothing
@@ -129,7 +129,7 @@ end
 
 execute "create_floating_network" do
   command "#{openstack_cmd} network create --external #{floating_network_type} floating"
-  not_if "out=$(#{openstack_cmd} network list); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
+  not_if "out=$(#{openstack_cmd} network list --name floating); [ $? != 0 ] || echo ${out} | grep -q ' floating '"
   retries 5
   retry_delay 10
   action :nothing
@@ -138,7 +138,7 @@ end
 execute "create_ironic_network" do
   command "#{openstack_cmd} network create --share #{ironic_network_type} ironic"
   only_if { ironic_net }
-  not_if "out=$(#{openstack_cmd} network list); [ $? != 0 ] || echo ${out} | grep -q ' ironic '"
+  not_if "out=$(#{openstack_cmd} network list --name ironic); [ $? != 0 ] || echo ${out} | grep -q ' ironic '"
   retries 5
   retry_delay 10
   action :nothing
@@ -235,7 +235,7 @@ execute "update_dns_domain_for_floating_network" do
 end
 
 execute "Neutron network configuration" do
-  command "#{openstack_cmd} network list &>/dev/null"
+  command "#{openstack_cmd} network list -c ID &>/dev/null"
   retries 5
   retry_delay 10
   action :nothing
