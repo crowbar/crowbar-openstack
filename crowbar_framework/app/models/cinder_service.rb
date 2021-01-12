@@ -160,6 +160,14 @@ class CinderService < OpenstackServiceObject
           )
         end
       end
+
+      if backend_driver == "netapp" && volume["netapp"]["storage_family"] != "ontap_cluster"
+        validation_error I18n.t(
+          "barclamp.#{@bc_name}.edit_attributes.volumes.netapp.storage_family_hint",
+          backend_driver: backend_driver
+        )
+        next
+      end
     end
 
     volume_names.each do |volume_name, count|
@@ -299,4 +307,3 @@ class CinderService < OpenstackServiceObject
     @logger.debug("Cinder apply_role_pre_chef_call: leaving")
   end
 end
-
