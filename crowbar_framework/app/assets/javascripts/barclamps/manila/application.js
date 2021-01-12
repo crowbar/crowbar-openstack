@@ -29,7 +29,7 @@ $(document).ready(function($) {
   {
     //FIXME: right now, there's no good way to localize strings in js :/
     if (confirm("All shares in the backend will be made unavailable; do you really want to delete this backend?")) {
-      share_entry = $(this).data("shareid");
+      var share_entry = $(this).data("shareid");
 
       // delete the backend entry from the attributes JSON
       $('#proposal_attributes').removeJsonAttribute('shares/' + share_entry);
@@ -64,8 +64,7 @@ $(document).ready(function($) {
         $('#backend_entries').html()
       );
     }
-    shares = $('#proposal_attributes').readJsonAttribute('shares', {});
-    share_defaults = $('#proposal_attributes').readJsonAttribute('share_defaults', {});
+    var shares = $('#proposal_attributes').readJsonAttribute('shares', {});
 
     // Render forms for backend list
     $('#manila_backends').replaceWith(
