@@ -232,15 +232,15 @@
       %div#cinder_backends
         = t(".volumes.loading_text")
 
-      %fieldset
-        %legend
-          = t(".volumes.addheader")
-
-        = select_field %w(volumes backend_driver), :collection => :volume_driver_for_cinder
-        = string_field %w(volumes backend_name)
-
-        %div.form-group.pull-left
-          %input(id='add_cinder_backend' class="form-control" type="button" value="Add Backend")
+      %ul.list-group
+        %li.list-group-item.active
+          %h3.list-group-item-heading
+            = t(".volumes.addheader")
+            .form-group.pull-right
+              %input(id='add_cinder_backend' class="form-control btn-default" type="button" value="Add Backend")
+        %li.list-group-item
+          = select_field %w(volumes backend_driver), :collection => :volume_driver_for_cinder
+          = string_field %w(volumes backend_name)
 
     %fieldset
       %legend

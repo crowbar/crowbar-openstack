@@ -102,15 +102,15 @@
       %div#manila_backends
         = t(".shares.loading_text")
 
-      %fieldset
-        %legend
-          = t(".shares.addheader")
-
-        = select_field %w(shares backend_driver), :collection => :share_driver_for_manila
-        = string_field %w(shares backend_name)
-
-        %div.form-group.pull-left
-          %input(id='add_manila_backend' class="form-control" type="button" value="Add Backend")
+      %ul.list-group
+        %li.list-group-item.active
+          %h3.list-group-item-heading
+            = t(".shares.addheader")
+            .form-group.pull-right
+              %input(id='add_manila_backend' class="form-control btn-default" type="button" value="Add Backend")
+        %li.list-group-item
+          = select_field %w(shares backend_driver), :collection => :share_driver_for_manila
+          = string_field %w(shares backend_name)
 
     %fieldset
       %legend
