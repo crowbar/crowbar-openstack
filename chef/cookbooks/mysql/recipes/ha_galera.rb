@@ -234,6 +234,11 @@ pacemaker_primitive service_name do
     "datadir" => node[:database][:mysql][:datadir],
     "log" => "/var/log/mysql/mysqld.log"
   })
+  meta ({
+    "migration-threshold" => "3",
+    "failure-timeout" => "1800s",
+    "resource-stickiness" => "100"
+  })
   op primitive_op
   action :update
   only_if { CrowbarPacemakerHelper.is_cluster_founder?(node) }
