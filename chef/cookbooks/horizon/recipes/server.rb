@@ -517,9 +517,14 @@ end if ha_enabled
 if node[:horizon][:apache][:ssl] && node[:horizon][:apache][:generate_certs]
   package "apache2-utils"
 
+  san_domains = []
+  san_domains.push(CrowbarHelper.get_host_for_public_url(node, true, ha_enabled))
+  san_domains.push(CrowbarHelper.get_host_for_admin_url(node, ha_enabled))
+  san = san_domains.map { |d| "DNS:#{d}" }.join(",")
+
   bash "Generate Apache certificate" do
     code <<-EOH
-      (umask 377 ; /usr/bin/gensslcert -C openstack-dashboard -n openstack-dashboard)
+      (umask 377 ; /usr/bin/gensslcert -C openstack-dashboard -n openstack-dashboard -a "#{san}")
 EOH
     only_if do
       !File.size?(node[:horizon][:apache][:ssl_crt_file]) && (
