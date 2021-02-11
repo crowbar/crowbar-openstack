@@ -25,7 +25,7 @@ monasca_hosts = MonascaHelper.monasca_hosts(monasca_servers)
 raise "no nodes with monasca-server role found" if monasca_hosts.nil? || monasca_hosts.empty?
 
 # monasca-server nodes are in reinstall state
-unless monasca_node[:state] == "ready"
+if monasca_node[:state] == "reinstall"
   Chef::Log.warn("monasca-installer: monasca-server node is in reinstall state. skipping")
   return
 end
