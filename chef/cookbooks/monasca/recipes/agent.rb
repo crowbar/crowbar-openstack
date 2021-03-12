@@ -27,12 +27,21 @@ if monasca_server.nil?
   return
 end
 
+kibana_url = "http://" + MonascaHelper.monasca_public_host(monasca_server) + ":5601"
 agent_dimensions = { service: "monitoring" }
 
 monasca_api_url = MonascaHelper.api_network_url(monasca_server)
 monasca_net_ip = MonascaHelper.get_host_for_monitoring_url(monasca_server)
 
 if node["roles"].include?("monasca-server")
+  # bsc#1044849: Kibana takes a few seconds from startup until it's actually
+  # listening, especially after a package upgrade, so we'll need to wait for
+  # it. Otherwise its unreachability will trip up monasca-setup.
+  execute "kibana listening?" do
+    command "while true; do sleep 5; curl -s #{kibana_url} > /dev/null && break; done"
+    timeout 180
+  end
+
   # Special monasca-reconfigure script for monasca-server: on this machine
   # monasca-reconfigure will configure the agent.
   template "/usr/sbin/monasca-reconfigure" do
