@@ -230,6 +230,14 @@ keystone_register "give admin user monasca-user role in monasca tenant" do
   action :add_access
 end
 
+# Make sure Kibana gets restarted after the update to Kibana 4.6.6. This is required
+# for this update only, since after that update, the faulty restart logic in
+# the package's %postun section will no longer be causing trouble (bsc#1044849).
+service "kibana" do
+  action [:restart]
+  only_if "rpm -qa | grep -q 'kibana-4\.6\.6' && zypper ps -s | grep -q kibana"
+end
+
 agents_settings = []
 
 agents_settings.push(node[:monasca][:agent][:keystone])

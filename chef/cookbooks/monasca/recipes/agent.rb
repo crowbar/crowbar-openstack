@@ -46,6 +46,15 @@ if node["roles"].include?("monasca-server")
                    " monasca-agent setup.")
     return
   end
+
+  # bsc#1044849: Kibana takes a few seconds from startup until it's actually
+  # listening, especially after a package upgrade, so we'll need to wait for
+  # it.  Otherwise its unreachability will trip up monasca-setup.
+  execute "kibana listening?" do
+    command "while true; do sleep 5; curl -s #{kibana_url} > /dev/null && break; done"
+    timeout 120
+  end
+
   # Special monasca-reconfigure script for monasca-server: on this machine
   # monasca-reconfigure will configure the agent.
   template "/usr/sbin/monasca-reconfigure" do
