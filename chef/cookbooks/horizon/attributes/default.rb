@@ -33,6 +33,7 @@ default[:horizon][:policy_file][:network] = "neutron_policy.json"
 default[:horizon][:policy_file][:neutron_fwaas] = "neutron-fwaas-policy.json"
 
 default[:horizon][:apache][:ssl] = false
+default[:horizon][:apache][:ssl_protocol] = "all -SSLv2 -SSLv3"
 default[:horizon][:apache][:ssl_crt_file] = "/etc/apache2/ssl.crt/openstack-dashboard-server.crt"
 default[:horizon][:apache][:ssl_key_file] = "/etc/apache2/ssl.key/openstack-dashboard-server.key"
 default[:horizon][:apache][:generate_certs] = false

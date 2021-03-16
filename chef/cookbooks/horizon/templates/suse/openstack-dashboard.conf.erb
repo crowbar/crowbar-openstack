@@ -55,7 +55,7 @@ Listen <%= @bind_host %>:<%= @bind_port_ssl %>
 <VirtualHost <%= @bind_host %>:<%= @bind_port_ssl %>>
     SSLEngine On
     SSLCipherSuite DEFAULT_SUSE
-    SSLProtocol all -SSLv2 -SSLv3
+    SSLProtocol <%= @ssl_protocol %>
     # Prevent plaintext downgrade for 180 days
     Header always set Strict-Transport-Security "max-age=15552000"
     SSLCertificateFile <%= @ssl_crt_file %>
