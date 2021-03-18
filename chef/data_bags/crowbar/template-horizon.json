@@ -36,7 +36,7 @@
       "apache": {
         "ssl": false,
         "generate_certs": false,
-        "ssl_protocol": "all -SSLv2 -SSLv3",
+        "ssl_protocol": "all -SSLv3",
         "ssl_crt_file": "/etc/apache2/ssl.crt/openstack-dashboard-server.crt",
         "ssl_key_file": "/etc/apache2/ssl.key/openstack-dashboard-server.key",
         "ssl_crt_chain_file": ""
