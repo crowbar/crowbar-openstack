@@ -25,17 +25,6 @@ monasca_host = MonascaHelper.monasca_hosts(monasca_servers)[0]
 
 keystone_settings = KeystoneHelper.keystone_settings(node, @cookbook_name)
 
-# see https://www.elastic.co/guide/en/kibana/current/install-plugin.html
-execute "kibana-optimized-permissions" do
-  command "/usr/bin/chown kibana:kibana -R /opt/kibana/optimize"
-  action :nothing
-end
-
-execute "kibana-logfile-permissions" do
-  command "/usr/bin/chown kibana:kibana /var/log/kibana/kibana.log"
-  action :nothing
-end
-
 # FIXME: This doesn't work if the monasca-kibana-plugin gets an update
 # but that problem already exists in the monasca-installer
 execute "monasca-kibana-plugin installation" do
@@ -44,6 +33,19 @@ execute "monasca-kibana-plugin installation" do
   notifies :run, "execute[kibana-logfile-permissions]"
   notifies :restart, "service[kibana]"
   not_if { ::Dir.exists?("/opt/kibana/installedPlugins/monasca-kibana-plugin") }
+end
+
+# see https://www.elastic.co/guide/en/kibana/current/install-plugin.html
+execute "kibana-optimized-permissions" do
+  command "/usr/bin/chown kibana:kibana -R /opt/kibana/optimize"
+  subscribes :run, "execute[monasca-kibana-plugin installation]"
+  only_if "ls -lR /opt/kibana/optimize/ | grep -q root"
+end
+
+execute "kibana-logfile-permissions" do
+  command "/usr/bin/chown kibana:kibana /var/log/kibana/kibana.log"
+  subscribes :run, "execute[monasca-kibana-plugin installation]"
+  only_if "ls -l /var/log/kibana/kibana.log | grep -q root"
 end
 
 template "/opt/kibana/config/kibana.yml" do
@@ -59,4 +61,17 @@ end
 service "kibana" do
   supports status: true, restart: true, start: true, stop: true
   action [:enable, :start]
+  subscribes :restart, "execute[monasca-kibana-plugin installation]"
+  subscribes :restart, "execute[kibana-optimized-permissions]"
+  subscribes :restart, "execute[kibana-logfile-permissions]"
+end
+
+# Make sure Kibana gets restarted after the update to Kibana 4.6.6. This is required
+# for this update only, since after the update in question, the faulty restart
+# logic in the package spec's %postun section will no longer be causing trouble
+# (bsc#1044849).
+service "restart kibana if needed" do
+  service_name "kibana"
+  action [:restart]
+  only_if "rpm -qa | grep -q 'kibana-4\.6\.6' && zypper ps -s | grep -q kibana"
 end
