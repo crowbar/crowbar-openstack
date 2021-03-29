@@ -564,6 +564,7 @@ template "#{node[:apache][:dir]}/sites-available/openstack-dashboard.conf" do
     user: node[:apache][:user],
     group: node[:apache][:group],
     use_ssl: node[:horizon][:apache][:ssl],
+    ssl_protocol: node[:horizon][:apache][:ssl_protocol],
     ssl_crt_file: node[:horizon][:apache][:ssl_crt_file],
     ssl_key_file: node[:horizon][:apache][:ssl_key_file],
     ssl_crt_chain_file: node[:horizon][:apache][:ssl_crt_chain_file],

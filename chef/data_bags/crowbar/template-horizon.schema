@@ -60,6 +60,7 @@
               "mapping": {
                 "ssl": { "type": "bool", "required": true },
                 "generate_certs": { "type": "bool", "required": true },
+                "ssl_protocol": { "type": "str" },
                 "ssl_crt_file": { "type": "str" },
                 "ssl_key_file": { "type": "str" },
                 "ssl_crt_chain_file": { "type": "str" }
