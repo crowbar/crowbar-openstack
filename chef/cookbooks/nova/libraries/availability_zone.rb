@@ -23,13 +23,15 @@ module NovaAvailabilityZone
     auth_url = KeystoneHelper.versioned_service_URL(keystone_settings["protocol"],
                                                     keystone_settings["internal_url_host"],
                                                     keystone_settings["service_port"],
-                                                    "2.0")
+                                                    keystone_settings["api_version"])
     env = {
       "OS_USERNAME" => keystone_settings["admin_user"],
       "OS_PASSWORD" => keystone_settings["admin_password"],
       "OS_TENANT_NAME" => keystone_settings["default_tenant"],
       "OS_AUTH_URL" => auth_url,
-      "OS_REGION_NAME" => keystone_settings["endpoint_region"]
+      "OS_REGION_NAME" => keystone_settings["endpoint_region"],
+      "OS_USER_DOMAIN_NAME" => keystone_settings["default_user_domain"],
+      "OS_PROJECT_DOMAIN_NAME" => keystone_settings["default_user_domain"]
     }
 
     command = ["/usr/bin/crowbar-nova-set-availability-zone"]
