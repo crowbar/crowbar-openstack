@@ -21,7 +21,9 @@ if node[:neutron][:ml2_mechanism_drivers].include?("apic_gbp")
 end
 
 aciswitches = node[:neutron][:apic][:apic_switches].to_hash
-template "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" do
+acivmms = node[:neutron][:apic][:apic_vmms]
+
+template node[:neutron][:ml2_cisco_apic_config_file] do
   cookbook "neutron"
   source "ml2_conf_cisco_apic.ini.erb"
   mode "0640"
@@ -30,6 +32,9 @@ template "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" d
   variables(
     vpc_pairs: node[:neutron][:apic][:vpc_pairs],
     apic_switches: aciswitches,
+    optimized_dhcp: node[:neutron][:apic][:optimized_dhcp],
+    optimized_metadata: node[:neutron][:apic][:optimized_metadata],
+    apic_vmms: acivmms,
     ml2_mechanism_drivers: node[:neutron][:ml2_mechanism_drivers],
     policy_drivers: "implicit_policy,apic",
     default_ip_pool: "192.168.0.0/16"

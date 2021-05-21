@@ -85,7 +85,7 @@ if node[:neutron][:networking_plugin] == "ml2" and
 else
   cisco_nexus_link_action = "delete"
 end
-link "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco.ini.conf" do
+link "#{node[:neutron][:platform][:ml2_cisco_config_file]}" do
   to "/etc/neutron/plugins/ml2/ml2_conf_cisco.ini"
   action cisco_nexus_link_action
   notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"
@@ -99,7 +99,7 @@ if node[:neutron][:networking_plugin] == "ml2" &&
 else
   cisco_apic_link_action = "delete"
 end
-link "/etc/neutron/neutron-server.conf.d/100-ml2_conf_cisco_apic.ini.conf" do
+link "#{node[:neutron][:platform][:ml2_cisco_apic_config_file]}" do
   to "/etc/neutron/plugins/ml2/ml2_conf_cisco_apic.ini"
   action cisco_apic_link_action
   notifies :restart, "service[#{node[:neutron][:platform][:service_name]}]"

@@ -2,7 +2,7 @@
 apic_system_id=<%= node[:neutron][:apic][:system_id] %>
 [opflex]
 networks = *
-[ml2_cisco_apic]
+[apic]
 apic_hosts=<%= node[:neutron][:apic][:hosts] %>
 apic_username=<%= node[:neutron][:apic][:username] %>
 apic_password=<%= node[:neutron][:apic][:password] %>
@@ -11,8 +11,8 @@ apic_name_mapping = use_name
 apic_clear_node_profiles = True
 enable_aci_routing = True
 apic_arp_flooding = True
-enable_optimized_metadata = <%= node[:neutron][:apic][:optimized_metadata] %>
-enable_optimized_dhcp = <%= node[:neutron][:apic][:optimized_dhcp] %>
+enable_optimized_metadata = <%= @optimized_metadata %>
+enable_optimized_dhcp = <%= @optimized_dhcp %>
 apic_provision_infra = True
 apic_provision_hostlinks = True
 <%  unless @vpc_pairs.nil? -%>
@@ -41,3 +41,12 @@ enable_nat = <%= node[:neutron][:apic][:ext_net][:nat_enabled] %>
 <% end -%>
 external_epg = <%= node[:neutron][:apic][:ext_net][:ext_epg] %>
 host_pool_cidr = <%= node[:neutron][:apic][:ext_net][:host_pool_cidr] %>
+
+<% @apic_vmms.each do |vmm_domain| -%>
+[apic_vmdom:<%= vmm_domain[:vmm_name]%>]
+vmm_type = <%= vmm_domain[:vmm_type]%>
+<%   if vmm_domain[:vlan_ranges] -%>
+vlan_ranges = <%= vmm_domain[:vlan_ranges] %> 
+<%   end -%>
+<% end -%>
+

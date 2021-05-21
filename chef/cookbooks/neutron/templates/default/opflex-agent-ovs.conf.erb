@@ -10,7 +10,7 @@
       {"hostname": "<%= @opflex_peer_ip %>", "port": "<%= @opflex_peer_port %>"}
     ],
     "ssl": {
-      "mode": "enabled",
+      "mode": "<%= @opflex_ssl_mode %>",
       "ca-store": "/etc/ssl/certs/"
     },
     "inspector": {
@@ -36,7 +36,8 @@
 
   "renderers": {
     "stitched-mode": {
-      "ovs-bridge-name": "br-int",
+      "int-bridge-name": "<%= @opflex_int_bridge %>",
+      "access-bridge-name": "<%= @opflex_access_bridge %>",
       "encap": {
         "vxlan" : {
           "encap-iface": "<%= @opflex_vxlan_encap_iface %>",
