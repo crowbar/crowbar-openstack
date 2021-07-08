@@ -10,7 +10,6 @@ pipeline = healthcheck recon container-server
 [app:container-server]
 use = egg:swift#container
 log_requests = true
-allow_versions = <%= node[:swift][:allow_versions] %>
 [filter:healthcheck]
 use = egg:swift#healthcheck
 [filter:recon]

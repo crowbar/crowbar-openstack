@@ -82,7 +82,7 @@
       "service_user": "swift",
       "service_password": "",
       "keystone_delay_auth_decision": false,
-      "allow_versions": false,
+      "allow_versioned_writes": true,
       "reseller_prefix" : "AUTH_",
       "debug": false,
       "admin_ip_expr": "Chef::Recipe::Barclamp::Inventory.get_network_by_type(node, \"admin\").address",
@@ -96,7 +96,7 @@
     "swift": {
       "crowbar-revision": 0,
       "crowbar-applied": false,
-      "schema-revision": 300,
+      "schema-revision": 301,
       "element_states": {
         "swift-dispersion": [ "ready", "applying" ],
         "swift-storage": [ "readying", "ready", "applying" ],

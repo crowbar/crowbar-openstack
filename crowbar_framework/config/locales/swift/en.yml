@@ -71,7 +71,7 @@ en:
       edit_attributes:
         keystone_instance: 'Keystone instance'
         keystone_delay_auth_decision: 'Allow Public Containers (Anonymous access, performance penalty)'
-        allow_versions: 'Enable Object Versioning'
+        allow_versioned_writes: 'Enables using versioned writes middleware'
         zones: 'Zones'
         partitions: 'Create 2^X Logical Partitions'
         min_part_hours: 'Minimum Hours before Partition is reassigned'

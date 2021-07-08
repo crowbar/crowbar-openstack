@@ -446,11 +446,11 @@ end
 swifts = search(:node, "roles:swift-proxy") || []
 use_swift = !swifts.empty?
 if use_swift
-  swift_allow_versions = swifts[0][:swift][:allow_versions]
+  swift_allow_versions = swifts[0][:swift][:allow_versioned_writes]
   swift_proposal_name = swifts[0][:swift][:config][:environment].gsub(/^swift-config-/, "")
   swift_cluster_name = "#{node[:domain]}_#{swift_proposal_name}"
 else
-  swift_allow_versions = false
+  swift_allow_versions = true
   swift_cluster_name = nil
 end
 
