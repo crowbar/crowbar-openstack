@@ -169,3 +169,20 @@ execute "run ansible" do
           " | awk '{ print strftime(\"[%Y-%m-%d %H:%M:%S]\"), $0 }'"\
           "   >> /var/log/monasca-installer.log"
 end
+
+template "/opt/monasca-installer/security.yml" do
+  source "security.yml.erb"
+  owner "root"
+  group "root"
+  mode "0o644"
+end
+
+bash "Update Zookeeper security settings" do
+  cwd "/opt/monasca-installer"
+  code <<-EOH
+    ansible-playbook -i monasca-hosts \
+      -e '@/opt/monasca-installer/crowbar_vars.yml' \
+      security.yml -vvv
+    EOH
+  subscribes :run, "execute[run ansible]", :delayed
+end
