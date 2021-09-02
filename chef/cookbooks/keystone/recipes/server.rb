@@ -509,7 +509,7 @@ keystone_register "wakeup keystone" do
   auth register_auth_hash
   retries 5
   retry_delay 10
-  reissue_token_on_error update_admin_password
+  reissue_token_on_error true
   action :wakeup
 end
 

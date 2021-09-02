@@ -26,6 +26,7 @@ action :wakeup do
     break unless error && count < 50
     sleep 1
     next unless new_resource.reissue_token_on_error
+    Chef::Log.info "Problem finding /v3/services. Retrying with new session."
     KeystoneHelper.reset_session
     session
   end
